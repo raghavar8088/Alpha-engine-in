@@ -1,0 +1,26 @@
+# Build context must be the frontend/ directory, e.g.:
+#   docker build -f ../docker/Dockerfile.frontend -t tradingai-frontend .
+FROM node:22-slim AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+
+FROM node:22-slim AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+# Same-origin relative paths: the browser calls this app's own /api/[...path]
+# proxy route, which attaches the backend URL + shared secret server-side at
+# runtime (BACKEND_URL / APP_SHARED_SECRET below) — never exposed to the client.
+ENV NEXT_PUBLIC_API_URL=""
+RUN npm run build
+
+FROM node:22-slim AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
+ENV PORT=8080
+EXPOSE 8080
+CMD ["node", "server.js"]

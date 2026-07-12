@@ -1,0 +1,23 @@
+# Build context must be the TradingAI/ repo root (backend/requirements.txt pulls in
+# sibling packages via `-e ../<service>`), e.g.:
+#   docker build -f docker/Dockerfile.backend -t tradingai-backend .
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY shared ./shared
+COPY strategy-service ./strategy-service
+COPY risk-service ./risk-service
+COPY backtesting-service ./backtesting-service
+COPY options-service ./options-service
+COPY ai-service ./ai-service
+COPY research-service ./research-service
+COPY vector-service ./vector-service
+COPY backend ./backend
+
+WORKDIR /app/backend
+RUN pip install --no-cache-dir -r requirements.txt
+
+ENV PORT=8080
+EXPOSE 8080
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]

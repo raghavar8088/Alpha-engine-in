@@ -1,0 +1,13 @@
+[project]
+name = "tradingai-options-service"
+version = "0.1.0"
+description = "TradingAI options analytics — chain, Greeks, payoff, OI, synthetic option backtesting"
+requires-python = ">=3.11"
+dependencies = ["pydantic>=2", "tradingai-shared", "tradingai-backtesting-service"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["options_service*"]

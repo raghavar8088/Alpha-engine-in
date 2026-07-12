@@ -1,0 +1,29 @@
+# Real secrets — never commit. .env.example files ARE tracked.
+.env
+.env.local
+.env.*.local
+!*.env.example
+!.env.local.example
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+.turbo/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Personal reference doc, not needed for deployment
+GOOGLE-CLOUD/

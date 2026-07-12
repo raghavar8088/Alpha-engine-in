@@ -1,0 +1,8 @@
+-e ../shared
+-e ../strategy-service
+-e ../risk-service
+-e ../backtesting-service
+-e .
+requests==2.32.3
+python-dotenv==1.0.1
+pymongo==4.10.1
