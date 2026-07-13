@@ -3,6 +3,7 @@
 .env.local
 .env.*.local
 .env.dhan-totp
+.env.dhan-api-keys
 !*.env.example
 !.env.local.example
 
