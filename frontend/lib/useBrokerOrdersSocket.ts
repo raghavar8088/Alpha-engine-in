@@ -8,8 +8,22 @@ export function useBrokerOrdersSocket() {
   const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    const ws = new WebSocket(brokerOrdersWsUrl());
+    const url = brokerOrdersWsUrl();
+    // See useMarketDataSocket.ts — same insecure ws://-from-https crash guard.
+    if (typeof window !== "undefined" && window.location.protocol === "https:" && url.startsWith("ws://")) {
+      console.warn("[broker-orders ws] skipped: insecure ws:// from an https page");
+      return;
+    }
+
+    let ws: WebSocket;
+    try {
+      ws = new WebSocket(url);
+    } catch (err) {
+      console.warn("[broker-orders ws] failed to open", err);
+      return;
+    }
     socketRef.current = ws;
+    ws.onerror = () => {};
 
     ws.onmessage = (event) => {
       const payload = JSON.parse(event.data);
