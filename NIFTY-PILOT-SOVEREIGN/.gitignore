@@ -1,0 +1,8 @@
+engine/niftypilot
+engine/*.exe
+client/node_modules/
+client/.next/
+client/out/
+.env
+.env.local
+*.log

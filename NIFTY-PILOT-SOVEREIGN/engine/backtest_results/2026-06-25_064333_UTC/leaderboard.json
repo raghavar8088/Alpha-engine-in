@@ -1,0 +1,92 @@
+[
+  {
+    "strategy": "S18_VWAP_Mean_Reversion_Options_Straddle",
+    "total_trades": 174,
+    "win_rate": 1,
+    "sharpe_per_trade": 76.05167118235066,
+    "max_drawdown_pct": 0,
+    "profit_factor": "inf",
+    "net_pnl_inr": 67812481.0934856,
+    "promotion_status": "PROMOTED"
+  },
+  {
+    "strategy": "S13_EMA_Ribbon_Scalp_Fast",
+    "total_trades": 10,
+    "win_rate": 0.9,
+    "sharpe_per_trade": 1.633852888176938,
+    "max_drawdown_pct": -2.1679038135872353,
+    "profit_factor": 12.961620480330852,
+    "net_pnl_inr": 2766236.8760588565,
+    "promotion_status": "INSUFFICIENT_DATA"
+  },
+  {
+    "strategy": "S2_VWAP_Reversion_BankNifty",
+    "total_trades": 41,
+    "win_rate": 0.7317073170731707,
+    "sharpe_per_trade": 0.6016057960140325,
+    "max_drawdown_pct": -12.439724469236857,
+    "profit_factor": 3.487197652342384,
+    "net_pnl_inr": 9726115.971173946,
+    "promotion_status": "INSUFFICIENT_DATA"
+  },
+  {
+    "strategy": "S8_EMA_Ribbon_Trend_Rider",
+    "total_trades": 82,
+    "win_rate": 0.9024390243902439,
+    "sharpe_per_trade": 0.485076519739983,
+    "max_drawdown_pct": -5.687075170595257,
+    "profit_factor": 8.27761763740081,
+    "net_pnl_inr": 22952523.876287416,
+    "promotion_status": "REJECTED"
+  },
+  {
+    "strategy": "S10_Tick_Scalp_Bid_Ask_Compression",
+    "total_trades": 12,
+    "win_rate": 0.4166666666666667,
+    "sharpe_per_trade": -0.03033491112591287,
+    "max_drawdown_pct": -6.827467224346783,
+    "profit_factor": 0.9405979384579058,
+    "net_pnl_inr": -81477.25474066677,
+    "promotion_status": "INSUFFICIENT_DATA"
+  },
+  {
+    "strategy": "S27_Gap_Up_Down_Fade_Options",
+    "total_trades": 9,
+    "win_rate": 0,
+    "sharpe_per_trade": -9.670324554545909,
+    "max_drawdown_pct": -47.85573030977095,
+    "profit_factor": 0,
+    "net_pnl_inr": -4785573.030977097,
+    "promotion_status": "INSUFFICIENT_DATA"
+  },
+  {
+    "strategy": "S17_Opening_Range_Breakout_Intraday",
+    "total_trades": 1,
+    "win_rate": 1,
+    "sharpe_per_trade": null,
+    "max_drawdown_pct": 0,
+    "profit_factor": "inf",
+    "net_pnl_inr": 3693615.337680802,
+    "promotion_status": "INSUFFICIENT_DATA"
+  },
+  {
+    "strategy": "S15_RSI_Divergence_Scalp",
+    "total_trades": 1,
+    "win_rate": 0,
+    "sharpe_per_trade": null,
+    "max_drawdown_pct": -4.123684021193363,
+    "profit_factor": 0,
+    "net_pnl_inr": -412368.40211933595,
+    "promotion_status": "INSUFFICIENT_DATA"
+  },
+  {
+    "strategy": "S7_Gap_Fill_Opening",
+    "total_trades": 1,
+    "win_rate": 0,
+    "sharpe_per_trade": null,
+    "max_drawdown_pct": -3.562349588509539,
+    "profit_factor": 0,
+    "net_pnl_inr": -356234.9588509544,
+    "promotion_status": "INSUFFICIENT_DATA"
+  }
+]

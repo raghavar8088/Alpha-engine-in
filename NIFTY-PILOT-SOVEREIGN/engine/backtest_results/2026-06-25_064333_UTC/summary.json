@@ -1,0 +1,57 @@
+{
+  "backtest_from_ist": "2023-10-01",
+  "backtest_to_ist": "2024-01-01",
+  "capital_inr": 10000000,
+  "data_source": "Synthetic",
+  "data_warnings": null,
+  "disclaimer": "Walk-forward Sharpe/WinRate use the live validator thresholds (0.60 / 0.48). Results on the Synthetic data source are for harness validation only — not tradable signal quality.",
+  "ending_equity_inr": 111315319.50799853,
+  "instruments": [
+    "NIFTY50",
+    "BANKNIFTY"
+  ],
+  "insufficient_count": 27,
+  "kill_events": 2,
+  "net_pnl_inr": 101315319.50799853,
+  "portfolio_max_drawdown_pct": -50.40084183930982,
+  "portfolio_return_annualized": 684.2146416264814,
+  "portfolio_sharpe_annualized": 7.284565386224147,
+  "promoted_count": 1,
+  "rejected_count": 1,
+  "strategies_insufficient": [
+    "S1_ORB_Nifty_Breakout",
+    "S2_VWAP_Reversion_BankNifty",
+    "S3_IV_Crush_Theta_Decay",
+    "S4_PCR_Extreme_Reversal",
+    "S5_Max_Pain_Magnet",
+    "S6_OI_Buildup_Directional",
+    "S7_Gap_Fill_Opening",
+    "S9_Event_Volatility_Fade",
+    "S10_Tick_Scalp_Bid_Ask_Compression",
+    "S11_Pullback_Scalp_VWAP_Micro",
+    "S12_Volume_Spike_Scalp_Order_Flow",
+    "S13_EMA_Ribbon_Scalp_Fast",
+    "S14_Breakout_Scalp_Support_Resistance",
+    "S15_RSI_Divergence_Scalp",
+    "S16_ATR_Breakout_Scalp_Volatility",
+    "S17_Opening_Range_Breakout_Intraday",
+    "S19_ADX_Trend_Filter_Breakouts",
+    "S20_Fibonacci_Retracement_Intraday",
+    "S21_Bollinger_Band_Squeeze_Breakout_Intraday",
+    "S22_News_Event_Vol_Fade_Options_Sell",
+    "S23_Weekly_Options_Theta_Decay_Strangle",
+    "S24_Momentum_Breakout_Swing",
+    "S25_Mean_Reversion_RSI_Oversold_Swing",
+    "S26_Sector_Rotation_Nifty_Rebalance",
+    "S27_Gap_Up_Down_Fade_Options",
+    "S28_Earnings_Straddle_IV_Play",
+    "S29_Index_Futures_Positional_Trend"
+  ],
+  "strategies_promoted": [
+    "S18_VWAP_Mean_Reversion_Options_Straddle"
+  ],
+  "strategies_rejected": [
+    "S8_EMA_Ribbon_Trend_Rider"
+  ],
+  "total_trades": 331
+}

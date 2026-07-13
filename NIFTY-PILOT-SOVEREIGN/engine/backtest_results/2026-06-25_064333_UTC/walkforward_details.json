@@ -1,0 +1,872 @@
+[
+  {
+    "strategy": "S1_ORB_Nifty_Breakout",
+    "total_trades": 0,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 0 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S2_VWAP_Reversion_BankNifty",
+    "total_trades": 41,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 30,
+      "sharpe": 0.9202409751466248,
+      "win_rate": 0.8333333333333334,
+      "max_drawdown": -0.12439724469236857,
+      "profit_factor": 6.567473181581802,
+      "avg_win_size_inr": 467897.0646000717,
+      "avg_loss_size_inr": 356223.0493093364,
+      "status": "PASS"
+    },
+    "window2": {
+      "start_trade": 31,
+      "end_trade": 60,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "Window 1 PASSED but only 41 trades total; need 60 for the confirmation window"
+  },
+  {
+    "strategy": "S3_IV_Crush_Theta_Decay",
+    "total_trades": 0,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 0 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S4_PCR_Extreme_Reversal",
+    "total_trades": 0,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 0 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S5_Max_Pain_Magnet",
+    "total_trades": 0,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 0 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S6_OI_Buildup_Directional",
+    "total_trades": 0,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 0 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S7_Gap_Fill_Opening",
+    "total_trades": 1,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 1,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 1 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S8_EMA_Ribbon_Trend_Rider",
+    "total_trades": 82,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 30,
+      "sharpe": 42.36295172378064,
+      "win_rate": 1,
+      "max_drawdown": 0,
+      "profit_factor": "inf",
+      "avg_win_size_inr": 287988.2531681227,
+      "avg_loss_size_inr": 0,
+      "status": "PASS"
+    },
+    "window2": {
+      "start_trade": 31,
+      "end_trade": 60,
+      "trades": 30,
+      "sharpe": 0.4210097778152429,
+      "win_rate": 0.9,
+      "max_drawdown": -0.0383731210749072,
+      "profit_factor": 10.820810827636153,
+      "avg_win_size_inr": 467624.18004253134,
+      "avg_loss_size_inr": 388937.36222003336,
+      "status": "FAIL"
+    },
+    "promotion_status": "REJECTED",
+    "reasoning": "Window 1 passed but Window 2 failed: Sharpe 0.42 \u003c 0.60 (fast-demotion: flip to conservative)"
+  },
+  {
+    "strategy": "S9_Event_Volatility_Fade",
+    "total_trades": 0,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 0 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S10_Tick_Scalp_Bid_Ask_Compression",
+    "total_trades": 12,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 12,
+      "sharpe": -0.03033491112591287,
+      "win_rate": 0.4166666666666667,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 12 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S11_Pullback_Scalp_VWAP_Micro",
+    "total_trades": 0,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 0 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S12_Volume_Spike_Scalp_Order_Flow",
+    "total_trades": 0,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 0 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S13_EMA_Ribbon_Scalp_Fast",
+    "total_trades": 10,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 10,
+      "sharpe": 1.633852888176938,
+      "win_rate": 0.9,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 10 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S14_Breakout_Scalp_Support_Resistance",
+    "total_trades": 0,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 0 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S15_RSI_Divergence_Scalp",
+    "total_trades": 1,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 1,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 1 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S16_ATR_Breakout_Scalp_Volatility",
+    "total_trades": 0,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 0 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S17_Opening_Range_Breakout_Intraday",
+    "total_trades": 1,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 1,
+      "sharpe": 0,
+      "win_rate": 1,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 1 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S18_VWAP_Mean_Reversion_Options_Straddle",
+    "total_trades": 174,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 30,
+      "sharpe": 78.26594474588518,
+      "win_rate": 1,
+      "max_drawdown": 0,
+      "profit_factor": "inf",
+      "avg_win_size_inr": 391566.33437246754,
+      "avg_loss_size_inr": 0,
+      "status": "PASS"
+    },
+    "window2": {
+      "start_trade": 31,
+      "end_trade": 60,
+      "trades": 30,
+      "sharpe": 101.72113577948103,
+      "win_rate": 1,
+      "max_drawdown": 0,
+      "profit_factor": "inf",
+      "avg_win_size_inr": 390803.1535099769,
+      "avg_loss_size_inr": 0,
+      "status": "PASS"
+    },
+    "promotion_status": "PROMOTED",
+    "reasoning": "Both windows passed (Sharpe ≥ 0.60, WinRate ≥ 0.48): eligible for live paper trading"
+  },
+  {
+    "strategy": "S19_ADX_Trend_Filter_Breakouts",
+    "total_trades": 0,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 0 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S20_Fibonacci_Retracement_Intraday",
+    "total_trades": 0,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 0 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S21_Bollinger_Band_Squeeze_Breakout_Intraday",
+    "total_trades": 0,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 0 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S22_News_Event_Vol_Fade_Options_Sell",
+    "total_trades": 0,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 0 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S23_Weekly_Options_Theta_Decay_Strangle",
+    "total_trades": 0,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 0 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S24_Momentum_Breakout_Swing",
+    "total_trades": 0,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 0 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S25_Mean_Reversion_RSI_Oversold_Swing",
+    "total_trades": 0,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 0 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S26_Sector_Rotation_Nifty_Rebalance",
+    "total_trades": 0,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 0 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S27_Gap_Up_Down_Fade_Options",
+    "total_trades": 9,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 9,
+      "sharpe": -9.670324554545909,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 9 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S28_Earnings_Straddle_IV_Play",
+    "total_trades": 0,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 0 trades in backtest; need 30 for window 1"
+  },
+  {
+    "strategy": "S29_Index_Futures_Positional_Trend",
+    "total_trades": 0,
+    "window1": {
+      "start_trade": 1,
+      "end_trade": 30,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": "INSUFFICIENT_DATA"
+    },
+    "window2": {
+      "start_trade": 0,
+      "end_trade": 0,
+      "trades": 0,
+      "sharpe": 0,
+      "win_rate": 0,
+      "max_drawdown": 0,
+      "profit_factor": 0,
+      "avg_win_size_inr": 0,
+      "avg_loss_size_inr": 0,
+      "status": ""
+    },
+    "promotion_status": "INSUFFICIENT_DATA",
+    "reasoning": "only 0 trades in backtest; need 30 for window 1"
+  }
+]

@@ -1,0 +1,100 @@
+﻿==== POST-RUN FIXES ====
+OK     TA-Lib/ta-lib-python  (replaces quantmind/ta-lib-python -> libs/ta-lib-python)
+OK     xgboosted/pandas-ta-classic  (replaces deleted twopirllc/pandas-ta -> libs/pandas-ta)
+
+==== UNAVAILABLE (URL invalid / private / removed) ====
+hi-imcodeman/pyNSE          - repo not found
+butor/blackbird             - repo not found / removed
+polakowo/vectorbt-pro-docs  - private (vectorbt PRO is a paid product)
+quantrocket-llc/quantrocket - not public (commercial product)
+gunthercox/Chandler         - repo not found (gunthercox maintains ChatterBot, not Chandler)
+femtotrader/pynance         - repo not found
+
+==== CLONE SUMMARY ====
+Cloned: 20  Skipped: 57  Failed: 8
+=======================
+SKIP   marketcalls/openalgo
+SKIP   marketcalls/openengine
+SKIP   dhan-oss/DhanHQ-py
+SKIP   angel-one/smartapi-python
+SKIP   zerodha/pykiteconnect
+SKIP   aeron7/nsepython
+SKIP   jugaad-py/jugaad-data
+FAIL   hi-imcodeman/pyNSE  (https://github.com/hi-imcodeman/pyNSE.git)
+SKIP   Akhilgovind02/india-stock-mcp
+OK     VarunS2002/Python-NSE-Option-Chain-Analyzer
+OK     anshuthopsee/nse-oi-visualizer
+OK     anurag-roy/kite-option-chain
+OK     pramakrishn/express-option-chain
+OK     srikar-kodakandla/fully-automated-nifty-options-trading
+OK     TechfaneTechnologies/ZerodhaStrikesAllowedToTrade
+OK     sunnywilson93/nifty-options-analysis
+OK     deshwalmahesh/NSE-Stock-Scanner
+OK     suhas2090/StockmarketDB
+OK     AdroitAnandAI/RRG-Sector-Rotation-India
+OK     hemangjoshi37a/TrendMaster
+OK     goldspanlabs/optopsy
+OK     joesinghh/AlgoApp
+OK     ajeeshworkspace/indian-trading-skills
+OK     narenkram/steadfast-monorepo
+OK     Shubxam/Nifty-500-Live-Sentiment-Analysis
+OK     nabojyoti/agentic-equity-research-system
+SKIP   polakowo/vectorbt
+SKIP   mementum/backtrader
+SKIP   kernc/backtesting.py
+SKIP   pmorissette/bt
+SKIP   mhallsmoore/qstrader
+SKIP   quantopian/zipline
+SKIP   stefan-jansen/zipline-reloaded
+SKIP   AI4Finance-Foundation/FinRL
+SKIP   AI4Finance-Foundation/FinGPT
+SKIP   microsoft/qlib
+SKIP   tensortrade-org/tensortrade
+SKIP   edtechre/pybroker
+FAIL   twopirllc/pandas-ta  (https://github.com/twopirllc/pandas-ta.git)
+SKIP   bukosabino/ta
+SKIP   mementum/bta-lib
+SKIP   facioquo/stock-indicators-python
+SKIP   peerchemist/finta
+SKIP   freqtrade/freqtrade
+SKIP   freqtrade/freqtrade-strategies
+SKIP   nautechsystems/nautilus_trader
+SKIP   jesse-ai/jesse
+SKIP   ranaroussi/yfinance
+SKIP   OpenBB-finance/OpenBB
+SKIP   vnpy/vnpy
+SKIP   ricequant/rqalpha
+SKIP   gbeced/pyalgotrade
+SKIP   bmoscon/cryptofeed
+SKIP   ccxt/ccxt
+SKIP   hummingbot/hummingbot
+SKIP   Superalgos/Superalgos
+SKIP   Drakkar-Software/OctoBot
+SKIP   QuantConnect/Lean
+SKIP   stellar/kelp
+FAIL   butor/blackbird  (https://github.com/butor/blackbird.git)
+SKIP   DeviaVir/zenbot
+SKIP   hyperliquid-dex/hyperliquid-python-sdk
+SKIP   drift-labs/protocol-v2
+SKIP   freqtrade/technical
+SKIP   freqtrade/ftui
+SKIP   nkaz001/hftbacktest
+SKIP   erdewit/ib_insync
+FAIL   polakowo/vectorbt-pro-docs  (https://github.com/polakowo/vectorbt-pro-docs.git)
+SKIP   jesse-ai/example-strategies
+SKIP   hummingbot/deploy
+SKIP   hummingbot/quants-lab
+FAIL   quantrocket-llc/quantrocket  (https://github.com/quantrocket-llc/quantrocket.git)
+OK     quantrocket-llc/moonshot
+SKIP   tradingstrategy-ai/trade-executor
+SKIP   tradingstrategy-ai/web3-ethereum-defi
+SKIP   tradingstrategy-ai/trading-strategy
+SKIP   enarjord/passivbot
+FAIL   gunthercox/Chandler  (https://github.com/gunthercox/Chandler.git)
+FAIL   femtotrader/pynance  (https://github.com/femtotrader/pynance.git)
+FAIL   quantmind/ta-lib-python  (https://github.com/quantmind/ta-lib-python.git)
+SKIP   flashbots/simple-arbitrage
+OK     flashbots/searcher-sponsored-tx
+OK     Uniswap/examples
+SKIP   aave/aave-v3-core
+SKIP   yearn/yearn-vaults

@@ -1,0 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0B0E11;
+  --surface: #161B22;
+  --surface-elevated: #1C2128;
+  --border: #30363D;
+  --primary: #4285F4;
+  --profit-green: #00C087;
+  --loss-red: #FF5733;
+  --neutral-yellow: #F5A623;
+  --text-primary: #E6EDF3;
+  --text-secondary: #8B949E;
+  --text-muted: #484F58;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  background-color: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Skeleton animation */
+@keyframes skeleton-pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.4; }
+}
+
+.skeleton {
+  background: var(--surface-elevated);
+  border-radius: 4px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+/* Price flash animations */
+@keyframes flash-green {
+  0%, 100% { background-color: transparent; }
+  50% { background-color: rgba(0, 192, 135, 0.2); }
+}
+
+@keyframes flash-red {
+  0%, 100% { background-color: transparent; }
+  50% { background-color: rgba(255, 87, 51, 0.2); }
+}
+
+.flash-green {
+  animation: flash-green 0.3s ease-in-out;
+}
+
+.flash-red {
+  animation: flash-red 0.3s ease-in-out;
+}
+
+/* Table styles */
+.trading-table th {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.trading-table td {
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.trading-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Card base */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.625rem;
+  padding: 1.25rem;
+}
+
+/* Profit/Loss coloring */
+.profit { color: var(--profit-green); }
+.loss { color: var(--loss-red); }
+.neutral { color: var(--text-primary); }
+
+/* Badge base */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* Kill switch pulsing overlay */
+@keyframes kill-pulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+.kill-switch-banner {
+  animation: kill-pulse 1.5s ease-in-out infinite;
+}
+
+/* Number mono font */
+.num {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-feature-settings: "tnum" 1;
+}
