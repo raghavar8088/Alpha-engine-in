@@ -2,8 +2,9 @@
 
 Loop:
   - Sleeps outside market hours; wakes at 09:15 IST Mon-Fri.
-  - At open: bootstraps each strategy's warmup history from the `bars` collection,
-    then resets the day.
+  - At open: reloads the qualified strategy universe from the latest options sweep,
+    bootstraps each strategy's warmup history from the `bars` collection, then resets
+    the day.
   - Every POLL_SECONDS: fetches the live NIFTY spot quote from Dhan, rolls it into
     5m/15m/1h bars; on each finalized bar drives that timeframe's strategies; re-prices
     open paper positions at their live option LTP (stop/target/EOD); snapshots equity.
@@ -24,7 +25,7 @@ import requests
 
 from credentials import get_dhan_access
 from db import _db
-from prelive_engine import TOP20, PreLiveEngine
+from prelive_engine import PreLiveEngine
 
 from tradingai_shared.domain import Bar, Timeframe
 
@@ -102,13 +103,13 @@ def bucket_start(now: datetime, tf: str) -> datetime:
 
 
 def bootstrap_history(engine: PreLiveEngine):
-    """Warm each strategy with recent finalized bars from the DB so it can signal
-    from the first live bar."""
+    """Warm each strategy in the engine's CURRENT universe with recent finalized bars
+    from the DB so it can signal from the first live bar."""
     for tf in TIMEFRAMES:
         recent = list(bars_collection.find(
             {"symbol": "NIFTY", "timeframe": tf}).sort("ts", -1).limit(400))
         recent.reverse()
-        for sid, stf in TOP20:
+        for sid, stf in engine.universe:
             if stf != tf:
                 continue
             ctx = engine.contexts[f"{sid}@{tf}"]
@@ -117,7 +118,7 @@ def bootstrap_history(engine: PreLiveEngine):
                 ctx.push(Bar(symbol="NIFTY", timeframe=Timeframe(tf), ts=d["ts"],
                              open=d["open"], high=d["high"], low=d["low"],
                              close=d["close"], volume=d.get("volume", 0)))
-    print(f"[prelive] bootstrapped warmup history for {len(TOP20)} strategy slots", flush=True)
+    print(f"[prelive] bootstrapped warmup history for {len(engine.universe)} strategy slots", flush=True)
 
 
 def run_session(engine: PreLiveEngine, feed: DhanFeed):
@@ -143,12 +144,13 @@ def run_session(engine: PreLiveEngine, feed: DhanFeed):
                               open=cur[1], high=cur[2], low=cur[3], close=cur[4], volume=0)
                     if last_finalized[tf] != cur[0]:
                         last_finalized[tf] = cur[0]
-                        for sid, stf in TOP20:
+                        for sid, stf in engine.universe:
                             if stf != tf:
                                 continue
                             ev = engine.on_bar(sid, tf, fin, feed.ltp)
                             if ev:
-                                print(f"[OPEN] {ev['key']} {ev['type']} {ev['strike']:.0f} @Rs{ev['premium']:.2f}", flush=True)
+                                print(f"[OPEN] {ev['key']} {ev['type']} {ev['strike']:.0f} "
+                                      f"x{ev['lots']}lot @Rs{ev['premium']:.2f}", flush=True)
                     forming[tf] = [bs, spot, spot, spot, spot]
                 else:
                     cur[2] = max(cur[2], spot)
@@ -175,11 +177,14 @@ def run_session(engine: PreLiveEngine, feed: DhanFeed):
 
 
 def main():
-    print("[prelive] Pre-Live paper desk daemon starting — top-20 NIFTY basket, real premiums, paper only", flush=True)
+    print("[prelive] Pre-Live paper desk daemon starting — dynamic qualified-strategy "
+          "universe, real premiums, paper only", flush=True)
     engine = PreLiveEngine()
     bal = engine.balance()
     print(f"[prelive] paper account: starting capital Rs{bal['initial_capital']:,.0f} | "
           f"balance Rs{bal['balance']:,.0f} | available Rs{bal['available_cash']:,.0f}", flush=True)
+    print(f"[prelive] qualified universe: {len(engine.universe)} strategy slots "
+          f"(source: {engine.universe_source})", flush=True)
     engine.publish_idle_state()
     while True:
         try:

@@ -18,6 +18,7 @@ import {
 const inr = (v: number | null | undefined) =>
   v === null || v === undefined ? "-" : v.toLocaleString("en-IN", { maximumFractionDigits: 0 });
 const pct = (v: number | null | undefined) => (v === null || v === undefined ? "-" : `${v.toFixed(1)}%`);
+const DEFAULT_INITIAL_CAPITAL = 10_000_000; // ₹1 crore — matches prelive_engine.py's default
 
 export default function PreLivePage() {
   const [status, setStatus] = useState<PreLiveStatus | null>(null);
@@ -45,31 +46,39 @@ export default function PreLivePage() {
 
   const eng = status?.engine;
   const running = eng?.status === "running";
+  const noUniverse = eng?.status === "no_qualified_universe";
   const totalNet = days.reduce((a, d) => a + (d.net_pnl || 0), 0);
   const greenDays = days.filter((d) => (d.net_pnl || 0) > 0).length;
+  const src = eng?.universe_source;
+  const sweepDate = src?.created_at ? new Date(src.created_at).toLocaleDateString() : null;
 
   return (
     <div className="page">
       <PageHeader
         crumb="Pre-Live Desk"
         title="Pre-Live Paper Desk"
-        subtitle="The top-20 audited NIFTY basket, traded automatically every market day on LIVE Dhan data — paper account, but REAL option premiums. This builds the forward, real-premium track record a historical backtest can't (Dhan purges expired-contract history). No real orders are ever placed."
+        subtitle="The current QUALIFIED strategies from the latest options sweep, traded automatically every market day on LIVE Dhan data — paper account, ₹1,00,00,000 starting capital, but REAL option premiums. This builds the forward, real-premium track record a historical backtest can't (Dhan purges expired-contract history). No real orders are ever placed."
       />
 
       {error && <ErrorBanner message={error} />}
+      {noUniverse && (
+        <ErrorBanner message={eng?.note ?? "No qualified strategies to trade right now — run the options sweep to populate one."} />
+      )}
 
       <div className="tiles">
         <div className="tile">
           <div className="tile-label">Engine</div>
-          <div className={`tile-value ${running ? "gain" : ""}`}>
+          <div className={`tile-value ${running ? "gain" : noUniverse ? "loss" : ""}`}>
             <span className={`dot ${running ? "live" : "off"}`} /> {eng?.status ?? "offline"}
           </div>
           <div className="tile-sub">{eng?.heartbeat ? `beat ${new Date(eng.heartbeat).toLocaleTimeString()}` : "no heartbeat"}</div>
         </div>
         <div className="tile">
           <div className="tile-label">Equity</div>
-          <div className={`tile-value ${(eng?.equity ?? 100000) >= 100000 ? "gain" : "loss"}`}>₹{inr(eng?.equity ?? eng?.balance ?? 100000)}</div>
-          <div className="tile-sub">from ₹{inr(eng?.initial_capital ?? 100000)} start · avail ₹{inr(eng?.available_cash ?? 100000)}</div>
+          <div className={`tile-value ${(eng?.equity ?? DEFAULT_INITIAL_CAPITAL) >= (eng?.initial_capital ?? DEFAULT_INITIAL_CAPITAL) ? "gain" : "loss"}`}>
+            ₹{inr(eng?.equity ?? eng?.balance ?? DEFAULT_INITIAL_CAPITAL)}
+          </div>
+          <div className="tile-sub">from ₹{inr(eng?.initial_capital ?? DEFAULT_INITIAL_CAPITAL)} start · avail ₹{inr(eng?.available_cash ?? DEFAULT_INITIAL_CAPITAL)}</div>
         </div>
         <div className="tile">
           <div className="tile-label">Today P&amp;L</div>
@@ -81,7 +90,14 @@ export default function PreLivePage() {
         <div className="tile">
           <div className="tile-label">Capital Deployed</div>
           <div className="tile-value">₹{inr(eng?.capital_locked)}</div>
-          <div className="tile-sub">{status?.open_positions?.length ?? 0} open position(s)</div>
+          <div className="tile-sub">{status?.open_positions?.length ?? 0} open position(s) · ₹{inr(eng?.capital_per_trade)}/trade budget</div>
+        </div>
+        <div className="tile">
+          <div className="tile-label">Qualified Universe</div>
+          <div className={`tile-value ${noUniverse ? "loss" : ""}`}>{eng?.universe_size ?? 0} strategies</div>
+          <div className="tile-sub">
+            {src?.fallback ? "TOP20 fallback (opt-in)" : src?.sweep_id ? `sweep ${src.sweep_id.slice(0, 8)}${sweepDate ? ` · ${sweepDate}` : ""}` : "no sweep yet"}
+          </div>
         </div>
         <div className="tile">
           <div className="tile-label">Track Record</div>

@@ -22,3 +22,4 @@ daily_pnl_collection = _db["prelive_daily_pnl"]    # one doc per session
 scores_collection = _db["prelive_strategy_scores"] # per-strategy leaderboard
 state_collection = _db["prelive_state"]            # singleton engine heartbeat/status
 instruments_collection = _db["instruments"]
+option_sweeps_collection = _db["option_sweeps"]    # qualification sweeps (backend writes, we read)
