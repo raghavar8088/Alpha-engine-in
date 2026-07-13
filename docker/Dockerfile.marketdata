@@ -1,0 +1,14 @@
+# Build context must be the TradingAI/ repo root (requirements.txt pulls in
+# ../shared), e.g.:
+#   docker build -f docker/Dockerfile.marketdata -t tradingai-marketdata .
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY shared ./shared
+COPY market-data-service ./market-data-service
+
+WORKDIR /app/market-data-service
+RUN pip install --no-cache-dir -r requirements.txt
+
+CMD ["python", "main.py"]
