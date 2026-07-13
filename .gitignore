@@ -1,9 +1,15 @@
-# credentials & secrets
+# Real secrets — never commit. .env.example files ARE tracked.
+.env
+.env.local
+.env.*.local
+.env.dhan-totp
 .application-credentials/
 dhan_config.py
 angel_one_config.py
 **/.env
 **/.env.*
+!*.env.example
+!.env.local.example
 !**/.env.example
 !**/.env.sample
 !**/*.env.example
@@ -45,13 +51,31 @@ pykiteconnect/
 smartapi-python/
 steadfast-monorepo/
 
-# build artifacts / caches
+# Python
+.venv/
 __pycache__/
 *.pyc
+*.pyo
+*.egg-info/
+
+# Node / Next.js
 node_modules/
 .next/
+out/
+.turbo/
 dist/
 build/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
 logs/
+
+# Personal reference doc, not needed for deployment
+GOOGLE-CLOUD/
+
 *.zip
 *.pem

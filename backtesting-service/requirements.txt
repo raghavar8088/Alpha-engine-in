@@ -1,0 +1,6 @@
+-e ../shared
+-e ../strategy-service
+-e ../risk-service
+-e .
+pymongo==4.10.1
+python-dotenv==1.0.1

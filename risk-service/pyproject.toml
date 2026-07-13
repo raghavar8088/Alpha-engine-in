@@ -1,0 +1,13 @@
+[project]
+name = "tradingai-risk-service"
+version = "0.1.0"
+description = "TradingAI risk engine — position sizing, exposure limits, kill-switch"
+requires-python = ">=3.11"
+dependencies = ["pydantic>=2", "tradingai-shared"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["risk_service*"]
