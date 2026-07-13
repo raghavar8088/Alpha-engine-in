@@ -4,6 +4,7 @@ from uuid import uuid4
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api.deps import get_current_user
+from app.core.config import settings
 from app.core.db import broker_credentials_collection, paper_orders_collection
 from app.core.encryption import decrypt_secret, encrypt_secret
 from app.schemas.broker import (
@@ -12,7 +13,7 @@ from app.schemas.broker import (
     OrderResponse,
     PlaceOrderRequest,
 )
-from app.services.dhan_client import DhanAPIError, DhanClient, extract_client_id_from_token
+from app.services.dhan_client import DhanAPIError, DhanClient, extract_client_id_from_token, totp_login
 from app.services.portfolio_analytics import get_risk_status
 
 router = APIRouter(prefix="/api/broker", tags=["broker"])
@@ -25,6 +26,26 @@ async def _get_dhan_client(user_id: str) -> DhanClient:
     return DhanClient(client_id=creds["client_id"], access_token=decrypt_secret(creds["access_token_encrypted"]))
 
 
+async def store_dhan_credentials(user_id: str, client_id: str, access_token: str, dhan_name: str | None = None) -> None:
+    """Shared upsert used by both the manual connect flow and the TOTP auto-refresh
+    loop so a refreshed token replaces the stored one without disturbing anything
+    else in the credentials document."""
+    await broker_credentials_collection.find_one_and_update(
+        {"user_id": user_id, "broker": "dhan"},
+        {
+            "$set": {
+                "user_id": user_id,
+                "broker": "dhan",
+                "client_id": client_id,
+                "access_token_encrypted": encrypt_secret(access_token),
+                "connected_at": datetime.now(timezone.utc),
+                **({"dhan_name": dhan_name} if dhan_name else {}),
+            }
+        },
+        upsert=True,
+    )
+
+
 @router.get("/status", response_model=BrokerConnectionResponse | None)
 async def broker_status(current_user: dict = Depends(get_current_user)):
     creds = await broker_credentials_collection.find_one({"user_id": str(current_user["_id"]), "broker": "dhan"})
@@ -34,7 +55,7 @@ async def broker_status(current_user: dict = Depends(get_current_user)):
         broker="dhan",
         client_id=creds["client_id"],
         connected_at=creds["connected_at"],
-        dhan_name=None,
+        dhan_name=creds.get("dhan_name"),
     )
 
 
@@ -55,26 +76,35 @@ async def connect_broker(payload: ConnectBrokerRequest, current_user: dict = Dep
     except DhanAPIError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Dhan validation failed: {exc.remarks}")
 
-    now = datetime.now(timezone.utc)
-    await broker_credentials_collection.find_one_and_update(
-        {"user_id": str(current_user["_id"]), "broker": "dhan"},
-        {
-            "$set": {
-                "user_id": str(current_user["_id"]),
-                "broker": "dhan",
-                "client_id": client_id,
-                "access_token_encrypted": encrypt_secret(payload.access_token),
-                "connected_at": now,
-            }
-        },
-        upsert=True,
-    )
+    dhan_name = profile.get("data", {}).get("dhanClientName") if isinstance(profile.get("data"), dict) else None
+    await store_dhan_credentials(str(current_user["_id"]), client_id, payload.access_token, dhan_name)
     return BrokerConnectionResponse(
         broker="dhan",
         client_id=client_id,
-        connected_at=now,
-        dhan_name=profile.get("data", {}).get("dhanClientName") if isinstance(profile.get("data"), dict) else None,
+        connected_at=datetime.now(timezone.utc),
+        dhan_name=dhan_name,
     )
+
+
+@router.post("/refresh-token")
+async def refresh_dhan_token(current_user: dict = Depends(get_current_user)):
+    """Manually trigger a TOTP-based token refresh (the same thing the background
+    loop in app/main.py does automatically every ~20h) — useful for testing the
+    TOTP setup without waiting for the scheduled refresh."""
+    if not (settings.dhan_client_id and settings.dhan_pin and settings.dhan_totp_secret):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="DHAN_CLIENT_ID / DHAN_PIN / DHAN_TOTP_SECRET not configured",
+        )
+    try:
+        data = await totp_login(settings.dhan_client_id, settings.dhan_pin, settings.dhan_totp_secret)
+    except DhanAPIError as exc:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=f"TOTP login failed: {exc.remarks}")
+
+    await store_dhan_credentials(
+        str(current_user["_id"]), str(data["dhanClientId"]), data["accessToken"], data.get("dhanClientName"),
+    )
+    return {"refreshed": True, "client_id": data["dhanClientId"], "expiry_time": data.get("expiryTime")}
 
 
 @router.get("/holdings")

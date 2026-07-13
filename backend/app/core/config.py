@@ -7,6 +7,13 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
     broker_encryption_key: str = ""
     dhan_base_url: str = "https://api.dhan.co/v2"
+    dhan_auth_base_url: str = "https://auth.dhan.co"
+    # TOTP-based programmatic login (no browser/2FA prompt) — all three must be set
+    # to enable auto-refresh. Requires TOTP API auth enabled once on the Dhan
+    # account first (Dhan Web -> DhanHQ Trading APIs -> Setup TOTP).
+    dhan_client_id: str = ""
+    dhan_pin: str = ""
+    dhan_totp_secret: str = ""
     groq_api_key: str = ""
     mistral_api_key: str = ""
     deepseek_api_key: str = ""

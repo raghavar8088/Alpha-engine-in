@@ -6,6 +6,7 @@ import base64
 import json as json_module
 
 import httpx
+import pyotp
 
 from app.core.config import settings
 
@@ -14,6 +15,28 @@ class DhanAPIError(Exception):
     def __init__(self, remarks: str):
         self.remarks = remarks
         super().__init__(remarks)
+
+
+async def totp_login(client_id: str, pin: str, totp_secret: str) -> dict:
+    """Programmatic Dhan login via TOTP — generates a fresh access token with no
+    browser/2FA prompt. Requires TOTP-based API auth enabled once on the Dhan
+    account first (Dhan Web -> DhanHQ Trading APIs -> Setup TOTP), which is a
+    one-time manual step outside this app.
+
+    Response shape: {dhanClientId, dhanClientName, dhanClientUcc,
+    givenPowerOfAttorney, accessToken, expiryTime}.
+    Docs: https://dhanhq.co/docs/v2/authentication/
+    """
+    code = pyotp.TOTP(totp_secret).now()
+    async with httpx.AsyncClient(base_url=settings.dhan_auth_base_url, timeout=30) as client:
+        response = await client.post(
+            "/app/generateAccessToken",
+            params={"dhanClientId": client_id, "pin": pin, "totp": code},
+        )
+    data = response.json()
+    if response.status_code >= 300 or not data.get("accessToken"):
+        raise DhanAPIError(data.get("remarks") or data.get("errorMessage") or "TOTP login failed")
+    return data
 
 
 def extract_client_id_from_token(access_token: str) -> str | None:
