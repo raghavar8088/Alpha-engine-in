@@ -126,9 +126,13 @@ class DhanClient:
         }
         return await self._request("POST", "/orders", json=payload)
 
-    async def quote_data(self, exchange_segment: str, security_id: int) -> dict:
-        payload = {exchange_segment: [security_id]}
-        return await self._request("POST", "/marketfeed/quote", json=payload)
+    async def quote_data(self, securities_by_segment: dict[str, list[int]]) -> dict:
+        """Batch full quote (same request shape as ltp_data, up to 1000 ids):
+        {"NSE_EQ": [11536, ...]} -> {"data": {segment: {security_id: {"last_price",
+        "ohlc": {"open","high","low","close"}, "volume", "net_change", ...}}}}.
+        Unlike LTP, "ohlc.close" here is the PREVIOUS session's close during
+        market hours — the live day-so-far levels are open/high/low + last_price."""
+        return await self._request("POST", "/marketfeed/quote", json=dict(securities_by_segment))
 
     async def ltp_data(self, securities_by_segment: dict[str, list[int]]) -> dict:
         """Batch LTP: {"NSE_EQ": [11536, ...], "NSE_FNO": [...]} ->

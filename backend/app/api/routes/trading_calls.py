@@ -11,11 +11,14 @@ import time
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
+from datetime import datetime
+
 from app.api.deps import get_current_user
 from app.api.routes.broker import _get_dhan_client
-from app.core.db import trading_call_positions_collection, trading_calls_collection
-from app.services.call_engine import generate_calls, refresh_calls
+from app.core.db import call_scheduler_state_collection, trading_call_positions_collection, trading_calls_collection
+from app.services.call_engine import IST, generate_calls, refresh_calls
 from app.services.call_positions import open_positions_for_calls, summary as positions_summary, sync_positions
+from app.services.call_scheduler import AUTOGEN_ENABLED, GENERATION_SLOTS, STATE_ID, next_slot
 from app.services.dhan_client import DhanClient
 
 router = APIRouter(prefix="/api/trading-calls", tags=["trading-calls"])
@@ -82,7 +85,18 @@ async def list_calls(
     async for row in trading_calls_collection.aggregate(pipeline):
         counts[row["_id"]] = row["n"]
 
-    return {"calls": calls, "live_counts": counts}
+    state = await call_scheduler_state_collection.find_one({"_id": STATE_ID}) or {}
+    last_run_at = state.get("last_run_at")
+    scheduler = {
+        "enabled": AUTOGEN_ENABLED,
+        "slots": list(GENERATION_SLOTS),
+        "last_run_at": last_run_at.isoformat() if last_run_at else None,
+        "last_slot": state.get("last_slot"),
+        "last_created": state.get("last_created"),
+        "next_slot": next_slot(datetime.now(IST)) if AUTOGEN_ENABLED else None,
+    }
+
+    return {"calls": calls, "live_counts": counts, "scheduler": scheduler}
 
 
 @router.post("/generate")

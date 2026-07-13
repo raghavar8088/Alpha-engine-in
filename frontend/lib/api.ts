@@ -462,9 +462,19 @@ export interface TradingCall {
   closed_at: string | null;
 }
 
+export interface CallSchedulerStatus {
+  enabled: boolean;
+  slots: string[];
+  last_run_at: string | null;
+  last_slot: string | null;
+  last_created: number | null;
+  next_slot: string | null;
+}
+
 export interface TradingCallsResponse {
   calls: TradingCall[];
   live_counts: Record<CallSegment, number>;
+  scheduler?: CallSchedulerStatus;
 }
 
 export async function fetchTradingCalls(segment?: CallSegment, status?: string): Promise<TradingCallsResponse> {

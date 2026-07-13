@@ -5,6 +5,7 @@ import GlassPanel from "../../components/GlassPanel";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import {
+  CallSchedulerStatus,
   CallSegment,
   GenerateCallsResult,
   TradingCall,
@@ -107,6 +108,7 @@ export default function TradingCallsPage() {
   const [positions, setPositions] = useState<TradingCallPosition[]>([]);
   const [positionsSummary, setPositionsSummary] = useState<TradingCallPositionsSummary | null>(null);
   const [positionsStatusFilter, setPositionsStatusFilter] = useState("OPEN");
+  const [scheduler, setScheduler] = useState<CallSchedulerStatus | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -114,6 +116,7 @@ export default function TradingCallsPage() {
       const data = await fetchTradingCalls();
       setCalls(data.calls);
       setCounts(data.live_counts);
+      setScheduler(data.scheduler ?? null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load trading calls");
     } finally {
@@ -270,6 +273,16 @@ export default function TradingCallsPage() {
         </div>
       </div>
 
+      {scheduler?.enabled && (
+        <div className="sched-line">
+          <span className="sched-dot" />
+          Auto-scan every 2h on trading days ({scheduler.slots.join(" · ")} IST)
+          {scheduler.last_slot
+            ? ` · last run ${scheduler.last_slot}${scheduler.last_created !== null ? ` (${scheduler.last_created} new call${scheduler.last_created === 1 ? "" : "s"})` : ""}`
+            : " · no runs yet"}
+          {scheduler.next_slot ? ` · next ${scheduler.next_slot}` : ""}
+        </div>
+      )}
       {error && <ErrorBanner message={error} />}
       {tradeMsg && <div className="notice">{tradeMsg}</div>}
       {genResult && (
@@ -511,6 +524,8 @@ export default function TradingCallsPage() {
         .count { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 20px; padding: 1px 8px; font-size: 10.5px; }
         .tab.active .count { background: var(--purple); color: #fff; border-color: transparent; }
         .toolbar { display: flex; gap: 10px; align-items: center; }
+        .sched-line { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--text-muted); padding: 0 2px; }
+        .sched-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gain); flex-shrink: 0; }
         .capital-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
         .capital-tiles .tile { display: flex; flex-direction: column; gap: 4px; background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 10px; padding: 12px 14px; }
         .capital-tiles .label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); }
