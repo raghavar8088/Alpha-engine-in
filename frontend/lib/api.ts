@@ -481,6 +481,7 @@ export interface GenerateCallsResult {
   calls: TradingCall[];
   notes: Partial<Record<CallSegment, string>>;
   broker_connected: boolean;
+  positions_opened: number;
 }
 
 export async function generateTradingCalls(segments?: CallSegment[]): Promise<GenerateCallsResult> {
@@ -492,6 +493,65 @@ export async function generateTradingCalls(segments?: CallSegment[]): Promise<Ge
 
 export async function closeTradingCall(callId: string): Promise<TradingCall> {
   return apiFetch(`/api/trading-calls/${callId}/close`, { method: "POST" });
+}
+
+// --- Trading Call Positions (auto-opened paper ledger over Trading Calls) ---
+
+export type CallPositionStatus = "OPEN" | "TARGET_HIT" | "STOPLOSS" | "EXPIRED" | "CLOSED";
+
+export interface TradingCallPosition {
+  position_id: string;
+  call_id: string;
+  segment: CallSegment;
+  horizon: "INTRADAY" | "POSITIONAL";
+  side: "BUY" | "SELL";
+  symbol: string;
+  display_name: string;
+  instrument: TradingCallInstrument | null;
+  entry_price: number;
+  lot_size: number;
+  lots: number;
+  qty: number;
+  capital_deployed: number;
+  target: number;
+  stoploss: number;
+  ltp: number;
+  ltp_source: "dhan_quote" | "last_bar_close" | "model";
+  unrealized_pnl: number;
+  pnl_pct: number | null;
+  realized_pnl: number | null;
+  exit_price: number | null;
+  status: CallPositionStatus;
+  opened_at: string;
+  updated_at: string;
+  closed_at: string | null;
+}
+
+export interface TradingCallPositionsSummary {
+  initial_capital: number;
+  available_cash: number;
+  deployed_capital: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  equity: number;
+  open_positions: number;
+  closed_positions: number;
+}
+
+export interface TradingCallPositionsResponse {
+  positions: TradingCallPosition[];
+  summary: TradingCallPositionsSummary;
+}
+
+export async function fetchTradingCallPositions(
+  segment?: CallSegment,
+  status?: string,
+): Promise<TradingCallPositionsResponse> {
+  const params = new URLSearchParams();
+  if (segment) params.set("segment", segment);
+  if (status) params.set("status", status);
+  const qs = params.toString();
+  return apiFetch(`/api/trading-calls/positions${qs ? `?${qs}` : ""}`);
 }
 
 // --- AI research & trade intelligence (roadmap Phase 6) ---
@@ -579,8 +639,21 @@ export async function indexResearchIntoVectorStore(limit = 200): Promise<{ mode?
 
 // --- Pre-Live paper desk ---
 
+export interface PreLiveUniverseSource {
+  sweep_id: string | null;
+  created_at: string | null;
+  symbol?: string;
+  qualified_count?: number;
+  fallback?: string;
+}
 export interface PreLiveStatus {
-  engine: { status: string; heartbeat?: string; session?: string; open_positions?: number; day_pnl?: number; capital_locked?: number; initial_capital?: number; balance?: number; equity?: number; available_cash?: number; realized_all_time?: number };
+  engine: {
+    status: string; heartbeat?: string; session?: string; open_positions?: number; day_pnl?: number;
+    capital_locked?: number; initial_capital?: number; balance?: number; equity?: number;
+    available_cash?: number; realized_all_time?: number;
+    universe_size?: number; universe_source?: PreLiveUniverseSource | null;
+    capital_per_trade?: number; note?: string | null;
+  };
   open_positions: Array<{ key: string; strategy_id: string; timeframe: string; option_type: string; strike: number; entry_premium: number; mark: number; unrealized: number; qty: number; entry_ts: string }>;
   today: { session: string; trades: number; net_pnl: number; peak_capital: number; roi_pct: number | null; wins: number } | null;
 }
