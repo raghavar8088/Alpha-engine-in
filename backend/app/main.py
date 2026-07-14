@@ -20,6 +20,7 @@ from app.api.routes import (
     risk,
     strategies,
     trading_calls,
+    watchlist,
 )
 from app.api.routes.broker import store_dhan_credentials
 from app.core.config import settings
@@ -117,6 +118,7 @@ app.include_router(ai.router)
 app.include_router(research.router)
 app.include_router(trading_calls.router)
 app.include_router(prelive.router)
+app.include_router(watchlist.router)
 app.include_router(manual_positions.router)
 
 if settings.enable_live_trading:

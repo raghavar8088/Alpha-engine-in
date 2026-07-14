@@ -589,6 +589,7 @@ export interface ManualPosition {
   avg_price: number;
   margin_used: number;
   leverage: number;
+  margin_source: "dhan_calculator" | "fallback";
   ltp: number;
   ltp_source: "dhan_quote";
   unrealized_pnl: number;
@@ -637,6 +638,7 @@ export interface MarginEstimate {
   margin_required: number;
   leverage: number;
   notional_value: number;
+  source: "dhan_calculator" | "fallback";
 }
 
 export async function searchManualInstruments(q: string): Promise<ManualInstrument[]> {
@@ -690,6 +692,10 @@ export async function exitManualPosition(positionId: string, quantity?: number):
     method: "POST",
     body: JSON.stringify({ quantity: quantity ?? null }),
   });
+}
+
+export async function resetManualPositions(): Promise<{ positions_deleted: number; orders_deleted: number; initial_capital: number }> {
+  return apiFetch("/api/manual-positions/reset", { method: "POST" });
 }
 
 // --- AI research & trade intelligence (roadmap Phase 6) ---
@@ -812,3 +818,70 @@ export async function fetchPreLiveStatus(): Promise<PreLiveStatus> { return apiF
 export async function fetchPreLiveLeaderboard(): Promise<{ count: number; strategies: PreLiveScore[] }> { return apiFetch("/api/prelive/leaderboard"); }
 export async function fetchPreLiveTrades(limit = 100): Promise<{ count: number; trades: PreLiveTrade[] }> { return apiFetch(`/api/prelive/trades?limit=${limit}`); }
 export async function fetchPreLiveDaily(limit = 60): Promise<{ count: number; days: PreLiveDay[] }> { return apiFetch(`/api/prelive/daily?limit=${limit}`); }
+
+// --- Watchlist (user-created named lists with live price tracking) ---
+
+export interface WatchlistSymbol {
+  symbol: string;
+  security_id: string;
+  exchange_segment: string;
+  added_at: string;
+}
+
+export interface Watchlist {
+  watchlist_id: string;
+  name: string;
+  symbols: WatchlistSymbol[];
+  created_at: string;
+}
+
+export interface WatchlistQuote {
+  symbol: string;
+  security_id: string;
+  exchange_segment: string;
+  ltp: number | null;
+  change: number | null;
+  pct_change: number | null;
+  open: number | null;
+  high: number | null;
+  low: number | null;
+  prev_close: number | null;
+  volume: number | null;
+}
+
+export async function searchWatchlistInstruments(q: string): Promise<ManualInstrument[]> {
+  if (!q.trim()) return [];
+  const data: { results: ManualInstrument[] } = await apiFetch(`/api/watchlist/search?q=${encodeURIComponent(q)}`);
+  return data.results;
+}
+
+export async function fetchWatchlists(): Promise<{ watchlists: Watchlist[] }> {
+  return apiFetch("/api/watchlist");
+}
+
+export async function createWatchlist(name: string): Promise<Watchlist> {
+  return apiFetch("/api/watchlist", { method: "POST", body: JSON.stringify({ name }) });
+}
+
+export async function deleteWatchlist(watchlistId: string): Promise<{ deleted: boolean }> {
+  return apiFetch(`/api/watchlist/${watchlistId}`, { method: "DELETE" });
+}
+
+export async function addWatchlistSymbol(watchlistId: string, instrument: ManualInstrument): Promise<WatchlistSymbol> {
+  return apiFetch(`/api/watchlist/${watchlistId}/symbols`, {
+    method: "POST",
+    body: JSON.stringify({
+      symbol: instrument.symbol,
+      security_id: instrument.security_id,
+      exchange_segment: instrument.exchange_segment,
+    }),
+  });
+}
+
+export async function removeWatchlistSymbol(watchlistId: string, symbol: string): Promise<{ removed: boolean }> {
+  return apiFetch(`/api/watchlist/${watchlistId}/symbols/${encodeURIComponent(symbol)}`, { method: "DELETE" });
+}
+
+export async function fetchWatchlistQuotes(watchlistId: string): Promise<{ quotes: WatchlistQuote[] }> {
+  return apiFetch(`/api/watchlist/${watchlistId}/quotes`);
+}

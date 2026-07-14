@@ -34,3 +34,5 @@ prelive_equity_collection = db["prelive_equity"]
 prelive_daily_pnl_collection = db["prelive_daily_pnl"]
 prelive_scores_collection = db["prelive_strategy_scores"]
 prelive_state_collection = db["prelive_state"]
+# Watchlist module — user-created named lists of symbols with live price tracking
+watchlists_collection = db["watchlists"]
