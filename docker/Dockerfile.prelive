@@ -9,6 +9,7 @@ WORKDIR /app
 
 COPY shared ./shared
 COPY strategy-service ./strategy-service
+COPY risk-service ./risk-service
 COPY options-service ./options-service
 COPY backtesting-service ./backtesting-service
 COPY prelive-service ./prelive-service
