@@ -8,6 +8,7 @@ dhan_config.py
 angel_one_config.py
 **/.env
 **/.env.*
+.env.dhan-api-keys
 !*.env.example
 !.env.local.example
 !**/.env.example

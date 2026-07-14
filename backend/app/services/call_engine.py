@@ -60,6 +60,29 @@ INTRADAY_MAX_STALENESS_DAYS = 3
 
 _YEARS_BY_TF = {"5m": 0.25, "15m": 0.5, "1h": 1.0, "1d": 3.0}
 
+# Quality gates — every candidate must clear these before insert. Broker research
+# desks (Kotak Neo, ICICI Direct, Sharekhan) only publish liquid names with a
+# defensible risk-reward, and cap how many ideas go out per session.
+MIN_TURNOVER_20D = 10_00_00_000  # ₹10 cr average daily traded value
+MIN_RISK_REWARD = 1.4
+MAX_NEW_CALLS_PER_RUN = {"STOCK": 12, "FNO": 8, "COMMODITY": 6}
+
+# Scheduler slots that change scan behaviour (see call_scheduler.py for the full
+# slot table). BTST is only meaningful on the last intraday scan; the evening
+# scan is positional-only because live intraday quotes are gone by then.
+BTST_SLOT = "15:20"
+EVENING_SLOT = "17:30"
+
+SETUP_NAMES = {
+    "technical_scan": "Daily technical scan",
+    "scan_pullback": "Uptrend pullback (EMA20)",
+    "scan_oversold": "Oversold bounce",
+    "scan_52w_breakout": "52-week-high breakout",
+    "scan_gap_go": "Gap-and-go momentum",
+    "scan_pdh_breakout": "Previous-day-high breakout",
+    "scan_btst": "BTST (buy today, sell tomorrow)",
+}
+
 
 def _now() -> datetime:
     return datetime.now(timezone.utc)
@@ -78,6 +101,32 @@ def _round_tick(price: float, tick: float) -> float:
     if tick <= 0:
         tick = 0.05
     return round(round(price / tick) * tick, 2)
+
+
+def _next_trading_day(d):
+    nxt = d + timedelta(days=1)
+    while nxt.weekday() >= 5:
+        nxt += timedelta(days=1)
+    return nxt
+
+
+def _avg_volume(bars: list[Bar], n: int = 20) -> float:
+    rows = bars[-n:]
+    return sum(b.volume for b in rows) / max(len(rows), 1)
+
+
+def _avg_turnover(bars: list[Bar], n: int = 20) -> float:
+    rows = bars[-n:]
+    if not rows:
+        return 0.0
+    return sum(b.close * b.volume for b in rows) / len(rows)
+
+
+def _rr_ok(call: dict) -> bool:
+    entry, target, stop = call["entry_price"], call["target"], call["stoploss"]
+    sign = 1 if call["side"] == "BUY" else -1
+    reward, risk = sign * (target - entry), sign * (entry - stop)
+    return risk > 0 and reward / risk >= MIN_RISK_REWARD
 
 
 # --------------------------------------------------------------------------------
@@ -190,6 +239,26 @@ async def _ltp_batch(dhan: DhanClient | None, wanted: dict[str, list[int]]) -> d
     return out
 
 
+async def _quote_batch(dhan: DhanClient | None, wanted: dict[str, list[int]]) -> dict[tuple[str, str], dict]:
+    """{(exchange_segment, security_id): full-quote row} via one Dhan
+    /marketfeed/quote call — rows carry last_price, day ohlc and volume, which is
+    what the intraday setups need. Empty dict when no client / expired token, so
+    intraday families are skipped honestly rather than run on stale data."""
+    if dhan is None or not wanted:
+        return {}
+    try:
+        raw = await dhan.quote_data(wanted)
+    except (DhanAPIError, Exception):
+        return {}
+    out: dict[tuple[str, str], dict] = {}
+    data = raw.get("data", {}) if isinstance(raw, dict) else {}
+    for segment, by_id in (data.items() if isinstance(data, dict) else []):
+        for sec_id, payload in (by_id.items() if isinstance(by_id, dict) else []):
+            if isinstance(payload, dict) and payload.get("last_price"):
+                out[(segment, str(sec_id))] = payload
+    return out
+
+
 # --------------------------------------------------------------------------------
 # Call construction
 # --------------------------------------------------------------------------------
@@ -244,12 +313,15 @@ def _instrument_ref(doc: dict | None) -> dict | None:
 
 
 async def _is_duplicate(call: dict) -> bool:
-    """One live call per instrument+horizon+side — regenerating must not stack."""
+    """One live call per instrument+horizon+side+setup — regenerating must not
+    stack. Different setup families (source.kind) may coexist on one symbol, the
+    same family may not."""
     query = {
         "segment": call["segment"],
         "symbol": call["symbol"],
         "horizon": call["horizon"],
         "side": call["side"],
+        "source.kind": (call.get("source") or {}).get("kind"),
         "status": {"$in": ["OPEN", "PARTIAL_EXIT"]},
     }
     inst = call.get("instrument") or {}
@@ -284,56 +356,178 @@ async def _scored_daily_symbols() -> list[tuple[str, float, list[str], float, li
     return out
 
 
-async def _stock_calls(dhan: DhanClient | None, scored: list) -> list[dict]:
+async def _stock_calls(dhan: DhanClient | None, scored: list, run_slot: str | None = None) -> list[dict]:
+    """All stock setup families, mirroring the taxonomy Indian research desks
+    publish: TREND (the original composite scan), PULLBACK, OVERSOLD and
+    52W BREAKOUT off daily bars; GAP-GO and PDH BREAKOUT off the live day-OHLC
+    quote (skipped honestly when the broker is offline); BTST only on the 15:20
+    slot. Illiquid names (< ₹10cr avg turnover) are dropped before any setup."""
     today = _today_ist()
+    allow_intraday = run_slot != EVENING_SLOT
+    allow_btst = run_slot == BTST_SLOT
     equities = {
         d["symbol"]: d
         async for d in instruments_collection.find({"asset_class": "EQUITY", "symbol": {"$in": [s for s, *_ in scored]}})
     }
     wanted: dict[str, list[int]] = {}
-    for symbol, score, _reasons, _atr14, _bars in scored:
+    for symbol, *_ in scored:
         inst = equities.get(symbol)
-        if inst and score >= STOCK_SCORE_GATE:
+        if inst:
             wanted.setdefault(inst["exchange_segment"], []).append(int(inst["security_id"]))
-    live = await _ltp_batch(dhan, wanted)
+    quotes = await _quote_batch(dhan, wanted)
 
-    calls = []
+    calls: list[dict] = []
     for symbol, score, reasons, atr14, bars in scored:
-        if score < STOCK_SCORE_GATE:  # cash segment is long-only, like broker desks
-            continue
         inst = equities.get(symbol)
-        if inst is None:
+        if inst is None or atr14 <= 0:
             continue
-        last_session = _session_date(bars[-1].ts)
-        key = (inst["exchange_segment"], str(inst["security_id"]))
-        ltp = live.get(key)
-        ltp_source = "dhan_quote" if ltp else "last_bar_close"
-        entry = ltp or bars[-1].close
-        tick = inst.get("tick_size", 0.05)
-        fresh_enough = (today - last_session).days <= INTRADAY_MAX_STALENESS_DAYS
+        if _avg_turnover(bars) < MIN_TURNOVER_20D:
+            continue
 
-        source = {"kind": "technical_scan", "strategy_id": None, "name": "Daily technical scan"}
-        rationale = "; ".join(reasons)
-        common = dict(
-            segment="STOCK", side="BUY", symbol=symbol, display_name=symbol,
-            instrument=_instrument_ref(inst), confidence=abs(score), source=source,
-            rationale=rationale, ltp_source=ltp_source, data_as_of=last_session.isoformat(),
-        )
-        calls.append(_call_doc(
-            **common, horizon="POSITIONAL", entry=entry,
-            target=_round_tick(entry + POSITIONAL_TARGET_ATR * atr14, tick),
-            stoploss=_round_tick(entry - POSITIONAL_STOP_ATR * atr14, tick),
-            call_expiry_date=(today + timedelta(days=10)).isoformat(),
-            tags=[],
-        ))
-        if score >= 0.6 and fresh_enough:
-            calls.append(_call_doc(
-                **common, horizon="INTRADAY", entry=entry,
-                target=_round_tick(entry + INTRADAY_TARGET_ATR * atr14, tick),
-                stoploss=_round_tick(entry - INTRADAY_STOP_ATR * atr14, tick),
-                call_expiry_date=today.isoformat(),
-                tags=[],
+        last_session = _session_date(bars[-1].ts)
+        fresh_enough = (today - last_session).days <= INTRADAY_MAX_STALENESS_DAYS
+        # last *completed* session: if tonight's top-up already wrote today's bar,
+        # yesterday's levels live one bar back
+        prev_bar = bars[-2] if last_session >= today and len(bars) >= 2 else bars[-1]
+
+        key = (inst["exchange_segment"], str(inst["security_id"]))
+        q = quotes.get(key)
+        ltp = float(q["last_price"]) if q else None
+        entry = ltp or bars[-1].close
+        ltp_source = "dhan_quote" if ltp else "last_bar_close"
+        tick = inst.get("tick_size", 0.05)
+
+        closes = [b.close for b in bars]
+        ema20, ema50 = ema(closes, 20), ema(closes, 50)
+        rsi14 = rsi(closes, 14)[-1]
+        _, donchian_low = donchian(bars, 20)
+        avg_vol = _avg_volume(bars)
+
+        def mk(*, kind: str, tag: str, horizon: str, target: float, stoploss: float,
+               expiry, confidence: float, rationale: str) -> dict:
+            return _call_doc(
+                segment="STOCK", horizon=horizon, side="BUY", symbol=symbol,
+                display_name=symbol, instrument=_instrument_ref(inst), entry=entry,
+                target=_round_tick(target, tick), stoploss=_round_tick(stoploss, tick),
+                call_expiry_date=expiry.isoformat(), confidence=confidence,
+                source={"kind": kind, "strategy_id": None, "name": SETUP_NAMES[kind]},
+                rationale=rationale, ltp_source=ltp_source,
+                data_as_of=last_session.isoformat(), tags=[tag],
+            )
+
+        # -- TREND: the original composite-score call, criteria unchanged --------
+        if score >= STOCK_SCORE_GATE:
+            calls.append(mk(
+                kind="technical_scan", tag="TREND", horizon="POSITIONAL",
+                target=entry + POSITIONAL_TARGET_ATR * atr14,
+                stoploss=entry - POSITIONAL_STOP_ATR * atr14,
+                expiry=today + timedelta(days=10), confidence=abs(score),
+                rationale="; ".join(reasons),
             ))
+            if score >= 0.6 and fresh_enough and allow_intraday:
+                calls.append(mk(
+                    kind="technical_scan", tag="TREND", horizon="INTRADAY",
+                    target=entry + INTRADAY_TARGET_ATR * atr14,
+                    stoploss=entry - INTRADAY_STOP_ATR * atr14,
+                    expiry=today, confidence=abs(score),
+                    rationale="; ".join(reasons),
+                ))
+
+        # -- PULLBACK: buy the dip to EMA20 inside an uptrend ---------------------
+        if ema20[-1] > ema50[-1] and abs(entry - ema20[-1]) / ema20[-1] <= 0.015 and 35 <= rsi14 <= 50:
+            swing_high = max(b.high for b in bars[-10:])
+            pullback_low = min(b.low for b in bars[-5:])
+            if pullback_low < entry < swing_high:
+                calls.append(mk(
+                    kind="scan_pullback", tag="PULLBACK", horizon="POSITIONAL",
+                    target=swing_high, stoploss=pullback_low,
+                    expiry=today + timedelta(days=10), confidence=0.55,
+                    rationale=(
+                        f"Uptrend intact (EMA20 above EMA50); price pulled back to EMA20 with RSI {rsi14:.0f}. "
+                        f"Buying the dip toward the {swing_high:.2f} swing high, risk defined at the "
+                        f"{pullback_low:.2f} pullback low"
+                    ),
+                ))
+
+        # -- OVERSOLD: mean-reversion bounce at the Donchian low ------------------
+        if rsi14 < 30 and donchian_low[-1] and entry <= donchian_low[-1] * 1.01:
+            calls.append(mk(
+                kind="scan_oversold", tag="OVERSOLD", horizon="POSITIONAL",
+                target=entry + 1.0 * atr14, stoploss=entry - 0.5 * atr14,
+                expiry=today + timedelta(days=5), confidence=0.45,
+                rationale=(
+                    f"RSI {rsi14:.0f} oversold right at the 20-day Donchian low — "
+                    "mean-reversion bounce with a tight 0.5-ATR stop"
+                ),
+            ))
+
+        # -- 52W BREAKOUT: at the yearly high on expanded volume ------------------
+        high_52w = max(b.high for b in bars[-250:])
+        if avg_vol and bars[-1].volume > 1.5 * avg_vol and high_52w * 0.99 <= entry <= high_52w * 1.02:
+            calls.append(mk(
+                kind="scan_52w_breakout", tag="52W BREAKOUT", horizon="POSITIONAL",
+                target=entry + 1.5 * atr14, stoploss=entry - 0.75 * atr14,
+                expiry=today + timedelta(days=10), confidence=0.6,
+                rationale=(
+                    f"Breaking out at the 52-week high {high_52w:.2f} on "
+                    f"{bars[-1].volume / avg_vol:.1f}x average volume"
+                ),
+            ))
+
+        # -- Intraday families: need a LIVE day-OHLC quote and a fresh prior bar --
+        if allow_intraday and q and ltp and fresh_enough and last_session < today:
+            ohlc = q.get("ohlc") or {}
+            day_open = float(ohlc.get("open") or 0)
+            day_high = float(ohlc.get("high") or 0)
+            day_low = float(ohlc.get("low") or 0)
+            day_vol = float(q.get("volume") or 0)
+            prev_close, prev_high = prev_bar.close, prev_bar.high
+            if day_open > 0 and day_vol > 0 and prev_close > 0:
+                gapped_up = day_open >= prev_close * 1.005
+
+                # GAP-GO: gapped up and holding above both the open and PDH
+                if gapped_up and ltp > day_open and ltp > prev_high:
+                    stop = max(day_low, entry - 0.4 * atr14)
+                    if stop < entry:
+                        calls.append(mk(
+                            kind="scan_gap_go", tag="GAP-GO", horizon="INTRADAY",
+                            target=entry + 0.8 * atr14, stoploss=stop, expiry=today,
+                            confidence=0.55,
+                            rationale=(
+                                f"Gapped up {(day_open / prev_close - 1) * 100:.1f}% and holding above "
+                                f"both the open and yesterday's high {prev_high:.2f} — momentum continuation"
+                            ),
+                        ))
+
+                # PDH BREAKOUT: no gap, just crossed yesterday's high (not extended)
+                # with participation already at 60% of a normal day's volume
+                elif (not gapped_up and prev_high < ltp <= prev_high * 1.01
+                      and avg_vol and day_vol > 0.6 * avg_vol):
+                    stop = max(prev_high * 0.99, entry - 0.5 * atr14)
+                    if stop < entry:
+                        calls.append(mk(
+                            kind="scan_pdh_breakout", tag="PDH BREAKOUT", horizon="INTRADAY",
+                            target=entry + 1.0 * atr14, stoploss=stop, expiry=today,
+                            confidence=0.5,
+                            rationale=(
+                                f"Crossed yesterday's high {prev_high:.2f} intraday on "
+                                f"{day_vol / avg_vol:.1f}x-of-average participation — range-expansion breakout"
+                            ),
+                        ))
+
+                # BTST: strong close forming — top of the day range on expanded volume
+                if allow_btst and day_high > day_low:
+                    range_pos = (ltp - day_low) / (day_high - day_low)
+                    if range_pos >= 0.8 and avg_vol and day_vol > 1.3 * avg_vol:
+                        calls.append(mk(
+                            kind="scan_btst", tag="BTST", horizon="POSITIONAL",
+                            target=entry + 0.8 * atr14, stoploss=entry - 0.5 * atr14,
+                            expiry=_next_trading_day(today), confidence=0.5,
+                            rationale=(
+                                f"Closing near the day's high ({range_pos * 100:.0f}% of range) on "
+                                f"{day_vol / avg_vol:.1f}x volume — strength likely to follow through tomorrow"
+                            ),
+                        ))
     return calls
 
 
@@ -632,7 +826,9 @@ async def _commodity_calls(dhan: DhanClient | None) -> tuple[list[dict], str | N
 # --------------------------------------------------------------------------------
 
 
-async def generate_calls(dhan: DhanClient | None, segments: list[str] | None = None) -> dict:
+async def generate_calls(
+    dhan: DhanClient | None, segments: list[str] | None = None, run_slot: str | None = None
+) -> dict:
     segments = segments or ["STOCK", "FNO", "COMMODITY"]
     notes: dict[str, str] = {}
     created: list[dict] = []
@@ -641,7 +837,7 @@ async def generate_calls(dhan: DhanClient | None, segments: list[str] | None = N
 
     candidates: list[dict] = []
     if "STOCK" in segments:
-        candidates += await _stock_calls(dhan, scored_stocks)
+        candidates += await _stock_calls(dhan, scored_stocks, run_slot)
         if not scored_stocks:
             notes["STOCK"] = "No non-index symbols have local daily bars — backfill stocks in the market-data service to widen the scan."
     if "FNO" in segments:
@@ -655,14 +851,34 @@ async def generate_calls(dhan: DhanClient | None, segments: list[str] | None = N
         if note:
             notes["COMMODITY"] = note
 
-    for call in candidates:
+    # Cooldown: a symbol that hit stoploss today is done for the day.
+    day_start_utc = datetime.now(IST).replace(hour=0, minute=0, second=0, microsecond=0).astimezone(timezone.utc)
+    stopped_today = set(await trading_calls_collection.distinct(
+        "symbol", {"status": "STOPLOSS", "closed_at": {"$gte": day_start_utc}}
+    ))
+
+    # Highest-confidence ideas first; per-segment caps keep each run curated
+    # rather than a firehose, like a research desk's daily list.
+    inserted: dict[str, int] = {}
+    for call in sorted(candidates, key=lambda c: c["confidence"], reverse=True):
+        seg = call["segment"]
+        if call["symbol"] in stopped_today:
+            continue
+        if not _rr_ok(call):
+            continue
+        if inserted.get(seg, 0) >= MAX_NEW_CALLS_PER_RUN.get(seg, 10):
+            continue
         if await _is_duplicate(call):
             continue
         await trading_calls_collection.insert_one(call)
         call.pop("_id", None)
         created.append(call)
+        inserted[seg] = inserted.get(seg, 0) + 1
 
-    return {"created": len(created), "calls": created, "notes": notes, "scanned": len(candidates)}
+    return {
+        "created": len(created), "calls": created, "notes": notes,
+        "scanned": len(candidates), "run_slot": run_slot,
+    }
 
 
 async def refresh_calls(dhan: DhanClient | None) -> int:

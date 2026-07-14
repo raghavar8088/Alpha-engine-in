@@ -11,6 +11,7 @@ from app.api.routes import (
     backtest,
     broker,
     live,
+    manual_positions,
     market_data,
     options,
     portfolio,
@@ -74,6 +75,17 @@ async def start_dhan_auto_refresh() -> None:
     else:
         logger.info("Dhan TOTP auto-refresh disabled — DHAN_CLIENT_ID/DHAN_PIN/DHAN_TOTP_SECRET not fully set")
 
+
+@app.on_event("startup")
+async def start_call_scheduler() -> None:
+    from app.services.call_scheduler import AUTOGEN_ENABLED, GENERATION_SLOTS, call_scheduler_loop
+
+    if AUTOGEN_ENABLED:
+        asyncio.create_task(call_scheduler_loop())
+        logger.info("Trading-calls auto-scan enabled (IST slots: %s)", ", ".join(GENERATION_SLOTS))
+    else:
+        logger.info("Trading-calls auto-scan disabled (CALLS_AUTOGEN_ENABLED=0)")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -105,6 +117,7 @@ app.include_router(ai.router)
 app.include_router(research.router)
 app.include_router(trading_calls.router)
 app.include_router(prelive.router)
+app.include_router(manual_positions.router)
 
 if settings.enable_live_trading:
     app.include_router(live.router)

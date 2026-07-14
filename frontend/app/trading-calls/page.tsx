@@ -5,10 +5,14 @@ import GlassPanel from "../../components/GlassPanel";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import {
+  CallSchedulerStatus,
   CallSegment,
   GenerateCallsResult,
   TradingCall,
+  TradingCallPosition,
+  TradingCallPositionsSummary,
   closeTradingCall,
+  fetchTradingCallPositions,
   fetchTradingCalls,
   generateTradingCalls,
   placeOrder,
@@ -19,6 +23,22 @@ const SEGMENTS: { id: CallSegment; label: string }[] = [
   { id: "FNO", label: "F&O" },
   { id: "COMMODITY", label: "Commodity" },
 ];
+
+const POSITION_STATUS_LABEL: Record<string, string> = {
+  OPEN: "OPEN",
+  TARGET_HIT: "TARGET HIT",
+  STOPLOSS: "STOPLOSS",
+  EXPIRED: "EXPIRED",
+  CLOSED: "CLOSED",
+};
+
+const POSITION_STATUS_TONE: Record<string, string> = {
+  OPEN: "gain",
+  TARGET_HIT: "gain",
+  STOPLOSS: "loss",
+  EXPIRED: "muted",
+  CLOSED: "loss",
+};
 
 const STATUS_LABEL: Record<string, string> = {
   OPEN: "OPEN",
@@ -70,8 +90,10 @@ function tradeLabel(call: TradingCall): string {
   return call.side === "BUY" ? "Buy" : "Sell";
 }
 
+type ViewTab = CallSegment | "POSITIONS";
+
 export default function TradingCallsPage() {
-  const [segment, setSegment] = useState<CallSegment>("STOCK");
+  const [segment, setSegment] = useState<ViewTab>("STOCK");
   const [calls, setCalls] = useState<TradingCall[]>([]);
   const [counts, setCounts] = useState<Record<CallSegment, number>>({ STOCK: 0, FNO: 0, COMMODITY: 0 });
   const [search, setSearch] = useState("");
@@ -83,12 +105,18 @@ export default function TradingCallsPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [tradeMsg, setTradeMsg] = useState<string | null>(null);
 
+  const [positions, setPositions] = useState<TradingCallPosition[]>([]);
+  const [positionsSummary, setPositionsSummary] = useState<TradingCallPositionsSummary | null>(null);
+  const [positionsStatusFilter, setPositionsStatusFilter] = useState("OPEN");
+  const [scheduler, setScheduler] = useState<CallSchedulerStatus | null>(null);
+
   const load = useCallback(async () => {
     setError(null);
     try {
       const data = await fetchTradingCalls();
       setCalls(data.calls);
       setCounts(data.live_counts);
+      setScheduler(data.scheduler ?? null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load trading calls");
     } finally {
@@ -96,11 +124,25 @@ export default function TradingCallsPage() {
     }
   }, []);
 
+  const loadPositions = useCallback(async () => {
+    try {
+      const data = await fetchTradingCallPositions();
+      setPositions(data.positions);
+      setPositionsSummary(data.summary);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load trading call positions");
+    }
+  }, []);
+
   useEffect(() => {
     load();
-    const timer = setInterval(load, 60_000);
+    loadPositions();
+    const timer = setInterval(() => {
+      load();
+      loadPositions();
+    }, 60_000);
     return () => clearInterval(timer);
-  }, [load]);
+  }, [load, loadPositions]);
 
   const generate = useCallback(async () => {
     setGenerating(true);
@@ -109,13 +151,13 @@ export default function TradingCallsPage() {
     try {
       const result = await generateTradingCalls();
       setGenResult(result);
-      await load();
+      await Promise.all([load(), loadPositions()]);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Call generation failed");
     } finally {
       setGenerating(false);
     }
-  }, [load]);
+  }, [load, loadPositions]);
 
   const trade = useCallback(async (call: TradingCall) => {
     const inst = call.instrument;
@@ -156,6 +198,7 @@ export default function TradingCallsPage() {
   );
 
   const visible = useMemo(() => {
+    if (segment === "POSITIONS") return [];
     const q = search.trim().toUpperCase();
     return calls.filter((c) => {
       if (c.segment !== segment) return false;
@@ -166,7 +209,16 @@ export default function TradingCallsPage() {
     });
   }, [calls, segment, statusFilter, search]);
 
-  const segmentNote = genResult?.notes?.[segment];
+  const visiblePositions = useMemo(() => {
+    const q = search.trim().toUpperCase();
+    return positions.filter((p) => {
+      if (positionsStatusFilter !== "all" && p.status !== positionsStatusFilter) return false;
+      if (q && !p.display_name.toUpperCase().includes(q) && !p.symbol.toUpperCase().includes(q)) return false;
+      return true;
+    });
+  }, [positions, positionsStatusFilter, search]);
+
+  const segmentNote = segment === "POSITIONS" ? undefined : genResult?.notes?.[segment];
 
   return (
     <div className="page">
@@ -184,36 +236,172 @@ export default function TradingCallsPage() {
               <span className="count">{counts[s.id] ?? 0}</span>
             </button>
           ))}
+          <button
+            className={segment === "POSITIONS" ? "tab active" : "tab"}
+            onClick={() => setSegment("POSITIONS")}
+          >
+            Trading Call Positions
+            <span className="count">{positionsSummary?.open_positions ?? 0}</span>
+          </button>
         </div>
         <div className="toolbar">
           <input placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} />
-          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-            <option value="live">Live (open + partial exit)</option>
-            <option value="all">All statuses</option>
-            <option value="OPEN">Open</option>
-            <option value="PARTIAL_EXIT">Partial exit</option>
-            <option value="TARGET_HIT">Target hit</option>
-            <option value="STOPLOSS">Stoploss</option>
-            <option value="EXPIRED">Expired</option>
-            <option value="CLOSED">Closed</option>
-          </select>
+          {segment === "POSITIONS" ? (
+            <select value={positionsStatusFilter} onChange={(e) => setPositionsStatusFilter(e.target.value)}>
+              <option value="OPEN">Open</option>
+              <option value="all">All statuses</option>
+              <option value="TARGET_HIT">Target hit</option>
+              <option value="STOPLOSS">Stoploss</option>
+              <option value="EXPIRED">Expired</option>
+              <option value="CLOSED">Closed</option>
+            </select>
+          ) : (
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+              <option value="live">Live (open + partial exit)</option>
+              <option value="all">All statuses</option>
+              <option value="OPEN">Open</option>
+              <option value="PARTIAL_EXIT">Partial exit</option>
+              <option value="TARGET_HIT">Target hit</option>
+              <option value="STOPLOSS">Stoploss</option>
+              <option value="EXPIRED">Expired</option>
+              <option value="CLOSED">Closed</option>
+            </select>
+          )}
           <button className="generate" onClick={generate} disabled={generating}>
             {generating ? "Scanning…" : "Generate calls"}
           </button>
         </div>
       </div>
 
+      {scheduler?.enabled && (
+        <div className="sched-line">
+          <span className="sched-dot" />
+          Auto-scan every 2h on trading days ({scheduler.slots.join(" · ")} IST)
+          {scheduler.last_slot
+            ? ` · last run ${scheduler.last_slot}${scheduler.last_created !== null ? ` (${scheduler.last_created} new call${scheduler.last_created === 1 ? "" : "s"})` : ""}`
+            : " · no runs yet"}
+          {scheduler.next_slot ? ` · next ${scheduler.next_slot}` : ""}
+        </div>
+      )}
       {error && <ErrorBanner message={error} />}
       {tradeMsg && <div className="notice">{tradeMsg}</div>}
       {genResult && (
         <div className="notice">
           Scan complete: {genResult.created} new call{genResult.created === 1 ? "" : "s"} ({genResult.scanned} candidates
           {genResult.created < genResult.scanned ? ", duplicates skipped" : ""}).
+          {genResult.positions_opened > 0 && ` ${genResult.positions_opened} paper position${genResult.positions_opened === 1 ? "" : "s"} opened.`}
           {!genResult.broker_connected && " Broker offline — prices are stored closes / model estimates."}
         </div>
       )}
       {segmentNote && <div className="notice warn">{segmentNote}</div>}
 
+      {segment === "POSITIONS" ? (
+        <>
+          {positionsSummary && (
+            <div className="capital-tiles">
+              <div className="tile">
+                <span className="label">Initial capital</span>
+                <span className="value">{inr(positionsSummary.initial_capital)}</span>
+              </div>
+              <div className="tile">
+                <span className="label">Equity</span>
+                <span className={`value ${positionsSummary.equity >= positionsSummary.initial_capital ? "gain" : "loss"}`}>
+                  {inr(positionsSummary.equity)}
+                </span>
+              </div>
+              <div className="tile">
+                <span className="label">Deployed capital</span>
+                <span className="value">{inr(positionsSummary.deployed_capital)}</span>
+              </div>
+              <div className="tile">
+                <span className="label">Available cash</span>
+                <span className="value">{inr(positionsSummary.available_cash)}</span>
+              </div>
+              <div className="tile">
+                <span className="label">Unrealized P&amp;L</span>
+                <span className={`value ${positionsSummary.unrealized_pnl >= 0 ? "gain" : "loss"}`}>
+                  {inr(positionsSummary.unrealized_pnl)}
+                </span>
+              </div>
+              <div className="tile">
+                <span className="label">Realized P&amp;L</span>
+                <span className={`value ${positionsSummary.realized_pnl >= 0 ? "gain" : "loss"}`}>
+                  {inr(positionsSummary.realized_pnl)}
+                </span>
+              </div>
+            </div>
+          )}
+          <GlassPanel title="Trading Call Positions">
+            {loading ? (
+              <div className="empty">Loading…</div>
+            ) : visiblePositions.length === 0 ? (
+              <div className="empty">
+                No {positionsStatusFilter === "OPEN" ? "open " : ""}positions yet — positions open automatically the moment a
+                trading call is generated.
+              </div>
+            ) : (
+              <div className="table-scroll">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ textAlign: "left" }}>Name</th>
+                      <th>Entry</th>
+                      <th>Qty</th>
+                      <th>Capital deployed</th>
+                      <th>LTP</th>
+                      <th>Target</th>
+                      <th>Stoploss</th>
+                      <th>P&amp;L</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {visiblePositions.map((pos) => {
+                      const live = pos.status === "OPEN";
+                      const pnl = live ? pos.unrealized_pnl : pos.realized_pnl ?? 0;
+                      return (
+                        <tr key={pos.position_id}>
+                          <td style={{ textAlign: "left" }}>
+                            <div className="name-cell">
+                              <div className="name-line">
+                                <span className="name">{pos.display_name}</span>
+                                <span className={`chip horizon ${pos.horizon.toLowerCase()}`}>{pos.horizon}</span>
+                              </div>
+                              <span className={`status ${POSITION_STATUS_TONE[pos.status] ?? ""}`}>
+                                {POSITION_STATUS_LABEL[pos.status]}
+                              </span>
+                            </div>
+                          </td>
+                          <td>{inr(pos.entry_price)}</td>
+                          <td>
+                            {pos.qty}
+                            {pos.lot_size > 1 ? ` (${pos.lots} lot${pos.lots === 1 ? "" : "s"})` : ""}
+                          </td>
+                          <td>{inr(pos.capital_deployed)}</td>
+                          <td>
+                            {inr(pos.ltp)}
+                            {pos.ltp_source !== "dhan_quote" && (
+                              <span className="src-star" title={LTP_SOURCE_LABEL[pos.ltp_source]}>*</span>
+                            )}
+                          </td>
+                          <td>{inr(pos.target)}</td>
+                          <td>{inr(pos.stoploss)}</td>
+                          <td className={pnl >= 0 ? "gain" : "loss"}>{inr(pnl)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <div className="footnote">
+              Every position is opened automatically the instant its trading call is generated, sized off a shared{" "}
+              {inr(positionsSummary?.initial_capital ?? 10000000)} paper capital pool ({(0.02 * 100).toFixed(0)}% of capital
+              per trade). Target/stoploss are copied directly from the call — positions close the moment their call hits
+              target, stoploss, or expires. Paper only, no live orders.
+            </div>
+          </GlassPanel>
+        </>
+      ) : (
       <GlassPanel title={`${SEGMENTS.find((s) => s.id === segment)?.label} calls`}>
         {loading ? (
           <div className="empty">Loading…</div>
@@ -321,6 +509,7 @@ export default function TradingCallsPage() {
           buttons place <b>paper</b> orders via the broker route.
         </div>
       </GlassPanel>
+      )}
 
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 18px; }
@@ -335,6 +524,14 @@ export default function TradingCallsPage() {
         .count { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 20px; padding: 1px 8px; font-size: 10.5px; }
         .tab.active .count { background: var(--purple); color: #fff; border-color: transparent; }
         .toolbar { display: flex; gap: 10px; align-items: center; }
+        .sched-line { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--text-muted); padding: 0 2px; }
+        .sched-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gain); flex-shrink: 0; }
+        .capital-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+        .capital-tiles .tile { display: flex; flex-direction: column; gap: 4px; background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 10px; padding: 12px 14px; }
+        .capital-tiles .label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); }
+        .capital-tiles .value { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
+        .capital-tiles .value.gain { color: var(--gain); }
+        .capital-tiles .value.loss { color: var(--loss); }
         input, select { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 9px; padding: 9px 12px; font-size: 13px; min-width: 120px; }
         .generate { background: linear-gradient(145deg, var(--accent), var(--accent-hover)); color: #241404; font-weight: 700; font-size: 13px; border: none; border-radius: 10px; padding: 10px 18px; cursor: pointer; }
         .generate:disabled { opacity: 0.55; cursor: default; }

@@ -1,11 +1,14 @@
-# Phase 1 uses NSE's public live-indices feed only. It has no bot-protection and needs
-# no session/cookies, unlike nseindia.com's equity quote-api which sits behind an Akamai
-# WAF that blocks non-browser clients (confirmed: even curl_cffi Chrome-impersonation gets
-# 403). Equity-level quotes will come from authenticated broker APIs (Dhan/Angel One) in
-# Phase 2, so no more scraping effort goes in here for Phase 1.
+# Index quotes come from Dhan (see collector/dhan_index_client.py), not NSE's public
+# niftyindices.com feed used through Phase 1 — that feed was found frozen months in the
+# past (its own payload carried a January timestamp while checked live in July), so
+# every index on it was silently wrong, not just occasionally stale. Dhan is already
+# the authoritative price source everywhere else on this platform.
 #
-# SENSEX is a BSE index and isn't on this NSE feed; adding it needs a BSE data source.
-INDEX_SYMBOLS = ["NIFTY 50", "NIFTY BANK", "NIFTY IT", "NIFTY 100", "NIFTY MIDCAP 100"]
+# These are the 5 indices Dhan lists as tradeable instruments (matches the
+# `instruments` collection / options-chain universe). NSE's old list also included
+# "NIFTY IT" / "NIFTY 100" / "NIFTY MIDCAP 100" sub-indices Dhan has no equivalent
+# for — dropped rather than left on the broken feed with no replacement.
+INDEX_SYMBOLS = ["NIFTY", "BANKNIFTY", "FINNIFTY", "SENSEX", "MIDCPNIFTY"]
 
 EQUITY_SYMBOLS: list[str] = []
 

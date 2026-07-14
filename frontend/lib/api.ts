@@ -462,9 +462,19 @@ export interface TradingCall {
   closed_at: string | null;
 }
 
+export interface CallSchedulerStatus {
+  enabled: boolean;
+  slots: string[];
+  last_run_at: string | null;
+  last_slot: string | null;
+  last_created: number | null;
+  next_slot: string | null;
+}
+
 export interface TradingCallsResponse {
   calls: TradingCall[];
   live_counts: Record<CallSegment, number>;
+  scheduler?: CallSchedulerStatus;
 }
 
 export async function fetchTradingCalls(segment?: CallSegment, status?: string): Promise<TradingCallsResponse> {
@@ -481,6 +491,7 @@ export interface GenerateCallsResult {
   calls: TradingCall[];
   notes: Partial<Record<CallSegment, string>>;
   broker_connected: boolean;
+  positions_opened: number;
 }
 
 export async function generateTradingCalls(segments?: CallSegment[]): Promise<GenerateCallsResult> {
@@ -492,6 +503,193 @@ export async function generateTradingCalls(segments?: CallSegment[]): Promise<Ge
 
 export async function closeTradingCall(callId: string): Promise<TradingCall> {
   return apiFetch(`/api/trading-calls/${callId}/close`, { method: "POST" });
+}
+
+// --- Trading Call Positions (auto-opened paper ledger over Trading Calls) ---
+
+export type CallPositionStatus = "OPEN" | "TARGET_HIT" | "STOPLOSS" | "EXPIRED" | "CLOSED";
+
+export interface TradingCallPosition {
+  position_id: string;
+  call_id: string;
+  segment: CallSegment;
+  horizon: "INTRADAY" | "POSITIONAL";
+  side: "BUY" | "SELL";
+  symbol: string;
+  display_name: string;
+  instrument: TradingCallInstrument | null;
+  entry_price: number;
+  lot_size: number;
+  lots: number;
+  qty: number;
+  capital_deployed: number;
+  target: number;
+  stoploss: number;
+  ltp: number;
+  ltp_source: "dhan_quote" | "last_bar_close" | "model";
+  unrealized_pnl: number;
+  pnl_pct: number | null;
+  realized_pnl: number | null;
+  exit_price: number | null;
+  status: CallPositionStatus;
+  opened_at: string;
+  updated_at: string;
+  closed_at: string | null;
+}
+
+export interface TradingCallPositionsSummary {
+  initial_capital: number;
+  available_cash: number;
+  deployed_capital: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  equity: number;
+  open_positions: number;
+  closed_positions: number;
+}
+
+export interface TradingCallPositionsResponse {
+  positions: TradingCallPosition[];
+  summary: TradingCallPositionsSummary;
+}
+
+export async function fetchTradingCallPositions(
+  segment?: CallSegment,
+  status?: string,
+): Promise<TradingCallPositionsResponse> {
+  const params = new URLSearchParams();
+  if (segment) params.set("segment", segment);
+  if (status) params.set("status", status);
+  const qs = params.toString();
+  return apiFetch(`/api/trading-calls/positions${qs ? `?${qs}` : ""}`);
+}
+
+// --- Manual Positions (user-initiated paper trading desk, NSE + BSE) ---
+
+export interface ManualInstrument {
+  symbol: string;
+  name: string;
+  security_id: string;
+  exchange_segment: string;
+  lot_size: number;
+  tick_size: number;
+  asset_class: string;
+}
+
+export type ManualProductType = "CNC" | "MTF" | "MARGIN" | "INTRADAY";
+
+export interface ManualPosition {
+  position_id: string;
+  symbol: string;
+  display_name: string;
+  instrument: ManualInstrument;
+  product_type: ManualProductType;
+  side: "BUY";
+  quantity: number;
+  avg_price: number;
+  margin_used: number;
+  leverage: number;
+  ltp: number;
+  ltp_source: "dhan_quote";
+  unrealized_pnl: number;
+  pnl_pct: number;
+  realized_pnl: number;
+  status: "OPEN" | "CLOSED";
+  opened_at: string;
+  updated_at: string;
+  closed_at: string | null;
+}
+
+export interface ManualOrder {
+  order_id: string;
+  symbol: string;
+  display_name: string;
+  instrument: ManualInstrument;
+  transaction_type: "BUY" | "SELL";
+  quantity: number;
+  order_type: "MARKET" | "LIMIT";
+  limit_price: number | null;
+  product_type: ManualProductType;
+  status: "PENDING" | "FILLED";
+  fill_price: number | null;
+  margin_used: number | null;
+  leverage: number | null;
+  placed_at: string;
+  updated_at: string;
+  filled_at: string | null;
+}
+
+export interface ManualPositionsSummary {
+  initial_capital: number;
+  available_cash: number;
+  deployed_margin: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  total_pnl: number;
+  equity: number;
+  roi_pct: number;
+  open_positions: number;
+  closed_positions: number;
+  win_rate: number | null;
+}
+
+export interface MarginEstimate {
+  margin_required: number;
+  leverage: number;
+  notional_value: number;
+}
+
+export async function searchManualInstruments(q: string): Promise<ManualInstrument[]> {
+  if (!q.trim()) return [];
+  const data: { results: ManualInstrument[] } = await apiFetch(`/api/manual-positions/search?q=${encodeURIComponent(q)}`);
+  return data.results;
+}
+
+export async function fetchManualQuote(securityId: string, exchangeSegment: string): Promise<{ ltp: number }> {
+  return apiFetch(`/api/manual-positions/quote?security_id=${securityId}&exchange_segment=${exchangeSegment}`);
+}
+
+export async function estimateManualMargin(params: {
+  security_id: string;
+  exchange_segment: string;
+  transaction_type: "BUY" | "SELL";
+  quantity: number;
+  product_type: ManualProductType;
+  price: number;
+}): Promise<MarginEstimate> {
+  const qs = new URLSearchParams(params as unknown as Record<string, string>).toString();
+  return apiFetch(`/api/manual-positions/margin?${qs}`);
+}
+
+export interface PlaceManualOrderRequest {
+  security_id: string;
+  exchange_segment: string;
+  transaction_type: "BUY" | "SELL";
+  quantity: number;
+  order_type: "MARKET" | "LIMIT";
+  product_type: ManualProductType;
+  limit_price?: number;
+}
+
+export async function placeManualOrder(payload: PlaceManualOrderRequest): Promise<ManualOrder & { position?: ManualPosition }> {
+  return apiFetch("/api/manual-positions/orders", { method: "POST", body: JSON.stringify(payload) });
+}
+
+export async function fetchManualPositions(status?: string): Promise<{ positions: ManualPosition[]; summary: ManualPositionsSummary }> {
+  const qs = status ? `?status=${status}` : "";
+  return apiFetch(`/api/manual-positions/positions${qs}`);
+}
+
+export async function fetchManualOrders(status?: string): Promise<{ orders: ManualOrder[] }> {
+  const qs = status ? `?status=${status}` : "";
+  return apiFetch(`/api/manual-positions/orders${qs}`);
+}
+
+export async function exitManualPosition(positionId: string, quantity?: number): Promise<ManualOrder & { position: ManualPosition }> {
+  return apiFetch(`/api/manual-positions/positions/${positionId}/exit`, {
+    method: "POST",
+    body: JSON.stringify({ quantity: quantity ?? null }),
+  });
 }
 
 // --- AI research & trade intelligence (roadmap Phase 6) ---
@@ -579,8 +777,21 @@ export async function indexResearchIntoVectorStore(limit = 200): Promise<{ mode?
 
 // --- Pre-Live paper desk ---
 
+export interface PreLiveUniverseSource {
+  sweep_id: string | null;
+  created_at: string | null;
+  symbol?: string;
+  qualified_count?: number;
+  fallback?: string;
+}
 export interface PreLiveStatus {
-  engine: { status: string; heartbeat?: string; session?: string; open_positions?: number; day_pnl?: number; capital_locked?: number; initial_capital?: number; balance?: number; equity?: number; available_cash?: number; realized_all_time?: number };
+  engine: {
+    status: string; heartbeat?: string; session?: string; open_positions?: number; day_pnl?: number;
+    capital_locked?: number; initial_capital?: number; balance?: number; equity?: number;
+    available_cash?: number; realized_all_time?: number;
+    universe_size?: number; universe_source?: PreLiveUniverseSource | null;
+    capital_per_trade?: number; note?: string | null;
+  };
   open_positions: Array<{ key: string; strategy_id: string; timeframe: string; option_type: string; strike: number; entry_premium: number; mark: number; unrealized: number; qty: number; entry_ts: string }>;
   today: { session: string; trades: number; net_pnl: number; peak_capital: number; roi_pct: number | null; wins: number } | null;
 }

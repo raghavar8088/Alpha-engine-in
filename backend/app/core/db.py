@@ -20,6 +20,13 @@ option_backtests_collection = db["option_backtests"]
 option_sweeps_collection = db["option_sweeps"]
 research_signals_collection = db["research_signals"]
 trading_calls_collection = db["trading_calls"]
+# Paper positions auto-opened off each trading call (see app.services.call_positions)
+trading_call_positions_collection = db["trading_call_positions"]
+# Single state doc for the trading-calls auto-generation scheduler
+call_scheduler_state_collection = db["call_scheduler_state"]
+# Manual "Positions" module — user-initiated paper trades (search -> buy -> exit)
+manual_positions_collection = db["manual_positions"]
+manual_orders_collection = db["manual_orders"]
 # Pre-Live paper desk (real-premium forward paper trading of the top-20 basket)
 prelive_trades_collection = db["prelive_trades"]
 prelive_positions_collection = db["prelive_positions"]

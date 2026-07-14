@@ -1,8 +1,13 @@
-"""Pre-Live paper-trading engine for the top-20 NIFTY option-buying basket.
+"""Pre-Live paper-trading engine — trades whatever the latest options qualification
+sweep says is qualified, on NIFTY, automatically.
 
 Mirrors antigravity's `pre_live` desk: consumes REAL market data, executes on a PAPER
 account (no real Dhan orders), and keeps a per-strategy scoreboard so any promotion to
-live rests on a forward paper track record — not just backtests.
+live rests on a forward paper track record — not just backtests. The traded universe
+is DYNAMIC: it's read from the `option_sweeps` collection (whatever POST
+/api/options/backtest-all last produced), not a hardcoded list, and re-checked at the
+start of every session so re-running the sweep changes what the desk trades without a
+restart.
 
 Difference from the backtester: premiums here are REAL. When a strategy signals, the
 engine buys the ATM CE/PE of the current weekly expiry at its live Dhan LTP, and manages
@@ -17,12 +22,14 @@ timeframe), turns signals into paper option positions, and persists everything.
 
 from __future__ import annotations
 
+import os
 from datetime import datetime, timedelta, timezone
 
 from db import (
     daily_pnl_collection,
     equity_collection,
     instruments_collection,
+    option_sweeps_collection,
     positions_collection,
     scores_collection,
     state_collection,
@@ -37,9 +44,27 @@ IST = timezone(timedelta(hours=5, minutes=30))
 LOT_SIZE = 75
 STRIKE_STEP = 50
 EOD_SQUAREOFF_MIN = 15 * 60 + 15  # 15:15 IST — flat before close
-INITIAL_CAPITAL = 100_000.0       # paper account starting balance (₹1 lakh)
 
-# The audited top-20 basket (strategy_id, timeframe). One paper position max per row.
+# Paper account starting balance. Overridable so the desk can be resized without a
+# code edit; the whole balance()/available_cash()/equity chain reads this one value.
+INITIAL_CAPITAL = float(os.getenv("PRELIVE_INITIAL_CAPITAL", "10000000"))  # ₹1 crore
+
+# Risk-based position sizing: each new position gets a fixed % of starting capital as
+# its premium budget (not 1 lot flat) — at ₹1cr/2% that's ₹2L/trade, which the smaller
+# ₹1L-basket 1-lot-only design badly under-deployed. Lots are floor(budget/premium/lot),
+# capped both by MAX_LOTS and by whatever cash is actually still free.
+CAPITAL_PER_TRADE_PCT = float(os.getenv("PRELIVE_CAPITAL_PER_TRADE_PCT", "0.02"))
+MAX_LOTS_PER_TRADE = int(os.getenv("PRELIVE_MAX_LOTS_PER_TRADE", "20"))
+
+# The live bar-builder (main.py) only ever produces these three intraday timeframes.
+# A qualified "1d" (swing) strategy can't run here: its whole model assumes a 30-DTE
+# position CARRIED across sessions, which conflicts with this engine's EOD square-off
+# — so daily-timeframe rows are skipped with a logged warning, not force-mapped onto
+# an intraday timeframe where their indicator math and holding-period logic would break.
+SUPPORTED_LIVE_TIMEFRAMES = {"5m", "15m", "1h"}
+
+# Opt-in only: the original hand-picked 20-strategy basket, used solely as a fallback
+# when PRELIVE_FALLBACK_TOP20=1 and no qualified sweep exists yet.
 TOP20 = [
     ("scalp_ibs", "5m"), ("intra_heikin_trend", "15m"), ("intra_ichimoku_tk", "5m"),
     ("scalp_roc_thrust", "15m"), ("intra_cci_trend", "5m"), ("intra_psar", "15m"),
@@ -49,6 +74,39 @@ TOP20 = [
     ("intra_cci_trend", "15m"), ("scalp_psar", "15m"), ("scalp_keltner_surf", "5m"),
     ("scalp_pctb", "5m"), ("scalp_cci_burst", "15m"),
 ]
+
+
+def load_qualified_universe() -> tuple[list[tuple[str, str]], dict | None]:
+    """Read the latest option_sweeps document and return the (strategy_id, timeframe)
+    pairs the live desk should trade — every row with qualified==True, that resolves to
+    a real registered strategy, on a timeframe this engine's bar-builder can produce.
+    Returns (pairs, sweep_meta); sweep_meta is None if no sweep document exists at all."""
+    doc = option_sweeps_collection.find_one({}, sort=[("created_at", -1)])
+    if not doc:
+        return [], None
+
+    created_at = doc.get("created_at")
+    sweep_meta = {
+        "sweep_id": doc.get("sweep_id"),
+        "created_at": created_at.isoformat() if hasattr(created_at, "isoformat") else created_at,
+        "symbol": doc.get("symbol"), "qualified_count": doc.get("qualified_count"),
+    }
+
+    pairs: list[tuple[str, str]] = []
+    for r in doc.get("results") or []:
+        if not r.get("qualified"):
+            continue
+        sid, tf = r.get("strategy_id"), r.get("timeframe")
+        if sid not in STRATEGY_REGISTRY:
+            print(f"[prelive] sweep {sweep_meta['sweep_id']}: skipping {sid}@{tf} — no longer in STRATEGY_REGISTRY", flush=True)
+            continue
+        if tf not in SUPPORTED_LIVE_TIMEFRAMES:
+            print(f"[prelive] sweep {sweep_meta['sweep_id']}: skipping {sid}@{tf} — "
+                  f"live desk only supports {sorted(SUPPORTED_LIVE_TIMEFRAMES)} (this is likely a "
+                  f"multi-day swing strategy that can't run under EOD square-off)", flush=True)
+            continue
+        pairs.append((sid, tf))
+    return pairs, sweep_meta
 
 
 def _key(strategy_id: str, tf: str) -> str:
@@ -80,11 +138,47 @@ class PreLiveEngine:
         self.contexts = {}        # key -> StrategyContext
         self.positions = {}       # key -> PaperPosition
         self.trades_today = {}    # key -> count
+        self.universe: list[tuple[str, str]] = []
+        self.universe_source: dict | None = None
         self._weekly_expiry = None
+        self.refresh_universe(force=True)
+
+    def refresh_universe(self, force: bool = False) -> None:
+        """Reload the qualified (strategy_id, timeframe) universe from the latest
+        sweep and rebuild strategy/context slots. Open positions are untouched —
+        manage_open() tracks them by key independent of the active universe, so a
+        strategy dropped from the qualified set simply stops receiving new signals
+        while any position it already opened still gets priced/closed normally.
+        prelive_strategy_scores history is never deleted either way.
+
+        `force=False` (used for the idle-loop refresh) skips the rebuild when the
+        driving sweep hasn't actually changed, so strategy instances (which hold
+        internal regime state like a running direction) aren't pointlessly reset
+        every idle tick. `force=True` (used at the start of every session) always
+        rebuilds, since a new trading day needs fresh per-strategy state regardless."""
+        pairs, meta = load_qualified_universe()
+        used_fallback = False
+        if not pairs and os.getenv("PRELIVE_FALLBACK_TOP20") == "1":
+            pairs, used_fallback = list(TOP20), True
+            meta = {"sweep_id": None, "created_at": None, "symbol": "NIFTY",
+                    "qualified_count": len(TOP20), "fallback": "TOP20"}
+
+        new_sweep_id = meta.get("sweep_id") if meta else None
+        old_sweep_id = self.universe_source.get("sweep_id") if self.universe_source else "__unset__"
+        if not force and self.universe and new_sweep_id == old_sweep_id:
+            return  # nothing changed since the last refresh — keep existing state
+
+        self.universe = pairs
+        self.universe_source = meta
         self._init_strategies()
+        label = "TOP20 fallback" if used_fallback else (meta.get("sweep_id") if meta else "none")
+        print(f"[prelive] universe refreshed: {len(pairs)} strategy slots (source: {label})", flush=True)
 
     def _init_strategies(self):
-        for sid, tf in TOP20:
+        self.strategies = {}
+        self.contexts = {}
+        self.trades_today = {}
+        for sid, tf in self.universe:
             cls = STRATEGY_REGISTRY.get(sid)
             if cls is None:
                 continue
@@ -155,8 +249,23 @@ class PreLiveEngine:
     # ---- the driving methods (called by main.py) --------------------------
 
     def new_session(self):
-        """Reset per-day counters + fresh strategy state at market open."""
-        self._init_strategies()
+        """Reset per-day counters + fresh strategy state at market open. Always a
+        full rebuild (force=True) — a new trading day needs fresh regime state
+        regardless of whether the qualified sweep itself changed overnight."""
+        self.refresh_universe(force=True)
+
+    def _status_label(self, running: bool) -> str:
+        if not self.universe:
+            return "no_qualified_universe"
+        return "running" if running else "idle"
+
+    def _universe_note(self) -> str | None:
+        if self.universe:
+            return None
+        return ("No qualified strategies to trade — the latest options sweep has none, or none "
+                "on a live-supported timeframe (5m/15m/1h). Run POST /api/options/backtest-all "
+                "to refresh the qualified universe, or set PRELIVE_FALLBACK_TOP20=1 to use the "
+                "original 20-strategy basket as a stopgap.")
 
     def on_bar(self, strategy_id: str, tf: str, bar: Bar, fetch_ltp) -> dict | None:
         """Feed one FINALIZED bar to its strategy; open a paper position on a fresh
@@ -187,9 +296,16 @@ class PreLiveEngine:
         premium = fetch_ltp(contract["security_id"], contract["exchange_segment"])
         if not premium or premium <= 0:
             return None
-        debit = premium * LOT_SIZE  # 1 lot
-        if debit > self.available_cash():
-            return None  # not enough paper balance free to take this position
+
+        one_lot_cost = premium * LOT_SIZE
+        budget = INITIAL_CAPITAL * CAPITAL_PER_TRADE_PCT
+        lots = max(1, int(budget // one_lot_cost))
+        lots = min(lots, MAX_LOTS_PER_TRADE)
+        affordable_lots = int(self.available_cash() // one_lot_cost)
+        lots = min(lots, affordable_lots)
+        if lots < 1:
+            return None  # can't even afford 1 lot at this premium — skip, don't force it
+
         cat = STRATEGY_REGISTRY[strategy_id].metadata.category
         style = OPTION_BUYING_CATEGORIES.get(cat, OPTION_BUYING_CATEGORIES["options_intraday"])
         pos = PaperPosition(
@@ -197,12 +313,13 @@ class PreLiveEngine:
             strike=contract["strike"], security_id=contract["security_id"],
             entry_premium=premium, entry_ts=datetime.now(IST),
             stop_pct=style["premium_stop_pct"], target_pct=style["premium_target_pct"],
+            lots=lots,
         )
         self.positions[key] = pos
         self.trades_today[key] += 1
         positions_collection.replace_one({"key": key}, self._pos_doc(pos, premium), upsert=True)
         return {"event": "OPEN", "key": key, "type": option_type, "strike": contract["strike"],
-                "premium": premium, "reason": signal.reasoning}
+                "premium": premium, "lots": lots, "reason": signal.reasoning}
 
     def manage_open(self, fetch_ltp, force_eod: bool = False) -> list[dict]:
         """Re-price every open position at its live option LTP; close on stop/target/EOD.
@@ -304,23 +421,33 @@ class PreLiveEngine:
         state_collection.replace_one({"_id": "engine"}, {
             "_id": "engine", "heartbeat": now.isoformat(), "session": session,
             "open_positions": len(self.positions), "day_pnl": round(realized + unrealized, 2),
-            "capital_locked": round(capital_locked, 2), "status": "running",
+            "capital_locked": round(capital_locked, 2), "status": self._status_label(running=True),
             "initial_capital": INITIAL_CAPITAL, "balance": bal["balance"],
             "equity": equity_value, "available_cash": bal["available_cash"],
             "realized_all_time": bal["realized_all_time"],
+            "universe_size": len(self.universe), "universe_source": self.universe_source,
+            "capital_per_trade": round(INITIAL_CAPITAL * CAPITAL_PER_TRADE_PCT, 2),
+            "note": self._universe_note(),
         }, upsert=True)
 
-    def publish_idle_state(self, status: str = "idle"):
+    def publish_idle_state(self, status: str | None = None):
         """Keep the account balance visible on the dashboard even when the market is
-        closed and no session is running."""
+        closed and no session is running. Also re-checks the qualified universe (a
+        cheap no-op if the driving sweep hasn't changed) so a freshly-run sweep shows
+        up on the dashboard without waiting for the next 09:15 session."""
+        self.refresh_universe(force=False)
         bal = self.balance()
         now = datetime.now(IST)
         state_collection.replace_one({"_id": "engine"}, {
-            "_id": "engine", "heartbeat": now.isoformat(), "status": status,
+            "_id": "engine", "heartbeat": now.isoformat(),
+            "status": status or self._status_label(running=False),
             "open_positions": len(self.positions),
             "initial_capital": INITIAL_CAPITAL, "balance": bal["balance"],
             "equity": bal["balance"], "available_cash": bal["available_cash"],
             "realized_all_time": bal["realized_all_time"], "capital_locked": bal["deployed"],
+            "universe_size": len(self.universe), "universe_source": self.universe_source,
+            "capital_per_trade": round(INITIAL_CAPITAL * CAPITAL_PER_TRADE_PCT, 2),
+            "note": self._universe_note(),
         }, upsert=True)
 
     def close_session(self, fetch_ltp):

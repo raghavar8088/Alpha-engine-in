@@ -5,6 +5,8 @@ own public file — no auth needed).
 Kept in the universe:
 - Major indices (whitelist below) — NSE + BSE(SENSEX), segment IDX_I
 - All NSE equities (series EQ) and ETFs
+- All BSE equities (instrument type ES) and ETFs — mostly BSE-exclusive small/micro
+  caps not dual-listed on NSE, for the manual Positions module's stock search
 - All NSE index/stock futures
 - Index options for the whitelisted indices only (stock options are deferred to the
   options phase — they multiply the row count ~50x for no Phase-1 benefit)
@@ -74,6 +76,19 @@ def _row_to_instrument(row: dict) -> dict | None:
             asset_class = "EQUITY"
         else:
             return None  # skip non-EQ series (BE/BZ/GS/partly-paid/...)
+        api_segment = _SEGMENT[(segment, exchange)]
+    elif segment == "E" and exchange == "BSE":
+        # BSE has no single "EQ series" like NSE — SEM_SERIES is a trading-group
+        # letter (A/B/T/M/X/Z/NS/...) that doesn't distinguish equity from debt.
+        # SEM_EXCH_INSTRUMENT_TYPE does: "ES" = Equity Stock, "ETF" = ETF; other
+        # values (DEB/CB/DBT/GB/MF/PTC/TB) are fixed-income/other, excluded.
+        instrument_type = row.get("SEM_EXCH_INSTRUMENT_TYPE", "").strip()
+        if instrument_type == "ETF":
+            asset_class = "ETF"
+        elif instrument_type == "ES":
+            asset_class = "EQUITY"
+        else:
+            return None
         api_segment = _SEGMENT[(segment, exchange)]
     elif segment == "D" and exchange == "NSE" and instrument_name in _DERIVATIVE_CLASS:
         if instrument_name == "OPTSTK":

@@ -3,6 +3,12 @@
 Examples:
     python backfill.py --symbols NIFTY,BANKNIFTY --timeframes 1d --years 5
     python backfill.py --symbols RELIANCE --timeframes 15m,1h --years 1
+    python backfill.py --universe fno --timeframes 1d --years 2
+
+`--universe fno` resolves the symbol list to every F&O-listed equity (distinct
+underlying of the EQUITY_FUTURE instruments, ~190 liquid names) — the same
+universe broker research desks cover, and what the Trading Calls stock scan
+feeds on.
 
 Requires a connected Dhan account (token comes from broker_credentials, decrypted with
 BROKER_ENCRYPTION_KEY — same as broker-service). Run `python universe.py` first so the
@@ -19,6 +25,16 @@ from providers.dhan_history import DhanHistoryProvider
 from tradingai_shared.domain import Instrument, Timeframe
 
 load_dotenv()
+
+
+def fno_universe() -> list[str]:
+    """Every equity with a listed stock future — liquid by construction.
+    NSE's exchange test scrips (…NSETEST) carry futures too; drop them."""
+    return sorted(
+        u for u in instruments_collection.distinct("underlying_symbol", {"asset_class": "EQUITY_FUTURE"})
+        if u and "NSETEST" not in u
+        and instruments_collection.find_one({"asset_class": "EQUITY", "symbol": u}) is not None
+    )
 
 
 def backfill(symbols: list[str], timeframes: list[Timeframe], years: float) -> None:
@@ -56,13 +72,21 @@ def backfill(symbols: list[str], timeframes: list[Timeframe], years: float) -> N
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Backfill historical bars from Dhan")
-    parser.add_argument("--symbols", required=True, help="comma-separated, e.g. NIFTY,RELIANCE")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--symbols", help="comma-separated, e.g. NIFTY,RELIANCE")
+    group.add_argument("--universe", choices=["fno"], help="fno = all F&O-listed equities (~190)")
     parser.add_argument("--timeframes", default="1d", help="comma-separated: 1m,5m,15m,1h,1d,1w")
     parser.add_argument("--years", type=float, default=5.0, help="lookback window in years")
     args = parser.parse_args()
 
+    if args.universe:
+        symbols = fno_universe()
+        print(f"--universe {args.universe}: {len(symbols)} symbols")
+    else:
+        symbols = [s.strip() for s in args.symbols.split(",") if s.strip()]
+
     backfill(
-        symbols=[s.strip() for s in args.symbols.split(",") if s.strip()],
+        symbols=symbols,
         timeframes=[Timeframe(t.strip()) for t in args.timeframes.split(",") if t.strip()],
         years=args.years,
     )

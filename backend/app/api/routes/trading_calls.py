@@ -1,19 +1,24 @@
 """Trading Calls — Kotak-Neo-style research calls across Stocks / F&O / Commodity.
 
 Generation and lifecycle live in app.services.call_engine; this router exposes:
-  GET  /api/trading-calls            list (LTP/status auto-refreshed, throttled)
-  POST /api/trading-calls/generate   run the call engine now
-  POST /api/trading-calls/{id}/close close a call manually
+  GET  /api/trading-calls              list (LTP/status auto-refreshed, throttled)
+  POST /api/trading-calls/generate     run the call engine now (also opens paper positions)
+  POST /api/trading-calls/{id}/close   close a call manually
+  GET  /api/trading-calls/positions    the auto-opened paper-position ledger (see call_positions)
 """
 
 import time
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
+from datetime import datetime
+
 from app.api.deps import get_current_user
 from app.api.routes.broker import _get_dhan_client
-from app.core.db import trading_calls_collection
-from app.services.call_engine import generate_calls, refresh_calls
+from app.core.db import call_scheduler_state_collection, trading_call_positions_collection, trading_calls_collection
+from app.services.call_engine import IST, generate_calls, refresh_calls
+from app.services.call_positions import open_positions_for_calls, summary as positions_summary, sync_positions
+from app.services.call_scheduler import AUTOGEN_ENABLED, GENERATION_SLOTS, STATE_ID, next_slot
 from app.services.dhan_client import DhanClient
 
 router = APIRouter(prefix="/api/trading-calls", tags=["trading-calls"])
@@ -35,6 +40,14 @@ async def _optional_dhan(user_id: str) -> DhanClient | None:
 def _serialize(doc: dict) -> dict:
     doc.pop("_id", None)
     for key in ("created_at", "updated_at", "closed_at"):
+        if doc.get(key) is not None:
+            doc[key] = doc[key].isoformat()
+    return doc
+
+
+def _serialize_position(doc: dict) -> dict:
+    doc.pop("_id", None)
+    for key in ("opened_at", "updated_at", "closed_at"):
         if doc.get(key) is not None:
             doc[key] = doc[key].isoformat()
     return doc
@@ -72,7 +85,18 @@ async def list_calls(
     async for row in trading_calls_collection.aggregate(pipeline):
         counts[row["_id"]] = row["n"]
 
-    return {"calls": calls, "live_counts": counts}
+    state = await call_scheduler_state_collection.find_one({"_id": STATE_ID}) or {}
+    last_run_at = state.get("last_run_at")
+    scheduler = {
+        "enabled": AUTOGEN_ENABLED,
+        "slots": list(GENERATION_SLOTS),
+        "last_run_at": last_run_at.isoformat() if last_run_at else None,
+        "last_slot": state.get("last_slot"),
+        "last_created": state.get("last_created"),
+        "next_slot": next_slot(datetime.now(IST)) if AUTOGEN_ENABLED else None,
+    }
+
+    return {"calls": calls, "live_counts": counts, "scheduler": scheduler}
 
 
 @router.post("/generate")
@@ -87,6 +111,7 @@ async def generate(
             raise HTTPException(status_code=422, detail=f"unknown segments {bad}; valid: {SEGMENTS}")
     dhan = await _optional_dhan(str(current_user["_id"]))
     result = await generate_calls(dhan, segments)
+    result["positions_opened"] = await open_positions_for_calls(result["calls"])
     result["calls"] = [_serialize(c) for c in result["calls"]]
     result["broker_connected"] = dhan is not None
     return result
@@ -107,3 +132,29 @@ async def close_call(call_id: str, current_user: dict = Depends(get_current_user
         {"$set": {"status": "CLOSED", "closed_at": now, "updated_at": now}},
     )
     return _serialize(await trading_calls_collection.find_one({"call_id": call_id}))
+
+
+@router.get("/positions")
+async def list_positions(
+    status: str | None = Query(None, description="OPEN | TARGET_HIT | STOPLOSS | EXPIRED | CLOSED"),
+    segment: str | None = Query(None, description="STOCK | FNO | COMMODITY"),
+    limit: int = Query(200, ge=1, le=500),
+    current_user: dict = Depends(get_current_user),
+):
+    global _last_refresh
+    if time.monotonic() - _last_refresh > REFRESH_THROTTLE_SECONDS:
+        _last_refresh = time.monotonic()
+        await refresh_calls(await _optional_dhan(str(current_user["_id"])))
+    await sync_positions()
+
+    query: dict = {}
+    if status:
+        query["status"] = status.upper()
+    if segment:
+        if segment.upper() not in SEGMENTS:
+            raise HTTPException(status_code=422, detail=f"segment must be one of {SEGMENTS}")
+        query["segment"] = segment.upper()
+
+    cursor = trading_call_positions_collection.find(query).sort("opened_at", -1).limit(limit)
+    positions = [_serialize_position(d) async for d in cursor]
+    return {"positions": positions, "summary": await positions_summary()}

@@ -149,7 +149,7 @@ async def place_order(payload: PlaceOrderRequest, current_user: dict = Depends(g
 
     if payload.paper_trading:
         try:
-            quote = await client.quote_data(payload.exchange_segment, int(payload.security_id))
+            quote = await client.quote_data({payload.exchange_segment: [int(payload.security_id)]})
         except DhanAPIError as exc:
             raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=exc.remarks)
 

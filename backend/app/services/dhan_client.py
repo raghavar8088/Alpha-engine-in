@@ -126,9 +126,13 @@ class DhanClient:
         }
         return await self._request("POST", "/orders", json=payload)
 
-    async def quote_data(self, exchange_segment: str, security_id: int) -> dict:
-        payload = {exchange_segment: [security_id]}
-        return await self._request("POST", "/marketfeed/quote", json=payload)
+    async def quote_data(self, securities_by_segment: dict[str, list[int]]) -> dict:
+        """Batch full quote (same request shape as ltp_data, up to 1000 ids):
+        {"NSE_EQ": [11536, ...]} -> {"data": {segment: {security_id: {"last_price",
+        "ohlc": {"open","high","low","close"}, "volume", "net_change", ...}}}}.
+        Unlike LTP, "ohlc.close" here is the PREVIOUS session's close during
+        market hours — the live day-so-far levels are open/high/low + last_price."""
+        return await self._request("POST", "/marketfeed/quote", json=dict(securities_by_segment))
 
     async def ltp_data(self, securities_by_segment: dict[str, list[int]]) -> dict:
         """Batch LTP: {"NSE_EQ": [11536, ...], "NSE_FNO": [...]} ->
@@ -151,6 +155,27 @@ class DhanClient:
             "toDate": to_date,
         }
         return await self._request("POST", "/charts/historical", json=payload)
+
+    async def margin_calculator(
+        self, security_id: str, exchange_segment: str, transaction_type: str,
+        quantity: int, product_type: str, price: float, trigger_price: float = 0,
+    ) -> dict:
+        """POST /margincalculator — margin/brokerage/leverage Dhan would actually
+        apply to this order. product_type "MTF" is what surfaces real per-stock
+        margin-trade-funding leverage (no separate "list of MTF stocks" endpoint
+        exists; this is the documented way to get it, one instrument at a time).
+        Response: {totalMargin, spanMargin, exposureMargin, availableBalance,
+        variableMargin, insufficientBalance, brokerage, leverage}."""
+        payload = {
+            "securityId": str(security_id),
+            "exchangeSegment": exchange_segment,
+            "transactionType": transaction_type.upper(),
+            "quantity": int(quantity),
+            "productType": product_type.upper(),
+            "price": float(price),
+            "triggerPrice": float(trigger_price),
+        }
+        return await self._request("POST", "/margincalculator", json=payload)
 
     async def option_chain_expiry_list(self, under_security_id: int, under_exchange_segment: str) -> dict:
         payload = {"UnderlyingScrip": under_security_id, "UnderlyingSeg": under_exchange_segment}
