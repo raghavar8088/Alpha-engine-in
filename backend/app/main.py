@@ -10,6 +10,7 @@ from app.api.routes import (
     ai,
     backtest,
     broker,
+    chart_data,
     fno_positions,
     intraday_lab,
     live,
@@ -135,6 +136,7 @@ app.include_router(watchlist.router)
 app.include_router(manual_positions.router)
 app.include_router(fno_positions.router)
 app.include_router(intraday_lab.router)
+app.include_router(chart_data.router)
 
 if settings.enable_live_trading:
     app.include_router(live.router)

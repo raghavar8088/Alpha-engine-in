@@ -187,6 +187,26 @@ class DhanClient:
         }
         return await self._request("POST", "/charts/historical", json=payload)
 
+    async def historical_intraday(
+        self, security_id: str, exchange_segment: str, instrument_type: str,
+        interval: int, from_date: str, to_date: str,
+    ) -> dict:
+        """Intraday candles (1/5/15/25/60-minute) as parallel arrays — same
+        /charts/intraday endpoint market-data-service's backfill uses, but callable
+        on demand for arbitrary symbols (charting needs live data for whatever the
+        user searches, not just the locally-backfilled set). Dhan caps one request
+        at 90 days; callers requesting a wider range must chunk themselves."""
+        payload = {
+            "securityId": str(security_id),
+            "exchangeSegment": exchange_segment,
+            "instrument": instrument_type,
+            "interval": interval,
+            "oi": False,
+            "fromDate": from_date,
+            "toDate": to_date,
+        }
+        return await self._request("POST", "/charts/intraday", json=payload)
+
     async def margin_calculator(
         self, security_id: str, exchange_segment: str, transaction_type: str,
         quantity: int, product_type: str, price: float, trigger_price: float = 0,

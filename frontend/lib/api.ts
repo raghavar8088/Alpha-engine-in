@@ -1159,3 +1159,73 @@ export async function removeWatchlistSymbol(watchlistId: string, symbol: string)
 export async function fetchWatchlistQuotes(watchlistId: string): Promise<{ quotes: WatchlistQuote[] }> {
   return apiFetch(`/api/watchlist/${watchlistId}/quotes`);
 }
+
+// --- Chart (TradingView-style candlestick charting, real Dhan OHLCV data) ---
+
+export interface ChartSymbol {
+  symbol: string;
+  name: string;
+  security_id: string;
+  exchange_segment: string;
+  asset_class: string;
+  tick_size: number;
+}
+
+export interface ChartSymbolInfo {
+  symbol: string;
+  name: string;
+  security_id: string;
+  exchange_segment: string;
+  asset_class: string;
+  pricescale: number;
+  timezone: string;
+  session: string;
+  supported_resolutions: string[];
+}
+
+export type ChartResolution = "1" | "5" | "15" | "60" | "D" | "W";
+
+export interface ChartBars {
+  s: "ok" | "no_data";
+  t?: number[];
+  o?: number[];
+  h?: number[];
+  l?: number[];
+  c?: number[];
+  v?: number[];
+}
+
+export interface ChartTrendPoint {
+  time: number;
+  price: number;
+}
+
+export interface ChartTrend {
+  kind: "support" | "resistance";
+  p1: ChartTrendPoint;
+  p2: ChartTrendPoint;
+}
+
+export async function searchChartSymbols(q: string): Promise<ChartSymbol[]> {
+  if (!q.trim()) return [];
+  const data: { results: ChartSymbol[] } = await apiFetch(`/api/chart/search?q=${encodeURIComponent(q)}`);
+  return data.results;
+}
+
+export async function resolveChartSymbol(securityId: string, exchangeSegment: string): Promise<ChartSymbolInfo> {
+  return apiFetch(`/api/chart/symbol?security_id=${securityId}&exchange_segment=${exchangeSegment}`);
+}
+
+export async function fetchChartHistory(
+  securityId: string, exchangeSegment: string, resolution: ChartResolution, from: number, to: number,
+): Promise<ChartBars> {
+  return apiFetch(
+    `/api/chart/history?security_id=${securityId}&exchange_segment=${exchangeSegment}&resolution=${resolution}&from=${from}&to=${to}`,
+  );
+}
+
+export async function fetchChartTrendline(
+  securityId: string, exchangeSegment: string, resolution: ChartResolution,
+): Promise<{ trend: ChartTrend | null }> {
+  return apiFetch(`/api/chart/trendline?security_id=${securityId}&exchange_segment=${exchangeSegment}&resolution=${resolution}`);
+}

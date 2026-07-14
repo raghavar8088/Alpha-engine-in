@@ -14,6 +14,17 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         icon: <path d="M3 17l6-6 4 4 8-8M15 6h6v6" />,
       },
       {
+        href: "/chart",
+        label: "Chart",
+        icon: (
+          <>
+            <rect x="4" y="10" width="3" height="10" />
+            <rect x="10.5" y="5" width="3" height="15" />
+            <rect x="17" y="13" width="3" height="7" />
+          </>
+        ),
+      },
+      {
         href: "/portfolio",
         label: "Portfolio",
         icon: (
