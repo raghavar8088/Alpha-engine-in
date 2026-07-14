@@ -325,22 +325,27 @@ function BuyModal({ onClose, onDone }: { onClose: () => void; onDone: (msg: stri
   const [quoteError, setQuoteError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     const q = query.trim();
-    if (q.length < 1) {
+    if (q.length < 1 || selected) {
       setResults([]);
+      setSearching(false);
       return;
     }
+    setSearching(true);
     const t = setTimeout(async () => {
       try {
         setResults(await searchManualInstruments(q));
       } catch {
         setResults([]);
+      } finally {
+        setSearching(false);
       }
     }, 250);
     return () => clearTimeout(t);
-  }, [query]);
+  }, [query, selected]);
 
   const select = useCallback(async (inst: ManualInstrument) => {
     setSelected(inst);
@@ -421,15 +426,26 @@ function BuyModal({ onClose, onDone }: { onClose: () => void; onDone: (msg: stri
             }}
             autoFocus
           />
-          {results.length > 0 && (
+          {!selected && query.trim().length >= 1 && (
             <div className="dropdown">
-              {results.map((r) => (
-                <button key={`${r.exchange_segment}-${r.security_id}`} className="dropdown-item" onClick={() => select(r)}>
-                  <span className="dsym">{r.symbol}</span>
-                  <span className="dname">{r.name}</span>
-                  <span className="dseg">{r.exchange_segment === "BSE_EQ" ? "BSE" : "NSE"}</span>
-                </button>
-              ))}
+              {results.length > 0 ? (
+                results.map((r) => (
+                  <button
+                    key={`${r.exchange_segment}-${r.security_id}`}
+                    type="button"
+                    className="dropdown-item"
+                    onClick={() => select(r)}
+                  >
+                    <span className="dsym">{r.symbol}</span>
+                    <span className="dname">{r.name}</span>
+                    <span className={`dseg ${r.exchange_segment === "BSE_EQ" ? "bse" : "nse"}`}>
+                      {r.exchange_segment === "BSE_EQ" ? "BSE" : "NSE"}
+                    </span>
+                  </button>
+                ))
+              ) : (
+                <div className="dropdown-empty">{searching ? "Searching…" : "No matching stocks"}</div>
+              )}
             </div>
           )}
         </div>
@@ -503,22 +519,26 @@ function BuyModal({ onClose, onDone }: { onClose: () => void; onDone: (msg: stri
       </div>
 
       <style jsx>{`
-        .modal-scrim { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 20px; }
-        .modal { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 16px; padding: 20px; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+        .modal-scrim { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: flex-start; justify-content: center; z-index: 50; padding: 5vh 16px 16px; overflow-y: auto; }
+        .modal { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 16px; padding: 20px; width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 14px; }
         .modal-head { display: flex; justify-content: space-between; align-items: center; }
         .modal-title { font-family: var(--font-display); font-weight: 800; font-size: 17px; }
-        .modal-close { background: none; border: none; font-size: 22px; line-height: 1; color: var(--text-muted); cursor: pointer; }
-        .field { display: flex; flex-direction: column; gap: 6px; position: relative; }
+        .modal-close { background: none; border: none; font-size: 26px; line-height: 1; color: var(--text-muted); cursor: pointer; padding: 0 4px; }
+        .field { display: flex; flex-direction: column; gap: 6px; }
         .field label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; }
-        .field input, .field select { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 9px; padding: 10px 12px; font-size: 13.5px; width: 100%; }
+        .field input, .field select { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 9px; padding: 11px 12px; font-size: 16px; width: 100%; }
         .field-row { display: flex; gap: 12px; }
-        .field-row .field { flex: 1; }
-        .dropdown { position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px; background: var(--panel); border: 1px solid var(--panel-border); border-radius: 10px; box-shadow: var(--shadow-sm); max-height: 220px; overflow-y: auto; z-index: 10; }
-        .dropdown-item { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 9px 12px; background: none; border: none; border-bottom: 1px solid var(--canvas-soft); cursor: pointer; font-size: 12.5px; }
-        .dropdown-item:hover { background: var(--canvas-soft); }
-        .dsym { font-weight: 700; min-width: 80px; }
-        .dname { flex: 1; color: var(--text-muted); font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .dseg { font-size: 10px; color: var(--text-faint); font-weight: 700; }
+        .field-row .field { flex: 1; min-width: 0; }
+        .dropdown { margin-top: 4px; background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 10px; max-height: 260px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .dropdown-item { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 12px; background: none; border: none; border-bottom: 1px solid var(--panel-border); cursor: pointer; font-size: 13.5px; }
+        .dropdown-item:last-child { border-bottom: none; }
+        .dropdown-item:hover, .dropdown-item:active { background: var(--panel); }
+        .dsym { font-weight: 700; min-width: 74px; flex-shrink: 0; }
+        .dname { flex: 1; color: var(--text-muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .dseg { font-size: 10px; font-weight: 800; flex-shrink: 0; padding: 2px 6px; border-radius: 5px; letter-spacing: 0.03em; }
+        .dseg.nse { color: #1d4f91; background: rgba(29, 79, 145, 0.12); }
+        .dseg.bse { color: #b45309; background: rgba(180, 83, 9, 0.12); }
+        .dropdown-empty { padding: 14px 12px; font-size: 13px; color: var(--text-faint); text-align: center; }
         .product-row { display: flex; flex-wrap: wrap; gap: 6px; }
         .product-btn { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 8px; padding: 8px 10px; font-size: 11.5px; font-weight: 600; color: var(--text-muted); cursor: pointer; }
         .product-btn.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
