@@ -2,8 +2,10 @@
 DhanHQ-py SDK (see DhanHQ-py/src/dhanhq/dhan_http.py and _order.py) but rewritten
 with httpx to match the rest of this async FastAPI codebase."""
 
+import asyncio
 import base64
 import json as json_module
+import time
 
 import httpx
 import pyotp
@@ -15,6 +17,33 @@ class DhanAPIError(Exception):
     def __init__(self, remarks: str):
         self.remarks = remarks
         super().__init__(remarks)
+
+
+# Dhan enforces a per-account rate limit; a fresh DhanClient is constructed on
+# every request (see _get_dhan_client), so pacing has to live at module scope
+# to actually throttle the account's *total* call rate, not just one instance's.
+# Concurrent features (market-data polling, trading-calls scan, manual-positions
+# quote/margin/order calls) all share this one real Dhan account.
+_rate_lock = asyncio.Lock()
+_last_call_at = 0.0
+_MIN_GAP_SECONDS = 0.34  # ~3 req/s — conservative, well under Dhan's limit
+_MAX_RETRIES = 3
+_RETRY_BACKOFF_SECONDS = (0.5, 1.5, 3.0)
+
+
+async def _paced_request(client: httpx.AsyncClient, method: str, path: str, **kwargs) -> httpx.Response:
+    global _last_call_at
+    for attempt in range(_MAX_RETRIES + 1):
+        async with _rate_lock:
+            wait = _MIN_GAP_SECONDS - (time.monotonic() - _last_call_at)
+            if wait > 0:
+                await asyncio.sleep(wait)
+            _last_call_at = time.monotonic()
+        response = await client.request(method, path, **kwargs)
+        if response.status_code != 429 or attempt == _MAX_RETRIES:
+            return response
+        await asyncio.sleep(_RETRY_BACKOFF_SECONDS[attempt])
+    return response  # unreachable, satisfies type checkers
 
 
 async def totp_login(client_id: str, pin: str, totp_secret: str) -> dict:
@@ -69,7 +98,9 @@ class DhanClient:
         if json is not None:
             json = {**json, "dhanClientId": self.client_id}
         async with httpx.AsyncClient(base_url=settings.dhan_base_url, timeout=30) as client:
-            response = await client.request(method, path, headers=self.headers, json=json)
+            response = await _paced_request(client, method, path, headers=self.headers, json=json)
+        if response.status_code == 429:
+            raise DhanAPIError("Dhan rate limit — too many requests, try again in a moment")
         data = response.json()
         # Some endpoints (holdings, positions, order list) return a bare JSON array on
         # success instead of the {"status": ..., "data": ...} envelope others use.

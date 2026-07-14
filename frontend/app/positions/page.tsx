@@ -16,6 +16,7 @@ import {
   fetchManualPositions,
   fetchManualQuote,
   placeManualOrder,
+  resetManualPositions,
   searchManualInstruments,
 } from "../../lib/api";
 
@@ -39,6 +40,7 @@ export default function PositionsPage() {
   const [error, setError] = useState<string | null>(null);
   const [buyOpen, setBuyOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [resetting, setResetting] = useState(false);
 
   const loadPositions = useCallback(async () => {
     setError(null);
@@ -86,6 +88,25 @@ export default function PositionsPage() {
     [loadPositions],
   );
 
+  const reset = useCallback(async () => {
+    if (
+      !window.confirm(
+        "Reset the paper desk? This permanently deletes every position and order and restores the ₹1 crore initial capital. This cannot be undone.",
+      )
+    )
+      return;
+    setResetting(true);
+    try {
+      const result = await resetManualPositions();
+      setNotice(`Reset complete — ${result.positions_deleted} position(s) and ${result.orders_deleted} order(s) cleared, capital restored to ${inr(result.initial_capital)}`);
+      await Promise.all([loadPositions(), loadOrders()]);
+    } catch (e) {
+      setNotice(`Reset failed: ${e instanceof Error ? e.message : "unknown error"}`);
+    } finally {
+      setResetting(false);
+    }
+  }, [loadPositions, loadOrders]);
+
   const win = summary?.win_rate;
 
   return (
@@ -95,9 +116,14 @@ export default function PositionsPage() {
         title="Positions"
         subtitle="Manual paper trading desk — search a stock on NSE or BSE, buy it with a market or limit order, optionally via MTF leverage. Real Dhan prices and real Dhan margin/leverage figures, ₹1 crore paper capital. Not investment advice."
         actions={
-          <button className="buy-cta" onClick={() => setBuyOpen(true)}>
-            + Buy
-          </button>
+          <>
+            <button className="reset-cta" onClick={reset} disabled={resetting}>
+              {resetting ? "Resetting…" : "Reset"}
+            </button>
+            <button className="buy-cta" onClick={() => setBuyOpen(true)}>
+              + Buy
+            </button>
+          </>
         }
       />
 
@@ -199,7 +225,12 @@ export default function PositionsPage() {
                         <td>{inr(p.avg_price)}</td>
                         <td>{inr(p.ltp)}</td>
                         <td>{inr(p.margin_used)}</td>
-                        <td>{p.leverage > 1 ? `${p.leverage.toFixed(2)}x` : "1x"}</td>
+                        <td>
+                          {p.leverage > 1 ? `${p.leverage.toFixed(2)}x` : "1x"}
+                          {p.margin_source === "fallback" && (
+                            <span className="src-star" title="Dhan's margin calculator was unreachable when this position was opened — shown as 1x/full notional, not a verified figure">*</span>
+                          )}
+                        </td>
                         <td className={pnl >= 0 ? "gain" : "loss"}>
                           {inr(pnl)}
                           {p.status === "OPEN" && <span className="pct"> ({p.pnl_pct >= 0 ? "+" : ""}{p.pnl_pct.toFixed(2)}%)</span>}
@@ -274,6 +305,8 @@ export default function PositionsPage() {
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 18px; }
         .buy-cta { background: linear-gradient(145deg, var(--accent), var(--accent-hover)); color: #241404; font-weight: 700; font-size: 13px; border: none; border-radius: 10px; padding: 10px 20px; cursor: pointer; }
+        .reset-cta { background: var(--loss-dim); color: var(--loss); border: 1px solid rgba(217, 45, 63, 0.26); font-weight: 700; font-size: 13px; border-radius: 10px; padding: 10px 18px; cursor: pointer; }
+        .reset-cta:disabled { opacity: 0.55; cursor: default; }
         .capital-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
         .capital-tiles .tile { display: flex; flex-direction: column; gap: 4px; background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 10px; padding: 12px 14px; }
         .capital-tiles .label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); }
@@ -304,6 +337,7 @@ export default function PositionsPage() {
         .gain { color: var(--gain); }
         .loss { color: var(--loss); }
         .pct { font-size: 11px; }
+        .src-star { color: var(--accent); margin-left: 2px; cursor: help; }
         .status.gain { color: var(--gain); }
         .status.muted { color: var(--text-faint); }
         .exit-btn { background: var(--loss-dim); color: var(--loss); border: 1px solid rgba(217, 45, 63, 0.26); border-radius: 8px; padding: 6px 14px; font-size: 11.5px; font-weight: 700; cursor: pointer; }
@@ -316,11 +350,12 @@ function BuyModal({ onClose, onDone }: { onClose: () => void; onDone: (msg: stri
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ManualInstrument[]>([]);
   const [selected, setSelected] = useState<ManualInstrument | null>(null);
-  const [quantity, setQuantity] = useState(1);
+  const [quantityInput, setQuantityInput] = useState("1");
+  const quantity = Math.max(1, parseInt(quantityInput, 10) || 0);
   const [orderType, setOrderType] = useState<"MARKET" | "LIMIT">("MARKET");
   const [limitPrice, setLimitPrice] = useState<number>(0);
   const [productType, setProductType] = useState<ManualProductType>("CNC");
-  const [margin, setMargin] = useState<{ margin_required: number; leverage: number; notional_value: number } | null>(null);
+  const [margin, setMargin] = useState<{ margin_required: number; leverage: number; notional_value: number; source: "dhan_calculator" | "fallback" } | null>(null);
   const [ltp, setLtp] = useState<number | null>(null);
   const [quoteError, setQuoteError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -368,14 +403,17 @@ function BuyModal({ onClose, onDone }: { onClose: () => void; onDone: (msg: stri
   useEffect(() => {
     if (!selected || priceForMargin <= 0) return;
     let cancelled = false;
-    estimateManualMargin({
-      security_id: selected.security_id, exchange_segment: selected.exchange_segment,
-      transaction_type: "BUY", quantity, product_type: productType, price: priceForMargin,
-    })
-      .then((est) => !cancelled && setMargin(est))
-      .catch(() => !cancelled && setMargin(null));
+    const t = setTimeout(() => {
+      estimateManualMargin({
+        security_id: selected.security_id, exchange_segment: selected.exchange_segment,
+        transaction_type: "BUY", quantity, product_type: productType, price: priceForMargin,
+      })
+        .then((est) => !cancelled && setMargin(est))
+        .catch(() => !cancelled && setMargin(null));
+    }, 300);
     return () => {
       cancelled = true;
+      clearTimeout(t);
     };
   }, [selected, quantity, productType, priceForMargin]);
 
@@ -455,7 +493,14 @@ function BuyModal({ onClose, onDone }: { onClose: () => void; onDone: (msg: stri
             <div className="field-row">
               <div className="field">
                 <label>Quantity</label>
-                <input type="number" min={1} value={quantity} onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))} />
+                <input
+                  type="number"
+                  min={1}
+                  inputMode="numeric"
+                  value={quantityInput}
+                  onChange={(e) => setQuantityInput(e.target.value)}
+                  onBlur={() => setQuantityInput(String(quantity))}
+                />
               </div>
               <div className="field">
                 <label>Order type</label>
@@ -502,10 +547,17 @@ function BuyModal({ onClose, onDone }: { onClose: () => void; onDone: (msg: stri
             </div>
 
             {margin && (
-              <div className="margin-box">
+              <div className={`margin-box ${margin.source === "fallback" ? "warn" : ""}`}>
                 <span>Notional value: {inr(margin.notional_value)}</span>
                 <span>Margin required: {inr(margin.margin_required)}</span>
                 <span className="leverage">Leverage: {margin.leverage.toFixed(2)}x</span>
+                {margin.source === "fallback" && (
+                  <span className="margin-warn">
+                    ⚠ Dhan's margin calculator is unreachable right now, so this is just the full notional
+                    value with no leverage assumed — not {productType}'s real margin. Try again shortly for
+                    {productType === "CNC" ? "" : ` ${productType}'s`} actual figure.
+                  </span>
+                )}
               </div>
             )}
 
@@ -544,6 +596,8 @@ function BuyModal({ onClose, onDone }: { onClose: () => void; onDone: (msg: stri
         .product-btn.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
         .margin-box { display: flex; flex-direction: column; gap: 4px; background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 9px; padding: 10px 12px; font-size: 12px; }
         .margin-box .leverage { font-weight: 700; color: var(--purple); }
+        .margin-box.warn { background: rgba(217, 160, 45, 0.1); border-color: rgba(217, 160, 45, 0.35); }
+        .margin-warn { color: #92620a; font-size: 11px; line-height: 1.4; margin-top: 2px; }
         .ltp-line { font-size: 12.5px; color: var(--text-muted); }
         .err { color: var(--loss); font-size: 12px; }
         .submit-btn { background: linear-gradient(145deg, var(--accent), var(--accent-hover)); color: #241404; font-weight: 700; font-size: 13.5px; border: none; border-radius: 10px; padding: 12px; cursor: pointer; }

@@ -9,6 +9,7 @@ is a thin HTTP layer over it, following the same shape as trading_calls.py.
   GET    /api/manual-positions/orders              order book (pending/filled)
   GET    /api/manual-positions/positions           open+closed positions, with summary
   POST   /api/manual-positions/positions/{id}/exit exit (fully or partially)
+  POST   /api/manual-positions/reset               wipe all positions/orders, reset capital
 """
 
 import time
@@ -25,6 +26,7 @@ from app.services.manual_positions import (
     exit_position,
     get_quote,
     place_order,
+    reset_all,
     search_instruments,
     summary,
     sync_positions,
@@ -155,3 +157,8 @@ async def exit(position_id: str, payload: ExitPositionRequest, current_user: dic
         raise HTTPException(status_code=422, detail=exc.detail)
     result["position"] = _serialize(result["position"], ("opened_at", "updated_at", "closed_at"))
     return _serialize(result, ("placed_at", "updated_at", "filled_at"))
+
+
+@router.post("/reset")
+async def reset(current_user: dict = Depends(get_current_user)):
+    return await reset_all()

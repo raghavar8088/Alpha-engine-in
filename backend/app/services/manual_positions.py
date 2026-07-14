@@ -69,18 +69,21 @@ async def _ltp(dhan: DhanClient, security_id: str, exchange_segment: str) -> flo
 async def _margin(
     dhan: DhanClient, security_id: str, exchange_segment: str, transaction_type: str,
     quantity: int, product_type: str, price: float,
-) -> tuple[float, float]:
-    """(margin_required, leverage). Falls back to full notional / 1x if Dhan's
-    calculator is unreachable — never silently grants leverage we can't verify."""
+) -> tuple[float, float, str]:
+    """(margin_required, leverage, source). Falls back to full notional / 1x if
+    Dhan's calculator is unreachable — never silently grants leverage we can't
+    verify. `source` is "dhan_calculator" for a real figure or "fallback" when
+    the calculator call failed, so callers can be honest about which one this is
+    instead of presenting a guessed 1x as if it were Dhan's real answer."""
     try:
         r = await dhan.margin_calculator(
             security_id=security_id, exchange_segment=exchange_segment, transaction_type=transaction_type,
             quantity=quantity, product_type=product_type, price=price,
         )
         margin = float(r.get("totalMargin") or 0) or (price * quantity)
-        return margin, _parse_leverage(r.get("leverage"))
+        return margin, _parse_leverage(r.get("leverage")), "dhan_calculator"
     except (DhanAPIError, Exception):
-        return price * quantity, 1.0
+        return price * quantity, 1.0, "fallback"
 
 
 async def _deployed_margin() -> float:
@@ -133,8 +136,11 @@ async def estimate_margin(
     dhan: DhanClient, security_id: str, exchange_segment: str, transaction_type: str,
     quantity: int, product_type: str, price: float,
 ) -> dict:
-    margin, leverage = await _margin(dhan, security_id, exchange_segment, transaction_type, quantity, product_type, price)
-    return {"margin_required": round(margin, 2), "leverage": leverage, "notional_value": round(price * quantity, 2)}
+    margin, leverage, source = await _margin(dhan, security_id, exchange_segment, transaction_type, quantity, product_type, price)
+    return {
+        "margin_required": round(margin, 2), "leverage": leverage, "notional_value": round(price * quantity, 2),
+        "source": source,
+    }
 
 
 async def place_order(
@@ -196,7 +202,7 @@ async def _fill(dhan: DhanClient, base_order: dict, fill_price: float) -> dict:
     )
 
     if transaction_type == "BUY":
-        margin, leverage = await _margin(dhan, security_id, segment, "BUY", quantity, product_type, fill_price)
+        margin, leverage, margin_source = await _margin(dhan, security_id, segment, "BUY", quantity, product_type, fill_price)
         cash = await available_cash()
         if margin > cash:
             raise OrderError(
@@ -208,7 +214,7 @@ async def _fill(dhan: DhanClient, base_order: dict, fill_price: float) -> dict:
                 "position_id": uuid4().hex[:12], "symbol": symbol, "display_name": base_order["display_name"],
                 "instrument": inst, "product_type": product_type, "side": "BUY",
                 "quantity": quantity, "avg_price": fill_price, "margin_used": round(margin, 2),
-                "leverage": leverage, "ltp": fill_price, "ltp_source": "dhan_quote",
+                "leverage": leverage, "margin_source": margin_source, "ltp": fill_price, "ltp_source": "dhan_quote",
                 "unrealized_pnl": 0.0, "pnl_pct": 0.0, "realized_pnl": 0.0,
                 "status": "OPEN", "opened_at": _now(), "updated_at": _now(), "closed_at": None,
             }
@@ -217,12 +223,12 @@ async def _fill(dhan: DhanClient, base_order: dict, fill_price: float) -> dict:
         else:
             new_qty = existing["quantity"] + quantity
             new_avg = (existing["quantity"] * existing["avg_price"] + quantity * fill_price) / new_qty
-            new_margin, new_leverage = await _margin(dhan, security_id, segment, "BUY", new_qty, product_type, new_avg)
+            new_margin, new_leverage, new_margin_source = await _margin(dhan, security_id, segment, "BUY", new_qty, product_type, new_avg)
             await manual_positions_collection.update_one(
                 {"_id": existing["_id"]},
                 {"$set": {"quantity": new_qty, "avg_price": round(new_avg, 4),
                           "margin_used": round(new_margin, 2), "leverage": new_leverage,
-                          "updated_at": _now()}},
+                          "margin_source": new_margin_source, "updated_at": _now()}},
             )
             position = await manual_positions_collection.find_one({"_id": existing["_id"]})
             position.pop("_id", None)
@@ -244,13 +250,14 @@ async def _fill(dhan: DhanClient, base_order: dict, fill_price: float) -> dict:
                 }},
             )
         else:
-            new_margin, new_leverage = await _margin(
+            new_margin, new_leverage, new_margin_source = await _margin(
                 dhan, security_id, segment, "BUY", remaining_qty, product_type, existing["avg_price"]
             )
             await manual_positions_collection.update_one(
                 {"_id": existing["_id"]},
                 {"$set": {
                     "quantity": remaining_qty, "margin_used": round(new_margin, 2), "leverage": new_leverage,
+                    "margin_source": new_margin_source,
                     "realized_pnl": round(existing.get("realized_pnl", 0.0) + realized, 2),
                     "updated_at": _now(),
                 }},
@@ -324,6 +331,15 @@ async def sync_positions(dhan: DhanClient) -> int:
             except OrderError:
                 continue  # capital dried up since placement — leave it pending
     return updated
+
+
+async def reset_all() -> dict:
+    """Wipe the paper desk back to a pristine state: every position and order is
+    deleted (not just closed) so realized P&L is cleared too and available_cash
+    returns to exactly INITIAL_CAPITAL. Irreversible — the caller confirms first."""
+    positions_deleted = (await manual_positions_collection.delete_many({})).deleted_count
+    orders_deleted = (await manual_orders_collection.delete_many({})).deleted_count
+    return {"positions_deleted": positions_deleted, "orders_deleted": orders_deleted, "initial_capital": INITIAL_CAPITAL}
 
 
 async def summary() -> dict:
