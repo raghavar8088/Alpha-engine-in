@@ -42,21 +42,29 @@ class ChartError(Exception):
 
 
 async def search_symbols(query: str, limit: int = 20) -> list[dict]:
+    """Prefix/name search across chartable instruments. A plain query() with no
+    ranking buries short exact tickers (e.g. the single "NIFTY" index row) under
+    thousands of same-prefixed F&O contract names ("NIFTY-Aug2026-FUT", every
+    NIFTY option strike, ...) — sort candidates by symbol length so exact/short
+    matches surface first, which is what "search for NIFTY" actually means."""
     q = query.strip()
     if not q:
         return []
-    cursor = instruments_collection.find(
-        {
+    pipeline = [
+        {"$match": {
             "asset_class": {"$in": list(_INSTRUMENT_TYPE.keys())},
             "$or": [
                 {"symbol": {"$regex": f"^{q}", "$options": "i"}},
                 {"name": {"$regex": q, "$options": "i"}},
             ],
-        },
-        {"_id": 0, "symbol": 1, "name": 1, "security_id": 1, "exchange_segment": 1,
-         "asset_class": 1, "tick_size": 1},
-    ).limit(limit)
-    return [d async for d in cursor]
+        }},
+        {"$addFields": {"_symlen": {"$strLenCP": "$symbol"}}},
+        {"$sort": {"_symlen": 1, "symbol": 1}},
+        {"$limit": limit},
+        {"$project": {"_id": 0, "symbol": 1, "name": 1, "security_id": 1, "exchange_segment": 1,
+                      "asset_class": 1, "tick_size": 1}},
+    ]
+    return [d async for d in instruments_collection.aggregate(pipeline)]
 
 
 async def _instrument(security_id: str, exchange_segment: str) -> dict:
