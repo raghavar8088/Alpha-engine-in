@@ -38,6 +38,8 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.backend
+    env_file:
+      - .env
     environment:
       PORT: 8080
       REDIS_URL: redis://redis:6379/0
@@ -51,17 +53,21 @@ services:
     ports:
       - "8000:8080"
     restart: unless-stopped
+    mem_limit: 500m
 
   market-data-service:
     build:
       context: .
       dockerfile: docker/Dockerfile.marketdata
+    env_file:
+      - .env
     environment:
       REDIS_URL: redis://redis:6379/0
       POLL_INTERVAL_SECONDS: ${POLL_INTERVAL_SECONDS:-7}
     depends_on:
       - redis
     restart: unless-stopped
+    mem_limit: 200m
 
   frontend:
     build:
