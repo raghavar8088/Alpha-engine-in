@@ -28,11 +28,14 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const load = () => {
-    setError(null);
-    setLoading(true);
+  const load = (showLoading = true) => {
+    if (showLoading) {
+      setError(null);
+      setLoading(true);
+    }
     fetchLatestMarketData()
       .then((rows) => {
+        setError(null);
         setInitialRows(rows);
         rows.forEach((row) => {
           if (seededSymbols.current.has(row.symbol)) return;
@@ -44,13 +47,23 @@ export default function DashboardPage() {
             .catch(() => {});
         });
       })
-      .catch((e) => setError(e instanceof Error ? e.message : "Failed to load market data"))
-      .finally(() => setLoading(false));
+      .catch((e) => {
+        // Only surface an error on the initial load; a failed background poll
+        // should leave the last good snapshot on screen rather than blanking it.
+        if (showLoading) setError(e instanceof Error ? e.message : "Failed to load market data");
+      })
+      .finally(() => {
+        if (showLoading) setLoading(false);
+      });
   };
 
   useEffect(() => {
     setMarketOpen(isMarketOpenIST());
     load();
+    // Poll is the live-update path in same-origin proxy mode (Vercel production
+    // has no reachable WebSocket); on local dev the socket also updates in between.
+    const timer = setInterval(() => load(false), 7000);
+    return () => clearInterval(timer);
   }, []);
 
   const rows = useMarketDataSocket(initialRows);
