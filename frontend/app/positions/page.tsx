@@ -5,13 +5,16 @@ import GlassPanel from "../../components/GlassPanel";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import {
+  ManualAccount,
   ManualInstrument,
   ManualOrder,
   ManualPosition,
   ManualPositionsSummary,
   ManualProductType,
+  createManualAccount,
   estimateManualMargin,
   exitManualPosition,
+  fetchManualAccounts,
   fetchManualOrders,
   fetchManualPositions,
   fetchManualQuote,
@@ -19,6 +22,8 @@ import {
   resetManualPositions,
   searchManualInstruments,
 } from "../../lib/api";
+
+const SELECTED_ACCOUNT_KEY = "tradingai:manual-positions:selected-account";
 
 const PRODUCT_TYPES: { id: ManualProductType; label: string }[] = [
   { id: "CNC", label: "CNC (Delivery)" },
@@ -31,6 +36,11 @@ const inr = (v: number | null | undefined) =>
   v === null || v === undefined ? "-" : v.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export default function PositionsPage() {
+  const [accounts, setAccounts] = useState<ManualAccount[]>([]);
+  const [accountId, setAccountId] = useState<string | null>(null);
+  const [accountsLoading, setAccountsLoading] = useState(true);
+  const [createAccountOpen, setCreateAccountOpen] = useState(false);
+
   const [tab, setTab] = useState<"positions" | "orders">("positions");
   const [positions, setPositions] = useState<ManualPosition[]>([]);
   const [summary, setSummary] = useState<ManualPositionsSummary | null>(null);
@@ -42,10 +52,38 @@ export default function PositionsPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [resetting, setResetting] = useState(false);
 
+  const loadAccounts = useCallback(async () => {
+    setAccountsLoading(true);
+    try {
+      const data = await fetchManualAccounts();
+      setAccounts(data);
+      setAccountId((current) => {
+        if (current && data.some((a) => a.account_id === current)) return current;
+        const saved = typeof window !== "undefined" ? window.localStorage.getItem(SELECTED_ACCOUNT_KEY) : null;
+        if (saved && data.some((a) => a.account_id === saved)) return saved;
+        return data[0]?.account_id ?? null;
+      });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load accounts");
+    } finally {
+      setAccountsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadAccounts();
+  }, [loadAccounts]);
+
+  const selectAccount = useCallback((id: string) => {
+    setAccountId(id);
+    if (typeof window !== "undefined") window.localStorage.setItem(SELECTED_ACCOUNT_KEY, id);
+  }, []);
+
   const loadPositions = useCallback(async () => {
+    if (!accountId) return;
     setError(null);
     try {
-      const data = await fetchManualPositions(positionsFilter === "all" ? undefined : positionsFilter);
+      const data = await fetchManualPositions(accountId, positionsFilter === "all" ? undefined : positionsFilter);
       setPositions(data.positions);
       setSummary(data.summary);
     } catch (e) {
@@ -53,22 +91,24 @@ export default function PositionsPage() {
     } finally {
       setLoading(false);
     }
-  }, [positionsFilter]);
+  }, [accountId, positionsFilter]);
 
   const loadOrders = useCallback(async () => {
+    if (!accountId) return;
     try {
-      const data = await fetchManualOrders();
+      const data = await fetchManualOrders(accountId);
       setOrders(data.orders);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load orders");
     }
-  }, []);
+  }, [accountId]);
 
   useEffect(() => {
+    if (!accountId) return;
     loadPositions();
     const timer = setInterval(loadPositions, 20_000);
     return () => clearInterval(timer);
-  }, [loadPositions]);
+  }, [accountId, loadPositions]);
 
   useEffect(() => {
     if (tab === "orders") loadOrders();
@@ -76,28 +116,31 @@ export default function PositionsPage() {
 
   const exit = useCallback(
     async (position: ManualPosition) => {
+      if (!accountId) return;
       if (!window.confirm(`Exit ${position.quantity} ${position.symbol} @ market?`)) return;
       try {
-        const result = await exitManualPosition(position.position_id);
+        const result = await exitManualPosition(accountId, position.position_id);
         setNotice(`Exited ${position.symbol} at ${inr(result.fill_price)} (realized P&L ${inr(result.position.realized_pnl)})`);
         await loadPositions();
       } catch (e) {
         setNotice(`Exit failed: ${e instanceof Error ? e.message : "unknown error"}`);
       }
     },
-    [loadPositions],
+    [accountId, loadPositions],
   );
 
   const reset = useCallback(async () => {
+    if (!accountId) return;
+    const account = accounts.find((a) => a.account_id === accountId);
     if (
       !window.confirm(
-        "Reset the paper desk? This permanently deletes every position and order and restores the ₹1 crore initial capital. This cannot be undone.",
+        `Reset "${account?.name ?? "this"}" account? This permanently deletes every position and order in it and restores ${inr(account?.initial_capital ?? 10000000)} initial capital. Other accounts are untouched. This cannot be undone.`,
       )
     )
       return;
     setResetting(true);
     try {
-      const result = await resetManualPositions();
+      const result = await resetManualPositions(accountId);
       setNotice(`Reset complete — ${result.positions_deleted} position(s) and ${result.orders_deleted} order(s) cleared, capital restored to ${inr(result.initial_capital)}`);
       await Promise.all([loadPositions(), loadOrders()]);
     } catch (e) {
@@ -105,7 +148,22 @@ export default function PositionsPage() {
     } finally {
       setResetting(false);
     }
-  }, [loadPositions, loadOrders]);
+  }, [accountId, accounts, loadPositions, loadOrders]);
+
+  const createAccount = useCallback(
+    async (name: string) => {
+      try {
+        const account = await createManualAccount(name);
+        setCreateAccountOpen(false);
+        await loadAccounts();
+        selectAccount(account.account_id);
+        setNotice(`Created account "${account.name}" with ${inr(account.initial_capital)} paper capital`);
+      } catch (e) {
+        setNotice(`Could not create account: ${e instanceof Error ? e.message : "unknown error"}`);
+      }
+    },
+    [loadAccounts, selectAccount],
+  );
 
   const win = summary?.win_rate;
 
@@ -117,16 +175,42 @@ export default function PositionsPage() {
         subtitle="Manual paper trading desk — search a stock on NSE or BSE, buy it with a market or limit order, optionally via MTF leverage. Real Dhan prices and real Dhan margin/leverage figures, ₹1 crore paper capital. Not investment advice."
         actions={
           <>
-            <button className="reset-cta" onClick={reset} disabled={resetting}>
+            {accounts.length > 0 && (
+              <select
+                className="account-select"
+                value={accountId ?? ""}
+                onChange={(e) => selectAccount(e.target.value)}
+              >
+                {accounts.map((a) => (
+                  <option key={a.account_id} value={a.account_id}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+            )}
+            <button className="account-cta" onClick={() => setCreateAccountOpen(true)}>
+              + New Account
+            </button>
+            <button className="reset-cta" onClick={reset} disabled={resetting || !accountId}>
               {resetting ? "Resetting…" : "Reset"}
             </button>
-            <button className="buy-cta" onClick={() => setBuyOpen(true)}>
+            <button className="buy-cta" onClick={() => setBuyOpen(true)} disabled={!accountId}>
               + Buy
             </button>
           </>
         }
       />
 
+      {accountsLoading ? (
+        <div className="empty">Loading accounts…</div>
+      ) : accounts.length === 0 ? (
+        <GlassPanel>
+          <div className="empty">
+            No trading accounts yet — hit <b>+ New Account</b> to create your first paper trading account.
+          </div>
+        </GlassPanel>
+      ) : (
+        <>
       {summary && (
         <div className="capital-tiles">
           <div className="tile">
@@ -291,8 +375,9 @@ export default function PositionsPage() {
         </GlassPanel>
       )}
 
-      {buyOpen && (
+      {buyOpen && accountId && (
         <BuyModal
+          accountId={accountId}
           onClose={() => setBuyOpen(false)}
           onDone={(msg) => {
             setBuyOpen(false);
@@ -301,11 +386,20 @@ export default function PositionsPage() {
           }}
         />
       )}
+        </>
+      )}
+
+      {createAccountOpen && (
+        <CreateAccountModal onClose={() => setCreateAccountOpen(false)} onCreate={createAccount} />
+      )}
 
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 18px; }
         .buy-cta { background: linear-gradient(145deg, var(--accent), var(--accent-hover)); color: #241404; font-weight: 700; font-size: 13px; border: none; border-radius: 10px; padding: 10px 20px; cursor: pointer; }
+        .buy-cta:disabled { opacity: 0.5; cursor: default; }
         .reset-cta { background: var(--loss-dim); color: var(--loss); border: 1px solid rgba(217, 45, 63, 0.26); font-weight: 700; font-size: 13px; border-radius: 10px; padding: 10px 18px; cursor: pointer; }
+        .account-select { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 10px; padding: 10px 12px; font-size: 13px; font-weight: 600; min-width: 140px; }
+        .account-cta { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); font-weight: 700; font-size: 12.5px; border-radius: 10px; padding: 10px 16px; cursor: pointer; }
         .reset-cta:disabled { opacity: 0.55; cursor: default; }
         .capital-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
         .capital-tiles .tile { display: flex; flex-direction: column; gap: 4px; background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 10px; padding: 12px 14px; }
@@ -346,7 +440,15 @@ export default function PositionsPage() {
   );
 }
 
-function BuyModal({ onClose, onDone }: { onClose: () => void; onDone: (msg: string) => void }) {
+function BuyModal({
+  accountId,
+  onClose,
+  onDone,
+}: {
+  accountId: string;
+  onClose: () => void;
+  onDone: (msg: string) => void;
+}) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ManualInstrument[]>([]);
   const [selected, setSelected] = useState<ManualInstrument | null>(null);
@@ -427,6 +529,7 @@ function BuyModal({ onClose, onDone }: { onClose: () => void; onDone: (msg: stri
     setErr(null);
     try {
       const result = await placeManualOrder({
+        account_id: accountId,
         security_id: selected.security_id, exchange_segment: selected.exchange_segment,
         transaction_type: "BUY", quantity, order_type: orderType, product_type: productType,
         limit_price: orderType === "LIMIT" ? limitPrice : 0,
@@ -441,7 +544,7 @@ function BuyModal({ onClose, onDone }: { onClose: () => void; onDone: (msg: stri
     } finally {
       setSubmitting(false);
     }
-  }, [selected, quantity, orderType, limitPrice, productType, onDone]);
+  }, [accountId, selected, quantity, orderType, limitPrice, productType, onDone]);
 
   return (
     <div className="modal-scrim" onClick={onClose}>
@@ -600,6 +703,66 @@ function BuyModal({ onClose, onDone }: { onClose: () => void; onDone: (msg: stri
         .margin-warn { color: #92620a; font-size: 11px; line-height: 1.4; margin-top: 2px; }
         .ltp-line { font-size: 12.5px; color: var(--text-muted); }
         .err { color: var(--loss); font-size: 12px; }
+        .submit-btn { background: linear-gradient(145deg, var(--accent), var(--accent-hover)); color: #241404; font-weight: 700; font-size: 13.5px; border: none; border-radius: 10px; padding: 12px; cursor: pointer; }
+        .submit-btn:disabled { opacity: 0.55; cursor: default; }
+      `}</style>
+    </div>
+  );
+}
+
+function CreateAccountModal({ onClose, onCreate }: { onClose: () => void; onCreate: (name: string) => Promise<void> }) {
+  const [name, setName] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const submit = useCallback(async () => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    setSubmitting(true);
+    try {
+      await onCreate(trimmed);
+    } finally {
+      setSubmitting(false);
+    }
+  }, [name, onCreate]);
+
+  return (
+    <div className="modal-scrim" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-head">
+          <div className="modal-title">New trading account</div>
+          <button className="modal-close" onClick={onClose}>
+            &times;
+          </button>
+        </div>
+
+        <div className="field">
+          <label>Account name</label>
+          <input
+            placeholder="e.g. Momentum Strategy, Swing Trades"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && submit()}
+            autoFocus
+          />
+        </div>
+
+        <p className="account-note">Starts with its own independent ₹1 crore paper capital, separate from every other account.</p>
+
+        <button className="submit-btn" onClick={submit} disabled={submitting || !name.trim()}>
+          {submitting ? "Creating…" : "Create account"}
+        </button>
+      </div>
+
+      <style jsx>{`
+        .modal-scrim { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: flex-start; justify-content: center; z-index: 50; padding: 5vh 16px 16px; overflow-y: auto; }
+        .modal { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 16px; padding: 20px; width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 14px; }
+        .modal-head { display: flex; justify-content: space-between; align-items: center; }
+        .modal-title { font-family: var(--font-display); font-weight: 800; font-size: 17px; }
+        .modal-close { background: none; border: none; font-size: 26px; line-height: 1; color: var(--text-muted); cursor: pointer; padding: 0 4px; }
+        .field { display: flex; flex-direction: column; gap: 6px; }
+        .field label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; }
+        .field input { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 9px; padding: 11px 12px; font-size: 16px; width: 100%; }
+        .account-note { margin: 0; font-size: 12px; color: var(--text-muted); }
         .submit-btn { background: linear-gradient(145deg, var(--accent), var(--accent-hover)); color: #241404; font-weight: 700; font-size: 13.5px; border: none; border-radius: 10px; padding: 12px; cursor: pointer; }
         .submit-btn:disabled { opacity: 0.55; cursor: default; }
       `}</style>

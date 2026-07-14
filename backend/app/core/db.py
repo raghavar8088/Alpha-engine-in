@@ -27,6 +27,12 @@ call_scheduler_state_collection = db["call_scheduler_state"]
 # Manual "Positions" module — user-initiated paper trades (search -> buy -> exit)
 manual_positions_collection = db["manual_positions"]
 manual_orders_collection = db["manual_orders"]
+# Named paper-trading accounts for the manual Positions module — each with its own
+# independent capital pool, so different strategies can be tracked separately
+manual_accounts_collection = db["manual_accounts"]
+# F&O Positions module — user-initiated paper trades on index/stock options & futures
+fno_positions_collection = db["fno_positions"]
+fno_orders_collection = db["fno_orders"]
 # Pre-Live paper desk (real-premium forward paper trading of the top-20 basket)
 prelive_trades_collection = db["prelive_trades"]
 prelive_positions_collection = db["prelive_positions"]
@@ -36,3 +42,8 @@ prelive_scores_collection = db["prelive_strategy_scores"]
 prelive_state_collection = db["prelive_state"]
 # Watchlist module — user-created named lists of symbols with live price tracking
 watchlists_collection = db["watchlists"]
+# Intraday Strategy Lab — 50-strategy auto-trading paper desk (sub-module of Trading Calls)
+intraday_lab_positions_collection = db["intraday_lab_positions"]
+intraday_lab_trades_collection = db["intraday_lab_trades"]
+intraday_lab_scores_collection = db["intraday_lab_scores"]
+intraday_lab_state_collection = db["intraday_lab_state"]

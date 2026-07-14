@@ -564,6 +564,107 @@ export async function fetchTradingCallPositions(
   return apiFetch(`/api/trading-calls/positions${qs ? `?${qs}` : ""}`);
 }
 
+// --- Intraday Strategy Lab (50-strategy auto-trading paper desk, sub-module of Trading Calls) ---
+
+export type IntradayLabCategory = "scalping" | "momentum" | "mean_reversion" | "swing";
+
+export interface IntradayLabStrategy {
+  strategy_id: string;
+  name: string;
+  category: IntradayLabCategory;
+  timeframe: string;
+  rationale: string;
+  max_hold_days: number;
+  risk_pct: number;
+  trades: number;
+  win_rate: number;
+  net_pnl: number;
+  allocated_capital: number | null;
+}
+
+export interface IntradayLabStrategiesResponse {
+  strategies: IntradayLabStrategy[];
+  count: number;
+}
+
+export async function fetchIntradayLabStrategies(): Promise<IntradayLabStrategiesResponse> {
+  return apiFetch("/api/intraday-lab/strategies");
+}
+
+export interface IntradayLabLeaderboardRow {
+  strategy_id: string;
+  name: string;
+  category: IntradayLabCategory;
+  trades: number;
+  win_rate: number;
+  net_pnl: number;
+  allocated_capital: number | null;
+}
+
+export async function fetchIntradayLabLeaderboard(): Promise<{ leaderboard: IntradayLabLeaderboardRow[] }> {
+  return apiFetch("/api/intraday-lab/leaderboard");
+}
+
+export interface IntradayLabPosition {
+  position_id: string;
+  strategy_id: string;
+  strategy_name: string;
+  category: IntradayLabCategory;
+  symbol: string;
+  display_name: string;
+  side: "BUY" | "SELL";
+  entry_price: number;
+  qty: number;
+  capital_deployed: number;
+  target: number;
+  stoploss: number;
+  ltp: number;
+  ltp_source: "dhan_quote" | "last_bar_close";
+  unrealized_pnl: number;
+  pnl_pct: number | null;
+  realized_pnl: number | null;
+  exit_price: number | null;
+  exit_reason: string | null;
+  status: "OPEN" | "CLOSED";
+  confidence: number;
+  rationale: string;
+  opened_at: string;
+  updated_at: string;
+  closed_at: string | null;
+}
+
+export async function fetchIntradayLabPositions(
+  strategyId?: string,
+  status?: string,
+): Promise<{ positions: IntradayLabPosition[] }> {
+  const params = new URLSearchParams();
+  if (strategyId) params.set("strategy_id", strategyId);
+  if (status) params.set("status", status);
+  const qs = params.toString();
+  return apiFetch(`/api/intraday-lab/positions${qs ? `?${qs}` : ""}`);
+}
+
+export interface IntradayLabSummary {
+  initial_capital: number;
+  per_strategy_allocation: number;
+  available_cash: number;
+  deployed_capital: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  equity: number;
+  open_positions: number;
+  closed_positions: number;
+  strategy_count: number;
+}
+
+export async function fetchIntradayLabSummary(): Promise<IntradayLabSummary> {
+  return apiFetch("/api/intraday-lab/summary");
+}
+
+export async function runIntradayLabCycle(): Promise<{ opened: number; managed: number; scanned_symbols: number; notes: string[] }> {
+  return apiFetch("/api/intraday-lab/run", { method: "POST" });
+}
+
 // --- Manual Positions (user-initiated paper trading desk, NSE + BSE) ---
 
 export interface ManualInstrument {
@@ -578,8 +679,28 @@ export interface ManualInstrument {
 
 export type ManualProductType = "CNC" | "MTF" | "MARGIN" | "INTRADAY";
 
+export interface ManualAccount {
+  account_id: string;
+  name: string;
+  initial_capital: number;
+  created_at: string;
+}
+
+export async function fetchManualAccounts(): Promise<ManualAccount[]> {
+  const data: { accounts: ManualAccount[] } = await apiFetch("/api/manual-positions/accounts");
+  return data.accounts;
+}
+
+export async function createManualAccount(name: string, initialCapital?: number): Promise<ManualAccount> {
+  return apiFetch("/api/manual-positions/accounts", {
+    method: "POST",
+    body: JSON.stringify({ name, initial_capital: initialCapital ?? null }),
+  });
+}
+
 export interface ManualPosition {
   position_id: string;
+  account_id: string;
   symbol: string;
   display_name: string;
   instrument: ManualInstrument;
@@ -621,6 +742,7 @@ export interface ManualOrder {
 }
 
 export interface ManualPositionsSummary {
+  account_id: string;
   initial_capital: number;
   available_cash: number;
   deployed_margin: number;
@@ -664,6 +786,7 @@ export async function estimateManualMargin(params: {
 }
 
 export interface PlaceManualOrderRequest {
+  account_id: string;
   security_id: string;
   exchange_segment: string;
   transaction_type: "BUY" | "SELL";
@@ -677,25 +800,176 @@ export async function placeManualOrder(payload: PlaceManualOrderRequest): Promis
   return apiFetch("/api/manual-positions/orders", { method: "POST", body: JSON.stringify(payload) });
 }
 
-export async function fetchManualPositions(status?: string): Promise<{ positions: ManualPosition[]; summary: ManualPositionsSummary }> {
-  const qs = status ? `?status=${status}` : "";
-  return apiFetch(`/api/manual-positions/positions${qs}`);
+export async function fetchManualPositions(accountId: string, status?: string): Promise<{ positions: ManualPosition[]; summary: ManualPositionsSummary }> {
+  const params = new URLSearchParams({ account_id: accountId });
+  if (status) params.set("status", status);
+  return apiFetch(`/api/manual-positions/positions?${params.toString()}`);
 }
 
-export async function fetchManualOrders(status?: string): Promise<{ orders: ManualOrder[] }> {
-  const qs = status ? `?status=${status}` : "";
-  return apiFetch(`/api/manual-positions/orders${qs}`);
+export async function fetchManualOrders(accountId: string, status?: string): Promise<{ orders: ManualOrder[] }> {
+  const params = new URLSearchParams({ account_id: accountId });
+  if (status) params.set("status", status);
+  return apiFetch(`/api/manual-positions/orders?${params.toString()}`);
 }
 
-export async function exitManualPosition(positionId: string, quantity?: number): Promise<ManualOrder & { position: ManualPosition }> {
+export async function exitManualPosition(accountId: string, positionId: string, quantity?: number): Promise<ManualOrder & { position: ManualPosition }> {
   return apiFetch(`/api/manual-positions/positions/${positionId}/exit`, {
     method: "POST",
-    body: JSON.stringify({ quantity: quantity ?? null }),
+    body: JSON.stringify({ account_id: accountId, quantity: quantity ?? null }),
   });
 }
 
-export async function resetManualPositions(): Promise<{ positions_deleted: number; orders_deleted: number; initial_capital: number }> {
-  return apiFetch("/api/manual-positions/reset", { method: "POST" });
+export async function resetManualPositions(accountId: string): Promise<{ positions_deleted: number; orders_deleted: number; initial_capital: number }> {
+  return apiFetch("/api/manual-positions/reset", { method: "POST", body: JSON.stringify({ account_id: accountId }) });
+}
+
+// --- F&O Positions (options + futures paper desk, indices + F&O-enabled stocks) ---
+
+export interface FnoUnderlying {
+  symbol: string;
+  name: string;
+  kind: "INDEX" | "EQUITY";
+}
+
+export type OptionChainStrike = OptionStrikeRow;
+
+export interface OptionChainResponse extends OptionChain {
+  symbol: string;
+}
+
+export interface TopMover {
+  symbol: string;
+  expiry: string;
+  strike: number;
+  option_type: "CE" | "PE";
+  ltp: number;
+  change_pct: number;
+  volume: number;
+  oi: number;
+}
+
+export type FnoProductType = "INTRADAY" | "MARGIN";
+export type FnoInstrumentKind = "OPTION" | "FUTURE";
+
+export interface FnoInstrument {
+  symbol: string;
+  security_id: string;
+  exchange_segment: string;
+  lot_size: number;
+  tick_size: number;
+  underlying_symbol: string | null;
+  expiry: string | null;
+  strike: number | null;
+  option_type: "CE" | "PE" | null;
+}
+
+export interface FnoPosition {
+  position_id: string;
+  symbol: string;
+  display_name: string;
+  instrument_kind: FnoInstrumentKind;
+  instrument: FnoInstrument;
+  product_type: FnoProductType;
+  side: "BUY";
+  lots: number;
+  quantity: number;
+  avg_price: number;
+  margin_used: number;
+  leverage: number;
+  margin_source: "dhan_calculator" | "fallback";
+  ltp: number;
+  ltp_source: "dhan_quote";
+  unrealized_pnl: number;
+  pnl_pct: number;
+  realized_pnl: number;
+  status: "OPEN" | "CLOSED";
+  opened_at: string;
+  updated_at: string;
+  closed_at: string | null;
+}
+
+export interface FnoOrder {
+  order_id: string;
+  symbol: string;
+  display_name: string;
+  instrument_kind: FnoInstrumentKind;
+  instrument: FnoInstrument;
+  transaction_type: "BUY" | "SELL";
+  lots: number;
+  quantity: number;
+  order_type: "MARKET" | "LIMIT";
+  limit_price: number | null;
+  product_type: FnoProductType;
+  status: "PENDING" | "FILLED";
+  fill_price: number | null;
+  margin_used: number | null;
+  leverage: number | null;
+  placed_at: string;
+  updated_at: string;
+  filled_at: string | null;
+}
+
+export type FnoPositionsSummary = ManualPositionsSummary;
+
+export async function fetchFnoUnderlyings(): Promise<FnoUnderlying[]> {
+  const data: { underlyings: FnoUnderlying[] } = await apiFetch("/api/fno-positions/underlyings");
+  return data.underlyings;
+}
+
+export async function fetchFnoOptionExpiries(symbol: string): Promise<string[]> {
+  const data: { expiries: string[] } = await apiFetch(`/api/fno-positions/options/expiries?symbol=${encodeURIComponent(symbol)}`);
+  return data.expiries;
+}
+
+export async function fetchFnoOptionChain(symbol: string, expiry: string): Promise<OptionChainResponse> {
+  return apiFetch(`/api/fno-positions/options/chain?symbol=${encodeURIComponent(symbol)}&expiry=${encodeURIComponent(expiry)}`);
+}
+
+export async function fetchFnoFutureExpiries(symbol: string): Promise<string[]> {
+  const data: { expiries: string[] } = await apiFetch(`/api/fno-positions/futures/expiries?symbol=${encodeURIComponent(symbol)}`);
+  return data.expiries;
+}
+
+export async function fetchFnoTopMovers(limit = 10): Promise<{ top_calls: TopMover[]; top_puts: TopMover[] }> {
+  return apiFetch(`/api/fno-positions/top-movers?limit=${limit}`);
+}
+
+export interface PlaceFnoOrderRequest {
+  instrument_kind: FnoInstrumentKind;
+  symbol: string;
+  expiry: string;
+  transaction_type: "BUY" | "SELL";
+  lots: number;
+  order_type: "MARKET" | "LIMIT";
+  product_type: FnoProductType;
+  strike?: number | null;
+  option_type?: "CE" | "PE" | null;
+  limit_price?: number;
+}
+
+export async function placeFnoOrder(payload: PlaceFnoOrderRequest): Promise<FnoOrder & { position?: FnoPosition }> {
+  return apiFetch("/api/fno-positions/orders", { method: "POST", body: JSON.stringify(payload) });
+}
+
+export async function fetchFnoPositions(status?: string): Promise<{ positions: FnoPosition[]; summary: FnoPositionsSummary }> {
+  const qs = status ? `?status=${status}` : "";
+  return apiFetch(`/api/fno-positions/positions${qs}`);
+}
+
+export async function fetchFnoOrders(status?: string): Promise<{ orders: FnoOrder[] }> {
+  const qs = status ? `?status=${status}` : "";
+  return apiFetch(`/api/fno-positions/orders${qs}`);
+}
+
+export async function exitFnoPosition(positionId: string, lots?: number): Promise<FnoOrder & { position: FnoPosition }> {
+  return apiFetch(`/api/fno-positions/positions/${positionId}/exit`, {
+    method: "POST",
+    body: JSON.stringify({ lots: lots ?? null }),
+  });
+}
+
+export async function resetFnoPositions(): Promise<{ positions_deleted: number; orders_deleted: number; initial_capital: number }> {
+  return apiFetch("/api/fno-positions/reset", { method: "POST" });
 }
 
 // --- AI research & trade intelligence (roadmap Phase 6) ---
