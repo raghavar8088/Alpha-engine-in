@@ -1,0 +1,352 @@
+"""Manual Positions module — a user-initiated paper trading desk, separate from
+the auto-opened Trading Call Positions ledger. The user searches an instrument
+(NSE or BSE equity), places a market/limit BUY order sized in quantity, and can
+size it against real Dhan margin — CNC (full notional, no leverage), MARGIN,
+INTRADAY, or MTF (Margin Trade Funding), whose actual leverage for that stock
+comes straight from Dhan's own /margincalculator (no such data is invented
+locally: Dhan has no bulk "MTF-eligible stocks" list, only a per-order
+calculator, so leverage is fetched live per instrument+quantity).
+
+Capital pool convention mirrors app.services.call_positions: a fixed initial
+capital, available_cash = initial + realized_pnl - deployed_margin, equity =
+initial + realized_pnl + unrealized_pnl. Positions are opened/closed/averaged
+exactly like a real broker's Positions tab; SELL against an open position exits
+(fully or partially) rather than opening a short.
+"""
+
+import os
+from datetime import datetime, timezone
+from uuid import uuid4
+
+from app.core.db import instruments_collection, manual_orders_collection, manual_positions_collection
+from app.services.dhan_client import DhanAPIError, DhanClient
+
+INITIAL_CAPITAL = float(os.getenv("MANUAL_POSITIONS_INITIAL_CAPITAL", "10000000"))  # ₹1 crore
+PRODUCT_TYPES = ("CNC", "MTF", "MARGIN", "INTRADAY")
+
+
+class OrderError(Exception):
+    def __init__(self, detail: str):
+        self.detail = detail
+        super().__init__(detail)
+
+
+def _now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def _parse_leverage(raw: str | float | None) -> float:
+    """Dhan returns leverage as a string like "4.55X" (or sometimes a bare
+    number) — normalize to a float multiplier, defaulting to 1x (no leverage)
+    if the field is missing or unparsable rather than guessing higher."""
+    if raw is None:
+        return 1.0
+    if isinstance(raw, (int, float)):
+        return float(raw) or 1.0
+    try:
+        return float(str(raw).upper().replace("X", "").strip()) or 1.0
+    except ValueError:
+        return 1.0
+
+
+async def _instrument(security_id: str, exchange_segment: str) -> dict:
+    doc = await instruments_collection.find_one({"security_id": security_id, "exchange_segment": exchange_segment})
+    if doc is None:
+        raise OrderError(f"Unknown instrument {security_id}/{exchange_segment}")
+    return doc
+
+
+async def _ltp(dhan: DhanClient, security_id: str, exchange_segment: str) -> float | None:
+    try:
+        raw = await dhan.quote_data({exchange_segment: [int(security_id)]})
+    except (DhanAPIError, Exception):
+        return None
+    data = raw.get("data", {}) if isinstance(raw, dict) else {}
+    row = data.get(exchange_segment, {}).get(str(security_id))
+    return float(row["last_price"]) if row and row.get("last_price") else None
+
+
+async def _margin(
+    dhan: DhanClient, security_id: str, exchange_segment: str, transaction_type: str,
+    quantity: int, product_type: str, price: float,
+) -> tuple[float, float]:
+    """(margin_required, leverage). Falls back to full notional / 1x if Dhan's
+    calculator is unreachable — never silently grants leverage we can't verify."""
+    try:
+        r = await dhan.margin_calculator(
+            security_id=security_id, exchange_segment=exchange_segment, transaction_type=transaction_type,
+            quantity=quantity, product_type=product_type, price=price,
+        )
+        margin = float(r.get("totalMargin") or 0) or (price * quantity)
+        return margin, _parse_leverage(r.get("leverage"))
+    except (DhanAPIError, Exception):
+        return price * quantity, 1.0
+
+
+async def _deployed_margin() -> float:
+    total = 0.0
+    async for p in manual_positions_collection.find({"status": "OPEN"}, {"margin_used": 1}):
+        total += p.get("margin_used") or 0.0
+    return total
+
+
+async def _realized_pnl_all_time() -> float:
+    total = 0.0
+    async for p in manual_positions_collection.find({}, {"realized_pnl": 1}):
+        total += p.get("realized_pnl") or 0.0
+    return total
+
+
+async def available_cash() -> float:
+    deployed = await _deployed_margin()
+    realized = await _realized_pnl_all_time()
+    return INITIAL_CAPITAL + realized - deployed
+
+
+async def search_instruments(query: str, limit: int = 15) -> list[dict]:
+    """Autocomplete over NSE + BSE equities/ETFs by symbol or company name."""
+    q = query.strip()
+    if not q:
+        return []
+    cursor = instruments_collection.find(
+        {
+            "asset_class": {"$in": ["EQUITY", "ETF"]},
+            "$or": [
+                {"symbol": {"$regex": f"^{q}", "$options": "i"}},
+                {"name": {"$regex": q, "$options": "i"}},
+            ],
+        },
+        {"_id": 0, "symbol": 1, "name": 1, "security_id": 1, "exchange_segment": 1,
+         "lot_size": 1, "tick_size": 1, "asset_class": 1},
+    ).limit(limit)
+    return [d async for d in cursor]
+
+
+async def get_quote(dhan: DhanClient, security_id: str, exchange_segment: str) -> dict:
+    ltp = await _ltp(dhan, security_id, exchange_segment)
+    if ltp is None:
+        raise OrderError("Live quote unavailable (broker offline or rate-limited) — try again shortly")
+    return {"ltp": ltp}
+
+
+async def estimate_margin(
+    dhan: DhanClient, security_id: str, exchange_segment: str, transaction_type: str,
+    quantity: int, product_type: str, price: float,
+) -> dict:
+    margin, leverage = await _margin(dhan, security_id, exchange_segment, transaction_type, quantity, product_type, price)
+    return {"margin_required": round(margin, 2), "leverage": leverage, "notional_value": round(price * quantity, 2)}
+
+
+async def place_order(
+    dhan: DhanClient, *, security_id: str, exchange_segment: str, transaction_type: str,
+    quantity: int, order_type: str, product_type: str, limit_price: float = 0.0,
+) -> dict:
+    if quantity < 1:
+        raise OrderError("Quantity must be at least 1")
+    if product_type not in PRODUCT_TYPES:
+        raise OrderError(f"product_type must be one of {PRODUCT_TYPES}")
+    if order_type == "LIMIT" and limit_price <= 0:
+        raise OrderError("Limit orders need a positive limit_price")
+
+    inst = await _instrument(security_id, exchange_segment)
+    ltp = await _ltp(dhan, security_id, exchange_segment)
+    if ltp is None:
+        raise OrderError("Live quote unavailable (broker offline?) — cannot price this order")
+
+    order_id = f"MANUAL-{uuid4().hex[:12]}"
+    now = _now()
+    base_order = {
+        "order_id": order_id,
+        "symbol": inst["symbol"],
+        "display_name": inst.get("name") or inst["symbol"],
+        "instrument": {
+            "symbol": inst["symbol"], "security_id": inst["security_id"],
+            "exchange_segment": inst["exchange_segment"], "lot_size": inst.get("lot_size", 1),
+            "tick_size": inst.get("tick_size", 0.05),
+        },
+        "transaction_type": transaction_type, "quantity": quantity, "order_type": order_type,
+        "limit_price": limit_price if order_type == "LIMIT" else None,
+        "product_type": product_type, "placed_at": now, "updated_at": now,
+    }
+
+    marketable = (
+        order_type == "MARKET"
+        or (transaction_type == "BUY" and ltp <= limit_price)
+        or (transaction_type == "SELL" and ltp >= limit_price)
+    )
+    if not marketable:
+        doc = {**base_order, "status": "PENDING", "fill_price": None, "filled_at": None,
+               "margin_used": None, "leverage": None}
+        await manual_orders_collection.insert_one(doc)
+        doc.pop("_id", None)
+        return doc
+
+    fill_price = ltp if order_type == "MARKET" else limit_price
+    return await _fill(dhan, base_order, fill_price)
+
+
+async def _fill(dhan: DhanClient, base_order: dict, fill_price: float) -> dict:
+    inst = base_order["instrument"]
+    security_id, segment = inst["security_id"], inst["exchange_segment"]
+    transaction_type, quantity, product_type = base_order["transaction_type"], base_order["quantity"], base_order["product_type"]
+    symbol = base_order["symbol"]
+
+    existing = await manual_positions_collection.find_one(
+        {"symbol": symbol, "product_type": product_type, "status": "OPEN"}
+    )
+
+    if transaction_type == "BUY":
+        margin, leverage = await _margin(dhan, security_id, segment, "BUY", quantity, product_type, fill_price)
+        cash = await available_cash()
+        if margin > cash:
+            raise OrderError(
+                f"Insufficient paper capital: order needs {'₹'}{margin:,.2f} margin "
+                f"({product_type}), only {'₹'}{cash:,.2f} available"
+            )
+        if existing is None:
+            position = {
+                "position_id": uuid4().hex[:12], "symbol": symbol, "display_name": base_order["display_name"],
+                "instrument": inst, "product_type": product_type, "side": "BUY",
+                "quantity": quantity, "avg_price": fill_price, "margin_used": round(margin, 2),
+                "leverage": leverage, "ltp": fill_price, "ltp_source": "dhan_quote",
+                "unrealized_pnl": 0.0, "pnl_pct": 0.0, "realized_pnl": 0.0,
+                "status": "OPEN", "opened_at": _now(), "updated_at": _now(), "closed_at": None,
+            }
+            await manual_positions_collection.insert_one(position)
+            position.pop("_id", None)
+        else:
+            new_qty = existing["quantity"] + quantity
+            new_avg = (existing["quantity"] * existing["avg_price"] + quantity * fill_price) / new_qty
+            new_margin, new_leverage = await _margin(dhan, security_id, segment, "BUY", new_qty, product_type, new_avg)
+            await manual_positions_collection.update_one(
+                {"_id": existing["_id"]},
+                {"$set": {"quantity": new_qty, "avg_price": round(new_avg, 4),
+                          "margin_used": round(new_margin, 2), "leverage": new_leverage,
+                          "updated_at": _now()}},
+            )
+            position = await manual_positions_collection.find_one({"_id": existing["_id"]})
+            position.pop("_id", None)
+
+    else:  # SELL — must be exiting an existing open position, no short-selling
+        if existing is None or existing["quantity"] < quantity:
+            held = existing["quantity"] if existing else 0
+            raise OrderError(f"Cannot sell {quantity} {symbol} ({product_type}) — only {held} held")
+        realized = round((fill_price - existing["avg_price"]) * quantity, 2)
+        remaining_qty = existing["quantity"] - quantity
+        if remaining_qty == 0:
+            await manual_positions_collection.update_one(
+                {"_id": existing["_id"]},
+                {"$set": {
+                    "status": "CLOSED", "quantity": 0, "margin_used": 0.0,
+                    "realized_pnl": round(existing.get("realized_pnl", 0.0) + realized, 2),
+                    "unrealized_pnl": 0.0, "ltp": fill_price,
+                    "updated_at": _now(), "closed_at": _now(),
+                }},
+            )
+        else:
+            new_margin, new_leverage = await _margin(
+                dhan, security_id, segment, "BUY", remaining_qty, product_type, existing["avg_price"]
+            )
+            await manual_positions_collection.update_one(
+                {"_id": existing["_id"]},
+                {"$set": {
+                    "quantity": remaining_qty, "margin_used": round(new_margin, 2), "leverage": new_leverage,
+                    "realized_pnl": round(existing.get("realized_pnl", 0.0) + realized, 2),
+                    "updated_at": _now(),
+                }},
+            )
+        position = await manual_positions_collection.find_one({"_id": existing["_id"]})
+        position.pop("_id", None)
+
+    order_doc = {**base_order, "status": "FILLED", "fill_price": fill_price, "filled_at": _now(),
+                 "margin_used": position.get("margin_used"), "leverage": position.get("leverage")}
+    await manual_orders_collection.insert_one(order_doc)
+    order_doc.pop("_id", None)
+    order_doc["position"] = position
+    return order_doc
+
+
+async def exit_position(dhan: DhanClient, position_id: str, quantity: int | None = None) -> dict:
+    position = await manual_positions_collection.find_one({"position_id": position_id, "status": "OPEN"})
+    if position is None:
+        raise OrderError("Position not found or already closed")
+    qty = quantity or position["quantity"]
+    if qty > position["quantity"]:
+        raise OrderError(f"Cannot exit {qty} — position only holds {position['quantity']}")
+
+    inst = position["instrument"]
+    base_order = {
+        "order_id": f"MANUAL-{uuid4().hex[:12]}", "symbol": position["symbol"],
+        "display_name": position["display_name"], "instrument": inst,
+        "transaction_type": "SELL", "quantity": qty, "order_type": "MARKET",
+        "limit_price": None, "product_type": position["product_type"],
+        "placed_at": _now(), "updated_at": _now(),
+    }
+    ltp = await _ltp(dhan, inst["security_id"], inst["exchange_segment"])
+    if ltp is None:
+        raise OrderError("Live quote unavailable (broker offline?) — cannot exit right now")
+    return await _fill(dhan, base_order, ltp)
+
+
+async def sync_positions(dhan: DhanClient) -> int:
+    """Refresh LTP/unrealized P&L for open positions and fill any PENDING limit
+    orders whose price has now been crossed — same role as call_positions.sync."""
+    open_positions = [p async for p in manual_positions_collection.find({"status": "OPEN"})]
+    updated = 0
+    for pos in open_positions:
+        inst = pos["instrument"]
+        ltp = await _ltp(dhan, inst["security_id"], inst["exchange_segment"])
+        if ltp is None:
+            continue
+        unrealized = round((ltp - pos["avg_price"]) * pos["quantity"], 2)
+        pnl_pct = round((ltp / pos["avg_price"] - 1) * 100, 2) if pos["avg_price"] else 0.0
+        await manual_positions_collection.update_one(
+            {"_id": pos["_id"]},
+            {"$set": {"ltp": ltp, "ltp_source": "dhan_quote", "unrealized_pnl": unrealized,
+                      "pnl_pct": pnl_pct, "updated_at": _now()}},
+        )
+        updated += 1
+
+    pending = [o async for o in manual_orders_collection.find({"status": "PENDING"})]
+    for order in pending:
+        inst = order["instrument"]
+        ltp = await _ltp(dhan, inst["security_id"], inst["exchange_segment"])
+        if ltp is None:
+            continue
+        limit_price = order["limit_price"]
+        crossed = (order["transaction_type"] == "BUY" and ltp <= limit_price) or (
+            order["transaction_type"] == "SELL" and ltp >= limit_price
+        )
+        if crossed:
+            try:
+                await _fill(dhan, {k: v for k, v in order.items() if k not in ("_id", "status", "fill_price", "filled_at", "margin_used", "leverage")}, limit_price)
+                await manual_orders_collection.delete_one({"_id": order["_id"]})
+            except OrderError:
+                continue  # capital dried up since placement — leave it pending
+    return updated
+
+
+async def summary() -> dict:
+    deployed = await _deployed_margin()
+    realized = await _realized_pnl_all_time()
+    unrealized = 0.0
+    async for p in manual_positions_collection.find({"status": "OPEN"}, {"unrealized_pnl": 1}):
+        unrealized += p.get("unrealized_pnl") or 0.0
+    equity = INITIAL_CAPITAL + realized + unrealized
+    open_count = await manual_positions_collection.count_documents({"status": "OPEN"})
+    closed_count = await manual_positions_collection.count_documents({"status": "CLOSED"})
+    wins = await manual_positions_collection.count_documents({"status": "CLOSED", "realized_pnl": {"$gt": 0}})
+    win_rate = round(wins / closed_count * 100, 1) if closed_count else None
+    return {
+        "initial_capital": INITIAL_CAPITAL,
+        "available_cash": round(INITIAL_CAPITAL + realized - deployed, 2),
+        "deployed_margin": round(deployed, 2),
+        "realized_pnl": round(realized, 2),
+        "unrealized_pnl": round(unrealized, 2),
+        "total_pnl": round(realized + unrealized, 2),
+        "equity": round(equity, 2),
+        "roi_pct": round((equity - INITIAL_CAPITAL) / INITIAL_CAPITAL * 100, 2),
+        "open_positions": open_count,
+        "closed_positions": closed_count,
+        "win_rate": win_rate,
+    }

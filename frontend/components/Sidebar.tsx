@@ -41,6 +41,15 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
           </>
         ),
       },
+      {
+        href: "/positions",
+        label: "Positions",
+        icon: (
+          <>
+            <path d="M4 19V10M10 19V5M16 19v-7M20 19H4" />
+          </>
+        ),
+      },
     ],
   },
   {

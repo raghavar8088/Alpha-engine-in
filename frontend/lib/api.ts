@@ -564,6 +564,134 @@ export async function fetchTradingCallPositions(
   return apiFetch(`/api/trading-calls/positions${qs ? `?${qs}` : ""}`);
 }
 
+// --- Manual Positions (user-initiated paper trading desk, NSE + BSE) ---
+
+export interface ManualInstrument {
+  symbol: string;
+  name: string;
+  security_id: string;
+  exchange_segment: string;
+  lot_size: number;
+  tick_size: number;
+  asset_class: string;
+}
+
+export type ManualProductType = "CNC" | "MTF" | "MARGIN" | "INTRADAY";
+
+export interface ManualPosition {
+  position_id: string;
+  symbol: string;
+  display_name: string;
+  instrument: ManualInstrument;
+  product_type: ManualProductType;
+  side: "BUY";
+  quantity: number;
+  avg_price: number;
+  margin_used: number;
+  leverage: number;
+  ltp: number;
+  ltp_source: "dhan_quote";
+  unrealized_pnl: number;
+  pnl_pct: number;
+  realized_pnl: number;
+  status: "OPEN" | "CLOSED";
+  opened_at: string;
+  updated_at: string;
+  closed_at: string | null;
+}
+
+export interface ManualOrder {
+  order_id: string;
+  symbol: string;
+  display_name: string;
+  instrument: ManualInstrument;
+  transaction_type: "BUY" | "SELL";
+  quantity: number;
+  order_type: "MARKET" | "LIMIT";
+  limit_price: number | null;
+  product_type: ManualProductType;
+  status: "PENDING" | "FILLED";
+  fill_price: number | null;
+  margin_used: number | null;
+  leverage: number | null;
+  placed_at: string;
+  updated_at: string;
+  filled_at: string | null;
+}
+
+export interface ManualPositionsSummary {
+  initial_capital: number;
+  available_cash: number;
+  deployed_margin: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  total_pnl: number;
+  equity: number;
+  roi_pct: number;
+  open_positions: number;
+  closed_positions: number;
+  win_rate: number | null;
+}
+
+export interface MarginEstimate {
+  margin_required: number;
+  leverage: number;
+  notional_value: number;
+}
+
+export async function searchManualInstruments(q: string): Promise<ManualInstrument[]> {
+  if (!q.trim()) return [];
+  const data: { results: ManualInstrument[] } = await apiFetch(`/api/manual-positions/search?q=${encodeURIComponent(q)}`);
+  return data.results;
+}
+
+export async function fetchManualQuote(securityId: string, exchangeSegment: string): Promise<{ ltp: number }> {
+  return apiFetch(`/api/manual-positions/quote?security_id=${securityId}&exchange_segment=${exchangeSegment}`);
+}
+
+export async function estimateManualMargin(params: {
+  security_id: string;
+  exchange_segment: string;
+  transaction_type: "BUY" | "SELL";
+  quantity: number;
+  product_type: ManualProductType;
+  price: number;
+}): Promise<MarginEstimate> {
+  const qs = new URLSearchParams(params as unknown as Record<string, string>).toString();
+  return apiFetch(`/api/manual-positions/margin?${qs}`);
+}
+
+export interface PlaceManualOrderRequest {
+  security_id: string;
+  exchange_segment: string;
+  transaction_type: "BUY" | "SELL";
+  quantity: number;
+  order_type: "MARKET" | "LIMIT";
+  product_type: ManualProductType;
+  limit_price?: number;
+}
+
+export async function placeManualOrder(payload: PlaceManualOrderRequest): Promise<ManualOrder & { position?: ManualPosition }> {
+  return apiFetch("/api/manual-positions/orders", { method: "POST", body: JSON.stringify(payload) });
+}
+
+export async function fetchManualPositions(status?: string): Promise<{ positions: ManualPosition[]; summary: ManualPositionsSummary }> {
+  const qs = status ? `?status=${status}` : "";
+  return apiFetch(`/api/manual-positions/positions${qs}`);
+}
+
+export async function fetchManualOrders(status?: string): Promise<{ orders: ManualOrder[] }> {
+  const qs = status ? `?status=${status}` : "";
+  return apiFetch(`/api/manual-positions/orders${qs}`);
+}
+
+export async function exitManualPosition(positionId: string, quantity?: number): Promise<ManualOrder & { position: ManualPosition }> {
+  return apiFetch(`/api/manual-positions/positions/${positionId}/exit`, {
+    method: "POST",
+    body: JSON.stringify({ quantity: quantity ?? null }),
+  });
+}
+
 // --- AI research & trade intelligence (roadmap Phase 6) ---
 
 export interface AIStatus {

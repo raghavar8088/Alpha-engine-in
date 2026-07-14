@@ -11,6 +11,7 @@ from app.api.routes import (
     backtest,
     broker,
     live,
+    manual_positions,
     market_data,
     options,
     portfolio,
@@ -116,6 +117,7 @@ app.include_router(ai.router)
 app.include_router(research.router)
 app.include_router(trading_calls.router)
 app.include_router(prelive.router)
+app.include_router(manual_positions.router)
 
 if settings.enable_live_trading:
     app.include_router(live.router)
