@@ -108,6 +108,7 @@ export default function TradingCallsPage() {
   const [positions, setPositions] = useState<TradingCallPosition[]>([]);
   const [positionsSummary, setPositionsSummary] = useState<TradingCallPositionsSummary | null>(null);
   const [positionsStatusFilter, setPositionsStatusFilter] = useState("OPEN");
+  const [positionsLoading, setPositionsLoading] = useState(true);
   const [scheduler, setScheduler] = useState<CallSchedulerStatus | null>(null);
 
   const load = useCallback(async () => {
@@ -131,6 +132,8 @@ export default function TradingCallsPage() {
       setPositionsSummary(data.summary);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load trading call positions");
+    } finally {
+      setPositionsLoading(false);
     }
   }, []);
 
@@ -143,6 +146,13 @@ export default function TradingCallsPage() {
     }, 60_000);
     return () => clearInterval(timer);
   }, [load, loadPositions]);
+
+  // Refetch positions the moment the tab is opened so it never shows a stale or
+  // pre-load view — the positions table has its own loading state, independent of
+  // the calls list.
+  useEffect(() => {
+    if (segment === "POSITIONS") loadPositions();
+  }, [segment, loadPositions]);
 
   const generate = useCallback(async () => {
     setGenerating(true);
@@ -332,7 +342,7 @@ export default function TradingCallsPage() {
             </div>
           )}
           <GlassPanel title="Trading Call Positions">
-            {loading ? (
+            {positionsLoading && positions.length === 0 ? (
               <div className="empty">Loading…</div>
             ) : visiblePositions.length === 0 ? (
               <div className="empty">
