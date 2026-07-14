@@ -51,6 +51,16 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        href: "/fno-positions",
+        label: "F&O Positions",
+        icon: (
+          <>
+            <circle cx="12" cy="12" r="9" />
+            <path d="M8 10.5c0-1.4 1.2-2.5 4-2.5s4 1.1 4 2.5-1.4 2-4 2.5-4 1.1-4 2.5 1.2 2.5 4 2.5 4-1.1 4-2.5" />
+          </>
+        ),
+      },
+      {
         href: "/watchlist",
         label: "Watchlist",
         icon: (

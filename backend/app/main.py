@@ -10,6 +10,8 @@ from app.api.routes import (
     ai,
     backtest,
     broker,
+    fno_positions,
+    intraday_lab,
     live,
     manual_positions,
     market_data,
@@ -87,6 +89,17 @@ async def start_call_scheduler() -> None:
     else:
         logger.info("Trading-calls auto-scan disabled (CALLS_AUTOGEN_ENABLED=0)")
 
+
+@app.on_event("startup")
+async def start_intraday_lab_scheduler() -> None:
+    from app.services.intraday_lab_scheduler import INTRADAY_LAB_ENABLED, TICK_SECONDS, intraday_lab_loop
+
+    if INTRADAY_LAB_ENABLED:
+        asyncio.create_task(intraday_lab_loop())
+        logger.info("Intraday Strategy Lab auto-scan enabled (every %ss, market hours)", TICK_SECONDS)
+    else:
+        logger.info("Intraday Strategy Lab auto-scan disabled (INTRADAY_LAB_ENABLED=0)")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -120,6 +133,8 @@ app.include_router(trading_calls.router)
 app.include_router(prelive.router)
 app.include_router(watchlist.router)
 app.include_router(manual_positions.router)
+app.include_router(fno_positions.router)
+app.include_router(intraday_lab.router)
 
 if settings.enable_live_trading:
     app.include_router(live.router)

@@ -1,0 +1,194 @@
+"""F&O Positions — user-initiated paper trading desk for index/stock options
+and futures. See app.services.fno_positions for the capital-pool/fill/exit
+logic; this router is a thin HTTP layer over it, following the same shape as
+manual_positions.py.
+
+  GET    /api/fno-positions/underlyings           index/stock underlyings with F&O
+  GET    /api/fno-positions/options/expiries       expiry list for an underlying
+  GET    /api/fno-positions/options/chain          live option chain (strikes/CE/PE)
+  GET    /api/fno-positions/futures/expiries       futures expiry list for an underlying
+  GET    /api/fno-positions/top-movers             today's top gaining CE/PE across indices
+  GET    /api/fno-positions/margin                 live margin/leverage estimate
+  POST   /api/fno-positions/orders                 place a BUY/SELL option or future order
+  GET    /api/fno-positions/orders                 order book (pending/filled)
+  GET    /api/fno-positions/positions              open+closed positions, with summary
+  POST   /api/fno-positions/positions/{id}/exit    exit (fully or partially, in lots)
+  POST   /api/fno-positions/reset                  wipe all positions/orders, reset capital
+"""
+
+import time
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
+
+from app.api.deps import get_current_user
+from app.api.routes.broker import _get_dhan_client
+from app.core.db import fno_orders_collection, fno_positions_collection
+from app.services.fno_positions import (
+    OrderError,
+    estimate_margin,
+    exit_position,
+    future_expiries,
+    option_chain,
+    option_expiries,
+    place_order,
+    reset_all,
+    summary,
+    sync_positions,
+    top_movers,
+    underlyings,
+)
+
+router = APIRouter(prefix="/api/fno-positions", tags=["fno-positions"])
+
+REFRESH_THROTTLE_SECONDS = 20
+_last_refresh = 0.0
+
+
+class PlaceFnoOrderRequest(BaseModel):
+    instrument_kind: str  # OPTION / FUTURE
+    symbol: str
+    expiry: str
+    transaction_type: str  # BUY / SELL
+    lots: int
+    order_type: str  # MARKET / LIMIT
+    product_type: str  # INTRADAY / MARGIN
+    strike: float | None = None
+    option_type: str | None = None  # CE / PE
+    limit_price: float = 0.0
+
+
+class ExitPositionRequest(BaseModel):
+    lots: int | None = None  # None = exit the full remaining quantity
+
+
+def _serialize(doc: dict, ts_fields: tuple[str, ...]) -> dict:
+    doc.pop("_id", None)
+    for key in ts_fields:
+        if doc.get(key) is not None:
+            doc[key] = doc[key].isoformat()
+    return doc
+
+
+async def _dhan(current_user: dict):
+    try:
+        return await _get_dhan_client(str(current_user["_id"]))
+    except HTTPException:
+        raise HTTPException(
+            status_code=400,
+            detail="Dhan account not connected — the F&O Positions module needs a live broker "
+            "connection for real option chains, futures prices, and margin figures.",
+        )
+
+
+@router.get("/underlyings")
+async def list_underlyings(_current_user: dict = Depends(get_current_user)):
+    return {"underlyings": await underlyings()}
+
+
+@router.get("/options/expiries")
+async def options_expiries(symbol: str, current_user: dict = Depends(get_current_user)):
+    dhan = await _dhan(current_user)
+    try:
+        return {"symbol": symbol.upper(), "expiries": await option_expiries(dhan, symbol)}
+    except OrderError as exc:
+        raise HTTPException(status_code=422, detail=exc.detail)
+
+
+@router.get("/options/chain")
+async def options_chain(symbol: str, expiry: str = Query(description="YYYY-MM-DD"), current_user: dict = Depends(get_current_user)):
+    dhan = await _dhan(current_user)
+    try:
+        return await option_chain(dhan, symbol, expiry)
+    except OrderError as exc:
+        raise HTTPException(status_code=422, detail=exc.detail)
+
+
+@router.get("/futures/expiries")
+async def futures_expiries(symbol: str, _current_user: dict = Depends(get_current_user)):
+    return {"symbol": symbol.upper(), "expiries": await future_expiries(symbol)}
+
+
+@router.get("/top-movers")
+async def top_movers_route(limit: int = Query(10, ge=1, le=25), current_user: dict = Depends(get_current_user)):
+    dhan = await _dhan(current_user)
+    return await top_movers(dhan, limit)
+
+
+@router.get("/margin")
+async def margin_estimate(
+    security_id: str, exchange_segment: str, transaction_type: str, quantity: int,
+    product_type: str, price: float, current_user: dict = Depends(get_current_user),
+):
+    dhan = await _dhan(current_user)
+    return await estimate_margin(dhan, security_id, exchange_segment, transaction_type, quantity, product_type, price)
+
+
+@router.post("/orders")
+async def create_order(payload: PlaceFnoOrderRequest, current_user: dict = Depends(get_current_user)):
+    dhan = await _dhan(current_user)
+    try:
+        result = await place_order(
+            dhan, instrument_kind=payload.instrument_kind.upper(), symbol=payload.symbol, expiry=payload.expiry,
+            transaction_type=payload.transaction_type.upper(), lots=payload.lots, order_type=payload.order_type.upper(),
+            product_type=payload.product_type.upper(), strike=payload.strike,
+            option_type=payload.option_type.upper() if payload.option_type else None, limit_price=payload.limit_price,
+        )
+    except OrderError as exc:
+        raise HTTPException(status_code=422, detail=exc.detail)
+    if "position" in result:
+        result["position"] = _serialize(result["position"], ("opened_at", "updated_at", "closed_at"))
+    return _serialize(result, ("placed_at", "updated_at", "filled_at"))
+
+
+@router.get("/orders")
+async def list_orders(
+    status: str | None = Query(None, description="PENDING | FILLED"),
+    limit: int = Query(100, ge=1, le=500),
+    current_user: dict = Depends(get_current_user),
+):
+    query: dict = {}
+    if status:
+        query["status"] = status.upper()
+    cursor = fno_orders_collection.find(query).sort("placed_at", -1).limit(limit)
+    orders = [_serialize(d, ("placed_at", "updated_at", "filled_at")) async for d in cursor]
+    return {"orders": orders}
+
+
+@router.get("/positions")
+async def list_positions(
+    status: str | None = Query(None, description="OPEN | CLOSED"),
+    limit: int = Query(200, ge=1, le=500),
+    current_user: dict = Depends(get_current_user),
+):
+    global _last_refresh
+    if time.monotonic() - _last_refresh > REFRESH_THROTTLE_SECONDS:
+        _last_refresh = time.monotonic()
+        try:
+            dhan = await _dhan(current_user)
+            await sync_positions(dhan)
+        except HTTPException:
+            pass  # no broker connected yet — serve whatever's stored, honestly stale
+
+    query: dict = {}
+    if status:
+        query["status"] = status.upper()
+    cursor = fno_positions_collection.find(query).sort("opened_at", -1).limit(limit)
+    positions = [_serialize(d, ("opened_at", "updated_at", "closed_at")) async for d in cursor]
+    return {"positions": positions, "summary": await summary()}
+
+
+@router.post("/positions/{position_id}/exit")
+async def exit(position_id: str, payload: ExitPositionRequest, current_user: dict = Depends(get_current_user)):
+    dhan = await _dhan(current_user)
+    try:
+        result = await exit_position(dhan, position_id, payload.lots)
+    except OrderError as exc:
+        raise HTTPException(status_code=422, detail=exc.detail)
+    result["position"] = _serialize(result["position"], ("opened_at", "updated_at", "closed_at"))
+    return _serialize(result, ("placed_at", "updated_at", "filled_at"))
+
+
+@router.post("/reset")
+async def reset(_current_user: dict = Depends(get_current_user)):
+    return await reset_all()

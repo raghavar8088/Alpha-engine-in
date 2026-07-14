@@ -8,14 +8,21 @@ import {
   CallSchedulerStatus,
   CallSegment,
   GenerateCallsResult,
+  IntradayLabLeaderboardRow,
+  IntradayLabPosition,
+  IntradayLabSummary,
   TradingCall,
   TradingCallPosition,
   TradingCallPositionsSummary,
   closeTradingCall,
+  fetchIntradayLabLeaderboard,
+  fetchIntradayLabPositions,
+  fetchIntradayLabSummary,
   fetchTradingCallPositions,
   fetchTradingCalls,
   generateTradingCalls,
   placeOrder,
+  runIntradayLabCycle,
 } from "../../lib/api";
 
 const SEGMENTS: { id: CallSegment; label: string }[] = [
@@ -90,7 +97,7 @@ function tradeLabel(call: TradingCall): string {
   return call.side === "BUY" ? "Buy" : "Sell";
 }
 
-type ViewTab = CallSegment | "POSITIONS";
+type ViewTab = CallSegment | "POSITIONS" | "INTRADAY_LAB";
 
 export default function TradingCallsPage() {
   const [segment, setSegment] = useState<ViewTab>("STOCK");
@@ -110,6 +117,13 @@ export default function TradingCallsPage() {
   const [positionsStatusFilter, setPositionsStatusFilter] = useState("OPEN");
   const [positionsLoading, setPositionsLoading] = useState(true);
   const [scheduler, setScheduler] = useState<CallSchedulerStatus | null>(null);
+
+  const [labSummary, setLabSummary] = useState<IntradayLabSummary | null>(null);
+  const [labLeaderboard, setLabLeaderboard] = useState<IntradayLabLeaderboardRow[]>([]);
+  const [labPositions, setLabPositions] = useState<IntradayLabPosition[]>([]);
+  const [labLoading, setLabLoading] = useState(true);
+  const [labRunning, setLabRunning] = useState(false);
+  const [labPositionsStatusFilter, setLabPositionsStatusFilter] = useState("OPEN");
 
   const load = useCallback(async () => {
     setError(null);
@@ -137,6 +151,35 @@ export default function TradingCallsPage() {
     }
   }, []);
 
+  const loadLab = useCallback(async () => {
+    try {
+      const [summaryRes, leaderboardRes, positionsRes] = await Promise.all([
+        fetchIntradayLabSummary(),
+        fetchIntradayLabLeaderboard(),
+        fetchIntradayLabPositions(),
+      ]);
+      setLabSummary(summaryRes);
+      setLabLeaderboard(leaderboardRes.leaderboard);
+      setLabPositions(positionsRes.positions);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load Intraday Strategy Lab");
+    } finally {
+      setLabLoading(false);
+    }
+  }, []);
+
+  const runLabNow = useCallback(async () => {
+    setLabRunning(true);
+    try {
+      await runIntradayLabCycle();
+      await loadLab();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Intraday Lab run failed");
+    } finally {
+      setLabRunning(false);
+    }
+  }, [loadLab]);
+
   useEffect(() => {
     load();
     loadPositions();
@@ -153,6 +196,10 @@ export default function TradingCallsPage() {
   useEffect(() => {
     if (segment === "POSITIONS") loadPositions();
   }, [segment, loadPositions]);
+
+  useEffect(() => {
+    if (segment === "INTRADAY_LAB") loadLab();
+  }, [segment, loadLab]);
 
   const generate = useCallback(async () => {
     setGenerating(true);
@@ -208,7 +255,7 @@ export default function TradingCallsPage() {
   );
 
   const visible = useMemo(() => {
-    if (segment === "POSITIONS") return [];
+    if (segment === "POSITIONS" || segment === "INTRADAY_LAB") return [];
     const q = search.trim().toUpperCase();
     return calls.filter((c) => {
       if (c.segment !== segment) return false;
@@ -228,7 +275,12 @@ export default function TradingCallsPage() {
     });
   }, [positions, positionsStatusFilter, search]);
 
-  const segmentNote = segment === "POSITIONS" ? undefined : genResult?.notes?.[segment];
+  const visibleLabPositions = useMemo(() => {
+    if (labPositionsStatusFilter === "all") return labPositions;
+    return labPositions.filter((p) => p.status === labPositionsStatusFilter);
+  }, [labPositions, labPositionsStatusFilter]);
+
+  const segmentNote = segment === "POSITIONS" || segment === "INTRADAY_LAB" ? undefined : genResult?.notes?.[segment as CallSegment];
 
   return (
     <div className="page">
@@ -253,33 +305,55 @@ export default function TradingCallsPage() {
             Trading Call Positions
             <span className="count">{positionsSummary?.open_positions ?? 0}</span>
           </button>
+          <button
+            className={segment === "INTRADAY_LAB" ? "tab active" : "tab"}
+            onClick={() => setSegment("INTRADAY_LAB")}
+          >
+            Intraday Lab
+            <span className="count">{labSummary?.open_positions ?? 0}</span>
+          </button>
         </div>
         <div className="toolbar">
-          <input placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} />
-          {segment === "POSITIONS" ? (
-            <select value={positionsStatusFilter} onChange={(e) => setPositionsStatusFilter(e.target.value)}>
-              <option value="OPEN">Open</option>
-              <option value="all">All statuses</option>
-              <option value="TARGET_HIT">Target hit</option>
-              <option value="STOPLOSS">Stoploss</option>
-              <option value="EXPIRED">Expired</option>
-              <option value="CLOSED">Closed</option>
-            </select>
+          {segment === "INTRADAY_LAB" ? (
+            <>
+              <select value={labPositionsStatusFilter} onChange={(e) => setLabPositionsStatusFilter(e.target.value)}>
+                <option value="OPEN">Open</option>
+                <option value="all">All statuses</option>
+                <option value="CLOSED">Closed</option>
+              </select>
+              <button className="generate" onClick={runLabNow} disabled={labRunning}>
+                {labRunning ? "Running…" : "Run now"}
+              </button>
+            </>
           ) : (
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-              <option value="live">Live (open + partial exit)</option>
-              <option value="all">All statuses</option>
-              <option value="OPEN">Open</option>
-              <option value="PARTIAL_EXIT">Partial exit</option>
-              <option value="TARGET_HIT">Target hit</option>
-              <option value="STOPLOSS">Stoploss</option>
-              <option value="EXPIRED">Expired</option>
-              <option value="CLOSED">Closed</option>
-            </select>
+            <>
+              <input placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} />
+              {segment === "POSITIONS" ? (
+                <select value={positionsStatusFilter} onChange={(e) => setPositionsStatusFilter(e.target.value)}>
+                  <option value="OPEN">Open</option>
+                  <option value="all">All statuses</option>
+                  <option value="TARGET_HIT">Target hit</option>
+                  <option value="STOPLOSS">Stoploss</option>
+                  <option value="EXPIRED">Expired</option>
+                  <option value="CLOSED">Closed</option>
+                </select>
+              ) : (
+                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                  <option value="live">Live (open + partial exit)</option>
+                  <option value="all">All statuses</option>
+                  <option value="OPEN">Open</option>
+                  <option value="PARTIAL_EXIT">Partial exit</option>
+                  <option value="TARGET_HIT">Target hit</option>
+                  <option value="STOPLOSS">Stoploss</option>
+                  <option value="EXPIRED">Expired</option>
+                  <option value="CLOSED">Closed</option>
+                </select>
+              )}
+              <button className="generate" onClick={generate} disabled={generating}>
+                {generating ? "Scanning…" : "Generate calls"}
+              </button>
+            </>
           )}
-          <button className="generate" onClick={generate} disabled={generating}>
-            {generating ? "Scanning…" : "Generate calls"}
-          </button>
         </div>
       </div>
 
@@ -305,7 +379,160 @@ export default function TradingCallsPage() {
       )}
       {segmentNote && <div className="notice warn">{segmentNote}</div>}
 
-      {segment === "POSITIONS" ? (
+      {segment === "INTRADAY_LAB" ? (
+        <>
+          {labSummary && (
+            <div className="capital-tiles">
+              <div className="tile">
+                <span className="label">Initial capital</span>
+                <span className="value">{inr(labSummary.initial_capital)}</span>
+              </div>
+              <div className="tile">
+                <span className="label">Equity</span>
+                <span className={`value ${labSummary.equity >= labSummary.initial_capital ? "gain" : "loss"}`}>
+                  {inr(labSummary.equity)}
+                </span>
+              </div>
+              <div className="tile">
+                <span className="label">Deployed capital</span>
+                <span className="value">{inr(labSummary.deployed_capital)}</span>
+              </div>
+              <div className="tile">
+                <span className="label">Available cash</span>
+                <span className="value">{inr(labSummary.available_cash)}</span>
+              </div>
+              <div className="tile">
+                <span className="label">Unrealized P&amp;L</span>
+                <span className={`value ${labSummary.unrealized_pnl >= 0 ? "gain" : "loss"}`}>
+                  {inr(labSummary.unrealized_pnl)}
+                </span>
+              </div>
+              <div className="tile">
+                <span className="label">Realized P&amp;L</span>
+                <span className={`value ${labSummary.realized_pnl >= 0 ? "gain" : "loss"}`}>
+                  {inr(labSummary.realized_pnl)}
+                </span>
+              </div>
+              <div className="tile">
+                <span className="label">Per-strategy allocation</span>
+                <span className="value">{inr(labSummary.per_strategy_allocation)}</span>
+              </div>
+              <div className="tile">
+                <span className="label">Strategies</span>
+                <span className="value">{labSummary.strategy_count}</span>
+              </div>
+            </div>
+          )}
+
+          <GlassPanel title="Strategy Leaderboard (50 strategies)">
+            {labLoading && labLeaderboard.length === 0 ? (
+              <div className="empty">Loading…</div>
+            ) : (
+              <div className="table-scroll">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ textAlign: "left" }}>Strategy</th>
+                      <th>Category</th>
+                      <th>Trades</th>
+                      <th>Win rate</th>
+                      <th>Net P&amp;L</th>
+                      <th>Allocated capital</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {labLeaderboard.map((row) => (
+                      <tr key={row.strategy_id}>
+                        <td style={{ textAlign: "left" }}>
+                          <span className="name">{row.name}</span>
+                        </td>
+                        <td>
+                          <span className="chip">{row.category.replace("_", " ")}</span>
+                        </td>
+                        <td>{row.trades}</td>
+                        <td>{(row.win_rate * 100).toFixed(1)}%</td>
+                        <td className={row.net_pnl >= 0 ? "gain" : "loss"}>{inr(row.net_pnl)}</td>
+                        <td>{row.allocated_capital !== null ? inr(row.allocated_capital) : "-"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <div className="footnote">
+              50 intraday equity strategies (scalping / momentum / mean-reversion / swing), each trading its own
+              ~{inr(labSummary?.per_strategy_allocation ?? 200000)} slice of the shared{" "}
+              {inr(labSummary?.initial_capital ?? 10000000)} paper capital pool. Scalping/momentum/mean-reversion
+              positions square off at 15:15 IST; swing positions may carry over up to a few trading days.
+            </div>
+          </GlassPanel>
+
+          <GlassPanel title="Intraday Lab Positions">
+            {labLoading && labPositions.length === 0 ? (
+              <div className="empty">Loading…</div>
+            ) : visibleLabPositions.length === 0 ? (
+              <div className="empty">
+                No {labPositionsStatusFilter === "OPEN" ? "open " : ""}positions yet — hit <b>Run now</b> or wait for the
+                next auto-scan cycle (market hours, every few minutes).
+              </div>
+            ) : (
+              <div className="table-scroll">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ textAlign: "left" }}>Name</th>
+                      <th>Strategy</th>
+                      <th>Entry</th>
+                      <th>Qty</th>
+                      <th>Capital deployed</th>
+                      <th>LTP</th>
+                      <th>Target</th>
+                      <th>Stoploss</th>
+                      <th>P&amp;L</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {visibleLabPositions.map((pos) => {
+                      const live = pos.status === "OPEN";
+                      const pnl = live ? pos.unrealized_pnl : pos.realized_pnl ?? 0;
+                      return (
+                        <tr key={pos.position_id}>
+                          <td style={{ textAlign: "left" }}>
+                            <div className="name-cell">
+                              <div className="name-line">
+                                <span className="name">{pos.display_name}</span>
+                                <span className="chip">{pos.category.replace("_", " ")}</span>
+                              </div>
+                              <span className={live ? "status gain" : "status muted"}>{pos.status}</span>
+                            </div>
+                          </td>
+                          <td>{pos.strategy_name}</td>
+                          <td>{inr(pos.entry_price)}</td>
+                          <td>{pos.qty}</td>
+                          <td>{inr(pos.capital_deployed)}</td>
+                          <td>
+                            {inr(pos.ltp)}
+                            {pos.ltp_source !== "dhan_quote" && (
+                              <span className="src-star" title={LTP_SOURCE_LABEL[pos.ltp_source]}>*</span>
+                            )}
+                          </td>
+                          <td>{inr(pos.target)}</td>
+                          <td>{inr(pos.stoploss)}</td>
+                          <td className={pnl >= 0 ? "gain" : "loss"}>{inr(pnl)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <div className="footnote">
+              Paper only, no live orders. Every position is sized off its own strategy&apos;s allocated capital slice with
+              target/stoploss derived from that strategy&apos;s own ATR-based rules.
+            </div>
+          </GlassPanel>
+        </>
+      ) : segment === "POSITIONS" ? (
         <>
           {positionsSummary && (
             <div className="capital-tiles">
