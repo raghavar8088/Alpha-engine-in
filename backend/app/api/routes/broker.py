@@ -18,11 +18,34 @@ from app.services.portfolio_analytics import get_risk_status
 
 router = APIRouter(prefix="/api/broker", tags=["broker"])
 
+# The 20h background refresh loop (see app/main.py) is only a baseline — it has
+# no way to notice if something else invalidates the token in between cycles
+# (Dhan allows one active session token per account, so anything else logging
+# in with the same TOTP credentials silently kills whatever token we're
+# holding). Proactively refreshing here whenever the stored token is older than
+# this bounds the real-world staleness window instead of waiting up to 20h for
+# a human to notice "Invalid Token" and hit the manual refresh endpoint.
+DHAN_TOKEN_MAX_AGE_SECONDS = 3 * 60 * 60  # 3 hours
+
 
 async def _get_dhan_client(user_id: str) -> DhanClient:
     creds = await broker_credentials_collection.find_one({"user_id": user_id, "broker": "dhan"})
     if creds is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Dhan account not connected")
+
+    age_seconds = (datetime.now(timezone.utc) - creds["connected_at"]).total_seconds()
+    can_auto_refresh = settings.dhan_client_id and settings.dhan_pin and settings.dhan_totp_secret
+    if age_seconds > DHAN_TOKEN_MAX_AGE_SECONDS and can_auto_refresh:
+        try:
+            data = await totp_login(settings.dhan_client_id, settings.dhan_pin, settings.dhan_totp_secret)
+            await store_dhan_credentials(
+                user_id, str(data["dhanClientId"]), data["accessToken"], data.get("dhanClientName"),
+            )
+            return DhanClient(client_id=str(data["dhanClientId"]), access_token=data["accessToken"])
+        except (DhanAPIError, Exception):
+            pass  # Dhan may be mid-cooldown from a very recent login elsewhere — fall through
+            # to the possibly-stale stored token rather than hard-failing the whole request here.
+
     return DhanClient(client_id=creds["client_id"], access_token=decrypt_secret(creds["access_token_encrypted"]))
 
 
