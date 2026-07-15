@@ -47,3 +47,6 @@ intraday_lab_positions_collection = db["intraday_lab_positions"]
 intraday_lab_trades_collection = db["intraday_lab_trades"]
 intraday_lab_scores_collection = db["intraday_lab_scores"]
 intraday_lab_state_collection = db["intraday_lab_state"]
+# Telegram Signal Copier — raw channel messages parsed into trade ideas and
+# auto-opened as paper positions via the manual Positions module
+telegram_signals_collection = db["telegram_signals"]

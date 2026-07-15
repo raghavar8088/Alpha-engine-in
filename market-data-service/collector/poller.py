@@ -33,10 +33,10 @@ def _run_topup() -> None:
         from tradingai_shared.domain import Timeframe
 
         symbols = fno_universe()
-        print(f"[topup] daily-bars top-up for {len(symbols)} F&O symbols")
+        print(f"[topup] daily-bars top-up for {len(symbols)} F&O symbols", flush=True)
         backfill(symbols=symbols, timeframes=[Timeframe.D1], years=0.1)
     except Exception as exc:
-        print(f"[warn] daily-bars top-up failed: {exc}")
+        print(f"[warn] daily-bars top-up failed: {exc}", flush=True)
 
 
 def run(poll_interval_seconds: int) -> None:
@@ -44,7 +44,7 @@ def run(poll_interval_seconds: int) -> None:
     equity_client = NSEClient()  # equities still have no authenticated feed wired up
     conn = get_connection()
 
-    print(f"market-data-service: polling every {poll_interval_seconds}s (indices via Dhan)")
+    print(f"market-data-service: polling every {poll_interval_seconds}s (indices via Dhan)", flush=True)
     while True:
         for index_name in INDEX_SYMBOLS:
             _fetch_and_store(lambda i=index_name: index_client.get_index_quote(i), conn, index_name)
@@ -64,7 +64,7 @@ def _fetch_and_store(fetch_fn, conn, label: str) -> None:
     try:
         quote = fetch_fn()
         if quote is None or quote.get("price") is None:
-            print(f"[warn] no data for {label}")
+            print(f"[warn] no data for {label}", flush=True)
             return
         now = datetime.now(timezone.utc)
         upsert_quote(conn, quote, now)
@@ -75,6 +75,6 @@ def _fetch_and_store(fetch_fn, conn, label: str) -> None:
             # Mongo, so a down Redis must not abort the poll (warn once, not 5x/7s)
             if not _redis_warned:
                 _redis_warned = True
-                print(f"[warn] Redis publish unavailable ({exc}) — continuing with Mongo-only quotes")
+                print(f"[warn] Redis publish unavailable ({exc}) — continuing with Mongo-only quotes", flush=True)
     except Exception as exc:
-        print(f"[error] failed to fetch/store {label}: {exc}")
+        print(f"[error] failed to fetch/store {label}: {exc}", flush=True)

@@ -69,7 +69,7 @@ def _fetch_quotes(client_id: str, access_token: str, watch: list[dict]) -> dict[
             )
             data = response.json().get("data", {})
         except Exception as exc:
-            print(f"[error] quote fetch failed for {segment}: {exc}")
+            print(f"[error] quote fetch failed for {segment}: {exc}", flush=True)
             continue
         segment_data = data.get(segment, {}) if isinstance(data, dict) else {}
         for security_id, fields in segment_data.items():
@@ -130,7 +130,7 @@ def _process_tick(w: dict, quote: dict, now_ist: datetime) -> None:
 
 
 def run(poll_interval_seconds: int = 10) -> None:
-    print(f"live_feed: polling every {poll_interval_seconds}s")
+    print(f"live_feed: polling every {poll_interval_seconds}s", flush=True)
     while True:
         watch = list(watchlist_collection.find())
         if watch:
@@ -138,12 +138,21 @@ def run(poll_interval_seconds: int = 10) -> None:
                 client_id, access_token = get_dhan_access()
                 quotes = _fetch_quotes(client_id, access_token, watch)
                 now_ist = datetime.now(IST)
-                for w in watch:
-                    quote = quotes.get(w["security_id"])
-                    if quote is not None:
-                        _process_tick(w, quote, now_ist)
             except Exception as exc:
-                print(f"[error] live_feed cycle failed: {exc}")
+                print(f"[error] live_feed cycle failed: {exc}", flush=True)
+                quotes = {}
+            # Each (symbol, timeframe) is processed independently so one bad tick
+            # (or a downstream failure inside _process_tick) can't silently drop
+            # every timeframe queued after it in the same cycle - this is what let
+            # 15m/1h never finalize while 5m worked (see redis_pub.py fix).
+            for w in watch:
+                quote = quotes.get(w["security_id"])
+                if quote is None:
+                    continue
+                try:
+                    _process_tick(w, quote, now_ist)
+                except Exception as exc:
+                    print(f"[error] _process_tick failed for {w['symbol']}@{w['timeframe']}: {exc}", flush=True)
         time.sleep(poll_interval_seconds)
 
 

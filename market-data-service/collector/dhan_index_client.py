@@ -69,7 +69,7 @@ class DhanIndexClient:
                                      "pct_change": None, "volume": None}
             self._cache = fresh
         except Exception as exc:
-            print(f"[warn] Dhan index batch quote failed: {exc}")
+            print(f"[warn] Dhan index batch quote failed: {exc}", flush=True)
             self._cache = {}
 
     def get_index_quote(self, symbol: str) -> dict | None:

@@ -1,4 +1,4 @@
-"""Pre-Live paper desk daemon — runs every trading day, automatically.
+"""Pre-Live paper desk daemon - runs every trading day, automatically.
 
 Loop:
   - Sleeps outside market hours; wakes at 09:15 IST Mon-Fri.
@@ -10,7 +10,7 @@ Loop:
     open paper positions at their live option LTP (stop/target/EOD); snapshots equity.
   - At 15:20 IST: squares off everything, writes the daily P&L, sleeps to next day.
 
-Paper only — no real Dhan orders are ever placed. Premiums are the REAL live option
+Paper only - no real Dhan orders are ever placed. Premiums are the REAL live option
 LTPs, so the pre-live desk accrues the real-premium forward track record that a
 historical backtest can't (expired-contract history is purged by Dhan).
 
@@ -68,6 +68,12 @@ class DhanFeed:
         try:
             r = requests.post(f"{DHAN_BASE}/marketfeed/ltp", headers=self.headers,
                               json={NIFTY_SPOT_SEGMENT: [NIFTY_SPOT_SECURITY]}, timeout=10)
+            if r.status_code == 401:
+                print("[error] Dhan 401 - token expired/invalid (spot fetch)", flush=True)
+                return None
+            if r.status_code != 200:
+                print(f"[error] Dhan spot fetch HTTP {r.status_code}: {r.text[:200]}", flush=True)
+                return None
             data = r.json().get("data", {}).get(NIFTY_SPOT_SEGMENT, {})
             return data.get(str(NIFTY_SPOT_SECURITY), {}).get("last_price")
         except Exception as e:
@@ -86,6 +92,12 @@ class DhanFeed:
         try:
             r = requests.post(f"{DHAN_BASE}/marketfeed/ltp", headers=self.headers,
                               json={exchange_segment: [int(security_id)]}, timeout=10)
+            if r.status_code == 401:
+                print(f"[error] Dhan 401 - token expired/invalid (ltp fetch {security_id})", flush=True)
+                return None
+            if r.status_code != 200:
+                print(f"[error] Dhan ltp fetch {security_id} HTTP {r.status_code}: {r.text[:200]}", flush=True)
+                return None
             data = r.json().get("data", {}).get(exchange_segment, {})
             price = data.get(str(security_id), {}).get("last_price")
             self._ltp_cache[ck] = price
@@ -177,7 +189,7 @@ def run_session(engine: PreLiveEngine, feed: DhanFeed):
 
 
 def main():
-    print("[prelive] Pre-Live paper desk daemon starting — dynamic qualified-strategy "
+    print("[prelive] Pre-Live paper desk daemon starting - dynamic qualified-strategy "
           "universe, real premiums, paper only", flush=True)
     engine = PreLiveEngine()
     bal = engine.balance()
@@ -203,14 +215,14 @@ def main():
                     wait = f"{(MARKET_OPEN - mins)}min to open"
                 else:
                     wait = "post-close"
-                print(f"[prelive] market closed ({wait}) — {n:%Y-%m-%d %H:%M} IST", flush=True)
+                print(f"[prelive] market closed ({wait}) - {n:%Y-%m-%d %H:%M} IST", flush=True)
                 engine.publish_idle_state()
                 time.sleep(120)
         except KeyboardInterrupt:
             print("[prelive] stopped", flush=True)
             break
         except Exception as e:
-            print(f"[error] loop: {e} — retrying in 60s", flush=True)
+            print(f"[error] loop: {e} - retrying in 60s", flush=True)
             time.sleep(60)
 
 

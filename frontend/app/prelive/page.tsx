@@ -71,7 +71,10 @@ export default function PreLivePage() {
           <div className={`tile-value ${running ? "gain" : noUniverse ? "loss" : ""}`}>
             <span className={`dot ${running ? "live" : "off"}`} /> {eng?.status ?? "offline"}
           </div>
-          <div className="tile-sub">{eng?.heartbeat ? `beat ${new Date(eng.heartbeat).toLocaleTimeString()}` : "no heartbeat"}</div>
+          <div className={`tile-sub ${eng?.heartbeat_stale ? "loss" : ""}`}>
+            {eng?.heartbeat ? `beat ${new Date(eng.heartbeat).toLocaleTimeString()}` : "no heartbeat"}
+            {eng?.heartbeat_stale ? ` — STALE (${Math.round((eng.heartbeat_age_seconds ?? 0) / 60)}min)` : ""}
+          </div>
         </div>
         <div className="tile">
           <div className="tile-label">Equity</div>

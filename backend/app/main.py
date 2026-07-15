@@ -22,6 +22,7 @@ from app.api.routes import (
     research,
     risk,
     strategies,
+    telegram_signals,
     trading_calls,
     watchlist,
 )
@@ -137,6 +138,7 @@ app.include_router(manual_positions.router)
 app.include_router(fno_positions.router)
 app.include_router(intraday_lab.router)
 app.include_router(chart_data.router)
+app.include_router(telegram_signals.router)
 
 if settings.enable_live_trading:
     app.include_router(live.router)
