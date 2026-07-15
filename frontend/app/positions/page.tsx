@@ -25,6 +25,9 @@ import {
 
 const SELECTED_ACCOUNT_KEY = "tradingai:manual-positions:selected-account";
 
+const DEFAULT_BUY_NOTIONAL = 100_000; // pre-filled quantity targets ~1L notional; user can still edit
+const DEFAULT_PRODUCT_TYPE: ManualProductType = "MTF";
+
 const PRODUCT_TYPES: { id: ManualProductType; label: string }[] = [
   { id: "CNC", label: "CNC (Delivery)" },
   { id: "MTF", label: "MTF (Margin Trade Funding)" },
@@ -456,7 +459,7 @@ function BuyModal({
   const quantity = Math.max(1, parseInt(quantityInput, 10) || 0);
   const [orderType, setOrderType] = useState<"MARKET" | "LIMIT">("MARKET");
   const [limitPrice, setLimitPrice] = useState<number>(0);
-  const [productType, setProductType] = useState<ManualProductType>("CNC");
+  const [productType, setProductType] = useState<ManualProductType>(DEFAULT_PRODUCT_TYPE);
   const [margin, setMargin] = useState<{ margin_required: number; leverage: number; notional_value: number; source: "dhan_calculator" | "fallback" } | null>(null);
   const [ltp, setLtp] = useState<number | null>(null);
   const [quoteError, setQuoteError] = useState<string | null>(null);
@@ -491,10 +494,14 @@ function BuyModal({
     setMargin(null);
     setLtp(null);
     setQuoteError(null);
+    setProductType(DEFAULT_PRODUCT_TYPE);
     try {
       const q = await fetchManualQuote(inst.security_id, inst.exchange_segment);
       setLtp(q.ltp);
       setLimitPrice(q.ltp);
+      // Pre-fill quantity to roughly DEFAULT_BUY_NOTIONAL worth of shares —
+      // still freely editable, this is just a sane starting point per symbol.
+      if (q.ltp > 0) setQuantityInput(String(Math.max(1, Math.round(DEFAULT_BUY_NOTIONAL / q.ltp))));
     } catch (e) {
       setQuoteError(e instanceof Error ? e.message : "Could not fetch a live quote");
     }
