@@ -813,6 +813,13 @@ export async function fetchManualOrders(accountId: string, status?: string): Pro
   return apiFetch(`/api/manual-positions/orders?${params.toString()}`);
 }
 
+export async function cancelManualOrder(accountId: string, orderId: string): Promise<{ cancelled: boolean; order_id: string }> {
+  return apiFetch(`/api/manual-positions/orders/${orderId}/cancel`, {
+    method: "POST",
+    body: JSON.stringify({ account_id: accountId }),
+  });
+}
+
 export async function exitManualPosition(accountId: string, positionId: string, quantity?: number): Promise<ManualOrder & { position: ManualPosition }> {
   return apiFetch(`/api/manual-positions/positions/${positionId}/exit`, {
     method: "POST",

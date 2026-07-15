@@ -11,6 +11,7 @@ import {
   ManualPosition,
   ManualPositionsSummary,
   ManualProductType,
+  cancelManualOrder,
   createManualAccount,
   estimateManualMargin,
   exitManualPosition,
@@ -130,6 +131,21 @@ export default function PositionsPage() {
       }
     },
     [accountId, loadPositions],
+  );
+
+  const cancelOrder = useCallback(
+    async (order: ManualOrder) => {
+      if (!accountId) return;
+      if (!window.confirm(`Cancel the pending ${order.order_type} order for ${order.quantity} ${order.symbol}?`)) return;
+      try {
+        await cancelManualOrder(accountId, order.order_id);
+        setNotice(`Cancelled pending order for ${order.symbol}`);
+        await loadOrders();
+      } catch (e) {
+        setNotice(`Cancel failed: ${e instanceof Error ? e.message : "unknown error"}`);
+      }
+    },
+    [accountId, loadOrders],
   );
 
   const reset = useCallback(async () => {
@@ -354,6 +370,7 @@ export default function PositionsPage() {
                     <th>Price</th>
                     <th>Status</th>
                     <th>Time</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -369,6 +386,13 @@ export default function PositionsPage() {
                         <span className={`status ${o.status === "FILLED" ? "gain" : "muted"}`}>{o.status}</span>
                       </td>
                       <td>{new Date(o.filled_at ?? o.placed_at).toLocaleString("en-IN")}</td>
+                      <td>
+                        {o.status === "PENDING" && (
+                          <button className="cancel-order-btn" onClick={() => cancelOrder(o)}>
+                            Cancel
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -439,6 +463,7 @@ export default function PositionsPage() {
         .status.gain { color: var(--gain); }
         .status.muted { color: var(--text-faint); }
         .exit-btn { background: var(--loss-dim); color: var(--loss); border: 1px solid rgba(217, 45, 63, 0.26); border-radius: 8px; padding: 6px 14px; font-size: 11.5px; font-weight: 700; cursor: pointer; }
+        .cancel-order-btn { background: var(--canvas-soft); color: var(--text-muted); border: 1px solid var(--panel-border); border-radius: 8px; padding: 6px 14px; font-size: 11.5px; font-weight: 700; cursor: pointer; }
       `}</style>
     </div>
   );
@@ -537,11 +562,22 @@ function BuyModal({
       return;
     }
 
-    const existing = existingPositions.find((p) => p.status === "OPEN" && p.symbol === selected.symbol);
+    const existingPosition = existingPositions.find((p) => p.status === "OPEN" && p.symbol === selected.symbol);
+    let existingPendingOrder: ManualOrder | undefined;
+    try {
+      const pending = await fetchManualOrders(accountId, "PENDING");
+      existingPendingOrder = pending.orders.find((o) => o.symbol === selected.symbol);
+    } catch {
+      // if the pending-order check itself fails, don't block the buy over it
+    }
+
     let forceNewPosition = false;
-    if (existing) {
+    if (existingPosition || existingPendingOrder) {
+      const detail = existingPosition
+        ? `an open position (${existingPosition.quantity} qty, ${existingPosition.product_type})`
+        : `a pending ${existingPendingOrder!.order_type} order (${existingPendingOrder!.quantity} qty, ${existingPendingOrder!.product_type})`;
       const proceed = window.confirm(
-        `${selected.symbol} already exists in your positions (${existing.quantity} qty, ${existing.product_type}).\n\n` +
+        `${selected.symbol} already has ${detail}.\n\n` +
           `Click OK to open this as a brand new, separate position (it will NOT merge with the existing one).\n` +
           `Click Cancel to stop without placing an order.`,
       );

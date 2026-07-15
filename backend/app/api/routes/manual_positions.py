@@ -10,6 +10,7 @@ following the same shape as trading_calls.py.
   GET    /api/manual-positions/margin                live margin/leverage estimate before buying
   POST   /api/manual-positions/orders               place a BUY/SELL order (account_id required)
   GET    /api/manual-positions/orders               order book for one account (pending/filled)
+  POST   /api/manual-positions/orders/{id}/cancel   cancel a still-PENDING limit order
   GET    /api/manual-positions/positions            one account's open+closed positions, with summary
   POST   /api/manual-positions/positions/{id}/exit  exit (fully or partially)
   POST   /api/manual-positions/reset                wipe one account's positions/orders, reset its capital
@@ -25,6 +26,7 @@ from app.api.routes.broker import _get_dhan_client
 from app.core.db import manual_orders_collection, manual_positions_collection
 from app.services.manual_positions import (
     OrderError,
+    cancel_pending_order,
     create_account,
     estimate_margin,
     exit_position,
@@ -66,6 +68,10 @@ class CreateAccountRequest(BaseModel):
 
 
 class ResetAccountRequest(BaseModel):
+    account_id: str
+
+
+class CancelOrderRequest(BaseModel):
     account_id: str
 
 
@@ -156,6 +162,14 @@ async def list_orders(
     cursor = manual_orders_collection.find(query).sort("placed_at", -1).limit(limit)
     orders = [_serialize(d, ("placed_at", "updated_at", "filled_at")) async for d in cursor]
     return {"orders": orders}
+
+
+@router.post("/orders/{order_id}/cancel")
+async def cancel_order(order_id: str, payload: CancelOrderRequest, current_user: dict = Depends(get_current_user)):
+    try:
+        return await cancel_pending_order(payload.account_id, order_id)
+    except OrderError as exc:
+        raise HTTPException(status_code=404, detail=exc.detail)
 
 
 @router.get("/positions")

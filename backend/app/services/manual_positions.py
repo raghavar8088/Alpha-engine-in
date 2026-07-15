@@ -424,6 +424,18 @@ async def sync_positions(dhan: DhanClient) -> int:
     return updated
 
 
+async def cancel_pending_order(account_id: str, order_id: str) -> dict:
+    """A PENDING limit order sits forever until its price is touched or the user
+    cancels it — nothing auto-expires it. This is the manual cancel path."""
+    order = await manual_orders_collection.find_one({"order_id": order_id, "account_id": account_id})
+    if order is None:
+        raise OrderError("Order not found")
+    if order["status"] != "PENDING":
+        raise OrderError(f"Cannot cancel — order is already {order['status']}")
+    await manual_orders_collection.delete_one({"_id": order["_id"]})
+    return {"cancelled": True, "order_id": order_id}
+
+
 async def reset_account(account_id: str) -> dict:
     """Wipe one account back to a pristine state: every position and order
     belonging to it is deleted (not just closed) so realized P&L is cleared too
