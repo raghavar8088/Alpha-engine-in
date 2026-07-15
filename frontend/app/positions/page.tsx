@@ -381,6 +381,7 @@ export default function PositionsPage() {
       {buyOpen && accountId && (
         <BuyModal
           accountId={accountId}
+          existingPositions={positions}
           onClose={() => setBuyOpen(false)}
           onDone={(msg) => {
             setBuyOpen(false);
@@ -445,10 +446,12 @@ export default function PositionsPage() {
 
 function BuyModal({
   accountId,
+  existingPositions,
   onClose,
   onDone,
 }: {
   accountId: string;
+  existingPositions: ManualPosition[];
   onClose: () => void;
   onDone: (msg: string) => void;
 }) {
@@ -533,6 +536,19 @@ function BuyModal({
       setErr("Enter a limit price");
       return;
     }
+
+    const existing = existingPositions.find((p) => p.status === "OPEN" && p.symbol === selected.symbol);
+    let forceNewPosition = false;
+    if (existing) {
+      const proceed = window.confirm(
+        `${selected.symbol} already exists in your positions (${existing.quantity} qty, ${existing.product_type}).\n\n` +
+          `Click OK to open this as a brand new, separate position (it will NOT merge with the existing one).\n` +
+          `Click Cancel to stop without placing an order.`,
+      );
+      if (!proceed) return;
+      forceNewPosition = true;
+    }
+
     setSubmitting(true);
     setErr(null);
     try {
@@ -541,6 +557,7 @@ function BuyModal({
         security_id: selected.security_id, exchange_segment: selected.exchange_segment,
         transaction_type: "BUY", quantity, order_type: orderType, product_type: productType,
         limit_price: orderType === "LIMIT" ? limitPrice : 0,
+        force_new_position: forceNewPosition,
       });
       if (result.status === "PENDING") {
         onDone(`Limit order placed for ${quantity} ${selected.symbol} @ ${limitPrice} — will fill when price is hit`);
@@ -552,7 +569,7 @@ function BuyModal({
     } finally {
       setSubmitting(false);
     }
-  }, [accountId, selected, quantity, orderType, limitPrice, productType, onDone]);
+  }, [accountId, selected, quantity, orderType, limitPrice, productType, existingPositions, onDone]);
 
   return (
     <div className="modal-scrim" onClick={onClose}>

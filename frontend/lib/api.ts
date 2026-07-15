@@ -794,6 +794,7 @@ export interface PlaceManualOrderRequest {
   order_type: "MARKET" | "LIMIT";
   product_type: ManualProductType;
   limit_price?: number;
+  force_new_position?: boolean;
 }
 
 export async function placeManualOrder(payload: PlaceManualOrderRequest): Promise<ManualOrder & { position?: ManualPosition }> {
@@ -1228,4 +1229,35 @@ export async function fetchChartTrendline(
   securityId: string, exchangeSegment: string, resolution: ChartResolution,
 ): Promise<{ trend: ChartTrend | null }> {
   return apiFetch(`/api/chart/trendline?security_id=${securityId}&exchange_segment=${exchangeSegment}&resolution=${resolution}`);
+}
+
+// --- Telegram Signal Copier ---
+
+export interface TelegramParsedSignal {
+  is_trade_idea: boolean;
+  action: "BUY" | "SELL" | null;
+  symbol: string | null;
+  entry: number | null;
+  sl: number | null;
+  targets: number[];
+  confidence: number;
+}
+
+export interface TelegramSignal {
+  message_id: number;
+  raw_text: string;
+  received_at: string;
+  has_image?: boolean;
+  status: "pending" | "parser_not_configured" | "parse_failed" | "not_a_trade_idea" | "parsed_only" | "position_opened" | "execution_failed";
+  parsed?: TelegramParsedSignal;
+  order_result?: { order_id: string; status: string };
+  error?: string;
+}
+
+export async function fetchTelegramSignals(limit = 100): Promise<{ signals: TelegramSignal[] }> {
+  return apiFetch(`/api/telegram-signals?limit=${limit}`);
+}
+
+export function telegramSignalImageUrl(messageId: number): string {
+  return `${API_URL}/api/telegram-signals/image/${messageId}`;
 }

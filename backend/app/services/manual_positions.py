@@ -226,6 +226,7 @@ async def estimate_margin(
 async def place_order(
     dhan: DhanClient, *, account_id: str, security_id: str, exchange_segment: str, transaction_type: str,
     quantity: int, order_type: str, product_type: str, limit_price: float = 0.0,
+    force_new_position: bool = False,
 ) -> dict:
     await get_account(account_id)  # 404s cleanly if the account_id is bogus
     if quantity < 1:
@@ -254,6 +255,7 @@ async def place_order(
         "transaction_type": transaction_type, "quantity": quantity, "order_type": order_type,
         "limit_price": limit_price if order_type == "LIMIT" else None,
         "product_type": product_type, "placed_at": now, "updated_at": now,
+        "force_new_position": force_new_position,
     }
 
     marketable = (
@@ -269,16 +271,19 @@ async def place_order(
         return doc
 
     fill_price = ltp if order_type == "MARKET" else limit_price
-    return await _fill(dhan, base_order, fill_price)
+    return await _fill(dhan, base_order, fill_price, force_new_position=force_new_position)
 
 
-async def _fill(dhan: DhanClient, base_order: dict, fill_price: float) -> dict:
+async def _fill(dhan: DhanClient, base_order: dict, fill_price: float, force_new_position: bool = False) -> dict:
     inst = base_order["instrument"]
     security_id, segment = inst["security_id"], inst["exchange_segment"]
     transaction_type, quantity, product_type = base_order["transaction_type"], base_order["quantity"], base_order["product_type"]
     symbol, account_id = base_order["symbol"], base_order["account_id"]
 
-    existing = await manual_positions_collection.find_one(
+    # force_new_position: the user was warned this symbol already has an open
+    # position and chose to open a separate one anyway rather than average in —
+    # only meaningful on BUY (SELL always targets an existing position by id).
+    existing = None if (force_new_position and transaction_type == "BUY") else await manual_positions_collection.find_one(
         {"account_id": account_id, "symbol": symbol, "product_type": product_type, "status": "OPEN"}
     )
 
@@ -411,7 +416,8 @@ async def sync_positions(dhan: DhanClient) -> int:
         )
         if crossed:
             try:
-                await _fill(dhan, {k: v for k, v in order.items() if k not in ("_id", "status", "fill_price", "filled_at", "margin_used", "leverage")}, limit_price)
+                pending_order = {k: v for k, v in order.items() if k not in ("_id", "status", "fill_price", "filled_at", "margin_used", "leverage")}
+                await _fill(dhan, pending_order, limit_price, force_new_position=order.get("force_new_position", False))
                 await manual_orders_collection.delete_one({"_id": order["_id"]})
             except OrderError:
                 continue  # capital dried up since placement — leave it pending

@@ -52,6 +52,7 @@ class PlaceManualOrderRequest(BaseModel):
     order_type: str  # MARKET / LIMIT
     product_type: str  # CNC / MTF / MARGIN / INTRADAY
     limit_price: float = 0.0
+    force_new_position: bool = False  # user confirmed opening a separate position rather than averaging in
 
 
 class ExitPositionRequest(BaseModel):
@@ -133,7 +134,7 @@ async def create_order(payload: PlaceManualOrderRequest, current_user: dict = De
             dhan, account_id=payload.account_id, security_id=payload.security_id, exchange_segment=payload.exchange_segment,
             transaction_type=payload.transaction_type.upper(), quantity=payload.quantity,
             order_type=payload.order_type.upper(), product_type=payload.product_type.upper(),
-            limit_price=payload.limit_price,
+            limit_price=payload.limit_price, force_new_position=payload.force_new_position,
         )
     except OrderError as exc:
         raise HTTPException(status_code=422, detail=exc.detail)
