@@ -499,9 +499,10 @@ function BuyModal({
       const q = await fetchManualQuote(inst.security_id, inst.exchange_segment);
       setLtp(q.ltp);
       setLimitPrice(q.ltp);
-      // Pre-fill quantity to roughly DEFAULT_BUY_NOTIONAL worth of shares —
-      // still freely editable, this is just a sane starting point per symbol.
-      if (q.ltp > 0) setQuantityInput(String(Math.max(1, Math.round(DEFAULT_BUY_NOTIONAL / q.ltp))));
+      // Pre-fill quantity so notional is at least DEFAULT_BUY_NOTIONAL — ceil, not
+      // round, so it never lands a hair under 1L (e.g. 73 shares @ 1368 = 99,864).
+      // A little over is fine, under is not. Still freely editable either way.
+      if (q.ltp > 0) setQuantityInput(String(Math.max(1, Math.ceil(DEFAULT_BUY_NOTIONAL / q.ltp))));
     } catch (e) {
       setQuoteError(e instanceof Error ? e.message : "Could not fetch a live quote");
     }
