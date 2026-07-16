@@ -1079,6 +1079,10 @@ export interface PreLiveStatus {
     available_cash?: number; realized_all_time?: number;
     universe_size?: number; universe_source?: PreLiveUniverseSource | null;
     capital_per_trade?: number; note?: string | null;
+    // Only present when heartbeat_watchdog.py has actually run and written them —
+    // that script isn't wired into the Docker/Linux deployment yet (Windows-Task-
+    // Scheduler-only design), so treat both as possibly absent.
+    heartbeat_stale?: boolean; heartbeat_age_seconds?: number | null;
   };
   open_positions: Array<{ key: string; strategy_id: string; timeframe: string; option_type: string; strike: number; entry_premium: number; mark: number; unrealized: number; qty: number; entry_ts: string }>;
   today: { session: string; trades: number; net_pnl: number; peak_capital: number; roi_pct: number | null; wins: number } | null;
