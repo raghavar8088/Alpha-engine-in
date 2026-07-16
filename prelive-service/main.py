@@ -63,71 +63,73 @@ class DhanFeed:
                         "Content-Type": "application/json", "Accept": "application/json"}
         self._ltp_cache = {}
         self._cache_stamp = 0.0
+        self._requested: set = set()   # (sid, seg) covered by the last prefetch batch
+        self.rate_limited = False      # last batch got HTTP 429 — loop backs off on this
+        self._last_429_log = 0.0
 
     def prefetch(self, segment_ids: dict[str, list[int]]) -> None:
-        """One batched POST per poll tick for every security this cycle needs
-        (NIFTY spot + every open position), instead of a separate request per
-        security. Dhan's /marketfeed/ltp accepts up to 1000 ids per segment in
-        one call; firing one request per security here is what was tripping
-        Dhan's per-account rate limit (HTTP 429) as soon as more than a
-        handful of positions were open, starving every strategy of a price to
-        evaluate against."""
+        """ONE batched POST per poll tick for every security this cycle needs
+        (NIFTY spot + every open position), instead of a request per security.
+        Dhan's /marketfeed/ltp accepts up to 1000 ids per segment in one call;
+        firing one request per security is what tripped Dhan's per-account rate
+        limit (HTTP 429) and — once the account gets throttled — kept it
+        throttled. spot()/ltp() read straight out of this batch's cache and do
+        NOT fall back to their own single-security calls for anything already
+        requested here, so a rate-limited tick costs exactly one request, never
+        one-per-security."""
         payload = {seg: sorted(set(ids)) for seg, ids in segment_ids.items() if ids}
+        self._ltp_cache = {}
+        self._requested = {(str(sid), seg) for seg, ids in payload.items() for sid in ids}
         if not payload:
             return
         self._cache_stamp = time.time()
-        self._ltp_cache = {}
         try:
             r = requests.post(f"{DHAN_BASE}/marketfeed/ltp", headers=self.headers, json=payload, timeout=10)
             if r.status_code == 401:
                 print("[error] Dhan 401 - token expired/invalid (batch fetch)", flush=True)
+                self.rate_limited = False
+                return
+            if r.status_code == 429:
+                # log at most once every 30s so a sustained account-level block
+                # doesn't flood the logs with an identical line every tick
+                now = time.time()
+                if now - self._last_429_log > 30:
+                    self._last_429_log = now
+                    print("[warn] Dhan rate-limited (HTTP 429) — backing off; account is throttled, "
+                          "not a token problem. Waiting for the limit to lift.", flush=True)
+                self.rate_limited = True
                 return
             if r.status_code != 200:
                 print(f"[error] Dhan batch fetch HTTP {r.status_code}: {r.text[:200]}", flush=True)
+                self.rate_limited = False
                 return
+            self.rate_limited = False
             data = r.json().get("data", {})
             for seg, rows in data.items():
                 for sid, row in rows.items():
                     self._ltp_cache[(sid, seg)] = row.get("last_price")
         except Exception as e:
             print(f"[warn] batch fetch: {e}", flush=True)
+            self.rate_limited = False
 
     def spot(self) -> float | None:
-        ck = (str(NIFTY_SPOT_SECURITY), NIFTY_SPOT_SEGMENT)
-        if ck in self._ltp_cache:
-            return self._ltp_cache[ck]
-        # fallback single call only if this security wasn't in the last prefetch batch
-        try:
-            r = requests.post(f"{DHAN_BASE}/marketfeed/ltp", headers=self.headers,
-                              json={NIFTY_SPOT_SEGMENT: [NIFTY_SPOT_SECURITY]}, timeout=10)
-            if r.status_code == 401:
-                print("[error] Dhan 401 - token expired/invalid (spot fetch)", flush=True)
-                return None
-            if r.status_code != 200:
-                print(f"[error] Dhan spot fetch HTTP {r.status_code}: {r.text[:200]}", flush=True)
-                return None
-            data = r.json().get("data", {}).get(NIFTY_SPOT_SEGMENT, {})
-            price = data.get(str(NIFTY_SPOT_SECURITY), {}).get("last_price")
-            self._ltp_cache[ck] = price
-            return price
-        except Exception as e:
-            print(f"[warn] spot fetch: {e}", flush=True)
-            return None
+        return self.ltp(NIFTY_SPOT_SECURITY, NIFTY_SPOT_SEGMENT)
 
     def ltp(self, security_id, exchange_segment) -> float | None:
         ck = (str(security_id), exchange_segment)
         if ck in self._ltp_cache:
             return self._ltp_cache[ck]
-        # fallback single call only if this security wasn't in the last prefetch batch
-        # (e.g. a brand-new position opened mid-tick, after prefetch already ran)
+        # Already covered by this tick's batch (present or not) — never make a
+        # per-security fallback call, which is exactly what amplified one failed
+        # batch back into N rejected requests and kept the account throttled.
+        if ck in self._requested:
+            return None
+        # Only reached for a security not in the last prefetch (e.g. a position
+        # opened mid-tick, after prefetch already ran) — single fallback call.
         try:
             r = requests.post(f"{DHAN_BASE}/marketfeed/ltp", headers=self.headers,
                               json={exchange_segment: [int(security_id)]}, timeout=10)
-            if r.status_code == 401:
-                print(f"[error] Dhan 401 - token expired/invalid (ltp fetch {security_id})", flush=True)
-                return None
             if r.status_code != 200:
-                print(f"[error] Dhan ltp fetch {security_id} HTTP {r.status_code}: {r.text[:200]}", flush=True)
                 return None
             data = r.json().get("data", {}).get(exchange_segment, {})
             price = data.get(str(security_id), {}).get("last_price")
@@ -211,7 +213,11 @@ def run_session(engine: PreLiveEngine, feed: DhanFeed):
             engine.snapshot_equity(feed.ltp)
             last_equity_snap = time.time()
 
-        time.sleep(POLL_SECONDS)
+        # When Dhan has throttled the account, sleeping the normal 15s and
+        # re-hitting it keeps the block alive. Back off hard (POLL x4) so the
+        # account can recover and the limit lifts; we lose a little bar
+        # resolution during the block but that data was unusable anyway.
+        time.sleep(POLL_SECONDS * 4 if feed.rate_limited else POLL_SECONDS)
 
     print(f"[prelive] squaring off + closing session {ist_now():%H:%M}", flush=True)
     engine.close_session(feed.ltp)

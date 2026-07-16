@@ -53,7 +53,10 @@ def run(poll_interval_seconds: int) -> None:
             _fetch_and_store(lambda s=symbol: equity_client.get_equity_quote(s), conn, symbol)
 
         _maybe_start_daily_topup()
-        time.sleep(poll_interval_seconds)
+        # If Dhan has throttled the shared account, re-polling every 7s just keeps
+        # the block alive — back off to 4x the interval until the limit lifts.
+        sleep_for = poll_interval_seconds * 4 if index_client.rate_limited else poll_interval_seconds
+        time.sleep(sleep_for)
 
 
 _redis_warned = False

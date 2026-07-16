@@ -40,6 +40,8 @@ class DhanIndexClient:
     def __init__(self) -> None:
         self._cache: dict[str, dict] = {}
         self._cache_stamp = 0.0
+        self.rate_limited = False   # last refresh got HTTP 429 — poller backs off on this
+        self._last_429_log = 0.0
 
     def _headers(self) -> dict:
         # re-read creds each call so a daily token rotation doesn't need a restart
@@ -58,7 +60,19 @@ class DhanIndexClient:
         try:
             resp = requests.post(f"{DHAN_BASE_URL}/marketfeed/ltp", headers=self._headers(),
                                  json=by_segment, timeout=10)
+            if resp.status_code == 429:
+                # Account throttled by Dhan (shared with the prelive desk + backend).
+                # Flag it so the poller backs off instead of re-hitting every 7s and
+                # keeping the block alive; log at most once per 30s.
+                now = time.time()
+                if now - self._last_429_log > 30:
+                    self._last_429_log = now
+                    print("[warn] Dhan rate-limited (HTTP 429) — backing off index polling until it lifts", flush=True)
+                self.rate_limited = True
+                self._cache = {}
+                return
             resp.raise_for_status()
+            self.rate_limited = False
             data = resp.json().get("data", {})
             fresh = {}
             for symbol, (sec_id, segment) in DHAN_INDEX_IDS.items():
@@ -70,6 +84,7 @@ class DhanIndexClient:
             self._cache = fresh
         except Exception as exc:
             print(f"[warn] Dhan index batch quote failed: {exc}", flush=True)
+            self.rate_limited = False
             self._cache = {}
 
     def get_index_quote(self, symbol: str) -> dict | None:
