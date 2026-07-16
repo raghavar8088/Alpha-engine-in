@@ -16,8 +16,24 @@ from tradingai_shared.domain import AssetClass, Bar, Instrument, Timeframe
 DHAN_BASE_URL = "https://api.dhan.co/v2"
 # Dhan v2 caps one intraday request at 90 days; stay under it.
 INTRADAY_CHUNK_DAYS = 75
-# Data APIs are rate-limited; brief pause between chunked requests.
+# Data APIs are rate-limited. This gap is enforced globally in _fetch() before
+# EVERY request — it used to be applied only between intraday chunks, which left
+# the daily path completely unthrottled: a D1 backfill over the ~208-symbol F&O
+# universe is one request per symbol with nothing between them, so it fired the
+# whole burst as fast as the network allowed and reliably tripped Dhan's
+# per-account limit (HTTP 429 / error 805), throttling every other service
+# sharing the account.
 REQUEST_GAP_SECONDS = 0.4
+_last_request_at = 0.0
+
+
+def _throttle() -> None:
+    """Space out consecutive Dhan history requests process-wide."""
+    global _last_request_at
+    wait = REQUEST_GAP_SECONDS - (time.monotonic() - _last_request_at)
+    if wait > 0:
+        time.sleep(wait)
+    _last_request_at = time.monotonic()
 
 # Dhan's `instrument` field for the charts endpoints, from our asset class.
 _INSTRUMENT_TYPE = {
@@ -66,7 +82,6 @@ class DhanHistoryProvider(DataProvider):
                     )
                 )
                 chunk_start = chunk_end
-                time.sleep(REQUEST_GAP_SECONDS)
         return _to_bars(instrument.symbol, timeframe, candles)
 
     def _fetch(
@@ -88,11 +103,15 @@ class DhanHistoryProvider(DataProvider):
             **extra,
         }
         for attempt in range(3):
+            _throttle()
             response = requests.post(
                 f"{DHAN_BASE_URL}{path}", json=payload, headers=self.headers, timeout=30
             )
             if response.status_code in (429, 500, 502, 503, 504) and attempt < 2:
-                time.sleep(2**attempt)
+                # On a 429 specifically, back off much harder than the generic
+                # retry: the account is throttled, so retrying a second later just
+                # deepens the block.
+                time.sleep((5 * 2**attempt) if response.status_code == 429 else 2**attempt)
                 continue
             break
         data = response.json()

@@ -5,25 +5,34 @@ from datetime import datetime, timedelta, timezone
 from collector.dhan_index_client import DhanIndexClient
 from collector.nse_client import NSEClient
 from collector.symbols import EQUITY_SYMBOLS, INDEX_SYMBOLS
-from db import get_connection, upsert_quote
+from db import _db, get_connection, upsert_quote
 from redis_pub import publish_quote
 
 IST = timezone(timedelta(hours=5, minutes=30))
 DAILY_TOPUP_AFTER = "16:00"  # post-close, once per trading day
-_last_topup_date: str | None = None
+_topup_state = _db["market_data_topup_state"]
 
 
 def _maybe_start_daily_topup() -> None:
     """Keeps the F&O-universe daily bars current so the Trading Calls stock scan
     always sees yesterday's close. Runs in a thread so quote polling never
-    blocks; the backfill upsert is idempotent, so a restart re-running it is
-    harmless."""
-    global _last_topup_date
+    blocks; the backfill upsert is idempotent, so re-running it writes nothing new.
+
+    The 'already ran today' marker lives in Mongo, not in memory: it used to be a
+    module global, so every container restart after 16:00 IST re-fired the whole
+    ~208-symbol backfill. Several deploys in one evening therefore meant several
+    hundred extra Dhan requests, which is enough on its own to trip the account's
+    rate limit (HTTP 429) and take the live feed down with it."""
     now = datetime.now(IST)
     today = now.date().isoformat()
-    if now.weekday() >= 5 or _last_topup_date == today or now.strftime("%H:%M") < DAILY_TOPUP_AFTER:
+    if now.weekday() >= 5 or now.strftime("%H:%M") < DAILY_TOPUP_AFTER:
         return
-    _last_topup_date = today
+    # Atomic claim — only the first caller to insert today's marker runs the topup,
+    # so a restart (or a second worker) can't duplicate the request burst.
+    try:
+        _topup_state.insert_one({"_id": f"daily-topup-{today}", "claimed_at": now})
+    except Exception:
+        return  # already claimed today (duplicate key) — nothing to do
     threading.Thread(target=_run_topup, daemon=True).start()
 
 
