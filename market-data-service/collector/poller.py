@@ -35,6 +35,14 @@ def _run_topup() -> None:
         symbols = fno_universe()
         print(f"[topup] daily-bars top-up for {len(symbols)} F&O symbols", flush=True)
         backfill(symbols=symbols, timeframes=[Timeframe.D1], years=0.1)
+
+        # The pre-live desk bootstraps each strategy's warmup history from NIFTY
+        # 5m/15m bars, but nothing was ever refreshing those — only D1 was topped
+        # up here, so the intraday bars went stale (found 2 days behind) and every
+        # strategy warmed up on a discontinuous series before its first live bar.
+        # Two extra requests a day keeps that warmup honest.
+        print("[topup] NIFTY intraday-bars top-up (5m/15m) for pre-live warmup", flush=True)
+        backfill(symbols=["NIFTY"], timeframes=[Timeframe.M5, Timeframe.M15], years=0.08)
     except Exception as exc:
         print(f"[warn] daily-bars top-up failed: {exc}", flush=True)
 

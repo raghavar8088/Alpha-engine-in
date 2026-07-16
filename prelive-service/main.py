@@ -174,11 +174,25 @@ def run_session(engine: PreLiveEngine, feed: DhanFeed):
     last_finalized = {tf: None for tf in TIMEFRAMES}
     last_equity_snap = 0
 
+    ticks_ok = ticks_blocked = 0
+    last_tick_log = 0.0
+
     while market_open_now() and ist_minutes() < SESSION_END:
         open_security_ids = [pos.security_id for pos in engine.positions.values()]
         feed.prefetch({NIFTY_SPOT_SEGMENT: [NIFTY_SPOT_SECURITY], "NSE_FNO": open_security_ids})
         spot = feed.spot()
         now = ist_now()
+        # Proof-of-life: without this there is no way to tell "prices are flowing but
+        # nothing set up" from "we never got a single price all session" — which is
+        # exactly the ambiguity that made a zero-trade day impossible to diagnose.
+        if spot:
+            ticks_ok += 1
+        else:
+            ticks_blocked += 1
+        if time.time() - last_tick_log > 300:  # every ~5min
+            last_tick_log = time.time()
+            print(f"[prelive] {now:%H:%M} IST spot={spot} | ticks ok={ticks_ok} blocked={ticks_blocked} "
+                  f"| open_pos={len(engine.positions)}", flush=True)
         if spot:
             for tf in TIMEFRAMES:
                 bs = bucket_start(now, tf)
@@ -191,13 +205,21 @@ def run_session(engine: PreLiveEngine, feed: DhanFeed):
                               open=cur[1], high=cur[2], low=cur[3], close=cur[4], volume=0)
                     if last_finalized[tf] != cur[0]:
                         last_finalized[tf] = cur[0]
+                        drove = opened = 0
                         for sid, stf in engine.universe:
                             if stf != tf:
                                 continue
+                            drove += 1
                             ev = engine.on_bar(sid, tf, fin, feed.ltp)
                             if ev:
+                                opened += 1
                                 print(f"[OPEN] {ev['key']} {ev['type']} {ev['strike']:.0f} "
                                       f"x{ev['lots']}lot @Rs{ev['premium']:.2f}", flush=True)
+                        # One line per finalized bar proves the evaluation path ran and
+                        # says how many strategies it drove — so "0 trades" is always
+                        # attributable to a real cause instead of guesswork.
+                        print(f"[BAR] {tf} {cur[0]:%H:%M} close={cur[4]:.2f} drove={drove} opened={opened}",
+                              flush=True)
                     forming[tf] = [bs, spot, spot, spot, spot]
                 else:
                     cur[2] = max(cur[2], spot)
@@ -225,6 +247,19 @@ def run_session(engine: PreLiveEngine, feed: DhanFeed):
     if doc:
         print(f"[prelive] DAY {doc['session']}: net Rs{doc['net_pnl']:+,.0f} on "
               f"Rs{doc['peak_capital']:,.0f} peak = {doc['roi_pct']}% ({doc['trades']} trades)", flush=True)
+    # A zero-trade day must always state WHY. Without this, "0 trades" is
+    # indistinguishable between a throttled feed and a genuinely quiet market.
+    total = ticks_ok + ticks_blocked
+    blocked_pct = (100 * ticks_blocked / total) if total else 0
+    print(f"[prelive] FEED HEALTH: {ticks_ok}/{total} ticks got a price "
+          f"({blocked_pct:.0f}% blocked/failed)", flush=True)
+    if doc and doc.get("trades", 0) == 0:
+        if blocked_pct > 20:
+            print(f"[prelive] ZERO TRADES because the price feed was unusable for {blocked_pct:.0f}% "
+                  "of the session (Dhan rate-limit/throttle) — not a strategy decision.", flush=True)
+        else:
+            print("[prelive] ZERO TRADES with a healthy feed — strategies evaluated but no setup "
+                  "qualified today (see [BAR] lines for per-bar drove/opened counts).", flush=True)
 
 
 def main():
