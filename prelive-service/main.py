@@ -64,7 +64,39 @@ class DhanFeed:
         self._ltp_cache = {}
         self._cache_stamp = 0.0
 
+    def prefetch(self, segment_ids: dict[str, list[int]]) -> None:
+        """One batched POST per poll tick for every security this cycle needs
+        (NIFTY spot + every open position), instead of a separate request per
+        security. Dhan's /marketfeed/ltp accepts up to 1000 ids per segment in
+        one call; firing one request per security here is what was tripping
+        Dhan's per-account rate limit (HTTP 429) as soon as more than a
+        handful of positions were open, starving every strategy of a price to
+        evaluate against."""
+        payload = {seg: sorted(set(ids)) for seg, ids in segment_ids.items() if ids}
+        if not payload:
+            return
+        self._cache_stamp = time.time()
+        self._ltp_cache = {}
+        try:
+            r = requests.post(f"{DHAN_BASE}/marketfeed/ltp", headers=self.headers, json=payload, timeout=10)
+            if r.status_code == 401:
+                print("[error] Dhan 401 - token expired/invalid (batch fetch)", flush=True)
+                return
+            if r.status_code != 200:
+                print(f"[error] Dhan batch fetch HTTP {r.status_code}: {r.text[:200]}", flush=True)
+                return
+            data = r.json().get("data", {})
+            for seg, rows in data.items():
+                for sid, row in rows.items():
+                    self._ltp_cache[(sid, seg)] = row.get("last_price")
+        except Exception as e:
+            print(f"[warn] batch fetch: {e}", flush=True)
+
     def spot(self) -> float | None:
+        ck = (str(NIFTY_SPOT_SECURITY), NIFTY_SPOT_SEGMENT)
+        if ck in self._ltp_cache:
+            return self._ltp_cache[ck]
+        # fallback single call only if this security wasn't in the last prefetch batch
         try:
             r = requests.post(f"{DHAN_BASE}/marketfeed/ltp", headers=self.headers,
                               json={NIFTY_SPOT_SEGMENT: [NIFTY_SPOT_SECURITY]}, timeout=10)
@@ -75,20 +107,19 @@ class DhanFeed:
                 print(f"[error] Dhan spot fetch HTTP {r.status_code}: {r.text[:200]}", flush=True)
                 return None
             data = r.json().get("data", {}).get(NIFTY_SPOT_SEGMENT, {})
-            return data.get(str(NIFTY_SPOT_SECURITY), {}).get("last_price")
+            price = data.get(str(NIFTY_SPOT_SECURITY), {}).get("last_price")
+            self._ltp_cache[ck] = price
+            return price
         except Exception as e:
             print(f"[warn] spot fetch: {e}", flush=True)
             return None
 
     def ltp(self, security_id, exchange_segment) -> float | None:
-        # short cache so managing many positions in one cycle is one call each
-        now = time.time()
-        if now - self._cache_stamp > POLL_SECONDS:
-            self._ltp_cache = {}
-            self._cache_stamp = now
         ck = (str(security_id), exchange_segment)
         if ck in self._ltp_cache:
             return self._ltp_cache[ck]
+        # fallback single call only if this security wasn't in the last prefetch batch
+        # (e.g. a brand-new position opened mid-tick, after prefetch already ran)
         try:
             r = requests.post(f"{DHAN_BASE}/marketfeed/ltp", headers=self.headers,
                               json={exchange_segment: [int(security_id)]}, timeout=10)
@@ -142,6 +173,8 @@ def run_session(engine: PreLiveEngine, feed: DhanFeed):
     last_equity_snap = 0
 
     while market_open_now() and ist_minutes() < SESSION_END:
+        open_security_ids = [pos.security_id for pos in engine.positions.values()]
+        feed.prefetch({NIFTY_SPOT_SEGMENT: [NIFTY_SPOT_SECURITY], "NSE_FNO": open_security_ids})
         spot = feed.spot()
         now = ist_now()
         if spot:
