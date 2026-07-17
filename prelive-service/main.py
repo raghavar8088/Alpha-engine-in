@@ -65,6 +65,8 @@ class DhanFeed:
         self._cache_stamp = 0.0
         self._requested: set = set()   # (sid, seg) covered by the last prefetch batch
         self.rate_limited = False      # last batch got HTTP 429 — loop backs off on this
+        self.throttled_ticks = 0       # ticks lost to 429 (account throttled)
+        self.auth_failed_ticks = 0     # ticks lost to 401 (token rotated out from under us)
         self._last_429_log = 0.0
         self._last_cred_reload = 0.0
 
@@ -108,6 +110,7 @@ class DhanFeed:
             if r.status_code == 401:
                 print("[error] Dhan 401 - token expired/invalid (batch fetch)", flush=True)
                 self.rate_limited = False
+                self.auth_failed_ticks += 1
                 self._reload_creds()
                 return
             if r.status_code == 429:
@@ -119,6 +122,7 @@ class DhanFeed:
                     print("[warn] Dhan rate-limited (HTTP 429) — backing off; account is throttled, "
                           "not a token problem. Waiting for the limit to lift.", flush=True)
                 self.rate_limited = True
+                self.throttled_ticks += 1
                 return
             if r.status_code != 200:
                 print(f"[error] Dhan batch fetch HTTP {r.status_code}: {r.text[:200]}", flush=True)
@@ -273,11 +277,22 @@ def run_session(engine: PreLiveEngine, feed: DhanFeed):
     total = ticks_ok + ticks_blocked
     blocked_pct = (100 * ticks_blocked / total) if total else 0
     print(f"[prelive] FEED HEALTH: {ticks_ok}/{total} ticks got a price "
-          f"({blocked_pct:.0f}% blocked/failed)", flush=True)
+          f"({blocked_pct:.0f}% blocked/failed; 429-throttled={feed.throttled_ticks} "
+          f"401-auth={feed.auth_failed_ticks})", flush=True)
     if doc and doc.get("trades", 0) == 0:
         if blocked_pct > 20:
+            # 401 and 429 are different failures with different fixes — a token
+            # rotated out from under this feed is NOT a rate limit, and reporting
+            # one as the other sends the next investigation down the wrong path.
+            if feed.auth_failed_ticks > feed.throttled_ticks:
+                cause = ("Dhan returned 401 (the access token this feed was holding got rotated/"
+                         "invalidated mid-session — Dhan allows one active token per account)")
+            elif feed.throttled_ticks:
+                cause = "Dhan rate-limited the account (HTTP 429)"
+            else:
+                cause = "the price feed returned no data (cause not 401/429 — see [error]/[warn] lines above)"
             print(f"[prelive] ZERO TRADES because the price feed was unusable for {blocked_pct:.0f}% "
-                  "of the session (Dhan rate-limit/throttle) — not a strategy decision.", flush=True)
+                  f"of the session: {cause} — not a strategy decision.", flush=True)
         else:
             print("[prelive] ZERO TRADES with a healthy feed — strategies evaluated but no setup "
                   "qualified today (see [BAR] lines for per-bar drove/opened counts).", flush=True)
