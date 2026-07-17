@@ -66,6 +66,26 @@ class DhanFeed:
         self._requested: set = set()   # (sid, seg) covered by the last prefetch batch
         self.rate_limited = False      # last batch got HTTP 429 — loop backs off on this
         self._last_429_log = 0.0
+        self._last_cred_reload = 0.0
+
+    def _reload_creds(self) -> None:
+        """Re-read the (possibly rotated) token from the credential store. Dhan
+        allows ONE active token per account, so any re-login elsewhere (the AWS
+        backend's proactive refresh) instantly invalidates the token this feed
+        captured at construction. On 2026-07-17 that meant 401s for the entire
+        session because the feed held its dead token all day. Rate-limited to
+        once per 60s so a persistent auth outage doesn't hammer the store."""
+        now = time.time()
+        if now - self._last_cred_reload < 60:
+            return
+        self._last_cred_reload = now
+        try:
+            self.client_id, self.token = get_dhan_access()
+            self.headers = {"access-token": self.token, "client-id": self.client_id,
+                            "Content-Type": "application/json", "Accept": "application/json"}
+            print("[prelive] reloaded Dhan credentials after 401 — picked up rotated token", flush=True)
+        except Exception as e:
+            print(f"[error] credential reload failed (will retry in 60s): {e}", flush=True)
 
     def prefetch(self, segment_ids: dict[str, list[int]]) -> None:
         """ONE batched POST per poll tick for every security this cycle needs
@@ -88,6 +108,7 @@ class DhanFeed:
             if r.status_code == 401:
                 print("[error] Dhan 401 - token expired/invalid (batch fetch)", flush=True)
                 self.rate_limited = False
+                self._reload_creds()
                 return
             if r.status_code == 429:
                 # log at most once every 30s so a sustained account-level block

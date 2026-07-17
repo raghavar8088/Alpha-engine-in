@@ -330,7 +330,22 @@ class PreLiveEngine:
         for key, pos in list(self.positions.items()):
             ltp = fetch_ltp(pos.security_id, "NSE_FNO")
             if not ltp or ltp <= 0:
+                if not eod:
+                    continue
+                # EOD square-off must NEVER leave a position stuck open. On
+                # 2026-07-16 three positions survived overnight because live
+                # pricing was unavailable (429/market closed) at square-off and
+                # this loop just skipped them. Close at the last persisted mark
+                # (falling back to entry premium) and label the pricing honestly.
+                doc = positions_collection.find_one({"key": key}, {"mark": 1}) or {}
+                fallback = doc.get("mark") or pos.entry_premium
+                closes.append(self._close(pos, fallback, "eod", now, pricing="fallback_last_mark"))
                 continue
+            # keep the persisted mark current so the dashboard shows live MTM and
+            # the EOD fallback above always has a recent price to close against
+            qty = LOT_SIZE * pos.lots
+            positions_collection.update_one({"key": key}, {"$set": {
+                "mark": round(ltp, 2), "unrealized": round((ltp - pos.entry_premium) * qty, 2)}})
             move = (ltp - pos.entry_premium) / pos.entry_premium
             reason = None
             if move >= pos.target_pct:
@@ -343,7 +358,8 @@ class PreLiveEngine:
                 closes.append(self._close(pos, ltp, reason, now))
         return closes
 
-    def _close(self, pos: PaperPosition, exit_premium: float, reason: str, now) -> dict:
+    def _close(self, pos: PaperPosition, exit_premium: float, reason: str, now,
+               pricing: str = "real_dhan_ltp") -> dict:
         qty = LOT_SIZE * pos.lots
         gross = (exit_premium - pos.entry_premium) * qty
         charges = _option_charges(pos.entry_premium, qty) + _option_charges(exit_premium, qty)
@@ -354,7 +370,7 @@ class PreLiveEngine:
             "entry_premium": round(pos.entry_premium, 2), "exit_premium": round(exit_premium, 2),
             "entry_ts": pos.entry_ts, "exit_ts": now, "exit_reason": reason,
             "qty": qty, "charges": round(charges, 2), "pnl": pnl,
-            "session": now.date().isoformat(), "pricing": "real_dhan_ltp",
+            "session": now.date().isoformat(), "pricing": pricing,
         }
         trades_collection.insert_one(dict(trade))
         positions_collection.delete_one({"key": pos.key})
