@@ -420,6 +420,77 @@ export async function fetchQualifiedStrategies(): Promise<OptionsSweep> {
   return apiFetch("/api/options/qualified");
 }
 
+// --- Option SELLING lab (separate desk, separate gate, separate collection) ---
+//
+// Kept structurally apart from the buying sweep above rather than sharing its types:
+// the two are judged by different rules (selling ignores win rate entirely, buying is
+// built on it) and a shared shape would invite rendering them in one leaderboard, which
+// would compare strategies held to different standards.
+
+export interface OptionsSellingSweepRequest {
+  symbol?: string;
+  years?: number;
+  min_profit_factor?: number;
+  min_trades?: number;
+  max_worst_trade_pct_capital?: number;
+  max_drawdown_pct?: number;
+  naked_min_profit_factor?: number;
+  naked_max_worst_trade_pct_capital?: number;
+}
+
+export interface SellingGate {
+  min_profit_factor: number;
+  min_trades: number;
+  max_worst_trade_pct_capital: number;
+  max_drawdown_pct: number;
+  naked_min_profit_factor: number;
+  naked_max_worst_trade_pct_capital: number;
+  naked_threshold_pct?: number;
+}
+
+export interface SellingSweepEntry {
+  strategy_id: string;
+  name: string;
+  style: string;
+  timeframe: string;
+  suitable_market?: string;
+  data_from?: string;
+  data_to?: string;
+  metrics?: Record<string, any>;
+  structure?: Record<string, any>;
+  qualified?: boolean;
+  naked?: boolean;
+  gate_failures?: string[];
+  error?: string;
+}
+
+export interface OptionsSellingSweep {
+  sweep_id: string | null;
+  created_at?: string;
+  symbol?: string;
+  years?: number;
+  desk?: string;
+  gate?: SellingGate;
+  pricing_model?: string;
+  margin_model?: string;
+  qualified_count: number;
+  strategy_count: number;
+  results: SellingSweepEntry[];
+}
+
+export async function runOptionsSellingSweep(
+  request: OptionsSellingSweepRequest,
+): Promise<OptionsSellingSweep> {
+  return apiFetch("/api/options/selling/backtest-all", {
+    method: "POST",
+    body: JSON.stringify(request),
+  });
+}
+
+export async function fetchQualifiedSellingStrategies(): Promise<OptionsSellingSweep> {
+  return apiFetch("/api/options/selling/qualified");
+}
+
 // --- Trading Calls (Kotak-Neo-style research calls) ---
 
 export type CallSegment = "STOCK" | "FNO" | "COMMODITY";

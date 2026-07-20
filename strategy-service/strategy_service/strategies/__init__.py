@@ -63,4 +63,6 @@ from strategy_service.strategies import (  # noqa: F401
     long_put,
     # option-buying library (51-100): 15 scalp + 20 intraday + 15 swing
     options_buying,
+    # option-SELLING library: neutral + directional-credit-spread + naked books
+    options_selling,
 )

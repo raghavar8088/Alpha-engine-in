@@ -10,13 +10,16 @@ import PayoffChart from "../../components/charts/PayoffChart";
 import {
   OptionChain,
   OptionStrikeRow,
+  OptionsSellingSweep,
   OptionsSweep,
   PayoffLegRequest,
   fetchExpiries,
   fetchOptionChain,
   fetchPayoff,
+  fetchQualifiedSellingStrategies,
   fetchQualifiedStrategies,
   runOptionsBacktest,
+  runOptionsSellingSweep,
   runOptionsSweep,
 } from "../../lib/api";
 
@@ -45,7 +48,7 @@ function classifyBuildup(leg: OptionStrikeRow["ce"]): string | null {
 }
 
 export default function OptionsPage() {
-  const [tab, setTab] = useState<"chain" | "payoff" | "backtest" | "lab">("chain");
+  const [tab, setTab] = useState<"chain" | "payoff" | "backtest" | "lab" | "selling">("chain");
 
   // Chain tab
   const [symbol, setSymbol] = useState("NIFTY");
@@ -148,6 +151,34 @@ export default function OptionsPage() {
     }
   }, [labForm]);
 
+  // Selling Lab tab (option-SELLING sweep + tail-risk qualification gate)
+  const [sellForm, setSellForm] = useState({
+    symbol: "NIFTY", years: 10, min_profit_factor: 1.3, min_trades: 20,
+    max_worst_trade_pct_capital: 1.5, max_drawdown_pct: 10,
+  });
+  const [sellSweep, setSellSweep] = useState<OptionsSellingSweep | null>(null);
+  const [sellRunning, setSellRunning] = useState(false);
+  const [sellError, setSellError] = useState<string | null>(null);
+  const [sellFilter, setSellFilter] = useState<"all" | "qualified">("all");
+
+  useEffect(() => {
+    fetchQualifiedSellingStrategies()
+      .then((d) => { if (d.sweep_id) setSellSweep(d); })
+      .catch(() => {});
+  }, []);
+
+  const runSellingSweep = useCallback(async () => {
+    setSellRunning(true);
+    setSellError(null);
+    try {
+      setSellSweep(await runOptionsSellingSweep(sellForm));
+    } catch (e) {
+      setSellError(e instanceof Error ? e.message : "Selling sweep failed");
+    } finally {
+      setSellRunning(false);
+    }
+  }, [sellForm]);
+
   return (
     <div className="page">
       <PageHeader
@@ -157,9 +188,9 @@ export default function OptionsPage() {
       />
 
       <div className="tabs">
-        {(["chain", "payoff", "backtest", "lab"] as const).map((t) => (
+        {(["chain", "payoff", "backtest", "lab", "selling"] as const).map((t) => (
           <button key={t} className={tab === t ? "tab active" : "tab"} onClick={() => setTab(t)}>
-            {t === "chain" ? "Option Chain" : t === "payoff" ? "Payoff Builder" : t === "backtest" ? "Strategy Backtest" : "Buying Lab (50)"}
+            {t === "chain" ? "Option Chain" : t === "payoff" ? "Payoff Builder" : t === "backtest" ? "Strategy Backtest" : t === "lab" ? "Buying Lab (50)" : "Selling Lab (24)"}
           </button>
         ))}
       </div>
@@ -462,6 +493,141 @@ export default function OptionsPage() {
         </>
       )}
 
+      {tab === "selling" && (
+        <>
+          <GlassPanel title="Option-Selling Lab — 24 strategies, tail-risk gate">
+            <div className="form">
+              <label>
+                Underlying
+                <select value={sellForm.symbol} onChange={(e) => setSellForm({ ...sellForm, symbol: e.target.value })}>
+                  {INDICES.map((s) => (<option key={s}>{s}</option>))}
+                </select>
+              </label>
+              <label>
+                Years
+                <input type="number" min={1} max={25} value={sellForm.years} onChange={(e) => setSellForm({ ...sellForm, years: Number(e.target.value) })} />
+              </label>
+              <label>
+                Min profit factor
+                <input type="number" min={0} step={0.1} value={sellForm.min_profit_factor} onChange={(e) => setSellForm({ ...sellForm, min_profit_factor: Number(e.target.value) })} />
+              </label>
+              <label>
+                Min trades
+                <input type="number" min={1} value={sellForm.min_trades} onChange={(e) => setSellForm({ ...sellForm, min_trades: Number(e.target.value) })} />
+              </label>
+              <label>
+                Max worst trade %
+                <input type="number" min={0.1} step={0.1} value={sellForm.max_worst_trade_pct_capital} onChange={(e) => setSellForm({ ...sellForm, max_worst_trade_pct_capital: Number(e.target.value) })} />
+              </label>
+              <label>
+                Max drawdown %
+                <input type="number" min={1} step={1} value={sellForm.max_drawdown_pct} onChange={(e) => setSellForm({ ...sellForm, max_drawdown_pct: Number(e.target.value) })} />
+              </label>
+              <button onClick={runSellingSweep} disabled={sellRunning}>{sellRunning ? "Running all 24…" : "Run 24-strategy selling sweep"}</button>
+            </div>
+            <div className="footnote">
+              <strong>There is no win-rate gate here, on purpose.</strong> Premium selling routinely shows 70–90% win
+              rates while losing money, because its P&amp;L is decided by the size of the rare losers rather than the
+              count of the frequent winners — this library&apos;s own <code>sell_coil_strangle</code> wins 83.9% of the
+              time at a 0.33 profit factor. A strategy qualifies on profit factor, single-trade tail size, drawdown and
+              sample size instead. <strong>Naked structures clear a higher bar</strong> (PF {sellSweep?.gate?.naked_min_profit_factor ?? 1.6},
+              worst trade {sellSweep?.gate?.naked_max_worst_trade_pct_capital ?? 1.0}%) because this engine fills stops
+              at the stop level, so a naked short&apos;s real gap risk is understated and needs margin to cover it.
+              Premiums are Black-Scholes-modeled from realized volatility; margin is a documented SPAN+exposure
+              approximation, not an exchange figure. Positional strategies run on daily bars, which only go back
+              ~2 years in this database — check the data-window column before trusting a positional result.
+            </div>
+            {sellError && <ErrorBanner message={sellError} />}
+          </GlassPanel>
+
+          {sellSweep && (
+            <>
+              <div className="tiles">
+                <div className="tile"><div className="tile-label">Qualified</div><div className="tile-value gain">{sellSweep.qualified_count} / {sellSweep.strategy_count}</div></div>
+                <div className="tile"><div className="tile-label">Gate</div><div className="tile-value" style={{ fontSize: 12 }}>PF ≥ {sellSweep.gate?.min_profit_factor ?? 1.3} · worst ≤ {sellSweep.gate?.max_worst_trade_pct_capital ?? 1.5}% · DD ≤ {sellSweep.gate?.max_drawdown_pct ?? 10}% · ≥ {sellSweep.gate?.min_trades ?? 20} trades</div></div>
+                <div className="tile"><div className="tile-label">Window</div><div className="tile-value">{sellSweep.symbol} · {sellSweep.years}y requested</div></div>
+                <div className="tile"><div className="tile-label">Sweep</div><div className="tile-value">{sellSweep.created_at ? new Date(sellSweep.created_at).toLocaleString() : "-"}</div></div>
+              </div>
+              <GlassPanel title="Selling leaderboard">
+                <div className="form" style={{ paddingBottom: 0 }}>
+                  <label>
+                    Show
+                    <select value={sellFilter} onChange={(e) => setSellFilter(e.target.value as "all" | "qualified")}>
+                      <option value="all">All 24</option>
+                      <option value="qualified">Qualified only</option>
+                    </select>
+                  </label>
+                </div>
+                <div className="table-scroll">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>#</th><th style={{ textAlign: "left" }}>Strategy</th><th>Style</th><th>Risk</th>
+                        <th>Trades</th><th className="muted-col">Win %</th><th>PF</th><th>Net P&amp;L</th>
+                        <th>Credit</th><th>Avg margin</th><th>Return on margin</th>
+                        <th>Worst trade</th><th>Tail</th><th>Max DD</th><th>Data window</th>
+                        <th style={{ textAlign: "left" }}>Verdict</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sellSweep.results
+                        .filter((r) => sellFilter === "all" || r.qualified)
+                        .map((r, i) => {
+                          const m = r.metrics;
+                          const s = m?.selling;
+                          return (
+                            <tr key={r.strategy_id}>
+                              <td>{i + 1}</td>
+                              <td style={{ textAlign: "left" }}>{r.name}</td>
+                              <td>{r.style}</td>
+                              <td>
+                                {r.naked
+                                  ? <span className="badge loss">NAKED</span>
+                                  : <span className="badge">DEFINED</span>}
+                              </td>
+                              {r.error || !m ? (
+                                <td colSpan={10} className="loss" style={{ textAlign: "left" }}>{r.error ?? "no result"}</td>
+                              ) : (
+                                <>
+                                  <td>{m.total_trades}</td>
+                                  {/* Shown for reference only — deliberately NOT part of the gate. */}
+                                  <td className="muted-col">{m.win_rate !== null ? `${(m.win_rate * 100).toFixed(1)}%` : "-"}</td>
+                                  <td className={(m.profit_factor ?? 0) >= (sellSweep.gate?.min_profit_factor ?? 1.3) ? "gain" : "loss"}>
+                                    {m.profit_factor ?? "-"}
+                                  </td>
+                                  <td className={m.net_profit >= 0 ? "gain" : "loss"}>{inr(m.net_profit)}</td>
+                                  <td>{inr(s?.total_credit_collected)}</td>
+                                  <td>{inr(s?.avg_margin)}</td>
+                                  <td className={(s?.return_on_margin_pct ?? 0) >= 0 ? "gain" : "loss"}>
+                                    {s?.return_on_margin_pct !== null && s?.return_on_margin_pct !== undefined ? `${num(s.return_on_margin_pct, 1)}%` : "-"}
+                                  </td>
+                                  <td className={(s?.worst_trade_pct_capital ?? 0) > (sellSweep.gate?.max_worst_trade_pct_capital ?? 1.5) ? "loss" : ""}>
+                                    {s?.worst_trade_pct_capital !== null && s?.worst_trade_pct_capital !== undefined ? `${num(s.worst_trade_pct_capital)}%` : "-"}
+                                  </td>
+                                  <td className={(s?.tail_ratio ?? 0) > 3 ? "loss" : ""}>{num(s?.tail_ratio)}</td>
+                                  <td>{m.max_drawdown_pct}%</td>
+                                  <td style={{ fontSize: 10.5 }}>{r.data_from?.slice(0, 10)} → {r.data_to?.slice(0, 10)}</td>
+                                </>
+                              )}
+                              <td style={{ textAlign: "left", maxWidth: 280 }}>
+                                {r.qualified
+                                  ? <span className="badge gain">QUALIFIED</span>
+                                  : r.error
+                                    ? <span className="badge loss">ERROR</span>
+                                    : <span className="fail-reason">{(r.gate_failures ?? []).join("; ") || "—"}</span>}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              </GlassPanel>
+            </>
+          )}
+        </>
+      )}
+
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 18px; }
         .tabs { display: flex; gap: 8px; }
@@ -500,6 +666,11 @@ export default function OptionsPage() {
         .badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.05em; background: var(--canvas-soft); border: 1px solid var(--panel-border); }
         .badge.gain { background: rgba(34, 170, 96, 0.12); border-color: rgba(34, 170, 96, 0.3); }
         .badge.loss { background: var(--loss-dim); border-color: rgba(217, 45, 63, 0.3); }
+        /* Win rate is shown in the selling leaderboard for reference but is NOT part of
+           the gate; dimming it is the cheapest way to stop a reader ranking by it. */
+        .muted-col { color: var(--text-faint); font-weight: 400; }
+        .fail-reason { font-size: 10.5px; color: var(--text-faint); line-height: 1.45; display: block; }
+        .footnote code { font-family: var(--font-data); font-size: 10.5px; padding: 1px 4px; border-radius: 4px; background: var(--canvas-soft); }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
         @media (max-width: 1000px) { .grid-2 { grid-template-columns: 1fr; } }
       `}</style>

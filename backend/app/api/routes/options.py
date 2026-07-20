@@ -6,11 +6,26 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.api.deps import get_current_user
 from app.api.routes.broker import _get_dhan_client
-from app.core.db import instruments_collection, option_backtests_collection, option_sweeps_collection
-from app.schemas.options import OptionsBacktestRequest, OptionsSweepRequest, PayoffRequest
+from app.core.db import (
+    instruments_collection,
+    option_backtests_collection,
+    option_sweeps_collection,
+    option_sweeps_selling_collection,
+)
+from app.schemas.options import (
+    OptionsBacktestRequest,
+    OptionsSellingSweepRequest,
+    OptionsSweepRequest,
+    PayoffRequest,
+)
 from app.services.dhan_client import DhanAPIError
 from options_service.chain import parse_chain
 from options_service.options_backtest import OPTION_BUYING_CATEGORIES, run_options_backtest
+from options_service.options_selling_backtest import (
+    OPTION_SELLING_CATEGORIES,
+    qualify,
+    run_options_selling_backtest,
+)
 from options_service.payoff import Leg, breakevens, max_profit_loss, net_greeks, payoff_diagram
 from tradingai_shared.contracts import STRATEGY_REGISTRY
 from tradingai_shared.domain import Timeframe
@@ -222,6 +237,144 @@ async def options_backtest_all(request: OptionsSweepRequest, _current_user: dict
         "results": results,
     }
     await option_sweeps_collection.insert_one(doc)
+    doc.pop("_id", None)
+    doc["created_at"] = doc["created_at"].isoformat()
+    return doc
+
+
+SELLING_STYLE_TIMEFRAMES = {
+    "options_sell_intraday": Timeframe.M15,
+    "options_sell_expiry": Timeframe.M15,
+    # Swing entries are read off 15m bars but the position is HELD across sessions to
+    # the weekly expiry — the style that measurably rescued the neutral book (see
+    # OPTION_SELLING_CATEGORIES for the before/after numbers).
+    "options_sell_swing": Timeframe.M15,
+    "options_sell_positional": Timeframe.D1,
+}
+
+
+@router.post("/selling/backtest-all")
+async def options_selling_backtest_all(
+    request: OptionsSellingSweepRequest, _current_user: dict = Depends(get_current_user)
+):
+    """Run every registered option-SELLING strategy and gate each on the selling rule
+    (profit factor + tail size + drawdown + sample size — never win rate).
+
+    Every result carries the reasons it failed the gate, so the leaderboard can show why
+    a 90%-win-rate strategy was rejected instead of just marking it red.
+    """
+    from backtesting_service.service import load_bars
+
+    sweep_id = uuid4().hex[:12]
+    bars_cache: dict[Timeframe, list] = {}
+
+    def bars_for(timeframe: Timeframe):
+        if timeframe not in bars_cache:
+            bars_cache[timeframe] = load_bars(request.symbol, timeframe, request.years)
+        return bars_cache[timeframe]
+
+    gate = {
+        "min_profit_factor": request.min_profit_factor,
+        "min_trades": request.min_trades,
+        "max_worst_trade_pct_capital": request.max_worst_trade_pct_capital,
+        "max_drawdown_pct": request.max_drawdown_pct,
+        "naked_min_profit_factor": request.naked_min_profit_factor,
+        "naked_max_worst_trade_pct_capital": request.naked_max_worst_trade_pct_capital,
+    }
+
+    selling = sorted(
+        (sid, cls) for sid, cls in STRATEGY_REGISTRY.items()
+        if cls.metadata.category in OPTION_SELLING_CATEGORIES
+    )
+    results = []
+    for sid, cls in selling:
+        timeframe = SELLING_STYLE_TIMEFRAMES[cls.metadata.category]
+        entry = {
+            "strategy_id": sid,
+            "name": cls.metadata.name,
+            "style": cls.metadata.category.removeprefix("options_sell_"),
+            "timeframe": timeframe.value,
+            "suitable_market": cls.metadata.suitable_market,
+        }
+        bars = await to_thread.run_sync(bars_for, timeframe)
+        if not bars:
+            entry["error"] = f"no local bars for {request.symbol} {timeframe.value} — backfill it first"
+            results.append(entry)
+            continue
+
+        # Weekly expiries exist only for NIFTY in this app's instrument data, so only
+        # NIFTY's intraday/expiry styles get priced off the real Tuesday cycle; the
+        # positional style's 30-day assumption already matches real monthlies.
+        # Weekly-expiry styles price each entry off NIFTY's REAL Tuesday cycle, not a
+        # flat DTE guess. Swing belongs in this set: a "7-day hold" is not a listed
+        # contract on any day but Wednesday, and pricing it as one overstates the time
+        # value collected on late-week entries. Verified that the swing book's edge
+        # survives the switch (10 of 11 robust strategies stay above the gate) — the
+        # realistic cycle roughly doubles turnover because holds are shorter.
+        expiry_wd = (
+            1 if request.symbol == "NIFTY"
+            and cls.metadata.category in (
+                "options_sell_intraday", "options_sell_expiry", "options_sell_swing",
+            )
+            else None
+        )
+        try:
+            result = await to_thread.run_sync(
+                lambda sid=sid, timeframe=timeframe, bars=bars, expiry_wd=expiry_wd: (
+                    run_options_selling_backtest(
+                        sid, request.symbol, timeframe, bars,
+                        initial_capital=request.initial_capital, lot_size=request.lot_size,
+                        quantity_lots=request.quantity_lots, expiry_weekday=expiry_wd,
+                    )
+                )
+            )
+        except Exception as exc:  # one bad strategy must not sink the sweep
+            entry["error"] = str(exc)
+            results.append(entry)
+            continue
+
+        verdict = qualify(result["metrics"], gate)
+        entry.update({
+            "data_from": bars[0].ts.isoformat(),
+            "data_to": bars[-1].ts.isoformat(),
+            "metrics": result["metrics"],
+            "structure": result["structure"],
+            "qualified": verdict["qualified"],
+            "naked": verdict["naked"],
+            "gate_failures": verdict["reasons"],
+        })
+        results.append(entry)
+
+    def sort_key(e):
+        m = e.get("metrics") or {}
+        return (e.get("qualified", False), m.get("profit_factor") or -1, m.get("net_profit") or 0)
+
+    results.sort(key=sort_key, reverse=True)
+    doc = {
+        "sweep_id": sweep_id,
+        "created_at": datetime.now(timezone.utc),
+        "symbol": request.symbol,
+        "years": request.years,
+        "desk": "selling",
+        "gate": gate,
+        "pricing_model": "black_scholes_realized_vol_proxy",
+        "margin_model": "span_exposure_approximation",
+        "qualified_count": sum(1 for e in results if e.get("qualified")),
+        "strategy_count": len(results),
+        "results": results,
+    }
+    await option_sweeps_selling_collection.insert_one(doc)
+    doc.pop("_id", None)
+    doc["created_at"] = doc["created_at"].isoformat()
+    return doc
+
+
+@router.get("/selling/qualified")
+async def qualified_selling_strategies(_current_user: dict = Depends(get_current_user)):
+    """The latest SELLING sweep's leaderboard (all strategies, with gate verdicts)."""
+    doc = await option_sweeps_selling_collection.find_one({}, sort=[("created_at", -1)])
+    if doc is None:
+        return {"sweep_id": None, "results": [], "qualified_count": 0, "strategy_count": 0}
     doc.pop("_id", None)
     doc["created_at"] = doc["created_at"].isoformat()
     return doc

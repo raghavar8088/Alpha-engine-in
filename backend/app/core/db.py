@@ -18,6 +18,11 @@ strategy_runs_collection = db["strategy_runs"]
 live_watchlist_collection = db["live_watchlist"]
 option_backtests_collection = db["option_backtests"]
 option_sweeps_collection = db["option_sweeps"]
+# Option-SELLING sweeps live in their own collection, never mixed with the buying ones:
+# the two are gated on different rules (selling ignores win rate entirely) and carry
+# different columns, so a shared history would produce leaderboards that silently
+# compare strategies judged by different standards.
+option_sweeps_selling_collection = db["option_sweeps_selling"]
 research_signals_collection = db["research_signals"]
 trading_calls_collection = db["trading_calls"]
 # Paper positions auto-opened off each trading call (see app.services.call_positions)
