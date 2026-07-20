@@ -38,6 +38,7 @@ the instruments collection.
 import time
 from datetime import datetime, timedelta, timezone
 
+from angel_feed import FailoverFeed
 from db_selling import bars_collection
 from main import DhanFeed, bucket_start  # feed wrapper + bar bucketing, debugged in prod
 from prelive_selling_engine import PreLiveSellingEngine
@@ -277,7 +278,16 @@ def main() -> None:
 
     while True:
         try:
-            feed = DhanFeed()  # re-read creds each day; Dhan rotates the token
+            # Dhan is the book of record — it is the account the strategies were
+            # qualified against. Angel One is a per-tick standby for PRICES only, used
+            # for the securities Dhan failed to answer for on that tick. If no Angel
+            # credentials are configured the wrapper reports itself unavailable and the
+            # desk runs exactly as it would on Dhan alone, so this is inert until
+            # someone deliberately enables it.
+            feed = FailoverFeed(DhanFeed())  # re-read creds each day; Dhan rotates the token
+            if not feed.angel.available:
+                print("[selling] standby feed not configured — running on Dhan alone",
+                      flush=True)
             if market_open_now():
                 run_session(engine, feed)
                 while market_open_now():
