@@ -142,6 +142,36 @@ class PreLiveEngine:
         self.universe_source: dict | None = None
         self._weekly_expiry = None
         self.refresh_universe(force=True)
+        self._restore_open_positions()
+
+    def _restore_open_positions(self) -> None:
+        """Rebuild in-memory positions from Mongo on startup. Without this, any
+        restart while positions are open orphans their docs forever (the Jul 16
+        incident left 3 stuck docs, and the Jul 20 mid-session hotfix restart
+        would have orphaned the desk's first-ever real trades). stop/target pcts
+        are persisted with the doc; older docs fall back to the default style."""
+        from datetime import datetime as _dt
+        default = OPTION_BUYING_CATEGORIES["options_intraday"]
+        n = 0
+        for d in positions_collection.find({}):
+            try:
+                ts = d.get("entry_ts")
+                entry_ts = _dt.fromisoformat(ts) if isinstance(ts, str) else (ts or datetime.now(IST))
+                pos = PaperPosition(
+                    key=d["key"], strategy_id=d["strategy_id"], tf=d.get("timeframe", "15m"),
+                    option_type=d.get("option_type"), strike=d.get("strike"),
+                    security_id=d["security_id"], entry_premium=d["entry_premium"],
+                    entry_ts=entry_ts,
+                    stop_pct=d.get("stop_pct") or default["premium_stop_pct"],
+                    target_pct=d.get("target_pct") or default["premium_target_pct"],
+                    lots=max(1, int(d.get("qty", LOT_SIZE) // LOT_SIZE)),
+                )
+                self.positions[pos.key] = pos
+                n += 1
+            except Exception as e:
+                print(f"[warn] could not restore position {d.get('key')}: {e}", flush=True)
+        if n:
+            print(f"[prelive] restored {n} open position(s) from Mongo", flush=True)
 
     def refresh_universe(self, force: bool = False) -> None:
         """Reload the qualified (strategy_id, timeframe) universe from the latest
@@ -411,6 +441,8 @@ class PreLiveEngine:
             "entry_premium": round(pos.entry_premium, 2), "mark": round(mark, 2),
             "unrealized": round((mark - pos.entry_premium) * qty, 2),
             "entry_ts": pos.entry_ts.isoformat(), "qty": qty,
+            # persisted so a restart can restore exits exactly (see _restore_open_positions)
+            "stop_pct": pos.stop_pct, "target_pct": pos.target_pct,
         }
 
     def snapshot_equity(self, fetch_ltp):

@@ -99,7 +99,7 @@ class DhanFeed:
         NOT fall back to their own single-security calls for anything already
         requested here, so a rate-limited tick costs exactly one request, never
         one-per-security."""
-        payload = {seg: sorted(set(ids)) for seg, ids in segment_ids.items() if ids}
+        payload = {seg: sorted({int(i) for i in ids}) for seg, ids in segment_ids.items() if ids}
         self._ltp_cache = {}
         self._requested = {(str(sid), seg) for seg, ids in payload.items() for sid in ids}
         if not payload:
@@ -203,7 +203,10 @@ def run_session(engine: PreLiveEngine, feed: DhanFeed):
     last_tick_log = 0.0
 
     while market_open_now() and ist_minutes() < SESSION_END:
-        open_security_ids = [pos.security_id for pos in engine.positions.values()]
+        # int() is load-bearing: Mongo stores security_id as a string, and Dhan's
+        # marketfeed rejects string IDs with HTTP 400 "814 Invalid Request" — which
+        # blinded the desk the moment its first-ever positions opened (2026-07-20).
+        open_security_ids = [int(pos.security_id) for pos in engine.positions.values()]
         feed.prefetch({NIFTY_SPOT_SEGMENT: [NIFTY_SPOT_SECURITY], "NSE_FNO": open_security_ids})
         spot = feed.spot()
         now = ist_now()
