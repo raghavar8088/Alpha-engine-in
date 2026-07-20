@@ -91,6 +91,21 @@ services:
       - backend
     restart: unless-stopped
 
+
+  bars-feed:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.marketdata
+    command: ["sh", "-c", "python warmup_backfill.py; python live_feed.py"]
+    env_file:
+      - .env
+    environment:
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - redis
+    restart: unless-stopped
+    mem_limit: 200m
+
 volumes:
   redisdata:
   miniodata:
