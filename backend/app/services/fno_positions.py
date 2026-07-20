@@ -28,6 +28,11 @@ PRODUCT_TYPES = ("INTRADAY", "MARGIN")
 OPTION_CLASSES = ("INDEX_OPTION", "EQUITY_OPTION")
 FUTURE_CLASSES = ("INDEX_FUTURE", "EQUITY_FUTURE")
 INDEX_UNDERLYINGS = {"NIFTY", "BANKNIFTY", "FINNIFTY", "MIDCPNIFTY", "SENSEX"}
+# Only used when Dhan's margin calculator is unreachable. SPAN+exposure on a short
+# scales with the UNDERLYING notional, not with the premium, so the stand-in is a
+# flat percentage of notional. Set above real SPAN (~10-12% on index options) so an
+# outage errs toward under-trading. See _fallback_margin.
+SHORT_MARGIN_NOTIONAL_PCT = 0.15
 
 
 class OrderError(Exception):
@@ -133,19 +138,34 @@ async def _ltp(dhan: DhanClient, security_id: str, exchange_segment: str) -> flo
     return float(row["last_price"]) if row and row.get("last_price") else None
 
 
+def _fallback_margin(transaction_type: str, quantity: int, price: float, strike: float | None) -> float:
+    """Stand-in margin for when Dhan's calculator can't be reached.
+
+    Premium x quantity is correct for a BUY — that is exactly what you pay. It is
+    badly wrong for a SELL: the broker blocks SPAN+exposure, which tracks the
+    underlying notional, so a ₹0.25 far-OTM strike would reserve a few hundred
+    rupees against a position whose real margin is over a lakh per lot. Use the
+    strike as the underlying proxy for options; a future's own price is already the
+    notional, so it needs no proxy.
+    """
+    if transaction_type != "SELL":
+        return price * quantity
+    return (strike or price) * quantity * SHORT_MARGIN_NOTIONAL_PCT
+
+
 async def _margin(
     dhan: DhanClient, security_id: str, exchange_segment: str, transaction_type: str,
-    quantity: int, product_type: str, price: float,
+    quantity: int, product_type: str, price: float, strike: float | None = None,
 ) -> tuple[float, float, str]:
     try:
         r = await dhan.margin_calculator(
             security_id=security_id, exchange_segment=exchange_segment, transaction_type=transaction_type,
             quantity=quantity, product_type=product_type, price=price,
         )
-        margin = float(r.get("totalMargin") or 0) or (price * quantity)
+        margin = float(r.get("totalMargin") or 0) or _fallback_margin(transaction_type, quantity, price, strike)
         return margin, _parse_leverage(r.get("leverage")), "dhan_calculator"
     except (DhanAPIError, Exception):
-        return price * quantity, 1.0, "fallback"
+        return _fallback_margin(transaction_type, quantity, price, strike), 1.0, "fallback"
 
 
 async def _deployed_margin() -> float:
@@ -203,7 +223,15 @@ async def estimate_margin(
     dhan: DhanClient, security_id: str, exchange_segment: str, transaction_type: str,
     quantity: int, product_type: str, price: float,
 ) -> dict:
-    margin, leverage, source = await _margin(dhan, security_id, exchange_segment, transaction_type, quantity, product_type, price)
+    # The strike only matters if we end up on the fallback path, but it has to be
+    # resolved here — this entry point is handed a bare security_id, not a contract.
+    contract = await instruments_collection.find_one(
+        {"security_id": security_id, "exchange_segment": exchange_segment}, {"strike": 1}
+    )
+    margin, leverage, source = await _margin(
+        dhan, security_id, exchange_segment, transaction_type, quantity, product_type, price,
+        strike=(contract or {}).get("strike"),
+    )
     return {"margin_required": round(margin, 2), "leverage": leverage, "notional_value": round(price * quantity, 2), "source": source}
 
 
@@ -278,16 +306,28 @@ async def _fill(dhan: DhanClient, base_order: dict, fill_price: float) -> dict:
                      "instrument.strike": inst.get("strike"), "instrument.option_type": inst.get("option_type")}
 
     existing = await fno_positions_collection.find_one({**contract_key, "product_type": product_type, "status": "OPEN"})
+    lot_size = inst.get("lot_size", 1) or 1
 
-    if transaction_type == "BUY":
-        margin, leverage, margin_source = await _margin(dhan, security_id, segment, "BUY", quantity, product_type, fill_price)
+    # Positions net per contract+product, the way a real broker book does: an order
+    # on the same side as the open position adds to it, the opposite side reduces or
+    # closes it, and with nothing open either side may open one — BUY goes long,
+    # SELL opens a short (option writing). Legacy docs predate `side`, so any
+    # position without it is a long.
+    existing_side = existing.get("side", "BUY") if existing else None
+    opening = existing is None or existing_side == transaction_type
+
+    if opening:
+        side = transaction_type
+        margin, leverage, margin_source = await _margin(
+            dhan, security_id, segment, side, quantity, product_type, fill_price, strike=inst.get("strike")
+        )
         cash = await available_cash()
         if margin > cash:
             raise OrderError(f"Insufficient paper capital: order needs ₹{margin:,.2f} margin ({product_type}), only ₹{cash:,.2f} available")
         if existing is None:
             position = {
                 "position_id": uuid4().hex[:12], "symbol": base_order["symbol"], "display_name": base_order["display_name"],
-                "instrument_kind": base_order["instrument_kind"], "instrument": inst, "product_type": product_type, "side": "BUY",
+                "instrument_kind": base_order["instrument_kind"], "instrument": inst, "product_type": product_type, "side": side,
                 "lots": base_order["lots"], "quantity": quantity, "avg_price": fill_price, "margin_used": round(margin, 2),
                 "leverage": leverage, "margin_source": margin_source, "ltp": fill_price, "ltp_source": "dhan_quote",
                 "unrealized_pnl": 0.0, "pnl_pct": 0.0, "realized_pnl": 0.0,
@@ -298,8 +338,9 @@ async def _fill(dhan: DhanClient, base_order: dict, fill_price: float) -> dict:
         else:
             new_qty = existing["quantity"] + quantity
             new_avg = (existing["quantity"] * existing["avg_price"] + quantity * fill_price) / new_qty
-            new_margin, new_leverage, new_margin_source = await _margin(dhan, security_id, segment, "BUY", new_qty, product_type, new_avg)
-            lot_size = inst.get("lot_size", 1) or 1
+            new_margin, new_leverage, new_margin_source = await _margin(
+                dhan, security_id, segment, side, new_qty, product_type, new_avg, strike=inst.get("strike")
+            )
             await fno_positions_collection.update_one(
                 {"_id": existing["_id"]},
                 {"$set": {"quantity": new_qty, "lots": new_qty // lot_size, "avg_price": round(new_avg, 4),
@@ -309,13 +350,14 @@ async def _fill(dhan: DhanClient, base_order: dict, fill_price: float) -> dict:
             position = await fno_positions_collection.find_one({"_id": existing["_id"]})
             position.pop("_id", None)
 
-    else:  # SELL — must be exiting an existing open position, no naked shorting
-        if existing is None or existing["quantity"] < quantity:
-            held = existing["quantity"] if existing else 0
-            raise OrderError(f"Cannot sell {quantity} {base_order['display_name']} — only {held} held")
-        realized = round((fill_price - existing["avg_price"]) * quantity, 2)
+    else:  # opposite side — reduce or close the open position
+        if existing["quantity"] < quantity:
+            verb = "sell" if transaction_type == "SELL" else "buy back"
+            raise OrderError(f"Cannot {verb} {quantity} {base_order['display_name']} — only {existing['quantity']} open")
+        # A long earns (exit - entry); a short earns (entry - exit).
+        direction = 1 if existing_side == "BUY" else -1
+        realized = round((fill_price - existing["avg_price"]) * quantity * direction, 2)
         remaining_qty = existing["quantity"] - quantity
-        lot_size = inst.get("lot_size", 1) or 1
         if remaining_qty == 0:
             await fno_positions_collection.update_one(
                 {"_id": existing["_id"]},
@@ -327,7 +369,8 @@ async def _fill(dhan: DhanClient, base_order: dict, fill_price: float) -> dict:
             )
         else:
             new_margin, new_leverage, new_margin_source = await _margin(
-                dhan, security_id, segment, "BUY", remaining_qty, product_type, existing["avg_price"]
+                dhan, security_id, segment, existing_side, remaining_qty, product_type, existing["avg_price"],
+                strike=inst.get("strike"),
             )
             await fno_positions_collection.update_one(
                 {"_id": existing["_id"]},
@@ -361,7 +404,9 @@ async def exit_position(dhan: DhanClient, position_id: str, lots: int | None = N
     base_order = {
         "order_id": f"FNO-{uuid4().hex[:12]}", "symbol": position["symbol"], "display_name": position["display_name"],
         "instrument_kind": position["instrument_kind"], "instrument": inst,
-        "transaction_type": "SELL", "lots": qty // lot_size, "quantity": qty, "order_type": "MARKET",
+        # Exiting means trading the opposite side: sell to close a long, buy back a short.
+        "transaction_type": "BUY" if position.get("side", "BUY") == "SELL" else "SELL",
+        "lots": qty // lot_size, "quantity": qty, "order_type": "MARKET",
         "limit_price": None, "product_type": position["product_type"], "placed_at": _now(), "updated_at": _now(),
     }
     ltp = await _ltp(dhan, inst["security_id"], inst["exchange_segment"])
@@ -378,8 +423,9 @@ async def sync_positions(dhan: DhanClient) -> int:
         ltp = await _ltp(dhan, inst["security_id"], inst["exchange_segment"])
         if ltp is None:
             continue
-        unrealized = round((ltp - pos["avg_price"]) * pos["quantity"], 2)
-        pnl_pct = round((ltp / pos["avg_price"] - 1) * 100, 2) if pos["avg_price"] else 0.0
+        direction = 1 if pos.get("side", "BUY") == "BUY" else -1
+        unrealized = round((ltp - pos["avg_price"]) * pos["quantity"] * direction, 2)
+        pnl_pct = round((ltp / pos["avg_price"] - 1) * 100 * direction, 2) if pos["avg_price"] else 0.0
         await fno_positions_collection.update_one(
             {"_id": pos["_id"]},
             {"$set": {"ltp": ltp, "ltp_source": "dhan_quote", "unrealized_pnl": unrealized, "pnl_pct": pnl_pct, "updated_at": _now()}},

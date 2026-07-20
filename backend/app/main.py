@@ -1,5 +1,8 @@
 import asyncio
+import base64
+import json
 import logging
+import time
 
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,7 +30,7 @@ from app.api.routes import (
     trading_calls,
     watchlist,
 )
-from app.api.routes.broker import store_dhan_credentials
+from app.api.routes.broker import _get_dhan_client, store_dhan_credentials
 from app.core.config import settings
 from app.core.db import (
     live_watchlist_collection,
@@ -43,23 +46,57 @@ logger = logging.getLogger("dhan_totp_refresh")
 
 app = FastAPI(title="TradingAI API")
 
-# Dhan access tokens expire in 24h (SEBI-mandated, fixed regardless of auth method).
-# 20h leaves margin on both ends without refreshing needlessly often.
-DHAN_TOKEN_REFRESH_INTERVAL_SECONDS = 20 * 60 * 60
+# Dhan access tokens expire in 24h (SEBI-mandated, fixed regardless of auth method)
+# and Dhan permits exactly ONE active token per account — minting a new one can pull
+# the token out from under whoever else is holding it (prelive-service rotates its
+# own). So this loop wakes often but mints rarely: it only logs in when the stored
+# token is missing, unreadable, or nearly expired. Refreshing unconditionally on
+# startup is what turned an ordinary container redeploy into a token tug-of-war.
+DHAN_TOKEN_CHECK_INTERVAL_SECONDS = 60 * 60
+DHAN_TOKEN_REFRESH_MARGIN_SECONDS = 2 * 60 * 60
+
+
+def _token_seconds_remaining(access_token: str) -> float | None:
+    """Seconds left on Dhan's JWT, or None if the claim can't be read.
+
+    Unverified decode on purpose — Dhan validates the token on every call; all we
+    need here is the `exp` claim to decide whether a refresh is due.
+    """
+    try:
+        segment = access_token.split(".")[1]
+        payload = json.loads(base64.urlsafe_b64decode(segment + "=" * (-len(segment) % 4)))
+        exp = payload.get("exp")
+        return float(exp) - time.time() if exp else None
+    except Exception:
+        return None
+
+
+async def _stored_token_seconds_remaining() -> float | None:
+    """Life left on the token already in storage; None if there isn't a usable one."""
+    try:
+        user = await get_current_user()
+        client = await _get_dhan_client(str(user["_id"]))
+    except Exception:
+        return None
+    return _token_seconds_remaining(client.access_token)
 
 
 async def _dhan_token_refresh_loop() -> None:
     while True:
         try:
-            data = await totp_login(settings.dhan_client_id, settings.dhan_pin, settings.dhan_totp_secret)
-            user = await get_current_user()
-            await store_dhan_credentials(
-                str(user["_id"]), str(data["dhanClientId"]), data["accessToken"], data.get("dhanClientName"),
-            )
-            logger.info("Dhan access token refreshed via TOTP, expires %s", data.get("expiryTime"))
+            remaining = await _stored_token_seconds_remaining()
+            if remaining is None or remaining <= DHAN_TOKEN_REFRESH_MARGIN_SECONDS:
+                data = await totp_login(settings.dhan_client_id, settings.dhan_pin, settings.dhan_totp_secret)
+                user = await get_current_user()
+                await store_dhan_credentials(
+                    str(user["_id"]), str(data["dhanClientId"]), data["accessToken"], data.get("dhanClientName"),
+                )
+                logger.info("Dhan access token refreshed via TOTP, expires %s", data.get("expiryTime"))
+            else:
+                logger.info("Dhan token still valid for %.1fh — leaving it alone", remaining / 3600)
         except Exception:
             logger.exception("Dhan TOTP auto-refresh failed — will retry next cycle")
-        await asyncio.sleep(DHAN_TOKEN_REFRESH_INTERVAL_SECONDS)
+        await asyncio.sleep(DHAN_TOKEN_CHECK_INTERVAL_SECONDS)
 
 
 @app.on_event("startup")
@@ -77,7 +114,10 @@ async def ensure_indexes() -> None:
 async def start_dhan_auto_refresh() -> None:
     if settings.dhan_client_id and settings.dhan_pin and settings.dhan_totp_secret:
         asyncio.create_task(_dhan_token_refresh_loop())
-        logger.info("Dhan TOTP auto-refresh enabled (every %ss)", DHAN_TOKEN_REFRESH_INTERVAL_SECONDS)
+        logger.info(
+            "Dhan TOTP auto-refresh enabled (checks every %ss, mints only within %sh of expiry)",
+            DHAN_TOKEN_CHECK_INTERVAL_SECONDS, DHAN_TOKEN_REFRESH_MARGIN_SECONDS // 3600,
+        )
     else:
         logger.info("Dhan TOTP auto-refresh disabled — DHAN_CLIENT_ID/DHAN_PIN/DHAN_TOTP_SECRET not fully set")
 
