@@ -12,6 +12,7 @@ import {
   FnoProductType,
   FnoUnderlying,
   OptionChainResponse,
+  OptionLeg,
   TopMover,
   exitFnoPosition,
   fetchFnoFutureExpiries,
@@ -135,6 +136,17 @@ export default function FnoPositionsPage() {
     return chain.strikes.reduce((best, s) => (Math.abs(s.strike - chain.spot) < Math.abs(best.strike - chain.spot) ? s : best)).strike;
   }, [chain]);
 
+  // Dhan returns the entire listed ladder (224 strikes on a NIFTY weekly), and most
+  // of it is far-OTM contracts that have never traded — every field zero. Show only
+  // strikes that are actually live. A deep-ITM leg can quote a real LTP while its OI
+  // and volume sit at zero, so any one of the three fields keeps the row.
+  const liveStrikes = useMemo(() => {
+    if (!chain) return [];
+    const traded = (leg: OptionLeg | undefined) =>
+      !!leg && ((leg.last_price ?? 0) > 0 || (leg.oi ?? 0) > 0 || (leg.volume ?? 0) > 0);
+    return chain.strikes.filter((row) => traded(row.ce) || traded(row.pe));
+  }, [chain]);
+
   const exit = useCallback(
     async (p: FnoPosition) => {
       if (!window.confirm(`Exit ${p.lots} lot(s) of ${p.display_name} @ market?`)) return;
@@ -170,7 +182,7 @@ export default function FnoPositionsPage() {
       <PageHeader
         crumb="F&O Positions"
         title="F&O Positions"
-        subtitle="Live index/stock option chains and futures off your Dhan account — buy CE/PE or futures with real premiums, real Dhan margin, ₹1 crore paper capital. Not investment advice."
+        subtitle="Live index/stock option chains and futures off your Dhan account — buy or sell CE/PE and futures with real premiums, real Dhan margin, ₹1 crore paper capital. Not investment advice."
         actions={
           <button className="reset-cta" onClick={reset} disabled={resetting}>
             {resetting ? "Resetting…" : "Reset"}
@@ -220,6 +232,8 @@ export default function FnoPositionsPage() {
             <div className="empty">Loading chain…</div>
           ) : !chain || chain.strikes.length === 0 ? (
             <div className="empty">No chain data — connect your Dhan account under Broker Settings.</div>
+          ) : liveStrikes.length === 0 ? (
+            <div className="empty">No strikes are trading yet for this expiry — premiums appear once the market is open.</div>
           ) : (
             <div className="table-scroll">
               <table className="data-table chain-table">
@@ -236,37 +250,63 @@ export default function FnoPositionsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {chain.strikes.map((row) => (
+                  {liveStrikes.map((row) => (
                     <tr key={row.strike} className={row.strike === atmStrike ? "atm" : ""}>
                       <td>{(row.ce.oi ?? 0).toLocaleString("en-IN")}</td>
                       <td>{(row.ce.volume ?? 0).toLocaleString("en-IN")}</td>
                       <td className="ltp">{inr(row.ce.last_price)}</td>
                       <td>
-                        <button
-                          className="buy-chip"
-                          onClick={() =>
-                            setDraft({
-                              instrument_kind: "OPTION", symbol, expiry, strike: row.strike, option_type: "CE",
-                              transaction_type: "BUY", ltp: row.ce.last_price ?? 0, lot_size: 1,
-                            })
-                          }
-                        >
-                          Buy CE
-                        </button>
+                        <div className="chip-pair">
+                          <button
+                            className="buy-chip"
+                            onClick={() =>
+                              setDraft({
+                                instrument_kind: "OPTION", symbol, expiry, strike: row.strike, option_type: "CE",
+                                transaction_type: "BUY", ltp: row.ce.last_price ?? 0, lot_size: 1,
+                              })
+                            }
+                          >
+                            Buy CE
+                          </button>
+                          <button
+                            className="sell-chip"
+                            onClick={() =>
+                              setDraft({
+                                instrument_kind: "OPTION", symbol, expiry, strike: row.strike, option_type: "CE",
+                                transaction_type: "SELL", ltp: row.ce.last_price ?? 0, lot_size: 1,
+                              })
+                            }
+                          >
+                            Sell CE
+                          </button>
+                        </div>
                       </td>
                       <td className="strike">{row.strike.toLocaleString("en-IN")}</td>
                       <td>
-                        <button
-                          className="buy-chip pe"
-                          onClick={() =>
-                            setDraft({
-                              instrument_kind: "OPTION", symbol, expiry, strike: row.strike, option_type: "PE",
-                              transaction_type: "BUY", ltp: row.pe.last_price ?? 0, lot_size: 1,
-                            })
-                          }
-                        >
-                          Buy PE
-                        </button>
+                        <div className="chip-pair">
+                          <button
+                            className="buy-chip pe"
+                            onClick={() =>
+                              setDraft({
+                                instrument_kind: "OPTION", symbol, expiry, strike: row.strike, option_type: "PE",
+                                transaction_type: "BUY", ltp: row.pe.last_price ?? 0, lot_size: 1,
+                              })
+                            }
+                          >
+                            Buy PE
+                          </button>
+                          <button
+                            className="sell-chip pe"
+                            onClick={() =>
+                              setDraft({
+                                instrument_kind: "OPTION", symbol, expiry, strike: row.strike, option_type: "PE",
+                                transaction_type: "SELL", ltp: row.pe.last_price ?? 0, lot_size: 1,
+                              })
+                            }
+                          >
+                            Sell PE
+                          </button>
+                        </div>
                       </td>
                       <td className="ltp">{inr(row.pe.last_price)}</td>
                       <td>{(row.pe.volume ?? 0).toLocaleString("en-IN")}</td>
@@ -374,6 +414,9 @@ export default function FnoPositionsPage() {
                         <td style={{ textAlign: "left" }}>
                           <div className="name-cell">
                             <span className="name">{p.display_name}</span>
+                            <span className={p.side === "SELL" ? "chip short" : "chip long"}>
+                              {p.side === "SELL" ? "SHORT" : "LONG"}
+                            </span>
                             {p.status === "CLOSED" && <span className="chip muted">CLOSED</span>}
                           </div>
                         </td>
@@ -479,6 +522,8 @@ export default function FnoPositionsPage() {
         .name { font-weight: 700; font-size: 13px; }
         .chip { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 6px; padding: 2px 7px; font-size: 10px; font-weight: 700; color: var(--text-muted); }
         .chip.muted { color: var(--text-faint); }
+        .chip.long { background: var(--gain-dim); border-color: rgba(14, 159, 110, 0.26); color: var(--gain); }
+        .chip.short { background: var(--loss-dim); border-color: rgba(217, 45, 63, 0.26); color: var(--loss); }
         .gain { color: var(--gain); }
         .loss { color: var(--loss); }
         .pct { font-size: 11px; }
@@ -487,6 +532,9 @@ export default function FnoPositionsPage() {
         .exit-btn { background: var(--loss-dim); color: var(--loss); border: 1px solid rgba(217, 45, 63, 0.26); border-radius: 8px; padding: 6px 14px; font-size: 11.5px; font-weight: 700; cursor: pointer; }
         .buy-chip { background: linear-gradient(145deg, var(--accent), var(--accent-hover)); color: #241404; font-weight: 700; font-size: 11px; border: none; border-radius: 7px; padding: 6px 10px; cursor: pointer; }
         .buy-chip.pe { background: linear-gradient(145deg, #7d34dc, #5b23a8); color: #fff; }
+        .chip-pair { display: flex; align-items: center; gap: 6px; justify-content: center; }
+        .sell-chip { background: var(--loss-dim); color: var(--loss); border: 1px solid rgba(217, 45, 63, 0.3); font-weight: 700; font-size: 11px; border-radius: 7px; padding: 5px 10px; cursor: pointer; }
+        .sell-chip:hover { background: rgba(217, 45, 63, 0.18); }
         .fut-buy-row { display: flex; align-items: center; gap: 14px; padding: 20px; }
         .fut-hint { font-size: 12px; color: var(--text-faint); }
         .movers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 16px 20px; }
@@ -547,6 +595,14 @@ function OrderModal({ draft, onClose, onDone }: { draft: OrderDraft; onClose: ()
 
         {draft.ltp > 0 && <div className="ltp-line">Live LTP (at click): <b>{inr(draft.ltp)}</b></div>}
 
+        {draft.transaction_type === "SELL" && (
+          <div className="sell-warn">
+            Selling collects the premium but blocks <b>margin</b> — typically many times the premium, not the
+            premium itself. If this opens a new short rather than closing a long, the downside is unlimited.
+            Exiting a short buys it back.
+          </div>
+        )}
+
         <div className="field-row">
           <div className="field">
             <label>Lots</label>
@@ -601,6 +657,7 @@ function OrderModal({ draft, onClose, onDone }: { draft: OrderDraft; onClose: ()
         .product-btn { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 8px; padding: 8px 10px; font-size: 11.5px; font-weight: 600; color: var(--text-muted); cursor: pointer; }
         .product-btn.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
         .ltp-line { font-size: 12.5px; color: var(--text-muted); }
+        .sell-warn { background: var(--loss-dim); border: 1px solid rgba(217, 45, 63, 0.26); border-radius: 8px; padding: 9px 11px; font-size: 11.5px; line-height: 1.5; color: var(--loss); }
         .err { color: var(--loss); font-size: 12px; }
         .submit-btn { background: linear-gradient(145deg, var(--accent), var(--accent-hover)); color: #241404; font-weight: 700; font-size: 13.5px; border: none; border-radius: 10px; padding: 12px; cursor: pointer; }
         .submit-btn:disabled { opacity: 0.55; cursor: default; }

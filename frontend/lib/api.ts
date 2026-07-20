@@ -878,7 +878,7 @@ export interface FnoPosition {
   instrument_kind: FnoInstrumentKind;
   instrument: FnoInstrument;
   product_type: FnoProductType;
-  side: "BUY";
+  side: "BUY" | "SELL";
   lots: number;
   quantity: number;
   avg_price: number;
