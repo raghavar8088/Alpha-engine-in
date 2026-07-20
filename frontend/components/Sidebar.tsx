@@ -130,12 +130,26 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
       },
       {
         href: "/prelive",
-        label: "Pre-Live Desk",
+        label: "Pre-Live Desk · Buying",
         icon: (
           <>
             <path d="M4 4h16v12H4z" />
             <path d="M4 20h16M8 16v4M16 16v4" />
             <path d="M7 11l3-3 2 2 4-5" />
+          </>
+        ),
+      },
+      {
+        // Named and iconed to be unmistakable against the buying desk above: the two
+        // have opposite risk profiles (bounded loss vs capped gain and a large tail)
+        // and must never be confused for one another at a glance.
+        href: "/prelive-selling",
+        label: "Pre-Live Desk · Selling",
+        icon: (
+          <>
+            <path d="M4 4h16v12H4z" />
+            <path d="M4 20h16M8 16v4M16 16v4" />
+            <path d="M7 7l3 3 2-2 4 5" />
           </>
         ),
       },

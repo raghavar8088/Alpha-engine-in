@@ -491,6 +491,136 @@ export async function fetchQualifiedSellingStrategies(): Promise<OptionsSellingS
   return apiFetch("/api/options/selling/qualified");
 }
 
+// --- Pre-Live SELLING desk ---
+//
+// Separate types from the buying desk's, not shared ones. Selling positions are
+// multi-leg, carry margin and credit, and can be held for days; a shared type would
+// make every selling-specific field optional and let a selling number render on a
+// buying page. The two desks must never be confusable.
+
+export interface SellingLeg {
+  option_type: "CE" | "PE";
+  strike: number;
+  sold: boolean;
+  security_id: string;
+  symbol?: string;
+  entry_premium: number;
+}
+
+export interface SellingPosition {
+  key: string;
+  strategy_id: string;
+  timeframe: string;
+  legs: SellingLeg[];
+  structure: string;
+  credit: number;
+  lots: number;
+  qty: number;
+  margin: number;
+  margin_basis: "defined_risk" | "naked_span" | string;
+  expiry: string | null;
+  entry_spot: number;
+  entry_ts: string;
+  mark?: number;
+  unrealized?: number;
+  updated_at?: string;
+}
+
+export interface SellingDeskStatus {
+  desk: "selling";
+  running: boolean;
+  heartbeat: string | null;
+  session: string | null;
+  universe_size: number;
+  universe_source: Record<string, any> | null;
+  open_structures: number;
+  breaker_tripped: boolean;
+  breaker_reason: string | null;
+  initial_capital: number;
+  realized: number;
+  balance: number;
+  margin_deployed: number;
+  free_margin: number;
+  realized_all_time: number;
+  unrealized: number;
+  credit_at_risk: number;
+  sessions_traded: number;
+  open_structures_detail: SellingPosition[];
+}
+
+export interface SellingScore {
+  strategy_id: string;
+  trades: number;
+  wins: number;
+  losses: number;
+  net_pnl: number;
+  win_rate: number | null;
+  profit_factor: number | null;
+  updated_at?: string;
+}
+
+export interface SellingTrade {
+  key: string;
+  strategy_id: string;
+  timeframe: string;
+  legs: SellingLeg[];
+  structure: string;
+  credit: number;
+  exit_cost: number;
+  lots: number;
+  qty: number;
+  margin: number;
+  margin_basis: string;
+  expiry: string | null;
+  entry_ts: string;
+  exit_ts: string;
+  entry_spot: number;
+  exit_spot: number | null;
+  exit_reason: string;
+  pnl: number;
+  held_days: number;
+}
+
+export interface SellingEquityPoint {
+  ts: string;
+  session: string | null;
+  equity: number;
+  realized: number;
+  unrealized: number;
+  margin_deployed: number;
+  open_structures: number;
+}
+
+export interface SellingDay {
+  session: string;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  net_pnl: number;
+  trades: number;
+  open_carried: number;
+  margin_deployed: number;
+  start_equity: number;
+  breaker_tripped: boolean;
+  breaker_reason: string | null;
+  roi_pct: number;
+}
+
+export async function fetchSellingDeskStatus(): Promise<SellingDeskStatus> {
+  return apiFetch("/api/prelive-selling/status");
+}
+export async function fetchSellingDeskLeaderboard(): Promise<SellingScore[]> {
+  return apiFetch("/api/prelive-selling/leaderboard");
+}
+export async function fetchSellingDeskTrades(limit = 100): Promise<SellingTrade[]> {
+  return apiFetch(`/api/prelive-selling/trades?limit=${limit}`);
+}
+export async function fetchSellingDeskEquity(limit = 500): Promise<SellingEquityPoint[]> {
+  return apiFetch(`/api/prelive-selling/equity?limit=${limit}`);
+}
+export async function fetchSellingDeskDaily(limit = 60): Promise<SellingDay[]> {
+  return apiFetch(`/api/prelive-selling/daily?limit=${limit}`);
+}
+
 // --- Trading Calls (Kotak-Neo-style research calls) ---
 
 export type CallSegment = "STOCK" | "FNO" | "COMMODITY";

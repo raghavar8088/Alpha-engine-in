@@ -93,20 +93,24 @@ def _now():
 def load_qualified_basket() -> tuple[list[tuple[str, str]], dict | None]:
     """The qualified basket from the latest SELLING sweep.
 
-    Only strategies the gate passed are traded. If the sweep recorded out-of-sample
-    verdicts (`test_qualified`), those are required too — a strategy that qualified on
-    the full history but failed on data it was never selected against is a mining
-    artifact, and this desk exists to forward-test real edges, not to launder them.
+    A strategy is traded only if the sweep marked it `in_basket`, which means all three
+    of: it passed the gate, it survived the chronological out-of-sample split, and it is
+    not a duplicate of something already in the basket.
+
+    The daemon requires the flag rather than deriving it. An earlier version checked
+    `qualified` and skipped entries whose `test_qualified` was False — which silently
+    admitted everything, because the sweep did not write that field at all. The result
+    would have been a desk trading every full-history qualifier, including naked shorts
+    that collapse out of sample. Absence of a verdict is now treated as absence of
+    approval: no `in_basket`, no trading.
     """
     doc = option_sweeps_selling_collection.find_one({}, sort=[("created_at", -1)])
     if doc is None:
         return [], None
     pairs = []
     for entry in doc.get("results", []):
-        if not entry.get("qualified"):
+        if not entry.get("in_basket"):
             continue
-        if entry.get("test_qualified") is False:
-            continue  # explicitly failed out of sample
         sid = entry["strategy_id"]
         cls = STRATEGY_REGISTRY.get(sid)
         if cls is None:
@@ -116,9 +120,15 @@ def load_qualified_basket() -> tuple[list[tuple[str, str]], dict | None]:
             pairs.append((sid, tf))
     meta = {
         "sweep_id": doc.get("sweep_id"), "created_at": doc.get("created_at"),
-        "symbol": doc.get("symbol"), "qualified_count": doc.get("qualified_count"),
-        "strategy_count": doc.get("strategy_count"), "gate": doc.get("gate"),
+        "symbol": doc.get("symbol"), "strategy_count": doc.get("strategy_count"),
+        "qualified_count": doc.get("qualified_count"),
+        "robust_count": doc.get("robust_count"), "basket_count": doc.get("basket_count"),
+        "gate": doc.get("gate"), "overlap_threshold": doc.get("overlap_threshold"),
     }
+    if not pairs and doc.get("qualified_count"):
+        print(f"[selling] sweep {doc.get('sweep_id')} has {doc['qualified_count']} qualified "
+              f"strategies but none marked in_basket — it predates the out-of-sample/overlap "
+              f"filters. Re-run the selling sweep; trading nothing until then.", flush=True)
     return sorted(set(pairs)), meta
 
 

@@ -96,3 +96,20 @@ class OptionsSellingSweepRequest(BaseModel):
         "stop level, so a naked short's true gap risk is understated and needs margin",
     )
     naked_max_worst_trade_pct_capital: float = Field(default=1.0, gt=0)
+    train_fraction: float = Field(
+        default=0.6, gt=0.2, lt=0.95,
+        description="chronological split: this share of bars is selected on, the rest is "
+        "held back. Testing ~180 candidates against one history guarantees some clear the "
+        "gate on noise; the held-back tail is what separates edge from luck",
+    )
+    min_test_trades: int = Field(
+        default=15, ge=1,
+        description="a held-back period with fewer trades than this is too thin to judge, "
+        "so the strategy is treated as unproven rather than robust",
+    )
+    overlap_threshold: float = Field(
+        default=0.60, gt=0, le=1.0,
+        description="two survivors whose ENTRY DAYS overlap by more than this are the same "
+        "bet; the lower out-of-sample profit factor is dropped from the basket. Without "
+        "this a desk can hold five names of one trade and believe it is diversified",
+    )

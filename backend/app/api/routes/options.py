@@ -22,7 +22,10 @@ from app.services.dhan_client import DhanAPIError
 from options_service.chain import parse_chain
 from options_service.options_backtest import OPTION_BUYING_CATEGORIES, run_options_backtest
 from options_service.options_selling_backtest import (
+    DEFAULT_OVERLAP_THRESHOLD,
     OPTION_SELLING_CATEGORIES,
+    entry_days,
+    overlap_groups,
     qualify,
     run_options_selling_backtest,
 )
@@ -287,6 +290,7 @@ async def options_selling_backtest_all(
         if cls.metadata.category in OPTION_SELLING_CATEGORIES
     )
     results = []
+    days_by_strategy: dict[str, set] = {}  # entry days, for the overlap pass below
     for sid, cls in selling:
         timeframe = SELLING_STYLE_TIMEFRAMES[cls.metadata.category]
         entry = {
@@ -318,22 +322,32 @@ async def options_selling_backtest_all(
             )
             else None
         )
+        # Full history, plus a chronological hold-back run. The split is what separates
+        # "this works" from "this got lucky once" when ~180 candidates are tested against
+        # one price history — at a PF gate, some WILL clear it on noise alone. Split is
+        # strictly by time; shuffling bars would leak the future into the past and make
+        # almost everything look robust.
+        cut = int(len(bars) * request.train_fraction)
         try:
-            result = await to_thread.run_sync(
-                lambda sid=sid, timeframe=timeframe, bars=bars, expiry_wd=expiry_wd: (
-                    run_options_selling_backtest(
-                        sid, request.symbol, timeframe, bars,
-                        initial_capital=request.initial_capital, lot_size=request.lot_size,
-                        quantity_lots=request.quantity_lots, expiry_weekday=expiry_wd,
-                    )
+            def _go(window, sid=sid, timeframe=timeframe, expiry_wd=expiry_wd, trades=False):
+                return run_options_selling_backtest(
+                    sid, request.symbol, timeframe, window,
+                    initial_capital=request.initial_capital, lot_size=request.lot_size,
+                    quantity_lots=request.quantity_lots, expiry_weekday=expiry_wd,
+                    include_trades=trades,
                 )
-            )
+
+            result = await to_thread.run_sync(lambda: _go(bars, trades=True))
+            test = await to_thread.run_sync(lambda: _go(bars[cut:]))
         except Exception as exc:  # one bad strategy must not sink the sweep
             entry["error"] = str(exc)
             results.append(entry)
             continue
 
         verdict = qualify(result["metrics"], gate)
+        test_verdict = qualify(test["metrics"], gate)
+        thin_test = test["metrics"]["total_trades"] < request.min_test_trades
+        days_by_strategy[sid] = entry_days(result.get("trades"))
         entry.update({
             "data_from": bars[0].ts.isoformat(),
             "data_to": bars[-1].ts.isoformat(),
@@ -342,12 +356,53 @@ async def options_selling_backtest_all(
             "qualified": verdict["qualified"],
             "naked": verdict["naked"],
             "gate_failures": verdict["reasons"],
+            # Out-of-sample verdict on the held-back tail.
+            "test_qualified": test_verdict["qualified"] and not thin_test,
+            "test_metrics": {
+                "profit_factor": test["metrics"]["profit_factor"],
+                "total_trades": test["metrics"]["total_trades"],
+                "net_profit": test["metrics"]["net_profit"],
+                "win_rate": test["metrics"]["win_rate"],
+                "max_drawdown_pct": test["metrics"]["max_drawdown_pct"],
+            },
+            "test_failures": (
+                [f"only {test['metrics']['total_trades']} held-back trades "
+                 f"(need {request.min_test_trades})"] if thin_test else test_verdict["reasons"]
+            ),
         })
         results.append(entry)
 
+    # --- de-duplicate the survivors ------------------------------------------------
+    # A strategy that passes both the gate and the split can still be another survivor
+    # wearing a different name. Keep the higher out-of-sample profit factor of each
+    # overlapping pair and record what each dropped one duplicates, so the leaderboard
+    # can show WHY rather than silently omitting it.
+    def _test_pf(e):
+        return (e.get("test_metrics") or {}).get("profit_factor") or 0
+
+    survivors = [e for e in results if e.get("qualified") and e.get("test_qualified")]
+    survivors.sort(key=_test_pf, reverse=True)
+    kept, dropped = overlap_groups(
+        days_by_strategy, [e["strategy_id"] for e in survivors], request.overlap_threshold
+    )
+    kept_set = set(kept)
+    for e in results:
+        sid = e["strategy_id"]
+        if sid in dropped:
+            e["independent"] = False
+            e["duplicate_of"] = dropped[sid]["duplicate_of"]
+            e["overlap"] = dropped[sid]["overlap"]
+        else:
+            e["independent"] = sid in kept_set
+    # The basket the daemon trades: passed the gate, survived out of sample, and is not
+    # a duplicate of something already in it.
+    for e in results:
+        e["in_basket"] = bool(e.get("qualified") and e.get("test_qualified") and e.get("independent"))
+
     def sort_key(e):
         m = e.get("metrics") or {}
-        return (e.get("qualified", False), m.get("profit_factor") or -1, m.get("net_profit") or 0)
+        return (e.get("in_basket", False), e.get("qualified", False),
+                _test_pf(e), m.get("profit_factor") or -1)
 
     results.sort(key=sort_key, reverse=True)
     doc = {
@@ -357,10 +412,16 @@ async def options_selling_backtest_all(
         "years": request.years,
         "desk": "selling",
         "gate": gate,
+        "train_fraction": request.train_fraction,
+        "min_test_trades": request.min_test_trades,
+        "overlap_threshold": request.overlap_threshold,
         "pricing_model": "black_scholes_realized_vol_proxy",
         "margin_model": "span_exposure_approximation",
-        "qualified_count": sum(1 for e in results if e.get("qualified")),
+        # The funnel, so the count can never be quoted without its context.
         "strategy_count": len(results),
+        "qualified_count": sum(1 for e in results if e.get("qualified")),
+        "robust_count": sum(1 for e in results if e.get("qualified") and e.get("test_qualified")),
+        "basket_count": sum(1 for e in results if e.get("in_basket")),
         "results": results,
     }
     await option_sweeps_selling_collection.insert_one(doc)

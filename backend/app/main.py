@@ -19,6 +19,7 @@ from app.api.routes import (
     options,
     portfolio,
     prelive,
+    prelive_selling,
     research,
     risk,
     strategies,
@@ -133,6 +134,7 @@ app.include_router(ai.router)
 app.include_router(research.router)
 app.include_router(trading_calls.router)
 app.include_router(prelive.router)
+app.include_router(prelive_selling.router)
 app.include_router(watchlist.router)
 app.include_router(manual_positions.router)
 app.include_router(fno_positions.router)

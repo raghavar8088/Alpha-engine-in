@@ -674,6 +674,65 @@ def qualify(metrics: dict, gate: dict | None = None) -> dict:
     return {"qualified": not reasons, "naked": naked, "reasons": reasons}
 
 
+def entry_days(trades) -> set:
+    """The set of calendar dates a strategy OPENED a position on.
+
+    Two strategies that open on the same days with similar structures are one bet,
+    however differently their entry rules are worded — see `overlap_groups`.
+    """
+    out = set()
+    for t in trades or []:
+        ts = t.get("entry_ts")
+        if ts is None:
+            continue
+        out.add(ts.date() if hasattr(ts, "date") else str(ts)[:10])
+    return out
+
+
+def jaccard(a: set, b: set) -> float:
+    """Overlap of two entry-day sets, 0.0 (never coincide) to 1.0 (identical)."""
+    if not a and not b:
+        return 0.0
+    union = a | b
+    return len(a & b) / len(union) if union else 0.0
+
+
+# Above this entry-day overlap, two strategies are treated as the same bet. 0.60 is a
+# judgement call, and a deliberately conservative one: measured pairs in this library
+# cluster either below ~0.5 (genuinely different reads) or above ~0.65 (the same quiet-
+# tape condor wearing a different regime name), so the threshold sits in the empty band
+# between them rather than cutting through a cluster.
+DEFAULT_OVERLAP_THRESHOLD = 0.60
+
+
+def overlap_groups(days_by_strategy: dict, rank: list, threshold: float = DEFAULT_OVERLAP_THRESHOLD):
+    """Greedy de-duplication of a qualified set.
+
+    `rank` is the strategy ids best-first (the survivor of each cluster is the one the
+    caller ranks highest). Returns (kept, dropped) where `dropped` maps each removed
+    strategy to the kept one it duplicates and their overlap.
+
+    This exists because a count of qualifiers is meaningless without it. In this library
+    two 'different' dip strategies opened on the same days 98% of the time, and five
+    separately-named quiet-tape condors turned out to be one bet — a desk running all
+    five would be 5x concentrated while believing it was diversified.
+    """
+    kept, dropped = [], {}
+    for sid in rank:
+        mine = days_by_strategy.get(sid, set())
+        clash = None
+        for k in kept:
+            j = jaccard(mine, days_by_strategy.get(k, set()))
+            if j >= threshold:
+                clash = (k, round(j, 3))
+                break
+        if clash is None:
+            kept.append(sid)
+        else:
+            dropped[sid] = {"duplicate_of": clash[0], "overlap": clash[1]}
+    return kept, dropped
+
+
 def _selling_metrics(
     trades, metrics: dict, initial_capital: float, margins: list[float],
     credits: list[float], naked_trades: int, rejected_for_margin: int,
