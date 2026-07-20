@@ -29,6 +29,30 @@ DERIVATIVE_CLASSES = {
 }
 CASH_CLASSES = {"EQUITY", "ETF"}
 
+# Which Angel exchange lists the same contract as a given Dhan segment. Angel
+# carries some commodities on both MCX and NCO (NSE's commodity segment) under
+# identical name/expiry/strike, so without this preference whichever row appears
+# later in the master silently wins — which mapped MCX gold to the NSE listing.
+PREFERRED_ANGEL_EXCHANGE = {
+    "NSE_EQ": "NSE",
+    "BSE_EQ": "BSE",
+    "IDX_I": "NSE",
+    "NSE_FNO": "NFO",
+    "BSE_FNO": "BFO",
+    "MCX_COMM": "MCX",
+}
+
+
+def _pick(candidates: dict[str, str] | None, dhan_segment: str | None) -> tuple[str, str] | None:
+    """Choose the listing on the venue matching the Dhan segment, else any of them."""
+    if not candidates:
+        return None
+    preferred = PREFERRED_ANGEL_EXCHANGE.get(dhan_segment or "")
+    if preferred and preferred in candidates:
+        return candidates[preferred], preferred
+    exchange, token = next(iter(candidates.items()))
+    return token, exchange
+
 
 def to_angel_expiry(iso_date: str) -> str:
     """2026-07-21 -> 21JUL2026, the format Angel's master uses."""
@@ -37,10 +61,12 @@ def to_angel_expiry(iso_date: str) -> str:
 
 
 def _build_lookups(rows: list[dict]) -> tuple[dict, dict, dict]:
-    """Three indexes: derivatives by contract identity, cash by ticker, indices by name."""
-    deriv: dict[tuple, tuple[str, str]] = {}
-    cash: dict[str, tuple[str, str]] = {}
-    indices: dict[str, tuple[str, str]] = {}
+    """Three indexes: derivatives by contract identity, cash by ticker, indices by
+    name. Each maps to {angel_exchange: token} rather than a single token, because
+    the same contract can be listed on more than one Angel venue."""
+    deriv: dict[tuple, dict[str, str]] = {}
+    cash: dict[str, dict[str, str]] = {}
+    indices: dict[str, dict[str, str]] = {}
     for row in rows:
         seg = row.get("exch_seg")
         itype = row.get("instrumenttype") or ""
@@ -61,20 +87,22 @@ def _build_lookups(rows: list[dict]) -> tuple[dict, dict, dict]:
             kind = "FUT" if is_future else sym[-2:]
             if kind not in ("FUT", "CE", "PE"):
                 continue
-            deriv[(row.get("name"), row.get("expiry"), strike, kind)] = (str(token), seg)
+            deriv.setdefault((row.get("name"), row.get("expiry"), strike, kind), {}).setdefault(seg, str(token))
         elif seg in ("NSE", "BSE") and sym.endswith("-EQ"):
-            cash.setdefault(sym[:-3].upper(), (str(token), seg))
+            cash.setdefault(sym[:-3].upper(), {}).setdefault(seg, str(token))
         elif seg in ("NSE", "BSE"):
-            indices.setdefault((row.get("name") or "").upper(), (str(token), seg))
+            indices.setdefault((row.get("name") or "").upper(), {}).setdefault(seg, str(token))
     return deriv, cash, indices
 
 
 def _match(doc: dict, deriv: dict, cash: dict, indices: dict) -> tuple[str, str] | None:
     asset_class = doc.get("asset_class")
+    segment = doc.get("exchange_segment")
     if asset_class in CASH_CLASSES:
-        return cash.get((doc.get("symbol") or "").upper())
+        return _pick(cash.get((doc.get("symbol") or "").upper()), segment)
     if asset_class == "INDEX":
-        return indices.get((doc.get("symbol") or "").upper()) or indices.get((doc.get("name") or "").upper())
+        found = indices.get((doc.get("symbol") or "").upper()) or indices.get((doc.get("name") or "").upper())
+        return _pick(found, segment)
     if asset_class in DERIVATIVE_CLASSES:
         expiry = doc.get("expiry")
         if not expiry:
@@ -83,7 +111,7 @@ def _match(doc: dict, deriv: dict, cash: dict, indices: dict) -> tuple[str, str]
         strike = round(float(doc["strike"]), 2) if doc.get("strike") is not None else -1.0
         if kind == "FUT":
             strike = -1.0
-        return deriv.get((doc.get("underlying_symbol"), to_angel_expiry(expiry), strike, kind))
+        return _pick(deriv.get((doc.get("underlying_symbol"), to_angel_expiry(expiry), strike, kind)), segment)
     return None
 
 
