@@ -14,6 +14,16 @@ class Settings(BaseSettings):
     dhan_client_id: str = ""
     dhan_pin: str = ""
     dhan_totp_secret: str = ""
+    # Angel One SmartAPI — standby market-data source for when Dhan's single
+    # permitted access token is rotated out from under us. Quotes and candles only;
+    # orders stay on Dhan. Angel enforces IP whitelisting, so angelone_public_ip
+    # must be one of the static IPs registered against the API key.
+    angelone_base_url: str = "https://apiconnect.angelone.in"
+    angelone_api_key: str = ""
+    angelone_client_code: str = ""
+    angelone_pin: str = ""
+    angelone_totp_secret: str = ""
+    angelone_public_ip: str = ""
     groq_api_key: str = ""
     mistral_api_key: str = ""
     deepseek_api_key: str = ""

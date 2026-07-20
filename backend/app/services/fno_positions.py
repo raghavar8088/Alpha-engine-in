@@ -20,6 +20,7 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 from app.core.db import fno_orders_collection, fno_positions_collection, instruments_collection
+from app.services.broker_data import get_ltp
 from app.services.dhan_client import DhanAPIError, DhanClient
 from options_service.chain import parse_chain
 
@@ -128,14 +129,17 @@ async def _resolve_future(symbol: str, expiry: str) -> dict:
     return doc
 
 
+async def _ltp_with_source(dhan: DhanClient, security_id: str, exchange_segment: str) -> tuple[float | None, str]:
+    """Live price plus which broker produced it — falls back to Angel One when Dhan
+    can't answer, so a rotated-out Dhan token no longer blinds position marking."""
+    return await get_ltp(dhan, security_id, exchange_segment)
+
+
 async def _ltp(dhan: DhanClient, security_id: str, exchange_segment: str) -> float | None:
-    try:
-        raw = await dhan.quote_data({exchange_segment: [int(security_id)]})
-    except (DhanAPIError, Exception):
-        return None
-    data = raw.get("data", {}) if isinstance(raw, dict) else {}
-    row = data.get(exchange_segment, {}).get(str(security_id))
-    return float(row["last_price"]) if row and row.get("last_price") else None
+    price, _source = await get_ltp(dhan, security_id, exchange_segment)
+    return price
+
+
 
 
 def _fallback_margin(transaction_type: str, quantity: int, price: float, strike: float | None) -> float:
@@ -420,7 +424,7 @@ async def sync_positions(dhan: DhanClient) -> int:
     updated = 0
     for pos in open_positions:
         inst = pos["instrument"]
-        ltp = await _ltp(dhan, inst["security_id"], inst["exchange_segment"])
+        ltp, ltp_source = await _ltp_with_source(dhan, inst["security_id"], inst["exchange_segment"])
         if ltp is None:
             continue
         direction = 1 if pos.get("side", "BUY") == "BUY" else -1
@@ -428,7 +432,7 @@ async def sync_positions(dhan: DhanClient) -> int:
         pnl_pct = round((ltp / pos["avg_price"] - 1) * 100 * direction, 2) if pos["avg_price"] else 0.0
         await fno_positions_collection.update_one(
             {"_id": pos["_id"]},
-            {"$set": {"ltp": ltp, "ltp_source": "dhan_quote", "unrealized_pnl": unrealized, "pnl_pct": pnl_pct, "updated_at": _now()}},
+            {"$set": {"ltp": ltp, "ltp_source": ltp_source, "unrealized_pnl": unrealized, "pnl_pct": pnl_pct, "updated_at": _now()}},
         )
         updated += 1
 

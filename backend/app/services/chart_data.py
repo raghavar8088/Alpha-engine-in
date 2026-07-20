@@ -14,6 +14,7 @@ from datetime import datetime, timedelta, timezone
 
 from app.core.db import instruments_collection
 from app.services import chart_cache
+from app.services.broker_data import angel_bars
 from app.services.dhan_client import DhanAPIError, DhanClient
 
 IST = timezone(timedelta(hours=5, minutes=30))
@@ -200,6 +201,7 @@ async def _fetch_bars(
     low: list[float] = []
     c: list[float] = []
     v: list[float] = []
+    dhan_failure: str | None = None
 
     try:
         if resolution in ("D", "W"):
@@ -229,7 +231,9 @@ async def _fetch_bars(
                 t.extend(ct); o.extend(co); h.extend(ch); low.extend(cl); c.extend(cc); v.extend(cv)
                 chunk_start = chunk_end
     except DhanAPIError as exc:
-        raise ChartError(f"Dhan history request failed: {exc.remarks}")
+        # Don't give up yet — Angel One below is an independent source that
+        # survives the Dhan token being rotated out from under us.
+        dhan_failure = exc.remarks
 
     series = {"t": t, "o": o, "h": h, "l": low, "c": c, "v": v}
 
@@ -242,6 +246,22 @@ async def _fetch_bars(
             series = chart_cache.merge_series(stored, series)
 
     if not series["t"]:
+        # Nothing from Dhan — it either errored or served an empty window. Try Angel
+        # One, which authenticates independently. Angel has no weekly interval, so
+        # weekly is aggregated from its daily bars exactly as Dhan's is above.
+        fallback = await angel_bars(
+            security_id, exchange_segment, "D" if resolution == "W" else resolution, from_ts, to_ts
+        )
+        if fallback:
+            if resolution == "W":
+                (fallback["t"], fallback["o"], fallback["h"],
+                 fallback["l"], fallback["c"], fallback["v"]) = _aggregate_weekly(
+                    fallback["t"], fallback["o"], fallback["h"],
+                    fallback["l"], fallback["c"], fallback["v"],
+                )
+            return fallback
+        if dhan_failure:
+            raise ChartError(f"Dhan history request failed: {dhan_failure}")
         return {"s": "no_data"}
     return {"s": "ok", **series}
 
