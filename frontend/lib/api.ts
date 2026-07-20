@@ -1382,6 +1382,12 @@ export interface ChartSymbol {
   exchange_segment: string;
   asset_class: string;
   tick_size: number;
+  // Derivatives only — absent on equities/ETFs/indices.
+  expiry?: string | null;
+  strike?: number | null;
+  option_type?: string | null;
+  underlying_symbol?: string | null;
+  lot_size?: number | null;
 }
 
 export interface ChartSymbolInfo {
@@ -1392,8 +1398,16 @@ export interface ChartSymbolInfo {
   asset_class: string;
   pricescale: number;
   timezone: string;
+  /** "HHMM-HHMM" IST. MCX runs far later than the equity 0915-1530. */
   session: string;
   supported_resolutions: string[];
+  expiry?: string | null;
+  strike?: number | null;
+  option_type?: string | null;
+  underlying_symbol?: string | null;
+  lot_size?: number | null;
+  is_option?: boolean;
+  is_commodity?: boolean;
 }
 
 export type ChartResolution = "1" | "5" | "15" | "60" | "D" | "W";
@@ -1441,6 +1455,266 @@ export async function fetchChartTrendline(
   securityId: string, exchangeSegment: string, resolution: ChartResolution,
 ): Promise<{ trend: ChartTrend | null }> {
   return apiFetch(`/api/chart/trendline?security_id=${securityId}&exchange_segment=${exchangeSegment}&resolution=${resolution}`);
+}
+
+/** SSE endpoint for live bar updates.
+ *
+ * Unlike the market-data WebSocket this is plain HTTP, so it works both direct
+ * and through the same-origin proxy in `app/api/[...path]/route.ts` — which is
+ * the only path available in production, where WebSocket upgrades don't survive
+ * the hop. Returns a relative URL in proxy mode, which EventSource resolves
+ * against the current origin. */
+export function chartStreamUrl(
+  securityId: string, exchangeSegment: string, resolution: ChartResolution,
+): string {
+  return `${API_URL}/api/chart/stream?security_id=${securityId}&exchange_segment=${exchangeSegment}&resolution=${resolution}`;
+}
+
+// --- Chart cross-module overlays (Phase 5) ---
+
+export interface ChartPositionOverlay {
+  source: "positions" | "fno";
+  position_id: string | null;
+  symbol: string;
+  display_name: string;
+  side: string;
+  quantity: number;
+  /** Average fill. Positions in this app carry no SL/target, so only entry is drawn. */
+  entry_price: number;
+  ltp: number | null;
+  unrealized_pnl: number | null;
+  product_type: string | null;
+  opened_at: string | null;
+}
+
+export interface ChartCallOverlay {
+  call_id: string;
+  symbol: string;
+  display_name: string;
+  segment: string;
+  side: string;
+  horizon: string | null;
+  entry_price: number;
+  target: number;
+  stoploss: number;
+  confidence: number | null;
+  rationale: string | null;
+  created_at: string | null;
+}
+
+export interface ChartBacktestRun {
+  id: string;
+  strategy_id: string;
+  symbol: string;
+  timeframe: string;
+  start: string | null;
+  end: string | null;
+  created_at: string | null;
+  total_return_pct: number | null;
+  win_rate: number | null;
+  trades: number | null;
+}
+
+export interface ChartBacktestTrade {
+  entry_ts: string;
+  exit_ts: string | null;
+  direction: string;
+  entry_price: number;
+  exit_price: number | null;
+  quantity: number;
+  pnl: number | null;
+  charges: number;
+  exit_reason: string;
+}
+
+export interface ChartOptionContext {
+  available: boolean;
+  reason?: string;
+  symbol?: string;
+  expiry?: string;
+  spot?: number;
+  days_to_expiry?: number;
+  max_pain?: number | null;
+  pcr_oi?: number | null;
+  top_call_oi?: { strike: number; oi: number }[];
+  top_put_oi?: { strike: number; oi: number }[];
+}
+
+export async function fetchChartOverlays(
+  securityId: string, exchangeSegment: string,
+): Promise<{ positions: ChartPositionOverlay[]; calls: ChartCallOverlay[] }> {
+  return apiFetch(`/api/chart/overlays?security_id=${securityId}&exchange_segment=${exchangeSegment}`);
+}
+
+export async function fetchChartBacktests(symbol: string): Promise<{ runs: ChartBacktestRun[] }> {
+  return apiFetch(`/api/chart/backtests?symbol=${encodeURIComponent(symbol)}`);
+}
+
+export async function fetchChartBacktestTrades(
+  backtestId: string,
+): Promise<{ found: boolean; strategy_id: string; trades: ChartBacktestTrade[] }> {
+  return apiFetch(`/api/chart/backtests/${backtestId}/trades`);
+}
+
+export async function fetchChartOptionContext(symbol: string): Promise<ChartOptionContext> {
+  return apiFetch(`/api/chart/option-context?symbol=${encodeURIComponent(symbol)}`);
+}
+
+// --- Chart structure & AI explain (Phase 6) ---
+
+export interface ChartZone {
+  price: number;
+  low: number;
+  high: number;
+  touches: number;
+  last_touch_time: number;
+}
+
+export interface ChartChannelLine {
+  p1: { time: number; price: number };
+  p2: { time: number; price: number };
+  slope_per_bar: number;
+}
+
+export interface ChartStructure {
+  available: boolean;
+  reason?: string;
+  bars_analyzed?: number;
+  last_close?: number | null;
+  structure?: { label: string; bias: string };
+  support_zones?: ChartZone[];
+  resistance_zones?: ChartZone[];
+  channel?: { upper: ChartChannelLine | null; lower: ChartChannelLine | null } | null;
+  swing_highs?: { time: number; price: number }[];
+  swing_lows?: { time: number; price: number }[];
+}
+
+export async function fetchChartStructure(
+  securityId: string, exchangeSegment: string, resolution: ChartResolution, lookback = 120,
+): Promise<ChartStructure> {
+  return apiFetch(
+    `/api/chart/structure?security_id=${securityId}&exchange_segment=${exchangeSegment}&resolution=${resolution}&lookback=${lookback}`,
+  );
+}
+
+export interface ChartExplainLevel {
+  price: number;
+  kind: "support" | "resistance";
+  why: string;
+}
+
+export interface ChartExplanation {
+  status: "ok" | "not_configured";
+  message?: string;
+  summary?: string;
+  trend?: "uptrend" | "downtrend" | "sideways" | "unclear";
+  key_observations?: string[];
+  levels_to_watch?: ChartExplainLevel[];
+  risks?: string[];
+  confidence?: number;
+}
+
+export async function explainChart(context: Record<string, unknown>): Promise<ChartExplanation> {
+  return apiFetch("/api/chart/explain", { method: "POST", body: JSON.stringify(context) });
+}
+
+// --- Chart workspace: drawings, layouts, alerts (Phase 7) ---
+
+export type ChartDrawingKind = "trendline" | "horizontal" | "rectangle" | "text";
+
+export interface ChartDrawingPoint {
+  time: number;
+  price: number;
+}
+
+export interface ChartDrawing {
+  drawing_id: string;
+  kind: ChartDrawingKind;
+  points: ChartDrawingPoint[];
+  text: string | null;
+  color: string | null;
+  created_at: string | null;
+}
+
+export interface ChartLayout {
+  layout_id: string;
+  name: string;
+  resolution: ChartResolution | null;
+  indicators: Record<string, unknown>;
+  overlays: Record<string, unknown>;
+  updated_at: string | null;
+}
+
+export interface ChartAlert {
+  alert_id: string;
+  symbol: string | null;
+  display_name: string | null;
+  security_id: string;
+  exchange_segment: string;
+  condition: "crosses_above" | "crosses_below";
+  price: number;
+  note: string | null;
+  status: "ACTIVE" | "TRIGGERED";
+  created_at: string | null;
+  triggered_at: string | null;
+  triggered_price: number | null;
+  /** "in_app" until notification-service exists — see chart_workspace.py. */
+  delivery: string | null;
+}
+
+export async function fetchChartDrawings(
+  securityId: string, exchangeSegment: string,
+): Promise<{ drawings: ChartDrawing[] }> {
+  return apiFetch(`/api/chart/drawings?security_id=${securityId}&exchange_segment=${exchangeSegment}`);
+}
+
+export async function saveChartDrawing(
+  securityId: string, exchangeSegment: string,
+  drawing: { kind: ChartDrawingKind; points: ChartDrawingPoint[]; text?: string; color?: string },
+): Promise<ChartDrawing> {
+  return apiFetch(
+    `/api/chart/drawings?security_id=${securityId}&exchange_segment=${exchangeSegment}`,
+    { method: "POST", body: JSON.stringify(drawing) },
+  );
+}
+
+export async function deleteChartDrawing(drawingId: string): Promise<{ deleted: boolean }> {
+  return apiFetch(`/api/chart/drawings/${drawingId}`, { method: "DELETE" });
+}
+
+export async function fetchChartLayouts(): Promise<{ layouts: ChartLayout[] }> {
+  return apiFetch("/api/chart/layouts");
+}
+
+export async function saveChartLayout(layout: {
+  name: string; resolution: ChartResolution; indicators: unknown; overlays: unknown;
+}): Promise<ChartLayout> {
+  return apiFetch("/api/chart/layouts", { method: "POST", body: JSON.stringify(layout) });
+}
+
+export async function deleteChartLayout(layoutId: string): Promise<{ deleted: boolean }> {
+  return apiFetch(`/api/chart/layouts/${layoutId}`, { method: "DELETE" });
+}
+
+export async function fetchChartAlerts(securityId?: string): Promise<{ alerts: ChartAlert[] }> {
+  return apiFetch(`/api/chart/alerts${securityId ? `?security_id=${securityId}` : ""}`);
+}
+
+export async function createChartAlert(alert: {
+  security_id: string; exchange_segment: string; symbol?: string; display_name?: string;
+  condition: "crosses_above" | "crosses_below"; price: number; note?: string;
+}): Promise<ChartAlert> {
+  return apiFetch("/api/chart/alerts", { method: "POST", body: JSON.stringify(alert) });
+}
+
+export async function deleteChartAlert(alertId: string): Promise<{ deleted: boolean }> {
+  return apiFetch(`/api/chart/alerts/${alertId}`, { method: "DELETE" });
+}
+
+export async function evaluateChartAlerts(payload: {
+  security_id: string; exchange_segment: string; last_price: number; previous_price: number | null;
+}): Promise<{ triggered: ChartAlert[] }> {
+  return apiFetch("/api/chart/alerts/evaluate", { method: "POST", body: JSON.stringify(payload) });
 }
 
 // --- Telegram Signal Copier ---

@@ -7,6 +7,7 @@ import json
 
 from ai_service.provider import AnthropicProvider, ProviderNotConfiguredError, get_provider
 from ai_service.schemas import (
+    CHART_EXPLANATION_SCHEMA,
     NEWS_SUMMARY_SCHEMA,
     STRATEGY_COMPARISON_SCHEMA,
     STRATEGY_RANKING_SCHEMA,
@@ -36,6 +37,25 @@ async def explain_trade(trade: dict, provider: AnthropicProvider | None = None) 
     provider = provider or get_provider()
     prompt = f"Explain this trade in plain language, then score it.\n\nTrade data:\n{json.dumps(trade, indent=2)}"
     return await _run(provider, prompt, TRADE_EXPLANATION_SCHEMA)
+
+
+async def explain_chart(context: dict, provider: AnthropicProvider | None = None) -> dict:
+    """Plain-English read of the chart window the user is actually looking at.
+
+    `context` carries the instrument, the resolution, an OHLCV digest of the
+    visible window, whichever indicators the user has switched on with their
+    current values, and the structural analysis (zones/channel/swings) from
+    services.chart_data. Only summarised data is sent, never the full candle
+    array — a 2000-bar series would be mostly tokens and no more informative.
+    """
+    provider = provider or get_provider()
+    prompt = (
+        "Read this chart for a trader and explain what it is doing. Work only from the "
+        "numbers provided — do not assume news, fundamentals, or anything outside this data, "
+        "and do not tell the user to buy or sell.\n\n"
+        f"Chart context:\n{json.dumps(context, indent=2, default=str)}"
+    )
+    return await _run(provider, prompt, CHART_EXPLANATION_SCHEMA, max_tokens=1500)
 
 
 async def summarize_news(articles: list[dict], provider: AnthropicProvider | None = None) -> dict:

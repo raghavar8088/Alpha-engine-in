@@ -15,6 +15,40 @@ TRADE_EXPLANATION_SCHEMA = {
     "additionalProperties": False,
 }
 
+CHART_EXPLANATION_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "summary": {"type": "string", "description": "Plain-English read of what this chart is doing right now"},
+        "trend": {"type": "string", "enum": ["uptrend", "downtrend", "sideways", "unclear"]},
+        "key_observations": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Specific, number-citing observations drawn only from the supplied data",
+        },
+        "levels_to_watch": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "price": {"type": "number"},
+                    "kind": {"type": "string", "enum": ["support", "resistance"]},
+                    "why": {"type": "string"},
+                },
+                "required": ["price", "kind", "why"],
+                "additionalProperties": False,
+            },
+        },
+        "risks": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "What would invalidate the read above",
+        },
+        "confidence": {"type": "number", "description": "0-1: how clear the picture is from the data given"},
+    },
+    "required": ["summary", "trend", "key_observations", "levels_to_watch", "risks", "confidence"],
+    "additionalProperties": False,
+}
+
 NEWS_SUMMARY_SCHEMA = {
     "type": "object",
     "properties": {

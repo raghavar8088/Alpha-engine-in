@@ -21,10 +21,28 @@ async function proxy(req: NextRequest, path: string[]): Promise<NextResponse> {
     body: hasBody ? await req.text() : undefined,
   });
 
+  const contentType = upstream.headers.get("Content-Type") || "application/json";
+
+  // Server-sent events must be piped through untouched — buffering with .text()
+  // would never resolve until the stream ended, which for a live feed is never.
+  // Only SSE takes this path; every other response keeps the original buffered
+  // behaviour byte for byte.
+  if (contentType.includes("text/event-stream")) {
+    return new NextResponse(upstream.body, {
+      status: upstream.status,
+      headers: {
+        "Content-Type": contentType,
+        "Cache-Control": "no-cache, no-transform",
+        "X-Accel-Buffering": "no",
+        Connection: "keep-alive",
+      },
+    });
+  }
+
   const body = await upstream.text();
   return new NextResponse(body, {
     status: upstream.status,
-    headers: { "Content-Type": upstream.headers.get("Content-Type") || "application/json" },
+    headers: { "Content-Type": contentType },
   });
 }
 

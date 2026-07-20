@@ -38,6 +38,7 @@ from app.core.db import (
     strategy_runs_collection,
     trading_calls_collection,
 )
+from app.services import chart_cache, chart_workspace
 from app.services.dhan_client import totp_login
 from app.ws import broker_manager
 from app.ws.manager import manager
@@ -108,6 +109,8 @@ async def ensure_indexes() -> None:
     await live_watchlist_collection.create_index([("symbol", 1), ("timeframe", 1)], unique=True)
     await trading_calls_collection.create_index("call_id", unique=True)
     await trading_calls_collection.create_index([("status", 1), ("segment", 1)])
+    await chart_cache.ensure_indexes()
+    await chart_workspace.ensure_indexes()
 
 
 @app.on_event("startup")

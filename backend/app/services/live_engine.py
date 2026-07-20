@@ -111,6 +111,10 @@ class LiveEngine:
             {"$set": {
                 "symbol": request.symbol, "timeframe": timeframe.value,
                 "security_id": instrument["security_id"], "exchange_segment": instrument["exchange_segment"],
+                # Claims the entry for this run: a chart view streaming the same
+                # (symbol, timeframe) only ever deletes rows it owns, so it can't
+                # deregister the feed a live run depends on when its tab closes.
+                "chart_owned": False,
             }},
             upsert=True,
         )

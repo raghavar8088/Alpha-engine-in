@@ -55,3 +55,15 @@ intraday_lab_state_collection = db["intraday_lab_state"]
 # Telegram Signal Copier — raw channel messages parsed into trade ideas and
 # auto-opened as paper positions via the manual Positions module
 telegram_signals_collection = db["telegram_signals"]
+# Chart module's own durable candle store. Deliberately separate from `bars`:
+# that collection is written by two producers with different timestamp
+# conventions (backfill stores Dhan's epoch read as UTC, live_feed stores an
+# IST-aware bucket), which can't be told apart after the fact. These rows store
+# the chart epoch verbatim, so what goes in is exactly what the history endpoint
+# serves back out. See app.services.chart_cache.
+chart_bars_collection = db["chart_bars"]
+# Chart workspace (Phase 7): user drawings/annotations per instrument, named
+# layouts (indicator set + timeframe + drawings), and price/indicator alerts.
+chart_drawings_collection = db["chart_drawings"]
+chart_layouts_collection = db["chart_layouts"]
+chart_alerts_collection = db["chart_alerts"]
