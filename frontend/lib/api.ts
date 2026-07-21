@@ -1620,7 +1620,9 @@ export async function explainChart(context: Record<string, unknown>): Promise<Ch
 
 // --- Chart workspace: drawings, layouts, alerts (Phase 7) ---
 
-export type ChartDrawingKind = "trendline" | "horizontal" | "rectangle" | "text" | "fibonacci";
+export type ChartDrawingKind =
+  | "trendline" | "horizontal" | "rectangle" | "text" | "fibonacci"
+  | "long_position" | "short_position";
 
 export interface ChartDrawingPoint {
   time: number;

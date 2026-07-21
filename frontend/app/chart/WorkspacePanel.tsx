@@ -44,8 +44,15 @@ const TOOLS: { id: ChartDrawingKind; label: string; hint: string }[] = [
   { id: "horizontal", label: "Horizontal", hint: "Click one point" },
   { id: "rectangle", label: "Zone", hint: "Click two opposite corners" },
   { id: "fibonacci", label: "Fib", hint: "Click the swing low, then the swing high" },
+  { id: "long_position", label: "Long", hint: "Click your entry — target and stop default to a 1:2 risk:reward, drag either to adjust" },
+  { id: "short_position", label: "Short", hint: "Click your entry — target and stop default to a 1:2 risk:reward, drag either to adjust" },
   { id: "text", label: "Note", hint: "Click where the note goes" },
 ];
+
+const KIND_LABEL: Record<ChartDrawingKind, string> = {
+  trendline: "trendline", horizontal: "horizontal", rectangle: "zone",
+  fibonacci: "fib", text: "note", long_position: "long", short_position: "short",
+};
 
 export default function WorkspacePanel({
   activeTool, onSelectTool, colors, activeColor, onSelectColor, drawings, onDeleteDrawing, pendingPoint,
@@ -106,7 +113,7 @@ export default function WorkspacePanel({
           <ul className="list">
             {drawings.map((d) => (
               <li key={d.drawing_id}>
-                <span className="dk">{d.kind}</span>
+                <span className="dk">{KIND_LABEL[d.kind] || d.kind}</span>
                 <span className="dv">
                   {d.kind === "text" ? d.text || "note" : d.points.map((p) => p.price.toFixed(1)).join(" → ")}
                 </span>

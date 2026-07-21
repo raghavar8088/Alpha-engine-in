@@ -121,6 +121,15 @@ const FIB_LEVELS = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
 // on a trackpad without stealing ordinary clicks on the chart.
 const GRAB_RADIUS = 10;
 
+// Default sizing for a freshly placed Long/Short Position: risk 1% of entry price,
+// reward twice that — a 1:2 risk:reward starting point, same convention the tool
+// carries in TradingView. Either handle is draggable afterward to any ratio.
+const POSITION_DEFAULT_RISK_PCT = 0.01;
+const POSITION_DEFAULT_REWARD_MULTIPLE = 2;
+// How far right of the entry click the position box extends, in bars rather than
+// a fixed duration so it reads the same width at any timeframe.
+const POSITION_WIDTH_BARS = 20;
+
 // Palette offered for drawings. Kept small and legible on the chart background
 // rather than exposing a full colour wheel.
 const DRAW_COLORS = ["#f2b705", "#7d34dc", "#0e9f6e", "#d92d3f", "#2f80ed", "#e0e0e0"];
@@ -1155,8 +1164,9 @@ export default function ChartPage() {
         for (let i = 0; i < d.points.length; i++) {
           const py = series.priceToCoordinate(d.points[i].price);
           if (py === null) continue;
-          // A horizontal ray spans the full width, so only its price can be grabbed.
-          if (d.kind === "horizontal") {
+          // A horizontal ray and a position box's levels each span a width rather
+          // than sitting at one point, so only price needs to be close to grab them.
+          if (d.kind === "horizontal" || d.kind === "long_position" || d.kind === "short_position") {
             if (Math.abs(py - y) <= GRAB_RADIUS) return { drawingId: d.drawing_id, index: i };
             continue;
           }
@@ -1194,8 +1204,13 @@ export default function ChartPage() {
                   i !== drag.index
                     ? p
                     : {
-                        // A horizontal ray has no meaningful time to slide along.
-                        time: d.kind === "horizontal" || time === null ? p.time : (time as number),
+                        // A horizontal ray has no meaningful time to slide along, and
+                        // a position box's width is fixed — dragging its handles
+                        // adjusts entry/target/stop price, not the box's extent.
+                        time:
+                          d.kind === "horizontal" || d.kind === "long_position" || d.kind === "short_position" || time === null
+                            ? p.time
+                            : (time as number),
                         price: Number(price),
                       },
                 ),
@@ -1267,6 +1282,18 @@ export default function ChartPage() {
       // point and complete on the next click.
       if (activeTool === "horizontal") {
         persist([point]);
+        setActiveTool(null);
+        return;
+      }
+      if (activeTool === "long_position" || activeTool === "short_position") {
+        // One click marks entry; target and stop default to a 1:2 risk:reward on
+        // the correct side for the direction, adjustable afterward by dragging
+        // either handle — nobody wants to place three points for a starting guess.
+        const risk = point.price * POSITION_DEFAULT_RISK_PCT;
+        const long = activeTool === "long_position";
+        const target = point.price + (long ? 1 : -1) * risk * POSITION_DEFAULT_REWARD_MULTIPLE;
+        const stop = point.price - (long ? 1 : -1) * risk;
+        persist([point, { time: point.time, price: target }, { time: point.time, price: stop }]);
         setActiveTool(null);
         return;
       }
@@ -1403,6 +1430,63 @@ export default function ChartPage() {
           { time: t1 as UTCTimestamp, value: bottom },
         ]);
         drawingSeriesRef.current.push(floor);
+      } else if (
+        (drawing.kind === "long_position" || drawing.kind === "short_position") &&
+        drawing.points.length >= 3
+      ) {
+        // Entry, target and stop are stored at the same time — the box's width is
+        // a fixed number of bars rather than something dragged, so every level's
+        // own time is redundant and only its price matters (see the drag handler
+        // and hit-test above, both of which already treat these points that way).
+        const [entryPt, targetPt, stopPt] = drawing.points;
+        const t0 = entryPt.time as UTCTimestamp;
+        const t1 = (entryPt.time + RESOLUTION_SECONDS[resolution] * POSITION_WIDTH_BARS) as UTCTimestamp;
+        const span = [
+          { time: t0, value: 0 },
+          { time: t1, value: 0 },
+        ];
+        // Profit and loss are always green/above and red/below in meaning, however
+        // the box happens to be oriented — a baseline series fills whichever side
+        // of its base the value falls on, so painting both sides the same colour
+        // means the fill is correct for a long AND a short without branching.
+        const zone = (basePrice: number, valuePrice: number, hue: string) =>
+          chart.addSeries(
+            BaselineSeries,
+            {
+              baseValue: { type: "price", price: basePrice },
+              topLineColor: hue, bottomLineColor: hue,
+              topFillColor1: withAlpha(hue, 0.16), topFillColor2: withAlpha(hue, 0.16),
+              bottomFillColor1: withAlpha(hue, 0.16), bottomFillColor2: withAlpha(hue, 0.16),
+              lineWidth: 1, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
+            },
+            0,
+          );
+        const profit = zone(entryPt.price, targetPt.price, "#0e9f6e");
+        profit.setData(span.map((p) => ({ time: p.time, value: targetPt.price })));
+        const loss = zone(entryPt.price, stopPt.price, "#d92d3f");
+        loss.setData(span.map((p) => ({ time: p.time, value: stopPt.price })));
+        drawingSeriesRef.current.push(profit, loss);
+
+        const reward = Math.abs(targetPt.price - entryPt.price);
+        const risk = Math.abs(entryPt.price - stopPt.price);
+        const rr = risk > 0 ? (reward / risk).toFixed(1) : "—";
+        const pct = (p: number) => `${p >= 0 ? "+" : ""}${((p / entryPt.price) * 100).toFixed(2)}%`;
+
+        drawingLinesRef.current.push(
+          series.createPriceLine({
+            price: entryPt.price, color: "#f2b705", lineWidth: 2, lineStyle: LineStyle.Solid,
+            axisLabelVisible: true, title: `Entry ${entryPt.price.toFixed(2)}`,
+          }),
+          series.createPriceLine({
+            price: targetPt.price, color: "#0e9f6e", lineWidth: 1, lineStyle: LineStyle.Dashed,
+            axisLabelVisible: true,
+            title: `Target ${targetPt.price.toFixed(2)} (${pct(targetPt.price - entryPt.price)}) R:R 1:${rr}`,
+          }),
+          series.createPriceLine({
+            price: stopPt.price, color: "#d92d3f", lineWidth: 1, lineStyle: LineStyle.Dashed,
+            axisLabelVisible: true, title: `Stop ${stopPt.price.toFixed(2)} (${pct(stopPt.price - entryPt.price)})`,
+          }),
+        );
       } else if (drawing.points.length >= 2) {
         const line = chart.addSeries(
           LineSeries,
@@ -1419,7 +1503,7 @@ export default function ChartPage() {
       }
     }
     setNoteMarkers(notes);
-  }, [drawings, loadSeq]);
+  }, [drawings, loadSeq, resolution]);
 
   // Single owner of the markers plugin: trade markers and drawing notes share
   // one series, so they are merged and written together.

@@ -28,7 +28,10 @@ from app.core.db import (
 
 # Anything else is rejected rather than stored — an unknown shape would be dead
 # weight the frontend can't render.
-DRAWING_KINDS = {"trendline", "horizontal", "rectangle", "text", "fibonacci"}
+DRAWING_KINDS = {
+    "trendline", "horizontal", "rectangle", "text", "fibonacci",
+    "long_position", "short_position",
+}
 
 ALERT_CONDITIONS = {"crosses_above", "crosses_below"}
 

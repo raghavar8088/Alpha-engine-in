@@ -21,6 +21,8 @@ const TOOLS: ToolDef[] = [
   { id: "horizontal", label: "Horizontal Line" },
   { id: "rectangle", label: "Rectangle" },
   { id: "fibonacci", label: "Fib Retracement" },
+  { id: "long_position", label: "Long Position" },
+  { id: "short_position", label: "Short Position" },
   { id: "text", label: "Text" },
 ];
 
@@ -61,6 +63,20 @@ function ToolIcon({ id }: { id: ToolDef["id"] }) {
       return (
         <svg {...common}>
           <path d="M5 6h14M12 6v12" />
+        </svg>
+      );
+    case "long_position":
+      return (
+        <svg {...common}>
+          <rect x="4" y="12" width="16" height="6" fill="rgba(14,159,110,0.3)" stroke="#0e9f6e" />
+          <path d="M4 8h16" stroke="#0e9f6e" />
+        </svg>
+      );
+    case "short_position":
+      return (
+        <svg {...common}>
+          <rect x="4" y="6" width="16" height="6" fill="rgba(217,45,63,0.3)" stroke="#d92d3f" />
+          <path d="M4 16h16" stroke="#d92d3f" />
         </svg>
       );
     default:
