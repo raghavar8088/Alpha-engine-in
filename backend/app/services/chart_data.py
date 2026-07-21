@@ -14,8 +14,8 @@ from datetime import datetime, timedelta, timezone
 
 from app.core.db import instruments_collection
 from app.services import chart_cache
-from app.services.broker_data import angel_bars
-from app.services.dhan_client import DhanAPIError, DhanClient
+from app.services.broker_data import angel_bars, dhan_is_cooling_down, note_dhan_rate_limit
+from app.services.dhan_client import DhanAPIError, DhanClient, DhanRateLimitError
 
 IST = timezone(timedelta(hours=5, minutes=30))
 
@@ -204,6 +204,10 @@ async def _fetch_bars(
     dhan_failure: str | None = None
 
     try:
+        if dhan_is_cooling_down():
+            # Skip straight to the Angel fallback below rather than spending another
+            # request while Dhan is throttling the account.
+            raise DhanRateLimitError("Dhan rate limit — cooling down")
         if resolution in ("D", "W"):
             raw = await dhan.historical_daily(
                 security_id, exchange_segment, instrument_type,
@@ -230,6 +234,9 @@ async def _fetch_bars(
                 ct, co, ch, cl, cc, cv = _parse_candles(raw)
                 t.extend(ct); o.extend(co); h.extend(ch); low.extend(cl); c.extend(cc); v.extend(cv)
                 chunk_start = chunk_end
+    except DhanRateLimitError as exc:
+        note_dhan_rate_limit()
+        dhan_failure = exc.remarks
     except DhanAPIError as exc:
         # Don't give up yet — Angel One below is an independent source that
         # survives the Dhan token being rotated out from under us.

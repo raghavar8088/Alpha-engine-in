@@ -19,6 +19,20 @@ class DhanAPIError(Exception):
         super().__init__(remarks)
 
 
+class DhanRateLimitError(DhanAPIError):
+    """Dhan is throttling this account. Distinct from a generic failure because the
+    right response is to stop calling for a while — Dhan escalates sustained
+    over-polling to blocking the account outright."""
+
+
+def _mentions_throttle(body: str) -> bool:
+    """Dhan signals throttling inconsistently: sometimes HTTP 429, sometimes a body
+    carrying {"status":"failed","data":{"805":"Too many requests..."}} with no
+    `remarks` field, which would otherwise surface as an unhelpful generic error."""
+    lowered = (body or "").lower()
+    return "too many requests" in lowered or '"805"' in lowered
+
+
 # Dhan enforces a per-account rate limit; a fresh DhanClient is constructed on
 # every request (see _get_dhan_client), so pacing has to live at module scope
 # to actually throttle the account's *total* call rate, not just one instance's.
@@ -99,8 +113,8 @@ class DhanClient:
             json = {**json, "dhanClientId": self.client_id}
         async with httpx.AsyncClient(base_url=settings.dhan_base_url, timeout=30) as client:
             response = await _paced_request(client, method, path, headers=self.headers, json=json)
-        if response.status_code == 429:
-            raise DhanAPIError("Dhan rate limit — too many requests, try again in a moment")
+        if response.status_code == 429 or _mentions_throttle(response.text):
+            raise DhanRateLimitError("Dhan rate limit — too many requests, try again in a moment")
         data = response.json()
         # Some endpoints (holdings, positions, order list) return a bare JSON array on
         # success instead of the {"status": ..., "data": ...} envelope others use.
