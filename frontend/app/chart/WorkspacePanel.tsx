@@ -46,12 +46,17 @@ const TOOLS: { id: ChartDrawingKind; label: string; hint: string }[] = [
   { id: "fibonacci", label: "Fib", hint: "Click the swing low, then the swing high" },
   { id: "long_position", label: "Long", hint: "Click your entry — target and stop default to a 1:2 risk:reward, drag either to adjust" },
   { id: "short_position", label: "Short", hint: "Click your entry — target and stop default to a 1:2 risk:reward, drag either to adjust" },
+  { id: "ray", label: "Ray", hint: "Click two points — the line runs through them and keeps going" },
+  { id: "arrow", label: "Arrow", hint: "Click the start, then the point it should point at" },
+  { id: "vertical", label: "Vertical", hint: "Click one point in time" },
+  { id: "channel", label: "Channel", hint: "Click two points for the first line — the second is placed a fixed offset below, drag it to adjust" },
   { id: "text", label: "Note", hint: "Click where the note goes" },
 ];
 
 const KIND_LABEL: Record<ChartDrawingKind, string> = {
   trendline: "trendline", horizontal: "horizontal", rectangle: "zone",
   fibonacci: "fib", text: "note", long_position: "long", short_position: "short",
+  ray: "ray", arrow: "arrow", vertical: "vertical", channel: "channel",
 };
 
 export default function WorkspacePanel({

@@ -48,6 +48,7 @@ import OverlayPanel, { DEFAULT_OVERLAYS, OverlayConfig, ReplayState } from "./Ov
 import AnalysisPanel from "./AnalysisPanel";
 import WorkspacePanel, { DrawingTool } from "./WorkspacePanel";
 import DrawToolbar from "./DrawToolbar";
+import { VertLine } from "./VerticalLinePrimitive";
 import CompareGrid from "./CompareGrid";
 import WatchlistPanel from "./WatchlistPanel";
 import {
@@ -129,6 +130,16 @@ const POSITION_DEFAULT_REWARD_MULTIPLE = 2;
 // How far right of the entry click the position box extends, in bars rather than
 // a fixed duration so it reads the same width at any timeframe.
 const POSITION_WIDTH_BARS = 20;
+
+// Default gap between a parallel channel's two lines: a multiple of the primary
+// line's own end-to-end price move, so it scales with whatever was drawn rather
+// than a fixed price gap that would look absurd on a ₹50 stock and invisible on
+// a ₹50,000 one. Drag the second line afterward for any other width.
+const CHANNEL_DEFAULT_OFFSET_MULTIPLE = 0.5;
+
+// How far past its second click a Ray is extrapolated, in bars — generous enough
+// to visibly run off the current view rather than stopping just past the click.
+const RAY_EXTEND_BARS = 200;
 
 // Palette offered for drawings. Kept small and legible on the chart background
 // rather than exposing a full colour wheel.
@@ -284,6 +295,9 @@ export default function ChartPage() {
   const [firedAlerts, setFiredAlerts] = useState<ChartAlert[]>([]);
   const [compareSymbols, setCompareSymbols] = useState<ChartSymbol[]>([]);
   const drawingSeriesRef = useRef<ISeriesApi<"Line" | "Baseline">[]>([]);
+  // Vertical lines render as canvas primitives attached to the candle series
+  // rather than as a series of their own, so they get their own cleanup list.
+  const verticalLinesRef = useRef<VertLine[]>([]);
   const drawingLinesRef = useRef<IPriceLine[]>([]);
   // Which anchor is being dragged, and the latest drawings — both read from inside
   // long-lived mouse handlers that must not re-subscribe on every mouse move.
@@ -1162,6 +1176,14 @@ export default function ChartPage() {
     const anchorAt = (x: number, y: number) => {
       for (const d of drawingsRef.current) {
         for (let i = 0; i < d.points.length; i++) {
+          // A vertical line spans the full pane height at one point in time — the
+          // mirror image of a horizontal ray — so only x needs to be close, and its
+          // point's stored price (unused for rendering) is irrelevant here too.
+          if (d.kind === "vertical") {
+            const px = timeScale.timeToCoordinate(d.points[i].time as UTCTimestamp);
+            if (px !== null && Math.abs(px - x) <= GRAB_RADIUS) return { drawingId: d.drawing_id, index: i };
+            continue;
+          }
           const py = series.priceToCoordinate(d.points[i].price);
           if (py === null) continue;
           // A horizontal ray and a position box's levels each span a width rather
@@ -1297,6 +1319,14 @@ export default function ChartPage() {
         setActiveTool(null);
         return;
       }
+      if (activeTool === "vertical") {
+        persist([point]);
+        setActiveTool(null);
+        return;
+      }
+      // Ray, arrow and channel all fall through to the generic two-click flow
+      // below (bank the first point, complete on the second) — the same one
+      // trendline, rectangle and fibonacci already use unchanged.
       if (activeTool === "text") {
         // Hand off to an inline input anchored at the click; it persists on commit.
         setNoteDraft({ point, x: param.point.x, y: param.point.y });
@@ -1307,7 +1337,20 @@ export default function ChartPage() {
         setPendingPoint(point);
         return;
       }
-      persist([pendingPoint, point]);
+      if (activeTool === "channel") {
+        // The second click sets the main line; the parallel line defaults to a
+        // fixed offset below it and is stored as a third point at the first
+        // anchor's time, so dragging it (a normal 2D drag, nothing special-cased)
+        // adjusts the channel's width directly.
+        const span = Math.abs(point.price - pendingPoint.price) || pendingPoint.price * POSITION_DEFAULT_RISK_PCT;
+        const offsetPoint: ChartDrawingPoint = {
+          time: pendingPoint.time,
+          price: pendingPoint.price - span * CHANNEL_DEFAULT_OFFSET_MULTIPLE,
+        };
+        persist([pendingPoint, point, offsetPoint]);
+      } else {
+        persist([pendingPoint, point]);
+      }
       setPendingPoint(null);
       setActiveTool(null);
     };
@@ -1350,6 +1393,8 @@ export default function ChartPage() {
     drawingSeriesRef.current = [];
     for (const line of drawingLinesRef.current) series.removePriceLine(line);
     drawingLinesRef.current = [];
+    for (const v of verticalLinesRef.current) series.detachPrimitive(v);
+    verticalLinesRef.current = [];
 
     const notes: SeriesMarker<Time>[] = [];
 
@@ -1487,6 +1532,74 @@ export default function ChartPage() {
             axisLabelVisible: true, title: `Stop ${stopPt.price.toFixed(2)} (${pct(stopPt.price - entryPt.price)})`,
           }),
         );
+      } else if (drawing.kind === "vertical" && drawing.points[0]) {
+        const vline = new VertLine(chart, series, drawing.points[0].time as UTCTimestamp, color, 1);
+        series.attachPrimitive(vline);
+        verticalLinesRef.current.push(vline);
+      } else if (drawing.kind === "ray" && drawing.points.length >= 2) {
+        const [from, to] = [...drawing.points].sort((p, q) => p.time - q.time);
+        const line = chart.addSeries(
+          LineSeries,
+          {
+            color, lineWidth: 2, lineStyle: LineStyle.Solid,
+            priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
+          },
+          0,
+        );
+        // A ray is a trend line that keeps going: extrapolate past the second
+        // click along the same slope rather than stopping there. Two identical
+        // times (a double-click on one bar) would divide by zero, so it falls
+        // back to a flat line through both points instead of extending it.
+        const dt = to.time - from.time;
+        const extended = dt === 0
+          ? { time: to.time, price: to.price }
+          : {
+              time: to.time + RESOLUTION_SECONDS[resolution] * RAY_EXTEND_BARS,
+              price: to.price + ((to.price - from.price) / dt) * (RESOLUTION_SECONDS[resolution] * RAY_EXTEND_BARS),
+            };
+        line.setData([
+          { time: from.time as UTCTimestamp, value: from.price },
+          { time: extended.time as UTCTimestamp, value: extended.price },
+        ]);
+        drawingSeriesRef.current.push(line);
+      } else if (drawing.kind === "arrow" && drawing.points.length >= 2) {
+        const [p0, p1] = drawing.points;
+        const line = chart.addSeries(
+          LineSeries,
+          {
+            color, lineWidth: 2, lineStyle: LineStyle.Solid,
+            priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
+          },
+          0,
+        );
+        const ordered = [p0, p1].sort((p, q) => p.time - q.time);
+        line.setData(ordered.map((p) => ({ time: p.time as UTCTimestamp, value: p.price })));
+        drawingSeriesRef.current.push(line);
+        // The markers plugin has no rotate-to-slope option, so the arrowhead
+        // points straight up or down depending on which way the line runs —
+        // an approximation, not a true arrow along the line's exact angle.
+        notes.push({
+          time: p1.time as UTCTimestamp,
+          position: p1.price >= p0.price ? "aboveBar" : "belowBar",
+          shape: p1.price >= p0.price ? "arrowUp" : "arrowDown",
+          color,
+        });
+      } else if (drawing.kind === "channel" && drawing.points.length >= 3) {
+        const [p0, p1, offsetPt] = drawing.points;
+        const offset = offsetPt.price - p0.price;
+        const ordered = [p0, p1].sort((p, q) => p.time - q.time);
+        for (const shift of [0, offset]) {
+          const line = chart.addSeries(
+            LineSeries,
+            {
+              color, lineWidth: 2, lineStyle: shift === 0 ? LineStyle.Solid : LineStyle.Dashed,
+              priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
+            },
+            0,
+          );
+          line.setData(ordered.map((p) => ({ time: p.time as UTCTimestamp, value: p.price + shift })));
+          drawingSeriesRef.current.push(line);
+        }
       } else if (drawing.points.length >= 2) {
         const line = chart.addSeries(
           LineSeries,

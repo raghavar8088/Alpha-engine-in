@@ -1622,7 +1622,8 @@ export async function explainChart(context: Record<string, unknown>): Promise<Ch
 
 export type ChartDrawingKind =
   | "trendline" | "horizontal" | "rectangle" | "text" | "fibonacci"
-  | "long_position" | "short_position";
+  | "long_position" | "short_position"
+  | "ray" | "arrow" | "vertical" | "channel";
 
 export interface ChartDrawingPoint {
   time: number;

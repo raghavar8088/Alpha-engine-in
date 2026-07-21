@@ -23,6 +23,10 @@ const TOOLS: ToolDef[] = [
   { id: "fibonacci", label: "Fib Retracement" },
   { id: "long_position", label: "Long Position" },
   { id: "short_position", label: "Short Position" },
+  { id: "ray", label: "Ray" },
+  { id: "arrow", label: "Arrow" },
+  { id: "vertical", label: "Vertical Line" },
+  { id: "channel", label: "Parallel Channel" },
   { id: "text", label: "Text" },
 ];
 
@@ -77,6 +81,33 @@ function ToolIcon({ id }: { id: ToolDef["id"] }) {
         <svg {...common}>
           <rect x="4" y="6" width="16" height="6" fill="rgba(217,45,63,0.3)" stroke="#d92d3f" />
           <path d="M4 16h16" stroke="#d92d3f" />
+        </svg>
+      );
+    case "ray":
+      return (
+        <svg {...common}>
+          <circle cx="5" cy="19" r="1.6" fill="currentColor" stroke="none" />
+          <path d="M5 19L21 3" />
+        </svg>
+      );
+    case "arrow":
+      return (
+        <svg {...common}>
+          <path d="M5 19L19 5" />
+          <path d="M19 5H12M19 5V12" />
+        </svg>
+      );
+    case "vertical":
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="5" r="1.6" fill="currentColor" stroke="none" />
+          <path d="M12 5v14" />
+        </svg>
+      );
+    case "channel":
+      return (
+        <svg {...common}>
+          <path d="M4 9l16-4M4 17l16-4" />
         </svg>
       );
     default:
