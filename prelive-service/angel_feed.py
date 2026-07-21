@@ -29,6 +29,24 @@ contract's price is far more dangerous than one that returns nothing: on a short
 position a wrong mark does not fail loudly, it silently mis-marks the book and can fire
 or suppress a stop. So every failure path here returns None, never a guess.
 
+MEASURED COVERAGE (2026-07-21, against the live account)
+--------------------------------------------------------
+Login, scrip-master download and quoting all verified end to end. Of ~4000 NIFTY option
+rows in this app's `instruments` collection, ~1475 map to an Angel token — and that gap
+is expected rather than a defect: Angel's master lists only ~1600 NIFTY OPTIDX contracts
+at all, because our collection accumulates expired contracts and far-out strikes the
+exchange does not actively list.
+
+What matters is coverage where the desk actually trades. Near-ATM strikes on the front
+expiry — which is where 15-delta short legs live — mapped and priced 10 of 10, with
+sensible values (23600CE at 653.85 against spot 24216: intrinsic 616 plus time value).
+Deep strikes thousands of points from spot return None, correctly, because Angel does
+not list them.
+
+So: treat this as a standby that covers the tradeable book, not the whole instrument
+universe. If a future strategy ever sells strikes far from spot, re-measure before
+relying on the failover for them.
+
 CREDENTIALS come from the encrypted `broker_credentials` collection (same Fernet pattern
 as Dhan) or from env, never from a file checked into the repo.
 """
