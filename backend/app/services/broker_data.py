@@ -13,14 +13,36 @@ Whichever source answered is reported back to the caller (`ltp_source` /
 """
 
 import logging
+import time
 from datetime import datetime, timedelta, timezone
 
 from app.core.db import instruments_collection
 from app.services.angel_client import AngelAPIError, angel_client
+from app.services.dhan_client import DhanRateLimitError
 
 logger = logging.getLogger("broker_data")
 
 IST = timezone(timedelta(hours=5, minutes=30))
+
+# Once Dhan throttles us, retrying on the very next call is the behaviour that turns
+# a 429 into a blocked account — its own message warns as much. Trip a shared
+# cooldown instead and serve from Angel until it lapses. Shared, not per-instrument:
+# the limit applies to the account, so one 429 means every symbol should stand down.
+DHAN_COOLDOWN_SECONDS = 120
+_dhan_blocked_until = 0.0
+
+
+def dhan_is_cooling_down() -> bool:
+    return time.monotonic() < _dhan_blocked_until
+
+
+def note_dhan_rate_limit() -> None:
+    global _dhan_blocked_until
+    _dhan_blocked_until = time.monotonic() + DHAN_COOLDOWN_SECONDS
+    logger.warning(
+        "Dhan rate-limited — pausing Dhan market-data calls for %ss, serving from Angel One",
+        DHAN_COOLDOWN_SECONDS,
+    )
 
 
 async def _angel_ref(security_id: str, exchange_segment: str) -> tuple[str, str] | None:
@@ -39,14 +61,17 @@ async def get_ltp(dhan, security_id: str, exchange_segment: str) -> tuple[float 
     Returns (None, "unavailable") when neither broker can price it — callers already
     treat a missing price as "skip this one" rather than as zero.
     """
-    try:
-        raw = await dhan.quote_data({exchange_segment: [int(security_id)]})
-        data = raw.get("data", {}) if isinstance(raw, dict) else {}
-        row = data.get(exchange_segment, {}).get(str(security_id))
-        if row and row.get("last_price"):
-            return float(row["last_price"]), "dhan_quote"
-    except Exception as exc:
-        logger.warning("Dhan quote failed for %s/%s (%s) — trying Angel", security_id, exchange_segment, exc)
+    if not dhan_is_cooling_down():
+        try:
+            raw = await dhan.quote_data({exchange_segment: [int(security_id)]})
+            data = raw.get("data", {}) if isinstance(raw, dict) else {}
+            row = data.get(exchange_segment, {}).get(str(security_id))
+            if row and row.get("last_price"):
+                return float(row["last_price"]), "dhan_quote"
+        except DhanRateLimitError:
+            note_dhan_rate_limit()
+        except Exception as exc:
+            logger.warning("Dhan quote failed for %s/%s (%s) — trying Angel", security_id, exchange_segment, exc)
 
     if not angel_client.configured():
         return None, "unavailable"
