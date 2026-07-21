@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  BaselineSeries,
   CandlestickData,
   CandlestickSeries,
   ColorType,
@@ -118,6 +119,23 @@ const FIB_LEVELS = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
 // How close the pointer must get to an anchor to grab it. Generous enough to hit
 // on a trackpad without stealing ordinary clicks on the chart.
 const GRAB_RADIUS = 10;
+
+// Palette offered for drawings. Kept small and legible on the chart background
+// rather than exposing a full colour wheel.
+const DRAW_COLORS = ["#f2b705", "#7d34dc", "#0e9f6e", "#d92d3f", "#2f80ed", "#e0e0e0"];
+
+/** Hex (#rgb or #rrggbb) to rgba() so a zone can be filled semi-transparently.
+ *  Anything already in a functional form is returned untouched. */
+function withAlpha(color: string, alpha: number): string {
+  const hex = color.trim();
+  if (!hex.startsWith("#")) return hex;
+  const body = hex.slice(1);
+  const full = body.length === 3 ? body.split("").map((ch) => ch + ch).join("") : body;
+  if (full.length !== 6) return hex;
+  const value = parseInt(full, 16);
+  if (Number.isNaN(value)) return hex;
+  return `rgba(${(value >> 16) & 255}, ${(value >> 8) & 255}, ${value & 255}, ${alpha})`;
+}
 
 const RESYNC_MISMATCHES = 3;
 const RESYNC_COOLDOWN_MS = 120_000;
@@ -246,12 +264,16 @@ export default function ChartPage() {
   const [showWorkspacePanel, setShowWorkspacePanel] = useState(false);
   const [activeTool, setActiveTool] = useState<DrawingTool>(null);
   const [pendingPoint, setPendingPoint] = useState<ChartDrawingPoint | null>(null);
+  const [drawColor, setDrawColor] = useState<string>(DRAW_COLORS[0]);
+  // Where an in-progress note is being typed: the chart point it pins to, plus the
+  // pixel position to float the input over.
+  const [noteDraft, setNoteDraft] = useState<{ point: ChartDrawingPoint; x: number; y: number } | null>(null);
   const [drawings, setDrawings] = useState<ChartDrawing[]>([]);
   const [layouts, setLayouts] = useState<ChartLayout[]>([]);
   const [alerts, setAlerts] = useState<ChartAlert[]>([]);
   const [firedAlerts, setFiredAlerts] = useState<ChartAlert[]>([]);
   const [compareSymbols, setCompareSymbols] = useState<ChartSymbol[]>([]);
-  const drawingSeriesRef = useRef<ISeriesApi<"Line">[]>([]);
+  const drawingSeriesRef = useRef<ISeriesApi<"Line" | "Baseline">[]>([]);
   const drawingLinesRef = useRef<IPriceLine[]>([]);
   // Which anchor is being dragged, and the latest drawings — both read from inside
   // long-lived mouse handlers that must not re-subscribe on every mouse move.
@@ -1232,7 +1254,7 @@ export default function ChartPage() {
       const persist = async (points: ChartDrawingPoint[], text?: string) => {
         try {
           const saved = await saveChartDrawing(selected.security_id, selected.exchange_segment, {
-            kind: activeTool, points, ...(text ? { text } : {}),
+            kind: activeTool, points, color: drawColor, ...(text ? { text } : {}),
           });
           setDrawings((prev) => [...prev, saved]);
         } catch (e) {
@@ -1248,8 +1270,8 @@ export default function ChartPage() {
         return;
       }
       if (activeTool === "text") {
-        const text = window.prompt("Note text");
-        if (text?.trim()) persist([point], text.trim());
+        // Hand off to an inline input anchored at the click; it persists on commit.
+        setNoteDraft({ point, x: param.point.x, y: param.point.y });
         setActiveTool(null);
         return;
       }
@@ -1264,7 +1286,31 @@ export default function ChartPage() {
 
     chart.subscribeClick(handler);
     return () => chart.unsubscribeClick(handler);
-  }, [activeTool, pendingPoint, selected]);
+  }, [activeTool, pendingPoint, selected, drawColor]);
+
+  // Commits the note being typed. Empty text simply abandons it, so a stray click
+  // with the note tool doesn't litter the chart with blank markers.
+  const commitNote = useCallback(
+    async (text: string) => {
+      const draft = noteDraft;
+      setNoteDraft(null);
+      if (!draft || !selected || !text.trim()) return;
+      try {
+        const saved = await saveChartDrawing(selected.security_id, selected.exchange_segment, {
+          kind: "text", points: [draft.point], text: text.trim(), color: drawColor,
+        });
+        setDrawings((prev) => [...prev, saved]);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Could not save that note");
+      }
+    },
+    [noteDraft, selected, drawColor],
+  );
+
+  // A note pinned to a symbol makes no sense once the chart moves on.
+  useEffect(() => {
+    setNoteDraft(null);
+  }, [selected]);
 
   // --- Phase 7: render drawings --------------------------------------------
   useEffect(() => {
@@ -1314,30 +1360,61 @@ export default function ChartPage() {
             }),
           );
         }
+      } else if (drawing.kind === "rectangle" && drawing.points.length >= 2) {
+        // lightweight-charts has no box primitive, but a baseline series fills
+        // between its line and a baseline price — anchor the line to the zone's top
+        // and the baseline to its bottom and the fill *is* the rectangle.
+        const [a, b] = drawing.points;
+        const top = Math.max(a.price, b.price);
+        const bottom = Math.min(a.price, b.price);
+        const [t0, t1] = a.time <= b.time ? [a.time, b.time] : [b.time, a.time];
+        const zone = chart.addSeries(
+          BaselineSeries,
+          {
+            baseValue: { type: "price", price: bottom },
+            topLineColor: color,
+            topFillColor1: withAlpha(color, 0.18),
+            topFillColor2: withAlpha(color, 0.18),
+            bottomLineColor: "transparent",
+            bottomFillColor1: "transparent",
+            bottomFillColor2: "transparent",
+            lineWidth: 2,
+            priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
+          },
+          0,
+        );
+        zone.setData([
+          { time: t0 as UTCTimestamp, value: top },
+          { time: t1 as UTCTimestamp, value: top },
+        ]);
+        drawingSeriesRef.current.push(zone);
+        // The baseline itself isn't stroked, so the lower edge gets its own line.
+        const floor = chart.addSeries(
+          LineSeries,
+          {
+            color, lineWidth: 2, lineStyle: LineStyle.Solid,
+            priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
+          },
+          0,
+        );
+        floor.setData([
+          { time: t0 as UTCTimestamp, value: bottom },
+          { time: t1 as UTCTimestamp, value: bottom },
+        ]);
+        drawingSeriesRef.current.push(floor);
       } else if (drawing.points.length >= 2) {
-        // A rectangle is drawn as its two horizontal edges — lightweight-charts
-        // has no filled-box primitive, and two edges convey the same zone.
-        const segments =
-          drawing.kind === "rectangle"
-            ? [
-                [drawing.points[0], { ...drawing.points[1], price: drawing.points[0].price }],
-                [{ ...drawing.points[0], price: drawing.points[1].price }, drawing.points[1]],
-              ]
-            : [[drawing.points[0], drawing.points[1]]];
-        for (const segment of segments) {
-          const s = chart.addSeries(
-            LineSeries,
-            {
-              color, lineWidth: 2,
-              lineStyle: drawing.kind === "rectangle" ? LineStyle.Dashed : LineStyle.Solid,
-              priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
-            },
-            0,
-          );
-          const ordered = [...segment].sort((a, b) => a.time - b.time);
-          s.setData(ordered.map((p) => ({ time: p.time as UTCTimestamp, value: p.price })));
-          drawingSeriesRef.current.push(s);
-        }
+        const line = chart.addSeries(
+          LineSeries,
+          {
+            color, lineWidth: 2, lineStyle: LineStyle.Solid,
+            priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
+          },
+          0,
+        );
+        // Series data must run left to right; the anchors are in click order.
+        const ordered = [drawing.points[0], drawing.points[1]].sort((p, q) => p.time - q.time);
+        line.setData(ordered.map((p) => ({ time: p.time as UTCTimestamp, value: p.price })));
+        drawingSeriesRef.current.push(line);
       }
     }
     setNoteMarkers(notes);
@@ -1691,6 +1768,19 @@ export default function ChartPage() {
               </div>
             )}
             <div ref={containerRef} className="chart-el" />
+            {noteDraft && (
+              <input
+                className="note-input"
+                autoFocus
+                placeholder="Note, then Enter"
+                style={{ left: noteDraft.x, top: noteDraft.y }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") commitNote((e.target as HTMLInputElement).value);
+                  if (e.key === "Escape") setNoteDraft(null);
+                }}
+                onBlur={(e) => commitNote(e.target.value)}
+              />
+            )}
           </div>
           {showWatchlist && (
             <WatchlistPanel activeSecurityId={selected?.security_id} onSelect={selectSymbol} />
@@ -1731,6 +1821,9 @@ export default function ChartPage() {
             <WorkspacePanel
               activeTool={activeTool}
               onSelectTool={setActiveTool}
+              colors={DRAW_COLORS}
+              activeColor={drawColor}
+              onSelectColor={setDrawColor}
               drawings={drawings}
               onDeleteDrawing={async (id) => {
                 try {
@@ -1835,6 +1928,12 @@ export default function ChartPage() {
         .alert-toast button { background: none; border: none; color: var(--text-faint); font-size: 16px; line-height: 1; cursor: pointer; flex-shrink: 0; }
         .chart-row { display: flex; gap: 14px; align-items: flex-start; padding: 12px 20px 4px; }
         .chart-wrap { position: relative; flex: 1; min-width: 0; min-height: 520px; }
+        .note-input {
+          position: absolute; z-index: 6; transform: translate(-50%, -140%);
+          background: var(--panel); color: inherit; border: 1px solid var(--purple);
+          border-radius: 7px; padding: 5px 8px; font-size: 12px; font-family: inherit;
+          width: 190px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+        }
         .chart-el { width: 100%; }
         .empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 13px; background: var(--canvas-soft); border-radius: 10px; z-index: 4; }
         .loading-overlay { position: absolute; top: 6px; right: 14px; font-size: 12px; color: var(--text-muted); background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px; padding: 5px 10px; z-index: 6; }

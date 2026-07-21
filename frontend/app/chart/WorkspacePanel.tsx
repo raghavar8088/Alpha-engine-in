@@ -15,6 +15,9 @@ interface Props {
   // drawings
   activeTool: DrawingTool;
   onSelectTool: (tool: DrawingTool) => void;
+  colors: string[];
+  activeColor: string;
+  onSelectColor: (color: string) => void;
   drawings: ChartDrawing[];
   onDeleteDrawing: (id: string) => void;
   pendingPoint: boolean;
@@ -45,7 +48,7 @@ const TOOLS: { id: ChartDrawingKind; label: string; hint: string }[] = [
 ];
 
 export default function WorkspacePanel({
-  activeTool, onSelectTool, drawings, onDeleteDrawing, pendingPoint,
+  activeTool, onSelectTool, colors, activeColor, onSelectColor, drawings, onDeleteDrawing, pendingPoint,
   layouts, onSaveLayout, onApplyLayout, onDeleteLayout,
   alerts, onCreateAlert, onDeleteAlert, lastPrice,
   compareSymbols, onRemoveCompare, canAddCompare, onAddCompare, disabled,
@@ -77,6 +80,19 @@ export default function WorkspacePanel({
             >
               {t.label}
             </button>
+          ))}
+        </div>
+        <div className="swatches">
+          {colors.map((c) => (
+            <button
+              key={c}
+              className={activeColor === c ? "swatch active" : "swatch"}
+              style={{ background: c }}
+              disabled={disabled}
+              onClick={() => onSelectColor(c)}
+              title={`Draw in ${c}`}
+              aria-label={`Draw in ${c}`}
+            />
           ))}
         </div>
         {activeTool && (
@@ -217,6 +233,10 @@ export default function WorkspacePanel({
         .tool.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.35); color: var(--purple); }
         .tool:disabled { opacity: 0.45; cursor: not-allowed; }
         .hint { font-size: 10px; color: var(--text-faint); line-height: 1.45; }
+        .swatches { display: flex; gap: 5px; margin-top: 6px; }
+        .swatch { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--panel-border); cursor: pointer; padding: 0; }
+        .swatch.active { box-shadow: 0 0 0 2px var(--canvas), 0 0 0 3px currentColor; }
+        .swatch:disabled { opacity: 0.4; cursor: default; }
         .row { display: flex; gap: 5px; }
         .row input, .row select, .note-input { flex: 1; min-width: 0; background: var(--panel); border: 1px solid var(--panel-border); border-radius: 7px; padding: 5px 7px; font-size: 11px; }
         .go { background: var(--purple-dim); border: 1px solid rgba(125, 52, 220, 0.3); color: var(--purple); border-radius: 7px; padding: 5px 9px; font-size: 11px; font-weight: 700; cursor: pointer; flex-shrink: 0; }
