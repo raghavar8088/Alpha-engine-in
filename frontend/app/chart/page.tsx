@@ -141,6 +141,10 @@ const CHANNEL_DEFAULT_OFFSET_MULTIPLE = 0.5;
 // to visibly run off the current view rather than stopping just past the click.
 const RAY_EXTEND_BARS = 200;
 
+// Minimum pixel movement between two Brush samples. Every mousemove event would
+// otherwise bank a point, storing far more than the shape's own resolution needs.
+const BRUSH_SAMPLE_MIN_PIXELS = 6;
+
 // Palette offered for drawings. Kept small and legible on the chart background
 // rather than exposing a full colour wheel.
 const DRAW_COLORS = ["#f2b705", "#7d34dc", "#0e9f6e", "#d92d3f", "#2f80ed", "#e0e0e0"];
@@ -289,6 +293,10 @@ export default function ChartPage() {
   // Where an in-progress note is being typed: the chart point it pins to, plus the
   // pixel position to float the input over.
   const [noteDraft, setNoteDraft] = useState<{ point: ChartDrawingPoint; x: number; y: number } | null>(null);
+  // Points banked so far for a Polyline (added one per click) or a Brush stroke
+  // (sampled while dragging) — the two multi-point tools share this and its
+  // preview rendering below since, once captured, both are just a connected line.
+  const [multiPointDraft, setMultiPointDraft] = useState<ChartDrawingPoint[]>([]);
   const [drawings, setDrawings] = useState<ChartDrawing[]>([]);
   const [layouts, setLayouts] = useState<ChartLayout[]>([]);
   const [alerts, setAlerts] = useState<ChartAlert[]>([]);
@@ -303,6 +311,12 @@ export default function ChartPage() {
   // long-lived mouse handlers that must not re-subscribe on every mouse move.
   const dragRef = useRef<{ drawingId: string; index: number } | null>(null);
   const drawingsRef = useRef<ChartDrawing[]>([]);
+  // Live preview of an in-progress Polyline/Brush, redrawn as points are added.
+  const multiPointPreviewRef = useRef<ISeriesApi<"Line"> | null>(null);
+  // Whether a Brush stroke is currently being dragged, and where its last sample
+  // landed — both read from inside a long-lived mousemove listener.
+  const brushActiveRef = useRef(false);
+  const lastBrushPixelRef = useRef<{ x: number; y: number } | null>(null);
   const [noteMarkers, setNoteMarkers] = useState<SeriesMarker<Time>[]>([]);
   const alertLinesRef = useRef<IPriceLine[]>([]);
   const lastAlertPriceRef = useRef<number | null>(null);
@@ -1157,6 +1171,7 @@ export default function ChartPage() {
   // Switching tool or symbol abandons a half-finished shape.
   useEffect(() => {
     setPendingPoint(null);
+    setMultiPointDraft([]);
   }, [activeTool, selected]);
 
   useEffect(() => {
@@ -1324,6 +1339,17 @@ export default function ChartPage() {
         setActiveTool(null);
         return;
       }
+      if (activeTool === "polyline") {
+        // Every click banks another point; Enter/Escape (below) finish or
+        // abandon it, so this never falls through to the two-click flow.
+        setMultiPointDraft((prev) => [...prev, point]);
+        return;
+      }
+      if (activeTool === "brush") {
+        // Entirely mouse-drag driven (see the mousedown/mousemove/mouseup effect
+        // below) — an ordinary click here is not a stroke, so there's nothing to do.
+        return;
+      }
       // Ray, arrow and channel all fall through to the generic two-click flow
       // below (bank the first point, complete on the second) — the same one
       // trendline, rectangle and fibonacci already use unchanged.
@@ -1382,6 +1408,121 @@ export default function ChartPage() {
   useEffect(() => {
     setNoteDraft(null);
   }, [selected]);
+
+  // Finishes a Polyline: fewer than two points isn't a line, so it's simply
+  // dropped rather than saved as something that couldn't render.
+  const commitPolyline = useCallback(async () => {
+    const points = multiPointDraft;
+    setMultiPointDraft([]);
+    setActiveTool(null);
+    if (!selected || points.length < 2) return;
+    try {
+      const saved = await saveChartDrawing(selected.security_id, selected.exchange_segment, {
+        kind: "polyline", points, color: drawColor,
+      });
+      setDrawings((prev) => [...prev, saved]);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not save that polyline");
+    }
+  }, [multiPointDraft, selected, drawColor]);
+
+  // Enter finishes a Polyline in progress, Escape abandons it — mirrors the note
+  // input's own commit/cancel keys, just via the window since no input is focused
+  // while placing polyline points.
+  useEffect(() => {
+    if (activeTool !== "polyline" || multiPointDraft.length === 0) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Enter") commitPolyline();
+      if (e.key === "Escape") setMultiPointDraft([]);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [activeTool, multiPointDraft.length, commitPolyline]);
+
+  // Live preview of whatever's been placed so far for a Polyline or dragged so
+  // far for a Brush stroke — without this, placing points gives no feedback
+  // until the shape is actually finished.
+  useEffect(() => {
+    const chart = chartRef.current;
+    if (!chart) return;
+    if (multiPointPreviewRef.current) {
+      chart.removeSeries(multiPointPreviewRef.current);
+      multiPointPreviewRef.current = null;
+    }
+    if (multiPointDraft.length < 2) return;
+    const preview = chart.addSeries(
+      LineSeries,
+      {
+        color: drawColor, lineWidth: 2, lineStyle: LineStyle.Dotted,
+        priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
+      },
+      0,
+    );
+    const ordered = [...multiPointDraft].sort((p, q) => p.time - q.time);
+    preview.setData(ordered.map((p) => ({ time: p.time as UTCTimestamp, value: p.price })));
+    multiPointPreviewRef.current = preview;
+  }, [multiPointDraft, drawColor]);
+
+  // --- Brush: a freehand stroke sampled while the mouse button is held -------
+  useEffect(() => {
+    const chart = chartRef.current;
+    const series = candleSeriesRef.current;
+    const host = containerRef.current;
+    if (!chart || !series || !host || activeTool !== "brush" || !selected) return;
+    const timeScale = chart.timeScale();
+
+    const sample = (e: MouseEvent) => {
+      const rect = host.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const last = lastBrushPixelRef.current;
+      // Throttle by pixel distance, not time — sampling every mousemove event
+      // would bank far more points than the shape needs and bloat what's stored.
+      if (last && Math.hypot(x - last.x, y - last.y) < BRUSH_SAMPLE_MIN_PIXELS) return;
+      const time = timeScale.coordinateToTime(x);
+      const price = series.coordinateToPrice(y);
+      if (time === null || price === null) return;
+      lastBrushPixelRef.current = { x, y };
+      setMultiPointDraft((prev) => [...prev, { time: time as number, price: Number(price) }]);
+    };
+
+    const onDown = (e: MouseEvent) => {
+      brushActiveRef.current = true;
+      lastBrushPixelRef.current = null;
+      setMultiPointDraft([]);
+      chart.applyOptions({ handleScroll: false, handleScale: false });
+      sample(e);
+      e.preventDefault();
+    };
+    const onMove = (e: MouseEvent) => {
+      if (brushActiveRef.current) sample(e);
+    };
+    const onUp = () => {
+      if (!brushActiveRef.current) return;
+      brushActiveRef.current = false;
+      chart.applyOptions({ handleScroll: true, handleScale: true });
+      setMultiPointDraft((points) => {
+        if (selected && points.length >= 2) {
+          saveChartDrawing(selected.security_id, selected.exchange_segment, {
+            kind: "brush", points, color: drawColor,
+          })
+            .then((saved) => setDrawings((prev) => [...prev, saved]))
+            .catch((e) => setError(e instanceof Error ? e.message : "Could not save that brush stroke"));
+        }
+        return [];
+      });
+      setActiveTool(null);
+    };
+
+    host.addEventListener("mousedown", onDown, true);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      host.removeEventListener("mousedown", onDown, true);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, [activeTool, selected, drawColor]);
 
   // --- Phase 7: render drawings --------------------------------------------
   useEffect(() => {
@@ -1600,6 +1741,24 @@ export default function ChartPage() {
           line.setData(ordered.map((p) => ({ time: p.time as UTCTimestamp, value: p.price + shift })));
           drawingSeriesRef.current.push(line);
         }
+      } else if (
+        (drawing.kind === "polyline" || drawing.kind === "brush") &&
+        drawing.points.length >= 2
+      ) {
+        // Unlike every other multi-point shape here, all of these points matter —
+        // this is the one kind where "just the first two" would silently discard
+        // most of what was drawn.
+        const line = chart.addSeries(
+          LineSeries,
+          {
+            color, lineWidth: 2, lineStyle: LineStyle.Solid,
+            priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
+          },
+          0,
+        );
+        const ordered = [...drawing.points].sort((p, q) => p.time - q.time);
+        line.setData(ordered.map((p) => ({ time: p.time as UTCTimestamp, value: p.price })));
+        drawingSeriesRef.current.push(line);
       } else if (drawing.points.length >= 2) {
         const line = chart.addSeries(
           LineSeries,

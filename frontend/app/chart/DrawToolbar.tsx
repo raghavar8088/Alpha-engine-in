@@ -27,6 +27,8 @@ const TOOLS: ToolDef[] = [
   { id: "arrow", label: "Arrow" },
   { id: "vertical", label: "Vertical Line" },
   { id: "channel", label: "Parallel Channel" },
+  { id: "polyline", label: "Polyline" },
+  { id: "brush", label: "Brush" },
   { id: "text", label: "Text" },
 ];
 
@@ -108,6 +110,22 @@ function ToolIcon({ id }: { id: ToolDef["id"] }) {
       return (
         <svg {...common}>
           <path d="M4 9l16-4M4 17l16-4" />
+        </svg>
+      );
+    case "polyline":
+      return (
+        <svg {...common}>
+          <path d="M4 18l6-9 5 5 5-9" />
+          <circle cx="4" cy="18" r="1.4" fill="currentColor" stroke="none" />
+          <circle cx="10" cy="9" r="1.4" fill="currentColor" stroke="none" />
+          <circle cx="15" cy="14" r="1.4" fill="currentColor" stroke="none" />
+          <circle cx="20" cy="5" r="1.4" fill="currentColor" stroke="none" />
+        </svg>
+      );
+    case "brush":
+      return (
+        <svg {...common}>
+          <path d="M6 18c2-5 4-9 8-13 1.3-1.3 3 .3 1.7 1.7-4 4-8 6-9.7 11.3-.5 1.6-2 2-3 1-1-1-.5-2.5 3-1z" />
         </svg>
       );
     default:

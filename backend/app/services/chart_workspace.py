@@ -32,6 +32,7 @@ DRAWING_KINDS = {
     "trendline", "horizontal", "rectangle", "text", "fibonacci",
     "long_position", "short_position",
     "ray", "arrow", "vertical", "channel",
+    "polyline", "brush",
 }
 
 ALERT_CONDITIONS = {"crosses_above", "crosses_below"}

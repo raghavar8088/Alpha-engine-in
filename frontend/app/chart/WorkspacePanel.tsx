@@ -50,11 +50,14 @@ const TOOLS: { id: ChartDrawingKind; label: string; hint: string }[] = [
   { id: "arrow", label: "Arrow", hint: "Click the start, then the point it should point at" },
   { id: "vertical", label: "Vertical", hint: "Click one point in time" },
   { id: "channel", label: "Channel", hint: "Click two points for the first line — the second is placed a fixed offset below, drag it to adjust" },
+  { id: "polyline", label: "Polyline", hint: "Click each point, then Enter to finish or Esc to cancel" },
+  { id: "brush", label: "Brush", hint: "Click and drag to draw freehand" },
   { id: "text", label: "Note", hint: "Click where the note goes" },
 ];
 
 const KIND_LABEL: Record<ChartDrawingKind, string> = {
   trendline: "trendline", horizontal: "horizontal", rectangle: "zone",
+  polyline: "polyline", brush: "brush",
   fibonacci: "fib", text: "note", long_position: "long", short_position: "short",
   ray: "ray", arrow: "arrow", vertical: "vertical", channel: "channel",
 };
