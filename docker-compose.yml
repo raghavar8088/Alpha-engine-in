@@ -79,6 +79,31 @@ services:
     restart: unless-stopped
     mem_limit: 200m
 
+  # Option-SELLING paper desk. Same image as the buying desk (Dockerfile.prelive already
+  # ships the whole prelive-service directory) but a different entrypoint, its own
+  # prelive_selling_* collections and its own capital pool — the two desks share nothing
+  # but the Dhan feed and the instruments table.
+  #
+  # NOT started by default: `docker-compose up -d` brings up the profiles it knows about,
+  # and this one is held behind an explicit profile so a routine redeploy never silently
+  # starts a desk that opens short option positions. Start it deliberately:
+  #     docker-compose --profile selling up -d prelive-selling
+  #
+  # Gets more memory than the buying desk because it holds multi-leg structures across
+  # sessions and re-marks every leg on every tick.
+  prelive-selling:
+    profiles: ["selling"]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.prelive
+    command: ["python", "main_selling.py"]
+    env_file:
+      - .env
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+    mem_limit: 300m
+
   frontend:
     build:
       context: frontend
