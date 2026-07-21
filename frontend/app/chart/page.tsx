@@ -62,6 +62,7 @@ import {
   fetchChartDrawings,
   fetchChartLayouts,
   saveChartDrawing,
+  updateChartDrawing,
   saveChartLayout,
 } from "../../lib/api";
 import {
@@ -113,6 +114,10 @@ const RESOLUTION_SECONDS: Record<ChartResolution, number> = {
 // drawn too. 78.6% is the square root of 61.8% and is the one traders add beyond
 // the textbook set.
 const FIB_LEVELS = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+
+// How close the pointer must get to an anchor to grab it. Generous enough to hit
+// on a trackpad without stealing ordinary clicks on the chart.
+const GRAB_RADIUS = 10;
 
 const RESYNC_MISMATCHES = 3;
 const RESYNC_COOLDOWN_MS = 120_000;
@@ -248,6 +253,10 @@ export default function ChartPage() {
   const [compareSymbols, setCompareSymbols] = useState<ChartSymbol[]>([]);
   const drawingSeriesRef = useRef<ISeriesApi<"Line">[]>([]);
   const drawingLinesRef = useRef<IPriceLine[]>([]);
+  // Which anchor is being dragged, and the latest drawings — both read from inside
+  // long-lived mouse handlers that must not re-subscribe on every mouse move.
+  const dragRef = useRef<{ drawingId: string; index: number } | null>(null);
+  const drawingsRef = useRef<ChartDrawing[]>([]);
   const [noteMarkers, setNoteMarkers] = useState<SeriesMarker<Time>[]>([]);
   const alertLinesRef = useRef<IPriceLine[]>([]);
   const lastAlertPriceRef = useRef<number | null>(null);
@@ -1103,6 +1112,110 @@ export default function ChartPage() {
   useEffect(() => {
     setPendingPoint(null);
   }, [activeTool, selected]);
+
+  useEffect(() => {
+    drawingsRef.current = drawings;
+  }, [drawings]);
+
+  // --- Phase 2: drag an existing drawing by its anchors ---------------------
+  // Armed only when no tool is selected: with a tool active a click is placing a
+  // new shape, and that path must keep working untouched.
+  useEffect(() => {
+    const chart = chartRef.current;
+    const series = candleSeriesRef.current;
+    const host = containerRef.current;
+    if (!chart || !series || !host || activeTool) return;
+    const timeScale = chart.timeScale();
+
+    const anchorAt = (x: number, y: number) => {
+      for (const d of drawingsRef.current) {
+        for (let i = 0; i < d.points.length; i++) {
+          const py = series.priceToCoordinate(d.points[i].price);
+          if (py === null) continue;
+          // A horizontal ray spans the full width, so only its price can be grabbed.
+          if (d.kind === "horizontal") {
+            if (Math.abs(py - y) <= GRAB_RADIUS) return { drawingId: d.drawing_id, index: i };
+            continue;
+          }
+          const px = timeScale.timeToCoordinate(d.points[i].time as UTCTimestamp);
+          if (px === null) continue;
+          if (Math.hypot(px - x, py - y) <= GRAB_RADIUS) return { drawingId: d.drawing_id, index: i };
+        }
+      }
+      return null;
+    };
+
+    const localPoint = (e: MouseEvent) => {
+      const rect = host.getBoundingClientRect();
+      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    };
+
+    const onMove = (e: MouseEvent) => {
+      const drag = dragRef.current;
+      if (!drag && !host.contains(e.target as Node)) return;
+      const { x, y } = localPoint(e);
+      if (!drag) {
+        host.style.cursor = anchorAt(x, y) ? "grab" : "";
+        return;
+      }
+      const price = series.coordinateToPrice(y);
+      if (price === null) return;
+      const time = timeScale.coordinateToTime(x);
+      setDrawings((prev) =>
+        prev.map((d) =>
+          d.drawing_id !== drag.drawingId
+            ? d
+            : {
+                ...d,
+                points: d.points.map((p, i) =>
+                  i !== drag.index
+                    ? p
+                    : {
+                        // A horizontal ray has no meaningful time to slide along.
+                        time: d.kind === "horizontal" || time === null ? p.time : (time as number),
+                        price: Number(price),
+                      },
+                ),
+              },
+        ),
+      );
+    };
+
+    const onDown = (e: MouseEvent) => {
+      const { x, y } = localPoint(e);
+      const hit = anchorAt(x, y);
+      if (!hit) return;
+      dragRef.current = hit;
+      host.style.cursor = "grabbing";
+      // Freeze pan/zoom, otherwise the chart slides under the anchor being moved.
+      chart.applyOptions({ handleScroll: false, handleScale: false });
+      e.stopPropagation();
+      e.preventDefault();
+    };
+
+    const onUp = () => {
+      const drag = dragRef.current;
+      if (!drag) return;
+      dragRef.current = null;
+      host.style.cursor = "";
+      chart.applyOptions({ handleScroll: true, handleScale: true });
+      const moved = drawingsRef.current.find((d) => d.drawing_id === drag.drawingId);
+      if (!moved) return;
+      updateChartDrawing(drag.drawingId, { points: moved.points }).catch((err) =>
+        setError(err instanceof Error ? err.message : "Could not save that edit"),
+      );
+    };
+
+    host.addEventListener("mousedown", onDown, true);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      host.removeEventListener("mousedown", onDown, true);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      host.style.cursor = "";
+    };
+  }, [activeTool, selected, loadSeq]);
 
   // --- Phase 7: capture clicks into drawings --------------------------------
   useEffect(() => {

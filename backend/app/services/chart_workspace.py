@@ -18,7 +18,7 @@ schema or re-evaluating history.
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from pymongo import ASCENDING, DESCENDING
+from pymongo import ASCENDING, DESCENDING, ReturnDocument
 
 from app.core.db import (
     chart_alerts_collection,
@@ -74,18 +74,24 @@ async def list_drawings(user_id: str, security_id: str, exchange_segment: str) -
     return [_drawing_out(doc) async for doc in cursor]
 
 
+def _clean_points(points) -> list[dict]:
+    """Validates and normalises a {time, price} list, shared by create and update so
+    a dragged shape can't be stored in a shape a freshly drawn one couldn't."""
+    if not isinstance(points, list) or not points:
+        raise ValueError("points must be a non-empty list of {time, price}")
+    for point in points:
+        if not isinstance(point, dict) or "time" not in point or "price" not in point:
+            raise ValueError("each point needs a time and a price")
+    return [{"time": int(p["time"]), "price": float(p["price"])} for p in points]
+
+
 async def save_drawing(
     user_id: str, security_id: str, exchange_segment: str, payload: dict,
 ) -> dict:
     kind = payload.get("kind")
     if kind not in DRAWING_KINDS:
         raise ValueError(f"kind must be one of {sorted(DRAWING_KINDS)}")
-    points = payload.get("points") or []
-    if not isinstance(points, list) or not points:
-        raise ValueError("points must be a non-empty list of {time, price}")
-    for point in points:
-        if not isinstance(point, dict) or "time" not in point or "price" not in point:
-            raise ValueError("each point needs a time and a price")
+    points = _clean_points(payload.get("points"))
 
     doc = {
         "drawing_id": uuid4().hex[:12],
@@ -93,13 +99,35 @@ async def save_drawing(
         "security_id": security_id,
         "exchange_segment": exchange_segment,
         "kind": kind,
-        "points": [{"time": int(p["time"]), "price": float(p["price"])} for p in points],
+        "points": points,
         "text": payload.get("text"),
         "color": payload.get("color"),
         "created_at": _now(),
     }
     await chart_drawings_collection.insert_one(doc)
     return _drawing_out(doc)
+
+
+async def update_drawing(user_id: str, drawing_id: str, payload: dict) -> dict | None:
+    """Repositions or restyles an existing drawing. `kind` is deliberately not
+    updatable — a shape changing type mid-edit would leave the stored points
+    meaningless for the new kind."""
+    changes: dict = {}
+    if "points" in payload:
+        changes["points"] = _clean_points(payload.get("points"))
+    if "text" in payload:
+        changes["text"] = payload.get("text")
+    if "color" in payload:
+        changes["color"] = payload.get("color")
+    if not changes:
+        raise ValueError("nothing to update — send points, text or color")
+
+    doc = await chart_drawings_collection.find_one_and_update(
+        {"user_id": user_id, "drawing_id": drawing_id},
+        {"$set": changes},
+        return_document=ReturnDocument.AFTER,
+    )
+    return _drawing_out(doc) if doc else None
 
 
 async def delete_drawing(user_id: str, drawing_id: str) -> bool:

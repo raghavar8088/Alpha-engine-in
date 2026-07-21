@@ -324,6 +324,19 @@ async def create_drawing(
         raise HTTPException(status_code=422, detail=str(exc))
 
 
+@router.patch("/drawings/{drawing_id}")
+async def edit_drawing(
+    drawing_id: str, payload: dict, current_user: dict = Depends(get_current_user),
+):
+    try:
+        updated = await chart_workspace.update_drawing(_user_id(current_user), drawing_id, payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    if updated is None:
+        raise HTTPException(status_code=404, detail="No such drawing")
+    return updated
+
+
 @router.delete("/drawings/{drawing_id}")
 async def remove_drawing(drawing_id: str, current_user: dict = Depends(get_current_user)):
     if not await chart_workspace.delete_drawing(_user_id(current_user), drawing_id):

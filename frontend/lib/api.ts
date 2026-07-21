@@ -1678,6 +1678,17 @@ export async function saveChartDrawing(
   );
 }
 
+/** Repositions or restyles a drawing in place. `kind` is fixed at creation. */
+export async function updateChartDrawing(
+  drawingId: string,
+  changes: { points?: ChartDrawingPoint[]; text?: string; color?: string },
+): Promise<ChartDrawing> {
+  return apiFetch(`/api/chart/drawings/${drawingId}`, {
+    method: "PATCH",
+    body: JSON.stringify(changes),
+  });
+}
+
 export async function deleteChartDrawing(drawingId: string): Promise<{ deleted: boolean }> {
   return apiFetch(`/api/chart/drawings/${drawingId}`, { method: "DELETE" });
 }
