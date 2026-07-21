@@ -6,6 +6,7 @@ import asyncio
 import base64
 import json as json_module
 import time
+from datetime import datetime, timezone
 
 import httpx
 import pyotp
@@ -76,10 +77,41 @@ async def totp_login(client_id: str, pin: str, totp_secret: str) -> dict:
             "/app/generateAccessToken",
             params={"dhanClientId": client_id, "pin": pin, "totp": code},
         )
-    data = response.json()
+    # Throttling is called out separately so callers can back off instead of
+    # retrying straight into the limit. The auth endpoint is rate-limited in its
+    # own right, and a burst of logins here is what produced the recurring
+    # "TOTP login failed" — see app.services.dhan_token for the coordination.
+    if response.status_code == 429 or _mentions_throttle(response.text):
+        raise DhanRateLimitError("Dhan auth endpoint is throttling this account")
+    try:
+        data = response.json()
+    except ValueError:
+        raise DhanAPIError(f"Dhan auth returned non-JSON (HTTP {response.status_code})")
     if response.status_code >= 300 or not data.get("accessToken"):
         raise DhanAPIError(data.get("remarks") or data.get("errorMessage") or "TOTP login failed")
     return data
+
+
+def token_seconds_remaining(access_token: str) -> float | None:
+    """Seconds of life left on a Dhan access token, or None if unreadable.
+
+    Unverified decode on purpose — Dhan validates the token on every call; all we
+    need locally is the `exp` claim to decide whether a refresh is due.
+    """
+    expiry = token_expiry(access_token)
+    return None if expiry is None else (expiry - datetime.now(timezone.utc)).total_seconds()
+
+
+def token_expiry(access_token: str) -> datetime | None:
+    """Expiry instant from the token's JWT `exp` claim (authoritative, unlike the
+    tz-less `expiryTime` string Dhan returns alongside it)."""
+    try:
+        segment = access_token.split(".")[1]
+        payload = json_module.loads(base64.urlsafe_b64decode(segment + "=" * (-len(segment) % 4)))
+        exp = payload.get("exp")
+        return datetime.fromtimestamp(float(exp), tz=timezone.utc) if exp else None
+    except Exception:
+        return None
 
 
 def extract_client_id_from_token(access_token: str) -> str | None:

@@ -4,69 +4,56 @@ from uuid import uuid4
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api.deps import get_current_user
-from app.core.config import settings
 from app.core.db import broker_credentials_collection, paper_orders_collection
-from app.core.encryption import decrypt_secret, encrypt_secret
+from app.core.encryption import decrypt_secret
 from app.schemas.broker import (
     BrokerConnectionResponse,
     ConnectBrokerRequest,
     OrderResponse,
     PlaceOrderRequest,
 )
-from app.services.dhan_client import DhanAPIError, DhanClient, extract_client_id_from_token, totp_login
+from app.services.dhan_client import DhanAPIError, DhanClient, extract_client_id_from_token
+from app.services.dhan_token import health as dhan_token_health
+from app.services.dhan_token import refresh_locked, should_refresh, store_token, totp_configured
 from app.services.portfolio_analytics import get_risk_status
 
 router = APIRouter(prefix="/api/broker", tags=["broker"])
 
-# The 20h background refresh loop (see app/main.py) is only a baseline — it has
-# no way to notice if something else invalidates the token in between cycles
-# (Dhan allows one active session token per account, so anything else logging
-# in with the same TOTP credentials silently kills whatever token we're
-# holding). Proactively refreshing here whenever the stored token is older than
-# this bounds the real-world staleness window instead of waiting up to 20h for
-# a human to notice "Invalid Token" and hit the manual refresh endpoint.
-DHAN_TOKEN_MAX_AGE_SECONDS = 3 * 60 * 60  # 3 hours
-
 
 async def _get_dhan_client(user_id: str) -> DhanClient:
+    """The single read path every Dhan-backed feature goes through.
+
+    Refreshing here is a safety net for the background loop in app/main.py, which
+    can't notice a token invalidated out of band (Dhan allows one active session
+    per account, so any other login silently kills ours). Two things keep that
+    safety net from becoming the problem it used to be:
+
+    * the decision is made from the token's real expiry, so a healthy token
+      triggers no login at all — previously any request past a wall-clock age
+      minted unconditionally, and N concurrent requests minted N times; and
+    * the mint itself is serialised across processes by a Redis lock, so even a
+      simultaneous burst produces exactly one login.
+
+    A failed refresh is deliberately not fatal: fall through to the stored token,
+    which is usually still valid, rather than 500-ing every Dhan feature at once.
+    """
     creds = await broker_credentials_collection.find_one({"user_id": user_id, "broker": "dhan"})
     if creds is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Dhan account not connected")
 
-    age_seconds = (datetime.now(timezone.utc) - creds["connected_at"]).total_seconds()
-    can_auto_refresh = settings.dhan_client_id and settings.dhan_pin and settings.dhan_totp_secret
-    if age_seconds > DHAN_TOKEN_MAX_AGE_SECONDS and can_auto_refresh:
-        try:
-            data = await totp_login(settings.dhan_client_id, settings.dhan_pin, settings.dhan_totp_secret)
-            await store_dhan_credentials(
-                user_id, str(data["dhanClientId"]), data["accessToken"], data.get("dhanClientName"),
-            )
-            return DhanClient(client_id=str(data["dhanClientId"]), access_token=data["accessToken"])
-        except (DhanAPIError, Exception):
-            pass  # Dhan may be mid-cooldown from a very recent login elsewhere — fall through
-            # to the possibly-stale stored token rather than hard-failing the whole request here.
+    if should_refresh(creds):
+        await refresh_locked(user_id)
+        creds = await broker_credentials_collection.find_one({"user_id": user_id, "broker": "dhan"}) or creds
 
     return DhanClient(client_id=creds["client_id"], access_token=decrypt_secret(creds["access_token_encrypted"]))
 
 
 async def store_dhan_credentials(user_id: str, client_id: str, access_token: str, dhan_name: str | None = None) -> None:
-    """Shared upsert used by both the manual connect flow and the TOTP auto-refresh
+    """Shared upsert used by the manual connect flow and the TOTP auto-refresh
     loop so a refreshed token replaces the stored one without disturbing anything
-    else in the credentials document."""
-    await broker_credentials_collection.find_one_and_update(
-        {"user_id": user_id, "broker": "dhan"},
-        {
-            "$set": {
-                "user_id": user_id,
-                "broker": "dhan",
-                "client_id": client_id,
-                "access_token_encrypted": encrypt_secret(access_token),
-                "connected_at": datetime.now(timezone.utc),
-                **({"dhan_name": dhan_name} if dhan_name else {}),
-            }
-        },
-        upsert=True,
-    )
+    else in the credentials document. Delegates to the token manager so the
+    token's expiry is recorded the same way no matter who stored it."""
+    await store_token(user_id, client_id, access_token, dhan_name)
 
 
 @router.get("/status", response_model=BrokerConnectionResponse | None)
@@ -79,6 +66,12 @@ async def broker_status(current_user: dict = Depends(get_current_user)):
         client_id=creds["client_id"],
         connected_at=creds["connected_at"],
         dhan_name=creds.get("dhan_name"),
+        # Surfacing expiry/remaining here is what makes "is the auto-refresh
+        # actually working?" answerable without reading container logs — the
+        # question that previously needed log archaeology because only failures
+        # were ever visible.
+        auto_refresh_enabled=totp_configured(),
+        **dhan_token_health(creds),
     )
 
 
@@ -111,23 +104,29 @@ async def connect_broker(payload: ConnectBrokerRequest, current_user: dict = Dep
 
 @router.post("/refresh-token")
 async def refresh_dhan_token(current_user: dict = Depends(get_current_user)):
-    """Manually trigger a TOTP-based token refresh (the same thing the background
-    loop in app/main.py does automatically every ~20h) — useful for testing the
-    TOTP setup without waiting for the scheduled refresh."""
-    if not (settings.dhan_client_id and settings.dhan_pin and settings.dhan_totp_secret):
+    """Manually trigger a TOTP-based token refresh — useful for testing the TOTP
+    setup, or forcing a new token after one was invalidated out of band.
+
+    Goes through the same cross-process lock as every other login, so pressing it
+    repeatedly (or while the background loop happens to be minting) produces one
+    login, not several. `minted` distinguishes "this call did the work" from
+    "someone else was already minting and we took their result"; both leave a
+    usable token behind.
+    """
+    if not totp_configured():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="DHAN_CLIENT_ID / DHAN_PIN / DHAN_TOTP_SECRET not configured",
         )
-    try:
-        data = await totp_login(settings.dhan_client_id, settings.dhan_pin, settings.dhan_totp_secret)
-    except DhanAPIError as exc:
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=f"TOTP login failed: {exc.remarks}")
-
-    await store_dhan_credentials(
-        str(current_user["_id"]), str(data["dhanClientId"]), data["accessToken"], data.get("dhanClientName"),
-    )
-    return {"refreshed": True, "client_id": data["dhanClientId"], "expiry_time": data.get("expiryTime")}
+    user_id = str(current_user["_id"])
+    minted = await refresh_locked(user_id)
+    creds = await broker_credentials_collection.find_one({"user_id": user_id, "broker": "dhan"})
+    if creds is None:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="TOTP refresh did not produce a usable token — check DHAN_* credentials and Dhan's auth status.",
+        )
+    return {"refreshed": True, "minted": minted, "client_id": creds["client_id"], **dhan_token_health(creds)}
 
 
 @router.get("/holdings")
