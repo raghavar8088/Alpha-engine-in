@@ -359,7 +359,7 @@ def run_options_selling_backtest(
     square_off_eod: bool | None = None, credit_target_pct: float | None = None,
     loss_cap_mult: float | None = None, strike_buffer_pct: float | None = None,
     max_loss_pct_capital: float | None = None, include_trades: bool = False,
-    expiry_weekday: int | None = None,
+    expiry_weekday: int | None = None, with_charts: bool = True,
 ) -> dict:
     category = _selling_category(strategy_id)
     if category is None:
@@ -558,7 +558,13 @@ def run_options_selling_backtest(
 
     out = {
         "metrics": metrics,
-        "charts": compute_charts(run),
+        # Charts are one dict + isoformat() per BAR. On a 32k-bar 15m series that is 32k
+        # objects per run, and a 178-strategy sweep runs each strategy twice (full +
+        # held-back) — ~11 million objects built and, in the sweep's case, thrown away
+        # unread, because the sweep document stores only metrics and structure. Callers
+        # that render charts (the single-backtest endpoint) leave this on; the sweep
+        # turns it off. This was the dominant cost of a sweep, not the backtesting.
+        **({"charts": compute_charts(run)} if with_charts else {}),
         "structure": {
             "style": category, "dte_days": dte_days, "strike_step": strike_step,
             "lot_size": lot_size, "quantity_lots": quantity_lots, "iv_lookback": iv_lookback,

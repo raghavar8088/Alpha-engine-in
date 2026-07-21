@@ -335,6 +335,11 @@ async def options_selling_backtest_all(
                     initial_capital=request.initial_capital, lot_size=request.lot_size,
                     quantity_lots=request.quantity_lots, expiry_weekday=expiry_wd,
                     include_trades=trades,
+                    # The sweep stores metrics and structure only — never charts. Building
+                    # them anyway cost one dict + isoformat per bar per run, which on a
+                    # 178-strategy sweep over 32k 15m bars is ~11M objects created and
+                    # discarded unread, and was the dominant cost of running a sweep.
+                    with_charts=False,
                 )
 
             result = await to_thread.run_sync(lambda: _go(bars, trades=True))
