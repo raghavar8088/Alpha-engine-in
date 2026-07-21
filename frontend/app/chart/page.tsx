@@ -47,6 +47,7 @@ import OverlayPanel, { DEFAULT_OVERLAYS, OverlayConfig, ReplayState } from "./Ov
 import AnalysisPanel from "./AnalysisPanel";
 import WorkspacePanel, { DrawingTool } from "./WorkspacePanel";
 import CompareGrid from "./CompareGrid";
+import WatchlistPanel from "./WatchlistPanel";
 import {
   ChartAlert,
   ChartDrawing,
@@ -221,6 +222,7 @@ export default function ChartPage() {
 
   // --- Phase 6: structure + AI explain --------------------------------------
   const [showAnalysisPanel, setShowAnalysisPanel] = useState(false);
+  const [showWatchlist, setShowWatchlist] = useState(true);
   const [showStructure, setShowStructure] = useState(false);
   const [structure, setStructure] = useState<ChartStructure | null>(null);
   const [structureLoading, setStructureLoading] = useState(false);
@@ -1468,6 +1470,9 @@ export default function ChartPage() {
             <button className={showAnalysisPanel ? "trend-btn active" : "trend-btn"} onClick={() => setShowAnalysisPanel((v) => !v)}>
               Analysis
             </button>
+            <button className={showWatchlist ? "trend-btn active" : "trend-btn"} onClick={() => setShowWatchlist((v) => !v)}>
+              Watchlist
+            </button>
             <button className={showWorkspacePanel ? "trend-btn active" : "trend-btn"} onClick={() => setShowWorkspacePanel((v) => !v)}>
               Workspace
             </button>
@@ -1549,6 +1554,9 @@ export default function ChartPage() {
             )}
             <div ref={containerRef} className="chart-el" />
           </div>
+          {showWatchlist && (
+            <WatchlistPanel activeSecurityId={selected?.security_id} onSelect={selectSymbol} />
+          )}
           {showPanel && <IndicatorPanel config={config} onChange={setConfig} intraday={intraday} />}
           {showOverlayPanel && (
             <OverlayPanel
