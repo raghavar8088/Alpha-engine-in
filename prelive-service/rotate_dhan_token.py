@@ -11,8 +11,21 @@ credentials.py can read from:
   2. dhan_config.py at the repo root (plaintext) - the fallback path, kept in sync
      so it's never the thing silently serving a stale token again.
 
-Scheduled via Windows Task Scheduler to run daily before 09:15 IST (see
-setup_scheduler.ps1). Run manually any time with: python rotate_dhan_token.py
+RETIRED AS A ROUTINE ROTATOR. The backend now owns Dhan token refresh: it mints
+from the token's real expiry and serialises every login behind a Redis lock
+(backend/app/services/dhan_token.py). Because Dhan permits exactly one active
+session per account, this script rotating on its own schedule *invalidated the
+backend's token every time it ran*, which forced the backend to re-mint, which
+invalidated this one — a cascade whose bursts tripped Dhan's rate limit and
+surfaced as "TOTP login failed".
+
+So it no longer logs in unconditionally. It first checks the token the backend
+maintains in Mongo and exits without touching Dhan if that token is still good,
+which is the normal case. It remains useful as a break-glass tool for when the
+backend is down or its token is genuinely dead — force that with `--force`.
+
+Prefer the backend's POST /api/broker/refresh-token, which takes the same lock.
+Run here only if the backend can't: python rotate_dhan_token.py [--force]
 """
 
 import base64
@@ -21,7 +34,7 @@ import os
 import re
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import pyotp
 import requests
@@ -116,8 +129,42 @@ def _exp_str(access_token: str) -> str:
         return "unknown"
 
 
+# A token with more life than this is left alone: minting over it would revoke
+# the one the backend and every other consumer is actively using.
+STILL_GOOD_MARGIN = timedelta(hours=2)
+
+
+def _stored_token_remaining() -> timedelta | None:
+    """Life left on the token the backend maintains, or None if unreadable."""
+    if not ENCRYPTION_KEY:
+        return None
+    try:
+        doc = credentials_collection.find_one({"broker": "dhan"})
+        if not doc:
+            return None
+        token = Fernet(ENCRYPTION_KEY.encode()).decrypt(doc["access_token_encrypted"].encode()).decode()
+        payload_b64 = token.split(".")[1]
+        payload_b64 += "=" * (-len(payload_b64) % 4)
+        exp = json.loads(base64.urlsafe_b64decode(payload_b64))["exp"]
+        return datetime.fromtimestamp(exp, tz=timezone.utc) - datetime.now(timezone.utc)
+    except Exception:
+        return None
+
+
 def main() -> None:
     _require_config()
+
+    if "--force" not in sys.argv:
+        remaining = _stored_token_remaining()
+        if remaining is not None and remaining > STILL_GOOD_MARGIN:
+            print(
+                f"[rotate] backend-managed token still valid for {remaining} "
+                f"(> {STILL_GOOD_MARGIN}) — skipping. Minting now would revoke the "
+                f"token every service is currently using. Use --force to override.",
+                flush=True,
+            )
+            return
+
     print(f"[rotate] {datetime.now(timezone.utc).isoformat()} requesting fresh Dhan token via TOTP...", flush=True)
     for attempt in range(3):
         try:

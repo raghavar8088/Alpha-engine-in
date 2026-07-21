@@ -13,6 +13,12 @@ class BrokerConnectionResponse(BaseModel):
     client_id: str
     connected_at: datetime
     dhan_name: str | None = None
+    # Token health, so the UI (and a human with curl) can tell a working
+    # auto-refresh from a silently-stalled one without reading server logs.
+    token_expiry: datetime | None = None
+    seconds_remaining: int | None = None
+    token_healthy: bool = False
+    auto_refresh_enabled: bool = False
 
 
 class PlaceOrderRequest(BaseModel):
