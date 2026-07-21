@@ -45,10 +45,21 @@ class FakeCollection:
                 if not any(self._match(doc, sub) for sub in v):
                     return False
                 continue
+            if k == "$and":
+                if not all(self._match(doc, sub) for sub in v):
+                    return False
+                continue
             cur, parts = doc, k.split(".")
+            present = True
             for p in parts:
-                cur = (cur or {}).get(p) if isinstance(cur, dict) else None
+                if isinstance(cur, dict) and p in cur:
+                    cur = cur[p]
+                else:
+                    cur, present = None, False
+                    break
             if isinstance(v, dict):
+                if "$exists" in v and bool(present) != bool(v["$exists"]):
+                    return False
                 if "$in" in v and cur not in v["$in"]:
                     return False
                 if "$gte" in v and (cur is None or cur < v["$gte"]):
@@ -135,10 +146,19 @@ CRUDE = {
     "exchange_segment": "MCX_COMM", "asset_class": "COMMODITY_FUTURE", "tick_size": 1.0,
     "expiry": "2026-08-19", "underlying_symbol": "CRUDEOIL", "lot_size": 100,
 }
+# Same underlying as NIFTY_CE but already expired — the instrument master keeps
+# every historical contract, and search must NOT surface these (they chart as
+# no_data). Dated in the past relative to the app's 2026-07-21 clock.
+NIFTY_CE_EXPIRED = {
+    "_id": "i4", "symbol": "NIFTY24JUN24000CE", "name": "NIFTY 24000 CE (expired)",
+    "security_id": "44000", "exchange_segment": "NSE_FNO", "asset_class": "INDEX_OPTION",
+    "tick_size": 0.05, "expiry": "2026-06-26", "strike": 24000, "option_type": "CE",
+    "underlying_symbol": "NIFTY", "lot_size": 50,
+}
 
 import app.core.db as db_mod
 
-db_mod.instruments_collection = FakeCollection([NIFTY, NIFTY_CE, CRUDE])
+db_mod.instruments_collection = FakeCollection([NIFTY, NIFTY_CE, CRUDE, NIFTY_CE_EXPIRED])
 db_mod.users_collection = FakeCollection([{"_id": "u1", "email": "local@tradingai.dev", "is_active": True}])
 db_mod.manual_positions_collection = FakeCollection([{
     "position_id": "p1", "symbol": "NIFTY", "display_name": "Nifty 50", "side": "BUY", "quantity": 50,
@@ -251,6 +271,8 @@ with TestClient(app) as client:
     check("option carries strike", opt.get("strike") == 24500, opt)
     check("option carries expiry", opt.get("expiry") == "2026-08-28", opt)
     check("option carries option_type", opt.get("option_type") == "CE", opt)
+    # Expired contracts must never surface — they only ever chart as no_data.
+    check("expired option is excluded from search", "NIFTY24JUN24000CE" not in syms, syms)
 
     r = client.get("/api/chart/search", params={"q": "CRUDE"})
     check("MCX contract is searchable", "CRUDEOIL" in {d["symbol"] for d in r.json()["results"]}, r.text)

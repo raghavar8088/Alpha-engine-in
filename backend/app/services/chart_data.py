@@ -74,18 +74,31 @@ async def search_symbols(query: str, limit: int = 20) -> list[dict]:
 
     `expiry`/`strike`/`option_type`/`underlying_symbol` are projected so the UI
     can label a contract properly — "NIFTY 24500 CE 28-Aug" rather than an
-    opaque contract symbol."""
+    opaque contract symbol.
+
+    Expired derivatives are excluded. The instrument master keeps every historical
+    contract, and there are far more dead strikes than live ones, so without this
+    a "NIFTY-Jul" search returned 20 already-expired options — each of which
+    charts as no_data — and not a single tradeable one. A contract is kept if it
+    has no expiry (equities/indices/ETFs) or its expiry is today or later."""
     q = query.strip()
     if not q:
         return []
+    today = datetime.now(IST).strftime("%Y-%m-%d")
     pipeline = [
         {"$match": {
             "asset_class": {"$in": list(_INSTRUMENT_TYPE.keys())},
+            # No expiry field at all (cash/index/ETF) OR not yet expired.
             "$or": [
+                {"expiry": {"$exists": False}},
+                {"expiry": None},
+                {"expiry": {"$gte": today}},
+            ],
+            "$and": [{"$or": [
                 {"symbol": {"$regex": f"^{q}", "$options": "i"}},
                 {"name": {"$regex": q, "$options": "i"}},
                 {"underlying_symbol": {"$regex": f"^{q}", "$options": "i"}},
-            ],
+            ]}],
         }},
         {"$addFields": {"_symlen": {"$strLenCP": "$symbol"}}},
         # Nearest expiry first within a given symbol length, so the contracts a
