@@ -47,6 +47,7 @@ import { StreamStatus, useChartStream } from "./useChartStream";
 import OverlayPanel, { DEFAULT_OVERLAYS, OverlayConfig, ReplayState } from "./OverlayPanel";
 import AnalysisPanel from "./AnalysisPanel";
 import WorkspacePanel, { DrawingTool } from "./WorkspacePanel";
+import DrawToolbar from "./DrawToolbar";
 import CompareGrid from "./CompareGrid";
 import WatchlistPanel from "./WatchlistPanel";
 import {
@@ -1768,6 +1769,14 @@ export default function ChartPage() {
               </div>
             )}
             <div ref={containerRef} className="chart-el" />
+            <DrawToolbar
+              activeTool={activeTool}
+              onSelectTool={setActiveTool}
+              colors={DRAW_COLORS}
+              activeColor={drawColor}
+              onSelectColor={setDrawColor}
+              disabled={!selected}
+            />
             {noteDraft && (
               <input
                 className="note-input"
