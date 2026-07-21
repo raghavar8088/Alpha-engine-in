@@ -120,6 +120,36 @@ check("merge with empty older keeps newer", merge_series({k: [] for k in older},
 messy = {"t": [50, 5], "o": [5, 0], "h": [5, 0], "l": [5, 0], "c": [5, 0], "v": [5, 0]}
 check("merge sorts unordered input", merge_series(messy, {k: [] for k in messy})["t"], [5, 50])
 
+# --- bar_epoch: live-stream bars must land on Dhan's history grid -----------
+# Pinned to a real production observation: Dhan's /charts/intraday returned
+# 1784173500 for the first 5m bar of 2026-07-16, which is 03:45 UTC = 09:15 IST
+# (market open). live_feed publishes that same bar as an IST-aware datetime, so
+# converting it must reproduce Dhan's epoch exactly. Getting this wrong put every
+# streamed bar 5.5h ahead of history, so live updates never merged at all.
+_STREAM_SRC = r"d:\INDIAN MARKET\backend\app\services\chart_stream.py"
+_stream_tree = ast.parse(open(_STREAM_SRC, encoding="utf-8").read())
+_stream_picked = [n for n in _stream_tree.body if isinstance(n, ast.FunctionDef) and n.name == "bar_epoch"]
+assert _stream_picked, "bar_epoch not found in chart_stream.py"
+_stream_ns = {"datetime": datetime, "timezone": timezone, "timedelta": timedelta}
+exec(compile(ast.Module(body=_stream_picked, type_ignores=[]), _STREAM_SRC, "exec"), _stream_ns)
+bar_epoch = _stream_ns["bar_epoch"]
+
+DHAN_0915_IST = 1784173500  # observed in production
+check("live bar at 09:15 IST lands on Dhan's grid",
+      bar_epoch("2026-07-16T09:15:00+05:30"), DHAN_0915_IST)
+check("the next 5m bucket is exactly 300s later",
+      bar_epoch("2026-07-16T09:20:00+05:30"), DHAN_0915_IST + 300)
+check("an explicit-UTC timestamp gives the same instant",
+      bar_epoch("2026-07-16T03:45:00+00:00"), DHAN_0915_IST)
+check("15:30 IST close maps to 10:00 UTC",
+      bar_epoch("2026-07-16T15:30:00+05:30"),
+      int(datetime(2026, 7, 16, 10, 0, tzinfo=timezone.utc).timestamp()))
+# The specific regression: never re-read IST wall-clock as if it were UTC.
+_wall_clock_bug = int(datetime.fromisoformat("2026-07-16T09:15:00+05:30")
+                      .replace(tzinfo=timezone.utc).timestamp())
+check("does not reintroduce the 5.5h wall-clock bug",
+      bar_epoch("2026-07-16T09:15:00+05:30") == _wall_clock_bug, False)
+
 print()
 print("ALL CHECKS PASSED" if failures == 0 else f"{failures} CHECK(S) FAILED")
 raise SystemExit(0 if failures == 0 else 1)

@@ -55,21 +55,23 @@ def stream_timeframe(resolution: str) -> str | None:
 
 
 def bar_epoch(ts_iso: str) -> int:
-    """Epoch seconds for a live bar, in the same convention the `history`
-    endpoint's timestamps use.
+    """Epoch seconds for a live bar, on the same grid the `history` endpoint uses.
 
-    Dhan's /charts/* responses carry epochs that, read as UTC, spell out IST
-    wall-clock time — `providers/dhan_history.py` and `chart_data._to_ist_date`
-    both already treat them that way. live_feed stamps its buckets with a real
-    IST-aware datetime, so to land on the same grid the wall-clock is stripped
-    of its offset and re-read as UTC.
+    Verified against production data rather than assumed: Dhan's /charts/intraday
+    returned 1784173500 for the first 5m bar of 2026-07-16, which is 03:45 UTC —
+    i.e. 09:15 IST, the market open. So Dhan's timestamps are true UTC epochs,
+    not IST wall-clock re-read as UTC.
 
-    The frontend does not trust this blindly: it only merges an update that
-    lands exactly on its current bar or the next one, and otherwise flags the
-    stream stale rather than writing a candle at the wrong place.
+    live_feed stamps its buckets with an IST-aware datetime, so the plain
+    instant is already the right answer; no offset juggling is needed. An
+    earlier version of this stripped the tzinfo and re-read it as UTC, which put
+    every streamed bar 5.5 hours ahead of the history grid.
+
+    The frontend does not trust this blindly regardless: it merges only an
+    update landing on its current bar or the next one, and otherwise re-pulls
+    history rather than drawing a candle at the wrong time.
     """
-    ts = datetime.fromisoformat(ts_iso)
-    return int(ts.replace(tzinfo=timezone.utc).timestamp())
+    return int(datetime.fromisoformat(ts_iso).timestamp())
 
 
 class ChartStreamHub:
