@@ -109,6 +109,11 @@ const RESOLUTION_SECONDS: Record<ChartResolution, number> = {
 // drawn — it's far worse to paint a candle at the wrong timestamp than to miss
 // an update. Instead, after a few consecutive mismatches the page re-pulls
 // history, which is the source of truth, no more often than this.
+// Standard retracement ladder, including the 0/100 anchors so the swing itself is
+// drawn too. 78.6% is the square root of 61.8% and is the one traders add beyond
+// the textbook set.
+const FIB_LEVELS = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+
 const RESYNC_MISMATCHES = 3;
 const RESYNC_COOLDOWN_MS = 120_000;
 
@@ -1176,6 +1181,26 @@ export default function ChartPage() {
           position: "aboveBar", shape: "circle", color,
           text: drawing.text || "note",
         });
+      } else if (drawing.kind === "fibonacci" && drawing.points.length >= 2) {
+        // Levels run from the first click (0%) to the second (100%), so clicking a
+        // swing low then its high gives the familiar retracement ladder. Drawn as
+        // price lines rather than segments bounded by the swing: a retracement is
+        // read as forward support/resistance, not only inside the move that made it.
+        const [from, to] = drawing.points;
+        const span = to.price - from.price;
+        for (const level of FIB_LEVELS) {
+          const anchor = level === 0 || level === 1;
+          drawingLinesRef.current.push(
+            series.createPriceLine({
+              price: from.price + span * level,
+              color,
+              lineWidth: 1,
+              lineStyle: anchor ? LineStyle.Solid : LineStyle.Dashed,
+              axisLabelVisible: true,
+              title: `fib ${(level * 100).toFixed(1).replace(/\.0$/, "")}%`,
+            }),
+          );
+        }
       } else if (drawing.points.length >= 2) {
         // A rectangle is drawn as its two horizontal edges — lightweight-charts
         // has no filled-box primitive, and two edges convey the same zone.

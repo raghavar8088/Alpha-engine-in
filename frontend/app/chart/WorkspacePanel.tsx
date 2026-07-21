@@ -40,6 +40,7 @@ const TOOLS: { id: ChartDrawingKind; label: string; hint: string }[] = [
   { id: "trendline", label: "Trend line", hint: "Click two points on the chart" },
   { id: "horizontal", label: "Horizontal", hint: "Click one point" },
   { id: "rectangle", label: "Zone", hint: "Click two opposite corners" },
+  { id: "fibonacci", label: "Fib", hint: "Click the swing low, then the swing high" },
   { id: "text", label: "Note", hint: "Click where the note goes" },
 ];
 
