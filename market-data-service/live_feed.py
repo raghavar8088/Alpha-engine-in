@@ -44,6 +44,13 @@ IDLE_POLL_SECONDS = 300
 FIRST_BACKOFF_SECONDS = 30
 MAX_BACKOFF_SECONDS = 300
 
+# Dhan's rate limit is per ACCOUNT, and this process is not the only thing spending
+# it — prelive polls the same NIFTY quote every 15s and the backend marks positions
+# on every request. At 10s this loop lost that race and sat in backoff collecting
+# nothing. The fastest timeframe anything registers is 5m, so 30s still samples a
+# bar ten times over while costing a third of the requests.
+POLL_SECONDS = 30
+
 
 def _market_is_open(now_ist: datetime) -> bool:
     if now_ist.weekday() >= 5:  # Saturday/Sunday
@@ -158,7 +165,7 @@ def _process_tick(w: dict, quote: dict, now_ist: datetime) -> None:
     _publish(symbol, timeframe, bar, final=False)
 
 
-def run(poll_interval_seconds: int = 10) -> None:
+def run(poll_interval_seconds: int = POLL_SECONDS) -> None:
     print(
         f"live_feed: polling every {poll_interval_seconds}s during market hours "
         f"(idle every {IDLE_POLL_SECONDS}s otherwise)",
