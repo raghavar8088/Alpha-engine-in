@@ -23,6 +23,7 @@ from datetime import datetime, timedelta, timezone
 
 import requests
 
+from angel_feed import FailoverFeed
 from credentials import get_dhan_access
 from db import _db
 from prelive_engine import PreLiveEngine
@@ -279,9 +280,11 @@ def run_session(engine: PreLiveEngine, feed: DhanFeed):
     # indistinguishable between a throttled feed and a genuinely quiet market.
     total = ticks_ok + ticks_blocked
     blocked_pct = (100 * ticks_blocked / total) if total else 0
+    failover_prices = getattr(feed, "failover_prices", 0)
+    failover_note = f"; Angel-One-covered={failover_prices}" if failover_prices else ""
     print(f"[prelive] FEED HEALTH: {ticks_ok}/{total} ticks got a price "
           f"({blocked_pct:.0f}% blocked/failed; 429-throttled={feed.throttled_ticks} "
-          f"401-auth={feed.auth_failed_ticks})", flush=True)
+          f"401-auth={feed.auth_failed_ticks}{failover_note})", flush=True)
     if doc and doc.get("trades", 0) == 0:
         if blocked_pct > 20:
             # 401 and 429 are different failures with different fixes — a token
@@ -313,7 +316,11 @@ def main():
     engine.publish_idle_state()
     while True:
         try:
-            feed = DhanFeed()  # re-read creds each day (token rotates)
+            # Dhan first, Angel One when Dhan can't price a security this tick — the
+            # selling desk (main_selling.py) already runs this way; 2026-07-22 was a
+            # whole session with zero ticks and zero trades on this desk specifically
+            # because it had no standby when Dhan went dark.
+            feed = FailoverFeed(DhanFeed())  # re-read creds each day (token rotates)
             if market_open_now():
                 run_session(engine, feed)
                 # after session, wait past close
