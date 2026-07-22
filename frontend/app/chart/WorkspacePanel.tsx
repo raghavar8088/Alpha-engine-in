@@ -15,6 +15,9 @@ interface Props {
   // drawings
   activeTool: DrawingTool;
   onSelectTool: (tool: DrawingTool) => void;
+  colors: string[];
+  activeColor: string;
+  onSelectColor: (color: string) => void;
   drawings: ChartDrawing[];
   onDeleteDrawing: (id: string) => void;
   pendingPoint: boolean;
@@ -40,11 +43,27 @@ const TOOLS: { id: ChartDrawingKind; label: string; hint: string }[] = [
   { id: "trendline", label: "Trend line", hint: "Click two points on the chart" },
   { id: "horizontal", label: "Horizontal", hint: "Click one point" },
   { id: "rectangle", label: "Zone", hint: "Click two opposite corners" },
+  { id: "fibonacci", label: "Fib", hint: "Click the swing low, then the swing high" },
+  { id: "long_position", label: "Long", hint: "Click your entry — target and stop default to a 1:2 risk:reward, drag either to adjust" },
+  { id: "short_position", label: "Short", hint: "Click your entry — target and stop default to a 1:2 risk:reward, drag either to adjust" },
+  { id: "ray", label: "Ray", hint: "Click two points — the line runs through them and keeps going" },
+  { id: "arrow", label: "Arrow", hint: "Click the start, then the point it should point at" },
+  { id: "vertical", label: "Vertical", hint: "Click one point in time" },
+  { id: "channel", label: "Channel", hint: "Click two points for the first line — the second is placed a fixed offset below, drag it to adjust" },
+  { id: "polyline", label: "Polyline", hint: "Click each point, then Enter to finish or Esc to cancel" },
+  { id: "brush", label: "Brush", hint: "Click and drag to draw freehand" },
   { id: "text", label: "Note", hint: "Click where the note goes" },
 ];
 
+const KIND_LABEL: Record<ChartDrawingKind, string> = {
+  trendline: "trendline", horizontal: "horizontal", rectangle: "zone",
+  polyline: "polyline", brush: "brush",
+  fibonacci: "fib", text: "note", long_position: "long", short_position: "short",
+  ray: "ray", arrow: "arrow", vertical: "vertical", channel: "channel",
+};
+
 export default function WorkspacePanel({
-  activeTool, onSelectTool, drawings, onDeleteDrawing, pendingPoint,
+  activeTool, onSelectTool, colors, activeColor, onSelectColor, drawings, onDeleteDrawing, pendingPoint,
   layouts, onSaveLayout, onApplyLayout, onDeleteLayout,
   alerts, onCreateAlert, onDeleteAlert, lastPrice,
   compareSymbols, onRemoveCompare, canAddCompare, onAddCompare, disabled,
@@ -78,6 +97,19 @@ export default function WorkspacePanel({
             </button>
           ))}
         </div>
+        <div className="swatches">
+          {colors.map((c) => (
+            <button
+              key={c}
+              className={activeColor === c ? "swatch active" : "swatch"}
+              style={{ background: c }}
+              disabled={disabled}
+              onClick={() => onSelectColor(c)}
+              title={`Draw in ${c}`}
+              aria-label={`Draw in ${c}`}
+            />
+          ))}
+        </div>
         {activeTool && (
           <div className="hint">
             {pendingPoint
@@ -89,7 +121,7 @@ export default function WorkspacePanel({
           <ul className="list">
             {drawings.map((d) => (
               <li key={d.drawing_id}>
-                <span className="dk">{d.kind}</span>
+                <span className="dk">{KIND_LABEL[d.kind] || d.kind}</span>
                 <span className="dv">
                   {d.kind === "text" ? d.text || "note" : d.points.map((p) => p.price.toFixed(1)).join(" → ")}
                 </span>
@@ -216,6 +248,10 @@ export default function WorkspacePanel({
         .tool.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.35); color: var(--purple); }
         .tool:disabled { opacity: 0.45; cursor: not-allowed; }
         .hint { font-size: 10px; color: var(--text-faint); line-height: 1.45; }
+        .swatches { display: flex; gap: 5px; margin-top: 6px; }
+        .swatch { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--panel-border); cursor: pointer; padding: 0; }
+        .swatch.active { box-shadow: 0 0 0 2px var(--canvas), 0 0 0 3px currentColor; }
+        .swatch:disabled { opacity: 0.4; cursor: default; }
         .row { display: flex; gap: 5px; }
         .row input, .row select, .note-input { flex: 1; min-width: 0; background: var(--panel); border: 1px solid var(--panel-border); border-radius: 7px; padding: 5px 7px; font-size: 11px; }
         .go { background: var(--purple-dim); border: 1px solid rgba(125, 52, 220, 0.3); color: var(--purple); border-radius: 7px; padding: 5px 9px; font-size: 11px; font-weight: 700; cursor: pointer; flex-shrink: 0; }

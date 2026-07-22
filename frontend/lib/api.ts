@@ -1852,7 +1852,11 @@ export async function explainChart(context: Record<string, unknown>): Promise<Ch
 
 // --- Chart workspace: drawings, layouts, alerts (Phase 7) ---
 
-export type ChartDrawingKind = "trendline" | "horizontal" | "rectangle" | "text";
+export type ChartDrawingKind =
+  | "trendline" | "horizontal" | "rectangle" | "text" | "fibonacci"
+  | "long_position" | "short_position"
+  | "ray" | "arrow" | "vertical" | "channel"
+  | "polyline" | "brush";
 
 export interface ChartDrawingPoint {
   time: number;
@@ -1908,6 +1912,17 @@ export async function saveChartDrawing(
     `/api/chart/drawings?security_id=${securityId}&exchange_segment=${exchangeSegment}`,
     { method: "POST", body: JSON.stringify(drawing) },
   );
+}
+
+/** Repositions or restyles a drawing in place. `kind` is fixed at creation. */
+export async function updateChartDrawing(
+  drawingId: string,
+  changes: { points?: ChartDrawingPoint[]; text?: string; color?: string },
+): Promise<ChartDrawing> {
+  return apiFetch(`/api/chart/drawings/${drawingId}`, {
+    method: "PATCH",
+    body: JSON.stringify(changes),
+  });
 }
 
 export async function deleteChartDrawing(drawingId: string): Promise<{ deleted: boolean }> {
