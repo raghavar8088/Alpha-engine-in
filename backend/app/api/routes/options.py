@@ -158,6 +158,7 @@ async def options_backtest_all(request: OptionsSweepRequest, _current_user: dict
         if cls.metadata.category in OPTION_BUYING_CATEGORIES
     )
     results = []
+    days_by_strategy: dict[str, set] = {}  # entry days, for the overlap de-dup below
     for sid, cls in buying:
         native_tf = STYLE_TIMEFRAMES[cls.metadata.category]
         bars, used_tf = [], native_tf
@@ -194,6 +195,7 @@ async def options_backtest_all(request: OptionsSweepRequest, _current_user: dict
                     sid, request.symbol, used_tf, bars,
                     initial_capital=request.initial_capital, lot_size=request.lot_size,
                     quantity_lots=request.quantity_lots, adx_regime=adx_gate, expiry_weekday=expiry_wd,
+                    include_trades=True,  # needed to measure entry-day overlap between strategies
                 )
             )
         except Exception as exc:  # one bad strategy must not sink the sweep
@@ -218,11 +220,42 @@ async def options_backtest_all(request: OptionsSweepRequest, _current_user: dict
                 ),
             }
         )
+        days_by_strategy[sid] = entry_days(result.get("trades"))
         results.append(entry)
+
+    # --- de-duplicate the qualified survivors --------------------------------------
+    # A bare qualifier count is misleading: two 'different' buying strategies that open
+    # on the same days with the same directional read are ONE bet, however differently
+    # their entry rules are worded. Trading all of them is not diversification, it is
+    # leverage — this is exactly what put six near-identical strategies into the same
+    # 24150PE on 2026-07-20 and multiplied one wrong read into a -29% day. The daemon
+    # trades only `in_basket` (qualified AND independent); the rest stay on the
+    # leaderboard with the survivor they duplicate, so the cut is auditable, not silent.
+    overlap_threshold = getattr(request, "overlap_threshold", None) or DEFAULT_OVERLAP_THRESHOLD
+
+    def _net(e):
+        return (e.get("metrics") or {}).get("net_profit") or 0
+
+    survivors = [e for e in results if e.get("qualified")]
+    survivors.sort(key=_net, reverse=True)  # the kept member of each cluster is its best net
+    kept, dropped = overlap_groups(
+        days_by_strategy, [e["strategy_id"] for e in survivors], overlap_threshold
+    )
+    kept_set = set(kept)
+    for e in results:
+        sid = e.get("strategy_id")
+        if sid in dropped:
+            e["independent"] = False
+            e["duplicate_of"] = dropped[sid]["duplicate_of"]
+            e["overlap"] = dropped[sid]["overlap"]
+        else:
+            e["independent"] = sid in kept_set
+        e["in_basket"] = bool(e.get("qualified") and e.get("independent"))
 
     def sort_key(e):
         m = e.get("metrics") or {}
-        return (e.get("qualified", False), m.get("win_rate") or -1, m.get("net_profit") or 0)
+        return (e.get("in_basket", False), e.get("qualified", False),
+                m.get("win_rate") or -1, m.get("net_profit") or 0)
 
     results.sort(key=sort_key, reverse=True)
     doc = {
@@ -234,8 +267,11 @@ async def options_backtest_all(request: OptionsSweepRequest, _current_user: dict
         "min_trades": request.min_trades,
         "min_expectancy": request.min_expectancy,
         "adx_regime": request.adx_regime,
+        "overlap_threshold": overlap_threshold,
         "pricing_model": "black_scholes_realized_vol_proxy",
+        # The funnel, so a qualifier count is never quoted without the independent one.
         "qualified_count": sum(1 for e in results if e.get("qualified")),
+        "basket_count": sum(1 for e in results if e.get("in_basket")),
         "strategy_count": len(results),
         "results": results,
     }
