@@ -51,6 +51,17 @@ INTRADAY_LAB_INITIAL_CAPITAL = float(os.getenv("INTRADAY_LAB_INITIAL_CAPITAL", "
 PER_STRATEGY_ALLOCATION = INTRADAY_LAB_INITIAL_CAPITAL / max(len(STRATEGY_CATALOG), 1)
 MAX_SYMBOLS_PER_SCAN = int(os.getenv("INTRADAY_LAB_MAX_SYMBOLS", "150"))  # keeps one Dhan quote call bounded
 
+# Kill switch for NEW entries only. Set once the fee-honest daily-bar backtest
+# (intraday_backtest.py) showed this catalog losing 16/16 measurable strategies to real
+# NSE costs, and live trading then reproduced the same loss even BEFORE costs (this
+# engine charges none) — plus visible correlated triples firing on one symbol at once
+# (e.g. three "VWAP Fade" parameter variants all buying the same LT print). Paused rather
+# than stopped: `manage_cycle` keeps running regardless, so every already-open paper
+# position is still marked, stopped, targeted and EOD-squared-off normally. Only the
+# opening of new ones is gated — a paused desk that stopped MANAGING its book would leave
+# open risk untracked, which is worse than leaving it running.
+PAUSE_NEW_ENTRIES = os.getenv("INTRADAY_LAB_PAUSE_ENTRIES", "0").lower() not in ("0", "false", "")
+
 EOD_SQUAREOFF_HHMM = "15:15"
 INTRADAY_CATEGORIES = {"scalping", "momentum", "mean_reversion"}  # square off same day
 SWING_CATEGORIES = {"swing"}  # may carry up to spec.max_hold_days trading days
@@ -371,7 +382,13 @@ async def run_cycle(dhan: DhanClient | None) -> dict:
     """One full scan+manage pass — used by both the background loop and the
     manual 'Run now' endpoint."""
     managed = await manage_cycle(dhan)
-    scan_result = await scan_cycle(dhan)
+    if PAUSE_NEW_ENTRIES:
+        # Every open position is still managed above; only new entries are withheld.
+        scan_result = {"opened": 0, "scanned_symbols": 0,
+                       "notes": ["INTRADAY_LAB_PAUSE_ENTRIES is set — no new positions are "
+                                 "being opened. Existing positions are still managed normally."]}
+    else:
+        scan_result = await scan_cycle(dhan)
     await _snapshot_equity()
     await intraday_lab_state_collection.update_one(
         {"_id": STATE_ID},
@@ -380,6 +397,7 @@ async def run_cycle(dhan: DhanClient | None) -> dict:
             "last_managed": managed, "last_notes": scan_result["notes"],
             "broker_connected": dhan is not None,
             "angel_configured": angel_client.configured(),
+            "paused": PAUSE_NEW_ENTRIES,
         }},
         upsert=True,
     )
