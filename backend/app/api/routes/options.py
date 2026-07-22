@@ -190,12 +190,17 @@ async def options_backtest_all(request: OptionsSweepRequest, _current_user: dict
             else None
         )
         try:
+            # No include_trades here: this loop runs the ENTIRE candidate library (~215
+            # strategies over up to 10y), and materializing a full trade list for every
+            # one of them — most of which won't even qualify — is what pinned this
+            # container's memory and hung the request the first time this ran in
+            # production (2026-07-22). Trades are only fetched below, in a second pass,
+            # for the much smaller set that actually qualifies and needs de-duplicating.
             result = await to_thread.run_sync(
                 lambda sid=sid, used_tf=used_tf, bars=bars, adx_gate=adx_gate, expiry_wd=expiry_wd: run_options_backtest(
                     sid, request.symbol, used_tf, bars,
                     initial_capital=request.initial_capital, lot_size=request.lot_size,
                     quantity_lots=request.quantity_lots, adx_regime=adx_gate, expiry_weekday=expiry_wd,
-                    include_trades=True,  # needed to measure entry-day overlap between strategies
                 )
             )
         except Exception as exc:  # one bad strategy must not sink the sweep
@@ -220,8 +225,38 @@ async def options_backtest_all(request: OptionsSweepRequest, _current_user: dict
                 ),
             }
         )
-        days_by_strategy[sid] = entry_days(result.get("trades"))
         results.append(entry)
+
+    # --- re-run just the qualified survivors WITH trades, for overlap de-dup -------
+    # Only strategies that already passed the gate above can end up `in_basket`, so only
+    # they need their entry-day set. Re-running (bars are cached, so this is CPU only,
+    # no re-fetch) a handful of qualifiers is far cheaper than building a full trade list
+    # for all ~215 candidates up front, most of which are about to be discarded anyway.
+    qualified_entries = [e for e in results if e.get("qualified")]
+    for e in qualified_entries:
+        sid = e["strategy_id"]
+        cls = STRATEGY_REGISTRY[sid]
+        native_tf = STYLE_TIMEFRAMES[cls.metadata.category]
+        used_tf = Timeframe(e["timeframe"])
+        bars = await to_thread.run_sync(bars_for, used_tf)
+        adx_gate = request.adx_regime if cls.metadata.suitable_market == "trending" else None
+        expiry_wd = (
+            1 if request.symbol == "NIFTY"
+            and cls.metadata.category in ("options_scalp", "options_intraday", "options_breakout")
+            else None
+        )
+        try:
+            with_trades = await to_thread.run_sync(
+                lambda sid=sid, used_tf=used_tf, bars=bars, adx_gate=adx_gate, expiry_wd=expiry_wd: run_options_backtest(
+                    sid, request.symbol, used_tf, bars,
+                    initial_capital=request.initial_capital, lot_size=request.lot_size,
+                    quantity_lots=request.quantity_lots, adx_regime=adx_gate, expiry_weekday=expiry_wd,
+                    include_trades=True,
+                )
+            )
+            days_by_strategy[sid] = entry_days(with_trades.get("trades"))
+        except Exception:
+            days_by_strategy[sid] = set()  # can't measure overlap for it; treated as never-overlapping
 
     # --- de-duplicate the qualified survivors --------------------------------------
     # A bare qualifier count is misleading: two 'different' buying strategies that open
