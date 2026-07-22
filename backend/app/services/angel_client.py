@@ -155,6 +155,38 @@ class AngelClient:
                     out[str(token)] = float(price)
         return out
 
+    async def full_quote(self, tokens_by_exchange: dict[str, list[str]]) -> dict[str, dict]:
+        """{"NSE": ["3045"], ...} -> {token: {ltp, open, high, low, close, volume}}.
+
+        FULL mode carries the day OHLC and traded volume that the intraday equity
+        setups need; LTP mode (see `ltp`) does not. Missing/illiquid tokens are simply
+        absent — a caller can tell "no quote" from a real 0 the same way `ltp` lets it.
+        """
+        out: dict[str, dict] = {}
+        flat = [(ex, t) for ex, toks in tokens_by_exchange.items() for t in toks]
+        for i in range(0, len(flat), QUOTE_BATCH_SIZE):
+            chunk = flat[i : i + QUOTE_BATCH_SIZE]
+            grouped: dict[str, list[str]] = {}
+            for ex, t in chunk:
+                grouped.setdefault(ex, []).append(t)
+            body = await self._post(
+                "/rest/secure/angelbroking/market/v1/quote",
+                {"mode": "FULL", "exchangeTokens": grouped},
+            )
+            for row in (body.get("data") or {}).get("fetched") or []:
+                token, ltp = row.get("symbolToken"), row.get("ltp")
+                if token is None or ltp is None:
+                    continue
+                out[str(token)] = {
+                    "ltp": float(ltp),
+                    "open": float(row["open"]) if row.get("open") else None,
+                    "high": float(row["high"]) if row.get("high") else None,
+                    "low": float(row["low"]) if row.get("low") else None,
+                    "close": float(row["close"]) if row.get("close") else None,
+                    "volume": float(row.get("tradeVolume") or 0),
+                }
+        return out
+
     async def candles(
         self, exchange: str, symbol_token: str, resolution: str, from_dt: str, to_dt: str
     ) -> list[list]:

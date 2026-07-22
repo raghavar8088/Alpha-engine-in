@@ -31,11 +31,14 @@ from anyio import to_thread
 
 from app.core.db import (
     instruments_collection,
+    intraday_lab_equity_collection,
     intraday_lab_positions_collection,
     intraday_lab_scores_collection,
     intraday_lab_state_collection,
     intraday_lab_trades_collection,
 )
+from app.services.angel_client import angel_client
+from app.services.angel_equity_feed import equity_quotes
 from app.services.call_engine import IST, _quote_batch, _scored_daily_symbols
 from app.services.dhan_client import DhanClient
 from app.services.intraday_strategies import STRATEGY_CATALOG, STRATEGY_BY_ID, evaluate
@@ -61,6 +64,37 @@ def _now() -> datetime:
 
 def _today_ist():
     return datetime.now(IST).date()
+
+
+async def _equity_quote_map(
+    dhan: DhanClient | None, insts: list[dict]
+) -> tuple[dict[tuple[str, str], dict], dict[tuple[str, str], str]]:
+    """Live quotes for the given equity instrument docs — Angel One first, Dhan for
+    whatever Angel could not price. Returns (quotes_by_key, source_by_key) keyed by
+    (exchange_segment, security_id); source is "angel_quote" or "dhan_quote" so the desk
+    can record which broker actually answered, exactly like broker_data.py's ltp_source.
+
+    Angel is the desk's primary equity feed (this is a cash-equity desk and Angel is our
+    equity broker); Dhan covers the tail Angel does not list or an off-whitelist host that
+    cannot reach Angel at all. Anything neither can price is simply absent, and the caller
+    falls back to the last daily-bar close — never a fabricated intraday print."""
+    quotes: dict[tuple[str, str], dict] = {}
+    source: dict[tuple[str, str], str] = {}
+
+    for key, q in (await equity_quotes(insts)).items():
+        quotes[key] = q
+        source[key] = "angel_quote"
+
+    wanted: dict[str, list[int]] = {}
+    for inst in insts:
+        key = (inst["exchange_segment"], str(inst["security_id"]))
+        if key in quotes:
+            continue
+        wanted.setdefault(inst["exchange_segment"], []).append(int(inst["security_id"]))
+    for key, q in (await _quote_batch(dhan, wanted)).items():
+        quotes[key] = q
+        source[key] = "dhan_quote"
+    return quotes, source
 
 
 async def _open_positions_count(strategy_id: str) -> int:
@@ -191,16 +225,22 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
     equities = {d["symbol"]: d async for d in instruments_collection.find(
         {"asset_class": "EQUITY", "symbol": {"$in": symbols}}
     )}
-    wanted: dict[str, list[int]] = {}
-    for symbol in symbols:
-        inst = equities.get(symbol)
-        if inst:
-            wanted.setdefault(inst["exchange_segment"], []).append(int(inst["security_id"]))
-    quotes = await _quote_batch(dhan, wanted)
+    quotes, quote_source = await _equity_quote_map(dhan, list(equities.values()))
 
     notes = []
-    if dhan is None:
-        notes.append("No Dhan connection — intraday-context strategies (scalping/momentum/mean_reversion) skipped this cycle; only daily-bar swing signals can fire.")
+    if not quotes:
+        # Say WHICH feed came up empty. "No signals today" and "the desk was blind today"
+        # look identical on the page otherwise, and that ambiguity has already cost the
+        # option desks whole sessions of misdiagnosis.
+        angel_on = angel_client.configured()
+        if not angel_on and dhan is None:
+            notes.append("No Angel One or Dhan feed configured — intraday-context strategies (scalping/momentum/mean_reversion) skipped this cycle; only daily-bar swing signals can fire.")
+        else:
+            notes.append(
+                f"No live equity quotes this cycle (Angel One: {'returned none' if angel_on else 'not configured'}; "
+                f"Dhan: {'returned none' if dhan is not None else 'not connected'}) — "
+                "only daily-bar swing signals can fire."
+            )
 
     opened = 0
     for symbol, score, reasons, atr14, bars in scored:
@@ -209,7 +249,7 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
             continue
         key = (inst["exchange_segment"], str(inst["security_id"]))
         quote = quotes.get(key)
-        ltp_source = "dhan_quote" if quote else "last_bar_close"
+        ltp_source = quote_source.get(key, "last_bar_close")
         ctx = {"bars": bars, "atr14": atr14, "quote": quote, "prev_bar": bars[-2]}
         for spec in STRATEGY_CATALOG:
             if spec.category != "swing" and quote is None:
@@ -237,10 +277,7 @@ async def manage_cycle(dhan: DhanClient | None) -> int:
     equities = {d["symbol"]: d async for d in instruments_collection.find(
         {"asset_class": "EQUITY", "symbol": {"$in": list(by_symbol.keys())}}
     )}
-    wanted: dict[str, list[int]] = {}
-    for symbol, inst in equities.items():
-        wanted.setdefault(inst["exchange_segment"], []).append(int(inst["security_id"]))
-    quotes = await _quote_batch(dhan, wanted)
+    quotes, quote_source = await _equity_quote_map(dhan, list(equities.values()))
 
     now_ist = datetime.now(IST)
     is_eod = now_ist.strftime("%H:%M") >= EOD_SQUAREOFF_HHMM
@@ -255,7 +292,7 @@ async def manage_cycle(dhan: DhanClient | None) -> int:
             key = (inst["exchange_segment"], str(inst["security_id"]))
             q = quotes.get(key)
             if q:
-                ltp, ltp_source = float(q["last_price"]), "dhan_quote"
+                ltp, ltp_source = float(q["last_price"]), quote_source[key]
         if ltp is None:
             bars = await to_thread.run_sync(load_bars, symbol, Timeframe.D1, 0.1)
             if bars:
@@ -314,17 +351,35 @@ async def manage_cycle(dhan: DhanClient | None) -> int:
     return updated
 
 
+async def _snapshot_equity() -> dict:
+    """Append one point to the equity curve and return the pool summary. Mirrors the
+    selling desk's `snapshot_equity` so the Intraday Stocks page can chart an equity line
+    the same way. Written once per cycle (~every 3 min in market hours)."""
+    snap = await summary()
+    await intraday_lab_equity_collection.insert_one({
+        "ts": _now(),
+        "equity": snap["equity"],
+        "realized": snap["realized_pnl"],
+        "unrealized": snap["unrealized_pnl"],
+        "deployed": snap["deployed_capital"],
+        "open_positions": snap["open_positions"],
+    })
+    return snap
+
+
 async def run_cycle(dhan: DhanClient | None) -> dict:
     """One full scan+manage pass — used by both the background loop and the
     manual 'Run now' endpoint."""
     managed = await manage_cycle(dhan)
     scan_result = await scan_cycle(dhan)
+    await _snapshot_equity()
     await intraday_lab_state_collection.update_one(
         {"_id": STATE_ID},
         {"$set": {
             "last_run_at": _now(), "last_opened": scan_result["opened"],
             "last_managed": managed, "last_notes": scan_result["notes"],
             "broker_connected": dhan is not None,
+            "angel_configured": angel_client.configured(),
         }},
         upsert=True,
     )

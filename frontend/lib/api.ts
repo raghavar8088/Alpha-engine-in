@@ -621,6 +621,238 @@ export async function fetchSellingDeskDaily(limit = 60): Promise<SellingDay[]> {
   return apiFetch(`/api/prelive-selling/daily?limit=${limit}`);
 }
 
+// --- Intraday Stocks desk (50-strategy auto-trading equity paper desk, Angel One feed) ---
+
+export interface IntradayPosition {
+  position_id: string;
+  strategy_id: string;
+  strategy_name: string;
+  category: string;
+  symbol: string;
+  display_name: string;
+  side: string;
+  entry_price: number;
+  qty: number;
+  capital_deployed: number;
+  target: number;
+  stoploss: number;
+  ltp: number;
+  ltp_source: string;
+  unrealized_pnl: number;
+  pnl_pct: number;
+  realized_pnl: number | null;
+  exit_price: number | null;
+  exit_reason: string | null;
+  status: string;
+  confidence: number;
+  rationale: string;
+  max_hold_days: number;
+  opened_at: string | null;
+  opened_on: string | null;
+  closed_at: string | null;
+}
+
+export interface IntradayDeskStatus {
+  initial_capital: number;
+  per_strategy_allocation: number;
+  available_cash: number;
+  deployed_capital: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  equity: number;
+  open_positions: number;
+  closed_positions: number;
+  strategy_count: number;
+  heartbeat: string | null;
+  last_opened: number | null;
+  last_managed: number | null;
+  last_notes: string[];
+  broker_connected: boolean;
+  angel_configured: boolean;
+  feed_source: "angel" | "dhan" | "none";
+  open_positions_detail: IntradayPosition[];
+}
+
+export interface IntradayScore {
+  strategy_id: string;
+  name: string;
+  category: string;
+  trades: number;
+  win_rate: number;
+  net_pnl: number;
+  allocated_capital: number | null;
+}
+
+export interface IntradayTrade {
+  trade_id: string;
+  strategy_id: string;
+  strategy_name: string;
+  symbol: string;
+  side: string;
+  entry_price: number;
+  exit_price: number;
+  qty: number;
+  realized_pnl: number;
+  exit_reason: string;
+  opened_at: string | null;
+  closed_at: string | null;
+}
+
+export interface IntradayEquityPoint {
+  ts: string;
+  equity: number;
+  realized: number;
+  unrealized: number;
+  deployed: number;
+  open_positions: number;
+}
+
+export interface IntradayDay {
+  session: string;
+  net_pnl: number;
+  trades: number;
+  wins: number;
+  win_rate: number;
+}
+
+export async function fetchIntradayStatus(): Promise<IntradayDeskStatus> {
+  return apiFetch("/api/intraday-lab/status");
+}
+export async function fetchIntradayLeaderboard(): Promise<IntradayScore[]> {
+  const r = await apiFetch("/api/intraday-lab/leaderboard");
+  return r.leaderboard ?? [];
+}
+export async function fetchIntradayTrades(limit = 100): Promise<IntradayTrade[]> {
+  return apiFetch(`/api/intraday-lab/trades?limit=${limit}`);
+}
+export async function fetchIntradayEquity(limit = 500): Promise<IntradayEquityPoint[]> {
+  return apiFetch(`/api/intraday-lab/equity?limit=${limit}`);
+}
+export async function fetchIntradayDaily(limit = 60): Promise<IntradayDay[]> {
+  return apiFetch(`/api/intraday-lab/daily?limit=${limit}`);
+}
+
+// --- Long-Horizon factor desk (cross-sectional momentum/low-vol/reversal, months-long holds) ---
+
+export interface LongHorizonPosition {
+  strategy_id: string;
+  strategy_name: string;
+  category: string;
+  symbol: string;
+  entry_price: number;
+  qty: number;
+  ltp: number;
+  unrealized_pnl: number;
+  opened_at: string | null;
+  max_hold_days: number;
+  rationale: string;
+}
+
+export interface LongHorizonStatus {
+  desk: "long_horizon";
+  initial_capital: number;
+  realized: number;
+  unrealized: number;
+  equity: number;
+  deployed: number;
+  heartbeat: string | null;
+  basket_size: number;
+  open_positions: number;
+  open_positions_detail: LongHorizonPosition[];
+  trades_closed: number;
+  note?: string;
+}
+
+export interface LongHorizonScore {
+  strategy_id: string;
+  name: string;
+  category: string;
+  trades: number;
+  win_rate: number;
+  net_pnl: number;
+  allocated_capital: number;
+}
+
+export interface LongHorizonTrade {
+  trade_id: string;
+  strategy_id: string;
+  strategy_name: string;
+  symbol: string;
+  entry_price: number;
+  exit_price: number;
+  qty: number;
+  net_pnl: number;
+  costs: number;
+  exit_reason: string;
+  opened_at: string | null;
+  closed_at: string | null;
+}
+
+export interface LongHorizonEquityPoint {
+  ts: string;
+  equity: number;
+  realized: number;
+  unrealized: number;
+  deployed: number;
+  open_positions: number;
+}
+
+export interface LongHorizonSweepResult {
+  strategy_id: string;
+  name: string;
+  category: string;
+  family: string;
+  max_hold_days: number;
+  train_metrics: Record<string, number | null>;
+  test_metrics: Record<string, number | null>;
+  qualified: boolean;
+  gate_failures: string[];
+  test_qualified: boolean;
+  test_failures: string[];
+  independent: boolean;
+  in_basket: boolean;
+  duplicate_of?: string;
+}
+
+export interface LongHorizonSweep {
+  sweep_id: string;
+  created_at: string;
+  desk: "long_horizon";
+  top_k: number;
+  universe_size: number;
+  train_fraction: number;
+  overlap_threshold: number;
+  data_from: string | null;
+  data_to: string | null;
+  strategy_count: number;
+  qualified_count: number;
+  robust_count: number;
+  basket_count: number;
+  results: LongHorizonSweepResult[];
+}
+
+export async function fetchLongHorizonStatus(): Promise<LongHorizonStatus> {
+  return apiFetch("/api/long-horizon/status");
+}
+export async function fetchLongHorizonLeaderboard(): Promise<LongHorizonScore[]> {
+  return apiFetch("/api/long-horizon/leaderboard");
+}
+export async function fetchLongHorizonTrades(limit = 100): Promise<LongHorizonTrade[]> {
+  return apiFetch(`/api/long-horizon/trades?limit=${limit}`);
+}
+export async function fetchLongHorizonEquity(limit = 500): Promise<LongHorizonEquityPoint[]> {
+  return apiFetch(`/api/long-horizon/equity?limit=${limit}`);
+}
+export async function fetchLongHorizonSweep(): Promise<LongHorizonSweep | null> {
+  return apiFetch("/api/long-horizon/sweep");
+}
+export async function runLongHorizonSweep(): Promise<LongHorizonSweep> {
+  return apiFetch("/api/long-horizon/sweep", { method: "POST", body: JSON.stringify({}) });
+}
+export async function runLongHorizonRebalance(): Promise<{ basket_size: number; rebalanced: number }> {
+  return apiFetch("/api/long-horizon/rebalance", { method: "POST" });
+}
+
 // --- Trading Calls (Kotak-Neo-style research calls) ---
 
 export type CallSegment = "STOCK" | "FNO" | "COMMODITY";

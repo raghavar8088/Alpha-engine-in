@@ -17,6 +17,7 @@ from app.api.routes import (
     fno_positions,
     intraday_lab,
     live,
+    long_horizon,
     manual_positions,
     market_data,
     options,
@@ -146,6 +147,42 @@ async def start_intraday_lab_scheduler() -> None:
     else:
         logger.info("Intraday Strategy Lab auto-scan disabled (INTRADAY_LAB_ENABLED=0)")
 
+
+@app.on_event("startup")
+async def start_long_horizon_scheduler() -> None:
+    from app.services.long_horizon_scheduler import LONG_HORIZON_ENABLED, RUN_AFTER_HHMM, long_horizon_loop
+
+    if LONG_HORIZON_ENABLED:
+        asyncio.create_task(long_horizon_loop())
+        logger.info("Long-Horizon factor desk auto-rebalance enabled (once daily, after %s IST)",
+                    RUN_AFTER_HHMM)
+    else:
+        logger.info("Long-Horizon factor desk auto-rebalance disabled (LONG_HORIZON_ENABLED=0)")
+
+
+@app.on_event("startup")
+async def refresh_angel_equity_tokens() -> None:
+    """Stamp Angel `symboltoken`s onto our instrument docs so the Intraday Stocks desk
+    can quote equities off Angel One (its primary feed). Idempotent; runs once in the
+    background so a slow scrip-master download never blocks startup. No-op unless Angel
+    is configured — off-whitelist/local dev falls back to Dhan and needs no map."""
+    from app.services.angel_client import AngelClient
+
+    if not AngelClient.configured():
+        logger.info("Angel token-map refresh skipped — Angel One not configured")
+        return
+
+    async def _run() -> None:
+        try:
+            from app.services.angel_instruments import refresh_angel_tokens
+
+            result = await refresh_angel_tokens()
+            logger.info("Angel token map refreshed for Intraday Stocks desk: %s", result)
+        except Exception:
+            logger.exception("Angel token-map refresh failed — desk will fall back to Dhan")
+
+    asyncio.create_task(_run())
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -182,6 +219,7 @@ app.include_router(watchlist.router)
 app.include_router(manual_positions.router)
 app.include_router(fno_positions.router)
 app.include_router(intraday_lab.router)
+app.include_router(long_horizon.router)
 app.include_router(chart_data.router)
 app.include_router(telegram_signals.router)
 

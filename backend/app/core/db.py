@@ -52,6 +52,17 @@ intraday_lab_positions_collection = db["intraday_lab_positions"]
 intraday_lab_trades_collection = db["intraday_lab_trades"]
 intraday_lab_scores_collection = db["intraday_lab_scores"]
 intraday_lab_state_collection = db["intraday_lab_state"]
+intraday_lab_equity_collection = db["intraday_lab_equity"]
+intraday_lab_backtests_collection = db["intraday_lab_backtests"]
+# Long-Horizon factor desk — cross-sectional (top-K basket) momentum/low-vol/reversal
+# strategies, own capital pool, own sweep, mirroring the prelive_* / prelive_selling_*
+# separation: different capital, different risk model, different qualification rule.
+long_horizon_sweeps_collection = db["long_horizon_sweeps"]
+long_horizon_positions_collection = db["long_horizon_positions"]
+long_horizon_trades_collection = db["long_horizon_trades"]
+long_horizon_scores_collection = db["long_horizon_scores"]
+long_horizon_equity_collection = db["long_horizon_equity"]
+long_horizon_state_collection = db["long_horizon_state"]
 # Telegram Signal Copier — raw channel messages parsed into trade ideas and
 # auto-opened as paper positions via the manual Positions module
 telegram_signals_collection = db["telegram_signals"]

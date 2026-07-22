@@ -153,6 +153,32 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
           </>
         ),
       },
+      {
+        // Cash equities, not options — a candlestick-and-clock icon to separate it at a
+        // glance from the two NIFTY option desks directly above it.
+        href: "/intraday-stocks",
+        label: "Intraday Stocks",
+        icon: (
+          <>
+            <path d="M6 4v3M6 15v5M6 7h0a1 1 0 011 1v6a1 1 0 01-1 1H6a1 1 0 01-1-1V8a1 1 0 011-1z" />
+            <path d="M13 10h6M13 14h6M13 18h4" />
+            <circle cx="16.5" cy="6" r="2.5" />
+          </>
+        ),
+      },
+      {
+        // Months-long basket holds, not single ticks — a calendar-page icon rather than
+        // Intraday Stocks' clock-candlestick mark, to read as "slow" at a glance.
+        href: "/long-horizon",
+        label: "Long-Horizon Desk",
+        icon: (
+          <>
+            <rect x="3" y="4" width="18" height="17" rx="2" />
+            <path d="M3 9h18M8 2v4M16 2v4" />
+            <path d="M8 13h2M14 13h2M8 17h2M14 17h2" />
+          </>
+        ),
+      },
     ],
   },
   {
