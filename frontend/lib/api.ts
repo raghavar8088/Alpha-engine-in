@@ -670,6 +670,7 @@ export interface IntradayDeskStatus {
   broker_connected: boolean;
   angel_configured: boolean;
   feed_source: "angel" | "dhan" | "none";
+  paused: boolean;
   open_positions_detail: IntradayPosition[];
 }
 

@@ -104,6 +104,15 @@ export default function IntradayStocksPage() {
 
       {error && <ErrorBanner message={error} />}
 
+      {status?.paused && (
+        <div className="breaker">
+          <strong>NEW ENTRIES PAUSED.</strong> This catalog lost 16/16 measurable strategies
+          to real NSE costs in backtest and is losing live even before costs — the desk is
+          paused while it&rsquo;s reworked. Every already-open position is still being marked,
+          stopped, targeted and squared off normally; nothing new is being opened.
+        </div>
+      )}
+
       {status && status.feed_source !== "angel" && (
         <div className="feed-note">
           <strong>Feed: {feedLabel}.</strong>{" "}
@@ -336,6 +345,10 @@ export default function IntradayStocksPage() {
           padding: 10px 16px; border-radius: 8px; font-size: 12px; line-height: 1.5;
           background: var(--loss-dim); border: 1px solid rgba(217, 45, 63, 0.3);
           color: var(--text-secondary);
+        }
+        .breaker {
+          padding: 10px 16px; border-radius: 8px; font-size: 12px; line-height: 1.5;
+          background: var(--loss-dim); border: 1px solid rgba(217, 45, 63, 0.55);
         }
         .tiles {
           display: grid; gap: 12px;

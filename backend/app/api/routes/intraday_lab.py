@@ -182,6 +182,7 @@ async def status(current_user: dict = Depends(get_current_user)):
         "broker_connected": dhan_on,
         "angel_configured": angel_on,
         "feed_source": "angel" if angel_on else ("dhan" if dhan_on else "none"),
+        "paused": bool(state.get("paused")),
         "open_positions_detail": positions,
     }
 

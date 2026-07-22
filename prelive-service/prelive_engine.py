@@ -56,6 +56,15 @@ INITIAL_CAPITAL = float(os.getenv("PRELIVE_INITIAL_CAPITAL", "10000000"))  # ₹
 CAPITAL_PER_TRADE_PCT = float(os.getenv("PRELIVE_CAPITAL_PER_TRADE_PCT", "0.02"))
 MAX_LOTS_PER_TRADE = int(os.getenv("PRELIVE_MAX_LOTS_PER_TRADE", "20"))
 
+# Desk-level daily circuit breaker. Each buying position's loss is bounded by construction
+# (max loss = premium paid), so this engine never needed one — until a basket of correlated
+# strategies all read the market wrong on the same day and ran the DESK to -29% on
+# 2026-07-20 with no floor under it. Once the day's loss (realized + open MTM) crosses this
+# share of the day's starting equity, the desk opens nothing new for the rest of the
+# session; open positions are still managed to their stops/targets/EOD. Mirrors the selling
+# desk's breaker, which had this from day one for the same reason.
+DAILY_LOSS_BREAKER_PCT = float(os.getenv("PRELIVE_DAILY_LOSS_PCT", "0.04"))
+
 # The live bar-builder (main.py) only ever produces these three intraday timeframes.
 # A qualified "1d" (swing) strategy can't run here: its whole model assumes a 30-DTE
 # position CARRIED across sessions, which conflicts with this engine's EOD square-off
@@ -78,9 +87,17 @@ TOP20 = [
 
 def load_qualified_universe() -> tuple[list[tuple[str, str]], dict | None]:
     """Read the latest option_sweeps document and return the (strategy_id, timeframe)
-    pairs the live desk should trade — every row with qualified==True, that resolves to
-    a real registered strategy, on a timeframe this engine's bar-builder can produce.
-    Returns (pairs, sweep_meta); sweep_meta is None if no sweep document exists at all."""
+    pairs the live desk should trade — every row marked `in_basket`, that resolves to a
+    real registered strategy, on a timeframe this engine's bar-builder can produce.
+    Returns (pairs, sweep_meta); sweep_meta is None if no sweep document exists at all.
+
+    `in_basket`, not bare `qualified`: a qualifier can be another survivor wearing a
+    different name, and trading the whole qualified set is how six near-identical
+    strategies all bought the same 24150PE on 2026-07-20 and turned one wrong read into a
+    -29% day. `in_basket` = qualified AND independent (survived the entry-day overlap
+    de-dup). Absence of a verdict is treated as absence of approval, exactly as the
+    selling desk does: a sweep that predates the de-dup marks nothing `in_basket`, so the
+    desk trades nothing until the sweep is re-run rather than silently trading duplicates."""
     doc = option_sweeps_collection.find_one({}, sort=[("created_at", -1)])
     if not doc:
         return [], None
@@ -90,11 +107,12 @@ def load_qualified_universe() -> tuple[list[tuple[str, str]], dict | None]:
         "sweep_id": doc.get("sweep_id"),
         "created_at": created_at.isoformat() if hasattr(created_at, "isoformat") else created_at,
         "symbol": doc.get("symbol"), "qualified_count": doc.get("qualified_count"),
+        "basket_count": doc.get("basket_count"),
     }
 
     pairs: list[tuple[str, str]] = []
     for r in doc.get("results") or []:
-        if not r.get("qualified"):
+        if not r.get("in_basket"):
             continue
         sid, tf = r.get("strategy_id"), r.get("timeframe")
         if sid not in STRATEGY_REGISTRY:
@@ -106,6 +124,11 @@ def load_qualified_universe() -> tuple[list[tuple[str, str]], dict | None]:
                   f"multi-day swing strategy that can't run under EOD square-off)", flush=True)
             continue
         pairs.append((sid, tf))
+    if not pairs and doc.get("qualified_count"):
+        print(f"[prelive] sweep {sweep_meta['sweep_id']} has {doc['qualified_count']} qualified "
+              f"strategies but none marked in_basket — it predates the overlap de-dup. Re-run the "
+              f"buying sweep (POST /api/options/backtest-all); trading nothing until then rather "
+              f"than trading duplicates.", flush=True)
     return pairs, sweep_meta
 
 
@@ -141,8 +164,13 @@ class PreLiveEngine:
         self.universe: list[tuple[str, str]] = []
         self.universe_source: dict | None = None
         self._weekly_expiry = None
+        self.breaker_tripped = False
+        self.breaker_reason: str | None = None
         self.refresh_universe(force=True)
         self._restore_open_positions()
+        # Set after restore so a mid-session restart measures the day against the equity it
+        # actually started the day with, not a fresh ₹1cr.
+        self.day_start_equity = self.balance()["balance"]
 
     def _restore_open_positions(self) -> None:
         """Rebuild in-memory positions from Mongo on startup. Without this, any
@@ -283,6 +311,40 @@ class PreLiveEngine:
         full rebuild (force=True) — a new trading day needs fresh regime state
         regardless of whether the qualified sweep itself changed overnight."""
         self.refresh_universe(force=True)
+        self.day_start_equity = self.balance()["balance"]
+        self.breaker_tripped = False
+        self.breaker_reason = None
+
+    def day_pnl(self, fetch_ltp) -> tuple[float, float]:
+        """(realized today, unrealized on open positions). The breaker reads both — a desk
+        that only counted realized losses would keep opening new risk while its open book
+        bled."""
+        session = datetime.now(IST).date().isoformat()
+        realized = sum(t["pnl"] for t in trades_collection.find({"session": session}, {"pnl": 1}))
+        unrealized = 0.0
+        for pos in self.positions.values():
+            ltp = fetch_ltp(pos.security_id, "NSE_FNO") or pos.entry_premium
+            unrealized += (ltp - pos.entry_premium) * (LOT_SIZE * pos.lots)
+        return realized, unrealized
+
+    def check_breaker(self, fetch_ltp) -> bool:
+        """Trip the desk-level daily breaker once the day's loss crosses the limit. Stays
+        tripped for the rest of the session even if the book recovers — a desk that has
+        already had its worst day of the month should not be adding risk to it."""
+        if self.breaker_tripped:
+            return True
+        realized, unrealized = self.day_pnl(fetch_ltp)
+        day_loss = -(realized + unrealized)
+        limit = DAILY_LOSS_BREAKER_PCT * self.day_start_equity
+        if day_loss >= limit:
+            self.breaker_tripped = True
+            self.breaker_reason = (
+                f"day loss Rs{day_loss:,.0f} crossed {DAILY_LOSS_BREAKER_PCT:.1%} of "
+                f"Rs{self.day_start_equity:,.0f} (realized Rs{realized:,.0f}, "
+                f"unrealized Rs{unrealized:,.0f})"
+            )
+            print(f"[BREAKER] {self.breaker_reason} — no new positions this session", flush=True)
+        return self.breaker_tripped
 
     def _status_label(self, running: bool) -> str:
         if not self.universe:
@@ -309,6 +371,8 @@ class PreLiveEngine:
         ctx.push(bar)
         if key in self.positions:
             return None  # already holding — managed by manage_open()
+        if self.breaker_tripped:
+            return None  # desk-level daily circuit breaker: manage open risk, open nothing new
         if self.trades_today[key] >= 6:
             return None  # generous daily cap safety
         if len(ctx.bars) < strat.warmup:
@@ -356,6 +420,9 @@ class PreLiveEngine:
         Returns a list of close events."""
         closes = []
         now = datetime.now(IST)
+        # Refresh the desk-level breaker each tick (runs far more often than bar close, so a
+        # violent intrabar move stops new entries without waiting for the next 15m bar).
+        self.check_breaker(fetch_ltp)
         eod = force_eod or _ist_minutes(now) >= EOD_SQUAREOFF_MIN
         for key, pos in list(self.positions.items()):
             ltp = fetch_ltp(pos.security_id, "NSE_FNO")
@@ -475,6 +542,7 @@ class PreLiveEngine:
             "realized_all_time": bal["realized_all_time"],
             "universe_size": len(self.universe), "universe_source": self.universe_source,
             "capital_per_trade": round(INITIAL_CAPITAL * CAPITAL_PER_TRADE_PCT, 2),
+            "breaker_tripped": self.breaker_tripped, "breaker_reason": self.breaker_reason,
             "note": self._universe_note(),
         }, upsert=True)
 
@@ -495,6 +563,7 @@ class PreLiveEngine:
             "realized_all_time": bal["realized_all_time"], "capital_locked": bal["deployed"],
             "universe_size": len(self.universe), "universe_source": self.universe_source,
             "capital_per_trade": round(INITIAL_CAPITAL * CAPITAL_PER_TRADE_PCT, 2),
+            "breaker_tripped": self.breaker_tripped, "breaker_reason": self.breaker_reason,
             "note": self._universe_note(),
         }, upsert=True)
 
