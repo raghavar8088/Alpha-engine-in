@@ -66,6 +66,21 @@ EOD_SQUAREOFF_HHMM = "15:15"
 INTRADAY_CATEGORIES = {"scalping", "momentum", "mean_reversion"}  # square off same day
 SWING_CATEGORIES = {"swing"}  # may carry up to spec.max_hold_days trading days
 
+# How many DIFFERENT strategies may hold the same symbol at once.
+#
+# The per-strategy guard below already stops one strategy doubling up on a symbol, but
+# nothing stopped N strategies each taking their own position in it — which is how this
+# desk ended up holding SUNPHARMA across four strategies and TCS across three on the same
+# read. That is the same concentration the buying desk's `in_basket` de-dup exists to
+# prevent, where six near-identical strategies bought one strike and turned a single wrong
+# call into a -29% day (2026-07-20).
+#
+# Near-identical variants are the common case here (three "VWAP Fade" parameter sets
+# firing on one print), so the cap counts DISTINCT strategies, not positions. Set to 1 to
+# forbid overlap entirely; raise it to allow genuinely different reads (a swing and a
+# scalp on one name) to coexist.
+MAX_STRATEGIES_PER_SYMBOL = int(os.getenv("INTRADAY_LAB_MAX_STRATEGIES_PER_SYMBOL", "2"))
+
 STATE_ID = "intraday_lab"
 
 
@@ -110,6 +125,15 @@ async def _equity_quote_map(
 
 async def _open_positions_count(strategy_id: str) -> int:
     return await intraday_lab_positions_collection.count_documents({"strategy_id": strategy_id, "status": "OPEN"})
+
+
+async def _strategies_holding(symbol: str) -> int:
+    """How many DISTINCT strategies currently hold this symbol. Distinct rather than a
+    raw position count, because the concentration that matters is how many independent
+    reads are riding on one name, not how many rows exist."""
+    return len(await intraday_lab_positions_collection.distinct(
+        "strategy_id", {"symbol": symbol, "status": "OPEN"}
+    ))
 
 
 async def _deployed_capital(strategy_id: str) -> float:
@@ -179,6 +203,11 @@ async def _open_position(spec, symbol: str, inst: dict, signal, ltp_source: str)
         {"strategy_id": spec.strategy_id, "symbol": symbol, "status": "OPEN"}
     )
     if existing is not None:
+        return False
+
+    # Desk-wide concentration guard: the check above is per-strategy, so without this a
+    # symbol can be taken independently by as many strategies as happen to signal on it.
+    if await _strategies_holding(symbol) >= MAX_STRATEGIES_PER_SYMBOL:
         return False
 
     cash = await _available_cash(spec.strategy_id)
