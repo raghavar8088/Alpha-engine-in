@@ -60,7 +60,15 @@ MAX_SYMBOLS_PER_SCAN = int(os.getenv("INTRADAY_LAB_MAX_SYMBOLS", "150"))  # keep
 # position is still marked, stopped, targeted and EOD-squared-off normally. Only the
 # opening of new ones is gated — a paused desk that stopped MANAGING its book would leave
 # open risk untracked, which is worse than leaving it running.
-PAUSE_NEW_ENTRIES = os.getenv("INTRADAY_LAB_PAUSE_ENTRIES", "0").lower() not in ("0", "false", "")
+#
+# Defaults to PAUSED (fail-safe), not trading: on 2026-07-24 this var was found reset to
+# "0" in production with no record of who/what did it, and because the old default was
+# "trade unless told otherwise", the desk silently resumed opening new positions on a
+# catalog already proven to lose net of costs and kept losing for days before anyone
+# noticed. A proven-unprofitable strategy set must now be explicitly re-armed
+# (INTRADAY_LAB_PAUSE_ENTRIES=0) to trade; losing the env var, a fresh deploy without it,
+# or any other accidental reset now fails toward safe, not toward loss.
+PAUSE_NEW_ENTRIES = os.getenv("INTRADAY_LAB_PAUSE_ENTRIES", "1").lower() not in ("0", "false", "")
 
 EOD_SQUAREOFF_HHMM = "15:15"
 INTRADAY_CATEGORIES = {"scalping", "momentum", "mean_reversion"}  # square off same day
