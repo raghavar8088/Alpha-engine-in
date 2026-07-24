@@ -74,6 +74,33 @@ EOD_SQUAREOFF_HHMM = "15:15"
 INTRADAY_CATEGORIES = {"scalping", "momentum", "mean_reversion"}  # square off same day
 SWING_CATEGORIES = {"swing"}  # may carry up to spec.max_hold_days trading days
 
+# How many DIFFERENT strategies may hold the same symbol at once.
+#
+# The per-strategy guard below already stops one strategy doubling up on a symbol, but
+# nothing stopped N strategies each taking their own position in it — which is how this
+# desk ended up holding SUNPHARMA across four strategies and TCS across three on the same
+# read. That is the same concentration the buying desk's `in_basket` de-dup exists to
+# prevent, where six near-identical strategies bought one strike and turned a single wrong
+# call into a -29% day (2026-07-20).
+#
+# Near-identical variants are the common case here (three "VWAP Fade" parameter sets
+# firing on one print), so the cap counts DISTINCT strategies, not positions. Set to 1 to
+# forbid overlap entirely; raise it to allow genuinely different reads (a swing and a
+# scalp on one name) to coexist.
+MAX_STRATEGIES_PER_SYMBOL = int(os.getenv("INTRADAY_LAB_MAX_STRATEGIES_PER_SYMBOL", "2"))
+
+# Daily loss circuit breaker, as a fraction of starting capital. Once the day's P&L is
+# worse than this, the desk stops OPENING for the rest of the session; manage_cycle keeps
+# running, so open positions are still marked, stopped, targeted and squared off — a
+# breaker that stopped managing open risk would be worse than no breaker.
+#
+# The selling desk has had one of these since it was built and the buying desk gained one
+# after its -29% day; this desk had none, which mattered because its measured live edge is
+# negative (Rs16,497 lost over 500 trades at 39% before any costs). A bad day here had
+# nothing to stop it compounding.
+DAILY_LOSS_BREAKER_PCT = float(os.getenv("INTRADAY_LAB_DAILY_LOSS_PCT", "0.03"))
+IST = timezone(timedelta(hours=5, minutes=30))
+
 STATE_ID = "intraday_lab"
 
 
@@ -118,6 +145,51 @@ async def _equity_quote_map(
 
 async def _open_positions_count(strategy_id: str) -> int:
     return await intraday_lab_positions_collection.count_documents({"strategy_id": strategy_id, "status": "OPEN"})
+
+
+def _session_start_utc() -> datetime:
+    """Midnight IST today, as UTC — the boundary for 'this session'."""
+    now_ist = datetime.now(IST)
+    return now_ist.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(timezone.utc)
+
+
+async def today_pnl() -> float:
+    """This session's P&L: realized on positions closed today plus unrealized on
+    positions opened today. Positions carried in from earlier sessions are excluded —
+    a swing trade drifting since Monday is not this session's decision to keep trading,
+    and counting it would trip the breaker on history rather than on today."""
+    start = _session_start_utc()
+    total = 0.0
+    async for p in intraday_lab_positions_collection.find(
+        {"status": {"$ne": "OPEN"}, "closed_at": {"$gte": start}}, {"realized_pnl": 1}
+    ):
+        total += p.get("realized_pnl") or 0.0
+    async for p in intraday_lab_positions_collection.find(
+        {"status": "OPEN", "opened_at": {"$gte": start}}, {"unrealized_pnl": 1}
+    ):
+        total += p.get("unrealized_pnl") or 0.0
+    return total
+
+
+async def breaker_state() -> dict:
+    """Whether the daily loss breaker has tripped, and the numbers behind it."""
+    pnl = await today_pnl()
+    limit = DAILY_LOSS_BREAKER_PCT * INTRADAY_LAB_INITIAL_CAPITAL
+    return {
+        "breaker_tripped": pnl <= -limit,
+        "today_pnl": round(pnl, 2),
+        "daily_loss_limit": round(limit, 2),
+        "daily_loss_pct": DAILY_LOSS_BREAKER_PCT,
+    }
+
+
+async def _strategies_holding(symbol: str) -> int:
+    """How many DISTINCT strategies currently hold this symbol. Distinct rather than a
+    raw position count, because the concentration that matters is how many independent
+    reads are riding on one name, not how many rows exist."""
+    return len(await intraday_lab_positions_collection.distinct(
+        "strategy_id", {"symbol": symbol, "status": "OPEN"}
+    ))
 
 
 async def _deployed_capital(strategy_id: str) -> float:
@@ -189,6 +261,11 @@ async def _open_position(spec, symbol: str, inst: dict, signal, ltp_source: str)
     if existing is not None:
         return False
 
+    # Desk-wide concentration guard: the check above is per-strategy, so without this a
+    # symbol can be taken independently by as many strategies as happen to signal on it.
+    if await _strategies_holding(symbol) >= MAX_STRATEGIES_PER_SYMBOL:
+        return False
+
     cash = await _available_cash(spec.strategy_id)
     budget = PER_STRATEGY_ALLOCATION * spec.risk_pct
     qty = _size(signal.entry, budget, cash)
@@ -235,6 +312,20 @@ async def _open_position(spec, symbol: str, inst: dict, signal, ltp_source: str)
 async def scan_cycle(dhan: DhanClient | None) -> dict:
     """One scan pass across every strategy x scored symbol. Returns a summary
     dict {opened, scanned_symbols, notes}."""
+    # Checked before any scanning work: once the day's loss limit is hit there is no
+    # point pricing symbols we have already decided not to trade.
+    breaker = await breaker_state()
+    if breaker["breaker_tripped"]:
+        return {
+            "opened": 0,
+            "scanned_symbols": 0,
+            "notes": [
+                f"DAILY LOSS BREAKER TRIPPED — today's P&L Rs{breaker['today_pnl']:,.0f} crossed the "
+                f"Rs{breaker['daily_loss_limit']:,.0f} limit ({DAILY_LOSS_BREAKER_PCT:.1%} of capital). "
+                f"No new positions for the rest of the session; open positions are still managed."
+            ],
+        }
+
     scored = await _scored_daily_symbols()
     if not scored:
         return {"opened": 0, "scanned_symbols": 0, "notes": ["No scored symbols — backfill daily bars first."]}
@@ -436,4 +527,6 @@ async def summary() -> dict:
         "open_positions": open_count,
         "closed_positions": closed_count,
         "strategy_count": len(STRATEGY_CATALOG),
+        **(await breaker_state()),
+        "max_strategies_per_symbol": MAX_STRATEGIES_PER_SYMBOL,
     }
