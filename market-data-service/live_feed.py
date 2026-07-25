@@ -22,6 +22,7 @@ from datetime import datetime, timedelta, timezone
 import requests
 from dotenv import load_dotenv
 
+import broker_failover
 from bars_store import upsert_bars
 from credentials import get_dhan_access
 from db import _db
@@ -91,25 +92,42 @@ def _fetch_quotes(client_id: str, access_token: str, watch: list[dict]) -> tuple
 
     out: dict[str, dict] = {}
     throttled = False
-    for segment, security_ids in by_segment.items():
-        payload = {segment: [int(sid) for sid in security_ids]}
-        try:
-            response = requests.post(
-                f"{DHAN_BASE_URL}/marketfeed/quote", json=payload, headers=headers, timeout=15
-            )
-            if response.status_code == 429:
-                # Don't try to parse it — a throttled response isn't the JSON we want,
-                # and decoding it is what turned this into an unreadable parse error.
-                print(f"[warn] Dhan rate-limited (429) on {segment} — backing off", flush=True)
-                throttled = True
+    # Respect the account-wide cooldown: if another process already tripped Dhan's 429,
+    # skip Dhan entirely this cycle and price everything off Angel instead of adding to
+    # the throttle. `throttled` stays False so the caller keeps the normal cadence — we
+    # have data, just from the standby.
+    cooling = broker_failover.dhan_is_cooling_down()
+    if not cooling:
+        for segment, security_ids in by_segment.items():
+            payload = {segment: [int(sid) for sid in security_ids]}
+            try:
+                response = requests.post(
+                    f"{DHAN_BASE_URL}/marketfeed/quote", json=payload, headers=headers, timeout=15
+                )
+                if response.status_code == 429:
+                    # Don't try to parse it — a throttled response isn't the JSON we want,
+                    # and decoding it is what turned this into an unreadable parse error.
+                    print(f"[warn] Dhan rate-limited (429) on {segment} — failing over to Angel", flush=True)
+                    broker_failover.note_dhan_rate_limit()  # stand every process down
+                    throttled = True
+                    continue
+                data = response.json().get("data", {})
+            except Exception as exc:
+                print(f"[error] quote fetch failed for {segment}: {exc}", flush=True)
                 continue
-            data = response.json().get("data", {})
-        except Exception as exc:
-            print(f"[error] quote fetch failed for {segment}: {exc}", flush=True)
-            continue
-        segment_data = data.get(segment, {}) if isinstance(data, dict) else {}
-        for security_id, fields in segment_data.items():
-            out[str(security_id)] = fields
+            segment_data = data.get(segment, {}) if isinstance(data, dict) else {}
+            for security_id, fields in segment_data.items():
+                out[str(security_id)] = fields
+
+    # Angel failover for anything Dhan didn't price (everything, if cooling down) — so a
+    # throttled or blind Dhan costs freshness on unmapped names only, not the whole feed.
+    missing: dict[str, list] = {}
+    for w in watch:
+        if str(w["security_id"]) not in out:
+            missing.setdefault(w["exchange_segment"], []).append(w["security_id"])
+    if missing:
+        for sid, quote in broker_failover.angel_full_quotes(missing).items():
+            out[sid] = quote
     return out, throttled
 
 
@@ -192,18 +210,11 @@ def run(poll_interval_seconds: int = POLL_SECONDS) -> None:
                 print(f"[error] live_feed cycle failed: {exc}", flush=True)
                 quotes, throttled = {}, False
 
-            if throttled:
-                # Escalate the wait for as long as Dhan keeps refusing; coming back at
-                # the normal 10s cadence is what turns throttling into a block.
-                backoff = min(max(backoff * 2, FIRST_BACKOFF_SECONDS), MAX_BACKOFF_SECONDS)
-                print(f"live_feed: sleeping {backoff}s before retrying Dhan", flush=True)
-                time.sleep(backoff)
-                continue
-            backoff = 0
-            # Each (symbol, timeframe) is processed independently so one bad tick
-            # (or a downstream failure inside _process_tick) can't silently drop
-            # every timeframe queued after it in the same cycle - this is what let
-            # 15m/1h never finalize while 5m worked (see redis_pub.py fix).
+            # Process whatever we have FIRST — `quotes` now includes Angel failover
+            # fills, so even a throttled Dhan cycle still finalizes bars — then decide
+            # how long to wait. Each (symbol, timeframe) is processed independently so one
+            # bad tick can't silently drop every timeframe queued after it in the same
+            # cycle (this is what let 15m/1h never finalize while 5m worked).
             for w in watch:
                 quote = quotes.get(w["security_id"])
                 if quote is None:
@@ -212,6 +223,16 @@ def run(poll_interval_seconds: int = POLL_SECONDS) -> None:
                     _process_tick(w, quote, now_ist)
                 except Exception as exc:
                     print(f"[error] _process_tick failed for {w['symbol']}@{w['timeframe']}: {exc}", flush=True)
+
+            if throttled:
+                # Escalate the Dhan wait for as long as it keeps refusing; coming back at
+                # the normal cadence is what turns throttling into a block. Angel keeps the
+                # bars flowing meanwhile, so backing off Dhan costs nothing here.
+                backoff = min(max(backoff * 2, FIRST_BACKOFF_SECONDS), MAX_BACKOFF_SECONDS)
+                print(f"live_feed: backing off Dhan {backoff}s (Angel covering)", flush=True)
+                time.sleep(backoff)
+                continue
+            backoff = 0
         time.sleep(poll_interval_seconds)
 
 

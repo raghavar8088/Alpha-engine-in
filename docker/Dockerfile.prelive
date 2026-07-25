@@ -8,6 +8,7 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 COPY shared ./shared
+COPY broker-clients ./broker-clients
 COPY strategy-service ./strategy-service
 COPY risk-service ./risk-service
 COPY options-service ./options-service

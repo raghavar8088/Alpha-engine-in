@@ -175,9 +175,9 @@ async def refresh_angel_equity_tokens() -> None:
     can quote equities off Angel One (its primary feed). Idempotent; runs once in the
     background so a slow scrip-master download never blocks startup. No-op unless Angel
     is configured — off-whitelist/local dev falls back to Dhan and needs no map."""
-    from app.services.angel_client import AngelClient
+    from app.services.angel_client import angel_client
 
-    if not AngelClient.configured():
+    if not angel_client.configured():
         logger.info("Angel token-map refresh skipped — Angel One not configured")
         return
 

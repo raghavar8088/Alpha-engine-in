@@ -6,6 +6,7 @@ FROM python:3.12-slim
 WORKDIR /app
 
 COPY shared ./shared
+COPY broker-clients ./broker-clients
 COPY strategy-service ./strategy-service
 COPY risk-service ./risk-service
 COPY backtesting-service ./backtesting-service

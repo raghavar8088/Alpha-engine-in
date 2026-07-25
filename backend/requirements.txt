@@ -1,4 +1,5 @@
 -e ../shared
+-e ../broker-clients
 -e ../strategy-service
 -e ../risk-service
 -e ../backtesting-service

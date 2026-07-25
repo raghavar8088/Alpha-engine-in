@@ -16,6 +16,7 @@ import time
 
 import requests
 
+import broker_failover
 from credentials import get_dhan_access
 
 DHAN_BASE_URL = "https://api.dhan.co/v2"
@@ -57,19 +58,24 @@ class DhanIndexClient:
         by_segment: dict[str, list[int]] = {}
         for sec_id, segment in DHAN_INDEX_IDS.values():
             by_segment.setdefault(segment, []).append(int(sec_id))
+
+        # If ANY process has tripped Dhan's account-wide 429 cooldown, don't spend a
+        # request into the throttle — serve the indices from Angel this cycle instead.
+        if broker_failover.dhan_is_cooling_down():
+            self._serve_from_angel()
+            return
+
         try:
             resp = requests.post(f"{DHAN_BASE_URL}/marketfeed/ltp", headers=self._headers(),
                                  json=by_segment, timeout=10)
             if resp.status_code == 429:
-                # Account throttled by Dhan (shared with the prelive desk + backend).
-                # Flag it so the poller backs off instead of re-hitting every 7s and
-                # keeping the block alive; log at most once per 30s.
                 now = time.time()
                 if now - self._last_429_log > 30:
                     self._last_429_log = now
-                    print("[warn] Dhan rate-limited (HTTP 429) — backing off index polling until it lifts", flush=True)
+                    print("[warn] Dhan rate-limited (HTTP 429) — trading indices to Angel One", flush=True)
+                broker_failover.note_dhan_rate_limit()  # stand DOWN every process, not just this one
                 self.rate_limited = True
-                self._cache = {}
+                self._serve_from_angel()  # failover instead of an empty (stale) cache
                 return
             resp.raise_for_status()
             self.rate_limited = False
@@ -80,12 +86,31 @@ class DhanIndexClient:
                 last = row.get("last_price") if row else None
                 if last is not None:
                     fresh[symbol] = {"symbol": symbol, "price": last, "change": None,
-                                     "pct_change": None, "volume": None}
+                                     "pct_change": None, "volume": None, "source": "dhan"}
             self._cache = fresh
         except Exception as exc:
-            print(f"[warn] Dhan index batch quote failed: {exc}", flush=True)
+            print(f"[warn] Dhan index batch quote failed: {exc} — trying Angel One", flush=True)
             self.rate_limited = False
+            self._serve_from_angel()
+
+    def _serve_from_angel(self) -> None:
+        """Fill the index cache from Angel One when Dhan can't. Angel prices only the
+        indices it lists and has a mapped token for; anything unpriceable is simply
+        absent (the snapshot then keeps its last value) rather than guessed."""
+        ids_by_segment: dict[str, list[str]] = {}
+        for sec_id, segment in DHAN_INDEX_IDS.values():
+            ids_by_segment.setdefault(segment, []).append(str(sec_id))
+        prices = broker_failover.angel_ltp(ids_by_segment)  # {(segment, sid): price}
+        if not prices:
             self._cache = {}
+            return
+        fresh = {}
+        for symbol, (sec_id, segment) in DHAN_INDEX_IDS.items():
+            price = prices.get((segment, str(sec_id)))
+            if price is not None:
+                fresh[symbol] = {"symbol": symbol, "price": price, "change": None,
+                                 "pct_change": None, "volume": None, "source": "angel"}
+        self._cache = fresh
 
     def get_index_quote(self, symbol: str) -> dict | None:
         if symbol not in DHAN_INDEX_IDS:
