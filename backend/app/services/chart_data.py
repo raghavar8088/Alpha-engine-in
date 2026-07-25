@@ -217,7 +217,7 @@ async def _fetch_bars(
     dhan_failure: str | None = None
 
     try:
-        if dhan_is_cooling_down():
+        if await dhan_is_cooling_down():
             # Skip straight to the Angel fallback below rather than spending another
             # request while Dhan is throttling the account.
             raise DhanRateLimitError("Dhan rate limit — cooling down")
@@ -248,7 +248,7 @@ async def _fetch_bars(
                 t.extend(ct); o.extend(co); h.extend(ch); low.extend(cl); c.extend(cc); v.extend(cv)
                 chunk_start = chunk_end
     except DhanRateLimitError as exc:
-        note_dhan_rate_limit()
+        await note_dhan_rate_limit()
         dhan_failure = exc.remarks
     except DhanAPIError as exc:
         # Don't give up yet — Angel One below is an independent source that

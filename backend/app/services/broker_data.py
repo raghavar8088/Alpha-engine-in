@@ -16,6 +16,9 @@ import logging
 import time
 from datetime import datetime, timedelta, timezone
 
+import redis.asyncio as redis
+
+from app.core.config import settings
 from app.core.db import instruments_collection
 from app.services.angel_client import AngelAPIError, angel_client
 from app.services.dhan_client import DhanRateLimitError
@@ -28,19 +31,51 @@ IST = timezone(timedelta(hours=5, minutes=30))
 # a 429 into a blocked account — its own message warns as much. Trip a shared
 # cooldown instead and serve from Angel until it lapses. Shared, not per-instrument:
 # the limit applies to the account, so one 429 means every symbol should stand down.
+#
+# The cooldown lives in REDIS, not a module global, because the one Dhan account is hit
+# by FIVE separate OS processes (this backend, market-data-service, the two prelive
+# daemons, bars-feed). A per-process flag only stood down the process that got the 429
+# while the others kept hammering the same throttled account — which is how the audit
+# found 458 429s/24h from market-data-service alone. A Redis key with a TTL is the shared
+# state: any process that trips it stands every process down (they all read the same key;
+# market-data-service does so via its own sync redis client against this same key name).
+# The key name is the cross-process contract — keep it in sync with that service.
 DHAN_COOLDOWN_SECONDS = 120
-_dhan_blocked_until = 0.0
+_COOLDOWN_KEY = "dhan:ratelimit:cooldown"
+_dhan_blocked_until = 0.0  # process-local fallback used only when Redis is unreachable
+
+_redis: redis.Redis | None = None
 
 
-def dhan_is_cooling_down() -> bool:
-    return time.monotonic() < _dhan_blocked_until
+def _redis_client() -> redis.Redis:
+    global _redis
+    if _redis is None:
+        _redis = redis.from_url(settings.redis_url, decode_responses=True)
+    return _redis
 
 
-def note_dhan_rate_limit() -> None:
+async def dhan_is_cooling_down() -> bool:
+    """True while the shared Dhan rate-limit cooldown is active. Reads the shared Redis
+    key so a 429 tripped by ANY process stands this one down too; degrades to a
+    process-local timestamp if Redis is unreachable rather than failing open."""
+    try:
+        return bool(await _redis_client().exists(_COOLDOWN_KEY))
+    except Exception:
+        return time.monotonic() < _dhan_blocked_until
+
+
+async def note_dhan_rate_limit() -> None:
+    """Trip the shared cooldown on a Dhan 429 — every process then serves from Angel until
+    it lapses instead of retrying into the throttle and deepening it. Also sets the local
+    fallback so a same-process caller stands down even if the Redis write failed."""
     global _dhan_blocked_until
     _dhan_blocked_until = time.monotonic() + DHAN_COOLDOWN_SECONDS
+    try:
+        await _redis_client().set(_COOLDOWN_KEY, "1", ex=DHAN_COOLDOWN_SECONDS)
+    except Exception:
+        pass  # Redis down: local fallback above still protects this process
     logger.warning(
-        "Dhan rate-limited — pausing Dhan market-data calls for %ss, serving from Angel One",
+        "Dhan rate-limited — pausing Dhan market-data calls for %ss (shared), serving from Angel One",
         DHAN_COOLDOWN_SECONDS,
     )
 
@@ -61,7 +96,7 @@ async def get_ltp(dhan, security_id: str, exchange_segment: str) -> tuple[float 
     Returns (None, "unavailable") when neither broker can price it — callers already
     treat a missing price as "skip this one" rather than as zero.
     """
-    if not dhan_is_cooling_down():
+    if not await dhan_is_cooling_down():
         try:
             raw = await dhan.quote_data({exchange_segment: [int(security_id)]})
             data = raw.get("data", {}) if isinstance(raw, dict) else {}
@@ -69,7 +104,7 @@ async def get_ltp(dhan, security_id: str, exchange_segment: str) -> tuple[float 
             if row and row.get("last_price"):
                 return float(row["last_price"]), "dhan_quote"
         except DhanRateLimitError:
-            note_dhan_rate_limit()
+            await note_dhan_rate_limit()
         except Exception as exc:
             logger.warning("Dhan quote failed for %s/%s (%s) — trying Angel", security_id, exchange_segment, exc)
 

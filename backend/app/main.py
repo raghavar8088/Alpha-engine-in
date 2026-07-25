@@ -31,7 +31,7 @@ from app.api.routes import (
     trading_calls,
     watchlist,
 )
-from app.api.routes.broker import _get_dhan_client, store_dhan_credentials
+from app.api.routes.broker import _get_dhan_client
 from app.core.config import settings
 from app.core.db import (
     live_watchlist_collection,
@@ -40,7 +40,6 @@ from app.core.db import (
     trading_calls_collection,
 )
 from app.services import chart_cache, chart_workspace
-from app.services.dhan_client import totp_login
 from app.ws import broker_manager
 from app.ws.manager import manager
 
@@ -84,16 +83,26 @@ async def _stored_token_seconds_remaining() -> float | None:
 
 
 async def _dhan_token_refresh_loop() -> None:
+    from app.services import dhan_token
+
     while True:
         try:
             remaining = await _stored_token_seconds_remaining()
             if remaining is None or remaining <= DHAN_TOKEN_REFRESH_MARGIN_SECONDS:
-                data = await totp_login(settings.dhan_client_id, settings.dhan_pin, settings.dhan_totp_secret)
+                # Mint through dhan_token.refresh_locked — the SAME cross-process Redis
+                # lock that _get_dhan_client and the manual /refresh-token route already
+                # use. The old code called totp_login() + store_dhan_credentials() here
+                # directly, which was a second, UNLOCKED minting path racing the locked
+                # ones: exactly the "token tug-of-war" (one active Dhan token per account,
+                # so every unsynchronised login invalidates the others) that dhan_token
+                # was built to end. This loop keeps its proactive 2h margin — it just no
+                # longer mints outside the lock.
                 user = await get_current_user()
-                await store_dhan_credentials(
-                    str(user["_id"]), str(data["dhanClientId"]), data["accessToken"], data.get("dhanClientName"),
-                )
-                logger.info("Dhan access token refreshed via TOTP, expires %s", data.get("expiryTime"))
+                minted = await dhan_token.refresh_locked(str(user["_id"]))
+                if minted:
+                    logger.info("Dhan access token refreshed via TOTP (under lock)")
+                else:
+                    logger.info("Dhan token refresh deferred — another owner minted, or auth in cooldown")
             else:
                 logger.info("Dhan token still valid for %.1fh — leaving it alone", remaining / 3600)
         except Exception:
