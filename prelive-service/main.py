@@ -300,8 +300,19 @@ def run_session(engine: PreLiveEngine, feed: DhanFeed):
             print(f"[prelive] ZERO TRADES because the price feed was unusable for {blocked_pct:.0f}% "
                   f"of the session: {cause} — not a strategy decision.", flush=True)
         else:
-            print("[prelive] ZERO TRADES with a healthy feed — strategies evaluated but no setup "
-                  "qualified today (see [BAR] lines for per-bar drove/opened counts).", flush=True)
+            dropped = getattr(engine, "dropped_signals", {}) or {}
+            n_dropped = sum(dropped.values())
+            if n_dropped:
+                # Signals fired but could not be turned into orders — this IS a fault to
+                # chase, unlike a genuinely quiet market.
+                print(f"[prelive] ZERO TRADES but {n_dropped} SIGNAL(S) WERE DROPPED by the "
+                      f"execution path: {dropped} — a valid signal could not become an order "
+                      f"(see [prelive] SIGNAL DROPPED lines). This is an execution fault, not a "
+                      f"quiet market.", flush=True)
+            else:
+                print("[prelive] ZERO TRADES with a healthy feed and NO dropped signals — strategies "
+                      "evaluated but none produced a setup today (see [BAR] lines for per-bar "
+                      "drove/opened counts). Genuine no-trade day, not a fault.", flush=True)
 
 
 def main():

@@ -225,8 +225,17 @@ def run_session(engine: PreLiveSellingEngine, feed: DhanFeed) -> None:
                   f"{blocked_pct:.0f}% of the session: {cause} — not a strategy decision.",
                   flush=True)
         else:
-            print("[selling] ZERO ACTIVITY with a healthy feed — no regime qualified today "
-                  "(see [BAR] lines for per-bar drove/opened counts).", flush=True)
+            dropped = getattr(engine, "dropped_signals", {}) or {}
+            n_dropped = sum(dropped.values())
+            if n_dropped:
+                print(f"[selling] ZERO ACTIVITY but {n_dropped} SELL SIGNAL(S) WERE DROPPED by the "
+                      f"execution path: {dropped} — a valid short could not be built into a priced "
+                      f"structure (see [selling] SIGNAL DROPPED lines). Execution fault, not a quiet "
+                      f"market.", flush=True)
+            else:
+                print("[selling] ZERO ACTIVITY with a healthy feed and NO dropped signals — no regime "
+                      "qualified today (see [BAR] lines for per-bar drove/opened counts). Genuine "
+                      "no-trade day, not a fault.", flush=True)
 
 
 def _drive_daily(engine: PreLiveSellingEngine, feed: DhanFeed) -> None:

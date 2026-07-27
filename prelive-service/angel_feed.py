@@ -100,6 +100,29 @@ class AngelOneFeed:
     def ltp(self, security_id, exchange_segment) -> float | None:
         return self._cache.get((str(security_id), exchange_segment))
 
+    def fetch_one(self, security_id, exchange_segment) -> float | None:
+        """Price ONE instrument on demand and merge it into the cache WITHOUT clearing
+        the rest. `prefetch` resets the whole cache each tick, so it can't be reused
+        mid-tick to add a single leg. This is for the fresh option leg of a position
+        being opened right now: it was never in the tick's prefetch, so when Dhan is
+        throttled at that instant its price is otherwise unobtainable and the signal is
+        lost. This closes that last 'valid signal, no fill' path."""
+        if not self.available:
+            return None
+        ref = _angel_ref(security_id, exchange_segment)
+        if ref is None:
+            return None  # unmapped contract — unpriceable, never guessed
+        token, exchange = ref
+        try:
+            prices = self.client.ltp({exchange: [token]})  # {token: last_price}
+        except AngelAPIError as exc:
+            print(f"[angel] on-demand quote failed for {security_id}: {exc}", flush=True)
+            return None
+        price = prices.get(token)
+        if price is not None:
+            self._cache[(str(security_id), exchange_segment)] = price
+        return price
+
 
 class FailoverFeed:
     """Dhan first, Angel One when Dhan cannot answer.
@@ -160,6 +183,12 @@ class FailoverFeed:
         if price is not None:
             return price
         price = self.angel.ltp(security_id, exchange_segment)
+        if price is None and self.angel.available:
+            # Cache miss: a leg the tick's prefetch never covered — the fresh option of a
+            # position being opened this instant. If Dhan is throttled right now its own
+            # single fallback also fails, so price this one leg from Angel on demand
+            # rather than dropping a valid signal.
+            price = self.angel.fetch_one(security_id, exchange_segment)
         if price is not None:
             self.failover_prices += 1
         return price

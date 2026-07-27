@@ -231,6 +231,11 @@ class PreLiveSellingEngine:
         self.day_start_equity: float = INITIAL_CAPITAL
         self.breaker_tripped: bool = False
         self.breaker_reason: str | None = None
+        # A SELL signal that fires but cannot be built into a priced structure is an
+        # execution failure, not a quiet regime. Counted per reason so a zero-activity day
+        # can distinguish "no regime qualified" from "a valid short couldn't be placed".
+        self.dropped_signals = {"no_expiry": 0, "no_contract": 0, "no_premium": 0,
+                                "bad_credit": 0, "bad_wing": 0}
         self.refresh_universe(force=True)
         self._restore_open_positions()
 
@@ -363,6 +368,8 @@ class PreLiveSellingEngine:
         self.day_start_equity = self.balance()["balance"]
         self.breaker_tripped = False
         self.breaker_reason = None
+        self.dropped_signals = {"no_expiry": 0, "no_contract": 0, "no_premium": 0,
+                                "bad_credit": 0, "bad_wing": 0}
         self.refresh_universe(force=True)
 
     def day_pnl(self, fetch_ltp) -> tuple[float, float]:
@@ -444,6 +451,9 @@ class PreLiveSellingEngine:
         style = OPTION_SELLING_CATEGORIES[category]
         expiry = self.expiry_for_style(category)
         if not expiry:
+            self.dropped_signals["no_expiry"] += 1
+            print(f"[selling] SIGNAL DROPPED ({key}): no {category} expiry available in the "
+                  f"instruments/scrip master — check it is current", flush=True)
             strategy.position_closed()
             return None
 
@@ -468,6 +478,9 @@ class PreLiveSellingEngine:
             if spec.wing_pct is not None:
                 anchor = resolved_short.get(spec.option_type.upper())
                 if anchor is None:
+                    self.dropped_signals["bad_wing"] += 1
+                    print(f"[selling] SIGNAL DROPPED ({key}): wing leg has no short anchor to hang "
+                          f"off — malformed {spec.option_type} structure", flush=True)
                     strategy.position_closed()
                     return None
                 off = anchor * spec.wing_pct
@@ -487,12 +500,20 @@ class PreLiveSellingEngine:
 
             contract = self.contract(expiry, strike, spec.option_type.upper())
             if contract is None:
+                self.dropped_signals["no_contract"] += 1
+                print(f"[selling] SIGNAL DROPPED ({key}): no {spec.option_type} contract at strike "
+                      f"{strike} expiry {expiry} — strike outside the listed ladder or scrip master "
+                      f"stale", flush=True)
                 strategy.position_closed()
                 return None
             premium = fetch_ltp(contract["security_id"], contract["exchange_segment"])
             if premium is None or premium <= 0:
                 # No live price for a leg = no honest entry. Never open a structure on a
                 # partially-priced book.
+                self.dropped_signals["no_premium"] += 1
+                print(f"[selling] SIGNAL DROPPED ({key}): feed returned no premium for "
+                      f"{contract['symbol']} (sid {contract['security_id']}) — neither Dhan nor Angel "
+                      f"could price this leg", flush=True)
                 strategy.position_closed()
                 return None
             legs.append(OpenLeg(spec.option_type.upper(), contract["strike"], spec.sell,
@@ -501,6 +522,9 @@ class PreLiveSellingEngine:
 
         credit = sum(l.entry_premium if l.sold else -l.entry_premium for l in legs)
         if credit <= 0:
+            self.dropped_signals["bad_credit"] += 1
+            print(f"[selling] SIGNAL DROPPED ({key}): net credit Rs{credit:.2f} <= 0 — a credit "
+                  f"structure that costs money to open, priced legs look wrong", flush=True)
             strategy.position_closed()
             return None  # a "credit" structure that costs money to open is a bug, not a trade
 

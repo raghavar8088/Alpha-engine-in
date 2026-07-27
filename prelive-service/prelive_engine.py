@@ -166,6 +166,11 @@ class PreLiveEngine:
         self._weekly_expiry = None
         self.breaker_tripped = False
         self.breaker_reason: str | None = None
+        # A signal that fires but cannot become an order is an execution FAILURE, distinct
+        # from a strategy that simply didn't signal. Counted per reason so a zero-trade day
+        # can say whether the strategies stayed silent or whether valid signals were dropped
+        # by the pipeline — the two used to look identical in the logs.
+        self.dropped_signals = {"no_contract": 0, "no_premium": 0, "cant_afford": 0}
         self.refresh_universe(force=True)
         self._restore_open_positions()
         # Set after restore so a mid-session restart measures the day against the equity it
@@ -314,6 +319,7 @@ class PreLiveEngine:
         self.day_start_equity = self.balance()["balance"]
         self.breaker_tripped = False
         self.breaker_reason = None
+        self.dropped_signals = {"no_contract": 0, "no_premium": 0, "cant_afford": 0}
 
     def day_pnl(self, fetch_ltp) -> tuple[float, float]:
         """(realized today, unrealized on open positions). The breaker reads both — a desk
@@ -384,11 +390,22 @@ class PreLiveEngine:
         if _ist_minutes(bar.ts) >= EOD_SQUAREOFF_MIN:
             return None
         option_type = "CE" if signal.signal == SignalAction.BUY else "PE"
+        # Past this point a strategy HAS signalled, so any drop below is an execution
+        # failure, not a quiet no-setup. Each is logged and counted so it can never again
+        # masquerade as "no signal" in a zero-trade session summary.
         contract = self.atm_contract(bar.close, option_type)
         if not contract:
+            self.dropped_signals["no_contract"] += 1
+            print(f"[prelive] SIGNAL DROPPED ({strategy_id}@{tf}): no ATM {option_type} contract for "
+                  f"expiry {self._weekly_expiry[1] if self._weekly_expiry else '?'} near spot {bar.close:.1f} "
+                  f"— check the instruments/scrip master is current", flush=True)
             return None
         premium = fetch_ltp(contract["security_id"], contract["exchange_segment"])
         if not premium or premium <= 0:
+            self.dropped_signals["no_premium"] += 1
+            print(f"[prelive] SIGNAL DROPPED ({strategy_id}@{tf}): feed returned no premium for "
+                  f"{contract['symbol']} (sid {contract['security_id']}) — neither Dhan nor Angel could "
+                  f"price this leg this tick", flush=True)
             return None
 
         one_lot_cost = premium * LOT_SIZE
@@ -398,6 +415,10 @@ class PreLiveEngine:
         affordable_lots = int(self.available_cash() // one_lot_cost)
         lots = min(lots, affordable_lots)
         if lots < 1:
+            self.dropped_signals["cant_afford"] += 1
+            print(f"[prelive] SIGNAL DROPPED ({strategy_id}@{tf}): can't afford 1 lot of "
+                  f"{contract['symbol']} at premium {premium:.2f} (1 lot = Rs{one_lot_cost:,.0f}, "
+                  f"available cash Rs{self.available_cash():,.0f})", flush=True)
             return None  # can't even afford 1 lot at this premium — skip, don't force it
 
         cat = STRATEGY_REGISTRY[strategy_id].metadata.category
