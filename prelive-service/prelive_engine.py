@@ -26,6 +26,7 @@ import os
 from datetime import datetime, timedelta, timezone
 
 from db import (
+    _db,
     daily_pnl_collection,
     equity_collection,
     instruments_collection,
@@ -35,6 +36,19 @@ from db import (
     state_collection,
     trades_collection,
 )
+
+bars_collection = _db["bars"]
+
+# Volatility regime gate for option BUYING. Buying premium only pays when the underlying
+# moves enough, fast enough, to beat the theta you bleed every day. Every session this desk
+# has traded was flat — NIFTY daily ranges of 0.32-0.54% — and it lost on all of them
+# (-Rs1.29L cumulative, 71% of trades stopped out). So new buys are stood aside when the
+# recent daily range is below a floor comfortably above those flat days. This is regime
+# selection, not a profit guarantee: it removes the proven-losing condition (buying into a
+# dead tape); it does NOT claim the desk wins on trending days, for which there is not yet
+# any evidence. Env-tunable; set the floor to 0 to disable the gate.
+VOL_REGIME_FLOOR_PCT = float(os.getenv("PRELIVE_VOL_FLOOR_PCT", "0.7"))
+VOL_REGIME_LOOKBACK_DAYS = int(os.getenv("PRELIVE_VOL_LOOKBACK_DAYS", "5"))
 
 from options_service.options_backtest import OPTION_BUYING_CATEGORIES
 from tradingai_shared.contracts import STRATEGY_REGISTRY, StrategyContext
@@ -171,6 +185,11 @@ class PreLiveEngine:
         # can say whether the strategies stayed silent or whether valid signals were dropped
         # by the pipeline — the two used to look identical in the logs.
         self.dropped_signals = {"no_contract": 0, "no_premium": 0, "cant_afford": 0}
+        # Deliberate stand-asides (a healthy no-trade), counted separately from execution
+        # failures. Regime skips = buying declined because the market was too flat to justify
+        # paying theta.
+        self.regime_skips = 0
+        self.low_vol_regime = self._is_low_vol_regime()
         self.refresh_universe(force=True)
         self._restore_open_positions()
         # Set after restore so a mid-session restart measures the day against the equity it
@@ -320,6 +339,52 @@ class PreLiveEngine:
         self.breaker_tripped = False
         self.breaker_reason = None
         self.dropped_signals = {"no_contract": 0, "no_premium": 0, "cant_afford": 0}
+        self.regime_skips = 0
+        self.low_vol_regime = self._is_low_vol_regime()
+        if self.low_vol_regime:
+            print(f"[prelive] LOW-VOL REGIME — recent NIFTY daily range below "
+                  f"{VOL_REGIME_FLOOR_PCT:.2f}%. New option buys stand aside today; buying premium "
+                  f"in a flat tape is where 100% of this desk's losses came from.", flush=True)
+
+    def _is_low_vol_regime(self) -> bool:
+        """True when NIFTY's recent daily range is below the floor — a flat tape where bought
+        premium bleeds to theta faster than direction can pay.
+
+        Derives recent daily ranges by aggregating the 1h series, NOT the 1d series: the 1d
+        bars are not reliably maintained (found gapped from 2026-07-16 to 07-27, which made a
+        naive 1d lookback read stale higher-range days and fail to gate a flat market), while
+        the 1h series is written by the live feed and is continuous. Absence of data returns
+        False — never gate the desk off on missing evidence."""
+        if VOL_REGIME_FLOOR_PCT <= 0:
+            return False
+        try:
+            rows = list(bars_collection.find(
+                {"symbol": "NIFTY", "timeframe": "1h"},
+                {"ts": 1, "high": 1, "low": 1, "close": 1, "_id": 0},
+            ).sort("ts", -1).limit(80))
+        except Exception:
+            return False
+        # (max high, min low, day-close proxy) per date. Rows are newest-first, so the first
+        # 1h bar seen for a date is its last hour — a good close proxy for the % denominator.
+        byday: dict[str, list[float]] = {}
+        for b in rows:
+            try:
+                ts = b["ts"]
+                d = ts.strftime("%Y-%m-%d") if hasattr(ts, "strftime") else str(ts)[:10]
+                hi, lo, cl = float(b["high"]), float(b["low"]), float(b["close"])
+            except (TypeError, ValueError, KeyError):
+                continue
+            e = byday.setdefault(d, [hi, lo, cl])
+            e[0] = max(e[0], hi)
+            e[1] = min(e[1], lo)
+        ranges = []
+        for d in sorted(byday)[-VOL_REGIME_LOOKBACK_DAYS:]:
+            hi, lo, cl = byday[d]
+            if cl > 0 and hi >= lo:
+                ranges.append(100.0 * (hi - lo) / cl)
+        if len(ranges) < max(2, VOL_REGIME_LOOKBACK_DAYS // 2):
+            return False  # not enough recent data — don't gate blind
+        return (sum(ranges) / len(ranges)) < VOL_REGIME_FLOOR_PCT
 
     def day_pnl(self, fetch_ltp) -> tuple[float, float]:
         """(realized today, unrealized on open positions). The breaker reads both — a desk
@@ -388,6 +453,12 @@ class PreLiveEngine:
             return None
         # EOD guard: don't open new positions after square-off time
         if _ist_minutes(bar.ts) >= EOD_SQUAREOFF_MIN:
+            return None
+        # Regime gate: a real signal fired, but the tape is too flat to pay for the theta a
+        # bought option bleeds. Stand aside (a healthy decline, counted separately from
+        # execution failures) rather than feed premium to the sellers.
+        if self.low_vol_regime:
+            self.regime_skips += 1
             return None
         option_type = "CE" if signal.signal == SignalAction.BUY else "PE"
         # Past this point a strategy HAS signalled, so any drop below is an execution

@@ -26,7 +26,7 @@ import requests
 from angel_feed import FailoverFeed
 from credentials import get_dhan_access
 from db import _db
-from prelive_engine import PreLiveEngine
+from prelive_engine import PreLiveEngine, VOL_REGIME_FLOOR_PCT
 
 from tradingai_shared.domain import Bar, Timeframe
 
@@ -309,6 +309,13 @@ def run_session(engine: PreLiveEngine, feed: DhanFeed):
                       f"execution path: {dropped} — a valid signal could not become an order "
                       f"(see [prelive] SIGNAL DROPPED lines). This is an execution fault, not a "
                       f"quiet market.", flush=True)
+            elif getattr(engine, "regime_skips", 0):
+                # Signals fired but the desk deliberately stood aside — a healthy no-trade,
+                # not a fault and not a dead market.
+                print(f"[prelive] ZERO TRADES by design — {engine.regime_skips} signal(s) stood aside "
+                      f"in a low-volatility regime (recent NIFTY daily range below "
+                      f"{VOL_REGIME_FLOOR_PCT:.2f}%). Buying premium in a flat tape is where this "
+                      f"desk's losses came from; standing aside is the intended behaviour.", flush=True)
             else:
                 print("[prelive] ZERO TRADES with a healthy feed and NO dropped signals — strategies "
                       "evaluated but none produced a setup today (see [BAR] lines for per-bar "

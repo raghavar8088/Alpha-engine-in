@@ -74,6 +74,20 @@ EOD_SQUAREOFF_HHMM = "15:15"
 INTRADAY_CATEGORIES = {"scalping", "momentum", "mean_reversion"}  # square off same day
 SWING_CATEGORIES = {"swing"}  # may carry up to spec.max_hold_days trading days
 
+# Categories barred from NEW entries. Swing is removed by default because the live record
+# is unambiguous: of the desk's -Rs756k, swing was -Rs728k — 96% of the entire loss —
+# while the three genuine intraday categories together were roughly breakeven before costs
+# (scalping -Rs37k, momentum -Rs32k, mean_reversion +Rs41k). Swing carries positions
+# overnight with wide ATR stops on a desk built for same-day square-off, so when it is
+# wrong (it wins ~38% of the time) it loses far bigger than the intraday book. This is a
+# structural mismatch, not a parameter to tune, so it is cut rather than fitted. Existing
+# swing positions still close out normally through manage_cycle; only new swing entries are
+# gated. Env-tunable so the exclusion can be widened or cleared without a code change.
+EXCLUDED_CATEGORIES = {
+    c.strip().lower() for c in os.getenv("INTRADAY_LAB_EXCLUDE_CATEGORIES", "swing").split(",")
+    if c.strip()
+}
+
 # How many DIFFERENT strategies may hold the same symbol at once.
 #
 # The per-strategy guard below already stops one strategy doubling up on a symbol, but
@@ -362,6 +376,8 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
         ltp_source = quote_source.get(key, "last_bar_close")
         ctx = {"bars": bars, "atr14": atr14, "quote": quote, "prev_bar": bars[-2]}
         for spec in STRATEGY_CATALOG:
+            if spec.category in EXCLUDED_CATEGORIES:
+                continue  # structurally barred (swing by default — 96% of the desk's losses)
             if spec.category != "swing" and quote is None:
                 continue  # honest skip — no live intraday context available
             signal = evaluate(spec, symbol, ctx)
@@ -529,4 +545,5 @@ async def summary() -> dict:
         "strategy_count": len(STRATEGY_CATALOG),
         **(await breaker_state()),
         "max_strategies_per_symbol": MAX_STRATEGIES_PER_SYMBOL,
+        "excluded_categories": sorted(EXCLUDED_CATEGORIES),
     }
