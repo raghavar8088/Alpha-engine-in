@@ -85,6 +85,20 @@ STYLE_TF = {
     "options_sell_positional": "1d",
 }
 
+# Tournament mode — same idea as the buying desk. The selling desk exists to select
+# real-money winners from forward evidence, so it should evaluate the WHOLE library, not
+# just the sweep's de-duped basket. With this on, EVERY registered option-selling strategy
+# trades — each on its OWN independent PER_STRATEGY_CAPITAL margin account (default ₹10 lakh),
+# never a shared pool, so one strategy can never starve another's margin. Every structure is
+# a flat 1 lot so the leaderboard ranks entry/exit timing, not size. The qualification +
+# out-of-sample + overlap de-dup that protect a REAL-money basket are deliberately NOT
+# applied here (that selection happens afterwards from these records); the desk-wide
+# MAX_OPEN_STRUCTURES cap is also lifted, since each strategy is already limited to one
+# structure and the point is to let all of them run.
+TRADE_ALL_STRATEGIES = os.getenv("PRELIVE_SELLING_TRADE_ALL_STRATEGIES", "0").lower() not in ("0", "false", "")
+PER_STRATEGY_CAPITAL = float(os.getenv("PRELIVE_SELLING_PER_STRATEGY_CAPITAL", "1000000"))  # ₹10 lakh each
+TOURNAMENT_LOTS = int(os.getenv("PRELIVE_SELLING_TOURNAMENT_LOTS", "1"))
+
 
 def _now():
     return datetime.now(IST)
@@ -130,6 +144,36 @@ def load_qualified_basket() -> tuple[list[tuple[str, str]], dict | None]:
               f"strategies but none marked in_basket — it predates the out-of-sample/overlap "
               f"filters. Re-run the selling sweep; trading nothing until then.", flush=True)
     return sorted(set(pairs)), meta
+
+
+def load_all_selling_universe() -> tuple[list[tuple[str, str]], dict | None]:
+    """Tournament universe: every registered option-selling strategy on its style's
+    timeframe, bypassing the sweep/in_basket gate. Importing the library registers the
+    whole set; each strategy maps to exactly one timeframe via STYLE_TF. Deliberately no
+    qualification, out-of-sample or de-dup filter — the point is a complete forward record
+    for every candidate, which the later real-money selection reads from."""
+    try:
+        import strategy_service.strategies.options_selling  # noqa: F401 — registers the library
+    except Exception as e:  # pragma: no cover
+        print(f"[selling] could not import the options_selling library: {e}", flush=True)
+
+    pairs = []
+    for sid, cls in STRATEGY_REGISTRY.items():
+        if "options_selling" not in (getattr(cls, "__module__", "") or ""):
+            continue
+        tf = STYLE_TF.get(cls.metadata.category)
+        if tf and tf in SUPPORTED_TIMEFRAMES:
+            pairs.append((sid, tf))
+    pairs = sorted(set(pairs))
+    meta = {
+        "sweep_id": "TRADE_ALL", "created_at": None, "symbol": "NIFTY",
+        "strategy_count": len(pairs), "qualified_count": len(pairs),
+        "basket_count": len(pairs), "mode": "tournament_all",
+    }
+    print(f"[selling] TOURNAMENT MODE — trading ALL {len(pairs)} option-selling strategies "
+          f"(no qualification gate), each on its own Rs{PER_STRATEGY_CAPITAL:,.0f} margin account "
+          f"at {TOURNAMENT_LOTS} lot(s)/structure, for forward selection.", flush=True)
+    return pairs, meta
 
 
 class OpenLeg:
@@ -242,7 +286,7 @@ class PreLiveSellingEngine:
     # ---- universe ---------------------------------------------------------
 
     def refresh_universe(self, force: bool = False) -> None:
-        pairs, meta = load_qualified_basket()
+        pairs, meta = load_all_selling_universe() if TRADE_ALL_STRATEGIES else load_qualified_basket()
         if not force and meta and self.universe_source and \
                 meta.get("sweep_id") == self.universe_source.get("sweep_id"):
             return
@@ -349,15 +393,33 @@ class PreLiveSellingEngine:
         cur = trades_collection.aggregate([{"$group": {"_id": None, "s": {"$sum": "$pnl"}}}])
         return float(next(cur, {}).get("s", 0.0) or 0.0)
 
+    def _strategy_realized(self, strategy_id: str) -> float:
+        """Lifetime realized P&L of ONE strategy — the balance of its own ₹10L margin
+        account. Each selling strategy maps to a single timeframe, so strategy_id keys the
+        slot uniquely. Used only in tournament mode."""
+        cur = trades_collection.aggregate([
+            {"$match": {"strategy_id": strategy_id}},
+            {"$group": {"_id": None, "s": {"$sum": "$pnl"}}},
+        ])
+        return float(next(cur, {}).get("s", 0.0) or 0.0)
+
+    def _total_capital(self) -> float:
+        """Desk-wide capital. In tournament mode every strategy has its own
+        PER_STRATEGY_CAPITAL account, so the desk total is that times the field size."""
+        if TRADE_ALL_STRATEGIES:
+            return PER_STRATEGY_CAPITAL * max(len(self.universe), 1)
+        return INITIAL_CAPITAL
+
     def margin_deployed(self) -> float:
         return sum(p.margin for p in self.positions.values())
 
     def balance(self) -> dict:
+        total = self._total_capital()
         realized = self.realized_all_time()
-        equity = INITIAL_CAPITAL + realized
+        equity = total + realized
         deployed = self.margin_deployed()
         return {
-            "initial_capital": INITIAL_CAPITAL, "realized": realized, "balance": equity,
+            "initial_capital": total, "realized": realized, "balance": equity,
             "margin_deployed": deployed, "free_margin": max(equity - deployed, 0.0),
         }
 
@@ -438,7 +500,10 @@ class PreLiveSellingEngine:
 
         if signal.signal != SignalAction.SELL or key in self.positions:
             return None
-        if self.breaker_tripped or len(self.positions) >= MAX_OPEN_STRUCTURES:
+        # The desk-wide open-structure cap protects a shared real-money pool; in tournament
+        # mode each strategy has its own account and is already limited to one structure
+        # (key in self.positions above), so the cap is lifted to let the whole field run.
+        if self.breaker_tripped or (not TRADE_ALL_STRATEGIES and len(self.positions) >= MAX_OPEN_STRUCTURES):
             # The strategy believes it is short now; keep its flag honest so it can
             # signal again on the next regime change rather than latching open forever.
             strategy.position_closed()
@@ -537,18 +602,29 @@ class PreLiveSellingEngine:
 
         model_legs = [_L(l) for l in legs]
         premiums = [l.entry_premium for l in legs]
-        one_lot = estimate_margin(model_legs, bar.close, LOT_SIZE, 1, premiums)
-        per_lot_margin = one_lot["margin"]
-        bal = self.balance()
-        budget = MARGIN_PER_TRADE_PCT * bal["balance"]
-        lots = int(min(budget // per_lot_margin, MAX_LOTS_PER_TRADE)) if per_lot_margin > 0 else 0
-        if lots < 1:
-            strategy.position_closed()
-            return None
-        sized = estimate_margin(model_legs, bar.close, LOT_SIZE, lots, premiums)
-        if sized["margin"] > bal["free_margin"]:
-            strategy.position_closed()
-            return None
+        if TRADE_ALL_STRATEGIES:
+            # Flat 1 lot, checked against THIS strategy's own ₹10L margin account (starting
+            # capital + its own realized). Independent accounts, so no strategy starves
+            # another; a strategy that has bled through its ₹10L simply stops trading.
+            lots = TOURNAMENT_LOTS
+            sized = estimate_margin(model_legs, bar.close, LOT_SIZE, lots, premiums)
+            account = PER_STRATEGY_CAPITAL + self._strategy_realized(strategy_id)
+            if sized["margin"] > account:
+                strategy.position_closed()
+                return None
+        else:
+            one_lot = estimate_margin(model_legs, bar.close, LOT_SIZE, 1, premiums)
+            per_lot_margin = one_lot["margin"]
+            bal = self.balance()
+            budget = MARGIN_PER_TRADE_PCT * bal["balance"]
+            lots = int(min(budget // per_lot_margin, MAX_LOTS_PER_TRADE)) if per_lot_margin > 0 else 0
+            if lots < 1:
+                strategy.position_closed()
+                return None
+            sized = estimate_margin(model_legs, bar.close, LOT_SIZE, lots, premiums)
+            if sized["margin"] > bal["free_margin"]:
+                strategy.position_closed()
+                return None
 
         pos = OpenStructure(
             key=key, strategy_id=strategy_id, tf=tf, legs=legs, credit=credit, lots=lots,
