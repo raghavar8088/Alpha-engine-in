@@ -1,4 +1,4 @@
-"""Intraday Strategy Lab — catalog of 50 distinctly-configured intraday equity
+"""Intraday Strategy Lab — catalog of 150 distinctly-configured intraday equity
 strategies (scalping, momentum/breakout, mean-reversion, swing-style).
 
 Data reality check (same honesty convention as call_engine.py): this backend only
@@ -10,10 +10,20 @@ for today's actual intraday behaviour (open/high/low so far, volume so far).
 Strategies are skipped honestly (no signal) when a live quote isn't available —
 we never fabricate an intraday high/low from stale data.
 
-50 strategies are produced by instantiating a handful of well-reasoned strategy
-*families* with different, meaningfully distinct parameters (thresholds, ATR
-multiples, lookbacks) — not 50 copies of one stub. Each StrategySpec carries a
-concrete signal function bound via `family`.
+150 strategies are produced by instantiating ~30 well-reasoned strategy *families*
+with different, meaningfully distinct parameters (thresholds, ATR multiples,
+lookbacks) — not 150 copies of one stub. Each StrategySpec carries a concrete
+signal function bound via `family`.
+
+The catalog is split into two blocks: the original 50 (11 families) and a +100
+extension (20 additional families — Keltner, Donchian, MACD, RSI-momentum, CCI,
+Aroon, ADX/DMI, PSAR, Heikin-Ashi, stochastic, Williams %R, z-score, pivot-R1,
+gap-fill, prev-day-low bounce, …). The extension lives entirely in the three
+same-day-squared-off categories (scalping / momentum / mean_reversion) — swing is
+deliberately not extended, since the live desk excludes swing from new entries.
+Every extension family is long-only (cash equities) and is only ever evaluated
+when a live quote is present, so each enters at the live LTP with ATR-derived
+target/stop.
 """
 
 from __future__ import annotations
@@ -21,7 +31,24 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 
-from strategy_service.indicators import donchian, ema, roc, rolling_vwap, rsi, stdev
+from strategy_service.indicators import (
+    adx,
+    aroon,
+    cci,
+    donchian,
+    ema,
+    heikin_ashi,
+    keltner,
+    macd,
+    psar,
+    roc,
+    rolling_vwap,
+    rsi,
+    stdev,
+    stochastic,
+    williams_r,
+    zscore,
+)
 from tradingai_shared.domain import Bar
 
 # --------------------------------------------------------------------------------
@@ -430,6 +457,512 @@ def momentum_swing_family(spec: StrategySpec, symbol: str, ctx: Ctx) -> Optional
     )
 
 
+# ================================================================================
+# Extended catalog (+100): 20 additional intraday families across the three
+# same-day-squared-off categories (scalping / momentum / mean_reversion).
+#
+# These are only ever evaluated when a live quote is present (the engine skips a
+# non-swing strategy that has no live quote), so every one of them enters at the
+# live LTP with ATR-derived target/stop. `_mk_long` is the shared constructor for
+# the daily-signal families that don't clamp their stop to an intraday level.
+# ================================================================================
+
+
+def _mk_long(ltp: float, atr14: float, target_atr: float, stop_atr: float,
+             conf: float, rationale: str) -> Optional[Signal]:
+    """Long signal at the live LTP with an ATR target/stop; rejects degenerate legs."""
+    if ltp <= 0 or atr14 <= 0:
+        return None
+    target = ltp + target_atr * atr14
+    stop = ltp - stop_atr * atr14
+    if stop >= ltp or target <= ltp:
+        return None
+    return Signal(side="BUY", entry=ltp, target=target, stoploss=stop, confidence=conf, rationale=rationale)
+
+
+# ---- Scalping (33): Keltner ride, range expansion, prev-close reclaim, momentum burst, pivot R1, PSAR flip ----
+
+
+def keltner_ride_scalp_family(spec: StrategySpec, symbol: str, ctx: Ctx) -> Optional[Signal]:
+    """Keltner-channel ride: price trading above the upper Keltner band (EMA +
+    mult*ATR) while making new day highs — a volatility-breakout continuation scalp."""
+    o = _quote_ohlc(ctx)
+    if o is None:
+        return None
+    _, day_high, _, ltp, _ = o
+    bars = ctx["bars"]
+    period, mult = spec.params["kc_period"], spec.params["kc_mult"]
+    if len(bars) < period + 1:
+        return None
+    upper, mid, lower = keltner(bars, period, mult)
+    if upper[-1] <= 0 or ltp <= upper[-1]:
+        return None
+    if day_high <= 0 or ltp < day_high * 0.998:
+        return None
+    atr14 = ctx["atr14"]
+    stop = max(mid[-1], ltp - spec.params["stop_atr"] * atr14)
+    if stop >= ltp:
+        return None
+    return Signal(
+        side="BUY", entry=ltp, target=ltp + spec.params["target_atr"] * atr14, stoploss=stop,
+        confidence=0.5,
+        rationale=(
+            f"Keltner ride: price {ltp:.2f} above the {period}/{mult:g} upper Keltner band "
+            f"({upper[-1]:.2f}) and making new day highs — volatility-breakout scalp"
+        ),
+    )
+
+
+def range_expansion_scalp_family(spec: StrategySpec, symbol: str, ctx: Ctx) -> Optional[Signal]:
+    """Range-expansion scalp: today's realised range already exceeds a multiple of
+    the daily ATR and price sits near the top of that range — a wide-range day with
+    buyers in control."""
+    o = _quote_ohlc(ctx)
+    if o is None:
+        return None
+    _, day_high, day_low, ltp, _ = o
+    atr14 = ctx["atr14"]
+    if atr14 <= 0 or day_high <= day_low:
+        return None
+    if (day_high - day_low) < spec.params["range_mult"] * atr14:
+        return None
+    if (ltp - day_low) / (day_high - day_low) < spec.params["min_pos"]:
+        return None
+    stop = max(day_low, ltp - spec.params["stop_atr"] * atr14)
+    if stop >= ltp:
+        return None
+    return Signal(
+        side="BUY", entry=ltp, target=ltp + spec.params["target_atr"] * atr14, stoploss=stop,
+        confidence=0.5,
+        rationale=(
+            f"Range expansion: today's range is {(day_high - day_low) / atr14:.1f}x ATR with price in "
+            f"the top {(1 - spec.params['min_pos']) * 100:.0f}% of it — wide-range day, buyers in control"
+        ),
+    )
+
+
+def prev_close_reclaim_scalp_family(spec: StrategySpec, symbol: str, ctx: Ctx) -> Optional[Signal]:
+    """Previous-close reclaim: price dipped below yesterday's close intraday and has
+    reclaimed it — a failed-breakdown / support-hold scalp."""
+    o = _quote_ohlc(ctx)
+    if o is None:
+        return None
+    _, _, day_low, ltp, _ = o
+    prev_close = ctx["prev_bar"].close
+    if prev_close <= 0:
+        return None
+    if not (day_low < prev_close and prev_close < ltp <= prev_close * (1 + spec.params["band_pct"] / 100)):
+        return None
+    atr14 = ctx["atr14"]
+    stop = max(day_low, ltp - spec.params["stop_atr"] * atr14)
+    if stop >= ltp:
+        return None
+    return Signal(
+        side="BUY", entry=ltp, target=ltp + spec.params["target_atr"] * atr14, stoploss=stop,
+        confidence=0.45,
+        rationale=(
+            f"Prev-close reclaim: dipped below yesterday's close {prev_close:.2f} and reclaimed it — "
+            "failed-breakdown scalp"
+        ),
+    )
+
+
+def momentum_burst_scalp_family(spec: StrategySpec, symbol: str, ctx: Ctx) -> Optional[Signal]:
+    """Momentum-burst scalp: a short-lookback rate-of-change spike confirmed by price
+    pressing today's high — a fast continuation entry."""
+    o = _quote_ohlc(ctx)
+    if o is None:
+        return None
+    _, day_high, _, ltp, _ = o
+    closes = [b.close for b in ctx["bars"]]
+    period = spec.params["roc_period"]
+    if len(closes) < period + 1:
+        return None
+    m = roc(closes, period)[-1]
+    if m < spec.params["roc_th"]:
+        return None
+    if day_high <= 0 or ltp < day_high * 0.998:
+        return None
+    atr14 = ctx["atr14"]
+    stop = ltp - spec.params["stop_atr"] * atr14
+    if stop >= ltp:
+        return None
+    return Signal(
+        side="BUY", entry=ltp, target=ltp + spec.params["target_atr"] * atr14, stoploss=stop,
+        confidence=min(0.85, 0.4 + m / 15),
+        rationale=(
+            f"Momentum burst: {period}-bar ROC +{m:.1f}% and price pressing today's high — "
+            "fast continuation scalp"
+        ),
+    )
+
+
+def pivot_r1_scalp_family(spec: StrategySpec, symbol: str, ctx: Ctx) -> Optional[Signal]:
+    """Classic floor-pivot R1 breakout: yesterday's (H+L+C)/3 pivot projects
+    R1 = 2*PP - L; a push above R1 is an intraday strength signal, stop at the pivot."""
+    o = _quote_ohlc(ctx)
+    if o is None:
+        return None
+    _, _, _, ltp, _ = o
+    pb = ctx["prev_bar"]
+    high, low, close = pb.high, pb.low, pb.close
+    if min(high, low, close) <= 0 or high <= low:
+        return None
+    pp = (high + low + close) / 3
+    r1 = 2 * pp - low
+    if not (r1 < ltp <= r1 * (1 + spec.params["band_pct"] / 100)):
+        return None
+    atr14 = ctx["atr14"]
+    stop = max(pp, ltp - spec.params["stop_atr"] * atr14)
+    if stop >= ltp:
+        return None
+    return Signal(
+        side="BUY", entry=ltp, target=ltp + spec.params["target_atr"] * atr14, stoploss=stop,
+        confidence=0.5,
+        rationale=(
+            f"Pivot R1 breakout: crossed the floor-pivot R1 {r1:.2f} (PP {pp:.2f}) — intraday "
+            "strength, stop at the pivot"
+        ),
+    )
+
+
+def psar_flip_scalp_family(spec: StrategySpec, symbol: str, ctx: Ctx) -> Optional[Signal]:
+    """Parabolic-SAR flip: SAR just flipped from bearish to bullish (a fresh trend
+    turn) with price holding above the day's open — momentum-ignition scalp."""
+    bars = ctx["bars"]
+    if len(bars) < 3:
+        return None
+    flags = psar(bars, spec.params["af_step"], spec.params["af_max"])
+    if len(flags) < 2 or not (flags[-1] == 1 and flags[-2] == -1):
+        return None
+    o = _quote_ohlc(ctx)
+    if o is None:
+        return None
+    day_open, _, day_low, ltp, _ = o
+    if ltp <= day_open:
+        return None
+    atr14 = ctx["atr14"]
+    stop = max(day_low, ltp - spec.params["stop_atr"] * atr14)
+    if stop >= ltp:
+        return None
+    return Signal(
+        side="BUY", entry=ltp, target=ltp + spec.params["target_atr"] * atr14, stoploss=stop,
+        confidence=0.5,
+        rationale="Parabolic-SAR flip: SAR turned bullish with price above the open — momentum-ignition scalp",
+    )
+
+
+# ---- Momentum (34): Donchian breakout, MACD cross, RSI momentum, CCI breakout, Aroon, ADX/DMI, Heikin-Ashi ----
+
+
+def donchian_breakout_family(spec: StrategySpec, symbol: str, ctx: Ctx) -> Optional[Signal]:
+    """N-day Donchian (highest-high) breakout: price trades above the prior N-day
+    channel top — a fresh N-day high, the canonical trend-following entry."""
+    bars = ctx["bars"]
+    period = spec.params["dc_period"]
+    if len(bars) < period + 2:
+        return None
+    upper, _ = donchian(bars, period)
+    level = upper[-2]
+    if level <= 0:
+        return None
+    o = _quote_ohlc(ctx)
+    if o is None:
+        return None
+    _, _, _, ltp, _ = o
+    if not (level < ltp <= level * (1 + spec.params["band_pct"] / 100)):
+        return None
+    atr14 = ctx["atr14"]
+    stop = max(level * 0.995, ltp - spec.params["stop_atr"] * atr14)
+    if stop >= ltp:
+        return None
+    return Signal(
+        side="BUY", entry=ltp, target=ltp + spec.params["target_atr"] * atr14, stoploss=stop,
+        confidence=0.55,
+        rationale=f"Donchian breakout: new {period}-day high above {level:.2f} — trend-following entry",
+    )
+
+
+def macd_cross_family(spec: StrategySpec, symbol: str, ctx: Ctx) -> Optional[Signal]:
+    """MACD bullish cross: the MACD line crosses above its signal line (histogram
+    turns positive) — a momentum-turn entry."""
+    closes = [b.close for b in ctx["bars"]]
+    fast, slow, sig = spec.params["fast"], spec.params["slow"], spec.params["signal"]
+    if len(closes) < slow + sig + 2:
+        return None
+    ml, sl = macd(closes, fast, slow, sig)
+    if len(ml) < 2:
+        return None
+    if not (ml[-2] - sl[-2] <= 0 < ml[-1] - sl[-1]):
+        return None
+    o = _quote_ohlc(ctx)
+    if o is None:
+        return None
+    return _mk_long(
+        o[3], ctx["atr14"], spec.params["target_atr"], spec.params["stop_atr"], 0.5,
+        f"MACD cross: MACD({fast},{slow},{sig}) line crossed above signal — momentum turn",
+    )
+
+
+def rsi_momentum_family(spec: StrategySpec, symbol: str, ctx: Ctx) -> Optional[Signal]:
+    """RSI momentum trigger: RSI crosses up through a mid-line threshold (50-60) —
+    momentum shifting bullish, distinct from the RSI(2) extreme-oversold reversion."""
+    closes = [b.close for b in ctx["bars"]]
+    period, th = spec.params["rsi_period"], spec.params["threshold"]
+    if len(closes) < period + 2:
+        return None
+    r = rsi(closes, period)
+    if not (r[-2] <= th < r[-1]):
+        return None
+    o = _quote_ohlc(ctx)
+    if o is None:
+        return None
+    return _mk_long(
+        o[3], ctx["atr14"], spec.params["target_atr"], spec.params["stop_atr"], 0.5,
+        f"RSI momentum: RSI{period} crossed up through {th:.0f} ({r[-2]:.0f}->{r[-1]:.0f}) — momentum turning bullish",
+    )
+
+
+def cci_breakout_family(spec: StrategySpec, symbol: str, ctx: Ctx) -> Optional[Signal]:
+    """CCI breakout: the Commodity Channel Index crosses up through +threshold
+    (typically +100) — price breaking out of its statistical range to the upside."""
+    bars = ctx["bars"]
+    period, th = spec.params["cci_period"], spec.params["threshold"]
+    if len(bars) < period + 2:
+        return None
+    c = cci(bars, period)
+    if not (c[-2] <= th < c[-1]):
+        return None
+    o = _quote_ohlc(ctx)
+    if o is None:
+        return None
+    return _mk_long(
+        o[3], ctx["atr14"], spec.params["target_atr"], spec.params["stop_atr"], 0.5,
+        f"CCI breakout: CCI{period} crossed above +{th:.0f} — upside range breakout",
+    )
+
+
+def aroon_trend_family(spec: StrategySpec, symbol: str, ctx: Ctx) -> Optional[Signal]:
+    """Aroon uptrend: Aroon-Up is high (a very recent new high) and dominates
+    Aroon-Down — a fresh, clean uptrend."""
+    bars = ctx["bars"]
+    period = spec.params["aroon_period"]
+    if len(bars) < period + 2:
+        return None
+    up, dn = aroon(bars, period)
+    if not (up[-1] >= spec.params["up_min"] and up[-1] - dn[-1] >= spec.params["spread_min"]):
+        return None
+    o = _quote_ohlc(ctx)
+    if o is None:
+        return None
+    return _mk_long(
+        o[3], ctx["atr14"], spec.params["target_atr"], spec.params["stop_atr"], 0.5,
+        f"Aroon trend: Aroon-Up {up[-1]:.0f} vs Aroon-Down {dn[-1]:.0f} over {period} bars — fresh uptrend",
+    )
+
+
+def adx_di_momentum_family(spec: StrategySpec, symbol: str, ctx: Ctx) -> Optional[Signal]:
+    """ADX/DMI trend: ADX above a strength threshold with +DI over -DI — an
+    established, directional up-trend (trend-strength filter, not just direction)."""
+    bars = ctx["bars"]
+    period = spec.params["adx_period"]
+    if len(bars) < 2 * period + 2:
+        return None
+    adx_v, pdi, mdi = adx(bars, period)
+    if not (adx_v[-1] >= spec.params["adx_min"] and pdi[-1] > mdi[-1]):
+        return None
+    o = _quote_ohlc(ctx)
+    if o is None:
+        return None
+    return _mk_long(
+        o[3], ctx["atr14"], spec.params["target_atr"], spec.params["stop_atr"], 0.55,
+        f"ADX trend: ADX{period} {adx_v[-1]:.0f} (>={spec.params['adx_min']:.0f}) with +DI over -DI — strong uptrend",
+    )
+
+
+def heikin_momentum_family(spec: StrategySpec, symbol: str, ctx: Ctx) -> Optional[Signal]:
+    """Heikin-Ashi momentum: N consecutive bullish HA candles (ha_close > ha_open) —
+    smoothed trend persistence, filtering intrabar noise."""
+    bars = ctx["bars"]
+    streak = spec.params["streak"]
+    if len(bars) < streak + 2:
+        return None
+    ha = heikin_ashi(bars)
+    if len(ha) < streak:
+        return None
+    if not all(ha[-i][1] > ha[-i][0] for i in range(1, streak + 1)):
+        return None
+    o = _quote_ohlc(ctx)
+    if o is None:
+        return None
+    return _mk_long(
+        o[3], ctx["atr14"], spec.params["target_atr"], spec.params["stop_atr"], 0.5,
+        f"Heikin-Ashi momentum: {streak} consecutive bullish HA candles — smoothed trend persistence",
+    )
+
+
+# ---- Mean reversion (33): stochastic, Williams %R, CCI, Keltner-lower, z-score, gap-fill, prev-day-low bounce ----
+
+
+def stochastic_oversold_family(spec: StrategySpec, symbol: str, ctx: Ctx) -> Optional[Signal]:
+    """Stochastic oversold turn: %K below an oversold threshold and turning up
+    (%K rising) — a momentum-exhaustion bounce."""
+    bars = ctx["bars"]
+    kp = spec.params["k_period"]
+    if len(bars) < kp + 4:
+        return None
+    k, _ = stochastic(bars, kp, spec.params.get("d_period", 3))
+    if not (k[-2] < spec.params["oversold"] and k[-1] > k[-2]):
+        return None
+    o = _quote_ohlc(ctx)
+    if o is None:
+        return None
+    return _mk_long(
+        o[3], ctx["atr14"], spec.params["target_atr"], spec.params["stop_atr"], 0.5,
+        f"Stochastic bounce: %K turned up from oversold ({k[-2]:.0f}->{k[-1]:.0f}, <{spec.params['oversold']:.0f}) — exhaustion reversal",
+    )
+
+
+def williams_reversion_family(spec: StrategySpec, symbol: str, ctx: Ctx) -> Optional[Signal]:
+    """Williams %R reversion: %R below the oversold line (e.g. -80) and turning up —
+    a short-term oversold bounce on a bounded oscillator."""
+    bars = ctx["bars"]
+    period = spec.params["wr_period"]
+    if len(bars) < period + 3:
+        return None
+    w = williams_r(bars, period)
+    if not (w[-2] < spec.params["oversold"] and w[-1] > w[-2]):
+        return None
+    o = _quote_ohlc(ctx)
+    if o is None:
+        return None
+    return _mk_long(
+        o[3], ctx["atr14"], spec.params["target_atr"], spec.params["stop_atr"], 0.5,
+        f"Williams %R bounce: %R turned up from {w[-2]:.0f} (<{spec.params['oversold']:.0f}) — oversold reversal",
+    )
+
+
+def cci_reversion_family(spec: StrategySpec, symbol: str, ctx: Ctx) -> Optional[Signal]:
+    """CCI reversion: CCI below -threshold (e.g. -100) and turning up — price
+    stretched below its statistical range and snapping back."""
+    bars = ctx["bars"]
+    period = spec.params["cci_period"]
+    if len(bars) < period + 3:
+        return None
+    c = cci(bars, period)
+    if not (c[-2] < spec.params["oversold"] and c[-1] > c[-2]):
+        return None
+    o = _quote_ohlc(ctx)
+    if o is None:
+        return None
+    return _mk_long(
+        o[3], ctx["atr14"], spec.params["target_atr"], spec.params["stop_atr"], 0.5,
+        f"CCI reversion: CCI{period} turning up from {c[-2]:.0f} (<{spec.params['oversold']:.0f}) — snap-back from oversold",
+    )
+
+
+def keltner_lower_reversion_family(spec: StrategySpec, symbol: str, ctx: Ctx) -> Optional[Signal]:
+    """Keltner lower-band reversion: price closed below the lower Keltner band and
+    has reclaimed it — mean reversion back toward the channel mid (EMA)."""
+    bars = ctx["bars"]
+    period, mult = spec.params["kc_period"], spec.params["kc_mult"]
+    if len(bars) < period + 2:
+        return None
+    upper, mid, lower = keltner(bars, period, mult)
+    o = _quote_ohlc(ctx)
+    if o is None:
+        return None
+    _, _, _, ltp, _ = o
+    if not (bars[-2].close < lower[-2] and ltp >= lower[-1]):
+        return None
+    atr14 = ctx["atr14"]
+    target = mid[-1]
+    stop = ltp - spec.params["stop_atr"] * atr14
+    if stop >= ltp or target <= ltp:
+        return None
+    return Signal(
+        side="BUY", entry=ltp, target=target, stoploss=stop, confidence=0.5,
+        rationale=(
+            f"Keltner reversion: reclaimed the {period}/{mult:g} lower band — reverting toward the "
+            f"mid {mid[-1]:.2f}"
+        ),
+    )
+
+
+def zscore_reversion_family(spec: StrategySpec, symbol: str, ctx: Ctx) -> Optional[Signal]:
+    """Z-score reversion: closing price more than N standard deviations below its
+    rolling mean and ticking back up — a statistical mean-reversion entry."""
+    closes = [b.close for b in ctx["bars"]]
+    period = spec.params["z_period"]
+    if len(closes) < period + 2:
+        return None
+    z = zscore(closes, period)
+    if not (z[-2] <= -spec.params["z_th"] and z[-1] > z[-2]):
+        return None
+    o = _quote_ohlc(ctx)
+    if o is None:
+        return None
+    return _mk_long(
+        o[3], ctx["atr14"], spec.params["target_atr"], spec.params["stop_atr"], 0.5,
+        f"Z-score reversion: price {abs(z[-2]):.1f} sigma below its {period}-bar mean and turning up — statistical snap-back",
+    )
+
+
+def gap_fill_reversion_family(spec: StrategySpec, symbol: str, ctx: Ctx) -> Optional[Signal]:
+    """Gap-fill reversion: a gap DOWN at the open that price is now climbing back to
+    fill toward yesterday's close — the fade of an over-reaction gap."""
+    o = _quote_ohlc(ctx)
+    if o is None:
+        return None
+    day_open, _, day_low, ltp, _ = o
+    prev_close = ctx["prev_bar"].close
+    if prev_close <= 0:
+        return None
+    gap_pct = (day_open / prev_close - 1) * 100
+    if gap_pct > -spec.params["gap_pct"]:
+        return None
+    if not (ltp > day_open and ltp < prev_close):
+        return None
+    atr14 = ctx["atr14"]
+    stop = max(day_low, ltp - spec.params["stop_atr"] * atr14)
+    if stop >= ltp or prev_close <= ltp:
+        return None
+    return Signal(
+        side="BUY", entry=ltp, target=prev_close, stoploss=stop, confidence=0.5,
+        rationale=(
+            f"Gap-fill: gapped down {gap_pct:.2f}% and recovering off the low — reversion toward "
+            f"yesterday's close {prev_close:.2f}"
+        ),
+    )
+
+
+def prev_day_low_bounce_family(spec: StrategySpec, symbol: str, ctx: Ctx) -> Optional[Signal]:
+    """Previous-day-low support bounce: price tested yesterday's low and is holding
+    above it — buying a prior-support retest, stop just below the low."""
+    o = _quote_ohlc(ctx)
+    if o is None:
+        return None
+    _, _, day_low, ltp, _ = o
+    prev_low = ctx["prev_bar"].low
+    if prev_low <= 0:
+        return None
+    near = spec.params["near_pct"] / 100
+    if not (day_low <= prev_low * (1 + near) and prev_low <= ltp <= prev_low * (1 + near)):
+        return None
+    atr14 = ctx["atr14"]
+    stop = prev_low * (1 - spec.params["stop_buf_pct"] / 100)
+    if stop >= ltp:
+        return None
+    return Signal(
+        side="BUY", entry=ltp, target=ltp + spec.params["target_atr"] * atr14, stoploss=stop,
+        confidence=0.45,
+        rationale=(
+            f"PDL bounce: tested yesterday's low {prev_low:.2f} and holding — prior-support retest, "
+            "stop below the low"
+        ),
+    )
+
+
 FAMILY_FUNCS: dict[str, Callable[[StrategySpec, str, Ctx], Optional[Signal]]] = {
     "orb": orb_family,
     "vwap_reversion_scalp": vwap_reversion_scalp_family,
@@ -443,6 +976,27 @@ FAMILY_FUNCS: dict[str, Callable[[StrategySpec, str, Ctx], Optional[Signal]]] = 
     "ema_pullback_swing": ema_pullback_swing_family,
     "breakout_retest_swing": breakout_retest_swing_family,
     "momentum_swing": momentum_swing_family,
+    # ---- +100 extension ----
+    "keltner_ride_scalp": keltner_ride_scalp_family,
+    "range_expansion_scalp": range_expansion_scalp_family,
+    "prev_close_reclaim_scalp": prev_close_reclaim_scalp_family,
+    "momentum_burst_scalp": momentum_burst_scalp_family,
+    "pivot_r1_scalp": pivot_r1_scalp_family,
+    "psar_flip_scalp": psar_flip_scalp_family,
+    "donchian_breakout": donchian_breakout_family,
+    "macd_cross": macd_cross_family,
+    "rsi_momentum": rsi_momentum_family,
+    "cci_breakout": cci_breakout_family,
+    "aroon_trend": aroon_trend_family,
+    "adx_di_momentum": adx_di_momentum_family,
+    "heikin_momentum": heikin_momentum_family,
+    "stochastic_oversold": stochastic_oversold_family,
+    "williams_reversion": williams_reversion_family,
+    "cci_reversion": cci_reversion_family,
+    "keltner_lower_reversion": keltner_lower_reversion_family,
+    "zscore_reversion": zscore_reversion_family,
+    "gap_fill_reversion": gap_fill_reversion_family,
+    "prev_day_low_bounce": prev_day_low_bounce_family,
 }
 
 
@@ -457,7 +1011,8 @@ def evaluate(spec: StrategySpec, symbol: str, ctx: Ctx) -> Optional[Signal]:
 
 
 # --------------------------------------------------------------------------------
-# Catalog: 50 distinctly-configured strategies
+# Catalog: 150 distinctly-configured strategies (original 50 + a 100-strategy
+# extension across scalping / momentum / mean_reversion)
 # --------------------------------------------------------------------------------
 
 
@@ -566,10 +1121,218 @@ def _build_catalog() -> list[StrategySpec]:
             hold_days, 0.35, "momentum_swing", {"roc_period": roc_period, "roc_th": roc_th},
         )
 
+    # ================================================================================
+    # +100 extension — all in the three same-day-squared-off categories (never swing),
+    # so every one of them trades on the live desk.
+    # ================================================================================
+
+    # ---- Scalping (33) ----
+    for kc_period, kc_mult, target_atr, stop_atr in (
+        (20, 1.5, 0.35, 0.25), (20, 2.0, 0.40, 0.30), (14, 1.5, 0.30, 0.22),
+        (14, 2.0, 0.45, 0.30), (30, 2.0, 0.50, 0.35), (30, 2.5, 0.55, 0.40),
+    ):
+        add(
+            f"Keltner Ride {kc_period}/{kc_mult:g} Scalp", "scalping", "1-5m",
+            f"Price trading above the {kc_period}-period, {kc_mult:g}x-ATR upper Keltner band while "
+            "making new day highs — volatility-breakout continuation scalp.",
+            0, 0.30, "keltner_ride_scalp",
+            {"kc_period": kc_period, "kc_mult": kc_mult, "target_atr": target_atr, "stop_atr": stop_atr},
+        )
+    for range_mult, min_pos, target_atr, stop_atr in (
+        (1.0, 0.70, 0.40, 0.40), (1.25, 0.72, 0.50, 0.45), (1.5, 0.75, 0.60, 0.50),
+        (1.75, 0.78, 0.70, 0.50), (2.0, 0.80, 0.80, 0.55), (2.5, 0.85, 0.90, 0.60),
+    ):
+        add(
+            f"Range Expansion {range_mult:g}xATR Scalp", "scalping", "1-5m",
+            f"Today's realised range already exceeds {range_mult:g}x ATR with price in the top of "
+            "that range — a wide-range day with buyers in control.",
+            0, 0.30, "range_expansion_scalp",
+            {"range_mult": range_mult, "min_pos": min_pos, "target_atr": target_atr, "stop_atr": stop_atr},
+        )
+    for band_pct, target_atr, stop_atr in (
+        (0.3, 0.40, 0.30), (0.5, 0.50, 0.35), (0.75, 0.60, 0.40), (1.0, 0.70, 0.45), (1.5, 0.80, 0.50),
+    ):
+        add(
+            f"Prev-Close Reclaim {band_pct:.2f}% Scalp", "scalping", "1-5m",
+            f"Price dipped below yesterday's close and reclaimed it (within {band_pct:.2f}%) — "
+            "failed-breakdown / support-hold scalp.",
+            0, 0.25, "prev_close_reclaim_scalp",
+            {"band_pct": band_pct, "target_atr": target_atr, "stop_atr": stop_atr},
+        )
+    for roc_period, roc_th, target_atr, stop_atr in (
+        (2, 1.0, 0.30, 0.22), (3, 1.5, 0.35, 0.25), (3, 2.5, 0.40, 0.28),
+        (5, 3.0, 0.45, 0.30), (5, 4.0, 0.50, 0.35), (7, 5.0, 0.55, 0.38),
+    ):
+        add(
+            f"Momentum Burst ROC{roc_period}>{roc_th:g}% Scalp", "scalping", "1-5m",
+            f"A {roc_period}-bar rate-of-change spike above {roc_th:g}% confirmed by price pressing "
+            "today's high — fast continuation scalp.",
+            0, 0.25, "momentum_burst_scalp",
+            {"roc_period": roc_period, "roc_th": roc_th, "target_atr": target_atr, "stop_atr": stop_atr},
+        )
+    for band_pct, target_atr, stop_atr in (
+        (0.2, 0.50, 0.35), (0.35, 0.60, 0.40), (0.5, 0.70, 0.45), (0.75, 0.80, 0.50), (1.0, 0.90, 0.55),
+    ):
+        add(
+            f"Pivot R1 Breakout {band_pct:.2f}% Scalp", "scalping", "1-5m",
+            f"Push above the classic floor-pivot R1 (2*PP - L) by up to {band_pct:.2f}% — intraday "
+            "strength, stop back at the pivot.",
+            0, 0.30, "pivot_r1_scalp",
+            {"band_pct": band_pct, "target_atr": target_atr, "stop_atr": stop_atr},
+        )
+    for af_step, af_max, target_atr, stop_atr in (
+        (0.02, 0.2, 0.40, 0.30), (0.02, 0.1, 0.45, 0.32), (0.03, 0.2, 0.50, 0.35),
+        (0.04, 0.2, 0.55, 0.38), (0.01, 0.15, 0.35, 0.28),
+    ):
+        add(
+            f"PSAR Flip Scalp af{af_step:g}/{af_max:g}", "scalping", "1-5m",
+            f"Parabolic-SAR (step {af_step:g}, max {af_max:g}) just flipped bullish with price above "
+            "the open — momentum-ignition scalp.",
+            0, 0.30, "psar_flip_scalp",
+            {"af_step": af_step, "af_max": af_max, "target_atr": target_atr, "stop_atr": stop_atr},
+        )
+
+    # ---- Momentum / breakout (34) ----
+    for dc_period, band_pct, target_atr, stop_atr in (
+        (10, 0.5, 0.8, 0.5), (20, 0.5, 1.0, 0.6), (20, 1.0, 1.0, 0.6),
+        (30, 0.75, 1.2, 0.7), (40, 1.0, 1.3, 0.75), (55, 1.0, 1.5, 0.8),
+    ):
+        add(
+            f"Donchian {dc_period}d Breakout", "momentum", "15m-1h",
+            f"Price makes a fresh {dc_period}-day high above the prior Donchian channel top — "
+            "canonical trend-following breakout.",
+            0, 0.30, "donchian_breakout",
+            {"dc_period": dc_period, "band_pct": band_pct, "target_atr": target_atr, "stop_atr": stop_atr},
+        )
+    for fast, slow, sig, target_atr, stop_atr in (
+        (12, 26, 9, 1.0, 0.6), (8, 17, 9, 0.9, 0.55), (5, 35, 5, 1.2, 0.7),
+        (10, 21, 7, 1.0, 0.6), (6, 19, 6, 0.9, 0.55),
+    ):
+        add(
+            f"MACD Cross {fast}/{slow}/{sig}", "momentum", "15m-1h",
+            f"MACD({fast},{slow},{sig}) line crosses above its signal (histogram turns positive) — "
+            "momentum-turn entry.",
+            0, 0.30, "macd_cross",
+            {"fast": fast, "slow": slow, "signal": sig, "target_atr": target_atr, "stop_atr": stop_atr},
+        )
+    for rsi_period, threshold, target_atr, stop_atr in (
+        (14, 50, 0.9, 0.55), (14, 55, 1.0, 0.6), (9, 50, 0.8, 0.5), (9, 60, 1.0, 0.6), (21, 55, 1.1, 0.65),
+    ):
+        add(
+            f"RSI{rsi_period} Momentum >{threshold}", "momentum", "15m-1h",
+            f"RSI{rsi_period} crosses up through {threshold} — momentum shifting bullish (distinct "
+            "from the RSI(2) extreme-oversold reversion).",
+            0, 0.30, "rsi_momentum",
+            {"rsi_period": rsi_period, "threshold": threshold, "target_atr": target_atr, "stop_atr": stop_atr},
+        )
+    for cci_period, threshold, target_atr, stop_atr in (
+        (20, 100, 1.0, 0.6), (14, 100, 0.9, 0.55), (20, 150, 1.1, 0.65), (30, 100, 1.2, 0.7), (14, 50, 0.8, 0.5),
+    ):
+        add(
+            f"CCI{cci_period} Breakout +{threshold}", "momentum", "15m-1h",
+            f"CCI{cci_period} crosses up through +{threshold} — price breaking out of its statistical "
+            "range to the upside.",
+            0, 0.30, "cci_breakout",
+            {"cci_period": cci_period, "threshold": threshold, "target_atr": target_atr, "stop_atr": stop_atr},
+        )
+    for aroon_period, up_min, spread_min, target_atr, stop_atr in (
+        (25, 80, 50, 1.0, 0.6), (25, 100, 60, 1.1, 0.65), (14, 80, 40, 0.9, 0.55),
+        (30, 90, 50, 1.2, 0.7), (20, 100, 70, 1.1, 0.65),
+    ):
+        add(
+            f"Aroon{aroon_period} Trend Up{up_min}", "momentum", "15m-1h",
+            f"Aroon-Up >= {up_min} and beating Aroon-Down by {spread_min}+ over {aroon_period} bars — "
+            "a fresh, clean uptrend.",
+            0, 0.30, "aroon_trend",
+            {"aroon_period": aroon_period, "up_min": up_min, "spread_min": spread_min,
+             "target_atr": target_atr, "stop_atr": stop_atr},
+        )
+    for adx_period, adx_min, target_atr, stop_atr in (
+        (14, 25, 1.0, 0.6), (14, 30, 1.1, 0.65), (20, 25, 1.2, 0.7), (10, 20, 0.9, 0.55),
+    ):
+        add(
+            f"ADX{adx_period} DMI Trend >={adx_min}", "momentum", "15m-1h",
+            f"ADX{adx_period} >= {adx_min} with +DI over -DI — an established, directional uptrend "
+            "(trend-strength filter, not just direction).",
+            0, 0.30, "adx_di_momentum",
+            {"adx_period": adx_period, "adx_min": adx_min, "target_atr": target_atr, "stop_atr": stop_atr},
+        )
+    for streak, target_atr, stop_atr in ((3, 0.9, 0.55), (4, 1.0, 0.6), (5, 1.1, 0.65), (2, 0.8, 0.5)):
+        add(
+            f"Heikin-Ashi {streak}-Candle Momentum", "momentum", "15m-1h",
+            f"{streak} consecutive bullish Heikin-Ashi candles — smoothed trend persistence that "
+            "filters intrabar noise.",
+            0, 0.30, "heikin_momentum",
+            {"streak": streak, "target_atr": target_atr, "stop_atr": stop_atr},
+        )
+
+    # ---- Mean reversion (33) ----
+    for k_period, oversold, target_atr, stop_atr in (
+        (14, 20, 0.9, 0.55), (14, 15, 1.0, 0.6), (9, 20, 0.8, 0.5),
+        (21, 25, 1.0, 0.6), (14, 10, 1.1, 0.65), (5, 20, 0.7, 0.45),
+    ):
+        add(
+            f"Stochastic{k_period} Oversold <{oversold}", "mean_reversion", "15m-1h",
+            f"Stochastic %K({k_period}) below {oversold} and turning up — momentum-exhaustion bounce.",
+            0, 0.25, "stochastic_oversold",
+            {"k_period": k_period, "oversold": oversold, "target_atr": target_atr, "stop_atr": stop_atr},
+        )
+    for wr_period, oversold, target_atr, stop_atr in (
+        (14, -80, 0.9, 0.55), (14, -90, 1.0, 0.6), (9, -80, 0.8, 0.5), (21, -85, 1.0, 0.6), (10, -90, 0.9, 0.55),
+    ):
+        add(
+            f"Williams%R{wr_period} Reversion <{oversold}", "mean_reversion", "15m-1h",
+            f"Williams %R({wr_period}) below {oversold} and turning up — a short-term oversold bounce.",
+            0, 0.25, "williams_reversion",
+            {"wr_period": wr_period, "oversold": oversold, "target_atr": target_atr, "stop_atr": stop_atr},
+        )
+    for cci_period, oversold, target_atr, stop_atr in (
+        (20, -100, 1.0, 0.6), (14, -100, 0.9, 0.55), (20, -150, 1.1, 0.65), (30, -100, 1.2, 0.7), (14, -200, 1.0, 0.6),
+    ):
+        add(
+            f"CCI{cci_period} Reversion <{oversold}", "mean_reversion", "15m-1h",
+            f"CCI{cci_period} below {oversold} and turning up — price stretched below its statistical "
+            "range, snapping back.",
+            0, 0.25, "cci_reversion",
+            {"cci_period": cci_period, "oversold": oversold, "target_atr": target_atr, "stop_atr": stop_atr},
+        )
+    for kc_period, kc_mult, stop_atr in ((20, 2.0, 0.6), (20, 1.5, 0.55), (14, 2.0, 0.5), (30, 2.5, 0.7), (14, 1.5, 0.5)):
+        add(
+            f"Keltner Lower Reversion {kc_period}/{kc_mult:g}", "mean_reversion", "15m-1h",
+            f"Price closed below the {kc_period}/{kc_mult:g} lower Keltner band and reclaimed it — "
+            "mean reversion back toward the channel mid (EMA).",
+            0, 0.25, "keltner_lower_reversion",
+            {"kc_period": kc_period, "kc_mult": kc_mult, "stop_atr": stop_atr},
+        )
+    for z_period, z_th, target_atr, stop_atr in ((20, 2.0, 1.0, 0.6), (20, 2.5, 1.1, 0.65), (30, 2.0, 1.2, 0.7), (14, 1.5, 0.9, 0.55)):
+        add(
+            f"Z-Score{z_period} Reversion <-{z_th:g}sd", "mean_reversion", "15m-1h",
+            f"Close more than {z_th:g} sigma below its {z_period}-bar mean and ticking back up — "
+            "statistical mean-reversion entry.",
+            0, 0.25, "zscore_reversion",
+            {"z_period": z_period, "z_th": z_th, "target_atr": target_atr, "stop_atr": stop_atr},
+        )
+    for gap_pct, stop_atr in ((0.5, 0.5), (0.75, 0.55), (1.0, 0.6), (1.5, 0.7)):
+        add(
+            f"Gap-Fill Reversion {gap_pct:.2f}%", "mean_reversion", "15m-1h",
+            f"A gap down of at least {gap_pct:.2f}% that price is climbing back to fill toward "
+            "yesterday's close — the fade of an over-reaction gap.",
+            0, 0.25, "gap_fill_reversion",
+            {"gap_pct": gap_pct, "stop_atr": stop_atr},
+        )
+    for near_pct, stop_buf_pct, target_atr in ((0.3, 0.5, 0.8), (0.5, 0.75, 1.0), (0.75, 1.0, 1.0), (1.0, 1.0, 1.2)):
+        add(
+            f"Prev-Day-Low Bounce {near_pct:.2f}%", "mean_reversion", "15m-1h",
+            f"Price tested yesterday's low (within {near_pct:.2f}%) and is holding above it — a "
+            "prior-support retest, stop just below the low.",
+            0, 0.25, "prev_day_low_bounce",
+            {"near_pct": near_pct, "stop_buf_pct": stop_buf_pct, "target_atr": target_atr},
+        )
+
     return specs
 
 
 STRATEGY_CATALOG: list[StrategySpec] = _build_catalog()
 STRATEGY_BY_ID: dict[str, StrategySpec] = {s.strategy_id: s for s in STRATEGY_CATALOG}
 
-assert len(STRATEGY_CATALOG) == 50, f"expected 50 strategies, got {len(STRATEGY_CATALOG)}"
+assert len(STRATEGY_CATALOG) == 150, f"expected 150 strategies, got {len(STRATEGY_CATALOG)}"

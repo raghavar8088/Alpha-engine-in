@@ -58,7 +58,7 @@ INTRADAY_LAB_INITIAL_CAPITAL = PER_STRATEGY_ALLOCATION * max(len(STRATEGY_CATALO
 # WHEN, not on how much it deployed: spec.risk_pct varies per strategy and is deliberately
 # bypassed for this uniform size. Capped by the strategy's own remaining ₹10L, so a strategy
 # can run up to ~10 concurrent names.
-POSITION_NOTIONAL = float(os.getenv("INTRADAY_LAB_POSITION_NOTIONAL", "100000"))  # ₹1 lakh/position
+POSITION_NOTIONAL = float(os.getenv("INTRADAY_LAB_POSITION_NOTIONAL", "1000000"))  # ₹10 lakh/position
 MAX_SYMBOLS_PER_SCAN = int(os.getenv("INTRADAY_LAB_MAX_SYMBOLS", "150"))  # keeps one Dhan quote call bounded
 
 # Kill switch for NEW entries only. Set once the fee-honest daily-bar backtest
