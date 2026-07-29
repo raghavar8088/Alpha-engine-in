@@ -57,7 +57,7 @@ export default function PreLivePage() {
       <PageHeader
         crumb="Pre-Live Desk"
         title="Pre-Live Paper Desk"
-        subtitle="The current QUALIFIED strategies from the latest options sweep, traded automatically every market day on LIVE Dhan data — paper account, ₹1,00,00,000 starting capital, but REAL option premiums. This builds the forward, real-premium track record a historical backtest can't (Dhan purges expired-contract history). No real orders are ever placed."
+        subtitle="Strategy-selection tournament: EVERY registered option-buying strategy, traded automatically every market day on LIVE Dhan data — each on its own independent ₹10 lakh account at 1 lot/position, REAL option premiums (paper, no real orders). This builds the forward, real-premium track record a historical backtest can't (Dhan purges expired-contract history), so the leaderboard can select the best for real-money trading."
       />
 
       {error && <ErrorBanner message={error} />}
@@ -139,7 +139,7 @@ export default function PreLivePage() {
           ) : (
             <div className="table-scroll">
               <table className="data-table">
-                <thead><tr><th>#</th><th style={{ textAlign: "left" }}>Strategy</th><th>TF</th><th>Trades</th><th>Win%</th><th>PF</th><th>Net ₹</th></tr></thead>
+                <thead><tr><th>#</th><th style={{ textAlign: "left" }}>Strategy</th><th>TF</th><th>Trades</th><th>Win%</th><th>PF</th><th>Net ₹</th><th>Allocated</th></tr></thead>
                 <tbody>
                   {board.map((s, i) => (
                     <tr key={s.key}>
@@ -150,6 +150,7 @@ export default function PreLivePage() {
                       <td className={s.win_rate >= 0.5 ? "gain" : ""}>{(s.win_rate * 100).toFixed(0)}%</td>
                       <td>{s.profit_factor ?? "-"}</td>
                       <td className={s.net_pnl >= 0 ? "gain" : "loss"}>₹{inr(s.net_pnl)}</td>
+                      <td>₹{inr(s.allocated_capital)}</td>
                     </tr>
                   ))}
                 </tbody>

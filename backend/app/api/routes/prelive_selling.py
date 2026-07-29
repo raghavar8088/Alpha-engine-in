@@ -11,6 +11,8 @@ response honest about which desk it describes.
 Everything here reads `prelive_selling_*`. The daemon owns all writes.
 """
 
+import os
+
 from fastapi import APIRouter, Depends, Query
 
 from app.api.deps import get_current_user
@@ -80,6 +82,7 @@ async def leaderboard(_current_user: dict = Depends(get_current_user)):
     gross win/loss totals. Win rate is returned but is NOT what this desk is judged on —
     the same reason the qualification gate ignores it.
     """
+    per_cap = float(os.getenv("PRELIVE_SELLING_PER_STRATEGY_CAPITAL", "1000000"))
     rows = []
     async for doc in scores_collection.find({}).sort("net_pnl", -1):
         doc = _clean(doc)
@@ -89,6 +92,7 @@ async def leaderboard(_current_user: dict = Depends(get_current_user)):
         doc["trades"] = trades
         doc["win_rate"] = round(wins / trades, 4) if trades else None
         doc["profit_factor"] = round(gross_win / gross_loss, 3) if gross_loss > 0 else None
+        doc["allocated_capital"] = round(per_cap + (doc.get("net_pnl") or 0.0), 2)
         rows.append(doc)
     return rows
 

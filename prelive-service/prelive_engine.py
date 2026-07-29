@@ -319,6 +319,27 @@ class PreLiveEngine:
             self.strategies[key] = cls(params={})
             self.contexts[key] = StrategyContext(max_bars=max(500, cls(params={}).warmup + 5))
             self.trades_today[key] = 0
+        self._seed_scoreboard()
+
+    def _seed_scoreboard(self):
+        """Ensure EVERY tournament strategy has a leaderboard row from the first tick, so
+        the board shows the whole field — each on its own PER_STRATEGY_CAPITAL account — not
+        just the strategies that happen to have closed a trade. Baseline counters are written
+        on insert only ($setOnInsert), so a strategy that has already traded is never
+        clobbered."""
+        for sid, tf in self.universe:
+            key = _key(sid, tf)
+            cls = STRATEGY_REGISTRY.get(sid)
+            name = getattr(getattr(cls, "metadata", None), "name", None) or sid
+            scores_collection.update_one(
+                {"key": key},
+                {"$setOnInsert": {
+                    "key": key, "strategy_id": sid, "timeframe": tf, "name": name,
+                    "trades": 0, "wins": 0, "gross_win": 0.0, "gross_loss": 0.0,
+                    "net_pnl": 0.0, "win_rate": 0.0, "profit_factor": None, "expectancy": 0.0,
+                }},
+                upsert=True,
+            )
 
     # ---- expiry / instrument lookup ---------------------------------------
 

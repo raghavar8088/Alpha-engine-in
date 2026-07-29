@@ -2,6 +2,8 @@
 leaderboard, equity curve, and the daily P&L history. Read-only: the prelive-service
 daemon owns all writes; the backend just surfaces what it has recorded."""
 
+import os
+
 from fastapi import APIRouter, Depends, Query
 
 from app.api.deps import get_current_user
@@ -37,9 +39,11 @@ async def status(_user: dict = Depends(get_current_user)):
 
 @router.get("/leaderboard")
 async def leaderboard(_user: dict = Depends(get_current_user)):
+    per_cap = float(os.getenv("PRELIVE_PER_STRATEGY_CAPITAL", "1000000"))
     rows = []
     async for s in prelive_scores_collection.find({}).sort("net_pnl", -1):
         s.pop("_id", None)
+        s["allocated_capital"] = round(per_cap + (s.get("net_pnl") or 0.0), 2)
         rows.append(s)
     return {"count": len(rows), "strategies": rows}
 

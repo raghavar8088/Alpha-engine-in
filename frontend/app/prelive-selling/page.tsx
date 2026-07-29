@@ -87,7 +87,7 @@ export default function PreLiveSellingPage() {
       <PageHeader
         crumb="Pre-Live"
         title="Pre-Live Desk · SELLING"
-        subtitle="Paper desk that SELLS option premium on NIFTY — multi-leg credit structures at real live Dhan premiums, sized by margin, on a capital pool entirely separate from the buying desk. Positions are held across sessions, so structures carried overnight are normal here."
+        subtitle="Strategy-selection tournament that SELLS option premium on NIFTY — EVERY registered option-selling strategy trades multi-leg credit structures at real live Dhan premiums, each on its own independent ₹10 lakh margin account at 1 lot/position (paper, capital pool entirely separate from the buying desk). Positions are held across sessions, so structures carried overnight are normal here."
       />
 
       {/* The two desks have opposite risk profiles and must never be mistaken for one
@@ -233,6 +233,7 @@ export default function PreLiveSellingPage() {
                   <th className="muted-col">Win %</th>
                   <th>PF</th>
                   <th>Net P&amp;L</th>
+                  <th>Allocated</th>
                 </tr>
               </thead>
               <tbody>
@@ -251,6 +252,7 @@ export default function PreLiveSellingPage() {
                     <td className={s.net_pnl >= 0 ? "gain" : "loss"}>
                       {s.net_pnl >= 0 ? "+" : ""}₹{inr(s.net_pnl)}
                     </td>
+                    <td>₹{inr(s.allocated_capital)}</td>
                   </tr>
                 ))}
               </tbody>

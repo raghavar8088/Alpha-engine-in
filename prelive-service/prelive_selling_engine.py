@@ -309,6 +309,30 @@ class PreLiveSellingEngine:
             st = self.strategies.get(pos.key)
             if st is not None:
                 st._open = True
+        self._seed_scoreboard()
+
+    def _seed_scoreboard(self) -> None:
+        """Ensure EVERY tournament strategy has a leaderboard row from the first tick, so the
+        board shows the whole field — each on its own PER_STRATEGY_CAPITAL margin account — not
+        just the strategies that have closed a trade. This desk scores per strategy_id
+        (timeframe-independent); baseline counters are written on insert only, so an
+        already-traded strategy is never clobbered."""
+        seen: set[str] = set()
+        for sid, tf in self.universe:
+            if sid in seen:
+                continue
+            seen.add(sid)
+            cls = STRATEGY_REGISTRY.get(sid)
+            name = getattr(getattr(cls, "metadata", None), "name", None) or sid
+            scores_collection.update_one(
+                {"strategy_id": sid},
+                {"$setOnInsert": {
+                    "strategy_id": sid, "name": name,
+                    "trades": 0, "wins": 0, "losses": 0,
+                    "gross_win": 0.0, "gross_loss": 0.0, "net_pnl": 0.0,
+                }},
+                upsert=True,
+            )
 
     # ---- restart safety ---------------------------------------------------
 

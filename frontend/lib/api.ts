@@ -556,6 +556,7 @@ export interface SellingScore {
   net_pnl: number;
   win_rate: number | null;
   profit_factor: number | null;
+  allocated_capital?: number;
   updated_at?: string;
 }
 
@@ -1524,6 +1525,7 @@ export interface PreLiveStatus {
 export interface PreLiveScore {
   key: string; strategy_id: string; timeframe: string; trades: number; wins: number;
   win_rate: number; profit_factor: number | null; expectancy: number; net_pnl: number;
+  allocated_capital?: number;
 }
 export interface PreLiveTrade {
   id: string; strategy_id: string; timeframe: string; option_type: string; strike: number;
