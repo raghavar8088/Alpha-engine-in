@@ -28,7 +28,12 @@ from app.core.db import (
 from app.services.intraday_backtest import run_intraday_backtest
 from app.services.call_engine import IST
 from app.services.dhan_client import DhanClient
-from app.services.intraday_lab_engine import STATE_ID, run_cycle, summary as lab_summary
+from app.services.intraday_lab_engine import (
+    PER_STRATEGY_ALLOCATION,
+    STATE_ID,
+    run_cycle,
+    summary as lab_summary,
+)
 from app.services.intraday_strategies import STRATEGY_CATALOG
 
 router = APIRouter(prefix="/api/intraday-lab", tags=["intraday-lab"])
@@ -60,7 +65,9 @@ async def list_strategies(current_user: dict = Depends(get_current_user)):
             "timeframe": spec.timeframe, "rationale": spec.rationale,
             "max_hold_days": spec.max_hold_days, "risk_pct": spec.risk_pct,
             "trades": score.get("trades", 0), "win_rate": score.get("win_rate", 0.0),
-            "net_pnl": score.get("net_pnl", 0.0), "allocated_capital": score.get("allocated_capital"),
+            "net_pnl": score.get("net_pnl", 0.0),
+            "allocated_capital": score.get("allocated_capital")
+            if score.get("allocated_capital") is not None else PER_STRATEGY_ALLOCATION,
         })
     return {"strategies": out, "count": len(out)}
 
@@ -92,7 +99,8 @@ async def leaderboard(current_user: dict = Depends(get_current_user)):
             "strategy_id": spec.strategy_id, "name": spec.name, "category": spec.category,
             "trades": score.get("trades", 0), "win_rate": score.get("win_rate", 0.0),
             "net_pnl": score.get("net_pnl", 0.0),
-            "allocated_capital": score.get("allocated_capital", None),
+            "allocated_capital": score.get("allocated_capital")
+            if score.get("allocated_capital") is not None else PER_STRATEGY_ALLOCATION,
         })
     rows.sort(key=lambda r: r["net_pnl"], reverse=True)
     return {"leaderboard": rows}

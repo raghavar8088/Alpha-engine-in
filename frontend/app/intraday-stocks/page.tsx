@@ -91,7 +91,7 @@ export default function IntradayStocksPage() {
       <PageHeader
         crumb="Intraday Stocks"
         title="Intraday Stocks"
-        subtitle="Paper desk that auto-trades 50 intraday NSE-equity strategies on live Angel One prices — a ₹1cr pool split 50 ways, each strategy trading its own slice. Long-only cash equities; scalping/momentum/mean-reversion styles square off at 15:15 IST, swing styles may carry a few days."
+        subtitle="Paper strategy-selection tournament: auto-trades 150 intraday NSE-equity strategies on live Angel One prices. Each strategy runs its own independent ₹10 lakh account (₹15 cr across the desk) and takes a uniform ₹10 lakh per position, so the leaderboard ranks timing edge, not bet size. Long-only cash equities; scalping/momentum/mean-reversion styles square off at 15:15 IST, swing styles may carry a few days."
       />
 
       <div className="desk-banner">
