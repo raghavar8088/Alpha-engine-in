@@ -47,8 +47,18 @@ from tradingai_shared.domain import Timeframe
 
 logger = logging.getLogger("intraday_lab")
 
-INTRADAY_LAB_INITIAL_CAPITAL = float(os.getenv("INTRADAY_LAB_INITIAL_CAPITAL", "10000000"))  # ₹1 crore
-PER_STRATEGY_ALLOCATION = INTRADAY_LAB_INITIAL_CAPITAL / max(len(STRATEGY_CATALOG), 1)
+# Tournament capital, matching the buying/selling desks. Each strategy trades its OWN
+# independent account (₹10 lakh by default), never a shared pool — one strategy can never
+# starve another and each is judged against its own capital. The desk total is that times
+# the catalog size (50 × ₹10L = ₹5 crore).
+PER_STRATEGY_ALLOCATION = float(os.getenv("INTRADAY_LAB_PER_STRATEGY_CAPITAL", "1000000"))  # ₹10 lakh each
+INTRADAY_LAB_INITIAL_CAPITAL = PER_STRATEGY_ALLOCATION * max(len(STRATEGY_CATALOG), 1)
+# Every position is a uniform ₹1 lakh notional — the equity analog of the option desks'
+# "1 lot everywhere". The leaderboard then ranks a strategy on WHICH stocks it picks and
+# WHEN, not on how much it deployed: spec.risk_pct varies per strategy and is deliberately
+# bypassed for this uniform size. Capped by the strategy's own remaining ₹10L, so a strategy
+# can run up to ~10 concurrent names.
+POSITION_NOTIONAL = float(os.getenv("INTRADAY_LAB_POSITION_NOTIONAL", "100000"))  # ₹1 lakh/position
 MAX_SYMBOLS_PER_SCAN = int(os.getenv("INTRADAY_LAB_MAX_SYMBOLS", "150"))  # keeps one Dhan quote call bounded
 
 # Kill switch for NEW entries only. Set once the fee-honest daily-bar backtest
@@ -281,7 +291,7 @@ async def _open_position(spec, symbol: str, inst: dict, signal, ltp_source: str)
         return False
 
     cash = await _available_cash(spec.strategy_id)
-    budget = PER_STRATEGY_ALLOCATION * spec.risk_pct
+    budget = POSITION_NOTIONAL  # uniform size for every strategy — see POSITION_NOTIONAL note
     qty = _size(signal.entry, budget, cash)
     if qty < 1:
         return False
