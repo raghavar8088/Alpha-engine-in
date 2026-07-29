@@ -70,6 +70,23 @@ INITIAL_CAPITAL = float(os.getenv("PRELIVE_INITIAL_CAPITAL", "10000000"))  # ₹
 CAPITAL_PER_TRADE_PCT = float(os.getenv("PRELIVE_CAPITAL_PER_TRADE_PCT", "0.02"))
 MAX_LOTS_PER_TRADE = int(os.getenv("PRELIVE_MAX_LOTS_PER_TRADE", "20"))
 
+# Tournament mode. The desk exists to select real-money winners from forward evidence, so
+# it should evaluate the WHOLE library, not just the sweep's de-duped basket. With this on,
+# EVERY registered option-buying strategy on a live timeframe trades — each on its OWN
+# independent capital account (PER_STRATEGY_CAPITAL, default ₹10 lakh), not a shared pool.
+# Independent accounts mean one strategy's trades can never starve another's, every strategy
+# starts on identical footing, and each one's P&L is measured against its own ₹10L so the
+# leaderboard is a fair per-strategy return. The qualification + overlap de-dup that protects
+# a real-money basket is deliberately NOT applied here; that selection happens afterwards,
+# from exactly the per-strategy track records this generates. Every strategy buys the same
+# ATM CE/PE, so what the tournament measures is each strategy's entry/exit timing edge.
+TRADE_ALL_STRATEGIES = os.getenv("PRELIVE_TRADE_ALL_STRATEGIES", "0").lower() not in ("0", "false", "")
+PER_STRATEGY_CAPITAL = float(os.getenv("PRELIVE_PER_STRATEGY_CAPITAL", "1000000"))  # ₹10 lakh each
+# Every tournament position is a flat 1 lot: uniform size means the leaderboard ranks each
+# strategy on its timing, not on who deployed more of its ₹10L. The ₹10L is the account
+# (and a buffer that guarantees the 1 lot is always affordable), not a size target.
+TOURNAMENT_LOTS = int(os.getenv("PRELIVE_TOURNAMENT_LOTS", "1"))
+
 # Desk-level daily circuit breaker. Each buying position's loss is bounded by construction
 # (max loss = premium paid), so this engine never needed one — until a basket of correlated
 # strategies all read the market wrong on the same day and ran the DESK to -29% on
@@ -144,6 +161,37 @@ def load_qualified_universe() -> tuple[list[tuple[str, str]], dict | None]:
               f"buying sweep (POST /api/options/backtest-all); trading nothing until then rather "
               f"than trading duplicates.", flush=True)
     return pairs, sweep_meta
+
+
+def load_all_strategies_universe() -> tuple[list[tuple[str, str]], dict | None]:
+    """Tournament universe: every registered option-buying strategy on a live-supported
+    timeframe, bypassing the sweep/in_basket gate entirely. Importing the library package
+    registers the whole set; we then keep the (strategy_id, timeframe) pairs whose timeframe
+    the live bar-builder can actually produce. Deliberately no qualification and no de-dup:
+    the whole point is a complete forward record for every candidate, which is what the
+    later real-money selection reads from."""
+    try:
+        import strategy_service.strategies.options_buying  # noqa: F401 — registers the library
+    except Exception as e:  # pragma: no cover
+        print(f"[prelive] could not import the options_buying library: {e}", flush=True)
+
+    pairs: list[tuple[str, str]] = []
+    for sid, cls in STRATEGY_REGISTRY.items():
+        if "options_buying" not in (getattr(cls, "__module__", "") or ""):
+            continue
+        for tf in getattr(cls.metadata, "timeframes", []) or []:
+            tfv = getattr(tf, "value", None) or str(tf)
+            if tfv in SUPPORTED_LIVE_TIMEFRAMES:
+                pairs.append((sid, tfv))
+    pairs.sort()
+    meta = {
+        "sweep_id": "TRADE_ALL", "created_at": None, "symbol": "NIFTY",
+        "qualified_count": len(pairs), "basket_count": len(pairs), "mode": "tournament_all",
+    }
+    print(f"[prelive] TOURNAMENT MODE — trading ALL {len(pairs)} option-buying strategies "
+          f"(no qualification gate), each on its own Rs{PER_STRATEGY_CAPITAL:,.0f} account at "
+          f"{TOURNAMENT_LOTS} lot(s)/position, for forward selection.", flush=True)
+    return pairs, meta
 
 
 def _key(strategy_id: str, tf: str) -> str:
@@ -238,7 +286,10 @@ class PreLiveEngine:
         internal regime state like a running direction) aren't pointlessly reset
         every idle tick. `force=True` (used at the start of every session) always
         rebuilds, since a new trading day needs fresh per-strategy state regardless."""
-        pairs, meta = load_qualified_universe()
+        if TRADE_ALL_STRATEGIES:
+            pairs, meta = load_all_strategies_universe()
+        else:
+            pairs, meta = load_qualified_universe()
         used_fallback = False
         if not pairs and os.getenv("PRELIVE_FALLBACK_TOP20") == "1":
             pairs, used_fallback = list(TOP20), True
@@ -308,24 +359,43 @@ class PreLiveEngine:
         docs = list(cur)
         return round(docs[0]["s"], 2) if docs else 0.0
 
+    def _key_realized(self, key: str) -> float:
+        """Lifetime realized P&L of ONE strategy slot (sid@tf) — the balance of its own
+        ₹10L tournament account. Used only in trade-all mode, where each strategy trades
+        against its independent capital rather than the shared pool."""
+        cur = trades_collection.aggregate([
+            {"$match": {"key": key}},
+            {"$group": {"_id": None, "s": {"$sum": "$pnl"}}},
+        ])
+        docs = list(cur)
+        return round(docs[0]["s"], 2) if docs else 0.0
+
+    def _total_capital(self) -> float:
+        """Desk-wide starting capital. In tournament mode every strategy has its own
+        PER_STRATEGY_CAPITAL account, so the desk total is that times the field size."""
+        if TRADE_ALL_STRATEGIES:
+            return PER_STRATEGY_CAPITAL * max(len(self.universe), 1)
+        return INITIAL_CAPITAL
+
     def deployed_capital(self) -> float:
         """Premium currently locked in open paper positions."""
         return round(sum(p.entry_premium * LOT_SIZE * p.lots for p in self.positions.values()), 2)
 
     def available_cash(self) -> float:
-        """Cash free to open new positions = starting capital + lifetime realized
-        − premium already deployed in open positions."""
-        return round(INITIAL_CAPITAL + self.realized_all_time() - self.deployed_capital(), 2)
+        """Desk-wide cash free to open new positions. Not used for per-strategy sizing in
+        tournament mode (each strategy sizes against its own account), only for reporting."""
+        return round(self._total_capital() + self.realized_all_time() - self.deployed_capital(), 2)
 
     def balance(self) -> dict:
+        total = self._total_capital()
         realized = self.realized_all_time()
         deployed = self.deployed_capital()
         return {
-            "initial_capital": INITIAL_CAPITAL,
+            "initial_capital": total,
             "realized_all_time": realized,
             "deployed": deployed,
-            "available_cash": round(INITIAL_CAPITAL + realized - deployed, 2),
-            "balance": round(INITIAL_CAPITAL + realized, 2),  # cash + deployed (excl. open MTM)
+            "available_cash": round(total + realized - deployed, 2),
+            "balance": round(total + realized, 2),  # cash + deployed (excl. open MTM)
         }
 
     # ---- the driving methods (called by main.py) --------------------------
@@ -480,10 +550,18 @@ class PreLiveEngine:
             return None
 
         one_lot_cost = premium * LOT_SIZE
-        budget = INITIAL_CAPITAL * CAPITAL_PER_TRADE_PCT
-        lots = max(1, int(budget // one_lot_cost))
-        lots = min(lots, MAX_LOTS_PER_TRADE)
-        affordable_lots = int(self.available_cash() // one_lot_cost)
+        if TRADE_ALL_STRATEGIES:
+            # Flat 1 lot, checked against THIS strategy's own ₹10L account (starting capital
+            # + its own realized P&L). Independent accounts, so one strategy can never starve
+            # another; a strategy that has bled through its ₹10L simply stops trading.
+            lots = TOURNAMENT_LOTS
+            account = PER_STRATEGY_CAPITAL + self._key_realized(key)
+            affordable_lots = int(account // one_lot_cost)
+        else:
+            budget = INITIAL_CAPITAL * CAPITAL_PER_TRADE_PCT
+            lots = max(1, int(budget // one_lot_cost))
+            lots = min(lots, MAX_LOTS_PER_TRADE)
+            affordable_lots = int(self.available_cash() // one_lot_cost)
         lots = min(lots, affordable_lots)
         if lots < 1:
             self.dropped_signals["cant_afford"] += 1
