@@ -10,7 +10,9 @@ directly from the strategy's own signal (already ATR-derived).
 Lifecycle:
 - scan: for every strategy, for every scored equity symbol without an open
   position under that strategy, evaluate the strategy's signal function; open a
-  paper position when it fires.
+  paper position when it fires. New intraday-category entries stop at
+  ENTRY_CUTOFF_HHMM (15:00 IST) so one is never opened too late to be squared off
+  in the same session.
 - manage: refresh LTP for every open position (live Dhan quote, else last daily
   bar close — never fabricated), close on target/stop hit; scalping/momentum/
   mean_reversion positions are also force-closed at EOD 15:15 IST; swing
@@ -81,6 +83,14 @@ MAX_SYMBOLS_PER_SCAN = int(os.getenv("INTRADAY_LAB_MAX_SYMBOLS", "150"))  # keep
 PAUSE_NEW_ENTRIES = os.getenv("INTRADAY_LAB_PAUSE_ENTRIES", "1").lower() not in ("0", "false", "")
 
 EOD_SQUAREOFF_HHMM = "15:15"
+# No NEW same-day (intraday-category) entries at/after this IST time. Those categories are
+# force-squared-off at EOD_SQUAREOFF_HHMM; opening one after the cutoff can only strand it
+# overnight — the final scan of the day (~15:30) has no later manage cycle left to square it
+# off, which is exactly how ~40 positions a day were being left open past the close — or
+# create a pointless sub-minute trade right before square-off. Kept before 15:15 so there is
+# always at least one manage cycle left in the session to close anything opened just under the
+# wire. Swing entries are unaffected (they legitimately hold across sessions).
+ENTRY_CUTOFF_HHMM = os.getenv("INTRADAY_LAB_ENTRY_CUTOFF", "15:00")
 INTRADAY_CATEGORIES = {"scalping", "momentum", "mean_reversion"}  # square off same day
 SWING_CATEGORIES = {"swing"}  # may carry up to spec.max_hold_days trading days
 
@@ -376,6 +386,18 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
                 "only daily-bar swing signals can fire."
             )
 
+    # Same-day entry cutoff: once we are at/after ENTRY_CUTOFF_HHMM there is no longer enough
+    # of the session left to hold and then cleanly square off an intraday-category position, so
+    # we stop opening them — a late scan only manages the book. This is what stops the final
+    # ~15:30 scan from opening positions that then strand open overnight.
+    intraday_entries_closed = datetime.now(IST).strftime("%H:%M") >= ENTRY_CUTOFF_HHMM
+    if intraday_entries_closed:
+        notes.append(
+            f"Past the {ENTRY_CUTOFF_HHMM} IST intraday entry cutoff — no new "
+            "scalping/momentum/mean_reversion entries this late; open positions are still "
+            "managed and squared off at 15:15."
+        )
+
     opened = 0
     for symbol, score, reasons, atr14, bars in scored:
         inst = equities.get(symbol)
@@ -388,6 +410,8 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
         for spec in STRATEGY_CATALOG:
             if spec.category in EXCLUDED_CATEGORIES:
                 continue  # structurally barred (swing by default — 96% of the desk's losses)
+            if spec.category in INTRADAY_CATEGORIES and intraday_entries_closed:
+                continue  # past the same-day entry cutoff — a new one could only strand overnight
             if spec.category != "swing" and quote is None:
                 continue  # honest skip — no live intraday context available
             signal = evaluate(spec, symbol, ctx)
@@ -449,8 +473,12 @@ async def manage_cycle(dhan: DhanClient | None) -> int:
             hit_target = ltp >= pos["target"] if sign > 0 else ltp <= pos["target"]
             hit_stop = ltp <= pos["stoploss"] if sign > 0 else ltp >= pos["stoploss"]
             category = pos.get("category")
-            eod_close = category in INTRADAY_CATEGORIES and is_eod
             days_held = (datetime.fromisoformat(today_iso).date() - datetime.fromisoformat(pos["opened_on"]).date()).days
+            # Square off same-day categories at EOD, AND — as a safety net — any that somehow
+            # survived into a later session (days_held >= 1), e.g. one opened on the final scan
+            # just before an off-hours shutdown. Without this, a stranded intraday position would
+            # wait until 15:15 of the NEXT day to close; now the very next manage cycle clears it.
+            eod_close = category in INTRADAY_CATEGORIES and (is_eod or days_held >= 1)
             swing_expired = category in SWING_CATEGORIES and days_held >= pos.get("max_hold_days", 5)
 
             reason = None
