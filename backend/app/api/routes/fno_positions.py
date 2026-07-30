@@ -28,7 +28,9 @@ from app.services.fno_positions import (
     OrderError,
     create_account,
     edit_account,
+    estimate_basket_margin,
     estimate_margin,
+    execute_basket,
     exit_position,
     future_expiries,
     list_accounts,
@@ -79,6 +81,22 @@ class EditAccountRequest(BaseModel):
 
 class ResetAccountRequest(BaseModel):
     account_id: str
+
+
+class BasketLegRequest(BaseModel):
+    instrument_kind: str = "OPTION"  # OPTION / FUTURE
+    symbol: str
+    expiry: str
+    transaction_type: str  # BUY / SELL
+    lots: int
+    strike: float | None = None
+    option_type: str | None = None  # CE / PE
+
+
+class BasketRequest(BaseModel):
+    account_id: str
+    product_type: str = "MARGIN"
+    legs: list[BasketLegRequest]
 
 
 def _serialize(doc: dict, ts_fields: tuple[str, ...]) -> dict:
@@ -184,6 +202,39 @@ async def create_order(payload: PlaceFnoOrderRequest, current_user: dict = Depen
     if "position" in result:
         result["position"] = _serialize(result["position"], ("opened_at", "updated_at", "closed_at"))
     return _serialize(result, ("placed_at", "updated_at", "filled_at"))
+
+
+def _basket_legs(payload: "BasketRequest") -> list[dict]:
+    return [
+        {"instrument_kind": leg.instrument_kind.upper(), "symbol": leg.symbol, "expiry": leg.expiry,
+         "transaction_type": leg.transaction_type.upper(), "lots": leg.lots, "strike": leg.strike,
+         "option_type": leg.option_type.upper() if leg.option_type else None}
+        for leg in payload.legs
+    ]
+
+
+@router.post("/basket/margin")
+async def basket_margin(payload: BasketRequest, current_user: dict = Depends(get_current_user)):
+    """Preview the COMBINED hedge-aware margin (and net premium) for a multi-leg basket
+    before placing it — the number a Groww-style order pad shows."""
+    dhan = await _dhan(current_user)
+    try:
+        return await estimate_basket_margin(dhan, payload.account_id, _basket_legs(payload), payload.product_type.upper())
+    except OrderError as exc:
+        raise HTTPException(status_code=422, detail=exc.detail)
+
+
+@router.post("/basket/execute")
+async def basket_execute(payload: BasketRequest, current_user: dict = Depends(get_current_user)):
+    """Place every leg of the basket at once, gated on the combined netted margin
+    (all-or-nothing: if any leg can't be priced, none are placed)."""
+    dhan = await _dhan(current_user)
+    try:
+        result = await execute_basket(dhan, payload.account_id, _basket_legs(payload), payload.product_type.upper())
+    except OrderError as exc:
+        raise HTTPException(status_code=422, detail=exc.detail)
+    result["positions"] = [_serialize(p, ("opened_at", "updated_at", "closed_at")) for p in result["positions"]]
+    return result
 
 
 @router.get("/orders")

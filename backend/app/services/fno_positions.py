@@ -386,6 +386,37 @@ async def estimate_margin(
     }
 
 
+async def _resolve_contract(instrument_kind: str, symbol: str, expiry: str, strike: float | None, option_type: str | None) -> dict:
+    if instrument_kind == "OPTION":
+        if strike is None or option_type not in ("CE", "PE"):
+            raise OrderError("Options need a strike and option_type (CE/PE)")
+        return await _resolve_option(symbol, expiry, strike, option_type)
+    if instrument_kind == "FUTURE":
+        return await _resolve_future(symbol, expiry)
+    raise OrderError("instrument_kind must be OPTION or FUTURE")
+
+
+def _build_base_order(
+    account_id: str, inst: dict, instrument_kind: str, symbol: str, expiry: str, transaction_type: str,
+    lots: int, order_type: str, product_type: str, limit_price: float, strike: float | None, option_type: str | None,
+) -> dict:
+    now = _now()
+    label = f"{symbol} {expiry} {strike:g}{option_type}" if instrument_kind == "OPTION" else f"{symbol} {expiry} FUT"
+    return {
+        "order_id": f"FNO-{uuid4().hex[:12]}", "account_id": account_id, "symbol": inst["symbol"],
+        "display_name": label, "instrument_kind": instrument_kind,
+        "instrument": {
+            "symbol": inst["symbol"], "security_id": inst["security_id"],
+            "exchange_segment": inst["exchange_segment"], "lot_size": inst.get("lot_size", 1),
+            "tick_size": inst.get("tick_size", 0.05), "underlying_symbol": inst.get("underlying_symbol"),
+            "expiry": inst.get("expiry"), "strike": inst.get("strike"), "option_type": inst.get("option_type"),
+        },
+        "transaction_type": transaction_type, "lots": lots, "quantity": lots * inst.get("lot_size", 1),
+        "order_type": order_type, "limit_price": limit_price if order_type == "LIMIT" else None,
+        "product_type": product_type, "placed_at": now, "updated_at": now,
+    }
+
+
 async def place_order(
     dhan: DhanClient, *, account_id: str, instrument_kind: str, symbol: str, expiry: str, transaction_type: str,
     lots: int, order_type: str, product_type: str, strike: float | None = None,
@@ -399,41 +430,15 @@ async def place_order(
     if order_type == "LIMIT" and limit_price <= 0:
         raise OrderError("Limit orders need a positive limit_price")
 
-    if instrument_kind == "OPTION":
-        if strike is None or option_type not in ("CE", "PE"):
-            raise OrderError("Options need a strike and option_type (CE/PE)")
-        inst = await _resolve_option(symbol, expiry, strike, option_type)
-    elif instrument_kind == "FUTURE":
-        inst = await _resolve_future(symbol, expiry)
-    else:
-        raise OrderError("instrument_kind must be OPTION or FUTURE")
-
-    quantity = lots * inst.get("lot_size", 1)
+    inst = await _resolve_contract(instrument_kind, symbol, expiry, strike, option_type)
     ltp = await _ltp(dhan, inst["security_id"], inst["exchange_segment"])
     if ltp is None:
         raise OrderError("Live quote unavailable (broker offline?) — cannot price this order")
 
-    order_id = f"FNO-{uuid4().hex[:12]}"
-    now = _now()
-    contract_label = (
-        f"{symbol} {expiry} {strike:g}{option_type}" if instrument_kind == "OPTION" else f"{symbol} {expiry} FUT"
+    base_order = _build_base_order(
+        account_id, inst, instrument_kind, symbol, expiry, transaction_type, lots, order_type, product_type,
+        limit_price, strike, option_type,
     )
-    base_order = {
-        "order_id": order_id,
-        "account_id": account_id,
-        "symbol": inst["symbol"],
-        "display_name": contract_label,
-        "instrument_kind": instrument_kind,
-        "instrument": {
-            "symbol": inst["symbol"], "security_id": inst["security_id"],
-            "exchange_segment": inst["exchange_segment"], "lot_size": inst.get("lot_size", 1),
-            "tick_size": inst.get("tick_size", 0.05), "underlying_symbol": inst.get("underlying_symbol"),
-            "expiry": inst.get("expiry"), "strike": inst.get("strike"), "option_type": inst.get("option_type"),
-        },
-        "transaction_type": transaction_type, "lots": lots, "quantity": quantity, "order_type": order_type,
-        "limit_price": limit_price if order_type == "LIMIT" else None,
-        "product_type": product_type, "placed_at": now, "updated_at": now,
-    }
 
     marketable = (
         order_type == "MARKET"
@@ -451,7 +456,7 @@ async def place_order(
     return await _fill(dhan, base_order, fill_price)
 
 
-async def _fill(dhan: DhanClient, base_order: dict, fill_price: float) -> dict:
+async def _fill(dhan: DhanClient, base_order: dict, fill_price: float, check_margin: bool = True) -> dict:
     inst = base_order["instrument"]
     account_id = base_order["account_id"]
     transaction_type, quantity, product_type = base_order["transaction_type"], base_order["quantity"], base_order["product_type"]
@@ -498,12 +503,15 @@ async def _fill(dhan: DhanClient, base_order: dict, fill_price: float) -> dict:
         old_group = portfolio_margin(old_legs, group_spot, t_years)["total"]
         new_group = portfolio_margin(new_legs, group_spot, t_years)["total"]
         added = new_group - old_group
-        cash = await available_cash(account_id)
-        if added > cash + 0.01:
-            raise OrderError(
-                f"Insufficient paper capital: this order adds ₹{added:,.2f} of portfolio margin "
-                f"(net of hedges), only ₹{cash:,.2f} available in this account"
-            )
+        if check_margin:
+            # Skipped when a basket has already gated the WHOLE set of legs together —
+            # otherwise a naked short would be rejected before its hedge leg is added.
+            cash = await available_cash(account_id)
+            if added > cash + 0.01:
+                raise OrderError(
+                    f"Insufficient paper capital: this order adds ₹{added:,.2f} of portfolio margin "
+                    f"(net of hedges), only ₹{cash:,.2f} available in this account"
+                )
         standalone = portfolio_margin([proj_leg], group_spot, t_years)["total"]
 
         if existing is None:
@@ -598,6 +606,121 @@ async def exit_position(dhan: DhanClient, account_id: str, position_id: str, lot
     if ltp is None:
         raise OrderError("Live quote unavailable (broker offline?) — cannot exit right now")
     return await _fill(dhan, base_order, ltp)
+
+
+# --------------------------------------------------------------------------------
+# Basket orders — build several legs (a vertical spread, an iron condor, a custom
+# multi-leg) and place them as ONE order, gated on the COMBINED netted margin. This
+# is what lets a condor go on in a single click at its true small hedged margin
+# instead of being blocked leg-by-leg on the naked short before its wing is added.
+# --------------------------------------------------------------------------------
+
+
+async def _price_basket(dhan: DhanClient, legs: list[dict]) -> list[dict]:
+    """Resolve + live-price every leg, failing the WHOLE basket if any leg can't be
+    resolved or priced — a basket goes on complete or not at all."""
+    if not legs:
+        raise OrderError("Basket is empty")
+    if len(legs) > 10:
+        raise OrderError("A basket can hold at most 10 legs")
+    priced = []
+    for leg in legs:
+        kind = str(leg.get("instrument_kind", "OPTION")).upper()
+        side = str(leg.get("transaction_type", "")).upper()
+        lots = int(leg.get("lots") or 0)
+        if lots < 1:
+            raise OrderError("Every basket leg needs at least 1 lot")
+        if side not in ("BUY", "SELL"):
+            raise OrderError("Each leg's transaction_type must be BUY or SELL")
+        inst = await _resolve_contract(kind, leg["symbol"], leg["expiry"], leg.get("strike"), leg.get("option_type"))
+        ltp = await _ltp(dhan, inst["security_id"], inst["exchange_segment"])
+        label = (
+            f"{leg['symbol']} {leg['expiry']} {float(leg['strike']):g}{leg.get('option_type')}"
+            if kind == "OPTION" else f"{leg['symbol']} {leg['expiry']} FUT"
+        )
+        if ltp is None:
+            raise OrderError(f"Live quote unavailable for {label} — cannot price the basket right now")
+        priced.append({
+            "leg": leg, "inst": inst, "kind": kind, "side": side, "lots": lots,
+            "qty": lots * inst.get("lot_size", 1), "ltp": ltp, "label": label,
+        })
+    return priced
+
+
+async def _basket_margin_delta(dhan: DhanClient, account_id: str, priced: list[dict]) -> tuple[float, float]:
+    """(added_margin, net_premium). added_margin = the rise in the account's NETTED
+    portfolio margin from adding every leg, summed across (underlying, expiry) groups
+    — so hedges inside the basket (and against existing positions) net. net_premium is
+    the credit(+) received / debit(-) paid to open the basket."""
+    groups: dict[tuple, list[dict]] = {}
+    net_premium = 0.0
+    for p in priced:
+        inst = p["inst"]
+        groups.setdefault((inst.get("underlying_symbol"), inst.get("expiry")), []).append(p)
+        net_premium += p["ltp"] * p["qty"] * (1 if p["side"] == "SELL" else -1)
+    added = 0.0
+    for (underlying, expiry), plist in groups.items():
+        t = _years_to_expiry(expiry)
+        current = await _group_positions(account_id, underlying, expiry)
+        old_legs = [_pos_to_leg(q) for q in current]
+        spot = await _underlying_spot(
+            dhan, underlying,
+            fallback=_group_spot(current) or plist[0]["inst"].get("strike") or plist[0]["ltp"],
+        )
+        add_legs = []
+        for p in plist:
+            ot = p["inst"].get("option_type")
+            add_legs.append({
+                "kind": p["kind"], "option_type": ot, "strike": p["inst"].get("strike"),
+                "qty": p["qty"], "side": p["side"], "premium": p["ltp"],
+                "iv": solve_iv(p["ltp"], spot, p["inst"].get("strike"), t, ot) if ot else None,
+            })
+        old = portfolio_margin(old_legs, spot, t)["total"]
+        new = portfolio_margin(old_legs + add_legs, spot, t)["total"]
+        added += new - old
+    return round(max(0.0, added), 2), round(net_premium, 2)
+
+
+async def estimate_basket_margin(dhan: DhanClient, account_id: str, legs: list[dict], product_type: str = "MARGIN") -> dict:
+    await get_account(account_id)
+    priced = await _price_basket(dhan, legs)
+    added, net_premium = await _basket_margin_delta(dhan, account_id, priced)
+    cash = await available_cash(account_id)
+    return {
+        "margin_required": added,
+        "net_premium": net_premium,
+        "available_cash": round(cash, 2),
+        "affordable": added <= cash + 0.01,
+        "legs": [
+            {"label": p["label"], "side": p["side"], "lots": p["lots"], "qty": p["qty"], "ltp": round(p["ltp"], 2)}
+            for p in priced
+        ],
+    }
+
+
+async def execute_basket(dhan: DhanClient, account_id: str, legs: list[dict], product_type: str = "MARGIN") -> dict:
+    await get_account(account_id)
+    if product_type not in PRODUCT_TYPES:
+        raise OrderError(f"product_type must be one of {PRODUCT_TYPES}")
+    priced = await _price_basket(dhan, legs)
+    added, net_premium = await _basket_margin_delta(dhan, account_id, priced)
+    cash = await available_cash(account_id)
+    if added > cash + 0.01:
+        raise OrderError(
+            f"Insufficient paper capital: this basket adds ₹{added:,.2f} of portfolio margin "
+            f"(net of hedges), only ₹{cash:,.2f} available in this account"
+        )
+    # Fill BUYS first so any protective long is in place before its short — keeps every
+    # intermediate book state within margin, even though the combined gate already cleared.
+    positions = []
+    for p in sorted(priced, key=lambda x: 0 if x["side"] == "BUY" else 1):
+        base_order = _build_base_order(
+            account_id, p["inst"], p["kind"], p["leg"]["symbol"], p["leg"]["expiry"], p["side"],
+            p["lots"], "MARKET", product_type, 0.0, p["inst"].get("strike"), p["inst"].get("option_type"),
+        )
+        result = await _fill(dhan, base_order, p["ltp"], check_margin=False)
+        positions.append(result["position"])
+    return {"filled": len(positions), "positions": positions, "margin_added": added, "net_premium": net_premium}
 
 
 async def sync_positions(dhan: DhanClient) -> int:

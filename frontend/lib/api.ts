@@ -1455,6 +1455,38 @@ export async function resetFnoPositions(accountId: string): Promise<{ positions_
   return apiFetch("/api/fno-positions/reset", { method: "POST", body: JSON.stringify({ account_id: accountId }) });
 }
 
+export interface FnoBasketLeg {
+  instrument_kind?: "OPTION" | "FUTURE";
+  symbol: string;
+  expiry: string;
+  transaction_type: "BUY" | "SELL";
+  lots: number;
+  strike?: number | null;
+  option_type?: "CE" | "PE" | null;
+}
+
+export interface FnoBasketMargin {
+  margin_required: number;   // combined, netted vs current account positions
+  net_premium: number;       // + = credit received, - = debit paid
+  available_cash: number;
+  affordable: boolean;
+  legs: { label: string; side: string; lots: number; qty: number; ltp: number }[];
+}
+
+export async function estimateFnoBasketMargin(accountId: string, productType: FnoProductType, legs: FnoBasketLeg[]): Promise<FnoBasketMargin> {
+  return apiFetch("/api/fno-positions/basket/margin", {
+    method: "POST",
+    body: JSON.stringify({ account_id: accountId, product_type: productType, legs }),
+  });
+}
+
+export async function executeFnoBasket(accountId: string, productType: FnoProductType, legs: FnoBasketLeg[]): Promise<{ filled: number; positions: FnoPosition[]; margin_added: number; net_premium: number }> {
+  return apiFetch("/api/fno-positions/basket/execute", {
+    method: "POST",
+    body: JSON.stringify({ account_id: accountId, product_type: productType, legs }),
+  });
+}
+
 // --- AI research & trade intelligence (roadmap Phase 6) ---
 
 export interface AIStatus {

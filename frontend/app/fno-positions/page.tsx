@@ -6,6 +6,8 @@ import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import {
   FnoAccount,
+  FnoBasketLeg,
+  FnoBasketMargin,
   FnoInstrumentKind,
   FnoOrder,
   FnoPosition,
@@ -17,6 +19,8 @@ import {
   TopMover,
   createFnoAccount,
   editFnoAccount,
+  estimateFnoBasketMargin,
+  executeFnoBasket,
   exitFnoPosition,
   fetchFnoAccounts,
   fetchFnoFutureExpiries,
@@ -29,6 +33,17 @@ import {
   placeFnoOrder,
   resetFnoPositions,
 } from "../../lib/api";
+
+type BasketItem = {
+  id: string;
+  symbol: string;
+  expiry: string;
+  strike: number;
+  option_type: "CE" | "PE";
+  transaction_type: "BUY" | "SELL";
+  lots: number;
+  ltp: number;
+};
 
 const SELECTED_ACCOUNT_KEY = "tradingai:fno-positions:selected-account";
 
@@ -78,6 +93,10 @@ export default function FnoPositionsPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [resetting, setResetting] = useState(false);
   const [draft, setDraft] = useState<OrderDraft | null>(null);
+  const [basket, setBasket] = useState<BasketItem[]>([]);
+  const [basketProduct, setBasketProduct] = useState<FnoProductType>("MARGIN");
+  const [basketMargin, setBasketMargin] = useState<FnoBasketMargin | null>(null);
+  const [basketBusy, setBasketBusy] = useState(false);
 
   useEffect(() => {
     fetchFnoUnderlyings()
@@ -251,6 +270,59 @@ export default function FnoPositionsPage() {
     [accountId, loadAccounts, loadPositions],
   );
 
+  // ---- Basket (Groww-style multi-leg) --------------------------------------
+  const addToBasket = useCallback(
+    (leg: { symbol: string; expiry: string; strike: number; option_type: "CE" | "PE"; transaction_type: "BUY" | "SELL"; ltp: number }) => {
+      setBasket((prev) => {
+        const i = prev.findIndex(
+          (b) => b.symbol === leg.symbol && b.expiry === leg.expiry && b.strike === leg.strike
+            && b.option_type === leg.option_type && b.transaction_type === leg.transaction_type,
+        );
+        if (i >= 0) {
+          const next = [...prev];
+          next[i] = { ...next[i], lots: next[i].lots + 1, ltp: leg.ltp };
+          return next;
+        }
+        return [...prev, { ...leg, id: `${leg.strike}-${leg.option_type}-${leg.transaction_type}-${Date.now()}`, lots: 1 }];
+      });
+    },
+    [],
+  );
+  const setLegLots = useCallback((id: string, lots: number) => {
+    setBasket((prev) => prev.map((b) => (b.id === id ? { ...b, lots: Math.max(1, lots) } : b)));
+  }, []);
+  const removeLeg = useCallback((id: string) => setBasket((prev) => prev.filter((b) => b.id !== id)), []);
+  const clearBasket = useCallback(() => { setBasket([]); setBasketMargin(null); }, []);
+
+  const basketLegs = useMemo<FnoBasketLeg[]>(
+    () => basket.map((b) => ({ instrument_kind: "OPTION", symbol: b.symbol, expiry: b.expiry, transaction_type: b.transaction_type, lots: b.lots, strike: b.strike, option_type: b.option_type })),
+    [basket],
+  );
+
+  useEffect(() => {
+    if (!accountId || basket.length === 0) { setBasketMargin(null); return; }
+    const h = setTimeout(() => {
+      estimateFnoBasketMargin(accountId, basketProduct, basketLegs).then(setBasketMargin).catch(() => setBasketMargin(null));
+    }, 400);
+    return () => clearTimeout(h);
+  }, [accountId, basketLegs, basketProduct, basket.length]);
+
+  const executeBasketNow = useCallback(async () => {
+    if (!accountId || basket.length === 0) return;
+    setBasketBusy(true);
+    try {
+      const r = await executeFnoBasket(accountId, basketProduct, basketLegs);
+      setBasket([]);
+      setBasketMargin(null);
+      setNotice(`Basket placed — ${r.filled} leg(s), margin blocked ₹${inr(r.margin_added)}, net premium ₹${inr(Math.abs(r.net_premium))} ${r.net_premium >= 0 ? "credit" : "debit"}`);
+      await loadPositions();
+    } catch (e) {
+      setNotice(`Basket failed: ${e instanceof Error ? e.message : "unknown error"}`);
+    } finally {
+      setBasketBusy(false);
+    }
+  }, [accountId, basket.length, basketProduct, basketLegs, loadPositions]);
+
   const win = summary?.win_rate;
 
   return (
@@ -312,8 +384,51 @@ export default function FnoPositionsPage() {
       {error && <ErrorBanner message={error} />}
       {notice && <div className="notice">{notice}</div>}
 
+      {basket.length > 0 && (
+        <GlassPanel title={`Order Basket · ${basket.length} leg${basket.length > 1 ? "s" : ""}`} note="Combined hedge-aware margin — placed as one order">
+          <div className="basket">
+            <div className="basket-legs">
+              {basket.map((b) => (
+                <div key={b.id} className="basket-leg">
+                  <span className={b.transaction_type === "SELL" ? "chip short" : "chip long"}>{b.transaction_type}</span>
+                  <span className="basket-name">{b.symbol} {b.strike.toLocaleString("en-IN")}{b.option_type}</span>
+                  <span className="basket-exp">{b.expiry}</span>
+                  <span className="basket-ltp">₹{inr(b.ltp)}</span>
+                  <div className="lot-stepper">
+                    <button onClick={() => setLegLots(b.id, b.lots - 1)} aria-label="fewer lots">−</button>
+                    <span>{b.lots} lot{b.lots > 1 ? "s" : ""}</span>
+                    <button onClick={() => setLegLots(b.id, b.lots + 1)} aria-label="more lots">+</button>
+                  </div>
+                  <button className="leg-remove" onClick={() => removeLeg(b.id)} aria-label="remove leg">×</button>
+                </div>
+              ))}
+            </div>
+            <div className="basket-footer">
+              <div className="product-row">
+                {PRODUCT_TYPES.map((pt) => (
+                  <button key={pt.id} className={basketProduct === pt.id ? "product-btn active" : "product-btn"} onClick={() => setBasketProduct(pt.id)}>{pt.label}</button>
+                ))}
+              </div>
+              <div className="basket-metrics">
+                <div className="metric"><span className="mlabel">Margin required</span><span className="mval">{basketMargin ? `₹${inr(basketMargin.margin_required)}` : "…"}</span></div>
+                <div className="metric"><span className="mlabel">Net premium</span><span className={`mval ${basketMargin ? (basketMargin.net_premium >= 0 ? "gain" : "loss") : ""}`}>{basketMargin ? `₹${inr(Math.abs(basketMargin.net_premium))} ${basketMargin.net_premium >= 0 ? "credit" : "debit"}` : "…"}</span></div>
+              </div>
+              <div className="basket-actions">
+                <button className="ghost-btn" onClick={clearBasket}>Clear</button>
+                <button className="basket-place" onClick={executeBasketNow} disabled={basketBusy || (basketMargin ? !basketMargin.affordable : false)}>
+                  {basketBusy ? "Placing…" : `Place basket (${basket.length})`}
+                </button>
+              </div>
+            </div>
+            {basketMargin && !basketMargin.affordable && (
+              <div className="basket-warn">This basket needs ₹{inr(basketMargin.margin_required)} margin but only ₹{inr(basketMargin.available_cash)} is available in this account. Reduce lots, add a hedge, or top up the balance.</div>
+            )}
+          </div>
+        </GlassPanel>
+      )}
+
       {tab === "chain" && (
-        <GlassPanel title="Option Chain" note={chain ? `Spot ${inr(chain.spot)} · PCR(OI) ${chain.pcr_oi ?? "-"} · Max pain ${chain.max_pain ?? "-"}` : undefined}>
+        <GlassPanel title="Option Chain" note={chain ? `Spot ${inr(chain.spot)} · PCR(OI) ${chain.pcr_oi ?? "-"} · Max pain ${chain.max_pain ?? "-"} · Tap Buy/Sell to add legs to your basket` : "Tap Buy/Sell to add legs to your basket"}>
           <div className="chain-controls">
             <select value={symbol} onChange={(e) => setSymbol(e.target.value)}>
               {underlyings.map((u) => (
@@ -358,10 +473,7 @@ export default function FnoPositionsPage() {
                           <button
                             className="buy-chip"
                             onClick={() =>
-                              setDraft({
-                                instrument_kind: "OPTION", symbol, expiry, strike: row.strike, option_type: "CE",
-                                transaction_type: "BUY", ltp: row.ce.last_price ?? 0, lot_size: 1,
-                              })
+                              addToBasket({ symbol, expiry, strike: row.strike, option_type: "CE", transaction_type: "BUY", ltp: row.ce.last_price ?? 0 })
                             }
                           >
                             Buy CE
@@ -369,10 +481,7 @@ export default function FnoPositionsPage() {
                           <button
                             className="sell-chip"
                             onClick={() =>
-                              setDraft({
-                                instrument_kind: "OPTION", symbol, expiry, strike: row.strike, option_type: "CE",
-                                transaction_type: "SELL", ltp: row.ce.last_price ?? 0, lot_size: 1,
-                              })
+                              addToBasket({ symbol, expiry, strike: row.strike, option_type: "CE", transaction_type: "SELL", ltp: row.ce.last_price ?? 0 })
                             }
                           >
                             Sell CE
@@ -385,10 +494,7 @@ export default function FnoPositionsPage() {
                           <button
                             className="buy-chip pe"
                             onClick={() =>
-                              setDraft({
-                                instrument_kind: "OPTION", symbol, expiry, strike: row.strike, option_type: "PE",
-                                transaction_type: "BUY", ltp: row.pe.last_price ?? 0, lot_size: 1,
-                              })
+                              addToBasket({ symbol, expiry, strike: row.strike, option_type: "PE", transaction_type: "BUY", ltp: row.pe.last_price ?? 0 })
                             }
                           >
                             Buy PE
@@ -396,10 +502,7 @@ export default function FnoPositionsPage() {
                           <button
                             className="sell-chip pe"
                             onClick={() =>
-                              setDraft({
-                                instrument_kind: "OPTION", symbol, expiry, strike: row.strike, option_type: "PE",
-                                transaction_type: "SELL", ltp: row.pe.last_price ?? 0, lot_size: 1,
-                              })
+                              addToBasket({ symbol, expiry, strike: row.strike, option_type: "PE", transaction_type: "SELL", ltp: row.pe.last_price ?? 0 })
                             }
                           >
                             Sell PE
@@ -661,7 +764,30 @@ export default function FnoPositionsPage() {
         .movers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 16px 20px; }
         .movers-head { font-weight: 700; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-muted); margin-bottom: 8px; }
         .mover-row { display: grid; grid-template-columns: 1fr auto auto auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--canvas-soft); font-size: 12.5px; }
+        .basket { display: flex; flex-direction: column; gap: 14px; padding: 6px 4px 10px; }
+        .basket-legs { display: flex; flex-direction: column; gap: 8px; }
+        .basket-leg { display: grid; grid-template-columns: auto 1fr auto auto auto auto; align-items: center; gap: 12px; padding: 9px 12px; background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 10px; font-size: 12.5px; }
+        .basket-name { font-weight: 700; }
+        .basket-exp { color: var(--text-faint); font-size: 11.5px; }
+        .basket-ltp { font-variant-numeric: tabular-nums; }
+        .lot-stepper { display: flex; align-items: center; gap: 8px; }
+        .lot-stepper button { width: 26px; height: 26px; border-radius: 7px; border: 1px solid var(--panel-border); background: var(--panel); font-size: 16px; cursor: pointer; line-height: 1; }
+        .lot-stepper span { min-width: 54px; text-align: center; font-weight: 600; }
+        .leg-remove { background: none; border: none; color: var(--text-muted); font-size: 20px; line-height: 1; cursor: pointer; padding: 0 4px; }
+        .basket-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; padding-top: 8px; border-top: 1px solid var(--panel-border); }
+        .product-row { display: flex; gap: 6px; }
+        .product-btn { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 8px; padding: 8px 12px; font-size: 11.5px; font-weight: 600; color: var(--text-muted); cursor: pointer; }
+        .product-btn.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .basket-metrics { display: flex; gap: 22px; }
+        .metric { display: flex; flex-direction: column; gap: 2px; }
+        .mlabel { font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); font-weight: 700; }
+        .mval { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+        .basket-actions { display: flex; gap: 8px; }
+        .basket-place { background: linear-gradient(145deg, var(--accent), var(--accent-hover)); color: #241404; font-weight: 700; font-size: 13px; border: none; border-radius: 10px; padding: 10px 18px; cursor: pointer; }
+        .basket-place:disabled { opacity: 0.5; cursor: default; }
+        .basket-warn { background: var(--loss-dim); border: 1px solid rgba(217, 45, 63, 0.26); border-radius: 8px; padding: 9px 11px; font-size: 11.5px; color: var(--loss); }
         @media (max-width: 720px) { .movers-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 640px) { .basket-leg { grid-template-columns: auto 1fr; row-gap: 8px; } .basket-footer { flex-direction: column; align-items: stretch; } .basket-metrics { justify-content: space-between; } }
       `}</style>
     </div>
   );
