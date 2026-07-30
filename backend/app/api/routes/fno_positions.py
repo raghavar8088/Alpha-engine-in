@@ -26,13 +26,16 @@ from app.api.routes.broker import _get_dhan_client
 from app.core.db import fno_orders_collection, fno_positions_collection
 from app.services.fno_positions import (
     OrderError,
+    create_account,
+    edit_account,
     estimate_margin,
     exit_position,
     future_expiries,
+    list_accounts,
     option_chain,
     option_expiries,
     place_order,
-    reset_all,
+    reset_account,
     summary,
     sync_positions,
     top_movers,
@@ -46,6 +49,7 @@ _last_refresh = 0.0
 
 
 class PlaceFnoOrderRequest(BaseModel):
+    account_id: str
     instrument_kind: str  # OPTION / FUTURE
     symbol: str
     expiry: str
@@ -59,7 +63,22 @@ class PlaceFnoOrderRequest(BaseModel):
 
 
 class ExitPositionRequest(BaseModel):
+    account_id: str
     lots: int | None = None  # None = exit the full remaining quantity
+
+
+class CreateAccountRequest(BaseModel):
+    name: str
+    initial_capital: float | None = None
+
+
+class EditAccountRequest(BaseModel):
+    name: str | None = None
+    initial_capital: float | None = None
+
+
+class ResetAccountRequest(BaseModel):
+    account_id: str
 
 
 def _serialize(doc: dict, ts_fields: tuple[str, ...]) -> dict:
@@ -79,6 +98,32 @@ async def _dhan(current_user: dict):
             detail="Dhan account not connected — the F&O Positions module needs a live broker "
             "connection for real option chains, futures prices, and margin figures.",
         )
+
+
+@router.get("/accounts")
+async def accounts(_current_user: dict = Depends(get_current_user)):
+    return {"accounts": [{**a, "created_at": a["created_at"].isoformat()} for a in await list_accounts()]}
+
+
+@router.post("/accounts")
+async def new_account(payload: CreateAccountRequest, _current_user: dict = Depends(get_current_user)):
+    try:
+        account = await create_account(payload.name, payload.initial_capital)
+    except OrderError as exc:
+        raise HTTPException(status_code=422, detail=exc.detail)
+    account["created_at"] = account["created_at"].isoformat()
+    return account
+
+
+@router.patch("/accounts/{account_id}")
+async def update_account(account_id: str, payload: EditAccountRequest, _current_user: dict = Depends(get_current_user)):
+    try:
+        account = await edit_account(account_id, name=payload.name, initial_capital=payload.initial_capital)
+    except OrderError as exc:
+        raise HTTPException(status_code=422, detail=exc.detail)
+    if account.get("created_at") is not None and not isinstance(account["created_at"], str):
+        account["created_at"] = account["created_at"].isoformat()
+    return account
 
 
 @router.get("/underlyings")
@@ -129,9 +174,9 @@ async def create_order(payload: PlaceFnoOrderRequest, current_user: dict = Depen
     dhan = await _dhan(current_user)
     try:
         result = await place_order(
-            dhan, instrument_kind=payload.instrument_kind.upper(), symbol=payload.symbol, expiry=payload.expiry,
-            transaction_type=payload.transaction_type.upper(), lots=payload.lots, order_type=payload.order_type.upper(),
-            product_type=payload.product_type.upper(), strike=payload.strike,
+            dhan, account_id=payload.account_id, instrument_kind=payload.instrument_kind.upper(), symbol=payload.symbol,
+            expiry=payload.expiry, transaction_type=payload.transaction_type.upper(), lots=payload.lots,
+            order_type=payload.order_type.upper(), product_type=payload.product_type.upper(), strike=payload.strike,
             option_type=payload.option_type.upper() if payload.option_type else None, limit_price=payload.limit_price,
         )
     except OrderError as exc:
@@ -143,11 +188,12 @@ async def create_order(payload: PlaceFnoOrderRequest, current_user: dict = Depen
 
 @router.get("/orders")
 async def list_orders(
+    account_id: str = Query(...),
     status: str | None = Query(None, description="PENDING | FILLED"),
     limit: int = Query(100, ge=1, le=500),
     current_user: dict = Depends(get_current_user),
 ):
-    query: dict = {}
+    query: dict = {"account_id": account_id}
     if status:
         query["status"] = status.upper()
     cursor = fno_orders_collection.find(query).sort("placed_at", -1).limit(limit)
@@ -157,6 +203,7 @@ async def list_orders(
 
 @router.get("/positions")
 async def list_positions(
+    account_id: str = Query(...),
     status: str | None = Query(None, description="OPEN | CLOSED"),
     limit: int = Query(200, ge=1, le=500),
     current_user: dict = Depends(get_current_user),
@@ -170,19 +217,23 @@ async def list_positions(
         except HTTPException:
             pass  # no broker connected yet — serve whatever's stored, honestly stale
 
-    query: dict = {}
+    query: dict = {"account_id": account_id}
     if status:
         query["status"] = status.upper()
     cursor = fno_positions_collection.find(query).sort("opened_at", -1).limit(limit)
     positions = [_serialize(d, ("opened_at", "updated_at", "closed_at")) async for d in cursor]
-    return {"positions": positions, "summary": await summary()}
+    try:
+        acct_summary = await summary(account_id)
+    except OrderError as exc:
+        raise HTTPException(status_code=404, detail=exc.detail)
+    return {"positions": positions, "summary": acct_summary}
 
 
 @router.post("/positions/{position_id}/exit")
 async def exit(position_id: str, payload: ExitPositionRequest, current_user: dict = Depends(get_current_user)):
     dhan = await _dhan(current_user)
     try:
-        result = await exit_position(dhan, position_id, payload.lots)
+        result = await exit_position(dhan, payload.account_id, position_id, payload.lots)
     except OrderError as exc:
         raise HTTPException(status_code=422, detail=exc.detail)
     result["position"] = _serialize(result["position"], ("opened_at", "updated_at", "closed_at"))
@@ -190,5 +241,8 @@ async def exit(position_id: str, payload: ExitPositionRequest, current_user: dic
 
 
 @router.post("/reset")
-async def reset(_current_user: dict = Depends(get_current_user)):
-    return await reset_all()
+async def reset(payload: ResetAccountRequest, _current_user: dict = Depends(get_current_user)):
+    try:
+        return await reset_account(payload.account_id)
+    except OrderError as exc:
+        raise HTTPException(status_code=404, detail=exc.detail)

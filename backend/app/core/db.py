@@ -38,6 +38,9 @@ manual_accounts_collection = db["manual_accounts"]
 # F&O Positions module — user-initiated paper trades on index/stock options & futures
 fno_positions_collection = db["fno_positions"]
 fno_orders_collection = db["fno_orders"]
+# Named paper-trading accounts for the F&O Positions module — each with its own
+# capital pool (default ₹1 crore, editable), mirroring manual_accounts.
+fno_accounts_collection = db["fno_accounts"]
 # Pre-Live paper desk (real-premium forward paper trading of the top-20 basket)
 prelive_trades_collection = db["prelive_trades"]
 prelive_positions_collection = db["prelive_positions"]

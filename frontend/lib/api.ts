@@ -1354,6 +1354,38 @@ export interface FnoOrder {
 
 export type FnoPositionsSummary = ManualPositionsSummary;
 
+export interface FnoAccount {
+  account_id: string;
+  name: string;
+  initial_capital: number;
+  created_at: string;
+}
+
+export async function fetchFnoAccounts(): Promise<FnoAccount[]> {
+  const data: { accounts: FnoAccount[] } = await apiFetch("/api/fno-positions/accounts");
+  return data.accounts;
+}
+
+export async function createFnoAccount(name: string, initialCapital?: number): Promise<FnoAccount> {
+  return apiFetch("/api/fno-positions/accounts", {
+    method: "POST",
+    body: JSON.stringify({ name, initial_capital: initialCapital ?? null }),
+  });
+}
+
+export async function editFnoAccount(
+  accountId: string,
+  changes: { name?: string; initialCapital?: number },
+): Promise<FnoAccount> {
+  return apiFetch(`/api/fno-positions/accounts/${accountId}`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      name: changes.name ?? null,
+      initial_capital: changes.initialCapital ?? null,
+    }),
+  });
+}
+
 export async function fetchFnoUnderlyings(): Promise<FnoUnderlying[]> {
   const data: { underlyings: FnoUnderlying[] } = await apiFetch("/api/fno-positions/underlyings");
   return data.underlyings;
@@ -1378,6 +1410,7 @@ export async function fetchFnoTopMovers(limit = 10): Promise<{ top_calls: TopMov
 }
 
 export interface PlaceFnoOrderRequest {
+  account_id: string;
   instrument_kind: FnoInstrumentKind;
   symbol: string;
   expiry: string;
@@ -1394,25 +1427,27 @@ export async function placeFnoOrder(payload: PlaceFnoOrderRequest): Promise<FnoO
   return apiFetch("/api/fno-positions/orders", { method: "POST", body: JSON.stringify(payload) });
 }
 
-export async function fetchFnoPositions(status?: string): Promise<{ positions: FnoPosition[]; summary: FnoPositionsSummary }> {
-  const qs = status ? `?status=${status}` : "";
-  return apiFetch(`/api/fno-positions/positions${qs}`);
+export async function fetchFnoPositions(accountId: string, status?: string): Promise<{ positions: FnoPosition[]; summary: FnoPositionsSummary }> {
+  const qs = new URLSearchParams({ account_id: accountId });
+  if (status) qs.set("status", status);
+  return apiFetch(`/api/fno-positions/positions?${qs.toString()}`);
 }
 
-export async function fetchFnoOrders(status?: string): Promise<{ orders: FnoOrder[] }> {
-  const qs = status ? `?status=${status}` : "";
-  return apiFetch(`/api/fno-positions/orders${qs}`);
+export async function fetchFnoOrders(accountId: string, status?: string): Promise<{ orders: FnoOrder[] }> {
+  const qs = new URLSearchParams({ account_id: accountId });
+  if (status) qs.set("status", status);
+  return apiFetch(`/api/fno-positions/orders?${qs.toString()}`);
 }
 
-export async function exitFnoPosition(positionId: string, lots?: number): Promise<FnoOrder & { position: FnoPosition }> {
+export async function exitFnoPosition(accountId: string, positionId: string, lots?: number): Promise<FnoOrder & { position: FnoPosition }> {
   return apiFetch(`/api/fno-positions/positions/${positionId}/exit`, {
     method: "POST",
-    body: JSON.stringify({ lots: lots ?? null }),
+    body: JSON.stringify({ account_id: accountId, lots: lots ?? null }),
   });
 }
 
-export async function resetFnoPositions(): Promise<{ positions_deleted: number; orders_deleted: number; initial_capital: number }> {
-  return apiFetch("/api/fno-positions/reset", { method: "POST" });
+export async function resetFnoPositions(accountId: string): Promise<{ positions_deleted: number; orders_deleted: number; initial_capital: number }> {
+  return apiFetch("/api/fno-positions/reset", { method: "POST", body: JSON.stringify({ account_id: accountId }) });
 }
 
 // --- AI research & trade intelligence (roadmap Phase 6) ---

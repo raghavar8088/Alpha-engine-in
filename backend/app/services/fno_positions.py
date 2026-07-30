@@ -19,12 +19,17 @@ import os
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from app.core.db import fno_orders_collection, fno_positions_collection, instruments_collection
+from app.core.db import (
+    fno_accounts_collection,
+    fno_orders_collection,
+    fno_positions_collection,
+    instruments_collection,
+)
 from app.services.broker_data import get_ltp
 from app.services.dhan_client import DhanAPIError, DhanClient
 from options_service.chain import parse_chain
 
-INITIAL_CAPITAL = float(os.getenv("FNO_POSITIONS_INITIAL_CAPITAL", "10000000"))  # ₹1 crore
+DEFAULT_INITIAL_CAPITAL = float(os.getenv("FNO_POSITIONS_INITIAL_CAPITAL", "10000000"))  # ₹1 crore
 PRODUCT_TYPES = ("INTRADAY", "MARGIN")
 OPTION_CLASSES = ("INDEX_OPTION", "EQUITY_OPTION")
 FUTURE_CLASSES = ("INDEX_FUTURE", "EQUITY_FUTURE")
@@ -55,6 +60,89 @@ def _parse_leverage(raw: str | float | None) -> float:
         return float(str(raw).upper().replace("X", "").strip()) or 1.0
     except ValueError:
         return 1.0
+
+
+# --------------------------------------------------------------------------------
+# Accounts — multiple independent named paper accounts, each with its own capital
+# pool, mirroring app.services.manual_positions. Every position/order belongs to
+# exactly one account_id; a "Default" account is auto-created and pre-existing
+# account-less data migrated into it the first time accounts are listed, so this
+# upgrade never loses the old single-book data.
+# --------------------------------------------------------------------------------
+
+
+async def ensure_default_account() -> dict:
+    existing = await fno_accounts_collection.find_one(sort=[("created_at", 1)])
+    if existing is not None:
+        return existing
+    account = {
+        "account_id": uuid4().hex[:12], "name": "Default",
+        "initial_capital": DEFAULT_INITIAL_CAPITAL, "created_at": _now(),
+    }
+    await fno_accounts_collection.insert_one(account)
+    await fno_positions_collection.update_many(
+        {"account_id": {"$exists": False}}, {"$set": {"account_id": account["account_id"]}}
+    )
+    await fno_orders_collection.update_many(
+        {"account_id": {"$exists": False}}, {"$set": {"account_id": account["account_id"]}}
+    )
+    account.pop("_id", None)
+    return account
+
+
+async def list_accounts() -> list[dict]:
+    await ensure_default_account()
+    cursor = fno_accounts_collection.find({}, {"_id": 0}).sort("created_at", 1)
+    return [d async for d in cursor]
+
+
+async def get_account(account_id: str) -> dict:
+    doc = await fno_accounts_collection.find_one({"account_id": account_id}, {"_id": 0})
+    if doc is None:
+        raise OrderError(f"Unknown account {account_id}")
+    return doc
+
+
+async def create_account(name: str, initial_capital: float | None = None) -> dict:
+    name = name.strip()
+    if not name:
+        raise OrderError("Account name cannot be empty")
+    if await fno_accounts_collection.find_one({"name": name}):
+        raise OrderError(f'An account named "{name}" already exists')
+    account = {
+        "account_id": uuid4().hex[:12], "name": name,
+        "initial_capital": initial_capital if initial_capital and initial_capital > 0 else DEFAULT_INITIAL_CAPITAL,
+        "created_at": _now(),
+    }
+    await fno_accounts_collection.insert_one(account)
+    account.pop("_id", None)
+    return account
+
+
+async def edit_account(account_id: str, name: str | None = None, initial_capital: float | None = None) -> dict:
+    """Rename an account and/or change its starting capital. Editing the balance
+    changes only the base capital pool — realized/unrealized P&L and every open
+    position are untouched, so available_cash simply re-derives from the new base
+    (initial_capital + realized - deployed). A brand-new account defaults to ₹1 cr;
+    here the user can set any positive figure at any time."""
+    account = await get_account(account_id)
+    changes: dict = {}
+    if name is not None:
+        name = name.strip()
+        if not name:
+            raise OrderError("Account name cannot be empty")
+        clash = await fno_accounts_collection.find_one({"name": name, "account_id": {"$ne": account_id}})
+        if clash is not None:
+            raise OrderError(f'An account named "{name}" already exists')
+        changes["name"] = name
+    if initial_capital is not None:
+        if initial_capital <= 0:
+            raise OrderError("Account balance must be a positive number")
+        changes["initial_capital"] = float(initial_capital)
+    if not changes:
+        raise OrderError("Nothing to update — provide a new name and/or balance")
+    await fno_accounts_collection.update_one({"account_id": account_id}, {"$set": changes})
+    return {**account, **changes}
 
 
 async def _underlying_instrument(symbol: str) -> dict:
@@ -172,24 +260,25 @@ async def _margin(
         return _fallback_margin(transaction_type, quantity, price, strike), 1.0, "fallback"
 
 
-async def _deployed_margin() -> float:
+async def _deployed_margin(account_id: str) -> float:
     total = 0.0
-    async for p in fno_positions_collection.find({"status": "OPEN"}, {"margin_used": 1}):
+    async for p in fno_positions_collection.find({"account_id": account_id, "status": "OPEN"}, {"margin_used": 1}):
         total += p.get("margin_used") or 0.0
     return total
 
 
-async def _realized_pnl_all_time() -> float:
+async def _realized_pnl_all_time(account_id: str) -> float:
     total = 0.0
-    async for p in fno_positions_collection.find({}, {"realized_pnl": 1}):
+    async for p in fno_positions_collection.find({"account_id": account_id}, {"realized_pnl": 1}):
         total += p.get("realized_pnl") or 0.0
     return total
 
 
-async def available_cash() -> float:
-    deployed = await _deployed_margin()
-    realized = await _realized_pnl_all_time()
-    return INITIAL_CAPITAL + realized - deployed
+async def available_cash(account_id: str) -> float:
+    account = await get_account(account_id)
+    deployed = await _deployed_margin(account_id)
+    realized = await _realized_pnl_all_time(account_id)
+    return account["initial_capital"] + realized - deployed
 
 
 async def top_movers(dhan: DhanClient, limit: int = 10) -> dict:
@@ -240,10 +329,11 @@ async def estimate_margin(
 
 
 async def place_order(
-    dhan: DhanClient, *, instrument_kind: str, symbol: str, expiry: str, transaction_type: str,
+    dhan: DhanClient, *, account_id: str, instrument_kind: str, symbol: str, expiry: str, transaction_type: str,
     lots: int, order_type: str, product_type: str, strike: float | None = None,
     option_type: str | None = None, limit_price: float = 0.0,
 ) -> dict:
+    await get_account(account_id)  # 404s cleanly if the account_id is bogus
     if lots < 1:
         raise OrderError("Lots must be at least 1")
     if product_type not in PRODUCT_TYPES:
@@ -272,6 +362,7 @@ async def place_order(
     )
     base_order = {
         "order_id": order_id,
+        "account_id": account_id,
         "symbol": inst["symbol"],
         "display_name": contract_label,
         "instrument_kind": instrument_kind,
@@ -304,9 +395,10 @@ async def place_order(
 
 async def _fill(dhan: DhanClient, base_order: dict, fill_price: float) -> dict:
     inst = base_order["instrument"]
+    account_id = base_order["account_id"]
     security_id, segment = inst["security_id"], inst["exchange_segment"]
     transaction_type, quantity, product_type = base_order["transaction_type"], base_order["quantity"], base_order["product_type"]
-    contract_key = {"symbol": base_order["symbol"], "instrument.expiry": inst.get("expiry"),
+    contract_key = {"account_id": account_id, "symbol": base_order["symbol"], "instrument.expiry": inst.get("expiry"),
                      "instrument.strike": inst.get("strike"), "instrument.option_type": inst.get("option_type")}
 
     existing = await fno_positions_collection.find_one({**contract_key, "product_type": product_type, "status": "OPEN"})
@@ -325,12 +417,12 @@ async def _fill(dhan: DhanClient, base_order: dict, fill_price: float) -> dict:
         margin, leverage, margin_source = await _margin(
             dhan, security_id, segment, side, quantity, product_type, fill_price, strike=inst.get("strike")
         )
-        cash = await available_cash()
+        cash = await available_cash(account_id)
         if margin > cash:
             raise OrderError(f"Insufficient paper capital: order needs ₹{margin:,.2f} margin ({product_type}), only ₹{cash:,.2f} available")
         if existing is None:
             position = {
-                "position_id": uuid4().hex[:12], "symbol": base_order["symbol"], "display_name": base_order["display_name"],
+                "position_id": uuid4().hex[:12], "account_id": account_id, "symbol": base_order["symbol"], "display_name": base_order["display_name"],
                 "instrument_kind": base_order["instrument_kind"], "instrument": inst, "product_type": product_type, "side": side,
                 "lots": base_order["lots"], "quantity": quantity, "avg_price": fill_price, "margin_used": round(margin, 2),
                 "leverage": leverage, "margin_source": margin_source, "ltp": fill_price, "ltp_source": "dhan_quote",
@@ -395,10 +487,12 @@ async def _fill(dhan: DhanClient, base_order: dict, fill_price: float) -> dict:
     return order_doc
 
 
-async def exit_position(dhan: DhanClient, position_id: str, lots: int | None = None) -> dict:
-    position = await fno_positions_collection.find_one({"position_id": position_id, "status": "OPEN"})
+async def exit_position(dhan: DhanClient, account_id: str, position_id: str, lots: int | None = None) -> dict:
+    position = await fno_positions_collection.find_one(
+        {"position_id": position_id, "account_id": account_id, "status": "OPEN"}
+    )
     if position is None:
-        raise OrderError("Position not found or already closed")
+        raise OrderError("Position not found (in this account) or already closed")
     lot_size = position["instrument"].get("lot_size", 1) or 1
     qty = (lots * lot_size) if lots else position["quantity"]
     if qty > position["quantity"]:
@@ -406,7 +500,7 @@ async def exit_position(dhan: DhanClient, position_id: str, lots: int | None = N
 
     inst = position["instrument"]
     base_order = {
-        "order_id": f"FNO-{uuid4().hex[:12]}", "symbol": position["symbol"], "display_name": position["display_name"],
+        "order_id": f"FNO-{uuid4().hex[:12]}", "account_id": account_id, "symbol": position["symbol"], "display_name": position["display_name"],
         "instrument_kind": position["instrument_kind"], "instrument": inst,
         # Exiting means trading the opposite side: sell to close a long, buy back a short.
         "transaction_type": "BUY" if position.get("side", "BUY") == "SELL" else "SELL",
@@ -453,32 +547,42 @@ async def sync_positions(dhan: DhanClient) -> int:
     return updated
 
 
-async def reset_all() -> dict:
-    positions_deleted = (await fno_positions_collection.delete_many({})).deleted_count
-    orders_deleted = (await fno_orders_collection.delete_many({})).deleted_count
-    return {"positions_deleted": positions_deleted, "orders_deleted": orders_deleted, "initial_capital": INITIAL_CAPITAL}
+async def reset_account(account_id: str) -> dict:
+    """Wipe ONE account back to pristine: delete every position and order in it so
+    realized P&L clears and available_cash returns to exactly its initial_capital.
+    Other accounts are untouched. Irreversible — the caller confirms first."""
+    account = await get_account(account_id)
+    positions_deleted = (await fno_positions_collection.delete_many({"account_id": account_id})).deleted_count
+    orders_deleted = (await fno_orders_collection.delete_many({"account_id": account_id})).deleted_count
+    return {"positions_deleted": positions_deleted, "orders_deleted": orders_deleted,
+            "initial_capital": account["initial_capital"]}
 
 
-async def summary() -> dict:
-    deployed = await _deployed_margin()
-    realized = await _realized_pnl_all_time()
+async def summary(account_id: str) -> dict:
+    account = await get_account(account_id)
+    initial_capital = account["initial_capital"]
+    deployed = await _deployed_margin(account_id)
+    realized = await _realized_pnl_all_time(account_id)
     unrealized = 0.0
-    async for p in fno_positions_collection.find({"status": "OPEN"}, {"unrealized_pnl": 1}):
+    async for p in fno_positions_collection.find({"account_id": account_id, "status": "OPEN"}, {"unrealized_pnl": 1}):
         unrealized += p.get("unrealized_pnl") or 0.0
-    equity = INITIAL_CAPITAL + realized + unrealized
-    open_count = await fno_positions_collection.count_documents({"status": "OPEN"})
-    closed_count = await fno_positions_collection.count_documents({"status": "CLOSED"})
-    wins = await fno_positions_collection.count_documents({"status": "CLOSED", "realized_pnl": {"$gt": 0}})
+    equity = initial_capital + realized + unrealized
+    open_count = await fno_positions_collection.count_documents({"account_id": account_id, "status": "OPEN"})
+    closed_count = await fno_positions_collection.count_documents({"account_id": account_id, "status": "CLOSED"})
+    wins = await fno_positions_collection.count_documents(
+        {"account_id": account_id, "status": "CLOSED", "realized_pnl": {"$gt": 0}}
+    )
     win_rate = round(wins / closed_count * 100, 1) if closed_count else None
     return {
-        "initial_capital": INITIAL_CAPITAL,
-        "available_cash": round(INITIAL_CAPITAL + realized - deployed, 2),
+        "account_id": account_id,
+        "initial_capital": initial_capital,
+        "available_cash": round(initial_capital + realized - deployed, 2),
         "deployed_margin": round(deployed, 2),
         "realized_pnl": round(realized, 2),
         "unrealized_pnl": round(unrealized, 2),
         "total_pnl": round(realized + unrealized, 2),
         "equity": round(equity, 2),
-        "roi_pct": round((equity - INITIAL_CAPITAL) / INITIAL_CAPITAL * 100, 2),
+        "roi_pct": round((equity - initial_capital) / initial_capital * 100, 2) if initial_capital else 0.0,
         "open_positions": open_count,
         "closed_positions": closed_count,
         "win_rate": win_rate,

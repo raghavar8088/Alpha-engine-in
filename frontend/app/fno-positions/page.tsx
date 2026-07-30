@@ -5,6 +5,7 @@ import GlassPanel from "../../components/GlassPanel";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import {
+  FnoAccount,
   FnoInstrumentKind,
   FnoOrder,
   FnoPosition,
@@ -14,7 +15,10 @@ import {
   OptionChainResponse,
   OptionLeg,
   TopMover,
+  createFnoAccount,
+  editFnoAccount,
   exitFnoPosition,
+  fetchFnoAccounts,
   fetchFnoFutureExpiries,
   fetchFnoOptionChain,
   fetchFnoOptionExpiries,
@@ -25,6 +29,8 @@ import {
   placeFnoOrder,
   resetFnoPositions,
 } from "../../lib/api";
+
+const SELECTED_ACCOUNT_KEY = "tradingai:fno-positions:selected-account";
 
 const PRODUCT_TYPES: { id: FnoProductType; label: string }[] = [
   { id: "INTRADAY", label: "Intraday" },
@@ -48,6 +54,11 @@ type OrderDraft = {
 };
 
 export default function FnoPositionsPage() {
+  const [accounts, setAccounts] = useState<FnoAccount[]>([]);
+  const [accountId, setAccountId] = useState<string | null>(null);
+  const [accountsLoading, setAccountsLoading] = useState(true);
+  const [createAccountOpen, setCreateAccountOpen] = useState(false);
+  const [editAccountOpen, setEditAccountOpen] = useState(false);
   const [tab, setTab] = useState<Tab>("chain");
   const [underlyings, setUnderlyings] = useState<FnoUnderlying[]>([]);
   const [symbol, setSymbol] = useState<string>("NIFTY");
@@ -74,16 +85,46 @@ export default function FnoPositionsPage() {
       .catch(() => setUnderlyings([{ symbol: "NIFTY", name: "Nifty 50", kind: "INDEX" }]));
   }, []);
 
+  const loadAccounts = useCallback(async () => {
+    setAccountsLoading(true);
+    try {
+      const data = await fetchFnoAccounts();
+      setAccounts(data);
+      setAccountId((current) => {
+        if (current && data.some((a) => a.account_id === current)) return current;
+        const saved = typeof window !== "undefined" ? window.localStorage.getItem(SELECTED_ACCOUNT_KEY) : null;
+        if (saved && data.some((a) => a.account_id === saved)) return saved;
+        return data[0]?.account_id ?? null;
+      });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load accounts");
+    } finally {
+      setAccountsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadAccounts();
+  }, [loadAccounts]);
+
+  const selectAccount = useCallback((id: string) => {
+    setAccountId(id);
+    if (typeof window !== "undefined") window.localStorage.setItem(SELECTED_ACCOUNT_KEY, id);
+  }, []);
+
+  const activeAccount = accounts.find((a) => a.account_id === accountId) ?? null;
+
   const loadPositions = useCallback(async () => {
+    if (!accountId) return;
     setError(null);
     try {
-      const data = await fetchFnoPositions(positionsFilter === "all" ? undefined : positionsFilter);
+      const data = await fetchFnoPositions(accountId, positionsFilter === "all" ? undefined : positionsFilter);
       setPositions(data.positions);
       setSummary(data.summary);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load positions");
     }
-  }, [positionsFilter]);
+  }, [accountId, positionsFilter]);
 
   useEffect(() => {
     loadPositions();
@@ -92,8 +133,8 @@ export default function FnoPositionsPage() {
   }, [loadPositions]);
 
   useEffect(() => {
-    if (tab === "orders") fetchFnoOrders().then((d) => setOrders(d.orders)).catch(() => {});
-  }, [tab]);
+    if (tab === "orders" && accountId) fetchFnoOrders(accountId).then((d) => setOrders(d.orders)).catch(() => {});
+  }, [tab, accountId]);
 
   useEffect(() => {
     if (tab !== "chain" || !symbol) return;
@@ -149,23 +190,27 @@ export default function FnoPositionsPage() {
 
   const exit = useCallback(
     async (p: FnoPosition) => {
+      if (!accountId) return;
       if (!window.confirm(`Exit ${p.lots} lot(s) of ${p.display_name} @ market?`)) return;
       try {
-        const result = await exitFnoPosition(p.position_id);
+        const result = await exitFnoPosition(accountId, p.position_id);
         setNotice(`Exited ${p.display_name} at ${inr(result.fill_price)} (realized P&L ${inr(result.position.realized_pnl)})`);
         await loadPositions();
       } catch (e) {
         setNotice(`Exit failed: ${e instanceof Error ? e.message : "unknown error"}`);
       }
     },
-    [loadPositions],
+    [accountId, loadPositions],
   );
 
   const reset = useCallback(async () => {
-    if (!window.confirm("Reset the F&O paper desk? This permanently deletes every position and order and restores the ₹1 crore initial capital. This cannot be undone.")) return;
+    if (!accountId) return;
+    if (!window.confirm(
+      `Reset "${activeAccount?.name ?? "this"}" account? This permanently deletes every position and order in it and restores ${inr(activeAccount?.initial_capital ?? 10000000)} initial capital. Other accounts are untouched. This cannot be undone.`,
+    )) return;
     setResetting(true);
     try {
-      const result = await resetFnoPositions();
+      const result = await resetFnoPositions(accountId);
       setNotice(`Reset complete — ${result.positions_deleted} position(s) and ${result.orders_deleted} order(s) cleared, capital restored to ${inr(result.initial_capital)}`);
       await loadPositions();
     } catch (e) {
@@ -173,7 +218,38 @@ export default function FnoPositionsPage() {
     } finally {
       setResetting(false);
     }
-  }, [loadPositions]);
+  }, [accountId, activeAccount, loadPositions]);
+
+  const createAccount = useCallback(
+    async (name: string, initialCapital?: number) => {
+      try {
+        const account = await createFnoAccount(name, initialCapital);
+        setCreateAccountOpen(false);
+        await loadAccounts();
+        selectAccount(account.account_id);
+        setNotice(`Created account "${account.name}" with ${inr(account.initial_capital)} paper capital`);
+      } catch (e) {
+        setNotice(`Could not create account: ${e instanceof Error ? e.message : "unknown error"}`);
+      }
+    },
+    [loadAccounts, selectAccount],
+  );
+
+  const saveAccountEdit = useCallback(
+    async (changes: { name?: string; initialCapital?: number }) => {
+      if (!accountId) return;
+      try {
+        const account = await editFnoAccount(accountId, changes);
+        setEditAccountOpen(false);
+        await loadAccounts();
+        await loadPositions();
+        setNotice(`Updated account — now "${account.name}" with ${inr(account.initial_capital)} base capital`);
+      } catch (e) {
+        setNotice(`Could not update account: ${e instanceof Error ? e.message : "unknown error"}`);
+      }
+    },
+    [accountId, loadAccounts, loadPositions],
+  );
 
   const win = summary?.win_rate;
 
@@ -182,13 +258,32 @@ export default function FnoPositionsPage() {
       <PageHeader
         crumb="F&O Positions"
         title="F&O Positions"
-        subtitle="Live index/stock option chains and futures off your Dhan account — buy or sell CE/PE and futures with real premiums, real Dhan margin, ₹1 crore paper capital. Not investment advice."
+        subtitle="Live index/stock option chains and futures off your Dhan account — buy or sell CE/PE and futures with real premiums and real Dhan margin, across multiple paper accounts each with its own editable balance (default ₹1 crore). Not investment advice."
         actions={
-          <button className="reset-cta" onClick={reset} disabled={resetting}>
-            {resetting ? "Resetting…" : "Reset"}
-          </button>
+          <div className="account-bar">
+            {accounts.length > 0 && (
+              <select
+                className="account-select"
+                value={accountId ?? ""}
+                onChange={(e) => selectAccount(e.target.value)}
+              >
+                {accounts.map((a) => (
+                  <option key={a.account_id} value={a.account_id}>{a.name}</option>
+                ))}
+              </select>
+            )}
+            <button className="ghost-btn" onClick={() => setCreateAccountOpen(true)}>+ New Account</button>
+            <button className="ghost-btn" onClick={() => setEditAccountOpen(true)} disabled={!activeAccount}>Edit</button>
+            <button className="reset-cta" onClick={reset} disabled={resetting || !accountId}>
+              {resetting ? "Resetting…" : "Reset"}
+            </button>
+          </div>
         }
       />
+
+      {!accountsLoading && accounts.length === 0 && (
+        <div className="notice">No F&amp;O accounts yet — hit <b>+ New Account</b> to create your first paper account.</div>
+      )}
 
       {summary && (
         <div className="capital-tiles">
@@ -482,6 +577,7 @@ export default function FnoPositionsPage() {
       {draft && (
         <OrderModal
           draft={draft}
+          accountId={accountId}
           onClose={() => setDraft(null)}
           onDone={(msg) => {
             setDraft(null);
@@ -491,10 +587,32 @@ export default function FnoPositionsPage() {
         />
       )}
 
+      {createAccountOpen && (
+        <AccountModal
+          mode="create"
+          onClose={() => setCreateAccountOpen(false)}
+          onSubmit={({ name, initialCapital }) => createAccount(name!, initialCapital)}
+        />
+      )}
+
+      {editAccountOpen && activeAccount && (
+        <AccountModal
+          mode="edit"
+          initialName={activeAccount.name}
+          initialCapital={activeAccount.initial_capital}
+          onClose={() => setEditAccountOpen(false)}
+          onSubmit={saveAccountEdit}
+        />
+      )}
+
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 18px; }
         .reset-cta { background: var(--loss-dim); color: var(--loss); border: 1px solid rgba(217, 45, 63, 0.26); font-weight: 700; font-size: 13px; border-radius: 10px; padding: 10px 18px; cursor: pointer; }
         .reset-cta:disabled { opacity: 0.55; cursor: default; }
+        .account-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .account-select { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 10px; padding: 10px 14px; font-size: 13px; font-weight: 700; min-width: 150px; }
+        .ghost-btn { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); font-weight: 600; font-size: 13px; border-radius: 10px; padding: 10px 16px; cursor: pointer; }
+        .ghost-btn:disabled { opacity: 0.5; cursor: default; }
         .capital-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
         .capital-tiles .tile { display: flex; flex-direction: column; gap: 4px; background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 10px; padding: 12px 14px; }
         .capital-tiles .label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); }
@@ -546,7 +664,7 @@ export default function FnoPositionsPage() {
   );
 }
 
-function OrderModal({ draft, onClose, onDone }: { draft: OrderDraft; onClose: () => void; onDone: (msg: string) => void }) {
+function OrderModal({ draft, accountId, onClose, onDone }: { draft: OrderDraft; accountId: string | null; onClose: () => void; onDone: (msg: string) => void }) {
   const [lotsInput, setLotsInput] = useState("1");
   const lots = Math.max(1, parseInt(lotsInput, 10) || 0);
   const [orderType, setOrderType] = useState<"MARKET" | "LIMIT">("MARKET");
@@ -561,6 +679,10 @@ function OrderModal({ draft, onClose, onDone }: { draft: OrderDraft; onClose: ()
       : `${draft.symbol} ${draft.expiry} FUT`;
 
   const submit = useCallback(async () => {
+    if (!accountId) {
+      setErr("Select or create an account first");
+      return;
+    }
     if (orderType === "LIMIT" && limitPrice <= 0) {
       setErr("Enter a limit price");
       return;
@@ -569,6 +691,7 @@ function OrderModal({ draft, onClose, onDone }: { draft: OrderDraft; onClose: ()
     setErr(null);
     try {
       const result = await placeFnoOrder({
+        account_id: accountId,
         instrument_kind: draft.instrument_kind, symbol: draft.symbol, expiry: draft.expiry,
         strike: draft.strike, option_type: draft.option_type, transaction_type: draft.transaction_type,
         lots, order_type: orderType, product_type: productType, limit_price: orderType === "LIMIT" ? limitPrice : 0,
@@ -583,7 +706,7 @@ function OrderModal({ draft, onClose, onDone }: { draft: OrderDraft; onClose: ()
     } finally {
       setSubmitting(false);
     }
-  }, [draft, lots, orderType, limitPrice, productType, label, onDone]);
+  }, [accountId, draft, lots, orderType, limitPrice, productType, label, onDone]);
 
   return (
     <div className="modal-scrim" onClick={onClose}>
@@ -658,6 +781,110 @@ function OrderModal({ draft, onClose, onDone }: { draft: OrderDraft; onClose: ()
         .product-btn.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
         .ltp-line { font-size: 12.5px; color: var(--text-muted); }
         .sell-warn { background: var(--loss-dim); border: 1px solid rgba(217, 45, 63, 0.26); border-radius: 8px; padding: 9px 11px; font-size: 11.5px; line-height: 1.5; color: var(--loss); }
+        .err { color: var(--loss); font-size: 12px; }
+        .submit-btn { background: linear-gradient(145deg, var(--accent), var(--accent-hover)); color: #241404; font-weight: 700; font-size: 13.5px; border: none; border-radius: 10px; padding: 12px; cursor: pointer; }
+        .submit-btn:disabled { opacity: 0.55; cursor: default; }
+      `}</style>
+    </div>
+  );
+}
+
+const QUICK_BALANCES: { label: string; value: number }[] = [
+  { label: "₹10 L", value: 1000000 },
+  { label: "₹50 L", value: 5000000 },
+  { label: "₹1 Cr", value: 10000000 },
+  { label: "₹5 Cr", value: 50000000 },
+];
+
+function AccountModal({
+  mode, initialName, initialCapital, onClose, onSubmit,
+}: {
+  mode: "create" | "edit";
+  initialName?: string;
+  initialCapital?: number;
+  onClose: () => void;
+  onSubmit: (changes: { name?: string; initialCapital?: number }) => Promise<void> | void;
+}) {
+  const [name, setName] = useState(initialName ?? "");
+  const [balanceInput, setBalanceInput] = useState(String(initialCapital ?? 10000000));
+  const [submitting, setSubmitting] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const balance = Math.round(parseFloat(balanceInput) || 0);
+  const isEdit = mode === "edit";
+
+  const submit = useCallback(async () => {
+    if (!name.trim()) {
+      setErr("Enter an account name");
+      return;
+    }
+    if (balance <= 0) {
+      setErr("Balance must be a positive amount");
+      return;
+    }
+    setSubmitting(true);
+    setErr(null);
+    try {
+      await onSubmit({ name: name.trim(), initialCapital: balance });
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Failed");
+      setSubmitting(false);
+    }
+  }, [name, balance, onSubmit]);
+
+  return (
+    <div className="modal-scrim" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-head">
+          <div className="modal-title">{isEdit ? "Edit account" : "New account"}</div>
+          <button className="modal-close" onClick={onClose}>&times;</button>
+        </div>
+
+        <div className="field">
+          <label>Account name</label>
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Swing Trading" autoFocus />
+        </div>
+
+        <div className="field">
+          <label>{isEdit ? "Account balance (₹)" : "Starting balance (₹)"}</label>
+          <input type="number" min={0} step="1" inputMode="numeric" value={balanceInput} onChange={(e) => setBalanceInput(e.target.value)} />
+          <div className="balance-line">= <b>{balance.toLocaleString("en-IN")}</b> {isEdit ? "base capital" : "paper capital"}</div>
+          <div className="quick-row">
+            {QUICK_BALANCES.map((q) => (
+              <button key={q.value} className={balance === q.value ? "quick-btn active" : "quick-btn"} onClick={() => setBalanceInput(String(q.value))}>
+                {q.label}
+              </button>
+            ))}
+          </div>
+          {isEdit && (
+            <div className="edit-note">
+              Changing the balance only moves the base capital pool. Your open positions and realized/unrealized
+              P&amp;L are untouched — available cash simply re-derives from the new base.
+            </div>
+          )}
+        </div>
+
+        {err && <div className="err">{err}</div>}
+
+        <button className="submit-btn" onClick={submit} disabled={submitting}>
+          {submitting ? "Saving…" : isEdit ? "Save changes" : "Create account"}
+        </button>
+      </div>
+
+      <style jsx>{`
+        .modal-scrim { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: flex-start; justify-content: center; z-index: 50; padding: 8vh 16px 16px; overflow-y: auto; }
+        .modal { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 16px; padding: 20px; width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 14px; }
+        .modal-head { display: flex; justify-content: space-between; align-items: center; }
+        .modal-title { font-family: var(--font-display); font-weight: 800; font-size: 16px; }
+        .modal-close { background: none; border: none; font-size: 26px; line-height: 1; color: var(--text-muted); cursor: pointer; padding: 0 4px; }
+        .field { display: flex; flex-direction: column; gap: 6px; }
+        .field label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; }
+        .field input { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 9px; padding: 11px 12px; font-size: 16px; width: 100%; }
+        .balance-line { font-size: 12.5px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+        .quick-row { display: flex; flex-wrap: wrap; gap: 6px; }
+        .quick-btn { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; }
+        .quick-btn.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .edit-note { font-size: 11.5px; line-height: 1.5; color: var(--text-faint); background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 8px; padding: 9px 11px; }
         .err { color: var(--loss); font-size: 12px; }
         .submit-btn { background: linear-gradient(145deg, var(--accent), var(--accent-hover)); color: #241404; font-weight: 700; font-size: 13.5px; border: none; border-radius: 10px; padding: 12px; cursor: pointer; }
         .submit-btn:disabled { opacity: 0.55; cursor: default; }
