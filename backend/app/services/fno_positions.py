@@ -16,7 +16,7 @@ lists index underlyings until that's re-enabled and universe.py is re-run.
 """
 
 import os
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from uuid import uuid4
 
 from app.core.db import (
@@ -27,6 +27,7 @@ from app.core.db import (
 )
 from app.services.broker_data import get_ltp
 from app.services.dhan_client import DhanAPIError, DhanClient
+from app.services.fno_margin import portfolio_margin, solve_iv
 from options_service.chain import parse_chain
 
 DEFAULT_INITIAL_CAPITAL = float(os.getenv("FNO_POSITIONS_INITIAL_CAPITAL", "10000000"))  # ₹1 crore
@@ -34,11 +35,6 @@ PRODUCT_TYPES = ("INTRADAY", "MARGIN")
 OPTION_CLASSES = ("INDEX_OPTION", "EQUITY_OPTION")
 FUTURE_CLASSES = ("INDEX_FUTURE", "EQUITY_FUTURE")
 INDEX_UNDERLYINGS = {"NIFTY", "BANKNIFTY", "FINNIFTY", "MIDCPNIFTY", "SENSEX"}
-# Only used when Dhan's margin calculator is unreachable. SPAN+exposure on a short
-# scales with the UNDERLYING notional, not with the premium, so the stand-in is a
-# flat percentage of notional. Set above real SPAN (~10-12% on index options) so an
-# outage errs toward under-trading. See _fallback_margin.
-SHORT_MARGIN_NOTIONAL_PCT = 0.15
 
 
 class OrderError(Exception):
@@ -49,17 +45,6 @@ class OrderError(Exception):
 
 def _now() -> datetime:
     return datetime.now(timezone.utc)
-
-
-def _parse_leverage(raw: str | float | None) -> float:
-    if raw is None:
-        return 1.0
-    if isinstance(raw, (int, float)):
-        return float(raw) or 1.0
-    try:
-        return float(str(raw).upper().replace("X", "").strip()) or 1.0
-    except ValueError:
-        return 1.0
 
 
 # --------------------------------------------------------------------------------
@@ -230,41 +215,104 @@ async def _ltp(dhan: DhanClient, security_id: str, exchange_segment: str) -> flo
 
 
 
-def _fallback_margin(transaction_type: str, quantity: int, price: float, strike: float | None) -> float:
-    """Stand-in margin for when Dhan's calculator can't be reached.
-
-    Premium x quantity is correct for a BUY — that is exactly what you pay. It is
-    badly wrong for a SELL: the broker blocks SPAN+exposure, which tracks the
-    underlying notional, so a ₹0.25 far-OTM strike would reserve a few hundred
-    rupees against a position whose real margin is over a lakh per lot. Use the
-    strike as the underlying proxy for options; a future's own price is already the
-    notional, so it needs no proxy.
-    """
-    if transaction_type != "SELL":
-        return price * quantity
-    return (strike or price) * quantity * SHORT_MARGIN_NOTIONAL_PCT
+# --------------------------------------------------------------------------------
+# Portfolio (SPAN-lite) margin — the account's deployed margin is NOT the sum of each
+# leg's standalone margin; it is the netted, hedge-aware figure computed per
+# (underlying, expiry) group by app.services.fno_margin. So a long option that caps a
+# short's loss reduces the whole account's blocked capital, exactly like a real broker.
+# Each position still stores its OWN standalone margin (margin_used) for display; the
+# gap between the sum of those and the netted deployed figure is the hedge benefit.
+# --------------------------------------------------------------------------------
 
 
-async def _margin(
-    dhan: DhanClient, security_id: str, exchange_segment: str, transaction_type: str,
-    quantity: int, product_type: str, price: float, strike: float | None = None,
-) -> tuple[float, float, str]:
+def _years_to_expiry(expiry: str | None) -> float:
+    if not expiry:
+        return 30 / 365.0
     try:
-        r = await dhan.margin_calculator(
-            security_id=security_id, exchange_segment=exchange_segment, transaction_type=transaction_type,
-            quantity=quantity, product_type=product_type, price=price,
-        )
-        margin = float(r.get("totalMargin") or 0) or _fallback_margin(transaction_type, quantity, price, strike)
-        return margin, _parse_leverage(r.get("leverage")), "dhan_calculator"
-    except (DhanAPIError, Exception):
-        return _fallback_margin(transaction_type, quantity, price, strike), 1.0, "fallback"
+        days = (date.fromisoformat(expiry) - _now().date()).days
+    except (ValueError, TypeError):
+        return 30 / 365.0
+    return max(days, 0.5) / 365.0
+
+
+def _pos_to_leg(pos: dict) -> dict:
+    inst = pos.get("instrument", {})
+    return {
+        "kind": pos.get("instrument_kind", "OPTION"),
+        "option_type": inst.get("option_type"),
+        "strike": inst.get("strike"),
+        "qty": pos.get("quantity", 0),
+        "side": pos.get("side", "BUY"),
+        "premium": pos.get("avg_price", 0.0),
+        "iv": pos.get("iv"),
+    }
+
+
+def _same_contract(pos: dict, inst: dict) -> bool:
+    pi = pos.get("instrument", {})
+    return (
+        pi.get("strike") == inst.get("strike")
+        and pi.get("option_type") == inst.get("option_type")
+        and pi.get("expiry") == inst.get("expiry")
+    )
+
+
+def _group_spot(positions: list[dict]) -> float:
+    """A spot for the (underlying, expiry) group: the freshest one stored on any leg
+    (all share an underlying), else an ATM proxy from the strikes, else a future's
+    price — so margin can still be estimated when a live spot is momentarily absent."""
+    spots = [p.get("spot") for p in positions if p.get("spot")]
+    if spots:
+        return float(max(spots))
+    strikes = [p["instrument"].get("strike") for p in positions if p.get("instrument", {}).get("strike")]
+    if strikes:
+        return float(sum(strikes) / len(strikes))
+    prices = [p.get("avg_price") for p in positions if p.get("avg_price")]
+    return float(sum(prices) / len(prices)) if prices else 0.0
+
+
+async def _underlying_spot(dhan: DhanClient, symbol: str, fallback: float | None = None) -> float | None:
+    try:
+        inst = await _underlying_instrument(symbol)
+        spot = await _ltp(dhan, inst["security_id"], inst["exchange_segment"])
+        if spot and spot > 0:
+            return float(spot)
+    except Exception:
+        pass
+    return fallback
+
+
+async def _group_positions(account_id: str, symbol: str | None, expiry: str | None) -> list[dict]:
+    return [
+        p async for p in fno_positions_collection.find({
+            "account_id": account_id, "status": "OPEN",
+            "instrument.underlying_symbol": symbol, "instrument.expiry": expiry,
+        })
+    ]
 
 
 async def _deployed_margin(account_id: str) -> float:
+    """Netted portfolio margin: group every open position by (underlying, expiry) and
+    sum each group's SPAN-lite portfolio margin. Hedges within a group net."""
+    groups: dict[tuple, list[dict]] = {}
+    async for p in fno_positions_collection.find({"account_id": account_id, "status": "OPEN"}):
+        inst = p.get("instrument", {})
+        groups.setdefault((inst.get("underlying_symbol"), inst.get("expiry")), []).append(p)
+    total = 0.0
+    for (_symbol, expiry), positions in groups.items():
+        spot = _group_spot(positions)
+        legs = [_pos_to_leg(p) for p in positions]
+        total += portfolio_margin(legs, spot, _years_to_expiry(expiry))["total"]
+    return round(total, 2)
+
+
+async def _standalone_margin_total(account_id: str) -> float:
+    """Sum of each open leg's OWN standalone margin (no netting) — the pre-hedge
+    figure; deployed subtracted from this is the account's total hedge benefit."""
     total = 0.0
     async for p in fno_positions_collection.find({"account_id": account_id, "status": "OPEN"}, {"margin_used": 1}):
         total += p.get("margin_used") or 0.0
-    return total
+    return round(total, 2)
 
 
 async def _realized_pnl_all_time(account_id: str) -> float:
@@ -316,16 +364,26 @@ async def estimate_margin(
     dhan: DhanClient, security_id: str, exchange_segment: str, transaction_type: str,
     quantity: int, product_type: str, price: float,
 ) -> dict:
-    # The strike only matters if we end up on the fallback path, but it has to be
-    # resolved here — this entry point is handed a bare security_id, not a contract.
+    """Standalone SPAN-lite margin for a single leg (the same engine the fill gate and
+    deployed margin use). Contract details are resolved from the bare security_id."""
     contract = await instruments_collection.find_one(
-        {"security_id": security_id, "exchange_segment": exchange_segment}, {"strike": 1}
-    )
-    margin, leverage, source = await _margin(
-        dhan, security_id, exchange_segment, transaction_type, quantity, product_type, price,
-        strike=(contract or {}).get("strike"),
-    )
-    return {"margin_required": round(margin, 2), "leverage": leverage, "notional_value": round(price * quantity, 2), "source": source}
+        {"security_id": security_id, "exchange_segment": exchange_segment},
+        {"strike": 1, "option_type": 1, "underlying_symbol": 1, "expiry": 1},
+    ) or {}
+    underlying = contract.get("underlying_symbol")
+    t = _years_to_expiry(contract.get("expiry"))
+    spot = (await _underlying_spot(dhan, underlying, fallback=contract.get("strike") or price)) if underlying else (contract.get("strike") or price)
+    iv = solve_iv(price, spot, contract.get("strike"), t, contract.get("option_type")) if contract.get("option_type") else None
+    leg = {
+        "kind": "OPTION" if contract.get("option_type") else "FUTURE",
+        "option_type": contract.get("option_type"), "strike": contract.get("strike"),
+        "qty": quantity, "side": transaction_type, "premium": price, "iv": iv,
+    }
+    m = portfolio_margin([leg], spot or (contract.get("strike") or price), t)
+    return {
+        "margin_required": m["total"], "span": m["span"], "exposure": m["exposure"],
+        "notional_value": round(price * quantity, 2), "source": "span_lite",
+    }
 
 
 async def place_order(
@@ -396,7 +454,6 @@ async def place_order(
 async def _fill(dhan: DhanClient, base_order: dict, fill_price: float) -> dict:
     inst = base_order["instrument"]
     account_id = base_order["account_id"]
-    security_id, segment = inst["security_id"], inst["exchange_segment"]
     transaction_type, quantity, product_type = base_order["transaction_type"], base_order["quantity"], base_order["product_type"]
     contract_key = {"account_id": account_id, "symbol": base_order["symbol"], "instrument.expiry": inst.get("expiry"),
                      "instrument.strike": inst.get("strike"), "instrument.option_type": inst.get("option_type")}
@@ -412,36 +469,63 @@ async def _fill(dhan: DhanClient, base_order: dict, fill_price: float) -> dict:
     existing_side = existing.get("side", "BUY") if existing else None
     opening = existing is None or existing_side == transaction_type
 
+    # SPAN-lite margin context for this contract's (underlying, expiry) group.
+    underlying = inst.get("underlying_symbol") or base_order["symbol"]
+    expiry = inst.get("expiry")
+    t_years = _years_to_expiry(expiry)
+    spot = await _underlying_spot(dhan, underlying, fallback=inst.get("strike") or fill_price)
+
     if opening:
         side = transaction_type
-        margin, leverage, margin_source = await _margin(
-            dhan, security_id, segment, side, quantity, product_type, fill_price, strike=inst.get("strike")
+        new_qty = (existing["quantity"] + quantity) if existing else quantity
+        new_avg = (
+            (existing["quantity"] * existing["avg_price"] + quantity * fill_price) / new_qty
+            if existing else fill_price
         )
+        group = await _group_positions(account_id, underlying, expiry)
+        group_spot = spot or _group_spot(group) or (inst.get("strike") or fill_price)
+        iv = solve_iv(new_avg, group_spot, inst.get("strike"), t_years, inst["option_type"]) if inst.get("option_type") else None
+        proj_leg = {
+            "kind": base_order["instrument_kind"], "option_type": inst.get("option_type"),
+            "strike": inst.get("strike"), "qty": new_qty, "side": side, "premium": new_avg, "iv": iv,
+        }
+        # Group-incremental balance gate: block only what this order ADDS to the
+        # account's NETTED portfolio margin — so a hedge (which lowers the group
+        # margin) is always allowed, and only genuinely risk-increasing orders can be
+        # capital-constrained. This is the hedge-aware version of the old per-leg check.
+        old_legs = [_pos_to_leg(p) for p in group]
+        new_legs = [_pos_to_leg(p) for p in group if not _same_contract(p, inst)] + [proj_leg]
+        old_group = portfolio_margin(old_legs, group_spot, t_years)["total"]
+        new_group = portfolio_margin(new_legs, group_spot, t_years)["total"]
+        added = new_group - old_group
         cash = await available_cash(account_id)
-        if margin > cash:
-            raise OrderError(f"Insufficient paper capital: order needs ₹{margin:,.2f} margin ({product_type}), only ₹{cash:,.2f} available")
+        if added > cash + 0.01:
+            raise OrderError(
+                f"Insufficient paper capital: this order adds ₹{added:,.2f} of portfolio margin "
+                f"(net of hedges), only ₹{cash:,.2f} available in this account"
+            )
+        standalone = portfolio_margin([proj_leg], group_spot, t_years)["total"]
+
         if existing is None:
             position = {
-                "position_id": uuid4().hex[:12], "account_id": account_id, "symbol": base_order["symbol"], "display_name": base_order["display_name"],
-                "instrument_kind": base_order["instrument_kind"], "instrument": inst, "product_type": product_type, "side": side,
-                "lots": base_order["lots"], "quantity": quantity, "avg_price": fill_price, "margin_used": round(margin, 2),
-                "leverage": leverage, "margin_source": margin_source, "ltp": fill_price, "ltp_source": "dhan_quote",
+                "position_id": uuid4().hex[:12], "account_id": account_id, "symbol": base_order["symbol"],
+                "display_name": base_order["display_name"], "instrument_kind": base_order["instrument_kind"],
+                "instrument": inst, "product_type": product_type, "side": side,
+                "lots": base_order["lots"], "quantity": quantity, "avg_price": fill_price,
+                "margin_used": standalone, "margin_source": "span_lite", "leverage": None,
+                "iv": iv, "spot": group_spot,
+                "ltp": fill_price, "ltp_source": "dhan_quote",
                 "unrealized_pnl": 0.0, "pnl_pct": 0.0, "realized_pnl": 0.0,
                 "status": "OPEN", "opened_at": _now(), "updated_at": _now(), "closed_at": None,
             }
             await fno_positions_collection.insert_one(position)
             position.pop("_id", None)
         else:
-            new_qty = existing["quantity"] + quantity
-            new_avg = (existing["quantity"] * existing["avg_price"] + quantity * fill_price) / new_qty
-            new_margin, new_leverage, new_margin_source = await _margin(
-                dhan, security_id, segment, side, new_qty, product_type, new_avg, strike=inst.get("strike")
-            )
             await fno_positions_collection.update_one(
                 {"_id": existing["_id"]},
                 {"$set": {"quantity": new_qty, "lots": new_qty // lot_size, "avg_price": round(new_avg, 4),
-                          "margin_used": round(new_margin, 2), "leverage": new_leverage,
-                          "margin_source": new_margin_source, "updated_at": _now()}},
+                          "margin_used": standalone, "margin_source": "span_lite", "leverage": None,
+                          "iv": iv, "spot": group_spot, "updated_at": _now()}},
             )
             position = await fno_positions_collection.find_one({"_id": existing["_id"]})
             position.pop("_id", None)
@@ -454,6 +538,7 @@ async def _fill(dhan: DhanClient, base_order: dict, fill_price: float) -> dict:
         direction = 1 if existing_side == "BUY" else -1
         realized = round((fill_price - existing["avg_price"]) * quantity * direction, 2)
         remaining_qty = existing["quantity"] - quantity
+        group_spot = spot or existing.get("spot") or (inst.get("strike") or fill_price)
         if remaining_qty == 0:
             await fno_positions_collection.update_one(
                 {"_id": existing["_id"]},
@@ -464,15 +549,17 @@ async def _fill(dhan: DhanClient, base_order: dict, fill_price: float) -> dict:
                 }},
             )
         else:
-            new_margin, new_leverage, new_margin_source = await _margin(
-                dhan, security_id, segment, existing_side, remaining_qty, product_type, existing["avg_price"],
-                strike=inst.get("strike"),
-            )
+            remain_leg = {
+                "kind": existing.get("instrument_kind", "OPTION"), "option_type": inst.get("option_type"),
+                "strike": inst.get("strike"), "qty": remaining_qty, "side": existing_side,
+                "premium": existing["avg_price"], "iv": existing.get("iv"),
+            }
+            standalone = portfolio_margin([remain_leg], group_spot, t_years)["total"]
             await fno_positions_collection.update_one(
                 {"_id": existing["_id"]},
                 {"$set": {
-                    "quantity": remaining_qty, "lots": remaining_qty // lot_size, "margin_used": round(new_margin, 2),
-                    "leverage": new_leverage, "margin_source": new_margin_source,
+                    "quantity": remaining_qty, "lots": remaining_qty // lot_size, "margin_used": standalone,
+                    "margin_source": "span_lite",
                     "realized_pnl": round(existing.get("realized_pnl", 0.0) + realized, 2), "updated_at": _now(),
                 }},
             )
@@ -516,6 +603,7 @@ async def exit_position(dhan: DhanClient, account_id: str, position_id: str, lot
 async def sync_positions(dhan: DhanClient) -> int:
     open_positions = [p async for p in fno_positions_collection.find({"status": "OPEN"})]
     updated = 0
+    spot_cache: dict[str, float | None] = {}
     for pos in open_positions:
         inst = pos["instrument"]
         ltp, ltp_source = await _ltp_with_source(dhan, inst["security_id"], inst["exchange_segment"])
@@ -524,10 +612,21 @@ async def sync_positions(dhan: DhanClient) -> int:
         direction = 1 if pos.get("side", "BUY") == "BUY" else -1
         unrealized = round((ltp - pos["avg_price"]) * pos["quantity"] * direction, 2)
         pnl_pct = round((ltp / pos["avg_price"] - 1) * 100 * direction, 2) if pos["avg_price"] else 0.0
-        await fno_positions_collection.update_one(
-            {"_id": pos["_id"]},
-            {"$set": {"ltp": ltp, "ltp_source": ltp_source, "unrealized_pnl": unrealized, "pnl_pct": pnl_pct, "updated_at": _now()}},
-        )
+        changes = {"ltp": ltp, "ltp_source": ltp_source, "unrealized_pnl": unrealized, "pnl_pct": pnl_pct, "updated_at": _now()}
+        # Keep a fresh underlying spot on each open leg so the netted portfolio margin
+        # (_deployed_margin, which has no broker handle) re-derives off live prices.
+        underlying = inst.get("underlying_symbol")
+        if underlying:
+            if underlying not in spot_cache:
+                spot_cache[underlying] = await _underlying_spot(dhan, underlying, fallback=pos.get("spot"))
+            if spot_cache[underlying]:
+                changes["spot"] = spot_cache[underlying]
+                # Keep each leg's standalone margin engine-consistent and current as the
+                # underlying moves (also backfills legacy legs that stored an old figure).
+                leg = _pos_to_leg({**pos, "spot": spot_cache[underlying]})
+                changes["margin_used"] = portfolio_margin([leg], spot_cache[underlying], _years_to_expiry(inst.get("expiry")))["total"]
+                changes["margin_source"] = "span_lite"
+        await fno_positions_collection.update_one({"_id": pos["_id"]}, {"$set": changes})
         updated += 1
 
     pending = [o async for o in fno_orders_collection.find({"status": "PENDING"})]
@@ -562,6 +661,7 @@ async def summary(account_id: str) -> dict:
     account = await get_account(account_id)
     initial_capital = account["initial_capital"]
     deployed = await _deployed_margin(account_id)
+    standalone = await _standalone_margin_total(account_id)
     realized = await _realized_pnl_all_time(account_id)
     unrealized = 0.0
     async for p in fno_positions_collection.find({"account_id": account_id, "status": "OPEN"}, {"unrealized_pnl": 1}):
@@ -578,6 +678,8 @@ async def summary(account_id: str) -> dict:
         "initial_capital": initial_capital,
         "available_cash": round(initial_capital + realized - deployed, 2),
         "deployed_margin": round(deployed, 2),
+        "standalone_margin": round(standalone, 2),
+        "margin_benefit": round(max(0.0, standalone - deployed), 2),
         "realized_pnl": round(realized, 2),
         "unrealized_pnl": round(unrealized, 2),
         "total_pnl": round(realized + unrealized, 2),

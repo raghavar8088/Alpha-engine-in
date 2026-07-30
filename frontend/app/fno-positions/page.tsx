@@ -258,7 +258,7 @@ export default function FnoPositionsPage() {
       <PageHeader
         crumb="F&O Positions"
         title="F&O Positions"
-        subtitle="Live index/stock option chains and futures off your Dhan account — buy or sell CE/PE and futures with real premiums and real Dhan margin, across multiple paper accounts each with its own editable balance (default ₹1 crore). Not investment advice."
+        subtitle="Live index/stock option chains and futures off your Dhan account — buy or sell CE/PE and futures with real premiums and hedge-aware SPAN-style portfolio margin (a bought option that caps a sold option's risk lowers the margin blocked, like a real broker), across multiple paper accounts each with its own editable balance (default ₹1 crore). Not investment advice."
         actions={
           <div className="account-bar">
             {accounts.length > 0 && (
@@ -292,7 +292,10 @@ export default function FnoPositionsPage() {
           <div className="tile"><span className="label">Total P&amp;L</span><span className={`value ${summary.total_pnl >= 0 ? "gain" : "loss"}`}>{inr(summary.total_pnl)}</span></div>
           <div className="tile"><span className="label">ROI</span><span className={`value ${summary.roi_pct >= 0 ? "gain" : "loss"}`}>{summary.roi_pct >= 0 ? "+" : ""}{summary.roi_pct.toFixed(2)}%</span></div>
           <div className="tile"><span className="label">Win %</span><span className="value">{win === null || win === undefined ? "-" : `${win.toFixed(1)}%`}</span></div>
-          <div className="tile"><span className="label">Margin deployed</span><span className="value">{inr(summary.deployed_margin)}</span></div>
+          <div className="tile"><span className="label">Margin deployed (netted)</span><span className="value">{inr(summary.deployed_margin)}</span></div>
+          {(summary.margin_benefit ?? 0) > 0 && (
+            <div className="tile"><span className="label">Hedge benefit</span><span className="value gain">−{inr(summary.margin_benefit)}</span></div>
+          )}
           <div className="tile"><span className="label">Available cash</span><span className="value">{inr(summary.available_cash)}</span></div>
         </div>
       )}
@@ -496,7 +499,7 @@ export default function FnoPositionsPage() {
                     <th>Lots</th>
                     <th>Avg price</th>
                     <th>LTP</th>
-                    <th>Margin</th>
+                    <th>Margin (standalone)</th>
                     <th>P&amp;L</th>
                     <th>Action</th>
                   </tr>
@@ -722,7 +725,8 @@ function OrderModal({ draft, accountId, onClose, onDone }: { draft: OrderDraft; 
           <div className="sell-warn">
             Selling collects the premium but blocks <b>margin</b> — typically many times the premium, not the
             premium itself. If this opens a new short rather than closing a long, the downside is unlimited.
-            Exiting a short buys it back.
+            Buying a further-OTM option of the same type as a hedge sharply lowers the margin blocked. Exiting a
+            short buys it back.
           </div>
         )}
 

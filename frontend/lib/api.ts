@@ -1352,7 +1352,12 @@ export interface FnoOrder {
   filled_at: string | null;
 }
 
-export type FnoPositionsSummary = ManualPositionsSummary;
+export interface FnoPositionsSummary extends ManualPositionsSummary {
+  // Hedge-aware margin: deployed_margin is the NETTED portfolio (SPAN-lite) figure;
+  // standalone_margin is the sum of each leg's own margin; the gap is the benefit.
+  standalone_margin?: number;
+  margin_benefit?: number;
+}
 
 export interface FnoAccount {
   account_id: string;
