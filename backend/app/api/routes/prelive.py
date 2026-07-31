@@ -37,6 +37,32 @@ async def status(_user: dict = Depends(get_current_user)):
             "today": today_doc}
 
 
+def _anti_row(s: dict, per_cap: float) -> dict:
+    """The exact inverse of a strategy's running record — the ANTI-<name> that takes
+    the reverse trade (SL/TP swapped). Net P&L negated, wins<->losses swapped, win rate
+    and profit factor inverted; computed at read time so the trading engine is untouched."""
+    trades = s.get("trades", 0) or 0
+    wins = s.get("wins", 0) or 0
+    net_pnl = s.get("net_pnl", 0.0) or 0.0
+    gross_win = s.get("gross_win", 0.0) or 0.0
+    gross_loss = s.get("gross_loss", 0.0) or 0.0
+    anti_wins = trades - wins
+    return {
+        "key": f"anti_{s.get('key', '')}",
+        "strategy_id": f"ANTI-{s.get('strategy_id', '')}",
+        "name": f"ANTI-{s.get('name', s.get('strategy_id', ''))}",
+        "timeframe": s.get("timeframe"),
+        "trades": trades, "wins": anti_wins, "losses": wins,
+        "gross_win": round(gross_loss, 2), "gross_loss": round(gross_win, 2),
+        "net_pnl": round(-net_pnl, 2),
+        "win_rate": round(anti_wins / trades, 4) if trades else 0.0,
+        "profit_factor": round(gross_loss / gross_win, 3) if gross_win > 0 else None,
+        "expectancy": round(-(s.get("expectancy") or 0.0), 2),
+        "allocated_capital": round(per_cap - net_pnl, 2),
+        "is_anti": True,
+    }
+
+
 @router.get("/leaderboard")
 async def leaderboard(_user: dict = Depends(get_current_user)):
     per_cap = float(os.getenv("PRELIVE_PER_STRATEGY_CAPITAL", "1000000"))
@@ -45,6 +71,8 @@ async def leaderboard(_user: dict = Depends(get_current_user)):
         s.pop("_id", None)
         s["allocated_capital"] = round(per_cap + (s.get("net_pnl") or 0.0), 2)
         rows.append(s)
+        rows.append(_anti_row(s, per_cap))
+    rows.sort(key=lambda r: r.get("net_pnl") or 0.0, reverse=True)
     return {"count": len(rows), "strategies": rows}
 
 

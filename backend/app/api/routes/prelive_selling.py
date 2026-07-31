@@ -89,11 +89,27 @@ async def leaderboard(_current_user: dict = Depends(get_current_user)):
         wins, losses = doc.get("wins", 0), doc.get("losses", 0)
         trades = wins + losses
         gross_win, gross_loss = doc.get("gross_win", 0.0), doc.get("gross_loss", 0.0)
+        net_pnl = doc.get("net_pnl") or 0.0
         doc["trades"] = trades
         doc["win_rate"] = round(wins / trades, 4) if trades else None
         doc["profit_factor"] = round(gross_win / gross_loss, 3) if gross_loss > 0 else None
-        doc["allocated_capital"] = round(per_cap + (doc.get("net_pnl") or 0.0), 2)
+        doc["allocated_capital"] = round(per_cap + net_pnl, 2)
         rows.append(doc)
+        # ANTI-<name>: the exact inverse (reverse trade, SL/TP swapped) — net P&L negated,
+        # wins<->losses swapped, win-rate and profit-factor inverted. Read-time only; the
+        # selling engine is never touched.
+        rows.append({
+            "strategy_id": f"ANTI-{doc.get('strategy_id', '')}",
+            "name": f"ANTI-{doc.get('name', doc.get('strategy_id', ''))}",
+            "trades": trades, "wins": losses, "losses": wins,
+            "gross_win": round(gross_loss, 2), "gross_loss": round(gross_win, 2),
+            "net_pnl": round(-net_pnl, 2),
+            "win_rate": round(losses / trades, 4) if trades else None,
+            "profit_factor": round(gross_loss / gross_win, 3) if gross_win > 0 else None,
+            "allocated_capital": round(per_cap - net_pnl, 2),
+            "is_anti": True,
+        })
+    rows.sort(key=lambda r: r.get("net_pnl") or 0.0, reverse=True)
     return rows
 
 

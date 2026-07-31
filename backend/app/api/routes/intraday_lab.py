@@ -95,12 +95,27 @@ async def leaderboard(current_user: dict = Depends(get_current_user)):
     rows = []
     for spec in STRATEGY_CATALOG:
         score = scores.get(spec.strategy_id) or {}
+        trades = score.get("trades", 0) or 0
+        win_rate = score.get("win_rate", 0.0) or 0.0
+        net_pnl = score.get("net_pnl", 0.0) or 0.0
+        allocated = (
+            score.get("allocated_capital") if score.get("allocated_capital") is not None else PER_STRATEGY_ALLOCATION
+        )
         rows.append({
             "strategy_id": spec.strategy_id, "name": spec.name, "category": spec.category,
-            "trades": score.get("trades", 0), "win_rate": score.get("win_rate", 0.0),
-            "net_pnl": score.get("net_pnl", 0.0),
-            "allocated_capital": score.get("allocated_capital")
-            if score.get("allocated_capital") is not None else PER_STRATEGY_ALLOCATION,
+            "trades": trades, "win_rate": win_rate, "net_pnl": round(net_pnl, 2),
+            "allocated_capital": allocated,
+        })
+        # ANTI-<name>: the exact inverse (take the reverse trade — SL/TP swapped). Same
+        # entries, opposite outcome: when the original loses, this gains. Computed here so
+        # the live trading engines are never touched. See intraday_lab.py leaderboard.
+        rows.append({
+            "strategy_id": f"anti_{spec.strategy_id}", "name": f"ANTI {spec.name}", "category": spec.category,
+            "trades": trades,
+            "win_rate": round(1.0 - win_rate, 4) if trades else 0.0,
+            "net_pnl": round(-net_pnl, 2),
+            "allocated_capital": round(PER_STRATEGY_ALLOCATION - net_pnl, 2),
+            "is_anti": True,
         })
     rows.sort(key=lambda r: r["net_pnl"], reverse=True)
     return {"leaderboard": rows}
