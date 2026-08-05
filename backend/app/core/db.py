@@ -57,6 +57,13 @@ intraday_lab_scores_collection = db["intraday_lab_scores"]
 intraday_lab_state_collection = db["intraday_lab_state"]
 intraday_lab_equity_collection = db["intraday_lab_equity"]
 intraday_lab_backtests_collection = db["intraday_lab_backtests"]
+# Live Intraday desk — the curated ₹80k shortlist (8 strategies, ₹10k each) inside the
+# Intraday Stocks module; paper today, real money later. Separate from the tournament above.
+live_intraday_positions_collection = db["live_intraday_positions"]
+live_intraday_trades_collection = db["live_intraday_trades"]
+live_intraday_scores_collection = db["live_intraday_scores"]
+live_intraday_state_collection = db["live_intraday_state"]
+live_intraday_equity_collection = db["live_intraday_equity"]
 # Long-Horizon factor desk — cross-sectional (top-K basket) momentum/low-vol/reversal
 # strategies, own capital pool, own sweep, mirroring the prelive_* / prelive_selling_*
 # separation: different capital, different risk model, different qualification rule.

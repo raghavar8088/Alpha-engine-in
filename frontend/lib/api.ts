@@ -651,6 +651,7 @@ export interface IntradayPosition {
   opened_at: string | null;
   opened_on: string | null;
   closed_at: string | null;
+  is_anti?: boolean;
 }
 
 export interface IntradayDeskStatus {
@@ -683,6 +684,7 @@ export interface IntradayScore {
   win_rate: number;
   net_pnl: number;
   allocated_capital: number | null;
+  is_anti?: boolean;
 }
 
 export interface IntradayTrade {
@@ -726,6 +728,44 @@ export async function fetchIntradayLeaderboard(): Promise<IntradayScore[]> {
 }
 export async function fetchIntradayTrades(limit = 100): Promise<IntradayTrade[]> {
   return apiFetch(`/api/intraday-lab/trades?limit=${limit}`);
+}
+
+// ---- Live Intraday desk (curated ₹80k shortlist inside Intraday Stocks) ----
+export interface LiveIntradaySummary {
+  initial_capital: number;
+  per_strategy_allocation: number;
+  position_notional: number;
+  available_cash: number;
+  deployed_capital: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  equity: number;
+  open_positions: number;
+  closed_positions: number;
+  strategy_count: number;
+  paused: boolean;
+  mode: string;
+  today_pnl: number;
+  breaker_tripped: boolean;
+  daily_loss_limit: number;
+  last_run_at: string | null;
+  broker_connected: boolean;
+  angel_configured: boolean;
+}
+
+export async function fetchLiveIntradaySummary(): Promise<LiveIntradaySummary> {
+  return apiFetch("/api/live-intraday/summary");
+}
+export async function fetchLiveIntradayLeaderboard(): Promise<IntradayScore[]> {
+  const r = await apiFetch("/api/live-intraday/leaderboard");
+  return r.leaderboard ?? [];
+}
+export async function fetchLiveIntradayPositions(): Promise<{ positions: IntradayPosition[]; summary: LiveIntradaySummary }> {
+  return apiFetch("/api/live-intraday/positions");
+}
+export async function fetchLiveIntradayTrades(limit = 100): Promise<IntradayTrade[]> {
+  const r = await apiFetch(`/api/live-intraday/trades?limit=${limit}`);
+  return r.trades ?? [];
 }
 export async function fetchIntradayEquity(limit = 500): Promise<IntradayEquityPoint[]> {
   return apiFetch(`/api/intraday-lab/equity?limit=${limit}`);

@@ -35,6 +35,7 @@ async def _dhan_or_none():
 
 async def intraday_lab_loop() -> None:
     from app.services.intraday_lab_engine import run_cycle
+    from app.services.live_intraday_engine import run_cycle as live_run_cycle
 
     while True:
         try:
@@ -46,6 +47,15 @@ async def intraday_lab_loop() -> None:
                     "intraday-lab cycle: %d opened, %d managed, %d symbols scanned",
                     result["opened"], result["managed"], result["scanned_symbols"],
                 )
+                # The curated ₹80k Live Intraday shortlist rides the same tick + feed.
+                try:
+                    live_result = await live_run_cycle(dhan)
+                    logger.info(
+                        "live-intraday cycle: %d opened, %d managed",
+                        live_result["opened"], live_result["managed"],
+                    )
+                except Exception:
+                    logger.exception("live-intraday cycle failed — tournament tick already committed")
         except Exception:
             logger.exception("intraday-lab scheduler tick failed — will retry next tick")
         await asyncio.sleep(TICK_SECONDS)

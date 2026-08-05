@@ -12,12 +12,19 @@ import {
   IntradayPosition,
   IntradayScore,
   IntradayTrade,
+  LiveIntradaySummary,
   fetchIntradayDaily,
   fetchIntradayEquity,
   fetchIntradayLeaderboard,
   fetchIntradayStatus,
   fetchIntradayTrades,
+  fetchLiveIntradayLeaderboard,
+  fetchLiveIntradayPositions,
+  fetchLiveIntradaySummary,
+  fetchLiveIntradayTrades,
 } from "../../lib/api";
+
+type IntradayTab = "tournament" | "live";
 
 const REFRESH_MS = 15000;
 
@@ -41,12 +48,19 @@ function SourcePill({ source }: { source: string | null | undefined }) {
 }
 
 export default function IntradayStocksPage() {
+  const [tab, setTab] = useState<IntradayTab>("tournament");
   const [status, setStatus] = useState<IntradayDeskStatus | null>(null);
   const [scores, setScores] = useState<IntradayScore[]>([]);
   const [trades, setTrades] = useState<IntradayTrade[]>([]);
   const [equity, setEquity] = useState<IntradayEquityPoint[]>([]);
   const [days, setDays] = useState<IntradayDay[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  // Live Intraday desk (curated ₹80k shortlist)
+  const [liveSummary, setLiveSummary] = useState<LiveIntradaySummary | null>(null);
+  const [liveScores, setLiveScores] = useState<IntradayScore[]>([]);
+  const [livePositions, setLivePositions] = useState<IntradayPosition[]>([]);
+  const [liveTrades, setLiveTrades] = useState<IntradayTrade[]>([]);
 
   const load = useCallback(async () => {
     try {
@@ -68,11 +82,35 @@ export default function IntradayStocksPage() {
     }
   }, []);
 
+  const loadLive = useCallback(async () => {
+    try {
+      const [lb, pos, tr] = await Promise.all([
+        fetchLiveIntradayLeaderboard(),
+        fetchLiveIntradayPositions(),
+        fetchLiveIntradayTrades(100),
+      ]);
+      setLiveScores(lb);
+      setLivePositions(pos.positions);
+      setLiveSummary(pos.summary);
+      setLiveTrades(tr);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load the Live Intraday desk");
+    }
+  }, []);
+
   useEffect(() => {
     load();
     const id = setInterval(load, REFRESH_MS);
     return () => clearInterval(id);
   }, [load]);
+
+  useEffect(() => {
+    if (tab !== "live") return;
+    loadLive();
+    const id = setInterval(loadLive, REFRESH_MS);
+    return () => clearInterval(id);
+  }, [tab, loadLive]);
 
   const heartbeatAge = status?.heartbeat
     ? (Date.now() - new Date(status.heartbeat).getTime()) / 1000
@@ -94,6 +132,19 @@ export default function IntradayStocksPage() {
         subtitle="Paper strategy-selection tournament: auto-trades 150 intraday NSE-equity strategies on live Angel One prices. Each strategy runs its own independent ₹10 lakh account (₹15 cr across the desk) and takes a uniform ₹10 lakh per position, so the leaderboard ranks timing edge, not bet size. Long-only cash equities; scalping/momentum/mean-reversion styles square off at 15:15 IST, swing styles may carry a few days."
       />
 
+      <div className="tabs">
+        <button className={tab === "tournament" ? "tab active" : "tab"} onClick={() => setTab("tournament")}>
+          Tournament · 150 strategies
+        </button>
+        <button className={tab === "live" ? "tab active" : "tab"} onClick={() => setTab("live")}>
+          Live Intraday · ₹80k
+        </button>
+      </div>
+
+      {error && <ErrorBanner message={error} />}
+
+      {tab === "tournament" && (
+      <>
       <div className="desk-banner">
         <strong>LONG-ONLY CASH EQUITIES.</strong> Every position is a paper buy sized by its
         strategy&rsquo;s capital slice, with the target and stop taken from the signal itself.
@@ -101,8 +152,6 @@ export default function IntradayStocksPage() {
         last daily-bar close only when neither can price a name — each mark is labelled with its
         source, never faked.
       </div>
-
-      {error && <ErrorBanner message={error} />}
 
       {status?.paused && (
         <div className="breaker">
@@ -333,9 +382,115 @@ export default function IntradayStocksPage() {
           </div>
         )}
       </GlassPanel>
+      </>
+      )}
+
+      {tab === "live" && (
+      <>
+      <div className="desk-banner">
+        <strong>LIVE INTRADAY · ₹80,000 PAPER.</strong> The 8-strategy shortlist selected to take toward real money —
+        each on its own <strong>₹10,000</strong> account (₹80k total), trading on the live Angel One feed. Six are{" "}
+        <strong>ANTI</strong> strategies: this desk places the <em>real reverse trade</em> (opposite side, stop/target
+        swapped), not a computed mirror. Paper today; real-money wiring is the next step.
+      </div>
+
+      <div className="tiles">
+        <div className="tile"><div className="tile-label">Mode</div><div className="tile-value gain">PAPER</div><div className="tile-sub">{liveSummary?.paused ? "entries paused" : "armed · live Angel feed"}</div></div>
+        <div className="tile"><div className="tile-label">Equity</div><div className="tile-value">₹{inr(liveSummary?.equity)}</div><div className="tile-sub">from ₹{inr(liveSummary?.initial_capital)} (8 × ₹10k)</div></div>
+        <div className="tile"><div className="tile-label">Today P&amp;L</div><div className={`tile-value ${(liveSummary?.today_pnl ?? 0) >= 0 ? "gain" : "loss"}`}>{(liveSummary?.today_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(liveSummary?.today_pnl)}</div><div className="tile-sub">breaker at −₹{inr(liveSummary?.daily_loss_limit)}</div></div>
+        <div className="tile"><div className="tile-label">Realised P&amp;L</div><div className={`tile-value ${(liveSummary?.realized_pnl ?? 0) >= 0 ? "gain" : "loss"}`}>{(liveSummary?.realized_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(liveSummary?.realized_pnl)}</div><div className="tile-sub">{liveSummary?.closed_positions ?? 0} trades closed</div></div>
+        <div className="tile"><div className="tile-label">Open positions</div><div className="tile-value">{liveSummary?.open_positions ?? 0}</div><div className="tile-sub">₹{inr(liveSummary?.unrealized_pnl)} unrealised</div></div>
+        <div className="tile"><div className="tile-label">Deployed</div><div className="tile-value">₹{inr(liveSummary?.deployed_capital)}</div><div className="tile-sub">₹{inr(liveSummary?.available_cash)} free</div></div>
+        <div className="tile"><div className="tile-label">Strategies</div><div className="tile-value">{liveSummary?.strategy_count ?? 0}</div><div className="tile-sub">₹{inr(liveSummary?.position_notional)} / position</div></div>
+      </div>
+
+      <GlassPanel title="Selected strategies">
+        {!liveScores.length ? (
+          <div className="empty">Loading the shortlist…</div>
+        ) : (
+          <div className="table-scroll">
+            <table className="data-table">
+              <thead><tr><th style={{ textAlign: "left" }}>Strategy</th><th style={{ textAlign: "left" }}>Category</th><th>Trades</th><th>Win %</th><th>Net P&amp;L</th><th>Account</th></tr></thead>
+              <tbody>
+                {liveScores.map((s) => (
+                  <tr key={s.strategy_id}>
+                    <td style={{ textAlign: "left" }}>{s.is_anti && <span className="badge anti">ANTI</span>} {s.name}</td>
+                    <td style={{ textAlign: "left" }}><span className="badge">{s.category}</span></td>
+                    <td>{s.trades}</td>
+                    <td>{s.trades ? `${(s.win_rate * 100).toFixed(1)}%` : "-"}</td>
+                    <td className={s.net_pnl >= 0 ? "gain" : "loss"}>{s.net_pnl >= 0 ? "+" : ""}₹{inr(s.net_pnl)}</td>
+                    <td>₹{inr(s.allocated_capital)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </GlassPanel>
+
+      <GlassPanel title={`Open positions (${liveSummary?.open_positions ?? 0})`}>
+        {!livePositions.filter((p) => p.status === "OPEN").length ? (
+          <div className="empty">No open positions yet — the desk trades during market hours (09:15–15:30 IST).</div>
+        ) : (
+          <div className="table-scroll">
+            <table className="data-table">
+              <thead><tr><th style={{ textAlign: "left" }}>Symbol</th><th style={{ textAlign: "left" }}>Strategy</th><th>Side</th><th>Qty</th><th>Entry</th><th>LTP</th><th>Src</th><th>Target</th><th>Stop</th><th>Unrealised</th></tr></thead>
+              <tbody>
+                {livePositions.filter((p) => p.status === "OPEN").map((p) => (
+                  <tr key={p.position_id}>
+                    <td style={{ textAlign: "left" }}>{p.symbol}</td>
+                    <td style={{ textAlign: "left", fontSize: 11 }}>{p.strategy_name}</td>
+                    <td><span className={p.side === "SELL" ? "badge loss" : "badge"}>{p.side}</span></td>
+                    <td>{p.qty}</td>
+                    <td>₹{inr2(p.entry_price)}</td>
+                    <td>₹{inr2(p.ltp)}</td>
+                    <td><SourcePill source={p.ltp_source} /></td>
+                    <td>₹{inr2(p.target)}</td>
+                    <td>₹{inr2(p.stoploss)}</td>
+                    <td className={(p.unrealized_pnl ?? 0) >= 0 ? "gain" : "loss"}>{(p.unrealized_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(p.unrealized_pnl)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </GlassPanel>
+
+      <GlassPanel title="Recent paper trades">
+        {!liveTrades.length ? (
+          <div className="empty">No closed trades yet.</div>
+        ) : (
+          <div className="table-scroll">
+            <table className="data-table">
+              <thead><tr><th style={{ textAlign: "left" }}>Symbol</th><th style={{ textAlign: "left" }}>Strategy</th><th>Side</th><th>Qty</th><th>Entry</th><th>Exit</th><th>Reason</th><th>P&amp;L</th><th>Closed</th></tr></thead>
+              <tbody>
+                {liveTrades.map((t, i) => (
+                  <tr key={`${t.trade_id}-${i}`}>
+                    <td style={{ textAlign: "left" }}>{t.symbol}</td>
+                    <td style={{ textAlign: "left", fontSize: 11 }}>{t.strategy_name}</td>
+                    <td>{t.side}</td>
+                    <td>{t.qty}</td>
+                    <td>₹{inr2(t.entry_price)}</td>
+                    <td>₹{inr2(t.exit_price)}</td>
+                    <td><span className={`badge ${t.exit_reason === "stoploss" ? "loss" : ""}`}>{t.exit_reason}</span></td>
+                    <td className={t.realized_pnl >= 0 ? "gain" : "loss"}>{t.realized_pnl >= 0 ? "+" : ""}₹{inr(t.realized_pnl)}</td>
+                    <td style={{ fontSize: 10.5 }}>{t.closed_at ? new Date(t.closed_at).toLocaleString() : "-"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </GlassPanel>
+      </>
+      )}
 
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 16px; }
+        .tabs { display: flex; gap: 8px; }
+        .tab { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+        .tab.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .badge.anti { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); margin-right: 4px; }
         .desk-banner {
           padding: 10px 16px; border-radius: 8px; font-size: 12px; line-height: 1.5;
           background: var(--canvas-soft); border: 1px solid var(--panel-border);
