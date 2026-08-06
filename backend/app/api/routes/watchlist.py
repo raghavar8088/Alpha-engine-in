@@ -115,12 +115,17 @@ async def watchlist_quotes(watchlist_id: str, current_user: dict = Depends(get_c
     for s in symbols:
         by_segment.setdefault(s["exchange_segment"], []).append(int(s["security_id"]))
 
+    # Dhan first for the full OHLC/volume snapshot; if Dhan's data endpoint is
+    # unavailable, fall back to Angel One for at least the LTP (broker_data.get_ltp owns
+    # the failover) so the watchlist still shows a live price.
+    from app.services.broker_data import get_ltp
+
     try:
         resp = await dhan.quote_data(by_segment)
-    except DhanAPIError as exc:
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=exc.remarks)
+        data = resp.get("data", {})
+    except (DhanAPIError, Exception):
+        data = {}
 
-    data = resp.get("data", {})
     quotes = []
     for s in symbols:
         seg_data = data.get(s["exchange_segment"], {})
@@ -128,6 +133,8 @@ async def watchlist_quotes(watchlist_id: str, current_user: dict = Depends(get_c
         ltp = q.get("last_price")
         ohlc = q.get("ohlc") or {}
         prev_close = ohlc.get("close")
+        if ltp is None:
+            ltp, _src = await get_ltp(dhan, str(s["security_id"]), s["exchange_segment"])
         change = (ltp - prev_close) if (ltp is not None and prev_close) else None
         pct_change = (change / prev_close * 100) if (change is not None and prev_close) else None
         quotes.append({

@@ -131,6 +131,13 @@ async def _instrument(security_id: str, exchange_segment: str) -> dict:
 
 
 async def _ltp(dhan: DhanClient, security_id: str, exchange_segment: str) -> float | None:
+    # Dhan-first, then Angel One (broker_data.get_ltp owns the failover), so equity
+    # marking/fills keep working when Dhan's data endpoint is unavailable.
+    from app.services.broker_data import get_ltp
+
+    price, _source = await get_ltp(dhan, security_id, exchange_segment)
+    if price is not None:
+        return price
     try:
         raw = await dhan.quote_data({exchange_segment: [int(security_id)]})
     except (DhanAPIError, Exception):
