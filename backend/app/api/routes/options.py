@@ -18,8 +18,11 @@ from app.schemas.options import (
     OptionsSweepRequest,
     PayoffRequest,
 )
-from app.services.dhan_client import DhanAPIError
-from options_service.chain import parse_chain
+from app.services.angel_option_chain import (
+    ChainError,
+    option_chain as angel_option_chain,
+    option_expiries as angel_option_expiries,
+)
 from options_service.options_backtest import OPTION_BUYING_CATEGORIES, run_options_backtest
 from options_service.options_selling_backtest import (
     DEFAULT_OVERLAP_THRESHOLD,
@@ -48,28 +51,22 @@ async def _underlying_instrument(symbol: str) -> dict:
 
 @router.get("/expiries/{symbol}")
 async def expiries(symbol: str, current_user: dict = Depends(get_current_user)):
-    instrument = await _underlying_instrument(symbol)
-    client = await _get_dhan_client(str(current_user["_id"]))
+    # Off Dhan — expiries from the instrument master, chain from Angel One (below).
+    await _underlying_instrument(symbol)  # validate it's a whitelisted underlying
     try:
-        result = await client.option_chain_expiry_list(int(instrument["security_id"]), instrument["exchange_segment"])
-    except DhanAPIError as exc:
-        raise HTTPException(status_code=502, detail=exc.remarks)
-    return {"symbol": symbol.upper(), "expiries": result.get("data", [])}
+        return {"symbol": symbol.upper(), "expiries": await angel_option_expiries(symbol)}
+    except ChainError as exc:
+        raise HTTPException(status_code=422, detail=exc.detail)
 
 
 @router.get("/chain/{symbol}")
 async def chain(
     symbol: str, expiry: str = Query(description="YYYY-MM-DD"), current_user: dict = Depends(get_current_user)
 ):
-    instrument = await _underlying_instrument(symbol)
-    client = await _get_dhan_client(str(current_user["_id"]))
     try:
-        raw = await client.option_chain(int(instrument["security_id"]), instrument["exchange_segment"], expiry)
-    except DhanAPIError as exc:
-        raise HTTPException(status_code=502, detail=exc.remarks)
-    if raw.get("status") != "success":
-        raise HTTPException(status_code=502, detail=raw.get("remarks") or "Dhan option chain request failed")
-    return parse_chain(raw, expiry)
+        return await angel_option_chain(symbol, expiry)
+    except ChainError as exc:
+        raise HTTPException(status_code=422, detail=exc.detail)
 
 
 @router.post("/payoff")

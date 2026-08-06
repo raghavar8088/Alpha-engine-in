@@ -44,8 +44,12 @@ from app.services.chart_data import (
 )
 from app.services.chart_overlays import active_calls, backtest_runs, backtest_trades, open_positions
 from app.services.chart_stream import bar_epoch, hub, stream_timeframe
-from app.services.dhan_client import DhanAPIError
-from options_service.chain import parse_chain
+from app.services.angel_option_chain import (
+    ChainError,
+    option_chain as angel_option_chain,
+    option_expiries as angel_option_expiries,
+)
+from app.services.dhan_client import DhanAPIError  # noqa: F401 — still used by historical-bar paths
 
 # Long enough to stay clear of chatty reconnects, short enough that an idle
 # proxy doesn't reap the connection and that the client can tell "market quiet"
@@ -262,25 +266,16 @@ async def option_context(
             status_code=422,
             detail=f"Option-chain context is only available for index underlyings, not {symbol}.",
         )
-    client = await _dhan(current_user)
+    # Off Dhan — expiries from the instrument master, chain assembled from Angel One.
     try:
         if not expiry:
-            expiries = await client.option_chain_expiry_list(
-                int(instrument["security_id"]), instrument["exchange_segment"]
-            )
-            available = expiries.get("data") or []
+            available = await angel_option_expiries(symbol)
             if not available:
-                return {"available": False, "reason": "Dhan returned no expiries for this underlying."}
+                return {"available": False, "reason": "No listed expiries for this underlying."}
             expiry = available[0]
-        raw = await client.option_chain(
-            int(instrument["security_id"]), instrument["exchange_segment"], expiry
-        )
-    except DhanAPIError as exc:
-        raise HTTPException(status_code=502, detail=exc.remarks)
-    if raw.get("status") != "success":
-        raise HTTPException(status_code=502, detail=raw.get("remarks") or "Dhan option chain request failed")
-
-    parsed = parse_chain(raw, expiry)
+        parsed = await angel_option_chain(symbol, expiry)
+    except ChainError as exc:
+        raise HTTPException(status_code=422, detail=exc.detail)
     strikes = parsed.get("strikes") or []
     top_call_oi = sorted(strikes, key=lambda s: (s["ce"].get("oi") or 0), reverse=True)[:3]
     top_put_oi = sorted(strikes, key=lambda s: (s["pe"].get("oi") or 0), reverse=True)[:3]
