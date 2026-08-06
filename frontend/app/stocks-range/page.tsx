@@ -202,7 +202,7 @@ export default function StocksRangePage() {
       <PageHeader
         crumb="Stocks Range"
         title="Stocks Range"
-        subtitle="A watch-table of the Nifty 50 / 100 / 250 / 500 universe on live Angel One prices — LTP, 1-day and 1-week change, sector and stock trend. Set your own manual buy price per stock; when the live price is within ±6% of it, the stock lights up as a BUY ZONE."
+        subtitle="A watch-table of the Nifty 50 / 100 / 250 / 500 universe on live Angel One prices — LTP, 1-day and 1-week change, sector and stock trend. Set your own manual buy price per stock; when the live price is within ±10% of it, the stock lights up as a BUY ZONE."
         actions={<button className="add-cta" onClick={() => setDialogFor(null)}>+ Add Range</button>}
       />
 

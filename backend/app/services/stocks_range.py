@@ -8,7 +8,7 @@ Data sources, all Angel/local (no Dhan):
   * LTP + previous close (1-day change): Angel One FULL quotes.
   * 1-week change + stock/sector trend: the stored daily bars (bars_collection).
   * buy range: the user's own price, stored per (user, symbol); a stock is in the BUY
-    ZONE when the live price is within ±6% of that entered price.
+    ZONE when the live price is within ±10% of that entered price.
 """
 
 import csv
@@ -29,7 +29,7 @@ from app.services.angel_client import AngelAPIError, angel_client
 
 logger = logging.getLogger("stocks_range")
 
-BUY_ZONE_PCT = 0.06  # within ±6% of the entered price = buy zone
+BUY_ZONE_PCT = 0.10  # within ±10% of the entered price = buy zone
 
 # (index key, label, official constituent CSV). The lists nest largest-to-smallest.
 INDEX_CSVS = [
