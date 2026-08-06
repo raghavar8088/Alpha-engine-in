@@ -2,6 +2,7 @@ import asyncio
 import base64
 import json
 import logging
+import os
 import time
 
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
@@ -172,24 +173,29 @@ async def start_long_horizon_scheduler() -> None:
 
 @app.on_event("startup")
 async def refresh_angel_equity_tokens() -> None:
-    """Stamp Angel `symboltoken`s onto our instrument docs so the Intraday Stocks desk
-    can quote equities off Angel One (its primary feed). Idempotent; runs once in the
-    background so a slow scrip-master download never blocks startup. No-op unless Angel
-    is configured — off-whitelist/local dev falls back to Dhan and needs no map."""
+    """Stamp Angel `symboltoken`s onto our instrument docs so every desk can quote off
+    Angel One. Idempotent; runs in the background (a slow scrip-master download never
+    blocks startup) and then re-runs DAILY, so as weekly option expiries roll and new
+    strikes list, the option chain stays fully mapped without a redeploy. No-op unless
+    Angel is configured."""
     from app.services.angel_client import angel_client
 
     if not angel_client.configured():
         logger.info("Angel token-map refresh skipped — Angel One not configured")
         return
 
-    async def _run() -> None:
-        try:
-            from app.services.angel_instruments import refresh_angel_tokens
+    interval = int(os.getenv("ANGEL_TOKEN_REFRESH_HOURS", "12")) * 3600
 
-            result = await refresh_angel_tokens()
-            logger.info("Angel token map refreshed for Intraday Stocks desk: %s", result)
-        except Exception:
-            logger.exception("Angel token-map refresh failed — desk will fall back to Dhan")
+    async def _run() -> None:
+        while True:
+            try:
+                from app.services.angel_instruments import refresh_angel_tokens
+
+                result = await refresh_angel_tokens()
+                logger.info("Angel token map refreshed: %s", result)
+            except Exception:
+                logger.exception("Angel token-map refresh failed — desks fall back to Dhan")
+            await asyncio.sleep(interval)
 
     asyncio.create_task(_run())
 
