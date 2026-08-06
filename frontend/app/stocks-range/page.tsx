@@ -283,7 +283,7 @@ export default function StocksRangePage() {
                         <span className="nm">{r.name}</span>
                       </div>
                     </td>
-                    <td><span className="badge">{r.belongs_to}</span></td>
+                    <td><span className="badge">{r.belongs_to || "—"}</span></td>
                     <td style={{ textAlign: "left" }} className="sector">{r.sector}</td>
                     <td className="ltp">₹{inr(r.ltp)}</td>
                     <td className={(r.change_1d ?? 0) >= 0 ? "gain" : "loss"}>{signed(r.change_1d)}</td>

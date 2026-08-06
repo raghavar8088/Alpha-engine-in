@@ -119,6 +119,10 @@ async def backfill_universe_bars() -> dict:
         return {"ok": 0, "failed": 0, "skipped": True}
 
     syms = [d["symbol"] async for d in stock_universe_collection.find({}, {"symbol": 1})]
+    # include any custom stock a user has set a buy range for (e.g. one outside the Nifty
+    # 500) so its 1-week change / trend columns fill in too.
+    ranged = await stock_ranges_collection.distinct("symbol")
+    syms = list({*syms, *ranged})
     inst = {
         d["symbol"]: d async for d in instruments_collection.find(
             {"asset_class": "EQUITY", "symbol": {"$in": syms}, "angel_token": {"$ne": None}},
@@ -204,6 +208,30 @@ async def list_universe(user_id: str, index: str) -> dict:
     docs = [d async for d in stock_universe_collection.find({"indices": index})]
     if not docs:
         raise RangeError("Stock universe not seeded yet — try again in a moment.")
+
+    ranges = {r["symbol"]: r["buy_price"] async for r in stock_ranges_collection.find({"user_id": user_id})}
+
+    # Also surface every stock the user has set a buy range for, even when it sits outside
+    # the selected index — or outside the Nifty 500 entirely (e.g. KANSAINER). Those are the
+    # user's own watch list and should appear on any tab. Pull index members from the
+    # universe (keeps their real sector/belongs-to); for symbols not in any Nifty index,
+    # synthesise a doc from the instrument master so they can still be quoted and shown.
+    present = {d["symbol"] for d in docs}
+    extra = [s for s in ranges if s not in present]
+    if extra:
+        async for d in stock_universe_collection.find({"symbol": {"$in": extra}}):
+            docs.append(d)
+            present.add(d["symbol"])
+        missing = [s for s in extra if s not in present]
+        if missing:
+            async for i in instruments_collection.find(
+                {"asset_class": "EQUITY", "symbol": {"$in": missing}, "angel_token": {"$ne": None}},
+                {"symbol": 1, "name": 1},
+            ):
+                docs.append({"symbol": i["symbol"], "name": i.get("name"),
+                             "sector": "Unclassified", "indices": [], "tightest_index": None})
+                present.add(i["symbol"])
+
     symbols = [d["symbol"] for d in docs]
 
     # Angel tokens for live quotes
@@ -251,8 +279,6 @@ async def list_universe(user_id: str, index: str) -> dict:
         {"timeframe": "1d", "symbol": {"$in": symbols}}, {"symbol": 1, "close": 1, "ts": 1}
     ).sort("ts", 1):
         closes_by_sym.setdefault(b["symbol"], []).append(b["close"])
-
-    ranges = {r["symbol"]: r["buy_price"] async for r in stock_ranges_collection.find({"user_id": user_id})}
 
     rows = []
     for d in docs:
@@ -303,21 +329,36 @@ async def list_universe(user_id: str, index: str) -> dict:
 
 
 async def search_stocks(q: str, limit: int = 15) -> list[dict]:
+    """Search the Nifty 50/100/250/500 universe FIRST (those carry sector + index), then
+    fall back to any other Angel-quotable NSE equity in the instrument master — so stocks
+    outside the Nifty 500 (e.g. KANSAINER) can still be found and given a buy range."""
     q = q.strip()
     if not q:
         return []
-    cursor = stock_universe_collection.find(
-        {"$or": [
-            {"symbol": {"$regex": f"^{q.upper()}"}},
-            {"name": {"$regex": q, "$options": "i"}},
-        ]},
-        {"_id": 0, "symbol": 1, "name": 1, "sector": 1, "belongs_to": 1, "tightest_index": 1},
-    ).limit(limit)
-    out = []
-    async for d in cursor:
+    out: list[dict] = []
+    seen: set[str] = set()
+
+    async for d in stock_universe_collection.find(
+        {"$or": [{"symbol": {"$regex": f"^{q.upper()}"}}, {"name": {"$regex": q, "$options": "i"}}]},
+        {"_id": 0, "symbol": 1, "name": 1, "sector": 1, "tightest_index": 1},
+    ).limit(limit):
         out.append({"symbol": d["symbol"], "name": d.get("name"), "sector": d.get("sector"),
                     "belongs_to": INDEX_LABELS.get(d.get("tightest_index")),
                     "tightest_index": d.get("tightest_index")})
+        seen.add(d["symbol"])
+
+    if len(out) < limit:
+        async for i in instruments_collection.find(
+            {"asset_class": "EQUITY", "angel_token": {"$ne": None},
+             "symbol": {"$nin": list(seen)},
+             "$or": [{"symbol": {"$regex": f"^{q.upper()}"}}, {"name": {"$regex": q, "$options": "i"}}]},
+            {"_id": 0, "symbol": 1, "name": 1},
+        ).limit(limit - len(out)):
+            if i["symbol"] in seen:
+                continue
+            out.append({"symbol": i["symbol"], "name": i.get("name"), "sector": None,
+                        "belongs_to": None, "tightest_index": None})
+            seen.add(i["symbol"])
     return out
 
 
