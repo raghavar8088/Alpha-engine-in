@@ -134,6 +134,7 @@ export default function StocksRangePage() {
                   <th>Stock trend</th>
                   <th>Sector trend</th>
                   <th>Buy range</th>
+                  <th>Range</th>
                   <th>Zone</th>
                 </tr>
               </thead>
@@ -159,6 +160,9 @@ export default function StocksRangePage() {
                       <button className={r.buy_price != null ? "range-btn set" : "range-btn"} onClick={() => setDialogFor(r.symbol)}>
                         {r.buy_price != null ? `₹${inr(r.buy_price)}` : "+ Set"}
                       </button>
+                    </td>
+                    <td className={r.range_move_pct == null ? "muted" : r.range_move_pct >= 0 ? "gain" : "loss"}>
+                      {r.range_move_pct == null ? "—" : pct(r.range_move_pct)}
                     </td>
                     <td>
                       {r.buy_price == null ? (

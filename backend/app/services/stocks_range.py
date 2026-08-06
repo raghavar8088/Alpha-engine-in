@@ -191,6 +191,7 @@ async def list_universe(user_id: str, index: str) -> dict:
             "stock_trend": _stock_trend(closes, ltp),
             "buy_price": buy,
             "in_buy_zone": in_zone,
+            "range_move_pct": round((ltp / buy - 1) * 100, 2) if (buy and ltp) else None,
             "_rank": TIGHTEST_ORDER.index(d.get("tightest_index")) if d.get("tightest_index") in TIGHTEST_ORDER else 99,
         })
 

@@ -2125,6 +2125,7 @@ export interface StockRangeRow {
   sector_trend: string | null;
   buy_price: number | null;
   in_buy_zone: boolean;
+  range_move_pct: number | null;
 }
 export interface StocksRangeUniverse {
   index: string;
