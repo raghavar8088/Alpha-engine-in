@@ -28,7 +28,11 @@ from app.core.db import (
 from app.services.broker_data import get_ltp
 from app.services.dhan_client import DhanAPIError, DhanClient
 from app.services.fno_margin import portfolio_margin, solve_iv
-from options_service.chain import parse_chain
+from app.services.angel_option_chain import (
+    ChainError,
+    option_chain as angel_option_chain,
+    option_expiries as angel_option_expiries,
+)
 
 DEFAULT_INITIAL_CAPITAL = float(os.getenv("FNO_POSITIONS_INITIAL_CAPITAL", "10000000"))  # ₹1 crore
 PRODUCT_TYPES = ("INTRADAY", "MARGIN")
@@ -154,25 +158,18 @@ async def underlyings() -> list[dict]:
 
 
 async def option_expiries(dhan: DhanClient, symbol: str) -> list[str]:
-    inst = await _underlying_instrument(symbol)
-    try:
-        result = await dhan.option_chain_expiry_list(int(inst["security_id"]), inst["exchange_segment"])
-    except DhanAPIError as exc:
-        raise OrderError(exc.remarks)
-    return result.get("data", [])
+    # Off Dhan: expiries come from the instrument master (no broker call, no Data-API
+    # subscription needed). `dhan` is kept for signature compatibility and ignored.
+    return await angel_option_expiries(symbol)
 
 
 async def option_chain(dhan: DhanClient, symbol: str, expiry: str) -> dict:
-    inst = await _underlying_instrument(symbol)
+    # Off Dhan: the chain is assembled from Angel-One FULL quotes (Dhan's option-chain
+    # endpoint needs a paid Data-API subscription this account doesn't have).
     try:
-        raw = await dhan.option_chain(int(inst["security_id"]), inst["exchange_segment"], expiry)
-    except DhanAPIError as exc:
-        raise OrderError(exc.remarks)
-    if raw.get("status") != "success":
-        raise OrderError(raw.get("remarks") or "Dhan option chain request failed")
-    parsed = parse_chain(raw, expiry)
-    parsed["symbol"] = symbol.upper()
-    return parsed
+        return await angel_option_chain(symbol, expiry)
+    except ChainError as exc:
+        raise OrderError(exc.detail)
 
 
 async def future_expiries(symbol: str) -> list[str]:

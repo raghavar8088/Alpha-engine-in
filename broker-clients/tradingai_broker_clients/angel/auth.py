@@ -119,8 +119,9 @@ def parse_ltp(body: dict) -> dict[str, float]:
 
 
 def parse_full(body: dict) -> dict[str, dict]:
-    """FULL-mode quote body -> {token: {ltp, open, high, low, close, volume}}. FULL mode
-    carries the day OHLC and traded volume that LTP mode does not."""
+    """FULL-mode quote body -> {token: {ltp, open, high, low, close, volume, oi}}. FULL
+    mode carries the day OHLC, traded volume AND open interest (for F&O) that LTP mode
+    does not — the OI is what an option chain needs for PCR / max-pain."""
     out: dict[str, dict] = {}
     for row in (body.get("data") or {}).get("fetched") or []:
         token, ltp = row.get("symbolToken"), row.get("ltp")
@@ -133,5 +134,6 @@ def parse_full(body: dict) -> dict[str, dict]:
             "low": float(row["low"]) if row.get("low") else None,
             "close": float(row["close"]) if row.get("close") else None,
             "volume": float(row.get("tradeVolume") or 0),
+            "oi": float(row.get("opnInterest") or 0),
         }
     return out

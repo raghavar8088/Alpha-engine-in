@@ -151,18 +151,17 @@ async def list_underlyings(_current_user: dict = Depends(get_current_user)):
 
 @router.get("/options/expiries")
 async def options_expiries(symbol: str, current_user: dict = Depends(get_current_user)):
-    dhan = await _dhan(current_user)
+    # Chain + expiries now come from Angel One / the instrument master, so no Dhan needed.
     try:
-        return {"symbol": symbol.upper(), "expiries": await option_expiries(dhan, symbol)}
+        return {"symbol": symbol.upper(), "expiries": await option_expiries(None, symbol)}
     except OrderError as exc:
         raise HTTPException(status_code=422, detail=exc.detail)
 
 
 @router.get("/options/chain")
 async def options_chain(symbol: str, expiry: str = Query(description="YYYY-MM-DD"), current_user: dict = Depends(get_current_user)):
-    dhan = await _dhan(current_user)
     try:
-        return await option_chain(dhan, symbol, expiry)
+        return await option_chain(None, symbol, expiry)
     except OrderError as exc:
         raise HTTPException(status_code=422, detail=exc.detail)
 
