@@ -11,10 +11,11 @@ Data sources, all Angel/local (no Dhan):
     ZONE when the live price is within ±10% of that entered price.
 """
 
+import asyncio
 import csv
 import io
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import httpx
 from pymongo import UpdateOne
@@ -26,10 +27,15 @@ from app.core.db import (
     stock_universe_collection,
 )
 from app.services.angel_client import AngelAPIError, angel_client
+from tradingai_broker_clients.angel.auth import batches
 
 logger = logging.getLogger("stocks_range")
 
 BUY_ZONE_PCT = 0.10  # within ±10% of the entered price = buy zone
+IST = timezone(timedelta(hours=5, minutes=30))
+QUOTE_PACE_SECONDS = 0.15  # small gap between 50-token quote chunks (Angel rate limit)
+BARS_LOOKBACK_DAYS = 90    # daily history to keep per symbol (covers SMA50 + 1-week change)
+BARS_PACE_SECONDS = 0.4    # gap between historical-candle calls (Angel's stricter limit)
 
 # (index key, label, official constituent CSV). The lists nest largest-to-smallest.
 INDEX_CSVS = [
@@ -100,6 +106,71 @@ async def refresh_stock_universe() -> dict:
     return {"symbols": len(members), "by_index": fetched}
 
 
+async def backfill_universe_bars() -> dict:
+    """Fetch ~90 days of daily candles from Angel for EVERY universe symbol and upsert into
+    bars_collection ('1d'), so the 1-week change and stock/sector trend columns are filled
+    for the whole Nifty 500 — not just the ~200 symbols that carried bars from an old load.
+
+    Paced for Angel's historical-data rate limit; per-symbol failures are non-fatal. The ts
+    is stored as a UTC isoformat string (e.g. '...T18:30:00+00:00'), matching the existing
+    daily bars so the upsert dedupes by (symbol, timeframe, ts) instead of doubling days."""
+    if not angel_client.configured():
+        logger.info("universe bars backfill skipped — Angel One not configured")
+        return {"ok": 0, "failed": 0, "skipped": True}
+
+    syms = [d["symbol"] async for d in stock_universe_collection.find({}, {"symbol": 1})]
+    inst = {
+        d["symbol"]: d async for d in instruments_collection.find(
+            {"asset_class": "EQUITY", "symbol": {"$in": syms}, "angel_token": {"$ne": None}},
+            {"symbol": 1, "angel_token": 1, "angel_exchange": 1},
+        )
+    }
+    now = _now()
+    to_dt = now.astimezone(IST).strftime("%Y-%m-%d 15:30")
+    from_dt = (now - timedelta(days=BARS_LOOKBACK_DAYS)).astimezone(IST).strftime("%Y-%m-%d 09:15")
+
+    try:
+        await angel_client._session()  # warm once; per-symbol calls then reuse the JWT
+    except AngelAPIError:
+        pass
+
+    ok = fail = 0
+    for sym, i in inst.items():
+        token = str(i["angel_token"])
+        ex = i.get("angel_exchange") or "NSE"
+        try:
+            rows = await angel_client.candles(ex, token, "D", from_dt, to_dt)
+        except Exception:
+            fail += 1
+            await asyncio.sleep(BARS_PACE_SECONDS)
+            continue
+        ops = []
+        for row in rows or []:
+            try:
+                stamp = datetime.fromisoformat(row[0]).astimezone(timezone.utc)
+                ts = stamp.isoformat()
+                ops.append(UpdateOne(
+                    {"symbol": sym, "timeframe": "1d", "ts": ts},
+                    {"$set": {
+                        "symbol": sym, "timeframe": "1d", "ts": ts,
+                        "open": float(row[1]), "high": float(row[2]), "low": float(row[3]),
+                        "close": float(row[4]), "volume": float(row[5]), "oi": None,
+                    }},
+                    upsert=True,
+                ))
+            except (ValueError, TypeError, IndexError):
+                continue
+        if ops:
+            await bars_collection.bulk_write(ops, ordered=False)
+            ok += 1
+        else:
+            fail += 1
+        await asyncio.sleep(BARS_PACE_SECONDS)
+
+    logger.info("universe bars backfill: %s ok, %s failed (of %s)", ok, fail, len(inst))
+    return {"ok": ok, "failed": fail, "symbols": len(inst)}
+
+
 # --------------------------------------------------------------------------------
 # Trends
 # --------------------------------------------------------------------------------
@@ -149,14 +220,30 @@ async def list_universe(user_id: str, index: str) -> dict:
             tok = str(i["angel_token"])
             by_ex.setdefault(i.get("angel_exchange") or "NSE", []).append(tok)
             tok_sym[tok] = sym
-    q_by_sym: dict[str, dict] = {}
-    for ex, toks in by_ex.items():
+    # Pre-warm the Angel session ONCE. Otherwise, the first quote of the batch may trigger
+    # a login, and if that login is momentarily rate-limited (403) the whole quote call
+    # raises and EVERY price falls back to (often missing) daily bars — which is exactly
+    # why the Nifty 500 tail showed ₹-. One retry covers a transient login hiccup.
+    for attempt in range(2):
         try:
-            for tok, q in (await angel_client.full_quote({ex: toks})).items():
+            await angel_client._session()
+            break
+        except AngelAPIError:
+            if attempt == 0:
+                await asyncio.sleep(0.7)
+
+    # Quote in 50-token chunks with light pacing, and — crucially — catch per chunk so a
+    # single failed chunk can't blank the other ~450 stocks. Whatever a chunk can't return
+    # still falls back to daily bars below.
+    q_by_sym: dict[str, dict] = {}
+    for grouped in batches(by_ex):
+        try:
+            for tok, q in (await angel_client.full_quote(grouped)).items():
                 if tok in tok_sym:
                     q_by_sym[tok_sym[tok]] = q
         except AngelAPIError:
-            continue
+            pass
+        await asyncio.sleep(QUOTE_PACE_SECONDS)
 
     # recent daily closes (oldest→newest) per symbol
     closes_by_sym: dict[str, list[float]] = {}

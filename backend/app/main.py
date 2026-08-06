@@ -220,6 +220,28 @@ async def seed_stock_universe() -> None:
     asyncio.create_task(_run())
 
 
+@app.on_event("startup")
+async def backfill_stock_bars() -> None:
+    """Keep bars_collection topped up with recent daily candles for the whole Stocks Range
+    universe, so the 1-week change and stock/sector trend columns fill in for every stock —
+    not just the ~200 that carried bars from an old load. Runs shortly after startup (the
+    universe seed + Angel token map are both already persisted), then daily. Paced; never
+    blocks startup."""
+    async def _run() -> None:
+        await asyncio.sleep(90)  # let seed_stock_universe run first
+        while True:
+            try:
+                from app.services.stocks_range import backfill_universe_bars
+
+                result = await backfill_universe_bars()
+                logger.info("Stocks Range bars backfill: %s", result)
+            except Exception:
+                logger.exception("Stocks Range bars backfill failed")
+            await asyncio.sleep(24 * 3600)
+
+    asyncio.create_task(_run())
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
