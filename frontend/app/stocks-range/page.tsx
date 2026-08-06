@@ -220,6 +220,15 @@ export default function StocksRangePage() {
         .loss { color: var(--loss); }
         @media (max-width: 720px) { .filter { max-width: none; } }
       `}</style>
+
+      {/* This is a wide 13-column table. Break out of the app's centered 1320px
+          content column (which left a big gutter beside the sidebar and pushed the
+          last "Zone" column off-screen) and use the full width — but ONLY while this
+          page is mounted. styled-jsx global styles are injected on mount and removed
+          on navigate-away, so every other page keeps the centered layout. */}
+      <style jsx global>{`
+        .app-main { max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; }
+      `}</style>
     </div>
   );
 }
