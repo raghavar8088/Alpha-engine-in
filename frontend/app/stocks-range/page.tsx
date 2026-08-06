@@ -209,7 +209,14 @@ export default function StocksRangePage() {
       <div className="controls">
         <div className="index-tabs">
           {INDICES.map((ix) => (
-            <button key={ix.key} className={index === ix.key ? "tab active" : "tab"} onClick={() => setIndex(ix.key)}>
+            <button
+              key={ix.key}
+              className={index === ix.key ? "tab active" : "tab"}
+              // Clicking a tab is a deliberate "show me this whole list" — clear any
+              // leftover search so the full index shows (and the auto-switch, which
+              // fires from the effect not a click, doesn't yank you back).
+              onClick={() => { setFilter(""); setIndex(ix.key); }}
+            >
               {ix.label}
             </button>
           ))}
