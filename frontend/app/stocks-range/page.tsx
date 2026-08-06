@@ -36,6 +36,78 @@ function Trend({ t }: { t: string | null }) {
   return <span className={cls}>{t}</span>;
 }
 
+// ---- sortable columns (click a header to sort, like the leaderboard tables) --------
+type SortKey =
+  | "symbol" | "belongs_to" | "sector" | "ltp"
+  | "change_1d" | "change_1d_pct" | "change_1w" | "change_1w_pct"
+  | "stock_trend" | "sector_trend" | "buy_price" | "range_move_pct" | "zone";
+type SortState = { key: SortKey; dir: "asc" | "desc" } | null;
+
+const COLS: { key: SortKey; label: string; left?: boolean }[] = [
+  { key: "symbol", label: "Stock", left: true },
+  { key: "belongs_to", label: "Belongs to" },
+  { key: "sector", label: "Sector", left: true },
+  { key: "ltp", label: "LTP" },
+  { key: "change_1d", label: "1D" },
+  { key: "change_1d_pct", label: "1D %" },
+  { key: "change_1w", label: "1W" },
+  { key: "change_1w_pct", label: "1W %" },
+  { key: "stock_trend", label: "Stock trend" },
+  { key: "sector_trend", label: "Sector trend" },
+  { key: "buy_price", label: "Buy range" },
+  { key: "range_move_pct", label: "Range" },
+  { key: "zone", label: "Zone" },
+];
+// numeric/ranked columns default to descending (biggest first); text columns ascending
+const NUMERIC_KEYS: SortKey[] = [
+  "belongs_to", "ltp", "change_1d", "change_1d_pct", "change_1w", "change_1w_pct",
+  "stock_trend", "sector_trend", "buy_price", "range_move_pct", "zone",
+];
+const defaultDir = (k: SortKey): "asc" | "desc" => (NUMERIC_KEYS.includes(k) ? "desc" : "asc");
+
+const BELONGS_RANK: Record<string, number> = { "Nifty 50": 0, "Nifty 100": 1, "Nifty 250": 2, "Nifty 500": 3 };
+const trendRank = (t: string | null): number | null =>
+  t === "Up" ? 3 : t === "Sideways" || t === "Flat" ? 2 : t === "Down" ? 1 : null;
+
+function sortValue(r: StockRangeRow, key: SortKey): number | string | null {
+  switch (key) {
+    case "symbol": return r.symbol;
+    case "belongs_to": return r.belongs_to != null ? BELONGS_RANK[r.belongs_to] ?? null : null;
+    case "sector": return r.sector;
+    case "ltp": return r.ltp;
+    case "change_1d": return r.change_1d;
+    case "change_1d_pct": return r.change_1d_pct;
+    case "change_1w": return r.change_1w;
+    case "change_1w_pct": return r.change_1w_pct;
+    case "stock_trend": return trendRank(r.stock_trend);
+    case "sector_trend": return trendRank(r.sector_trend);
+    case "buy_price": return r.buy_price;
+    case "range_move_pct": return r.range_move_pct;
+    case "zone": return r.buy_price == null ? null : r.in_buy_zone ? 2 : 1;
+  }
+}
+
+function sortRows(rs: StockRangeRow[], sort: SortState): StockRangeRow[] {
+  const arr = [...rs];
+  if (!sort) {
+    // Default view: stocks you've set a buy range for float to the top; within each
+    // group the server order (tightest index, then symbol) is kept (Array.sort is stable).
+    arr.sort((a, b) => (b.buy_price != null ? 1 : 0) - (a.buy_price != null ? 1 : 0));
+    return arr;
+  }
+  const { key, dir } = sort;
+  arr.sort((a, b) => {
+    const va = sortValue(a, key);
+    const vb = sortValue(b, key);
+    if (va == null && vb == null) return 0;
+    if (va == null) return 1;   // missing values always sink to the bottom
+    if (vb == null) return -1;
+    const d = typeof va === "string" ? va.localeCompare(vb as string) : va - (vb as number);
+    return dir === "asc" ? d : -d;
+  });
+  return arr;
+}
+
 export default function StocksRangePage() {
   const [index, setIndex] = useState("nifty50");
   const [data, setData] = useState<StocksRangeUniverse | null>(null);
@@ -44,6 +116,7 @@ export default function StocksRangePage() {
   const [filter, setFilter] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
   const [dialogFor, setDialogFor] = useState<string | null | undefined>(undefined); // undefined=closed, null=new, string=prefill
+  const [sort, setSort] = useState<SortState>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -66,11 +139,50 @@ export default function StocksRangePage() {
   const rows = useMemo(() => {
     const f = filter.trim().toLowerCase();
     const rs = data?.rows ?? [];
-    if (!f) return rs;
-    return rs.filter(
-      (r) => r.symbol.toLowerCase().includes(f) || (r.name || "").toLowerCase().includes(f) || (r.sector || "").toLowerCase().includes(f),
+    const filtered = !f
+      ? rs
+      : rs.filter(
+          (r) => r.symbol.toLowerCase().includes(f) || (r.name || "").toLowerCase().includes(f) || (r.sector || "").toLowerCase().includes(f),
+        );
+    return sortRows(filtered, sort);
+  }, [data, filter, sort]);
+
+  // Global search: the filter box searches the WHOLE Nifty 50/100/250/500 universe, not
+  // just the list that happens to be selected. If what you typed isn't in the current
+  // list but exists in a broader one (e.g. ABB is a Nifty 100 name while Nifty 50 is
+  // showing), jump to the tightest index that contains it so the row appears.
+  useEffect(() => {
+    const f = filter.trim();
+    if (!f || loading) return;
+    const lf = f.toLowerCase();
+    const hasLocal = (data?.rows ?? []).some(
+      (r) => r.symbol.toLowerCase().includes(lf) || (r.name || "").toLowerCase().includes(lf) || (r.sector || "").toLowerCase().includes(lf),
     );
-  }, [data, filter]);
+    if (hasLocal) return;
+    let cancelled = false;
+    const h = setTimeout(() => {
+      searchStocksRange(f)
+        .then((res) => {
+          if (cancelled || !res.length) return;
+          const target = res[0].tightest_index;
+          if (target && target !== index) setIndex(target);
+        })
+        .catch(() => {});
+    }, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(h);
+    };
+  }, [filter, data, loading, index]);
+
+  const toggleSort = (key: SortKey) =>
+    setSort((s) => {
+      if (!s || s.key !== key) return { key, dir: defaultDir(key) };
+      // second click flips the direction; third click clears back to the default
+      // (buy-range-set stocks first).
+      if (s.dir === defaultDir(key)) return { key, dir: defaultDir(key) === "asc" ? "desc" : "asc" };
+      return null;
+    });
 
   const inZone = rows.filter((r) => r.in_buy_zone).length;
   const withRange = rows.filter((r) => r.buy_price != null).length;
@@ -123,19 +235,26 @@ export default function StocksRangePage() {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th style={{ textAlign: "left" }}>Stock</th>
-                  <th>Belongs to</th>
-                  <th style={{ textAlign: "left" }}>Sector</th>
-                  <th>LTP</th>
-                  <th>1D</th>
-                  <th>1D %</th>
-                  <th>1W</th>
-                  <th>1W %</th>
-                  <th>Stock trend</th>
-                  <th>Sector trend</th>
-                  <th>Buy range</th>
-                  <th>Range</th>
-                  <th>Zone</th>
+                  {COLS.map((c) => {
+                    const active = sort?.key === c.key;
+                    return (
+                      <th
+                        key={c.key}
+                        className="sortable"
+                        style={c.left ? { textAlign: "left" } : undefined}
+                        onClick={() => toggleSort(c.key)}
+                        title="Sort"
+                      >
+                        <span className="th-inner">
+                          {c.label}
+                          <span className="arrows">
+                            <span className={active && sort?.dir === "asc" ? "on" : ""}>▲</span>
+                            <span className={active && sort?.dir === "desc" ? "on" : ""}>▼</span>
+                          </span>
+                        </span>
+                      </th>
+                    );
+                  })}
                 </tr>
               </thead>
               <tbody>
@@ -199,6 +318,11 @@ export default function StocksRangePage() {
         .table-scroll { overflow-x: auto; max-height: 640px; overflow-y: auto; }
         .data-table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
         .data-table th { text-align: center; padding: 9px 12px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--panel-border); position: sticky; top: 0; background: var(--panel); }
+        .data-table th.sortable { cursor: pointer; user-select: none; }
+        .data-table th.sortable:hover { color: var(--purple); }
+        .th-inner { display: inline-flex; align-items: center; gap: 3px; }
+        .arrows { display: inline-flex; flex-direction: column; line-height: 6px; font-size: 7px; color: var(--text-faint); }
+        .arrows .on { color: var(--purple); }
         .data-table td { padding: 8px 12px; text-align: center; border-bottom: 1px solid var(--canvas-soft); }
         tr.in-zone { background: rgba(14, 159, 110, 0.07); }
         .stock-cell { display: flex; flex-direction: column; }

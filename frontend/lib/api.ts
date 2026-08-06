@@ -2138,6 +2138,7 @@ export interface StockSearchResult {
   name: string | null;
   sector: string | null;
   belongs_to: string | null;
+  tightest_index: string | null;
 }
 export interface StockRangeSetResult {
   symbol: string;

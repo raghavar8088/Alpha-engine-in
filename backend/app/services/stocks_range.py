@@ -229,7 +229,8 @@ async def search_stocks(q: str, limit: int = 15) -> list[dict]:
     out = []
     async for d in cursor:
         out.append({"symbol": d["symbol"], "name": d.get("name"), "sector": d.get("sector"),
-                    "belongs_to": INDEX_LABELS.get(d.get("tightest_index"))})
+                    "belongs_to": INDEX_LABELS.get(d.get("tightest_index")),
+                    "tightest_index": d.get("tightest_index")})
     return out
 
 
