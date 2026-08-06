@@ -35,6 +35,10 @@ manual_orders_collection = db["manual_orders"]
 # Named paper-trading accounts for the manual Positions module — each with its own
 # independent capital pool, so different strategies can be tracked separately
 manual_accounts_collection = db["manual_accounts"]
+# Stocks Range module — index constituents (Nifty 50/100/250/500) with sector, seeded from
+# niftyindices.com, plus the user's per-stock manual "buy range" price.
+stock_universe_collection = db["stock_universe"]
+stock_ranges_collection = db["stock_ranges"]
 # F&O Positions module — user-initiated paper trades on index/stock options & futures
 fno_positions_collection = db["fno_positions"]
 fno_orders_collection = db["fno_orders"]

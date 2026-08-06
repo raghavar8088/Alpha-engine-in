@@ -2109,3 +2109,52 @@ export async function fetchTelegramSignals(limit = 100): Promise<{ signals: Tele
 export function telegramSignalImageUrl(messageId: number): string {
   return `${API_URL}/api/telegram-signals/image/${messageId}`;
 }
+
+// ---- Stocks Range (Nifty 50/100/250/500 watch-table with manual buy range) ----
+export interface StockRangeRow {
+  symbol: string;
+  name: string | null;
+  belongs_to: string | null;
+  sector: string | null;
+  ltp: number | null;
+  change_1d: number | null;
+  change_1d_pct: number | null;
+  change_1w: number | null;
+  change_1w_pct: number | null;
+  stock_trend: string | null;
+  sector_trend: string | null;
+  buy_price: number | null;
+  in_buy_zone: boolean;
+}
+export interface StocksRangeUniverse {
+  index: string;
+  label: string;
+  count: number;
+  rows: StockRangeRow[];
+}
+export interface StockSearchResult {
+  symbol: string;
+  name: string | null;
+  sector: string | null;
+  belongs_to: string | null;
+}
+export interface StockRangeSetResult {
+  symbol: string;
+  buy_price: number;
+  previous: number | null;
+  pct_diff: number | null;
+}
+
+export async function fetchStocksRangeUniverse(index: string): Promise<StocksRangeUniverse> {
+  return apiFetch(`/api/stocks-range/universe?index=${encodeURIComponent(index)}`);
+}
+export async function searchStocksRange(q: string): Promise<StockSearchResult[]> {
+  const d = await apiFetch(`/api/stocks-range/search?q=${encodeURIComponent(q)}`);
+  return d.results ?? [];
+}
+export async function getStockRange(symbol: string): Promise<{ symbol: string; buy_price: number | null }> {
+  return apiFetch(`/api/stocks-range/range?symbol=${encodeURIComponent(symbol)}`);
+}
+export async function setStockRange(symbol: string, buyPrice: number): Promise<StockRangeSetResult> {
+  return apiFetch(`/api/stocks-range/range`, { method: "POST", body: JSON.stringify({ symbol, buy_price: buyPrice }) });
+}

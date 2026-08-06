@@ -28,6 +28,7 @@ from app.api.routes import (
     prelive_selling,
     research,
     risk,
+    stocks_range,
     strategies,
     telegram_signals,
     trading_calls,
@@ -199,6 +200,26 @@ async def refresh_angel_equity_tokens() -> None:
 
     asyncio.create_task(_run())
 
+
+@app.on_event("startup")
+async def seed_stock_universe() -> None:
+    """Load the Nifty 50/100/250/500 constituents (with sector) for the Stocks Range
+    module from niftyindices.com. Background on startup, then weekly — the indices only
+    rebalance quarterly."""
+    async def _run() -> None:
+        while True:
+            try:
+                from app.services.stocks_range import refresh_stock_universe
+
+                result = await refresh_stock_universe()
+                logger.info("Stocks Range universe seeded: %s", result)
+            except Exception:
+                logger.exception("Stock universe seed failed")
+            await asyncio.sleep(7 * 24 * 3600)
+
+    asyncio.create_task(_run())
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -236,6 +257,7 @@ app.include_router(manual_positions.router)
 app.include_router(fno_positions.router)
 app.include_router(intraday_lab.router)
 app.include_router(live_intraday.router)
+app.include_router(stocks_range.router)
 app.include_router(long_horizon.router)
 app.include_router(chart_data.router)
 app.include_router(telegram_signals.router)

@@ -62,6 +62,16 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        href: "/stocks-range",
+        label: "Stocks Range",
+        icon: (
+          <>
+            <path d="M4 18h16M4 6h16M7 6v12M17 6v12" />
+            <circle cx="12" cy="12" r="2" />
+          </>
+        ),
+      },
+      {
         href: "/fno-positions",
         label: "F&O Positions",
         icon: (
