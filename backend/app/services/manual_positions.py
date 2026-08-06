@@ -147,24 +147,21 @@ async def _ltp(dhan: DhanClient, security_id: str, exchange_segment: str) -> flo
     return float(row["last_price"]) if row and row.get("last_price") else None
 
 
+# Static, conservative leverage per product type, used now that margin no longer comes
+# from Dhan (Angel One is a market-DATA source only — it has no margin calculator). CNC
+# is full notional; leveraged products divide notional by the assumed multiplier.
+_PRODUCT_LEVERAGE = {"CNC": 1.0, "MTF": 4.0, "MARGIN": 5.0, "INTRADAY": 5.0}
+
+
 async def _margin(
-    dhan: DhanClient, security_id: str, exchange_segment: str, transaction_type: str,
+    dhan: DhanClient | None, security_id: str, exchange_segment: str, transaction_type: str,
     quantity: int, product_type: str, price: float,
 ) -> tuple[float, float, str]:
-    """(margin_required, leverage, source). Falls back to full notional / 1x if
-    Dhan's calculator is unreachable — never silently grants leverage we can't
-    verify. `source` is "dhan_calculator" for a real figure or "fallback" when
-    the calculator call failed, so callers can be honest about which one this is
-    instead of presenting a guessed 1x as if it were Dhan's real answer."""
-    try:
-        r = await dhan.margin_calculator(
-            security_id=security_id, exchange_segment=exchange_segment, transaction_type=transaction_type,
-            quantity=quantity, product_type=product_type, price=price,
-        )
-        margin = float(r.get("totalMargin") or 0) or (price * quantity)
-        return margin, _parse_leverage(r.get("leverage")), "dhan_calculator"
-    except (DhanAPIError, Exception):
-        return price * quantity, 1.0, "fallback"
+    """(margin_required, leverage, source). Off Dhan: derived from the static leverage
+    assumption above. `source` is "static" so callers stay honest that it's an assumption,
+    not a live broker figure."""
+    leverage = _PRODUCT_LEVERAGE.get(product_type, 1.0)
+    return round(price * quantity / leverage, 2), leverage, "static"
 
 
 async def _deployed_margin(account_id: str) -> float:

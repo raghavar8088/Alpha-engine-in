@@ -170,12 +170,12 @@ async def place_order(payload: PlaceOrderRequest, current_user: dict = Depends(g
         )
 
     if payload.paper_trading:
-        try:
-            quote = await client.quote_data({payload.exchange_segment: [int(payload.security_id)]})
-        except DhanAPIError as exc:
-            raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=exc.remarks)
+        # Fill price from Dhan-first / Angel-One-fallback (broker_data.get_ltp), so a
+        # paper fill still prices when Dhan's data endpoint is unavailable.
+        from app.services.broker_data import get_ltp
 
-        fill_price = _extract_ltp(quote) or payload.price
+        ltp, _src = await get_ltp(client, str(payload.security_id), payload.exchange_segment)
+        fill_price = ltp or payload.price
         order_id = f"PAPER-{uuid4().hex[:12]}"
         doc = {
             "order_id": order_id,

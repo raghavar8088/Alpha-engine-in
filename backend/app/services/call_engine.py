@@ -27,6 +27,7 @@ from uuid import uuid4
 from anyio import to_thread
 
 from app.core.db import instruments_collection, option_sweeps_collection, trading_calls_collection
+from app.services.angel_client import AngelAPIError, angel_client
 from app.services.dhan_client import DhanAPIError, DhanClient
 from backtesting_service.service import load_bars
 from options_service.greeks import black_scholes_price
@@ -244,19 +245,58 @@ async def _quote_batch(dhan: DhanClient | None, wanted: dict[str, list[int]]) ->
     /marketfeed/quote call — rows carry last_price, day ohlc and volume, which is
     what the intraday setups need. Empty dict when no client / expired token, so
     intraday families are skipped honestly rather than run on stale data."""
-    if dhan is None or not wanted:
-        return {}
-    try:
-        raw = await dhan.quote_data(wanted)
-    except (DhanAPIError, Exception):
+    if not wanted:
         return {}
     out: dict[tuple[str, str], dict] = {}
-    data = raw.get("data", {}) if isinstance(raw, dict) else {}
-    for segment, by_id in (data.items() if isinstance(data, dict) else []):
-        for sec_id, payload in (by_id.items() if isinstance(by_id, dict) else []):
-            if isinstance(payload, dict) and payload.get("last_price"):
-                out[(segment, str(sec_id))] = payload
+    if dhan is not None:
+        try:
+            raw = await dhan.quote_data(wanted)
+            data = raw.get("data", {}) if isinstance(raw, dict) else {}
+            for segment, by_id in (data.items() if isinstance(data, dict) else []):
+                for sec_id, payload in (by_id.items() if isinstance(by_id, dict) else []):
+                    if isinstance(payload, dict) and payload.get("last_price"):
+                        out[(segment, str(sec_id))] = payload
+        except (DhanAPIError, Exception):
+            pass
+    await _angel_fill_quotes(wanted, out)
     return out
+
+
+async def _angel_fill_quotes(wanted: dict[str, list[int]], out: dict[tuple[str, str], dict]) -> None:
+    """Angel-One failover for anything Dhan didn't price — so live quotes keep flowing
+    when Dhan's data endpoint is unavailable. Builds the same {last_price, ohlc, volume}
+    row shape from Angel FULL quotes, resolving each contract's Angel token from the
+    instrument master; contracts without an Angel token are simply left unpriced."""
+    missing = [(seg, str(sid)) for seg, ids in wanted.items() for sid in ids if (seg, str(sid)) not in out]
+    if not missing or not angel_client.configured():
+        return
+    docs = {
+        (d["exchange_segment"], str(d["security_id"])): d
+        async for d in instruments_collection.find(
+            {"$or": [{"exchange_segment": seg, "security_id": sid} for seg, sid in missing]},
+            {"exchange_segment": 1, "security_id": 1, "angel_token": 1, "angel_exchange": 1},
+        )
+    }
+    by_ex: dict[str, list[str]] = {}
+    tok_key: dict[str, tuple[str, str]] = {}
+    for seg, sid in missing:
+        d = docs.get((seg, sid))
+        if d and d.get("angel_token"):
+            tok = str(d["angel_token"])
+            by_ex.setdefault(d.get("angel_exchange") or "NSE", []).append(tok)
+            tok_key[tok] = (seg, sid)
+    for ex, toks in by_ex.items():
+        try:
+            for tok, q in (await angel_client.full_quote({ex: toks})).items():
+                key = tok_key.get(tok)
+                if key and q.get("ltp"):
+                    out[key] = {
+                        "last_price": q["ltp"],
+                        "ohlc": {"open": q.get("open"), "high": q.get("high"), "low": q.get("low")},
+                        "volume": q.get("volume") or 0,
+                    }
+        except AngelAPIError:
+            continue
 
 
 # --------------------------------------------------------------------------------
