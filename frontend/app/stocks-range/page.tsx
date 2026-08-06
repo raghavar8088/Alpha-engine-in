@@ -90,9 +90,19 @@ function sortValue(r: StockRangeRow, key: SortKey): number | string | null {
 function sortRows(rs: StockRangeRow[], sort: SortState): StockRangeRow[] {
   const arr = [...rs];
   if (!sort) {
-    // Default view: stocks you've set a buy range for float to the top; within each
-    // group the server order (tightest index, then symbol) is kept (Array.sort is stable).
-    arr.sort((a, b) => (b.buy_price != null ? 1 : 0) - (a.buy_price != null ? 1 : 0));
+    // Default view: stocks you've set a buy range for float to the top, and WITHIN that
+    // group they're ordered by how close the live price is to your buy price — smallest
+    // |% move| first — so the ones in or nearest the BUY ZONE sit at the very top. A
+    // range stock with no live price (distance = Infinity) sorts after the ranked ones
+    // but still above no-range stocks; no-range stocks keep the server order (stable).
+    const dist = (r: StockRangeRow) => (r.range_move_pct != null ? Math.abs(r.range_move_pct) : Infinity);
+    arr.sort((a, b) => {
+      const ra = a.buy_price != null ? 1 : 0;
+      const rb = b.buy_price != null ? 1 : 0;
+      if (ra !== rb) return rb - ra;
+      if (ra === 1) return dist(a) - dist(b);
+      return 0;
+    });
     return arr;
   }
   const { key, dir } = sort;
