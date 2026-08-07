@@ -58,6 +58,10 @@ export default function LiveTradingPage() {
 
   const armed = !!summary?.armed;
   const killed = !!summary?.kill_switch;
+  const angel = summary?.angel;
+  // Armed with no money in the account: every order will be rejected for insufficient
+  // funds, so say so plainly rather than letting the user discover it via reject counts.
+  const noFunds = !!angel?.available && (angel.available_cash ?? 0) <= 0;
 
   const toggleArm = async () => {
     if (busy || !summary) return;
@@ -141,6 +145,20 @@ export default function LiveTradingPage() {
       {error && <ErrorBanner message={error} />}
       {notice && <div className="notice" onClick={() => setNotice(null)}>{notice}</div>}
 
+      {noFunds && (
+        <div className="warn">
+          <b>Angel One account has ₹0 available cash.</b> Orders need funds — while the balance is
+          zero every entry will be rejected by the broker for insufficient margin, and the desk
+          auto-disarms after {summary?.max_consecutive_rejects ?? 3} consecutive rejects. Add funds
+          to the Angel account before arming for a real session.
+        </div>
+      )}
+      {angel && !angel.available && (
+        <div className="warn">
+          <b>Angel One account could not be read.</b> {angel.reason}
+        </div>
+      )}
+
       {/* The big green/red LIVE TRADING switch */}
       <div className={`arm-banner ${armed ? "on" : "off"}`}>
         <div className="arm-left">
@@ -177,13 +195,70 @@ export default function LiveTradingPage() {
       {/* Summary tiles */}
       <div className="tiles">
         <Tile label="Mode" value="REAL" tone={armed ? "gain" : "loss"} sub={armed ? "armed · live Angel" : "disarmed"} />
-        <Tile label="Equity" value={inr(summary?.equity)} sub={`from ${inr(summary?.initial_capital)}`} />
+        <Tile
+          label="Angel balance"
+          value={angel?.available ? inr(angel.available_cash) : "—"}
+          tone={angel?.available && (angel.available_cash ?? 0) <= 0 ? "loss" : undefined}
+          sub={angel?.available ? "available cash · live account" : "account unavailable"}
+        />
         <Tile label="Today P&L" value={signed(summary?.today_pnl)} tone={(summary?.today_pnl ?? 0) >= 0 ? "gain" : "loss"} sub={`breaker at −${inr(summary?.daily_loss_limit)}`} />
         <Tile label="Realised P&L" value={signed(summary?.realized_pnl)} tone={(summary?.realized_pnl ?? 0) >= 0 ? "gain" : "loss"} sub={`${summary?.closed_positions ?? 0} closed`} />
         <Tile label="Open positions" value={String(summary?.open_positions ?? 0)} sub={`${inr(summary?.unrealized_pnl)} unrealised`} />
-        <Tile label="Deployed" value={inr(summary?.deployed_capital)} sub={`${inr(summary?.available_cash)} free of ${inr(summary?.desk_ceiling)}`} />
+        <Tile label="Deployed" value={inr(summary?.deployed_capital)} sub={`cap ${inr(summary?.desk_ceiling)} across the desk`} />
         <Tile label="Strategies" value={String(board.filter((s) => s.enabled).length)} sub={`of ${summary?.strategy_count ?? 0} enabled`} />
       </div>
+
+      <GlassPanel title="Angel One account · live">
+        {!angel?.available ? (
+          <div className="empty">{angel?.reason || "Loading account…"}</div>
+        ) : (
+          <>
+            <div className="acct">
+              <Field label="Available cash" value={inr(angel.available_cash)} tone={(angel.available_cash ?? 0) > 0 ? "gain" : "loss"} />
+              <Field label="Net" value={inr(angel.net)} />
+              <Field label="Margin used" value={inr(angel.utilised_margin)} />
+              <Field label="Collateral" value={inr(angel.collateral)} />
+              <Field label="M2M realised" value={signed(angel.m2m_realized)} tone={(angel.m2m_realized ?? 0) >= 0 ? "gain" : "loss"} />
+              <Field label="M2M unrealised" value={signed(angel.m2m_unrealized)} tone={(angel.m2m_unrealized ?? 0) >= 0 ? "gain" : "loss"} />
+            </div>
+            <div className="bpos">
+              <div className="bpos-head">
+                Broker positions (Angel&apos;s own view): <b>{angel.broker_position_count ?? 0}</b>
+              </div>
+              {(angel.broker_positions?.length ?? 0) > 0 && (
+                <div className="table-scroll">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th style={{ textAlign: "left" }}>Symbol</th>
+                        <th>Product</th>
+                        <th>Net qty</th>
+                        <th>Buy avg</th>
+                        <th>Sell avg</th>
+                        <th>LTP</th>
+                        <th>P&amp;L</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {angel.broker_positions!.map((p, i) => (
+                        <tr key={`${p.symbol}-${i}`}>
+                          <td style={{ textAlign: "left" }} className="sym">{p.symbol}</td>
+                          <td><span className="cat">{p.product}</span></td>
+                          <td>{p.net_qty}</td>
+                          <td>{inr(p.buy_avg)}</td>
+                          <td>{inr(p.sell_avg)}</td>
+                          <td>{inr(p.ltp)}</td>
+                          <td className={p.pnl >= 0 ? "gain" : "loss"}>{signed(p.pnl)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </GlassPanel>
 
       <GlassPanel title="Selected strategies">
         <div className="table-scroll">
@@ -277,6 +352,10 @@ export default function LiveTradingPage() {
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 16px; }
         .notice { padding: 10px 14px; border-radius: 9px; background: var(--canvas-soft); border: 1px solid var(--panel-border); font-size: 12.5px; cursor: pointer; }
+        .warn { padding: 12px 16px; border-radius: 10px; background: var(--loss-dim); border: 1px solid rgba(224,49,49,0.35); color: var(--loss); font-size: 12.5px; line-height: 1.55; }
+        .acct { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; padding: 4px 2px 14px; }
+        .bpos { border-top: 1px solid var(--panel-border); padding-top: 12px; }
+        .bpos-head { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
         .arm-banner { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 22px; border-radius: 14px; border: 1px solid; }
         .arm-banner.on { background: rgba(14, 159, 110, 0.10); border-color: rgba(14, 159, 110, 0.4); }
         .arm-banner.off { background: rgba(224, 49, 49, 0.08); border-color: rgba(224, 49, 49, 0.35); }
@@ -330,6 +409,21 @@ export default function LiveTradingPage() {
         .muted { color: var(--text-faint); }
         .gain { color: var(--gain); }
         .loss { color: var(--loss); }
+      `}</style>
+    </div>
+  );
+}
+
+function Field({ label, value, tone }: { label: string; value: string; tone?: "gain" | "loss" }) {
+  return (
+    <div className="f">
+      <div className="f-label">{label}</div>
+      <div className={`f-value ${tone ?? ""}`}>{value}</div>
+      <style jsx>{`
+        .f-label { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); }
+        .f-value { font-weight: 700; font-size: 16px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+        .f-value.gain { color: var(--gain); }
+        .f-value.loss { color: var(--loss); }
       `}</style>
     </div>
   );

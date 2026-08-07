@@ -769,8 +769,33 @@ export async function fetchLiveIntradayTrades(limit = 100): Promise<IntradayTrad
 }
 
 // ---- Live Trading desk (REAL MONEY twin of Live Intraday; routes real Dhan orders) ----
+export interface AngelBrokerPosition {
+  symbol: string | null;
+  product: string | null;
+  net_qty: number;
+  buy_avg: number;
+  sell_avg: number;
+  pnl: number;
+  ltp: number;
+}
+
+export interface AngelAccount {
+  available: boolean;
+  reason?: string;
+  available_cash?: number;
+  net?: number;
+  utilised_margin?: number;
+  collateral?: number;
+  m2m_realized?: number;
+  m2m_unrealized?: number;
+  intraday_payin?: number;
+  broker_positions?: AngelBrokerPosition[];
+  broker_position_count?: number;
+}
+
 export interface LiveTradingSummary {
   mode: string;                       // "real"
+  angel: AngelAccount;
   armed: boolean;
   kill_switch: boolean;
   consecutive_rejects: number;
@@ -827,6 +852,9 @@ export interface LiveTradingOpenPosition {
 
 export async function fetchLiveTradingSummary(): Promise<LiveTradingSummary> {
   return apiFetch("/api/live-trading/summary");
+}
+export async function fetchAngelAccount(force = false): Promise<AngelAccount> {
+  return apiFetch(`/api/live-trading/angel-account${force ? "?force=true" : ""}`);
 }
 export async function fetchLiveTradingLeaderboard(): Promise<LiveTradingScore[]> {
   const r = await apiFetch("/api/live-trading/leaderboard");

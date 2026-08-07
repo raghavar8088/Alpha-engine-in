@@ -15,9 +15,12 @@ import httpx
 from .auth import (
     ANGEL_INTERVALS,
     CANDLE_PATH,
+    HOLDING_PATH,
     LOGIN_PATH,
     ORDER_PATH,
+    POSITION_PATH,
     QUOTE_PATH,
+    RMS_PATH,
     SESSION_REFRESH_MARGIN_SECONDS,
     AngelAPIError,
     batches,
@@ -121,6 +124,32 @@ class AngelClient:
             },
         )
         return body.get("data") or []
+
+    async def _get(self, path: str) -> dict:
+        jwt = await self._session()
+        async with httpx.AsyncClient(base_url=self.creds.base_url, timeout=30) as c:
+            r = await c.get(path, headers=client_headers(self.creds.api_key, self.creds.public_ip, jwt))
+        try:
+            body = r.json()
+        except Exception:
+            raise AngelAPIError(f"Angel returned non-JSON ({r.status_code})")
+        if not body.get("status"):
+            raise AngelAPIError(f"Angel error: {body.get('message') or body.get('errorcode')}")
+        return body
+
+    async def funds(self) -> dict:
+        """RMS limits — the real account money: availablecash, net, utiliseddebits (margin
+        in use), collateral, m2mrealized / m2munrealized. Values come back as strings."""
+        return (await self._get(RMS_PATH)).get("data") or {}
+
+    async def broker_positions(self) -> list[dict]:
+        """Today's positions as ANGEL sees them — the broker's own truth, independent of
+        whatever our ledger thinks."""
+        return (await self._get(POSITION_PATH)).get("data") or []
+
+    async def holdings(self) -> list[dict]:
+        """Delivery holdings (CNC), not intraday positions."""
+        return (await self._get(HOLDING_PATH)).get("data") or []
 
     async def place_order(
         self,

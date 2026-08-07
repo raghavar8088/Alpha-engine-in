@@ -544,6 +544,69 @@ async def panic_close_all(dhan: DhanClient | None) -> dict:
 # ── read models ──────────────────────────────────────────────────────────────────
 
 
+_funds_cache: dict = {"at": 0.0, "data": None}
+FUNDS_TTL_SECONDS = 20
+
+
+def _num(d: dict, key: str) -> float:
+    try:
+        return round(float(d.get(key) or 0), 2)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+async def angel_account(force: bool = False) -> dict:
+    """The REAL Angel One account: funds and the broker's own view of today's positions.
+
+    This is the money that actually exists, as opposed to the desk's notional allocation —
+    the whole point of showing it on a real-money desk. Cached briefly because the page
+    polls, and Angel rate-limits."""
+    import time as _t
+
+    if not angel_client.configured():
+        return {"available": False, "reason": "Angel One is not configured"}
+    if not force and _funds_cache["data"] and _t.monotonic() - _funds_cache["at"] < FUNDS_TTL_SECONDS:
+        return _funds_cache["data"]
+
+    out: dict = {"available": True}
+    try:
+        f = await angel_client.funds()
+        out.update({
+            "available_cash": _num(f, "availablecash"),
+            "net": _num(f, "net"),
+            "utilised_margin": _num(f, "utiliseddebits"),
+            "collateral": _num(f, "collateral"),
+            "m2m_realized": _num(f, "m2mrealized"),
+            "m2m_unrealized": _num(f, "m2munrealized"),
+            "intraday_payin": _num(f, "availableintradaypayin"),
+        })
+    except Exception as exc:
+        return {"available": False, "reason": f"Could not read Angel funds: {exc}"}
+
+    # Broker-side positions are informational; never fail the whole call over them.
+    try:
+        bp = await angel_client.broker_positions()
+        out["broker_positions"] = [
+            {
+                "symbol": p.get("tradingsymbol"),
+                "product": p.get("producttype"),
+                "net_qty": int(float(p.get("netqty") or 0)),
+                "buy_avg": _num(p, "buyavgprice"),
+                "sell_avg": _num(p, "sellavgprice"),
+                "pnl": _num(p, "pnl"),
+                "ltp": _num(p, "ltp"),
+            }
+            for p in bp
+            if int(float(p.get("netqty") or 0)) != 0
+        ]
+    except Exception:
+        out["broker_positions"] = []
+    out["broker_position_count"] = len(out.get("broker_positions") or [])
+
+    _funds_cache.update({"at": _t.monotonic(), "data": out})
+    return out
+
+
 async def summary() -> dict:
     deployed = realized = unrealized = 0.0
     async for p in live_trading_positions_collection.find({"status": "OPEN"}, {"capital_deployed": 1, "unrealized_pnl": 1}):
@@ -576,6 +639,9 @@ async def summary() -> dict:
         "open_positions": open_count,
         "closed_positions": closed_count,
         "strategy_count": len(SELECTED),
+        # The REAL account. `equity` above is only the desk's notional allocation + P&L;
+        # on a real-money desk what matters is the money Angel actually holds.
+        "angel": await angel_account(),
         **(await breaker_state()),
     }
 

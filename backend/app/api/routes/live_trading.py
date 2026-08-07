@@ -23,6 +23,7 @@ from app.core.db import (
 from app.services.dhan_client import DhanClient
 from app.services.live_trading_engine import (
     LiveTradingError,
+    angel_account,
     get_state,
     leaderboard as live_leaderboard,
     open_positions,
@@ -68,6 +69,15 @@ class StrategyEnabledRequest(BaseModel):
 @router.get("/summary")
 async def summary_endpoint(current_user: dict = Depends(get_current_user)):
     return await live_summary()
+
+
+@router.get("/angel-account")
+async def angel_account_endpoint(
+    force: bool = Query(False, description="bypass the short funds cache"),
+    current_user: dict = Depends(get_current_user),
+):
+    """The REAL Angel One account — funds and the broker's own open positions."""
+    return await angel_account(force=force)
 
 
 @router.get("/leaderboard")

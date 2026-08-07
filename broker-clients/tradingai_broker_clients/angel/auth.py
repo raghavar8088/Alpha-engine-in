@@ -17,6 +17,9 @@ LOGIN_PATH = "/rest/auth/angelbroking/user/v1/loginByPassword"
 QUOTE_PATH = "/rest/secure/angelbroking/market/v1/quote"
 CANDLE_PATH = "/rest/secure/angelbroking/historical/v1/getCandleData"
 ORDER_PATH = "/rest/secure/angelbroking/order/v1/placeOrder"  # SmartAPI order placement
+RMS_PATH = "/rest/secure/angelbroking/user/v1/getRMS"          # funds / margin limits
+POSITION_PATH = "/rest/secure/angelbroking/order/v1/getPosition"
+HOLDING_PATH = "/rest/secure/angelbroking/portfolio/v1/getHolding"
 
 # Angel caps a quote request at 50 tokens; chunk anything larger.
 QUOTE_BATCH_SIZE = 50
