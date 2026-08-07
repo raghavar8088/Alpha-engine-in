@@ -121,10 +121,40 @@ check("MACD drops below signal after a rollover", rline < rsig, f"({rline:.2f} <
 
 # ---- 9 EMA streak --------------------------------------------------------------
 up = [float(i) for i in range(1, 60)]
-check("EMA9 streak counts a full uptrend", bs._ema9_streak(up) == len(up) - 8,
-      f"(got {bs._ema9_streak(up)})")
+streak, hold, above = bs._ema9_hold(up)
+check("EMA9 streak counts a full uptrend", streak == len(up) - 8, f"(got {streak})")
+check("EMA9 hold is 100% in a full uptrend", hold == 1.0)
+check("EMA9 reports above-now in an uptrend", above)
+
 broken = up[:-1] + [1.0]  # last bar crashes below the EMA
-check("EMA9 streak resets on a break below", bs._ema9_streak(broken) == 0)
+s2, h2, a2 = bs._ema9_hold(broken)
+check("EMA9 streak resets on a break below", s2 == 0)
+check("EMA9 above-now is False after a break", not a2)
+check("one bad bar barely dents the hold %", h2 > 0.9, f"(got {h2:.2f})")
+
+# The gate must tolerate ordinary pullbacks: a stock that dips under the 9 EMA for a
+# couple of sessions a month is still 'holding above it'. Requiring an UNBROKEN month
+# is what emptied the live screen (median streak on the Nifty 500 is 2 sessions).
+dips = [float(i) for i in range(1, 60)]
+# on a +1/bar ramp the 9 EMA trails ~4 below price, so the dip has to clear that to
+# genuinely close under the line
+dips[-5] = dips[-6] - 12.0       # a real 2-session dip inside the last month
+dips[-4] = dips[-6] - 10.0
+s3, h3, a3 = bs._ema9_hold(dips)
+check("a brief pullback still counts as holding above the 9 EMA",
+      a3 and h3 >= bs.EMA9_MIN_HOLD_PCT, f"(hold={h3:.2f}, streak={s3})")
+check("  ...and it does break the raw streak", s3 < 21, f"(streak={s3})")
+
+# A stock mostly BELOW its 9 EMA must fail the gate however you slice it.
+down = [float(i) for i in range(60, 1, -1)]
+s4, h4, a4 = bs._ema9_hold(down)
+check("a downtrend fails the hold gate", not a4 and h4 < bs.EMA9_MIN_HOLD_PCT,
+      f"(hold={h4:.2f})")
+# Above right now but only just reclaimed the line => not a month of holding.
+reclaim = [100.0 - i for i in range(40)] + [61.0 + i * 2 for i in range(6)]
+s5, h5, a5 = bs._ema9_hold(reclaim)
+check("a fresh reclaim is above-now but fails the month test",
+      a5 and h5 < bs.EMA9_MIN_HOLD_PCT, f"(hold={h5:.2f}, above={a5})")
 
 # ---- swing structure -----------------------------------------------------------
 check("_ascending true for rising pivots", bs._ascending([1.0, 2.0, 3.0]))

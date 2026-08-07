@@ -22,7 +22,7 @@ const pct = (v: number | null | undefined) =>
 // ---- sortable columns (click a header to sort, exactly like Stocks Range) ----------
 type SortKey =
   | "symbol" | "fno_enabled" | "belongs_to" | "sector" | "ltp" | "change_1d_pct"
-  | "ema9_days" | "pct_from_52w_high" | "pct_from_ath" | "rsi" | "macd" | "vol_x_avg"
+  | "ema9_days" | "ema9_hold_pct" | "pct_from_52w_high" | "pct_from_ath" | "rsi" | "macd" | "vol_x_avg"
   | "ret_3m" | "score" | "revenue_growth" | "earnings_growth" | "profit_margin" | "roe"
   | "debt_to_equity" | "held_institutions" | "fundamental_score"
   | "entry" | "stop_loss" | "target" | "trail_stop";
@@ -35,7 +35,7 @@ const COLS: { key: SortKey; label: string; left?: boolean; title?: string }[] = 
   { key: "sector", label: "Sector", left: true },
   { key: "ltp", label: "LTP" },
   { key: "change_1d_pct", label: "1D %" },
-  { key: "ema9_days", label: "9EMA d", title: "Consecutive sessions closed above the 9 EMA" },
+  { key: "ema9_hold_pct", label: "9EMA hold", title: "Share of the last month (21 sessions) closed above the 9 EMA. The gate is 80% AND above it right now — an unbroken month is not realistic, the 9 EMA is fast enough that even strong trends clip it." },
   { key: "pct_from_ath", label: "vs ATH", title: "Distance from the all-time high (full Angel history)" },
   { key: "pct_from_52w_high", label: "vs 52W H", title: "Distance from the 52-week high" },
   { key: "rsi", label: "RSI" },
@@ -90,7 +90,7 @@ function sortRows(rs: BullishStockRow[], sort: SortState): BullishStockRow[] {
 /** The nine technical signals behind the score, for the row tooltip. */
 function signalSummary(r: BullishStockRow): string {
   const s: [string, boolean][] = [
-    ["1 month above 9 EMA", r.sig_ema9],
+    ["Held above 9 EMA for a month", r.sig_ema9],
     ["Above 50 & 200 DMA (50>200)", r.sig_ma_stack],
     ["At / near 52-week high", r.sig_near_high],
     ["At / near ALL-TIME high", r.sig_all_time_high],
@@ -284,7 +284,9 @@ export default function BullishStocksPage() {
                     <td style={{ textAlign: "left" }} className="sector">{r.sector}</td>
                     <td className="ltp">₹{inr(r.ltp)}</td>
                     <td className={(r.change_1d_pct ?? 0) >= 0 ? "gain" : "loss"}>{pct(r.change_1d_pct)}</td>
-                    <td className={r.sig_ema9 ? "gain" : "muted"}>{r.ema9_days}</td>
+                    <td className={r.sig_ema9 ? "gain" : "muted"} title={`${r.ema9_days} consecutive sessions above the 9 EMA`}>
+                      {r.ema9_hold_pct.toFixed(0)}%
+                    </td>
                     <td
                       className={r.pct_from_ath == null ? "muted" : r.sig_all_time_high ? "gain" : ""}
                       title={r.all_time_high != null

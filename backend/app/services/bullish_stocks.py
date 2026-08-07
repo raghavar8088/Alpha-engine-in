@@ -44,7 +44,8 @@ logger = logging.getLogger("bullish_stocks")
 
 # ── screen thresholds ────────────────────────────────────────────────────────────
 EMA_FAST = 9
-EMA9_MIN_SESSIONS = 21        # "above the 9 EMA for more than a month" ≈ 21 sessions
+EMA9_HOLD_WINDOW = 21         # "for more than a month" ≈ 21 sessions
+EMA9_MIN_HOLD_PCT = 0.80      # share of that month that must have closed above the 9 EMA
 SMA_MID, SMA_SLOW = 50, 200
 NEAR_HIGH_PCT = 0.98          # within 2% of the 52-week high counts as "at highs"
 VOL_BREAKOUT_MULT = 1.2       # last session's volume vs its 20-day average
@@ -133,19 +134,31 @@ def _macd(closes: list[float]) -> tuple[float | None, float | None]:
     return line[-1], (sig[-1] if sig else None)
 
 
-def _ema9_streak(closes: list[float]) -> int:
-    """How many consecutive most-recent sessions closed above the 9 EMA."""
+def _ema9_hold(closes: list[float]) -> tuple[int, float, bool]:
+    """(consecutive streak, share of the last month closed above the 9 EMA, above right now).
+
+    "Above the 9 EMA for more than a month" cannot mean an UNBROKEN month of closes. The
+    9 EMA is fast enough that even the strongest uptrend clips it every week or two.
+    Measured against the live Nifty 500: the median stock's streak is 2 sessions, p90 is 9,
+    and only 4 of 476 reach 21 — so gating on an unbroken streak empties this screen
+    permanently, which is exactly what it did on first deploy. What a trader means is that
+    the stock has been HOLDING above the line, so the gate is the share of the last month
+    spent above it, combined with being above it right now. The raw streak is still
+    reported because it is a useful read on how clean the trend is.
+    """
     ema = _ema_series(closes, EMA_FAST)
     if not ema:
-        return 0
-    aligned = closes[EMA_FAST - 1:]
+        return 0, 0.0, False
+    pairs = list(zip(closes[EMA_FAST - 1:], ema))
     streak = 0
-    for c, e in zip(reversed(aligned), reversed(ema)):
+    for c, e in reversed(pairs):
         if c > e:
             streak += 1
         else:
             break
-    return streak
+    window = pairs[-EMA9_HOLD_WINDOW:]
+    hold = (sum(1 for c, e in window if c > e) / len(window)) if window else 0.0
+    return streak, hold, bool(pairs[-1][0] > pairs[-1][1])
 
 
 def _ascending(seq: list[float], n: int = 3) -> bool:
@@ -199,7 +212,7 @@ def _evaluate(closes, highs, lows, volumes, ltp, all_time_high: float | None = N
     if len(closes) < SMA_SLOW + 1 or ltp is None:
         return None
 
-    ema9_days = _ema9_streak(closes)
+    ema9_days, ema9_hold, ema9_above = _ema9_hold(closes)
     sma50 = _sma(closes, SMA_MID)
     sma200 = _sma(closes, SMA_SLOW)
     high_52w = max(highs[-WINDOW_52W:]) if highs else None
@@ -220,6 +233,7 @@ def _evaluate(closes, highs, lows, volumes, ltp, all_time_high: float | None = N
         "all_time_high": round(all_time_high, 2) if all_time_high else None,
         "pct_from_ath": round(pct_from_ath, 2) if pct_from_ath is not None else None,
         "ema9_days": ema9_days,
+        "ema9_hold_pct": round(ema9_hold * 100, 1),
         "sma50": round(sma50, 2),
         "sma200": round(sma200, 2),
         "high_52w": round(high_52w, 2),
@@ -231,7 +245,7 @@ def _evaluate(closes, highs, lows, volumes, ltp, all_time_high: float | None = N
         "ret_3m": _pct_return(closes, RS_LOOKBACK),
         "trail_high": round(trail_high, 2) if trail_high else None,
         # boolean signals
-        "sig_ema9": ema9_days >= EMA9_MIN_SESSIONS,
+        "sig_ema9": ema9_above and ema9_hold >= EMA9_MIN_HOLD_PCT,
         "sig_ma_stack": ltp > sma50 and ltp > sma200 and sma50 > sma200,
         "sig_near_high": ltp >= high_52w * NEAR_HIGH_PCT,
         "sig_all_time_high": bool(all_time_high and ltp >= all_time_high * NEAR_HIGH_PCT),

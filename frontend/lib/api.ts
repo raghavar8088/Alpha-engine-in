@@ -2172,6 +2172,7 @@ export interface BullishStockRow {
   change_1d_pct: number | null;
   // indicator values
   ema9_days: number;
+  ema9_hold_pct: number;
   sma50: number;
   sma200: number;
   high_52w: number;
