@@ -22,8 +22,10 @@ const pct = (v: number | null | undefined) =>
 // ---- sortable columns (click a header to sort, exactly like Stocks Range) ----------
 type SortKey =
   | "symbol" | "fno_enabled" | "belongs_to" | "sector" | "ltp" | "change_1d_pct"
-  | "ema9_days" | "pct_from_52w_high" | "rsi" | "macd" | "vol_x_avg" | "ret_3m"
-  | "score" | "entry" | "stop_loss" | "target" | "trail_stop";
+  | "ema9_days" | "pct_from_52w_high" | "pct_from_ath" | "rsi" | "macd" | "vol_x_avg"
+  | "ret_3m" | "score" | "revenue_growth" | "earnings_growth" | "profit_margin" | "roe"
+  | "debt_to_equity" | "held_institutions" | "fundamental_score"
+  | "entry" | "stop_loss" | "target" | "trail_stop";
 type SortState = { key: SortKey; dir: "asc" | "desc" } | null;
 
 const COLS: { key: SortKey; label: string; left?: boolean; title?: string }[] = [
@@ -34,12 +36,20 @@ const COLS: { key: SortKey; label: string; left?: boolean; title?: string }[] = 
   { key: "ltp", label: "LTP" },
   { key: "change_1d_pct", label: "1D %" },
   { key: "ema9_days", label: "9EMA d", title: "Consecutive sessions closed above the 9 EMA" },
+  { key: "pct_from_ath", label: "vs ATH", title: "Distance from the all-time high (full Angel history)" },
   { key: "pct_from_52w_high", label: "vs 52W H", title: "Distance from the 52-week high" },
   { key: "rsi", label: "RSI" },
   { key: "macd", label: "MACD" },
   { key: "vol_x_avg", label: "Vol ×", title: "Last session volume vs its 20-day average" },
   { key: "ret_3m", label: "3M %" },
-  { key: "score", label: "Score", title: "How many of the 8 bullish signals are firing" },
+  { key: "score", label: "Tech", title: "How many of the 9 technical signals are firing" },
+  { key: "revenue_growth", label: "Rev gr", title: "Revenue growth, YoY (Yahoo)" },
+  { key: "earnings_growth", label: "PAT gr", title: "Earnings growth, YoY (Yahoo)" },
+  { key: "profit_margin", label: "Margin", title: "Net profit margin (Yahoo)" },
+  { key: "roe", label: "ROE" },
+  { key: "debt_to_equity", label: "D/E", title: "Debt to equity, % (lower is better)" },
+  { key: "held_institutions", label: "Inst %", title: "Institutional holding (Yahoo)" },
+  { key: "fundamental_score", label: "Fund", title: "How many of the 6 fundamental checks pass" },
   { key: "entry", label: "Entry" },
   { key: "stop_loss", label: "SL −10%" },
   { key: "target", label: "Target +10%" },
@@ -77,12 +87,13 @@ function sortRows(rs: BullishStockRow[], sort: SortState): BullishStockRow[] {
   return arr;
 }
 
-/** The eight signals behind the score, for the row tooltip. */
+/** The nine technical signals behind the score, for the row tooltip. */
 function signalSummary(r: BullishStockRow): string {
   const s: [string, boolean][] = [
     ["1 month above 9 EMA", r.sig_ema9],
     ["Above 50 & 200 DMA (50>200)", r.sig_ma_stack],
     ["At / near 52-week high", r.sig_near_high],
+    ["At / near ALL-TIME high", r.sig_all_time_high],
     ["Higher highs & higher lows", r.sig_structure],
     ["RSI above 50", r.sig_rsi],
     ["MACD positive crossover", r.sig_macd],
@@ -90,6 +101,23 @@ function signalSummary(r: BullishStockRow): string {
     ["Outperforming index & sector", r.sig_outperform],
   ];
   return s.map(([label, on]) => `${on ? "✓" : "·"} ${label}`).join("\n");
+}
+
+/** The six fundamental checks, for the Fund column tooltip. */
+function fundamentalSummary(r: BullishStockRow): string {
+  if (!r.fundamentals_known) return "No fundamentals available from Yahoo for this symbol";
+  const s: [string, boolean | undefined][] = [
+    ["Revenue growing ≥5% YoY", r.fund_revenue],
+    ["Earnings growing ≥5% YoY", r.fund_earnings],
+    ["Net margin ≥5%", r.fund_margin],
+    ["Debt/equity ≤150%", r.fund_debt],
+    ["ROE ≥12%", r.fund_roe],
+    ["Institutional holding ≥5%", r.fund_holding],
+  ];
+  const lines = s.map(([label, on]) => `${on ? "✓" : "·"} ${label}`);
+  if (r.analyst_rec) lines.push(`— analysts: ${r.analyst_rec.replace("_", " ")}`);
+  if (r.held_insiders != null) lines.push(`— promoter/insider holding: ${r.held_insiders.toFixed(1)}%`);
+  return lines.join("\n");
 }
 
 export default function BullishStocksPage() {
@@ -142,13 +170,14 @@ export default function BullishStocksPage() {
 
   const fnoCount = rows.filter((r) => r.fno_enabled).length;
   const perfect = rows.filter((r) => r.score === r.max_score).length;
+  const atAth = rows.filter((r) => r.sig_all_time_high).length;
 
   return (
     <div className="page">
       <PageHeader
         crumb="Bullish Stocks"
         title="Bullish Stocks"
-        subtitle="Stocks in a sustained uptrend — making higher highs and higher lows, pressed against their 52-week high, and holding above the 9 EMA for a month or more, with the 50/200 DMA stack, RSI, MACD, volume and relative strength confirming. Plan on every row: enter at the live price, 10% stop, 10% first target, and trail the stop 10% below the running high."
+        subtitle="Stocks in a sustained uptrend — making higher highs and higher lows, pressed against their all-time high, and holding above the 9 EMA for a month or more, with the 50/200 DMA stack, RSI, MACD, volume and relative strength confirming, and revenue growth, margins, debt, ROE and institutional holding checked underneath. Plan on every row: enter at the live price, 10% stop, 10% first target, and trail the stop 10% below the running high."
       />
 
       <div className="controls">
@@ -183,19 +212,29 @@ export default function BullishStocksPage() {
       <div className="stat-row">
         <span>{data?.label ?? "—"}: <b className="gain">{rows.length}</b> {showAll ? "screened" : "bullish"}</span>
         <span><b>{fnoCount}</b> F&amp;O enabled</span>
-        <span><b>{perfect}</b> with all 8 signals</span>
+        <span><b>{perfect}</b> with every technical signal</span>
+        <span><b className="gain">{atAth}</b> at an all-time high</span>
         {data?.benchmark_ret_3m != null && (
           <span className="muted">benchmark {data.benchmark} 3M {pct(data.benchmark_ret_3m)}</span>
         )}
         {loading && <span className="muted">refreshing…</span>}
       </div>
 
-      {data && !data.fundamentals_available && (
+      {data && (
         <div className="note">
-          <b>Technical screen only.</b> Revenue/profit growth, margins, debt, ROE, order book, earnings
-          beats, analyst upgrades and promoter/institutional buying are <b>not</b> screened — this codebase has no
-          fundamentals data source wired up yet. Highs are measured against the <b>52-week</b> high (the deepest
-          daily history we store), not an all-time high.
+          {data.fundamentals_available ? (
+            <>
+              <b>Coverage.</b> Fundamentals graded for <b>{data.fundamentals_graded}</b> of {data.screened} screened
+              stocks (Yahoo, refreshed daily); all-time highs backfilled for <b>{data.ath_available}</b>. Stocks Yahoo
+              has no data for show <b>n/a</b> and are never dropped for it. {data.unscreened_note}
+            </>
+          ) : (
+            <>
+              <b>Fundamentals still loading.</b> The daily Yahoo refresh has not completed yet, so only the technical
+              screen is scoring right now — rows will show <b>n/a</b> under the fundamental columns until it lands.
+              All-time highs backfilled for <b>{data.ath_available}</b> of {data.screened}. {data.unscreened_note}
+            </>
+          )}
         </div>
       )}
 
@@ -246,6 +285,14 @@ export default function BullishStocksPage() {
                     <td className="ltp">₹{inr(r.ltp)}</td>
                     <td className={(r.change_1d_pct ?? 0) >= 0 ? "gain" : "loss"}>{pct(r.change_1d_pct)}</td>
                     <td className={r.sig_ema9 ? "gain" : "muted"}>{r.ema9_days}</td>
+                    <td
+                      className={r.pct_from_ath == null ? "muted" : r.sig_all_time_high ? "gain" : ""}
+                      title={r.all_time_high != null
+                        ? `All-time high ₹${inr(r.all_time_high)}${r.all_time_high_date ? ` on ${r.all_time_high_date}` : ""}`
+                        : "All-time high not backfilled yet for this symbol"}
+                    >
+                      {r.pct_from_ath == null ? "—" : pct(r.pct_from_ath)}
+                    </td>
                     <td className={r.sig_near_high ? "gain" : ""}>{pct(r.pct_from_52w_high)}</td>
                     <td className={r.sig_rsi ? "gain" : "loss"}>{r.rsi == null ? "-" : r.rsi.toFixed(1)}</td>
                     <td className={r.sig_macd ? "gain" : "muted"}>{r.macd == null ? "-" : r.macd.toFixed(2)}</td>
@@ -255,6 +302,26 @@ export default function BullishStocksPage() {
                       <span className={r.score === r.max_score ? "score full" : r.qualified ? "score ok" : "score"}>
                         {r.score}/{r.max_score}
                       </span>
+                    </td>
+                    <td className={r.fund_revenue ? "gain" : r.revenue_growth == null ? "muted" : ""}>{pct(r.revenue_growth)}</td>
+                    <td className={r.fund_earnings ? "gain" : r.earnings_growth == null ? "muted" : ""}>{pct(r.earnings_growth)}</td>
+                    <td className={r.fund_margin ? "gain" : r.profit_margin == null ? "muted" : ""}>{pct(r.profit_margin)}</td>
+                    <td className={r.fund_roe ? "gain" : r.roe == null ? "muted" : ""}>{pct(r.roe)}</td>
+                    <td className={r.debt_to_equity == null ? "muted" : r.fund_debt ? "gain" : "loss"}>
+                      {r.debt_to_equity == null ? "—" : r.debt_to_equity.toFixed(0)}
+                    </td>
+                    <td className={r.fund_holding ? "gain" : r.held_institutions == null ? "muted" : ""}>{pct(r.held_institutions)}</td>
+                    <td title={fundamentalSummary(r)}>
+                      {!r.fundamentals_known ? (
+                        <span className="score">n/a</span>
+                      ) : (
+                        <span className={
+                          r.fundamental_score === r.fundamental_max ? "score full"
+                            : r.fundamentally_ok ? "score ok" : "score weak"
+                        }>
+                          {r.fundamental_score}/{r.fundamental_max}
+                        </span>
+                      )}
                     </td>
                     <td className="plan">₹{inr(r.entry)}</td>
                     <td className="plan loss">₹{inr(r.stop_loss)}</td>
@@ -302,6 +369,7 @@ export default function BullishStocksPage() {
         .score { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 10.5px; font-weight: 800; background: var(--canvas-soft); color: var(--text-muted); }
         .score.ok { background: var(--gain-dim); color: var(--gain); }
         .score.full { background: var(--gain); color: #fff; }
+        .score.weak { background: var(--loss-dim); color: var(--loss); }
         .plan { font-weight: 600; }
         .muted { color: var(--text-faint); }
         .gain { color: var(--gain); }
@@ -309,7 +377,7 @@ export default function BullishStocksPage() {
         @media (max-width: 720px) { .filter { max-width: none; } .right-controls { justify-content: flex-start; } }
       `}</style>
 
-      {/* Wide 17-column table — break out of the app's centered 1320px content column
+      {/* Wide 25-column table — break out of the app's centered 1320px content column
           for this page only, exactly as Stocks Range does. styled-jsx global styles are
           injected on mount and removed on navigate-away, so other pages stay centered. */}
       <style jsx global>{`

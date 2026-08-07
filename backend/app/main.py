@@ -243,6 +243,48 @@ async def backfill_stock_bars() -> None:
     asyncio.create_task(_run())
 
 
+@app.on_event("startup")
+async def seed_all_time_highs() -> None:
+    """Bullish Stocks needs a genuine all-time high, which no window of bars_collection can
+    give. Walk each symbol's full Angel history ONCE into stock_highs (only_missing, so this
+    is a no-op after the first run and only picks up newly-added constituents), then keep it
+    current daily from the bars the Stocks Range backfill already stores."""
+    async def _run() -> None:
+        await asyncio.sleep(180)  # after the universe seed and the bars backfill
+        while True:
+            try:
+                from app.services.stock_highs import backfill_all_time_highs, bump_from_bars
+
+                seeded = await backfill_all_time_highs(only_missing=True)
+                bumped = await bump_from_bars()
+                logger.info("All-time highs: seeded=%s bumped=%s", seeded, bumped)
+            except Exception:
+                logger.exception("All-time-high backfill failed")
+            await asyncio.sleep(24 * 3600)
+
+    asyncio.create_task(_run())
+
+
+@app.on_event("startup")
+async def refresh_stock_fundamentals() -> None:
+    """Daily Yahoo fundamentals for the Bullish Stocks screen (growth, margins, debt, ROE,
+    institutional holding). Stale-only by default, paced, and entirely optional — if Yahoo
+    or yfinance is unavailable the screen still runs and simply reports stocks as ungraded."""
+    async def _run() -> None:
+        await asyncio.sleep(300)  # last in the queue; nothing else depends on it
+        while True:
+            try:
+                from app.services.stock_fundamentals import refresh_fundamentals
+
+                result = await refresh_fundamentals()
+                logger.info("Stock fundamentals refresh: %s", result)
+            except Exception:
+                logger.exception("Stock fundamentals refresh failed")
+            await asyncio.sleep(24 * 3600)
+
+    asyncio.create_task(_run())
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],

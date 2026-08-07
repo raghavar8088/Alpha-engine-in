@@ -26,7 +26,8 @@ for name in ["app", "app.core", "app.core.db", "app.services", "app.services.ang
     sys.modules.setdefault(name, types.ModuleType(name))
 
 db = sys.modules["app.core.db"]
-for c in ["bars_collection", "instruments_collection", "stock_universe_collection"]:
+for c in ["bars_collection", "instruments_collection", "stock_universe_collection",
+          "stock_highs_collection", "stock_fundamentals_collection"]:
     setattr(db, c, object())
 ac = sys.modules["app.services.angel_client"]
 ac.AngelAPIError = type("AngelAPIError", (Exception,), {})
@@ -39,10 +40,24 @@ auth.batches = lambda x: []
 
 sys.path.insert(0, r"d:/INDIAN MARKET/backend")
 import importlib.util
-spec = importlib.util.spec_from_file_location(
-    "bs", r"d:/INDIAN MARKET/backend/app/services/bullish_stocks.py")
-bs = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(bs)
+
+SERVICES = r"d:/INDIAN MARKET/backend/app/services"
+
+
+def _load(name: str, path: str):
+    """Load a real service module by path and register it under its dotted name, so the
+    modules that import it resolve against the real thing rather than the stub package."""
+    spec = importlib.util.spec_from_file_location(name, path)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[name] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+# fundamentals and highs first — bullish_stocks imports both at module scope
+sf = _load("app.services.stock_fundamentals", f"{SERVICES}/stock_fundamentals.py")
+_load("app.services.stock_highs", f"{SERVICES}/stock_highs.py")
+bs = _load("app.services.bullish_stocks", f"{SERVICES}/bullish_stocks.py")
 
 fails = []
 def check(label, cond, extra=""):
@@ -191,6 +206,54 @@ ltp = 250.0
 check("stop is 10% below entry", abs(round(ltp * (1 - bs.STOP_PCT), 2) - 225.0) < 1e-9)
 check("target is 10% above entry", abs(round(ltp * (1 + bs.TARGET_PCT), 2) - 275.0) < 1e-9)
 check("trail is 10% below the running high", abs(round(300.0 * (1 - bs.TRAIL_PCT), 2) - 270.0) < 1e-9)
+
+# ---- all-time-high signal -------------------------------------------------------
+ev_ath = bs._evaluate(c, h, l, v, ltp, all_time_high=ltp * 0.99)   # price ABOVE the old ATH
+check("at an all-time high fires the ATH signal", ev_ath and ev_ath["sig_all_time_high"])
+check("ATH distance is positive when price is above it",
+      ev_ath and ev_ath["pct_from_ath"] > 0, f"({ev_ath['pct_from_ath']}%)")
+ev_far = bs._evaluate(c, h, l, v, ltp, all_time_high=ltp * 2.0)    # far below the old ATH
+check("far below the ATH does not fire", ev_far and not ev_far["sig_all_time_high"])
+check("ATH distance is negative when price is below it",
+      ev_far and ev_far["pct_from_ath"] < 0, f"({ev_far['pct_from_ath']}%)")
+ev_none = bs._evaluate(c, h, l, v, ltp, all_time_high=None)
+check("a missing ATH never fires the signal", ev_none and not ev_none["sig_all_time_high"])
+check("a missing ATH reports no distance rather than guessing",
+      ev_none and ev_none["pct_from_ath"] is None and ev_none["all_time_high"] is None)
+# the 52-week signal must be independent of the all-time one
+check("52-week signal unaffected by the ATH input",
+      ev_ath["sig_near_high"] == ev_far["sig_near_high"] == ev_none["sig_near_high"])
+
+# ---- fundamental grading (pure function, no network) ----------------------------
+strong = sf.grade({"revenue_growth": 0.22, "earnings_growth": 0.30, "profit_margin": 0.18,
+                   "debt_to_equity": 20.0, "roe": 0.25, "held_institutions": 0.30,
+                   "analyst_rec": "buy"})
+check("a strong business scores 6/6", strong["fundamental_score"] == 6, f"(got {strong['fundamental_score']})")
+check("strong business is flagged analyst-bullish", strong["analyst_bullish"])
+
+weak = sf.grade({"revenue_growth": -0.10, "earnings_growth": -0.20, "profit_margin": 0.01,
+                 "debt_to_equity": 400.0, "roe": 0.02, "held_institutions": 0.001,
+                 "analyst_rec": "sell"})
+check("a weak business scores 0/6", weak["fundamental_score"] == 0, f"(got {weak['fundamental_score']})")
+check("weak business is not analyst-bullish", not weak["analyst_bullish"])
+
+missing = sf.grade(None)
+check("no fundamentals => ungraded, not failed", missing["fundamental_score"] is None
+      and missing["fundamentals_known"] is False)
+partial = sf.grade({"revenue_growth": 0.20})
+check("partial data grades only what exists", partial["fundamental_score"] == 1
+      and partial["fundamentals_known"] is True, f"(got {partial['fundamental_score']})")
+check("None fields never crash the grader", sf.grade({"revenue_growth": None, "roe": None})
+      ["fundamental_score"] == 0)
+# debt is the one "lower is better" check — make sure the comparison isn't inverted
+check("low debt passes, high debt fails",
+      sf.grade({"debt_to_equity": 10.0})["fund_debt"] is True
+      and sf.grade({"debt_to_equity": 900.0})["fund_debt"] is False)
+
+# ---- NaN guard (yfinance hands back NaN for missing numerics) --------------------
+check("_num rejects NaN", sf._num(float("nan")) is None)
+check("_num rejects junk", sf._num("n/a") is None and sf._num(None) is None)
+check("_num accepts real numbers", sf._num("12.5") == 12.5)
 
 print("\n" + ("ALL CHECKS PASSED" if not fails else f"{len(fails)} FAILED: {fails}"))
 sys.exit(1 if fails else 0)

@@ -39,6 +39,14 @@ manual_accounts_collection = db["manual_accounts"]
 # niftyindices.com, plus the user's per-stock manual "buy range" price.
 stock_universe_collection = db["stock_universe"]
 stock_ranges_collection = db["stock_ranges"]
+# Bullish Stocks module. One small doc per symbol holding the ALL-TIME high (and the date
+# it was set), so the screener can test "at an all-time high" without keeping decades of
+# daily bars in bars_collection. Seeded by a deep one-off Angel backfill, then nudged
+# forward incrementally as new daily bars arrive.
+stock_highs_collection = db["stock_highs"]
+# Per-symbol fundamentals (growth, margins, debt, ROE, holding, analyst view) refreshed
+# daily from Yahoo Finance. Quarterly-changing data, so a daily snapshot is ample.
+stock_fundamentals_collection = db["stock_fundamentals"]
 # F&O Positions module — user-initiated paper trades on index/stock options & futures
 fno_positions_collection = db["fno_positions"]
 fno_orders_collection = db["fno_orders"]

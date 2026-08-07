@@ -2176,6 +2176,9 @@ export interface BullishStockRow {
   sma200: number;
   high_52w: number;
   pct_from_52w_high: number;
+  all_time_high: number | null;
+  all_time_high_date: string | null;
+  pct_from_ath: number | null;
   rsi: number | null;
   macd: number | null;
   macd_signal: number | null;
@@ -2187,6 +2190,7 @@ export interface BullishStockRow {
   sig_ema9: boolean;
   sig_ma_stack: boolean;
   sig_near_high: boolean;
+  sig_all_time_high: boolean;
   sig_structure: boolean;
   sig_rsi: boolean;
   sig_macd: boolean;
@@ -2195,6 +2199,26 @@ export interface BullishStockRow {
   score: number;
   max_score: number;
   qualified: boolean;
+  // fundamentals (Yahoo, refreshed daily; null when Yahoo has no data for the symbol)
+  revenue_growth: number | null;
+  earnings_growth: number | null;
+  profit_margin: number | null;
+  roe: number | null;
+  debt_to_equity: number | null;
+  held_institutions: number | null;
+  held_insiders: number | null;
+  analyst_rec: string | null;
+  analyst_bullish?: boolean;
+  fund_revenue?: boolean;
+  fund_earnings?: boolean;
+  fund_margin?: boolean;
+  fund_debt?: boolean;
+  fund_roe?: boolean;
+  fund_holding?: boolean;
+  fundamental_score: number | null;
+  fundamental_max: number;
+  fundamentals_known: boolean;
+  fundamentally_ok: boolean;
   // trade plan
   entry: number;
   stop_loss: number;
@@ -2210,7 +2234,10 @@ export interface BullishStocksScreen {
   benchmark: string;
   benchmark_ret_3m: number | null;
   fundamentals_available: boolean;
+  fundamentals_graded: number;
+  ath_available: number;
   high_window: string;
+  unscreened_note: string;
   plan: { stop_pct: number; target_pct: number; trail_pct: number };
   computed_at: string;
   rows: BullishStockRow[];

@@ -11,13 +11,16 @@ Data sources are the same Angel/local ones the Stocks Range table already uses �
 niftyindices constituent lists (via stock_universe), Angel FULL quotes for the live price,
 and the stored daily bars for every indicator. No new vendor, no new credentials.
 
-Two honest limits, surfaced in the API rather than hidden:
-  * "All-time high" is not computable from what we store. Daily bars go back
-    BARS_LOOKBACK_DAYS (~1.5y), so this screens on the **52-week high** and says so.
-  * Fundamental screening (revenue/profit growth, margins, debt, ROE, order book,
-    earnings beats, analyst upgrades, promoter/institutional buying) has NO data source
-    in this codebase today. Those columns are deliberately absent rather than faked; the
-    response carries `fundamentals_available: false` so the UI can say so plainly.
+Highs are measured against the genuine ALL-TIME high, kept per symbol in stock_highs
+(seeded by a deep Angel history walk, then nudged forward from daily bars) rather than
+against the shallow window bars_collection holds. The 52-week high is still computed and
+shown alongside it.
+
+Fundamentals come from stock_fundamentals (Yahoo, refreshed daily): revenue and earnings
+growth, margins, debt, ROE and institutional holding are graded out of 6 and can gate
+qualification. One item from the original brief has no programmatic source anywhere and is
+deliberately NOT approximated: order-book strength, which is disclosed in prose in filings
+and is sector-specific. Everything else is real data or absent, never invented.
 """
 
 import asyncio
@@ -31,6 +34,9 @@ from app.core.db import (
     stock_universe_collection,
 )
 from app.services.angel_client import AngelAPIError, angel_client
+from app.services.stock_fundamentals import grade as grade_fundamentals
+from app.services.stock_fundamentals import load_fundamentals
+from app.services.stock_highs import load_highs
 from app.services.stocks_range import INDEX_LABELS, QUOTE_PACE_SECONDS
 from tradingai_broker_clients.angel.auth import batches
 
@@ -56,6 +62,7 @@ TRAIL_PCT = 0.10              # trail 10% below the running high
 
 SCREEN_TTL_SECONDS = 300      # these are daily-bar signals; recompute at most every 5 min
 BENCHMARK_SYMBOL = "NIFTY"
+MIN_FUNDAMENTAL_SCORE = 3     # of 6 — a confirmation bar, not a value screen
 
 IST = timezone(timedelta(hours=5, minutes=30))
 
@@ -166,6 +173,13 @@ def _higher_structure(highs: list[float], lows: list[float]) -> bool:
     return _ascending(block_highs, STRUCTURE_BLOCKS) and _ascending(block_lows, STRUCTURE_BLOCKS)
 
 
+def _pctize(f: dict | None, key: str) -> float | None:
+    """Yahoo reports growth/margin/holding ratios as fractions — show them as percentages."""
+    if not f or f.get(key) is None:
+        return None
+    return round(f[key] * 100, 2)
+
+
 def _pct_return(closes: list[float], lookback: int) -> float | None:
     if len(closes) < lookback + 1 or closes[-lookback - 1] <= 0:
         return None
@@ -175,8 +189,13 @@ def _pct_return(closes: list[float], lookback: int) -> float | None:
 # ── screen ───────────────────────────────────────────────────────────────────────
 
 
-def _evaluate(closes, highs, lows, volumes, ltp) -> dict | None:
-    """Compute every signal for one stock. None when there is not enough history."""
+def _evaluate(closes, highs, lows, volumes, ltp, all_time_high: float | None = None) -> dict | None:
+    """Compute every signal for one stock. None when there is not enough history.
+
+    `all_time_high` comes from stock_highs (the full-history walk). When it is missing the
+    stock is simply not credited with the all-time-high signal — it is never silently
+    downgraded to the 52-week high, which would quietly change what the column means.
+    """
     if len(closes) < SMA_SLOW + 1 or ltp is None:
         return None
 
@@ -194,9 +213,12 @@ def _evaluate(closes, highs, lows, volumes, ltp) -> dict | None:
         return None
 
     pct_from_high = (ltp / high_52w - 1) * 100
+    pct_from_ath = ((ltp / all_time_high - 1) * 100) if all_time_high else None
 
     return {
         # raw values (shown in the table)
+        "all_time_high": round(all_time_high, 2) if all_time_high else None,
+        "pct_from_ath": round(pct_from_ath, 2) if pct_from_ath is not None else None,
         "ema9_days": ema9_days,
         "sma50": round(sma50, 2),
         "sma200": round(sma200, 2),
@@ -212,6 +234,7 @@ def _evaluate(closes, highs, lows, volumes, ltp) -> dict | None:
         "sig_ema9": ema9_days >= EMA9_MIN_SESSIONS,
         "sig_ma_stack": ltp > sma50 and ltp > sma200 and sma50 > sma200,
         "sig_near_high": ltp >= high_52w * NEAR_HIGH_PCT,
+        "sig_all_time_high": bool(all_time_high and ltp >= all_time_high * NEAR_HIGH_PCT),
         "sig_structure": _higher_structure(highs, lows),
         "sig_rsi": rsi is not None and rsi > RSI_MIN,
         "sig_macd": (macd_line is not None and macd_sig is not None
@@ -311,6 +334,8 @@ async def screen(index: str, qualified_only: bool = True, force: bool = False) -
 
     fno = await _fno_symbols(symbols)
     bench_ret, bench_name = await _benchmark_return()
+    highs = await load_highs(symbols)
+    funds = await load_fundamentals(symbols)
 
     scored: list[dict] = []
     for d in docs:
@@ -321,10 +346,12 @@ async def screen(index: str, qualified_only: bool = True, force: bool = False) -
         q = q_by_sym.get(sym)
         ltp = (q.get("ltp") if q else None) or (s["c"][-1] if s["c"] else None)
         prev = (q.get("close") if q else None) or (s["c"][-2] if len(s["c"]) >= 2 else None)
-        ev = _evaluate(s["c"], s["h"], s["l"], s["v"], ltp)
+        ath = (highs.get(sym) or {}).get("all_time_high")
+        ev = _evaluate(s["c"], s["h"], s["l"], s["v"], ltp, ath)
         if not ev:
             continue
         chg1d = (ltp - prev) if (ltp is not None and prev) else None
+        f = funds.get(sym)
         scored.append({
             "symbol": sym,
             "name": d.get("name"),
@@ -333,7 +360,17 @@ async def screen(index: str, qualified_only: bool = True, force: bool = False) -
             "fno_enabled": sym in fno,
             "ltp": round(ltp, 2),
             "change_1d_pct": round(chg1d / prev * 100, 2) if (chg1d is not None and prev) else None,
+            "all_time_high_date": (highs.get(sym) or {}).get("all_time_high_date"),
             **ev,
+            **grade_fundamentals(f),
+            "revenue_growth": _pctize(f, "revenue_growth"),
+            "earnings_growth": _pctize(f, "earnings_growth"),
+            "profit_margin": _pctize(f, "profit_margin"),
+            "roe": _pctize(f, "roe"),
+            "debt_to_equity": round(f["debt_to_equity"], 1) if f and f.get("debt_to_equity") is not None else None,
+            "held_institutions": _pctize(f, "held_institutions"),
+            "held_insiders": _pctize(f, "held_insiders"),
+            "analyst_rec": (f or {}).get("analyst_rec"),
         })
 
     # ── relative strength: vs the index (or universe median) and vs own sector ──
@@ -356,18 +393,25 @@ async def screen(index: str, qualified_only: bool = True, force: bool = False) -
         r["ret_3m"] = round(rr, 2) if rr is not None else None
 
         signals = [
-            r["sig_ema9"], r["sig_ma_stack"], r["sig_near_high"], r["sig_structure"],
-            r["sig_rsi"], r["sig_macd"], r["sig_volume"], r["sig_outperform"],
+            r["sig_ema9"], r["sig_ma_stack"], r["sig_near_high"], r["sig_all_time_high"],
+            r["sig_structure"], r["sig_rsi"], r["sig_macd"], r["sig_volume"],
+            r["sig_outperform"],
         ]
         r["score"] = sum(1 for s in signals if s)
         r["max_score"] = len(signals)
-        # The four non-negotiables define "bullish" for this desk: a month above the
-        # 9 EMA, the full MA stack, pressed against the 52-week high, and an intact
-        # higher-high/higher-low structure. Volume, RSI, MACD and relative strength
-        # add conviction (they lift the score) but never on their own qualify a stock.
+        # The four technical non-negotiables define "bullish" for this desk: a month above
+        # the 9 EMA, the full MA stack, pressed against the 52-week high, and an intact
+        # higher-high/higher-low structure. The all-time-high signal, volume, RSI, MACD and
+        # relative strength add conviction (they lift the score) but never on their own
+        # qualify a stock — an all-time high is the ambition, not a hard gate, because a
+        # stock can be a valid breakout while still working through an old overhead level.
         r["qualified"] = bool(
             r["sig_ema9"] and r["sig_ma_stack"] and r["sig_near_high"] and r["sig_structure"]
         )
+        # Fundamentals gate separately from the technical read, so a stock is never dropped
+        # merely because Yahoo has no data for it. Unknown = not blocked, and flagged.
+        fs = r.get("fundamental_score")
+        r["fundamentally_ok"] = fs is None or fs >= MIN_FUNDAMENTAL_SCORE
 
         # trade plan — enter now, 10% stop, 10% first target, stop trails the running high
         ltp = r["ltp"]
@@ -376,9 +420,11 @@ async def screen(index: str, qualified_only: bool = True, force: bool = False) -
         r["target"] = round(ltp * (1 + TARGET_PCT), 2)
         r["trail_stop"] = round((r["trail_high"] or ltp) * (1 - TRAIL_PCT), 2)
 
-    rows = [r for r in scored if r["qualified"]] if qualified_only else scored
+    rows = ([r for r in scored if r["qualified"] and r["fundamentally_ok"]]
+            if qualified_only else scored)
     rows.sort(key=lambda r: (-r["score"], r["pct_from_52w_high"] is None, -(r["pct_from_52w_high"] or -999)))
 
+    graded = sum(1 for r in scored if r.get("fundamentals_known"))
     payload = {
         "index": index,
         "label": INDEX_LABELS[index],
@@ -387,8 +433,12 @@ async def screen(index: str, qualified_only: bool = True, force: bool = False) -
         "qualified_only": qualified_only,
         "benchmark": bench_name,
         "benchmark_ret_3m": round(bench, 2) if bench is not None else None,
-        "fundamentals_available": False,
-        "high_window": "52-week",
+        # coverage, so the UI can be honest about what actually backed this run
+        "fundamentals_available": graded > 0,
+        "fundamentals_graded": graded,
+        "ath_available": sum(1 for r in scored if r.get("all_time_high")),
+        "high_window": "all-time",
+        "unscreened_note": "Order-book strength is not screened — no programmatic source.",
         "plan": {"stop_pct": STOP_PCT * 100, "target_pct": TARGET_PCT * 100, "trail_pct": TRAIL_PCT * 100},
         "computed_at": _now().isoformat(),
         "rows": rows,
