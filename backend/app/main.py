@@ -14,6 +14,7 @@ from app.api.routes import (
     ai,
     backtest,
     broker,
+    bullish_stocks,
     chart_data,
     fno_positions,
     intraday_lab,
@@ -280,6 +281,7 @@ app.include_router(fno_positions.router)
 app.include_router(intraday_lab.router)
 app.include_router(live_intraday.router)
 app.include_router(stocks_range.router)
+app.include_router(bullish_stocks.router)
 app.include_router(long_horizon.router)
 app.include_router(chart_data.router)
 app.include_router(telegram_signals.router)

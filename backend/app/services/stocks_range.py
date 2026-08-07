@@ -34,7 +34,12 @@ logger = logging.getLogger("stocks_range")
 BUY_ZONE_PCT = 0.10  # within ±10% of the entered price = buy zone
 IST = timezone(timedelta(hours=5, minutes=30))
 QUOTE_PACE_SECONDS = 0.15  # small gap between 50-token quote chunks (Angel rate limit)
-BARS_LOOKBACK_DAYS = 90    # daily history to keep per symbol (covers SMA50 + 1-week change)
+# Daily history to keep per symbol. 90 days covered this module (SMA50 + 1-week change),
+# but the Bullish Stocks screener needs a real 200-DMA and a real 52-week high, so this is
+# now ~1.5 calendar years of sessions. Costs no extra Angel calls — the same one call per
+# symbol just returns more candles — and every consumer here reads tail slices, so the
+# deeper history cannot change what this module already showed.
+BARS_LOOKBACK_DAYS = 400
 BARS_PACE_SECONDS = 0.4    # gap between historical-candle calls (Angel's stricter limit)
 
 # (index key, label, official constituent CSV). The lists nest largest-to-smallest.

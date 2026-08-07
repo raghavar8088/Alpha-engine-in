@@ -72,6 +72,19 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // Sits directly under Stocks Range and shares its table: same universe, but
+        // filtered to stocks already trending up. A rising staircase to read as
+        // "higher highs" at a glance, against Stocks Range's bracketed-range mark.
+        href: "/bullish-stocks",
+        label: "Bullish Stocks",
+        icon: (
+          <>
+            <path d="M3 20l4-4 3 3 4-6 3 3 4-8" />
+            <path d="M17 5h5v5" />
+          </>
+        ),
+      },
+      {
         href: "/fno-positions",
         label: "F&O Positions",
         icon: (

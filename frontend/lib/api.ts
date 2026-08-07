@@ -2160,3 +2160,62 @@ export async function getStockRange(symbol: string): Promise<{ symbol: string; b
 export async function setStockRange(symbol: string, buyPrice: number): Promise<StockRangeSetResult> {
   return apiFetch(`/api/stocks-range/range`, { method: "POST", body: JSON.stringify({ symbol, buy_price: buyPrice }) });
 }
+
+// ---- Bullish Stocks (momentum screener: highs, 9 EMA, MA stack, RSI/MACD, volume) ----
+export interface BullishStockRow {
+  symbol: string;
+  name: string | null;
+  sector: string | null;
+  belongs_to: string | null;
+  fno_enabled: boolean;
+  ltp: number;
+  change_1d_pct: number | null;
+  // indicator values
+  ema9_days: number;
+  sma50: number;
+  sma200: number;
+  high_52w: number;
+  pct_from_52w_high: number;
+  rsi: number | null;
+  macd: number | null;
+  macd_signal: number | null;
+  vol_x_avg: number | null;
+  ret_3m: number | null;
+  sector_ret_3m: number | null;
+  trail_high: number | null;
+  // signals
+  sig_ema9: boolean;
+  sig_ma_stack: boolean;
+  sig_near_high: boolean;
+  sig_structure: boolean;
+  sig_rsi: boolean;
+  sig_macd: boolean;
+  sig_volume: boolean;
+  sig_outperform: boolean;
+  score: number;
+  max_score: number;
+  qualified: boolean;
+  // trade plan
+  entry: number;
+  stop_loss: number;
+  target: number;
+  trail_stop: number;
+}
+export interface BullishStocksScreen {
+  index: string;
+  label: string;
+  count: number;
+  screened: number;
+  qualified_only: boolean;
+  benchmark: string;
+  benchmark_ret_3m: number | null;
+  fundamentals_available: boolean;
+  high_window: string;
+  plan: { stop_pct: number; target_pct: number; trail_pct: number };
+  computed_at: string;
+  rows: BullishStockRow[];
+}
+
+export async function fetchBullishStocks(index: string, all = false): Promise<BullishStocksScreen> {
+  return apiFetch(`/api/bullish-stocks/screen?index=${encodeURIComponent(index)}&all=${all ? "true" : "false"}`);
+}
