@@ -440,6 +440,7 @@ async def manage_cycle(dhan: DhanClient | None) -> int:
 
     now_ist = datetime.now(IST)
     is_eod = now_ist.strftime("%H:%M") >= EOD_SQUAREOFF_HHMM
+    today_iso = _today_ist().isoformat()
 
     updated = 0
     touched: set[str] = set()
@@ -460,6 +461,37 @@ async def manage_cycle(dhan: DhanClient | None) -> int:
 
         for pos in positions:
             sign = 1 if pos["side"] == "BUY" else -1
+
+            # A position opened in an EARLIER session cannot still be live: this desk trades
+            # INTRADAY (MIS), which the broker auto-squares-off the same day. If our ledger
+            # still says OPEN, the exit order failed (or the scheduler stopped before a retry
+            # succeeded) — the broker is already flat. Reconcile it CLOSED here WITHOUT
+            # sending an order: placing one would not "close" anything, it would open a
+            # brand-new opposite position with real money on a later day.
+            if pos.get("opened_on") and pos["opened_on"] < today_iso:
+                realized = round(sign * (ltp - pos["entry_price"]) * pos["qty"], 2)
+                await live_trading_positions_collection.update_one({"_id": pos["_id"]}, {"$set": {
+                    "status": "CLOSED", "exit_price": round(ltp, 2),
+                    "exit_reason": "stale_session_reconciled", "realized_pnl": realized,
+                    "unrealized_pnl": 0.0, "ltp": round(ltp, 2), "updated_at": _now(), "closed_at": _now(),
+                }})
+                await live_trading_trades_collection.insert_one({
+                    "trade_id": uuid4().hex[:12], "strategy_id": pos["strategy_id"],
+                    "strategy_name": pos["strategy_name"], "symbol": pos["symbol"], "side": pos["side"],
+                    "entry_price": pos["entry_price"], "exit_price": round(ltp, 2), "qty": pos["qty"],
+                    "realized_pnl": realized, "exit_reason": "stale_session_reconciled",
+                    "entry_order_id": pos.get("entry_order_id"), "exit_order_id": None,
+                    "opened_at": pos["opened_at"], "closed_at": _now(),
+                })
+                logger.warning(
+                    "[live_trading] STALE position %s %s from %s reconciled CLOSED without an order "
+                    "(broker auto-squared it off intraday); marked P&L %.2f at last price %.2f",
+                    pos["side"], pos["symbol"], pos["opened_on"], realized, ltp,
+                )
+                touched.add(pos["strategy_id"])
+                updated += 1
+                continue
+
             unrealized = round(sign * (ltp - pos["entry_price"]) * pos["qty"], 2)
             await live_trading_positions_collection.update_one({"_id": pos["_id"]}, {"$set": {
                 "ltp": round(ltp, 2), "ltp_source": ltp_source, "unrealized_pnl": unrealized,
