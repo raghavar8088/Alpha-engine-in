@@ -123,7 +123,9 @@ function fundamentalSummary(r: BullishStockRow): string {
 export default function BullishStocksPage() {
   const [index, setIndex] = useState("nifty500");
   const [data, setData] = useState<BullishStocksScreen | null>(null);
-  const [showAll, setShowAll] = useState(false);
+  // Default view: every screened stock, ranked by score (the table is never empty and you
+  // see the leaders even when few fully qualify). "Bullish only" narrows to the qualifiers.
+  const [bullishOnly, setBullishOnly] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
@@ -133,14 +135,14 @@ export default function BullishStocksPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      setData(await fetchBullishStocks(index, showAll));
+      setData(await fetchBullishStocks(index, !bullishOnly));
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to run the bullish screen");
     } finally {
       setLoading(false);
     }
-  }, [index, showAll]);
+  }, [index, bullishOnly]);
 
   useEffect(() => {
     load();
@@ -169,6 +171,7 @@ export default function BullishStocksPage() {
     });
 
   const fnoCount = rows.filter((r) => r.fno_enabled).length;
+  const qualifiedCount = rows.filter((r) => r.qualified).length;
   const perfect = rows.filter((r) => r.score === r.max_score).length;
   const atAth = rows.filter((r) => r.sig_all_time_high).length;
 
@@ -197,11 +200,11 @@ export default function BullishStocksPage() {
             F&amp;O only
           </button>
           <button
-            className={showAll ? "toggle on" : "toggle"}
-            onClick={() => setShowAll((v) => !v)}
-            title="Include stocks that fail one or more of the four core conditions, with their score"
+            className={bullishOnly ? "toggle on" : "toggle"}
+            onClick={() => setBullishOnly((v) => !v)}
+            title="Narrow to only the stocks that pass all four core conditions"
           >
-            Show near-misses
+            Bullish only
           </button>
           <input className="filter" value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter by symbol, name or sector…" />
         </div>
@@ -210,7 +213,8 @@ export default function BullishStocksPage() {
       {error && <ErrorBanner message={error} />}
 
       <div className="stat-row">
-        <span>{data?.label ?? "—"}: <b className="gain">{rows.length}</b> {showAll ? "screened" : "bullish"}</span>
+        <span>{data?.label ?? "—"}: <b>{rows.length}</b> {bullishOnly ? "bullish" : "screened"}</span>
+        <span><b className="gain">{qualifiedCount}</b> fully bullish</span>
         <span><b>{fnoCount}</b> F&amp;O enabled</span>
         <span><b>{perfect}</b> with every technical signal</span>
         <span><b className="gain">{atAth}</b> at an all-time high</span>
@@ -238,10 +242,14 @@ export default function BullishStocksPage() {
         </div>
       )}
 
-      <GlassPanel title={showAll ? "Screened stocks" : "Bullish stocks"}>
+      <GlassPanel title={bullishOnly ? "Bullish stocks" : "Screened stocks — ranked by score"}>
         {!rows.length ? (
           <div className="empty">
-            {loading ? "Loading…" : "No stock currently passes every core condition. Try “Show near-misses”, or a wider index."}
+            {loading
+              ? "Loading…"
+              : bullishOnly
+                ? "No stock currently passes all four core conditions in this index — switch off “Bullish only” to see the full ranked list."
+                : "No stocks match this filter."}
           </div>
         ) : (
           <div className="table-scroll">
@@ -272,10 +280,13 @@ export default function BullishStocksPage() {
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.symbol} className={r.fno_enabled ? "fno" : ""}>
+                  <tr key={r.symbol} className={`${r.fno_enabled ? "fno" : ""}${r.qualified ? " qualified" : ""}`}>
                     <td style={{ textAlign: "left" }}>
                       <div className="stock-cell">
-                        <span className={r.fno_enabled ? "sym fno-sym" : "sym"}>{r.symbol}</span>
+                        <span className="sym-line">
+                          <span className={r.fno_enabled ? "sym fno-sym" : "sym"}>{r.symbol}</span>
+                          {r.qualified && <span className="bull-chip" title="Passes all four core conditions">BULLISH</span>}
+                        </span>
                         <span className="nm">{r.name}</span>
                       </div>
                     </td>
@@ -360,7 +371,13 @@ export default function BullishStocksPage() {
         .arrows .on { color: var(--purple); }
         .data-table td { padding: 8px 12px; text-align: center; border-bottom: 1px solid var(--canvas-soft); }
         tr.fno { background: rgba(14, 159, 110, 0.07); }
+        /* Qualifiers stand out even inside the full ranked list: amber tint + a left accent
+           bar. Defined after tr.fno so a row that is both reads as "bullish" first. */
+        tr.qualified { background: rgba(196, 138, 46, 0.12); }
+        tr.qualified td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
         .stock-cell { display: flex; flex-direction: column; }
+        .sym-line { display: inline-flex; align-items: center; gap: 6px; }
+        .bull-chip { display: inline-block; padding: 1px 6px; border-radius: 5px; font-size: 8.5px; font-weight: 800; letter-spacing: 0.04em; background: var(--accent); color: #241404; }
         .sym { font-weight: 700; }
         .sym.fno-sym { color: var(--gain); }
         .nm { font-size: 10.5px; color: var(--text-faint); max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
