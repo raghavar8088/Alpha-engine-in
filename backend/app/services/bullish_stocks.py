@@ -161,19 +161,19 @@ def _ema9_hold(closes: list[float]) -> tuple[int, float, bool]:
     return streak, hold, bool(pairs[-1][0] > pairs[-1][1])
 
 
-def _ascending(seq: list[float], n: int = 3) -> bool:
-    s = seq[-n:]
-    return len(s) >= 2 and all(s[i] > s[i - 1] for i in range(1, len(s)))
-
-
 def _higher_structure(highs: list[float], lows: list[float]) -> bool:
-    """Higher highs AND higher lows across consecutive ~monthly blocks.
+    """Higher highs AND higher lows across ~monthly blocks — the most recent month sitting
+    above the month from a quarter ago, on both the highs and the lows.
 
-    Deliberately NOT fractal +/-k swing pivots. On a stock trending hard with shallow
-    pullbacks — precisely what this screen looks for — a pivot test finds no swing points
-    at all, because every forward bar takes out the prior peak, so the structure check
-    silently rejected the entire watchlist. Block extremes encode "higher highs and
-    higher lows" directly and degrade gracefully on noisy data.
+    NOT a strictly monotonic staircase (every block above the one just before it). That
+    reading is effectively never true: even a textbook uptrend has one month that pulls
+    back below the previous month's low, and requiring an unbroken ascent on BOTH highs and
+    lows across three straight months rejected all but ~1 of the Nifty 50 — emptying the
+    screen. What "higher highs and higher lows" means for a trend that's still intact is
+    that the stock is structurally higher than it was a quarter ago, which is the first vs
+    last block comparison below. It tolerates a mid-quarter pullback while still demanding a
+    net higher high and a net higher low; the near-52w-high gate handles "how far off the
+    peak," so this test doesn't also need to.
     """
     need = STRUCTURE_BLOCK * STRUCTURE_BLOCKS
     if len(highs) < need or len(lows) < need:
@@ -183,7 +183,7 @@ def _higher_structure(highs: list[float], lows: list[float]) -> bool:
     for i in range(STRUCTURE_BLOCKS):
         block_highs.append(max(hs[i * STRUCTURE_BLOCK:(i + 1) * STRUCTURE_BLOCK]))
         block_lows.append(min(ls[i * STRUCTURE_BLOCK:(i + 1) * STRUCTURE_BLOCK]))
-    return _ascending(block_highs, STRUCTURE_BLOCKS) and _ascending(block_lows, STRUCTURE_BLOCKS)
+    return block_highs[-1] > block_highs[0] and block_lows[-1] > block_lows[0]
 
 
 def _pctize(f: dict | None, key: str) -> float | None:
