@@ -3,8 +3,10 @@
 Same eight strategies, same ₹10,000-per-strategy / ₹10,000-per-position structure as the
 paper Live Intraday desk (it imports that desk's exact selection and signal logic, so the
 two can never drift apart). The difference is execution: when this desk is ARMED it routes
-REAL orders to Dhan, the app's live execution broker. Angel One remains the price/signal
-feed — it has no order path here by design.
+REAL orders to Angel One via SmartAPI placeOrder. Angel is also the price/signal feed, so
+the whole desk is on one broker. (This needs an Angel TRADING API key — a market-data-only
+key is rejected at order time.) Dhan is still consulted for quotes with an Angel fallback,
+but never for orders here.
 
 Safety model (mirrors the Antigravity Live Engine the user already runs):
   * ARMED flag — ships OFF. Nothing is ordered until the desk is armed. Disarming stops
@@ -238,35 +240,45 @@ async def _update_score(strategy_id: str) -> None:
     )
 
 
-# ── real Dhan order placement ────────────────────────────────────────────────────
+# ── real Angel One order placement ───────────────────────────────────────────────
 
 
-async def _place_dhan_order(dhan: DhanClient, inst: dict, side: str, qty: int) -> str | None:
-    """Place a REAL market INTRADAY order. Returns the Dhan orderId, or None on any
-    failure (so the caller can refuse to record a position that never actually opened)."""
+async def _place_angel_order(inst: dict, side: str, qty: int) -> str | None:
+    """Place a REAL market INTRADAY order via Angel One SmartAPI. Returns the Angel orderid,
+    or None on any failure — rejected, not permitted (a non-trading API key), or no id — so
+    the caller can refuse to record a position that never actually opened.
+
+    Angel needs BOTH the symboltoken and the tradingsymbol (e.g. "RELIANCE-EQ"); the token
+    map stamps `angel_tradingsymbol`, and we fall back to "<symbol>-EQ" for NSE cash."""
+    token = inst.get("angel_token")
+    if not token:
+        logger.error("[live_trading] no Angel token for %s — cannot place order", inst.get("symbol"))
+        return None
+    exchange = inst.get("angel_exchange") or "NSE"
+    tradingsymbol = inst.get("angel_tradingsymbol") or f"{inst.get('symbol')}-EQ"
     try:
-        result = await dhan.place_order(
-            security_id=str(inst["security_id"]),
-            exchange_segment=inst["exchange_segment"],
-            transaction_type=side,
+        body = await angel_client.place_order(
+            tradingsymbol=tradingsymbol,
+            symboltoken=str(token),
+            transactiontype=side,
+            exchange=exchange,
             quantity=int(qty),
-            order_type="MARKET",
-            product_type=PRODUCT_TYPE,
+            ordertype="MARKET",
+            producttype=PRODUCT_TYPE,
+            duration="DAY",
             price=0,
         )
     except Exception:
-        logger.exception("[live_trading] Dhan order FAILED: %s %s x%s", side, inst.get("symbol"), qty)
+        logger.exception("[live_trading] Angel order FAILED: %s %s x%s", side, inst.get("symbol"), qty)
         return None
-    oid = None
-    if isinstance(result, dict):
-        oid = (result.get("data") or {}).get("orderId") or result.get("orderId")
+    oid = (body.get("data") or {}).get("orderid") if isinstance(body, dict) else None
     if not oid:
-        logger.error("[live_trading] Dhan order returned no orderId: %s", result)
+        logger.error("[live_trading] Angel order returned no orderid: %s", body)
         return None
     return str(oid)
 
 
-async def _open_position(ls, symbol: str, inst: dict, signal, ltp_source: str, dhan: DhanClient) -> bool:
+async def _open_position(ls, symbol: str, inst: dict, signal, ltp_source: str) -> bool:
     if await live_trading_positions_collection.find_one(
         {"strategy_id": ls.strategy_id, "symbol": symbol, "status": "OPEN"}
     ):
@@ -280,8 +292,8 @@ async def _open_position(ls, symbol: str, inst: dict, signal, ltp_source: str, d
     if await _desk_deployed() + new_notional > DESK_CEILING + 1:
         return False
 
-    # REAL order — only record the position if the broker accepted it
-    order_id = await _place_dhan_order(dhan, inst, signal.side, qty)
+    # REAL order via Angel One — only record the position if Angel accepted it
+    order_id = await _place_angel_order(inst, signal.side, qty)
     if not order_id:
         await _register_reject()
         return False
@@ -294,6 +306,8 @@ async def _open_position(ls, symbol: str, inst: dict, signal, ltp_source: str, d
         "instrument": {
             "symbol": inst["symbol"], "security_id": inst["security_id"],
             "exchange_segment": inst["exchange_segment"], "lot_size": inst.get("lot_size", 1),
+            "angel_token": inst.get("angel_token"), "angel_exchange": inst.get("angel_exchange"),
+            "angel_tradingsymbol": inst.get("angel_tradingsymbol"),
         },
         "side": signal.side, "entry_price": round(signal.entry, 2), "qty": qty,
         "capital_deployed": round(signal.entry * qty, 2),
@@ -304,7 +318,7 @@ async def _open_position(ls, symbol: str, inst: dict, signal, ltp_source: str, d
         "confidence": round(signal.confidence, 2), "rationale": signal.rationale,
         "product_type": PRODUCT_TYPE, "mode": "real",
         "entry_order_id": order_id, "exit_order_id": None,
-        # entry_price is the reference/signal price; the true fill price comes from Dhan and
+        # entry_price is the reference/signal price; the true fill price comes from Angel and
         # is not reconciled into this ledger in v1 (matches the app's existing LiveExecutor).
         "opened_at": _now(), "opened_on": _today_ist().isoformat(), "updated_at": _now(), "closed_at": None,
     })
@@ -324,9 +338,9 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
     if state["kill_switch"]:
         return {"opened": 0, "scanned_symbols": 0, "notes": [
             "KILL SWITCH is ON — new orders halted. Open positions are still managed."]}
-    if dhan is None:
+    if not angel_client.configured():
         return {"opened": 0, "scanned_symbols": 0, "notes": [
-            "Broker not connected — cannot place real orders. Connect Dhan in Broker Settings."]}
+            "Angel One is not configured — cannot place real orders."]}
     breaker = await breaker_state()
     if breaker["breaker_tripped"]:
         return {"opened": 0, "scanned_symbols": 0, "notes": [
@@ -375,7 +389,7 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
             if not live["armed"] or live["kill_switch"]:
                 notes.append("Desk was disarmed / kill-switched mid-scan — stopped placing new orders.")
                 return {"opened": opened, "scanned_symbols": len(scored), "notes": notes}
-            if await _open_position(ls, symbol, inst, signal, ltp_source, dhan):
+            if await _open_position(ls, symbol, inst, signal, ltp_source):
                 opened += 1
     return {"opened": opened, "scanned_symbols": len(scored), "notes": notes}
 
@@ -383,15 +397,12 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
 # ── manage (always runs, even disarmed — open real positions must be exited) ─────
 
 
-async def _close_real(pos: dict, ltp: float, reason: str, dhan: DhanClient | None) -> bool:
-    """Square off a real position with an opposite-side market order. Returns True only if
-    the exit order was accepted (or there is nothing to send). If it fails we leave the
-    position OPEN so the next cycle retries — we never mark a broker position closed on a
-    failed exit."""
+async def _close_real(pos: dict, ltp: float, reason: str) -> bool:
+    """Square off a real position with an opposite-side Angel market order. Returns True only
+    if the exit order was accepted. If it fails we leave the position OPEN so the next cycle
+    retries — we never mark a broker position closed on a failed exit."""
     exit_side = "SELL" if pos["side"] == "BUY" else "BUY"
-    if dhan is None:
-        return False
-    oid = await _place_dhan_order(dhan, pos["instrument"], exit_side, pos["qty"])
+    oid = await _place_angel_order(pos["instrument"], exit_side, pos["qty"])
     if not oid:
         await _register_reject()
         return False
@@ -461,7 +472,7 @@ async def manage_cycle(dhan: DhanClient | None) -> int:
             hit_stop = ltp <= pos["stoploss"] if sign > 0 else ltp >= pos["stoploss"]
             # INTRADAY product: every position squares off same day, so EOD closes everything.
             reason = "target" if hit_target else "stoploss" if hit_stop else "eod" if is_eod else None
-            if reason and await _close_real(pos, ltp, reason, dhan):
+            if reason and await _close_real(pos, ltp, reason):
                 touched.add(pos["strategy_id"])
 
     for strategy_id in touched:
@@ -486,7 +497,7 @@ async def panic_close_all(dhan: DhanClient | None) -> dict:
             q = quotes.get((inst["exchange_segment"], str(inst["security_id"])))
             if q:
                 ltp = float(q["last_price"])
-        if await _close_real(pos, ltp, "panic", dhan):
+        if await _close_real(pos, ltp, "panic"):
             closed += 1
             touched.add(pos["strategy_id"])
         else:
@@ -584,7 +595,7 @@ async def run_cycle(dhan: DhanClient | None) -> dict:
         {"_id": STATE_ID},
         {"$set": {
             "last_run_at": _now(), "last_opened": scan_result["opened"], "last_managed": managed,
-            "last_notes": scan_result["notes"], "broker_connected": dhan is not None,
+            "last_notes": scan_result["notes"], "broker_connected": angel_client.configured(),
             "angel_configured": angel_client.configured(),
         }},
         upsert=True,

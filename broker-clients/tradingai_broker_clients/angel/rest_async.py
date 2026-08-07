@@ -16,6 +16,7 @@ from .auth import (
     ANGEL_INTERVALS,
     CANDLE_PATH,
     LOGIN_PATH,
+    ORDER_PATH,
     QUOTE_PATH,
     SESSION_REFRESH_MARGIN_SECONDS,
     AngelAPIError,
@@ -34,7 +35,7 @@ logger = logging.getLogger("angel_client")
 
 
 class AngelClient:
-    """Async Angel One market-data client. Quotes and candles only — never orders."""
+    """Async Angel One client: quotes, candles, and (with a TRADING API key) real orders."""
 
     def __init__(self, creds: AngelCredentials | None = None) -> None:
         self.creds = creds or AngelCredentials.from_env()
@@ -120,3 +121,39 @@ class AngelClient:
             },
         )
         return body.get("data") or []
+
+    async def place_order(
+        self,
+        *,
+        tradingsymbol: str,
+        symboltoken: str,
+        transactiontype: str,
+        exchange: str,
+        quantity: int,
+        ordertype: str = "MARKET",
+        producttype: str = "INTRADAY",
+        duration: str = "DAY",
+        price: float = 0,
+        variety: str = "NORMAL",
+    ) -> dict:
+        """Place a REAL order via SmartAPI placeOrder.
+
+        NOTE: this only works when the logged-in app is a TRADING API key — a Market-Data
+        or Historical-only key is rejected by Angel here. Returns Angel's response body; the
+        broker order id is at body["data"]["orderid"]. A rejected order raises AngelAPIError
+        (surfaced by _post when the response's `status` is false)."""
+        payload = {
+            "variety": variety,
+            "tradingsymbol": tradingsymbol,
+            "symboltoken": str(symboltoken),
+            "transactiontype": transactiontype.upper(),
+            "exchange": exchange.upper(),
+            "ordertype": ordertype.upper(),
+            "producttype": producttype.upper(),
+            "duration": duration.upper(),
+            "price": str(price),
+            "squareoff": "0",
+            "stoploss": "0",
+            "quantity": str(int(quantity)),
+        }
+        return await self._post(ORDER_PATH, payload)

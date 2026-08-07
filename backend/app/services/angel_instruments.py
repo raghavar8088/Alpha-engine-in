@@ -60,12 +60,14 @@ def to_angel_expiry(iso_date: str) -> str:
     return f"{int(d):02d}{_MONTHS[int(m) - 1]}{y}"
 
 
-def _build_lookups(rows: list[dict]) -> tuple[dict, dict, dict]:
-    """Three indexes: derivatives by contract identity, cash by ticker, indices by
-    name. Each maps to {angel_exchange: token} rather than a single token, because
-    the same contract can be listed on more than one Angel venue."""
+def _build_lookups(rows: list[dict]) -> tuple[dict, dict, dict, dict]:
+    """Four indexes: derivatives by contract identity, cash by ticker, cash TRADING SYMBOLS
+    by ticker (the full Angel symbol like "RELIANCE-EQ", needed to place an order — the
+    token alone isn't enough), and indices by name. Each maps to {angel_exchange: value}
+    because the same contract can be listed on more than one Angel venue."""
     deriv: dict[tuple, dict[str, str]] = {}
     cash: dict[str, dict[str, str]] = {}
+    cash_ts: dict[str, dict[str, str]] = {}
     indices: dict[str, dict[str, str]] = {}
     for row in rows:
         seg = row.get("exch_seg")
@@ -89,10 +91,12 @@ def _build_lookups(rows: list[dict]) -> tuple[dict, dict, dict]:
                 continue
             deriv.setdefault((row.get("name"), row.get("expiry"), strike, kind), {}).setdefault(seg, str(token))
         elif seg in ("NSE", "BSE") and sym.endswith("-EQ"):
-            cash.setdefault(sym[:-3].upper(), {}).setdefault(seg, str(token))
+            base = sym[:-3].upper()
+            cash.setdefault(base, {}).setdefault(seg, str(token))
+            cash_ts.setdefault(base, {}).setdefault(seg, sym.upper())  # e.g. "RELIANCE-EQ"
         elif seg in ("NSE", "BSE"):
             indices.setdefault((row.get("name") or "").upper(), {}).setdefault(seg, str(token))
-    return deriv, cash, indices
+    return deriv, cash, cash_ts, indices
 
 
 def _match(doc: dict, deriv: dict, cash: dict, indices: dict) -> tuple[str, str] | None:
@@ -119,7 +123,7 @@ async def refresh_angel_tokens() -> dict:
     """Re-map every instrument. Safe to re-run; only writes docs whose token changed."""
     async with httpx.AsyncClient(timeout=180) as client:
         rows = (await client.get(SCRIP_MASTER_URL)).json()
-    deriv, cash, indices = _build_lookups(rows)
+    deriv, cash, cash_ts, indices = _build_lookups(rows)
 
     ops: list[UpdateOne] = []
     matched = 0
@@ -128,7 +132,8 @@ async def refresh_angel_tokens() -> dict:
     async for doc in instruments_collection.find(
         {},
         {"security_id": 1, "exchange_segment": 1, "asset_class": 1, "symbol": 1, "name": 1,
-         "underlying_symbol": 1, "expiry": 1, "strike": 1, "option_type": 1, "angel_token": 1},
+         "underlying_symbol": 1, "expiry": 1, "strike": 1, "option_type": 1,
+         "angel_token": 1, "angel_tradingsymbol": 1},
     ):
         total += 1
         hit = _match(doc, deriv, cash, indices)
@@ -139,9 +144,19 @@ async def refresh_angel_tokens() -> dict:
         matched += 1
         stats[0] += 1
         token, exchange = hit
-        if doc.get("angel_token") == token:
+        set_fields = {"angel_token": token, "angel_exchange": exchange}
+        # For cash equities also stamp the Angel TRADING SYMBOL (e.g. "RELIANCE-EQ") — an
+        # order needs it, the token alone won't place one.
+        is_cash = doc.get("asset_class") in CASH_CLASSES
+        if is_cash:
+            ts = cash_ts.get((doc.get("symbol") or "").upper(), {}).get(exchange)
+            if ts:
+                set_fields["angel_tradingsymbol"] = ts
+        # Skip only when nothing would change: same token AND (not cash, or its trading
+        # symbol is already stored). This lets a first run backfill the new field.
+        if doc.get("angel_token") == token and (not is_cash or doc.get("angel_tradingsymbol")):
             continue
-        ops.append(UpdateOne({"_id": doc["_id"]}, {"$set": {"angel_token": token, "angel_exchange": exchange}}))
+        ops.append(UpdateOne({"_id": doc["_id"]}, {"$set": set_fields}))
 
     written = 0
     for i in range(0, len(ops), 1000):

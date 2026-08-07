@@ -63,7 +63,7 @@ export default function LiveTradingPage() {
     if (busy || !summary) return;
     if (!armed) {
       const ok = window.confirm(
-        "ARM LIVE TRADING?\n\nThis places REAL orders with real money on your Dhan account as the " +
+        "ARM LIVE TRADING?\n\nThis places REAL orders with real money on your Angel One account as the " +
           "strategies fire during market hours (each capped at ₹10,000, ₹80,000 desk total). " +
           "You can disarm or hit the kill switch at any time.\n\nArm the desk now?",
       );
@@ -135,7 +135,7 @@ export default function LiveTradingPage() {
       <PageHeader
         crumb="Live Trading"
         title="Live Trading"
-        subtitle="REAL-MONEY desk: the same 8 intraday strategies as the Live Intraday shortlist, but routing real orders to your Dhan account when ARMED. Each strategy trades up to ₹10,000 (₹80,000 desk ceiling, server-enforced), on the live Angel One feed. Cash equities can't hold shorts overnight, so every order is INTRADAY (MIS) and squares off the same day. Ships disarmed — nothing trades until you flip the toggle."
+        subtitle="REAL-MONEY desk: the same 8 intraday strategies as the Live Intraday shortlist, but routing real orders to your Angel One account when ARMED. Each strategy trades up to ₹10,000 (₹80,000 desk ceiling, server-enforced), on the live Angel One feed. Cash equities can't hold shorts overnight, so every order is INTRADAY (MIS) and squares off the same day. Ships disarmed — nothing trades until you flip the toggle."
       />
 
       {error && <ErrorBanner message={error} />}
@@ -150,7 +150,7 @@ export default function LiveTradingPage() {
           </div>
           <div className="arm-sub">
             {armed
-              ? "Real orders are placed on your Dhan account as strategies fire during market hours."
+              ? "Real orders are placed on your Angel One account as strategies fire during market hours."
               : "Disarmed — no orders are placed. Turn on to trade with real money."}
             {summary?.disarmed_reason && !armed ? ` · last: ${summary.disarmed_reason}` : ""}
           </div>
@@ -168,7 +168,7 @@ export default function LiveTradingPage() {
         </button>
         <button className="ctl panic" onClick={panic} disabled={busy}>Panic — CLOSE ALL</button>
         <span className={`broker ${summary?.broker_connected ? "ok" : "bad"}`}>
-          {summary?.broker_connected ? "Dhan connected" : "Dhan not connected"}
+          {summary?.broker_connected ? "Angel One connected" : "Angel One not configured"}
         </span>
         {summary?.breaker_tripped && <span className="breaker">Daily loss breaker tripped</span>}
         <span className="rejects">{summary ? `rejects ${summary.consecutive_rejects}/${summary.max_consecutive_rejects} → auto-disarm` : ""}</span>
@@ -176,7 +176,7 @@ export default function LiveTradingPage() {
 
       {/* Summary tiles */}
       <div className="tiles">
-        <Tile label="Mode" value="REAL" tone={armed ? "gain" : "loss"} sub={armed ? "armed · live Dhan" : "disarmed"} />
+        <Tile label="Mode" value="REAL" tone={armed ? "gain" : "loss"} sub={armed ? "armed · live Angel" : "disarmed"} />
         <Tile label="Equity" value={inr(summary?.equity)} sub={`from ${inr(summary?.initial_capital)}`} />
         <Tile label="Today P&L" value={signed(summary?.today_pnl)} tone={(summary?.today_pnl ?? 0) >= 0 ? "gain" : "loss"} sub={`breaker at −${inr(summary?.daily_loss_limit)}`} />
         <Tile label="Realised P&L" value={signed(summary?.realized_pnl)} tone={(summary?.realized_pnl ?? 0) >= 0 ? "gain" : "loss"} sub={`${summary?.closed_positions ?? 0} closed`} />
