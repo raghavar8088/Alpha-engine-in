@@ -76,6 +76,15 @@ live_intraday_trades_collection = db["live_intraday_trades"]
 live_intraday_scores_collection = db["live_intraday_scores"]
 live_intraday_state_collection = db["live_intraday_state"]
 live_intraday_equity_collection = db["live_intraday_equity"]
+# Live Trading desk — the REAL-MONEY twin of the Live Intraday shortlist. Same 8
+# strategies / ₹10k-per-strategy structure, but routes real Dhan orders when ARMED, with a
+# per-strategy enable flag, an ₹80k desk ceiling, a kill switch and panic close-all.
+live_trading_positions_collection = db["live_trading_positions"]
+live_trading_trades_collection = db["live_trading_trades"]
+live_trading_scores_collection = db["live_trading_scores"]
+live_trading_state_collection = db["live_trading_state"]
+live_trading_equity_collection = db["live_trading_equity"]
+live_trading_flags_collection = db["live_trading_flags"]  # per-strategy enabled toggle
 # Long-Horizon factor desk — cross-sectional (top-K basket) momentum/low-vol/reversal
 # strategies, own capital pool, own sweep, mirroring the prelive_* / prelive_selling_*
 # separation: different capital, different risk model, different qualification rule.

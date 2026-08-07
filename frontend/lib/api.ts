@@ -767,6 +767,86 @@ export async function fetchLiveIntradayTrades(limit = 100): Promise<IntradayTrad
   const r = await apiFetch(`/api/live-intraday/trades?limit=${limit}`);
   return r.trades ?? [];
 }
+
+// ---- Live Trading desk (REAL MONEY twin of Live Intraday; routes real Dhan orders) ----
+export interface LiveTradingSummary {
+  mode: string;                       // "real"
+  armed: boolean;
+  kill_switch: boolean;
+  consecutive_rejects: number;
+  max_consecutive_rejects: number;
+  disarmed_reason: string | null;
+  broker_connected: boolean;
+  last_run_at: string | null;
+  last_notes: string[];
+  initial_capital: number;
+  desk_ceiling: number;
+  per_strategy_allocation: number;
+  position_notional: number;
+  available_cash: number;
+  deployed_capital: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  equity: number;
+  open_positions: number;
+  closed_positions: number;
+  strategy_count: number;
+  today_pnl: number;
+  breaker_tripped: boolean;
+  daily_loss_limit: number;
+}
+
+export interface LiveTradingScore {
+  strategy_id: string;
+  name: string;
+  category: string;
+  is_anti: boolean;
+  trades: number;
+  win_rate: number;
+  net_pnl: number;
+  allocated_capital: number | null;
+  enabled: boolean;
+}
+
+export interface LiveTradingOpenPosition {
+  position_id: string;
+  symbol: string;
+  strategy_name: string;
+  is_anti: boolean;
+  side: string;
+  qty: number;
+  entry_price: number;
+  ltp: number | null;
+  ltp_source: string | null;
+  target: number;
+  stoploss: number;
+  unrealized_pnl: number;
+  pnl_pct: number;
+  entry_order_id: string | null;
+}
+
+export async function fetchLiveTradingSummary(): Promise<LiveTradingSummary> {
+  return apiFetch("/api/live-trading/summary");
+}
+export async function fetchLiveTradingLeaderboard(): Promise<LiveTradingScore[]> {
+  const r = await apiFetch("/api/live-trading/leaderboard");
+  return r.leaderboard ?? [];
+}
+export async function fetchLiveTradingPositions(): Promise<{ open: LiveTradingOpenPosition[]; summary: LiveTradingSummary }> {
+  return apiFetch("/api/live-trading/positions?status=OPEN");
+}
+export async function setLiveTradingArmed(armed: boolean): Promise<{ summary: LiveTradingSummary }> {
+  return apiFetch("/api/live-trading/arm", { method: "POST", body: JSON.stringify({ armed }) });
+}
+export async function setLiveTradingKillSwitch(active: boolean): Promise<{ summary: LiveTradingSummary }> {
+  return apiFetch("/api/live-trading/kill-switch", { method: "POST", body: JSON.stringify({ active }) });
+}
+export async function setLiveTradingStrategyEnabled(strategyId: string, enabled: boolean): Promise<{ leaderboard: LiveTradingScore[] }> {
+  return apiFetch("/api/live-trading/strategy-enabled", { method: "POST", body: JSON.stringify({ strategy_id: strategyId, enabled }) });
+}
+export async function panicCloseAllLiveTrading(): Promise<{ result: { closed: number; failed: number }; summary: LiveTradingSummary }> {
+  return apiFetch("/api/live-trading/panic-close-all", { method: "POST" });
+}
 export async function fetchIntradayEquity(limit = 500): Promise<IntradayEquityPoint[]> {
   return apiFetch(`/api/intraday-lab/equity?limit=${limit}`);
 }

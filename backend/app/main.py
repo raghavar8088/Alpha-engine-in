@@ -20,6 +20,7 @@ from app.api.routes import (
     intraday_lab,
     live,
     live_intraday,
+    live_trading,
     long_horizon,
     manual_positions,
     market_data,
@@ -322,6 +323,7 @@ app.include_router(manual_positions.router)
 app.include_router(fno_positions.router)
 app.include_router(intraday_lab.router)
 app.include_router(live_intraday.router)
+app.include_router(live_trading.router)
 app.include_router(stocks_range.router)
 app.include_router(bullish_stocks.router)
 app.include_router(long_horizon.router)

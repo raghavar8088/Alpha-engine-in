@@ -36,6 +36,7 @@ async def _dhan_or_none():
 async def intraday_lab_loop() -> None:
     from app.services.intraday_lab_engine import run_cycle
     from app.services.live_intraday_engine import run_cycle as live_run_cycle
+    from app.services.live_trading_engine import run_cycle as live_trading_run_cycle
 
     while True:
         try:
@@ -56,6 +57,17 @@ async def intraday_lab_loop() -> None:
                     )
                 except Exception:
                     logger.exception("live-intraday cycle failed — tournament tick already committed")
+                # The REAL-MONEY Live Trading desk rides the same tick + real Dhan client.
+                # It is inert unless ARMED, so this is a no-op until the user turns it on.
+                try:
+                    lt_result = await live_trading_run_cycle(dhan)
+                    if lt_result["opened"] or lt_result["managed"]:
+                        logger.warning(
+                            "LIVE-TRADING (real money) cycle: %d opened, %d managed",
+                            lt_result["opened"], lt_result["managed"],
+                        )
+                except Exception:
+                    logger.exception("live-trading (real) cycle failed — other ticks already committed")
         except Exception:
             logger.exception("intraday-lab scheduler tick failed — will retry next tick")
         await asyncio.sleep(TICK_SECONDS)

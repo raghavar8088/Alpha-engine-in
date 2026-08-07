@@ -14,6 +14,13 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         icon: <path d="M3 17l6-6 4 4 8-8M15 6h6v6" />,
       },
       {
+        // REAL-MONEY desk. Lightning-bolt mark to read as "live/hot" at a glance and to
+        // separate it from the paper Live Intraday view inside Intraday Stocks.
+        href: "/live-trading",
+        label: "Live Trading",
+        icon: <path d="M13 2L4.5 13H11l-1 9 8.5-11H12l1-9z" />,
+      },
+      {
         href: "/chart",
         label: "Chart",
         icon: (
