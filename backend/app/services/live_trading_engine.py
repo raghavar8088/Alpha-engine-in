@@ -583,6 +583,16 @@ async def angel_account(force: bool = False) -> dict:
     except Exception as exc:
         return {"available": False, "reason": f"Could not read Angel funds: {exc}"}
 
+    # Which account is this? Shown so the operator can confirm the desk is pointed at the
+    # right Angel login before arming. Informational — never fail the call over it.
+    try:
+        pr = await angel_client.profile()
+        out["client_code"] = pr.get("clientcode")
+        out["account_name"] = pr.get("name")
+    except Exception:
+        out["client_code"] = None
+        out["account_name"] = None
+
     # Broker-side positions are informational; never fail the whole call over them.
     try:
         bp = await angel_client.broker_positions()

@@ -782,6 +782,8 @@ export interface AngelBrokerPosition {
 export interface AngelAccount {
   available: boolean;
   reason?: string;
+  client_code?: string | null;
+  account_name?: string | null;
   available_cash?: number;
   net?: number;
   utilised_margin?: number;

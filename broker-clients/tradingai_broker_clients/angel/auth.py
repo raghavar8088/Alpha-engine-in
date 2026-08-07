@@ -18,6 +18,7 @@ QUOTE_PATH = "/rest/secure/angelbroking/market/v1/quote"
 CANDLE_PATH = "/rest/secure/angelbroking/historical/v1/getCandleData"
 ORDER_PATH = "/rest/secure/angelbroking/order/v1/placeOrder"  # SmartAPI order placement
 RMS_PATH = "/rest/secure/angelbroking/user/v1/getRMS"          # funds / margin limits
+PROFILE_PATH = "/rest/secure/angelbroking/user/v1/getProfile"  # account identity
 POSITION_PATH = "/rest/secure/angelbroking/order/v1/getPosition"
 HOLDING_PATH = "/rest/secure/angelbroking/portfolio/v1/getHolding"
 

@@ -213,6 +213,12 @@ export default function LiveTradingPage() {
           <div className="empty">{angel?.reason || "Loading account…"}</div>
         ) : (
           <>
+            {angel.client_code && (
+              <div className="who">
+                Connected account: <b>{angel.client_code}</b>
+                {angel.account_name ? ` · ${angel.account_name}` : ""}
+              </div>
+            )}
             <div className="acct">
               <Field label="Available cash" value={inr(angel.available_cash)} tone={(angel.available_cash ?? 0) > 0 ? "gain" : "loss"} />
               <Field label="Net" value={inr(angel.net)} />
@@ -353,6 +359,7 @@ export default function LiveTradingPage() {
         .page { display: flex; flex-direction: column; gap: 16px; }
         .notice { padding: 10px 14px; border-radius: 9px; background: var(--canvas-soft); border: 1px solid var(--panel-border); font-size: 12.5px; cursor: pointer; }
         .warn { padding: 12px 16px; border-radius: 10px; background: var(--loss-dim); border: 1px solid rgba(224,49,49,0.35); color: var(--loss); font-size: 12.5px; line-height: 1.55; }
+        .who { font-size: 12px; color: var(--text-muted); padding: 2px 2px 12px; }
         .acct { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; padding: 4px 2px 14px; }
         .bpos { border-top: 1px solid var(--panel-border); padding-top: 12px; }
         .bpos-head { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }

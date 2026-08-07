@@ -19,6 +19,7 @@ from .auth import (
     LOGIN_PATH,
     ORDER_PATH,
     POSITION_PATH,
+    PROFILE_PATH,
     QUOTE_PATH,
     RMS_PATH,
     SESSION_REFRESH_MARGIN_SECONDS,
@@ -141,6 +142,11 @@ class AngelClient:
         """RMS limits — the real account money: availablecash, net, utiliseddebits (margin
         in use), collateral, m2mrealized / m2munrealized. Values come back as strings."""
         return (await self._get(RMS_PATH)).get("data") or {}
+
+    async def profile(self) -> dict:
+        """Account identity — clientcode, name, and the exchanges/products enabled. Useful
+        for confirming WHICH account the desk is about to trade with."""
+        return (await self._get(PROFILE_PATH)).get("data") or {}
 
     async def broker_positions(self) -> list[dict]:
         """Today's positions as ANGEL sees them — the broker's own truth, independent of
