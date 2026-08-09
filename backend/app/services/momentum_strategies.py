@@ -191,17 +191,24 @@ def pct_return(bars: list[Bar], lookback: int) -> Optional[float]:
     return (bars[-1].close / past - 1.0) * 100.0
 
 
-def annualised_vol(bars: list[Bar], lookback: int = 252) -> Optional[float]:
+def annualised_vol(bars: list[Bar], lookback: int = 252, min_samples: int | None = None) -> Optional[float]:
     """Annualised standard deviation of daily returns, in percent. This is the
-    denominator of the Nifty200 Momentum 30 risk adjustment."""
+    denominator of the Nifty200 Momentum 30 risk adjustment.
+
+    `min_samples` is the smallest return count that still gives a usable estimate; it
+    defaults to `min(60, lookback)` rather than a flat 60, because a flat floor silently
+    made every SHORT-window call impossible — the regime gate's 20-day index volatility
+    asked for 20 sessions, could never clear a 60-sample bar, and so always came back
+    None, leaving the panic-volatility half of that gate permanently inert."""
+    need = min_samples if min_samples is not None else min(60, lookback)
     rows = bars[-(lookback + 1):]
-    if len(rows) < 60:  # under ~3 months the estimate is too noisy to divide by
+    if len(rows) < need + 1:
         return None
     rets = []
     for prev, cur in zip(rows, rows[1:]):
         if prev.close > 0:
             rets.append(cur.close / prev.close - 1.0)
-    if len(rets) < 40:
+    if len(rets) < need:
         return None
     mean = sum(rets) / len(rets)
     var = sum((r - mean) ** 2 for r in rets) / (len(rets) - 1)
