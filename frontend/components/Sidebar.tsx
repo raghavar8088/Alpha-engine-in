@@ -32,6 +32,20 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // Sits directly under Chart. A rocket-trail arrow accelerating off a base — this
+        // is the "strength attracts strength" desk, distinct from Bullish Stocks' staircase
+        // (a screener) because this one actually trades a ₹10k paper account per strategy.
+        href: "/momentum",
+        label: "Momentum",
+        icon: (
+          <>
+            <path d="M13.5 3.5c3.5 0 7 3.5 7 7 0 4.5-5 9.5-8.5 9.5S3.5 15 3.5 10.5" />
+            <path d="M4 20l4-4" />
+            <circle cx="14" cy="9" r="1.8" />
+          </>
+        ),
+      },
+      {
         href: "/portfolio",
         label: "Portfolio",
         icon: (

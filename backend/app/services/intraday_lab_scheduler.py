@@ -37,6 +37,7 @@ async def intraday_lab_loop() -> None:
     from app.services.intraday_lab_engine import run_cycle
     from app.services.live_intraday_engine import run_cycle as live_run_cycle
     from app.services.live_trading_engine import run_cycle as live_trading_run_cycle
+    from app.services.momentum_engine import run_cycle as momentum_run_cycle
 
     while True:
         try:
@@ -68,6 +69,18 @@ async def intraday_lab_loop() -> None:
                         )
                 except Exception:
                     logger.exception("live-trading (real) cycle failed — other ticks already committed")
+                # The Momentum pre-live desk (paper, ₹10k/strategy, fee-honest) rides the
+                # same tick and feed. Isolated like the others: a failure here must not
+                # roll back ticks that already committed above.
+                try:
+                    mom = await momentum_run_cycle(dhan)
+                    logger.info(
+                        "momentum cycle: %d opened, %d managed, %d symbols scanned (regime: %s)",
+                        mom["opened"], mom["managed"], mom["scanned_symbols"],
+                        "ok" if mom["regime"]["ok"] else "risk-off",
+                    )
+                except Exception:
+                    logger.exception("momentum cycle failed — other ticks already committed")
         except Exception:
             logger.exception("intraday-lab scheduler tick failed — will retry next tick")
         await asyncio.sleep(TICK_SECONDS)

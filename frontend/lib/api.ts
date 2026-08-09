@@ -2357,3 +2357,177 @@ export interface BullishStocksScreen {
 export async function fetchBullishStocks(index: string, all = false): Promise<BullishStocksScreen> {
   return apiFetch(`/api/bullish-stocks/screen?index=${encodeURIComponent(index)}&all=${all ? "true" : "false"}`);
 }
+
+// ---- Momentum Trading desk (pre-live gate; paper, ₹10k/strategy, real costs charged) ----
+export interface MomentumRegime {
+  ok: boolean;
+  gate_enabled: boolean;
+  benchmark: string;
+  close: number | null;
+  ma: number | null;
+  index_vol: number | null;
+  reason: string;
+}
+
+export interface MomentumPromotionGate {
+  min_trades: number;
+  min_profit_factor: number;
+  min_win_rate: number;
+  max_drawdown_pct: number;
+  min_t_stat: number;
+}
+
+export interface MomentumSummary {
+  initial_capital: number;
+  per_strategy_allocation: number;
+  position_notional: number;
+  max_positions_per_strategy: number;
+  available_cash: number;
+  deployed_capital: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  total_costs: number;
+  equity: number;
+  open_positions: number;
+  closed_positions: number;
+  strategy_count: number;
+  ready_count: number;
+  rejected_count: number;
+  pending_count: number;
+  paused: boolean;
+  mode: string;
+  costs_charged: boolean;
+  slippage_bps: number;
+  promotion_gate: MomentumPromotionGate;
+  today_pnl: number;
+  breaker_tripped: boolean;
+  daily_loss_limit: number;
+  daily_loss_pct: number;
+  last_run_at: string | null;
+  last_notes: string[];
+  broker_connected: boolean;
+  angel_configured: boolean;
+  regime: MomentumRegime;
+}
+
+export interface MomentumScore {
+  strategy_id: string;
+  name: string;
+  style: string;
+  style_label: string;
+  horizon: string;
+  timeframe: string;
+  rationale: string;
+  max_hold_days: number;
+  trades: number;
+  win_rate: number;
+  net_pnl: number;
+  total_costs: number;
+  profit_factor: number | null;
+  expectancy: number;
+  max_drawdown_pct: number;
+  t_stat: number | null;
+  return_pct: number;
+  allocated_capital: number;
+  open_positions: number;
+  verdict: "READY" | "REJECTED" | "PENDING";
+  verdict_reasons: string[];
+}
+
+export interface MomentumPosition {
+  position_id: string;
+  strategy_id: string;
+  strategy_name: string;
+  style: string;
+  style_label: string;
+  horizon: string;
+  product: string;
+  symbol: string;
+  side: string;
+  signal_price: number;
+  entry_price: number;
+  qty: number;
+  capital_deployed: number;
+  entry_costs: number;
+  target: number;
+  stoploss: number;
+  initial_stop: number;
+  trail_mode: string;
+  high_water: number;
+  ltp: number;
+  ltp_source: string;
+  unrealized_pnl: number;
+  pnl_pct: number;
+  realized_pnl: number | null;
+  costs: number | null;
+  exit_price: number | null;
+  exit_reason: string | null;
+  status: string;
+  rationale: string;
+  max_hold_days: number;
+  stop_trailed?: boolean;
+  opened_at: string;
+  opened_on: string;
+  closed_at: string | null;
+}
+
+export interface MomentumTrade {
+  trade_id: string;
+  strategy_id: string;
+  strategy_name: string;
+  style_label: string;
+  symbol: string;
+  side: string;
+  entry_price: number;
+  exit_price: number;
+  qty: number;
+  gross_pnl: number;
+  costs: number;
+  realized_pnl: number;
+  exit_reason: string;
+  rationale: string;
+  opened_at: string;
+  closed_at: string;
+}
+
+export interface MomentumCatalogStyle {
+  style: string;
+  label: string;
+  strategies: {
+    strategy_id: string;
+    name: string;
+    horizon: string;
+    timeframe: string;
+    rationale: string;
+    max_hold_days: number;
+    params: Record<string, unknown>;
+  }[];
+}
+
+export async function fetchMomentumSummary(): Promise<MomentumSummary> {
+  return apiFetch("/api/momentum/summary");
+}
+export async function fetchMomentumLeaderboard(): Promise<MomentumScore[]> {
+  const r = await apiFetch("/api/momentum/leaderboard");
+  return r.leaderboard ?? [];
+}
+// /positions embeds the capital snapshot only — the regime, heartbeat and cycle notes are
+// stitched in from engine state by /summary alone, so they are absent here by design.
+export type MomentumCapitalSnapshot = Omit<
+  MomentumSummary,
+  "regime" | "last_run_at" | "last_notes" | "broker_connected" | "angel_configured"
+>;
+
+export async function fetchMomentumPositions(): Promise<{ positions: MomentumPosition[]; open: MomentumPosition[]; summary: MomentumCapitalSnapshot }> {
+  return apiFetch("/api/momentum/positions");
+}
+export async function fetchMomentumTrades(limit = 100): Promise<MomentumTrade[]> {
+  const r = await apiFetch(`/api/momentum/trades?limit=${limit}`);
+  return r.trades ?? [];
+}
+export async function fetchMomentumCatalog(): Promise<{ styles: MomentumCatalogStyle[]; total: number }> {
+  return apiFetch("/api/momentum/catalog");
+}
+export async function runMomentumCycle(): Promise<{ opened: number; managed: number; scanned_symbols: number; regime: MomentumRegime; notes: string[] }> {
+  return apiFetch("/api/momentum/run", { method: "POST" });
+}

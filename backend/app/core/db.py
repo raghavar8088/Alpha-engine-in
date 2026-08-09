@@ -94,6 +94,16 @@ long_horizon_trades_collection = db["long_horizon_trades"]
 long_horizon_scores_collection = db["long_horizon_scores"]
 long_horizon_equity_collection = db["long_horizon_equity"]
 long_horizon_state_collection = db["long_horizon_state"]
+# Momentum Trading desk — the pre-live gate for the 37-strategy momentum catalog
+# (52W-high breakout, relative strength, NSE momentum score, MA stack, ORB, sector
+# rotation, volume breakout). ₹10,000 paper account per strategy, and unlike every
+# desk above it, fills are charged real NSE transaction costs + slippage — its whole
+# purpose is deciding which strategies deserve real money on the Live Trading desk.
+momentum_positions_collection = db["momentum_positions"]
+momentum_trades_collection = db["momentum_trades"]
+momentum_scores_collection = db["momentum_scores"]
+momentum_state_collection = db["momentum_state"]
+momentum_equity_collection = db["momentum_equity"]
 # Telegram Signal Copier — raw channel messages parsed into trade ideas and
 # auto-opened as paper positions via the manual Positions module
 telegram_signals_collection = db["telegram_signals"]
