@@ -421,11 +421,19 @@ async def _open_position(side: str, plan: dict, prices: dict[str, float]) -> boo
         })
     else:
         wing = plan["wing"]
-        p_wing = prices.get(str(wing["angel_token"])) or 0.0
-        credit = p_short - p_wing
-        if credit <= 0:
+        # The wing is what MAKES this defined-risk. Never treat an unpriced wing as free:
+        # doing so inflates the credit and understates the loss on the one leg whose whole
+        # job is to cap it. No wing price -> no trade.
+        p_wing = prices.get(str(wing["angel_token"]))
+        if p_wing is None:
             return False
+        credit = p_short - p_wing
         width = abs(wing["strike"] - short["strike"])
+        # A vertical's credit cannot exceed its width (that would be a risk-free arbitrage);
+        # if a stale or crossed quote says otherwise, max_loss would go NEGATIVE and the
+        # position would look free money while corrupting the desk's deployed capital.
+        if credit <= 0 or credit >= width or width <= 0:
+            return False
         doc.update({
             "structure": f"SHORT {plan['kind']} spread {short['strike']:g}/{wing['strike']:g}",
             "wing_token": str(wing["angel_token"]), "wing_strike": wing["strike"],
@@ -469,7 +477,12 @@ async def _manage(side: str) -> int:
             hit_t = cur >= p["target_premium"]
             hit_s = cur <= p["stop_premium"]
         else:
-            pw = prices.get(p.get("wing_token") or "") or 0.0
+            # Same rule as at entry: an unpriced wing must not be marked at zero, which
+            # would overstate the cost to close and can fire a phantom stop. Leave the
+            # position untouched this cycle and re-mark when Angel prices it again.
+            pw = prices.get(p.get("wing_token") or "")
+            if pw is None:
+                continue
             cur = ps - pw                      # cost to close the spread
             unreal = round((p["entry_premium"] - cur) * p["qty"], 2)  # credit received minus cost now
             hit_t = cur <= p["target_premium"]
