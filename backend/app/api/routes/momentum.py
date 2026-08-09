@@ -59,6 +59,7 @@ async def summary_endpoint(current_user: dict = Depends(get_current_user)):
     # The regime is recomputed rather than read from state so the page is right even
     # before the first scheduler tick of the day has run.
     snap["regime"] = state.get("regime") or await _regime()
+    snap["coverage"] = state.get("coverage")
     return snap
 
 

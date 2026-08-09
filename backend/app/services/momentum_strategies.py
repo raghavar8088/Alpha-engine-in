@@ -325,8 +325,8 @@ def relative_strength_family(spec: MomentumSpec, symbol: str, ctx: Ctx) -> Optio
         target=entry + spec.params["target_atr"] * atr14, stoploss=stop,
         confidence=min(0.9, 0.4 + pctile * 0.5),
         rationale=(
-            f"Relative strength {months}M: beat the benchmark by {rs:+.1f} points and ranks in the "
-            f"top {(1 - pctile) * 100:.0f}% of the scanned universe"
+            f"Relative strength {months}M: beat the benchmark by {rs:+.1f} points and sits at the "
+            f"{pctile * 100:.0f}th percentile of the scanned universe"
         ),
         trail_mode=spec.params["trail_mode"], trail_param=spec.params["trail_param"],
     )
@@ -362,7 +362,7 @@ def risk_adjusted_family(spec: MomentumSpec, symbol: str, ctx: Ctx) -> Optional[
         confidence=min(0.9, 0.4 + pctile * 0.5),
         rationale=(
             f"NSE normalised momentum score ({leg_label}, volatility-adjusted) = {score:.2f}, "
-            f"top {(1 - pctile) * 100:.0f}% of the scanned universe"
+            f"{pctile * 100:.0f}th percentile of the scanned universe"
         ),
         trail_mode=spec.params["trail_mode"], trail_param=spec.params["trail_param"],
     )

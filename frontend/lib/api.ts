@@ -2369,6 +2369,12 @@ export interface MomentumRegime {
   reason: string;
 }
 
+export interface MomentumCoverage {
+  scanned: number;
+  available: number | null;
+  note: string | null;
+}
+
 export interface MomentumPromotionGate {
   min_trades: number;
   min_profit_factor: number;
@@ -2408,6 +2414,7 @@ export interface MomentumSummary {
   broker_connected: boolean;
   angel_configured: boolean;
   regime: MomentumRegime;
+  coverage: MomentumCoverage | null;
 }
 
 export interface MomentumScore {
@@ -2515,7 +2522,7 @@ export async function fetchMomentumLeaderboard(): Promise<MomentumScore[]> {
 // stitched in from engine state by /summary alone, so they are absent here by design.
 export type MomentumCapitalSnapshot = Omit<
   MomentumSummary,
-  "regime" | "last_run_at" | "last_notes" | "broker_connected" | "angel_configured"
+  "regime" | "coverage" | "last_run_at" | "last_notes" | "broker_connected" | "angel_configured"
 >;
 
 export async function fetchMomentumPositions(): Promise<{ positions: MomentumPosition[]; open: MomentumPosition[]; summary: MomentumCapitalSnapshot }> {

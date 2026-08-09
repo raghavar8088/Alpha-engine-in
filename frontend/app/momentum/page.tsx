@@ -155,6 +155,16 @@ export default function MomentumPage() {
         </div>
       )}
 
+      {summary?.coverage?.note && (
+        <div className="coverage">
+          <div className="cov-head">
+            UNIVERSE {summary.coverage.scanned}
+            {summary.coverage.available ? ` / ${summary.coverage.available}` : ""} SYMBOLS
+          </div>
+          <p>{summary.coverage.note}</p>
+        </div>
+      )}
+
       {summary?.breaker_tripped && (
         <div className="breaker">
           Daily loss breaker tripped — today&rsquo;s P&amp;L {signed(summary.today_pnl)} crossed the{" "}
@@ -403,6 +413,13 @@ export default function MomentumPage() {
         .regime-meta { font-size: 11.5px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
         .regime p { margin: 7px 0 0; font-size: 12.5px; color: var(--text); }
         .regime-why { color: var(--text-muted) !important; font-size: 11.5px !important; }
+
+        .coverage {
+          border-radius: 12px; padding: 12px 16px;
+          background: var(--warn-dim); border: 1px solid rgba(185, 119, 14, 0.3);
+        }
+        .cov-head { font-size: 10.5px; font-weight: 800; letter-spacing: 0.06em; color: var(--warn); }
+        .coverage p { margin: 5px 0 0; font-size: 12.5px; color: var(--text); }
 
         .breaker {
           border-radius: 12px; padding: 12px 16px; font-size: 12.5px; font-weight: 600;

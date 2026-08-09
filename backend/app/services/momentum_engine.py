@@ -664,6 +664,35 @@ async def _close(pos: dict, ltp: float, reason: str) -> float:
 # --------------------------------------------------------------------------------
 
 
+async def _universe_coverage(scanned: int) -> dict:
+    """How much of the available equity universe this scan could actually see.
+
+    `_scored_daily_symbols()` silently drops any symbol `load_bars` cannot return enough
+    history for, so a desk can be starved down to a handful of names while every log line
+    still reads "success". That matters more here than on a single-symbol desk: the
+    relative-strength, NSE-score and sector-rotation families are CROSS-SECTIONAL — a "top
+    decile" of 24 names is 2 stocks, which is a different (and much weaker) strategy than
+    the one being advertised. Measured every cycle and surfaced on the page so a starved
+    universe is visible rather than inferred from suspiciously few trades.
+    """
+    try:
+        from app.core.db import bars_collection
+
+        available = len(await bars_collection.distinct("symbol", {"timeframe": "1d"}))
+    except Exception:  # noqa: BLE001 — a diagnostic must never break a scan
+        return {"scanned": scanned, "available": None, "note": None}
+
+    note = None
+    if available and scanned < available * 0.5:
+        note = (
+            f"UNIVERSE STARVED: only {scanned} of {available} symbols with daily bars could be "
+            f"scored — the rest lack enough loadable history. Cross-sectional families "
+            f"(relative strength, NSE momentum score, sector rotation) are ranking inside a "
+            f"{scanned}-name pool, so their percentile cuts are far coarser than intended."
+        )
+    return {"scanned": scanned, "available": available, "note": note}
+
+
 async def scan_cycle(dhan: DhanClient | None) -> dict:
     notes: list[str] = []
     breaker = await breaker_state()
@@ -762,7 +791,11 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
             f"{MAX_STRATEGIES_PER_SYMBOL} strategies in it — the concentration cap that exists because "
             "near-identical variants firing together is how the option desk lost 29% in one day."
         )
-    return {"opened": opened, "scanned_symbols": len(scored), "regime": regime, "notes": notes}
+    coverage = await _universe_coverage(len(scored))
+    if coverage["note"]:
+        notes.insert(0, coverage["note"])
+    return {"opened": opened, "scanned_symbols": len(scored), "regime": regime,
+            "coverage": coverage, "notes": notes}
 
 
 async def manage_cycle(dhan: DhanClient | None) -> int:
@@ -868,10 +901,15 @@ async def manage_cycle(dhan: DhanClient | None) -> int:
 async def summary() -> dict:
     deployed = realized = unrealized = costs = 0.0
     async for p in momentum_positions_collection.find(
-        {"status": "OPEN"}, {"capital_deployed": 1, "unrealized_pnl": 1}
+        {"status": "OPEN"}, {"capital_deployed": 1, "unrealized_pnl": 1, "entry_costs": 1}
     ):
         deployed += p.get("capital_deployed", 0.0)
         unrealized += p.get("unrealized_pnl") or 0.0
+        # Entry charges on an OPEN position are already spent, so they belong in the
+        # running cost total. Counting only closed trades showed "costs charged: Rs0"
+        # while 20 positions had each paid real brokerage — on a desk whose entire claim
+        # is fee-honesty, that reads as "costs are not being charged".
+        costs += p.get("entry_costs") or 0.0
     async for p in momentum_positions_collection.find(
         {"status": {"$ne": "OPEN"}}, {"realized_pnl": 1, "costs": 1}
     ):
@@ -967,6 +1005,7 @@ async def run_cycle(dhan: DhanClient | None) -> dict:
         {"$set": {
             "last_run_at": _now(), "last_opened": scan["opened"], "last_managed": managed,
             "last_notes": scan["notes"], "regime": scan["regime"],
+            "coverage": scan.get("coverage"),
             "broker_connected": dhan is not None, "angel_configured": angel_client.configured(),
             "paused": PAUSE_NEW_ENTRIES,
         }},
@@ -974,5 +1013,5 @@ async def run_cycle(dhan: DhanClient | None) -> dict:
     )
     return {
         "opened": scan["opened"], "managed": managed, "scanned_symbols": scan["scanned_symbols"],
-        "regime": scan["regime"], "notes": scan["notes"],
+        "regime": scan["regime"], "coverage": scan.get("coverage"), "notes": scan["notes"],
     }
