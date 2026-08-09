@@ -167,6 +167,17 @@ def _product(spec) -> str:
 # --------------------------------------------------------------------------------
 
 
+# Which return window each sector-rotation lookback ranks on, and the set of lookbacks the
+# catalog actually uses — derived FROM the catalog so adding a variant with a new lookback
+# cannot silently fall back to somebody else's window.
+_RET_ATTR_FOR_LOOKBACK = {21: "ret_21", 63: "ret_63", 126: "ret_126", 252: "ret_252"}
+SECTOR_LOOKBACKS: list[int] = sorted(
+    {s.params["lookback"] for s in MOMENTUM_CATALOG if s.family == "sector_rotation"}
+)
+_unsupported = [lb for lb in SECTOR_LOOKBACKS if lb not in _RET_ATTR_FOR_LOOKBACK]
+assert not _unsupported, f"sector_rotation lookback(s) with no return window: {_unsupported}"
+
+
 def _percentiles(values: dict[str, float]) -> dict[str, float]:
     """Rank -> 0..1 percentile where 1.0 is the strongest. Ties share the mean rank so a
     universe of identical scores does not hand one arbitrary symbol the top decile."""
@@ -266,21 +277,25 @@ def build_universe(scored: list, bench_bars: list) -> dict[str, SymbolMomentum]:
         for symbol, p in _percentiles(vals).items():
             setattr(rows[symbol], pct_attr, p)
 
-    # ── sector ranking: average 3-month member return, strongest first ──
-    by_sector: dict[str, list[tuple[float, str]]] = {}
-    for symbol, m in rows.items():
-        if m.sector and m.ret_63 is not None:
-            by_sector.setdefault(m.sector, []).append((m.ret_63, symbol))
-    sector_strength = sorted(
-        ((sum(r for r, _ in members) / len(members), sec) for sec, members in by_sector.items()),
-        reverse=True,
-    )
-    for rank, (_avg, sec) in enumerate(sector_strength, start=1):
-        members = sorted(by_sector[sec], reverse=True)
-        for pos, (_ret, symbol) in enumerate(members, start=1):
-            rows[symbol].sector_rank = rank
-            rows[symbol].sector_count = len(sector_strength)
-            rows[symbol].rank_in_sector = pos
+    # ── sector ranking, computed once PER LOOKBACK the catalog actually asks for ──
+    # Ranking every variant on one fixed window would make the "1M", "3M" and "6M"
+    # sector-rotation strategies the same strategy wearing three different labels.
+    for lookback in SECTOR_LOOKBACKS:
+        ret_attr = _RET_ATTR_FOR_LOOKBACK.get(lookback)
+        if ret_attr is None:
+            continue
+        by_sector: dict[str, list[tuple[float, str]]] = {}
+        for symbol, m in rows.items():
+            ret = getattr(m, ret_attr)
+            if m.sector and ret is not None:
+                by_sector.setdefault(m.sector, []).append((ret, symbol))
+        sector_strength = sorted(
+            ((sum(r for r, _ in members) / len(members), sec) for sec, members in by_sector.items()),
+            reverse=True,
+        )
+        for rank, (_avg, sec) in enumerate(sector_strength, start=1):
+            for pos, (_ret, symbol) in enumerate(sorted(by_sector[sec], reverse=True), start=1):
+                rows[symbol].sector_ranks[lookback] = (rank, len(sector_strength), pos)
     return rows
 
 
@@ -404,8 +419,17 @@ def _verdict(stats: dict) -> tuple[str, list[str]]:
     if stats["net_pnl"] <= 0:
         fails.append(f"Net P&L ₹{stats['net_pnl']:,.0f} is not positive after real costs.")
     pf = stats["profit_factor"]
-    if pf is None or pf <= MIN_PROFIT_FACTOR:
-        fails.append(f"Profit factor {pf if pf is None else round(pf, 2)} is not above {MIN_PROFIT_FACTOR}.")
+    # `profit_factor` is None in two opposite situations, and they must not be conflated:
+    # no losses at all (undefined but excellent — gross_loss is the denominator) versus no
+    # winning trades (genuinely bad). `gross_loss` tells them apart. Treating both as a
+    # failure would reject a flawless record for the nonsense reason "profit factor None".
+    if pf is None and stats["gross_loss"] == 0 and stats["gross_profit"] > 0:
+        pass  # every trade won — the t-stat and drawdown criteria still have to pass
+    elif pf is None or pf <= MIN_PROFIT_FACTOR:
+        fails.append(
+            f"Profit factor {'undefined (no winning trades)' if pf is None else round(pf, 2)} "
+            f"is not above {MIN_PROFIT_FACTOR}."
+        )
     if stats["expectancy"] <= 0:
         fails.append(f"Expectancy ₹{stats['expectancy']:,.0f} per trade is not positive.")
     if stats["win_rate"] < MIN_WIN_RATE:
@@ -413,16 +437,24 @@ def _verdict(stats: dict) -> tuple[str, list[str]]:
     if stats["max_drawdown_pct"] > MAX_DRAWDOWN_PCT:
         fails.append(f"Peak-to-trough drawdown {stats['max_drawdown_pct']:.1f}% exceeds {MAX_DRAWDOWN_PCT:.0f}%.")
     t_stat = stats["t_stat"]
-    if t_stat is None or t_stat < MIN_T_STAT:
+    # t is undefined when every trade returned the SAME amount (zero dispersion). With a
+    # positive mean that is maximally significant, not insignificant — failing it would
+    # reject a perfectly consistent record for having no variance to divide by.
+    if t_stat is None and stats.get("pnl_stdev") == 0 and stats["net_pnl"] > 0:
+        pass
+    elif t_stat is None or t_stat < MIN_T_STAT:
         fails.append(
-            f"t-statistic {t_stat if t_stat is None else round(t_stat, 2)} is below {MIN_T_STAT} — "
+            f"t-statistic {'undefined' if t_stat is None else round(t_stat, 2)} is below {MIN_T_STAT} — "
             "this record is not separable from luck yet."
         )
     if fails:
         return "REJECTED", fails
     return "READY", [
-        f"{trades} trades, profit factor {pf:.2f}, expectancy ₹{stats['expectancy']:,.0f}/trade, "
-        f"max drawdown {stats['max_drawdown_pct']:.1f}%, t-stat {t_stat:.2f} — clears the gate net of costs."
+        f"{trades} trades, profit factor {'no losing trades' if pf is None else format(pf, '.2f')}, "
+        f"expectancy ₹{stats['expectancy']:,.0f}/trade, "
+        f"max drawdown {stats['max_drawdown_pct']:.1f}%, "
+        f"t-stat {'n/a (every trade identical)' if t_stat is None else format(t_stat, '.2f')} "
+        "— clears the gate net of costs."
     ]
 
 
@@ -452,7 +484,11 @@ def _trade_stats(closed: list[dict]) -> dict:
 
     # t = mean / (stdev / sqrt(n)) — how many standard errors the average trade sits
     # above zero. See MIN_T_STAT for why net P&L and profit factor alone are not enough.
+    # `sd == 0` (every trade returned the identical amount) leaves t undefined rather than
+    # zero; `pnl_stdev` is reported alongside so `_verdict` can tell that degenerate case
+    # apart from "not enough trades to compute one at all".
     t_stat = None
+    sd = None
     if trades >= 2:
         mean = net / trades
         var = sum((p - mean) ** 2 for p in pnls) / (trades - 1)
@@ -468,12 +504,16 @@ def _trade_stats(closed: list[dict]) -> dict:
         "gross_profit": round(gross_profit, 2),
         "gross_loss": round(gross_loss, 2),
         "total_costs": round(costs, 2),
-        "profit_factor": round(gross_profit / gross_loss, 3) if gross_loss > 0 else (None if gross_profit == 0 else float("inf")),
+        # None whenever it is undefined (no losses to divide by, or no trades at all).
+        # Never `inf`: that is not BSON-encodable and would break the leaderboard write.
+        # Callers disambiguate "no losses" from "no wins" via gross_loss/gross_profit.
+        "profit_factor": round(gross_profit / gross_loss, 3) if gross_loss > 0 else None,
         "expectancy": round(net / trades, 2) if trades else 0.0,
         "avg_win": round(gross_profit / len(wins), 2) if wins else 0.0,
         "avg_loss": round(-gross_loss / len(losses), 2) if losses else 0.0,
         "max_drawdown_pct": round(max_dd, 2),
         "t_stat": t_stat,
+        "pnl_stdev": round(sd, 2) if sd is not None else None,
         "return_pct": round(net / PER_STRATEGY_ALLOCATION * 100, 2),
     }
 
@@ -488,10 +528,6 @@ async def _update_score(strategy_id: str) -> None:
         ).sort("closed_at", 1)
     ]
     stats = _trade_stats(closed)
-    # inf is not BSON-encodable and is meaningless in a leaderboard; a no-loss strategy
-    # is reported as None (undefined) and stays PENDING/REJECTED on its other criteria.
-    if stats["profit_factor"] == float("inf"):
-        stats["profit_factor"] = None
     verdict, reasons = _verdict(stats)
     await momentum_scores_collection.update_one(
         {"strategy_id": strategy_id},
@@ -512,7 +548,7 @@ async def _update_score(strategy_id: str) -> None:
 # --------------------------------------------------------------------------------
 
 
-async def _open_position(spec, symbol: str, inst: dict, signal, ltp_source: str, uni: SymbolMomentum) -> bool:
+async def _open_position(spec, symbol: str, inst: dict, signal, ltp_source: str, uni: SymbolMomentum, atr14: float) -> bool:
     open_count = await momentum_positions_collection.count_documents(
         {"strategy_id": spec.strategy_id, "status": "OPEN"}
     )
@@ -548,7 +584,10 @@ async def _open_position(spec, symbol: str, inst: dict, signal, ltp_source: str,
         "target": round(signal.target, 2), "stoploss": round(signal.stoploss, 2),
         "initial_stop": round(signal.stoploss, 2),
         "trail_mode": signal.trail_mode, "trail_param": signal.trail_param,
-        "entry_atr": round(signal.entry - signal.stoploss, 4),
+        # Raw ATR(14) at entry — the unit the chandelier trail ratchets in. Stored
+        # separately from the stop distance below, which is a MULTIPLE of it.
+        "atr_at_entry": round(atr14, 4),
+        "stop_distance": round(signal.entry - signal.stoploss, 4),
         "high_water": round(fill, 4),
         "ltp": round(fill, 2), "ltp_source": ltp_source,
         "unrealized_pnl": 0.0, "pnl_pct": 0.0, "realized_pnl": None, "costs": None,
@@ -558,7 +597,10 @@ async def _open_position(spec, symbol: str, inst: dict, signal, ltp_source: str,
         "momentum_snapshot": {
             "ret_63": uni.ret_63, "ret_126": uni.ret_126, "ret_252": uni.ret_252,
             "rs_63": uni.rs_63, "norm_score": uni.norm_score, "dist_52w": uni.dist_52w,
-            "sector": uni.sector, "sector_rank": uni.sector_rank,
+            "sector": uni.sector,
+            # {lookback: [sector_rank, sector_count, rank_in_sector]} — lists, not tuples,
+            # so the doc round-trips through BSON unchanged.
+            "sector_ranks": {str(lb): list(v) for lb, v in uni.sector_ranks.items()},
         },
         "opened_at": _now(), "opened_on": _today_ist().isoformat(),
         "updated_at": _now(), "closed_at": None,
@@ -575,9 +617,11 @@ def _new_trailing_stop(pos: dict, ltp: float, ema_now: float | None) -> float | 
     if mode == "pct" and param > 0:
         candidate = high_water * (1 - param)
     elif mode == "chandelier" and param > 0:
-        # entry_atr was stored as (entry - initial stop) = stop_atr * ATR at entry, so
-        # dividing back out recovers one ATR unit as measured when the trade was taken.
-        atr_unit = (pos.get("entry_atr") or 0.0)
+        # ONE ATR as measured at entry. This must be the raw ATR, not the stop distance:
+        # the stop distance is stop_atr x ATR, so using it here silently multiplied the
+        # chandelier width by each strategy's own stop_atr — trailing ~2x too tight on the
+        # ORB variants (stop_atr 0.5) and ~2x too loose on the 52-week breakout (stop_atr 2).
+        atr_unit = pos.get("atr_at_entry") or 0.0
         if atr_unit <= 0:
             return None
         candidate = high_water - param * atr_unit
@@ -702,7 +746,7 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
             signal = evaluate(spec, symbol, ctx)
             if signal is None:
                 continue
-            if await _open_position(spec, symbol, inst, signal, ltp_source, uni):
+            if await _open_position(spec, symbol, inst, signal, ltp_source, uni, atr14):
                 opened += 1
                 holders[symbol] = holders.get(symbol, 0) + 1
 

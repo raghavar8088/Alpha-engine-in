@@ -123,9 +123,14 @@ class SymbolMomentum:
     pct_rs_126: Optional[float] = None
     pct_rs_252: Optional[float] = None
     sector: Optional[str] = None
-    sector_rank: Optional[int] = None  # 1 = strongest sector this cycle
-    sector_count: int = 0
-    rank_in_sector: Optional[int] = None  # 1 = strongest name inside its sector
+    # Sector standing PER LOOKBACK: {lookback_sessions: (sector_rank, sector_count,
+    # rank_within_sector)}, all 1-based with 1 = strongest. Keyed by lookback because the
+    # sector-rotation variants differ precisely in the window they rank on — collapsing
+    # this to one scalar silently made a "1M" and a "6M" variant the same strategy.
+    sector_ranks: dict[int, tuple[int, int, int]] = field(default_factory=dict)
+
+    def sector_standing(self, lookback: int) -> Optional[tuple[int, int, int]]:
+        return self.sector_ranks.get(lookback)
 
 
 Ctx = dict
@@ -489,11 +494,14 @@ def sector_rotation_family(spec: MomentumSpec, symbol: str, ctx: Ctx) -> Optiona
     the top `top_sectors`. Symbols whose sector is unknown are skipped rather than lumped
     into an "Unclassified" bucket that would then be ranked as if it were a real sector."""
     uni: SymbolMomentum = ctx["uni"]
-    if uni.sector is None or uni.sector_rank is None or uni.rank_in_sector is None:
+    lookback = spec.params["lookback"]
+    standing = uni.sector_standing(lookback)
+    if uni.sector is None or standing is None:
         return None
-    if uni.sector_rank > spec.params["top_sectors"]:
+    sector_rank, sector_count, rank_in_sector = standing
+    if sector_rank > spec.params["top_sectors"]:
         return None
-    if uni.rank_in_sector > spec.params["top_names"]:
+    if rank_in_sector > spec.params["top_names"]:
         return None
 
     entry = _entry_price(ctx)
@@ -508,8 +516,8 @@ def sector_rotation_family(spec: MomentumSpec, symbol: str, ctx: Ctx) -> Optiona
         target=entry + spec.params["target_atr"] * atr14, stoploss=stop,
         confidence=0.6,
         rationale=(
-            f"Sector rotation: {uni.sector} ranks #{uni.sector_rank} of {uni.sector_count} sectors on "
-            f"{spec.params['lookback'] // 21}M return, and {symbol} is #{uni.rank_in_sector} inside it"
+            f"Sector rotation: {uni.sector} ranks #{sector_rank} of {sector_count} sectors on "
+            f"{lookback // 21}M return, and {symbol} is #{rank_in_sector} inside it"
         ),
         trail_mode=spec.params["trail_mode"], trail_param=spec.params["trail_param"],
     )
