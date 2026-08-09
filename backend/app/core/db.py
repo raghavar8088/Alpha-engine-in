@@ -93,6 +93,15 @@ stock_desk_trades_collection = db["stock_desk_trades"]
 stock_desk_scores_collection = db["stock_desk_scores"]
 stock_desk_state_collection = db["stock_desk_state"]
 stock_desk_equity_collection = db["stock_desk_equity"]
+# Zero Hero Trades — expiry-day deep-OTM INDEX option buying, 50 strategies on Rs1L each.
+# Signals are stored separately from positions because most zero-hero signals are NOT
+# taken (too expensive, unquotable), and knowing why is the point of the history.
+zero_hero_positions_collection = db["zero_hero_positions"]
+zero_hero_trades_collection = db["zero_hero_trades"]
+zero_hero_scores_collection = db["zero_hero_scores"]
+zero_hero_signals_collection = db["zero_hero_signals"]
+zero_hero_state_collection = db["zero_hero_state"]
+zero_hero_equity_collection = db["zero_hero_equity"]
 # Long-Horizon factor desk — cross-sectional (top-K basket) momentum/low-vol/reversal
 # strategies, own capital pool, own sweep, mirroring the prelive_* / prelive_selling_*
 # separation: different capital, different risk model, different qualification rule.

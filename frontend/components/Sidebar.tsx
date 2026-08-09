@@ -142,6 +142,18 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // Expiry-day deep-OTM index lottery tickets. Sits right under Strategies because it
+        // is a strategy library first and a desk second. Ticket/star mark to read as
+        // "long shot" rather than another routine desk.
+        href: "/zero-hero",
+        label: "Zero Hero Trades",
+        icon: (
+          <>
+            <path d="M12 3l2.2 5.2 5.6.5-4.2 3.7 1.2 5.5L12 15l-4.8 2.9 1.2-5.5L4.2 8.7l5.6-.5L12 3z" />
+          </>
+        ),
+      },
+      {
         href: "/backtesting",
         label: "Backtesting",
         icon: (

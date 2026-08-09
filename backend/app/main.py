@@ -32,6 +32,7 @@ from app.api.routes import (
     research,
     risk,
     stock_desk,
+    zero_hero,
     stocks_range,
     strategies,
     telegram_signals,
@@ -328,6 +329,7 @@ app.include_router(live_intraday.router)
 app.include_router(live_trading.router)
 app.include_router(momentum.router)
 app.include_router(stock_desk.router)
+app.include_router(zero_hero.router)
 app.include_router(stocks_range.router)
 app.include_router(bullish_stocks.router)
 app.include_router(long_horizon.router)

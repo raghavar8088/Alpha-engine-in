@@ -38,6 +38,7 @@ async def intraday_lab_loop() -> None:
     from app.services.live_intraday_engine import run_cycle as live_run_cycle
     from app.services.live_trading_engine import run_cycle as live_trading_run_cycle
     from app.services.stock_desk import BUYING, SELLING, run_cycle as stock_desk_run_cycle
+    from app.services.zero_hero import run_cycle as zero_hero_run_cycle
     from app.services.momentum_engine import run_cycle as momentum_run_cycle
 
     while True:
@@ -80,6 +81,14 @@ async def intraday_lab_loop() -> None:
                                         _side, sd["opened"], sd["managed"])
                     except Exception:
                         logger.exception("stock-desk[%s] cycle failed", _side)
+                # Zero Hero (expiry-day index lottery tickets, paper). Inert on any day no
+                # index expires, so this is a cheap no-op most of the week.
+                try:
+                    zh = await zero_hero_run_cycle()
+                    if zh["opened"] or zh["managed"]:
+                        logger.info("zero-hero: %d opened, %d managed", zh["opened"], zh["managed"])
+                except Exception:
+                    logger.exception("zero-hero cycle failed")
                 # The Momentum pre-live desk (paper, ₹10k/strategy, fee-honest) rides the
                 # same tick and feed. Isolated like the others: a failure here must not
                 # roll back ticks that already committed above.

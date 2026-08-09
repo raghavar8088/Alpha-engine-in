@@ -2601,3 +2601,124 @@ export async function fetchStockDeskPositions(side: string): Promise<{ positions
 export async function runStockDeskCycle(side: string): Promise<{ opened: number; managed: number; notes: string[] }> {
   return apiFetch(`/api/stock-desk/${side}/run`, { method: "POST" });
 }
+
+// ---- Zero Hero Trades (expiry-day deep-OTM index option lottery, paper) ----
+export interface ZeroHeroSummary {
+  mode: string;
+  strategy_count: number;
+  per_strategy_capital: number;
+  initial_capital: number;
+  deployed_capital: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  equity: number;
+  open_positions: number;
+  closed_positions: number;
+  wins: number;
+  win_rate: number;
+  expiring_today: string[];
+  max_trade_budget: number;
+  last_run_at: string | null;
+  last_notes: string[];
+}
+export interface ZeroHeroScore {
+  strategy_id: string;
+  name: string;
+  index: string;
+  otm_pct: number;
+  max_premium: number;
+  window: string;
+  window_from: string;
+  window_to: string;
+  trigger: string;
+  target_mult: number;
+  trades: number;
+  wins: number;
+  win_rate: number;
+  net_pnl: number;
+  profit_factor: number | null;
+  expectancy: number;
+  best_trade: number;
+  capital: number;
+}
+export interface ZeroHeroPosition {
+  position_id: string;
+  strategy_id: string;
+  strategy_name: string;
+  index: string;
+  option_type: string;
+  strike: number;
+  expiry: string;
+  lots: number;
+  qty: number;
+  spot_at_entry: number;
+  entry_premium: number;
+  ltp: number | null;
+  capital_deployed: number;
+  target_premium: number;
+  stop_premium: number;
+  unrealized_pnl: number;
+  realized_pnl: number | null;
+  exit_premium: number | null;
+  exit_reason: string | null;
+  status: string;
+}
+export interface ZeroHeroTrade {
+  trade_id: string;
+  strategy_name: string;
+  index: string;
+  option_type: string;
+  strike: number;
+  qty: number;
+  entry_premium: number;
+  exit_premium: number;
+  multiple: number | null;
+  realized_pnl: number;
+  exit_reason: string;
+  session: string;
+}
+export interface ZeroHeroSignal {
+  signal_id: string;
+  ts: string;
+  strategy_id: string;
+  strategy_name: string;
+  index: string;
+  option_type: string;
+  strike: number;
+  spot: number;
+  premium: number | null;
+  max_premium: number;
+  taken: boolean;
+  reason: string | null;
+}
+export interface ZeroHeroDaily {
+  session: string;
+  net_pnl: number;
+  trades: number;
+  wins: number;
+  win_rate: number;
+  best_trade: number;
+}
+
+export async function fetchZeroHeroSummary(): Promise<ZeroHeroSummary> {
+  return apiFetch("/api/zero-hero/summary");
+}
+export async function fetchZeroHeroLeaderboard(): Promise<ZeroHeroScore[]> {
+  const r = await apiFetch("/api/zero-hero/leaderboard");
+  return r.leaderboard ?? [];
+}
+export async function fetchZeroHeroPositions(status = "OPEN"): Promise<{ positions: ZeroHeroPosition[]; summary: ZeroHeroSummary }> {
+  return apiFetch(`/api/zero-hero/positions?status=${status}`);
+}
+export async function fetchZeroHeroTrades(limit = 300): Promise<ZeroHeroTrade[]> {
+  const r = await apiFetch(`/api/zero-hero/trades?limit=${limit}`);
+  return r.trades ?? [];
+}
+export async function fetchZeroHeroSignals(limit = 300): Promise<ZeroHeroSignal[]> {
+  const r = await apiFetch(`/api/zero-hero/signals?limit=${limit}`);
+  return r.signals ?? [];
+}
+export async function fetchZeroHeroDaily(limit = 60): Promise<ZeroHeroDaily[]> {
+  const r = await apiFetch(`/api/zero-hero/daily?limit=${limit}`);
+  return r.daily ?? [];
+}
