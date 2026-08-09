@@ -85,6 +85,14 @@ live_trading_scores_collection = db["live_trading_scores"]
 live_trading_state_collection = db["live_trading_state"]
 live_trading_equity_collection = db["live_trading_equity"]
 live_trading_flags_collection = db["live_trading_flags"]  # per-strategy enabled toggle
+# Stock-option Pre-Live desks — paper buying/selling desks on SINGLE-STOCK options, the
+# stock twins of the NIFTY prelive desks. One set of collections for both sides; every doc
+# carries `side` ("buying"/"selling") so the two desks stay separable but share the schema.
+stock_desk_positions_collection = db["stock_desk_positions"]
+stock_desk_trades_collection = db["stock_desk_trades"]
+stock_desk_scores_collection = db["stock_desk_scores"]
+stock_desk_state_collection = db["stock_desk_state"]
+stock_desk_equity_collection = db["stock_desk_equity"]
 # Long-Horizon factor desk — cross-sectional (top-K basket) momentum/low-vol/reversal
 # strategies, own capital pool, own sweep, mirroring the prelive_* / prelive_selling_*
 # separation: different capital, different risk model, different qualification rule.

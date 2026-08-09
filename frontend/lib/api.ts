@@ -2531,3 +2531,73 @@ export async function fetchMomentumCatalog(): Promise<{ styles: MomentumCatalogS
 export async function runMomentumCycle(): Promise<{ opened: number; managed: number; scanned_symbols: number; regime: MomentumRegime; notes: string[] }> {
   return apiFetch("/api/momentum/run", { method: "POST" });
 }
+
+// ---- Stock-option Pre-Live desks (paper, single-stock options on live Angel data) ----
+export interface StockDeskSummary {
+  side: string;
+  mode: string;
+  strategy_count: number;
+  universe: string[];
+  timeframe: string;
+  per_strategy_capital: number;
+  initial_capital: number;
+  deployed_capital: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  equity: number;
+  open_positions: number;
+  closed_positions: number;
+  last_run_at: string | null;
+  last_notes: string[];
+  today_pnl: number;
+  breaker_tripped: boolean;
+  daily_loss_limit: number;
+}
+export interface StockDeskScore {
+  side: string;
+  strategy_id: string;
+  name: string;
+  is_anti: boolean;
+  trades: number;
+  wins: number;
+  win_rate: number;
+  net_pnl: number;
+  profit_factor: number | null;
+  allocated_capital: number | null;
+}
+export interface StockDeskPosition {
+  position_id: string;
+  side: string;
+  strategy_id: string;
+  strategy_name: string;
+  is_anti: boolean;
+  symbol: string;
+  option_type: string;
+  expiry: string | null;
+  strike: number;
+  lot_size: number;
+  qty: number;
+  structure: string;
+  entry_premium: number;
+  ltp: number | null;
+  capital_deployed: number;
+  max_loss?: number;
+  credit?: number;
+  unrealized_pnl: number;
+  realized_pnl: number | null;
+  status: string;
+}
+
+export async function fetchStockDeskSummary(side: string): Promise<StockDeskSummary> {
+  return apiFetch(`/api/stock-desk/${side}/summary`);
+}
+export async function fetchStockDeskLeaderboard(side: string): Promise<StockDeskScore[]> {
+  const r = await apiFetch(`/api/stock-desk/${side}/leaderboard`);
+  return r.leaderboard ?? [];
+}
+export async function fetchStockDeskPositions(side: string): Promise<{ positions: StockDeskPosition[]; summary: StockDeskSummary }> {
+  return apiFetch(`/api/stock-desk/${side}/positions?status=OPEN`);
+}
+export async function runStockDeskCycle(side: string): Promise<{ opened: number; managed: number; notes: string[] }> {
+  return apiFetch(`/api/stock-desk/${side}/run`, { method: "POST" });
+}

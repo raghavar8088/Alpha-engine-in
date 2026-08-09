@@ -37,6 +37,7 @@ async def intraday_lab_loop() -> None:
     from app.services.intraday_lab_engine import run_cycle
     from app.services.live_intraday_engine import run_cycle as live_run_cycle
     from app.services.live_trading_engine import run_cycle as live_trading_run_cycle
+    from app.services.stock_desk import BUYING, SELLING, run_cycle as stock_desk_run_cycle
     from app.services.momentum_engine import run_cycle as momentum_run_cycle
 
     while True:
@@ -69,6 +70,16 @@ async def intraday_lab_loop() -> None:
                         )
                 except Exception:
                     logger.exception("live-trading (real) cycle failed — other ticks already committed")
+                # Stock-option Pre-Live desks (paper) ride the same tick. Each is
+                # rate-limit paced internally; a failure in one never stops the other.
+                for _side in (BUYING, SELLING):
+                    try:
+                        sd = await stock_desk_run_cycle(_side)
+                        if sd["opened"] or sd["managed"]:
+                            logger.info("stock-desk[%s]: %d opened, %d managed",
+                                        _side, sd["opened"], sd["managed"])
+                    except Exception:
+                        logger.exception("stock-desk[%s] cycle failed", _side)
                 # The Momentum pre-live desk (paper, ₹10k/strategy, fee-honest) rides the
                 # same tick and feed. Isolated like the others: a failure here must not
                 # roll back ticks that already committed above.

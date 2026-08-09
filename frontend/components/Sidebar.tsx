@@ -198,6 +198,31 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // Stock-option twins of the two NIFTY desks above. Placed directly beneath them so
+        // the four option desks read as one family: index buying/selling, then stock
+        // buying/selling.
+        href: "/stock-prelive-buying",
+        label: "Stock Pre-Live · Buying",
+        icon: (
+          <>
+            <path d="M3 5h18v11H3z" />
+            <path d="M3 20h18M8 16v4M16 16v4" />
+            <path d="M8 12l3-3 2 2 3-4" />
+          </>
+        ),
+      },
+      {
+        href: "/stock-prelive-selling",
+        label: "Stock Pre-Live · Selling",
+        icon: (
+          <>
+            <path d="M3 5h18v11H3z" />
+            <path d="M3 20h18M8 16v4M16 16v4" />
+            <path d="M8 8l3 3 2-2 3 4" />
+          </>
+        ),
+      },
+      {
         // Cash equities, not options — a candlestick-and-clock icon to separate it at a
         // glance from the two NIFTY option desks directly above it.
         href: "/intraday-stocks",
