@@ -110,6 +110,13 @@ buy_low_trades_collection = db["buy_low_trades"]
 buy_low_signals_collection = db["buy_low_signals"]
 buy_low_state_collection = db["buy_low_state"]
 buy_low_equity_collection = db["buy_low_equity"]
+# Live Paper Buying — the 5 Pre-Live leaderboard winners on a realistic Rs50,000 book
+# (Rs10k each), NIFTY ATM options at live Angel premiums. Paper.
+live_paper_positions_collection = db["live_paper_positions"]
+live_paper_trades_collection = db["live_paper_trades"]
+live_paper_scores_collection = db["live_paper_scores"]
+live_paper_state_collection = db["live_paper_state"]
+live_paper_equity_collection = db["live_paper_equity"]
 # Long-Horizon factor desk — cross-sectional (top-K basket) momentum/low-vol/reversal
 # strategies, own capital pool, own sweep, mirroring the prelive_* / prelive_selling_*
 # separation: different capital, different risk model, different qualification rule.

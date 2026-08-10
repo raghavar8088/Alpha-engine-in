@@ -44,6 +44,7 @@ async def intraday_lab_loop() -> None:
     from app.services.zero_hero import run_cycle as zero_hero_run_cycle
     from app.services.buy_low_options import run_cycle as buy_low_run_cycle
     from app.services.buy_low_options import refresh_fno_bars
+    from app.services.live_paper_buying import run_cycle as live_paper_run_cycle
     from app.services.momentum_engine import run_cycle as momentum_run_cycle
 
     while True:
@@ -103,6 +104,15 @@ async def intraday_lab_loop() -> None:
                                     bl["opened"], bl["managed"], bl["fell"])
                 except Exception:
                     logger.exception("buy-low cycle failed")
+                # Live Paper Buying: the 5 leaderboard winners on a Rs50k book. Trades
+                # automatically through the session and squares off at 15:15.
+                try:
+                    lp = await live_paper_run_cycle()
+                    if lp["opened"] or lp["managed"]:
+                        logger.info("live-paper: %d opened, %d managed, %d signals",
+                                    lp["opened"], lp["managed"], lp["signals"])
+                except Exception:
+                    logger.exception("live-paper cycle failed")
                 # Screener week/month columns need CURRENT daily closes; refresh once a
                 # day, after the close, so it never competes with live trading cycles.
                 try:

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import GlassPanel from "../../components/GlassPanel";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
+import LivePaperBuying from "../../components/LivePaperBuying";
 import {
   PreLiveDay,
   PreLiveScore,
@@ -26,6 +27,7 @@ export default function PreLivePage() {
   const [trades, setTrades] = useState<PreLiveTrade[]>([]);
   const [days, setDays] = useState<PreLiveDay[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [tab, setTab] = useState<"tournament" | "livepaper">("tournament");
 
   const load = useCallback(async () => {
     try {
@@ -60,6 +62,19 @@ export default function PreLivePage() {
         subtitle="Strategy-selection tournament: EVERY registered option-buying strategy, traded automatically every market day on LIVE Dhan data — each on its own independent ₹10 lakh account at 1 lot/position, REAL option premiums (paper, no real orders). This builds the forward, real-premium track record a historical backtest can't (Dhan purges expired-contract history), so the leaderboard can select the best for real-money trading."
       />
 
+      <div className="desk-tabs">
+        <button className={tab === "tournament" ? "dt active" : "dt"} onClick={() => setTab("tournament")}>
+          Tournament · all strategies
+        </button>
+        <button className={tab === "livepaper" ? "dt active" : "dt"} onClick={() => setTab("livepaper")}>
+          Live Paper Buying · ₹50k
+        </button>
+      </div>
+
+      {tab === "livepaper" ? (
+        <LivePaperBuying />
+      ) : (
+      <>
       {error && <ErrorBanner message={error} />}
       {noUniverse && (
         <ErrorBanner message={eng?.note ?? "No qualified strategies to trade right now — run the options sweep to populate one."} />
@@ -209,6 +224,9 @@ export default function PreLivePage() {
         )}
       </GlassPanel>
 
+      </>
+      )}
+
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 18px; }
         .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
@@ -229,6 +247,9 @@ export default function PreLivePage() {
         .data-table th { text-align: center; padding: 8px 10px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--panel-border); position: sticky; top: 0; background: var(--panel); }
         .data-table td { padding: 7px 10px; text-align: center; border-bottom: 1px solid var(--canvas-soft); }
         .empty { padding: 28px 20px; text-align: center; color: var(--text-faint); font-size: 13px; }
+        .desk-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+        .dt { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+        .dt.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
       `}</style>
     </div>
   );

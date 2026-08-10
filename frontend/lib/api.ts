@@ -2872,3 +2872,83 @@ export interface BuyLowScreener {
 export async function fetchBuyLowScreener(limit = 15): Promise<BuyLowScreener> {
   return apiFetch(`/api/buy-low/screener?limit=${limit}`);
 }
+
+// ---- Live Paper Buying (the 5 Pre-Live winners on a Rs50,000 book) ----
+export interface LivePaperSummary {
+  mode: string;
+  underlying: string;
+  timeframe: string;
+  total_capital: number;
+  per_strategy: number;
+  strategy_count: number;
+  deployed_capital: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  equity: number;
+  open_positions: number;
+  closed_positions: number;
+  wins: number;
+  win_rate: number;
+  market_open: boolean;
+  entry_cutoff: string;
+  squareoff: string;
+  last_run_at: string | null;
+  last_notes: string[];
+}
+export interface LivePaperScore {
+  strategy_id: string;
+  base_id: string;
+  name: string;
+  trades: number;
+  wins: number;
+  win_rate: number;
+  net_pnl: number;
+  profit_factor: number | null;
+  expectancy: number;
+  allocated: number;
+}
+export interface LivePaperPosition {
+  position_id: string;
+  strategy_id: string;
+  strategy_name: string;
+  underlying: string;
+  option_type: string;
+  strike: number;
+  expiry: string;
+  lots: number;
+  qty: number;
+  spot_at_entry: number;
+  entry_premium: number;
+  ltp: number | null;
+  cost: number;
+  target_premium: number;
+  stop_premium: number;
+  unrealized_pnl: number;
+  realized_pnl: number | null;
+  exit_premium: number | null;
+  exit_reason: string | null;
+  status: string;
+  session: string;
+}
+export interface LivePaperDaily {
+  session: string;
+  net_pnl: number;
+  trades: number;
+  wins: number;
+  win_rate: number;
+}
+
+export async function fetchLivePaperSummary(): Promise<LivePaperSummary> {
+  return apiFetch("/api/live-paper/summary");
+}
+export async function fetchLivePaperLeaderboard(): Promise<LivePaperScore[]> {
+  const r = await apiFetch("/api/live-paper/leaderboard");
+  return r.leaderboard ?? [];
+}
+export async function fetchLivePaperPositions(status = "OPEN"): Promise<{ positions: LivePaperPosition[]; summary: LivePaperSummary }> {
+  return apiFetch(`/api/live-paper/positions?status=${status}`);
+}
+export async function fetchLivePaperDaily(limit = 60): Promise<LivePaperDaily[]> {
+  const r = await apiFetch(`/api/live-paper/daily?limit=${limit}`);
+  return r.daily ?? [];
+}
