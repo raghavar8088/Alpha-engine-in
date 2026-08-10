@@ -417,3 +417,122 @@ async def fallers(limit: int = 40) -> list[dict]:
     for r in rows:
         r["triggers"] = r["change_pct"] <= -FALL_PCT
     return rows[:limit]
+
+
+# ── F&O screener: biggest movers over 1 day / 1 week / 1 month ───────────────────
+
+SCREENER_BARS_DAYS = int(os.getenv("BUY_LOW_SCREENER_BARS_DAYS", "45"))
+BARS_PACE = float(os.getenv("BUY_LOW_BARS_PACE", "0.4"))
+
+
+async def refresh_fno_bars() -> dict:
+    """Pull recent daily candles from Angel for every F&O stock so the week/month columns
+    are measured against REAL recent closes.
+
+    This exists because the shared daily-bar store is refreshed on its own slower schedule
+    and was ~12 days stale when this screener was built — computing a '1 week' change off a
+    12-day-old close would have quietly mislabelled the number. Paced for Angel's history
+    limit, so it takes ~90s for 208 symbols; run daily, not per request."""
+    from pymongo import UpdateOne
+
+    eq = await _fno_equities()
+    if not eq:
+        return {"ok": 0, "failed": 0}
+    now = datetime.now(IST)
+    frm = (now - timedelta(days=SCREENER_BARS_DAYS)).strftime("%Y-%m-%d 09:15")
+    to = now.strftime("%Y-%m-%d %H:%M")
+    try:
+        await angel_client._session()
+    except AngelAPIError:
+        pass
+
+    ok = fail = 0
+    for sym, d in eq.items():
+        try:
+            rows = await angel_client.candles("NSE", str(d["angel_token"]), "D", frm, to)
+        except Exception:
+            fail += 1
+            await asyncio.sleep(BARS_PACE)
+            continue
+        ops = []
+        for r in rows or []:
+            try:
+                ts = datetime.fromisoformat(r[0]).astimezone(timezone.utc).isoformat()
+                ops.append(UpdateOne(
+                    {"symbol": sym, "timeframe": "1d", "ts": ts},
+                    {"$set": {"symbol": sym, "timeframe": "1d", "ts": ts,
+                              "open": float(r[1]), "high": float(r[2]), "low": float(r[3]),
+                              "close": float(r[4]), "volume": float(r[5]), "oi": None}},
+                    upsert=True))
+            except (ValueError, TypeError, IndexError):
+                continue
+        if ops:
+            from app.core.db import bars_collection
+            await bars_collection.bulk_write(ops, ordered=False)
+            ok += 1
+        else:
+            fail += 1
+        await asyncio.sleep(BARS_PACE)
+    logger.info("F&O screener bars refreshed: %s ok, %s failed", ok, fail)
+    return {"ok": ok, "failed": fail, "symbols": len(eq)}
+
+
+async def _ref_closes(symbols: list[str], cutoff_iso: str) -> dict[str, tuple[float, str]]:
+    """For each symbol, the last daily close AT OR BEFORE the cutoff, with its actual date.
+
+    The date is returned, not assumed: if the store is stale the caller can say what it
+    really measured from instead of calling a 12-day move a '1 week' move."""
+    from app.core.db import bars_collection
+
+    out: dict[str, tuple[float, str]] = {}
+    async for r in bars_collection.aggregate([
+        {"$match": {"timeframe": "1d", "symbol": {"$in": symbols}, "ts": {"$lte": cutoff_iso}}},
+        {"$sort": {"ts": 1}},
+        {"$group": {"_id": "$symbol", "close": {"$last": "$close"}, "ts": {"$last": "$ts"}}},
+    ]):
+        if r.get("close"):
+            out[r["_id"]] = (float(r["close"]), str(r["ts"])[:10])
+    return out
+
+
+async def screener(limit: int = 15) -> dict:
+    """Biggest F&O movers over 1 day, 1 week and 1 month — gainers and losers for each.
+
+    1-day comes from the live quote's previous close (always exact). Week and month are
+    measured against the last stored daily close on or before the cutoff, and each row
+    carries the date that close actually came from."""
+    live = await scan_falls()                      # symbol, ltp, prev_close, change_pct
+    if not live:
+        return {"as_of": None, "windows": []}
+    by_sym = {r["symbol"]: r for r in live}
+    symbols = list(by_sym)
+
+    today = datetime.now(IST).date()
+    windows = [("1 day", 1), ("1 week", 7), ("1 month", 30)]
+    out = []
+    for label, days in windows:
+        if days == 1:
+            rows = [{"symbol": r["symbol"], "ltp": r["ltp"], "ref": r["prev_close"],
+                     "ref_date": "previous close", "change_pct": r["change_pct"]}
+                    for r in live]
+            ref_dates = ["previous close"]
+        else:
+            cutoff = (today - timedelta(days=days)).isoformat() + "T23:59:59+00:00"
+            refs = await _ref_closes(symbols, cutoff)
+            rows = []
+            for s, (close, d) in refs.items():
+                ltp = by_sym[s]["ltp"]
+                if close > 0:
+                    rows.append({"symbol": s, "ltp": ltp, "ref": round(close, 2), "ref_date": d,
+                                 "change_pct": round((ltp / close - 1) * 100, 2)})
+            ref_dates = sorted({r["ref_date"] for r in rows})
+        rows.sort(key=lambda r: r["change_pct"], reverse=True)
+        out.append({
+            "window": label,
+            "measured_from": ref_dates[-1] if ref_dates else None,
+            "covered": len(rows),
+            "gainers": rows[:limit],
+            "losers": list(reversed(rows[-limit:])) if rows else [],
+        })
+    return {"as_of": datetime.now(IST).strftime("%Y-%m-%d %H:%M IST"),
+            "universe": len(symbols), "windows": out}

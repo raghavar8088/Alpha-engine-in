@@ -6,6 +6,8 @@ import GlassPanel from "../../components/GlassPanel";
 import ErrorBanner from "../../components/ErrorBanner";
 import {
   BuyLowDaily,
+  BuyLowMover,
+  BuyLowScreener,
   BuyLowFaller,
   BuyLowPosition,
   BuyLowSignal,
@@ -14,13 +16,14 @@ import {
   fetchBuyLowDaily,
   fetchBuyLowFallers,
   fetchBuyLowPositions,
+  fetchBuyLowScreener,
   fetchBuyLowSignals,
   fetchBuyLowSummary,
   fetchBuyLowTrades,
 } from "../../lib/api";
 
 const REFRESH_MS = 30000;
-type Tab = "fallers" | "open" | "closed" | "daily" | "signals";
+type Tab = "screener" | "fallers" | "open" | "closed" | "daily" | "signals";
 
 const inr = (v: number | null | undefined) =>
   v === null || v === undefined ? "—" : `₹${v.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
@@ -30,7 +33,7 @@ const pct = (v: number | null | undefined) =>
   v === null || v === undefined ? "—" : `${v >= 0 ? "+" : ""}${v.toFixed(2)}%`;
 
 export default function BuyLowPage() {
-  const [tab, setTab] = useState<Tab>("fallers");
+  const [tab, setTab] = useState<Tab>("screener");
   const [summary, setSummary] = useState<BuyLowSummary | null>(null);
   const [fallers, setFallers] = useState<BuyLowFaller[]>([]);
   const [open, setOpen] = useState<BuyLowPosition[]>([]);
@@ -38,11 +41,12 @@ export default function BuyLowPage() {
   const [trades, setTrades] = useState<BuyLowTrade[]>([]);
   const [daily, setDaily] = useState<BuyLowDaily[]>([]);
   const [signals, setSignals] = useState<BuyLowSignal[]>([]);
+  const [screener, setScreener] = useState<BuyLowScreener | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
-      const [s, f, o, c, t, d, g] = await Promise.all([
+      const [s, f, o, c, t, d, g, sc] = await Promise.all([
         fetchBuyLowSummary(),
         fetchBuyLowFallers(),
         fetchBuyLowPositions("OPEN"),
@@ -50,6 +54,7 @@ export default function BuyLowPage() {
         fetchBuyLowTrades(),
         fetchBuyLowDaily(),
         fetchBuyLowSignals(),
+        fetchBuyLowScreener(),
       ]);
       setSummary(s);
       setFallers(f);
@@ -58,6 +63,7 @@ export default function BuyLowPage() {
       setTrades(t);
       setDaily(d);
       setSignals(g);
+      setScreener(sc);
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load Buy Low Options");
@@ -118,6 +124,7 @@ export default function BuyLowPage() {
 
       <div className="tabs">
         {([
+          ["screener", "F&O Screener"],
           ["fallers", `Fallers (${fallers.length})`],
           ["open", `Open (${open.length})`],
           ["closed", `Closed (${closed.length})`],
@@ -129,6 +136,28 @@ export default function BuyLowPage() {
           </button>
         ))}
       </div>
+
+      {tab === "screener" && (
+        <div className="screener">
+          <div className="note">
+            Biggest movers across all <b>{screener?.universe ?? 0}</b> F&amp;O stocks
+            {screener?.as_of ? ` · as of ${screener.as_of}` : ""}. The 1-day column is measured
+            against the previous close; week and month are measured against the last daily close
+            on or before the cutoff, and each block states the date it actually used.
+          </div>
+          {(screener?.windows ?? []).map((w) => (
+            <GlassPanel key={w.window} title={`${w.window} — biggest movers`}>
+              <div className="wmeta">
+                measured from <b>{w.measured_from ?? "—"}</b> · {w.covered} stocks covered
+              </div>
+              <div className="two">
+                <MoverTable title="Top gainers" rows={w.gainers} up />
+                <MoverTable title="Top losers" rows={w.losers} up={false} />
+              </div>
+            </GlassPanel>
+          ))}
+        </div>
+      )}
 
       {tab === "fallers" && (
         <GlassPanel title="Today's F&O fallers — worst first">
@@ -334,6 +363,9 @@ export default function BuyLowPage() {
         .out.lose { background: var(--loss-dim); color: var(--loss); }
         .out.skip { background: var(--canvas-soft); color: var(--text-faint); }
         .out.buy { background: var(--accent); color: #241404; }
+        .screener { display: flex; flex-direction: column; gap: 16px; }
+        .wmeta { font-size: 11.5px; color: var(--text-faint); padding-bottom: 10px; }
+        .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
         .sub { margin-top: 18px; }
         .sub-head { font-size: 11.5px; font-weight: 700; color: var(--text-muted); padding-bottom: 8px; }
         .gain { color: var(--gain); }
@@ -342,6 +374,46 @@ export default function BuyLowPage() {
 
       <style jsx global>{`
         .app-main { max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; }
+      `}</style>
+    </div>
+  );
+}
+
+function MoverTable({ title, rows, up }: { title: string; rows: BuyLowMover[]; up: boolean }) {
+  return (
+    <div>
+      <div className="mt-head">{title}</div>
+      <table className="data-table">
+        <thead>
+          <tr>
+            <th style={{ textAlign: "left" }}>Stock</th>
+            <th>From</th>
+            <th>LTP</th>
+            <th>Change</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.symbol}>
+              <td style={{ textAlign: "left" }} className="sym">{r.symbol}</td>
+              <td className="dim">{r.ref.toLocaleString("en-IN")}</td>
+              <td>{r.ltp.toLocaleString("en-IN")}</td>
+              <td className={r.change_pct >= 0 ? "gain" : "loss"}>
+                {r.change_pct >= 0 ? "+" : ""}{r.change_pct.toFixed(2)}%
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <style jsx>{`
+        .mt-head { font-size: 11px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: ${up ? "var(--gain)" : "var(--loss)"}; padding-bottom: 8px; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .data-table th { text-align: center; padding: 7px 10px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--panel-border); }
+        .data-table td { padding: 7px 10px; text-align: center; border-bottom: 1px solid var(--canvas-soft); }
+        .sym { font-weight: 700; }
+        .dim { color: var(--text-faint); }
+        .gain { color: var(--gain); }
+        .loss { color: var(--loss); }
       `}</style>
     </div>
   );

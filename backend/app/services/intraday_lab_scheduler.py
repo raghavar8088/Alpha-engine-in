@@ -17,6 +17,9 @@ INTRADAY_LAB_ENABLED = os.getenv("INTRADAY_LAB_ENABLED", "1").lower() not in ("0
 TICK_SECONDS = int(os.getenv("INTRADAY_LAB_TICK_SECONDS", "180"))  # every 3 minutes
 MARKET_OPEN, MARKET_CLOSE = "09:15", "15:30"
 
+# Set once a day after the close, so the F&O screener bar refresh runs exactly once.
+_last_fno_bars_day: str | None = None
+
 
 def _in_market_hours(now: datetime) -> bool:
     return now.weekday() < 5 and MARKET_OPEN <= now.strftime("%H:%M") <= MARKET_CLOSE
@@ -40,6 +43,7 @@ async def intraday_lab_loop() -> None:
     from app.services.stock_desk import BUYING, SELLING, run_cycle as stock_desk_run_cycle
     from app.services.zero_hero import run_cycle as zero_hero_run_cycle
     from app.services.buy_low_options import run_cycle as buy_low_run_cycle
+    from app.services.buy_low_options import refresh_fno_bars
     from app.services.momentum_engine import run_cycle as momentum_run_cycle
 
     while True:
@@ -99,6 +103,17 @@ async def intraday_lab_loop() -> None:
                                     bl["opened"], bl["managed"], bl["fell"])
                 except Exception:
                     logger.exception("buy-low cycle failed")
+                # Screener week/month columns need CURRENT daily closes; refresh once a
+                # day, after the close, so it never competes with live trading cycles.
+                try:
+                    global _last_fno_bars_day
+                    today_str = now.date().isoformat()
+                    if now.strftime("%H:%M") >= "15:20" and _last_fno_bars_day != today_str:
+                        _last_fno_bars_day = today_str
+                        r = await refresh_fno_bars()
+                        logger.info("buy-low screener bars refreshed: %s", r)
+                except Exception:
+                    logger.exception("buy-low screener bar refresh failed")
                 # The Momentum pre-live desk (paper, ₹10k/strategy, fee-honest) rides the
                 # same tick and feed. Isolated like the others: a failure here must not
                 # roll back ticks that already committed above.

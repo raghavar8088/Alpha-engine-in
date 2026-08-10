@@ -15,6 +15,8 @@ from app.api.deps import get_current_user
 from app.services.buy_low_options import (
     daily_pnl,
     fallers as bl_fallers,
+    refresh_fno_bars,
+    screener as bl_screener,
     positions as bl_positions,
     run_cycle,
     signals as bl_signals,
@@ -33,6 +35,18 @@ async def summary_endpoint(_u: dict = Depends(get_current_user)):
 @router.get("/fallers")
 async def fallers_endpoint(limit: int = Query(40, ge=1, le=250), _u: dict = Depends(get_current_user)):
     return {"fallers": await bl_fallers(limit)}
+
+
+@router.get("/screener")
+async def screener_endpoint(limit: int = Query(15, ge=1, le=50), _u: dict = Depends(get_current_user)):
+    """Biggest F&O movers — gainers and losers over 1 day / 1 week / 1 month."""
+    return await bl_screener(limit)
+
+
+@router.post("/refresh-bars")
+async def refresh_bars_endpoint(_u: dict = Depends(get_current_user)):
+    """Re-pull recent daily candles for the F&O universe (used by the week/month columns)."""
+    return await refresh_fno_bars()
 
 
 @router.get("/positions")

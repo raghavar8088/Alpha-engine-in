@@ -2834,3 +2834,27 @@ export async function fetchBuyLowDaily(limit = 60): Promise<BuyLowDaily[]> {
   const r = await apiFetch(`/api/buy-low/daily?limit=${limit}`);
   return r.daily ?? [];
 }
+
+export interface BuyLowMover {
+  symbol: string;
+  ltp: number;
+  ref: number;
+  ref_date: string;
+  change_pct: number;
+}
+export interface BuyLowScreenerWindow {
+  window: string;
+  measured_from: string | null;
+  covered: number;
+  gainers: BuyLowMover[];
+  losers: BuyLowMover[];
+}
+export interface BuyLowScreener {
+  as_of: string | null;
+  universe: number;
+  windows: BuyLowScreenerWindow[];
+}
+
+export async function fetchBuyLowScreener(limit = 15): Promise<BuyLowScreener> {
+  return apiFetch(`/api/buy-low/screener?limit=${limit}`);
+}
