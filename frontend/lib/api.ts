@@ -2849,10 +2849,24 @@ export interface BuyLowScreenerWindow {
   gainers: BuyLowMover[];
   losers: BuyLowMover[];
 }
+export interface BuyLowUniverseRow {
+  symbol: string;
+  ltp: number;
+  prev_close: number;
+  change_1d: number | null;
+  ref_1w: number | null;
+  change_1w: number | null;
+  ref_1m: number | null;
+  change_1m: number | null;
+  triggers: boolean;
+}
 export interface BuyLowScreener {
   as_of: string | null;
   universe: number;
   windows: BuyLowScreenerWindow[];
+  week_from: string | null;
+  month_from: string | null;
+  all: BuyLowUniverseRow[];
 }
 
 export async function fetchBuyLowScreener(limit = 15): Promise<BuyLowScreener> {

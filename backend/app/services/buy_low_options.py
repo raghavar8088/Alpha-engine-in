@@ -510,6 +510,7 @@ async def screener(limit: int = 15) -> dict:
     today = datetime.now(IST).date()
     windows = [("1 day", 1), ("1 week", 7), ("1 month", 30)]
     out = []
+    per_window: dict[str, dict[str, dict]] = {}
     for label, days in windows:
         if days == 1:
             rows = [{"symbol": r["symbol"], "ltp": r["ltp"], "ref": r["prev_close"],
@@ -526,6 +527,7 @@ async def screener(limit: int = 15) -> dict:
                     rows.append({"symbol": s, "ltp": ltp, "ref": round(close, 2), "ref_date": d,
                                  "change_pct": round((ltp / close - 1) * 100, 2)})
             ref_dates = sorted({r["ref_date"] for r in rows})
+        per_window[label] = {r["symbol"]: r for r in rows}
         rows.sort(key=lambda r: r["change_pct"], reverse=True)
         out.append({
             "window": label,
@@ -534,5 +536,30 @@ async def screener(limit: int = 15) -> dict:
             "gainers": rows[:limit],
             "losers": list(reversed(rows[-limit:])) if rows else [],
         })
+
+    # The whole universe in ONE row per stock, so all three horizons can be read together
+    # and filtered/sorted client-side. A window with no reference close for a stock returns
+    # null rather than 0 — an unmeasurable move must not look like a flat one.
+    d1, d7, d30 = per_window["1 day"], per_window["1 week"], per_window["1 month"]
+    all_rows = []
+    for s in symbols:
+        r = by_sym[s]
+        w, m = d7.get(s), d30.get(s)
+        all_rows.append({
+            "symbol": s,
+            "ltp": r["ltp"],
+            "prev_close": r["prev_close"],
+            "change_1d": d1[s]["change_pct"] if s in d1 else None,
+            "ref_1w": w["ref"] if w else None,
+            "change_1w": w["change_pct"] if w else None,
+            "ref_1m": m["ref"] if m else None,
+            "change_1m": m["change_pct"] if m else None,
+            "triggers": r["change_pct"] <= -FALL_PCT,
+        })
+    all_rows.sort(key=lambda r: (r["change_1d"] is None, r["change_1d"] or 0))
+
     return {"as_of": datetime.now(IST).strftime("%Y-%m-%d %H:%M IST"),
-            "universe": len(symbols), "windows": out}
+            "universe": len(symbols), "windows": out,
+            "week_from": next((w["measured_from"] for w in out if w["window"] == "1 week"), None),
+            "month_from": next((w["measured_from"] for w in out if w["window"] == "1 month"), None),
+            "all": all_rows}

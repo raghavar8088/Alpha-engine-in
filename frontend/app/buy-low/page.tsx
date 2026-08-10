@@ -8,6 +8,7 @@ import {
   BuyLowDaily,
   BuyLowMover,
   BuyLowScreener,
+  BuyLowUniverseRow,
   BuyLowFaller,
   BuyLowPosition,
   BuyLowSignal,
@@ -42,6 +43,9 @@ export default function BuyLowPage() {
   const [daily, setDaily] = useState<BuyLowDaily[]>([]);
   const [signals, setSignals] = useState<BuyLowSignal[]>([]);
   const [screener, setScreener] = useState<BuyLowScreener | null>(null);
+  const [scrFilter, setScrFilter] = useState("");
+  const [scrSort, setScrSort] = useState<{ key: "symbol" | "ltp" | "change_1d" | "change_1w" | "change_1m"; dir: "asc" | "desc" }>({ key: "change_1d", dir: "asc" });
+  const [onlyTrig, setOnlyTrig] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -77,6 +81,27 @@ export default function BuyLowPage() {
   }, [load]);
 
   const triggering = fallers.filter((f) => f.triggers).length;
+
+  const universeRows = (() => {
+    let rs = screener?.all ?? [];
+    const f = scrFilter.trim().toLowerCase();
+    if (f) rs = rs.filter((r) => r.symbol.toLowerCase().includes(f));
+    if (onlyTrig) rs = rs.filter((r) => r.triggers);
+    const { key, dir } = scrSort;
+    return [...rs].sort((a, b) => {
+      const va = a[key];
+      const vb = b[key];
+      if (va == null && vb == null) return 0;
+      if (va == null) return 1;          // unmeasurable rows always sink
+      if (vb == null) return -1;
+      const d = typeof va === "string" ? va.localeCompare(vb as string) : (va as number) - (vb as number);
+      return dir === "asc" ? d : -d;
+    });
+  })();
+
+  const sortBy = (key: typeof scrSort.key) =>
+    setScrSort((s) => (s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: key === "symbol" ? "asc" : "desc" }));
+  const arrow = (key: typeof scrSort.key) => (scrSort.key === key ? (scrSort.dir === "asc" ? " ▲" : " ▼") : "");
 
   return (
     <div className="page">
@@ -145,6 +170,55 @@ export default function BuyLowPage() {
             against the previous close; week and month are measured against the last daily close
             on or before the cutoff, and each block states the date it actually used.
           </div>
+          <GlassPanel title={`All F&O stocks (${universeRows.length} of ${screener?.universe ?? 0})`}>
+            <div className="scr-controls">
+              <input
+                className="filter"
+                value={scrFilter}
+                onChange={(e) => setScrFilter(e.target.value)}
+                placeholder="Filter by symbol…"
+              />
+              <button className={onlyTrig ? "toggle on" : "toggle"} onClick={() => setOnlyTrig((v) => !v)}>
+                Only triggering (&gt; {summary?.fall_pct ?? 4}% down)
+              </button>
+              <span className="dim">
+                1W from {screener?.week_from ?? "—"} · 1M from {screener?.month_from ?? "—"}
+              </span>
+            </div>
+            <div className="table-scroll">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: "left" }} className="sortable" onClick={() => sortBy("symbol")}>Stock{arrow("symbol")}</th>
+                    <th className="sortable" onClick={() => sortBy("ltp")}>LTP{arrow("ltp")}</th>
+                    <th>Prev close</th>
+                    <th className="sortable" onClick={() => sortBy("change_1d")}>1 day{arrow("change_1d")}</th>
+                    <th>1W from</th>
+                    <th className="sortable" onClick={() => sortBy("change_1w")}>1 week{arrow("change_1w")}</th>
+                    <th>1M from</th>
+                    <th className="sortable" onClick={() => sortBy("change_1m")}>1 month{arrow("change_1m")}</th>
+                    <th>Triggers?</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {universeRows.map((r) => (
+                    <tr key={r.symbol} className={r.triggers ? "hit" : ""}>
+                      <td style={{ textAlign: "left" }} className="sym">{r.symbol}</td>
+                      <td>{r.ltp.toLocaleString("en-IN")}</td>
+                      <td className="dim">{r.prev_close.toLocaleString("en-IN")}</td>
+                      <Chg v={r.change_1d} />
+                      <td className="dim">{r.ref_1w == null ? "—" : r.ref_1w.toLocaleString("en-IN")}</td>
+                      <Chg v={r.change_1w} />
+                      <td className="dim">{r.ref_1m == null ? "—" : r.ref_1m.toLocaleString("en-IN")}</td>
+                      <Chg v={r.change_1m} />
+                      <td>{r.triggers ? <span className="out buy">BUY CALL</span> : <span className="dim">—</span>}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </GlassPanel>
+
           {(screener?.windows ?? []).map((w) => (
             <GlassPanel key={w.window} title={`${w.window} — biggest movers`}>
               <div className="wmeta">
@@ -364,6 +438,12 @@ export default function BuyLowPage() {
         .out.skip { background: var(--canvas-soft); color: var(--text-faint); }
         .out.buy { background: var(--accent); color: #241404; }
         .screener { display: flex; flex-direction: column; gap: 16px; }
+        .scr-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding-bottom: 10px; }
+        .filter { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 9px; padding: 8px 13px; font-size: 12.5px; min-width: 200px; }
+        .toggle { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 8px 13px; border-radius: 9px; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .toggle.on { background: var(--loss-dim); border-color: rgba(224,49,49,0.35); color: var(--loss); }
+        .data-table th.sortable { cursor: pointer; user-select: none; }
+        .data-table th.sortable:hover { color: var(--purple); }
         .wmeta { font-size: 11.5px; color: var(--text-faint); padding-bottom: 10px; }
         .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
         .sub { margin-top: 18px; }
@@ -376,6 +456,19 @@ export default function BuyLowPage() {
         .app-main { max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; }
       `}</style>
     </div>
+  );
+}
+
+function Chg({ v }: { v: number | null }) {
+  if (v == null) return <td className="dim">—</td>;
+  return (
+    <td className={v >= 0 ? "gain" : "loss"}>
+      {v >= 0 ? "+" : ""}{v.toFixed(2)}%
+      <style jsx>{`
+        .gain { color: var(--gain); }
+        .loss { color: var(--loss); }
+      `}</style>
+    </td>
   );
 }
 
