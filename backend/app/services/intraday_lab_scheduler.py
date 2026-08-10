@@ -39,6 +39,7 @@ async def intraday_lab_loop() -> None:
     from app.services.live_trading_engine import run_cycle as live_trading_run_cycle
     from app.services.stock_desk import BUYING, SELLING, run_cycle as stock_desk_run_cycle
     from app.services.zero_hero import run_cycle as zero_hero_run_cycle
+    from app.services.buy_low_options import run_cycle as buy_low_run_cycle
     from app.services.momentum_engine import run_cycle as momentum_run_cycle
 
     while True:
@@ -89,6 +90,15 @@ async def intraday_lab_loop() -> None:
                         logger.info("zero-hero: %d opened, %d managed", zh["opened"], zh["managed"])
                 except Exception:
                     logger.exception("zero-hero cycle failed")
+                # Buy Low Options: only buys inside its 3 PM window, but manages open
+                # calls on every tick (they are carried to target/stop/expiry).
+                try:
+                    bl = await buy_low_run_cycle()
+                    if bl["opened"] or bl["managed"]:
+                        logger.info("buy-low: %d opened, %d managed, %d fell",
+                                    bl["opened"], bl["managed"], bl["fell"])
+                except Exception:
+                    logger.exception("buy-low cycle failed")
                 # The Momentum pre-live desk (paper, ₹10k/strategy, fee-honest) rides the
                 # same tick and feed. Isolated like the others: a failure here must not
                 # roll back ticks that already committed above.

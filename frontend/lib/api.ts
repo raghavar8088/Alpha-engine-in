@@ -2729,3 +2729,108 @@ export async function fetchZeroHeroDaily(limit = 60): Promise<ZeroHeroDaily[]> {
   const r = await apiFetch(`/api/zero-hero/daily?limit=${limit}`);
   return r.daily ?? [];
 }
+
+// ---- Buy Low Options (cheap OTM calls on F&O stocks down >4% at the 3 PM check) ----
+export interface BuyLowSummary {
+  mode: string;
+  total_capital: number;
+  max_position_cost: number;
+  fall_pct: number;
+  target_rupees: number;
+  stop_rupees: number;
+  scan_window: string;
+  deployed_capital: number;
+  free_capital: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  equity: number;
+  open_positions: number;
+  closed_positions: number;
+  wins: number;
+  win_rate: number;
+  max_concurrent: number;
+  last_run_at: string | null;
+  last_notes: string[];
+}
+export interface BuyLowFaller {
+  symbol: string;
+  ltp: number;
+  prev_close: number;
+  change_pct: number;
+  triggers: boolean;
+}
+export interface BuyLowPosition {
+  position_id: string;
+  symbol: string;
+  session: string;
+  change_pct_at_entry: number;
+  spot_at_entry: number;
+  option_type: string;
+  strike: number;
+  expiry: string;
+  lot_size: number;
+  qty: number;
+  entry_premium: number;
+  ltp: number | null;
+  cost: number;
+  target_premium: number;
+  stop_premium: number;
+  unrealized_pnl: number;
+  realized_pnl: number | null;
+  exit_premium: number | null;
+  exit_reason: string | null;
+  status: string;
+}
+export interface BuyLowTrade {
+  trade_id: string;
+  symbol: string;
+  session: string;
+  strike: number;
+  change_pct_at_entry: number;
+  entry_premium: number;
+  exit_premium: number;
+  cost: number;
+  realized_pnl: number;
+  exit_reason: string;
+}
+export interface BuyLowSignal {
+  signal_id: string;
+  ts: string;
+  symbol: string;
+  change_pct: number;
+  spot: number;
+  strike?: number;
+  cost?: number;
+  taken: boolean;
+  reason: string | null;
+}
+export interface BuyLowDaily {
+  session: string;
+  net_pnl: number;
+  trades: number;
+  wins: number;
+  win_rate: number;
+}
+
+export async function fetchBuyLowSummary(): Promise<BuyLowSummary> {
+  return apiFetch("/api/buy-low/summary");
+}
+export async function fetchBuyLowFallers(limit = 40): Promise<BuyLowFaller[]> {
+  const r = await apiFetch(`/api/buy-low/fallers?limit=${limit}`);
+  return r.fallers ?? [];
+}
+export async function fetchBuyLowPositions(status = "OPEN"): Promise<{ positions: BuyLowPosition[]; summary: BuyLowSummary }> {
+  return apiFetch(`/api/buy-low/positions?status=${status}`);
+}
+export async function fetchBuyLowTrades(limit = 500): Promise<BuyLowTrade[]> {
+  const r = await apiFetch(`/api/buy-low/trades?limit=${limit}`);
+  return r.trades ?? [];
+}
+export async function fetchBuyLowSignals(limit = 500): Promise<BuyLowSignal[]> {
+  const r = await apiFetch(`/api/buy-low/signals?limit=${limit}`);
+  return r.signals ?? [];
+}
+export async function fetchBuyLowDaily(limit = 60): Promise<BuyLowDaily[]> {
+  const r = await apiFetch(`/api/buy-low/daily?limit=${limit}`);
+  return r.daily ?? [];
+}

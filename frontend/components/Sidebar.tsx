@@ -46,6 +46,19 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // Sits under Momentum: same "wait for a specific market state, then act" shape,
+        // but the state is a one-day crash and the expression is a cheap long call.
+        href: "/buy-low",
+        label: "Buy Low Options",
+        icon: (
+          <>
+            <path d="M4 7l6 6 3-3 7 7" />
+            <path d="M20 12v5h-5" />
+            <path d="M4 20h16" />
+          </>
+        ),
+      },
+      {
         href: "/portfolio",
         label: "Portfolio",
         icon: (

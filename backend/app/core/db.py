@@ -102,6 +102,14 @@ zero_hero_scores_collection = db["zero_hero_scores"]
 zero_hero_signals_collection = db["zero_hero_signals"]
 zero_hero_state_collection = db["zero_hero_state"]
 zero_hero_equity_collection = db["zero_hero_equity"]
+# Buy Low Options — buys a cheap OTM CALL on any F&O stock down >4% at the 3 PM check.
+# Long premium only, so each position's loss is bounded by its cost; signals are kept
+# separately because a faller is often skipped (no strike fits the Rs5,100 budget).
+buy_low_positions_collection = db["buy_low_positions"]
+buy_low_trades_collection = db["buy_low_trades"]
+buy_low_signals_collection = db["buy_low_signals"]
+buy_low_state_collection = db["buy_low_state"]
+buy_low_equity_collection = db["buy_low_equity"]
 # Long-Horizon factor desk — cross-sectional (top-K basket) momentum/low-vol/reversal
 # strategies, own capital pool, own sweep, mirroring the prelive_* / prelive_selling_*
 # separation: different capital, different risk model, different qualification rule.
