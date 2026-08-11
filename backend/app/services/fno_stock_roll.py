@@ -54,7 +54,12 @@ ROLL_TO = os.getenv("FNO_STOCK_ROLL_TO", "15:25")
 MIN_DAYS_TO_EXPIRY = int(os.getenv("FNO_STOCK_ROLL_MIN_DTE", "5"))
 LOTS = int(os.getenv("FNO_STOCK_ROLL_LOTS", "1"))
 PRODUCT = os.getenv("FNO_STOCK_ROLL_PRODUCT", "MARGIN")
-ORDER_PACE = float(os.getenv("FNO_STOCK_ROLL_PACE", "0.12"))
+# Each close/open fetches its OWN live quote inside fno_positions, so a full roll is
+# ~670 sequential quote calls. At 0.12s that is ~8/sec, well past what Angel tolerates —
+# the first real re-roll had 390 of 416 opens rejected with "live quote unavailable" once
+# the limiter kicked in. Paced to stay under it; a full roll takes ~6 minutes, which is
+# fine for a once-a-day job inside a 25-minute window.
+ORDER_PACE = float(os.getenv("FNO_STOCK_ROLL_PACE", "0.5"))
 
 
 class StockRollError(Exception):
