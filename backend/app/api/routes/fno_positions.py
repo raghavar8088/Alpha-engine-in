@@ -340,3 +340,28 @@ async def auto_roll_run(current_user: dict = Depends(get_current_user)):
     dhan = await _optional_dhan(str(current_user["_id"]))
     result = await run_roll(dhan, trigger="manual")
     return _serialize(result, ("started_at", "finished_at"))
+
+
+# --- Stock-universe ATM straddle roll (sibling of the NIFTY auto-roll above) ---------
+@router.get("/stock-roll/status")
+async def stock_roll_status(_current_user: dict = Depends(get_current_user)):
+    from app.services.fno_stock_roll import status as sr_status
+
+    return await sr_status()
+
+
+@router.get("/stock-roll/preview")
+async def stock_roll_preview(_current_user: dict = Depends(get_current_user)):
+    from app.services.fno_stock_roll import preview
+
+    return await preview()
+
+
+@router.post("/stock-roll/run")
+async def stock_roll_run(
+    force: bool = Query(False, description="bypass the trading-day / window / once-a-day guards"),
+    _current_user: dict = Depends(get_current_user),
+):
+    from app.services.fno_stock_roll import roll
+
+    return await roll(force=force, trigger="manual")

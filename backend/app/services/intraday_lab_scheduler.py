@@ -45,6 +45,7 @@ async def intraday_lab_loop() -> None:
     from app.services.buy_low_options import run_cycle as buy_low_run_cycle
     from app.services.buy_low_options import refresh_fno_bars
     from app.services.live_paper_buying import run_cycle as live_paper_run_cycle
+    from app.services.fno_stock_roll import ENABLED as STOCK_ROLL_ENABLED, roll as stock_roll
     from app.services.momentum_engine import run_cycle as momentum_run_cycle
 
     while True:
@@ -113,6 +114,16 @@ async def intraday_lab_loop() -> None:
                                     lp["opened"], lp["managed"], lp["signals"])
                 except Exception:
                     logger.exception("live-paper cycle failed")
+                # Daily 15:00 ATM straddle roll across the whole stock-option universe.
+                # Self-guarded: trading day, window, and once per session.
+                try:
+                    if STOCK_ROLL_ENABLED:
+                        sr = await stock_roll()
+                        if sr.get("ran"):
+                            logger.warning("fno stock-roll: closed %s, sold %s legs",
+                                           sr["closed"]["closed"], sr["opened"]["sold"])
+                except Exception:
+                    logger.exception("fno stock-roll failed")
                 # Screener week/month columns need CURRENT daily closes; refresh once a
                 # day, after the close, so it never competes with live trading cycles.
                 try:

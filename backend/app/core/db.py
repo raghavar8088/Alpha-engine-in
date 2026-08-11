@@ -132,6 +132,10 @@ long_horizon_state_collection = db["long_horizon_state"]
 # says why rather than just showing no trades.
 fno_auto_roll_state_collection = db["fno_auto_roll_state"]
 fno_auto_roll_log_collection = db["fno_auto_roll_log"]
+# Sibling of the NIFTY roll above: the same daily 15:00 close-and-resell, but across the
+# WHOLE stock-option universe on its own account (see app.services.fno_stock_roll).
+fno_stock_roll_state_collection = db["fno_stock_roll_state"]
+fno_stock_roll_log_collection = db["fno_stock_roll_log"]
 # Momentum Trading desk — the pre-live gate for the 37-strategy momentum catalog
 # (52W-high breakout, relative strength, NSE momentum score, MA stack, ORB, sector
 # rotation, volume breakout). ₹10,000 paper account per strategy, and unlike every
