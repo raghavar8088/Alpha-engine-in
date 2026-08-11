@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import GlassPanel from "../../components/GlassPanel";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
+import FnoAutoRoll from "../../components/FnoAutoRoll";
 import {
   FnoAccount,
   FnoBasketLeg,
@@ -383,6 +384,10 @@ export default function FnoPositionsPage() {
 
       {error && <ErrorBanner message={error} />}
       {notice && <div className="notice">{notice}</div>}
+
+      {/* Renders only on the one account the 3 PM roller owns, so the other paper
+          books here never look like they are being auto-traded. */}
+      <FnoAutoRoll accountName={activeAccount?.name ?? null} />
 
       {basket.length > 0 && (
         <GlassPanel title={`Order Basket · ${basket.length} leg${basket.length > 1 ? "s" : ""}`} note="Combined hedge-aware margin — placed as one order">

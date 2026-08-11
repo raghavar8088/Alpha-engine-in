@@ -107,6 +107,16 @@ def _serialize(doc: dict, ts_fields: tuple[str, ...]) -> dict:
     return doc
 
 
+async def _optional_dhan(user_id: str):
+    """Dhan if it is connected, else None — quotes, chains and expiries all fall back to
+    Angel One, and the auto-roll scheduler runs with None routinely, so its HTTP twin
+    must behave identically rather than 400ing where the scheduler would have proceeded."""
+    try:
+        return await _get_dhan_client(user_id)
+    except HTTPException:
+        return None
+
+
 async def _dhan(current_user: dict):
     try:
         return await _get_dhan_client(str(current_user["_id"]))
@@ -296,3 +306,37 @@ async def reset(payload: ResetAccountRequest, _current_user: dict = Depends(get_
         return await reset_account(payload.account_id)
     except OrderError as exc:
         raise HTTPException(status_code=404, detail=exc.detail)
+
+
+# --------------------------------------------------------------------------------
+# Auto-roll — the daily 3 PM ATM short-straddle roll on one named paper account.
+# See app.services.fno_auto_roll. Read-only status/preview plus a manual trigger, so
+# the roll can be rehearsed and verified without waiting for the scheduler slot.
+# --------------------------------------------------------------------------------
+
+
+@router.get("/auto-roll/status")
+async def auto_roll_status(_current_user: dict = Depends(get_current_user)):
+    from app.services.fno_auto_roll import status as roll_status
+
+    return await roll_status()
+
+
+@router.get("/auto-roll/preview")
+async def auto_roll_preview(current_user: dict = Depends(get_current_user)):
+    """Exactly what the next roll would close and open, without touching anything."""
+    from app.services.fno_auto_roll import preview
+
+    dhan = await _optional_dhan(str(current_user["_id"]))
+    return await preview(dhan)
+
+
+@router.post("/auto-roll/run")
+async def auto_roll_run(current_user: dict = Depends(get_current_user)):
+    """Run the roll NOW. Same code path the 15:00 scheduler uses, so a manual run is a
+    real rehearsal rather than a separate implementation that could drift from it."""
+    from app.services.fno_auto_roll import run_roll
+
+    dhan = await _optional_dhan(str(current_user["_id"]))
+    result = await run_roll(dhan, trigger="manual")
+    return _serialize(result, ("started_at", "finished_at"))

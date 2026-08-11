@@ -2952,3 +2952,57 @@ export async function fetchLivePaperDaily(limit = 60): Promise<LivePaperDaily[]>
   const r = await apiFetch(`/api/live-paper/daily?limit=${limit}`);
   return r.daily ?? [];
 }
+
+// ---- F&O auto-roll: the daily 3 PM ATM short-straddle roll on one named account ----
+export interface FnoAutoRollStatus {
+  enabled: boolean;
+  account_name: string;
+  account_found: boolean;
+  account_id: string | null;
+  symbol: string;
+  lots: number;
+  product_type: string;
+  roll_time_ist: string;
+  grace_minutes: number;
+  min_days_to_expiry: number;
+  holidays: string[];
+  now_ist: string;
+  is_trading_day: boolean;
+  rolled_today: boolean;
+  last_status: string | null;
+  last_message: string | null;
+  last_run_at: string | null;
+  last_rolled_on: string | null;
+  recent: {
+    roll_id: string;
+    status: string;
+    trigger: string;
+    message: string;
+    trading_date: string;
+    finished_at: string;
+  }[];
+}
+
+export interface FnoAutoRollPreview {
+  ok: boolean;
+  reason: string | null;
+  symbol: string;
+  lots: number;
+  spot: number | null;
+  target_expiry: string | null;
+  expiry_note: string;
+  target_strike: number | null;
+  strike_note: string;
+  would_close: { position_id: string; display_name: string; side: string; quantity: number }[];
+  would_open: string[];
+}
+
+export async function fetchFnoAutoRollStatus(): Promise<FnoAutoRollStatus> {
+  return apiFetch("/api/fno-positions/auto-roll/status");
+}
+export async function fetchFnoAutoRollPreview(): Promise<FnoAutoRollPreview> {
+  return apiFetch("/api/fno-positions/auto-roll/preview");
+}
+export async function runFnoAutoRoll(): Promise<{ status: string; message: string }> {
+  return apiFetch("/api/fno-positions/auto-roll/run", { method: "POST" });
+}

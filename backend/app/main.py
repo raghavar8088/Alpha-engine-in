@@ -168,6 +168,22 @@ async def start_intraday_lab_scheduler() -> None:
 
 
 @app.on_event("startup")
+async def start_fno_auto_roll_scheduler() -> None:
+    from app.services.fno_auto_roll import (
+        ACCOUNT_NAME, ENABLED as ROLL_ENABLED, LOTS, ROLL_HHMM, SYMBOL, fno_auto_roll_loop,
+    )
+
+    if ROLL_ENABLED:
+        asyncio.create_task(fno_auto_roll_loop())
+        logger.info(
+            "F&O auto-roll enabled — %r rolls its %s %d-lot ATM straddle daily at %s IST (paper)",
+            ACCOUNT_NAME, SYMBOL, LOTS, ROLL_HHMM,
+        )
+    else:
+        logger.info("F&O auto-roll disabled (FNO_AUTO_ROLL_ENABLED=0)")
+
+
+@app.on_event("startup")
 async def start_long_horizon_scheduler() -> None:
     from app.services.long_horizon_scheduler import LONG_HORIZON_ENABLED, RUN_AFTER_HHMM, long_horizon_loop
 

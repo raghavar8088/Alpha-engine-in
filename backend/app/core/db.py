@@ -126,6 +126,12 @@ long_horizon_trades_collection = db["long_horizon_trades"]
 long_horizon_scores_collection = db["long_horizon_scores"]
 long_horizon_equity_collection = db["long_horizon_equity"]
 long_horizon_state_collection = db["long_horizon_state"]
+# Daily 3 PM ATM short-straddle roll on ONE named F&O paper account (see
+# app.services.fno_auto_roll). `state` holds the once-a-day guard (`last_rolled_on`);
+# `log` keeps one row per attempt including aborts, so a day that did not roll always
+# says why rather than just showing no trades.
+fno_auto_roll_state_collection = db["fno_auto_roll_state"]
+fno_auto_roll_log_collection = db["fno_auto_roll_log"]
 # Momentum Trading desk — the pre-live gate for the 37-strategy momentum catalog
 # (52W-high breakout, relative strength, NSE momentum score, MA stack, ORB, sector
 # rotation, volume breakout). ₹10,000 paper account per strategy, and unlike every
