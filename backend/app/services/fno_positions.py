@@ -722,6 +722,11 @@ async def execute_basket(dhan: DhanClient, account_id: str, legs: list[dict], pr
 
 
 
+# Hard ceiling on single-token Angel calls per sync, so one rate-limited sweep can
+# never cascade into hundreds more.
+MAX_SINGLE_QUOTE_FALLBACKS = 25
+
+
 async def _batch_quote_positions(positions: list[dict]) -> dict[str, float]:
     """Price every open leg in ONE set of batched Angel calls, keyed by security_id.
 
@@ -752,19 +757,56 @@ async def _batch_quote_positions(positions: list[dict]) -> dict[str, float]:
     return {tok_by_id[t]: v for t, v in prices.items() if t in tok_by_id}
 
 
+
+async def _batch_underlying_spots(underlyings: set[str]) -> dict[str, float]:
+    """Spot for many underlyings in one batched sweep, keyed by symbol.
+
+    The companion to _batch_quote_positions. Batching only the option legs was half a fix:
+    the spot lookup stayed one Angel call per underlying, so a 208-name book still fired
+    ~208 single-token requests on EVERY positions refresh and kept the limiter pinned
+    (5,117 non-JSON 403s in five minutes). Both sweeps are batched now.
+    """
+    if not underlyings:
+        return {}
+    by_ex: dict[str, list[str]] = {}
+    tok_sym: dict[str, str] = {}
+    async for d in instruments_collection.find(
+        {"symbol": {"$in": list(underlyings)}, "asset_class": {"$in": ["EQUITY", "INDEX"]},
+         "angel_token": {"$ne": None}},
+        {"symbol": 1, "angel_token": 1, "angel_exchange": 1},
+    ):
+        tok = str(d["angel_token"])
+        tok_sym[tok] = d["symbol"]
+        by_ex.setdefault(d.get("angel_exchange") or "NSE", []).append(tok)
+    if not by_ex:
+        return {}
+    prices = await batched_ltp(by_ex)
+    return {tok_sym[t]: v for t, v in prices.items() if t in tok_sym}
+
+
 async def sync_positions(dhan: DhanClient) -> int:
     open_positions = [p async for p in fno_positions_collection.find({"status": "OPEN"})]
     updated = 0
-    spot_cache: dict[str, float | None] = {}
     # One batched sweep for the whole book instead of a quote per leg (see the helper).
     batched = await _batch_quote_positions(open_positions)
+    spot_cache = await _batch_underlying_spots(
+        {p["instrument"].get("underlying_symbol") for p in open_positions
+         if p.get("instrument", {}).get("underlying_symbol")})
+    # A per-leg fallback is fine for a handful of misses, but firing one Angel call per
+    # position AFTER the batch already failed is what turned a rate-limit blip into 800+
+    # 403s a minute: the fallback re-hits the very limiter that rejected the batch. Cap it,
+    # and let the rest keep their last known mark until the next sweep.
+    fallback_budget = MAX_SINGLE_QUOTE_FALLBACKS
     for pos in open_positions:
         inst = pos["instrument"]
         sid = str(inst.get("security_id"))
         if sid in batched:
             ltp, ltp_source = batched[sid], "angel_quote"
-        else:
+        elif fallback_budget > 0:
+            fallback_budget -= 1
             ltp, ltp_source = await _ltp_with_source(dhan, inst["security_id"], inst["exchange_segment"])
+        else:
+            continue
         if ltp is None:
             continue
         direction = 1 if pos.get("side", "BUY") == "BUY" else -1
@@ -776,7 +818,11 @@ async def sync_positions(dhan: DhanClient) -> int:
         underlying = inst.get("underlying_symbol")
         if underlying:
             if underlying not in spot_cache:
-                spot_cache[underlying] = await _underlying_spot(dhan, underlying, fallback=pos.get("spot"))
+                if fallback_budget <= 0:
+                    spot_cache[underlying] = pos.get("spot")
+                else:
+                    fallback_budget -= 1
+                    spot_cache[underlying] = await _underlying_spot(dhan, underlying, fallback=pos.get("spot"))
             if spot_cache[underlying]:
                 changes["spot"] = spot_cache[underlying]
                 # Keep each leg's standalone margin engine-consistent and current as the
