@@ -136,6 +136,9 @@ fno_auto_roll_log_collection = db["fno_auto_roll_log"]
 # WHOLE stock-option universe on its own account (see app.services.fno_stock_roll).
 fno_stock_roll_state_collection = db["fno_stock_roll_state"]
 fno_stock_roll_log_collection = db["fno_stock_roll_log"]
+# Morning-momentum option buying (app.services.morning_momentum): which of the 09:20 /
+# 09:30 / 10:00 checkpoints have already run today, so a scheduler retry cannot re-buy.
+momentum_buy_state_collection = db["momentum_buy_state"]
 # Momentum Trading desk — the pre-live gate for the 37-strategy momentum catalog
 # (52W-high breakout, relative strength, NSE momentum score, MA stack, ORB, sector
 # rotation, volume breakout). ₹10,000 paper account per strategy, and unlike every

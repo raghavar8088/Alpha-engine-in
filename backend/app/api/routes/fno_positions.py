@@ -365,3 +365,28 @@ async def stock_roll_run(
     from app.services.fno_stock_roll import roll
 
     return await roll(force=force, trigger="manual")
+
+
+# --- Morning-momentum option buying (09:20 / 09:30 / 10:00 checkpoints) --------------
+@router.get("/momentum/status")
+async def momentum_status(_current_user: dict = Depends(get_current_user)):
+    from app.services.morning_momentum import status as mm_status
+
+    return await mm_status()
+
+
+@router.get("/momentum/preview")
+async def momentum_preview(_current_user: dict = Depends(get_current_user)):
+    from app.services.morning_momentum import preview as mm_preview
+
+    return await mm_preview()
+
+
+@router.post("/momentum/run")
+async def momentum_run(
+    checkpoint: str | None = Query(None, description="force a specific checkpoint, e.g. 09:20"),
+    _current_user: dict = Depends(get_current_user),
+):
+    from app.services.morning_momentum import run_cycle as mm_run
+
+    return await mm_run(force_checkpoint=checkpoint)

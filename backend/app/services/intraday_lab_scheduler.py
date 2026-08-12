@@ -46,6 +46,7 @@ async def intraday_lab_loop() -> None:
     from app.services.buy_low_options import refresh_fno_bars
     from app.services.live_paper_buying import run_cycle as live_paper_run_cycle
     from app.services.fno_stock_roll import ENABLED as STOCK_ROLL_ENABLED, roll as stock_roll
+    from app.services.morning_momentum import run_cycle as momentum_run
     from app.services.momentum_engine import run_cycle as momentum_run_cycle
 
     while True:
@@ -124,6 +125,15 @@ async def intraday_lab_loop() -> None:
                                            sr["closed"]["closed"], sr["opened"]["sold"])
                 except Exception:
                     logger.exception("fno stock-roll failed")
+                # Morning-momentum option buying: self-guarded to its 09:20/09:30/10:00
+                # checkpoints, and manages its own book to target/stop/15:10 every tick.
+                try:
+                    mm = await momentum_run()
+                    if mm.get("ran"):
+                        logger.warning("morning-momentum %s: bought %s",
+                                       mm.get("checkpoint"), mm.get("bought"))
+                except Exception:
+                    logger.exception("morning-momentum failed")
                 # Screener week/month columns need CURRENT daily closes; refresh once a
                 # day, after the close, so it never competes with live trading cycles.
                 try:
