@@ -28,6 +28,7 @@ from app.core.db import (
 from app.services.broker_data import get_ltp
 from app.services.dhan_client import DhanAPIError, DhanClient
 from app.services.fno_margin import portfolio_margin, solve_iv
+from app.services.stock_options import batched_ltp
 from app.services.angel_option_chain import (
     ChainError,
     option_chain as angel_option_chain,
@@ -720,13 +721,50 @@ async def execute_basket(dhan: DhanClient, account_id: str, legs: list[dict], pr
     return {"filled": len(positions), "positions": positions, "margin_added": added, "net_premium": net_premium}
 
 
+
+async def _batch_quote_positions(positions: list[dict]) -> dict[str, float]:
+    """Price every open leg in ONE set of batched Angel calls, keyed by security_id.
+
+    Why this exists: sync_positions used to fetch a quote PER position, and per underlying
+    on top. With a few hundred open legs that is 600+ sequential requests per refresh,
+    which walks straight into Angel's rate limiter — it starts returning a non-JSON 403,
+    and then the option chain and the Exit button fail too, because they share the same
+    limiter. Angel prices 50 tokens per request, so the whole book costs ~10 calls instead.
+
+    Returns {security_id: ltp}. Anything Angel cannot price is simply absent, and the
+    caller falls back to its original per-leg path for those few.
+    """
+    ids = {str(p["instrument"].get("security_id")) for p in positions if p.get("instrument")}
+    if not ids:
+        return {}
+    tok_by_id: dict[str, str] = {}
+    by_ex: dict[str, list[str]] = {}
+    async for d in instruments_collection.find(
+        {"security_id": {"$in": list(ids)}, "angel_token": {"$ne": None}},
+        {"security_id": 1, "angel_token": 1, "angel_exchange": 1},
+    ):
+        sid, tok = str(d["security_id"]), str(d["angel_token"])
+        tok_by_id[tok] = sid
+        by_ex.setdefault(d.get("angel_exchange") or "NFO", []).append(tok)
+    if not by_ex:
+        return {}
+    prices = await batched_ltp(by_ex)
+    return {tok_by_id[t]: v for t, v in prices.items() if t in tok_by_id}
+
+
 async def sync_positions(dhan: DhanClient) -> int:
     open_positions = [p async for p in fno_positions_collection.find({"status": "OPEN"})]
     updated = 0
     spot_cache: dict[str, float | None] = {}
+    # One batched sweep for the whole book instead of a quote per leg (see the helper).
+    batched = await _batch_quote_positions(open_positions)
     for pos in open_positions:
         inst = pos["instrument"]
-        ltp, ltp_source = await _ltp_with_source(dhan, inst["security_id"], inst["exchange_segment"])
+        sid = str(inst.get("security_id"))
+        if sid in batched:
+            ltp, ltp_source = batched[sid], "angel_quote"
+        else:
+            ltp, ltp_source = await _ltp_with_source(dhan, inst["security_id"], inst["exchange_segment"])
         if ltp is None:
             continue
         direction = 1 if pos.get("side", "BUY") == "BUY" else -1
