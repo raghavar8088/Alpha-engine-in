@@ -1,8 +1,8 @@
 """Momentum Trading — intraday cash-equity momentum on the F&O stock universe.
 
 THE RULE, as specified:
-  At 09:20, 09:40 and 10:00 IST on every active trading day, check every F&O stock against
-  its previous close:
+  At 09:20, 09:40 and 10:00 IST on every active trading day, check every stock in the TOP
+  1000 INDIAN COMPANIES BY MARKET CAP against its previous close:
       up   2% or more  ->  BUY  the stock (long)
       down 2% or more  ->  SELL the stock (short)
   Target +2% and stop -2% from the entry price, in the direction of the trade. Anything
@@ -16,12 +16,18 @@ desk: here a 2% adverse move is a 2% loss on the position, with no premium cap u
 it. The short side is only possible intraday (cash equities cannot be held short
 overnight), which is exactly why everything squares off the same session.
 
-SIZING, since the brief did not state capital: Rs5,00,000 desk, Rs25,000 per position, so
-up to 20 concurrent names. When more stocks qualify than the desk can fund — 30 crossed 2%
-on a recent session — the STRONGEST movers are taken first and the rest are logged as
-skipped, rather than silently dropping whichever the scan happened to reach last.
+THE UNIVERSE is the exchange's own top-1000-by-market-cap construction: NIFTY TOTAL MARKET
+(750 names, large+mid+small) plus NIFTY MICROCAP 250. Those two lists are disjoint by
+design and sum to exactly 1000, so this is the published market-cap ranking rather than a
+hand-rolled one. Refreshed weekly, since the indices rebalance.
 
-Prices are live Angel One, and the scan is ONE batched sweep for all 208 stocks.
+SIZING: Rs1,00,00,000 desk at Rs25,000 per position. On a normal session well over a
+hundred names cross 2%, so the desk cannot fund them all — the STRONGEST movers are taken
+first and the rest are logged as skipped, rather than silently keeping whichever the scan
+happened to reach last.
+
+Prices are live Angel One. Scanning 1000 stocks is ~20 batched quote requests, paced — not
+1000 calls; that distinction is what keeps this off Angel's rate limiter.
 """
 
 import asyncio
@@ -30,15 +36,23 @@ import os
 from datetime import date, datetime, timedelta, timezone
 from uuid import uuid4
 
+import csv
+import io
+
+import httpx
+from pymongo import UpdateOne
+
 from app.core.db import (
     instruments_collection,
+    momentum_universe_collection,
     momentum_trading_equity_collection,
     momentum_trading_positions_collection,
     momentum_trading_state_collection,
     momentum_trading_trades_collection,
 )
-from app.services.buy_low_options import scan_falls
+from app.services.angel_client import AngelAPIError, angel_client
 from app.services.stock_options import batched_ltp
+from tradingai_broker_clients.angel.auth import batches
 
 logger = logging.getLogger("momentum_trading")
 
@@ -52,8 +66,15 @@ MOVE_PCT = float(os.getenv("MT_MOVE_PCT", "2.0"))
 TARGET_PCT = float(os.getenv("MT_TARGET_PCT", "2.0"))
 STOP_PCT = float(os.getenv("MT_STOP_PCT", "2.0"))
 SQUAREOFF = os.getenv("MT_SQUAREOFF", "15:00")
-TOTAL_CAPITAL = float(os.getenv("MT_CAPITAL", "500000"))
+QUOTE_PACE = float(os.getenv("MT_QUOTE_PACE", "0.15"))
+TOTAL_CAPITAL = float(os.getenv("MT_CAPITAL", "10000000"))   # Rs1 crore
 POSITION_SIZE = float(os.getenv("MT_POSITION_SIZE", "25000"))
+
+# The published top-1000 by market cap: TOTAL MARKET (750) + MICROCAP 250, disjoint.
+UNIVERSE_CSVS = [
+    ("total_market", "https://niftyindices.com/IndexConstituent/ind_niftytotalmarket_list.csv"),
+    ("microcap250", "https://niftyindices.com/IndexConstituent/ind_niftymicrocap250_list.csv"),
+]
 
 
 def _now() -> datetime:
@@ -87,6 +108,100 @@ def due_checkpoint(done: list[str]) -> str | None:
     return None
 
 
+# ── universe: top 1000 by market cap ────────────────────────────────
+
+
+async def refresh_universe() -> dict:
+    """(Re)load the top-1000 list from the index constituent files. Idempotent; weekly."""
+    members: dict[str, dict] = {}
+    fetched: dict[str, int] = {}
+    async with httpx.AsyncClient(timeout=60, headers={"User-Agent": "Mozilla/5.0"}) as c:
+        for key, url in UNIVERSE_CSVS:
+            try:
+                text = (await c.get(url)).text
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("momentum universe: could not fetch %s (%s)", key, exc)
+                continue
+            rows = list(csv.DictReader(io.StringIO(text)))
+            fetched[key] = len(rows)
+            for r in rows:
+                sym = (r.get("Symbol") or "").strip().upper()
+                if not sym:
+                    continue
+                m = members.setdefault(sym, {
+                    "symbol": sym,
+                    "name": (r.get("Company Name") or "").strip(),
+                    "sector": (r.get("Industry") or "").strip(),
+                    "lists": set(),
+                })
+                m["lists"].add(key)
+    if not members:
+        return {"symbols": 0, "by_list": fetched, "error": "no constituents fetched"}
+
+    ops = [
+        UpdateOne({"symbol": sym},
+                  {"$set": {"symbol": sym, "name": m["name"], "sector": m["sector"],
+                            "lists": sorted(m["lists"]), "updated_at": _now()}},
+                  upsert=True)
+        for sym, m in members.items()
+    ]
+    for i in range(0, len(ops), 500):
+        await momentum_universe_collection.bulk_write(ops[i:i + 500], ordered=False)
+    # Names that fell out of both indices at a rebalance should stop being traded.
+    dropped = (await momentum_universe_collection.delete_many(
+        {"symbol": {"$nin": list(members)}})).deleted_count
+    logger.info("momentum universe: %s symbols (%s), %s dropped", len(members), fetched, dropped)
+    return {"symbols": len(members), "by_list": fetched, "dropped": dropped}
+
+
+async def universe_symbols() -> list[str]:
+    return sorted([d["symbol"] async for d in momentum_universe_collection.find({}, {"symbol": 1})])
+
+
+async def scan_universe() -> list[dict]:
+    """Day-change for every stock in the top-1000 universe, in batched Angel sweeps.
+
+    `close` on a FULL quote is the PREVIOUS session's close during market hours, which is
+    exactly the reference a "% move on the day" rule needs. Batching matters here: 1000
+    single-token calls is what puts this app on the wrong side of Angel's rate limiter."""
+    syms = await universe_symbols()
+    if not syms:
+        await refresh_universe()
+        syms = await universe_symbols()
+    if not syms:
+        return []
+    eq = {d["symbol"]: d async for d in instruments_collection.find(
+        {"asset_class": "EQUITY", "symbol": {"$in": syms}, "angel_token": {"$ne": None}},
+        {"symbol": 1, "angel_token": 1, "angel_exchange": 1})}
+    by_ex: dict[str, list[str]] = {}
+    tok2sym: dict[str, str] = {}
+    for sym, d in eq.items():
+        tok = str(d["angel_token"])
+        tok2sym[tok] = sym
+        by_ex.setdefault(d.get("angel_exchange") or "NSE", []).append(tok)
+    try:
+        await angel_client._session()
+    except AngelAPIError:
+        pass
+    quotes: dict[str, dict] = {}
+    for grouped in batches(by_ex):
+        try:
+            quotes.update(await angel_client.full_quote(grouped))
+        except AngelAPIError:
+            pass
+        await asyncio.sleep(QUOTE_PACE)
+    rows = []
+    for tok, q in quotes.items():
+        sym, ltp, prev = tok2sym.get(tok), q.get("ltp"), q.get("close")
+        if not sym or not ltp or not prev:
+            continue
+        rows.append({"symbol": sym, "ltp": round(float(ltp), 2),
+                     "prev_close": round(float(prev), 2),
+                     "change_pct": round((float(ltp) / float(prev) - 1) * 100, 2)})
+    rows.sort(key=lambda r: r["change_pct"])
+    return rows
+
+
 # ── capital ──────────────────────────────────────────────────────────────────────
 
 
@@ -113,7 +228,7 @@ async def _open_symbols() -> set[str]:
 
 
 async def run_checkpoint(checkpoint: str) -> dict:
-    rows = await scan_falls()                       # one batched sweep, all 208 stocks
+    rows = await scan_universe()                       # one batched sweep, all 208 stocks
     if not rows:
         return {"checkpoint": checkpoint, "opened": 0, "candidates": 0,
                 "notes": ["no live quotes this cycle"]}
@@ -280,6 +395,7 @@ async def summary() -> dict:
     shorts = await momentum_trading_positions_collection.count_documents({"status": "OPEN", "side": "SELL"})
     return {
         "mode": "paper", "enabled": ENABLED,
+        "universe_size": await momentum_universe_collection.count_documents({}),
         "total_capital": TOTAL_CAPITAL, "position_size": POSITION_SIZE,
         "max_concurrent": int(TOTAL_CAPITAL // POSITION_SIZE),
         "move_pct": MOVE_PCT, "target_pct": TARGET_PCT, "stop_pct": STOP_PCT,
@@ -334,7 +450,7 @@ async def daily_pnl(limit: int = 60) -> list[dict]:
 
 async def preview() -> dict:
     """Who would be taken right now, without opening anything."""
-    rows = await scan_falls()
+    rows = await scan_universe()
     held = await _open_symbols()
     cands = sorted((r for r in rows if abs(r["change_pct"]) >= MOVE_PCT),
                    key=lambda r: abs(r["change_pct"]), reverse=True)

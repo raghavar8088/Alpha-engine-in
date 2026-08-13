@@ -145,6 +145,8 @@ momentum_trading_positions_collection = db["momentum_trading_positions"]
 momentum_trading_trades_collection = db["momentum_trading_trades"]
 momentum_trading_state_collection = db["momentum_trading_state"]
 momentum_trading_equity_collection = db["momentum_trading_equity"]
+# The desk trades the top 1000 by market cap (TOTAL MARKET 750 + MICROCAP 250), not F&O.
+momentum_universe_collection = db["momentum_universe"]
 # Momentum Trading desk — the pre-live gate for the 37-strategy momentum catalog
 # (52W-high breakout, relative strength, NSE momentum score, MA stack, ORB, sector
 # rotation, volume breakout). ₹10,000 paper account per strategy, and unlike every
