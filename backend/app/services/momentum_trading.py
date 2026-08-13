@@ -45,6 +45,7 @@ from pymongo import UpdateOne
 from app.core.db import (
     instruments_collection,
     momentum_universe_collection,
+    stock_fundamentals_collection,
     momentum_trading_equity_collection,
     momentum_trading_positions_collection,
     momentum_trading_state_collection,
@@ -70,7 +71,13 @@ QUOTE_PACE = float(os.getenv("MT_QUOTE_PACE", "0.15"))
 TOTAL_CAPITAL = float(os.getenv("MT_CAPITAL", "10000000"))   # Rs1 crore
 POSITION_SIZE = float(os.getenv("MT_POSITION_SIZE", "25000"))
 
-# The published top-1000 by market cap: TOTAL MARKET (750) + MICROCAP 250, disjoint.
+# Bucket 1 is the published market-cap index. Bucket 2 is the next tier by REAL market
+# cap among listed stocks outside it — there is no published list that far down, so it is
+# ranked from Yahoo market caps rather than asserted.
+TOP_BUCKET, NEXT_BUCKET = "top752", "next752"
+BUCKETS = [TOP_BUCKET, NEXT_BUCKET]
+NEXT_BUCKET_SIZE = int(os.getenv("MT_NEXT_BUCKET_SIZE", "752"))
+
 UNIVERSE_CSVS = [
     ("total_market", "https://niftyindices.com/IndexConstituent/ind_niftytotalmarket_list.csv"),
     ("microcap250", "https://niftyindices.com/IndexConstituent/ind_niftymicrocap250_list.csv"),
@@ -141,7 +148,8 @@ async def refresh_universe() -> dict:
     ops = [
         UpdateOne({"symbol": sym},
                   {"$set": {"symbol": sym, "name": m["name"], "sector": m["sector"],
-                            "lists": sorted(m["lists"]), "updated_at": _now()}},
+                            "lists": sorted(m["lists"]), "bucket": TOP_BUCKET,
+                            "updated_at": _now()}},
                   upsert=True)
         for sym, m in members.items()
     ]
@@ -149,25 +157,73 @@ async def refresh_universe() -> dict:
         await momentum_universe_collection.bulk_write(ops[i:i + 500], ordered=False)
     # Names that fell out of both indices at a rebalance should stop being traded.
     dropped = (await momentum_universe_collection.delete_many(
-        {"symbol": {"$nin": list(members)}})).deleted_count
+        {"bucket": TOP_BUCKET, "symbol": {"$nin": list(members)}})).deleted_count
     logger.info("momentum universe: %s symbols (%s), %s dropped", len(members), fetched, dropped)
     return {"symbols": len(members), "by_list": fetched, "dropped": dropped}
 
 
-async def universe_symbols() -> list[str]:
-    return sorted([d["symbol"] async for d in momentum_universe_collection.find({}, {"symbol": 1})])
+async def refresh_next_bucket(fetch_caps: bool = True, cap_limit: int | None = None) -> dict:
+    """Rank the listed stocks OUTSIDE the index by real market cap and keep the top slice.
+
+    There is no published ranking past the index, so this builds one: every listed equity we
+    can quote, minus the index names, ordered by the market cap already stored for it. Caps
+    come from the same Yahoo fetcher the rest of the app uses — a symbol with no cap is left
+    OUT rather than guessed at, so the bucket is always a real ranking even when partial.
+    """
+    top = set(await momentum_universe_collection.distinct("symbol", {"bucket": TOP_BUCKET}))
+    listed = [d["symbol"] async for d in instruments_collection.find(
+        {"asset_class": "EQUITY", "angel_token": {"$ne": None}}, {"symbol": 1})]
+    outside = sorted({s for s in listed if s and s not in top})
+
+    fetched = {}
+    if fetch_caps:
+        from app.services.stock_fundamentals import refresh_fundamentals
+        have = set(await stock_fundamentals_collection.distinct(
+            "symbol", {"market_cap": {"$ne": None}}))
+        todo = [s for s in outside if s not in have]
+        if cap_limit:
+            todo = todo[:cap_limit]
+        if todo:
+            fetched = await refresh_fundamentals(symbols=todo)
+
+    caps = {d["symbol"]: d["market_cap"] async for d in stock_fundamentals_collection.find(
+        {"symbol": {"$in": outside}, "market_cap": {"$ne": None}}, {"symbol": 1, "market_cap": 1})}
+    ranked = sorted(caps.items(), key=lambda kv: kv[1], reverse=True)[:NEXT_BUCKET_SIZE]
+
+    if ranked:
+        ops = [UpdateOne({"symbol": sym},
+                         {"$set": {"symbol": sym, "bucket": NEXT_BUCKET,
+                                   "market_cap": cap, "rank": i + 1, "updated_at": _now()}},
+                         upsert=True)
+               for i, (sym, cap) in enumerate(ranked)]
+        for i in range(0, len(ops), 500):
+            await momentum_universe_collection.bulk_write(ops[i:i + 500], ordered=False)
+        keep = [s for s, _ in ranked]
+        await momentum_universe_collection.delete_many(
+            {"bucket": NEXT_BUCKET, "symbol": {"$nin": keep}})
+
+    return {"listed": len(listed), "outside_index": len(outside),
+            "with_market_cap": len(caps), "bucket_size": len(ranked),
+            "cap_fetch": fetched,
+            "largest": ranked[0][0] if ranked else None,
+            "smallest": ranked[-1][0] if ranked else None}
 
 
-async def scan_universe() -> list[dict]:
+async def universe_symbols(bucket: str = TOP_BUCKET) -> list[str]:
+    return sorted([d["symbol"] async for d in
+                   momentum_universe_collection.find({"bucket": bucket}, {"symbol": 1})])
+
+
+async def scan_universe(bucket: str = TOP_BUCKET) -> list[dict]:
     """Day-change for every stock in the top-1000 universe, in batched Angel sweeps.
 
     `close` on a FULL quote is the PREVIOUS session's close during market hours, which is
     exactly the reference a "% move on the day" rule needs. Batching matters here: 1000
     single-token calls is what puts this app on the wrong side of Angel's rate limiter."""
-    syms = await universe_symbols()
-    if not syms:
+    syms = await universe_symbols(bucket)
+    if not syms and bucket == TOP_BUCKET:
         await refresh_universe()
-        syms = await universe_symbols()
+        syms = await universe_symbols(bucket)
     if not syms:
         return []
     eq = {d["symbol"]: d async for d in instruments_collection.find(
@@ -205,42 +261,43 @@ async def scan_universe() -> list[dict]:
 # ── capital ──────────────────────────────────────────────────────────────────────
 
 
-async def _deployed() -> float:
+async def _deployed(bucket: str) -> float:
     total = 0.0
-    async for p in momentum_trading_positions_collection.find({"status": "OPEN"}, {"cost": 1}):
+    async for p in momentum_trading_positions_collection.find({"bucket": bucket, "status": "OPEN"}, {"cost": 1}):
         total += p.get("cost") or 0.0
     return total
 
 
-async def _realized() -> float:
+async def _realized(bucket: str) -> float:
     total = 0.0
     async for p in momentum_trading_positions_collection.find(
-            {"status": {"$ne": "OPEN"}}, {"realized_pnl": 1}):
+            {"bucket": bucket, "status": {"$ne": "OPEN"}}, {"realized_pnl": 1}):
         total += p.get("realized_pnl") or 0.0
     return total
 
 
-async def _open_symbols() -> set[str]:
-    return set(await momentum_trading_positions_collection.distinct("symbol", {"status": "OPEN"}))
+async def _open_symbols(bucket: str) -> set[str]:
+    return set(await momentum_trading_positions_collection.distinct(
+        "symbol", {"bucket": bucket, "status": "OPEN"}))
 
 
 # ── checkpoint ───────────────────────────────────────────────────────────────────
 
 
-async def run_checkpoint(checkpoint: str) -> dict:
-    rows = await scan_universe()                       # one batched sweep, all 208 stocks
+async def run_checkpoint(checkpoint: str, bucket: str) -> dict:
+    rows = await scan_universe(bucket)                       # one batched sweep, all 208 stocks
     if not rows:
-        return {"checkpoint": checkpoint, "opened": 0, "candidates": 0,
+        return {"bucket": bucket, "checkpoint": checkpoint, "opened": 0, "candidates": 0,
                 "notes": ["no live quotes this cycle"]}
 
-    held = await _open_symbols()
+    held = await _open_symbols(bucket)
     # Strongest movers first, so a capital-constrained desk funds the best signals rather
     # than whichever names the scan happened to reach first.
     cands = sorted(
         (r for r in rows if abs(r["change_pct"]) >= MOVE_PCT and r["symbol"] not in held),
         key=lambda r: abs(r["change_pct"]), reverse=True)
 
-    free = TOTAL_CAPITAL + await _realized() - await _deployed()
+    free = TOTAL_CAPITAL + await _realized(bucket) - await _deployed(bucket)
     opened = skipped = 0
     picks: list[dict] = []
     notes: list[str] = []
@@ -261,7 +318,8 @@ async def run_checkpoint(checkpoint: str) -> dict:
         sign = 1 if side == "BUY" else -1
         cost = price * qty
         await momentum_trading_positions_collection.insert_one({
-            "position_id": uuid4().hex[:12], "session": _today(), "checkpoint": checkpoint,
+            "position_id": uuid4().hex[:12], "bucket": bucket,
+            "session": _today(), "checkpoint": checkpoint,
             "symbol": r["symbol"], "side": side,
             "change_pct_at_entry": r["change_pct"], "prev_close": r["prev_close"],
             "entry_price": round(price, 2), "qty": qty, "cost": round(cost, 2),
@@ -283,7 +341,7 @@ async def run_checkpoint(checkpoint: str) -> dict:
         notes.append(f"{skipped} qualifying stock(s) skipped — desk capital fully deployed.")
     ups = sum(1 for r in rows if r["change_pct"] >= MOVE_PCT)
     downs = sum(1 for r in rows if r["change_pct"] <= -MOVE_PCT)
-    return {"checkpoint": checkpoint, "scanned": len(rows), "up": ups, "down": downs,
+    return {"bucket": bucket, "checkpoint": checkpoint, "scanned": len(rows), "up": ups, "down": downs,
             "candidates": len(cands), "opened": opened, "skipped": skipped,
             "picks": picks, "notes": notes}
 
@@ -291,8 +349,9 @@ async def run_checkpoint(checkpoint: str) -> dict:
 # ── manage ───────────────────────────────────────────────────────────────────────
 
 
-async def manage() -> dict:
-    pos = [p async for p in momentum_trading_positions_collection.find({"status": "OPEN"})]
+async def manage(bucket: str) -> dict:
+    pos = [p async for p in momentum_trading_positions_collection.find(
+        {"bucket": bucket, "status": "OPEN"})]
     if not pos:
         return {"managed": 0, "closed": 0}
 
@@ -327,7 +386,7 @@ async def manage() -> dict:
             changes.update({"status": "CLOSED", "exit_price": round(ltp, 2), "exit_reason": reason,
                             "realized_pnl": pnl, "unrealized_pnl": 0.0, "closed_at": _now()})
             await momentum_trading_trades_collection.insert_one({
-                "trade_id": uuid4().hex[:12], "session": p.get("session"),
+                "trade_id": uuid4().hex[:12], "bucket": bucket, "session": p.get("session"),
                 "checkpoint": p.get("checkpoint"), "symbol": p["symbol"], "side": p["side"],
                 "change_pct_at_entry": p.get("change_pct_at_entry"),
                 "entry_price": p["entry_price"], "exit_price": round(ltp, 2), "qty": p["qty"],
@@ -342,60 +401,64 @@ async def manage() -> dict:
 # ── cycle ────────────────────────────────────────────────────────────────────────
 
 
-async def run_cycle(force_checkpoint: str | None = None) -> dict:
+async def run_cycle(force_checkpoint: str | None = None, bucket: str = TOP_BUCKET) -> dict:
     if not ENABLED:
         return {"ran": False, "reason": "disabled"}
     session = _today()
-    st = await momentum_trading_state_collection.find_one({"_id": STATE_ID}) or {}
+    st = await momentum_trading_state_collection.find_one({"_id": bucket}) or {}
     done = st.get("done", []) if st.get("session") == session else []
 
-    managed = await manage()
+    managed = await manage(bucket)
     cp = force_checkpoint or (due_checkpoint(done) if _trading_day() else None)
     if not cp:
         await momentum_trading_state_collection.update_one(
-            {"_id": STATE_ID},
-            {"$set": {"session": session, "done": done, "last_run_at": _now(),
-                      "last_managed": managed}}, upsert=True)
-        return {"ran": False, "reason": f"no checkpoint due (now {_hhmm()} IST; done {done})",
+            {"_id": bucket},
+            {"$set": {"bucket": bucket, "session": session, "done": done,
+                      "last_run_at": _now(), "last_managed": managed}}, upsert=True)
+        return {"ran": False, "bucket": bucket,
+                "reason": f"no checkpoint due (now {_hhmm()} IST; done {done})",
                 "managed": managed}
 
-    result = await run_checkpoint(cp)
+    result = await run_checkpoint(cp, bucket)
     done = sorted(set(done + [cp]))
     await momentum_trading_state_collection.update_one(
-        {"_id": STATE_ID},
-        {"$set": {"session": session, "done": done, "last_run_at": _now(),
+        {"_id": bucket},
+        {"$set": {"bucket": bucket, "session": session, "done": done, "last_run_at": _now(),
                   "last_checkpoint": result, "last_managed": managed}}, upsert=True)
-    snap = await summary()
+    snap = await summary(bucket)
     await momentum_trading_equity_collection.insert_one({
-        "ts": _now(), "session": session, "equity": snap["equity"],
+        "ts": _now(), "bucket": bucket, "session": session, "equity": snap["equity"],
         "realized": snap["realized_pnl"], "unrealized": snap["unrealized_pnl"],
         "open_positions": snap["open_positions"]})
-    logger.warning("[momentum_trading] %s: opened %s of %s candidates",
-                   cp, result["opened"], result["candidates"])
+    logger.warning("[momentum_trading/%s] %s: opened %s of %s candidates",
+                   bucket, cp, result["opened"], result["candidates"])
     return {"ran": True, "managed": managed, **result}
 
 
 # ── read models ──────────────────────────────────────────────────────────────────
 
 
-async def summary() -> dict:
+async def summary(bucket: str = TOP_BUCKET) -> dict:
     deployed = unreal = 0.0
     async for p in momentum_trading_positions_collection.find(
-            {"status": "OPEN"}, {"cost": 1, "unrealized_pnl": 1}):
+            {"bucket": bucket, "status": "OPEN"}, {"cost": 1, "unrealized_pnl": 1}):
         deployed += p.get("cost") or 0.0
         unreal += p.get("unrealized_pnl") or 0.0
-    realized = await _realized()
-    closed = await momentum_trading_positions_collection.count_documents({"status": {"$ne": "OPEN"}})
+    realized = await _realized(bucket)
+    closed = await momentum_trading_positions_collection.count_documents(
+        {"bucket": bucket, "status": {"$ne": "OPEN"}})
     wins = await momentum_trading_positions_collection.count_documents(
-        {"status": {"$ne": "OPEN"}, "realized_pnl": {"$gt": 0}})
-    st = await momentum_trading_state_collection.find_one({"_id": STATE_ID}) or {}
+        {"bucket": bucket, "status": {"$ne": "OPEN"}, "realized_pnl": {"$gt": 0}})
+    st = await momentum_trading_state_collection.find_one({"_id": bucket}) or {}
     session = _today()
     done = st.get("done", []) if st.get("session") == session else []
-    longs = await momentum_trading_positions_collection.count_documents({"status": "OPEN", "side": "BUY"})
-    shorts = await momentum_trading_positions_collection.count_documents({"status": "OPEN", "side": "SELL"})
+    longs = await momentum_trading_positions_collection.count_documents(
+        {"bucket": bucket, "status": "OPEN", "side": "BUY"})
+    shorts = await momentum_trading_positions_collection.count_documents(
+        {"bucket": bucket, "status": "OPEN", "side": "SELL"})
     return {
-        "mode": "paper", "enabled": ENABLED,
-        "universe_size": await momentum_universe_collection.count_documents({}),
+        "mode": "paper", "enabled": ENABLED, "bucket": bucket, "buckets": BUCKETS,
+        "universe_size": await momentum_universe_collection.count_documents({"bucket": bucket}),
         "total_capital": TOTAL_CAPITAL, "position_size": POSITION_SIZE,
         "max_concurrent": int(TOTAL_CAPITAL // POSITION_SIZE),
         "move_pct": MOVE_PCT, "target_pct": TARGET_PCT, "stop_pct": STOP_PCT,
@@ -421,22 +484,25 @@ def _ser(d: dict, ts: tuple[str, ...]) -> dict:
     return d
 
 
-async def positions(status: str = "OPEN", limit: int = 300) -> list[dict]:
-    q = {"status": status.upper()} if status else {}
+async def positions(status: str = "OPEN", limit: int = 300, bucket: str = TOP_BUCKET) -> list[dict]:
+    q = {"bucket": bucket}
+    if status:
+        q["status"] = status.upper()
     return [_ser(p, ("opened_at", "updated_at", "closed_at"))
             async for p in momentum_trading_positions_collection.find(q)
             .sort("opened_at", -1).limit(limit)]
 
 
-async def trades(limit: int = 300) -> list[dict]:
+async def trades(limit: int = 300, bucket: str = TOP_BUCKET) -> list[dict]:
     return [_ser(t, ("opened_at", "closed_at"))
-            async for t in momentum_trading_trades_collection.find({})
+            async for t in momentum_trading_trades_collection.find({"bucket": bucket})
             .sort("closed_at", -1).limit(limit)]
 
 
-async def daily_pnl(limit: int = 60) -> list[dict]:
+async def daily_pnl(limit: int = 60, bucket: str = TOP_BUCKET) -> list[dict]:
     rows = []
     async for r in momentum_trading_trades_collection.aggregate([
+        {"$match": {"bucket": bucket}},
         {"$group": {"_id": "$session", "net_pnl": {"$sum": "$realized_pnl"},
                     "trades": {"$sum": 1},
                     "wins": {"$sum": {"$cond": [{"$gt": ["$realized_pnl", 0]}, 1, 0]}}}},
@@ -448,10 +514,10 @@ async def daily_pnl(limit: int = 60) -> list[dict]:
     return rows
 
 
-async def preview() -> dict:
+async def preview(bucket: str = TOP_BUCKET) -> dict:
     """Who would be taken right now, without opening anything."""
-    rows = await scan_universe()
-    held = await _open_symbols()
+    rows = await scan_universe(bucket)
+    held = await _open_symbols(bucket)
     cands = sorted((r for r in rows if abs(r["change_pct"]) >= MOVE_PCT),
                    key=lambda r: abs(r["change_pct"]), reverse=True)
     out = []
@@ -460,7 +526,7 @@ async def preview() -> dict:
         out.append({"symbol": r["symbol"], "change_pct": r["change_pct"], "ltp": r["ltp"],
                     "side": "BUY" if r["change_pct"] > 0 else "SELL", "qty": qty,
                     "cost": round(r["ltp"] * qty, 2), "already_open": r["symbol"] in held})
-    return {"scanned": len(rows), "candidates": len(cands),
+    return {"bucket": bucket, "scanned": len(rows), "candidates": len(cands),
             "up": sum(1 for r in rows if r["change_pct"] >= MOVE_PCT),
             "down": sum(1 for r in rows if r["change_pct"] <= -MOVE_PCT),
             "rows": out}

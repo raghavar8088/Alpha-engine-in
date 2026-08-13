@@ -12,6 +12,8 @@ from fastapi import APIRouter, Depends, Query
 
 from app.api.deps import get_current_user
 from app.services.momentum_trading import (
+    BUCKETS,
+    TOP_BUCKET,
     daily_pnl,
     positions as mt_positions,
     preview as mt_preview,
@@ -24,37 +26,57 @@ router = APIRouter(prefix="/api/momentum-trading", tags=["momentum-trading"])
 
 
 @router.get("/summary")
-async def summary_endpoint(_u: dict = Depends(get_current_user)):
-    return await mt_summary()
+async def summary_endpoint(bucket: str = Query(TOP_BUCKET), _u: dict = Depends(get_current_user)):
+    return await mt_summary(bucket if bucket in BUCKETS else TOP_BUCKET)
 
 
 @router.get("/preview")
-async def preview_endpoint(_u: dict = Depends(get_current_user)):
-    return await mt_preview()
+async def preview_endpoint(bucket: str = Query(TOP_BUCKET), _u: dict = Depends(get_current_user)):
+    return await mt_preview(bucket if bucket in BUCKETS else TOP_BUCKET)
 
 
 @router.get("/positions")
 async def positions_endpoint(
     status: str = Query("OPEN", description="OPEN | CLOSED"),
     limit: int = Query(300, ge=1, le=1000),
+    bucket: str = Query(TOP_BUCKET),
     _u: dict = Depends(get_current_user),
 ):
-    return {"positions": await mt_positions(status, limit), "summary": await mt_summary()}
+    b = bucket if bucket in BUCKETS else TOP_BUCKET
+    return {"positions": await mt_positions(status, limit, b), "summary": await mt_summary(b)}
 
 
 @router.get("/trades")
-async def trades_endpoint(limit: int = Query(300, ge=1, le=1000), _u: dict = Depends(get_current_user)):
-    return {"trades": await mt_trades(limit)}
+async def trades_endpoint(limit: int = Query(300, ge=1, le=1000), bucket: str = Query(TOP_BUCKET),
+                          _u: dict = Depends(get_current_user)):
+    return {"trades": await mt_trades(limit, bucket if bucket in BUCKETS else TOP_BUCKET)}
 
 
 @router.get("/daily")
-async def daily_endpoint(limit: int = Query(60, ge=1, le=365), _u: dict = Depends(get_current_user)):
-    return {"daily": await daily_pnl(limit)}
+async def daily_endpoint(limit: int = Query(60, ge=1, le=365), bucket: str = Query(TOP_BUCKET),
+                         _u: dict = Depends(get_current_user)):
+    return {"daily": await daily_pnl(limit, bucket if bucket in BUCKETS else TOP_BUCKET)}
 
 
 @router.post("/run")
 async def run_endpoint(
     checkpoint: str | None = Query(None, description="force a checkpoint, e.g. 09:20"),
+    bucket: str = Query(TOP_BUCKET),
     _u: dict = Depends(get_current_user),
 ):
-    return await run_cycle(force_checkpoint=checkpoint)
+    return await run_cycle(force_checkpoint=checkpoint,
+                           bucket=bucket if bucket in BUCKETS else TOP_BUCKET)
+
+
+@router.post("/refresh-universe")
+async def refresh_universe_endpoint(
+    next_bucket: bool = Query(False, description="also rebuild the next-752 market-cap bucket"),
+    cap_limit: int | None = Query(None, description="cap how many market caps to fetch this call"),
+    _u: dict = Depends(get_current_user),
+):
+    from app.services.momentum_trading import refresh_next_bucket, refresh_universe
+
+    out = {"top": await refresh_universe()}
+    if next_bucket:
+        out["next"] = await refresh_next_bucket(cap_limit=cap_limit)
+    return out

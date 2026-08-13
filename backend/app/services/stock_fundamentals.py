@@ -124,9 +124,15 @@ def grade(f: dict | None) -> dict:
     }
 
 
-async def refresh_fundamentals(force: bool = False, limit: int | None = None) -> dict:
-    """Pull fundamentals for every universe symbol that is stale (or all, when forced)."""
-    syms = [d["symbol"] async for d in stock_universe_collection.find({}, {"symbol": 1})]
+async def refresh_fundamentals(force: bool = False, limit: int | None = None,
+                               symbols: list[str] | None = None) -> dict:
+    """Pull fundamentals for stale universe symbols (or all, when forced).
+
+    `symbols` overrides the default Nifty-500 universe, so callers that need market
+    caps for a different set — e.g. ranking the listed stocks OUTSIDE the index — can
+    reuse this fetcher instead of writing a second Yahoo client."""
+    syms = symbols if symbols is not None else [
+        d["symbol"] async for d in stock_universe_collection.find({}, {"symbol": 1})]
     if not syms:
         return {"ok": 0, "failed": 0, "reason": "universe not seeded"}
 
