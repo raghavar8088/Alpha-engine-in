@@ -17,6 +17,15 @@ import {
 
 const REFRESH_MS = 20000;
 type Tab = "candidates" | "open" | "closed" | "daily";
+type Bucket = "top752" | "next752";
+
+// The two books are separate desks that happen to share a rule set: each has its own
+// Rs1 crore, its own positions and its own checkpoint state, so switching here swaps
+// the whole view rather than filtering one shared book.
+const BUCKETS: { key: Bucket; label: string; blurb: string }[] = [
+  { key: "top752", label: "Top 752", blurb: "the published broad market-cap index" },
+  { key: "next752", label: "Next 752", blurb: "next tier by real market cap, outside the index" },
+];
 
 const inr = (v: number | null | undefined) =>
   v === null || v === undefined ? "—" : `₹${v.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
@@ -27,6 +36,7 @@ const pct = (v: number | null | undefined) =>
 
 export default function MomentumTradingPage() {
   const [tab, setTab] = useState<Tab>("candidates");
+  const [bucket, setBucket] = useState<Bucket>("top752");
   const [summary, setSummary] = useState<MomentumTradingSummary | null>(null);
   const [prev, setPrev] = useState<MomentumTradingPreview | null>(null);
   const [open, setOpen] = useState<MomentumTradingPosition[]>([]);
@@ -37,11 +47,11 @@ export default function MomentumTradingPage() {
   const load = useCallback(async () => {
     try {
       const [s, p, o, c, d] = await Promise.all([
-        fetchMomentumTradingSummary(),
-        fetchMomentumTradingPreview(),
-        fetchMomentumTradingPositions("OPEN"),
-        fetchMomentumTradingPositions("CLOSED"),
-        fetchMomentumTradingDaily(),
+        fetchMomentumTradingSummary(bucket),
+        fetchMomentumTradingPreview(bucket),
+        fetchMomentumTradingPositions("OPEN", bucket),
+        fetchMomentumTradingPositions("CLOSED", bucket),
+        fetchMomentumTradingDaily(60, bucket),
       ]);
       setSummary(s);
       setPrev(p);
@@ -52,7 +62,7 @@ export default function MomentumTradingPage() {
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load Momentum Trading");
     }
-  }, []);
+  }, [bucket]);
 
   useEffect(() => {
     load();
@@ -67,10 +77,26 @@ export default function MomentumTradingPage() {
       <PageHeader
         crumb="Momentum Trading"
         title="Momentum Trading"
-        subtitle="Intraday cash-equity momentum. At 09:20, 09:40 and 10:00 IST it checks every F&O stock against its previous close: up 2% or more is bought, down 2% or more is sold short. Target +2%, stop −2%, and anything still open is squared off at 15:00. Paper, on live Angel One prices."
+        subtitle="Intraday cash-equity momentum across two independent books, each on its own ₹1 crore. At 09:20, 09:40 and 10:00 IST each book checks its universe against the previous close: up 2% or more is bought, down 2% or more is sold short. Target +2%, stop −2%, and anything still open is squared off at 15:00. Paper, on live Angel One prices."
       />
 
       {error && <ErrorBanner message={error} />}
+
+      <div className="books">
+        {BUCKETS.map((b) => (
+          <button
+            key={b.key}
+            className={bucket === b.key ? "book active" : "book"}
+            onClick={() => setBucket(b.key)}
+          >
+            <span className="bk-label">{b.label}</span>
+            <span className="bk-blurb">{b.blurb}</span>
+          </button>
+        ))}
+        <span className="bk-size">
+          {summary?.universe_size ?? 0} stocks in this book · own ₹1 cr, own positions, own P&amp;L
+        </span>
+      </div>
 
       <div className="rules">
         <span><b>Trigger</b> ±{summary?.move_pct ?? 2}% vs previous close</span>
@@ -251,6 +277,12 @@ export default function MomentumTradingPage() {
 
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 16px; }
+        .books { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .book { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 9px 15px; border-radius: 10px; cursor: pointer; text-align: left; }
+        .book.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.35); color: var(--purple); }
+        .bk-label { font-size: 13px; font-weight: 800; }
+        .bk-blurb { font-size: 10.5px; opacity: 0.8; }
+        .bk-size { font-size: 11.5px; color: var(--text-faint); margin-left: 4px; }
         .rules { display: flex; gap: 18px; flex-wrap: wrap; padding: 11px 15px; border-radius: 9px; background: var(--canvas-soft); border: 1px solid var(--panel-border); font-size: 12px; color: var(--text-muted); }
         .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
         .note { padding: 11px 15px; border-radius: 9px; background: var(--canvas-soft); border: 1px solid var(--panel-border); font-size: 12px; line-height: 1.6; }

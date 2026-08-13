@@ -3011,6 +3011,9 @@ export async function runFnoAutoRoll(): Promise<{ status: string; message: strin
 export interface MomentumTradingSummary {
   mode: string;
   enabled: boolean;
+  bucket: string;
+  buckets: string[];
+  universe_size: number;
   total_capital: number;
   position_size: number;
   max_concurrent: number;
@@ -3077,16 +3080,16 @@ export interface MomentumTradingDaily {
   win_rate: number;
 }
 
-export async function fetchMomentumTradingSummary(): Promise<MomentumTradingSummary> {
-  return apiFetch("/api/momentum-trading/summary");
+export async function fetchMomentumTradingSummary(bucket = "top752"): Promise<MomentumTradingSummary> {
+  return apiFetch(`/api/momentum-trading/summary?bucket=${bucket}`);
 }
-export async function fetchMomentumTradingPreview(): Promise<MomentumTradingPreview> {
-  return apiFetch("/api/momentum-trading/preview");
+export async function fetchMomentumTradingPreview(bucket = "top752"): Promise<MomentumTradingPreview> {
+  return apiFetch(`/api/momentum-trading/preview?bucket=${bucket}`);
 }
-export async function fetchMomentumTradingPositions(status = "OPEN"): Promise<{ positions: MomentumTradingPosition[]; summary: MomentumTradingSummary }> {
-  return apiFetch(`/api/momentum-trading/positions?status=${status}`);
+export async function fetchMomentumTradingPositions(status = "OPEN", bucket = "top752"): Promise<{ positions: MomentumTradingPosition[]; summary: MomentumTradingSummary }> {
+  return apiFetch(`/api/momentum-trading/positions?status=${status}&bucket=${bucket}`);
 }
-export async function fetchMomentumTradingDaily(limit = 60): Promise<MomentumTradingDaily[]> {
-  const r = await apiFetch(`/api/momentum-trading/daily?limit=${limit}`);
+export async function fetchMomentumTradingDaily(limit = 60, bucket = "top752"): Promise<MomentumTradingDaily[]> {
+  const r = await apiFetch(`/api/momentum-trading/daily?limit=${limit}&bucket=${bucket}`);
   return r.daily ?? [];
 }
