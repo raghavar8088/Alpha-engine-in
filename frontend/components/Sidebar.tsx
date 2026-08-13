@@ -46,6 +46,19 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // Sits under Momentum: same "wait for a state, then act" shape, but this one
+        // trades the SHARES intraday - long a 2% riser, short a 2% faller.
+        href: "/momentum-trading",
+        label: "Momentum Trading",
+        icon: (
+          <>
+            <path d="M3 17l5-5 3 3 5-6" />
+            <path d="M16 9h4v4" />
+            <path d="M3 21h18" />
+          </>
+        ),
+      },
+      {
         // Sits under Momentum: same "wait for a specific market state, then act" shape,
         // but the state is a one-day crash and the expression is a cheap long call.
         href: "/buy-low",

@@ -34,6 +34,7 @@ from app.api.routes import (
     stock_desk,
     buy_low,
     live_paper,
+    momentum_trading,
     zero_hero,
     stocks_range,
     strategies,
@@ -118,6 +119,45 @@ async def _dhan_token_refresh_loop() -> None:
         except Exception:
             logger.exception("Dhan TOTP auto-refresh failed — will retry next cycle")
         await asyncio.sleep(DHAN_TOKEN_CHECK_INTERVAL_SECONDS)
+
+
+# Every desk writes an equity snapshot on each scheduler tick (~every 180s). Left alone
+# that is a few hundred rows per desk per day, forever — and with a dozen desks it is what
+# filled a 512MB Atlas tier and blocked ALL writes, taking the whole app down. These
+# collections are for charting recent history, not a permanent record, so they expire.
+# Same for the high-churn snapshot/log collections.
+EXPIRING_COLLECTIONS = {
+    "stock_desk_equity": 14,
+    "zero_hero_equity": 14,
+    "buy_low_equity": 14,
+    "live_paper_equity": 14,
+    "live_trading_equity": 30,
+    "momentum_trading_equity": 14,
+    "intraday_lab_equity": 14,
+    "prelive_equity": 30,
+    "prelive_selling_equity": 30,
+    "market_data_history": 7,
+    "fno_stock_roll_log": 30,
+    "zero_hero_signals": 30,
+    "buy_low_signals": 30,
+}
+
+
+@app.on_event("startup")
+async def ensure_ttl_indexes() -> None:
+    """Give the high-churn snapshot collections a TTL so they cannot grow without bound.
+
+    Mongo needs a DATE field to expire on; every one of these writes `ts`, so the index is
+    on `ts` with expireAfterSeconds. Creating an index that already exists with the same
+    spec is a no-op, so this is safe on every boot."""
+    from app.core.db import db
+
+    for name, days in EXPIRING_COLLECTIONS.items():
+        try:
+            await db[name].create_index("ts", expireAfterSeconds=days * 24 * 3600,
+                                        name=f"{name}_ttl")
+        except Exception as exc:  # an existing conflicting index must not block startup
+            logger.warning("TTL index on %s skipped (%s)", name, exc)
 
 
 @app.on_event("startup")
@@ -350,6 +390,7 @@ app.include_router(stock_desk.router)
 app.include_router(zero_hero.router)
 app.include_router(buy_low.router)
 app.include_router(live_paper.router)
+app.include_router(momentum_trading.router)
 app.include_router(stocks_range.router)
 app.include_router(bullish_stocks.router)
 app.include_router(long_horizon.router)

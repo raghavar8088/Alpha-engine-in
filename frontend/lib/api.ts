@@ -3006,3 +3006,87 @@ export async function fetchFnoAutoRollPreview(): Promise<FnoAutoRollPreview> {
 export async function runFnoAutoRoll(): Promise<{ status: string; message: string }> {
   return apiFetch("/api/fno-positions/auto-roll/run", { method: "POST" });
 }
+
+// ---- Momentum Trading (intraday cash equity: long +2%, short -2%) ----
+export interface MomentumTradingSummary {
+  mode: string;
+  enabled: boolean;
+  total_capital: number;
+  position_size: number;
+  max_concurrent: number;
+  move_pct: number;
+  target_pct: number;
+  stop_pct: number;
+  checkpoints: string[];
+  done_today: string[];
+  squareoff: string;
+  now_ist: string;
+  next_due: string | null;
+  deployed_capital: number;
+  free_capital: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  equity: number;
+  open_positions: number;
+  longs: number;
+  shorts: number;
+  closed_positions: number;
+  wins: number;
+  win_rate: number;
+}
+export interface MomentumTradingPosition {
+  position_id: string;
+  session: string;
+  checkpoint: string;
+  symbol: string;
+  side: string;
+  change_pct_at_entry: number;
+  entry_price: number;
+  qty: number;
+  cost: number;
+  ltp: number | null;
+  target_price: number;
+  stop_price: number;
+  unrealized_pnl: number;
+  realized_pnl: number | null;
+  exit_price: number | null;
+  exit_reason: string | null;
+  status: string;
+}
+export interface MomentumTradingCandidate {
+  symbol: string;
+  change_pct: number;
+  ltp: number;
+  side: string;
+  qty: number;
+  cost: number;
+  already_open: boolean;
+}
+export interface MomentumTradingPreview {
+  scanned: number;
+  candidates: number;
+  up: number;
+  down: number;
+  rows: MomentumTradingCandidate[];
+}
+export interface MomentumTradingDaily {
+  session: string;
+  net_pnl: number;
+  trades: number;
+  wins: number;
+  win_rate: number;
+}
+
+export async function fetchMomentumTradingSummary(): Promise<MomentumTradingSummary> {
+  return apiFetch("/api/momentum-trading/summary");
+}
+export async function fetchMomentumTradingPreview(): Promise<MomentumTradingPreview> {
+  return apiFetch("/api/momentum-trading/preview");
+}
+export async function fetchMomentumTradingPositions(status = "OPEN"): Promise<{ positions: MomentumTradingPosition[]; summary: MomentumTradingSummary }> {
+  return apiFetch(`/api/momentum-trading/positions?status=${status}`);
+}
+export async function fetchMomentumTradingDaily(limit = 60): Promise<MomentumTradingDaily[]> {
+  const r = await apiFetch(`/api/momentum-trading/daily?limit=${limit}`);
+  return r.daily ?? [];
+}

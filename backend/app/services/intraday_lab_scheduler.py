@@ -47,6 +47,7 @@ async def intraday_lab_loop() -> None:
     from app.services.live_paper_buying import run_cycle as live_paper_run_cycle
     from app.services.fno_stock_roll import ENABLED as STOCK_ROLL_ENABLED, roll as stock_roll
     from app.services.morning_momentum import run_cycle as momentum_run
+    from app.services.momentum_trading import run_cycle as momentum_trading_run
     from app.services.momentum_engine import run_cycle as momentum_run_cycle
 
     while True:
@@ -134,6 +135,14 @@ async def intraday_lab_loop() -> None:
                                        mm.get("checkpoint"), mm.get("bought"))
                 except Exception:
                     logger.exception("morning-momentum failed")
+                # Momentum Trading (cash equity): self-guarded to 09:20/09:40/10:00, and
+                # manages its own book to +/-2% or the 15:00 square-off on every tick.
+                try:
+                    mt = await momentum_trading_run()
+                    if mt.get("ran") or (mt.get("managed") or {}).get("closed"):
+                        logger.warning("momentum-trading: %s", {k: mt.get(k) for k in ("checkpoint","opened","managed")})
+                except Exception:
+                    logger.exception("momentum-trading failed")
                 # Screener week/month columns need CURRENT daily closes; refresh once a
                 # day, after the close, so it never competes with live trading cycles.
                 try:

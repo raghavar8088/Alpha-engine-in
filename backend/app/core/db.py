@@ -139,6 +139,12 @@ fno_stock_roll_log_collection = db["fno_stock_roll_log"]
 # Morning-momentum option buying (app.services.morning_momentum): which of the 09:20 /
 # 09:30 / 10:00 checkpoints have already run today, so a scheduler retry cannot re-buy.
 momentum_buy_state_collection = db["momentum_buy_state"]
+# Momentum Trading — intraday CASH-EQUITY momentum: long a stock up 2%, short one down 2%,
+# +/-2% target and stop, squared off at 15:00. Separate from the option desks above.
+momentum_trading_positions_collection = db["momentum_trading_positions"]
+momentum_trading_trades_collection = db["momentum_trading_trades"]
+momentum_trading_state_collection = db["momentum_trading_state"]
+momentum_trading_equity_collection = db["momentum_trading_equity"]
 # Momentum Trading desk — the pre-live gate for the 37-strategy momentum catalog
 # (52W-high breakout, relative strength, NSE momentum score, MA stack, ORB, sector
 # rotation, volume breakout). ₹10,000 paper account per strategy, and unlike every
