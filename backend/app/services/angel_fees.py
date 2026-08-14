@@ -44,6 +44,17 @@ SEBI_TURNOVER = 0.000001
 NSE_IPFT = 0.000001
 DP_CHARGE = 20.0
 
+# ── F&O options (NSE) ─────────────────────────────────────────────────────────
+# A different schedule entirely, and the difference is not cosmetic. Options brokerage is
+# a FLAT Rs20 per order with no percentage cap, so a cheap option pays the same Rs20 as an
+# expensive one — on a Rs3,000 premium that is 1.3% before anything else. All statutory
+# charges are on PREMIUM turnover, never on notional.
+OPT_BROKERAGE = 20.0          # per executed order, flat
+OPT_STT_SELL = 0.001          # 0.10% of premium, sell side only
+OPT_EXCHANGE_TXN = 0.0005     # 0.05% of premium, both sides (NSE)
+OPT_STAMP_BUY = 0.00003       # 0.003% of premium, buy side only
+OPT_SEBI = 0.000001           # Rs10 per crore
+
 
 @dataclass
 class FeeBreakdown:
@@ -119,6 +130,29 @@ def round_trip(
     if product == "DELIVERY" and side == "BUY":
         # Debiting shares out of the demat on exit; a delivery short is not possible.
         fb.dp_charge = DP_CHARGE * (1 + GST_RATE)
+    return fb
+
+
+def option_round_trip(entry_premium: float, exit_premium: float, lots: int, lot_size: int) -> FeeBreakdown:
+    """Cost of buying and then selling one NSE options position.
+
+    Option buying is charged on the PREMIUM paid, not the contract's notional value, so a
+    Rs150 ATM NIFTY option on a 75-lot is Rs11,250 of turnover per leg — not Rs17 lakh.
+    Sizing off notional here would overstate costs by roughly 150x."""
+    fb = FeeBreakdown(product="OPTION")
+    qty = max(lots, 0) * max(lot_size, 0)
+    if qty <= 0 or entry_premium <= 0 or exit_premium < 0:
+        return fb
+    buy_turnover = entry_premium * qty
+    sell_turnover = exit_premium * qty
+    turnover = buy_turnover + sell_turnover
+
+    fb.brokerage = OPT_BROKERAGE * 2          # one order in, one out
+    fb.stt = sell_turnover * OPT_STT_SELL
+    fb.exchange_txn = turnover * OPT_EXCHANGE_TXN
+    fb.sebi = turnover * OPT_SEBI
+    fb.stamp_duty = buy_turnover * OPT_STAMP_BUY
+    fb.gst = GST_RATE * (fb.brokerage + fb.exchange_txn + fb.sebi)
     return fb
 
 

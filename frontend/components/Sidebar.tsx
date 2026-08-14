@@ -59,6 +59,21 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // Sits under Momentum Trading: the same signal-then-act shape, but expressed
+        // through NIFTY options rather than shares, and run across every candle size at
+        // once to find which HORIZON an edge actually lives on.
+        href: "/nifty-scalp",
+        label: "NIFTY 50 Option Scalping",
+        icon: (
+          <>
+            <path d="M4 18V9" />
+            <path d="M9 18V5" />
+            <path d="M14 18v-7" />
+            <path d="M19 18v-4" />
+          </>
+        ),
+      },
+      {
         // Sits under Momentum: same "wait for a specific market state, then act" shape,
         // but the state is a one-day crash and the expression is a cheap long call.
         href: "/buy-low",

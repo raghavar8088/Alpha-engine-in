@@ -39,6 +39,7 @@ async def _dhan_or_none():
 async def intraday_lab_loop() -> None:
     from app.services.intraday_lab_engine import run_cycle
     from app.services.live_intraday_engine import run_cycle as live_run_cycle
+    from app.services.nifty_scalp_engine import run_cycle as nifty_scalp_run
     from app.services.live_trading_engine import run_cycle as live_trading_run_cycle
     from app.services.stock_desk import BUYING, SELLING, run_cycle as stock_desk_run_cycle
     from app.services.zero_hero import run_cycle as zero_hero_run_cycle
@@ -137,6 +138,15 @@ async def intraday_lab_loop() -> None:
                     logger.exception("morning-momentum failed")
                 # Momentum Trading (cash equity): self-guarded to 09:20/09:40/10:00, and
                 # manages its own book to +/-2% or the 15:00 square-off on every tick.
+                # NIFTY 50 Option Scalping: 400 candle/indicator strategies across 8
+                # timeframes, buying near-expiry ATM options. Self-guarded on cutoffs.
+                try:
+                    ns = await nifty_scalp_run()
+                    if ns.get("opened") or ns.get("closed"):
+                        logger.info("nifty-scalp: opened %s closed %s of %s signals",
+                                    ns["opened"], ns["closed"], ns.get("signals"))
+                except Exception:
+                    logger.exception("nifty-scalp failed")
                 for _b in MT_BUCKETS:
                     try:
                         mt = await momentum_trading_run(bucket=_b)

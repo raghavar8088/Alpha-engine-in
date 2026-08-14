@@ -3129,3 +3129,126 @@ export async function fetchMomentumTradingDaily(limit = 60, bucket = "top752"): 
   const r = await apiFetch(`/api/momentum-trading/daily?limit=${limit}&bucket=${bucket}`);
   return r.daily ?? [];
 }
+
+
+// ── NIFTY 50 Option Scalping ───────────────────────────────────────────────────
+// 400 strategies: 50 candle/indicator templates x 8 timeframes, each buying near-expiry
+// ATM NIFTY options on its own Rs2,00,000.
+
+export interface NiftyScalpSummary {
+  mode: string;
+  enabled: boolean;
+  initial_capital: number;
+  per_strategy_capital: number;
+  strategy_count: number;
+  deployed_capital: number;
+  available_cash: number;
+  realized_pnl: number;
+  gross_realized_pnl: number;
+  total_fees: number;
+  unrealized_pnl: number;
+  equity: number;
+  roi_pct: number;
+  today_pnl: number;
+  today_roi_pct: number;
+  daily_loss_limit: number;
+  breaker_tripped: boolean;
+  open_positions: number;
+  closed_positions: number;
+  expiry: string | null;
+  last_run_at: string | null;
+  last_notes: string[];
+}
+
+export interface NiftyScalpScore {
+  strategy_id: string;
+  name: string;
+  template: string;
+  family: string;
+  timeframe: string;
+  style: string;
+  trades: number;
+  win_rate: number;
+  net_pnl: number;
+  gross_pnl: number;
+  fees: number;
+  roi_pct: number;
+}
+
+export interface NiftyScalpTimeframe {
+  timeframe: string;
+  label: string;
+  style: string;
+  strategies: number;
+  capital: number;
+  trades: number;
+  wins: number;
+  win_rate: number;
+  net_pnl: number;
+  gross_pnl: number;
+  fees: number;
+  roi_pct: number;
+}
+
+export interface NiftyScalpPosition {
+  position_id: string;
+  strategy_name: string;
+  template: string;
+  timeframe: string;
+  style: string;
+  symbol: string;
+  option_type: string;
+  strike: number;
+  expiry: string;
+  direction: string;
+  lots: number;
+  lot_size: number;
+  qty: number;
+  entry_premium: number;
+  ltp: number;
+  exit_premium: number | null;
+  target_premium: number;
+  stop_premium: number;
+  capital_deployed: number;
+  unrealized_pnl: number;
+  realized_pnl: number | null;
+  fees: number | null;
+  exit_reason: string | null;
+  status: string;
+}
+
+export interface NiftyScalpSignal {
+  ts: string;
+  strategy_name: string;
+  timeframe: string;
+  direction: string;
+  spot: number;
+  option: string | null;
+  premium: number | null;
+}
+
+export async function fetchNiftyScalpSummary(): Promise<NiftyScalpSummary> {
+  return apiFetch("/api/nifty-scalp/summary");
+}
+export async function fetchNiftyScalpLeaderboard(timeframe?: string): Promise<NiftyScalpScore[]> {
+  const q = timeframe ? `?timeframe=${timeframe}` : "";
+  const r = await apiFetch(`/api/nifty-scalp/leaderboard${q}`);
+  return r.leaderboard ?? [];
+}
+export async function fetchNiftyScalpTimeframes(): Promise<NiftyScalpTimeframe[]> {
+  const r = await apiFetch("/api/nifty-scalp/timeframes");
+  return r.timeframes ?? [];
+}
+export async function fetchNiftyScalpPositions(status = "OPEN", timeframe?: string): Promise<NiftyScalpPosition[]> {
+  const q = timeframe ? `&timeframe=${timeframe}` : "";
+  const r = await apiFetch(`/api/nifty-scalp/positions?status=${status}${q}`);
+  return r.positions ?? [];
+}
+export async function fetchNiftyScalpSignals(limit = 150): Promise<NiftyScalpSignal[]> {
+  const r = await apiFetch(`/api/nifty-scalp/signals?limit=${limit}`);
+  return r.signals ?? [];
+}
+export async function fetchNiftyScalpDaily(limit = 60): Promise<DailyRoi[]> {
+  const r = await apiFetch(`/api/nifty-scalp/daily?limit=${limit}`);
+  return r.daily ?? [];
+}

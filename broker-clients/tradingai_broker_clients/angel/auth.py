@@ -31,7 +31,9 @@ SESSION_REFRESH_MARGIN_SECONDS = 10 * 60
 ANGEL_INTERVALS = {
     "1": "ONE_MINUTE",
     "5": "FIVE_MINUTE",
+    "10": "TEN_MINUTE",
     "15": "FIFTEEN_MINUTE",
+    "30": "THIRTY_MINUTE",
     "60": "ONE_HOUR",
     "D": "ONE_DAY",
 }
