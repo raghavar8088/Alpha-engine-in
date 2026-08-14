@@ -40,6 +40,7 @@ from app.core.db import (
     intraday_lab_trades_collection,
 )
 from app.services.angel_client import angel_client
+from app.services.angel_fees import product_for, round_trip
 from app.services.angel_equity_feed import equity_quotes
 from app.services.call_engine import IST, _quote_batch, _scored_daily_symbols
 from app.services.dhan_client import DhanClient
@@ -212,6 +213,10 @@ async def breaker_state() -> dict:
     return {
         "breaker_tripped": pnl <= -limit,
         "today_pnl": round(pnl, 2),
+        # Daily ROI against desk capital: the rupee figure alone says nothing about
+        # whether a Rs15 crore book had a good day.
+        "today_roi_pct": round(pnl / INTRADAY_LAB_INITIAL_CAPITAL * 100, 4)
+        if INTRADAY_LAB_INITIAL_CAPITAL else 0.0,
         "daily_loss_limit": round(limit, 2),
         "daily_loss_pct": DAILY_LOSS_BREAKER_PCT,
     }
@@ -492,18 +497,31 @@ async def manage_cycle(dhan: DhanClient | None) -> int:
                 reason = "max_hold_expired"
 
             if reason:
+                # `unrealized` is the gross price move. What the desk actually keeps is
+                # that minus the real Angel One round-trip cost, so both are stored:
+                # gross_pnl for the signal's quality, realized_pnl for the money.
+                _fb = round_trip(
+                    entry_price=pos["entry_price"], exit_price=ltp, qty=pos["qty"],
+                    side=pos["side"], product=product_for(category, days_held),
+                )
+                _net = round(unrealized - _fb.total, 2)
                 changes["status"] = "CLOSED"
                 changes["exit_price"] = round(ltp, 2)
                 changes["exit_reason"] = reason
-                changes["realized_pnl"] = unrealized
+                changes["gross_pnl"] = unrealized
+                changes["fees"] = _fb.total
+                changes["fee_breakdown"] = _fb.as_dict()
+                changes["realized_pnl"] = _net
                 changes["unrealized_pnl"] = 0.0
                 changes["closed_at"] = _now()
+                changes["closed_on"] = today_iso
                 touched_strategies.add(pos["strategy_id"])
                 await intraday_lab_trades_collection.insert_one({
                     "trade_id": uuid4().hex[:12],
                     "strategy_id": pos["strategy_id"], "strategy_name": pos["strategy_name"],
                     "symbol": symbol, "side": pos["side"], "entry_price": pos["entry_price"],
-                    "exit_price": round(ltp, 2), "qty": pos["qty"], "realized_pnl": unrealized,
+                    "exit_price": round(ltp, 2), "qty": pos["qty"],
+                    "gross_pnl": unrealized, "fees": _fb.total, "realized_pnl": _net,
                     "exit_reason": reason, "opened_at": pos["opened_at"], "closed_at": _now(),
                 })
 
@@ -557,13 +575,51 @@ async def run_cycle(dhan: DhanClient | None) -> dict:
     return {"opened": scan_result["opened"], "managed": managed, "scanned_symbols": scan_result["scanned_symbols"], "notes": scan_result["notes"]}
 
 
+async def daily(limit: int = 60) -> list[dict]:
+    """Realised P&L, cost and ROI per trading day, newest first.
+
+    Grouped on the IST date the position CLOSED, because that is the day the money
+    actually moved — grouping on entry would credit a multi-day swing to the wrong
+    session."""
+    buckets: dict[str, dict] = {}
+    async for p in intraday_lab_positions_collection.find(
+        {"status": {"$ne": "OPEN"}},
+        {"realized_pnl": 1, "gross_pnl": 1, "fees": 1, "closed_at": 1, "closed_on": 1},
+    ):
+        closed_at = p.get("closed_at")
+        day = p.get("closed_on") or (closed_at.astimezone(IST).date().isoformat() if closed_at else None)
+        if not day:
+            continue
+        b = buckets.setdefault(day, {"date": day, "trades": 0, "wins": 0,
+                                     "realized_pnl": 0.0, "fees": 0.0, "gross_pnl": 0.0})
+        net = p.get("realized_pnl") or 0.0
+        fee = p.get("fees") or 0.0
+        b["trades"] += 1
+        b["wins"] += 1 if net > 0 else 0
+        b["realized_pnl"] += net
+        b["fees"] += fee
+        b["gross_pnl"] += p["gross_pnl"] if p.get("gross_pnl") is not None else net + fee
+    rows = sorted(buckets.values(), key=lambda r: r["date"], reverse=True)[:limit]
+    cap = INTRADAY_LAB_INITIAL_CAPITAL
+    for r in rows:
+        r["realized_pnl"] = round(r["realized_pnl"], 2)
+        r["fees"] = round(r["fees"], 2)
+        r["gross_pnl"] = round(r["gross_pnl"], 2)
+        r["win_rate"] = round(r["wins"] / r["trades"], 4) if r["trades"] else 0.0
+        r["roi_pct"] = round(r["realized_pnl"] / cap * 100, 4) if cap else 0.0
+    return rows
+
+
 async def summary() -> dict:
     deployed = 0.0
     async for p in intraday_lab_positions_collection.find({"status": "OPEN"}, {"capital_deployed": 1}):
         deployed += p.get("capital_deployed", 0.0)
-    realized = 0.0
-    async for p in intraday_lab_positions_collection.find({"status": {"$ne": "OPEN"}}, {"realized_pnl": 1}):
+    realized = fees = 0.0
+    async for p in intraday_lab_positions_collection.find(
+        {"status": {"$ne": "OPEN"}}, {"realized_pnl": 1, "fees": 1}
+    ):
         realized += p.get("realized_pnl") or 0.0
+        fees += p.get("fees") or 0.0
     unrealized = 0.0
     async for p in intraday_lab_positions_collection.find({"status": "OPEN"}, {"unrealized_pnl": 1}):
         unrealized += p.get("unrealized_pnl") or 0.0
@@ -576,8 +632,13 @@ async def summary() -> dict:
         "available_cash": round(INTRADAY_LAB_INITIAL_CAPITAL + realized - deployed, 2),
         "deployed_capital": round(deployed, 2),
         "realized_pnl": round(realized, 2),
+        "gross_realized_pnl": round(realized + fees, 2),
+        "total_fees": round(fees, 2),
         "unrealized_pnl": round(unrealized, 2),
         "equity": round(equity, 2),
+        # Return on the desk's own capital — the tile that was missing.
+        "roi_pct": round((equity - INTRADAY_LAB_INITIAL_CAPITAL) / INTRADAY_LAB_INITIAL_CAPITAL * 100, 3)
+        if INTRADAY_LAB_INITIAL_CAPITAL else 0.0,
         "open_positions": open_count,
         "closed_positions": closed_count,
         "strategy_count": len(STRATEGY_CATALOG),

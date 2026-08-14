@@ -22,9 +22,54 @@ import {
   fetchLiveIntradayPositions,
   fetchLiveIntradaySummary,
   fetchLiveIntradayTrades,
+  fetchLiveIntradayDaily,
+  fetchIntradayLabDaily,
+  type DailyRoi,
 } from "../../lib/api";
 
-type IntradayTab = "tournament" | "live";
+// The three live books are TABS rather than a dropdown because they are separate
+// accounts, not a filter: switching replaces every number on the page.
+type IntradayTab = "tournament" | "80k" | "30k" | "10k";
+const LIVE_BOOKS: { key: "80k" | "30k" | "10k"; capital: number }[] = [
+  { key: "80k", capital: 80000 },
+  { key: "30k", capital: 30000 },
+  { key: "10k", capital: 10000 },
+];
+
+// Signed, because a return of "0.42%" and "-0.42%" must not look alike at a glance.
+// Distinct from the file's existing `pct`, which formats an already-scaled percentage.
+const roiPct = (v: number | null | undefined, dp = 2) =>
+  `${(v ?? 0) >= 0 ? "+" : ""}${(v ?? 0).toFixed(dp)}%`;
+
+/** Realised P&L per session, net of Angel One costs, expressed against desk capital. */
+function DailyRoiPanel({ rows, capital }: { rows: DailyRoi[]; capital: number }) {
+  return (
+    <GlassPanel title={`Daily ROI — on ₹${capital.toLocaleString("en-IN")} desk capital`}>
+      {rows.length === 0 ? (
+        <div className="empty">No closed sessions yet.</div>
+      ) : (
+        <div className="table-scroll">
+          <table className="data-table">
+            <thead><tr><th style={{ textAlign: "left" }}>Date</th><th>Trades</th><th>Win %</th><th>Gross P&amp;L</th><th>Angel fees</th><th>Net P&amp;L</th><th>ROI</th></tr></thead>
+            <tbody>
+              {rows.map((d) => (
+                <tr key={d.date}>
+                  <td style={{ textAlign: "left" }}>{d.date}</td>
+                  <td>{d.trades}</td>
+                  <td>{(d.win_rate * 100).toFixed(1)}%</td>
+                  <td className={d.gross_pnl >= 0 ? "gain" : "loss"}>{d.gross_pnl >= 0 ? "+" : ""}₹{inr(d.gross_pnl)}</td>
+                  <td className="loss">−₹{inr(d.fees)}</td>
+                  <td className={d.realized_pnl >= 0 ? "gain" : "loss"}>{d.realized_pnl >= 0 ? "+" : ""}₹{inr(d.realized_pnl)}</td>
+                  <td className={d.roi_pct >= 0 ? "gain" : "loss"}>{roiPct(d.roi_pct, 3)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </GlassPanel>
+  );
+}
 
 const REFRESH_MS = 15000;
 
@@ -61,6 +106,11 @@ export default function IntradayStocksPage() {
   const [liveScores, setLiveScores] = useState<IntradayScore[]>([]);
   const [livePositions, setLivePositions] = useState<IntradayPosition[]>([]);
   const [liveTrades, setLiveTrades] = useState<IntradayTrade[]>([]);
+  const [liveDaily, setLiveDaily] = useState<DailyRoi[]>([]);
+  const [labDaily, setLabDaily] = useState<DailyRoi[]>([]);
+  const liveBook = tab === "tournament" ? "80k" : tab;
+  const isLive = tab !== "tournament";
+  const bookCapital = LIVE_BOOKS.find((b) => b.key === liveBook)?.capital ?? 80000;
 
   const load = useCallback(async () => {
     try {
@@ -76,6 +126,7 @@ export default function IntradayStocksPage() {
       setTrades(t);
       setEquity(e);
       setDays(d);
+      setLabDaily(await fetchIntradayLabDaily(60));
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load the intraday desk");
@@ -84,20 +135,22 @@ export default function IntradayStocksPage() {
 
   const loadLive = useCallback(async () => {
     try {
-      const [lb, pos, tr] = await Promise.all([
-        fetchLiveIntradayLeaderboard(),
-        fetchLiveIntradayPositions(),
-        fetchLiveIntradayTrades(100),
+      const [lb, pos, tr, dl] = await Promise.all([
+        fetchLiveIntradayLeaderboard(liveBook),
+        fetchLiveIntradayPositions(liveBook),
+        fetchLiveIntradayTrades(100, liveBook),
+        fetchLiveIntradayDaily(liveBook),
       ]);
       setLiveScores(lb);
       setLivePositions(pos.positions);
       setLiveSummary(pos.summary);
       setLiveTrades(tr);
+      setLiveDaily(dl);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load the Live Intraday desk");
     }
-  }, []);
+  }, [liveBook]);
 
   useEffect(() => {
     load();
@@ -106,7 +159,7 @@ export default function IntradayStocksPage() {
   }, [load]);
 
   useEffect(() => {
-    if (tab !== "live") return;
+    if (!isLive) return;
     loadLive();
     const id = setInterval(loadLive, REFRESH_MS);
     return () => clearInterval(id);
@@ -136,9 +189,15 @@ export default function IntradayStocksPage() {
         <button className={tab === "tournament" ? "tab active" : "tab"} onClick={() => setTab("tournament")}>
           Tournament · 150 strategies
         </button>
-        <button className={tab === "live" ? "tab active" : "tab"} onClick={() => setTab("live")}>
-          Live Intraday · ₹80k
-        </button>
+        {LIVE_BOOKS.map((b) => (
+          <button
+            key={b.key}
+            className={tab === b.key ? "tab active" : "tab"}
+            onClick={() => setTab(b.key)}
+          >
+            Live Intraday · ₹{b.key}
+          </button>
+        ))}
       </div>
 
       {error && <ErrorBanner message={error} />}
@@ -185,11 +244,23 @@ export default function IntradayStocksPage() {
           <div className="tile-sub">from ₹{inr(status?.initial_capital)} paper</div>
         </div>
         <div className="tile">
+          <div className="tile-label">ROI</div>
+          <div className={`tile-value ${(status?.roi_pct ?? 0) >= 0 ? "gain" : "loss"}`}>
+            {roiPct(status?.roi_pct, 2)}
+          </div>
+          <div className="tile-sub">on ₹{inr(status?.initial_capital)} desk capital</div>
+        </div>
+        <div className="tile">
           <div className="tile-label">Today P&amp;L</div>
           <div className={`tile-value ${todayPnl >= 0 ? "gain" : "loss"}`}>
             {todayPnl >= 0 ? "+" : ""}₹{inr(todayPnl)}
           </div>
-          <div className="tile-sub">{days[0]?.session ?? "no closes yet"}</div>
+          <div className="tile-sub">{roiPct(status?.today_roi_pct, 3)} today · {days[0]?.session ?? "no closes yet"}</div>
+        </div>
+        <div className="tile">
+          <div className="tile-label">Angel fees paid</div>
+          <div className="tile-value loss">−₹{inr(status?.total_fees)}</div>
+          <div className="tile-sub">gross ₹{inr(status?.gross_realized_pnl)} before costs</div>
         </div>
         <div className="tile">
           <div className="tile-label">Deployed capital</div>
@@ -307,36 +378,7 @@ export default function IntradayStocksPage() {
         )}
       </GlassPanel>
 
-      <GlassPanel title="Daily P&L history">
-        {!days.length ? (
-          <div className="empty">No sessions recorded yet.</div>
-        ) : (
-          <div className="table-scroll">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Session</th>
-                  <th>Net P&amp;L</th>
-                  <th>Trades closed</th>
-                  <th>Win %</th>
-                </tr>
-              </thead>
-              <tbody>
-                {days.map((d) => (
-                  <tr key={d.session}>
-                    <td>{d.session}</td>
-                    <td className={d.net_pnl >= 0 ? "gain" : "loss"}>
-                      {d.net_pnl >= 0 ? "+" : ""}₹{inr(d.net_pnl)}
-                    </td>
-                    <td>{d.trades}</td>
-                    <td>{pct(d.win_rate * 100, 1)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </GlassPanel>
+      <DailyRoiPanel rows={labDaily} capital={status?.initial_capital ?? 0} />
 
       <GlassPanel title="Recent paper trades">
         {!trades.length ? (
@@ -385,20 +427,25 @@ export default function IntradayStocksPage() {
       </>
       )}
 
-      {tab === "live" && (
+      {isLive && (
       <>
       <div className="desk-banner">
-        <strong>LIVE INTRADAY · ₹80,000 PAPER.</strong> The 8-strategy shortlist selected to take toward real money —
-        each on its own <strong>₹10,000</strong> account (₹80k total), trading on the live Angel One feed. Six are{" "}
-        <strong>ANTI</strong> strategies: this desk places the <em>real reverse trade</em> (opposite side, stop/target
-        swapped), not a computed mirror. Paper today; real-money wiring is the next step.
+        <strong>LIVE INTRADAY · ₹{bookCapital.toLocaleString("en-IN")} PAPER.</strong> The same 8-strategy
+        shortlist runs in three books that differ only in capital — ₹80k, ₹30k and ₹10k — each strategy on
+        ₹{inr(liveSummary?.per_strategy_allocation)} here. Six are <strong>ANTI</strong> strategies: this desk places
+        the <em>real reverse trade</em> (opposite side, stop/target swapped), not a computed mirror.{" "}
+        <strong>P&amp;L is net of real Angel One costs</strong> — brokerage, STT, exchange and SEBI charges, stamp
+        duty, GST, and a DP charge on delivery exits. On a book this small a signal must clear roughly
+        ₹50 a round trip before it earns anything, which is exactly what the smaller books are here to test.
       </div>
 
       <div className="tiles">
         <div className="tile"><div className="tile-label">Mode</div><div className="tile-value gain">PAPER</div><div className="tile-sub">{liveSummary?.paused ? "entries paused" : "armed · live Angel feed"}</div></div>
-        <div className="tile"><div className="tile-label">Equity</div><div className="tile-value">₹{inr(liveSummary?.equity)}</div><div className="tile-sub">from ₹{inr(liveSummary?.initial_capital)} (8 × ₹10k)</div></div>
-        <div className="tile"><div className="tile-label">Today P&amp;L</div><div className={`tile-value ${(liveSummary?.today_pnl ?? 0) >= 0 ? "gain" : "loss"}`}>{(liveSummary?.today_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(liveSummary?.today_pnl)}</div><div className="tile-sub">breaker at −₹{inr(liveSummary?.daily_loss_limit)}</div></div>
+        <div className="tile"><div className="tile-label">Equity</div><div className="tile-value">₹{inr(liveSummary?.equity)}</div><div className="tile-sub">from ₹{inr(liveSummary?.initial_capital)} ({liveSummary?.strategy_count ?? 8} × ₹{inr(liveSummary?.per_strategy_allocation)})</div></div>
+        <div className="tile"><div className="tile-label">ROI</div><div className={`tile-value ${(liveSummary?.roi_pct ?? 0) >= 0 ? "gain" : "loss"}`}>{roiPct(liveSummary?.roi_pct, 2)}</div><div className="tile-sub">on ₹{inr(liveSummary?.initial_capital)} desk capital</div></div>
+        <div className="tile"><div className="tile-label">Today P&amp;L</div><div className={`tile-value ${(liveSummary?.today_pnl ?? 0) >= 0 ? "gain" : "loss"}`}>{(liveSummary?.today_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(liveSummary?.today_pnl)}</div><div className="tile-sub">{roiPct(liveSummary?.today_roi_pct, 3)} today · breaker at −₹{inr(liveSummary?.daily_loss_limit)}</div></div>
         <div className="tile"><div className="tile-label">Realised P&amp;L</div><div className={`tile-value ${(liveSummary?.realized_pnl ?? 0) >= 0 ? "gain" : "loss"}`}>{(liveSummary?.realized_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(liveSummary?.realized_pnl)}</div><div className="tile-sub">{liveSummary?.closed_positions ?? 0} trades closed</div></div>
+        <div className="tile"><div className="tile-label">Angel fees paid</div><div className="tile-value loss">−₹{inr(liveSummary?.total_fees)}</div><div className="tile-sub">gross ₹{inr(liveSummary?.gross_realized_pnl)} before costs</div></div>
         <div className="tile"><div className="tile-label">Open positions</div><div className="tile-value">{liveSummary?.open_positions ?? 0}</div><div className="tile-sub">₹{inr(liveSummary?.unrealized_pnl)} unrealised</div></div>
         <div className="tile"><div className="tile-label">Deployed</div><div className="tile-value">₹{inr(liveSummary?.deployed_capital)}</div><div className="tile-sub">₹{inr(liveSummary?.available_cash)} free</div></div>
         <div className="tile"><div className="tile-label">Strategies</div><div className="tile-value">{liveSummary?.strategy_count ?? 0}</div><div className="tile-sub">₹{inr(liveSummary?.position_notional)} / position</div></div>
@@ -427,6 +474,8 @@ export default function IntradayStocksPage() {
           </div>
         )}
       </GlassPanel>
+
+      <DailyRoiPanel rows={liveDaily} capital={bookCapital} />
 
       <GlassPanel title={`Open positions (${liveSummary?.open_positions ?? 0})`}>
         {!livePositions.filter((p) => p.status === "OPEN").length ? (

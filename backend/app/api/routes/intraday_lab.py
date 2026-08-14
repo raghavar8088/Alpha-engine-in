@@ -29,6 +29,7 @@ from app.services.intraday_backtest import run_intraday_backtest
 from app.services.call_engine import IST
 from app.services.dhan_client import DhanClient
 from app.services.intraday_lab_engine import (
+    daily as lab_daily,
     PER_STRATEGY_ALLOCATION,
     STATE_ID,
     run_cycle,
@@ -124,6 +125,15 @@ async def leaderboard(current_user: dict = Depends(get_current_user)):
 @router.get("/summary")
 async def summary_endpoint(current_user: dict = Depends(get_current_user)):
     return await lab_summary()
+
+
+@router.get("/daily")
+async def daily_endpoint(
+    limit: int = Query(60, ge=1, le=365),
+    current_user: dict = Depends(get_current_user),
+):
+    """Realised P&L, Angel One costs and ROI for each trading day."""
+    return {"daily": await lab_daily(limit)}
 
 
 @router.post("/run")

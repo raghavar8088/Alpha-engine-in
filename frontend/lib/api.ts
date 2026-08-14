@@ -660,8 +660,12 @@ export interface IntradayDeskStatus {
   available_cash: number;
   deployed_capital: number;
   realized_pnl: number;
+  gross_realized_pnl: number;
+  total_fees: number;
   unrealized_pnl: number;
   equity: number;
+  roi_pct: number;
+  today_roi_pct: number;
   open_positions: number;
   closed_positions: number;
   strategy_count: number;
@@ -677,6 +681,9 @@ export interface IntradayDeskStatus {
 }
 
 export interface IntradayScore {
+  roi_pct?: number;
+  fees?: number;
+  gross_pnl?: number;
   strategy_id: string;
   name: string;
   category: string;
@@ -731,15 +738,34 @@ export async function fetchIntradayTrades(limit = 100): Promise<IntradayTrade[]>
 }
 
 // ---- Live Intraday desk (curated ₹80k shortlist inside Intraday Stocks) ----
+export type LiveIntradayBook = "80k" | "30k" | "10k";
+
+export interface DailyRoi {
+  date: string;
+  trades: number;
+  wins: number;
+  win_rate: number;
+  gross_pnl: number;
+  fees: number;
+  realized_pnl: number;
+  roi_pct: number;
+}
+
 export interface LiveIntradaySummary {
+  book: LiveIntradayBook;
+  books: LiveIntradayBook[];
   initial_capital: number;
   per_strategy_allocation: number;
   position_notional: number;
   available_cash: number;
   deployed_capital: number;
   realized_pnl: number;
+  gross_realized_pnl: number;
+  total_fees: number;
   unrealized_pnl: number;
   equity: number;
+  roi_pct: number;
+  today_roi_pct: number;
   open_positions: number;
   closed_positions: number;
   strategy_count: number;
@@ -753,19 +779,29 @@ export interface LiveIntradaySummary {
   angel_configured: boolean;
 }
 
-export async function fetchLiveIntradaySummary(): Promise<LiveIntradaySummary> {
-  return apiFetch("/api/live-intraday/summary");
+// Every Live Intraday call is scoped to one book. The books are separate accounts on
+// the same eight strategies, so an unscoped call would blend three desks into nonsense.
+export async function fetchLiveIntradaySummary(book: LiveIntradayBook = "80k"): Promise<LiveIntradaySummary> {
+  return apiFetch(`/api/live-intraday/summary?book=${book}`);
 }
-export async function fetchLiveIntradayLeaderboard(): Promise<IntradayScore[]> {
-  const r = await apiFetch("/api/live-intraday/leaderboard");
+export async function fetchLiveIntradayLeaderboard(book: LiveIntradayBook = "80k"): Promise<IntradayScore[]> {
+  const r = await apiFetch(`/api/live-intraday/leaderboard?book=${book}`);
   return r.leaderboard ?? [];
 }
-export async function fetchLiveIntradayPositions(): Promise<{ positions: IntradayPosition[]; summary: LiveIntradaySummary }> {
-  return apiFetch("/api/live-intraday/positions");
+export async function fetchLiveIntradayPositions(book: LiveIntradayBook = "80k"): Promise<{ positions: IntradayPosition[]; summary: LiveIntradaySummary }> {
+  return apiFetch(`/api/live-intraday/positions?book=${book}`);
 }
-export async function fetchLiveIntradayTrades(limit = 100): Promise<IntradayTrade[]> {
-  const r = await apiFetch(`/api/live-intraday/trades?limit=${limit}`);
+export async function fetchLiveIntradayTrades(limit = 100, book: LiveIntradayBook = "80k"): Promise<IntradayTrade[]> {
+  const r = await apiFetch(`/api/live-intraday/trades?limit=${limit}&book=${book}`);
   return r.trades ?? [];
+}
+export async function fetchLiveIntradayDaily(book: LiveIntradayBook = "80k", limit = 60): Promise<DailyRoi[]> {
+  const r = await apiFetch(`/api/live-intraday/daily?book=${book}&limit=${limit}`);
+  return r.daily ?? [];
+}
+export async function fetchIntradayLabDaily(limit = 60): Promise<DailyRoi[]> {
+  const r = await apiFetch(`/api/intraday-lab/daily?limit=${limit}`);
+  return r.daily ?? [];
 }
 
 // ---- Live Trading desk (REAL MONEY twin of Live Intraday; routes real Dhan orders) ----
