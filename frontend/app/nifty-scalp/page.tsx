@@ -30,6 +30,18 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "daily", label: "Daily ROI" },
 ];
 const TF_KEYS = ["1m", "5m", "10m", "15m", "30m", "1h", "4h", "1d"];
+// `chart_pattern` is the 13 geometric formations — head & shoulders, double/triple
+// tops, triangles, wedges, flags, pennants, cup & handle, rounding, diamond,
+// broadening. They are worth isolating because they work differently from the rest:
+// they read swing STRUCTURE, not the last candle.
+const FAMILIES = [
+  { key: "chart_pattern", label: "Chart patterns" },
+  { key: "pattern", label: "Candlesticks" },
+  { key: "trend", label: "Trend" },
+  { key: "momentum", label: "Momentum" },
+  { key: "mean_reversion", label: "Mean reversion" },
+  { key: "breakout", label: "Breakout" },
+];
 
 const inr = (v: number | null | undefined) =>
   (v ?? 0).toLocaleString("en-IN", { maximumFractionDigits: 0 });
@@ -42,6 +54,7 @@ const cls = (v: number | null | undefined) => ((v ?? 0) >= 0 ? "gain" : "loss");
 export default function NiftyScalpPage() {
   const [tab, setTab] = useState<Tab>("leaderboard");
   const [tf, setTf] = useState<string | null>(null);
+  const [fam, setFam] = useState<string | null>(null);
   const [summary, setSummary] = useState<NiftyScalpSummary | null>(null);
   const [board, setBoard] = useState<NiftyScalpScore[]>([]);
   const [frames, setFrames] = useState<NiftyScalpTimeframe[]>([]);
@@ -55,7 +68,7 @@ export default function NiftyScalpPage() {
     try {
       const [s, b, f, o, c, g, d] = await Promise.all([
         fetchNiftyScalpSummary(),
-        fetchNiftyScalpLeaderboard(tf ?? undefined),
+        fetchNiftyScalpLeaderboard(tf ?? undefined, fam ?? undefined),
         fetchNiftyScalpTimeframes(),
         fetchNiftyScalpPositions("OPEN", tf ?? undefined),
         fetchNiftyScalpPositions("CLOSED", tf ?? undefined),
@@ -68,7 +81,7 @@ export default function NiftyScalpPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load the NIFTY scalping desk");
     }
-  }, [tf]);
+  }, [tf, fam]);
 
   useEffect(() => {
     load();
@@ -81,7 +94,7 @@ export default function NiftyScalpPage() {
       <PageHeader
         crumb="NIFTY 50 Option Scalping"
         title="NIFTY 50 Option Scalping"
-        subtitle="A 400-strategy hunt for edges worth real money: 50 candle-and-indicator templates run on every timeframe from 1 minute to 1 day, each on its own ₹2,00,000. Signals are read off NIFTY spot candles and expressed by BUYING the near-expiry option nearest the money — a call when bullish, a put when bearish. Never sold, so the most any position can lose is the premium. Paper, on live Angel One prices, with real Angel One F&O costs charged on every close."
+        subtitle="A 504-strategy hunt for edges worth real money: 63 candle-and-indicator templates — including 13 classic geometric chart patterns — run on every timeframe from 1 minute to 1 day, each on its own ₹2,00,000. Signals are read off NIFTY spot candles and expressed by BUYING the near-expiry option nearest the money — a call when bullish, a put when bearish. Never sold, so the most any position can lose is the premium. Paper, on live Angel One prices, with real Angel One F&O costs charged on every close."
       />
 
       <div className="desk-banner">
@@ -98,7 +111,7 @@ export default function NiftyScalpPage() {
 
       <div className="tiles">
         <div className="tile"><div className="tile-label">Mode</div><div className="tile-value gain">PAPER</div><div className="tile-sub">{summary?.enabled ? "armed · live Angel feed" : "disabled"}</div></div>
-        <div className="tile"><div className="tile-label">Desk capital</div><div className="tile-value">₹{inr(summary?.initial_capital)}</div><div className="tile-sub">{summary?.strategy_count ?? 400} × ₹{inr(summary?.per_strategy_capital)}</div></div>
+        <div className="tile"><div className="tile-label">Desk capital</div><div className="tile-value">₹{inr(summary?.initial_capital)}</div><div className="tile-sub">{summary?.strategy_count ?? 504} × ₹{inr(summary?.per_strategy_capital)}</div></div>
         <div className="tile"><div className="tile-label">Equity</div><div className="tile-value">₹{inr(summary?.equity)}</div><div className="tile-sub">₹{inr(summary?.unrealized_pnl)} unrealised</div></div>
         <div className="tile"><div className="tile-label">ROI</div><div className={`tile-value ${cls(summary?.roi_pct)}`}>{roiPct(summary?.roi_pct, 3)}</div><div className="tile-sub">on ₹{inr(summary?.initial_capital)} desk capital</div></div>
         <div className="tile"><div className="tile-label">Today P&amp;L</div><div className={`tile-value ${cls(summary?.today_pnl)}`}>{(summary?.today_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(summary?.today_pnl)}</div><div className="tile-sub">{roiPct(summary?.today_roi_pct, 3)} today</div></div>
@@ -115,9 +128,17 @@ export default function NiftyScalpPage() {
 
       <div className="filters">
         <span className="flabel">Timeframe</span>
-        <button className={tf === null ? "chip active" : "chip"} onClick={() => setTf(null)}>All 400</button>
+        <button className={tf === null ? "chip active" : "chip"} onClick={() => setTf(null)}>All {summary?.strategy_count ?? 504}</button>
         {TF_KEYS.map((k) => (
           <button key={k} className={tf === k ? "chip active" : "chip"} onClick={() => setTf(k)}>{k}</button>
+        ))}
+      </div>
+
+      <div className="filters">
+        <span className="flabel">Family</span>
+        <button className={fam === null ? "chip active" : "chip"} onClick={() => setFam(null)}>All</button>
+        {FAMILIES.map((f) => (
+          <button key={f.key} className={fam === f.key ? "chip active" : "chip"} onClick={() => setFam(f.key)}>{f.label}</button>
         ))}
       </div>
 
@@ -130,7 +151,7 @@ export default function NiftyScalpPage() {
       </div>
 
       {tab === "leaderboard" && (
-        <GlassPanel title={`Strategy leaderboard${tf ? ` · ${tf}` : " · all 400"}`}>
+        <GlassPanel title={`Strategy leaderboard${tf ? ` · ${tf}` : ` · all ${summary?.strategy_count ?? 504}`}`}>
           <div className="table-scroll">
             <table className="data-table">
               <thead><tr><th style={{ textAlign: "left" }}>Strategy</th><th>TF</th><th>Style</th><th>Family</th><th>Trades</th><th>Win %</th><th>Gross</th><th>Fees</th><th>Net P&amp;L</th><th>ROI</th></tr></thead>
@@ -156,7 +177,7 @@ export default function NiftyScalpPage() {
       )}
 
       {tab === "timeframes" && (
-        <GlassPanel title="Which horizon is working — 50 strategies aggregated per candle">
+        <GlassPanel title="Which horizon is working — every strategy aggregated per candle">
           <div className="table-scroll">
             <table className="data-table">
               <thead><tr><th style={{ textAlign: "left" }}>Candle</th><th>Style</th><th>Strategies</th><th>Capital</th><th>Trades</th><th>Win %</th><th>Gross</th><th>Fees</th><th>Net P&amp;L</th><th>ROI</th></tr></thead>
@@ -245,7 +266,7 @@ export default function NiftyScalpPage() {
       )}
 
       {tab === "daily" && (
-        <GlassPanel title="Daily ROI — on ₹8,00,00,000 desk capital">
+        <GlassPanel title={`Daily ROI — on ₹${inr(summary?.initial_capital)} desk capital`}>
           {!daily.length ? <div className="empty">No closed sessions yet.</div> : (
             <div className="table-scroll">
               <table className="data-table">

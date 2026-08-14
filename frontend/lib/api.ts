@@ -3230,9 +3230,11 @@ export interface NiftyScalpSignal {
 export async function fetchNiftyScalpSummary(): Promise<NiftyScalpSummary> {
   return apiFetch("/api/nifty-scalp/summary");
 }
-export async function fetchNiftyScalpLeaderboard(timeframe?: string): Promise<NiftyScalpScore[]> {
-  const q = timeframe ? `?timeframe=${timeframe}` : "";
-  const r = await apiFetch(`/api/nifty-scalp/leaderboard${q}`);
+export async function fetchNiftyScalpLeaderboard(timeframe?: string, family?: string): Promise<NiftyScalpScore[]> {
+  const q = new URLSearchParams();
+  if (timeframe) q.set("timeframe", timeframe);
+  if (family) q.set("family", family);
+  const r = await apiFetch(`/api/nifty-scalp/leaderboard?${q.toString()}`);
   return r.leaderboard ?? [];
 }
 export async function fetchNiftyScalpTimeframes(): Promise<NiftyScalpTimeframe[]> {

@@ -6,8 +6,10 @@ short options anywhere on this desk, so the worst case on any position is the pr
 paid, which is what makes a Rs2 lakh per-strategy allocation a real ceiling rather than a
 margin estimate.
 
-THE GRID: 50 candle/indicator templates x 8 timeframes (1m, 5m, 10m, 15m, 30m, 1h, 4h,
-1d), each on its own Rs2,00,000 — Rs8 crore across the desk. Signals are read off NIFTY
+THE GRID: 63 candle/indicator templates x 8 timeframes (1m, 5m, 10m, 15m, 30m, 1h, 4h,
+1d), each on its own Rs2,00,000 — Rs10.08 crore across the desk. Fifty are bar-level
+rules; thirteen are the classic geometric chart patterns, which fire only once price
+closes through the shape's own boundary. Signals are read off NIFTY
 SPOT candles and expressed through options, because indicators computed on an option's own
 price are polluted by theta and IV; the index is the thing the rule is actually about.
 
@@ -47,6 +49,7 @@ from app.services.angel_fees import option_round_trip
 from app.services.call_engine import IST
 from app.services.nifty_scalp_strategies import (
     CATALOG,
+    TEMPLATES,
     CATALOG_BY_ID,
     TIMEFRAMES,
     TIMEFRAME_BY_KEY,
@@ -483,7 +486,7 @@ async def summary() -> dict:
     }
 
 
-async def leaderboard(timeframe: str | None = None, limit: int = 400) -> list[dict]:
+async def leaderboard(timeframe: str | None = None, limit: int = 1000) -> list[dict]:
     q = {"timeframe": timeframe} if timeframe else {}
     scores = {s["strategy_id"]: s async for s in nifty_scalp_scores_collection.find(q)}
     rows = []
@@ -510,8 +513,9 @@ async def timeframe_stats() -> list[dict]:
     out = []
     for tf in TIMEFRAMES:
         agg = {"timeframe": tf.key, "label": tf.label, "style": tf.style,
-               "strategies": 50, "trades": 0, "wins": 0, "net_pnl": 0.0, "fees": 0.0,
-               "gross_pnl": 0.0, "capital": PER_STRATEGY_CAPITAL * 50}
+               "strategies": len(TEMPLATES), "trades": 0, "wins": 0, "net_pnl": 0.0,
+               "fees": 0.0, "gross_pnl": 0.0,
+               "capital": PER_STRATEGY_CAPITAL * len(TEMPLATES)}
         async for s in nifty_scalp_scores_collection.find({"timeframe": tf.key}):
             agg["trades"] += s.get("trades", 0) or 0
             agg["wins"] += s.get("wins", 0) or 0

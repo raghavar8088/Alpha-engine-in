@@ -1,5 +1,6 @@
-"""NIFTY 50 Option Scalping API — 400 candle/indicator strategies (50 templates x 8
-timeframes) buying near-expiry ATM NIFTY options on Rs2,00,000 each.
+"""NIFTY 50 Option Scalping API — 504 candle/indicator strategies (63 templates x 8
+timeframes) buying near-expiry ATM NIFTY options on Rs2,00,000 each. Thirteen of the
+templates are geometric chart patterns, filterable via `family=chart_pattern`.
 
   GET  /api/nifty-scalp/summary      desk capital, ROI, costs, expiry in use
   GET  /api/nifty-scalp/leaderboard  every strategy ranked, filterable by timeframe
@@ -34,10 +35,14 @@ async def summary_endpoint(current_user: dict = Depends(get_current_user)):
 @router.get("/leaderboard")
 async def leaderboard_endpoint(
     timeframe: str | None = Query(None, description="1m|5m|10m|15m|30m|1h|4h|1d"),
-    limit: int = Query(400, ge=1, le=400),
+    family: str | None = Query(None, description="e.g. chart_pattern, trend, breakout"),
+    limit: int = Query(1000, ge=1, le=1000),
     current_user: dict = Depends(get_current_user),
 ):
-    return {"leaderboard": await ns_leaderboard(timeframe, limit)}
+    rows = await ns_leaderboard(timeframe, limit)
+    if family:
+        rows = [r for r in rows if r["family"] == family]
+    return {"leaderboard": rows}
 
 
 @router.get("/timeframes")

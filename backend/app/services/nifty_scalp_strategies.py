@@ -1,8 +1,18 @@
 """Strategy library for the NIFTY 50 Option Scalping desk.
 
-FIFTY templates, each one a rule over CANDLES and INDICATORS — no fundamental, news or
-sentiment inputs — instantiated on every timeframe from 1 minute to 1 day. 50 x 8 = 400
-strategies, each with its own Rs2,00,000 book.
+SIXTY-THREE templates, each one a rule over CANDLES and INDICATORS — no fundamental,
+news or sentiment inputs — instantiated on every timeframe from 1 minute to 1 day.
+63 x 8 = 504 strategies, each with its own Rs2,00,000 book.
+
+Fifty are single-bar or short-window rules that can be checked exactly on the last closed
+bar. THIRTEEN are the classic geometric chart patterns — head & shoulders, double and
+triple tops/bottoms, the three triangles, wedges, flags, pennants, cup & handle, rounding
+tops/bottoms, diamonds and broadening formations. Those are a different kind of rule: they
+are statements about the shape of the last several SWING POINTS, not about a candle, so
+they need pivot detection and trendline fitting first. Each also requires price to close
+through the pattern's own boundary before it fires — a shape that has not broken is not a
+signal, and firing on the shape alone is how these patterns earn their reputation for
+being imaginary.
 
 WHY THE SAME 50 ON EVERY TIMEFRAME: the point of this desk is to find which edges survive
 into real money, and an edge is a pairing of a RULE with a HORIZON. Running "EMA 9/21
@@ -245,6 +255,391 @@ def aroon(s: Series, n: int):
         up.append(100 * (len(w_h) - 1 - w_h.index(max(w_h))) / max(len(w_h) - 1, 1))
         dn.append(100 * (len(w_l) - 1 - w_l.index(min(w_l))) / max(len(w_l) - 1, 1))
     return [100 - x for x in up], [100 - x for x in dn]
+
+
+# ── swing structure, for the geometric chart patterns ──────────────────────────
+#
+# Everything below this line needs SWING POINTS, not bars. A head-and-shoulders is not a
+# statement about the last candle; it is a statement about the shape of the last several
+# turning points. So these first find pivots, then test the pivot sequence for a shape,
+# then require a BREAK of the pattern's own boundary before firing — a shape that has not
+# broken is not yet a signal, and firing on the shape alone is how these patterns get a
+# reputation for being imaginary.
+
+
+def pivots(s: Series, k: int) -> list[tuple[int, float, int]]:
+    """Fractal turning points as (bar index, price, +1 high | -1 low).
+
+    A bar is a pivot high when its high is the highest in the +/-k window around it. The
+    last k bars can never qualify — a turning point is only known once price has moved
+    away from it — which is what keeps this from repainting."""
+    out: list[tuple[int, float, int]] = []
+    for i in range(k, len(s) - k):
+        if s.h[i] == max(s.h[i - k:i + k + 1]):
+            out.append((i, s.h[i], 1))
+        elif s.l[i] == min(s.l[i - k:i + k + 1]):
+            out.append((i, s.l[i], -1))
+    return out
+
+
+def swings(s: Series, k: int) -> list[tuple[int, float, int]]:
+    """Pivots reduced to a strictly alternating high/low sequence.
+
+    Raw fractals often produce two highs in a row with no low between them; keeping only
+    the more extreme of each run is what makes "the last five swings" a meaningful phrase
+    for the pattern matchers."""
+    def build():
+        out: list[tuple[int, float, int]] = []
+        for p in pivots(s, k):
+            if out and out[-1][2] == p[2]:
+                better = p[1] > out[-1][1] if p[2] == 1 else p[1] < out[-1][1]
+                if better:
+                    out[-1] = p
+            else:
+                out.append(p)
+        return out
+    return s.cached(("swings", k), build)
+
+
+def _near(a: float, b: float, tol: float) -> bool:
+    return abs(a - b) <= tol * max(abs(a), abs(b), 1e-9)
+
+
+def _slope(pts: list[tuple[float, float]]) -> float:
+    """Least-squares slope, normalised by mean price so it is comparable across
+    timeframes and price levels."""
+    n = len(pts)
+    if n < 2:
+        return 0.0
+    mx = sum(p[0] for p in pts) / n
+    my = sum(p[1] for p in pts) / n
+    den = sum((p[0] - mx) ** 2 for p in pts)
+    if den == 0:
+        return 0.0
+    return (sum((p[0] - mx) * (p[1] - my) for p in pts) / den) / max(abs(my), 1e-9)
+
+
+def _quadfit(ys: list[float]):
+    """Fit y = a*x^2 + b*x + c over x = 0..n-1. Returns (a_normalised, vertex_position)
+    with vertex_position in 0..1 across the window.
+
+    A rounding bottom is a positive quadratic whose vertex sits near the middle; testing
+    that directly is more honest than eyeballing "looks like a U" with slope rules."""
+    n = len(ys)
+    if n < 5:
+        return 0.0, 0.5
+    sx = sx2 = sx3 = sx4 = sy = sxy = sx2y = 0.0
+    for x, y in enumerate(ys):
+        x2 = x * x
+        sx += x; sx2 += x2; sx3 += x2 * x; sx4 += x2 * x2
+        sy += y; sxy += x * y; sx2y += x2 * y
+    m = [[sx4, sx3, sx2, sx2y], [sx3, sx2, sx, sxy], [sx2, sx, float(n), sy]]
+    for col in range(3):                       # Gaussian elimination, 3x3
+        piv = max(range(col, 3), key=lambda r: abs(m[r][col]))
+        if abs(m[piv][col]) < 1e-12:
+            return 0.0, 0.5
+        m[col], m[piv] = m[piv], m[col]
+        for r in range(3):
+            if r == col:
+                continue
+            f = m[r][col] / m[col][col]
+            for c in range(col, 4):
+                m[r][c] -= f * m[col][c]
+    a = m[0][3] / m[0][0]
+    b = m[1][3] / m[1][1]
+    if abs(a) < 1e-12:
+        return 0.0, 0.5
+    vertex = (-b / (2 * a)) / max(n - 1, 1)
+    mean = sy / n
+    return a * (n ** 2) / max(abs(mean), 1e-9), vertex
+
+
+def _broke_up(s: Series, level: float) -> bool:
+    return len(s) > 1 and s.c[-1] > level and s.c[-2] <= level
+
+
+def _broke_dn(s: Series, level: float) -> bool:
+    return len(s) > 1 and s.c[-1] < level and s.c[-2] >= level
+
+
+# ── the geometric patterns ─────────────────────────────────────────────────────
+
+
+def t_head_shoulders(s, p):
+    """Head & shoulders / inverse: five swings, a dominant middle, matched shoulders,
+    and a close through the neckline."""
+    w = swings(s, p["pivot"])
+    if len(w) < 5:
+        return 0
+    a, b, c, d, e = w[-5:]
+    kinds = [x[2] for x in (a, b, c, d, e)]
+    neck = (b[1] + d[1]) / 2
+    if kinds == [1, -1, 1, -1, 1]:
+        if c[1] > a[1] and c[1] > e[1] and _near(a[1], e[1], 0.03) and _near(b[1], d[1], 0.03):
+            return -1 if _broke_dn(s, neck) else 0
+    if kinds == [-1, 1, -1, 1, -1]:
+        if c[1] < a[1] and c[1] < e[1] and _near(a[1], e[1], 0.03) and _near(b[1], d[1], 0.03):
+            return 1 if _broke_up(s, neck) else 0
+    return 0
+
+
+def t_double_top_bottom(s, p):
+    """Two matched extremes either side of a single counter-swing, then a break of it."""
+    w = swings(s, p["pivot"])
+    if len(w) < 3:
+        return 0
+    a, b, c = w[-3:]
+    if not _near(a[1], c[1], 0.015):
+        return 0
+    if a[2] == 1 and b[2] == -1:
+        return -1 if _broke_dn(s, b[1]) else 0
+    if a[2] == -1 and b[2] == 1:
+        return 1 if _broke_up(s, b[1]) else 0
+    return 0
+
+
+def t_triple_top_bottom(s, p):
+    """Three matched extremes — unlike head & shoulders, the middle one is NOT dominant,
+    which is the whole distinction between the two shapes."""
+    w = swings(s, p["pivot"])
+    if len(w) < 5:
+        return 0
+    a, b, c, d, e = w[-5:]
+    kinds = [x[2] for x in (a, b, c, d, e)]
+    if kinds == [1, -1, 1, -1, 1] and _near(a[1], c[1], 0.02) and _near(c[1], e[1], 0.02):
+        return -1 if _broke_dn(s, min(b[1], d[1])) else 0
+    if kinds == [-1, 1, -1, 1, -1] and _near(a[1], c[1], 0.02) and _near(c[1], e[1], 0.02):
+        return 1 if _broke_up(s, max(b[1], d[1])) else 0
+    return 0
+
+
+def _tri_lines(s, p, need=2):
+    """Recent highs and lows as (index, price) lists, for trendline fitting."""
+    w = swings(s, p["pivot"])
+    hi = [(x[0], x[1]) for x in w if x[2] == 1][-3:]
+    lo = [(x[0], x[1]) for x in w if x[2] == -1][-3:]
+    if len(hi) < need or len(lo) < need:
+        return None, None
+    return hi, lo
+
+
+FLAT = 0.0004   # a trendline this shallow counts as horizontal
+
+
+def t_ascending_triangle(s, p):
+    """Flat resistance, rising support — bullish on a close through the resistance."""
+    hi, lo = _tri_lines(s, p)
+    if hi is None:
+        return 0
+    if abs(_slope(hi)) < FLAT and _slope(lo) > FLAT:
+        return 1 if _broke_up(s, max(h[1] for h in hi)) else 0
+    return 0
+
+
+def t_descending_triangle(s, p):
+    hi, lo = _tri_lines(s, p)
+    if hi is None:
+        return 0
+    if abs(_slope(lo)) < FLAT and _slope(hi) < -FLAT:
+        return -1 if _broke_dn(s, min(l[1] for l in lo)) else 0
+    return 0
+
+
+def t_symmetrical_triangle(s, p):
+    """Both boundaries converging. Direction is taken from the break, not guessed."""
+    hi, lo = _tri_lines(s, p)
+    if hi is None:
+        return 0
+    if _slope(hi) < -FLAT and _slope(lo) > FLAT:
+        if _broke_up(s, max(h[1] for h in hi)):
+            return 1
+        if _broke_dn(s, min(l[1] for l in lo)):
+            return -1
+    return 0
+
+
+def t_wedge(s, p):
+    """Rising wedge (both lines up, converging) breaks DOWN; falling wedge breaks UP.
+    A wedge points the opposite way to its slope, which is what separates it from a
+    trend channel."""
+    hi, lo = _tri_lines(s, p)
+    if hi is None:
+        return 0
+    sh, sl = _slope(hi), _slope(lo)
+    if sh > FLAT and sl > FLAT and sl > sh:              # rising, converging
+        return -1 if _broke_dn(s, min(l[1] for l in lo)) else 0
+    if sh < -FLAT and sl < -FLAT and sh > sl:            # falling, converging
+        return 1 if _broke_up(s, max(h[1] for h in hi)) else 0
+    return 0
+
+
+# A pole must be a move the market does not make by drifting. Over an n-bar window a
+# random walk covers roughly sqrt(n) x ATR, so a 3x-ATR gate is about a one-sigma move —
+# it lets ordinary noise through and then the range test rejects everything, which is how
+# the flag and pennant templates managed to never fire once in 3,200 evaluations. 4x ATR
+# is a genuine thrust, and the consolidation is then measured RELATIVE to it.
+POLE_ATR_MULT = 4.0
+# The consolidation may be as wide as the pole itself but no wider; what makes it a flag
+# is that the thrust stopped, not that the range collapsed to nothing.
+FLAG_RANGE_FRAC = 1.0
+
+
+def _pole(s, p):
+    """(direction, size) of the impulse leading into the current consolidation."""
+    n, m = p["pole"], p["flag"]
+    if len(s) < n + m + 2:
+        return 0, 0.0
+    start, end = s.c[-(n + m)], s.c[-m]
+    move = (end - start) / max(abs(start), 1e-9)
+    a = atr(s, 14)[-1] / max(s.c[-1], 1e-9)
+    if abs(move) < POLE_ATR_MULT * a:
+        return 0, 0.0
+    return (1 if move > 0 else -1), abs(move)
+
+
+def t_flag(s, p):
+    """Sharp pole, then a shallow counter-drift in a tight range, then continuation."""
+    d, size = _pole(s, p)
+    if not d:
+        return 0
+    m = p["flag"]
+    # The consolidation is measured on bars BEFORE the current one. Including the current
+    # bar puts its own high into the level it must exceed, so `close > max(...)` can never
+    # be true and the template silently never fires — which is exactly what a 3,200-bar
+    # sweep caught here. Any breakout level must be built from history only.
+    seg_h, seg_l = max(s.h[-(m + 1):-1]), min(s.l[-(m + 1):-1])
+    if (seg_h - seg_l) / max(s.c[-1], 1e-9) > FLAG_RANGE_FRAC * size:
+        return 0                                        # too loose to be a flag
+    if d > 0 and _broke_up(s, seg_h):
+        return 1
+    if d < 0 and _broke_dn(s, seg_l):
+        return -1
+    return 0
+
+
+def t_pennant(s, p):
+    """Pole, then a small SYMMETRICAL convergence — a flag whose range narrows."""
+    d, _ = _pole(s, p)
+    if not d:
+        return 0
+    m = p["flag"]
+    if m < 6:
+        return 0
+    half = m // 2
+    early = max(s.h[-(m + 1):-half - 1]) - min(s.l[-(m + 1):-half - 1])
+    late_h, late_l = max(s.h[-(half + 1):-1]), min(s.l[-(half + 1):-1])
+    if (late_h - late_l) >= early * 0.7:
+        return 0                                        # not converging
+    if d > 0 and _broke_up(s, late_h):
+        return 1
+    if d < 0 and _broke_dn(s, late_l):
+        return -1
+    return 0
+
+
+def _rounded(win: list[float], bullish: bool, floor_depth: float) -> bool:
+    """Is this window a U (or an upside-down U) rather than a V or a straight line?
+
+    Three things have to hold, and none of them alone is enough: the quadratic must curve
+    the right way, the move must be deep enough to be a pattern rather than noise, and the
+    base must be FLAT — a V-bottom and a U-bottom both put their extreme in the middle,
+    and only the width of the base distinguishes them. Basing the depth test on ATR
+    instead of a fixed percentage is what makes the same rule work on 1-minute and daily
+    candles."""
+    a, vx = _quadfit(win)
+    if not (0.3 <= vx <= 0.7):
+        return False
+    if (a <= 0) if bullish else (a >= 0):
+        return False
+    extreme = min(win) if bullish else max(win)
+    rim = max(win[0], win[-1]) if bullish else min(win[0], win[-1])
+    depth = abs(rim - extreme)
+    if depth < floor_depth:
+        return False
+    # a genuine base spends time near the extreme; a V touches it once
+    near_base = sum(1 for y in win if abs(y - extreme) < 0.35 * depth)
+    return near_base >= max(4, len(win) // 5)
+
+
+def t_cup_handle(s, p):
+    """Rounded base with matched rims, a shallow handle, then a break of the rim.
+
+    The roundness test is a quadratic fit: a V-bottom and a U-bottom both have a low in
+    the middle, and only the curvature tells them apart."""
+    n = p["cup"]
+    h = max(4, n // 6)
+    if len(s) < n + h + 2:
+        return 0
+    cup = s.c[-(n + h):-h]
+    left, right = cup[0], cup[-1]
+    if not _near(left, right, 0.05):
+        return 0
+    floor_depth = 2.0 * atr(s, 14)[-1]
+    handle_hi, handle_lo = max(s.h[-h:]), min(s.l[-h:])
+    if _rounded(cup, True, floor_depth):
+        rim = max(left, right)
+        if (handle_hi - handle_lo) < 0.6 * abs(rim - min(cup)) and _broke_up(s, rim):
+            return 1
+    if _rounded(cup, False, floor_depth):
+        rim = min(left, right)
+        if (handle_hi - handle_lo) < 0.6 * abs(max(cup) - rim) and _broke_dn(s, rim):
+            return -1
+    return 0
+
+
+def t_rounding(s, p):
+    """Rounding bottom / top with no handle: curvature plus a centred vertex, then a
+    close through the rim."""
+    n = p["cup"]
+    if len(s) < n + 2:
+        return 0
+    win = s.c[-(n + 1):-1]          # rim from history; the last bar is the break
+    # A saucer has LEVEL rims, and "level" has to be judged against the pattern's own
+    # DEPTH rather than against price. A 6%-of-price tolerance sounds strict but is ~1440
+    # NIFTY points, wider than the whole window — it excluded nothing. Depth-relative is
+    # both the real definition and the only version that scales across timeframes.
+    depth = max(win) - min(win)
+    if depth <= 0 or abs(win[0] - win[-1]) > 0.35 * depth:
+        return 0
+    floor_depth = 2.0 * atr(s, 14)[-1]
+    if _rounded(win, True, floor_depth) and _broke_up(s, max(win[0], win[-1])):
+        return 1
+    if _rounded(win, False, floor_depth) and _broke_dn(s, min(win[0], win[-1])):
+        return -1
+    return 0
+
+
+def t_diamond(s, p):
+    """Broadening then narrowing — range expands in the first half of the window and
+    contracts in the second. Direction comes from the break."""
+    n = p["cup"]
+    if len(s) < n + 2 or n < 12:
+        return 0
+    t = n // 3
+    r1 = max(s.h[-n:-2 * t]) - min(s.l[-n:-2 * t])
+    r2 = max(s.h[-2 * t:-t]) - min(s.l[-2 * t:-t])
+    r3 = max(s.h[-t:]) - min(s.l[-t:])
+    if not (r2 > r1 * 1.2 and r3 < r2 * 0.8):
+        return 0
+    if _broke_up(s, max(s.h[-t:-1])):
+        return 1
+    if _broke_dn(s, min(s.l[-t:-1])):
+        return -1
+    return 0
+
+
+def t_broadening(s, p):
+    """Higher highs AND lower lows — a megaphone. Widening, so the break is taken
+    against the last expansion."""
+    hi, lo = _tri_lines(s, p, need=3)
+    if hi is None:
+        return 0
+    if _slope(hi) > FLAT and _slope(lo) < -FLAT:
+        if _broke_up(s, hi[-1][1]):
+            return 1
+        if _broke_dn(s, lo[-1][1]):
+            return -1
+    return 0
 
 
 def _x_up(a: list[float], b: list[float]) -> bool:
@@ -757,8 +1152,21 @@ TEMPLATES: list[tuple[str, str, Callable]] = [
     ("Fibonacci 61.8% Bounce", "mean_reversion", t_fib_retrace),
     ("Gap Fade", "mean_reversion", t_gap_fade),
     ("VWAP Reclaim", "momentum", t_vwap_reclaim),
+    ("Head & Shoulders", "chart_pattern", t_head_shoulders),
+    ("Double Top / Bottom", "chart_pattern", t_double_top_bottom),
+    ("Triple Top / Bottom", "chart_pattern", t_triple_top_bottom),
+    ("Ascending Triangle", "chart_pattern", t_ascending_triangle),
+    ("Descending Triangle", "chart_pattern", t_descending_triangle),
+    ("Symmetrical Triangle", "chart_pattern", t_symmetrical_triangle),
+    ("Rising / Falling Wedge", "chart_pattern", t_wedge),
+    ("Bull / Bear Flag", "chart_pattern", t_flag),
+    ("Pennant", "chart_pattern", t_pennant),
+    ("Cup & Handle", "chart_pattern", t_cup_handle),
+    ("Rounding Top / Bottom", "chart_pattern", t_rounding),
+    ("Diamond", "chart_pattern", t_diamond),
+    ("Broadening Formation", "chart_pattern", t_broadening),
 ]
-assert len(TEMPLATES) == 50, f"expected 50 templates, got {len(TEMPLATES)}"
+assert len(TEMPLATES) == 63, f"expected 63 templates, got {len(TEMPLATES)}"
 
 
 # ── timeframes ─────────────────────────────────────────────────────────────────
@@ -784,29 +1192,34 @@ class Timeframe:
     profile: dict
 
 
-def _profile(fast, mid, slow, trend, orb, session):
+def _profile(fast, mid, slow, trend, orb, session, pivot=3, pole=10, flag=8, cup=40):
+    """`pivot` is the fractal half-width that defines a swing point, and `cup`/`pole`/
+    `flag` are the windows the geometric patterns measure over. They scale with the
+    timeframe for the same reason the moving averages do: a 40-bar cup is half a session
+    on 5-minute candles and two months on daily ones."""
     return {"fast": fast, "mid": mid, "slow": slow, "trend": trend,
-            "rsi": 14, "orb": orb, "session": session}
+            "rsi": 14, "orb": orb, "session": session,
+            "pivot": pivot, "pole": pole, "flag": flag, "cup": cup}
 
 
 TIMEFRAMES: list[Timeframe] = [
     Timeframe("1m", "1 minute", "1", 1, "scalping", 5, 25, 15, 15,
-              _profile(5, 9, 21, 50, 5, 375)),
+              _profile(5, 9, 21, 50, 5, 375, pivot=6, pole=20, flag=15, cup=90)),
     Timeframe("5m", "5 minutes", "5", 1, "scalping", 15, 30, 18, 12,
-              _profile(5, 9, 21, 50, 3, 75)),
+              _profile(5, 9, 21, 50, 3, 75, pivot=5, pole=15, flag=12, cup=70)),
     Timeframe("10m", "10 minutes", "10", 1, "intraday", 30, 35, 20, 10,
-              _profile(5, 10, 20, 50, 3, 38)),
+              _profile(5, 10, 20, 50, 3, 38, pivot=4, pole=12, flag=10, cup=55)),
     Timeframe("15m", "15 minutes", "15", 1, "intraday", 45, 40, 22, 8,
-              _profile(5, 10, 20, 50, 2, 25)),
+              _profile(5, 10, 20, 50, 2, 25, pivot=4, pole=10, flag=8, cup=45)),
     Timeframe("30m", "30 minutes", "30", 1, "intraday", 90, 45, 25, 6,
-              _profile(5, 9, 21, 50, 2, 13)),
+              _profile(5, 9, 21, 50, 2, 13, pivot=3, pole=10, flag=8, cup=40)),
     Timeframe("1h", "1 hour", "60", 1, "intraday", 180, 50, 28, 5,
-              _profile(5, 9, 21, 50, 1, 7)),
+              _profile(5, 9, 21, 50, 1, 7, pivot=3, pole=8, flag=6, cup=35)),
     # Angel has no 4-hour interval; these bars are aggregated from 1-hour candles.
     Timeframe("4h", "4 hours", "60", 4, "swing", 365, 60, 32, 4,
-              _profile(3, 6, 12, 30, 1, 2)),
+              _profile(3, 6, 12, 30, 1, 2, pivot=2, pole=6, flag=5, cup=25)),
     Timeframe("1d", "1 day", "D", 1, "swing", 900, 70, 35, 5,
-              _profile(5, 10, 20, 50, 1, 1)),
+              _profile(5, 10, 20, 50, 1, 1, pivot=3, pole=8, flag=6, cup=35)),
 ]
 TIMEFRAME_BY_KEY = {t.key: t for t in TIMEFRAMES}
 
