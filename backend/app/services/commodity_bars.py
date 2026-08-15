@@ -28,7 +28,11 @@ import os
 import time
 from datetime import date, datetime, timedelta, timezone
 
-from app.core.db import commodity_bars_collection, instruments_collection
+from app.core.db import (
+    commodity_bars_collection,
+    commodity_state_collection,
+    instruments_collection,
+)
 from app.services.angel_client import AngelAPIError, angel_client
 
 logger = logging.getLogger("commodity_bars")
@@ -66,12 +70,13 @@ KEEP_BARS = {"1m": 3000, "5m": 1500, "15m": 1200, "1h": 900, "1d": 600}
 
 # Pacing for the candle endpoint. Measured: 8 unpaced calls -> 5 x 403. This is the one
 # knob that decides whether the poller works at all, so it is deliberately conservative.
-CANDLE_MIN_INTERVAL_S = float(os.getenv("COMMODITY_CANDLE_INTERVAL_S", "1.5"))
-CANDLE_MAX_RETRIES = int(os.getenv("COMMODITY_CANDLE_RETRIES", "3"))
-CANDLE_BACKOFF_S = float(os.getenv("COMMODITY_CANDLE_BACKOFF_S", "4.0"))
+CANDLE_MIN_INTERVAL_S = float(os.getenv("COMMODITY_CANDLE_INTERVAL_S", "3.0"))
+CANDLE_MAX_RETRIES = int(os.getenv("COMMODITY_CANDLE_RETRIES", "4"))
+CANDLE_BACKOFF_S = float(os.getenv("COMMODITY_CANDLE_BACKOFF_S", "6.0"))
 
 _last_call_at = 0.0
 _call_lock = asyncio.Lock()
+_LAST_ERRORS: dict[str, str] = {}
 
 
 class Bar:
@@ -176,7 +181,9 @@ async def refresh_symbol(symbol: str, inst: dict) -> dict:
         except Exception as exc:  # noqa: BLE001
             logger.warning("[commodity_bars] %s %s fetch failed: %s", symbol, tf, exc)
             result[tf] = -1
+            _LAST_ERRORS[f"{symbol}/{tf}"] = str(exc)[:160]
             continue
+        _LAST_ERRORS.pop(f"{symbol}/{tf}", None)
         bars = _parse(rows)[-KEEP_BARS[tf]:]
         if not bars:
             result[tf] = 0
@@ -211,10 +218,19 @@ async def refresh_all() -> dict:
     for symbol, inst in universe.items():
         detail[symbol] = await refresh_symbol(symbol, inst)
     failed = sum(1 for tfs in detail.values() for v in tfs.values() if v < 0)
-    return {
+    outcome = {
         "symbols": len(universe), "seconds": round(time.monotonic() - started, 1),
         "failed_fetches": failed, "detail": detail,
+        "errors": dict(_LAST_ERRORS),
+        "finished_at": datetime.now(timezone.utc),
+        "pacing_seconds": CANDLE_MIN_INTERVAL_S,
     }
+    # Written to state because the module logger does not reach uvicorn's handlers in this
+    # image: a throttled refresh was leaving four symbols empty with nothing anywhere to
+    # say so. The API is now the place that tells you.
+    await commodity_state_collection.update_one(
+        {"_id": "commodity_bars"}, {"$set": outcome}, upsert=True)
+    return outcome
 
 
 def _session_open(ts: datetime) -> datetime:
@@ -290,7 +306,12 @@ async def coverage() -> dict:
             iso = (ts if ts.tzinfo else ts.replace(tzinfo=timezone.utc)).astimezone(IST).isoformat()
             if s not in latest or (latest[s] or "") < iso:
                 latest[s] = iso
+    last = await commodity_state_collection.find_one({"_id": "commodity_bars"}) or {}
+    last.pop("_id", None)
+    if last.get("finished_at") is not None:
+        last["finished_at"] = last["finished_at"].isoformat()
     return {
+        "last_refresh": last,
         "symbols": sorted(rows),
         "native_timeframes": sorted(NATIVE_TIMEFRAMES),
         "derived_timeframes": sorted(DERIVED_FROM),
