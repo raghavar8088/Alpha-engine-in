@@ -20,6 +20,8 @@ ORDER_PATH = "/rest/secure/angelbroking/order/v1/placeOrder"  # SmartAPI order p
 RMS_PATH = "/rest/secure/angelbroking/user/v1/getRMS"          # funds / margin limits
 PROFILE_PATH = "/rest/secure/angelbroking/user/v1/getProfile"  # account identity
 POSITION_PATH = "/rest/secure/angelbroking/order/v1/getPosition"
+TRADEBOOK_PATH = "/rest/secure/angelbroking/order/v1/getTradeBook"   # executed fills
+ORDERBOOK_PATH = "/rest/secure/angelbroking/order/v1/getOrderBook"   # order status
 HOLDING_PATH = "/rest/secure/angelbroking/portfolio/v1/getHolding"
 
 # Angel caps a quote request at 50 tokens; chunk anything larger.

@@ -18,10 +18,12 @@ from .auth import (
     HOLDING_PATH,
     LOGIN_PATH,
     ORDER_PATH,
+    ORDERBOOK_PATH,
     POSITION_PATH,
     PROFILE_PATH,
     QUOTE_PATH,
     RMS_PATH,
+    TRADEBOOK_PATH,
     SESSION_REFRESH_MARGIN_SECONDS,
     AngelAPIError,
     batches,
@@ -156,6 +158,19 @@ class AngelClient:
     async def holdings(self) -> list[dict]:
         """Delivery holdings (CNC), not intraday positions."""
         return (await self._get(HOLDING_PATH)).get("data") or []
+
+    async def trade_book(self) -> list[dict]:
+        """Today's EXECUTED fills, one row per trade.
+
+        This is the only place the real fill price exists. A market order's fill is not
+        the price the signal was computed at — between the two sit the spread and whatever
+        moved while the order travelled — so any desk that records the signal price is
+        reporting a number the broker never charged."""
+        return (await self._get(TRADEBOOK_PATH)).get("data") or []
+
+    async def order_book(self) -> list[dict]:
+        """Today's orders with their status (complete / rejected / pending)."""
+        return (await self._get(ORDERBOOK_PATH)).get("data") or []
 
     async def place_order(
         self,

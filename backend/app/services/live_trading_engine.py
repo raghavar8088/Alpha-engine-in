@@ -25,6 +25,8 @@ contact with a real broker for shorts, so this desk is honest about being same-d
 """
 
 import logging
+import os
+import time
 from datetime import datetime, timezone
 from uuid import uuid4
 
@@ -188,7 +190,17 @@ async def _realized_pnl(strategy_id: str) -> float:
 
 
 async def _available_cash(strategy_id: str) -> float:
-    return PER_STRATEGY_ALLOCATION + await _realized_pnl(strategy_id) - await _deployed_capital(strategy_id)
+    """The tighter of this strategy's own slice and the cash Angel says exists.
+
+    Both limits are real: the per-strategy allocation is the user's risk decision, and the
+    Angel balance is a fact. Sizing off the allocation alone would place orders the
+    account cannot fund, which Angel rejects — and enough rejections auto-disarm the
+    desk."""
+    slice_left = PER_STRATEGY_ALLOCATION + await _realized_pnl(strategy_id) - await _deployed_capital(strategy_id)
+    bal = await account_balance()
+    if not bal["ok"]:
+        return 0.0
+    return max(0.0, min(slice_left, bal["available"]))
 
 
 async def today_pnl() -> float:
@@ -205,14 +217,65 @@ async def today_pnl() -> float:
     return total
 
 
+# ── the real account, not a constant ──────────────────────────────────────────
+#
+# This desk spends ACTUAL money, so the two numbers that decide whether it may keep
+# trading — how much cash exists, and how large a loss trips the breaker — have to come
+# from Angel rather than from INITIAL_CAPITAL. A static Rs80,000 breaker on an account
+# holding Rs10,300 is not a safety limit; it would let the account be emptied without
+# ever tripping. Cached briefly because it is read several times per cycle and the
+# balance does not move between those reads.
+
+_BALANCE_TTL = float(os.getenv("LIVE_TRADING_BALANCE_TTL", "60"))
+_balance_cache: dict = {"at": 0.0, "data": None}
+
+
+async def account_balance(force: bool = False) -> dict:
+    """Live Angel RMS funds. `available` is spendable cash; `net` is the account value.
+
+    On failure this returns `ok: False` with zero cash rather than falling back to a
+    made-up figure — the desk then refuses to open, which is the correct behaviour when
+    it cannot confirm the money is there."""
+    now = time.time()
+    cached = _balance_cache["data"]
+    if not force and cached and now - _balance_cache["at"] < _BALANCE_TTL:
+        return cached
+    try:
+        f = await angel_client.funds()
+        data = {
+            "ok": True,
+            "available": float(f.get("availablecash") or 0.0),
+            "net": float(f.get("net") or 0.0),
+            "utilised": float(f.get("utiliseddebits") or 0.0),
+            "m2m_realized": float(f.get("m2mrealized") or 0.0),
+            "m2m_unrealized": float(f.get("m2munrealized") or 0.0),
+            "fetched_at": _now().isoformat(),
+        }
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("[live_trading] could not read Angel balance: %s", exc)
+        data = {"ok": False, "available": 0.0, "net": 0.0, "utilised": 0.0,
+                "m2m_realized": 0.0, "m2m_unrealized": 0.0,
+                "error": str(exc)[:160], "fetched_at": _now().isoformat()}
+    _balance_cache.update({"at": now, "data": data})
+    return data
+
+
 async def breaker_state() -> dict:
+    """Daily-loss breaker scaled to the REAL account value, falling back to the configured
+    desk size only when Angel cannot be reached — and in that case the desk is not opening
+    anything anyway."""
     pnl = await today_pnl()
-    limit = DAILY_LOSS_BREAKER_PCT * INITIAL_CAPITAL
+    bal = await account_balance()
+    base = bal["net"] if bal["ok"] and bal["net"] > 0 else INITIAL_CAPITAL
+    limit = DAILY_LOSS_BREAKER_PCT * base
     return {
         "breaker_tripped": pnl <= -limit,
         "today_pnl": round(pnl, 2),
         "daily_loss_limit": round(limit, 2),
         "daily_loss_pct": DAILY_LOSS_BREAKER_PCT,
+        "breaker_basis": round(base, 2),
+        "breaker_basis_source": "angel_net" if (bal["ok"] and bal["net"] > 0) else "configured",
+        "angel_balance": bal,
     }
 
 
@@ -310,6 +373,10 @@ async def _open_position(ls, symbol: str, inst: dict, signal, ltp_source: str) -
             "angel_tradingsymbol": inst.get("angel_tradingsymbol"),
         },
         "side": signal.side, "entry_price": round(signal.entry, 2), "qty": qty,
+        # `entry_price` is provisional until reconcile_fills() replaces it with the real
+        # fill; `signal_price` preserves what the strategy actually asked for.
+        "signal_price": round(signal.entry, 2),
+        "entry_fill_price": None, "exit_fill_price": None, "entry_slippage": None,
         "capital_deployed": round(signal.entry * qty, 2),
         "target": round(signal.target, 2), "stoploss": round(signal.stoploss, 2),
         "ltp": round(signal.entry, 2), "ltp_source": ltp_source,
@@ -691,7 +758,109 @@ async def open_positions() -> list[dict]:
 # ── the tick ─────────────────────────────────────────────────────────────────────
 
 
+async def reconcile_fills() -> dict:
+    """Replace recorded signal prices with the prices Angel actually filled at.
+
+    A market order does not fill at the price the signal was computed from — the spread
+    and whatever moved in between sit between the two — so a desk that records the signal
+    price reports P&L the broker never charged. Measured on this desk: a session recorded
+    as -Rs210 was really -Rs36.52.
+
+    `signal_price` keeps what the strategy asked for, so the slippage stays visible as its
+    own number; `entry_price` becomes the truth, and every downstream P&L figure follows
+    from it. One trade-book call per cycle covers every position.
+    """
+    # Angel's trade book covers TODAY ONLY. A position opened on an earlier session can
+    # never be reconciled from it, so those are marked once and skipped rather than
+    # re-queried every cycle forever — and marked rather than silently left looking
+    # reconciled, because their entry price is still the signal price and their P&L is
+    # therefore still wrong.
+    today_start = datetime.now(IST).replace(
+        hour=0, minute=0, second=0, microsecond=0).astimezone(timezone.utc)
+    unresolved = {"$or": [
+        {"entry_order_id": {"$ne": None}, "entry_fill_price": None},
+        {"exit_order_id": {"$ne": None}, "exit_fill_price": None},
+    ]}
+    stale = await live_trading_positions_collection.update_many(
+        {**unresolved, "opened_at": {"$lt": today_start},
+         "reconcile_status": {"$in": [None, False]}},
+        {"$set": {"reconcile_status": "unavailable",
+                  "reconcile_note": "opened before today; Angel's trade book is same-day "
+                                    "only, so this entry price is the signal price, not "
+                                    "the fill"}},
+    )
+    pending = [p async for p in live_trading_positions_collection.find(
+        {**unresolved, "opened_at": {"$gte": today_start}})]
+    if not pending:
+        return {"checked": 0, "entries": 0, "exits": 0,
+                "marked_unreconcilable": stale.modified_count}
+    try:
+        trades = await angel_client.trade_book()
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("[live_trading] trade book unavailable: %s", exc)
+        return {"checked": len(pending), "entries": 0, "exits": 0, "error": str(exc)[:160]}
+
+    # Angel returns one row per FILL; a single order can fill in several pieces, so the
+    # honest entry price is the size-weighted average across them, not the first row.
+    by_order: dict[str, list[dict]] = {}
+    for t in trades:
+        oid = str(t.get("orderid") or "")
+        if oid:
+            by_order.setdefault(oid, []).append(t)
+
+    def avg_fill(oid: str):
+        rows = by_order.get(str(oid) or "")
+        if not rows:
+            return None, 0
+        qty = sum(float(r.get("fillsize") or 0) for r in rows)
+        if qty <= 0:
+            return None, 0
+        val = sum(float(r.get("fillprice") or 0) * float(r.get("fillsize") or 0) for r in rows)
+        return round(val / qty, 2), int(qty)
+
+    entries = exits = 0
+    for pos in pending:
+        upd: dict = {}
+        eid = pos.get("entry_order_id")
+        if eid and pos.get("entry_fill_price") is None:
+            price, qty = avg_fill(eid)
+            if price:
+                signal_px = pos.get("signal_price", pos.get("entry_price"))
+                upd.update({
+                    "signal_price": round(signal_px, 2),
+                    "entry_fill_price": price,
+                    "entry_price": price,                       # truth, for all P&L below
+                    "entry_fill_qty": qty,
+                    "entry_slippage": round(price - signal_px, 2),
+                    "capital_deployed": round(price * pos["qty"], 2),
+                })
+                entries += 1
+        xid = pos.get("exit_order_id")
+        if xid and pos.get("exit_fill_price") is None:
+            price, _ = avg_fill(xid)
+            if price:
+                entry_px = upd.get("entry_price", pos.get("entry_price"))
+                sign = 1 if pos["side"] == "BUY" else -1
+                upd.update({
+                    "exit_fill_price": price, "exit_price": price,
+                    "realized_pnl": round(sign * (price - entry_px) * pos["qty"], 2),
+                })
+                exits += 1
+        if upd:
+            upd["reconciled_at"] = _now()
+            await live_trading_positions_collection.update_one({"_id": pos["_id"]}, {"$set": upd})
+            await _update_score(pos["strategy_id"])
+    if entries or exits:
+        logger.warning("[live_trading] reconciled %s entries and %s exits to real fills",
+                       entries, exits)
+    return {"checked": len(pending), "entries": entries, "exits": exits,
+            "marked_unreconcilable": stale.modified_count}
+
+
 async def run_cycle(dhan: DhanClient | None) -> dict:
+    # Reconcile BEFORE managing: an open position marked against the signal price would
+    # otherwise be stopped or targeted off a price that was never paid.
+    fills = await reconcile_fills()
     managed = await manage_cycle(dhan)   # ALWAYS manage open real positions
     scan_result = await scan_cycle(dhan)  # gated by armed / kill / breaker / broker
     snap = await summary()
@@ -708,5 +877,5 @@ async def run_cycle(dhan: DhanClient | None) -> dict:
         }},
         upsert=True,
     )
-    return {"opened": scan_result["opened"], "managed": managed,
+    return {"opened": scan_result["opened"], "managed": managed, "fills": fills,
             "scanned_symbols": scan_result["scanned_symbols"], "notes": scan_result["notes"]}

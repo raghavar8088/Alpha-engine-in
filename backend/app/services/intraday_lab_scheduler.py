@@ -40,6 +40,7 @@ async def intraday_lab_loop() -> None:
     from app.services.intraday_lab_engine import run_cycle
     from app.services.live_intraday_engine import run_cycle as live_run_cycle
     from app.services.nifty_scalp_engine import run_cycle as nifty_scalp_run
+    from app.services.nse_volume_gainers import maybe_capture as nse_volume_capture
     from app.services.live_trading_engine import run_cycle as live_trading_run_cycle
     from app.services.stock_desk import BUYING, SELLING, run_cycle as stock_desk_run_cycle
     from app.services.zero_hero import run_cycle as zero_hero_run_cycle
@@ -54,6 +55,19 @@ async def intraday_lab_loop() -> None:
     while True:
         try:
             now = datetime.now(IST)
+            # NSE volume gainers must sit OUTSIDE the market-hours gate: the capture
+            # runs at 16:15 IST, after the 15:30 close, precisely so the numbers are
+            # final rather than a mid-session snapshot the closing auction will revise.
+            # Inside the gate it could never fire. It self-guards on time and weekday and
+            # is idempotent per day, so running it every tick costs one indexed lookup.
+            try:
+                nv = await nse_volume_capture()
+                if nv.get("ran"):
+                    logger.warning("nse-volume: %s",
+                                   {k: nv.get(k) for k in ("ok", "count", "error")})
+            except Exception:
+                logger.exception("nse-volume capture failed")
+
             if _in_market_hours(now):
                 dhan = await _dhan_or_none()
                 result = await run_cycle(dhan)

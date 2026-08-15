@@ -128,6 +128,7 @@ async def _dhan_token_refresh_loop() -> None:
 # collections are for charting recent history, not a permanent record, so they expire.
 # Same for the high-churn snapshot/log collections.
 EXPIRING_COLLECTIONS = {
+    "nse_volume_gainers": 120,
     "nifty_scalp_equity": 30,
     "nifty_scalp_signals": 30,
     "stock_desk_equity": 14,

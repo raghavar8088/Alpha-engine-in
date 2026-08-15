@@ -18,13 +18,15 @@ import {
   fetchBuyLowFallers,
   fetchBuyLowPositions,
   fetchBuyLowScreener,
+  fetchNseVolumeGainers,
+  type NseVolume,
   fetchBuyLowSignals,
   fetchBuyLowSummary,
   fetchBuyLowTrades,
 } from "../../lib/api";
 
 const REFRESH_MS = 30000;
-type Tab = "screener" | "fallers" | "open" | "closed" | "daily" | "signals";
+type Tab = "screener" | "nsevol" | "fallers" | "open" | "closed" | "daily" | "signals";
 
 const inr = (v: number | null | undefined) =>
   v === null || v === undefined ? "—" : `₹${v.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
@@ -43,6 +45,7 @@ export default function BuyLowPage() {
   const [daily, setDaily] = useState<BuyLowDaily[]>([]);
   const [signals, setSignals] = useState<BuyLowSignal[]>([]);
   const [screener, setScreener] = useState<BuyLowScreener | null>(null);
+  const [nseVol, setNseVol] = useState<NseVolume | null>(null);
   const [scrFilter, setScrFilter] = useState("");
   const [scrSort, setScrSort] = useState<{ key: "symbol" | "ltp" | "change_1d" | "change_1w" | "change_1m"; dir: "asc" | "desc" }>({ key: "change_1d", dir: "asc" });
   const [onlyTrig, setOnlyTrig] = useState(false);
@@ -50,7 +53,7 @@ export default function BuyLowPage() {
 
   const load = useCallback(async () => {
     try {
-      const [s, f, o, c, t, d, g, sc] = await Promise.all([
+      const [s, f, o, c, t, d, g, sc, nv] = await Promise.all([
         fetchBuyLowSummary(),
         fetchBuyLowFallers(),
         fetchBuyLowPositions("OPEN"),
@@ -59,6 +62,7 @@ export default function BuyLowPage() {
         fetchBuyLowDaily(),
         fetchBuyLowSignals(),
         fetchBuyLowScreener(),
+        fetchNseVolumeGainers(),
       ]);
       setSummary(s);
       setFallers(f);
@@ -68,6 +72,7 @@ export default function BuyLowPage() {
       setDaily(d);
       setSignals(g);
       setScreener(sc);
+      setNseVol(nv);
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load Buy Low Options");
@@ -150,6 +155,7 @@ export default function BuyLowPage() {
       <div className="tabs">
         {([
           ["screener", "F&O Screener"],
+          ["nsevol", "NSE Volume Gainers"],
           ["fallers", `Fallers (${fallers.length})`],
           ["open", `Open (${open.length})`],
           ["closed", `Closed (${closed.length})`],
@@ -230,6 +236,64 @@ export default function BuyLowPage() {
               </div>
             </GlassPanel>
           ))}
+        </div>
+      )}
+
+      {tab === "nsevol" && (
+        <div className="screener">
+          <p className="hint">
+            NSE&rsquo;s own volume-gainers list, captured at <b>16:15 IST</b> each trading day —
+            after the close, so the numbers are final rather than a mid-session snapshot the
+            closing auction would revise. This is the one thing the Angel feed cannot give:
+            today&rsquo;s volume against each stock&rsquo;s <em>own</em> recent habit. A 4% fall on
+            ordinary turnover is noise; the same fall on five times normal volume is someone
+            doing something.
+          </p>
+
+          {nseVol && !nseVol.ok ? (
+            <div className="breaker">
+              <strong>NO CAPTURE YET.</strong> {nseVol.error ?? "NSE has not been reached."} This
+              table stays empty rather than showing zeros — missing exchange data is missing,
+              not quiet.
+            </div>
+          ) : (
+            <GlassPanel
+              title={`NSE volume gainers (${nseVol?.count ?? 0})${nseVol?.date ? ` · ${nseVol.date}` : ""}`}
+            >
+              {!nseVol?.rows?.length ? (
+                <div className="empty">Nothing captured yet — the first pull runs at 16:15 IST.</div>
+              ) : (
+                <div className="table-scroll">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th style={{ textAlign: "left" }}>Symbol</th>
+                        <th style={{ textAlign: "left" }}>Company</th>
+                        <th>LTP</th><th>Change</th><th>Volume</th>
+                        <th>× 1-week avg</th><th>× 2-week avg</th><th>Value (Cr)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {nseVol.rows.map((r) => (
+                        <tr key={r.symbol}>
+                          <td style={{ textAlign: "left" }}><strong>{r.symbol}</strong></td>
+                          <td style={{ textAlign: "left", fontSize: 11 }}>{r.company}</td>
+                          <td>₹{(r.ltp ?? 0).toLocaleString("en-IN")}</td>
+                          <td className={(r.change_pct ?? 0) >= 0 ? "gain" : "loss"}>
+                            {(r.change_pct ?? 0) >= 0 ? "+" : ""}{(r.change_pct ?? 0).toFixed(2)}%
+                          </td>
+                          <td>{(r.volume ?? 0).toLocaleString("en-IN")}</td>
+                          <td className="gain"><strong>{r.volume_x_1week ?? "—"}×</strong></td>
+                          <td>{r.volume_x_2week ?? "—"}×</td>
+                          <td>{r.value_cr ?? "—"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </GlassPanel>
+          )}
         </div>
       )}
 

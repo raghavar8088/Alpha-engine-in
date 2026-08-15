@@ -6,12 +6,15 @@
   GET  /api/buy-low/trades      closed-trade blotter
   GET  /api/buy-low/signals     every faller evaluated, taken or skipped (with the reason)
   GET  /api/buy-low/daily       realised P&L per session
+  GET  /api/buy-low/nse-volume  NSE's own volume-gainers capture (volume vs its habit)
+  POST /api/buy-low/nse-volume/capture  pull it now instead of waiting for 16:15 IST
   POST /api/buy-low/run         run one cycle now (?force=true to bypass the 3 PM window)
 """
 
 from fastapi import APIRouter, Depends, Query
 
 from app.api.deps import get_current_user
+from app.services import nse_volume_gainers as nse_vol
 from app.services.buy_low_options import (
     daily_pnl,
     fallers as bl_fallers,
@@ -79,3 +82,36 @@ async def run_endpoint(
     _u: dict = Depends(get_current_user),
 ):
     return await run_cycle(force_scan=force)
+
+
+# ── NSE volume gainers ─────────────────────────────────────────────────────────
+# Lives on this router because it feeds the screener tab: Angel gives price and today's
+# volume, NSE gives today's volume against the stock's OWN weekly and monthly habit, which
+# is what separates a fall on ordinary turnover from a fall someone is causing.
+
+
+@router.get("/nse-volume")
+async def nse_volume(
+    limit: int = Query(200, ge=1, le=500),
+    current_user: dict = Depends(get_current_user),
+):
+    """Latest successful capture. Returns ok=false with the reason when NSE refused —
+    never an empty table pretending to be a quiet day."""
+    return await nse_vol.latest(limit)
+
+
+@router.get("/nse-volume/history")
+async def nse_volume_history(
+    limit: int = Query(30, ge=1, le=180),
+    current_user: dict = Depends(get_current_user),
+):
+    """Capture log: which days succeeded, which failed and why."""
+    return {"history": await nse_vol.history(limit)}
+
+
+@router.post("/nse-volume/capture")
+async def nse_volume_capture(
+    force: bool = Query(False, description="re-pull even if today is already captured"),
+    current_user: dict = Depends(get_current_user),
+):
+    return await nse_vol.capture(force=force)

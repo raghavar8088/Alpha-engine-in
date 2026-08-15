@@ -3254,3 +3254,34 @@ export async function fetchNiftyScalpDaily(limit = 60): Promise<DailyRoi[]> {
   const r = await apiFetch(`/api/nifty-scalp/daily?limit=${limit}`);
   return r.daily ?? [];
 }
+
+// ── NSE volume gainers (feeds the Buy Low screener) ────────────────────────────
+// Exchange data Angel does not provide: today's volume against each stock's own 1-week
+// and 2-week average, which is what separates a move on ordinary turnover from one
+// someone is causing.
+
+export interface NseVolumeRow {
+  symbol: string;
+  company: string;
+  ltp: number | null;
+  change_pct: number | null;
+  volume: number | null;
+  avg_1week_volume: number | null;
+  avg_2week_volume: number | null;
+  volume_x_1week: number | null;
+  volume_x_2week: number | null;
+  value_cr: number | null;
+}
+
+export interface NseVolume {
+  date: string | null;
+  count: number;
+  ok: boolean;
+  error: string | null;
+  captured_at?: string | null;
+  rows: NseVolumeRow[];
+}
+
+export async function fetchNseVolumeGainers(limit = 200): Promise<NseVolume> {
+  return apiFetch(`/api/buy-low/nse-volume?limit=${limit}`);
+}
