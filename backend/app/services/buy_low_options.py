@@ -457,7 +457,9 @@ async def refresh_fno_bars() -> dict:
         ops = []
         for r in rows or []:
             try:
-                ts = datetime.fromisoformat(r[0]).astimezone(timezone.utc).isoformat()
+                # Store the DATETIME, never its isoformat string. `ts` is queried with
+                # date range filters; a string silently matches none of them.
+                ts = datetime.fromisoformat(r[0]).astimezone(timezone.utc)
                 ops.append(UpdateOne(
                     {"symbol": sym, "timeframe": "1d", "ts": ts},
                     {"$set": {"symbol": sym, "timeframe": "1d", "ts": ts,

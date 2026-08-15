@@ -152,8 +152,9 @@ async def backfill_universe_bars() -> dict:
         ops = []
         for row in rows or []:
             try:
-                stamp = datetime.fromisoformat(row[0]).astimezone(timezone.utc)
-                ts = stamp.isoformat()
+                # Store the DATETIME, never its isoformat string. `ts` is queried with
+                # date range filters; a string silently matches none of them.
+                ts = datetime.fromisoformat(row[0]).astimezone(timezone.utc)
                 ops.append(UpdateOne(
                     {"symbol": sym, "timeframe": "1d", "ts": ts},
                     {"$set": {
