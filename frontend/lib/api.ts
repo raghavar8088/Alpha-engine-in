@@ -3285,3 +3285,156 @@ export interface NseVolume {
 export async function fetchNseVolumeGainers(limit = 200): Promise<NseVolume> {
   return apiFetch(`/api/buy-low/nse-volume?limit=${limit}`);
 }
+
+// ---- Commodity Trading desk (311 pattern strategies on MCX futures, ₹10L each, paper) ----
+export interface CommoditySummary {
+  initial_capital: number;
+  per_strategy_allocation: number;
+  position_notional: number;
+  strategy_count: number;
+  available_cash: number;
+  deployed_capital: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  total_costs: number;
+  equity: number;
+  open_positions: number;
+  closed_positions: number;
+  ready_count: number;
+  rejected_count: number;
+  pending_count: number;
+  paused: boolean;
+  mode: string;
+  costs_charged: boolean;
+  slippage_bps: number;
+  market_open: boolean;
+  max_strategies_per_symbol: number;
+  promotion_gate: {
+    min_trades: number;
+    min_profit_factor: number;
+    min_win_rate: number;
+    max_drawdown_pct: number;
+    min_t_stat: number;
+  };
+  today_pnl: number;
+  breaker_tripped: boolean;
+  daily_loss_limit: number;
+  last_run_at: string | null;
+  last_notes: string[];
+  last_evaluated: number;
+}
+
+export interface CommodityScore {
+  strategy_id: string;
+  name: string;
+  family: string;
+  family_label: string;
+  template: string;
+  timeframe: string;
+  trades: number;
+  win_rate: number;
+  net_pnl: number;
+  total_costs: number;
+  profit_factor: number | null;
+  expectancy: number;
+  max_drawdown_pct: number;
+  t_stat: number | null;
+  return_pct: number;
+  allocated_capital: number;
+  open_positions: number;
+  verdict: "READY" | "REJECTED" | "PENDING";
+  verdict_reasons: string[];
+}
+
+export interface CommodityPosition {
+  position_id: string;
+  strategy_name: string;
+  family_label: string;
+  template: string;
+  timeframe: string;
+  pattern: string;
+  symbol: string;
+  display_name: string;
+  side: string;
+  entry_price: number;
+  qty: number;
+  capital_deployed: number;
+  target: number;
+  stoploss: number;
+  ltp: number;
+  ltp_source: string;
+  unrealized_pnl: number;
+  pnl_pct: number;
+  bars_held: number;
+  max_hold_bars: number;
+  rationale: string;
+  status: string;
+  opened_at: string;
+}
+
+export interface CommodityTrade {
+  trade_id: string;
+  strategy_name: string;
+  timeframe: string;
+  pattern: string;
+  symbol: string;
+  side: string;
+  entry_price: number;
+  exit_price: number;
+  qty: number;
+  gross_pnl: number;
+  costs: number;
+  realized_pnl: number;
+  exit_reason: string;
+  closed_at: string;
+}
+
+export interface CommodityUniverseRow {
+  underlying: string;
+  symbol: string;
+  expiry: string;
+  security_id: string;
+  lot_size: number;
+  tick_size: number;
+  exchange_segment: string;
+}
+
+export interface CommodityCoverage {
+  symbols: string[];
+  native_timeframes: string[];
+  derived_timeframes: string[];
+  bars: Record<string, Record<string, number>>;
+  latest_bar_ist: Record<string, string | null>;
+}
+
+export async function fetchCommoditySummary(): Promise<CommoditySummary> {
+  return apiFetch("/api/commodity/summary");
+}
+export async function fetchCommodityLeaderboard(params: { family?: string; timeframe?: string; verdict?: string } = {}): Promise<{ leaderboard: CommodityScore[]; total: number; timeframes: string[] }> {
+  const q = new URLSearchParams();
+  if (params.family) q.set("family", params.family);
+  if (params.timeframe) q.set("timeframe", params.timeframe);
+  if (params.verdict) q.set("verdict", params.verdict);
+  const s = q.toString();
+  return apiFetch(`/api/commodity/leaderboard${s ? `?${s}` : ""}`);
+}
+export async function fetchCommodityPositions(): Promise<{ positions: CommodityPosition[]; open: CommodityPosition[] }> {
+  return apiFetch("/api/commodity/positions");
+}
+export async function fetchCommodityTrades(limit = 80): Promise<CommodityTrade[]> {
+  const r = await apiFetch(`/api/commodity/trades?limit=${limit}`);
+  return r.trades ?? [];
+}
+export async function fetchCommodityUniverse(): Promise<CommodityUniverseRow[]> {
+  const r = await apiFetch("/api/commodity/universe");
+  return r.universe ?? [];
+}
+export async function fetchCommodityBars(): Promise<{ coverage: CommodityCoverage }> {
+  return apiFetch("/api/commodity/bars");
+}
+export async function runCommodityCycle(): Promise<{ opened: number; managed: number; evaluated: number; notes: string[] }> {
+  return apiFetch("/api/commodity/run", { method: "POST" });
+}
+export async function refreshCommodityBars(): Promise<{ symbols: number; seconds: number; failed_fetches: number }> {
+  return apiFetch("/api/commodity/refresh-bars", { method: "POST" });
+}

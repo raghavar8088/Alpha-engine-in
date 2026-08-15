@@ -74,6 +74,20 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // Sits in the momentum block but is a different asset class: MCX futures, not
+        // equities or index options. A bullion-bar mark rather than another trend arrow,
+        // so it does not read as a third momentum screen.
+        href: "/commodity",
+        label: "Commodity Trading",
+        icon: (
+          <>
+            <path d="M3 17.5h8l2-4H5l-2 4z" />
+            <path d="M11 13.5h8l2-4h-8l-2 4z" />
+            <path d="M8 21h9" />
+          </>
+        ),
+      },
+      {
         // Sits under Momentum: same "wait for a specific market state, then act" shape,
         // but the state is a one-day crash and the expression is a cheap long call.
         href: "/buy-low",

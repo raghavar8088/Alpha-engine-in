@@ -17,6 +17,7 @@ from app.api.routes import (
     broker,
     bullish_stocks,
     chart_data,
+    commodity,
     fno_positions,
     intraday_lab,
     live,
@@ -212,6 +213,26 @@ async def start_intraday_lab_scheduler() -> None:
 
 
 @app.on_event("startup")
+async def start_commodity_scheduler() -> None:
+    from app.services.commodity_patterns import COMMODITY_CATALOG
+    from app.services.commodity_scheduler import (
+        BARS_TICK_SECONDS, DESK_TICK_SECONDS, ENABLED as COMMODITY_ON,
+        commodity_bars_loop, commodity_desk_loop,
+    )
+
+    if COMMODITY_ON:
+        asyncio.create_task(commodity_bars_loop())
+        asyncio.create_task(commodity_desk_loop())
+        logger.info(
+            "Commodity Trading desk enabled — %d pattern strategies on MCX front-month "
+            "futures (bars every %ss, desk every %ss, 09:00-23:30 IST, paper)",
+            len(COMMODITY_CATALOG), BARS_TICK_SECONDS, DESK_TICK_SECONDS,
+        )
+    else:
+        logger.info("Commodity Trading desk disabled (COMMODITY_ENABLED=0)")
+
+
+@app.on_event("startup")
 async def start_fno_auto_roll_scheduler() -> None:
     from app.services.fno_auto_roll import (
         ACCOUNT_NAME, ENABLED as ROLL_ENABLED, LOTS, ROLL_HHMM, SYMBOL, fno_auto_roll_loop,
@@ -390,6 +411,7 @@ app.include_router(intraday_lab.router)
 app.include_router(live_intraday.router)
 app.include_router(live_trading.router)
 app.include_router(momentum.router)
+app.include_router(commodity.router)
 app.include_router(stock_desk.router)
 app.include_router(zero_hero.router)
 app.include_router(buy_low.router)

@@ -126,6 +126,16 @@ long_horizon_trades_collection = db["long_horizon_trades"]
 long_horizon_scores_collection = db["long_horizon_scores"]
 long_horizon_equity_collection = db["long_horizon_equity"]
 long_horizon_state_collection = db["long_horizon_state"]
+# Commodity Trading desk — 311 chart/candlestick/structure pattern strategies over 8 MCX
+# front-month futures on 8 timeframes, ₹10 lakh paper each. `commodity_bars` is the desk's
+# own paced bar store (Angel throttles the candle endpoint hard, so strategies read from
+# here rather than calling out); only NATIVE intervals are stored, 30m/45m/4h are derived.
+commodity_bars_collection = db["commodity_bars"]
+commodity_positions_collection = db["commodity_positions"]
+commodity_trades_collection = db["commodity_trades"]
+commodity_scores_collection = db["commodity_scores"]
+commodity_state_collection = db["commodity_state"]
+commodity_equity_collection = db["commodity_equity"]
 # Daily 3 PM ATM short-straddle roll on ONE named F&O paper account (see
 # app.services.fno_auto_roll). `state` holds the once-a-day guard (`last_rolled_on`);
 # `log` keeps one row per attempt including aborts, so a day that did not roll always
