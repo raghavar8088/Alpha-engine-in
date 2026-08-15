@@ -12,6 +12,8 @@
   POST /api/commodity/run           force one scan+manage cycle
 """
 
+import asyncio
+
 from fastapi import APIRouter, Depends, Query
 
 from app.api.deps import get_current_user
@@ -41,6 +43,9 @@ from app.services.commodity_patterns import (
 )
 
 router = APIRouter(prefix="/api/commodity", tags=["commodity"])
+
+# Strong refs to in-flight background refreshes (asyncio only holds weak ones).
+_BACKGROUND: set[asyncio.Task] = set()
 
 
 def _serialize(doc: dict, ts_fields: tuple[str, ...]) -> dict:
@@ -160,9 +165,19 @@ async def equity_endpoint(limit: int = Query(500, ge=1, le=2000), _user: dict = 
 
 @router.post("/refresh-bars")
 async def refresh_bars_endpoint(_user: dict = Depends(get_current_user)):
-    """One paced pass over every symbol x native interval. Takes ~60s by design — the
-    candle endpoint 403s if hit any faster."""
-    return await refresh_all()
+    """Kick off one paced pass over every symbol x native interval.
+
+    Fire-and-forget on purpose. A full pass is 40 throttled requests — at least a minute,
+    and several if Angel starts 403ing and the backoff kicks in — which is far longer than
+    any browser or proxy will hold a request open. Awaiting it here just produced an empty
+    HTTP 000 while the work carried on regardless. Poll GET /bars for progress instead."""
+    task = asyncio.create_task(refresh_all())
+    # Hold a reference so the task is not garbage-collected mid-flight.
+    _BACKGROUND.add(task)
+    task.add_done_callback(_BACKGROUND.discard)
+    return {"started": True,
+            "note": "Paced refresh started in the background (~1-3 min). Poll GET /api/commodity/bars "
+                    "to watch the store fill."}
 
 
 @router.post("/run")
