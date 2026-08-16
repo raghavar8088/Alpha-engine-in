@@ -59,6 +59,7 @@ export default function SwingTradingPage() {
   const [buyPrice, setBuyPrice] = useState("");
   const [slPct, setSlPct] = useState("10");
   const [tpPct, setTpPct] = useState("10");
+  const [driftPct, setDriftPct] = useState("2");
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
@@ -105,6 +106,7 @@ export default function SwingTradingPage() {
         buy_price: Number(buyPrice),
         sl_pct: Number(slPct) || undefined,
         tp_pct: Number(tpPct) || undefined,
+        drift_pct: driftPct === "" ? undefined : Number(driftPct),
       });
       setNotice(`${picked.symbol} added to the buy zone at ₹${buyPrice}`);
       setPicked(null); setQ(""); setBuyPrice(""); setHits([]);
@@ -114,8 +116,11 @@ export default function SwingTradingPage() {
     } finally { setBusy(false); }
   }
 
-  async function patchWatch(id: string, field: "buy_price" | "sl_pct" | "tp_pct", cur: number) {
-    const label = field === "buy_price" ? "buy price (₹)" : field === "sl_pct" ? "stop-loss %" : "target %";
+  async function patchWatch(id: string, field: "buy_price" | "sl_pct" | "tp_pct" | "drift_pct", cur: number) {
+    const label = field === "buy_price" ? "buy price (₹)"
+      : field === "sl_pct" ? "stop-loss %"
+      : field === "drift_pct" ? "drift % (how far a gap may open past your price)"
+      : "target %";
     const v = window.prompt(`New ${label}:`, String(cur));
     if (v === null || v.trim() === "") return;
     try {
@@ -155,13 +160,14 @@ export default function SwingTradingPage() {
       />
 
       <div className="desk-banner">
-        <strong>HOW YOUR PRICE IS READ.</strong> A price <em>below</em> the market is a{" "}
-        <b>DIP</b> order — it fills when price falls to it. A price <em>above</em> the market
-        is a <b>BREAKOUT</b> order — it fills when price rises to it. The direction is fixed
-        when you add the watch, from where the stock trades at that moment, so a stock
-        drifting past your level overnight cannot silently reverse what you asked for.
-        Stop and target are anchored to <strong>the price you named</strong>, not to the fill,
-        so a gap-through fill never quietly changes the risk you accepted.
+        <strong>GAP-UPS STILL FILL, WITHIN A LIMIT.</strong> Name ₹102 on a ₹100 stock and
+        it opens at ₹104 — that is still your trade, so it fills at ₹104 and is marked{" "}
+        <span className="badge drift">DRIFTED</span>. But only inside the{" "}
+        <b>drift band</b> (2% by default). Open at ₹130 against your ₹102 and the desk{" "}
+        <em>refuses</em> — that is not the trade you asked for at any price. The watch stays
+        live, records how far it gapped, and still fills if price pulls back into the band.
+        Stop and target are set from the price you <strong>actually filled at</strong>, so a
+        drifted entry measures its risk from where the money really went in.
       </div>
 
       {error && <ErrorBanner message={error} />}
@@ -210,6 +216,11 @@ export default function SwingTradingPage() {
             <label>Target %</label>
             <input type="number" step="0.5" value={tpPct} onChange={(e) => setTpPct(e.target.value)} />
           </div>
+          <div className="field sm">
+            <label>Drift %</label>
+            <input type="number" step="0.5" min="0" value={driftPct}
+                   onChange={(e) => setDriftPct(e.target.value)} />
+          </div>
           <button className="primary" disabled={!picked || !buyPrice || busy} onClick={submitWatch}>
             {busy ? "Adding…" : "Add to buy zone"}
           </button>
@@ -218,7 +229,9 @@ export default function SwingTradingPage() {
           <p className="preview">
             <b>{picked.symbol}</b> at ₹{buyPrice} → stop ₹{inr2(Number(buyPrice) * (1 - Number(slPct) / 100))} ·
             target ₹{inr2(Number(buyPrice) * (1 + Number(tpPct) / 100))} ·
-            about {Math.floor((summary?.position_size ?? 100000) / Number(buyPrice))} shares
+            about {Math.floor((summary?.position_size ?? 100000) / Number(buyPrice))} shares.
+            {" "}Fills anywhere up to ₹{inr2(Number(buyPrice) * (1 + Number(driftPct || 0) / 100))}{" "}
+            if it gaps; above that it is refused.
           </p>
         )}
       </GlassPanel>
@@ -252,7 +265,7 @@ export default function SwingTradingPage() {
               <table className="data-table">
                 <thead><tr>
                   <th style={{ textAlign: "left" }}>Symbol</th><th>Type</th><th>Your price</th>
-                  <th>LTP</th><th>Away</th><th>Stop</th><th>Target</th><th>Edit</th>
+                  <th>LTP</th><th>Away</th><th>Fills up to</th><th>Stop</th><th>Target</th><th>Edit</th>
                 </tr></thead>
                 <tbody>
                   {waiting.map((w) => {
@@ -264,12 +277,21 @@ export default function SwingTradingPage() {
                         <td>₹{inr2(w.buy_price)}</td>
                         <td>{w.ltp ? `₹${inr2(w.ltp)}` : "—"}</td>
                         <td className={away === null ? "" : cls(-Math.abs(away))}>{away === null ? "—" : `${away.toFixed(2)}%`}</td>
+                        <td>
+                          ₹{inr2(w.max_fill_price)} <span className="sub">({w.drift_pct}% drift)</span>
+                          {w.gapped_past && (
+                            <div className="gapwarn">
+                              gapped {(w.last_gap_pct ?? 0) > 0 ? "+" : ""}{w.last_gap_pct}% past — not filled
+                            </div>
+                          )}
+                        </td>
                         <td>₹{inr2(w.stop_price)} <span className="sub">({w.sl_pct}%)</span></td>
                         <td>₹{inr2(w.target_price)} <span className="sub">({w.tp_pct}%)</span></td>
                         <td className="acts">
                           <button onClick={() => patchWatch(w.watch_id, "buy_price", w.buy_price)}>price</button>
                           <button onClick={() => patchWatch(w.watch_id, "sl_pct", w.sl_pct)}>SL</button>
                           <button onClick={() => patchWatch(w.watch_id, "tp_pct", w.tp_pct)}>TP</button>
+                          <button onClick={() => patchWatch(w.watch_id, "drift_pct", w.drift_pct)}>drift</button>
                           <button className="danger" onClick={() => cancelWatch(w.watch_id, w.symbol)}>✕</button>
                         </td>
                       </tr>
@@ -305,11 +327,22 @@ export default function SwingTradingPage() {
                 </tr></thead>
                 <tbody>
                   {(tab === "open" ? open : closed).map((p) => (
-                    <tr key={p.position_id}>
-                      <td style={{ textAlign: "left" }}><strong>{p.symbol}</strong><div className="sub">{p.name}</div></td>
+                    <tr key={p.position_id} className={p.drifted ? "drifted" : ""}>
+                      <td style={{ textAlign: "left" }}>
+                        <strong>{p.symbol}</strong>
+                        {p.drifted && <span className="badge drift">DRIFTED</span>}
+                        <div className="sub">{p.name}</div>
+                      </td>
                       <td>{p.qty}</td>
                       <td>₹{inr2(p.buy_price)}</td>
-                      <td>₹{inr2(p.entry_price)}<div className="sub">{p.slippage ? `slip ₹${inr2(p.slippage)}` : "exact"}</div></td>
+                      <td>
+                        ₹{inr2(p.entry_price)}
+                        <div className="sub">
+                          {p.drifted
+                            ? `gapped ${(p.drift_pct_actual ?? 0) > 0 ? "+" : ""}${p.drift_pct_actual}%`
+                            : "exact"}
+                        </div>
+                      </td>
                       <td>₹{inr2(tab === "open" ? p.ltp : p.exit_price)}</td>
                       <td>₹{inr2(p.stop_price)}</td>
                       <td>₹{inr2(p.target_price)}</td>
@@ -395,6 +428,12 @@ export default function SwingTradingPage() {
         .acts button:hover { color: var(--purple); border-color: rgba(125,52,220,.35); }
         .acts button.danger:hover { color: var(--red); border-color: var(--red); }
         .badge.dip { background: rgba(34,160,90,.14); color: var(--green); }
+        /* DRIFTED gets its own amber identity: filled, but not at the price you named -
+           that is neither an error nor an ordinary fill, so it should read as neither. */
+        .badge.drift { background: rgba(214,138,20,.16); color: #d68a14; margin-left: 7px; font-size: 9.5px; letter-spacing: .04em; }
+        tr.drifted { background: rgba(214,138,20,.07); }
+        tr.drifted td:first-child { box-shadow: inset 3px 0 0 #d68a14; }
+        .gapwarn { font-size: 10px; color: #d68a14; margin-top: 2px; }
         .empty { padding: 22px; text-align: center; color: var(--text-faint); font-size: 12.5px; }
         .hint { font-size: 11.5px; color: var(--text-faint); margin: 10px 0 0; }
         .gain { color: var(--green); }

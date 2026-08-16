@@ -3485,6 +3485,11 @@ export interface SwingWatch {
   ltp_at_add: number | null;
   sl_pct: number;
   tp_pct: number;
+  drift_pct: number;
+  max_fill_price: number;
+  min_fill_price: number;
+  gapped_past: boolean;
+  last_gap_pct: number | null;
   stop_price: number;
   target_price: number;
   status: string;
@@ -3501,6 +3506,10 @@ export interface SwingPosition {
   buy_price: number;
   entry_price: number;
   slippage: number;
+  drifted: boolean;
+  drift_pct_actual: number | null;
+  drift_pct_allowed: number | null;
+  anchor_price: number;
   capital_deployed: number;
   sl_pct: number;
   tp_pct: number;
@@ -3552,13 +3561,14 @@ export async function fetchSwingWatchlist(status?: string): Promise<SwingWatch[]
   return r.watchlist ?? [];
 }
 export async function addSwingWatch(body: {
-  symbol: string; buy_price: number; sl_pct?: number; tp_pct?: number; note?: string;
+  symbol: string; buy_price: number; sl_pct?: number; tp_pct?: number;
+  drift_pct?: number; note?: string;
 }): Promise<SwingWatch> {
   return apiFetch("/api/swing/watch", { method: "POST", body: JSON.stringify(body) });
 }
 export async function editSwingWatch(
   watchId: string,
-  body: { buy_price?: number; sl_pct?: number; tp_pct?: number },
+  body: { buy_price?: number; sl_pct?: number; tp_pct?: number; drift_pct?: number },
 ): Promise<SwingWatch> {
   return apiFetch(`/api/swing/watch/${watchId}`, { method: "PATCH", body: JSON.stringify(body) });
 }

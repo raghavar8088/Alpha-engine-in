@@ -27,6 +27,8 @@ class WatchIn(BaseModel):
     buy_price: float = Field(gt=0)
     sl_pct: float | None = Field(default=None, gt=0, lt=100)
     tp_pct: float | None = Field(default=None, gt=0)
+    # How far past your price a gap may open and still be filled. 0 = exact price only.
+    drift_pct: float | None = Field(default=None, ge=0, le=25)
     note: str = ""
 
 
@@ -34,6 +36,7 @@ class WatchEdit(BaseModel):
     buy_price: float | None = Field(default=None, gt=0)
     sl_pct: float | None = Field(default=None, gt=0, lt=100)
     tp_pct: float | None = Field(default=None, gt=0)
+    drift_pct: float | None = Field(default=None, ge=0, le=25)
 
 
 class PositionEdit(BaseModel):
@@ -70,7 +73,8 @@ async def watchlist_endpoint(
 @router.post("/watch")
 async def add_watch_endpoint(body: WatchIn, current_user: dict = Depends(get_current_user)):
     try:
-        return await sw.add_watch(body.symbol, body.buy_price, body.sl_pct, body.tp_pct, body.note)
+        return await sw.add_watch(body.symbol, body.buy_price, body.sl_pct,
+                                  body.tp_pct, body.note, body.drift_pct)
     except ValueError as exc:
         raise HTTPException(400, str(exc))
 
@@ -80,7 +84,8 @@ async def edit_watch_endpoint(
     watch_id: str, body: WatchEdit, current_user: dict = Depends(get_current_user)
 ):
     try:
-        return await sw.edit_watch(watch_id, body.buy_price, body.sl_pct, body.tp_pct)
+        return await sw.edit_watch(watch_id, body.buy_price, body.sl_pct,
+                                   body.tp_pct, body.drift_pct)
     except ValueError as exc:
         raise HTTPException(400, str(exc))
 

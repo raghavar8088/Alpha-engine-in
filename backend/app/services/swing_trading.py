@@ -16,10 +16,20 @@ SIZING: Rs1,00,000 per position out of a Rs10 crore desk, so up to 1,000 names c
 at once. Whole shares only, so a share priced above Rs1,00,000 simply cannot be taken and
 the watch says so rather than filling for zero.
 
-STOP AND TARGET default to 10% either side of YOUR buy price — not of the fill. If the
-market gaps through your level the fill can differ, and anchoring the stop to the fill
-would quietly move the risk you accepted. Both are editable at any point, and an edit
-after the fill takes effect on the very next cycle.
+DRIFT: a gap-up does not have to mean a missed trade. Naming Rs102 on a stock at Rs100
+and finding it open at Rs104 is still the move you wanted, so the desk fills it — but only
+inside a DRIFT BAND of 2% above your price by default. Beyond that band it refuses: a
+stock that opened Rs130 against your Rs102 is not the trade you asked for at any price,
+and filling it "because the trigger was crossed" would be the desk overruling you. The
+watch stays live when that happens and records how far past it gapped, so a pullback back
+into the band still fills and you can see exactly what was skipped and why. The band works
+the same way below for a dip order, because an unbounded gap-down fill is the same hazard
+in the opposite direction.
+
+STOP AND TARGET are set from the price actually FILLED, so a drifted entry measures its
+risk from where the money really went in — buy at Rs104 with a 10% stop and the stop is
+Rs93.60, not Rs91.80 off the Rs102 you named. Both are editable at any point, before the
+fill or after, and an edit takes effect on the very next cycle.
 
 COSTS are the real Angel One DELIVERY schedule, charged on close: a swing position sleeps
 overnight, so it pays 0.1% STT on both legs plus a DP charge on exit — roughly four times
@@ -55,6 +65,8 @@ TOTAL_CAPITAL = float(os.getenv("SWING_CAPITAL", "100000000"))        # Rs10 cro
 POSITION_SIZE = float(os.getenv("SWING_POSITION_SIZE", "100000"))     # Rs1 lakh
 DEFAULT_SL_PCT = float(os.getenv("SWING_SL_PCT", "10"))
 DEFAULT_TP_PCT = float(os.getenv("SWING_TP_PCT", "10"))
+# How far past your price a gap may open and still be filled. Per-watch overridable.
+DEFAULT_DRIFT_PCT = float(os.getenv("SWING_DRIFT_PCT", "2"))
 QUOTE_PACE = float(os.getenv("SWING_QUOTE_PACE", "0.15"))
 QUOTE_BATCH = 50
 ENABLED = os.getenv("SWING_ENABLED", "1").lower() not in ("0", "false", "")
@@ -160,7 +172,8 @@ async def _quote(symbols: list[str]) -> dict[str, float]:
 
 
 async def add_watch(symbol: str, buy_price: float, sl_pct: float | None = None,
-                    tp_pct: float | None = None, note: str = "") -> dict:
+                    tp_pct: float | None = None, note: str = "",
+                    drift_pct: float | None = None) -> dict:
     symbol = (symbol or "").strip().upper()
     inst = await instruments_collection.find_one(
         {"asset_class": "EQUITY", "symbol": symbol, "angel_token": {"$ne": None}})
@@ -176,6 +189,7 @@ async def add_watch(symbol: str, buy_price: float, sl_pct: float | None = None,
     side = "DIP" if (ltp is None or buy_price <= ltp) else "BREAKOUT"
     sl_pct = DEFAULT_SL_PCT if sl_pct is None else float(sl_pct)
     tp_pct = DEFAULT_TP_PCT if tp_pct is None else float(tp_pct)
+    drift_pct = DEFAULT_DRIFT_PCT if drift_pct is None else float(drift_pct)
     doc = {
         "watch_id": uuid4().hex[:12], "symbol": symbol,
         "name": inst.get("name") or symbol,
@@ -184,10 +198,14 @@ async def add_watch(symbol: str, buy_price: float, sl_pct: float | None = None,
         "buy_price": round(float(buy_price), 2),
         "trigger_side": side,
         "ltp_at_add": round(ltp, 2) if ltp else None,
-        "sl_pct": sl_pct, "tp_pct": tp_pct,
-        # Levels are anchored to the price YOU named, not to the fill.
+        "sl_pct": sl_pct, "tp_pct": tp_pct, "drift_pct": drift_pct,
+        # The band a gap may open inside and still be filled.
+        "max_fill_price": round(buy_price * (1 + drift_pct / 100), 2),
+        "min_fill_price": round(buy_price * (1 - drift_pct / 100), 2),
+        # Indicative only — the real levels are set from the FILL when it happens.
         "stop_price": round(buy_price * (1 - sl_pct / 100), 2),
         "target_price": round(buy_price * (1 + tp_pct / 100), 2),
+        "gapped_past": False, "last_gap_pct": None,
         "note": note, "status": "WAITING", "ltp": round(ltp, 2) if ltp else None,
         "created_at": _now(), "updated_at": _now(), "triggered_at": None,
     }
@@ -197,7 +215,8 @@ async def add_watch(symbol: str, buy_price: float, sl_pct: float | None = None,
 
 
 async def edit_watch(watch_id: str, buy_price: float | None = None,
-                     sl_pct: float | None = None, tp_pct: float | None = None) -> dict:
+                     sl_pct: float | None = None, tp_pct: float | None = None,
+                     drift_pct: float | None = None) -> dict:
     w = await swing_watchlist_collection.find_one({"watch_id": watch_id})
     if not w:
         raise ValueError("watch not found")
@@ -206,11 +225,17 @@ async def edit_watch(watch_id: str, buy_price: float | None = None,
     bp = float(buy_price) if buy_price is not None else w["buy_price"]
     sl = float(sl_pct) if sl_pct is not None else w["sl_pct"]
     tp = float(tp_pct) if tp_pct is not None else w["tp_pct"]
+    dr = float(drift_pct) if drift_pct is not None else w.get("drift_pct", DEFAULT_DRIFT_PCT)
     if bp <= 0:
         raise ValueError("buy price must be positive")
-    upd = {"buy_price": round(bp, 2), "sl_pct": sl, "tp_pct": tp,
+    if dr < 0:
+        raise ValueError("drift cannot be negative")
+    upd = {"buy_price": round(bp, 2), "sl_pct": sl, "tp_pct": tp, "drift_pct": dr,
+           "max_fill_price": round(bp * (1 + dr / 100), 2),
+           "min_fill_price": round(bp * (1 - dr / 100), 2),
            "stop_price": round(bp * (1 - sl / 100), 2),
-           "target_price": round(bp * (1 + tp / 100), 2), "updated_at": _now()}
+           "target_price": round(bp * (1 + tp / 100), 2),
+           "gapped_past": False, "updated_at": _now()}
     if buy_price is not None and w.get("ltp"):
         # Moving the price can change what the order MEANS, so re-decide the direction
         # rather than leaving a dip order that now sits above the market.
@@ -234,7 +259,10 @@ async def edit_position(position_id: str, sl_pct: float | None = None,
     p = await swing_positions_collection.find_one({"position_id": position_id, "status": "OPEN"})
     if not p:
         raise ValueError("open position not found")
-    anchor = p.get("buy_price") or p["entry_price"]
+    # Anchored to the FILL, matching how the levels were set at entry — a percentage
+    # edit that silently measured from a different price than the original would be a
+    # different risk than the one on screen.
+    anchor = p.get("anchor_price") or p["entry_price"]
     upd: dict = {"updated_at": _now()}
     if sl_pct is not None:
         upd["sl_pct"] = float(sl_pct)
@@ -288,6 +316,8 @@ async def _fill(w: dict, price: float) -> bool:
     deployed = await _deployed()
     if deployed + price * qty > TOTAL_CAPITAL:
         return False                       # desk full; the watch simply keeps waiting
+    drifted = price > w["buy_price"] + 0.005
+    drift_actual = (price / w["buy_price"] - 1) * 100 if w["buy_price"] else 0.0
     await swing_positions_collection.insert_one({
         "position_id": uuid4().hex[:12], "watch_id": w["watch_id"],
         "symbol": w["symbol"], "name": w.get("name"),
@@ -296,9 +326,15 @@ async def _fill(w: dict, price: float) -> bool:
         # buy_price is the level YOU named; entry_price is what it actually filled at.
         "buy_price": w["buy_price"], "entry_price": round(price, 2), "qty": qty,
         "slippage": round(price - w["buy_price"], 2),
+        # DRIFTED means the gap carried the fill past your price, inside the allowed band.
+        "drifted": drifted, "drift_pct_actual": round(drift_actual, 2),
+        "drift_pct_allowed": w.get("drift_pct", DEFAULT_DRIFT_PCT),
         "capital_deployed": round(price * qty, 2),
         "sl_pct": w["sl_pct"], "tp_pct": w["tp_pct"],
-        "stop_price": w["stop_price"], "target_price": w["target_price"],
+        # Anchored to the FILL: risk is measured from where the money actually went in.
+        "anchor_price": round(price, 2),
+        "stop_price": round(price * (1 - w["sl_pct"] / 100), 2),
+        "target_price": round(price * (1 + w["tp_pct"] / 100), 2),
         "ltp": round(price, 2), "unrealized_pnl": 0.0, "pnl_pct": 0.0,
         "realized_pnl": None, "gross_pnl": None, "fees": None, "fee_breakdown": None,
         "exit_price": None, "exit_reason": None, "status": "OPEN",
@@ -309,8 +345,9 @@ async def _fill(w: dict, price: float) -> bool:
         {"watch_id": w["watch_id"]},
         {"$set": {"status": "TRIGGERED", "triggered_at": _now(),
                   "fill_price": round(price, 2), "updated_at": _now()}})
-    logger.warning("swing: FILLED %s x%d @ Rs%.2f (wanted Rs%.2f)",
-                   w["symbol"], qty, price, w["buy_price"])
+    logger.warning("swing: FILLED%s %s x%d @ Rs%.2f (wanted Rs%.2f%s)",
+                   " DRIFTED" if drifted else "", w["symbol"], qty, price, w["buy_price"],
+                   f", drift {drift_actual:+.2f}%" if drifted else "")
     return True
 
 
@@ -330,7 +367,23 @@ async def run_cycle() -> dict:
             continue
         await swing_watchlist_collection.update_one(
             {"watch_id": w["watch_id"]}, {"$set": {"ltp": round(ltp, 2), "updated_at": _now()}})
-        hit = ltp <= w["buy_price"] if w["trigger_side"] == "DIP" else ltp >= w["buy_price"]
+        # A crossed trigger is not enough on its own — the price has to be INSIDE the
+        # drift band. Outside it the gap has carried the stock past the trade that was
+        # actually asked for, so the watch stays live and records the miss instead.
+        drift = w.get("drift_pct", DEFAULT_DRIFT_PCT)
+        hi = w.get("max_fill_price") or round(w["buy_price"] * (1 + drift / 100), 2)
+        lo = w.get("min_fill_price") or round(w["buy_price"] * (1 - drift / 100), 2)
+        if w["trigger_side"] == "BREAKOUT":
+            hit, gapped = w["buy_price"] <= ltp <= hi, ltp > hi
+        else:
+            hit, gapped = lo <= ltp <= w["buy_price"], ltp < lo
+        if gapped:
+            gap_pct = (ltp / w["buy_price"] - 1) * 100
+            await swing_watchlist_collection.update_one(
+                {"watch_id": w["watch_id"]},
+                {"$set": {"gapped_past": True, "last_gap_pct": round(gap_pct, 2),
+                          "gapped_at": _now(), "updated_at": _now()}})
+            continue
         if hit and await _fill(w, ltp):
             filled += 1
 
