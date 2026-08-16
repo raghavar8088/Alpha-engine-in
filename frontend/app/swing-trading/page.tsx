@@ -185,23 +185,15 @@ export default function SwingTradingPage() {
       </div>
 
       <GlassPanel title="Add a stock to the buy zone">
+       <div className="addwrap">
         <div className="addbox">
           <div className="field grow">
             <label>Search any Indian stock</label>
             <input
-              value={picked ? `${picked.symbol} — ${picked.name}` : q}
+              value={q}
               placeholder="symbol or company name, e.g. TATASTEEL or Reliance"
               onChange={(e) => { setPicked(null); setQ(e.target.value); }}
             />
-            {!picked && hits.length > 0 && (
-              <div className="hits">
-                {hits.map((h) => (
-                  <button key={h.symbol} className="hit" onClick={() => { setPicked(h); setHits([]); }}>
-                    <b>{h.symbol}</b><span>{h.name}</span>
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
           <div className="field">
             <label>Buy price (₹)</label>
@@ -225,6 +217,29 @@ export default function SwingTradingPage() {
             {busy ? "Adding…" : "Add to buy zone"}
           </button>
         </div>
+
+        {/* Results sit IN FLOW, not floating over the page. GlassPanel clips its children
+            (overflow: hidden), so an absolutely-positioned dropdown rendered correctly and
+            was then invisible below the panel edge — which read as "search is broken". */}
+        {!picked && q.trim() !== "" && (
+          <div className="hits">
+            {hits.length === 0 ? (
+              <div className="nohit">No listed stock matches “{q}”.</div>
+            ) : (
+              hits.map((h) => (
+                <button key={h.symbol} className="hit" onClick={() => { setPicked(h); setQ(""); setHits([]); }}>
+                  <b>{h.symbol}</b><span>{h.name}</span>
+                </button>
+              ))
+            )}
+          </div>
+        )}
+        {picked && (
+          <div className="chosen">
+            Selected <b>{picked.symbol}</b> — {picked.name}
+            <button className="clear" onClick={() => { setPicked(null); setQ(""); }}>change</button>
+          </div>
+        )}
         {picked && buyPrice && (
           <p className="preview">
             <b>{picked.symbol}</b> at ₹{buyPrice} → stop ₹{inr2(Number(buyPrice) * (1 - Number(slPct) / 100))} ·
@@ -234,6 +249,7 @@ export default function SwingTradingPage() {
             if it gaps; above that it is refused.
           </p>
         )}
+       </div>
       </GlassPanel>
 
       <GlassPanel title="Equity">
@@ -405,16 +421,24 @@ export default function SwingTradingPage() {
         .tile-label { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-faint); }
         .tile-value { font-size: 21px; font-weight: 800; margin-top: 4px; font-variant-numeric: tabular-nums; }
         .tile-sub { font-size: 11px; color: var(--text-faint); margin-top: 3px; }
+        /* GlassPanel gives its children no padding, so this box had been sitting flush
+           against the panel edges. */
+        .addwrap { padding: 16px 20px 18px; }
         .addbox { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
         .field { display: flex; flex-direction: column; gap: 5px; position: relative; }
         .field.grow { flex: 1 1 320px; }
         .field.sm { width: 108px; }
         .field label { font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-faint); }
         .field input { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 9px; padding: 9px 12px; font-size: 13px; color: var(--text); width: 100%; }
-        .hits { position: absolute; top: 100%; left: 0; right: 0; z-index: 20; margin-top: 4px; background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 10px; overflow: hidden; max-height: 280px; overflow-y: auto; }
-        .hit { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; width: 100%; padding: 8px 12px; background: none; border: none; cursor: pointer; text-align: left; color: var(--text); }
-        .hit:hover { background: var(--canvas-soft); }
-        .hit span { font-size: 11px; color: var(--text-faint); }
+        .hits { margin-top: 12px; border: 1px solid var(--panel-border); border-radius: 10px; max-height: 300px; overflow-y: auto; background: var(--canvas-soft); }
+        .hit { display: flex; align-items: baseline; gap: 10px; width: 100%; padding: 9px 14px; background: none; border: none; border-bottom: 1px solid var(--panel-border); cursor: pointer; text-align: left; color: var(--text); }
+        .hit:last-child { border-bottom: none; }
+        .hit:hover { background: var(--purple-dim); color: var(--purple); }
+        .hit b { min-width: 130px; font-size: 12.5px; }
+        .hit span { font-size: 11.5px; color: var(--text-faint); }
+        .nohit { padding: 14px; font-size: 12px; color: var(--text-faint); text-align: center; }
+        .chosen { margin-top: 12px; font-size: 12.5px; color: var(--text-muted); display: flex; align-items: center; gap: 10px; }
+        .clear { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); border-radius: 7px; padding: 3px 10px; font-size: 11px; cursor: pointer; }
         .primary { background: var(--purple); color: #fff; border: none; border-radius: 9px; padding: 10px 20px; font-weight: 700; font-size: 13px; cursor: pointer; }
         .primary:disabled { opacity: .45; cursor: not-allowed; }
         .preview { margin: 12px 0 0; font-size: 12px; color: var(--text-muted); }
