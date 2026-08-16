@@ -291,26 +291,32 @@ export default function NiftyScalpPage() {
       )}
 
       <style jsx>{`
-        .page { display: flex; flex-direction: column; gap: 18px; }
-        .desk-banner { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 12px; padding: 12px 16px; font-size: 12.5px; line-height: 1.65; color: var(--text-muted); }
-        .notes { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 10px; padding: 9px 14px; font-size: 11.5px; color: var(--text-faint); display: flex; flex-direction: column; gap: 3px; }
-        .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 12px; }
-        .tile { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 12px; padding: 14px 16px; }
-        .tile-label { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); }
-        .tile-value { font-size: 21px; font-weight: 800; margin-top: 4px; font-variant-numeric: tabular-nums; }
-        .tile-value.sm { font-size: 15px; }
-        .tile-sub { font-size: 11px; color: var(--text-faint); margin-top: 3px; }
-        .filters { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
-        .flabel { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); margin-right: 3px; }
-        .chip { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 5px 12px; border-radius: 999px; cursor: pointer; font-size: 12px; font-weight: 700; }
-        .chip.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.35); color: var(--purple); }
+        .page { display: flex; flex-direction: column; gap: 16px; }
+        .tiles { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+        .tile { padding: 12px 14px; border-radius: 10px; background: var(--panel); border: 1px solid var(--panel-border); }
+        .tile-label { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); }
+        .tile-value { margin-top: 5px; font-family: var(--font-data); font-variant-numeric: tabular-nums; font-size: 16px; font-weight: 600; }
+        .tile-value.sm { font-size: 13px; }
+        .tile-sub { margin-top: 3px; font-size: 10.5px; color: var(--text-faint); line-height: 1.4; }
         .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
-        .tab { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 8px 15px; border-radius: 10px; cursor: pointer; font-size: 12.5px; font-weight: 700; }
-        .tab.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.35); color: var(--purple); }
-        .table-scroll { overflow-x: auto; }
-        .empty { padding: 22px; text-align: center; color: var(--text-faint); font-size: 12.5px; }
-        .gain { color: var(--green); }
-        .loss { color: var(--red); }
+        .tab { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+        .tab.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .table-scroll { overflow-x: auto; max-height: 460px; overflow-y: auto; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+        .data-table th { text-align: center; padding: 8px 10px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--panel-border); position: sticky; top: 0; background: var(--panel); }
+        .data-table td { padding: 7px 10px; text-align: center; border-bottom: 1px solid var(--canvas-soft); }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.05em; background: var(--canvas-soft); border: 1px solid var(--panel-border); }
+        .badge.loss { background: var(--loss-dim); border-color: rgba(217, 45, 63, 0.3); }
+        .empty { padding: 18px 20px; font-size: 12px; color: var(--text-faint); text-align: center; }
+        .gain { color: var(--gain); }
+        .loss { color: var(--loss); }
+        .sub { font-size: 10.5px; color: var(--text-faint); }
+        .desk-banner { background: var(--canvas-edge); border: 1px solid var(--panel-border); border-radius: 12px; padding: 12px 16px; font-size: 12px; line-height: 1.7; color: var(--text-muted); }
+        .notes { background: var(--canvas-edge); border: 1px solid var(--panel-border); border-radius: 10px; padding: 9px 14px; font-size: 11px; color: var(--text-faint); display: flex; flex-direction: column; gap: 3px; }
+        .filters { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+        .flabel { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-right: 3px; }
+        .chip { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 5px 12px; border-radius: 999px; cursor: pointer; font-size: 11.5px; font-weight: 600; }
+        .chip.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
       `}</style>
     </div>
   );

@@ -413,55 +413,60 @@ export default function SwingTradingPage() {
       )}
 
       <style jsx>{`
-        .page { display: flex; flex-direction: column; gap: 18px; }
-        .desk-banner { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 12px; padding: 12px 16px; font-size: 12.5px; line-height: 1.65; color: var(--text-muted); }
-        .notice { background: var(--purple-dim); border: 1px solid rgba(125,52,220,.35); color: var(--purple); border-radius: 10px; padding: 9px 14px; font-size: 12.5px; cursor: pointer; }
-        .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
-        .tile { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 12px; padding: 14px 16px; }
-        .tile-label { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-faint); }
-        .tile-value { font-size: 21px; font-weight: 800; margin-top: 4px; font-variant-numeric: tabular-nums; }
-        .tile-sub { font-size: 11px; color: var(--text-faint); margin-top: 3px; }
-        /* GlassPanel gives its children no padding, so this box had been sitting flush
-           against the panel edges. */
+        .page { display: flex; flex-direction: column; gap: 16px; }
+        .tiles { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+        .tile { padding: 12px 14px; border-radius: 10px; background: var(--panel); border: 1px solid var(--panel-border); }
+        .tile-label { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); }
+        .tile-value { margin-top: 5px; font-family: var(--font-data); font-variant-numeric: tabular-nums; font-size: 16px; font-weight: 600; }
+        .tile-value.sm { font-size: 13px; }
+        .tile-sub { margin-top: 3px; font-size: 10.5px; color: var(--text-faint); line-height: 1.4; }
+        .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+        .tab { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+        .tab.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .table-scroll { overflow-x: auto; max-height: 460px; overflow-y: auto; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+        .data-table th { text-align: center; padding: 8px 10px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--panel-border); position: sticky; top: 0; background: var(--panel); }
+        .data-table td { padding: 7px 10px; text-align: center; border-bottom: 1px solid var(--canvas-soft); }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.05em; background: var(--canvas-soft); border: 1px solid var(--panel-border); }
+        .badge.loss { background: var(--loss-dim); border-color: rgba(217, 45, 63, 0.3); }
+        .empty { padding: 18px 20px; font-size: 12px; color: var(--text-faint); text-align: center; }
+        .gain { color: var(--gain); }
+        .loss { color: var(--loss); }
+        .sub { font-size: 10.5px; color: var(--text-faint); }
+        .desk-banner { background: var(--canvas-edge); border: 1px solid var(--panel-border); border-radius: 12px; padding: 12px 16px; font-size: 12px; line-height: 1.7; color: var(--text-muted); }
+        .notice { background: var(--purple-dim); border: 1px solid rgba(125, 52, 220, 0.3); color: var(--purple); border-radius: 10px; padding: 9px 14px; font-size: 12px; cursor: pointer; }
         .addwrap { padding: 16px 20px 18px; }
         .addbox { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
-        .field { display: flex; flex-direction: column; gap: 5px; position: relative; }
+        .field { display: flex; flex-direction: column; gap: 5px; }
         .field.grow { flex: 1 1 320px; }
-        .field.sm { width: 108px; }
-        .field label { font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-faint); }
-        .field input { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 9px; padding: 9px 12px; font-size: 13px; color: var(--text); width: 100%; }
+        .field.sm { width: 96px; }
+        .field label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); }
+        .field input { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 9px; padding: 9px 12px; font-size: 12.5px; color: var(--text); width: 100%; font-variant-numeric: tabular-nums; }
+        .field input:focus { outline: none; border-color: var(--purple); }
         .hits { margin-top: 12px; border: 1px solid var(--panel-border); border-radius: 10px; max-height: 300px; overflow-y: auto; background: var(--canvas-soft); }
-        .hit { display: flex; align-items: baseline; gap: 10px; width: 100%; padding: 9px 14px; background: none; border: none; border-bottom: 1px solid var(--panel-border); cursor: pointer; text-align: left; color: var(--text); }
+        .hit { display: flex; align-items: baseline; gap: 12px; width: 100%; padding: 9px 14px; background: none; border: none; border-bottom: 1px solid var(--panel-border); cursor: pointer; text-align: left; color: var(--text); }
         .hit:last-child { border-bottom: none; }
         .hit:hover { background: var(--purple-dim); color: var(--purple); }
-        .hit b { min-width: 130px; font-size: 12.5px; }
-        .hit span { font-size: 11.5px; color: var(--text-faint); }
+        .hit b { min-width: 132px; font-size: 12px; font-weight: 700; }
+        .hit span { font-size: 11px; color: var(--text-faint); }
         .nohit { padding: 14px; font-size: 12px; color: var(--text-faint); text-align: center; }
-        .chosen { margin-top: 12px; font-size: 12.5px; color: var(--text-muted); display: flex; align-items: center; gap: 10px; }
-        .clear { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); border-radius: 7px; padding: 3px 10px; font-size: 11px; cursor: pointer; }
-        .primary { background: var(--purple); color: #fff; border: none; border-radius: 9px; padding: 10px 20px; font-weight: 700; font-size: 13px; cursor: pointer; }
-        .primary:disabled { opacity: .45; cursor: not-allowed; }
-        .preview { margin: 12px 0 0; font-size: 12px; color: var(--text-muted); }
-        .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
-        .tab { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 8px 15px; border-radius: 10px; cursor: pointer; font-size: 12.5px; font-weight: 700; }
-        .tab.active { background: var(--purple-dim); border-color: rgba(125,52,220,.35); color: var(--purple); }
-        .table-scroll { overflow-x: auto; }
-        .sub { font-size: 10.5px; color: var(--text-faint); }
-        .acts { display: flex; gap: 5px; justify-content: center; }
-        .acts button { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); border-radius: 7px; padding: 3px 9px; font-size: 11px; cursor: pointer; }
-        .acts button:hover { color: var(--purple); border-color: rgba(125,52,220,.35); }
-        .acts button.danger:hover { color: var(--red); border-color: var(--red); }
-        .badge.dip { background: rgba(34,160,90,.14); color: var(--green); }
-        /* DRIFTED gets its own amber identity: filled, but not at the price you named -
-           that is neither an error nor an ordinary fill, so it should read as neither. */
-        .badge.drift { background: rgba(214,138,20,.16); color: #d68a14; margin-left: 7px; font-size: 9.5px; letter-spacing: .04em; }
-        tr.drifted { background: rgba(214,138,20,.07); }
-        tr.drifted td:first-child { box-shadow: inset 3px 0 0 #d68a14; }
-        .gapwarn { font-size: 10px; color: #d68a14; margin-top: 2px; }
-        .empty { padding: 22px; text-align: center; color: var(--text-faint); font-size: 12.5px; }
-        .hint { font-size: 11.5px; color: var(--text-faint); margin: 10px 0 0; }
-        .gain { color: var(--green); }
-        .loss { color: var(--red); }
+        .chosen { margin-top: 12px; font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 10px; }
+        .clear { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); border-radius: 7px; padding: 3px 10px; font-size: 10.5px; font-weight: 600; cursor: pointer; }
+        .primary { background: var(--purple); color: #fff; border: none; border-radius: 9px; padding: 10px 18px; font-weight: 700; font-size: 12.5px; cursor: pointer; }
+        .primary:hover:not(:disabled) { background: var(--purple-hover); }
+        .primary:disabled { opacity: 0.4; cursor: not-allowed; }
+        .preview { margin: 12px 0 0; font-size: 11.5px; color: var(--text-muted); line-height: 1.6; }
+        .acts { display: flex; gap: 4px; justify-content: center; }
+        .acts button { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); border-radius: 6px; padding: 3px 8px; font-size: 10px; font-weight: 600; cursor: pointer; }
+        .acts button:hover { color: var(--purple); border-color: rgba(125, 52, 220, 0.3); background: var(--purple-dim); }
+        .acts button.danger:hover { color: var(--loss); border-color: rgba(217, 45, 63, 0.3); background: var(--loss-dim); }
+        .badge.dip { background: var(--gain-dim); border-color: rgba(16, 150, 90, 0.3); color: var(--gain); }
+        /* DRIFTED is neither an error nor an ordinary fill, so it takes the app's WARN
+           token rather than a hand-picked colour or the loss red. */
+        .badge.drift { background: var(--warn-dim); border-color: var(--warn); color: var(--warn); margin-left: 6px; }
+        tr.drifted { background: var(--warn-dim); }
+        .gapwarn { font-size: 10px; color: var(--warn); margin-top: 2px; }
+        .hint { font-size: 11px; color: var(--text-faint); padding: 10px 20px 14px; margin: 0; }
       `}</style>
     </div>
   );
