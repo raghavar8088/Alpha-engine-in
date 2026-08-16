@@ -40,6 +40,7 @@ async def intraday_lab_loop() -> None:
     from app.services.intraday_lab_engine import run_cycle
     from app.services.live_intraday_engine import run_cycle as live_run_cycle
     from app.services.nifty_scalp_engine import run_cycle as nifty_scalp_run
+    from app.services.swing_trading import run_cycle as swing_run
     from app.services.nse_volume_gainers import maybe_capture as nse_volume_capture
     from app.services.live_trading_engine import run_cycle as live_trading_run_cycle
     from app.services.stock_desk import BUYING, SELLING, run_cycle as stock_desk_run_cycle
@@ -152,6 +153,15 @@ async def intraday_lab_loop() -> None:
                     logger.exception("morning-momentum failed")
                 # Momentum Trading (cash equity): self-guarded to 09:20/09:40/10:00, and
                 # manages its own book to +/-2% or the 15:00 square-off on every tick.
+                # Swing Trading: fills user-placed buy orders when price reaches
+                # them, then manages each to its stop/target.
+                try:
+                    sw = await swing_run()
+                    if sw.get("filled") or sw.get("closed"):
+                        logger.warning("swing: filled %s closed %s of %s watching",
+                                       sw["filled"], sw["closed"], sw["watching"])
+                except Exception:
+                    logger.exception("swing trading failed")
                 # NIFTY 50 Option Scalping: 400 candle/indicator strategies across 8
                 # timeframes, buying near-expiry ATM options. Self-guarded on cutoffs.
                 try:

@@ -3438,3 +3438,148 @@ export async function runCommodityCycle(): Promise<{ opened: number; managed: nu
 export async function refreshCommodityBars(): Promise<{ symbols: number; seconds: number; failed_fetches: number }> {
   return apiFetch("/api/commodity/refresh-bars", { method: "POST" });
 }
+
+// ── Swing Trading ──────────────────────────────────────────────────────────────
+// You name the buy price; the desk waits for the market to reach it, then manages the
+// position to a stop and target you can change at any time.
+
+export interface SwingSummary {
+  mode: string;
+  enabled: boolean;
+  initial_capital: number;
+  position_size: number;
+  max_positions: number;
+  default_sl_pct: number;
+  default_tp_pct: number;
+  deployed_capital: number;
+  available_cash: number;
+  realized_pnl: number;
+  gross_realized_pnl: number;
+  total_fees: number;
+  unrealized_pnl: number;
+  equity: number;
+  roi_pct: number;
+  today_pnl: number;
+  today_roi_pct: number;
+  deployed_roi_pct: number;
+  open_positions: number;
+  closed_positions: number;
+  waiting: number;
+  last_run_at: string | null;
+}
+
+export interface SwingSearchResult {
+  symbol: string;
+  name: string;
+  angel_token: string;
+  angel_exchange: string;
+}
+
+export interface SwingWatch {
+  watch_id: string;
+  symbol: string;
+  name: string;
+  buy_price: number;
+  trigger_side: string;
+  ltp: number | null;
+  ltp_at_add: number | null;
+  sl_pct: number;
+  tp_pct: number;
+  stop_price: number;
+  target_price: number;
+  status: string;
+  note: string;
+  created_at: string | null;
+  triggered_at: string | null;
+}
+
+export interface SwingPosition {
+  position_id: string;
+  symbol: string;
+  name: string;
+  qty: number;
+  buy_price: number;
+  entry_price: number;
+  slippage: number;
+  capital_deployed: number;
+  sl_pct: number;
+  tp_pct: number;
+  stop_price: number;
+  target_price: number;
+  ltp: number;
+  exit_price: number | null;
+  unrealized_pnl: number;
+  realized_pnl: number | null;
+  gross_pnl: number | null;
+  fees: number | null;
+  exit_reason: string | null;
+  status: string;
+}
+
+export interface SwingEquityPoint {
+  ts: string;
+  equity: number;
+  realized: number;
+  unrealized: number;
+  deployed: number;
+  roi_pct: number;
+  open_positions: number;
+}
+
+export interface SwingDay {
+  date: string;
+  trades: number;
+  wins: number;
+  win_rate: number;
+  gross_pnl: number;
+  fees: number;
+  realized_pnl: number;
+  deployed: number;
+  roi_pct: number;
+  deployed_roi_pct: number;
+}
+
+export async function fetchSwingSummary(): Promise<SwingSummary> {
+  return apiFetch("/api/swing/summary");
+}
+export async function searchSwingStocks(q: string, limit = 25): Promise<SwingSearchResult[]> {
+  const r = await apiFetch(`/api/swing/search?q=${encodeURIComponent(q)}&limit=${limit}`);
+  return r.results ?? [];
+}
+export async function fetchSwingWatchlist(status?: string): Promise<SwingWatch[]> {
+  const q = status ? `?status=${status}` : "";
+  const r = await apiFetch(`/api/swing/watchlist${q}`);
+  return r.watchlist ?? [];
+}
+export async function addSwingWatch(body: {
+  symbol: string; buy_price: number; sl_pct?: number; tp_pct?: number; note?: string;
+}): Promise<SwingWatch> {
+  return apiFetch("/api/swing/watch", { method: "POST", body: JSON.stringify(body) });
+}
+export async function editSwingWatch(
+  watchId: string,
+  body: { buy_price?: number; sl_pct?: number; tp_pct?: number },
+): Promise<SwingWatch> {
+  return apiFetch(`/api/swing/watch/${watchId}`, { method: "PATCH", body: JSON.stringify(body) });
+}
+export async function removeSwingWatch(watchId: string): Promise<{ removed: boolean }> {
+  return apiFetch(`/api/swing/watch/${watchId}`, { method: "DELETE" });
+}
+export async function fetchSwingPositions(status = "OPEN"): Promise<SwingPosition[]> {
+  const r = await apiFetch(`/api/swing/positions?status=${status}`);
+  return r.positions ?? [];
+}
+export async function editSwingPosition(
+  positionId: string,
+  body: { sl_pct?: number; tp_pct?: number; stop_price?: number; target_price?: number },
+): Promise<SwingPosition> {
+  return apiFetch(`/api/swing/positions/${positionId}`, { method: "PATCH", body: JSON.stringify(body) });
+}
+export async function fetchSwingEquity(limit = 500): Promise<SwingEquityPoint[]> {
+  const r = await apiFetch(`/api/swing/equity?limit=${limit}`);
+  return r.equity ?? [];
+}
+export async function fetchSwingDaily(limit = 90): Promise<SwingDay[]> {
+  const r = await apiFetch(`/api/swing/daily?limit=${limit}`);
+  return r.daily ?? [];
+}

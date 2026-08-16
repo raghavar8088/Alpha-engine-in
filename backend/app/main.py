@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 
 from app.api.deps import get_current_user
 from app.api.routes import (
+    swing_trading,
     nifty_scalp,
     ai,
     backtest,
@@ -129,6 +130,7 @@ async def _dhan_token_refresh_loop() -> None:
 # collections are for charting recent history, not a permanent record, so they expire.
 # Same for the high-churn snapshot/log collections.
 EXPIRING_COLLECTIONS = {
+    "swing_equity": 120,
     "nse_volume_gainers": 120,
     "nifty_scalp_equity": 30,
     "nifty_scalp_signals": 30,
@@ -418,6 +420,7 @@ app.include_router(buy_low.router)
 app.include_router(live_paper.router)
 app.include_router(momentum_trading.router)
 app.include_router(nifty_scalp.router)
+app.include_router(swing_trading.router)
 app.include_router(stocks_range.router)
 app.include_router(bullish_stocks.router)
 app.include_router(long_horizon.router)

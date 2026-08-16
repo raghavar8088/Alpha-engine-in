@@ -14,6 +14,19 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         icon: <path d="M3 17l6-6 4 4 8-8M15 6h6v6" />,
       },
       {
+        // Directly under Market Data: this is the one desk driven by prices the USER
+        // names rather than by a strategy, so it belongs with the data tools.
+        href: "/swing-trading",
+        label: "Swing Trading",
+        icon: (
+          <>
+            <path d="M3 15l4-4 4 4 6-8" />
+            <circle cx="7" cy="11" r="1.6" />
+            <circle cx="11" cy="15" r="1.6" />
+          </>
+        ),
+      },
+      {
         // REAL-MONEY desk. Lightning-bolt mark to read as "live/hot" at a glance and to
         // separate it from the paper Live Intraday view inside Intraday Stocks.
         href: "/live-trading",
