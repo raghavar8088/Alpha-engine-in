@@ -41,6 +41,7 @@ from app.core.db import (
 )
 from app.services.angel_client import angel_client
 from app.services.angel_fees import product_for, round_trip
+from app.services.desk_totals import split as _totals_split
 from app.services.angel_equity_feed import equity_quotes
 from app.services.call_engine import IST, _quote_batch, _scored_daily_symbols
 from app.services.dhan_client import DhanClient
@@ -611,21 +612,11 @@ async def daily(limit: int = 60) -> list[dict]:
 
 
 async def summary() -> dict:
-    deployed = 0.0
-    async for p in intraday_lab_positions_collection.find({"status": "OPEN"}, {"capital_deployed": 1}):
-        deployed += p.get("capital_deployed", 0.0)
-    realized = fees = 0.0
-    async for p in intraday_lab_positions_collection.find(
-        {"status": {"$ne": "OPEN"}}, {"realized_pnl": 1, "fees": 1}
-    ):
-        realized += p.get("realized_pnl") or 0.0
-        fees += p.get("fees") or 0.0
-    unrealized = 0.0
-    async for p in intraday_lab_positions_collection.find({"status": "OPEN"}, {"unrealized_pnl": 1}):
-        unrealized += p.get("unrealized_pnl") or 0.0
+    op, cl = await _totals_split(intraday_lab_positions_collection)
+    deployed, unrealized = op["deployed"], op["unrealized"]
+    realized, fees = cl["realized"], cl["fees"]
     equity = INTRADAY_LAB_INITIAL_CAPITAL + realized + unrealized
-    open_count = await intraday_lab_positions_collection.count_documents({"status": "OPEN"})
-    closed_count = await intraday_lab_positions_collection.count_documents({"status": {"$ne": "OPEN"}})
+    open_count, closed_count = op["n"], cl["n"]
     return {
         "initial_capital": INTRADAY_LAB_INITIAL_CAPITAL,
         "per_strategy_allocation": round(PER_STRATEGY_ALLOCATION, 2),

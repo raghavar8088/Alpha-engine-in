@@ -6,6 +6,7 @@ import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import LivePaperBuying from "../../components/LivePaperBuying";
 import {
+  refreshing,
   PreLiveDay,
   PreLiveScore,
   PreLiveStatus,
@@ -40,6 +41,16 @@ export default function PreLivePage() {
     }
   }, []);
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshing(() => load());
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [load]);
+
   useEffect(() => {
     load();
     const id = setInterval(load, 15000); // live refresh every 15s
@@ -57,6 +68,8 @@ export default function PreLivePage() {
   return (
     <div className="page">
       <PageHeader
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
         crumb="Pre-Live Desk"
         title="Pre-Live Paper Desk"
         subtitle="Strategy-selection tournament: EVERY registered option-buying strategy, traded automatically every market day on LIVE Dhan data — each on its own independent ₹10 lakh account at 1 lot/position, REAL option premiums (paper, no real orders). This builds the forward, real-premium track record a historical backtest can't (Dhan purges expired-contract history), so the leaderboard can select the best for real-money trading."

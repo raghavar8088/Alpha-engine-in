@@ -8,6 +8,7 @@ import Histogram from "../../components/charts/Histogram";
 import LineChart from "../../components/charts/LineChart";
 import PayoffChart from "../../components/charts/PayoffChart";
 import {
+  refreshing,
   OptionChain,
   OptionStrikeRow,
   OptionsSellingSweep,
@@ -79,6 +80,16 @@ export default function OptionsPage() {
       setChainLoading(false);
     }
   }, [symbol, expiry]);
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshing(() => loadChain());
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [loadChain]);
 
   // Payoff tab
   const [legs, setLegs] = useState<PayoffLegRequest[]>([
@@ -182,6 +193,8 @@ export default function OptionsPage() {
   return (
     <div className="page">
       <PageHeader
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
         crumb="Options"
         title="Options"
         subtitle="Live Dhan option chain with Greeks/OI analytics, a multi-leg payoff builder, and a Black-Scholes synthetic-premium backtester for the 5 options strategies (#46-50) — see the note in the backtest tab for why premiums are modeled rather than historical-quoted."

@@ -5,6 +5,7 @@ import GlassPanel from "../../components/GlassPanel";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import {
+  refreshing,
   ManualInstrument,
   Watchlist,
   WatchlistQuote,
@@ -53,6 +54,16 @@ export default function WatchlistPage() {
       setLoading(false);
     }
   }, []);
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshing(() => loadWatchlists());
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [loadWatchlists]);
 
   useEffect(() => {
     loadWatchlists();
@@ -141,6 +152,8 @@ export default function WatchlistPage() {
   return (
     <div className="page">
       <PageHeader
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
         crumb="Watchlist"
         title="Watchlist"
         subtitle="Create named watchlists and track live prices for the symbols in each — real Dhan quotes."

@@ -6,6 +6,7 @@ import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import LineChart from "../../components/charts/LineChart";
 import {
+  refreshing,
   LongHorizonEquityPoint,
   LongHorizonScore,
   LongHorizonStatus,
@@ -55,6 +56,16 @@ export default function LongHorizonPage() {
     }
   }, []);
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshing(() => load());
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [load]);
+
   useEffect(() => {
     load();
     const id = setInterval(load, REFRESH_MS);
@@ -84,6 +95,8 @@ export default function LongHorizonPage() {
   return (
     <div className="page">
       <PageHeader
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
         crumb="Long-Horizon"
         title="Long-Horizon Factor Desk"
         subtitle="Paper desk that holds cross-sectional momentum/low-vol/reversal baskets for months, not days — the low-turnover construction that survives real NSE transaction costs where 1-5 day holds did not. Rebalances once per holding cycle (3-12 months) on a strategy's own qualified basket."

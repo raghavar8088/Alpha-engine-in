@@ -46,6 +46,7 @@ from app.core.db import (
 )
 from app.services.angel_client import AngelAPIError, angel_client
 from app.services.angel_fees import option_round_trip
+from app.services.desk_totals import split as _totals_split
 from app.services.call_engine import IST
 from app.services.nifty_scalp_strategies import (
     CATALOG,
@@ -449,17 +450,9 @@ async def scan() -> dict:
 
 
 async def summary() -> dict:
-    deployed = realized = unrealized = fees = 0.0
-    async for p in nifty_scalp_positions_collection.find(
-        {"status": "OPEN"}, {"capital_deployed": 1, "unrealized_pnl": 1}
-    ):
-        deployed += p.get("capital_deployed") or 0.0
-        unrealized += p.get("unrealized_pnl") or 0.0
-    async for p in nifty_scalp_positions_collection.find(
-        {"status": {"$ne": "OPEN"}}, {"realized_pnl": 1, "fees": 1}
-    ):
-        realized += p.get("realized_pnl") or 0.0
-        fees += p.get("fees") or 0.0
+    op, cl = await _totals_split(nifty_scalp_positions_collection)
+    deployed, unrealized = op["deployed"], op["unrealized"]
+    realized, fees = cl["realized"], cl["fees"]
     equity = TOTAL_CAPITAL + realized + unrealized
     state = await nifty_scalp_state_collection.find_one({"_id": "engine"}) or {}
     return {
@@ -477,8 +470,8 @@ async def summary() -> dict:
         "unrealized_pnl": round(unrealized, 2),
         "equity": round(equity, 2),
         "roi_pct": round((equity - TOTAL_CAPITAL) / TOTAL_CAPITAL * 100, 4) if TOTAL_CAPITAL else 0.0,
-        "open_positions": await nifty_scalp_positions_collection.count_documents({"status": "OPEN"}),
-        "closed_positions": await nifty_scalp_positions_collection.count_documents({"status": {"$ne": "OPEN"}}),
+        "open_positions": op["n"],
+        "closed_positions": cl["n"],
         "expiry": await near_expiry(),
         "last_run_at": state["last_run_at"].isoformat() if state.get("last_run_at") else None,
         "last_notes": state.get("last_notes", []),

@@ -5,6 +5,7 @@ import PageHeader from "../../components/PageHeader";
 import GlassPanel from "../../components/GlassPanel";
 import ErrorBanner from "../../components/ErrorBanner";
 import {
+  refreshing,
   MomentumTradingDaily,
   MomentumTradingPosition,
   MomentumTradingPreview,
@@ -64,6 +65,16 @@ export default function MomentumTradingPage() {
     }
   }, [bucket]);
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshing(() => load());
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [load]);
+
   useEffect(() => {
     load();
     const id = setInterval(load, REFRESH_MS);
@@ -75,6 +86,8 @@ export default function MomentumTradingPage() {
   return (
     <div className="page">
       <PageHeader
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
         crumb="Momentum Trading"
         title="Momentum Trading"
         subtitle="Intraday cash-equity momentum across two independent books, each on its own ₹1 crore. At 09:20, 09:40 and 10:00 IST each book checks its universe against the previous close: up 2% or more is bought, down 2% or more is sold short. Target +2%, stop −2%, and anything still open is squared off at 15:00. Paper, on live Angel One prices."

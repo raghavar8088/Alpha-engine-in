@@ -5,6 +5,7 @@ import PageHeader from "../../components/PageHeader";
 import GlassPanel from "../../components/GlassPanel";
 import ErrorBanner from "../../components/ErrorBanner";
 import {
+  refreshing,
   ZeroHeroDaily,
   ZeroHeroPosition,
   ZeroHeroScore,
@@ -65,6 +66,16 @@ export default function ZeroHeroPage() {
     }
   }, []);
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshing(() => load());
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [load]);
+
   useEffect(() => {
     load();
     const id = setInterval(load, REFRESH_MS);
@@ -82,6 +93,8 @@ export default function ZeroHeroPage() {
   return (
     <div className="page">
       <PageHeader
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
         crumb="Zero Hero Trades"
         title="Zero Hero Trades"
         subtitle="PAPER desk for the expiry-day lottery: 50 strategies buying deep-OTM index options for a few rupees, betting one sharp move turns ₹2 into ₹50. Each strategy trades its own ₹1,00,000 account on live Angel One premiums, and only on a day that index actually expires."

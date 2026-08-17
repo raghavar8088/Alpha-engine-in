@@ -17,7 +17,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from app.api.deps import get_current_user
+from app.services.response_cache import cached as _cached
 from app.services import swing_trading as sw
+
+
+async def _envelope(key: str, coro):
+    """Cache the response BODY, not the bare list, so a hit and a miss are identical."""
+    return {key: await coro}
 
 router = APIRouter(prefix="/api/swing", tags=["swing-trading"])
 
@@ -57,17 +63,22 @@ async def search_endpoint(
 
 
 @router.get("/summary")
-async def summary_endpoint(current_user: dict = Depends(get_current_user)):
-    return await sw.summary()
+async def summary_endpoint(
+    fresh: bool = Query(False, description="bypass the short cache; the refresh button sends this"),
+    current_user: dict = Depends(get_current_user),
+):
+    return await _cached("swing:summary", sw.summary, fresh=fresh)
 
 
 @router.get("/watchlist")
 async def watchlist_endpoint(
     status: str | None = Query(None, description="WAITING | TRIGGERED | UNFILLABLE | ALL"),
     limit: int = Query(500, ge=1, le=1000),
+    fresh: bool = Query(False, description="bypass the short cache"),
     current_user: dict = Depends(get_current_user),
 ):
-    return {"watchlist": await sw.watchlist(status, limit)}
+    return await _cached(f"swing:watchlist:{status}:{limit}",
+                         lambda: _envelope("watchlist", sw.watchlist(status, limit)), fresh=fresh)
 
 
 @router.post("/watch")
@@ -101,9 +112,13 @@ async def remove_watch_endpoint(watch_id: str, current_user: dict = Depends(get_
 async def positions_endpoint(
     status: str = Query("OPEN", description="OPEN | CLOSED | ALL"),
     limit: int = Query(500, ge=1, le=1000),
+    fresh: bool = Query(False, description="bypass the short cache"),
     current_user: dict = Depends(get_current_user),
 ):
-    return {"positions": await sw.positions(status, limit), "summary": await sw.summary()}
+    async def build():
+        return {"positions": await sw.positions(status, limit), "summary": await sw.summary()}
+
+    return await _cached(f"swing:positions:{status}:{limit}", build, fresh=fresh)
 
 
 @router.patch("/positions/{position_id}")
@@ -119,16 +134,22 @@ async def edit_position_endpoint(
 
 @router.get("/equity")
 async def equity_endpoint(
-    limit: int = Query(500, ge=1, le=2000), current_user: dict = Depends(get_current_user)
+    limit: int = Query(500, ge=1, le=2000),
+    fresh: bool = Query(False, description="bypass the short cache"),
+    current_user: dict = Depends(get_current_user),
 ):
-    return {"equity": await sw.equity_curve(limit)}
+    return await _cached(f"swing:equity:{limit}",
+                         lambda: _envelope("equity", sw.equity_curve(limit)), fresh=fresh)
 
 
 @router.get("/daily")
 async def daily_endpoint(
-    limit: int = Query(90, ge=1, le=365), current_user: dict = Depends(get_current_user)
+    limit: int = Query(90, ge=1, le=365),
+    fresh: bool = Query(False, description="bypass the short cache"),
+    current_user: dict = Depends(get_current_user),
 ):
-    return {"daily": await sw.daily(limit)}
+    return await _cached(f"swing:daily:{limit}",
+                         lambda: _envelope("daily", sw.daily(limit)), fresh=fresh)
 
 
 @router.post("/run")

@@ -6,6 +6,7 @@ import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import LineChart from "../../components/charts/LineChart";
 import {
+  refreshing,
   SellingDay,
   SellingDeskStatus,
   SellingEquityPoint,
@@ -69,6 +70,16 @@ export default function PreLiveSellingPage() {
     }
   }, []);
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshing(() => load());
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [load]);
+
   useEffect(() => {
     load();
     const id = setInterval(load, REFRESH_MS);
@@ -85,6 +96,8 @@ export default function PreLiveSellingPage() {
   return (
     <div className="page">
       <PageHeader
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
         crumb="Pre-Live"
         title="Pre-Live Desk · SELLING"
         subtitle="Strategy-selection tournament that SELLS option premium on NIFTY — EVERY registered option-selling strategy trades multi-leg credit structures at real live Dhan premiums, each on its own independent ₹10 lakh margin account at 1 lot/position (paper, capital pool entirely separate from the buying desk). Positions are held across sessions, so structures carried overnight are normal here."

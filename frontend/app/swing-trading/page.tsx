@@ -6,6 +6,7 @@ import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import LineChart from "../../components/charts/LineChart";
 import {
+  refreshing,
   fetchSwingSummary,
   fetchSwingWatchlist,
   fetchSwingPositions,
@@ -78,6 +79,16 @@ export default function SwingTradingPage() {
       setError(err instanceof Error ? err.message : "Failed to load Swing Trading");
     }
   }, []);
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshing(() => load());
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [load]);
 
   useEffect(() => {
     load();
@@ -154,6 +165,8 @@ export default function SwingTradingPage() {
   return (
     <div className="page">
       <PageHeader
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
         crumb="Swing Trading"
         title="Swing Trading"
         subtitle="You name the price; the desk waits for it. Search any listed Indian equity, set the price you want to buy at, and the order fills automatically when the market reaches it — then runs to a stop and target you can change at any time, before the fill or after. ₹1,00,000 per position out of a ₹10 crore book. Paper, on live Angel One prices, with real Angel One delivery costs charged on every close."

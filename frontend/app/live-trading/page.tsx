@@ -5,6 +5,7 @@ import PageHeader from "../../components/PageHeader";
 import GlassPanel from "../../components/GlassPanel";
 import ErrorBanner from "../../components/ErrorBanner";
 import {
+  refreshing,
   LiveTradingOpenPosition,
   LiveTradingScore,
   LiveTradingSummary,
@@ -49,6 +50,16 @@ export default function LiveTradingPage() {
       setError(e instanceof Error ? e.message : "Failed to load the live trading desk");
     }
   }, []);
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshing(() => load());
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [load]);
 
   useEffect(() => {
     load();
@@ -137,6 +148,8 @@ export default function LiveTradingPage() {
   return (
     <div className="page">
       <PageHeader
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
         crumb="Live Trading"
         title="Live Trading"
         subtitle="REAL-MONEY desk: the same 8 intraday strategies as the Live Intraday shortlist, but routing real orders to your Angel One account when ARMED. Each strategy trades up to ₹10,000 (₹80,000 desk ceiling, server-enforced), on the live Angel One feed. Cash equities can't hold shorts overnight, so every order is INTRADAY (MIS) and squares off the same day. Ships disarmed — nothing trades until you flip the toggle."

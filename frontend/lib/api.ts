@@ -45,7 +45,27 @@ export interface BrokerConnection {
   dhan_name: string | null;
 }
 
+// A refresh must re-read the database, not re-serve the short server-side cache that
+// makes ordinary loads fast. `refreshing()` raises this flag for the duration of one
+// load, and every request started inside it asks the backend to skip its cache.
+let FORCE_FRESH = false;
+
+/** Run a loader with cache-bypass on every request it fires. */
+export async function refreshing<T>(fn: () => Promise<T>): Promise<T> {
+  FORCE_FRESH = true;
+  try {
+    // The flag is read synchronously as each request is created, so a Promise.all of
+    // six fetches all pick it up before the first await resolves.
+    return await fn();
+  } finally {
+    FORCE_FRESH = false;
+  }
+}
+
 async function apiFetch(path: string, init?: RequestInit) {
+  if (FORCE_FRESH) {
+    path += `${path.includes("?") ? "&" : "?"}fresh=true`;
+  }
   const res = await fetch(`${API_URL}${path}`, {
     ...init,
     headers: {

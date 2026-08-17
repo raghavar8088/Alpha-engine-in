@@ -14,6 +14,7 @@ templates are geometric chart patterns, filterable via `family=chart_pattern`.
 from fastapi import APIRouter, Depends, Query
 
 from app.api.deps import get_current_user
+from app.services.response_cache import cached as _cached
 from app.services.nifty_scalp_engine import (
     daily as ns_daily,
     leaderboard as ns_leaderboard,
@@ -24,12 +25,26 @@ from app.services.nifty_scalp_engine import (
     timeframe_stats,
 )
 
+
+async def _wrap(key: str, coro):
+    """Cache the wrapped envelope, not the bare list, so the cached value is exactly the
+    response body."""
+    return {key: await coro}
+
+
+async def _envelope(key: str, coro):
+    """Cache the response BODY, not the bare list, so a hit and a miss are identical."""
+    return {key: await coro}
+
 router = APIRouter(prefix="/api/nifty-scalp", tags=["nifty-scalp"])
 
 
 @router.get("/summary")
-async def summary_endpoint(current_user: dict = Depends(get_current_user)):
-    return await ns_summary()
+async def summary_endpoint(
+    fresh: bool = Query(False, description="bypass the short cache; the refresh button sends this"),
+    current_user: dict = Depends(get_current_user),
+):
+    return await _cached("nscalp:summary", ns_summary, fresh=fresh)
 
 
 @router.get("/leaderboard")
@@ -38,16 +53,24 @@ async def leaderboard_endpoint(
     family: str | None = Query(None, description="e.g. chart_pattern, trend, breakout"),
     limit: int = Query(1000, ge=1, le=1000),
     current_user: dict = Depends(get_current_user),
+    fresh: bool = Query(False, description="bypass the short cache"),
 ):
-    rows = await ns_leaderboard(timeframe, limit)
-    if family:
-        rows = [r for r in rows if r["family"] == family]
-    return {"leaderboard": rows}
+    async def build():
+        rows = await ns_leaderboard(timeframe, limit)
+        if family:
+            rows = [r for r in rows if r["family"] == family]
+        return {"leaderboard": rows}
+
+    return await _cached(f"nscalp:lb:{timeframe}:{family}:{limit}", build, fresh=fresh)
 
 
 @router.get("/timeframes")
-async def timeframes_endpoint(current_user: dict = Depends(get_current_user)):
-    return {"timeframes": await timeframe_stats()}
+async def timeframes_endpoint(
+    fresh: bool = Query(False, description="bypass the short cache"),
+    current_user: dict = Depends(get_current_user),
+):
+    return await _cached(
+        "nscalp:timeframes", lambda: _wrap("timeframes", timeframe_stats()), fresh=fresh)
 
 
 @router.get("/positions")
@@ -56,9 +79,13 @@ async def positions_endpoint(
     timeframe: str | None = Query(None),
     limit: int = Query(300, ge=1, le=1000),
     current_user: dict = Depends(get_current_user),
+    fresh: bool = Query(False, description="bypass the short cache"),
 ):
-    return {"positions": await ns_positions(status, limit, timeframe),
-            "summary": await ns_summary()}
+    async def build():
+        return {"positions": await ns_positions(status, limit, timeframe),
+                "summary": await ns_summary()}
+
+    return await _cached(f"nscalp:pos:{status}:{timeframe}:{limit}", build, fresh=fresh)
 
 
 @router.get("/signals")
@@ -73,8 +100,10 @@ async def signals_endpoint(
 async def daily_endpoint(
     limit: int = Query(60, ge=1, le=365),
     current_user: dict = Depends(get_current_user),
+    fresh: bool = Query(False, description="bypass the short cache"),
 ):
-    return {"daily": await ns_daily(limit)}
+    return await _cached(f"nscalp:daily:{limit}",
+                         lambda: _envelope("daily", ns_daily(limit)), fresh=fresh)
 
 
 @router.post("/run")

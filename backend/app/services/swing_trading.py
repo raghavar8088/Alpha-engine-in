@@ -58,6 +58,7 @@ from app.core.db import (
 from app.services.angel_client import AngelAPIError, angel_client
 from app.services.angel_fees import round_trip
 from app.services.call_engine import IST
+from app.services.desk_totals import split as _totals_split
 
 logger = logging.getLogger("swing_trading")
 
@@ -438,18 +439,9 @@ async def run_cycle() -> dict:
 
 
 async def summary() -> dict:
-    deployed = unrealized = 0.0
-    async for p in swing_positions_collection.find(
-        {"status": "OPEN"}, {"capital_deployed": 1, "unrealized_pnl": 1}
-    ):
-        deployed += p.get("capital_deployed") or 0.0
-        unrealized += p.get("unrealized_pnl") or 0.0
-    realized = fees = 0.0
-    async for p in swing_positions_collection.find(
-        {"status": {"$ne": "OPEN"}}, {"realized_pnl": 1, "fees": 1}
-    ):
-        realized += p.get("realized_pnl") or 0.0
-        fees += p.get("fees") or 0.0
+    op, cl = await _totals_split(swing_positions_collection)
+    deployed, unrealized = op["deployed"], op["unrealized"]
+    realized, fees = cl["realized"], cl["fees"]
     equity = TOTAL_CAPITAL + realized + unrealized
     today = _today()
     today_pnl = 0.0
@@ -483,8 +475,8 @@ async def summary() -> dict:
         # deploys, total-capital ROI will always look tiny and says little about the
         # trades themselves.
         "deployed_roi_pct": round((realized + unrealized) / deployed * 100, 3) if deployed else 0.0,
-        "open_positions": await swing_positions_collection.count_documents({"status": "OPEN"}),
-        "closed_positions": await swing_positions_collection.count_documents({"status": {"$ne": "OPEN"}}),
+        "open_positions": op["n"],
+        "closed_positions": cl["n"],
         "waiting": await swing_watchlist_collection.count_documents({"status": "WAITING"}),
         "last_run_at": state["last_run_at"].isoformat() if state.get("last_run_at") else None,
     }

@@ -7,6 +7,7 @@ import StatusPill from "../../components/StatusPill";
 import ErrorBanner from "../../components/ErrorBanner";
 import EmptyState from "../../components/EmptyState";
 import {
+  refreshing,
   MomentumPosition,
   MomentumScore,
   MomentumSummary,
@@ -66,6 +67,16 @@ export default function MomentumPage() {
     }
   }, []);
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshing(() => load());
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [load]);
+
   useEffect(() => {
     load();
     const id = setInterval(load, REFRESH_MS);
@@ -108,6 +119,8 @@ export default function MomentumPage() {
   return (
     <div className="page">
       <PageHeader
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
         crumb="Momentum"
         title="Momentum Trading"
         subtitle={

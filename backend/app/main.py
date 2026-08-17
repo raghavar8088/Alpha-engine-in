@@ -129,6 +129,46 @@ async def _dhan_token_refresh_loop() -> None:
 # filled a 512MB Atlas tier and blocked ALL writes, taking the whole app down. These
 # collections are for charting recent history, not a permanent record, so they expire.
 # Same for the high-churn snapshot/log collections.
+# Every desk filters positions on these; without them each summary is a collection scan
+# that gets slower as history grows. Cheap to create, idempotent, safe to re-run.
+DESK_INDEXES: dict[str, list] = {
+    "nifty_scalp_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)], [("closed_on", 1)], [("timeframe", 1)]],
+    "live_intraday_positions": [[("book", 1), ("status", 1)], [("strategy_id", 1), ("book", 1), ("status", 1)], [("closed_on", 1)]],
+    "intraday_lab_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)], [("closed_on", 1)]],
+    "live_trading_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)]],
+    "momentum_trading_positions": [[("bucket", 1), ("status", 1)], [("closed_on", 1)]],
+    "swing_positions": [[("status", 1)], [("closed_on", 1)]],
+    "swing_watchlist": [[("status", 1)], [("symbol", 1), ("status", 1)]],
+    "buy_low_positions": [[("status", 1)], [("closed_on", 1)]],
+    "zero_hero_positions": [[("status", 1)], [("closed_on", 1)]],
+    "stock_desk_positions": [[("side", 1), ("status", 1)], [("closed_on", 1)]],
+}
+
+
+async def ensure_desk_indexes() -> None:
+    from app.core.db import db as _db
+    made = 0
+    for coll, keys in DESK_INDEXES.items():
+        for key in keys:
+            try:
+                await _db[coll].create_index(key, background=True)
+                made += 1
+            except Exception:  # noqa: BLE001 - a missing collection is not an error here
+                pass
+    logger.info("desk indexes ensured (%s)", made)
+
+
+async def warm_mongo_pool() -> None:
+    """Open the minimum pool before the first user request instead of during it."""
+    from app.core.db import client as _client
+    import asyncio as _asyncio
+    try:
+        await _asyncio.gather(*[_client.admin.command("ping") for _ in range(8)])
+        logger.info("mongo pool warmed")
+    except Exception:  # noqa: BLE001
+        logger.warning("could not warm the mongo pool", exc_info=True)
+
+
 EXPIRING_COLLECTIONS = {
     "swing_equity": 120,
     "nse_volume_gainers": 120,
@@ -165,6 +205,17 @@ async def ensure_ttl_indexes() -> None:
                                         name=f"{name}_ttl")
         except Exception as exc:  # an existing conflicting index must not block startup
             logger.warning("TTL index on %s skipped (%s)", name, exc)
+
+
+@app.on_event("startup")
+async def startup_warm_and_index() -> None:
+    """Pay the Atlas handshake and the index creation here, not inside the first request
+    a user makes. Both are idempotent and neither may block the app from starting."""
+    try:
+        await warm_mongo_pool()
+        await ensure_desk_indexes()
+    except Exception:  # noqa: BLE001
+        logger.warning("startup warm/index step failed; serving anyway", exc_info=True)
 
 
 @app.on_event("startup")

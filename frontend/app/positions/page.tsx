@@ -5,6 +5,7 @@ import GlassPanel from "../../components/GlassPanel";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import {
+  refreshing,
   ManualAccount,
   ManualInstrument,
   ManualOrder,
@@ -73,6 +74,16 @@ export default function PositionsPage() {
       setAccountsLoading(false);
     }
   }, []);
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshing(() => loadAccounts());
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [loadAccounts]);
 
   useEffect(() => {
     loadAccounts();
@@ -189,6 +200,8 @@ export default function PositionsPage() {
   return (
     <div className="page">
       <PageHeader
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
         crumb="Positions"
         title="Positions"
         subtitle="Manual paper trading desk — search a stock on NSE or BSE, buy it with a market or limit order, optionally via MTF leverage. Real Dhan prices and real Dhan margin/leverage figures, ₹1 crore paper capital. Not investment advice."

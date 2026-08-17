@@ -6,6 +6,7 @@ import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import LineChart from "../../components/charts/LineChart";
 import {
+  refreshing,
   IntradayDay,
   IntradayDeskStatus,
   IntradayEquityPoint,
@@ -133,6 +134,16 @@ export default function IntradayStocksPage() {
     }
   }, []);
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshing(() => load());
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [load]);
+
   const loadLive = useCallback(async () => {
     try {
       const [lb, pos, tr, dl] = await Promise.all([
@@ -180,6 +191,8 @@ export default function IntradayStocksPage() {
   return (
     <div className="page">
       <PageHeader
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
         crumb="Intraday Stocks"
         title="Intraday Stocks"
         subtitle="Paper strategy-selection tournament: auto-trades 150 intraday NSE-equity strategies on live Angel One prices. Each strategy runs its own independent ₹10 lakh account (₹15 cr across the desk) and takes a uniform ₹10 lakh per position, so the leaderboard ranks timing edge, not bet size. Long-only cash equities; scalping/momentum/mean-reversion styles square off at 15:15 IST, swing styles may carry a few days."

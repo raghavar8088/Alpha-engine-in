@@ -47,6 +47,7 @@ from app.core.db import (
 from app.services.angel_client import angel_client
 from app.services.angel_fees import product_for, round_trip
 from app.services.call_engine import IST, _scored_daily_symbols
+from app.services.desk_totals import split as _totals_split
 from app.services.dhan_client import DhanClient
 from app.services.intraday_lab_engine import _equity_quote_map, _size
 from app.services.intraday_strategies import STRATEGY_CATALOG, Signal, evaluate
@@ -446,19 +447,10 @@ async def manage_cycle(dhan: DhanClient | None) -> int:
 async def summary(book: str = DEFAULT_BOOK) -> dict:
     book = normalize_book(book)
     capital = book_capital(book)
-    deployed = realized = unrealized = fees = 0.0
-    async for p in live_intraday_positions_collection.find(
-        {"book": book, "status": "OPEN"}, {"capital_deployed": 1, "unrealized_pnl": 1}
-    ):
-        deployed += p.get("capital_deployed", 0.0)
-        unrealized += p.get("unrealized_pnl") or 0.0
-    async for p in live_intraday_positions_collection.find(
-        {"book": book, "status": {"$ne": "OPEN"}}, {"realized_pnl": 1, "fees": 1}
-    ):
-        realized += p.get("realized_pnl") or 0.0
-        fees += p.get("fees") or 0.0
-    open_count = await live_intraday_positions_collection.count_documents({"book": book, "status": "OPEN"})
-    closed_count = await live_intraday_positions_collection.count_documents({"book": book, "status": {"$ne": "OPEN"}})
+    op, cl = await _totals_split(live_intraday_positions_collection, {"book": book})
+    deployed, unrealized = op["deployed"], op["unrealized"]
+    realized, fees = cl["realized"], cl["fees"]
+    open_count, closed_count = op["n"], cl["n"]
     equity = capital + realized + unrealized
     alloc = per_strategy_allocation(book)
     return {

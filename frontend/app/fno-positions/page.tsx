@@ -6,6 +6,7 @@ import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import FnoAutoRoll from "../../components/FnoAutoRoll";
 import {
+  refreshing,
   FnoAccount,
   FnoBasketLeg,
   FnoBasketMargin,
@@ -122,6 +123,16 @@ export default function FnoPositionsPage() {
       setAccountsLoading(false);
     }
   }, []);
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshing(() => loadAccounts());
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [loadAccounts]);
 
   useEffect(() => {
     loadAccounts();
@@ -329,6 +340,8 @@ export default function FnoPositionsPage() {
   return (
     <div className="page">
       <PageHeader
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
         crumb="F&O Positions"
         title="F&O Positions"
         subtitle="Live index/stock option chains and futures off your Dhan account — buy or sell CE/PE and futures with real premiums and hedge-aware SPAN-style portfolio margin (a bought option that caps a sold option's risk lowers the margin blocked, like a real broker), across multiple paper accounts each with its own editable balance (default ₹1 crore). Not investment advice."

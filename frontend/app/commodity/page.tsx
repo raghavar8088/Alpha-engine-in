@@ -7,6 +7,7 @@ import StatusPill from "../../components/StatusPill";
 import ErrorBanner from "../../components/ErrorBanner";
 import EmptyState from "../../components/EmptyState";
 import {
+  refreshing,
   CommodityCoverage,
   CommodityPosition,
   CommodityScore,
@@ -83,6 +84,16 @@ export default function CommodityPage() {
     }
   }, [family, timeframe, verdict]);
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshing(() => load());
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [load]);
+
   useEffect(() => {
     load();
     const id = setInterval(load, REFRESH_MS);
@@ -116,6 +127,8 @@ export default function CommodityPage() {
   return (
     <div className="page">
       <PageHeader
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
         crumb="Commodity Trading"
         title="Commodity Trading"
         subtitle={

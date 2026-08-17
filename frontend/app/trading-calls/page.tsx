@@ -5,6 +5,7 @@ import GlassPanel from "../../components/GlassPanel";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import {
+  refreshing,
   CallSchedulerStatus,
   CallSegment,
   GenerateCallsResult,
@@ -138,6 +139,16 @@ export default function TradingCallsPage() {
       setLoading(false);
     }
   }, []);
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshing(() => load());
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [load]);
 
   const loadPositions = useCallback(async () => {
     try {
@@ -285,6 +296,8 @@ export default function TradingCallsPage() {
   return (
     <div className="page">
       <PageHeader
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
         crumb="Trading Calls"
         title="Trading Calls"
         subtitle="System-generated research calls with live target/stoploss tracking. Stock calls come from a daily technical scan of locally backfilled symbols; F&O option calls are emitted only when the qualified strategies of the latest Buying-Lab sweep agree on a direction; every price is labeled with its source (live quote, stored close, or model). Not investment advice — validate before trading real money."

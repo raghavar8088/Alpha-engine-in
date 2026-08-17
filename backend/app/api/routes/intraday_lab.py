@@ -14,6 +14,7 @@ from datetime import timezone
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.api.deps import get_current_user
+from app.services.response_cache import cached as _cached
 from app.api.routes.broker import _get_dhan_client
 from pydantic import BaseModel, Field
 
@@ -123,8 +124,11 @@ async def leaderboard(current_user: dict = Depends(get_current_user)):
 
 
 @router.get("/summary")
-async def summary_endpoint(current_user: dict = Depends(get_current_user)):
-    return await lab_summary()
+async def summary_endpoint(
+    fresh: bool = Query(False, description="bypass the short cache; the refresh button sends this"),
+    current_user: dict = Depends(get_current_user),
+):
+    return await _cached("lab:summary", lab_summary, fresh=fresh)
 
 
 @router.get("/daily")

@@ -5,6 +5,7 @@ import PageHeader from "../../components/PageHeader";
 import GlassPanel from "../../components/GlassPanel";
 import ErrorBanner from "../../components/ErrorBanner";
 import {
+  refreshing,
   BuyLowDaily,
   BuyLowMover,
   BuyLowScreener,
@@ -79,6 +80,16 @@ export default function BuyLowPage() {
     }
   }, []);
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshing(() => load());
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [load]);
+
   useEffect(() => {
     load();
     const id = setInterval(load, REFRESH_MS);
@@ -111,6 +122,8 @@ export default function BuyLowPage() {
   return (
     <div className="page">
       <PageHeader
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
         crumb="Buy Low Options"
         title="Buy Low Options"
         subtitle="At 3 PM every trading day this desk checks all 208 F&O stocks against their previous close. Anything down more than 4% gets a cheap out-of-the-money CALL bought on it — a bounded-risk bet that a sharp one-day fall snaps back. Ten stocks fall, ten calls; the same stock falling again another day is a fresh bet. Paper, on live Angel One premiums."

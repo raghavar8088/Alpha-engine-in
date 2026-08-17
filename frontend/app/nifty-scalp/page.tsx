@@ -5,6 +5,7 @@ import GlassPanel from "../../components/GlassPanel";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import {
+  refreshing,
   fetchNiftyScalpSummary,
   fetchNiftyScalpLeaderboard,
   fetchNiftyScalpTimeframes,
@@ -83,6 +84,16 @@ export default function NiftyScalpPage() {
     }
   }, [tf, fam]);
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshing(() => load());
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [load]);
+
   useEffect(() => {
     load();
     const id = setInterval(load, REFRESH_MS);
@@ -92,6 +103,8 @@ export default function NiftyScalpPage() {
   return (
     <div className="page">
       <PageHeader
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
         crumb="NIFTY 50 Option Scalping"
         title="NIFTY 50 Option Scalping"
         subtitle="A 504-strategy hunt for edges worth real money: 63 candle-and-indicator templates — including 13 classic geometric chart patterns — run on every timeframe from 1 minute to 1 day, each on its own ₹2,00,000. Signals are read off NIFTY spot candles and expressed by BUYING the near-expiry option nearest the money — a call when bullish, a put when bearish. Never sold, so the most any position can lose is the premium. Paper, on live Angel One prices, with real Angel One F&O costs charged on every close."

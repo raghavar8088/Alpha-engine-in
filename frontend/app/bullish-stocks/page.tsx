@@ -4,7 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import PageHeader from "../../components/PageHeader";
 import GlassPanel from "../../components/GlassPanel";
 import ErrorBanner from "../../components/ErrorBanner";
-import { BullishStockRow, BullishStocksScreen, fetchBullishStocks } from "../../lib/api";
+import {
+  refreshing, BullishStockRow, BullishStocksScreen, fetchBullishStocks } from "../../lib/api";
 
 const INDICES = [
   { key: "nifty50", label: "Nifty 50" },
@@ -144,6 +145,16 @@ export default function BullishStocksPage() {
     }
   }, [index, bullishOnly]);
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshing(() => load());
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [load]);
+
   useEffect(() => {
     load();
     const id = setInterval(load, REFRESH_MS);
@@ -178,6 +189,8 @@ export default function BullishStocksPage() {
   return (
     <div className="page">
       <PageHeader
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
         crumb="Bullish Stocks"
         title="Bullish Stocks"
         subtitle="Stocks in a sustained uptrend — making higher highs and higher lows, pressed against their all-time high, and holding above the 9 EMA for a month or more, with the 50/200 DMA stack, RSI, MACD, volume and relative strength confirming, and revenue growth, margins, debt, ROE and institutional holding checked underneath. Plan on every row: enter at the live price, 10% stop, 10% first target, and trail the stop 10% below the running high."

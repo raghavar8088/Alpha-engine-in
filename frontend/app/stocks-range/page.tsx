@@ -5,6 +5,7 @@ import PageHeader from "../../components/PageHeader";
 import GlassPanel from "../../components/GlassPanel";
 import ErrorBanner from "../../components/ErrorBanner";
 import {
+  refreshing,
   StockRangeRow,
   StockRangeSetResult,
   StockSearchResult,
@@ -140,6 +141,16 @@ export default function StocksRangePage() {
     }
   }, [index]);
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshing(() => load());
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [load]);
+
   useEffect(() => {
     load();
     const id = setInterval(load, REFRESH_MS);
@@ -210,6 +221,8 @@ export default function StocksRangePage() {
   return (
     <div className="page">
       <PageHeader
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
         crumb="Stocks Range"
         title="Stocks Range"
         subtitle="A watch-table of the Nifty 50 / 100 / 250 / 500 universe on live Angel One prices — LTP, 1-day and 1-week change, sector and stock trend. Set your own manual buy price per stock; when the live price is within ±10% of it, the stock lights up as a BUY ZONE."
