@@ -852,6 +852,10 @@ export interface AngelAccount {
 }
 
 export interface LiveTradingSummary {
+  roi_pct: number;
+  account_roi_pct: number | null;
+  account_basis: number;
+  deployed_roi_pct: number;
   mode: string;                       // "real"
   angel: AngelAccount;
   armed: boolean;
@@ -3611,5 +3615,37 @@ export async function fetchSwingEquity(limit = 500): Promise<SwingEquityPoint[]>
 }
 export async function fetchSwingDaily(limit = 90): Promise<SwingDay[]> {
   const r = await apiFetch(`/api/swing/daily?limit=${limit}`);
+  return r.daily ?? [];
+}
+
+
+// ── Live Trading history ───────────────────────────────────────────────────────
+
+export interface LiveTradingEquityPoint {
+  ts: string;
+  equity: number;
+  realized: number;
+  unrealized: number;
+  deployed: number;
+  open_positions: number;
+}
+
+export interface LiveTradingDay {
+  date: string;
+  trades: number;
+  wins: number;
+  win_rate: number;
+  realized_pnl: number;
+  deployed: number;
+  roi_pct: number;
+  deployed_roi_pct: number;
+}
+
+export async function fetchLiveTradingEquity(limit = 500): Promise<LiveTradingEquityPoint[]> {
+  const r = await apiFetch(`/api/live-trading/equity?limit=${limit}`);
+  return r.equity ?? [];
+}
+export async function fetchLiveTradingDaily(limit = 90): Promise<LiveTradingDay[]> {
+  const r = await apiFetch(`/api/live-trading/daily?limit=${limit}`);
   return r.daily ?? [];
 }

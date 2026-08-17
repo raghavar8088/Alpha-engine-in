@@ -694,6 +694,7 @@ async def summary() -> dict:
     open_count = await live_trading_positions_collection.count_documents({"status": "OPEN"})
     closed_count = await live_trading_positions_collection.count_documents({"status": {"$ne": "OPEN"}})
     state = await get_state()
+    _bal = await account_balance()
     return {
         "mode": "real",
         "armed": state["armed"],
@@ -713,6 +714,16 @@ async def summary() -> dict:
         "realized_pnl": round(realized, 2),
         "unrealized_pnl": round(unrealized, 2),
         "equity": round(INITIAL_CAPITAL + realized + unrealized, 2),
+        # See the module note on `daily()`: the desk's Rs80,000 is a ceiling, not money
+        # held, so the ceiling ROI and the real-account ROI are both reported rather than
+        # letting the kinder of the two stand alone.
+        "roi_pct": round((realized + unrealized) / INITIAL_CAPITAL * 100, 3)
+        if INITIAL_CAPITAL else 0.0,
+        "account_roi_pct": round((realized + unrealized) / _bal["net"] * 100, 3)
+        if _bal.get("net") else None,
+        "account_basis": round(_bal.get("net") or 0.0, 2),
+        "deployed_roi_pct": round((realized + unrealized) / deployed * 100, 3)
+        if deployed else 0.0,
         "open_positions": open_count,
         "closed_positions": closed_count,
         "strategy_count": len(SELECTED),
@@ -879,3 +890,50 @@ async def run_cycle(dhan: DhanClient | None) -> dict:
     )
     return {"opened": scan_result["opened"], "managed": managed, "fills": fills,
             "scanned_symbols": scan_result["scanned_symbols"], "notes": scan_result["notes"]}
+
+
+# ── history ────────────────────────────────────────────────────────────────────
+
+
+async def equity_curve(limit: int = 500) -> list[dict]:
+    """Equity marks, oldest first so a chart can plot them directly."""
+    rows = []
+    async for d in live_trading_equity_collection.find({}).sort("ts", -1).limit(limit):
+        d.pop("_id", None)
+        d["ts"] = d["ts"].isoformat()
+        rows.append(d)
+    return list(reversed(rows))
+
+
+async def daily(limit: int = 90) -> list[dict]:
+    """Realised P&L and ROI per trading day, newest first.
+
+    Grouped on the IST date the position CLOSED, since that is when the money moved.
+    Positions predating the `closed_on` field fall back to their close timestamp, so old
+    trades still appear rather than silently vanishing from the history."""
+    buckets: dict[str, dict] = {}
+    async for p in live_trading_positions_collection.find(
+        {"status": {"$ne": "OPEN"}},
+        {"realized_pnl": 1, "closed_at": 1, "closed_on": 1, "capital_deployed": 1,
+         "symbol": 1, "strategy_name": 1},
+    ):
+        closed_at = p.get("closed_at")
+        day = p.get("closed_on") or (
+            closed_at.astimezone(IST).date().isoformat() if closed_at else None)
+        if not day:
+            continue
+        b = buckets.setdefault(day, {"date": day, "trades": 0, "wins": 0,
+                                     "realized_pnl": 0.0, "deployed": 0.0})
+        net = p.get("realized_pnl") or 0.0
+        b["trades"] += 1
+        b["wins"] += 1 if net > 0 else 0
+        b["realized_pnl"] += net
+        b["deployed"] += p.get("capital_deployed") or 0.0
+    rows = sorted(buckets.values(), key=lambda r: r["date"], reverse=True)[:limit]
+    for r in rows:
+        r["realized_pnl"] = round(r["realized_pnl"], 2)
+        r["deployed"] = round(r["deployed"], 2)
+        r["win_rate"] = round(r["wins"] / r["trades"], 4) if r["trades"] else 0.0
+        r["roi_pct"] = round(r["realized_pnl"] / INITIAL_CAPITAL * 100, 3) if INITIAL_CAPITAL else 0.0
+        r["deployed_roi_pct"] = round(r["realized_pnl"] / r["deployed"] * 100, 3) if r["deployed"] else 0.0
+    return rows

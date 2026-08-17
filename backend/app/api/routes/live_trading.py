@@ -22,6 +22,8 @@ from app.core.db import (
 )
 from app.services.dhan_client import DhanClient
 from app.services.live_trading_engine import (
+    daily as lt_daily,
+    equity_curve as lt_equity,
     LiveTradingError,
     angel_account,
     get_state,
@@ -145,3 +147,31 @@ async def run_now(current_user: dict = Depends(get_current_user)):
     result = await run_cycle(dhan)
     result["broker_connected"] = dhan is not None
     return result
+
+
+@router.get("/equity")
+async def equity_endpoint(
+    limit: int = Query(500, ge=1, le=2000),
+    fresh: bool = Query(False, description="bypass the short cache"),
+    current_user: dict = Depends(get_current_user),
+):
+    """Equity marks over time, oldest first."""
+    from app.services.response_cache import cached as _c
+    return await _c(f"lt:equity:{limit}",
+                    lambda: _env("equity", lt_equity(limit)), fresh=fresh)
+
+
+@router.get("/daily")
+async def daily_endpoint(
+    limit: int = Query(90, ge=1, le=365),
+    fresh: bool = Query(False, description="bypass the short cache"),
+    current_user: dict = Depends(get_current_user),
+):
+    """Per-day realised P&L, win rate and ROI on both the desk and deployed bases."""
+    from app.services.response_cache import cached as _c
+    return await _c(f"lt:daily:{limit}",
+                    lambda: _env("daily", lt_daily(limit)), fresh=fresh)
+
+
+async def _env(key: str, coro):
+    return {key: await coro}

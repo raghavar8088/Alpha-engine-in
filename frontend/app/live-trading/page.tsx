@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import PageHeader from "../../components/PageHeader";
 import GlassPanel from "../../components/GlassPanel";
+import LineChart from "../../components/charts/LineChart";
 import ErrorBanner from "../../components/ErrorBanner";
 import {
   refreshing,
@@ -12,6 +13,10 @@ import {
   fetchLiveTradingLeaderboard,
   fetchLiveTradingPositions,
   fetchLiveTradingSummary,
+  fetchLiveTradingEquity,
+  fetchLiveTradingDaily,
+  type LiveTradingEquityPoint,
+  type LiveTradingDay,
   panicCloseAllLiveTrading,
   setLiveTradingArmed,
   setLiveTradingKillSwitch,
@@ -35,16 +40,23 @@ export default function LiveTradingPage() {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
+  const [equity, setEquity] = useState<LiveTradingEquityPoint[]>([]);
+  const [daily, setDaily] = useState<LiveTradingDay[]>([]);
+
   const load = useCallback(async () => {
     try {
-      const [s, lb, pos] = await Promise.all([
+      const [s, lb, pos, eq, dy] = await Promise.all([
         fetchLiveTradingSummary(),
         fetchLiveTradingLeaderboard(),
         fetchLiveTradingPositions(),
+        fetchLiveTradingEquity(),
+        fetchLiveTradingDaily(),
       ]);
       setSummary(s);
       setBoard(lb);
       setPositions(pos.open ?? []);
+      setEquity(eq);
+      setDaily(dy);
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load the live trading desk");
@@ -221,6 +233,77 @@ export default function LiveTradingPage() {
         <Tile label="Strategies" value={String(board.filter((s) => s.enabled).length)} sub={`of ${summary?.strategy_count ?? 0} enabled`} />
       </div>
 
+      <div className="roi-row">
+        <div className="roi">
+          <div className="roi-label">ROI · desk allocation</div>
+          <div className={`roi-value ${(summary?.roi_pct ?? 0) >= 0 ? "gain" : "loss"}`}>
+            {pct(summary?.roi_pct)}
+          </div>
+          <div className="roi-sub">of the {inr(summary?.initial_capital)} ceiling</div>
+        </div>
+        <div className="roi">
+          <div className="roi-label">ROI · real account</div>
+          <div className={`roi-value ${(summary?.account_roi_pct ?? 0) >= 0 ? "gain" : "loss"}`}>
+            {pct(summary?.account_roi_pct)}
+          </div>
+          <div className="roi-sub">of {inr(summary?.account_basis)} actually held</div>
+        </div>
+        <div className="roi">
+          <div className="roi-label">ROI · deployed</div>
+          <div className={`roi-value ${(summary?.deployed_roi_pct ?? 0) >= 0 ? "gain" : "loss"}`}>
+            {pct(summary?.deployed_roi_pct)}
+          </div>
+          <div className="roi-sub">of capital actually at risk</div>
+        </div>
+        <p className="roi-note">
+          The {inr(summary?.initial_capital)} is a <strong>ceiling</strong>, not money held —
+          the account carries {inr(summary?.account_basis)}. Both returns are real; showing
+          only the first would flatter the desk.
+        </p>
+      </div>
+
+      <GlassPanel title="Equity">
+        {equity.length < 2 ? (
+          <div className="empty">The curve appears once the desk has recorded a few marks.</div>
+        ) : (
+          <LineChart
+            points={equity.map((p) => ({ ts: p.ts, value: p.equity }))}
+            height={210}
+            formatValue={(v) => `₹${v.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`}
+          />
+        )}
+      </GlassPanel>
+
+      <GlassPanel title="Daily P&L and ROI">
+        {!daily.length ? (
+          <div className="empty">No closed trades yet.</div>
+        ) : (
+          <div className="table-scroll">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th style={{ textAlign: "left" }}>Date</th><th>Trades</th><th>Win %</th>
+                  <th>Deployed</th><th>Net P&amp;L</th><th>ROI (desk)</th><th>ROI (deployed)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {daily.map((d) => (
+                  <tr key={d.date}>
+                    <td style={{ textAlign: "left" }}>{d.date}</td>
+                    <td>{d.trades}</td>
+                    <td>{(d.win_rate * 100).toFixed(0)}%</td>
+                    <td>{inr(d.deployed)}</td>
+                    <td className={d.realized_pnl >= 0 ? "gain" : "loss"}>{signed(d.realized_pnl)}</td>
+                    <td className={d.roi_pct >= 0 ? "gain" : "loss"}>{pct(d.roi_pct)}</td>
+                    <td className={d.deployed_roi_pct >= 0 ? "gain" : "loss"}>{pct(d.deployed_roi_pct)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </GlassPanel>
+
       <GlassPanel title="Angel One account · live">
         {!angel?.available ? (
           <div className="empty">{angel?.reason || "Loading account…"}</div>
@@ -369,6 +452,12 @@ export default function LiveTradingPage() {
       </GlassPanel>
 
       <style jsx>{`
+        .roi-row { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+        .roi { padding: 12px 14px; border-radius: 10px; background: var(--panel); border: 1px solid var(--panel-border); }
+        .roi-label { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); }
+        .roi-value { margin-top: 5px; font-family: var(--font-data); font-variant-numeric: tabular-nums; font-size: 20px; font-weight: 700; }
+        .roi-sub { margin-top: 3px; font-size: 10.5px; color: var(--text-faint); }
+        .roi-note { grid-column: 1 / -1; margin: 0; font-size: 11px; line-height: 1.6; color: var(--text-faint); }
         .page { display: flex; flex-direction: column; gap: 16px; }
         .notice { padding: 10px 14px; border-radius: 9px; background: var(--canvas-soft); border: 1px solid var(--panel-border); font-size: 12.5px; cursor: pointer; }
         .warn { padding: 12px 16px; border-radius: 10px; background: var(--loss-dim); border: 1px solid rgba(224,49,49,0.35); color: var(--loss); font-size: 12.5px; line-height: 1.55; }
