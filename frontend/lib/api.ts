@@ -3649,3 +3649,60 @@ export async function fetchLiveTradingDaily(limit = 90): Promise<LiveTradingDay[
   const r = await apiFetch(`/api/live-trading/daily?limit=${limit}`);
   return r.daily ?? [];
 }
+
+
+// ── Desk history (shared by every trading module) ──────────────────────────────
+
+export interface DeskHistoryDay {
+  date: string;
+  trades: number;
+  wins: number;
+  win_rate: number;
+  realized_pnl: number;
+  fees: number;
+  deployed: number;
+  roi_pct: number;
+  deployed_roi_pct: number | null;
+  deployed_coverage: number;
+}
+
+export interface DeskHistory {
+  started_on: string | null;
+  days_live: number;
+  days_traded: number;
+  capital: number;
+  equity: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  total_fees: number;
+  trades: number;
+  wins: number;
+  win_rate: number;
+  roi_pct: number;
+  deployed_now: number;
+  open_positions: number;
+  deployed_roi_pct: number | null;
+  deployed_total: number;
+  deployed_known: boolean;
+  deployed_note: string | null;
+  avg_per_trading_day: number;
+  avg_per_calendar_day: number;
+  avg_roi_per_trading_day_pct: number;
+  daily: DeskHistoryDay[];
+  curve: { ts: string; value: number }[];
+  curve_is_derived: boolean;
+  account_id?: string;
+  account_name?: string;
+}
+
+export async function fetchDeskHistory(
+  desk: string,
+  scope?: string,
+  fresh = false,
+): Promise<DeskHistory> {
+  const q = new URLSearchParams();
+  if (scope) q.set("scope", scope);
+  if (fresh) q.set("fresh", "true");
+  const qs = q.toString();
+  return apiFetch(`/api/desk-history/${desk}${qs ? `?${qs}` : ""}`);
+}

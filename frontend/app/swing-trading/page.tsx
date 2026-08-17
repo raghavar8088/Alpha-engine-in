@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import GlassPanel from "../../components/GlassPanel";
+import DeskHistory from "../../components/DeskHistory";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import LineChart from "../../components/charts/LineChart";
@@ -424,6 +425,8 @@ export default function SwingTradingPage() {
           )}
         </GlassPanel>
       )}
+
+      <DeskHistory deskKey={"swing"} />
 
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 16px; }

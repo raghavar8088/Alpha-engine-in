@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import GlassPanel from "../../components/GlassPanel";
+import DeskHistory from "../../components/DeskHistory";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import LineChart from "../../components/charts/LineChart";
@@ -546,6 +547,8 @@ export default function IntradayStocksPage() {
       </GlassPanel>
       </>
       )}
+
+      <DeskHistory deskKey={"intraday-lab"} />
 
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 16px; }

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import PageHeader from "../../components/PageHeader";
 import GlassPanel from "../../components/GlassPanel";
+import DeskHistory from "../../components/DeskHistory";
 import ErrorBanner from "../../components/ErrorBanner";
 import {
   refreshing,
@@ -287,6 +288,8 @@ export default function MomentumTradingPage() {
           )}
         </GlassPanel>
       )}
+
+      <DeskHistory deskKey={"momentum-trading"} scope={bucket} />
 
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 16px; }

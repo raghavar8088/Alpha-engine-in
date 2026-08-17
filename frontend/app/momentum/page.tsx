@@ -3,6 +3,7 @@
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import PageHeader from "../../components/PageHeader";
 import GlassPanel from "../../components/GlassPanel";
+import DeskHistory from "../../components/DeskHistory";
 import StatusPill from "../../components/StatusPill";
 import ErrorBanner from "../../components/ErrorBanner";
 import EmptyState from "../../components/EmptyState";
@@ -407,6 +408,8 @@ export default function MomentumPage() {
           </ul>
         </GlassPanel>
       )}
+
+      <DeskHistory deskKey={"momentum"} />
 
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 16px; }

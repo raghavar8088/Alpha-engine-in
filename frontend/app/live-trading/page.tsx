@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import PageHeader from "../../components/PageHeader";
 import GlassPanel from "../../components/GlassPanel";
+import DeskHistory from "../../components/DeskHistory";
 import LineChart from "../../components/charts/LineChart";
 import ErrorBanner from "../../components/ErrorBanner";
 import {
@@ -450,6 +451,8 @@ export default function LiveTradingPage() {
           </div>
         )}
       </GlassPanel>
+
+      <DeskHistory deskKey={"live-trading"} />
 
       <style jsx>{`
         .roi-row { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }

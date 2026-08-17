@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 
 from app.api.deps import get_current_user
 from app.api.routes import (
+    desk_history,
     swing_trading,
     nifty_scalp,
     ai,
@@ -472,6 +473,7 @@ app.include_router(live_paper.router)
 app.include_router(momentum_trading.router)
 app.include_router(nifty_scalp.router)
 app.include_router(swing_trading.router)
+app.include_router(desk_history.router)
 app.include_router(stocks_range.router)
 app.include_router(bullish_stocks.router)
 app.include_router(long_horizon.router)

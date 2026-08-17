@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import GlassPanel from "../../components/GlassPanel";
+import DeskHistory from "../../components/DeskHistory";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import FnoAutoRoll from "../../components/FnoAutoRoll";
@@ -728,6 +729,8 @@ export default function FnoPositionsPage() {
           onSubmit={saveAccountEdit}
         />
       )}
+
+      <DeskHistory deskKey={"fno"} scope={accountId} />
 
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 18px; }
