@@ -52,9 +52,9 @@ from app.services.live_intraday_engine import (
     MAX_SYMBOLS_PER_SCAN,
     PER_STRATEGY_ALLOCATION,
     POSITION_NOTIONAL,
-    SELECTED,
-    SELECTED_BY_ID,
+    SELECTED as _PAPER_SHORTLIST,
     _live_signal,
+    resolve_names,
 )
 from backtesting_service.service import load_bars
 from tradingai_shared.domain import Timeframe
@@ -62,6 +62,26 @@ from tradingai_shared.domain import Timeframe
 logger = logging.getLogger("live_trading")
 
 STATE_ID = "engine"
+
+# Six additions taken from the Intraday Stocks tournament leaderboard. All are same-day
+# categories (momentum, scalping, mean reversion) with max_hold_days = 0, which is what
+# INTRADAY/MIS requires — a swing pick here would be force-closed at 15:15 and never trade
+# the edge it was selected for.
+EXTRA_STRATEGY_NAMES = [
+    "ANTI Gap-Go 0.30%",
+    "ANTI ORB 0.25% Scalp",
+    "ANTI Gap-Go 0.50%",
+    "ANTI Bollinger Snap-Back 2.25sd",
+    "ANTI ORB 0.15% Scalp",
+    "ANTI ORB 0.35% Scalp",
+]
+
+# This desk owns its selection rather than importing the paper desk's, so adding here does
+# not change what Live Intraday trades. The original eight are kept in front, untouched.
+_EXTRAS = [ls for ls in resolve_names(EXTRA_STRATEGY_NAMES)
+           if ls.strategy_id not in {p.strategy_id for p in _PAPER_SHORTLIST}]
+SELECTED = list(_PAPER_SHORTLIST) + _EXTRAS
+SELECTED_BY_ID = {ls.strategy_id: ls for ls in SELECTED}
 DESK_CEILING = PER_STRATEGY_ALLOCATION * max(len(SELECTED), 1)  # ₹80k across the 8 names
 MAX_CONSECUTIVE_REJECTS = 3        # auto-disarm after this many failed real orders in a row
 PRODUCT_TYPE = "INTRADAY"          # MIS: intraday shorts allowed, everything squares off EOD

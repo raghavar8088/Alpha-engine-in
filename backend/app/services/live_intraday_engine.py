@@ -104,10 +104,15 @@ class LiveStrategy:
     spec: object              # the base StrategySpec whose signal we evaluate
 
 
-def _resolve_selection() -> list[LiveStrategy]:
+def resolve_names(names: list[str]) -> list[LiveStrategy]:
+    """Turn leaderboard display names into tradable strategies.
+
+    An "ANTI " prefix means trade the REVERSE of that base — same entry, opposite side,
+    target and stop swapped. Shared with the real-money desk so both read a name the same
+    way; a name that resolves differently on two desks would be a silent divergence."""
     by_name = {s.name: s for s in STRATEGY_CATALOG}
     out: list[LiveStrategy] = []
-    for disp in SELECTED_NAMES:
+    for disp in names:
         is_anti = disp.startswith("ANTI ")
         base_name = disp[5:] if is_anti else disp
         spec = by_name.get(base_name)
@@ -120,6 +125,10 @@ def _resolve_selection() -> list[LiveStrategy]:
             max_hold_days=spec.max_hold_days, spec=spec,
         ))
     return out
+
+
+def _resolve_selection() -> list[LiveStrategy]:
+    return resolve_names(SELECTED_NAMES)
 
 
 SELECTED: list[LiveStrategy] = _resolve_selection()
