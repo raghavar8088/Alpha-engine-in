@@ -146,6 +146,39 @@ async def set_kill_switch(active: bool) -> dict:
     return await get_state()
 
 
+# Phrases Angel uses when it is declining ONE INSTRUMENT rather than reporting that
+# something is wrong with the account or the session. Matched loosely because the wording
+# is prose, not an error code, and it varies by ban type.
+SYMBOL_REFUSAL_MARKERS = (
+    "cautionary",
+    "surveillance",
+    "not allowed to trade",
+    "not permitted",
+    "banned",
+    "ban period",
+    "asm",
+    "gsm",
+    "trade to trade",
+    "t2t",
+    "blocked for trading",
+    "restricted",
+)
+
+# Symbols the exchange refused today. Reset with the session, because a listing added on
+# Monday is usually gone by the next review and hard-coding a blocklist would outlive it.
+_refused_symbols: dict[str, str] = {}
+
+
+def _is_symbol_refusal(message: str) -> bool:
+    m = (message or "").lower()
+    return any(k in m for k in SYMBOL_REFUSAL_MARKERS)
+
+
+def refused_symbols() -> dict[str, str]:
+    """Names the exchange declined this session, and why."""
+    return dict(_refused_symbols)
+
+
 async def _register_reject() -> None:
     st = await get_state()
     n = st["consecutive_rejects"] + 1
@@ -210,17 +243,42 @@ async def _realized_pnl(strategy_id: str) -> float:
 
 
 async def _available_cash(strategy_id: str) -> float:
-    """The tighter of this strategy's own slice and the cash Angel says exists.
+    """The tightest of three real limits: this strategy's own slice, and what the ACCOUNT
+    can still fund across every strategy.
 
-    Both limits are real: the per-strategy allocation is the user's risk decision, and the
-    Angel balance is a fact. Sizing off the allocation alone would place orders the
-    account cannot fund, which Angel rejects — and enough rejections auto-disarm the
-    desk."""
+    The account limit has to be desk-wide. Checking each strategy against Angel's balance
+    separately let eleven idle strategies each treat the same rupees as theirs; fired in the
+    same cycle they would have ordered several times the cash on hand, been rejected on
+    margin, and auto-disarmed the desk for a shortfall that was our arithmetic rather than
+    the broker's."""
     slice_left = PER_STRATEGY_ALLOCATION + await _realized_pnl(strategy_id) - await _deployed_capital(strategy_id)
     bal = await account_balance()
     if not bal["ok"]:
+        return 0.0            # cannot confirm the money exists, so do not spend it
+    desk_room = bal["available"] - await _desk_unseen_notional(bal.get("fetched_at"))
+    return max(0.0, min(slice_left, desk_room))
+
+
+async def _desk_unseen_notional(balance_fetched_at: str | None) -> float:
+    """Notional opened AFTER the cached balance was read.
+
+    Only these are missing from `availablecash`; everything older is already reflected in
+    it as blocked margin, and subtracting those again would charge the desk twice for the
+    same positions. Notional overstates what MIS actually consumes, which makes this
+    deliberately conservative for the seconds until the next balance refresh — the right
+    direction to be wrong in when the alternative is an order the account cannot fund."""
+    if not balance_fetched_at:
         return 0.0
-    return max(0.0, min(slice_left, bal["available"]))
+    try:
+        since = datetime.fromisoformat(balance_fetched_at)
+    except (TypeError, ValueError):
+        return 0.0
+    total = 0.0
+    async for p in live_trading_positions_collection.find(
+        {"status": "OPEN", "opened_at": {"$gte": since}}, {"capital_deployed": 1}
+    ):
+        total += p.get("capital_deployed") or 0.0
+    return total
 
 
 async def today_pnl() -> float:
@@ -351,8 +409,17 @@ async def _place_angel_order(inst: dict, side: str, qty: int) -> str | None:
             duration="DAY",
             price=0,
         )
-    except Exception:
-        logger.exception("[live_trading] Angel order FAILED: %s %s x%s", side, inst.get("symbol"), qty)
+    except Exception as exc:  # noqa: BLE001
+        msg = str(exc)
+        sym = inst.get("symbol")
+        if _is_symbol_refusal(msg):
+            # The exchange declining one name is not a desk fault. Remember it, skip it for
+            # the rest of the session, and do NOT touch the auto-disarm counter.
+            _refused_symbols[sym] = msg[:160]
+            logger.warning("[live_trading] %s refused by the exchange, skipping for today: %s",
+                           sym, msg[:120])
+            return "SKIP"
+        logger.exception("[live_trading] Angel order FAILED: %s %s x%s", side, sym, qty)
         return None
     oid = (body.get("data") or {}).get("orderid") if isinstance(body, dict) else None
     if not oid:
@@ -362,6 +429,8 @@ async def _place_angel_order(inst: dict, side: str, qty: int) -> str | None:
 
 
 async def _open_position(ls, symbol: str, inst: dict, signal, ltp_source: str) -> bool:
+    if symbol in _refused_symbols:
+        return False          # already declined by the exchange this session
     if await live_trading_positions_collection.find_one(
         {"strategy_id": ls.strategy_id, "symbol": symbol, "status": "OPEN"}
     ):
@@ -377,6 +446,8 @@ async def _open_position(ls, symbol: str, inst: dict, signal, ltp_source: str) -
 
     # REAL order via Angel One — only record the position if Angel accepted it
     order_id = await _place_angel_order(inst, signal.side, qty)
+    if order_id == "SKIP":
+        return False          # exchange said no to this SYMBOL; the desk stays armed
     if not order_id:
         await _register_reject()
         return False
@@ -744,6 +815,10 @@ async def summary() -> dict:
         "account_basis": round(_bal.get("net") or 0.0, 2),
         "deployed_roi_pct": round((realized + unrealized) / deployed * 100, 3)
         if deployed else 0.0,
+        # Symbols the exchange declined today. Surfaced rather than silently skipped: a
+        # name quietly disappearing from a real-money desk is exactly the kind of thing
+        # that should be visible.
+        "refused_symbols": refused_symbols(),
         "open_positions": open_count,
         "closed_positions": closed_count,
         "strategy_count": len(SELECTED),
