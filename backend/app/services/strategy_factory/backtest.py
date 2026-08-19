@@ -30,7 +30,8 @@ from typing import Optional
 
 from .catalog import Strategy
 from .primitives import (
-    DEFAULT_CAPITAL, DEFAULT_RISK_PCT, position_size, round_trip_cost, slippage_price,
+    DEFAULT_CAPITAL, DEFAULT_RISK_PCT, classify_regime_series, position_size,
+    round_trip_cost, slippage_price,
 )
 from .signals import evaluate
 
@@ -212,6 +213,12 @@ def backtest(strategy: Strategy, bars, symbol: str, exchange: str = "MCX",
     max_hold = max_hold or DEFAULT_MAX_HOLD.get(tf, 60)
     htf_ts = [b.ts for b in htf_bars] if htf_bars else []
 
+    # Regime for every bar in ONE pass. Recomputing it per bar made the replay O(n^2)
+    # and was measured at 65% of total backtest time (a full 546-strategy sweep projected
+    # to 10 hours). The series is provably identical to the per-bar function — every
+    # indicator involved is causal — so this is speed, not a shortcut.
+    regimes = classify_regime_series(bars)
+
     trades: list[Trade] = []
     equity = [capital]
     rejections: dict[str, int] = {}
@@ -267,7 +274,8 @@ def backtest(strategy: Strategy, bars, symbol: str, exchange: str = "MCX",
             cut = bisect_right(htf_ts, bars[i].ts)
             htf_slice = htf_bars[:cut] if cut else None
 
-        sig, rej = evaluate(strategy, bars[:i + 1], symbol, exchange, htf_slice)
+        sig, rej = evaluate(strategy, bars[:i + 1], symbol, exchange, htf_slice,
+                            regime=regimes[i])
         if sig is None:
             if rej is not None:
                 rejections[rej.stage] = rejections.get(rej.stage, 0) + 1
