@@ -20,6 +20,8 @@ import os
 from datetime import datetime, timezone
 from uuid import uuid4
 
+from anyio import to_thread
+
 from app.core.db import (
     sf_backtests_collection,
     sf_equity_collection,
@@ -135,9 +137,14 @@ async def run_backtests(source: str = DEFAULT_SOURCE, symbols: list[str] | None 
                 skipped += 1
                 continue
             htf = await bars_for(sym, strat.htf) if strat.htf else None
-            res = backtest(strat, bars, sym, src["exchange"], htf_bars=htf,
-                           capital=PER_STRATEGY_CAPITAL, cost_model=src["cost_model"],
-                           slippage_bps=SLIPPAGE_BPS, lot_size=lot)
+            # Off the event loop. One replay is ~3s of pure CPU, and this loop runs
+            # thousands of them; left inline it stalls every other desk's scheduler tick
+            # and every HTTP request for seconds at a time, for hours.
+            res = await to_thread.run_sync(
+                lambda st=strat, b=bars, sy=sym, h=htf, lo=lot: backtest(
+                    st, b, sy, src["exchange"], htf_bars=h,
+                    capital=PER_STRATEGY_CAPITAL, cost_model=src["cost_model"],
+                    slippage_bps=SLIPPAGE_BPS, lot_size=lo))
             graded[res.grade] = graded.get(res.grade, 0) + 1
             await sf_backtests_collection.update_one(
                 {"strategy_id": strat.strategy_id, "symbol": sym, "source": source},
