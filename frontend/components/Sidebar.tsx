@@ -199,6 +199,20 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
     label: "Strategy Lab",
     links: [
       {
+        // The Strategy Factory library: 546 composed strategies with their own backtests
+        // and grades. A factory/gear-stack mark rather than another chart icon, because
+        // this page is about the strategies themselves, not about any one market.
+        href: "/strategy-factory",
+        label: "Strategy Factory",
+        icon: (
+          <>
+            <path d="M3 20h18" />
+            <path d="M4 20V9l5 3V9l5 3V9l5 3v8" />
+            <path d="M9 20v-4h3v4" />
+          </>
+        ),
+      },
+      {
         href: "/strategies",
         label: "Strategies",
         icon: (

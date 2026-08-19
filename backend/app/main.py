@@ -41,6 +41,7 @@ from app.api.routes import (
     momentum_trading,
     zero_hero,
     stocks_range,
+    strategy_factory,
     strategies,
     telegram_signals,
     trading_calls,
@@ -188,6 +189,10 @@ EXPIRING_COLLECTIONS = {
     "fno_stock_roll_log": 30,
     "zero_hero_signals": 30,
     "buy_low_signals": 30,
+    # Strategy Factory: 546 strategies writing an equity point per cycle is the
+    # highest-churn source in the app, so it expires soonest.
+    "sf_equity": 14,
+    "sf_signals": 30,
 }
 
 
@@ -466,6 +471,7 @@ app.include_router(live_intraday.router)
 app.include_router(live_trading.router)
 app.include_router(momentum.router)
 app.include_router(commodity.router)
+app.include_router(strategy_factory.router)
 app.include_router(stock_desk.router)
 app.include_router(zero_hero.router)
 app.include_router(buy_low.router)

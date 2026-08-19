@@ -144,6 +144,17 @@ long_horizon_trades_collection = db["long_horizon_trades"]
 long_horizon_scores_collection = db["long_horizon_scores"]
 long_horizon_equity_collection = db["long_horizon_equity"]
 long_horizon_state_collection = db["long_horizon_state"]
+# Strategy Factory — 546 composed strategies (69 hypotheses x 8 timeframes), Rs10L paper
+# each. ADDITIVE: every other desk keeps its own collections and engine untouched.
+# `sf_backtests` holds one row per (strategy, symbol) rather than an average, because
+# "works on crude, fails on gold" is the answer the library exists to give.
+sf_backtests_collection = db["sf_backtests"]
+sf_scores_collection = db["sf_scores"]
+sf_positions_collection = db["sf_positions"]
+sf_trades_collection = db["sf_trades"]
+sf_signals_collection = db["sf_signals"]
+sf_equity_collection = db["sf_equity"]
+sf_state_collection = db["sf_state"]
 # Commodity Trading desk — 311 chart/candlestick/structure pattern strategies over 8 MCX
 # front-month futures on 8 timeframes, ₹10 lakh paper each. `commodity_bars` is the desk's
 # own paced bar store (Angel throttles the candle endpoint hard, so strategies read from

@@ -3706,3 +3706,114 @@ export async function fetchDeskHistory(
   const qs = q.toString();
   return apiFetch(`/api/desk-history/${desk}${qs ? `?${qs}` : ""}`);
 }
+
+// ---- Strategy Factory (546 composed strategies, Rs10L paper each) ----
+export interface SFSummary {
+  strategy_count: number;
+  family_counts: Record<string, number>;
+  per_strategy_capital: number;
+  initial_capital: number;
+  deployed_capital: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  total_costs: number;
+  equity: number;
+  open_positions: number;
+  closed_positions: number;
+  backtest_rows: number;
+  grade_counts: Record<string, number>;
+  min_grade_to_trade: number;
+  require_grade: boolean;
+  paused: boolean;
+  mode: string;
+  costs_charged: boolean;
+  slippage_bps: number;
+  last_run_at: string | null;
+  last_backtest_at: string | null;
+  last_notes: string[];
+  today_pnl: number;
+  breaker_tripped: boolean;
+  daily_loss_limit: number;
+}
+
+export interface SFRow {
+  strategy_id: string;
+  name: string;
+  family: string;
+  sub_family: string;
+  timeframe: string;
+  htf: string | null;
+  style: string;
+  target_r: number;
+  hypothesis: string;
+  regimes: string[];
+  detector: string;
+  grade: number;
+  grade_reasons: string[];
+  best_symbol: string | null;
+  bt_trades: number;
+  bt_win_rate: number;
+  bt_profit_factor: number | null;
+  bt_expectancy: number;
+  bt_avg_r: number;
+  bt_net_pnl: number;
+  bt_max_dd_pct: number;
+  bt_cagr_pct: number | null;
+  bt_sharpe: number | null;
+  oos_net_pnl: number;
+  oos_trades: number;
+  paper_trades: number;
+  paper_net_pnl: number;
+  paper_win_rate: number;
+  open_positions: number;
+  eligible: boolean;
+}
+
+export interface SFRecipe {
+  key: string;
+  name: string;
+  family: string;
+  sub_family: string;
+  hypothesis: string;
+  detector: string;
+  target_r: number;
+  regimes: string[];
+  confirmations: string[];
+  intraday_only: boolean;
+  uses_htf: boolean;
+}
+
+export async function fetchSFSummary(): Promise<SFSummary> {
+  return apiFetch("/api/strategy-factory/summary");
+}
+export async function fetchSFLibrary(p: { family?: string; timeframe?: string; grade?: number } = {}): Promise<{ library: SFRow[]; total: number; timeframes: string[]; families: Record<string, number> }> {
+  const q = new URLSearchParams();
+  if (p.family) q.set("family", p.family);
+  if (p.timeframe) q.set("timeframe", p.timeframe);
+  if (p.grade !== undefined) q.set("grade", String(p.grade));
+  const s = q.toString();
+  return apiFetch(`/api/strategy-factory/library${s ? `?${s}` : ""}`);
+}
+export async function fetchSFRecipes(): Promise<{ recipes: SFRecipe[]; count: number }> {
+  return apiFetch("/api/strategy-factory/recipes");
+}
+export async function fetchSFStrategy(id: string): Promise<any> {
+  return apiFetch(`/api/strategy-factory/strategy/${id}`);
+}
+export async function fetchSFPositions(): Promise<{ positions: any[]; open: any[] }> {
+  return apiFetch("/api/strategy-factory/positions");
+}
+export async function fetchSFTrades(limit = 100): Promise<any[]> {
+  const r = await apiFetch(`/api/strategy-factory/trades?limit=${limit}`);
+  return r.trades ?? [];
+}
+export async function fetchSFSignals(limit = 60): Promise<any[]> {
+  const r = await apiFetch(`/api/strategy-factory/signals?limit=${limit}`);
+  return r.signals ?? [];
+}
+export async function runSFBacktest(): Promise<{ started: boolean; note: string }> {
+  return apiFetch("/api/strategy-factory/backtest", { method: "POST" });
+}
+export async function runSFCycle(): Promise<{ opened: number; managed: number; notes: string[] }> {
+  return apiFetch("/api/strategy-factory/run", { method: "POST" });
+}
