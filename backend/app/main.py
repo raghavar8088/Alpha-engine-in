@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 
 from app.api.deps import get_current_user
 from app.api.routes import (
+    pattern,
     desk_history,
     swing_trading,
     nifty_scalp,
@@ -140,6 +141,7 @@ DESK_INDEXES: dict[str, list] = {
     "live_trading_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)]],
     "momentum_trading_positions": [[("bucket", 1), ("status", 1)], [("closed_on", 1)]],
     "swing_positions": [[("status", 1)], [("closed_on", 1)]],
+    "pattern_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)], [("closed_on", 1)], [("timeframe", 1)]],
     "swing_watchlist": [[("status", 1)], [("symbol", 1), ("status", 1)]],
     "buy_low_positions": [[("status", 1)], [("closed_on", 1)]],
     "zero_hero_positions": [[("status", 1)], [("closed_on", 1)]],
@@ -172,6 +174,7 @@ async def warm_mongo_pool() -> None:
 
 
 EXPIRING_COLLECTIONS = {
+    "pattern_equity": 60,
     "swing_equity": 120,
     "nse_volume_gainers": 120,
     "nifty_scalp_equity": 30,
@@ -480,6 +483,7 @@ app.include_router(momentum_trading.router)
 app.include_router(nifty_scalp.router)
 app.include_router(swing_trading.router)
 app.include_router(desk_history.router)
+app.include_router(pattern.router)
 app.include_router(stocks_range.router)
 app.include_router(bullish_stocks.router)
 app.include_router(long_horizon.router)

@@ -20,7 +20,11 @@ Lifecycle (refresh_calls): OPEN -> PARTIAL_EXIT (>= 60% of the way to target;
 stoploss trails to entry) -> TARGET_HIT / STOPLOSS / EXPIRED (past call expiry).
 """
 
+import asyncio
+import logging
 import math
+import os
+import time
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
@@ -34,6 +38,8 @@ from options_service.greeks import black_scholes_price
 from options_service.options_backtest import OPTION_BUYING_CATEGORIES
 from strategy_service import STRATEGY_REGISTRY
 from strategy_service.indicators import atr, donchian, ema, macd, roc, rsi
+
+logger = logging.getLogger("call_engine")
 from tradingai_shared.contracts import StrategyContext
 from tradingai_shared.domain import Bar, Timeframe
 
@@ -376,23 +382,93 @@ async def _is_duplicate(call: dict) -> bool:
 # --------------------------------------------------------------------------------
 
 
-async def _scored_daily_symbols() -> list[tuple[str, float, list[str], float, list[Bar]]]:
-    """(symbol, score, reasons, atr14, bars) for every non-index symbol that has
-    local daily bars. The scan universe is exactly what has been backfilled —
-    the module never invents data for symbols it cannot see."""
+# The screen is built from DAILY bars, so it can only change once a day. Holding the
+# result for a while turns a 500-second scan into one call that every desk in the tick
+# shares. Set SCORED_SYMBOLS_TTL=0 to disable.
+SCORED_TTL = float(os.getenv("SCORED_SYMBOLS_TTL", "1800"))
+_scored_cache: dict = {"at": 0.0, "data": None}
+_scored_lock = asyncio.Lock()
+
+
+_scored_task: asyncio.Task | None = None
+
+
+async def _refresh_scored() -> None:
+    """Rebuild the screen in the background. Only ever one at a time."""
+    global _scored_task
+    async with _scored_lock:
+        try:
+            data = await _scan_daily_symbols()
+            _scored_cache.update({"at": time.monotonic(), "data": data})
+        except Exception:  # noqa: BLE001 - a failed rebuild must not kill the scheduler
+            logger.exception("daily screen rebuild failed; keeping the previous one")
+        finally:
+            _scored_task = None
+
+
+async def _scored_daily_symbols(force: bool = False):
+    """(symbol, score, reasons, atr14, bars) for every non-index symbol with daily bars.
+
+    NEVER BLOCKS. Returns the last good screen immediately and rebuilds in the background
+    when it is stale. This is computed from DAILY bars, so a screen a few minutes old is
+    the same screen; a tick hanging ten minutes to prove that is not a trade-off worth
+    making on a desk that also places real orders.
+
+    `force=True` awaits a rebuild, for callers that genuinely need it fresh."""
+    global _scored_task
+    now = time.monotonic()
+    cached = _scored_cache["data"]
+    fresh = cached is not None and now - _scored_cache["at"] < SCORED_TTL
+
+    if force:
+        await _refresh_scored()
+        return _scored_cache["data"] or []
+
+    if not fresh and _scored_task is None:
+        _scored_task = asyncio.create_task(_refresh_scored())
+    return cached or []
+
+
+async def _scan_daily_symbols() -> list[tuple[str, float, list[str], float, list[Bar]]]:
+    """The uncached scan. The universe is exactly what has been backfilled — the module
+    never invents data for symbols it cannot see."""
     from app.core.db import bars_collection
 
-    symbols = await bars_collection.distinct("symbol", {"timeframe": "1d"})
-    out = []
-    for symbol in sorted(symbols):
-        if symbol in INDICES:
-            continue
-        bars = await to_thread.run_sync(load_bars, symbol, Timeframe.D1, 2.0)
-        scored = technical_score(bars)
-        if scored is None:
-            continue
-        score, reasons, atr14 = scored
-        out.append((symbol, score, reasons, atr14, bars))
+    started = time.monotonic()
+    # 14 months: the longest lookback in `technical_score` is a 200-day EMA, and every
+    # extra month is ~500 more documents per symbol crossing the wire for nothing.
+    cutoff = datetime.now(timezone.utc) - timedelta(days=int(os.getenv("SCORED_DAYS", "425")))
+    symbols = [s for s in await bars_collection.distinct("symbol", {"timeframe": "1d"})
+               if s not in INDICES]
+    symbols.sort()
+
+    out: list[tuple[str, float, list[str], float, list[Bar]]] = []
+    CHUNK = int(os.getenv("SCORED_SYMBOL_CHUNK", "50"))
+    for i in range(0, len(symbols), CHUNK):
+        group = symbols[i:i + CHUNK]
+        by_symbol: dict[str, list[Bar]] = {sym: [] for sym in group}
+        cursor = bars_collection.find(
+            {"timeframe": "1d", "symbol": {"$in": group}, "ts": {"$gte": cutoff}},
+            {"_id": 0},
+        ).sort([("symbol", 1), ("ts", 1)])
+        async for doc in cursor:
+            sym = doc.get("symbol")
+            if sym in by_symbol:
+                try:
+                    by_symbol[sym].append(Bar(**doc))
+                except TypeError:
+                    continue          # a stray document shape is skipped, not fatal
+        for sym in group:
+            bars = by_symbol.get(sym) or []
+            scored = technical_score(bars)
+            if scored is None:
+                continue
+            score, reasons, atr14 = scored
+            out.append((sym, score, reasons, atr14, bars))
+
+    logger.info("daily screen rebuilt: %s of %s symbols scored in %.1fs (%s chunks)",
+                len(out), len(symbols), time.monotonic() - started,
+                (len(symbols) + CHUNK - 1) // CHUNK)
     return out
 
 

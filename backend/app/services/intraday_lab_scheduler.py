@@ -40,6 +40,7 @@ async def intraday_lab_loop() -> None:
     from app.services.intraday_lab_engine import run_cycle
     from app.services.live_intraday_engine import run_cycle as live_run_cycle
     from app.services.nifty_scalp_engine import run_cycle as nifty_scalp_run
+    from app.services.intraday_pattern_engine import run_cycle as pattern_run
     from app.services.swing_trading import run_cycle as swing_run
     from app.services.nse_volume_gainers import maybe_capture as nse_volume_capture
     from app.services.live_trading_engine import run_cycle as live_trading_run_cycle
@@ -162,6 +163,15 @@ async def intraday_lab_loop() -> None:
                                        sw["filled"], sw["closed"], sw["watching"])
                 except Exception:
                     logger.exception("swing trading failed")
+                # Pattern desk: 63 templates x 8 timeframes on equities. Self-guarded
+                # on its own entry cutoff and candle-fetch budget.
+                try:
+                    pt = await pattern_run()
+                    if pt.get("opened") or pt.get("closed"):
+                        logger.info("pattern: opened %s closed %s (%s evaluated)",
+                                    pt["opened"], pt["closed"], pt.get("evaluated"))
+                except Exception:
+                    logger.exception("pattern desk failed")
                 # NIFTY 50 Option Scalping: 400 candle/indicator strategies across 8
                 # timeframes, buying near-expiry ATM options. Self-guarded on cutoffs.
                 try:

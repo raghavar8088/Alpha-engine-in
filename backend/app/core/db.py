@@ -180,6 +180,11 @@ fno_stock_roll_log_collection = db["fno_stock_roll_log"]
 momentum_buy_state_collection = db["momentum_buy_state"]
 # Momentum Trading — intraday CASH-EQUITY momentum: long a stock up 2%, short one down 2%,
 # +/-2% target and stop, squared off at 15:00. Separate from the option desks above.
+pattern_positions_collection = db["pattern_positions"]
+pattern_trades_collection = db["pattern_trades"]
+pattern_scores_collection = db["pattern_scores"]
+pattern_state_collection = db["pattern_state"]
+pattern_equity_collection = db["pattern_equity"]
 swing_watchlist_collection = db["swing_watchlist"]
 swing_positions_collection = db["swing_positions"]
 swing_trades_collection = db["swing_trades"]
