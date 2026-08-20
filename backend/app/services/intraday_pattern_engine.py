@@ -45,7 +45,16 @@ from app.core.db import (
 from app.services.angel_client import AngelAPIError, angel_client
 from app.services.angel_fees import product_for, round_trip
 from app.services.call_engine import IST, _scored_daily_symbols
-from app.services.nifty_scalp_strategies import TEMPLATES, Series, from_rows, resample
+from app.services.nifty_scalp_strategies import (
+    TEMPLATES as _BASE_TEMPLATES, Series, from_rows, resample)
+from app.services.vcp_templates import VCP_TEMPLATES
+
+# The base catalog plus the VCP family. Appended rather than merged into
+# nifty_scalp_strategies so the NIFTY option desk keeps exactly the 63 it had —
+# a VCP is a multi-week accumulation pattern and means nothing on a near-expiry
+# option premium. Duplicate names are skipped, so this stays idempotent.
+_EXISTING = {t[0] for t in _BASE_TEMPLATES}
+TEMPLATES = list(_BASE_TEMPLATES) + [t for t in VCP_TEMPLATES if t[0] not in _EXISTING]
 
 logger = logging.getLogger("intraday_pattern")
 

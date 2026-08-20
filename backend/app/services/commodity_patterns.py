@@ -1049,7 +1049,120 @@ def gap_fade(spec, bars) -> Optional[PatternSignal]:
 # Registry + catalog
 # --------------------------------------------------------------------------------
 
+
+
+# --------------------------------------------------------------------------------
+# VCP / Minervini family
+# --------------------------------------------------------------------------------
+# Same detection as the Intraday Stocks desk, via the shared vcp_core, so the two modules
+# cannot drift on what counts as a contraction. Long-only by nature: a VCP describes supply
+# drying up before a breakout, and there is no symmetric short version of that.
+
+
+def _vcp_cols(bars):
+    return ([b.high for b in bars], [b.low for b in bars],
+            [b.close for b in bars], [float(b.volume or 0) for b in bars])
+
+
+def _vcp_entry(spec, bars, **kw):
+    """Shared body: qualify the base, require a close through the pivot, build the signal."""
+    from app.services import vcp_core as V
+
+    p = spec.params
+    h, l, c, v = _vcp_cols(bars)
+    r = V.vcp(h, l, c, v, pivot_k=p.get("pivot", 3), **kw)
+    if not (r["ok"] and r["pivot"] and V.broke_out(c, r["pivot"])):
+        return None
+    atr, last = _atr(bars), bars[-1].close
+    return _mk("BUY", last, atr, p["target_atr"], p["stop_atr"], spec.template,
+               r["reason"], min(0.9, 0.5 + r["strength"] / 250))
+
+
+def vcp_breakout(spec, bars):
+    """Tightening base, then a close through the pivot."""
+    return _vcp_entry(spec, bars, min_contractions=2)
+
+
+def vcp_three_contraction(spec, bars):
+    """The textbook 3T: three shrinking pullbacks and a tight finish."""
+    return _vcp_entry(spec, bars, min_contractions=3, max_last_pullback=0.10)
+
+
+def vcp_tight_base(spec, bars):
+    """Final contraction under 6% with volume well below the base average."""
+    return _vcp_entry(spec, bars, min_contractions=2, max_last_pullback=0.06,
+                      dryup_frac=0.65)
+
+
+def vcp_volume_dryup(spec, bars):
+    """Leads on volume: under half the base average going into the break."""
+    return _vcp_entry(spec, bars, min_contractions=2, dryup_frac=0.50, dryup_bars=7)
+
+
+def vcp_pivot_reclaim(spec, bars):
+    """A qualified base whose breakout failed back under the pivot, then reclaimed it."""
+    from app.services import vcp_core as V
+
+    p = spec.params
+    h, l, c, v = _vcp_cols(bars)
+    r = V.vcp(h, l, c, v, pivot_k=p.get("pivot", 3), min_contractions=2)
+    if not (r["ok"] and r["pivot"]) or len(c) < 6:
+        return None
+    piv = r["pivot"]
+    if not (any(x > piv for x in c[-6:-2]) and V.broke_out(c, piv)):
+        return None
+    atr, last = _atr(bars), bars[-1].close
+    return _mk("BUY", last, atr, p["target_atr"], p["stop_atr"], spec.template,
+               f"Reclaimed the pivot after a failed break — {r['reason']}", 0.6)
+
+
+def pocket_pivot(spec, bars):
+    """Up day on volume above the largest down-day volume of the last ten."""
+    from app.services import vcp_core as V
+
+    p = spec.params
+    c = [b.close for b in bars]
+    v = [float(b.volume or 0) for b in bars]
+    if not V.pocket_pivot(c, v):
+        return None
+    atr, last = _atr(bars), bars[-1].close
+    return _mk("BUY", last, atr, p["target_atr"], p["stop_atr"], spec.template,
+               "Up day on volume above every down day of the last ten", 0.55)
+
+
+def high_tight_flag(spec, bars):
+    """A near-doubling, then a shallow tight flag, then the break of it."""
+    from app.services import vcp_core as V
+
+    p = spec.params
+    h = [b.high for b in bars]
+    c = [b.close for b in bars]
+    if not V.high_tight_flag(c) or len(h) <= 12:
+        return None
+    flag_hi = max(h[-12:-1])
+    if not V.broke_out(c, flag_hi):
+        return None
+    atr, last = _atr(bars), bars[-1].close
+    return _mk("BUY", last, atr, p["target_atr"], p["stop_atr"], spec.template,
+               "Power play: sharp run, tight flag, break", 0.6)
+
+
 TEMPLATES: dict[str, tuple[str, str, Callable, dict, int]] = {
+    "vcp_breakout": ("structure", "VCP Breakout", vcp_breakout,
+                     dict(pivot=3, target_atr=4.0, stop_atr=1.5), 120),
+    "vcp_three_contraction": ("structure", "VCP 3-Contraction", vcp_three_contraction,
+                              dict(pivot=3, target_atr=4.5, stop_atr=1.5), 140),
+    "vcp_tight_base": ("structure", "VCP Tight Base", vcp_tight_base,
+                       dict(pivot=3, target_atr=4.0, stop_atr=1.2), 120),
+    "vcp_volume_dryup": ("structure", "VCP Volume Dry-Up", vcp_volume_dryup,
+                         dict(pivot=3, target_atr=4.0, stop_atr=1.5), 120),
+    "vcp_pivot_reclaim": ("structure", "VCP Pivot Reclaim", vcp_pivot_reclaim,
+                          dict(pivot=3, target_atr=3.5, stop_atr=1.5), 120),
+    "pocket_pivot": ("structure", "Pocket Pivot", pocket_pivot,
+                     dict(target_atr=3.0, stop_atr=1.5), 40),
+    "high_tight_flag": ("structure", "High Tight Flag", high_tight_flag,
+                        dict(target_atr=5.0, stop_atr=2.0), 70),
+
     # key: (family, display name, fn, default params, min_bars)
     "head_shoulders": ("chart", "Head & Shoulders", head_shoulders,
                        dict(pivot=3, shoulder_tol=0.03, target_atr=3.0, stop_atr=1.5), 70),
