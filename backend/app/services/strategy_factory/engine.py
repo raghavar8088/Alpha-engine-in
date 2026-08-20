@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 from anyio import to_thread
@@ -109,7 +109,7 @@ BAR_SOURCES = {
 }
 # Which markets the desk sweeps and paper-trades by default.
 ACTIVE_SOURCES = [s.strip() for s in
-                  os.getenv("SF_SOURCES", "commodity,equity,index").split(",") if s.strip()]
+                  os.getenv("SF_SOURCES", "equity,index,commodity").split(",") if s.strip()]
 DEFAULT_SOURCE = os.getenv("SF_BAR_SOURCE", "commodity")
 
 
@@ -143,7 +143,7 @@ async def run_backtests_all(sources: list[str] | None = None,
 
 async def run_backtests(source: str = DEFAULT_SOURCE, symbols: list[str] | None = None,
                         strategy_ids: list[str] | None = None,
-                        bar_limit: int = 1500) -> dict:
+                        bar_limit: int = 1500, redo_after_hours: float = 20.0) -> dict:
     """Backtest strategies over every symbol in the source and persist one row each.
 
     Results are stored per (strategy, symbol) rather than averaged: a pattern that works
@@ -160,6 +160,18 @@ async def run_backtests(source: str = DEFAULT_SOURCE, symbols: list[str] | None 
     strategies = [FACTORY_BY_ID[i] for i in strategy_ids if i in FACTORY_BY_ID] \
         if strategy_ids else FACTORY_CATALOG
 
+    # RESUMABLE. A full sweep is thousands of replays and hours long, so any restart —
+    # a deploy, a container recycle — used to throw the work away and begin again,
+    # meaning it never reached the end. Rows refreshed within `redo_after_hours` are
+    # skipped, so a restart continues from where it stopped. Pass 0 to force a full redo.
+    done: set[tuple[str, str]] = set()
+    if redo_after_hours > 0:
+        cutoff = _now() - timedelta(hours=redo_after_hours)
+        async for d in sf_backtests_collection.find(
+                {"source": source, "updated_at": {"$gte": cutoff}},
+                {"strategy_id": 1, "symbol": 1}):
+            done.add((d["strategy_id"], d["symbol"]))
+
     # Cache bars per (symbol, timeframe): 546 strategies share only 8 timeframes, so
     # loading per strategy would be ~68x more database work for identical data.
     cache: dict[tuple[str, str], list] = {}
@@ -170,12 +182,15 @@ async def run_backtests(source: str = DEFAULT_SOURCE, symbols: list[str] | None 
             cache[key] = await src["bars"](sym, tf, bar_limit)
         return cache[key]
 
-    written = skipped = 0
+    written = skipped = resumed = 0
     graded: dict[int, int] = {}
     for sym in names:
         inst = universe[sym]
         lot = int(inst.get("lot_size") or 1)
         for strat in strategies:
+            if (strat.strategy_id, sym) in done:
+                resumed += 1
+                continue
             bars = await bars_for(sym, strat.timeframe)
             if len(bars) < strat.min_bars + 30:
                 skipped += 1
@@ -215,8 +230,9 @@ async def run_backtests(source: str = DEFAULT_SOURCE, symbols: list[str] | None 
         "last_backtest_at": _now(), "backtests_written": written,
         "backtests_skipped": skipped, "grade_histogram": graded, "source": source,
     }}, upsert=True)
-    return {"written": written, "skipped": skipped, "symbols": names,
-            "grade_histogram": graded, "strategies": len(strategies)}
+    return {"written": written, "skipped": skipped, "already_done": resumed,
+            "symbols": len(names), "grade_histogram": graded,
+            "strategies": len(strategies), "source": source}
 
 
 async def _refresh_scores() -> None:
