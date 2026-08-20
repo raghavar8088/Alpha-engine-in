@@ -55,6 +55,8 @@ DAILY_LOSS_BREAKER_PCT = float(os.getenv("SF_DAILY_LOSS_PCT", "0.03"))
 # strategies (no backtest yet) are held back rather than let loose: the brief's whole
 # point is that paper trading is EARNED by evidence, not granted by existing.
 MIN_GRADE_TO_TRADE = int(os.getenv("SF_MIN_GRADE", "3"))
+# How often, in rows written, the leaderboard is rolled forward mid-sweep.
+SCORE_REFRESH_EVERY = int(os.getenv("SF_SCORE_REFRESH_EVERY", "300"))
 REQUIRE_GRADE = os.getenv("SF_REQUIRE_GRADE", "1").lower() not in ("0", "false", "")
 
 
@@ -224,6 +226,12 @@ async def run_backtests(source: str = DEFAULT_SOURCE, symbols: list[str] | None 
                     "updated_at": _now(),
                 }}, upsert=True)
             written += 1
+            # Roll scores forward DURING the sweep, not only at the end. A full market is
+            # thousands of replays and up to an hour; refreshing only on completion left
+            # the leaderboard empty for that whole time, which reads as "nothing works"
+            # rather than "still measuring".
+            if written % SCORE_REFRESH_EVERY == 0:
+                await _refresh_scores()
 
     await _refresh_scores()
     await sf_state_collection.update_one({"_id": STATE_ID}, {"$set": {
