@@ -244,37 +244,69 @@ async def run_backtests(source: str = DEFAULT_SOURCE, symbols: list[str] | None 
 
 
 async def _refresh_scores() -> None:
-    """Roll per-(strategy, symbol) backtests into one row per strategy.
+    """Roll per-(strategy, symbol, market) backtests into one row per strategy.
 
-    The strategy's grade is its BEST grade on any symbol, and the row records which
-    symbol earned it — because "this works on crude" is the actionable answer, whereas an
-    average across eight unrelated contracts is not."""
-    best: dict[str, dict] = {}
-    async for d in sf_backtests_collection.find({}):
-        sid = d["strategy_id"]
-        cur = best.get(sid)
-        key = (d.get("grade", 1), (d.get("overall") or {}).get("net_pnl", 0))
-        if cur is None or key > cur["_key"]:
-            best[sid] = {"_key": key, "doc": d}
-    for sid, entry in best.items():
-        d = entry["doc"]
+    Done SERVER-SIDE. The first version streamed every backtest document to the client and
+    picked the best in Python; once the sweep passed a few thousand rows those documents —
+    each carrying an equity curve — exceeded the 45s socket timeout and the refresh failed
+    on every call, which is why the leaderboard stayed empty while thousands of rows were
+    being written. The pipeline projects away the heavy fields first, sorts and groups in
+    Mongo, and returns one small document per strategy.
+
+    A strategy's grade is its BEST grade on any symbol in any market, and the row records
+    which symbol and market earned it — "works on crude, fails on gold" is the actionable
+    answer, and averaging unrelated instruments together destroys it."""
+    light = {"strategy_id": 1, "name": 1, "family": 1, "sub_family": 1, "timeframe": 1,
+             "style": 1, "hypothesis": 1, "symbol": 1, "source": 1, "grade": 1,
+             "grade_reasons": 1, "overall": 1, "out_of_sample": 1}
+    pipeline = [
+        {"$project": light},
+        {"$sort": {"grade": -1, "overall.net_pnl": -1}},
+        {"$group": {"_id": "$strategy_id", "doc": {"$first": "$$ROOT"}}},
+    ]
+    ops = []
+    from pymongo import UpdateOne
+
+    async for row in sf_backtests_collection.aggregate(pipeline, allowDiskUse=True):
+        d = row["doc"]
         o = d.get("overall") or {}
-        await sf_scores_collection.update_one({"strategy_id": sid}, {"$set": {
-            "strategy_id": sid, "name": d.get("name"), "family": d.get("family"),
-            "sub_family": d.get("sub_family"), "timeframe": d.get("timeframe"),
-            "style": d.get("style"), "hypothesis": d.get("hypothesis"),
+        oos = d.get("out_of_sample") or {}
+        ops.append(UpdateOne({"strategy_id": d["strategy_id"]}, {"$set": {
+            "strategy_id": d["strategy_id"], "name": d.get("name"),
+            "family": d.get("family"), "sub_family": d.get("sub_family"),
+            "timeframe": d.get("timeframe"), "style": d.get("style"),
+            "hypothesis": d.get("hypothesis"),
             "best_symbol": d.get("symbol"), "best_source": d.get("source"),
-            "grade": d.get("grade", 1),
-            "grade_reasons": d.get("grade_reasons", []),
+            "grade": d.get("grade", 1), "grade_reasons": d.get("grade_reasons", []),
             "bt_trades": o.get("trades", 0), "bt_win_rate": o.get("win_rate", 0.0),
-            "bt_profit_factor": o.get("profit_factor"), "bt_expectancy": o.get("expectancy", 0.0),
-            "bt_avg_r": o.get("avg_r", 0.0), "bt_net_pnl": o.get("net_pnl", 0.0),
-            "bt_max_dd_pct": o.get("max_drawdown_pct", 0.0), "bt_cagr_pct": o.get("cagr_pct"),
-            "bt_sharpe": o.get("sharpe"), "bt_sortino": o.get("sortino"),
-            "oos_net_pnl": (d.get("out_of_sample") or {}).get("net_pnl", 0.0),
-            "oos_trades": (d.get("out_of_sample") or {}).get("trades", 0),
+            "bt_profit_factor": o.get("profit_factor"),
+            "bt_expectancy": o.get("expectancy", 0.0), "bt_avg_r": o.get("avg_r", 0.0),
+            "bt_net_pnl": o.get("net_pnl", 0.0),
+            "bt_max_dd_pct": o.get("max_drawdown_pct", 0.0),
+            "bt_cagr_pct": o.get("cagr_pct"), "bt_sharpe": o.get("sharpe"),
+            "bt_sortino": o.get("sortino"),
+            "oos_net_pnl": oos.get("net_pnl", 0.0), "oos_trades": oos.get("trades", 0),
             "updated_at": _now(),
-        }}, upsert=True)
+        }}, upsert=True))
+        if len(ops) >= 300:
+            await sf_scores_collection.bulk_write(ops, ordered=False)
+            ops = []
+    if ops:
+        await sf_scores_collection.bulk_write(ops, ordered=False)
+
+
+async def ensure_indexes() -> None:
+    """Indexes the sweep and the resume check depend on. Without them the resume lookup
+    is a collection scan that grows with every row it writes."""
+    try:
+        await sf_backtests_collection.create_index(
+            [("strategy_id", 1), ("symbol", 1), ("source", 1)], name="sf_bt_key", unique=True)
+        await sf_backtests_collection.create_index([("source", 1), ("updated_at", -1)],
+                                                   name="sf_bt_resume")
+        await sf_backtests_collection.create_index([("grade", -1)], name="sf_bt_grade")
+        await sf_scores_collection.create_index("strategy_id", name="sf_scores_key", unique=True)
+    except Exception as exc:  # noqa: BLE001 — a conflicting legacy index must not block boot
+        logger.warning("[strategy_factory] index creation skipped: %s", exc)
 
 
 # --------------------------------------------------------------------------------

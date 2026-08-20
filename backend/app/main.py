@@ -238,6 +238,8 @@ async def ensure_indexes() -> None:
     await trading_calls_collection.create_index([("status", 1), ("segment", 1)])
     await chart_cache.ensure_indexes()
     await chart_workspace.ensure_indexes()
+    from app.services.strategy_factory.engine import ensure_indexes as sf_ensure_indexes
+    await sf_ensure_indexes()
 
 
 @app.on_event("startup")
