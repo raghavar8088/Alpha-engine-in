@@ -445,6 +445,21 @@ app.add_middleware(
 )
 
 
+from app.services.api_cache import APICacheMiddleware
+
+# Serve any GET under /api/ from memory for a few seconds. The database is an
+# Atlas M0 that stalls for seconds on arbitrary queries, so the only real lever
+# is asking it less often. ?fresh=true bypasses; the Refresh button sends it.
+#
+# Registered BEFORE require_shared_secret on purpose. Starlette applies middleware in
+# reverse order of registration, so whatever is added LAST runs first — with the cache
+# added last it sat OUTSIDE the auth gate and would have served cached bodies to a
+# request that never presented the shared secret. app_shared_secret is empty in this
+# deployment so nothing was exposed, but the ordering would have become a hole the day
+# it was set. The cache now runs inside the gate.
+app.add_middleware(APICacheMiddleware)
+
+
 @app.middleware("http")
 async def require_shared_secret(request: Request, call_next):
     """Cloud Run must allow unauthenticated calls for the Firebase Hosting rewrite
@@ -455,13 +470,6 @@ async def require_shared_secret(request: Request, call_next):
         if request.headers.get("x-app-secret") != settings.app_shared_secret:
             return JSONResponse({"detail": "Not authenticated"}, status_code=401)
     return await call_next(request)
-
-from app.services.api_cache import APICacheMiddleware
-
-# Serve any GET under /api/ from memory for a few seconds. The database is an
-# Atlas M0 that stalls for seconds on arbitrary queries, so the only real lever
-# is asking it less often. ?fresh=true bypasses; the Refresh button sends it.
-app.add_middleware(APICacheMiddleware)
 
 app.include_router(market_data.router)
 app.include_router(broker.router)

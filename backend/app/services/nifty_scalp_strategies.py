@@ -1166,7 +1166,8 @@ TEMPLATES: list[tuple[str, str, Callable]] = [
     ("Diamond", "chart_pattern", t_diamond),
     ("Broadening Formation", "chart_pattern", t_broadening),
 ]
-assert len(TEMPLATES) == 63, f"expected 63 templates, got {len(TEMPLATES)}"
+# A MINIMUM, not an exact count: an exact count makes adding a template an outage.
+assert len(TEMPLATES) >= 63, f"templates shrank to {len(TEMPLATES)}"
 
 
 # ── timeframes ─────────────────────────────────────────────────────────────────

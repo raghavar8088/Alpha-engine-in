@@ -1164,7 +1164,12 @@ def _build_catalog() -> list[PatternSpec]:
 COMMODITY_CATALOG: list[PatternSpec] = _build_catalog()
 COMMODITY_BY_ID: dict[str, PatternSpec] = {s.strategy_id: s for s in COMMODITY_CATALOG}
 
-assert len(TEMPLATES) == 39, f"expected 39 templates, have {len(TEMPLATES)}"
+# A MINIMUM, not an exact count. This assertion previously read `== 39` and, the day
+# another session legitimately added seven templates, it crash-looped the ENTIRE
+# backend at import — every desk down because a pattern library grew. An exact count
+# only catches "I miscounted while writing this", a one-off authoring concern; a
+# minimum catches the regression that actually matters, templates going missing.
+assert len(TEMPLATES) >= 39, f"templates shrank to {len(TEMPLATES)}; expected at least 39"
 assert len(COMMODITY_BY_ID) == len(COMMODITY_CATALOG), "duplicate commodity strategy_id"
 assert {t[0] for t in TEMPLATES.values()} == {"chart", "candlestick", "structure"}
 

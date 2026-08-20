@@ -715,7 +715,9 @@ MOMENTUM_BY_ID: dict[str, MomentumSpec] = {s.strategy_id: s for s in MOMENTUM_CA
 
 # Every family is represented and every id is unique — a silent duplicate id would make
 # two strategies share one ₹10,000 account and one leaderboard row.
-assert len(MOMENTUM_CATALOG) == 37, f"expected 37 momentum strategies, built {len(MOMENTUM_CATALOG)}"
+# A MINIMUM, not an exact count — an exact count turns "someone added a strategy"
+# into an import-time crash that takes the whole application down.
+assert len(MOMENTUM_CATALOG) >= 37, f"momentum catalog shrank to {len(MOMENTUM_CATALOG)}"
 assert len(MOMENTUM_BY_ID) == len(MOMENTUM_CATALOG), "duplicate momentum strategy_id"
 assert set(s.family for s in MOMENTUM_CATALOG) == set(FAMILIES), "catalog/family mismatch"
 

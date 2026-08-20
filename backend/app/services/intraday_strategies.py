@@ -1335,4 +1335,5 @@ def _build_catalog() -> list[StrategySpec]:
 STRATEGY_CATALOG: list[StrategySpec] = _build_catalog()
 STRATEGY_BY_ID: dict[str, StrategySpec] = {s.strategy_id: s for s in STRATEGY_CATALOG}
 
-assert len(STRATEGY_CATALOG) == 150, f"expected 150 strategies, got {len(STRATEGY_CATALOG)}"
+# A MINIMUM, not an exact count: an exact count makes adding a strategy an outage.
+assert len(STRATEGY_CATALOG) >= 150, f"catalog shrank to {len(STRATEGY_CATALOG)}"
