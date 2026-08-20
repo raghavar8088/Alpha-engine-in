@@ -77,10 +77,39 @@ async def _commodity_universe() -> dict[str, dict]:
     return await front_month_universe()
 
 
+async def _equity_bars(symbol: str, timeframe: str, limit: int):
+    from .sources import equity_load_bars
+    return await equity_load_bars(symbol, timeframe, limit)
+
+
+async def _equity_universe() -> dict[str, dict]:
+    from .sources import equity_universe
+    return await equity_universe()
+
+
+async def _index_bars(symbol: str, timeframe: str, limit: int):
+    from .sources import index_load_bars
+    return await index_load_bars(symbol, timeframe, limit)
+
+
+async def _index_universe() -> dict[str, dict]:
+    from .sources import index_universe
+    return await index_universe()
+
+
+# One entry per MARKET, not per module. Adding a market here makes all 546 strategies
+# available on it; no existing desk is touched and no strategy is duplicated.
 BAR_SOURCES = {
     "commodity": {"bars": _commodity_bars, "universe": _commodity_universe,
                   "cost_model": "commodity", "exchange": "MCX"},
+    "equity": {"bars": _equity_bars, "universe": _equity_universe,
+               "cost_model": "equity_delivery", "exchange": "NSE"},
+    "index": {"bars": _index_bars, "universe": _index_universe,
+              "cost_model": "equity_intraday", "exchange": "NSE"},
 }
+# Which markets the desk sweeps and paper-trades by default.
+ACTIVE_SOURCES = [s.strip() for s in
+                  os.getenv("SF_SOURCES", "commodity,equity,index").split(",") if s.strip()]
 DEFAULT_SOURCE = os.getenv("SF_BAR_SOURCE", "commodity")
 
 
@@ -95,6 +124,21 @@ def _metrics_doc(m) -> dict:
         "total_costs", "profit_factor", "expectancy", "avg_r", "max_drawdown_pct",
         "return_pct", "cagr_pct", "sharpe", "sortino", "largest_win", "largest_loss",
         "max_consecutive_wins", "max_consecutive_losses", "exposure_pct")}
+
+
+async def run_backtests_all(sources: list[str] | None = None,
+                            bar_limit: int = 1500) -> dict:
+    """Sweep every active market in turn. Rows are upserted per (strategy, symbol,
+    source), so a market that fails leaves the others' results intact."""
+    active = [s for s in (sources or ACTIVE_SOURCES) if s in BAR_SOURCES]
+    out: dict[str, dict] = {}
+    for source in active:
+        try:
+            out[source] = await run_backtests(source=source, bar_limit=bar_limit)
+        except Exception as exc:  # noqa: BLE001
+            out[source] = {"error": str(exc)}
+    await _refresh_scores()
+    return {"sources": out, "swept": active}
 
 
 async def run_backtests(source: str = DEFAULT_SOURCE, symbols: list[str] | None = None,
@@ -195,7 +239,8 @@ async def _refresh_scores() -> None:
             "strategy_id": sid, "name": d.get("name"), "family": d.get("family"),
             "sub_family": d.get("sub_family"), "timeframe": d.get("timeframe"),
             "style": d.get("style"), "hypothesis": d.get("hypothesis"),
-            "best_symbol": d.get("symbol"), "grade": d.get("grade", 1),
+            "best_symbol": d.get("symbol"), "best_source": d.get("source"),
+            "grade": d.get("grade", 1),
             "grade_reasons": d.get("grade_reasons", []),
             "bt_trades": o.get("trades", 0), "bt_win_rate": o.get("win_rate", 0.0),
             "bt_profit_factor": o.get("profit_factor"), "bt_expectancy": o.get("expectancy", 0.0),
@@ -264,13 +309,17 @@ async def breaker_state() -> dict:
             "daily_loss_limit": round(limit, 2)}
 
 
-async def run_paper_cycle(source: str = DEFAULT_SOURCE) -> dict:
-    """One scan+manage pass over the live bar store."""
-    src = BAR_SOURCES.get(source)
-    if src is None:
-        return {"error": f"unknown bar source {source!r}"}
+async def run_paper_cycle(sources: list[str] | None = None) -> dict:
+    """One scan+manage pass across EVERY active market.
 
-    managed = await _manage(src)
+    Managing comes first and is source-aware: an open position carries the market it was
+    opened on, so a commodity position is always marked with commodity bars even while
+    the equity sweep is running."""
+    active = [s for s in (sources or ACTIVE_SOURCES) if s in BAR_SOURCES]
+    if not active:
+        return {"error": "no valid bar sources configured", "configured": ACTIVE_SOURCES}
+
+    managed = await _manage()
     notes: list[str] = []
     opened = 0
     breaker = await breaker_state()
@@ -281,8 +330,14 @@ async def run_paper_cycle(source: str = DEFAULT_SOURCE) -> dict:
         notes.append(f"Daily loss breaker tripped at {breaker['today_pnl']:,.0f}; "
                      "no new entries, open positions still managed.")
     else:
-        opened, scan_notes = await _scan(src, source)
-        notes += scan_notes
+        for source in active:
+            try:
+                got, scan_notes = await _scan(BAR_SOURCES[source], source)
+            except Exception as exc:  # noqa: BLE001 — one market must not stop the others
+                notes.append(f"{source}: scan failed ({exc})")
+                continue
+            opened += got
+            notes += [f"{source}: {n}" for n in scan_notes]
 
     snap = await summary()
     await sf_equity_collection.insert_one({
@@ -412,16 +467,20 @@ async def _open(strat, sig, inst: dict, lot: int, src: dict, source: str) -> boo
     return True
 
 
-async def _manage(src: dict) -> int:
+async def _manage() -> int:
     open_positions = [p async for p in sf_positions_collection.find({"status": "OPEN"})]
     if not open_positions:
         return 0
-    cache: dict[tuple[str, str], list] = {}
+    cache: dict[tuple[str, str, str], list] = {}
     updated = 0
     touched: set[str] = set()
 
     for pos in open_positions:
-        key = (pos["symbol"], pos["timeframe"])
+        source = pos.get("source") or DEFAULT_SOURCE
+        src = BAR_SOURCES.get(source)
+        if src is None:
+            continue
+        key = (source, pos["symbol"], pos["timeframe"])
         if key not in cache:
             cache[key] = await src["bars"](pos["symbol"], pos["timeframe"], 5)
         bars = cache[key]
@@ -524,6 +583,26 @@ async def summary() -> dict:
     backtested = await sf_backtests_collection.count_documents({})
     state = await sf_state_collection.find_one({"_id": STATE_ID}) or {}
 
+    # Per-market view: how many backtest rows each market has produced, and how many
+    # symbols it can actually serve. Makes "this market has no data" visible instead of
+    # looking like strategies that never fire.
+    markets: dict[str, dict] = {}
+    for name in ACTIVE_SOURCES:
+        if name not in BAR_SOURCES:
+            continue
+        try:
+            uni = await BAR_SOURCES[name]["universe"]()
+        except Exception:  # noqa: BLE001
+            uni = {}
+        markets[name] = {
+            "symbols": len(uni),
+            "exchange": BAR_SOURCES[name]["exchange"],
+            "cost_model": BAR_SOURCES[name]["cost_model"],
+            "backtest_rows": await sf_backtests_collection.count_documents({"source": name}),
+            "open_positions": await sf_positions_collection.count_documents(
+                {"source": name, "status": "OPEN"}),
+        }
+
     return {
         "strategy_count": len(FACTORY_CATALOG),
         "family_counts": family_counts(),
@@ -537,6 +616,8 @@ async def summary() -> dict:
         "closed_positions": await sf_positions_collection.count_documents({"status": {"$ne": "OPEN"}}),
         "backtest_rows": backtested,
         "grade_counts": grades,
+        "markets": markets,
+        "active_sources": ACTIVE_SOURCES,
         "min_grade_to_trade": MIN_GRADE_TO_TRADE,
         "require_grade": REQUIRE_GRADE,
         "paused": PAUSE_NEW_ENTRIES, "mode": "paper", "costs_charged": True,
@@ -571,7 +652,7 @@ async def leaderboard(family: str | None = None, timeframe: str | None = None,
             "style": s.style, "target_r": s.target_r, "hypothesis": s.hypothesis,
             "regimes": sorted(s.regimes), "detector": s.detector,
             "grade": g, "grade_reasons": sc.get("grade_reasons", []),
-            "best_symbol": sc.get("best_symbol"),
+            "best_symbol": sc.get("best_symbol"), "best_source": sc.get("best_source"),
             "bt_trades": sc.get("bt_trades", 0), "bt_win_rate": sc.get("bt_win_rate", 0.0),
             "bt_profit_factor": sc.get("bt_profit_factor"),
             "bt_expectancy": sc.get("bt_expectancy", 0.0), "bt_avg_r": sc.get("bt_avg_r", 0.0),
@@ -588,5 +669,6 @@ async def leaderboard(family: str | None = None, timeframe: str | None = None,
     return rows[:limit]
 
 
-__all__ = ["run_backtests", "run_paper_cycle", "summary", "leaderboard",
+__all__ = ["run_backtests", "run_backtests_all", "run_paper_cycle", "summary",
+           "leaderboard", "ACTIVE_SOURCES",
            "PER_STRATEGY_CAPITAL", "INITIAL_CAPITAL", "STATE_ID", "BAR_SOURCES"]

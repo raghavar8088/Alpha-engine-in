@@ -28,7 +28,8 @@ from app.services.strategy_factory.catalog import (
     FACTORY_BY_ID, FACTORY_CATALOG, RECIPES, TIMEFRAMES, family_counts,
 )
 from app.services.strategy_factory.engine import (
-    leaderboard as sf_leaderboard, run_backtests, run_paper_cycle, summary as sf_summary,
+    ACTIVE_SOURCES, leaderboard as sf_leaderboard, run_backtests, run_backtests_all,
+    run_paper_cycle, summary as sf_summary,
 )
 
 router = APIRouter(prefix="/api/strategy-factory", tags=["strategy-factory"])
@@ -153,10 +154,13 @@ async def backtest_endpoint(
     far longer than any proxy will hold a request open, so this returns immediately and
     the caller polls /summary for `last_backtest_at` and the grade histogram."""
     syms = [s.strip().upper() for s in symbols.split(",")] if symbols else None
-    task = asyncio.create_task(run_backtests(symbols=syms, bar_limit=bar_limit))
+    task = asyncio.create_task(
+        run_backtests(symbols=syms, bar_limit=bar_limit) if syms
+        else run_backtests_all(bar_limit=bar_limit))
     _BACKGROUND.add(task)
     task.add_done_callback(_BACKGROUND.discard)
     return {"started": True, "strategies": len(FACTORY_CATALOG),
+            "markets": ACTIVE_SOURCES,
             "note": "Batch backtest running in the background. Poll GET /summary for "
                     "last_backtest_at and the grade histogram."}
 

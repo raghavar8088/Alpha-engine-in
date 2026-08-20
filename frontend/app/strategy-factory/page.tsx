@@ -164,6 +164,32 @@ export default function StrategyFactoryPage() {
         <Tile label="Open" value={String(summary?.open_positions ?? 0)} sub={inr(summary?.deployed_capital) + " deployed"} />
       </div>
 
+
+      <GlassPanel title="Markets" note="the same 546 strategies, run on every market that has bars">
+        <div className="markets">
+          {Object.entries(summary?.markets ?? {}).map(([name, m]) => (
+            <div className="mkt" key={name}>
+              <div className="mname">{name}<span className="cat">{m.exchange}</span></div>
+              <div className="mrow"><b>{m.symbols}</b> symbols</div>
+              <div className="mrow">{m.backtest_rows.toLocaleString("en-IN")} backtest rows</div>
+              <div className="mrow">{m.open_positions} open</div>
+              <div className="mrow dim">costs: {m.cost_model.replace("_", " ")}</div>
+            </div>
+          ))}
+          {!Object.keys(summary?.markets ?? {}).length && (
+            <div className="dim" style={{ fontSize: 12 }}>No markets configured.</div>
+          )}
+        </div>
+        <div className="gnote">
+          Strategies are not duplicated into each desk — every other module keeps its own
+          catalog untouched. Instead each market is a bar source the one library runs on,
+          so a strategy is only ever defined once. A market only offers the timeframes it
+          genuinely has bars for: equities currently hold deep <strong>daily</strong>
+          history for ~500 names but almost no intraday, so the intraday strategies simply
+          do not run there rather than being fed a truncated series.
+        </div>
+      </GlassPanel>
+
       <GlassPanel title="Grade distribution" note="grade 5 = production candidate · grade 1 = rejected">
         <div className="grades">
           {[5, 4, 3, 2, 1].map((g) => (
@@ -395,6 +421,12 @@ export default function StrategyFactoryPage() {
                border: 1px solid var(--panel-border); background: var(--panel); color: var(--text); }
         .btn:disabled { opacity: .55; cursor: default; }
         .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+        .markets { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+                   gap: 12px; padding: 16px 20px 6px; }
+        .mkt { border: 1px solid var(--panel-border); border-radius: 10px; padding: 11px 13px; background: var(--panel); }
+        .mname { font-size: 13px; font-weight: 700; text-transform: capitalize; display: flex;
+                 align-items: center; gap: 8px; margin-bottom: 6px; }
+        .mrow { font-size: 12px; font-variant-numeric: tabular-nums; margin: 2px 0; }
         .grades { display: flex; flex-wrap: wrap; gap: 18px; padding: 16px 20px 6px; }
         .gcell { display: flex; flex-direction: column; align-items: center; gap: 6px; }
         .gnum { font-family: var(--font-data); font-size: 20px; font-weight: 700; }
@@ -469,7 +501,7 @@ function Detail({ d, row }: { d: any; row: SFRow }) {
         <div>
           <div className="k">Grade {row.grade || "—"}</div>
           {(row.grade_reasons ?? []).map((r, i) => <div className="v" key={i}>{r}</div>)}
-          {row.best_symbol && <div className="v dim">best on {row.best_symbol}</div>}
+          {row.best_symbol && <div className="v dim">best on {row.best_symbol}{row.best_source ? ` (${row.best_source})` : ""}</div>}
         </div>
         <div>
           <div className="k">Backtest</div>

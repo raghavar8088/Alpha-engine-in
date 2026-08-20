@@ -3734,6 +3734,14 @@ export interface SFSummary {
   today_pnl: number;
   breaker_tripped: boolean;
   daily_loss_limit: number;
+  markets: Record<string, {
+    symbols: number;
+    exchange: string;
+    cost_model: string;
+    backtest_rows: number;
+    open_positions: number;
+  }>;
+  active_sources: string[];
 }
 
 export interface SFRow {
@@ -3751,6 +3759,7 @@ export interface SFRow {
   grade: number;
   grade_reasons: string[];
   best_symbol: string | null;
+  best_source: string | null;
   bt_trades: number;
   bt_win_rate: number;
   bt_profit_factor: number | null;
