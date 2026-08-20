@@ -24,6 +24,14 @@ import {
   fetchLiveIntradayPositions,
   fetchLiveIntradaySummary,
   fetchLiveIntradayTrades,
+  fetchPatternSummary,
+  fetchPatternLeaderboard,
+  fetchPatternTimeframes,
+  fetchPatternPositions,
+  type PatternSummary,
+  type PatternScore,
+  type PatternTimeframeStat,
+  type PatternPosition,
   fetchLiveIntradayDaily,
   fetchIntradayLabDaily,
   type DailyRoi,
@@ -31,7 +39,16 @@ import {
 
 // The three live books are TABS rather than a dropdown because they are separate
 // accounts, not a filter: switching replaces every number on the page.
-type IntradayTab = "tournament" | "80k" | "30k" | "10k";
+type IntradayTab = "tournament" | "patterns" | "80k" | "30k" | "10k";
+// Families as the desk names them, so a filter maps 1:1 onto the catalog.
+const PAT_FAMILIES: { key: string; label: string }[] = [
+  { key: "chart_pattern", label: "Chart patterns" },
+  { key: "pattern", label: "Candlesticks" },
+  { key: "trend", label: "Trend" },
+  { key: "breakout", label: "Breakout" },
+  { key: "momentum", label: "Momentum" },
+  { key: "mean_reversion", label: "Mean reversion" },
+];
 const LIVE_BOOKS: { key: "80k" | "30k" | "10k"; capital: number }[] = [
   { key: "80k", capital: 80000 },
   { key: "30k", capital: 30000 },
@@ -110,9 +127,41 @@ export default function IntradayStocksPage() {
   const [liveTrades, setLiveTrades] = useState<IntradayTrade[]>([]);
   const [liveDaily, setLiveDaily] = useState<DailyRoi[]>([]);
   const [labDaily, setLabDaily] = useState<DailyRoi[]>([]);
-  const liveBook = tab === "tournament" ? "80k" : tab;
-  const isLive = tab !== "tournament";
+  // Only the three book tabs name a book; tournament and patterns are their own
+  // views, so both must fall back rather than leak a non-book value downstream.
+  const liveBook: "80k" | "30k" | "10k" =
+    tab === "tournament" || tab === "patterns" ? "80k" : tab;
+  const isLive = tab !== "tournament" && tab !== "patterns";
   const bookCapital = LIVE_BOOKS.find((b) => b.key === liveBook)?.capital ?? 80000;
+
+  const [patSummary, setPatSummary] = useState<PatternSummary | null>(null);
+  const [patBoard, setPatBoard] = useState<PatternScore[]>([]);
+  const [patFrames, setPatFrames] = useState<PatternTimeframeStat[]>([]);
+  const [patOpen, setPatOpen] = useState<PatternPosition[]>([]);
+  const [patTf, setPatTf] = useState<string | null>(null);
+  const [patFam, setPatFam] = useState<string | null>(null);
+
+  const loadPatterns = useCallback(async () => {
+    try {
+      const [s, lb, tf, op] = await Promise.all([
+        fetchPatternSummary(),
+        fetchPatternLeaderboard(patTf ?? undefined, patFam ?? undefined),
+        fetchPatternTimeframes(),
+        fetchPatternPositions("OPEN", patTf ?? undefined),
+      ]);
+      setPatSummary(s); setPatBoard(lb); setPatFrames(tf); setPatOpen(op);
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load the pattern desk");
+    }
+  }, [patTf, patFam]);
+
+  useEffect(() => {
+    if (tab !== "patterns") return;
+    loadPatterns();
+    const id = setInterval(loadPatterns, REFRESH_MS);
+    return () => clearInterval(id);
+  }, [tab, loadPatterns]);
 
   const load = useCallback(async () => {
     try {
@@ -202,6 +251,9 @@ export default function IntradayStocksPage() {
       <div className="tabs">
         <button className={tab === "tournament" ? "tab active" : "tab"} onClick={() => setTab("tournament")}>
           Tournament · 150 strategies
+        </button>
+        <button className={tab === "patterns" ? "tab active" : "tab"} onClick={() => setTab("patterns")}>
+          Patterns · {patSummary?.strategy_count ?? 504}
         </button>
         {LIVE_BOOKS.map((b) => (
           <button
@@ -431,6 +483,128 @@ export default function IntradayStocksPage() {
                     <td style={{ fontSize: 10.5 }}>
                       {t.closed_at ? new Date(t.closed_at).toLocaleString() : "-"}
                     </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </GlassPanel>
+      </>
+      )}
+
+      {tab === "patterns" && (
+      <>
+      <div className="desk-banner">
+        <strong>PATTERN DESK · {patSummary?.template_count ?? 63} TEMPLATES × {patSummary?.timeframes?.length ?? 8} TIMEFRAMES.</strong>{" "}
+        13 geometric chart patterns (head &amp; shoulders, double/triple tops, triangles,
+        wedges, flags, pennants, cup &amp; handle, rounding, diamond, broadening), 10
+        candlestick patterns, and 40 indicator/structure rules — each on its own{" "}
+        ₹{inr(patSummary?.per_strategy_capital)}. Runs alongside the 150-strategy tournament,
+        not instead of it. <strong>45m and 4h are aggregated</strong>; Angel has no native
+        interval for either. Universe is capped at{" "}
+        <strong>{patSummary?.universe_size ?? 25} symbols</strong> because Angel&rsquo;s candle
+        endpoint rate-limits far harder than its quotes — 150 symbols × 8 timeframes would be
+        1,200 requests a cycle. P&amp;L is net of real Angel One costs.
+      </div>
+
+      <div className="tiles">
+        <div className="tile"><div className="tile-label">Mode</div><div className="tile-value gain">PAPER</div><div className="tile-sub">{patSummary?.enabled ? "armed · live Angel" : "disabled"}</div></div>
+        <div className="tile"><div className="tile-label">Desk capital</div><div className="tile-value">₹{inr(patSummary?.initial_capital)}</div><div className="tile-sub">{patSummary?.strategy_count ?? 0} × ₹{inr(patSummary?.per_strategy_capital)}</div></div>
+        <div className="tile"><div className="tile-label">Equity</div><div className="tile-value">₹{inr(patSummary?.equity)}</div><div className="tile-sub">₹{inr(patSummary?.unrealized_pnl)} unrealised</div></div>
+        <div className="tile"><div className="tile-label">ROI</div><div className={`tile-value ${(patSummary?.roi_pct ?? 0) >= 0 ? "gain" : "loss"}`}>{roiPct(patSummary?.roi_pct, 4)}</div><div className="tile-sub">on desk capital</div></div>
+        <div className="tile"><div className="tile-label">Angel fees</div><div className="tile-value loss">−₹{inr(patSummary?.total_fees)}</div><div className="tile-sub">gross ₹{inr(patSummary?.gross_realized_pnl)} before costs</div></div>
+        <div className="tile"><div className="tile-label">Open positions</div><div className="tile-value">{patSummary?.open_positions ?? 0}</div><div className="tile-sub">₹{inr(patSummary?.deployed_capital)} deployed</div></div>
+        <div className="tile"><div className="tile-label">Closed</div><div className="tile-value">{patSummary?.closed_positions ?? 0}</div><div className="tile-sub">{(patSummary?.last_evaluated ?? 0).toLocaleString("en-IN")} evaluated last cycle</div></div>
+      </div>
+
+      {!!patSummary?.last_notes?.length && (
+        <div className="feed-note">{patSummary.last_notes.join(" · ")}</div>
+      )}
+
+      <div className="tabs">
+        <button className={patTf === null ? "tab active" : "tab"} onClick={() => setPatTf(null)}>All timeframes</button>
+        {(patSummary?.timeframes ?? []).map((t) => (
+          <button key={t.key} className={patTf === t.key ? "tab active" : "tab"} onClick={() => setPatTf(t.key)}>
+            {t.key}{t.native ? "" : "*"}
+          </button>
+        ))}
+      </div>
+      <div className="tabs">
+        <button className={patFam === null ? "tab active" : "tab"} onClick={() => setPatFam(null)}>All families</button>
+        {PAT_FAMILIES.map((f) => (
+          <button key={f.key} className={patFam === f.key ? "tab active" : "tab"} onClick={() => setPatFam(f.key)}>
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      <GlassPanel title="Which horizon is working — every template aggregated per candle">
+        <div className="table-scroll">
+          <table className="data-table">
+            <thead><tr><th style={{ textAlign: "left" }}>Candle</th><th>Style</th><th>Strategies</th><th>Capital</th><th>Trades</th><th>Win %</th><th>Fees</th><th>Net P&amp;L</th><th>ROI</th></tr></thead>
+            <tbody>
+              {patFrames.map((f) => (
+                <tr key={f.timeframe}>
+                  <td style={{ textAlign: "left" }}><strong>{f.label}</strong></td>
+                  <td>{f.style}</td>
+                  <td>{f.strategies}</td>
+                  <td>₹{inr(f.capital)}</td>
+                  <td>{f.trades}</td>
+                  <td>{(f.win_rate * 100).toFixed(1)}%</td>
+                  <td className="loss">−₹{inr(f.fees)}</td>
+                  <td className={f.net_pnl >= 0 ? "gain" : "loss"}>{f.net_pnl >= 0 ? "+" : ""}₹{inr(f.net_pnl)}</td>
+                  <td className={f.roi_pct >= 0 ? "gain" : "loss"}>{roiPct(f.roi_pct, 4)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </GlassPanel>
+
+      <GlassPanel title={`Strategy leaderboard (${patBoard.length})`}>
+        <div className="table-scroll">
+          <table className="data-table">
+            <thead><tr><th style={{ textAlign: "left" }}>Template</th><th>TF</th><th>Family</th><th>Style</th><th>Trades</th><th>Win %</th><th>Fees</th><th>Net P&amp;L</th><th>ROI</th></tr></thead>
+            <tbody>
+              {patBoard.slice(0, 200).map((r) => (
+                <tr key={r.strategy_id}>
+                  <td style={{ textAlign: "left" }}>{r.template}</td>
+                  <td><span className="badge">{r.timeframe}</span></td>
+                  <td style={{ fontSize: 11 }}>{r.family}</td>
+                  <td style={{ fontSize: 11 }}>{r.style}</td>
+                  <td>{r.trades}</td>
+                  <td>{(r.win_rate * 100).toFixed(1)}%</td>
+                  <td className="loss">−₹{inr(r.fees)}</td>
+                  <td className={r.net_pnl >= 0 ? "gain" : "loss"}>{r.net_pnl >= 0 ? "+" : ""}₹{inr(r.net_pnl)}</td>
+                  <td className={r.roi_pct >= 0 ? "gain" : "loss"}>{roiPct(r.roi_pct, 4)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </GlassPanel>
+
+      <GlassPanel title={`Open positions (${patOpen.length})`}>
+        {!patOpen.length ? (
+          <div className="empty">No open positions — entries run during market hours up to 15:00 IST.</div>
+        ) : (
+          <div className="table-scroll">
+            <table className="data-table">
+              <thead><tr><th style={{ textAlign: "left" }}>Template</th><th>TF</th><th>Symbol</th><th>Side</th><th>Qty</th><th>Entry</th><th>LTP</th><th>Target</th><th>Stop</th><th>Unrealised</th></tr></thead>
+              <tbody>
+                {patOpen.map((p) => (
+                  <tr key={p.position_id}>
+                    <td style={{ textAlign: "left", fontSize: 11 }}>{p.template}</td>
+                    <td><span className="badge">{p.timeframe}</span></td>
+                    <td>{p.symbol}</td>
+                    <td><span className={p.side === "SELL" ? "badge loss" : "badge"}>{p.side}</span></td>
+                    <td>{p.qty}</td>
+                    <td>₹{inr2(p.entry_price)}</td>
+                    <td>₹{inr2(p.ltp)}</td>
+                    <td>₹{inr2(p.target)}</td>
+                    <td>₹{inr2(p.stoploss)}</td>
+                    <td className={(p.unrealized_pnl ?? 0) >= 0 ? "gain" : "loss"}>{(p.unrealized_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(p.unrealized_pnl)}</td>
                   </tr>
                 ))}
               </tbody>

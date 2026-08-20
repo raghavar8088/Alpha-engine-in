@@ -3817,3 +3817,113 @@ export async function runSFBacktest(): Promise<{ started: boolean; note: string 
 export async function runSFCycle(): Promise<{ opened: number; managed: number; notes: string[] }> {
   return apiFetch("/api/strategy-factory/run", { method: "POST" });
 }
+
+
+// ── Pattern desk (inside Intraday Stocks) ──────────────────────────────────────
+// 63 templates x 8 timeframes on NSE equities: 13 geometric chart patterns, 10
+// candlestick patterns, 40 indicator/structure rules.
+
+export interface PatternTimeframeCfg {
+  key: string;
+  label: string;
+  style: string;
+  target_pct: number;
+  stop_pct: number;
+  native: boolean;
+}
+
+export interface PatternSummary {
+  mode: string;
+  enabled: boolean;
+  initial_capital: number;
+  per_strategy_capital: number;
+  strategy_count: number;
+  template_count: number;
+  universe_size: number;
+  timeframes: PatternTimeframeCfg[];
+  deployed_capital: number;
+  available_cash: number;
+  realized_pnl: number;
+  gross_realized_pnl: number;
+  total_fees: number;
+  unrealized_pnl: number;
+  equity: number;
+  roi_pct: number;
+  open_positions: number;
+  closed_positions: number;
+  last_run_at: string | null;
+  last_notes: string[];
+  last_evaluated: number;
+}
+
+export interface PatternScore {
+  strategy_id: string;
+  name: string;
+  template: string;
+  family: string;
+  timeframe: string;
+  style: string;
+  trades: number;
+  win_rate: number;
+  net_pnl: number;
+  gross_pnl: number;
+  fees: number;
+  roi_pct: number;
+}
+
+export interface PatternTimeframeStat {
+  timeframe: string;
+  label: string;
+  style: string;
+  strategies: number;
+  capital: number;
+  trades: number;
+  wins: number;
+  win_rate: number;
+  net_pnl: number;
+  fees: number;
+  roi_pct: number;
+}
+
+export interface PatternPosition {
+  position_id: string;
+  strategy_name: string;
+  template: string;
+  timeframe: string;
+  style: string;
+  symbol: string;
+  side: string;
+  qty: number;
+  entry_price: number;
+  ltp: number;
+  exit_price: number | null;
+  target: number;
+  stoploss: number;
+  capital_deployed: number;
+  unrealized_pnl: number;
+  realized_pnl: number | null;
+  fees: number | null;
+  exit_reason: string | null;
+  status: string;
+}
+
+export async function fetchPatternSummary(): Promise<PatternSummary> {
+  return apiFetch("/api/pattern/summary");
+}
+export async function fetchPatternLeaderboard(timeframe?: string, family?: string): Promise<PatternScore[]> {
+  const q = new URLSearchParams();
+  if (timeframe) q.set("timeframe", timeframe);
+  if (family) q.set("family", family);
+  const qs = q.toString();
+  const r = await apiFetch(`/api/pattern/leaderboard${qs ? `?${qs}` : ""}`);
+  return r.leaderboard ?? [];
+}
+export async function fetchPatternTimeframes(): Promise<PatternTimeframeStat[]> {
+  const r = await apiFetch("/api/pattern/timeframes");
+  return r.timeframes ?? [];
+}
+export async function fetchPatternPositions(status = "OPEN", timeframe?: string): Promise<PatternPosition[]> {
+  const q = timeframe ? `&timeframe=${timeframe}` : "";
+  const r = await apiFetch(`/api/pattern/positions?status=${status}${q}`);
+  return r.positions ?? [];
+}
