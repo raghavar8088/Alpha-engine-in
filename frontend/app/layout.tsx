@@ -1,6 +1,7 @@
 import { Sora, Manrope, JetBrains_Mono } from "next/font/google";
 import Sidebar from "@/components/Sidebar";
 import Footer from "@/components/Footer";
+import SortableTables from "@/components/SortableTables";
 import "./globals.css";
 
 const sora = Sora({ subsets: ["latin"], weight: ["600", "700", "800"], variable: "--font-display" });
@@ -16,6 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${sora.variable} ${manrope.variable} ${jetbrainsMono.variable}`}>
       <body style={{ display: "flex" }}>
+        <SortableTables />
         <Sidebar />
         <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
           <main className="app-main" style={{ flex: 1, minWidth: 0, padding: "32px 40px 0", maxWidth: 1320, width: "100%", margin: "0 auto" }}>
