@@ -228,3 +228,33 @@ chart_bars_collection = db["chart_bars"]
 chart_drawings_collection = db["chart_drawings"]
 chart_layouts_collection = db["chart_layouts"]
 chart_alerts_collection = db["chart_alerts"]
+# Stock Screener module — momentum / sector rotation / chart patterns over the NSE
+# universe. All four collections are DERIVED: every row can be recomputed from
+# `bars` + `stock_universe`, so they are snapshots for history and fast first paint,
+# never a source of truth. They are TTL'd in main.py accordingly.
+screener_momentum_collection = db["screener_momentum"]
+screener_sectors_collection = db["screener_sectors"]
+screener_patterns_collection = db["screener_patterns"]
+screener_breadth_collection = db["screener_breadth"]
+# Trending Stocks — LONG-ONLY desk over a basket the USER names, 678 strategies at
+# ₹10,00,000 paper each. `ts_basket` is the only user-authored collection in the module;
+# everything else is produced by the engine. Two of these have no counterpart anywhere
+# else in the app and are the point of the desk:
+#   `ts_evidence`   the seven research pillars scored at ENTRY TIME, so the reason a
+#                   position was taken is a record rather than a later reconstruction.
+#   `ts_rejections` why a setup did NOT become a trade. "No trades today" and "forty
+#                   setups all failed the 1:6 reachability test" look identical from the
+#                   outside, and only one of them means the desk is working as designed.
+# Bars are NOT stored here — they go into the shared `bars` collection, so the deeper
+# intraday history this desk backfills is available to every other module.
+ts_basket_collection = db["ts_basket"]
+ts_backtests_collection = db["ts_backtests"]
+ts_validation_collection = db["ts_validation"]
+ts_scores_collection = db["ts_scores"]
+ts_positions_collection = db["ts_positions"]
+ts_trades_collection = db["ts_trades"]
+ts_signals_collection = db["ts_signals"]
+ts_rejections_collection = db["ts_rejections"]
+ts_evidence_collection = db["ts_evidence"]
+ts_equity_collection = db["ts_equity"]
+ts_state_collection = db["ts_state"]

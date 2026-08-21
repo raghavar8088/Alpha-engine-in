@@ -14,6 +14,21 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         icon: <path d="M3 17l6-6 4 4 8-8M15 6h6v6" />,
       },
       {
+        // Sits directly under Market Data because it is the same kind of thing: a read of
+        // the market rather than a desk that trades one. A magnifier over a rising bar —
+        // it SCREENS the universe (momentum, sector rotation, chart patterns), where
+        // Bullish Stocks answers one yes/no question and Momentum runs a paper book.
+        href: "/stock-screener",
+        label: "Stock Screener",
+        icon: (
+          <>
+            <path d="M4 20V13M9 20V9M14 20v-5" />
+            <circle cx="17.5" cy="8.5" r="4" />
+            <path d="M20.5 11.5L23 14" />
+          </>
+        ),
+      },
+      {
         // Directly under Market Data: this is the one desk driven by prices the USER
         // names rather than by a strategy, so it belongs with the data tools.
         href: "/swing-trading",

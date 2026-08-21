@@ -37,6 +37,7 @@ from app.api.routes import (
     prelive_selling,
     research,
     risk,
+    screener,
     stock_desk,
     buy_low,
     live_paper,
@@ -147,6 +148,10 @@ DESK_INDEXES: dict[str, list] = {
     "buy_low_positions": [[("status", 1)], [("closed_on", 1)]],
     "zero_hero_positions": [[("status", 1)], [("closed_on", 1)]],
     "stock_desk_positions": [[("side", 1), ("status", 1)], [("closed_on", 1)]],
+    "screener_momentum": [[("index", 1), ("date", -1)]],
+    "screener_sectors": [[("index", 1), ("date", -1)]],
+    "screener_patterns": [[("index", 1), ("date", -1)]],
+    "screener_breadth": [[("date", -1)]],
 }
 
 
@@ -197,6 +202,14 @@ EXPIRING_COLLECTIONS = {
     # highest-churn source in the app, so it expires soonest.
     "sf_equity": 14,
     "sf_signals": 30,
+    # Stock Screener snapshots. Every one of these is DERIVED from `bars` +
+    # `stock_universe` and can be recomputed at any time, so they expire freely.
+    # Sector rotation is kept longest: the whole point of the board is how a
+    # sector's RANK moves over months, which needs the history behind it.
+    "screener_momentum": 90,
+    "screener_patterns": 90,
+    "screener_breadth": 365,
+    "screener_sectors": 365,
 }
 
 
@@ -338,6 +351,23 @@ async def start_fno_auto_roll_scheduler() -> None:
         )
     else:
         logger.info("F&O auto-roll disabled (FNO_AUTO_ROLL_ENABLED=0)")
+
+
+@app.on_event("startup")
+async def start_screener_scheduler() -> None:
+    from app.services.screener_scheduler import (
+        ENABLED as SCREENER_ON, EOD_HHMM, TICK_SECONDS, screener_loop,
+    )
+
+    if SCREENER_ON:
+        asyncio.create_task(screener_loop())
+        logger.info(
+            "Stock Screener enabled — snapshot refresh every %ss during the session, "
+            "full recompute + persist at %s IST (momentum, sectors, daily/weekly patterns)",
+            TICK_SECONDS, EOD_HHMM,
+        )
+    else:
+        logger.info("Stock Screener scheduler disabled (SCREENER_ENABLED=0)")
 
 
 @app.on_event("startup")
@@ -531,6 +561,7 @@ app.include_router(desk_history.router)
 app.include_router(pattern.router)
 app.include_router(stocks_range.router)
 app.include_router(bullish_stocks.router)
+app.include_router(screener.router)
 app.include_router(long_horizon.router)
 app.include_router(chart_data.router)
 app.include_router(telegram_signals.router)

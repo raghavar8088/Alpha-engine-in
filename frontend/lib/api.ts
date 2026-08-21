@@ -3936,3 +3936,252 @@ export async function fetchPatternPositions(status = "OPEN", timeframe?: string)
   const r = await apiFetch(`/api/pattern/positions?status=${status}${q}`);
   return r.positions ?? [];
 }
+
+// ── Stock Screener ────────────────────────────────────────────────────────────────
+// Momentum across four horizons, sector rotation with drill-down, daily/weekly chart
+// patterns, and the intraday/swing/breakout setup shortlists. Every number is computed
+// from stored daily bars plus live Angel quotes; NSE and Chartink are enrichment only,
+// and the /sources endpoint reports exactly which of them answered.
+
+export interface ScreenerChip { label: string; tier: number; code: string; }
+
+export interface ScreenerMomentumRow {
+  rank: number;
+  symbol: string;
+  name: string | null;
+  sector: string;
+  belongs_to: string | null;
+  ltp: number;
+  return_pct: number | null;
+  returns: Record<string, number | null>;
+  rank_pct: number | null;
+  rs_index: number | null;
+  rs_sector: number | null;
+  consistency: number | null;
+  sector_return_pct: number | null;
+  volume_x: number | null;
+  turnover: number | null;
+  delivery_pct: number | null;
+  ema9_hold_pct: number | null;
+  up_streak: number;
+  pct_from_52w_high: number | null;
+  pct_from_ath: number | null;
+  breakout: { window: number; date: string } | null;
+  sessions: number;
+  why: ScreenerChip[];
+  why_summary: string;
+  character: string;
+  score: number | null;
+}
+
+export interface ScreenerCoverage {
+  symbols: number; with_history: number; pct: number; sessions_needed: number;
+}
+
+export interface ScreenerMomentumBoard {
+  index: string; label: string; horizon: string; horizon_label: string;
+  benchmark: { symbol: string; available: boolean; returns: Record<string, number | null> };
+  coverage: ScreenerCoverage;
+  quotes_live: boolean;
+  count: number;
+  rows: ScreenerMomentumRow[];
+}
+
+export interface ScreenerSectorRow {
+  sector: string; count: number; thin: boolean;
+  returns: Record<string, number | null>;
+  breadth: Record<string, number | null>;
+  ranks: Record<string, number>;
+  rank_change: number | null;
+  rotation: string;
+  leader?: { symbol: string; return_pct: number };
+  laggard?: { symbol: string; return_pct: number };
+  volume_x?: number | null;
+  rs_index?: number | null;
+}
+
+export interface ScreenerSectorBoard {
+  count: number; sectors: ScreenerSectorRow[];
+  benchmark: Record<string, number | null>;
+  horizons: { key: string; label: string }[];
+  basis: string;
+}
+
+export interface ScreenerContribution {
+  symbol: string; name: string | null; return_pct: number;
+  weight_pct: number; contribution_pp: number; volume_x: number | null; ltp: number;
+}
+
+export interface ScreenerSectorDetail {
+  sector: string; horizon: string; horizon_label: string;
+  summary: Record<string, any>;
+  shape: string; breadth_pct: number; top2_share_pct: number;
+  drivers: string[];
+  contributions: ScreenerContribution[];
+  constituents: (ScreenerMomentumRow & { return_pct: number })[];
+  note: string;
+}
+
+export interface ScreenerPatternRow {
+  symbol: string; sector: string | null;
+  pattern: string; template: string; family: string; family_label: string;
+  timeframe: string; timeframe_label: string;
+  state: "TRIGGERED" | "FORMING";
+  side: string; direction: string;
+  entry: number; target: number; stoploss: number;
+  trigger_level: number | null;
+  confidence: number; rationale: string; as_of: string;
+  reward_risk: number | null;
+}
+
+export interface ScreenerPatternBoard {
+  index: string; scanned: number; count: number;
+  triggered: number; forming: number;
+  weekly_coverage: { symbols: number; with_enough_weekly_bars: number; pct: number; note: string };
+  elapsed_s: number;
+  catalog: { key: string; label: string; family: string; family_label: string; probeable: boolean }[];
+  rows: ScreenerPatternRow[];
+}
+
+export interface ScreenerPlan {
+  kind: string; label: string; tradable: boolean;
+  entry: number; stop: number; target: number;
+  stop_pct: number; target_pct: number;
+  horizon: string; exit_rule: string; basis: string;
+  qty: number; capital_used: number;
+  gross_rr: number | null; net_rr: number | null;
+  net_reward: number | null; net_risk: number | null;
+  cost_win: Record<string, number | string> | null;
+  product: string;
+  worth_taking: boolean;
+  drift_pct?: number; blocked_reason?: string;
+  confirming_patterns: { pattern: string; state: string; timeframe: string }[];
+}
+
+export interface ScreenerSetupRow {
+  symbol: string; name: string | null; sector: string; ltp: number;
+  return_pct: number | null; volume_x: number | null; rs_index: number | null;
+  sector_return_pct: number | null;
+  plan: ScreenerPlan;
+  why: ScreenerChip[]; why_summary: string; character: string;
+  patterns: { pattern: string; state: string; timeframe: string }[];
+}
+
+export interface ScreenerSetupBoard {
+  kind: string; index: string; horizon: string;
+  universe: number; qualified: number; worth_taking: number; rejected: number;
+  capital_per_trade: number; note: string;
+  rows: ScreenerSetupRow[];
+}
+
+export interface ScreenerSummary {
+  index: string; label: string; universe: number;
+  advances: number; declines: number; unchanged: number;
+  advance_decline_ratio: number | null;
+  above_sma20: { pct: number | null; n: number; of: number };
+  above_sma50: { pct: number | null; n: number; of: number };
+  above_sma200: { pct: number | null; n: number; of: number };
+  new_52w_highs: number; new_52w_lows: number;
+  above_vwap: { available: boolean; reason: string };
+  benchmark: { symbol: string; available: boolean; returns: Record<string, number | null> };
+  coverage: Record<string, ScreenerCoverage>;
+  quotes_live: boolean;
+  market_open: boolean | null;
+}
+
+export interface ScreenerSources {
+  index: string;
+  feeds: {
+    name: string; role: string; ok: boolean | null; detail: string;
+    coverage?: Record<string, ScreenerCoverage>;
+    endpoints?: Record<string, { ok: boolean; error: string | null }>;
+    verified?: Record<string, string>;
+  }[];
+  checked_at: string;
+}
+
+export interface ScreenerConfig {
+  indices: { key: string; label: string }[];
+  default_index: string;
+  horizons: { key: string; label: string; sessions: number }[];
+  timeframes: { key: string; label: string }[];
+  pattern_catalog: { key: string; label: string; family: string; family_label: string; probeable: boolean }[];
+  setup_kinds: string[];
+  chartink: {
+    enabled: boolean;
+    presets: { key: string; label: string; why_not_local: string }[];
+    verified: Record<string, string>;
+    policy: string;
+  };
+}
+
+export interface ScreenerReason {
+  code: string; tier: number; text: string;
+  weight: number; value: number | null; unit: string | null;
+}
+
+export interface ScreenerDetail {
+  symbol: string; name: string | null; sector: string; belongs_to: string | null;
+  ltp: number; sessions: number;
+  horizons: Record<string, {
+    label: string; return_pct: number | null; benchmark_pct: number | null;
+    rs_index: number | null; sector_return_pct: number | null; sector_rank: number | null;
+    reasons: ScreenerReason[];
+    summary: string; character: string;
+  }>;
+  structure: Record<string, any>;
+  patterns: ScreenerPatternRow[];
+  trade_plans: ScreenerPlan[];
+  narrative: { available: boolean; reason: string };
+}
+
+function screenerQs(params: Record<string, string | number | boolean | null | undefined>): string {
+  const q = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== null && v !== undefined && v !== "") q.set(k, String(v));
+  }
+  const s = q.toString();
+  return s ? "?" + s : "";
+}
+
+export async function fetchScreenerConfig(): Promise<ScreenerConfig> {
+  return apiFetch("/api/screener/config");
+}
+export async function fetchScreenerSummary(index?: string): Promise<ScreenerSummary> {
+  return apiFetch("/api/screener/summary" + screenerQs({ index }));
+}
+export async function fetchScreenerMomentum(
+  horizon: string, index?: string, sector?: string, limit = 100, minTurnover?: number,
+): Promise<ScreenerMomentumBoard> {
+  return apiFetch("/api/screener/momentum" +
+    screenerQs({ horizon, index, sector, limit, min_turnover: minTurnover }));
+}
+export async function fetchScreenerDetail(symbol: string, index?: string): Promise<ScreenerDetail> {
+  return apiFetch("/api/screener/momentum/" + encodeURIComponent(symbol) + screenerQs({ index }));
+}
+export async function fetchScreenerSectors(index?: string, horizon?: string): Promise<ScreenerSectorBoard> {
+  return apiFetch("/api/screener/sectors" + screenerQs({ index, horizon }));
+}
+export async function fetchScreenerSectorDetail(
+  sector: string, horizon: string, index?: string,
+): Promise<ScreenerSectorDetail> {
+  return apiFetch("/api/screener/sectors/" + encodeURIComponent(sector) +
+    screenerQs({ horizon, index }));
+}
+export async function fetchScreenerPatterns(opts: {
+  timeframe?: string; pattern?: string; family?: string; state?: string;
+  direction?: string; sector?: string; index?: string; limit?: number;
+} = {}): Promise<ScreenerPatternBoard> {
+  return apiFetch("/api/screener/patterns" + screenerQs(opts as Record<string, string | number>));
+}
+export async function fetchScreenerSetups(
+  kind: string, index?: string, limit = 40,
+): Promise<ScreenerSetupBoard> {
+  return apiFetch("/api/screener/setups" + screenerQs({ kind, index, limit }));
+}
+export async function fetchScreenerSources(index?: string): Promise<ScreenerSources> {
+  return apiFetch("/api/screener/sources" + screenerQs({ index }));
+}
+export async function refreshScreener(index?: string): Promise<Record<string, any>> {
+  return apiFetch("/api/screener/refresh" + screenerQs({ index }), { method: "POST" });
+}

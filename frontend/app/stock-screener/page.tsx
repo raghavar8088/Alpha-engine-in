@@ -1,0 +1,838 @@
+"use client";
+
+/**
+ * Stock Screener — momentum, sector rotation, chart patterns and tradable setups.
+ *
+ * The five tabs answer five different questions and are deliberately not merged:
+ *   Momentum  which stocks are strongest today / this week / this month / this half-year
+ *   Sectors   where money is rotating, and which stocks inside a sector are driving it
+ *   Patterns  which charts have formed a shape, on daily and weekly candles
+ *   Setups    what is actually tradable right now, priced net of real Angel One costs
+ *   Sources   which feeds answered — so a data outage never reads as a quiet market
+ */
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import PageHeader from "../../components/PageHeader";
+import GlassPanel from "../../components/GlassPanel";
+import ErrorBanner from "../../components/ErrorBanner";
+import EmptyState from "../../components/EmptyState";
+import StatusPill from "../../components/StatusPill";
+import {
+  refreshing,
+  fetchScreenerConfig, fetchScreenerSummary, fetchScreenerMomentum,
+  fetchScreenerDetail, fetchScreenerSectors, fetchScreenerSectorDetail,
+  fetchScreenerPatterns, fetchScreenerSetups, fetchScreenerSources, refreshScreener,
+  ScreenerConfig, ScreenerSummary, ScreenerMomentumBoard, ScreenerMomentumRow,
+  ScreenerDetail, ScreenerSectorBoard, ScreenerSectorDetail, ScreenerPatternBoard,
+  ScreenerSetupBoard, ScreenerSources,
+} from "../../lib/api";
+
+type Tab = "momentum" | "sectors" | "patterns" | "setups" | "sources";
+const TABS: { key: Tab; label: string }[] = [
+  { key: "momentum", label: "Momentum" },
+  { key: "sectors", label: "Sectors" },
+  { key: "patterns", label: "Chart Patterns" },
+  { key: "setups", label: "Setups" },
+  { key: "sources", label: "Sources" },
+];
+
+const REFRESH_MS = 60000;
+
+const pct = (v: number | null | undefined, dp = 2) =>
+  v === null || v === undefined ? "—" : `${v >= 0 ? "+" : ""}${v.toFixed(dp)}%`;
+const num = (v: number | null | undefined, dp = 2) =>
+  v === null || v === undefined ? "—" : v.toLocaleString("en-IN", { maximumFractionDigits: dp });
+const money = (v: number | null | undefined) =>
+  v === null || v === undefined ? "—" : `₹${v.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+const cls = (v: number | null | undefined) =>
+  v === null || v === undefined ? "" : v > 0 ? "gain" : v < 0 ? "loss" : "";
+
+const ROTATION_TONE: Record<string, "gain" | "loss" | "warn" | "accent" | "muted"> = {
+  leading: "gain", improving: "accent", weakening: "warn", lagging: "loss", unknown: "muted",
+};
+
+export default function StockScreenerPage() {
+  const [cfg, setCfg] = useState<ScreenerConfig | null>(null);
+  const [index, setIndex] = useState<string>("");
+  const [tab, setTab] = useState<Tab>("momentum");
+  const [horizon, setHorizon] = useState("1d");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const [summary, setSummary] = useState<ScreenerSummary | null>(null);
+  const [board, setBoard] = useState<ScreenerMomentumBoard | null>(null);
+  const [sectors, setSectors] = useState<ScreenerSectorBoard | null>(null);
+  const [sectorDetail, setSectorDetail] = useState<ScreenerSectorDetail | null>(null);
+  const [patterns, setPatterns] = useState<ScreenerPatternBoard | null>(null);
+  const [setups, setSetups] = useState<ScreenerSetupBoard | null>(null);
+  const [sources, setSources] = useState<ScreenerSources | null>(null);
+  const [detail, setDetail] = useState<ScreenerDetail | null>(null);
+  const [detailFor, setDetailFor] = useState<string | null>(null);
+
+  const [filter, setFilter] = useState("");
+  const [sectorFilter, setSectorFilter] = useState("");
+  const [patTimeframe, setPatTimeframe] = useState("1d");
+  const [patState, setPatState] = useState("");
+  const [patFamily, setPatFamily] = useState("chart");
+  const [patDirection, setPatDirection] = useState("bullish");
+  const [setupKind, setSetupKind] = useState("intraday");
+
+  // ── config, once ──────────────────────────────────────────────────────────
+  useEffect(() => {
+    fetchScreenerConfig()
+      .then((c) => { setCfg(c); setIndex(c.default_index); })
+      .catch((e) => setError(e.message));
+  }, []);
+
+  // ── per-tab loaders ───────────────────────────────────────────────────────
+  const load = useCallback(async () => {
+    if (!index) return;
+    setBusy(true);
+    try {
+      const jobs: Promise<unknown>[] = [
+        fetchScreenerSummary(index).then(setSummary),
+      ];
+      if (tab === "momentum") {
+        jobs.push(fetchScreenerMomentum(horizon, index, sectorFilter || undefined, 200).then(setBoard));
+      } else if (tab === "sectors") {
+        jobs.push(fetchScreenerSectors(index).then(setSectors));
+      } else if (tab === "patterns") {
+        jobs.push(fetchScreenerPatterns({
+          index, timeframe: patTimeframe, state: patState || undefined,
+          family: patFamily || undefined, direction: patDirection || undefined, limit: 400,
+        }).then(setPatterns));
+      } else if (tab === "setups") {
+        jobs.push(fetchScreenerSetups(setupKind, index, 60).then(setSetups));
+      } else if (tab === "sources") {
+        jobs.push(fetchScreenerSources(index).then(setSources));
+      }
+      await Promise.all(jobs);
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  }, [index, tab, horizon, sectorFilter, patTimeframe, patState, patFamily, patDirection, setupKind]);
+
+  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    const id = setInterval(() => { load(); }, REFRESH_MS);
+    return () => clearInterval(id);
+  }, [load]);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try { await refreshing(load); } finally { setIsRefreshing(false); }
+  };
+
+  const handleHardRefresh = async () => {
+    setIsRefreshing(true);
+    try { await refreshScreener(index); await refreshing(load); }
+    catch (e) { setError(e instanceof Error ? e.message : String(e)); }
+    finally { setIsRefreshing(false); }
+  };
+
+  const openDetail = async (symbol: string) => {
+    setDetailFor(symbol); setDetail(null);
+    try { setDetail(await fetchScreenerDetail(symbol, index)); }
+    catch (e) { setError(e instanceof Error ? e.message : String(e)); setDetailFor(null); }
+  };
+
+  const openSector = async (sector: string) => {
+    setSectorDetail(null);
+    try { setSectorDetail(await fetchScreenerSectorDetail(sector, horizon, index)); }
+    catch (e) { setError(e instanceof Error ? e.message : String(e)); }
+  };
+
+  const rows = useMemo(() => {
+    const f = filter.trim().toLowerCase();
+    const rs = board?.rows ?? [];
+    if (!f) return rs;
+    return rs.filter((r) =>
+      r.symbol.toLowerCase().includes(f) ||
+      (r.name || "").toLowerCase().includes(f) ||
+      (r.sector || "").toLowerCase().includes(f));
+  }, [board, filter]);
+
+  const sectorNames = useMemo(
+    () => Array.from(new Set((sectors?.sectors ?? []).map((s) => s.sector))).sort(),
+    [sectors]);
+
+  return (
+    <div className="page">
+      <PageHeader
+        crumb="Stock Screener"
+        title="Stock Screener"
+        subtitle="Momentum across day, week, month and six months — with why each stock is trending, which sector the money is rotating into, what shapes the daily and weekly charts have formed, and which of it is actually tradable after real Angel One costs."
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
+        actions={
+          <button className="hard-refresh" onClick={handleHardRefresh} disabled={isRefreshing}
+            title="Recompute every horizon, rescan patterns, and re-capture NSE. Slower than Refresh.">
+            Recompute all
+          </button>
+        }
+      />
+
+      {/* ── controls ─────────────────────────────────────────────────────── */}
+      <div className="controls">
+        <div className="index-tabs">
+          {(cfg?.indices ?? []).map((ix) => (
+            <button key={ix.key} className={index === ix.key ? "tab active" : "tab"}
+              onClick={() => setIndex(ix.key)}>{ix.label}</button>
+          ))}
+        </div>
+        <div className="right-controls">
+          {summary?.market_open !== null && summary?.market_open !== undefined && (
+            <StatusPill label={summary.market_open ? "Market Open" : "Market Closed"}
+              tone={summary.market_open ? "gain" : "muted"} pulse={summary.market_open} />
+          )}
+          {summary && (
+            <StatusPill label={summary.quotes_live ? "Live quotes" : "Last close"}
+              tone={summary.quotes_live ? "accent" : "warn"} />
+          )}
+        </div>
+      </div>
+
+      {error && <ErrorBanner message={error} onRetry={load} />}
+
+      {/* ── breadth strip ────────────────────────────────────────────────── */}
+      {summary && (
+        <div className="breadth">
+          <Metric label="Advances / Declines"
+            value={`${summary.advances} / ${summary.declines}`}
+            tone={summary.advances >= summary.declines ? "gain" : "loss"}
+            note={summary.advance_decline_ratio !== null ? `${summary.advance_decline_ratio}× ratio` : undefined} />
+          <Metric label="Above 20 DMA" value={summary.above_sma20.pct !== null ? `${summary.above_sma20.pct}%` : "—"}
+            note={`${summary.above_sma20.n} of ${summary.above_sma20.of}`} />
+          <Metric label="Above 50 DMA" value={summary.above_sma50.pct !== null ? `${summary.above_sma50.pct}%` : "—"}
+            note={`${summary.above_sma50.n} of ${summary.above_sma50.of}`} />
+          <Metric label="Above 200 DMA" value={summary.above_sma200.pct !== null ? `${summary.above_sma200.pct}%` : "—"}
+            note={`${summary.above_sma200.n} of ${summary.above_sma200.of}`} />
+          <Metric label="52w Highs / Lows" value={`${summary.new_52w_highs} / ${summary.new_52w_lows}`}
+            tone={summary.new_52w_highs >= summary.new_52w_lows ? "gain" : "loss"} />
+          <Metric label={summary.benchmark.symbol}
+            value={pct(summary.benchmark.returns["1d"])}
+            tone={(summary.benchmark.returns["1d"] ?? 0) >= 0 ? "gain" : "loss"}
+            note={`1M ${pct(summary.benchmark.returns["1m"])}`} />
+          <Metric label="Above VWAP" value="n/a"
+            note="intraday measure — not stored" muted />
+        </div>
+      )}
+
+      {/* ── tabs ─────────────────────────────────────────────────────────── */}
+      <div className="tabbar">
+        {TABS.map((t) => (
+          <button key={t.key} className={tab === t.key ? "tabb active" : "tabb"}
+            onClick={() => setTab(t.key)}>{t.label}</button>
+        ))}
+        {busy && <span className="busy">loading…</span>}
+      </div>
+
+      {/* ══ MOMENTUM ═══════════════════════════════════════════════════════ */}
+      {tab === "momentum" && (
+        <>
+          <div className="subcontrols">
+            <div className="seg">
+              {(cfg?.horizons ?? []).map((h) => (
+                <button key={h.key} className={horizon === h.key ? "segb active" : "segb"}
+                  onClick={() => setHorizon(h.key)}
+                  title={`${h.sessions} trading session${h.sessions > 1 ? "s" : ""}`}>{h.label}</button>
+              ))}
+            </div>
+            <div className="right-controls">
+              <select className="sel" value={sectorFilter} onChange={(e) => setSectorFilter(e.target.value)}>
+                <option value="">All sectors</option>
+                {sectorNames.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+              <input className="filter" value={filter} onChange={(e) => setFilter(e.target.value)}
+                placeholder="Filter by symbol, name or sector…" />
+            </div>
+          </div>
+
+          {board && (
+            <div className="note">
+              <b>{board.label}</b> · {board.count} stocks with a {board.horizon_label.toLowerCase()} reading ·
+              benchmark {board.benchmark.symbol} {pct(board.benchmark.returns[horizon])} ·
+              coverage {board.coverage.with_history}/{board.coverage.symbols} ({board.coverage.pct}%)
+              have the {board.coverage.sessions_needed} sessions this horizon needs.
+              {!board.benchmark.available && " Benchmark bars are missing, so relative-strength columns read as unavailable rather than zero."}
+            </div>
+          )}
+
+          <GlassPanel>
+            {rows.length === 0 ? (
+              <EmptyState title="Nothing to show"
+                note="Either the universe has no stored bars yet, or every stock was filtered out." />
+            ) : (
+              <div className="tablewrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>#</th><th className="l">Stock</th><th className="l">Sector</th><th>LTP</th>
+                      <th className="hl">{board?.horizon_label}</th>
+                      <th>1D</th><th>1W</th><th>1M</th><th>6M</th>
+                      <th title="Return minus the index return, in percentage points">RS idx</th>
+                      <th title="Return minus its own sector's return">RS sec</th>
+                      <th title="Last session volume vs its own 20-day average">Vol ×</th>
+                      <th title="Share of sessions in this window that closed up">Consist</th>
+                      <th title="Share of the last month held above the 9 EMA">9EMA</th>
+                      <th title="Distance from the 52-week high">52w H</th>
+                      <th className="l">Why</th>
+                      <th>Score</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((r) => (
+                      <tr key={r.symbol} onClick={() => openDetail(r.symbol)} className="clickable"
+                        title={r.why_summary}>
+                        <td className="dim">{r.rank}</td>
+                        <td className="l"><b>{r.symbol}</b><div className="sub">{r.name}</div></td>
+                        <td className="l dim">{r.sector}</td>
+                        <td>{num(r.ltp)}</td>
+                        <td className={`hl ${cls(r.return_pct)}`}><b>{pct(r.return_pct)}</b></td>
+                        <td className={cls(r.returns["1d"])}>{pct(r.returns["1d"], 1)}</td>
+                        <td className={cls(r.returns["1w"])}>{pct(r.returns["1w"], 1)}</td>
+                        <td className={cls(r.returns["1m"])}>{pct(r.returns["1m"], 1)}</td>
+                        <td className={cls(r.returns["6m"])}>{pct(r.returns["6m"], 1)}</td>
+                        <td className={cls(r.rs_index)}>{r.rs_index === null ? "—" : r.rs_index.toFixed(1)}</td>
+                        <td className={cls(r.rs_sector)}>{r.rs_sector === null ? "—" : r.rs_sector.toFixed(1)}</td>
+                        <td className={r.volume_x && r.volume_x >= 2 ? "gain" : ""}>
+                          {r.volume_x === null ? "—" : `${r.volume_x.toFixed(1)}×`}</td>
+                        <td>{r.consistency === null ? "—" : `${r.consistency.toFixed(0)}%`}</td>
+                        <td>{r.ema9_hold_pct === null ? "—" : `${r.ema9_hold_pct.toFixed(0)}%`}</td>
+                        <td className={r.pct_from_52w_high !== null && r.pct_from_52w_high >= -2 ? "gain" : ""}>
+                          {pct(r.pct_from_52w_high, 1)}</td>
+                        <td className="l">
+                          <div className="chips">
+                            {r.why.length === 0
+                              ? <span className="chip t0">unexplained</span>
+                              : r.why.map((c) => <span key={c.code} className={`chip t${c.tier}`}>{c.label}</span>)}
+                          </div>
+                        </td>
+                        <td><b>{r.score === null ? "—" : r.score.toFixed(0)}</b></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </GlassPanel>
+        </>
+      )}
+
+      {/* ══ SECTORS ════════════════════════════════════════════════════════ */}
+      {tab === "sectors" && (
+        <>
+          {sectors && <div className="note"><b>Basis.</b> {sectors.basis}. NSE&rsquo;s own sectoral
+            indices are cap-weighted and use a different taxonomy, so the two are never merged
+            into one number.</div>}
+          <GlassPanel title="Sector rotation">
+            {!sectors ? <EmptyState title="Loading sectors…" /> : (
+              <div className="tablewrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th className="l">Sector</th><th>Names</th>
+                      <th>1D</th><th>1W</th><th>1M</th><th>6M</th>
+                      <th title="Share of the sector's names that are up over this horizon">Breadth (1M)</th>
+                      <th title="Rank over 6 months minus rank over 1 week — positive means it is climbing">Rank Δ</th>
+                      <th>Rotation</th>
+                      <th className="l">Leader</th><th className="l">Laggard</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sectors.sectors.map((s) => (
+                      <tr key={s.sector} className="clickable"
+                        onClick={() => { setHorizon(horizon); openSector(s.sector); }}>
+                        <td className="l"><b>{s.sector}</b>{s.thin && <span className="thin"> thin</span>}</td>
+                        <td className="dim">{s.count}</td>
+                        <td className={cls(s.returns["1d"])}>{pct(s.returns["1d"], 1)}</td>
+                        <td className={cls(s.returns["1w"])}>{pct(s.returns["1w"], 1)}</td>
+                        <td className={cls(s.returns["1m"])}><b>{pct(s.returns["1m"], 1)}</b></td>
+                        <td className={cls(s.returns["6m"])}>{pct(s.returns["6m"], 1)}</td>
+                        <td>{s.breadth["1m"] === null ? "—" : `${s.breadth["1m"]!.toFixed(0)}%`}</td>
+                        <td className={cls(s.rank_change)}>
+                          {s.rank_change === null ? "—" : (s.rank_change > 0 ? `▲ ${s.rank_change}` : s.rank_change < 0 ? `▼ ${Math.abs(s.rank_change)}` : "—")}</td>
+                        <td><StatusPill label={s.rotation} tone={ROTATION_TONE[s.rotation] ?? "muted"} /></td>
+                        <td className="l dim">{s.leader?.symbol} {pct(s.leader?.return_pct, 1)}</td>
+                        <td className="l dim">{s.laggard?.symbol} {pct(s.laggard?.return_pct, 1)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </GlassPanel>
+
+          {sectorDetail && (
+            <GlassPanel title={`${sectorDetail.sector} — ${sectorDetail.horizon_label}`}
+              note={`${sectorDetail.shape} move`}>
+              <div className="drivers">
+                {sectorDetail.drivers.map((d, i) => <div key={i} className="driver">{d}</div>)}
+              </div>
+              <div className="seg small">
+                {(cfg?.horizons ?? []).map((h) => (
+                  <button key={h.key} className={sectorDetail.horizon === h.key ? "segb active" : "segb"}
+                    onClick={async () => setSectorDetail(await fetchScreenerSectorDetail(sectorDetail.sector, h.key, index))}>
+                    {h.label}</button>
+                ))}
+              </div>
+              <h4>Who is driving it</h4>
+              <div className="tablewrap">
+                <table>
+                  <thead><tr><th className="l">Stock</th><th>LTP</th><th>Return</th>
+                    <th title="Share of the sector's turnover">Weight</th>
+                    <th title="Return × weight — its share of the sector's move">Contribution</th>
+                    <th>Vol ×</th></tr></thead>
+                  <tbody>
+                    {sectorDetail.contributions.map((c) => (
+                      <tr key={c.symbol} className="clickable" onClick={() => openDetail(c.symbol)}>
+                        <td className="l"><b>{c.symbol}</b><div className="sub">{c.name}</div></td>
+                        <td>{num(c.ltp)}</td>
+                        <td className={cls(c.return_pct)}>{pct(c.return_pct, 1)}</td>
+                        <td className="dim">{c.weight_pct.toFixed(1)}%</td>
+                        <td className={cls(c.contribution_pp)}><b>{c.contribution_pp.toFixed(2)} pp</b></td>
+                        <td>{c.volume_x === null ? "—" : `${c.volume_x.toFixed(1)}×`}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="note small">{sectorDetail.note}</div>
+            </GlassPanel>
+          )}
+        </>
+      )}
+
+      {/* ══ PATTERNS ═══════════════════════════════════════════════════════ */}
+      {tab === "patterns" && (
+        <>
+          <div className="subcontrols">
+            <div className="seg">
+              {(cfg?.timeframes ?? []).map((t) => (
+                <button key={t.key} className={patTimeframe === t.key ? "segb active" : "segb"}
+                  onClick={() => setPatTimeframe(t.key)}>{t.label}</button>
+              ))}
+            </div>
+            <div className="right-controls">
+              <select className="sel" value={patFamily} onChange={(e) => setPatFamily(e.target.value)}>
+                <option value="">All families</option>
+                <option value="chart">Chart patterns</option>
+                <option value="candlestick">Candlesticks</option>
+                <option value="structure">Price structure</option>
+              </select>
+              <select className="sel" value={patState} onChange={(e) => setPatState(e.target.value)}>
+                <option value="">Triggered + Forming</option>
+                <option value="TRIGGERED">Triggered only</option>
+                <option value="FORMING">Forming only</option>
+              </select>
+              <select className="sel" value={patDirection} onChange={(e) => setPatDirection(e.target.value)}>
+                <option value="">Both directions</option>
+                <option value="bullish">Bullish</option>
+                <option value="bearish">Bearish</option>
+              </select>
+            </div>
+          </div>
+
+          {patterns && (
+            <div className="note">
+              <b>{patterns.count}</b> hits over {patterns.scanned} stocks —{" "}
+              <b className="gain">{patterns.triggered}</b> triggered (price has closed through
+              the pattern&rsquo;s boundary) and <b className="warn">{patterns.forming}</b> forming
+              (shape complete, boundary intact — the Trigger column is the level that would
+              confirm it). Scan took {patterns.elapsed_s}s and made no broker calls.
+              {patTimeframe === "1w" && (
+                <> Weekly coverage: {patterns.weekly_coverage.with_enough_weekly_bars}/
+                  {patterns.weekly_coverage.symbols} ({patterns.weekly_coverage.pct}%) have enough
+                  history. {patterns.weekly_coverage.note}</>
+              )}
+            </div>
+          )}
+
+          <GlassPanel>
+            {!patterns || patterns.rows.length === 0 ? (
+              <EmptyState title="No pattern hits" note="Try widening the filters, or the other timeframe." />
+            ) : (
+              <div className="tablewrap">
+                <table>
+                  <thead><tr>
+                    <th className="l">Stock</th><th className="l">Sector</th><th className="l">Pattern</th>
+                    <th>TF</th><th>State</th><th>Dir</th>
+                    <th>Entry</th><th>Trigger</th><th>Stop</th><th>Target</th>
+                    <th>R:R</th><th>Conf</th><th className="l">Rationale</th>
+                  </tr></thead>
+                  <tbody>
+                    {patterns.rows.map((p, i) => (
+                      <tr key={`${p.symbol}-${p.template}-${p.timeframe}-${i}`} className="clickable"
+                        onClick={() => openDetail(p.symbol)}>
+                        <td className="l"><b>{p.symbol}</b></td>
+                        <td className="l dim">{p.sector}</td>
+                        <td className="l">{p.pattern}<div className="sub">{p.family_label}</div></td>
+                        <td className="dim">{p.timeframe_label}</td>
+                        <td><span className={p.state === "TRIGGERED" ? "state trig" : "state form"}>{p.state}</span></td>
+                        <td className={p.direction === "bullish" ? "gain" : "loss"}>{p.side}</td>
+                        <td>{num(p.entry)}</td>
+                        <td>{p.trigger_level === null ? "—" : <b>{num(p.trigger_level)}</b>}</td>
+                        <td className="loss">{num(p.stoploss)}</td>
+                        <td className="gain">{num(p.target)}</td>
+                        <td><b>{p.reward_risk === null ? "—" : `${p.reward_risk}×`}</b></td>
+                        <td className="dim">{(p.confidence * 100).toFixed(0)}%</td>
+                        <td className="l sub wide">{p.rationale}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </GlassPanel>
+        </>
+      )}
+
+      {/* ══ SETUPS ═════════════════════════════════════════════════════════ */}
+      {tab === "setups" && (
+        <>
+          <div className="subcontrols">
+            <div className="seg">
+              {(cfg?.setup_kinds ?? []).map((k) => (
+                <button key={k} className={setupKind === k ? "segb active" : "segb"}
+                  onClick={() => setSetupKind(k)}>{k[0].toUpperCase() + k.slice(1)}</button>
+              ))}
+            </div>
+          </div>
+
+          {setups && (
+            <div className="note">
+              <b>{setups.qualified}</b> of {setups.universe} stocks pass the {setups.kind} gate;{" "}
+              <b className="gain">{setups.worth_taking}</b> clear their costs at{" "}
+              {money(setups.capital_per_trade)} per trade. {setups.note}
+            </div>
+          )}
+
+          <GlassPanel>
+            {!setups || setups.rows.length === 0 ? (
+              <EmptyState title="No setups today"
+                note="Nothing passed this mode's gate. That is a real answer, not an error." />
+            ) : (
+              <div className="tablewrap">
+                <table>
+                  <thead><tr>
+                    <th className="l">Stock</th><th className="l">Sector</th><th>LTP</th><th>Return</th>
+                    <th>Entry</th><th>Stop</th><th>Target</th><th>Qty</th>
+                    <th title="Reward:risk before costs">Gross R:R</th>
+                    <th title="Reward:risk after real Angel One charges on both legs">Net R:R</th>
+                    <th>Product</th><th className="l">Why</th><th className="l">Pattern</th>
+                  </tr></thead>
+                  <tbody>
+                    {setups.rows.map((s) => (
+                      <tr key={s.symbol} className={s.plan.worth_taking ? "clickable" : "clickable faded"}
+                        onClick={() => openDetail(s.symbol)}
+                        title={s.plan.blocked_reason || s.plan.basis}>
+                        <td className="l"><b>{s.symbol}</b><div className="sub">{s.name}</div></td>
+                        <td className="l dim">{s.sector}</td>
+                        <td>{num(s.ltp)}</td>
+                        <td className={cls(s.return_pct)}>{pct(s.return_pct, 1)}</td>
+                        <td>{num(s.plan.entry)}</td>
+                        <td className="loss">{num(s.plan.stop)} <span className="sub">{pct(s.plan.stop_pct, 1)}</span></td>
+                        <td className="gain">{num(s.plan.target)} <span className="sub">{pct(s.plan.target_pct, 1)}</span></td>
+                        <td className="dim">{s.plan.qty}</td>
+                        <td className="dim">{s.plan.gross_rr ?? "—"}×</td>
+                        <td className={s.plan.worth_taking ? "gain" : "loss"}>
+                          <b>{s.plan.net_rr ?? "—"}×</b>
+                          {!s.plan.tradable && <div className="sub">gapped past</div>}
+                        </td>
+                        <td className="dim">{s.plan.product}</td>
+                        <td className="l">
+                          <div className="chips">
+                            {s.why.map((c) => <span key={c.code} className={`chip t${c.tier}`}>{c.label}</span>)}
+                          </div>
+                        </td>
+                        <td className="l sub">
+                          {s.plan.confirming_patterns.length === 0 ? "—"
+                            : s.plan.confirming_patterns.map((p) => `${p.pattern} (${p.state})`).join(", ")}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </GlassPanel>
+        </>
+      )}
+
+      {/* ══ SOURCES ════════════════════════════════════════════════════════ */}
+      {tab === "sources" && (
+        <GlassPanel title="Where every number comes from"
+          note={sources ? `checked ${new Date(sources.checked_at).toLocaleTimeString()}` : undefined}>
+          {!sources ? <EmptyState title="Checking feeds…" /> : (
+            <div className="feeds">
+              {sources.feeds.map((f) => (
+                <div key={f.name} className="feed">
+                  <div className="feedhead">
+                    <span className={`dot ${f.ok === true ? "ok" : f.ok === false ? "bad" : "unk"}`} />
+                    <b>{f.name}</b>
+                    <span className="role">{f.role}</span>
+                  </div>
+                  <div className="detail">{f.detail}</div>
+                  {f.endpoints && (
+                    <div className="eps">
+                      {Object.entries(f.endpoints).map(([k, v]) => (
+                        <div key={k} className={v.ok ? "ep ok" : "ep bad"}>
+                          {k}: {v.ok ? "ok" : v.error}
+                        </div>
+                      ))}
+                      {Object.keys(f.endpoints).length === 0 && <div className="ep unk">not attempted yet this process</div>}
+                    </div>
+                  )}
+                  {f.verified && (
+                    <div className="eps">
+                      {Object.entries(f.verified).map(([k, v]) => (
+                        <div key={k} className="ep unk"><b>{k}</b>: {v}</div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </GlassPanel>
+      )}
+
+      {/* ══ STOCK DRAWER ═══════════════════════════════════════════════════ */}
+      {detailFor && (
+        <div className="scrim" onClick={() => { setDetailFor(null); setDetail(null); }}>
+          <div className="drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="drawerhead">
+              <div>
+                <h2>{detailFor}</h2>
+                {detail && <div className="sub">{detail.name} · {detail.sector} · {detail.belongs_to} · ₹{num(detail.ltp)}</div>}
+              </div>
+              <button className="close" onClick={() => { setDetailFor(null); setDetail(null); }}>✕</button>
+            </div>
+
+            {!detail ? <EmptyState title="Loading…" /> : (
+              <div className="drawerbody">
+                <h4>Across the four horizons</h4>
+                <div className="hgrid">
+                  {Object.entries(detail.horizons).map(([k, h]) => (
+                    <div key={k} className="hcard">
+                      <div className="hlabel">{h.label}</div>
+                      <div className={`hval ${cls(h.return_pct)}`}>{pct(h.return_pct, 1)}</div>
+                      <div className="sub">
+                        vs index {h.rs_index === null ? "—" : `${h.rs_index > 0 ? "+" : ""}${h.rs_index.toFixed(1)}`}
+                        {h.sector_rank && ` · sector rank ${h.sector_rank}`}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <h4>Why it is moving</h4>
+                {Object.entries(detail.horizons).map(([k, h]) => (
+                  <div key={k} className="reasonblock">
+                    <div className="rhead">{h.label} — <span className={`char ${h.character}`}>{h.character}</span></div>
+                    <div className="rsummary">{h.summary}</div>
+                    {h.reasons.length > 0 && (
+                      <ul className="rlist">
+                        {h.reasons.map((r) => (
+                          <li key={r.code}>
+                            <span className={`tier t${r.tier}`}>T{r.tier}</span> {r.text}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+
+                <h4>Chart patterns</h4>
+                {detail.patterns.length === 0 ? (
+                  <div className="sub">No pattern shapes detected on the daily or weekly chart.</div>
+                ) : (
+                  <div className="tablewrap">
+                    <table>
+                      <thead><tr><th className="l">Pattern</th><th>TF</th><th>State</th><th>Entry</th>
+                        <th>Trigger</th><th>Stop</th><th>Target</th><th>R:R</th></tr></thead>
+                      <tbody>
+                        {detail.patterns.map((p, i) => (
+                          <tr key={i}>
+                            <td className="l">{p.pattern}</td>
+                            <td className="dim">{p.timeframe_label}</td>
+                            <td><span className={p.state === "TRIGGERED" ? "state trig" : "state form"}>{p.state}</span></td>
+                            <td>{num(p.entry)}</td>
+                            <td>{p.trigger_level === null ? "—" : num(p.trigger_level)}</td>
+                            <td className="loss">{num(p.stoploss)}</td>
+                            <td className="gain">{num(p.target)}</td>
+                            <td>{p.reward_risk === null ? "—" : `${p.reward_risk}×`}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                <h4>Trade plans — net of real Angel One costs</h4>
+                <div className="plangrid">
+                  {detail.trade_plans.map((p) => (
+                    <div key={p.kind} className={p.worth_taking ? "plan good" : "plan"}>
+                      <div className="planhead">
+                        <b>{p.label}</b>
+                        <span className="sub">{p.horizon}</span>
+                      </div>
+                      <div className="planrow"><span>Entry</span><b>{num(p.entry)}</b></div>
+                      <div className="planrow"><span>Stop</span><b className="loss">{num(p.stop)} ({pct(p.stop_pct, 1)})</b></div>
+                      <div className="planrow"><span>Target</span><b className="gain">{num(p.target)} ({pct(p.target_pct, 1)})</b></div>
+                      <div className="planrow"><span>Qty @ {money(p.capital_used)}</span><b>{p.qty}</b></div>
+                      <div className="planrow"><span>Gross R:R</span><b>{p.gross_rr ?? "—"}×</b></div>
+                      <div className="planrow hi"><span>Net R:R</span>
+                        <b className={p.worth_taking ? "gain" : "loss"}>{p.net_rr ?? "—"}×</b></div>
+                      <div className="planrow"><span>Cost to target</span>
+                        <b>{p.cost_win ? money(Number(p.cost_win.total)) : "—"} ({p.product})</b></div>
+                      <div className="planbasis">{p.basis}</div>
+                      <div className="planbasis"><b>Exit:</b> {p.exit_rule}</div>
+                      {p.blocked_reason && <div className="blocked">{p.blocked_reason}</div>}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="note small"><b>News.</b> {detail.narrative.reason}</div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        .page { display: flex; flex-direction: column; gap: 16px; }
+        .controls, .subcontrols { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .index-tabs, .seg { display: flex; gap: 4px; background: var(--canvas-soft); padding: 4px; border-radius: 10px; border: 1px solid var(--panel-border); }
+        .tab, .segb { border: 0; background: transparent; padding: 7px 14px; border-radius: 7px; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; }
+        .tab.active, .segb.active { background: var(--panel); color: var(--text); box-shadow: var(--shadow-sm); }
+        .seg.small { margin: 10px 0; display: inline-flex; }
+        .right-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .filter, .sel { padding: 8px 12px; border-radius: 9px; border: 1px solid var(--panel-border); background: var(--panel); font-size: 13px; color: var(--text); min-width: 150px; }
+        .hard-refresh { padding: 7px 13px; border-radius: 9px; border: 1px solid var(--panel-border); background: var(--panel); font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; }
+        .hard-refresh:hover:not(:disabled) { border-color: var(--purple); color: var(--purple); }
+        .hard-refresh:disabled { opacity: .5; cursor: default; }
+
+        .breadth { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+
+        .tabbar { display: flex; gap: 2px; border-bottom: 1px solid var(--panel-border); align-items: center; }
+        .tabb { border: 0; background: transparent; padding: 10px 16px; font-size: 13.5px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+        .tabb.active { color: var(--purple); border-bottom-color: var(--purple); }
+        .busy { margin-left: auto; font-size: 12px; color: var(--text-faint); }
+
+        .note { font-size: 12.5px; color: var(--text-muted); line-height: 1.6; background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 10px; padding: 10px 14px; }
+        .note.small { font-size: 11.5px; margin-top: 12px; }
+
+        .tablewrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+        th, td { padding: 8px 10px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--panel-border); font-variant-numeric: tabular-nums; }
+        th { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; position: sticky; top: 0; background: var(--panel); }
+        th.l, td.l { text-align: left; }
+        th.hl, td.hl { background: var(--purple-dim); }
+        td.dim { color: var(--text-muted); }
+        .sub { font-size: 10.5px; color: var(--text-faint); font-weight: 400; white-space: normal; }
+        td.wide { max-width: 340px; white-space: normal; }
+        tr.clickable { cursor: pointer; }
+        tr.clickable:hover td { background: var(--canvas-soft); }
+        tr.faded td { opacity: .55; }
+        .gain { color: var(--gain); }
+        .loss { color: var(--loss); }
+        .warn { color: var(--warn); }
+        .thin { font-size: 10px; color: var(--warn); font-weight: 600; }
+
+        .chips { display: flex; gap: 4px; flex-wrap: wrap; }
+        .chip { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; white-space: nowrap; }
+        .chip.t1 { background: var(--gain-dim); color: var(--gain); }
+        .chip.t2 { background: var(--purple-dim); color: var(--purple); }
+        .chip.t3 { background: var(--accent-dim); color: var(--accent); }
+        .chip.t0 { background: var(--canvas-soft); color: var(--text-faint); }
+
+        .state { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .03em; }
+        .state.trig { background: var(--gain-dim); color: var(--gain); }
+        .state.form { background: var(--warn-dim); color: var(--warn); }
+
+        .drivers { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+        .driver { font-size: 13px; color: var(--text); padding: 8px 12px; background: var(--canvas-soft); border-radius: 8px; border-left: 3px solid var(--purple); }
+        h4 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin: 18px 0 8px; }
+
+        .feeds { display: flex; flex-direction: column; gap: 12px; }
+        .feed { border: 1px solid var(--panel-border); border-radius: 10px; padding: 12px 14px; }
+        .feedhead { display: flex; align-items: center; gap: 8px; font-size: 13.5px; }
+        .role { font-size: 11.5px; color: var(--text-faint); }
+        .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .dot.ok { background: var(--gain); }
+        .dot.bad { background: var(--loss); }
+        .dot.unk { background: var(--text-faint); }
+        .detail { font-size: 12.5px; color: var(--text-muted); margin-top: 5px; line-height: 1.55; }
+        .eps { margin-top: 7px; display: flex; flex-direction: column; gap: 3px; }
+        .ep { font-size: 11px; font-family: ui-monospace, monospace; color: var(--text-muted); }
+        .ep.ok { color: var(--gain); }
+        .ep.bad { color: var(--loss); }
+
+        .scrim { position: fixed; inset: 0; background: rgba(18,16,28,.42); z-index: 90; display: flex; justify-content: flex-end; }
+        .drawer { width: min(940px, 100%); height: 100%; background: var(--panel); overflow-y: auto; padding: 22px 26px 60px; box-shadow: var(--shadow-lg); }
+        .drawerhead { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; border-bottom: 1px solid var(--panel-border); padding-bottom: 14px; }
+        .drawerhead h2 { margin: 0; font-size: 22px; }
+        .close { border: 0; background: var(--canvas-soft); width: 30px; height: 30px; border-radius: 8px; cursor: pointer; color: var(--text-muted); font-size: 14px; }
+        .drawerbody { padding-top: 4px; }
+
+        .hgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+        .hcard { border: 1px solid var(--panel-border); border-radius: 10px; padding: 10px 12px; }
+        .hlabel { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+        .hval { font-size: 20px; font-weight: 700; margin: 3px 0; font-variant-numeric: tabular-nums; }
+
+        .reasonblock { border-left: 2px solid var(--panel-border); padding: 8px 0 8px 14px; margin-bottom: 10px; }
+        .rhead { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
+        .char { font-weight: 700; }
+        .char.rotation { color: var(--purple); }
+        .char.breakout { color: var(--gain); }
+        .char.momentum { color: var(--gain); }
+        .char.fundamental { color: var(--accent); }
+        .char.short-covering { color: var(--warn); }
+        .char.unexplained { color: var(--text-faint); }
+        .rsummary { font-size: 13px; margin: 5px 0; line-height: 1.6; }
+        .rlist { margin: 6px 0 0; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
+        .rlist li { font-size: 12.5px; color: var(--text-muted); line-height: 1.5; }
+        .tier { font-size: 9.5px; font-weight: 700; padding: 1px 5px; border-radius: 3px; margin-right: 6px; }
+        .tier.t1 { background: var(--gain-dim); color: var(--gain); }
+        .tier.t2 { background: var(--purple-dim); color: var(--purple); }
+        .tier.t3 { background: var(--accent-dim); color: var(--accent); }
+
+        .plangrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+        .plan { border: 1px solid var(--panel-border); border-radius: 12px; padding: 14px; }
+        .plan.good { border-color: var(--gain); background: var(--gain-dim); }
+        .planhead { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+        .planrow { display: flex; justify-content: space-between; font-size: 12.5px; padding: 3px 0; gap: 10px; }
+        .planrow span { color: var(--text-muted); }
+        .planrow.hi { border-top: 1px solid var(--panel-border); margin-top: 5px; padding-top: 7px; font-size: 14px; }
+        .planbasis { font-size: 11px; color: var(--text-faint); line-height: 1.5; margin-top: 8px; }
+        .blocked { font-size: 11.5px; color: var(--loss); background: var(--loss-dim); padding: 7px 9px; border-radius: 7px; margin-top: 8px; line-height: 1.5; }
+      `}</style>
+    </div>
+  );
+}
+
+function Metric({ label, value, note, tone, muted }: {
+  label: string; value: string; note?: string;
+  tone?: "gain" | "loss"; muted?: boolean;
+}) {
+  return (
+    <div className={muted ? "metric muted" : "metric"}>
+      <div className="ml">{label}</div>
+      <div className={`mv ${tone ?? ""}`}>{value}</div>
+      {note && <div className="mn">{note}</div>}
+      <style jsx>{`
+        .metric { border: 1px solid var(--panel-border); border-radius: 11px; padding: 10px 13px; background: var(--panel); }
+        .metric.muted { opacity: .6; }
+        .ml { font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); }
+        .mv { font-size: 18px; font-weight: 700; margin-top: 3px; font-variant-numeric: tabular-nums; }
+        .mv.gain { color: var(--gain); }
+        .mv.loss { color: var(--loss); }
+        .mn { font-size: 10.5px; color: var(--text-faint); margin-top: 2px; }
+      `}</style>
+    </div>
+  );
+}
