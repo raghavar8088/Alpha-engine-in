@@ -26,7 +26,7 @@ from __future__ import annotations
 import math
 from bisect import bisect_right
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Callable, Optional
 
 from .catalog import Strategy
 from .primitives import (
@@ -207,8 +207,17 @@ def backtest(strategy: Strategy, bars, symbol: str, exchange: str = "MCX",
              cost_model: str = "commodity", slippage_bps: float = 5.0,
              risk_pct: float = DEFAULT_RISK_PCT, lot_size: int = 1,
              max_hold: int | None = None, oos_fraction: float = 0.3,
-             min_trades_for_grade: int = 20) -> BacktestResult:
-    """Replay `strategy` over `bars`. See the module docstring for the realism rules."""
+             min_trades_for_grade: int = 20,
+             evaluate_fn: Callable | None = None) -> BacktestResult:
+    """Replay `strategy` over `bars`. See the module docstring for the realism rules.
+
+    `evaluate_fn` lets a desk with its own decision rules — the long-only Trending
+    Stocks library, whose signals must clear a 1:6 feasibility gate — reuse THIS
+    replay rather than forking it. It must have `evaluate()`'s exact signature and
+    return shape. Default is `evaluate` itself, so factory behaviour is unchanged;
+    the point of the hook is that there stays exactly one no-look-ahead replay in the
+    app, and every desk's numbers come out of it."""
+    _eval = evaluate_fn or evaluate
     tf = strategy.timeframe
     max_hold = max_hold or DEFAULT_MAX_HOLD.get(tf, 60)
     htf_ts = [b.ts for b in htf_bars] if htf_bars else []
@@ -274,8 +283,8 @@ def backtest(strategy: Strategy, bars, symbol: str, exchange: str = "MCX",
             cut = bisect_right(htf_ts, bars[i].ts)
             htf_slice = htf_bars[:cut] if cut else None
 
-        sig, rej = evaluate(strategy, bars[:i + 1], symbol, exchange, htf_slice,
-                            regime=regimes[i])
+        sig, rej = _eval(strategy, bars[:i + 1], symbol, exchange, htf_slice,
+                         regime=regimes[i])
         if sig is None:
             if rej is not None:
                 rejections[rej.stage] = rejections.get(rej.stage, 0) + 1

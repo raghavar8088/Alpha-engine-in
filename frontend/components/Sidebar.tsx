@@ -87,6 +87,20 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // Sits directly under Momentum Trading, and is the only desk in the app whose
+        // universe the USER writes: it trades a named basket, long only, and refuses a
+        // setup unless seven research pillars agree. A flame over candles rather than a
+        // fourth trend arrow — the three above it are already arrows.
+        href: "/trending-stocks",
+        label: "Trending Stocks",
+        icon: (
+          <>
+            <path d="M12 3c.6 3 3.5 4.2 3.5 7.5A3.5 3.5 0 0112 14a3.5 3.5 0 01-3.5-3.5C8.5 8.4 10 7.2 12 3z" />
+            <path d="M5 21v-4M9.5 21v-6M14.5 21v-5M19 21v-7" />
+          </>
+        ),
+      },
+      {
         // Sits under Momentum Trading: the same signal-then-act shape, but expressed
         // through NIFTY options rather than shares, and run across every candle size at
         // once to find which HORIZON an edge actually lives on.

@@ -4185,3 +4185,287 @@ export async function fetchScreenerSources(index?: string): Promise<ScreenerSour
 export async function refreshScreener(index?: string): Promise<Record<string, any>> {
   return apiFetch("/api/screener/refresh" + screenerQs({ index }), { method: "POST" });
 }
+
+// --- Trending Stocks: LONG-ONLY desk over a user-named basket -----------------
+// 678 strategies at Rs10,00,000 paper each, gated by a 1:6 feasibility test and a
+// seven-pillar research gate. Every position carries the sentences that justified it.
+
+export interface TSPillar {
+  name: string;
+  verdict: "supports" | "neutral" | "opposes" | "veto";
+  score: number;
+  sentence: string;
+  facts: Record<string, any>;
+}
+
+export interface TSEvidence {
+  ok: boolean;
+  supports: number;
+  required: number;
+  score: number;
+  vetoes: string[];
+  reasons: string[];
+  pillars: TSPillar[];
+}
+
+export interface TSCoverageCell {
+  bars: number;
+  first: string | null;
+  last: string | null;
+  native: boolean;
+  derived_from?: string;
+  error?: string | null;
+}
+
+export interface TSBasketRow {
+  symbol: string;
+  name: string | null;
+  status: "ACTIVE" | "QUARANTINED" | "REMOVED";
+  note: string | null;
+  quarantine_reason?: string;
+  added_at: string | null;
+  backfilled_at: string | null;
+  backfill: Record<string, number> | null;
+  coverage: Record<string, TSCoverageCell>;
+  open_positions: number;
+}
+
+export interface TSSummary {
+  module: string;
+  direction: string;
+  mode: string;
+  strategy_count: number;
+  family_counts: Record<string, number>;
+  style_counts: Record<string, number>;
+  per_strategy_capital: number;
+  initial_capital: number;
+  deployed_capital: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  total_costs: number;
+  equity: number;
+  open_positions: number;
+  closed_positions: number;
+  backtest_rows: number;
+  validated_rows: number;
+  failed_1_6_rr: number;
+  grade_counts: Record<string, number>;
+  basket: { symbol: string; name: string | null; status: string; quarantine_reason?: string }[];
+  basket_size: number;
+  gate: {
+    min_rr: number;
+    min_pillars: number;
+    pillars: string[];
+    min_grade_to_trade: number;
+    require_grade: boolean;
+    max_strategies_per_symbol: number;
+    max_positions_per_strategy: number;
+    max_consecutive_losses: number;
+    risk_pct: number;
+    slippage_bps: number;
+    min_turnover: number;
+    entry_cutoff: string;
+    squareoff: string;
+  };
+  costs_charged: boolean;
+  paused: boolean;
+  market_open: boolean;
+  benchmark: string;
+  last_run_at: string | null;
+  last_backtest_at: string | null;
+  last_validation_at: string | null;
+  last_notes: string[];
+  last_rejections: Record<string, number>;
+  breaker_tripped: boolean;
+  breaker_reasons: string[];
+  today_pnl: number;
+  week_pnl: number;
+  drawdown_pct: number;
+}
+
+export interface TSLibraryRow {
+  strategy_id: string;
+  name: string;
+  family: string;
+  sub_family: string;
+  timeframe: string;
+  htf: string | null;
+  style: string;
+  target_r: number;
+  min_rr: number;
+  hypothesis: string;
+  regimes: string[];
+  detector: string;
+  direction: string;
+  grade: number | null;
+  base_grade: number | null;
+  status: string | null;
+  grade_reasons: string[];
+  failed_rr: boolean;
+  failed_rr_label: string | null;
+  best_symbol: string | null;
+  bt_trades: number;
+  bt_win_rate: number;
+  bt_profit_factor: number | null;
+  bt_expectancy: number;
+  bt_avg_r: number;
+  bt_net_pnl: number;
+  bt_costs: number;
+  bt_max_dd_pct: number;
+  bt_cagr_pct: number | null;
+  bt_sharpe: number | null;
+  oos_net_pnl: number;
+  oos_trades: number;
+  wf_fraction: number | null;
+  wf_windows: number | null;
+  mc_p5_final: number | null;
+  mc_prob_ruin: number | null;
+  paper_trades: number;
+  paper_net_pnl: number;
+  paper_win_rate: number;
+  open_positions: number;
+  eligible: boolean;
+}
+
+export interface TSPosition {
+  position_id: string;
+  strategy_id: string;
+  strategy_name: string;
+  family: string;
+  timeframe: string;
+  style: string;
+  symbol: string;
+  side: string;
+  entry_price: number;
+  stoploss: number;
+  target: number;
+  qty: number;
+  risk_amount: number;
+  reward_amount: number;
+  r_multiple: number;
+  min_rr: number;
+  capital_deployed: number;
+  pattern: string;
+  detail: string;
+  confirmations: string[];
+  regime_primary: string;
+  confidence: number;
+  reasons: string[];
+  evidence: TSEvidence;
+  evidence_score: number;
+  feasibility: Record<string, any> | null;
+  ltp: number;
+  unrealized_pnl: number;
+  realized_pnl: number | null;
+  pnl_pct: number;
+  r_now: number | null;
+  costs: number | null;
+  exit_price: number | null;
+  exit_reason: string | null;
+  status: string;
+  opened_at: string | null;
+  closed_at: string | null;
+}
+
+export interface TSSignal {
+  signal_id: string;
+  position_id: string;
+  strategy_id: string;
+  strategy_name: string;
+  symbol: string;
+  timeframe: string;
+  htf: string | null;
+  direction: string;
+  entry: number;
+  stop: number;
+  target: number;
+  risk: number;
+  reward: number;
+  r_multiple: number;
+  qty: number;
+  capital_allocated: number;
+  pattern: string;
+  confirmations: string[];
+  regime: string;
+  confidence: number;
+  evidence_score: number;
+  pillars_supporting: number;
+  reasons: string[];
+  created_at: string | null;
+}
+
+export interface TSRejections {
+  cycles: number;
+  totals: Record<string, number>;
+  samples: { strategy_id: string; symbol: string; timeframe: string; stage: string; reason: string; detail: string }[];
+  backtest_rejection_totals: Record<string, number>;
+  legend: Record<string, string>;
+}
+
+export async function fetchTSSummary(): Promise<TSSummary> {
+  return apiFetch("/api/trending-stocks/summary");
+}
+export async function fetchTSBasket(): Promise<{ basket: TSBasketRow[]; active: string[]; timeframes: string[]; benchmark: string; native_timeframes: string[]; derived_timeframes: Record<string, string> }> {
+  return apiFetch("/api/trending-stocks/basket");
+}
+export async function addTSSymbol(symbol: string, note?: string): Promise<any> {
+  return apiFetch("/api/trending-stocks/basket", {
+    method: "POST",
+    body: JSON.stringify({ symbol, note: note ?? null }),
+  });
+}
+export async function setTSBasket(raw: string): Promise<any> {
+  return apiFetch("/api/trending-stocks/basket/bulk", {
+    method: "POST",
+    body: JSON.stringify({ symbols: [], raw }),
+  });
+}
+export async function removeTSSymbol(symbol: string): Promise<any> {
+  return apiFetch(`/api/trending-stocks/basket/${encodeURIComponent(symbol)}`, { method: "DELETE" });
+}
+export async function releaseTSSymbol(symbol: string): Promise<any> {
+  return apiFetch(`/api/trending-stocks/basket/${encodeURIComponent(symbol)}/release`, { method: "POST" });
+}
+export async function searchTSInstruments(q: string): Promise<{ results: any[] }> {
+  return apiFetch(`/api/trending-stocks/basket/search?q=${encodeURIComponent(q)}`);
+}
+export async function backfillTSBars(full = true): Promise<any> {
+  return apiFetch(`/api/trending-stocks/basket/backfill?full=${full}`, { method: "POST" });
+}
+export async function fetchTSResearch(symbol: string, timeframe = "1d"): Promise<any> {
+  return apiFetch(`/api/trending-stocks/research/${encodeURIComponent(symbol)}?timeframe=${timeframe}`);
+}
+export async function fetchTSLibrary(p: { family?: string; timeframe?: string; style?: string; grade?: number } = {}): Promise<{ library: TSLibraryRow[]; total: number; timeframes: string[]; families: Record<string, number>; styles: Record<string, number>; strategy_count: number; min_rr: number }> {
+  const q = new URLSearchParams();
+  if (p.family) q.set("family", p.family);
+  if (p.timeframe) q.set("timeframe", p.timeframe);
+  if (p.style) q.set("style", p.style);
+  if (p.grade !== undefined) q.set("grade", String(p.grade));
+  const s = q.toString();
+  return apiFetch(`/api/trending-stocks/library${s ? `?${s}` : ""}`);
+}
+export async function fetchTSRecipes(): Promise<{ recipes: any[]; count: number; excluded: { key: string; why: string }[]; note: string }> {
+  return apiFetch("/api/trending-stocks/recipes");
+}
+export async function fetchTSStrategy(id: string): Promise<any> {
+  return apiFetch(`/api/trending-stocks/strategy/${encodeURIComponent(id)}`);
+}
+export async function fetchTSPositions(status?: string): Promise<{ positions: TSPosition[]; open: TSPosition[]; closed: TSPosition[] }> {
+  return apiFetch(`/api/trending-stocks/positions${status ? `?status=${status}` : ""}`);
+}
+export async function fetchTSSignals(limit = 120): Promise<TSSignal[]> {
+  const r = await apiFetch(`/api/trending-stocks/signals?limit=${limit}`);
+  return r.signals ?? [];
+}
+export async function fetchTSRejections(cycles = 20): Promise<TSRejections> {
+  return apiFetch(`/api/trending-stocks/rejections?cycles=${cycles}`);
+}
+export async function runTSBacktest(): Promise<any> {
+  return apiFetch("/api/trending-stocks/backtest", { method: "POST", body: JSON.stringify({}) });
+}
+export async function runTSValidation(): Promise<any> {
+  return apiFetch("/api/trending-stocks/validate", { method: "POST", body: JSON.stringify({}) });
+}
+export async function runTSCycle(): Promise<{ opened: number; managed: number; closed: number; notes: string[] }> {
+  return apiFetch("/api/trending-stocks/run", { method: "POST" });
+}

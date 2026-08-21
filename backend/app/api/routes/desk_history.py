@@ -74,6 +74,16 @@ DESKS: dict[str, dict] = {
         "equity": lambda: D.momentum_equity_collection,
         "capital": lambda: __import__("app.services.momentum_engine", fromlist=["x"]).INITIAL_CAPITAL,
     },
+    # Long-only desk over the user's own basket. Its capital is 678 strategies x Rs10L, so
+    # the desk-level ROI denominator is enormous and the "on capital deployed" number is
+    # the one that means anything here — which is exactly why this reader reports both.
+    "trending-stocks": {
+        "label": "Trending Stocks",
+        "positions": lambda: D.ts_positions_collection,
+        "equity": lambda: D.ts_equity_collection,
+        "capital": lambda: __import__("app.services.trending_stocks.engine",
+                                      fromlist=["x"]).INITIAL_CAPITAL,
+    },
 }
 
 # Desks that split into books/buckets take a `scope` and filter on their own key.

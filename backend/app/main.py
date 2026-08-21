@@ -48,6 +48,7 @@ from app.api.routes import (
     strategies,
     telegram_signals,
     trading_calls,
+    trending_stocks,
     watchlist,
 )
 from app.api.routes.broker import _get_dhan_client
@@ -142,6 +143,9 @@ DESK_INDEXES: dict[str, list] = {
     "intraday_lab_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)], [("closed_on", 1)]],
     "live_trading_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)]],
     "momentum_trading_positions": [[("bucket", 1), ("status", 1)], [("closed_on", 1)]],
+    "ts_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)], [("symbol", 1), ("status", 1)], [("closed_on", 1)]],
+    "ts_backtests": [[("strategy_id", 1), ("symbol", 1)], [("grade", -1)], [("updated_at", -1)]],
+    "ts_basket": [[("status", 1)], [("symbol", 1)]],
     "swing_positions": [[("status", 1)], [("closed_on", 1)]],
     "pattern_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)], [("closed_on", 1)], [("timeframe", 1)]],
     "swing_watchlist": [[("status", 1)], [("symbol", 1), ("status", 1)]],
@@ -202,6 +206,13 @@ EXPIRING_COLLECTIONS = {
     # highest-churn source in the app, so it expires soonest.
     "sf_equity": 14,
     "sf_signals": 30,
+    # Trending Stocks. `ts_rejections` is by far the highest-churn row in the
+    # module — one aggregated document per scan cycle, every few minutes — and it
+    # exists to answer "why did nothing trade TODAY", so a week is all it needs.
+    "ts_equity": 14,
+    "ts_signals": 30,
+    "ts_rejections": 7,
+    "ts_evidence": 180,
     # Stock Screener snapshots. Every one of these is DERIVED from `bars` +
     # `stock_universe` and can be recomputed at any time, so they expire freely.
     # Sector rotation is kept longest: the whole point of the board is how a
@@ -281,6 +292,8 @@ async def ensure_indexes() -> None:
     await _try("chart_workspace", chart_workspace.ensure_indexes())
     from app.services.strategy_factory.engine import ensure_indexes as sf_ensure_indexes
     await sf_ensure_indexes()
+    from app.services.trending_stocks.engine import ensure_indexes as ts_ensure_indexes
+    await ts_ensure_indexes()
 
 
 @app.on_event("startup")
@@ -368,6 +381,34 @@ async def start_screener_scheduler() -> None:
         )
     else:
         logger.info("Stock Screener scheduler disabled (SCREENER_ENABLED=0)")
+
+
+@app.on_event("startup")
+async def start_trending_stocks_scheduler() -> None:
+    """Trending Stocks: session loop, nightly sweep, and the RSS ingest nothing scheduled
+    before now (research-service has always had the function; only a button called it)."""
+    from app.services.trending_stocks.catalog import LONG_CATALOG
+    from app.services.trending_stocks.scheduler import (
+        ENABLED as TRENDING_ON, EOD_HHMM as TS_EOD, NEWS_ENABLED, NEWS_INTERVAL_SECONDS,
+        TICK_SECONDS as TS_TICK, news_ingest_loop, trending_eod_loop,
+        trending_session_loop,
+    )
+
+    if TRENDING_ON:
+        asyncio.create_task(trending_session_loop())
+        asyncio.create_task(trending_eod_loop())
+        logger.info(
+            "Trending Stocks desk enabled — %d LONG-ONLY strategies on the user's basket "
+            "at Rs10,00,000 paper each (scan every %ss during the session, sweep + "
+            "walk-forward at %s IST, 1:6 R:R gate, 7-pillar research gate)",
+            len(LONG_CATALOG), TS_TICK, TS_EOD,
+        )
+        if NEWS_ENABLED:
+            asyncio.create_task(news_ingest_loop())
+            logger.info("RSS news ingest enabled (every %ss) — feeds the Trending Stocks "
+                        "news pillar", NEWS_INTERVAL_SECONDS)
+    else:
+        logger.info("Trending Stocks desk disabled (TRENDING_STOCKS_ENABLED=0)")
 
 
 @app.on_event("startup")
@@ -555,6 +596,7 @@ app.include_router(zero_hero.router)
 app.include_router(buy_low.router)
 app.include_router(live_paper.router)
 app.include_router(momentum_trading.router)
+app.include_router(trending_stocks.router)
 app.include_router(nifty_scalp.router)
 app.include_router(swing_trading.router)
 app.include_router(desk_history.router)
