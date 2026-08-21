@@ -144,7 +144,11 @@ DESK_INDEXES: dict[str, list] = {
     "live_trading_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)]],
     "momentum_trading_positions": [[("bucket", 1), ("status", 1)], [("closed_on", 1)]],
     "ts_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)], [("symbol", 1), ("status", 1)], [("closed_on", 1)]],
-    "ts_backtests": [[("strategy_id", 1), ("symbol", 1)], [("grade", -1)], [("updated_at", -1)]],
+    # Only the resume lookup lives here; the rest of the ts_* indexes are created
+    # WITH NAMES by trending_stocks.engine.ensure_indexes(). Declaring the same key
+    # in both places makes Mongo auto-name it here and then reject the named one
+    # there as a conflict.
+    "ts_backtests": [[("updated_at", -1)]],
     "ts_basket": [[("status", 1)], [("symbol", 1)]],
     "swing_positions": [[("status", 1)], [("closed_on", 1)]],
     "pattern_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)], [("closed_on", 1)], [("timeframe", 1)]],

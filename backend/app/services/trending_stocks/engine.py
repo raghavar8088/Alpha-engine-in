@@ -55,6 +55,7 @@ from pymongo import UpdateOne
 
 from app.core.db import (
     ts_backtests_collection,
+    ts_basket_collection,
     ts_equity_collection,
     ts_evidence_collection,
     ts_positions_collection,
@@ -146,27 +147,42 @@ def _hhmm() -> str:
 
 
 async def ensure_indexes() -> None:
-    """Indexes the sweep, the resume check and every summary depend on. Without them each
-    read is a collection scan that gets slower with every row the desk writes."""
-    try:
-        await ts_backtests_collection.create_index(
-            [("strategy_id", 1), ("symbol", 1)], name="ts_bt_key", unique=True)
-        await ts_backtests_collection.create_index([("updated_at", -1)], name="ts_bt_resume")
-        await ts_backtests_collection.create_index([("grade", -1)], name="ts_bt_grade")
-        await ts_scores_collection.create_index("strategy_id", name="ts_scores_key", unique=True)
-        await ts_positions_collection.create_index([("status", 1)], name="ts_pos_status")
-        await ts_positions_collection.create_index(
-            [("strategy_id", 1), ("status", 1)], name="ts_pos_strategy")
-        await ts_positions_collection.create_index([("symbol", 1), ("status", 1)], name="ts_pos_symbol")
-        await ts_trades_collection.create_index([("closed_at", -1)], name="ts_trades_closed")
-        await ts_signals_collection.create_index([("created_at", -1)], name="ts_signals_recent")
-        await ts_evidence_collection.create_index([("symbol", 1), ("created_at", -1)],
-                                                  name="ts_evidence_key")
-        await ts_rejections_collection.create_index([("created_at", -1)], name="ts_rej_recent")
-        await ts_validation_collection.create_index(
-            [("strategy_id", 1), ("symbol", 1)], name="ts_val_key", unique=True)
-    except Exception as exc:  # noqa: BLE001 — a conflicting legacy index must not block boot
-        logger.warning("[trending_stocks] index creation skipped: %s", exc)
+    """Indexes the sweep, the resume check and every summary depend on.
+
+    Each index is created in its OWN try block, not one shared one. Seen in the first
+    production boot: `main.py`'s generic `ensure_desk_indexes()` had already created the
+    same `updated_at` key under Mongo's auto-generated name, so creating it again under a
+    chosen name raised IndexOptionsConflict — and because every creation shared a single
+    try, that one conflict silently skipped the EIGHT indexes after it, including the
+    unique key on `ts_scores`. A collection whose indexes depend on the one before it
+    succeeding is a collection that will be missing indexes.
+
+    `updated_at` is deliberately absent below: `main.py` owns that one. Two places
+    creating the same key under different names is what caused the conflict."""
+    specs = [
+        (ts_backtests_collection, [("strategy_id", 1), ("symbol", 1)], "ts_bt_key", True),
+        (ts_backtests_collection, [("grade", -1)], "ts_bt_grade", False),
+        (ts_scores_collection, [("strategy_id", 1)], "ts_scores_key", True),
+        (ts_positions_collection, [("status", 1)], "ts_pos_status", False),
+        (ts_positions_collection, [("strategy_id", 1), ("status", 1)], "ts_pos_strategy", False),
+        (ts_positions_collection, [("symbol", 1), ("status", 1)], "ts_pos_symbol", False),
+        (ts_trades_collection, [("closed_at", -1)], "ts_trades_closed", False),
+        (ts_signals_collection, [("created_at", -1)], "ts_signals_recent", False),
+        (ts_evidence_collection, [("symbol", 1), ("created_at", -1)], "ts_evidence_key", False),
+        (ts_rejections_collection, [("created_at", -1)], "ts_rej_recent", False),
+        (ts_validation_collection, [("strategy_id", 1), ("symbol", 1)], "ts_val_key", True),
+        (ts_basket_collection, [("status", 1)], "ts_basket_status", False),
+    ]
+    made = skipped = 0
+    for coll, keys, name, unique in specs:
+        try:
+            await coll.create_index(keys, name=name, unique=unique, background=True)
+            made += 1
+        except Exception as exc:  # noqa: BLE001 — one conflict must not skip the rest
+            skipped += 1
+            logger.warning("[trending_stocks] index %s skipped: %s", name, exc)
+    logger.info("[trending_stocks] indexes ensured (%d created/present, %d skipped)",
+                made, skipped)
 
 
 # --------------------------------------------------------------------------------
