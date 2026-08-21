@@ -143,19 +143,16 @@ DESK_INDEXES: dict[str, list] = {
     "intraday_lab_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)], [("closed_on", 1)]],
     "live_trading_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)]],
     "momentum_trading_positions": [[("bucket", 1), ("status", 1)], [("closed_on", 1)]],
-    "ts_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)], [("symbol", 1), ("status", 1)], [("closed_on", 1)]],
-    # Only the resume lookup lives here; the rest of the ts_* indexes are created
-    # WITH NAMES by trending_stocks.engine.ensure_indexes(). Declaring the same key
-    # in both places makes Mongo auto-name it here and then reject the named one
-    # there as a conflict.
-    "ts_backtests": [[("updated_at", -1)]],
-    "ts_basket": [[("status", 1)], [("symbol", 1)]],
     "swing_positions": [[("status", 1)], [("closed_on", 1)]],
     "pattern_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)], [("closed_on", 1)], [("timeframe", 1)]],
     "swing_watchlist": [[("status", 1)], [("symbol", 1), ("status", 1)]],
     "buy_low_positions": [[("status", 1)], [("closed_on", 1)]],
     "zero_hero_positions": [[("status", 1)], [("closed_on", 1)]],
     "stock_desk_positions": [[("side", 1), ("status", 1)], [("closed_on", 1)]],
+    # ts_* is deliberately ABSENT: trending_stocks.engine.ensure_indexes() owns every
+    # one of those, with names and with uniqueness. This map creates keys WITHOUT
+    # names, and Mongo rejects the same key under a second name — so a collection
+    # listed in both places gets whichever ran first, plus a warning on every boot.
     "screener_momentum": [[("index", 1), ("date", -1)]],
     "screener_sectors": [[("index", 1), ("date", -1)]],
     "screener_patterns": [[("index", 1), ("date", -1)]],

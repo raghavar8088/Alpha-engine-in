@@ -157,8 +157,10 @@ async def ensure_indexes() -> None:
     unique key on `ts_scores`. A collection whose indexes depend on the one before it
     succeeding is a collection that will be missing indexes.
 
-    `updated_at` is deliberately absent below: `main.py` owns that one. Two places
-    creating the same key under different names is what caused the conflict."""
+    This module is the SINGLE owner of every `ts_*` index. `main.py`'s generic
+    `ensure_desk_indexes()` deliberately declares none of them: it creates keys without
+    names, this creates them with names and with uniqueness, and Mongo treats the same
+    key under two names as a conflict. One owner, or neither works."""
     specs = [
         (ts_backtests_collection, [("strategy_id", 1), ("symbol", 1)], "ts_bt_key", True),
         (ts_backtests_collection, [("grade", -1)], "ts_bt_grade", False),
@@ -166,6 +168,9 @@ async def ensure_indexes() -> None:
         (ts_positions_collection, [("status", 1)], "ts_pos_status", False),
         (ts_positions_collection, [("strategy_id", 1), ("status", 1)], "ts_pos_strategy", False),
         (ts_positions_collection, [("symbol", 1), ("status", 1)], "ts_pos_symbol", False),
+        # DeskHistory groups closed positions by day, so this one is for it.
+        (ts_positions_collection, [("closed_on", 1)], "ts_pos_closed_on", False),
+        (ts_backtests_collection, [("updated_at", -1)], "ts_bt_resume", False),
         (ts_trades_collection, [("closed_at", -1)], "ts_trades_closed", False),
         (ts_signals_collection, [("created_at", -1)], "ts_signals_recent", False),
         (ts_evidence_collection, [("symbol", 1), ("created_at", -1)], "ts_evidence_key", False),
