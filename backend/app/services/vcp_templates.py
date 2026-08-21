@@ -109,3 +109,37 @@ VCP_TEMPLATES = [
     ("Pocket Pivot", "vcp", t_pocket_pivot),
     ("High Tight Flag", "vcp", t_high_tight_flag),
 ]
+
+
+# The shortest candle on which each template is still the pattern it is named after.
+# Keyed by display name so both desks can consult it without importing each other.
+TIMEFRAME_ORDER = ["1m", "5m", "15m", "30m", "45m", "1h", "4h", "1d"]
+
+MIN_TIMEFRAME = {
+    # Defined on 50/150/200-DAY averages. On any intraday candle the numbers are real but
+    # the name is not, so these exist on daily only.
+    "Minervini Trend Template": "1d",
+    "Trend Template + VCP": "1d",
+    # A base needs sessions, not minutes: 120 one-minute bars is two hours.
+    "VCP Breakout": "15m",
+    "VCP 3-Contraction": "15m",
+    "VCP Tight Base": "15m",
+    "VCP Volume Dry-Up": "15m",
+    "VCP Pivot Reclaim": "15m",
+    "Pocket Pivot": "15m",
+    "High Tight Flag": "15m",
+}
+
+
+def allowed_on(template_name: str, timeframe: str) -> bool:
+    """True when this template is meaningful on that candle. Unlisted templates are
+    unrestricted, so the base catalogs are unaffected."""
+    floor = MIN_TIMEFRAME.get(template_name)
+    if floor is None:
+        return True
+    if floor == "1d":
+        return timeframe == "1d"
+    try:
+        return TIMEFRAME_ORDER.index(timeframe) >= TIMEFRAME_ORDER.index(floor)
+    except ValueError:
+        return True

@@ -1257,12 +1257,34 @@ CATALOG_TIMEFRAMES = ["1m", "5m", "15m", "30m", "45m", "1h", "4h", "1d"]
 # and call it an "opening range".
 INTRADAY_ONLY = {"opening_range"}
 
+# The inverse of INTRADAY_ONLY: templates that need sessions rather than minutes. A
+# 120-bar base on 1-minute candles is two hours, which is not accumulation, so the VCP
+# family is not created below 15m at all instead of being created and mislabelled.
+_VCP_MIN_TF = {
+    "vcp_breakout": "15m", "vcp_three_contraction": "15m", "vcp_tight_base": "15m",
+    "vcp_volume_dryup": "15m", "vcp_pivot_reclaim": "15m",
+    "pocket_pivot": "15m", "high_tight_flag": "15m",
+}
+_TF_ORDER = ["1m", "5m", "15m", "30m", "45m", "1h", "4h", "1d"]
+
+
+def _tf_allowed(key: str, tf: str) -> bool:
+    floor = _VCP_MIN_TF.get(key)
+    if floor is None:
+        return True
+    try:
+        return _TF_ORDER.index(tf) >= _TF_ORDER.index(floor)
+    except ValueError:
+        return True
+
 
 def _build_catalog() -> list[PatternSpec]:
     specs: list[PatternSpec] = []
     for tf in CATALOG_TIMEFRAMES:
         for key, (family, label, _fn, params, min_bars) in TEMPLATES.items():
             if key in INTRADAY_ONLY and tf == "1d":
+                continue
+            if not _tf_allowed(key, tf):
                 continue
             specs.append(PatternSpec(
                 strategy_id=f"cmd_{len(specs) + 1:04d}",

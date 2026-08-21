@@ -47,7 +47,7 @@ from app.services.angel_fees import product_for, round_trip
 from app.services.call_engine import IST, _scored_daily_symbols
 from app.services.nifty_scalp_strategies import (
     TEMPLATES as _BASE_TEMPLATES, Series, from_rows, resample)
-from app.services.vcp_templates import VCP_TEMPLATES
+from app.services.vcp_templates import VCP_TEMPLATES, allowed_on
 
 # The base catalog plus the VCP family. Appended rather than merged into
 # nifty_scalp_strategies so the NIFTY option desk keeps exactly the 63 it had —
@@ -113,6 +113,10 @@ def _build() -> list[PatternStrategy]:
     out = []
     for tf in TIMEFRAMES:
         for i, (name, family, fn) in enumerate(TEMPLATES, start=1):
+            # A template that is not the pattern it is named after on this candle is not
+            # created at all, rather than created and quietly mislabelled.
+            if not allowed_on(name, tf.key):
+                continue
             out.append(PatternStrategy(
                 f"pat_{tf.key}_{i:02d}", f"{name} · {tf.label}", name, family, tf.key,
                 tf.style, fn))
