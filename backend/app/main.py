@@ -2,6 +2,7 @@ import asyncio
 import base64
 import json
 import logging
+from datetime import datetime
 import os
 import time
 
@@ -203,17 +204,30 @@ EXPIRING_COLLECTIONS = {
 async def ensure_ttl_indexes() -> None:
     """Give the high-churn snapshot collections a TTL so they cannot grow without bound.
 
-    Mongo needs a DATE field to expire on; every one of these writes `ts`, so the index is
-    on `ts` with expireAfterSeconds. Creating an index that already exists with the same
-    spec is a no-op, so this is safe on every boot."""
+    Mongo expires on a DATE field, and these collections do not agree on its name — most
+    write `ts`, market_data_history writes `recorded_at`. The previous version assumed `ts`
+    everywhere, so it built an index on a field that collection does not have; that expires
+    nothing, and it grew to 37 days against a 7-day policy until it filled the cluster. So
+    the field is now DETECTED from a real document, and a collection with no date field is
+    reported rather than given an index that silently does nothing."""
     from app.core.db import db
 
+    candidates = ("ts", "recorded_at", "created_at", "closed_at", "opened_at", "date")
     for name, days in EXPIRING_COLLECTIONS.items():
         try:
-            await db[name].create_index("ts", expireAfterSeconds=days * 24 * 3600,
+            doc = await db[name].find_one({}, {c: 1 for c in candidates})
+            if not doc:
+                continue                      # empty collection; nothing to expire yet
+            field = next((c for c in candidates
+                          if isinstance(doc.get(c), datetime)), None)
+            if field is None:
+                logger.warning("TTL on %s skipped: no date field among %s",
+                               name, ", ".join(candidates))
+                continue
+            await db[name].create_index(field, expireAfterSeconds=days * 24 * 3600,
                                         name=f"{name}_ttl")
-        except Exception as exc:  # an existing conflicting index must not block startup
-            logger.warning("TTL index on %s skipped (%s)", name, exc)
+        except Exception as exc:  # a conflicting index or a blocked cluster must not stop boot
+            logger.warning("TTL index on %s skipped (%s)", name, str(exc)[:140])
 
 
 @app.on_event("startup")
@@ -231,13 +245,27 @@ async def startup_warm_and_index() -> None:
 async def ensure_indexes() -> None:
     """No ODM here, so indexes aren't declarative — ensure the Phase 5 ones each
     startup (idempotent; init-mongo.js also declares them for a fresh install)."""
-    await strategy_runs_collection.create_index("run_id", unique=True)
-    await strategy_runs_collection.create_index("started_at")
-    await live_watchlist_collection.create_index([("symbol", 1), ("timeframe", 1)], unique=True)
-    await trading_calls_collection.create_index("call_id", unique=True)
-    await trading_calls_collection.create_index([("status", 1), ("segment", 1)])
-    await chart_cache.ensure_indexes()
-    await chart_workspace.ensure_indexes()
+    async def _try(label, coro):
+        # A blocked or full cluster refuses index writes. That must degrade, not crash:
+        # every index below is an optimisation over data that already exists.
+        try:
+            await coro
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("index %s skipped (%s)", label, str(exc)[:140])
+
+    await _try("strategy_runs.run_id",
+               strategy_runs_collection.create_index("run_id", unique=True))
+    await _try("strategy_runs.started_at",
+               strategy_runs_collection.create_index("started_at"))
+    await _try("live_watchlist.symbol_timeframe",
+               live_watchlist_collection.create_index([("symbol", 1), ("timeframe", 1)],
+                                                      unique=True))
+    await _try("trading_calls.call_id",
+               trading_calls_collection.create_index("call_id", unique=True))
+    await _try("trading_calls.status_segment",
+               trading_calls_collection.create_index([("status", 1), ("segment", 1)]))
+    await _try("chart_cache", chart_cache.ensure_indexes())
+    await _try("chart_workspace", chart_workspace.ensure_indexes())
     from app.services.strategy_factory.engine import ensure_indexes as sf_ensure_indexes
     await sf_ensure_indexes()
 
