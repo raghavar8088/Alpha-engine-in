@@ -21,6 +21,7 @@ partially) rather than opening a short.
 """
 
 import os
+import re
 from datetime import datetime, timezone
 from uuid import uuid4
 
@@ -186,8 +187,20 @@ async def available_cash(account_id: str) -> float:
 
 
 async def search_instruments(query: str, limit: int = 15) -> list[dict]:
-    """Autocomplete over NSE + BSE equities/ETFs by symbol or company name."""
-    q = query.strip()
+    """Autocomplete over NSE + BSE equities/ETFs by symbol or company name.
+
+    The query is `re.escape`d before it reaches `$regex`. Interpolating it raw was a real
+    outage class, not a theoretical one — measured against production, a query of `(`
+    returned `OperationFailure: missing closing parenthesis` (a 500), `a{100000}` was
+    rejected as a runaway quantifier, and `.*` executed as a wildcard. This function is
+    shared by the Watchlist and Positions modules, so all three broke on a stray bracket.
+
+    Length is capped for the same reason: an arbitrarily long pattern is an arbitrarily
+    long scan of every instrument.
+
+    Richer ranked search lives in `app.services.instrument_search`; this stays as the
+    simple, safe fallback its two callers already expect."""
+    q = re.escape(query.strip()[:64])
     if not q:
         return []
     cursor = instruments_collection.find(

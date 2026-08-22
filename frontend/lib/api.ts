@@ -4582,3 +4582,114 @@ export async function fetchScreenerChartink(scan: string): Promise<{
 }> {
   return apiFetch("/api/screener/chartink" + screenerQs({ scan }));
 }
+
+// --- Instrument search: ranked, typo-tolerant, enriched, app-wide ------------
+// Replaces a Mongo $regex built from raw user input, which 500'd on a query of "(" and
+// ranked RPOWER above RELIANCE for "reliance".
+
+export interface SearchTradability {
+  ok: boolean;
+  verdict: "tradable" | "blocked";
+  blockers: string[];
+  warnings: string[];
+}
+
+export interface SearchResult {
+  symbol: string;
+  name: string;
+  broker_name: string;
+  sector: string | null;
+  indices: string[];
+  index_label: string | null;
+  security_id: string | null;
+  exchange_segment: string;
+  angel_token: string | null;
+  asset_class: string;
+  lot_size: number;
+  tradable: boolean;
+  ltp: number | null;
+  returns: { "1d": number | null; "1w": number | null; "1m": number | null; "6m": number | null } | null;
+  turnover: number | null;
+  volume_x: number | null;
+  pct_from_ath: number | null;
+  pct_from_52w_high: number | null;
+  up_streak: number | null;
+  breakout: string | null;
+  sessions: number | null;
+  all_time_high: number | null;
+  all_time_high_date: string | null;
+  above_sma: { "20": boolean | null; "50": boolean | null; "200": boolean | null } | null;
+  coverage: string[];
+  coverage_note: string;
+  tradability: SearchTradability;
+  as_of: string | null;
+  demotion?: number;
+  matched_on?: string;
+  why?: string[];
+  score?: number;
+}
+
+export interface SearchResponse {
+  mode: "lexical" | "natural-language" | "trending";
+  query?: string;
+  results: SearchResult[];
+  count: number;
+  universe?: number;
+  as_of: string | null;
+  note?: string;
+  sort?: string;
+  nl_available?: boolean;
+  nl_note?: string;
+  filter?: Record<string, any>;
+  filter_english?: string;
+}
+
+export interface SearchStats {
+  instruments: number;
+  tradable: number;
+  with_clean_name: number;
+  with_daily_bars: number;
+  aliases: number;
+  aliases_dropped: string[];
+  trending_pool: number;
+  snapshot: { symbols: number; date: string | null; cached: boolean };
+  natural_language: {
+    enabled: boolean;
+    provider: string | null;
+    model: string | null;
+    configured_providers: string[];
+    note: string;
+  };
+}
+
+export async function searchInstruments(
+  q: string,
+  opts: { limit?: number; includeUntradable?: boolean } = {},
+): Promise<SearchResponse> {
+  const p = new URLSearchParams({ q, limit: String(opts.limit ?? 12) });
+  if (opts.includeUntradable) p.set("include_untradable", "true");
+  return apiFetch(`/api/search/instruments?${p.toString()}`);
+}
+
+export async function trendingInstruments(limit = 12, sort: "1d" | "1w" | "1m" | "6m" = "1d"): Promise<SearchResponse> {
+  return apiFetch(`/api/search/trending?limit=${limit}&sort=${sort}`);
+}
+
+export async function naturalSearch(query: string, limit = 20): Promise<SearchResponse> {
+  return apiFetch("/api/search/natural", {
+    method: "POST",
+    body: JSON.stringify({ query, limit }),
+  });
+}
+
+export async function resolveInstrument(symbol: string): Promise<SearchResult | { error: string }> {
+  return apiFetch(`/api/search/resolve/${encodeURIComponent(symbol)}`);
+}
+
+export async function searchStats(): Promise<SearchStats> {
+  return apiFetch("/api/search/stats");
+}
+
+export async function reindexSearch(): Promise<{ rebuilt: boolean; instruments: number }> {
+  return apiFetch("/api/search/reindex", { method: "POST" });
+}

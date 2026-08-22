@@ -84,6 +84,43 @@ export default function TrendingStocksPage() {
   const [style, setStyle] = useState("ALL");
   const [grade, setGrade] = useState<number | "ALL">("ALL");
 
+  const addSymbol = useCallback(async (symbol: string) => {
+    setBusy("add");
+    try {
+      await addTSSymbol(symbol);
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : `Could not add ${symbol}`);
+    } finally {
+      setBusy(null);
+    }
+    // `load` is intentionally omitted: it is redefined on every filter change, and this
+    // callback only ever needs the newest one, which the closure already has.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // The ⌘K palette is mounted once for the whole app. When it is already on this page it
+  // hands the symbol over by event; when it is elsewhere it navigates here with ?add=.
+  useEffect(() => {
+    const onPick = (e: Event) => {
+      const sym = (e as CustomEvent<{ symbol: string }>).detail?.symbol;
+      if (sym) addSymbol(sym);
+    };
+    window.addEventListener("palette-add-symbol", onPick);
+    return () => window.removeEventListener("palette-add-symbol", onPick);
+  }, [addSymbol]);
+
+  // Read the query string from `window` rather than `useSearchParams`: that hook forces
+  // the page into a Suspense boundary at build time or Next refuses to prerender it, and
+  // this only ever needs to run once, in the browser, after arriving from the palette.
+  useEffect(() => {
+    const sym = new URLSearchParams(window.location.search).get("add");
+    if (sym) {
+      addSymbol(sym.toUpperCase());
+      window.history.replaceState({}, "", "/trending-stocks");
+    }
+  }, [addSymbol]);
+
   const load = useCallback(async () => {
     try {
       const [s, b, lib, pos, sg, rj] = await Promise.all([
@@ -252,8 +289,23 @@ export default function TrendingStocksPage() {
         <>
           <GlassPanel
             title="Name the stocks"
-            note="one per line, or comma separated — the desk trades nothing else"
+            note="search one at a time, or paste a list — the desk trades nothing else"
           >
+            <button className="cpk" onClick={() => window.dispatchEvent(new Event("open-command-palette"))}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+                <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" />
+              </svg>
+              <span>Search a stock by name or ticker…</span>
+              <span className="cpk-hint">
+                start with <b>?</b> to describe what you want in words
+              </span>
+              <kbd>⌘K</kbd>
+            </button>
+            <div className="cpk-note">
+              Results are ranked, survive typos, and say <strong>before you add</strong> whether
+              the desk can actually trade the name — 2,457 NSE symbols are searchable but only
+              around 500 clear the liquidity floor the desk vetoes on.
+            </div>
             <div className="basketform">
               <textarea
                 className="ta"
@@ -703,7 +755,15 @@ export default function TrendingStocksPage() {
         .reasons li { font-size: 11.5px; color: var(--text-muted); margin: 2px 0; line-height: 1.45; }
         .notes { margin: 0; padding: 14px 20px 16px 38px; }
         .notes li { font-size: 12.5px; color: var(--text-muted); margin: 4px 0; }
-        .basketform { padding: 16px 20px 6px; display: flex; flex-direction: column; gap: 10px; }
+        .cpk { display: flex; align-items: center; gap: 10px; width: calc(100% - 40px);
+               margin: 16px 20px 0; padding: 11px 14px; border-radius: 12px; cursor: pointer;
+               border: 1px solid var(--panel-border); background: var(--canvas-soft);
+               color: var(--text-muted); font-size: 13px; text-align: left; }
+        .cpk:hover { border-color: rgba(125,52,220,.35); color: var(--text); }
+        .cpk svg { width: 16px; height: 16px; flex: none; }
+        .cpk-hint { margin-left: auto; font-size: 11px; color: var(--text-faint); }
+        .cpk-note { padding: 8px 20px 0; font-size: 11.5px; color: var(--text-muted); max-width: 900px; }
+        .basketform { padding: 12px 20px 6px; display: flex; flex-direction: column; gap: 10px; }
         .ta { width: 100%; border-radius: 10px; border: 1px solid var(--panel-border); background: var(--panel);
               padding: 10px 12px; font-family: var(--font-data); font-size: 13px; color: var(--text); resize: vertical; }
         .bactions { display: flex; gap: 8px; flex-wrap: wrap; }

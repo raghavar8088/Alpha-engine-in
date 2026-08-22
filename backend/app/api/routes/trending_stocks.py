@@ -99,9 +99,17 @@ async def summary_endpoint(_u: dict = Depends(get_current_user)):
 
 
 @router.get("/basket/search")
-async def search_endpoint(q: str = Query(..., min_length=1),
+async def search_endpoint(q: str = Query(..., min_length=1, max_length=64),
+                          limit: int = Query(12, ge=1, le=50),
                           _u: dict = Depends(get_current_user)):
-    return {"results": await ts_basket.search(q)}
+    """Ranked, enriched instrument search for the basket box.
+
+    Delegates to the app-wide `instrument_search` service rather than keeping a second
+    implementation. Results carry the tradability verdict, so the box can warn that a name
+    is below the turnover floor BEFORE it enters the basket rather than after the desk has
+    quietly refused to trade it for a week."""
+    from app.services import instrument_search as S
+    return await S.search(q, limit=limit)
 
 
 @router.get("/basket")

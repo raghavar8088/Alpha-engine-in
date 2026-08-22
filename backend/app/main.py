@@ -28,6 +28,7 @@ from app.api.routes import (
     live_intraday,
     live_trading,
     long_horizon,
+    instrument_search,
     manual_positions,
     market_data,
     momentum,
@@ -412,6 +413,29 @@ async def start_screener_scheduler() -> None:
 
 
 @app.on_event("startup")
+async def warm_instrument_search_index() -> None:
+    """Build the search index in the BACKGROUND, never in the first keystroke.
+
+    It is a few hundred kilobytes over ~2,500 instruments, but it reads four collections
+    to assemble them. Doing that lazily would put the whole cost on whoever types the
+    first character of the day, which is the one moment search must feel instant."""
+    async def _warm() -> None:
+        try:
+            from app.services.instrument_search.enrich import ensure_snapshot
+            from app.services.instrument_search.index import ensure_index
+            idx = await ensure_index(force=True)
+            snap = await ensure_snapshot(force=True)
+            logger.info("Instrument search index warm — %d instruments, %d aliases, "
+                        "screener snapshot %s (%d symbols)",
+                        idx.size, len(idx.aliases), snap.get("date"), snap.get("symbols", 0))
+        except Exception:  # noqa: BLE001 — search degrades, the app still serves
+            logger.warning("Instrument search index could not be warmed; it will build "
+                           "on first use", exc_info=True)
+
+    asyncio.create_task(_warm())
+
+
+@app.on_event("startup")
 async def start_trending_stocks_scheduler() -> None:
     """Trending Stocks: session loop, nightly sweep, and the RSS ingest nothing scheduled
     before now (research-service has always had the function; only a button called it)."""
@@ -625,6 +649,7 @@ app.include_router(buy_low.router)
 app.include_router(live_paper.router)
 app.include_router(momentum_trading.router)
 app.include_router(trending_stocks.router)
+app.include_router(instrument_search.router)
 app.include_router(nifty_scalp.router)
 app.include_router(swing_trading.router)
 app.include_router(desk_history.router)

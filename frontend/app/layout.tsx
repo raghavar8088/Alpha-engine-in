@@ -2,6 +2,7 @@ import { Sora, Manrope, JetBrains_Mono } from "next/font/google";
 import Sidebar from "@/components/Sidebar";
 import Footer from "@/components/Footer";
 import SortableTables from "@/components/SortableTables";
+import CommandPalette from "@/components/CommandPalette";
 import "./globals.css";
 
 const sora = Sora({ subsets: ["latin"], weight: ["600", "700", "800"], variable: "--font-display" });
@@ -18,6 +19,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${sora.variable} ${manrope.variable} ${jetbrainsMono.variable}`}>
       <body style={{ display: "flex" }}>
         <SortableTables />
+        {/* One instance for the whole app: ⌘K anywhere. Mounting it per page
+            would mean several listeners racing for the same shortcut. */}
+        <CommandPalette />
         <Sidebar />
         <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
           <main className="app-main" style={{ flex: 1, minWidth: 0, padding: "32px 40px 0", maxWidth: 1320, width: "100%", margin: "0 auto" }}>
