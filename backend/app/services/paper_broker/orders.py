@@ -34,7 +34,7 @@ from app.core.db import (
     pt_trades_collection,
 )
 from app.services.fno_margin import portfolio_margin, solve_iv
-from app.services.paper_broker import accounts, market
+from app.services.paper_broker import accounts, market, mtf
 from app.services.paper_broker.core import (
     MIS_LEVERAGE,
     OPEN_STATUSES,
@@ -85,6 +85,39 @@ async def estimate_margin(*, account_id: str, segment: str, contract: dict,
     CREATE — so a short strangle's second leg costs less than its first, and a spread costs
     a fraction of a naked leg, which is the whole reason the model exists.
     """
+    if segment == SEGMENT_EQUITY and product == "MTF":
+        # MTF leverage is per SCRIP, not per product — a Nifty 50 name is funded far more
+        # generously than a smallcap, and the difference is the whole reason the rate card
+        # exists. See paper_broker.mtf for where these numbers come from and do not.
+        lev = await mtf.leverage_for(
+            contract["symbol"], security_id=contract.get("security_id"),
+            exchange_segment=contract.get("exchange_segment"),
+            quantity=quantity, price=price)
+        notional = price * quantity
+        own = round(notional / lev["leverage"], 2)
+        funded = mtf.funded_amount(notional, lev["leverage"])
+        return {
+            "margin": own,
+            "method": f"MTF {lev['margin_pct']:g}% ({lev['source']})",
+            "basis": (f"Of {notional:,.2f}, you fund {own:,.2f} and the broker funds "
+                      f"{funded:,.2f} at {mtf.MTF_DAILY_RATE * 100:.4f}%/day "
+                      f"({mtf.annual_rate_pct():g}% a year) — about "
+                      f"{mtf.daily_interest(funded):,.2f} every calendar day you hold, plus "
+                      f"{mtf.pledge_charge():,.2f} to pledge and {mtf.unpledge_charge():,.2f} "
+                      f"to unpledge. {lev['note']}"),
+            "span": None, "exposure": None,
+            "mtf": {
+                "leverage": lev["leverage"], "margin_pct": lev["margin_pct"],
+                "source": lev["source"], "tier": lev.get("tier"),
+                "funded_amount": funded,
+                "daily_interest": mtf.daily_interest(funded),
+                "daily_rate_pct": round(mtf.MTF_DAILY_RATE * 100, 4),
+                "annual_rate_pct": mtf.annual_rate_pct(),
+                "pledge_charge": mtf.pledge_charge(),
+                "unpledge_charge": mtf.unpledge_charge(),
+            },
+        }
+
     if segment == SEGMENT_EQUITY:
         m = margin_required(segment=segment, product=product, price=price, quantity=quantity)
         cnc = product == "CNC"
@@ -285,6 +318,19 @@ async def execute(order: dict, ltp: float) -> dict:
     # reduced holdings, which booked the same shares twice — once against a day position
     # that did not hold them and once against the holding.
     holdings_sell_qty = 0
+    if segment == SEGMENT_EQUITY and product == "MTF" and side == "SELL" and opening_qty > 0:
+        # MTF is funded delivery. You cannot short stock the broker just lent you the money
+        # to buy — a sell only ever closes an MTF position.
+        if closing_qty == 0:
+            return await _reject(
+                order,
+                "MTF is funded delivery — a sell can only close an existing MTF position, "
+                f"and you have none open in {contract['symbol']}. Use MIS to go short intraday.")
+        qty = closing_qty
+        opening_qty = 0
+        order = {**order, "quantity": qty,
+                 "status_message": "Quantity capped at the open MTF position — MTF cannot short"}
+
     if segment == SEGMENT_EQUITY and product == "CNC" and side == "SELL" and opening_qty > 0:
         held = await _holdings_qty(account_id, contract["angel_token"])
         holdings_sell_qty = min(opening_qty, max(0, held))
@@ -312,8 +358,28 @@ async def execute(order: dict, ltp: float) -> dict:
         if not ok:
             return await _reject(order, why)
 
+    # Opening an MTF leg pledges the stock, which costs money on the way in.
+    mtf_open_meta: dict | None = None
+    if opening_qty > 0 and product == "MTF" and segment == SEGMENT_EQUITY:
+        lev = await mtf.leverage_for(
+            contract["symbol"], security_id=contract.get("security_id"),
+            exchange_segment=contract.get("exchange_segment"),
+            quantity=opening_qty, price=fill)
+        notional = fill * opening_qty
+        mtf_open_meta = {
+            "leverage": lev["leverage"],
+            "margin_pct": lev["margin_pct"],
+            "leverage_source": lev["source"],
+            "funded": mtf.funded_amount(notional, lev["leverage"]),
+            "pledge_charge": mtf.pledge_charge(),
+        }
+
     realised = 0.0
     fees_total = 0.0
+    mtf_cost: dict | None = None
+    statutory_breakdown: dict | None = None
+    gross_for_breakdown = 0.0
+    statutory = 0.0
     if closing_qty > 0 and existing:
         entry = float(existing["avg_price"])
         direction = 1 if signed_existing > 0 else -1
@@ -323,7 +389,41 @@ async def execute(order: dict, ltp: float) -> dict:
                       lot_size=contract.get("lot_size", 1),
                       side="BUY" if direction > 0 else "SELL")
         fees_total = float(fee["total"])
+        statutory_breakdown = fee
+        gross_for_breakdown = gross
         realised = round(gross - fees_total, 2)
+
+        # MTF's real cost lands here. Interest has been running every calendar day the
+        # funding was outstanding, and closing means unpledging the shares. Neither shows up
+        # in the statutory charge schedule, and together they routinely exceed it — on a
+        # month-held position the funding alone can dwarf every other line.
+        if existing.get("product") == "MTF":
+            share = closing_qty / abs(signed_existing)
+            funded_closed = round(float(existing.get("mtf_funded") or 0) * share, 2)
+            held = mtf.days_held(existing.get("opened_on"), today_ist())
+            interest = mtf.interest_for_days(funded_closed, held)
+            unpledge = mtf.unpledge_charge()
+            mtf_cost = {
+                "days_held": held,
+                "funded_amount": funded_closed,
+                "daily_rate_pct": round(mtf.MTF_DAILY_RATE * 100, 4),
+                "annual_rate_pct": mtf.annual_rate_pct(),
+                "interest": interest,
+                "pledge_charge": round(float(existing.get("mtf_pledge_charge") or 0) * share, 2),
+                "unpledge_charge": unpledge,
+                "leverage": existing.get("mtf_leverage"),
+                "leverage_source": existing.get("mtf_leverage_source"),
+                "total": round(interest + unpledge
+                               + float(existing.get("mtf_pledge_charge") or 0) * share, 2),
+            }
+            fees_total += mtf_cost["total"]
+            realised = round(gross - fees_total, 2)
+            await accounts.ledger(
+                account_id, "CHARGES", -interest,
+                f"MTF funding interest on {contract['symbol']} — {funded_closed:,.2f} funded "
+                f"for {held} day(s)", order["order_id"])
+            await accounts.ledger(account_id, "CHARGES", -unpledge,
+                                  f"Unpledge charge on {contract['symbol']}", order["order_id"])
 
         released = float(existing.get("margin_blocked") or 0) * (closing_qty / abs(signed_existing))
         remaining = signed_existing + (closing_qty if side == "BUY" else -closing_qty)
@@ -336,17 +436,27 @@ async def execute(order: dict, ltp: float) -> dict:
                               float(existing.get("realised_pnl") or 0) + realised, 2),
                           "margin_blocked": 0.0, "updated_at": now_utc()}})
         else:
-            await pt_positions_collection.update_one(
-                {"_id": existing["_id"]},
-                {"$set": {"quantity": remaining,
-                          "margin_blocked": round(float(existing.get("margin_blocked") or 0) - released, 2),
-                          "realised_pnl": round(float(existing.get("realised_pnl") or 0) + realised, 2),
-                          "updated_at": now_utc()}})
+            partial = {"quantity": remaining,
+                       "margin_blocked": round(float(existing.get("margin_blocked") or 0) - released, 2),
+                       "realised_pnl": round(float(existing.get("realised_pnl") or 0) + realised, 2),
+                       "updated_at": now_utc()}
+            if mtf_cost:
+                # The funding on the SOLD portion has been repaid, so it must come off the
+                # position. Leaving it whole would charge interest on the full original
+                # borrowing again on the next partial close — the same money billed twice.
+                keep = 1 - (closing_qty / abs(signed_existing))
+                partial["mtf_funded"] = round(float(existing.get("mtf_funded") or 0) * keep, 2)
+                partial["mtf_pledge_charge"] = round(
+                    float(existing.get("mtf_pledge_charge") or 0) * keep, 2)
+                partial["mtf_interest_accrued"] = round(
+                    float(existing.get("mtf_interest_accrued") or 0) * keep, 2)
+            await pt_positions_collection.update_one({"_id": existing["_id"]}, {"$set": partial})
 
         await accounts.ledger(account_id, "REALISED", gross,
                               f"Closed {closing_qty} {contract['symbol']} @ {fill}",
                               order["order_id"])
-        await accounts.ledger(account_id, "CHARGES", -fees_total,
+        statutory = round(fees_total - (mtf_cost["total"] if mtf_cost else 0.0), 2)
+        await accounts.ledger(account_id, "CHARGES", -statutory,
                               f"Charges on {contract['symbol']}", order["order_id"])
         await accounts.ledger(account_id, "MARGIN_RELEASE", released,
                               f"Margin released on {contract['symbol']}", order["order_id"])
@@ -357,7 +467,11 @@ async def execute(order: dict, ltp: float) -> dict:
 
     if opening_qty > 0:
         await _open_or_add(account_id, segment, contract, product, side, opening_qty,
-                           fill, margin, order)
+                           fill, margin, order, mtf_open_meta)
+        if mtf_open_meta:
+            await accounts.ledger(
+                account_id, "CHARGES", -mtf_open_meta["pledge_charge"],
+                f"Pledge charge on {contract['symbol']} (MTF)", order["order_id"])
         await accounts.ledger(account_id, "MARGIN_BLOCK", -margin,
                               f"Margin blocked for {opening_qty} {contract['symbol']}",
                               order["order_id"])
@@ -377,6 +491,16 @@ async def execute(order: dict, ltp: float) -> dict:
         "value": round(fill * qty, 2),
         "realised_pnl": realised,
         "charges": round(fees_total, 2),
+        # The whole cost of the round trip, itemised. This is what the closed-position view
+        # renders: a single "charges" number cannot tell you whether a losing MTF trade lost
+        # on the market or on the funding.
+        "charge_breakdown": {
+            "gross_pnl": round(gross_for_breakdown, 2),
+            "statutory": statutory_breakdown,
+            "mtf": mtf_cost,
+            "total_charges": round(fees_total, 2),
+            "net_pnl": realised,
+        } if closing_qty > 0 else None,
         "traded_at": now_utc(),
         "traded_on": today_ist(),
         "ts": now_utc(),
@@ -395,7 +519,8 @@ async def execute(order: dict, ltp: float) -> dict:
     return {**order, "trade": trade}
 
 
-async def _open_or_add(account_id, segment, contract, product, side, qty, fill, margin, order):
+async def _open_or_add(account_id, segment, contract, product, side, qty, fill, margin, order,
+                       mtf_meta: dict | None = None):
     """Open a new position or average into an existing one on the same side."""
     signed = qty if side == "BUY" else -qty
     existing = await pt_positions_collection.find_one(_pos_key(account_id, contract, product))
@@ -406,11 +531,19 @@ async def _open_or_add(account_id, segment, contract, product, side, qty, fill, 
         # its average the same way adding to a long does.
         total_cost = abs(old_qty) * float(existing["avg_price"]) + abs(signed) * fill
         avg = total_cost / max(1, abs(old_qty) + abs(signed))
-        await pt_positions_collection.update_one(
-            {"_id": existing["_id"]},
-            {"$set": {"quantity": new_qty, "avg_price": round(avg, 2),
-                      "margin_blocked": round(float(existing.get("margin_blocked") or 0) + margin, 2),
-                      "updated_at": now_utc()}})
+        update = {"quantity": new_qty, "avg_price": round(avg, 2),
+                  "margin_blocked": round(float(existing.get("margin_blocked") or 0) + margin, 2),
+                  "updated_at": now_utc()}
+        if mtf_meta:
+            # Funding and pledge fees ACCUMULATE across top-ups: each add pledges more stock
+            # and borrows more money, and both have to be carried or the close-out
+            # under-charges the position.
+            update["mtf_funded"] = round(float(existing.get("mtf_funded") or 0) + mtf_meta["funded"], 2)
+            update["mtf_pledge_charge"] = round(
+                float(existing.get("mtf_pledge_charge") or 0) + mtf_meta["pledge_charge"], 2)
+            update["mtf_leverage"] = mtf_meta["leverage"]
+            update["mtf_leverage_source"] = mtf_meta["leverage_source"]
+        await pt_positions_collection.update_one({"_id": existing["_id"]}, {"$set": update})
         return
 
     await pt_positions_collection.insert_one({
@@ -432,6 +565,12 @@ async def _open_or_add(account_id, segment, contract, product, side, qty, fill, 
         "margin_blocked": round(margin, 2),
         "realised_pnl": 0.0,
         "unrealised_pnl": 0.0,
+        "mtf_funded": (mtf_meta or {}).get("funded", 0.0),
+        "mtf_leverage": (mtf_meta or {}).get("leverage"),
+        "mtf_leverage_source": (mtf_meta or {}).get("leverage_source"),
+        "mtf_pledge_charge": (mtf_meta or {}).get("pledge_charge", 0.0),
+        "mtf_interest_accrued": 0.0,
+        "mtf_last_accrued_on": None,
         "status": "OPEN",
         "opened_at": now_utc(),
         "opened_on": today_ist(),

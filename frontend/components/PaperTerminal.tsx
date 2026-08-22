@@ -25,12 +25,12 @@ import {
   fetchPTConfig, fetchPTDashboard, searchPTScrips, fetchPTMargin, placePTOrder,
   fetchPTOrders, fetchPTTrades, fetchPTPositions, fetchPTHoldings, fetchPTLedger,
   cancelPTOrder, exitPTPosition, fetchPTUnderlyings, fetchPTExpiries, fetchPTChain,
-  runPTTick, resetPTAccount,
+  runPTTick, resetPTAccount, fetchPTClosed,
   PTConfig, PTDashboard, PTContract, PTOrder, PTPosition, PTTrade, PTHolding,
-  PTLedgerEntry, PTMargin, PTChain,
+  PTLedgerEntry, PTMargin, PTChain, PTClosedBook,
 } from "../lib/api";
 
-type Book = "positions" | "orders" | "trades" | "holdings" | "funds";
+type Book = "positions" | "orders" | "closed" | "trades" | "holdings" | "funds";
 
 const inr = (v: number | null | undefined, dp = 2) =>
   v === null || v === undefined ? "—" :
@@ -62,6 +62,7 @@ export default function PaperTerminal({ segment }: { segment: "EQUITY" | "FNO" }
   const [trades, setTrades] = useState<PTTrade[]>([]);
   const [holdings, setHoldings] = useState<PTHolding[]>([]);
   const [ledger, setLedger] = useState<PTLedgerEntry[]>([]);
+  const [closed, setClosed] = useState<PTClosedBook | null>(null);
 
   // ── order ticket ──────────────────────────────────────────────────────────
   const [query, setQuery] = useState("");
@@ -116,6 +117,7 @@ export default function PaperTerminal({ segment }: { segment: "EQUITY" | "FNO" }
       if (book === "orders") jobs.push(fetchPTOrders(undefined, segment).then((r) => setOrders(r.rows)));
       if (book === "trades") jobs.push(fetchPTTrades(undefined, segment).then((r) => setTrades(r.rows)));
       if (book === "holdings") jobs.push(fetchPTHoldings().then((r) => setHoldings(r.rows)));
+      if (book === "closed") jobs.push(fetchPTClosed(undefined, segment).then(setClosed));
       if (book === "funds") jobs.push(fetchPTLedger().then((r) => setLedger(r.rows)));
       await Promise.all(jobs);
       setError(null);
@@ -386,6 +388,24 @@ export default function PaperTerminal({ segment }: { segment: "EQUITY" | "FNO" }
                     <div className="mrow">
                       <span>Available</span><b>{inr(margin.available_margin)}</b>
                     </div>
+                    {margin.mtf && (
+                      <div className="mtfbox">
+                        <div className="mrow"><span>Broker funds</span>
+                          <b>{inr(margin.mtf.funded_amount)}</b></div>
+                        <div className="mrow"><span>Interest per day</span>
+                          <b className="loss">{inr(margin.mtf.daily_interest)}</b></div>
+                        <div className="mrow"><span>Pledge in + out</span>
+                          <b className="loss">{inr(margin.mtf.pledge_charge + margin.mtf.unpledge_charge)}</b></div>
+                        <div className="mrow"><span>Leverage</span>
+                          <b>{margin.mtf.leverage}x · {margin.mtf.margin_pct}% yours
+                            <span className="src"> ({margin.mtf.source})</span></b></div>
+                        <div className="mtfwarn">
+                          Funding runs every calendar day, weekends included. Holding this
+                          30 days costs about {inr(margin.mtf.daily_interest * 30)} in interest
+                          alone — more than a 1% move on the position.
+                        </div>
+                      </div>
+                    )}
                     <div className="mbasis">{margin.basis}</div>
                     {!margin.sufficient && (
                       <div className="mwarn">
@@ -408,7 +428,7 @@ export default function PaperTerminal({ segment }: { segment: "EQUITY" | "FNO" }
         {/* ── right: the books ──────────────────────────────────────────── */}
         <div className="right">
           <div className="booktabs">
-            {(["positions", "orders", "trades", ...(isFno ? [] : ["holdings"]), "funds"] as Book[]).map((b) => (
+            {(["positions", "orders", "closed", "trades", ...(isFno ? [] : ["holdings"]), "funds"] as Book[]).map((b) => (
               <button key={b} className={book === b ? "bt active" : "bt"} onClick={() => setBook(b)}>
                 {b[0].toUpperCase() + b.slice(1)}
               </button>
@@ -425,7 +445,10 @@ export default function PaperTerminal({ segment }: { segment: "EQUITY" | "FNO" }
                 <div className="tw"><table>
                   <thead><tr>
                     <th className="l">Instrument</th><th>Product</th><th>Qty</th><th>Avg</th><th>LTP</th>
-                    <th>P&amp;L</th><th>%</th><th>Margin</th><th></th>
+                    <th>P&amp;L</th><th>%</th><th>Margin</th>
+                    <th title="Funding interest accrued plus pledge fees — what it costs to close">MTF cost</th>
+                    <th title="Unrealised P&L minus the MTF cost of getting out">After funding</th>
+                    <th></th>
                   </tr></thead>
                   <tbody>
                     {positions.map((p) => (
@@ -439,6 +462,17 @@ export default function PaperTerminal({ segment }: { segment: "EQUITY" | "FNO" }
                         <td className={cls(p.unrealised_pnl)}><b>{inr(p.unrealised_pnl)}</b></td>
                         <td className={cls(p.pnl_pct)}>{pct(p.pnl_pct)}</td>
                         <td className="dim">{inr(p.margin_blocked, 0)}</td>
+                        <td className={p.mtf ? "loss" : "dim"}>
+                          {p.mtf ? (
+                            <>
+                              {inr(p.mtf.estimated_exit_cost)}
+                              <div className="sub">{p.mtf.days_held}d · {inr(p.mtf.daily_interest)}/day</div>
+                            </>
+                          ) : "—"}
+                        </td>
+                        <td className={p.pnl_after_funding !== undefined ? cls(p.pnl_after_funding) : "dim"}>
+                          {p.pnl_after_funding !== undefined ? <b>{inr(p.pnl_after_funding)}</b> : "—"}
+                        </td>
                         <td><button className="exit" onClick={async () => {
                           await exitPTPosition(p.position_id); await refreshing(load);
                         }}>Exit</button></td>
@@ -481,6 +515,67 @@ export default function PaperTerminal({ segment }: { segment: "EQUITY" | "FNO" }
                     ))}
                   </tbody>
                 </table></div>
+              )
+            )}
+
+            {book === "closed" && (
+              !closed ? <div className="tw"><EmptyState title="Loading…" /></div> :
+              closed.rows.length === 0 ? (
+                <EmptyState title="No closed positions yet"
+                  note="Close a position and its full cost — statutory charges, MTF funding, pledge fees — is itemised here." />
+              ) : (
+                <>
+                  <div className="closedtotals">
+                    <Cell label="Gross P&L" value={inr(closed.totals.gross_pnl)}
+                      tone={closed.totals.gross_pnl >= 0 ? "gain" : "loss"} />
+                    <Cell label="Statutory charges" value={inr(closed.totals.statutory_charges)} />
+                    <Cell label="MTF interest" value={inr(closed.totals.mtf_interest)} />
+                    <Cell label="Pledge fees" value={inr(closed.totals.pledge_charges)} />
+                    <Cell label="Total charges" value={inr(closed.totals.total_charges)} />
+                    <Cell label="Net P&L" value={inr(closed.totals.net_pnl)}
+                      tone={closed.totals.net_pnl >= 0 ? "gain" : "loss"} strong />
+                  </div>
+                  <div className="tw">
+                    <table>
+                      <thead><tr>
+                        <th className="l">Instrument</th><th>Product</th><th>Qty</th><th>Exit</th>
+                        <th>Gross P&amp;L</th>
+                        <th title="Brokerage, STT, exchange + SEBI fees, stamp duty, GST, DP charge">Statutory</th>
+                        <th title="Funding interest on the amount the broker lent">MTF interest</th>
+                        <th title="Pledge in + unpledge out">Pledge</th>
+                        <th>Total charges</th><th>Net P&amp;L</th><th>Held</th><th>When</th>
+                      </tr></thead>
+                      <tbody>
+                        {closed.rows.map((t) => {
+                          const b = t.charge_breakdown;
+                          const m = b?.mtf ?? null;
+                          const statutory = b ? b.total_charges - (m?.total ?? 0) : 0;
+                          return (
+                            <tr key={t.trade_id}>
+                              <td className="l"><b>{t.symbol}</b></td>
+                              <td className={t.product === "MTF" ? "mtftag" : "dim"}>{t.product}</td>
+                              <td>{t.quantity}</td>
+                              <td>{num(t.price)}</td>
+                              <td className={cls(b?.gross_pnl)}>{inr(b?.gross_pnl)}</td>
+                              <td className="dim">{inr(statutory)}</td>
+                              <td className={m ? "loss" : "dim"}>
+                                {m ? inr(m.interest) : "—"}
+                                {m && <div className="sub">{inr(m.funded_amount, 0)} funded</div>}
+                              </td>
+                              <td className={m ? "loss" : "dim"}>
+                                {m ? inr(m.pledge_charge + m.unpledge_charge) : "—"}</td>
+                              <td className="loss">{inr(b?.total_charges)}</td>
+                              <td className={cls(b?.net_pnl)}><b>{inr(b?.net_pnl)}</b></td>
+                              <td className="dim">{m ? `${m.days_held}d` : "—"}</td>
+                              <td className="dim">{new Date(t.traded_at).toLocaleDateString()}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="note">{closed.note}</div>
+                </>
               )
             )}
 
@@ -568,6 +663,40 @@ export default function PaperTerminal({ segment }: { segment: "EQUITY" | "FNO" }
                     </tbody>
                   </table></div>
                 )}
+                {cfg?.mtf && !isFno && (
+                  <>
+                    <h4>MTF rate card</h4>
+                    <div className="tw">
+                      <table>
+                        <thead><tr><th className="l">Tier</th><th>Leverage</th><th>You fund</th></tr></thead>
+                        <tbody>
+                          {cfg.mtf.leverage_tiers.map((t) => (
+                            <tr key={t.tier}>
+                              <td className="l">{t.tier}</td>
+                              <td>{t.leverage}x</td>
+                              <td>{t.margin_pct}%</td>
+                            </tr>
+                          ))}
+                          <tr>
+                            <td className="l dim">anything else</td>
+                            <td className="dim">{cfg.mtf.default_leverage}x</td>
+                            <td className="dim">{cfg.mtf.default_margin_pct}%</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className="fundsdetail">
+                      <Row label="Funding rate" value={`${cfg.mtf.daily_rate_pct}% / day  (${cfg.mtf.annual_rate_pct}% a year)`} />
+                      <Row label="Pledge charge" value={inr(cfg.mtf.pledge_charge)} />
+                      <Row label="Unpledge charge" value={inr(cfg.mtf.unpledge_charge)} />
+                      <Row label="Live leverage source" value={cfg.mtf.live_leverage_enabled ? "Dhan margin calculator" : "rate card (configured)"} />
+                    </div>
+                    <div className="provenance">
+                      <b>Where these numbers come from.</b> {cfg.mtf.provenance}
+                    </div>
+                    <div className="note small">{cfg.mtf.mechanics}</div>
+                  </>
+                )}
                 <div className="reset">
                   <button onClick={async () => {
                     if (!dash) return;
@@ -640,6 +769,12 @@ export default function PaperTerminal({ segment }: { segment: "EQUITY" | "FNO" }
         .mrow { display: flex; justify-content: space-between; padding: 2px 0; }
         .mrow span { color: var(--text-muted); }
         .mbasis { font-size: 10px; color: var(--text-faint); margin-top: 6px; line-height: 1.4; }
+        .mtfbox { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--panel-border); }
+        .src { font-weight: 400; color: var(--text-faint); font-size: 10px; }
+        .mtfwarn { font-size: 10.5px; color: var(--warn); line-height: 1.45; margin-top: 6px; }
+        .closedtotals { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 12px; }
+        .mtftag { color: var(--purple); font-weight: 700; }
+        .provenance { font-size: 11px; color: var(--warn); background: var(--warn-dim); border: 1px solid var(--warn); border-radius: 9px; padding: 10px 13px; line-height: 1.55; margin-top: 12px; }
         .mwarn { font-size: 11px; color: var(--loss); margin-top: 6px; line-height: 1.4; }
 
         .submit { padding: 12px; border-radius: 10px; border: 0; font-weight: 700; font-size: 14px; cursor: pointer; color: #fff; }

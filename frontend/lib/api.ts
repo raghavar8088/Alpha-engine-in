@@ -4733,6 +4733,12 @@ export interface PTPosition {
   margin_blocked: number; realised_pnl: number; unrealised_pnl: number;
   pnl_pct: number | null; side: "LONG" | "SHORT"; value: number;
   opened_on: string;
+  mtf?: {
+    funded_amount: number; leverage: number | null; leverage_source: string | null;
+    days_held: number; interest_accrued: number; daily_interest: number;
+    pledge_charge: number; estimated_exit_cost: number;
+  };
+  pnl_after_funding?: number;
 }
 
 export interface PTTrade {
@@ -4764,6 +4770,13 @@ export interface PTConfig {
   market_open: boolean;
   engine: Record<string, unknown>;
   fills_note: string;
+  mtf: {
+    leverage_tiers: { tier: string; leverage: number; margin_pct: number }[];
+    default_leverage: number; default_margin_pct: number;
+    daily_rate_pct: number; annual_rate_pct: number;
+    pledge_charge: number; unpledge_charge: number;
+    live_leverage_enabled: boolean; provenance: string; mechanics: string;
+  };
 }
 
 export interface PTDashboard {
@@ -4779,6 +4792,12 @@ export interface PTMargin {
   span: number | null; exposure: number | null; iv?: number | null;
   price: number; contract: PTContract;
   available_margin: number; sufficient: boolean;
+  mtf?: {
+    leverage: number; margin_pct: number; source: string; tier: string | null;
+    funded_amount: number; daily_interest: number;
+    daily_rate_pct: number; annual_rate_pct: number;
+    pledge_charge: number; unpledge_charge: number;
+  };
 }
 
 export interface PTChainLeg {
@@ -4869,4 +4888,69 @@ export async function fetchPTChain(symbol: string, expiry: string): Promise<PTCh
 }
 export async function runPTTick(): Promise<Record<string, number>> {
   return apiFetch("/api/paper-trading/tick", { method: "POST" });
+}
+
+// ── Paper broker: MTF and closed-position cost breakdown ──────────────────────────
+
+export interface PTMtfDetail {
+  leverage: number; margin_pct: number; source: string; tier: string | null;
+  funded_amount: number; daily_interest: number;
+  daily_rate_pct: number; annual_rate_pct: number;
+  pledge_charge: number; unpledge_charge: number;
+}
+
+export interface PTMtfRateCard {
+  leverage_tiers: { tier: string; leverage: number; margin_pct: number }[];
+  default_leverage: number; default_margin_pct: number;
+  daily_rate_pct: number; annual_rate_pct: number;
+  pledge_charge: number; unpledge_charge: number;
+  live_leverage_enabled: boolean;
+  provenance: string;
+  mechanics: string;
+}
+
+/** The MTF cost carried on a position while it is open. */
+export interface PTPositionMtf {
+  funded_amount: number; leverage: number | null; leverage_source: string | null;
+  days_held: number; interest_accrued: number; daily_interest: number;
+  pledge_charge: number; estimated_exit_cost: number;
+}
+
+/** Everything a closed trade cost, itemised. */
+export interface PTChargeBreakdown {
+  gross_pnl: number;
+  statutory: Record<string, number | string> | null;
+  mtf: {
+    days_held: number; funded_amount: number;
+    daily_rate_pct: number; annual_rate_pct: number;
+    interest: number; pledge_charge: number; unpledge_charge: number;
+    leverage: number | null; leverage_source: string | null; total: number;
+  } | null;
+  total_charges: number;
+  net_pnl: number;
+}
+
+export interface PTClosedTrade extends PTTrade {
+  charge_breakdown: PTChargeBreakdown | null;
+}
+
+export interface PTClosedBook {
+  count: number;
+  rows: PTClosedTrade[];
+  totals: {
+    gross_pnl: number; net_pnl: number; total_charges: number;
+    statutory_charges: number; mtf_charges: number;
+    mtf_interest: number; pledge_charges: number;
+  };
+  note: string;
+}
+
+export async function fetchPTClosed(accountId?: string, segment?: string): Promise<PTClosedBook> {
+  return apiFetch("/api/paper-trading/closed" + screenerQs({ account_id: accountId, segment }));
+}
+export async function fetchPTMtfRateCard(): Promise<PTMtfRateCard> {
+  return apiFetch("/api/paper-trading/mtf/rate-card");
+}
+export async function accruePTMtf(): Promise<{ accrued: number }> {
+  return apiFetch("/api/paper-trading/mtf/accrue", { method: "POST" });
 }

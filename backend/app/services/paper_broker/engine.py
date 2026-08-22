@@ -34,7 +34,7 @@ from app.core.db import (
     pt_positions_collection,
     pt_trades_collection,
 )
-from app.services.paper_broker import accounts, market, orders
+from app.services.paper_broker import accounts, market, mtf, orders
 from app.services.paper_broker.core import (
     MARKET_CLOSE,
     OPEN_STATUSES,
@@ -125,6 +125,9 @@ async def tick() -> dict:
     # 5. force intraday flat at the cutoff
     result["squared_off"] = await _squareoff_mis(prices)
 
+    # 6. accrue MTF funding interest once per calendar day
+    result["mtf_accrued"] = await accrue_mtf_interest()
+
     _state["last_tick"] = now_utc()
     _state["ticks"] += 1
     return result
@@ -160,6 +163,91 @@ async def _squareoff_mis(prices: dict[str, float]) -> int:
             except OrderError:
                 logger.exception("paper broker: auto square-off failed for %s", pos["symbol"])
     return closed
+
+
+async def accrue_mtf_interest() -> int:
+    """Add one day's funding interest to each open MTF position, once per calendar day.
+
+    This exists so the cost is VISIBLE WHILE THE POSITION IS OPEN. The exact charge is
+    recomputed from the holding period when the position closes — this running figure is
+    what stops a leveraged position quietly looking profitable for three weeks because the
+    only thing paying for it has not been shown yet.
+
+    Guarded on `mtf_last_accrued_on` rather than a timer, so a restart, a redeploy or a
+    dozen ticks in one minute cannot double-charge a day.
+    """
+    today = today_ist()
+    accrued = 0
+    async for pos in pt_positions_collection.find(
+            {"status": "OPEN", "product": "MTF", "segment": SEGMENT_EQUITY}):
+        if pos.get("mtf_last_accrued_on") == today:
+            continue
+        funded = float(pos.get("mtf_funded") or 0)
+        if funded <= 0:
+            continue
+        # Charge every day since the last accrual, not just one — a position opened on
+        # Friday and first ticked on Monday borrowed the money all weekend.
+        last = pos.get("mtf_last_accrued_on") or pos.get("opened_on")
+        days = mtf.days_held(last, today) if last != today else 1
+        interest = mtf.interest_for_days(funded, days)
+        await pt_positions_collection.update_one(
+            {"_id": pos["_id"]},
+            {"$set": {"mtf_interest_accrued": round(
+                float(pos.get("mtf_interest_accrued") or 0) + interest, 2),
+                "mtf_last_accrued_on": today, "updated_at": now_utc()}})
+        accrued += 1
+    if accrued:
+        logger.info("paper broker: accrued MTF interest on %s position(s)", accrued)
+    return accrued
+
+
+async def closed_positions(account_id: str, segment: str | None = None,
+                           limit: int = 200) -> dict:
+    """Closed trades with the whole cost of each one itemised.
+
+    A closing trade carries a `charge_breakdown` — gross P&L, the statutory schedule line by
+    line, and for MTF the funding interest, pledge and unpledge fees. That itemisation is
+    the point: a single "charges" total cannot tell you whether a losing MTF trade lost on
+    the market or on the borrowing, and those call for opposite corrections.
+    """
+    q: dict = {"account_id": account_id, "charge_breakdown": {"$ne": None}}
+    if segment:
+        q["segment"] = segment
+    rows = [t async for t in pt_trades_collection.find(q, {"_id": 0})
+            .sort("traded_at", -1).limit(limit)]
+    for r in rows:
+        for k in ("traded_at", "ts"):
+            if hasattr(r.get(k), "isoformat"):
+                r[k] = r[k].isoformat()
+
+    gross = sum(float((r.get("charge_breakdown") or {}).get("gross_pnl") or 0) for r in rows)
+    net = sum(float(r.get("realised_pnl") or 0) for r in rows)
+    fees = sum(float(r.get("charges") or 0) for r in rows)
+    mtf_total = sum(float(((r.get("charge_breakdown") or {}).get("mtf") or {}).get("total") or 0)
+                    for r in rows)
+    interest = sum(float(((r.get("charge_breakdown") or {}).get("mtf") or {}).get("interest") or 0)
+                   for r in rows)
+    pledge = sum(
+        float(((r.get("charge_breakdown") or {}).get("mtf") or {}).get("pledge_charge") or 0)
+        + float(((r.get("charge_breakdown") or {}).get("mtf") or {}).get("unpledge_charge") or 0)
+        for r in rows)
+
+    return {
+        "count": len(rows),
+        "rows": rows,
+        "totals": {
+            "gross_pnl": round(gross, 2),
+            "net_pnl": round(net, 2),
+            "total_charges": round(fees, 2),
+            "statutory_charges": round(fees - mtf_total, 2),
+            "mtf_charges": round(mtf_total, 2),
+            "mtf_interest": round(interest, 2),
+            "pledge_charges": round(pledge, 2),
+        },
+        "note": ("Net P&L is after everything: brokerage, STT, exchange and SEBI fees, stamp "
+                 "duty, GST, the DP charge on delivery, and for MTF the funding interest plus "
+                 "pledge and unpledge fees."),
+    }
 
 
 async def settle_delivery() -> dict:
@@ -230,6 +318,29 @@ async def positions(account_id: str, segment: str | None = None) -> dict:
                             if r.get("unrealised_pnl") is not None and r["avg_price"] else None)
             r["side"] = "LONG" if int(r["quantity"]) > 0 else "SHORT"
             r["value"] = round(abs(int(r["quantity"])) * (r.get("ltp") or r["avg_price"]), 2)
+            if r.get("product") == "MTF":
+                # The running cost of the borrowing, shown beside the position's P&L. A
+                # leveraged position that is up 2% while the funding has eaten 1.5% is not
+                # the winner the P&L column alone suggests.
+                days = mtf.days_held(r.get("opened_on"), today_ist())
+                funded = float(r.get("mtf_funded") or 0)
+                r["mtf"] = {
+                    "funded_amount": round(funded, 2),
+                    "leverage": r.get("mtf_leverage"),
+                    "leverage_source": r.get("mtf_leverage_source"),
+                    "days_held": days,
+                    "interest_accrued": mtf.interest_for_days(funded, days),
+                    "daily_interest": mtf.daily_interest(funded),
+                    "pledge_charge": round(float(r.get("mtf_pledge_charge") or 0), 2),
+                    "estimated_exit_cost": round(
+                        mtf.interest_for_days(funded, days)
+                        + float(r.get("mtf_pledge_charge") or 0) + mtf.unpledge_charge(), 2),
+                }
+                # P&L net of the funding accrued so far — the number that actually decides
+                # whether holding this another week is worth it.
+                if r.get("unrealised_pnl") is not None:
+                    r["pnl_after_funding"] = round(
+                        r["unrealised_pnl"] - r["mtf"]["estimated_exit_cost"], 2)
             for k in ("opened_at", "updated_at", "ts"):
                 if hasattr(r.get(k), "isoformat"):
                     r[k] = r[k].isoformat()

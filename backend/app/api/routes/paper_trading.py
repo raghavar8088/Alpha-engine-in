@@ -31,7 +31,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from app.api.deps import get_current_user
-from app.services.paper_broker import accounts, engine, market, orders
+from app.services.paper_broker import accounts, engine, market, mtf, orders
 from app.services.paper_broker.core import (
     MIS_LEVERAGE,
     MIS_SQUAREOFF_EQUITY,
@@ -74,9 +74,13 @@ async def config(_u: dict = Depends(get_current_user)):
         "validities": list(VALIDITIES),
         "product_help": {
             "CNC": "Delivery. Fully paid, cannot short, settles into Holdings overnight.",
+            "MTF": (f"Margin Trade Funding. You fund part, the broker funds the rest and "
+                    f"charges {mtf.annual_rate_pct():g}% a year on it EVERY CALENDAR DAY you "
+                    f"hold, plus pledge fees in and out. Delivery charges apply. Cannot short."),
             "MIS": f"Intraday. {MIS_LEVERAGE:g}x leverage, auto squared off at the cutoff.",
             "NRML": "F&O overnight. Carries to expiry on full SPAN margin.",
         },
+        "mtf": mtf.rate_card(),
         "order_type_help": {
             "MARKET": "Fills at the last traded price.",
             "LIMIT": "Rests until price reaches your limit, then fills at the better of the two.",
@@ -338,3 +342,43 @@ async def run_tick(_u: dict = Depends(get_current_user)):
 async def settle(_u: dict = Depends(get_current_user)):
     """Move unsold CNC buys into Holdings. Normally the scheduler's job, after the close."""
     return await engine.settle_delivery()
+
+
+# ── MTF + closed positions ──────────────────────────────────────────────────────
+
+
+@router.get("/mtf/rate-card")
+async def mtf_rate_card(_u: dict = Depends(get_current_user)):
+    """The MTF leverage tiers, funding rate and pledge fees — and where they came from."""
+    return mtf.rate_card()
+
+
+@router.get("/mtf/leverage")
+async def mtf_leverage(symbol: str = Query(...), _u: dict = Depends(get_current_user)):
+    """Leverage for one scrip, with its source named."""
+    try:
+        contract = await market.resolve_equity(symbol)
+    except OrderError as exc:
+        raise _guard(exc)
+    return await mtf.leverage_for(
+        contract["symbol"], security_id=contract.get("security_id"),
+        exchange_segment=contract.get("exchange_segment"))
+
+
+@router.get("/closed")
+async def closed_positions(account_id: str | None = Query(None),
+                           segment: str | None = Query(None),
+                           limit: int = Query(200, ge=1, le=1000),
+                           fresh: bool = Query(False),
+                           _u: dict = Depends(get_current_user)):
+    """Closed trades with every charge itemised — statutory, MTF funding, pledge fees."""
+    aid = await _account(account_id)
+    return await _cached(f"pt:closed:{aid}:{segment}:{limit}",
+                         lambda: engine.closed_positions(aid, segment, limit),
+                         ttl=10, fresh=fresh)
+
+
+@router.post("/mtf/accrue")
+async def mtf_accrue(_u: dict = Depends(get_current_user)):
+    """Run the daily MTF interest accrual by hand. Idempotent per calendar day."""
+    return {"accrued": await engine.accrue_mtf_interest()}

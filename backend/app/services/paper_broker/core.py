@@ -25,9 +25,11 @@ TRANSACTION_TYPES = ("BUY", "SELL")
 VALIDITIES = ("DAY", "IOC")
 
 # CNC  delivery equity — cannot short, settles into holdings
+# MTF  delivery equity on broker funding — cannot short, carries overnight, accrues DAILY
+#      interest on the funded part and pledge fees in and out. See paper_broker.mtf.
 # MIS  intraday, any segment — squared off at the cutoff, leveraged
 # NRML overnight F&O — carries to expiry
-PRODUCTS_EQUITY = ("CNC", "MIS")
+PRODUCTS_EQUITY = ("CNC", "MTF", "MIS")
 PRODUCTS_FNO = ("NRML", "MIS")
 
 ORDER_STATUSES = ("PENDING", "TRIGGER_PENDING", "COMPLETE", "CANCELLED", "REJECTED", "EXPIRED")
@@ -90,6 +92,10 @@ def past_squareoff(segment: str, when: datetime | None = None) -> bool:
     return is_trading_day(when) and when.time() >= _hhmm(cutoff)
 
 
+# Products that survive the close. Everything else is flattened at the intraday cutoff.
+OVERNIGHT_PRODUCTS = ("CNC", "MTF", "NRML")
+
+
 def products_for(segment: str) -> tuple[str, ...]:
     return PRODUCTS_FNO if segment == SEGMENT_FNO else PRODUCTS_EQUITY
 
@@ -123,6 +129,10 @@ def validate_order(*, segment: str, transaction_type: str, order_type: str, prod
         raise OrderError(f"{order_type} orders need a trigger price")
     if order_type == "MARKET" and price:
         raise OrderError("A MARKET order cannot carry a price")
+
+    # NOTE: CNC and MTF cannot go short, but that is not checked here — it depends on what
+    # the account actually holds, which this pure function cannot see. `orders.execute`
+    # enforces it against the position book and the holdings.
 
     # A stop-loss that triggers on the wrong side of its own limit can never fill: a BUY
     # SL arms when price rises to the trigger, so its limit must sit at or above it.
@@ -176,10 +186,16 @@ def fill_price_for(order: dict, ltp: float) -> float:
 
 
 def fee_product(segment: str, product: str) -> str:
-    """Map a broker product onto the Angel One equity fee schedule."""
+    """Map a broker product onto the Angel One equity fee schedule.
+
+    MTF pays DELIVERY charges. It is funded delivery, not a leveraged intraday trade — the
+    stock is actually bought and pledged, so it carries the 0.1%-both-legs STT and the DP
+    charge. Billing it as intraday would understate an MTF round trip by roughly two thirds
+    before the funding interest is even counted.
+    """
     if segment == SEGMENT_FNO:
         return "INTRADAY"          # unused for F&O; option/future charges go their own way
-    return "DELIVERY" if product == "CNC" else "INTRADAY"
+    return "DELIVERY" if product in ("CNC", "MTF") else "INTRADAY"
 
 
 def charges(*, segment: str, product: str, instrument_kind: str, entry: float, exit_price: float,
@@ -209,4 +225,7 @@ def margin_required(*, segment: str, product: str, price: float, quantity: int) 
         return notional
     if product == "MIS":
         return notional / MIS_LEVERAGE
+    # MTF never reaches here — its leverage is per-scrip and has to be looked up, which is
+    # async, so orders.estimate_margin owns it. Falling through to full notional would
+    # silently turn every MTF order into a CNC one.
     return notional      # CNC is fully paid
