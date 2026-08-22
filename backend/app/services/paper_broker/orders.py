@@ -36,6 +36,7 @@ from app.core.db import (
 from app.services.fno_margin import portfolio_margin, solve_iv
 from app.services.paper_broker import accounts, market
 from app.services.paper_broker.core import (
+    MIS_LEVERAGE,
     OPEN_STATUSES,
     SEGMENT_EQUITY,
     SEGMENT_FNO,
@@ -86,11 +87,16 @@ async def estimate_margin(*, account_id: str, segment: str, contract: dict,
     """
     if segment == SEGMENT_EQUITY:
         m = margin_required(segment=segment, product=product, price=price, quantity=quantity)
-        return {"margin": round(m, 2), "method": "notional" if product == "CNC"
-                else f"notional / {int(margin_required(segment=segment, product='CNC', price=1, quantity=1) and 1) or 1}",
-                "basis": ("Full notional — CNC is fully paid delivery" if product == "CNC"
-                          else "Notional divided by the intraday leverage multiplier"),
-                "span": None, "exposure": None}
+        cnc = product == "CNC"
+        return {
+            "margin": round(m, 2),
+            "method": "notional" if cnc else f"notional / {MIS_LEVERAGE:g}",
+            "basis": (f"Full notional ({price:,.2f} x {quantity}) — CNC is fully paid delivery"
+                      if cnc else
+                      f"Notional {price * quantity:,.2f} divided by the {MIS_LEVERAGE:g}x "
+                      f"intraday multiplier. One flat figure, because a real broker's MIS "
+                      f"leverage varies per scrip and per day and there is no bulk feed for it."),
+            "span": None, "exposure": None}
 
     # Long options are paid for in full and block nothing beyond the premium.
     if contract["kind"] == "OPTION" and transaction_type == "BUY":

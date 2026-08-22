@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 
 from app.core.db import instruments_collection
 from app.services.angel_client import AngelAPIError, angel_client
@@ -29,6 +30,17 @@ from tradingai_broker_clients.angel.auth import batches
 logger = logging.getLogger("paper_broker.market")
 
 QUOTE_PACE_SECONDS = 0.15
+
+# NSE's exchange test scrips. They live in the instrument master, they quote, and they are
+# not a market — 011NSETEST through 101NSETEST and similar.
+TEST_SCRIP_RE = re.compile(r"NSETEST|^TEST", re.I)
+INDEX_UNDERLYINGS = {"NIFTY", "BANKNIFTY", "FINNIFTY", "MIDCPNIFTY", "NIFTYNXT50", "SENSEX", "BANKEX"}
+
+
+def _today_iso() -> str:
+    from app.services.paper_broker.core import now_ist
+    return now_ist().date().isoformat()
+
 
 OPTION_CLASSES = ("INDEX_OPTION", "EQUITY_OPTION")
 FUTURE_CLASSES = ("INDEX_FUTURE", "EQUITY_FUTURE")
@@ -164,15 +176,30 @@ async def resolve_equity(symbol: str) -> dict:
 
 
 async def fno_underlyings() -> list[dict]:
-    """Underlyings that actually have listed contracts on file, with their kinds."""
+    """Underlyings with LIVE listed contracts, ordered with the indices first.
+
+    Two filters that are not optional:
+
+    NSE's own test scrips (011NSETEST and friends) sit in the instrument master alongside
+    real contracts. They quote, they accept orders, and they are not a market — putting them
+    in a picker invites someone to trade one.
+
+    And only underlyings with an UNEXPIRED contract are listed. The master keeps expired
+    series, so an unfiltered list offers July expiries in August.
+    """
+    today = _today_iso()
     rows = await instruments_collection.aggregate([
-        {"$match": {"asset_class": {"$in": list(FNO_CLASSES)}, "angel_token": {"$ne": None}}},
+        {"$match": {"asset_class": {"$in": list(FNO_CLASSES)},
+                    "angel_token": {"$ne": None},
+                    "expiry": {"$gte": today},
+                    "underlying_symbol": {"$not": TEST_SCRIP_RE}}},
         {"$group": {"_id": "$underlying_symbol",
                     "classes": {"$addToSet": "$asset_class"},
                     "lot_size": {"$first": "$lot_size"}}},
         {"$sort": {"_id": 1}},
-    ]).to_list(length=500)
-    return [
+    ]).to_list(length=1000)
+
+    out = [
         {
             "symbol": r["_id"],
             "lot_size": int(r.get("lot_size") or 1),
@@ -181,14 +208,25 @@ async def fno_underlyings() -> list[dict]:
         }
         for r in rows if r.get("_id")
     ]
+    # Indices first — they are what almost every F&O session starts with, and hunting for
+    # NIFTY under N in a 200-name alphabetical list is friction for no reason.
+    out.sort(key=lambda u: (u["symbol"] not in INDEX_UNDERLYINGS, u["symbol"]))
+    return out
 
 
 async def expiries(symbol: str, kind: str = "OPTION") -> list[str]:
+    """Unexpired expiries only, nearest first.
+
+    The instrument master retains dead series. Returning them puts an expired contract at
+    the top of the picker — which is what happened on the first live run: on 22 August the
+    chain opened on the 21 July expiry and showed a month-old premium as if it were live.
+    """
     classes = list(OPTION_CLASSES) if kind == "OPTION" else list(FUTURE_CLASSES)
     vals = await instruments_collection.distinct(
         "expiry", {"underlying_symbol": symbol.upper(), "asset_class": {"$in": classes},
                    "angel_token": {"$ne": None}})
-    return sorted(v for v in vals if v)
+    today = _today_iso()
+    return sorted(v for v in vals if v and v >= today)
 
 
 async def resolve_option(symbol: str, expiry: str, strike: float, option_type: str) -> dict:
@@ -222,6 +260,12 @@ async def option_chain(symbol: str, expiry: str) -> dict:
     place an order against — the chain module returns a display structure, and re-resolving
     a strike from a display row is where an order ends up on the wrong contract.
     """
+    if expiry < _today_iso():
+        raise OrderError(
+            f"{symbol.upper()} {expiry} has already expired. The instrument master keeps dead "
+            f"series and they still carry their last premium, so serving this chain would show "
+            f"month-old prices as if they were live.")
+
     docs = [d async for d in instruments_collection.find({
         "underlying_symbol": symbol.upper(), "expiry": expiry,
         "asset_class": {"$in": list(OPTION_CLASSES)}, "angel_token": {"$ne": None},
