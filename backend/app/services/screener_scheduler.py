@@ -28,7 +28,7 @@ import logging
 import os
 from datetime import datetime
 
-from app.services.screener import engine, momentum, nse_breadth, patterns
+from app.services.screener import bhavcopy, engine, momentum, nse_breadth, paper, patterns
 from app.services.screener.horizons import IST
 
 logger = logging.getLogger("screener_scheduler")
@@ -56,15 +56,37 @@ def _in_session(now: datetime | None = None) -> bool:
 
 
 async def _intraday_tick() -> None:
-    """Refresh the in-memory snapshot so the next page load is already warm. Deliberately
-    does NOT persist — see the module docstring."""
+    """Refresh the in-memory snapshot so the next page load is already warm, then run the
+    paper desk. Deliberately does NOT persist the snapshot — see the module docstring.
+
+    The paper desk runs on the SAME tick rather than its own loop, because it has to see
+    the snapshot that produced its signals. A separate loop would open positions against
+    prices from a different moment than the reasons attached to them, which would make the
+    leaderboard measure the gap between two clocks as if it were edge."""
     await momentum.universe_snapshot(momentum.DEFAULT_INDEX, fresh=True)
     await nse_breadth.snapshot(persist=False)
+    if paper.ENABLED:
+        try:
+            await paper.run_cycle(momentum.DEFAULT_INDEX)
+        except Exception:
+            logger.exception("screener paper cycle failed — desk skips this tick")
 
 
 async def _eod() -> None:
+    # Bhavcopy first: it publishes after the close and every delivery-based reason in the
+    # EOD recompute wants today's row, not yesterday's.
+    try:
+        cap = await bhavcopy.capture()
+        logger.info("screener bhavcopy capture: %s", cap)
+    except Exception:
+        logger.exception("bhavcopy capture failed — delivery columns read n/a for today")
     result = await engine.refresh_all(momentum.DEFAULT_INDEX)
     logger.info("screener EOD refresh: %s", result)
+    if paper.ENABLED:
+        try:
+            await paper.run_cycle(momentum.DEFAULT_INDEX)
+        except Exception:
+            logger.exception("screener paper EOD cycle failed")
 
 
 async def _weekly() -> None:

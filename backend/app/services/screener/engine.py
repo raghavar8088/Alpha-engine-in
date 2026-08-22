@@ -28,7 +28,7 @@ import time
 from datetime import datetime, timezone
 
 from app.core.db import screener_momentum_collection, screener_sectors_collection
-from app.services.screener import chartink, nse_breadth, patterns, plans, sectors
+from app.services.screener import bhavcopy, chartink, nse_breadth, patterns, plans, sectors
 from app.services.screener import horizons as H
 from app.services.screener import momentum as M
 
@@ -213,6 +213,11 @@ async def sources(index: str | None = None) -> dict:
         universe_ok, universe_err = False, exc.detail
         coverage, quotes_live, bench = {}, False, {}
 
+    try:
+        bhav = await bhavcopy.status()
+    except Exception:  # noqa: BLE001 — the Sources tab must render even if this errors
+        bhav = {}
+
     return {
         "index": index,
         "feeds": [
@@ -257,6 +262,17 @@ async def sources(index: str | None = None) -> dict:
                 "detail": ("enabled — free tier is 30-45 min delayed"
                            if chartink.ENABLED else "disabled (SCREENER_CHARTINK_ENABLED=0)"),
                 "verified": chartink.status()["verified"],
+            },
+            {
+                "name": "NSE bhavcopy (delivery %)",
+                "role": "the strongest 'is this real buying' signal",
+                "ok": bool(bhav.get("days_stored")),
+                "detail": (
+                    f"{bhav.get('days_stored', 0)} days stored, latest {bhav.get('latest_date')} "
+                    f"({bhav.get('symbols_latest', 0)} symbols). {bhav.get('note', '')}"
+                    if bhav.get("days_stored") else
+                    "No bhavcopy captured from this host yet — delivery columns read n/a. "
+                    f"Last error: {bhav.get('last_error') or 'none recorded'}"),
             },
             {
                 "name": "Yahoo fundamentals",

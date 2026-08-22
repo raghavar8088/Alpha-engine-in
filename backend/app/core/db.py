@@ -258,3 +258,12 @@ ts_rejections_collection = db["ts_rejections"]
 ts_evidence_collection = db["ts_evidence"]
 ts_equity_collection = db["ts_equity"]
 ts_state_collection = db["ts_state"]
+# Stock Screener upgrade: NSE end-of-day bhavcopy (delivery %, trade counts) and the
+# Screener's own paper desk. The bhavcopy rows are a cache of a public archive file and
+# are re-fetchable at any time; the paper desk's TRADES are the one thing here that is
+# genuinely a record, which is why only equity snapshots expire.
+screener_bhavcopy_collection = db["screener_bhavcopy"]
+screener_paper_positions_collection = db["screener_paper_positions"]
+screener_paper_trades_collection = db["screener_paper_trades"]
+screener_paper_equity_collection = db["screener_paper_equity"]
+screener_paper_state_collection = db["screener_paper_state"]

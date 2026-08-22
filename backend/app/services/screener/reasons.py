@@ -74,12 +74,34 @@ def build(metrics: dict, sector_ctx: dict | None = None,
             weight=min(1.0, vol_x / 5) * 0.9, value=vol_x, unit="x",
         ))
 
+    # Delivery is judged against the stock's OWN average wherever we have one. A flat 55%
+    # threshold marks every utility as accumulating and never flags a smallcap that just
+    # tripled its delivery from 12% to 40% — which is the actual event.
     delivery = metrics.get("delivery_pct")
-    if delivery is not None and delivery >= DELIVERY_NOTABLE:
+    dratio = metrics.get("delivery_ratio")
+    davg = metrics.get("delivery_avg")
+    if delivery is not None and dratio is not None and davg is not None:
+        if dratio >= 1.3:
+            out.append(Reason(
+                "delivery", 1,
+                f"{delivery:.0f}% delivery against its own {davg:.0f}% average "
+                f"({dratio:.1f}x) — being taken home, not traded around",
+                weight=0.85, value=delivery, unit="%",
+            ))
+        elif dratio <= 0.7:
+            out.append(Reason(
+                "delivery_low", 1,
+                f"Only {delivery:.0f}% delivery against a {davg:.0f}% average — the volume "
+                f"is intraday churn, not accumulation",
+                weight=0.6, value=delivery, unit="%",
+            ))
+    elif delivery is not None and delivery >= DELIVERY_NOTABLE:
+        # No history to compare against yet, so this is the weaker absolute read.
         out.append(Reason(
             "delivery", 1,
-            f"{delivery:.0f}% of today's volume went to delivery — buying, not intraday churn",
-            weight=0.75, value=delivery, unit="%",
+            f"{delivery:.0f}% of today's volume went to delivery (no history yet to compare "
+            f"against this stock's own norm)",
+            weight=0.65, value=delivery, unit="%",
         ))
 
     brk = metrics.get("breakout")
@@ -257,6 +279,8 @@ def chips(reasons: list[dict], limit: int = 3) -> list[dict]:
             label = f"{int(r['value'])}d breakout"
         elif code == "delivery":
             label = f"Delivery {r['value']:.0f}%"
+        elif code == "delivery_low":
+            label = f"Churn {r['value']:.0f}% dlv"
         elif code == "rs_index":
             label = f"RS {r['value']:+.1f}"
         elif code == "fno_long":

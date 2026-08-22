@@ -4107,6 +4107,9 @@ export interface ScreenerConfig {
   timeframes: { key: string; label: string }[];
   pattern_catalog: { key: string; label: string; family: string; family_label: string; probeable: boolean }[];
   setup_kinds: string[];
+  volume_windows: { key: string; label: string; sessions: number }[];
+  volume_states: { key: string; label: string; text: string }[];
+  paper_families: { key: string; label: string; product: string }[];
   chartink: {
     enabled: boolean;
     presets: { key: string; label: string; why_not_local: string }[];
@@ -4468,4 +4471,111 @@ export async function runTSValidation(): Promise<any> {
 }
 export async function runTSCycle(): Promise<{ opened: number; managed: number; closed: number; notes: string[] }> {
   return apiFetch("/api/trending-stocks/run", { method: "POST" });
+}
+
+// ── Stock Screener: volume, delivery and the paper desk ───────────────────────────
+
+export interface ScreenerTarget {
+  target: number | null;
+  upside_pct: number | null;
+  method: string;
+  strength: "strong" | "moderate" | "weak" | "none";
+  note: string | null;
+}
+
+export interface ScreenerVolumeRow {
+  symbol: string; name: string | null; sector: string; ltp: number;
+  return_pct: number | null;
+  volume_ratio: number; volume: number; volume_baseline: number;
+  turnover: number | null;
+  delivery_pct: number | null; delivery_avg: number | null; delivery_ratio: number | null;
+  trades: number | null;
+  state: string; state_label: string; state_text: string;
+  price_confirms: boolean;
+  sector_return_pct: number | null;
+  reasons: string[];
+  target: ScreenerTarget;
+  patterns: { pattern: string; state: string; timeframe: string }[];
+}
+
+export interface ScreenerVolumeBoard {
+  index: string; label: string; window: string; window_label: string; sessions: number;
+  count: number; min_volume_ratio: number;
+  by_state: Record<string, number>;
+  states: { key: string; label: string; text: string }[];
+  delivery_available: boolean; delivery_note: string;
+  rows: ScreenerVolumeRow[];
+}
+
+export interface ScreenerPaperFamily {
+  family: string; label: string; product: string; rank: number;
+  trades: number; wins: number; losses: number; win_rate: number | null;
+  net_pnl: number; gross_pnl: number; fees: number;
+  profit_factor: number | null; expectancy: number | null; avg_r: number | null;
+  best: number; worst: number;
+  open_positions: number; capital: number; equity: number; roi_pct: number;
+}
+
+export interface ScreenerPaperSummary {
+  families: ScreenerPaperFamily[];
+  ranked: string[];
+  total_capital: number; total_net_pnl: number; total_trades: number; total_fees: number;
+  per_trade_capital: number; max_open_per_family: number;
+  note: string;
+  enabled: boolean; squareoff: string;
+  last_cycle: string | null; last_opened: number | null; last_closed: number | null;
+  max_hold_days: Record<string, number>;
+}
+
+export interface ScreenerPaperPosition {
+  position_id: string; family: string; symbol: string; name: string | null;
+  sector: string | null;
+  entry: number; stop: number; target: number; qty: number; capital: number;
+  product: string; opened_on: string; opened_at?: string;
+  signal_reason: string | null; pattern: string | null;
+  net_rr_at_entry: number | null;
+  ltp?: number | null;
+  unrealised_gross?: number; unrealised_net?: number;
+  return_pct?: number; to_target_pct?: number; to_stop_pct?: number;
+  exit?: number; exit_reason?: string; closed_on?: string;
+  gross_pnl?: number; fees?: number; net_pnl?: number; r_multiple?: number;
+}
+
+export interface ScreenerPaperPositions {
+  status: string; count: number; rows: ScreenerPaperPosition[];
+}
+
+export interface ScreenerDeliveryStatus {
+  days_stored: number; latest_date: string | null; symbols_latest: number;
+  last_error: string | null; source: string; note: string;
+}
+
+export async function fetchScreenerVolume(
+  window: string, index?: string, state?: string, limit = 60,
+): Promise<ScreenerVolumeBoard> {
+  return apiFetch("/api/screener/volume" + screenerQs({ window, index, state, limit }));
+}
+export async function fetchScreenerPaperSummary(): Promise<ScreenerPaperSummary> {
+  return apiFetch("/api/screener/paper/summary");
+}
+export async function fetchScreenerPaperPositions(
+  status = "OPEN", family?: string, limit = 200,
+): Promise<ScreenerPaperPositions> {
+  return apiFetch("/api/screener/paper/positions" + screenerQs({ status, family, limit }));
+}
+export async function runScreenerPaperCycle(index?: string): Promise<Record<string, unknown>> {
+  return apiFetch("/api/screener/paper/run" + screenerQs({ index }), { method: "POST" });
+}
+export async function fetchScreenerDelivery(): Promise<ScreenerDeliveryStatus> {
+  return apiFetch("/api/screener/delivery");
+}
+export async function backfillScreenerDelivery(days = 30): Promise<Record<string, unknown>> {
+  return apiFetch("/api/screener/delivery/backfill" + screenerQs({ days }), { method: "POST" });
+}
+export async function fetchScreenerChartink(scan: string): Promise<{
+  ok: boolean; rows: { symbol: string; name: string; close: number | null;
+  change_pct: number | null; volume: number | null }[];
+  error: string | null; label?: string; warning?: string; why_not_local?: string;
+}> {
+  return apiFetch("/api/screener/chartink" + screenerQs({ scan }));
 }

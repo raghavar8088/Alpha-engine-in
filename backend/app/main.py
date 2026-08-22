@@ -157,6 +157,9 @@ DESK_INDEXES: dict[str, list] = {
     "screener_sectors": [[("index", 1), ("date", -1)]],
     "screener_patterns": [[("index", 1), ("date", -1)]],
     "screener_breadth": [[("date", -1)]],
+    "screener_bhavcopy": [[("date", -1)]],
+    "screener_paper_positions": [[("family", 1), ("status", 1)], [("symbol", 1), ("status", 1)]],
+    "screener_paper_trades": [[("family", 1)], [("closed_on", 1)]],
 }
 
 
@@ -219,6 +222,10 @@ EXPIRING_COLLECTIONS = {
     # Sector rotation is kept longest: the whole point of the board is how a
     # sector's RANK moves over months, which needs the history behind it.
     "screener_momentum": 90,
+    # The bhavcopy is a cache of a public archive; 120 days is enough for the rolling
+    # delivery averages and it re-downloads on demand.
+    "screener_bhavcopy": 120,
+    "screener_paper_equity": 30,
     "screener_patterns": 90,
     "screener_breadth": 365,
     "screener_sectors": 365,
@@ -365,6 +372,26 @@ async def start_fno_auto_roll_scheduler() -> None:
         )
     else:
         logger.info("F&O auto-roll disabled (FNO_AUTO_ROLL_ENABLED=0)")
+
+
+@app.on_event("startup")
+async def seed_screener_bhavcopy() -> None:
+    """Delivery data for the Screener. The rolling delivery average needs history, so this
+    backfills roughly a month once, then tops up daily. Background and paced — the NSE
+    archive may block this host entirely, in which case delivery columns read n/a."""
+    async def _run() -> None:
+        await asyncio.sleep(240)  # after the universe seed and the bars backfill
+        while True:
+            try:
+                from app.services.screener import bhavcopy
+
+                result = await bhavcopy.backfill()
+                logger.info("Screener bhavcopy: %s", result)
+            except Exception:
+                logger.exception("Screener bhavcopy backfill failed — delivery reads n/a")
+            await asyncio.sleep(12 * 3600)
+
+    asyncio.create_task(_run())
 
 
 @app.on_event("startup")

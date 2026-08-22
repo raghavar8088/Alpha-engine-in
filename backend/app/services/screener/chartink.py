@@ -39,7 +39,7 @@ import httpx
 
 logger = logging.getLogger("screener.chartink")
 
-ENABLED = os.getenv("SCREENER_CHARTINK_ENABLED", "0").lower() not in ("0", "false", "")
+ENABLED = os.getenv("SCREENER_CHARTINK_ENABLED", "1").lower() not in ("0", "false", "")
 BASE = "https://chartink.com"
 SCREENER_PAGE = "/screener/"
 PROCESS = "/screener/process"
@@ -56,6 +56,7 @@ NIFTY500 = "{33489}"
 # belongs in the local engine, not here — duplicating it would mean showing a delayed
 # number beside a live one with no way for a reader to tell which was which.
 PRESETS: dict[str, dict] = {
+    # ── things we cannot compute: they need INTRADAY bars, which this app does not store ──
     "volume_spurt_5m": {
         "label": "5-minute volume spurt",
         "why": "Needs intraday bars across the whole market, which this app does not store.",
@@ -72,6 +73,35 @@ PRESETS: dict[str, dict] = {
         "why": "Requires the first 15 minutes of the session, which we do not store.",
         "clause": (f"( {NIFTY500} ( [0] 15 minute close > [-1] 15 minute high "
                    f"and [0] 15 minute volume > [-1] 15 minute volume ) )"),
+    },
+    "intraday_reversal": {
+        "label": "Intraday reversal off the low",
+        "why": "Compares the session's own low to where it is now — an intraday shape.",
+        "clause": (f"( {NIFTY500} ( [0] 15 minute close > [0] 15 minute open "
+                   f"and [-2] 15 minute close < [-2] 15 minute open "
+                   f"and [0] 15 minute rsi( 14 ) > 50 ) )"),
+    },
+
+    # ── whole-market scans: genuinely additive because our own universe stops at the
+    #    Nifty 500, and most volume surprises happen outside it ──
+    "all_market_gainers": {
+        "label": "Whole-market gainers (beyond Nifty 500)",
+        "why": "Our universe is the Nifty 500; this reaches the ~1,800 names outside it.",
+        "clause": ("( {cash} ( latest close > 1 day ago close * 1.05 "
+                   "and latest volume > 200000 and latest close > 30 ) )"),
+    },
+    "all_market_volume_breakout": {
+        "label": "Whole-market volume breakout",
+        "why": "Same reach beyond our universe, filtered to real participation.",
+        "clause": ("( {cash} ( latest volume > 3 * latest sma( latest volume , 20 ) "
+                   "and latest close > latest max( 20 , latest high ) * 0.99 "
+                   "and latest close > 30 ) )"),
+    },
+    "all_market_52w_high": {
+        "label": "Whole-market 52-week highs",
+        "why": "Catches names at new highs that never enter a Nifty index.",
+        "clause": ("( {cash} ( latest high >= latest max( 252 , latest high ) "
+                   "and latest volume > 100000 and latest close > 30 ) )"),
     },
 }
 

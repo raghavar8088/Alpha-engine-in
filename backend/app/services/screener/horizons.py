@@ -326,6 +326,44 @@ def last_swing_low(bars: list[Bar], left: int = 3, right: int = 3) -> float | No
     return None
 
 
+def swing_highs(bars: list[Bar], left: int = 3, right: int = 3) -> list[float]:
+    """Every confirmed swing high, oldest first. Same confirmation rule as the low finder:
+    the last `right` bars can never qualify, because a high is only a swing high once price
+    has turned away from it."""
+    out: list[float] = []
+    n = len(bars)
+    for i in range(left, n - right):
+        high = bars[i].high
+        if all(bars[j].high <= high for j in range(i - left, i)) and \
+           all(bars[j].high <= high for j in range(i + 1, i + right + 1)):
+            out.append(high)
+    return out
+
+
+def nearest_resistance_above(bars: list[Bar], price: float) -> float | None:
+    """The lowest confirmed swing high still above `price` — where the stock last turned
+    back, and therefore the first level that has to give way. Returns None when price is
+    above every prior swing high, which is the honest answer for a stock at new highs:
+    there is no overhead level, so a target has to come from somewhere else."""
+    above = [h for h in swing_highs(bars) if h > price]
+    return min(above) if above else None
+
+
+def window_volume(bars: list[Bar], sessions: int) -> tuple[float | None, float | None]:
+    """(volume over the last `sessions`, average volume over the `sessions` before that).
+
+    The comparison window sits strictly BEFORE the measured one so a volume surge is never
+    compared against a baseline it is itself inflating.
+    """
+    if len(bars) < sessions * 2:
+        return None, None
+    recent = bars[-sessions:]
+    prior = bars[-sessions * 2:-sessions]
+    cur = sum(b.volume for b in recent)
+    base = sum(b.volume for b in prior)
+    return cur, base
+
+
 def donchian_high(bars: list[Bar], window: int) -> float | None:
     """Highest high over the `window` sessions BEFORE the last bar."""
     if len(bars) < window + 1:

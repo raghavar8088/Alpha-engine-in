@@ -114,12 +114,18 @@ async def universe_snapshot(index: str = DEFAULT_INDEX, fresh: bool = False) -> 
             f"no constituents stored for {index}. The universe seed runs on startup and "
             f"weekly — POST /api/stocks-range/refresh to force it.")
 
+    from app.services.screener import bhavcopy
+
     symbols = [d["symbol"] for d in docs]
-    bars_by_sym, quotes, funds, highs = await asyncio.gather(
+    bars_by_sym, quotes, funds, highs, delivery = await asyncio.gather(
         H.load_daily_bars(symbols + [BENCHMARK_SYMBOL], fresh=fresh),
         _live_quotes(symbols),
         load_fundamentals(symbols),
         load_highs(symbols),
+        # Delivery % from the NSE end-of-day bhavcopy. Absent for every symbol when the
+        # archive has not been captured from this host — the column then reads n/a, and
+        # the delivery reason simply never fires.
+        bhavcopy.delivery_stats(),
     )
 
     # Benchmark returns, for relative strength. Absent benchmark bars mean RS columns are
@@ -184,7 +190,12 @@ async def universe_snapshot(index: str = DEFAULT_INDEX, fresh: bool = False) -> 
             "donchian_high_50": _r(H.donchian_high(bars, 50)),
             "base_low_20": _r(H.donchian_low(bars, 20)),
             "sessions": len(bars),
-            "delivery_pct": None,   # filled by nse_breadth when NSE is reachable
+            "delivery_pct": (delivery.get(sym) or {}).get("delivery_pct"),
+            "delivery_avg": (delivery.get(sym) or {}).get("delivery_avg"),
+            # The RATIO is what carries information: utilities always deliver 70% and
+            # operator-driven smallcaps always deliver 15%, so the absolute number mostly
+            # describes the sector's conventions rather than today's behaviour.
+            "delivery_ratio": (delivery.get(sym) or {}).get("delivery_ratio"),
             # The tail of the close series, kept so consistency can be measured per
             # horizon without re-reading the bar set. 130 sessions covers the deepest
             # horizon (126) plus the bar it measures from.
@@ -211,6 +222,7 @@ async def universe_snapshot(index: str = DEFAULT_INDEX, fresh: bool = False) -> 
                                     for r in rows}, h)
                      for h in H.HORIZON_ORDER},
         "quotes_live": bool(quotes),
+        "delivery_symbols": len(delivery),
         "computed_at": time.time(),
     }
     _snapshot[index] = (time.monotonic(), snap)

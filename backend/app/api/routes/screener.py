@@ -20,7 +20,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.api.deps import get_current_user
 from app.services.response_cache import cached as _cached
+from app.services.screener import bhavcopy as BC
 from app.services.screener import chartink as CK
+from app.services.screener import paper as PA
+from app.services.screener import volume as V
 from app.services.screener import engine as E
 from app.services.screener import horizons as H
 from app.services.screener import momentum as M
@@ -46,6 +49,12 @@ async def config(_current_user: dict = Depends(get_current_user)):
         "timeframes": [{"key": t, "label": P.TIMEFRAME_LABELS[t]} for t in P.TIMEFRAMES],
         "pattern_catalog": P.catalog(),
         "setup_kinds": E.SETUP_KINDS,
+        "volume_windows": [{"key": w, "label": V.WINDOW_LABELS[w], "sessions": V.WINDOWS[w]}
+                           for w in V.WINDOW_ORDER],
+        "volume_states": [{"key": k, "label": k.replace("_", " ").title(), "text": t}
+                          for k, t in V.STATES.items()],
+        "paper_families": [{"key": f, "label": PA.FAMILY_LABELS[f],
+                            "product": PA.FAMILY_PRODUCT[f]} for f in PA.FAMILIES],
         "chartink": CK.status(),
     }
 
@@ -213,3 +222,84 @@ async def refresh(
         return await E.refresh_all(index)
     except M.ScreenerError as exc:
         raise _guard(exc)
+
+
+# ── volume ──────────────────────────────────────────────────────────────────────
+
+
+@router.get("/volume")
+async def volume_board(
+    window: str = Query("1d", description="1d | 1w | 1m"),
+    index: str | None = Query(None),
+    state: str | None = Query(None, description="accumulation | distribution | weak_rally | selling_dried | churn"),
+    limit: int = Query(60, ge=1, le=400),
+    fresh: bool = Query(False),
+    _current_user: dict = Depends(get_current_user),
+):
+    """Volume gainers with the price-volume state, the reason, and a labelled next target."""
+    try:
+        return await _cached(f"scr:vol:{index}:{window}:{state}:{limit}",
+                             lambda: V.board(index, window, limit, state, fresh=fresh),
+                             ttl=60, fresh=fresh)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+
+@router.get("/delivery")
+async def delivery_status(_current_user: dict = Depends(get_current_user)):
+    """How much NSE bhavcopy delivery history is stored, and from when."""
+    return await BC.status()
+
+
+@router.post("/delivery/backfill")
+async def delivery_backfill(
+    days: int = Query(30, ge=1, le=120),
+    _current_user: dict = Depends(get_current_user),
+):
+    return await BC.backfill(days)
+
+
+# ── paper desk ──────────────────────────────────────────────────────────────────
+
+
+@router.get("/paper/summary")
+async def paper_summary(
+    fresh: bool = Query(False),
+    _current_user: dict = Depends(get_current_user),
+):
+    """Per-family leaderboard: which kind of Screener signal actually makes money."""
+    return await _cached("scr:paper:sum", PA.summary, ttl=30, fresh=fresh)
+
+
+@router.get("/paper/positions")
+async def paper_positions(
+    status: str = Query("OPEN", description="OPEN | CLOSED"),
+    family: str | None = Query(None),
+    limit: int = Query(200, ge=1, le=1000),
+    fresh: bool = Query(False),
+    _current_user: dict = Depends(get_current_user),
+):
+    return await _cached(f"scr:paper:pos:{status}:{family}:{limit}",
+                         lambda: PA.positions(status, family, limit), ttl=20, fresh=fresh)
+
+
+@router.post("/paper/run")
+async def paper_run(
+    index: str | None = Query(None),
+    _current_user: dict = Depends(get_current_user),
+):
+    """Trigger one manage-then-scan cycle by hand."""
+    return await PA.run_cycle(index)
+
+
+@router.post("/paper/reset")
+async def paper_reset(
+    confirm: bool = Query(False, description="must be true — this deletes the trade history"),
+    _current_user: dict = Depends(get_current_user),
+):
+    if not confirm:
+        raise HTTPException(
+            status_code=400,
+            detail="Refusing to wipe the paper desk without ?confirm=true. The trade log is "
+                   "the only record of which signals worked; deleting it is not undoable.")
+    return await PA.reset()
