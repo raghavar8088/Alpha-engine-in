@@ -7,8 +7,59 @@ This plan replaces it with a **⌘K instrument console**: ranked, typo-tolerant,
 what the app already knows, and honest about whether a stock is tradable *before* it enters
 the basket.
 
-Status: **plan only.** Every number below was measured on production on 2026-08-22, not
-assumed.
+Status: **BUILT AND DEPLOYED** (2026-08-22). All six phases shipped. The build report is
+immediately below; everything after it is the plan as written, with the measurements that
+motivated it.
+
+---
+
+## BUILD REPORT
+
+### Shipped
+
+| Phase | What | Where |
+|---|---|---|
+| 0 | `re.escape` on the shared search + the endpoint finally wired to the UI | `manual_positions.py` |
+| 1 | In-process index, alias map, ranking function | `services/instrument_search/{index,aliases,scoring}.py` |
+| 2 | Enrichment + the tradability verdict | `instrument_search/enrich.py` |
+| 3 | ⌘K palette, mounted once app-wide, zero-query "Trending now" | `components/CommandPalette.tsx` |
+| 4 | Every result says whether the desk would trade it, before you add | `enrich.tradability()` |
+| 5 | English → filter → deterministic execution | `instrument_search/nlq.py` |
+| — | API | `GET /api/search/{instruments,trending,resolve,stats}`, `POST /api/search/{natural,reindex}` |
+| — | Tests | `backend/tests/instrument_search/verify_{ranking,nlq}.py` — 60 assertions |
+
+### The same queries, re-probed on production after deploying
+
+| Query | Before | After |
+|---|---|---|
+| `reliance` | RPOWER, **RELIANCE**, RIIL | **RELIANCE**, RPOWER, RIIL |
+| `RELI` | RELIGARE, RPOWER, RELIABLE, **RELIANCE** | **RELIANCE**, RPOWER, RIIL |
+| `tata` | TCS, NPBET, TATAINVEST *(no Tata Motors)* | TATASTEEL, TATATECH, TATACONSUM, TATACAP, TATAPOWER |
+| `bank` | FEDERALBNK, PNB *(no HDFC/ICICI)* | BANKBARODA, BANKINDIA, AXISBANK, **HDFCBANK**, **ICICIBANK** |
+| `RELINCE` | *nothing* | **RELIANCE**, RPOWER, RIIL |
+| `(` `[` `a{100000}` `.*` | **500 OperationFailure** | handled, no error |
+
+Index warm on boot: **2,457 instruments, 39 aliases, screener snapshot 2026-08-21 (499 symbols)**.
+Natural language is **live on Groq** (`llama-3.3-70b-versatile`); Cerebras, DeepSeek, Mistral
+and XAI are configured as fallbacks.
+
+### Two things the build changed about the plan
+
+1. **Demotion became its own axis.** The plan scored illiquid and bar-less names down with
+   large negative numbers. That is wrong: a penalty big enough to demote reliably is big
+   enough to push the total below zero, and the result is then dropped. `balkrishna paper`
+   scored 476, took −300 for no bars and −250 for illiquidity, and returned **nothing** —
+   the exact silent failure this upgrade exists to remove, one layer down. Results now sort
+   on `(demotion, -score)`: blocked names fall below tradable ones and nothing is deleted
+   by arithmetic.
+2. **Alias validation caught a corporate action.** Three curated aliases were auto-dropped
+   at index build because their targets no longer exist. `TATAMOTORS` is gone — the company
+   demerged into **TMCV** ("Tata Motors Ltd.") and **TMPV** ("Tata Motors Passenger Vehicles
+   Ltd."), and typing "tata motors" already finds both through the name rules, ranked TMCV
+   first. LTIMindtree is absent from this master entirely. All three were removed rather
+   than repointed: hardcoding one side of a demerger would silently choose for you.
+
+Every number in the sections below was measured on production on 2026-08-22, not assumed.
 
 ---
 

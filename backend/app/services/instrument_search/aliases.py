@@ -133,7 +133,11 @@ CURATED: dict[str, str] = {
     "BAJAJ FINANCE": "BAJFINANCE",
     "BAJAJ FINSERV": "BAJAJFINSV",
     "BAJAJ AUTO": "BAJAJ-AUTO",
-    "TATA MOTORS": "TATAMOTORS",
+    # NOT "TATA MOTORS": that ticker no longer exists. The company demerged into TMCV
+    # ("Tata Motors Ltd.", which kept the parent name) and TMPV ("Tata Motors Passenger
+    # Vehicles Ltd."). Typing "tata motors" already finds BOTH through the name rules,
+    # ranked TMCV first — an alias would silently pick one side of a demerger for you.
+    # This was caught by the build-time validation rather than by anyone noticing.
     "TATA STEEL": "TATASTEEL",
     "TATA POWER": "TATAPOWER",
     "TATA CONSULTANCY": "TCS",
@@ -145,8 +149,10 @@ CURATED: dict[str, str] = {
     "ZOMATO": "ETERNAL",
     "ONE 97": "PAYTM",
     "ONE97": "PAYTM",
-    "MINDTREE": "LTIM",
-    "LTI": "LTIM",
+    # LTIMindtree is absent from this instrument master entirely, so MINDTREE -> LTIM and
+    # LTI -> LTIM were dropped at validation. Left out rather than left in: an alias whose
+    # target does not exist turns a search that would have fuzzy-matched something into
+    # one that confidently finds nothing.
 }
 
 
