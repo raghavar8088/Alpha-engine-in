@@ -19,6 +19,7 @@ import EmptyState from "../../components/EmptyState";
 import StatusPill from "../../components/StatusPill";
 import Skeleton from "../../components/Skeleton";
 import RankedBars, { RankedBarRow } from "../../components/charts/RankedBars";
+import SectorSpread from "../../components/charts/SectorSpread";
 import {
   refreshing,
   fetchScreenerConfig, fetchScreenerSummary, fetchScreenerMomentum,
@@ -186,10 +187,17 @@ export default function StockScreenerPage() {
     catch (e) { setError(e instanceof Error ? e.message : String(e)); setDetailFor(null); }
   };
 
-  const openSector = async (sector: string) => {
+  // Takes the horizon explicitly and defaults to the SECTORS tab's own selector, not the
+  // Momentum tab's. Reading `horizon` here meant clicking a sector on the "This Month"
+  // chart silently opened its "Today" drill-down — the numbers in the panel then had
+  // nothing to do with the bar that was clicked.
+  const openSector = async (sector: string, forHorizon?: string) => {
     setSectorDetail(null);
-    try { setSectorDetail(await fetchScreenerSectorDetail(sector, horizon, index)); }
-    catch (e) { setError(e instanceof Error ? e.message : String(e)); }
+    try {
+      setSectorDetail(await fetchScreenerSectorDetail(sector, forHorizon ?? sectorHorizon, index));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
   };
 
   const rows = useMemo(() => {
@@ -416,6 +424,32 @@ export default function StockScreenerPage() {
             </div>
           </GlassPanel>
 
+          <GlassPanel title="Best and worst name in every sector"
+            note="widest spread first">
+            {!sectors ? <TableSkeleton /> : (
+              <SectorSpread
+                onSelectSector={(sec) => openSector(sec)}
+                onSelectSymbol={(sym) => openDetail(sym)}
+                rows={(sectors.sectors ?? []).map((x) => ({
+                  sector: x.sector,
+                  count: x.count,
+                  thin: x.thin,
+                  leader: x.leaders?.[sectorHorizon] ?? null,
+                  laggard: x.laggards?.[sectorHorizon] ?? null,
+                  sectorReturn: x.returns[sectorHorizon] ?? null,
+                }))}
+              />
+            )}
+            <div className="note small">
+              Each row spans that sector&rsquo;s worst name to its best over{" "}
+              {(cfg?.horizons.find((h) => h.key === sectorHorizon)?.label ?? "").toLowerCase()},
+              on one shared scale. A <b>narrow</b> span means the sector really is moving
+              together and can be traded as a sector; a <b>wide</b> one means the average is
+              two different stories filed under one label. Click a sector to drill in, or a
+              dot to open that stock.
+            </div>
+          </GlassPanel>
+
           <GlassPanel title="Sector rotation">
             {!sectors ? <TableSkeleton /> : (
               <div className="tablewrap">
@@ -424,7 +458,7 @@ export default function StockScreenerPage() {
                     <tr>
                       <th className="l">Sector</th><th>Names</th>
                       <th>1D</th><th>1W</th><th>1M</th><th>6M</th>
-                      <th title="Share of the sector's names that are up over this horizon">Breadth (1M)</th>
+                      <th title="Share of the sector's names that are up over the selected horizon">Breadth</th>
                       <th title="Rank over 6 months minus rank over 1 week — positive means it is climbing">Rank Δ</th>
                       <th>Rotation</th>
                       <th className="l">Leader</th><th className="l">Laggard</th>
@@ -433,19 +467,19 @@ export default function StockScreenerPage() {
                   <tbody>
                     {sectors.sectors.map((s) => (
                       <tr key={s.sector} className="clickable"
-                        onClick={() => { setHorizon(horizon); openSector(s.sector); }}>
-                        <td className="l"><b>{s.sector}</b>{s.thin && <span className="thin"> thin</span>}</td>
+                        onClick={() => openSector(s.sector)}>
+                        <td className="l"><b className="seclink">{s.sector}</b>{s.thin && <span className="thin"> thin</span>}</td>
                         <td className="dim">{s.count}</td>
                         <td className={cls(s.returns["1d"])}>{pct(s.returns["1d"], 1)}</td>
                         <td className={cls(s.returns["1w"])}>{pct(s.returns["1w"], 1)}</td>
                         <td className={cls(s.returns["1m"])}><b>{pct(s.returns["1m"], 1)}</b></td>
                         <td className={cls(s.returns["6m"])}>{pct(s.returns["6m"], 1)}</td>
-                        <td>{s.breadth["1m"] === null ? "—" : `${s.breadth["1m"]!.toFixed(0)}%`}</td>
+                        <td>{s.breadth[sectorHorizon] == null ? "—" : `${s.breadth[sectorHorizon]!.toFixed(0)}%`}</td>
                         <td className={cls(s.rank_change)}>
                           {s.rank_change === null ? "—" : (s.rank_change > 0 ? `▲ ${s.rank_change}` : s.rank_change < 0 ? `▼ ${Math.abs(s.rank_change)}` : "—")}</td>
                         <td><StatusPill label={s.rotation} tone={ROTATION_TONE[s.rotation] ?? "muted"} /></td>
-                        <td className="l dim">{s.leader?.symbol} {pct(s.leader?.return_pct, 1)}</td>
-                        <td className="l dim">{s.laggard?.symbol} {pct(s.laggard?.return_pct, 1)}</td>
+                        <td className="l dim">{s.leaders?.[sectorHorizon]?.symbol} {pct(s.leaders?.[sectorHorizon]?.return_pct, 1)}</td>
+                        <td className="l dim">{s.laggards?.[sectorHorizon]?.symbol} {pct(s.laggards?.[sectorHorizon]?.return_pct, 1)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -463,7 +497,7 @@ export default function StockScreenerPage() {
               <div className="seg small">
                 {(cfg?.horizons ?? []).map((h) => (
                   <button key={h.key} className={sectorDetail.horizon === h.key ? "segb active" : "segb"}
-                    onClick={async () => setSectorDetail(await fetchScreenerSectorDetail(sectorDetail.sector, h.key, index))}>
+                    onClick={() => { setSectorHorizon(h.key); openSector(sectorDetail.sector, h.key); }}>
                     {h.label}</button>
                 ))}
               </div>
@@ -1124,6 +1158,8 @@ Click for the full reason stack`,
         .loss { color: var(--loss); }
         .warn { color: var(--warn); }
         .thin { font-size: 10px; color: var(--warn); font-weight: 600; }
+        .seclink { color: var(--purple); }
+        tr:hover .seclink { text-decoration: underline; }
 
         .chips { display: flex; gap: 4px; flex-wrap: wrap; }
         .chip { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; white-space: nowrap; }

@@ -82,7 +82,7 @@ export default function RankedBars({
             </div>
 
             <div className="track">
-              <div className="zero" style={{ left: `${zeroPct}%` }} />
+              <div className={`zero${hasNegative ? " visible" : ""}`} style={{ left: `${zeroPct}%` }} />
               <div
                 className={`bar ${up ? "up" : "down"}`}
                 style={
@@ -91,14 +91,14 @@ export default function RankedBars({
                     : { right: `${100 - zeroPct}%`, width: `${width}%` }
                 }
               />
-              <span
-                className={`val ${up ? "up" : "down"}`}
-                style={up ? { left: `calc(${zeroPct}% + ${width}% + 6px)` }
-                          : { right: `calc(${100 - zeroPct}% + ${width}% + 6px)` }}
-              >
-                {fmt(v)}
-              </span>
             </div>
+
+            {/* The value gets its own fixed column rather than being pinned to the bar's
+                end. Anchored to the bar it overflowed the track on the longest rows — the
+                top bar's label was clipped away entirely and the ones below it overprinted
+                the rotation badge. A column also lets the numbers line up on the decimal,
+                which is what makes a ranked chart scannable. */}
+            <span className={`val ${up ? "up" : "down"}`}>{fmt(v)}</span>
 
             {r.badge && <span className={`badge ${r.badge.tone ?? "muted"}`}>{r.badge.text}</span>}
           </div>
@@ -147,14 +147,17 @@ export default function RankedBars({
           height: 20px;
           min-width: 120px;
         }
-        /* Recessive axis — present, never competing with the data */
+        /* Recessive axis — present, never competing with the data. It only earns a
+           visible weight when there ARE negatives; on an all-positive chart the bars
+           already start at the left edge and a line there is noise. */
         .zero {
           position: absolute;
           top: 0;
           bottom: 0;
           width: 1px;
-          background: var(--panel-border);
+          background: transparent;
         }
+        .zero.visible { background: var(--panel-border-hover); }
         .bar {
           position: absolute;
           top: 4px;
@@ -173,26 +176,29 @@ export default function RankedBars({
           border-radius: 4px 0 0 4px;
         }
         .val {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          font-size: 11px;
+          flex-shrink: 0;
+          width: 68px;
+          text-align: right;
+          font-size: 11.5px;
           font-weight: 600;
           font-variant-numeric: tabular-nums;
           white-space: nowrap;
-          /* Values wear text tokens tinted to the sign, never the raw mark colour on
-             a light ground where it would fail contrast. */
         }
         .val.up { color: var(--gain); }
         .val.down { color: var(--loss); }
 
+        /* Fixed width so the badges form a clean column instead of a ragged right edge
+           that tracks the length of each word. */
         .badge {
           flex-shrink: 0;
+          width: 82px;
+          text-align: center;
           font-size: 10px;
           font-weight: 600;
           padding: 2px 7px;
           border-radius: 20px;
           white-space: nowrap;
+          text-transform: capitalize;
         }
         .badge.gain { background: var(--gain-dim); color: var(--gain); }
         .badge.loss { background: var(--loss-dim); color: var(--loss); }

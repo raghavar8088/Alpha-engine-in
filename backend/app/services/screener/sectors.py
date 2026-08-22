@@ -115,15 +115,20 @@ def all_horizons(snapshot: dict) -> dict:
             m = merged.setdefault(s["sector"], {
                 "sector": s["sector"], "count": s["count"], "thin": s["thin"],
                 "returns": {}, "breadth": {}, "ranks": {},
+                "leaders": {}, "laggards": {}, "rs": {},
             })
             m["returns"][h] = s["return_pct"]
             m["breadth"][h] = s["breadth_pct"]
             m["ranks"][h] = s["rank"]
+            # PER HORIZON, not just 1d. These were previously computed only for the daily
+            # board and reused across every column, so the table showed a stock's ONE-DAY
+            # leadership next to its sector's MONTHLY return — two different measurements
+            # sitting in the same row implying they were about the same window.
+            m["leaders"][h] = s["leader"]
+            m["laggards"][h] = s["laggard"]
+            m["rs"][h] = s["rs_index"]
             if h == "1d":
-                m["leader"] = s["leader"]
-                m["laggard"] = s["laggard"]
                 m["volume_x"] = s["volume_x"]
-                m["rs_index"] = s["rs_index"]
 
     rows = list(merged.values())
     for r in rows:

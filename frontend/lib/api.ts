@@ -3994,10 +3994,12 @@ export interface ScreenerSectorRow {
   ranks: Record<string, number>;
   rank_change: number | null;
   rotation: string;
-  leader?: { symbol: string; return_pct: number };
-  laggard?: { symbol: string; return_pct: number };
+  // Keyed by horizon. These used to be a single pair computed on the daily board and
+  // reused across every column, which put a one-day leader next to a monthly return.
+  leaders: Record<string, { symbol: string; return_pct: number }>;
+  laggards: Record<string, { symbol: string; return_pct: number }>;
+  rs: Record<string, number | null>;
   volume_x?: number | null;
-  rs_index?: number | null;
 }
 
 export interface ScreenerSectorBoard {
