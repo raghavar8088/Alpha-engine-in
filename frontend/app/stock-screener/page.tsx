@@ -11,7 +11,7 @@
  *   Sources   which feeds answered — so a data outage never reads as a quiet market
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PageHeader from "../../components/PageHeader";
 import GlassPanel from "../../components/GlassPanel";
 import ErrorBanner from "../../components/ErrorBanner";
@@ -110,6 +110,11 @@ export default function StockScreenerPage() {
   const [paperView, setPaperView] = useState<"OPEN" | "CLOSED">("OPEN");
   const [paperFamily, setPaperFamily] = useState("");
   const [sectorHorizon, setSectorHorizon] = useState("1m");
+  const sectorPanelRef = useRef<HTMLDivElement | null>(null);
+  // Which sector we have already scrolled to. Without this the panel would yank the page
+  // back to itself every time the horizon buttons inside it re-fetch, which is jarring
+  // when you are already looking at it.
+  const scrolledFor = useRef<string | null>(null);
 
   const [filter, setFilter] = useState("");
   const [sectorFilter, setSectorFilter] = useState("");
@@ -168,6 +173,23 @@ export default function StockScreenerPage() {
     const id = setInterval(() => { load(); }, REFRESH_MS);
     return () => clearInterval(id);
   }, [load]);
+
+  // Bring the drill-down into view when a NEW sector is opened. The panel renders below a
+  // long table, so without this a click appeared to do nothing at all.
+  useEffect(() => {
+    if (!sectorDetail) {
+      scrolledFor.current = null;
+      return;
+    }
+    if (scrolledFor.current === sectorDetail.sector) return;
+    scrolledFor.current = sectorDetail.sector;
+    const reduce = typeof window !== "undefined"
+      && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    sectorPanelRef.current?.scrollIntoView({
+      behavior: reduce ? "auto" : "smooth",
+      block: "start",
+    });
+  }, [sectorDetail]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -478,8 +500,33 @@ export default function StockScreenerPage() {
                         <td className={cls(s.rank_change)}>
                           {s.rank_change === null ? "—" : (s.rank_change > 0 ? `▲ ${s.rank_change}` : s.rank_change < 0 ? `▼ ${Math.abs(s.rank_change)}` : "—")}</td>
                         <td><StatusPill label={s.rotation} tone={ROTATION_TONE[s.rotation] ?? "muted"} /></td>
-                        <td className="l dim">{s.leaders?.[sectorHorizon]?.symbol} {pct(s.leaders?.[sectorHorizon]?.return_pct, 1)}</td>
-                        <td className="l dim">{s.laggards?.[sectorHorizon]?.symbol} {pct(s.laggards?.[sectorHorizon]?.return_pct, 1)}</td>
+                        <td className="l dim">
+                          {/* stopPropagation: the row itself opens the SECTOR, so without it
+                              a click on the stock would open both, and the sector panel would
+                              scroll the drawer out from under you. */}
+                          <span className="symlink"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const sym = s.leaders?.[sectorHorizon]?.symbol;
+                              if (sym) openDetail(sym);
+                            }}
+                            title={`Open ${s.leaders?.[sectorHorizon]?.symbol}`}>
+                            {s.leaders?.[sectorHorizon]?.symbol}
+                          </span>{" "}
+                          <span className="gain">{pct(s.leaders?.[sectorHorizon]?.return_pct, 1)}</span>
+                        </td>
+                        <td className="l dim">
+                          <span className="symlink"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const sym = s.laggards?.[sectorHorizon]?.symbol;
+                              if (sym) openDetail(sym);
+                            }}
+                            title={`Open ${s.laggards?.[sectorHorizon]?.symbol}`}>
+                            {s.laggards?.[sectorHorizon]?.symbol}
+                          </span>{" "}
+                          <span className="loss">{pct(s.laggards?.[sectorHorizon]?.return_pct, 1)}</span>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -489,8 +536,21 @@ export default function StockScreenerPage() {
           </GlassPanel>
 
           {sectorDetail && (
-            <GlassPanel title={`${sectorDetail.sector} — ${sectorDetail.horizon_label}`}
-              note={`${sectorDetail.shape} move`}>
+            <div ref={sectorPanelRef} className="sector-panel">
+            <GlassPanel title={`${sectorDetail.sector} — ${sectorDetail.horizon_label}`}>
+              <button className="panel-close" onClick={() => setSectorDetail(null)}
+                title="Close this sector">✕</button>
+              <div className="shaperow">
+                <StatusPill
+                  label={`${sectorDetail.shape} move`}
+                  tone={sectorDetail.shape === "broad" ? "gain"
+                      : sectorDetail.shape === "narrow" ? "warn"
+                      : sectorDetail.shape === "thin" ? "muted" : "accent"} />
+                <span className="shapemeta">
+                  {sectorDetail.breadth_pct}% of names up · top two are{" "}
+                  {sectorDetail.top2_share_pct}% of the move
+                </span>
+              </div>
               <div className="drivers">
                 {sectorDetail.drivers.map((d, i) => <div key={i} className="driver">{d}</div>)}
               </div>
@@ -541,6 +601,7 @@ Click for the full reason stack`,
               </div>
               <div className="note small">{sectorDetail.note}</div>
             </GlassPanel>
+            </div>
           )}
         </>
       )}
@@ -1160,6 +1221,15 @@ Click for the full reason stack`,
         .thin { font-size: 10px; color: var(--warn); font-weight: 600; }
         .seclink { color: var(--purple); }
         tr:hover .seclink { text-decoration: underline; }
+        .symlink { color: var(--purple); font-weight: 600; cursor: pointer; }
+        .symlink:hover { text-decoration: underline; }
+        /* scroll-margin keeps the panel's heading clear of the viewport edge when the
+           click scrolls it into view. */
+        .sector-panel { position: relative; scroll-margin-top: 16px; }
+        .shaperow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+        .shapemeta { font-size: 11.5px; color: var(--text-muted); }
+        .panel-close { position: absolute; top: 14px; right: 16px; border: 0; background: var(--canvas-soft); width: 26px; height: 26px; border-radius: 7px; cursor: pointer; color: var(--text-muted); font-size: 12px; z-index: 2; }
+        .panel-close:hover { background: var(--panel-border); color: var(--text); }
 
         .chips { display: flex; gap: 4px; flex-wrap: wrap; }
         .chip { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; white-space: nowrap; }
