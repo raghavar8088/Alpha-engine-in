@@ -4693,3 +4693,180 @@ export async function searchStats(): Promise<SearchStats> {
 export async function reindexSearch(): Promise<{ rebuilt: boolean; instruments: number }> {
   return apiFetch("/api/search/reindex", { method: "POST" });
 }
+
+// ── Paper Broker: Stock Paper Trading + F&O Paper Trading ─────────────────────────
+// One account, two segments. Real Angel One prices, paper money, no order ever reaches
+// a broker.
+
+export interface PTContract {
+  symbol: string; name: string; security_id: string | null;
+  angel_token: string | null; exchange: string; exchange_segment: string | null;
+  asset_class: string | null; kind: "EQUITY" | "OPTION" | "FUTURE";
+  lot_size: number; tick_size: number;
+  expiry: string | null; strike: number | null;
+  option_type: string | null; underlying: string | null;
+}
+
+export interface PTFunds {
+  account_id: string; name: string;
+  opening_balance: number; realised_pnl: number; charges_paid: number;
+  blocked_margin: number; available_margin: number;
+  unrealised_pnl: number; equity: number; net_pnl: number; roi_pct: number;
+}
+
+export interface PTOrder {
+  order_id: string; account_id: string; segment: string;
+  contract: PTContract; symbol: string; token: string;
+  transaction_type: "BUY" | "SELL"; quantity: number; filled_quantity: number;
+  order_type: string; product: string; validity: string;
+  price: number | null; trigger_price: number | null;
+  status: string; status_message: string | null;
+  fill_price?: number; placed_at: string; filled_at?: string;
+  margin_blocked: number;
+}
+
+export interface PTPosition {
+  position_id: string; segment: string; symbol: string; token: string;
+  contract: PTContract; kind: string; underlying: string | null;
+  option_type: string | null; strike: number | null; expiry: string | null;
+  product: string; quantity: number; avg_price: number; ltp: number | null;
+  margin_blocked: number; realised_pnl: number; unrealised_pnl: number;
+  pnl_pct: number | null; side: "LONG" | "SHORT"; value: number;
+  opened_on: string;
+}
+
+export interface PTTrade {
+  trade_id: string; order_id: string; segment: string; symbol: string;
+  transaction_type: string; quantity: number; price: number; product: string;
+  order_type: string; value: number; realised_pnl: number; charges: number;
+  traded_at: string; traded_on: string;
+}
+
+export interface PTHolding {
+  symbol: string; token: string; contract: PTContract;
+  quantity: number; avg_price: number; ltp: number | null;
+  invested: number; current_value: number | null;
+  pnl: number | null; pnl_pct: number | null; settled_on: string;
+}
+
+export interface PTLedgerEntry {
+  entry_id: string; kind: string; amount: number; note: string;
+  ref: string | null; date: string; ts: string;
+}
+
+export interface PTConfig {
+  segments: { key: string; label: string; products: string[] }[];
+  order_types: string[];
+  validities: string[];
+  product_help: Record<string, string>;
+  order_type_help: Record<string, string>;
+  squareoff: Record<string, string>;
+  market_open: boolean;
+  engine: Record<string, unknown>;
+  fills_note: string;
+}
+
+export interface PTDashboard {
+  funds: PTFunds;
+  positions: { count: number; unrealised_pnl: number; day_realised: number };
+  holdings: { count: number; pnl: number | null; invested: number | null; value: number | null };
+  open_orders: number;
+  engine: Record<string, unknown>;
+}
+
+export interface PTMargin {
+  margin: number; method: string; basis: string;
+  span: number | null; exposure: number | null; iv?: number | null;
+  price: number; contract: PTContract;
+  available_margin: number; sufficient: boolean;
+}
+
+export interface PTChainLeg {
+  contract: PTContract; ltp: number | null; oi: number | null;
+  volume: number | null; close: number | null; change_pct: number | null;
+}
+
+export interface PTChain {
+  symbol: string; expiry: string; atm_strike: number | null; lot_size: number;
+  count: number; priced: number;
+  strikes: { strike: number; CE: PTChainLeg | null; PE: PTChainLeg | null }[];
+}
+
+export interface PTContractRef {
+  segment: string; symbol: string;
+  expiry?: string | null; strike?: number | null;
+  option_type?: string | null; instrument_kind?: string;
+}
+
+export async function fetchPTConfig(): Promise<PTConfig> {
+  return apiFetch("/api/paper-trading/config");
+}
+export async function fetchPTAccounts(): Promise<{ accounts: { account_id: string; name: string; opening_balance: number }[] }> {
+  return apiFetch("/api/paper-trading/accounts");
+}
+export async function createPTAccount(name: string, capital?: number) {
+  return apiFetch("/api/paper-trading/accounts", {
+    method: "POST", body: JSON.stringify({ name, capital }),
+  });
+}
+export async function resetPTAccount(accountId: string) {
+  return apiFetch(`/api/paper-trading/accounts/${accountId}/reset?confirm=true`, { method: "POST" });
+}
+export async function fetchPTDashboard(accountId?: string, segment?: string): Promise<PTDashboard> {
+  return apiFetch("/api/paper-trading/dashboard" + screenerQs({ account_id: accountId, segment }));
+}
+export async function searchPTScrips(q: string, segment: string): Promise<{ results: PTContract[] }> {
+  return apiFetch("/api/paper-trading/search" + screenerQs({ q, segment }));
+}
+export async function fetchPTMargin(body: PTContractRef & {
+  account_id?: string; transaction_type: string; quantity: number; product: string; price?: number | null;
+}): Promise<PTMargin> {
+  return apiFetch("/api/paper-trading/margin", { method: "POST", body: JSON.stringify(body) });
+}
+export async function placePTOrder(body: PTContractRef & {
+  account_id?: string; transaction_type: string; quantity: number;
+  order_type: string; product: string; validity: string;
+  price?: number | null; trigger_price?: number | null;
+}): Promise<PTOrder> {
+  return apiFetch("/api/paper-trading/orders", { method: "POST", body: JSON.stringify(body) });
+}
+export async function modifyPTOrder(orderId: string, body: {
+  account_id?: string; quantity?: number; price?: number; trigger_price?: number; order_type?: string;
+}): Promise<PTOrder> {
+  return apiFetch(`/api/paper-trading/orders/${orderId}`, { method: "PUT", body: JSON.stringify(body) });
+}
+export async function cancelPTOrder(orderId: string, accountId?: string) {
+  return apiFetch(`/api/paper-trading/orders/${orderId}` + screenerQs({ account_id: accountId }),
+    { method: "DELETE" });
+}
+export async function fetchPTOrders(accountId?: string, segment?: string, status?: string): Promise<{ count: number; rows: PTOrder[]; open: number }> {
+  return apiFetch("/api/paper-trading/orders" + screenerQs({ account_id: accountId, segment, status }));
+}
+export async function fetchPTTrades(accountId?: string, segment?: string): Promise<{ count: number; rows: PTTrade[]; realised_pnl: number; charges: number }> {
+  return apiFetch("/api/paper-trading/trades" + screenerQs({ account_id: accountId, segment }));
+}
+export async function fetchPTPositions(accountId?: string, segment?: string): Promise<{ count: number; rows: PTPosition[]; unrealised_pnl: number; day_realised: number }> {
+  return apiFetch("/api/paper-trading/positions" + screenerQs({ account_id: accountId, segment }));
+}
+export async function exitPTPosition(positionId: string, accountId?: string, quantity?: number) {
+  return apiFetch(`/api/paper-trading/positions/${positionId}/exit` +
+    screenerQs({ account_id: accountId, quantity }), { method: "POST" });
+}
+export async function fetchPTHoldings(accountId?: string): Promise<{ count: number; rows: PTHolding[]; invested: number; current_value: number; pnl: number }> {
+  return apiFetch("/api/paper-trading/holdings" + screenerQs({ account_id: accountId }));
+}
+export async function fetchPTLedger(accountId?: string): Promise<{ count: number; rows: PTLedgerEntry[] }> {
+  return apiFetch("/api/paper-trading/ledger" + screenerQs({ account_id: accountId }));
+}
+export async function fetchPTUnderlyings(): Promise<{ underlyings: { symbol: string; lot_size: number; has_options: boolean; has_futures: boolean }[] }> {
+  return apiFetch("/api/paper-trading/fno/underlyings");
+}
+export async function fetchPTExpiries(symbol: string, kind = "OPTION"): Promise<{ expiries: string[] }> {
+  return apiFetch("/api/paper-trading/fno/expiries" + screenerQs({ symbol, kind }));
+}
+export async function fetchPTChain(symbol: string, expiry: string): Promise<PTChain> {
+  return apiFetch("/api/paper-trading/fno/chain" + screenerQs({ symbol, expiry }));
+}
+export async function runPTTick(): Promise<Record<string, number>> {
+  return apiFetch("/api/paper-trading/tick", { method: "POST" });
+}

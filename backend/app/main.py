@@ -33,6 +33,7 @@ from app.api.routes import (
     market_data,
     momentum,
     options,
+    paper_trading,
     portfolio,
     prelive,
     prelive_selling,
@@ -160,6 +161,12 @@ DESK_INDEXES: dict[str, list] = {
     "screener_breadth": [[("date", -1)]],
     "screener_bhavcopy": [[("date", -1)]],
     "screener_paper_positions": [[("family", 1), ("status", 1)], [("symbol", 1), ("status", 1)]],
+    # Paper broker. Every read is scoped by account, and usually by segment or status too.
+    "pt_orders": [[("account_id", 1), ("status", 1)], [("account_id", 1), ("segment", 1)], [("placed_at", -1)]],
+    "pt_positions": [[("account_id", 1), ("status", 1)], [("account_id", 1), ("token", 1), ("product", 1), ("status", 1)]],
+    "pt_trades": [[("account_id", 1), ("traded_on", 1)], [("account_id", 1), ("segment", 1)]],
+    "pt_holdings": [[("account_id", 1), ("token", 1)]],
+    "pt_ledger": [[("account_id", 1), ("kind", 1)], [("ts", -1)]],
     "screener_paper_trades": [[("family", 1)], [("closed_on", 1)]],
 }
 
@@ -393,6 +400,24 @@ async def seed_screener_bhavcopy() -> None:
             await asyncio.sleep(12 * 3600)
 
     asyncio.create_task(_run())
+
+
+@app.on_event("startup")
+async def start_paper_broker() -> None:
+    """Stock Paper Trading + F&O Paper Trading. Ticks only while the market is open (plus a
+    short grace window so the square-off and expiry passes actually run), so it costs no
+    Angel quota overnight."""
+    from app.services.paper_broker.scheduler import TICK_SECONDS as PT_TICK
+    from app.services.paper_broker.scheduler import enabled as pt_enabled
+    from app.services.paper_broker.scheduler import paper_broker_loop
+
+    if pt_enabled():
+        asyncio.create_task(paper_broker_loop())
+        logger.info(
+            "Paper Broker enabled — Stock + F&O paper trading on live Angel One prices "
+            "(tick every %ss during market hours; NO orders reach the broker)", PT_TICK)
+    else:
+        logger.info("Paper Broker disabled (PT_ENABLED=0)")
 
 
 @app.on_event("startup")
@@ -657,6 +682,7 @@ app.include_router(pattern.router)
 app.include_router(stocks_range.router)
 app.include_router(bullish_stocks.router)
 app.include_router(screener.router)
+app.include_router(paper_trading.router)
 app.include_router(long_horizon.router)
 app.include_router(chart_data.router)
 app.include_router(telegram_signals.router)

@@ -267,3 +267,15 @@ screener_paper_positions_collection = db["screener_paper_positions"]
 screener_paper_trades_collection = db["screener_paper_trades"]
 screener_paper_equity_collection = db["screener_paper_equity"]
 screener_paper_state_collection = db["screener_paper_state"]
+# Stock Paper Trading + F&O Paper Trading — a paper BROKER (app.services.paper_broker), not
+# another position list. One account trades both segments out of one cash pool, exactly as a
+# real broking account does, so every doc carries `segment` rather than the two modules
+# owning separate wallets. The ledger is what makes the cash balance explainable; the trade
+# book is the only genuinely irreplaceable record here, which is why nothing below expires
+# except the engine's own scratch state.
+pt_accounts_collection = db["pt_accounts"]
+pt_orders_collection = db["pt_orders"]
+pt_trades_collection = db["pt_trades"]
+pt_positions_collection = db["pt_positions"]
+pt_holdings_collection = db["pt_holdings"]
+pt_ledger_collection = db["pt_ledger"]

@@ -49,6 +49,34 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         icon: <path d="M13 2L4.5 13H11l-1 9 8.5-11H12l1-9z" />,
       },
       {
+        // Directly under Live Trading and deliberately adjacent to it: same terminal shape,
+        // same Angel One prices, fake money. A banknote mark rather than the real desk's
+        // lightning bolt, so the two are never confused at a glance — that confusion is the
+        // only genuinely dangerous mistake on this sidebar.
+        href: "/stock-paper-trading",
+        label: "Stock Paper Trading",
+        icon: (
+          <>
+            <rect x="2.5" y="6" width="19" height="12" rx="2" />
+            <circle cx="12" cy="12" r="2.6" />
+            <path d="M6 12h.01M18 12h.01" />
+          </>
+        ),
+      },
+      {
+        // Nested under Stock Paper Trading: the same paper broker, F&O segment.
+        href: "/stock-paper-trading/fno",
+        label: "F&O Paper Trading",
+        icon: (
+          <>
+            <rect x="2.5" y="6" width="19" height="12" rx="2" />
+            <path d="M7 15V9h4" />
+            <path d="M7 12h3" />
+            <path d="M14 9l4 6M18 9l-4 6" />
+          </>
+        ),
+      },
+      {
         href: "/chart",
         label: "Chart",
         icon: (

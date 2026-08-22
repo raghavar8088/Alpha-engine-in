@@ -1,0 +1,340 @@
+"""Paper Broker API — Stock Paper Trading and F&O Paper Trading.
+
+One router, one engine, two segments. `?segment=EQUITY` is the Stock module and
+`?segment=FNO` is the F&O module; everything else — funds, order book, trade book, ledger —
+is shared, because they are two screens onto one broking account.
+
+  GET  /api/paper-trading/config              order types, products, validities, cutoffs
+  GET  /api/paper-trading/accounts            list / create / rename / reset
+  GET  /api/paper-trading/dashboard           funds + positions + holdings + open orders
+  GET  /api/paper-trading/search              scrip search for the order ticket
+  GET  /api/paper-trading/quote               live price for one contract
+  POST /api/paper-trading/margin              what an order would block, before placing it
+  POST /api/paper-trading/orders              place
+  PUT  /api/paper-trading/orders/{id}         modify a resting order
+  DELETE /api/paper-trading/orders/{id}       cancel
+  GET  /api/paper-trading/orders              order book
+  GET  /api/paper-trading/trades              trade book
+  GET  /api/paper-trading/positions           positions (segment-filtered)
+  POST /api/paper-trading/positions/{id}/exit square off
+  GET  /api/paper-trading/holdings            settled delivery stock
+  GET  /api/paper-trading/ledger              every cash movement
+  POST /api/paper-trading/tick                run one engine pass by hand
+
+  F&O contract discovery:
+  GET  /api/paper-trading/fno/underlyings
+  GET  /api/paper-trading/fno/expiries
+  GET  /api/paper-trading/fno/chain
+"""
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
+
+from app.api.deps import get_current_user
+from app.services.paper_broker import accounts, engine, market, orders
+from app.services.paper_broker.core import (
+    MIS_LEVERAGE,
+    MIS_SQUAREOFF_EQUITY,
+    MIS_SQUAREOFF_FNO,
+    ORDER_TYPES,
+    PRODUCTS_EQUITY,
+    PRODUCTS_FNO,
+    SEGMENT_EQUITY,
+    SEGMENT_FNO,
+    VALIDITIES,
+    OrderError,
+    market_is_open,
+)
+from app.services.response_cache import cached as _cached
+
+router = APIRouter(prefix="/api/paper-trading", tags=["paper-trading"])
+
+
+def _guard(exc: OrderError) -> HTTPException:
+    return HTTPException(status_code=422, detail=exc.detail)
+
+
+async def _account(account_id: str | None) -> str:
+    if account_id:
+        return account_id
+    return (await accounts.ensure_default())["account_id"]
+
+
+# ── config + accounts ───────────────────────────────────────────────────────────
+
+
+@router.get("/config")
+async def config(_u: dict = Depends(get_current_user)):
+    return {
+        "segments": [
+            {"key": SEGMENT_EQUITY, "label": "Stocks", "products": list(PRODUCTS_EQUITY)},
+            {"key": SEGMENT_FNO, "label": "F&O", "products": list(PRODUCTS_FNO)},
+        ],
+        "order_types": list(ORDER_TYPES),
+        "validities": list(VALIDITIES),
+        "product_help": {
+            "CNC": "Delivery. Fully paid, cannot short, settles into Holdings overnight.",
+            "MIS": f"Intraday. {MIS_LEVERAGE:g}x leverage, auto squared off at the cutoff.",
+            "NRML": "F&O overnight. Carries to expiry on full SPAN margin.",
+        },
+        "order_type_help": {
+            "MARKET": "Fills at the last traded price.",
+            "LIMIT": "Rests until price reaches your limit, then fills at the better of the two.",
+            "SL": "Arms when the trigger is touched, then works as a limit order.",
+            "SL-M": "Arms when the trigger is touched, then fills at market.",
+        },
+        "squareoff": {"EQUITY": MIS_SQUAREOFF_EQUITY, "FNO": MIS_SQUAREOFF_FNO},
+        "market_open": market_is_open(),
+        "engine": engine.state(),
+        "fills_note": (
+            "Fills are at the last traded price. Angel's quote feed as consumed here carries "
+            "no bid/ask depth, so there is no spread and no queue position — a resting limit "
+            "at the touch always fills, where in reality it might not. Paper P&L is therefore "
+            "optimistic by roughly half a spread per side."),
+    }
+
+
+class AccountRequest(BaseModel):
+    name: str
+    capital: float | None = None
+
+
+@router.get("/accounts")
+async def list_accounts(_u: dict = Depends(get_current_user)):
+    return {"accounts": await accounts.list_accounts()}
+
+
+@router.post("/accounts")
+async def create_account(payload: AccountRequest, _u: dict = Depends(get_current_user)):
+    try:
+        return await accounts.create(payload.name, payload.capital)
+    except OrderError as exc:
+        raise _guard(exc)
+
+
+@router.post("/accounts/{account_id}/reset")
+async def reset_account(account_id: str, confirm: bool = Query(False),
+                        _u: dict = Depends(get_current_user)):
+    if not confirm:
+        raise HTTPException(
+            status_code=400,
+            detail="Refusing to reset without ?confirm=true — this deletes every order, "
+                   "trade, position and holding on the account, and cannot be undone.")
+    try:
+        return await accounts.reset(account_id)
+    except OrderError as exc:
+        raise _guard(exc)
+
+
+# ── market data ─────────────────────────────────────────────────────────────────
+
+
+@router.get("/search")
+async def search(q: str = Query(..., min_length=1), segment: str = Query(SEGMENT_EQUITY),
+                 _u: dict = Depends(get_current_user)):
+    return {"results": await market.search(q, segment)}
+
+
+@router.get("/quote")
+async def quote(token: str = Query(...), exchange: str = Query("NSE"),
+                _u: dict = Depends(get_current_user)):
+    fq = await market.full_quotes([{"angel_token": token, "exchange": exchange}])
+    row = fq.get(str(token))
+    if row is None:
+        raise HTTPException(status_code=404, detail="Angel One returned no quote for this token")
+    return row
+
+
+@router.get("/fno/underlyings")
+async def fno_underlyings(_u: dict = Depends(get_current_user)):
+    return {"underlyings": await _cached("pt:fno:und", market.fno_underlyings, ttl=600)}
+
+
+@router.get("/fno/expiries")
+async def fno_expiries(symbol: str = Query(...), kind: str = Query("OPTION"),
+                       _u: dict = Depends(get_current_user)):
+    return {"expiries": await market.expiries(symbol, kind)}
+
+
+@router.get("/fno/chain")
+async def fno_chain(symbol: str = Query(...), expiry: str = Query(...),
+                    fresh: bool = Query(False), _u: dict = Depends(get_current_user)):
+    try:
+        return await _cached(f"pt:chain:{symbol}:{expiry}",
+                             lambda: market.option_chain(symbol, expiry), ttl=15, fresh=fresh)
+    except OrderError as exc:
+        raise _guard(exc)
+
+
+# ── order ticket ────────────────────────────────────────────────────────────────
+
+
+class ContractRef(BaseModel):
+    """How the front end names an instrument. Equity by symbol; F&O by its coordinates."""
+    segment: str = SEGMENT_EQUITY
+    symbol: str
+    expiry: str | None = None
+    strike: float | None = None
+    option_type: str | None = None
+    instrument_kind: str = "EQUITY"     # EQUITY | OPTION | FUTURE
+
+
+async def _resolve(ref: ContractRef) -> dict:
+    if ref.segment == SEGMENT_EQUITY:
+        return await market.resolve_equity(ref.symbol)
+    if ref.instrument_kind == "FUTURE":
+        return await market.resolve_future(ref.symbol, ref.expiry or "")
+    if ref.strike is None or not ref.option_type:
+        raise OrderError("An option needs an expiry, a strike and CE/PE")
+    return await market.resolve_option(ref.symbol, ref.expiry or "", ref.strike, ref.option_type)
+
+
+class MarginRequest(ContractRef):
+    account_id: str | None = None
+    transaction_type: str = "BUY"
+    quantity: int = 1
+    product: str = "MIS"
+    price: float | None = None
+
+
+@router.post("/margin")
+async def margin(payload: MarginRequest, _u: dict = Depends(get_current_user)):
+    try:
+        account_id = await _account(payload.account_id)
+        contract = await _resolve(payload)
+        price = payload.price or await market.quote_one(contract)
+        if not price:
+            raise OrderError("No live quote — cannot estimate margin")
+        est = await orders.estimate_margin(
+            account_id=account_id, segment=payload.segment, contract=contract,
+            transaction_type=payload.transaction_type, quantity=payload.quantity,
+            price=price, product=payload.product)
+        funds = await accounts.funds(account_id)
+        return {**est, "price": price, "contract": contract,
+                "available_margin": funds["available_margin"],
+                "sufficient": est["margin"] <= funds["available_margin"]}
+    except OrderError as exc:
+        raise _guard(exc)
+
+
+class OrderRequest(ContractRef):
+    account_id: str | None = None
+    transaction_type: str
+    quantity: int
+    order_type: str = "MARKET"
+    product: str = "MIS"
+    validity: str = "DAY"
+    price: float | None = None
+    trigger_price: float | None = None
+
+
+@router.post("/orders")
+async def place_order(payload: OrderRequest, _u: dict = Depends(get_current_user)):
+    try:
+        account_id = await _account(payload.account_id)
+        contract = await _resolve(payload)
+        return await orders.place(
+            account_id=account_id, segment=payload.segment, contract=contract,
+            transaction_type=payload.transaction_type, quantity=payload.quantity,
+            order_type=payload.order_type, product=payload.product,
+            validity=payload.validity, price=payload.price,
+            trigger_price=payload.trigger_price)
+    except OrderError as exc:
+        raise _guard(exc)
+
+
+class ModifyRequest(BaseModel):
+    account_id: str | None = None
+    quantity: int | None = None
+    price: float | None = None
+    trigger_price: float | None = None
+    order_type: str | None = None
+
+
+@router.put("/orders/{order_id}")
+async def modify_order(order_id: str, payload: ModifyRequest,
+                       _u: dict = Depends(get_current_user)):
+    try:
+        return await orders.modify(
+            await _account(payload.account_id), order_id, quantity=payload.quantity,
+            price=payload.price, trigger_price=payload.trigger_price,
+            order_type=payload.order_type)
+    except OrderError as exc:
+        raise _guard(exc)
+
+
+@router.delete("/orders/{order_id}")
+async def cancel_order(order_id: str, account_id: str | None = Query(None),
+                       _u: dict = Depends(get_current_user)):
+    try:
+        return await orders.cancel(await _account(account_id), order_id)
+    except OrderError as exc:
+        raise _guard(exc)
+
+
+# ── books ───────────────────────────────────────────────────────────────────────
+
+
+@router.get("/dashboard")
+async def dashboard(account_id: str | None = Query(None), segment: str | None = Query(None),
+                    fresh: bool = Query(False), _u: dict = Depends(get_current_user)):
+    aid = await _account(account_id)
+    return await _cached(f"pt:dash:{aid}:{segment}",
+                         lambda: engine.dashboard(aid, segment), ttl=5, fresh=fresh)
+
+
+@router.get("/orders")
+async def order_book(account_id: str | None = Query(None), segment: str | None = Query(None),
+                     status: str | None = Query(None), limit: int = Query(300, ge=1, le=1000),
+                     _u: dict = Depends(get_current_user)):
+    return await engine.order_book(await _account(account_id), segment, status, limit)
+
+
+@router.get("/trades")
+async def trade_book(account_id: str | None = Query(None), segment: str | None = Query(None),
+                     limit: int = Query(300, ge=1, le=1000),
+                     _u: dict = Depends(get_current_user)):
+    return await engine.trade_book(await _account(account_id), segment, limit)
+
+
+@router.get("/positions")
+async def positions(account_id: str | None = Query(None), segment: str | None = Query(None),
+                    fresh: bool = Query(False), _u: dict = Depends(get_current_user)):
+    aid = await _account(account_id)
+    return await _cached(f"pt:pos:{aid}:{segment}",
+                         lambda: engine.positions(aid, segment), ttl=5, fresh=fresh)
+
+
+@router.post("/positions/{position_id}/exit")
+async def exit_position(position_id: str, account_id: str | None = Query(None),
+                        quantity: int | None = Query(None),
+                        _u: dict = Depends(get_current_user)):
+    try:
+        return await orders.square_off(await _account(account_id), position_id, quantity)
+    except OrderError as exc:
+        raise _guard(exc)
+
+
+@router.get("/holdings")
+async def holdings(account_id: str | None = Query(None), fresh: bool = Query(False),
+                   _u: dict = Depends(get_current_user)):
+    aid = await _account(account_id)
+    return await _cached(f"pt:hold:{aid}", lambda: engine.holdings(aid), ttl=10, fresh=fresh)
+
+
+@router.get("/ledger")
+async def ledger(account_id: str | None = Query(None), limit: int = Query(200, ge=1, le=1000),
+                 _u: dict = Depends(get_current_user)):
+    return await engine.ledger(await _account(account_id), limit)
+
+
+@router.post("/tick")
+async def run_tick(_u: dict = Depends(get_current_user)):
+    """Run one engine pass by hand — arms stops, fills resting orders, marks positions."""
+    return await engine.tick()
+
+
+@router.post("/settle")
+async def settle(_u: dict = Depends(get_current_user)):
+    """Move unsold CNC buys into Holdings. Normally the scheduler's job, after the close."""
+    return await engine.settle_delivery()
