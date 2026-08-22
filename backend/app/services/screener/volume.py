@@ -244,6 +244,27 @@ async def board(index: str | None = None, window: str = "1d", limit: int = 60,
         hits = hits_by_sym.get(r["symbol"], [])
         tgt = next_target(bars, r["ltp"], hits, r.get("atr14"))
 
+        # DELIVERY CAN CONTRADICT THE STATE, and when it does that is the more important
+        # fact. Price up on heavy volume reads as "accumulation" by definition — but the
+        # top of this board is routinely full of names whose delivery collapsed to 7%
+        # against a 41% average, which is the same stock being passed between traders all
+        # day and squared off by the close. That is very nearly the opposite of
+        # accumulation. The state stays a pure price-volume fact, because that is what it
+        # measures; the conflict gets its own flag so the table can show the disagreement
+        # instead of leaving the label to be read as a verdict it cannot support.
+        dratio = (d or {}).get("delivery_ratio")
+        conflict = None
+        if dratio is not None:
+            if state == "accumulation" and dratio <= 0.6:
+                conflict = ("Delivery collapsed to "
+                            f"{dratio:.2f}x its average — the volume is being squared off "
+                            f"intraday, so this is not the accumulation the price-volume "
+                            f"reading implies")
+            elif state == "distribution" and dratio >= 1.4:
+                conflict = (f"Delivery ran at {dratio:.2f}x its average even as price fell — "
+                            f"someone is taking stock on the way down, which is not ordinary "
+                            f"distribution")
+
         rows.append({
             "symbol": r["symbol"],
             "name": r.get("name"),
@@ -262,6 +283,7 @@ async def board(index: str | None = None, window: str = "1d", limit: int = 60,
             "state_label": state.replace("_", " ").title(),
             "state_text": state_text,
             "price_confirms": state in ("accumulation", "distribution"),
+            "delivery_conflict": conflict,
             "sector_return_pct": sec.get("return_pct"),
             "reasons": volume_reason(r, state, vol_ratio, d,
                                      {"sector": r["sector"], "return_pct": sec.get("return_pct")},

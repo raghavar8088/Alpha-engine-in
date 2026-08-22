@@ -4492,6 +4492,7 @@ export interface ScreenerVolumeRow {
   trades: number | null;
   state: string; state_label: string; state_text: string;
   price_confirms: boolean;
+  delivery_conflict: string | null;
   sector_return_pct: number | null;
   reasons: string[];
   target: ScreenerTarget;

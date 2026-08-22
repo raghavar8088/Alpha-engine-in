@@ -759,6 +759,14 @@ Click for the full reason stack`,
                           <td>
                             <span className={"vstate " + sty.tone + (sty.filled ? " filled" : "")}
                               title={v.state_text}>{v.state_label}</span>
+                            {/* Delivery contradicting the price-volume reading is the more
+                                important fact, so it sits next to the label rather than
+                                three columns away in the reason list. */}
+                            {v.delivery_conflict && (
+                              <div className="conflict" title={v.delivery_conflict}>
+                                ⚠ delivery disagrees
+                              </div>
+                            )}
                           </td>
                           <td>
                             {v.target.target === null ? <span className="dim">—</span> : (
@@ -1213,6 +1221,7 @@ Click for the full reason stack`,
         .vstate.filled.gain { background: var(--gain-dim); }
         .vstate.filled.loss { background: var(--loss-dim); }
         .vstate.filled.accent { background: var(--purple-dim); }
+        .conflict { font-size: 9.5px; font-weight: 600; color: var(--warn); margin-top: 3px; white-space: nowrap; cursor: help; }
 
         /* How a target was derived is part of the target. A 3xATR projection is
            arithmetic on volatility, not a level, and must not look like one. */
