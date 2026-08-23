@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import ThemeToggle from "./ThemeToggle";
 import { useEffect, useState } from "react";
 
 const GROUPS: { label: string; links: { href: string; label: string; icon: React.ReactNode }[] }[] = [
@@ -503,9 +504,12 @@ export default function Sidebar() {
           ))}
         </nav>
 
-        <Link href="/settings/broker" className="connect-cta">
-          Connect Broker
-        </Link>
+        <div className="sidebar-foot">
+          <ThemeToggle />
+          <Link href="/settings/broker" className="connect-cta">
+            Connect Broker
+          </Link>
+        </div>
       </aside>
     </>
   );

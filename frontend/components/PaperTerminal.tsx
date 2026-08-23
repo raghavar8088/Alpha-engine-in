@@ -20,6 +20,7 @@ import ErrorBanner from "./ErrorBanner";
 import EmptyState from "./EmptyState";
 import StatusPill from "./StatusPill";
 import Skeleton from "./Skeleton";
+import StrategyBuilder from "./StrategyBuilder";
 import {
   refreshing,
   fetchPTConfig, fetchPTDashboard, searchPTScrips, fetchPTMargin, placePTOrder,
@@ -315,6 +316,21 @@ export default function PaperTerminal({ segment }: { segment: "EQUITY" | "FNO" }
               </>
             )}
           </GlassPanel>
+
+          {isFno && chain && chain.atm_strike && (
+            <StrategyBuilder
+              symbol={under}
+              expiry={expiry}
+              atmStrike={chain.atm_strike}
+              strikeStep={
+                chain.strikes.length > 1
+                  ? Math.abs(chain.strikes[1].strike - chain.strikes[0].strike)
+                  : 50
+              }
+              lotSize={chain.lot_size}
+              onExecuted={() => refreshing(load)}
+            />
+          )}
 
           <GlassPanel title="Order ticket">
             {!picked ? (

@@ -19,6 +19,7 @@ import EmptyState from "../../components/EmptyState";
 import StatusPill from "../../components/StatusPill";
 import Skeleton from "../../components/Skeleton";
 import RankedBars, { RankedBarRow } from "../../components/charts/RankedBars";
+import Sparkline from "../../components/Sparkline";
 import SectorSpread from "../../components/charts/SectorSpread";
 import {
   refreshing,
@@ -370,6 +371,11 @@ export default function StockScreenerPage() {
                         <td className="l"><b>{r.symbol}</b><div className="sub">{r.name}</div></td>
                         <td className="l dim">{r.sector}</td>
                         <td>{num(r.ltp)}</td>
+                        <td className="spark">
+                          {r.spark && r.spark.length > 1
+                            ? <Sparkline values={r.spark} />
+                            : <span className="dim">—</span>}
+                        </td>
                         <td className={`hl ${cls(r.return_pct)}`}><b>{pct(r.return_pct)}</b></td>
                         <td className={cls(r.returns["1d"])}>{pct(r.returns["1d"], 1)}</td>
                         <td className={cls(r.returns["1w"])}>{pct(r.returns["1w"], 1)}</td>
@@ -1204,6 +1210,7 @@ Click for the full reason stack`,
         .note.small { font-size: 11.5px; margin-top: 12px; }
 
         .tablewrap { overflow-x: auto; }
+        td.spark { width: 92px; min-width: 92px; padding: 2px 8px; }
         table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
         th, td { padding: 8px 10px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--panel-border); font-variant-numeric: tabular-nums; }
         th { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; position: sticky; top: 0; background: var(--panel); }

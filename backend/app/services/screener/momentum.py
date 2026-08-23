@@ -289,6 +289,9 @@ async def board(index: str = DEFAULT_INDEX, horizon: str = "1d",
         )
         out.append({
             **{k: v for k, v in r.items() if not k.startswith("_")},
+            # A 30-session price trace for the row's sparkline. Trimmed here rather than
+            # sent whole: 500 rows x 131 closes is a megabyte of JSON for a 60px graphic.
+            "spark": [round(c, 2) for c in (r.get("_closes") or [])[-30:]],
             "return_pct": ret,
             "rank_pct": _r(H.percentile_rank(ret, population)),
             "rs_index": _r(metrics["rs_index"]),

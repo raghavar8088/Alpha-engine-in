@@ -3972,6 +3972,7 @@ export interface ScreenerMomentumRow {
   why_summary: string;
   character: string;
   score: number | null;
+  spark: number[];
 }
 
 export interface ScreenerCoverage {
@@ -4953,4 +4954,62 @@ export async function fetchPTMtfRateCard(): Promise<PTMtfRateCard> {
 }
 export async function accruePTMtf(): Promise<{ accrued: number }> {
   return apiFetch("/api/paper-trading/mtf/accrue", { method: "POST" });
+}
+
+// ── F&O multi-leg strategy builder ────────────────────────────────────────────────
+
+export interface StrategyPreset {
+  key: string; name: string; outlook: string; why: string;
+  legs: { offset: number; type: string; side: string; lots: number }[];
+}
+
+export interface StrategyLeg {
+  strike: number; option_type: string; side: string; lots: number;
+}
+
+export interface StrategyAnalysis {
+  ok: boolean;
+  spot: number; expiry: string | null; days_to_expiry: number; lot_size: number;
+  points: { spot: number; pnl: number }[];
+  breakevens: number[];
+  max_profit: number | null; max_loss: number | null;
+  unlimited_profit: boolean; unlimited_loss: boolean; downside_open: boolean;
+  scan_range: { low: number; high: number; pct: number };
+  net_premium: number; is_debit: boolean;
+  greeks: { delta: number; gamma: number; theta: number; vega: number; rho: number };
+  per_leg: {
+    strike: number; option_type: string; side: string; quantity: number;
+    premium: number; label: string; iv: number | null;
+    greeks: Record<string, number> | null; note?: string;
+  }[];
+  unpriced_legs: number;
+  margin: { total: number; span: number; exposure: number };
+  risk_note: string;
+  symbol: string;
+  legs: { strike: number; option_type: string; side: string; lots: number; quantity: number; premium: number }[];
+  unpriced_strikes: string[];
+  available_margin: number;
+  affordable: boolean;
+}
+
+export async function fetchStrategyPresets(): Promise<{ presets: StrategyPreset[] }> {
+  return apiFetch("/api/paper-trading/fno/strategy/presets");
+}
+export async function analyseStrategy(body: {
+  symbol: string; expiry: string; legs: StrategyLeg[]; account_id?: string;
+}): Promise<StrategyAnalysis> {
+  return apiFetch("/api/paper-trading/fno/strategy/analyse", {
+    method: "POST", body: JSON.stringify(body),
+  });
+}
+export async function executeStrategy(body: {
+  symbol: string; expiry: string; legs: StrategyLeg[]; account_id?: string;
+}): Promise<{
+  placed: { leg: string; status: string; message: string | null; fill: number | null }[];
+  failed: { leg: string; status: string; message: string | null }[];
+  complete: boolean; warning: string | null;
+}> {
+  return apiFetch("/api/paper-trading/fno/strategy/execute", {
+    method: "POST", body: JSON.stringify(body),
+  });
 }

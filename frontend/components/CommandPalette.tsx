@@ -37,6 +37,8 @@ const PAGES: { label: string; href: string; hint: string }[] = [
   { label: "Market Data", href: "/dashboard", hint: "live NSE indices" },
   { label: "Momentum Trading", href: "/momentum-trading", hint: "intraday cash momentum" },
   { label: "Stock Screener", href: "/stock-screener", hint: "momentum, sectors, patterns" },
+  { label: "Stock Paper Trading", href: "/stock-paper-trading", hint: "paper broker on live prices" },
+  { label: "F&O Paper Trading", href: "/stock-paper-trading/fno", hint: "options + futures, paper" },
   { label: "Strategy Factory", href: "/strategy-factory", hint: "546 composed strategies" },
   { label: "Live Trading", href: "/live-trading", hint: "real-money desk" },
   { label: "Chart", href: "/chart", hint: "candles and drawings" },

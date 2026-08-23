@@ -31,7 +31,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from app.api.deps import get_current_user
-from app.services.paper_broker import accounts, engine, market, mtf, orders
+from app.services.paper_broker import accounts, engine, market, mtf, orders, strategy
 from app.services.paper_broker.core import (
     MIS_LEVERAGE,
     MIS_SQUAREOFF_EQUITY,
@@ -382,3 +382,137 @@ async def closed_positions(account_id: str | None = Query(None),
 async def mtf_accrue(_u: dict = Depends(get_current_user)):
     """Run the daily MTF interest accrual by hand. Idempotent per calendar day."""
     return {"accrued": await engine.accrue_mtf_interest()}
+
+
+# ── F&O strategy builder ────────────────────────────────────────────────────────
+
+
+class StrategyLeg(BaseModel):
+    strike: float
+    option_type: str          # CE | PE
+    side: str                 # BUY | SELL
+    lots: int = 1
+
+
+class StrategyRequest(BaseModel):
+    symbol: str
+    expiry: str
+    legs: list[StrategyLeg]
+    account_id: str | None = None
+
+
+@router.get("/fno/strategy/presets")
+async def strategy_presets(_u: dict = Depends(get_current_user)):
+    """The standard structures, each with what it is actually for."""
+    return {"presets": strategy.PRESETS}
+
+
+async def _price_legs(symbol: str, expiry: str, legs: list[StrategyLeg]) -> tuple[list[dict], dict, float]:
+    """Resolve each leg to a real contract and price it off ONE batched quote.
+
+    One quote for the whole structure rather than a call per leg: a four-leg condor would
+    otherwise be four round trips to Angel every time a strike is nudged, which is both slow
+    and exactly the pattern that gets this backend rate-limited.
+    """
+    resolved = []
+    for leg in legs:
+        contract = await market.resolve_option(symbol, expiry, leg.strike, leg.option_type)
+        resolved.append((leg, contract))
+
+    prices = await market.quotes([c for _, c in resolved])
+    priced, missing = [], []
+    lot_size = resolved[0][1]["lot_size"] if resolved else 1
+    for leg, contract in resolved:
+        ltp = prices.get(str(contract["angel_token"]))
+        if ltp is None:
+            missing.append(f"{leg.strike:g}{leg.option_type}")
+            continue
+        priced.append({
+            "strike": leg.strike,
+            "option_type": leg.option_type.upper(),
+            "side": leg.side.upper(),
+            "lots": leg.lots,
+            "quantity": leg.lots * contract["lot_size"],
+            "premium": ltp,
+            "contract": contract,
+        })
+    return priced, {"missing": missing}, lot_size
+
+
+@router.post("/fno/strategy/analyse")
+async def strategy_analyse(payload: StrategyRequest, _u: dict = Depends(get_current_user)):
+    """Payoff, net Greeks, margin and outcome bounds for a whole structure."""
+    if not payload.legs:
+        raise HTTPException(status_code=422, detail="Add at least one leg")
+    try:
+        priced, meta, lot_size = await _price_legs(payload.symbol, payload.expiry, payload.legs)
+    except OrderError as exc:
+        raise _guard(exc)
+    if not priced:
+        raise HTTPException(
+            status_code=422,
+            detail=f"None of these strikes could be priced right now ({', '.join(meta['missing'])}) "
+                   f"— Angel returned no quote, so there is nothing honest to plot.")
+
+    chain = await _cached(f"pt:chain:{payload.symbol}:{payload.expiry}",
+                          lambda: market.option_chain(payload.symbol, payload.expiry), ttl=15)
+    spot = chain.get("atm_strike")
+    result = strategy.analyse(priced, float(spot or 0), payload.expiry, lot_size)
+    if not result.get("ok"):
+        raise HTTPException(status_code=422, detail=result.get("error", "Could not analyse"))
+
+    account_id = await _account(payload.account_id)
+    funds = await accounts.funds(account_id)
+    return {
+        **result,
+        "symbol": payload.symbol,
+        "legs": [{k: v for k, v in p.items() if k != "contract"} for p in priced],
+        "unpriced_strikes": meta["missing"],
+        "available_margin": funds["available_margin"],
+        "affordable": result["margin"]["total"] <= funds["available_margin"],
+    }
+
+
+@router.post("/fno/strategy/execute")
+async def strategy_execute(payload: StrategyRequest, _u: dict = Depends(get_current_user)):
+    """Place every leg as a market order.
+
+    LONG LEGS FIRST, deliberately. In a defined-risk structure the long wings are what cap
+    the loss and therefore what earns the margin benefit — placing a naked short first can
+    trip the margin check on a basket the account can comfortably afford once complete.
+    """
+    account_id = await _account(payload.account_id)
+    try:
+        priced, meta, _ = await _price_legs(payload.symbol, payload.expiry, payload.legs)
+    except OrderError as exc:
+        raise _guard(exc)
+    if meta["missing"]:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Refusing to place a partial structure — {', '.join(meta['missing'])} "
+                   f"could not be priced. A half-built spread is a naked position.")
+
+    ordered = sorted(priced, key=lambda p: 0 if p["side"] == "BUY" else 1)
+    placed, failed = [], []
+    for p in ordered:
+        try:
+            res = await orders.place(
+                account_id=account_id, segment=SEGMENT_FNO, contract=p["contract"],
+                transaction_type=p["side"], quantity=p["quantity"],
+                order_type="MARKET", product="NRML", validity="DAY")
+            (placed if res["status"] == "COMPLETE" else failed).append({
+                "leg": f"{p['side']} {p['lots']}x{p['strike']:g}{p['option_type']}",
+                "status": res["status"], "message": res.get("status_message"),
+                "fill": res.get("fill_price"),
+            })
+        except OrderError as exc:
+            failed.append({"leg": f"{p['side']} {p['lots']}x{p['strike']:g}{p['option_type']}",
+                           "status": "ERROR", "message": exc.detail})
+
+    return {
+        "placed": placed, "failed": failed,
+        "complete": len(failed) == 0,
+        "warning": (None if not failed else
+                    "Some legs did not fill. What is open is NOT the structure you designed — "
+                    "check Positions and either complete it or close what filled."),
+    }

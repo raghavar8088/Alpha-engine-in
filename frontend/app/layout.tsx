@@ -17,6 +17,17 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${sora.variable} ${manrope.variable} ${jetbrainsMono.variable}`}>
+      <head>
+        {/* Applies the saved theme BEFORE first paint. Without this a dark-mode user gets
+            a full-white flash on every navigation, because React only reaches the toggle
+            after hydration. Deliberately tiny, deliberately blocking, and it must stay in
+            sync with the key ThemeToggle writes. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('tradingai-theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body style={{ display: "flex" }}>
         <SortableTables />
         {/* One instance for the whole app: ⌘K anywhere. Mounting it per page
