@@ -52,7 +52,19 @@ services:
     ports:
       - "8000:8080"
     restart: unless-stopped
-    mem_limit: 500m
+    # 800m, raised from 500m. This container was capped when the backend ran a handful of
+    # desks; it now starts roughly a dozen — trading calls, the intraday lab, commodity
+    # (353 pattern strategies), the F&O auto-roll, Trending Stocks (678 strategies), the
+    # long-horizon desk, RSS ingest, the screener and the paper broker — and it blew past
+    # 500MB within SIXTY SECONDS of boot, before any of their timers had even fired a
+    # second cycle. At the cap it does not crash, it thrashes: every request, including
+    # /health from inside the box, times out, which reads from outside as "the app has no
+    # data".
+    #
+    # 800m fits the observed peak with headroom. The host has 1.9GB and every other
+    # container on it totals about 410MB, so this stays inside what the box can actually
+    # back. Raising it further would start trading one service's health for another's.
+    mem_limit: 800m
 
   market-data-service:
     build:
