@@ -118,7 +118,7 @@ async def universe_snapshot(index: str = DEFAULT_INDEX, fresh: bool = False) -> 
 
     symbols = [d["symbol"] for d in docs]
     bars_by_sym, quotes, funds, highs, delivery = await asyncio.gather(
-        H.load_daily_bars(symbols + [BENCHMARK_SYMBOL], fresh=fresh),
+        H.load_daily_bars(symbols, fresh=fresh),
         _live_quotes(symbols),
         load_fundamentals(symbols),
         load_highs(symbols),

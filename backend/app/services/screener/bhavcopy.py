@@ -67,6 +67,12 @@ BROWSER_HEADERS = {
 
 _status: dict = {"last_ok": None, "last_error": None, "days_stored": 0}
 
+# The computed delivery table, cached. Rebuilding it means pulling 21 daily documents of
+# ~2,860 rows each — some 60,000 dicts — and it was being rebuilt on EVERY universe
+# snapshot, i.e. every five minutes, for a table that changes once a day after the close.
+_delivery_cache: tuple[float, dict[str, dict]] | None = None
+DELIVERY_CACHE_TTL = 1800.0
+
 
 def _now() -> datetime:
     return datetime.now(timezone.utc)
@@ -189,6 +195,12 @@ async def delivery_stats() -> dict[str, dict]:
     with no stored bhavcopy simply does not appear — callers must treat absence as unknown,
     which is why this returns a dict rather than filling in zeros.
     """
+    global _delivery_cache
+    import time as _time
+
+    if _delivery_cache and _time.monotonic() - _delivery_cache[0] < DELIVERY_CACHE_TTL:
+        return _delivery_cache[1]
+
     docs = [d async for d in screener_bhavcopy_collection.find(
         {"ok": True}, {"_id": 0, "date": 1, "rows": 1}).sort("date", -1).limit(DELIVERY_AVG_WINDOW + 1)]
     if not docs:
@@ -218,6 +230,10 @@ async def delivery_stats() -> dict[str, dict]:
             "turnover_lacs": r.get("turnover_lacs"),
             "date": latest["date"],
         }
+    # Drop the raw documents before returning: `docs` holds tens of thousands of row dicts
+    # and would otherwise stay reachable for as long as the caller keeps the result.
+    docs.clear()
+    _delivery_cache = (_time.monotonic(), out)
     return out
 
 

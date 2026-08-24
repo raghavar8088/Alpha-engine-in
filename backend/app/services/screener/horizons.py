@@ -63,8 +63,36 @@ HORIZON_ORDER = ["1d", "1w", "1m", "6m"]
 MIN_BARS_FOR = {"1d": 2, "1w": 6, "1m": 22, "6m": 127}
 
 BARS_CACHE_TTL = 900.0  # 15 min; the daily bar set only changes once a day anyway
+# At most this many bar sets live at once. Two is enough for the common case (one index
+# being browsed, one being recomputed by the scheduler) and bounds the worst case at a few
+# tens of megabytes instead of the whole container.
+BARS_CACHE_MAX = 2
+BENCHMARK = "NIFTY"
 
 _bars_cache: dict[str, tuple[float, dict[str, list[Bar]]]] = {}
+
+
+def _prune_bars_cache(now: float) -> None:
+    """Drop expired entries, then the oldest until the cache is within its cap.
+
+    Called on every load. Without it the dict only ever grows — which is exactly how this
+    module once ate a 500MB container.
+    """
+    for k in [k for k, (ts, _) in _bars_cache.items() if now - ts >= BARS_CACHE_TTL]:
+        _bars_cache.pop(k, None)
+    while len(_bars_cache) > BARS_CACHE_MAX:
+        oldest = min(_bars_cache, key=lambda k: _bars_cache[k][0])
+        _bars_cache.pop(oldest, None)
+
+
+def bars_cache_stats() -> dict:
+    """Surfaced on the Sources tab so this can never quietly grow again unnoticed."""
+    return {
+        "entries": len(_bars_cache),
+        "max_entries": BARS_CACHE_MAX,
+        "symbols_held": sum(len(v) for _, v in _bars_cache.values()),
+        "ttl_seconds": BARS_CACHE_TTL,
+    }
 
 
 def ist_date(ts: datetime) -> date:
@@ -81,11 +109,28 @@ async def load_daily_bars(symbols: list[str], lookback: int = 400,
     One query for the whole universe rather than 500 queries — on an Atlas M0 the
     per-query latency dominates completely, and a per-symbol loop here was what made the
     first draft of this take minutes instead of seconds.
+
+    THE CACHE IS BOUNDED, and that is not a detail. Each entry holds roughly 500 symbols x
+    400 Bar objects — 200,000 objects, tens of megabytes. The first version of this had a
+    TTL but no eviction: the TTL stopped it SERVING stale data and never freed it, so every
+    distinct symbol list left an entry behind forever. Three callers each passed a slightly
+    different list (with the benchmark, without it, with "NIFTY" appended), so a single
+    index produced three permanent entries, and four indices produced twelve. That took the
+    backend from 119MB to its 500MB container ceiling in about ten minutes and hung it.
+
+    Two fixes, both needed. The benchmark is folded in HERE so every caller produces the
+    same key and shares one entry, and expired entries are actually dropped.
     """
+    # Every caller wants the benchmark alongside the universe, so normalise it in rather
+    # than letting each one build a subtly different list — which is what fragmented the
+    # cache into a leak.
+    wanted = sorted({*symbols, BENCHMARK})
     # Key on the CONTENT of the symbol list, not its length. Two different universes of
     # the same size would otherwise share a cache entry and serve each other's bars.
-    key = f"{hashlib.sha1(','.join(sorted(symbols)).encode()).hexdigest()}:{lookback}"
+    key = f"{hashlib.sha1(','.join(wanted).encode()).hexdigest()}:{lookback}"
     now = time.monotonic()
+    _prune_bars_cache(now)
+    symbols = wanted
     if not fresh:
         hit = _bars_cache.get(key)
         if hit and now - hit[0] < BARS_CACHE_TTL:
@@ -116,6 +161,7 @@ async def load_daily_bars(symbols: list[str], lookback: int = 400,
         out[sym] = merged[-lookback:]
 
     _bars_cache[key] = (now, out)
+    _prune_bars_cache(now)
     return out
 
 

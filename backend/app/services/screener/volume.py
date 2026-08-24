@@ -213,7 +213,7 @@ async def board(index: str | None = None, window: str = "1d", limit: int = 60,
     sessions = WINDOWS[window]
     snap = await universe_snapshot(index, fresh=fresh)
     symbols = [r["symbol"] for r in snap["rows"]]
-    bars_by_sym = await H.load_daily_bars(symbols + ["NIFTY"], fresh=fresh)
+    bars_by_sym = await H.load_daily_bars(symbols, fresh=fresh)
 
     delivery = await bhavcopy.delivery_stats()
     scan = await patterns.scan(index, fresh=False)
