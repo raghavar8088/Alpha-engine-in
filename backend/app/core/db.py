@@ -288,3 +288,7 @@ ath_trades_collection = db["ath_trades"]
 ath_signals_collection = db["ath_signals"]
 ath_equity_collection = db["ath_equity"]
 ath_state_collection = db["ath_state"]
+# All Time High Trading — the hand-built watchlist. One document: the curated symbol list,
+# whether the desk runs on the screen / the list / both, and whether the market-cap floor
+# still applies to hand-picked names.
+ath_watchlist_collection = db["ath_watchlist"]

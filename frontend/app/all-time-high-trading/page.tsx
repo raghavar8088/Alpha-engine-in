@@ -15,15 +15,17 @@ import ErrorBanner from "../../components/ErrorBanner";
 import EmptyState from "../../components/EmptyState";
 import StatusPill from "../../components/StatusPill";
 import Skeleton from "../../components/Skeleton";
+import AthWatchlist from "../../components/AthWatchlist";
 import {
   refreshing, fetchAthSummary, fetchAthCoverage, fetchAthPositions, fetchAthTrades,
   fetchAthSignals, fetchAthNearHighs, fetchAthUniverse, runAthCycle, seedAthHighs,
   AthSummary, AthCoverage, AthPosition, AthTrade, AthSignal, AthNearHigh, AthUniverseRow,
 } from "../../lib/api";
 
-type Tab = "positions" | "near" | "signals" | "trades" | "universe";
+type Tab = "positions" | "watchlist" | "near" | "signals" | "trades" | "universe";
 const TABS: { key: Tab; label: string }[] = [
   { key: "positions", label: "Positions" },
+  { key: "watchlist", label: "My watchlist" },
   { key: "near", label: "Approaching highs" },
   { key: "signals", label: "Signals" },
   { key: "trades", label: "Closed" },
@@ -158,6 +160,16 @@ export default function AllTimeHighTradingPage() {
             <Arrow />
             <Step n={coverage.tradable} label={`and ≥ ${coverage.min_sessions} sessions`} strong />
           </div>
+          {coverage.mode_note && (
+            <div className={coverage.mode === "auto" && coverage.watchlist_size > 0 ? "note warn" : "note"}>
+              <b>Mode:</b> {coverage.mode_note}
+              {coverage.mode === "auto" && coverage.watchlist_size > 0 && (
+                <> Your {coverage.watchlist_size}-symbol list is saved but NOT being traded —
+                  switch to &ldquo;My list only&rdquo; or &ldquo;Screen + my list&rdquo; on the
+                  My watchlist tab.</>
+              )}
+            </div>
+          )}
           <div className="note">{coverage.note}</div>
           <div className="note warn">{coverage.exchange_note}</div>
           {coverage.missing_highs > 0 && (
@@ -178,6 +190,9 @@ export default function AllTimeHighTradingPage() {
           onClick={() => act(runAthCycle, "Cycle")}>Run a cycle now</button>
       </div>
 
+      {tab === "watchlist" && <AthWatchlist onSaved={() => refreshing(load)} />}
+
+      {tab !== "watchlist" && (
       <GlassPanel>
         {tab === "positions" && (
           positions.length === 0 ? (
@@ -301,7 +316,7 @@ export default function AllTimeHighTradingPage() {
         )}
 
         {tab === "universe" && (
-          uni.length === 0 ? <EmptyState title="Universe empty" /> : (
+          uni.length === 0 ? <EmptyState title="Universe empty" note="Nothing passes the current mode and filters." /> : (
             <div className="tw"><table>
               <thead><tr>
                 <th className="l">Stock</th><th>Market cap</th><th>All-time high</th>
@@ -322,6 +337,7 @@ export default function AllTimeHighTradingPage() {
           )
         )}
       </GlassPanel>
+      )}
 
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 14px; }

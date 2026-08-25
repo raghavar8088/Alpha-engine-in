@@ -54,11 +54,13 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import re
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 from app.core.db import (
     ath_equity_collection,
+    ath_watchlist_collection,
     ath_positions_collection,
     ath_signals_collection,
     ath_state_collection,
@@ -111,6 +113,152 @@ def market_is_open(when: datetime | None = None) -> bool:
     return now.weekday() < 5 and MARKET_OPEN <= now.strftime("%H:%M") <= MARKET_CLOSE
 
 
+# ── watchlist ───────────────────────────────────────────────────────────────────
+#
+# The desk can run on its own market-cap screen or on a hand-built list, and the list is
+# built the way a watchlist actually gets built: you paste symbols in bulk, they are MAPPED
+# against the instrument master, and you then remove the ones you did not mean before
+# committing. The mapping step is the point — a pasted list is always partly wrong (a
+# renamed scrip, a BSE-only name, a typo), and finding that out at submit time rather than
+# silently at scan time is the difference between a watchlist and a source of confusion.
+
+WATCHLIST_ID = "default"
+MODES = ("auto", "manual", "both")
+
+
+def _normalise(token: str) -> str:
+    """Clean one pasted token into an NSE symbol.
+
+    Handles what people actually paste: TradingView's "NSE:RELIANCE", trailing "-EQ",
+    lowercase, stray quotes and whitespace. Anything else is left alone so the mapper can
+    report it as unknown rather than mangling it into a different real symbol.
+    """
+    t = (token or "").strip().strip('"\'').upper()
+    for prefix in ("NSE:", "NSE-", "BSE:"):
+        if t.startswith(prefix):
+            t = t[len(prefix):]
+    if t.endswith("-EQ"):
+        t = t[:-3]
+    return t.strip()
+
+
+def parse_tokens(raw: str | list[str]) -> list[str]:
+    """Split a pasted blob into candidate symbols, order preserved, duplicates dropped."""
+    if isinstance(raw, list):
+        parts = raw
+    else:
+        parts = re.split(r"[\s,;\n\t]+", raw or "")
+    seen, out = set(), []
+    for p in parts:
+        sym = _normalise(p)
+        if sym and sym not in seen:
+            seen.add(sym)
+            out.append(sym)
+    return out
+
+
+async def map_symbols(raw: str | list[str]) -> dict:
+    """Resolve pasted symbols against the instrument master and report EVERY outcome.
+
+    Nothing is silently dropped. A symbol that cannot be traded is returned with the reason
+    — not tradable is a different problem from not found, and "no all-time high yet" is a
+    different problem again because that one fixes itself once the seeder reaches it.
+    """
+    tokens = parse_tokens(raw)
+    if not tokens:
+        return {"count": 0, "rows": [], "tradable": 0}
+
+    inst = {
+        d["symbol"]: d
+        async for d in instruments_collection.find(
+            {"asset_class": "EQUITY", "symbol": {"$in": tokens}},
+            {"_id": 0, "symbol": 1, "name": 1, "angel_token": 1, "angel_exchange": 1})
+    }
+    caps = {
+        d["symbol"]: d.get("market_cap")
+        async for d in stock_fundamentals_collection.find(
+            {"symbol": {"$in": tokens}}, {"_id": 0, "symbol": 1, "market_cap": 1})
+    }
+    highs = {
+        d["symbol"]: d
+        async for d in stock_highs_collection.find(
+            {"symbol": {"$in": tokens}},
+            {"_id": 0, "symbol": 1, "all_time_high": 1, "all_time_high_date": 1, "sessions": 1})
+    }
+
+    rows = []
+    for sym in tokens:
+        i = inst.get(sym)
+        cap = caps.get(sym)
+        h = highs.get(sym)
+        sessions = int((h or {}).get("sessions") or 0)
+
+        if not i:
+            status, note = "not_found", (
+                f"No NSE equity called {sym} in the instrument master. Check the spelling, "
+                f"or it may be BSE-only — this app carries no BSE instruments.")
+        elif not i.get("angel_token"):
+            status, note = "not_quotable", "In the master but Angel cannot quote it, so it cannot be priced or traded."
+        elif not h or not h.get("all_time_high"):
+            status, note = "no_high", "No all-time high stored yet. Seed it below and this becomes tradable."
+        elif sessions < MIN_SESSIONS:
+            status, note = "too_new", (
+                f"Only {sessions} sessions of history. A stock listed this recently is at its "
+                f"all-time high by definition, so it is excluded until it has {MIN_SESSIONS}.")
+        elif cap is None:
+            status, note = "no_market_cap", "No market cap on file, so the size floor cannot be checked."
+        elif cap < MIN_MARKET_CAP:
+            status, note = "below_cap", (
+                f"Market cap {cap / 1e7:,.0f}cr is below the {MIN_MARKET_CAP / 1e7:,.0f}cr floor.")
+        else:
+            status, note = "ok", "Tradable."
+
+        rows.append({
+            "symbol": sym,
+            "name": (i or {}).get("name") or sym,
+            "status": status,
+            "note": note,
+            "tradable": status == "ok",
+            "market_cap": cap,
+            "market_cap_cr": round(cap / 1e7) if cap else None,
+            "all_time_high": (h or {}).get("all_time_high"),
+            "ath_date": (h or {}).get("all_time_high_date"),
+            "sessions": sessions or None,
+        })
+
+    return {"count": len(rows), "rows": rows,
+            "tradable": sum(1 for r in rows if r["tradable"])}
+
+
+async def get_watchlist() -> dict:
+    doc = await ath_watchlist_collection.find_one({"_id": WATCHLIST_ID}, {"_id": 0})
+    if not doc:
+        doc = {"symbols": [], "mode": "auto", "enforce_market_cap": True, "updated_at": None}
+    return doc
+
+
+async def save_watchlist(symbols: list[str], mode: str | None = None,
+                         enforce_market_cap: bool | None = None) -> dict:
+    """Commit the curated list. Replaces rather than merges — the UI owns the final set."""
+    current = await get_watchlist()
+    clean = parse_tokens(symbols)
+    if mode and mode not in MODES:
+        raise ValueError(f"mode must be one of {MODES}")
+    doc = {
+        "_id": WATCHLIST_ID,
+        "symbols": clean,
+        "mode": mode or current.get("mode", "auto"),
+        "enforce_market_cap": (current.get("enforce_market_cap", True)
+                               if enforce_market_cap is None else bool(enforce_market_cap)),
+        "updated_at": _now(),
+    }
+    await ath_watchlist_collection.replace_one({"_id": WATCHLIST_ID}, doc, upsert=True)
+    logger.info("ath watchlist saved: %s symbols, mode=%s, cap floor %s",
+                len(clean), doc["mode"], "on" if doc["enforce_market_cap"] else "off")
+    doc.pop("_id", None)
+    return doc
+
+
 # ── universe ────────────────────────────────────────────────────────────────────
 
 
@@ -121,11 +269,39 @@ async def universe() -> list[dict]:
     Each exclusion is counted rather than silently dropped — the coverage report is what
     tells you whether "no signals today" means the market was quiet or the data is thin.
     """
+    wl = await get_watchlist()
+    mode = wl.get("mode", "auto")
+    picked = set(wl.get("symbols") or [])
+    # A hand-picked list can waive the size floor, but only deliberately: `enforce_market_cap`
+    # defaults to on, because the floor is part of the rule this desk was asked for and
+    # dropping it silently for manual names would make two different strategies share one
+    # equity curve.
+    enforce = wl.get("enforce_market_cap", True)
+
+    if mode == "manual" and not picked:
+        return []
+
+    cap_query: dict = {"market_cap": {"$gte": MIN_MARKET_CAP}}
+    if mode == "manual":
+        cap_query = {"symbol": {"$in": list(picked)}}
+        if enforce:
+            cap_query["market_cap"] = {"$gte": MIN_MARKET_CAP}
+    elif mode == "both" and picked:
+        clauses: list[dict] = [{"market_cap": {"$gte": MIN_MARKET_CAP}}]
+        clauses.append({"symbol": {"$in": list(picked)},
+                        **({"market_cap": {"$gte": MIN_MARKET_CAP}} if enforce else {})})
+        cap_query = {"$or": clauses}
+
     caps = {
-        d["symbol"]: d["market_cap"]
+        d["symbol"]: d.get("market_cap")
         async for d in stock_fundamentals_collection.find(
-            {"market_cap": {"$gte": MIN_MARKET_CAP}}, {"_id": 0, "symbol": 1, "market_cap": 1})
+            cap_query, {"_id": 0, "symbol": 1, "market_cap": 1})
     }
+    # A manual pick with no fundamentals row is still tradable when the floor is waived —
+    # the cap is unknown, not zero, and the user asked for it by name.
+    if mode in ("manual", "both") and not enforce:
+        for sym in picked:
+            caps.setdefault(sym, None)
     if not caps:
         return []
 
@@ -153,7 +329,8 @@ async def universe() -> list[dict]:
             "token": str(i["angel_token"]),
             "exchange": i.get("angel_exchange") or "NSE",
             "market_cap": caps[sym],
-            "market_cap_cr": round(caps[sym] / 1e7, 0),
+            "market_cap_cr": round(caps[sym] / 1e7, 0) if caps[sym] else None,
+            "source": "watchlist" if sym in picked else "screen",
             "all_time_high": float(h["all_time_high"]),
             "ath_date": h.get("all_time_high_date"),
             "sessions": int(h.get("sessions") or 0),
@@ -176,7 +353,18 @@ async def coverage() -> dict:
         {"asset_class": "EQUITY", "symbol": {"$in": caps}, "angel_token": {"$ne": None}})
     with_high = await stock_highs_collection.count_documents({"symbol": {"$in": caps}})
     tradable = len(await universe())
+    wl = await get_watchlist()
+    mode = wl.get("mode", "auto")
+    picked = wl.get("symbols") or []
     return {
+        "mode": mode,
+        "watchlist_size": len(picked),
+        "enforce_market_cap": wl.get("enforce_market_cap", True),
+        "mode_note": {
+            "auto": "Trading the screen: every NSE stock above the market-cap floor.",
+            "manual": f"Trading ONLY your watchlist ({len(picked)} symbols). The screen is off.",
+            "both": f"Trading the screen PLUS your {len(picked)} hand-picked symbols.",
+        }[mode],
         "market_cap_floor_cr": round(MIN_MARKET_CAP / 1e7),
         "above_market_cap": above_cap,
         "angel_quotable": quotable,
@@ -601,11 +789,17 @@ async def seed_highs(limit: int = 120) -> dict:
 
     caps = [d["symbol"] async for d in stock_fundamentals_collection.find(
         {"market_cap": {"$gte": MIN_MARKET_CAP}}, {"_id": 0, "symbol": 1})]
+    wl = await get_watchlist()
+    picked = list(wl.get("symbols") or [])
     have = set(await stock_highs_collection.distinct("symbol"))
-    quotable = [d["symbol"] async for d in instruments_collection.find(
-        {"asset_class": "EQUITY", "symbol": {"$in": caps}, "angel_token": {"$ne": None}},
-        {"_id": 0, "symbol": 1})]
-    missing = [s for s in quotable if s not in have]
+    candidates = list(dict.fromkeys(picked + caps))
+    quotable_set = {d["symbol"] async for d in instruments_collection.find(
+        {"asset_class": "EQUITY", "symbol": {"$in": candidates}, "angel_token": {"$ne": None}},
+        {"_id": 0, "symbol": 1})}
+    # Hand-picked names first. Someone who just built a watchlist is waiting on THOSE highs,
+    # and making them queue behind 600 screen names they never chose would make the feature
+    # look broken for days.
+    missing = [s for s in candidates if s in quotable_set and s not in have]
     if not missing:
         return {"seeded": 0, "remaining": 0, "complete": True}
 

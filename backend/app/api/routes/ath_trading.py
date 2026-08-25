@@ -14,6 +14,7 @@
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
 
 from app.api.deps import get_current_user
 from app.services import ath_trading
@@ -92,3 +93,52 @@ async def reset(confirm: bool = Query(False), _u: dict = Depends(get_current_use
             detail="Refusing to reset without ?confirm=true — this deletes every position, "
                    "trade and signal on the desk and cannot be undone.")
     return await ath_trading.reset()
+
+
+# ── watchlist ───────────────────────────────────────────────────────────────────
+
+
+class MapRequest(BaseModel):
+    """`symbols` takes either a pasted blob or a list — the UI sends a blob from the
+    textarea and a list when re-mapping an already-curated set."""
+    symbols: str | list[str]
+
+
+class SaveWatchlistRequest(BaseModel):
+    symbols: list[str]
+    mode: str | None = None                  # auto | manual | both
+    enforce_market_cap: bool | None = None
+
+
+@router.post("/watchlist/map")
+async def map_watchlist(payload: MapRequest, _u: dict = Depends(get_current_user)):
+    """Resolve pasted symbols against the instrument master, reporting every outcome.
+
+    This is the step between pasting and committing: it says which symbols are tradable and,
+    for the rest, exactly why not — not found, not quotable, no all-time high yet, too newly
+    listed, or below the size floor.
+    """
+    return await ath_trading.map_symbols(payload.symbols)
+
+
+@router.get("/watchlist")
+async def get_watchlist(_u: dict = Depends(get_current_user)):
+    """The saved list, re-mapped so its rows carry current status rather than what was
+    true when it was saved — a stock's all-time high gets seeded, its market cap moves."""
+    wl = await ath_trading.get_watchlist()
+    mapped = await ath_trading.map_symbols(wl.get("symbols") or [])
+    return {**wl, **mapped,
+            "updated_at": wl["updated_at"].isoformat() if wl.get("updated_at") else None}
+
+
+@router.post("/watchlist")
+async def save_watchlist(payload: SaveWatchlistRequest,
+                         _u: dict = Depends(get_current_user)):
+    try:
+        saved = await ath_trading.save_watchlist(
+            payload.symbols, payload.mode, payload.enforce_market_cap)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    mapped = await ath_trading.map_symbols(saved.get("symbols") or [])
+    return {**saved, **mapped,
+            "updated_at": saved["updated_at"].isoformat() if saved.get("updated_at") else None}

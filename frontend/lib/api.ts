@@ -5031,6 +5031,7 @@ export interface AthSummary {
 }
 
 export interface AthCoverage {
+  mode: string; watchlist_size: number; enforce_market_cap: boolean; mode_note: string;
   market_cap_floor_cr: number; above_market_cap: number;
   angel_quotable: number; with_all_time_high: number;
   tradable: number; missing_highs: number; min_sessions: number;
@@ -5098,4 +5099,40 @@ export async function runAthCycle(): Promise<Record<string, unknown>> {
 }
 export async function seedAthHighs(limit = 120): Promise<Record<string, unknown>> {
   return apiFetch("/api/ath/seed-highs" + screenerQs({ limit }), { method: "POST" });
+}
+
+// ── ATH hand-built watchlist ──────────────────────────────────────────────────────
+
+export interface AthMappedSymbol {
+  symbol: string; name: string; status: string; note: string; tradable: boolean;
+  market_cap: number | null; market_cap_cr: number | null;
+  all_time_high: number | null; ath_date: string | null; sessions: number | null;
+}
+
+export interface AthWatchlist {
+  symbols: string[];
+  mode: string;
+  enforce_market_cap: boolean;
+  updated_at: string | null;
+  count: number;
+  tradable: number;
+  rows: AthMappedSymbol[];
+}
+
+export async function mapAthSymbols(symbols: string | string[]): Promise<{
+  count: number; tradable: number; rows: AthMappedSymbol[];
+}> {
+  return apiFetch("/api/ath/watchlist/map", {
+    method: "POST", body: JSON.stringify({ symbols }),
+  });
+}
+export async function fetchAthWatchlist(): Promise<AthWatchlist> {
+  return apiFetch("/api/ath/watchlist");
+}
+export async function saveAthWatchlist(
+  symbols: string[], mode?: string, enforce_market_cap?: boolean,
+): Promise<AthWatchlist> {
+  return apiFetch("/api/ath/watchlist", {
+    method: "POST", body: JSON.stringify({ symbols, mode, enforce_market_cap }),
+  });
 }
