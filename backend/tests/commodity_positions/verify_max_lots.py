@@ -62,14 +62,24 @@ async def go() -> None:
     if not accounts:
         print("no paper accounts; nothing to verify")
         return
-    # Test the TIGHTEST book. A 1cr default account affords the 500-lot cap on every
-    # contract, which never exercises the boundary the gate actually has to find.
+    # Both ends of the range. The tightest book exercises the refusal boundary — the
+    # largest size that still fits, and the honest zero when nothing does. The roomiest
+    # exercises the search itself: it has to walk down from the cap and land on a real
+    # number, which a book that cannot afford one lot never tests.
     by_cash = sorted([(await available_cash(a["account_id"]), a) for a in accounts],
                      key=lambda t: t[0])
-    cash, account = next(((c, a) for c, a in by_cash if c > 0), by_cash[-1])
-    aid = account["account_id"]
-    print(f"account: {account['name']}  free cash Rs{cash:,.0f}  (tightest of {len(accounts)})\n")
+    picks = [("tightest", *next(((c, a) for c, a in by_cash if c > 0), by_cash[-1]))]
+    if by_cash[-1][1] is not picks[0][2]:
+        picks.append(("roomiest", by_cash[-1][0], by_cash[-1][1]))
 
+    for role, cash, account in picks:
+        print("=" * 64)
+        print(f"{role}: {account['name']}  free cash Rs{cash:,.0f}")
+        print()
+        await run_book(account["account_id"])
+
+
+async def run_book(aid: str) -> None:
     for symbol in ("CRUDEOILM", "NATGASMINI", "GOLDM"):
         built = await straddle_legs(symbol)
         if not built:
@@ -116,7 +126,10 @@ async def go() -> None:
               f"Rs{res['margin']:,.0f} vs Rs{naive:,.0f} if scaled linearly")
         print()
 
-    print("=" * 62)
+
+async def main() -> None:
+    await go()
+    print("=" * 64)
     if FAILURES:
         print(f"{len(FAILURES)} FAILED:")
         for f in FAILURES:
@@ -125,4 +138,4 @@ async def go() -> None:
     print("all auto-sizing checks passed")
 
 
-asyncio.run(go())
+asyncio.run(main())
