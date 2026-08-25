@@ -32,14 +32,27 @@ def check(label: str, ok: bool, detail: str = "") -> None:
         FAILURES.append(label)
 
 
-def mirror(pos: dict) -> dict | None:
-    """The other half of the pair this position is one leg of."""
+def mirror(pos: dict, open_positions: list[dict]) -> dict | None:
+    """The MISSING other half of the pair this position is one leg of.
+
+    Returns None when that half is already open. Proposing it anyway would be proposing a
+    SECOND put on top of an existing one, which doubles that side of the book and correctly
+    raises margin — a true result about a basket nobody wants, dressed up as a re-hedge.
+    Only a genuinely absent leg exercises the gate this test is about."""
     inst = pos.get("instrument") or {}
     if not inst.get("option_type"):
         return None
+    want = "CE" if inst["option_type"] == "PE" else "PE"
+    for q in open_positions:
+        qi = q.get("instrument") or {}
+        if (q["underlying_symbol"] == pos["underlying_symbol"]
+                and qi.get("expiry") == inst["expiry"]
+                and qi.get("strike") == inst["strike"]
+                and qi.get("option_type") == want):
+            return None
     return {"instrument_kind": "OPTION", "symbol": pos["underlying_symbol"],
             "expiry": inst["expiry"], "strike": inst["strike"],
-            "option_type": "CE" if inst["option_type"] == "PE" else "PE",
+            "option_type": want,
             "transaction_type": pos["side"], "lots": pos["lots"]}
 
 
@@ -65,7 +78,7 @@ async def go() -> None:
         s = await summary(aid)
         cash = await available_cash(aid)
         for pos in s["open_positions"]:
-            leg = mirror(pos)
+            leg = mirror(pos, s["open_positions"])
             if not leg:
                 continue
             tested += 1
@@ -95,7 +108,8 @@ async def go() -> None:
             break  # one pair per account is enough
 
     if not tested:
-        print("  no option positions open — the gate table above is the whole check")
+        print("  every open option position is already paired, so there is no missing leg "
+              "to put back — the gate table above is the whole check")
 
     print("\n" + "=" * 64)
     if FAILURES:
