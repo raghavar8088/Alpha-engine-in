@@ -231,7 +231,7 @@ export default function AllTimeHighTradingPage() {
                       <td className="dim">{cr(r.market_cap_cr)}</td>
                       <td>{num(r.ltp)}</td>
                       <td>{num(r.all_time_high)}</td>
-                      <td className="dim">{r.ath_date}</td>
+                      <td className="dim">{r.ath_date ?? "—"}</td>
                       <td className={r.pct_from_ath > -2 ? "warn" : "dim"}>
                         <b>{pct(r.pct_from_ath)}</b></td>
                       <td className="dim">{r.sessions} sessions</td>
@@ -313,7 +313,7 @@ export default function AllTimeHighTradingPage() {
                     <td className="l"><b>{r.symbol}</b><div className="sub">{r.name}</div></td>
                     <td>{cr(r.market_cap_cr)}</td>
                     <td>{num(r.all_time_high)}</td>
-                    <td className="dim">{r.ath_date}</td>
+                    <td className="dim">{r.ath_date ?? "—"}</td>
                     <td className="dim">{r.sessions}</td>
                   </tr>
                 ))}

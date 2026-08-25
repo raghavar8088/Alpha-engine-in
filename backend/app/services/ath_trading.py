@@ -423,9 +423,12 @@ async def _open(r: dict, ltp: float, qty: int, cost: float) -> dict:
     }
     await ath_positions_collection.insert_one(dict(doc))
     doc.pop("_id", None)
+    # Some stored highs carry no date — `bump_from_bars` can raise a high from a daily bar
+    # whose timestamp it could not resolve. Print the level without a date rather than the
+    # word "None", which reads like a bug in a row that is otherwise correct.
+    when = f" set on {r['ath_date']}" if r.get("ath_date") else ""
     await _record_signal(r, ltp, taken=True,
-                         why=f"New all-time high — took out {r['all_time_high']:,.2f} "
-                             f"set on {r.get('ath_date')}")
+                         why=f"New all-time high — took out {r['all_time_high']:,.2f}{when}")
     logger.info("ath: bought %s x%s @ %.2f (prev ATH %.2f, mcap %s cr)",
                 r["symbol"], qty, ltp, r["all_time_high"], r.get("market_cap_cr"))
     return doc
