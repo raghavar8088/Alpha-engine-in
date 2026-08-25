@@ -114,11 +114,26 @@ CONTRACT_SPEC: dict[str, tuple[str, str, int]] = {
 # `angel_lotsize` and are reported `verified: false`, with the derived contract value
 # shown so it can be checked against the exchange's published spec before trading.
 
-# SPAN price-scan range per underlying. Energies move multiples of what the metals do, and
-# one shared number would over-margin gold or under-margin natural gas.
+# SPAN price-scan range per COMMODITY, not per contract. Energies move multiples of what
+# the metals do, and one shared number would over-margin gold or under-margin natural gas.
+#
+# Keyed by commodity family on purpose: a mini contract is the same commodity in a smaller
+# wrapper and therefore has exactly the same volatility. The first version keyed on the
+# contract symbol, so CRUDEOILM and NATGASMINI fell through to the default — which
+# under-margined the gas mini by a third against its own parent (8% against 13%). Caught
+# by the first live round trip, not by reading the code.
 PRICE_SCAN: dict[str, float] = {
-    "GOLD": 0.05, "GOLDM": 0.05, "SILVER": 0.08, "SILVERM": 0.08,
-    "CRUDEOIL": 0.09, "NATURALGAS": 0.13, "COPPER": 0.06, "ZINC": 0.06,
+    "GOLD": 0.05, "SILVER": 0.08, "CRUDEOIL": 0.09, "NATURALGAS": 0.13,
+    "COPPER": 0.06, "ZINC": 0.06, "ALUMINIUM": 0.06, "LEAD": 0.06, "NICKEL": 0.08,
+}
+
+# Which family each listed contract belongs to. Everything not named here falls back to
+# its own symbol and then to DEFAULT_SCAN.
+SCAN_FAMILY: dict[str, str] = {
+    "GOLDM": "GOLD", "GOLDTEN": "GOLD", "GOLDGUINEA": "GOLD", "GOLDPETAL": "GOLD",
+    "SILVERM": "SILVER", "SILVERMIC": "SILVER", "SILVER100": "SILVER",
+    "CRUDEOILM": "CRUDEOIL", "NATGASMINI": "NATURALGAS",
+    "ZINCMINI": "ZINC", "ALUMINI": "ALUMINIUM", "LEADMINI": "LEAD",
 }
 DEFAULT_SCAN = float(os.getenv("COMMODITY_MARGIN_SCAN_PCT", "0.08"))
 EXPOSURE_PCT = float(os.getenv("COMMODITY_MARGIN_EXPOSURE_PCT", "0.02"))
@@ -568,7 +583,13 @@ async def futures_board(symbol: str | None = None) -> dict:
 
 
 def _scan_pct(underlying: str) -> float:
-    return PRICE_SCAN.get((underlying or "").upper(), DEFAULT_SCAN)
+    """The price-scan band for this contract's COMMODITY.
+
+    A mini is the same commodity as its parent, so it inherits the parent's band rather
+    than the generic default."""
+    sym = (underlying or "").upper()
+    family = SCAN_FAMILY.get(sym, sym)
+    return PRICE_SCAN.get(family, DEFAULT_SCAN)
 
 
 def _leg_from(inst: dict, side: str, quantity: int, premium: float,
@@ -911,7 +932,7 @@ async def summary(account_id: str) -> dict:
 
 
 __all__ = [
-    "OrderError", "ensure_indexes", "CONTRACT_SPEC", "PRICE_SCAN", "DEFAULT_INITIAL_CAPITAL",
+    "OrderError", "ensure_indexes", "CONTRACT_SPEC", "PRICE_SCAN", "SCAN_FAMILY", "DEFAULT_INITIAL_CAPITAL",
     "multiplier", "contract_value", "spec_doc", "check_specs", "tick_rupees",
     "prime_lotsizes",
     "ensure_default_account", "list_accounts", "get_account", "create_account",
