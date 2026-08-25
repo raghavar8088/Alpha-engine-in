@@ -5146,3 +5146,212 @@ export async function enterAllAthWatchlist(symbols?: string[]): Promise<{
     method: "POST", body: JSON.stringify({ symbols: symbols ?? null }),
   });
 }
+
+// --- Commodity Positions: MCX futures + options paper desk -------------------
+// The commodity twin of the F&O Positions client. Priced by Angel (Dhan does not cover
+// MCX) and margined locally, both of which the payloads state rather than imply.
+
+export interface CmpAccount {
+  account_id: string;
+  name: string;
+  initial_capital: number;
+  created_at: string | null;
+}
+
+export interface CmpSpec {
+  verified: boolean;
+  lot_quantity: string;
+  price_unit: string;
+  multiplier: number;
+  spec_source?: string;
+  note?: string;
+}
+
+export interface CmpUnderlying extends CmpSpec {
+  symbol: string;
+  futures: number;
+  options: number;
+  has_options: boolean;
+}
+
+export interface CmpFuture extends CmpSpec {
+  symbol: string;
+  underlying: string;
+  expiry: string;
+  security_id: string;
+  angel_token: string;
+  ltp: number | null;
+  tick: number;
+  contract_value: number | null;
+}
+
+export interface CmpChainLeg {
+  last_price: number;
+  oi: number;
+  volume: number;
+  iv?: number | null;
+  delta?: number | null;
+  theta?: number | null;
+  vega?: number | null;
+  gamma?: number | null;
+}
+
+export interface CmpChain extends CmpSpec {
+  symbol: string;
+  expiry: string;
+  spot: number;
+  underlying_contract: string | null;
+  underlying_expiry: string | null;
+  days_to_expiry: number;
+  strikes: { strike: number; ce: CmpChainLeg; pe: CmpChainLeg }[];
+  strikes_listed: number;
+  strikes_shown: number;
+  pcr_oi: number | null;
+  max_pain: number | null;
+  source: string;
+  note: string;
+}
+
+export interface CmpPosition {
+  position_id: string;
+  account_id: string;
+  symbol: string;
+  display_name: string;
+  instrument_kind: "OPTION" | "FUTURE";
+  underlying_symbol: string;
+  instrument: Record<string, any>;
+  side: "BUY" | "SELL";
+  lots: number;
+  quantity: number;
+  entry_price: number;
+  ltp: number;
+  product_type: string;
+  margin_used: number;
+  contract_value: number;
+  unrealized_pnl: number;
+  realized_pnl: number;
+  status: string;
+  opened_at: string | null;
+  closed_at: string | null;
+}
+
+export interface CmpOrder {
+  order_id: string;
+  display_name: string;
+  instrument_kind: string;
+  transaction_type: "BUY" | "SELL";
+  lots: number;
+  quantity: number;
+  order_type: string;
+  limit_price: number | null;
+  product_type: string;
+  status: string;
+  fill_price: number | null;
+  margin_used: number | null;
+  contract_value?: number;
+  placed_at: string | null;
+}
+
+export interface CmpSummary {
+  account: CmpAccount;
+  initial_capital: number;
+  available_cash: number;
+  margin_deployed: number;
+  contract_exposure: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  equity: number;
+  open_count: number;
+  closed_count: number;
+  open_positions: CmpPosition[];
+  closed_positions: CmpPosition[];
+  exchange: string;
+  priced_by: string;
+  note: string;
+}
+
+export interface CmpMargin {
+  margin_required: number;
+  span: number;
+  exposure: number;
+  notional_value: number;
+  quantity: number;
+  multiplier: number;
+  scan_pct: number;
+  reference_price: number;
+  source: string;
+  note: string;
+}
+
+export interface CmpSpecCheckRow extends CmpSpec {
+  underlying: string;
+  price: number;
+  contract_value: number;
+  plausible: boolean;
+}
+
+const cmp = "/api/commodity-positions";
+
+export async function fetchCmpAccounts(): Promise<{ accounts: CmpAccount[] }> {
+  return apiFetch(`${cmp}/accounts`);
+}
+export async function createCmpAccount(name: string, initial_capital?: number): Promise<CmpAccount> {
+  return apiFetch(`${cmp}/accounts`, { method: "POST", body: JSON.stringify({ name, initial_capital }) });
+}
+export async function editCmpAccount(id: string, body: { name?: string; initial_capital?: number }): Promise<CmpAccount> {
+  return apiFetch(`${cmp}/accounts/${id}`, { method: "PATCH", body: JSON.stringify(body) });
+}
+export async function fetchCmpUnderlyings(): Promise<{ underlyings: CmpUnderlying[]; count: number }> {
+  return apiFetch(`${cmp}/underlyings`);
+}
+export async function fetchCmpFutures(symbol?: string): Promise<{ contracts: CmpFuture[]; count: number; spec_check: CmpSpecCheckRow[] }> {
+  return apiFetch(`${cmp}/futures${symbol ? `?symbol=${encodeURIComponent(symbol)}` : ""}`);
+}
+export async function fetchCmpFutureExpiries(symbol: string): Promise<{ expiries: string[] }> {
+  return apiFetch(`${cmp}/futures/expiries?symbol=${encodeURIComponent(symbol)}`);
+}
+export async function fetchCmpOptionExpiries(symbol: string): Promise<{ expiries: string[] }> {
+  return apiFetch(`${cmp}/options/expiries?symbol=${encodeURIComponent(symbol)}`);
+}
+export async function fetchCmpChain(symbol: string, expiry: string, around = 20): Promise<CmpChain> {
+  return apiFetch(`${cmp}/options/chain?symbol=${encodeURIComponent(symbol)}&expiry=${expiry}&around=${around}`);
+}
+export async function fetchCmpMargin(p: {
+  symbol: string; expiry: string; instrument_kind: string; transaction_type: string;
+  lots: number; price: number; strike?: number; option_type?: string;
+}): Promise<CmpMargin> {
+  const q = new URLSearchParams({
+    symbol: p.symbol, expiry: p.expiry, instrument_kind: p.instrument_kind,
+    transaction_type: p.transaction_type, lots: String(p.lots), price: String(p.price),
+  });
+  if (p.strike !== undefined) q.set("strike", String(p.strike));
+  if (p.option_type) q.set("option_type", p.option_type);
+  return apiFetch(`${cmp}/margin?${q.toString()}`);
+}
+export async function placeCmpOrder(body: {
+  account_id: string; instrument_kind: string; symbol: string; expiry: string;
+  transaction_type: string; lots: number; order_type: string; product_type: string;
+  strike?: number | null; option_type?: string | null; limit_price?: number;
+}): Promise<CmpOrder> {
+  return apiFetch(`${cmp}/orders`, { method: "POST", body: JSON.stringify(body) });
+}
+export async function fetchCmpOrders(account_id: string): Promise<{ orders: CmpOrder[] }> {
+  return apiFetch(`${cmp}/orders?account_id=${encodeURIComponent(account_id)}`);
+}
+export async function fetchCmpPositions(account_id: string): Promise<CmpSummary> {
+  return apiFetch(`${cmp}/positions?account_id=${encodeURIComponent(account_id)}`);
+}
+export async function exitCmpPosition(position_id: string, account_id: string, lots?: number): Promise<CmpOrder> {
+  return apiFetch(`${cmp}/positions/${position_id}/exit`, {
+    method: "POST", body: JSON.stringify({ account_id, lots: lots ?? null }),
+  });
+}
+export async function resetCmpAccount(account_id: string): Promise<any> {
+  return apiFetch(`${cmp}/reset?account_id=${encodeURIComponent(account_id)}`, { method: "POST" });
+}
+export async function fetchCmpSpecCheck(): Promise<{ spec_check: CmpSpecCheckRow[]; all_plausible: boolean; note: string }> {
+  return apiFetch(`${cmp}/spec-check`);
+}
+export async function syncCmpInstruments(): Promise<any> {
+  return apiFetch(`${cmp}/sync-instruments`, { method: "POST" });
+}

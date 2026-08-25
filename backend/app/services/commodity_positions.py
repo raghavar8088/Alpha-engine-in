@@ -84,7 +84,11 @@ CONTRACT_SPEC: dict[str, tuple[str, str, int]] = {
     "SILVER":     ("30 kg",         "₹ per kg",       30),
     "SILVERM":    ("5 kg",          "₹ per kg",       5),
     "SILVERMIC":  ("1 kg",          "₹ per kg",       1),
-    "SILVER100":  ("100 kg",        "₹ per kg",       100),
+    # Priced at 2,421 against SILVERMIC's 2,42,275 for 1 kg — a factor of 100, so
+    # SILVER100 is quoted per 10 GRAMS, not per kg. The multiplier is unchanged; the
+    # label was wrong, and a wrong label on a right number is still something the
+    # page would have told you incorrectly.
+    "SILVER100":  ("1 kg",          "₹ per 10 grams", 100),
     # --- energy ------------------------------------------------------------------
     "CRUDEOIL":   ("100 barrels",   "₹ per barrel",   100),
     "CRUDEOILM":  ("10 barrels",    "₹ per barrel",   10),

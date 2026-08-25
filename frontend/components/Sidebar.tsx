@@ -173,6 +173,21 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // Sits directly under Commodity Trading, and is to it what F&O Positions is to the
+        // index desks: you place the trades, it does not. A ledger/scales mark rather than
+        // another bullion bar, so the manual book does not read as a second strategy desk.
+        href: "/commodity-positions",
+        label: "Commodity Positions",
+        icon: (
+          <>
+            <path d="M12 4v16" />
+            <path d="M6 8h12" />
+            <path d="M3 13l3-5 3 5a3 3 0 01-6 0z" />
+            <path d="M15 13l3-5 3 5a3 3 0 01-6 0z" />
+          </>
+        ),
+      },
+      {
         // Sits under Momentum: same "wait for a specific market state, then act" shape,
         // but the state is a one-day crash and the expression is a cheap long call.
         href: "/buy-low",

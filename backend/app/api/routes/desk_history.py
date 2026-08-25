@@ -114,7 +114,9 @@ async def list_desks(current_user: dict = Depends(get_current_user)):
         + [{"key": k, "label": v["label"], "scoped": True, "default_scope": v["default"]}
            for k, v in SCOPED.items()]
         + [{"key": "fno", "label": "F&O Positions (per account)", "scoped": True,
-            "default_scope": None}],
+            "default_scope": None},
+           {"key": "commodity-positions", "label": "Commodity Positions (per account)",
+            "scoped": True, "default_scope": None}],
     }
 
 
@@ -133,6 +135,23 @@ async def _fno(account_id: str | None):
     ) | {"account_id": acc["account_id"], "account_name": acc.get("name")}
 
 
+async def _commodity_positions(account_id: str | None):
+    """Same shape as the F&O reader: one positions collection across many paper accounts,
+    no equity snapshots, so the curve is derived from closed trades. Margin is the money
+    actually put at risk, which on a commodity book is a small fraction of the notional —
+    so the deployed-capital ROI is the one that means anything here."""
+    acc = await (D.commodity_accounts_collection.find_one({"account_id": account_id})
+                 if account_id else D.commodity_accounts_collection.find_one({}))
+    if not acc:
+        raise HTTPException(404, "no such commodity account")
+    return await history(
+        D.commodity_pos_positions_collection,
+        float(acc.get("initial_capital") or 0),
+        match={"account_id": acc["account_id"]},
+        deployed_field="margin_used",
+    ) | {"account_id": acc["account_id"], "account_name": acc.get("name")}
+
+
 @router.get("/{desk}")
 async def desk_history(
     desk: str,
@@ -142,6 +161,10 @@ async def desk_history(
 ):
     if desk == "fno":
         return await _cached(f"hist:fno:{scope}", lambda: _fno(scope), fresh=fresh)
+
+    if desk == "commodity-positions":
+        return await _cached(f"hist:cmp:{scope}",
+                             lambda: _commodity_positions(scope), fresh=fresh)
 
     if desk in SCOPED:
         cfg = SCOPED[desk]
