@@ -25,6 +25,7 @@ import DeskHistory from "../../components/DeskHistory";
 import {
   CmpBasketEstimate,
   CmpBasketLeg,
+  CmpMaxLots,
   CmpChain,
   CmpFuture,
   CmpOrder,
@@ -47,6 +48,8 @@ import {
   fetchCmpSpecCheck,
   fetchCmpUnderlyings,
   placeCmpOrder,
+  deleteCmpAccount,
+  maxCmpLots,
   resetCmpAccount,
   syncCmpInstruments,
 } from "../../lib/api";
@@ -64,6 +67,9 @@ const compact = (v: number | null | undefined) => {
   if (Math.abs(v) >= 1e5) return `₹${(v / 1e5).toFixed(2)}L`;
   return `₹${v.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 };
+// Mirrors COMMODITY_MAX_LOTS_PER_ORDER on the server. The server is the authority — this
+// only keeps the box from accepting a number it will refuse.
+const MAX_LOTS = 500;
 const num = (v: number | null | undefined, dp = 2) =>
   v === null || v === undefined ? "—" : v.toFixed(dp);
 
@@ -89,6 +95,14 @@ export default function CommodityPositionsPage() {
 
   const [tab, setTab] = useState<Tab>("chain");
   const [lots, setLots] = useState(1);
+  // Auto-sizing for the at-the-money pair: the largest EQUAL number of calls and puts this
+  // account can carry, sold or bought. Computed by the server against the same margin model
+  // the order gate uses, so the number offered is a number that will actually fill.
+  const [sizing, setSizing] = useState<{ sell: CmpMaxLots | null; buy: CmpMaxLots | null } | null>(null);
+  const [sizingFor, setSizingFor] = useState("");
+  // Bumped after a fill so the ATM pair is re-sized against the cash that is left. Keying
+  // the sizer on live available cash instead would re-run it on every mark-to-market tick.
+  const [sizingNonce, setSizingNonce] = useState(0);
   const [product, setProduct] = useState<"MARGIN" | "INTRADAY">("MARGIN");
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -111,6 +125,52 @@ export default function CommodityPositionsPage() {
   const [formCapital, setFormCapital] = useState("");
 
   const spec = useMemo(() => unders.find((u) => u.symbol === symbol), [unders, symbol]);
+
+  // The at-the-money strike: the listed strike nearest the underlying FUTURE, which is the
+  // reference the chain is priced against — not the spot commodity, which MCX does not
+  // quote intraday. Computed once here rather than rescanning every strike per row.
+  const atmRow = useMemo(() => {
+    if (!chain?.strikes?.length) return null;
+    return chain.strikes.reduce((best, r) =>
+      Math.abs(r.strike - chain.spot) < Math.abs(best.strike - chain.spot) ? r : best);
+  }, [chain]);
+
+  // One key for "which ATM pair, in which book". Sizing is only shown when it was computed
+  // for exactly this key, so a stale number from the previous contract or the previous
+  // account can never be displayed as if it applied here.
+  const sizingKey = useMemo(
+    () => (chain && atmRow && accountId
+      ? `${accountId}|${chain.symbol}|${chain.expiry}|${atmRow.strike}` : ""),
+    [accountId, chain, atmRow]);
+
+  const atmSizing = sizingFor === sizingKey ? sizing?.sell ?? null : null;
+
+  // Size the ATM pair whenever the contract or the account changes, and pre-fill Lots with
+  // it. Both directions are priced: selling is margin-bound and buying is premium-bound, so
+  // they are different numbers and neither stands in for the other.
+  useEffect(() => {
+    if (!sizingKey || !chain || !atmRow) { setSizing(null); setSizingFor(""); return; }
+    let live = true;
+    setSizing(null);
+    setSizingFor("");
+    const pair = (side: "BUY" | "SELL"): CmpBasketLeg[] =>
+      (["CE", "PE"] as const).map((ot) => ({
+        instrument_kind: "OPTION", symbol: chain.symbol, expiry: chain.expiry,
+        strike: atmRow.strike, option_type: ot, transaction_type: side, lots: 1,
+      }));
+    Promise.all([
+      maxCmpLots(accountId, pair("SELL")).catch(() => null),
+      maxCmpLots(accountId, pair("BUY")).catch(() => null),
+    ]).then(([sell, buy]) => {
+      if (!live) return;
+      setSizing({ sell, buy });
+      setSizingFor(sizingKey);
+      // Pre-fill with the selling size: every position in this book is a short pair, and
+      // it is the binding constraint of the two. The buying size is one click away.
+      if (sell && sell.max_lots > 0) setLots(sell.max_lots);
+    });
+    return () => { live = false; };
+  }, [sizingKey, accountId, chain, atmRow, sizingNonce]);
 
   // ---- bootstrap -------------------------------------------------------------
   // Two INDEPENDENT loads, deliberately not one Promise.all. When they were combined, a
@@ -281,6 +341,7 @@ export default function CommodityPositionsPage() {
       const res = await executeCmpBasket(accountId, basket, product);
       setBasket([]);
       setQuote(null);
+      setSizingNonce((n) => n + 1);
       setNotice(`${res.filled} leg${res.filled > 1 ? "s" : ""} filled — margin blocked ` +
         `${compact(res.margin_added)}, net premium ${signed(res.net_premium)}.`);
       setTab("positions");
@@ -327,6 +388,27 @@ export default function CommodityPositionsPage() {
             }}>
               <Icon d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14" /> Reset
             </button>
+            <button className="btn danger" disabled={!!busy || !accountId} onClick={() => {
+              const a = accounts.find((x) => x.account_id === accountId);
+              if (!window.confirm(
+                `Delete "${a?.name ?? "this account"}" and its whole history?\n\n` +
+                "Closed positions and orders go with it. This cannot be undone — " +
+                "Reset empties the book but keeps it.")) return;
+              act("delete", async () => {
+                const r = await deleteCmpAccount(accountId);
+                // Point at another book BEFORE anything reloads, or the page keeps an id
+                // that no longer resolves and every panel below renders an error.
+                const rest = accounts.filter((x) => x.account_id !== accountId);
+                setAccountId(rest[0]?.account_id ?? "");
+                setBasket([]);
+                setQuote(null);
+                setNotice(`Deleted "${r.deleted}" — ${r.closed_positions_removed} closed ` +
+                          `position(s) and ${r.orders_removed} order(s) went with it.`);
+                await loadAccounts();
+              }, false);
+            }}>
+              <Icon d="M10 11v6M14 11v6M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /> Delete
+            </button>
           </>
         }
       />
@@ -335,7 +417,15 @@ export default function CommodityPositionsPage() {
         <label className="fld">
           <span>Paper account</span>
           <select className="sel wide" value={accountId}
-                  onChange={(e) => { setAccountId(e.target.value); setLoadingBook(true); }}>
+                  onChange={(e) => {
+                    // Clear the fill notice with the account. It described the PREVIOUS
+                    // book's trade, and left above another account's tiles it reads as a
+                    // statement about this one — a premium figure from a different book.
+                    setAccountId(e.target.value);
+                    setNotice(null);
+                    setQuoteError(null);
+                    setLoadingBook(true);
+                  }}>
             {!accounts.length && <option value="">Loading accounts…</option>}
             {accounts.map((a) => (
               <option key={a.account_id} value={a.account_id}>
@@ -450,8 +540,9 @@ export default function CommodityPositionsPage() {
                     </td>
                     <td className={l.side === "BUY" ? "gain" : "loss"}>{l.side}</td>
                     <td>
-                      <input className="inp tiny" type="number" min={1} value={basket[i]?.lots ?? l.lots}
-                             onChange={(e) => setLegLots(i, Number(e.target.value) || 1)} />
+                      <LotsInput className="inp tiny" max={MAX_LOTS}
+                                 value={basket[i]?.lots ?? l.lots}
+                                 onCommit={(n) => setLegLots(i, n)} />
                     </td>
                     <td className="l dim">{l.lot_quantity}</td>
                     <td className="px">{num(l.ltp, 2)}</td>
@@ -467,8 +558,8 @@ export default function CommodityPositionsPage() {
                       {l.instrument_kind === "OPTION" ? `${l.strike}${l.option_type}` : "FUT"}</td>
                     <td className={l.transaction_type === "BUY" ? "gain" : "loss"}>{l.transaction_type}</td>
                     <td>
-                      <input className="inp tiny" type="number" min={1} value={l.lots}
-                             onChange={(e) => setLegLots(i, Number(e.target.value) || 1)} />
+                      <LotsInput className="inp tiny" max={MAX_LOTS} value={l.lots}
+                                 onCommit={(n) => setLegLots(i, n)} />
                     </td>
                     <td className="l dim">—</td><td className="px">—</td><td className="px">—</td>
                     <td><button className="mini" onClick={() => dropLeg(i)}>×</button></td>
@@ -559,8 +650,14 @@ export default function CommodityPositionsPage() {
             </select>
           </label>
           <label>Lots
-            <input className="inp" type="number" min={1} max={1000} value={lots}
-                   onChange={(e) => setLots(Math.max(1, Number(e.target.value) || 1))} />
+            <LotsInput value={lots} onCommit={setLots} max={MAX_LOTS} />
+            {atmSizing && atmSizing.max_lots > 0 && (
+              <button className="linkish" type="button"
+                      onClick={() => setLots(atmSizing.max_lots)}
+                      title={atmSizing.reason}>
+                max {atmSizing.max_lots}
+              </button>
+            )}
           </label>
           <label>Product
             <select className="sel" value={product}
@@ -625,6 +722,70 @@ export default function CommodityPositionsPage() {
             )}
           </div>
 
+          {chain && atmRow && (
+            <div className="atmstrip">
+              <div className="atmhead">
+                <span className="atmtag">AT THE MONEY</span>
+                <b className="atmstrike">{atmRow.strike.toLocaleString("en-IN")}</b>
+                <span className="dim">
+                  future {inr(chain.spot, 2)}
+                  {atmRow.strike !== chain.spot && (
+                    <> · strike is {chain.spot > atmRow.strike ? "below" : "above"} it by{" "}
+                      {Math.abs(chain.spot - atmRow.strike).toFixed(2)}</>
+                  )}
+                </span>
+                <span className="grow" />
+                {sizingFor === sizingKey ? (
+                  <span className="sizeline">
+                    {atmSizing && atmSizing.max_lots > 0
+                      ? <>max <b>{atmSizing.max_lots}</b> lots each side · {atmSizing.reason}</>
+                      : <span className="warn-text">
+                          {atmSizing?.reason ?? "this account cannot carry one lot here"}
+                        </span>}
+                  </span>
+                ) : <span className="dim">sizing…</span>}
+              </div>
+              <div className="atmpair">
+                {(["CE", "PE"] as const).map((ot) => {
+                  const side = atmRow[ot === "CE" ? "ce" : "pe"];
+                  return (
+                    <div key={ot} className={`atmleg ${ot.toLowerCase()}`}>
+                      <span className="atmlabel">{ot === "CE" ? "CALL" : "PUT"}</span>
+                      <span className="atmname">
+                        {chain.symbol} {atmRow.strike.toLocaleString("en-IN")}{ot}
+                      </span>
+                      <span className="atmpx">{num(side.last_price, 2)}</span>
+                      <span className="atmiv">
+                        {side.iv ? `${(side.iv * 100).toFixed(1)}% IV` : "—"}
+                      </span>
+                      <span className="grow" />
+                      <button className="mini buy" disabled={!!busy}
+                              onClick={() => trade("OPTION", "BUY", chain.expiry, atmRow.strike, ot)}>
+                        Buy
+                      </button>
+                      <button className="mini sell" disabled={!!busy}
+                              onClick={() => trade("OPTION", "SELL", chain.expiry, atmRow.strike, ot)}>
+                        Sell
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="atmfoot dim">
+                Lots is pre-filled with the largest EQUAL size this account can carry on both
+                legs — {sizing?.sell ? <>{sizing.sell.max_lots} selling</> : "—"}
+                {sizing?.buy ? <>, {sizing.buy.max_lots} buying</> : ""}. Sized against the
+                same margin model the order gate uses, so it is a size that will fill.
+                {sizing?.buy && sizing.buy.max_lots > 0 && (
+                  <button className="linkish" type="button"
+                          onClick={() => setLots(sizing.buy!.max_lots)}>
+                    use the buying size
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {!optExpiries.length ? (
             <EmptyState
               title={expiriesFor !== symbol ? `Loading ${symbol} expiries…`
@@ -650,11 +811,9 @@ export default function CommodityPositionsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {chain.strikes.map((s) => {
-                    const atm = Math.abs(s.strike - chain.spot) ===
-                      Math.min(...chain.strikes.map((x) => Math.abs(x.strike - chain.spot)));
-                    return (
-                      <tr key={s.strike} className={atm ? "atm" : ""}>
+                  {chain.strikes.map((s) => (
+                      <tr key={s.strike}
+                          className={s.strike === atmRow?.strike ? "atm" : ""}>
                         <td className="dim">{s.ce.iv ? `${(s.ce.iv * 100).toFixed(1)}%` : "—"}</td>
                         <td className="dim">{num(s.ce.delta)}</td>
                         <td className="px">{num(s.ce.last_price, 2)}</td>
@@ -675,8 +834,7 @@ export default function CommodityPositionsPage() {
                         <td className="dim">{num(s.pe.delta)}</td>
                         <td className="dim">{s.pe.iv ? `${(s.pe.iv * 100).toFixed(1)}%` : "—"}</td>
                       </tr>
-                    );
-                  })}
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -913,6 +1071,60 @@ export default function CommodityPositionsPage() {
         .data-table td { padding: 7px 9px; text-align: center; border-bottom: 1px solid var(--canvas-soft); }
         .data-table th.l, .data-table td.l { text-align: left; }
         .atm { background: var(--purple-dim); }
+
+        /* The at-the-money pair, lifted above the ladder. The ladder itself is unchanged —
+           this is an addition, not a reordering, so a strike stays where you expect it. */
+        .atmstrip {
+          border: 1px solid var(--purple-line);
+          background: var(--purple-dim);
+          border-radius: 14px;
+          padding: 12px 14px;
+          margin-bottom: 14px;
+          display: flex; flex-direction: column; gap: 10px;
+        }
+        .atmhead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .atmtag {
+          font-size: 10px; font-weight: 700; letter-spacing: .09em;
+          color: var(--purple); border: 1px solid var(--purple-line);
+          border-radius: 999px; padding: 3px 9px; background: var(--panel);
+        }
+        .atmstrike { font-size: 19px; font-variant-numeric: tabular-nums; }
+        .grow { flex: 1 1 auto; }
+        .sizeline { font-size: 12px; color: var(--fg-dim); }
+        .sizeline b { color: var(--fg); font-variant-numeric: tabular-nums; }
+        .warn-text { color: var(--loss); font-size: 12px; }
+
+        .atmpair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .atmleg {
+          display: flex; align-items: center; gap: 10px;
+          background: var(--panel); border: 1px solid var(--line);
+          border-radius: 10px; padding: 9px 12px; min-width: 0;
+        }
+        .atmleg.ce { border-left: 3px solid var(--gain); }
+        .atmleg.pe { border-left: 3px solid var(--loss); }
+        .atmlabel {
+          font-size: 10px; font-weight: 700; letter-spacing: .07em; color: var(--fg-dim);
+        }
+        .atmname {
+          font-size: 12px; color: var(--fg-dim);
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .atmpx {
+          font-size: 16px; font-weight: 650; font-variant-numeric: tabular-nums;
+        }
+        .atmiv { font-size: 11px; color: var(--fg-dim); font-variant-numeric: tabular-nums; }
+        .atmfoot { font-size: 11.5px; line-height: 1.5; }
+
+        .linkish {
+          background: none; border: 0; padding: 0 0 0 6px; cursor: pointer;
+          color: var(--purple); font: inherit; font-size: 11.5px;
+          text-decoration: underline; text-underline-offset: 2px;
+        }
+        .linkish:hover { opacity: .78; }
+
+        @media (max-width: 720px) {
+          .atmpair { grid-template-columns: 1fr; }
+        }
         .bad { background: rgba(220,38,38,.06); }
         .strike { font-family: var(--font-data); font-weight: 700; }
         .px { font-family: var(--font-data); }
@@ -939,6 +1151,54 @@ export default function CommodityPositionsPage() {
 }
 
 /** One labelled number in the basket footer — smaller than a Tile, same vocabulary. */
+/** A lot-count box you can actually edit.
+ *
+ * The obvious `value={n} onChange={e => set(Number(e.target.value) || 1)}` cannot be typed
+ * in. Backspacing to empty parses as 0, the `|| 1` snaps it straight back to "1", and the
+ * caret lands after a digit nobody typed — so changing 10 to 30 means deleting the 0,
+ * watching a 1 reappear, and never getting the field empty. Replacing the value is
+ * impossible without selecting all of it first.
+ *
+ * The fix is to let the field hold raw text while it has focus, including empty, and only
+ * coerce to a number on blur. Digits still commit as you type, so the estimate below keeps
+ * updating live; it is only the snap-back that is gone. Focus also selects, so typing over
+ * a value works the way it does everywhere else. */
+function LotsInput({ value, onCommit, min = 1, max = MAX_LOTS, className = "inp" }: {
+  value: number;
+  onCommit: (n: number) => void;
+  min?: number;
+  max?: number;
+  className?: string;
+}) {
+  const [text, setText] = useState(String(value));
+  const [editing, setEditing] = useState(false);
+
+  useEffect(() => { if (!editing) setText(String(value)); }, [value, editing]);
+
+  return (
+    <input
+      className={className}
+      type="text"
+      inputMode="numeric"
+      value={editing ? text : String(value)}
+      aria-label="Lots"
+      onFocus={(e) => { setEditing(true); setText(String(value)); e.currentTarget.select(); }}
+      onChange={(e) => {
+        const raw = e.target.value.replace(/[^0-9]/g, "").slice(0, 5);
+        setText(raw);
+        const n = parseInt(raw, 10);
+        // Empty and 0 are legal to HOLD but not to commit — they are mid-edit states.
+        if (Number.isFinite(n) && n >= min) onCommit(Math.min(max, n));
+      }}
+      onBlur={() => {
+        setEditing(false);
+        const n = parseInt(text, 10);
+        onCommit(Number.isFinite(n) && n >= min ? Math.min(max, n) : min);
+      }}
+    />
+  );
+}
+
 function Figure({ label, value, sub, tone }: {
   label: string; value: string; sub?: string; tone?: "gain" | "loss";
 }) {

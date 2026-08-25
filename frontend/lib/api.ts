@@ -5349,6 +5349,11 @@ export async function exitCmpPosition(position_id: string, account_id: string, l
 export async function resetCmpAccount(account_id: string): Promise<any> {
   return apiFetch(`${cmp}/reset?account_id=${encodeURIComponent(account_id)}`, { method: "POST" });
 }
+export async function deleteCmpAccount(account_id: string): Promise<{
+  deleted: string; closed_positions_removed: number; orders_removed: number;
+}> {
+  return apiFetch(`${cmp}/accounts/${encodeURIComponent(account_id)}`, { method: "DELETE" });
+}
 export async function fetchCmpSpecCheck(): Promise<{ spec_check: CmpSpecCheckRow[]; all_plausible: boolean; note: string }> {
   return apiFetch(`${cmp}/spec-check`);
 }
@@ -5401,6 +5406,25 @@ export interface CmpBasketEstimate {
 
 export async function estimateCmpBasket(account_id: string, legs: CmpBasketLeg[]): Promise<CmpBasketEstimate> {
   return apiFetch(`${cmp}/basket/estimate`, {
+    method: "POST",
+    body: JSON.stringify({ account_id, legs }),
+  });
+}
+
+export interface CmpMaxLots {
+  max_lots: number;
+  margin: number;
+  available_cash: number;
+  margin_per_lot: number;
+  premium_per_lot: number;
+  legs: number;
+  reason: string;
+}
+
+/** The largest EQUAL lot count this account can carry across these legs.
+ *  Lots in the payload are ignored — the server sizes them. */
+export async function maxCmpLots(account_id: string, legs: CmpBasketLeg[]): Promise<CmpMaxLots> {
+  return apiFetch(`${cmp}/basket/max-lots`, {
     method: "POST",
     body: JSON.stringify({ account_id, legs }),
   });

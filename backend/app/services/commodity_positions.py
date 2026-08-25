@@ -350,6 +350,32 @@ async def edit_account(account_id: str, name: str | None = None,
     return await get_account(account_id)
 
 
+async def delete_account(account_id: str) -> dict:
+    """Remove a paper account and everything in it.
+
+    Refuses while positions are still open: deleting a book with live positions would
+    orphan them — they would keep being marked to market by the sync pass, against an
+    account that no longer exists to carry the risk. Close first, then delete."""
+    account = await get_account(account_id)
+    open_count = await commodity_pos_positions_collection.count_documents(
+        {"account_id": account_id, "status": "OPEN"})
+    if open_count:
+        raise OrderError(
+            f"{account['name']} still has {open_count} open position"
+            f"{'s' if open_count > 1 else ''}. Close them first — deleting the account "
+            "would leave them being marked to market against a book that is gone.")
+    if await commodity_accounts_collection.count_documents({}) <= 1:
+        raise OrderError(
+            "This is the only paper account. Create another before deleting this one, "
+            "or use Reset to empty it instead.")
+
+    pos = await commodity_pos_positions_collection.delete_many({"account_id": account_id})
+    orders = await commodity_pos_orders_collection.delete_many({"account_id": account_id})
+    await commodity_accounts_collection.delete_one({"account_id": account_id})
+    return {"deleted": account["name"], "closed_positions_removed": pos.deleted_count,
+            "orders_removed": orders.deleted_count}
+
+
 # --------------------------------------------------------------------------------
 # Universe
 # --------------------------------------------------------------------------------
@@ -922,6 +948,9 @@ async def exit_position(account_id: str, position_id: str, lots: int | None = No
 # stop — leaving a naked short where a spread was intended.
 
 MAX_BASKET_LEGS = int(os.getenv("COMMODITY_MAX_BASKET_LEGS", "10"))
+# Ceiling for auto-sizing only. A rich account against a cheap contract can afford
+# thousands of lots, which is not a size anyone means to put on by clicking "Max".
+MAX_LOTS_PER_ORDER = int(os.getenv("COMMODITY_MAX_LOTS_PER_ORDER", "500"))
 
 
 async def _price_basket(legs: list[dict]) -> list[dict]:
@@ -1054,6 +1083,76 @@ async def estimate_basket(account_id: str, legs: list[dict]) -> dict:
                 "each other cost less together than apart. Contract exposure is the full "
                 "notional you are controlling, which on MCX is many times the margin.",
     }
+
+
+async def max_lots(account_id: str, legs: list[dict], cap: int = MAX_LOTS_PER_ORDER) -> dict:
+    """The largest EQUAL lot count this account can carry across the given legs.
+
+    Not `cash / one_lot_margin`: margin is not linear in lots once legs hedge each other,
+    and a short straddle's margin is one side's risk rather than the sum of both, so the
+    linear guess is wrong in both directions depending on the basket. This searches the
+    real margin model instead.
+
+    Everything that does not depend on SIZE — the reference future price, time to expiry,
+    the legs already open in the group — is resolved once and reused, so the search itself
+    is pure arithmetic. Prices are fetched once at one lot, not once per probe; the naive
+    version re-quoted every leg through Angel on each of ~18 iterations.
+
+    Returns 0 when even one lot does not fit. That is an answer, not an error."""
+    await get_account(account_id)
+    if not legs:
+        raise OrderError("Nothing to size — pick a contract first")
+    cash = await available_cash(account_id)
+    priced = await _price_basket([{**leg, "lots": 1} for leg in legs])
+
+    groups: dict[tuple, list[dict]] = {}
+    for p in priced:
+        groups.setdefault((p["symbol"], p["inst"].get("expiry")), []).append(p)
+
+    context: list[tuple] = []
+    for (underlying, expiry), plist in groups.items():
+        t = _years_to_expiry(expiry)
+        ref, _fut = await future_price(underlying, expiry)
+        ref = ref or plist[0]["ltp"]
+        open_legs = [_pos_to_leg(q, ref, t)
+                     for q in await _open_group(account_id, underlying, expiry)]
+        before = _margin_for(open_legs, underlying, ref, t)["total"] if open_legs else 0.0
+        context.append((underlying, ref, t, open_legs, before, plist))
+
+    def margin_for(n: int) -> float:
+        added = 0.0
+        for underlying, ref, t, open_legs, before, plist in context:
+            add = [_leg_from(p["inst"], p["side"], n * p["multiplier"], p["ltp"], ref, t)
+                   for p in plist]
+            added += _margin_for(open_legs + add, underlying, ref, t)["total"] - before
+        return round(max(0.0, added), 2)
+
+    premium = round(sum(p["ltp"] * p["multiplier"] * (1 if p["side"] == "SELL" else -1)
+                        for p in priced), 2)
+    shape = {"legs": len(priced), "premium_per_lot": premium,
+             "margin_per_lot": margin_for(1), "available_cash": round(cash, 2)}
+
+    one = margin_for(1)
+    if cash <= 0 or one > cash:
+        return {**shape, "max_lots": 0, "margin": one,
+                "reason": (f"no free cash in this account" if cash <= 0 else
+                           f"one lot needs ₹{one:,.0f} but only ₹{cash:,.0f} is free")}
+
+    lo, hi = 1, 2
+    while hi <= cap and margin_for(hi) <= cash:
+        lo, hi = hi, hi * 2
+    hi = min(hi, cap + 1)
+    while lo + 1 < hi:
+        mid = (lo + hi) // 2
+        if margin_for(mid) <= cash:
+            lo = mid
+        else:
+            hi = mid
+
+    used = margin_for(lo)
+    return {**shape, "max_lots": lo, "margin": used,
+            "reason": (f"{lo} lot{'s' if lo > 1 else ''} per leg blocks ₹{used:,.0f} "
+                       f"of ₹{cash:,.0f}" + (f" (capped at {cap})" if lo >= cap else ""))}
 
 
 async def execute_basket(account_id: str, legs: list[dict],
@@ -1214,6 +1313,7 @@ __all__ = [
     "multiplier", "contract_value", "spec_doc", "check_specs", "tick_rupees",
     "prime_lotsizes",
     "ensure_default_account", "list_accounts", "get_account", "create_account",
+    "delete_account", "max_lots",
     "edit_account", "underlyings", "future_expiries", "option_expiries",
     "option_chain", "futures_board", "underlying_future", "future_price",
     "estimate_margin", "place_order", "exit_position", "sync_positions",

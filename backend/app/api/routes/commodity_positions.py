@@ -16,6 +16,8 @@ mathematics; this router is a thin layer over it.
   POST   /api/commodity-positions/orders               place a BUY/SELL order
   POST   /api/commodity-positions/basket/estimate      what a basket costs, before placing
   POST   /api/commodity-positions/basket/execute       fill every leg, or none
+  POST   /api/commodity-positions/basket/max-lots      largest equal size this book can carry
+  DELETE /api/commodity-positions/accounts/{id}        delete an empty paper account
   GET    /api/commodity-positions/orders               order book
   GET    /api/commodity-positions/positions            open + closed, with summary
   POST   /api/commodity-positions/positions/{id}/exit  exit fully or partially, in lots
@@ -40,8 +42,10 @@ from app.services.commodity_positions import (
     MAX_BASKET_LEGS,
     OrderError,
     create_account,
+    delete_account,
     estimate_basket,
     execute_basket,
+    max_lots,
     remargin_account,
     edit_account,
     estimate_margin,
@@ -151,6 +155,15 @@ async def edit_account_endpoint(account_id: str, payload: EditAccountRequest,
                                 _u: dict = Depends(get_current_user)):
     try:
         return await edit_account(account_id, payload.name, payload.initial_capital)
+    except OrderError as exc:
+        raise HTTPException(400, exc.detail)
+
+
+@router.delete("/accounts/{account_id}")
+async def delete_account_endpoint(account_id: str, _u: dict = Depends(get_current_user)):
+    """Delete a paper account. Refuses while it still holds open positions."""
+    try:
+        return await delete_account(account_id)
     except OrderError as exc:
         raise HTTPException(400, exc.detail)
 
@@ -274,6 +287,16 @@ async def basket_estimate_endpoint(payload: BasketRequest,
     try:
         return await estimate_basket(payload.account_id,
                                      [leg.model_dump() for leg in payload.legs])
+    except OrderError as exc:
+        raise HTTPException(400, exc.detail)
+
+
+@router.post("/basket/max-lots")
+async def max_lots_endpoint(payload: BasketRequest, _u: dict = Depends(get_current_user)):
+    """The largest equal lot count this account can carry across the given legs."""
+    try:
+        return await max_lots(payload.account_id,
+                              [leg.model_dump() for leg in payload.legs])
     except OrderError as exc:
         raise HTTPException(400, exc.detail)
 
