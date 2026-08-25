@@ -5392,7 +5392,10 @@ export interface CmpPricedLeg extends CmpSpec {
 
 export interface CmpBasketEstimate {
   legs: CmpPricedLeg[];
+  /** Signed. Negative when the basket hedges an open position and FREES margin. */
   margin_required: number;
+  /** How much the basket frees, as a positive number. Zero when it consumes margin. */
+  margin_released: number;
   margin_if_legged_separately: number;
   hedge_benefit: number;
   net_premium: number;

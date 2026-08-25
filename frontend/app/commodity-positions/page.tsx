@@ -126,6 +126,11 @@ export default function CommodityPositionsPage() {
 
   const spec = useMemo(() => unders.find((u) => u.symbol === symbol), [unders, symbol]);
 
+  // True when the basket REDUCES the account's required margin rather than consuming any:
+  // it hedges a position already open, so less is held against the pair than against the
+  // surviving leg on its own.
+  const releasesMargin = !!quote && quote.margin_released > 0;
+
   // The at-the-money strike: the listed strike nearest the underlying FUTURE, which is the
   // reference the chain is priced against — not the spot commodity, which MCX does not
   // quote intraday. Computed once here rather than rescanning every strike per row.
@@ -573,12 +578,22 @@ export default function CommodityPositionsPage() {
 
           <div className="basketfoot">
             <div className="figures">
-              <Figure label="Margin required" value={compact(quote?.margin_required)}
-                      tone={quote && !quote.affordable ? "loss" : undefined}
-                      sub={quote && quote.hedge_benefit > 0
-                        ? `${compact(quote.hedge_benefit)} saved by hedging`
-                        : "portfolio margin for the whole basket"} />
+              {/* A basket that hedges something already open needs NEGATIVE margin — the
+                  book holds less against the pair than against the leg alone. Showing that
+                  as "Margin required -12,331" reads like a defect, so it is labelled for
+                  what it is. */}
+              {releasesMargin ? (
+                <Figure label="Margin released" value={compact(quote!.margin_released)}
+                        tone="gain" sub="this basket hedges an open position" />
+              ) : (
+                <Figure label="Margin required" value={compact(quote?.margin_required)}
+                        tone={quote && !quote.affordable ? "loss" : undefined}
+                        sub={quote && quote.hedge_benefit > 0
+                          ? `${compact(quote.hedge_benefit)} saved by hedging`
+                          : "portfolio margin for the whole basket"} />
+              )}
               <Figure label="Available cash" value={compact(quote?.available_cash)}
+                      tone={(quote?.available_cash ?? 0) < 0 ? "loss" : undefined}
                       sub={quote ? `${compact(quote.cash_after)} left after` : "in this account"} />
               <Figure label="Contract exposure" value={compact(quote?.contract_exposure)}
                       sub="full notional controlled" />
@@ -590,10 +605,18 @@ export default function CommodityPositionsPage() {
             <div className="basketactions">
               {quote && !quote.affordable && (
                 <div className="blocked">
-                  Short by <b>{compact(quote.shortfall)}</b> — this basket needs{" "}
-                  {compact(quote.margin_required)} and the account has{" "}
+                  Short by <b>{compact(quote.shortfall)}</b> — this basket adds{" "}
+                  {compact(quote.margin_required)} of margin and the account has{" "}
                   {compact(quote.available_cash)}. Reduce lots, remove a leg, or raise the
                   account&apos;s capital.
+                </div>
+              )}
+              {releasesMargin && (quote?.available_cash ?? 0) < 0 && (
+                <div className="freed">
+                  This basket <b>frees {compact(quote!.margin_released)}</b> — it hedges what
+                  is already open, so the book needs less held against it after the fill.
+                  Allowed even though cash is negative: it cannot make this account any less
+                  solvent, and refusing it would leave you holding the riskier half.
                 </div>
               )}
               <button className="btn" disabled={!!busy} onClick={() => { setBasket([]); setQuote(null); }}>
@@ -605,6 +628,7 @@ export default function CommodityPositionsPage() {
                 {busy === "basket" ? "Placing…"
                   : quoting ? "Pricing…"
                   : quote && !quote.affordable ? "Exceeds available cash"
+                  : releasesMargin ? `Place basket · frees ${compact(quote!.margin_released)}`
                   : `Place basket · ${compact(quote?.margin_required)}`}
               </button>
             </div>
@@ -1031,6 +1055,10 @@ export default function CommodityPositionsPage() {
                          flex-wrap: wrap; }
         .blocked { font-size: 11.5px; color: var(--loss); max-width: 380px; line-height: 1.5;
                    align-self: center; }
+        .freed {
+          color: var(--gain); font-size: 12px; line-height: 1.55;
+          max-width: 560px; text-align: right;
+        }
         .bad-note { padding: 10px 20px; font-size: 12px; color: var(--loss); }
         .overcommitted { border: 1px solid rgba(220,38,38,.35); background: rgba(220,38,38,.06);
                          border-radius: 14px; padding: 13px 18px; font-size: 12.5px;

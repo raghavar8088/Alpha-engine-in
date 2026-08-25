@@ -1042,7 +1042,32 @@ async def basket_margin_delta(account_id: str, priced: list[dict]) -> tuple[floa
         before = _margin_for(old_legs, underlying, ref, t)["total"] if old_legs else 0.0
         after = _margin_for(old_legs + add_legs, underlying, ref, t)["total"]
         added += after - before
-    return round(max(0.0, added), 2), round(net_premium, 2)
+    # SIGNED, deliberately. A basket that re-hedges an existing position genuinely REDUCES
+    # this account's required margin, and clamping that to zero was not a cosmetic choice:
+    # `added <= available_cash` is just `deployed + added <= capital + realised` rearranged,
+    # so reporting 0 for a delta of -12,331 made the gate compare the WRONG total and refuse
+    # a basket that would have left the book solvent.
+    return round(added, 2), round(net_premium, 2)
+
+
+def basket_allowed(added: float, cash: float) -> bool:
+    """Can this basket go on? One definition, shared by the estimate and the fill, so the
+    number on screen can never disagree with the one that decides.
+
+    Two ways to pass. The obvious one is having the cash for the extra margin. The second —
+    asking for no extra margin at all — is not a convenience, it is what stops the desk
+    trapping you:
+
+      * margin is re-derived from the live futures price on every fill, so a book can drift
+        over-committed without you trading at all; and
+      * closing one leg of a hedged pair RAISES the margin on the leg left behind, because
+        the leg that was offsetting it is gone.
+
+    Either leaves available cash negative. A gate of `added <= cash` alone then refuses the
+    re-hedge that would repair the book, and the account is locked out of the one trade that
+    fixes it — while the position it is stuck holding is the riskier of the two. Anything
+    that does not increase required margin cannot reduce solvency, so it is always allowed."""
+    return added <= cash + 0.01 or added <= 0.01
 
 
 async def estimate_basket(account_id: str, legs: list[dict]) -> dict:
@@ -1071,14 +1096,17 @@ async def estimate_basket(account_id: str, legs: list[dict]) -> dict:
             **spec_doc(p["symbol"]),
         } for p in priced],
         "margin_required": added,
+        # Positive when the basket FREES margin — it hedges something already open, so the
+        # book needs less held against it after the fill than before.
+        "margin_released": round(max(0.0, -added), 2),
         "margin_if_legged_separately": round(naive, 2),
         "hedge_benefit": round(max(0.0, naive - added), 2),
         "net_premium": net_premium,
         "contract_exposure": round(exposure, 2),
         "available_cash": round(cash, 2),
         "cash_after": round(cash - added, 2),
-        "affordable": added <= cash + 0.01,
-        "shortfall": round(max(0.0, added - cash), 2),
+        "affordable": basket_allowed(added, cash),
+        "shortfall": round(max(0.0, added - cash), 2) if added > 0.01 else 0.0,
         "note": "Margin is the portfolio figure for the whole basket, so legs that hedge "
                 "each other cost less together than apart. Contract exposure is the full "
                 "notional you are controlling, which on MCX is many times the margin.",
@@ -1125,34 +1153,33 @@ async def max_lots(account_id: str, legs: list[dict], cap: int = MAX_LOTS_PER_OR
             add = [_leg_from(p["inst"], p["side"], n * p["multiplier"], p["ltp"], ref, t)
                    for p in plist]
             added += _margin_for(open_legs + add, underlying, ref, t)["total"] - before
-        return round(max(0.0, added), 2)
+        return round(added, 2)
 
     premium = round(sum(p["ltp"] * p["multiplier"] * (1 if p["side"] == "SELL" else -1)
                         for p in priced), 2)
     shape = {"legs": len(priced), "premium_per_lot": premium,
              "margin_per_lot": margin_for(1), "available_cash": round(cash, 2)}
 
+    # Scan DOWN from the cap for the largest size that passes, rather than binary
+    # searching up. Added margin is not monotonic in lots when the basket hedges something
+    # already open: it falls as the new legs offset the existing risk, bottoms out near the
+    # size that balances it, then climbs once the new side dominates. A binary search
+    # assumes one crossing and can settle on the wrong side of that dip. `margin_for` is
+    # pure arithmetic on a handful of legs — prices were fetched once, above — so scanning
+    # the whole range costs a few milliseconds and is correct whatever the shape.
+    for n in range(cap, 0, -1):
+        added = margin_for(n)
+        if basket_allowed(added, cash):
+            note = (f"{n} lot{'s' if n > 1 else ''} per leg "
+                    + (f"frees ₹{-added:,.0f}" if added < 0
+                       else f"blocks ₹{added:,.0f} of ₹{cash:,.0f}")
+                    + (f" (capped at {cap})" if n >= cap else ""))
+            return {**shape, "max_lots": n, "margin": added, "reason": note}
+
     one = margin_for(1)
-    if cash <= 0 or one > cash:
-        return {**shape, "max_lots": 0, "margin": one,
-                "reason": (f"no free cash in this account" if cash <= 0 else
-                           f"one lot needs ₹{one:,.0f} but only ₹{cash:,.0f} is free")}
-
-    lo, hi = 1, 2
-    while hi <= cap and margin_for(hi) <= cash:
-        lo, hi = hi, hi * 2
-    hi = min(hi, cap + 1)
-    while lo + 1 < hi:
-        mid = (lo + hi) // 2
-        if margin_for(mid) <= cash:
-            lo = mid
-        else:
-            hi = mid
-
-    used = margin_for(lo)
-    return {**shape, "max_lots": lo, "margin": used,
-            "reason": (f"{lo} lot{'s' if lo > 1 else ''} per leg blocks ₹{used:,.0f} "
-                       f"of ₹{cash:,.0f}" + (f" (capped at {cap})" if lo >= cap else ""))}
+    return {**shape, "max_lots": 0, "margin": one,
+            "reason": (f"one lot needs ₹{one:,.0f} but only ₹{cash:,.0f} is free"
+                       if cash < one else "this account cannot carry one lot here")}
 
 
 async def execute_basket(account_id: str, legs: list[dict],
@@ -1170,11 +1197,11 @@ async def execute_basket(account_id: str, legs: list[dict],
     priced = await _price_basket(legs)
     added, net_premium = await basket_margin_delta(account_id, priced)
     cash = await available_cash(account_id)
-    if added > cash + 0.01:
+    if not basket_allowed(added, cash):
         raise OrderError(
-            f"Not enough paper capital. This basket needs ₹{added:,.0f} of portfolio "
-            f"margin and the account has ₹{cash:,.0f} — short by ₹{added - cash:,.0f}. "
-            "Nothing was filled.")
+            f"Not enough paper capital. This basket ADDS ₹{added:,.0f} of portfolio margin "
+            f"and the account has ₹{cash:,.0f} — short by ₹{added - cash:,.0f}. Reduce lots "
+            "or close something first. Nothing was filled.")
 
     # Buys first, so a protective long is in place before the short it covers. The
     # combined gate has already cleared, but this keeps every intermediate state sane.
@@ -1318,6 +1345,7 @@ __all__ = [
     "option_chain", "futures_board", "underlying_future", "future_price",
     "estimate_margin", "place_order", "exit_position", "sync_positions",
     "reset_account", "summary", "available_cash",
-    "estimate_basket", "execute_basket", "basket_margin_delta", "MAX_BASKET_LEGS",
+    "estimate_basket", "execute_basket", "basket_margin_delta", "basket_allowed",
+    "MAX_BASKET_LEGS",
     "remargin_group", "remargin_account",
 ]

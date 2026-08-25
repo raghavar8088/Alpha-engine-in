@@ -676,7 +676,20 @@ async def _basket_margin_delta(dhan: DhanClient, account_id: str, priced: list[d
         old = portfolio_margin(old_legs, spot, t)["total"]
         new = portfolio_margin(old_legs + add_legs, spot, t)["total"]
         added += new - old
-    return round(max(0.0, added), 2), round(net_premium, 2)
+    # SIGNED — see `_basket_allowed` below. Clamping a margin-reducing basket to zero made
+    # the gate compare the wrong total and refuse a re-hedge that leaves the book solvent.
+    return round(added, 2), round(net_premium, 2)
+
+
+def _basket_allowed(added: float, cash: float) -> bool:
+    """Fund the extra margin, OR ask for no extra margin at all.
+
+    The second clause stops the desk trapping you. Closing one leg of a hedged pair raises
+    the margin on the leg left behind — the offset is gone — which can push available cash
+    negative without a single new trade. Gating only on `added <= cash` then refuses the
+    re-hedge that would repair the book. A basket that does not increase required margin
+    cannot reduce solvency, so it always goes on."""
+    return added <= cash + 0.01 or added <= 0.01
 
 
 async def estimate_basket_margin(dhan: DhanClient, account_id: str, legs: list[dict], product_type: str = "MARGIN") -> dict:
@@ -686,9 +699,10 @@ async def estimate_basket_margin(dhan: DhanClient, account_id: str, legs: list[d
     cash = await available_cash(account_id)
     return {
         "margin_required": added,
+        "margin_released": round(max(0.0, -added), 2),
         "net_premium": net_premium,
         "available_cash": round(cash, 2),
-        "affordable": added <= cash + 0.01,
+        "affordable": _basket_allowed(added, cash),
         "legs": [
             {"label": p["label"], "side": p["side"], "lots": p["lots"], "qty": p["qty"], "ltp": round(p["ltp"], 2)}
             for p in priced
@@ -703,7 +717,7 @@ async def execute_basket(dhan: DhanClient, account_id: str, legs: list[dict], pr
     priced = await _price_basket(dhan, legs)
     added, net_premium = await _basket_margin_delta(dhan, account_id, priced)
     cash = await available_cash(account_id)
-    if added > cash + 0.01:
+    if not _basket_allowed(added, cash):
         raise OrderError(
             f"Insufficient paper capital: this basket adds ₹{added:,.2f} of portfolio margin "
             f"(net of hedges), only ₹{cash:,.2f} available in this account"
