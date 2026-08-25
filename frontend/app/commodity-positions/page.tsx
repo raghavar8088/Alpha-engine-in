@@ -84,25 +84,43 @@ export default function CommodityPositionsPage() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  const [loadingBook, setLoadingBook] = useState(true);
+  const [loadingUnders, setLoadingUnders] = useState(true);
+  const [undersError, setUndersError] = useState<string | null>(null);
 
   const spec = useMemo(() => unders.find((u) => u.symbol === symbol), [unders, symbol]);
 
   // ---- bootstrap -------------------------------------------------------------
-  useEffect(() => {
-    (async () => {
-      try {
-        const [a, u] = await Promise.all([fetchCmpAccounts(), fetchCmpUnderlyings()]);
-        setAccounts(a.accounts);
-        if (a.accounts.length && !accountId) setAccountId(a.accounts[0].account_id);
-        setUnders(u.underlyings);
-        const first = u.underlyings.find((x) => x.has_options) ?? u.underlyings[0];
-        if (first && !symbol) setSymbol(first.symbol);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Failed to load the commodity desk");
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Two INDEPENDENT loads, deliberately not one Promise.all. When they were combined, a
+  // single slow endpoint rejected the pair and blanked the entire page — no accounts, no
+  // underlyings, every tile a dash — even though the account list had answered fine.
+  const loadAccounts = useCallback(async () => {
+    try {
+      const a = await fetchCmpAccounts();
+      setAccounts(a.accounts);
+      setAccountId((cur) => cur || a.accounts[0]?.account_id || "");
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not load the paper accounts");
+    }
   }, []);
+
+  const loadUnderlyings = useCallback(async () => {
+    setLoadingUnders(true);
+    try {
+      const u = await fetchCmpUnderlyings();
+      setUnders(u.underlyings);
+      setSymbol((cur) => cur ||
+        (u.underlyings.find((x) => x.has_options) ?? u.underlyings[0])?.symbol || "");
+      setUndersError(null);
+    } catch (e) {
+      setUndersError(e instanceof Error ? e.message : "Could not load the MCX board");
+    } finally {
+      setLoadingUnders(false);
+    }
+  }, []);
+
+  useEffect(() => { loadAccounts(); loadUnderlyings(); }, [loadAccounts, loadUnderlyings]);
 
   // ---- expiries follow the underlying ----------------------------------------
   useEffect(() => {
@@ -132,13 +150,15 @@ export default function CommodityPositionsPage() {
   }, [tab, specs.length]);
 
   const loadBook = useCallback(async () => {
-    if (!accountId) return;
+    if (!accountId) { setLoadingBook(false); return; }
     try {
       const s = await fetchCmpPositions(accountId);
       setSummary(s);
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load positions");
+    } finally {
+      setLoadingBook(false);
     }
   }, [accountId]);
 
@@ -193,41 +213,35 @@ export default function CommodityPositionsPage() {
         subtitle={
           <>
             Live MCX futures and option chains — buy or sell in lots at real prices, across
-            multiple paper accounts each with its own balance (default ₹1 crore).{" "}
-            <strong>An MCX lot is not one unit.</strong> A ZINC lot is 5 tonnes and a GOLD
-            lot is a kilogram, so every contract here shows its lot quantity and its full
-            contract value before you trade it. Priced by Angel One — Dhan does not cover
-            MCX — and margined with a local SPAN-style model scanned per commodity. Not
-            investment advice.
+            multiple paper accounts each with its own balance. Priced by Angel One and
+            margined with a local SPAN-style model. Not investment advice.
           </>
         }
         actions={
           <>
             <StatusPill label="MCX · paper" tone="accent" />
-            <select className="sel" value={accountId} onChange={(e) => setAccountId(e.target.value)}>
-              {accounts.map((a) => (
-                <option key={a.account_id} value={a.account_id}>
-                  {a.name} · {compact(a.initial_capital)}
-                </option>
-              ))}
-            </select>
+            <button className="btn" disabled={!!busy} onClick={() => {
+              setLoadingBook(true);
+              act("refresh", async () => {
+                await Promise.all([loadAccounts(), loadUnderlyings()]);
+              });
+            }}>{busy === "refresh" ? "Refreshing\u2026" : "\u21bb Refresh"}</button>
             <button className="btn" disabled={!!busy} onClick={() => {
               const name = window.prompt("New paper account name");
               if (!name) return;
               act("new", async () => {
                 const a = await createCmpAccount(name);
-                const list = await fetchCmpAccounts();
-                setAccounts(list.accounts);
+                await loadAccounts();
                 setAccountId(a.account_id);
               }, false);
             }}>+ New Account</button>
             <button className="btn" disabled={!!busy || !accountId} onClick={() => {
-              const cap = window.prompt("New starting capital (₹)",
+              const cap = window.prompt("New starting capital (INR)",
                 String(summary?.initial_capital ?? 10000000));
               if (!cap) return;
               act("edit", async () => {
                 await editCmpAccount(accountId, { initial_capital: Number(cap) });
-                setAccounts((await fetchCmpAccounts()).accounts);
+                await loadAccounts();
               });
             }}>Edit</button>
             <button className="btn danger" disabled={!!busy || !accountId} onClick={() => {
@@ -238,7 +252,31 @@ export default function CommodityPositionsPage() {
         }
       />
 
+      <div className="accountbar">
+        <label className="fld">
+          <span>Paper account</span>
+          <select className="sel wide" value={accountId}
+                  onChange={(e) => { setAccountId(e.target.value); setLoadingBook(true); }}>
+            {!accounts.length && <option value="">Loading accounts\u2026</option>}
+            {accounts.map((a) => (
+              <option key={a.account_id} value={a.account_id}>
+                {a.name} — starting capital {compact(a.initial_capital)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className="lotnote">
+          <b>An MCX lot is not one unit.</b> A ZINC lot is 5 tonnes and a GOLD lot is a
+          kilogram, so every contract here shows its lot quantity and full contract value
+          before you trade it — one lot ranges from ₹16,000 to ₹1.6 crore.
+        </div>
+      </div>
+
       {error && <ErrorBanner message={error} onRetry={loadBook} />}
+      {undersError && <ErrorBanner
+        message={undersError + " \u2014 the MCX contract board could not be read, "
+                 + "so the underlying list is empty."}
+        onRetry={loadUnderlyings} />}
       {notice && (
         <GlassPanel title="Filled" note="paper">
           <div className="notice">{notice}</div>
@@ -246,30 +284,36 @@ export default function CommodityPositionsPage() {
       )}
 
       <div className="tiles">
-        <Tile label="Equity" value={compact(summary?.equity)}
-              sub={`started at ${compact(summary?.initial_capital)}`} />
-        <Tile label="Available cash" value={compact(summary?.available_cash)}
+        <Tile label="Equity" value={compact(summary?.equity)} loading={loadingBook}
+              sub={summary ? `started at ${compact(summary.initial_capital)}` : "no account selected"} />
+        <Tile label="Available cash" value={compact(summary?.available_cash)} loading={loadingBook}
               sub={`${compact(summary?.margin_deployed)} margin blocked`} />
-        <Tile label="Contract exposure" value={compact(summary?.contract_exposure)}
+        <Tile label="Contract exposure" value={compact(summary?.contract_exposure)} loading={loadingBook}
               sub="full notional of the open book" />
-        <Tile label="Unrealised" value={signed(summary?.unrealized_pnl)}
+        <Tile label="Unrealised" value={signed(summary?.unrealized_pnl)} loading={loadingBook}
               tone={(summary?.unrealized_pnl ?? 0) >= 0 ? "gain" : "loss"}
               sub={`${summary?.open_count ?? 0} open`} />
-        <Tile label="Realised" value={signed(summary?.realized_pnl)}
+        <Tile label="Realised" value={signed(summary?.realized_pnl)} loading={loadingBook}
               tone={(summary?.realized_pnl ?? 0) >= 0 ? "gain" : "loss"}
               sub={`${summary?.closed_count ?? 0} closed`} />
-        <Tile label="Underlyings" value={String(unders.length)}
-              sub={`${unders.filter((u) => u.has_options).length} with options`} />
+        <Tile label="Underlyings" value={String(unders.length)} loading={loadingUnders}
+              sub={unders.length
+                ? `${unders.filter((u) => u.has_options).length} with options`
+                : undersError ? "board unavailable" : "none loaded"} />
       </div>
 
       {/* ---- order ticket -------------------------------------------------- */}
       <GlassPanel title="Order ticket" note="applies to every Buy/Sell button below">
         <div className="ticket">
           <label>Underlying
-            <select className="sel" value={symbol} onChange={(e) => setSymbol(e.target.value)}>
+            <select className="sel wide" value={symbol} disabled={!unders.length}
+                    onChange={(e) => setSymbol(e.target.value)}>
+              {!unders.length && (
+                <option value="">{loadingUnders ? "Loading MCX board\u2026" : "No contracts on file"}</option>
+              )}
               {unders.map((u) => (
                 <option key={u.symbol} value={u.symbol}>
-                  {u.symbol}{u.has_options ? "" : " (futures only)"}
+                  {u.symbol}{u.has_options ? " \u2014 " + u.options + " options" : " \u2014 futures only"}
                 </option>
               ))}
             </select>
@@ -550,6 +594,15 @@ export default function CommodityPositionsPage() {
         .sel, .inp { border-radius: 9px; border: 1px solid var(--panel-border); background: var(--panel);
                      padding: 7px 10px; font-size: 12.5px; color: var(--text); font-family: var(--font-ui); }
         .inp { width: 90px; font-family: var(--font-data); }
+        .accountbar { display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap;
+                      padding: 14px 18px; border: 1px solid var(--panel-border);
+                      border-radius: 14px; background: var(--panel); box-shadow: var(--shadow-sm); }
+        .fld { display: flex; flex-direction: column; gap: 5px; font-size: 10.5px;
+               font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+               color: var(--text-muted); }
+        .sel.wide { min-width: 300px; }
+        .lotnote { flex: 1; min-width: 320px; font-size: 11.5px; color: var(--text-muted);
+                   line-height: 1.5; }
         .ticket { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; padding: 16px 20px; }
         .ticket label { display: flex; flex-direction: column; gap: 5px; font-size: 10.5px;
                         font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); }
@@ -667,14 +720,16 @@ function PositionTable({ rows, live, busy, onExit }: {
   );
 }
 
-function Tile({ label, value, sub, tone }: {
-  label: string; value: string; sub?: string; tone?: "gain" | "loss";
+function Tile({ label, value, sub, tone, loading }: {
+  label: string; value: string; sub?: string; tone?: "gain" | "loss"; loading?: boolean;
 }) {
   return (
     <div className="tile">
       <div className="t-label">{label}</div>
-      <div className={`t-value ${tone ?? ""}`}>{value}</div>
-      {sub && <div className="t-sub">{sub}</div>}
+      {loading
+        ? <div className="t-skel" />
+        : <div className={`t-value ${tone ?? ""}`}>{value}</div>}
+      {sub && <div className="t-sub">{loading ? "loading\u2026" : sub}</div>}
       <style jsx>{`
         .tile { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 14px;
                 padding: 14px 16px; box-shadow: var(--shadow-sm); }
@@ -683,6 +738,11 @@ function Tile({ label, value, sub, tone }: {
         .t-value { margin-top: 7px; font-family: var(--font-data); font-variant-numeric: tabular-nums;
                    font-size: 21px; font-weight: 600; letter-spacing: -.2px; }
         .t-value.gain { color: var(--gain); } .t-value.loss { color: var(--loss); }
+        .t-skel { margin-top: 9px; height: 22px; width: 70%; border-radius: 6px;
+                  background: linear-gradient(90deg, var(--canvas-soft) 25%,
+                              var(--panel-border) 50%, var(--canvas-soft) 75%);
+                  background-size: 200% 100%; animation: shim 1.3s linear infinite; }
+        @keyframes shim { to { background-position: -200% 0; } }
         .t-sub { margin-top: 4px; font-size: 11px; color: var(--text-faint); }
       `}</style>
     </div>

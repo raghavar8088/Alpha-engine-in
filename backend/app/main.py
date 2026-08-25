@@ -320,6 +320,8 @@ async def ensure_indexes() -> None:
     await ts_ensure_indexes()
     from app.services.commodity_positions import ensure_indexes as cmp_ensure_indexes
     await cmp_ensure_indexes()
+    from app.services.commodity_instruments import ensure_indexes as cmi_ensure_indexes
+    await cmi_ensure_indexes()
 
 
 @app.on_event("startup")

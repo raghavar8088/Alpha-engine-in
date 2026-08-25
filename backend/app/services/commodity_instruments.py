@@ -182,6 +182,23 @@ async def sync(only_unexpired: bool = True) -> dict:
     return stats
 
 
+async def ensure_indexes() -> None:
+    """One compound index on the SHARED `instruments` collection.
+
+    Every commodity lookup filters on (asset_class, expiry) and most also on
+    underlying_symbol; the collection holds 54,000 documents of which 18,000 are commodity
+    options, so without this each of those is a scan. Created with a name and its own try,
+    for the reason the Trending Stocks deploy taught: an index that conflicts must not
+    take the others down with it."""
+    try:
+        await instruments_collection.create_index(
+            [("asset_class", 1), ("expiry", 1), ("underlying_symbol", 1)],
+            name="inst_commodity_lookup", background=True)
+        logger.info("[commodity_instruments] lookup index ensured")
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("[commodity_instruments] index skipped: %s", exc)
+
+
 async def coverage() -> dict:
     """What the master holds per MCX underlying — futures, options, and lot size."""
     today = date.today().isoformat()
@@ -206,4 +223,5 @@ async def coverage() -> dict:
     return {"underlyings": out, "count": len(out)}
 
 
-__all__ = ["sync", "coverage", "build_rows", "KIND_TO_CLASS", "SCRIP_MASTER_URL"]
+__all__ = ["sync", "coverage", "ensure_indexes", "build_rows", "KIND_TO_CLASS",
+           "SCRIP_MASTER_URL"]

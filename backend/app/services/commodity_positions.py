@@ -358,26 +358,37 @@ async def edit_account(account_id: str, name: str | None = None,
 async def underlyings() -> list[dict]:
     """The MCX underlyings with at least one unexpired, Angel-mapped contract.
 
-    Reported per underlying rather than per contract, with the counts behind each one, so
-    an underlying whose options have not been token-mapped reads as a coverage gap rather
-    than as an empty chain later."""
+    ONE aggregation, not a count per underlying. The first version issued two
+    `count_documents` per underlying — 56 round trips to Atlas, measured at 2.7 seconds,
+    which was enough for the endpoint to time out entirely. Because the page loaded this
+    alongside the account list in a single `Promise.all`, that one slow call blanked the
+    whole screen: no accounts, no underlyings, every tile a dash. The same grouping now
+    takes 37 ms.
+
+    Counts are reported per underlying so an underlying whose options have not been
+    token-mapped reads as a coverage gap rather than as an empty chain later."""
     await prime_lotsizes()
-    today = _today()
-    out: list[dict] = []
-    names = await instruments_collection.distinct(
-        "underlying_symbol",
-        {"asset_class": {"$in": [FUTURE_CLASS, OPTION_CLASS]}, "expiry": {"$gte": today},
-         "angel_token": {"$ne": None}})
-    for sym in sorted(n for n in names if n):
-        futs = await instruments_collection.count_documents(
-            {"asset_class": FUTURE_CLASS, "underlying_symbol": sym,
-             "expiry": {"$gte": today}, "angel_token": {"$ne": None}})
-        opts = await instruments_collection.count_documents(
-            {"asset_class": OPTION_CLASS, "underlying_symbol": sym,
-             "expiry": {"$gte": today}, "angel_token": {"$ne": None}})
-        out.append({"symbol": sym, "futures": futs, "options": opts,
-                    "has_options": opts > 0, **spec_doc(sym)})
-    return out
+    pipeline = [
+        {"$match": {"asset_class": {"$in": [FUTURE_CLASS, OPTION_CLASS]},
+                    "expiry": {"$gte": _today()}, "angel_token": {"$ne": None}}},
+        {"$group": {"_id": {"u": "$underlying_symbol", "c": "$asset_class"},
+                    "n": {"$sum": 1}}},
+    ]
+    tally: dict[str, dict[str, int]] = {}
+    async for row in instruments_collection.aggregate(pipeline):
+        key = row["_id"]
+        sym = key.get("u")
+        if not sym:
+            continue
+        bucket = tally.setdefault(sym, {"futures": 0, "options": 0})
+        if key.get("c") == FUTURE_CLASS:
+            bucket["futures"] += row["n"]
+        else:
+            bucket["options"] += row["n"]
+
+    return [{"symbol": sym, "futures": t["futures"], "options": t["options"],
+             "has_options": t["options"] > 0, **spec_doc(sym)}
+            for sym, t in sorted(tally.items())]
 
 
 async def future_expiries(symbol: str) -> list[str]:
