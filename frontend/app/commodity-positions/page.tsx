@@ -395,6 +395,18 @@ export default function CommodityPositionsPage() {
         </GlassPanel>
       )}
 
+      {summary && summary.available_cash < 0 && (
+        <div className="overcommitted">
+          <b>This book is over-committed.</b> Its open positions require{" "}
+          {compact(summary.margin_deployed)} of margin against{" "}
+          {compact(summary.initial_capital)} of capital, so available cash is{" "}
+          {compact(summary.available_cash)}. No further order will be accepted until you
+          close something or raise the account&apos;s capital. Margin is re-derived from the
+          live futures price on every fill, so this can also appear when a position moves
+          against you.
+        </div>
+      )}
+
       {(basket.length > 0 || quoteError) && (
         <GlassPanel
           title={`Basket — ${basket.length} leg${basket.length === 1 ? "" : "s"}`}
@@ -492,6 +504,7 @@ export default function CommodityPositionsPage() {
         <Tile label="Equity" value={compact(summary?.equity)} loading={loadingBook}
               sub={summary ? `started at ${compact(summary.initial_capital)}` : "no account selected"} />
         <Tile label="Available cash" value={compact(summary?.available_cash)} loading={loadingBook}
+              tone={(summary?.available_cash ?? 0) < 0 ? "loss" : undefined}
               sub={`${compact(summary?.margin_deployed)} margin blocked`} />
         <Tile label="Contract exposure" value={compact(summary?.contract_exposure)} loading={loadingBook}
               sub="full notional of the open book" />
@@ -835,6 +848,9 @@ export default function CommodityPositionsPage() {
         .blocked { font-size: 11.5px; color: var(--loss); max-width: 380px; line-height: 1.5;
                    align-self: center; }
         .bad-note { padding: 10px 20px; font-size: 12px; color: var(--loss); }
+        .overcommitted { border: 1px solid rgba(220,38,38,.35); background: rgba(220,38,38,.06);
+                         border-radius: 14px; padding: 13px 18px; font-size: 12.5px;
+                         color: var(--loss); line-height: 1.55; }
         .editor { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; padding: 16px 20px; }
         .editor .hint { font-style: normal; font-size: 11px; color: var(--text-faint);
                         font-weight: 500; letter-spacing: 0; text-transform: none; }
