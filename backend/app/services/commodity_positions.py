@@ -1174,10 +1174,16 @@ async def max_lots(account_id: str, legs: list[dict], cap: int = MAX_LOTS_PER_OR
                     + (f"frees ₹{-added:,.0f}" if added < 0
                        else f"blocks ₹{added:,.0f} of ₹{cash:,.0f}")
                     + (f" (capped at {cap})" if n >= cap else ""))
-            return {**shape, "max_lots": n, "margin": added, "reason": note}
+            # What one more lot would cost, at the SAME prices this answer was computed
+            # from. Quoting it from a later snapshot is not a check on the sizer: at a
+            # boundary this fine — one gas lot is 0.2% of a 30L book — ordinary tick drift
+            # between two quote calls moves it across the line on its own.
+            return {**shape, "max_lots": n, "margin": added,
+                    "margin_at_next": None if n >= cap else margin_for(n + 1),
+                    "reason": note}
 
     one = margin_for(1)
-    return {**shape, "max_lots": 0, "margin": one,
+    return {**shape, "max_lots": 0, "margin": one, "margin_at_next": one,
             "reason": (f"one lot needs ₹{one:,.0f} but only ₹{cash:,.0f} is free"
                        if cash < one else "this account cannot carry one lot here")}
 

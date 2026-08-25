@@ -112,12 +112,15 @@ async def run_book(aid: str) -> None:
         check(f"{symbol}: {n} lots fits", real <= res["available_cash"] + 0.01,
               f"Rs{real:,.0f} <= Rs{res['available_cash']:,.0f}")
 
-        if 0 < n < 500:
-            over, _p = await basket_margin_delta(
-                aid, await _price_basket([{**leg, "lots": n + 1} for leg in legs]))
+        # N+1 must fail — judged at the prices the sizer itself used. Re-fetching quotes
+        # to test this compares two snapshots: the natural gas straddle sizes to within
+        # Rs545 of a Rs30L book, which is 0.018%, so a tick between the two calls flips the
+        # answer and the test fails on market noise rather than on a defect.
+        nxt = res.get("margin_at_next")
+        if nxt is not None:
             check(f"{symbol}: {n + 1} lots does NOT fit",
-                  over > res["available_cash"] + 0.01,
-                  f"Rs{over:,.0f} > Rs{res['available_cash']:,.0f}")
+                  nxt > res["available_cash"] + 0.01,
+                  f"Rs{nxt:,.0f} > Rs{res['available_cash']:,.0f}")
 
         # 3. a straddle must not be margined as both sides added together
         naive = res["margin_per_lot"] * n

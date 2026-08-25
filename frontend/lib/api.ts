@@ -5419,6 +5419,8 @@ export interface CmpMaxLots {
   margin: number;
   available_cash: number;
   margin_per_lot: number;
+  /** Margin at one lot MORE, from the same price snapshot. null when capped. */
+  margin_at_next: number | null;
   premium_per_lot: number;
   legs: number;
   reason: string;
