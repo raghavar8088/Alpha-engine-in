@@ -5355,3 +5355,62 @@ export async function fetchCmpSpecCheck(): Promise<{ spec_check: CmpSpecCheckRow
 export async function syncCmpInstruments(): Promise<any> {
   return apiFetch(`${cmp}/sync-instruments`, { method: "POST" });
 }
+
+// --- Commodity basket orders --------------------------------------------------
+// Buy/Sell on a contract adds a LEG; nothing is filled until the basket is placed. The
+// estimate is re-run on every change so the capital shown is the number the execute gate
+// will actually use.
+
+export interface CmpBasketLeg {
+  instrument_kind: "OPTION" | "FUTURE";
+  symbol: string;
+  expiry: string;
+  transaction_type: "BUY" | "SELL";
+  lots: number;
+  strike?: number | null;
+  option_type?: "CE" | "PE" | null;
+}
+
+export interface CmpPricedLeg extends CmpSpec {
+  label: string;
+  symbol: string;
+  expiry: string;
+  instrument_kind: "OPTION" | "FUTURE";
+  strike: number | null;
+  option_type: string | null;
+  side: "BUY" | "SELL";
+  lots: number;
+  qty: number;
+  ltp: number;
+  contract_value: number;
+}
+
+export interface CmpBasketEstimate {
+  legs: CmpPricedLeg[];
+  margin_required: number;
+  margin_if_legged_separately: number;
+  hedge_benefit: number;
+  net_premium: number;
+  contract_exposure: number;
+  available_cash: number;
+  cash_after: number;
+  affordable: boolean;
+  shortfall: number;
+  note: string;
+}
+
+export async function estimateCmpBasket(account_id: string, legs: CmpBasketLeg[]): Promise<CmpBasketEstimate> {
+  return apiFetch(`${cmp}/basket/estimate`, {
+    method: "POST",
+    body: JSON.stringify({ account_id, legs }),
+  });
+}
+
+export async function executeCmpBasket(
+  account_id: string, legs: CmpBasketLeg[], product_type = "MARGIN",
+): Promise<{ filled: number; margin_added: number; net_premium: number; orders: CmpOrder[] }> {
+  return apiFetch(`${cmp}/basket/execute`, {
+    method: "POST",
+    body: JSON.stringify({ account_id, legs, product_type }),
+  });
+}

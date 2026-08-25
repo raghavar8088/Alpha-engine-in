@@ -23,6 +23,8 @@ import ErrorBanner from "../../components/ErrorBanner";
 import EmptyState from "../../components/EmptyState";
 import DeskHistory from "../../components/DeskHistory";
 import {
+  CmpBasketEstimate,
+  CmpBasketLeg,
   CmpChain,
   CmpFuture,
   CmpOrder,
@@ -32,6 +34,8 @@ import {
   CmpUnderlying,
   createCmpAccount,
   editCmpAccount,
+  estimateCmpBasket,
+  executeCmpBasket,
   exitCmpPosition,
   fetchCmpAccounts,
   fetchCmpChain,
@@ -91,6 +95,13 @@ export default function CommodityPositionsPage() {
   // re-capitalises the selected book. Replaces two window.prompt() calls, which could not
   // show what the number meant and looked like a different application.
   const [editor, setEditor] = useState<null | "new" | "edit">(null);
+  // The basket. Buy/Sell adds a leg; nothing reaches the book until it is placed, and the
+  // estimate below is what the execute gate will use — so the capital on screen is never a
+  // different number from the one that decides whether the order is allowed.
+  const [basket, setBasket] = useState<CmpBasketLeg[]>([]);
+  const [quote, setQuote] = useState<CmpBasketEstimate | null>(null);
+  const [quoting, setQuoting] = useState(false);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
   const [formName, setFormName] = useState("");
   const [formCapital, setFormCapital] = useState("");
 
@@ -180,6 +191,47 @@ export default function CommodityPositionsPage() {
     }
   }, [tab, accountId]);
 
+  // ---- the basket ------------------------------------------------------------
+  const addLeg = useCallback((leg: CmpBasketLeg) => {
+    setBasket((cur) => {
+      // Same contract and same direction? Add lots rather than stacking a duplicate row.
+      const i = cur.findIndex((l) =>
+        l.symbol === leg.symbol && l.expiry === leg.expiry &&
+        l.instrument_kind === leg.instrument_kind &&
+        (l.strike ?? null) === (leg.strike ?? null) &&
+        (l.option_type ?? null) === (leg.option_type ?? null) &&
+        l.transaction_type === leg.transaction_type);
+      if (i >= 0) {
+        const next = [...cur];
+        next[i] = { ...next[i], lots: next[i].lots + leg.lots };
+        return next;
+      }
+      return [...cur, leg];
+    });
+    setNotice(null);
+  }, []);
+
+  const setLegLots = (i: number, n: number) =>
+    setBasket((cur) => cur.map((l, k) => (k === i ? { ...l, lots: Math.max(1, n) } : l)));
+  const dropLeg = (i: number) => setBasket((cur) => cur.filter((_, k) => k !== i));
+
+  // Re-price on every change. Debounced because each estimate resolves and quotes every
+  // leg through Angel, which is rate-limited.
+  useEffect(() => {
+    if (!basket.length || !accountId) { setQuote(null); setQuoteError(null); return; }
+    setQuoting(true);
+    const t = setTimeout(() => {
+      estimateCmpBasket(accountId, basket)
+        .then((q) => { setQuote(q); setQuoteError(null); })
+        .catch((e) => {
+          setQuote(null);
+          setQuoteError(e instanceof Error ? e.message : "Could not price the basket");
+        })
+        .finally(() => setQuoting(false));
+    }, 350);
+    return () => clearTimeout(t);
+  }, [basket, accountId]);
+
   // ---- actions ---------------------------------------------------------------
   const act = async (label: string, fn: () => Promise<unknown>, after = true) => {
     if (busy) return;
@@ -195,21 +247,22 @@ export default function CommodityPositionsPage() {
     }
   };
 
+  // Buy/Sell no longer fires an order — it puts a leg in the basket. Nothing reaches the
+  // book without passing the affordability gate first.
   const trade = (kind: "OPTION" | "FUTURE", side: "BUY" | "SELL",
                  expiry: string, strike?: number, optionType?: "CE" | "PE") =>
-    act(`${side}-${strike ?? "fut"}`, async () => {
-      const res = await placeCmpOrder({
-        account_id: accountId, instrument_kind: kind, symbol, expiry,
-        transaction_type: side, lots, order_type: "MARKET", product_type: product,
-        strike: strike ?? null, option_type: optionType ?? null,
-      });
-      setNotice(`${side} ${lots} lot${lots > 1 ? "s" : ""} of ${res.display_name} filled at ` +
-        `${inr(res.fill_price, 2)} — contract value ${compact(res.contract_value)}, ` +
-        `margin ${compact(res.margin_used)}.`);
-    });
+    addLeg({ instrument_kind: kind, symbol, expiry, transaction_type: side, lots,
+             strike: strike ?? null, option_type: optionType ?? null });
 
-  const lotValue = (price: number | null | undefined) =>
-    price && spec ? price * spec.multiplier * lots : null;
+  const placeBasket = () =>
+    act("basket", async () => {
+      const res = await executeCmpBasket(accountId, basket, product);
+      setBasket([]);
+      setQuote(null);
+      setNotice(`${res.filled} leg${res.filled > 1 ? "s" : ""} filled — margin blocked ` +
+        `${compact(res.margin_added)}, net premium ${signed(res.net_premium)}.`);
+      setTab("positions");
+    });
 
   return (
     <div className="page">
@@ -339,6 +392,99 @@ export default function CommodityPositionsPage() {
       {notice && (
         <GlassPanel title="Filled" note="paper">
           <div className="notice">{notice}</div>
+        </GlassPanel>
+      )}
+
+      {(basket.length > 0 || quoteError) && (
+        <GlassPanel
+          title={`Basket — ${basket.length} leg${basket.length === 1 ? "" : "s"}`}
+          note="nothing is filled until you place it"
+        >
+          <div className="table-scroll">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th className="l">Contract</th><th>Side</th><th>Lots</th>
+                  <th className="l">1 lot</th><th>Price</th><th>Contract value</th><th />
+                </tr>
+              </thead>
+              <tbody>
+                {(quote?.legs ?? []).map((l, i) => (
+                  <tr key={`${l.label}-${l.side}-${i}`}>
+                    <td className="l sym">{l.label}
+                      {!l.verified && <span className="tag warn">spec?</span>}
+                    </td>
+                    <td className={l.side === "BUY" ? "gain" : "loss"}>{l.side}</td>
+                    <td>
+                      <input className="inp tiny" type="number" min={1} value={basket[i]?.lots ?? l.lots}
+                             onChange={(e) => setLegLots(i, Number(e.target.value) || 1)} />
+                    </td>
+                    <td className="l dim">{l.lot_quantity}</td>
+                    <td className="px">{num(l.ltp, 2)}</td>
+                    <td className="px">{compact(l.contract_value)}</td>
+                    <td>
+                      <button className="mini" onClick={() => dropLeg(i)} title="Remove leg">×</button>
+                    </td>
+                  </tr>
+                ))}
+                {!quote && basket.map((l, i) => (
+                  <tr key={`pending-${i}`}>
+                    <td className="l sym">{l.symbol} {l.expiry}{" "}
+                      {l.instrument_kind === "OPTION" ? `${l.strike}${l.option_type}` : "FUT"}</td>
+                    <td className={l.transaction_type === "BUY" ? "gain" : "loss"}>{l.transaction_type}</td>
+                    <td>
+                      <input className="inp tiny" type="number" min={1} value={l.lots}
+                             onChange={(e) => setLegLots(i, Number(e.target.value) || 1)} />
+                    </td>
+                    <td className="l dim">—</td><td className="px">—</td><td className="px">—</td>
+                    <td><button className="mini" onClick={() => dropLeg(i)}>×</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {quoteError && <div className="bad-note">{quoteError}</div>}
+
+          <div className="basketfoot">
+            <div className="figures">
+              <Figure label="Margin required" value={compact(quote?.margin_required)}
+                      tone={quote && !quote.affordable ? "loss" : undefined}
+                      sub={quote && quote.hedge_benefit > 0
+                        ? `${compact(quote.hedge_benefit)} saved by hedging`
+                        : "portfolio margin for the whole basket"} />
+              <Figure label="Available cash" value={compact(quote?.available_cash)}
+                      sub={quote ? `${compact(quote.cash_after)} left after` : "in this account"} />
+              <Figure label="Contract exposure" value={compact(quote?.contract_exposure)}
+                      sub="full notional controlled" />
+              <Figure label="Net premium" value={signed(quote?.net_premium)}
+                      tone={(quote?.net_premium ?? 0) >= 0 ? "gain" : "loss"}
+                      sub={(quote?.net_premium ?? 0) >= 0 ? "received" : "paid"} />
+            </div>
+
+            <div className="basketactions">
+              {quote && !quote.affordable && (
+                <div className="blocked">
+                  Short by <b>{compact(quote.shortfall)}</b> — this basket needs{" "}
+                  {compact(quote.margin_required)} and the account has{" "}
+                  {compact(quote.available_cash)}. Reduce lots, remove a leg, or raise the
+                  account&apos;s capital.
+                </div>
+              )}
+              <button className="btn" disabled={!!busy} onClick={() => { setBasket([]); setQuote(null); }}>
+                Clear
+              </button>
+              <button className="btn primary"
+                      disabled={!!busy || quoting || !quote || !quote.affordable}
+                      onClick={placeBasket}>
+                {busy === "basket" ? "Placing…"
+                  : quoting ? "Pricing…"
+                  : quote && !quote.affordable ? "Exceeds available cash"
+                  : `Place basket · ${compact(quote?.margin_required)}`}
+              </button>
+            </div>
+          </div>
+          {quote && <div className="gnote">{quote.note}</div>}
         </GlassPanel>
       )}
 
@@ -680,6 +826,15 @@ export default function CommodityPositionsPage() {
         .btn.danger:hover:not(:disabled) { color: #fff; background: var(--loss);
                                            border-color: var(--loss); }
 
+        .inp.tiny { width: 60px; padding: 5px 8px; text-align: center; }
+        .basketfoot { display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap;
+                      padding: 14px 20px 4px; }
+        .figures { display: flex; gap: 26px; flex-wrap: wrap; }
+        .basketactions { margin-left: auto; display: flex; gap: 8px; align-items: flex-end;
+                         flex-wrap: wrap; }
+        .blocked { font-size: 11.5px; color: var(--loss); max-width: 380px; line-height: 1.5;
+                   align-self: center; }
+        .bad-note { padding: 10px 20px; font-size: 12px; color: var(--loss); }
         .editor { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; padding: 16px 20px; }
         .editor .hint { font-style: normal; font-size: 11px; color: var(--text-faint);
                         font-weight: 500; letter-spacing: 0; text-transform: none; }
@@ -740,6 +895,29 @@ export default function CommodityPositionsPage() {
     </div>
   );
 }
+
+/** One labelled number in the basket footer — smaller than a Tile, same vocabulary. */
+function Figure({ label, value, sub, tone }: {
+  label: string; value: string; sub?: string; tone?: "gain" | "loss";
+}) {
+  return (
+    <div className="fig">
+      <div className="f-label">{label}</div>
+      <div className={`f-value ${tone ?? ""}`}>{value}</div>
+      {sub && <div className="f-sub">{sub}</div>}
+      <style jsx>{`
+        .fig { min-width: 120px; }
+        .f-label { font-size: 9.5px; font-weight: 800; letter-spacing: .06em;
+                   text-transform: uppercase; color: var(--text-muted); }
+        .f-value { margin-top: 4px; font-family: var(--font-data); font-size: 17px;
+                   font-weight: 600; font-variant-numeric: tabular-nums; }
+        .f-value.gain { color: var(--gain); } .f-value.loss { color: var(--loss); }
+        .f-sub { margin-top: 2px; font-size: 10.5px; color: var(--text-faint); }
+      `}</style>
+    </div>
+  );
+}
+
 
 /** A 14px stroked glyph, so a button reads as an action rather than a word in a box. */
 function Icon({ d }: { d: string }) {

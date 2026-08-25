@@ -14,6 +14,8 @@ mathematics; this router is a thin layer over it.
   GET    /api/commodity-positions/options/chain        option chain around the future
   GET    /api/commodity-positions/margin               SPAN-lite margin for one leg
   POST   /api/commodity-positions/orders               place a BUY/SELL order
+  POST   /api/commodity-positions/basket/estimate      what a basket costs, before placing
+  POST   /api/commodity-positions/basket/execute       fill every leg, or none
   GET    /api/commodity-positions/orders               order book
   GET    /api/commodity-positions/positions            open + closed, with summary
   POST   /api/commodity-positions/positions/{id}/exit  exit fully or partially, in lots
@@ -34,8 +36,11 @@ from pydantic import BaseModel, Field
 from app.api.deps import get_current_user
 from app.core.db import commodity_pos_orders_collection, commodity_pos_positions_collection
 from app.services.commodity_positions import (
+    MAX_BASKET_LEGS,
     OrderError,
     create_account,
+    estimate_basket,
+    execute_basket,
     edit_account,
     estimate_margin,
     exit_position,
@@ -81,6 +86,22 @@ class PlaceOrderRequest(BaseModel):
     strike: float | None = None
     option_type: str | None = Field(None, pattern="^(CE|PE)$")
     limit_price: float = 0.0
+
+
+class BasketLeg(BaseModel):
+    instrument_kind: str = Field(..., pattern="^(OPTION|FUTURE)$")
+    symbol: str
+    expiry: str
+    transaction_type: str = Field(..., pattern="^(BUY|SELL)$")
+    lots: int = Field(..., ge=1, le=1000)
+    strike: float | None = None
+    option_type: str | None = Field(None, pattern="^(CE|PE)$")
+
+
+class BasketRequest(BaseModel):
+    account_id: str
+    legs: list[BasketLeg] = Field(..., min_length=1, max_length=MAX_BASKET_LEGS)
+    product_type: str = Field("MARGIN", pattern="^(INTRADAY|MARGIN)$")
 
 
 class ExitRequest(BaseModel):
@@ -237,6 +258,34 @@ async def place_order_endpoint(payload: PlaceOrderRequest,
             order_type=payload.order_type, product_type=payload.product_type,
             strike=payload.strike, option_type=payload.option_type,
             limit_price=payload.limit_price)
+    except OrderError as exc:
+        raise HTTPException(400, exc.detail)
+
+
+@router.post("/basket/estimate")
+async def basket_estimate_endpoint(payload: BasketRequest,
+                                   _u: dict = Depends(get_current_user)):
+    """What the basket costs and whether the account can carry it — no order placed.
+
+    The page calls this on every change, so the capital figure on screen is always the
+    one the execute gate will use."""
+    try:
+        return await estimate_basket(payload.account_id,
+                                     [leg.model_dump() for leg in payload.legs])
+    except OrderError as exc:
+        raise HTTPException(400, exc.detail)
+
+
+@router.post("/basket/execute")
+async def basket_execute_endpoint(payload: BasketRequest,
+                                  _u: dict = Depends(get_current_user)):
+    """Fill every leg or none. Refuses outright if the basket exceeds available cash."""
+    try:
+        res = await execute_basket(payload.account_id,
+                                   [leg.model_dump() for leg in payload.legs],
+                                   payload.product_type)
+        res["orders"] = [_ser(o, ORDER_TS) for o in res["orders"]]
+        return res
     except OrderError as exc:
         raise HTTPException(400, exc.detail)
 

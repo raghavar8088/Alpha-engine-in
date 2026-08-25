@@ -846,6 +846,176 @@ async def exit_position(account_id: str, position_id: str, lots: int | None = No
 
 
 # --------------------------------------------------------------------------------
+# Baskets
+# --------------------------------------------------------------------------------
+# A basket is priced and margined AS A PORTFOLIO before a single leg is filled. That
+# matters far more on MCX than on the index desks: one CRUDEOILM lot is 10 barrels and one
+# GOLD lot is a kilo, so summing leg margins independently would refuse spreads a broker
+# would happily accept, while filling leg by leg would let a basket get halfway in and then
+# stop — leaving a naked short where a spread was intended.
+
+MAX_BASKET_LEGS = int(os.getenv("COMMODITY_MAX_BASKET_LEGS", "10"))
+
+
+async def _price_basket(legs: list[dict]) -> list[dict]:
+    """Resolve and live-price every leg. The WHOLE basket fails if any one leg cannot be
+    priced — a basket goes on complete or not at all."""
+    if not legs:
+        raise OrderError("The basket is empty")
+    if len(legs) > MAX_BASKET_LEGS:
+        raise OrderError(f"A basket can hold at most {MAX_BASKET_LEGS} legs")
+
+    priced: list[dict] = []
+    for leg in legs:
+        kind = str(leg.get("instrument_kind", "OPTION")).upper()
+        side = str(leg.get("transaction_type", "")).upper()
+        lots = int(leg.get("lots") or 0)
+        if lots < 1:
+            raise OrderError("Every basket leg needs at least 1 lot")
+        if side not in ("BUY", "SELL"):
+            raise OrderError("Each leg must be BUY or SELL")
+        symbol = str(leg["symbol"]).upper()
+        inst = await _resolve_contract(kind, symbol, leg["expiry"],
+                                       leg.get("strike"), leg.get("option_type"))
+        label = (f"{symbol} {leg['expiry']} {float(leg['strike']):g}{leg.get('option_type')}"
+                 if kind == "OPTION" else f"{symbol} {leg['expiry']} FUT")
+        ltp = await ltp_for(inst)
+        if ltp is None:
+            raise OrderError(
+                f"Angel returned no price for {label}. The basket is not priced and nothing "
+                "was filled — MCX may be closed.")
+        mult = multiplier(symbol)
+        priced.append({
+            "leg": leg, "inst": inst, "kind": kind, "side": side, "lots": lots,
+            "symbol": symbol, "qty": lots * mult, "multiplier": mult,
+            "ltp": ltp, "label": label,
+            "contract_value": contract_value(symbol, ltp, lots),
+        })
+    return priced
+
+
+def _pos_to_leg(pos: dict) -> dict:
+    inst = pos.get("instrument") or {}
+    return {"kind": pos.get("instrument_kind", "FUTURE"),
+            "option_type": inst.get("option_type"), "strike": inst.get("strike"),
+            "qty": pos.get("quantity", 0), "side": pos.get("side", "BUY"),
+            "premium": pos.get("ltp") or pos.get("entry_price") or 0.0, "iv": None}
+
+
+async def _open_group(account_id: str, underlying: str, expiry: str) -> list[dict]:
+    return [p async for p in commodity_pos_positions_collection.find(
+        {"account_id": account_id, "status": "OPEN",
+         "underlying_symbol": underlying, "instrument.expiry": expiry})]
+
+
+async def basket_margin_delta(account_id: str, priced: list[dict]) -> tuple[float, float]:
+    """(added_margin, net_premium).
+
+    The added margin is the RISE in this account's netted portfolio margin once every leg
+    is added — computed per (underlying, expiry) group, so a spread inside the basket nets
+    against itself and against anything already open in the same group.
+
+    Grouping is deliberately per expiry rather than per commodity: `portfolio_margin` takes
+    a single time-to-expiry, and pretending a September option and a December future share
+    one is how a calendar spread gets under-margined. The cost is that calendars do not net
+    here — margin is over-stated for those, which is the safe direction for a gate that
+    decides whether an order is allowed."""
+    groups: dict[tuple, list[dict]] = {}
+    net_premium = 0.0
+    for p in priced:
+        groups.setdefault((p["symbol"], p["inst"].get("expiry")), []).append(p)
+        # A sold leg brings premium in, a bought leg pays it out.
+        net_premium += p["ltp"] * p["qty"] * (1 if p["side"] == "SELL" else -1)
+
+    added = 0.0
+    for (underlying, expiry), plist in groups.items():
+        t = _years_to_expiry(expiry)
+        ref, _fut = await future_price(underlying, expiry)
+        ref = ref or plist[0]["ltp"]
+        existing = await _open_group(account_id, underlying, expiry)
+        old_legs = [_pos_to_leg(q) for q in existing]
+        add_legs = [_leg_from(p["inst"], p["side"], p["qty"], p["ltp"], ref, t) for p in plist]
+        before = _margin_for(old_legs, underlying, ref, t)["total"] if old_legs else 0.0
+        after = _margin_for(old_legs + add_legs, underlying, ref, t)["total"]
+        added += after - before
+    return round(max(0.0, added), 2), round(net_premium, 2)
+
+
+async def estimate_basket(account_id: str, legs: list[dict]) -> dict:
+    """What this basket would cost, and whether the account can carry it."""
+    await get_account(account_id)
+    priced = await _price_basket(legs)
+    added, net_premium = await basket_margin_delta(account_id, priced)
+    cash = await available_cash(account_id)
+    exposure = sum(p["contract_value"] for p in priced)
+    naive = 0.0
+    for p in priced:
+        t = _years_to_expiry(p["inst"].get("expiry"))
+        ref, _f = await future_price(p["symbol"], p["inst"].get("expiry"))
+        ref = ref or p["ltp"]
+        naive += _margin_for([_leg_from(p["inst"], p["side"], p["qty"], p["ltp"], ref, t)],
+                             p["symbol"], ref, t)["total"]
+
+    return {
+        "legs": [{
+            "label": p["label"], "symbol": p["symbol"], "expiry": p["inst"].get("expiry"),
+            "instrument_kind": p["kind"], "strike": p["inst"].get("strike"),
+            "option_type": p["inst"].get("option_type"),
+            "side": p["side"], "lots": p["lots"], "qty": p["qty"],
+            "multiplier": p["multiplier"], "ltp": round(p["ltp"], 2),
+            "contract_value": p["contract_value"],
+            **spec_doc(p["symbol"]),
+        } for p in priced],
+        "margin_required": added,
+        "margin_if_legged_separately": round(naive, 2),
+        "hedge_benefit": round(max(0.0, naive - added), 2),
+        "net_premium": net_premium,
+        "contract_exposure": round(exposure, 2),
+        "available_cash": round(cash, 2),
+        "cash_after": round(cash - added, 2),
+        "affordable": added <= cash + 0.01,
+        "shortfall": round(max(0.0, added - cash), 2),
+        "note": "Margin is the portfolio figure for the whole basket, so legs that hedge "
+                "each other cost less together than apart. Contract exposure is the full "
+                "notional you are controlling, which on MCX is many times the margin.",
+    }
+
+
+async def execute_basket(account_id: str, legs: list[dict],
+                         product_type: str = "MARGIN") -> dict:
+    """Fill every leg, or none.
+
+    The affordability gate runs on the WHOLE basket before anything is filled, and the
+    per-leg margin check is then switched off deliberately: re-checking each leg as it
+    goes would refuse the second half of a spread whose first half had just consumed the
+    margin the pair nets away."""
+    await get_account(account_id)
+    if product_type not in PRODUCT_TYPES:
+        raise OrderError(f"product_type must be one of {PRODUCT_TYPES}")
+
+    priced = await _price_basket(legs)
+    added, net_premium = await basket_margin_delta(account_id, priced)
+    cash = await available_cash(account_id)
+    if added > cash + 0.01:
+        raise OrderError(
+            f"Not enough paper capital. This basket needs ₹{added:,.0f} of portfolio "
+            f"margin and the account has ₹{cash:,.0f} — short by ₹{added - cash:,.0f}. "
+            "Nothing was filled.")
+
+    # Buys first, so a protective long is in place before the short it covers. The
+    # combined gate has already cleared, but this keeps every intermediate state sane.
+    filled = []
+    for p in sorted(priced, key=lambda x: 0 if x["side"] == "BUY" else 1):
+        base = _build_base_order(account_id, p["inst"], p["kind"], p["symbol"],
+                                 p["inst"].get("expiry"), p["side"], p["lots"],
+                                 "MARKET", product_type, 0.0)
+        filled.append(await _fill(base, p["ltp"], check_margin=False))
+
+    return {"filled": len(filled), "orders": filled, "margin_added": added,
+            "net_premium": net_premium}
+
+
+# --------------------------------------------------------------------------------
 # Book maths
 # --------------------------------------------------------------------------------
 
@@ -951,4 +1121,5 @@ __all__ = [
     "option_chain", "futures_board", "underlying_future", "future_price",
     "estimate_margin", "place_order", "exit_position", "sync_positions",
     "reset_account", "summary", "available_cash",
+    "estimate_basket", "execute_basket", "basket_margin_delta", "MAX_BASKET_LEGS",
 ]
