@@ -25,7 +25,9 @@ logger = logging.getLogger("ath_scheduler")
 
 SCAN_SECONDS = int(os.getenv("ATH_SCAN_SECONDS", "180"))
 SEED_SECONDS = int(os.getenv("ATH_SEED_SECONDS", "900"))
-SEED_BATCH = int(os.getenv("ATH_SEED_BATCH", "60"))
+# Deliberately small. Angel throttles the historical endpoint hard, and a large batch
+# does not finish faster — it just converts the tail into refusals.
+SEED_BATCH = int(os.getenv("ATH_SEED_BATCH", "40"))
 
 
 async def ath_scan_loop() -> None:

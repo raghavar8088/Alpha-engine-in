@@ -79,9 +79,13 @@ async def run(_u: dict = Depends(get_current_user)):
 
 
 @router.post("/seed-highs")
-async def seed_highs(limit: int = Query(120, ge=1, le=400),
+async def seed_highs(limit: int = Query(60, ge=1, le=150),
                      _u: dict = Depends(get_current_user)):
-    """Walk history for eligible stocks that have no stored all-time high yet."""
+    """Walk history for eligible stocks that have no stored all-time high yet.
+
+    Capped at 150. Angel throttles this endpoint hard enough that a bigger batch does not
+    finish sooner — it just turns the tail of the batch into refusals.
+    """
     return await ath_trading.seed_highs(limit)
 
 

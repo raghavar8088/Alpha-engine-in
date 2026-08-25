@@ -35,26 +35,46 @@ IST = timezone(timedelta(hours=5, minutes=30))
 CHUNK_YEARS = 5          # Angel returns a bounded number of candles per call
 MAX_CHUNKS = 6           # walk back at most ~30 years (NSE itself only dates to 1994)
 PACE_SECONDS = 0.4       # Angel's historical endpoint is the rate-limited one
+RETRY_BACKOFF = 2.0      # pause before retrying a chunk Angel refused
+COOLDOWN_AFTER = 5       # consecutive failures before assuming we are being throttled
+COOLDOWN_SECONDS = 15.0  # and standing down for a while
 
 
 def _now() -> datetime:
     return datetime.now(timezone.utc)
 
 
-async def _deep_history(exchange: str, token: str) -> list[list]:
+async def _deep_history(exchange: str, token: str, symbol: str = "") -> list[list]:
     """Every daily candle Angel will give us, oldest→newest, walking back in windows
-    until a window comes back empty (i.e. before the stock listed)."""
+    until a window comes back empty (i.e. before the stock listed).
+
+    RETRIES AND PACES ON FAILURE. Angel's historical endpoint throttles far harder than its
+    quote endpoint, and a refusal here used to `break` silently — no log line, and crucially
+    it skipped the pacing sleep that follows a successful call. So the first throttled symbol
+    moved straight on to the next one with no delay, earning another throttle, and one
+    rate-limit cascaded into a whole batch: a 200-symbol seed returned 31 ok and 169 failed
+    in seconds, with nothing in the logs to say why.
+    """
     rows: list[list] = []
     end = _now()
     for _ in range(MAX_CHUNKS):
         start = end - timedelta(days=365 * CHUNK_YEARS)
-        try:
-            chunk = await angel_client.candles(
-                exchange, token, "D",
-                start.astimezone(IST).strftime("%Y-%m-%d 09:15"),
-                end.astimezone(IST).strftime("%Y-%m-%d 15:30"),
-            )
-        except Exception:
+        chunk = None
+        for attempt in range(2):
+            try:
+                chunk = await angel_client.candles(
+                    exchange, token, "D",
+                    start.astimezone(IST).strftime("%Y-%m-%d 09:15"),
+                    end.astimezone(IST).strftime("%Y-%m-%d 15:30"),
+                )
+                break
+            except Exception as exc:  # noqa: BLE001 — one symbol must not stop the walk
+                if attempt == 0:
+                    await asyncio.sleep(RETRY_BACKOFF)
+                    continue
+                logger.info("history walk refused for %s (%s): %s",
+                            symbol or token, exchange, str(exc)[:120])
+        if chunk is None:
             break
         await asyncio.sleep(PACE_SECONDS)
         if not chunk:
@@ -129,12 +149,24 @@ async def backfill_all_time_highs(only_missing: bool = True,
         pass
 
     ok = fail = 0
+    consecutive = 0
     for sym, i in inst.items():
-        rows = await _deep_history(i.get("angel_exchange") or "NSE", str(i["angel_token"]))
+        rows = await _deep_history(i.get("angel_exchange") or "NSE", str(i["angel_token"]), sym)
         got = _high_of(rows) if rows else None
         if not got:
             fail += 1
+            consecutive += 1
+            # A run of failures means Angel is throttling, not that these particular stocks
+            # have no history. Standing down for a moment recovers the rest of the batch;
+            # ploughing on burns it.
+            if consecutive and consecutive % COOLDOWN_AFTER == 0:
+                logger.info("all-time-high walk: %s consecutive refusals, cooling down %.0fs",
+                            consecutive, COOLDOWN_SECONDS)
+                await asyncio.sleep(COOLDOWN_SECONDS)
+            else:
+                await asyncio.sleep(PACE_SECONDS)
             continue
+        consecutive = 0
         high, date = got
         first = None
         try:
@@ -152,6 +184,9 @@ async def backfill_all_time_highs(only_missing: bool = True,
         ok += 1
 
     logger.info("all-time-high backfill: %s ok, %s failed (of %s)", ok, fail, len(inst))
+    if fail and ok == 0:
+        logger.warning("all-time-high backfill got NOTHING — Angel is refusing the historical "
+                       "endpoint entirely; the desk's coverage will not grow until that clears")
     return {"ok": ok, "failed": fail, "symbols": len(inst)}
 
 
