@@ -43,10 +43,13 @@ async def straddle_legs(symbol: str) -> tuple[list[dict], str, float] | None:
         return None
     expiry = expiries[0]
     chain = await option_chain(symbol, expiry)
-    rows = [r for r in chain["rows"] if r.get("atm")] or chain["rows"]
+    rows = chain.get("strikes") or []
     if not rows:
         return None
-    strike = float(rows[0]["strike"])
+    # The ATM strike, chosen the same way the page does: nearest the underlying FUTURE,
+    # which is what the chain is priced against. MCX does not quote a spot intraday.
+    spot = float(chain["spot"])
+    strike = float(min(rows, key=lambda r: abs(float(r["strike"]) - spot))["strike"])
     legs = [{"instrument_kind": "OPTION", "symbol": symbol, "expiry": expiry,
              "strike": strike, "option_type": ot, "transaction_type": "SELL", "lots": 1}
             for ot in ("CE", "PE")]
@@ -96,7 +99,7 @@ async def go() -> None:
         check(f"{symbol}: {n} lots fits", real <= res["available_cash"] + 0.01,
               f"Rs{real:,.0f} <= Rs{res['available_cash']:,.0f}")
 
-        if n < 500:
+        if 0 < n < 500:
             over, _p = await basket_margin_delta(
                 aid, await _price_basket([{**leg, "lots": n + 1} for leg in legs]))
             check(f"{symbol}: {n + 1} lots does NOT fit",
