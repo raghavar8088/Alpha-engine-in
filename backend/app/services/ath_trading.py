@@ -163,11 +163,21 @@ async def _angel_lookup(symbol: str) -> dict | None:
 
 async def _adopt_instrument(found: dict) -> dict:
     """Write an Angel-sourced equity into the instrument master so the rest of the desk —
-    quoting, history seeding, position marking — can use it like any other symbol."""
+    quoting, history seeding, position marking — can use it like any other symbol.
+
+    `security_id` is SYNTHESISED, and it has to be. The collection carries a unique index on
+    (security_id, exchange_segment), and these rows have no Dhan security id because Dhan is
+    where they were missing from in the first place. Leaving it null meant the FIRST adopted
+    symbol claimed the (null, "NSE_EQ") slot and every later one collided with it — WELINV
+    went in, then STLTECH, MODISONLTD, HITECHCORP and CALSOFT all failed on a duplicate key
+    that surfaced as a 500. Prefixing the Angel token keeps each row unique and makes it
+    obvious at a glance that the id is not a Dhan one.
+    """
     doc = {
         "symbol": found["symbol"],
         "name": found["symbol"],
         "asset_class": "EQUITY",
+        "security_id": f"ANGEL:{found['angel_token']}",
         "angel_token": found["angel_token"],
         "angel_tradingsymbol": found["angel_tradingsymbol"],
         "angel_exchange": "NSE",
@@ -269,8 +279,13 @@ async def map_symbols(raw: str | list[str], enforce_cap: bool | None = None) -> 
         if not i:
             found = await _angel_lookup(sym)
             if found:
-                i = await _adopt_instrument(found)
-                adopted = True
+                try:
+                    i = await _adopt_instrument(found)
+                    adopted = True
+                except Exception:  # noqa: BLE001
+                    # One symbol failing to be written must cost that symbol, not the whole
+                    # mapping. A pasted list of forty should never be lost to one bad row.
+                    logger.exception("ath: could not adopt %s", sym)
 
         if not i:
             status, note = "not_found", (
