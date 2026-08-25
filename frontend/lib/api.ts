@@ -5120,7 +5120,7 @@ export interface AthWatchlist {
 }
 
 export async function mapAthSymbols(symbols: string | string[]): Promise<{
-  count: number; tradable: number; rows: AthMappedSymbol[];
+  count: number; tradable: number; rows: AthMappedSymbol[]; enforce_market_cap?: boolean;
 }> {
   return apiFetch("/api/ath/watchlist/map", {
     method: "POST", body: JSON.stringify({ symbols }),

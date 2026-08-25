@@ -157,13 +157,26 @@ def parse_tokens(raw: str | list[str]) -> list[str]:
     return out
 
 
-async def map_symbols(raw: str | list[str]) -> dict:
+async def map_symbols(raw: str | list[str], enforce_cap: bool | None = None) -> dict:
     """Resolve pasted symbols against the instrument master and report EVERY outcome.
 
     Nothing is silently dropped. A symbol that cannot be traded is returned with the reason
     — not tradable is a different problem from not found, and "no all-time high yet" is a
     different problem again because that one fixes itself once the seeder reaches it.
+
+    THE MARKET-CAP FLOOR IS OFF BY DEFAULT FOR HAND-PICKED NAMES. If you have typed a
+    symbol in, you have already decided you want it; re-screening your own choice on size
+    just hides it behind a filter you did not ask for. The floor still governs the automatic
+    screen, where it is doing the job it was written for. `enforce_cap` falls back to
+    whatever the saved watchlist says.
+
+    What is NOT waived is the all-time-high data itself: a symbol with no stored high, or
+    with too little history for a high to mean anything, is still excluded. Those are not
+    preferences — a stock listed four months ago is at its all-time high by definition, and
+    trading that is not the strategy.
     """
+    if enforce_cap is None:
+        enforce_cap = (await get_watchlist()).get("enforce_market_cap", False)
     tokens = parse_tokens(raw)
     if not tokens:
         return {"count": 0, "rows": [], "tradable": 0}
@@ -205,11 +218,17 @@ async def map_symbols(raw: str | list[str]) -> dict:
             status, note = "too_new", (
                 f"Only {sessions} sessions of history. A stock listed this recently is at its "
                 f"all-time high by definition, so it is excluded until it has {MIN_SESSIONS}.")
-        elif cap is None:
+        elif enforce_cap and cap is None:
             status, note = "no_market_cap", "No market cap on file, so the size floor cannot be checked."
-        elif cap < MIN_MARKET_CAP:
+        elif enforce_cap and cap < MIN_MARKET_CAP:
             status, note = "below_cap", (
                 f"Market cap {cap / 1e7:,.0f}cr is below the {MIN_MARKET_CAP / 1e7:,.0f}cr floor.")
+        elif cap is None:
+            status, note = "ok", "Tradable. No market cap on file, and the size floor is off for your picks."
+        elif cap < MIN_MARKET_CAP:
+            status, note = "ok", (
+                f"Tradable. {cap / 1e7:,.0f}cr is under the {MIN_MARKET_CAP / 1e7:,.0f}cr floor, "
+                f"which is off for hand-picked names.")
         else:
             status, note = "ok", "Tradable."
 
@@ -227,28 +246,45 @@ async def map_symbols(raw: str | list[str]) -> dict:
         })
 
     return {"count": len(rows), "rows": rows,
-            "tradable": sum(1 for r in rows if r["tradable"])}
+            "tradable": sum(1 for r in rows if r["tradable"]),
+            "enforce_market_cap": enforce_cap}
 
 
 async def get_watchlist() -> dict:
     doc = await ath_watchlist_collection.find_one({"_id": WATCHLIST_ID}, {"_id": 0})
     if not doc:
-        doc = {"symbols": [], "mode": "auto", "enforce_market_cap": True, "updated_at": None}
+        # No list yet: the automatic screen runs, which is the only sensible default when
+        # there is nothing to trade. The moment a list IS saved, `save_watchlist` switches
+        # the desk to trading it.
+        doc = {"symbols": [], "mode": "auto", "enforce_market_cap": False, "updated_at": None}
     return doc
 
 
 async def save_watchlist(symbols: list[str], mode: str | None = None,
                          enforce_market_cap: bool | None = None) -> dict:
-    """Commit the curated list. Replaces rather than merges — the UI owns the final set."""
+    """Commit the curated list. Replaces rather than merges — the UI owns the final set.
+
+    SUBMITTING A LIST PUTS THE DESK ON IT. If no mode is given and the list is non-empty,
+    the desk switches to trading that list. Saving a watchlist and then discovering it was
+    parked behind a mode switch is the wrong default: the reason anyone builds the list is
+    to trade it.
+    """
     current = await get_watchlist()
     clean = parse_tokens(symbols)
     if mode and mode not in MODES:
         raise ValueError(f"mode must be one of {MODES}")
+    if mode:
+        resolved_mode = mode
+    elif clean:
+        resolved_mode = "manual" if current.get("mode", "auto") == "auto" else current["mode"]
+    else:
+        # An emptied list cannot be the traded universe — fall back to the screen.
+        resolved_mode = "auto"
     doc = {
         "_id": WATCHLIST_ID,
         "symbols": clean,
-        "mode": mode or current.get("mode", "auto"),
-        "enforce_market_cap": (current.get("enforce_market_cap", True)
+        "mode": resolved_mode,
+        "enforce_market_cap": (current.get("enforce_market_cap", False)
                                if enforce_market_cap is None else bool(enforce_market_cap)),
         "updated_at": _now(),
     }
@@ -276,7 +312,7 @@ async def universe() -> list[dict]:
     # defaults to on, because the floor is part of the rule this desk was asked for and
     # dropping it silently for manual names would make two different strategies share one
     # equity curve.
-    enforce = wl.get("enforce_market_cap", True)
+    enforce = wl.get("enforce_market_cap", False)
 
     if mode == "manual" and not picked:
         return []
@@ -359,7 +395,7 @@ async def coverage() -> dict:
     return {
         "mode": mode,
         "watchlist_size": len(picked),
-        "enforce_market_cap": wl.get("enforce_market_cap", True),
+        "enforce_market_cap": wl.get("enforce_market_cap", False),
         "mode_note": {
             "auto": "Trading the screen: every NSE stock above the market-cap floor.",
             "manual": f"Trading ONLY your watchlist ({len(picked)} symbols). The screen is off.",

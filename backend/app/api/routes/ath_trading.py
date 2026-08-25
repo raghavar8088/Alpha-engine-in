@@ -130,7 +130,8 @@ async def get_watchlist(_u: dict = Depends(get_current_user)):
     """The saved list, re-mapped so its rows carry current status rather than what was
     true when it was saved — a stock's all-time high gets seeded, its market cap moves."""
     wl = await ath_trading.get_watchlist()
-    mapped = await ath_trading.map_symbols(wl.get("symbols") or [])
+    mapped = await ath_trading.map_symbols(
+        wl.get("symbols") or [], enforce_cap=wl.get("enforce_market_cap", False))
     return {**wl, **mapped,
             "updated_at": wl["updated_at"].isoformat() if wl.get("updated_at") else None}
 
@@ -143,6 +144,7 @@ async def save_watchlist(payload: SaveWatchlistRequest,
             payload.symbols, payload.mode, payload.enforce_market_cap)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
-    mapped = await ath_trading.map_symbols(saved.get("symbols") or [])
+    mapped = await ath_trading.map_symbols(
+        saved.get("symbols") or [], enforce_cap=saved.get("enforce_market_cap", False))
     return {**saved, **mapped,
             "updated_at": saved["updated_at"].isoformat() if saved.get("updated_at") else None}

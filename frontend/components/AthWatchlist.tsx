@@ -40,7 +40,7 @@ const STATUS_TONE: Record<string, string> = {
 
 const MODES: { key: string; label: string; hint: string }[] = [
   { key: "auto", label: "Screen only", hint: "Every NSE stock above the market-cap floor. Your list is ignored." },
-  { key: "manual", label: "My list only", hint: "Trade only the symbols below. The screen is switched off." },
+  { key: "manual", label: "My list only", hint: "Trade only the symbols below. The screen is switched off. This is the default once you submit a list." },
   { key: "both", label: "Screen + my list", hint: "The screen, plus anything you have added by hand." },
 ];
 
@@ -50,16 +50,16 @@ const cr = (v: number | null | undefined) =>
 export default function AthWatchlist({ onSaved }: { onSaved?: () => void }) {
   const [rows, setRows] = useState<Row[]>([]);
   const [paste, setPaste] = useState("");
-  const [mode, setMode] = useState("auto");
-  const [enforceCap, setEnforceCap] = useState(true);
+  const [mode, setMode] = useState("manual");
+  const [enforceCap, setEnforceCap] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
 
   const applyDoc = useCallback((d: AthWatchlistDoc) => {
-    setMode(d.mode ?? "auto");
-    setEnforceCap(d.enforce_market_cap ?? true);
+    setMode(d.mode ?? "manual");
+    setEnforceCap(d.enforce_market_cap ?? false);
     // Everything already saved comes back selected — it IS the committed list.
     setRows((d.rows ?? []).map((r) => ({ ...r, selected: true })));
   }, []);
@@ -105,9 +105,10 @@ export default function AthWatchlist({ onSaved }: { onSaved?: () => void }) {
       const res = await saveAthWatchlist(selected.map((r) => r.symbol), mode, enforceCap);
       applyDoc(res);
       setSaved(
-        `Saved ${res.count} symbol${res.count === 1 ? "" : "s"} — ${res.tradable} tradable now.` +
-        (mode === "auto" ? " Mode is still Screen only, so the desk will not use this list yet."
-                         : ""));
+        `Saved ${res.count} symbol${res.count === 1 ? "" : "s"} — ${res.tradable} tradable now` +
+        (res.mode === "manual" ? ", and the desk is now trading this list."
+         : res.mode === "both" ? ", trading alongside the screen."
+         : ". Mode is Screen only, so the desk is NOT using this list."));
       onSaved?.();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -220,14 +221,21 @@ export default function AthWatchlist({ onSaved }: { onSaved?: () => void }) {
           <input type="checkbox" checked={enforceCap}
             onChange={(e) => setEnforceCap(e.target.checked)} />
           <span>
-            <b>Apply the ₹1,000 crore floor to my hand-picked names too</b>
+            <b>Also apply the ₹1,000 crore floor to my hand-picked names</b>
             <small>
-              On by default, because the size floor is part of the rule this desk was asked
-              for. Turn it off and your picks trade regardless of size — but then the equity
-              curve mixes two different strategies, so it is worth doing deliberately.
+              OFF by default. If you have typed a symbol in, you have already decided you
+              want it — re-screening your own choice on size just hides it behind a filter
+              you did not ask for. The floor still governs the automatic screen. Tick this
+              only if you want your list screened on size as well.
             </small>
           </span>
         </label>
+        <div className="stillapplies">
+          <b>What is never waived:</b> a symbol still needs a stored all-time high and at
+          least a year of history. Those are not size preferences — a stock listed four
+          months ago is at its all-time high by definition, and trading that is not the
+          strategy.
+        </div>
 
         <button className="submit" disabled={busy} onClick={submit}>
           {busy ? "Saving…" : `Submit final list (${selected.length})`}
@@ -278,6 +286,7 @@ export default function AthWatchlist({ onSaved }: { onSaved?: () => void }) {
         .capline { display: flex; gap: 9px; align-items: flex-start; margin: 14px 0; cursor: pointer; }
         .capline b { font-size: 12.5px; display: block; }
         .capline small { font-size: 10.5px; color: var(--text-muted); line-height: 1.5; display: block; margin-top: 3px; }
+        .stillapplies { font-size: 10.5px; color: var(--text-muted); line-height: 1.55; background: var(--canvas-soft); border-radius: 8px; padding: 9px 12px; margin-bottom: 12px; }
 
         .submit { width: 100%; padding: 12px; border: 0; border-radius: 10px; background: var(--purple); color: #fff; font-weight: 700; font-size: 13.5px; cursor: pointer; }
         .submit:disabled { opacity: .5; cursor: default; }
