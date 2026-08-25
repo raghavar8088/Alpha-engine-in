@@ -87,6 +87,12 @@ export default function CommodityPositionsPage() {
   const [loadingBook, setLoadingBook] = useState(true);
   const [loadingUnders, setLoadingUnders] = useState(true);
   const [undersError, setUndersError] = useState<string | null>(null);
+  // The account editor. `mode` null means closed; "new" creates, "edit" renames and
+  // re-capitalises the selected book. Replaces two window.prompt() calls, which could not
+  // show what the number meant and looked like a different application.
+  const [editor, setEditor] = useState<null | "new" | "edit">(null);
+  const [formName, setFormName] = useState("");
+  const [formCapital, setFormCapital] = useState("");
 
   const spec = useMemo(() => unders.find((u) => u.symbol === symbol), [unders, symbol]);
 
@@ -217,37 +223,35 @@ export default function CommodityPositionsPage() {
             margined with a local SPAN-style model. Not investment advice.
           </>
         }
+        onRefresh={async () => {
+          setLoadingBook(true);
+          await Promise.all([loadAccounts(), loadUnderlyings(), loadBook()]);
+        }}
+        refreshing={busy === "refresh"}
         actions={
           <>
             <StatusPill label="MCX · paper" tone="accent" />
-            <button className="btn" disabled={!!busy} onClick={() => {
-              setLoadingBook(true);
-              act("refresh", async () => {
-                await Promise.all([loadAccounts(), loadUnderlyings()]);
-              });
-            }}>{busy === "refresh" ? "Refreshing\u2026" : "\u21bb Refresh"}</button>
-            <button className="btn" disabled={!!busy} onClick={() => {
-              const name = window.prompt("New paper account name");
-              if (!name) return;
-              act("new", async () => {
-                const a = await createCmpAccount(name);
-                await loadAccounts();
-                setAccountId(a.account_id);
-              }, false);
-            }}>+ New Account</button>
+            <button className="btn primary" disabled={!!busy} onClick={() => {
+              setFormName("");
+              setFormCapital("10000000");
+              setEditor("new");
+            }}>
+              <Icon d="M12 5v14M5 12h14" /> New account
+            </button>
             <button className="btn" disabled={!!busy || !accountId} onClick={() => {
-              const cap = window.prompt("New starting capital (INR)",
-                String(summary?.initial_capital ?? 10000000));
-              if (!cap) return;
-              act("edit", async () => {
-                await editCmpAccount(accountId, { initial_capital: Number(cap) });
-                await loadAccounts();
-              });
-            }}>Edit</button>
+              const a = accounts.find((x) => x.account_id === accountId);
+              setFormName(a?.name ?? "");
+              setFormCapital(String(a?.initial_capital ?? 10000000));
+              setEditor("edit");
+            }}>
+              <Icon d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z" /> Edit
+            </button>
             <button className="btn danger" disabled={!!busy || !accountId} onClick={() => {
               if (!window.confirm("Wipe every position and order in this account?")) return;
               act("reset", () => resetCmpAccount(accountId));
-            }}>Reset</button>
+            }}>
+              <Icon d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14" /> Reset
+            </button>
           </>
         }
       />
@@ -257,7 +261,7 @@ export default function CommodityPositionsPage() {
           <span>Paper account</span>
           <select className="sel wide" value={accountId}
                   onChange={(e) => { setAccountId(e.target.value); setLoadingBook(true); }}>
-            {!accounts.length && <option value="">Loading accounts\u2026</option>}
+            {!accounts.length && <option value="">Loading accounts…</option>}
             {accounts.map((a) => (
               <option key={a.account_id} value={a.account_id}>
                 {a.name} — starting capital {compact(a.initial_capital)}
@@ -271,6 +275,61 @@ export default function CommodityPositionsPage() {
           before you trade it — one lot ranges from ₹16,000 to ₹1.6 crore.
         </div>
       </div>
+
+      {editor && (
+        <GlassPanel
+          title={editor === "new" ? "New paper account" : "Edit account"}
+          note="capital is the book's starting balance — changing it rebases every return"
+        >
+          <div className="editor">
+            <label className="fld">
+              <span>Name</span>
+              <input className="inp wide" value={formName} autoFocus
+                     placeholder="e.g. MCX swing book"
+                     onChange={(e) => setFormName(e.target.value)} />
+            </label>
+            <label className="fld">
+              <span>Starting capital (₹)</span>
+              <input className="inp wide mono" value={formCapital} inputMode="numeric"
+                     onChange={(e) => setFormCapital(e.target.value.replace(/[^0-9.]/g, ""))} />
+              <em className="hint">
+                {Number(formCapital) > 0
+                  ? `= ${compact(Number(formCapital))}`
+                  : "enter a number greater than zero"}
+              </em>
+            </label>
+            <div className="presets">
+              {[1000000, 5000000, 10000000, 50000000, 100000000].map((v) => (
+                <button key={v} type="button"
+                        className={`chip ${Number(formCapital) === v ? "on" : ""}`}
+                        onClick={() => setFormCapital(String(v))}>{compact(v)}</button>
+              ))}
+            </div>
+            <div className="editor-actions">
+              <button className="btn primary" disabled={!!busy || !formName.trim() || !(Number(formCapital) > 0)}
+                      onClick={() => act(editor === "new" ? "new" : "edit", async () => {
+                        const capital = Number(formCapital);
+                        if (editor === "new") {
+                          const a = await createCmpAccount(formName.trim(), capital);
+                          await loadAccounts();
+                          setAccountId(a.account_id);
+                        } else {
+                          await editCmpAccount(accountId, {
+                            name: formName.trim(), initial_capital: capital });
+                          await loadAccounts();
+                        }
+                        setEditor(null);
+                        setNotice(editor === "new"
+                          ? `Created ${formName.trim()} with ${compact(capital)}.`
+                          : `${formName.trim()} now starts from ${compact(capital)}.`);
+                      })}>
+                {busy ? "Saving…" : editor === "new" ? "Create account" : "Save changes"}
+              </button>
+              <button className="btn" disabled={!!busy} onClick={() => setEditor(null)}>Cancel</button>
+            </div>
+          </div>
+        </GlassPanel>
+      )}
 
       {error && <ErrorBanner message={error} onRetry={loadBook} />}
       {undersError && <ErrorBanner
@@ -591,9 +650,46 @@ export default function CommodityPositionsPage() {
         .tab { padding: 7px 14px; border-radius: 100px; font-size: 12.5px; font-weight: 600; cursor: pointer;
                border: 1px solid var(--panel-border); background: var(--panel); color: var(--text-muted); }
         .tab.on { background: var(--purple-dim); border-color: rgba(125,52,220,.24); color: var(--purple); }
-        .sel, .inp { border-radius: 9px; border: 1px solid var(--panel-border); background: var(--panel);
-                     padding: 7px 10px; font-size: 12.5px; color: var(--text); font-family: var(--font-ui); }
+        .sel, .inp { border-radius: 10px; border: 1px solid var(--panel-border); background: var(--panel);
+                     padding: 8px 11px; font-size: 12.5px; color: var(--text);
+                     font-family: var(--font-ui); transition: border-color .15s, box-shadow .15s; }
+        .sel:focus, .inp:focus { outline: none; border-color: rgba(125,52,220,.45);
+                                 box-shadow: 0 0 0 3px var(--purple-dim); }
         .inp { width: 90px; font-family: var(--font-data); }
+        .inp.wide { width: 260px; }
+        .inp.mono { font-family: var(--font-data); letter-spacing: .3px; }
+
+        /* Buttons. .btn is not a global class in this app — every page supplies its own,
+           and this page previously supplied none, so these rendered as bare native
+           buttons. Matched to PageHeader's own Refresh control so the row reads as one
+           set of controls rather than two. (No backticks in here: this is inside a
+           template literal and one would end it.) */
+        .btn { display: inline-flex; align-items: center; gap: 7px; border-radius: 10px;
+               border: 1px solid var(--panel-border); background: var(--canvas-soft);
+               color: var(--text-muted); padding: 8px 14px; font-size: 12.5px;
+               font-weight: 600; cursor: pointer; font-family: var(--font-ui);
+               transition: background .15s, color .15s, border-color .15s, transform .06s; }
+        .btn:hover:not(:disabled) { color: var(--purple); border-color: rgba(125,52,220,.32);
+                                    background: var(--purple-dim); }
+        .btn:active:not(:disabled) { transform: translateY(1px); }
+        .btn:disabled { opacity: .5; cursor: default; }
+        .btn.primary { background: var(--purple); border-color: var(--purple); color: #fff;
+                       box-shadow: 0 1px 2px rgba(125,52,220,.35); }
+        .btn.primary:hover:not(:disabled) { background: #6a2cbb; border-color: #6a2cbb; color: #fff; }
+        .btn.danger { color: var(--loss); }
+        .btn.danger:hover:not(:disabled) { color: #fff; background: var(--loss);
+                                           border-color: var(--loss); }
+
+        .editor { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; padding: 16px 20px; }
+        .editor .hint { font-style: normal; font-size: 11px; color: var(--text-faint);
+                        font-weight: 500; letter-spacing: 0; text-transform: none; }
+        .presets { display: flex; gap: 6px; flex-wrap: wrap; align-self: flex-end; padding-bottom: 2px; }
+        .chip { font-size: 11.5px; font-weight: 600; padding: 6px 11px; border-radius: 100px;
+                cursor: pointer; border: 1px solid var(--panel-border);
+                background: var(--panel); color: var(--text-muted); font-family: var(--font-ui); }
+        .chip.on { background: var(--purple-dim); border-color: rgba(125,52,220,.3); color: var(--purple); }
+        .editor-actions { display: flex; gap: 8px; align-self: flex-end; margin-left: auto;
+                          padding-bottom: 2px; }
         .accountbar { display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap;
                       padding: 14px 18px; border: 1px solid var(--panel-border);
                       border-radius: 14px; background: var(--panel); box-shadow: var(--shadow-sm); }
@@ -640,11 +736,21 @@ export default function CommodityPositionsPage() {
         .gnote { padding: 10px 20px 16px; font-size: 11.5px; color: var(--text-muted);
                  max-width: 940px; line-height: 1.55; }
         .gnote.standalone { padding: 0 4px; }
-        .btn.danger { color: var(--loss); }
       `}</style>
     </div>
   );
 }
+
+/** A 14px stroked glyph, so a button reads as an action rather than a word in a box. */
+function Icon({ d }: { d: string }) {
+  return (
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+         strokeWidth={2.1} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d={d} />
+    </svg>
+  );
+}
+
 
 function PositionTable({ rows, live, busy, onExit }: {
   rows: CmpPosition[]; live?: boolean; busy: string | null;
