@@ -279,3 +279,12 @@ pt_trades_collection = db["pt_trades"]
 pt_positions_collection = db["pt_positions"]
 pt_holdings_collection = db["pt_holdings"]
 pt_ledger_collection = db["pt_ledger"]
+# All Time High Trading — buys ₹1,00,000 of any NSE stock above ₹1,000cr market cap the day
+# it prints a new all-time high, and holds to +20% or -20% and nothing else. `ath_signals`
+# is kept separate from positions because most signals are NOT taken (no capital, share
+# price above the position size) and knowing why is the point of the record.
+ath_positions_collection = db["ath_positions"]
+ath_trades_collection = db["ath_trades"]
+ath_signals_collection = db["ath_signals"]
+ath_equity_collection = db["ath_equity"]
+ath_state_collection = db["ath_state"]

@@ -5013,3 +5013,89 @@ export async function executeStrategy(body: {
     method: "POST", body: JSON.stringify(body),
   });
 }
+
+// ── All Time High Trading ─────────────────────────────────────────────────────────
+
+export interface AthSummary {
+  mode: string; enabled: boolean;
+  desk_capital: number; per_position: number;
+  stop_pct: number; target_pct: number; market_cap_floor_cr: number;
+  deployed: number; available: number;
+  realised_pnl: number; fees_paid: number; unrealised_pnl: number;
+  equity: number; roi_pct: number;
+  open_positions: number; max_positions: number;
+  closed_trades: number; wins: number; win_rate: number | null;
+  target_hits: number; stop_hits: number;
+  last_cycle: string | null; last_scanned: number | null;
+  market_open: boolean; exit_note: string;
+}
+
+export interface AthCoverage {
+  market_cap_floor_cr: number; above_market_cap: number;
+  angel_quotable: number; with_all_time_high: number;
+  tradable: number; missing_highs: number; min_sessions: number;
+  note: string; exchange_note: string;
+}
+
+export interface AthPosition {
+  position_id: string; symbol: string; name: string | null;
+  entry: number; quantity: number; cost: number;
+  stop: number; target: number; ltp: number | null;
+  unrealised_pnl: number; return_pct?: number;
+  to_target_pct?: number; to_stop_pct?: number;
+  market_cap_cr: number | null; ath_broken: number | null;
+  previous_ath_date: string | null; days_held: number; opened_on: string;
+}
+
+export interface AthTrade {
+  position_id: string; symbol: string; entry: number; exit: number;
+  quantity: number; exit_reason: string; return_pct: number;
+  gross_pnl: number; fees: number; net_pnl: number;
+  days_held: number; opened_on: string; closed_on: string;
+}
+
+export interface AthSignal {
+  signal_id: string; symbol: string; ltp: number;
+  all_time_high: number | null; previous_ath_date: string | null;
+  market_cap_cr: number | null; taken: boolean; why: string;
+  date: string; ts: string;
+}
+
+export interface AthNearHigh {
+  symbol: string; name: string; market_cap_cr: number;
+  all_time_high: number; ath_date: string | null;
+  sessions: number; ltp: number; pct_from_ath: number;
+}
+
+export interface AthUniverseRow {
+  symbol: string; name: string; market_cap_cr: number;
+  all_time_high: number; ath_date: string | null; sessions: number;
+}
+
+export async function fetchAthSummary(): Promise<AthSummary> {
+  return apiFetch("/api/ath/summary");
+}
+export async function fetchAthCoverage(): Promise<AthCoverage> {
+  return apiFetch("/api/ath/coverage");
+}
+export async function fetchAthPositions(): Promise<{ count: number; rows: AthPosition[]; unrealised_pnl: number }> {
+  return apiFetch("/api/ath/positions");
+}
+export async function fetchAthTrades(limit = 300): Promise<{ count: number; rows: AthTrade[]; net_pnl: number; fees: number; avg_days_held: number | null }> {
+  return apiFetch("/api/ath/trades" + screenerQs({ limit }));
+}
+export async function fetchAthSignals(limit = 200): Promise<{ count: number; rows: AthSignal[] }> {
+  return apiFetch("/api/ath/signals" + screenerQs({ limit }));
+}
+export async function fetchAthNearHighs(limit = 50): Promise<{ count: number; rows: AthNearHigh[]; universe?: number; priced?: number }> {
+  return apiFetch("/api/ath/near-highs" + screenerQs({ limit }));
+}
+export async function fetchAthUniverse(limit = 500): Promise<{ count: number; rows: AthUniverseRow[] }> {
+  return apiFetch("/api/ath/universe" + screenerQs({ limit }));
+}
+export async function runAthCycle(): Promise<Record<string, unknown>> {
+  return apiFetch("/api/ath/run", { method: "POST" });
+}
+export async function seedAthHighs(limit = 120): Promise<Record<string, unknown>> {
+  return apiFetch("/api/ath/seed-highs" + screenerQs({ limit }), { method: "POST" });
+}

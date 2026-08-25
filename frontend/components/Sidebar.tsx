@@ -15,6 +15,20 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         icon: <path d="M3 17l6-6 4 4 8-8M15 6h6v6" />,
       },
       {
+        // Directly under Market Data, as asked. A trophy/peak mark rather than a chart one:
+        // this desk acts on a single event — a stock printing a price it has never printed
+        // before — not on a trend or a screen.
+        href: "/all-time-high-trading",
+        label: "All Time High Trading",
+        icon: (
+          <>
+            <path d="M3 19h18" />
+            <path d="M5 19V13l4-4 4 4 6-7" />
+            <path d="M15 6h4v4" />
+          </>
+        ),
+      },
+      {
         // Sits directly under Market Data because it is the same kind of thing: a read of
         // the market rather than a desk that trades one. A magnifier over a rising bar —
         // it SCREENS the universe (momentum, sector rotation, chart patterns), where

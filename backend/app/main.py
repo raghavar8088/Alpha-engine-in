@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 
 from app.api.deps import get_current_user
 from app.api.routes import (
+    ath_trading,
     pattern,
     desk_history,
     swing_trading,
@@ -167,6 +168,9 @@ DESK_INDEXES: dict[str, list] = {
     "pt_trades": [[("account_id", 1), ("traded_on", 1)], [("account_id", 1), ("segment", 1)]],
     "pt_holdings": [[("account_id", 1), ("token", 1)]],
     "pt_ledger": [[("account_id", 1), ("kind", 1)], [("ts", -1)]],
+    "ath_positions": [[("status", 1)], [("symbol", 1), ("status", 1)]],
+    "ath_trades": [[("closed_on", 1)], [("symbol", 1)]],
+    "ath_signals": [[("date", 1)], [("taken", 1)]],
     "screener_paper_trades": [[("family", 1)], [("closed_on", 1)]],
 }
 
@@ -234,6 +238,9 @@ EXPIRING_COLLECTIONS = {
     # delivery averages and it re-downloads on demand.
     "screener_bhavcopy": 120,
     "screener_paper_equity": 30,
+    # Equity snapshots are for charting; the ATH desk's TRADES are the record and never expire.
+    "ath_equity": 60,
+    "ath_signals": 90,
     "screener_patterns": 90,
     "screener_breadth": 365,
     "screener_sectors": 365,
@@ -400,6 +407,29 @@ async def seed_screener_bhavcopy() -> None:
             await asyncio.sleep(12 * 3600)
 
     asyncio.create_task(_run())
+
+
+@app.on_event("startup")
+async def start_ath_trading() -> None:
+    """All Time High Trading: buys Rs1,00,000 of any NSE stock above Rs1,000cr market cap
+    the day it prints a new all-time high, then holds to +20% or -20% and nothing else."""
+    from app.services.ath_trading import (
+        ENABLED as ATH_ON, MIN_MARKET_CAP, PER_POSITION,
+        STOP_PCT, TARGET_PCT,
+    )
+    from app.services.ath_scheduler import SCAN_SECONDS, ath_scan_loop, ath_seed_loop
+
+    if ATH_ON:
+        asyncio.create_task(ath_scan_loop())
+        asyncio.create_task(ath_seed_loop())
+        logger.info(
+            "All Time High Trading enabled — Rs%s per position, +%g%%/-%g%% exits only, "
+            "market cap above Rs%scr, scan every %ss during market hours (paper)",
+            f"{PER_POSITION:,.0f}", TARGET_PCT, STOP_PCT,
+            f"{MIN_MARKET_CAP / 1e7:,.0f}", SCAN_SECONDS,
+        )
+    else:
+        logger.info("All Time High Trading disabled (ATH_ENABLED=0)")
 
 
 @app.on_event("startup")
@@ -683,6 +713,7 @@ app.include_router(stocks_range.router)
 app.include_router(bullish_stocks.router)
 app.include_router(screener.router)
 app.include_router(paper_trading.router)
+app.include_router(ath_trading.router)
 app.include_router(long_horizon.router)
 app.include_router(chart_data.router)
 app.include_router(telegram_signals.router)

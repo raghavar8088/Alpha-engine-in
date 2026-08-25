@@ -85,21 +85,35 @@ def _high_of(rows: list[list]) -> tuple[float, str] | None:
     return best, date
 
 
-async def backfill_all_time_highs(only_missing: bool = True) -> dict:
-    """Walk each universe symbol's full history once and store its all-time high.
+async def backfill_all_time_highs(only_missing: bool = True,
+                                  symbols: list[str] | None = None,
+                                  limit: int | None = None) -> dict:
+    """Walk each symbol's full history once and store its all-time high.
 
     `only_missing=True` (the default, and what startup uses) skips symbols already seeded,
     so this is safe to call on every boot — it costs nothing once warm and picks up any
     stock newly added to the index lists.
+
+    `symbols` widens the job beyond the Nifty 50/100/250/500 lists. The All Time High
+    Trading desk needs highs for every NSE name above a market-cap floor — about 1,100
+    stocks against the 500 the index lists carry — and an all-time high is the one input
+    that desk cannot approximate. `limit` caps how many are walked in one pass, because
+    each symbol costs several calls against Angel's rate-limited historical endpoint and a
+    1,100-symbol walk has to be spread over several runs rather than done in one.
     """
     if not angel_client.configured():
         logger.info("all-time-high backfill skipped — Angel One not configured")
         return {"ok": 0, "failed": 0, "skipped": True}
 
-    syms = [d["symbol"] async for d in stock_universe_collection.find({}, {"symbol": 1})]
+    if symbols is not None:
+        syms = list(symbols)
+    else:
+        syms = [d["symbol"] async for d in stock_universe_collection.find({}, {"symbol": 1})]
     if only_missing:
         have = set(await stock_highs_collection.distinct("symbol"))
         syms = [s for s in syms if s not in have]
+    if limit:
+        syms = syms[:limit]
     if not syms:
         return {"ok": 0, "failed": 0, "already_seeded": True}
 
