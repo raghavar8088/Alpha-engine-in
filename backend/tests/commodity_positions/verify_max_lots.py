@@ -62,10 +62,13 @@ async def go() -> None:
     if not accounts:
         print("no paper accounts; nothing to verify")
         return
-    account = accounts[0]
+    # Test the TIGHTEST book. A 1cr default account affords the 500-lot cap on every
+    # contract, which never exercises the boundary the gate actually has to find.
+    by_cash = sorted([(await available_cash(a["account_id"]), a) for a in accounts],
+                     key=lambda t: t[0])
+    cash, account = next(((c, a) for c, a in by_cash if c > 0), by_cash[-1])
     aid = account["account_id"]
-    cash = await available_cash(aid)
-    print(f"account: {account['name']}  free cash Rs{cash:,.0f}\n")
+    print(f"account: {account['name']}  free cash Rs{cash:,.0f}  (tightest of {len(accounts)})\n")
 
     for symbol in ("CRUDEOILM", "NATGASMINI", "GOLDM"):
         built = await straddle_legs(symbol)
