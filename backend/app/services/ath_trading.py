@@ -125,6 +125,63 @@ def market_is_open(when: datetime | None = None) -> bool:
 WATCHLIST_ID = "default"
 MODES = ("auto", "manual", "both")
 
+# Angel's own scrip search. The instrument master in this app is DHAN-keyed — Angel tokens
+# are stamped onto rows that came from Dhan — so a stock Dhan does not carry is missing here
+# no matter how well Angel knows it. CALSOFT is a live NSE equity and was reported as "not
+# found" for exactly that reason.
+#
+# This asks Angel directly and adopts what it finds. Targeted rather than downloading the
+# 36MB scrip master: parsing 155,000 rows in a container that already runs at 340MB of its
+# 800MB cap is a real risk, and one symbol is all that is needed.
+ANGEL_SEARCH_PATH = "/rest/secure/angelbroking/order/v1/searchScrip"
+# Cash series Angel uses. -BE is Trade-to-Trade (delivery only, no intraday), which is
+# exactly what this desk trades anyway.
+CASH_SUFFIXES = ("-EQ", "-BE", "-BZ", "-SM")
+
+
+async def _angel_lookup(symbol: str) -> dict | None:
+    """Ask Angel for a symbol the instrument master does not have. None on any failure."""
+    try:
+        body = await angel_client._post(
+            ANGEL_SEARCH_PATH, {"exchange": "NSE", "searchscrip": symbol.upper()})
+    except Exception as exc:  # noqa: BLE001 — a lookup must never break the mapper
+        logger.info("angel scrip search failed for %s: %s", symbol, str(exc)[:120])
+        return None
+
+    for row in (body.get("data") or []):
+        ts = str(row.get("tradingsymbol") or "").upper()
+        token = row.get("symboltoken")
+        if not ts or not token:
+            continue
+        # Exact base match only. A prefix match would happily return HITECH for HITECHCORP
+        # and adopt the wrong company under the right name, which is far worse than a miss.
+        if ts.rsplit("-", 1)[0] == symbol.upper() and ts.endswith(CASH_SUFFIXES):
+            return {"symbol": symbol.upper(), "angel_token": str(token),
+                    "angel_tradingsymbol": ts, "series": ts.rsplit("-", 1)[-1]}
+    return None
+
+
+async def _adopt_instrument(found: dict) -> dict:
+    """Write an Angel-sourced equity into the instrument master so the rest of the desk —
+    quoting, history seeding, position marking — can use it like any other symbol."""
+    doc = {
+        "symbol": found["symbol"],
+        "name": found["symbol"],
+        "asset_class": "EQUITY",
+        "angel_token": found["angel_token"],
+        "angel_tradingsymbol": found["angel_tradingsymbol"],
+        "angel_exchange": "NSE",
+        "exchange_segment": "NSE_EQ",
+        "series": found.get("series"),
+        "source": "angel_search",
+        "adopted_at": _now(),
+    }
+    await instruments_collection.update_one(
+        {"symbol": doc["symbol"], "asset_class": "EQUITY"}, {"$set": doc}, upsert=True)
+    logger.info("ath: adopted %s (%s) from Angel's scrip search",
+                doc["symbol"], doc["angel_tradingsymbol"])
+    return doc
+
 
 def _normalise(token: str) -> str:
     """Clean one pasted token into an NSE symbol.
@@ -205,11 +262,21 @@ async def map_symbols(raw: str | list[str], enforce_cap: bool | None = None) -> 
         cap = caps.get(sym)
         h = highs.get(sym)
         sessions = int((h or {}).get("sessions") or 0)
+        adopted = False
+
+        # Not in the master? Ask Angel before giving up. The master is Dhan-derived, so its
+        # absence says nothing about whether the stock is listed and quotable.
+        if not i:
+            found = await _angel_lookup(sym)
+            if found:
+                i = await _adopt_instrument(found)
+                adopted = True
 
         if not i:
             status, note = "not_found", (
-                f"No NSE equity called {sym} in the instrument master. Check the spelling, "
-                f"or it may be BSE-only — this app carries no BSE instruments.")
+                f"Neither the instrument master nor Angel's own scrip search knows an NSE "
+                f"equity called {sym}. Check the spelling — or it may be BSE-only, and this "
+                f"app carries no BSE instruments.")
         elif not i.get("angel_token"):
             status, note = "not_quotable", "In the master but Angel cannot quote it, so it cannot be priced or traded."
         elif not h or not h.get("all_time_high"):
@@ -232,9 +299,15 @@ async def map_symbols(raw: str | list[str], enforce_cap: bool | None = None) -> 
         else:
             status, note = "ok", "Tradable."
 
+        if adopted and status != "not_found":
+            note = (f"Found via Angel's scrip search ({i.get('angel_tradingsymbol')}) and added "
+                    f"to the instrument master. ") + note
+
         rows.append({
             "symbol": sym,
             "name": (i or {}).get("name") or sym,
+            "series": (i or {}).get("series"),
+            "adopted": adopted,
             "status": status,
             "note": note,
             "tradable": status == "ok",

@@ -18,6 +18,15 @@ from pymongo import UpdateOne
 
 from app.core.db import instruments_collection
 
+# Cash-segment series we accept. Restricting this to "-EQ" silently dropped every
+# Trade-to-Trade (-BE) stock — real NSE listings like STLTECH (Rs33,460cr), MODISONLTD and
+# WELINV simply never got an Angel token, so no module could quote or trade them. BE is a
+# settlement restriction (delivery only, no intraday), not a lesser listing, and it is
+# exactly the segment a delivery-held desk should be able to reach. -BZ and -SM are the
+# surveillance and SME series and are included for the same reason: absent is worse than
+# present-and-labelled.
+CASH_SUFFIXES = ("-EQ", "-BE", "-BZ", "-SM")
+
 logger = logging.getLogger("angel_instruments")
 
 SCRIP_MASTER_URL = "https://margincalculator.angelbroking.com/OpenAPI_File/files/OpenAPIScripMaster.json"
@@ -90,10 +99,17 @@ def _build_lookups(rows: list[dict]) -> tuple[dict, dict, dict, dict]:
             if kind not in ("FUT", "CE", "PE"):
                 continue
             deriv.setdefault((row.get("name"), row.get("expiry"), strike, kind), {}).setdefault(seg, str(token))
-        elif seg in ("NSE", "BSE") and sym.endswith("-EQ"):
-            base = sym[:-3].upper()
-            cash.setdefault(base, {}).setdefault(seg, str(token))
-            cash_ts.setdefault(base, {}).setdefault(seg, sym.upper())  # e.g. "RELIANCE-EQ"
+        elif seg in ("NSE", "BSE") and sym.upper().endswith(CASH_SUFFIXES):
+            base = sym.rsplit("-", 1)[0].upper()
+            # -EQ wins if a symbol somehow lists in two series: it is the normal rolling
+            # segment, and setdefault below would otherwise freeze whichever row the
+            # scrip master happened to emit first.
+            if sym.upper().endswith("-EQ"):
+                cash[base] = {**cash.get(base, {}), seg: str(token)}
+                cash_ts[base] = {**cash_ts.get(base, {}), seg: sym.upper()}
+            else:
+                cash.setdefault(base, {}).setdefault(seg, str(token))
+                cash_ts.setdefault(base, {}).setdefault(seg, sym.upper())
         elif seg in ("NSE", "BSE"):
             indices.setdefault((row.get("name") or "").upper(), {}).setdefault(seg, str(token))
     return deriv, cash, cash_ts, indices
