@@ -292,3 +292,13 @@ ath_state_collection = db["ath_state"]
 # whether the desk runs on the screen / the list / both, and whether the market-cap floor
 # still applies to hand-picked names.
 ath_watchlist_collection = db["ath_watchlist"]
+# Commodity Positions — the MCX twin of the F&O Positions desk (see
+# app.services.commodity_positions). Separate collections rather than a `segment` field on
+# the F&O ones: the two desks have different capital, different margin calibration, and
+# different contract mathematics (an MCX lot carries a value multiplier that NSE F&O does
+# not), so a shared book would produce summaries that silently mix them.
+# `commodity_pos_*` is deliberately not `commodity_*` — those already belong to the
+# 311-strategy Commodity Trading pattern desk and must not be confused with this one.
+commodity_accounts_collection = db["commodity_accounts"]
+commodity_pos_positions_collection = db["commodity_pos_positions"]
+commodity_pos_orders_collection = db["commodity_pos_orders"]

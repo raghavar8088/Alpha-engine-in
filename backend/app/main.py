@@ -23,6 +23,7 @@ from app.api.routes import (
     bullish_stocks,
     chart_data,
     commodity,
+    commodity_positions,
     fno_positions,
     intraday_lab,
     live,
@@ -317,6 +318,8 @@ async def ensure_indexes() -> None:
     await sf_ensure_indexes()
     from app.services.trending_stocks.engine import ensure_indexes as ts_ensure_indexes
     await ts_ensure_indexes()
+    from app.services.commodity_positions import ensure_indexes as cmp_ensure_indexes
+    await cmp_ensure_indexes()
 
 
 @app.on_event("startup")
@@ -465,6 +468,31 @@ async def start_screener_scheduler() -> None:
         )
     else:
         logger.info("Stock Screener scheduler disabled (SCREENER_ENABLED=0)")
+
+
+@app.on_event("startup")
+async def sync_mcx_instruments() -> None:
+    """Pull the whole MCX board into the instrument master, in the background.
+
+    Measured 2026-08-22: the master held 8 of MCX's 28 underlyings and `lot_size: 1` on
+    every contract, so the mini crude and mini natural-gas ladders — 1,396 option
+    contracts between them — did not exist as far as this app was concerned. The upstream
+    loader is a separate service run by hand, so the Commodity Positions desk closes the
+    gap itself, from the same scrip master the token mapper already downloads."""
+    async def _sync() -> None:
+        try:
+            from app.services.commodity_instruments import sync
+            stats = await sync()
+            logger.info("MCX instruments synced — %d contracts across %d underlyings "
+                        "(%d futures, %d options)", stats["mcx_contracts"],
+                        stats["underlyings"], stats["futures"], stats["options"])
+            from app.services.commodity_positions import prime_lotsizes
+            await prime_lotsizes()
+        except Exception:  # noqa: BLE001 — the desk degrades, the app still serves
+            logger.warning("MCX instrument sync failed; the board may be incomplete",
+                           exc_info=True)
+
+    asyncio.create_task(_sync())
 
 
 @app.on_event("startup")
@@ -697,6 +725,7 @@ app.include_router(live_intraday.router)
 app.include_router(live_trading.router)
 app.include_router(momentum.router)
 app.include_router(commodity.router)
+app.include_router(commodity_positions.router)
 app.include_router(strategy_factory.router)
 app.include_router(stock_desk.router)
 app.include_router(zero_hero.router)

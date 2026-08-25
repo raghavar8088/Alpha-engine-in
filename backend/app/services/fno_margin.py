@@ -77,9 +77,10 @@ def _leg_value(scenario_spot: float, leg: dict, t_years: float, at_expiry: bool 
     )
 
 
-def _exposure(legs: list[dict], spot: float) -> float:
+def _exposure(legs: list[dict], spot: float, exposure_pct: float | None = None) -> float:
     """EXPOSURE_PCT on the NET-short notional per option type + net futures, so a
     balanced hedge (equal long/short counts of a type) carries no exposure on it."""
+    pct = EXPOSURE_PCT if exposure_pct is None else exposure_pct
     short_ce = long_ce = short_pe = long_pe = 0.0
     net_fut = 0.0
     for leg in legs:
@@ -98,15 +99,24 @@ def _exposure(legs: list[dict], spot: float) -> float:
     net_short_ce = max(0.0, short_ce - long_ce)
     net_short_pe = max(0.0, short_pe - long_pe)
     units = net_short_ce + net_short_pe + abs(net_fut)
-    return EXPOSURE_PCT * spot * units
+    return pct * spot * units
 
 
-def portfolio_margin(legs: list[dict], spot: float, t_years: float) -> dict:
+def portfolio_margin(legs: list[dict], spot: float, t_years: float,
+                     price_scan_pct: float | None = None,
+                     exposure_pct: float | None = None) -> dict:
     """Portfolio margin (span + exposure) for a set of legs on ONE underlying.
 
     legs: [{kind:"OPTION"|"FUTURE", option_type:"CE"|"PE"|None, strike, qty (units,
             positive), side:"BUY"|"SELL", premium, iv}]. Empty -> zero.
+
+    `price_scan_pct`/`exposure_pct` override the module defaults for ONE call. The
+    defaults are calibrated on NIFTY (~6%), which is wrong for other markets: the MCX
+    desk scans natural gas at 13% and gold at 5%, because one shared number would
+    either over-margin the metals or under-margin the energies. Omitting them keeps
+    the F&O desk byte-identical.
     """
+    scan = PRICE_SCAN_PCT if price_scan_pct is None else price_scan_pct
     if not legs or not spot or spot <= 0:
         return {"span": 0.0, "exposure": 0.0, "total": 0.0, "worst_spot": spot}
 
@@ -122,7 +132,7 @@ def portfolio_margin(legs: list[dict], spot: float, t_years: float) -> dict:
     worst_spot = spot
     for i in range(SCAN_STEPS + 1):
         frac = 2.0 * i / SCAN_STEPS - 1.0  # -1 .. +1
-        s2 = spot * (1.0 + PRICE_SCAN_PCT * frac)
+        s2 = spot * (1.0 + scan * frac)
         for tp, at_expiry in time_points:
             for shift in iv_shifts:
                 pnl = 0.0
@@ -138,7 +148,7 @@ def portfolio_margin(legs: list[dict], spot: float, t_years: float) -> dict:
                     worst_loss, worst_spot = loss, s2
 
     span = max(0.0, worst_loss)
-    exposure = _exposure(legs, spot)
+    exposure = _exposure(legs, spot, exposure_pct)
     return {
         "span": round(span, 2),
         "exposure": round(exposure, 2),
