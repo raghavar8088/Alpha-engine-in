@@ -773,6 +773,10 @@ async def _fill(base_order: dict, fill_price: float, check_margin: bool = True) 
             "opened_at": now, "updated_at": now, "closed_at": None, "closed_on": None,
         })
 
+    # Re-margin the whole group at its new size. Without this the position keeps the
+    # margin of its FIRST fill for ever, and adding to it is free.
+    await remargin_group(account_id, symbol, inst.get("expiry"))
+
     doc = {**base_order, "status": "FILLED", "fill_price": round(fill_price, 4),
            "filled_at": now, "margin_used": round(margin, 2), "position_id": position_id,
            "contract_value": contract_value(symbol, fill_price, base_order["lots"])}
@@ -810,6 +814,50 @@ def _merge(existing: dict, side: str, lots: int, quantity: int, price: float) ->
     return {"side": side, "lots": lots - cur_lots, "quantity": quantity - cur_qty,
             "entry_price": round(price, 4), "realized_pnl": round(realized, 2),
             "ltp": round(price, 4)}
+
+
+async def remargin_group(account_id: str, underlying: str, expiry: str) -> float:
+    """Re-margin an entire (account, underlying, expiry) group at its CURRENT size.
+
+    THIS EXISTS BECAUSE MARGIN USED TO BE WRITTEN ONCE AND NEVER AGAIN. `margin_used` was
+    set when a position was created and `_merge` — which grows a position when you add to
+    it — never touched it. So a book could hold 38 lots while still reporting the margin of
+    the single lot it opened with. Measured on a live account: a 38-lot NATGASMINI short
+    strangle, Rs2.53 lakh of contract exposure on a Rs2 lakh book, blocking Rs14,574 when
+    the real portfolio margin was Rs2,59,314. Every subsequent affordability check then saw
+    capital that was not there.
+
+    The group is margined as a PORTFOLIO — the same figure the basket gate quotes — and
+    that total is then apportioned across the open legs by their standalone margins, so the
+    per-position column still means something and the sum still equals the portfolio
+    number. Both must be true: the UI reads the parts, `available_cash` reads the sum."""
+    positions = await _open_group(account_id, underlying, expiry)
+    if not positions:
+        return 0.0
+
+    t = _years_to_expiry(expiry)
+    ref, _fut = await future_price(underlying, expiry)
+    if not ref:
+        # No reference price means no honest margin. Leave what is stored rather than
+        # overwrite it with a number derived from an option premium standing in for its
+        # own underlying — that mistake understates a short by a factor of twenty.
+        logger.warning("[commodity_positions] no future price for %s %s — margin left as "
+                       "stored for %d positions", underlying, expiry, len(positions))
+        return sum(p.get("margin_used") or 0.0 for p in positions)
+
+    legs = [_pos_to_leg(p, ref, t) for p in positions]
+    total = _margin_for(legs, underlying, ref, t)["total"]
+    standalone = [_margin_for([leg], underlying, ref, t)["total"] for leg in legs]
+    denom = sum(standalone) or 1.0
+
+    for pos, alone in zip(positions, standalone):
+        share = round(total * alone / denom, 2)
+        await commodity_pos_positions_collection.update_one(
+            {"_id": pos["_id"]},
+            {"$set": {"margin_used": share, "capital_deployed": share,
+                      "standalone_margin": round(alone, 2),
+                      "margin_reference_price": ref, "updated_at": _now()}})
+    return total
 
 
 async def exit_position(account_id: str, position_id: str, lots: int | None = None) -> dict:
@@ -894,12 +942,20 @@ async def _price_basket(legs: list[dict]) -> list[dict]:
     return priced
 
 
-def _pos_to_leg(pos: dict) -> dict:
+def _pos_to_leg(pos: dict, ref: float | None = None, t_years: float = 0.0) -> dict:
+    """An open position as a margin leg, at its CURRENT size.
+
+    `qty` comes from the stored quantity, so a position that has been added to margins as
+    what it is now rather than as what it was when it opened."""
     inst = pos.get("instrument") or {}
+    option_type = inst.get("option_type")
+    premium = pos.get("ltp") or pos.get("entry_price") or 0.0
+    iv = (solve_iv(premium, ref, inst.get("strike"), t_years, option_type)
+          if option_type and ref else None)
     return {"kind": pos.get("instrument_kind", "FUTURE"),
-            "option_type": inst.get("option_type"), "strike": inst.get("strike"),
+            "option_type": option_type, "strike": inst.get("strike"),
             "qty": pos.get("quantity", 0), "side": pos.get("side", "BUY"),
-            "premium": pos.get("ltp") or pos.get("entry_price") or 0.0, "iv": None}
+            "premium": premium, "iv": iv}
 
 
 async def _open_group(account_id: str, underlying: str, expiry: str) -> list[dict]:
@@ -933,7 +989,7 @@ async def basket_margin_delta(account_id: str, priced: list[dict]) -> tuple[floa
         ref, _fut = await future_price(underlying, expiry)
         ref = ref or plist[0]["ltp"]
         existing = await _open_group(account_id, underlying, expiry)
-        old_legs = [_pos_to_leg(q) for q in existing]
+        old_legs = [_pos_to_leg(q, ref, t) for q in existing]
         add_legs = [_leg_from(p["inst"], p["side"], p["qty"], p["ltp"], ref, t) for p in plist]
         before = _margin_for(old_legs, underlying, ref, t)["total"] if old_legs else 0.0
         after = _margin_for(old_legs + add_legs, underlying, ref, t)["total"]
@@ -1069,6 +1125,28 @@ async def sync_positions() -> int:
     return updated
 
 
+async def remargin_account(account_id: str | None = None) -> dict:
+    """Re-margin every open group. Repairs books written before margin was recomputed on
+    merge, and is safe to run at any time — it only ever restates margin from the current
+    positions and the current futures price."""
+    q: dict = {"status": "OPEN"}
+    if account_id:
+        q["account_id"] = account_id
+    groups: set[tuple[str, str, str]] = set()
+    async for p in commodity_pos_positions_collection.find(
+            q, {"account_id": 1, "underlying_symbol": 1, "instrument.expiry": 1}):
+        exp = (p.get("instrument") or {}).get("expiry")
+        if p.get("underlying_symbol") and exp:
+            groups.add((p["account_id"], p["underlying_symbol"], exp))
+
+    out = []
+    for acc, underlying, expiry in sorted(groups):
+        total = await remargin_group(acc, underlying, expiry)
+        out.append({"account_id": acc, "underlying": underlying, "expiry": expiry,
+                    "portfolio_margin": round(total, 2)})
+    return {"groups": len(out), "detail": out}
+
+
 async def reset_account(account_id: str) -> dict:
     await get_account(account_id)
     pos = await commodity_pos_positions_collection.delete_many({"account_id": account_id})
@@ -1122,4 +1200,5 @@ __all__ = [
     "estimate_margin", "place_order", "exit_position", "sync_positions",
     "reset_account", "summary", "available_cash",
     "estimate_basket", "execute_basket", "basket_margin_delta", "MAX_BASKET_LEGS",
+    "remargin_group", "remargin_account",
 ]

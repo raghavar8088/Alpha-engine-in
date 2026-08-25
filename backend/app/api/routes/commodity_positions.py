@@ -19,6 +19,7 @@ mathematics; this router is a thin layer over it.
   GET    /api/commodity-positions/orders               order book
   GET    /api/commodity-positions/positions            open + closed, with summary
   POST   /api/commodity-positions/positions/{id}/exit  exit fully or partially, in lots
+  POST   /api/commodity-positions/remargin             restate margin from current positions
   POST   /api/commodity-positions/reset                wipe one account's book
   GET    /api/commodity-positions/spec-check           are the contract multipliers sane?
   POST   /api/commodity-positions/sync-instruments     reload the whole MCX board
@@ -41,6 +42,7 @@ from app.services.commodity_positions import (
     create_account,
     estimate_basket,
     execute_basket,
+    remargin_account,
     edit_account,
     estimate_margin,
     exit_position,
@@ -332,6 +334,17 @@ async def exit_endpoint(position_id: str, payload: ExitRequest,
                     ORDER_TS)
     except OrderError as exc:
         raise HTTPException(400, exc.detail)
+
+
+@router.post("/remargin")
+async def remargin_endpoint(account_id: str | None = Query(None),
+                            _u: dict = Depends(get_current_user)):
+    """Restate margin on every open group from current positions and current prices.
+
+    Repairs books written before margin was recomputed when a position was added to: the
+    margin was set at the first fill and never again, so a position could grow without its
+    margin growing. Safe to re-run."""
+    return await remargin_account(account_id)
 
 
 @router.post("/reset")
