@@ -503,9 +503,28 @@ async def option_chain(symbol: str, expiry: str, around: int = 20) -> dict:
             {"strike": 1, "option_type": 1, "angel_token": 1, "tick_size": 1})
     ]
     if not contracts:
+        # Say which of the three possible causes it actually is, rather than asserting one.
+        # The first version always blamed a token-mapping gap; measured on production, every
+        # underlying is fully mapped (1044/1044 for CRUDEOILM, 4040/4040 for GOLD) and the
+        # real cause was an expiry that belongs to a DIFFERENT commodity — MCX does not run
+        # one calendar. Crude expires on the 17th, gas and copper on the 23rd.
+        listed = await option_expiries(symbol)
+        unmapped = await instruments_collection.count_documents(
+            {"underlying_symbol": symbol.upper(), "expiry": expiry,
+             "asset_class": OPTION_CLASS})
+        if unmapped:
+            raise OrderError(
+                f"{symbol} has {unmapped} option contracts for {expiry} but none carry a "
+                "broker token yet, so none can be priced. That is a mapping gap — reload "
+                "the MCX contracts from the Contract Specs tab.")
+        if listed:
+            raise OrderError(
+                f"{symbol} does not have an option expiry on {expiry}. MCX runs a different "
+                f"calendar per commodity — {symbol} expires on "
+                f"{', '.join(listed[:3])}. Pick one of those.")
         raise OrderError(
-            f"No Angel-mapped {symbol} option contracts for {expiry}. The chain is built "
-            "from the instrument master, so this is a token-mapping gap, not a quiet market.")
+            f"{symbol} has no listed option expiries at all — MCX lists options on ten "
+            "underlyings only. Use the Futures tab for this one.")
 
     fut_px, fut = await future_price(symbol, expiry)
 

@@ -80,6 +80,11 @@ export default function CommodityPositionsPage() {
   const [symbol, setSymbol] = useState("");
   const [optExpiry, setOptExpiry] = useState("");
   const [optExpiries, setOptExpiries] = useState<string[]>([]);
+  // Which underlying the expiry list above belongs to. Without this the chain fetches with
+  // the NEW symbol and the OLD expiry the moment you switch commodity, because the expiry
+  // list is loaded asynchronously and has not caught up — and MCX runs a different expiry
+  // calendar per commodity, so that pair is usually a contract that does not exist.
+  const [expiriesFor, setExpiriesFor] = useState("");
   const [futExpiries, setFutExpiries] = useState<string[]>([]);
 
   const [tab, setTab] = useState<Tab>("chain");
@@ -142,19 +147,36 @@ export default function CommodityPositionsPage() {
   // ---- expiries follow the underlying ----------------------------------------
   useEffect(() => {
     if (!symbol) return;
+    // Drop the previous commodity's expiries immediately, so nothing downstream can pair
+    // them with the new symbol while the new list is in flight.
+    setExpiriesFor("");
+    setOptExpiries([]);
+    setOptExpiry("");
+    setChain(null);
+    let live = true;
     fetchCmpOptionExpiries(symbol).then((r) => {
+      if (!live) return;
       setOptExpiries(r.expiries);
       setOptExpiry(r.expiries[0] ?? "");
-    }).catch(() => { setOptExpiries([]); setOptExpiry(""); });
-    fetchCmpFutureExpiries(symbol).then((r) => setFutExpiries(r.expiries)).catch(() => setFutExpiries([]));
+      setExpiriesFor(symbol);
+    }).catch(() => { if (live) setExpiriesFor(symbol); });
+    fetchCmpFutureExpiries(symbol).then((r) => live && setFutExpiries(r.expiries))
+      .catch(() => live && setFutExpiries([]));
+    return () => { live = false; };
   }, [symbol]);
 
   useEffect(() => {
+    // Only fetch once the expiry list is known to belong to THIS symbol and the chosen
+    // expiry is one of its own.
     if (tab !== "chain" || !symbol || !optExpiry) return;
+    if (expiriesFor !== symbol || !optExpiries.includes(optExpiry)) return;
+    let live = true;
     setChain(null);
-    fetchCmpChain(symbol, optExpiry).then(setChain)
-      .catch((e) => setError(e instanceof Error ? e.message : "Chain unavailable"));
-  }, [tab, symbol, optExpiry]);
+    fetchCmpChain(symbol, optExpiry)
+      .then((c) => { if (live) { setChain(c); setError(null); } })
+      .catch((e) => live && setError(e instanceof Error ? e.message : "Chain unavailable"));
+    return () => { live = false; };
+  }, [tab, symbol, optExpiry, expiriesFor, optExpiries]);
 
   useEffect(() => {
     if (tab !== "futures") return;
@@ -604,8 +626,12 @@ export default function CommodityPositionsPage() {
           </div>
 
           {!optExpiries.length ? (
-            <EmptyState title={`${symbol} has no listed options`}
-                        note="MCX lists options on ten underlyings. Use the Futures tab for this one." />
+            <EmptyState
+              title={expiriesFor !== symbol ? `Loading ${symbol} expiries…`
+                                            : `${symbol} has no listed options`}
+              note={expiriesFor !== symbol
+                ? "MCX runs a different expiry calendar per commodity."
+                : "MCX lists options on ten underlyings only. Use the Futures tab for this one."} />
           ) : !chain ? (
             <div className="dim pad">Loading chain…</div>
           ) : (
