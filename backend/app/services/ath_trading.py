@@ -708,8 +708,14 @@ async def _scan(rows: list[dict], prices: dict[str, float]) -> tuple[int, int]:
     return opened, skipped
 
 
-async def _open(r: dict, ltp: float, qty: int, cost: float) -> dict:
+async def _open(r: dict, ltp: float, qty: int, cost: float,
+                entry_reason: str = "ath_break") -> dict:
     doc = {
+        # "ath_break" = the desk's own rule fired. "manual" = someone added it by hand at
+        # whatever price it happened to be. Kept apart deliberately: this desk exists to
+        # answer whether buying all-time highs works, and a book that mixes signalled
+        # entries with hand-picked ones cannot answer that question about either.
+        "entry_reason": entry_reason,
         "position_id": f"ATH-{uuid4().hex[:12]}",
         "symbol": r["symbol"],
         "name": r.get("name"),
@@ -746,6 +752,78 @@ async def _open(r: dict, ltp: float, qty: int, cost: float) -> dict:
     return doc
 
 
+async def enter_all(symbols: list[str] | None = None) -> dict:
+    """Buy every named stock at the current price, whether or not it is at an all-time high.
+
+    THIS DELIBERATELY BYPASSES THE SIGNAL. The desk's rule is to buy a break; this buys the
+    list. It exists because a hand-built watchlist is usually built FROM a screen that has
+    already found these names at their highs, and waiting for each to print another break
+    could mean waiting months.
+
+    What it does NOT change: the position size, the ±20% exits, the delivery cost schedule,
+    or the one-position-per-symbol rule. Stop and target are measured from the price actually
+    paid, so a stock entered well below its high has its risk measured from where the money
+    really went in — not from a high it is nowhere near.
+
+    Every position it opens is tagged `entry_reason="manual"` so the desk's statistics can
+    still separate "the rule worked" from "we bought a list".
+    """
+    wl = await get_watchlist()
+    wanted = [str(x).upper() for x in (symbols or wl.get("symbols") or [])]
+    if not wanted:
+        return {"opened": 0, "reason": "no symbols — save a watchlist first"}
+
+    rows = {r["symbol"]: r for r in await universe() if r["symbol"] in wanted}
+    if not rows:
+        return {"opened": 0, "reason": "none of those symbols are tradable — map them first"}
+
+    held = {p["symbol"] async for p in ath_positions_collection.find(
+        {"status": "OPEN"}, {"symbol": 1})}
+    prices = await _quotes(list(rows.values()))
+    cash = await available_capital()
+
+    opened, skipped, already = 0, [], 0
+    for sym, r in rows.items():
+        if sym in held:
+            already += 1
+            continue
+        ltp = prices.get(r["token"])
+        if ltp is None or ltp <= 0:
+            skipped.append({"symbol": sym, "why": "no live quote"})
+            continue
+        qty = int(PER_POSITION // ltp)
+        if qty < 1:
+            skipped.append({"symbol": sym,
+                            "why": f"one share costs {ltp:,.2f}, above the "
+                                   f"{PER_POSITION:,.0f} position size"})
+            continue
+        cost = qty * ltp
+        if cost > cash:
+            skipped.append({"symbol": sym,
+                            "why": f"needs {cost:,.0f}, desk has {cash:,.0f} free"})
+            continue
+
+        await _open(r, ltp, qty, cost, entry_reason="manual")
+        await _record_signal(
+            r, ltp, taken=True,
+            why=(f"Manual entry — added to positions by hand at {ltp:,.2f}, not on an "
+                 f"all-time-high break. Its high is {r['all_time_high']:,.2f}."))
+        cash -= cost
+        opened += 1
+
+    logger.info("ath: manual entry opened %s position(s), %s already held, %s skipped",
+                opened, already, len(skipped))
+    return {
+        "opened": opened,
+        "already_held": already,
+        "skipped": skipped,
+        "capital_left": round(cash, 2),
+        "note": ("Entered at the current price, not on a break. Stop and target are ±"
+                 f"{STOP_PCT:g}% of what was actually paid. These carry entry_reason="
+                 "'manual' so they can be told apart from the desk's own signals."),
+    }
+
+
 async def _record_signal(r: dict, ltp: float, taken: bool, why: str) -> None:
     await ath_signals_collection.insert_one({
         "signal_id": f"S-{uuid4().hex[:10]}",
@@ -778,6 +856,8 @@ async def summary(prices: dict[str, float] | None = None) -> dict:
     unrealised = sum(float(p.get("unrealised_pnl") or 0) for p in positions)
     net, fees = await _realised()
     deployed = sum(float(p.get("cost") or 0) for p in positions)
+    manual_open = await ath_positions_collection.count_documents(
+        {"status": "OPEN", "entry_reason": "manual"})
     trades = await ath_trades_collection.count_documents({})
     wins = await ath_trades_collection.count_documents({"net_pnl": {"$gt": 0}})
     hits = await ath_trades_collection.count_documents({"exit_reason": "TARGET"})
@@ -800,6 +880,8 @@ async def summary(prices: dict[str, float] | None = None) -> dict:
         "equity": round(DESK_CAPITAL + net + unrealised, 2),
         "roi_pct": round((net + unrealised) / DESK_CAPITAL * 100, 3) if DESK_CAPITAL else 0.0,
         "open_positions": len(positions),
+        "open_manual": manual_open,
+        "open_on_signal": len(positions) - manual_open,
         "max_positions": int(DESK_CAPITAL // PER_POSITION),
         "closed_trades": trades,
         "wins": wins,

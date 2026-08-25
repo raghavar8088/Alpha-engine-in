@@ -18,7 +18,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import GlassPanel from "./GlassPanel";
 import EmptyState from "./EmptyState";
 import {
-  mapAthSymbols, fetchAthWatchlist, saveAthWatchlist,
+  mapAthSymbols, fetchAthWatchlist, saveAthWatchlist, enterAllAthWatchlist,
   AthMappedSymbol, AthWatchlist as AthWatchlistDoc,
 } from "../lib/api";
 
@@ -240,6 +240,41 @@ export default function AthWatchlist({ onSaved }: { onSaved?: () => void }) {
         <button className="submit" disabled={busy} onClick={submit}>
           {busy ? "Saving…" : `Submit final list (${selected.length})`}
         </button>
+
+        <div className="enternow">
+          <div className="entertext">
+            <b>Buy the whole list now</b>
+            <small>
+              Opens a ₹1,00,000 position in every tradable symbol at the current price,
+              without waiting for each to print a fresh all-time high. Stop and target are
+              still ±20%, measured from what is actually paid. These are tagged as manual
+              entries so the desk&rsquo;s own signalled trades stay separable — otherwise the
+              equity curve stops answering whether buying all-time highs works.
+            </small>
+          </div>
+          <button className="enterbtn" disabled={busy} onClick={async () => {
+            const n = selected.filter((r) => r.tradable).length;
+            if (!window.confirm(
+              `Open a position in ${n} stock(s) at the current price?
+
+` +
+              `That is up to ₹${(n * 100000).toLocaleString("en-IN")} committed, ` +
+              `bypassing the all-time-high rule. Already-held names are skipped.`)) return;
+            setBusy(true); setError(null); setSaved(null);
+            try {
+              const r = await enterAllAthWatchlist();
+              setSaved(
+                `Opened ${r.opened} position(s)` +
+                (r.already_held ? `, ${r.already_held} already held` : "") +
+                (r.skipped?.length ? `, ${r.skipped.length} skipped` : "") + ".");
+              onSaved?.();
+            } catch (e) {
+              setError(e instanceof Error ? e.message : String(e));
+            } finally { setBusy(false); }
+          }}>
+            {busy ? "Working…" : "Buy all now"}
+          </button>
+        </div>
       </GlassPanel>
 
       <style jsx>{`
@@ -290,6 +325,12 @@ export default function AthWatchlist({ onSaved }: { onSaved?: () => void }) {
 
         .submit { width: 100%; padding: 12px; border: 0; border-radius: 10px; background: var(--purple); color: #fff; font-weight: 700; font-size: 13.5px; cursor: pointer; }
         .submit:disabled { opacity: .5; cursor: default; }
+        .enternow { display: flex; gap: 14px; align-items: center; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--panel-border); }
+        .entertext { flex: 1; }
+        .entertext b { font-size: 12.5px; display: block; }
+        .entertext small { font-size: 10.5px; color: var(--text-muted); line-height: 1.5; display: block; margin-top: 3px; }
+        .enterbtn { flex-shrink: 0; padding: 11px 18px; border: 1px solid var(--gain); border-radius: 10px; background: var(--gain-dim); color: var(--gain); font-weight: 700; font-size: 13px; cursor: pointer; }
+        .enterbtn:disabled { opacity: .5; cursor: default; }
       `}</style>
     </div>
   );

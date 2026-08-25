@@ -5136,3 +5136,13 @@ export async function saveAthWatchlist(
     method: "POST", body: JSON.stringify({ symbols, mode, enforce_market_cap }),
   });
 }
+
+export async function enterAllAthWatchlist(symbols?: string[]): Promise<{
+  opened: number; already_held?: number;
+  skipped?: { symbol: string; why: string }[];
+  capital_left?: number; note?: string; reason?: string;
+}> {
+  return apiFetch("/api/ath/enter-all?confirm=true", {
+    method: "POST", body: JSON.stringify({ symbols: symbols ?? null }),
+  });
+}

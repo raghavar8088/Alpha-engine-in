@@ -108,6 +108,11 @@ class MapRequest(BaseModel):
     symbols: str | list[str]
 
 
+class EnterAllRequest(BaseModel):
+    """Omit `symbols` to buy the whole saved watchlist."""
+    symbols: list[str] | None = None
+
+
 class SaveWatchlistRequest(BaseModel):
     symbols: list[str]
     mode: str | None = None                  # auto | manual | both
@@ -148,3 +153,21 @@ async def save_watchlist(payload: SaveWatchlistRequest,
         saved.get("symbols") or [], enforce_cap=saved.get("enforce_market_cap", False))
     return {**saved, **mapped,
             "updated_at": saved["updated_at"].isoformat() if saved.get("updated_at") else None}
+
+
+@router.post("/enter-all")
+async def enter_all(payload: EnterAllRequest | None = None,
+                    confirm: bool = Query(False, description="must be true — this opens real paper positions"),
+                    _u: dict = Depends(get_current_user)):
+    """Buy the whole watchlist at the current price, bypassing the all-time-high signal.
+
+    Gated on ?confirm=true because it commits capital across every name at once rather than
+    one break at a time. Positions are tagged entry_reason='manual' so the desk's own
+    signalled trades stay separable from these.
+    """
+    if not confirm:
+        raise HTTPException(
+            status_code=400,
+            detail="Refusing without ?confirm=true — this opens a position in every tradable "
+                   "symbol on the watchlist at once, bypassing the all-time-high rule.")
+    return await ath_trading.enter_all((payload.symbols if payload else None))
