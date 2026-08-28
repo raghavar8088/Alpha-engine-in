@@ -105,6 +105,19 @@ class Check:
     verdict: str           # pass | warn | fail | unknown
     detail: str
     value: float | None = None
+    # How comfortably it passed, 0..1, where the check has a continuous measure behind it.
+    # Without this a verdict is a cliff: delivery at 0.81x its own average and delivery at
+    # 1.4x both "pass" and both earn full marks, so every clean position ties at exactly
+    # 100 and the number ranks nothing. The verdict still decides pass/fail; quality
+    # decides how much credit passing earns.
+    quality: float | None = None
+
+
+def _grade(value: float, best: float, worst: float) -> float:
+    """Linear 0..1 between two anchors, clamped. Works in either direction."""
+    if best == worst:
+        return 1.0
+    return max(0.0, min(1.0, (value - worst) / (best - worst)))
 
 
 @dataclass
@@ -177,19 +190,22 @@ def _check_band(s: dict) -> Check:
         # This is the BEST case for a wide stop, not the absence of information.
         return Check("band", "Price band", "pass",
                      "No fixed circuit band (an F&O security), so a 20% stop can fill.",
-                     None)
+                     None, quality=1.0)
     if band < BAND_FAIL_BELOW:
         need = int(20 / band) + 1
         return Check("band", "Price band", "fail",
                      f"{band:g}% circuit band — a 20% fall takes at least {need} sessions, "
                      f"each one locked limit-down with no bid. The stop cannot fire at "
-                     f"−20%; it fires at whatever price exists once the lock clears.", band)
+                     f"−20%; it fires at whatever price exists once the lock clears.",
+                     band, quality=0.0)
     if band < BAND_WARN_BELOW:
         return Check("band", "Price band", "warn",
                      f"{band:g}% circuit band — the stop needs two clean sessions to fill, "
-                     f"so expect to exit below −20%.", band)
+                     f"so expect to exit below −20%.", band,
+                     quality=_grade(band, best=20, worst=6))
     return Check("band", "Price band", "pass",
-                 f"{band:g}% band — the stop can fill inside one session.", band)
+                 f"{band:g}% band — the stop can fill inside one session.", band,
+                 quality=_grade(band, best=20, worst=10))
 
 
 def _check_surveillance(s: dict) -> Check:
@@ -210,9 +226,9 @@ def _check_surveillance(s: dict) -> Check:
     if t2t:
         return Check("surveillance", "Surveillance", "warn",
                      f"Trade-to-Trade series ({s.get('series')}). Delivery only, and the "
-                     f"series itself is usually a surveillance step.")
+                     f"series itself is usually a surveillance step.", quality=0.4)
     return Check("surveillance", "Surveillance", "pass",
-                 f"Not under ASM or GSM; series {s.get('series') or 'EQ'}.")
+                 f"Not under ASM or GSM; series {s.get('series') or 'EQ'}.", quality=1.0)
 
 
 def _check_liquidity(d: dict | None, per_position: float) -> Check:
@@ -231,9 +247,11 @@ def _check_liquidity(d: dict | None, per_position: float) -> Check:
     if pct >= POSITION_PCT_OF_TURNOVER_WARN:
         return Check("liquidity", "Liquidity", "warn",
                      f"₹{per_position:,.0f} is {pct:.1f}% of a median day's turnover "
-                     f"(₹{turnover/1e5:,.0f}L) — thin enough to slip on the way out.", pct)
+                     f"(₹{turnover/1e5:,.0f}L) — thin enough to slip on the way out.",
+                     pct, quality=_grade(pct, best=1.0, worst=3.0))
     return Check("liquidity", "Liquidity", "pass",
-                 f"{pct:.2f}% of a median day's turnover (₹{turnover/1e5:,.0f}L).", pct)
+                 f"{pct:.2f}% of a median day's turnover (₹{turnover/1e5:,.0f}L).", pct,
+                 quality=_grade(pct, best=0.05, worst=1.0))
 
 
 def _check_delivery(d: dict | None) -> Check:
@@ -250,9 +268,10 @@ def _check_delivery(d: dict | None) -> Check:
     if ratio < DELIVERY_WARN_BELOW:
         return Check("delivery", "Delivery", "warn",
                      f"{where} — {ratio:.2f}x, below its own habit on the day it broke out.",
-                     ratio)
+                     ratio, quality=_grade(ratio, best=0.8, worst=0.5))
     return Check("delivery", "Delivery", "pass",
-                 f"{where} — {ratio:.2f}x.", ratio)
+                 f"{where} — {ratio:.2f}x.", ratio,
+                 quality=_grade(ratio, best=1.3, worst=0.8))
 
 
 def _check_extension(ltp: float, ath: float) -> Check:
@@ -266,9 +285,11 @@ def _check_extension(ltp: float, ath: float) -> Check:
                      ext)
     if ext >= EXTENSION_WARN_PCT:
         return Check("extension", "Entry vs the high", "warn",
-                     f"{ext:+.1f}% past the high — later than the break.", ext)
+                     f"{ext:+.1f}% past the high — later than the break.", ext,
+                     quality=_grade(ext, best=4.0, worst=10.0))
     return Check("extension", "Entry vs the high", "pass",
-                 f"{ext:+.1f}% from the high — at the break.", ext)
+                 f"{ext:+.1f}% from the high — at the break.", ext,
+                 quality=_grade(ext, best=0.0, worst=4.0))
 
 
 def _check_regime(regime: dict | None) -> Check:
@@ -278,7 +299,8 @@ def _check_regime(regime: dict | None) -> Check:
     if regime["above"]:
         return Check("regime", "Market regime", "pass",
                      f"Nifty is {regime['distance_pct']:+.1f}% above its {REGIME_MA}-day "
-                     f"average.", regime["distance_pct"])
+                     f"average.", regime["distance_pct"],
+                     quality=_grade(regime["distance_pct"], best=6.0, worst=0.0))
     return Check("regime", "Market regime", "fail",
                  f"Nifty is {regime['distance_pct']:+.1f}% below its {REGIME_MA}-day "
                  f"average. Breakouts fail wholesale in a downtrend, and this desk holds "
@@ -438,8 +460,14 @@ def _volume_line(d: dict | None) -> str:
                      f"{avg:.0f}% average ({ratio:.2f}x)")
     t = d.get("median_turnover")
     if t:
-        parts.append(f"median turnover {'Rs%.0f cr' % (t / 1e7) if t >= 1e7 else 'Rs%.0f L' % (t / 1e5)} a day")
-    return "; ".join(parts).capitalize() + "." if parts else "No delivery data yet."
+        amount = f"\u20b9{t/1e7:,.0f}cr" if t >= 1e7 else f"\u20b9{t/1e5:,.0f}L"
+        parts.append(f"median turnover {amount} a day")
+    if not parts:
+        return "No delivery or turnover data stored yet."
+    line = "; ".join(parts)
+    # Upper-case the FIRST letter only. `.capitalize()` lower-cases everything after it,
+    # which is why the turnover was rendering as "rs128 cr" instead of a rupee amount.
+    return line[0].upper() + line[1:] + "."
 
 
 def conviction(v: Verdict, d: dict | None = None) -> dict:
@@ -460,7 +488,18 @@ def conviction(v: Verdict, d: dict | None = None) -> dict:
         return {"pct": 0, "label": "Unknown", "headline": "Nothing could be checked.",
                 "volume": _volume_line(d), "confidence": "none", "capped": False}
 
-    earned = sum(WEIGHTS.get(k, 0) * POINTS[c.verdict] for k, c in by.items())
+    def _points(c: Check) -> float:
+        # A passing check earns between a floor and full marks according to how
+        # comfortably it passed; a warn earns a fraction of its warn ceiling the same way.
+        # Without the graded term every clean position scored exactly 100 and the number
+        # could not rank one holding against another, which is the whole point of it.
+        if c.verdict == "pass":
+            return 0.75 + 0.25 * (1.0 if c.quality is None else c.quality)
+        if c.verdict == "warn":
+            return POINTS["warn"] * (1.0 if c.quality is None else max(0.2, c.quality))
+        return POINTS[c.verdict]
+
+    earned = sum(WEIGHTS.get(k, 0) * _points(c) for k, c in by.items())
     pct = round(earned / total * 100)
 
     structural_fails = [k for k in STRUCTURAL
