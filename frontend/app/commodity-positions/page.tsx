@@ -1110,93 +1110,6 @@ export default function CommodityPositionsPage() {
         .data-table th.l, .data-table td.l { text-align: left; }
         .atm { background: var(--purple-dim); }
 
-        /* ---- underlying picker ------------------------------------------- */
-        .pickwrap { position: relative; }
-        .picker {
-          width: 100%; min-width: 260px;
-          display: flex; align-items: center; gap: 10px;
-          padding: 8px 12px; cursor: pointer;
-          background: var(--panel); color: var(--fg);
-          border: 1px solid var(--line); border-radius: 10px;
-          font: inherit; text-align: left;
-          transition: border-color .12s, box-shadow .12s;
-        }
-        .picker:hover:not(:disabled) { border-color: var(--purple-line); }
-        .picker:focus-visible {
-          outline: none; border-color: var(--purple);
-          box-shadow: 0 0 0 3px var(--purple-dim);
-        }
-        .picker:disabled { opacity: .6; cursor: default; }
-        .pickcol { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
-        .pickmain {
-          display: flex; align-items: center; gap: 7px;
-          font-size: 14px; font-weight: 600; letter-spacing: .01em;
-        }
-        .picksub {
-          font-size: 11.5px; color: var(--fg-dim);
-          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .minitag {
-          font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
-          color: var(--purple); background: var(--purple-dim);
-          border: 1px solid var(--purple-line); border-radius: 999px; padding: 1px 6px;
-        }
-        .chev { color: var(--fg-dim); flex: none; transition: transform .15s; }
-        .chev.up { transform: rotate(180deg); }
-
-        .pickmenu {
-          position: absolute; z-index: 40; top: calc(100% + 6px); left: 0;
-          width: max(340px, 100%);
-          background: var(--panel); border: 1px solid var(--line);
-          border-radius: 12px; box-shadow: 0 18px 44px rgba(0, 0, 0, .18);
-          overflow: hidden;
-        }
-        .picksearch {
-          width: 100%; padding: 10px 13px; font: inherit; font-size: 13px;
-          color: var(--fg); background: transparent;
-          border: 0; border-bottom: 1px solid var(--line); outline: none;
-        }
-        .picksearch::placeholder { color: var(--fg-dim); }
-        .picklist { max-height: 340px; overflow-y: auto; padding: 5px; }
-        .pickgroup + .pickgroup { margin-top: 3px; }
-        .pickhead {
-          display: flex; align-items: baseline; gap: 7px;
-          padding: 8px 9px 5px; font-size: 10px; font-weight: 700;
-          letter-spacing: .08em; text-transform: uppercase; color: var(--fg-dim);
-        }
-        .pickheadnote {
-          font-size: 10px; font-weight: 500; letter-spacing: .01em;
-          text-transform: none; opacity: .8;
-        }
-        .pickrow {
-          width: 100%; display: grid;
-          grid-template-columns: minmax(96px, 1.1fr) minmax(72px, 1fr) auto;
-          align-items: center; gap: 10px;
-          padding: 7px 9px; border: 0; border-radius: 8px;
-          background: none; color: var(--fg); font: inherit; text-align: left;
-          cursor: pointer;
-        }
-        .pickrow.cursor { background: var(--purple-dim); }
-        .pickrow.on { background: var(--purple-dim); box-shadow: inset 2px 0 0 var(--purple); }
-        .pickrowsym {
-          font-size: 13px; font-weight: 600;
-          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-        }
-        .pickrowlot {
-          font-size: 11.5px; color: var(--fg-dim); font-variant-numeric: tabular-nums;
-          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-        }
-        .pickrowopt {
-          font-size: 11px; color: var(--purple); white-space: nowrap;
-          font-variant-numeric: tabular-nums;
-        }
-        .pickrowopt.none { color: var(--fg-dim); opacity: .75; }
-        .pickempty { padding: 16px 12px; font-size: 12.5px; color: var(--fg-dim); }
-
-        @media (max-width: 560px) {
-          .pickmenu { width: min(92vw, 340px); }
-        }
-
         /* The at-the-money pair, lifted above the ladder. The ladder itself is unchanged —
            this is an addition, not a reordering, so a strike stays where you expect it. */
         .atmstrip {
@@ -1301,8 +1214,10 @@ function LotsInput({ value, onCommit, min = 1, max = MAX_LOTS, className = "inp"
   useEffect(() => { if (!editing) setText(String(value)); }, [value, editing]);
 
   return (
+    <>
+      <LotsInputStyles />
     <input
-      className={className}
+      className={className.replace(/\binp\b/, "cmp-inp")}
       type="text"
       inputMode="numeric"
       value={editing ? text : String(value)}
@@ -1321,6 +1236,36 @@ function LotsInput({ value, onCommit, min = 1, max = MAX_LOTS, className = "inp"
         onCommit(Number.isFinite(n) && n >= min ? Math.min(max, n) : min);
       }}
     />
+    </>
+  );
+}
+
+/* styled-jsx scopes a style block to the component that DECLARES it, so a helper
+   component gets nothing from the page's block however many classes it shares. The .inp
+   rules below are the page's, repeated here because this input lives in its own
+   component and was otherwise rendering as a bare browser field. */
+function LotsInputStyles() {
+  return (
+    <style jsx global>{`
+      .cmp-inp {
+        border-radius: 10px;
+        border: 1px solid var(--panel-border);
+        background: var(--panel);
+        color: var(--text);
+        padding: 8px 11px;
+        font-size: 12.5px;
+        font-family: var(--font-data);
+        font-variant-numeric: tabular-nums;
+        width: 90px;
+        transition: border-color .15s, box-shadow .15s;
+      }
+      .cmp-inp:focus {
+        outline: none;
+        border-color: rgba(125, 52, 220, .45);
+        box-shadow: 0 0 0 3px var(--purple-dim);
+      }
+      .cmp-inp.tiny { width: 68px; padding: 6px 9px; font-size: 12px; }
+    `}</style>
   );
 }
 
@@ -1423,7 +1368,8 @@ function UnderlyingPicker({ value, onChange, unders, loading }: {
   let index = -1;
   return (
     <div className="pickwrap" ref={boxRef}>
-      <button className="picker" type="button" aria-haspopup="listbox" aria-expanded={open}
+      <button className={`picker${open ? " open" : ""}`} type="button"
+              aria-haspopup="listbox" aria-expanded={open}
               onClick={() => setOpen((o) => !o)} onKeyDown={onKey}>
         <span className="pickcol">
           <span className="pickmain">
@@ -1485,6 +1431,141 @@ function UnderlyingPicker({ value, onChange, unders, loading }: {
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        .pickwrap { position: relative; display: inline-block; }
+
+        .picker {
+          display: flex; align-items: center; gap: 12px;
+          min-width: 268px; width: 100%;
+          padding: 7px 12px;
+          border-radius: 10px;
+          border: 1px solid var(--panel-border);
+          background: var(--panel);
+          color: var(--text);
+          font-family: var(--font-ui);
+          text-align: left;
+          cursor: pointer;
+          transition: border-color .15s, box-shadow .15s;
+        }
+        .picker:hover:not(:disabled) { border-color: var(--panel-border-hover); }
+        .picker.open, .picker:focus-visible {
+          outline: none;
+          border-color: rgba(125, 52, 220, .45);
+          box-shadow: 0 0 0 3px var(--purple-dim);
+        }
+        .picker:disabled { opacity: .55; cursor: default; }
+
+        .pickcol { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+        .pickmain {
+          display: flex; align-items: center; gap: 7px;
+          font-size: 13.5px; font-weight: 600; letter-spacing: -.1px;
+        }
+        .picksub {
+          font-size: 11px; color: var(--text-muted);
+          font-family: var(--font-data); font-variant-numeric: tabular-nums;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .minitag {
+          font-size: 9px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+          color: var(--purple); background: var(--purple-dim);
+          border: 1px solid rgba(125, 52, 220, .24);
+          border-radius: 100px; padding: 2px 7px; line-height: 1.35;
+        }
+        .chev { color: var(--text-faint); flex: none; transition: transform .18s ease; }
+        .chev.up { transform: rotate(180deg); }
+
+        .pickmenu {
+          position: absolute; z-index: 60;
+          top: calc(100% + 7px); left: 0;
+          width: max(392px, 100%);
+          background: var(--panel);
+          border: 1px solid var(--panel-border);
+          border-radius: 14px;
+          box-shadow: var(--shadow-lg);
+          overflow: hidden;
+        }
+        .picksearch {
+          display: block; width: 100%;
+          padding: 11px 14px;
+          border: 0; border-bottom: 1px solid var(--panel-border);
+          background: transparent;
+          color: var(--text);
+          font-family: var(--font-ui); font-size: 12.5px;
+          outline: none;
+        }
+        .picksearch::placeholder { color: var(--text-faint); }
+
+        .picklist { max-height: 348px; overflow-y: auto; padding: 6px; }
+        .picklist::-webkit-scrollbar { width: 10px; }
+        .picklist::-webkit-scrollbar-thumb {
+          background: var(--scroll-thumb); border-radius: 100px;
+          border: 3px solid var(--panel);
+        }
+        .picklist::-webkit-scrollbar-thumb:hover { background: var(--scroll-thumb-hover); }
+
+        .pickgroup + .pickgroup {
+          margin-top: 5px; padding-top: 5px;
+          border-top: 1px solid var(--panel-border);
+        }
+        .pickhead {
+          display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+          padding: 8px 10px 6px;
+          font-size: 10px; font-weight: 700; letter-spacing: .06em;
+          text-transform: uppercase; color: var(--text-muted);
+        }
+        .pickheadnote {
+          font-size: 10.5px; font-weight: 500; letter-spacing: 0;
+          text-transform: none; color: var(--text-faint);
+        }
+
+        .pickrow {
+          display: grid;
+          grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto;
+          align-items: center; gap: 12px;
+          width: 100%; padding: 8px 10px;
+          border: 0; border-radius: 9px;
+          background: none; color: var(--text);
+          font-family: var(--font-ui); text-align: left;
+          cursor: pointer;
+        }
+        .pickrow.cursor { background: var(--panel-tint); }
+        .pickrow.on {
+          background: var(--purple-dim);
+          box-shadow: inset 2px 0 0 var(--purple);
+        }
+        .pickrowsym {
+          font-size: 13px; font-weight: 600; letter-spacing: -.1px;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .pickrowlot {
+          font-size: 11.5px; color: var(--text-muted);
+          font-family: var(--font-data); font-variant-numeric: tabular-nums;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .pickrowopt {
+          justify-self: end;
+          font-size: 10.5px; font-weight: 600; white-space: nowrap;
+          font-family: var(--font-data); font-variant-numeric: tabular-nums;
+          color: var(--purple); background: var(--purple-dim);
+          border-radius: 100px; padding: 3px 9px;
+        }
+        .pickrowopt.none {
+          color: var(--text-faint); background: var(--panel-tint);
+          font-weight: 500;
+        }
+
+        .pickempty {
+          padding: 22px 14px; text-align: center;
+          font-size: 12.5px; color: var(--text-muted);
+        }
+
+        @media (max-width: 620px) {
+          .pickmenu { width: min(90vw, 392px); }
+          .pickrow { grid-template-columns: minmax(0, 1fr) auto; }
+          .pickrowlot { display: none; }
+        }
+      `}</style>
     </div>
   );
 }
