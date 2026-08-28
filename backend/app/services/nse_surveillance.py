@@ -18,6 +18,14 @@ WHAT WAS VERIFIED FROM THE AWS BOX (probe, 2026-08-28, not documentation):
   * `www.nseindia.com/api/reportGSM` — 200, a bare LIST of 82 rows.
   * ASM and GSM rows both carry a `symbol` field, so NO ISIN join is needed. The archive
     CSV forms of these two (ASMSHORTTERM.csv, GSMSTAGES.csv) all 404 — do not retry them.
+  * `content/equities/eq_etfseclist.csv` — 200, no priming, 349 ETFs. Columns Symbol,
+    Underlying, SecurityName, DateofListing, MarketLot, ISINNumber, FaceValue. This is the
+    authoritative ETF register and the only reliable way to know that IT, ALPHA, HEALTHY
+    and LIQUID are funds rather than companies — nothing in those symbols says so.
+  * `content/equities/EQUITY_L.csv` — 200, 2,559 equities. NOT used as a whitelist: it is
+    incomplete. ASHIKA, NAGAFERT and WINSOME are live NSE equities absent from it, so
+    keeping only what it lists would silently delete real stocks. Non-equity has to be
+    PROVEN, never inferred from absence — the same lesson CALSOFT taught the ATH mapper.
 
 EVERY PATH FAILS SOFT. NSE is the least reliable feed this app touches, and a surveillance
 outage must never stop the desk trading; it degrades to "unknown", which the gate treats as
@@ -43,6 +51,7 @@ logger = logging.getLogger("nse.surveillance")
 SEC_LIST = "https://nsearchives.nseindia.com/content/equities/sec_list.csv"
 ASM_API = "https://www.nseindia.com/api/reportASM"
 GSM_API = "https://www.nseindia.com/api/reportGSM"
+ETF_LIST = "https://nsearchives.nseindia.com/content/equities/eq_etfseclist.csv"
 NSE_HOME = "https://www.nseindia.com/"
 
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -108,6 +117,19 @@ async def _fetch_sec_list(client: httpx.AsyncClient) -> dict[str, dict]:
     return out
 
 
+async def _fetch_etfs(client: httpx.AsyncClient) -> dict[str, str]:
+    """{symbol: security name} for every listed ETF."""
+    r = await client.get(ETF_LIST)
+    r.raise_for_status()
+    out: dict[str, str] = {}
+    for raw in csv.DictReader(io.StringIO(r.text)):
+        rec = {(k or "").strip(): (v or "").strip() for k, v in raw.items()}
+        sym = (rec.get("Symbol") or "").upper()
+        if sym:
+            out[sym] = rec.get("SecurityName") or sym
+    return out
+
+
 async def _fetch_json(client: httpx.AsyncClient, url: str) -> object:
     """NSE's JSON API needs a browser-ish session; the archive CSVs do not."""
     try:
@@ -158,6 +180,7 @@ async def refresh() -> dict:
     bands: dict[str, dict] = {}
     asm: list[dict] = []
     gsm: list[dict] = []
+    etfs: dict[str, str] = {}
     errors: dict[str, str] = {}
 
     async with httpx.AsyncClient(timeout=TIMEOUT, headers={"User-Agent": UA},
@@ -174,8 +197,12 @@ async def refresh() -> dict:
             gsm = _gsm_rows(await _fetch_json(c, GSM_API))
         except Exception as exc:  # noqa: BLE001
             errors["gsm"] = f"{type(exc).__name__}: {str(exc)[:120]}"
+        try:
+            etfs = await _fetch_etfs(c)
+        except Exception as exc:  # noqa: BLE001
+            errors["etfs"] = f"{type(exc).__name__}: {str(exc)[:120]}"
 
-    if not bands and not asm and not gsm:
+    if not bands and not asm and not gsm and not etfs:
         logger.warning("nse surveillance: every source failed %s", errors)
         return {"ok": False, "errors": errors, "bands": 0, "asm": 0, "gsm": 0}
 
@@ -184,15 +211,17 @@ async def refresh() -> dict:
         "bands": bands,
         "asm": {r["symbol"]: r for r in asm},
         "gsm": {r["symbol"]: r for r in gsm},
+        "etfs": etfs,
         "errors": errors,
         "fetched_at": _utcnow(),
     }
     await screener_meta_collection.replace_one({"_id": DOC_ID}, doc, upsert=True)
     _cache = (time.monotonic(), doc)
-    logger.info("nse surveillance: %s bands, %s ASM, %s GSM%s",
-                len(bands), len(asm), len(gsm), f", errors {errors}" if errors else "")
+    logger.info("nse surveillance: %s bands, %s ASM, %s GSM, %s ETFs%s",
+                len(bands), len(asm), len(gsm), len(etfs),
+                f", errors {errors}" if errors else "")
     return {"ok": True, "bands": len(bands), "asm": len(asm), "gsm": len(gsm),
-            "errors": errors}
+            "etfs": len(etfs), "errors": errors}
 
 
 async def load(max_age_hours: float = 24.0) -> dict:
@@ -218,7 +247,8 @@ async def load(max_age_hours: float = 24.0) -> dict:
         except Exception as exc:  # noqa: BLE001
             logger.warning("nse surveillance refresh failed, using stored: %s", exc)
 
-    doc = doc or {"bands": {}, "asm": {}, "gsm": {}, "errors": {"all": "never fetched"}}
+    doc = doc or {"bands": {}, "asm": {}, "gsm": {}, "etfs": {},
+                  "errors": {"all": "never fetched"}}
     _cache = (time.monotonic(), doc)
     return doc
 
@@ -258,6 +288,13 @@ async def snapshot_reader():
     return lambda sym: _read(snap, sym)
 
 
+async def etf_symbols() -> dict[str, str]:
+    """{symbol: name} of every listed ETF. Empty on failure, which callers must treat as
+    "could not check" rather than "there are none"."""
+    snap = await load()
+    return snap.get("etfs") or {}
+
+
 async def status() -> dict:
     doc = await screener_meta_collection.find_one({"_id": DOC_ID})
     if not doc:
@@ -269,6 +306,7 @@ async def status() -> dict:
         "bands": len(doc.get("bands") or {}),
         "asm": len(doc.get("asm") or {}),
         "gsm": len(doc.get("gsm") or {}),
+        "etfs": len(doc.get("etfs") or {}),
         "errors": doc.get("errors") or {},
         "fetched_at": fetched.isoformat() if fetched else None,
         "age_hours": round(age_h, 1) if age_h is not None else None,
@@ -276,5 +314,6 @@ async def status() -> dict:
             "bands": SEC_LIST,
             "asm": ASM_API,
             "gsm": GSM_API,
+            "etfs": ETF_LIST,
         },
     }

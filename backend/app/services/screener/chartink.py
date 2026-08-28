@@ -123,8 +123,8 @@ NAMED: dict[str, dict] = {
     "all-time-high-8": {
         "label": "All time high",
         "why": "Today's high above the highest close of the last 1,000 sessions. Feeds the "
-               "All Time High desk — but note it returns INDICES and ETFs too (CNXMIDCAP, "
-               "BHARATBOND), which are not equities and will not map.",
+               "All Time High desk. The raw scan returns indices and ETFs alongside "
+               "companies; those are filtered out and counted separately.",
     },
     "short-term-breakouts": {
         "label": "Short term breakouts",
@@ -158,6 +158,47 @@ _CSRF_RE = re.compile(r'name="csrf-token"\s+content="([^"]+)"')
 _BEHIND_RE = re.compile(r"scanBehindByTimeInMins\s*=\s*[\"\']?(\d+)")
 _SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9\-]{0,80}$")
 _URL_RE = re.compile(r"chartink\.com/screener/([a-z0-9\-]+)")
+
+# ── keeping funds and indices out of the results ────────────────────────────────
+# Chartink's {cash} group is the whole cash market, which includes ETFs and index rows.
+# Those are not stocks, they cannot be bought on any of this app's equity desks, and in a
+# TradingView watchlist they resolve as something other than a company.
+#
+# NON-EQUITY MUST BE PROVEN, NEVER INFERRED FROM ABSENCE. Whitelisting against NSE's
+# EQUITY_L.csv looks tidier and is wrong: ASHIKA, NAGAFERT and WINSOME are live equities
+# missing from that file, so a whitelist silently deletes real stocks. Every rule below is
+# therefore positive evidence that a row is NOT a company.
+#
+# Symbol patterns alone are hopeless here — Kotak's IT ETF trades as `IT`, Aditya Birla's
+# healthcare ETF as `HEALTHY`, Kotak's alpha fund as `ALPHA`. Nothing in those strings
+# says "fund", which is why NSE's own ETF register does most of the work.
+INDEX_PREFIX = re.compile(r"^(NIFTY|CNX|BANKNIFTY|FINNIFTY|MIDCPNIFTY|SENSEX|INDIAVIX)",
+                          re.I)
+# Only applied when the name tells us nothing (Chartink echoes the symbol back), which is
+# what ICICINIFTY and RELCNX100 look like. A company symbol does not contain these.
+INDEX_INFIX = re.compile(r"(NIFTY|CNX|SENSEX)", re.I)
+# Catches funds that are missing from the ETF register — AXISNIFTY, IBMFNIFTY, KOTAKNIFTY,
+# NAVINIFTY all name themselves honestly even though NSE's list has dropped them.
+FUND_NAME = re.compile(
+    r"(\bETF\b|\bBeES\b|\bGilt\b|index fund|mutual fund|liquid fund|rate liquid)", re.I)
+
+
+def _non_equity(sym: str, name: str, volume, etfs: dict) -> str | None:
+    """Why this row is not a company, or None if it looks like one."""
+    if sym in etfs:
+        return "ETF"
+    # Indices do not trade, so they report no volume. This is the only signal that
+    # separates NIFTYINDDIGITAL and BHARATBOND-APR31 from an illiquid small cap.
+    if not volume:
+        return "index"
+    if INDEX_PREFIX.search(sym):
+        return "index"
+    if FUND_NAME.search(name or ""):
+        return "fund"
+    if (not name or name.upper() == sym) and INDEX_INFIX.search(sym):
+        return "index or fund"
+    return None
+
 
 _cache: dict[str, tuple[float, dict]] = {}
 
@@ -210,23 +251,48 @@ async def run_clause(clause: str, referer: str = SCREENER_PAGE) -> dict:
     if isinstance(body, dict) and body.get("scan_error"):
         return {"ok": False, "rows": [], "error": body["scan_error"], "delayed": True}
 
-    return {"ok": True, "rows": _rows(body), "error": None, "delayed": True}
+    keep, drop = _rows(body, await _etf_register())
+    return {"ok": True, "rows": keep, "excluded": drop, "excluded_count": len(drop),
+            "error": None, "delayed": True}
 
 
-def _rows(body: object) -> list[dict]:
-    out = []
+def _rows(body: object, etfs: dict | None = None) -> tuple[list[dict], list[dict]]:
+    """Shape the response into (stocks, excluded).
+
+    Returns both halves rather than quietly dropping the second: a result that says
+    "35 stocks" when the scan matched 39 is a lie by omission, and the reader deserves to
+    know which four went and why.
+    """
+    etfs = etfs or {}
+    keep, drop = [], []
     for d in (body.get("data") or []) if isinstance(body, dict) else []:
         sym = (d.get("nsecode") or "").strip().upper()
         if not sym:
             continue
-        out.append({
+        row = {
             "symbol": sym,
             "name": (d.get("name") or "").strip(),
             "close": d.get("close"),
             "change_pct": d.get("per_chg"),
             "volume": d.get("volume"),
-        })
-    return out
+        }
+        why = _non_equity(sym, row["name"], row["volume"], etfs)
+        if why:
+            drop.append({**row, "why": why})
+        else:
+            keep.append(row)
+    return keep, drop
+
+
+async def _etf_register() -> dict:
+    """NSE's ETF list, or an empty dict. Failing soft means a few funds slip through on an
+    outage — far better than an outage deleting real stocks from a watchlist."""
+    try:
+        from app.services import nse_surveillance
+        return await nse_surveillance.etf_symbols()
+    except Exception as exc:  # noqa: BLE001
+        logger.info("chartink: ETF register unavailable (%s)", str(exc)[:120])
+        return {}
 
 
 def parse_slug(value: str) -> str | None:
@@ -327,10 +393,15 @@ async def named(slug_or_url: str, fresh: bool = False) -> dict:
     if isinstance(body, dict) and body.get("scan_error"):
         return {"ok": False, "rows": [], "error": body["scan_error"], "clause": clause}
 
+    keep, drop = _rows(body, await _etf_register())
     behind = scan.get("_behind_mins")
     out = {
         "ok": True,
-        "rows": _rows(body),
+        "rows": keep,
+        # Shown, not hidden. The panel reports how many were removed and what they were,
+        # so a shrinking row count is explained rather than mysterious.
+        "excluded": drop,
+        "excluded_count": len(drop),
         "error": None,
         "slug": slug,
         "url": f"{BASE}/screener/{slug}",
