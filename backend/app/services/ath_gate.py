@@ -65,6 +65,38 @@ EXTENSION_FAIL_PCT = 10.0
 
 REGIME_MA = 200
 
+# ── buy conviction ──────────────────────────────────────────────────────────────
+# What the checks are worth when the question is "should real money go into this?".
+# Not equal, and deliberately not a flat average: the band decides whether the stop is
+# executable at all, while the regime is identical for every position on any given day and
+# so tells you nothing about which of them is better.
+WEIGHTS = {
+    "band": 25,
+    "surveillance": 20,
+    "liquidity": 20,
+    "delivery": 15,
+    "extension": 12,
+    "regime": 8,
+}
+
+# Failing any of these is not a demerit to be averaged away — it is a reason the rule
+# cannot be executed on this stock. Five passes must not drown out one of these.
+STRUCTURAL = ("band", "surveillance", "liquidity")
+STRUCTURAL_CAP = 30
+STRUCTURAL_CAP_MULTI = 15
+
+# An unknown is not half a pass. It scores at 0.6 AND lowers the stated confidence, so a
+# row built mostly on missing data cannot present itself as a strong buy.
+POINTS = {"pass": 1.0, "warn": 0.45, "unknown": 0.6, "fail": 0.0}
+
+BANDS = [
+    (80, "Strong", "Everything that decides execution is clean."),
+    (65, "Good", "Tradable, with something to keep an eye on."),
+    (50, "Fair", "Workable but compromised — size down or skip."),
+    (30, "Weak", "The rule does not sit well on this stock."),
+    (0, "Avoid", "Something here breaks the +-20% rule outright."),
+]
+
 
 @dataclass
 class Check:
@@ -80,6 +112,7 @@ class Verdict:
     symbol: str
     checks: list[Check] = field(default_factory=list)
     mode: str = "observe"
+    conviction: dict | None = None
 
     @property
     def failures(self) -> list[Check]:
@@ -116,6 +149,7 @@ class Verdict:
             "warn_count": len(self.warnings),
             "unknown_count": len(self.unknowns),
             "summary": self.summary(),
+            "conviction": self.conviction,
             "checks": [vars(c) for c in self.checks],
         }
 
@@ -357,7 +391,7 @@ class GateContext:
     def evaluate(self, symbol: str, ltp: float, ath: float) -> Verdict:
         sym = (symbol or "").upper()
         d = self.stats.get(sym)
-        return Verdict(symbol=sym, mode=self.mode, checks=[
+        v = Verdict(symbol=sym, mode=self.mode, checks=[
             _check_band(self.surv(sym)),
             _check_surveillance(self.surv(sym)),
             _check_liquidity(d, self.per_position),
@@ -365,6 +399,8 @@ class GateContext:
             _check_extension(ltp, ath),
             _check_regime(self.regime),
         ])
+        v.conviction = conviction(v, d)
+        return v
 
 
 async def build_context(mode: str | None = None,
@@ -386,6 +422,85 @@ async def build_context(mode: str | None = None,
         logger.warning("ath gate: regime unavailable (%s)", exc)
         regime = {"above": None}
     return GateContext(surv, stats, regime, (mode or MODE_DEFAULT), per_position)
+
+
+def _volume_line(d: dict | None) -> str:
+    """One sentence on whether the money behind the move is real."""
+    if not d:
+        return "No volume or delivery data stored for this stock."
+    parts = []
+    ratio, pct, avg = d.get("delivery_ratio"), d.get("delivery_pct"), d.get("delivery_avg")
+    if ratio is not None:
+        word = ("well above" if ratio >= 1.3 else "above" if ratio >= 1.05
+                else "in line with" if ratio >= 0.85 else "below" if ratio >= 0.5
+                else "far below")
+        parts.append(f"{pct:.0f}% of volume was delivered, {word} its own "
+                     f"{avg:.0f}% average ({ratio:.2f}x)")
+    t = d.get("median_turnover")
+    if t:
+        parts.append(f"median turnover {'Rs%.0f cr' % (t / 1e7) if t >= 1e7 else 'Rs%.0f L' % (t / 1e5)} a day")
+    return "; ".join(parts).capitalize() + "." if parts else "No delivery data yet."
+
+
+def conviction(v: Verdict, d: dict | None = None) -> dict:
+    """A single percentage for "should real money go into this stock on this rule?".
+
+    WHAT IT IS NOT: a probability of profit. Nothing here forecasts the trade. It scores
+    whether the +-20% rule can actually be executed on this stock and whether the move
+    that triggered it was backed by real ownership. A 90% can still lose; it just loses
+    for reasons the desk chose to take rather than ones it failed to look at.
+
+    Weighted and CAPPED rather than averaged. A stock whose stop cannot fill is not
+    redeemed by passing five other checks, so a structural failure caps the result instead
+    of being diluted by it.
+    """
+    by = {c.key: c for c in v.checks}
+    total = sum(WEIGHTS.get(k, 0) for k in by)
+    if not total:
+        return {"pct": 0, "label": "Unknown", "headline": "Nothing could be checked.",
+                "volume": _volume_line(d), "confidence": "none", "capped": False}
+
+    earned = sum(WEIGHTS.get(k, 0) * POINTS[c.verdict] for k, c in by.items())
+    pct = round(earned / total * 100)
+
+    structural_fails = [k for k in STRUCTURAL
+                        if k in by and by[k].verdict == "fail"]
+    cap = None
+    if len(structural_fails) >= 2:
+        cap = STRUCTURAL_CAP_MULTI
+    elif structural_fails:
+        cap = STRUCTURAL_CAP
+    capped = cap is not None and pct > cap
+    if capped:
+        pct = cap
+
+    label, blurb = next((lb, b) for lo, lb, b in BANDS if pct >= lo)
+
+    fails = [c for c in v.checks if c.verdict == "fail"]
+    warns = [c for c in v.checks if c.verdict == "warn"]
+    if fails:
+        headline = fails[0].detail
+    elif warns:
+        headline = warns[0].detail
+    else:
+        headline = blurb
+
+    unknowns = sum(1 for c in v.checks if c.verdict == "unknown")
+    confidence = ("high" if unknowns == 0 else "medium" if unknowns <= 1 else "low")
+
+    return {
+        "pct": pct,
+        "label": label,
+        "headline": headline,
+        "volume": _volume_line(d),
+        "confidence": confidence,
+        "unknown_checks": unknowns,
+        "capped": capped,
+        "cap_reason": (f"Capped at {cap}% — "
+                       + ", ".join(by[k].label.lower() for k in structural_fails)
+                       + " decides whether the rule can be executed at all, so passing "
+                         "other checks cannot make up for it.") if capped else None,
+    }
 
 
 def thresholds() -> dict:

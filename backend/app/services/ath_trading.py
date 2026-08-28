@@ -980,6 +980,27 @@ async def positions(limit: int = 500) -> dict:
             for k in ("opened_at", "updated_at", "ts"):
                 if hasattr(r.get(k), "isoformat"):
                     r[k] = r[k].isoformat()
+
+        # Score every position for real-money conviction, inline. Built once for the whole
+        # list: the underlying NSE and bhavcopy reads are cached, but the context object
+        # still has to exist, and per-row construction would rebuild it for each holding.
+        #
+        # Scored at the CURRENT price, not the entry price — the question this answers is
+        # "would I put real money into this stock right now", which is about the stock as
+        # it stands, not the decision that was made when it was bought.
+        try:
+            ctx = await GATE.build_context(await gate_mode(), PER_POSITION)
+            for r in rows:
+                v = ctx.evaluate(r["symbol"], float(r.get("ltp") or r.get("entry") or 0),
+                                 float(r.get("ath_broken") or 0))
+                r["conviction"] = v.conviction
+                r["gate_now"] = {"passed": v.passed, "summary": v.summary(),
+                                 "checks": [vars(c) for c in v.checks]}
+        except Exception as exc:  # noqa: BLE001 — scoring must never break the book
+            logger.warning("ath: could not score positions (%s)", exc)
+            for r in rows:
+                r.setdefault("conviction", None)
+
     rows.sort(key=lambda r: -(r.get("unrealised_pnl") or 0))
     return {"count": len(rows), "rows": rows,
             "unrealised_pnl": round(sum(r.get("unrealised_pnl") or 0 for r in rows), 2)}
