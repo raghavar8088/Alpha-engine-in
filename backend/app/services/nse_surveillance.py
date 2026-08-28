@@ -32,7 +32,7 @@ import csv
 import io
 import logging
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 
 import httpx
 
@@ -57,6 +57,21 @@ DOC_ID = "nse_surveillance"
 T2T_SERIES = {"BE", "BZ"}
 
 _cache: tuple[float, dict] | None = None
+
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def _aware(dt):
+    """Mongo hands back tz-aware datetimes here; a naive one would raise on subtraction.
+
+    Both shapes exist in the wild — a document written before this module used aware
+    timestamps is naive — so the read side normalises rather than assuming.
+    """
+    if dt is None:
+        return None
+    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
 
 
 def _num_band(v: str) -> float | None:
@@ -170,7 +185,7 @@ async def refresh() -> dict:
         "asm": {r["symbol"]: r for r in asm},
         "gsm": {r["symbol"]: r for r in gsm},
         "errors": errors,
-        "fetched_at": datetime.utcnow(),
+        "fetched_at": _utcnow(),
     }
     await screener_meta_collection.replace_one({"_id": DOC_ID}, doc, upsert=True)
     _cache = (time.monotonic(), doc)
@@ -193,7 +208,7 @@ async def load(max_age_hours: float = 24.0) -> dict:
     doc = await screener_meta_collection.find_one({"_id": DOC_ID})
     fresh_enough = False
     if doc and doc.get("fetched_at"):
-        age = (datetime.utcnow() - doc["fetched_at"]).total_seconds() / 3600
+        age = (_utcnow() - _aware(doc["fetched_at"])).total_seconds() / 3600
         fresh_enough = age < max_age_hours
 
     if not fresh_enough:
@@ -247,15 +262,15 @@ async def status() -> dict:
     doc = await screener_meta_collection.find_one({"_id": DOC_ID})
     if not doc:
         return {"ok": False, "detail": "never fetched", "bands": 0, "asm": 0, "gsm": 0}
-    age_h = ((datetime.utcnow() - doc["fetched_at"]).total_seconds() / 3600
-             if doc.get("fetched_at") else None)
+    fetched = _aware(doc.get("fetched_at"))
+    age_h = (_utcnow() - fetched).total_seconds() / 3600 if fetched else None
     return {
         "ok": bool(doc.get("bands")),
         "bands": len(doc.get("bands") or {}),
         "asm": len(doc.get("asm") or {}),
         "gsm": len(doc.get("gsm") or {}),
         "errors": doc.get("errors") or {},
-        "fetched_at": doc["fetched_at"].isoformat() if doc.get("fetched_at") else None,
+        "fetched_at": fetched.isoformat() if fetched else None,
         "age_hours": round(age_h, 1) if age_h is not None else None,
         "sources": {
             "bands": SEC_LIST,
