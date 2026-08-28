@@ -16,6 +16,7 @@
  */
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import PageHeader from "../../components/PageHeader";
 import GlassPanel from "../../components/GlassPanel";
 import StatusPill from "../../components/StatusPill";
@@ -1291,7 +1292,11 @@ function UnderlyingPicker({ value, onChange, unders, loading }: {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [cursor, setCursor] = useState(0);
+  // Where to put the menu on screen. It is rendered into document.body rather than beside
+  // the trigger, so it needs real coordinates instead of `top: 100%`.
+  const [at, setAt] = useState<{ top: number; left: number; width: number } | null>(null);
   const boxRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
   const selected = unders.find((u) => u.symbol === value) ?? null;
@@ -1331,15 +1336,44 @@ function UnderlyingPicker({ value, onChange, unders, loading }: {
 
   useEffect(() => { setCursor(0); }, [query]);
 
+  // The menu is portalled to document.body because every ancestor panel on this page sets
+  // overflow: hidden to clip its own rounded corners — which also clipped the menu, leaving
+  // the search box visible and the list cut off at the panel edge. A portal escapes that,
+  // at the cost of having to place and re-place the menu by hand.
+  const place = useCallback(() => {
+    const r = boxRef.current?.getBoundingClientRect();
+    if (!r) return;
+    const width = Math.max(392, r.width);
+    const height = Math.min(408, window.innerHeight - 24);
+    const below = window.innerHeight - r.bottom - 8;
+    // Drop upward when there is not room beneath, so the list is never half off-screen.
+    const top = below >= height || r.top - 8 < height
+      ? r.bottom + 7
+      : Math.max(8, r.top - 7 - height);
+    const left = Math.min(Math.max(8, r.left), window.innerWidth - width - 8);
+    setAt({ top, left, width });
+  }, []);
+
   useEffect(() => {
-    if (!open) return;
+    if (!open) { setAt(null); return; }
+    place();
     searchRef.current?.focus();
     const away = (e: MouseEvent) => {
-      if (boxRef.current && !boxRef.current.contains(e.target as Node)) setOpen(false);
+      const t = e.target as Node;
+      if (boxRef.current?.contains(t) || menuRef.current?.contains(t)) return;
+      setOpen(false);
     };
+    // `true` so the menu follows the trigger when any scrolling ancestor moves, not only
+    // the window.
     document.addEventListener("mousedown", away);
-    return () => document.removeEventListener("mousedown", away);
-  }, [open]);
+    window.addEventListener("scroll", place, true);
+    window.addEventListener("resize", place);
+    return () => {
+      document.removeEventListener("mousedown", away);
+      window.removeEventListener("scroll", place, true);
+      window.removeEventListener("resize", place);
+    };
+  }, [open, place]);
 
   const pick = (sym: string) => { onChange(sym); setOpen(false); setQuery(""); };
 
@@ -1392,8 +1426,9 @@ function UnderlyingPicker({ value, onChange, unders, loading }: {
         </svg>
       </button>
 
-      {open && (
-        <div className="pickmenu" role="listbox" onKeyDown={onKey}>
+      {open && at && typeof document !== "undefined" && createPortal(
+        <div className="pickmenu" role="listbox" ref={menuRef} onKeyDown={onKey}
+             style={{ top: at.top, left: at.left, width: at.width }}>
           <input ref={searchRef} className="picksearch" value={query} placeholder="Search commodities…"
                  onChange={(e) => setQuery(e.target.value)} onKeyDown={onKey} />
           <div className="picklist">
@@ -1429,7 +1464,8 @@ function UnderlyingPicker({ value, onChange, unders, loading }: {
               <div className="pickempty">Nothing matches “{query}”.</div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
 
       <style jsx>{`
@@ -1476,14 +1512,13 @@ function UnderlyingPicker({ value, onChange, unders, loading }: {
         .chev.up { transform: rotate(180deg); }
 
         .pickmenu {
-          position: absolute; z-index: 60;
-          top: calc(100% + 7px); left: 0;
-          width: max(392px, 100%);
+          position: fixed; z-index: 200;
           background: var(--panel);
           border: 1px solid var(--panel-border);
           border-radius: 14px;
           box-shadow: var(--shadow-lg);
           overflow: hidden;
+          font-family: var(--font-ui);
         }
         .picksearch {
           display: block; width: 100%;
@@ -1554,17 +1589,19 @@ function UnderlyingPicker({ value, onChange, unders, loading }: {
           color: var(--text-faint); background: var(--panel-tint);
           font-weight: 500;
         }
-
         .pickempty {
           padding: 22px 14px; text-align: center;
           font-size: 12.5px; color: var(--text-muted);
         }
-
         @media (max-width: 620px) {
-          .pickmenu { width: min(90vw, 392px); }
           .pickrow { grid-template-columns: minmax(0, 1fr) auto; }
           .pickrowlot { display: none; }
         }
+
+        @media (max-width: 620px) {
+          .picker { min-width: 0; }
+        }
+
       `}</style>
     </div>
   );
