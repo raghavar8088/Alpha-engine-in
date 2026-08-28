@@ -5496,11 +5496,14 @@ export interface CmpReopenAtmAll {
   note: string;
 }
 
-/** Roll EVERY open option leg in the account to its at-the-money strike. */
-export async function reopenCmpAtmAll(account_id: string): Promise<CmpReopenAtmAll> {
+/** Roll open option legs to their at-the-money strike.
+ *  Pass `position_ids` to roll only those; omit it to roll the whole book. */
+export async function reopenCmpAtmAll(
+  account_id: string, position_ids?: string[],
+): Promise<CmpReopenAtmAll> {
   return apiFetch(
     `${cmp}/positions/reopen-atm-all?account_id=${encodeURIComponent(account_id)}`,
-    { method: "POST" });
+    { method: "POST", body: JSON.stringify({ position_ids: position_ids ?? null }) });
 }
 
 export async function resetCmpAccount(account_id: string): Promise<any> {

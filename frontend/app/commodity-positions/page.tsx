@@ -108,6 +108,8 @@ export default function CommodityPositionsPage() {
   // Bumped after a fill so the ATM pair is re-sized against the cash that is left. Keying
   // the sizer on live available cash instead would re-run it on every mark-to-market tick.
   const [sizingNonce, setSizingNonce] = useState(0);
+  // Which legs the roll applies to. Empty means the whole book.
+  const [picked, setPicked] = useState<Set<string>>(new Set());
   const [product, setProduct] = useState<"MARGIN" | "INTRADAY">("MARGIN");
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -136,9 +138,19 @@ export default function CommodityPositionsPage() {
   // surviving leg on its own.
   const releasesMargin = !!quote && quote.margin_released > 0;
 
-  // Only options have an at-the-money strike, so futures are not counted in the button.
-  const rollableLegs = (summary?.open_positions ?? []).filter(
-    (p) => (p.instrument as { option_type?: string } | undefined)?.option_type).length;
+  // Only options have an at-the-money strike, so futures are not counted or selectable.
+  const rollable = useMemo(
+    () => (summary?.open_positions ?? []).filter(
+      (p) => (p.instrument as { option_type?: string } | undefined)?.option_type),
+    [summary]);
+  const rollableLegs = rollable.length;
+
+  // A roll replaces position ids, and a row can be closed from another tab, so a stale
+  // selection would silently ask the server to roll legs that no longer exist. Read it
+  // through the live book rather than trusting what was ticked.
+  const selected = useMemo(
+    () => rollable.filter((p) => picked.has(p.position_id)).map((p) => p.position_id),
+    [rollable, picked]);
 
   // The at-the-money strike: the listed strike nearest the underlying FUTURE, which is the
   // reference the chain is priced against — not the spot commodity, which MCX does not
@@ -379,17 +391,21 @@ export default function CommodityPositionsPage() {
   // loop over the per-row buttons: rolling a straddle a leg at a time leaves a naked leg
   // in between, which costs MORE margin than the pair did, and on a tight book that
   // intermediate state can refuse the second roll and strand the position half-rolled.
-  const rollBookToAtm = () => {
-    const legs = (summary?.open_positions ?? []).filter(
-      (p) => (p.instrument as { option_type?: string } | undefined)?.option_type);
-    if (!legs.length) return;
+  const rollBookToAtm = (ids?: string[]) => {
+    const n = ids?.length ?? rollableLegs;
+    if (!n) return;
     if (!window.confirm(
-      `Roll all ${legs.length} option leg${legs.length > 1 ? "s" : ""} to the money?\n\n`
-      + "Every one is closed at the live price, realising its P&L, and re-opened at the "
-      + "strike nearest its own future — same side, same lots. Futures are left alone.\n\n"
-      + "This is checked against your margin before anything is closed.")) return;
+      `Roll ${ids ? `the ${n} selected` : `all ${n}`} option leg${n > 1 ? "s" : ""} `
+      + "to the money?\n\n"
+      + "Each is closed at the live price, realising its P&L, and re-opened at the strike "
+      + "nearest its own future — same side, same lots. Futures are left alone.\n\n"
+      + (ids && ids.length < rollableLegs
+        ? "Note: rolling only part of a pair leaves the other leg where it is, which can "
+          + "cost more margin than the pair did. It is checked against your margin first.\n\n"
+        : "")
+      + "Nothing is closed unless the whole thing fits.")) return;
     act("rollall", async () => {
-      const r = await reopenCmpAtmAll(accountId);
+      const r = await reopenCmpAtmAll(accountId, ids);
       const rs = Math.round(r.realized).toLocaleString("en-IN");
       const md = Math.round(r.margin_delta).toLocaleString("en-IN");
       setNotice(
@@ -398,6 +414,7 @@ export default function CommodityPositionsPage() {
       if (r.failed.length) {
         setError(r.failed.map((f) => `${f.underlying} ${f.expiry}: ${f.reason}`).join(" "));
       }
+      setPicked(new Set());
       setSizingNonce((n) => n + 1);
     });
   };
@@ -963,21 +980,39 @@ export default function CommodityPositionsPage() {
             {!!rollableLegs && (
               <div className="bookbar">
                 <div className="bookbar-say">
-                  <b>Roll the book to the money.</b> Every option leg closed at the live
-                  price and re-opened at the strike nearest its own future — same side,
-                  same lots. Checked against your margin before anything is closed, and
-                  done per expiry group so a straddle never sits half-rolled.
+                  {selected.length ? (
+                    <>
+                      <b>{selected.length} of {rollableLegs} legs selected.</b> Each is
+                      closed at the live price and re-opened at the strike nearest its own
+                      future — same side, same lots. Rolling only part of a pair leaves the
+                      other leg where it is, so the margin check runs on that end state
+                      before anything is closed.
+                      <button className="linkish" type="button"
+                              onClick={() => setPicked(new Set())}>clear selection</button>
+                    </>
+                  ) : (
+                    <>
+                      <b>Roll the book to the money.</b> Every option leg closed at the live
+                      price and re-opened at the strike nearest its own future — same side,
+                      same lots. Checked against your margin before anything is closed, and
+                      done per expiry group so a straddle never sits half-rolled. Tick rows
+                      to roll only some of them.
+                    </>
+                  )}
                 </div>
                 <button className="btn rollall" disabled={!!busy}
-                        onClick={rollBookToAtm}>
+                        onClick={() => rollBookToAtm(selected.length ? selected : undefined)}>
                   {busy === "rollall"
-                    ? "Rolling the book…"
-                    : `Re-add ATM · all ${rollableLegs} leg${rollableLegs > 1 ? "s" : ""}`}
+                    ? "Rolling…"
+                    : selected.length
+                      ? `Re-add ATM · ${selected.length} selected`
+                      : `Re-add ATM · all ${rollableLegs} leg${rollableLegs > 1 ? "s" : ""}`}
                 </button>
               </div>
             )}
             <PositionTable rows={summary?.open_positions ?? []} live busy={busy}
                            onReopenAtm={reopenAtm}
+                           picked={picked} onPick={setPicked}
                            onExit={(p, l) => act(`exit-${p.position_id}`,
                              () => exitCmpPosition(p.position_id, accountId, l))} />
           </GlassPanel>
@@ -1733,11 +1768,29 @@ function Icon({ d }: { d: string }) {
 }
 
 
-function PositionTable({ rows, live, busy, onExit, onReopenAtm }: {
+const isOption = (p: CmpPosition) =>
+  !!(p.instrument as { option_type?: string } | undefined)?.option_type;
+
+function PositionTable({ rows, live, busy, onExit, onReopenAtm, picked, onPick }: {
   rows: CmpPosition[]; live?: boolean; busy: string | null;
   onExit?: (p: CmpPosition, lots?: number) => void;
   onReopenAtm?: (p: CmpPosition) => void;
+  picked?: Set<string>;
+  onPick?: (next: Set<string>) => void;
 }) {
+  // Only option rows are selectable, so "all" means all the OPTIONS — a header box that
+  // claimed to tick everything and then left the futures rows alone would be lying about
+  // what the button will act on.
+  const selectable = rows.filter(isOption);
+  const allOn = !!selectable.length
+    && selectable.every((p) => picked?.has(p.position_id));
+  const someOn = !allOn && selectable.some((p) => picked?.has(p.position_id));
+  const toggle = (id: string) => {
+    if (!onPick || !picked) return;
+    const next = new Set(picked);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    onPick(next);
+  };
   if (!rows.length) {
     return <EmptyState title={live ? "No open positions" : "Nothing closed yet"}
                        note="Trade from the option chain or the futures board." />;
@@ -1747,6 +1800,15 @@ function PositionTable({ rows, live, busy, onExit, onReopenAtm }: {
       <table className="data-table">
         <thead>
           <tr>
+            {live && onPick && (
+              <th className="pickcell">
+                <input type="checkbox" aria-label="Select every option leg"
+                       checked={allOn}
+                       ref={(el) => { if (el) el.indeterminate = someOn; }}
+                       onChange={() => onPick(allOn ? new Set()
+                         : new Set(selectable.map((p) => p.position_id)))} />
+              </th>
+            )}
             <th className="l">Contract</th><th>Side</th><th>Lots</th><th>Qty</th>
             <th>Entry</th><th>{live ? "LTP" : "Exit"}</th>
             <th>Contract value</th><th>Margin</th>
@@ -1759,7 +1821,17 @@ function PositionTable({ rows, live, busy, onExit, onReopenAtm }: {
           {rows.map((p) => {
             const pnl = live ? p.unrealized_pnl : p.realized_pnl;
             return (
-              <tr key={p.position_id}>
+              <tr key={p.position_id}
+                  className={picked?.has(p.position_id) ? "picked" : ""}>
+                {live && onPick && (
+                  <td className="pickcell">
+                    {isOption(p) ? (
+                      <input type="checkbox" checked={picked?.has(p.position_id) ?? false}
+                             aria-label={`Select ${p.display_name}`}
+                             onChange={() => toggle(p.position_id)} />
+                    ) : null}
+                  </td>
+                )}
                 <td className="l sym">{p.display_name}
                   <div className="small dim">{p.instrument_kind} · {p.product_type}</div>
                 </td>
@@ -1778,7 +1850,7 @@ function PositionTable({ rows, live, busy, onExit, onReopenAtm }: {
                 </td>
                 {live && onReopenAtm && (
                   <td>
-                    {(p.instrument as { option_type?: string } | undefined)?.option_type ? (
+                    {isOption(p) ? (
                       <button className="mini roll" disabled={!!busy}
                               onClick={() => onReopenAtm(p)}
                               title="Close this leg and re-open the same option at today's at-the-money strike">
@@ -1817,6 +1889,10 @@ function PositionTable({ rows, live, busy, onExit, onReopenAtm }: {
                 font-size: 11px; font-weight: 800; cursor: pointer; background: var(--panel);
                 color: var(--loss); }
         .mini:disabled { opacity: .4; cursor: default; }
+        .pickcell { width: 34px; text-align: center; padding-left: 4px; padding-right: 4px; }
+        .pickcell input { width: 15px; height: 15px; accent-color: var(--purple);
+                          cursor: pointer; vertical-align: middle; }
+        tr.picked { background: var(--purple-dim); }
         /* The roll button carries a word, so it cannot use the square close-button box. */
         .mini.roll { width: auto; height: 24px; padding: 0 11px; white-space: nowrap;
                      font-size: 11px; font-weight: 700; letter-spacing: .01em;

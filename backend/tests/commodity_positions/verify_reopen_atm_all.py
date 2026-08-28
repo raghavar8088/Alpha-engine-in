@@ -144,7 +144,53 @@ async def go() -> None:
                  "allowed here, so this run does NOT demonstrate stranding. What it "
                  "shows is that the grouped path reaches the same end state."))
 
-        # ------------------------------------------------ 3. an empty book -------
+        # ------------------------------------ 3. rolling only a SELECTION --------
+        acc4 = await create_account("SCRATCH roll-all selection", 3000000.0)
+        scratch.append(acc4["account_id"])
+        did = acc4["account_id"]
+        await build(did, expiry, away, 1)
+        s4 = await summary(did)
+        one = next(p for p in s4["open_positions"]
+                   if (p["instrument"] or {}).get("option_type") == "CE")
+        other = next(p for p in s4["open_positions"]
+                     if p["position_id"] != one["position_id"])
+        print("")
+        print(f"selection: rolling ONLY {one['display_name']}, "
+              f"leaving {other['display_name']} alone")
+
+        r4 = await reopen_all_at_the_money(did, [one["position_id"]])
+        print(f"  {r4['note']}")
+        after4 = await summary(did)
+        check("only the selected leg was rolled", r4["legs_rolled"] == 1,
+              f"{r4['legs_rolled']} rolled")
+        want_ce, _r = await atm_strike(SYMBOL, expiry, "CE")
+        moved = [q for q in after4["open_positions"]
+                 if (q["instrument"] or {}).get("option_type") == "CE"]
+        stayed = [q for q in after4["open_positions"]
+                  if (q["instrument"] or {}).get("option_type") == "PE"]
+        check("the selected leg is now at the money",
+              len(moved) == 1 and float(moved[0]["instrument"]["strike"]) == want_ce,
+              str([float(q["instrument"]["strike"]) for q in moved]))
+        check("the UNSELECTED leg was left exactly where it was",
+              len(stayed) == 1
+              and float(stayed[0]["instrument"]["strike"]) == away
+              and stayed[0]["position_id"] == other["position_id"],
+              f"{[float(q['instrument']['strike']) for q in stayed]} vs {away:g}")
+
+        # A selection that has gone stale must be refused, not silently reduced to the
+        # rows that still exist — the button would then do less than it said it would.
+        try:
+            await reopen_all_at_the_money(did, [one["position_id"], "deadbeefdead"])
+            check("a stale selection is refused, not partly rolled", False, "it returned")
+        except OrderError as exc:
+            check("a stale selection is refused, not partly rolled",
+                  "no longer open" in exc.detail, exc.detail[:70])
+        after5 = await summary(did)
+        check("the refused stale roll closed nothing",
+              after5["open_count"] == after4["open_count"],
+              f"{after4['open_count']} -> {after5['open_count']}")
+
+        # ------------------------------------------------ 4. an empty book -------
         acc3 = await create_account("SCRATCH roll-all empty", 100000.0)
         scratch.append(acc3["account_id"])
         try:

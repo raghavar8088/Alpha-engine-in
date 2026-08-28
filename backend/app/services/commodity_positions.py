@@ -1013,8 +1013,11 @@ async def reopen_at_the_money(account_id: str, position_id: str) -> dict:
     }
 
 
-async def reopen_all_at_the_money(account_id: str) -> dict:
-    """Roll EVERY open option leg to its at-the-money strike, in one operation.
+async def reopen_all_at_the_money(account_id: str,
+                                  position_ids: list[str] | None = None) -> dict:
+    """Roll open option legs to their at-the-money strike, in one operation.
+
+    Every open leg by default; only the ones named in `position_ids` when given.
 
     Not a loop over the single-leg roll. Rolling a straddle one leg at a time leaves a
     naked leg in between, and a naked leg costs MORE margin than the pair did — the leg
@@ -1030,8 +1033,22 @@ async def reopen_all_at_the_money(account_id: str) -> dict:
     Groups are independent. If one fails, the others are unaffected and the failure names
     exactly which legs are now flat rather than reporting a generic error."""
     await get_account(account_id)
-    positions = [p async for p in commodity_pos_positions_collection.find(
-        {"account_id": account_id, "status": "OPEN"})]
+    query: dict = {"account_id": account_id, "status": "OPEN"}
+    if position_ids is not None:
+        wanted = [pid for pid in dict.fromkeys(position_ids) if pid]
+        if not wanted:
+            raise OrderError("No positions were selected to roll.")
+        query["position_id"] = {"$in": wanted}
+    positions = [p async for p in commodity_pos_positions_collection.find(query)]
+    if position_ids is not None:
+        # Name what is missing rather than quietly rolling a subset. A selection that has
+        # gone stale — a row closed in another tab, or by an earlier roll in this same
+        # click — would otherwise silently do less than the button said it would.
+        missing = {pid for pid in wanted} - {p["position_id"] for p in positions}
+        if missing:
+            raise OrderError(
+                f"{len(missing)} of the {len(wanted)} selected position(s) are no longer "
+                "open in this account. Nothing was closed — refresh and select again.")
     if not positions:
         raise OrderError("This account has no open positions to roll.")
 
@@ -1044,6 +1061,8 @@ async def reopen_all_at_the_money(account_id: str) -> dict:
             skipped.append(pos["display_name"])
     if not rollable:
         raise OrderError(
+            "Nothing selected has an at-the-money strike — a future is already the "
+            "underlying." if position_ids is not None else
             "Nothing here has an at-the-money strike — every open position is a future, "
             "and a future is already the underlying.")
 
@@ -1090,10 +1109,11 @@ async def reopen_all_at_the_money(account_id: str) -> dict:
     total_delta = round(total_delta, 2)
     cash = await available_cash(account_id)
     if not basket_allowed(total_delta, cash):
+        scope = "the selected" if position_ids is not None else "all"
         raise OrderError(
-            f"Rolling all {len(rollable)} legs to the money would add ₹{total_delta:,.0f} "
-            f"of margin and only ₹{cash:,.0f} is free. Nothing was closed — every position "
-            "is exactly as it was.")
+            f"Rolling {scope} {len(rollable)} leg(s) to the money would add "
+            f"₹{total_delta:,.0f} of margin and only ₹{cash:,.0f} is free. Nothing was "
+            "closed — every position is exactly as it was.")
 
     # ---- execute, group by group ------------------------------------------------
     rolled, failed, realized = [], [], 0.0
@@ -1123,7 +1143,7 @@ async def reopen_all_at_the_money(account_id: str) -> dict:
             f"{len(rolled)} group(s) to the money — {moved} changed strike, "
             f"{sum(r['legs'] for r in rolled) - moved} re-entered at the same one.")
     if skipped:
-        note += f" Skipped {len(skipped)} future(s), which have no at-the-money strike."
+        note += (f" Skipped {len(skipped)} future(s), which have no at-the-money strike.")
     if failed:
         flat = ", ".join(c["contract"] for f in failed for c in f["closed"])
         note += (f" {len(failed)} group(s) FAILED to re-open and are now flat: {flat}. "

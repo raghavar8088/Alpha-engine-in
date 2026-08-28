@@ -19,7 +19,7 @@ mathematics; this router is a thin layer over it.
   POST   /api/commodity-positions/basket/max-lots      largest equal size this book can carry
   DELETE /api/commodity-positions/accounts/{id}        delete an empty paper account
   POST   /api/commodity-positions/positions/{id}/reopen-atm   roll a leg to today's ATM strike
-  POST   /api/commodity-positions/positions/reopen-atm-all    roll the whole book to ATM
+  POST   /api/commodity-positions/positions/reopen-atm-all    roll the book, or a selection, to ATM
   GET    /api/commodity-positions/orders               order book
   GET    /api/commodity-positions/positions            open + closed, with summary
   POST   /api/commodity-positions/positions/{id}/exit  exit fully or partially, in lots
@@ -172,11 +172,19 @@ async def delete_account_endpoint(account_id: str, _u: dict = Depends(get_curren
         raise HTTPException(400, exc.detail)
 
 
+class ReopenAtmRequest(BaseModel):
+    """Which legs to roll. Omit `position_ids` (or send null) to roll the whole book."""
+    position_ids: list[str] | None = None
+
+
 @router.post("/positions/reopen-atm-all")
-async def reopen_atm_all_endpoint(account_id: str, _u: dict = Depends(get_current_user)):
-    """Roll every open option leg in this account to its at-the-money strike."""
+async def reopen_atm_all_endpoint(account_id: str,
+                                  payload: ReopenAtmRequest | None = None,
+                                  _u: dict = Depends(get_current_user)):
+    """Roll open option legs to their at-the-money strike — all of them, or a selection."""
     try:
-        return await reopen_all_at_the_money(account_id)
+        return await reopen_all_at_the_money(
+            account_id, payload.position_ids if payload else None)
     except OrderError as exc:
         raise HTTPException(400, exc.detail)
 
