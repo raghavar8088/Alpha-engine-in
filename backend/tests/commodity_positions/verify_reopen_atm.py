@@ -19,8 +19,8 @@ import traceback
 
 from app.services.commodity_positions import (
     OrderError, atm_strike, available_cash, create_account, delete_account, execute_basket,
-    exit_position, option_chain, option_expiries, prime_lotsizes, reopen_at_the_money,
-    summary,
+    exit_position, future_expiries, option_chain, option_expiries, prime_lotsizes,
+    reopen_at_the_money, summary,
 )
 
 SYMBOL = "CRUDEOILM"
@@ -91,7 +91,10 @@ async def go() -> None:
               f"{len(after['closed_positions'])} closed row(s)")
 
         # A future has no at-the-money strike; rolling one must be refused, not invented.
-        fut_expiry = expiry
+        # Its own expiry, not the option's: MCX options expire BEFORE the future they are
+        # written on, so reusing the option expiry here just fails to find a contract and
+        # skips the check that matters.
+        fut_expiry = (await future_expiries(SYMBOL))[0]
         try:
             await execute_basket(aid, [{
                 "instrument_kind": "FUTURE", "symbol": SYMBOL, "expiry": fut_expiry,
