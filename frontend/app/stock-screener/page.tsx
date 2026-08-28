@@ -8,6 +8,7 @@
  *   Sectors   where money is rotating, and which stocks inside a sector are driving it
  *   Patterns  which charts have formed a shape, on daily and weekly candles
  *   Setups    what is actually tradable right now, priced net of real Angel One costs
+ *   Chartink  a delayed SECOND OPINION from outside — labelled as such, never mixed in
  *   Sources   which feeds answered — so a data outage never reads as a quiet market
  */
 
@@ -21,6 +22,7 @@ import Skeleton from "../../components/Skeleton";
 import RankedBars, { RankedBarRow } from "../../components/charts/RankedBars";
 import Sparkline from "../../components/Sparkline";
 import SectorSpread from "../../components/charts/SectorSpread";
+import ChartinkPanel from "../../components/ChartinkPanel";
 import {
   refreshing,
   fetchScreenerConfig, fetchScreenerSummary, fetchScreenerMomentum,
@@ -34,7 +36,7 @@ import {
   ScreenerVolumeBoard, ScreenerPaperSummary, ScreenerPaperPositions,
 } from "../../lib/api";
 
-type Tab = "momentum" | "sectors" | "volume" | "patterns" | "setups" | "paper" | "sources";
+type Tab = "momentum" | "sectors" | "volume" | "patterns" | "setups" | "paper" | "chartink" | "sources";
 const TABS: { key: Tab; label: string }[] = [
   { key: "momentum", label: "Momentum" },
   { key: "sectors", label: "Sectors" },
@@ -42,6 +44,7 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "patterns", label: "Chart Patterns" },
   { key: "setups", label: "Setups" },
   { key: "paper", label: "Paper Desk" },
+  { key: "chartink", label: "Chartink" },
   { key: "sources", label: "Sources" },
 ];
 
@@ -1047,6 +1050,8 @@ Click for the full reason stack`,
       )}
 
       {/* ══ SOURCES ════════════════════════════════════════════════════════ */}
+      {tab === "chartink" && <ChartinkPanel cfg={cfg?.chartink} />}
+
       {tab === "sources" && (
         <GlassPanel title="Where every number comes from"
           note={sources ? `checked ${new Date(sources.checked_at).toLocaleTimeString()}` : undefined}>

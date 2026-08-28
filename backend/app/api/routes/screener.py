@@ -8,7 +8,8 @@
   GET  /api/screener/patterns         daily/weekly chart-pattern hits
   GET  /api/screener/setups           intraday | swing | breakout shortlists
   GET  /api/screener/sources          per-feed honesty for the Sources tab
-  GET  /api/screener/chartink         optional delayed secondary feed
+  GET  /api/screener/chartink         optional delayed secondary feed (curated presets)
+  GET  /api/screener/chartink/named   run ANY public Chartink screener by URL or slug
   POST /api/screener/refresh          force a full recompute and persist
 
 Every GET is plain and cacheable — the app-wide 20s door cache applies, and `?fresh=true`
@@ -210,6 +211,22 @@ async def chartink_preset(
 ):
     """Optional, delayed, secondary. Disabled unless SCREENER_CHARTINK_ENABLED=1."""
     return await CK.preset(scan, fresh=fresh)
+
+
+@router.get("/chartink/named")
+async def chartink_named(
+    slug: str = Query(..., description="a Chartink screener slug or its full URL, e.g. "
+                                       "short-term-breakouts"),
+    fresh: bool = Query(False),
+    _current_user: dict = Depends(get_current_user),
+):
+    """Read a public Chartink screener by name and run it.
+
+    Returns 200 with `ok: false` and a reason rather than raising: a Chartink outage, a
+    typo'd slug and a private screener are all ordinary answers here, and none of them is
+    a fault in this app.
+    """
+    return await CK.named(slug, fresh=fresh)
 
 
 @router.post("/refresh")

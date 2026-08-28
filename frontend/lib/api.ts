@@ -4116,6 +4116,7 @@ export interface ScreenerConfig {
   chartink: {
     enabled: boolean;
     presets: { key: string; label: string; why_not_local: string }[];
+    named: { slug: string; label: string; why: string; url: string }[];
     verified: Record<string, string>;
     policy: string;
   };
@@ -4576,12 +4577,32 @@ export async function fetchScreenerDelivery(): Promise<ScreenerDeliveryStatus> {
 export async function backfillScreenerDelivery(days = 30): Promise<Record<string, unknown>> {
   return apiFetch("/api/screener/delivery/backfill" + screenerQs({ days }), { method: "POST" });
 }
-export async function fetchScreenerChartink(scan: string): Promise<{
-  ok: boolean; rows: { symbol: string; name: string; close: number | null;
-  change_pct: number | null; volume: number | null }[];
-  error: string | null; label?: string; warning?: string; why_not_local?: string;
-}> {
+export interface ChartinkRow {
+  symbol: string; name: string;
+  close: number | null; change_pct: number | null; volume: number | null;
+}
+export interface ChartinkResult {
+  ok: boolean;
+  rows: ChartinkRow[];
+  error: string | null;
+  label?: string; why_not_local?: string;
+  slug?: string; url?: string; name?: string; description?: string;
+  /** The scan's own clause. Shown, not hidden — a name is not a definition. */
+  clause?: string;
+  delayed?: boolean;
+  behind_mins?: number | null;
+  warning?: string;
+  fetched_at?: number;
+  source?: string;
+}
+export async function fetchScreenerChartink(scan: string): Promise<ChartinkResult> {
   return apiFetch("/api/screener/chartink" + screenerQs({ scan }));
+}
+/** Run ANY public Chartink screener. Takes a slug or a full chartink.com URL. */
+export async function fetchScreenerChartinkNamed(
+  slug: string, fresh = false,
+): Promise<ChartinkResult> {
+  return apiFetch("/api/screener/chartink/named" + screenerQs({ slug, fresh }));
 }
 
 // --- Instrument search: ranked, typo-tolerant, enriched, app-wide ------------

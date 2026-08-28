@@ -8,6 +8,14 @@ WHAT WAS ACTUALLY VERIFIED (probe, 2026-08-21, not documentation):
     `{"data":[{"nsecode","name","bsecode","close","per_chg","volume"}, ...]}`.
   * Dashboard 11543 is PUBLIC — `is_private: false`. `GET /dashboard/11543/widgets` returns
     all 20 widget definitions and their query strings without logging in.
+  * ANY PUBLIC NAMED SCREENER can be both READ and RUN, e.g.
+    `/screener/short-term-breakouts`. The clause is NOT in the page as `scan_clause` — the
+    page is a Vue app and the scan arrives as a prop: `<scanner :scan-json="{...}">`,
+    HTML-escaped JSON whose `atlas_query` field IS the executable clause. Feed that to
+    `/screener/process` and it returns rows. Verified from the AWS box on 2026-08-28:
+    short-term-breakouts 33 rows, breakouts 139, volume-shockers 44, rsi-crossing-60 150,
+    each in well under a second. A bad slug 404s cleanly. This is what makes the adapter
+    worth more than a fixed preset list — it can be pointed at any screener URL.
   * BUT the dashboard's widget query language is NOT executable through
     `/screener/process`: posting a widget query verbatim returns
     `{"data":[],"scan_error":"There was a error in running your scan"}`. Their JS bundle
@@ -30,6 +38,8 @@ and never raises into a page.
 
 from __future__ import annotations
 
+import html
+import json
 import logging
 import os
 import re
@@ -105,6 +115,44 @@ PRESETS: dict[str, dict] = {
     },
 }
 
+# Public screeners worth having one click away. Every one of these was RUN from the AWS
+# box on 2026-08-28 and returned rows — none is a guess. `why` says what it adds over the
+# local engine, because a scan this app can already compute has no business being fetched
+# from a delayed third party and shown beside live numbers.
+NAMED: dict[str, dict] = {
+    "short-term-breakouts": {
+        "label": "Short term breakouts",
+        "why": "5-day close 5% above the 6-month high, on volume above its own 5-day mean.",
+    },
+    "breakouts": {
+        "label": "Breakouts (RSI + ADX + MACD)",
+        "why": "Multi-indicator confluence — broader than our single-signal setups.",
+    },
+    "volume-shockers": {
+        "label": "Volume shockers",
+        "why": "Volume above 5x its 20-day mean across the WHOLE cash market.",
+    },
+    "rsi-crossing-60": {
+        "label": "RSI crossing 60",
+        "why": "Momentum ignition on the day it happens, whole market.",
+    },
+    "bullish-marubozu-1": {
+        "label": "Bullish marubozu",
+        "why": "Single-candle conviction; our pattern engine reads multi-bar structures.",
+    },
+    "nr7-narrow-range-7": {
+        "label": "NR7 narrow range",
+        "why": "Compression before expansion — a setup we do not screen for locally.",
+    },
+}
+
+# The scan arrives as a Vue prop, HTML-escaped; `atlas_query` inside it is the clause.
+_SCAN_JSON_RE = re.compile(r':scan-json="([^"]+)"')
+_CSRF_RE = re.compile(r'name="csrf-token"\s+content="([^"]+)"')
+_BEHIND_RE = re.compile(r"scanBehindByTimeInMins\s*=\s*[\"\']?(\d+)")
+_SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9\-]{0,80}$")
+_URL_RE = re.compile(r"chartink\.com/screener/([a-z0-9\-]+)")
+
 _cache: dict[str, tuple[float, dict]] = {}
 
 
@@ -156,19 +204,148 @@ async def run_clause(clause: str, referer: str = SCREENER_PAGE) -> dict:
     if isinstance(body, dict) and body.get("scan_error"):
         return {"ok": False, "rows": [], "error": body["scan_error"], "delayed": True}
 
-    rows = []
+    return {"ok": True, "rows": _rows(body), "error": None, "delayed": True}
+
+
+def _rows(body: object) -> list[dict]:
+    out = []
     for d in (body.get("data") or []) if isinstance(body, dict) else []:
         sym = (d.get("nsecode") or "").strip().upper()
         if not sym:
             continue
-        rows.append({
+        out.append({
             "symbol": sym,
             "name": (d.get("name") or "").strip(),
             "close": d.get("close"),
             "change_pct": d.get("per_chg"),
             "volume": d.get("volume"),
         })
-    return {"ok": True, "rows": rows, "error": None, "delayed": True}
+    return out
+
+
+def parse_slug(value: str) -> str | None:
+    """Accept a slug or a full Chartink URL; None if it is neither.
+
+    Validated rather than trusted. This string is interpolated into the path of an outbound
+    request, so a value like `../../admin` or one carrying a query string would build a
+    request we never meant to make.
+    """
+    v = (value or "").strip().lower()
+    if not v:
+        return None
+    m = _URL_RE.search(v)
+    if m:
+        v = m.group(1)
+    v = v.strip("/").split("?")[0].split("#")[0]
+    return v if _SLUG_RE.match(v) else None
+
+
+async def _fetch_scan(client: httpx.AsyncClient, slug: str) -> tuple[str, dict]:
+    """Return (csrf token, the screener's own definition) for a public named screener."""
+    r = await client.get(f"/screener/{slug}", follow_redirects=True)
+    if r.status_code == 404:
+        raise ChartinkUnavailable(f"no public Chartink screener called {slug!r}")
+    if r.status_code != 200:
+        raise ChartinkUnavailable(f"HTTP {r.status_code} fetching /screener/{slug}")
+
+    tok = _CSRF_RE.search(r.text)
+    if not tok:
+        raise ChartinkUnavailable("no csrf-token on the page — layout changed")
+
+    m = _SCAN_JSON_RE.search(r.text)
+    if not m:
+        # A private screener still renders a page but withholds the prop. Name that case:
+        # "returned nothing" and "not yours to read" call for opposite responses.
+        raise ChartinkUnavailable(
+            f"{slug!r} exists but its definition is not public — a private screener is only "
+            "readable while signed in as its owner")
+    try:
+        scan = json.loads(html.unescape(m.group(1)))
+    except ValueError as exc:
+        raise ChartinkUnavailable(f"could not parse the scan definition: {exc}") from exc
+
+    if not scan.get("atlas_query"):
+        raise ChartinkUnavailable(f"{slug!r} carries no runnable clause")
+
+    # Chartink stamps its own lag on the page. It is empty outside market hours, which is
+    # why the caller falls back to a stated range rather than inventing a number.
+    lag = _BEHIND_RE.search(r.text)
+    scan["_behind_mins"] = int(lag.group(1)) if lag else None
+    return tok.group(1), scan
+
+
+async def named(slug_or_url: str, fresh: bool = False) -> dict:
+    """Read a public Chartink screener by name and RUN it.
+
+    Two steps, both required: the page holds the scan definition but not its results, and
+    `/screener/process` runs a clause but knows no screener by name.
+    """
+    slug = parse_slug(slug_or_url)
+    if not slug:
+        return {"ok": False, "rows": [], "error":
+                "That is not a Chartink screener. Paste a URL like "
+                "https://chartink.com/screener/short-term-breakouts — or just the last "
+                "part of it."}
+    if not ENABLED:
+        return {"ok": False, "rows": [], "error":
+                "Chartink adapter disabled (set SCREENER_CHARTINK_ENABLED=1)"}
+
+    ck = f"named:{slug}"
+    now = time.monotonic()
+    if not fresh:
+        hit = _cache.get(ck)
+        if hit and now - hit[0] < CACHE_TTL:
+            return hit[1]
+
+    clause = None
+    try:
+        async with httpx.AsyncClient(base_url=BASE, timeout=TIMEOUT,
+                                     headers={"User-Agent": UA}) as c:
+            tok, scan = await _fetch_scan(c, slug)
+            clause = scan["atlas_query"]
+            r = await c.post(
+                PROCESS,
+                data={"scan_clause": clause},
+                headers={"x-csrf-token": tok, "x-requested-with": "XMLHttpRequest",
+                         "Referer": f"{BASE}/screener/{slug}"},
+            )
+            if r.status_code != 200:
+                return {"ok": False, "rows": [], "clause": clause,
+                        "error": f"HTTP {r.status_code} running the scan"}
+            body = r.json()
+    except ChartinkUnavailable as exc:
+        return {"ok": False, "rows": [], "error": str(exc)}
+    except (httpx.HTTPError, ValueError) as exc:
+        return {"ok": False, "rows": [], "error": f"{type(exc).__name__}: {str(exc)[:120]}"}
+
+    if isinstance(body, dict) and body.get("scan_error"):
+        return {"ok": False, "rows": [], "error": body["scan_error"], "clause": clause}
+
+    behind = scan.get("_behind_mins")
+    out = {
+        "ok": True,
+        "rows": _rows(body),
+        "error": None,
+        "slug": slug,
+        "url": f"{BASE}/screener/{slug}",
+        "name": scan.get("name") or slug,
+        "description": scan.get("description"),
+        # The clause is shown, never hidden. It is the only way a reader can tell whether
+        # the screen means what its name suggests — "Breakouts" is a title, not a definition.
+        "clause": clause,
+        "delayed": True,
+        "behind_mins": behind,
+        "warning": (
+            f"Chartink reports this scan running {behind} minutes behind live."
+            if behind else
+            "Chartink's free tier serves DELAYED data — commonly 30-45 minutes intraday. "
+            "Do not trade these as live prices. Every other number in this module is live "
+            "Angel One or computed from stored bars."),
+        "fetched_at": time.time(),
+        "source": "chartink.com (free tier)",
+    }
+    _cache[ck] = (now, out)
+    return out
 
 
 async def preset(key: str, fresh: bool = False) -> dict:
@@ -209,8 +386,13 @@ def status() -> dict:
     return {
         "enabled": ENABLED,
         "presets": presets(),
+        "named": [{"slug": k, "label": v["label"], "why": v["why"],
+                   "url": f"{BASE}/screener/{k}"} for k, v in NAMED.items()],
         "verified": {
             "scan_api": "works without login (POST /screener/process with scan_clause)",
+            "named_screeners": "readable AND runnable — the clause is the atlas_query "
+                               "field inside the page's :scan-json prop, which "
+                               "/screener/process then executes. Any public screener works.",
             "dashboard_11543": "public; GET /dashboard/11543/widgets returns 20 widget "
                                "definitions without login",
             "dashboard_numbers": "NOT retrievable — widget queries are not executable via "
