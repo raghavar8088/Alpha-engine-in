@@ -19,6 +19,7 @@ import { useCallback, useEffect, useState } from "react";
 import GlassPanel from "./GlassPanel";
 import EmptyState from "./EmptyState";
 import Skeleton from "./Skeleton";
+import SymbolConverter from "./SymbolConverter";
 import {
   fetchScreenerChartinkNamed, ChartinkResult, ScreenerConfig,
 } from "../lib/api";
@@ -134,6 +135,8 @@ export default function ChartinkPanel({ cfg }: { cfg: Cfg }) {
           </>
         )}
       </GlassPanel>
+
+      <SymbolConverter />
 
       {enabled && (
         <GlassPanel
