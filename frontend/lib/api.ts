@@ -5067,6 +5067,24 @@ export interface AthPosition {
   to_target_pct?: number; to_stop_pct?: number;
   market_cap_cr: number | null; ath_broken: number | null;
   previous_ath_date: string | null; days_held: number; opened_on: string;
+  entry_reason?: string | null;
+  /** Real-money buy conviction, scored at the CURRENT price. Null if it could not be
+   *  computed — which is shown as such, never as a zero. */
+  conviction?: AthConviction | null;
+  gate_now?: { passed: boolean; summary: string; checks: AthGateCheck[] } | null;
+}
+
+export interface AthConviction {
+  /** 0-100. NOT a probability of profit — see the label copy on the page. */
+  pct: number;
+  label: "Strong" | "Good" | "Fair" | "Weak" | "Avoid" | "Unknown";
+  headline: string;
+  /** One sentence on delivery against the stock's own average, plus median turnover. */
+  volume: string;
+  confidence: "high" | "medium" | "low" | "none";
+  unknown_checks?: number;
+  capped: boolean;
+  cap_reason: string | null;
 }
 
 export interface AthTrade {

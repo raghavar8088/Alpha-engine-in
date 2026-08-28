@@ -8,7 +8,7 @@
  * scanned and another if 400 were — and only the coverage panel can tell you which.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import PageHeader from "../../components/PageHeader";
 import GlassPanel from "../../components/GlassPanel";
 import ErrorBanner from "../../components/ErrorBanner";
@@ -58,6 +58,7 @@ export default function AllTimeHighTradingPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [openConv, setOpenConv] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -203,31 +204,89 @@ export default function AllTimeHighTradingPage() {
             <EmptyState title="No open positions"
               note="The desk buys only when a qualifying stock prints a NEW all-time high. On most days that is nobody." />
           ) : (
-            <div className="tw"><table>
-              <thead><tr>
-                <th className="l">Stock</th><th>Mkt cap</th><th>Entry</th><th>Qty</th><th>LTP</th>
-                <th>Return</th><th>P&amp;L</th><th>Stop</th><th>Target</th>
-                <th>To target</th><th>To stop</th><th>Held</th>
-              </tr></thead>
-              <tbody>
-                {positions.map((p) => (
-                  <tr key={p.position_id}>
-                    <td className="l"><b>{p.symbol}</b><div className="sub">{p.name}</div></td>
-                    <td className="dim">{cr(p.market_cap_cr)}</td>
-                    <td>{num(p.entry)}</td>
-                    <td className="dim">{p.quantity}</td>
-                    <td>{num(p.ltp)}</td>
-                    <td className={cls(p.return_pct)}>{pct(p.return_pct)}</td>
-                    <td className={cls(p.unrealised_pnl)}><b>{inr(p.unrealised_pnl)}</b></td>
-                    <td className="loss">{num(p.stop)}</td>
-                    <td className="gain">{num(p.target)}</td>
-                    <td className="dim">{pct(p.to_target_pct)}</td>
-                    <td className="dim">{pct(p.to_stop_pct)}</td>
-                    <td className="dim">{p.days_held}d</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table></div>
+            <>
+              <div className="convnote">
+                <b>Buy now</b> scores whether ₹1,00,000 of <i>real</i> money could be put
+                into this stock on this rule today — whether the −20% stop can actually
+                fill, whether you could get out, and whether the move was backed by
+                delivery. It is <b>not</b> a probability of profit: a 95% can still lose,
+                it just loses for a reason the desk chose rather than one it never looked
+                at. Click a score for the six checks behind it.
+              </div>
+              <div className="tw"><table>
+                <thead><tr>
+                  <th className="l">Stock</th><th className="l">Buy now</th>
+                  <th>Mkt cap</th><th>Entry</th><th>Qty</th><th>LTP</th>
+                  <th>Return</th><th>P&amp;L</th><th>Stop</th><th>Target</th>
+                  <th>To target</th><th>To stop</th><th>Held</th>
+                </tr></thead>
+                <tbody>
+                  {positions.map((p) => {
+                    const c = p.conviction;
+                    const tone = !c ? "unk"
+                      : c.pct >= 80 ? "ok" : c.pct >= 65 ? "good"
+                      : c.pct >= 50 ? "fair" : c.pct >= 30 ? "weak" : "bad";
+                    return (
+                      <Fragment key={p.position_id}>
+                        <tr>
+                          <td className="l"><b>{p.symbol}</b><div className="sub">{p.name}</div></td>
+                          <td className="l">
+                            {!c ? <span className="conv unk">not scored</span> : (
+                              <button className={`conv ${tone}`}
+                                onClick={() => setOpenConv(
+                                  openConv === p.position_id ? null : p.position_id)}
+                                title={c.headline}>
+                                <b>{c.pct}%</b>
+                                <span className="cl">{c.label}</span>
+                                {c.confidence !== "high" && <span className="cf">?</span>}
+                              </button>
+                            )}
+                          </td>
+                          <td className="dim">{cr(p.market_cap_cr)}</td>
+                          <td>{num(p.entry)}</td>
+                          <td className="dim">{p.quantity}</td>
+                          <td>{num(p.ltp)}</td>
+                          <td className={cls(p.return_pct)}>{pct(p.return_pct)}</td>
+                          <td className={cls(p.unrealised_pnl)}><b>{inr(p.unrealised_pnl)}</b></td>
+                          <td className="loss">{num(p.stop)}</td>
+                          <td className="gain">{num(p.target)}</td>
+                          <td className="dim">{pct(p.to_target_pct)}</td>
+                          <td className="dim">{pct(p.to_stop_pct)}</td>
+                          <td className="dim">{p.days_held}d</td>
+                        </tr>
+                        {openConv === p.position_id && c && (
+                          <tr className="convrow">
+                            <td colSpan={13}>
+                              <div className="cvhead">{c.headline}</div>
+                              <div className="cvvol">{c.volume}</div>
+                              {c.capped && <div className="cvcap">{c.cap_reason}</div>}
+                              {c.confidence !== "high" && (
+                                <div className="cvcap">
+                                  {c.unknown_checks} of the six checks could not be run, so
+                                  this score is less certain than it looks. Missing data is
+                                  never counted as a pass.
+                                </div>
+                              )}
+                              <div className="cvchecks">
+                                {(p.gate_now?.checks ?? []).map((k) => (
+                                  <div key={k.key} className={`cvchk ${k.verdict}`}>
+                                    <div className="cvtop">
+                                      <span className="dot" /><b>{k.label}</b>
+                                      <span className="vd">{k.verdict}</span>
+                                    </div>
+                                    <div className="cvd">{k.detail}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    );
+                  })}
+                </tbody>
+              </table></div>
+            </>
           )
         )}
 
@@ -370,6 +429,80 @@ export default function AllTimeHighTradingPage() {
         th.l, td.l { text-align: left; }
         td.dim { color: var(--text-muted); }
         .sub { font-size: 10px; color: var(--text-faint); white-space: normal; }
+
+        /* ── buy conviction ──────────────────────────────────────────────── */
+        .convnote {
+          font-size: 12px; line-height: 1.6; color: var(--text-muted);
+          border: 1px solid var(--border); border-radius: 10px;
+          padding: 10px 13px; margin-bottom: 12px; max-width: 92ch;
+          background: var(--canvas-soft);
+        }
+        .convnote b { color: var(--text-primary); }
+        .conv {
+          display: inline-flex; align-items: baseline; gap: 6px;
+          padding: 3px 10px; border-radius: 999px; cursor: pointer;
+          border: 1px solid transparent; font-size: 12px; white-space: nowrap;
+          font-family: inherit;
+        }
+        .conv b { font-size: 13px; font-weight: 700; }
+        .conv .cl { font-size: 10.5px; opacity: 0.85; }
+        /* A visible marker that the score rests on incomplete data. Without it a 70%
+           built on two unknowns looks exactly like a 70% that was fully checked. */
+        .conv .cf { font-size: 11px; font-weight: 700; opacity: 0.7; }
+        .conv.ok   { background: rgba(22,163,74,0.14);  color: var(--gain);
+                     border-color: rgba(22,163,74,0.3); }
+        .conv.good { background: rgba(22,163,74,0.09);  color: var(--gain);
+                     border-color: rgba(22,163,74,0.22); }
+        .conv.fair { background: rgba(217,119,6,0.12);  color: #b45309;
+                     border-color: rgba(217,119,6,0.3); }
+        .conv.weak { background: rgba(217,119,6,0.16);  color: #b45309;
+                     border-color: rgba(217,119,6,0.42); }
+        .conv.bad  { background: rgba(220,38,38,0.14);  color: var(--loss);
+                     border-color: rgba(220,38,38,0.34); }
+        .conv.unk  { background: var(--canvas-soft); color: var(--text-faint);
+                     border: 1px dashed var(--border); cursor: default; }
+        .convrow td { background: var(--canvas-soft); text-align: left; padding: 12px 14px; }
+        .cvhead {
+          font-size: 12.5px; color: var(--text-primary); line-height: 1.55;
+          margin-bottom: 5px; max-width: 92ch;
+        }
+        .cvvol {
+          font-size: 12px; color: var(--text-secondary); line-height: 1.55;
+          margin-bottom: 8px;
+        }
+        .cvcap {
+          font-size: 11.5px; color: #b45309; line-height: 1.55; margin-bottom: 8px;
+          max-width: 92ch;
+        }
+        .cvchecks {
+          display: grid; gap: 8px;
+          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        }
+        .cvchk {
+          border: 1px solid var(--border); border-radius: 9px;
+          padding: 8px 10px; background: var(--canvas);
+        }
+        .cvtop {
+          display: flex; align-items: center; gap: 7px;
+          font-size: 11.5px; color: var(--text-primary); margin-bottom: 3px;
+        }
+        .cvtop .vd {
+          margin-left: auto; font-size: 9.5px; text-transform: uppercase;
+          letter-spacing: 0.05em; font-weight: 700;
+        }
+        .cvd { font-size: 11px; line-height: 1.5; color: var(--text-muted); }
+        .cvchk .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+        .cvchk.pass .dot { background: var(--gain); }
+        .cvchk.pass .vd { color: var(--gain); }
+        .cvchk.warn .dot { background: #d97706; }
+        .cvchk.warn .vd { color: #b45309; }
+        .cvchk.fail .dot { background: var(--loss); }
+        .cvchk.fail .vd { color: var(--loss); }
+        /* unknown is neither green nor red on purpose: it is an absence of evidence, and
+           colouring it either way would assert something the data does not support. */
+        .cvchk.unknown { border-style: dashed; }
+        .cvchk.unknown .dot { background: var(--text-faint); }
+        .cvchk.unknown .vd { color: var(--text-faint); }
         td.wide { max-width: 340px; white-space: normal; }
         .gain { color: var(--gain); } .loss { color: var(--loss); } .warn { color: var(--warn); }
         .yes { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; background: var(--gain-dim); color: var(--gain); }
