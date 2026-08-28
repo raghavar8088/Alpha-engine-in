@@ -51,6 +51,7 @@ import {
   placeCmpOrder,
   deleteCmpAccount,
   maxCmpLots,
+  reopenCmpAtm,
   resetCmpAccount,
   syncCmpInstruments,
 } from "../../lib/api";
@@ -343,6 +344,31 @@ export default function CommodityPositionsPage() {
                  expiry: string, strike?: number, optionType?: "CE" | "PE") =>
     addLeg({ instrument_kind: kind, symbol, expiry, transaction_type: side, lots,
              strike: strike ?? null, option_type: optionType ?? null });
+
+  // Roll a leg back to the money: close it, and put the same contract straight back on at
+  // whichever listed strike now sits nearest the future. A strike picked weeks ago drifts
+  // as the underlying moves — a 159000 call against a 162000 future is no longer the trade
+  // that was put on — and doing it by hand is two trips through the chain with the book
+  // unhedged in between.
+  const reopenAtm = (p: CmpPosition) => {
+    const inst = p.instrument as { strike?: number; option_type?: string } | undefined;
+    if (!window.confirm(
+      `Close ${p.display_name} (${p.lots} lots) and re-open the same `
+      + `${inst?.option_type ?? "option"} at the at-the-money strike?\n\n`
+      + `The ${inst?.strike ?? "current"} strike is closed at the live price, realising its `
+      + `P&L, and the new leg goes on at the same ${p.lots} lots on the same side.`)) return;
+    act(`atm-${p.position_id}`, async () => {
+      const r = await reopenCmpAtm(p.position_id, accountId);
+      const rs = Math.round(r.closed.realized).toLocaleString("en-IN");
+      const md = Math.round(r.margin_delta).toLocaleString("en-IN");
+      setNotice(
+        `${r.closed.contract} closed at ${r.closed.exit_price} `
+        + `(realised ${r.closed.realized >= 0 ? "+" : ""}₹${rs}), re-opened at the `
+        + `${r.opened.strike} strike at ${r.opened.entry_price}. Future ${r.future} · `
+        + `margin ${r.margin_delta >= 0 ? "+" : ""}₹${md}.`);
+      setSizingNonce((n) => n + 1);
+    });
+  };
 
   const placeBasket = () =>
     act("basket", async () => {
@@ -903,6 +929,7 @@ export default function CommodityPositionsPage() {
         <>
           <GlassPanel title="Open positions" note="marked to the live Angel price">
             <PositionTable rows={summary?.open_positions ?? []} live busy={busy}
+                           onReopenAtm={reopenAtm}
                            onExit={(p, l) => act(`exit-${p.position_id}`,
                              () => exitCmpPosition(p.position_id, accountId, l))} />
           </GlassPanel>
@@ -1640,9 +1667,10 @@ function Icon({ d }: { d: string }) {
 }
 
 
-function PositionTable({ rows, live, busy, onExit }: {
+function PositionTable({ rows, live, busy, onExit, onReopenAtm }: {
   rows: CmpPosition[]; live?: boolean; busy: string | null;
   onExit?: (p: CmpPosition, lots?: number) => void;
+  onReopenAtm?: (p: CmpPosition) => void;
 }) {
   if (!rows.length) {
     return <EmptyState title={live ? "No open positions" : "Nothing closed yet"}
@@ -1657,6 +1685,7 @@ function PositionTable({ rows, live, busy, onExit }: {
             <th>Entry</th><th>{live ? "LTP" : "Exit"}</th>
             <th>Contract value</th><th>Margin</th>
             <th>{live ? "Unrealised" : "Realised"}</th>
+            {live && onReopenAtm && <th>Re-add ATM</th>}
             {live && <th>Close</th>}
           </tr>
         </thead>
@@ -1681,6 +1710,19 @@ function PositionTable({ rows, live, busy, onExit }: {
                   {pnl === null || pnl === undefined ? "—"
                     : `${pnl >= 0 ? "+" : ""}₹${pnl.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`}
                 </td>
+                {live && onReopenAtm && (
+                  <td>
+                    {(p.instrument as { option_type?: string } | undefined)?.option_type ? (
+                      <button className="mini roll" disabled={!!busy}
+                              onClick={() => onReopenAtm(p)}
+                              title="Close this leg and re-open the same option at today's at-the-money strike">
+                        {busy === `atm-${p.position_id}` ? "Rolling…" : "Re-add ATM"}
+                      </button>
+                    ) : (
+                      <span className="dim small">futures</span>
+                    )}
+                  </td>
+                )}
                 {live && (
                   <td>
                     <button className="mini" disabled={!!busy} onClick={() => onExit?.(p)}>×</button>
@@ -1709,6 +1751,14 @@ function PositionTable({ rows, live, busy, onExit }: {
                 font-size: 11px; font-weight: 800; cursor: pointer; background: var(--panel);
                 color: var(--loss); }
         .mini:disabled { opacity: .4; cursor: default; }
+        /* The roll button carries a word, so it cannot use the square close-button box. */
+        .mini.roll { width: auto; height: 24px; padding: 0 11px; white-space: nowrap;
+                     font-size: 11px; font-weight: 700; letter-spacing: .01em;
+                     color: var(--purple); border-color: rgba(125, 52, 220, .28);
+                     background: var(--purple-dim); border-radius: 100px;
+                     transition: background .15s, border-color .15s; }
+        .mini.roll:hover:not(:disabled) { border-color: var(--purple); }
+        .small { font-size: 10.5px; }
       `}</style>
     </div>
   );

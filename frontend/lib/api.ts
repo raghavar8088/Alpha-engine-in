@@ -5367,6 +5367,26 @@ export async function exitCmpPosition(position_id: string, account_id: string, l
     method: "POST", body: JSON.stringify({ account_id, lots: lots ?? null }),
   });
 }
+export interface CmpReopenAtm {
+  closed: { contract: string; strike: number; lots: number; side: string;
+            exit_price: number; realized: number };
+  opened: { contract: string; strike: number; lots: number; side: string;
+            entry_price: number };
+  future: number;
+  strike_moved: number;
+  margin_delta: number;
+  net_premium: number;
+  note: string;
+}
+
+/** Close a position and re-open the same contract at today's at-the-money strike.
+ *  Same underlying, expiry, option type, side and lots — only the strike moves. */
+export async function reopenCmpAtm(position_id: string, account_id: string): Promise<CmpReopenAtm> {
+  return apiFetch(
+    `${cmp}/positions/${position_id}/reopen-atm?account_id=${encodeURIComponent(account_id)}`,
+    { method: "POST" });
+}
+
 export async function resetCmpAccount(account_id: string): Promise<any> {
   return apiFetch(`${cmp}/reset?account_id=${encodeURIComponent(account_id)}`, { method: "POST" });
 }
