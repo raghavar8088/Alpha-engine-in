@@ -52,6 +52,7 @@ import {
   deleteCmpAccount,
   maxCmpLots,
   reopenCmpAtm,
+  reopenCmpAtmAll,
   resetCmpAccount,
   syncCmpInstruments,
 } from "../../lib/api";
@@ -134,6 +135,10 @@ export default function CommodityPositionsPage() {
   // it hedges a position already open, so less is held against the pair than against the
   // surviving leg on its own.
   const releasesMargin = !!quote && quote.margin_released > 0;
+
+  // Only options have an at-the-money strike, so futures are not counted in the button.
+  const rollableLegs = (summary?.open_positions ?? []).filter(
+    (p) => (p.instrument as { option_type?: string } | undefined)?.option_type).length;
 
   // The at-the-money strike: the listed strike nearest the underlying FUTURE, which is the
   // reference the chain is priced against — not the spot commodity, which MCX does not
@@ -366,6 +371,33 @@ export default function CommodityPositionsPage() {
         + `(realised ${r.closed.realized >= 0 ? "+" : ""}₹${rs}), re-opened at the `
         + `${r.opened.strike} strike at ${r.opened.entry_price}. Future ${r.future} · `
         + `margin ${r.margin_delta >= 0 ? "+" : ""}₹${md}.`);
+      setSizingNonce((n) => n + 1);
+    });
+  };
+
+  // The same roll, across the whole book. Deliberately one server call rather than a
+  // loop over the per-row buttons: rolling a straddle a leg at a time leaves a naked leg
+  // in between, which costs MORE margin than the pair did, and on a tight book that
+  // intermediate state can refuse the second roll and strand the position half-rolled.
+  const rollBookToAtm = () => {
+    const legs = (summary?.open_positions ?? []).filter(
+      (p) => (p.instrument as { option_type?: string } | undefined)?.option_type);
+    if (!legs.length) return;
+    if (!window.confirm(
+      `Roll all ${legs.length} option leg${legs.length > 1 ? "s" : ""} to the money?\n\n`
+      + "Every one is closed at the live price, realising its P&L, and re-opened at the "
+      + "strike nearest its own future — same side, same lots. Futures are left alone.\n\n"
+      + "This is checked against your margin before anything is closed.")) return;
+    act("rollall", async () => {
+      const r = await reopenCmpAtmAll(accountId);
+      const rs = Math.round(r.realized).toLocaleString("en-IN");
+      const md = Math.round(r.margin_delta).toLocaleString("en-IN");
+      setNotice(
+        `${r.note} Realised ${r.realized >= 0 ? "+" : ""}₹${rs}, `
+        + `margin ${r.margin_delta >= 0 ? "+" : ""}₹${md}.`);
+      if (r.failed.length) {
+        setError(r.failed.map((f) => `${f.underlying} ${f.expiry}: ${f.reason}`).join(" "));
+      }
       setSizingNonce((n) => n + 1);
     });
   };
@@ -928,6 +960,22 @@ export default function CommodityPositionsPage() {
       {tab === "positions" && (
         <>
           <GlassPanel title="Open positions" note="marked to the live Angel price">
+            {!!rollableLegs && (
+              <div className="bookbar">
+                <div className="bookbar-say">
+                  <b>Roll the book to the money.</b> Every option leg closed at the live
+                  price and re-opened at the strike nearest its own future — same side,
+                  same lots. Checked against your margin before anything is closed, and
+                  done per expiry group so a straddle never sits half-rolled.
+                </div>
+                <button className="btn rollall" disabled={!!busy}
+                        onClick={rollBookToAtm}>
+                  {busy === "rollall"
+                    ? "Rolling the book…"
+                    : `Re-add ATM · all ${rollableLegs} leg${rollableLegs > 1 ? "s" : ""}`}
+                </button>
+              </div>
+            )}
             <PositionTable rows={summary?.open_positions ?? []} live busy={busy}
                            onReopenAtm={reopenAtm}
                            onExit={(p, l) => act(`exit-${p.position_id}`,
@@ -1137,6 +1185,24 @@ export default function CommodityPositionsPage() {
         .data-table td { padding: 7px 9px; text-align: center; border-bottom: 1px solid var(--canvas-soft); }
         .data-table th.l, .data-table td.l { text-align: left; }
         .atm { background: var(--purple-dim); }
+
+        .bookbar {
+          display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+          padding: 12px 16px; margin: 0 0 2px;
+          border-bottom: 1px solid var(--panel-border);
+          background: var(--panel-tint);
+        }
+        .bookbar-say {
+          flex: 1 1 320px; min-width: 0;
+          font-size: 12px; line-height: 1.55; color: var(--text-muted);
+        }
+        .bookbar-say b { color: var(--text); font-weight: 650; }
+        .btn.rollall {
+          flex: none;
+          color: var(--purple); background: var(--purple-dim);
+          border-color: rgba(125, 52, 220, .28);
+        }
+        .btn.rollall:hover:not(:disabled) { border-color: var(--purple); }
 
         /* The at-the-money pair, lifted above the ladder. The ladder itself is unchanged —
            this is an addition, not a reordering, so a strike stays where you expect it. */

@@ -5387,6 +5387,31 @@ export async function reopenCmpAtm(position_id: string, account_id: string): Pro
     { method: "POST" });
 }
 
+export interface CmpReopenAtmAll {
+  rolled: {
+    underlying: string; expiry: string; future: number; legs: number;
+    moves: { contract: string; from_strike: number; to_strike: number;
+             lots: number; side: string; option_type: string }[];
+    closed: { contract: string; exit_price: number }[];
+    net_premium: number; margin_added: number;
+  }[];
+  failed: { underlying: string; expiry: string; reason: string;
+            closed: { contract: string; exit_price: number }[] }[];
+  skipped: string[];
+  legs_rolled: number;
+  strikes_changed: number;
+  realized: number;
+  margin_delta: number;
+  note: string;
+}
+
+/** Roll EVERY open option leg in the account to its at-the-money strike. */
+export async function reopenCmpAtmAll(account_id: string): Promise<CmpReopenAtmAll> {
+  return apiFetch(
+    `${cmp}/positions/reopen-atm-all?account_id=${encodeURIComponent(account_id)}`,
+    { method: "POST" });
+}
+
 export async function resetCmpAccount(account_id: string): Promise<any> {
   return apiFetch(`${cmp}/reset?account_id=${encodeURIComponent(account_id)}`, { method: "POST" });
 }

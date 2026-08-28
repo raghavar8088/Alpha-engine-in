@@ -1013,6 +1013,129 @@ async def reopen_at_the_money(account_id: str, position_id: str) -> dict:
     }
 
 
+async def reopen_all_at_the_money(account_id: str) -> dict:
+    """Roll EVERY open option leg to its at-the-money strike, in one operation.
+
+    Not a loop over the single-leg roll. Rolling a straddle one leg at a time leaves a
+    naked leg in between, and a naked leg costs MORE margin than the pair did — the leg
+    that was offsetting it is gone. On a tight book that intermediate state can refuse the
+    second roll, leaving the position half-rolled and worse than when it started.
+
+    So the work is done per (underlying, expiry) group, which is the unit margin actually
+    nets over: every leg in the group is closed first, releasing all of its margin, and the
+    replacements go on as ONE basket that is all-or-none. The whole thing is projected and
+    gated before anything is touched, so a book that cannot afford the end state is told
+    that while it still holds its original positions.
+
+    Groups are independent. If one fails, the others are unaffected and the failure names
+    exactly which legs are now flat rather than reporting a generic error."""
+    await get_account(account_id)
+    positions = [p async for p in commodity_pos_positions_collection.find(
+        {"account_id": account_id, "status": "OPEN"})]
+    if not positions:
+        raise OrderError("This account has no open positions to roll.")
+
+    rollable, skipped = [], []
+    for pos in positions:
+        inst = pos.get("instrument") or {}
+        if pos.get("instrument_kind") == "OPTION" and inst.get("option_type"):
+            rollable.append(pos)
+        else:
+            skipped.append(pos["display_name"])
+    if not rollable:
+        raise OrderError(
+            "Nothing here has an at-the-money strike — every open position is a future, "
+            "and a future is already the underlying.")
+
+    # ---- plan every group before touching anything ------------------------------
+    groups: dict[tuple, list[dict]] = {}
+    for pos in rollable:
+        groups.setdefault((pos["underlying_symbol"], pos["instrument"]["expiry"]), []).append(pos)
+
+    plans, total_delta = [], 0.0
+    for (underlying, expiry), members in groups.items():
+        t = _years_to_expiry(expiry)
+        legs, moves = [], []
+        ref = None
+        for pos in members:
+            inst = pos["instrument"]
+            strike, ref = await atm_strike(underlying, expiry, inst["option_type"])
+            legs.append({"instrument_kind": "OPTION", "symbol": underlying,
+                         "expiry": expiry, "strike": strike,
+                         "option_type": inst["option_type"],
+                         "transaction_type": pos["side"], "lots": int(pos["lots"])})
+            moves.append({"contract": pos["display_name"],
+                          "from_strike": float(inst.get("strike") or 0),
+                          "to_strike": strike, "lots": int(pos["lots"]),
+                          "side": pos["side"], "option_type": inst["option_type"]})
+        if len(legs) > MAX_BASKET_LEGS:
+            raise OrderError(
+                f"{underlying} {expiry} has {len(legs)} legs and a basket holds at most "
+                f"{MAX_BASKET_LEGS}. Roll those rows individually.")
+
+        priced = await _price_basket(legs)
+        whole = await _open_group(account_id, underlying, expiry)
+        ids = {pos["position_id"] for pos in members}
+        survivors = [q for q in whole if q["position_id"] not in ids]
+        before = _margin_for([_pos_to_leg(q, ref, t) for q in whole], underlying, ref, t)["total"]
+        after = _margin_for(
+            [_pos_to_leg(q, ref, t) for q in survivors]
+            + [_leg_from(x["inst"], x["side"], x["qty"], x["ltp"], ref, t) for x in priced],
+            underlying, ref, t)["total"]
+        total_delta += after - before
+        plans.append({"underlying": underlying, "expiry": expiry, "members": members,
+                      "legs": legs, "moves": moves, "ref": round(float(ref), 2),
+                      "product": members[0].get("product_type", "MARGIN")})
+
+    total_delta = round(total_delta, 2)
+    cash = await available_cash(account_id)
+    if not basket_allowed(total_delta, cash):
+        raise OrderError(
+            f"Rolling all {len(rollable)} legs to the money would add ₹{total_delta:,.0f} "
+            f"of margin and only ₹{cash:,.0f} is free. Nothing was closed — every position "
+            "is exactly as it was.")
+
+    # ---- execute, group by group ------------------------------------------------
+    rolled, failed, realized = [], [], 0.0
+    for plan in plans:
+        closed_here = []
+        try:
+            for pos in plan["members"]:
+                fill = await exit_position(account_id, pos["position_id"])
+                doc = await commodity_pos_positions_collection.find_one(
+                    {"position_id": pos["position_id"], "account_id": account_id})
+                realized += float((doc or {}).get("realized_pnl") or 0.0)
+                closed_here.append({"contract": pos["display_name"],
+                                    "exit_price": fill["fill_price"]})
+            res = await execute_basket(account_id, plan["legs"], plan["product"])
+            rolled.append({
+                "underlying": plan["underlying"], "expiry": plan["expiry"],
+                "future": plan["ref"], "legs": len(plan["legs"]),
+                "moves": plan["moves"], "closed": closed_here,
+                "net_premium": res["net_premium"], "margin_added": res["margin_added"],
+            })
+        except OrderError as exc:
+            failed.append({"underlying": plan["underlying"], "expiry": plan["expiry"],
+                           "closed": closed_here, "reason": exc.detail})
+
+    moved = sum(1 for r in rolled for m in r["moves"] if m["from_strike"] != m["to_strike"])
+    note = (f"Rolled {sum(r['legs'] for r in rolled)} leg(s) across "
+            f"{len(rolled)} group(s) to the money — {moved} changed strike, "
+            f"{sum(r['legs'] for r in rolled) - moved} re-entered at the same one.")
+    if skipped:
+        note += f" Skipped {len(skipped)} future(s), which have no at-the-money strike."
+    if failed:
+        flat = ", ".join(c["contract"] for f in failed for c in f["closed"])
+        note += (f" {len(failed)} group(s) FAILED to re-open and are now flat: {flat}. "
+                 "Re-open them by hand from the chain.")
+
+    return {"rolled": rolled, "failed": failed, "skipped": skipped,
+            "legs_rolled": sum(r["legs"] for r in rolled),
+            "strikes_changed": moved,
+            "realized": round(realized, 2),
+            "margin_delta": total_delta, "note": note}
+
+
 async def exit_position(account_id: str, position_id: str, lots: int | None = None) -> dict:
     pos = await commodity_pos_positions_collection.find_one(
         {"position_id": position_id, "account_id": account_id, "status": "OPEN"})
@@ -1460,7 +1583,7 @@ __all__ = [
     "estimate_margin", "place_order", "exit_position", "sync_positions",
     "reset_account", "summary", "available_cash",
     "estimate_basket", "execute_basket", "basket_margin_delta", "basket_allowed",
-    "atm_strike", "reopen_at_the_money",
+    "atm_strike", "reopen_at_the_money", "reopen_all_at_the_money",
     "MAX_BASKET_LEGS",
     "remargin_group", "remargin_account",
 ]
