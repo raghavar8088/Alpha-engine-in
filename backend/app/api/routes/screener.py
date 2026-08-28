@@ -10,6 +10,7 @@
   GET  /api/screener/sources          per-feed honesty for the Sources tab
   GET  /api/screener/chartink         optional delayed secondary feed (curated presets)
   GET  /api/screener/chartink/named   run ANY public Chartink screener by URL or slug
+  POST /api/screener/analyse          analyse a stock or a pasted list of them
   POST /api/screener/refresh          force a full recompute and persist
 
 Every GET is plain and cacheable — the app-wide 20s door cache applies, and `?fresh=true`
@@ -18,10 +19,12 @@ belong in NEVER_CACHE.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
 
 from app.api.deps import get_current_user
 from app.services.response_cache import cached as _cached
 from app.services.screener import bhavcopy as BC
+from app.services.screener import analysis as ANALYSIS
 from app.services.screener import chartink as CK
 from app.services.screener import paper as PA
 from app.services.screener import volume as V
@@ -227,6 +230,24 @@ async def chartink_named(
     a fault in this app.
     """
     return await CK.named(slug, fresh=fresh)
+
+
+class AnalyseRequest(BaseModel):
+    symbols: str | list[str]
+    fresh: bool = False
+
+
+@router.post("/analyse")
+async def analyse(payload: AnalyseRequest, _current_user: dict = Depends(get_current_user)):
+    """Analyse one stock or a pasted list.
+
+    POST rather than GET because a pasted list can run to thousands of characters, which
+    does not belong in a query string.
+    """
+    try:
+        return await ANALYSIS.analyse(payload.symbols, fresh=payload.fresh)
+    except M.ScreenerError as exc:
+        raise _guard(exc)
 
 
 @router.post("/refresh")
