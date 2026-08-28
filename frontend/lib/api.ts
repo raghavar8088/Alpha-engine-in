@@ -4609,6 +4609,74 @@ export async function fetchScreenerChartinkNamed(
   return apiFetch("/api/screener/chartink/named" + screenerQs({ slug, fresh }));
 }
 
+// --- Stock Analysis: ask about named stocks -----------------------------------
+// `bias` and `action` are separate on purpose. Where the chart points and whether to buy
+// today are different questions; a stock can be in a clean uptrend and still be a poor
+// purchase because it is extended or cannot be exited.
+
+export interface AnalysisPillar {
+  key: string;
+  score: number;
+  verdict: "strong" | "ok" | "weak" | "bad" | "unknown";
+  note: string;
+}
+export interface AnalysisRow {
+  symbol: string;
+  analysed: boolean;
+  note?: string;
+  screens: string[];
+  market_cap_cr: number | null;
+  ltp?: number;
+  sessions?: number;
+  as_of?: string;
+  verdict?: {
+    score: number; chart_score: number;
+    bias: "Bullish" | "Neutral" | "Bearish";
+    action: "Buy" | "Watch" | "Avoid";
+    action_why: string;
+  };
+  pillars?: Record<string, AnalysisPillar>;
+  returns?: Record<string, number | null>;
+  levels?: Record<string, number | null>;
+  delivery?: { delivery_pct?: number; delivery_avg?: number; delivery_ratio?: number } | null;
+  gate?: { checks: AthGateCheck[]; summary: string } | null;
+  patterns?: {
+    key: string; label: string; family: string | null; timeframe: string | null;
+    state: string; direction: string;
+    target?: number; stoploss?: number; reward_risk?: number | null;
+  }[];
+  next_target?: {
+    target: number | null; upside_pct: number | null;
+    method: string; strength: string; note?: string;
+  } | null;
+  plan?: {
+    entry: number; stop: number; target: number;
+    stop_pct: number; target_pct: number; horizon: string;
+    exit_rule: string; basis: string;
+    quantity?: number; net_target?: number; net_stop?: number;
+    reward_risk?: number | null;
+  } | null;
+  reasons?: { code: string; tier: number; text: string }[];
+}
+export interface AnalysisResult {
+  count: number;
+  analysed: number;
+  rows: AnalysisRow[];
+  fetch_note?: string | null;
+  generated_at?: string;
+  sources?: Record<string, string>;
+  note?: string;
+  error?: string;
+}
+
+export async function analyseStocks(
+  symbols: string, fresh = false,
+): Promise<AnalysisResult> {
+  return apiFetch("/api/screener/analyse", {
+    method: "POST", body: JSON.stringify({ symbols, fresh }),
+  });
+}
+
 // --- Instrument search: ranked, typo-tolerant, enriched, app-wide ------------
 // Replaces a Mongo $regex built from raw user input, which 500'd on a query of "(" and
 // ranked RPOWER above RELIANCE for "reliance".
