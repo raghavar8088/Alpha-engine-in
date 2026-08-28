@@ -15,7 +15,7 @@
  *     priced against and that contract's own, later, expiry.
  */
 
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PageHeader from "../../components/PageHeader";
 import GlassPanel from "../../components/GlassPanel";
 import StatusPill from "../../components/StatusPill";
@@ -663,17 +663,8 @@ export default function CommodityPositionsPage() {
       <GlassPanel title="Order ticket" note="applies to every Buy/Sell button below">
         <div className="ticket">
           <label>Underlying
-            <select className="sel wide" value={symbol} disabled={!unders.length}
-                    onChange={(e) => setSymbol(e.target.value)}>
-              {!unders.length && (
-                <option value="">{loadingUnders ? "Loading MCX board\u2026" : "No contracts on file"}</option>
-              )}
-              {unders.map((u) => (
-                <option key={u.symbol} value={u.symbol}>
-                  {u.symbol}{u.has_options ? " \u2014 " + u.options + " options" : " \u2014 futures only"}
-                </option>
-              ))}
-            </select>
+            <UnderlyingPicker value={symbol} onChange={setSymbol}
+                              unders={unders} loading={loadingUnders} />
           </label>
           <label>Lots
             <LotsInput value={lots} onCommit={setLots} max={MAX_LOTS} />
@@ -1013,7 +1004,24 @@ export default function CommodityPositionsPage() {
       {tab === "history" && <DeskHistory deskKey="commodity-positions" scope={accountId} />}
 
       <style jsx>{`
-        .page { display: flex; flex-direction: column; gap: 18px; }
+        .page {
+          display: flex; flex-direction: column; gap: 18px;
+
+          /* Four token names this page uses are not defined anywhere in the frontend:
+             --fg, --fg-dim, --line and --purple-line. An undefined custom property makes
+             the whole declaration invalid at computed-value time, so a colour set from
+             --fg-dim was rendering as ordinary body text rather than muted, and a border
+             set from --purple-line was falling back to currentColor. Alias them to the
+             real design tokens once, here, so every rule on the page is repaired rather
+             than each call site being hunted down.
+             (No backticks in this comment: the block is a template literal, and one ends
+             the string.) */
+          --fg: var(--text);
+          --fg-dim: var(--text-muted);
+          --line: var(--panel-border);
+          --purple-line: var(--purple-glow);
+          --purple-line: color-mix(in srgb, var(--purple) 30%, transparent);
+        }
         .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
         .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
         .tab { padding: 7px 14px; border-radius: 100px; font-size: 12.5px; font-weight: 600; cursor: pointer;
@@ -1101,6 +1109,93 @@ export default function CommodityPositionsPage() {
         .data-table td { padding: 7px 9px; text-align: center; border-bottom: 1px solid var(--canvas-soft); }
         .data-table th.l, .data-table td.l { text-align: left; }
         .atm { background: var(--purple-dim); }
+
+        /* ---- underlying picker ------------------------------------------- */
+        .pickwrap { position: relative; }
+        .picker {
+          width: 100%; min-width: 260px;
+          display: flex; align-items: center; gap: 10px;
+          padding: 8px 12px; cursor: pointer;
+          background: var(--panel); color: var(--fg);
+          border: 1px solid var(--line); border-radius: 10px;
+          font: inherit; text-align: left;
+          transition: border-color .12s, box-shadow .12s;
+        }
+        .picker:hover:not(:disabled) { border-color: var(--purple-line); }
+        .picker:focus-visible {
+          outline: none; border-color: var(--purple);
+          box-shadow: 0 0 0 3px var(--purple-dim);
+        }
+        .picker:disabled { opacity: .6; cursor: default; }
+        .pickcol { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+        .pickmain {
+          display: flex; align-items: center; gap: 7px;
+          font-size: 14px; font-weight: 600; letter-spacing: .01em;
+        }
+        .picksub {
+          font-size: 11.5px; color: var(--fg-dim);
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .minitag {
+          font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+          color: var(--purple); background: var(--purple-dim);
+          border: 1px solid var(--purple-line); border-radius: 999px; padding: 1px 6px;
+        }
+        .chev { color: var(--fg-dim); flex: none; transition: transform .15s; }
+        .chev.up { transform: rotate(180deg); }
+
+        .pickmenu {
+          position: absolute; z-index: 40; top: calc(100% + 6px); left: 0;
+          width: max(340px, 100%);
+          background: var(--panel); border: 1px solid var(--line);
+          border-radius: 12px; box-shadow: 0 18px 44px rgba(0, 0, 0, .18);
+          overflow: hidden;
+        }
+        .picksearch {
+          width: 100%; padding: 10px 13px; font: inherit; font-size: 13px;
+          color: var(--fg); background: transparent;
+          border: 0; border-bottom: 1px solid var(--line); outline: none;
+        }
+        .picksearch::placeholder { color: var(--fg-dim); }
+        .picklist { max-height: 340px; overflow-y: auto; padding: 5px; }
+        .pickgroup + .pickgroup { margin-top: 3px; }
+        .pickhead {
+          display: flex; align-items: baseline; gap: 7px;
+          padding: 8px 9px 5px; font-size: 10px; font-weight: 700;
+          letter-spacing: .08em; text-transform: uppercase; color: var(--fg-dim);
+        }
+        .pickheadnote {
+          font-size: 10px; font-weight: 500; letter-spacing: .01em;
+          text-transform: none; opacity: .8;
+        }
+        .pickrow {
+          width: 100%; display: grid;
+          grid-template-columns: minmax(96px, 1.1fr) minmax(72px, 1fr) auto;
+          align-items: center; gap: 10px;
+          padding: 7px 9px; border: 0; border-radius: 8px;
+          background: none; color: var(--fg); font: inherit; text-align: left;
+          cursor: pointer;
+        }
+        .pickrow.cursor { background: var(--purple-dim); }
+        .pickrow.on { background: var(--purple-dim); box-shadow: inset 2px 0 0 var(--purple); }
+        .pickrowsym {
+          font-size: 13px; font-weight: 600;
+          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .pickrowlot {
+          font-size: 11.5px; color: var(--fg-dim); font-variant-numeric: tabular-nums;
+          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .pickrowopt {
+          font-size: 11px; color: var(--purple); white-space: nowrap;
+          font-variant-numeric: tabular-nums;
+        }
+        .pickrowopt.none { color: var(--fg-dim); opacity: .75; }
+        .pickempty { padding: 16px 12px; font-size: 12.5px; color: var(--fg-dim); }
+
+        @media (max-width: 560px) {
+          .pickmenu { width: min(92vw, 340px); }
+        }
 
         /* The at-the-money pair, lifted above the ladder. The ladder itself is unchanged —
            this is an addition, not a reordering, so a strike stays where you expect it. */
@@ -1226,6 +1321,171 @@ function LotsInput({ value, onCommit, min = 1, max = MAX_LOTS, className = "inp"
         onCommit(Number.isFinite(n) && n >= min ? Math.min(max, n) : min);
       }}
     />
+  );
+}
+
+// The four mini contracts, in the order they are pinned. These are not favourites: on a
+// paper book of a few lakh they are the only contracts on their market that a single lot
+// fits inside. A GOLD lot is a kilogram and runs past a crore of notional; GOLDM is a
+// tenth of that. Burying them alphabetically between GOLDGUINEA and GOLDPETAL hides the
+// one contract most of these accounts can actually trade.
+const MINI_SYMBOLS = ["NATGASMINI", "CRUDEOILM", "GOLDM", "SILVERM"] as const;
+
+/** The underlying picker.
+ *
+ * A native <select> cannot group, cannot search, cannot show a second line, and renders
+ * as an OS menu that looks nothing like the rest of the page. With 28 commodities — most
+ * of them futures-only, and the tradable minis scattered through the alphabet — that list
+ * was a wall of names in which the useful entries were the hardest to find. */
+function UnderlyingPicker({ value, onChange, unders, loading }: {
+  value: string;
+  onChange: (symbol: string) => void;
+  unders: CmpUnderlying[];
+  loading: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [cursor, setCursor] = useState(0);
+  const boxRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  const selected = unders.find((u) => u.symbol === value) ?? null;
+
+  const groups = useMemo(() => {
+    const q = query.trim().toUpperCase();
+    const hit = (u: CmpUnderlying) =>
+      !q || u.symbol.includes(q) || (u.lot_quantity ?? "").toUpperCase().includes(q);
+    const rest = unders.filter((u) => !MINI_SYMBOLS.includes(u.symbol as never));
+    return [
+      {
+        key: "mini",
+        label: "Minis",
+        note: "smallest lot on each market",
+        rows: MINI_SYMBOLS
+          .map((sym) => unders.find((u) => u.symbol === sym))
+          .filter((u): u is CmpUnderlying => !!u && hit(u)),
+      },
+      {
+        key: "options",
+        label: "Full size, with options",
+        note: null,
+        rows: rest.filter((u) => u.has_options && hit(u)),
+      },
+      {
+        key: "futures",
+        label: "Futures only",
+        note: "MCX lists no options on these",
+        rows: rest.filter((u) => !u.has_options && hit(u)),
+      },
+    ].filter((g) => g.rows.length);
+  }, [unders, query]);
+
+  // One flat list behind the groups, so the arrow keys walk the visible rows in the
+  // order they are drawn rather than the order the data arrived in.
+  const flat = useMemo(() => groups.flatMap((g) => g.rows), [groups]);
+
+  useEffect(() => { setCursor(0); }, [query]);
+
+  useEffect(() => {
+    if (!open) return;
+    searchRef.current?.focus();
+    const away = (e: MouseEvent) => {
+      if (boxRef.current && !boxRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", away);
+    return () => document.removeEventListener("mousedown", away);
+  }, [open]);
+
+  const pick = (sym: string) => { onChange(sym); setOpen(false); setQuery(""); };
+
+  const onKey = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") { setOpen(false); setQuery(""); return; }
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      setCursor((c) => {
+        const n = flat.length;
+        if (!n) return 0;
+        return (c + (e.key === "ArrowDown" ? 1 : n - 1)) % n;
+      });
+      return;
+    }
+    if (e.key === "Enter" && flat[cursor]) { e.preventDefault(); pick(flat[cursor].symbol); }
+  };
+
+  if (!unders.length) {
+    return (
+      <button className="picker" type="button" disabled>
+        <span className="pickmain">{loading ? "Loading MCX board…" : "No contracts on file"}</span>
+      </button>
+    );
+  }
+
+  let index = -1;
+  return (
+    <div className="pickwrap" ref={boxRef}>
+      <button className="picker" type="button" aria-haspopup="listbox" aria-expanded={open}
+              onClick={() => setOpen((o) => !o)} onKeyDown={onKey}>
+        <span className="pickcol">
+          <span className="pickmain">
+            {selected?.symbol ?? "Pick a commodity"}
+            {selected && MINI_SYMBOLS.includes(selected.symbol as never) && (
+              <span className="minitag">mini</span>
+            )}
+          </span>
+          <span className="picksub">
+            {selected
+              ? `${selected.lot_quantity ?? "1 lot"} · ${selected.has_options
+                  ? `${selected.options.toLocaleString("en-IN")} options`
+                  : "futures only"}`
+              : `${unders.length} MCX underlyings`}
+          </span>
+        </span>
+        <svg className={`chev ${open ? "up" : ""}`} viewBox="0 0 24 24" width="16" height="16"
+             fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="pickmenu" role="listbox" onKeyDown={onKey}>
+          <input ref={searchRef} className="picksearch" value={query} placeholder="Search commodities…"
+                 onChange={(e) => setQuery(e.target.value)} onKeyDown={onKey} />
+          <div className="picklist">
+            {groups.map((g) => (
+              <div key={g.key} className="pickgroup">
+                <div className="pickhead">
+                  {g.label}
+                  {g.note && <span className="pickheadnote">{g.note}</span>}
+                </div>
+                {g.rows.map((u) => {
+                  index += 1;
+                  const here = index;
+                  return (
+                    <button key={u.symbol} type="button" role="option"
+                            aria-selected={u.symbol === value}
+                            className={`pickrow${u.symbol === value ? " on" : ""}`
+                                       + (here === cursor ? " cursor" : "")}
+                            onMouseEnter={() => setCursor(here)}
+                            onClick={() => pick(u.symbol)}>
+                      <span className="pickrowsym">{u.symbol}</span>
+                      <span className="pickrowlot">{u.lot_quantity ?? "—"}</span>
+                      <span className={`pickrowopt${u.has_options ? "" : " none"}`}>
+                        {u.has_options
+                          ? `${u.options.toLocaleString("en-IN")} options`
+                          : "futures only"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+            {!flat.length && (
+              <div className="pickempty">Nothing matches “{query}”.</div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
