@@ -148,7 +148,9 @@ def _trend(closes: list[float], price: float) -> dict:
         parts.append("but it is below the 200-day, so the long trend is still down")
 
     v = "strong" if score >= 75 else "ok" if score >= 50 else "weak" if score >= 25 else "bad"
-    return _pillar(score, "trend", ". ".join(parts) + ".", v)
+    # Joined with a comma, not a full stop: every continuation starts with "and" or "but",
+    # so a period produced "moving averages. and the stack is intact".
+    return _pillar(score, "trend", ", ".join(parts) + ".", v)
 
 
 def _momentum(rets: dict, rs_val: float | None, r: float | None) -> dict:
