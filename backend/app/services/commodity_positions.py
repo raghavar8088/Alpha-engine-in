@@ -905,6 +905,114 @@ async def remargin_group(account_id: str, underlying: str, expiry: str) -> float
     return total
 
 
+async def atm_strike(underlying: str, expiry: str, option_type: str) -> tuple[float, float]:
+    """(strike, future_price) — the listed strike nearest the underlying FUTURE.
+
+    The future, not a spot: MCX does not quote a spot intraday, and the chain this strike
+    has to exist on is priced against the future. Only strikes that carry a broker token
+    are considered, because a strike with no token cannot be priced or filled."""
+    ref, _fut = await future_price(underlying, expiry)
+    if not ref:
+        raise OrderError(
+            f"No live {underlying} future for {expiry}, so there is no reference price to "
+            "pick an at-the-money strike from. MCX may be closed.")
+    strikes = await instruments_collection.distinct(
+        "strike", {"underlying_symbol": underlying.upper(), "expiry": expiry,
+                   "asset_class": OPTION_CLASS, "option_type": option_type.upper(),
+                   "angel_token": {"$ne": None}})
+    strikes = [float(k) for k in strikes if k is not None]
+    if not strikes:
+        raise OrderError(
+            f"No mapped {underlying} {option_type} strikes for {expiry} to roll into.")
+    return min(strikes, key=lambda k: abs(k - ref)), float(ref)
+
+
+async def reopen_at_the_money(account_id: str, position_id: str) -> dict:
+    """Close a position and immediately re-open the SAME contract at today's ATM strike.
+
+    Same underlying, same expiry, same option type, same side, same lots — only the strike
+    moves, to whichever listed strike now sits nearest the future. That is the whole point:
+    a strike chosen weeks ago drifts as the future moves, and a 159000 call against a
+    162000 future is no longer the trade that was put on.
+
+    The margin gate runs on the NET effect — the old leg gone and the new one in its place
+    — before anything is touched. Checking the new leg alone would refuse a roll that is
+    self-financing, since the position being closed is releasing the margin that funds it.
+
+    Ordering is close-then-open, and it cannot be otherwise: holding both legs at once
+    would need margin for a doubled position that the account is not being asked to carry.
+    The window between them is the real risk, so the gate is deliberately strict about the
+    end state, and a failure to re-open is reported as exactly that rather than swallowed."""
+    pos = await commodity_pos_positions_collection.find_one(
+        {"position_id": position_id, "account_id": account_id, "status": "OPEN"})
+    if pos is None:
+        raise OrderError("No such open position in this account")
+
+    inst = pos["instrument"]
+    option_type = inst.get("option_type")
+    if pos.get("instrument_kind") != "OPTION" or not option_type:
+        raise OrderError(
+            "Only options have an at-the-money strike. A future is already the underlying.")
+
+    underlying, expiry = pos["underlying_symbol"], inst["expiry"]
+    old_strike = float(inst.get("strike") or 0)
+    lots, side = int(pos["lots"]), pos["side"]
+
+    strike, ref = await atm_strike(underlying, expiry, option_type)
+
+    new_leg = {"instrument_kind": "OPTION", "symbol": underlying, "expiry": expiry,
+               "strike": strike, "option_type": option_type,
+               "transaction_type": side, "lots": lots}
+    priced = await _price_basket([new_leg])
+
+    # Project the end state: this group with the old leg REMOVED and the new one added.
+    t = _years_to_expiry(expiry)
+    group = await _open_group(account_id, underlying, expiry)
+    survivors = [q for q in group if q["position_id"] != position_id]
+    before = _margin_for([_pos_to_leg(q, ref, t) for q in group], underlying, ref, t)["total"]
+    after_legs = [_pos_to_leg(q, ref, t) for q in survivors] + [
+        _leg_from(p["inst"], p["side"], p["qty"], p["ltp"], ref, t) for p in priced]
+    after = _margin_for(after_legs, underlying, ref, t)["total"]
+    delta = round(after - before, 2)
+    cash = await available_cash(account_id)
+    if not basket_allowed(delta, cash):
+        raise OrderError(
+            f"Rolling {pos['display_name']} to the {strike:g} strike would add "
+            f"₹{delta:,.0f} of margin and only ₹{cash:,.0f} is free. Nothing was closed — "
+            "the position is exactly as it was.")
+
+    closed = await exit_position(account_id, position_id)
+    # The order doc carries the fill, not the P&L — that is settled onto the position.
+    closed_pos = await commodity_pos_positions_collection.find_one(
+        {"position_id": position_id, "account_id": account_id})
+    realized = round(float((closed_pos or {}).get("realized_pnl") or 0.0), 2)
+    try:
+        opened = await execute_basket(account_id, [new_leg],
+                                      pos.get("product_type", "MARGIN"))
+    except OrderError as exc:
+        raise OrderError(
+            f"{pos['display_name']} WAS CLOSED at {closed['fill_price']}, but the "
+            f"{strike:g}{option_type} could not be opened: {exc.detail} You are flat on "
+            "that leg — re-open it by hand from the chain.") from exc
+
+    return {
+        "closed": {"contract": pos["display_name"], "strike": old_strike,
+                   "lots": lots, "side": side,
+                   "exit_price": closed["fill_price"],
+                   "realized": realized},
+        "opened": {"contract": opened["orders"][0]["display_name"], "strike": strike,
+                   "lots": lots, "side": side,
+                   "entry_price": opened["orders"][0]["fill_price"]},
+        "future": round(ref, 2),
+        "strike_moved": round(strike - old_strike, 2),
+        "margin_delta": delta,
+        "net_premium": opened["net_premium"],
+        "note": (f"Rolled {lots} lot{'s' if lots > 1 else ''} of {underlying} "
+                 f"{option_type} from {old_strike:g} to {strike:g}, the listed strike "
+                 f"nearest the {ref:,.2f} future."),
+    }
+
+
 async def exit_position(account_id: str, position_id: str, lots: int | None = None) -> dict:
     pos = await commodity_pos_positions_collection.find_one(
         {"position_id": position_id, "account_id": account_id, "status": "OPEN"})
@@ -1352,6 +1460,7 @@ __all__ = [
     "estimate_margin", "place_order", "exit_position", "sync_positions",
     "reset_account", "summary", "available_cash",
     "estimate_basket", "execute_basket", "basket_margin_delta", "basket_allowed",
+    "atm_strike", "reopen_at_the_money",
     "MAX_BASKET_LEGS",
     "remargin_group", "remargin_account",
 ]

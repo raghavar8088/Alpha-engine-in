@@ -18,6 +18,7 @@ mathematics; this router is a thin layer over it.
   POST   /api/commodity-positions/basket/execute       fill every leg, or none
   POST   /api/commodity-positions/basket/max-lots      largest equal size this book can carry
   DELETE /api/commodity-positions/accounts/{id}        delete an empty paper account
+  POST   /api/commodity-positions/positions/{id}/reopen-atm   roll a leg to today's ATM strike
   GET    /api/commodity-positions/orders               order book
   GET    /api/commodity-positions/positions            open + closed, with summary
   POST   /api/commodity-positions/positions/{id}/exit  exit fully or partially, in lots
@@ -47,6 +48,7 @@ from app.services.commodity_positions import (
     execute_basket,
     max_lots,
     remargin_account,
+    reopen_at_the_money,
     edit_account,
     estimate_margin,
     exit_position,
@@ -164,6 +166,16 @@ async def delete_account_endpoint(account_id: str, _u: dict = Depends(get_curren
     """Delete a paper account. Refuses while it still holds open positions."""
     try:
         return await delete_account(account_id)
+    except OrderError as exc:
+        raise HTTPException(400, exc.detail)
+
+
+@router.post("/positions/{position_id}/reopen-atm")
+async def reopen_atm_endpoint(position_id: str, account_id: str,
+                              _u: dict = Depends(get_current_user)):
+    """Close this position and re-open the same contract at today's ATM strike."""
+    try:
+        return await reopen_at_the_money(account_id, position_id)
     except OrderError as exc:
         raise HTTPException(400, exc.detail)
 

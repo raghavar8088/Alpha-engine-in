@@ -10,6 +10,9 @@
   GET  /api/ath/equity       equity curve
   POST /api/ath/run          run one cycle by hand
   POST /api/ath/seed-highs   walk history for stocks with no stored all-time high
+  GET  /api/ath/gate         pre-entry checks: the open book scored, graded trades reviewed
+  POST /api/ath/gate/mode    observe | enforce | off
+  POST /api/ath/gate/refresh-nse  re-read NSE price bands + ASM/GSM
   POST /api/ath/reset        wipe the desk
 """
 
@@ -171,3 +174,39 @@ async def enter_all(payload: EnterAllRequest | None = None,
             detail="Refusing without ?confirm=true — this opens a position in every tradable "
                    "symbol on the watchlist at once, bypassing the all-time-high rule.")
     return await ath_trading.enter_all((payload.symbols if payload else None))
+
+
+class GateModeRequest(BaseModel):
+    mode: str
+
+
+@router.get("/gate")
+async def gate(limit: int = Query(500, ge=1, le=1000),
+               fresh: bool = Query(False), _u: dict = Depends(get_current_user)):
+    """The pre-entry gate: what it says about the open book, and how graded trades did.
+
+    Cached for a few minutes because it reads NSE's band and surveillance files plus 20
+    days of bhavcopy — none of which changes inside a session.
+    """
+    return await _cached("ath:gate", lambda: ath_trading.gate_report(limit),
+                         ttl=300, fresh=fresh)
+
+
+@router.post("/gate/mode")
+async def set_gate_mode(payload: GateModeRequest, _u: dict = Depends(get_current_user)):
+    """observe (score and record, still trade) | enforce (block failures) | off.
+
+    Starts in observe on purpose — see app.services.ath_gate. A gate in enforce mode has
+    no counterfactual, so it can never be shown to help.
+    """
+    try:
+        return await ath_trading.set_gate_mode(payload.mode)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+
+@router.post("/gate/refresh-nse")
+async def refresh_nse(_u: dict = Depends(get_current_user)):
+    """Re-read NSE's price-band list and the ASM/GSM registers."""
+    from app.services import nse_surveillance
+    return await nse_surveillance.refresh()

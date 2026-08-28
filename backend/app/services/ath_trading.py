@@ -69,6 +69,8 @@ from app.core.db import (
     stock_fundamentals_collection,
     stock_highs_collection,
 )
+from app.services import ath_gate as GATE
+from app.services import nse_surveillance as SURV
 from app.services.angel_client import AngelAPIError, angel_client
 from app.services.angel_fees import round_trip
 from tradingai_broker_clients.angel.auth import batches
@@ -124,6 +126,27 @@ def market_is_open(when: datetime | None = None) -> bool:
 
 WATCHLIST_ID = "default"
 MODES = ("auto", "manual", "both")
+
+# The pre-entry gate's mode lives in the DB so it can be changed without a redeploy, and
+# falls back to the env default. See app.services.ath_gate for why it starts in `observe`.
+GATE_STATE_ID = "gate"
+
+
+async def gate_mode() -> str:
+    doc = await ath_state_collection.find_one({"_id": GATE_STATE_ID})
+    mode = (doc or {}).get("mode") or GATE.MODE_DEFAULT
+    return mode if mode in GATE.MODES else "observe"
+
+
+async def set_gate_mode(mode: str) -> dict:
+    mode = (mode or "").lower()
+    if mode not in GATE.MODES:
+        raise ValueError(f"mode must be one of {GATE.MODES}")
+    await ath_state_collection.replace_one(
+        {"_id": GATE_STATE_ID}, {"_id": GATE_STATE_ID, "mode": mode, "ts": _now()},
+        upsert=True)
+    logger.info("ath: gate mode set to %s", mode)
+    return {"mode": mode, "note": GATE.thresholds()["note"]}
 
 # Angel's own scrip search. The instrument master in this app is DHAN-keyed — Angel tokens
 # are stamped onto rows that came from Dhan — so a stock Dhan does not carry is missing here
@@ -659,6 +682,12 @@ async def _scan(rows: list[dict], prices: dict[str, float]) -> tuple[int, int]:
     cash = await available_capital()
     opened = skipped = 0
 
+    # Built once for the whole cycle. The gate reads NSE bands, ASM/GSM, 20 days of
+    # bhavcopy and the index trend; doing that per symbol would be hundreds of repeats of
+    # the same three queries.
+    mode = await gate_mode()
+    ctx = None if mode == "off" else await GATE.build_context(mode, PER_POSITION)
+
     for r in rows:
         sym = r["symbol"]
         if sym in held:
@@ -681,23 +710,35 @@ async def _scan(rows: list[dict], prices: dict[str, float]) -> tuple[int, int]:
                 if gap < REENTRY_COOLDOWN_DAYS:
                     continue
 
+        verdict = ctx.evaluate(sym, ltp, float(r.get("all_time_high") or 0)) if ctx else None
+        if verdict and verdict.mode == "enforce" and not verdict.passed:
+            # Blocked, but RECORDED — with the price it would have paid. Without that the
+            # gate can never be judged: a blocked trade with no entry price has no
+            # counterfactual, and "the filter works" stays an assertion forever.
+            await _record_signal(r, ltp, taken=False,
+                                 why=f"Blocked by the pre-entry gate — {verdict.summary()}",
+                                 verdict=verdict)
+            continue
+
         qty = int(PER_POSITION // ltp)
         if qty < 1:
             # A single share costs more than the position size. Recorded rather than
             # dropped — silently skipping a signal makes the desk look like it never fired.
             await _record_signal(r, ltp, taken=False,
                                  why=f"One share costs {ltp:,.2f}, above the "
-                                     f"{PER_POSITION:,.0f} position size")
+                                     f"{PER_POSITION:,.0f} position size",
+                                 verdict=verdict)
             continue
 
         cost = qty * ltp
         if cost > cash:
             skipped += 1
             await _record_signal(r, ltp, taken=False,
-                                 why=f"Desk has {cash:,.0f} free, needs {cost:,.0f}")
+                                 why=f"Desk has {cash:,.0f} free, needs {cost:,.0f}",
+                                 verdict=verdict)
             continue
 
-        await _open(r, ltp, qty, cost)
+        await _open(r, ltp, qty, cost, verdict=verdict)
         # The stored high moves up with the price, so tomorrow's signal is measured against
         # today's peak rather than a record the stock has already beaten.
         await stock_highs_collection.update_one(
@@ -709,8 +750,15 @@ async def _scan(rows: list[dict], prices: dict[str, float]) -> tuple[int, int]:
 
 
 async def _open(r: dict, ltp: float, qty: int, cost: float,
-                entry_reason: str = "ath_break") -> dict:
+                entry_reason: str = "ath_break", verdict=None) -> dict:
     doc = {
+        # The gate's verdict AT ENTRY, frozen onto the position. Recomputing it later would
+        # answer a different question — bands, ASM and delivery all move, and what matters
+        # is what was true when the money went in. This is what makes "did the filters
+        # actually help?" answerable from closed trades rather than from opinion.
+        "gate": verdict.to_dict() if verdict is not None else None,
+        "gate_passed": verdict.passed if verdict is not None else None,
+        "gate_score": verdict.score if verdict is not None else None,
         # "ath_break" = the desk's own rule fired. "manual" = someone added it by hand at
         # whatever price it happened to be. Kept apart deliberately: this desk exists to
         # answer whether buying all-time highs works, and a book that mixes signalled
@@ -745,8 +793,10 @@ async def _open(r: dict, ltp: float, qty: int, cost: float,
     # whose timestamp it could not resolve. Print the level without a date rather than the
     # word "None", which reads like a bug in a row that is otherwise correct.
     when = f" set on {r['ath_date']}" if r.get("ath_date") else ""
-    await _record_signal(r, ltp, taken=True,
-                         why=f"New all-time high — took out {r['all_time_high']:,.2f}{when}")
+    why = f"New all-time high — took out {r['all_time_high']:,.2f}{when}"
+    if verdict is not None and not verdict.passed:
+        why += f" (gate says: {verdict.summary()})"
+    await _record_signal(r, ltp, taken=True, why=why, verdict=verdict)
     logger.info("ath: bought %s x%s @ %.2f (prev ATH %.2f, mcap %s cr)",
                 r["symbol"], qty, ltp, r["all_time_high"], r.get("market_cap_cr"))
     return doc
@@ -781,6 +831,8 @@ async def enter_all(symbols: list[str] | None = None) -> dict:
         {"status": "OPEN"}, {"symbol": 1})}
     prices = await _quotes(list(rows.values()))
     cash = await available_capital()
+    mode = await gate_mode()
+    ctx = None if mode == "off" else await GATE.build_context(mode, PER_POSITION)
 
     opened, skipped, already = 0, [], 0
     for sym, r in rows.items():
@@ -803,7 +855,12 @@ async def enter_all(symbols: list[str] | None = None) -> dict:
                             "why": f"needs {cost:,.0f}, desk has {cash:,.0f} free"})
             continue
 
-        await _open(r, ltp, qty, cost, entry_reason="manual")
+        verdict = ctx.evaluate(sym, ltp, float(r.get("all_time_high") or 0)) if ctx else None
+        if verdict and verdict.mode == "enforce" and not verdict.passed:
+            skipped.append({"symbol": sym, "why": verdict.summary(), "gate": True})
+            continue
+
+        await _open(r, ltp, qty, cost, entry_reason="manual", verdict=verdict)
         await _record_signal(
             r, ltp, taken=True,
             why=(f"Manual entry — added to positions by hand at {ltp:,.2f}, not on an "
@@ -824,7 +881,8 @@ async def enter_all(symbols: list[str] | None = None) -> dict:
     }
 
 
-async def _record_signal(r: dict, ltp: float, taken: bool, why: str) -> None:
+async def _record_signal(r: dict, ltp: float, taken: bool, why: str,
+                         verdict=None) -> None:
     await ath_signals_collection.insert_one({
         "signal_id": f"S-{uuid4().hex[:10]}",
         "symbol": r["symbol"],
@@ -834,6 +892,11 @@ async def _record_signal(r: dict, ltp: float, taken: bool, why: str) -> None:
         "market_cap_cr": r.get("market_cap_cr"),
         "taken": taken,
         "why": why,
+        "gate": verdict.to_dict() if verdict is not None else None,
+        "gate_passed": verdict.passed if verdict is not None else None,
+        "gate_score": verdict.score if verdict is not None else None,
+        "blocked_by_gate": bool(verdict is not None and verdict.mode == "enforce"
+                                and not verdict.passed),
         "date": _today(),
         "ts": _now(),
     })
@@ -983,6 +1046,98 @@ async def equity_curve(limit: int = 500) -> dict:
         if hasattr(r.get("ts"), "isoformat"):
             r["ts"] = r["ts"].isoformat()
     return {"count": len(rows), "rows": rows}
+
+
+async def gate_report(limit: int = 500) -> dict:
+    """Score the CURRENT open book against the gate, and grade closed trades by it.
+
+    Two different questions, deliberately in one place:
+
+      * The book the desk already holds was bought before any of these checks existed, so
+        every position carries no verdict. Scoring it now is the only way to see what the
+        gate is actually claiming — and whether that claim is worth acting on.
+      * Closed trades DO carry the verdict they were bought under, so they can be split
+        into passers and failers and compared. That comparison is the point of the whole
+        exercise; until it has enough trades in it, the gate is a hypothesis.
+
+    The open-book scoring uses each position's entry price against the high it broke, so
+    the "entry vs the high" check answers what was true at entry rather than today.
+    """
+    rows = [p async for p in ath_positions_collection.find(
+        {"status": "OPEN"}, {"_id": 0}).sort("opened_at", -1).limit(limit)]
+
+    mode = await gate_mode()
+    ctx = await GATE.build_context(mode, PER_POSITION)
+
+    scored, fails, warns = [], 0, 0
+    for r in rows:
+        v = ctx.evaluate(r["symbol"], float(r.get("entry") or 0),
+                         float(r.get("ath_broken") or 0))
+        d = v.to_dict()
+        if not v.passed:
+            fails += 1
+        elif v.warnings:
+            warns += 1
+        scored.append({
+            "symbol": r["symbol"],
+            "name": r.get("name"),
+            "entry": r.get("entry"),
+            "ltp": r.get("ltp"),
+            "quantity": r.get("quantity"),
+            "unrealised_pnl": r.get("unrealised_pnl"),
+            "entry_reason": r.get("entry_reason"),
+            "opened_on": r.get("opened_on"),
+            # The verdict stored AT ENTRY, where one exists. Positions opened before the
+            # gate shipped have none, and that is shown as such rather than back-filled —
+            # a verdict computed today is not evidence about a decision made last week.
+            "gate_at_entry": r.get("gate_passed"),
+            **d,
+        })
+
+    scored.sort(key=lambda x: (x["passed"], x["score"]))
+
+    # ── closed trades, split by the verdict they were bought under ──────────
+    closed = [t async for t in ath_trades_collection.find({}, {"_id": 0}).limit(2000)]
+    buckets: dict[str, dict] = {}
+    for t in closed:
+        pos_gate = t.get("gate_passed")
+        key = "passed" if pos_gate is True else "failed" if pos_gate is False else "ungraded"
+        b = buckets.setdefault(key, {"trades": 0, "wins": 0, "pnl": 0.0})
+        b["trades"] += 1
+        # net_pnl, not gross: the desk charges the real Angel delivery schedule on exit,
+        # and a filter judged on gross P&L is judged on money that was never received.
+        pnl = float(t.get("net_pnl") or 0)
+        b["pnl"] += pnl
+        if pnl > 0:
+            b["wins"] += 1
+    for b in buckets.values():
+        b["win_rate"] = round(b["wins"] / b["trades"] * 100, 1) if b["trades"] else None
+        b["pnl"] = round(b["pnl"], 2)
+
+    graded = sum(v["trades"] for k, v in buckets.items() if k != "ungraded")
+    return {
+        "mode": mode,
+        "thresholds": GATE.thresholds(),
+        "regime": ctx.regime,
+        "surveillance": await SURV.status(),
+        "open_scored": len(scored),
+        "open_failing": fails,
+        "open_warning": warns,
+        "open_clean": len(scored) - fails - warns,
+        "rows": scored,
+        "review": {
+            "buckets": buckets,
+            "graded_trades": graded,
+            # Stated rather than implied: a handful of trades cannot separate a real filter
+            # from noise, and a leaderboard that does not say so invites exactly that error.
+            "verdict": (
+                "No closed trades carry a gate verdict yet — the comparison below becomes "
+                "meaningful once the desk has closed a few dozen graded trades."
+                if graded < 30 else
+                f"{graded} graded trades. Compare the win rates: the gate is worth "
+                f"enforcing only if passers beat failers by more than a few points."),
+        },
+    }
 
 
 async def seed_highs(limit: int = 120) -> dict:

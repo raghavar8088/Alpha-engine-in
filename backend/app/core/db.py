@@ -263,6 +263,9 @@ ts_state_collection = db["ts_state"]
 # are re-fetchable at any time; the paper desk's TRADES are the one thing here that is
 # genuinely a record, which is why only equity snapshots expire.
 screener_bhavcopy_collection = db["screener_bhavcopy"]
+# NSE price bands + the ASM/GSM surveillance frameworks, one snapshot document. A cache of
+# public files, re-fetchable at any time — see app.services.nse_surveillance.
+screener_meta_collection = db["screener_meta"]
 screener_paper_positions_collection = db["screener_paper_positions"]
 screener_paper_trades_collection = db["screener_paper_trades"]
 screener_paper_equity_collection = db["screener_paper_equity"]
