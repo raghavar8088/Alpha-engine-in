@@ -93,7 +93,9 @@ export default function CommodityPositionsPage() {
   const [expiriesFor, setExpiriesFor] = useState("");
   const [futExpiries, setFutExpiries] = useState<string[]>([]);
 
-  const [tab, setTab] = useState<Tab>("chain");
+  // Open on the book, not the chain. The first thing you want on arriving is what you
+  // are already holding and what it is worth; the chain is where you go to add to it.
+  const [tab, setTab] = useState<Tab>("positions");
   const [lots, setLots] = useState(1);
   // Auto-sizing for the at-the-money pair: the largest EQUAL number of calls and puts this
   // account can carry, sold or bought. Computed by the server against the same margin model
