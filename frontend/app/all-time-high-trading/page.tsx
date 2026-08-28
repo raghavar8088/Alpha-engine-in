@@ -16,16 +16,18 @@ import EmptyState from "../../components/EmptyState";
 import StatusPill from "../../components/StatusPill";
 import Skeleton from "../../components/Skeleton";
 import AthWatchlist from "../../components/AthWatchlist";
+import AthGate from "../../components/AthGate";
 import {
   refreshing, fetchAthSummary, fetchAthCoverage, fetchAthPositions, fetchAthTrades,
   fetchAthSignals, fetchAthNearHighs, fetchAthUniverse, runAthCycle, seedAthHighs,
   AthSummary, AthCoverage, AthPosition, AthTrade, AthSignal, AthNearHigh, AthUniverseRow,
 } from "../../lib/api";
 
-type Tab = "positions" | "watchlist" | "near" | "signals" | "trades" | "universe";
+type Tab = "positions" | "watchlist" | "gate" | "near" | "signals" | "trades" | "universe";
 const TABS: { key: Tab; label: string }[] = [
   { key: "positions", label: "Positions" },
   { key: "watchlist", label: "My watchlist" },
+  { key: "gate", label: "Pre-entry checks" },
   { key: "near", label: "Approaching highs" },
   { key: "signals", label: "Signals" },
   { key: "trades", label: "Closed" },
@@ -191,6 +193,8 @@ export default function AllTimeHighTradingPage() {
       </div>
 
       {tab === "watchlist" && <AthWatchlist onSaved={() => refreshing(load)} />}
+
+      {tab === "gate" && <AthGate />}
 
       {tab !== "watchlist" && (
       <GlassPanel>

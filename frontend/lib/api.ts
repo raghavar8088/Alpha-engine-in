@@ -5168,6 +5168,75 @@ export async function enterAllAthWatchlist(symbols?: string[]): Promise<{
   });
 }
 
+// --- All Time High: the pre-entry gate ---------------------------------------
+// Six checks that decide whether the +-20% exit rule is even physically available on a
+// given stock. Verdicts are pass / warn / fail / UNKNOWN, and unknown is never folded
+// into pass: NSE is the flakiest feed here and an outage must not read as an all-clear.
+
+export interface AthGateCheck {
+  key: string;
+  label: string;
+  verdict: "pass" | "warn" | "fail" | "unknown";
+  detail: string;
+  value: number | null;
+}
+export interface AthGateRow {
+  symbol: string;
+  name: string | null;
+  entry: number | null;
+  ltp: number | null;
+  quantity: number | null;
+  unrealised_pnl: number | null;
+  entry_reason: string | null;
+  opened_on: string | null;
+  /** The verdict stored when the position was opened, or null if it predates the gate. */
+  gate_at_entry: boolean | null;
+  passed: boolean;
+  score: number;
+  blocked: boolean;
+  fail_count: number;
+  warn_count: number;
+  unknown_count: number;
+  summary: string;
+  checks: AthGateCheck[];
+}
+export interface AthGateReport {
+  mode: "observe" | "enforce" | "off";
+  thresholds: Record<string, unknown> & { note?: string };
+  regime: {
+    symbol: string | null; last?: number; ma?: number;
+    above: boolean | null; distance_pct: number | null; sessions: number;
+  };
+  surveillance: {
+    ok: boolean; bands: number; asm: number; gsm: number;
+    errors?: Record<string, string>;
+    fetched_at?: string | null; age_hours?: number | null;
+    sources?: Record<string, string>;
+  };
+  open_scored: number;
+  open_failing: number;
+  open_warning: number;
+  open_clean: number;
+  rows: AthGateRow[];
+  review: {
+    buckets: Record<string, {
+      trades: number; wins: number; pnl: number; win_rate: number | null;
+    }>;
+    graded_trades: number;
+    verdict: string;
+  };
+}
+
+export async function fetchAthGate(fresh = false): Promise<AthGateReport> {
+  return apiFetch("/api/ath/gate" + (fresh ? "?fresh=true" : ""));
+}
+export async function setAthGateMode(mode: string): Promise<{ mode: string; note?: string }> {
+  return apiFetch("/api/ath/gate/mode", { method: "POST", body: JSON.stringify({ mode }) });
+}
+export async function refreshAthNse(): Promise<Record<string, unknown>> {
+  return apiFetch("/api/ath/gate/refresh-nse", { method: "POST" });
+}
+
 // --- Commodity Positions: MCX futures + options paper desk -------------------
 // The commodity twin of the F&O Positions client. Priced by Angel (Dhan does not cover
 // MCX) and margined locally, both of which the payloads state rather than imply.
