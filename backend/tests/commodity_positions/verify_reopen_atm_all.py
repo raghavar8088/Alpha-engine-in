@@ -9,8 +9,11 @@ it is gone. On a book with little free cash that intermediate state can refuse t
 roll and leave the position half-rolled: one leg at the money, one stranded far from it,
 and the account worse off than before it was touched.
 
-So this test deliberately builds a TIGHT book, checks that a leg-at-a-time roll would in
-fact be refused there, and then checks the real operation completes anyway.
+So this test builds a tight book, measures whether a leg-at-a-time roll would be refused
+there, and checks the real operation completes either way. Whether that refusal actually
+occurs depends on live prices - an inverted intermediate is not always dearer than the
+pair - so the run PRINTS which case it demonstrated rather than letting a pass imply the
+harder one.
 
 Run: python -m tests.commodity_positions.verify_reopen_atm_all
 """
@@ -123,15 +126,23 @@ async def go() -> None:
         r2 = await reopen_all_at_the_money(bid)
         print(f"  {r2['note']}")
         after2 = await summary(bid)
-        check("the tight book rolled anyway, as one group",
+        check("the tight book rolled as one group",
               r2["legs_rolled"] == 2 and not r2["failed"],
               f"{r2['legs_rolled']} legs, {len(r2['failed'])} failed")
         check("the tight book is not left half-rolled",
               len({float(p["instrument"]["strike"]) for p in after2["open_positions"]}) == 1,
               ", ".join(f"{float(p['instrument']['strike']):g}"
                         for p in after2["open_positions"]))
-        if refused:
-            print("    (this is the case a loop over the per-row button would strand)")
+        # Be explicit about which of the two this run actually demonstrated. The grouped
+        # design prevents stranding by construction, but whether a leg-at-a-time roll
+        # WOULD have stranded depends on live prices, and on many days it would not.
+        # Reporting a pass as proof of the harder case when the condition never arose
+        # would make this test a worse witness than saying so.
+        print("    NOTE: rolling one leg alone would have been "
+              + ("REFUSED here — this run does demonstrate the case a loop strands."
+                 if refused else
+                 "allowed here, so this run does NOT demonstrate stranding. What it "
+                 "shows is that the grouped path reaches the same end state."))
 
         # ------------------------------------------------ 3. an empty book -------
         acc3 = await create_account("SCRATCH roll-all empty", 100000.0)
