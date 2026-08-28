@@ -40,12 +40,12 @@ export default function ChartinkPanel({ cfg }: { cfg: Cfg }) {
   const [input, setInput] = useState("");
   const [res, setRes] = useState<ChartinkResult | null>(null);
   const [busy, setBusy] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<"tv" | "plain" | null>(null);
   const [sort, setSort] = useState<"change" | "volume" | "close" | "symbol">("change");
 
   const run = useCallback(async (s: string, fresh = false) => {
     if (!s) return;
-    setBusy(true); setCopied(false);
+    setBusy(true); setCopied(null);
     try {
       setRes(await fetchScreenerChartinkNamed(s, fresh));
     } catch (e) {
@@ -62,10 +62,28 @@ export default function ChartinkPanel({ cfg }: { cfg: Cfg }) {
     return (b[k] ?? -Infinity) - (a[k] ?? -Infinity);
   });
 
-  const copy = () => {
-    navigator.clipboard?.writeText(rows.map((r) => r.symbol).join(", "))
-      .then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); })
-      .catch(() => {});
+  /** Copy the result as a symbol list.
+   *
+   * Two formats because they feed two different places. TradingView's watchlist import
+   * wants `NSE:SYM,NSE:SYM` with no spaces — that same string is also what the All Time
+   * High watchlist accepts, since its parser strips the `NSE:` prefix, so this one covers
+   * both. Plain is kept for anywhere that wants bare tickers.
+   *
+   * The clipboard API is unavailable on insecure origins and can be refused outright, so
+   * a failure falls back to a prompt rather than silently doing nothing and leaving the
+   * button looking broken.
+   */
+  const copy = (fmt: "tv" | "plain") => {
+    const text = fmt === "tv"
+      ? rows.map((r) => `NSE:${r.symbol}`).join(",")
+      : rows.map((r) => r.symbol).join(", ");
+    const done = () => { setCopied(fmt); setTimeout(() => setCopied(null), 2000); };
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(() => window.prompt(
+        "Copy the list below (Ctrl/⌘ + C):", text));
+    } else {
+      window.prompt("Copy the list below (Ctrl/⌘ + C):", text);
+    }
   };
 
   return (
@@ -144,9 +162,18 @@ export default function ChartinkPanel({ cfg }: { cfg: Cfg }) {
                     open on chartink.com ↗
                   </a>
                 )}
-                <button className="copy" onClick={copy} disabled={!rows.length}>
-                  {copied ? "copied ✓" : "copy symbols"}
-                </button>
+                <div className="copies">
+                  <button className="copy primary" onClick={() => copy("tv")}
+                    disabled={!rows.length}
+                    title="NSE:SYM,NSE:SYM — paste straight into a TradingView watchlist, or into the All Time High watchlist">
+                    {copied === "tv" ? `copied ${rows.length} ✓` : "copy for TradingView"}
+                  </button>
+                  <button className="copy" onClick={() => copy("plain")}
+                    disabled={!rows.length}
+                    title="Bare tickers, comma separated">
+                    {copied === "plain" ? "copied ✓" : "plain"}
+                  </button>
+                </div>
               </div>
 
               {res.clause && (
@@ -240,10 +267,15 @@ export default function ChartinkPanel({ cfg }: { cfg: Cfg }) {
         }
         .meta a { color: var(--accent); text-decoration: none; }
         .meta a:hover { text-decoration: underline; }
+        .copies { margin-left: auto; display: flex; gap: 6px; }
         .copy {
-          margin-left: auto; padding: 4px 11px; border-radius: 7px; font-size: 11.5px;
+          padding: 4px 11px; border-radius: 7px; font-size: 11.5px;
           border: 1px solid var(--border); background: var(--canvas-soft);
-          color: var(--text-secondary); cursor: pointer;
+          color: var(--text-secondary); cursor: pointer; white-space: nowrap;
+        }
+        .copy:hover:not(:disabled) { border-color: var(--accent); color: var(--text-primary); }
+        .copy.primary {
+          border-color: var(--accent); color: var(--accent); font-weight: 600;
         }
         .copy:disabled { opacity: 0.4; cursor: default; }
         .clause { margin-bottom: 12px; }

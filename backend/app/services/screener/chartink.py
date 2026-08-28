@@ -120,6 +120,12 @@ PRESETS: dict[str, dict] = {
 # local engine, because a scan this app can already compute has no business being fetched
 # from a delayed third party and shown beside live numbers.
 NAMED: dict[str, dict] = {
+    "all-time-high-8": {
+        "label": "All time high",
+        "why": "Today's high above the highest close of the last 1,000 sessions. Feeds the "
+               "All Time High desk — but note it returns INDICES and ETFs too (CNXMIDCAP, "
+               "BHARATBOND), which are not equities and will not map.",
+    },
     "short-term-breakouts": {
         "label": "Short term breakouts",
         "why": "5-day close 5% above the 6-month high, on volume above its own 5-day mean.",
