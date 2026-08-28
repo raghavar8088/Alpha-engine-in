@@ -34,7 +34,6 @@ import statistics
 from dataclasses import dataclass, field
 
 from app.services import nse_surveillance as SURV
-from app.services.screener import bhavcopy as BHAV
 
 logger = logging.getLogger("ath.gate")
 
@@ -254,38 +253,69 @@ def _check_regime(regime: dict | None) -> Check:
 
 # ── context loading ─────────────────────────────────────────────────────────────
 
-async def liquidity_and_delivery() -> dict[str, dict]:
+_stats_cache: tuple[float, dict] | None = None
+STATS_TTL = 1800.0
+# Ten sessions is plenty for a median turnover and halves what has to come off the wire.
+TURNOVER_WINDOW = 10
+
+
+async def liquidity_and_delivery(fresh: bool = False) -> dict[str, dict]:
     """Per-symbol median turnover and delivery-vs-own-average, from stored bhavcopy.
 
-    Both come out of the same documents, so they are built together — reading that history
-    twice would double the cost of the heaviest query in the cycle.
+    ONE read, THREE economies. Each bhavcopy document holds ~2,860 embedded rows of nine
+    fields; pulling twenty of them whole is ~60,000 dicts and reliably times out against
+    the M0 cluster at 45s. So: project only the three subfields actually used, take ten
+    sessions rather than twenty-one, and compute delivery here instead of also calling
+    `bhavcopy.delivery_stats()` — which reads the very same documents a second time.
     """
+    global _stats_cache
+    import time as _time
     from app.core.db import screener_bhavcopy_collection
 
+    if not fresh and _stats_cache and _time.monotonic() - _stats_cache[0] < STATS_TTL:
+        return _stats_cache[1]
+
     docs = [d async for d in screener_bhavcopy_collection.find(
-        {"ok": True}, {"_id": 0, "date": 1, "rows": 1}
-    ).sort("date", -1).limit(BHAV.DELIVERY_AVG_WINDOW + 1)]
+        {"ok": True},
+        {"_id": 0, "date": 1, "rows.symbol": 1, "rows.turnover_lacs": 1,
+         "rows.delivery_pct": 1},
+    ).sort("date", -1).limit(TURNOVER_WINDOW + 1)]
     if not docs:
         return {}
 
     turnovers: dict[str, list[float]] = {}
-    for d in docs:
+    history: dict[str, list[float]] = {}
+    for i, d in enumerate(docs):
         for r in d.get("rows") or []:
+            sym = r.get("symbol")
+            if not sym:
+                continue
             t = r.get("turnover_lacs")
             if t:
-                turnovers.setdefault(r["symbol"], []).append(float(t) * 1e5)
+                turnovers.setdefault(sym, []).append(float(t) * 1e5)
+            # The most recent document is "today"; delivery is judged against the days
+            # BEFORE it, never against an average that includes the day being judged.
+            if i > 0 and r.get("delivery_pct") is not None:
+                history.setdefault(sym, []).append(float(r["delivery_pct"]))
 
-    delivery = await BHAV.delivery_stats()
+    latest = {r["symbol"]: r for r in (docs[0].get("rows") or []) if r.get("symbol")}
     out: dict[str, dict] = {}
-    for sym, vals in turnovers.items():
-        row = dict(delivery.get(sym) or {})
-        row["median_turnover"] = statistics.median(vals) if vals else None
-        row["turnover_sessions"] = len(vals)
-        out[sym] = row
-    # Symbols with delivery but no turnover still deserve their delivery verdict.
-    for sym, row in delivery.items():
-        out.setdefault(sym, {**row, "median_turnover": None, "turnover_sessions": 0})
+    for sym in set(turnovers) | set(latest):
+        vals = turnovers.get(sym) or []
+        pct = (latest.get(sym) or {}).get("delivery_pct")
+        prior = history.get(sym) or []
+        avg = sum(prior) / len(prior) if prior else None
+        out[sym] = {
+            "median_turnover": statistics.median(vals) if vals else None,
+            "turnover_sessions": len(vals),
+            "delivery_pct": pct,
+            "delivery_avg": round(avg, 2) if avg is not None else None,
+            "delivery_ratio": (round(pct / avg, 2)
+                               if pct is not None and avg and avg > 0 else None),
+            "date": docs[0].get("date"),
+        }
     docs.clear()
+    _stats_cache = (_time.monotonic(), out)
     return out
 
 
