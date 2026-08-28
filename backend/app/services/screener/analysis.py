@@ -43,9 +43,21 @@ from app.services.screener import volume as VOL
 
 logger = logging.getLogger("screener.analysis")
 
-MAX_SYMBOLS = 60
+MAX_SYMBOLS = 40
 LOOKBACK = 400
 BENCH = "NIFTY"
+
+# ── on-demand history ───────────────────────────────────────────────────────────
+# The screener backfills the Nifty 500 and nothing else, but the names a user pastes come
+# from whole-market Chartink scans, so most of them have no stored bars at all. Without
+# this the tab answers "no history" for the majority of any realistic list — which is not
+# an analysis, it is an apology.
+#
+# So: fetch what is missing from Angel, persist it, and analyse it. Subsequent runs on the
+# same names are instant because the bars are now stored like any other.
+FETCH_LOOKBACK_DAYS = 500   # ~1.4y — enough for SMA200 and a 52-week range
+FETCH_PACE = 0.4            # Angel's historical endpoint is the rate-limited one
+MAX_FETCH = 25              # per request, so a long paste cannot hang the page
 
 # Chartink screens used as a cross-check. Membership in one of these is a genuinely
 # independent read on the same stock — a different engine, different data vintage, and a
@@ -301,6 +313,86 @@ async def _crosscheck() -> dict[str, list[str]]:
     return out
 
 
+async def _fetch_missing(symbols: list[str]) -> dict:
+    """Pull daily candles from Angel for symbols with no stored history, and persist them.
+
+    Resolves through the instrument master first and falls back to Angel's own scrip
+    search, because the master is Dhan-derived: its not knowing a symbol says nothing
+    about whether NSE lists it. CALSOFT taught that lesson to the ATH mapper.
+    """
+    from datetime import timedelta
+
+    from pymongo import UpdateOne
+
+    from app.core.db import bars_collection, instruments_collection
+    from app.services import ath_trading as ATH
+    from app.services.angel_client import AngelAPIError, angel_client
+
+    inst = {d["symbol"]: d async for d in instruments_collection.find(
+        {"symbol": {"$in": symbols}, "asset_class": "EQUITY",
+         "angel_token": {"$ne": None}},
+        {"_id": 0, "symbol": 1, "angel_token": 1, "angel_exchange": 1})}
+
+    for sym in symbols:
+        if sym in inst:
+            continue
+        try:
+            found = await ATH._angel_lookup(sym)
+            if found:
+                inst[sym] = await ATH._adopt_instrument(found)
+        except Exception as exc:  # noqa: BLE001
+            logger.info("analysis: scrip search failed for %s (%s)", sym, str(exc)[:100])
+
+    if not inst:
+        return {"fetched": 0, "failed": len(symbols), "resolved": 0}
+
+    now = datetime.now(H.IST)
+    to_dt = now.strftime("%Y-%m-%d 15:30")
+    from_dt = (now - timedelta(days=FETCH_LOOKBACK_DAYS)).strftime("%Y-%m-%d 09:15")
+    try:
+        await angel_client._session()
+    except AngelAPIError:
+        pass
+
+    ok = fail = 0
+    for sym, i in list(inst.items())[:MAX_FETCH]:
+        try:
+            candles = await angel_client.candles(
+                i.get("angel_exchange") or "NSE", str(i["angel_token"]), "D",
+                from_dt, to_dt)
+        except Exception as exc:  # noqa: BLE001
+            logger.info("analysis: candles failed for %s (%s)", sym, str(exc)[:100])
+            fail += 1
+            # Pace even on failure. Skipping the sleep here is what turned one throttle
+            # into a cascade the last time this pattern was written.
+            await asyncio.sleep(FETCH_PACE)
+            continue
+        ops = []
+        for row in candles or []:
+            try:
+                # Store the DATETIME, never its isoformat string — `ts` is queried with
+                # range filters and a string silently matches none of them.
+                ts = datetime.fromisoformat(row[0]).astimezone(timezone.utc)
+                ops.append(UpdateOne(
+                    {"symbol": sym, "timeframe": "1d", "ts": ts},
+                    {"$set": {"symbol": sym, "timeframe": "1d", "ts": ts,
+                              "open": float(row[1]), "high": float(row[2]),
+                              "low": float(row[3]), "close": float(row[4]),
+                              "volume": float(row[5]), "oi": None}},
+                    upsert=True))
+            except (ValueError, TypeError, IndexError):
+                continue
+        if ops:
+            await bars_collection.bulk_write(ops, ordered=False)
+            ok += 1
+        else:
+            fail += 1
+        await asyncio.sleep(FETCH_PACE)
+
+    logger.info("analysis: fetched history for %s symbol(s), %s failed", ok, fail)
+    return {"fetched": ok, "failed": fail, "resolved": len(inst)}
+
+
 async def analyse(raw: str | list[str], fresh: bool = False) -> dict:
     """Analyse one stock or a list. Never raises for a single bad symbol."""
     symbols = parse_symbols(raw)
@@ -332,6 +424,22 @@ async def analyse(raw: str | list[str], fresh: bool = False) -> dict:
     caps = {d["symbol"]: d async for d in stock_fundamentals_collection.find(
         {"symbol": {"$in": symbols}}, {"_id": 0, "symbol": 1, "market_cap": 1})}
 
+    # Anything without enough stored history gets pulled from Angel now, then re-read.
+    # Done once for the whole request rather than per symbol.
+    missing = [s for s in symbols if len(bars_by.get(s) or []) < 30]
+    fetch_note = None
+    if missing:
+        try:
+            got = await _fetch_missing(missing)
+            if got["fetched"]:
+                bars_by = await H.load_daily_bars(symbols, LOOKBACK, fresh=True)
+            if len(missing) > MAX_FETCH:
+                fetch_note = (f"{len(missing)} symbols had no stored history; the first "
+                              f"{MAX_FETCH} were fetched. Run again to do the rest.")
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("analysis: on-demand fetch failed (%s)", exc)
+            fetch_note = "Could not reach Angel to backfill the missing histories."
+
     bench = bars_by.get(BENCH) or []
     bench_rets = H.all_horizon_returns([b.close for b in bench]) if bench else {}
 
@@ -345,6 +453,7 @@ async def analyse(raw: str | list[str], fresh: bool = False) -> dict:
         "count": len(rows),
         "analysed": len(ok),
         "rows": rows,
+        "fetch_note": fetch_note,
         "generated_at": _now().isoformat(),
         "sources": {
             "bars": "own stored daily bars (Angel One)",
