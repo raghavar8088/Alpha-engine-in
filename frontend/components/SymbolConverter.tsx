@@ -7,11 +7,12 @@
  * seeing that the output is right before you paste it somewhere that will silently drop
  * what it cannot resolve.
  *
- * WHAT IT DELIBERATELY DOES NOT DO: silently remove anything. Indices get flagged, not
- * dropped — NIFTYMETAL and CNXPHARMA are real tickers that TradingView will resolve as
- * indices rather than equities, and whether that is wanted depends on what the list is
- * for. Duplicates are the one exception: a repeated symbol is never meaningful in a
- * watchlist, and the count says how many went.
+ * Indices and ETF-looking tickers are removed by default and COUNTED, with a one-click
+ * put-back. Nothing is removed silently: the stats line always says what went and why.
+ *
+ * The detection here is best effort and says so. It has only the ticker string to go on,
+ * and a ticker cannot reveal that Kotak's IT ETF trades as `IT`. The Chartink results in
+ * this tab are filtered server-side against NSE's actual ETF register instead.
  */
 
 import { useMemo, useState } from "react";
@@ -32,8 +33,16 @@ const TOKEN = /[A-Za-z0-9&_.-]+/g;
 // Cash-series suffixes NSE appends. TradingView wants the base symbol.
 const SERIES = /-(EQ|BE|BZ|SM|ST|IV|RR|SZ)$/i;
 
-// Index families. Flagged, never removed — see the module comment.
-const INDEXY = /^(NIFTY|CNX|BANKNIFTY|FINNIFTY|MIDCPNIFTY|SENSEX|INDIAVIX)/i;
+// Indices and funds, BEST EFFORT ONLY. This runs in the browser with nothing but the
+// ticker string, and a ticker cannot tell you that Kotak's IT ETF trades as `IT` or Aditya
+// Birla's healthcare fund as `HEALTHY`. The Chartink results above are filtered properly
+// against NSE's own ETF register on the server; this catches the obvious ones so a pasted
+// list is not obviously wrong, and says it is best-effort rather than implying certainty.
+const INDEXY = new RegExp(
+  "^(NIFTY|CNX|BANKNIFTY|FINNIFTY|MIDCPNIFTY|SENSEX|INDIAVIX|BHARATBOND)"
+  + "|(BEES|ETF)$"
+  + "|^(GOLD|SILVER|LIQUID)(BEES|CASE|ETF|IETF|ADD|BETA)?$",
+  "i");
 
 function parse(raw: string) {
   const seen = new Set<string>();
@@ -63,7 +72,9 @@ export default function SymbolConverter({
 }: { title?: string; initial?: string }) {
   const [raw, setRaw] = useState(initial);
   const [fmt, setFmt] = useState<Fmt>("tv");
-  const [dropIdx, setDropIdx] = useState(false);
+  // Defaults ON. Someone converting a list for a watchlist almost never wants the
+  // index rows a whole-market scan drags in, and the toggle is right there.
+  const [dropIdx, setDropIdx] = useState(true);
   const [copied, setCopied] = useState(false);
 
   const { symbols, dupes, stripped } = useMemo(() => parse(raw), [raw]);
@@ -124,9 +135,10 @@ export default function SymbolConverter({
               {dupes > 0 && <span>{dupes} duplicate{dupes === 1 ? "" : "s"} collapsed</span>}
               {stripped > 0 && <span>{stripped} series suffix{stripped === 1 ? "" : "es"} stripped</span>}
               {indices.length > 0 && (
-                <span className="idx">
-                  {indices.length} look{indices.length === 1 ? "s" : ""} like an index
+                <span className="idx" title="Best effort from the ticker alone — a symbol cannot always reveal a fund">
+                  {indices.length} index/ETF-looking
                   {" ("}{indices.slice(0, 4).join(", ")}{indices.length > 4 ? "…" : ""}{")"}
+                  {" "}{dropIdx ? "removed" : "kept"}
                   <button onClick={() => setDropIdx(!dropIdx)}>
                     {dropIdx ? "put back" : "remove"}
                   </button>

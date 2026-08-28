@@ -43,6 +43,7 @@ export default function ChartinkPanel({ cfg }: { cfg: Cfg }) {
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState<"tv" | "plain" | null>(null);
   const [sort, setSort] = useState<"change" | "volume" | "close" | "symbol">("change");
+  const [showExcluded, setShowExcluded] = useState(false);
 
   const run = useCallback(async (s: string, fresh = false) => {
     if (!s) return;
@@ -165,6 +166,11 @@ export default function ChartinkPanel({ cfg }: { cfg: Cfg }) {
                     open on chartink.com ↗
                   </a>
                 )}
+                {!!res.excluded_count && (
+                  <button className="excl" onClick={() => setShowExcluded(!showExcluded)}>
+                    {res.excluded_count} index/ETF row{res.excluded_count === 1 ? "" : "s"} removed
+                  </button>
+                )}
                 <div className="copies">
                   <button className="copy primary" onClick={() => copy("tv")}
                     disabled={!rows.length}
@@ -178,6 +184,22 @@ export default function ChartinkPanel({ cfg }: { cfg: Cfg }) {
                   </button>
                 </div>
               </div>
+
+              {showExcluded && !!res.excluded?.length && (
+                <div className="exclbox">
+                  <div className="exclhead">
+                    Removed — not companies, so they cannot be bought on an equity desk and
+                    would resolve as something else in a watchlist:
+                  </div>
+                  <div className="excllist">
+                    {res.excluded.map((e) => (
+                      <span key={e.symbol} className="exclchip" title={e.name || e.symbol}>
+                        {e.symbol}<i>{e.why}</i>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {res.clause && (
                 <details className="clause">
@@ -281,6 +303,27 @@ export default function ChartinkPanel({ cfg }: { cfg: Cfg }) {
           border-color: var(--accent); color: var(--accent); font-weight: 600;
         }
         .copy:disabled { opacity: 0.4; cursor: default; }
+        .excl {
+          padding: 3px 10px; border-radius: 999px; font-size: 11px; cursor: pointer;
+          border: 1px dashed var(--border); background: transparent;
+          color: var(--text-muted);
+        }
+        .excl:hover { border-color: var(--accent); color: var(--text-secondary); }
+        .exclbox {
+          border: 1px dashed var(--border); border-radius: 10px;
+          padding: 10px 12px; margin-bottom: 12px; background: var(--canvas-soft);
+        }
+        .exclhead {
+          font-size: 11.5px; color: var(--text-muted); line-height: 1.55; margin-bottom: 8px;
+        }
+        .excllist { display: flex; flex-wrap: wrap; gap: 6px; }
+        .exclchip {
+          display: inline-flex; align-items: baseline; gap: 5px;
+          padding: 3px 9px; border-radius: 6px; font-size: 11.5px;
+          background: var(--canvas); border: 1px solid var(--border);
+          color: var(--text-secondary);
+        }
+        .exclchip i { font-size: 9.5px; color: var(--text-faint); font-style: normal; }
         .clause { margin-bottom: 12px; }
         .clause summary {
           cursor: pointer; font-size: 12px; color: var(--text-secondary);

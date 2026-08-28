@@ -4584,6 +4584,10 @@ export interface ChartinkRow {
 export interface ChartinkResult {
   ok: boolean;
   rows: ChartinkRow[];
+  /** Indices and ETFs the scan matched, removed from `rows`. Returned rather than dropped
+   *  silently so a shrinking row count is explained. */
+  excluded?: (ChartinkRow & { why: string })[];
+  excluded_count?: number;
   error: string | null;
   label?: string; why_not_local?: string;
   slug?: string; url?: string; name?: string; description?: string;
