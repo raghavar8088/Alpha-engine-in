@@ -28,7 +28,8 @@ import logging
 import os
 from datetime import datetime
 
-from app.services.screener import bhavcopy, engine, momentum, nse_breadth, paper, patterns
+from app.services.screener import (ath_universe, bhavcopy, engine, momentum,
+                                   nse_breadth, paper, patterns)
 from app.services.screener.horizons import IST
 
 logger = logging.getLogger("screener_scheduler")
@@ -36,10 +37,16 @@ logger = logging.getLogger("screener_scheduler")
 ENABLED = os.getenv("SCREENER_ENABLED", "1").lower() not in ("0", "false", "")
 TICK_SECONDS = int(os.getenv("SCREENER_TICK_SECONDS", "300"))
 EOD_HHMM = os.getenv("SCREENER_EOD_HHMM", "16:15")
+# The all-time-high sweep runs AFTER the EOD recompute, not with it. It reads the bhavcopy
+# delivery and the stored bars that EOD refreshes, so running them together would have it
+# analyse yesterday's numbers on today's prices.
+ATH_SWEEP_HHMM = os.getenv("SCREENER_ATH_SWEEP_HHMM", "16:45")
+ATH_SWEEP_ENABLED = os.getenv("SCREENER_ATH_SWEEP", "1").lower() not in ("0", "false", "")
 SESSION_OPEN = os.getenv("SCREENER_OPEN_HHMM", "09:15")
 SESSION_CLOSE = os.getenv("SCREENER_CLOSE_HHMM", "15:30")
 
-_state = {"last_eod": None, "last_weekly": None, "last_tick": None, "ticks": 0, "errors": 0}
+_state = {"last_eod": None, "last_weekly": None, "last_tick": None,
+          "last_ath_sweep": None, "ticks": 0, "errors": 0}
 
 
 def _hhmm(now: datetime | None = None) -> str:
@@ -89,6 +96,18 @@ async def _eod() -> None:
             logger.exception("screener paper EOD cycle failed")
 
 
+async def _ath_sweep() -> None:
+    """Rebuild the all-time-high sweep once the day's data is settled.
+
+    Awaited rather than fired and forgotten: this loop's next tick is 5 minutes away and
+    the sweep takes about two, so there is nothing to gain from detaching it and something
+    to lose — an exception inside a stray task would be logged by nobody.
+    """
+    res = await ath_universe.build()
+    logger.info("all-time-high sweep: %s candidates, %s confirmed, %s buyable",
+                res.get("candidates"), res.get("confirmed_ath"), res.get("buyable"))
+
+
 async def _weekly() -> None:
     """Rescan weekly bars now the week is complete."""
     res = await patterns.persist(momentum.DEFAULT_INDEX)
@@ -110,6 +129,14 @@ async def screener_loop() -> None:
                 if now.weekday() == 4 and _state["last_weekly"] != today:
                     await _weekly()
                     _state["last_weekly"] = today
+
+            elif (ATH_SWEEP_ENABLED and _is_weekday(now) and hhmm >= ATH_SWEEP_HHMM
+                  and _state["last_ath_sweep"] != today):
+                # Its own branch, and only once the EOD recompute has already run today —
+                # the sweep reads what EOD writes, so ordering is correctness, not tidiness.
+                if _state["last_eod"] == today:
+                    await _ath_sweep()
+                    _state["last_ath_sweep"] = today
 
             elif _in_session(now):
                 await _intraday_tick()
