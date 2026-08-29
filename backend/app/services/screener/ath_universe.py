@@ -14,7 +14,9 @@ then reports what each contributed:
      listing date through Angel. This is the AUTHORITATIVE check: Chartink's 20-year window
      is not all-time for a company listed in 1987, and a 20-year high is a different claim
      from an all-time high.
-  3. OUR OWN STORED BARS, for anything the first two missed.
+  3. THE NSE BHAVCOPY, which carries every listed symbol every day. This is what lets the
+     register actually be used: stored bars cover about 630 symbols, so joining the
+     register against them left 1,988 of its 2,616 entries with a high and no price.
 
 Candidates come from the union; the VERDICT on whether a candidate is really at an
 all-time high comes from source 2 alone. A stock Chartink flags whose stored all-time high
@@ -193,8 +195,18 @@ async def _chartink_candidates() -> tuple[dict[str, list[str]], dict, list[dict]
 # ── net 2 + 3: our own register and bars ────────────────────────────────────────
 
 async def _own_candidates() -> tuple[dict[str, dict], int]:
-    """Symbols whose latest stored bar is at or above their stored all-time high."""
-    from app.core.db import bars_collection, stock_highs_collection
+    """Register symbols whose latest price is at or near their stored all-time high.
+
+    PRICES COME FROM THE BHAVCOPY, NOT FROM STORED BARS. This was the reason expanding the
+    register from 1,188 to 2,616 symbols added not one candidate: the join was against
+    `bars_collection`, which holds about 630 symbols, so 1,988 register entries had a
+    stored all-time high and no price to compare it to. Seeding stores the high, never the
+    series. The bhavcopy is the only daily source covering every NSE symbol.
+
+    Bars are still used where they exist, because they are fresher intraday — the bhavcopy
+    publishes after the close.
+    """
+    from app.core.db import bars_collection, screener_bhavcopy_collection, stock_highs_collection
 
     highs = {d["symbol"]: d async for d in stock_highs_collection.find(
         {"all_time_high": {"$gt": 0}},
@@ -202,39 +214,43 @@ async def _own_candidates() -> tuple[dict[str, dict], int]:
     if not highs:
         return {}, 0
 
-    # One aggregation for the whole register rather than a query per symbol — on M0 the
-    # per-query latency dominates and a 1,100-symbol loop takes minutes.
-    #
-    # NO $sort. Sorting every bar of 1,147 symbols blew Mongo's 32MB in-memory sort limit,
-    # and M0 does not permit spilling to disk. $max needs no sort, and bounding to the
-    # last few sessions cuts the working set by two orders of magnitude.
-    #
-    # Taking the max over a WINDOW rather than the single last bar is also the more correct
-    # question: "at an all-time high" means recently, and a symbol whose last stored bar is
-    # weeks stale should not be judged on it.
+    # ── price source 1: the bhavcopy, every NSE symbol ──────────────────────
+    latest = {}
+    doc = await screener_bhavcopy_collection.find_one(
+        {"ok": True}, {"_id": 0, "date": 1, "rows.symbol": 1, "rows.high": 1,
+                       "rows.close": 1},
+        sort=[("date", -1)])
+    for r in (doc or {}).get("rows") or []:
+        sym = r.get("symbol")
+        if not sym:
+            continue
+        # Rows captured before high/low were stored fall back to the close. Stated rather
+        # than silent: it makes such a symbol harder to confirm, never easier.
+        px = r.get("high") or r.get("close")
+        if px:
+            latest[sym] = float(px)
+
+    # ── price source 2: stored bars, fresher where they exist ───────────────
     cutoff = datetime.now(timezone.utc) - timedelta(days=RECENT_DAYS)
-    last = {}
     pipeline = [
         {"$match": {"timeframe": "1d", "ts": {"$gte": cutoff},
                     "symbol": {"$in": list(highs)}}},
-        {"$group": {"_id": "$symbol", "high": {"$max": "$high"},
-                    "close": {"$max": "$close"}, "ts": {"$max": "$ts"}}},
+        {"$group": {"_id": "$symbol", "high": {"$max": "$high"}}},
     ]
     async for d in bars_collection.aggregate(pipeline):
-        last[d["_id"]] = d
+        if d.get("high"):
+            latest[d["_id"]] = max(latest.get(d["_id"], 0.0), float(d["high"]))
 
     hits = {}
     for sym, h in highs.items():
-        b = last.get(sym)
-        if not b or not b.get("high"):
-            continue
+        px = latest.get(sym)
         ath = float(h["all_time_high"])
-        if ath <= 0:
+        if not px or ath <= 0:
             continue
-        gap = (float(b["high"]) / ath - 1) * 100
+        gap = (px / ath - 1) * 100
         if gap >= -NEAR_ATH_PCT:
             hits[sym] = {"stored_ath": ath, "ath_date": h.get("all_time_high_date"),
-                         "sessions": h.get("sessions"), "last_high": float(b["high"]),
+                         "sessions": h.get("sessions"), "last_high": px,
                          "gap_pct": round(gap, 2)}
     return hits, len(highs)
 

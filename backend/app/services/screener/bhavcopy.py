@@ -14,6 +14,7 @@ end-of-day archive:
 
 SYMBOL, SERIES, DATE1, PREV_CLOSE, OPEN_PRICE, HIGH_PRICE, LOW_PRICE, LAST_PRICE, CLOSE_PRICE,
 AVG_PRICE, TTL_TRD_QNTY, TURNOVER_LACS, NO_OF_TRADES, DELIV_QTY, DELIV_PER
+(HIGH_PRICE and LOW_PRICE are kept too — see the row builder)
 
 One request returns the whole market — about 400KB and ~2,700 rows — instead of 500 per-symbol
 calls that would be rate-limited into next week. Verified working for 21-Aug and 20-Aug 2026.
@@ -132,6 +133,11 @@ async def fetch_day(day: datetime) -> dict:
             "symbol": sym,
             "series": series,
             "close": _num(rec.get("CLOSE_PRICE")),
+            # The session's own high and low. Stored because this file is the only daily
+            # source that covers EVERY NSE symbol — stored bars reach about 630 — and
+            # "printed a new high" is a claim about the high, not the close.
+            "high": _num(rec.get("HIGH_PRICE")),
+            "low": _num(rec.get("LOW_PRICE")),
             "prev_close": _num(rec.get("PREV_CLOSE")),
             "volume": total_qty,
             "turnover_lacs": _num(rec.get("TURNOVER_LACS")),
