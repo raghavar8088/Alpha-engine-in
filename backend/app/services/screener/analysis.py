@@ -555,6 +555,11 @@ def _analyse_one(symbol: str, bars: list, bench_rets: dict, deliv: dict | None,
             "sma200": _r(H.sma(closes, 200)),
             "rsi14": r, "atr14": _r(atr14),
             "atr_pct": _r(atr14 / price * 100) if atr14 else None,
+            # The session's own high and low. Needed because "printed a new all-time
+            # high" is a claim about the HIGH, not the close — a stock can take out its
+            # record intraday and close a percent under it, and judging that on the close
+            # reports it as "1% away" from a record it actually set.
+            "day_high": _r(bars[-1].high), "day_low": _r(bars[-1].low),
             "week52_high": _r(hl.get("high")), "week52_low": _r(hl.get("low")),
             "pct_from_52w_high": _r(hl.get("pct_from_high")),
             "all_time_high": _r(ath),

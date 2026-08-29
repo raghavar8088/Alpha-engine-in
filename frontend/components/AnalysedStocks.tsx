@@ -38,7 +38,7 @@ const pctf = (v: number | null | undefined) =>
 const cls = (v: number | null | undefined) =>
   v === null || v === undefined ? "" : v > 0 ? "gain" : v < 0 ? "loss" : "";
 
-type Filter = "all" | "confirmed" | "buy" | "confirmed_buy";
+type Filter = "all" | "confirmed" | "near" | "buy" | "confirmed_buy";
 
 export default function AnalysedStocks() {
   const [snap, setSnap] = useState<AthUniverseSnapshot | null>(null);
@@ -85,9 +85,10 @@ export default function AnalysedStocks() {
 
   const rows = (snap?.rows ?? []).filter((r) => {
     const buy = r.verdict?.action === "Buy";
-    if (filter === "confirmed") return r.ath_confirmed === true;
+    if (filter === "confirmed") return r.ath_grade === "all_time";
+    if (filter === "near") return r.ath_grade === "near_ath";
     if (filter === "buy") return buy;
-    if (filter === "confirmed_buy") return buy && r.ath_confirmed === true;
+    if (filter === "confirmed_buy") return buy && r.ath_grade === "all_time";
     return true;
   });
 
@@ -102,10 +103,12 @@ export default function AnalysedStocks() {
         note={snap?.finished_at ? `built ${new Date(snap.finished_at).toLocaleString()}` : undefined}>
         <p className="lede">
           Every NSE stock at a multi-year or all-time high, pulled from{" "}
-          <b>eight independent nets</b> across Chartink&rsquo;s whole cash market plus our
-          own register of stocks walked back to their listing date — then run through the
-          full analysis: trend, momentum, delivery, position in range and whether the stock
-          can actually be traded.
+          <b>nineteen independent nets</b> — thirteen clauses across Chartink&rsquo;s whole
+          cash market, six named public screeners, and our own register of stocks walked
+          back to their listing date — then run through the full analysis: trend, momentum,
+          delivery, position in range and whether the stock can actually be traded.
+          A high is judged on the session&rsquo;s <i>high</i>, so a stock that set a record
+          intraday and closed under it still counts as having set one.
         </p>
 
         <div className="acts">
@@ -147,9 +150,11 @@ export default function AnalysedStocks() {
               tone="ok" note="confirmed against our own register" />
             <Cell label="Buyable now" value={String(snap.buyable ?? 0)} tone="ok"
               note="bullish AND tradable" />
-            <Cell label="Multi-year, not all-time"
-              value={String((snap.count ?? 0) - (snap.confirmed_ath ?? 0))} tone="mid"
-              note="high, but its record still stands" />
+            <Cell label="Within 3% of one" value={String(snap.near_ath ?? 0)} tone="mid"
+              note="one push from a record" />
+            <Cell label="Multi-year high"
+              value={String((snap.count ?? 0) - (snap.confirmed_ath ?? 0) - (snap.near_ath ?? 0))}
+              note="high, but its record still stands well above" />
           </div>
 
           {showCoverage && cov && (
@@ -191,14 +196,17 @@ export default function AnalysedStocks() {
               stock back to its listing date. Chartink&rsquo;s window stops around 20 years,
               so a name it flags may be at a <i>multi-year</i> high while its real record
               still stands — those are labelled as such, not counted as all-time highs.
+              Names within 3% show the actual gap, because one push from a record is a
+              different setup from one that is 40% below it.
               <br />
               <b>Action</b> is capped by tradability: a stock in a narrow circuit band or
               under ASM reads Avoid however good its chart is.
             </div>
 
             <div className="filters">
-              {([["all", "All"], ["confirmed", "All-time high only"],
-                 ["buy", "Buy only"], ["confirmed_buy", "All-time high + Buy"]] as const)
+              {([["all", "All"], ["confirmed", "At an all-time high"],
+                 ["near", "Within 3% of one"], ["buy", "Buy only"],
+                 ["confirmed_buy", "All-time high + Buy"]] as const)
                 .map(([k, l]) => (
                   <button key={k} className={filter === k ? "on" : ""}
                     onClick={() => setFilter(k as Filter)}>{l}</button>
@@ -327,11 +335,12 @@ function Row({ r, open, toggle }: { r: AthUniverseRowFull; open: boolean; toggle
           {r.market_cap_cr ? <div className="sub">₹{r.market_cap_cr.toLocaleString("en-IN")}cr</div> : null}
         </td>
         <td className="l">
-          {r.ath_confirmed === true
-            ? <span className="ath yes" title={r.ath_basis}>all-time</span>
-            : r.ath_confirmed === false
-              ? <span className="ath no" title={r.ath_basis}>multi-year</span>
-              : <span className="ath unk" title={r.ath_basis}>unverified</span>}
+          <span className={`ath ${r.ath_grade}`} title={r.ath_basis}>
+            {r.ath_grade === "all_time" ? "all-time"
+             : r.ath_grade === "near_ath" ? `${Math.abs(r.pct_from_ath ?? 0).toFixed(1)}% away`
+             : r.ath_grade === "multi_year" ? "multi-year"
+             : "unverified"}
+          </span>
         </td>
         <td>{v ? <span className={`sc ${v.score >= 72 ? "ok" : v.score >= 50 ? "mid" : "bad"}`}>{v.score}</span> : "—"}</td>
         <td className="l">{v ? <span className={`tag ${BIAS_TONE[v.bias]}`}>{v.bias}</span> : "—"}</td>
@@ -359,6 +368,7 @@ function Row({ r, open, toggle }: { r: AthUniverseRowFull; open: boolean; toggle
                 <h4>The high</h4>
                 <Kv k="Verdict" v={r.ath_basis} />
                 <Kv k="Stored all-time high" v={num(r.stored_ath)} />
+                <Kv k="Distance from it" v={pctf(r.pct_from_ath)} />
                 <Kv k="Set on" v={r.stored_ath_date ?? "—"} />
                 <Kv k="History walked" v={r.history_sessions ? `${r.history_sessions} sessions` : "—"} />
                 <Kv k="52-week high" v={num(r.levels?.week52_high)} />
@@ -406,9 +416,12 @@ function Row({ r, open, toggle }: { r: AthUniverseRowFull; open: boolean; toggle
         .sub { font-size: 10px; color: var(--text-faint); font-weight: 400; }
         td.why { color: var(--text-muted); font-size: 11.5px; line-height: 1.5; min-width: 230px; max-width: 440px; }
         .ath { display: inline-block; padding: 2px 8px; border-radius: 5px; font-size: 10.5px; font-weight: 700; white-space: nowrap; }
-        .ath.yes { background: rgba(22,163,74,0.15); color: var(--gain); }
-        .ath.no { background: var(--canvas-soft); color: var(--text-muted); border: 1px solid var(--border); }
-        .ath.unk { background: transparent; color: var(--text-faint); border: 1px dashed var(--border); }
+        .ath.all_time { background: rgba(22,163,74,0.15); color: var(--gain); }
+        .ath.near_ath { background: rgba(217,119,6,0.12); color: #b45309; }
+        .ath.multi_year { background: var(--canvas-soft); color: var(--text-muted); border: 1px solid var(--border); }
+        /* unverified is dashed and grey on purpose — no register entry is an absence of
+           evidence, not a weaker kind of high. */
+        .ath.unverified { background: transparent; color: var(--text-faint); border: 1px dashed var(--border); }
         .sc { display: inline-block; min-width: 32px; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 12px; }
         .sc.ok { background: rgba(22,163,74,0.14); color: var(--gain); }
         .sc.mid { background: rgba(217,119,6,0.13); color: #b45309; }

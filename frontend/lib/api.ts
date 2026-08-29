@@ -4687,6 +4687,10 @@ export interface AthUniverseRowFull extends AnalysisRow {
   history_sessions: number | null;
   /** null when there is no stored all-time high to check against — never treated as false. */
   ath_confirmed: boolean | null;
+  /** Three real states plus unverified. "At an all-time high", "1% away from one" and
+   *  "at a 4-year high while the record still stands 40% above" are different facts. */
+  ath_grade: "all_time" | "near_ath" | "multi_year" | "unverified";
+  pct_from_ath: number | null;
   ath_basis: string;
 }
 export interface AthUniverseSnapshot {
@@ -4699,6 +4703,7 @@ export interface AthUniverseSnapshot {
   count?: number;
   candidates?: number;
   confirmed_ath?: number;
+  near_ath?: number;
   buyable?: number;
   rows?: AthUniverseRowFull[];
   note?: string;

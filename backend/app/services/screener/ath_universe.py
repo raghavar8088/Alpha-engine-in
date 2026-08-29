@@ -305,8 +305,14 @@ async def build() -> dict:
             # THE VERDICT ON "ALL-TIME" COMES FROM OUR REGISTER, NOT FROM CHARTINK.
             # A 20-year high is not an all-time high, and a stock whose stored peak sits
             # above today's price is reported as the multi-year high it actually is.
-            if ath and ltp:
-                gap = (ltp / float(ath) - 1) * 100
+            # Judge the high on the SESSION'S HIGH, not the close. Measured live: 11 of
+            # 12 rows graded "about 1% away" had a session high sitting exactly on their
+            # stored all-time high — they set the record intraday and closed under it.
+            # Grading those as near-misses halved the confirmed count and was simply wrong.
+            day_high = ((r.get("levels") or {}).get("day_high")) or ltp
+            best = max(day_high or 0, ltp or 0)
+            if ath and best:
+                gap = (best / float(ath) - 1) * 100
                 confirmed = gap >= -0.1
                 # Three states, not two. "At an all-time high", "1% away from one" and
                 # "at a 4-year high while its record still stands 40% above" are different
@@ -314,10 +320,15 @@ async def build() -> dict:
                 grade = ("all_time" if confirmed
                          else "near_ath" if gap >= -NEAR_ATH_PCT
                          else "multi_year")
-                basis = (f"At or through its all-time high of {float(ath):,.2f}"
-                         if confirmed else
-                         f"{abs(gap):.1f}% below its all-time high of {float(ath):,.2f}"
-                         f" (set {h.get('all_time_high_date') or 'earlier'})")
+                intraday_only = confirmed and ltp and ltp < float(ath) * 0.999
+                basis = (
+                    (f"Touched its all-time high of {float(ath):,.2f} intraday and closed "
+                     f"{abs((ltp / float(ath) - 1) * 100):.1f}% under it"
+                     if intraday_only else
+                     f"At or through its all-time high of {float(ath):,.2f}")
+                    if confirmed else
+                    f"{abs(gap):.1f}% below its all-time high of {float(ath):,.2f}"
+                    f" (set {h.get('all_time_high_date') or 'earlier'})")
             else:
                 gap, confirmed, grade = None, None, "unverified"
                 basis = ("No stored all-time high to check against yet — this is a "
