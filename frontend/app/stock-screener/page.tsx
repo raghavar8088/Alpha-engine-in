@@ -10,6 +10,7 @@
  *   Setups    what is actually tradable right now, priced net of real Angel One costs
  *   Chartink  a delayed SECOND OPINION from outside — labelled as such, never mixed in
  *   Analysis  ask about NAMED stocks, rather than waiting for a screen to surface them
+ *   Sweep     every stock at an all-time high, with an account of what the nets missed
  *   Sources   which feeds answered — so a data outage never reads as a quiet market
  */
 
@@ -25,6 +26,7 @@ import Sparkline from "../../components/Sparkline";
 import SectorSpread from "../../components/charts/SectorSpread";
 import ChartinkPanel from "../../components/ChartinkPanel";
 import StockAnalysis from "../../components/StockAnalysis";
+import AnalysedStocks from "../../components/AnalysedStocks";
 import {
   refreshing,
   fetchScreenerConfig, fetchScreenerSummary, fetchScreenerMomentum,
@@ -38,7 +40,7 @@ import {
   ScreenerVolumeBoard, ScreenerPaperSummary, ScreenerPaperPositions,
 } from "../../lib/api";
 
-type Tab = "momentum" | "sectors" | "volume" | "patterns" | "setups" | "paper" | "chartink" | "analysis" | "sources";
+type Tab = "momentum" | "sectors" | "volume" | "patterns" | "setups" | "paper" | "chartink" | "analysis" | "athsweep" | "sources";
 const TABS: { key: Tab; label: string }[] = [
   { key: "momentum", label: "Momentum" },
   { key: "sectors", label: "Sectors" },
@@ -48,6 +50,7 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "paper", label: "Paper Desk" },
   { key: "chartink", label: "Chartink" },
   { key: "analysis", label: "Stock Analysis" },
+  { key: "athsweep", label: "Analysed Stocks" },
   { key: "sources", label: "Sources" },
 ];
 
@@ -1057,6 +1060,8 @@ Click for the full reason stack`,
 
       {/* Symbol-driven, so it stays out of the shared index/horizon loader entirely. */}
       {tab === "analysis" && <StockAnalysis />}
+
+      {tab === "athsweep" && <AnalysedStocks />}
 
       {tab === "sources" && (
         <GlassPanel title="Where every number comes from"

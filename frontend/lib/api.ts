@@ -4677,6 +4677,53 @@ export async function analyseStocks(
   });
 }
 
+// --- Analysed Stocks: the all-time-high sweep --------------------------------
+
+export interface AthUniverseRowFull extends AnalysisRow {
+  nets: string[];
+  from_own_register: boolean;
+  stored_ath: number | null;
+  stored_ath_date: string | null;
+  history_sessions: number | null;
+  /** null when there is no stored all-time high to check against — never treated as false. */
+  ath_confirmed: boolean | null;
+  ath_basis: string;
+}
+export interface AthUniverseSnapshot {
+  state: "ready" | "running" | "failed" | "never built";
+  step?: string;
+  progress?: number;
+  started_at?: string;
+  finished_at?: string;
+  seconds?: number;
+  count?: number;
+  candidates?: number;
+  confirmed_ath?: number;
+  buyable?: number;
+  rows?: AthUniverseRowFull[];
+  note?: string;
+  coverage?: {
+    chartink_nets: Record<string, { label: string; rows: number; excluded?: number; error: string | null }>;
+    chartink_symbols: number;
+    own_register_hits: number;
+    register_size: number;
+    seeded: { needed: number; seeded: number; left: number; error?: string };
+    excluded_non_equity: number;
+    excluded?: { symbol: string; name: string; why: string }[];
+    blind_spot: string;
+  };
+}
+
+export async function fetchAthUniverseSweep(): Promise<AthUniverseSnapshot> {
+  return apiFetch("/api/screener/ath-universe");
+}
+export async function fetchAthUniverseStatus(): Promise<AthUniverseSnapshot> {
+  return apiFetch("/api/screener/ath-universe/status");
+}
+export async function buildAthUniverse(): Promise<{ started: boolean; reason?: string }> {
+  return apiFetch("/api/screener/ath-universe/build", { method: "POST" });
+}
+
 // --- Instrument search: ranked, typo-tolerant, enriched, app-wide ------------
 // Replaces a Mongo $regex built from raw user input, which 500'd on a query of "(" and
 // ranked RPOWER above RELIANCE for "reliance".
