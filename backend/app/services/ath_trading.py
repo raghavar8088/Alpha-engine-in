@@ -247,7 +247,8 @@ def parse_tokens(raw: str | list[str]) -> list[str]:
     return out
 
 
-async def map_symbols(raw: str | list[str], enforce_cap: bool | None = None) -> dict:
+async def map_symbols(raw: str | list[str], enforce_cap: bool | None = None,
+                      enforce_history: bool | None = None) -> dict:
     """Resolve pasted symbols against the instrument master and report EVERY outcome.
 
     Nothing is silently dropped. A symbol that cannot be traded is returned with the reason
@@ -265,8 +266,12 @@ async def map_symbols(raw: str | list[str], enforce_cap: bool | None = None) -> 
     preferences — a stock listed four months ago is at its all-time high by definition, and
     trading that is not the strategy.
     """
-    if enforce_cap is None:
-        enforce_cap = (await get_watchlist()).get("enforce_market_cap", False)
+    if enforce_cap is None or enforce_history is None:
+        _wl = await get_watchlist()
+        if enforce_cap is None:
+            enforce_cap = _wl.get("enforce_market_cap", False)
+        if enforce_history is None:
+            enforce_history = _wl.get("enforce_history", True)
     tokens = parse_tokens(raw)
     if not tokens:
         return {"count": 0, "rows": [], "tradable": 0}
@@ -319,7 +324,7 @@ async def map_symbols(raw: str | list[str], enforce_cap: bool | None = None) -> 
             status, note = "not_quotable", "In the master but Angel cannot quote it, so it cannot be priced or traded."
         elif not h or not h.get("all_time_high"):
             status, note = "no_high", "No all-time high stored yet. Seed it below and this becomes tradable."
-        elif sessions < MIN_SESSIONS:
+        elif enforce_history and sessions < MIN_SESSIONS:
             status, note = "too_new", (
                 f"Only {sessions} sessions of history. A stock listed this recently is at its "
                 f"all-time high by definition, so it is excluded until it has {MIN_SESSIONS}.")
@@ -358,7 +363,7 @@ async def map_symbols(raw: str | list[str], enforce_cap: bool | None = None) -> 
 
     return {"count": len(rows), "rows": rows,
             "tradable": sum(1 for r in rows if r["tradable"]),
-            "enforce_market_cap": enforce_cap}
+            "enforce_market_cap": enforce_cap, "enforce_history": enforce_history}
 
 
 async def get_watchlist() -> dict:
@@ -367,12 +372,14 @@ async def get_watchlist() -> dict:
         # No list yet: the automatic screen runs, which is the only sensible default when
         # there is nothing to trade. The moment a list IS saved, `save_watchlist` switches
         # the desk to trading it.
-        doc = {"symbols": [], "mode": "auto", "enforce_market_cap": False, "updated_at": None}
+        doc = {"symbols": [], "mode": "auto", "enforce_market_cap": False,
+               "enforce_history": True, "updated_at": None}
     return doc
 
 
 async def save_watchlist(symbols: list[str], mode: str | None = None,
-                         enforce_market_cap: bool | None = None) -> dict:
+                         enforce_market_cap: bool | None = None,
+                         enforce_history: bool | None = None) -> dict:
     """Commit the curated list. Replaces rather than merges — the UI owns the final set.
 
     SUBMITTING A LIST PUTS THE DESK ON IT. If no mode is given and the list is non-empty,
@@ -397,11 +404,19 @@ async def save_watchlist(symbols: list[str], mode: str | None = None,
         "mode": resolved_mode,
         "enforce_market_cap": (current.get("enforce_market_cap", False)
                                if enforce_market_cap is None else bool(enforce_market_cap)),
+        # The minimum-history rule exists because a stock listed weeks ago is at its
+        # all-time high by definition, which carries no information. That reasoning is
+        # about the SCREEN. For a name someone typed in themselves the judgement has
+        # already been made, so the rule is waivable — deliberately, and visibly, the same
+        # way the size floor is.
+        "enforce_history": (current.get("enforce_history", True)
+                            if enforce_history is None else bool(enforce_history)),
         "updated_at": _now(),
     }
     await ath_watchlist_collection.replace_one({"_id": WATCHLIST_ID}, doc, upsert=True)
-    logger.info("ath watchlist saved: %s symbols, mode=%s, cap floor %s",
-                len(clean), doc["mode"], "on" if doc["enforce_market_cap"] else "off")
+    logger.info("ath watchlist saved: %s symbols, mode=%s, cap floor %s, history rule %s",
+                len(clean), doc["mode"], "on" if doc["enforce_market_cap"] else "off",
+                "on" if doc["enforce_history"] else "off")
     doc.pop("_id", None)
     return doc
 
@@ -424,6 +439,8 @@ async def universe() -> list[dict]:
     # dropping it silently for manual names would make two different strategies share one
     # equity curve.
     enforce = wl.get("enforce_market_cap", False)
+    enforce_history = wl.get("enforce_history", True)
+    min_sessions = MIN_SESSIONS if enforce_history else 2
 
     if mode == "manual" and not picked:
         return []
@@ -468,7 +485,7 @@ async def universe() -> list[dict]:
         h = highs.get(sym)
         if not h or not h.get("all_time_high"):
             continue
-        if int(h.get("sessions") or 0) < MIN_SESSIONS:
+        if int(h.get("sessions") or 0) < min_sessions:
             continue
         out.append({
             "symbol": sym,
@@ -507,6 +524,7 @@ async def coverage() -> dict:
         "mode": mode,
         "watchlist_size": len(picked),
         "enforce_market_cap": wl.get("enforce_market_cap", False),
+        "enforce_history": wl.get("enforce_history", True),
         "mode_note": {
             "auto": "Trading the screen: every NSE stock above the market-cap floor.",
             "manual": f"Trading ONLY your watchlist ({len(picked)} symbols). The screen is off.",
@@ -824,8 +842,40 @@ async def enter_all(symbols: list[str] | None = None) -> dict:
         return {"opened": 0, "reason": "no symbols — save a watchlist first"}
 
     rows = {r["symbol"]: r for r in await universe() if r["symbol"] in wanted}
+
+    # ACCOUNT FOR EVERY SYMBOL THAT NEVER REACHED THE UNIVERSE. This was the bug behind
+    # "it is not working": a name with no market-cap row is excluded by the cap query
+    # itself, so it never appeared in `rows` and was dropped without a word. Thirteen of a
+    # fifty-five-symbol list vanished that way. The mapper already knows why each one
+    # fails, so ask it rather than inventing a second explanation that could disagree.
+    unseen = [s for s in wanted if s not in rows]
+    not_eligible = []
+    if unseen:
+        try:
+            mapped = await map_symbols(unseen)
+            not_eligible = [{"symbol": r["symbol"], "status": r["status"],
+                             "why": r.get("note") or r["status"]}
+                            for r in mapped["rows"] if not r["tradable"]]
+            explained = {r["symbol"] for r in not_eligible}
+            not_eligible += [{"symbol": s, "status": "not_in_universe",
+                              "why": "Passes the individual checks but did not reach the "
+                                     "tradable universe — usually a missing market-cap row "
+                                     "while the size floor is on."}
+                             for s in unseen if s not in explained]
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("enter_all: could not explain %s skipped symbols (%s)",
+                           len(unseen), exc)
+            not_eligible = [{"symbol": s, "status": "unknown",
+                             "why": "Not tradable; the reason could not be determined."}
+                            for s in unseen]
+
     if not rows:
-        return {"opened": 0, "reason": "none of those symbols are tradable — map them first"}
+        return {"opened": 0, "already_held": 0, "skipped": [],
+                "not_eligible": not_eligible,
+                "reason": f"None of those {len(wanted)} symbols are tradable right now. "
+                          f"See the reasons below — the usual causes are the ₹1,000cr size "
+                          f"floor and the {MIN_SESSIONS}-session history rule, both of "
+                          f"which can be waived for a hand-picked list."}
 
     held = {p["symbol"] async for p in ath_positions_collection.find(
         {"status": "OPEN"}, {"symbol": 1})}
@@ -868,12 +918,14 @@ async def enter_all(symbols: list[str] | None = None) -> dict:
         cash -= cost
         opened += 1
 
-    logger.info("ath: manual entry opened %s position(s), %s already held, %s skipped",
-                opened, already, len(skipped))
+    logger.info("ath: manual entry opened %s position(s), %s already held, %s skipped, "
+                "%s not eligible", opened, already, len(skipped), len(not_eligible))
     return {
         "opened": opened,
         "already_held": already,
+        "requested": len(wanted),
         "skipped": skipped,
+        "not_eligible": not_eligible,
         "capital_left": round(cash, 2),
         "note": ("Entered at the current price, not on a break. Stop and target are ±"
                  f"{STOP_PCT:g}% of what was actually paid. These carry entry_reason="

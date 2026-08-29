@@ -120,6 +120,7 @@ class SaveWatchlistRequest(BaseModel):
     symbols: list[str]
     mode: str | None = None                  # auto | manual | both
     enforce_market_cap: bool | None = None
+    enforce_history: bool | None = None      # the 250-session minimum
 
 
 @router.post("/watchlist/map")
@@ -139,7 +140,8 @@ async def get_watchlist(_u: dict = Depends(get_current_user)):
     true when it was saved — a stock's all-time high gets seeded, its market cap moves."""
     wl = await ath_trading.get_watchlist()
     mapped = await ath_trading.map_symbols(
-        wl.get("symbols") or [], enforce_cap=wl.get("enforce_market_cap", False))
+        wl.get("symbols") or [], enforce_cap=wl.get("enforce_market_cap", False),
+        enforce_history=wl.get("enforce_history", True))
     return {**wl, **mapped,
             "updated_at": wl["updated_at"].isoformat() if wl.get("updated_at") else None}
 
@@ -149,11 +151,13 @@ async def save_watchlist(payload: SaveWatchlistRequest,
                          _u: dict = Depends(get_current_user)):
     try:
         saved = await ath_trading.save_watchlist(
-            payload.symbols, payload.mode, payload.enforce_market_cap)
+            payload.symbols, payload.mode, payload.enforce_market_cap,
+            payload.enforce_history)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
     mapped = await ath_trading.map_symbols(
-        saved.get("symbols") or [], enforce_cap=saved.get("enforce_market_cap", False))
+        saved.get("symbols") or [], enforce_cap=saved.get("enforce_market_cap", False),
+        enforce_history=saved.get("enforce_history", True))
     return {**saved, **mapped,
             "updated_at": saved["updated_at"].isoformat() if saved.get("updated_at") else None}
 
