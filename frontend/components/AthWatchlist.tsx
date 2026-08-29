@@ -52,6 +52,10 @@ export default function AthWatchlist({ onSaved }: { onSaved?: () => void }) {
   const [paste, setPaste] = useState("");
   const [mode, setMode] = useState("manual");
   const [enforceCap, setEnforceCap] = useState(false);
+  const [enforceHistory, setEnforceHistory] = useState(true);
+  const [outcome, setOutcome] = useState<{
+    symbol: string; status?: string; why: string;
+  }[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
@@ -60,6 +64,7 @@ export default function AthWatchlist({ onSaved }: { onSaved?: () => void }) {
   const applyDoc = useCallback((d: AthWatchlistDoc) => {
     setMode(d.mode ?? "manual");
     setEnforceCap(d.enforce_market_cap ?? false);
+    setEnforceHistory(d.enforce_history ?? true);
     // Everything already saved comes back selected — it IS the committed list.
     setRows((d.rows ?? []).map((r) => ({ ...r, selected: true })));
   }, []);
@@ -102,7 +107,8 @@ export default function AthWatchlist({ onSaved }: { onSaved?: () => void }) {
   const submit = async () => {
     setBusy(true); setError(null); setSaved(null);
     try {
-      const res = await saveAthWatchlist(selected.map((r) => r.symbol), mode, enforceCap);
+      const res = await saveAthWatchlist(
+        selected.map((r) => r.symbol), mode, enforceCap, enforceHistory);
       applyDoc(res);
       setSaved(
         `Saved ${res.count} symbol${res.count === 1 ? "" : "s"} — ${res.tradable} tradable now` +
@@ -230,11 +236,24 @@ export default function AthWatchlist({ onSaved }: { onSaved?: () => void }) {
             </small>
           </span>
         </label>
+        <label className="capline">
+          <input type="checkbox" checked={enforceHistory}
+            onChange={(e) => setEnforceHistory(e.target.checked)} />
+          <span>
+            <b>Require at least a year of price history</b>
+            <small>
+              ON by default. A stock listed four months ago is at its all-time high by
+              definition, and there is no information in that — which is why the automatic
+              screen always applies it. Untick it only for names you have chosen yourself
+              and want traded anyway; they will be bought at the current price like any
+              other manual entry.
+            </small>
+          </span>
+        </label>
         <div className="stillapplies">
-          <b>What is never waived:</b> a symbol still needs a stored all-time high and at
-          least a year of history. Those are not size preferences — a stock listed four
-          months ago is at its all-time high by definition, and trading that is not the
-          strategy.
+          <b>What is never waived:</b> a symbol still needs to be quotable on Angel and to
+          have a stored all-time high. Without a stored high there is no level to measure
+          the ±20% from, so there is nothing to trade.
         </div>
 
         <button className="submit" disabled={busy} onClick={submit}>
@@ -260,13 +279,18 @@ export default function AthWatchlist({ onSaved }: { onSaved?: () => void }) {
 ` +
               `That is up to ₹${(n * 100000).toLocaleString("en-IN")} committed, ` +
               `bypassing the all-time-high rule. Already-held names are skipped.`)) return;
-            setBusy(true); setError(null); setSaved(null);
+            setBusy(true); setError(null); setSaved(null); setOutcome(null);
             try {
               const r = await enterAllAthWatchlist();
               setSaved(
                 `Opened ${r.opened} position(s)` +
                 (r.already_held ? `, ${r.already_held} already held` : "") +
-                (r.skipped?.length ? `, ${r.skipped.length} skipped` : "") + ".");
+                (r.skipped?.length ? `, ${r.skipped.length} skipped` : "") +
+                (r.not_eligible?.length ? `, ${r.not_eligible.length} not eligible` : "") +
+                "." + (r.reason ? ` ${r.reason}` : ""));
+              // Every name that did NOT get bought, with its reason. Without this the
+              // screen just says "opened 0" and the cause is invisible.
+              setOutcome([...(r.skipped ?? []), ...(r.not_eligible ?? [])]);
               onSaved?.();
             } catch (e) {
               setError(e instanceof Error ? e.message : String(e));
@@ -275,10 +299,45 @@ export default function AthWatchlist({ onSaved }: { onSaved?: () => void }) {
             {busy ? "Working…" : "Buy all now"}
           </button>
         </div>
+
+        {outcome && outcome.length > 0 && (
+          <div className="outcome">
+            <div className="ohead">
+              {outcome.length} symbol{outcome.length === 1 ? " was" : "s were"} not bought —
+              here is why each one:
+            </div>
+            <div className="tw">
+              <table>
+                <tbody>
+                  {outcome.map((x) => (
+                    <tr key={x.symbol}>
+                      <td className="osym">{x.symbol}</td>
+                      <td className="ostatus">{(x.status ?? "").replace(/_/g, " ")}</td>
+                      <td className="owhy">{x.why}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="ofoot">
+              The size floor and the history rule are both toggles above. Untick the one
+              that is blocking a name, submit the list again, then buy.
+            </div>
+          </div>
+        )}
       </GlassPanel>
 
       <style jsx>{`
         .wl { display: flex; flex-direction: column; gap: 14px; }
+        .outcome { margin-top: 14px; border: 1px solid var(--panel-border); border-radius: 11px; padding: 12px 14px; background: var(--canvas-soft); }
+        .ohead { font-size: 12.5px; font-weight: 650; color: var(--text); margin-bottom: 9px; }
+        .outcome .tw { overflow-x: auto; max-height: 340px; overflow-y: auto; }
+        .outcome table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+        .outcome td { padding: 5px 8px; border-bottom: 1px solid var(--panel-border); vertical-align: top; }
+        .osym { font-weight: 700; white-space: nowrap; color: var(--text); }
+        .ostatus { white-space: nowrap; color: #b45309; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.03em; }
+        .owhy { color: var(--text-faint); line-height: 1.5; }
+        .ofoot { font-size: 11px; color: var(--text-faint); margin-top: 9px; line-height: 1.55; }
         .pastebox { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 12px; }
         @media (max-width: 800px) { .pastebox { grid-template-columns: 1fr; } }
         textarea { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--panel-border); background: var(--panel); color: var(--text); font-size: 13px; font-family: var(--font-data), monospace; resize: vertical; line-height: 1.6; }

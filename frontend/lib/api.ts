@@ -5306,6 +5306,8 @@ export interface AthWatchlist {
   symbols: string[];
   mode: string;
   enforce_market_cap: boolean;
+  /** The 250-session minimum. Waivable for hand-picked names, on for the screen. */
+  enforce_history?: boolean;
   updated_at: string | null;
   count: number;
   tradable: number;
@@ -5313,7 +5315,8 @@ export interface AthWatchlist {
 }
 
 export async function mapAthSymbols(symbols: string | string[]): Promise<{
-  count: number; tradable: number; rows: AthMappedSymbol[]; enforce_market_cap?: boolean;
+  count: number; tradable: number; rows: AthMappedSymbol[];
+  enforce_market_cap?: boolean; enforce_history?: boolean;
 }> {
   return apiFetch("/api/ath/watchlist/map", {
     method: "POST", body: JSON.stringify({ symbols }),
@@ -5324,15 +5327,19 @@ export async function fetchAthWatchlist(): Promise<AthWatchlist> {
 }
 export async function saveAthWatchlist(
   symbols: string[], mode?: string, enforce_market_cap?: boolean,
+  enforce_history?: boolean,
 ): Promise<AthWatchlist> {
   return apiFetch("/api/ath/watchlist", {
-    method: "POST", body: JSON.stringify({ symbols, mode, enforce_market_cap }),
+    method: "POST",
+    body: JSON.stringify({ symbols, mode, enforce_market_cap, enforce_history }),
   });
 }
 
 export async function enterAllAthWatchlist(symbols?: string[]): Promise<{
-  opened: number; already_held?: number;
+  opened: number; already_held?: number; requested?: number;
   skipped?: { symbol: string; why: string }[];
+  /** Symbols that never reached the tradable universe, each with the reason. */
+  not_eligible?: { symbol: string; status: string; why: string }[];
   capital_left?: number; note?: string; reason?: string;
 }> {
   return apiFetch("/api/ath/enter-all?confirm=true", {
