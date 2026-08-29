@@ -447,11 +447,27 @@ async def register_coverage() -> dict:
     }
 
 
+# A job writing progress every batch should never go this long without a heartbeat.
+STALE_AFTER_SECONDS = 420
+
+
 async def expand_status() -> dict:
     col = await _state_col()
     doc = await col.find_one({"_id": EXPAND_STATE_ID}) or {}
     doc.pop("_id", None)
-    for k in ("started_at", "finished_at"):
+
+    hb = doc.get("heartbeat")
+    if doc.get("state") == "running" and hb:
+        if hb.tzinfo is None:
+            hb = hb.replace(tzinfo=timezone.utc)
+        age = (_now() - hb).total_seconds()
+        if age > STALE_AFTER_SECONDS:
+            doc["state"] = "stalled"
+            doc["step"] = (f"No progress for {age / 60:.0f} minutes — the run stopped. "
+                           f"{doc.get('seeded', 0)} symbols were seeded before it did, and "
+                           f"they are kept. Start it again to continue from there.")
+
+    for k in ("started_at", "finished_at", "heartbeat"):
         if hasattr(doc.get(k), "isoformat"):
             doc[k] = doc[k].isoformat()
     return doc or {"state": "never run"}
@@ -459,8 +475,13 @@ async def expand_status() -> dict:
 
 async def _expand_progress(**kw) -> None:
     col = await _state_col()
+    # Every write stamps a heartbeat. A long job that dies — the process killed, the
+    # container restarted mid-run — leaves `state: running` behind forever otherwise, and
+    # a stalled job that still claims to be working is worse than one that admits it
+    # stopped: the page waits on it and nobody restarts it.
     await col.update_one({"_id": EXPAND_STATE_ID},
-                         {"$set": {"_id": EXPAND_STATE_ID, **kw}}, upsert=True)
+                         {"$set": {"_id": EXPAND_STATE_ID, "heartbeat": _now(), **kw}},
+                         upsert=True)
 
 
 async def expand_register(limit: int | None = None) -> dict:
@@ -547,6 +568,11 @@ async def start_expand(limit: int | None = None) -> dict:
     if _expand_task and not _expand_task.done():
         return {"started": False, "reason": "an expansion is already running",
                 **(await expand_status())}
+    # A stalled doc must not block a restart. The work already done is kept — seeding is
+    # `only_missing`, so a fresh run simply skips what the dead one finished.
+    st = await expand_status()
+    if st.get("state") == "running":
+        return {"started": False, "reason": "an expansion is already running", **st}
 
     async def _run():
         try:
