@@ -4622,6 +4622,7 @@ export interface AnalysisPillar {
 }
 export interface AnalysisRow {
   symbol: string;
+  name?: string | null;
   analysed: boolean;
   note?: string;
   screens: string[];

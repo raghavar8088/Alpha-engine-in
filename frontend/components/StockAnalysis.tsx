@@ -18,6 +18,7 @@ import GlassPanel from "./GlassPanel";
 import EmptyState from "./EmptyState";
 import Skeleton from "./Skeleton";
 import { copySymbols } from "../lib/copySymbols";
+import { Th, Select, SearchBox, FilterBar, cmp, SortState } from "./TableControls";
 import { analyseStocks, AnalysisResult, AnalysisRow } from "../lib/api";
 
 const BIAS_TONE: Record<string, string> = {
@@ -30,6 +31,18 @@ const PILLAR_LABEL: Record<string, string> = {
   trend: "Trend", momentum: "Momentum", volume: "Volume & delivery",
   structure: "Position in range", tradability: "Can you trade it",
 };
+
+type SortKey = "symbol" | "score" | "bias" | "action" | "ltp" | "r1w" | "r1m" | "r6m";
+
+const BIAS_OPTS: [string, string][] = [
+  ["any", "any"], ["Bullish", "Bullish"], ["Neutral", "Neutral"], ["Bearish", "Bearish"],
+];
+const ACTION_OPTS: [string, string][] = [
+  ["any", "any"], ["Buy", "Buy"], ["Watch", "Watch"], ["Avoid", "Avoid"],
+];
+const SCORE_OPTS: [string, string][] = [
+  ["0", "any"], ["60", "60+"], ["70", "70+"], ["80", "80+"], ["90", "90+"],
+];
 
 const num = (v: number | null | undefined, dp = 2) =>
   v === null || v === undefined ? "—" : v.toLocaleString("en-IN", { maximumFractionDigits: dp });
@@ -44,7 +57,11 @@ export default function StockAnalysis() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [open, setOpen] = useState<string | null>(null);
-  const [only, setOnly] = useState<"all" | "buy" | "bullish">("all");
+  const [q, setQ] = useState("");
+  const [bias, setBias] = useState("any");
+  const [action, setAction] = useState("any");
+  const [minScore, setMinScore] = useState("0");
+  const [sort, setSort] = useState<SortState<SortKey>>({ key: "score", dir: -1 });
   const [copied, setCopied] = useState<"tv" | "plain" | null>(null);
 
   const run = useCallback(async (fresh = false) => {
@@ -55,10 +72,35 @@ export default function StockAnalysis() {
     finally { setBusy(false); }
   }, [raw]);
 
-  const rows = (res?.rows ?? []).filter((r) =>
-    only === "all" ? true
-    : only === "buy" ? r.verdict?.action === "Buy"
-    : r.verdict?.bias === "Bullish");
+  const activeFilters = [q.trim(), bias, action, minScore]
+    .filter((v, i) => (i === 0 ? !!v : v !== "any" && v !== "0")).length;
+  const clearFilters = () => {
+    setQ(""); setBias("any"); setAction("any"); setMinScore("0");
+  };
+
+  const rows = (res?.rows ?? [])
+    .filter((r) => {
+      const needle = q.trim().toUpperCase();
+      if (needle && !r.symbol.includes(needle)
+          && !(r.name ?? "").toUpperCase().includes(needle)) return false;
+      if (bias !== "any" && r.verdict?.bias !== bias) return false;
+      if (action !== "any" && r.verdict?.action !== action) return false;
+      if (Number(minScore) && (r.verdict?.score ?? 0) < Number(minScore)) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      const { key, dir } = sort;
+      const pick = (r: AnalysisRow) =>
+        key === "symbol" ? r.symbol
+        : key === "score" ? r.verdict?.score
+        : key === "bias" ? r.verdict?.bias
+        : key === "action" ? r.verdict?.action
+        : key === "ltp" ? r.ltp
+        : key === "r1w" ? r.returns?.["1w"]
+        : key === "r1m" ? r.returns?.["1m"]
+        : r.returns?.["6m"];
+      return cmp(pick(a), pick(b), dir);
+    });
 
   // Copies the filtered view, so "Buy only" then copy hands you exactly the shortlist.
   const copy = async (fmt: "tv" | "plain") => {
@@ -106,7 +148,9 @@ export default function StockAnalysis() {
       {res && (
         <GlassPanel
           title="Verdicts"
-          note={`${res.analysed} of ${res.count} analysed`}
+          note={activeFilters
+            ? `${rows.length} of ${res.analysed} shown`
+            : `${res.analysed} of ${res.count} analysed`}
         >
           {res.fetch_note && <div className="warn">{res.fetch_note}</div>}
 
@@ -118,12 +162,22 @@ export default function StockAnalysis() {
             allows.
           </div>
 
+          <FilterBar active={activeFilters} onClear={clearFilters}>
+            <SearchBox value={q} onChange={setQ} placeholder="Find a stock…" />
+            <Select label="Bias" value={bias} onChange={setBias} options={BIAS_OPTS} />
+            <Select label="Action" value={action} onChange={setAction} options={ACTION_OPTS} />
+            <Select label="Score" value={minScore} onChange={setMinScore} options={SCORE_OPTS} />
+          </FilterBar>
+
           <div className="filters">
-            {(["all", "buy", "bullish"] as const).map((f) => (
-              <button key={f} className={only === f ? "on" : ""} onClick={() => setOnly(f)}>
-                {f === "all" ? "All" : f === "buy" ? "Buy only" : "Bullish only"}
-              </button>
-            ))}
+            <button className="preset"
+              onClick={() => { clearFilters(); setAction("Buy"); }}>
+              Buyable only
+            </button>
+            <button className="preset"
+              onClick={() => { clearFilters(); setAction("Buy"); setMinScore("80"); }}>
+              Best scoring buys
+            </button>
             <div className="copies">
               <button className="cp primary" disabled={!rows.length}
                 onClick={() => copy("tv")}
@@ -138,14 +192,20 @@ export default function StockAnalysis() {
           </div>
 
           {!rows.length ? (
-            <EmptyState title="Nothing matches that filter" />
+            <EmptyState title="Nothing matches those filters"
+              note={activeFilters ? "Loosen a filter to see the rest." : undefined} />
           ) : (
             <div className="tw">
               <table>
                 <thead><tr>
-                  <th className="l">Stock</th><th>Score</th>
-                  <th className="l">Bias</th><th className="l">Action</th>
-                  <th>LTP</th><th>1w</th><th>1m</th><th>6m</th>
+                  <Th k="symbol" sort={sort} setSort={setSort} align="l">Stock</Th>
+                  <Th k="score" sort={sort} setSort={setSort} numeric>Score</Th>
+                  <Th k="bias" sort={sort} setSort={setSort} align="l">Bias</Th>
+                  <Th k="action" sort={sort} setSort={setSort} align="l">Action</Th>
+                  <Th k="ltp" sort={sort} setSort={setSort} numeric>LTP</Th>
+                  <Th k="r1w" sort={sort} setSort={setSort} numeric>1w</Th>
+                  <Th k="r1m" sort={sort} setSort={setSort} numeric>1m</Th>
+                  <Th k="r6m" sort={sort} setSort={setSort} numeric>6m</Th>
                   <th className="l">Why</th><th></th>
                 </tr></thead>
                 <tbody>
@@ -204,7 +264,9 @@ export default function StockAnalysis() {
           border: 1px solid var(--border); background: var(--canvas-soft);
           color: var(--text-secondary);
         }
-        .filters button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+        .filters .preset {
+          border-color: var(--accent); color: var(--accent); font-weight: 600;
+        }
         .copies { margin-left: auto; display: flex; gap: 6px; }
         .cp {
           padding: 5px 13px; border-radius: 8px; font-size: 11.5px; cursor: pointer;
@@ -217,12 +279,14 @@ export default function StockAnalysis() {
         .sk { display: flex; flex-direction: column; gap: 8px; }
         .tw { overflow-x: auto; }
         .tw table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-        .tw th {
+        /* :global because the sortable headers are rendered by the shared Th component,
+           and styled-jsx scopes plain selectors to this file's own JSX only. */
+        .tw :global(th) {
           text-align: right; padding: 8px 10px; font-weight: 600; font-size: 11px;
           text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted);
           border-bottom: 1px solid var(--border); white-space: nowrap;
         }
-        .tw th.l { text-align: left; }
+        .tw :global(th.l) { text-align: left; }
       `}</style>
     </div>
   );

@@ -19,6 +19,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import GlassPanel from "./GlassPanel";
 import EmptyState from "./EmptyState";
 import { copySymbols } from "../lib/copySymbols";
+import { Th, Select, SearchBox, FilterBar, cmp, SortState } from "./TableControls";
 import Skeleton from "./Skeleton";
 import {
   fetchAthUniverseSweep, fetchAthUniverseStatus, buildAthUniverse,
@@ -40,14 +41,33 @@ const pctf = (v: number | null | undefined) =>
 const cls = (v: number | null | undefined) =>
   v === null || v === undefined ? "" : v > 0 ? "gain" : v < 0 ? "loss" : "";
 
-type Filter = "all" | "confirmed" | "near" | "buy" | "confirmed_buy";
+type SortKey = "symbol" | "high" | "score" | "bias" | "action" | "ltp" | "r1m" | "r6m";
+
+const HIGH_OPTS: [string, string][] = [
+  ["any", "any"], ["all_time", "at an all-time high"], ["near_ath", "within 3% of one"],
+  ["multi_year", "multi-year only"], ["unverified", "unverified"],
+];
+const BIAS_OPTS: [string, string][] = [
+  ["any", "any"], ["Bullish", "Bullish"], ["Neutral", "Neutral"], ["Bearish", "Bearish"],
+];
+const ACTION_OPTS: [string, string][] = [
+  ["any", "any"], ["Buy", "Buy"], ["Watch", "Watch"], ["Avoid", "Avoid"],
+];
+const SCORE_OPTS: [string, string][] = [
+  ["0", "any"], ["60", "60+"], ["70", "70+"], ["80", "80+"], ["90", "90+"],
+];
 
 export default function AnalysedStocks() {
   const [snap, setSnap] = useState<AthUniverseSnapshot | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [open, setOpen] = useState<string | null>(null);
-  const [filter, setFilter] = useState<Filter>("all");
+  const [q, setQ] = useState("");
+  const [high, setHigh] = useState("any");
+  const [bias, setBias] = useState("any");
+  const [action, setAction] = useState("any");
+  const [minScore, setMinScore] = useState("0");
+  const [sort, setSort] = useState<SortState<SortKey>>({ key: "score", dir: -1 });
   const [showCoverage, setShowCoverage] = useState(false);
   const [copied, setCopied] = useState<"tv" | "plain" | null>(null);
   const [reg, setReg] = useState<{ coverage: AthRegisterCoverage; expand: AthExpandStatus } | null>(null);
@@ -110,14 +130,47 @@ export default function AnalysedStocks() {
     finally { setBusy(false); }
   };
 
-  const rows = (snap?.rows ?? []).filter((r) => {
-    const buy = r.verdict?.action === "Buy";
-    if (filter === "confirmed") return r.ath_grade === "all_time";
-    if (filter === "near") return r.ath_grade === "near_ath";
-    if (filter === "buy") return buy;
-    if (filter === "confirmed_buy") return buy && r.ath_grade === "all_time";
-    return true;
-  });
+  const activeFilters = [q.trim(), high, bias, action, minScore]
+    .filter((v, i) => (i === 0 ? !!v : v !== "any" && v !== "0")).length;
+
+  const clearFilters = () => {
+    setQ(""); setHigh("any"); setBias("any"); setAction("any"); setMinScore("0");
+  };
+
+  const HIGH_RANK: Record<string, number> = {
+    all_time: 3, near_ath: 2, multi_year: 1, unverified: 0,
+  };
+
+  const rows = (snap?.rows ?? [])
+    .filter((r) => {
+      const needle = q.trim().toUpperCase();
+      if (needle && !r.symbol.includes(needle)
+          && !(r.name ?? "").toUpperCase().includes(needle)) return false;
+      if (high !== "any" && r.ath_grade !== high) return false;
+      if (bias !== "any" && r.verdict?.bias !== bias) return false;
+      if (action !== "any" && r.verdict?.action !== action) return false;
+      if (Number(minScore) && (r.verdict?.score ?? 0) < Number(minScore)) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      const { key, dir } = sort;
+      // Sorting the High column by its label would order it alphabetically, putting
+      // "multi-year" above "all-time". Rank it by what it means instead, and within a
+      // rank by how close the stock actually is.
+      if (key === "high") {
+        const d = cmp(HIGH_RANK[a.ath_grade] ?? -1, HIGH_RANK[b.ath_grade] ?? -1, dir);
+        return d !== 0 ? d : cmp(a.pct_from_ath, b.pct_from_ath, dir);
+      }
+      const pick = (r: AthUniverseRowFull) =>
+        key === "symbol" ? r.symbol
+        : key === "score" ? r.verdict?.score
+        : key === "bias" ? r.verdict?.bias
+        : key === "action" ? r.verdict?.action
+        : key === "ltp" ? r.ltp
+        : key === "r1m" ? r.returns?.["1m"]
+        : r.returns?.["6m"];
+      return cmp(pick(a), pick(b), dir);
+    });
 
   const cov = snap?.coverage;
   const running = snap?.state === "running";
@@ -262,7 +315,10 @@ export default function AnalysedStocks() {
             </GlassPanel>
           )}
 
-          <GlassPanel title="The stocks" note={`${rows.length} shown`}>
+          <GlassPanel title="The stocks"
+            note={activeFilters
+              ? `${rows.length} of ${snap.count ?? 0} shown`
+              : `${rows.length} shown`}>
             <div className="legend">
               <b>All-time high</b> is confirmed against our own register, which walks each
               stock back to its listing date. Chartink&rsquo;s window stops around 20 years,
@@ -275,14 +331,23 @@ export default function AnalysedStocks() {
               under ASM reads Avoid however good its chart is.
             </div>
 
+            <FilterBar active={activeFilters} onClear={clearFilters}>
+              <SearchBox value={q} onChange={setQ} placeholder="Find a stock…" />
+              <Select label="High" value={high} onChange={setHigh} options={HIGH_OPTS} />
+              <Select label="Bias" value={bias} onChange={setBias} options={BIAS_OPTS} />
+              <Select label="Action" value={action} onChange={setAction} options={ACTION_OPTS} />
+              <Select label="Score" value={minScore} onChange={setMinScore} options={SCORE_OPTS} />
+            </FilterBar>
+
             <div className="filters">
-              {([["all", "All"], ["confirmed", "At an all-time high"],
-                 ["near", "Within 3% of one"], ["buy", "Buy only"],
-                 ["confirmed_buy", "All-time high + Buy"]] as const)
-                .map(([k, l]) => (
-                  <button key={k} className={filter === k ? "on" : ""}
-                    onClick={() => setFilter(k as Filter)}>{l}</button>
-              ))}
+              <button className="preset"
+                onClick={() => { clearFilters(); setHigh("all_time"); setAction("Buy"); }}>
+                At an all-time high &amp; buyable
+              </button>
+              <button className="preset"
+                onClick={() => { clearFilters(); setAction("Buy"); setMinScore("80"); }}>
+                Best scoring buys
+              </button>
               <div className="copies">
                 <button className="cp primary" disabled={!rows.length}
                   onClick={() => copy("tv")}
@@ -296,13 +361,23 @@ export default function AnalysedStocks() {
               </div>
             </div>
 
-            {!rows.length ? <EmptyState title="Nothing matches that filter" /> : (
+            {!rows.length ? (
+              <EmptyState title="Nothing matches those filters"
+                note={activeFilters
+                  ? `${snap.count ?? 0} stocks were swept — loosen a filter to see them.`
+                  : undefined} />
+            ) : (
               <div className="tw">
                 <table>
                   <thead><tr>
-                    <th className="l">Stock</th><th className="l">High</th><th>Score</th>
-                    <th className="l">Bias</th><th className="l">Action</th>
-                    <th>LTP</th><th>1m</th><th>6m</th>
+                    <Th k="symbol" sort={sort} setSort={setSort} align="l">Stock</Th>
+                    <Th k="high" sort={sort} setSort={setSort} align="l" numeric>High</Th>
+                    <Th k="score" sort={sort} setSort={setSort} numeric>Score</Th>
+                    <Th k="bias" sort={sort} setSort={setSort} align="l">Bias</Th>
+                    <Th k="action" sort={sort} setSort={setSort} align="l">Action</Th>
+                    <Th k="ltp" sort={sort} setSort={setSort} numeric>LTP</Th>
+                    <Th k="r1m" sort={sort} setSort={setSort} numeric>1m</Th>
+                    <Th k="r6m" sort={sort} setSort={setSort} numeric>6m</Th>
                     <th className="l">Why</th><th></th>
                   </tr></thead>
                   <tbody>
@@ -378,7 +453,9 @@ export default function AnalysedStocks() {
           padding: 5px 13px; border-radius: 999px; font-size: 12px; cursor: pointer;
           border: 1px solid var(--border); background: var(--canvas-soft); color: var(--text-secondary);
         }
-        .filters button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+        .filters .preset {
+          border-color: var(--accent); color: var(--accent); font-weight: 600;
+        }
         .copies { margin-left: auto; display: flex; gap: 6px; }
         .cp {
           padding: 5px 13px; border-radius: 8px; font-size: 11.5px; cursor: pointer;

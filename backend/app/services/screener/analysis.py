@@ -453,6 +453,12 @@ async def analyse(raw: str | list[str], fresh: bool = False) -> dict:
                                        "all_time_high_date": 1})}
     caps = {d["symbol"]: d async for d in stock_fundamentals_collection.find(
         {"symbol": {"$in": symbols}}, {"_id": 0, "symbol": 1, "market_cap": 1})}
+    # Company names, so a row reads as a company rather than a ticker and a search box can
+    # match either. The field was being emitted as a hardcoded None.
+    from app.core.db import instruments_collection
+    names = {d["symbol"]: d.get("name") async for d in instruments_collection.find(
+        {"symbol": {"$in": symbols}, "asset_class": "EQUITY"},
+        {"_id": 0, "symbol": 1, "name": 1})}
 
     # Anything without enough stored history gets pulled from Angel now, then re-read.
     # Done once for the whole request rather than per symbol.
@@ -474,7 +480,8 @@ async def analyse(raw: str | list[str], fresh: bool = False) -> dict:
     bench_rets = H.all_horizon_returns([b.close for b in bench]) if bench else {}
 
     rows = [_analyse_one(s, bars_by.get(s) or [], bench_rets, delivery.get(s),
-                         cross.get(s) or [], highs.get(s), caps.get(s), gate_ctx)
+                         cross.get(s) or [], highs.get(s), caps.get(s), gate_ctx,
+                         names.get(s))
             for s in symbols]
 
     ok = [r for r in rows if r.get("analysed")]
@@ -503,8 +510,9 @@ async def _gate_context():
 
 
 def _analyse_one(symbol: str, bars: list, bench_rets: dict, deliv: dict | None,
-                 screens: list[str], high: dict | None, cap: dict | None, ctx) -> dict:
-    base = {"symbol": symbol, "screens": screens, "analysed": False}
+                 screens: list[str], high: dict | None, cap: dict | None, ctx,
+                 name: str | None = None) -> dict:
+    base = {"symbol": symbol, "name": name, "screens": screens, "analysed": False}
     mcap = (cap or {}).get("market_cap")
     base["market_cap_cr"] = round(mcap / 1e7) if mcap else None
 
@@ -571,7 +579,6 @@ def _analyse_one(symbol: str, bars: list, bench_rets: dict, deliv: dict | None,
     return {
         **base,
         "analysed": True,
-        "name": None,
         "ltp": round(price, 2),
         "sessions": len(bars),
         "as_of": H.ist_date(bars[-1].ts).isoformat(),
