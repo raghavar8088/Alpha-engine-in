@@ -17,6 +17,7 @@ import { useCallback, useState } from "react";
 import GlassPanel from "./GlassPanel";
 import EmptyState from "./EmptyState";
 import Skeleton from "./Skeleton";
+import { copySymbols } from "../lib/copySymbols";
 import { analyseStocks, AnalysisResult, AnalysisRow } from "../lib/api";
 
 const BIAS_TONE: Record<string, string> = {
@@ -44,6 +45,7 @@ export default function StockAnalysis() {
   const [err, setErr] = useState<string | null>(null);
   const [open, setOpen] = useState<string | null>(null);
   const [only, setOnly] = useState<"all" | "buy" | "bullish">("all");
+  const [copied, setCopied] = useState<"tv" | "plain" | null>(null);
 
   const run = useCallback(async (fresh = false) => {
     if (!raw.trim()) return;
@@ -57,6 +59,13 @@ export default function StockAnalysis() {
     only === "all" ? true
     : only === "buy" ? r.verdict?.action === "Buy"
     : r.verdict?.bias === "Bullish");
+
+  // Copies the filtered view, so "Buy only" then copy hands you exactly the shortlist.
+  const copy = async (fmt: "tv" | "plain") => {
+    await copySymbols(rows.map((r) => r.symbol), fmt);
+    setCopied(fmt);
+    setTimeout(() => setCopied(null), 2000);
+  };
 
   return (
     <div className="sa">
@@ -115,6 +124,17 @@ export default function StockAnalysis() {
                 {f === "all" ? "All" : f === "buy" ? "Buy only" : "Bullish only"}
               </button>
             ))}
+            <div className="copies">
+              <button className="cp primary" disabled={!rows.length}
+                onClick={() => copy("tv")}
+                title="NSE:SYM,NSE:SYM — paste into a TradingView watchlist, or into the All Time High watchlist">
+                {copied === "tv" ? `copied ${rows.length} ✓` : "copy for TradingView"}
+              </button>
+              <button className="cp" disabled={!rows.length}
+                onClick={() => copy("plain")} title="Bare tickers, comma separated">
+                {copied === "plain" ? "copied ✓" : "plain"}
+              </button>
+            </div>
           </div>
 
           {!rows.length ? (
@@ -185,6 +205,15 @@ export default function StockAnalysis() {
           color: var(--text-secondary);
         }
         .filters button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+        .copies { margin-left: auto; display: flex; gap: 6px; }
+        .cp {
+          padding: 5px 13px; border-radius: 8px; font-size: 11.5px; cursor: pointer;
+          border: 1px solid var(--border); background: var(--canvas-soft);
+          color: var(--text-secondary); white-space: nowrap;
+        }
+        .cp.primary { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+        .cp:hover:not(:disabled) { border-color: var(--accent); color: var(--text-primary); }
+        .cp:disabled { opacity: 0.4; cursor: default; }
         .sk { display: flex; flex-direction: column; gap: 8px; }
         .tw { overflow-x: auto; }
         .tw table { width: 100%; border-collapse: collapse; font-size: 12.5px; }

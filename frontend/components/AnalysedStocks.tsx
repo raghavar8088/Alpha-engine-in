@@ -18,6 +18,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import GlassPanel from "./GlassPanel";
 import EmptyState from "./EmptyState";
+import { copySymbols } from "../lib/copySymbols";
 import Skeleton from "./Skeleton";
 import {
   fetchAthUniverseSweep, fetchAthUniverseStatus, buildAthUniverse,
@@ -48,6 +49,7 @@ export default function AnalysedStocks() {
   const [open, setOpen] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
   const [showCoverage, setShowCoverage] = useState(false);
+  const [copied, setCopied] = useState<"tv" | "plain" | null>(null);
   const [reg, setReg] = useState<{ coverage: AthRegisterCoverage; expand: AthExpandStatus } | null>(null);
   const poll = useRef<ReturnType<typeof setInterval> | null>(null);
   const regPoll = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -119,6 +121,15 @@ export default function AnalysedStocks() {
 
   const cov = snap?.coverage;
   const running = snap?.state === "running";
+
+  // Copies WHAT IS ON SCREEN — the active filter and the score ordering both carry
+  // through. Filtering to "All-time high + Buy" and copying is the whole workflow; a
+  // button that always copied all 183 would defeat the filters sitting next to it.
+  const copy = async (fmt: "tv" | "plain") => {
+    await copySymbols(rows.map((r) => r.symbol), fmt);
+    setCopied(fmt);
+    setTimeout(() => setCopied(null), 2000);
+  };
 
   return (
     <div className="as">
@@ -272,6 +283,17 @@ export default function AnalysedStocks() {
                   <button key={k} className={filter === k ? "on" : ""}
                     onClick={() => setFilter(k as Filter)}>{l}</button>
               ))}
+              <div className="copies">
+                <button className="cp primary" disabled={!rows.length}
+                  onClick={() => copy("tv")}
+                  title="NSE:SYM,NSE:SYM — paste into a TradingView watchlist, or into the All Time High watchlist">
+                  {copied === "tv" ? `copied ${rows.length} ✓` : "copy for TradingView"}
+                </button>
+                <button className="cp" disabled={!rows.length}
+                  onClick={() => copy("plain")} title="Bare tickers, comma separated">
+                  {copied === "plain" ? "copied ✓" : "plain"}
+                </button>
+              </div>
             </div>
 
             {!rows.length ? <EmptyState title="Nothing matches that filter" /> : (
@@ -357,6 +379,15 @@ export default function AnalysedStocks() {
           border: 1px solid var(--border); background: var(--canvas-soft); color: var(--text-secondary);
         }
         .filters button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+        .copies { margin-left: auto; display: flex; gap: 6px; }
+        .cp {
+          padding: 5px 13px; border-radius: 8px; font-size: 11.5px; cursor: pointer;
+          border: 1px solid var(--border); background: var(--canvas-soft);
+          color: var(--text-secondary); white-space: nowrap;
+        }
+        .cp.primary { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+        .cp:hover:not(:disabled) { border-color: var(--accent); color: var(--text-primary); }
+        .cp:disabled { opacity: 0.4; cursor: default; }
         .sk { display: flex; flex-direction: column; gap: 8px; }
         .tw { overflow-x: auto; }
         .tw table { width: 100%; border-collapse: collapse; font-size: 12.5px; }

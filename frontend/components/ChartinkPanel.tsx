@@ -20,6 +20,7 @@ import GlassPanel from "./GlassPanel";
 import EmptyState from "./EmptyState";
 import Skeleton from "./Skeleton";
 import SymbolConverter from "./SymbolConverter";
+import { copySymbols } from "../lib/copySymbols";
 import {
   fetchScreenerChartinkNamed, ChartinkResult, ScreenerConfig,
 } from "../lib/api";
@@ -64,28 +65,11 @@ export default function ChartinkPanel({ cfg }: { cfg: Cfg }) {
     return (b[k] ?? -Infinity) - (a[k] ?? -Infinity);
   });
 
-  /** Copy the result as a symbol list.
-   *
-   * Two formats because they feed two different places. TradingView's watchlist import
-   * wants `NSE:SYM,NSE:SYM` with no spaces — that same string is also what the All Time
-   * High watchlist accepts, since its parser strips the `NSE:` prefix, so this one covers
-   * both. Plain is kept for anywhere that wants bare tickers.
-   *
-   * The clipboard API is unavailable on insecure origins and can be refused outright, so
-   * a failure falls back to a prompt rather than silently doing nothing and leaving the
-   * button looking broken.
-   */
-  const copy = (fmt: "tv" | "plain") => {
-    const text = fmt === "tv"
-      ? rows.map((r) => `NSE:${r.symbol}`).join(",")
-      : rows.map((r) => r.symbol).join(", ");
-    const done = () => { setCopied(fmt); setTimeout(() => setCopied(null), 2000); };
-    if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(text).then(done).catch(() => window.prompt(
-        "Copy the list below (Ctrl/⌘ + C):", text));
-    } else {
-      window.prompt("Copy the list below (Ctrl/⌘ + C):", text);
-    }
+  /** Copy the result as a symbol list, in whatever order the table is currently sorted. */
+  const copy = async (fmt: "tv" | "plain") => {
+    await copySymbols(rows.map((r) => r.symbol), fmt);
+    setCopied(fmt);
+    setTimeout(() => setCopied(null), 2000);
   };
 
   return (
