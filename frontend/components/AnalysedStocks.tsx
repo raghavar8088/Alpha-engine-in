@@ -21,7 +21,8 @@ import EmptyState from "./EmptyState";
 import Skeleton from "./Skeleton";
 import {
   fetchAthUniverseSweep, fetchAthUniverseStatus, buildAthUniverse,
-  AthUniverseSnapshot, AthUniverseRowFull,
+  fetchAthRegister, expandAthRegister,
+  AthUniverseSnapshot, AthUniverseRowFull, AthRegisterCoverage, AthExpandStatus,
 } from "../lib/api";
 
 const PILLAR_LABEL: Record<string, string> = {
@@ -47,14 +48,38 @@ export default function AnalysedStocks() {
   const [open, setOpen] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
   const [showCoverage, setShowCoverage] = useState(false);
+  const [reg, setReg] = useState<{ coverage: AthRegisterCoverage; expand: AthExpandStatus } | null>(null);
   const poll = useRef<ReturnType<typeof setInterval> | null>(null);
+  const regPoll = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const load = useCallback(async () => {
     try { setSnap(await fetchAthUniverseSweep()); setErr(null); }
     catch (e) { setErr(e instanceof Error ? e.message : String(e)); }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  const loadReg = useCallback(async () => {
+    try { setReg(await fetchAthRegister()); } catch { /* coverage is not worth an error banner */ }
+  }, []);
+
+  useEffect(() => { load(); loadReg(); }, [load, loadReg]);
+
+  // The expansion is long — minutes to an hour — so it gets its own slow poll rather than
+  // riding the sweep's, which stops as soon as the sweep does.
+  useEffect(() => {
+    if (reg?.expand?.state !== "running") {
+      if (regPoll.current) { clearInterval(regPoll.current); regPoll.current = null; }
+      return;
+    }
+    regPoll.current = setInterval(loadReg, 8000);
+    return () => { if (regPoll.current) clearInterval(regPoll.current); };
+  }, [reg?.expand?.state, loadReg]);
+
+  const expand = async () => {
+    setBusy(true);
+    try { await expandAthRegister(); await loadReg(); }
+    catch (e) { setErr(e instanceof Error ? e.message : String(e)); }
+    finally { setBusy(false); }
+  };
 
   // While a build runs, poll the CHEAP status route — the full snapshot carries every
   // analysed row and re-fetching it every few seconds would be wasteful.
@@ -156,6 +181,42 @@ export default function AnalysedStocks() {
               value={String((snap.count ?? 0) - (snap.confirmed_ath ?? 0) - (snap.near_ath ?? 0))}
               note="high, but its record still stands well above" />
           </div>
+
+          {showCoverage && reg && (
+            <GlassPanel title="How much of NSE can be checked at all"
+              note={`${reg.coverage.pct ?? 0}% of the cash market`}>
+              <div className="regbar">
+                <div style={{ width: `${reg.coverage.pct ?? 0}%` }} />
+              </div>
+              <div className="regnums">
+                <span><b>{reg.coverage.seeded.toLocaleString("en-IN")}</b> of{" "}
+                  {reg.coverage.universe.toLocaleString("en-IN")} NSE cash equities have a
+                  stored all-time high</span>
+                <span className="miss">{reg.coverage.missing.toLocaleString("en-IN")} missing</span>
+              </div>
+              <p className="regnote">{reg.coverage.note}</p>
+
+              {reg.expand.state === "running" ? (
+                <div className="prog">
+                  <div className="bar"><div style={{ width: `${reg.expand.progress ?? 0}%` }} /></div>
+                  <div className="stepline">
+                    {reg.expand.step} · {reg.expand.resolved ?? 0} resolved through Angel&rsquo;s
+                    scrip search, {reg.expand.seeded ?? 0} histories walked
+                  </div>
+                </div>
+              ) : (
+                <div className="acts">
+                  <button className="go small" disabled={busy} onClick={expand}>
+                    Seed the missing {reg.coverage.missing.toLocaleString("en-IN")}
+                  </button>
+                  <span className="took">
+                    Slow — several rate-limited calls per stock, and it runs on the server.
+                    {reg.expand.seeded ? ` Last run added ${reg.expand.seeded}.` : ""}
+                  </span>
+                </div>
+              )}
+            </GlassPanel>
+          )}
 
           {showCoverage && cov && (
             <GlassPanel title="How this list was assembled">
@@ -267,6 +328,16 @@ export default function AnalysedStocks() {
         .prog .bar div { height: 100%; background: var(--accent); transition: width 0.4s ease; }
         .stepline { font-size: 12px; color: var(--text-secondary); margin-top: 7px; }
         .patience { font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.5; max-width: 80ch; }
+        .regbar { height: 10px; border-radius: 999px; background: var(--canvas-soft); overflow: hidden; }
+        .regbar div { height: 100%; background: var(--accent); transition: width 0.5s ease; }
+        .regnums {
+          display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+          font-size: 12px; color: var(--text-secondary); margin-top: 8px;
+        }
+        .regnums b { color: var(--text-primary); font-size: 13px; }
+        .regnums .miss { color: #b45309; font-weight: 600; }
+        .regnote { font-size: 11.5px; line-height: 1.55; color: var(--text-muted); margin: 8px 0 12px; max-width: 92ch; }
+        .go.small { padding: 6px 16px; font-size: 12.5px; }
         .stats { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
         .legend {
           font-size: 12px; line-height: 1.65; color: var(--text-muted);

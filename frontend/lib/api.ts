@@ -4712,11 +4712,40 @@ export interface AthUniverseSnapshot {
     chartink_symbols: number;
     own_register_hits: number;
     register_size: number;
+    register?: AthRegisterCoverage;
     seeded: { needed: number; seeded: number; left: number; error?: string };
     excluded_non_equity: number;
     excluded?: { symbol: string; name: string; why: string }[];
     blind_spot: string;
   };
+}
+
+export interface AthRegisterCoverage {
+  universe: number;
+  seeded: number;
+  missing: number;
+  missing_resolvable?: number;
+  missing_need_lookup?: number;
+  pct?: number;
+  note: string;
+}
+export interface AthExpandStatus {
+  state: "ready" | "running" | "failed" | "never run";
+  step?: string; progress?: number;
+  total?: number; done?: number;
+  resolved?: number; seeded?: number; failed?: number;
+  seconds?: number; finished_at?: string;
+}
+export async function fetchAthRegister(): Promise<{
+  coverage: AthRegisterCoverage; expand: AthExpandStatus;
+}> {
+  return apiFetch("/api/screener/ath-universe/register");
+}
+export async function expandAthRegister(limit?: number): Promise<{
+  started: boolean; reason?: string; note?: string;
+}> {
+  return apiFetch("/api/screener/ath-universe/expand" + (limit ? `?limit=${limit}` : ""),
+                  { method: "POST" });
 }
 
 export async function fetchAthUniverseSweep(): Promise<AthUniverseSnapshot> {
