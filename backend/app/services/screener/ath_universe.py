@@ -49,26 +49,64 @@ STATE_ID = "ath_universe"
 # high to a 20-year high, and the union is far wider than any one of them: probed live,
 # 252d returned 77 rows, 1000d 28, 5000d 5 — different stocks in each.
 CLAUSES: list[tuple[str, str, str]] = [
+    # ── strict: through the high of an N-session window, intraday basis ──────────
     ("ath_20y", "20-year high (intraday)",
      "( {cash} ( latest high > 1 day ago max( 5000 , latest high ) ) )"),
+    ("ath_14y", "14-year high (intraday)",
+     "( {cash} ( latest high > 1 day ago max( 3500 , latest high ) ) )"),
     ("ath_10y", "10-year high (intraday)",
      "( {cash} ( latest high > 1 day ago max( 2500 , latest high ) ) )"),
+    ("ath_6y", "6-year high (intraday)",
+     "( {cash} ( latest high > 1 day ago max( 1500 , latest high ) ) )"),
     ("ath_4y", "4-year high (intraday)",
      "( {cash} ( latest high > 1 day ago max( 1000 , latest high ) ) )"),
+    ("ath_3y", "3-year high (intraday)",
+     "( {cash} ( latest high > 1 day ago max( 750 , latest high ) ) )"),
+
+    # ── closing basis: a different question, and it catches different names. A stock
+    #    can close at a record without its intraday high exceeding an old spike. ─────
     ("ath_4y_close", "4-year high (closing basis)",
      "( {cash} ( latest high > 1 day ago max( 1000 , latest close ) ) )"),
     ("ath_2y_close", "2-year high (closing basis)",
      "( {cash} ( latest close > 1 day ago max( 500 , latest close ) ) )"),
+    ("ath_1y_close", "52-week high (closing basis)",
+     "( {cash} ( latest close > 1 day ago max( 252 , latest close ) ) )"),
+
+    # ── 52-week, with and without a volume floor. The floor version is the standard
+    #    screen; the unfloored one reaches illiquid names the floor hides, which the
+    #    tradability pillar then judges rather than silently dropping. ──────────────
     ("high_52w", "52-week high",
      "( {cash} ( latest high >= latest max( 252 , latest high ) and latest volume > 1000 ) )"),
-]
-NAMED_NETS = ["all-time-high-8", "all-time-high"]
+    ("high_52w_all", "52-week high (no volume floor)",
+     "( {cash} ( latest high >= latest max( 252 , latest high ) ) )"),
 
-# Seeding is the expensive step. Capped per build so one run cannot spend an hour against
-# Angel; whatever is left is picked up by the next build and the shortfall is reported.
+    # ── approaching: within 2% of the level. Not at a high yet, so they are labelled
+    #    as such — but a stock 1% away today is the one that breaks out tomorrow. ────
+    ("near_52w", "Within 2% of the 52-week high",
+     "( {cash} ( latest close >= latest max( 252 , latest high ) * 0.98 "
+     "and latest volume > 5000 ) )"),
+    ("near_4y", "Within 2% of the 4-year high",
+     "( {cash} ( latest close >= 1 day ago max( 1000 , latest high ) * 0.98 "
+     "and latest volume > 5000 ) )"),
+]
+# Named public screeners, each verified to run. `all-time-high` was dropped: its owner
+# DELETED it between two probes on the same day — the page still returns 200 with a
+# scan-json prop whose clause is stripped. Public screeners are not a stable dependency,
+# which is the whole reason this sweep unions many nets instead of trusting one.
+NAMED_NETS = ["all-time-high-8", "all-time-high-stocks", "stocks-at-all-time-high",
+              "52-week-high", "new-52-week-high", "near-52-week-high"]
+
 # How recent a bar has to be to count as "at" the high.
 RECENT_DAYS = 7
-MAX_SEED = 60
+# How close to its stored all-time high a register symbol has to be to become a candidate.
+# Widened from "at or above" so approaching names are analysed too — they are labelled by
+# their actual distance, never counted as all-time highs.
+NEAR_ATH_PCT = 3.0
+# Seeding is the expensive step — several rate-limited Angel calls per symbol. Raised
+# because the register is what CONFIRMS an all-time high: every symbol seeded is one more
+# that can be judged properly instead of reported as unverified. Whatever is left over is
+# picked up by the next build and the shortfall is reported.
+MAX_SEED = 200
 SEED_PACE = 0.4
 ANALYSE_BATCH = 20
 
@@ -191,9 +229,13 @@ async def _own_candidates() -> tuple[dict[str, dict], int]:
         if not b or not b.get("high"):
             continue
         ath = float(h["all_time_high"])
-        if ath > 0 and float(b["high"]) >= ath * 0.999:
+        if ath <= 0:
+            continue
+        gap = (float(b["high"]) / ath - 1) * 100
+        if gap >= -NEAR_ATH_PCT:
             hits[sym] = {"stored_ath": ath, "ath_date": h.get("all_time_high_date"),
-                         "sessions": h.get("sessions"), "last_high": float(b["high"])}
+                         "sessions": h.get("sessions"), "last_high": float(b["high"]),
+                         "gap_pct": round(gap, 2)}
     return hits, len(highs)
 
 
@@ -264,13 +306,22 @@ async def build() -> dict:
             # A 20-year high is not an all-time high, and a stock whose stored peak sits
             # above today's price is reported as the multi-year high it actually is.
             if ath and ltp:
-                confirmed = ltp >= float(ath) * 0.999
-                basis = (f"at or above its stored all-time high of {float(ath):,.2f}"
+                gap = (ltp / float(ath) - 1) * 100
+                confirmed = gap >= -0.1
+                # Three states, not two. "At an all-time high", "1% away from one" and
+                # "at a 4-year high while its record still stands 40% above" are different
+                # facts, and a reader deciding what to buy needs to tell them apart.
+                grade = ("all_time" if confirmed
+                         else "near_ath" if gap >= -NEAR_ATH_PCT
+                         else "multi_year")
+                basis = (f"At or through its all-time high of {float(ath):,.2f}"
                          if confirmed else
-                         f"below its stored all-time high of {float(ath):,.2f}")
+                         f"{abs(gap):.1f}% below its all-time high of {float(ath):,.2f}"
+                         f" (set {h.get('all_time_high_date') or 'earlier'})")
             else:
-                confirmed = None
-                basis = "no stored all-time high to check against"
+                gap, confirmed, grade = None, None, "unverified"
+                basis = ("No stored all-time high to check against yet — this is a "
+                         "multi-year high on Chartink's window, not a verified record.")
             # `gate` is the largest nested object on an analysis row and everything a
             # reader needs from it is already summarised in pillars.tradability. Dropped
             # here to keep the stored snapshot well clear of Mongo's document ceiling —
@@ -284,6 +335,8 @@ async def build() -> dict:
                 "stored_ath_date": h.get("all_time_high_date"),
                 "history_sessions": h.get("sessions"),
                 "ath_confirmed": confirmed,
+                "ath_grade": grade,
+                "pct_from_ath": round(gap, 2) if gap is not None else None,
                 "ath_basis": basis,
             })
         await _progress(progress=40 + int(55 * (i + len(chunk)) / max(1, len(candidates))),
@@ -293,6 +346,7 @@ async def build() -> dict:
     rows.sort(key=lambda r: -((r.get("verdict") or {}).get("score") or -1))
 
     confirmed = [r for r in rows if r.get("ath_confirmed")]
+    near = [r for r in rows if r.get("ath_grade") == "near_ath"]
     buy = [r for r in rows if (r.get("verdict") or {}).get("action") == "Buy"]
     doc = {
         "state": "ready",
@@ -304,6 +358,7 @@ async def build() -> dict:
         "count": len(rows),
         "candidates": len(candidates),
         "confirmed_ath": len(confirmed),
+        "near_ath": len(near),
         "buyable": len(buy),
         "rows": rows,
         "coverage": {

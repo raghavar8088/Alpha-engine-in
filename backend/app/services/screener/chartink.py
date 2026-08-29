@@ -337,6 +337,17 @@ async def _fetch_scan(client: httpx.AsyncClient, slug: str) -> tuple[str, dict]:
         raise ChartinkUnavailable(f"could not parse the scan definition: {exc}") from exc
 
     if not scan.get("atlas_query"):
+        # A screener the owner deleted or made private still SERVES A PAGE — 200, full
+        # layout, a scan-json prop — with the clause stripped and the name replaced by
+        # "Deleted Scan". Saying "carries no runnable clause" sent me hunting a parse bug
+        # that did not exist, so name the actual cause.
+        if scan.get("deleted_at") or (scan.get("name") or "").lower() == "deleted scan":
+            raise ChartinkUnavailable(
+                f"{slug!r} has been deleted on Chartink — the page still loads but the "
+                f"scan behind it is gone. Public screeners can vanish without notice.")
+        if scan.get("is_private"):
+            raise ChartinkUnavailable(
+                f"{slug!r} is private — only its owner can run it.")
         raise ChartinkUnavailable(f"{slug!r} carries no runnable clause")
 
     # Chartink stamps its own lag on the page. It is empty outside market hours, which is
