@@ -11,6 +11,9 @@
   GET  /api/screener/chartink         optional delayed secondary feed (curated presets)
   GET  /api/screener/chartink/named   run ANY public Chartink screener by URL or slug
   POST /api/screener/analyse          analyse a stock or a pasted list of them
+  GET  /api/screener/ath-universe     every NSE stock at an all-time high, analysed
+  GET  /api/screener/ath-universe/status  build progress
+  POST /api/screener/ath-universe/build   start a rebuild (runs in the background)
   POST /api/screener/refresh          force a full recompute and persist
 
 Every GET is plain and cacheable — the app-wide 20s door cache applies, and `?fresh=true`
@@ -25,6 +28,7 @@ from app.api.deps import get_current_user
 from app.services.response_cache import cached as _cached
 from app.services.screener import bhavcopy as BC
 from app.services.screener import analysis as ANALYSIS
+from app.services.screener import ath_universe as ATHU
 from app.services.screener import chartink as CK
 from app.services.screener import paper as PA
 from app.services.screener import volume as V
@@ -248,6 +252,25 @@ async def analyse(payload: AnalyseRequest, _current_user: dict = Depends(get_cur
         return await ANALYSIS.analyse(payload.symbols, fresh=payload.fresh)
     except M.ScreenerError as exc:
         raise _guard(exc)
+
+
+@router.get("/ath-universe")
+async def ath_universe(_current_user: dict = Depends(get_current_user)):
+    """The last completed all-time-high sweep, with its coverage accounting."""
+    return await ATHU.snapshot()
+
+
+@router.get("/ath-universe/status")
+async def ath_universe_status(_current_user: dict = Depends(get_current_user)):
+    """Cheap progress poll — never carries the rows."""
+    return await ATHU.status()
+
+
+@router.post("/ath-universe/build")
+async def ath_universe_build(_current_user: dict = Depends(get_current_user)):
+    """Start a rebuild. Returns immediately; the sweep runs in the background because
+    seeding an unseen symbol's full history costs several rate-limited Angel calls."""
+    return await ATHU.start_build()
 
 
 @router.post("/refresh")
