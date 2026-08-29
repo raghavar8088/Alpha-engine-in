@@ -373,6 +373,7 @@ async def build() -> dict:
         "buyable": len(buy),
         "rows": rows,
         "coverage": {
+            "register": await register_coverage(),
             "chartink_nets": per_net,
             "chartink_symbols": len(ck_hits),
             "own_register_hits": len(own_hits),
@@ -399,6 +400,166 @@ async def build() -> dict:
                 "%s buyable, in %.0fs", len(candidates), len(confirmed), len(buy),
                 doc["seconds"])
     return {k: v for k, v in doc.items() if k != "rows"}
+
+
+# ── growing the register ────────────────────────────────────────────────────────
+# THE REGISTER IS THE REAL COVERAGE LIMIT. Measured: NSE's own sec_list carries 3,137 cash
+# equities once ETFs are removed, and only 1,188 of them have a stored all-time high. The
+# other 1,949 are invisible to net 2 entirely — they can only be found if a Chartink net
+# happens to flag them, and their high can never be CONFIRMED because there is nothing to
+# confirm it against.
+#
+# Closing that gap is the single largest completeness win available, and it is pure
+# grinding: several rate-limited Angel calls per symbol, two phases deep.
+EXPAND_STATE_ID = "ath_register_expand"
+EXPAND_BATCH = 50
+RESOLVE_PACE = 0.35
+
+
+async def register_coverage() -> dict:
+    """How much of NSE's cash market has a stored all-time high."""
+    from app.core.db import instruments_collection, stock_highs_collection
+    from app.services import nse_surveillance as SURV
+
+    snap = await SURV.load()
+    bands, etfs = snap.get("bands") or {}, snap.get("etfs") or {}
+    cash = {sym for sym, b in bands.items()
+            if (b.get("series") or "") in ("EQ", "BE", "BZ", "SM", "ST") and sym not in etfs}
+    if not cash:
+        return {"universe": 0, "seeded": 0, "missing": 0,
+                "note": "NSE's security list was unavailable, so coverage cannot be measured."}
+
+    have = {d["symbol"] async for d in stock_highs_collection.find(
+        {"all_time_high": {"$gt": 0}}, {"symbol": 1})}
+    missing = sorted(cash - have)
+    resolvable = {d["symbol"] async for d in instruments_collection.find(
+        {"asset_class": "EQUITY", "angel_token": {"$ne": None},
+         "symbol": {"$in": missing}}, {"symbol": 1})}
+    return {
+        "universe": len(cash),
+        "seeded": len(cash & have),
+        "missing": len(missing),
+        "missing_resolvable": len(resolvable),
+        "missing_need_lookup": len(missing) - len(resolvable),
+        "pct": round(len(cash & have) / len(cash) * 100, 1),
+        "note": ("Every missing symbol is one whose all-time high cannot be CONFIRMED — it "
+                 "can still be found by a Chartink net, but only reported as unverified."),
+    }
+
+
+async def expand_status() -> dict:
+    col = await _state_col()
+    doc = await col.find_one({"_id": EXPAND_STATE_ID}) or {}
+    doc.pop("_id", None)
+    for k in ("started_at", "finished_at"):
+        if hasattr(doc.get(k), "isoformat"):
+            doc[k] = doc[k].isoformat()
+    return doc or {"state": "never run"}
+
+
+async def _expand_progress(**kw) -> None:
+    col = await _state_col()
+    await col.update_one({"_id": EXPAND_STATE_ID},
+                         {"$set": {"_id": EXPAND_STATE_ID, **kw}}, upsert=True)
+
+
+async def expand_register(limit: int | None = None) -> dict:
+    """Resolve and seed NSE cash equities that have no stored all-time high.
+
+    Two phases per batch because they fail differently. A symbol absent from the
+    instrument master needs Angel's scrip search first — the master is Dhan-derived, so
+    its silence says nothing — and `backfill_all_time_highs` silently skips anything it
+    cannot resolve, which would otherwise look like a symbol with no history rather than
+    one nobody looked up.
+    """
+    from app.services import ath_trading as ATH
+    from app.services import stock_highs as SH
+    from app.core.db import instruments_collection
+
+    started = _now()
+    cov = await register_coverage()
+    if not cov.get("missing"):
+        await _expand_progress(state="ready", finished_at=_now(), step="nothing missing")
+        return {"seeded": 0, "resolved": 0, **cov}
+
+    from app.core.db import stock_highs_collection
+    from app.services import nse_surveillance as SURV
+    snap = await SURV.load()
+    bands, etfs = snap.get("bands") or {}, snap.get("etfs") or {}
+    cash = {sym for sym, b in bands.items()
+            if (b.get("series") or "") in ("EQ", "BE", "BZ", "SM", "ST") and sym not in etfs}
+    have = {d["symbol"] async for d in stock_highs_collection.find(
+        {"all_time_high": {"$gt": 0}}, {"symbol": 1})}
+    todo = sorted(cash - have)
+    if limit:
+        todo = todo[:limit]
+
+    await _expand_progress(state="running", started_at=started, finished_at=None,
+                           total=len(todo), done=0, resolved=0, seeded=0, progress=0,
+                           step="starting")
+
+    resolved = seeded = failed = 0
+    for i in range(0, len(todo), EXPAND_BATCH):
+        batch = todo[i:i + EXPAND_BATCH]
+
+        known = {d["symbol"] async for d in instruments_collection.find(
+            {"asset_class": "EQUITY", "angel_token": {"$ne": None},
+             "symbol": {"$in": batch}}, {"symbol": 1})}
+        for sym in batch:
+            if sym in known:
+                continue
+            try:
+                found = await ATH._angel_lookup(sym)
+                if found:
+                    await ATH._adopt_instrument(found)
+                    resolved += 1
+            except Exception as exc:  # noqa: BLE001
+                logger.info("expand: lookup failed for %s (%s)", sym, str(exc)[:90])
+            await asyncio.sleep(RESOLVE_PACE)
+
+        try:
+            res = await SH.backfill_all_time_highs(only_missing=True, symbols=batch)
+            seeded += res.get("ok", 0)
+            failed += res.get("failed", 0)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("expand: seeding batch failed (%s)", exc)
+
+        done = min(i + EXPAND_BATCH, len(todo))
+        await _expand_progress(done=done, resolved=resolved, seeded=seeded, failed=failed,
+                               progress=int(done / max(1, len(todo)) * 100),
+                               step=f"{done} of {len(todo)} — {seeded} seeded")
+
+    out = {"state": "ready", "finished_at": _now(), "progress": 100,
+           "total": len(todo), "resolved": resolved, "seeded": seeded, "failed": failed,
+           "seconds": round((_now() - started).total_seconds(), 1),
+           "step": f"done — {seeded} new all-time highs stored"}
+    await _expand_progress(**out)
+    logger.info("expand register: %s resolved, %s seeded, %s failed in %.0fs",
+                resolved, seeded, failed, out["seconds"])
+    return out
+
+
+_expand_task: asyncio.Task | None = None
+
+
+async def start_expand(limit: int | None = None) -> dict:
+    global _expand_task
+    if _expand_task and not _expand_task.done():
+        return {"started": False, "reason": "an expansion is already running",
+                **(await expand_status())}
+
+    async def _run():
+        try:
+            await expand_register(limit)
+        except Exception as exc:  # noqa: BLE001
+            logger.exception("register expansion failed")
+            await _expand_progress(state="failed", step=str(exc)[:200], finished_at=_now())
+
+    _expand_task = asyncio.create_task(_run())
+    return {"started": True,
+            "note": "Growing the register in the background. This is slow — several "
+                    "rate-limited Angel calls per symbol — but every symbol it adds is one "
+                    "whose all-time high can afterwards be confirmed rather than guessed."}
 
 
 _task: asyncio.Task | None = None

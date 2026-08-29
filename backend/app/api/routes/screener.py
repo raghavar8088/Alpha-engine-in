@@ -14,6 +14,8 @@
   GET  /api/screener/ath-universe     every NSE stock at an all-time high, analysed
   GET  /api/screener/ath-universe/status  build progress
   POST /api/screener/ath-universe/build   start a rebuild (runs in the background)
+  GET  /api/screener/ath-universe/register  how much of NSE has a stored all-time high
+  POST /api/screener/ath-universe/expand    seed the rest (slow, background)
   POST /api/screener/refresh          force a full recompute and persist
 
 Every GET is plain and cacheable — the app-wide 20s door cache applies, and `?fresh=true`
@@ -271,6 +273,27 @@ async def ath_universe_build(_current_user: dict = Depends(get_current_user)):
     """Start a rebuild. Returns immediately; the sweep runs in the background because
     seeding an unseen symbol's full history costs several rate-limited Angel calls."""
     return await ATHU.start_build()
+
+
+@router.get("/ath-universe/register")
+async def ath_register_coverage(_current_user: dict = Depends(get_current_user)):
+    """How much of NSE's cash market has a stored all-time high, plus expansion progress."""
+    return {"coverage": await ATHU.register_coverage(), "expand": await ATHU.expand_status()}
+
+
+@router.post("/ath-universe/expand")
+async def ath_register_expand(
+    limit: int | None = Query(None, ge=1, le=4000,
+                              description="cap symbols this run; omit to attempt them all"),
+    _current_user: dict = Depends(get_current_user),
+):
+    """Resolve and seed NSE equities missing from the all-time-high register.
+
+    Slow on purpose — several rate-limited Angel calls per symbol — so it runs in the
+    background and reports progress. Every symbol it adds is one whose high can afterwards
+    be CONFIRMED rather than reported as unverified.
+    """
+    return await ATHU.start_expand(limit)
 
 
 @router.post("/refresh")
