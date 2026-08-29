@@ -36,7 +36,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from app.services.screener import analysis as AN
 from app.services.screener import chartink as CK
@@ -66,6 +66,8 @@ NAMED_NETS = ["all-time-high-8", "all-time-high"]
 
 # Seeding is the expensive step. Capped per build so one run cannot spend an hour against
 # Angel; whatever is left is picked up by the next build and the shortfall is reported.
+# How recent a bar has to be to count as "at" the high.
+RECENT_DAYS = 7
 MAX_SEED = 60
 SEED_PACE = 0.4
 ANALYSE_BATCH = 20
@@ -162,14 +164,23 @@ async def _own_candidates() -> tuple[dict[str, dict], int]:
     if not highs:
         return {}, 0
 
-    # One aggregation for the last bar of every symbol rather than a query per symbol —
-    # on M0 the per-query latency dominates and a 1,100-symbol loop takes minutes.
+    # One aggregation for the whole register rather than a query per symbol — on M0 the
+    # per-query latency dominates and a 1,100-symbol loop takes minutes.
+    #
+    # NO $sort. Sorting every bar of 1,147 symbols blew Mongo's 32MB in-memory sort limit,
+    # and M0 does not permit spilling to disk. $max needs no sort, and bounding to the
+    # last few sessions cuts the working set by two orders of magnitude.
+    #
+    # Taking the max over a WINDOW rather than the single last bar is also the more correct
+    # question: "at an all-time high" means recently, and a symbol whose last stored bar is
+    # weeks stale should not be judged on it.
+    cutoff = datetime.now(timezone.utc) - timedelta(days=RECENT_DAYS)
     last = {}
     pipeline = [
-        {"$match": {"timeframe": "1d", "symbol": {"$in": list(highs)}}},
-        {"$sort": {"ts": 1}},
-        {"$group": {"_id": "$symbol", "high": {"$last": "$high"},
-                    "close": {"$last": "$close"}, "ts": {"$last": "$ts"}}},
+        {"$match": {"timeframe": "1d", "ts": {"$gte": cutoff},
+                    "symbol": {"$in": list(highs)}}},
+        {"$group": {"_id": "$symbol", "high": {"$max": "$high"},
+                    "close": {"$max": "$close"}, "ts": {"$max": "$ts"}}},
     ]
     async for d in bars_collection.aggregate(pipeline):
         last[d["_id"]] = d
