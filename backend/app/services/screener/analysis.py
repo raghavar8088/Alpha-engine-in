@@ -213,7 +213,22 @@ def _volume(vol_x: float | None, d: dict | None) -> dict:
     return _pillar(score, "volume", ", ".join(bits).capitalize() + ".", v)
 
 
-def _structure(hl: dict, price: float, ath: float | None, brk: bool) -> dict:
+def _close_strength(bar) -> float | None:
+    """Where in the session's range the close landed, 0 (at the low) to 1 (at the high).
+
+    A stock that prints an all-time high and closes near the bottom of its range was SOLD
+    into that high — the buyers who mattered were sellers by the close. The sweep found
+    names touching a record intraday and closing 6% under it, and without this they scored
+    as clean breakouts.
+    """
+    rng = (bar.high or 0) - (bar.low or 0)
+    if rng <= 0:
+        return None
+    return max(0.0, min(1.0, (bar.close - bar.low) / rng))
+
+
+def _structure(hl: dict, price: float, ath: float | None, brk: bool,
+               close_strength: float | None = None) -> dict:
     from_high = hl.get("pct_from_high")
     from_low = hl.get("pct_from_low")
     if from_high is None:
@@ -233,8 +248,21 @@ def _structure(hl: dict, price: float, ath: float | None, brk: bool) -> dict:
         score = min(100.0, score + 8)
         bits.append("with a 20-day breakout today")
 
+    # A weak close inside the session's range is a rejection, and it matters most exactly
+    # where this pillar scores highest — at a high. Penalised in proportion, and named.
+    if close_strength is not None:
+        if close_strength < 0.3:
+            score -= 28
+            bits.append(f"but it closed in the bottom {close_strength * 100:.0f}% of the "
+                        f"day's range — the high was sold into")
+        elif close_strength < 0.5:
+            score -= 12
+            bits.append(f"though it closed only {close_strength * 100:.0f}% up the day's range")
+        elif close_strength >= 0.8:
+            bits.append("closing near the top of the day's range")
+
     v = "strong" if score >= 75 else "ok" if score >= 50 else "weak" if score >= 25 else "bad"
-    return _pillar(score, "structure", ", ".join(bits).capitalize() + ".", v)
+    return _pillar(max(0.0, score), "structure", ", ".join(bits).capitalize() + ".", v)
 
 
 def _tradability(gate: dict | None) -> dict:
@@ -518,7 +546,7 @@ def _analyse_one(symbol: str, bars: list, bench_rets: dict, deliv: dict | None,
         "momentum": _momentum(rets, H.relative_strength(rets.get("1m"),
                                                         bench_rets.get("1m")), r),
         "volume": _volume(vol_x, deliv),
-        "structure": _structure(hl, price, ath, broke_today),
+        "structure": _structure(hl, price, ath, broke_today, _close_strength(bars[-1])),
         "tradability": _tradability(gate),
     }
     verdict = _verdict(pillars, extension)
@@ -560,6 +588,7 @@ def _analyse_one(symbol: str, bars: list, bench_rets: dict, deliv: dict | None,
             # record intraday and close a percent under it, and judging that on the close
             # reports it as "1% away" from a record it actually set.
             "day_high": _r(bars[-1].high), "day_low": _r(bars[-1].low),
+            "close_strength": _r(_close_strength(bars[-1]), 3),
             "week52_high": _r(hl.get("high")), "week52_low": _r(hl.get("low")),
             "pct_from_52w_high": _r(hl.get("pct_from_high")),
             "all_time_high": _r(ath),
