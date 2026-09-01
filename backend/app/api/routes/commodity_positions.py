@@ -52,6 +52,7 @@ from app.services.commodity_positions import (
     reopen_all_at_the_money,
     reopen_at_the_money,
     edit_account,
+    performance,
     estimate_margin,
     exit_position,
     future_expiries,
@@ -80,8 +81,10 @@ class CreateAccountRequest(BaseModel):
 
 
 class EditAccountRequest(BaseModel):
+    """`roi_start_date` is the day the per-day averages are measured from."""
     name: str | None = Field(None, min_length=1, max_length=60)
     initial_capital: float | None = Field(None, gt=0)
+    roi_start_date: str | None = None      # YYYY-MM-DD
 
 
 class PlaceOrderRequest(BaseModel):
@@ -158,7 +161,8 @@ async def create_account_endpoint(payload: CreateAccountRequest,
 async def edit_account_endpoint(account_id: str, payload: EditAccountRequest,
                                 _u: dict = Depends(get_current_user)):
     try:
-        return await edit_account(account_id, payload.name, payload.initial_capital)
+        return await edit_account(account_id, payload.name, payload.initial_capital,
+                                  payload.roi_start_date)
     except OrderError as exc:
         raise HTTPException(400, exc.detail)
 

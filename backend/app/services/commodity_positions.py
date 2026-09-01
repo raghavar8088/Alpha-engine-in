@@ -48,7 +48,7 @@ only place that conversion happens.
 import asyncio
 import logging
 import os
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from uuid import uuid4
 
 from app.core.db import (
@@ -146,6 +146,9 @@ class OrderError(Exception):
     def __init__(self, detail: str):
         self.detail = detail
         super().__init__(detail)
+
+
+IST = timezone(timedelta(hours=5, minutes=30))
 
 
 def _now() -> datetime:
@@ -322,13 +325,17 @@ async def create_account(name: str, initial_capital: float | None = None) -> dic
         raise OrderError(f"An account named {clean!r} already exists")
     account = {"account_id": uuid4().hex[:12], "name": clean,
                "initial_capital": float(initial_capital or DEFAULT_INITIAL_CAPITAL),
+               # The day performance is measured from. Defaults to the account's own
+               # creation date, which is the only start that cannot be wrong.
+               "roi_start_date": _today(),
                "created_at": _now()}
     await commodity_accounts_collection.insert_one(dict(account))
     return account
 
 
 async def edit_account(account_id: str, name: str | None = None,
-                       initial_capital: float | None = None) -> dict:
+                       initial_capital: float | None = None,
+                       roi_start_date: str | None = None) -> dict:
     await get_account(account_id)
     changes: dict = {}
     if name is not None:
@@ -344,6 +351,8 @@ async def edit_account(account_id: str, name: str | None = None,
         if float(initial_capital) <= 0:
             raise OrderError("Capital must be positive")
         changes["initial_capital"] = float(initial_capital)
+    if roi_start_date is not None:
+        changes["roi_start_date"] = _parse_start(roi_start_date)
     if changes:
         await commodity_accounts_collection.update_one(
             {"account_id": account_id}, {"$set": changes})
@@ -1556,6 +1565,116 @@ async def reset_account(account_id: str) -> dict:
     return {"positions_deleted": pos.deleted_count, "orders_deleted": orders.deleted_count}
 
 
+def _parse_start(value: str | None) -> str:
+    """Validate an ISO date. Raises rather than silently falling back — a mistyped start
+    date would quietly rebase every per-day number on the page."""
+    if not value:
+        raise OrderError("A start date is required")
+    try:
+        d = date.fromisoformat(str(value)[:10])
+    except ValueError as exc:
+        raise OrderError(f"{value!r} is not a date (expected YYYY-MM-DD)") from exc
+    if d > date.today():
+        raise OrderError("The start date cannot be in the future")
+    return d.isoformat()
+
+
+def _as_date(v) -> date | None:
+    if isinstance(v, datetime):
+        return v.astimezone(IST).date() if v.tzinfo else v.date()
+    if isinstance(v, str) and v:
+        try:
+            return date.fromisoformat(v[:10])
+        except ValueError:
+            return None
+    return None
+
+
+async def performance(account_id: str, start: str | None = None) -> dict:
+    """Profit since a chosen day, and what that averages per day.
+
+    HOW A POSITION IS ATTRIBUTED TO THE WINDOW, because this is the part that can quietly
+    mislead. Realised profit counts when the position CLOSED inside the window. Unrealised
+    profit counts only for positions OPENED inside it — a trade opened months ago carries
+    gains that were earned before the window and would otherwise be credited to it, which
+    is exactly how a per-day average gets flattered.
+
+    Those carried gains are not hidden; they are reported separately so the two numbers can
+    be seen apart rather than silently blended.
+    """
+    account = await get_account(account_id)
+    initial = float(account.get("initial_capital") or 0)
+    start_iso = _parse_start(start or account.get("roi_start_date") or _today())
+    start_d = date.fromisoformat(start_iso)
+    today = date.today()
+
+    # "Ten days back" reads as ten days, so the span is the gap between the dates. Same
+    # day selected means one day, never zero — nothing may be divided by zero here.
+    days = max(1, (today - start_d).days)
+    # Counted over the SAME span as `days` — the days after the start, up to today. An
+    # inclusive count would make trading days exceed calendar days on a one-day window,
+    # which inverts the two averages: per-trading-day must never be the smaller number.
+    trading_days = max(1, sum(1 for i in range(1, (today - start_d).days + 1)
+                              if (start_d + timedelta(days=i)).weekday() < 5))
+
+    realised_in = realised_before = 0.0
+    unrealised_in = unrealised_carried = 0.0
+    opened_in = closed_in = 0
+
+    async for p in commodity_pos_positions_collection.find(
+            {"account_id": account_id},
+            {"_id": 0, "status": 1, "opened_at": 1, "closed_at": 1,
+             "realized_pnl": 1, "unrealized_pnl": 1}):
+        r = float(p.get("realized_pnl") or 0.0)
+        u = float(p.get("unrealized_pnl") or 0.0)
+        o_d, c_d = _as_date(p.get("opened_at")), _as_date(p.get("closed_at"))
+        is_open = p.get("status") == "OPEN"
+
+        if is_open:
+            if o_d and o_d >= start_d:
+                opened_in += 1
+                unrealised_in += u
+                realised_in += r          # partial closes on a position opened in-window
+            else:
+                unrealised_carried += u
+                realised_before += r
+        else:
+            if c_d and c_d >= start_d:
+                closed_in += 1
+                realised_in += r
+            else:
+                realised_before += r
+
+    pnl = realised_in + unrealised_in
+    per_day = pnl / days
+    return {
+        "start_date": start_iso,
+        "as_of": today.isoformat(),
+        "days": days,
+        "trading_days": trading_days,
+        "initial_capital": initial,
+        "realised_in_window": round(realised_in, 2),
+        "unrealised_in_window": round(unrealised_in, 2),
+        "pnl_in_window": round(pnl, 2),
+        "avg_per_day": round(per_day, 2),
+        "avg_per_trading_day": round(pnl / trading_days, 2),
+        "roi_pct": round(pnl / initial * 100, 4) if initial else None,
+        "avg_roi_pct_per_day": round(per_day / initial * 100, 4) if initial else None,
+        "opened_in_window": opened_in,
+        "closed_in_window": closed_in,
+        "carried_unrealised": round(unrealised_carried, 2),
+        "realised_before_window": round(realised_before, 2),
+        "carried_note": (
+            f"{round(unrealised_carried, 2):,.2f} of unrealised profit sits in positions "
+            f"opened before {start_iso}. It is excluded from the window, because it was "
+            f"not earned inside it."
+            if abs(unrealised_carried) > 0.005 else None),
+        "note": ("Realised counts where the position CLOSED in the window; unrealised only "
+                 "for positions OPENED in it. Per-day is the window profit divided by "
+                 f"{days} calendar days ({trading_days} of them trading days)."),
+    }
+
+
 async def summary(account_id: str) -> dict:
     account = await get_account(account_id)
     initial = float(account.get("initial_capital") or 0)
@@ -1585,6 +1704,7 @@ async def summary(account_id: str) -> dict:
             {"account_id": account_id, "status": {"$ne": "OPEN"}}),
         "open_positions": open_positions,
         "closed_positions": closed,
+        "performance": await performance(account_id),
         "exchange": "MCX", "priced_by": "angel",
         "note": "Margin is a local SPAN-lite estimate: Dhan does not cover MCX, so there "
                 "is no broker number to quote. Contract exposure is the full notional of "
@@ -1597,7 +1717,7 @@ __all__ = [
     "multiplier", "contract_value", "spec_doc", "check_specs", "tick_rupees",
     "prime_lotsizes",
     "ensure_default_account", "list_accounts", "get_account", "create_account",
-    "delete_account", "max_lots",
+    "delete_account", "max_lots", "performance",
     "edit_account", "underlyings", "future_expiries", "option_expiries",
     "option_chain", "futures_board", "underlying_future", "future_price",
     "estimate_margin", "place_order", "exit_position", "sync_positions",
