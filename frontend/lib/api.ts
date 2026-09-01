@@ -1563,6 +1563,7 @@ export interface FnoOrder {
 }
 
 export interface FnoPositionsSummary extends ManualPositionsSummary {
+  performance?: CmpPerformance;
   // Hedge-aware margin: deployed_margin is the NETTED portfolio (SPAN-lite) figure;
   // standalone_margin is the sum of each leg's own margin; the gap is the benefit.
   standalone_margin?: number;
@@ -1574,6 +1575,9 @@ export interface FnoAccount {
   name: string;
   initial_capital: number;
   created_at: string;
+  /** The day per-day averages are measured from. Null on accounts made before it
+   *  existed; the backend then falls back to the account's creation date. */
+  roi_start_date?: string | null;
 }
 
 export async function fetchFnoAccounts(): Promise<FnoAccount[]> {
@@ -1590,13 +1594,14 @@ export async function createFnoAccount(name: string, initialCapital?: number): P
 
 export async function editFnoAccount(
   accountId: string,
-  changes: { name?: string; initialCapital?: number },
+  changes: { name?: string; initialCapital?: number; roiStartDate?: string },
 ): Promise<FnoAccount> {
   return apiFetch(`/api/fno-positions/accounts/${accountId}`, {
     method: "PATCH",
     body: JSON.stringify({
       name: changes.name ?? null,
       initial_capital: changes.initialCapital ?? null,
+      roi_start_date: changes.roiStartDate ?? null,
     }),
   });
 }
@@ -1691,6 +1696,15 @@ export interface FnoReopenAtm {
 }
 
 /** Delete a paper account. Refuses while it still holds open positions. */
+/** Profit since a chosen day for an F&O paper account. Shares the commodity desk's
+ *  shape — the two windows answer the same question the same way. */
+export async function fetchFnoPerformance(
+  accountId: string, start?: string,
+): Promise<CmpPerformance> {
+  return apiFetch(`/api/fno-positions/accounts/${accountId}/performance`
+    + (start ? `?start=${encodeURIComponent(start)}` : ""));
+}
+
 export async function deleteFnoAccount(accountId: string): Promise<{
   deleted: string; closed_positions_removed: number; orders_removed: number;
 }> {

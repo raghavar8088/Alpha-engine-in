@@ -6,6 +6,7 @@ import DeskHistory from "../../components/DeskHistory";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import FnoAutoRoll from "../../components/FnoAutoRoll";
+import PerformanceWindow from "../../components/PerformanceWindow";
 import {
   refreshing,
   FnoAccount,
@@ -22,6 +23,8 @@ import {
   TopMover,
   createFnoAccount,
   editFnoAccount,
+  fetchFnoPerformance,
+  type CmpPerformance,
   estimateFnoBasketMargin,
   executeFnoBasket,
   exitFnoPosition,
@@ -94,6 +97,12 @@ export default function FnoPositionsPage() {
   const [movers, setMovers] = useState<{ top_calls: TopMover[]; top_puts: TopMover[] } | null>(null);
   const [positions, setPositions] = useState<FnoPosition[]>([]);
   const [summary, setSummary] = useState<FnoPositionsSummary | null>(null);
+  // The performance window. `since` is what the calendar shows; `perf` is what the server
+  // computed for it. Kept apart so dragging the date previews without saving.
+  const [since, setSince] = useState<string>("");
+  const [perf, setPerf] = useState<CmpPerformance | null>(null);
+  const [perfBusy, setPerfBusy] = useState(false);
+  const [perfSaved, setPerfSaved] = useState(false);
   const [orders, setOrders] = useState<FnoOrder[]>([]);
   const [positionsFilter, setPositionsFilter] = useState<"OPEN" | "all">("OPEN");
   const [error, setError] = useState<string | null>(null);
@@ -161,6 +170,12 @@ export default function FnoPositionsPage() {
       const data = await fetchFnoPositions(accountId, positionsFilter === "all" ? undefined : positionsFilter);
       setPositions(data.positions);
       setSummary(data.summary);
+      // The server already computed the window for the stored start date, so it fills on
+      // the same round trip; the calendar only calls out again when it MOVES.
+      if (data.summary?.performance) {
+        setPerf(data.summary.performance);
+        setSince((prev) => prev || data.summary.performance!.start_date);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load positions");
     }
@@ -408,6 +423,34 @@ export default function FnoPositionsPage() {
     }
   }, [accountId, basket.length, basketProduct, basketLegs, loadPositions]);
 
+  /** Preview a start date without committing it. */
+  const previewSince = useCallback(async (d: string) => {
+    setSince(d); setPerfSaved(false);
+    if (!accountId || !d) return;
+    setPerfBusy(true);
+    try { setPerf(await fetchFnoPerformance(accountId, d)); }
+    catch (e) { setNotice(e instanceof Error ? e.message : "Bad start date"); }
+    finally { setPerfBusy(false); }
+  }, [accountId]);
+
+  /** Commit it, so it survives a reload and applies on every future visit. */
+  const saveSince = useCallback(async () => {
+    if (!accountId || !since) return;
+    setPerfBusy(true);
+    try {
+      await editFnoAccount(accountId, { roiStartDate: since });
+      setPerf(await fetchFnoPerformance(accountId, since));
+      setPerfSaved(true);
+      await loadAccounts();
+    } catch (e) {
+      setNotice(e instanceof Error ? e.message : "Could not save the start date");
+    } finally { setPerfBusy(false); }
+  }, [accountId, since, loadAccounts]);
+
+  // A different account has a different start date; carrying the previous one over would
+  // report one account's window against another's book.
+  useEffect(() => { setSince(""); setPerf(null); setPerfSaved(false); }, [accountId]);
+
   const win = summary?.win_rate;
 
   return (
@@ -481,6 +524,16 @@ export default function FnoPositionsPage() {
 
       {/* Renders only on the one account the 3 PM roller owns, so the other paper
           books here never look like they are being auto-traded. */}
+      {accountId && (
+        <GlassPanel title="Performance since a date"
+          note={perf ? `${perf.days} day${perf.days === 1 ? "" : "s"}` : undefined}>
+          <PerformanceWindow
+            perf={perf} since={since} busy={perfBusy} saved={perfSaved}
+            onPreview={previewSince} onSave={saveSince}
+            compact={(v) => inr(v)} signed={(v) => (v != null && v > 0 ? "+" : "") + inr(v)} />
+        </GlassPanel>
+      )}
+
       <FnoAutoRoll accountName={activeAccount?.name ?? null} />
 
       {basket.length > 0 && (
