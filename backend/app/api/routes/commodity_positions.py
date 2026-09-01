@@ -167,6 +167,24 @@ async def edit_account_endpoint(account_id: str, payload: EditAccountRequest,
         raise HTTPException(400, exc.detail)
 
 
+@router.get("/accounts/{account_id}/performance")
+async def account_performance(account_id: str,
+                              start: str | None = Query(
+                                  None,
+                                  description="YYYY-MM-DD; defaults to the account's "
+                                              "stored start date"),
+                              _u: dict = Depends(get_current_user)):
+    """Profit since a chosen day, and what it averages per day.
+
+    `start` is a query parameter so the page can preview a date before committing it —
+    dragging the calendar should not require saving the account first.
+    """
+    try:
+        return await performance(account_id, start)
+    except OrderError as exc:
+        raise HTTPException(422, exc.detail)
+
+
 @router.delete("/accounts/{account_id}")
 async def delete_account_endpoint(account_id: str, _u: dict = Depends(get_current_user)):
     """Delete a paper account. Refuses while it still holds open positions."""

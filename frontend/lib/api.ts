@@ -5425,6 +5425,31 @@ export interface CmpAccount {
   name: string;
   initial_capital: number;
   created_at: string | null;
+  /** The day per-day averages are measured from. Null on accounts made before it existed;
+   *  the backend then falls back to the account's creation date. */
+  roi_start_date?: string | null;
+}
+
+export interface CmpPerformance {
+  start_date: string;
+  as_of: string;
+  days: number;
+  trading_days: number;
+  initial_capital: number;
+  realised_in_window: number;
+  unrealised_in_window: number;
+  pnl_in_window: number;
+  avg_per_day: number;
+  avg_per_trading_day: number;
+  roi_pct: number | null;
+  avg_roi_pct_per_day: number | null;
+  opened_in_window: number;
+  closed_in_window: number;
+  /** Unrealised profit on positions opened BEFORE the window — excluded from it. */
+  carried_unrealised: number;
+  realised_before_window: number;
+  carried_note: string | null;
+  note: string;
 }
 
 export interface CmpSpec {
@@ -5523,6 +5548,7 @@ export interface CmpOrder {
 
 export interface CmpSummary {
   account: CmpAccount;
+  performance?: CmpPerformance;
   initial_capital: number;
   available_cash: number;
   margin_deployed: number;
@@ -5567,7 +5593,13 @@ export async function fetchCmpAccounts(): Promise<{ accounts: CmpAccount[] }> {
 export async function createCmpAccount(name: string, initial_capital?: number): Promise<CmpAccount> {
   return apiFetch(`${cmp}/accounts`, { method: "POST", body: JSON.stringify({ name, initial_capital }) });
 }
-export async function editCmpAccount(id: string, body: { name?: string; initial_capital?: number }): Promise<CmpAccount> {
+export async function fetchCmpPerformance(
+  id: string, start?: string,
+): Promise<CmpPerformance> {
+  return apiFetch(`${cmp}/accounts/${id}/performance`
+    + (start ? `?start=${encodeURIComponent(start)}` : ""));
+}
+export async function editCmpAccount(id: string, body: { name?: string; initial_capital?: number; roi_start_date?: string }): Promise<CmpAccount> {
   return apiFetch(`${cmp}/accounts/${id}`, { method: "PATCH", body: JSON.stringify(body) });
 }
 export async function fetchCmpUnderlyings(): Promise<{ underlyings: CmpUnderlying[]; count: number }> {
