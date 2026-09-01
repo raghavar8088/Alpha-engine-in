@@ -78,6 +78,9 @@ ENABLED = os.getenv("FNO_AUTO_ROLL_ENABLED", "1").lower() not in ("0", "false", 
 # Matched case-insensitively against the F&O paper account names. Only this one account
 # is ever touched — every other book on the desk is left completely alone.
 ACCOUNT_NAME = os.getenv("FNO_AUTO_ROLL_ACCOUNT", "AUTO SELLING 2 LAKH")
+# Pin the roller to one account by id. Set this and the name is ignored entirely, which is
+# the only binding a rename cannot break.
+ACCOUNT_ID = os.getenv("FNO_AUTO_ROLL_ACCOUNT_ID", "").strip()
 SYMBOL = os.getenv("FNO_AUTO_ROLL_SYMBOL", "NIFTY")
 LOTS = int(os.getenv("FNO_AUTO_ROLL_LOTS", "1"))
 PRODUCT_TYPE = os.getenv("FNO_AUTO_ROLL_PRODUCT", "MARGIN")
@@ -107,15 +110,52 @@ def is_trading_day(now: datetime | None = None) -> bool:
     return now.weekday() < 5 and now.date().isoformat() not in HOLIDAYS
 
 
-async def _target_account() -> dict | None:
-    """The one account this roller owns, matched by name. Returns None (and the caller
-    no-ops) rather than inventing an account — creating a funded book as a side effect
-    of a scheduler tick is not something a scheduler should do."""
+async def resolve_account() -> tuple[dict | None, str]:
+    """Find the account this roller owns, and say HOW it was found.
+
+    Exact-name matching alone is why this silently stopped working. The account was
+    renamed "AUTO SELLING 2 LAKH 1 ST SEPT", the configured name stayed "AUTO SELLING 2
+    LAKH", and the roller skipped every session for eighteen days while logging a message
+    nobody had a reason to read.
+
+    So three rules, narrowest first, and the winner is reported rather than assumed:
+      1. an explicit account id, which no rename can break;
+      2. an exact name match;
+      3. a name that STARTS WITH the configured one — and only if exactly one does.
+         Dated variants of the same book are the normal case here. Two matches is
+         ambiguous, and guessing between two funded accounts is worse than not trading.
+
+    Returns (account, how). `how` is one of: id, exact, prefix, ambiguous, none.
+    """
+    accounts = await list_accounts()
+    if ACCOUNT_ID:
+        for acct in accounts:
+            if str(acct.get("account_id")) == ACCOUNT_ID:
+                return acct, "id"
+        return None, "none"
+
     wanted = ACCOUNT_NAME.strip().lower()
-    for acct in await list_accounts():
+    for acct in accounts:
         if str(acct.get("name", "")).strip().lower() == wanted:
-            return acct
-    return None
+            return acct, "exact"
+
+    starts = [a for a in accounts
+              if str(a.get("name", "")).strip().lower().startswith(wanted)]
+    if len(starts) == 1:
+        logger.info("fno auto-roll: bound to %r by prefix — configured name is %r",
+                    starts[0].get("name"), ACCOUNT_NAME)
+        return starts[0], "prefix"
+    if len(starts) > 1:
+        logger.warning("fno auto-roll: %s accounts start with %r (%s) — refusing to guess",
+                       len(starts), ACCOUNT_NAME,
+                       ", ".join(str(a.get("name")) for a in starts))
+        return None, "ambiguous"
+    return None, "none"
+
+
+async def _target_account() -> dict | None:
+    acct, _how = await resolve_account()
+    return acct
 
 
 async def resolve_expiry(dhan: DhanClient | None) -> tuple[str | None, str]:
@@ -273,6 +313,7 @@ async def _record(trigger: str, status: str, started: datetime, account_id: str 
     doc = {
         "roll_id": uuid4().hex[:12], "trigger": trigger, "status": status,
         "account_id": account_id, "account_name": ACCOUNT_NAME, "symbol": SYMBOL,
+        "configured_account": ACCOUNT_NAME,
         "message": message, "started_at": started, "finished_at": _now_utc(),
         "trading_date": _today_ist().isoformat(),
         **extra,
@@ -296,7 +337,7 @@ async def status() -> dict:
          for k, v in doc.items() if k != "_id"}
         async for doc in fno_auto_roll_log_collection.find({}).sort("finished_at", -1).limit(20)
     ]
-    acct = await _target_account()
+    acct, how = await resolve_account()
     snap = await summary(acct["account_id"]) if acct else None
     now = datetime.now(IST)
     return {
@@ -304,6 +345,23 @@ async def status() -> dict:
         "account_name": ACCOUNT_NAME,
         "account_found": acct is not None,
         "account_id": acct["account_id"] if acct else None,
+        # The name the roller is ACTUALLY trading, which may differ from the configured
+        # one when it bound by prefix. The panel keys its visibility off this — keying it
+        # off the configured name is why the failure stayed invisible for eighteen days.
+        "matched_account_name": acct.get("name") if acct else None,
+        "matched_by": how,
+        "binding_note": {
+            "id": "Pinned to this account by id — a rename cannot break it.",
+            "exact": "Bound by an exact name match.",
+            "prefix": f"Bound by prefix: the configured name is {ACCOUNT_NAME!r} and this "
+                      f"account's name starts with it. Set FNO_AUTO_ROLL_ACCOUNT_ID to "
+                      f"pin it properly.",
+            "ambiguous": f"More than one account's name starts with {ACCOUNT_NAME!r}, so "
+                         f"the roller will not guess between them. Rename all but one, or "
+                         f"set FNO_AUTO_ROLL_ACCOUNT_ID.",
+            "none": f"No account matches {ACCOUNT_NAME!r}. NOTHING IS BEING AUTO-TRADED. "
+                    f"Rename an account to that, or set FNO_AUTO_ROLL_ACCOUNT_ID.",
+        }.get(how),
         "symbol": SYMBOL, "lots": LOTS, "product_type": PRODUCT_TYPE,
         "roll_time_ist": ROLL_HHMM, "grace_minutes": GRACE_MINUTES,
         "min_days_to_expiry": MIN_DAYS_TO_EXPIRY,

@@ -38,8 +38,48 @@ export default function FnoAutoRoll({ accountName }: { accountName: string | nul
     return () => clearInterval(id);
   }, [load]);
 
-  // Only surface on the account this actually manages.
-  if (!status || !accountName || status.account_name.trim().toLowerCase() !== accountName.trim().toLowerCase()) {
+  // WHEN THE ROLLER IS BOUND TO NOTHING, SAY SO — on whichever account is open.
+  //
+  // This panel used to hide unless the selected account's name equalled the CONFIGURED
+  // name, which is the very comparison that breaks when an account is renamed. The roller
+  // skipped every session for eighteen days and the one component that could have said so
+  // hid itself for exactly the same reason. A failure must never be invisible because of
+  // the check that failed.
+  if (status && status.enabled && !status.account_found) {
+    return (
+      <div className="unbound">
+        <b>The daily auto-roll is not running.</b>
+        <p>
+          It is looking for an account named{" "}
+          <code>{status.account_name}</code>, and no account has that name — so nothing is
+          being auto-traded. {status.binding_note}
+        </p>
+        {status.last_run_at && (
+          <p className="lastrun">
+            Last attempt {new Date(status.last_run_at).toLocaleString()} —{" "}
+            {status.last_message}
+            {status.last_rolled_on && <> · last successful roll {status.last_rolled_on}.</>}
+          </p>
+        )}
+        <style jsx>{`
+          .unbound {
+            border: 1px solid var(--loss); background: rgba(220, 38, 38, .07);
+            border-radius: 12px; padding: 14px 16px; margin-top: 14px;
+          }
+          .unbound b { color: var(--loss); font-size: 13.5px; }
+          .unbound p { font-size: 12.5px; line-height: 1.6; color: var(--text); margin: 7px 0 0; max-width: 96ch; }
+          .unbound .lastrun { color: var(--text-faint); font-size: 11.5px; }
+          code { background: var(--canvas-soft); padding: 1px 5px; border-radius: 4px; font-size: 11.5px; }
+        `}</style>
+      </div>
+    );
+  }
+
+  // Otherwise surface only on the account it actually manages — matched by the name the
+  // roller RESOLVED to, not the one it was configured with.
+  const owned = status?.matched_account_name ?? status?.account_name;
+  if (!status || !accountName || !owned
+      || owned.trim().toLowerCase() !== accountName.trim().toLowerCase()) {
     return null;
   }
 

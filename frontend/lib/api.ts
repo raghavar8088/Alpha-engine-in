@@ -3075,6 +3075,10 @@ export interface FnoAutoRollStatus {
   account_name: string;
   account_found: boolean;
   account_id: string | null;
+  /** The account actually being traded — may differ from account_name on a prefix bind. */
+  matched_account_name?: string | null;
+  matched_by?: "id" | "exact" | "prefix" | "ambiguous" | "none";
+  binding_note?: string | null;
   symbol: string;
   lots: number;
   product_type: string;
