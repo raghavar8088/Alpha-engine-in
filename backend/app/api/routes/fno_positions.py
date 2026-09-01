@@ -81,6 +81,7 @@ class CreateAccountRequest(BaseModel):
 class EditAccountRequest(BaseModel):
     name: str | None = None
     initial_capital: float | None = None
+    roi_start_date: str | None = None      # YYYY-MM-DD; the per-day averages start here
 
 
 class ResetAccountRequest(BaseModel):
@@ -150,12 +151,33 @@ async def new_account(payload: CreateAccountRequest, _current_user: dict = Depen
 @router.patch("/accounts/{account_id}")
 async def update_account(account_id: str, payload: EditAccountRequest, _current_user: dict = Depends(get_current_user)):
     try:
-        account = await edit_account(account_id, name=payload.name, initial_capital=payload.initial_capital)
+        account = await edit_account(account_id, name=payload.name,
+                                     initial_capital=payload.initial_capital,
+                                     roi_start_date=payload.roi_start_date)
     except OrderError as exc:
         raise HTTPException(status_code=422, detail=exc.detail)
     if account.get("created_at") is not None and not isinstance(account["created_at"], str):
         account["created_at"] = account["created_at"].isoformat()
     return account
+
+
+@router.get("/accounts/{account_id}/performance")
+async def account_performance(account_id: str,
+                              start: str | None = Query(
+                                  None,
+                                  description="YYYY-MM-DD; defaults to the account's "
+                                              "stored start date"),
+                              _current_user: dict = Depends(get_current_user)):
+    """Profit since a chosen day, and what it averages per day.
+
+    `start` is a query so the page can preview a date before committing it — dragging the
+    calendar should not require saving the account first.
+    """
+    from app.services.fno_positions import performance
+    try:
+        return await performance(account_id, start)
+    except OrderError as exc:
+        raise HTTPException(status_code=422, detail=exc.detail)
 
 
 @router.delete("/accounts/{account_id}")

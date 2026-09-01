@@ -16,7 +16,7 @@ lists index underlyings until that's re-enabled and universe.py is re-run.
 """
 
 import os
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from uuid import uuid4
 
 from app.core.db import (
@@ -102,6 +102,8 @@ async def create_account(name: str, initial_capital: float | None = None) -> dic
     account = {
         "account_id": uuid4().hex[:12], "name": name,
         "initial_capital": initial_capital if initial_capital and initial_capital > 0 else DEFAULT_INITIAL_CAPITAL,
+        # The day the per-day averages are measured from.
+        "roi_start_date": date.today().isoformat(),
         "created_at": _now(),
     }
     await fno_accounts_collection.insert_one(account)
@@ -109,7 +111,9 @@ async def create_account(name: str, initial_capital: float | None = None) -> dic
     return account
 
 
-async def edit_account(account_id: str, name: str | None = None, initial_capital: float | None = None) -> dict:
+async def edit_account(account_id: str, name: str | None = None,
+                       initial_capital: float | None = None,
+                       roi_start_date: str | None = None) -> dict:
     """Rename an account and/or change its starting capital. Editing the balance
     changes only the base capital pool — realized/unrealized P&L and every open
     position are untouched, so available_cash simply re-derives from the new base
@@ -125,6 +129,8 @@ async def edit_account(account_id: str, name: str | None = None, initial_capital
         if clash is not None:
             raise OrderError(f'An account named "{name}" already exists')
         changes["name"] = name
+    if roi_start_date is not None:
+        changes["roi_start_date"] = _parse_roi_start(roi_start_date)
     if initial_capital is not None:
         if initial_capital <= 0:
             raise OrderError("Account balance must be a positive number")
@@ -1140,6 +1146,113 @@ async def reset_account(account_id: str) -> dict:
             "initial_capital": account["initial_capital"]}
 
 
+def _parse_roi_start(value: str | None) -> str:
+    """Validate an ISO date. Raises rather than falling back — a mistyped start would
+    silently rebase every per-day number on the page."""
+    if not value:
+        raise OrderError("A start date is required")
+    try:
+        d = date.fromisoformat(str(value)[:10])
+    except ValueError as exc:
+        raise OrderError(f"{value!r} is not a date (expected YYYY-MM-DD)") from exc
+    if d > date.today():
+        raise OrderError("The start date cannot be in the future")
+    return d.isoformat()
+
+
+def _roi_as_date(v) -> date | None:
+    if isinstance(v, datetime):
+        return v.date()
+    if isinstance(v, str) and v:
+        try:
+            return date.fromisoformat(v[:10])
+        except ValueError:
+            return None
+    return None
+
+
+async def performance(account_id: str, start: str | None = None) -> dict:
+    """Profit since a chosen day, and what it averages per day.
+
+    ATTRIBUTION, because this is the part that can quietly mislead. Realised counts where
+    the position CLOSED inside the window; unrealised only for positions OPENED inside it.
+    A leg carried from before the window holds gains earned outside it, and crediting
+    those to the window is exactly how a per-day average gets flattered — so they are
+    reported separately instead of blended in.
+    """
+    account = await get_account(account_id)
+    initial = float(account.get("initial_capital") or 0)
+    start_iso = _parse_roi_start(
+        start
+        or account.get("roi_start_date")
+        or (_roi_as_date(account.get("created_at")) or date.today()).isoformat())
+    start_d = date.fromisoformat(start_iso)
+    today = date.today()
+
+    # "Ten days back" reads as ten days, so the span is the gap. Same day means one day,
+    # never zero — nothing may be divided by zero here.
+    days = max(1, (today - start_d).days)
+    # Counted over the SAME span, so trading days can never exceed calendar days and
+    # invert the two averages.
+    trading_days = max(1, sum(1 for i in range(1, (today - start_d).days + 1)
+                              if (start_d + timedelta(days=i)).weekday() < 5))
+
+    realised_in = realised_before = 0.0
+    unrealised_in = unrealised_carried = 0.0
+    opened_in = closed_in = 0
+
+    async for p in fno_positions_collection.find(
+            {"account_id": account_id},
+            {"_id": 0, "status": 1, "opened_at": 1, "closed_at": 1,
+             "realized_pnl": 1, "unrealized_pnl": 1}):
+        r = float(p.get("realized_pnl") or 0.0)
+        u = float(p.get("unrealized_pnl") or 0.0)
+        o_d, c_d = _roi_as_date(p.get("opened_at")), _roi_as_date(p.get("closed_at"))
+        if p.get("status") == "OPEN":
+            if o_d and o_d >= start_d:
+                opened_in += 1
+                unrealised_in += u
+                realised_in += r          # partial closes on a position opened in-window
+            else:
+                unrealised_carried += u
+                realised_before += r
+        else:
+            if c_d and c_d >= start_d:
+                closed_in += 1
+                realised_in += r
+            else:
+                realised_before += r
+
+    pnl = realised_in + unrealised_in
+    per_day = pnl / days
+    return {
+        "start_date": start_iso,
+        "as_of": today.isoformat(),
+        "days": days,
+        "trading_days": trading_days,
+        "initial_capital": initial,
+        "realised_in_window": round(realised_in, 2),
+        "unrealised_in_window": round(unrealised_in, 2),
+        "pnl_in_window": round(pnl, 2),
+        "avg_per_day": round(per_day, 2),
+        "avg_per_trading_day": round(pnl / trading_days, 2),
+        "roi_pct": round(pnl / initial * 100, 4) if initial else None,
+        "avg_roi_pct_per_day": round(per_day / initial * 100, 4) if initial else None,
+        "opened_in_window": opened_in,
+        "closed_in_window": closed_in,
+        "carried_unrealised": round(unrealised_carried, 2),
+        "realised_before_window": round(realised_before, 2),
+        "carried_note": (
+            f"{round(unrealised_carried, 2):,.2f} of unrealised profit sits in legs opened "
+            f"before {start_iso}. It is excluded from the window, because it was not "
+            f"earned inside it."
+            if abs(unrealised_carried) > 0.005 else None),
+        "note": ("Realised counts where the position CLOSED in the window; unrealised only "
+                 "for positions OPENED in it. Per-day is the window profit divided by "
+                 f"{days} calendar days ({trading_days} of them trading days)."),
+    }
+
+
 async def summary(account_id: str) -> dict:
     account = await get_account(account_id)
     initial_capital = account["initial_capital"]
@@ -1171,4 +1284,5 @@ async def summary(account_id: str) -> dict:
         "open_positions": open_count,
         "closed_positions": closed_count,
         "win_rate": win_rate,
+        "performance": await performance(account_id),
     }
