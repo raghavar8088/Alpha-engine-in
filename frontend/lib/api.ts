@@ -4172,7 +4172,8 @@ export interface ScreenerConfig {
   chartink: {
     enabled: boolean;
     presets: { key: string; label: string; why_not_local: string }[];
-    named: { slug: string; label: string; why: string; url: string }[];
+    named: { slug: string; label: string; why: string; url: string; group?: string }[];
+    named_groups?: string[];
     verified: Record<string, string>;
     policy: string;
   };

@@ -107,15 +107,29 @@ export default function ChartinkPanel({ cfg }: { cfg: Cfg }) {
               owner, and the panel will say so rather than showing an empty table.
             </div>
 
-            <div className="chips">
-              {(cfg?.named ?? []).map((n) => (
-                <button key={n.slug}
-                  className={`chip ${slug === n.slug ? "on" : ""}`}
-                  title={n.why}
-                  onClick={() => { setSlug(n.slug); setInput(""); }}>
-                  {n.label}
-                </button>
-              ))}
+            {/* Grouped, not one long row. Thirty-eight screeners in a flat wrap is a
+                wall to scan; by theme you can find the kind of idea you came for. */}
+            <div className="groups">
+              {(cfg?.named_groups ?? ["Other"]).map((g) => {
+                const inGroup = (cfg?.named ?? []).filter(
+                  (n) => (n.group ?? "Other") === g);
+                if (!inGroup.length) return null;
+                return (
+                  <div className="grp" key={g}>
+                    <div className="glabel">{g}</div>
+                    <div className="chips">
+                      {inGroup.map((n) => (
+                        <button key={n.slug}
+                          className={`chip ${slug === n.slug ? "on" : ""}`}
+                          title={n.why}
+                          onClick={() => { setSlug(n.slug); setInput(""); }}>
+                          {n.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </>
         )}
@@ -256,7 +270,12 @@ export default function ChartinkPanel({ cfg }: { cfg: Cfg }) {
         .hint {
           margin-top: 8px; font-size: 11.5px; line-height: 1.55; color: var(--text-muted);
         }
-        .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 14px; }
+        .groups { display: flex; flex-direction: column; gap: 11px; margin-top: 16px; }
+        .glabel {
+          font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
+          color: var(--text-faint); margin-bottom: 6px; font-weight: 700;
+        }
+        .chips { display: flex; flex-wrap: wrap; gap: 7px; }
         .chip {
           padding: 6px 12px; border-radius: 999px; font-size: 12px;
           border: 1px solid var(--border); background: var(--canvas-soft);

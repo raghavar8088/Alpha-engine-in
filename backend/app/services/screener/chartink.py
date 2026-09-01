@@ -119,38 +119,230 @@ PRESETS: dict[str, dict] = {
 # box on 2026-08-28 and returned rows — none is a guess. `why` says what it adds over the
 # local engine, because a scan this app can already compute has no business being fetched
 # from a delayed third party and shown beside live numbers.
+# Public screeners worth having one click away. Every one was RUN from the AWS box before
+# being listed, and — more importantly — its CLAUSE was read.
+#
+# CHARTINK TITLES ARE AUTHOR-WRITTEN AND SOMETIMES WRONG. Three candidates were rejected
+# for exactly that: `supertrend` is titled "Macd" and tests a MACD crossover; `high-delivery`
+# tests nothing but "closed up on higher volume" — no delivery anywhere in it; and
+# `short-term-breakdown` carries the same clause as short-term BREAKOUT. Every `why` below
+# describes what the clause does, not what its title claims.
 NAMED: dict[str, dict] = {
+    # ── highs and breakouts ─────────────────────────────────────────────────
     "all-time-high-8": {
+        "group": "Highs & breakouts",
         "label": "All time high",
         "why": "Today's high above the highest close of the last 1,000 sessions. Feeds the "
-               "All Time High desk. The raw scan returns indices and ETFs alongside "
-               "companies; those are filtered out and counted separately.",
+               "All Time High desk; indices and ETFs are filtered out and counted apart.",
     },
     "short-term-breakouts": {
+        "group": "Highs & breakouts",
         "label": "Short term breakouts",
         "why": "5-day close 5% above the 6-month high, on volume above its own 5-day mean.",
     },
     "breakouts": {
+        "group": "Highs & breakouts",
         "label": "Breakouts (RSI + ADX + MACD)",
         "why": "Multi-indicator confluence — broader than our single-signal setups.",
     },
-    "volume-shockers": {
-        "label": "Volume shockers",
-        "why": "Volume above 5x its 20-day mean across the WHOLE cash market.",
+    "52-week-high": {
+        "group": "Highs & breakouts",
+        "label": "52-week high",
+        "why": "At the highest point of the last year.",
+    },
+    "all-time-high-stocks": {
+        "group": "Highs & breakouts",
+        "label": "All-time-high stocks",
+        "why": "A second author's take on the same idea — different clause, different names.",
+    },
+    "stocks-at-all-time-high": {
+        "group": "Highs & breakouts",
+        "label": "At an all-time high",
+        "why": "A stricter reading; usually a handful of names.",
+    },
+    "new-52-week-high": {
+        "group": "Highs & breakouts",
+        "label": "New 52-week high",
+        "why": "Made the high TODAY rather than merely sitting at it.",
+    },
+    "near-52-week-high": {
+        "group": "Highs & breakouts",
+        "label": "Near the 52-week high",
+        "why": "Approaching the level without having taken it out.",
+    },
+    "trendline-breakout": {
+        "group": "Highs & breakouts",
+        "label": "Trendline breakout",
+        "why": "Closed above a 20-day high it had not breached the session before.",
+    },
+    "range-breakout": {
+        "group": "Highs & breakouts",
+        "label": "Range breakout",
+        "why": "Leaving a defined range to the upside.",
+    },
+    "bollinger-band-breakout": {
+        "group": "Highs & breakouts",
+        "label": "Bollinger band breakout",
+        "why": "First close above the upper 20,2 band — Nifty 500 only.",
+    },
+    "darvas-box": {
+        "group": "Highs & breakouts",
+        "label": "Darvas box",
+        "why": "At a 12-month high on the monthly candle, with EPS above last year's.",
+    },
+    "cup-and-handle": {
+        "group": "Highs & breakouts",
+        "label": "Cup and handle",
+        "why": "The rounded base and pullback, read off closes 10/30/60 days back.",
+    },
+    "volatility-contraction": {
+        "group": "Highs & breakouts",
+        "label": "Volatility contraction",
+        "why": "Each session's range tighter than the last — coiling before it moves.",
+    },
+    "nr7-narrow-range-7": {
+        "group": "Highs & breakouts",
+        "label": "NR7 narrow range",
+        "why": "The narrowest range of the last seven sessions.",
+    },
+
+    # ── trend and momentum ──────────────────────────────────────────────────
+    "golden-crossover": {
+        "group": "Trend & momentum",
+        "label": "Golden crossover",
+        "why": "EMA 55 crossed above EMA 200 within the last five days. Note it is 55/200, "
+               "not the textbook 50/200.",
+    },
+    "macd-bullish-crossover": {
+        "group": "Trend & momentum",
+        "label": "MACD crossover",
+        "why": "MACD line crossed above its signal line today.",
+    },
+    "stochastic-crossover": {
+        "group": "Trend & momentum",
+        "label": "Stochastic crossover",
+        "why": "Slow stochastic %K crossed above %D today.",
+    },
+    "adx-strong-trend": {
+        "group": "Trend & momentum",
+        "label": "ADX strong trend",
+        "why": "ADX between 40 and 60 — trending hard without being exhausted. Above ₹80 "
+               "and 5 lakh shares.",
     },
     "rsi-crossing-60": {
+        "group": "Trend & momentum",
         "label": "RSI crossing 60",
         "why": "Momentum ignition on the day it happens, whole market.",
     },
-    "bullish-marubozu-1": {
-        "label": "Bullish marubozu",
-        "why": "Single-candle conviction; our pattern engine reads multi-bar structures.",
+    "stock-above-200-dma": {
+        "group": "Trend & momentum",
+        "label": "Above the 200-DMA",
+        "why": "Trading above its long-term average — the crude regime filter.",
     },
-    "nr7-narrow-range-7": {
-        "label": "NR7 narrow range",
-        "why": "Compression before expansion — a setup we do not screen for locally.",
+
+    # ── volume ──────────────────────────────────────────────────────────────
+    "volume-shockers": {
+        "group": "Volume",
+        "label": "Volume shockers",
+        "why": "Volume above 5x its 20-day mean across the WHOLE cash market.",
+    },
+    "volume-breakout": {
+        "group": "Volume",
+        "label": "Volume breakout",
+        "why": "Yesterday's volume double the day before, with price following.",
+    },
+    "high-volume-gainers": {
+        "group": "Volume",
+        "label": "High-volume gainers",
+        "why": "Up on the day with participation well above normal.",
+    },
+    "unusual-volume": {
+        "group": "Volume",
+        "label": "Unusual volume",
+        "why": "Turnover far outside the stock's own recent habit.",
+    },
+
+    # ── candles ─────────────────────────────────────────────────────────────
+    "bullish-marubozu-1": {
+        "group": "Candlesticks",
+        "label": "Bullish marubozu",
+        "why": "Open at the low, close at the high — a session with no seller.",
+    },
+    "morning-star": {
+        "group": "Candlesticks",
+        "label": "Morning star",
+        "why": "The three-candle reversal off a low.",
+    },
+    "piercing-line": {
+        "group": "Candlesticks",
+        "label": "Piercing line",
+        "why": "Gapped down then closed back through the midpoint of the prior candle.",
+    },
+    "bullish-engulfing": {
+        "group": "Candlesticks",
+        "label": "Bullish engulfing",
+        "why": "Today's body swallows yesterday's whole.",
+    },
+
+    # ── intraday ────────────────────────────────────────────────────────────
+    "gap-up-stocks": {
+        "group": "Intraday",
+        "label": "Gap up",
+        "why": "Opened at least 1% above the previous close, ₹85-1,000, on real volume.",
+    },
+    "opening-range-breakout": {
+        "group": "Intraday",
+        "label": "Opening range break",
+        "why": "First 15 minutes through YESTERDAY'S high — or its low. The scan is "
+               "bidirectional, so read the direction before acting on a name.",
+    },
+    "intraday-buy": {
+        "group": "Intraday",
+        "label": "Intraday buy",
+        "why": "An intraday long setup on 15-minute candles.",
+    },
+
+    # ── quality ─────────────────────────────────────────────────────────────
+    "fundamentally-strong-stocks": {
+        "group": "Quality",
+        "label": "Below book, profitable",
+        "why": "Price under book value, pays a dividend, and profitable both yearly and "
+               "quarterly. A value screen rather than a growth one, despite the title.",
+    },
+    "high-roe": {
+        "group": "Quality",
+        "label": "High return on equity",
+        "why": "Yearly net profit at least 20% of book value.",
+    },
+    "turnaround-stocks": {
+        "group": "Quality",
+        "label": "Turnarounds",
+        "why": "Back to profit after a loss-making stretch.",
+    },
+
+    # ── the other side ──────────────────────────────────────────────────────
+    # Kept deliberately. This app has no short desk, but knowing a name you hold appears
+    # on a bearish screen is worth more than a page that only ever shows reasons to buy.
+    "bearish-engulfing": {
+        "group": "Warning signs",
+        "label": "Bearish engulfing",
+        "why": "Today's down candle swallows yesterday's up one.",
+    },
+    "rsi-oversold": {
+        "group": "Warning signs",
+        "label": "RSI oversold",
+        "why": "RSI in the floor. Not a buy signal on its own — a stock in a downtrend "
+               "stays oversold all the way down.",
+    },
+    "death-cross": {
+        "group": "Warning signs",
+        "label": "Death cross",
+        "why": "Short average crossed below the long one.",
     },
 }
+
+GROUP_ORDER = ["Highs & breakouts", "Trend & momentum", "Volume", "Candlesticks",
+               "Intraday", "Quality", "Warning signs"]
 
 # The scan arrives as a Vue prop, HTML-escaped; `atlas_query` inside it is the clause.
 _SCAN_JSON_RE = re.compile(r':scan-json="([^"]+)"')
@@ -475,7 +667,9 @@ def status() -> dict:
         "enabled": ENABLED,
         "presets": presets(),
         "named": [{"slug": k, "label": v["label"], "why": v["why"],
+                   "group": v.get("group", "Other"),
                    "url": f"{BASE}/screener/{k}"} for k, v in NAMED.items()],
+        "named_groups": GROUP_ORDER,
         "verified": {
             "scan_api": "works without login (POST /screener/process with scan_clause)",
             "named_screeners": "readable AND runnable — the clause is the atlas_query "
