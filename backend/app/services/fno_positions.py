@@ -135,6 +135,31 @@ async def edit_account(account_id: str, name: str | None = None, initial_capital
     return {**account, **changes}
 
 
+async def delete_account(account_id: str) -> dict:
+    """Remove a paper account and everything in it.
+
+    Refuses while positions are still open: `sync_positions` walks every OPEN row on a
+    timer and would keep marking them to market against a book that no longer exists.
+    Close first, then delete. Also refuses the last account, where Reset is what is meant."""
+    account = await get_account(account_id)
+    open_count = await fno_positions_collection.count_documents(
+        {"account_id": account_id, "status": "OPEN"})
+    if open_count:
+        raise OrderError(
+            f"{account['name']} still has {open_count} open position"
+            f"{'s' if open_count > 1 else ''}. Close them first — deleting the account "
+            "would leave them being marked to market against a book that is gone.")
+    if await fno_accounts_collection.count_documents({}) <= 1:
+        raise OrderError(
+            "This is the only paper account. Create another before deleting this one, "
+            "or use Reset to empty it instead.")
+    pos = await fno_positions_collection.delete_many({"account_id": account_id})
+    orders = await fno_orders_collection.delete_many({"account_id": account_id})
+    await fno_accounts_collection.delete_one({"account_id": account_id})
+    return {"deleted": account["name"], "closed_positions_removed": pos.deleted_count,
+            "orders_removed": orders.deleted_count}
+
+
 async def _underlying_instrument(symbol: str) -> dict:
     doc = await instruments_collection.find_one({
         "symbol": symbol.upper(),
@@ -739,6 +764,246 @@ async def execute_basket(dhan: DhanClient, account_id: str, legs: list[dict], pr
 # Hard ceiling on single-token Angel calls per sync, so one rate-limited sweep can
 # never cascade into hundreds more.
 MAX_SINGLE_QUOTE_FALLBACKS = 25
+
+
+MAX_LOTS_PER_ORDER = int(os.getenv("FNO_MAX_LOTS_PER_ORDER", "500"))
+
+
+async def max_lots(dhan: DhanClient, account_id: str, legs: list[dict],
+                   cap: int = MAX_LOTS_PER_ORDER) -> dict:
+    """The largest EQUAL lot count this account can carry across the given legs.
+
+    Not `cash / one_lot_margin`: margin is not linear in lots once legs hedge each other,
+    and a short straddle is margined as one side's risk rather than the sum of both, so
+    the linear guess is wrong in both directions depending on the basket.
+
+    Everything that does not depend on SIZE — the spot, time to expiry, the legs already
+    open in the group — is resolved once and reused, so the search is pure arithmetic.
+    Prices are fetched once at one lot, not once per probe.
+
+    The scan runs DOWN from the cap rather than binary searching: added margin is not
+    monotonic in lots when the basket hedges something already open — it falls as the new
+    legs offset existing risk, bottoms out, then climbs once the new side dominates — and
+    a binary search assumes one crossing."""
+    await get_account(account_id)
+    if not legs:
+        raise OrderError("Nothing to size — pick a contract first")
+    cash = await available_cash(account_id)
+    priced = await _price_basket(dhan, [{**leg, "lots": 1} for leg in legs])
+
+    groups: dict[tuple, list[dict]] = {}
+    for p in priced:
+        inst = p["inst"]
+        groups.setdefault((inst.get("underlying_symbol"), inst.get("expiry")), []).append(p)
+
+    context: list[tuple] = []
+    for (underlying, expiry), plist in groups.items():
+        t = _years_to_expiry(expiry)
+        current = await _group_positions(account_id, underlying, expiry)
+        spot = await _underlying_spot(
+            dhan, underlying,
+            fallback=_group_spot(current) or plist[0]["inst"].get("strike") or plist[0]["ltp"])
+        open_legs = [_pos_to_leg(q) for q in current]
+        before = portfolio_margin(open_legs, spot, t)["total"] if open_legs else 0.0
+        context.append((spot, t, open_legs, before, plist))
+
+    def margin_for(n: int) -> float:
+        added = 0.0
+        for spot, t, open_legs, before, plist in context:
+            add = []
+            for p in plist:
+                ot = p["inst"].get("option_type")
+                qty = n * int(p["inst"].get("lot_size", 1) or 1)
+                add.append({
+                    "kind": p["kind"], "option_type": ot, "strike": p["inst"].get("strike"),
+                    "qty": qty, "side": p["side"], "premium": p["ltp"],
+                    "iv": solve_iv(p["ltp"], spot, p["inst"].get("strike"), t, ot) if ot else None,
+                })
+            added += portfolio_margin(open_legs + add, spot, t)["total"] - before
+        return round(added, 2)
+
+    premium = round(sum(p["ltp"] * int(p["inst"].get("lot_size", 1) or 1)
+                        * (1 if p["side"] == "SELL" else -1) for p in priced), 2)
+    shape = {"legs": len(priced), "premium_per_lot": premium,
+             "margin_per_lot": margin_for(1), "available_cash": round(cash, 2)}
+
+    for n in range(cap, 0, -1):
+        added = margin_for(n)
+        if _basket_allowed(added, cash):
+            note = (f"{n} lot{'s' if n > 1 else ''} per leg "
+                    + (f"frees ₹{-added:,.0f}" if added < 0
+                       else f"blocks ₹{added:,.0f} of ₹{cash:,.0f}")
+                    + (f" (capped at {cap})" if n >= cap else ""))
+            return {**shape, "max_lots": n, "margin": added,
+                    "margin_at_next": None if n >= cap else margin_for(n + 1),
+                    "reason": note}
+
+    one = margin_for(1)
+    return {**shape, "max_lots": 0, "margin": one, "margin_at_next": one,
+            "reason": (f"one lot needs ₹{one:,.0f} but only ₹{cash:,.0f} is free"
+                       if cash < one else "this account cannot carry one lot here")}
+
+
+async def atm_strike(dhan: DhanClient, underlying: str, expiry: str,
+                     option_type: str) -> tuple[float, float]:
+    """(strike, spot) — the listed strike nearest the underlying's live spot."""
+    spot = await _underlying_spot(dhan, underlying)
+    if not spot:
+        raise OrderError(
+            f"No live {underlying} price, so there is no reference to pick an "
+            "at-the-money strike from. The market may be closed.")
+    strikes = await instruments_collection.distinct(
+        "strike", {"underlying_symbol": underlying.upper(), "expiry": expiry,
+                   "option_type": option_type.upper(),
+                   "asset_class": {"$in": list(OPTION_CLASSES)}})
+    strikes = [float(k) for k in strikes if k is not None]
+    if not strikes:
+        raise OrderError(
+            f"No listed {underlying} {option_type} strikes for {expiry} to roll into.")
+    return min(strikes, key=lambda k: abs(k - spot)), float(spot)
+
+
+async def reopen_at_the_money(dhan: DhanClient, account_id: str, position_id: str) -> dict:
+    """Close a position and immediately re-open the SAME contract at today's ATM strike.
+
+    Same underlying, expiry, option type, side and lots — only the strike moves. A strike
+    chosen weeks ago drifts as the underlying moves, and a far-OTM call against a spot
+    that has run away from it is no longer the trade that was put on.
+
+    The margin gate runs on the NET effect — old leg gone, new one in its place — before
+    anything is touched. Checking the new leg alone would refuse a roll that is
+    self-financing, since the position being closed releases the margin that funds it."""
+    return (await reopen_all_at_the_money(dhan, account_id, [position_id]))
+
+
+async def reopen_all_at_the_money(dhan: DhanClient, account_id: str,
+                                  position_ids: list[str] | None = None) -> dict:
+    """Roll open option legs to their at-the-money strike, in one operation.
+
+    Every open leg by default; only the ones named in `position_ids` when given.
+
+    Deliberately not a loop over the single-leg roll. A straddle rolled one leg at a time
+    is, in between, a naked leg — and a naked leg costs MORE margin than the pair did,
+    because the leg that was offsetting it is gone. On a tight book that intermediate
+    state can refuse the second roll and strand the position half-rolled.
+
+    So the work is done per (underlying, expiry) group, which is the unit margin nets
+    over: every leg in the group is closed first, releasing its margin, and the
+    replacements go on as ONE all-or-none basket. The whole plan is projected and gated
+    before anything is touched."""
+    await get_account(account_id)
+    query: dict = {"account_id": account_id, "status": "OPEN"}
+    if position_ids is not None:
+        wanted = [pid for pid in dict.fromkeys(position_ids) if pid]
+        if not wanted:
+            raise OrderError("No positions were selected to roll.")
+        query["position_id"] = {"$in": wanted}
+    positions = [p async for p in fno_positions_collection.find(query)]
+    if position_ids is not None:
+        missing = set(wanted) - {p["position_id"] for p in positions}
+        if missing:
+            raise OrderError(
+                f"{len(missing)} of the {len(wanted)} selected position(s) are no longer "
+                "open in this account. Nothing was closed — refresh and select again.")
+    if not positions:
+        raise OrderError("This account has no open positions to roll.")
+
+    rollable, skipped = [], []
+    for pos in positions:
+        inst = pos.get("instrument") or {}
+        if inst.get("option_type") and inst.get("strike") is not None:
+            rollable.append(pos)
+        else:
+            skipped.append(pos["display_name"])
+    if not rollable:
+        raise OrderError(
+            "Nothing here has an at-the-money strike — a future is already the underlying.")
+
+    groups: dict[tuple, list[dict]] = {}
+    for pos in rollable:
+        inst = pos["instrument"]
+        groups.setdefault((inst["underlying_symbol"], inst["expiry"]), []).append(pos)
+
+    plans, total_delta = [], 0.0
+    for (underlying, expiry), members in groups.items():
+        t = _years_to_expiry(expiry)
+        legs, moves, spot = [], [], None
+        for pos in members:
+            inst = pos["instrument"]
+            strike, spot = await atm_strike(dhan, underlying, expiry, inst["option_type"])
+            legs.append({"instrument_kind": "OPTION", "symbol": underlying,
+                         "expiry": expiry, "strike": strike,
+                         "option_type": inst["option_type"],
+                         "transaction_type": pos["side"], "lots": int(pos["lots"])})
+            moves.append({"contract": pos["display_name"],
+                          "from_strike": float(inst.get("strike") or 0),
+                          "to_strike": strike, "lots": int(pos["lots"]),
+                          "side": pos["side"], "option_type": inst["option_type"]})
+
+        priced = await _price_basket(dhan, legs)
+        whole = await _group_positions(account_id, underlying, expiry)
+        ids = {pos["position_id"] for pos in members}
+        survivors = [q for q in whole if q["position_id"] not in ids]
+        before = portfolio_margin([_pos_to_leg(q) for q in whole], spot, t)["total"]
+        add = []
+        for p in priced:
+            ot = p["inst"].get("option_type")
+            add.append({"kind": p["kind"], "option_type": ot,
+                        "strike": p["inst"].get("strike"), "qty": p["qty"],
+                        "side": p["side"], "premium": p["ltp"],
+                        "iv": solve_iv(p["ltp"], spot, p["inst"].get("strike"), t, ot) if ot else None})
+        after = portfolio_margin([_pos_to_leg(q) for q in survivors] + add, spot, t)["total"]
+        total_delta += after - before
+        plans.append({"underlying": underlying, "expiry": expiry, "members": members,
+                      "legs": legs, "moves": moves, "spot": round(float(spot), 2),
+                      "product": members[0].get("product_type", "MARGIN")})
+
+    total_delta = round(total_delta, 2)
+    cash = await available_cash(account_id)
+    if not _basket_allowed(total_delta, cash):
+        scope = "the selected" if position_ids is not None else "all"
+        raise OrderError(
+            f"Rolling {scope} {len(rollable)} leg(s) to the money would add "
+            f"₹{total_delta:,.0f} of margin and only ₹{cash:,.0f} is free. Nothing was "
+            "closed — every position is exactly as it was.")
+
+    rolled, failed, realized = [], [], 0.0
+    for plan in plans:
+        closed_here = []
+        try:
+            for pos in plan["members"]:
+                fill = await exit_position(dhan, account_id, pos["position_id"])
+                doc = await fno_positions_collection.find_one(
+                    {"position_id": pos["position_id"], "account_id": account_id})
+                realized += float((doc or {}).get("realized_pnl") or 0.0)
+                closed_here.append({"contract": pos["display_name"],
+                                    "exit_price": fill.get("fill_price")})
+            res = await execute_basket(dhan, account_id, plan["legs"], plan["product"])
+            rolled.append({
+                "underlying": plan["underlying"], "expiry": plan["expiry"],
+                "spot": plan["spot"], "legs": len(plan["legs"]),
+                "moves": plan["moves"], "closed": closed_here,
+                "net_premium": res.get("net_premium"),
+                "margin_added": res.get("margin_added"),
+            })
+        except OrderError as exc:
+            failed.append({"underlying": plan["underlying"], "expiry": plan["expiry"],
+                           "closed": closed_here, "reason": exc.detail})
+
+    moved = sum(1 for r in rolled for m in r["moves"] if m["from_strike"] != m["to_strike"])
+    total_legs = sum(r["legs"] for r in rolled)
+    note = (f"Rolled {total_legs} leg(s) across {len(rolled)} group(s) to the money — "
+            f"{moved} changed strike, {total_legs - moved} re-entered at the same one.")
+    if skipped:
+        note += f" Skipped {len(skipped)} future(s), which have no at-the-money strike."
+    if failed:
+        flat = ", ".join(c["contract"] for f in failed for c in f["closed"])
+        note += (f" {len(failed)} group(s) FAILED to re-open and are now flat: {flat}. "
+                 "Re-open them by hand from the chain.")
+
+    return {"rolled": rolled, "failed": failed, "skipped": skipped,
+            "legs_rolled": total_legs, "strikes_changed": moved,
+            "realized": round(realized, 2), "margin_delta": total_delta, "note": note}
 
 
 async def _batch_quote_positions(positions: list[dict]) -> dict[str, float]:

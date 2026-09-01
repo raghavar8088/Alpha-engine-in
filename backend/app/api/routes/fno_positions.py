@@ -27,6 +27,7 @@ from app.core.db import fno_orders_collection, fno_positions_collection
 from app.services.fno_positions import (
     OrderError,
     create_account,
+    delete_account,
     edit_account,
     estimate_basket_margin,
     estimate_margin,
@@ -34,9 +35,12 @@ from app.services.fno_positions import (
     exit_position,
     future_expiries,
     list_accounts,
+    max_lots,
     option_chain,
     option_expiries,
     place_order,
+    reopen_all_at_the_money,
+    reopen_at_the_money,
     reset_account,
     summary,
     sync_positions,
@@ -154,6 +158,15 @@ async def update_account(account_id: str, payload: EditAccountRequest, _current_
     return account
 
 
+@router.delete("/accounts/{account_id}")
+async def delete_account_endpoint(account_id: str, _u: dict = Depends(get_current_user)):
+    """Delete a paper account. Refuses while it still holds open positions."""
+    try:
+        return await delete_account(account_id)
+    except OrderError as exc:
+        raise HTTPException(400, exc.detail)
+
+
 @router.get("/underlyings")
 async def list_underlyings(_current_user: dict = Depends(get_current_user)):
     return {"underlyings": await underlyings()}
@@ -233,6 +246,17 @@ async def basket_margin(payload: BasketRequest, current_user: dict = Depends(get
         raise HTTPException(status_code=422, detail=exc.detail)
 
 
+@router.post("/basket/max-lots")
+async def basket_max_lots(payload: BasketRequest, dhan: DhanClient = Depends(get_dhan),
+                          _u: dict = Depends(get_current_user)):
+    """The largest equal lot count this account can carry across the given legs."""
+    try:
+        return await max_lots(dhan, payload.account_id,
+                              [leg.model_dump() for leg in payload.legs])
+    except OrderError as exc:
+        raise HTTPException(400, exc.detail)
+
+
 @router.post("/basket/execute")
 async def basket_execute(payload: BasketRequest, current_user: dict = Depends(get_current_user)):
     """Place every leg of the basket at once, gated on the combined netted margin
@@ -298,6 +322,35 @@ async def exit(position_id: str, payload: ExitPositionRequest, current_user: dic
         raise HTTPException(status_code=422, detail=exc.detail)
     result["position"] = _serialize(result["position"], ("opened_at", "updated_at", "closed_at"))
     return _serialize(result, ("placed_at", "updated_at", "filled_at"))
+
+
+class ReopenAtmRequest(BaseModel):
+    """Which legs to roll. Omit `position_ids` (or send null) to roll the whole book."""
+    position_ids: list[str] | None = None
+
+
+@router.post("/positions/reopen-atm-all")
+async def reopen_atm_all_endpoint(account_id: str,
+                                  payload: ReopenAtmRequest | None = None,
+                                  dhan: DhanClient = Depends(get_dhan),
+                                  _u: dict = Depends(get_current_user)):
+    """Roll open option legs to their at-the-money strike — all of them, or a selection."""
+    try:
+        return await reopen_all_at_the_money(
+            dhan, account_id, payload.position_ids if payload else None)
+    except OrderError as exc:
+        raise HTTPException(400, exc.detail)
+
+
+@router.post("/positions/{position_id}/reopen-atm")
+async def reopen_atm_endpoint(position_id: str, account_id: str,
+                              dhan: DhanClient = Depends(get_dhan),
+                              _u: dict = Depends(get_current_user)):
+    """Close this position and re-open the same contract at today's ATM strike."""
+    try:
+        return await reopen_at_the_money(dhan, account_id, position_id)
+    except OrderError as exc:
+        raise HTTPException(400, exc.detail)
 
 
 @router.post("/reset")
