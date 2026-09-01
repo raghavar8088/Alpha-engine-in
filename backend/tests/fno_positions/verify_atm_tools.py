@@ -12,11 +12,21 @@ import asyncio
 import sys
 import traceback
 
+from app.core.db import fno_positions_collection as POS
 from app.services.fno_positions import (
     OrderError, atm_strike, available_cash, create_account, delete_account, execute_basket,
     exit_position, max_lots, option_chain, option_expiries, reopen_all_at_the_money,
     summary,
 )
+
+
+async def open_legs(account_id: str) -> list[dict]:
+    """The open rows themselves.
+
+    `summary()` on this desk reports `open_positions` as a COUNT, unlike the commodity
+    desk where the same key holds the rows. Reading them from the collection keeps this
+    test honest about which shape it is actually looking at."""
+    return [p async for p in POS.find({"account_id": account_id, "status": "OPEN"})]
 
 SYMBOL = "NIFTY"
 FAILURES: list[str] = []
@@ -73,37 +83,33 @@ async def go() -> None:
             {"instrument_kind": "OPTION", "symbol": SYMBOL, "expiry": expiry,
              "strike": away, "option_type": ot, "transaction_type": "SELL", "lots": 1}
             for ot in ("CE", "PE")])
-        before = await summary(aid)
-        print(f"\nopened {before['open_count']} legs at {away:g}")
+        before = await open_legs(aid)
+        print("")
+        print(f"opened {len(before)} legs at {away:g}")
 
         want, _spot = await atm_strike(None, SYMBOL, expiry, "CE")
         r = await reopen_all_at_the_money(None, aid)
         print(f"  {r['note']}")
-        after = await summary(aid)
+        after = await open_legs(aid)
         check("every leg still open after the roll",
-              after["open_count"] == before["open_count"],
-              f"{before['open_count']} -> {after['open_count']}")
+              len(after) == len(before), f"{len(before)} -> {len(after)}")
         check("both legs rolled", r["legs_rolled"] == 2, str(r["legs_rolled"]))
         check("both strikes changed", r["strikes_changed"] == 2,
               f"{r['strikes_changed']} changed")
         check("every open leg now sits at the money",
-              all(float(p["instrument"]["strike"]) == want
-                  for p in after["open_positions"]),
-              ", ".join(f"{float(p['instrument']['strike']):g}"
-                        for p in after["open_positions"]))
+              all(float(p["instrument"]["strike"]) == want for p in after),
+              ", ".join(f"{float(p['instrument']['strike']):g}" for p in after))
         check("nothing failed", not r["failed"], str(r["failed"])[:80])
 
         # ------------------------------------------------- a selection only -----
-        one = after["open_positions"][0]
-        other = after["open_positions"][1]
+        one, other = after[0], after[1]
         r2 = await reopen_all_at_the_money(None, aid, [one["position_id"]])
         check("only the selected leg was rolled", r2["legs_rolled"] == 1,
               f"{r2['legs_rolled']} rolled")
-        after2 = await summary(aid)
+        after2 = await open_legs(aid)
         check("the unselected leg kept its position id",
-              any(p["position_id"] == other["position_id"]
-                  for p in after2["open_positions"]),
-              "it was replaced" )
+              any(p["position_id"] == other["position_id"] for p in after2),
+              "it was replaced")
 
         try:
             await reopen_all_at_the_money(None, aid, ["deadbeefdead"])
@@ -127,8 +133,7 @@ async def go() -> None:
         print("\ncleanup:")
         for aid in scratch:
             try:
-                s = await summary(aid)
-                for p in s["open_positions"]:
+                for p in await open_legs(aid):
                     await exit_position(None, aid, p["position_id"])
                 await delete_account(aid)
                 print(f"  deleted {aid}")
