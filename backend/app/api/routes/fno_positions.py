@@ -159,12 +159,13 @@ async def update_account(account_id: str, payload: EditAccountRequest, _current_
 
 
 @router.delete("/accounts/{account_id}")
-async def delete_account_endpoint(account_id: str, _u: dict = Depends(get_current_user)):
+async def delete_account_endpoint(account_id: str,
+                                  _u: dict = Depends(get_current_user)):
     """Delete a paper account. Refuses while it still holds open positions."""
     try:
         return await delete_account(account_id)
     except OrderError as exc:
-        raise HTTPException(400, exc.detail)
+        raise HTTPException(status_code=422, detail=exc.detail)
 
 
 @router.get("/underlyings")
@@ -247,14 +248,14 @@ async def basket_margin(payload: BasketRequest, current_user: dict = Depends(get
 
 
 @router.post("/basket/max-lots")
-async def basket_max_lots(payload: BasketRequest, dhan: DhanClient = Depends(get_dhan),
-                          _u: dict = Depends(get_current_user)):
+async def basket_max_lots(payload: BasketRequest,
+                          current_user: dict = Depends(get_current_user)):
     """The largest equal lot count this account can carry across the given legs."""
+    dhan = await _dhan(current_user)
     try:
-        return await max_lots(dhan, payload.account_id,
-                              [leg.model_dump() for leg in payload.legs])
+        return await max_lots(dhan, payload.account_id, _basket_legs(payload))
     except OrderError as exc:
-        raise HTTPException(400, exc.detail)
+        raise HTTPException(status_code=422, detail=exc.detail)
 
 
 @router.post("/basket/execute")
@@ -332,25 +333,25 @@ class ReopenAtmRequest(BaseModel):
 @router.post("/positions/reopen-atm-all")
 async def reopen_atm_all_endpoint(account_id: str,
                                   payload: ReopenAtmRequest | None = None,
-                                  dhan: DhanClient = Depends(get_dhan),
-                                  _u: dict = Depends(get_current_user)):
+                                  current_user: dict = Depends(get_current_user)):
     """Roll open option legs to their at-the-money strike — all of them, or a selection."""
+    dhan = await _dhan(current_user)
     try:
         return await reopen_all_at_the_money(
             dhan, account_id, payload.position_ids if payload else None)
     except OrderError as exc:
-        raise HTTPException(400, exc.detail)
+        raise HTTPException(status_code=422, detail=exc.detail)
 
 
 @router.post("/positions/{position_id}/reopen-atm")
 async def reopen_atm_endpoint(position_id: str, account_id: str,
-                              dhan: DhanClient = Depends(get_dhan),
-                              _u: dict = Depends(get_current_user)):
+                              current_user: dict = Depends(get_current_user)):
     """Close this position and re-open the same contract at today's ATM strike."""
+    dhan = await _dhan(current_user)
     try:
         return await reopen_at_the_money(dhan, account_id, position_id)
     except OrderError as exc:
-        raise HTTPException(400, exc.detail)
+        raise HTTPException(status_code=422, detail=exc.detail)
 
 
 @router.post("/reset")
