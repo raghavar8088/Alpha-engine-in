@@ -1604,7 +1604,14 @@ async def performance(account_id: str, start: str | None = None) -> dict:
     """
     account = await get_account(account_id)
     initial = float(account.get("initial_capital") or 0)
-    start_iso = _parse_start(start or account.get("roi_start_date") or _today())
+    # Fall back to the account's own creation date, not today. Accounts made before this
+    # field existed have no stored start, and defaulting those to today would report a
+    # one-day window over a book that has been trading for weeks — every per-day number
+    # would be the whole P&L.
+    start_iso = _parse_start(
+        start
+        or account.get("roi_start_date")
+        or (_as_date(account.get("created_at")) or date.today()).isoformat())
     start_d = date.fromisoformat(start_iso)
     today = date.today()
 
