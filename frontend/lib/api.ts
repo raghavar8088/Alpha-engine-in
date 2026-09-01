@@ -1661,6 +1661,62 @@ export async function exitFnoPosition(accountId: string, positionId: string, lot
   });
 }
 
+export interface FnoMaxLots {
+  max_lots: number;
+  margin: number;
+  margin_at_next: number | null;
+  margin_per_lot: number;
+  premium_per_lot: number;
+  available_cash: number;
+  legs: number;
+  reason: string;
+}
+
+export interface FnoReopenAtm {
+  rolled: {
+    underlying: string; expiry: string; spot: number; legs: number;
+    moves: { contract: string; from_strike: number; to_strike: number;
+             lots: number; side: string; option_type: string }[];
+    closed: { contract: string; exit_price: number }[];
+    net_premium: number; margin_added: number;
+  }[];
+  failed: { underlying: string; expiry: string; reason: string;
+            closed: { contract: string; exit_price: number }[] }[];
+  skipped: string[];
+  legs_rolled: number;
+  strikes_changed: number;
+  realized: number;
+  margin_delta: number;
+  note: string;
+}
+
+/** Delete a paper account. Refuses while it still holds open positions. */
+export async function deleteFnoAccount(accountId: string): Promise<{
+  deleted: string; closed_positions_removed: number; orders_removed: number;
+}> {
+  return apiFetch(`/api/fno-positions/accounts/${accountId}`, { method: "DELETE" });
+}
+
+/** The largest EQUAL lot count this account can carry across these legs. */
+export async function maxFnoLots(
+  accountId: string, legs: FnoBasketLeg[], productType: FnoProductType = "MARGIN",
+): Promise<FnoMaxLots> {
+  return apiFetch("/api/fno-positions/basket/max-lots", {
+    method: "POST",
+    body: JSON.stringify({ account_id: accountId, product_type: productType, legs }),
+  });
+}
+
+/** Roll open option legs to their at-the-money strike.
+ *  Pass `positionIds` to roll only those; omit it to roll the whole book. */
+export async function reopenFnoAtm(
+  accountId: string, positionIds?: string[],
+): Promise<FnoReopenAtm> {
+  return apiFetch(
+    `/api/fno-positions/positions/reopen-atm-all?account_id=${encodeURIComponent(accountId)}`,
+    { method: "POST", body: JSON.stringify({ position_ids: positionIds ?? null }) });
+}
+
 export async function resetFnoPositions(accountId: string): Promise<{ positions_deleted: number; orders_deleted: number; initial_capital: number }> {
   return apiFetch("/api/fno-positions/reset", { method: "POST", body: JSON.stringify({ account_id: accountId }) });
 }

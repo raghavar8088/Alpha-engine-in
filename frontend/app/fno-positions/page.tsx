@@ -34,6 +34,8 @@ import {
   fetchFnoTopMovers,
   fetchFnoUnderlyings,
   placeFnoOrder,
+  deleteFnoAccount,
+  reopenFnoAtm,
   resetFnoPositions,
 } from "../../lib/api";
 
@@ -77,7 +79,9 @@ export default function FnoPositionsPage() {
   const [accountsLoading, setAccountsLoading] = useState(true);
   const [createAccountOpen, setCreateAccountOpen] = useState(false);
   const [editAccountOpen, setEditAccountOpen] = useState(false);
-  const [tab, setTab] = useState<Tab>("chain");
+  // Open on the book. What you are holding and what it is worth is the first thing you
+  // want on arriving; the chain is where you go to add to it.
+  const [tab, setTab] = useState<Tab>("positions");
   const [underlyings, setUnderlyings] = useState<FnoUnderlying[]>([]);
   const [symbol, setSymbol] = useState<string>("NIFTY");
   const [expiry, setExpiry] = useState<string>("");
@@ -100,6 +104,10 @@ export default function FnoPositionsPage() {
   const [basketProduct, setBasketProduct] = useState<FnoProductType>("MARGIN");
   const [basketMargin, setBasketMargin] = useState<FnoBasketMargin | null>(null);
   const [basketBusy, setBasketBusy] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [rolling, setRolling] = useState(false);
+  // Which legs the roll applies to. Empty means the whole book.
+  const [picked, setPicked] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchFnoUnderlyings()
@@ -219,6 +227,70 @@ export default function FnoPositionsPage() {
       !!leg && ((leg.last_price ?? 0) > 0 || (leg.oi ?? 0) > 0 || (leg.volume ?? 0) > 0);
     return chain.strikes.filter((row) => traded(row.ce) || traded(row.pe));
   }, [chain]);
+
+  const openLegs = useMemo(
+    () => positions.filter((p) => p.status === "OPEN" && !!p.instrument?.option_type),
+    [positions]);
+
+  // A roll replaces position ids and a row can be closed from another tab, so a stale tick
+  // would ask the server to roll legs that no longer exist. Read the selection back through
+  // the live book rather than trusting what was ticked.
+  const selected = useMemo(
+    () => openLegs.filter((p) => picked.has(p.position_id)).map((p) => p.position_id),
+    [openLegs, picked]);
+
+  const deleteAccount = useCallback(async () => {
+    if (!accountId) return;
+    if (!window.confirm(
+      `Delete "${activeAccount?.name ?? "this account"}" and its whole history?\n\n`
+      + "Closed positions and orders go with it. This cannot be undone — Reset empties "
+      + "the book but keeps it.")) return;
+    setDeleting(true);
+    try {
+      const r = await deleteFnoAccount(accountId);
+      // Point at another book BEFORE anything reloads, or the page keeps an id that no
+      // longer resolves and every panel below renders an error.
+      const rest = accounts.filter((a) => a.account_id !== accountId);
+      setAccountId(rest[0]?.account_id ?? null);
+      setPicked(new Set());
+      setNotice(`Deleted "${r.deleted}" — ${r.closed_positions_removed} closed position(s) `
+        + `and ${r.orders_removed} order(s) went with it.`);
+      await loadAccounts();
+    } catch (e) {
+      setNotice(`Delete failed: ${e instanceof Error ? e.message : "unknown error"}`);
+    } finally {
+      setDeleting(false);
+    }
+  }, [accountId, accounts, activeAccount, loadAccounts]);
+
+  // Roll legs back to the money: close each at the live price and put the SAME contract
+  // straight back on at the strike nearest its own spot — same side, same lots. Done per
+  // (underlying, expiry) group on the server, because rolling a straddle one leg at a time
+  // leaves a naked leg in between that costs more margin than the pair did.
+  const rollToAtm = useCallback(async (ids?: string[]) => {
+    if (!accountId) return;
+    const n = ids?.length ?? openLegs.length;
+    if (!n) return;
+    if (!window.confirm(
+      `Roll ${ids ? `the ${n} selected` : `all ${n}`} option leg${n > 1 ? "s" : ""} to the money?\n\n`
+      + "Each is closed at the live price, realising its P&L, and re-opened at the strike "
+      + "nearest its own spot — same side, same lots. Futures are left alone.\n\n"
+      + (ids && ids.length < openLegs.length
+        ? "Note: rolling only part of a pair leaves the other leg where it is, which can "
+          + "cost more margin than the pair did.\n\n" : "")
+      + "Nothing is closed unless the whole thing fits your margin.")) return;
+    setRolling(true);
+    try {
+      const r = await reopenFnoAtm(accountId, ids);
+      setNotice(`${r.note} Realised ${inr(r.realized)}, margin ${inr(r.margin_delta)}.`);
+      setPicked(new Set());
+      await loadPositions();
+    } catch (e) {
+      setNotice(`Roll failed: ${e instanceof Error ? e.message : "unknown error"}`);
+    } finally {
+      setRolling(false);
+    }
+  }, [accountId, openLegs, loadPositions]);
 
   const exit = useCallback(
     async (p: FnoPosition) => {
@@ -363,6 +435,14 @@ export default function FnoPositionsPage() {
             <button className="ghost-btn" onClick={() => setEditAccountOpen(true)} disabled={!activeAccount}>Edit</button>
             <button className="reset-cta" onClick={reset} disabled={resetting || !accountId}>
               {resetting ? "Resetting…" : "Reset"}
+            </button>
+            <button
+              className="ghost-btn danger"
+              onClick={deleteAccount}
+              disabled={deleting || !accountId}
+              title="Delete this paper account. Refused while it still holds open positions."
+            >
+              {deleting ? "Deleting…" : "Delete"}
             </button>
           </div>
         }
@@ -609,6 +689,37 @@ export default function FnoPositionsPage() {
               <option value="all">All (incl. closed)</option>
             </select>
           </div>
+          {!!openLegs.length && (
+            <div className="rollbar">
+              <div className="rollbar-say">
+                {selected.length ? (
+                  <>
+                    <b>{selected.length} of {openLegs.length} legs selected.</b> Each is
+                    closed at the live price and re-opened at the strike nearest its own
+                    spot — same side, same lots. Rolling part of a pair leaves the other leg
+                    where it is, so the margin check runs on that end state first.
+                    <button className="linkish" type="button"
+                            onClick={() => setPicked(new Set())}>clear selection</button>
+                  </>
+                ) : (
+                  <>
+                    <b>Roll the book to the money.</b> Every option leg closed at the live
+                    price and re-opened at the strike nearest its own spot — same side, same
+                    lots. Checked against your margin before anything is closed, and done
+                    per expiry group so a straddle never sits half-rolled. Tick rows to roll
+                    only some of them.
+                  </>
+                )}
+              </div>
+              <button className="ghost-btn roll" disabled={rolling}
+                      onClick={() => rollToAtm(selected.length ? selected : undefined)}>
+                {rolling ? "Rolling…"
+                  : selected.length
+                    ? `Re-add ATM · ${selected.length} selected`
+                    : `Re-add ATM · all ${openLegs.length} leg${openLegs.length > 1 ? "s" : ""}`}
+              </button>
+            </div>
+          )}
           {positions.length === 0 ? (
             <div className="empty">No F&O positions yet — buy a CE/PE from the Option Chain tab or a future from the Futures tab.</div>
           ) : (
@@ -616,6 +727,18 @@ export default function FnoPositionsPage() {
               <table className="data-table">
                 <thead>
                   <tr>
+                    <th className="pickcell">
+                      <input type="checkbox" aria-label="Select every open option leg"
+                             checked={!!openLegs.length && selected.length === openLegs.length}
+                             ref={(el) => {
+                               if (el) el.indeterminate = selected.length > 0
+                                 && selected.length < openLegs.length;
+                             }}
+                             onChange={() => setPicked(
+                               selected.length === openLegs.length
+                                 ? new Set()
+                                 : new Set(openLegs.map((p) => p.position_id)))} />
+                    </th>
                     <th style={{ textAlign: "left" }}>Contract</th>
                     <th>Product</th>
                     <th>Lots</th>
@@ -623,6 +746,7 @@ export default function FnoPositionsPage() {
                     <th>LTP</th>
                     <th>Margin (standalone)</th>
                     <th>P&amp;L</th>
+                    <th>Re-add ATM</th>
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -630,7 +754,20 @@ export default function FnoPositionsPage() {
                   {positions.map((p) => {
                     const pnl = p.status === "OPEN" ? p.unrealized_pnl : p.realized_pnl;
                     return (
-                      <tr key={p.position_id}>
+                      <tr key={p.position_id}
+                          className={picked.has(p.position_id) ? "picked" : ""}>
+                        <td className="pickcell">
+                          {p.status === "OPEN" && p.instrument?.option_type ? (
+                            <input type="checkbox" aria-label={`Select ${p.display_name}`}
+                                   checked={picked.has(p.position_id)}
+                                   onChange={() => {
+                                     const next = new Set(picked);
+                                     if (next.has(p.position_id)) next.delete(p.position_id);
+                                     else next.add(p.position_id);
+                                     setPicked(next);
+                                   }} />
+                          ) : null}
+                        </td>
                         <td style={{ textAlign: "left" }}>
                           <div className="name-cell">
                             <span className="name">{p.display_name}</span>
@@ -648,6 +785,15 @@ export default function FnoPositionsPage() {
                         <td className={pnl >= 0 ? "gain" : "loss"}>
                           {inr(pnl)}
                           {p.status === "OPEN" && <span className="pct"> ({p.pnl_pct >= 0 ? "+" : ""}{p.pnl_pct.toFixed(2)}%)</span>}
+                        </td>
+                        <td>
+                          {p.status === "OPEN" && (p.instrument?.option_type
+                            ? <button className="roll-btn" disabled={rolling}
+                                      onClick={() => rollToAtm([p.position_id])}
+                                      title="Close this leg and re-open the same option at today's at-the-money strike">
+                                Re-add ATM
+                              </button>
+                            : <span className="muted-cell">futures</span>)}
                         </td>
                         <td>{p.status === "OPEN" && <button className="exit-btn" onClick={() => exit(p)}>Exit</button>}</td>
                       </tr>
@@ -775,6 +921,36 @@ export default function FnoPositionsPage() {
         .status.gain { color: var(--gain); }
         .status.muted { color: var(--text-faint); }
         .exit-btn { background: var(--loss-dim); color: var(--loss); border: 1px solid rgba(217, 45, 63, 0.26); border-radius: 8px; padding: 6px 14px; font-size: 11.5px; font-weight: 700; cursor: pointer; }
+        .ghost-btn.danger { color: var(--loss); border-color: rgba(217, 45, 63, 0.26);
+                            background: var(--loss-dim); }
+        .ghost-btn.danger:hover:not(:disabled) { border-color: var(--loss); }
+        .ghost-btn.roll { flex: none; color: var(--purple); background: var(--purple-dim);
+                          border-color: rgba(125, 52, 220, 0.28); }
+        .ghost-btn.roll:hover:not(:disabled) { border-color: var(--purple); }
+
+        .rollbar { display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+                   padding: 12px 16px; margin-bottom: 2px;
+                   border-bottom: 1px solid var(--panel-border);
+                   background: var(--panel-tint); }
+        .rollbar-say { flex: 1 1 320px; min-width: 0; font-size: 12px; line-height: 1.55;
+                       color: var(--text-muted); }
+        .rollbar-say b { color: var(--text); font-weight: 650; }
+        .linkish { background: none; border: 0; padding: 0 0 0 6px; cursor: pointer;
+                   color: var(--purple); font: inherit; font-size: 11.5px;
+                   text-decoration: underline; text-underline-offset: 2px; }
+        .linkish:hover { opacity: 0.78; }
+
+        .pickcell { width: 34px; text-align: center; padding-left: 4px; padding-right: 4px; }
+        .pickcell input { width: 15px; height: 15px; accent-color: var(--purple);
+                          cursor: pointer; vertical-align: middle; }
+        tr.picked { background: var(--purple-dim); }
+        .roll-btn { background: var(--purple-dim); color: var(--purple);
+                    border: 1px solid rgba(125, 52, 220, 0.26); border-radius: 100px;
+                    padding: 6px 12px; font-size: 11px; font-weight: 700;
+                    white-space: nowrap; cursor: pointer; }
+        .roll-btn:hover:not(:disabled) { border-color: var(--purple); }
+        .roll-btn:disabled { opacity: 0.45; cursor: default; }
+        .muted-cell { font-size: 11px; color: var(--text-faint); }
         .buy-chip { background: linear-gradient(145deg, var(--accent), var(--accent-hover)); color: #241404; font-weight: 700; font-size: 11px; border: none; border-radius: 7px; padding: 6px 10px; cursor: pointer; }
         .buy-chip.pe { background: linear-gradient(145deg, #7d34dc, #5b23a8); color: #fff; }
         .chip-pair { display: flex; align-items: center; gap: 6px; justify-content: center; }
