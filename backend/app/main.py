@@ -324,7 +324,7 @@ async def ensure_indexes() -> None:
     from app.services.commodity_instruments import ensure_indexes as cmi_ensure_indexes
     await cmi_ensure_indexes()
     from app.services.commodity_prelive import ensure_indexes as cmpl_ensure_indexes
-    await cmpl_ensure_indexes()
+    await _try("commodity_prelive", cmpl_ensure_indexes())
 
 
 @app.on_event("startup")

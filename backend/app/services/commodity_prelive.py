@@ -909,12 +909,32 @@ async def summary() -> dict:
 
 
 async def ensure_indexes() -> None:
-    await commodity_prelive_positions_collection.create_index([("symbol", 1), ("status", 1)])
-    await commodity_prelive_positions_collection.create_index(
-        [("strategy_id", 1), ("symbol", 1), ("status", 1)])
-    await commodity_prelive_positions_collection.create_index([("closed_at", -1)])
-    await commodity_prelive_trades_collection.create_index([("symbol", 1), ("closed_at", -1)])
-    await commodity_prelive_scores_collection.create_index(
-        [("symbol", 1), ("strategy_id", 1)], unique=True)
-    await commodity_prelive_flags_collection.create_index([("symbol", 1)], unique=True)
-    await commodity_prelive_equity_collection.create_index([("ts", -1)])
+    """Best-effort. An index is a speed-up, never a precondition for the desk to load.
+
+    THIS MUST NOT RAISE. The first version let `create_index` propagate, and on a cluster
+    whose writes were blocked (Atlas M0 at its 512 MB quota) that single exception escaped
+    the startup hook and took the WHOLE BACKEND down — every unrelated desk with it — for
+    a set of indexes nothing needs to serve a page. Every other module here already logs
+    and continues; this one now does too."""
+    specs = [
+        (commodity_prelive_positions_collection, [("symbol", 1), ("status", 1)],
+         "cpl_pos_symbol_status", False),
+        (commodity_prelive_positions_collection,
+         [("strategy_id", 1), ("symbol", 1), ("status", 1)], "cpl_pos_strategy_symbol", False),
+        (commodity_prelive_positions_collection, [("closed_at", -1)], "cpl_pos_closed_at", False),
+        (commodity_prelive_trades_collection, [("symbol", 1), ("closed_at", -1)],
+         "cpl_trade_symbol_closed", False),
+        (commodity_prelive_scores_collection, [("symbol", 1), ("strategy_id", 1)],
+         "cpl_score_key", True),
+        (commodity_prelive_flags_collection, [("symbol", 1)], "cpl_flag_symbol", True),
+        (commodity_prelive_equity_collection, [("ts", -1)], "cpl_equity_ts", False),
+    ]
+    made = skipped = 0
+    for coll, keys, name, unique in specs:
+        try:
+            await coll.create_index(keys, name=name, unique=unique, background=True)
+            made += 1
+        except Exception as exc:  # noqa: BLE001 — one failure must not skip the rest
+            skipped += 1
+            logger.warning("[commodity_prelive] index %s skipped: %s", name, exc)
+    logger.info("[commodity_prelive] indexes ensured (%d present, %d skipped)", made, skipped)
