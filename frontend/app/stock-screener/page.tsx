@@ -658,6 +658,12 @@ Click for the full reason stack`,
               the pattern&rsquo;s boundary) and <b className="warn">{patterns.forming}</b> forming
               (shape complete, boundary intact — the Trigger column is the level that would
               confirm it). Scan took {patterns.elapsed_s}s and made no broker calls.
+              {typeof patterns.stale_s === "number" && (
+                <span className="stalenote">
+                  {" "}Showing the previous scan ({Math.round(patterns.stale_s / 60)} min old)
+                  while a fresh one runs — reload shortly for the current board.
+                </span>
+              )}
               {patTimeframe === "1w" && (
                 <> Weekly coverage: {patterns.weekly_coverage.with_enough_weekly_bars}/
                   {patterns.weekly_coverage.symbols} ({patterns.weekly_coverage.pct}%) have enough
@@ -1224,6 +1230,7 @@ Click for the full reason stack`,
 
         .note { font-size: 12.5px; color: var(--text-muted); line-height: 1.6; background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 10px; padding: 10px 14px; }
         .note.small { font-size: 11.5px; margin-top: 12px; }
+        .stalenote { color: var(--warn); font-weight: 600; }
 
         .tablewrap { overflow-x: auto; }
         td.spark { width: 92px; min-width: 92px; padding: 2px 8px; }

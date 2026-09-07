@@ -337,6 +337,18 @@ async def start_dhan_auto_refresh() -> None:
 
 
 @app.on_event("startup")
+async def start_screener_pattern_warm() -> None:
+    """Keep the screener's pattern board hot — see patterns.warm_loop for why."""
+    from app.services.screener.patterns import WARM_ENABLED, WARM_EVERY, warm_loop
+
+    if WARM_ENABLED:
+        asyncio.create_task(warm_loop())
+        logger.info("Screener pattern warm enabled (every %.0f min)", WARM_EVERY / 60)
+    else:
+        logger.info("Screener pattern warm disabled (SCREENER_PATTERN_WARM=0)")
+
+
+@app.on_event("startup")
 async def start_call_scheduler() -> None:
     from app.services.call_scheduler import AUTOGEN_ENABLED, GENERATION_SLOTS, call_scheduler_loop
 

@@ -3508,6 +3508,55 @@ export interface CommodityCoverage {
 export async function fetchCommoditySummary(): Promise<CommoditySummary> {
   return apiFetch("/api/commodity/summary");
 }
+// --- Commodity: per-contract leaderboards ------------------------------------
+// The main board blends all eight underlyings. These recompute the stats AND re-run the
+// promotion gate on one contract's trades alone, so a verdict here means "clears the gate
+// on THIS contract" rather than on a book dominated by the metals.
+
+export interface CommodityScriptRow {
+  symbol: string;
+  strategies_traded: number;
+  closed_trades: number;
+  open_positions: number;
+  realised_pnl: number;
+  unrealised_pnl: number;
+  net_pnl: number;
+  deployed: number;
+  total_costs: number;
+  ready: number;
+  rejected: number;
+  pending: number;
+  profitable: number;
+}
+export interface CommodityScriptOverview {
+  rows: CommodityScriptRow[];
+  gate: Record<string, number>;
+  note: string;
+}
+export interface CommodityScriptBoard {
+  symbol: string;
+  rows: (CommodityScore & { symbol: string })[];
+  totals: CommodityScriptRow;
+  available: string[];
+  total?: number;
+  note?: string;
+  error?: string;
+  timeframes?: string[];
+}
+
+export async function fetchCommodityScripts(fresh = false): Promise<CommodityScriptOverview> {
+  return apiFetch(`/api/commodity/scripts${fresh ? "?fresh=true" : ""}`);
+}
+export async function fetchCommodityScriptBoard(
+  symbol: string,
+  params: { family?: string; timeframe?: string; verdict?: string } = {},
+): Promise<CommodityScriptBoard> {
+  const q = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) if (v) q.set(k, v);
+  const s = q.toString();
+  return apiFetch(`/api/commodity/scripts/${encodeURIComponent(symbol)}${s ? `?${s}` : ""}`);
+}
+
 export async function fetchCommodityLeaderboard(params: { family?: string; timeframe?: string; verdict?: string } = {}): Promise<{ leaderboard: CommodityScore[]; total: number; timeframes: string[] }> {
   const q = new URLSearchParams();
   if (params.family) q.set("family", params.family);
@@ -4116,6 +4165,8 @@ export interface ScreenerPatternBoard {
   triggered: number; forming: number;
   weekly_coverage: { symbols: number; with_enough_weekly_bars: number; pct: number; note: string };
   elapsed_s: number;
+  /** Set only when the rows come from an expired scan being refreshed behind the request. */
+  stale_s?: number;
   catalog: { key: string; label: string; family: string; family_label: string; probeable: boolean }[];
   rows: ScreenerPatternRow[];
 }

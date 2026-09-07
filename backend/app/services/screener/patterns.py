@@ -70,9 +70,41 @@ PROBE_FAMILIES = {"chart"}
 PROBE_EDGE = 0.001         # break the extreme by 0.1% to count as "closed through"
 
 SCAN_TTL = float(os.getenv("SCREENER_PATTERN_TTL", "3600"))
+# How long a result may still be SERVED after it goes stale, while a refresh runs behind
+# the request. Beyond this the data is too old to hand back and the caller waits.
+STALE_GRACE = float(os.getenv("SCREENER_PATTERN_STALE_GRACE", "10800"))
 MIN_BARS_WEEKLY = 45       # below this the longer shapes cannot form at all
 
 _cache: dict[str, tuple[float, dict]] = {}
+# One lock per index. A full scan is ~30s of single-threaded CPU and holds every symbol's
+# bars in memory at once; the box it runs on has two cores and a few hundred MB free, so
+# letting three tab-opens start three concurrent scans is how it gets OOM-killed rather
+# than merely slow. Everyone after the first waits for the same result.
+_scan_locks: dict[str, asyncio.Lock] = {}
+_refreshing: set[str] = set()
+
+
+def _lock_for(key: str) -> asyncio.Lock:
+    lock = _scan_locks.get(key)
+    if lock is None:
+        lock = _scan_locks[key] = asyncio.Lock()
+    return lock
+
+
+async def _refresh_behind(index: str, key: str) -> None:
+    """Re-run the scan for a cache entry that has gone stale, off the request path."""
+    if key in _refreshing:
+        return
+    _refreshing.add(key)
+    try:
+        await _scan_uncached(index, key)
+    except Exception:
+        # A failed background refresh must not take the module down or clear the cache —
+        # the stale entry is still the best answer available, and the next request retries.
+        logger.warning("screener pattern refresh failed for %s; keeping stale scan",
+                       index, exc_info=True)
+    finally:
+        _refreshing.discard(key)
 
 
 def _now() -> datetime:
@@ -195,9 +227,14 @@ def _rr(entry: float, target: float, stop: float) -> float | None:
 
 
 def _scan_sync(universe: list[tuple[str, str | None]],
-               bars_by_sym: dict[str, list[Bar]]) -> list[dict]:
-    """The CPU-bound body, run in a worker thread so it never blocks the event loop."""
+               bars_by_sym: dict[str, list[Bar]]) -> tuple[list[dict], int]:
+    """The CPU-bound body, run in a worker thread so it never blocks the event loop.
+
+    Returns the hits AND the weekly-coverage count. The count used to be computed by a
+    second pass that re-ran `to_weekly` on all 500 symbols, throwing away a resampling this
+    loop had already done."""
     out: list[dict] = []
+    weekly_ready = 0
     for symbol, sector in universe:
         daily = bars_by_sym.get(symbol) or []
         if len(daily) < 40:
@@ -205,12 +242,21 @@ def _scan_sync(universe: list[tuple[str, str | None]],
         out.extend(_scan_symbol(symbol, sector, daily, "1d"))
         weekly = H.to_weekly(daily)
         if len(weekly) >= MIN_BARS_WEEKLY:
+            weekly_ready += 1
             out.extend(_scan_symbol(symbol, sector, weekly, "1w"))
-    return out
+    return out, weekly_ready
 
 
 async def scan(index: str | None = None, fresh: bool = False) -> dict:
-    """Scan the universe on both timeframes. Cached for the trading day."""
+    """Scan the universe on both timeframes.
+
+    Stale-while-revalidate. A cold scan is ~30 seconds of single-threaded work over 500
+    symbols on two timeframes, and the entry expires hourly, so serving only fresh results
+    meant somebody opened the Patterns tab to a 35-second wait several times a day. Past
+    the TTL the previous scan is handed back immediately and a refresh runs behind the
+    request; only a genuinely empty cache — first boot — makes anyone wait.
+
+    Staleness is reported rather than hidden: the caller gets `stale_s` and can say so."""
     from app.services.screener.momentum import DEFAULT_INDEX
 
     index = index or DEFAULT_INDEX
@@ -218,21 +264,40 @@ async def scan(index: str | None = None, fresh: bool = False) -> dict:
     now = time.monotonic()
     if not fresh:
         hit = _cache.get(key)
-        if hit and now - hit[0] < SCAN_TTL:
-            return hit[1]
+        if hit:
+            age = now - hit[0]
+            if age < SCAN_TTL:
+                return hit[1]
+            if age < STALE_GRACE:
+                asyncio.create_task(_refresh_behind(index, key))
+                return {**hit[1], "stale_s": round(age, 1)}
+    return await _scan_uncached(index, key, force=fresh)
 
+
+async def _scan_uncached(index: str, key: str, force: bool = False) -> dict:
+    """The scan itself, serialised per index so only one ever runs at a time."""
+    async with _lock_for(key):
+        # Someone may have finished the same scan while this call waited for the lock — but
+        # not when the caller explicitly asked for fresh, which must mean fresh or the
+        # Refresh button silently returns the thing it was pressed to replace.
+        if not force:
+            hit = _cache.get(key)
+            if hit and time.monotonic() - hit[0] < SCAN_TTL:
+                return hit[1]
+        return await _run_scan(index, key, force=force)
+
+
+async def _run_scan(index: str, key: str, force: bool = False) -> dict:
+    now = time.monotonic()
     docs = [d async for d in stock_universe_collection.find(
         {"indices": index}, {"_id": 0, "symbol": 1, "sector": 1})]
     universe = [(d["symbol"], d.get("sector") or "Unclassified") for d in docs]
     symbols = [s for s, _ in universe]
 
-    bars_by_sym = await H.load_daily_bars(symbols, fresh=fresh)
+    bars_by_sym = await H.load_daily_bars(symbols, fresh=force)
     started = time.monotonic()
-    hits = await asyncio.to_thread(_scan_sync, universe, bars_by_sym)
+    hits, weekly_ready = await asyncio.to_thread(_scan_sync, universe, bars_by_sym)
     elapsed = time.monotonic() - started
-
-    weekly_ready = sum(1 for s in symbols
-                       if len(H.to_weekly(bars_by_sym.get(s) or [])) >= MIN_BARS_WEEKLY)
 
     result = {
         "index": index,
@@ -254,6 +319,38 @@ async def scan(index: str | None = None, fresh: bool = False) -> dict:
     }
     _cache[key] = (now, result)
     return result
+
+
+WARM_ENABLED = os.getenv("SCREENER_PATTERN_WARM", "1") not in ("0", "false", "False")
+# Re-scan a little before the entry expires, so the served copy is never actually stale.
+WARM_EVERY = SCAN_TTL * 0.8
+WARM_DELAY = float(os.getenv("SCREENER_PATTERN_WARM_DELAY", "90"))
+
+
+async def warm_loop() -> None:
+    """Keep the pattern scan hot so nobody opens the tab into a 30-second scan.
+
+    Stale-while-revalidate already means only an EMPTY cache makes a caller wait, and the
+    cache is empty exactly once — after a deploy. This closes that window, and keeps the
+    served copy inside its TTL rather than merely inside the staleness grace.
+
+    The first pass is delayed: a container that has just started is already loading the
+    instrument master and warming other caches on two cores, and adding a 30-second CPU
+    burn to that makes the whole app slow to answer instead of just this one board."""
+    from app.services.screener.momentum import DEFAULT_INDEX
+
+    await asyncio.sleep(WARM_DELAY)
+    while True:
+        try:
+            started = time.monotonic()
+            res = await scan(DEFAULT_INDEX)
+            logger.info("pattern scan warm: %s rows over %s symbols in %.1fs",
+                        len(res.get("rows") or []), res.get("scanned"),
+                        time.monotonic() - started)
+        except Exception:
+            # Never let a warm failure kill the loop — the board still works without it.
+            logger.warning("pattern scan warm failed; retrying next cycle", exc_info=True)
+        await asyncio.sleep(WARM_EVERY)
 
 
 async def board(index: str | None = None, timeframe: str | None = None,
@@ -292,6 +389,9 @@ async def board(index: str | None = None, timeframe: str | None = None,
         "forming": sum(1 for r in rows if r["state"] == "FORMING"),
         "weekly_coverage": res["weekly_coverage"],
         "elapsed_s": res["elapsed_s"],
+        # Present only when the rows come from an expired scan being refreshed behind
+        # this request. The board is still worth showing; pretending it is current is not.
+        **({"stale_s": res["stale_s"]} if "stale_s" in res else {}),
         "filters": {"timeframe": timeframe, "pattern": pattern, "family": family,
                     "state": state, "direction": direction, "sector": sector},
         "catalog": catalog(),
