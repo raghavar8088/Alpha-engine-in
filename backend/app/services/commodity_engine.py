@@ -177,13 +177,21 @@ async def breaker_state() -> dict:
 # ── scoring / verdict ────────────────────────────────────────────────────────────
 
 
-def _trade_stats(closed: list[dict]) -> dict:
+def _trade_stats(closed: list[dict], base: float | None = None) -> dict:
+    """Trade statistics for one record, with drawdown and return measured against `base`.
+
+    `base` defaults to this desk's Rs 10 lakh per-strategy stake. It is a parameter because
+    the Pre-Live Commodity desk reuses this function against a Rs 1,00,000 per-CONTRACT
+    book: percentage drawdown is meaningless unless it is taken against the capital the
+    record was actually run on, and hard-coding Rs 10 lakh there would understate every
+    drawdown by a factor of ten."""
+    base = PER_STRATEGY_ALLOCATION if base is None else base
     trades = len(closed)
     pnls = [t.get("realized_pnl") or 0.0 for t in closed]
     wins = [p for p in pnls if p > 0]
     losses = [p for p in pnls if p < 0]
     net, gp, gl = sum(pnls), sum(wins), abs(sum(losses))
-    equity = peak = PER_STRATEGY_ALLOCATION
+    equity = peak = base
     max_dd = 0.0
     for p in pnls:
         equity += p
@@ -205,7 +213,7 @@ def _trade_stats(closed: list[dict]) -> dict:
         "expectancy": round(net / trades, 2) if trades else 0.0,
         "max_drawdown_pct": round(max_dd, 2), "t_stat": t_stat,
         "pnl_stdev": round(sd, 2) if sd is not None else None,
-        "return_pct": round(net / PER_STRATEGY_ALLOCATION * 100, 2),
+        "return_pct": round(net / base * 100, 2) if base else 0.0,
     }
 
 

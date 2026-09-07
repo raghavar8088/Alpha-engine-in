@@ -165,6 +165,20 @@ commodity_trades_collection = db["commodity_trades"]
 commodity_scores_collection = db["commodity_scores"]
 commodity_state_collection = db["commodity_state"]
 commodity_equity_collection = db["commodity_equity"]
+# Pre-Live Commodity Trading — the graduation desk that sits on top of the pattern desk
+# above. It trades ONLY the patterns that already cleared that desk's promotion gate, in
+# WHOLE MCX lots sized against SPAN-lite margin, on a per-CONTRACT book of Rs 1,00,000
+# rather than a per-strategy one. Separate collections because the two books answer
+# different questions and must never be summed: `commodity_*` is "does this pattern have
+# an edge at all", `commodity_prelive_*` is "does Rs 1 lakh on this contract survive real
+# lot sizes and real margin". `flags` holds the per-contract on/off switches, `state` the
+# master engine switch (ships OFF).
+commodity_prelive_positions_collection = db["commodity_prelive_positions"]
+commodity_prelive_trades_collection = db["commodity_prelive_trades"]
+commodity_prelive_scores_collection = db["commodity_prelive_scores"]
+commodity_prelive_flags_collection = db["commodity_prelive_flags"]
+commodity_prelive_state_collection = db["commodity_prelive_state"]
+commodity_prelive_equity_collection = db["commodity_prelive_equity"]
 # Daily 3 PM ATM short-straddle roll on ONE named F&O paper account (see
 # app.services.fno_auto_roll). `state` holds the once-a-day guard (`last_rolled_on`);
 # `log` keeps one row per attempt including aborts, so a day that did not roll always

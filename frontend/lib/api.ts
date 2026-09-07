@@ -5918,3 +5918,270 @@ export async function executeCmpBasket(
     body: JSON.stringify({ account_id, legs, product_type }),
   });
 }
+
+// ---- Pre-Live Commodity Trading -----------------------------------------------
+// The graduation desk above the 311-pattern paper desk: only patterns that already
+// cleared that desk's promotion gate trade here, in WHOLE MCX lots sized against margin,
+// on a Rs 1,00,000 book per CONTRACT. The engine ships OFF and every contract has its own
+// switch. Still paper — no order reaches a broker from this module.
+const cpl = "/api/commodity-prelive";
+
+export interface CommodityPreliveSummary {
+  enabled: boolean;
+  admission_mode: "per_script" | "blended";
+  enabled_at: string | null;
+  disabled_reason: string | null;
+  last_run_at: string | null;
+  last_opened: number;
+  last_managed: number;
+  last_evaluated: number;
+  last_notes: string[];
+  script_capital: number;
+  scripts: string[];
+  active_scripts: string[];
+  script_count: number;
+  active_script_count: number;
+  initial_capital: number;
+  capital_switched_on: number;
+  equity: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  margin_deployed: number;
+  available_margin: number;
+  total_costs: number;
+  open_positions: number;
+  closed_positions: number;
+  admitted_total: number;
+  admitted_by_script: Record<string, number>;
+  admission_counts: {
+    per_script: Record<string, number>;
+    per_script_total: number;
+    blended_per_contract: number;
+    blended_total: number;
+  };
+  ready_count: number;
+  rejected_count: number;
+  pending_count: number;
+  mode: string;
+  costs_charged: boolean;
+  sizing: string;
+  slippage_bps: number;
+  market_open: boolean;
+  max_positions_per_script: number;
+  max_lots_per_position: number;
+  promotion_gate: {
+    min_trades: number;
+    min_profit_factor: number;
+    min_win_rate: number;
+    max_drawdown_pct: number;
+    min_t_stat: number;
+  };
+  today_pnl: number;
+  breaker_tripped: boolean;
+  daily_loss_limit: number;
+  breaker_base: number;
+}
+
+export interface CommodityPreliveScript {
+  symbol: string;
+  enabled: boolean;
+  contract: string;
+  expiry: string;
+  capital: number;
+  ltp: number | null;
+  ltp_source: string | null;
+  multiplier: number;
+  lot_quantity: string | null;
+  price_unit: string | null;
+  spec_verified: boolean;
+  lot_notional: number;
+  margin_per_lot: number;
+  margin_pct: number;
+  lots_per_book: number;
+  lots_fundable_now: number;
+  tradable: boolean;
+  unpriced: boolean;
+  afford_note: string | null;
+  admitted_strategies: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  net_pnl: number;
+  return_pct: number;
+  margin_deployed: number;
+  available_margin: number;
+  equity: number;
+  open_positions: number;
+  closed_positions: number;
+}
+
+export interface CommodityPreliveScripts {
+  rows: CommodityPreliveScript[];
+  script_capital: number;
+  max_positions_per_script: number;
+  max_lots_per_position: number;
+  admission_mode: string;
+  tradable_count: number;
+  note: string;
+}
+
+export interface CommodityPreliveScore {
+  strategy_id: string;
+  symbol: string;
+  name: string;
+  family: string;
+  family_label: string;
+  template: string;
+  timeframe: string;
+  trades: number;
+  win_rate: number;
+  net_pnl: number;
+  total_costs: number;
+  profit_factor: number | null;
+  expectancy: number;
+  max_drawdown_pct: number;
+  t_stat: number | null;
+  return_pct: number;
+  open_positions: number;
+  unrealized_pnl: number;
+  verdict: "READY" | "REJECTED" | "PENDING";
+  verdict_reasons: string[];
+  still_admitted: boolean;
+  admitted_because: string | null;
+}
+
+export interface CommodityPreliveBoard {
+  rows: CommodityPreliveScore[];
+  symbol: string | null;
+  total: number;
+  shown: number;
+  admission_mode: string;
+  gate: Record<string, number>;
+  note: string;
+}
+
+export interface CommodityPrelivePosition {
+  position_id: string;
+  strategy_id: string;
+  strategy_name: string;
+  family_label: string;
+  timeframe: string;
+  pattern: string;
+  symbol: string;
+  display_name: string;
+  side: string;
+  entry_price: number;
+  lots: number;
+  multiplier: number;
+  qty: number;
+  notional: number;
+  margin_used: number;
+  target: number;
+  stoploss: number;
+  ltp: number;
+  unrealized_pnl: number;
+  pnl_pct: number;
+  return_on_margin_pct: number;
+  bars_held: number;
+  max_hold_bars: number;
+  rationale: string;
+  admitted_because: string | null;
+  status: string;
+  opened_at: string;
+}
+
+export interface CommodityPreliveTrade {
+  trade_id: string;
+  strategy_name: string;
+  timeframe: string;
+  pattern: string;
+  symbol: string;
+  side: string;
+  entry_price: number;
+  exit_price: number;
+  lots: number;
+  qty: number;
+  margin_used: number;
+  gross_pnl: number;
+  costs: number;
+  realized_pnl: number;
+  return_on_margin_pct: number;
+  exit_reason: string;
+  closed_at: string;
+}
+
+export async function fetchCommodityPreliveSummary(): Promise<CommodityPreliveSummary> {
+  return apiFetch(`${cpl}/summary`);
+}
+
+export async function fetchCommodityPreliveScripts(fresh = false): Promise<CommodityPreliveScripts> {
+  return apiFetch(`${cpl}/scripts${fresh ? "?fresh=true" : ""}`);
+}
+
+export async function fetchCommodityPreliveBoard(params: {
+  symbol?: string;
+  family?: string;
+  timeframe?: string;
+  verdict?: string;
+  limit?: number;
+} = {}): Promise<CommodityPreliveBoard> {
+  const q = new URLSearchParams();
+  if (params.symbol) q.set("symbol", params.symbol);
+  if (params.family) q.set("family", params.family);
+  if (params.timeframe) q.set("timeframe", params.timeframe);
+  if (params.verdict) q.set("verdict", params.verdict);
+  if (params.limit) q.set("limit", String(params.limit));
+  const qs = q.toString();
+  return apiFetch(`${cpl}/leaderboard${qs ? `?${qs}` : ""}`);
+}
+
+export async function fetchCommodityPrelivePositions(symbol?: string): Promise<{
+  positions: CommodityPrelivePosition[];
+  open: CommodityPrelivePosition[];
+}> {
+  return apiFetch(`${cpl}/positions${symbol ? `?symbol=${encodeURIComponent(symbol)}` : ""}`);
+}
+
+export async function fetchCommodityPreliveTrades(limit = 60, symbol?: string): Promise<CommodityPreliveTrade[]> {
+  const q = new URLSearchParams({ limit: String(limit) });
+  if (symbol) q.set("symbol", symbol);
+  const r = await apiFetch(`${cpl}/trades?${q.toString()}`);
+  return r.trades ?? [];
+}
+
+export async function setCommodityPreliveEngine(enabled: boolean, reason?: string) {
+  return apiFetch(`${cpl}/engine`, {
+    method: "POST",
+    body: JSON.stringify({ enabled, reason: reason ?? null }),
+  });
+}
+
+export async function setCommodityPreliveScript(symbol: string, enabled: boolean) {
+  return apiFetch(`${cpl}/script-enabled`, {
+    method: "POST",
+    body: JSON.stringify({ symbol, enabled }),
+  });
+}
+
+export async function setCommodityPreliveAllScripts(enabled: boolean) {
+  return apiFetch(`${cpl}/scripts-enabled`, {
+    method: "POST",
+    body: JSON.stringify({ enabled }),
+  });
+}
+
+export async function setCommodityPreliveAdmissionMode(mode: "per_script" | "blended") {
+  return apiFetch(`${cpl}/admission-mode`, {
+    method: "POST",
+    body: JSON.stringify({ mode }),
+  });
+}
+
+export async function runCommodityPreliveCycle() {
+  return apiFetch(`${cpl}/run`, { method: "POST" });
+}
+
+export async function closeAllCommodityPrelive(symbol?: string) {
+  return apiFetch(`${cpl}/close-all${symbol ? `?symbol=${encodeURIComponent(symbol)}` : ""}`, {
+    method: "POST",
+  });
+}

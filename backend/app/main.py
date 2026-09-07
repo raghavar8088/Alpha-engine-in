@@ -24,6 +24,7 @@ from app.api.routes import (
     chart_data,
     commodity,
     commodity_positions,
+    commodity_prelive,
     fno_positions,
     intraday_lab,
     live,
@@ -322,6 +323,8 @@ async def ensure_indexes() -> None:
     await cmp_ensure_indexes()
     from app.services.commodity_instruments import ensure_indexes as cmi_ensure_indexes
     await cmi_ensure_indexes()
+    from app.services.commodity_prelive import ensure_indexes as cmpl_ensure_indexes
+    await cmpl_ensure_indexes()
 
 
 @app.on_event("startup")
@@ -388,6 +391,27 @@ async def start_commodity_scheduler() -> None:
         )
     else:
         logger.info("Commodity Trading desk disabled (COMMODITY_ENABLED=0)")
+
+
+@app.on_event("startup")
+async def start_commodity_prelive_scheduler() -> None:
+    """The graduation desk above the pattern desk. Its loop starts regardless of the
+    engine switch: the switch gates ENTRIES, while the loop must keep managing whatever is
+    already open."""
+    from app.services.commodity_prelive import SCRIPT_CAPITAL
+    from app.services.commodity_prelive_scheduler import (
+        ENABLED as PRELIVE_ON, TICK_SECONDS as PRELIVE_TICK, commodity_prelive_loop,
+    )
+
+    if PRELIVE_ON:
+        asyncio.create_task(commodity_prelive_loop())
+        logger.info(
+            "Pre-Live Commodity desk loop enabled (every %ss while MCX is open) — "
+            "Rs %s per contract, whole MCX lots on margin, engine ships OFF",
+            PRELIVE_TICK, f"{SCRIPT_CAPITAL:,.0f}",
+        )
+    else:
+        logger.info("Pre-Live Commodity desk loop disabled (COMMODITY_PRELIVE_SCHEDULER=0)")
 
 
 @app.on_event("startup")
@@ -740,6 +764,7 @@ app.include_router(live_trading.router)
 app.include_router(momentum.router)
 app.include_router(commodity.router)
 app.include_router(commodity_positions.router)
+app.include_router(commodity_prelive.router)
 app.include_router(strategy_factory.router)
 app.include_router(stock_desk.router)
 app.include_router(zero_hero.router)

@@ -173,6 +173,21 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // Sits directly under Commodity Trading because it is that desk's next step, not a
+        // rival to it: the same patterns, but only the ones that already cleared the gate,
+        // in whole MCX lots on Rs 1 lakh per contract. A rocket-on-a-pad mark — staged and
+        // switched off until you arm it — rather than a third bullion bar.
+        href: "/commodity-prelive",
+        label: "Pre-Live Commodity Trading",
+        icon: (
+          <>
+            <path d="M12 3c2.5 2.2 4 5.3 4 8.7V15H8v-3.3C8 8.3 9.5 5.2 12 3z" />
+            <path d="M8 15l-2.5 3.5h13L16 15" />
+            <path d="M12 19v2" />
+          </>
+        ),
+      },
+      {
         // Sits directly under Commodity Trading, and is to it what F&O Positions is to the
         // index desks: you place the trades, it does not. A ledger/scales mark rather than
         // another bullion bar, so the manual book does not read as a second strategy desk.
