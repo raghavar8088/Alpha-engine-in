@@ -29,6 +29,7 @@ bounds that, the same lesson the option and momentum desks each had to learn.
 import logging
 import math
 import os
+import time as _time
 from datetime import date, datetime, timedelta, timezone
 from uuid import uuid4
 
@@ -512,6 +513,138 @@ async def leaderboard() -> list[dict]:
         })
     rows.sort(key=lambda r: (r["verdict"] != "READY", -r["net_pnl"]))
     return rows
+
+
+# ── per-underlying leaderboard ───────────────────────────────────────────────────
+# WHY THIS IS COMPUTED RATHER THAN READ. `commodity_scores_collection` holds ONE blended
+# record per strategy — every underlying pooled. That is what the main board shows, and it
+# answers a different question from the one people ask of it: "Opening Range Breakout 30m
+# is READY" is true of a book dominated by copper, gold, silver and zinc, and false of
+# crude oil, where the same strategy is 4 trades and negative.
+#
+# So the per-script view recomputes the stats from the positions themselves and re-runs the
+# SAME gate. A verdict here means "clears the gate ON THIS CONTRACT", which is the only
+# reading that supports putting money on one.
+
+_SCRIPT_CACHE: dict | None = None
+_SCRIPT_CACHE_AT: float = 0.0
+SCRIPT_CACHE_TTL = float(os.getenv("COMMODITY_SCRIPT_TTL", "300"))
+
+
+async def _script_stats(fresh: bool = False) -> dict:
+    """{underlying: {strategy_id: stats}} plus per-underlying totals.
+
+    One pass over every position, grouped in memory. Twenty-odd thousand closed rows is
+    a single projected read; doing it per underlying would be eight.
+    """
+    global _SCRIPT_CACHE, _SCRIPT_CACHE_AT
+    now = _time.monotonic()
+    if not fresh and _SCRIPT_CACHE and now - _SCRIPT_CACHE_AT < SCRIPT_CACHE_TTL:
+        return _SCRIPT_CACHE
+
+    closed: dict[tuple[str, str], list[dict]] = {}
+    open_counts: dict[tuple[str, str], int] = {}
+    unreal: dict[str, float] = {}
+    deployed: dict[str, float] = {}
+
+    async for p in commodity_positions_collection.find(
+            {}, {"_id": 0, "strategy_id": 1, "symbol": 1, "status": 1,
+                 "realized_pnl": 1, "unrealized_pnl": 1, "costs": 1,
+                 "capital_deployed": 1}):
+        sid, sym = p.get("strategy_id"), p.get("symbol")
+        if not sid or not sym:
+            continue
+        if p.get("status") == "OPEN":
+            open_counts[(sid, sym)] = open_counts.get((sid, sym), 0) + 1
+            unreal[sym] = unreal.get(sym, 0.0) + float(p.get("unrealized_pnl") or 0.0)
+            deployed[sym] = deployed.get(sym, 0.0) + float(p.get("capital_deployed") or 0.0)
+        else:
+            closed.setdefault((sid, sym), []).append(p)
+
+    symbols = sorted({sym for _sid, sym in closed} | {sym for _sid, sym in open_counts})
+    out: dict = {"symbols": symbols, "per_symbol": {}, "totals": {}}
+    for sym in symbols:
+        rows: dict[str, dict] = {}
+        for spec in COMMODITY_CATALOG:
+            key = (spec.strategy_id, sym)
+            trades = closed.get(key, [])
+            opens = open_counts.get(key, 0)
+            if not trades and not opens:
+                continue          # this strategy has never touched this contract
+            st = _trade_stats(trades)
+            verdict, reasons = _verdict(st)
+            rows[spec.strategy_id] = {**st, "verdict": verdict, "verdict_reasons": reasons,
+                                      "open_positions": opens}
+        v = {"READY": 0, "REJECTED": 0, "PENDING": 0}
+        for r in rows.values():
+            v[r["verdict"]] = v.get(r["verdict"], 0) + 1
+        out["per_symbol"][sym] = rows
+        out["totals"][sym] = {
+            "strategies_traded": len(rows),
+            "closed_trades": sum(r["trades"] for r in rows.values()),
+            "open_positions": sum(r["open_positions"] for r in rows.values()),
+            "realised_pnl": round(sum(r["net_pnl"] for r in rows.values()), 2),
+            "unrealised_pnl": round(unreal.get(sym, 0.0), 2),
+            "deployed": round(deployed.get(sym, 0.0), 2),
+            "total_costs": round(sum(r["total_costs"] for r in rows.values()), 2),
+            "ready": v["READY"], "rejected": v["REJECTED"], "pending": v["PENDING"],
+            "profitable": sum(1 for r in rows.values() if r["net_pnl"] > 0),
+        }
+
+    _SCRIPT_CACHE, _SCRIPT_CACHE_AT = out, now
+    return out
+
+
+async def script_overview(fresh: bool = False) -> dict:
+    """One row per underlying: how the whole desk did on that contract."""
+    stats = await _script_stats(fresh)
+    rows = []
+    for sym in stats["symbols"]:
+        t = stats["totals"][sym]
+        rows.append({"symbol": sym, **t,
+                     "net_pnl": round(t["realised_pnl"] + t["unrealised_pnl"], 2)})
+    rows.sort(key=lambda r: -r["net_pnl"])
+    return {
+        "rows": rows,
+        "gate": {"min_trades": MIN_TRADES_FOR_VERDICT, "min_profit_factor": MIN_PROFIT_FACTOR,
+                 "min_win_rate": MIN_WIN_RATE, "max_drawdown_pct": MAX_DRAWDOWN_PCT,
+                 "min_t_stat": MIN_T_STAT},
+        "note": ("Each strategy trades every contract, so these are the same 353 strategies "
+                 "measured separately on each one. A verdict here is per-contract and does "
+                 "not follow the blended board."),
+    }
+
+
+async def script_leaderboard(symbol: str, fresh: bool = False) -> dict:
+    """The leaderboard for ONE underlying, with the gate re-run on that contract alone."""
+    sym = (symbol or "").strip().upper()
+    stats = await _script_stats(fresh)
+    if sym not in stats["per_symbol"]:
+        return {"symbol": sym, "rows": [], "totals": {},
+                "available": stats["symbols"],
+                "error": f"No positions on record for {sym!r}."}
+
+    per = stats["per_symbol"][sym]
+    rows = []
+    for spec in COMMODITY_CATALOG:
+        r = per.get(spec.strategy_id)
+        if not r:
+            continue
+        rows.append({
+            "strategy_id": spec.strategy_id, "name": spec.name, "family": spec.family,
+            "family_label": FAMILY_LABELS.get(spec.family, spec.family),
+            "template": spec.template, "timeframe": spec.timeframe,
+            "symbol": sym,
+            **{k: r[k] for k in ("trades", "win_rate", "net_pnl", "total_costs",
+                                 "profit_factor", "expectancy", "max_drawdown_pct",
+                                 "t_stat", "return_pct", "verdict", "verdict_reasons",
+                                 "open_positions")},
+        })
+    rows.sort(key=lambda r: (r["verdict"] != "READY", -r["net_pnl"]))
+    return {"symbol": sym, "rows": rows, "totals": stats["totals"][sym],
+            "available": stats["symbols"],
+            "note": (f"Stats and the promotion gate recomputed on {sym} trades only — this "
+                     f"is NOT the blended verdict from the main board.")}
 
 
 async def run_cycle() -> dict:

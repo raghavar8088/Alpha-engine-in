@@ -2,6 +2,8 @@
 
   GET  /api/commodity/summary       desk capital, gate thresholds, market state
   GET  /api/commodity/leaderboard   every strategy with its verdict (filterable)
+  GET  /api/commodity/scripts       one row per underlying — how the desk did on each
+  GET  /api/commodity/scripts/{sym} the leaderboard for ONE contract, gate re-run on it
   GET  /api/commodity/catalog       the 39 templates x 8 timeframes, grouped
   GET  /api/commodity/positions     open + closed paper positions
   GET  /api/commodity/trades        closed-trade blotter, net of MCX charges
@@ -32,6 +34,8 @@ from app.services.commodity_bars import (
 from app.services.commodity_engine import (
     STATE_ID,
     leaderboard as desk_leaderboard,
+    script_overview,
+    script_leaderboard,
     run_cycle,
     summary as desk_summary,
 )
@@ -82,6 +86,41 @@ async def leaderboard_endpoint(
     if verdict:
         rows = [r for r in rows if r["verdict"] == verdict.upper()]
     return {"leaderboard": rows[:limit], "total": len(rows),
+            "families": FAMILY_LABELS, "timeframes": CATALOG_TIMEFRAMES}
+
+
+@router.get("/scripts")
+async def scripts_overview(fresh: bool = Query(False),
+                           _user: dict = Depends(get_current_user)):
+    """How the whole desk performed on each underlying, side by side."""
+    return await script_overview(fresh)
+
+
+@router.get("/scripts/{symbol}")
+async def script_board(
+    symbol: str,
+    family: str | None = Query(None, description="chart | candlestick | structure"),
+    timeframe: str | None = Query(None),
+    verdict: str | None = Query(None, description="READY | REJECTED | PENDING"),
+    limit: int = Query(400, ge=1, le=1000),
+    fresh: bool = Query(False),
+    _user: dict = Depends(get_current_user),
+):
+    """The strategy leaderboard for ONE contract.
+
+    The stats and the promotion gate are recomputed from that contract's trades alone, so
+    a READY here means "clears the gate on THIS underlying" — which the blended board on
+    the main page does not tell you.
+    """
+    data = await script_leaderboard(symbol, fresh)
+    rows = data.get("rows") or []
+    if family:
+        rows = [r for r in rows if r["family"] == family]
+    if timeframe:
+        rows = [r for r in rows if r["timeframe"] == timeframe]
+    if verdict:
+        rows = [r for r in rows if r["verdict"] == verdict.upper()]
+    return {**data, "rows": rows[:limit], "total": len(rows),
             "families": FAMILY_LABELS, "timeframes": CATALOG_TIMEFRAMES}
 
 
