@@ -6,6 +6,7 @@ import GlassPanel from "../../components/GlassPanel";
 import StatusPill from "../../components/StatusPill";
 import ErrorBanner from "../../components/ErrorBanner";
 import EmptyState from "../../components/EmptyState";
+import CommodityScripts from "../../components/CommodityScripts";
 import {
   refreshing,
   CommodityCoverage,
@@ -239,7 +240,10 @@ export default function CommodityPage() {
         )}
       </GlassPanel>
 
-      <GlassPanel title="Strategy leaderboard" note={`${board.length} shown · ₹10L each`}>
+      <CommodityScripts />
+
+      <GlassPanel title="Strategy leaderboard"
+        note={`${board.length} shown · ₹10L each · ALL 8 contracts pooled`}>
         <div className="filters">
           <div className="frow">
             <span className="flabel">Family</span>
