@@ -9,18 +9,23 @@ buy 14 units of crude oil; you buy ONE LOT of 100 barrels, and you fund it with 
 with the full notional.
 
 This desk asks the next question, the one you have to answer before real money: *does
-₹1,00,000 on THIS contract survive real lot sizes and real margin?* So it differs from the
-paper desk in four deliberate ways:
+₹2,00,000 on THIS contract survive real lot sizes and real margin?* So it differs from the
+paper desk in five deliberate ways:
 
   1. **Only admitted strategies trade.** A pattern gets in on a contract only if it already
      cleared the paper desk's promotion gate. Two admission modes (below).
-  2. **Capital is per CONTRACT, not per strategy.** ₹1,00,000 per script. Every admitted
-     strategy on natural gas shares natural gas's one lakh — which is what a real account
+  2. **Capital is per CONTRACT, not per strategy.** ₹2,00,000 per script. Every admitted
+     strategy on a contract shares that contract's book — which is what a real account
      looks like, and what makes the per-script switches mean something.
   3. **Whole lots, sized against margin.** `lots = available margin // margin per lot`,
-     using the same SPAN-lite calibration as the Commodity Positions desk. If ₹1 lakh
-     cannot fund one lot of a contract, this desk says so instead of inventing a fraction.
-  4. **The engine ships OFF**, and every contract has its own switch. Nothing trades until
+     using the same SPAN-lite calibration as the Commodity Positions desk. If the book
+     cannot fund one lot, this desk says so instead of inventing a fraction.
+  4. **It trades the MINIS.** Measured live: one lot of CRUDEOIL needs ~₹96,000 of margin
+     and one of GOLD ~₹10,70,000, so a book this size could hold almost nothing and 29 of
+     31 admitted strategies were stranded on contracts they could not fund. CRUDEOILM and
+     NATGASMINI quote the SAME price as their parents (8,735 vs 8,732; 273.4 vs 273.2) at a
+     tenth and a fifth of the lot, so the same patterns become tradable at this capital.
+  5. **The engine ships OFF**, and every contract has its own switch. Nothing trades until
      the master switch is on AND that contract's switch is on.
 
 STILL PAPER. Fills are simulated at the signal bar and marked on live Angel quotes; no
@@ -42,7 +47,9 @@ BARS COME FROM THE SHARED STORE
 -------------------------------
 This desk reads `commodity_bars` and never calls Angel's candle endpoint. That endpoint
 403s under load (measured: 5 of 8 unpaced calls), and adding a second poller for the same
-eight symbols would break the one that already works.
+symbols would break the one that already works. The minis were added to that poller's
+universe (`COMMODITY_UNDERLYINGS`) rather than given a fetcher here — a symbol with no
+candles in the store has nothing for any strategy to evaluate.
 """
 
 import logging
@@ -89,6 +96,7 @@ from app.services.commodity_patterns import (
 # getting it wrong is not a rounding error — a bare 1 understates a ZINC lot by 5,000x.
 from app.services.commodity_positions import (
     EXPOSURE_PCT,
+    SCAN_FAMILY,
     _scan_pct,
     multiplier,
     spec_doc,
@@ -98,24 +106,39 @@ logger = logging.getLogger("commodity_prelive")
 
 STATE_ID = "commodity_prelive"
 
+# ── the contracts this desk trades ───────────────────────────────────────────────
+# Deliberately NOT the pattern desk's universe. That desk trades the eight liquid
+# underlyings to find out which patterns work; this one trades what Rs 2,00,000 can
+# actually hold, which at MCX contract sizes means the MINIS. One lot of CRUDEOIL needs
+# ~Rs 96,000 of margin against ~Rs 9,600 for CRUDEOILM at the same price — the mini is the
+# same commodity in a wrapper this book can carry.
+PRELIVE_UNDERLYINGS = [
+    u.strip().upper() for u in os.getenv(
+        "COMMODITY_PRELIVE_UNDERLYINGS", "CRUDEOILM,NATGASMINI"
+    ).split(",") if u.strip()
+]
+
 # ── capital: one book per CONTRACT ───────────────────────────────────────────────
-SCRIPT_CAPITAL = float(os.getenv("COMMODITY_PRELIVE_SCRIPT_CAPITAL", "100000"))   # ₹1 lakh
+SCRIPT_CAPITAL = float(os.getenv("COMMODITY_PRELIVE_SCRIPT_CAPITAL", "200000"))   # ₹2 lakh
 MAX_POSITIONS_PER_SCRIPT = int(os.getenv("COMMODITY_PRELIVE_MAX_POSITIONS", "2"))
-# ONE lot per position, and the whole remaining book is available to fund it.
+# There is no pre-divided position budget. The first draft split the book into four equal
+# position budgets, the way the equity desks in this app divide a strategy's stake, and on
+# MCX that produces a desk that can never open anything: every lot cost more than a quarter
+# of the book. A signal is sized against what the contract ACTUALLY has free, which is how a
+# real account works — you do not reserve a quarter of your margin for trades you have not
+# taken.
 #
-# These two numbers were nearly the bug that made this desk useless. The first draft
-# pre-divided the lakh into four Rs 25,000 position budgets, the way the equity desks in
-# this app divide a strategy's stake. On MCX that produces a desk that can never open
-# anything: at today's prices one lot of natural gas needs ~Rs 47,000 of margin, crude
-# ~Rs 62,000, gold mini ~Rs 51,000 — every one of them more than a quarter of the book.
-# So there is no pre-divided budget. A signal is sized against what the contract ACTUALLY
-# has free, which is how a real account works: you do not reserve a quarter of your margin
-# for three trades you have not taken.
-#
-# The lot cap is 1 because Rs 1,00,000 is a small book for MCX majors. One natural gas lot
-# is ~Rs 3,12,000 of notional against a Rs 1,00,000 account — already 3x levered. Two would
-# be a leveraged bet dressed up as a rehearsal.
-MAX_LOTS_PER_POSITION = int(os.getenv("COMMODITY_PRELIVE_MAX_LOTS", "1"))
+# HOW BIG ONE POSITION MAY GET IS CAPPED BY NOTIONAL, NOT BY A LOT COUNT.
+# A flat "1 lot" cap cannot survive a change of contract size, and this desk exists to
+# change contract size: 1 lot of NATURALGAS is Rs 3.4 lakh of notional (1.7x a Rs 2 lakh
+# book) while 1 lot of its mini is Rs 68,000 (0.34x). The same number is reckless on one
+# and leaves 96% of the book idle on the other. So the limit is expressed in the thing that
+# actually measures risk — exposure against the book — and the lot count falls out of it.
+# 1.0x means a single position may not carry more notional than the contract's own capital.
+MAX_NOTIONAL_X = float(os.getenv("COMMODITY_PRELIVE_MAX_NOTIONAL_X", "1.0"))
+# A backstop only, for the case where a contract is so small that the notional cap would
+# wave through an absurd number of lots.
+MAX_LOTS_PER_POSITION = int(os.getenv("COMMODITY_PRELIVE_MAX_LOTS", "25"))
 
 SLIPPAGE_BPS = float(os.getenv("COMMODITY_PRELIVE_SLIPPAGE_BPS", "5"))
 MAX_HOLD_BARS = int(os.getenv("COMMODITY_PRELIVE_MAX_HOLD_BARS", "60"))
@@ -160,6 +183,31 @@ def margin_pct(symbol: str) -> float:
 
 def margin_per_lot(symbol: str, price: float) -> float:
     return margin_pct(symbol) * float(price) * multiplier(symbol)
+
+
+# ── this desk's universe ─────────────────────────────────────────────────────────
+
+
+async def prelive_universe() -> dict:
+    """The front-month contracts THIS desk trades — a subset of the shared master.
+
+    The bar store is filled for a wider set (the pattern desk's eight plus these), so this
+    filters rather than fetches: the candles are already there."""
+    uni = await front_month_universe()
+    return {s: d for s, d in uni.items() if s in PRELIVE_UNDERLYINGS}
+
+
+# A mini and its parent are the SAME COMMODITY at the SAME QUOTE — verified live:
+# CRUDEOIL 8,732.00 vs CRUDEOILM 8,735.00, NATURALGAS 273.20 vs NATGASMINI 273.40. They
+# differ only in how many units one lot carries. `commodity_positions.SCAN_FAMILY` already
+# encodes exactly this reasoning for margin ("a mini is the same commodity as its parent,
+# so it inherits the parent's band"); the same fact licenses inheriting ADMISSION.
+#
+# This matters because a pattern is a function of the PRICE SERIES, and the two series are
+# the same series. Without it the minis could never trade at all: admission needs a paper
+# record on that exact symbol, the pattern desk has never traded the minis, so their roster
+# would be empty for ever and this desk would sit idle by construction.
+MINI_PARENT = {m: p for m, p in SCAN_FAMILY.items()}
 
 
 # ── engine + per-contract switches ───────────────────────────────────────────────
@@ -210,7 +258,7 @@ async def script_flags() -> dict[str, bool]:
 
 async def set_script_enabled(symbol: str, enabled: bool) -> dict:
     sym = (symbol or "").strip().upper()
-    universe = await front_month_universe()
+    universe = await prelive_universe()
     if sym not in universe:
         raise PreliveError(
             f"{sym!r} is not one of the front-month contracts this desk trades "
@@ -224,7 +272,7 @@ async def set_script_enabled(symbol: str, enabled: bool) -> dict:
 
 
 async def set_all_scripts(enabled: bool) -> dict:
-    universe = await front_month_universe()
+    universe = await prelive_universe()
     for sym in universe:
         await commodity_prelive_flags_collection.update_one(
             {"symbol": sym},
@@ -236,7 +284,7 @@ async def set_all_scripts(enabled: bool) -> dict:
 async def active_scripts() -> list[str]:
     """Contracts allowed to take NEW positions right now."""
     flags = await script_flags()
-    return sorted(s for s in (await front_month_universe()) if flags.get(s, True))
+    return sorted(s for s in (await prelive_universe()) if flags.get(s, True))
 
 
 # ── admission: which paper strategies earned a place on which contract ───────────
@@ -264,7 +312,7 @@ async def admissions(fresh: bool = False) -> dict:
     if not fresh and _ADMIT_CACHE and _ADMIT_CACHE.get("mode") == mode and now - _ADMIT_AT < ADMIT_TTL:
         return _ADMIT_CACHE
 
-    universe = sorted(await front_month_universe())
+    universe = sorted(await prelive_universe())
     per: dict[str, dict[str, dict]] = {s: {} for s in universe}
 
     if mode == "blended":
@@ -286,15 +334,27 @@ async def admissions(fresh: bool = False) -> dict:
     else:
         stats = await _script_stats(fresh)
         for sym in universe:
-            for sid, row in (stats["per_symbol"].get(sym) or {}).items():
+            # A mini has no paper record of its own — the pattern desk has never traded it.
+            # Read its PARENT's record instead: same commodity, same quote, same series.
+            source = MINI_PARENT.get(sym, sym)
+            inherited = source != sym
+            for sid, row in (stats["per_symbol"].get(source) or {}).items():
                 if row.get("verdict") != "READY" or sid not in COMMODITY_BY_ID:
                     continue
                 per[sym][sid] = {
-                    "basis": "per_script", "trades": row["trades"], "win_rate": row["win_rate"],
+                    "basis": "parent_script" if inherited else "per_script",
+                    "source_symbol": source,
+                    "trades": row["trades"], "win_rate": row["win_rate"],
                     "net_pnl": row["net_pnl"], "profit_factor": row["profit_factor"],
                     "expectancy": row["expectancy"], "max_drawdown_pct": row["max_drawdown_pct"],
                     "t_stat": row["t_stat"],
-                    "why": f"Cleared the paper gate on {sym}'s own {row['trades']} trades.",
+                    "why": (
+                        f"Cleared the paper gate on {source}'s own {row['trades']} trades. "
+                        f"{sym} is the same commodity at the same quote — one lot carries "
+                        f"{multiplier(sym):,} units against {multiplier(source):,} — so the "
+                        "price series the pattern was proved on is this contract's series."
+                    ) if inherited else
+                    f"Cleared the paper gate on {sym}'s own {row['trades']} trades.",
                 }
 
     out = {"mode": mode, "per_symbol": per,
@@ -306,9 +366,9 @@ async def admissions(fresh: bool = False) -> dict:
 
 async def admission_counts_both() -> dict:
     """How many strategies each mode would admit, so the choice is visible before it is made."""
-    universe = sorted(await front_month_universe())
+    universe = sorted(await prelive_universe())
     stats = await _script_stats(False)
-    per_script = {s: sum(1 for r in (stats["per_symbol"].get(s) or {}).values()
+    per_script = {s: sum(1 for r in (stats["per_symbol"].get(MINI_PARENT.get(s, s)) or {}).values()
                          if r.get("verdict") == "READY") for s in universe}
     from app.core.db import commodity_scores_collection
     blended = await commodity_scores_collection.count_documents({"verdict": "READY"})
@@ -405,7 +465,9 @@ async def _open_position(spec, symbol: str, inst: dict, sig, bar_ts: datetime,
     if lot_margin <= 0:
         return False, None, 0.0
 
-    lots = min(int(free_margin // lot_margin), MAX_LOTS_PER_POSITION)
+    lots = min(int(free_margin // lot_margin),                        # what margin allows
+               int((MAX_NOTIONAL_X * SCRIPT_CAPITAL) // lot_notional),  # what risk allows
+               MAX_LOTS_PER_POSITION)
     if lots < 1:
         return False, (
             f"{symbol}: one lot needs ~₹{lot_margin:,.0f} of margin (notional "
@@ -518,7 +580,7 @@ async def scan_cycle() -> dict:
             f"₹{breaker['daily_loss_limit']:,.0f} limit on the switched-on contracts. No new "
             "positions; open ones still managed."]}
 
-    universe = await front_month_universe()
+    universe = await prelive_universe()
     if not universe:
         return {"opened": 0, "evaluated": 0,
                 "notes": ["No unexpired MCX front-month futures with an Angel token on file."]}
@@ -605,15 +667,32 @@ async def manage_cycle() -> int:
     open_positions = [p async for p in commodity_prelive_positions_collection.find({"status": "OPEN"})]
     if not open_positions:
         return 0
+    # Deliberately the FULL master, not this desk's universe. A position can outlive its
+    # contract's membership — the universe is a config list and it changes — and a position
+    # that can no longer be priced is one that can never hit its stop. Managing an orphan
+    # out is exactly what you want; stranding it open for ever is not.
     universe = await front_month_universe()
     prices: dict[str, tuple] = {}
+    orphans: set[str] = set()
     for symbol in {p["symbol"] for p in open_positions}:
         inst = universe.get(symbol)
         if not inst:
+            # Not even in the master any more (expired roll, delisting): fall back to the
+            # instrument stamped on the position itself when it was opened.
+            for p in open_positions:
+                if p["symbol"] == symbol and p.get("instrument", {}).get("security_id"):
+                    inst = p["instrument"]
+                    break
+        if not inst:
             continue
+        if symbol not in PRELIVE_UNDERLYINGS:
+            orphans.add(symbol)
         price, src = await get_ltp(None, str(inst.get("security_id")), inst.get("exchange_segment"))
         if price:
             prices[symbol] = (float(price), src)
+    if orphans:
+        logger.info("[commodity_prelive] managing %d position(s) on contracts no longer in "
+                    "this desk's universe: %s", len(orphans), ", ".join(sorted(orphans)))
 
     updated = 0
     touched = set()
@@ -669,12 +748,14 @@ async def close_all(symbol: str | None = None, reason: str = "manual_close_all")
     open_positions = [p async for p in commodity_prelive_positions_collection.find(q)]
     if not open_positions:
         return {"closed": 0, "skipped": 0, "net_pnl": 0.0}
+    # Full master, same reason as manage_cycle: squaring off must reach a position on a
+    # contract this desk no longer lists, which is precisely when you need it most.
     universe = await front_month_universe()
     closed = skipped = 0
     net = 0.0
     touched = set()
     for pos in open_positions:
-        inst = universe.get(pos["symbol"])
+        inst = universe.get(pos["symbol"]) or pos.get("instrument")
         price = None
         if inst:
             price, _src = await get_ltp(None, str(inst.get("security_id")), inst.get("exchange_segment"))
@@ -718,7 +799,7 @@ async def scripts_view(fresh: bool = False) -> dict:
     than the position budget can never trade here, and that is a fact about ₹1,00,000
     meeting MCX contract sizes — not a bug — so it is stated on the row rather than
     discovered as silence in the blotter."""
-    universe = await front_month_universe()
+    universe = await prelive_universe()
     flags = await script_flags()
     admit = await admissions(fresh)
     roster = admit["per_symbol"]
@@ -734,6 +815,7 @@ async def scripts_view(fresh: bool = False) -> dict:
         lot_margin = margin_pct(sym) * lot_notional
         lots_per_book = int(SCRIPT_CAPITAL // lot_margin) if lot_margin > 0 else 0
         lots_now = min(int(book["available_margin"] // lot_margin) if lot_margin > 0 else 0,
+                       int((MAX_NOTIONAL_X * SCRIPT_CAPITAL) // lot_notional) if lot_notional > 0 else 0,
                        MAX_LOTS_PER_POSITION)
         spec = spec_doc(sym)
         rows.append({
@@ -853,7 +935,7 @@ async def leaderboard(symbol: str | None = None) -> dict:
 
 async def summary() -> dict:
     state = await get_state()
-    universe = sorted(await front_month_universe())
+    universe = sorted(await prelive_universe())
     flags = await script_flags()
     active = [s for s in universe if flags.get(s, True)]
 

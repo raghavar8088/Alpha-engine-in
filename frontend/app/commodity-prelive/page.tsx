@@ -125,7 +125,7 @@ export default function CommodityPrelivePage() {
 
   const engineOn = !!summary?.enabled;
   const gate = summary?.promotion_gate;
-  const capital = summary?.script_capital ?? 100000;
+  const capital = summary?.script_capital ?? 200000;
   const activeScripts = summary?.active_scripts ?? [];
   const untradable = useMemo(() => scripts.filter((s) => !s.tradable && !s.unpriced), [scripts]);
   const symbolsWithRows = useMemo(
@@ -376,7 +376,9 @@ export default function CommodityPrelivePage() {
               <div className="m-why">
                 A strategy is admitted to a contract only if it cleared the paper desk&rsquo;s gate on{" "}
                 <b>that contract&rsquo;s own trades</b>. Since capital here is committed per contract, this is the
-                only reading that supports putting money on one.
+                only reading that supports putting money on one. A <b>mini inherits its parent&rsquo;s</b> record
+                &mdash; CRUDEOILM and CRUDEOIL are the same commodity at the same quote, so a pattern proved on
+                one was proved on the other&rsquo;s price series.
               </div>
               <div className="m-count">
                 {summary?.admission_counts?.per_script_total ?? 0} seats across all contracts

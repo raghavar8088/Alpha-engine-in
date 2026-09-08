@@ -45,7 +45,13 @@ SESSION_CLOSE_HHMM = (23, 30)
 
 LIQUID_UNDERLYINGS = [
     u.strip().upper() for u in os.getenv(
-        "COMMODITY_UNDERLYINGS", "GOLD,GOLDM,SILVER,SILVERM,CRUDEOIL,NATURALGAS,COPPER,ZINC"
+        # CRUDEOILM and NATGASMINI are here for the bars, not for the pattern desk's sake:
+        # the Pre-Live Commodity desk trades those two and reads THIS store, and a symbol
+        # absent from here has no candles for anything to evaluate. They cost 2 more symbols
+        # x 5 native intervals on an already-paced poller (~15s), which is the cheap half of
+        # the trade; the alternative was a second poller against an endpoint that 403s.
+        "COMMODITY_UNDERLYINGS",
+        "GOLD,GOLDM,SILVER,SILVERM,CRUDEOIL,NATURALGAS,COPPER,ZINC,CRUDEOILM,NATGASMINI"
     ).split(",") if u.strip()
 ]
 
