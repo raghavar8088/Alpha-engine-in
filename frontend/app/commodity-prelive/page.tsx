@@ -325,9 +325,14 @@ export default function CommodityPrelivePage() {
                       tone={s.tradable ? undefined : "loss"}
                     />
                     <Row
-                      label={`Lots per ₹${(capital / 1000).toFixed(0)}k`}
-                      value={String(s.lots_per_book)}
+                      label="Lots / trade"
+                      value={s.tradable ? String(summary?.lots_per_trade ?? 1) : "0"}
                       tone={s.tradable ? "gain" : "loss"}
+                    />
+                    <Row
+                      label={`Book funds (₹${(capital / 1000).toFixed(0)}k)`}
+                      value={`${s.lots_per_book} lots`}
+                      dim
                     />
                     <Row label="Admitted" value={String(s.admitted_strategies)} />
                     <Row label="Open" value={`${s.open_positions} · ${inr(s.margin_deployed)} blocked`} dim />
@@ -345,7 +350,12 @@ export default function CommodityPrelivePage() {
                 </div>
               ))}
             </div>
-            <div className="legend">{scriptsNote}</div>
+            <div className="legend">
+              Every trade is <b>one lot</b> — the exchange minimum — so a strategy&rsquo;s record
+              here measures its edge rather than a sizing rule. &ldquo;Book funds&rdquo; is how many
+              lots the capital could carry, shown for context, not what a trade takes.{" "}
+              {scriptsNote}
+            </div>
           </>
         )}
       </GlassPanel>

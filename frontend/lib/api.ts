@@ -5968,7 +5968,7 @@ export interface CommodityPreliveSummary {
   slippage_bps: number;
   market_open: boolean;
   max_positions_per_script: number;
-  max_lots_per_position: number;
+  lots_per_trade: number;
   promotion_gate: {
     min_trades: number;
     min_profit_factor: number;
@@ -6018,7 +6018,7 @@ export interface CommodityPreliveScripts {
   rows: CommodityPreliveScript[];
   script_capital: number;
   max_positions_per_script: number;
-  max_lots_per_position: number;
+  lots_per_trade: number;
   admission_mode: string;
   tradable_count: number;
   note: string;

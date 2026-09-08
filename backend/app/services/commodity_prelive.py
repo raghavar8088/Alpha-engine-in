@@ -17,9 +17,11 @@ paper desk in five deliberate ways:
   2. **Capital is per CONTRACT, not per strategy.** ₹2,00,000 per script. Every admitted
      strategy on a contract shares that contract's book — which is what a real account
      looks like, and what makes the per-script switches mean something.
-  3. **Whole lots, sized against margin.** `lots = available margin // margin per lot`,
-     using the same SPAN-lite calibration as the Commodity Positions desk. If the book
-     cannot fund one lot, this desk says so instead of inventing a fraction.
+  3. **One trade is one lot.** Every fill is the exchange's minimum, so a strategy's
+     record here counts how its edge did rather than how a sizing rule did. Margin is
+     still checked against the same SPAN-lite calibration as the Commodity Positions
+     desk: if the book cannot fund that one lot, the desk declines and says so instead
+     of inventing a fraction.
   4. **It trades the MINIS.** Measured live: one lot of CRUDEOIL needs ~₹96,000 of margin
      and one of GOLD ~₹10,70,000, so a book this size could hold almost nothing and 29 of
      31 admitted strategies were stranded on contracts they could not fund. CRUDEOILM and
@@ -128,17 +130,19 @@ MAX_POSITIONS_PER_SCRIPT = int(os.getenv("COMMODITY_PRELIVE_MAX_POSITIONS", "2")
 # real account works — you do not reserve a quarter of your margin for trades you have not
 # taken.
 #
-# HOW BIG ONE POSITION MAY GET IS CAPPED BY NOTIONAL, NOT BY A LOT COUNT.
-# A flat "1 lot" cap cannot survive a change of contract size, and this desk exists to
-# change contract size: 1 lot of NATURALGAS is Rs 3.4 lakh of notional (1.7x a Rs 2 lakh
-# book) while 1 lot of its mini is Rs 68,000 (0.34x). The same number is reckless on one
-# and leaves 96% of the book idle on the other. So the limit is expressed in the thing that
-# actually measures risk — exposure against the book — and the lot count falls out of it.
-# 1.0x means a single position may not carry more notional than the contract's own capital.
+# ONE TRADE IS ONE LOT. The trade, not the rupee, is the unit this desk reasons in: every
+# fill is the exchange's own minimum, so a strategy's record here is a straight count of
+# how its edge did, with no position-sizing decision blended into the result. It also makes
+# the blotter readable against a real account — you placed one lot, you see one lot.
+LOTS_PER_TRADE = int(os.getenv("COMMODITY_PRELIVE_LOTS_PER_TRADE", "1"))
+
+# Exposure guard, kept underneath the lot rule rather than replaced by it. It can only ever
+# REDUCE the size, and at one lot it binds only if a single lot is worth more than the
+# contract's whole book — which is exactly the case the minis exist to avoid (1 lot of
+# NATURALGAS is Rs 3.4 lakh against a Rs 2 lakh book; its mini is Rs 68,000). If that ever
+# happens the desk declines the trade and says so, rather than quietly taking on 1.7x
+# leverage because "one lot" sounded small.
 MAX_NOTIONAL_X = float(os.getenv("COMMODITY_PRELIVE_MAX_NOTIONAL_X", "1.0"))
-# A backstop only, for the case where a contract is so small that the notional cap would
-# wave through an absurd number of lots.
-MAX_LOTS_PER_POSITION = int(os.getenv("COMMODITY_PRELIVE_MAX_LOTS", "25"))
 
 SLIPPAGE_BPS = float(os.getenv("COMMODITY_PRELIVE_SLIPPAGE_BPS", "5"))
 MAX_HOLD_BARS = int(os.getenv("COMMODITY_PRELIVE_MAX_HOLD_BARS", "60"))
@@ -465,9 +469,9 @@ async def _open_position(spec, symbol: str, inst: dict, sig, bar_ts: datetime,
     if lot_margin <= 0:
         return False, None, 0.0
 
-    lots = min(int(free_margin // lot_margin),                        # what margin allows
-               int((MAX_NOTIONAL_X * SCRIPT_CAPITAL) // lot_notional),  # what risk allows
-               MAX_LOTS_PER_POSITION)
+    lots = min(LOTS_PER_TRADE,                                        # one trade, one lot
+               int(free_margin // lot_margin),                         # what margin allows
+               int((MAX_NOTIONAL_X * SCRIPT_CAPITAL) // lot_notional))  # what exposure allows
     if lots < 1:
         return False, (
             f"{symbol}: one lot needs ~₹{lot_margin:,.0f} of margin (notional "
@@ -814,9 +818,9 @@ async def scripts_view(fresh: bool = False) -> dict:
         lot_notional = price * mult if price else 0.0
         lot_margin = margin_pct(sym) * lot_notional
         lots_per_book = int(SCRIPT_CAPITAL // lot_margin) if lot_margin > 0 else 0
-        lots_now = min(int(book["available_margin"] // lot_margin) if lot_margin > 0 else 0,
-                       int((MAX_NOTIONAL_X * SCRIPT_CAPITAL) // lot_notional) if lot_notional > 0 else 0,
-                       MAX_LOTS_PER_POSITION)
+        lots_now = min(LOTS_PER_TRADE,
+                       int(book["available_margin"] // lot_margin) if lot_margin > 0 else 0,
+                       int((MAX_NOTIONAL_X * SCRIPT_CAPITAL) // lot_notional) if lot_notional > 0 else 0)
         spec = spec_doc(sym)
         rows.append({
             **book,
@@ -845,7 +849,7 @@ async def scripts_view(fresh: bool = False) -> dict:
     return {
         "rows": rows, "script_capital": SCRIPT_CAPITAL,
         "max_positions_per_script": MAX_POSITIONS_PER_SCRIPT,
-        "max_lots_per_position": MAX_LOTS_PER_POSITION,
+        "lots_per_trade": LOTS_PER_TRADE,
         "admission_mode": admit["mode"],
         "tradable_count": sum(1 for r in rows if r["tradable"]),
         "note": (f"Each contract gets its own ₹{SCRIPT_CAPITAL:,.0f}. Sizing is in WHOLE MCX "
@@ -982,7 +986,7 @@ async def summary() -> dict:
         "mode": "paper", "costs_charged": True, "sizing": "whole_lots_on_margin",
         "slippage_bps": SLIPPAGE_BPS, "market_open": is_market_open(),
         "max_positions_per_script": MAX_POSITIONS_PER_SCRIPT,
-        "max_lots_per_position": MAX_LOTS_PER_POSITION,
+        "lots_per_trade": LOTS_PER_TRADE,
         "promotion_gate": {"min_trades": MIN_TRADES_FOR_VERDICT, "min_profit_factor": MIN_PROFIT_FACTOR,
                            "min_win_rate": MIN_WIN_RATE, "max_drawdown_pct": MAX_DRAWDOWN_PCT,
                            "min_t_stat": MIN_T_STAT},
