@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { copySymbols } from "../../lib/copySymbols";
 import PageHeader from "../../components/PageHeader";
 import GlassPanel from "../../components/GlassPanel";
 import ErrorBanner from "../../components/ErrorBanner";
@@ -157,16 +158,48 @@ export default function StocksRangePage() {
     return () => clearInterval(id);
   }, [load]);
 
+  // Which slice of the table to show. "zone" is the one worth a control of its own:
+  // a buy zone is the whole point of setting a range, and hunting for the green rows in
+  // 268 lines is the thing this page kept making you do.
+  const [zoneView, setZoneView] = useState<"all" | "zone" | "ranged" | "unranged">("all");
+  const [copied, setCopied] = useState<string | null>(null);
+
   const rows = useMemo(() => {
     const f = filter.trim().toLowerCase();
     const rs = data?.rows ?? [];
-    const filtered = !f
+    const searched = !f
       ? rs
       : rs.filter(
           (r) => r.symbol.toLowerCase().includes(f) || (r.name || "").toLowerCase().includes(f) || (r.sector || "").toLowerCase().includes(f),
         );
+    const filtered = searched.filter((r) =>
+      zoneView === "zone" ? r.in_buy_zone
+        : zoneView === "ranged" ? r.buy_price != null
+        : zoneView === "unranged" ? r.buy_price == null
+        : true);
     return sortRows(filtered, sort);
-  }, [data, filter, sort]);
+  }, [data, filter, sort, zoneView]);
+
+  // Counted over the whole index, not the current view — otherwise the chips would report
+  // the effect of the filter you are choosing between, and "54 in buy zone" would collapse
+  // to "54 of 54" the moment you pressed it.
+  const universe = useMemo(() => {
+    const rs = data?.rows ?? [];
+    return {
+      total: rs.length,
+      zone: rs.filter((r) => r.in_buy_zone).length,
+      ranged: rs.filter((r) => r.buy_price != null).length,
+      unranged: rs.filter((r) => r.buy_price == null).length,
+    };
+  }, [data]);
+
+  /** Copy what is ON SCREEN. Anything else would be a different list from the one the
+   *  counts above describe, which is the sort of mismatch you only notice in TradingView. */
+  const copyVisible = useCallback(async (fmt: "tv" | "plain", tag: string) => {
+    await copySymbols(rows.map((r) => r.symbol), fmt);
+    setCopied(tag);
+    setTimeout(() => setCopied(null), 2000);
+  }, [rows]);
 
   // Global search: the filter box searches the WHOLE Nifty 50/100/250/500 universe, not
   // just the list that happens to be selected. If what you typed isn't in the current
@@ -205,8 +238,11 @@ export default function StocksRangePage() {
       return null;
     });
 
-  const inZone = rows.filter((r) => r.in_buy_zone).length;
-  const withRange = rows.filter((r) => r.buy_price != null).length;
+  // Deliberately the INDEX totals, not the current view's. These describe the universe you
+  // are looking at; the view chips below describe the slice. Deriving them from the filtered
+  // rows made "54 in buy zone" read "54" whether you had filtered to the buy zone or not.
+  const inZone = universe.zone;
+  const withRange = universe.ranged;
 
   const onSaved = (r: StockRangeSetResult) => {
     setDialogFor(undefined);
@@ -251,9 +287,44 @@ export default function StocksRangePage() {
       {notice && <div className="notice">{notice}</div>}
 
       <div className="stat-row">
-        <span>{data?.label ?? "—"}: <b>{rows.length}</b> stocks</span>
+        <span>{data?.label ?? "—"}: <b>{universe.total}</b> stocks</span>
         <span><b className="gain">{inZone}</b> in buy zone</span>
         <span><b>{withRange}</b> with a buy range set</span>
+      </div>
+
+      <div className="viewbar">
+        <div className="views">
+          {([
+            { k: "all", label: "All", n: universe.total },
+            { k: "zone", label: "In buy zone", n: universe.zone },
+            { k: "ranged", label: "Range set", n: universe.ranged },
+            { k: "unranged", label: "No range yet", n: universe.unranged },
+          ] as const).map((v) => (
+            <button key={v.k}
+                    className={`viewb${zoneView === v.k ? " on" : ""}${v.k === "zone" ? " zone" : ""}`}
+                    onClick={() => setZoneView(v.k)}>
+              {v.label} <span className="viewn">{v.n}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="copies">
+          <span className="copylabel">
+            {rows.length === universe.total
+              ? `all ${rows.length} shown`
+              : `${rows.length} of ${universe.total} shown`}
+          </span>
+          <button className="copyb primary" disabled={!rows.length}
+                  onClick={() => copyVisible("tv", "tv")}
+                  title="NSE:SYM,NSE:SYM for exactly the rows on screen — paste straight into a TradingView watchlist">
+            {copied === "tv" ? `copied ${rows.length} ✓` : "copy for TradingView"}
+          </button>
+          <button className="copyb" disabled={!rows.length}
+                  onClick={() => copyVisible("plain", "plain")}
+                  title="Bare tickers, comma separated">
+            {copied === "plain" ? "copied ✓" : "plain"}
+          </button>
+        </div>
         {loading && <span className="muted">refreshing…</span>}
       </div>
 
@@ -344,6 +415,43 @@ export default function StocksRangePage() {
         .filter { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 9px; padding: 9px 14px; font-size: 13px; min-width: 260px; flex: 1; max-width: 360px; }
         .notice { padding: 10px 14px; border-radius: 9px; background: var(--canvas-soft); border: 1px solid var(--panel-border); font-size: 12.5px; }
         .stat-row { display: flex; gap: 20px; font-size: 12.5px; color: var(--text-muted); flex-wrap: wrap; }
+        .viewbar { display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+                   justify-content: space-between; }
+        .views { display: flex; gap: 7px; flex-wrap: wrap; }
+        .viewb { display: inline-flex; align-items: center; gap: 7px;
+                 border: 1px solid var(--panel-border); background: var(--panel);
+                 color: var(--text-muted); border-radius: 100px;
+                 padding: 7px 13px; font-size: 12.5px; font-weight: 600;
+                 cursor: pointer; transition: border-color .14s, color .14s; }
+        .viewb:hover { border-color: var(--panel-border-hover); }
+        .viewn { font-family: var(--font-data); font-variant-numeric: tabular-nums;
+                 font-size: 11px; font-weight: 700; color: var(--text-faint); }
+        .viewb.on { background: var(--purple-dim); border-color: rgba(125, 52, 220, .28);
+                    color: var(--purple); }
+        .viewb.on .viewn { color: var(--purple); }
+        /* The buy-zone chip carries the page's own green, so the control and the rows it
+           filters to are the same colour rather than two unrelated highlights. */
+        .viewb.zone.on { background: var(--gain-dim); border-color: rgba(14, 159, 110, .3);
+                         color: var(--gain); }
+        .viewb.zone.on .viewn { color: var(--gain); }
+
+        .copies { display: flex; align-items: center; gap: 8px; }
+        .copylabel { font-size: 11.5px; color: var(--text-faint);
+                     font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+        .copyb { border: 1px solid var(--panel-border); background: var(--panel);
+                 color: var(--text-muted); border-radius: 9px; padding: 7px 13px;
+                 font-size: 12px; font-weight: 600; cursor: pointer;
+                 transition: border-color .14s; white-space: nowrap; }
+        .copyb:hover:not(:disabled) { border-color: var(--panel-border-hover); }
+        .copyb.primary { color: var(--accent); border-color: rgba(200, 147, 63, .34);
+                         background: var(--accent-dim); }
+        .copyb.primary:hover:not(:disabled) { border-color: var(--accent); }
+        .copyb:disabled { opacity: .45; cursor: default; }
+
+        @media (max-width: 720px) {
+          .viewbar { align-items: stretch; }
+          .copies { justify-content: flex-end; }
+        }
         .empty { padding: 24px 20px; font-size: 13px; color: var(--text-faint); }
         .table-scroll { overflow-x: auto; max-height: 640px; overflow-y: auto; }
         .data-table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
