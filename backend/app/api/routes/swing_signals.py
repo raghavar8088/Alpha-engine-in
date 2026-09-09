@@ -9,6 +9,8 @@
 """
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.api.deps import get_current_user
@@ -48,16 +50,18 @@ async def research_one(symbol: str, _u: dict = Depends(get_current_user)):
     Rejections are as much the point as the passes: a desk you cannot interrogate about
     the names it turned down is one you have to take on faith."""
     sym = symbol.upper()
-    bars_by_sym = await H.load_daily_bars([sym])
+    bars_by_sym = await H.load_daily_bars([sym], lookback=E.LOOKBACK)
     bars = bars_by_sym.get(sym) or []
     if not bars:
         raise HTTPException(404, f"No daily bars on file for {sym}")
-    bench = (await H.load_daily_bars([E.BENCHMARK])).get(E.BENCHMARK) or []
+    bench = (await H.load_daily_bars([E.BENCHMARK], lookback=E.LOOKBACK)
+             ).get(E.BENCHMARK) or []
     doc = await stock_universe_collection.find_one({"symbol": sym},
                                                    {"_id": 0, "name": 1, "sector": 1})
     res = evaluate(sym, bars, bench)
     sig, why = (build(res, bars, (doc or {}).get("name"), (doc or {}).get("sector"),
-                      H.ist_date().isoformat()) if res.ok else (None, res.reject))
+                      H.ist_date(datetime.now(timezone.utc)).isoformat())
+               if res.ok else (None, res.reject))
     return {
         "symbol": sym,
         "name": (doc or {}).get("name"),

@@ -10,9 +10,17 @@ tight on a volatile name or too loose on a quiet one and the same number cannot 
           structural level is used when the chart offers one and volatility when it does
           not. Never wider than 12% — past that the position gets too small to matter.
   T1      2.0R. The literature's minimum acceptable reward-to-risk for this style.
-  T2      3.5R, and additionally required to sit under the nearest overhead resistance
-          where one exists, because a target above a supply shelf is a target the stock
-          has to fight through rather than reach.
+  T2      3.5R, trimmed back to the nearest overhead resistance when one sits BETWEEN
+          T1 and T2 — no point publishing a target on the far side of a shelf the stock
+          has to break first.
+
+          Resistance is deliberately NOT a disqualifier. The first draft rejected any call
+          whose T1 sat above the nearest resistance, and that threw out the archetypal
+          setup this module exists to find: after a 3-14% pullback with a ~2xATR stop, 2R
+          lands at or just above the prior swing high almost by construction, and that
+          high IS the overhead resistance. Trading back up through it is the thesis, not
+          an objection to it. Where it sits is reported instead, and counted against the
+          call in the written case.
   RANGE   entry +/- 0.35 x ATR, which is where the call can still be taken without the
           arithmetic changing materially.
 
@@ -130,15 +138,18 @@ def build(res: Research, bars: list[Bar], name: str | None = None,
     t1 = price + T1_R * risk
     t2 = price + T2_R * risk
 
-    # --- respect overhead supply on the far target ----------------------------------
+    # --- overhead supply: disclosed, and it trims T2, but it never rejects -----------
     res_above = nearest_resistance_above(bars, price)
     capped = None
-    if res_above and res_above < t2:
-        if res_above <= t1:
-            return None, (f"the nearest resistance at ₹{res_above:,.0f} sits below a 1:2 "
-                          "target — there is no room between the entry and the supply above it")
-        t2 = res_above
-        capped = res_above
+    overhead = None
+    if res_above:
+        if t1 < res_above < t2:
+            t2 = res_above
+            capped = res_above
+        elif res_above <= t1:
+            # T1 already sits above a shelf. That is normal for a pullback buy and is the
+            # trade's premise, so it is recorded as a headwind rather than a veto.
+            overhead = res_above
 
     rr1 = (t1 - price) / risk
     rr2 = (t2 - price) / risk
@@ -171,8 +182,12 @@ def build(res: Research, bars: list[Bar], name: str | None = None,
         score=res.score, pillars_passed=res.pillars_passed,
         conviction=_conviction(res.score, res.pillars_passed),
         atr=round(a, 2), atr_pct=float(res.facts["atr_pct"]),
-        reasons=res.reasons, against=res.against,
+        reasons=res.reasons,
+        against=(res.against + ([f"Overhead supply: a prior high at ₹{overhead:,.0f} sits "
+                                 "under T1 and has to be cleared on the way"]
+                                if overhead else [])),
         facts={**res.facts, "stop_basis": basis,
-               **({"t2_capped_at_resistance": round(capped, 2)} if capped else {})},
+               **({"t2_capped_at_resistance": round(capped, 2)} if capped else {}),
+               **({"overhead_before_t1": round(overhead, 2)} if overhead else {})},
     )
     return sig, None

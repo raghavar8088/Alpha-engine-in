@@ -26,6 +26,13 @@ logger = logging.getLogger("swing_signals")
 UNIVERSE_INDEX = "nifty500"
 BENCHMARK = "NIFTY 50"
 MAX_NEW_PER_DAY = 12       # a desk that opens 60 positions a day is not selecting
+# 400, matching the screener, and that is the whole reason for the number. The analysis
+# only needs ~260 bars (a 200 EMA plus a 60-session swing window), but `load_daily_bars`
+# keys its cache on (symbol list, lookback), so asking for 260 guarantees a MISS against
+# the entry the screener's pattern warmer keeps hot for the same 500 names. Measured: the
+# miss costs 40 seconds for 60 symbols against a cluster this slow, and would time the
+# scan out entirely over the full universe. Sharing the key makes it free.
+LOOKBACK = 400
 SCAN_TTL = 900.0
 
 _cache: dict[str, tuple[float, dict]] = {}
@@ -33,7 +40,10 @@ _lock = asyncio.Lock()
 
 
 def _today() -> str:
-    return H.ist_date().isoformat()
+    """Today's trading date in IST. `ist_date` reads a BAR's timestamp, so it is given
+    one — the alternative is a naive `date.today()` that flips a day early for anyone
+    running this from a UTC container in the evening."""
+    return H.ist_date(datetime.now(timezone.utc)).isoformat()
 
 
 async def _load_benchmark(bars_by_sym: dict) -> list:
@@ -82,7 +92,7 @@ async def scan(fresh: bool = False) -> dict:
         universe = [(d["symbol"], d.get("name"), d.get("sector")) for d in docs]
         symbols = [u[0] for u in universe]
 
-        bars_by_sym = await H.load_daily_bars(symbols)
+        bars_by_sym = await H.load_daily_bars(symbols, lookback=LOOKBACK)
         bench = await _load_benchmark(bars_by_sym)
         today = _today()
         signals, rejects = await asyncio.to_thread(
@@ -149,7 +159,7 @@ async def run_daily() -> dict:
     """Publish today's signals, then mark and resolve every open position."""
     pub = await publish(fresh=True)
     open_syms = [p["symbol"] async for p in POS.find({"status": "OPEN"}, {"symbol": 1})]
-    bars = await H.load_daily_bars(open_syms) if open_syms else {}
+    bars = await H.load_daily_bars(open_syms, lookback=LOOKBACK) if open_syms else {}
     marks = await desk.mark_and_exit(bars, pub["as_of"])
     return {**pub, "desk": marks}
 
