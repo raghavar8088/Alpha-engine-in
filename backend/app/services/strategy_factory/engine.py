@@ -236,10 +236,17 @@ async def run_backtests(source: str = DEFAULT_SOURCE, symbols: list[str] | None 
     await _refresh_scores()
     await sf_state_collection.update_one({"_id": STATE_ID}, {"$set": {
         "last_backtest_at": _now(), "backtests_written": written,
-        "backtests_skipped": skipped, "grade_histogram": graded, "source": source,
+        # Mongo rejects integer keys, and `graded` is keyed by grade. The whole sweep —
+        # hours of replays, every row already written — used to complete and then throw on
+        # THIS line, so the state doc never recorded the run and the caller saw a BSON
+        # error instead of its summary.
+        "backtests_skipped": skipped,
+        "grade_histogram": {str(k): v for k, v in graded.items()},
+        "source": source,
     }}, upsert=True)
     return {"written": written, "skipped": skipped, "already_done": resumed,
-            "symbols": len(names), "grade_histogram": graded,
+            "symbols": len(names),
+            "grade_histogram": {str(k): v for k, v in graded.items()},
             "strategies": len(strategies), "source": source}
 
 
