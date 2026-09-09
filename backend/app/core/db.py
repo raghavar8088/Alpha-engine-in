@@ -281,6 +281,14 @@ screener_bhavcopy_collection = db["screener_bhavcopy"]
 # public files, re-fetchable at any time — see app.services.nse_surveillance.
 screener_meta_collection = db["screener_meta"]
 screener_paper_positions_collection = db["screener_paper_positions"]
+
+# --- Swing Trading Signals -------------------------------------------------------------
+# Published calls, the ₹1cr paper desk's open book, and its closed trades. Separate from
+# the screener's own paper desk: that one trades screener setups, this one trades the
+# multi-condition swing research, and mixing their P&L would make neither answerable.
+swing_signals_collection = db["swing_signals"]
+swing_signal_positions_collection = db["swing_signal_positions"]
+swing_signal_trades_collection = db["swing_signal_trades"]
 screener_paper_trades_collection = db["screener_paper_trades"]
 screener_paper_equity_collection = db["screener_paper_equity"]
 screener_paper_state_collection = db["screener_paper_state"]

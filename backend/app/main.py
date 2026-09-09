@@ -43,6 +43,7 @@ from app.api.routes import (
     research,
     risk,
     screener,
+    swing_signals,
     stock_desk,
     buy_low,
     live_paper,
@@ -780,6 +781,7 @@ app.include_router(pattern.router)
 app.include_router(stocks_range.router)
 app.include_router(bullish_stocks.router)
 app.include_router(screener.router)
+app.include_router(swing_signals.router)
 app.include_router(paper_trading.router)
 app.include_router(ath_trading.router)
 app.include_router(long_horizon.router)
