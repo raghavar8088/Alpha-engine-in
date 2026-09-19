@@ -523,6 +523,37 @@ async def leaderboard() -> list[dict]:
     return rows
 
 
+async def ensure_indexes() -> None:
+    """Index the desk's collections.
+
+    THIS COLLECTION HAD NO INDEXES AT ALL. Measured on 29,192 documents: a bare
+    `count_documents({})` took 21.4 seconds and streaming the collection blew the 45-second
+    socket timeout, which took the whole Commodity Trading page down. Every query in this
+    module was a full scan; it only became fatal once the collection grew past ~25k rows.
+
+    `strategy_id + symbol` is the shape the per-script leaderboard groups on, and `status`
+    the one every open-position pass filters by.
+    """
+    from pymongo import ASCENDING
+
+    async def _try(coll, keys, **kw):
+        try:
+            await coll.create_index(keys, background=True, **kw)
+        except Exception as exc:  # noqa: BLE001 — an index that exists is not an error
+            logger.info("commodity index %s: %s", keys, str(exc)[:120])
+
+    await _try(commodity_positions_collection,
+               [("strategy_id", ASCENDING), ("symbol", ASCENDING)])
+    await _try(commodity_positions_collection, [("status", ASCENDING)])
+    await _try(commodity_positions_collection,
+               [("symbol", ASCENDING), ("status", ASCENDING)])
+    await _try(commodity_positions_collection, [("opened_at", ASCENDING)])
+    await _try(commodity_trades_collection, [("strategy_id", ASCENDING)])
+    await _try(commodity_trades_collection, [("symbol", ASCENDING)])
+    await _try(commodity_scores_collection, [("strategy_id", ASCENDING)], unique=False)
+    logger.info("commodity desk indexes ensured")
+
+
 # ── per-underlying leaderboard ───────────────────────────────────────────────────
 # WHY THIS IS COMPUTED RATHER THAN READ. `commodity_scores_collection` holds ONE blended
 # record per strategy — every underlying pooled. That is what the main board shows, and it
@@ -555,19 +586,38 @@ async def _script_stats(fresh: bool = False) -> dict:
     unreal: dict[str, float] = {}
     deployed: dict[str, float] = {}
 
-    async for p in commodity_positions_collection.find(
-            {}, {"_id": 0, "strategy_id": 1, "symbol": 1, "status": 1,
-                 "realized_pnl": 1, "unrealized_pnl": 1, "costs": 1,
-                 "capital_deployed": 1}):
-        sid, sym = p.get("strategy_id"), p.get("symbol")
+    # GROUPED IN MONGO, NOT STREAMED. Pulling all 29,000 documents to Python is what made
+    # this endpoint exceed the socket timeout and hang the page. Grouping server-side
+    # returns roughly 3,500 rows — one per (strategy, contract) — and only the two fields
+    # the stats actually need, so the wire carries a fraction of the bytes.
+    #
+    # `realized_pnl` is pushed as an ARRAY rather than summed: max drawdown, standard
+    # deviation and the t-statistic all need the individual trade results, not a total.
+    async for g in commodity_positions_collection.aggregate([
+        {"$match": {"status": {"$ne": "OPEN"}}},
+        {"$group": {"_id": {"s": "$strategy_id", "y": "$symbol"},
+                    "pnls": {"$push": {"$ifNull": ["$realized_pnl", 0.0]}},
+                    "costs": {"$sum": {"$ifNull": ["$costs", 0.0]}}}},
+    ]):
+        sid, sym = g["_id"].get("s"), g["_id"].get("y")
         if not sid or not sym:
             continue
-        if p.get("status") == "OPEN":
-            open_counts[(sid, sym)] = open_counts.get((sid, sym), 0) + 1
-            unreal[sym] = unreal.get(sym, 0.0) + float(p.get("unrealized_pnl") or 0.0)
-            deployed[sym] = deployed.get(sym, 0.0) + float(p.get("capital_deployed") or 0.0)
-        else:
-            closed.setdefault((sid, sym), []).append(p)
+        closed[(sid, sym)] = [{"realized_pnl": v} for v in g["pnls"]]
+        closed[(sid, sym)][0]["costs"] = g.get("costs", 0.0)
+
+    async for g in commodity_positions_collection.aggregate([
+        {"$match": {"status": "OPEN"}},
+        {"$group": {"_id": {"s": "$strategy_id", "y": "$symbol"},
+                    "n": {"$sum": 1},
+                    "unreal": {"$sum": {"$ifNull": ["$unrealized_pnl", 0.0]}},
+                    "deployed": {"$sum": {"$ifNull": ["$capital_deployed", 0.0]}}}},
+    ]):
+        sid, sym = g["_id"].get("s"), g["_id"].get("y")
+        if not sid or not sym:
+            continue
+        open_counts[(sid, sym)] = g["n"]
+        unreal[sym] = unreal.get(sym, 0.0) + float(g.get("unreal") or 0.0)
+        deployed[sym] = deployed.get(sym, 0.0) + float(g.get("deployed") or 0.0)
 
     symbols = sorted({sym for _sid, sym in closed} | {sym for _sid, sym in open_counts})
     out: dict = {"symbols": symbols, "per_symbol": {}, "totals": {}}

@@ -320,6 +320,10 @@ async def ensure_indexes() -> None:
     await sf_ensure_indexes()
     from app.services.trending_stocks.engine import ensure_indexes as ts_ensure_indexes
     await ts_ensure_indexes()
+    # commodity_positions reached 29,192 rows with only _id_ indexed — a bare count took
+    # 21s and the per-script endpoint timed out, taking the page with it.
+    from app.services.commodity_engine import ensure_indexes as cmd_ensure_indexes
+    await _try("commodity_engine", cmd_ensure_indexes())
     from app.services.commodity_positions import ensure_indexes as cmp_ensure_indexes
     await cmp_ensure_indexes()
     from app.services.commodity_instruments import ensure_indexes as cmi_ensure_indexes
