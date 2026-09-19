@@ -453,17 +453,26 @@ async def manage_cycle() -> int:
 
 async def summary() -> dict:
     deployed = realized = unrealized = costs = 0.0
-    async for p in commodity_positions_collection.find(
-        {"status": "OPEN"}, {"capital_deployed": 1, "unrealized_pnl": 1, "entry_costs": 1}
-    ):
-        deployed += p.get("capital_deployed", 0.0)
-        unrealized += p.get("unrealized_pnl") or 0.0
-        costs += p.get("entry_costs") or 0.0
-    async for p in commodity_positions_collection.find(
-        {"status": {"$ne": "OPEN"}}, {"realized_pnl": 1, "costs": 1}
-    ):
-        realized += p.get("realized_pnl") or 0.0
-        costs += p.get("costs") or 0.0
+    # SUMMED IN MONGO. The closed leg used to stream all 29,000 documents just to add two
+    # numbers, which is what kept this endpoint at 20 seconds even after the collection
+    # was indexed — an index makes a scan findable, not cheap. $group returns one row.
+    async for g in commodity_positions_collection.aggregate([
+        {"$match": {"status": "OPEN"}},
+        {"$group": {"_id": None,
+                    "deployed": {"$sum": {"$ifNull": ["$capital_deployed", 0.0]}},
+                    "unrealized": {"$sum": {"$ifNull": ["$unrealized_pnl", 0.0]}},
+                    "costs": {"$sum": {"$ifNull": ["$entry_costs", 0.0]}}}},
+    ]):
+        deployed, unrealized = g.get("deployed", 0.0), g.get("unrealized", 0.0)
+        costs += g.get("costs", 0.0)
+    async for g in commodity_positions_collection.aggregate([
+        {"$match": {"status": {"$ne": "OPEN"}}},
+        {"$group": {"_id": None,
+                    "realized": {"$sum": {"$ifNull": ["$realized_pnl", 0.0]}},
+                    "costs": {"$sum": {"$ifNull": ["$costs", 0.0]}}}},
+    ]):
+        realized = g.get("realized", 0.0)
+        costs += g.get("costs", 0.0)
 
     verdicts = {"READY": 0, "REJECTED": 0, "PENDING": 0}
     async for s in commodity_scores_collection.find({}, {"verdict": 1}):
