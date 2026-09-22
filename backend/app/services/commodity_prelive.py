@@ -338,16 +338,43 @@ async def admissions(fresh: bool = False) -> dict:
     else:
         stats = await _script_stats(fresh)
         for sym in universe:
-            # A mini has no paper record of its own — the pattern desk has never traded it.
-            # Read its PARENT's record instead: same commodity, same quote, same series.
-            source = MINI_PARENT.get(sym, sym)
-            inherited = source != sym
-            for sid, row in (stats["per_symbol"].get(source) or {}).items():
+            own_rows = stats["per_symbol"].get(sym) or {}
+
+            # 1. THE CONTRACT'S OWN paper record comes first. Inheritance was written when
+            #    the minis had been in the pattern desk's universe for minutes and had no
+            #    record at all, so the parent was the only evidence there was. They have
+            #    their own now — NATGASMINI is past 500 closed paper trades — and reading
+            #    only the parent made a strategy that cleared the gate ON THIS EXACT
+            #    CONTRACT invisible to admission. Direct evidence outranks borrowed.
+            for sid, row in own_rows.items():
                 if row.get("verdict") != "READY" or sid not in COMMODITY_BY_ID:
                     continue
                 per[sym][sid] = {
-                    "basis": "parent_script" if inherited else "per_script",
-                    "source_symbol": source,
+                    "basis": "per_script", "source_symbol": sym,
+                    "trades": row["trades"], "win_rate": row["win_rate"],
+                    "net_pnl": row["net_pnl"], "profit_factor": row["profit_factor"],
+                    "expectancy": row["expectancy"], "max_drawdown_pct": row["max_drawdown_pct"],
+                    "t_stat": row["t_stat"],
+                    "why": f"Cleared the paper gate on {sym}'s own {row['trades']} trades.",
+                }
+
+            # 2. Then the PARENT's record, but only for strategies this contract has not
+            #    judged for itself. A mini and its parent are the same commodity at the same
+            #    quote, so the parent's proof transfers — until the contract's own trades
+            #    have something to say, at which point they are the better evidence.
+            source = MINI_PARENT.get(sym, sym)
+            if source == sym:
+                continue
+            for sid, row in (stats["per_symbol"].get(source) or {}).items():
+                if row.get("verdict") != "READY" or sid not in COMMODITY_BY_ID:
+                    continue
+                if sid in per[sym]:
+                    continue        # already admitted on its own, stronger, record
+                own = own_rows.get(sid)
+                if own and own.get("verdict") == "REJECTED":
+                    continue        # this contract tried it and it failed — do not inherit past that
+                per[sym][sid] = {
+                    "basis": "parent_script", "source_symbol": source,
                     "trades": row["trades"], "win_rate": row["win_rate"],
                     "net_pnl": row["net_pnl"], "profit_factor": row["profit_factor"],
                     "expectancy": row["expectancy"], "max_drawdown_pct": row["max_drawdown_pct"],
@@ -357,8 +384,7 @@ async def admissions(fresh: bool = False) -> dict:
                         f"{sym} is the same commodity at the same quote — one lot carries "
                         f"{multiplier(sym):,} units against {multiplier(source):,} — so the "
                         "price series the pattern was proved on is this contract's series."
-                    ) if inherited else
-                    f"Cleared the paper gate on {sym}'s own {row['trades']} trades.",
+                    ),
                 }
 
     # OWN-RECORD OVERRIDE, applied after either branch above. Once THIS desk has traded a
