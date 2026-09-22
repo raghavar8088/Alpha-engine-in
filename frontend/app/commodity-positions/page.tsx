@@ -147,10 +147,14 @@ export default function CommodityPositionsPage() {
   // surviving leg on its own.
   const releasesMargin = !!quote && quote.margin_released > 0;
 
-  // Only options have an at-the-money strike, so futures are not counted or selectable.
+  // Only options have an at-the-money strike, so futures are not counted or selectable —
+  // and neither are expired legs, which have no live expiry to be rolled into. The count
+  // here is what the "all N legs" button promises to act on, so it has to be the set the
+  // server will actually roll.
   const rollable = useMemo(
     () => (summary?.open_positions ?? []).filter(
-      (p) => (p.instrument as { option_type?: string } | undefined)?.option_type),
+      (p) => (p.instrument as { option_type?: string } | undefined)?.option_type
+             && !p.expired),
     [summary]);
   const rollableLegs = rollable.length;
 
@@ -1066,8 +1070,14 @@ export default function CommodityPositionsPage() {
             <PositionTable rows={summary?.open_positions ?? []} live busy={busy}
                            onReopenAtm={reopenAtm}
                            picked={picked} onPick={setPicked}
-                           onExit={(p, l) => act(`exit-${p.position_id}`,
-                             () => exitCmpPosition(p.position_id, accountId, l))} />
+                           onExit={(p, l) => act(`exit-${p.position_id}`, async () => {
+                             const o = await exitCmpPosition(p.position_id, accountId, l);
+                             // An expired leg does not close at a quote, so say which
+                             // number it did close at and where that number came from.
+                             setNotice(`${p.display_name} `
+                               + (o.exit_basis ?? `closed at ${o.fill_price?.toFixed(2)}`)
+                               + ".");
+                           })} />
           </GlassPanel>
           <GlassPanel title="Closed positions" note="realised P&L">
             <PositionTable rows={summary?.closed_positions ?? []} busy={busy} />
@@ -1832,10 +1842,11 @@ function PositionTable({ rows, live, busy, onExit, onReopenAtm, picked, onPick }
   picked?: Set<string>;
   onPick?: (next: Set<string>) => void;
 }) {
-  // Only option rows are selectable, so "all" means all the OPTIONS — a header box that
-  // claimed to tick everything and then left the futures rows alone would be lying about
-  // what the button will act on.
-  const selectable = rows.filter(isOption);
+  // Only LIVE option rows are selectable, so "all" means all the OPTIONS that can actually
+  // be rolled — a header box that claimed to tick everything and then left the futures rows
+  // alone would be lying about what the button will act on, and an expired leg has no live
+  // expiry to roll into at all.
+  const selectable = rows.filter((p) => isOption(p) && !p.expired);
   const allOn = !!selectable.length
     && selectable.every((p) => picked?.has(p.position_id));
   const someOn = !allOn && selectable.some((p) => picked?.has(p.position_id));
@@ -1879,7 +1890,7 @@ function PositionTable({ rows, live, busy, onExit, onReopenAtm, picked, onPick }
                   className={picked?.has(p.position_id) ? "picked" : ""}>
                 {live && onPick && (
                   <td className="pickcell">
-                    {isOption(p) ? (
+                    {isOption(p) && !p.expired ? (
                       <input type="checkbox" checked={picked?.has(p.position_id) ?? false}
                              aria-label={`Select ${p.display_name}`}
                              onChange={() => toggle(p.position_id)} />
@@ -1887,13 +1898,18 @@ function PositionTable({ rows, live, busy, onExit, onReopenAtm, picked, onPick }
                   </td>
                 )}
                 <td className="l sym">{p.display_name}
-                  <div className="small dim">{p.instrument_kind} · {p.product_type}</div>
+                  <div className="small dim">{p.instrument_kind} · {p.product_type}
+                    {live && p.expired && <span className="expired">EXPIRED</span>}
+                  </div>
                 </td>
                 <td className={p.side === "BUY" ? "gain" : "loss"}>{p.side}</td>
                 <td>{p.lots}</td>
                 <td className="dim">{p.quantity.toLocaleString("en-IN")}</td>
                 <td className="px">{p.entry_price?.toFixed(2)}</td>
-                <td className="px">{p.ltp?.toFixed(2)}</td>
+                <td className="px" title={live && p.price_basis ? p.price_basis : undefined}>
+                  {p.ltp?.toFixed(2)}
+                  {live && p.expired && <div className="small dim">settled</div>}
+                </td>
                 <td className="px">{p.contract_value >= 1e5
                   ? `₹${(p.contract_value / 1e5).toFixed(2)}L` : `₹${Math.round(p.contract_value)}`}</td>
                 <td className="px dim">{p.margin_used >= 1e5
@@ -1904,7 +1920,12 @@ function PositionTable({ rows, live, busy, onExit, onReopenAtm, picked, onPick }
                 </td>
                 {live && onReopenAtm && (
                   <td>
-                    {isOption(p) ? (
+                    {isOption(p) && p.expired ? (
+                      <span className="dim small"
+                            title="A roll re-opens the SAME expiry at a new strike, and this one has stopped trading. Close it to settle, then open a fresh leg on a live expiry.">
+                        expired
+                      </span>
+                    ) : isOption(p) ? (
                       <button className="mini roll" disabled={!!busy}
                               onClick={() => onReopenAtm(p)}
                               title="Close this leg and re-open the same option at today's at-the-money strike">
@@ -1939,6 +1960,9 @@ function PositionTable({ rows, live, busy, onExit, onReopenAtm, picked, onPick }
         .dim { color: var(--text-muted); }
         .small { font-size: 11px; }
         .gain { color: var(--gain); } .loss { color: var(--loss); }
+        .expired { margin-left: 6px; padding: 0 5px; border-radius: 4px; font-size: 9px;
+                   font-weight: 800; letter-spacing: .04em; background: var(--loss);
+                   color: #fff; vertical-align: 1px; }
         .mini { border: 1px solid var(--panel-border); border-radius: 6px; width: 24px; height: 22px;
                 font-size: 11px; font-weight: 800; cursor: pointer; background: var(--panel);
                 color: var(--loss); }

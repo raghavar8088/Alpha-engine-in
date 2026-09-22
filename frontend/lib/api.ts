@@ -5653,6 +5653,10 @@ export interface CmpPosition {
   status: string;
   opened_at: string | null;
   closed_at: string | null;
+  /** True once the contract has stopped trading. Its `ltp` is then a settlement value,
+   *  not a live quote, and `price_basis` says where that number came from. */
+  expired?: boolean;
+  price_basis?: string;
 }
 
 export interface CmpOrder {
@@ -5670,6 +5674,9 @@ export interface CmpOrder {
   margin_used: number | null;
   contract_value?: number;
   placed_at: string | null;
+  /** On an exit: how the fill price was arrived at — a live quote, or, for a contract
+   *  closed after expiry, the settlement basis. */
+  exit_basis?: string;
 }
 
 export interface CmpSummary {

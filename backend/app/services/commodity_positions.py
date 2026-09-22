@@ -48,11 +48,13 @@ only place that conversion happens.
 import asyncio
 import logging
 import os
+import time
 from datetime import date, datetime, timedelta, timezone
 from uuid import uuid4
 
 from app.core.db import (
     commodity_accounts_collection,
+    commodity_bars_collection,
     commodity_pos_orders_collection,
     commodity_pos_positions_collection,
     instruments_collection,
@@ -467,13 +469,19 @@ async def underlying_future(symbol: str, option_expiry: str | None = None) -> di
     happens on the last few days of a cycle."""
     q = {"underlying_symbol": symbol.upper(), "asset_class": FUTURE_CLASS,
          "angel_token": {"$ne": None}}
+    today = _today()
     if option_expiry:
+        # `>= today` as well as `>= option_expiry`: for an option that has already expired
+        # the nearest future on or after its expiry is itself expired, and an expired token
+        # is one Angel will never quote — so without this the caller gets a contract that
+        # can only ever price as None, and margin, ATM strikes and settlement all fail on a
+        # book that holds an expired leg.
         doc = await instruments_collection.find_one(
-            {**q, "expiry": {"$gte": option_expiry}}, sort=[("expiry", 1)])
+            {**q, "expiry": {"$gte": max(option_expiry, today)}}, sort=[("expiry", 1)])
         if doc:
             return doc
     return await instruments_collection.find_one(
-        {**q, "expiry": {"$gte": _today()}}, sort=[("expiry", 1)])
+        {**q, "expiry": {"$gte": today}}, sort=[("expiry", 1)])
 
 
 # --------------------------------------------------------------------------------
@@ -509,6 +517,238 @@ async def ltp_for(inst: dict) -> float | None:
     prices = await _quote_tokens([str(token)])
     val = prices.get(str(token))
     return float(val) if val else None
+
+
+# --------------------------------------------------------------------------------
+# Expiry and settlement
+# --------------------------------------------------------------------------------
+# An MCX contract stops trading on its expiry day, and from the next morning Angel will
+# never quote its token again. Before this section existed that was fatal: `exit_position`
+# asked for a live price, got None, and refused with "cannot close at an invented level" —
+# so a position held through expiry could not be closed EVER. It sat in the book for good,
+# blocking margin and showing whatever price happened to be its last successful mark, which
+# is why an expired CRUDEOILM straddle could show its two legs implying two different
+# futures prices: each leg's last quote landed at a different moment.
+#
+# The refusal was right about one thing — a close must not happen at an invented level. The
+# answer is not to invent one, it is to settle the contract the way the exchange does, and
+# to say on the fill WHERE the number came from. An MCX option is an option ON A FUTURE, so
+# at expiry it is worth its intrinsic value against that future's settlement price on the
+# option's expiry day, and nothing else. `settlement_price` looks for that number in order
+# of how much it can be trusted and returns the basis alongside it; if it cannot find any
+# real price it says so rather than guessing.
+
+# How far back to look for the settlement close: MCX holidays and weekends mean the expiry
+# day itself is not always a trading day.
+SETTLE_LOOKBACK_DAYS = int(os.getenv("COMMODITY_SETTLE_LOOKBACK_DAYS", "7"))
+# A settlement close is a fact about a day that has already happened, so a hit is cached for
+# the life of the process. A miss is not — one 403 from a throttled candle endpoint would
+# otherwise pin a leg to a worse price source for ever — so misses expire and are retried.
+SETTLE_MISS_TTL_S = float(os.getenv("COMMODITY_SETTLE_MISS_TTL_S", "600"))
+_SETTLE_CACHE: dict[tuple[str, str], tuple[float, str]] = {}
+_SETTLE_MISSES: dict[tuple[str, str], float] = {}
+
+
+def is_expired(expiry: str | None, as_of: str | None = None) -> bool:
+    """Has this contract stopped trading? Expiry day itself still trades."""
+    if not expiry:
+        return False
+    return str(expiry) < (as_of or _today())
+
+
+async def _settlement_future(symbol: str, option_expiry: str) -> dict | None:
+    """The future an expired option settles against — the nearest one expiring ON OR AFTER
+    the option did, INCLUDING one that has since expired itself.
+
+    Deliberately not `underlying_future`, which skips expired contracts because it exists to
+    find something QUOTABLE. Settlement is a question about the past, and the answer to it
+    is usually a contract that is dead today."""
+    return await instruments_collection.find_one(
+        {"underlying_symbol": symbol.upper(), "asset_class": FUTURE_CLASS,
+         "expiry": {"$gte": option_expiry}}, sort=[("expiry", 1)])
+
+
+async def _angel_close_on(inst: dict, on_date: str) -> float | None:
+    """One daily candle for THIS contract's own token, from Angel, on or just before
+    `on_date`.
+
+    The exchange-correct source, and the only one specific to the contract: Angel serves
+    history for an expired token even though it will not quote one. Paced against the same
+    lock the commodity bar poller holds, because that endpoint answers five of eight unpaced
+    calls with a 403 and two pacers racing each other would be no pacer at all."""
+    token = inst.get("angel_token")
+    if not token:
+        return None
+    try:
+        target = datetime.strptime(on_date, "%Y-%m-%d").date()
+    except (TypeError, ValueError):
+        return None
+
+    from app.services import commodity_bars as _bars
+
+    start = target - timedelta(days=SETTLE_LOOKBACK_DAYS)
+    try:
+        async with _bars._call_lock:
+            wait = _bars.CANDLE_MIN_INTERVAL_S - (time.monotonic() - _bars._last_call_at)
+            if wait > 0:
+                await asyncio.sleep(wait)
+            _bars._last_call_at = time.monotonic()
+        rows = await angel_client.candles(
+            inst.get("angel_exchange") or MCX_EXCHANGE, str(token), "D",
+            f"{start.isoformat()} 00:00", f"{target.isoformat()} 23:59")
+    except Exception as exc:  # noqa: BLE001 — any failure here just means "try the next source"
+        logger.info("[commodity_positions] settlement candle failed for %s: %s",
+                    inst.get("symbol"), exc)
+        return None
+
+    for row in reversed(rows or []):
+        try:
+            day = datetime.fromisoformat(str(row[0])).date()
+            close = float(row[4])
+        except (TypeError, ValueError, IndexError):
+            continue
+        if day <= target and close:
+            return close
+    return None
+
+
+async def _store_close_on(symbol: str, on_date: str,
+                          want_expiry: str | None) -> tuple[float, str] | None:
+    """The commodity bar store's daily close on `on_date` — IF it is the right contract.
+
+    The store is keyed by UNDERLYING and holds whatever was front month when the poller last
+    ran, and the poller re-upserts its WHOLE history every pass. So a bar dated on a past
+    expiry day carries today's front month, not the contract that was trading then, and
+    using it blind would settle a September option against an October future. The bar's own
+    expiry has to be the one being settled against; checked, not assumed. That holds in the
+    case this path exists for — an option closed inside its own future's cycle, which on MCX
+    is most of them, since the option expires before the future it is written on."""
+    try:
+        target = datetime.strptime(on_date, "%Y-%m-%d").date()
+    except (TypeError, ValueError):
+        return None
+    floor = datetime.combine(target - timedelta(days=SETTLE_LOOKBACK_DAYS),
+                             datetime.min.time(), tzinfo=timezone.utc)
+    ceil = datetime.combine(target + timedelta(days=1),
+                            datetime.min.time(), tzinfo=timezone.utc)
+    async for doc in commodity_bars_collection.find(
+            {"symbol": symbol.upper(), "timeframe": "1d",
+             "ts": {"$gte": floor, "$lt": ceil}}).sort("ts", -1):
+        if not doc.get("close"):
+            continue
+        if want_expiry and str(doc.get("expiry") or "") != str(want_expiry):
+            continue
+        ts = doc["ts"]
+        if isinstance(ts, datetime):
+            if ts.tzinfo is None:
+                ts = ts.replace(tzinfo=timezone.utc)
+            day = ts.astimezone(IST).date().isoformat()
+        else:
+            day = target.isoformat()
+        return float(doc["close"]), day
+    return None
+
+
+async def settlement_ref(symbol: str, on_date: str) -> tuple[float, str] | None:
+    """(price, basis) for the underlying future on `on_date` — the number an option
+    expiring that day settles against, and where it came from.
+
+    Cached, because a close on a day that has already happened does not change and both
+    callers would otherwise keep asking: the mark-to-market pass runs every twenty seconds
+    against an endpoint that throttles at one request every three."""
+    key = (symbol.upper(), on_date)
+    if key in _SETTLE_CACHE:
+        return _SETTLE_CACHE[key]
+    if time.monotonic() - _SETTLE_MISSES.get(key, 0.0) < SETTLE_MISS_TTL_S:
+        return None
+
+    fut = await _settlement_future(symbol, on_date)
+    if fut is not None:
+        px = await _angel_close_on(fut, on_date)
+        if px:
+            out = (round(px, 2),
+                   f"the {fut.get('expiry')} {symbol} future's {px:,.2f} settlement close "
+                   f"for {on_date}")
+            _SETTLE_CACHE[key] = out
+            return out
+
+    stored = await _store_close_on(symbol, on_date, (fut or {}).get("expiry"))
+    if stored:
+        px, day = stored
+        out = (px, f"the {symbol} front-month future's {px:,.2f} close on {day}, from this "
+                   "desk's own bar store")
+        _SETTLE_CACHE[key] = out
+        return out
+
+    _SETTLE_MISSES[key] = time.monotonic()
+    return None
+
+
+async def settlement_price(inst: dict, last_mark: float | None = None) -> tuple[float, str]:
+    """What an expired contract settles at, and the one-line basis for that number.
+
+    Never returns an invented level. Every branch is a real close, a real live quote, or the
+    last real price this desk itself recorded, and the basis names which — so a fill at a
+    weaker source is legible as one instead of looking like an exchange settlement. If there
+    is no real price at all it raises rather than picking a plausible number."""
+    symbol = str(inst.get("underlying_symbol") or "").upper()
+    expiry = str(inst.get("expiry") or "")
+    kind = "OPTION" if inst.get("option_type") else "FUTURE"
+
+    if kind == "FUTURE":
+        # A future settles at its OWN last close, so ask for its own token's candle rather
+        # than for a reference price — `settlement_ref` would answer about whichever future
+        # expires on or after this one, which for a future is itself only by coincidence.
+        px = await _angel_close_on(inst, expiry)
+        if px:
+            return round(px, 2), (f"settled at {symbol} {expiry}'s own {px:,.2f} close on "
+                                  "its last trading day")
+        stored = await _store_close_on(symbol, expiry, expiry)
+        if stored:
+            close_px, day = stored
+            return close_px, f"settled at the {symbol} future's {close_px:,.2f} close on {day}"
+        if last_mark:
+            return round(float(last_mark), 2), (
+                f"settled at {float(last_mark):,.2f} — the last price this desk recorded "
+                f"before {symbol} {expiry} stopped trading")
+        raise OrderError(
+            f"{symbol} {expiry} expired and neither a settlement close nor a recorded mark "
+            "exists for it, so there is no honest price to close at. Refresh the commodity "
+            "bar store from the Commodity module, then close again.")
+
+    strike = float(inst.get("strike") or 0)
+    option_type = str(inst.get("option_type") or "").upper()
+
+    ref, ref_basis = None, ""
+    settled = await settlement_ref(symbol, expiry)
+    if settled:
+        ref, ref_basis = settled
+    else:
+        # Last resort for the reference itself: a LIVE future, quoted now. It is a different
+        # contract at a different moment from the one the exchange settled against, and the
+        # basis says so rather than passing it off as a settlement price.
+        live, fut = await future_price(symbol, expiry)
+        if live:
+            ref = live
+            ref_basis = (f"the {(fut or {}).get('expiry', '')} {symbol} future at {live:,.2f} "
+                         "NOW — no settlement close could be found for the expiry day, so "
+                         "this is a later price on a later contract, not the exchange's")
+
+    if ref is not None:
+        intrinsic = max(0.0, ref - strike) if option_type == "CE" else max(0.0, strike - ref)
+        return round(intrinsic, 2), (
+            f"settled at its {intrinsic:,.2f} intrinsic value against {ref_basis}")
+
+    if last_mark:
+        return round(float(last_mark), 2), (
+            f"settled at {float(last_mark):,.2f} — the last price this desk recorded before "
+            f"{symbol} {expiry} expired. No futures settlement price was available to take "
+            "intrinsic value against, so this is a recorded mark, not an exchange number.")
+
+    raise OrderError(
+        f"{symbol} {expiry} {strike:g}{option_type} expired and no futures settlement price, "
+        "live future or recorded mark exists for it, so there is no honest price to close "
+        "at. Refresh the commodity bar store from the Commodity module, then close again.")
 
 
 async def future_price(symbol: str, option_expiry: str | None = None) -> tuple[float | None, dict | None]:
@@ -962,6 +1202,12 @@ async def reopen_at_the_money(account_id: str, position_id: str) -> dict:
     if pos.get("instrument_kind") != "OPTION" or not option_type:
         raise OrderError(
             "Only options have an at-the-money strike. A future is already the underlying.")
+    if is_expired(inst.get("expiry")):
+        raise OrderError(
+            f"{pos['display_name']} expired on {inst.get('expiry')}, so there is no strike "
+            "on that expiry left to roll into — a roll re-opens the SAME expiry. Close it "
+            "instead: it settles at its value on expiry day. To keep the trade on, open a "
+            "fresh leg on a live expiry from the chain.")
 
     underlying, expiry = pos["underlying_symbol"], inst["expiry"]
     old_strike = float(inst.get("strike") or 0)
@@ -1061,13 +1307,23 @@ async def reopen_all_at_the_money(account_id: str,
     if not positions:
         raise OrderError("This account has no open positions to roll.")
 
-    rollable, skipped = [], []
+    rollable, skipped, dead = [], [], []
     for pos in positions:
         inst = pos.get("instrument") or {}
-        if pos.get("instrument_kind") == "OPTION" and inst.get("option_type"):
-            rollable.append(pos)
-        else:
+        if pos.get("instrument_kind") != "OPTION" or not inst.get("option_type"):
             skipped.append(pos["display_name"])
+        elif is_expired(inst.get("expiry")):
+            # A roll re-opens the same expiry at a new strike. On a dead expiry there is
+            # nothing to re-open into, and rolling one anyway would close the leg and then
+            # fail to replace it — leaving it flat, which is not what the button says.
+            dead.append(pos["display_name"])
+        else:
+            rollable.append(pos)
+    if not rollable and dead:
+        raise OrderError(
+            f"{len(dead)} leg(s) have expired ({', '.join(dead[:3])}) and a roll re-opens "
+            "the SAME expiry, so there is nothing to roll them into. Close them instead — "
+            "they settle at their value on expiry day.")
     if not rollable:
         raise OrderError(
             "Nothing selected has an at-the-money strike — a future is already the "
@@ -1153,12 +1409,15 @@ async def reopen_all_at_the_money(account_id: str,
             f"{sum(r['legs'] for r in rolled) - moved} re-entered at the same one.")
     if skipped:
         note += (f" Skipped {len(skipped)} future(s), which have no at-the-money strike.")
+    if dead:
+        note += (f" Skipped {len(dead)} expired leg(s) — a dead expiry has nothing to roll "
+                 "into; close them to settle.")
     if failed:
         flat = ", ".join(c["contract"] for f in failed for c in f["closed"])
         note += (f" {len(failed)} group(s) FAILED to re-open and are now flat: {flat}. "
                  "Re-open them by hand from the chain.")
 
-    return {"rolled": rolled, "failed": failed, "skipped": skipped,
+    return {"rolled": rolled, "failed": failed, "skipped": skipped, "expired": dead,
             "legs_rolled": sum(r["legs"] for r in rolled),
             "strikes_changed": moved,
             "realized": round(realized, 2),
@@ -1173,9 +1432,27 @@ async def exit_position(account_id: str, position_id: str, lots: int | None = No
 
     inst = pos["instrument"]
     doc = await instruments_collection.find_one({"symbol": inst["symbol"]})
-    price = await ltp_for(doc or inst)
+    # Quote from whichever copy actually carries a broker token. The master row used to win
+    # unconditionally, so a re-sync that dropped a token made the position unquotable even
+    # though the position's own instrument — written when the token was live — still had it.
+    price = await ltp_for(doc if (doc or {}).get("angel_token") else inst)
+    basis = f"closed at the live Angel price of {price:,.2f}" if price else ""
+    if price is None and is_expired(inst.get("expiry")):
+        # Checked before the token, because settlement does not need this contract's token
+        # — it values the leg against its UNDERLYING future — and an expired leg with a
+        # missing token is still a leg the book has to be able to get out of.
+        price, basis = await settlement_price(inst, pos.get("ltp"))
+    if price is None and not (doc or {}).get("angel_token") and not inst.get("angel_token"):
+        raise OrderError(
+            f"{pos['display_name']} carries no broker token, so it cannot be priced. "
+            "Reload the MCX contracts from the Contract Specs tab and close again.")
     if price is None:
-        raise OrderError("Angel returned no price — cannot close at an invented level")
+        raise OrderError(
+            f"Angel did not quote {pos['display_name']} just now, and this contract has "
+            f"not expired ({inst.get('expiry')}) — so it HAS a live price and this is a "
+            "quote failure, not a dead contract. MCX trades 09:00–23:30 IST Mon–Fri and "
+            "Angel throttles its quote endpoint hard. Press Retry in a few seconds rather "
+            "than closing at an invented level.")
 
     close_lots = min(lots or pos["lots"], pos["lots"])
     if close_lots < 1:
@@ -1195,7 +1472,11 @@ async def exit_position(account_id: str, position_id: str, lots: int | None = No
     }
     # Closing never re-checks margin: it can only reduce risk, and refusing an exit for
     # want of margin is how a paper desk ends up unable to get out of a losing trade.
-    return await _fill(base, price, check_margin=False)
+    fill = await _fill(base, price, check_margin=False)
+    fill["exit_basis"] = basis
+    await commodity_pos_orders_collection.update_one(
+        {"order_id": fill["order_id"]}, {"$set": {"exit_basis": basis}})
+    return fill
 
 
 # --------------------------------------------------------------------------------
@@ -1511,7 +1792,14 @@ async def available_cash(account_id: str) -> float:
 
 
 async def sync_positions() -> int:
-    """Mark every open position to the live Angel price, in one batched pass."""
+    """Mark every open position, in one batched pass.
+
+    A LIVE contract marks to its Angel quote. An EXPIRED one has no quote and never will,
+    so it marks to its settlement value instead — before this it kept whatever price
+    happened to be its last successful quote, for ever, which is how a book ends up showing
+    a five-figure unrealised P&L on a contract that stopped trading a week ago. The mark is
+    also flagged `expired`, so the desk can say on the row that the number is a settlement
+    and not a live price."""
     positions = [p async for p in commodity_pos_positions_collection.find({"status": "OPEN"})]
     if not positions:
         return 0
@@ -1519,11 +1807,22 @@ async def sync_positions() -> int:
                      if p["instrument"].get("angel_token")})
     prices = await _quote_tokens(tokens)
 
+    today = _today()
     updated = 0
     for pos in positions:
         tok = str(pos["instrument"].get("angel_token") or "")
         px = prices.get(tok)
-        if not px:
+        expired = is_expired(pos["instrument"].get("expiry"), today)
+        basis = "live Angel quote"
+        if not px and expired:
+            try:
+                settled, basis = await settlement_price(pos["instrument"], pos.get("ltp"))
+            except OrderError as exc:
+                logger.info("[commodity_positions] cannot settle %s: %s",
+                            pos.get("display_name"), exc.detail)
+                continue
+            px = settled
+        if px is None or (not px and not expired):
             continue
         direction = 1 if pos["side"] == "BUY" else -1
         pnl = (float(px) - pos["entry_price"]) * pos["quantity"] * direction
@@ -1531,6 +1830,7 @@ async def sync_positions() -> int:
             "ltp": round(float(px), 4), "unrealized_pnl": round(pnl, 2),
             "contract_value": contract_value(pos.get("underlying_symbol", ""),
                                              float(px), pos["lots"]),
+            "expired": expired, "price_basis": basis,
             "updated_at": _now()}})
         updated += 1
     return updated
@@ -1728,6 +2028,7 @@ __all__ = [
     "edit_account", "underlyings", "future_expiries", "option_expiries",
     "option_chain", "futures_board", "underlying_future", "future_price",
     "estimate_margin", "place_order", "exit_position", "sync_positions",
+    "is_expired", "settlement_price",
     "reset_account", "summary", "available_cash",
     "estimate_basket", "execute_basket", "basket_margin_delta", "basket_allowed",
     "atm_strike", "reopen_at_the_money", "reopen_all_at_the_money",
