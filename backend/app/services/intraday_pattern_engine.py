@@ -471,20 +471,34 @@ async def leaderboard(timeframe: str | None = None, family: str | None = None,
     return rows[:limit]
 
 
+# How many strategies the catalog ACTUALLY holds on each candle.
+#
+# THIS IS NOT `len(TEMPLATES)`. That is the number of templates; `_build()` then drops any
+# template that is not its own pattern on a given candle (`allowed_on`), so the count
+# varies: 63 on 1m and 5m, 70 on 15m through 4h, 72 on 1d — 548 in total, not 8 x 72 = 576.
+# Charging every candle for all 72 put 28 strategies' worth of capital on the desk that
+# does not exist, and since ROI divides by that capital, every row read closer to zero than
+# it was: 1m's true -0.68% showed as -0.59%, and only 1d (where all 72 do exist) was right.
+_STRATEGIES_PER_TF: dict[str, int] = {}
+for _st in CATALOG:
+    _STRATEGIES_PER_TF[_st.timeframe] = _STRATEGIES_PER_TF.get(_st.timeframe, 0) + 1
+
+
 async def timeframe_stats() -> list[dict]:
     out = []
     for tf in TIMEFRAMES:
+        n = _STRATEGIES_PER_TF.get(tf.key, 0)
         agg = {"timeframe": tf.key, "label": tf.label, "style": tf.style,
-               "strategies": len(TEMPLATES), "trades": 0, "wins": 0,
+               "strategies": n, "trades": 0, "wins": 0,
                "net_pnl": 0.0, "fees": 0.0,
-               "capital": PER_STRATEGY_CAPITAL * len(TEMPLATES)}
+               "capital": PER_STRATEGY_CAPITAL * n}
         async for s in pattern_scores_collection.find({"timeframe": tf.key}):
             agg["trades"] += s.get("trades", 0) or 0
             agg["wins"] += s.get("wins", 0) or 0
             agg["net_pnl"] += s.get("net_pnl", 0.0) or 0.0
             agg["fees"] += s.get("fees", 0.0) or 0.0
         agg["win_rate"] = round(agg["wins"] / agg["trades"], 4) if agg["trades"] else 0.0
-        agg["roi_pct"] = round(agg["net_pnl"] / agg["capital"] * 100, 4)
+        agg["roi_pct"] = round(agg["net_pnl"] / agg["capital"] * 100, 4) if agg["capital"] else 0.0
         agg["net_pnl"] = round(agg["net_pnl"], 2)
         agg["fees"] = round(agg["fees"], 2)
         out.append(agg)
