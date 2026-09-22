@@ -14,6 +14,7 @@ from app.api.deps import get_current_user
 from app.api.routes import (
     ath_trading,
     pattern,
+    pattern_books,
     desk_history,
     swing_trading,
     nifty_scalp,
@@ -204,6 +205,7 @@ async def warm_mongo_pool() -> None:
 
 EXPIRING_COLLECTIONS = {
     "pattern_equity": 60,
+    "pattern_book_equity": 60,
     "swing_equity": 120,
     "nse_volume_gainers": 120,
     "nifty_scalp_equity": 30,
@@ -330,6 +332,8 @@ async def ensure_indexes() -> None:
     await cmi_ensure_indexes()
     from app.services.commodity_prelive import ensure_indexes as cmpl_ensure_indexes
     await _try("commodity_prelive", cmpl_ensure_indexes())
+    from app.services.pattern_books_engine import ensure_indexes as pb_ensure_indexes
+    await _try("pattern_books", pb_ensure_indexes())
 
 
 @app.on_event("startup")
@@ -782,6 +786,7 @@ app.include_router(nifty_scalp.router)
 app.include_router(swing_trading.router)
 app.include_router(desk_history.router)
 app.include_router(pattern.router)
+app.include_router(pattern_books.router)
 app.include_router(stocks_range.router)
 app.include_router(bullish_stocks.router)
 app.include_router(screener.router)

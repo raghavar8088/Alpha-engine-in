@@ -41,6 +41,7 @@ async def intraday_lab_loop() -> None:
     from app.services.live_intraday_engine import run_cycle as live_run_cycle
     from app.services.nifty_scalp_engine import run_cycle as nifty_scalp_run
     from app.services.intraday_pattern_engine import run_cycle as pattern_run
+    from app.services.pattern_books_engine import run_cycle as pattern_books_run
     from app.services.swing_trading import run_cycle as swing_run
     from app.services.nse_volume_gainers import maybe_capture as nse_volume_capture
     from app.services.live_trading_engine import run_cycle as live_trading_run_cycle
@@ -172,6 +173,18 @@ async def intraday_lab_loop() -> None:
                                     pt["opened"], pt["closed"], pt.get("evaluated"))
                 except Exception:
                     logger.exception("pattern desk failed")
+                # The Rs 50,000 / Rs 2,00,000 books MIRROR the desk above, so they run
+                # in the same tick and immediately after it: they read its fills rather
+                # than the market, and a cycle's worth of lag would have them entering a
+                # position the parent had already closed. Failure here must not touch the
+                # parent, which has already done the expensive part.
+                try:
+                    pb = await pattern_books_run()
+                    if pb.get("opened") or pb.get("closed"):
+                        logger.info("pattern-books: opened %s closed %s",
+                                    pb["opened"], pb["closed"])
+                except Exception:
+                    logger.exception("pattern books failed")
                 # NIFTY 50 Option Scalping: 400 candle/indicator strategies across 8
                 # timeframes, buying near-expiry ATM options. Self-guarded on cutoffs.
                 try:

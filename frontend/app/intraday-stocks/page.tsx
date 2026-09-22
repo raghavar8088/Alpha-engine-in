@@ -35,11 +35,20 @@ import {
   fetchLiveIntradayDaily,
   fetchIntradayLabDaily,
   type DailyRoi,
+  PatternBookKey,
+  PatternBookSummary,
+  PatternBookScore,
+  PatternBookPosition,
+  PatternBookTrade,
+  fetchPatternBookSummary,
+  fetchPatternBookLeaderboard,
+  fetchPatternBookPositions,
+  fetchPatternBookTrades,
 } from "../../lib/api";
 
 // The three live books are TABS rather than a dropdown because they are separate
 // accounts, not a filter: switching replaces every number on the page.
-type IntradayTab = "tournament" | "patterns" | "80k" | "30k" | "10k";
+type IntradayTab = "tournament" | "patterns" | "pb50k" | "pb2L" | "80k" | "30k" | "10k";
 // Families as the desk names them, so a filter maps 1:1 onto the catalog.
 const PAT_FAMILIES: { key: string; label: string }[] = [
   { key: "chart_pattern", label: "Chart patterns" },
@@ -49,6 +58,13 @@ const PAT_FAMILIES: { key: string; label: string }[] = [
   { key: "momentum", label: "Momentum" },
   { key: "mean_reversion", label: "Mean reversion" },
 ];
+// The pattern shortlist's two paper books. `tab` carries a "pb" prefix because "50k"
+// alone would collide with the Live Intraday book keys, which are a different desk.
+const PATTERN_BOOKS: { tab: "pb50k" | "pb2L"; key: PatternBookKey; label: string }[] = [
+  { tab: "pb50k", key: "50k", label: "Paper Trade · ₹50k" },
+  { tab: "pb2L", key: "2L", label: "Paper Trade · ₹2 lakh" },
+];
+
 const LIVE_BOOKS: { key: "80k" | "30k" | "10k"; capital: number }[] = [
   { key: "80k", capital: 80000 },
   { key: "30k", capital: 30000 },
@@ -130,9 +146,21 @@ export default function IntradayStocksPage() {
   // Only the three book tabs name a book; tournament and patterns are their own
   // views, so both must fall back rather than leak a non-book value downstream.
   const liveBook: "80k" | "30k" | "10k" =
-    tab === "tournament" || tab === "patterns" ? "80k" : tab;
-  const isLive = tab !== "tournament" && tab !== "patterns";
+    tab === "tournament" || tab === "patterns" || tab === "pb50k" || tab === "pb2L"
+      ? "80k"
+      : tab;
+  const isLive =
+    tab !== "tournament" && tab !== "patterns" && tab !== "pb50k" && tab !== "pb2L";
   const bookCapital = LIVE_BOOKS.find((b) => b.key === liveBook)?.capital ?? 80000;
+
+  // Pattern paper books (₹50k / ₹2L) — the shortlist at a real account's size.
+  const [pbSummary, setPbSummary] = useState<PatternBookSummary | null>(null);
+  const [pbBoard, setPbBoard] = useState<PatternBookScore[]>([]);
+  const [pbOpen, setPbOpen] = useState<PatternBookPosition[]>([]);
+  const [pbDeclined, setPbDeclined] = useState<PatternBookPosition[]>([]);
+  const [pbTrades, setPbTrades] = useState<PatternBookTrade[]>([]);
+  const isPatternBook = tab === "pb50k" || tab === "pb2L";
+  const pbKey: PatternBookKey = tab === "pb2L" ? "2L" : "50k";
 
   const [patSummary, setPatSummary] = useState<PatternSummary | null>(null);
   const [patBoard, setPatBoard] = useState<PatternScore[]>([]);
@@ -162,6 +190,36 @@ export default function IntradayStocksPage() {
     const id = setInterval(loadPatterns, REFRESH_MS);
     return () => clearInterval(id);
   }, [tab, loadPatterns]);
+
+  const loadPatternBook = useCallback(async () => {
+    try {
+      const [sm, lb, op, dec, tr] = await Promise.all([
+        fetchPatternBookSummary(pbKey),
+        fetchPatternBookLeaderboard(pbKey),
+        fetchPatternBookPositions(pbKey, "OPEN"),
+        fetchPatternBookPositions(pbKey, "ALL"),
+        fetchPatternBookTrades(pbKey, 60),
+      ]);
+      setPbSummary(sm);
+      setPbBoard(lb.rows ?? []);
+      setPbOpen(op);
+      // Signals this book could not afford. Fetched from ALL and filtered here rather
+      // than given their own endpoint — they are positions that were never taken, and
+      // keeping them in the same collection is what stops one being counted twice.
+      setPbDeclined((dec ?? []).filter((r) => r.status === "DECLINED"));
+      setPbTrades(tr);
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load the pattern paper book");
+    }
+  }, [pbKey]);
+
+  useEffect(() => {
+    if (!isPatternBook) return;
+    loadPatternBook();
+    const id = setInterval(loadPatternBook, REFRESH_MS);
+    return () => clearInterval(id);
+  }, [isPatternBook, loadPatternBook]);
 
   const load = useCallback(async () => {
     try {
@@ -255,6 +313,15 @@ export default function IntradayStocksPage() {
         <button className={tab === "patterns" ? "tab active" : "tab"} onClick={() => setTab("patterns")}>
           Patterns · {patSummary?.strategy_count ?? 504}
         </button>
+        {PATTERN_BOOKS.map((b) => (
+          <button
+            key={b.tab}
+            className={tab === b.tab ? "tab active" : "tab"}
+            onClick={() => setTab(b.tab)}
+          >
+            {b.label}
+          </button>
+        ))}
         {LIVE_BOOKS.map((b) => (
           <button
             key={b.key}
@@ -605,6 +672,166 @@ export default function IntradayStocksPage() {
                     <td>₹{inr2(p.target)}</td>
                     <td>₹{inr2(p.stoploss)}</td>
                     <td className={(p.unrealized_pnl ?? 0) >= 0 ? "gain" : "loss"}>{(p.unrealized_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(p.unrealized_pnl)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </GlassPanel>
+      </>
+      )}
+
+      {isPatternBook && (
+      <>
+      <div className="desk-banner">
+        <strong>PATTERN PAPER BOOK · ₹{inr(pbSummary?.desk_capital)}.</strong> The{" "}
+        <strong>{pbSummary?.strategies ?? 8} shortlisted pattern strategies</strong> run here on{" "}
+        ₹{inr(pbSummary?.per_strategy_allocation)} each. Both books trade the{" "}
+        <em>same signals at the same fills</em> as the Patterns desk — they mirror its entries and
+        exits rather than re-scanning, so any difference between ₹50k and ₹2 lakh is caused by{" "}
+        <strong>account size and nothing else</strong>. Sizing is whole shares and{" "}
+        <strong>P&amp;L is net of real Angel One costs</strong>, which is the point: a near-fixed
+        round-trip fee is a far heavier drag on the smaller book, and a slice that cannot buy one
+        share simply does not take the trade.
+      </div>
+
+      <div className="tiles">
+        <div className="tile"><div className="tile-label">Mode</div><div className="tile-value gain">PAPER</div><div className="tile-sub">{pbSummary?.enabled ? "mirrors the pattern desk" : "disabled"}</div></div>
+        <div className="tile"><div className="tile-label">Desk capital</div><div className="tile-value">₹{inr(pbSummary?.desk_capital)}</div><div className="tile-sub">{pbSummary?.strategies ?? 0} × ₹{inr(pbSummary?.per_strategy_allocation)}</div></div>
+        <div className="tile"><div className="tile-label">Equity</div><div className="tile-value">₹{inr2(pbSummary?.equity)}</div><div className="tile-sub">₹{inr2(pbSummary?.unrealized_pnl)} unrealised</div></div>
+        <div className="tile"><div className="tile-label">ROI</div><div className={`tile-value ${(pbSummary?.roi_pct ?? 0) >= 0 ? "gain" : "loss"}`}>{roiPct(pbSummary?.roi_pct, 4)}</div><div className="tile-sub">on ₹{inr(pbSummary?.desk_capital)} book</div></div>
+        <div className="tile"><div className="tile-label">Angel fees</div><div className="tile-value loss">−₹{inr2(pbSummary?.fees)}</div><div className="tile-sub">gross ₹{inr2(pbSummary?.gross_pnl)} before costs</div></div>
+        <div className="tile"><div className="tile-label">Open positions</div><div className="tile-value">{pbSummary?.open_positions ?? 0}</div><div className="tile-sub">₹{inr2(pbSummary?.deployed)} deployed</div></div>
+        <div className="tile"><div className="tile-label">Closed</div><div className="tile-value">{pbSummary?.closed_positions ?? 0}</div><div className="tile-sub">₹{inr2(pbSummary?.available_cash)} cash free</div></div>
+        <div className="tile">
+          <div className="tile-label">Couldn&rsquo;t afford</div>
+          <div className={`tile-value ${(pbSummary?.skipped_unaffordable ?? 0) > 0 ? "loss" : ""}`}>{pbSummary?.skipped_unaffordable ?? 0}</div>
+          <div className="tile-sub">signals this book had to skip</div>
+        </div>
+      </div>
+
+      <GlassPanel title={`The shortlist — ${pbSummary?.strategies ?? 8} strategies on ₹${inr(pbSummary?.per_strategy_allocation)} each`}>
+        <div className="table-wrap">
+          <table className="data-table">
+            <thead><tr>
+              <th style={{ textAlign: "left" }}>Strategy</th><th>TF</th><th>Family</th>
+              <th>Slice</th><th>Trades</th><th>Win %</th><th>Fees</th><th>Net P&amp;L</th><th>ROI</th>
+            </tr></thead>
+            <tbody>
+              {pbBoard.map((r) => (
+                <tr key={r.strategy_id}>
+                  <td style={{ textAlign: "left", fontSize: 11 }}>{r.template}</td>
+                  <td><span className="badge">{r.timeframe}</span></td>
+                  <td style={{ fontSize: 11 }}>{r.family}</td>
+                  <td>₹{inr(r.allocation)}</td>
+                  <td>{r.trades}</td>
+                  <td>{r.trades ? `${(r.win_rate * 100).toFixed(1)}%` : "—"}</td>
+                  <td className="loss">{r.fees ? `−₹${inr2(r.fees)}` : "—"}</td>
+                  <td className={r.net_pnl >= 0 ? "gain" : "loss"}>{r.trades ? `${r.net_pnl >= 0 ? "+" : ""}₹${inr2(r.net_pnl)}` : "—"}</td>
+                  <td className={r.roi_pct >= 0 ? "gain" : "loss"}>{r.trades ? roiPct(r.roi_pct, 3) : "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="feed-note">
+          ROI is on the strategy&rsquo;s own ₹{inr(pbSummary?.per_strategy_allocation)} slice, not on
+          the whole book — eight slices each quoting a desk-level return would sum to eight times
+          what the book actually made.
+        </div>
+      </GlassPanel>
+
+      <GlassPanel title={`Open positions (${pbOpen.length})`}>
+        {!pbOpen.length ? (
+          <div className="feed-note">
+            Nothing open. This book takes a position when the Patterns desk opens one of the
+            shortlisted strategies.
+          </div>
+        ) : (
+          <div className="table-wrap">
+            <table className="data-table">
+              <thead><tr>
+                <th style={{ textAlign: "left" }}>Strategy</th><th>TF</th><th>Symbol</th><th>Side</th>
+                <th>Qty</th><th>Entry</th><th>LTP</th><th>Target</th><th>Stop</th><th>Deployed</th><th>Unrealised</th>
+              </tr></thead>
+              <tbody>
+                {pbOpen.map((p) => (
+                  <tr key={p.position_id}>
+                    <td style={{ textAlign: "left", fontSize: 11 }}>{p.template}</td>
+                    <td><span className="badge">{p.timeframe}</span></td>
+                    <td>{p.symbol}</td>
+                    <td><span className={p.side === "SELL" ? "badge loss" : "badge"}>{p.side}</span></td>
+                    <td>{p.qty}</td>
+                    <td>₹{inr2(p.entry_price)}</td>
+                    <td>₹{inr2(p.ltp)}</td>
+                    <td>{p.target ? `₹${inr2(p.target)}` : "—"}</td>
+                    <td>{p.stoploss ? `₹${inr2(p.stoploss)}` : "—"}</td>
+                    <td>₹{inr2(p.capital_deployed)}</td>
+                    <td className={(p.unrealized_pnl ?? 0) >= 0 ? "gain" : "loss"}>{(p.unrealized_pnl ?? 0) >= 0 ? "+" : ""}₹{inr2(p.unrealized_pnl)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </GlassPanel>
+
+      {pbDeclined.length > 0 && (
+        <GlassPanel title={`Signals this book could not afford (${pbDeclined.length})`}>
+          <div className="feed-note">
+            The Patterns desk took these on ₹10 lakh per strategy. Here the slice could not buy a
+            single share, so the trade was declined rather than sized down — which is what a real
+            account of this size would have done.
+          </div>
+          <div className="table-wrap">
+            <table className="data-table">
+              <thead><tr>
+                <th style={{ textAlign: "left" }}>Strategy</th><th>TF</th><th>Symbol</th>
+                <th>Share price</th><th>Slice</th><th style={{ textAlign: "left" }}>Why</th>
+              </tr></thead>
+              <tbody>
+                {pbDeclined.slice(0, 40).map((p) => (
+                  <tr key={p.position_id}>
+                    <td style={{ textAlign: "left", fontSize: 11 }}>{p.template}</td>
+                    <td><span className="badge">{p.timeframe}</span></td>
+                    <td>{p.symbol}</td>
+                    <td>₹{inr2(p.entry_price)}</td>
+                    <td>₹{inr(p.allocation)}</td>
+                    <td style={{ textAlign: "left", fontSize: 11 }} className="loss">{p.decline_reason}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </GlassPanel>
+      )}
+
+      <GlassPanel title={`Closed trades (${pbTrades.length})`}>
+        {!pbTrades.length ? (
+          <div className="feed-note">No closed trades yet. Every close shows gross, the Angel fees taken, and the net kept.</div>
+        ) : (
+          <div className="table-wrap">
+            <table className="data-table">
+              <thead><tr>
+                <th style={{ textAlign: "left" }}>Strategy</th><th>TF</th><th>Symbol</th><th>Side</th>
+                <th>Qty</th><th>Entry</th><th>Exit</th><th>Gross</th><th>Fees</th><th>Net</th><th>Why</th><th>Closed</th>
+              </tr></thead>
+              <tbody>
+                {pbTrades.map((t) => (
+                  <tr key={t.trade_id}>
+                    <td style={{ textAlign: "left", fontSize: 11 }}>{t.template}</td>
+                    <td><span className="badge">{t.timeframe}</span></td>
+                    <td>{t.symbol}</td>
+                    <td><span className={t.side === "SELL" ? "badge loss" : "badge"}>{t.side}</span></td>
+                    <td>{t.qty}</td>
+                    <td>₹{inr2(t.entry_price)}</td>
+                    <td>₹{inr2(t.exit_price)}</td>
+                    <td className={t.gross_pnl >= 0 ? "gain" : "loss"}>{t.gross_pnl >= 0 ? "+" : ""}₹{inr2(t.gross_pnl)}</td>
+                    <td className="loss">−₹{inr2(t.fees)}</td>
+                    <td className={t.realized_pnl >= 0 ? "gain" : "loss"}>{t.realized_pnl >= 0 ? "+" : ""}₹{inr2(t.realized_pnl)}</td>
+                    <td><span className="badge">{t.exit_reason ?? "—"}</span></td>
+                    <td style={{ fontSize: 11 }}>{new Date(t.closed_at).toLocaleString("en-IN", { dateStyle: "short", timeStyle: "short" })}</td>
                   </tr>
                 ))}
               </tbody>

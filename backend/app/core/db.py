@@ -199,6 +199,18 @@ pattern_trades_collection = db["pattern_trades"]
 pattern_scores_collection = db["pattern_scores"]
 pattern_state_collection = db["pattern_state"]
 pattern_equity_collection = db["pattern_equity"]
+# Pattern Paper Books — two small curated books (Rs 50,000 and Rs 2,00,000) that trade a
+# SHORTLIST of the 548-strategy pattern desk above, mirroring its fills at a size a real
+# account would use. Separate collections because the question is different: the pattern
+# desk asks "does this template have an edge on this candle" with Rs 10 lakh behind every
+# strategy, these ask "does that edge survive whole-share rounding and a fixed fee on a
+# Rs 50,000 account". Summing the two books into the parent desk would be meaningless, so
+# they are never stored together.
+pattern_book_positions_collection = db["pattern_book_positions"]
+pattern_book_trades_collection = db["pattern_book_trades"]
+pattern_book_scores_collection = db["pattern_book_scores"]
+pattern_book_state_collection = db["pattern_book_state"]
+pattern_book_equity_collection = db["pattern_book_equity"]
 swing_watchlist_collection = db["swing_watchlist"]
 swing_positions_collection = db["swing_positions"]
 swing_trades_collection = db["swing_trades"]

@@ -6185,3 +6185,138 @@ export async function closeAllCommodityPrelive(symbol?: string) {
     method: "POST",
   });
 }
+
+// ---- Pattern Paper Books (the pattern shortlist at ₹50k and ₹2 lakh) -----------
+// Two paper books running the SAME eight shortlisted pattern strategies, differing only
+// in capital. They mirror the 548-strategy pattern desk's fills rather than re-scanning,
+// so any difference between them is caused by ACCOUNT SIZE and nothing else.
+const pbk = "/api/pattern-books";
+
+export type PatternBookKey = "50k" | "2L";
+
+export interface PatternBookSummary {
+  book: PatternBookKey;
+  books: PatternBookKey[];
+  label: string;
+  book_capitals: Record<string, number>;
+  book_labels: Record<string, string>;
+  mode: string;
+  enabled: boolean;
+  desk_capital: number;
+  strategies: number;
+  per_strategy_allocation: number;
+  equity: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  gross_pnl: number;
+  fees: number;
+  deployed: number;
+  available_cash: number;
+  open_positions: number;
+  closed_positions: number;
+  roi_pct: number;
+  skipped_unaffordable: number;
+  last_skip: string | null;
+  last_run_at: string | null;
+  source: string;
+}
+
+export interface PatternBookScore {
+  strategy_id: string;
+  name: string;
+  template: string;
+  family: string;
+  timeframe: string;
+  style: string;
+  allocation: number;
+  trades: number;
+  win_rate: number;
+  gross_pnl: number;
+  fees: number;
+  net_pnl: number;
+  roi_pct: number;
+  open_positions: number;
+}
+
+export interface PatternBookPosition {
+  position_id: string;
+  book: PatternBookKey;
+  parent_position_id: string;
+  strategy_id: string;
+  strategy_name: string;
+  template: string;
+  family: string;
+  timeframe: string;
+  style: string;
+  symbol: string;
+  side: string;
+  entry_price: number;
+  qty: number;
+  capital_deployed: number;
+  allocation: number;
+  target: number | null;
+  stoploss: number | null;
+  ltp: number;
+  unrealized_pnl: number;
+  realized_pnl: number | null;
+  gross_pnl: number | null;
+  fees: number | null;
+  exit_price: number | null;
+  exit_reason: string | null;
+  status: "OPEN" | "CLOSED" | "DECLINED";
+  decline_reason?: string | null;
+  opened_at: string;
+  closed_at: string | null;
+}
+
+export interface PatternBookTrade {
+  trade_id: string;
+  book: PatternBookKey;
+  strategy_name: string;
+  template: string;
+  timeframe: string;
+  symbol: string;
+  side: string;
+  entry_price: number;
+  exit_price: number;
+  qty: number;
+  gross_pnl: number;
+  fees: number;
+  realized_pnl: number;
+  exit_reason: string | null;
+  closed_at: string;
+}
+
+export async function fetchPatternBookSummary(book: PatternBookKey): Promise<PatternBookSummary> {
+  return apiFetch(`${pbk}/summary?book=${book}`);
+}
+
+export async function fetchPatternBookLeaderboard(book: PatternBookKey): Promise<{
+  book: PatternBookKey;
+  rows: PatternBookScore[];
+  total: number;
+  per_strategy_allocation: number;
+  note: string;
+}> {
+  return apiFetch(`${pbk}/leaderboard?book=${book}`);
+}
+
+export async function fetchPatternBookPositions(
+  book: PatternBookKey,
+  status: "OPEN" | "CLOSED" | "ALL" = "OPEN",
+): Promise<PatternBookPosition[]> {
+  const r = await apiFetch(`${pbk}/positions?book=${book}&status=${status}`);
+  return r.positions ?? [];
+}
+
+export async function fetchPatternBookTrades(
+  book: PatternBookKey,
+  limit = 60,
+): Promise<PatternBookTrade[]> {
+  const r = await apiFetch(`${pbk}/trades?book=${book}&limit=${limit}`);
+  return r.trades ?? [];
+}
+
+export async function runPatternBooksCycle() {
+  return apiFetch(`${pbk}/run`, { method: "POST" });
+}
