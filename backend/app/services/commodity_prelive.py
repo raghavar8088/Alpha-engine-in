@@ -361,6 +361,39 @@ async def admissions(fresh: bool = False) -> dict:
                     f"Cleared the paper gate on {sym}'s own {row['trades']} trades.",
                 }
 
+    # OWN-RECORD OVERRIDE, applied after either branch above. Once THIS desk has traded a
+    # (contract, strategy) pair itself for the minimum a verdict needs, its own real fills
+    # on its own book are stronger evidence than anything the paper desk — blended
+    # OR per-contract — can offer about that exact contract. This is the whole premise of
+    # the desk: a record proved elsewhere can be wrong here. So an own REJECTED verdict
+    # revokes the seat regardless of why it was granted, and an own READY verdict simply
+    # becomes the stated reason, replacing whatever inherited or blended evidence got the
+    # strategy in the door. Caught live: CRUDEOILM's "Hammer / Shooting Star 15m" was
+    # admitted from CRUDEOIL's paper record, then rejected on its own 31 mini-contract
+    # trades (PF 0.52, t-stat -1.74) — and kept trading regardless, until this existed.
+    own_scores = {(sc["strategy_id"], sc["symbol"]): sc
+                  async for sc in commodity_prelive_scores_collection.find(
+                      {"trades": {"$gte": MIN_TRADES_FOR_VERDICT}})}
+    for sym in universe:
+        for sid in list(per[sym]):
+            own = own_scores.get((sid, sym))
+            if not own:
+                continue
+            if own.get("verdict") != "READY":
+                del per[sym][sid]
+                continue
+            per[sym][sid] = {
+                "basis": "own_record", "source_symbol": sym,
+                "trades": own["trades"], "win_rate": own.get("win_rate", 0.0),
+                "net_pnl": own.get("net_pnl", 0.0), "profit_factor": own.get("profit_factor"),
+                "expectancy": own.get("expectancy", 0.0),
+                "max_drawdown_pct": own.get("max_drawdown_pct", 0.0), "t_stat": own.get("t_stat"),
+                "why": (f"This desk's own {own['trades']} whole-lot trades on {sym} at "
+                        f"Rs {SCRIPT_CAPITAL:,.0f} clear the gate directly — the strongest "
+                        "evidence available, and it has replaced whatever got the strategy "
+                        "in the door."),
+            }
+
     out = {"mode": mode, "per_symbol": per,
            "counts": {s: len(per[s]) for s in universe},
            "total": sum(len(v) for v in per.values())}
