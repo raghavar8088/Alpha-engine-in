@@ -572,10 +572,16 @@ async def _angel_close_on(inst: dict, on_date: str) -> float | None:
     """One daily candle for THIS contract's own token, from Angel, on or just before
     `on_date`.
 
-    The exchange-correct source, and the only one specific to the contract: Angel serves
-    history for an expired token even though it will not quote one. Paced against the same
-    lock the commodity bar poller holds, because that endpoint answers five of eight unpaced
-    calls with a 403 and two pacers racing each other would be no pacer at all."""
+    The exchange-correct source, and the only one specific to the contract. It is tried
+    first and it often MISSES: measured against the live board on 2026-09-23, Angel served
+    nothing at all for CRUDEOILM's expired 21-Sep future over any September window, and its
+    history for that token stopped on 19 August — a month before the contract stopped
+    trading. So this is a best case, not a reliable one, and everything below it exists
+    because it fails.
+
+    Paced against the same lock the commodity bar poller holds, because that endpoint
+    answers five of eight unpaced calls with a 403 and two pacers racing each other would be
+    no pacer at all."""
     token = inst.get("angel_token")
     if not token:
         return None
@@ -613,24 +619,29 @@ async def _angel_close_on(inst: dict, on_date: str) -> float | None:
 
 
 async def _store_close_on(symbol: str, on_date: str,
-                          want_expiry: str | None) -> tuple[float, str] | None:
-    """The commodity bar store's daily close on `on_date` — IF it is the right contract.
+                          want_expiry: str | None) -> tuple[float, str, str | None] | None:
+    """(close, the IST date it belongs to, which contract it is) from the bar store.
 
-    The store is keyed by UNDERLYING and holds whatever was front month when the poller last
-    ran, and the poller re-upserts its WHOLE history every pass. So a bar dated on a past
-    expiry day carries today's front month, not the contract that was trading then, and
-    using it blind would settle a September option against an October future. The bar's own
-    expiry has to be the one being settled against; checked, not assumed. That holds in the
-    case this path exists for — an option closed inside its own future's cycle, which on MCX
-    is most of them, since the option expires before the future it is written on."""
+    `want_expiry` filters to one contract; None accepts whichever contract the store holds.
+    That distinction is the whole reason both calls exist. The store is keyed by UNDERLYING
+    and holds whatever was front month when the poller last ran, and the poller re-upserts
+    its WHOLE history every pass — so a bar dated on a past expiry day carries TODAY's front
+    month, not the contract that was trading then. Verified on the live store: every
+    CRUDEOILM bar for 2026-09-17 now carries `expiry 2026-10-19`, although the contract
+    trading that day was the September one. The caller therefore has to decide whether it
+    wants the right contract or merely the right day, and say which in the basis.
+
+    The window is built from IST MIDNIGHTS, not UTC ones. Angel stamps a daily candle
+    `2026-09-17T00:00:00+05:30`, which is 18:30 UTC on the 16th, so a UTC-midnight window
+    straddles two sessions and returns the NEXT day's bar — 9,664 for the 18th where the
+    17th closed at 9,752. Off-by-one-day on a settlement price is not a rounding error."""
     try:
         target = datetime.strptime(on_date, "%Y-%m-%d").date()
     except (TypeError, ValueError):
         return None
     floor = datetime.combine(target - timedelta(days=SETTLE_LOOKBACK_DAYS),
-                             datetime.min.time(), tzinfo=timezone.utc)
-    ceil = datetime.combine(target + timedelta(days=1),
-                            datetime.min.time(), tzinfo=timezone.utc)
+                             datetime.min.time(), tzinfo=IST)
+    ceil = datetime.combine(target + timedelta(days=1), datetime.min.time(), tzinfo=IST)
     async for doc in commodity_bars_collection.find(
             {"symbol": symbol.upper(), "timeframe": "1d",
              "ts": {"$gte": floor, "$lt": ceil}}).sort("ts", -1):
@@ -645,13 +656,25 @@ async def _store_close_on(symbol: str, on_date: str,
             day = ts.astimezone(IST).date().isoformat()
         else:
             day = target.isoformat()
-        return float(doc["close"]), day
+        return float(doc["close"]), day, (str(doc["expiry"]) if doc.get("expiry") else None)
     return None
 
 
 async def settlement_ref(symbol: str, on_date: str) -> tuple[float, str] | None:
     """(price, basis) for the underlying future on `on_date` — the number an option
     expiring that day settles against, and where it came from.
+
+    THE RIGHT DAY BEATS THE RIGHT CONTRACT, and that ordering is the entire point. A
+    settlement asks what the leg was worth ON EXPIRY DAY. Two kinds of substitute exist when
+    the exact contract's close cannot be had: another contract on the SAME day, which is
+    wrong by the calendar spread — tens of points — or the same contract on a LATER day,
+    which is wrong by everything the underlying has done since. Measured on the live board
+    on 2026-09-23: CRUDEOILM's October future closed at 9,752 on the 17th, the day the
+    options expired, and traded at 8,576 six days later. Settling a short 8350 call against
+    the later number would have valued a leg that expired 1,402 in the money at 226, and
+    booked a 3.3 lakh profit out of a crash the position was never exposed to. So a stale
+    contract on the right day is used, and named; a fresh price on the wrong day is not
+    used here at all.
 
     Cached, because a close on a day that has already happened does not change and both
     callers would otherwise keep asking: the mark-to-market pass runs every twenty seconds
@@ -662,26 +685,49 @@ async def settlement_ref(symbol: str, on_date: str) -> tuple[float, str] | None:
     if time.monotonic() - _SETTLE_MISSES.get(key, 0.0) < SETTLE_MISS_TTL_S:
         return None
 
+    def hit(px: float, basis: str) -> tuple[float, str]:
+        _SETTLE_CACHE[key] = (round(px, 2), basis)
+        return _SETTLE_CACHE[key]
+
+    # ---- 1. exact: the contract the option was written on, on the day it expired --------
     fut = await _settlement_future(symbol, on_date)
+    want = (fut or {}).get("expiry")
     if fut is not None:
         px = await _angel_close_on(fut, on_date)
         if px:
-            out = (round(px, 2),
-                   f"the {fut.get('expiry')} {symbol} future's {px:,.2f} settlement close "
-                   f"for {on_date}")
-            _SETTLE_CACHE[key] = out
-            return out
+            return hit(px, f"the {want} {symbol} future's {px:,.2f} settlement close "
+                           f"for {on_date}")
+        exact = await _store_close_on(symbol, on_date, want)
+        if exact:
+            px, day, _ = exact
+            return hit(px, f"the {want} {symbol} future's {px:,.2f} close on {day}, from "
+                           "this desk's own bar store")
 
-    stored = await _store_close_on(symbol, on_date, (fut or {}).get("expiry"))
-    if stored:
-        px, day = stored
-        out = (px, f"the {symbol} front-month future's {px:,.2f} close on {day}, from this "
-                   "desk's own bar store")
-        _SETTLE_CACHE[key] = out
-        return out
+    # ---- 2. right day, whichever contract the data is for -------------------------------
+    near = await _store_close_on(symbol, on_date, None)
+    if near:
+        px, day, bar_expiry = near
+        return hit(px, _near_basis(symbol, px, day, bar_expiry, want))
+
+    live = await underlying_future(symbol)
+    if live is not None and str(live.get("expiry")) != str(want):
+        px = await _angel_close_on(live, on_date)
+        if px:
+            return hit(px, _near_basis(symbol, px, on_date, live.get("expiry"), want))
 
     _SETTLE_MISSES[key] = time.monotonic()
     return None
+
+
+def _near_basis(symbol: str, px: float, day: str,
+                used_expiry: str | None, wanted_expiry: str | None) -> str:
+    """Basis line for a close taken from the right DAY but a different contract."""
+    if not used_expiry or str(used_expiry) == str(wanted_expiry):
+        return f"the {symbol} future's {px:,.2f} close on {day}"
+    return (f"the {used_expiry} {symbol} future's {px:,.2f} close on {day} — the "
+            f"{wanted_expiry} contract this leg was written on is not served for that day, "
+            "so this is a different contract on the RIGHT day, which differs by the "
+            "calendar spread rather than by everything the market has done since")
 
 
 async def settlement_price(inst: dict, last_mark: float | None = None) -> tuple[float, str]:
@@ -705,7 +751,7 @@ async def settlement_price(inst: dict, last_mark: float | None = None) -> tuple[
                                   "its last trading day")
         stored = await _store_close_on(symbol, expiry, expiry)
         if stored:
-            close_px, day = stored
+            close_px, day, _ = stored
             return close_px, f"settled at the {symbol} future's {close_px:,.2f} close on {day}"
         if last_mark:
             return round(float(last_mark), 2), (
@@ -719,31 +765,34 @@ async def settlement_price(inst: dict, last_mark: float | None = None) -> tuple[
     strike = float(inst.get("strike") or 0)
     option_type = str(inst.get("option_type") or "").upper()
 
-    ref, ref_basis = None, ""
     settled = await settlement_ref(symbol, expiry)
     if settled:
         ref, ref_basis = settled
-    else:
-        # Last resort for the reference itself: a LIVE future, quoted now. It is a different
-        # contract at a different moment from the one the exchange settled against, and the
-        # basis says so rather than passing it off as a settlement price.
-        live, fut = await future_price(symbol, expiry)
-        if live:
-            ref = live
-            ref_basis = (f"the {(fut or {}).get('expiry', '')} {symbol} future at {live:,.2f} "
-                         "NOW — no settlement close could be found for the expiry day, so "
-                         "this is a later price on a later contract, not the exchange's")
-
-    if ref is not None:
         intrinsic = max(0.0, ref - strike) if option_type == "CE" else max(0.0, strike - ref)
         return round(intrinsic, 2), (
             f"settled at its {intrinsic:,.2f} intrinsic value against {ref_basis}")
 
+    # Nothing dated anywhere near the expiry. What is left is a choice between two poor
+    # numbers, and the option's OWN last recorded price is the less poor of them: it is a
+    # price this contract actually traded at, close to when it stopped trading. The
+    # underlying quoted today is not — it is a number from after the position ceased to
+    # exist, and using it is how a settlement invents a profit or a loss out of a move the
+    # position never saw. Both are labelled, loudly, as what they are.
     if last_mark:
         return round(float(last_mark), 2), (
-            f"settled at {float(last_mark):,.2f} — the last price this desk recorded before "
-            f"{symbol} {expiry} expired. No futures settlement price was available to take "
-            "intrinsic value against, so this is a recorded mark, not an exchange number.")
+            f"settled at {float(last_mark):,.2f} — the last price this desk recorded for "
+            f"{symbol} {expiry} {strike:g}{option_type} before it expired. NOT an exchange "
+            "settlement: no close could be found for the expiry day, so this is a recorded "
+            "mark of the contract itself, which may be stale by hours or days.")
+
+    live, fut = await future_price(symbol, expiry)
+    if live:
+        intrinsic = max(0.0, live - strike) if option_type == "CE" else max(0.0, strike - live)
+        return round(intrinsic, 2), (
+            f"settled at {intrinsic:,.2f} against the {(fut or {}).get('expiry', '')} "
+            f"{symbol} future at {live:,.2f} NOW — a LAST RESORT and probably wrong. It is a "
+            f"price from after {expiry}, on a contract this leg was not written on, and the "
+            "underlying has moved since. Treat the realised P&L on this leg as an estimate.")
 
     raise OrderError(
         f"{symbol} {expiry} {strike:g}{option_type} expired and no futures settlement price, "

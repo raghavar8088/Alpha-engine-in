@@ -18,12 +18,17 @@ What has to hold, in the order the price is looked for:
     source specific to the contract, and the one the exchange itself settles against
   * that close is asked for ONCE and cached, because the mark-to-market pass runs every
     twenty seconds against an endpoint that throttles at one request every three
-  * the bar store is second, and only when its bar is the RIGHT contract: the poller
-    re-upserts its whole history against today's front month, so a bar dated on a past
-    expiry day carries October's future, not the September one that settled the option
-  * a live future is third, and the fill says plainly that it is a later price on a later
-    contract rather than passing it off as a settlement
-  * the last mark this desk recorded is fourth, and says it is a recorded mark
+  * THE RIGHT DAY BEATS THE RIGHT CONTRACT. When the exact contract's close cannot be had
+    — and on the live board it usually cannot; Angel served nothing for CRUDEOILM's expired
+    September future — a different contract's close ON THE EXPIRY DAY is used ahead of any
+    price from later, and the basis names the substitution. The error is then a calendar
+    spread instead of everything the market has done since. Measured: October closed 9,752
+    on expiry day and 8,576 six days later, so the later price valued a leg that expired
+    1,402 in the money at 226
+  * the day window is IST, not UTC — Angel stamps a daily candle at IST midnight, so a UTC
+    window returns the FOLLOWING session's bar
+  * below that, the option's OWN last recorded price beats the underlying quoted today, and
+    the underlying quoted today is a last resort that says so in the fill
   * with nothing at all, the close is REFUSED rather than priced at an invented level
   * a LIVE contract Angel merely failed to quote is still refused — the original guard is
     intact, it just no longer fires on contracts that can never be quoted again
@@ -155,10 +160,12 @@ class FakeCollection:
 class FakeAngel:
     """Angel with a quote list and a candle list, kept separate on purpose.
 
-    That separation is the whole point: the real Angel will not QUOTE a token whose contract
-    has expired but will still serve its HISTORY, and every fallback below turns on which of
-    the two answers. A token absent from `prices` simply does not come back in the quote
-    response, which is exactly what an expired one does."""
+    That separation is the whole point: quotes and history fail independently, and every
+    fallback below turns on which of the two answers. A token absent from `prices` simply
+    does not come back in the quote response, which is exactly what an expired one does.
+    A token absent from `candles` returns no rows — which, measured on the live board, is
+    also what an expired MCX future does, so the scenarios that leave `candles` empty are
+    the REALISTIC ones rather than the edge cases."""
 
     def __init__(self, prices: dict[str, float] | None = None,
                  candles: dict[str, list[list]] | None = None):
@@ -188,7 +195,8 @@ LIVE_FUT_EXPIRY = (TODAY + timedelta(days=25)).isoformat()
 LIVE_OPT_EXPIRY = (TODAY + timedelta(days=20)).isoformat()
 STRIKE = 8350.0
 SETTLE_CLOSE = 8214.0                 # the future's close on the option's expiry day
-LIVE_FUT_PX = 8600.0                  # a different, later price
+LIVE_FUT_PX = 8600.0                  # the SAME contract days later, after a crash
+EXPIRY_DAY_CLOSE = 9752.0             # the front-month close ON the expiry day
 
 
 def option_inst(expiry=OPT_EXPIRY, option_type="PE", token="990001"):
@@ -205,7 +213,10 @@ def future_inst(expiry, token):
 
 
 def daily_bar(day: str, close: float, expiry: str, symbol: str = SYMBOL):
-    ts = datetime.strptime(day, "%Y-%m-%d").replace(hour=9, tzinfo=IST)
+    # IST MIDNIGHT, which is how Angel stamps a daily candle and therefore how the poller
+    # stores one: "2026-09-17T00:00:00+05:30" is 18:30 UTC on the 16th. Getting this wrong
+    # in the fixture would hide the very off-by-one the window has to defend against.
+    ts = datetime.strptime(day, "%Y-%m-%d").replace(hour=0, tzinfo=IST)
     return {"symbol": symbol, "timeframe": "1d", "ts": ts.astimezone(timezone.utc),
             "open": close, "high": close, "low": close, "close": close,
             "volume": 1, "expiry": expiry}
@@ -306,13 +317,57 @@ async def check_store_used_when_right() -> None:
           "bar store" in basis, basis)
 
 
-async def check_live_future_fallback() -> None:
-    print("\nsettlement — no close at all, so the live future, said plainly")
+async def check_right_day_beats_right_contract() -> None:
+    print("\nsettlement — the RIGHT DAY beats the right contract")
+    # The real 2026-09-23 failure. Angel serves nothing for the expired September future, so
+    # its own close cannot be had. What remains is a choice between October's close ON the
+    # expiry day (wrong contract, right day — off by the calendar spread) and October quoted
+    # NOW (right contract, wrong day — off by a 12% crash that happened AFTER the option
+    # expired). Taking the later price valued a leg that expired 1,402 in the money at 226,
+    # and booked a 3.3 lakh profit out of a move the position never saw.
+    install(bars=[daily_bar(OPT_EXPIRY, EXPIRY_DAY_CLOSE, LIVE_FUT_EXPIRY)],
+            instruments=INSTRUMENTS, prices={"880002": LIVE_FUT_PX}, candles={})
+    px, basis = await cp.settlement_price(option_inst(option_type="CE"), last_mark=500.0)
+    check("a short call settles on the EXPIRY DAY's close, not today's",
+          px == EXPIRY_DAY_CLOSE - STRIKE, f"{px} vs {EXPIRY_DAY_CLOSE - STRIKE}")
+    check("it is NOT the live price, which would say 250",
+          px != max(0.0, LIVE_FUT_PX - STRIKE), f"{px}")
+    check("the basis names the substitute contract and why it is the lesser error",
+          LIVE_FUT_EXPIRY in basis and "calendar spread" in basis, basis)
+
+
+async def check_ist_window() -> None:
+    print("\nsettlement — the day window is IST, so it cannot grab the NEXT day's bar")
+    # Angel stamps daily candles at IST midnight, so a UTC-midnight window straddles two
+    # sessions and hands back the day AFTER the one asked for. On the live board that was
+    # 9,664 for the 18th where the 17th closed at 9,752.
+    day_after = (TODAY - timedelta(days=5)).isoformat()
+    install(bars=[daily_bar(OPT_EXPIRY, EXPIRY_DAY_CLOSE, LIVE_FUT_EXPIRY),
+                  daily_bar(day_after, 9664.0, LIVE_FUT_EXPIRY)],
+            instruments=INSTRUMENTS, prices={"880002": LIVE_FUT_PX}, candles={})
+    px, _ = await cp.settlement_price(option_inst(option_type="CE"), last_mark=500.0)
+    check("it takes the expiry day's close", px == EXPIRY_DAY_CLOSE - STRIKE, f"{px}")
+    check("not the following session's", px != 9664.0 - STRIKE, f"{px}")
+
+
+async def check_last_mark_beats_live_future() -> None:
+    print("\nsettlement — with no dated close, the contract's OWN last price beats the "
+          "underlying quoted today")
     install(bars=[], instruments=INSTRUMENTS, prices={"880002": LIVE_FUT_PX}, candles={})
     px, basis = await cp.settlement_price(option_inst(option_type="CE"), last_mark=500.0)
-    check("intrinsic is taken against the live future", px == LIVE_FUT_PX - STRIKE, f"{px}")
-    check("the basis admits it is a later price on a LATER CONTRACT",
-          "NOW" in basis and "later contract" in basis, basis)
+    check("the option's own recorded mark wins", px == 500.0, f"{px}")
+    check("and the basis refuses to call it an exchange settlement",
+          "NOT an exchange settlement" in basis, basis)
+
+
+async def check_live_future_last_resort() -> None:
+    print("\nsettlement — the live future is the LAST resort, and says so")
+    install(bars=[], instruments=INSTRUMENTS, prices={"880002": LIVE_FUT_PX}, candles={})
+    px, basis = await cp.settlement_price(option_inst(option_type="CE"), last_mark=None)
+    check("with no mark either, it falls to the live future", px == LIVE_FUT_PX - STRIKE,
+          f"{px}")
+    check("the basis calls it a last resort and probably wrong",
+          "LAST RESORT" in basis and "probably wrong" in basis, basis)
 
 
 async def check_last_mark_fallback() -> None:
@@ -426,7 +481,10 @@ async def go() -> None:
     await check_cached()
     await check_wrong_contract_ignored()
     await check_store_used_when_right()
-    await check_live_future_fallback()
+    await check_right_day_beats_right_contract()
+    await check_ist_window()
+    await check_last_mark_beats_live_future()
+    await check_live_future_last_resort()
     await check_last_mark_fallback()
     await check_refuses_with_nothing()
     await check_future_settlement()
