@@ -846,8 +846,12 @@ export default function IntradayStocksPage() {
       <>
       <div className="desk-banner">
         <strong>LIVE INTRADAY · ₹{bookCapital.toLocaleString("en-IN")} PAPER.</strong> The same 8-strategy
-        shortlist runs in three books that differ only in capital — ₹80k, ₹30k and ₹10k — each strategy on
-        ₹{inr(liveSummary?.per_strategy_allocation)} here. Six are <strong>ANTI</strong> strategies: this desk places
+        shortlist runs in three books that differ only in capital — ₹80k, ₹30k and ₹10k — each strategy opening
+        on ₹{inr(liveSummary?.per_strategy_allocation)} here, which is also its cap on any ONE position.
+        A strategy may hold several positions at once (one per symbol) and{" "}
+        <strong>reinvests its own realised profit</strong>, so deployed capital can exceed the
+        ₹{inr(liveSummary?.initial_capital)} the desk opened with — what it can never exceed is current
+        equity. Six are <strong>ANTI</strong> strategies: this desk places
         the <em>real reverse trade</em> (opposite side, stop/target swapped), not a computed mirror.{" "}
         <strong>P&amp;L is net of real Angel One costs</strong> — brokerage, STT, exchange and SEBI charges, stamp
         duty, GST, and a DP charge on delivery exits. On a book this small a signal must clear roughly
@@ -857,13 +861,13 @@ export default function IntradayStocksPage() {
       <div className="tiles">
         <div className="tile"><div className="tile-label">Mode</div><div className="tile-value gain">PAPER</div><div className="tile-sub">{liveSummary?.paused ? "entries paused" : "armed · live Angel feed"}</div></div>
         <div className="tile"><div className="tile-label">Equity</div><div className="tile-value">₹{inr(liveSummary?.equity)}</div><div className="tile-sub">from ₹{inr(liveSummary?.initial_capital)} ({liveSummary?.strategy_count ?? 8} × ₹{inr(liveSummary?.per_strategy_allocation)})</div></div>
-        <div className="tile"><div className="tile-label">ROI</div><div className={`tile-value ${(liveSummary?.roi_pct ?? 0) >= 0 ? "gain" : "loss"}`}>{roiPct(liveSummary?.roi_pct, 2)}</div><div className="tile-sub">on ₹{inr(liveSummary?.initial_capital)} desk capital</div></div>
+        <div className="tile"><div className="tile-label">ROI</div><div className={`tile-value ${(liveSummary?.roi_pct ?? 0) >= 0 ? "gain" : "loss"}`}>{roiPct(liveSummary?.roi_pct, 2)}</div><div className="tile-sub">compounded, on the ₹{inr(liveSummary?.initial_capital)} opened with</div></div>
         <div className="tile"><div className="tile-label">Today P&amp;L</div><div className={`tile-value ${(liveSummary?.today_pnl ?? 0) >= 0 ? "gain" : "loss"}`}>{(liveSummary?.today_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(liveSummary?.today_pnl)}</div><div className="tile-sub">{roiPct(liveSummary?.today_roi_pct, 3)} today · breaker at −₹{inr(liveSummary?.daily_loss_limit)}</div></div>
         <div className="tile"><div className="tile-label">Realised P&amp;L</div><div className={`tile-value ${(liveSummary?.realized_pnl ?? 0) >= 0 ? "gain" : "loss"}`}>{(liveSummary?.realized_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(liveSummary?.realized_pnl)}</div><div className="tile-sub">{liveSummary?.closed_positions ?? 0} trades closed</div></div>
         <div className="tile"><div className="tile-label">Angel fees paid</div><div className="tile-value loss">−₹{inr(liveSummary?.total_fees)}</div><div className="tile-sub">gross ₹{inr(liveSummary?.gross_realized_pnl)} before costs</div></div>
         <div className="tile"><div className="tile-label">Open positions</div><div className="tile-value">{liveSummary?.open_positions ?? 0}</div><div className="tile-sub">₹{inr(liveSummary?.unrealized_pnl)} unrealised</div></div>
-        <div className="tile"><div className="tile-label">Deployed</div><div className="tile-value">₹{inr(liveSummary?.deployed_capital)}</div><div className="tile-sub">₹{inr(liveSummary?.available_cash)} free</div></div>
-        <div className="tile"><div className="tile-label">Strategies</div><div className="tile-value">{liveSummary?.strategy_count ?? 0}</div><div className="tile-sub">₹{inr(liveSummary?.position_notional)} / position</div></div>
+        <div className="tile"><div className="tile-label">Deployed</div><div className="tile-value">₹{inr(liveSummary?.deployed_capital)}</div><div className="tile-sub">of ₹{inr(liveSummary?.equity)} equity · ₹{inr(liveSummary?.available_cash)} free</div></div>
+        <div className="tile"><div className="tile-label">Strategies</div><div className="tile-value">{liveSummary?.strategy_count ?? 0}</div><div className="tile-sub">max ₹{inr(liveSummary?.position_notional)} per position, {liveSummary?.open_positions ?? 0} open now</div></div>
       </div>
 
       <GlassPanel title="Selected strategies">
