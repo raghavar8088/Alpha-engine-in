@@ -428,18 +428,30 @@ async def _place_angel_order(inst: dict, side: str, qty: int) -> str | None:
     return str(oid)
 
 
-async def _open_position(ls, symbol: str, inst: dict, signal, ltp_source: str) -> bool:
+async def _open_position(ls, symbol: str, inst: dict, signal, ltp_source: str,
+                         fill_price: float | None = None) -> bool:
+    """Place one REAL order. Sized on the live quote, never on the signal's bar price.
+
+    The paper twin sized on `signal.entry`, a daily bar's price that does not move
+    intraday, and that produced positions opened at levels the market had long left (see
+    `live_intraday_engine._open_position`). Here the consequence would be a real order for
+    the wrong QUANTITY and a Rs 10,000 cap measured against a price nobody is trading at,
+    so the market price is used when one is available."""
     if symbol in _refused_symbols:
         return False          # already declined by the exchange this session
     if await live_trading_positions_collection.find_one(
         {"strategy_id": ls.strategy_id, "symbol": symbol, "status": "OPEN"}
     ):
         return False  # one open position per symbol per strategy
+    sig_entry = float(signal.entry or 0.0)
+    ref = float(fill_price or 0.0) or sig_entry
+    if ref <= 0:
+        return False
     cash = await _available_cash(ls.strategy_id)
-    qty = _size(signal.entry, POSITION_NOTIONAL, cash)
+    qty = _size(ref, POSITION_NOTIONAL, cash)
     if qty < 1:
         return False
-    new_notional = signal.entry * qty
+    new_notional = ref * qty
     # ₹80k desk-wide ceiling (the per-strategy ₹10k cap is already in `cash` above)
     if await _desk_deployed() + new_notional > DESK_CEILING + 1:
         return False
@@ -463,14 +475,14 @@ async def _open_position(ls, symbol: str, inst: dict, signal, ltp_source: str) -
             "angel_token": inst.get("angel_token"), "angel_exchange": inst.get("angel_exchange"),
             "angel_tradingsymbol": inst.get("angel_tradingsymbol"),
         },
-        "side": signal.side, "entry_price": round(signal.entry, 2), "qty": qty,
+        "side": signal.side, "entry_price": round(ref, 2), "qty": qty,
         # `entry_price` is provisional until reconcile_fills() replaces it with the real
         # fill; `signal_price` preserves what the strategy actually asked for.
         "signal_price": round(signal.entry, 2),
         "entry_fill_price": None, "exit_fill_price": None, "entry_slippage": None,
-        "capital_deployed": round(signal.entry * qty, 2),
+        "capital_deployed": round(ref * qty, 2),
         "target": round(signal.target, 2), "stoploss": round(signal.stoploss, 2),
-        "ltp": round(signal.entry, 2), "ltp_source": ltp_source,
+        "ltp": round(ref, 2), "ltp_source": ltp_source,
         "unrealized_pnl": 0.0, "pnl_pct": 0.0, "realized_pnl": None,
         "exit_price": None, "exit_reason": None, "status": "OPEN",
         "confidence": round(signal.confidence, 2), "rationale": signal.rationale,
@@ -480,8 +492,8 @@ async def _open_position(ls, symbol: str, inst: dict, signal, ltp_source: str) -
         # is not reconciled into this ledger in v1 (matches the app's existing LiveExecutor).
         "opened_at": _now(), "opened_on": _today_ist().isoformat(), "updated_at": _now(), "closed_at": None,
     })
-    logger.warning("[live_trading] REAL ENTRY %s %s x%s @~%.2f (order %s)",
-                   signal.side, symbol, qty, signal.entry, order_id)
+    logger.warning("[live_trading] REAL ENTRY %s %s x%s @~%.2f (signal %.2f, order %s)",
+                   signal.side, symbol, qty, ref, sig_entry, order_id)
     return True
 
 
@@ -524,6 +536,14 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
         notes.append(f"Past the {ENTRY_CUTOFF_HHMM} IST entry cutoff — no new entries; open positions still managed.")
 
     opened = 0
+    # ONE REAL ENTRY PER (strategy, symbol) PER BAR. A swing strategy reads DAILY bars,
+    # which do not change during the session, so without this the same unchanged signal
+    # is re-offered on every tick — on the paper twin that turned one SBIN setup into 183
+    # round trips. Here each repeat would be a REAL order at the broker.
+    bar_state = await live_trading_state_collection.find_one({"_id": "entry_bars"}) or {}
+    last_entry_bar: dict = bar_state.get("last", {})
+    fresh_bars: dict[str, str] = {}
+
     for symbol, score, reasons, atr14, bars in scored:
         inst = equities.get(symbol)
         if inst is None or atr14 <= 0 or len(bars) < 2:
@@ -532,6 +552,11 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
         quote = quotes.get(key)
         ltp_source = quote_source.get(key, "last_bar_close")
         ctx = {"bars": bars, "atr14": atr14, "quote": quote, "prev_bar": bars[-2]}
+        bar_ts = str(getattr(bars[-1], "ts", None) or (
+            bars[-1].get("ts") if isinstance(bars[-1], dict) else ""))
+        fill_price = None
+        if quote:
+            fill_price = float(quote.get("ltp") or quote.get("last_price") or 0.0) or None
         for ls in SELECTED:
             if not enabled.get(ls.strategy_id, True):
                 continue  # this strategy is disabled for real trading
@@ -539,6 +564,9 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
                 continue
             if quote is None:
                 continue  # a real MARKET order needs a live quote to size and to be fillable
+            guard = f"{ls.strategy_id}:{symbol}"
+            if bar_ts and last_entry_bar.get(guard) == bar_ts:
+                continue  # already acted on this bar — never re-order it on the next tick
             signal = _live_signal(ls, symbol, ctx)
             if signal is None:
                 continue
@@ -546,9 +574,23 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
             live = await get_state()
             if not live["armed"] or live["kill_switch"]:
                 notes.append("Desk was disarmed / kill-switched mid-scan — stopped placing new orders.")
+                if fresh_bars:
+                    await live_trading_state_collection.update_one(
+                        {"_id": "entry_bars"},
+                        {"$set": {f"last.{k}": v for k, v in fresh_bars.items()}}, upsert=True)
                 return {"opened": opened, "scanned_symbols": len(scored), "notes": notes}
-            if await _open_position(ls, symbol, inst, signal, ltp_source):
+            # Burn the bar BEFORE ordering. If the order throws after the broker has
+            # accepted it, the retry must not place a second one.
+            if bar_ts:
+                fresh_bars[guard] = bar_ts
+                await live_trading_state_collection.update_one(
+                    {"_id": "entry_bars"}, {"$set": {f"last.{guard}": bar_ts}}, upsert=True)
+            if await _open_position(ls, symbol, inst, signal, ltp_source, fill_price):
                 opened += 1
+    if fresh_bars:
+        await live_trading_state_collection.update_one(
+            {"_id": "entry_bars"},
+            {"$set": {f"last.{k}": v for k, v in fresh_bars.items()}}, upsert=True)
     return {"opened": opened, "scanned_symbols": len(scored), "notes": notes}
 
 

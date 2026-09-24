@@ -281,14 +281,43 @@ async def _update_score(strategy_id: str, book: str) -> None:
     )
 
 
-async def _open_position(ls: LiveStrategy, book: str, symbol: str, inst: dict, signal, ltp_source: str) -> bool:
+async def _open_position(ls: LiveStrategy, book: str, symbol: str, inst: dict, signal,
+                         ltp_source: str, fill_price: float | None = None) -> bool:
+    """Open one position, filled at the MARKET price rather than the signal's bar price.
+
+    WHY THIS TAKES A FILL PRICE AT ALL. It used to enter at `signal.entry`, which for a
+    swing strategy is a DAILY bar's price and does not move during the session. When the
+    market had already travelled past that level, the position opened instantly in profit
+    and the very next manage tick closed it at "target" — then the same unchanged bar
+    produced the same signal, and it opened again. AEROENTER was opened and closed at
+    Rs 146.29 fourteen times in one morning while the stock traded near Rs 127, booking
+    ~Rs 1,200 each time; SBIN repeated 183 times. Across the desk 2,769 of 3,065 closed
+    rows were re-closes of 296 distinct entries, manufacturing Rs 2,19,887 of the desk's
+    Rs 2,28,355 "profit". A fill has to be a price you could actually have traded at.
+
+    Target and stop are re-derived at the SAME RATIOS the signal specified, so the
+    strategy's intended reward:risk geometry survives the move to a live fill. Carrying
+    the signal's absolute levels across would be worse than the bug: on a SELL filled
+    below its bar price, the old target sits ABOVE the fill and the position is born
+    already past its own stop."""
     if await live_intraday_positions_collection.find_one(
         {"strategy_id": ls.strategy_id, "book": book, "symbol": symbol, "status": "OPEN"}
     ):
         return False  # one open position per symbol per strategy per book
+
+    sig_entry = float(signal.entry or 0.0)
+    entry = float(fill_price or 0.0)
+    if entry <= 0 or sig_entry <= 0:
+        # No tradeable price this cycle. Skipping is the honest outcome — the alternative
+        # is inventing a fill at a level nobody could have transacted at.
+        return False
+    ratio = entry / sig_entry
+    target = float(signal.target) * ratio
+    stoploss = float(signal.stoploss) * ratio
+
     notional = per_strategy_allocation(book)
     cash = await _available_cash(ls.strategy_id, book)
-    qty = _size(signal.entry, notional, cash)
+    qty = _size(entry, notional, cash)
     if qty < 1:
         return False  # share costs more than this book's slice — an honest skip
     await live_intraday_positions_collection.insert_one({
@@ -299,10 +328,13 @@ async def _open_position(ls: LiveStrategy, book: str, symbol: str, inst: dict, s
             "symbol": inst["symbol"], "security_id": inst["security_id"],
             "exchange_segment": inst["exchange_segment"], "lot_size": inst.get("lot_size", 1),
         },
-        "side": signal.side, "entry_price": round(signal.entry, 2), "qty": qty,
-        "capital_deployed": round(signal.entry * qty, 2),
-        "target": round(signal.target, 2), "stoploss": round(signal.stoploss, 2),
-        "ltp": round(signal.entry, 2), "ltp_source": ltp_source,
+        "side": signal.side, "entry_price": round(entry, 2), "qty": qty,
+        "capital_deployed": round(entry * qty, 2),
+        "target": round(target, 2), "stoploss": round(stoploss, 2),
+        "ltp": round(entry, 2), "ltp_source": ltp_source,
+        # Kept so a fill can always be compared with the level that triggered it.
+        "signal_price": round(sig_entry, 2),
+        "signal_slippage_pct": round((entry - sig_entry) / sig_entry * 100, 3),
         "unrealized_pnl": 0.0, "pnl_pct": 0.0, "realized_pnl": None,
         "gross_pnl": None, "fees": None, "fee_breakdown": None,
         "exit_price": None, "exit_reason": None, "status": "OPEN",
@@ -348,6 +380,15 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
     if intraday_entries_closed:
         notes.append(f"Past the {ENTRY_CUTOFF_HHMM} IST entry cutoff — no new same-day entries; open positions still managed.")
 
+    # ONE ENTRY PER (strategy, symbol) PER BAR.
+    # A swing strategy reads DAILY bars, which do not change during the session, so
+    # without this the identical signal re-fires on every tick all day — the desk took
+    # the same SBIN setup 183 times. The pattern desk has carried this guard from the
+    # start (`intraday_pattern_engine.scan`); this one was missing it.
+    bar_state = await live_intraday_state_collection.find_one({"_id": "entry_bars"}) or {}
+    last_entry_bar: dict = bar_state.get("last", {})
+    fresh_bars: dict[str, str] = {}
+
     for symbol, score, reasons, atr14, bars in scored:
         inst = equities.get(symbol)
         if inst is None or atr14 <= 0 or len(bars) < 2:
@@ -356,17 +397,39 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
         quote = quotes.get(key)
         ltp_source = quote_source.get(key, "last_bar_close")
         ctx = {"bars": bars, "atr14": atr14, "quote": quote, "prev_bar": bars[-2]}
+        bar_ts = str(getattr(bars[-1], "ts", None) or (
+            bars[-1].get("ts") if isinstance(bars[-1], dict) else ""))
+        # The price a fill can actually happen at this cycle.
+        fill_price = None
+        if quote:
+            fill_price = float(quote.get("ltp") or quote.get("last_price") or 0.0) or None
         for ls in SELECTED:
             if ls.category in INTRADAY_CATEGORIES and intraday_entries_closed:
                 continue
             if ls.category != "swing" and quote is None:
                 continue  # no live intraday context available
+            guard = f"{ls.strategy_id}:{symbol}"
+            if bar_ts and last_entry_bar.get(guard) == bar_ts:
+                continue  # already acted on this bar — do not re-enter it every tick
             signal = _live_signal(ls, symbol, ctx)
             if signal is None:
                 continue
+            took = False
             for book in live_books:
-                if await _open_position(ls, book, symbol, inst, signal, ltp_source):
+                if await _open_position(ls, book, symbol, inst, signal, ltp_source, fill_price):
                     opened_by_book[book] += 1
+                    took = True
+            # Burn the bar on any ATTEMPT, not only on a fill: a signal that no book could
+            # afford is still a signal that has been considered, and re-offering it every
+            # tick is what produced the repeats.
+            if bar_ts:
+                fresh_bars[guard] = bar_ts
+            _ = took
+
+    if fresh_bars:
+        await live_intraday_state_collection.update_one(
+            {"_id": "entry_bars"},
+            {"$set": {f"last.{k}": v for k, v in fresh_bars.items()}}, upsert=True)
     return {
         "opened": sum(opened_by_book.values()), "opened_by_book": opened_by_book,
         "scanned_symbols": len(scored), "notes": notes,
