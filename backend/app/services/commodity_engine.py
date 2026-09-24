@@ -273,7 +273,8 @@ async def _update_score(strategy_id: str) -> None:
 # ── position lifecycle ───────────────────────────────────────────────────────────
 
 
-async def _open_position(spec, symbol: str, inst: dict, sig, bar_ts: datetime) -> bool:
+async def _open_position(spec, symbol: str, inst: dict, sig, bar_ts: datetime,
+                         market: float | None = None) -> bool:
     if await commodity_positions_collection.count_documents(
         {"strategy_id": spec.strategy_id, "status": "OPEN"}
     ) >= MAX_POSITIONS_PER_STRATEGY:
@@ -282,8 +283,21 @@ async def _open_position(spec, symbol: str, inst: dict, sig, bar_ts: datetime) -
         {"strategy_id": spec.strategy_id, "symbol": symbol, "status": "OPEN"}
     ):
         return False
+    # FILL AT THE MARKET, NOT AT THE BAR.
+    # `sig.entry` is a price off the signal's own candle. On a 1d or 4h timeframe that
+    # candle does not move for hours, so entering at it after the market has travelled
+    # opens a position already past its own target — the next manage tick then closes it
+    # as a "win" and the unchanged bar produces the same signal again. Measured across
+    # this desk: 9,652 of 32,796 closed rows were same-day repeats of an identical entry.
+    # Target and stop are rescaled by the same ratio so the signal's reward:risk survives.
     slip = SLIPPAGE_BPS / 10000.0
-    fill = sig.entry * (1 + slip) if sig.side == "BUY" else sig.entry * (1 - slip)
+    ref = float(market or 0.0)
+    if ref <= 0 or not sig.entry:
+        return False          # no tradeable price this cycle — skip rather than invent one
+    ratio = ref / float(sig.entry)
+    target = float(sig.target) * ratio
+    stoploss = float(sig.stoploss) * ratio
+    fill = ref * (1 + slip) if sig.side == "BUY" else ref * (1 - slip)
     cash = await _available_cash(spec.strategy_id)
     qty = _size(fill, POSITION_NOTIONAL, cash)
     if qty < 1:
@@ -299,7 +313,7 @@ async def _open_position(spec, symbol: str, inst: dict, sig, bar_ts: datetime) -
                        "lot_size": inst.get("lot_size", 1)},
         "side": sig.side, "signal_price": round(sig.entry, 4), "entry_price": round(fill, 4),
         "qty": qty, "capital_deployed": round(fill * qty, 2), "entry_costs": round(entry_costs, 2),
-        "target": round(sig.target, 4), "stoploss": round(sig.stoploss, 4),
+        "target": round(target, 4), "stoploss": round(stoploss, 4),
         "ltp": round(fill, 4), "ltp_source": "signal_bar",
         "unrealized_pnl": 0.0, "pnl_pct": 0.0, "realized_pnl": None, "costs": None,
         "exit_price": None, "exit_reason": None, "status": "OPEN",
@@ -361,6 +375,21 @@ async def scan_cycle() -> dict:
     for spec in COMMODITY_CATALOG:
         by_tf.setdefault(spec.timeframe, []).append(spec)
 
+    # One live quote per contract for the whole sweep. Quotes are the permissive endpoint
+    # (the candle one is what throttles), so this is 8-10 calls a cycle, and it is what
+    # lets a fill happen at a price that actually existed.
+    market: dict[str, float] = {}
+    for _sym, _inst in universe.items():
+        _px, _src = await get_ltp(None, str(_inst.get("security_id")), _inst.get("exchange_segment"))
+        if _px:
+            market[_sym] = float(_px)
+
+    # ONE ENTRY PER (strategy, contract) PER BAR. Without it an unchanged 1d/4h candle
+    # re-offers the same signal on every 2-minute tick.
+    bar_state = await commodity_state_collection.find_one({"_id": "entry_bars"}) or {}
+    last_entry_bar: dict = bar_state.get("last", {})
+    fresh_bars: dict[str, str] = {}
+
     opened = evaluated = capped = 0
     thin: list[str] = []
     for tf, specs in by_tf.items():
@@ -375,13 +404,21 @@ async def scan_cycle() -> dict:
                 if holders.get(symbol, 0) >= MAX_STRATEGIES_PER_SYMBOL:
                     capped += 1
                     break
+                guard = f"{spec.strategy_id}:{symbol}"
+                if last_entry_bar.get(guard) == str(bar_ts):
+                    continue
                 evaluated += 1
                 sig = evaluate(spec, bars)
                 if sig is None:
                     continue
-                if await _open_position(spec, symbol, inst, sig, bar_ts):
+                fresh_bars[guard] = str(bar_ts)
+                if await _open_position(spec, symbol, inst, sig, bar_ts, market.get(symbol)):
                     opened += 1
                     holders[symbol] = holders.get(symbol, 0) + 1
+    if fresh_bars:
+        await commodity_state_collection.update_one(
+            {"_id": "entry_bars"},
+            {"$set": {f"last.{k}": v for k, v in fresh_bars.items()}}, upsert=True)
 
     if thin:
         notes.append(f"{len(thin)} (symbol, timeframe) series had too few bars to evaluate — "

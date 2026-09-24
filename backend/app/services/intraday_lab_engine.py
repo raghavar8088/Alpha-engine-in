@@ -292,7 +292,8 @@ async def _update_score(strategy_id: str) -> None:
     )
 
 
-async def _open_position(spec, symbol: str, inst: dict, signal, ltp_source: str) -> bool:
+async def _open_position(spec, symbol: str, inst: dict, signal, ltp_source: str,
+                         fill_price: float | None = None) -> bool:
     if await _open_positions_count(spec.strategy_id) >= 200:  # sane per-strategy cap
         return False
     existing = await intraday_lab_positions_collection.find_one(
@@ -306,9 +307,24 @@ async def _open_position(spec, symbol: str, inst: dict, signal, ltp_source: str)
     if await _strategies_holding(symbol) >= MAX_STRATEGIES_PER_SYMBOL:
         return False
 
+    # FILL AT THE MARKET, NOT AT THE SIGNAL'S BAR PRICE.
+    # `signal.entry` comes from a bar; for a swing strategy that bar is DAILY and does not
+    # move during the session. Entering at it after the market has travelled opens a
+    # position already in profit, which the next manage tick closes at "target" — and the
+    # unchanged bar then produces the same signal again. That is what put 1,624 same-day
+    # repeats into this desk's 12,692 closed rows. See the same fix in
+    # live_intraday_engine, where the effect was far larger.
+    sig_entry = float(signal.entry or 0.0)
+    entry = float(fill_price or 0.0)
+    if entry <= 0 or sig_entry <= 0:
+        return False          # no tradeable price — skip rather than invent a fill
+    ratio = entry / sig_entry
+    target = float(signal.target) * ratio
+    stoploss = float(signal.stoploss) * ratio
+
     cash = await _available_cash(spec.strategy_id)
     budget = POSITION_NOTIONAL  # uniform size for every strategy — see POSITION_NOTIONAL note
-    qty = _size(signal.entry, budget, cash)
+    qty = _size(entry, budget, cash)
     if qty < 1:
         return False
 
@@ -324,12 +340,14 @@ async def _open_position(spec, symbol: str, inst: dict, signal, ltp_source: str)
             "exchange_segment": inst["exchange_segment"], "lot_size": inst.get("lot_size", 1),
         },
         "side": signal.side,
-        "entry_price": round(signal.entry, 2),
+        "entry_price": round(entry, 2),
+        "signal_price": round(sig_entry, 2),
+        "signal_slippage_pct": round((entry - sig_entry) / sig_entry * 100, 3),
         "qty": qty,
-        "capital_deployed": round(signal.entry * qty, 2),
-        "target": round(signal.target, 2),
-        "stoploss": round(signal.stoploss, 2),
-        "ltp": round(signal.entry, 2),
+        "capital_deployed": round(entry * qty, 2),
+        "target": round(target, 2),
+        "stoploss": round(stoploss, 2),
+        "ltp": round(entry, 2),
         "ltp_source": ltp_source,
         "unrealized_pnl": 0.0,
         "pnl_pct": 0.0,
@@ -405,6 +423,13 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
         )
 
     opened = 0
+    # ONE ENTRY PER (strategy, symbol) PER BAR — the guard `intraday_pattern_engine` has
+    # always had and this desk never did. Without it an unchanged daily bar re-offers the
+    # identical signal on every tick.
+    bar_state = await intraday_lab_state_collection.find_one({"_id": "entry_bars"}) or {}
+    last_entry_bar: dict = bar_state.get("last", {})
+    fresh_bars: dict[str, str] = {}
+
     for symbol, score, reasons, atr14, bars in scored:
         inst = equities.get(symbol)
         if inst is None or atr14 <= 0 or len(bars) < 2:
@@ -413,6 +438,11 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
         quote = quotes.get(key)
         ltp_source = quote_source.get(key, "last_bar_close")
         ctx = {"bars": bars, "atr14": atr14, "quote": quote, "prev_bar": bars[-2]}
+        bar_ts = str(getattr(bars[-1], "ts", None) or (
+            bars[-1].get("ts") if isinstance(bars[-1], dict) else ""))
+        fill_price = None
+        if quote:
+            fill_price = float(quote.get("ltp") or quote.get("last_price") or 0.0) or None
         for spec in STRATEGY_CATALOG:
             if spec.category in EXCLUDED_CATEGORIES:
                 continue  # structurally barred (swing by default — 96% of the desk's losses)
@@ -420,11 +450,20 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
                 continue  # past the same-day entry cutoff — a new one could only strand overnight
             if spec.category != "swing" and quote is None:
                 continue  # honest skip — no live intraday context available
+            guard = f"{spec.strategy_id}:{symbol}"
+            if bar_ts and last_entry_bar.get(guard) == bar_ts:
+                continue  # already acted on this bar — do not re-enter it every tick
             signal = evaluate(spec, symbol, ctx)
             if signal is None:
                 continue
-            if await _open_position(spec, symbol, inst, signal, ltp_source):
+            if bar_ts:
+                fresh_bars[guard] = bar_ts
+            if await _open_position(spec, symbol, inst, signal, ltp_source, fill_price):
                 opened += 1
+    if fresh_bars:
+        await intraday_lab_state_collection.update_one(
+            {"_id": "entry_bars"},
+            {"$set": {f"last.{k}": v for k, v in fresh_bars.items()}}, upsert=True)
     return {"opened": opened, "scanned_symbols": len(scored), "notes": notes}
 
 

@@ -30,7 +30,8 @@ paper desk in five deliberate ways:
   5. **The engine ships OFF**, and every contract has its own switch. Nothing trades until
      the master switch is on AND that contract's switch is on.
 
-STILL PAPER. Fills are simulated at the signal bar and marked on live Angel quotes; no
+STILL PAPER. Fills are simulated at the LIVE QUOTE (not at the signal's bar — that filled
+positions at prices the market had already left) and marked on live Angel quotes; no
 order ever reaches a broker from this module. "Pre-live" is the rehearsal before real
 money, not real money — the same meaning the other Pre-Live desks in this app carry.
 
@@ -507,7 +508,8 @@ async def breaker_state() -> dict:
 
 async def _open_position(spec, symbol: str, inst: dict, sig, bar_ts: datetime,
                          evidence: dict, free_margin: float,
-                         open_count: int) -> tuple[bool, str | None, float]:
+                         open_count: int,
+                         market: float | None = None) -> tuple[bool, str | None, float]:
     """Open one whole-lot position.
 
     Returns (opened, note, margin consumed). `free_margin` and `open_count` are passed in
@@ -520,8 +522,17 @@ async def _open_position(spec, symbol: str, inst: dict, sig, bar_ts: datetime,
             {"strategy_id": spec.strategy_id, "symbol": symbol, "status": "OPEN"}):
         return False, None, 0.0
 
+    # FILL AT THE MARKET, NOT AT THE BAR — same defect and same fix as
+    # `commodity_engine._open_position`; this desk scans its own signals so it carried its
+    # own copy of it. Target and stop rescale by the same ratio.
     slip = SLIPPAGE_BPS / 10000.0
-    fill = sig.entry * (1 + slip) if sig.side == "BUY" else sig.entry * (1 - slip)
+    ref = float(market or 0.0)
+    if ref <= 0 or not sig.entry:
+        return False, None, 0.0
+    ratio = ref / float(sig.entry)
+    tgt = float(sig.target) * ratio
+    stp = float(sig.stoploss) * ratio
+    fill = ref * (1 + slip) if sig.side == "BUY" else ref * (1 - slip)
     mult = multiplier(symbol)
     lot_notional = fill * mult
     lot_margin = margin_pct(symbol) * lot_notional
@@ -557,7 +568,7 @@ async def _open_position(spec, symbol: str, inst: dict, sig, bar_ts: datetime,
         "notional": round(fill * qty, 2), "margin_used": round(margin_used, 2),
         "margin_pct": round(margin_pct(symbol), 5), "capital_deployed": round(margin_used, 2),
         "entry_costs": round(entry_costs, 2),
-        "target": round(sig.target, 4), "stoploss": round(sig.stoploss, 4),
+        "target": round(tgt, 4), "stoploss": round(stp, 4),
         "ltp": round(fill, 4), "ltp_source": "signal_bar",
         "unrealized_pnl": 0.0, "pnl_pct": 0.0, "return_on_margin_pct": 0.0,
         "realized_pnl": None, "costs": None,
@@ -675,6 +686,10 @@ async def scan_cycle() -> dict:
     # its book is read once per cycle and drawn down in memory as its own signals fill.
     # The other way round (the pattern desk's order) would size every fill against a book
     # that still looked untouched, and a Rs 1 lakh account can only afford one or two.
+    bar_state = await commodity_prelive_state_collection.find_one({"_id": "entry_bars"}) or {}
+    last_entry_bar: dict = bar_state.get("last", {})
+    fresh_bars: dict[str, str] = {}
+
     for symbol, inst in active.items():
         allowed = roster.get(symbol) or {}
         if not allowed:
@@ -682,6 +697,8 @@ async def scan_cycle() -> dict:
         book = await _book(symbol)
         free = book["available_margin"]
         opens = book["open_positions"]
+        _px, _src = await get_ltp(None, str(inst.get("security_id")), inst.get("exchange_segment"))
+        market_px = float(_px) if _px else None
         for tf, specs in by_tf.items():
             tf_specs = [s for s in specs if s.strategy_id in allowed]
             if not tf_specs:
@@ -700,12 +717,17 @@ async def scan_cycle() -> dict:
             for spec in tf_specs:
                 if opens >= MAX_POSITIONS_PER_SCRIPT:
                     break
+                guard = f"{spec.strategy_id}:{symbol}"
+                if last_entry_bar.get(guard) == str(bar_ts):
+                    continue
                 evaluated += 1
                 sig = evaluate(spec, bars)
                 if sig is None:
                     continue
+                fresh_bars[guard] = str(bar_ts)
                 ok, why, used = await _open_position(
-                    spec, symbol, inst, sig, bar_ts, allowed[spec.strategy_id], free, opens)
+                    spec, symbol, inst, sig, bar_ts, allowed[spec.strategy_id], free, opens,
+                    market_px)
                 if ok:
                     opened += 1
                     free -= used
@@ -721,6 +743,10 @@ async def scan_cycle() -> dict:
                      f"the shared bar store is still filling: {', '.join(thin[:8])}"
                      f"{'…' if len(thin) > 8 else ''}")
     notes.extend(unaffordable.values())
+    if fresh_bars:
+        await commodity_prelive_state_collection.update_one(
+            {"_id": "entry_bars"},
+            {"$set": {f"last.{k}": v for k, v in fresh_bars.items()}}, upsert=True)
     return {"opened": opened, "evaluated": evaluated, "notes": notes}
 
 
