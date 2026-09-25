@@ -37,7 +37,7 @@ def _mentions_throttle(body: str) -> bool:
 # Dhan enforces a per-account rate limit; a fresh DhanClient is constructed on
 # every request (see _get_dhan_client), so pacing has to live at module scope
 # to actually throttle the account's *total* call rate, not just one instance's.
-# Concurrent features (market-data polling, trading-calls scan, manual-positions
+# Concurrent features (market-data polling, the desk scan loops, manual-positions
 # quote/margin/order calls) all share this one real Dhan account.
 _rate_lock = asyncio.Lock()
 _last_call_at = 0.0

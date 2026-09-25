@@ -167,12 +167,6 @@ db_mod.manual_positions_collection = FakeCollection([{
     "instrument": {"security_id": "13", "exchange_segment": "IDX_I"},
 }])
 db_mod.fno_positions_collection = FakeCollection([])
-db_mod.trading_calls_collection = FakeCollection([{
-    "call_id": "c1", "symbol": "NIFTY", "display_name": "Nifty 50", "segment": "INDEX", "side": "BUY",
-    "horizon": "SWING", "entry_price": 24000.0, "target": 24800.0, "stoploss": 23700.0,
-    "confidence": 0.72, "rationale": "test", "status": "OPEN", "created_at": None,
-    "instrument": {"security_id": "13", "exchange_segment": "IDX_I"},
-}])
 db_mod.chart_drawings_collection = FakeCollection([])
 db_mod.chart_layouts_collection = FakeCollection([])
 db_mod.chart_alerts_collection = FakeCollection([])
@@ -187,7 +181,7 @@ import app.services.chart_data as cd_mod
 
 for mod in (cache_mod, ov_mod, ws_mod, cd_mod):
     for name in ("instruments_collection", "manual_positions_collection", "fno_positions_collection",
-                 "trading_calls_collection", "chart_drawings_collection", "chart_layouts_collection",
+                 "chart_drawings_collection", "chart_layouts_collection",
                  "chart_alerts_collection", "chart_bars_collection", "live_watchlist_collection"):
         if hasattr(mod, name):
             setattr(mod, name, getattr(db_mod, name))
@@ -366,14 +360,9 @@ with TestClient(app) as client:
     ov = r.json()
     check("open position surfaced", len(ov["positions"]) == 1, ov["positions"])
     check("position entry price is the avg fill", ov["positions"][0]["entry_price"] == 24100.5, ov["positions"][0])
-    check("active call surfaced", len(ov["calls"]) == 1, ov["calls"])
-    call = ov["calls"][0]
-    check("call carries entry/target/SL",
-          (call["entry_price"], call["target"], call["stoploss"]) == (24000.0, 24800.0, 23700.0), call)
-
-    # A different instrument must not inherit the index's position/call.
+    # A different instrument must not inherit the index's position.
     r = client.get("/api/chart/overlays", params={"security_id": "45001", "exchange_segment": "NSE_FNO"})
-    check("overlays are instrument-scoped", r.json()["positions"] == [] and r.json()["calls"] == [], r.json())
+    check("overlays are instrument-scoped", r.json()["positions"] == [], r.json())
 
     # --- streaming guard ----------------------------------------------------
     r = client.get("/api/chart/stream", params={

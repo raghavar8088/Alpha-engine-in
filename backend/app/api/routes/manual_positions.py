@@ -2,7 +2,7 @@
 with a market/limit order and a quantity, optionally via MTF leverage), across
 multiple independent named accounts. See app.services.manual_positions for the
 account/capital-pool/fill/exit logic; this router is a thin HTTP layer over it,
-following the same shape as trading_calls.py.
+following the same route shape as the other position modules.
 
   GET    /api/manual-positions/accounts            list accounts (auto-migrates legacy data into "Default")
   POST   /api/manual-positions/accounts            create a new named account

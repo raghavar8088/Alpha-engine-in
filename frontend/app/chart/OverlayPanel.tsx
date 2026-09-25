@@ -9,21 +9,18 @@
 
 import {
   ChartBacktestRun,
-  ChartCallOverlay,
   ChartOptionContext,
   ChartPositionOverlay,
 } from "../../lib/api";
 
 export interface OverlayConfig {
   positions: boolean;
-  calls: boolean;
   backtest: boolean;
   optionContext: boolean;
 }
 
 export const DEFAULT_OVERLAYS: OverlayConfig = {
   positions: true,
-  calls: true,
   backtest: false,
   optionContext: false,
 };
@@ -38,7 +35,6 @@ interface Props {
   config: OverlayConfig;
   onChange: (next: OverlayConfig) => void;
   positions: ChartPositionOverlay[];
-  calls: ChartCallOverlay[];
   runs: ChartBacktestRun[];
   selectedRunId: string | null;
   onSelectRun: (id: string | null) => void;
@@ -56,7 +52,7 @@ const money = (n: number | null | undefined) =>
   n === null || n === undefined ? "–" : n.toLocaleString("en-IN", { maximumFractionDigits: 2 });
 
 export default function OverlayPanel({
-  config, onChange, positions, calls, runs, selectedRunId, onSelectRun,
+  config, onChange, positions, runs, selectedRunId, onSelectRun,
   tradeCount, replay, onReplayChange, optionContext, optionContextLoading,
   optionContextError, optionContextEligible,
 }: Props) {
@@ -91,24 +87,6 @@ export default function OverlayPanel({
           </ul>
         )}
         {config.positions && positions.length === 0 && <div className="empty-note">No open position here.</div>}
-
-        <label className="toggle">
-          <input type="checkbox" checked={config.calls} onChange={(e) => set({ calls: e.target.checked })} />
-          <span>Trading calls {calls.length > 0 && <b>({calls.length})</b>}</span>
-        </label>
-        {config.calls && calls.length > 0 && (
-          <ul className="list">
-            {calls.map((c) => (
-              <li key={c.call_id}>
-                <span className={c.side === "BUY" ? "side long" : "side short"}>{c.side}</span>
-                <span className="at">E {money(c.entry_price)}</span>
-                <span className="t">T {money(c.target)}</span>
-                <span className="sl">SL {money(c.stoploss)}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-        {config.calls && calls.length === 0 && <div className="empty-note">No active call for this symbol.</div>}
       </div>
 
       <div className="group">

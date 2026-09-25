@@ -12,9 +12,10 @@ NSE IS NOT AN API. It is a website that serves JSON to its own front end and rej
 anything that does not look like a browser session — the endpoints 401 or hang unless the
 caller first loads a real page and carries the cookies it sets. The priming sequence, the
 header set, and the deliberate omission of Accept-Encoding are all lifted from
-`nse_volume_gainers`, which paid for that knowledge already: advertising Brotli made NSE
-return Brotli, httpx could not decode it without an optional package, and the module
-reported a decode failure as "blocked" — a wrong diagnosis that cost real time.
+the retired `nse_volume_gainers` capture, which paid for that knowledge already:
+advertising Brotli made NSE return Brotli, httpx could not decode it without an optional
+package, and a decode failure got reported as "blocked" — a wrong diagnosis that cost
+real time.
 """
 
 from __future__ import annotations

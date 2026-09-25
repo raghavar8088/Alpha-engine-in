@@ -13,7 +13,7 @@ separately. Every position/order belongs to exactly one account_id. A "Default"
 account is auto-created (and existing account-less data migrated into it) the
 first time accounts are listed, so this upgrade never loses pre-existing data.
 
-Capital pool convention mirrors app.services.call_positions, scoped per account:
+Capital pool convention, scoped per account:
 available_cash = initial + realized_pnl - deployed_margin, equity = initial +
 realized_pnl + unrealized_pnl. Positions are opened/closed/averaged exactly like
 a real broker's Positions tab; SELL against an open position exits (fully or
@@ -403,7 +403,7 @@ async def exit_position(dhan: DhanClient, account_id: str, position_id: str, qua
 
 async def sync_positions(dhan: DhanClient) -> int:
     """Refresh LTP/unrealized P&L for open positions and fill any PENDING limit
-    orders whose price has now been crossed — same role as call_positions.sync.
+    orders whose price has now been crossed.
     Runs across all accounts at once; LTP refresh isn't account-specific."""
     open_positions = [p async for p in manual_positions_collection.find({"status": "OPEN"})]
     updated = 0

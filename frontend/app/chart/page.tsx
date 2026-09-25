@@ -71,7 +71,6 @@ import {
 import {
   ChartBacktestRun,
   ChartBacktestTrade,
-  ChartCallOverlay,
   ChartExplanation,
   ChartOptionContext,
   ChartPositionOverlay,
@@ -264,7 +263,6 @@ export default function ChartPage() {
   const [overlayConfig, setOverlayConfig] = useState<OverlayConfig>(DEFAULT_OVERLAYS);
   const [showOverlayPanel, setShowOverlayPanel] = useState(false);
   const [positions, setPositions] = useState<ChartPositionOverlay[]>([]);
-  const [calls, setCalls] = useState<ChartCallOverlay[]>([]);
   const [runs, setRuns] = useState<ChartBacktestRun[]>([]);
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
   const [trades, setTrades] = useState<ChartBacktestTrade[]>([]);
@@ -761,7 +759,6 @@ export default function ChartPage() {
   useEffect(() => {
     if (!selected) {
       setPositions([]);
-      setCalls([]);
       return;
     }
     let cancelled = false;
@@ -770,12 +767,8 @@ export default function ChartPage() {
         const data = await fetchChartOverlays(selected.security_id, selected.exchange_segment);
         if (cancelled) return;
         setPositions(data.positions);
-        setCalls(data.calls);
       } catch {
-        if (!cancelled) {
-          setPositions([]);
-          setCalls([]);
-        }
+        if (!cancelled) setPositions([]);
       }
     })();
     return () => {
@@ -885,14 +878,7 @@ export default function ChartPage() {
         add(p.entry_price, `${p.side === "BUY" ? "LONG" : "SHORT"} ${p.quantity}`, "#7d34dc", LineStyle.Solid);
       }
     }
-    if (overlayConfig.calls) {
-      for (const c of calls) {
-        add(c.entry_price, `CALL ${c.side} entry`, "#2196f3", LineStyle.Solid);
-        add(c.target, "CALL target", "#26a69a", LineStyle.Dashed);
-        add(c.stoploss, "CALL SL", "#ef5350", LineStyle.Dashed);
-      }
-    }
-  }, [positions, calls, overlayConfig.positions, overlayConfig.calls, loadSeq]);
+  }, [positions, overlayConfig.positions, loadSeq]);
 
   // --- Phase 5: backtest trade markers + replay ----------------------------
   const visibleTrades = useMemo(
@@ -1100,9 +1086,8 @@ export default function ChartPage() {
       active_indicators: activeIndicators,
       structure: structure?.available ? structure : null,
       open_positions: overlayConfig.positions ? positions : [],
-      active_calls: overlayConfig.calls ? calls : [],
     };
-  }, [computed, config, resolution, symbolInfo, selected, structure, overlayConfig, positions, calls]);
+  }, [computed, config, resolution, symbolInfo, selected, structure, overlayConfig, positions]);
 
   const runExplain = useCallback(async () => {
     if (!computed.displayBars.length) return;
@@ -2156,7 +2141,6 @@ export default function ChartPage() {
               config={overlayConfig}
               onChange={setOverlayConfig}
               positions={positions}
-              calls={calls}
               runs={runs}
               selectedRunId={selectedRunId}
               onSelectRun={setSelectedRunId}

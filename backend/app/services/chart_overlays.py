@@ -1,13 +1,12 @@
 """Cross-module overlays for the Chart module (Phase 5).
 
 Everything here reads data other modules have already produced — open paper
-positions, active research calls, stored backtest trade logs — and reshapes it
+positions and stored backtest trade logs — and reshapes it
 into (time, price) marks the chart can draw. No market data is fetched, so none
 of it costs Dhan quota; the one exception is option-chain context, which is
 opt-in from the UI precisely because it does hit the broker.
 
-An honest note on stop-loss/target lines. Trading Calls carry an explicit
-`entry_price`/`target`/`stoploss`, and backtest trades carry `stop_loss`/
+An honest note on stop-loss/target lines. Backtest trades carry `stop_loss`/
 `target`, so those are drawn from real stored values. Paper *positions* in this
 app have no SL/target field at all — only an average fill price — so a position
 overlay draws its entry and nothing else rather than inventing levels the
@@ -20,7 +19,6 @@ from app.core.db import (
     db,
     fno_positions_collection,
     manual_positions_collection,
-    trading_calls_collection,
 )
 
 # Declared here the same way app/api/routes/backtest.py declares it — it isn't in
@@ -64,39 +62,6 @@ async def open_positions(security_id: str, exchange_segment: str) -> list[dict]:
         out.append(_position_mark(doc, "positions"))
     async for doc in fno_positions_collection.find(query):
         out.append(_position_mark(doc, "fno"))
-    return out
-
-
-async def active_calls(security_id: str, exchange_segment: str, symbol: str) -> list[dict]:
-    """Open Trading Calls for this instrument.
-
-    Falls back to a symbol match for calls whose stored instrument predates
-    security_id being recorded, but only when the segment agrees — so an equity
-    call never lands on a derivative chart of the same underlying.
-    """
-    query = {
-        "status": "OPEN",
-        "$or": [
-            {"instrument.security_id": security_id, "instrument.exchange_segment": exchange_segment},
-            {"symbol": symbol, "instrument.exchange_segment": exchange_segment},
-        ],
-    }
-    out = []
-    async for doc in trading_calls_collection.find(query).sort("created_at", -1).limit(20):
-        out.append({
-            "call_id": doc.get("call_id"),
-            "symbol": doc.get("symbol"),
-            "display_name": doc.get("display_name") or doc.get("symbol"),
-            "segment": doc.get("segment"),
-            "side": doc.get("side"),
-            "horizon": doc.get("horizon"),
-            "entry_price": doc.get("entry_price"),
-            "target": doc.get("target"),
-            "stoploss": doc.get("stoploss"),
-            "confidence": doc.get("confidence"),
-            "rationale": doc.get("rationale"),
-            "created_at": doc["created_at"].isoformat() if doc.get("created_at") else None,
-        })
     return out
 
 

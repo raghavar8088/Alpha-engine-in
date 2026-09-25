@@ -42,7 +42,7 @@ from app.services.chart_data import (
     resolve_symbol,
     search_symbols,
 )
-from app.services.chart_overlays import active_calls, backtest_runs, backtest_trades, open_positions
+from app.services.chart_overlays import backtest_runs, backtest_trades, open_positions
 from app.services.chart_stream import bar_epoch, hub, stream_timeframe
 from app.services.angel_option_chain import (
     ChainError,
@@ -221,18 +221,18 @@ async def explain(payload: dict, _current_user: dict = Depends(get_current_user)
 
 @router.get("/overlays")
 async def overlays(security_id: str, exchange_segment: str, _current_user: dict = Depends(get_current_user)):
-    """Open positions and active trading calls for the charted instrument.
+    """Open positions for the charted instrument.
 
     Reads Mongo only — no broker call — so it is safe to refresh whenever the
-    chart symbol changes without touching the Dhan rate limit.
+    chart symbol changes without touching the Dhan rate limit. The instrument
+    lookup stays so an unknown security still 404s rather than returning empty.
     """
     try:
-        inst = await instrument_for_stream(security_id, exchange_segment)
+        await instrument_for_stream(security_id, exchange_segment)
     except ChartError as exc:
         raise HTTPException(status_code=404, detail=exc.detail)
     return {
         "positions": await open_positions(security_id, exchange_segment),
-        "calls": await active_calls(security_id, exchange_segment, inst["symbol"]),
     }
 
 

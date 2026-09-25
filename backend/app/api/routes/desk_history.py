@@ -62,12 +62,6 @@ DESKS: dict[str, dict] = {
         "capital": lambda: (lambda z: z.PER_STRATEGY_CAPITAL * max(len(z.STRATEGIES), 1))(
             __import__("app.services.zero_hero", fromlist=["x"])),
     },
-    "buy-low": {
-        "label": "Buy Low Options",
-        "positions": lambda: D.buy_low_positions_collection,
-        "equity": lambda: D.buy_low_equity_collection,
-        "capital": lambda: __import__("app.services.buy_low_options", fromlist=["x"]).TOTAL_CAPITAL,
-    },
     "momentum": {
         "label": "Momentum",
         "positions": lambda: D.momentum_positions_collection,

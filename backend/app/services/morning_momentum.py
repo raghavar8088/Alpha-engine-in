@@ -33,7 +33,7 @@ from app.core.db import (
     instruments_collection,
     momentum_buy_state_collection,
 )
-from app.services.buy_low_options import scan_falls
+from app.services.fno_universe import scan_falls
 from app.services.fno_positions import exit_position, place_order
 from app.services.stock_options import batched_ltp, current_expiry
 
