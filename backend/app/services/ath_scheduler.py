@@ -31,9 +31,11 @@ SEED_BATCH = int(os.getenv("ATH_SEED_BATCH", "40"))
 
 
 async def ath_scan_loop() -> None:
+    from app.services.desk_switches import is_on
+
     while True:
         try:
-            if ath_trading.market_is_open():
+            if ath_trading.market_is_open() and await is_on("ath_trading"):
                 result = await ath_trading.run_cycle()
                 if result.get("opened") or result.get("closed"):
                     logger.info("ath cycle: %s", result)

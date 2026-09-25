@@ -408,6 +408,8 @@ async def _dhan_or_none():
 
 
 async def fno_auto_roll_loop() -> None:
+    from app.services.desk_switches import is_on
+
     logger.info(
         "[fno-auto-roll] armed for account %r — %s %d lot ATM straddle, roll at %s IST, "
         "expiry >= %d days out",
@@ -418,7 +420,7 @@ async def fno_auto_roll_loop() -> None:
             now = datetime.now(IST)
             state = await fno_auto_roll_state_collection.find_one({"_id": STATE_ID}) or {}
             rolled_today = state.get("last_rolled_on") == now.date().isoformat()
-            if _is_due(now, rolled_today):
+            if _is_due(now, rolled_today) and await is_on("fno_auto_roll"):
                 await run_roll(await _dhan_or_none(), trigger="scheduler")
         except Exception:
             logger.exception("[fno-auto-roll] tick failed — will retry next tick")

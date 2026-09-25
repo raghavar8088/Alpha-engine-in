@@ -29,12 +29,13 @@ def _due(now: datetime, last_run_date) -> bool:
 
 async def long_horizon_loop() -> None:
     from app.services.long_horizon_engine import rebalance
+    from app.services.desk_switches import is_on
 
     last_run_date = None
     while True:
         try:
             now = datetime.now(IST)
-            if _due(now, last_run_date):
+            if _due(now, last_run_date) and await is_on("long_horizon"):
                 result = await rebalance()
                 last_run_date = now.date()
                 logger.info("long-horizon rebalance: basket=%d rebalanced=%d",

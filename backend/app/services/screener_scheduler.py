@@ -115,8 +115,15 @@ async def _weekly() -> None:
 
 
 async def screener_loop() -> None:
+    from app.services.desk_switches import is_on
+
     while True:
         try:
+            # Gated as a whole rather than per branch: every branch below is a
+            # scheduled rebuild that pulls market data, so one check covers them all.
+            if not await is_on("screener"):
+                await asyncio.sleep(TICK_SECONDS)
+                continue
             now = datetime.now(IST)
             today = now.date().isoformat()
             hhmm = _hhmm(now)

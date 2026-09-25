@@ -51,7 +51,6 @@ MODULES: dict[str, tuple[str, str]] = {
     "swing_trading":     ("Swing Trading", "/swing-trading"),
     "stock_desk":        ("Stock Pre-Live (buying + selling)", "/stock-prelive-buying"),
     "zero_hero":         ("Zero Hero Trades", "/zero-hero"),
-    "buy_low":           ("Buy Low Options", "/buy-low"),
     "live_paper":        ("Live Paper Buying", "/live"),
     "morning_momentum":  ("Morning Momentum", "/momentum"),
     "momentum_engine":   ("Momentum", "/momentum"),

@@ -48,13 +48,14 @@ VALIDATE_NIGHTLY = os.getenv("TS_VALIDATE_NIGHTLY", "1").lower() not in ("0", "f
 
 async def trending_session_loop() -> None:
     """Top up bars, then scan and manage, every tick while the market is open."""
+    from app.services.desk_switches import is_on
     from . import basket
     from .bars import refresh_many
     from .engine import run_paper_cycle
 
     while True:
         try:
-            if is_market_open():
+            if is_market_open() and await is_on("trending_stocks"):
                 universe = await basket.active()
                 if universe:
                     await refresh_many(universe, full=False)
@@ -79,6 +80,7 @@ def _due(now: datetime, last_run_date) -> bool:
 
 async def trending_eod_loop() -> None:
     """Once a trading day, after the close: refresh, sweep, validate, re-grade."""
+    from app.services.desk_switches import is_on
     from . import basket
     from .bars import refresh_many
     from .engine import run_backtests, run_validation
@@ -87,7 +89,7 @@ async def trending_eod_loop() -> None:
     while True:
         try:
             now = datetime.now(IST)
-            if _due(now, last_run_date):
+            if _due(now, last_run_date) and await is_on("trending_stocks"):
                 universe = await basket.active()
                 if universe:
                     refreshed = await refresh_many(universe, full=False)
