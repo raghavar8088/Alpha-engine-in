@@ -443,7 +443,23 @@ async def scan() -> dict:
     if fresh:
         await nifty_scalp_state_collection.update_one(
             {"_id": "bars"}, {"$set": {f"last.{k}": v for k, v in fresh.items()}}, upsert=True)
-    return {"opened": opened, "signals": len(fired), "acted": len(fresh), "notes": notes}
+
+    # The Rs 2 lakh paper book trades a hand-picked roster of these same strategies on ONE
+    # shared balance. It is handed this cycle's candles, contracts and quotes rather than
+    # fetching its own: Angel's historical endpoint is the binding limit on this desk, and
+    # a second poller would 403 both books rather than one. It keeps its own bar-guard and
+    # its own breaker, so a failure here must not stop the desk above it reporting.
+    paper = {}
+    try:
+        from app.services import nifty_scalp_paper
+
+        paper = await nifty_scalp_paper.on_signals(fired, contracts, prices, spot, expiry, series)
+    except Exception:  # noqa: BLE001
+        logger.exception("[nifty_scalp] paper book scan failed")
+
+    return {"opened": opened, "signals": len(fired), "acted": len(fresh), "notes": notes,
+            "paper_opened": paper.get("opened", 0), "paper_skipped": paper.get("skipped", 0),
+            "paper_notes": paper.get("notes", [])}
 
 
 # ── reporting ──────────────────────────────────────────────────────────────────
@@ -577,6 +593,19 @@ async def run_cycle() -> dict:
     if not ENABLED:
         return {"opened": 0, "closed": 0, "notes": ["desk disabled"]}
     closed = await manage()
+
+    # The paper book is marked and exited BEFORE the scan, same as the desk above: cash
+    # released by an exit has to be available to the signals in this cycle, or a full book
+    # refuses trades it could actually afford. Guarded, because the desk's own reporting
+    # must not depend on the smaller book succeeding.
+    paper_closed = 0
+    try:
+        from app.services import nifty_scalp_paper
+
+        paper_closed = await nifty_scalp_paper.manage()
+    except Exception:  # noqa: BLE001
+        logger.exception("[nifty_scalp] paper book manage failed")
+
     result = await scan()
     snap = await summary()
     await nifty_scalp_equity_collection.insert_one({
@@ -591,6 +620,16 @@ async def run_cycle() -> dict:
                   "last_notes": result["notes"]}},
         upsert=True,
     )
+    try:
+        from app.services import nifty_scalp_paper
+
+        await nifty_scalp_paper.snapshot()
+    except Exception:  # noqa: BLE001
+        logger.exception("[nifty_scalp] paper book snapshot failed")
+
     return {"opened": result["opened"], "closed": closed,
             "signals": result["signals"], "acted": result.get("acted", 0),
-            "notes": result["notes"]}
+            "notes": result["notes"],
+            "paper": {"opened": result.get("paper_opened", 0), "closed": paper_closed,
+                      "skipped": result.get("paper_skipped", 0),
+                      "notes": result.get("paper_notes", [])}}

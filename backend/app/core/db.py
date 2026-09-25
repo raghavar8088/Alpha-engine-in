@@ -223,6 +223,14 @@ nifty_scalp_scores_collection = db["nifty_scalp_scores"]
 nifty_scalp_state_collection = db["nifty_scalp_state"]
 nifty_scalp_equity_collection = db["nifty_scalp_equity"]
 nifty_scalp_signals_collection = db["nifty_scalp_signals"]
+# The Rs 2 lakh paper book that trades a hand-picked roster off the desk above. Separate
+# collections, not a flag on the desk's own: the two books hold the same contracts at
+# different sizes, and every desk total is a $group over a whole collection.
+nifty_scalp_paper_positions_collection = db["nifty_scalp_paper_positions"]
+nifty_scalp_paper_trades_collection = db["nifty_scalp_paper_trades"]
+nifty_scalp_paper_scores_collection = db["nifty_scalp_paper_scores"]
+nifty_scalp_paper_state_collection = db["nifty_scalp_paper_state"]
+nifty_scalp_paper_equity_collection = db["nifty_scalp_paper_equity"]
 # The desk trades the top 1000 by market cap (TOTAL MARKET 750 + MICROCAP 250), not F&O.
 momentum_universe_collection = db["momentum_universe"]
 # Momentum Trading desk — the pre-live gate for the 37-strategy momentum catalog

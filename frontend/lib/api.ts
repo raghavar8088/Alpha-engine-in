@@ -3265,6 +3265,79 @@ export async function fetchNiftyScalpDaily(limit = 60): Promise<DailyRoi[]> {
   return r.daily ?? [];
 }
 
+// ── the Rs 2 lakh paper book on that desk ──────────────────────────────────────
+// A hand-picked roster of the SAME strategies sharing ONE book. The desk above gives
+// every strategy its own Rs 2 lakh, so nothing there ever competes for cash; here it
+// does, and that is the number this tab exists to show.
+
+export interface NiftyScalpPaperSummary {
+  mode: string;
+  enabled: boolean;
+  book_capital: number;
+  roster_size: number;
+  slice_per_strategy: number;
+  deployed_capital: number;
+  available_cash: number;
+  realized_pnl: number;
+  gross_realized_pnl: number;
+  total_fees: number;
+  unrealized_pnl: number;
+  equity: number;
+  roi_pct: number;
+  open_positions: number;
+  closed_positions: number;
+  one_lot_over_slice: boolean;
+  max_concurrent: number | null;
+  today_pnl: number;
+  daily_loss_limit: number;
+  breaker_tripped: boolean;
+  note: string;
+}
+
+export interface NiftyScalpPaperRosterRow {
+  strategy_id: string;
+  name: string;
+  template: string;
+  family: string;
+  timeframe: string;
+  style: string;
+  slice: number;
+  trades: number;
+  win_rate: number;
+  net_pnl: number;
+  gross_pnl: number;
+  fees: number;
+  roi_pct: number;
+  /** The same strategy's record on the parent desk — the record that got it picked. */
+  desk_trades: number;
+  desk_net_pnl: number;
+  desk_roi_pct: number;
+}
+
+export async function fetchNiftyScalpPaperSummary(): Promise<NiftyScalpPaperSummary> {
+  return apiFetch("/api/nifty-scalp/paper/summary");
+}
+export async function fetchNiftyScalpPaperRoster(): Promise<NiftyScalpPaperRosterRow[]> {
+  const r = await apiFetch("/api/nifty-scalp/paper/roster");
+  return r.roster ?? [];
+}
+export async function fetchNiftyScalpPaperPositions(status = "OPEN"): Promise<NiftyScalpPosition[]> {
+  const r = await apiFetch(`/api/nifty-scalp/paper/positions?status=${status}`);
+  return r.positions ?? [];
+}
+export async function fetchNiftyScalpPaperDaily(limit = 60): Promise<DailyRoi[]> {
+  const r = await apiFetch(`/api/nifty-scalp/paper/daily?limit=${limit}`);
+  return r.daily ?? [];
+}
+export async function setNiftyScalpPaperRoster(
+  strategy_ids: string[],
+): Promise<{ strategy_ids: string[]; count: number; unknown: string[] }> {
+  return apiFetch("/api/nifty-scalp/paper/roster", {
+    method: "PUT",
+    body: JSON.stringify({ strategy_ids }),
+  });
+}
+
 // ── NSE volume gainers (feeds the Buy Low screener) ────────────────────────────
 // Exchange data Angel does not provide: today's volume against each stock's own 1-week
 // and 2-week average, which is what separates a move on ordinary turnover from one

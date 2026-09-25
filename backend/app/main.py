@@ -145,6 +145,8 @@ async def _dhan_token_refresh_loop() -> None:
 # that gets slower as history grows. Cheap to create, idempotent, safe to re-run.
 DESK_INDEXES: dict[str, list] = {
     "nifty_scalp_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)], [("closed_on", 1)], [("timeframe", 1)]],
+    "nifty_scalp_paper_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)], [("closed_on", 1)], [("opened_on", 1), ("status", 1)]],
+    "nifty_scalp_paper_trades": [[("strategy_id", 1)], [("closed_at", -1)]],
     "live_intraday_positions": [[("book", 1), ("status", 1)], [("strategy_id", 1), ("book", 1), ("status", 1)], [("closed_on", 1)]],
     "intraday_lab_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)], [("closed_on", 1)]],
     "live_trading_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)]],
@@ -207,6 +209,7 @@ EXPIRING_COLLECTIONS = {
     "swing_equity": 120,
     "nse_volume_gainers": 120,
     "nifty_scalp_equity": 30,
+    "nifty_scalp_paper_equity": 30,
     "nifty_scalp_signals": 30,
     "stock_desk_equity": 14,
     "zero_hero_equity": 14,

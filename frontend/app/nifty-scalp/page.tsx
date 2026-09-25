@@ -5,6 +5,7 @@ import GlassPanel from "../../components/GlassPanel";
 import DeskHistory from "../../components/DeskHistory";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
+import PaperBook from "./PaperBook";
 import {
   refreshing,
   fetchNiftyScalpSummary,
@@ -22,7 +23,7 @@ import {
 } from "../../lib/api";
 
 const REFRESH_MS = 30000;
-type Tab = "leaderboard" | "timeframes" | "open" | "closed" | "signals" | "daily";
+type Tab = "leaderboard" | "timeframes" | "open" | "closed" | "signals" | "daily" | "paper";
 const TABS: { key: Tab; label: string }[] = [
   { key: "leaderboard", label: "Strategy leaderboard" },
   { key: "timeframes", label: "By timeframe" },
@@ -30,7 +31,12 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "closed", label: "Closed" },
   { key: "signals", label: "Signal history" },
   { key: "daily", label: "Daily ROI" },
+  { key: "paper", label: "Paper book · ₹2L" },
 ];
+// The timeframe and family chips filter the 504-strategy DESK. The paper book is a fixed
+// roster on one balance, so they mean nothing there and are hidden rather than left to
+// look like they are doing something.
+const DESK_TABS: Tab[] = ["leaderboard", "timeframes", "open", "closed", "signals", "daily"];
 const TF_KEYS = ["1m", "5m", "10m", "15m", "30m", "1h", "4h", "1d"];
 // `chart_pattern` is the 13 geometric formations — head & shoulders, double/triple
 // tops, triangles, wedges, flags, pennants, cup & handle, rounding, diamond,
@@ -140,6 +146,8 @@ export default function NiftyScalpPage() {
         </div>
       )}
 
+      {DESK_TABS.includes(tab) && (
+      <>
       <div className="filters">
         <span className="flabel">Timeframe</span>
         <button className={tf === null ? "chip active" : "chip"} onClick={() => setTf(null)}>All {summary?.strategy_count ?? 504}</button>
@@ -155,6 +163,8 @@ export default function NiftyScalpPage() {
           <button key={f.key} className={fam === f.key ? "chip active" : "chip"} onClick={() => setFam(f.key)}>{f.label}</button>
         ))}
       </div>
+      </>
+      )}
 
       <div className="tabs">
         {TABS.map((t) => (
@@ -303,6 +313,8 @@ export default function NiftyScalpPage() {
           )}
         </GlassPanel>
       )}
+
+      {tab === "paper" && <PaperBook board={board} />}
 
       <DeskHistory deskKey={"nifty-scalp"} />
 
