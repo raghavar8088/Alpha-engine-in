@@ -36,6 +36,10 @@ strategy_runs_collection = db["strategy_runs"]
 live_watchlist_collection = db["live_watchlist"]
 option_backtests_collection = db["option_backtests"]
 option_sweeps_collection = db["option_sweeps"]
+# Kept while `call_engine` still imports it. Another session is mid-removal of the Trading
+# Calls module: db.py lost this handle before call_engine stopped using it, which took the
+# WHOLE backend down on import. Restored so the two halves can land in either order.
+trading_calls_collection = db["trading_calls"]
 # Option-SELLING sweeps live in their own collection, never mixed with the buying ones:
 # the two are gated on different rules (selling ignores win rate entirely) and carry
 # different columns, so a shared history would produce leaderboards that silently
