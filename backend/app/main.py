@@ -48,7 +48,6 @@ from app.api.routes import (
     stock_desk,
     buy_low,
     live_paper,
-    momentum_trading,
     zero_hero,
     stocks_range,
     strategy_factory,
@@ -149,7 +148,6 @@ DESK_INDEXES: dict[str, list] = {
     "live_intraday_positions": [[("book", 1), ("status", 1)], [("strategy_id", 1), ("book", 1), ("status", 1)], [("closed_on", 1)]],
     "intraday_lab_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)], [("closed_on", 1)]],
     "live_trading_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)]],
-    "momentum_trading_positions": [[("bucket", 1), ("status", 1)], [("closed_on", 1)]],
     "swing_positions": [[("status", 1)], [("closed_on", 1)]],
     "pattern_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)], [("closed_on", 1)], [("timeframe", 1)]],
     "swing_watchlist": [[("status", 1)], [("symbol", 1), ("status", 1)]],
@@ -215,7 +213,6 @@ EXPIRING_COLLECTIONS = {
     "buy_low_equity": 14,
     "live_paper_equity": 14,
     "live_trading_equity": 30,
-    "momentum_trading_equity": 14,
     "intraday_lab_equity": 14,
     "prelive_equity": 30,
     "prelive_selling_equity": 30,
@@ -779,7 +776,6 @@ app.include_router(stock_desk.router)
 app.include_router(zero_hero.router)
 app.include_router(buy_low.router)
 app.include_router(live_paper.router)
-app.include_router(momentum_trading.router)
 app.include_router(trending_stocks.router)
 app.include_router(instrument_search.router)
 app.include_router(nifty_scalp.router)

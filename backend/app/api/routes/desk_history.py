@@ -96,14 +96,6 @@ SCOPED: dict[str, dict] = {
         "default": "80k",
         "capital": lambda s: __import__("app.services.live_intraday_engine", fromlist=["x"]).book_capital(s),
     },
-    "momentum-trading": {
-        "label": "Momentum Trading",
-        "positions": lambda: D.momentum_trading_positions_collection,
-        "equity": lambda: D.momentum_trading_equity_collection,
-        "field": "bucket",
-        "default": "top752",
-        "capital": lambda s: __import__("app.services.momentum_trading", fromlist=["x"]).TOTAL_CAPITAL,
-    },
 }
 
 
