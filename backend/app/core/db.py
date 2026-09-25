@@ -42,11 +42,6 @@ option_sweeps_collection = db["option_sweeps"]
 # compare strategies judged by different standards.
 option_sweeps_selling_collection = db["option_sweeps_selling"]
 research_signals_collection = db["research_signals"]
-trading_calls_collection = db["trading_calls"]
-# Paper positions auto-opened off each trading call (see app.services.call_positions)
-trading_call_positions_collection = db["trading_call_positions"]
-# Single state doc for the trading-calls auto-generation scheduler
-call_scheduler_state_collection = db["call_scheduler_state"]
 # Manual "Positions" module — user-initiated paper trades (search -> buy -> exit)
 manual_positions_collection = db["manual_positions"]
 manual_orders_collection = db["manual_orders"]
@@ -120,14 +115,6 @@ zero_hero_scores_collection = db["zero_hero_scores"]
 zero_hero_signals_collection = db["zero_hero_signals"]
 zero_hero_state_collection = db["zero_hero_state"]
 zero_hero_equity_collection = db["zero_hero_equity"]
-# Buy Low Options — buys a cheap OTM CALL on any F&O stock down >4% at the 3 PM check.
-# Long premium only, so each position's loss is bounded by its cost; signals are kept
-# separately because a faller is often skipped (no strike fits the Rs5,100 budget).
-buy_low_positions_collection = db["buy_low_positions"]
-buy_low_trades_collection = db["buy_low_trades"]
-buy_low_signals_collection = db["buy_low_signals"]
-buy_low_state_collection = db["buy_low_state"]
-buy_low_equity_collection = db["buy_low_equity"]
 # Live Paper Buying — the 5 Pre-Live leaderboard winners on a realistic Rs50,000 book
 # (Rs10k each), NIFTY ATM options at live Angel premiums. Paper.
 live_paper_positions_collection = db["live_paper_positions"]
@@ -211,12 +198,15 @@ pattern_book_trades_collection = db["pattern_book_trades"]
 pattern_book_scores_collection = db["pattern_book_scores"]
 pattern_book_state_collection = db["pattern_book_state"]
 pattern_book_equity_collection = db["pattern_book_equity"]
+# Per-module ON/OFF switches (see app.services.desk_switches). One tiny document per
+# module, `_id` = the module key. ABSENT MEANS ON, so the collection being empty is the
+# normal shipped state and nothing changes until someone switches something off.
+desk_switches_collection = db["desk_switches"]
 swing_watchlist_collection = db["swing_watchlist"]
 swing_positions_collection = db["swing_positions"]
 swing_trades_collection = db["swing_trades"]
 swing_equity_collection = db["swing_equity"]
 swing_state_collection = db["swing_state"]
-nse_volume_gainers_collection = db["nse_volume_gainers"]
 nifty_scalp_positions_collection = db["nifty_scalp_positions"]
 nifty_scalp_trades_collection = db["nifty_scalp_trades"]
 nifty_scalp_scores_collection = db["nifty_scalp_scores"]

@@ -35,11 +35,18 @@ IDLE_TICK_SECONDS = int(os.getenv("COMMODITY_IDLE_TICK_SECONDS", "1800"))
 
 async def commodity_bars_loop() -> None:
     from app.services.commodity_bars import refresh_all
+    from app.services.desk_switches import is_on
 
     first = True
     while True:
         try:
             open_now = is_market_open(datetime.now(IST))
+            # The bar poller IS this desk's market-data fetch, so the switch reaches it
+            # too — otherwise an OFF desk keeps pulling candles it cannot trade on, and
+            # the candle endpoint is the scarcer resource of the two.
+            if not await is_on("commodity"):
+                await asyncio.sleep(IDLE_TICK_SECONDS)
+                continue
             if open_now or first:
                 result = await refresh_all()
                 first = False
@@ -52,10 +59,11 @@ async def commodity_bars_loop() -> None:
 
 async def commodity_desk_loop() -> None:
     from app.services.commodity_engine import run_cycle
+    from app.services.desk_switches import is_on
 
     while True:
         try:
-            if is_market_open(datetime.now(IST)):
+            if is_market_open(datetime.now(IST)) and await is_on("commodity"):
                 r = await run_cycle()
                 logger.info("[commodity] desk cycle: %d opened, %d managed, %d evaluated",
                             r["opened"], r["managed"], r["evaluated"])

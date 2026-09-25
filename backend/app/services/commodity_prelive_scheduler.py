@@ -30,10 +30,11 @@ IDLE_TICK_SECONDS = int(os.getenv("COMMODITY_PRELIVE_IDLE_TICK_SECONDS", "1800")
 
 async def commodity_prelive_loop() -> None:
     from app.services.commodity_prelive import get_state, run_cycle
+    from app.services.desk_switches import is_on
 
     while True:
         try:
-            if is_market_open(datetime.now(IST)):
+            if is_market_open(datetime.now(IST)) and await is_on("commodity_prelive"):
                 state = await get_state()
                 r = await run_cycle()
                 logger.info(

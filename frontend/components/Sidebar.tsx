@@ -473,6 +473,19 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
     label: "System",
     links: [
       {
+        // The master switches. Sits in System rather than beside the desks because it
+        // governs ALL of them — a power-rail mark, not another desk.
+        href: "/modules",
+        label: "Modules",
+        icon: (
+          <>
+            <rect x="3" y="4" width="18" height="6" rx="2" />
+            <rect x="3" y="14" width="18" height="6" rx="2" />
+            <path d="M8 7h.01M16 17h.01" />
+          </>
+        ),
+      },
+      {
         href: "/settings/broker",
         label: "Broker Settings",
         icon: (

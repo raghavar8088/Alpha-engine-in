@@ -35,6 +35,7 @@ from app.api.routes import (
     instrument_search,
     manual_positions,
     market_data,
+    modules,
     momentum,
     options,
     paper_trading,
@@ -46,14 +47,12 @@ from app.api.routes import (
     screener,
     swing_signals,
     stock_desk,
-    buy_low,
     live_paper,
     zero_hero,
     stocks_range,
     strategy_factory,
     strategies,
     telegram_signals,
-    trading_calls,
     trending_stocks,
     watchlist,
 )
@@ -63,7 +62,6 @@ from app.core.db import (
     live_watchlist_collection,
     market_data_snapshot_collection,
     strategy_runs_collection,
-    trading_calls_collection,
 )
 from app.services import chart_cache, chart_workspace
 from app.ws import broker_manager
@@ -153,7 +151,6 @@ DESK_INDEXES: dict[str, list] = {
     "swing_positions": [[("status", 1)], [("closed_on", 1)]],
     "pattern_positions": [[("status", 1)], [("strategy_id", 1), ("status", 1)], [("closed_on", 1)], [("timeframe", 1)]],
     "swing_watchlist": [[("status", 1)], [("symbol", 1), ("status", 1)]],
-    "buy_low_positions": [[("status", 1)], [("closed_on", 1)]],
     "zero_hero_positions": [[("status", 1)], [("closed_on", 1)]],
     "stock_desk_positions": [[("side", 1), ("status", 1)], [("closed_on", 1)]],
     # ts_* is deliberately ABSENT: trending_stocks.engine.ensure_indexes() owns every
@@ -207,13 +204,11 @@ EXPIRING_COLLECTIONS = {
     "pattern_equity": 60,
     "pattern_book_equity": 60,
     "swing_equity": 120,
-    "nse_volume_gainers": 120,
     "nifty_scalp_equity": 30,
     "nifty_scalp_paper_equity": 30,
     "nifty_scalp_signals": 30,
     "stock_desk_equity": 14,
     "zero_hero_equity": 14,
-    "buy_low_equity": 14,
     "live_paper_equity": 14,
     "live_trading_equity": 30,
     "intraday_lab_equity": 14,
@@ -222,7 +217,6 @@ EXPIRING_COLLECTIONS = {
     "market_data_history": 7,
     "fno_stock_roll_log": 30,
     "zero_hero_signals": 30,
-    "buy_low_signals": 30,
     # Strategy Factory: 546 strategies writing an equity point per cycle is the
     # highest-churn source in the app, so it expires soonest.
     "sf_equity": 14,
@@ -312,10 +306,6 @@ async def ensure_indexes() -> None:
     await _try("live_watchlist.symbol_timeframe",
                live_watchlist_collection.create_index([("symbol", 1), ("timeframe", 1)],
                                                       unique=True))
-    await _try("trading_calls.call_id",
-               trading_calls_collection.create_index("call_id", unique=True))
-    await _try("trading_calls.status_segment",
-               trading_calls_collection.create_index([("status", 1), ("segment", 1)]))
     await _try("chart_cache", chart_cache.ensure_indexes())
     await _try("chart_workspace", chart_workspace.ensure_indexes())
     from app.services.strategy_factory.engine import ensure_indexes as sf_ensure_indexes
@@ -358,17 +348,6 @@ async def start_screener_pattern_warm() -> None:
         logger.info("Screener pattern warm enabled (every %.0f min)", WARM_EVERY / 60)
     else:
         logger.info("Screener pattern warm disabled (SCREENER_PATTERN_WARM=0)")
-
-
-@app.on_event("startup")
-async def start_call_scheduler() -> None:
-    from app.services.call_scheduler import AUTOGEN_ENABLED, GENERATION_SLOTS, call_scheduler_loop
-
-    if AUTOGEN_ENABLED:
-        asyncio.create_task(call_scheduler_loop())
-        logger.info("Trading-calls auto-scan enabled (IST slots: %s)", ", ".join(GENERATION_SLOTS))
-    else:
-        logger.info("Trading-calls auto-scan disabled (CALLS_AUTOGEN_ENABLED=0)")
 
 
 @app.on_event("startup")
@@ -761,7 +740,6 @@ app.include_router(risk.router)
 app.include_router(options.router)
 app.include_router(ai.router)
 app.include_router(research.router)
-app.include_router(trading_calls.router)
 app.include_router(prelive.router)
 app.include_router(prelive_selling.router)
 app.include_router(watchlist.router)
@@ -777,7 +755,6 @@ app.include_router(commodity_prelive.router)
 app.include_router(strategy_factory.router)
 app.include_router(stock_desk.router)
 app.include_router(zero_hero.router)
-app.include_router(buy_low.router)
 app.include_router(live_paper.router)
 app.include_router(trending_stocks.router)
 app.include_router(instrument_search.router)
@@ -786,6 +763,7 @@ app.include_router(swing_trading.router)
 app.include_router(desk_history.router)
 app.include_router(pattern.router)
 app.include_router(pattern_books.router)
+app.include_router(modules.router)
 app.include_router(stocks_range.router)
 app.include_router(bullish_stocks.router)
 app.include_router(screener.router)

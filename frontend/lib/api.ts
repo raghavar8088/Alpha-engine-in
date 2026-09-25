@@ -6312,3 +6312,40 @@ export async function fetchPatternBookTrades(
 export async function runPatternBooksCycle() {
   return apiFetch(`${pbk}/run`, { method: "POST" });
 }
+
+// ---- Module ON/OFF switches ---------------------------------------------------
+// Turning a module OFF stops its scheduler cycle, which is where it both fetches market
+// data and places paper trades — so both stop together. Positions already open are left
+// untouched and are NOT managed while it is off.
+export interface ModuleSwitch {
+  module: string;
+  label: string;
+  href: string;
+  enabled: boolean;
+}
+
+export interface ModuleSwitches {
+  modules: ModuleSwitch[];
+  total: number;
+  on: number;
+  off: number;
+  note: string;
+}
+
+export async function fetchModuleSwitches(): Promise<ModuleSwitches> {
+  return apiFetch("/api/modules");
+}
+
+export async function setModuleSwitch(module: string, enabled: boolean): Promise<ModuleSwitches> {
+  return apiFetch("/api/modules/toggle", {
+    method: "POST",
+    body: JSON.stringify({ module, enabled }),
+  });
+}
+
+export async function setAllModuleSwitches(enabled: boolean): Promise<ModuleSwitches> {
+  return apiFetch("/api/modules/all", {
+    method: "POST",
+    body: JSON.stringify({ enabled }),
+  });
+}
