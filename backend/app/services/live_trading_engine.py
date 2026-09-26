@@ -554,9 +554,13 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
         ctx = {"bars": bars, "atr14": atr14, "quote": quote, "prev_bar": bars[-2]}
         bar_ts = str(getattr(bars[-1], "ts", None) or (
             bars[-1].get("ts") if isinstance(bars[-1], dict) else ""))
+        # The quote dict's price key is `last_price` — see angel_equity_feed, which maps
+        # Angel's own "ltp" onto it, and the Dhan path returns the same shape. Reading
+        # "ltp" here would silently find nothing and stop the desk opening ANY position,
+        # so `last_price` is read first and "ltp" kept only as a defensive fallback.
         fill_price = None
         if quote:
-            fill_price = float(quote.get("ltp") or quote.get("last_price") or 0.0) or None
+            fill_price = float(quote.get("last_price") or quote.get("ltp") or 0.0) or None
         for ls in SELECTED:
             if not enabled.get(ls.strategy_id, True):
                 continue  # this strategy is disabled for real trading
