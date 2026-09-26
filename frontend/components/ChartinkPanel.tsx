@@ -107,8 +107,10 @@ export default function ChartinkPanel({ cfg }: { cfg: Cfg }) {
               owner, and the panel will say so rather than showing an empty table.
             </div>
 
-            {/* Grouped, not one long row. Thirty-eight screeners in a flat wrap is a
-                wall to scan; by theme you can find the kind of idea you came for. */}
+            {/* Grouped, not one long row. Sixty-odd screeners in a flat wrap is a wall
+                to scan; by theme you can find the kind of idea you came for. An empty
+                group renders nothing, so the catalogue can grow a theme without this
+                needing to know about it. */}
             <div className="groups">
               {(cfg?.named_groups ?? ["Other"]).map((g) => {
                 const inGroup = (cfg?.named ?? []).filter(

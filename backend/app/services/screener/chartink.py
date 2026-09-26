@@ -16,6 +16,16 @@ WHAT WAS ACTUALLY VERIFIED (probe, 2026-08-21, not documentation):
     short-term-breakouts 33 rows, breakouts 139, volume-shockers 44, rsi-crossing-60 150,
     each in well under a second. A bad slug 404s cleanly. This is what makes the adapter
     worth more than a fixed preset list — it can be pointed at any screener URL.
+  * RE-PROBED 2026-09-26 while adding the 200-EMA, VCP and chart-pattern screeners: all
+    64 catalogued screeners still fetch and run. The probe also settled how much the
+    titles can be trusted — of roughly thirty candidates examined, six were rejected
+    outright and four more had to be RELABELLED because the clause tested something other
+    than the name. Two were not merely mislabelled but impossible: `rounding-bottom`
+    asserts `sma(20) < ema(34)` and `sma(20) > ema(34)` in one clause, and
+    `descending-triangle` is scoped to segment {-1}, which matches nothing. Both return
+    zero rows for ever and look, from outside, exactly like a working screener on a quiet
+    day. Read the clause, always. `tests/screener/verify_chartink_catalog.py --live`
+    re-runs this whole check.
   * BUT the dashboard's widget query language is NOT executable through
     `/screener/process`: posting a widget query verbatim returns
     `{"data":[],"scan_error":"There was a error in running your scan"}`. Their JS bundle
@@ -175,6 +185,29 @@ NAMED: dict[str, dict] = {
         "label": "Trendline breakout",
         "why": "Closed above a 20-day high it had not breached the session before.",
     },
+    "chart-pattern-breakout": {
+        "group": "Highs & breakouts",
+        "label": "Chart pattern breakout",
+        "why": "Reads MONTHLY candles: last month closed down, this month has closed above "
+               "last month's HIGH while trading below it at some point, and today is the "
+               "month's high. A monthly reversal taken out — slow, and usually two or "
+               "three names.",
+    },
+    "triangle-breakout": {
+        "group": "Highs & breakouts",
+        "label": "Triangle breakout",
+        "why": "Four sessions of strictly narrowing range — each day's high below and low "
+               "above the day before. The name says breakout but the clause tests the "
+               "COILING, not the exit from it; it is the setup, and the break is still to "
+               "come.",
+    },
+    "consolidation-breakout": {
+        "group": "Highs & breakouts",
+        "label": "Consolidation breakout",
+        "why": "Up more than 5% today, after sitting pinned within 1% of its 8-day EMA "
+               "yesterday, four and eight sessions ago, closing down yesterday. A flat "
+               "stretch that ended in one decisive session.",
+    },
     "range-breakout": {
         "group": "Highs & breakouts",
         "label": "Range breakout",
@@ -205,6 +238,166 @@ NAMED: dict[str, dict] = {
         "label": "NR7 narrow range",
         "why": "The narrowest range of the last seven sessions.",
     },
+    "ath": {
+        "group": "Highs & breakouts",
+        "label": "All-time high · monthly",
+        "why": "The strictest of the all-time-high scans here, and the only one that reads "
+               "MONTHLY candles: this month's high above the highest monthly high of the "
+               "last 96 months, weekly and monthly RSI both over 60, market cap above "
+               "₹5,000cr. Eight years of history, so it will not call a two-year high an "
+               "all-time one.",
+    },
+    "all-time-high-1": {
+        "group": "Highs & breakouts",
+        "label": "All-time high taken out today",
+        "why": "Close at or above the highest high of the last 999 sessions AND above "
+               "yesterday's high, on at least ₹2.5 lakh of turnover. The 'today' part is "
+               "the difference from the scans that also list names merely sitting at a high.",
+    },
+    "all-time-high-breakout": {
+        "group": "Highs & breakouts",
+        "label": "All-time-high breakout",
+        "why": "The 5-day highest close 3% clear of the 120-day highest close as of six "
+               "sessions back, on volume above its own 5-day mean, closing up and above "
+               "the open. A move THROUGH the level rather than a touch of it.",
+    },
+
+    # ── around the 200-day line ─────────────────────────────────────────────
+    # Four of these are titled as though they test "price is above the 200 EMA". None of
+    # them do. Every one carries `1 day ago close <= 1 day ago ema(close,200)`, which makes
+    # it a CROSSOVER — the day the line is reclaimed, not the state of being above it. They
+    # are kept because that is a genuinely useful and different signal, but they are
+    # labelled for what the clause does. The app's own "Above the 200-DMA" chip under
+    # Trend & momentum is the one that answers the "is it above" question.
+    "price-above-200-ema": {
+        "group": "Around the 200-day line",
+        "label": "Crossed the 200 EMA",
+        "why": "Closed above the 200 EMA having closed below it yesterday — the whole cash "
+               "market, no volume or price floor, so it is the broadest of the three and "
+               "will include names too thin to trade.",
+    },
+    "stocks-above-200-ema": {
+        "group": "Around the 200-day line",
+        "label": "Crossed the 200 EMA · liquid",
+        "why": "The same reclaim, filtered to over 5 lakh shares traded. Despite the title "
+               "this is not 'stocks above the 200 EMA' — it fires on the crossing day only.",
+    },
+    "close-above-200-ema": {
+        "group": "Around the 200-day line",
+        "label": "Crossed the 200 EMA · RSI > 60",
+        "why": "The same reclaim again, with RSI(14) already above 60 — momentum confirming "
+               "the cross rather than the cross alone. The strictest of the three, and "
+               "usually a short list.",
+    },
+    "near-200-ema": {
+        "group": "Around the 200-day line",
+        "label": "Within 5% of the 200 EMA",
+        "why": "Trading between 0.95x and 1.05x its 200 EMA, market cap above ₹5,000cr. The "
+               "band is symmetric, so it returns names approaching the line from ABOVE as "
+               "well as from below — check which side before reading it as support.",
+    },
+    "stocks-touching-200-ema": {
+        "group": "Around the 200-day line",
+        "label": "Touching the 200 EMA · weekly",
+        "why": "The WEEKLY candle's low at or below the weekly 200 EMA and its high at or "
+               "above it — the line running through this week's range. A much slower signal "
+               "than the daily ones above; the same name can qualify for weeks.",
+    },
+    "200-ema": {
+        "group": "Around the 200-day line",
+        "label": "Touched the 200 SMA and held",
+        "why": "The day's LOW at or below the 200 SMA but the CLOSE back above it, while "
+               "still under the 20 SMA — a dip into the line that was bought, in a stock "
+               "that has not yet recovered its short average. Note it is the SMA here, not "
+               "the EMA, whatever the Chartink title says.",
+    },
+
+    # ── chart patterns ──────────────────────────────────────────────────────
+    # Read the `why` before trusting any of these. Chartink's pattern screeners are
+    # approximations written by users against a clause language that cannot express a
+    # shape: a head-and-shoulders is four ordered highs and lows, not a neckline. Several
+    # test something quite unlike their title and are described here as what they test.
+    "vcp-stocks": {
+        "group": "Chart patterns",
+        "label": "VCP · weekly contractions",
+        "why": "The closest thing here to a real volatility contraction: each of the last "
+               "several weekly highs within 3-5% of the 6-week high, so the swings are "
+               "getting shallower, on a 50-day average volume between 10k and 2 lakh. The "
+               "volume ceiling means it deliberately looks at SMALLER names.",
+    },
+    "vcp-pattern": {
+        "group": "Chart patterns",
+        "label": "Trend template (titled VCP)",
+        "why": "Not a contraction test at all despite the name — it is Minervini's trend "
+               "template: above the 200 SMA, 50 SMA above the 200, within 30% of the "
+               "52-week high and at least 80% above the 52-week low. A useful universe "
+               "filter, and a large list.",
+    },
+    "minervini-vcp": {
+        "group": "Chart patterns",
+        "label": "Minervini VCP",
+        "why": "The full trend template — within 25% of the 52-week high, 25% above the "
+               "52-week low, above the 150 and 200 averages on daily, weekly and monthly, "
+               "price above ₹100. Strict, so usually only a handful of names.",
+    },
+    "volatility-contraction-pattern": {
+        "group": "Chart patterns",
+        "label": "Inside-bar contraction",
+        "why": "Three successive sessions each trading inside the range of the one three "
+               "days back — a literal reading of contraction. Genuinely rare; an empty "
+               "result is the normal answer, not a failure.",
+    },
+    "vcp-breakout": {
+        "group": "Chart patterns",
+        "label": "Contraction with rising volume",
+        "why": "Volume higher than each of the last seven sessions while the 14-day ATR "
+               "keeps falling — range tightening as participation builds. The author left "
+               "it named 'Test_VCP Breakout', which is a fair warning about how finished it "
+               "is.",
+    },
+    "inverse-head-and-shoulders": {
+        "group": "Chart patterns",
+        "label": "Weekly higher low",
+        "why": "Four ordered weekly highs and lows making a higher low and a higher high on "
+               "rising weekly volume, above ₹75 and ₹1,000cr. That is a bottoming step, not "
+               "a neckline — hundreds of names qualify, so treat it as a starting list.",
+    },
+    "double-bottom": {
+        "group": "Chart patterns",
+        "label": "Oversold at a 360-day low",
+        "why": "RSI(5) crossing back up through 25 while the low is still the lowest of the "
+               "last 360 sessions. A bounce off a deep low, which is the situation a double "
+               "bottom forms in — but nothing in the clause tests for two of them.",
+    },
+    "ascending-triangle": {
+        "group": "Chart patterns",
+        "label": "Ascending triangle",
+        "why": "Back above the level it closed at three months ago after a week, a fortnight "
+               "and one and two months all closing below it, and above the 200 SMA — a flat "
+               "ceiling repeatedly tested, then reclaimed.",
+    },
+    "symmetrical-triangle": {
+        "group": "Chart patterns",
+        "label": "Symmetrical triangle",
+        "why": "The 20-period average of weekly HIGHS falling for three weeks while the "
+               "average of weekly LOWS rises — both edges converging, which is the one "
+               "pattern in this list the clause language can actually express.",
+    },
+    "falling-wedge": {
+        "group": "Chart patterns",
+        "label": "Five months of lower lows, low debt",
+        "why": "Each of the last five monthly lows below the one before, price above ₹50, "
+               "and total loans under half of net worth. The wedge part is unverified — "
+               "what it really finds is a long decline in a company that is not leveraged.",
+    },
+    "flag-pattern": {
+        "group": "Chart patterns",
+        "label": "Flag breakout",
+        "why": "First close above the 30-day high on 1.5x its 30-day average volume, EMA 13 "
+               "above EMA 34, RSI over 70, and still inside the upper Bollinger band. The "
+               "band condition is what keeps it from firing on names already extended.",
+    },
+
 
     # ── trend and momentum ──────────────────────────────────────────────────
     "golden-crossover": {
@@ -296,6 +489,14 @@ NAMED: dict[str, dict] = {
         "why": "First 15 minutes through YESTERDAY'S high — or its low. The scan is "
                "bidirectional, so read the direction before acting on a name.",
     },
+    "pennant": {
+        "group": "Intraday",
+        "label": "Pennant (15-minute)",
+        "why": "Three 15-minute bars of falling highs and rising lows on shrinking volume, "
+               "above Rs150 and 5 lakh shares. This is the class of scan Chartink is "
+               "actually worth asking: it needs intraday bars across the whole market, "
+               "which this app does not store. Empty outside market hours.",
+    },
     "intraday-buy": {
         "group": "Intraday",
         "label": "Intraday buy",
@@ -334,6 +535,21 @@ NAMED: dict[str, dict] = {
         "why": "RSI in the floor. Not a buy signal on its own — a stock in a downtrend "
                "stays oversold all the way down.",
     },
+    "head-and-shoulders": {
+        "group": "Warning signs",
+        "label": "Head and shoulders",
+        "why": "Four ordered daily highs and lows over four sessions on the Nifty 500. Far "
+               "too short a window to be the real topping pattern - read it as 'the last "
+               "four days traced a lower high', which is all the clause can say.",
+    },
+    "double-top": {
+        "group": "Warning signs",
+        "label": "Double top",
+        "why": "The high 26 sessions ago within 2% of the 50-session maximum high, and that "
+               "maximum unchanged over the 10 sessions before it - the same ceiling hit "
+               "twice about a month apart. One of the few here that genuinely tests the "
+               "shape it is named after.",
+    },
     "death-cross": {
         "group": "Warning signs",
         "label": "Death cross",
@@ -341,8 +557,24 @@ NAMED: dict[str, dict] = {
     },
 }
 
-GROUP_ORDER = ["Highs & breakouts", "Trend & momentum", "Volume", "Candlesticks",
+GROUP_ORDER = ["Highs & breakouts", "Around the 200-day line", "Chart patterns",
+               "Trend & momentum", "Volume", "Candlesticks",
                "Intraday", "Quality", "Warning signs"]
+
+# PROBED AND DELIBERATELY LEFT OUT (2026-09-26). Each was fetched, parsed and run before
+# being rejected, so nobody has to re-discover why:
+#   rounding-bottom      its clause asserts sma(20) < ema(34) AND sma(20) > ema(34) in the
+#                        same breath. It cannot ever return a row.
+#   descending-triangle  scoped to segment {-1}, which matches nothing. Always empty.
+#   200-ema-crossover    titled for the 200 EMA; every term in it is the 20 EMA, and it
+#                        compares VOLUME against a price average, which is meaningless.
+#   all-time-high        tests `close >= 0.998 x today's high` in a Rs50-1500 band. That is
+#                        "closed near the day's high" and has nothing to do with all-time
+#                        highs; 151 rows of it would have read as an ATH list.
+#   near-all-time-high   tests "doubled off the 52-week low and still trending". Nothing in
+#                        it measures distance from any high.
+#   above-200-ema        the same clause as price-above-200-ema on a narrower segment.
+#   vcp, stocks-near-200-ema, rectangle-pattern, stocks-at-52-week-high  private.
 
 # The scan arrives as a Vue prop, HTML-escaped; `atlas_query` inside it is the clause.
 _SCAN_JSON_RE = re.compile(r':scan-json="([^"]+)"')
