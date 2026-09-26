@@ -674,7 +674,22 @@ export interface IntradayPosition {
   is_anti?: boolean;
 }
 
+export interface IntradayGate {
+  t_threshold: number;
+  strategies_tested: number;
+  min_trades: number;
+  min_profit_factor: number;
+  max_drawdown_pct: number;
+  note: string;
+}
+
 export interface IntradayDeskStatus {
+  // Promotion gate. `ready_count` of 0 is the normal, honest state — it means nothing on
+  // the board has yet shown an edge distinguishable from luck.
+  gate?: IntradayGate;
+  ready_count?: number;
+  rejected_count?: number;
+  pending_count?: number;
   initial_capital: number;
   per_strategy_allocation: number;
   available_cash: number;
@@ -712,6 +727,16 @@ export interface IntradayScore {
   net_pnl: number;
   allocated_capital: number | null;
   is_anti?: boolean;
+  // Promotion gate. `verdict` is the only field that answers "is this an edge?" —
+  // net_pnl alone cannot, because the top of a 150-strategy board is where luck collects.
+  verdict?: "READY" | "REJECTED" | "PENDING";
+  verdict_reasons?: string[];
+  profit_factor?: number | null;
+  expectancy?: number;
+  max_drawdown_pct?: number;
+  t_stat?: number | null;
+  t_threshold?: number;
+  strategies_tested?: number;
 }
 
 export interface IntradayTrade {

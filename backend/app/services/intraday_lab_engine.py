@@ -45,6 +45,13 @@ from app.services.desk_totals import split as _totals_split
 from app.services.angel_equity_feed import equity_quotes
 from app.services.call_engine import IST, _quote_batch, _scored_daily_symbols
 from app.services.dhan_client import DhanClient
+from app.services.promotion_gate import (
+    MAX_DRAWDOWN_PCT as PG_MAX_DD,
+    MIN_PROFIT_FACTOR as PG_MIN_PF,
+    MIN_TRADES as PG_MIN_TRADES,
+    grade,
+    t_threshold,
+)
 from app.services.intraday_strategies import STRATEGY_CATALOG, STRATEGY_BY_ID, evaluate
 from backtesting_service.service import load_bars
 from tradingai_shared.domain import Timeframe
@@ -275,17 +282,20 @@ async def _update_score(strategy_id: str) -> None:
             {"strategy_id": strategy_id, "status": {"$ne": "OPEN"}}, {"realized_pnl": 1}
         )
     ]
-    trades = len(closed)
-    wins = sum(1 for p in closed if (p.get("realized_pnl") or 0) > 0)
-    net_pnl = sum(p.get("realized_pnl") or 0 for p in closed)
-    win_rate = round(wins / trades, 4) if trades else 0.0
-    allocated_capital = round(PER_STRATEGY_ALLOCATION + net_pnl, 2)
+    # GRADED, not just counted. Ranking 150 strategies by net P&L puts luck at the top of
+    # the board: with that many candidates a handful finish well ahead on noise alone. The
+    # gate answers the only question that matters before real money — would this record be
+    # surprising from a strategy with NO edge — and raises its t-stat bar to account for
+    # how many strategies were tried alongside this one.
+    pnls = [float(p.get("realized_pnl") or 0.0) for p in closed]
+    graded = grade(pnls, PER_STRATEGY_ALLOCATION, len(STRATEGY_CATALOG))
+    allocated_capital = round(PER_STRATEGY_ALLOCATION + graded["net_pnl"], 2)
     await intraday_lab_scores_collection.update_one(
         {"strategy_id": strategy_id},
         {"$set": {
             "strategy_id": strategy_id, "name": spec.name, "category": spec.category,
-            "trades": trades, "wins": wins, "win_rate": win_rate,
-            "net_pnl": round(net_pnl, 2), "allocated_capital": allocated_capital,
+            **graded,
+            "allocated_capital": allocated_capital,
             "updated_at": _now(),
         }},
         upsert=True,
@@ -679,4 +689,20 @@ async def summary() -> dict:
         **(await breaker_state()),
         "max_strategies_per_symbol": MAX_STRATEGIES_PER_SYMBOL,
         "excluded_categories": sorted(EXCLUDED_CATEGORIES),
+        # The promotion gate. `ready_count` is the number that would survive real money;
+        # it is normally 0 and that is the honest answer, not a fault.
+        "gate": {
+            "t_threshold": round(t_threshold(len(STRATEGY_CATALOG)), 3),
+            "strategies_tested": len(STRATEGY_CATALOG),
+            "min_trades": PG_MIN_TRADES,
+            "min_profit_factor": PG_MIN_PF,
+            "max_drawdown_pct": PG_MAX_DD,
+            "note": (f"The t-stat bar is {round(t_threshold(len(STRATEGY_CATALOG)), 2)}, not "
+                     f"the usual 1.96, because {len(STRATEGY_CATALOG)} strategies are tried "
+                     f"at once — at 1.96 about {max(1, round(len(STRATEGY_CATALOG) * 0.05))} "
+                     "would clear it on luck alone."),
+        },
+        "ready_count": await intraday_lab_scores_collection.count_documents({"verdict": "READY"}),
+        "rejected_count": await intraday_lab_scores_collection.count_documents({"verdict": "REJECTED"}),
+        "pending_count": await intraday_lab_scores_collection.count_documents({"verdict": "PENDING"}),
     }

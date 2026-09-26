@@ -474,6 +474,24 @@ export default function IntradayStocksPage() {
         )}
       </GlassPanel>
 
+      <div className="gate-note">
+        <strong>Ranked by P&amp;L, judged by the gate.</strong> The top of a{" "}
+        {status?.gate?.strategies_tested ?? scores.length}-strategy board is where luck
+        collects: run that many and a handful finish well ahead having proved nothing. A
+        strategy is only <strong>READY</strong> if its record would be surprising from a
+        strategy with <em>no edge</em> — which needs a t-statistic of{" "}
+        <strong>{(status?.gate?.t_threshold ?? 1.96).toFixed(2)}</strong>, not the usual
+        1.96, precisely because so many were tried at once.{" "}
+        {typeof status?.ready_count === "number" && (
+          <>
+            Currently <strong>{status.ready_count} READY</strong>,{" "}
+            {status.rejected_count ?? 0} rejected, {status.pending_count ?? 0} still too
+            short to judge. <em>Zero READY is the normal, honest answer</em> — it means
+            nothing here has yet earned real money.
+          </>
+        )}
+      </div>
+
       <GlassPanel title="Strategy leaderboard">
         {!scores.length ? (
           <div className="empty">No strategy stats yet.</div>
@@ -486,12 +504,18 @@ export default function IntradayStocksPage() {
                   <th style={{ textAlign: "left" }}>Category</th>
                   <th>Trades</th>
                   <th>Win %</th>
+                  <th>PF</th>
+                  <th>t-stat</th>
                   <th>Net P&amp;L</th>
                   <th>Allocated</th>
+                  <th>Verdict</th>
                 </tr>
               </thead>
               <tbody>
-                {scores.map((s) => (
+                {scores.map((s) => {
+                  const bar = s.t_threshold ?? status?.gate?.t_threshold ?? 1.96;
+                  const clears = (s.t_stat ?? -99) >= bar;
+                  return (
                   <tr key={s.strategy_id}>
                     <td style={{ textAlign: "left" }}>{s.name}</td>
                     <td style={{ textAlign: "left" }}>
@@ -499,12 +523,22 @@ export default function IntradayStocksPage() {
                     </td>
                     <td>{s.trades}</td>
                     <td>{s.trades ? `${(s.win_rate * 100).toFixed(1)}%` : "-"}</td>
+                    <td>{s.profit_factor == null ? "-" : s.profit_factor.toFixed(2)}</td>
+                    <td className={clears ? "gain" : ""} title={`needs ${bar.toFixed(2)}`}>
+                      {s.t_stat == null ? "-" : s.t_stat.toFixed(2)}
+                    </td>
                     <td className={s.net_pnl >= 0 ? "gain" : "loss"}>
                       {s.net_pnl >= 0 ? "+" : ""}₹{inr(s.net_pnl)}
                     </td>
                     <td>₹{inr(s.allocated_capital)}</td>
+                    <td>
+                      <span className={`badge ${s.verdict === "READY" ? "gain" : s.verdict === "REJECTED" ? "loss" : ""}`}>
+                        {s.verdict ?? "—"}
+                      </span>
+                    </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -992,6 +1026,9 @@ export default function IntradayStocksPage() {
           font-size: 16px; font-weight: 600;
         }
         .tile-sub { margin-top: 3px; font-size: 10.5px; color: var(--text-faint); line-height: 1.4; }
+        .gate-note { border-radius: 12px; padding: 12px 16px; font-size: 12.5px; line-height: 1.55;
+                     background: var(--canvas-soft); border: 1px solid var(--panel-border);
+                     color: var(--text-muted); }
         .empty { padding: 18px 20px; font-size: 12px; color: var(--text-faint); }
         .table-scroll { overflow-x: auto; max-height: 460px; overflow-y: auto; }
         .data-table {
