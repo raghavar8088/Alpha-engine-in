@@ -6216,6 +6216,10 @@ export interface FundamentalRating {
   data_missing?: string[];
   from_cache?: boolean;
   rated_at?: string;
+  /** A few sentences about the company's fundamentals, composed server-side. */
+  brief?: string;
+  /** The brief plus the identifying facts and source — what the Copy button copies. */
+  copy_text?: string;
   results?: ResultsStrength;
   pnl?: PnlStrength;
   statements?: Statements;

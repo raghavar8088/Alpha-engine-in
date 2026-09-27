@@ -45,6 +45,7 @@ export default function FundamentalsPage() {
   const [error, setError] = useState<string | null>(null);
   const [showMethod, setShowMethod] = useState(false);
   const [tab, setTab] = useState<"rate" | "universe">("rate");
+  const [copiedSym, setCopiedSym] = useState<string | null>(null);
 
   const loadSide = useCallback(async () => {
     try {
@@ -83,6 +84,18 @@ export default function FundamentalsPage() {
   );
 
   const ratings = result?.ratings ?? [];
+
+  const copyBrief = useCallback(async (r: FundamentalRating) => {
+    const text = r.copy_text || r.brief || "";
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedSym(r.symbol);
+      setTimeout(() => setCopiedSym((s) => (s === r.symbol ? null : s)), 2500);
+    } catch {
+      setError("The browser blocked the clipboard — expand the card and copy the text by hand.");
+    }
+  }, []);
 
   return (
     <div className="page">
@@ -257,6 +270,22 @@ export default function FundamentalsPage() {
                     </div>
                     <span className="chev">{expanded === r.symbol ? "▲" : "▼"}</span>
                   </button>
+
+                  {r.brief && (
+                    <div className="briefrow">
+                      <p className="brieftext">{r.brief}</p>
+                      <button
+                        className="copybtn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          copyBrief(r);
+                        }}
+                        title="Copy this write-up, the three grades and the key numbers"
+                      >
+                        {copiedSym === r.symbol ? "Copied" : "Copy"}
+                      </button>
+                    </div>
+                  )}
 
                   {expanded === r.symbol && (
                     <div className="detail">
@@ -673,6 +702,35 @@ export default function FundamentalsPage() {
         .chev {
           color: var(--text-faint);
           font-size: 10px;
+        }
+        .briefrow {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          padding: 0 16px 14px;
+        }
+        .brieftext {
+          flex: 1 1 auto;
+          margin: 0;
+          font-size: 12.5px;
+          line-height: 1.6;
+          color: var(--text-muted);
+        }
+        .copybtn {
+          flex: 0 0 auto;
+          background: var(--canvas-soft);
+          border: 1px solid var(--panel-border);
+          color: var(--text-muted);
+          border-radius: 8px;
+          padding: 5px 12px;
+          font-size: 11.5px;
+          font-weight: 650;
+          cursor: pointer;
+        }
+        .copybtn:hover {
+          color: var(--purple);
+          border-color: rgba(125, 52, 220, 0.35);
+          background: var(--purple-dim);
         }
         .detail {
           padding: 4px 16px 16px;

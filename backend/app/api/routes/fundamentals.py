@@ -19,7 +19,13 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query
 
 from app.api.deps import get_current_user
 from app.core.db import fundamental_ratings_collection
-from app.services import fundamental_universe, pnl_strength, results_strength, screener_in
+from app.services import (
+    fundamental_brief,
+    fundamental_universe,
+    pnl_strength,
+    results_strength,
+    screener_in,
+)
 from app.services.fundamental_rating import PILLARS, PILLAR_LABELS, rate
 from app.services.grades import ORDER as GRADE_ORDER, scale as grade_scale
 
@@ -193,6 +199,7 @@ async def rate_symbols(payload: dict = Body(...),
             r["pnl"] = {"rated": False, "score": None, "signals": [],
                         "verdict": "P&L record could not be read",
                         "headline": "The yearly table could not be interpreted."}
+        r.update(fundamental_brief.compose(r, r.get("results"), r.get("pnl")))
         r["statements"] = _statements(got)
         results.append(r)
         # The statements are already cached in screener_fundamentals; storing a second copy
@@ -233,6 +240,7 @@ async def one(symbol: str, force: bool = False,
     r["from_cache"] = bool(data.get("cached"))
     r["results"] = results_strength.analyse(data)
     r["pnl"] = pnl_strength.analyse(data)
+    r.update(fundamental_brief.compose(r, r["results"], r["pnl"]))
     r["statements"] = _statements(data)
     r["fundamentals"] = {
         "ratios": data.get("ratios"),
