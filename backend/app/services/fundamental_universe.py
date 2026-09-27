@@ -44,6 +44,7 @@ import httpx
 from app.core.db import (
     fundamental_ratings_collection,
     fundamental_scan_state_collection,
+    fundamental_watchlists_collection,
     stock_universe_collection,
 )
 from app.services import pnl_strength, results_strength, screener_in
@@ -86,7 +87,22 @@ def _now() -> datetime:
 
 
 async def _symbols_for(scope_type: str, scope_key: str) -> list[dict]:
-    """The constituent rows for an index key or an NSE sector name."""
+    """The constituent rows for an index key, an NSE sector, or a named watchlist.
+
+    A watchlist is scannable for the same reason an index is: funding a paper book off
+    unrated stocks would put every one of them in the "unrated" tier and make the whole
+    per-grade comparison empty. Routing it through the scanner means a watchlist is rated
+    at the scan's gentle pace with its rate-limit backoff, rather than by hammering
+    screener.in from a request handler.
+    """
+    if scope_type == "watchlist":
+        wl = await fundamental_watchlists_collection.find_one({"_id": scope_key})
+        syms = (wl or {}).get("symbols") or []
+        # Enrich with index/sector where the universe knows the stock; a watchlist may
+        # hold small caps that are in no index at all, and those still rate fine.
+        known = {d["symbol"]: d async for d in stock_universe_collection.find(
+            {"symbol": {"$in": syms}}, {"symbol": 1, "name": 1, "sector": 1, "indices": 1})}
+        return [known.get(s, {"symbol": s}) for s in syms]
     if scope_type == "index":
         if scope_key in DERIVED:
             outer, inner = DERIVED[scope_key]
@@ -121,11 +137,16 @@ async def scopes() -> dict:
         if count > 0:
             indices.append({"key": key, "label": label, "count": count})
 
+    wl_rows = [{"key": d["_id"], "label": d.get("name") or d["_id"],
+                "count": len(d.get("symbols") or [])}
+               async for d in fundamental_watchlists_collection.find({})]
+
     sector_rows = sorted(
         ({"key": k, "label": k, "count": v} for k, v in sectors.items() if not k.startswith("__idx__")),
         key=lambda r: -r["count"])
     rated = await fundamental_ratings_collection.count_documents({})
-    return {"indices": indices, "sectors": sector_rows, "rated_stored": rated}
+    return {"indices": indices, "sectors": sector_rows, "watchlists": wl_rows,
+            "rated_stored": rated}
 
 
 # ── scan state ───────────────────────────────────────────────────────────────────

@@ -6336,7 +6336,7 @@ export interface UniverseStock {
 }
 
 export interface ScanScope {
-  type: "index" | "sector";
+  type: "index" | "sector" | "watchlist";
   key: string;
   label: string;
 }
@@ -6344,6 +6344,7 @@ export interface ScanScope {
 export interface ScanScopes {
   indices: { key: string; label: string; count: number }[];
   sectors: { key: string; label: string; count: number }[];
+  watchlists?: { key: string; label: string; count: number }[];
   rated_stored: number;
 }
 
@@ -6371,7 +6372,7 @@ export async function fetchScanStatus(): Promise<ScanStatus> {
 }
 
 export async function startUniverseScan(
-  type: "index" | "sector",
+  type: "index" | "sector" | "watchlist",
   key: string,
   force = false,
 ): Promise<{ started: boolean; reason?: string; scope?: ScanScope }> {

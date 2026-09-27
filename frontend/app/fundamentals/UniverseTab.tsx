@@ -35,7 +35,7 @@ const crore = (v: number | null) => {
 
 export default function UniverseTab() {
   const [scopes, setScopes] = useState<ScanScopes | null>(null);
-  const [scanType, setScanType] = useState<"index" | "sector">("index");
+  const [scanType, setScanType] = useState<"index" | "sector" | "watchlist">("index");
   const [scanKey, setScanKey] = useState("nifty50");
   const [status, setStatus] = useState<ScanStatus | null>(null);
   const [stocks, setStocks] = useState<UniverseStock[]>([]);
@@ -156,7 +156,12 @@ export default function UniverseTab() {
   };
 
   const pct = status && status.total ? Math.round((status.done / status.total) * 100) : 0;
-  const scopeList = scanType === "index" ? scopes?.indices : scopes?.sectors;
+  const scopeList =
+    scanType === "index"
+      ? scopes?.indices
+      : scanType === "sector"
+        ? scopes?.sectors
+        : scopes?.watchlists;
 
   return (
     <>
@@ -182,6 +187,15 @@ export default function UniverseTab() {
               }}
             >
               Sector
+            </button>
+            <button
+              className={scanType === "watchlist" ? "on" : ""}
+              onClick={() => {
+                setScanType("watchlist");
+                setScanKey(scopes?.watchlists?.[0]?.key ?? "");
+              }}
+            >
+              Watchlist
             </button>
           </div>
 

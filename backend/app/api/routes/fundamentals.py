@@ -111,8 +111,9 @@ async def universe_scan(payload: dict = Body(default={}),
     """Start rating a whole index or sector in the background."""
     scope_type = (payload.get("type") or "index").strip()
     scope_key = (payload.get("key") or "").strip()
-    if scope_type not in ("index", "sector"):
-        raise HTTPException(status_code=400, detail="type must be 'index' or 'sector'.")
+    if scope_type not in ("index", "sector", "watchlist"):
+        raise HTTPException(status_code=400,
+                            detail="type must be 'index', 'sector' or 'watchlist'.")
     if not scope_key:
         raise HTTPException(status_code=400, detail="Pick an index or a sector to scan.")
     return await fundamental_universe.start(scope_type, scope_key, bool(payload.get("force")))
