@@ -85,7 +85,7 @@ export default function UniverseTab() {
 
   // Poll only while a scan is actually running, and reload the table as it fills.
   useEffect(() => {
-    const running = status?.running || status?.status === "cancelling";
+    const running = status?.running || status?.status === "cancelling" || status?.status === "cooling";
     if (!running) {
       if (pollRef.current) clearInterval(pollRef.current);
       pollRef.current = null;
@@ -219,6 +219,7 @@ export default function UniverseTab() {
               <b>{status.scope?.label}</b> — {status.done} of {status.total} ({pct}%) ·{" "}
               {status.ok} rated · {status.failed} failed
               {status.current && status.running && <> · now {status.current}</>}
+              {status.status === "cooling" && <> · <b className="cool">waiting out screener.in rate limit</b></>}
               {status.status === "done" && <> · finished</>}
               {status.status === "cancelled" && <> · stopped</>}
             </div>
@@ -536,6 +537,9 @@ export default function UniverseTab() {
           font-size: 12px;
           color: var(--text-muted);
           margin-top: 7px;
+        }
+        .cool {
+          color: #b8690f;
         }
         .fails {
           margin-top: 8px;

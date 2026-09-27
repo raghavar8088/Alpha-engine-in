@@ -36,6 +36,7 @@ always contain a few, and losing the other 495 to them would be absurd.
 
 import asyncio
 import logging
+import os
 from datetime import datetime, timezone
 
 import httpx
@@ -51,6 +52,17 @@ from app.services.fundamental_rating import rate
 logger = logging.getLogger("fundamental_universe")
 
 STATE_ID = "scan"
+
+# A SCAN IS PACED MORE GENTLY THAN AN INTERACTIVE PASTE, AND THIS WAS MEASURED.
+# The interactive path's 1.2s at two-at-a-time is ~1.7 requests/second, which screener.in
+# serves happily in the short bursts a pasted list produces. Sustained, it does not: the
+# first live Nifty 50 scan got 44 companies through and then took six straight 429s. So a
+# scan goes one at a time with a wider gap, and a 429 pauses the whole run rather than
+# burning the symbol — the alternative is a 500-stock scan that fails its own tail.
+SCAN_PACE_SECONDS = float(os.getenv("FUND_SCAN_PACE", "2.8"))
+SCAN_CONCURRENCY = int(os.getenv("FUND_SCAN_CONCURRENCY", "1"))
+RATE_LIMIT_COOLDOWN = float(os.getenv("FUND_SCAN_COOLDOWN", "75"))
+MAX_RETRIES = 2
 
 # Index keys as stock_universe stores them, plus the one we derive.
 INDEX_LABELS = {
@@ -125,7 +137,9 @@ async def status() -> dict:
         return {"running": False, "status": "idle", "done": 0, "total": 0,
                 "ok": 0, "failed": 0, "failures": [], "scope": None}
     doc.pop("_id", None)
-    doc["running"] = doc.get("status") == "running"
+    # "cooling" is a scan waiting out a rate limit — still running, and the page must
+    # keep polling or the progress bar freezes mid-scan and looks dead.
+    doc["running"] = doc.get("status") in ("running", "cooling", "cancelling")
     return doc
 
 
@@ -194,6 +208,29 @@ async def rate_one(symbol: str, universe: dict | None = None,
     return doc
 
 
+async def _rate_with_backoff(symbol: str, row: dict, client: httpx.AsyncClient,
+                             force: bool) -> dict:
+    """Rate one symbol, waiting out a 429 instead of spending the symbol on it.
+
+    Only rate-limiting is retried. A company with no screener.in page will not grow one,
+    so retrying that would just cost the scan two extra minutes to reach the same answer.
+    """
+    attempt = 0
+    while True:
+        try:
+            return await rate_one(symbol, universe=row, client=client, force=force)
+        except screener_in.ScreenerError as exc:
+            if "rate-limit" not in exc.detail.lower() or attempt >= MAX_RETRIES or _cancel:
+                raise
+            attempt += 1
+            wait = RATE_LIMIT_COOLDOWN * attempt
+            logger.warning("scan hit screener.in rate limit on %s — cooling down %.0fs "
+                           "(attempt %d/%d)", symbol, wait, attempt, MAX_RETRIES)
+            await _write(status="cooling", current=f"{symbol} — rate limited, waiting {wait:.0f}s")
+            await asyncio.sleep(wait)
+            await _write(status="running")
+
+
 async def _run(scope_type: str, scope_key: str, label: str, force: bool) -> None:
     global _cancel
     rows = await _symbols_for(scope_type, scope_key)
@@ -208,7 +245,7 @@ async def _run(scope_type: str, scope_key: str, label: str, force: bool) -> None
 
     done = ok = failed = 0
     failures: list[dict] = []
-    sem = asyncio.Semaphore(screener_in.MAX_CONCURRENCY)
+    sem = asyncio.Semaphore(max(1, SCAN_CONCURRENCY))
 
     async with httpx.AsyncClient(timeout=screener_in.TIMEOUT, follow_redirects=True,
                                  headers=screener_in.BROWSER_HEADERS) as client:
@@ -223,10 +260,10 @@ async def _run(scope_type: str, scope_key: str, label: str, force: bool) -> None
                 if _cancel:
                     return
                 try:
-                    res = await rate_one(sym, universe=row, client=client, force=force)
+                    res = await _rate_with_backoff(sym, row, client, force)
                     ok += 1
                     if not res.get("cached"):
-                        await asyncio.sleep(screener_in.PACE_SECONDS)
+                        await asyncio.sleep(SCAN_PACE_SECONDS)
                 except screener_in.ScreenerError as exc:
                     failed += 1
                     failures.append({"symbol": sym, "error": exc.detail})
@@ -261,7 +298,13 @@ async def start(scope_type: str, scope_key: str, force: bool = False) -> dict:
     label = (INDEX_LABELS.get(scope_key, scope_key) if scope_type == "index" else scope_key)
     _cancel = False
     _task = asyncio.create_task(_run(scope_type, scope_key, label, force))
-    return {"started": True, "scope": {"type": scope_type, "key": scope_key, "label": label}}
+    rows = await _symbols_for(scope_type, scope_key)
+    eta = int(len(rows) * SCAN_PACE_SECONDS / max(1, SCAN_CONCURRENCY) / 60)
+    return {"started": True, "scope": {"type": scope_type, "key": scope_key, "label": label},
+            "symbols": len(rows),
+            "eta_minutes": eta,
+            "note": (f"About {eta} minute(s) if nothing is cached — anything rated in the "
+                     "last day is reused, so a rescan is far quicker.")}
 
 
 async def cancel() -> dict:

@@ -6340,7 +6340,7 @@ export interface ScanScopes {
 
 export interface ScanStatus {
   running: boolean;
-  status: "idle" | "running" | "done" | "cancelled" | "cancelling";
+  status: "idle" | "running" | "cooling" | "done" | "cancelled" | "cancelling";
   scope: ScanScope | null;
   total: number;
   done: number;
