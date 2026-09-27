@@ -19,8 +19,9 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query
 
 from app.api.deps import get_current_user
 from app.core.db import fundamental_ratings_collection
-from app.services import results_strength, screener_in
+from app.services import fundamental_universe, pnl_strength, results_strength, screener_in
 from app.services.fundamental_rating import PILLARS, PILLAR_LABELS, rate
+from app.services.grades import ORDER as GRADE_ORDER, scale as grade_scale
 
 router = APIRouter(prefix="/api/fundamentals", tags=["fundamentals"])
 
@@ -62,6 +63,16 @@ async def methodology(_current_user: dict = Depends(get_current_user)):
             {"from": 4.0, "to": 5.4, "verdict": "Fundamentally weak", "band": "weak"},
             {"from": 1.0, "to": 3.9, "verdict": "Fundamentally poor", "band": "poor"},
         ],
+        "note_on_three_grades":
+            "The same nine-tier scale is applied three times: to the company overall, to "
+            "its latest quarter, and to its multi-year P&L record. They are reported "
+            "separately and often disagree — a company can post an explosive quarter on a "
+            "below-average decade, and that is worth seeing rather than averaging away.",
+        "grades": {
+            "company": grade_scale("company"),
+            "quarter": grade_scale("quarter"),
+            "pnl": grade_scale("pnl"),
+        },
         "source": "screener.in",
         "cache_hours": screener_in.CACHE_HOURS,
         "max_symbols": MAX_SYMBOLS,
@@ -74,6 +85,55 @@ async def methodology(_current_user: dict = Depends(get_current_user)):
             "dealings or what the business does next. Research aid, not advice.",
         ],
     }
+
+
+@router.get("/universe/scopes")
+async def universe_scopes(_current_user: dict = Depends(get_current_user)):
+    """Which indices and sectors can be scanned, and how many stocks in each."""
+    return await fundamental_universe.scopes()
+
+
+@router.get("/universe/scan/status")
+async def universe_scan_status(_current_user: dict = Depends(get_current_user)):
+    return await fundamental_universe.status()
+
+
+@router.post("/universe/scan")
+async def universe_scan(payload: dict = Body(default={}),
+                        _current_user: dict = Depends(get_current_user)):
+    """Start rating a whole index or sector in the background."""
+    scope_type = (payload.get("type") or "index").strip()
+    scope_key = (payload.get("key") or "").strip()
+    if scope_type not in ("index", "sector"):
+        raise HTTPException(status_code=400, detail="type must be 'index' or 'sector'.")
+    if not scope_key:
+        raise HTTPException(status_code=400, detail="Pick an index or a sector to scan.")
+    return await fundamental_universe.start(scope_type, scope_key, bool(payload.get("force")))
+
+
+@router.post("/universe/scan/cancel")
+async def universe_scan_cancel(_current_user: dict = Depends(get_current_user)):
+    return await fundamental_universe.cancel()
+
+
+@router.get("/universe/stocks")
+async def universe_stocks(
+    index: str | None = None,
+    sector: str | None = None,
+    min_score: float | None = None,
+    min_results: float | None = None,
+    min_pnl: float | None = None,
+    grades: str | None = Query(None, description="Comma-separated grade keys."),
+    search: str | None = None,
+    sort: str = "score",
+    limit: int = Query(600, ge=1, le=2000),
+    _current_user: dict = Depends(get_current_user),
+):
+    """The stored ratings, filtered — this is what the stock picker reads."""
+    keys = [g for g in (grades or "").split(",") if g in GRADE_ORDER] or None
+    return await fundamental_universe.browse(
+        index=index, sector=sector, min_score=min_score, min_results=min_results,
+        min_pnl=min_pnl, grades=keys, search=search, sort=sort, limit=limit)
 
 
 @router.get("/recent")
@@ -127,6 +187,12 @@ async def rate_symbols(payload: dict = Body(...),
             r["results"] = {"rated": False, "score": None, "band": "unknown",
                             "verdict": "Results could not be read", "signals": [],
                             "headline": "The quarterly table could not be interpreted."}
+        try:
+            r["pnl"] = pnl_strength.analyse(got)
+        except Exception:
+            r["pnl"] = {"rated": False, "score": None, "signals": [],
+                        "verdict": "P&L record could not be read",
+                        "headline": "The yearly table could not be interpreted."}
         r["statements"] = _statements(got)
         results.append(r)
         # The statements are already cached in screener_fundamentals; storing a second copy
@@ -166,6 +232,7 @@ async def one(symbol: str, force: bool = False,
     r["symbol"] = sym
     r["from_cache"] = bool(data.get("cached"))
     r["results"] = results_strength.analyse(data)
+    r["pnl"] = pnl_strength.analyse(data)
     r["statements"] = _statements(data)
     r["fundamentals"] = {
         "ratios": data.get("ratios"),

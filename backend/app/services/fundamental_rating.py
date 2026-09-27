@@ -36,6 +36,8 @@ what the business will do next.
 
 import logging
 
+from app.services.grades import grade
+
 logger = logging.getLogger("fundamental_rating")
 
 # Weights sum to 1.0 over the pillars that have data; see _blend for redistribution.
@@ -495,6 +497,7 @@ def rate(f: dict) -> dict:
     if not pillars:
         return {"symbol": f.get("symbol"), "name": f.get("name"), "rated": False,
                 "score": None, "verdict": "Not enough data to rate", "band": "unknown",
+                **grade(None, "company"),
                 "pillars": [], "skipped": skipped, "coverage": 0.0,
                 "summary": "screener.in returned a page, but none of the seven pillars had "
                            "the numbers behind them — nothing here is worth a score."}
@@ -524,6 +527,7 @@ def rate(f: dict) -> dict:
         "symbol": f.get("symbol"), "name": f.get("name"),
         "sector": f.get("sector"), "industry": f.get("industry"),
         "rated": True, "score": score, "verdict": verdict, "band": band,
+        **grade(score, "company"),
         "is_lender": lender,
         "coverage": round(live_weight, 3),
         "pillars": sorted(pillars, key=lambda p: -p["weight"]),

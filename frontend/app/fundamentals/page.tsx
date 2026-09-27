@@ -4,7 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import PageHeader from "../../components/PageHeader";
 import GlassPanel from "../../components/GlassPanel";
 import ErrorBanner from "../../components/ErrorBanner";
+import UniverseTab from "./UniverseTab";
 import {
+  GRADE_COLOR,
+  GradeKey,
   FundamentalRating,
   RatingBand,
   RatingMethodology,
@@ -41,6 +44,7 @@ export default function FundamentalsPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showMethod, setShowMethod] = useState(false);
+  const [tab, setTab] = useState<"rate" | "universe">("rate");
 
   const loadSide = useCallback(async () => {
     try {
@@ -101,6 +105,19 @@ export default function FundamentalsPage() {
         }
       />
 
+      <div className="tabs">
+        <button className={tab === "rate" ? "on" : ""} onClick={() => setTab("rate")}>
+          Rate stocks
+        </button>
+        <button className={tab === "universe" ? "on" : ""} onClick={() => setTab("universe")}>
+          Universe &amp; picker
+        </button>
+      </div>
+
+      {tab === "universe" && <UniverseTab />}
+
+      {tab === "rate" && (
+      <>
       {error && <ErrorBanner message={error} onRetry={() => run(false)} />}
 
       {showMethod && method && (
@@ -187,7 +204,10 @@ export default function FundamentalsPage() {
                   >
                     <div
                       className="score"
-                      style={{ background: BAND_COLOR[r.band], boxShadow: `0 4px 14px ${BAND_COLOR[r.band]}44` }}
+                      style={{
+                        background: GRADE_COLOR[r.grade_key] ?? BAND_COLOR[r.band],
+                        boxShadow: `0 4px 14px ${(GRADE_COLOR[r.grade_key] ?? BAND_COLOR[r.band])}44`,
+                      }}
                     >
                       {r.score === null ? "—" : r.score.toFixed(1)}
                     </div>
@@ -195,8 +215,15 @@ export default function FundamentalsPage() {
                       <div className="nm">
                         {r.name || r.symbol} <span className="sym">{r.symbol}</span>
                       </div>
-                      <div className="vd" style={{ color: BAND_COLOR[r.band] }}>
-                        {r.verdict}
+                      <div
+                        className="vd"
+                        style={{ color: GRADE_COLOR[r.grade_key] ?? BAND_COLOR[r.band] }}
+                      >
+                        {r.grade ?? r.verdict}
+                      </div>
+                      <div className="trio">
+                        <MiniGrade label="Quarter" g={r.results?.grade_key} s={r.results?.score ?? null} />
+                        <MiniGrade label="P&L" g={r.pnl?.grade_key} s={r.pnl?.score ?? null} />
                       </div>
                       <div className="meta">
                         {r.industry || r.sector || "—"}
@@ -240,16 +267,18 @@ export default function FundamentalsPage() {
                           <div className="rhead">
                             <span
                               className="rscore"
-                              style={{ background: BAND_COLOR[r.results.band] }}
+                              style={{
+                                background: GRADE_COLOR[r.results.grade_key] ?? BAND_COLOR[r.results.band],
+                              }}
                             >
                               {r.results.score === null ? "—" : r.results.score.toFixed(1)}
                             </span>
                             <div>
                               <div
                                 className="rverdict"
-                                style={{ color: BAND_COLOR[r.results.band] }}
+                                style={{ color: GRADE_COLOR[r.results.grade_key] ?? BAND_COLOR[r.results.band] }}
                               >
-                                {r.results.verdict}
+                                {r.results.grade ?? r.results.verdict}
                               </div>
                               <div className="rsub">
                                 Latest quarter{" "}
@@ -274,6 +303,51 @@ export default function FundamentalsPage() {
                           )}
                           {r.results.one_off_flag && r.results.one_off_note && (
                             <div className="oneoff">⚠ {r.results.one_off_note}</div>
+                          )}
+                        </div>
+                      )}
+
+                      {r.pnl && r.pnl.rated && (
+                        <div className="results">
+                          <div className="rhead">
+                            <span
+                              className="rscore"
+                              style={{ background: GRADE_COLOR[r.pnl.grade_key] }}
+                            >
+                              {r.pnl.score === null ? "—" : r.pnl.score.toFixed(1)}
+                            </span>
+                            <div>
+                              <div
+                                className="rverdict"
+                                style={{ color: GRADE_COLOR[r.pnl.grade_key] }}
+                              >
+                                {r.pnl.grade}
+                              </div>
+                              <div className="rsub">
+                                {r.pnl.years} years of accounts
+                                {r.pnl.first_year && r.pnl.last_year && (
+                                  <>
+                                    {" "}
+                                    ({r.pnl.first_year} → {r.pnl.last_year})
+                                  </>
+                                )}{" "}
+                                — the P&amp;L record on its own, apart from the balance sheet
+                              </div>
+                            </div>
+                          </div>
+                          <p className="rhead-line">{r.pnl.headline}</p>
+                          {r.pnl.signals.length > 0 && (
+                            <div className="sig">
+                              {r.pnl.signals.map((sg) => (
+                                <div key={sg.label} className={`sg ${sg.tone}`} title={sg.detail}>
+                                  <span className="sl">{sg.label}</span>
+                                  <b className="sv">{sg.value}</b>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {r.pnl.one_off_flag && r.pnl.one_off_note && (
+                            <div className="oneoff">⚠ {r.pnl.one_off_note}</div>
                           )}
                         </div>
                       )}
@@ -405,7 +479,31 @@ export default function FundamentalsPage() {
         </GlassPanel>
       )}
 
+      </>
+      )}
+
       <style jsx>{`
+        .tabs {
+          display: flex;
+          gap: 6px;
+          margin-bottom: 18px;
+          border-bottom: 1px solid var(--panel-border);
+        }
+        .tabs button {
+          background: none;
+          border: none;
+          border-bottom: 2px solid transparent;
+          padding: 9px 14px;
+          font-size: 13px;
+          font-weight: 600;
+          color: var(--text-muted);
+          cursor: pointer;
+          margin-bottom: -1px;
+        }
+        .tabs button.on {
+          color: var(--purple);
+          border-bottom-color: var(--purple);
+        }
         .page {
           padding: 28px 32px 64px;
           max-width: 1180px;
@@ -529,6 +627,11 @@ export default function FundamentalsPage() {
           font-size: 12.5px;
           font-weight: 650;
           margin-top: 1px;
+        }
+        .trio {
+          display: flex;
+          gap: 5px;
+          margin-top: 4px;
         }
         .meta {
           font-size: 11.5px;
@@ -1001,6 +1104,25 @@ function StatementTable({
         }
       `}</style>
     </div>
+  );
+}
+
+/** The other two grades, shown small on the collapsed card so all three read at a glance. */
+function MiniGrade({ label, g, s }: { label: string; g?: GradeKey | null; s: number | null }) {
+  if (s === null || s === undefined || !g) return null;
+  return (
+    <span className="mg" style={{ borderColor: GRADE_COLOR[g], color: GRADE_COLOR[g] }}>
+      {label} <b>{s.toFixed(1)}</b>
+      <style jsx>{`
+        .mg {
+          border: 1px solid;
+          border-radius: 20px;
+          padding: 1px 8px;
+          font-size: 10px;
+          font-weight: 600;
+        }
+      `}</style>
+    </span>
   );
 }
 

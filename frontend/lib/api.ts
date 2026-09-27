@@ -6150,12 +6150,33 @@ export interface ResultsStrength {
   score: number | null;
   verdict: string;
   band: RatingBand;
+  grade: string;
+  grade_key: GradeKey;
+  tier: string;
   headline: string;
   signals: ResultSignal[];
   latest_quarter?: string;
   comparison_quarter?: string;
   previous_quarter?: string;
   sales_qoq?: number | null;
+  one_off_flag?: boolean;
+  one_off_note?: string | null;
+  coverage?: number;
+}
+
+/** The multi-year P&L record, graded on the same nine-tier scale. */
+export interface PnlStrength {
+  rated: boolean;
+  score: number | null;
+  verdict?: string;
+  grade: string;
+  grade_key: GradeKey;
+  tier: string;
+  headline: string;
+  signals: ResultSignal[];
+  years?: number;
+  first_year?: string | null;
+  last_year?: string | null;
   one_off_flag?: boolean;
   one_off_note?: string | null;
   coverage?: number;
@@ -6196,7 +6217,11 @@ export interface FundamentalRating {
   from_cache?: boolean;
   rated_at?: string;
   results?: ResultsStrength;
+  pnl?: PnlStrength;
   statements?: Statements;
+  grade: string;
+  grade_key: GradeKey;
+  tier?: string;
 }
 
 export interface RateResponse {
@@ -6237,4 +6262,143 @@ export async function fetchRecentRatings(limit = 50): Promise<{ ratings: Fundame
 
 export async function fetchRatingMethodology(): Promise<RatingMethodology> {
   return apiFetch("/api/fundamentals/methodology");
+}
+
+// ---- Fundamental Rating: the nine-tier grade + the index/sector scanner ----
+export type GradeKey =
+  | "worst" | "below-average" | "average" | "above-average" | "good"
+  | "very-good" | "excellent" | "extraordinary" | "explosive" | "unrated";
+
+/** Worst -> best. Drives legend order and the filter list. */
+export const GRADE_ORDER: GradeKey[] = [
+  "worst", "below-average", "average", "above-average", "good",
+  "very-good", "excellent", "extraordinary", "explosive",
+];
+
+export const GRADE_COLOR: Record<GradeKey, string> = {
+  worst: "#b3261e",
+  "below-average": "#d4443c",
+  average: "#c98a10",
+  "above-average": "#9a9412",
+  good: "#6a9c1a",
+  "very-good": "#3f9c34",
+  excellent: "#1a9c5b",
+  extraordinary: "#0e8f8f",
+  explosive: "#7d34dc",
+  unrated: "#8a8a99",
+};
+
+export interface GradeTier {
+  tier: string;
+  grade_key: GradeKey;
+  grade: string;
+  from: number;
+  to: number;
+}
+
+/** A stock as the picker lists it — one flat row per company. */
+export interface UniverseStock {
+  symbol: string;
+  name: string | null;
+  nse_sector: string | null;
+  sector: string | null;
+  industry: string | null;
+  indices: string[];
+  score: number | null;
+  grade: string;
+  grade_key: GradeKey;
+  verdict: string;
+  coverage: number | null;
+  is_lender?: boolean;
+  results_score: number | null;
+  results_grade: string | null;
+  results_grade_key: GradeKey | null;
+  latest_quarter: string | null;
+  pnl_score: number | null;
+  pnl_grade: string | null;
+  pnl_grade_key: GradeKey | null;
+  price: number | null;
+  market_cap_cr: number | null;
+  pe: number | null;
+  roce: number | null;
+  summary: string | null;
+  source_url?: string;
+  rated_at?: string;
+}
+
+export interface ScanScope {
+  type: "index" | "sector";
+  key: string;
+  label: string;
+}
+
+export interface ScanScopes {
+  indices: { key: string; label: string; count: number }[];
+  sectors: { key: string; label: string; count: number }[];
+  rated_stored: number;
+}
+
+export interface ScanStatus {
+  running: boolean;
+  status: "idle" | "running" | "done" | "cancelled" | "cancelling";
+  scope: ScanScope | null;
+  total: number;
+  done: number;
+  ok: number;
+  failed: number;
+  failures: { symbol: string; error: string }[];
+  current?: string | null;
+  started_at?: string | null;
+  finished_at?: string | null;
+  note?: string;
+}
+
+export async function fetchScanScopes(): Promise<ScanScopes> {
+  return apiFetch("/api/fundamentals/universe/scopes");
+}
+
+export async function fetchScanStatus(): Promise<ScanStatus> {
+  return apiFetch("/api/fundamentals/universe/scan/status");
+}
+
+export async function startUniverseScan(
+  type: "index" | "sector",
+  key: string,
+  force = false,
+): Promise<{ started: boolean; reason?: string; scope?: ScanScope }> {
+  return apiFetch("/api/fundamentals/universe/scan", {
+    method: "POST",
+    body: JSON.stringify({ type, key, force }),
+  });
+}
+
+export async function cancelUniverseScan(): Promise<{ cancelling: boolean }> {
+  return apiFetch("/api/fundamentals/universe/scan/cancel", { method: "POST" });
+}
+
+export interface UniverseFilters {
+  index?: string;
+  sector?: string;
+  minScore?: number;
+  minResults?: number;
+  minPnl?: number;
+  grades?: GradeKey[];
+  search?: string;
+  sort?: string;
+}
+
+export async function fetchUniverseStocks(
+  f: UniverseFilters = {},
+): Promise<{ stocks: UniverseStock[]; count: number; sort: string }> {
+  const p = new URLSearchParams();
+  if (f.index) p.set("index", f.index);
+  if (f.sector) p.set("sector", f.sector);
+  if (f.minScore !== undefined) p.set("min_score", String(f.minScore));
+  if (f.minResults !== undefined) p.set("min_results", String(f.minResults));
+  if (f.minPnl !== undefined) p.set("min_pnl", String(f.minPnl));
+  if (f.grades?.length) p.set("grades", f.grades.join(","));
+  if (f.search) p.set("search", f.search);
+  if (f.sort) p.set("sort", f.sort);
+  const qs = p.toString();
+  return apiFetch(`/api/fundamentals/universe/stocks${qs ? `?${qs}` : ""}`);
 }

@@ -35,6 +35,8 @@ reader looks for, but it is deliberately not scored.
 
 import logging
 
+from app.services.grades import grade
+
 logger = logging.getLogger("results_strength")
 
 # Weights over the signals that have data; redistributed like the fundamental pillars.
@@ -117,7 +119,7 @@ def analyse(f: dict) -> dict:
     periods = f.get("quarters_periods") or []
     if not q or len(periods) < 5:
         return {"rated": False, "score": None, "verdict": "Not enough quarters to judge",
-                "band": "unknown", "signals": [], "headline":
+                "band": "unknown", "signals": [], **grade(None, "quarter"), "headline":
                 "screener.in did not return enough quarterly history to compare this "
                 "quarter with the same quarter last year."}
 
@@ -218,7 +220,7 @@ def analyse(f: dict) -> dict:
 
     if not scores:
         return {"rated": False, "score": None, "verdict": "Not enough data to judge results",
-                "band": "unknown", "signals": signals,
+                "band": "unknown", "signals": signals, **grade(None, "quarter"),
                 "headline": "The quarterly table was read, but none of the comparisons it "
                             "needs could be computed."}
 
@@ -244,6 +246,7 @@ def analyse(f: dict) -> dict:
 
     return {
         "rated": True, "score": score, "verdict": verdict, "band": band,
+        **grade(score, "quarter"),
         "headline": headline, "signals": signals,
         "latest_quarter": latest_label, "comparison_quarter": yoy_label,
         "previous_quarter": prev_label,

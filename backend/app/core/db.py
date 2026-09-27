@@ -70,6 +70,8 @@ stock_fundamentals_collection = db["stock_fundamentals"]
 # a deep per-company read pulled on demand for the symbols a user pastes in.
 screener_fundamentals_collection = db["screener_fundamentals"]
 fundamental_ratings_collection = db["fundamental_ratings"]
+# Progress of the index/sector scan that fills fundamental_ratings in bulk. One doc.
+fundamental_scan_state_collection = db["fundamental_scan_state"]
 # F&O Positions module — user-initiated paper trades on index/stock options & futures
 fno_positions_collection = db["fno_positions"]
 fno_orders_collection = db["fno_orders"]

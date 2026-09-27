@@ -58,6 +58,9 @@ NEVER_CACHE = (
     # Server-sent events. Buffering an endless generator emits no headers and hangs the
     # request forever; this must never reach the buffering path or the per-key lock.
     "chart/stream",
+    # A scan progress poll answered from a 20s cache would show a frozen bar and a
+    # "done" that arrives long after the scan finished.
+    "fundamentals/universe/scan",
 )
 
 # Content types that must be streamed straight through, whatever the path.
