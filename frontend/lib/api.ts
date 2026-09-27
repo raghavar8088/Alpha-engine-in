@@ -6014,6 +6014,17 @@ export interface ModuleSwitch {
   label: string;
   href: string;
   enabled: boolean;
+  // Main Control adds these. Optional so the older /api/modules response still types.
+  group?: string;
+  api_prefixes?: string[];
+  has_api?: boolean;
+  // True where OTHER pages read this module's API, so OFF reaches past its own page.
+  shared?: boolean;
+  note?: string;
+  // How many requests this switch has actually refused since the backend started. This is
+  // the proof the toggle does something; it resets on restart.
+  blocked_requests?: number;
+  last_blocked?: string;
 }
 
 export interface ModuleSwitches {
@@ -6022,6 +6033,70 @@ export interface ModuleSwitches {
   on: number;
   off: number;
   note: string;
+  groups?: string[];
+  blocked_total?: number;
+  api_prefixes_controlled?: number;
+}
+
+// ---- Main Control -------------------------------------------------------------
+// The same switches as /api/modules, but this endpoint reports the whole app (every module,
+// grouped as the sidebar groups them) and the blocked-request counters. OFF here stops the
+// module's scheduler AND makes its API refuse anything that would call the broker or write a
+// document; plain reads of stored rows still answer, so the page renders frozen numbers
+// rather than an error.
+const mc = "/api/main-control";
+
+export async function fetchMainControl(): Promise<ModuleSwitches> {
+  return apiFetch(mc);
+}
+
+export async function setMainControlModule(
+  module: string,
+  enabled: boolean,
+): Promise<ModuleSwitches> {
+  return apiFetch(`${mc}/toggle`, {
+    method: "POST",
+    body: JSON.stringify({ module, enabled }),
+  });
+}
+
+export async function setMainControlBulk(
+  modules: Record<string, boolean>,
+): Promise<ModuleSwitches> {
+  return apiFetch(`${mc}/bulk`, { method: "POST", body: JSON.stringify({ modules }) });
+}
+
+export async function setMainControlAll(enabled: boolean): Promise<ModuleSwitches> {
+  return apiFetch(`${mc}/all`, { method: "POST", body: JSON.stringify({ enabled }) });
+}
+
+// "Only this one works" in a single call: this module ON, every other module OFF.
+export async function setMainControlOnly(module: string): Promise<ModuleSwitches> {
+  return apiFetch(`${mc}/only`, { method: "POST", body: JSON.stringify({ module }) });
+}
+
+export async function resetMainControlCounts(): Promise<ModuleSwitches> {
+  return apiFetch(`${mc}/reset-counts`, { method: "POST" });
+}
+
+export interface ModuleResolution {
+  path: string;
+  method: string;
+  module: string | null;
+  label: string | null;
+  enabled: boolean;
+  counts_as_work: boolean;
+  would_block: boolean;
+  reason: string;
+}
+
+// Ask the backend which module owns a path and whether it would be blocked right now —
+// so a switch can be checked rather than trusted.
+export async function resolveModulePath(
+  path: string,
+  method = "GET",
+): Promise<ModuleResolution> {
+  return apiFetch(`${mc}/resolve?path=${encodeURIComponent(path)}&method=${method}`);
 }
 
 export async function fetchModuleSwitches(): Promise<ModuleSwitches> {

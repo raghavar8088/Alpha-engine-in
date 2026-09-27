@@ -35,6 +35,7 @@ from app.api.routes import (
     instrument_search,
     manual_positions,
     market_data,
+    main_control,
     modules,
     momentum,
     options,
@@ -720,6 +721,21 @@ from app.services.api_cache import APICacheMiddleware
 app.add_middleware(APICacheMiddleware)
 
 
+from app.services.module_gate import ModuleGateMiddleware
+
+# Main Control's API half: a module switched OFF stops answering requests that would spend a
+# broker call or write a document. Its background loop is stopped separately, by
+# desk_switches.gated() inside each scheduler; this closes the other door.
+#
+# Registered here on purpose, which puts it INSIDE require_shared_secret and OUTSIDE the
+# response cache:
+#     require_shared_secret -> ModuleGate -> APICache -> routes
+# Inside auth, so an unauthenticated caller is told it is unauthenticated rather than which
+# modules we run. Outside the cache, because a 423 must not be stored and then replayed for
+# 20s after the module is switched back on.
+app.add_middleware(ModuleGateMiddleware)
+
+
 @app.middleware("http")
 async def require_shared_secret(request: Request, call_next):
     """Cloud Run must allow unauthenticated calls for the Firebase Hosting rewrite
@@ -764,6 +780,7 @@ app.include_router(desk_history.router)
 app.include_router(pattern.router)
 app.include_router(pattern_books.router)
 app.include_router(modules.router)
+app.include_router(main_control.router)
 app.include_router(stocks_range.router)
 app.include_router(bullish_stocks.router)
 app.include_router(screener.router)

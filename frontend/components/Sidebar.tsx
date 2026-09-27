@@ -450,9 +450,10 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
     links: [
       {
         // The master switches. Sits in System rather than beside the desks because it
-        // governs ALL of them — a power-rail mark, not another desk.
-        href: "/modules",
-        label: "Modules",
+        // governs ALL of them — a power-rail mark, not another desk. One entry, not two:
+        // /modules redirects here, so there is a single place a switch can be changed.
+        href: "/main-control",
+        label: "Main Control",
         icon: (
           <>
             <rect x="3" y="4" width="18" height="6" rx="2" />

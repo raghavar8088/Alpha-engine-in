@@ -42,6 +42,7 @@ const PAGES: { label: string; href: string; hint: string }[] = [
   { label: "Live Trading", href: "/live-trading", hint: "real-money desk" },
   { label: "Chart", href: "/chart", hint: "candles and drawings" },
   { label: "Portfolio", href: "/portfolio", hint: "holdings and P&L" },
+  { label: "Main Control", href: "/main-control", hint: "switch any module on or off" },
 ];
 
 const inr = (v: number | null | undefined) =>
