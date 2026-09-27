@@ -6222,6 +6222,9 @@ export interface FundamentalRating {
   copy_text?: string;
   /** Just the name, score and the three grades — what the header Copy button copies. */
   headline_text?: string;
+  /** Rich-text versions, so a paste carries the grade's emphasis. */
+  copy_html?: string;
+  headline_html?: string;
   results?: ResultsStrength;
   pnl?: PnlStrength;
   statements?: Statements;

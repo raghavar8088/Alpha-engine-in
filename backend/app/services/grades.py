@@ -42,6 +42,22 @@ SUBJECTS = {
     "pnl": "profit & loss record",
 }
 
+# One colour per tier, kept HERE rather than only in the page, because the rich-text that
+# the Copy buttons put on the clipboard is composed on the server and has to match what
+# the card shows. Two copies of this ramp would drift the first time a tier was retuned.
+COLORS = {
+    "worst": "#b3261e",
+    "below-average": "#d4443c",
+    "average": "#c98a10",
+    "above-average": "#9a9412",
+    "good": "#6a9c1a",
+    "very-good": "#3f9c34",
+    "excellent": "#1a9c5b",
+    "extraordinary": "#0e8f8f",
+    "explosive": "#7d34dc",
+    "unrated": "#8a8a99",
+}
+
 # Ordered worst -> best, for filter dropdowns and legends that read bottom-up.
 ORDER = [key for _, _, key in reversed(TIERS)]
 
@@ -64,6 +80,7 @@ def grade(score: float | None, subject: str = "company") -> dict:
         "grade": f"{name} {noun}" if key != "unrated" else f"Not rated — {noun}",
         "tier": name,
         "grade_key": key,
+        "grade_color": COLORS.get(key, COLORS["unrated"]),
         "subject": subject,
     }
 

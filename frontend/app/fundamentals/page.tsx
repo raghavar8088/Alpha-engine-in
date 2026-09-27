@@ -85,14 +85,38 @@ export default function FundamentalsPage() {
 
   const ratings = result?.ratings ?? [];
 
-  const copyText = useCallback(async (text: string, key: string) => {
-    if (!text) return;
-    try {
-      await navigator.clipboard.writeText(text);
+  /** Copy as rich text where the browser allows it, so the grade pastes bold and large.
+   *
+   * Both flavours go on the clipboard at once: a rich target (Word, Docs, Gmail, Slack)
+   * takes the HTML, a plain one (a terminal, a code box) takes the text. Anything that
+   * cannot do ClipboardItem — older Firefox, a non-secure origin — falls back to plain
+   * rather than copying nothing.
+   */
+  const copyRich = useCallback(async (html: string, plain: string, key: string) => {
+    if (!plain && !html) return;
+    const done = () => {
       setCopiedSym(key);
       setTimeout(() => setCopiedSym((s) => (s === key ? null : s)), 2500);
+    };
+    try {
+      if (html && typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            "text/html": new Blob([html], { type: "text/html" }),
+            "text/plain": new Blob([plain], { type: "text/plain" }),
+          }),
+        ]);
+      } else {
+        await navigator.clipboard.writeText(plain);
+      }
+      done();
     } catch {
-      setError("The browser blocked the clipboard — select the text and copy it by hand.");
+      try {
+        await navigator.clipboard.writeText(plain);
+        done();
+      } catch {
+        setError("The browser blocked the clipboard — select the text and copy it by hand.");
+      }
     }
   }, []);
 
@@ -249,7 +273,11 @@ export default function FundamentalsPage() {
                             className="headcopy"
                             onClick={(e) => {
                               e.stopPropagation();
-                              copyText(r.headline_text!, `${r.symbol}:head`);
+                              copyRich(
+                                r.headline_html || "",
+                                r.headline_text || "",
+                                `${r.symbol}:head`,
+                              );
                             }}
                             title="Copy the name and the three grades"
                           >
@@ -297,7 +325,11 @@ export default function FundamentalsPage() {
                         className="copybtn"
                         onClick={(e) => {
                           e.stopPropagation();
-                          copyText(r.copy_text || r.brief || "", r.symbol);
+                          copyRich(
+                            r.copy_html || "",
+                            r.copy_text || r.brief || "",
+                            r.symbol,
+                          );
                         }}
                         title="Copy this write-up, the three grades and the key numbers"
                       >

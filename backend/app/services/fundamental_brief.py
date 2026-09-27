@@ -20,9 +20,22 @@ verdict the rating did not reach, and nothing recommends an action — the modul
 filings, it does not know what the reader should do.
 """
 
+import html as _html
 import logging
 
+from app.services.grades import COLORS
+
 logger = logging.getLogger("fundamental_brief")
+
+# Inline styles, not a stylesheet: this HTML goes on the CLIPBOARD, and whatever it is
+# pasted into — Word, Docs, Gmail, a ticket — keeps inline style and throws away
+# everything else. The font stack is the generic one every target already has.
+_FONT = "-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+
+
+def _e(text) -> str:
+    """Escape for HTML. The briefs are full of & (P&L) and quotes."""
+    return _html.escape(str(text if text is not None else ""), quote=False)
 
 # The clause each pillar contributes. Written to follow its own LABEL without repeating it
 # — "its strongest ground is return on capital, at 26.6%" rather than "... is return on
@@ -90,7 +103,9 @@ def compose(r: dict, q: dict | None = None, p: dict | None = None) -> dict:
         brief = (f"{name} could not be rated — screener.in did not return enough of its "
                  "filings to judge the business on.")
         head = f"{name}" + (f" ({symbol})" if symbol else "") + " — not rated"
-        return {"brief": brief, "copy_text": brief, "headline_text": head}
+        plain_html = f'<div style="font-family:{_FONT};font-size:13px">{_e(brief)}</div>'
+        return {"brief": brief, "copy_text": brief, "headline_text": head,
+                "copy_html": plain_html, "headline_html": plain_html}
 
     what = r.get("industry") or r.get("sector")
     ranked = sorted(pillars, key=lambda x: x["score"])
@@ -177,4 +192,60 @@ def compose(r: dict, q: dict | None = None, p: dict | None = None) -> dict:
         lines.append(f"Source: {r['source_url']}")
     lines.append("Rated from public filings — research aid, not investment advice.")
 
-    return {"brief": brief, "copy_text": "\n".join(lines), "headline_text": headline_text}
+    # ── the same thing as rich text, so a paste carries the emphasis ─────────────────
+    # The grade phrase is the point of the card, so on the clipboard it is set larger and
+    # bolder than everything around it, in its tier's colour. Every other line is ordinary
+    # body text, which is what makes the grade stand out at all.
+    colour = r.get("grade_color") or COLORS.get(r.get("grade_key") or "", COLORS["unrated"])
+    grade_html = (
+        f'<div style="font-size:20px;font-weight:800;color:{colour};'
+        f'margin:3px 0 7px;line-height:1.25">{_e(r.get("grade") or "")}</div>'
+    )
+
+    def sub(q_or_p, label):
+        if not q_or_p or q_or_p.get("score") is None:
+            return None
+        key = q_or_p.get("grade_key") or ""
+        c = COLORS.get(key, COLORS["unrated"])
+        return (f'{label} <b style="color:{c}">{q_or_p["score"]}/10</b> '
+                f'<span style="color:{c}">({_e(q_or_p.get("tier"))})</span>')
+
+    grade_line = " &middot; ".join(
+        x for x in (sub(q, "Quarter"), sub(p, "P&amp;L record")) if x)
+
+    html_parts = [
+        f'<div style="font-family:{_FONT};font-size:13px;line-height:1.6;color:#1f1f27">',
+        f'<div style="font-size:15px;font-weight:700">{_e(name)}'
+        + (f' <span style="color:#777;font-weight:600">({_e(symbol)})</span>' if symbol else "")
+        + f' &mdash; <b>{score}/10</b></div>',
+        grade_html,
+    ]
+    if grade_line:
+        html_parts.append(f'<div style="margin-bottom:10px">{grade_line}</div>')
+    html_parts.append(f'<div style="margin-bottom:11px">{_e(brief)}</div>')
+    if facts:
+        html_parts.append(f'<div style="color:#555">{_e(" · ".join(facts))}</div>')
+    html_parts.append(
+        '<div style="color:#555">Pillars: '
+        + ", ".join(f'{_e(x["label"])} <b>{x["score"]}</b>'
+                    for x in sorted(pillars, key=lambda z: -z["score"]))
+        + "</div>")
+    if r.get("source_url"):
+        html_parts.append(f'<div style="color:#555"><a href="{_e(r["source_url"])}">'
+                          "Source: screener.in</a></div>")
+    html_parts.append('<div style="color:#8a8a99;font-size:11px;margin-top:6px">'
+                      "Rated from public filings &mdash; research aid, not investment "
+                      "advice.</div></div>")
+    copy_html = "".join(html_parts)
+
+    headline_html = (
+        f'<div style="font-family:{_FONT};font-size:13px;line-height:1.6;color:#1f1f27">'
+        f'<div style="font-size:15px;font-weight:700">{_e(name)}'
+        + (f' <span style="color:#777;font-weight:600">({_e(symbol)})</span>' if symbol else "")
+        + f' &mdash; <b>{score}/10</b></div>{grade_html}'
+        + (f'<div>{grade_line}</div>' if grade_line else "")
+        + "</div>"
+    )
+
+    return {"brief": brief, "copy_text": "\n".join(lines), "headline_text": headline_text,
+            "copy_html": copy_html, "headline_html": headline_html}
