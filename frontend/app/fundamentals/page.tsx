@@ -5,6 +5,7 @@ import PageHeader from "../../components/PageHeader";
 import GlassPanel from "../../components/GlassPanel";
 import ErrorBanner from "../../components/ErrorBanner";
 import UniverseTab from "./UniverseTab";
+import WatchlistTab from "./WatchlistTab";
 import {
   GRADE_COLOR,
   GradeKey,
@@ -44,7 +45,7 @@ export default function FundamentalsPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showMethod, setShowMethod] = useState(false);
-  const [tab, setTab] = useState<"rate" | "universe">("rate");
+  const [tab, setTab] = useState<"rate" | "universe" | "watchlist">("rate");
   const [copiedSym, setCopiedSym] = useState<string | null>(null);
 
   const loadSide = useCallback(async () => {
@@ -148,9 +149,13 @@ export default function FundamentalsPage() {
         <button className={tab === "universe" ? "on" : ""} onClick={() => setTab("universe")}>
           Universe &amp; picker
         </button>
+        <button className={tab === "watchlist" ? "on" : ""} onClick={() => setTab("watchlist")}>
+          Watchlists &amp; paper book
+        </button>
       </div>
 
       {tab === "universe" && <UniverseTab />}
+      {tab === "watchlist" && <WatchlistTab />}
 
       {tab === "rate" && (
       <>

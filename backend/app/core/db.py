@@ -72,6 +72,12 @@ screener_fundamentals_collection = db["screener_fundamentals"]
 fundamental_ratings_collection = db["fundamental_ratings"]
 # Progress of the index/sector scan that fills fundamental_ratings in bulk. One doc.
 fundamental_scan_state_collection = db["fundamental_scan_state"]
+# Named watchlists from the Fundamental Rating module, and the paper book each can be
+# funded as — a fixed rupee amount per stock, marked daily, aggregated by the grade the
+# stock held AT ENTRY so the tiers can be checked against what they actually returned.
+fundamental_watchlists_collection = db["fundamental_watchlists"]
+fundamental_paper_positions_collection = db["fundamental_paper_positions"]
+fundamental_paper_equity_collection = db["fundamental_paper_equity"]
 # F&O Positions module — user-initiated paper trades on index/stock options & futures
 fno_positions_collection = db["fno_positions"]
 fno_orders_collection = db["fno_orders"]

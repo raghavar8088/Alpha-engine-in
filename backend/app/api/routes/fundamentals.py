@@ -22,6 +22,7 @@ from app.core.db import fundamental_ratings_collection
 from app.services import (
     fundamental_brief,
     fundamental_universe,
+    fundamental_watchlist,
     pnl_strength,
     results_strength,
     screener_in,
@@ -140,6 +141,70 @@ async def universe_stocks(
     return await fundamental_universe.browse(
         index=index, sector=sector, min_score=min_score, min_results=min_results,
         min_pnl=min_pnl, grades=keys, search=search, sort=sort, limit=limit)
+
+
+@router.get("/watchlists")
+async def list_watchlists(_current_user: dict = Depends(get_current_user)):
+    return {"watchlists": await fundamental_watchlist.watchlists()}
+
+
+@router.post("/watchlists")
+async def save_watchlist(payload: dict = Body(...),
+                         _current_user: dict = Depends(get_current_user)):
+    """Create or replace a named list. Takes pasted TradingView text as-is."""
+    try:
+        return await fundamental_watchlist.save_watchlist(
+            payload.get("name") or "", payload.get("symbols") or "")
+    except fundamental_watchlist.WatchlistError as exc:
+        raise HTTPException(status_code=400, detail=exc.detail)
+
+
+@router.delete("/watchlists/{name}")
+async def remove_watchlist(name: str, _current_user: dict = Depends(get_current_user)):
+    return await fundamental_watchlist.delete_watchlist(name)
+
+
+@router.post("/watchlists/{name}/fund")
+async def fund_watchlist(name: str, payload: dict = Body(default={}),
+                         _current_user: dict = Depends(get_current_user)):
+    """Open a paper position of `per_stock` rupees in every name not already held."""
+    try:
+        per = float(payload.get("per_stock") or fundamental_watchlist.DEFAULT_PER_STOCK)
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=400, detail="per_stock must be a number.")
+    try:
+        r = await fundamental_watchlist.fund(name, per)
+    except fundamental_watchlist.WatchlistError as exc:
+        raise HTTPException(status_code=404, detail=exc.detail)
+    await fundamental_watchlist.mark(name)
+    return r
+
+
+@router.get("/watchlists/{name}/book")
+async def watchlist_book(name: str, refresh: bool = False,
+                         _current_user: dict = Depends(get_current_user)):
+    """The paper book: every position, and the per-grade-tier aggregate."""
+    if refresh:
+        try:
+            await fundamental_watchlist.mark(name)
+        except Exception:                                # a stale mark beats a 500
+            pass
+    return await fundamental_watchlist.summary(name)
+
+
+@router.get("/watchlists/{name}/daily")
+async def watchlist_daily(name: str, limit: int = Query(120, ge=1, le=500),
+                          _current_user: dict = Depends(get_current_user)):
+    """One row per session: the book's day, and each tier's day."""
+    return await fundamental_watchlist.daily(name, limit)
+
+
+@router.post("/watchlists/{name}/snapshot")
+async def watchlist_snapshot(name: str, force: bool = False,
+                             _current_user: dict = Depends(get_current_user)):
+    """Write today's row now instead of waiting for the post-close tick."""
+    await fundamental_watchlist.mark(name)
+    return await fundamental_watchlist.snapshot(name, force=force)
 
 
 @router.get("/recent")

@@ -6411,3 +6411,130 @@ export async function fetchUniverseStocks(
   const qs = p.toString();
   return apiFetch(`/api/fundamentals/universe/stocks${qs ? `?${qs}` : ""}`);
 }
+
+// ---- Fundamental Rating: watchlists + the paper book that tests the grades ----
+export interface FundWatchlist {
+  name: string;
+  symbols: string[];
+  count: number;
+  updated_at?: string;
+}
+
+/** One grade tier's slice of the book — the answer to "how did the explosive stocks do". */
+export interface TierPerformance {
+  grade_key: GradeKey;
+  grade: string | null;
+  stocks: number;
+  invested: number;
+  value: number;
+  pnl: number;
+  avg_return_pct: number;
+  win_rate: number;
+  winners: number;
+  best: { symbol: string; return_pct: number } | null;
+  worst: { symbol: string; return_pct: number } | null;
+  day_pnl?: number | null;
+  day_return_pct?: number | null;
+}
+
+export interface BookPosition {
+  symbol: string;
+  name: string | null;
+  qty: number;
+  buy_price: number;
+  ltp: number | null;
+  invested: number;
+  cash_left: number;
+  value: number;
+  unrealized_pnl: number;
+  return_pct: number;
+  grade_at_entry: string | null;
+  grade_key_at_entry: GradeKey | null;
+  score_at_entry: number | null;
+  sector: string | null;
+  opened_on: string;
+}
+
+export interface PaperBook {
+  book: string;
+  funded: boolean;
+  note?: string;
+  stocks?: number;
+  allocated?: number;
+  invested?: number;
+  cash_left?: number;
+  value?: number;
+  pnl?: number;
+  return_pct?: number;
+  winners?: number;
+  losers?: number;
+  win_rate?: number;
+  positions: BookPosition[];
+  tiers: TierPerformance[];
+  marked_at?: string | null;
+}
+
+export interface BookDay {
+  session: string;
+  value: number;
+  invested: number;
+  pnl: number;
+  return_pct: number;
+  stocks: number;
+  win_rate: number;
+  day_pnl: number | null;
+  day_return_pct: number | null;
+  tiers: TierPerformance[];
+  movers: {
+    best: { symbol: string; return_pct: number } | null;
+    worst: { symbol: string; return_pct: number } | null;
+  };
+}
+
+export async function fetchFundWatchlists(): Promise<{ watchlists: FundWatchlist[] }> {
+  return apiFetch("/api/fundamentals/watchlists");
+}
+
+export async function saveFundWatchlist(name: string, symbols: string): Promise<FundWatchlist> {
+  return apiFetch("/api/fundamentals/watchlists", {
+    method: "POST",
+    body: JSON.stringify({ name, symbols }),
+  });
+}
+
+export async function deleteFundWatchlist(name: string): Promise<{ deleted: number }> {
+  return apiFetch(`/api/fundamentals/watchlists/${encodeURIComponent(name)}`, {
+    method: "DELETE",
+  });
+}
+
+export async function fundWatchlist(
+  name: string,
+  perStock = 100000,
+): Promise<{ opened: number; already_held: number; skipped?: { symbol: string; reason: string }[] }> {
+  return apiFetch(`/api/fundamentals/watchlists/${encodeURIComponent(name)}/fund`, {
+    method: "POST",
+    body: JSON.stringify({ per_stock: perStock }),
+  });
+}
+
+export async function fetchPaperBook(name: string, refresh = false): Promise<PaperBook> {
+  return apiFetch(
+    `/api/fundamentals/watchlists/${encodeURIComponent(name)}/book${refresh ? "?refresh=true" : ""}`,
+  );
+}
+
+export async function fetchBookDaily(
+  name: string,
+  limit = 120,
+): Promise<{ book: string; days: BookDay[]; count: number }> {
+  return apiFetch(
+    `/api/fundamentals/watchlists/${encodeURIComponent(name)}/daily?limit=${limit}`,
+  );
+}
+
+export async function snapshotBook(name: string): Promise<{ written: boolean; reason?: string }> {
+  return apiFetch(`/api/fundamentals/watchlists/${encodeURIComponent(name)}/snapshot`, {
+    method: "POST",
+  });
+}

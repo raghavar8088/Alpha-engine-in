@@ -353,6 +353,19 @@ async def start_screener_pattern_warm() -> None:
 
 
 @app.on_event("startup")
+async def start_fundamental_watchlist_loop() -> None:
+    """Marks the Fundamental Rating paper books and writes their daily series."""
+    from app.services.fundamental_watchlist import loop as fundamental_book_loop
+
+    if os.getenv("FUNDAMENTAL_BOOKS_ENABLED", "1") != "0":
+        asyncio.create_task(fundamental_book_loop())
+        logger.info("Fundamental paper books enabled — marked every 300s during the "
+                    "session, daily snapshot after 15:35 IST (paper, Rs1,00,000 a name)")
+    else:
+        logger.info("Fundamental paper books disabled (FUNDAMENTAL_BOOKS_ENABLED=0)")
+
+
+@app.on_event("startup")
 async def start_intraday_lab_scheduler() -> None:
     from app.services.intraday_lab_scheduler import INTRADAY_LAB_ENABLED, TICK_SECONDS, intraday_lab_loop
 
