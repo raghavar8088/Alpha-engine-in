@@ -89,7 +89,8 @@ def compose(r: dict, q: dict | None = None, p: dict | None = None) -> dict:
     if score is None or not pillars:
         brief = (f"{name} could not be rated — screener.in did not return enough of its "
                  "filings to judge the business on.")
-        return {"brief": brief, "copy_text": brief}
+        head = f"{name}" + (f" ({symbol})" if symbol else "") + " — not rated"
+        return {"brief": brief, "copy_text": brief, "headline_text": head}
 
     what = r.get("industry") or r.get("sector")
     ranked = sorted(pillars, key=lambda x: x["score"])
@@ -144,17 +145,20 @@ def compose(r: dict, q: dict | None = None, p: dict | None = None) -> dict:
 
     brief = " ".join(sentences)
 
-    # The paste block: the brief, the three grades, the headline numbers, the source.
+    # The headline is composed once and reused, so the small Copy button beside the grades
+    # and the big one under the brief can never disagree about what the grades are.
     head = f"{name}" + (f" ({symbol})" if symbol else "")
-    lines = [f"{head} — {score}/10, {r.get('grade') or ''}".rstrip(" ,-")]
+    headline_lines = [f"{head} — {score}/10, {r.get('grade') or ''}".rstrip(" ,-")]
     grades = []
     if q and q.get("score") is not None:
         grades.append(f"Quarter {q['score']}/10 ({q.get('tier')})")
     if p and p.get("score") is not None:
         grades.append(f"P&L record {p['score']}/10 ({p.get('tier')})")
     if grades:
-        lines.append(" · ".join(grades))
-    lines += ["", brief, ""]
+        headline_lines.append(" · ".join(grades))
+    headline_text = "\n".join(headline_lines)
+
+    lines = list(headline_lines) + ["", brief, ""]
 
     facts = []
     if r.get("price") is not None:
@@ -173,4 +177,4 @@ def compose(r: dict, q: dict | None = None, p: dict | None = None) -> dict:
         lines.append(f"Source: {r['source_url']}")
     lines.append("Rated from public filings — research aid, not investment advice.")
 
-    return {"brief": brief, "copy_text": "\n".join(lines)}
+    return {"brief": brief, "copy_text": "\n".join(lines), "headline_text": headline_text}

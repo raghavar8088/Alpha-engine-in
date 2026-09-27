@@ -6220,6 +6220,8 @@ export interface FundamentalRating {
   brief?: string;
   /** The brief plus the identifying facts and source — what the Copy button copies. */
   copy_text?: string;
+  /** Just the name, score and the three grades — what the header Copy button copies. */
+  headline_text?: string;
   results?: ResultsStrength;
   pnl?: PnlStrength;
   statements?: Statements;

@@ -85,15 +85,14 @@ export default function FundamentalsPage() {
 
   const ratings = result?.ratings ?? [];
 
-  const copyBrief = useCallback(async (r: FundamentalRating) => {
-    const text = r.copy_text || r.brief || "";
+  const copyText = useCallback(async (text: string, key: string) => {
     if (!text) return;
     try {
       await navigator.clipboard.writeText(text);
-      setCopiedSym(r.symbol);
-      setTimeout(() => setCopiedSym((s) => (s === r.symbol ? null : s)), 2500);
+      setCopiedSym(key);
+      setTimeout(() => setCopiedSym((s) => (s === key ? null : s)), 2500);
     } catch {
-      setError("The browser blocked the clipboard — expand the card and copy the text by hand.");
+      setError("The browser blocked the clipboard — select the text and copy it by hand.");
     }
   }, []);
 
@@ -211,9 +210,17 @@ export default function FundamentalsPage() {
             <div className="cards">
               {ratings.map((r) => (
                 <div key={r.symbol} className="card">
-                  <button
+                  <div
                     className="card-head"
+                    role="button"
+                    tabIndex={0}
                     onClick={() => setExpanded(expanded === r.symbol ? null : r.symbol)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setExpanded(expanded === r.symbol ? null : r.symbol);
+                      }
+                    }}
                   >
                     <div
                       className="score"
@@ -237,6 +244,18 @@ export default function FundamentalsPage() {
                       <div className="trio">
                         <MiniGrade label="Quarter" g={r.results?.grade_key} s={r.results?.score ?? null} />
                         <MiniGrade label="P&L" g={r.pnl?.grade_key} s={r.pnl?.score ?? null} />
+                        {r.headline_text && (
+                          <button
+                            className="headcopy"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              copyText(r.headline_text!, `${r.symbol}:head`);
+                            }}
+                            title="Copy the name and the three grades"
+                          >
+                            {copiedSym === `${r.symbol}:head` ? "Copied" : "Copy"}
+                          </button>
+                        )}
                       </div>
                       <div className="meta">
                         {r.industry || r.sector || "—"}
@@ -269,7 +288,7 @@ export default function FundamentalsPage() {
                       </div>
                     </div>
                     <span className="chev">{expanded === r.symbol ? "▲" : "▼"}</span>
-                  </button>
+                  </div>
 
                   {r.brief && (
                     <div className="briefrow">
@@ -278,7 +297,7 @@ export default function FundamentalsPage() {
                         className="copybtn"
                         onClick={(e) => {
                           e.stopPropagation();
-                          copyBrief(r);
+                          copyText(r.copy_text || r.brief || "", r.symbol);
                         }}
                         title="Copy this write-up, the three grades and the key numbers"
                       >
@@ -624,6 +643,27 @@ export default function FundamentalsPage() {
           cursor: pointer;
           text-align: left;
           color: inherit;
+        }
+        .card-head:focus-visible {
+          outline: 2px solid var(--purple);
+          outline-offset: -2px;
+          border-radius: 12px;
+        }
+        .headcopy {
+          border: 1px solid var(--panel-border);
+          background: var(--canvas);
+          color: var(--text-faint);
+          border-radius: 20px;
+          padding: 1px 9px;
+          font-size: 10px;
+          font-weight: 650;
+          cursor: pointer;
+          line-height: 1.6;
+        }
+        .headcopy:hover {
+          color: var(--purple);
+          border-color: rgba(125, 52, 220, 0.4);
+          background: var(--purple-dim);
         }
         .score {
           flex: 0 0 auto;
