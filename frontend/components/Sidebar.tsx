@@ -44,6 +44,20 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // Sits beside the Screener: both read the market rather than trade it. The
+        // Screener narrows a universe down to candidates; this one takes names you
+        // already have and judges the business behind each.
+        href: "/fundamentals",
+        label: "Fundamental Rating",
+        icon: (
+          <>
+            <path d="M4 19h16" />
+            <path d="M7 19V9l5-5 5 5v10" />
+            <path d="M10 19v-4h4v4" />
+          </>
+        ),
+      },
+      {
         // Directly under Market Data: this is the one desk driven by prices the USER
         // names rather than by a strategy, so it belongs with the data tools.
         href: "/swing-trading",

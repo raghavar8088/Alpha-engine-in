@@ -64,6 +64,12 @@ stock_highs_collection = db["stock_highs"]
 # Per-symbol fundamentals (growth, margins, debt, ROE, holding, analyst view) refreshed
 # daily from Yahoo Finance. Quarterly-changing data, so a daily snapshot is ample.
 stock_fundamentals_collection = db["stock_fundamentals"]
+# Fundamental Rating module — screener.in statements, parsed and cached for a day, plus
+# the 1-10 rating computed off them. Separate from stock_fundamentals above: that one is
+# Yahoo's coarse pass/fail over the whole universe for the Bullish Stocks screen, this is
+# a deep per-company read pulled on demand for the symbols a user pastes in.
+screener_fundamentals_collection = db["screener_fundamentals"]
+fundamental_ratings_collection = db["fundamental_ratings"]
 # F&O Positions module — user-initiated paper trades on index/stock options & futures
 fno_positions_collection = db["fno_positions"]
 fno_orders_collection = db["fno_orders"]

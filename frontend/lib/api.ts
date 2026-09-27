@@ -6116,3 +6116,90 @@ export async function setAllModuleSwitches(enabled: boolean): Promise<ModuleSwit
     body: JSON.stringify({ enabled }),
   });
 }
+
+// ---- Fundamental Rating (screener.in fundamentals, scored 1-10) ----
+export type RatingBand = "strong" | "good" | "mixed" | "weak" | "poor" | "unknown";
+
+export interface RatingPillar {
+  pillar: string;
+  label: string;
+  score: number;
+  weight: number;
+  effective_weight?: number;
+  reason: string;
+  inputs: Record<string, unknown>;
+}
+
+export interface SkippedPillar {
+  pillar: string;
+  label: string;
+  weight: number;
+  why: string;
+}
+
+export interface FundamentalRating {
+  symbol: string;
+  name: string | null;
+  sector?: string | null;
+  industry?: string | null;
+  rated: boolean;
+  score: number | null;
+  verdict: string;
+  band: RatingBand;
+  is_lender?: boolean;
+  coverage: number;
+  pillars: RatingPillar[];
+  skipped: SkippedPillar[];
+  summary: string;
+  price?: number | null;
+  market_cap_cr?: number | null;
+  pe?: number | null;
+  roce?: number | null;
+  screener_pros?: string[];
+  screener_cons?: string[];
+  basis?: string;
+  source_url?: string;
+  data_missing?: string[];
+  from_cache?: boolean;
+  rated_at?: string;
+}
+
+export interface RateResponse {
+  ratings: FundamentalRating[];
+  failures: { symbol: string; error: string }[];
+  requested: number;
+  rated: number;
+  truncated: string[];
+  note: string | null;
+}
+
+export interface RatingMethodology {
+  pillars: { pillar: string; label: string; weight: number }[];
+  bands: { from: number; to: number; verdict: string; band: RatingBand }[];
+  source: string;
+  cache_hours: number;
+  max_symbols: number;
+  notes: string[];
+}
+
+export async function rateFundamentals(symbols: string, force = false): Promise<RateResponse> {
+  return apiFetch("/api/fundamentals/rate", {
+    method: "POST",
+    body: JSON.stringify({ symbols, force }),
+  });
+}
+
+export async function fetchFundamentalDetail(
+  symbol: string,
+  force = false,
+): Promise<FundamentalRating & { fundamentals: Record<string, unknown> }> {
+  return apiFetch(`/api/fundamentals/${encodeURIComponent(symbol)}${force ? "?force=true" : ""}`);
+}
+
+export async function fetchRecentRatings(limit = 50): Promise<{ ratings: FundamentalRating[]; count: number }> {
+  return apiFetch(`/api/fundamentals/recent?limit=${limit}`);
+}
+
+export async function fetchRatingMethodology(): Promise<RatingMethodology> {
+  return apiFetch("/api/fundamentals/methodology");
+}

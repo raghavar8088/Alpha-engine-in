@@ -13,6 +13,7 @@ from fastapi.responses import JSONResponse
 from app.api.deps import get_current_user
 from app.api.routes import (
     ath_trading,
+    fundamentals,
     pattern,
     pattern_books,
     desk_history,
@@ -790,6 +791,7 @@ app.include_router(ath_trading.router)
 app.include_router(long_horizon.router)
 app.include_router(chart_data.router)
 app.include_router(telegram_signals.router)
+app.include_router(fundamentals.router)
 
 if settings.enable_live_trading:
     app.include_router(live.router)
