@@ -75,6 +75,10 @@ fundamental_scan_state_collection = db["fundamental_scan_state"]
 # Named watchlists from the Fundamental Rating module, and the paper book each can be
 # funded as — a fixed rupee amount per stock, marked daily, aggregated by the grade the
 # stock held AT ENTRY so the tiers can be checked against what they actually returned.
+# The BROAD NSE universe (Nifty Total Market, 755) kept separately from stock_universe on
+# purpose: stocks_range backfills daily Angel bars for every symbol in that shared
+# collection, so adding 250 more names there would silently double another module's work.
+fundamental_universe_symbols_collection = db["fundamental_universe_symbols"]
 fundamental_watchlists_collection = db["fundamental_watchlists"]
 fundamental_paper_positions_collection = db["fundamental_paper_positions"]
 fundamental_paper_equity_collection = db["fundamental_paper_equity"]

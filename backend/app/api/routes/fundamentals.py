@@ -160,6 +160,43 @@ async def save_watchlist(payload: dict = Body(...),
         raise HTTPException(status_code=400, detail=exc.detail)
 
 
+@router.post("/watchlists/from-filter")
+async def watchlist_from_filter(payload: dict = Body(...),
+                                _current_user: dict = Depends(get_current_user)):
+    """Save everything matching a set of filters as a named watchlist.
+
+    The point is repeatability: grades move as companies report, so "the excellent and
+    above names in the broad market" is a QUERY, not a list someone pasted once. Re-running
+    this rebuilds the list against whatever the ratings say today.
+    """
+    name = (payload.get("name") or "").strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Give the watchlist a name.")
+    keys = [g for g in (payload.get("grades") or []) if g in GRADE_ORDER]
+    res = await fundamental_universe.browse(
+        index=payload.get("index"), sector=payload.get("sector"),
+        min_score=payload.get("min_score"), min_results=payload.get("min_results"),
+        min_pnl=payload.get("min_pnl"), grades=keys or None,
+        sort="score", limit=int(payload.get("limit") or 2000))
+    symbols = [s["symbol"] for s in res["stocks"]]
+    if not symbols:
+        raise HTTPException(status_code=400,
+                            detail="Nothing matches those filters yet — scan the universe first.")
+    try:
+        wl = await fundamental_watchlist.save_watchlist(name, " ".join(symbols))
+    except fundamental_watchlist.WatchlistError as exc:
+        raise HTTPException(status_code=400, detail=exc.detail)
+    return {**wl, "matched": len(symbols), "filters": {"grades": keys,
+                                                       "index": payload.get("index"),
+                                                       "sector": payload.get("sector")}}
+
+
+@router.post("/universe/refresh-broad")
+async def refresh_broad(_current_user: dict = Depends(get_current_user)):
+    """Re-pull the wide NSE constituent lists (Total Market, Microcap 250)."""
+    return await fundamental_universe.refresh_broad_universe()
+
+
 @router.delete("/watchlists/{name}")
 async def remove_watchlist(name: str, _current_user: dict = Depends(get_current_user)):
     return await fundamental_watchlist.delete_watchlist(name)

@@ -35,6 +35,8 @@ always contain a few, and losing the other 495 to them would be absurd.
 """
 
 import asyncio
+import csv
+import io as _io
 import logging
 import os
 from datetime import datetime, timezone
@@ -44,6 +46,7 @@ import httpx
 from app.core.db import (
     fundamental_ratings_collection,
     fundamental_scan_state_collection,
+    fundamental_universe_symbols_collection,
     fundamental_watchlists_collection,
     stock_universe_collection,
 )
@@ -75,6 +78,21 @@ INDEX_LABELS = {
 }
 DERIVED = {"niftynext50": ("nifty100", "nifty50")}   # in the first, not in the second
 
+# THE BROAD UNIVERSE, AND WHY IT LIVES IN ITS OWN COLLECTION
+# NSE publishes no "top 1000" constituent list. Nifty Total Market, at 755 names, is the
+# widest one there is, and it already CONTAINS both the Nifty 500 and the Microcap 250 —
+# their union is 755, not 1000. So this is the investable NSE universe by index membership.
+#
+# It is seeded into fundamental_universe_symbols rather than the shared stock_universe
+# because stocks_range backfills daily Angel candles for every symbol in that collection;
+# adding 250 more names to it would quietly double another module's job.
+BROAD_CSVS = {
+    "niftytotalmarket": ("Nifty Total Market (~NSE top 750)",
+                         "https://niftyindices.com/IndexConstituent/ind_niftytotalmarket_list.csv"),
+    "niftymicrocap250": ("Nifty Microcap 250",
+                         "https://niftyindices.com/IndexConstituent/ind_niftymicrocap250_list.csv"),
+}
+
 _task: asyncio.Task | None = None
 _cancel = False
 
@@ -84,6 +102,41 @@ def _now() -> datetime:
 
 
 # ── the universe ─────────────────────────────────────────────────────────────────
+
+
+async def refresh_broad_universe() -> dict:
+    """(Re)load the wide index lists. Idempotent; called on demand and before a broad scan."""
+    seen: dict[str, dict] = {}
+    fetched: dict[str, int] = {}
+    async with httpx.AsyncClient(timeout=60, headers={"User-Agent": "Mozilla/5.0"}) as c:
+        for key, (_label, url) in BROAD_CSVS.items():
+            try:
+                text = (await c.get(url)).text
+            except Exception as exc:
+                logger.warning("broad universe: could not fetch %s (%s)", key, exc)
+                continue
+            rows = list(csv.DictReader(_io.StringIO(text)))
+            fetched[key] = len(rows)
+            for row in rows:
+                sym = (row.get("Symbol") or "").strip().upper()
+                if not sym:
+                    continue
+                m = seen.setdefault(sym, {
+                    "symbol": sym,
+                    "name": (row.get("Company Name") or "").strip(),
+                    "sector": (row.get("Industry") or "").strip() or "Unclassified",
+                    "lists": set(),
+                })
+                m["lists"].add(key)
+
+    for sym, m in seen.items():
+        await fundamental_universe_symbols_collection.replace_one(
+            {"_id": sym},
+            {"_id": sym, "symbol": sym, "name": m["name"], "sector": m["sector"],
+             "lists": sorted(m["lists"]), "updated_at": _now()},
+            upsert=True)
+    logger.info("broad universe refreshed: %d symbols %s", len(seen), fetched)
+    return {"symbols": len(seen), "by_list": fetched}
 
 
 async def _symbols_for(scope_type: str, scope_key: str) -> list[dict]:
@@ -103,6 +156,13 @@ async def _symbols_for(scope_type: str, scope_key: str) -> list[dict]:
         known = {d["symbol"]: d async for d in stock_universe_collection.find(
             {"symbol": {"$in": syms}}, {"symbol": 1, "name": 1, "sector": 1, "indices": 1})}
         return [known.get(s, {"symbol": s}) for s in syms]
+    if scope_type == "index" and scope_key in BROAD_CSVS:
+        if not await fundamental_universe_symbols_collection.count_documents({}, limit=1):
+            await refresh_broad_universe()
+        return [{"symbol": d["symbol"], "name": d.get("name"), "sector": d.get("sector"),
+                 "indices": d.get("lists") or []}
+                async for d in fundamental_universe_symbols_collection.find(
+                    {"lists": scope_key})]
     if scope_type == "index":
         if scope_key in DERIVED:
             outer, inner = DERIVED[scope_key]
@@ -128,6 +188,11 @@ async def scopes() -> dict:
         sec = d.get("sector") or "Unclassified"
         sectors[sec] = sectors.get(sec, 0) + 1
 
+    broad = []
+    for key, (label, _url) in BROAD_CSVS.items():
+        n = await fundamental_universe_symbols_collection.count_documents({"lists": key})
+        broad.append({"key": key, "label": label, "count": n})
+
     for key, label in INDEX_LABELS.items():
         if key in DERIVED:
             outer, inner = DERIVED[key]
@@ -145,8 +210,8 @@ async def scopes() -> dict:
         ({"key": k, "label": k, "count": v} for k, v in sectors.items() if not k.startswith("__idx__")),
         key=lambda r: -r["count"])
     rated = await fundamental_ratings_collection.count_documents({})
-    return {"indices": indices, "sectors": sector_rows, "watchlists": wl_rows,
-            "rated_stored": rated}
+    return {"indices": indices + [b for b in broad if b["count"] or True],
+            "sectors": sector_rows, "watchlists": wl_rows, "rated_stored": rated}
 
 
 # ── scan state ───────────────────────────────────────────────────────────────────
@@ -316,7 +381,12 @@ async def start(scope_type: str, scope_key: str, force: bool = False) -> dict:
     if st.get("running") and _task and not _task.done():
         return {"started": False, "reason": "A scan is already running.", "status": st}
 
-    label = (INDEX_LABELS.get(scope_key, scope_key) if scope_type == "index" else scope_key)
+    if scope_type == "index" and scope_key in BROAD_CSVS:
+        label = BROAD_CSVS[scope_key][0]
+    elif scope_type == "index":
+        label = INDEX_LABELS.get(scope_key, scope_key)
+    else:
+        label = scope_key
     _cancel = False
     _task = asyncio.create_task(_run(scope_type, scope_key, label, force))
     rows = await _symbols_for(scope_type, scope_key)
