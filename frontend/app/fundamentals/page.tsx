@@ -235,6 +235,85 @@ export default function FundamentalsPage() {
                     <div className="detail">
                       <p className="summary">{r.summary}</p>
 
+                      {r.results && (
+                        <div className="results">
+                          <div className="rhead">
+                            <span
+                              className="rscore"
+                              style={{ background: BAND_COLOR[r.results.band] }}
+                            >
+                              {r.results.score === null ? "—" : r.results.score.toFixed(1)}
+                            </span>
+                            <div>
+                              <div
+                                className="rverdict"
+                                style={{ color: BAND_COLOR[r.results.band] }}
+                              >
+                                {r.results.verdict}
+                              </div>
+                              <div className="rsub">
+                                Latest quarter{" "}
+                                {r.results.latest_quarter && (
+                                  <b>{r.results.latest_quarter}</b>
+                                )}{" "}
+                                vs {r.results.comparison_quarter ?? "a year earlier"} — judged
+                                separately from the {r.score}/10 business score above
+                              </div>
+                            </div>
+                          </div>
+                          <p className="rhead-line">{r.results.headline}</p>
+                          {r.results.signals.length > 0 && (
+                            <div className="sig">
+                              {r.results.signals.map((s) => (
+                                <div key={s.label} className={`sg ${s.tone}`} title={s.detail}>
+                                  <span className="sl">{s.label}</span>
+                                  <b className="sv">{s.value}</b>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {r.results.one_off_flag && r.results.one_off_note && (
+                            <div className="oneoff">⚠ {r.results.one_off_note}</div>
+                          )}
+                        </div>
+                      )}
+
+                      {r.statements && (
+                        <>
+                          <StatementTable
+                            title="Quarterly Results"
+                            subtitle={`${r.basis === "standalone" ? "Standalone" : "Consolidated"} figures in Rs. Crores`}
+                            periods={r.statements.quarters_periods}
+                            rows={r.statements.quarters}
+                            bold={["Operating Profit", "Profit before tax", "Net Profit", "Financing Profit"]}
+                            percentRows={["OPM %", "Tax %", "Financing Margin %"]}
+                          />
+                          <StatementTable
+                            title="Profit & Loss"
+                            subtitle={`${r.basis === "standalone" ? "Standalone" : "Consolidated"} figures in Rs. Crores`}
+                            periods={r.statements.profit_loss_periods}
+                            rows={r.statements.profit_loss}
+                            bold={["Operating Profit", "Profit before tax", "Net Profit", "Financing Profit"]}
+                            percentRows={["OPM %", "Tax %", "Dividend Payout %", "Financing Margin %"]}
+                          />
+                          {Object.keys(r.statements.ranges).length > 0 && (
+                            <div className="ranges">
+                              {Object.entries(r.statements.ranges).map(([title, vals]) => (
+                                <div key={title} className="rg">
+                                  <div className="rgt">{title}</div>
+                                  {Object.entries(vals).map(([k, v]) => (
+                                    <div key={k} className="rgr">
+                                      <span>{k}</span>
+                                      <b>{v === null || v === undefined ? "—" : `${v}%`}</b>
+                                    </div>
+                                  ))}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      )}
+
                       {r.pillars.map((p) => (
                         <div key={p.pillar} className="pillar">
                           <div className="prow">
@@ -539,6 +618,113 @@ export default function FundamentalsPage() {
           color: var(--text-muted);
           line-height: 1.5;
         }
+        .results {
+          border: 1px solid var(--panel-border);
+          border-radius: 10px;
+          padding: 12px 14px;
+          margin-bottom: 16px;
+          background: var(--canvas);
+        }
+        .rhead {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        .rscore {
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
+          color: #fff;
+          font-weight: 800;
+          font-size: 15px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex: 0 0 auto;
+          font-family: var(--font-display);
+        }
+        .rverdict {
+          font-weight: 700;
+          font-size: 13.5px;
+        }
+        .rsub {
+          font-size: 11.5px;
+          color: var(--text-faint);
+          margin-top: 1px;
+        }
+        .rhead-line {
+          font-size: 12.5px;
+          color: var(--text-muted);
+          line-height: 1.55;
+          margin: 10px 0 0;
+        }
+        .sig {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          margin-top: 10px;
+        }
+        .sg {
+          border: 1px solid var(--panel-border);
+          border-radius: 9px;
+          padding: 6px 11px;
+          display: flex;
+          flex-direction: column;
+          gap: 1px;
+          cursor: help;
+        }
+        .sg.good {
+          border-color: rgba(26, 156, 91, 0.4);
+        }
+        .sg.bad {
+          border-color: rgba(212, 68, 60, 0.4);
+        }
+        .sl {
+          font-size: 10.5px;
+          color: var(--text-faint);
+        }
+        .sv {
+          font-size: 13px;
+        }
+        .sg.good .sv {
+          color: #1a9c5b;
+        }
+        .sg.bad .sv {
+          color: #d4443c;
+        }
+        .oneoff {
+          margin-top: 10px;
+          font-size: 11.5px;
+          color: #b8690f;
+          background: rgba(224, 122, 44, 0.08);
+          border: 1px solid rgba(224, 122, 44, 0.3);
+          border-radius: 8px;
+          padding: 8px 10px;
+          line-height: 1.5;
+        }
+        .ranges {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+          gap: 10px;
+          margin: 4px 0 16px;
+        }
+        .rg {
+          border: 1px solid var(--panel-border);
+          border-radius: 9px;
+          padding: 10px 12px;
+        }
+        .rgt {
+          font-size: 11.5px;
+          font-weight: 700;
+          margin-bottom: 6px;
+        }
+        .rgr {
+          display: flex;
+          justify-content: space-between;
+          font-size: 12px;
+          color: var(--text-muted);
+          padding: 1px 0;
+        }
         .skipped {
           font-size: 12px;
           color: var(--text-faint);
@@ -669,6 +855,149 @@ export default function FundamentalsPage() {
           .proscons {
             grid-template-columns: 1fr;
           }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+/** A screener.in statement rendered as-is: periods across, line items down.
+ *
+ * Horizontally scrollable rather than wrapped or truncated — a P&L with twelve years and a
+ * TTM column cannot be made narrow without losing the comparison that makes it worth
+ * reading, and the first column is pinned so the line item stays visible while scrolling.
+ */
+function StatementTable({
+  title,
+  subtitle,
+  periods,
+  rows,
+  bold = [],
+  percentRows = [],
+}: {
+  title: string;
+  subtitle: string;
+  periods: string[];
+  rows: Record<string, (number | null)[]>;
+  bold?: string[];
+  percentRows?: string[];
+}) {
+  const names = Object.keys(rows);
+  if (!names.length || !periods.length) return null;
+
+  const fmt = (v: number | null | undefined, pct: boolean) => {
+    if (v === null || v === undefined) return "—";
+    if (pct) return `${v.toFixed(0)}%`;
+    return v.toLocaleString("en-IN", { maximumFractionDigits: 2 });
+  };
+
+  return (
+    <div className="stmt">
+      <div className="stmt-head">
+        <b>{title}</b>
+        <span>{subtitle}</span>
+      </div>
+      <div className="stmt-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th className="lead" />
+              {periods.map((p) => (
+                <th key={p}>{p}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {names.map((name) => {
+              const pct = percentRows.includes(name);
+              return (
+                <tr key={name} className={bold.includes(name) ? "strong" : ""}>
+                  <td className="lead">{name}</td>
+                  {periods.map((p, i) => (
+                    <td key={p} className={(rows[name]?.[i] ?? 0) < 0 ? "neg" : ""}>
+                      {fmt(rows[name]?.[i], pct)}
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <style jsx>{`
+        .stmt {
+          margin: 16px 0;
+          border: 1px solid var(--panel-border);
+          border-radius: 10px;
+          overflow: hidden;
+          background: var(--canvas);
+        }
+        .stmt-head {
+          padding: 10px 12px;
+          border-bottom: 1px solid var(--panel-border);
+          display: flex;
+          align-items: baseline;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+        .stmt-head b {
+          font-size: 13px;
+        }
+        .stmt-head span {
+          font-size: 11.5px;
+          color: var(--text-faint);
+        }
+        .stmt-scroll {
+          overflow-x: auto;
+        }
+        table {
+          border-collapse: collapse;
+          width: 100%;
+          font-size: 12px;
+          white-space: nowrap;
+        }
+        th,
+        td {
+          padding: 7px 10px;
+          text-align: right;
+          border-bottom: 1px solid var(--panel-border);
+        }
+        th {
+          font-size: 11px;
+          font-weight: 600;
+          color: var(--text-faint);
+          background: var(--canvas-soft);
+          position: sticky;
+          top: 0;
+        }
+        .lead {
+          text-align: left;
+          position: sticky;
+          left: 0;
+          background: var(--canvas);
+          z-index: 1;
+          font-weight: 500;
+          min-width: 150px;
+        }
+        th.lead {
+          background: var(--canvas-soft);
+          z-index: 2;
+        }
+        tr.strong td {
+          font-weight: 700;
+        }
+        tr.strong .lead {
+          font-weight: 700;
+        }
+        tbody tr:hover td {
+          background: var(--purple-dim);
+        }
+        tbody tr:hover .lead {
+          background: var(--purple-dim);
+        }
+        .neg {
+          color: #d4443c;
         }
       `}</style>
     </div>

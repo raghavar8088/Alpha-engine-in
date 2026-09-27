@@ -19,7 +19,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query
 
 from app.api.deps import get_current_user
 from app.core.db import fundamental_ratings_collection
-from app.services import screener_in
+from app.services import results_strength, screener_in
 from app.services.fundamental_rating import PILLARS, PILLAR_LABELS, rate
 
 router = APIRouter(prefix="/api/fundamentals", tags=["fundamentals"])
@@ -31,6 +31,22 @@ def _clean(doc: dict | None) -> dict | None:
     if doc:
         doc.pop("_id", None)
     return doc
+
+
+def _statements(f: dict) -> dict:
+    """The two tables the user reads alongside the score, shaped for direct rendering.
+
+    Sent with every rating rather than fetched on expand: the page already has the parsed
+    document in hand, and a second round trip per company to redraw a table we have already
+    read would be slower and would hit screener.in again for nothing.
+    """
+    return {
+        "quarters": f.get("quarters") or {},
+        "quarters_periods": f.get("quarters_periods") or [],
+        "profit_loss": f.get("profit_loss") or {},
+        "profit_loss_periods": f.get("profit_loss_periods") or [],
+        "ranges": f.get("ranges") or {},
+    }
 
 
 @router.get("/methodology")
@@ -105,9 +121,19 @@ async def rate_symbols(payload: dict = Body(...),
         r["symbol"] = sym
         r["rated_at"] = now
         r["from_cache"] = bool(got.get("cached"))
+        try:
+            r["results"] = results_strength.analyse(got)
+        except Exception:                               # a bad quarterly table is not fatal
+            r["results"] = {"rated": False, "score": None, "band": "unknown",
+                            "verdict": "Results could not be read", "signals": [],
+                            "headline": "The quarterly table could not be interpreted."}
+        r["statements"] = _statements(got)
         results.append(r)
+        # The statements are already cached in screener_fundamentals; storing a second copy
+        # per rating would double the write for data that is keyed by symbol either way.
         await fundamental_ratings_collection.replace_one(
-            {"_id": sym}, {**r, "_id": sym}, upsert=True)
+            {"_id": sym}, {**{k: v for k, v in r.items() if k != "statements"}, "_id": sym},
+            upsert=True)
 
     results.sort(key=lambda x: (x["score"] is None, -(x["score"] or 0)))
     for r in results:
@@ -139,6 +165,8 @@ async def one(symbol: str, force: bool = False,
     r = rate(data)
     r["symbol"] = sym
     r["from_cache"] = bool(data.get("cached"))
+    r["results"] = results_strength.analyse(data)
+    r["statements"] = _statements(data)
     r["fundamentals"] = {
         "ratios": data.get("ratios"),
         "ranges": data.get("ranges"),

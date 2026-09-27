@@ -6137,6 +6137,39 @@ export interface SkippedPillar {
   why: string;
 }
 
+export interface ResultSignal {
+  label: string;
+  value: string;
+  detail: string;
+  tone: "good" | "bad" | "neutral";
+}
+
+/** Whether the LATEST quarter is strong — a separate read from the 1-10 business score. */
+export interface ResultsStrength {
+  rated: boolean;
+  score: number | null;
+  verdict: string;
+  band: RatingBand;
+  headline: string;
+  signals: ResultSignal[];
+  latest_quarter?: string;
+  comparison_quarter?: string;
+  previous_quarter?: string;
+  sales_qoq?: number | null;
+  one_off_flag?: boolean;
+  one_off_note?: string | null;
+  coverage?: number;
+}
+
+/** The screener.in tables themselves, shaped for direct rendering. */
+export interface Statements {
+  quarters: Record<string, (number | null)[]>;
+  quarters_periods: string[];
+  profit_loss: Record<string, (number | null)[]>;
+  profit_loss_periods: string[];
+  ranges: Record<string, Record<string, number | null>>;
+}
+
 export interface FundamentalRating {
   symbol: string;
   name: string | null;
@@ -6162,6 +6195,8 @@ export interface FundamentalRating {
   data_missing?: string[];
   from_cache?: boolean;
   rated_at?: string;
+  results?: ResultsStrength;
+  statements?: Statements;
 }
 
 export interface RateResponse {

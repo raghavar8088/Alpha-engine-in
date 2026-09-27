@@ -133,8 +133,14 @@ def _labelled(rows: list[list[str]]) -> dict[str, list]:
         if len(r) < 2:
             continue
         key = re.sub(r"\s*\+$", "", r[0]).strip()
-        if key:
-            out[key] = [_num(c) for c in r[1:]]
+        if not key:
+            continue
+        vals = [_num(c) for c in r[1:]]
+        # The quarterly table ends in a "Raw PDF" row of download icons, which parses to a
+        # row of Nones. A row with no numbers at all carries nothing either way, so it is
+        # dropped rather than shipped to the UI as an empty line.
+        if any(v is not None for v in vals):
+            out[key] = vals
     return out
 
 
