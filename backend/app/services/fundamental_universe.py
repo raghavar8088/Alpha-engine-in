@@ -93,6 +93,17 @@ BROAD_CSVS = {
                          "https://niftyindices.com/IndexConstituent/ind_niftymicrocap250_list.csv"),
 }
 
+# EVERYTHING BELOW THE INDEXED MARKET, AND WHY IT CANNOT BE PRE-RANKED
+# NSE's full equity list carries no market cap, and its index constituent files stop at
+# Total Market's 755. There is therefore no published ranking of "the next 750" to read —
+# the only size number available is the one screener.in prints on each company's page,
+# which means the rank exists AFTER the scan, not before it. So this scope is every
+# EQ-series NSE equity outside Total Market, and "the next 750" is then taken from it by
+# market cap once the scan has supplied one.
+NSE_EQUITY_LIST = "https://nsearchives.nseindia.com/content/equities/EQUITY_L.csv"
+REST_KEY = "nserest"
+REST_LABEL = "NSE beyond Total Market (EQ series)"
+
 _task: asyncio.Task | None = None
 _cancel = False
 
@@ -139,6 +150,41 @@ async def refresh_broad_universe() -> dict:
     return {"symbols": len(seen), "by_list": fetched}
 
 
+async def refresh_nse_rest() -> dict:
+    """Seed every EQ-series NSE equity that Total Market does not already carry.
+
+    Restricted to SERIES == "EQ": the file also lists SME, debt and rights lines, none of
+    which are companies a fundamental rating means anything for.
+    """
+    if not await fundamental_universe_symbols_collection.count_documents(
+            {"lists": "niftytotalmarket"}, limit=1):
+        await refresh_broad_universe()
+    indexed = {d["_id"] async for d in fundamental_universe_symbols_collection.find(
+        {"lists": "niftytotalmarket"}, {"_id": 1})}
+
+    async with httpx.AsyncClient(timeout=90, headers={"User-Agent": "Mozilla/5.0"}) as c:
+        text = (await c.get(NSE_EQUITY_LIST)).text
+    rows = list(csv.DictReader(_io.StringIO(text)))
+
+    added = 0
+    for row in rows:
+        clean = {(k or "").strip(): (v or "").strip() for k, v in row.items()}
+        if clean.get("SERIES") != "EQ":
+            continue
+        sym = clean.get("SYMBOL", "").upper()
+        if not sym or sym in indexed:
+            continue
+        await fundamental_universe_symbols_collection.update_one(
+            {"_id": sym},
+            {"$set": {"symbol": sym, "name": clean.get("NAME OF COMPANY"),
+                      "sector": "Unclassified", "updated_at": _now()},
+             "$addToSet": {"lists": REST_KEY}},
+            upsert=True)
+        added += 1
+    logger.info("nse-rest universe refreshed: %d symbols outside Total Market", added)
+    return {"symbols": added, "rows_in_file": len(rows), "excluded_indexed": len(indexed)}
+
+
 async def _symbols_for(scope_type: str, scope_key: str) -> list[dict]:
     """The constituent rows for an index key, an NSE sector, or a named watchlist.
 
@@ -156,6 +202,14 @@ async def _symbols_for(scope_type: str, scope_key: str) -> list[dict]:
         known = {d["symbol"]: d async for d in stock_universe_collection.find(
             {"symbol": {"$in": syms}}, {"symbol": 1, "name": 1, "sector": 1, "indices": 1})}
         return [known.get(s, {"symbol": s}) for s in syms]
+    if scope_type == "index" and scope_key == REST_KEY:
+        if not await fundamental_universe_symbols_collection.count_documents(
+                {"lists": REST_KEY}, limit=1):
+            await refresh_nse_rest()
+        return [{"symbol": d["symbol"], "name": d.get("name"), "sector": d.get("sector"),
+                 "indices": d.get("lists") or []}
+                async for d in fundamental_universe_symbols_collection.find(
+                    {"lists": REST_KEY})]
     if scope_type == "index" and scope_key in BROAD_CSVS:
         if not await fundamental_universe_symbols_collection.count_documents({}, limit=1):
             await refresh_broad_universe()
@@ -192,6 +246,9 @@ async def scopes() -> dict:
     for key, (label, _url) in BROAD_CSVS.items():
         n = await fundamental_universe_symbols_collection.count_documents({"lists": key})
         broad.append({"key": key, "label": label, "count": n})
+    broad.append({"key": REST_KEY, "label": REST_LABEL,
+                  "count": await fundamental_universe_symbols_collection.count_documents(
+                      {"lists": REST_KEY})})
 
     for key, label in INDEX_LABELS.items():
         if key in DERIVED:
@@ -381,7 +438,9 @@ async def start(scope_type: str, scope_key: str, force: bool = False) -> dict:
     if st.get("running") and _task and not _task.done():
         return {"started": False, "reason": "A scan is already running.", "status": st}
 
-    if scope_type == "index" and scope_key in BROAD_CSVS:
+    if scope_type == "index" and scope_key == REST_KEY:
+        label = REST_LABEL
+    elif scope_type == "index" and scope_key in BROAD_CSVS:
         label = BROAD_CSVS[scope_key][0]
     elif scope_type == "index":
         label = INDEX_LABELS.get(scope_key, scope_key)
@@ -418,7 +477,7 @@ async def browse(index: str | None = None, sector: str | None = None,
                  min_score: float | None = None, min_results: float | None = None,
                  min_pnl: float | None = None, grades: list[str] | None = None,
                  search: str | None = None, sort: str = "score",
-                 limit: int = 600) -> dict:
+                 limit: int = 600, top_by_market_cap: int | None = None) -> dict:
     """Stored ratings, filtered the way the picker asks for them."""
     q: dict = {"score": {"$ne": None}}
     if index:
@@ -435,6 +494,14 @@ async def browse(index: str | None = None, sector: str | None = None,
         q["results_score"] = {"$gte": min_results}
     if min_pnl is not None:
         q["pnl_score"] = {"$gte": min_pnl}
+    if top_by_market_cap:
+        # "The excellent names among the next 750 companies" is size FIRST, grade second.
+        # Applying the grade filter first and then taking 750 would silently answer a
+        # different question — the 750 best-graded, of any size.
+        biggest = [d["symbol"] async for d in fundamental_ratings_collection.find(
+            {**q, "market_cap_cr": {"$ne": None}}, {"symbol": 1})
+            .sort("market_cap_cr", -1).limit(top_by_market_cap)]
+        q["symbol"] = {"$in": biggest}
     if grades:
         q["grade_key"] = {"$in": grades}
     if search:

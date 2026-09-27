@@ -177,7 +177,8 @@ async def watchlist_from_filter(payload: dict = Body(...),
         index=payload.get("index"), sector=payload.get("sector"),
         min_score=payload.get("min_score"), min_results=payload.get("min_results"),
         min_pnl=payload.get("min_pnl"), grades=keys or None,
-        sort="score", limit=int(payload.get("limit") or 2000))
+        sort="score", limit=int(payload.get("limit") or 2000),
+        top_by_market_cap=payload.get("top_by_market_cap"))
     symbols = [s["symbol"] for s in res["stocks"]]
     if not symbols:
         raise HTTPException(status_code=400,
@@ -195,6 +196,12 @@ async def watchlist_from_filter(payload: dict = Body(...),
 async def refresh_broad(_current_user: dict = Depends(get_current_user)):
     """Re-pull the wide NSE constituent lists (Total Market, Microcap 250)."""
     return await fundamental_universe.refresh_broad_universe()
+
+
+@router.post("/universe/refresh-rest")
+async def refresh_rest(_current_user: dict = Depends(get_current_user)):
+    """Seed every EQ-series NSE equity that sits outside Nifty Total Market."""
+    return await fundamental_universe.refresh_nse_rest()
 
 
 @router.delete("/watchlists/{name}")
