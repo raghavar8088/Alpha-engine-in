@@ -53,6 +53,16 @@ DESKS: dict[str, dict] = {
         "equity": lambda: D.intraday_lab_equity_collection,
         "capital": lambda: __import__("app.services.intraday_lab_engine", fromlist=["x"]).INTRADAY_LAB_INITIAL_CAPITAL,
     },
+    # The pattern desk runs alongside the tournament on its own capital, so it needs its
+    # own history — asking "how has Intraday Stocks done" of the tournament's collections
+    # answered for a different desk entirely.
+    "pattern": {
+        "label": "Intraday Stocks patterns",
+        "positions": lambda: D.pattern_positions_collection,
+        "equity": lambda: D.pattern_equity_collection,
+        "capital": lambda: __import__("app.services.intraday_pattern_engine",
+                                      fromlist=["x"]).TOTAL_CAPITAL,
+    },
     "zero-hero": {
         "label": "Zero Hero Trades",
         "positions": lambda: D.zero_hero_positions_collection,
@@ -82,6 +92,17 @@ DESKS: dict[str, dict] = {
 
 # Desks that split into books/buckets take a `scope` and filter on their own key.
 SCOPED: dict[str, dict] = {
+    # The pattern shortlist's two paper books share their collections and are told apart by
+    # `book`, exactly as the Live Intraday books are.
+    "pattern-books": {
+        "label": "Pattern paper books",
+        "positions": lambda: D.pattern_book_positions_collection,
+        "equity": lambda: D.pattern_book_equity_collection,
+        "field": "book",
+        "default": "50k",
+        "capital": lambda s: __import__("app.services.pattern_books_engine",
+                                        fromlist=["x"]).book_capital(s),
+    },
     "live-intraday": {
         "label": "Live Intraday",
         "positions": lambda: D.live_intraday_positions_collection,

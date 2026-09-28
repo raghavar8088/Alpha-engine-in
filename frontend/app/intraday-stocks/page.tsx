@@ -130,6 +130,85 @@ function DailyRoiPanel({ rows, capital }: { rows: DailyRoi[]; capital: number })
   );
 }
 
+/** Realised, unrealised and total P&L for any of this page's desks.
+ *
+ * Every tab's summary already carries the same three numbers against its own capital, so
+ * one component serves all seven. Writing it per tab is how the same figure ends up
+ * computed three slightly different ways — the tournament's ROI and a paper book's ROI
+ * have to mean the same thing or the tabs cannot be compared at all.
+ *
+ * Each leg is shown against the SAME denominator, the desk's capital, so realised %,
+ * unrealised % and total % add up. Showing unrealised against deployed capital instead
+ * would read higher and would not sum.
+ */
+function PnlRow({
+  capital, realized, unrealized, fees,
+}: {
+  capital: number | null | undefined;
+  realized: number | null | undefined;
+  unrealized: number | null | undefined;
+  fees?: number | null;
+}) {
+  const cap = capital || 0;
+  const r = realized ?? 0;
+  const u = unrealized ?? 0;
+  const total = r + u;
+  const pc = (v: number) => (cap > 0 ? `${v >= 0 ? "+" : ""}${((v / cap) * 100).toFixed(3)}%` : "—");
+  const money = (v: number) => `${v >= 0 ? "+" : "−"}₹${Math.abs(v).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+  const cls = (v: number) => (v > 0 ? "gain" : v < 0 ? "loss" : "");
+
+  return (
+    <div className="pnl-row">
+      <div className="pnl-card">
+        <div className="pnl-label">Realised P&amp;L</div>
+        <div className={`pnl-value ${cls(r)}`}>{money(r)}</div>
+        <div className={`pnl-pct ${cls(r)}`}>{pc(r)}</div>
+        <div className="pnl-sub">booked on closed trades{fees != null && fees !== 0 ? `, after ₹${Math.abs(fees).toLocaleString("en-IN", { maximumFractionDigits: 0 })} costs` : ""}</div>
+      </div>
+      <div className="pnl-card">
+        <div className="pnl-label">Unrealised P&amp;L</div>
+        <div className={`pnl-value ${cls(u)}`}>{money(u)}</div>
+        <div className={`pnl-pct ${cls(u)}`}>{pc(u)}</div>
+        <div className="pnl-sub">open positions, marked live</div>
+      </div>
+      <div className="pnl-card total">
+        <div className="pnl-label">Total P&amp;L</div>
+        <div className={`pnl-value ${cls(total)}`}>{money(total)}</div>
+        <div className={`pnl-pct ${cls(total)}`}>{pc(total)}</div>
+        <div className="pnl-sub">realised + unrealised, on ₹{cap.toLocaleString("en-IN")}</div>
+      </div>
+
+      <style jsx>{`
+        .pnl-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+        .pnl-card { border: 1px solid var(--panel-border); border-radius: 12px; padding: 12px 14px;
+                    background: var(--panel); }
+        .pnl-card.total { background: var(--canvas-soft); border-color: rgba(125, 52, 220, 0.28); }
+        .pnl-label { font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+                     text-transform: uppercase; color: var(--text-faint); }
+        .pnl-value { font-size: 21px; font-weight: 750; font-variant-numeric: tabular-nums;
+                     margin-top: 4px; letter-spacing: -0.3px; }
+        .pnl-pct { font-size: 12.5px; font-weight: 650; font-variant-numeric: tabular-nums;
+                   margin-top: 1px; }
+        .pnl-sub { margin-top: 4px; font-size: 10.5px; color: var(--text-faint); line-height: 1.4; }
+        .gain { color: var(--gain); }
+        .loss { color: var(--loss); }
+      `}</style>
+    </div>
+  );
+}
+
+/** Which desk each tab's history belongs to. The pattern desk and the two pattern books
+ *  are registered server-side alongside the tournament and the Live Intraday books. */
+const HISTORY_SCOPE: Record<IntradayTab, { deskKey: string; scope?: string; label: string }> = {
+  tournament: { deskKey: "intraday-lab", label: "Tournament · 150 strategies" },
+  patterns: { deskKey: "pattern", label: "Pattern desk" },
+  pb50k: { deskKey: "pattern-books", scope: "50k", label: "Paper Trade · ₹50k" },
+  pb2L: { deskKey: "pattern-books", scope: "2L", label: "Paper Trade · ₹2 lakh" },
+  "80k": { deskKey: "live-intraday", scope: "80k", label: "Live Intraday · ₹80k" },
+  "30k": { deskKey: "live-intraday", scope: "30k", label: "Live Intraday · ₹30k" },
+  "10k": { deskKey: "live-intraday", scope: "10k", label: "Live Intraday · ₹10k" },
+};
+
 const REFRESH_MS = 15000;
 
 const inr = (v: number | null | undefined) =>
@@ -458,6 +537,9 @@ export default function IntradayStocksPage() {
         </div>
       </div>
 
+      <PnlRow capital={status?.initial_capital} realized={status?.realized_pnl}
+              unrealized={status?.unrealized_pnl} fees={status?.total_fees} />
+
       {equity.length > 1 && (
         <GlassPanel title="Equity">
           <LineChart
@@ -658,6 +740,9 @@ export default function IntradayStocksPage() {
         <div className="tile"><div className="tile-label">Closed</div><div className="tile-value">{patSummary?.closed_positions ?? 0}</div><div className="tile-sub">{(patSummary?.last_evaluated ?? 0).toLocaleString("en-IN")} evaluated last cycle</div></div>
       </div>
 
+      <PnlRow capital={patSummary?.initial_capital} realized={patSummary?.realized_pnl}
+              unrealized={patSummary?.unrealized_pnl} fees={patSummary?.total_fees} />
+
       {!!patSummary?.last_notes?.length && (
         <div className="feed-note">{patSummary.last_notes.join(" · ")}</div>
       )}
@@ -783,6 +868,9 @@ export default function IntradayStocksPage() {
           <div className="tile-sub">signals this book had to skip</div>
         </div>
       </div>
+
+      <PnlRow capital={pbSummary?.desk_capital} realized={pbSummary?.realized_pnl}
+              unrealized={pbSummary?.unrealized_pnl} fees={pbSummary?.fees} />
 
       <GlassPanel title={`The shortlist — ${pbSummary?.strategies ?? 8} strategies on ₹${inr(pbSummary?.per_strategy_allocation)} each`}>
         <div className="table-wrap">
@@ -943,6 +1031,9 @@ export default function IntradayStocksPage() {
         <div className="tile"><div className="tile-label">Strategies</div><div className="tile-value">{liveSummary?.strategy_count ?? 0}</div><div className="tile-sub">max ₹{inr(liveSummary?.position_notional)} per position, {liveSummary?.open_positions ?? 0} open now</div></div>
       </div>
 
+      <PnlRow capital={liveSummary?.initial_capital} realized={liveSummary?.realized_pnl}
+              unrealized={liveSummary?.unrealized_pnl} fees={liveSummary?.total_fees} />
+
       <GlassPanel title="Selected strategies">
         {!liveScores.length ? (
           <div className="empty">Loading the shortlist…</div>
@@ -1026,7 +1117,15 @@ export default function IntradayStocksPage() {
       </>
       )}
 
-      <DeskHistory deskKey={"intraday-lab"} />
+      {/* History must answer for the desk you are LOOKING at. It was pinned to
+          "intraday-lab", so all seven tabs showed the tournament's history — including the
+          pattern desk and the four paper books, which have their own capital and their own
+          trades and were never the thing on screen. */}
+      <DeskHistory
+        deskKey={HISTORY_SCOPE[tab].deskKey}
+        scope={HISTORY_SCOPE[tab].scope}
+        title={`History — ${HISTORY_SCOPE[tab].label}`}
+      />
 
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 16px; }
