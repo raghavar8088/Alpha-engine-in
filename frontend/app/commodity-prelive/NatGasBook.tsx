@@ -196,7 +196,7 @@ export default function NatGasBook() {
             <tbody>
               {open.map((p) => (
                 <tr key={p.position_id}>
-                  <td className="l"><b>{p.strategy_name}</b> · {p.timeframe}</td>
+                  <td className="l"><b>{p.strategy_name}</b></td>
                   <td className={p.side === "BUY" ? "gain" : "loss"}>{p.side}</td>
                   <td>{p.lots}</td>
                   <td>{rs(p.entry_price, 2)}</td>
@@ -227,7 +227,7 @@ export default function NatGasBook() {
               {closed.map((p) => (
                 <tr key={p.position_id}>
                   <td className="l">{p.closed_at ? new Date(p.closed_at).toLocaleString("en-IN", { dateStyle: "short", timeStyle: "short" }) : "—"}</td>
-                  <td className="l">{p.strategy_name} · {p.timeframe}</td>
+                  <td className="l">{p.strategy_name}</td>
                   <td className={p.side === "BUY" ? "gain" : "loss"}>{p.side}</td>
                   <td>{rs(p.entry_price, 2)}</td>
                   <td>{rs(p.exit_price, 2)}</td>

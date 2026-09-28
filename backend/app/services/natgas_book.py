@@ -183,7 +183,7 @@ async def _open(spec, inst: dict, sig, bar_ts, free: float, market: float) -> tu
         return False, None, 0.0
     lots = min(LOTS_PER_TRADE, int(free // lot_margin), int(CAPITAL // lot_notional))
     if lots < 1:
-        return False, (f"{spec.name} · {spec.timeframe}: one {SYMBOL} lot needs "
+        return False, (f"{spec.name}: one {SYMBOL} lot needs "
                        f"~Rs{lot_margin:,.0f} of margin against Rs{free:,.0f} free — skipped, "
                        "no fraction of a lot invented."), 0.0
 
@@ -327,7 +327,7 @@ async def scan_cycle() -> dict:
     for spec in specs:
         bars = await load_bars(SYMBOL, spec.timeframe, limit=max(spec.min_bars + 5, 250))
         if len(bars) < spec.min_bars + 5:
-            notes.append(f"{spec.name} · {spec.timeframe}: only {len(bars)} bars in the store.")
+            notes.append(f"{spec.name}: only {len(bars)} bars in the store.")
             continue
         bar_ts = bars[-1].ts
         key = f"{spec.template}:{spec.timeframe}"
