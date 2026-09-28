@@ -4,7 +4,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import PageHeader from "./PageHeader";
 import GlassPanel from "./GlassPanel";
 import ErrorBanner from "./ErrorBanner";
+import StockBookView from "./StockBookView";
 import {
+  StockBookKey,
   StockDeskPosition,
   StockDeskScore,
   StockDeskSummary,
@@ -28,6 +30,28 @@ export default function StockDeskPage({ side }: { side: "buying" | "selling" }) 
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
   const [antiOnly, setAntiOnly] = useState(false);
+  // "desk" is the 220-strategy desk itself; the other two are the paper books that follow it.
+  // Books exist for the buying side only, so the selling page never leaves "desk".
+  const [tab, setTab] = useState<"desk" | StockBookKey>("desk");
+
+  useEffect(() => {
+    if (!buying) return;
+    try {
+      const saved = window.localStorage.getItem("stockDeskTab");
+      if (saved === "10L" || saved === "2L" || saved === "desk") setTab(saved);
+    } catch {
+      /* storage blocked - the default tab is fine */
+    }
+  }, [buying]);
+
+  const pickTab = (t: "desk" | StockBookKey) => {
+    setTab(t);
+    try {
+      window.localStorage.setItem("stockDeskTab", t);
+    } catch {
+      /* storage blocked - selection just will not persist */
+    }
+  };
 
   const load = useCallback(async () => {
     try {
@@ -46,10 +70,11 @@ export default function StockDeskPage({ side }: { side: "buying" | "selling" }) 
   }, [side]);
 
   useEffect(() => {
+    if (tab !== "desk") return;
     load();
     const id = setInterval(load, REFRESH_MS);
     return () => clearInterval(id);
-  }, [load]);
+  }, [load, tab]);
 
   const rows = useMemo(() => {
     const f = filter.trim().toLowerCase();
@@ -74,6 +99,30 @@ export default function StockDeskPage({ side }: { side: "buying" | "selling" }) 
         }
       />
 
+      {buying && (
+        <div className="tabs" role="tablist">
+          {([
+            ["desk", "Desk · 220 strategies"],
+            ["10L", "Paper Trade · ₹10 lakh"],
+            ["2L", "Paper Trade · ₹2 lakh"],
+          ] as ["desk" | StockBookKey, string][]).map(([k, label]) => (
+            <button
+              key={k}
+              role="tab"
+              aria-selected={tab === k}
+              className={tab === k ? "tab on" : "tab"}
+              onClick={() => pickTab(k)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {tab !== "desk" ? (
+        <StockBookView book={tab} />
+      ) : (
+      <>
       {error && <ErrorBanner message={error} />}
 
       <div className="tiles">
@@ -190,9 +239,16 @@ export default function StockDeskPage({ side }: { side: "buying" | "selling" }) 
           </div>
         )}
       </GlassPanel>
+      </>
+      )}
 
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 16px; }
+        .tabs { display: flex; gap: 6px; flex-wrap: wrap; border-bottom: 1px solid var(--panel-border); }
+        .tab { background: transparent; border: none; border-bottom: 2px solid transparent; margin-bottom: -1px;
+               padding: 10px 14px; font-size: 13px; font-weight: 700; color: var(--text-muted); cursor: pointer; }
+        .tab:hover { color: var(--text); }
+        .tab.on { color: var(--purple); border-bottom-color: var(--purple); }
         .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
         .note { padding: 11px 15px; border-radius: 9px; background: var(--canvas-soft); border: 1px solid var(--panel-border); font-size: 12px; line-height: 1.6; }
         .dim { color: var(--text-faint); }

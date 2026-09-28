@@ -185,7 +185,7 @@ async def _open_count(side: str, sid: str | None = None) -> int:
 async def _realized(side: str, sid: str) -> float:
     total = 0.0
     async for p in stock_desk_positions_collection.find(
-        {"side": side, "strategy_id": sid, "status": {"$ne": "OPEN"}}, {"realized_pnl": 1}
+        {"side": side, "strategy_id": sid, "status": "CLOSED"}, {"realized_pnl": 1}
     ):
         total += p.get("realized_pnl") or 0.0
     return total
@@ -193,7 +193,7 @@ async def _realized(side: str, sid: str) -> float:
 
 async def _update_score(side: str, sid: str) -> None:
     closed = [p async for p in stock_desk_positions_collection.find(
-        {"side": side, "strategy_id": sid, "status": {"$ne": "OPEN"}}, {"realized_pnl": 1})]
+        {"side": side, "strategy_id": sid, "status": "CLOSED"}, {"realized_pnl": 1})]
     trades = len(closed)
     wins = sum(1 for p in closed if (p.get("realized_pnl") or 0) > 0)
     net = sum(p.get("realized_pnl") or 0 for p in closed)
@@ -221,7 +221,7 @@ async def today_pnl(side: str) -> float:
     start = datetime.now(IST).replace(hour=0, minute=0, second=0, microsecond=0).astimezone(timezone.utc)
     total = 0.0
     async for p in stock_desk_positions_collection.find(
-        {"side": side, "status": {"$ne": "OPEN"}, "closed_at": {"$gte": start}}, {"realized_pnl": 1}):
+        {"side": side, "status": "CLOSED", "closed_at": {"$gte": start}}, {"realized_pnl": 1}):
         total += p.get("realized_pnl") or 0.0
     async for p in stock_desk_positions_collection.find(
         {"side": side, "status": "OPEN"}, {"unrealized_pnl": 1}):
@@ -255,6 +255,18 @@ async def run_cycle(side: str) -> dict:
         return {"side": side, "opened": 0, "managed": 0, "notes": ["No universe instruments with Angel tokens."]}
 
     managed = await _manage(side)
+
+    # Opening is for market hours only. Managing and settling above may run at any time -
+    # settlement in particular has to, since it is how an expired position ever leaves - but
+    # an ENTRY outside the session fills at the last traded premium, a price nobody could
+    # have dealt at by then. The scheduler already only ticks in session; this guard is for
+    # the manual Run endpoint, which had none, and did exactly that at 22:56 IST.
+    now_ist = datetime.now(IST)
+    if not (now_ist.weekday() < 5 and "09:15" <= now_ist.strftime("%H:%M") <= "15:30"):
+        notes.append("Outside market hours (09:15-15:30 IST, Mon-Fri) - open positions were "
+                     "managed, but no new entries are taken.")
+        await _persist_state(side, 0, managed, notes)
+        return {"side": side, "opened": 0, "managed": managed, "notes": notes}
 
     breaker = await breaker_state(side)
     if breaker["breaker_tripped"]:
@@ -668,7 +680,7 @@ async def summary(side: str) -> dict:
         deployed += p.get("capital_deployed") or 0.0
         unrealized += p.get("unrealized_pnl") or 0.0
     async for p in stock_desk_positions_collection.find(
-            {"side": side, "status": {"$ne": "OPEN"}}, {"realized_pnl": 1}):
+            {"side": side, "status": "CLOSED"}, {"realized_pnl": 1}):
         realized += p.get("realized_pnl") or 0.0
     n = len(strategy_ids(side))
     initial = PER_STRATEGY_CAPITAL * max(n, 1)
@@ -683,7 +695,7 @@ async def summary(side: str) -> dict:
         "equity": round(initial + realized + unrealized, 2),
         "open_positions": await _open_count(side),
         "closed_positions": await stock_desk_positions_collection.count_documents(
-            {"side": side, "status": {"$ne": "OPEN"}}),
+            {"side": side, "status": "CLOSED"}),
         "last_run_at": st.get("last_run_at").isoformat() if st.get("last_run_at") else None,
         "last_notes": st.get("last_notes", []),
         **(await breaker_state(side)),

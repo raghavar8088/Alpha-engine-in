@@ -44,6 +44,7 @@ async def intraday_lab_loop() -> None:
     from app.services.swing_trading import run_cycle as swing_run
     from app.services.live_trading_engine import run_cycle as live_trading_run_cycle
     from app.services.stock_desk import BUYING, SELLING, run_cycle as stock_desk_run_cycle
+    from app.services.stock_desk_books import run_cycle as stock_books_run_cycle
     from app.services.zero_hero import run_cycle as zero_hero_run_cycle
     from app.services.live_paper_buying import run_cycle as live_paper_run_cycle
     from app.services.fno_stock_roll import ENABLED as STOCK_ROLL_ENABLED, roll as stock_roll
@@ -59,24 +60,32 @@ async def intraday_lab_loop() -> None:
             if _in_market_hours(now):
                 dhan = await _dhan_or_none()
                 result = await gated("intraday_lab", run_cycle, dhan)
-                logger.info(
-                    "intraday-lab cycle: %d opened, %d managed, %d symbols scanned",
-                    result["opened"], result["managed"], result["scanned_symbols"],
-                )
+                # .get, never [...], on anything `gated` returns: it is {} when the module is
+                # switched off. Indexing it here raised a KeyError straight into this loop's
+                # OUTER handler, which skipped the rest of the tick - so switching off the
+                # Tournament silently stopped every desk below it as well. One switch must
+                # stop one module.
+                if result:
+                    logger.info(
+                        "intraday-lab cycle: %d opened, %d managed, %d symbols scanned",
+                        result.get("opened", 0), result.get("managed", 0),
+                        result.get("scanned_symbols", 0),
+                    )
                 # The curated ₹80k Live Intraday shortlist rides the same tick + feed.
                 try:
                     live_result = await gated("live_intraday", live_run_cycle, dhan)
-                    logger.info(
-                        "live-intraday cycle: %d opened, %d managed",
-                        live_result["opened"], live_result["managed"],
-                    )
+                    if live_result:
+                        logger.info(
+                            "live-intraday cycle: %d opened, %d managed",
+                            live_result.get("opened", 0), live_result.get("managed", 0),
+                        )
                 except Exception:
                     logger.exception("live-intraday cycle failed — tournament tick already committed")
                 # The REAL-MONEY Live Trading desk rides the same tick + real Dhan client.
                 # It is inert unless ARMED, so this is a no-op until the user turns it on.
                 try:
                     lt_result = await gated("live_trading", live_trading_run_cycle, dhan)
-                    if lt_result["opened"] or lt_result["managed"]:
+                    if lt_result.get("opened") or lt_result.get("managed"):
                         logger.warning(
                             "LIVE-TRADING (real money) cycle: %d opened, %d managed",
                             lt_result["opened"], lt_result["managed"],
@@ -88,11 +97,25 @@ async def intraday_lab_loop() -> None:
                 for _side in (BUYING, SELLING):
                     try:
                         sd = await gated("stock_desk", stock_desk_run_cycle, _side)
-                        if sd["opened"] or sd["managed"]:
+                        # .get, not [...]: `gated` returns {} when the module is switched
+                        # off, and indexing that raised a KeyError into the handler below
+                        # on every tick — an "off" desk logged a traceback as if it broke.
+                        if sd.get("opened") or sd.get("managed"):
                             logger.info("stock-desk[%s]: %d opened, %d managed",
                                         _side, sd["opened"], sd["managed"])
                     except Exception:
                         logger.exception("stock-desk[%s] cycle failed", _side)
+                # The paper books ride the parent's fills, so they follow it in the same
+                # tick and never call Angel themselves. Gated on their own key: the books
+                # are a separate module you can stop without stopping the desk they watch.
+                try:
+                    sb = await gated("stock_books", stock_books_run_cycle)
+                    if sb.get("opened") or sb.get("closed") or sb.get("declined"):
+                        logger.info("stock-books: %d opened, %d closed, %d declined",
+                                    sb.get("opened", 0), sb.get("closed", 0),
+                                    sb.get("declined", 0))
+                except Exception:
+                    logger.exception("stock-books cycle failed")
                 # Zero Hero (expiry-day index lottery tickets, paper). Inert on any day no
                 # index expires, so this is a cheap no-op most of the week.
                 try:
