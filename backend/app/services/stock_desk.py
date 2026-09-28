@@ -451,23 +451,151 @@ async def _open_position(side: str, plan: dict, prices: dict[str, float]) -> boo
     return True
 
 
+# -- expiry settlement -----------------------------------------------------------
+# An option stops trading on its expiry day, and from the next morning Angel will never
+# quote its token again. That was fatal here: `_manage` asked for a live premium, got None
+# and `continue`d, so a position held past expiry could never close. It sat OPEN forever,
+# frozen at whatever mark it last got, counting against the desk position cap. 120 positions
+# from 2026-08-25 did exactly that and deadlocked the whole desk for a month - capped, so no
+# new entries could open, and unclosable, so the cap never cleared.
+#
+# The old behaviour was right that a close must not happen at an invented level. The answer
+# is not to invent one, it is to settle the contract the way the exchange does. A stock
+# option at expiry is worth its INTRINSIC value against the underlying's close on expiry day
+# and nothing else: a call is worth spot-strike if that is positive, a put strike-spot, and
+# otherwise zero. Every settled fill records the basis it used, so a settlement is legible as
+# one rather than looking like a trade someone chose to make.
+
+SETTLE_LOOKBACK_DAYS = int(os.getenv("STOCK_DESK_SETTLE_LOOKBACK_DAYS", "7"))
+# A close on a day that has already happened cannot change, so a hit is cached for the life
+# of the process. Misses are not cached: one throttled candle call must not make a position
+# permanently unsettleable, which is the exact failure this whole section exists to undo.
+_SETTLE_CACHE: dict[tuple[str, str], float] = {}
+
+
+async def _settlement_close(symbol: str, expiry: str) -> float | None:
+    """The underlying's daily close on `expiry`, or None if no real close can be found.
+
+    Asks for a WINDOW around the date, never the single day. Angel returns an empty list for
+    a from/to inside one calendar day at the "D" resolution - verified against this desk's
+    own stuck positions - so a single-day request looks exactly like "no such close" and
+    would quietly leave every position unsettled."""
+    key = (symbol, expiry[:10])
+    if key in _SETTLE_CACHE:
+        return _SETTLE_CACHE[key]
+    d = await instruments_collection.find_one(
+        {"asset_class": "EQUITY", "symbol": symbol, "angel_token": {"$ne": None}},
+        {"angel_token": 1})
+    if not d:
+        return None
+    try:
+        exp = datetime.strptime(expiry[:10], "%Y-%m-%d")
+    except (ValueError, TypeError):
+        return None
+    frm = (exp - timedelta(days=SETTLE_LOOKBACK_DAYS)).strftime("%Y-%m-%d 09:15")
+    to = (exp + timedelta(days=1)).strftime("%Y-%m-%d 15:30")
+    try:
+        rows = await angel_client.candles("NSE", str(d["angel_token"]), "D", frm, to)
+    except (AngelAPIError, Exception) as exc:  # noqa: BLE001
+        logger.debug("stock_desk: settlement candles failed for %s (%s)", symbol, exc)
+        return None
+    if not rows:
+        return None
+    want = expiry[:10]
+    # The expiry day itself, or the last trading day before it when expiry fell on a holiday.
+    on_or_before = [r for r in rows if str(r[0])[:10] <= want]
+    if not on_or_before:
+        return None
+    try:
+        close = float(on_or_before[-1][4])
+    except (TypeError, ValueError, IndexError):
+        return None
+    if close <= 0:
+        return None
+    _SETTLE_CACHE[key] = close
+    return close
+
+
+def _intrinsic(option_type: str, strike: float, spot: float) -> float:
+    """What an option is worth once there is no time left in it."""
+    if (option_type or "").upper() == "CE":
+        return max(0.0, spot - strike)
+    return max(0.0, strike - spot)
+
+
+async def _settle_expired(side: str, p: dict) -> bool:
+    """Close one position that is past its expiry, at intrinsic.
+
+    False if it cannot be settled on a real number yet - it stays open and is retried next
+    cycle rather than being closed at a guess."""
+    spot = await _settlement_close(p["symbol"], str(p.get("expiry") or ""))
+    if spot is None:
+        return False
+
+    short_in = _intrinsic(p.get("option_type"), float(p.get("strike") or 0), spot)
+    if side == BUYING:
+        exit_px = short_in
+        realized = round((exit_px - p["entry_premium"]) * p["qty"], 2)
+    else:
+        # The spread settles at the difference between the two legs' intrinsics: that is what
+        # buying it back would have cost, had it been possible to trade it at expiry.
+        wing_in = _intrinsic(p.get("option_type"), float(p.get("wing_strike") or 0), spot)
+        exit_px = short_in - wing_in
+        realized = round((p["entry_premium"] - exit_px) * p["qty"], 2)
+
+    basis = (f"settled at intrinsic against {p['symbol']} {spot:,.2f} close on "
+             f"{str(p.get('expiry'))[:10]} - the contract stopped trading, so there is no "
+             f"exit price, only what it was worth")
+
+    await stock_desk_positions_collection.update_one(
+        {"_id": p["_id"]},
+        {"$set": {"status": "CLOSED", "ltp": round(exit_px, 2),
+                  "exit_premium": round(exit_px, 2), "exit_reason": "expiry_settled",
+                  "exit_basis": basis, "settlement_spot": round(spot, 2),
+                  "realized_pnl": realized, "unrealized_pnl": 0.0,
+                  "closed_at": _now(), "updated_at": _now()}})
+    await stock_desk_trades_collection.insert_one({
+        "trade_id": uuid4().hex[:12], "side": side, "strategy_id": p["strategy_id"],
+        "strategy_name": p.get("strategy_name"), "symbol": p["symbol"],
+        "structure": p.get("structure"), "strike": p.get("strike"),
+        "option_type": p.get("option_type"), "qty": p["qty"],
+        "entry_premium": p["entry_premium"], "exit_premium": round(exit_px, 2),
+        "realized_pnl": realized, "exit_reason": "expiry_settled", "exit_basis": basis,
+        "settlement_spot": round(spot, 2),
+        "opened_at": p["opened_at"], "closed_at": _now(),
+    })
+    return True
+
+
 async def _manage(side: str) -> int:
     """Mark open positions to live premiums and close on stop/target/expiry — every leg in
     one batched, paced set of quote requests."""
     pos = [p async for p in stock_desk_positions_collection.find({"side": side, "status": "OPEN"})]
     if not pos:
         return 0
-    tokens: list[str] = []
-    for p in pos:
-        tokens.append(p["short_token"])
-        if p.get("wing_token"):
-            tokens.append(p["wing_token"])
-    prices = await batched_ltp({"NFO": tokens})
 
     today = _today_ist()
     updated = 0
     touched: set[str] = set()
-    for p in pos:
+
+    # Past expiry is handled first and WITHOUT a quote, because there will never be one
+    # again. Strictly before today, not on-or-before: a contract expiring TODAY is still
+    # trading, and the live path below closes it at a real price with reason "expiry".
+    # Anything that cannot be settled on a real close stays open and is retried next cycle.
+    for p in [q for q in pos if q.get("expiry") and str(q["expiry"])[:10] < today]:
+        if await _settle_expired(side, p):
+            updated += 1
+            touched.add(p["strategy_id"])
+
+    live = [q for q in pos if not (q.get("expiry") and str(q["expiry"])[:10] < today)]
+    tokens: list[str] = []
+    for p in live:
+        tokens.append(p["short_token"])
+        if p.get("wing_token"):
+            tokens.append(p["wing_token"])
+    prices = await batched_ltp({"NFO": tokens}) if tokens else {}
+
+    for p in live:
         ps = prices.get(p["short_token"])
         if ps is None:
             continue
