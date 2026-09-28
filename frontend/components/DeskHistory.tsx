@@ -56,7 +56,7 @@ export default function DeskHistory({
     v === null || v === undefined ? "—" : `₹${v.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
   const signed = (v: number | null | undefined) =>
     v === null || v === undefined ? "—" : `${v >= 0 ? "+" : ""}₹${v.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
-  const pc = (v: number | null | undefined, dp = 3) =>
+  const pc = (v: number | null | undefined, dp = 2) =>
     v === null || v === undefined ? "—" : `${v >= 0 ? "+" : ""}${v.toFixed(dp)}%`;
   const cls = (v: number | null | undefined) =>
     v === null || v === undefined ? "" : v >= 0 ? "gain" : "loss";
@@ -72,7 +72,7 @@ export default function DeskHistory({
         <div className="hstats">
           <div className="hs"><span>Trading since</span><b>{h.started_on}</b><i>{h.days_live} days ago</i></div>
           <div className="hs"><span>Days traded</span><b>{h.days_traded}</b><i>of {h.days_live} calendar days</i></div>
-          <div className="hs"><span>Avg / trading day</span><b className={cls(h.avg_per_trading_day)}>{signed(h.avg_per_trading_day)}</b><i>{pc(h.avg_roi_per_trading_day_pct, 4)} of capital</i></div>
+          <div className="hs"><span>Avg / trading day</span><b className={cls(h.avg_per_trading_day)}>{signed(h.avg_per_trading_day)}</b><i>{pc(h.avg_roi_per_trading_day_pct)} of capital</i></div>
           <div className="hs"><span>Avg / calendar day</span><b className={cls(h.avg_per_calendar_day)}>{signed(h.avg_per_calendar_day)}</b><i>incl. days it did not trade</i></div>
           <div className="hs"><span>Total ROI</span><b className={cls(h.roi_pct)}>{pc(h.roi_pct)}</b><i>on {inr(h.capital)}</i></div>
           <div className="hs">
@@ -120,7 +120,7 @@ export default function DeskHistory({
                     <td>{d.deployed ? inr(d.deployed) : "—"}</td>
                     <td className={d.fees ? "loss" : ""}>{d.fees ? `−${inr(d.fees)}` : "—"}</td>
                     <td className={cls(d.realized_pnl)}>{signed(d.realized_pnl)}</td>
-                    <td className={cls(d.roi_pct)}>{pc(d.roi_pct, 4)}</td>
+                    <td className={cls(d.roi_pct)}>{pc(d.roi_pct)}</td>
                     <td className={cls(d.deployed_roi_pct)}>{pc(d.deployed_roi_pct, 2)}</td>
                   </tr>
                 ))}

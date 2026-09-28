@@ -304,7 +304,7 @@ export default function PreLiveSellingPage() {
                     <td className={d.net_pnl >= 0 ? "gain" : "loss"}>
                       {d.net_pnl >= 0 ? "+" : ""}₹{inr(d.net_pnl)}
                     </td>
-                    <td className={d.roi_pct >= 0 ? "gain" : "loss"}>{pct(d.roi_pct, 3)}</td>
+                    <td className={d.roi_pct >= 0 ? "gain" : "loss"}>{pct(d.roi_pct, 2)}</td>
                     <td>{d.trades}</td>
                     {/* Carrying positions overnight is expected on a swing desk, not a leak. */}
                     <td>{d.open_carried}</td>

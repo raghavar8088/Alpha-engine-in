@@ -95,7 +95,7 @@ function DailyRoiPanel({ rows, capital }: { rows: DailyRoi[]; capital: number })
                   <td className={d.gross_pnl >= 0 ? "gain" : "loss"}>{d.gross_pnl >= 0 ? "+" : ""}₹{inr(d.gross_pnl)}</td>
                   <td className="loss">−₹{inr(d.fees)}</td>
                   <td className={d.realized_pnl >= 0 ? "gain" : "loss"}>{d.realized_pnl >= 0 ? "+" : ""}₹{inr(d.realized_pnl)}</td>
-                  <td className={d.roi_pct >= 0 ? "gain" : "loss"}>{roiPct(d.roi_pct, 3)}</td>
+                  <td className={d.roi_pct >= 0 ? "gain" : "loss"}>{roiPct(d.roi_pct)}</td>
                 </tr>
               ))}
             </tbody>
@@ -506,7 +506,7 @@ export default function IntradayStocksPage() {
           <div className={`tile-value ${todayPnl >= 0 ? "gain" : "loss"}`}>
             {todayPnl >= 0 ? "+" : ""}₹{inr(todayPnl)}
           </div>
-          <div className="tile-sub">{roiPct(status?.today_roi_pct, 3)} today · {days[0]?.session ?? "no closes yet"}</div>
+          <div className="tile-sub">{roiPct(status?.today_roi_pct)} today · {days[0]?.session ?? "no closes yet"}</div>
         </div>
         <div className="tile">
           <div className="tile-label">Angel fees paid</div>
@@ -734,7 +734,7 @@ export default function IntradayStocksPage() {
         <div className="tile"><div className="tile-label">Mode</div><div className="tile-value gain">PAPER</div><div className="tile-sub">{patSummary?.enabled ? "armed · live Angel" : "disabled"}</div></div>
         <div className="tile"><div className="tile-label">Desk capital</div><div className="tile-value">₹{inr(patSummary?.initial_capital)}</div><div className="tile-sub">{patSummary?.strategy_count ?? 0} × ₹{inr(patSummary?.per_strategy_capital)}</div></div>
         <div className="tile"><div className="tile-label">Equity</div><div className="tile-value">₹{inr(patSummary?.equity)}</div><div className="tile-sub">₹{inr(patSummary?.unrealized_pnl)} unrealised</div></div>
-        <div className="tile"><div className="tile-label">ROI</div><div className={`tile-value ${(patSummary?.roi_pct ?? 0) >= 0 ? "gain" : "loss"}`}>{roiPct(patSummary?.roi_pct, 4)}</div><div className="tile-sub">on desk capital</div></div>
+        <div className="tile"><div className="tile-label">ROI</div><div className={`tile-value ${(patSummary?.roi_pct ?? 0) >= 0 ? "gain" : "loss"}`}>{roiPct(patSummary?.roi_pct)}</div><div className="tile-sub">on desk capital</div></div>
         <div className="tile"><div className="tile-label">Angel fees</div><div className="tile-value loss">−₹{inr(patSummary?.total_fees)}</div><div className="tile-sub">gross ₹{inr(patSummary?.gross_realized_pnl)} before costs</div></div>
         <div className="tile"><div className="tile-label">Open positions</div><div className="tile-value">{patSummary?.open_positions ?? 0}</div><div className="tile-sub">₹{inr(patSummary?.deployed_capital)} deployed</div></div>
         <div className="tile"><div className="tile-label">Closed</div><div className="tile-value">{patSummary?.closed_positions ?? 0}</div><div className="tile-sub">{(patSummary?.last_evaluated ?? 0).toLocaleString("en-IN")} evaluated last cycle</div></div>
@@ -779,7 +779,7 @@ export default function IntradayStocksPage() {
                   <td>{(f.win_rate * 100).toFixed(1)}%</td>
                   <td className="loss">−₹{inr(f.fees)}</td>
                   <td className={f.net_pnl >= 0 ? "gain" : "loss"}>{f.net_pnl >= 0 ? "+" : ""}₹{inr(f.net_pnl)}</td>
-                  <td className={f.roi_pct >= 0 ? "gain" : "loss"}>{roiPct(f.roi_pct, 4)}</td>
+                  <td className={f.roi_pct >= 0 ? "gain" : "loss"}>{roiPct(f.roi_pct)}</td>
                 </tr>
               ))}
             </tbody>
@@ -802,7 +802,7 @@ export default function IntradayStocksPage() {
                   <td>{(r.win_rate * 100).toFixed(1)}%</td>
                   <td className="loss">−₹{inr(r.fees)}</td>
                   <td className={r.net_pnl >= 0 ? "gain" : "loss"}>{r.net_pnl >= 0 ? "+" : ""}₹{inr(r.net_pnl)}</td>
-                  <td className={r.roi_pct >= 0 ? "gain" : "loss"}>{roiPct(r.roi_pct, 4)}</td>
+                  <td className={r.roi_pct >= 0 ? "gain" : "loss"}>{roiPct(r.roi_pct)}</td>
                 </tr>
               ))}
             </tbody>
@@ -858,7 +858,7 @@ export default function IntradayStocksPage() {
         <div className="tile"><div className="tile-label">Mode</div><div className="tile-value gain">PAPER</div><div className="tile-sub">{pbSummary?.enabled ? "mirrors the pattern desk" : "disabled"}</div></div>
         <div className="tile"><div className="tile-label">Desk capital</div><div className="tile-value">₹{inr(pbSummary?.desk_capital)}</div><div className="tile-sub">{pbSummary?.strategies ?? 0} × ₹{inr(pbSummary?.per_strategy_allocation)}</div></div>
         <div className="tile"><div className="tile-label">Equity</div><div className="tile-value">₹{inr2(pbSummary?.equity)}</div><div className="tile-sub">₹{inr2(pbSummary?.unrealized_pnl)} unrealised</div></div>
-        <div className="tile"><div className="tile-label">ROI</div><div className={`tile-value ${(pbSummary?.roi_pct ?? 0) >= 0 ? "gain" : "loss"}`}>{roiPct(pbSummary?.roi_pct, 4)}</div><div className="tile-sub">on ₹{inr(pbSummary?.desk_capital)} book</div></div>
+        <div className="tile"><div className="tile-label">ROI</div><div className={`tile-value ${(pbSummary?.roi_pct ?? 0) >= 0 ? "gain" : "loss"}`}>{roiPct(pbSummary?.roi_pct)}</div><div className="tile-sub">on ₹{inr(pbSummary?.desk_capital)} book</div></div>
         <div className="tile"><div className="tile-label">Angel fees</div><div className="tile-value loss">−₹{inr2(pbSummary?.fees)}</div><div className="tile-sub">gross ₹{inr2(pbSummary?.gross_pnl)} before costs</div></div>
         <div className="tile"><div className="tile-label">Open positions</div><div className="tile-value">{pbSummary?.open_positions ?? 0}</div><div className="tile-sub">₹{inr2(pbSummary?.deployed)} deployed</div></div>
         <div className="tile"><div className="tile-label">Closed</div><div className="tile-value">{pbSummary?.closed_positions ?? 0}</div><div className="tile-sub">₹{inr2(pbSummary?.available_cash)} cash free</div></div>
@@ -890,7 +890,7 @@ export default function IntradayStocksPage() {
                   <td>{r.trades ? `${(r.win_rate * 100).toFixed(1)}%` : "—"}</td>
                   <td className="loss">{r.fees ? `−₹${inr2(r.fees)}` : "—"}</td>
                   <td className={r.net_pnl >= 0 ? "gain" : "loss"}>{r.trades ? `${r.net_pnl >= 0 ? "+" : ""}₹${inr2(r.net_pnl)}` : "—"}</td>
-                  <td className={r.roi_pct >= 0 ? "gain" : "loss"}>{r.trades ? roiPct(r.roi_pct, 3) : "—"}</td>
+                  <td className={r.roi_pct >= 0 ? "gain" : "loss"}>{r.trades ? roiPct(r.roi_pct) : "—"}</td>
                 </tr>
               ))}
             </tbody>
@@ -1023,7 +1023,7 @@ export default function IntradayStocksPage() {
         <div className="tile"><div className="tile-label">Mode</div><div className="tile-value gain">PAPER</div><div className="tile-sub">{liveSummary?.paused ? "entries paused" : "armed · live Angel feed"}</div></div>
         <div className="tile"><div className="tile-label">Equity</div><div className="tile-value">₹{inr(liveSummary?.equity)}</div><div className="tile-sub">from ₹{inr(liveSummary?.initial_capital)} ({liveSummary?.strategy_count ?? 8} × ₹{inr(liveSummary?.per_strategy_allocation)})</div></div>
         <div className="tile"><div className="tile-label">ROI</div><div className={`tile-value ${(liveSummary?.roi_pct ?? 0) >= 0 ? "gain" : "loss"}`}>{roiPct(liveSummary?.roi_pct, 2)}</div><div className="tile-sub">compounded, on the ₹{inr(liveSummary?.initial_capital)} opened with</div></div>
-        <div className="tile"><div className="tile-label">Today P&amp;L</div><div className={`tile-value ${(liveSummary?.today_pnl ?? 0) >= 0 ? "gain" : "loss"}`}>{(liveSummary?.today_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(liveSummary?.today_pnl)}</div><div className="tile-sub">{roiPct(liveSummary?.today_roi_pct, 3)} today · breaker at −₹{inr(liveSummary?.daily_loss_limit)}</div></div>
+        <div className="tile"><div className="tile-label">Today P&amp;L</div><div className={`tile-value ${(liveSummary?.today_pnl ?? 0) >= 0 ? "gain" : "loss"}`}>{(liveSummary?.today_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(liveSummary?.today_pnl)}</div><div className="tile-sub">{roiPct(liveSummary?.today_roi_pct)} today · breaker at −₹{inr(liveSummary?.daily_loss_limit)}</div></div>
         <div className="tile"><div className="tile-label">Realised P&amp;L</div><div className={`tile-value ${(liveSummary?.realized_pnl ?? 0) >= 0 ? "gain" : "loss"}`}>{(liveSummary?.realized_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(liveSummary?.realized_pnl)}</div><div className="tile-sub">{liveSummary?.closed_positions ?? 0} trades closed</div></div>
         <div className="tile"><div className="tile-label">Angel fees paid</div><div className="tile-value loss">−₹{inr(liveSummary?.total_fees)}</div><div className="tile-sub">gross ₹{inr(liveSummary?.gross_realized_pnl)} before costs</div></div>
         <div className="tile"><div className="tile-label">Open positions</div><div className="tile-value">{liveSummary?.open_positions ?? 0}</div><div className="tile-sub">₹{inr(liveSummary?.unrealized_pnl)} unrealised</div></div>

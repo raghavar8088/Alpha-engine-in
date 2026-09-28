@@ -133,8 +133,8 @@ export default function NiftyScalpPage() {
         <div className="tile"><div className="tile-label">Mode</div><div className="tile-value gain">PAPER</div><div className="tile-sub">{summary?.enabled ? "armed · live Angel feed" : "disabled"}</div></div>
         <div className="tile"><div className="tile-label">Desk capital</div><div className="tile-value">₹{inr(summary?.initial_capital)}</div><div className="tile-sub">{summary?.strategy_count ?? 504} × ₹{inr(summary?.per_strategy_capital)}</div></div>
         <div className="tile"><div className="tile-label">Equity</div><div className="tile-value">₹{inr(summary?.equity)}</div><div className="tile-sub">₹{inr(summary?.unrealized_pnl)} unrealised</div></div>
-        <div className="tile"><div className="tile-label">ROI</div><div className={`tile-value ${cls(summary?.roi_pct)}`}>{roiPct(summary?.roi_pct, 3)}</div><div className="tile-sub">on ₹{inr(summary?.initial_capital)} desk capital</div></div>
-        <div className="tile"><div className="tile-label">Today P&amp;L</div><div className={`tile-value ${cls(summary?.today_pnl)}`}>{(summary?.today_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(summary?.today_pnl)}</div><div className="tile-sub">{roiPct(summary?.today_roi_pct, 3)} today</div></div>
+        <div className="tile"><div className="tile-label">ROI</div><div className={`tile-value ${cls(summary?.roi_pct)}`}>{roiPct(summary?.roi_pct)}</div><div className="tile-sub">on ₹{inr(summary?.initial_capital)} desk capital</div></div>
+        <div className="tile"><div className="tile-label">Today P&amp;L</div><div className={`tile-value ${cls(summary?.today_pnl)}`}>{(summary?.today_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(summary?.today_pnl)}</div><div className="tile-sub">{roiPct(summary?.today_roi_pct)} today</div></div>
         <div className="tile"><div className="tile-label">Angel F&amp;O fees</div><div className="tile-value loss">−₹{inr(summary?.total_fees)}</div><div className="tile-sub">gross ₹{inr(summary?.gross_realized_pnl)} before costs</div></div>
         <div className="tile"><div className="tile-label">Open positions</div><div className="tile-value">{summary?.open_positions ?? 0}</div><div className="tile-sub">₹{inr(summary?.deployed_capital)} deployed</div></div>
         <div className="tile"><div className="tile-label">Expiry in use</div><div className="tile-value sm">{summary?.expiry ?? "—"}</div><div className="tile-sub">{summary?.closed_positions ?? 0} trades closed</div></div>
@@ -217,7 +217,7 @@ export default function NiftyScalpPage() {
                     <td className={cls(f.gross_pnl)}>₹{inr(f.gross_pnl)}</td>
                     <td className="loss">−₹{inr(f.fees)}</td>
                     <td className={cls(f.net_pnl)}>{f.net_pnl >= 0 ? "+" : ""}₹{inr(f.net_pnl)}</td>
-                    <td className={cls(f.roi_pct)}>{roiPct(f.roi_pct, 3)}</td>
+                    <td className={cls(f.roi_pct)}>{roiPct(f.roi_pct)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -304,7 +304,7 @@ export default function NiftyScalpPage() {
                       <td className={cls(d.gross_pnl)}>{d.gross_pnl >= 0 ? "+" : ""}₹{inr(d.gross_pnl)}</td>
                       <td className="loss">−₹{inr(d.fees)}</td>
                       <td className={cls(d.realized_pnl)}>{d.realized_pnl >= 0 ? "+" : ""}₹{inr(d.realized_pnl)}</td>
-                      <td className={cls(d.roi_pct)}>{roiPct(d.roi_pct, 4)}</td>
+                      <td className={cls(d.roi_pct)}>{roiPct(d.roi_pct)}</td>
                     </tr>
                   ))}
                 </tbody>

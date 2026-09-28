@@ -70,7 +70,7 @@ export default function PerformanceWindow({
                 : `${perf.roi_pct >= 0 ? "+" : ""}${perf.roi_pct.toFixed(2)}%`}
               tone={(perf.roi_pct ?? 0) >= 0 ? "gain" : "loss"}
               sub={perf.avg_roi_pct_per_day === null ? "no capital set"
-                : `${perf.avg_roi_pct_per_day >= 0 ? "+" : ""}${perf.avg_roi_pct_per_day.toFixed(3)}% a day on ${compact(perf.initial_capital)}`} />
+                : `${perf.avg_roi_pct_per_day >= 0 ? "+" : ""}${perf.avg_roi_pct_per_day.toFixed(2)}% a day on ${compact(perf.initial_capital)}`} />
             <PTile label="Trades in window"
               value={`${perf.opened_in_window} / ${perf.closed_in_window}`}
               sub="opened / closed" />

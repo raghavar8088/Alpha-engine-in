@@ -191,9 +191,9 @@ export default function SwingTradingPage() {
         <div className="tile"><div className="tile-label">Mode</div><div className="tile-value gain">PAPER</div><div className="tile-sub">live Angel feed</div></div>
         <div className="tile"><div className="tile-label">Desk capital</div><div className="tile-value">₹{inr(summary?.initial_capital)}</div><div className="tile-sub">₹{inr(summary?.position_size)} / position · max {summary?.max_positions ?? 0}</div></div>
         <div className="tile"><div className="tile-label">Equity</div><div className="tile-value">₹{inr(summary?.equity)}</div><div className="tile-sub">₹{inr(summary?.unrealized_pnl)} unrealised</div></div>
-        <div className="tile"><div className="tile-label">Total capital ROI</div><div className={`tile-value ${cls(summary?.roi_pct)}`}>{pct(summary?.roi_pct, 4)}</div><div className="tile-sub">on the full ₹{inr(summary?.initial_capital)}</div></div>
-        <div className="tile"><div className="tile-label">ROI on deployed</div><div className={`tile-value ${cls(summary?.deployed_roi_pct)}`}>{pct(summary?.deployed_roi_pct, 3)}</div><div className="tile-sub">on ₹{inr(summary?.deployed_capital)} actually at risk</div></div>
-        <div className="tile"><div className="tile-label">Today P&amp;L</div><div className={`tile-value ${cls(summary?.today_pnl)}`}>{(summary?.today_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(summary?.today_pnl)}</div><div className="tile-sub">{pct(summary?.today_roi_pct, 4)} today</div></div>
+        <div className="tile"><div className="tile-label">Total capital ROI</div><div className={`tile-value ${cls(summary?.roi_pct)}`}>{pct(summary?.roi_pct, 2)}</div><div className="tile-sub">on the full ₹{inr(summary?.initial_capital)}</div></div>
+        <div className="tile"><div className="tile-label">ROI on deployed</div><div className={`tile-value ${cls(summary?.deployed_roi_pct)}`}>{pct(summary?.deployed_roi_pct, 2)}</div><div className="tile-sub">on ₹{inr(summary?.deployed_capital)} actually at risk</div></div>
+        <div className="tile"><div className="tile-label">Today P&amp;L</div><div className={`tile-value ${cls(summary?.today_pnl)}`}>{(summary?.today_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(summary?.today_pnl)}</div><div className="tile-sub">{pct(summary?.today_roi_pct, 2)} today</div></div>
         <div className="tile"><div className="tile-label">Angel fees</div><div className="tile-value loss">−₹{inr(summary?.total_fees)}</div><div className="tile-sub">gross ₹{inr(summary?.gross_realized_pnl)} before costs</div></div>
         <div className="tile"><div className="tile-label">Positions</div><div className="tile-value">{summary?.open_positions ?? 0}</div><div className="tile-sub">{summary?.waiting ?? 0} waiting · {summary?.closed_positions ?? 0} closed</div></div>
       </div>
@@ -415,8 +415,8 @@ export default function SwingTradingPage() {
                       <td className={cls(d.gross_pnl)}>{d.gross_pnl >= 0 ? "+" : ""}₹{inr(d.gross_pnl)}</td>
                       <td className="loss">−₹{inr(d.fees)}</td>
                       <td className={cls(d.realized_pnl)}>{d.realized_pnl >= 0 ? "+" : ""}₹{inr(d.realized_pnl)}</td>
-                      <td className={cls(d.roi_pct)}>{pct(d.roi_pct, 4)}</td>
-                      <td className={cls(d.deployed_roi_pct)}>{pct(d.deployed_roi_pct, 3)}</td>
+                      <td className={cls(d.roi_pct)}>{pct(d.roi_pct, 2)}</td>
+                      <td className={cls(d.deployed_roi_pct)}>{pct(d.deployed_roi_pct, 2)}</td>
                     </tr>
                   ))}
                 </tbody>

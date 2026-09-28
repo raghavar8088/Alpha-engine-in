@@ -127,7 +127,7 @@ export default function PaperBook({ board }: { board: NiftyScalpScore[] }) {
         </div>
         <div className="tile">
           <div className="tile-label">ROI</div>
-          <div className={`tile-value ${cls(sum?.roi_pct)}`}>{roiPct(sum?.roi_pct, 3)}</div>
+          <div className={`tile-value ${cls(sum?.roi_pct)}`}>{roiPct(sum?.roi_pct)}</div>
           <div className="tile-sub">on the whole ₹{inr(sum?.book_capital)}</div>
         </div>
         <div className="tile">
