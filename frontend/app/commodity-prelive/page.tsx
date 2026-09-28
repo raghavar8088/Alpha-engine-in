@@ -6,6 +6,7 @@ import GlassPanel from "../../components/GlassPanel";
 import StatusPill from "../../components/StatusPill";
 import ErrorBanner from "../../components/ErrorBanner";
 import EmptyState from "../../components/EmptyState";
+import NatGasBook from "./NatGasBook";
 import {
   refreshing,
   CommodityPreliveBoard,
@@ -50,6 +51,7 @@ const VERDICT_TONE: Record<string, "gain" | "loss" | "muted"> = {
 };
 
 export default function CommodityPrelivePage() {
+  const [tab, setTab] = useState<"desk" | "natgas">("desk");
   const [summary, setSummary] = useState<CommodityPreliveSummary | null>(null);
   const [scripts, setScripts] = useState<CommodityPreliveScript[]>([]);
   const [scriptsNote, setScriptsNote] = useState<string>("");
@@ -189,6 +191,19 @@ export default function CommodityPrelivePage() {
         </div>
       )}
 
+      <div className="page-tabs">
+        <button className={tab === "desk" ? "ptab on" : "ptab"} onClick={() => setTab("desk")}>
+          Pre-Live desk
+        </button>
+        <button className={tab === "natgas" ? "ptab on" : "ptab"} onClick={() => setTab("natgas")}>
+          Natural Gas Paper Trading
+        </button>
+      </div>
+
+      {tab === "natgas" && <NatGasBook />}
+
+      {tab === "desk" && (
+      <>
       {/* ── the master switch ─────────────────────────────────────────────────── */}
       <div className={`arm-banner ${engineOn ? "on" : "off"}`}>
         <div>
@@ -719,9 +734,15 @@ export default function CommodityPrelivePage() {
           </ul>
         </GlassPanel>
       )}
+      </>
+      )}
 
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 16px; }
+        .page-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+        .ptab { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted);
+                padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+        .ptab.on { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
         .btn { padding: 7px 14px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer;
                border: 1px solid var(--panel-border); background: var(--panel); color: var(--text); }
         .btn.sm { padding: 5px 11px; font-size: 11.5px; }

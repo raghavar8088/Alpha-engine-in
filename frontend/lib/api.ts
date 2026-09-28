@@ -2604,6 +2604,109 @@ export async function runStockDeskCycle(side: string): Promise<{ opened: number;
   return apiFetch(`/api/stock-desk/${side}/run`, { method: "POST" });
 }
 
+// ---- Stock Pre-Live Paper Books ------------------------------------------------
+// The buying desk's strategies on ONE shared account of Rs 10 lakh or Rs 2 lakh. Same
+// signals and same fills as the desk; what differs is that the account can run out of cash
+// (a signal it cannot afford is DECLINED, with the reason) and that every close pays real
+// Angel One option fees. The desk itself charges nothing, so its P&L is gross.
+export type StockBookKey = "10L" | "2L";
+
+export interface StockBookSummary {
+  book: StockBookKey;
+  books: StockBookKey[];
+  label: string;
+  book_labels: Record<string, string>;
+  book_capitals: Record<string, number>;
+  mode: string;
+  enabled: boolean;
+  parent_side: string;
+  capital: number;
+  position_cap: number;
+  cash: number;
+  deployed: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  gross_pnl: number;
+  fees: number;
+  equity: number;
+  roi_pct: number;
+  open_positions: number;
+  closed_positions: number;
+  declined: number;
+  strategies: number;
+}
+
+export interface StockBookScore {
+  book: StockBookKey;
+  strategy_id: string;
+  strategy_name: string | null;
+  is_anti: boolean;
+  trades: number;
+  wins: number;
+  win_rate: number;
+  net_pnl: number;
+  gross_pnl: number;
+  fees: number;
+  profit_factor: number | null;
+  declined: number;
+}
+
+export interface StockBookPosition {
+  position_id: string;
+  book: StockBookKey;
+  parent_position_id: string;
+  strategy_id: string;
+  strategy_name: string | null;
+  is_anti: boolean;
+  symbol: string;
+  option_type: string;
+  strike: number;
+  expiry: string;
+  structure: string | null;
+  lots: number;
+  lot_size: number;
+  qty: number;
+  entry_premium: number;
+  ltp: number;
+  capital_deployed: number;
+  unrealized_pnl: number;
+  realized_pnl: number | null;
+  gross_pnl: number | null;
+  fees: number | null;
+  exit_premium: number | null;
+  exit_reason: string | null;
+  status: "OPEN" | "CLOSED" | "DECLINED";
+  decline_reason?: string;
+  opened_at: string;
+  closed_at: string | null;
+}
+
+const sbk = "/api/stock-books";
+
+export async function fetchStockBookSummary(book: StockBookKey): Promise<StockBookSummary> {
+  return apiFetch(`${sbk}/summary?book=${book}`);
+}
+
+export async function fetchStockBookLeaderboard(book: StockBookKey): Promise<StockBookScore[]> {
+  const r = await apiFetch(`${sbk}/leaderboard?book=${book}`);
+  return r.rows ?? [];
+}
+
+export async function fetchStockBookPositions(
+  book: StockBookKey,
+  status: "OPEN" | "CLOSED" | "DECLINED" | "ALL" = "OPEN",
+  limit = 400,
+): Promise<StockBookPosition[]> {
+  const r = await apiFetch(`${sbk}/positions?book=${book}&status=${status}&limit=${limit}`);
+  return r.positions ?? [];
+}
+
+export async function runStockBooksCycle(): Promise<{
+  opened: number; closed: number; declined: number; marked: number; notes: string[];
+}> {
+  return apiFetch(`${sbk}/run`, { method: "POST" });
+}
+
 // ---- Zero Hero Trades (expiry-day deep-OTM index option lottery, paper) ----
 export interface ZeroHeroSummary {
   mode: string;
@@ -6538,4 +6641,100 @@ export async function snapshotBook(name: string): Promise<{ written: boolean; re
   return apiFetch(`/api/fundamentals/watchlists/${encodeURIComponent(name)}/snapshot`, {
     method: "POST",
   });
+}
+
+// ---- Natural Gas Paper Trading (Rs 2 lakh on two picked NATGASMINI strategies) ----
+export interface NatGasSummary {
+  book: string;
+  label: string;
+  symbol: string;
+  enabled: boolean;
+  capital: number;
+  equity: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  total_pnl: number;
+  realized_pct: number;
+  unrealized_pct: number;
+  total_pct: number;
+  today_pnl: number;
+  today_pct: number;
+  margin_deployed: number;
+  available_margin: number;
+  total_costs: number;
+  open_positions: number;
+  closed_positions: number;
+  win_rate: number;
+  daily_loss_limit: number;
+  breaker_tripped: boolean;
+  market_open: boolean;
+  last_run_at: string | null;
+  last_opened: number;
+  last_managed: number;
+  last_notes: string[];
+  roster: { template: string; timeframe: string }[];
+}
+
+export interface NatGasStrategy {
+  template: string;
+  name: string;
+  timeframe: string;
+  family: string;
+  family_label: string;
+  trades: number;
+  win_rate: number;
+  profit_factor: number | null;
+  expectancy: number;
+  max_drawdown_pct: number;
+  t_stat: number | null;
+  total_costs: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  open_positions: number;
+  verdict: string;
+  verdict_reasons: string[];
+}
+
+export interface NatGasPosition {
+  position_id: string;
+  strategy_name: string;
+  timeframe: string;
+  pattern: string | null;
+  side: "BUY" | "SELL";
+  lots: number;
+  qty: number;
+  entry_price: number;
+  exit_price: number | null;
+  ltp: number | null;
+  target: number;
+  stoploss: number;
+  margin_used: number;
+  unrealized_pnl: number | null;
+  realized_pnl: number | null;
+  costs: number | null;
+  return_on_margin_pct: number | null;
+  exit_reason: string | null;
+  status: string;
+  opened_at: string;
+  closed_at: string | null;
+}
+
+const ngb = "/api/natgas-book";
+export async function fetchNatGasSummary(): Promise<NatGasSummary> {
+  return apiFetch(`${ngb}/summary`);
+}
+export async function fetchNatGasStrategies(): Promise<{ strategies: NatGasStrategy[] }> {
+  return apiFetch(`${ngb}/strategies`);
+}
+export async function fetchNatGasPositions(status: "OPEN" | "CLOSED"): Promise<{ positions: NatGasPosition[] }> {
+  return apiFetch(`${ngb}/positions?status=${status}`);
+}
+export async function toggleNatGasBook(enabled: boolean): Promise<NatGasSummary> {
+  return apiFetch(`${ngb}/toggle`, { method: "POST", body: JSON.stringify({ enabled }) });
+}
+export async function runNatGasCycle(): Promise<{ opened: number; managed: number; notes: string[] }> {
+  return apiFetch(`${ngb}/run`, { method: "POST" });
+}
+export async function closeAllNatGas(): Promise<{ closed: number; net_pnl: number }> {
+  return apiFetch(`${ngb}/close-all`, { method: "POST" });
 }

@@ -32,6 +32,8 @@ async def commodity_prelive_loop() -> None:
     from app.services.commodity_prelive import get_state, run_cycle
     from app.services.desk_switches import is_on
 
+    from app.services import natgas_book
+
     while True:
         try:
             if is_market_open(datetime.now(IST)) and await is_on("commodity_prelive"):
@@ -43,4 +45,16 @@ async def commodity_prelive_loop() -> None:
                     r["opened"], r["managed"], r["evaluated"])
         except Exception:
             logger.exception("[commodity_prelive] cycle failed — will retry next tick")
+        # The Natural Gas book rides the same tick (the cadence its strategies' record was
+        # earned at) but on its OWN switch and in its OWN try: it was set up to trade two
+        # named strategies regardless of the Pre-Live desk, so neither that desk's Main
+        # Control switch nor a failure in its cycle may stop it.
+        try:
+            if is_market_open(datetime.now(IST)) and await is_on("natgas_book"):
+                nb = await natgas_book.run_cycle()
+                if nb["opened"] or nb["managed"]:
+                    logger.info("[natgas_book] %d opened, %d managed",
+                                nb["opened"], nb["managed"])
+        except Exception:
+            logger.exception("[natgas_book] cycle failed — will retry next tick")
         await asyncio.sleep(TICK_SECONDS if is_market_open() else IDLE_TICK_SECONDS)

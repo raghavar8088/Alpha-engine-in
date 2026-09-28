@@ -63,6 +63,12 @@ DESKS: dict[str, dict] = {
         "capital": lambda: __import__("app.services.intraday_pattern_engine",
                                       fromlist=["x"]).TOTAL_CAPITAL,
     },
+    "natgas-book": {
+        "label": "Natural Gas Paper Trading",
+        "positions": lambda: D.natgas_book_positions_collection,
+        "equity": lambda: D.natgas_book_equity_collection,
+        "capital": lambda: __import__("app.services.natgas_book", fromlist=["x"]).CAPITAL,
+    },
     "zero-hero": {
         "label": "Zero Hero Trades",
         "positions": lambda: D.zero_hero_positions_collection,

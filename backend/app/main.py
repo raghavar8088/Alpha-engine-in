@@ -13,6 +13,7 @@ from fastapi.responses import JSONResponse
 from app.api.deps import get_current_user
 from app.api.routes import (
     ath_trading,
+    natgas_book,
     fundamentals,
     pattern,
     pattern_books,
@@ -49,6 +50,7 @@ from app.api.routes import (
     screener,
     swing_signals,
     stock_desk,
+    stock_desk_books,
     live_paper,
     zero_hero,
     stocks_range,
@@ -155,6 +157,9 @@ DESK_INDEXES: dict[str, list] = {
     "swing_watchlist": [[("status", 1)], [("symbol", 1), ("status", 1)]],
     "zero_hero_positions": [[("status", 1)], [("closed_on", 1)]],
     "stock_desk_positions": [[("side", 1), ("status", 1)], [("closed_on", 1)]],
+    "stock_book_positions": [[("book", 1), ("status", 1)],
+                             [("book", 1), ("parent_position_id", 1)]],
+    "stock_book_trades": [[("book", 1), ("closed_at", -1)]],
     # ts_* is deliberately ABSENT: trending_stocks.engine.ensure_indexes() owns every
     # one of those, with names and with uniqueness. This map creates keys WITHOUT
     # names, and Mongo rejects the same key under a second name — so a collection
@@ -207,9 +212,11 @@ EXPIRING_COLLECTIONS = {
     "pattern_book_equity": 60,
     "swing_equity": 120,
     "nifty_scalp_equity": 30,
+    "natgas_book_equity": 30,
     "nifty_scalp_paper_equity": 30,
     "nifty_scalp_signals": 30,
     "stock_desk_equity": 14,
+    "stock_book_equity": 14,
     "zero_hero_equity": 14,
     "live_paper_equity": 14,
     "live_trading_equity": 30,
@@ -784,6 +791,7 @@ app.include_router(commodity_positions.router)
 app.include_router(commodity_prelive.router)
 app.include_router(strategy_factory.router)
 app.include_router(stock_desk.router)
+app.include_router(stock_desk_books.router)
 app.include_router(zero_hero.router)
 app.include_router(live_paper.router)
 app.include_router(trending_stocks.router)
@@ -805,6 +813,7 @@ app.include_router(long_horizon.router)
 app.include_router(chart_data.router)
 app.include_router(telegram_signals.router)
 app.include_router(fundamentals.router)
+app.include_router(natgas_book.router)
 
 if settings.enable_live_trading:
     app.include_router(live.router)

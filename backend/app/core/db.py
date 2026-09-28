@@ -128,6 +128,15 @@ stock_desk_trades_collection = db["stock_desk_trades"]
 stock_desk_scores_collection = db["stock_desk_scores"]
 stock_desk_state_collection = db["stock_desk_state"]
 stock_desk_equity_collection = db["stock_desk_equity"]
+# Paper Books over the stock buying desk: the SAME strategies and the SAME fills, on one
+# shared Rs 10L / Rs 2L account that can run out of money and that pays real option fees.
+# Separate collections, never the parent's, so a book can be reset without touching the
+# desk whose fills it mirrors.
+stock_book_positions_collection = db["stock_book_positions"]
+stock_book_trades_collection = db["stock_book_trades"]
+stock_book_scores_collection = db["stock_book_scores"]
+stock_book_state_collection = db["stock_book_state"]
+stock_book_equity_collection = db["stock_book_equity"]
 # Zero Hero Trades — expiry-day deep-OTM INDEX option buying, 50 strategies on Rs1L each.
 # Signals are stored separately from positions because most zero-hero signals are NOT
 # taken (too expensive, unquotable), and knowing why is the point of the history.
@@ -188,6 +197,12 @@ commodity_prelive_scores_collection = db["commodity_prelive_scores"]
 commodity_prelive_flags_collection = db["commodity_prelive_flags"]
 commodity_prelive_state_collection = db["commodity_prelive_state"]
 commodity_prelive_equity_collection = db["commodity_prelive_equity"]
+# Natural Gas Paper Trading — a Rs 2 lakh book trading two hand-picked NATGASMINI
+# strategies from the Pre-Live desk, on its own collections so its record is its own.
+natgas_book_positions_collection = db["natgas_book_positions"]
+natgas_book_trades_collection = db["natgas_book_trades"]
+natgas_book_state_collection = db["natgas_book_state"]
+natgas_book_equity_collection = db["natgas_book_equity"]
 # Daily 3 PM ATM short-straddle roll on ONE named F&O paper account (see
 # app.services.fno_auto_roll). `state` holds the once-a-day guard (`last_rolled_on`);
 # `log` keeps one row per attempt including aborts, so a day that did not roll always
