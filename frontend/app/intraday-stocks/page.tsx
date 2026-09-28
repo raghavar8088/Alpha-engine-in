@@ -102,6 +102,30 @@ function DailyRoiPanel({ rows, capital }: { rows: DailyRoi[]; capital: number })
           </table>
         </div>
       )}
+
+      {/* styled-jsx scopes CSS to the component that declares it, and this panel is a
+          component of its own — the page's .data-table rules below never reached it, so
+          the table rendered with browser defaults. Same spec, declared where it applies. */}
+      <style jsx>{`
+        .empty { padding: 18px 20px; font-size: 12px; color: var(--text-faint); }
+        .table-scroll { overflow-x: auto; max-height: 460px; overflow-y: auto; }
+        .data-table {
+          width: 100%; border-collapse: collapse; font-size: 12px;
+          font-variant-numeric: tabular-nums;
+        }
+        .data-table th {
+          text-align: center; padding: 8px 10px; font-size: 10px; font-weight: 700;
+          letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted);
+          border-bottom: 1px solid var(--panel-border); position: sticky; top: 0;
+          background: var(--panel);
+        }
+        .data-table td {
+          padding: 7px 10px; text-align: center; border-bottom: 1px solid var(--canvas-soft);
+        }
+        .data-table tbody tr:hover td { background: var(--canvas-soft); }
+        .gain { color: var(--gain); }
+        .loss { color: var(--loss); }
+      `}</style>
     </GlassPanel>
   );
 }
@@ -124,7 +148,22 @@ function SourcePill({ source }: { source: string | null | undefined }) {
     source === "dhan_quote" ? "DHAN" :
     source === "last_bar_close" ? "LAST BAR" : (source ?? "-");
   const cls = source === "angel_quote" ? "src angel" : source === "dhan_quote" ? "src dhan" : "src stale";
-  return <span className={cls}>{label}</span>;
+  return (
+    <span className={cls}>
+      {label}
+      {/* Declared here for the same reason as DailyRoiPanel: the page's .src rules are
+          scoped to the page component and never applied to this one. */}
+      <style jsx>{`
+        .src {
+          display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 9.5px;
+          font-weight: 700; letter-spacing: 0.04em; border: 1px solid var(--panel-border);
+        }
+        .src.angel { background: rgba(34, 170, 96, 0.12); border-color: rgba(34, 170, 96, 0.3); }
+        .src.dhan { background: var(--canvas-soft); }
+        .src.stale { background: var(--loss-dim); border-color: rgba(217, 45, 63, 0.3); }
+      `}</style>
+    </span>
+  );
 }
 
 export default function IntradayStocksPage() {
@@ -991,7 +1030,7 @@ export default function IntradayStocksPage() {
 
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 16px; }
-        .tabs { display: flex; gap: 8px; }
+        .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
         .tab { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
         .tab.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
         .badge.anti { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); margin-right: 4px; }
