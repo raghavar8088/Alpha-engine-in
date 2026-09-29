@@ -6738,3 +6738,163 @@ export async function runNatGasCycle(): Promise<{ opened: number; managed: numbe
 export async function closeAllNatGas(): Promise<{ closed: number; net_pnl: number }> {
   return apiFetch(`${ngb}/close-all`, { method: "POST" });
 }
+
+// ---- Gold Desk (MCX gold futures + Delta gold perpetuals, one book each) ----
+export type GoldVenueKey = "mcx" | "delta";
+
+export interface GoldSummary {
+  venue: GoldVenueKey;
+  label: string;
+  currency: "INR" | "USD";
+  unit_label: string;
+  quote_note: string;
+  symbols: string[];
+  tradable_symbols: string[];
+  enabled: boolean;
+  capital: number;
+  equity: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  total_pnl: number;
+  realized_pct: number;
+  unrealized_pct: number;
+  total_pct: number;
+  today_pnl: number;
+  today_pct: number;
+  margin_deployed: number;
+  available_margin: number;
+  total_costs: number;
+  open_positions: number;
+  closed_positions: number;
+  win_rate: number;
+  daily_loss_limit: number;
+  breaker_tripped: boolean;
+  book_floor: number;
+  book_floor_pct: number;
+  floor_reached: boolean;
+  market_open: boolean;
+  max_positions: number;
+  slippage_bps: number;
+  max_hold_bars: number;
+  strategy_count: number;
+  stream_count: number;
+  fee_note: string;
+  last_run_at: string | null;
+  last_opened: number;
+  last_managed: number;
+  last_evaluated: number;
+  last_notes: string[];
+}
+
+export interface GoldStrategy {
+  template: string;
+  timeframe: string;
+  symbol: string;
+  name: string;
+  family: string;
+  family_label: string;
+  trades: number;
+  win_rate: number;
+  profit_factor: number | null;
+  expectancy: number;
+  max_drawdown_pct: number;
+  t_stat: number | null;
+  total_costs: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  open_positions: number;
+  verdict: string;
+  verdict_reasons: string[];
+}
+
+export interface GoldPosition {
+  position_id: string;
+  venue: GoldVenueKey;
+  currency: string;
+  strategy_name: string;
+  timeframe: string;
+  pattern: string | null;
+  symbol: string;
+  side: "BUY" | "SELL";
+  units: number;
+  unit_label: string;
+  qty: number;
+  entry_price: number;
+  exit_price: number | null;
+  ltp: number | null;
+  target: number;
+  stoploss: number;
+  notional: number;
+  margin_used: number;
+  unrealized_pnl: number | null;
+  realized_pnl: number | null;
+  costs: number | null;
+  return_on_margin_pct: number | null;
+  exit_reason: string | null;
+  status: string;
+  rationale: string | null;
+  bars_held: number;
+  max_hold_bars: number;
+  opened_at: string;
+  closed_at: string | null;
+}
+
+export interface GoldBasis {
+  mcx?: {
+    symbol: string; price: number; source: string; quote: string;
+    per_gram_inr: number; per_oz_inr: number;
+  };
+  delta?: {
+    prices: Record<string, number>; quote: string; source: string; token_basis_usd: number;
+  };
+  implied?: {
+    note: string;
+    usd_inr_used?: number;
+    delta_per_oz_inr?: number;
+    mcx_per_oz_inr?: number;
+    premium_pct?: number;
+  };
+}
+
+export interface GoldCoverage {
+  venue?: string;
+  symbols?: string[];
+  bars?: Record<string, Record<string, number>>;
+  last_bar_at?: Record<string, string | null>;
+  latest_bar_ist?: Record<string, string | null>;
+  last_refresh?: Record<string, unknown>;
+}
+
+const gd = "/api/gold-desk";
+export async function fetchGoldVenues(): Promise<{ venues: GoldSummary[] }> {
+  return apiFetch(`${gd}/venues`);
+}
+export async function fetchGoldSummary(venue: GoldVenueKey): Promise<GoldSummary> {
+  return apiFetch(`${gd}/summary?venue=${venue}`);
+}
+export async function fetchGoldStrategies(venue: GoldVenueKey): Promise<{ strategies: GoldStrategy[] }> {
+  return apiFetch(`${gd}/strategies?venue=${venue}`);
+}
+export async function fetchGoldPositions(
+  venue: GoldVenueKey,
+  status: "OPEN" | "CLOSED",
+): Promise<{ positions: GoldPosition[] }> {
+  return apiFetch(`${gd}/positions?venue=${venue}&status=${status}`);
+}
+export async function fetchGoldBasis(): Promise<GoldBasis> {
+  return apiFetch(`${gd}/basis`);
+}
+export async function fetchGoldCoverage(venue: GoldVenueKey): Promise<GoldCoverage> {
+  return apiFetch(`${gd}/coverage?venue=${venue}`);
+}
+export async function toggleGoldDesk(venue: GoldVenueKey, enabled: boolean): Promise<GoldSummary> {
+  return apiFetch(`${gd}/toggle?venue=${venue}`, { method: "POST", body: JSON.stringify({ enabled }) });
+}
+export async function runGoldCycle(
+  venue: GoldVenueKey,
+): Promise<{ venue: string; opened: number; managed: number; evaluated: number; notes: string[] }> {
+  return apiFetch(`${gd}/run?venue=${venue}`, { method: "POST" });
+}
+export async function closeAllGold(venue: GoldVenueKey): Promise<{ closed: number; net_pnl: number }> {
+  return apiFetch(`${gd}/close-all?venue=${venue}`, { method: "POST" });
+}

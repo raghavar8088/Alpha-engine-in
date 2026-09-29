@@ -99,6 +99,10 @@ _MODULES: list[Module] = [
        ["/api/natgas-book"],
        note="Rs 2 lakh on two picked NATGASMINI strategies. Independent of the Pre-Live "
             "desk's switch — OFF here stops only this book's new entries."),
+    _m("gold_desk", "Gold Desk (MCX + Delta)", "Trading", "/gold-desk", ["/api/gold-desk"],
+       note="Two books on the same metal — MCX gold futures in rupees and Delta gold "
+            "perpetuals in dollars. OFF stops new entries on BOTH; open positions are "
+            "still managed to their target or stop."),
     _m("commodity_positions", "Commodity Positions", "Trading", "/commodity-positions",
        ["/api/commodity-positions"]),
     _m("portfolio", "Portfolio", "Trading", "/portfolio", ["/api/portfolio"]),

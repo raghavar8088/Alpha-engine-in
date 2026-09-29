@@ -117,6 +117,18 @@ SCOPED: dict[str, dict] = {
         "default": "80k",
         "capital": lambda s: __import__("app.services.live_intraday_engine", fromlist=["x"]).book_capital(s),
     },
+    # The Gold Desk's two books share their collections and are told apart by `venue`. It
+    # MUST be scoped rather than flat: the two are in different currencies, and a single
+    # unscoped history would add rupees to dollars and print the total as one number.
+    "gold-desk": {
+        "label": "Gold Desk (MCX / Delta)",
+        "positions": lambda: D.gold_positions_collection,
+        "equity": lambda: D.gold_equity_collection,
+        "field": "venue",
+        "default": "mcx",
+        "capital": lambda s: __import__("app.services.gold_desk",
+                                        fromlist=["x"]).venue(s).capital,
+    },
 }
 
 

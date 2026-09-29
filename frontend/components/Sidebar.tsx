@@ -189,6 +189,21 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // Sits in the commodity block because MCX gold is one of its two legs, but it is
+        // the only desk in the app that trades ONE metal across TWO venues and two
+        // currencies — so a coin mark with a second coin behind it, rather than a third
+        // bullion bar that would read as another MCX desk.
+        href: "/gold-desk",
+        label: "Gold Desk",
+        icon: (
+          <>
+            <circle cx="10" cy="14" r="6" />
+            <path d="M14.5 4.2a6 6 0 013 9.3" />
+            <path d="M10 11.5v5M8.4 12.8h2.6a1.4 1.4 0 010 2.8H9a1.4 1.4 0 000 2.8h2.6" />
+          </>
+        ),
+      },
+      {
         // Sits directly under Commodity Trading, and is to it what F&O Positions is to the
         // index desks: you place the trades, it does not. A ledger/scales mark rather than
         // another bullion bar, so the manual book does not read as a second strategy desk.

@@ -13,6 +13,7 @@ from fastapi.responses import JSONResponse
 from app.api.deps import get_current_user
 from app.api.routes import (
     ath_trading,
+    gold_desk,
     natgas_book,
     fundamentals,
     pattern,
@@ -213,6 +214,7 @@ EXPIRING_COLLECTIONS = {
     "swing_equity": 120,
     "nifty_scalp_equity": 30,
     "natgas_book_equity": 30,
+    "gold_desk_equity": 30,
     "nifty_scalp_paper_equity": 30,
     "nifty_scalp_signals": 30,
     "stock_desk_equity": 14,
@@ -333,6 +335,8 @@ async def ensure_indexes() -> None:
     await _try("commodity_prelive", cmpl_ensure_indexes())
     from app.services.pattern_books_engine import ensure_indexes as pb_ensure_indexes
     await _try("pattern_books", pb_ensure_indexes())
+    from app.services.gold_desk import ensure_indexes as gold_ensure_indexes
+    await _try("gold_desk", gold_ensure_indexes())
 
 
 @app.on_event("startup")
@@ -422,6 +426,35 @@ async def start_commodity_prelive_scheduler() -> None:
         )
     else:
         logger.info("Pre-Live Commodity desk loop disabled (COMMODITY_PRELIVE_SCHEDULER=0)")
+
+
+@app.on_event("startup")
+async def start_gold_desk_scheduler() -> None:
+    """The Gold Desk's two loops — MCX while the exchange is open, Delta around the clock.
+
+    Three tasks, not two: the Delta leg owns its own bar poller because nothing else in
+    this app fetches Delta candles, while the MCX leg reads the commodity store that is
+    already filled for GOLD and GOLDM. Both legs start regardless of the desk switch,
+    which gates ENTRIES — an open position is exposure and still has a stop."""
+    from app.services.gold_desk import VENUES
+    from app.services.gold_scheduler import (
+        DELTA_BARS_TICK_SECONDS, DELTA_TICK_SECONDS, ENABLED as GOLD_ON, MCX_TICK_SECONDS,
+        gold_delta_bars_loop, gold_delta_loop, gold_mcx_loop,
+    )
+
+    if not GOLD_ON:
+        logger.info("Gold Desk loops disabled (GOLD_DESK_SCHEDULER=0)")
+        return
+    asyncio.create_task(gold_mcx_loop())
+    asyncio.create_task(gold_delta_bars_loop())
+    asyncio.create_task(gold_delta_loop())
+    logger.info(
+        "Gold Desk enabled - MCX %s on Rs %s every %ss while MCX is open; Delta %s on $%s "
+        "every %ss round the clock (bars every %ss). Paper, ships OFF.",
+        "/".join(VENUES["mcx"].symbols), f"{VENUES['mcx'].capital:,.0f}", MCX_TICK_SECONDS,
+        "/".join(VENUES["delta"].symbols), f"{VENUES['delta'].capital:,.0f}",
+        DELTA_TICK_SECONDS, DELTA_BARS_TICK_SECONDS,
+    )
 
 
 @app.on_event("startup")
@@ -814,6 +847,7 @@ app.include_router(chart_data.router)
 app.include_router(telegram_signals.router)
 app.include_router(fundamentals.router)
 app.include_router(natgas_book.router)
+app.include_router(gold_desk.router)
 
 if settings.enable_live_trading:
     app.include_router(live.router)

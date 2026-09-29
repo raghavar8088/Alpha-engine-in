@@ -203,6 +203,19 @@ natgas_book_positions_collection = db["natgas_book_positions"]
 natgas_book_trades_collection = db["natgas_book_trades"]
 natgas_book_state_collection = db["natgas_book_state"]
 natgas_book_equity_collection = db["natgas_book_equity"]
+# Gold Desk — the same pattern library on gold, on TWO venues that quote the same metal
+# in different currencies at different hours: MCX gold futures in rupees, and Delta's
+# gold-backed token perpetuals in dollars, round the clock.
+#
+# One book per venue, and the venue is a field on every row rather than a second set of
+# collections. A shared collection is what lets the page ask "the same strategy, on the
+# same ounce, on two venues" in one query — which is the only question this desk exists
+# to answer that the Commodity module could not already answer on its own.
+gold_bars_collection = db["gold_delta_bars"]
+gold_positions_collection = db["gold_desk_positions"]
+gold_trades_collection = db["gold_desk_trades"]
+gold_state_collection = db["gold_desk_state"]
+gold_equity_collection = db["gold_desk_equity"]
 # Daily 3 PM ATM short-straddle roll on ONE named F&O paper account (see
 # app.services.fno_auto_roll). `state` holds the once-a-day guard (`last_rolled_on`);
 # `log` keeps one row per attempt including aborts, so a day that did not roll always
