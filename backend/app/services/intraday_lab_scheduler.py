@@ -45,6 +45,7 @@ async def intraday_lab_loop() -> None:
     from app.services.live_trading_engine import run_cycle as live_trading_run_cycle
     from app.services.stock_desk import BUYING, SELLING, run_cycle as stock_desk_run_cycle
     from app.services.stock_desk_books import run_cycle as stock_books_run_cycle
+    from app.services.selling_paper_books import run_cycle as selling_books_run_cycle
     from app.services.zero_hero import run_cycle as zero_hero_run_cycle
     from app.services.live_paper_buying import run_cycle as live_paper_run_cycle
     from app.services.fno_stock_roll import ENABLED as STOCK_ROLL_ENABLED, roll as stock_roll
@@ -116,6 +117,16 @@ async def intraday_lab_loop() -> None:
                                     sb.get("declined", 0))
                 except Exception:
                     logger.exception("stock-books cycle failed")
+                # Selling Paper Books follow the NIFTY selling daemon's fills - it runs in its
+                # own container, so this only READS what it wrote. Gated on its own key.
+                try:
+                    sl = await gated("selling_books", selling_books_run_cycle)
+                    if sl.get("opened") or sl.get("closed") or sl.get("declined"):
+                        logger.info("selling-books: %d opened, %d closed, %d declined",
+                                    sl.get("opened", 0), sl.get("closed", 0),
+                                    sl.get("declined", 0))
+                except Exception:
+                    logger.exception("selling-books cycle failed")
                 # Zero Hero (expiry-day index lottery tickets, paper). Inert on any day no
                 # index expires, so this is a cheap no-op most of the week.
                 try:

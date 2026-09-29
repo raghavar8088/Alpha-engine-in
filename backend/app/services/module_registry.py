@@ -133,6 +133,8 @@ _MODULES: list[Module] = [
        "/stock-prelive-buying", ["/api/stock-desk"]),
     _m("stock_books", "Stock Pre-Live - Paper Books (Rs 10L / Rs 2L)", "Strategy Lab",
        "/stock-prelive-buying", ["/api/stock-books"]),
+    _m("selling_books", "Pre-Live Selling - Paper Trading 01 (Rs 10L)", "Strategy Lab",
+       "/prelive-selling", ["/api/selling-books"]),
     _m("intraday_lab", "Intraday Stocks - Tournament", "Strategy Lab", "/intraday-stocks",
        ["/api/intraday-lab"]),
     _m("live_intraday", "Intraday Stocks - Live Intraday books", "Strategy Lab",

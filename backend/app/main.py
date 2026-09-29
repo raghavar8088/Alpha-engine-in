@@ -52,6 +52,7 @@ from app.api.routes import (
     swing_signals,
     stock_desk,
     stock_desk_books,
+    selling_paper_books,
     live_paper,
     zero_hero,
     stocks_range,
@@ -214,6 +215,7 @@ EXPIRING_COLLECTIONS = {
     "swing_equity": 120,
     "nifty_scalp_equity": 30,
     "natgas_book_equity": 30,
+    "selling_book_equity": 30,
     "gold_desk_equity": 30,
     "nifty_scalp_paper_equity": 30,
     "nifty_scalp_signals": 30,
@@ -335,6 +337,8 @@ async def ensure_indexes() -> None:
     await _try("commodity_prelive", cmpl_ensure_indexes())
     from app.services.pattern_books_engine import ensure_indexes as pb_ensure_indexes
     await _try("pattern_books", pb_ensure_indexes())
+    from app.services.selling_paper_books import ensure_indexes as sb_ensure_indexes
+    await _try("selling_books", sb_ensure_indexes())
     from app.services.gold_desk import ensure_indexes as gold_ensure_indexes
     await _try("gold_desk", gold_ensure_indexes())
 
@@ -825,6 +829,7 @@ app.include_router(commodity_prelive.router)
 app.include_router(strategy_factory.router)
 app.include_router(stock_desk.router)
 app.include_router(stock_desk_books.router)
+app.include_router(selling_paper_books.router)
 app.include_router(zero_hero.router)
 app.include_router(live_paper.router)
 app.include_router(trending_stocks.router)

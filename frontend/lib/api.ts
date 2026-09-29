@@ -2701,6 +2701,102 @@ export async function fetchStockBookPositions(
   return r.positions ?? [];
 }
 
+// ---- Selling Paper Books ("Paper Trading 01") ----------------------------------
+// A picked roster from the NIFTY option-SELLING desk on ONE account. The book follows the
+// desk's own fills, pays real option fees on every leg, and declines - with the reason - any
+// entry on a structure's own expiry day, any second copy of an identical position, and
+// anything the account cannot afford. ANTI picks BUY the structure the original sells.
+export interface SellingBookSummary {
+  book: string;
+  books: string[];
+  book_labels: Record<string, string>;
+  label: string;
+  mode: string;
+  enabled: boolean;
+  capital: number;
+  position_cap: number;
+  cash: number;
+  deployed: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  gross_pnl: number;
+  fees: number;
+  equity: number;
+  roi_pct: number;
+  open_positions: number;
+  closed_positions: number;
+  declined: number;
+  declined_by_reason: { expiry_day: number; duplicate: number; money: number };
+  rules: { skip_expiry_day_entries: boolean; one_copy_per_structure: boolean };
+  started_at: string | null;
+  last_run_at: string | null;
+  roster: { pick: string; base_strategy_id: string; direction: "SHORT" | "LONG" }[];
+}
+
+export interface SellingBookPick {
+  pick: string;
+  base_strategy_id: string;
+  direction: "SHORT" | "LONG";
+  trades: number;
+  wins: number;
+  win_rate: number | null;
+  profit_factor: number | null;
+  gross_pnl: number;
+  fees: number;
+  net_pnl: number;
+  open: number;
+  unrealized_pnl: number;
+  declined_expiry_day: number;
+  declined_duplicate: number;
+  declined_money: number;
+}
+
+export interface SellingBookPosition {
+  position_id: string;
+  book: string;
+  pick: string;
+  base_strategy_id: string;
+  direction: "SHORT" | "LONG";
+  structure: string;
+  expiry: string;
+  credit: number;
+  lots: number;
+  lot_size: number;
+  qty: number;
+  capital: number;
+  mark: number | null;
+  unrealized_pnl: number;
+  realized_pnl: number | null;
+  gross_pnl: number | null;
+  fees: number | null;
+  exit_cost: number | null;
+  exit_reason: string | null;
+  status: "OPEN" | "CLOSED" | "DECLINED";
+  decline_reason: string | null;
+  opened_at: string | null;
+  closed_at: string | null;
+}
+
+const slb = "/api/selling-books";
+
+export async function fetchSellingBookSummary(book: string): Promise<SellingBookSummary> {
+  return apiFetch(`${slb}/summary?book=${book}`);
+}
+
+export async function fetchSellingBookLeaderboard(book: string): Promise<SellingBookPick[]> {
+  const r = await apiFetch(`${slb}/leaderboard?book=${book}`);
+  return r.rows ?? [];
+}
+
+export async function fetchSellingBookPositions(
+  book: string,
+  status: "OPEN" | "CLOSED" | "DECLINED" | "ALL" = "OPEN",
+  limit = 400,
+): Promise<SellingBookPosition[]> {
+  const r = await apiFetch(`${slb}/positions?book=${book}&status=${status}&limit=${limit}`);
+  return r.positions ?? [];
+}
+
 export async function runStockBooksCycle(): Promise<{
   opened: number; closed: number; declined: number; marked: number; notes: string[];
 }> {

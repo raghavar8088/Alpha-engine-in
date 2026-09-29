@@ -5,6 +5,7 @@ import GlassPanel from "../../components/GlassPanel";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import LineChart from "../../components/charts/LineChart";
+import SellingPaperBook from "../../components/SellingPaperBook";
 import {
   refreshing,
   SellingDay,
@@ -49,6 +50,24 @@ export default function PreLiveSellingPage() {
   const [equity, setEquity] = useState<SellingEquityPoint[]>([]);
   const [days, setDays] = useState<SellingDay[]>([]);
   const [error, setError] = useState<string | null>(null);
+  // "desk" is the 393-strategy tournament; "pt01" is Paper Trading 01, the picked roster on
+  // one Rs 10 lakh account. The desk stops polling while the book is showing.
+  const [tab, setTab] = useState<"desk" | "pt01">("desk");
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem("sellingDeskTab") === "pt01") setTab("pt01");
+    } catch {
+      /* storage blocked - start on the desk */
+    }
+  }, []);
+  const pickTab = (t: "desk" | "pt01") => {
+    setTab(t);
+    try {
+      window.localStorage.setItem("sellingDeskTab", t);
+    } catch {
+      /* storage blocked - the choice just will not persist */
+    }
+  };
 
   const load = useCallback(async () => {
     try {
@@ -81,10 +100,11 @@ export default function PreLiveSellingPage() {
   }, [load]);
 
   useEffect(() => {
+    if (tab !== "desk") return;
     load();
     const id = setInterval(load, REFRESH_MS);
     return () => clearInterval(id);
-  }, [load]);
+  }, [load, tab]);
 
   const heartbeatAge = status?.heartbeat
     ? (Date.now() - new Date(status.heartbeat).getTime()) / 1000
@@ -112,6 +132,27 @@ export default function PreLiveSellingPage() {
         crosses the circuit breaker.
       </div>
 
+      <div className="tabs" role="tablist">
+        {([
+          ["desk", "Desk · all strategies"],
+          ["pt01", "Paper Trading 01 · ₹10 lakh"],
+        ] as ["desk" | "pt01", string][]).map(([k, label]) => (
+          <button
+            key={k}
+            role="tab"
+            aria-selected={tab === k}
+            className={tab === k ? "tab on" : "tab"}
+            onClick={() => pickTab(k)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "pt01" ? (
+        <SellingPaperBook book="pt01" />
+      ) : (
+      <>
       {error && <ErrorBanner message={error} />}
 
       {status?.breaker_tripped && (
@@ -374,9 +415,16 @@ export default function PreLiveSellingPage() {
           </div>
         )}
       </GlassPanel>
+      </>
+      )}
 
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 16px; }
+        .tabs { display: flex; gap: 6px; flex-wrap: wrap; border-bottom: 1px solid var(--panel-border); }
+        .tab { background: transparent; border: none; border-bottom: 2px solid transparent; margin-bottom: -1px;
+               padding: 10px 14px; font-size: 13px; font-weight: 700; color: var(--text-muted); cursor: pointer; }
+        .tab:hover { color: var(--text); }
+        .tab.on { color: var(--purple); border-bottom-color: var(--purple); }
         .desk-banner {
           padding: 10px 16px; border-radius: 8px; font-size: 12px; line-height: 1.5;
           background: var(--loss-dim); border: 1px solid rgba(217, 45, 63, 0.3);

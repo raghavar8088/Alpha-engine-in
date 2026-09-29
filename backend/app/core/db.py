@@ -137,6 +137,12 @@ stock_book_trades_collection = db["stock_book_trades"]
 stock_book_scores_collection = db["stock_book_scores"]
 stock_book_state_collection = db["stock_book_state"]
 stock_book_equity_collection = db["stock_book_equity"]
+# Selling Paper Books ("Paper Trading 01", ...): picked rosters from the NIFTY option-
+# SELLING desk on one shared account. Read the prelive_selling_* collections, never write
+# them - the selling daemon owns those. One row per decision: OPEN, CLOSED or DECLINED.
+selling_book_positions_collection = db["selling_book_positions"]
+selling_book_state_collection = db["selling_book_state"]
+selling_book_equity_collection = db["selling_book_equity"]
 # Zero Hero Trades — expiry-day deep-OTM INDEX option buying, 50 strategies on Rs1L each.
 # Signals are stored separately from positions because most zero-hero signals are NOT
 # taken (too expensive, unquotable), and knowing why is the point of the history.
