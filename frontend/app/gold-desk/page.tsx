@@ -144,7 +144,7 @@ export default function GoldDeskPage() {
         title="Gold Desk"
         subtitle={
           <>
-            The whole pattern library — <strong>{sum?.strategy_count ?? 312} strategies</strong>, long and
+            The whole pattern library — <strong>{sum?.strategy_count ?? 0} strategies</strong>, long and
             short — traded on gold, on two venues that price the same metal differently:{" "}
             <strong>MCX futures</strong> in rupees per 10 grams during Indian hours, and{" "}
             <strong>Delta gold perpetuals</strong> in dollars per ounce around the clock. One shared book per

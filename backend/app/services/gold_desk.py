@@ -6,9 +6,11 @@ things about it are not.
 
 WHAT CAME ACROSS
 ----------------
-The whole pattern catalogue (39 templates x 8 timeframes = 312 strategies, long and
-short) evaluated on gold, with every fill charged the venue's real costs, out of ONE
-shared balance per venue rather than one per strategy. A win here funds the next position,
+The whole shared pattern catalogue — every template this app builds, on every timeframe,
+long and short — evaluated on gold, with every fill charged the venue's real costs, out of
+ONE shared balance per venue rather than one per strategy. The count is read from the
+catalogue rather than written down here: it was 312 when the Commodity module shipped and
+is 353 today, and a number in a docstring would still say 312. A win here funds the next position,
 exactly as a real account does — which is the property that makes a book's record mean
 something a per-strategy leaderboard's does not.
 
