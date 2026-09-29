@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import GlassPanel from "./GlassPanel";
 import ErrorBanner from "./ErrorBanner";
+import DeskHistory from "./DeskHistory";
 import {
+  LivePaperBook,
   LivePaperDaily,
   LivePaperPosition,
   LivePaperScore,
@@ -21,7 +23,13 @@ const inr = (v: number | null | undefined) =>
 const signed = (v: number | null | undefined) =>
   v === null || v === undefined ? "—" : `${v >= 0 ? "+" : ""}₹${v.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 
-export default function LivePaperBuying() {
+const pc = (v: number | null | undefined) =>
+  v === null || v === undefined ? "—" : `${v >= 0 ? "+" : ""}${v.toFixed(2)}%`;
+const tone = (v: number | null | undefined) => (!v ? "" : v > 0 ? "gain" : "loss");
+
+/** One book of the Live Paper desk. `book` picks which — both trade the same roster on
+ *  the same signals; they differ only in how much capital they have to act on them. */
+export default function LivePaperBuying({ book = "50k" }: { book?: LivePaperBook }) {
   const [summary, setSummary] = useState<LivePaperSummary | null>(null);
   const [board, setBoard] = useState<LivePaperScore[]>([]);
   const [open, setOpen] = useState<LivePaperPosition[]>([]);
@@ -32,11 +40,11 @@ export default function LivePaperBuying() {
   const load = useCallback(async () => {
     try {
       const [s, lb, o, c, d] = await Promise.all([
-        fetchLivePaperSummary(),
-        fetchLivePaperLeaderboard(),
-        fetchLivePaperPositions("OPEN"),
-        fetchLivePaperPositions("CLOSED"),
-        fetchLivePaperDaily(),
+        fetchLivePaperSummary(book),
+        fetchLivePaperLeaderboard(book),
+        fetchLivePaperPositions("OPEN", book),
+        fetchLivePaperPositions("CLOSED", book),
+        fetchLivePaperDaily(60, book),
       ]);
       setSummary(s);
       setBoard(lb);
@@ -47,7 +55,7 @@ export default function LivePaperBuying() {
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load Live Paper Buying");
     }
-  }, []);
+  }, [book]);
 
   useEffect(() => {
     load();
@@ -60,14 +68,37 @@ export default function LivePaperBuying() {
       {error && <ErrorBanner message={error} />}
 
       <div className="intro">
-        <b>Live Paper Buying · {inr(summary?.total_capital)}.</b> The five strategies that topped the
-        tournament leaderboard, traded on a realistic {inr(summary?.total_capital)} book
-        ({inr(summary?.per_strategy)} each) instead of the tournament&apos;s ₹10 lakh accounts — so the
-        P&amp;L is what a real {inr(summary?.total_capital)} account would have done. Signals come from{" "}
-        <b>{summary?.underlying ?? "NIFTY"} {summary?.timeframe ?? "15m"}</b> bars on live Angel One data;
+        <b>{summary?.label ?? "Live Paper Buying"}.</b> The top {summary?.strategy_count ?? 21} strategies of
+        the Pre-Live tournament, traded on one realistic {inr(summary?.total_capital)} book instead of the
+        tournament&apos;s ₹10 lakh accounts. The book is a <b>shared pool</b>: every signal buys{" "}
+        <b>one lot</b> if there is free cash for it, and when several fire at once the tournament&apos;s rank
+        decides who is funded first. Each strategy runs on its own timeframe (5m or 15m) of{" "}
+        <b>{summary?.underlying ?? "NIFTY"}</b> bars on live Angel One data, deciding once per completed bar;
         entries buy the ATM CE/PE at its real premium, stop at −35%, target at +60%, no new entries after{" "}
-        {summary?.entry_cutoff ?? "15:00"} and everything squares off at {summary?.squareoff ?? "15:15"}.
-        Paper — no real orders.
+        {summary?.entry_cutoff ?? "15:00"}, square-off at {summary?.squareoff ?? "15:15"}. Paper — no real
+        orders{summary && !summary.costs_charged ? ", and no broker costs are charged, so real P&L would be lower" : ""}.
+      </div>
+
+      {/* realised / unrealised / total on the SAME book capital, so the three % add up */}
+      <div className="pnl">
+        <div className="pcard">
+          <div className="plab">Realised P&amp;L</div>
+          <div className={`pval ${tone(summary?.realized_pnl)}`}>{signed(summary?.realized_pnl)}</div>
+          <div className={`ppct ${tone(summary?.realized_pnl)}`}>{pc(summary?.realized_pct)}</div>
+          <div className="psub">{summary?.closed_positions ?? 0} closed · {summary?.wins ?? 0} won</div>
+        </div>
+        <div className="pcard">
+          <div className="plab">Unrealised P&amp;L</div>
+          <div className={`pval ${tone(summary?.unrealized_pnl)}`}>{signed(summary?.unrealized_pnl)}</div>
+          <div className={`ppct ${tone(summary?.unrealized_pnl)}`}>{pc(summary?.unrealized_pct)}</div>
+          <div className="psub">{summary?.open_positions ?? 0} open · live premiums</div>
+        </div>
+        <div className="pcard total">
+          <div className="plab">Total P&amp;L</div>
+          <div className={`pval ${tone(summary?.total_pnl)}`}>{signed(summary?.total_pnl)}</div>
+          <div className={`ppct ${tone(summary?.total_pnl)}`}>{pc(summary?.total_pct)}</div>
+          <div className="psub">realised + unrealised, on {inr(summary?.total_capital)}</div>
+        </div>
       </div>
 
       <div className="tiles">
@@ -90,39 +121,45 @@ export default function LivePaperBuying() {
           sub={`${summary?.closed_positions ?? 0} closed · ${summary?.wins ?? 0} won`}
         />
         <Tile label="Open" value={String(summary?.open_positions ?? 0)} sub={`${signed(summary?.unrealized_pnl)} unrealised`} />
-        <Tile label="Deployed" value={inr(summary?.deployed_capital)} sub={`${inr(summary?.per_strategy)} per strategy`} />
-        <Tile label="Strategies" value={String(summary?.strategy_count ?? 0)} sub="ANTI mirrors of the winners" />
+        <Tile label="Deployed" value={inr(summary?.deployed_capital)} sub={`${inr(summary?.free_cash)} free in the pool`} />
+        <Tile label="Strategies" value={String(summary?.strategy_count ?? 0)} sub="ANTI mirrors, tournament ranks 1–21" />
       </div>
 
       {summary?.last_notes?.length ? <div className="note">{summary.last_notes.join(" · ")}</div> : null}
 
-      <GlassPanel title="The five strategies">
+      <GlassPanel title={`The ${board.length} strategies — their record in THIS book`}>
         <div className="table-scroll">
           <table className="data-table">
             <thead>
               <tr>
+                <th title="Pre-Live tournament rank — also the capital priority">Rank</th>
                 <th style={{ textAlign: "left" }}>Strategy</th>
+                <th>TF</th>
                 <th>Trades</th>
                 <th>Win %</th>
                 <th>PF</th>
                 <th>Expectancy</th>
+                <th>Open</th>
+                <th>Unrealised</th>
                 <th>Net P&amp;L</th>
-                <th>Account</th>
               </tr>
             </thead>
             <tbody>
               {board.map((r) => (
                 <tr key={r.strategy_id}>
+                  <td>{r.rank}</td>
                   <td style={{ textAlign: "left" }}>
                     <span className="anti">ANTI</span>
                     {r.name.replace(/^ANTI /, "")}
                   </td>
+                  <td>{r.timeframe}</td>
                   <td>{r.trades}</td>
                   <td>{r.trades ? `${(r.win_rate * 100).toFixed(0)}%` : "—"}</td>
                   <td>{r.profit_factor == null ? "—" : r.profit_factor.toFixed(2)}</td>
                   <td className={r.expectancy >= 0 ? "gain" : "loss"}>{r.trades ? signed(r.expectancy) : "—"}</td>
+                  <td>{r.open_positions || "—"}</td>
+                  <td className={tone(r.unrealized_pnl)}>{r.open_positions ? signed(r.unrealized_pnl) : "—"}</td>
                   <td className={r.net_pnl >= 0 ? "gain" : "loss"}>{signed(r.net_pnl)}</td>
-                  <td>{inr(r.allocated)}</td>
                 </tr>
               ))}
             </tbody>
@@ -169,8 +206,17 @@ export default function LivePaperBuying() {
         </GlassPanel>
       </div>
 
+      <DeskHistory deskKey="live-paper" scope={book} title={`History — ${summary?.label ?? "Live Paper Buying"}`} />
+
       <style jsx>{`
         .lp { display: flex; flex-direction: column; gap: 16px; }
+        .pnl { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+        .pcard { border: 1px solid var(--panel-border); border-radius: 12px; padding: 13px 15px; background: var(--panel); }
+        .pcard.total { background: var(--canvas-soft); border-color: rgba(125, 52, 220, 0.28); }
+        .plab { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); }
+        .pval { font-size: 22px; font-weight: 750; font-variant-numeric: tabular-nums; margin-top: 4px; }
+        .ppct { font-size: 12.5px; font-weight: 650; font-variant-numeric: tabular-nums; margin-top: 1px; }
+        .psub { margin-top: 4px; font-size: 10.5px; color: var(--text-faint); line-height: 1.4; }
         .intro { padding: 12px 16px; border-radius: 10px; background: var(--canvas-soft); border: 1px solid var(--panel-border); font-size: 12.5px; line-height: 1.65; color: var(--text-muted); }
         .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
         .note { padding: 10px 14px; border-radius: 9px; background: var(--canvas-soft); border: 1px solid var(--panel-border); font-size: 12px; color: var(--text-muted); }

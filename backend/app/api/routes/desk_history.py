@@ -98,6 +98,19 @@ DESKS: dict[str, dict] = {
 
 # Desks that split into books/buckets take a `scope` and filter on their own key.
 SCOPED: dict[str, dict] = {
+    # Live Paper Buying's two books. `deployed` is `cost`: positions written before books
+    # existed never carried capital_deployed, and ROI-on-deployed for those days would
+    # otherwise read as zero rather than as what they actually put at risk.
+    "live-paper": {
+        "label": "Live Paper Buying",
+        "positions": lambda: D.live_paper_positions_collection,
+        "equity": lambda: D.live_paper_equity_collection,
+        "field": "book",
+        "default": "50k",
+        "deployed": "cost",
+        "capital": lambda s: __import__("app.services.live_paper_buying",
+                                        fromlist=["x"]).BOOKS.get(s, 50000.0),
+    },
     # The pattern shortlist's two paper books share their collections and are told apart by
     # `book`, exactly as the Live Intraday books are.
     "pattern-books": {
@@ -198,7 +211,8 @@ async def desk_history(
             f"hist:{desk}:{sc}",
             lambda: history(cfg["positions"](), float(cfg["capital"](sc)),
                             match={cfg["field"]: sc},
-                            equity=cfg["equity"](), equity_match={cfg["field"]: sc}),
+                            equity=cfg["equity"](), equity_match={cfg["field"]: sc},
+                            deployed_field=cfg.get("deployed", "capital_deployed")),
             fresh=fresh)
 
     cfg = DESKS.get(desk)

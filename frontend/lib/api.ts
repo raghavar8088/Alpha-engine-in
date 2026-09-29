@@ -2829,12 +2829,26 @@ export async function fetchZeroHeroDaily(limit = 60): Promise<ZeroHeroDaily[]> {
 }
 
 // ---- Live Paper Buying (the 5 Pre-Live winners on a Rs50,000 book) ----
+export type LivePaperBook = "50k" | "2L";
+
 export interface LivePaperSummary {
+  book: LivePaperBook;
+  books: LivePaperBook[];
+  label: string;
   mode: string;
   underlying: string;
   timeframe: string;
+  timeframes: string[];
   total_capital: number;
-  per_strategy: number;
+  /** null: the books are a shared pool, there is no per-strategy slice. */
+  per_strategy: number | null;
+  sizing: string;
+  free_cash: number;
+  total_pnl: number;
+  realized_pct: number;
+  unrealized_pct: number;
+  total_pct: number;
+  costs_charged: boolean;
   strategy_count: number;
   deployed_capital: number;
   realized_pnl: number;
@@ -2854,6 +2868,11 @@ export interface LivePaperScore {
   strategy_id: string;
   base_id: string;
   name: string;
+  /** Pre-Live tournament rank — also the capital priority when a book is short. */
+  rank: number;
+  timeframe: string;
+  open_positions: number;
+  unrealized_pnl: number;
   trades: number;
   wins: number;
   win_rate: number;
@@ -2893,18 +2912,21 @@ export interface LivePaperDaily {
   win_rate: number;
 }
 
-export async function fetchLivePaperSummary(): Promise<LivePaperSummary> {
-  return apiFetch("/api/live-paper/summary");
+export async function fetchLivePaperSummary(book: LivePaperBook = "50k"): Promise<LivePaperSummary> {
+  return apiFetch(`/api/live-paper/summary?book=${book}`);
 }
-export async function fetchLivePaperLeaderboard(): Promise<LivePaperScore[]> {
-  const r = await apiFetch("/api/live-paper/leaderboard");
+export async function fetchLivePaperLeaderboard(book: LivePaperBook = "50k"): Promise<LivePaperScore[]> {
+  const r = await apiFetch(`/api/live-paper/leaderboard?book=${book}`);
   return r.leaderboard ?? [];
 }
-export async function fetchLivePaperPositions(status = "OPEN"): Promise<{ positions: LivePaperPosition[]; summary: LivePaperSummary }> {
-  return apiFetch(`/api/live-paper/positions?status=${status}`);
+export async function fetchLivePaperPositions(
+  status = "OPEN",
+  book: LivePaperBook = "50k",
+): Promise<{ positions: LivePaperPosition[]; summary: LivePaperSummary }> {
+  return apiFetch(`/api/live-paper/positions?status=${status}&book=${book}`);
 }
-export async function fetchLivePaperDaily(limit = 60): Promise<LivePaperDaily[]> {
-  const r = await apiFetch(`/api/live-paper/daily?limit=${limit}`);
+export async function fetchLivePaperDaily(limit = 60, book: LivePaperBook = "50k"): Promise<LivePaperDaily[]> {
+  const r = await apiFetch(`/api/live-paper/daily?limit=${limit}&book=${book}`);
   return r.daily ?? [];
 }
 

@@ -28,7 +28,7 @@ export default function PreLivePage() {
   const [trades, setTrades] = useState<PreLiveTrade[]>([]);
   const [days, setDays] = useState<PreLiveDay[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<"tournament" | "livepaper">("tournament");
+  const [tab, setTab] = useState<"tournament" | "livepaper" | "livepaper2L">("tournament");
 
   const load = useCallback(async () => {
     try {
@@ -82,10 +82,14 @@ export default function PreLivePage() {
         <button className={tab === "livepaper" ? "dt active" : "dt"} onClick={() => setTab("livepaper")}>
           Live Paper Buying · ₹50k
         </button>
+        <button className={tab === "livepaper2L" ? "dt active" : "dt"} onClick={() => setTab("livepaper2L")}>
+          Live Paper Trade · ₹2 lakh
+        </button>
       </div>
 
-      {tab === "livepaper" ? (
-        <LivePaperBuying />
+      {tab === "livepaper" || tab === "livepaper2L" ? (
+        // key forces a fresh mount per book, so one book's rows never flash in the other
+        <LivePaperBuying key={tab} book={tab === "livepaper2L" ? "2L" : "50k"} />
       ) : (
       <>
       {error && <ErrorBanner message={error} />}
