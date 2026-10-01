@@ -15,6 +15,7 @@ touching a single strategy.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 from datetime import datetime, timedelta, timezone
@@ -629,34 +630,56 @@ async def _update_paper_score(sid: str) -> None:
 
 
 async def summary() -> dict:
-    deployed = realized = unrealized = costs = 0.0
-    async for p in sf_positions_collection.find({"status": "OPEN"},
-                                                {"capital_deployed": 1, "unrealized_pnl": 1}):
-        deployed += p.get("capital_deployed", 0.0)
-        unrealized += p.get("unrealized_pnl") or 0.0
-    async for p in sf_positions_collection.find({"status": {"$ne": "OPEN"}},
-                                                {"realized_pnl": 1, "costs": 1}):
-        realized += p.get("realized_pnl") or 0.0
-        costs += p.get("costs") or 0.0
+    # SUMMED IN MONGO, IN ONE PASS. This streamed every position document into Python to
+    # add four numbers — two full passes over the collection, the second of them on
+    # {"$ne": "OPEN"}, which cannot use the status index. The same fix as the commodity
+    # desks: one $group, one row back.
+    totals = {"deployed": 0.0, "unrealized": 0.0, "realized": 0.0, "costs": 0.0}
+    _open = {"$eq": ["$status", "OPEN"]}
+    async for g in sf_positions_collection.aggregate([
+        {"$group": {
+            "_id": None,
+            "deployed": {"$sum": {"$cond": [_open, {"$ifNull": ["$capital_deployed", 0.0]}, 0.0]}},
+            "unrealized": {"$sum": {"$cond": [_open, {"$ifNull": ["$unrealized_pnl", 0.0]}, 0.0]}},
+            "realized": {"$sum": {"$cond": [_open, 0.0, {"$ifNull": ["$realized_pnl", 0.0]}]}},
+            "costs": {"$sum": {"$cond": [_open, 0.0, {"$ifNull": ["$costs", 0.0]}]}},
+        }},
+    ]):
+        totals.update({k: g.get(k, totals[k]) for k in totals})
+    deployed, unrealized = totals["deployed"], totals["unrealized"]
+    realized, costs = totals["realized"], totals["costs"]
 
     grades: dict[str, int] = {}
-    async for d in sf_scores_collection.find({}, {"grade": 1}):
-        g = str(d.get("grade", 0))
-        grades[g] = grades.get(g, 0) + 1
-    backtested = await sf_backtests_collection.count_documents({})
+    async for g in sf_scores_collection.aggregate([
+        {"$group": {"_id": "$grade", "n": {"$sum": 1}}},
+    ]):
+        grades[str(g["_id"] if g["_id"] is not None else 0)] = g["n"]
+    # The collection's own document count rather than a scan. This is a headline number on
+    # a dashboard, not an accounting figure: `count_documents({})` walks 17,790 documents
+    # to produce it, while the metadata count is already there and can only differ after
+    # an unclean shutdown.
+    backtested = await sf_backtests_collection.estimated_document_count()
     state = await sf_state_collection.find_one({"_id": STATE_ID}) or {}
 
     # Per-market view: how many backtest rows each market has produced, and how many
     # symbols it can actually serve. Makes "this market has no data" visible instead of
     # looking like strategies that never fire.
-    markets: dict[str, dict] = {}
-    for name in ACTIVE_SOURCES:
-        if name not in BAR_SOURCES:
-            continue
+    # The per-market universes are independent queries, so they go together rather than
+    # one after another: serially this was the slowest half of the endpoint, and the
+    # database is perfectly happy to answer them at the same time.
+    _names = [n for n in ACTIVE_SOURCES if n in BAR_SOURCES]
+
+    async def _universe_of(name: str) -> dict:
         try:
-            uni = await BAR_SOURCES[name]["universe"]()
+            return await BAR_SOURCES[name]["universe"]()
         except Exception:  # noqa: BLE001
-            uni = {}
+            return {}
+
+    _unis = dict(zip(_names, await asyncio.gather(*(_universe_of(n) for n in _names))))
+
+    markets: dict[str, dict] = {}
+    for name in _names:
+        uni = _unis.get(name) or {}
         markets[name] = {
             "symbols": len(uni),
             "exchange": BAR_SOURCES[name]["exchange"],
