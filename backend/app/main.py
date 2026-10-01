@@ -302,6 +302,41 @@ async def startup_warm_and_index() -> None:
 
 
 @app.on_event("startup")
+async def start_memory_hygiene() -> None:
+    """Keep the heap from ratcheting, and stop paying for 40 idle threads.
+
+    The container thrashes at its 800 MB cap long before it runs out of real work — see
+    app/core/memory.py for the measurements. Two things happen here.
+
+    First, the thread pool. Starlette sizes its default worker pool at 40 threads and this
+    app is almost entirely async: the pool exists for the handful of sync calls that still
+    block. Each thread is a stack plus, under glibc, a claim on its own allocator arena —
+    which is the thing that ratchets. Eight is more than this app has ever needed at once,
+    and it is a ceiling rather than a reservation, so nothing is slower for having fewer.
+
+    Second, the trim timer, which hands freed pages back to the kernel instead of leaving
+    them on a free list the container is still being charged for."""
+    try:
+        import anyio.to_thread
+
+        limiter = anyio.to_thread.current_default_thread_limiter()
+        before = limiter.total_tokens
+        limiter.total_tokens = int(os.getenv("APP_THREAD_POOL", "8"))
+        logger.info("thread pool capped at %s (was %s)", limiter.total_tokens, before)
+    except Exception:  # noqa: BLE001
+        # A tuning knob must never be the reason the app does not boot.
+        logger.warning("could not cap the thread pool", exc_info=True)
+
+    from app.core.memory import TRIM_INTERVAL_S, trim, trim_loop
+
+    s = trim()
+    logger.info("malloc_trim %s — RSS %s MB, trimming every %ss",
+                "available" if s.get("available") else "NOT AVAILABLE (no-op)",
+                s.get("last_rss_mb"), TRIM_INTERVAL_S)
+    asyncio.create_task(trim_loop())
+
+
+@app.on_event("startup")
 async def ensure_indexes() -> None:
     """No ODM here, so indexes aren't declarative — ensure the Phase 5 ones each
     startup (idempotent; init-mongo.js also declares them for a fresh install)."""

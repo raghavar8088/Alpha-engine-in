@@ -104,6 +104,12 @@ def invalidate_module(module: str) -> int:
     dead = [k for k in _entries if k.startswith(prefix) or k.startswith(exact)]
     for k in dead:
         _entries.pop(k, None)
+        # The lock goes with the entry. It did not, and that was a slow leak: eviction is
+        # the only thing that ever dropped a lock, eviction only runs when the TABLE is
+        # over its cap, and every write shrinks the table. So on a busy desk — which
+        # writes constantly — the entries were invalidated away and their locks stayed
+        # for the life of the process, one per distinct URL ever requested.
+        _locks.pop(k, None)
     _invalidations += len(dead)
     return len(dead)
 
@@ -111,11 +117,19 @@ def invalidate_module(module: str) -> int:
 def _evict() -> None:
     """Drop the oldest half when the table grows. Entries are small, but a process that
     runs for weeks should not accumulate every query string ever asked for."""
-    if len(_entries) <= MAX_ENTRIES:
-        return
-    for k, _ in sorted(_entries.items(), key=lambda kv: kv[1][0])[: len(_entries) // 2]:
-        _entries.pop(k, None)
-        _locks.pop(k, None)
+    if len(_entries) > MAX_ENTRIES:
+        for k, _ in sorted(_entries.items(), key=lambda kv: kv[1][0])[: len(_entries) // 2]:
+            _entries.pop(k, None)
+            _locks.pop(k, None)
+    # Locks are capped INDEPENDENTLY, because they outlive the entries they guard: a lock
+    # is created on every miss, including for responses that are never cached at all
+    # (errors, and anything a module invalidates a moment later). Any lock with nothing
+    # waiting on it and no entry behind it is garbage, so the orphans go first.
+    if len(_locks) > MAX_ENTRIES:
+        for k in [k for k in _locks if k not in _entries]:
+            lk = _locks.get(k)
+            if lk is not None and not lk.locked():
+                _locks.pop(k, None)
 
 
 class APICacheMiddleware(BaseHTTPMiddleware):

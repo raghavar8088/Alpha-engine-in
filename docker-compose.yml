@@ -44,6 +44,24 @@ services:
       PORT: 8080
       REDIS_URL: redis://redis:6379/0
       APP_SHARED_SECRET: ${APP_SHARED_SECRET:-}
+      # Bound the glibc allocator's per-thread arenas.
+      #
+      # This process runs 44 threads (Starlette's 40-thread pool, plus Mongo's and
+      # uvicorn's) and allocates in bursts: one commodity cycle builds tens of thousands
+      # of Bar objects and frees them all two minutes later. glibc gives each thread its
+      # own arena, caps the count at 8 x cores, and never returns a free() in the middle
+      # of an arena to the kernel — so RSS tracks the sum of every arena's high-water
+      # mark, for ever. Measured: 1.9 GB of VmData holding ~1.4 GB of live heap, against
+      # an 800 MB cap, with 35 million swap refaults and /health taking 60 seconds.
+      #
+      # Two arenas is the standard container setting. It costs a little lock contention
+      # between threads and stops the ratchet. It MUST be set here rather than in Python:
+      # the allocator reads it before the interpreter's first allocation.
+      MALLOC_ARENA_MAX: "2"
+      # Return a freed block to the kernel once it exceeds 128 KB rather than keeping it
+      # on the free list. The desks free in large chunks, which is exactly the shape this
+      # helps; app/core/memory.py trims the rest on a timer.
+      MALLOC_TRIM_THRESHOLD_: "131072"
     depends_on:
       - redis
       - minio

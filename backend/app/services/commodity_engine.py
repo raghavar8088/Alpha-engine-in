@@ -489,33 +489,46 @@ async def manage_cycle() -> int:
 
 
 async def summary() -> dict:
-    deployed = realized = unrealized = costs = 0.0
-    # SUMMED IN MONGO. The closed leg used to stream all 29,000 documents just to add two
-    # numbers, which is what kept this endpoint at 20 seconds even after the collection
-    # was indexed — an index makes a scan findable, not cheap. $group returns one row.
+    # SUMMED AND COUNTED IN MONGO, IN ONE PASS.
+    #
+    # The closed leg used to stream all 29,000 documents just to add two numbers, which is
+    # what kept this endpoint at 20 seconds even after the collection was indexed — an
+    # index makes a scan findable, not cheap. Splitting that into two $group stages fixed
+    # the streaming but still walked the collection twice, and the two count_documents
+    # below walked it twice more; `{"$ne": "OPEN"}` cannot use the status index, so each
+    # count was a full scan to produce one integer. Four passes, one $group.
+    totals = {"deployed": 0.0, "unrealized": 0.0, "open_costs": 0.0,
+              "realized": 0.0, "closed_costs": 0.0, "open_n": 0, "closed_n": 0}
+    _open = {"$eq": ["$status", "OPEN"]}
     async for g in commodity_positions_collection.aggregate([
-        {"$match": {"status": "OPEN"}},
-        {"$group": {"_id": None,
-                    "deployed": {"$sum": {"$ifNull": ["$capital_deployed", 0.0]}},
-                    "unrealized": {"$sum": {"$ifNull": ["$unrealized_pnl", 0.0]}},
-                    "costs": {"$sum": {"$ifNull": ["$entry_costs", 0.0]}}}},
+        {"$group": {
+            "_id": None,
+            "deployed": {"$sum": {"$cond": [_open, {"$ifNull": ["$capital_deployed", 0.0]}, 0.0]}},
+            "unrealized": {"$sum": {"$cond": [_open, {"$ifNull": ["$unrealized_pnl", 0.0]}, 0.0]}},
+            "open_costs": {"$sum": {"$cond": [_open, {"$ifNull": ["$entry_costs", 0.0]}, 0.0]}},
+            "realized": {"$sum": {"$cond": [_open, 0.0, {"$ifNull": ["$realized_pnl", 0.0]}]}},
+            "closed_costs": {"$sum": {"$cond": [_open, 0.0, {"$ifNull": ["$costs", 0.0]}]}},
+            "open_n": {"$sum": {"$cond": [_open, 1, 0]}},
+            "closed_n": {"$sum": {"$cond": [_open, 0, 1]}},
+        }},
     ]):
-        deployed, unrealized = g.get("deployed", 0.0), g.get("unrealized", 0.0)
-        costs += g.get("costs", 0.0)
-    async for g in commodity_positions_collection.aggregate([
-        {"$match": {"status": {"$ne": "OPEN"}}},
-        {"$group": {"_id": None,
-                    "realized": {"$sum": {"$ifNull": ["$realized_pnl", 0.0]}},
-                    "costs": {"$sum": {"$ifNull": ["$costs", 0.0]}}}},
-    ]):
-        realized = g.get("realized", 0.0)
-        costs += g.get("costs", 0.0)
+        totals.update({k: g.get(k, totals[k]) for k in totals})
+    deployed = totals["deployed"]
+    unrealized = totals["unrealized"]
+    realized = totals["realized"]
+    costs = totals["open_costs"] + totals["closed_costs"]
+    open_n, closed_n = totals["open_n"], totals["closed_n"]
 
+    # One row per verdict instead of one document per strategy.
     verdicts = {"READY": 0, "REJECTED": 0, "PENDING": 0}
-    async for s in commodity_scores_collection.find({}, {"verdict": 1}):
-        v = s.get("verdict", "PENDING")
-        verdicts[v] = verdicts.get(v, 0) + 1
-    verdicts["PENDING"] += len(COMMODITY_CATALOG) - sum(verdicts.values())
+    scored = 0
+    async for g in commodity_scores_collection.aggregate([
+        {"$group": {"_id": "$verdict", "n": {"$sum": 1}}},
+    ]):
+        v = g["_id"] or "PENDING"
+        verdicts[v] = verdicts.get(v, 0) + g["n"]
+        scored += g["n"]
+    verdicts["PENDING"] += len(COMMODITY_CATALOG) - scored
 
     return {
         "initial_capital": INITIAL_CAPITAL,
@@ -527,8 +540,8 @@ async def summary() -> dict:
         "realized_pnl": round(realized, 2), "unrealized_pnl": round(unrealized, 2),
         "total_costs": round(costs, 2),
         "equity": round(INITIAL_CAPITAL + realized + unrealized, 2),
-        "open_positions": await commodity_positions_collection.count_documents({"status": "OPEN"}),
-        "closed_positions": await commodity_positions_collection.count_documents({"status": {"$ne": "OPEN"}}),
+        "open_positions": open_n,
+        "closed_positions": closed_n,
         "ready_count": verdicts.get("READY", 0), "rejected_count": verdicts.get("REJECTED", 0),
         "pending_count": verdicts.get("PENDING", 0),
         "paused": PAUSE_NEW_ENTRIES, "mode": "paper", "costs_charged": True,

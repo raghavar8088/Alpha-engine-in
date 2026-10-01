@@ -1028,23 +1028,41 @@ async def summary() -> dict:
     flags = await script_flags()
     active = [s for s in universe if flags.get(s, True)]
 
-    realized = unrealized = deployed = costs = 0.0
-    async for p in commodity_prelive_positions_collection.find(
-        {"status": "OPEN"}, {"margin_used": 1, "unrealized_pnl": 1, "entry_costs": 1}
-    ):
-        deployed += p.get("margin_used") or 0.0
-        unrealized += p.get("unrealized_pnl") or 0.0
-        costs += p.get("entry_costs") or 0.0
-    async for p in commodity_prelive_positions_collection.find(
-        {"status": {"$ne": "OPEN"}}, {"realized_pnl": 1, "costs": 1}
-    ):
-        realized += p.get("realized_pnl") or 0.0
-        costs += p.get("costs") or 0.0
+    # SUMMED AND COUNTED IN MONGO, IN ONE PASS.
+    #
+    # This streamed every position document into Python to add five numbers, then asked
+    # for two more counts — the same mistake `commodity_engine.summary` was already fixed
+    # for, left behind here. Four passes over the collection became one $group, and the
+    # two `count_documents({"status": {"$ne": "OPEN"}})` calls went with them: $ne cannot
+    # use the status index, so each one was a full scan to produce a single integer.
+    totals = {"deployed": 0.0, "unrealized": 0.0, "open_costs": 0.0,
+              "realized": 0.0, "closed_costs": 0.0, "open_n": 0, "closed_n": 0}
+    _open = {"$eq": ["$status", "OPEN"]}
+    async for g in commodity_prelive_positions_collection.aggregate([
+        {"$group": {
+            "_id": None,
+            "deployed": {"$sum": {"$cond": [_open, {"$ifNull": ["$margin_used", 0.0]}, 0.0]}},
+            "unrealized": {"$sum": {"$cond": [_open, {"$ifNull": ["$unrealized_pnl", 0.0]}, 0.0]}},
+            "open_costs": {"$sum": {"$cond": [_open, {"$ifNull": ["$entry_costs", 0.0]}, 0.0]}},
+            "realized": {"$sum": {"$cond": [_open, 0.0, {"$ifNull": ["$realized_pnl", 0.0]}]}},
+            "closed_costs": {"$sum": {"$cond": [_open, 0.0, {"$ifNull": ["$costs", 0.0]}]}},
+            "open_n": {"$sum": {"$cond": [_open, 1, 0]}},
+            "closed_n": {"$sum": {"$cond": [_open, 0, 1]}},
+        }},
+    ]):
+        totals.update({k: g.get(k, totals[k]) for k in totals})
+    deployed = totals["deployed"]
+    unrealized = totals["unrealized"]
+    realized = totals["realized"]
+    costs = totals["open_costs"] + totals["closed_costs"]
+    open_n, closed_n = totals["open_n"], totals["closed_n"]
 
+    # Counted in Mongo too: one row per verdict rather than one document per strategy.
     verdicts = {"READY": 0, "REJECTED": 0, "PENDING": 0}
-    async for s in commodity_prelive_scores_collection.find({}, {"verdict": 1}):
-        v = s.get("verdict", "PENDING")
-        verdicts[v] = verdicts.get(v, 0) + 1
+    async for g in commodity_prelive_scores_collection.aggregate([
+        {"$group": {"_id": "$verdict", "n": {"$sum": 1}}},
+    ]):
+        verdicts[g["_id"] or "PENDING"] = verdicts.get(g["_id"] or "PENDING", 0) + g["n"]
 
     admit = await admissions()
     # The desk's stake is every contract's lakh, switched on or not: a contract that is off
@@ -1062,8 +1080,8 @@ async def summary() -> dict:
         "margin_deployed": round(deployed, 2),
         "available_margin": round(base + realized - deployed, 2),
         "total_costs": round(costs, 2),
-        "open_positions": await commodity_prelive_positions_collection.count_documents({"status": "OPEN"}),
-        "closed_positions": await commodity_prelive_positions_collection.count_documents({"status": {"$ne": "OPEN"}}),
+        "open_positions": open_n,
+        "closed_positions": closed_n,
         "admitted_total": admit["total"], "admitted_by_script": admit["counts"],
         "admission_counts": await admission_counts_both(),
         "ready_count": verdicts["READY"], "rejected_count": verdicts["REJECTED"],
