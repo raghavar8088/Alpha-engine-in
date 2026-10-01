@@ -240,17 +240,95 @@ async def _scored_daily_symbols(force: bool = False):
     return cached or []
 
 
+# ── who is allowed into the screen at all ────────────────────────────────────────
+# Every intraday desk trades from this list, so a name that cannot be traded at size, or
+# whose data stopped updating, must not be in it however good its chart looks.
+#   * Rs 10 cr of average daily turnover over 20 sessions. A Rs 5-6 lakh paper position is
+#     then ~0.5% of a day's volume; below it the fills these desks assume are fiction.
+#   * The latest daily bar no older than SCORED_MAX_STALE_DAYS, and at least
+#     SCORED_MIN_SESSIONS sessions in the last 35 days. Measured 2026-10-02: 205 of 866
+#     symbols with recent bars had fewer than 15 sessions — a patchy series scores as a
+#     trend that does not exist.
+SCORED_MIN_TURNOVER = float(os.getenv("SCORED_MIN_TURNOVER_CR", "10")) * 1e7
+SCORED_MAX_STALE_DAYS = int(os.getenv("SCORED_MAX_STALE_DAYS", "7"))
+SCORED_MIN_SESSIONS = int(os.getenv("SCORED_MIN_SESSIONS", "15"))
+
+
+async def _eligible_symbols() -> tuple[list[str] | None, dict, dict[str, float]]:
+    """Liquid, fresh symbols, decided inside Atlas from ~35 days of daily bars.
+
+    Done BEFORE the 14-month load, so the heavy part of the scan only ever touches names
+    that could be traded. Returns (None, info) if the aggregation fails, and the caller
+    falls back to scanning everything — a failed pre-filter must never empty the screen.
+    """
+    from app.core.db import bars_collection
+
+    now = datetime.now(timezone.utc)
+    since = now - timedelta(days=35)
+    pipe = [
+        {"$match": {"timeframe": "1d", "ts": {"$gte": since}}},
+        {"$sort": {"ts": 1}},
+        {"$group": {"_id": "$symbol",
+                    "tv": {"$push": {"$multiply": ["$close", "$volume"]}},
+                    "last": {"$last": "$ts"}, "n": {"$sum": 1}}},
+        {"$project": {"last": 1, "n": 1, "avg": {"$avg": {"$slice": ["$tv", -20]}}}},
+    ]
+    try:
+        rows = [r async for r in bars_collection.aggregate(pipe, allowDiskUse=True)]
+    except Exception:  # noqa: BLE001
+        logger.exception("daily screen pre-filter failed — scanning every symbol instead")
+        return None, {"prefilter": "failed"}, {}
+
+    stale_cut = now - timedelta(days=SCORED_MAX_STALE_DAYS)
+    keep, illiquid, stale, thin = [], 0, 0, 0
+    turnover: dict[str, float] = {}
+    for r in rows:
+        sym = r["_id"]
+        if not sym or sym in INDICES:
+            continue
+        last = r.get("last")
+        if isinstance(last, datetime) and last.tzinfo is None:
+            last = last.replace(tzinfo=timezone.utc)
+        if not isinstance(last, datetime) or last < stale_cut:
+            stale += 1
+        elif (r.get("n") or 0) < SCORED_MIN_SESSIONS:
+            thin += 1
+        elif (r.get("avg") or 0.0) < SCORED_MIN_TURNOVER:
+            illiquid += 1
+        else:
+            keep.append(sym)
+            turnover[sym] = float(r.get("avg") or 0.0)
+    keep.sort()
+    return keep, {"considered": len(rows), "eligible": len(keep), "illiquid": illiquid,
+                  "stale": stale, "thin": thin}, turnover
+
+
 async def _scan_daily_symbols() -> list[tuple[str, float, list[str], float, list[Bar]]]:
-    """The uncached scan. The universe is exactly what has been backfilled — the module
-    never invents data for symbols it cannot see."""
+    """The uncached scan, RANKED BY SCORE, best first.
+
+    Every consumer takes `[:N]` from this and means "the N best-scored names". Until
+    2026-10-02 it was returned in alphabetical order (the symbols are loaded A-Z in
+    chunks and nothing re-sorted them), so five desks — the tournament, the pattern
+    desk, Live Intraday, Momentum and the real-money Live Trading desk — traded the first
+    N symbols of the alphabet: 20MICRONS, 360ONE, 3BBLACKBIO... while RELIANCE, TCS and
+    INFY were never scanned at all. The sort at the end of this function is the fix;
+    keep it the last thing this function does.
+
+    The universe is exactly what has been backfilled AND passes `_eligible_symbols` — the
+    module never invents data for symbols it cannot see, and never ranks one it cannot
+    trade."""
     from app.core.db import bars_collection
 
     started = time.monotonic()
     # 14 months: the longest lookback in `technical_score` is a 200-day EMA, and every
     # extra month is ~500 more documents per symbol crossing the wire for nothing.
     cutoff = datetime.now(timezone.utc) - timedelta(days=int(os.getenv("SCORED_DAYS", "425")))
-    symbols = [s for s in await bars_collection.distinct("symbol", {"timeframe": "1d"})
-               if s not in INDICES]
+    eligible, info, turnover = await _eligible_symbols()
+    if eligible is None:
+        symbols = [s for s in await bars_collection.distinct("symbol", {"timeframe": "1d"})
+                   if s not in INDICES]
+    else:
+        symbols = eligible
     symbols.sort()
 
     out: list[tuple[str, float, list[str], float, list[Bar]]] = []
@@ -277,9 +355,17 @@ async def _scan_daily_symbols() -> list[tuple[str, float, list[str], float, list
             score, reasons, atr14 = scored
             out.append((sym, score, reasons, atr14, bars))
 
-    logger.info("daily screen rebuilt: %s of %s symbols scored in %.1fs (%s chunks)",
+    # Best first. `technical_score` moves in steps of 0.1, so ties are the norm (measured:
+    # dozens of names sit at exactly 1.0). Breaking them alphabetically would quietly bring
+    # back the very bias this sort removes, so ties go to the MORE LIQUID name, then the
+    # symbol for a stable order — a desk taking `[:150]` must not see its universe
+    # reshuffle between rebuilds because two scores were equal.
+    out.sort(key=lambda row: (-row[1], -turnover.get(row[0], _avg_turnover(row[4])), row[0]))
+    logger.info("daily screen rebuilt: %s of %s symbols scored in %.1fs (%s chunks) — "
+                "pre-filter %s; top 5 by score: %s",
                 len(out), len(symbols), time.monotonic() - started,
-                (len(symbols) + CHUNK - 1) // CHUNK)
+                (len(symbols) + CHUNK - 1) // CHUNK, info,
+                [(s, round(sc, 3)) for s, sc, *_ in out[:5]])
     return out
 
 
