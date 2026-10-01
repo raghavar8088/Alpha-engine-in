@@ -13,6 +13,7 @@ from fastapi.responses import JSONResponse
 from app.api.deps import get_current_user
 from app.api.routes import (
     ath_trading,
+    diagnostics,
     gold_desk,
     natgas_book,
     fundamentals,
@@ -853,6 +854,7 @@ app.include_router(telegram_signals.router)
 app.include_router(fundamentals.router)
 app.include_router(natgas_book.router)
 app.include_router(gold_desk.router)
+app.include_router(diagnostics.router)
 
 if settings.enable_live_trading:
     app.include_router(live.router)
