@@ -44,6 +44,7 @@ from app.core.db import (
 )
 from app.services.angel_client import AngelAPIError, angel_client
 from app.services.angel_fees import product_for, round_trip
+from app.services import intraday_session as session
 from app.services.call_engine import IST, _scored_daily_symbols
 from app.services.nifty_scalp_strategies import (
     TEMPLATES as _BASE_TEMPLATES, Series, from_rows, resample)
@@ -62,8 +63,10 @@ PER_STRATEGY_CAPITAL = float(os.getenv("PAT_PER_STRATEGY_CAPITAL", "1000000"))  
 UNIVERSE_SIZE = int(os.getenv("PAT_UNIVERSE", "25"))
 CANDLE_PACE = float(os.getenv("PAT_CANDLE_PACE", "1.0"))
 ENABLED = os.getenv("PAT_ENABLED", "1").lower() not in ("0", "false", "")
-SQUAREOFF = os.getenv("PAT_SQUAREOFF", "15:15")
-ENTRY_CUTOFF = os.getenv("PAT_ENTRY_CUTOFF", "15:00")
+# The square-off is per SYMBOL now (see `intraday_session`): 15:05 for NSE closing-auction
+# stocks, 15:12 for the rest. SQUAREOFF is kept only for anything that still prints it.
+SQUAREOFF = session.NONCAS_SQUAREOFF_HHMM
+ENTRY_CUTOFF = os.getenv("PAT_ENTRY_CUTOFF", session.ENTRY_CUTOFF_HHMM)
 SWING_MAX_DAYS = int(os.getenv("PAT_SWING_MAX_DAYS", "5"))
 MAX_FETCH_PER_CYCLE = int(os.getenv("PAT_MAX_FETCH", "40"))
 
@@ -292,12 +295,40 @@ async def _quote(symbols: list[str]) -> dict[str, float]:
     return out
 
 
+# Serialises manage between the shared loop and the independent close-out job.
+_manage_lock = asyncio.Lock()
+
+
+def _bars_held(p: dict) -> int:
+    """Bars of the position's OWN timeframe since entry, from the clock.
+
+    It used to be `bars_held + 1` on every manage call. The loop calls every 180 s, so the
+    count measured how often the loop ran, not how long the trade had lived: a 1-minute
+    scalp with a 15-bar limit was held 45 minutes, a 5-minute one with 12 bars was cut at
+    36 minutes instead of 60, and calling manage more often would have cut both sooner."""
+    tf = TF_BY_KEY.get(p.get("timeframe") or "")
+    opened = p.get("opened_at")
+    if tf is None or opened is None:
+        return (p.get("bars_held") or 0) + 1
+    if opened.tzinfo is None:
+        opened = opened.replace(tzinfo=timezone.utc)
+    secs = (datetime.now(timezone.utc) - opened).total_seconds()
+    return max(0, int(secs // max(tf.ttl, 1)))
+
+
 async def manage() -> int:
+    """Idempotent: safe to call as often as the close-out job likes."""
+    async with _manage_lock:
+        await session.ensure_cas()
+        return await _manage()
+
+
+async def _manage() -> int:
     positions = [p async for p in pattern_positions_collection.find({"status": "OPEN"})]
     if not positions:
         return 0
     prices = await _quote(sorted({p["symbol"] for p in positions}))
-    eod = _hhmm() >= SQUAREOFF
+    now_ist = datetime.now(IST)
     today = _today()
     closed = 0
     touched: set[str] = set()
@@ -307,7 +338,8 @@ async def manage() -> int:
             continue
         sign = 1 if p["side"] == "BUY" else -1
         gross = round(sign * (ltp - p["entry_price"]) * p["qty"], 2)
-        bars = (p.get("bars_held") or 0) + 1
+        bars = _bars_held(p)
+        eod = session.squareoff_due(p["symbol"], now_ist)
         days = (datetime.fromisoformat(today).date()
                 - datetime.fromisoformat(p["opened_on"]).date()).days
         hit_t = ltp >= p["target"] if sign > 0 else ltp <= p["target"]

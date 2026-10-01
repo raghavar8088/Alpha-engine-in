@@ -40,6 +40,7 @@ What is NOT shared is the part that matters: sizing, cash, fees and P&L are comp
 book, against that book's own capital.
 """
 
+import asyncio
 import logging
 import os
 from datetime import datetime, timezone
@@ -330,6 +331,44 @@ async def _update_scores(pairs: set) -> None:
 # ── cycle ────────────────────────────────────────────────────────────────────────
 
 
+# Serialises the mirror's closes between the shared loop and the close-out job, which must
+# never both close the same mirror position.
+_sync_lock = asyncio.Lock()
+
+
+async def _close_closed_parents(parents: dict) -> tuple[int, set]:
+    closed = 0
+    touched: set = set()
+    open_books = [p async for p in pattern_book_positions_collection.find({"status": "OPEN"})]
+    for pos in open_books:
+        parent = parents.get(pos["parent_position_id"])
+        if parent is None:
+            continue
+        if parent.get("status") == "OPEN":
+            continue
+        await _close_mirror(pos, parent)
+        touched.add((pos["book"], pos["strategy_id"]))
+        closed += 1
+    return closed, touched
+
+
+async def sync_closes() -> int:
+    """Close every book position whose parent has closed — and nothing else.
+
+    What the intraday close-out job calls: once the pattern desk squares a position off,
+    its mirrors have to follow in the same pass. Opening mirrors is left to `run_cycle`,
+    which never does so after the entry cutoff anyway."""
+    if not ENABLED or not SELECTED:
+        return 0
+    async with _sync_lock:
+        sids = list(SELECTED_BY_ID)
+        parents = {p["position_id"]: p async for p in pattern_positions_collection.find(
+            {"strategy_id": {"$in": sids}})}
+        closed, touched = await _close_closed_parents(parents)
+        await _update_scores(touched)
+        return closed
+
+
 async def run_cycle() -> dict:
     """Mirror the parent desk: close what it closed, open what it opened.
 
@@ -346,20 +385,11 @@ async def run_cycle() -> dict:
     parents = {p["position_id"]: p async for p in pattern_positions_collection.find(
         {"strategy_id": {"$in": sids}})}
 
-    opened = closed = 0
-    touched = set()
+    opened = 0
 
     # 1. Close any book position whose parent has closed.
-    open_books = [p async for p in pattern_book_positions_collection.find({"status": "OPEN"})]
-    for pos in open_books:
-        parent = parents.get(pos["parent_position_id"])
-        if parent is None:
-            continue
-        if parent.get("status") == "OPEN":
-            continue
-        await _close_mirror(pos, parent)
-        touched.add((pos["book"], pos["strategy_id"]))
-        closed += 1
+    async with _sync_lock:
+        closed, touched = await _close_closed_parents(parents)
 
     # 2. Mirror parent positions that are open and not yet in each book.
     for parent in parents.values():

@@ -24,6 +24,7 @@ square off at EOD — the swing/intraday distinction the paper desk carries does
 contact with a real broker for shorts, so this desk is honest about being same-day.
 """
 
+import asyncio
 import logging
 import os
 import time
@@ -42,12 +43,12 @@ from app.core.db import (
     live_trading_trades_collection,
 )
 from app.services.angel_client import angel_client
+from app.services import intraday_session as session
 from app.services.call_engine import IST, _scored_daily_symbols
 from app.services.dhan_client import DhanClient
 from app.services.intraday_lab_engine import _equity_quote_map, _size
 from app.services.live_intraday_engine import (
     ENTRY_CUTOFF_HHMM,
-    EOD_SQUAREOFF_HHMM,
     INTRADAY_CATEGORIES,
     MAX_SYMBOLS_PER_SCAN,
     PER_STRATEGY_ALLOCATION,
@@ -630,7 +631,20 @@ async def _close_real(pos: dict, ltp: float, reason: str) -> bool:
     return True
 
 
+# REAL MONEY. Every close decided below sends an opposite-side market order. Two concurrent
+# manage cycles — the shared loop and the independent close-out job — could each decide to
+# close the same position and send TWO exits; the second would not close anything, it would
+# open a brand-new opposite position. This lock makes that impossible.
+_manage_lock = asyncio.Lock()
+
+
 async def manage_cycle(dhan: DhanClient | None) -> int:
+    async with _manage_lock:
+        await session.ensure_cas()
+        return await _manage_cycle(dhan)
+
+
+async def _manage_cycle(dhan: DhanClient | None) -> int:
     open_positions = [p async for p in live_trading_positions_collection.find({"status": "OPEN"})]
     if not open_positions:
         return 0
@@ -643,7 +657,6 @@ async def manage_cycle(dhan: DhanClient | None) -> int:
     quotes, quote_source = await _equity_quote_map(dhan, list(equities.values()))
 
     now_ist = datetime.now(IST)
-    is_eod = now_ist.strftime("%H:%M") >= EOD_SQUAREOFF_HHMM
     today_iso = _today_ist().isoformat()
 
     updated = 0
@@ -706,7 +719,11 @@ async def manage_cycle(dhan: DhanClient | None) -> int:
 
             hit_target = ltp >= pos["target"] if sign > 0 else ltp <= pos["target"]
             hit_stop = ltp <= pos["stoploss"] if sign > 0 else ltp >= pos["stoploss"]
-            # INTRADAY product: every position squares off same day, so EOD closes everything.
+            # INTRADAY product: every position squares off same day. The time is per SYMBOL:
+            # Angel auto-squares MIS at 15:10 in closing-auction stocks, so exiting at 15:15
+            # (the old rule) would send an exit for a position the broker had already closed —
+            # which opens a new opposite position instead of closing anything.
+            is_eod = session.squareoff_due(symbol, now_ist)
             reason = "target" if hit_target else "stoploss" if hit_stop else "eod" if is_eod else None
             if reason and await _close_real(pos, ltp, reason):
                 touched.add(pos["strategy_id"])

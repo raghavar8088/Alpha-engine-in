@@ -28,6 +28,7 @@ once and offered to each book in turn, so tripling the desks does not triple the
 Angel's rate limiter.
 """
 
+import asyncio
 import logging
 import os
 from dataclasses import dataclass
@@ -46,6 +47,7 @@ from app.core.db import (
 )
 from app.services.angel_client import angel_client
 from app.services.angel_fees import product_for, round_trip
+from app.services import intraday_session as session
 from app.services.call_engine import IST, _scored_daily_symbols
 from app.services.desk_totals import split as _totals_split
 from app.services.dhan_client import DhanClient
@@ -87,8 +89,11 @@ MAX_SYMBOLS_PER_SCAN = int(os.getenv("LIVE_INTRADAY_MAX_SYMBOLS", "150"))
 # Armed by default — the user explicitly wants these desks trading paper now.
 PAUSE_NEW_ENTRIES = os.getenv("LIVE_INTRADAY_PAUSE_ENTRIES", "0").lower() not in ("0", "false", "")
 
-EOD_SQUAREOFF_HHMM = "15:15"
-ENTRY_CUTOFF_HHMM = os.getenv("LIVE_INTRADAY_ENTRY_CUTOFF", "15:00")
+# The square-off is per SYMBOL now (see `intraday_session`): 15:05 for NSE closing-auction
+# stocks, 15:12 for the rest. These two names are also imported by the real-money Live
+# Trading desk, so they stay — EOD_SQUAREOFF_HHMM now only for display.
+EOD_SQUAREOFF_HHMM = session.NONCAS_SQUAREOFF_HHMM
+ENTRY_CUTOFF_HHMM = os.getenv("LIVE_INTRADAY_ENTRY_CUTOFF", session.ENTRY_CUTOFF_HHMM)
 INTRADAY_CATEGORIES = {"scalping", "momentum", "mean_reversion"}
 SWING_CATEGORIES = {"swing"}
 DAILY_LOSS_BREAKER_PCT = float(os.getenv("LIVE_INTRADAY_DAILY_LOSS_PCT", "0.03"))
@@ -440,8 +445,18 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
     }
 
 
+# Serialises manage between the shared loop and the independent close-out job.
+_manage_lock = asyncio.Lock()
+
+
 async def manage_cycle(dhan: DhanClient | None) -> int:
-    """Manage every book's open positions off a single quote sweep."""
+    """Manage every book's open positions off a single quote sweep. Idempotent."""
+    async with _manage_lock:
+        await session.ensure_cas()
+        return await _manage_cycle(dhan)
+
+
+async def _manage_cycle(dhan: DhanClient | None) -> int:
     open_positions = [p async for p in live_intraday_positions_collection.find({"status": "OPEN"})]
     if not open_positions:
         return 0
@@ -454,7 +469,6 @@ async def manage_cycle(dhan: DhanClient | None) -> int:
     quotes, quote_source = await _equity_quote_map(dhan, list(equities.values()))
 
     now_ist = datetime.now(IST)
-    is_eod = now_ist.strftime("%H:%M") >= EOD_SQUAREOFF_HHMM
     today_iso = _today_ist().isoformat()
 
     updated = 0
@@ -486,7 +500,8 @@ async def manage_cycle(dhan: DhanClient | None) -> int:
             hit_stop = ltp <= pos["stoploss"] if sign > 0 else ltp >= pos["stoploss"]
             category = pos.get("category")
             days_held = (datetime.fromisoformat(today_iso).date() - datetime.fromisoformat(pos["opened_on"]).date()).days
-            eod_close = category in INTRADAY_CATEGORIES and (is_eod or days_held >= 1)
+            eod_close = category in INTRADAY_CATEGORIES and (
+                session.squareoff_due(symbol, now_ist) or days_held >= 1)
             swing_expired = category in SWING_CATEGORIES and days_held >= pos.get("max_hold_days", 5)
 
             reason = "target" if hit_target else "stoploss" if hit_stop else "eod" if eod_close else "max_hold_expired" if swing_expired else None

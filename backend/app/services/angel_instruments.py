@@ -69,15 +69,27 @@ def to_angel_expiry(iso_date: str) -> str:
     return f"{int(d):02d}{_MONTHS[int(m) - 1]}{y}"
 
 
-def _build_lookups(rows: list[dict]) -> tuple[dict, dict, dict, dict]:
-    """Four indexes: derivatives by contract identity, cash by ticker, cash TRADING SYMBOLS
+def _truthy(v) -> bool:
+    return str(v).strip().lower() in ("1", "true", "y", "yes")
+
+
+def _build_lookups(rows: list[dict]) -> tuple[dict, dict, dict, dict, dict]:
+    """Five indexes: derivatives by contract identity, cash by ticker, cash TRADING SYMBOLS
     by ticker (the full Angel symbol like "RELIANCE-EQ", needed to place an order — the
-    token alone isn't enough), and indices by name. Each maps to {angel_exchange: value}
-    because the same contract can be listed on more than one Angel venue."""
+    token alone isn't enough), indices by name, and the NSE closing-auction flag by ticker.
+    The first four map to {angel_exchange: value} because the same contract can be listed
+    on more than one Angel venue.
+
+    `is_cas_enabled` is Angel's own marker for the stocks in NSE's Closing Auction Session
+    (from 3 Aug 2026): continuous trading in them ends at 15:15 and Angel auto-squares MIS
+    positions at 15:10. Read from the exchange's flag rather than inferred from F&O
+    membership, so a stock entering or leaving the auction list is picked up on the next
+    refresh without anyone noticing it changed."""
     deriv: dict[tuple, dict[str, str]] = {}
     cash: dict[str, dict[str, str]] = {}
     cash_ts: dict[str, dict[str, str]] = {}
     indices: dict[str, dict[str, str]] = {}
+    cas: dict[str, bool] = {}
     for row in rows:
         seg = row.get("exch_seg")
         itype = row.get("instrumenttype") or ""
@@ -107,12 +119,14 @@ def _build_lookups(rows: list[dict]) -> tuple[dict, dict, dict, dict]:
             if sym.upper().endswith("-EQ"):
                 cash[base] = {**cash.get(base, {}), seg: str(token)}
                 cash_ts[base] = {**cash_ts.get(base, {}), seg: sym.upper()}
+                if seg == "NSE":
+                    cas[base] = _truthy(row.get("is_cas_enabled"))
             else:
                 cash.setdefault(base, {}).setdefault(seg, str(token))
                 cash_ts.setdefault(base, {}).setdefault(seg, sym.upper())
         elif seg in ("NSE", "BSE"):
             indices.setdefault((row.get("name") or "").upper(), {}).setdefault(seg, str(token))
-    return deriv, cash, cash_ts, indices
+    return deriv, cash, cash_ts, indices, cas
 
 
 def _match(doc: dict, deriv: dict, cash: dict, indices: dict) -> tuple[str, str] | None:
@@ -139,7 +153,9 @@ async def refresh_angel_tokens() -> dict:
     """Re-map every instrument. Safe to re-run; only writes docs whose token changed."""
     async with httpx.AsyncClient(timeout=180) as client:
         rows = (await client.get(SCRIP_MASTER_URL)).json()
-    deriv, cash, cash_ts, indices = _build_lookups(rows)
+    angel_rows = len(rows)
+    deriv, cash, cash_ts, indices, cas = _build_lookups(rows)
+    del rows      # 140k dicts; drop them before the instrument walk, not after it
 
     ops: list[UpdateOne] = []
     matched = 0
@@ -149,7 +165,7 @@ async def refresh_angel_tokens() -> dict:
         {},
         {"security_id": 1, "exchange_segment": 1, "asset_class": 1, "symbol": 1, "name": 1,
          "underlying_symbol": 1, "expiry": 1, "strike": 1, "option_type": 1,
-         "angel_token": 1, "angel_tradingsymbol": 1},
+         "angel_token": 1, "angel_tradingsymbol": 1, "is_cas_enabled": 1},
     ):
         total += 1
         hit = _match(doc, deriv, cash, indices)
@@ -164,13 +180,20 @@ async def refresh_angel_tokens() -> dict:
         # For cash equities also stamp the Angel TRADING SYMBOL (e.g. "RELIANCE-EQ") — an
         # order needs it, the token alone won't place one.
         is_cash = doc.get("asset_class") in CASH_CLASSES
+        cas_now = None
         if is_cash:
-            ts = cash_ts.get((doc.get("symbol") or "").upper(), {}).get(exchange)
+            sym_u = (doc.get("symbol") or "").upper()
+            ts = cash_ts.get(sym_u, {}).get(exchange)
             if ts:
                 set_fields["angel_tradingsymbol"] = ts
+            cas_now = bool(cas.get(sym_u, False))
+            set_fields["is_cas_enabled"] = cas_now
         # Skip only when nothing would change: same token AND (not cash, or its trading
-        # symbol is already stored). This lets a first run backfill the new field.
-        if doc.get("angel_token") == token and (not is_cash or doc.get("angel_tradingsymbol")):
+        # symbol AND auction flag are already stored and current). A first run backfills
+        # the new fields; a stock moving in or out of the auction list is rewritten.
+        if doc.get("angel_token") == token and (
+                not is_cash or (doc.get("angel_tradingsymbol")
+                                and doc.get("is_cas_enabled") == cas_now)):
             continue
         ops.append(UpdateOne({"_id": doc["_id"]}, {"$set": set_fields}))
 
@@ -180,7 +203,8 @@ async def refresh_angel_tokens() -> dict:
         written += result.modified_count
 
     summary = {
-        "angel_rows": len(rows),
+        "angel_rows": angel_rows,
+        "cas_enabled": sum(1 for v in cas.values() if v),
         "instruments": total,
         "matched": matched,
         "written": written,

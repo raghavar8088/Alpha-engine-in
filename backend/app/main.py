@@ -404,6 +404,29 @@ async def start_screener_pattern_warm() -> None:
 
 
 @app.on_event("startup")
+async def start_intraday_closeout_loop() -> None:
+    """The intraday square-off, on its own task.
+
+    It used to happen only inside each desk's manage cycle, which only ran if the shared
+    intraday loop got a tick into the minutes before its 15:30 stop. On 2026-10-01 it did
+    not, and every intraday position in the house was carried overnight. This loop does
+    nothing but close what is due, every few seconds, from 15:00 to 15:45 IST, on every
+    equity intraday desk — and records an alarm if anything is still open past its time.
+    Must not raise: a startup hook that raises takes the whole backend down."""
+    try:
+        from app.services.intraday_session import describe, squareoff_loop
+
+        if os.getenv("INTRADAY_CLOSEOUT_ENABLED", "1") != "0":
+            asyncio.create_task(squareoff_loop())
+            logger.info("Intraday close-out loop enabled — %s", describe())
+        else:
+            logger.warning("Intraday close-out loop DISABLED (INTRADAY_CLOSEOUT_ENABLED=0) — "
+                           "intraday positions rely on each desk's own manage cycle alone")
+    except Exception:  # noqa: BLE001
+        logger.exception("could not start the intraday close-out loop")
+
+
+@app.on_event("startup")
 async def start_fundamental_watchlist_loop() -> None:
     """Marks the Fundamental Rating paper books and writes their daily series."""
     from app.services.fundamental_watchlist import loop as fundamental_book_loop

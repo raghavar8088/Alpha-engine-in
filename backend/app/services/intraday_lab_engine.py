@@ -24,6 +24,7 @@ Paper only — no live broker orders. Honest about price sourcing exactly like
 call_engine.py (`ltp_source`: dhan_quote / last_bar_close).
 """
 
+import asyncio
 import logging
 import os
 from datetime import datetime, timedelta, timezone
@@ -52,6 +53,7 @@ from app.services.promotion_gate import (
     grade,
     t_threshold,
 )
+from app.services import intraday_session as session
 from app.services.intraday_strategies import STRATEGY_CATALOG, STRATEGY_BY_ID, evaluate
 from backtesting_service.service import load_bars
 from tradingai_shared.domain import Timeframe
@@ -91,7 +93,10 @@ MAX_SYMBOLS_PER_SCAN = int(os.getenv("INTRADAY_LAB_MAX_SYMBOLS", "150"))  # keep
 # or any other accidental reset now fails toward safe, not toward loss.
 PAUSE_NEW_ENTRIES = os.getenv("INTRADAY_LAB_PAUSE_ENTRIES", "1").lower() not in ("0", "false", "")
 
-EOD_SQUAREOFF_HHMM = "15:15"
+# Kept for anything that still prints it. The square-off itself is now per SYMBOL and comes
+# from `intraday_session`: 15:05 for NSE closing-auction stocks (Angel squares MIS in them at
+# 15:10, and their continuous trading ends at 15:15), 15:12 for the rest.
+EOD_SQUAREOFF_HHMM = session.NONCAS_SQUAREOFF_HHMM
 # No NEW same-day (intraday-category) entries at/after this IST time. Those categories are
 # force-squared-off at EOD_SQUAREOFF_HHMM; opening one after the cutoff can only strand it
 # overnight — the final scan of the day (~15:30) has no later manage cycle left to square it
@@ -99,7 +104,7 @@ EOD_SQUAREOFF_HHMM = "15:15"
 # create a pointless sub-minute trade right before square-off. Kept before 15:15 so there is
 # always at least one manage cycle left in the session to close anything opened just under the
 # wire. Swing entries are unaffected (they legitimately hold across sessions).
-ENTRY_CUTOFF_HHMM = os.getenv("INTRADAY_LAB_ENTRY_CUTOFF", "15:00")
+ENTRY_CUTOFF_HHMM = os.getenv("INTRADAY_LAB_ENTRY_CUTOFF", session.ENTRY_CUTOFF_HHMM)
 INTRADAY_CATEGORIES = {"scalping", "momentum", "mean_reversion"}  # square off same day
 SWING_CATEGORIES = {"swing"}  # may carry up to spec.max_hold_days trading days
 
@@ -481,10 +486,23 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
     return {"opened": opened, "scanned_symbols": len(scored), "notes": notes}
 
 
+# One manage at a time. The independent close-out job (`intraday_session.squareoff_loop`)
+# calls this as well as the shared loop; without the lock both could close the same
+# position and write two trades for it.
+_manage_lock = asyncio.Lock()
+
+
 async def manage_cycle(dhan: DhanClient | None) -> int:
-    """Refresh LTP/PnL for every open position; close on target/stop, EOD
-    square-off (scalping/momentum/mean_reversion at 15:15 IST), or swing
-    max-hold-days expiry. Returns count of positions updated (incl. closed)."""
+    """Refresh LTP/PnL for every open position; close on target/stop, the per-symbol
+    intraday square-off (see `intraday_session`), or swing max-hold-days expiry. Returns
+    count of positions updated (incl. closed). Idempotent: safe to call as often as the
+    close-out job likes."""
+    async with _manage_lock:
+        await session.ensure_cas()
+        return await _manage_cycle(dhan)
+
+
+async def _manage_cycle(dhan: DhanClient | None) -> int:
     open_positions = [p async for p in intraday_lab_positions_collection.find({"status": "OPEN"})]
     if not open_positions:
         return 0
@@ -499,7 +517,6 @@ async def manage_cycle(dhan: DhanClient | None) -> int:
     quotes, quote_source = await _equity_quote_map(dhan, list(equities.values()))
 
     now_ist = datetime.now(IST)
-    is_eod = now_ist.strftime("%H:%M") >= EOD_SQUAREOFF_HHMM
     today_iso = _today_ist().isoformat()
 
     updated = 0
@@ -537,7 +554,8 @@ async def manage_cycle(dhan: DhanClient | None) -> int:
             # survived into a later session (days_held >= 1), e.g. one opened on the final scan
             # just before an off-hours shutdown. Without this, a stranded intraday position would
             # wait until 15:15 of the NEXT day to close; now the very next manage cycle clears it.
-            eod_close = category in INTRADAY_CATEGORIES and (is_eod or days_held >= 1)
+            eod_close = category in INTRADAY_CATEGORIES and (
+                session.squareoff_due(symbol, now_ist) or days_held >= 1)
             swing_expired = category in SWING_CATEGORIES and days_held >= pos.get("max_hold_days", 5)
 
             reason = None
