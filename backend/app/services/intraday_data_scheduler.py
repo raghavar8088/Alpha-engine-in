@@ -124,6 +124,15 @@ async def intraday_data_loop() -> None:
         await results_calendar.ensure_indexes()
     except Exception:  # noqa: BLE001
         pass
+    try:
+        from app.services.intraday_v2_registry import preregister
+        r = await preregister()
+        if r["registered"]:
+            logger.info("incubation: pre-registered %s", r["registered"])
+    except Exception:  # noqa: BLE001 - never blocks the data loop
+        logger.exception("pre-registration failed")
+    if not global_cues.history("SPX"):
+        _spawn("global_history", global_cues.refresh_history())   # the gap model needs it
     while True:
         try:
             now = datetime.now(market_calendar.IST)
@@ -183,11 +192,11 @@ async def intraday_data_loop() -> None:
                 r = await evaluate_forward()
                 if r.get("decided"):
                     logger.warning("incubation verdicts: %s", r["decided"])
+                logger.info("expected-move ranking today: %s", await scanner_board.score_day(now.date()))
+                logger.info("NIFTY gap today: %s", await selection_brief.score_gap(now.date()))
                 from app.services.intraday_ops import build_edge_report
                 rep = await build_edge_report(now.date())
                 logger.info("edge report %s: %s", now.date(), rep["desk"])
-                logger.info("expected-move ranking today: %s", await scanner_board.score_day(now.date()))
-                logger.info("NIFTY gap today: %s", await selection_brief.score_gap(now.date()))
 
             # ── off-hours ────────────────────────────────────────────────────────
             evening = (not trading) or hhmm >= "19:00"

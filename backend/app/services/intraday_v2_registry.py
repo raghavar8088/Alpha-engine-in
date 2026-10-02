@@ -80,6 +80,50 @@ async def register_from_backtest(run_id: str | None = None) -> dict:
     return {"run_id": run_id, "registered": len(added), "already": kept, "new": added}
 
 
+# Registered WITHOUT a gate pass, from the stock-selection study on 5-minute bars (S4,
+# 2026-10-02): positive in development (to 2026-03-31) and holdout (2026-04-01..10-01) at
+# almost every parameter setting, but its Deflated Sharpe counted against the 5,184
+# variants tried is ~0.05 — the gate's 0.95 is out of reach for any backtest of it now. The
+# forward record is the test. Expectations follow this module's rule (the LOWER of the two
+# periods' per-trade means) and the larger of their spreads; nothing here may be edited
+# once forward trades exist.
+PREREGISTERED = {
+    "iv2_orb_sel30": {
+        "name": "Selected ORB 30-min (top-5 expected move)",
+        "study": "S4 OR30|touch|w1430|atr|t2r|top5|both|rvol15",
+        "expected": {"per_trade_net_mean": 2111.88, "per_trade_net_mean_selection": 2170.27,
+                     "per_trade_net_mean_holdout": 2111.88, "per_trade_net_sd": 22928.81,
+                     "win_rate": 0.496, "trades_full_period": 767, "profit_factor": 1.29,
+                     "net_bp_selection": 21.7, "net_bp_holdout": 21.12,
+                     "dsr": 0.0465, "dsr_note": "deflated for 5,184 variants; 0.98 if it had been the only one"},
+    },
+    "iv2_orb_sel15": {
+        "name": "Selected ORB 15-min (top-5 expected move)",
+        "study": "S4 OR15|touch|w1430|opp|eod|top5|both|rvol15",
+        "expected": {"per_trade_net_mean": 1861.51, "per_trade_net_mean_selection": 3605.87,
+                     "per_trade_net_mean_holdout": 1861.51, "per_trade_net_sd": 27743.61,
+                     "win_rate": 0.525, "trades_full_period": 548, "profit_factor": 1.34,
+                     "net_bp_selection": 36.06, "net_bp_holdout": 18.62,
+                     "dsr": None, "dsr_note": "family best 0.047 deflated for 5,184 variants"},
+    },
+}
+
+
+async def preregister() -> dict:
+    """Register the PREREGISTERED strategies once. Never overwrites an existing entry."""
+    added = []
+    for sid, p in PREREGISTERED.items():
+        if await registry.find_one({"_id": sid}, {"_id": 1}):
+            continue
+        await registry.insert_one({
+            "_id": sid, "name": p["name"], "status": "INCUBATING", "registered_at": datetime.now(timezone.utc),
+            "run_id": None, "source": "pre-registered from the S4 stock-selection study, 2026-10-02",
+            "study_key": p["study"], "expected": p["expected"], "thresholds": dict(THRESHOLDS),
+            "forward": {}, "history": []})
+        added.append(sid)
+    return {"registered": added}
+
+
 async def evaluate_forward() -> dict:
     """Test every incubating strategy's forward record against its frozen expectation."""
     changed = []

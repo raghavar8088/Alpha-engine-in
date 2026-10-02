@@ -22,7 +22,7 @@ THE SESSION RULES (enforced by the engine, stated here because they shape the ru
 - Mean-reversion families skip names that are "in play" (relative volume high): fading a
   stock that the whole market is trading is fading information, not noise.
 
-THE CATALOG: 16 bar families x 3 timeframes, plus 4 day-level setups = 52 strategies.
+THE CATALOG: 16 bar families x 3 timeframes, plus 6 day-level setups = 54 strategies.
 Deliberately not 150: every extra strategy raises the bar the promotion gate must set
 against luck (Bonferroni over N), and the old catalog's 150 were ~30 ideas with parameter
 variants that mostly measured the same thing.
@@ -33,6 +33,19 @@ DAY-LEVEL SETUPS
   low (if it closed down), stop at a fraction of the 14-session ATR, held to the close.
   Two stop sizes: the paper's 10% of ATR and a wider 25%.
 - Gap-and-go and gap-fade on the 09:45 read.
+- SELECTED ORB, 30 and 15 minutes (added 2026-10-02, PRE-REGISTERED for incubation): the
+  only idea that held up in the stock-selection study on 5-minute bars (S4: 5,184 variants
+  of the opening-range break over 411 sessions). On the 5 names the expected-move model
+  ranks highest (scanner_board), and only when their opening volume is 1.5x normal, BOTH
+  edges of the opening range get a stop entry; the first one crossed fills and cancels
+  the other (a minute crossing both = no trade). It was positive before AND after
+  2026-04-01 at 42-43 of its 54 parameter settings — but counted against all 5,184
+  variants its Deflated Sharpe is 0.05, far below the 0.95 the gate asks. So it is not
+  "passed": its parameters are frozen here and the forward paper record decides
+  (intraday_v2_registry, PREREGISTERED). The 15-minute version enters from 09:30, the one
+  exception to the 09:45 rule, because that is what was tested. The Phase 3 backtest
+  cannot replay these (it has no expected-move selection) and reports no trades for them;
+  their record is the S4 study.
 
 Every function returns a V2Signal or None and never looks past the last closed bar it is
 handed; the engine and the Phase 3 backtest call the same functions.
@@ -97,6 +110,10 @@ class V2Signal:
     rationale: str
     trigger: float | None = None    # stop-entry level (ORB): fill only once price crosses it
     target_price: float | None = None  # absolute target (VWAP, mean) when the rule has one
+    stop_price: float | None = None    # absolute stop (an opposite range edge) instead of stop_dist
+    # Two stop entries, one cancels the other: [(side, trigger, stop_dist, target_dist,
+    # stop_price), ...]. The signal's own side/entry are then placeholders.
+    oco: list | None = None
 
 
 @dataclass
@@ -130,6 +147,9 @@ class Ctx:
     rvol_rank: int | None      # 1 = most in play in the universe right now
     nifty_ret: float | None    # NIFTY % change since today's open, as of `now`
     avg_vol: float | None = None
+    # The Scanner Board's read of this name at this close (expected-move rank, opening
+    # volume, 15-minute range) — set by the engine for the selected-ORB setups only.
+    sel: dict | None = None
 
 
 # ── context ──────────────────────────────────────────────────────────────────────
@@ -530,6 +550,32 @@ def f_orb_in_play(ctx: Ctx, p: dict):
                     f"sell stop at {ctx.or_low:.2f}, stop {p['stop_atr']:.0%} of daily ATR", trigger=ctx.or_low)
 
 
+def f_orb_selected(ctx: Ctx, p: dict):
+    """Two-sided opening-range break on the top expected-move names with heavy opening
+    volume. Parameters are the S4 study's, frozen at registration — do not tune them."""
+    sel = ctx.sel
+    if not sel or sel.get("rank") is None or sel["rank"] > p["top"]:
+        return None
+    rv = sel.get(p["rvol_key"])
+    if rv is None or rv < p["min_rvol"] or ctx.atr_day is None:
+        return None
+    hi, lo = (ctx.or_high, ctx.or_low) if p["range"] == 30 else (sel.get("or15_high"), sel.get("or15_low"))
+    if hi is None or lo is None or hi <= lo:
+        return None
+    if p["stop"] == "atr":
+        sd = p["stop_atr"] * ctx.atr_day
+        tgt = p["target_r"] * sd if p.get("target_r") else None
+        legs = [("BUY", hi, sd, tgt, None), ("SELL", lo, sd, tgt, None)]
+        risk = f"stop {p['stop_atr']:g} daily ATR" + (f", target {p['target_r']:g}R" if tgt else ", held to the close")
+    else:
+        legs = [("BUY", hi, hi - lo, None, lo), ("SELL", lo, hi - lo, None, hi)]
+        risk = "stop at the opposite edge, held to the close"
+    return V2Signal("BUY", hi, legs[0][2], None, 0, float(sel.get("em_bp") or 0.0),
+                    f"#{sel['rank']} by expected move ({sel.get('em_bp') or 0:.0f} bp), opening volume {rv:.1f}x — "
+                    f"buy stop {hi:.2f} / sell stop {lo:.2f} on the {p['range']}-minute range, first one cancels "
+                    f"the other; {risk}", oco=legs)
+
+
 def f_gap_go(ctx: Ctx, p: dict):
     if None in (ctx.prev_close, ctx.or_high, ctx.rvol, ctx.atr_day) or ctx.rvol < 2.0:
         return None
@@ -612,6 +658,20 @@ _DAY_SETUPS: list[tuple[str, str, str, str, Callable, dict, str]] = [
      "a gap of 1%+ on heavy volume that holds beyond yesterday's close through 09:45"),
     ("gap_fade", "Gap Fade", "gap", "mean_reversion", f_gap_fade, {},
      "a gap of 1.5%+ on thin volume that reverses in the first half hour, toward yesterday's close"),
+    # PRE-REGISTERED 2026-10-02 from the S4 study (see the module docstring). Research record,
+    # development (to 2026-03-31) / holdout (2026-04-01..10-01), net of costs at Rs 10 lakh:
+    #   sel30: 505 / 262 trades, +21.7 / +21.1 bp a trade, profit factor 1.32 / 1.26
+    #   sel15: 372 / 176 trades, +36.1 / +18.6 bp a trade, profit factor 1.45 / 1.19
+    ("orb_sel30", "Selected ORB 30-min (top-5 expected move)", "orb", "momentum", f_orb_selected,
+     {"range": 30, "top": 5, "rvol_key": "rvol30", "min_rvol": 1.5, "stop": "atr", "stop_atr": 0.5,
+      "target_r": 2.0, "eval_at": "09:45", "own_book": True},
+     "both edges of the 09:15-09:45 range on the 5 highest expected-move names with 1.5x opening volume; "
+     "stop 0.5 daily ATR, target 2R — pre-registered, incubating"),
+    ("orb_sel15", "Selected ORB 15-min (top-5 expected move)", "orb", "momentum", f_orb_selected,
+     {"range": 15, "top": 5, "rvol_key": "rvol_first", "min_rvol": 1.5, "stop": "opp",
+      "eval_at": "09:30", "entry_from": "09:30", "own_book": True},
+     "both edges of the 09:15-09:30 range on the 5 highest expected-move names with 1.5x first-bar volume; "
+     "stop at the opposite edge, held to the close — pre-registered, incubating"),
 ]
 
 TIMEFRAMES = ("15m", "45m", "1h")
@@ -645,6 +705,17 @@ def evaluate(spec: V2Spec, ctx: Ctx) -> V2Signal | None:
     return sig
 
 
-def in_entry_window(now: datetime) -> bool:
+def in_entry_window(now: datetime, start: str = ENTRY_FROM) -> bool:
     hhmm = now.astimezone(IST).strftime("%H:%M")
-    return ENTRY_FROM <= hhmm < ENTRY_UNTIL
+    return start <= hhmm < ENTRY_UNTIL
+
+
+# The earliest any rule may enter (the 15-minute selected ORB, from 09:30), and the closes
+# at which day setups are evaluated.
+EARLIEST_ENTRY = min([ENTRY_FROM] + [s.params.get("entry_from", ENTRY_FROM) for s in CATALOG])
+DAY_EVAL_TIMES = sorted({s.params.get("eval_at", ENTRY_FROM) for s in CATALOG if s.tf == "day"})
+
+
+def needs_selection(hhmm: str) -> bool:
+    return any(s.tf == "day" and s.params.get("eval_at", ENTRY_FROM) == hhmm and s.family.startswith("orb_sel")
+               for s in CATALOG)

@@ -169,6 +169,32 @@ async def _backtest_expectation() -> dict[str, float]:
     return {r["strategy_id"]: (r.get("full") or {}).get("expectancy") for r in doc.get("results", [])}
 
 
+async def _selection_record(iso: str, preregistered: list[str], incubation) -> dict:
+    """How the stock-selection layer did today: did the 09:45 expected-move ranking pick
+    the movers, was the expected NIFTY gap right, and where each pre-registered strategy
+    stands against the expectation frozen at registration. Paper fills charge modelled
+    slippage, so REAL slippage only becomes measurable once real orders exist."""
+    acc = await db["selection_accuracy"].find_one({"_id": iso}) or {}
+    brief = await db["market_brief"].find_one({"_id": iso}, {"gap_forecast": 1, "gap_actual_bp": 1}) or {}
+    gf = brief.get("gap_forecast") or {}
+    gap = None
+    if gf.get("pred_bp") is not None:
+        gap = {"forecast_bp": gf["pred_bp"], "call": gf.get("call"), "actual_bp": brief.get("gap_actual_bp")}
+        if gap["actual_bp"] is not None:
+            gap["direction_right"] = (gf["pred_bp"] > 0) == (gap["actual_bp"] > 0)
+    inc = []
+    async for r in incubation.find({"_id": {"$in": preregistered}}):
+        f = r.get("forward") or {}
+        inc.append({"strategy_id": r["_id"], "status": r.get("status"), "trades": f.get("trades", 0),
+                    "forward_mean": f.get("mean"), "t": f.get("t"), "z_vs_expected": f.get("z_vs_expected"),
+                    "expected_mean": (r.get("expected") or {}).get("per_trade_net_mean"),
+                    "registered_at": r.get("registered_at")})
+    return {"expected_move": {k: acc.get(k) for k in ("rank_ic", "top20_move_bp", "all_move_bp", "lift_top20", "n")}
+            if acc else None,
+            "nifty_gap": gap, "incubation": inc,
+            "slippage_note": "paper fills charge the modelled 1-4 bp a side; actual slippage needs real orders"}
+
+
 async def build_edge_report(day: date | None = None) -> dict:
     day = day or datetime.now(IST).date()
     iso = day.isoformat()
@@ -190,6 +216,12 @@ async def build_edge_report(day: date | None = None) -> dict:
         r["slippage"] += (p.get("slippage_bp") or 0) / 1e4 * (p.get("capital_deployed") or 0) * legs
         r["reasons"][p.get("exit_reason") or "?"] += 1
     expected = await _backtest_expectation()
+    # the pre-registered strategies have no backtest-gate run; their expectation is the
+    # frozen one from the S4 study
+    from app.services.intraday_v2_registry import PREREGISTERED, registry as incubation
+    for sid, p in PREREGISTERED.items():
+        if expected.get(sid) is None:
+            expected[sid] = p["expected"]["per_trade_net_mean"]
     # forward since launch, per strategy, against the backtest's per-trade mean
     fwd: dict[str, list[float]] = defaultdict(list)
     async for p in intraday_lab_positions_collection.find(
@@ -232,6 +264,7 @@ async def build_edge_report(day: date | None = None) -> dict:
         "engine": {k: (st.get("status") or {}).get(k) for k in ("evaluations", "signals", "opened",
                                                                 "closed", "skipped", "exit_source")},
         "alarms": [a for a in await open_alarms(1) if a.get("session") == iso],
+        "selection": await _selection_record(iso, list(PREREGISTERED), incubation),
     }
     await reports.replace_one({"_id": iso}, report, upsert=True)
     report.pop("_id", None)

@@ -248,12 +248,50 @@ def _complete_through(symbol: str, boundary: datetime) -> bool:
     return store.count_between(symbol, open_ts, b_ts - BASE_MIN * 60) >= want
 
 
+async def _selection(boundary: datetime) -> dict[str, dict]:
+    """The Scanner Board's ranking at this close, for the selected-ORB setups: each name's
+    expected-move rank, its opening volume (first bar, and first half hour), and the
+    15-minute range. Computed from the same closed bars the rules read."""
+    from app.services import scanner_board
+    st = await scanner_board.build_state(boundary + timedelta(seconds=1))
+    # rank only names scored by this close's own model variant, as the study did: at 09:45
+    # the first-half-hour model, at 09:30 the opening one (a name missing a bar would
+    # otherwise be ranked on fewer inputs)
+    want = "0945" if boundary.strftime("%H:%M") >= "09:45" else "open"
+    ranked = sorted((f for f in st["stocks"] if f.get("expected_move_bp") is not None and f.get("em_variant") == want),
+                    key=lambda f: -f["expected_move_bp"])
+    out = {}
+    for r, f in enumerate(ranked, 1):
+        first_only = f.get("bars_today") == 1
+        out[f["symbol"]] = {"rank": r, "em_bp": f["expected_move_bp"], "variant": f.get("em_variant"),
+                            "rvol30": f.get("rvol30"), "rvol_first": f.get("rvol") if first_only else None,
+                            "or15_high": f.get("day_high") if first_only else None,
+                            "or15_low": f.get("day_low") if first_only else None}
+    return out
+
+
+def _own_book(strategy_id: str) -> bool:
+    """Pre-registered strategies keep their own book: the two-strategies-per-symbol cap
+    neither blocks them nor counts them, so their forward record is the rule as tested."""
+    spec = v2.BY_ID.get(strategy_id)
+    return bool(spec and spec.params.get("own_book"))
+
+
 async def evaluate_close(boundary: datetime, open_positions: bool = True) -> dict:
     """Evaluate every strategy whose bar closed at `boundary`; open the best signals."""
     members = await _universe()
-    tfs = _closed_tfs(boundary)
-    day_setup = boundary.strftime("%H:%M") == v2.ENTRY_FROM
+    hhmm = boundary.strftime("%H:%M")
+    early = hhmm < v2.ENTRY_FROM                 # 09:30: only the setups that enter from 09:30
+    tfs = [] if early else _closed_tfs(boundary)
+    day_setup = hhmm in v2.DAY_EVAL_TIMES
     notes: list[str] = []
+    sel = {}
+    if v2.needs_selection(hhmm):
+        try:
+            sel = await _selection(boundary)
+        except Exception:  # noqa: BLE001 - the other strategies still run
+            logger.exception("selection failed at %s", hhmm)
+            notes.append("expected-move selection failed at this close — the selected-ORB setups did not run.")
     ranked = await in_play.ranked(top=len(members), now=boundary + timedelta(seconds=1))
     rv = {r["symbol"]: (r["rvol_raw"], i + 1) for i, r in enumerate(ranked["top"])}
     nifty = await _nifty_ret(boundary + timedelta(seconds=1))
@@ -275,8 +313,11 @@ async def evaluate_close(boundary: datetime, open_positions: bool = True) -> dic
             ctx = v2.build_ctx(sym, "15m" if tf == "day" else tf, boundary, s, s15, rvol, rank, nifty)
             if ctx is None:
                 continue
+            ctx.sel = sel.get(sym)
             for spec in v2.CATALOG:
                 if spec.tf != tf:
+                    continue
+                if tf == "day" and spec.params.get("eval_at", v2.ENTRY_FROM) != hhmm:
                     continue
                 sig = v2.evaluate(spec, ctx)
                 if sig is not None:
@@ -292,6 +333,7 @@ async def evaluate_close(boundary: datetime, open_positions: bool = True) -> dic
         opened = await _take(cands, boundary)
     status["last_eval"] = {"boundary": boundary.strftime("%H:%M"), "timeframes": tfs,
                            "day_setups": day_setup, "signals": len(cands), "opened": opened,
+                           "selection_ranked": len(sel) if sel else None,
                            "incomplete": incomplete, "universe": len(members),
                            "nifty_ret_pct": round(nifty, 2) if nifty is not None else None}
     status["last_notes"] = notes
@@ -306,7 +348,8 @@ async def _take(cands, boundary: datetime) -> int:
     held = set()
     for p in opened_rows:
         per_strategy[p["strategy_id"]] = per_strategy.get(p["strategy_id"], 0) + 1
-        per_symbol.setdefault(p["symbol"], set()).add(p["strategy_id"])
+        if not _own_book(p["strategy_id"]):
+            per_symbol.setdefault(p["symbol"], set()).add(p["strategy_id"])
         held.add((p["strategy_id"], p["symbol"]))
     pending = await _pending_today()
     opened = 0
@@ -315,8 +358,20 @@ async def _take(cands, boundary: datetime) -> int:
             _skip("strategy slots full"); continue
         if (spec.strategy_id, sym) in held:
             _skip("already holding"); continue
-        if len(per_symbol.get(sym, set()) - {spec.strategy_id}) >= MAX_STRATEGIES_PER_SYMBOL:
+        if not _own_book(spec.strategy_id) and \
+                len(per_symbol.get(sym, set()) - {spec.strategy_id}) >= MAX_STRATEGIES_PER_SYMBOL:
             _skip("symbol crowded"); continue
+        if sig.oco:
+            if any(x["strategy_id"] == spec.strategy_id and x["symbol"] == sym for x in pending):
+                continue
+            group = f"{spec.strategy_id}:{sym}:{boundary:%Y%m%d}"
+            for side, trig, sd, td, sp in sig.oco:
+                pending.append({"strategy_id": spec.strategy_id, "symbol": sym, "side": side,
+                                "trigger": trig, "stop_dist": sd, "target_dist": td, "stop_price": sp,
+                                "priority": sig.priority, "rationale": sig.rationale, "oco": group,
+                                "entry_from": spec.params.get("entry_from", v2.ENTRY_FROM),
+                                "since": int(boundary.timestamp())})
+            continue
         if sig.trigger is not None:
             if any(x["strategy_id"] == spec.strategy_id and x["symbol"] == sym for x in pending):
                 continue
@@ -352,7 +407,9 @@ async def _open(spec: v2.V2Spec, sym: str, sig: v2.V2Signal, price: float, sourc
     if await _strategy_cash(spec.strategy_id) < qty * fill:
         _skip("strategy cash"); return False
     sign = 1 if sig.side == "BUY" else -1
-    stop = fill - sign * sig.stop_dist
+    stop = sig.stop_price if sig.stop_price is not None else fill - sign * sig.stop_dist
+    if sign * (fill - stop) <= 0:
+        _skip("fill beyond the stop"); return False
     if sig.target_price is not None:
         target = sig.target_price
         if sign * (target - fill) <= 0:          # the mean was already reached by the fill
@@ -410,38 +467,64 @@ async def _save_pending(items: list[dict]) -> None:
         {"_id": PENDING_ID}, {"$set": {"date": _pending_day, "items": items}}, upsert=True)
 
 
+def _first_cross(x: dict, until_ts: int) -> tuple[int, float] | None:
+    """(minute, fill price) of the first stream minute that crosses the trigger, before
+    `until_ts` — at the trigger, or at the open of a minute that gapped through it."""
+    for t, o, h, l, _c in _minutes(x["symbol"], x["since"]):
+        if t >= until_ts:
+            return None
+        if x["side"] == "BUY" and h >= x["trigger"]:
+            return t, max(x["trigger"], o)
+        if x["side"] == "SELL" and l <= x["trigger"]:
+            return t, min(x["trigger"], o)
+    return None
+
+
 async def _fill_triggers() -> int:
     items = await _pending_today()
-    if not items or not v2.in_entry_window(_ist()):
+    now = _ist()
+    if not items or not v2.in_entry_window(now, v2.EARLIEST_ENTRY):
         return 0
+    until_ts = int(now.replace(hour=int(v2.ENTRY_UNTIL[:2]), minute=int(v2.ENTRY_UNTIL[3:]), second=0,
+                               microsecond=0).timestamp())
     left, filled = [], 0
     rows = await _open_rows()
     per_strategy: dict[str, int] = {}
     per_symbol: dict[str, set] = {}
     for p in rows:
         per_strategy[p["strategy_id"]] = per_strategy.get(p["strategy_id"], 0) + 1
-        per_symbol.setdefault(p["symbol"], set()).add(p["strategy_id"])
-    for x in sorted(items, key=lambda r: -r["priority"]):
-        hit = None
-        for t, o, h, l, _c in _minutes(x["symbol"], x["since"]):
-            if x["side"] == "BUY" and h >= x["trigger"]:
-                hit = max(x["trigger"], o); break
-            if x["side"] == "SELL" and l <= x["trigger"]:
-                hit = min(x["trigger"], o); break
-        if hit is None:
-            left.append(x); continue
+        if not _own_book(p["strategy_id"]):
+            per_symbol.setdefault(p["symbol"], set()).add(p["strategy_id"])
+    # One-cancels-other legs are decided together: the leg crossed first fills, the other
+    # is cancelled; a minute crossing BOTH edges is no trade (it cannot say which came
+    # first) — the convention the S4 study used.
+    groups: dict[str, list[dict]] = {}
+    for x in items:
+        groups.setdefault(x.get("oco") or f"single:{id(x)}", []).append(x)
+    for _g, legs in sorted(groups.items(), key=lambda kv: -kv[1][0]["priority"]):
+        if not v2.in_entry_window(now, legs[0].get("entry_from", v2.ENTRY_FROM)):
+            left.extend(legs); continue
+        hits = [(h, x) for x in legs for h in [_first_cross(x, until_ts)] if h is not None]
+        if not hits:
+            left.extend(legs); continue
+        hits.sort(key=lambda hx: hx[0][0])
+        if len(hits) > 1 and hits[0][0][0] == hits[1][0][0]:
+            _skip("both range edges crossed in one minute"); continue
+        (_t, hit), x = hits[0]
         spec = v2.BY_ID.get(x["strategy_id"])
         if spec is None:
             continue
-        if per_strategy.get(spec.strategy_id, 0) >= v2.SLOTS_PER_STRATEGY or \
-                len(per_symbol.get(x["symbol"], set()) - {spec.strategy_id}) >= MAX_STRATEGIES_PER_SYMBOL:
+        crowded = not _own_book(spec.strategy_id) and \
+            len(per_symbol.get(x["symbol"], set()) - {spec.strategy_id}) >= MAX_STRATEGIES_PER_SYMBOL
+        if per_strategy.get(spec.strategy_id, 0) >= v2.SLOTS_PER_STRATEGY or crowded:
             _skip("trigger crossed but no slot"); continue
         sig = v2.V2Signal(x["side"], x["trigger"], x["stop_dist"], x.get("target_dist"), 0,
-                          x["priority"], x["rationale"])
+                          x["priority"], x["rationale"], stop_price=x.get("stop_price"))
         if await _open(spec, x["symbol"], sig, hit, "stream", _ist(), fill_note="stop-entry"):
             filled += 1
             per_strategy[spec.strategy_id] = per_strategy.get(spec.strategy_id, 0) + 1
-            per_symbol.setdefault(x["symbol"], set()).add(spec.strategy_id)
+            if not _own_book(spec.strategy_id):
+                per_symbol.setdefault(x["symbol"], set()).add(spec.strategy_id)
     await _save_pending(left)
     return filled
 
@@ -581,7 +664,7 @@ async def tick() -> None:
     if not (SESSION_OPEN_MIN <= m <= 15 * 60 + 40):
         return
     await manage()
-    if await _pending_today() and v2.in_entry_window(now):
+    if await _pending_today() and v2.in_entry_window(now, v2.EARLIEST_ENTRY):
         ok, _why = await _entries_allowed()
         if ok:
             await _fill_triggers()
@@ -591,7 +674,7 @@ async def tick() -> None:
     b_ts = int(boundary.timestamp())
     if k >= 1 and b_ts > _last_eval_boundary and (now - boundary).total_seconds() >= EVAL_DELAY_S:
         _last_eval_boundary = b_ts
-        if v2.in_entry_window(boundary):
+        if v2.in_entry_window(boundary) or boundary.strftime("%H:%M") in v2.DAY_EVAL_TIMES:
             ok, why = await _entries_allowed()
             if ok:
                 r = await evaluate_close(boundary)
