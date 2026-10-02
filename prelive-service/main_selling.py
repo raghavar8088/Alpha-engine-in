@@ -44,6 +44,7 @@ from main import DhanFeed, bucket_start  # feed wrapper + bar bucketing, debugge
 from prelive_selling_engine import PreLiveSellingEngine
 
 from tradingai_shared.domain import Bar, Timeframe
+from tradingai_shared import nse_calendar
 
 IST = timezone(timedelta(hours=5, minutes=30))
 NIFTY_SPOT_SECURITY = 13
@@ -67,8 +68,9 @@ def ist_minutes(dt=None):
 
 
 def market_open_now() -> bool:
+    """An NSE TRADING day within hours — not just a weekday (see prelive main.py)."""
     n = ist_now()
-    return n.weekday() < 5 and MARKET_OPEN <= ist_minutes(n) < MARKET_CLOSE
+    return nse_calendar.is_listed_trading_day(n) and MARKET_OPEN <= ist_minutes(n) < MARKET_CLOSE
 
 
 def bootstrap_history(engine: PreLiveSellingEngine) -> None:
@@ -304,7 +306,7 @@ def main() -> None:
             else:
                 n = ist_now()
                 mins = ist_minutes(n)
-                wait = ("weekend" if n.weekday() >= 5
+                wait = (nse_calendar.closed_reason(n) if nse_calendar.closed_reason(n)
                         else f"{MARKET_OPEN - mins}min to open" if mins < MARKET_OPEN
                         else "post-close")
                 held = len(engine.positions)

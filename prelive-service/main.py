@@ -29,6 +29,7 @@ from db import _db
 from prelive_engine import PreLiveEngine, VOL_REGIME_FLOOR_PCT
 
 from tradingai_shared.domain import Bar, Timeframe
+from tradingai_shared import nse_calendar
 
 IST = timezone(timedelta(hours=5, minutes=30))
 DHAN_BASE = "https://api.dhan.co/v2"
@@ -53,8 +54,10 @@ def ist_minutes(dt=None):
 
 
 def market_open_now() -> bool:
+    """An NSE TRADING day within hours — not just a weekday. On 2026-10-02 (Gandhi Jayanti)
+    `weekday() < 5` let this desk trade a closed market at the previous session's prices."""
     n = ist_now()
-    return n.weekday() < 5 and MARKET_OPEN <= ist_minutes(n) < MARKET_CLOSE
+    return nse_calendar.is_listed_trading_day(n) and MARKET_OPEN <= ist_minutes(n) < MARKET_CLOSE
 
 
 class DhanFeed:
@@ -347,8 +350,8 @@ def main():
             else:
                 n = ist_now()
                 mins = ist_minutes(n)
-                if n.weekday() >= 5:
-                    wait = "weekend"
+                if nse_calendar.closed_reason(n):
+                    wait = nse_calendar.closed_reason(n)
                 elif mins < MARKET_OPEN:
                     wait = f"{(MARKET_OPEN - mins)}min to open"
                 else:

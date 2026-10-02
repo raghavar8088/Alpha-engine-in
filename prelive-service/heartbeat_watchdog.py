@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from db import _db  # noqa: E402
+from tradingai_shared import nse_calendar
 
 IST = timezone(timedelta(hours=5, minutes=30))
 STALE_AFTER = timedelta(minutes=10)
@@ -23,7 +24,7 @@ state_collection = _db["prelive_state"]
 def market_hours_now() -> bool:
     now = datetime.now(IST)
     mins = now.hour * 60 + now.minute
-    return now.weekday() < 5 and MARKET_OPEN <= mins < MARKET_CLOSE
+    return nse_calendar.is_listed_trading_day(now) and MARKET_OPEN <= mins < MARKET_CLOSE
 
 
 def main() -> None:
