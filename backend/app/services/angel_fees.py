@@ -31,6 +31,7 @@ tests can assert against a known schedule.
 """
 
 from dataclasses import dataclass, field
+from datetime import date, datetime, timedelta, timezone
 
 GST_RATE = 0.18
 
@@ -44,16 +45,47 @@ SEBI_TURNOVER = 0.000001
 NSE_IPFT = 0.000001
 DP_CHARGE = 20.0
 
-# ── F&O options (NSE) ─────────────────────────────────────────────────────────
-# A different schedule entirely, and the difference is not cosmetic. Options brokerage is
-# a FLAT Rs20 per order with no percentage cap, so a cheap option pays the same Rs20 as an
-# expensive one — on a Rs3,000 premium that is 1.3% before anything else. All statutory
-# charges are on PREMIUM turnover, never on notional.
+# ── F&O (NSE): DATED rate schedules ──────────────────────────────────────────────
+# A different schedule entirely, and the difference is not cosmetic. F&O brokerage is a
+# FLAT Rs20 per order with no percentage cap, so a cheap option pays the same Rs20 as an
+# expensive one — on a Rs3,000 premium that is 1.3% before anything else. Option charges
+# are on PREMIUM turnover, never on notional; futures charges are on notional.
+#
+# The statutory rates CHANGE, so they are kept with the date each took effect and a trade
+# is charged at the rate in force on its own date — a backtest over 2024-2026 must not
+# charge 2026 tax on a 2024 trade, nor 2024 tax on a 2026 one.
+#   * NSE transaction charges, uniform "true-to-label" schedule from 2024-10-01 (SEBI
+#     circular of 2024-07-01): options 0.03503% of premium (was 0.05%), futures 0.00173%.
+#   * STT, Union Budget 2026-27, from 2026-04-01: futures 0.02% -> 0.05% of the sell side;
+#     options 0.10% -> 0.15% of the premium sold. (Budget 2024 had raised futures to 0.02%
+#     and options to 0.10% from 2024-10-01.)
+# Until 2026-10-02 this module charged options 0.10% STT and 0.05% exchange — under-
+# charging every option sale since 2026-04-01.
+IST = timezone(timedelta(hours=5, minutes=30))
 OPT_BROKERAGE = 20.0          # per executed order, flat
-OPT_STT_SELL = 0.001          # 0.10% of premium, sell side only
-OPT_EXCHANGE_TXN = 0.0005     # 0.05% of premium, both sides (NSE)
 OPT_STAMP_BUY = 0.00003       # 0.003% of premium, buy side only
 OPT_SEBI = 0.000001           # Rs10 per crore
+FUT_BROKERAGE = 20.0          # per executed order, flat
+FUT_STAMP_BUY = 0.00002       # 0.002% of notional, buy side only
+
+# (effective from, rate) — newest first
+OPT_STT_SELL_SCHEDULE = [(date(2026, 4, 1), 0.0015), (date(2024, 10, 1), 0.001), (date(1900, 1, 1), 0.000625)]
+OPT_EXCHANGE_SCHEDULE = [(date(2024, 10, 1), 0.0003503), (date(1900, 1, 1), 0.0005)]
+FUT_STT_SELL_SCHEDULE = [(date(2026, 4, 1), 0.0005), (date(2024, 10, 1), 0.0002), (date(1900, 1, 1), 0.000125)]
+FUT_EXCHANGE_SCHEDULE = [(date(2024, 10, 1), 0.0000173), (date(1900, 1, 1), 0.00002)]
+
+
+def _rate(schedule: list[tuple[date, float]], on: date | datetime | None) -> float:
+    d = on.astimezone(IST).date() if isinstance(on, datetime) else (on or datetime.now(IST).date())
+    for start, rate in schedule:
+        if d >= start:
+            return rate
+    return schedule[-1][1]
+
+
+# Current rates, kept under the old names for anything that imports them.
+OPT_STT_SELL = _rate(OPT_STT_SELL_SCHEDULE, None)
+OPT_EXCHANGE_TXN = _rate(OPT_EXCHANGE_SCHEDULE, None)
 
 
 @dataclass
@@ -133,8 +165,10 @@ def round_trip(
     return fb
 
 
-def option_round_trip(entry_premium: float, exit_premium: float, lots: int, lot_size: int) -> FeeBreakdown:
-    """Cost of buying and then selling one NSE options position.
+def option_round_trip(entry_premium: float, exit_premium: float, lots: int, lot_size: int,
+                      on: date | datetime | None = None) -> FeeBreakdown:
+    """Cost of buying and then selling one NSE options position, at the rates in force
+    on `on` (default: today).
 
     Option buying is charged on the PREMIUM paid, not the contract's notional value, so a
     Rs150 ATM NIFTY option on a 75-lot is Rs11,250 of turnover per leg — not Rs17 lakh.
@@ -148,11 +182,35 @@ def option_round_trip(entry_premium: float, exit_premium: float, lots: int, lot_
     turnover = buy_turnover + sell_turnover
 
     fb.brokerage = OPT_BROKERAGE * 2          # one order in, one out
-    fb.stt = sell_turnover * OPT_STT_SELL
-    fb.exchange_txn = turnover * OPT_EXCHANGE_TXN
+    fb.stt = sell_turnover * _rate(OPT_STT_SELL_SCHEDULE, on)
+    fb.exchange_txn = turnover * _rate(OPT_EXCHANGE_SCHEDULE, on)
     fb.sebi = turnover * OPT_SEBI
     fb.stamp_duty = buy_turnover * OPT_STAMP_BUY
     fb.gst = GST_RATE * (fb.brokerage + fb.exchange_txn + fb.sebi)
+    return fb
+
+
+def futures_round_trip(entry_price: float, exit_price: float, qty: int, side: str = "BUY",
+                       on: date | datetime | None = None) -> FeeBreakdown:
+    """Cost of opening AND closing one NSE stock/index futures position (`qty` = lots x
+    lot size), at the rates in force on `on`. STT is on the SELL leg — the entry of a short.
+
+    Since 2026-04-01 a futures round trip (STT 0.05%) costs MORE than the same notional in
+    cash intraday (STT 0.025%): ~6.1 bp vs ~4.0 bp on Rs10 lakh. Futures are no longer the
+    cheap way to trade intraday."""
+    fb = FeeBreakdown(product="FUTURES")
+    if qty <= 0 or entry_price <= 0 or exit_price <= 0:
+        return fb
+    buy_turnover = (entry_price if side == "BUY" else exit_price) * qty
+    sell_turnover = (exit_price if side == "BUY" else entry_price) * qty
+    turnover = buy_turnover + sell_turnover
+    fb.brokerage = FUT_BROKERAGE * 2
+    fb.stt = sell_turnover * _rate(FUT_STT_SELL_SCHEDULE, on)
+    fb.exchange_txn = turnover * _rate(FUT_EXCHANGE_SCHEDULE, on)
+    fb.sebi = turnover * SEBI_TURNOVER
+    fb.ipft = turnover * NSE_IPFT
+    fb.stamp_duty = buy_turnover * FUT_STAMP_BUY
+    fb.gst = GST_RATE * (fb.brokerage + fb.exchange_txn + fb.sebi + fb.ipft)
     return fb
 
 

@@ -1,4 +1,7 @@
-"""Indian transaction-cost model (NSE, 2024-25 rate card, post-Oct-2024 STT revision).
+"""Indian transaction-cost model (NSE rate card; STT as revised by Budget 2026-27 from
+2026-04-01: futures 0.05% and options 0.15% of the sell side — they were 0.02% / 0.10%
+from 2024-10-01. A backtest spanning the change charges the current rate throughout,
+which errs toward higher costs for older trades).
 
 Every rate is a config field, not a constant, so brokers/rate changes are a config edit.
 Defaults follow Dhan's pricing (zero delivery brokerage; Rs 20 or 0.03% — whichever is
@@ -28,8 +31,8 @@ class CostModel(BaseModel):
     # STT (Securities Transaction Tax)
     stt_delivery_pct: float = 0.001  # 0.1% both sides
     stt_intraday_sell_pct: float = 0.00025  # 0.025% sell only
-    stt_futures_sell_pct: float = 0.0002  # 0.02% sell only
-    stt_options_sell_pct: float = 0.001  # 0.1% of premium, sell only
+    stt_futures_sell_pct: float = 0.0005  # 0.05% sell only (from 2026-04-01; 0.02% before)
+    stt_options_sell_pct: float = 0.0015  # 0.15% of premium, sell only (from 2026-04-01; 0.10% before)
 
     # NSE transaction charges
     exch_equity_pct: float = 0.0000297

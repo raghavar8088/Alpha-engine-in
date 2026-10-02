@@ -650,7 +650,7 @@ class PreLiveEngine:
                pricing: str = "real_dhan_ltp") -> dict:
         qty = LOT_SIZE * pos.lots
         gross = (exit_premium - pos.entry_premium) * qty
-        charges = _option_charges(pos.entry_premium, qty) + _option_charges(exit_premium, qty)
+        charges = _option_charges(pos.entry_premium, qty, sell=False) + _option_charges(exit_premium, qty, sell=True)
         pnl = round(gross - charges, 2)
         trade = {
             "key": pos.key, "strategy_id": pos.strategy_id, "timeframe": pos.tf,
@@ -783,15 +783,24 @@ def _ist_minutes(ts: datetime) -> int:
     return ist.hour * 60 + ist.minute
 
 
-def _option_charges(premium: float, qty: int) -> float:
-    """Dhan-style option round-trip components (approx): flat brokerage + STT (sell
-    side handled by caller pairing) + exchange + GST. Kept simple; the audited
-    backtester's CostModel is the source of truth for research runs."""
+OPT_STT_SELL = 0.0015       # 0.15% of premium sold, from 2026-04-01 (Budget 2026-27; was 0.10%)
+OPT_STAMP_BUY = 0.00003     # 0.003% of premium bought
+OPT_SEBI = 0.000001         # Rs10 per crore
+
+
+def _option_charges(premium: float, qty: int, sell: bool = False) -> float:
+    """One leg of an option trade: flat brokerage + exchange + SEBI + GST, plus STT on the
+    SELL leg and stamp duty on the BUY leg. Until 2026-10-02 this charged neither STT nor
+    stamp duty — the docstring said STT was "handled by caller pairing", but the caller
+    just added two of these together, so no option sale on this desk ever paid STT."""
     turnover = max(premium, 0.05) * qty
     brokerage = min(20.0, turnover * 0.0003)
     exch = turnover * 0.0003503
-    gst = (brokerage + exch) * 0.18
-    return brokerage + exch + gst
+    sebi = turnover * OPT_SEBI
+    gst = (brokerage + exch + sebi) * 0.18
+    stt = turnover * OPT_STT_SELL if sell else 0.0
+    stamp = 0.0 if sell else turnover * OPT_STAMP_BUY
+    return brokerage + exch + sebi + gst + stt + stamp
 
 
 def _peak_capital(session: str) -> float:
