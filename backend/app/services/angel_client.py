@@ -24,8 +24,9 @@ retry — not a single "safe" rate, which does not exist. Every desk here paced 
 still collided, which is what the pattern desk's "candles failed … (403)" log lines were.
 `candles()` now goes through one shared pacer: a minimum spacing between ANY two calls,
 and after a refusal a cooldown that doubles on each consecutive refusal and resets on the
-first success. Bulk jobs (the intraday backfill) also wait for interactive callers to go
-quiet first, so a history download never starves a live desk.
+first success. Bulk jobs (the intraday backfill) take a slot only when no live caller is
+queued for one, so a history download never delays a desk — and, unlike an earlier "wait
+for N quiet seconds" rule, is not starved by desks that call every couple of seconds.
 """
 
 from __future__ import annotations
@@ -49,7 +50,6 @@ logger = logging.getLogger("angel_client")
 CANDLE_MIN_GAP = float(os.getenv("ANGEL_CANDLE_MIN_GAP", "1.1"))
 CANDLE_COOLDOWN_BASE = float(os.getenv("ANGEL_CANDLE_COOLDOWN", "3"))
 CANDLE_COOLDOWN_MAX = float(os.getenv("ANGEL_CANDLE_COOLDOWN_MAX", "60"))
-BULK_YIELD_SECONDS = float(os.getenv("ANGEL_CANDLE_BULK_YIELD", "6"))
 
 
 def is_rate_limited(exc: Exception) -> bool:
@@ -64,7 +64,7 @@ class CandlePacer:
         self._next = 0.0
         self._cool_until = 0.0
         self._strikes = 0
-        self._last_normal = 0.0
+        self._normal_waiting = 0
         self.stats = {"calls": 0, "refused": 0, "bulk_calls": 0, "waited_s": 0.0}
         # Who spends the candle budget — the endpoint is shared by a dozen desks, and
         # "the backfill is slow" is only answerable by knowing who else is calling.
@@ -73,21 +73,24 @@ class CandlePacer:
 
     async def acquire(self, bulk: bool = False) -> None:
         if bulk:
-            # Yield to interactive callers WITHOUT holding the lock, so they never queue
-            # behind a history download.
-            while time.monotonic() - self._last_normal < BULK_YIELD_SECONDS:
-                await asyncio.sleep(BULK_YIELD_SECONDS - (time.monotonic() - self._last_normal))
-        async with self._lock:
-            wait = max(self._next, self._cool_until) - time.monotonic()
-            if wait > 0:
-                self.stats["waited_s"] += wait
-                await asyncio.sleep(wait)
-            self._next = time.monotonic() + self.gap
-            self.stats["calls"] += 1
-            if bulk:
-                self.stats["bulk_calls"] += 1
-            else:
-                self._last_normal = time.monotonic()
+            # Priority without starvation: step aside only while a live caller is waiting.
+            while self._normal_waiting > 0:
+                await asyncio.sleep(0.2)
+        else:
+            self._normal_waiting += 1
+        try:
+            async with self._lock:
+                wait = max(self._next, self._cool_until) - time.monotonic()
+                if wait > 0:
+                    self.stats["waited_s"] += wait
+                    await asyncio.sleep(wait)
+                self._next = time.monotonic() + self.gap
+                self.stats["calls"] += 1
+                if bulk:
+                    self.stats["bulk_calls"] += 1
+        finally:
+            if not bulk:
+                self._normal_waiting -= 1
 
     def refused(self) -> None:
         self._strikes += 1
