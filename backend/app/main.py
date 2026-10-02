@@ -430,6 +430,35 @@ async def start_intraday_closeout_loop() -> None:
 
 
 @app.on_event("startup")
+async def start_option_research_desk() -> None:
+    """The Pre-Live upgrade (2026-10-02 plan): the option-chain recorder (real NIFTY bid/ask
+    every minute), the volatility desk that incubates the pre-registered H1/H1b on paper,
+    the hypothesis registry, and a one-off repair of the daily records the buying desk
+    missed. Must not raise."""
+    try:
+        from app.services.option_hypotheses import preregister
+        logger.info("option hypotheses: %s", await preregister())
+    except Exception:  # noqa: BLE001
+        logger.exception("option hypothesis registration failed")
+    try:
+        from app.services.prelive_stats import repair_missing_daily_docs
+        fixed = await repair_missing_daily_docs()
+        if fixed:
+            logger.info("Pre-Live daily records rebuilt from trades for %s", fixed)
+    except Exception:  # noqa: BLE001
+        logger.exception("Pre-Live daily record repair failed")
+    try:
+        from app.services.option_chain_recorder import ENABLED as REC_ON, recorder_loop
+        if REC_ON:
+            asyncio.create_task(recorder_loop())
+        from app.services.vol_desk import ENABLED as VOL_ON, vol_desk_loop
+        if VOL_ON:
+            asyncio.create_task(vol_desk_loop())
+    except Exception:  # noqa: BLE001
+        logger.exception("could not start the option recorder / volatility desk")
+
+
+@app.on_event("startup")
 async def start_intraday_data() -> None:
     """Intraday data plumbing (Phase 1): the liquid universe, the Angel WebSocket stream that
     builds live 15-minute bars, gap-fill, the nightly reconcile against Angel's candles and
@@ -753,6 +782,14 @@ async def refresh_angel_equity_tokens() -> None:
 
     async def _run() -> None:
         while True:
+            try:
+                # New index weeklies first (from Dhan's scrip master), so the token map below
+                # covers them: without this the master froze at July's weeklies and the desks
+                # that pick "the nearest NIFTY expiry" traded monthlies (2026-10-02 audit).
+                from app.services.index_derivatives import sync as sync_index_derivatives
+                await sync_index_derivatives()
+            except Exception:  # noqa: BLE001 - the token refresh still runs
+                logger.exception("index derivative sync failed")
             try:
                 from app.services.angel_instruments import refresh_angel_tokens
 

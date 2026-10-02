@@ -1,0 +1,31 @@
+{
+ "features": [
+  "log VIX",
+  "VIX change since previous close",
+  "|gap| %",
+  "first-30-minute range %",
+  "log(prev-day RV / IV window)",
+  "log(5-day RV / IV window)",
+  "expiry day"
+ ],
+ "weights": [
+  -0.4547637169399677,
+  1.767328494056183,
+  -0.2665263830251039,
+  1.1814770168890516,
+  0.16600445640348227,
+  0.1789612336495073,
+  -0.146338163121991,
+  -2.2270246989079334
+ ],
+ "threshold": -1.105874147156844,
+ "explore": {
+  "traded": 121,
+  "net_mean": -636.2737179708089
+ },
+ "confirm": {
+  "traded": 60,
+  "net_mean": -773.5131416960869
+ },
+ "sd": 2125.3477480571537
+}

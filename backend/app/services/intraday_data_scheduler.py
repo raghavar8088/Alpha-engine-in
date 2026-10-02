@@ -197,6 +197,8 @@ async def intraday_data_loop() -> None:
                 from app.services.intraday_ops import build_edge_report
                 rep = await build_edge_report(now.date())
                 logger.info("edge report %s: %s", now.date(), rep["desk"])
+                from app.services.option_hypotheses import evaluate as evaluate_option_hypotheses
+                logger.info("option hypotheses: %s", await evaluate_option_hypotheses())
 
             # ── off-hours ────────────────────────────────────────────────────────
             evening = (not trading) or hhmm >= "19:00"
