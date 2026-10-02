@@ -68,9 +68,10 @@ OPT_SEBI = 0.000001           # Rs10 per crore
 FUT_BROKERAGE = 20.0          # per executed order, flat
 FUT_STAMP_BUY = 0.00002       # 0.002% of notional, buy side only
 
-# (effective from, rate) — newest first
-OPT_STT_SELL_SCHEDULE = [(date(2026, 4, 1), 0.0015), (date(2024, 10, 1), 0.001), (date(1900, 1, 1), 0.000625)]
-OPT_EXCHANGE_SCHEDULE = [(date(2024, 10, 1), 0.0003503), (date(1900, 1, 1), 0.0005)]
+# (effective from, rate) — newest first. The option schedules live in the shared package so
+# the Pre-Live paper daemons (other containers) charge exactly what this module charges.
+from tradingai_shared.option_fees import (EXCHANGE_SCHEDULE as OPT_EXCHANGE_SCHEDULE,  # noqa: E402
+                                          STT_SELL_SCHEDULE as OPT_STT_SELL_SCHEDULE)
 FUT_STT_SELL_SCHEDULE = [(date(2026, 4, 1), 0.0005), (date(2024, 10, 1), 0.0002), (date(1900, 1, 1), 0.000125)]
 FUT_EXCHANGE_SCHEDULE = [(date(2024, 10, 1), 0.0000173), (date(1900, 1, 1), 0.00002)]
 

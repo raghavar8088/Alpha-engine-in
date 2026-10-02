@@ -136,6 +136,9 @@ def parse_full(body: dict) -> dict[str, dict]:
         token, ltp = row.get("symbolToken"), row.get("ltp")
         if token is None or ltp is None:
             continue
+        depth = row.get("depth") or {}
+        buy = [lv for lv in depth.get("buy") or [] if (lv.get("price") or 0) > 0]
+        sell = [lv for lv in depth.get("sell") or [] if (lv.get("price") or 0) > 0]
         out[str(token)] = {
             "ltp": float(ltp),
             "open": float(row["open"]) if row.get("open") else None,
@@ -144,5 +147,12 @@ def parse_full(body: dict) -> dict[str, dict]:
             "close": float(row["close"]) if row.get("close") else None,
             "volume": float(row.get("tradeVolume") or 0),
             "oi": float(row.get("opnInterest") or 0),
+            # Best bid/ask of the 5-level book FULL mode returns: what a market order would
+            # actually pay. None when that side of the book is empty (illiquid, or closed).
+            "bid": float(buy[0]["price"]) if buy else None,
+            "bid_qty": int(buy[0].get("quantity") or 0) if buy else None,
+            "ask": float(sell[0]["price"]) if sell else None,
+            "ask_qty": int(sell[0].get("quantity") or 0) if sell else None,
+            "exch_time": row.get("exchFeedTime"),
         }
     return out

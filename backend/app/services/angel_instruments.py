@@ -73,7 +73,7 @@ def _truthy(v) -> bool:
     return str(v).strip().lower() in ("1", "true", "y", "yes")
 
 
-def _build_lookups(rows: list[dict]) -> tuple[dict, dict, dict, dict, dict]:
+def _build_lookups(rows: list[dict]) -> tuple[dict, dict, dict, dict, dict, dict]:
     """Five indexes: derivatives by contract identity, cash by ticker, cash TRADING SYMBOLS
     by ticker (the full Angel symbol like "RELIANCE-EQ", needed to place an order — the
     token alone isn't enough), indices by name, and the NSE closing-auction flag by ticker.
@@ -86,6 +86,9 @@ def _build_lookups(rows: list[dict]) -> tuple[dict, dict, dict, dict, dict]:
     membership, so a stock entering or leaving the auction list is picked up on the next
     refresh without anyone noticing it changed."""
     deriv: dict[tuple, dict[str, str]] = {}
+    # Angel's TRADING SYMBOL per derivative (e.g. "NIFTY06OCT2622450CE"): a real option
+    # order needs it, the token alone will not place one (live_options_executor).
+    deriv_ts: dict[tuple, dict[str, str]] = {}
     cash: dict[str, dict[str, str]] = {}
     cash_ts: dict[str, dict[str, str]] = {}
     indices: dict[str, dict[str, str]] = {}
@@ -111,6 +114,7 @@ def _build_lookups(rows: list[dict]) -> tuple[dict, dict, dict, dict, dict]:
             if kind not in ("FUT", "CE", "PE"):
                 continue
             deriv.setdefault((row.get("name"), row.get("expiry"), strike, kind), {}).setdefault(seg, str(token))
+            deriv_ts.setdefault((row.get("name"), row.get("expiry"), strike, kind), {}).setdefault(seg, sym)
         elif seg in ("NSE", "BSE") and sym.upper().endswith(CASH_SUFFIXES):
             base = sym.rsplit("-", 1)[0].upper()
             # -EQ wins if a symbol somehow lists in two series: it is the normal rolling
@@ -126,7 +130,18 @@ def _build_lookups(rows: list[dict]) -> tuple[dict, dict, dict, dict, dict]:
                 cash_ts.setdefault(base, {}).setdefault(seg, sym.upper())
         elif seg in ("NSE", "BSE"):
             indices.setdefault((row.get("name") or "").upper(), {}).setdefault(seg, str(token))
-    return deriv, cash, cash_ts, indices, cas
+    return deriv, cash, cash_ts, indices, cas, deriv_ts
+
+
+def _deriv_key(doc: dict) -> tuple | None:
+    expiry = doc.get("expiry")
+    if not expiry:
+        return None
+    kind = (doc.get("option_type") or "FUT").upper()
+    strike = round(float(doc["strike"]), 2) if doc.get("strike") is not None else -1.0
+    if kind == "FUT":
+        strike = -1.0
+    return (doc.get("underlying_symbol"), to_angel_expiry(expiry), strike, kind)
 
 
 def _match(doc: dict, deriv: dict, cash: dict, indices: dict) -> tuple[str, str] | None:
@@ -154,7 +169,7 @@ async def refresh_angel_tokens() -> dict:
     async with httpx.AsyncClient(timeout=180) as client:
         rows = (await client.get(SCRIP_MASTER_URL)).json()
     angel_rows = len(rows)
-    deriv, cash, cash_ts, indices, cas = _build_lookups(rows)
+    deriv, cash, cash_ts, indices, cas, deriv_ts = _build_lookups(rows)
     del rows      # 140k dicts; drop them before the instrument walk, not after it
 
     ops: list[UpdateOne] = []
@@ -180,6 +195,12 @@ async def refresh_angel_tokens() -> dict:
         # For cash equities also stamp the Angel TRADING SYMBOL (e.g. "RELIANCE-EQ") — an
         # order needs it, the token alone won't place one.
         is_cash = doc.get("asset_class") in CASH_CLASSES
+        is_deriv = doc.get("asset_class") in DERIVATIVE_CLASSES
+        if is_deriv:
+            dk = _deriv_key(doc)
+            ts = (deriv_ts.get(dk) or {}).get(exchange) if dk else None
+            if ts:
+                set_fields["angel_tradingsymbol"] = ts
         cas_now = None
         if is_cash:
             sym_u = (doc.get("symbol") or "").upper()
@@ -192,8 +213,9 @@ async def refresh_angel_tokens() -> dict:
         # symbol AND auction flag are already stored and current). A first run backfills
         # the new fields; a stock moving in or out of the auction list is rewritten.
         if doc.get("angel_token") == token and (
-                not is_cash or (doc.get("angel_tradingsymbol")
-                                and doc.get("is_cas_enabled") == cas_now)):
+                (not is_cash and not is_deriv)
+                or (is_cash and doc.get("angel_tradingsymbol") and doc.get("is_cas_enabled") == cas_now)
+                or (is_deriv and doc.get("angel_tradingsymbol") == set_fields.get("angel_tradingsymbol"))):
             continue
         ops.append(UpdateOne({"_id": doc["_id"]}, {"$set": set_fields}))
 
