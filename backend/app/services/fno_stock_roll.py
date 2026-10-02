@@ -40,6 +40,7 @@ from app.core.db import (
 from app.services.dhan_client import DhanClient
 from app.services.fno_positions import exit_position, place_order
 from app.services.stock_options import batched_ltp
+from app.services import market_calendar
 
 logger = logging.getLogger("fno_stock_roll")
 
@@ -81,7 +82,7 @@ def _hhmm() -> str:
 
 
 def _trading_day() -> bool:
-    return datetime.now(IST).weekday() < 5
+    return market_calendar.is_trading_day()
 
 
 async def target_account() -> dict:

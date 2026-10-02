@@ -74,6 +74,7 @@ from app.services import nse_surveillance as SURV
 from app.services.angel_client import AngelAPIError, angel_client
 from app.services.angel_fees import round_trip
 from tradingai_broker_clients.angel.auth import batches
+from app.services import market_calendar
 
 logger = logging.getLogger("ath_trading")
 
@@ -112,7 +113,7 @@ def _today() -> str:
 
 def market_is_open(when: datetime | None = None) -> bool:
     now = when or datetime.now(IST)
-    return now.weekday() < 5 and MARKET_OPEN <= now.strftime("%H:%M") <= MARKET_CLOSE
+    return market_calendar.is_trading_day(now) and MARKET_OPEN <= now.strftime("%H:%M") <= MARKET_CLOSE
 
 
 # ── watchlist ───────────────────────────────────────────────────────────────────

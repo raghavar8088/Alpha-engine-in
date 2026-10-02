@@ -31,6 +31,7 @@ from datetime import datetime
 from app.services.screener import (ath_universe, bhavcopy, engine, momentum,
                                    nse_breadth, paper, patterns)
 from app.services.screener.horizons import IST
+from app.services import market_calendar
 
 logger = logging.getLogger("screener_scheduler")
 
@@ -54,7 +55,8 @@ def _hhmm(now: datetime | None = None) -> str:
 
 
 def _is_weekday(now: datetime | None = None) -> bool:
-    return (now or datetime.now(IST)).weekday() < 5
+    """An NSE trading day (the name predates the holiday calendar)."""
+    return market_calendar.is_trading_day(now or datetime.now(IST))
 
 
 def _in_session(now: datetime | None = None) -> bool:

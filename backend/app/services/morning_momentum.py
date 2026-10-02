@@ -36,6 +36,7 @@ from app.core.db import (
 from app.services.fno_universe import scan_falls
 from app.services.fno_positions import exit_position, place_order
 from app.services.stock_options import batched_ltp, current_expiry
+from app.services import market_calendar
 
 logger = logging.getLogger("morning_momentum")
 
@@ -79,7 +80,7 @@ def _hhmm() -> str:
 
 
 def _trading_day() -> bool:
-    return datetime.now(IST).weekday() < 5
+    return market_calendar.is_trading_day()
 
 
 def _mins(hhmm: str) -> int:

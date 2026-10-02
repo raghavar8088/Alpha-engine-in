@@ -58,6 +58,7 @@ from app.core.db import (
     instruments_collection,
 )
 from app.services.dhan_client import DhanClient
+from app.services import market_calendar
 from app.services.fno_positions import (
     OPTION_CLASSES,
     OrderError,
@@ -90,10 +91,9 @@ ROLL_HHMM = os.getenv("FNO_AUTO_ROLL_TIME", "15:00")
 GRACE_MINUTES = int(os.getenv("FNO_AUTO_ROLL_GRACE_MINUTES", "25"))
 MIN_DAYS_TO_EXPIRY = int(os.getenv("FNO_AUTO_ROLL_MIN_DAYS", "7"))
 TICK_SECONDS = int(os.getenv("FNO_AUTO_ROLL_TICK_SECONDS", "60"))
-# NSE trading holidays that fall on a weekday, ISO dates, comma-separated. There is no
-# holiday feed in this app, and a live LTP alone cannot prove the market is open (a
-# quote endpoint happily returns the previous close on a holiday), so the honest
-# options are an explicit list or rolling on a closed day. This is the list.
+# Extra closures for THIS job only, ISO dates, comma-separated. The exchange's own list
+# now lives in market_calendar (with its live self-check) and applies here as well; this
+# variable is kept so an existing setting keeps working.
 HOLIDAYS = {d.strip() for d in os.getenv("FNO_AUTO_ROLL_HOLIDAYS", "").split(",") if d.strip()}
 
 
@@ -107,7 +107,7 @@ def _today_ist() -> date:
 
 def is_trading_day(now: datetime | None = None) -> bool:
     now = now or datetime.now(IST)
-    return now.weekday() < 5 and now.date().isoformat() not in HOLIDAYS
+    return market_calendar.is_trading_day(now) and now.date().isoformat() not in HOLIDAYS
 
 
 async def resolve_account() -> tuple[dict | None, str]:

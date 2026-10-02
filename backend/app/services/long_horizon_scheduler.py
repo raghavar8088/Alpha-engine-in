@@ -10,6 +10,7 @@ import os
 from datetime import datetime
 
 from app.services.call_engine import IST
+from app.services import market_calendar
 
 logger = logging.getLogger("long_horizon_scheduler")
 
@@ -20,7 +21,7 @@ CHECK_INTERVAL_SECONDS = 30 * 60  # only need to notice "has 16:00 IST passed to
 
 
 def _due(now: datetime, last_run_date) -> bool:
-    if now.weekday() >= 5:
+    if not market_calendar.is_trading_day(now):
         return False
     if now.strftime("%H:%M") < RUN_AFTER_HHMM:
         return False

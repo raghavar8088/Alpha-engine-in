@@ -46,6 +46,7 @@ import time
 from datetime import datetime, timedelta, timezone
 
 from app.core.db import db, instruments_collection
+from app.services import market_calendar
 
 logger = logging.getLogger("intraday_session")
 
@@ -235,7 +236,7 @@ async def squareoff_loop() -> None:
     while True:
         try:
             now = datetime.now(IST)
-            if now.weekday() < 5 and WINDOW_OPEN_HHMM <= _hhmm(now) <= WINDOW_CLOSE_HHMM:
+            if market_calendar.is_trading_day(now) and WINDOW_OPEN_HHMM <= _hhmm(now) <= WINDOW_CLOSE_HHMM:
                 report = await closeout_pass(now)
                 minute = _hhmm(now)
                 if minute != last_report_minute and any(

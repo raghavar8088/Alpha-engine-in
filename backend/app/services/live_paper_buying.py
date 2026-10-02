@@ -68,6 +68,7 @@ from app.services.anti_strategies import register_anti_buying
 from app.services.stock_options import batched_ltp
 from tradingai_shared.contracts import STRATEGY_REGISTRY, StrategyContext
 from tradingai_shared.domain import Bar, SignalAction, Timeframe
+from app.services import market_calendar
 
 logger = logging.getLogger("live_paper_buying")
 
@@ -135,7 +136,7 @@ def _hhmm() -> str:
 
 
 def _market_open() -> bool:
-    return datetime.now(IST).weekday() < 5 and MARKET_OPEN <= _hhmm() <= "15:30"
+    return market_calendar.is_trading_day() and MARKET_OPEN <= _hhmm() <= "15:30"
 
 
 def _book(book: str | None) -> str:

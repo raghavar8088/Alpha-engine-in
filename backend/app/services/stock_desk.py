@@ -45,6 +45,7 @@ from app.services.anti_strategies import register_anti_buying
 from app.services.stock_options import atm_contracts, batched_ltp, current_expiry
 from tradingai_shared.contracts import STRATEGY_REGISTRY, StrategyContext
 from tradingai_shared.domain import Bar, SignalAction, Timeframe
+from app.services import market_calendar
 
 logger = logging.getLogger("stock_desk")
 
@@ -262,8 +263,8 @@ async def run_cycle(side: str) -> dict:
     # have dealt at by then. The scheduler already only ticks in session; this guard is for
     # the manual Run endpoint, which had none, and did exactly that at 22:56 IST.
     now_ist = datetime.now(IST)
-    if not (now_ist.weekday() < 5 and "09:15" <= now_ist.strftime("%H:%M") <= "15:30"):
-        notes.append("Outside market hours (09:15-15:30 IST, Mon-Fri) - open positions were "
+    if not market_calendar.in_session(now_ist):
+        notes.append("Outside market hours (09:15-15:30 IST on NSE trading days) - open positions were "
                      "managed, but no new entries are taken.")
         await _persist_state(side, 0, managed, notes)
         return {"side": side, "opened": 0, "managed": managed, "notes": notes}

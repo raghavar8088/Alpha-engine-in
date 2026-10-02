@@ -11,6 +11,7 @@ import os
 from datetime import datetime, time, timedelta, timezone
 
 from app.services.angel_fees import option_round_trip, round_trip
+from app.services import market_calendar
 
 IST = timezone(timedelta(hours=5, minutes=30))
 
@@ -78,7 +79,7 @@ def _hhmm(value: str) -> time:
 
 
 def is_trading_day(when: datetime | None = None) -> bool:
-    return (when or now_ist()).weekday() < 5
+    return market_calendar.is_trading_day(when or now_ist())
 
 
 def market_is_open(when: datetime | None = None) -> bool:

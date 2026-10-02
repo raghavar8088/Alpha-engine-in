@@ -45,6 +45,7 @@ from pymongo import UpdateOne
 
 from app.core.db import bars_collection, instruments_collection
 from app.services.angel_client import AngelAPIError, angel_client
+from app.services import market_calendar
 from app.services.strategy_factory.sources import (
     DERIVED_FROM, INDICES, NSE_SESSION_OPEN, TF_MINUTES, equity_load_bars, resample,
 )
@@ -94,7 +95,7 @@ def _now_ist() -> datetime:
 
 def is_market_open(now: datetime | None = None) -> bool:
     now = now or _now_ist()
-    if now.weekday() >= 5:
+    if not market_calendar.is_trading_day(now):
         return False
     return "09:15" <= now.strftime("%H:%M") <= "15:30"
 

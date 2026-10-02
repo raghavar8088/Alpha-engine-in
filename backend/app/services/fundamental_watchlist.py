@@ -44,6 +44,7 @@ from app.core.db import (
 )
 from app.services.screener_in import normalise_symbol, split_symbols
 from app.services.stock_options import batched_ltp
+from app.services import market_calendar
 
 logger = logging.getLogger("fundamental_watchlist")
 
@@ -343,7 +344,7 @@ async def tick() -> dict:
         except Exception:
             logger.exception("marking book %s failed", n)
         now_ist = datetime.now(IST)
-        if now_ist.weekday() < 5 and now_ist.strftime("%H:%M") >= SNAPSHOT_AFTER:
+        if market_calendar.is_trading_day(now_ist) and now_ist.strftime("%H:%M") >= SNAPSHOT_AFTER:
             try:
                 r = await snapshot(n)
                 if r.get("written"):
@@ -360,7 +361,7 @@ async def loop(interval_seconds: int = 300) -> None:
             now = datetime.now(IST)
             # Marks are only meaningful while there are prices, but the post-close
             # snapshot has to be able to fire, so the window runs past the close.
-            if now.weekday() < 5 and "09:10" <= now.strftime("%H:%M") <= "16:10":
+            if market_calendar.is_trading_day(now) and "09:10" <= now.strftime("%H:%M") <= "16:10":
                 r = await tick()
                 if r.get("marked") or r.get("snapshots"):
                     logger.info("fundamental paper books: %s", r)

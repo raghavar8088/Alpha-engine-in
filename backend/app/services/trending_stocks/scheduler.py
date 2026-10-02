@@ -31,6 +31,7 @@ from datetime import datetime
 from anyio import to_thread
 
 from .bars import IST, is_market_open
+from app.services import market_calendar
 
 logger = logging.getLogger("trending_stocks.scheduler")
 
@@ -71,7 +72,7 @@ async def trending_session_loop() -> None:
 
 
 def _due(now: datetime, last_run_date) -> bool:
-    if now.weekday() >= 5:
+    if not market_calendar.is_trading_day(now):
         return False
     if now.strftime("%H:%M") < EOD_HHMM:
         return False

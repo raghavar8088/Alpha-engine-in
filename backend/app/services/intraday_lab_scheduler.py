@@ -1,6 +1,6 @@
 """Background loop for the Intraday Strategy Lab — a `while True` + try/except +
 asyncio.sleep pattern. Runs the scan+manage cycle every TICK_SECONDS during
-market hours only (09:15-15:30 IST, weekdays)."""
+market hours only (09:15-15:30 IST, on NSE trading days — see market_calendar)."""
 
 import asyncio
 import logging
@@ -10,6 +10,7 @@ from datetime import datetime
 from fastapi import HTTPException
 
 from app.services.call_engine import IST
+from app.services import market_calendar
 
 logger = logging.getLogger("intraday_lab_scheduler")
 
@@ -21,7 +22,9 @@ MARKET_OPEN, MARKET_CLOSE = "09:15", "15:30"
 
 
 def _in_market_hours(now: datetime) -> bool:
-    return now.weekday() < 5 and MARKET_OPEN <= now.strftime("%H:%M") <= MARKET_CLOSE
+    # A trading DAY, not a weekday: on 2026-10-02 (Gandhi Jayanti) `weekday() < 5` let
+    # every desk below trade a closed market at the previous session's prices.
+    return market_calendar.in_session(now, MARKET_OPEN, MARKET_CLOSE)
 
 
 async def _dhan_or_none():
@@ -55,9 +58,17 @@ async def intraday_lab_loop() -> None:
     # when off, so the existing `result.get(...)` logging simply finds nothing.
     from app.services.desk_switches import gated
 
+    closed_logged = None
     while True:
         try:
             now = datetime.now(IST)
+            # Detects a closure the published list does not know about; never raises.
+            await market_calendar.probe_if_due(now)
+            if (not market_calendar.is_trading_day(now) and closed_logged != now.date()
+                    and now.weekday() < 5):
+                closed_logged = now.date()
+                logger.warning("NSE closed today (%s) — no intraday desk runs",
+                               market_calendar.holiday_name(now) or "detected by the self-check")
             if _in_market_hours(now):
                 dhan = await _dhan_or_none()
                 result = await gated("intraday_lab", run_cycle, dhan)
