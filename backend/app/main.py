@@ -31,6 +31,7 @@ from app.api.routes import (
     commodity_positions,
     commodity_prelive,
     fno_positions,
+    intraday_data,
     intraday_lab,
     live,
     live_intraday,
@@ -424,6 +425,28 @@ async def start_intraday_closeout_loop() -> None:
                            "intraday positions rely on each desk's own manage cycle alone")
     except Exception:  # noqa: BLE001
         logger.exception("could not start the intraday close-out loop")
+
+
+@app.on_event("startup")
+async def start_intraday_data() -> None:
+    """Intraday data plumbing (Phase 1): the liquid universe, the Angel WebSocket stream that
+    builds live 15-minute bars, gap-fill, the nightly reconcile against Angel's candles and
+    the history backfill. Two tasks; both idle on days the exchange is shut. Must not
+    raise: a startup hook that raises takes the whole backend down."""
+    try:
+        from app.services.angel_stream import ENABLED as STREAM_ON, stream_loop
+        from app.services.intraday_data_scheduler import ENABLED as DATA_ON, intraday_data_loop
+        from app.services.intraday_store import store
+
+        if DATA_ON:
+            asyncio.create_task(intraday_data_loop())
+        if STREAM_ON:
+            asyncio.create_task(stream_loop())
+        logger.info("Intraday data: loop %s, stream %s, bar store %s (writable=%s)",
+                    "on" if DATA_ON else "OFF", "on" if STREAM_ON else "OFF",
+                    store.coverage([])["dir"], store.writable)
+    except Exception:  # noqa: BLE001
+        logger.exception("intraday data startup failed — the desks still run without it")
 
 
 @app.on_event("startup")
@@ -913,6 +936,7 @@ app.include_router(fundamentals.router)
 app.include_router(natgas_book.router)
 app.include_router(gold_desk.router)
 app.include_router(diagnostics.router)
+app.include_router(intraday_data.router)
 
 if settings.enable_live_trading:
     app.include_router(live.router)

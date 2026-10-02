@@ -77,16 +77,61 @@ def from_rows(rows: list[list]) -> Series:
     return Series(ts, o, h, l, c, v)
 
 
-def resample(s: Series, factor: int) -> Series:
-    """Aggregate `factor` bars into one. Angel has no native 4-hour interval, so the 4H
-    series is built from 1H bars here rather than being silently skipped. NSE trades
-    6h15m a day, so the last bucket of a session is a partial bar — real, but shorter
-    than the others, which is worth knowing before trusting a 4H signal."""
+def _session_bucket(stamp, width_min: int):
+    """(date, bucket) for an Angel timestamp, buckets counted from 09:15 within the day;
+    None when the stamp cannot be read."""
+    from datetime import datetime
+    try:
+        d = stamp if isinstance(stamp, datetime) else datetime.fromisoformat(str(stamp))
+    except (TypeError, ValueError):
+        return None
+    return d.date(), (d.hour * 60 + d.minute - 555) // width_min
+
+
+def resample(s: Series, factor: int, base_minutes: int | None = None) -> Series:
+    """Aggregate `factor` bars into one, ANCHORED TO THE SESSION. Angel has no native 45m or
+    4h interval, so they are built here from 15m and 1h bars.
+
+    The buckets start at 09:15 every day and never cross the overnight gap. This used to
+    chunk every `factor` bars counted from the start of the fetch — and an NSE day holds
+    25 fifteen-minute bars and 7 hourly ones, neither divisible by 3 or 4 — so most "45m"
+    and "4h" bars straddled two sessions: 15:15 of one day glued to 09:15-09:45 of the
+    next, with the overnight gap inside a single candle. Fixed 2026-10-02.
+
+    The last bucket of a session is shorter by design (15:15-15:30 for 45m; 13:15-15:30
+    for 4h). `base_minutes` is inferred from the first two same-day bars when omitted; if
+    the timestamps cannot be read the old count-based chunking is used."""
+    if factor <= 1 or len(s) == 0:
+        return s
+    if base_minutes is None:
+        from datetime import datetime
+        try:
+            stamps = [datetime.fromisoformat(str(t)) for t in s.ts[:50]]
+            gaps = [int((b - a).total_seconds() // 60) for a, b in zip(stamps, stamps[1:])
+                    if a.date() == b.date() and b > a]
+            base_minutes = min(gaps) if gaps else None
+        except (TypeError, ValueError):
+            base_minutes = None
     ts, o, h, l, c, v = [], [], [], [], [], []
-    for i in range(0, len(s) - factor + 1, factor):
-        j = i + factor
-        ts.append(s.ts[i]); o.append(s.o[i]); h.append(max(s.h[i:j]))
-        l.append(min(s.l[i:j])); c.append(s.c[j - 1]); v.append(sum(s.v[i:j]))
+    if not base_minutes:
+        for i in range(0, len(s) - factor + 1, factor):
+            j = i + factor
+            ts.append(s.ts[i]); o.append(s.o[i]); h.append(max(s.h[i:j]))
+            l.append(min(s.l[i:j])); c.append(s.c[j - 1]); v.append(sum(s.v[i:j]))
+        return Series(ts, o, h, l, c, v)
+    width = base_minutes * factor
+    key = None
+    for i in range(len(s)):
+        k = _session_bucket(s.ts[i], width)
+        if k is None:
+            continue
+        if k != key:
+            key = k
+            ts.append(s.ts[i]); o.append(s.o[i]); h.append(s.h[i]); l.append(s.l[i])
+            c.append(s.c[i]); v.append(s.v[i])
+        else:
+            h[-1] = max(h[-1], s.h[i]); l[-1] = min(l[-1], s.l[i]); c[-1] = s.c[i]
+            v[-1] += s.v[i]
     return Series(ts, o, h, l, c, v)
 
 

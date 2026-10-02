@@ -203,6 +203,35 @@ async def _universe() -> list[dict]:
          "exchange_segment": 1, "lot_size": 1})]
 
 
+def _base_minutes(tf: TF) -> int:
+    return 375 if tf.resolution == "D" else int(tf.resolution)
+
+
+def _closed(s: Series, minutes: int, now: datetime) -> Series:
+    """Drop trailing bars that have not finished. Angel's candle endpoint returns the bar
+    that is still forming; evaluating it fires a rule on a half-built candle — a different
+    rule from the one a backtest of closed bars measures — and the old "one entry per
+    closed bar" guard keyed on that forming bar. A bar ends `minutes` after it starts,
+    clipped to the 15:30 close (so a daily bar ends at 15:30 of its own day)."""
+    keep = len(s)
+    while keep:
+        try:
+            start = datetime.fromisoformat(str(s.ts[keep - 1]))
+        except (TypeError, ValueError):
+            break
+        if start.tzinfo is None:
+            start = start.replace(tzinfo=IST)
+        close = start.astimezone(IST).replace(hour=15, minute=30, second=0, microsecond=0)
+        # Angel stamps a DAILY candle at 00:00, so a daily bar ends at its own 15:30.
+        end = close if minutes >= 375 else min(start + timedelta(minutes=minutes), close)
+        if end <= now:
+            break
+        keep -= 1
+    if keep == len(s):
+        return s
+    return Series(s.ts[:keep], s.o[:keep], s.h[:keep], s.l[:keep], s.c[:keep], s.v[:keep])
+
+
 async def _series(inst: dict, tf: TF, budget: list[int]) -> Series | None:
     """Cached candles for one symbol/timeframe. `budget` caps fetches per cycle so a cold
     start spreads over several cycles instead of stalling one for minutes."""
@@ -230,9 +259,10 @@ async def _series(inst: dict, tf: TF, budget: list[int]) -> Series | None:
     await asyncio.sleep(CANDLE_PACE)
     if rows is None:
         return hit[1] if hit else None
-    s = from_rows(rows)
+    s = _closed(from_rows(rows), _base_minutes(tf), now)
     if tf.aggregate > 1:
-        s = resample(s, tf.aggregate)
+        s = _closed(resample(s, tf.aggregate, _base_minutes(tf)),
+                    _base_minutes(tf) * tf.aggregate, now)
     now = time.monotonic()
     _cache[key] = (now, s)
     _prune_cache(now)

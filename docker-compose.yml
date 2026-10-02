@@ -83,6 +83,12 @@ services:
     # container on it totals about 410MB, so this stays inside what the box can actually
     # back. Raising it further would start trading one service's health for another's.
     mem_limit: 800m
+    # Intraday 15-minute bars for the liquid universe (app/services/intraday_store.py):
+    # ~50 MB of compressed files for two years x 200 stocks. On disk, not in Atlas — the M0
+    # cluster has write-blocked at its 512 MB quota before — and on a named volume so a
+    # rebuild of this image does not throw the history away.
+    volumes:
+      - intraday_data:/data/intraday
 
   market-data-service:
     build:
@@ -166,3 +172,4 @@ volumes:
   miniodata:
   qdrantdata:
   mongodata:
+  intraday_data:
