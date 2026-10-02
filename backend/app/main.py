@@ -52,6 +52,7 @@ from app.api.routes import (
     research,
     risk,
     screener,
+    selection,
     swing_signals,
     stock_desk,
     stock_desk_books,
@@ -948,6 +949,7 @@ app.include_router(gold_desk.router)
 app.include_router(diagnostics.router)
 app.include_router(intraday_data.router)
 app.include_router(intraday_ops.router)
+app.include_router(selection.router)
 
 if settings.enable_live_trading:
     app.include_router(live.router)

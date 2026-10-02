@@ -66,7 +66,11 @@ async def _chart(client: httpx.AsyncClient, sym: str, rng: str = "10d") -> dict 
         res = r.json()["chart"]["result"][0]
         ts = res.get("timestamp") or []
         closes = res["indicators"]["quote"][0].get("close") or []
-        rows = [(datetime.fromtimestamp(t, timezone.utc).date().isoformat(), c)
+        # Date each daily bar in its EXCHANGE's local time: Yahoo stamps USD/INR at 23:00
+        # UTC of the day before (London midnight), so a UTC date put today's bar a day
+        # early — the live read then compared the price with today's own bar (~0%).
+        off = int((res.get("meta") or {}).get("gmtoffset") or 0)
+        rows = [(datetime.fromtimestamp(t + off, timezone.utc).date().isoformat(), c)
                 for t, c in zip(ts, closes) if c is not None]
         return {"meta": res.get("meta", {}), "rows": rows}
     except Exception:  # noqa: BLE001
@@ -99,7 +103,7 @@ async def snapshot(save: bool = True) -> dict:
                 live = {"price": price, "vs": done[-1][1],
                         "chg_pct": round((price / done[-1][1] - 1) * 100, 2)}
             out["series"][key] = {"label": label, "group": group, "read": read, "available": True,
-                                  "session": sess, "live": live}
+                                  "session": sess, "live": live, "recent": done[-8:]}
     if save:
         try:
             await brief_coll.update_one({"_id": now.date().isoformat()},
