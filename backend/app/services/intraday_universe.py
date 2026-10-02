@@ -35,6 +35,37 @@ UNIVERSE_SIZE = int(os.getenv("INTRADAY_UNIVERSE_SIZE", "200"))
 MIN_PRICE = float(os.getenv("INTRADAY_UNIVERSE_MIN_PRICE", "50"))
 NIFTY_TOKEN = "99926000"
 
+# Indices streamed and stored alongside the stocks (NSE cash-index tokens in Angel's scrip
+# master, resolved 2026-10-02). Volume is always 0 for an index; prices are what matter.
+INDEX_TOKENS = {
+    "NIFTY": "99926000", "INDIAVIX": "99926017", "NIFTYBANK": "99926009", "NIFTYIT": "99926008",
+    "FINNIFTY": "99926037", "NIFTYPVTBANK": "99926047", "NIFTYPSUBANK": "99926025",
+    "NIFTYAUTO": "99926029", "NIFTYPHARMA": "99926023", "NIFTYFMCG": "99926021",
+    "NIFTYMETAL": "99926030", "NIFTYENERGY": "99926020", "NIFTYREALTY": "99926018",
+    "NIFTYINFRA": "99926019", "NIFTYMEDIA": "99926031", "NIFTYCOMMODITIES": "99926035",
+    "NIFTYCONSUMPTION": "99926036", "NIFTYMIDCAP100": "99926011", "NIFTYNXT50": "99926013",
+}
+
+# `stock_universe.sector` holds the niftyindices "Industry" column. Each industry is read
+# against the NSE sectoral index that covers it; the mapping is approximate (the Industry
+# column does not separate banks from NBFCs, so both read against FINNIFTY) and anything
+# unmapped reads against NIFTY itself.
+SECTOR_INDEX = {
+    "Financial Services": "FINNIFTY", "Information Technology": "NIFTYIT",
+    "Automobile and Auto Components": "NIFTYAUTO", "Healthcare": "NIFTYPHARMA",
+    "Fast Moving Consumer Goods": "NIFTYFMCG", "Metals & Mining": "NIFTYMETAL",
+    "Oil Gas & Consumable Fuels": "NIFTYENERGY", "Power": "NIFTYENERGY",
+    "Capital Goods": "NIFTYINFRA", "Construction": "NIFTYINFRA", "Telecommunication": "NIFTYINFRA",
+    "Services": "NIFTYINFRA", "Construction Materials": "NIFTYCOMMODITIES", "Chemicals": "NIFTYCOMMODITIES",
+    "Consumer Durables": "NIFTYCONSUMPTION", "Consumer Services": "NIFTYCONSUMPTION",
+    "Textiles": "NIFTYCONSUMPTION", "Realty": "NIFTYREALTY",
+    "Media Entertainment & Publication": "NIFTYMEDIA",
+}
+
+
+def sector_index(industry: str | None) -> str:
+    return SECTOR_INDEX.get((industry or "").strip(), "NIFTY")
+
 universe_collection = db["intraday_universe"]
 
 _cache: dict = {"date": None, "doc": None}

@@ -16,10 +16,11 @@ from datetime import date, datetime
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.api.deps import get_current_user
-from app.services import (in_play, intraday_backfill, intraday_universe,
-                          market_calendar)
+from app.services import (global_cues, in_play, intraday_backfill, intraday_data_scheduler,
+                          intraday_universe, market_calendar, nse_archives, preopen,
+                          results_calendar)
 from app.services.angel_stream import stream
-from app.services.intraday_store import AGG_MINUTES, store
+from app.services.intraday_store import AGG_MINUTES, store, store5
 
 router = APIRouter(prefix="/api/intraday-data", tags=["intraday-data"])
 
@@ -39,7 +40,24 @@ async def status():
         "store": {**store.coverage(syms), **store.mem_stats()},
         "jobs": intraday_backfill.describe(),
         "last_reconcile": await intraday_backfill.last_reconcile(),
+        "store_5m": {**store5.coverage(syms), **store5.mem_stats()},
+        "nse_archives": nse_archives.describe(),
+        "preopen": preopen.status,
+        "results_calendar": results_calendar.status,
+        "scheduler": intraday_data_scheduler.describe(),
     }
+
+
+@router.get("/brief")
+async def brief(date_: str | None = Query(None, alias="date")):
+    """The day's market brief: global cues (08:40 / 09:05) and the NSE pre-open summary."""
+    day = date.fromisoformat(date_) if date_ else None
+    return await global_cues.latest_brief(day) or {}
+
+
+@router.get("/results-calendar")
+async def results_upcoming(days: int = Query(7, ge=0, le=60)):
+    return {"upcoming": await results_calendar.upcoming(days)}
 
 
 @router.get("/universe")

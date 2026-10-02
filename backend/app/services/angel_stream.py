@@ -44,7 +44,7 @@ from datetime import datetime, timedelta, timezone
 from app.services import market_calendar
 from app.services.angel_client import angel_client
 from app.services.intraday_store import (BASE_MIN, SESSION_CLOSE_MIN, SESSION_OPEN_MIN,
-                                         SRC_STREAM, store)
+                                         SRC_STREAM, store, store5)
 
 logger = logging.getLogger("angel_stream")
 
@@ -216,6 +216,8 @@ class Stream:
         self.last_message = 0.0
         self.messages = 0
         self.bars_emitted = 0
+        self.bars_emitted_5m = 0
+        self.last_emitted_5m = 0
         self.bars_skipped = {"outage": 0, "joined_late": 0, "no_trades": 0}
         self.last_emitted_boundary = 0
         self.last_error: str | None = None
@@ -287,9 +289,11 @@ class Stream:
             return False
         return True
 
-    def emit(self, boundary: int) -> int:
-        """Emit the 15-minute bars ending at `boundary` into the store."""
-        start = boundary - BASE_MIN * 60
+    def emit(self, boundary: int, minutes: int = BASE_MIN, target=None) -> int:
+        """Emit the `minutes`-long bars ending at `boundary` into `target` (default: the
+        15-minute store). The same coverage rules apply at every bar length."""
+        target = target if target is not None else store
+        start = boundary - minutes * 60
         made = 0
         covered = self._covered(start, boundary)
         for st in self.states.values():
@@ -311,10 +315,14 @@ class Stream:
             if row is None:
                 self.bars_skipped["no_trades"] += 1
                 continue
-            store.merge(st.symbol, [row])
+            target.merge(st.symbol, [row])
             made += 1
-        self.bars_emitted += made
-        self.last_emitted_boundary = boundary
+        if minutes == BASE_MIN:
+            self.bars_emitted += made
+            self.last_emitted_boundary = boundary
+        else:
+            self.bars_emitted_5m += made
+            self.last_emitted_5m = boundary
         return made
 
     async def _emitter(self) -> None:
@@ -329,6 +337,10 @@ class Stream:
                     made = self.emit(boundary)
                     logger.info("stream bars %s: %d emitted", datetime.fromtimestamp(
                         boundary, IST).strftime("%H:%M"), made)
+                k5 = (min(m, SESSION_CLOSE_MIN) - SESSION_OPEN_MIN) // 5
+                b5 = _session_epoch(d.date(), SESSION_OPEN_MIN + k5 * 5)
+                if k5 > 0 and b5 > self.last_emitted_5m:
+                    self.emit(b5, 5, store5)
             await asyncio.sleep(1.0)
 
     # ── lifecycle ────────────────────────────────────────────────────────────────
@@ -349,7 +361,8 @@ class Stream:
                     continue
                 members = await intraday_universe.members()
                 tokens = {m["token"]: m["symbol"] for m in members}
-                tokens[intraday_universe.NIFTY_TOKEN] = "NIFTY"
+                for sym_, tok_ in intraday_universe.INDEX_TOKENS.items():
+                    tokens[tok_] = sym_
                 for tok, sym in tokens.items():
                     if sym not in self.states:
                         self.states[sym] = TokenState(sym, tok)
@@ -377,7 +390,8 @@ class Stream:
             "reconnects": self.reconnects, "messages": self.messages,
             "seconds_since_message": round(now - self.last_message) if self.last_message else None,
             "tokens": len(self.states), "ticking_last_2m": len(live),
-            "bars_emitted": self.bars_emitted, "bars_skipped": dict(self.bars_skipped),
+            "bars_emitted": self.bars_emitted, "bars_emitted_5m": self.bars_emitted_5m,
+            "bars_skipped": dict(self.bars_skipped),
             "last_bar": datetime.fromtimestamp(self.last_emitted_boundary, IST).strftime("%H:%M")
             if self.last_emitted_boundary else None,
             "outages_today": len(self.outages), "last_error": self.last_error,

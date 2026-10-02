@@ -98,10 +98,10 @@ def session_minute(epoch: int) -> int:
     return d.hour * 60 + d.minute
 
 
-def is_session_bar(epoch: int) -> bool:
+def is_session_bar(epoch: int, minutes: int = BASE_MIN) -> bool:
     m = session_minute(epoch)
     return (SESSION_OPEN_MIN <= m < SESSION_CLOSE_MIN
-            and (m - SESSION_OPEN_MIN) % BASE_MIN == 0
+            and (m - SESSION_OPEN_MIN) % minutes == 0
             and _ist(epoch).second == 0)
 
 
@@ -179,17 +179,17 @@ class Bars:
 # ── files ────────────────────────────────────────────────────────────────────────
 
 
-def _path(symbol: str) -> str:
+def _path(symbol: str, tf: str = "15m") -> str:
     safe = "".join(ch if ch.isalnum() or ch in "-_&" else "_" for ch in symbol.upper())
-    return os.path.join(DATA_DIR, "15m", f"{safe}.ibar")
+    return os.path.join(DATA_DIR, tf, f"{safe}.ibar")
 
 
-def write_file(symbol: str, bars: Bars) -> None:
-    head = json.dumps({"symbol": symbol, "tf": "15m", "n": len(bars),
+def write_file(symbol: str, bars: Bars, tf: str = "15m") -> None:
+    head = json.dumps({"symbol": symbol, "tf": tf, "n": len(bars),
                        "cols": ["t:q", "o:d", "h:d", "l:d", "c:d", "v:q", "src:b"]}).encode()
     body = b"".join(getattr(bars, name).tobytes() for name in Bars.__slots__)
     blob = zlib.compress(MAGIC + head + b"\n" + body, 6)
-    path = _path(symbol)
+    path = _path(symbol, tf)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     tmp = f"{path}.tmp{os.getpid()}"
     with open(tmp, "wb") as f:
@@ -197,8 +197,8 @@ def write_file(symbol: str, bars: Bars) -> None:
     os.replace(tmp, path)                     # atomic: a reader sees old or new, never half
 
 
-def read_file(symbol: str) -> Bars:
-    path = _path(symbol)
+def read_file(symbol: str, tf: str = "15m") -> Bars:
+    path = _path(symbol, tf)
     if not os.path.exists(path):
         return Bars()
     with open(path, "rb") as f:
@@ -222,18 +222,22 @@ def read_file(symbol: str) -> Bars:
 
 
 class Store:
-    """Recent bars in memory for live use; the full history on disk for research."""
+    """Recent bars in memory for live use; the full history on disk for research.
 
-    def __init__(self):
+    One instance per bar length: `store` (15 minutes, what the strategies trade on) and
+    `store5` (5 minutes, kept for research that 15-minute bars cannot settle — where a
+    stop sits inside the bar that triggered the entry)."""
+
+    def __init__(self, tf: str = "15m", minutes: int = BASE_MIN, memory_sessions: int = MEMORY_SESSIONS):
+        self.tf, self.minutes, self.memory_sessions = tf, minutes, memory_sessions
         self._mem: dict[str, Bars] = {}
         self._dirty: set[str] = set()
         self._lock = threading.Lock()      # file writes may run in a worker thread
         self.writable = self._check_dir()
 
-    @staticmethod
-    def _check_dir() -> bool:
+    def _check_dir(self) -> bool:
         try:
-            os.makedirs(os.path.join(DATA_DIR, "15m"), exist_ok=True)
+            os.makedirs(os.path.join(DATA_DIR, self.tf), exist_ok=True)
             probe = os.path.join(DATA_DIR, ".write-probe")
             with open(probe, "w") as f:
                 f.write("ok")
@@ -248,11 +252,11 @@ class Store:
         b = self._mem.get(symbol)
         if b is None:
             try:
-                b = read_file(symbol)
+                b = read_file(symbol, self.tf)
             except (OSError, ValueError, zlib.error):
                 logger.exception("could not read bars for %s — starting empty", symbol)
                 b = Bars()
-            b.trim_sessions(MEMORY_SESSIONS)
+            b.trim_sessions(self.memory_sessions)
             self._mem[symbol] = b
         return b
 
@@ -265,11 +269,11 @@ class Store:
             if sym in self._mem:
                 continue
             try:
-                b = await asyncio.to_thread(read_file, sym)
+                b = await asyncio.to_thread(read_file, sym, self.tf)
             except (OSError, ValueError, zlib.error):
                 logger.exception("preload failed for %s", sym)
                 continue
-            b.trim_sessions(MEMORY_SESSIONS)
+            b.trim_sessions(self.memory_sessions)
             self._mem.setdefault(sym, b)
             loaded += 1
         return loaded
@@ -286,16 +290,17 @@ class Store:
 
         The returned Series also carries `epochs` (bar start times) so callers can find a
         day's bars by binary search instead of parsing timestamps."""
-        minutes = AGG_MINUTES[tf]
-        factor = minutes // BASE_MIN
+        minutes = self.minutes if tf == self.tf else AGG_MINUTES[tf]
+        factor = minutes // self.minutes
         cutoff = int((now or datetime.now(IST)).timestamp())
         b = self.get(symbol)
-        # A grid 15m bar ends 15 minutes after it starts (15:15 + 15 = the 15:30 close),
-        # so "closed by cutoff" is simply start <= cutoff - 900.
-        hi = bisect_right(b.t, cutoff - BASE_MIN * 60)
-        lo = 0 if n is None else max(0, hi - (n + 2) * factor - BARS_PER_SESSION)
+        # A grid bar ends `self.minutes` after it starts (the session's last grid bar ends
+        # exactly at the 15:30 close), so "closed by cutoff" is start <= cutoff - length.
+        hi = bisect_right(b.t, cutoff - self.minutes * 60)
+        per_session = (SESSION_CLOSE_MIN - SESSION_OPEN_MIN) // self.minutes
+        lo = 0 if n is None else max(0, hi - (n + 2) * factor - per_session)
         rows = [(b.t[i], b.o[i], b.h[i], b.l[i], b.c[i], b.v[i], b.src[i]) for i in range(lo, hi)]
-        if minutes != BASE_MIN:
+        if minutes != self.minutes:
             rows = aggregate(rows, minutes, cutoff)
             if lo > 0 and rows:
                 rows = rows[1:]          # the first bucket may be missing its early bars
@@ -319,10 +324,10 @@ class Store:
     def _merge_file(self, symbol: str, rows: list[tuple]) -> tuple[int, int]:
         """File-level merge. A STREAM bar never replaces a CANDLE bar already on disk."""
         with self._lock:
-            disk = read_file(symbol)
+            disk = read_file(symbol, self.tf)
             changed = disk.merge(rows)
             if changed:
-                write_file(symbol, disk)
+                write_file(symbol, disk, self.tf)
             return changed, len(disk)
 
     async def flush_dirty(self) -> dict:
@@ -361,14 +366,14 @@ class Store:
                 recent = [r for r in rows if r[0] >= mem.t[0]]
                 if recent:
                     mem.merge(recent)
-                    mem.trim_sessions(MEMORY_SESSIONS)
+                    mem.trim_sessions(self.memory_sessions)
         return changed, total
 
     def coverage(self, symbols: list[str]) -> dict:
         """What history exists on disk, without loading full files into memory."""
         have, sessions = 0, []
         for sym in symbols:
-            path = _path(sym)
+            path = _path(sym, self.tf)
             if not os.path.exists(path):
                 continue
             have += 1
@@ -376,7 +381,7 @@ class Store:
             if b is not None and len(b):
                 sessions.append(len({_ist(t).date() for t in b.t}))
         sessions.sort()
-        return {"symbols": len(symbols), "with_history": have,
+        return {"symbols": len(symbols), "with_history": have, "tf": self.tf,
                 "memory_sessions_median": sessions[len(sessions) // 2] if sessions else 0,
                 "dir": DATA_DIR, "writable": self.writable}
 
@@ -411,14 +416,14 @@ def aggregate(rows: list[tuple], minutes: int, cutoff: int) -> list[tuple]:
     return out
 
 
-def rows_from_angel(candles: list[list], src: int = SRC_CANDLE) -> list[tuple]:
+def rows_from_angel(candles: list[list], src: int = SRC_CANDLE, minutes: int = BASE_MIN) -> list[tuple]:
     """Angel candle rows -> store rows, dropping anything outside the session grid."""
     out = []
     for r in candles:
         if len(r) < 6:
             continue
         t = parse_stamp(r[0])
-        if t is None or not is_session_bar(t):
+        if t is None or not is_session_bar(t, minutes):
             continue
         try:
             out.append((t, float(r[1]), float(r[2]), float(r[3]), float(r[4]), int(r[5] or 0), src))
@@ -428,3 +433,6 @@ def rows_from_angel(candles: list[list], src: int = SRC_CANDLE) -> list[tuple]:
 
 
 store = Store()
+# 5-minute bars: research data (where a stop sits inside the 15-minute entry bar) and the
+# forward record of the same. Ten sessions in memory is all the live side ever needs.
+store5 = Store("5m", 5, int(os.getenv("INTRADAY_MEMORY_SESSIONS_5M", "10")))

@@ -30,7 +30,7 @@ from datetime import date, datetime, timedelta, timezone
 from app.core.db import db
 from app.services import intraday_universe, market_calendar
 from app.services.angel_client import AngelAPIError, angel_client, candle_pacer
-from app.services.intraday_store import (SRC_CANDLE, SRC_STREAM, rows_from_angel, store,
+from app.services.intraday_store import (SRC_CANDLE, SRC_STREAM, rows_from_angel, store, store5,
                                          _ist)
 
 logger = logging.getLogger("intraday_backfill")
@@ -38,6 +38,9 @@ logger = logging.getLogger("intraday_backfill")
 IST = timezone(timedelta(hours=5, minutes=30))
 HISTORY_DAYS = int(os.getenv("INTRADAY_HISTORY_DAYS", "730"))
 WINDOW_DAYS = 199                        # Angel serves 200 calendar days of 15m per request
+# Per bar length: (Angel interval key, days per request, the store it fills, state key).
+# FIVE_MINUTE is served 100 days per request (Angel's documented limit).
+TF = {"15m": ("15", 199, store, "exhausted"), "5m": ("5", 99, store5, "exhausted_5m")}
 OFF_HOURS_FROM, OFF_HOURS_UNTIL = "15:50", "08:50"
 
 state_collection = db["intraday_data_state"]
@@ -51,10 +54,17 @@ status: dict = {"backfill": {"running": False, "done_symbols": 0, "requests": 0,
 NIFTY_MEMBER = {"symbol": "NIFTY", "token": "99926000", "exchange": "NSE", "turnover_cr": None}
 
 
+def _index_members() -> list[dict]:
+    """NIFTY, India VIX and the sector indices — the market context every scanner and the
+    pre-market brief read. Streamed live and backfilled like stocks (volume is 0)."""
+    from app.services.intraday_universe import INDEX_TOKENS
+    return [{"symbol": sym, "token": tok, "exchange": "NSE", "turnover_cr": None, "index": True}
+            for sym, tok in INDEX_TOKENS.items()]
+
+
 async def _members() -> list[dict]:
-    """The universe plus NIFTY: the v2 trend rules trade only with the index's direction on
-    the day, so its bars are needed live and in every backtest."""
-    return list(await intraday_universe.members()) + [NIFTY_MEMBER]
+    """The universe plus the indices."""
+    return list(await intraday_universe.members()) + _index_members()
 
 
 def off_hours(now: datetime | None = None) -> bool:
@@ -65,14 +75,15 @@ def off_hours(now: datetime | None = None) -> bool:
     return hhmm >= OFF_HOURS_FROM or hhmm < OFF_HOURS_UNTIL
 
 
-async def _fetch(member: dict, frm: datetime, to: datetime, bulk: bool) -> list[tuple] | None:
+async def _fetch(member: dict, frm: datetime, to: datetime, bulk: bool, tf: str = "15m") -> list[tuple] | None:
     """One candle request. None on failure (the caller retries later)."""
+    interval = TF[tf][0]
     for attempt in (1, 2, 3):
         try:
             rows = await angel_client.candles(
-                member.get("exchange") or "NSE", str(member["token"]), "15",
+                member.get("exchange") or "NSE", str(member["token"]), interval,
                 frm.strftime("%Y-%m-%d %H:%M"), to.strftime("%Y-%m-%d %H:%M"), bulk=bulk)
-            return rows_from_angel(rows or [], SRC_CANDLE)
+            return rows_from_angel(rows or [], SRC_CANDLE, int(interval))
         except AngelAPIError as exc:
             # The pacer has already started a cooldown on a refusal; just try again.
             if attempt == 3:
@@ -84,21 +95,27 @@ async def _fetch(member: dict, frm: datetime, to: datetime, bulk: bool) -> list[
 # ── 1. backfill ──────────────────────────────────────────────────────────────────
 
 
-async def _exhausted() -> dict:
+async def _exhausted(tf: str = "15m") -> dict:
     doc = await state_collection.find_one({"_id": "backfill"}) or {}
-    return doc.get("exhausted", {})
+    return doc.get(TF[tf][3], {})
 
 
 def _windows(have_from: date | None, have_to: date | None, today: date,
-             floor: date) -> tuple[list[tuple[date, date]], list[tuple[date, date]]]:
+             floor: date, window: int = WINDOW_DAYS) -> tuple[list[tuple[date, date]], list[tuple[date, date]]]:
     """(newer, older) request windows, each at most WINDOW_DAYS long.
     newer: from the last day on disk (re-fetched, it may have been partial) up to today.
     older: from the day before the first day on disk back to `floor`, newest first."""
     newer: list[tuple[date, date]] = []
-    if have_to is not None and have_to < today:
+    # The last session whose bars can be complete: today once it has closed, else the
+    # previous trading day. A file already holding it needs no request at all — without
+    # this every run re-asked Angel for every symbol's latest window.
+    now = datetime.now(IST)
+    last_session = today if (market_calendar.is_trading_day(today) and now.strftime("%H:%M") >= "15:35") \
+        else market_calendar.previous_trading_day(today)
+    if have_to is not None and have_to < last_session:
         start = have_to
         while True:
-            w_end = min(today, start + timedelta(days=WINDOW_DAYS))
+            w_end = min(today, start + timedelta(days=window))
             newer.append((start, w_end))
             if w_end >= today:
                 break
@@ -106,7 +123,7 @@ def _windows(have_from: date | None, have_to: date | None, today: date,
     older: list[tuple[date, date]] = []
     cursor = (have_from - timedelta(days=1)) if have_from else today
     while cursor >= floor:
-        w_start = max(floor, cursor - timedelta(days=WINDOW_DAYS))
+        w_start = max(floor, cursor - timedelta(days=window))
         older.append((w_start, cursor))
         cursor = w_start - timedelta(days=1)
     return newer, older
@@ -116,32 +133,33 @@ def _at(d: date, hh: int, mm: int) -> datetime:
     return datetime(d.year, d.month, d.day, hh, mm)
 
 
-async def backfill_symbol(member: dict, earliest_wanted: date, exhausted: dict) -> dict:
-    """Bring one symbol's file to cover [earliest_wanted, today]."""
+async def backfill_symbol(member: dict, earliest_wanted: date, exhausted: dict, tf: str = "15m") -> dict:
+    """Bring one symbol's file (of bar length `tf`) to cover [earliest_wanted, today]."""
     from app.services.intraday_store import read_file
 
+    _iv, window, target, state_key = TF[tf]
     sym = member["symbol"]
-    disk = await asyncio.to_thread(read_file, sym)
+    disk = await asyncio.to_thread(read_file, sym, tf)
     have_from = _ist(disk.t[0]).date() if len(disk) else None
     have_to = _ist(disk.t[-1]).date() if len(disk) else None
     del disk
     floor = earliest_wanted
     if exhausted.get(sym):              # Angel holds nothing at or before this date
         floor = max(floor, date.fromisoformat(exhausted[sym]) + timedelta(days=1))
-    newer, older = _windows(have_from, have_to, datetime.now(IST).date(), floor)
+    newer, older = _windows(have_from, have_to, datetime.now(IST).date(), floor, window)
     added = requests = 0
     for kind, windows in (("newer", newer), ("older", older)):
         for w_start, w_end in windows:
             if not off_hours():
                 return {"symbol": sym, "added": added, "requests": requests, "complete": False}
-            rows = await _fetch(member, _at(w_start, 9, 15), _at(w_end, 15, 30), bulk=True)
+            rows = await _fetch(member, _at(w_start, 9, 15), _at(w_end, 15, 30), bulk=True, tf=tf)
             requests += 1
             status["backfill"]["requests"] += 1
             if rows is None:                     # a failure is not an empty answer
                 status["backfill"]["errors"] += 1
                 return {"symbol": sym, "added": added, "requests": requests, "complete": False}
             if rows:
-                changed, _total = await store.merge_history(sym, rows)
+                changed, _total = await target.merge_history(sym, rows)
                 added += changed
                 status["backfill"]["bars"] += changed
             elif kind == "older":
@@ -149,38 +167,56 @@ async def backfill_symbol(member: dict, earliest_wanted: date, exhausted: dict) 
                 # keeps nothing) that far back. Remember it so we never ask again.
                 exhausted[sym] = w_end.isoformat()
                 await state_collection.update_one(
-                    {"_id": "backfill"}, {"$set": {f"exhausted.{sym}": w_end.isoformat()}},
+                    {"_id": "backfill"}, {"$set": {f"{state_key}.{sym}": w_end.isoformat()}},
                     upsert=True)
                 break
     return {"symbol": sym, "added": added, "requests": requests, "complete": True}
 
 
-async def backfill(symbols: list[str] | None = None, days: int = HISTORY_DAYS) -> dict:
+async def backfill(symbols: list[str] | None = None, days: int = HISTORY_DAYS, tf: str = "15m") -> dict:
     """Bring every universe symbol's history to `days` back. Stops when the session opens."""
     if status["backfill"]["running"]:
         return {"already_running": True}
-    status["backfill"].update({"running": True, "done_symbols": 0, "started": datetime.now(IST).isoformat()})
+    status["backfill"].update({"running": True, "done_symbols": 0, "tf": tf,
+                               "started": datetime.now(IST).isoformat()})
     try:
         members = await _members()
         if symbols:
             members = [m for m in members if m["symbol"] in set(symbols)]
         earliest = datetime.now(IST).date() - timedelta(days=days)
-        exhausted = await _exhausted()
+        exhausted = await _exhausted(tf)
         done = []
         for m in members:
             if not off_hours():
                 logger.info("backfill paused for the session after %d symbols", len(done))
                 break
-            r = await backfill_symbol(m, earliest, exhausted)
+            r = await backfill_symbol(m, earliest, exhausted, tf)
             done.append(r)
             status["backfill"]["done_symbols"] = len(done)
             status["backfill"]["last"] = r
-        await store.flush_dirty()
-        return {"symbols": len(done), "bars_added": sum(r["added"] for r in done),
+        await TF[tf][2].flush_dirty()
+        return {"tf": tf, "symbols": len(done), "bars_added": sum(r["added"] for r in done),
                 "requests": sum(r["requests"] for r in done),
                 "incomplete": [r["symbol"] for r in done if not r["complete"]]}
     finally:
         status["backfill"]["running"] = False
+
+
+async def reconcile_5m(day: date | None = None) -> dict:
+    """Replace the day's stream-built 5m bars with Angel's 5m candles (the record research
+    reads). One request per member; no comparison statistics — the 15m reconcile keeps
+    those."""
+    day = day or datetime.now(IST).date()
+    frm = datetime(day.year, day.month, day.day, 9, 15)
+    to = datetime(day.year, day.month, day.day, 15, 30)
+    replaced = asked = 0
+    for m in await _members():
+        rows = await _fetch(m, frm, to, bulk=True, tf="5m")
+        asked += 1
+        if rows:
+            replaced += (await store5.merge_history(m["symbol"], rows))[0]
+    status["reconcile"]["last_5m"] = {"date": day.isoformat(), "requests": asked, "bars": replaced}
+    return status["reconcile"]["last_5m"]
 
 
 # ── 2. gap-fill ──────────────────────────────────────────────────────────────────
