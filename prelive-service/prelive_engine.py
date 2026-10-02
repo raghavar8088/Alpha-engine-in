@@ -53,10 +53,23 @@ VOL_REGIME_LOOKBACK_DAYS = int(os.getenv("PRELIVE_VOL_LOOKBACK_DAYS", "5"))
 from options_service.options_backtest import OPTION_BUYING_CATEGORIES
 from tradingai_shared.contracts import STRATEGY_REGISTRY, StrategyContext
 from tradingai_shared.domain import Bar, SignalAction, Timeframe
+from tradingai_shared.option_fees import option_round_trip
 
 IST = timezone(timedelta(hours=5, minutes=30))
-LOT_SIZE = 75
+# The lot size comes from the CONTRACT (instrument master `lot_size`), not a constant: this
+# was hard-coded at 75 while NIFTY's lot has been 65, so every position was 15% too big.
+# This default is only for restoring positions saved before contracts carried it.
+DEFAULT_LOT_SIZE = int(os.getenv("NIFTY_LOT_SIZE", "65"))
 STRIKE_STEP = 50
+# "Weekly ATM" must BE weekly. The desk took the nearest expiry the instrument master
+# listed, and the master had gone stale: from mid-August it bought monthlies (11-35 days
+# out) and from 30 Sep a December contract. A nearest expiry further out than this means
+# the master is missing contracts, and the desk now refuses rather than silently trading
+# something else.
+MAX_WEEKLY_DTE = int(os.getenv("PRELIVE_MAX_WEEKLY_DTE", "7"))
+# When the order book is unavailable at a fill, the real-money estimate assumes this half
+# spread (a fraction of the premium, floored at one tick). Measured fills replace it.
+EST_HALF_SPREAD_PCT = float(os.getenv("PRELIVE_EST_HALF_SPREAD_PCT", "0.0025"))
 EOD_SQUAREOFF_MIN = 15 * 60 + 15  # 15:15 IST — flat before close
 
 # Paper account starting balance. Overridable so the desk can be resized without a
@@ -129,6 +142,22 @@ def load_qualified_universe() -> tuple[list[tuple[str, str]], dict | None]:
     de-dup). Absence of a verdict is treated as absence of approval, exactly as the
     selling desk does: a sweep that predates the de-dup marks nothing `in_basket`, so the
     desk trades nothing until the sweep is re-run rather than silently trading duplicates."""
+    # Since 2026-10-02 the basket comes from the Buying Lab v2 (direction test + deflated Sharpe
+    # + overfitting check on a premium model calibrated to real fills), not the old win-rate
+    # sweep: a strategy is traded here only if that gate PASSED it. Until something passes, the
+    # basket is empty and the desk trades nothing — which is the honest state of the evidence.
+    lab = _db["option_lab_runs"].find_one({}, sort=[("created_at", -1)])
+    if lab is not None:
+        meta = {"sweep_id": f"lab:{lab.get('run_id')}", "created_at": lab.get("created_at").isoformat()
+                if hasattr(lab.get("created_at"), "isoformat") else None, "symbol": "NIFTY",
+                "qualified_count": len(lab.get("passed") or []), "basket_count": len(lab.get("passed") or []),
+                "mode": "buying_lab_v2"}
+        pairs = []
+        for k in lab.get("passed") or []:
+            sid, tf = k.split("@")
+            if sid in STRATEGY_REGISTRY and tf in SUPPORTED_LIVE_TIMEFRAMES:
+                pairs.append((sid, tf))
+        return pairs, meta
     doc = option_sweeps_collection.find_one({}, sort=[("created_at", -1)])
     if not doc:
         return [], None
@@ -200,21 +229,32 @@ def _key(strategy_id: str, tf: str) -> str:
 
 class PaperPosition:
     __slots__ = ("key", "strategy_id", "tf", "option_type", "strike", "security_id",
-                 "entry_premium", "entry_ts", "stop_pct", "target_pct", "lots")
+                 "entry_premium", "entry_ts", "stop_pct", "target_pct", "lots",
+                 "lot_size", "expiry", "spot_entry", "entry_bid", "entry_ask")
 
     def __init__(self, key, strategy_id, tf, option_type, strike, security_id,
-                 entry_premium, entry_ts, stop_pct, target_pct, lots=1):
+                 entry_premium, entry_ts, stop_pct, target_pct, lots=1,
+                 lot_size=DEFAULT_LOT_SIZE, expiry=None, spot_entry=None, entry_bid=None, entry_ask=None):
         self.key = key
         self.strategy_id = strategy_id
         self.tf = tf
         self.option_type = option_type
         self.strike = strike
         self.security_id = security_id
-        self.entry_premium = entry_premium
+        self.entry_premium = entry_premium      # the paper fill: the option's LTP
         self.entry_ts = entry_ts
         self.stop_pct = stop_pct
         self.target_pct = target_pct
         self.lots = lots
+        self.lot_size = lot_size
+        self.expiry = expiry
+        self.spot_entry = spot_entry
+        self.entry_bid = entry_bid              # the book at the fill: what a real buy pays
+        self.entry_ask = entry_ask
+
+    @property
+    def qty(self) -> int:
+        return self.lot_size * self.lots
 
 
 class PreLiveEngine:
@@ -232,7 +272,7 @@ class PreLiveEngine:
         # from a strategy that simply didn't signal. Counted per reason so a zero-trade day
         # can say whether the strategies stayed silent or whether valid signals were dropped
         # by the pipeline — the two used to look identical in the logs.
-        self.dropped_signals = {"no_contract": 0, "no_premium": 0, "cant_afford": 0}
+        self.dropped_signals = {"no_contract": 0, "no_premium": 0, "cant_afford": 0, "no_weekly_expiry": 0}
         # Deliberate stand-asides (a healthy no-trade), counted separately from execution
         # failures. Regime skips = buying declined because the market was too flat to justify
         # paying theta.
@@ -257,6 +297,7 @@ class PreLiveEngine:
             try:
                 ts = d.get("entry_ts")
                 entry_ts = _dt.fromisoformat(ts) if isinstance(ts, str) else (ts or datetime.now(IST))
+                lot_size = int(d.get("lot_size") or 0) or (75 if d.get("qty") == 75 else DEFAULT_LOT_SIZE)
                 pos = PaperPosition(
                     key=d["key"], strategy_id=d["strategy_id"], tf=d.get("timeframe", "15m"),
                     option_type=d.get("option_type"), strike=d.get("strike"),
@@ -264,7 +305,9 @@ class PreLiveEngine:
                     entry_ts=entry_ts,
                     stop_pct=d.get("stop_pct") or default["premium_stop_pct"],
                     target_pct=d.get("target_pct") or default["premium_target_pct"],
-                    lots=max(1, int(d.get("qty", LOT_SIZE) // LOT_SIZE)),
+                    lots=max(1, int(d.get("lots") or (d.get("qty", lot_size) // lot_size))),
+                    lot_size=lot_size, expiry=d.get("expiry"), spot_entry=d.get("spot_entry"),
+                    entry_bid=d.get("entry_bid"), entry_ask=d.get("entry_ask"),
                 )
                 self.positions[pos.key] = pos
                 n += 1
@@ -344,8 +387,12 @@ class PreLiveEngine:
     # ---- expiry / instrument lookup ---------------------------------------
 
     def current_weekly_expiry(self) -> str | None:
-        """Nearest NIFTY option expiry >= today, cached per day."""
-        today = datetime.now(IST).date().isoformat()
+        """Nearest NIFTY option expiry >= today, cached per day — and only if it IS a weekly
+        (within MAX_WEEKLY_DTE days). Anything further out means the instrument master is
+        missing this week's contracts; returning None makes every signal a counted
+        'no_weekly_expiry' drop instead of a silent monthly or quarterly trade."""
+        today_d = datetime.now(IST).date()
+        today = today_d.isoformat()
         if self._weekly_expiry and self._weekly_expiry[0] == today:
             return self._weekly_expiry[1]
         exps = sorted(
@@ -354,6 +401,11 @@ class PreLiveEngine:
             if e and e >= today
         )
         exp = exps[0] if exps else None
+        if exp and (datetime.fromisoformat(exp).date() - today_d).days > MAX_WEEKLY_DTE:
+            print(f"[prelive] NO WEEKLY EXPIRY: the nearest NIFTY expiry in the instrument master is {exp}, "
+                  f"more than {MAX_WEEKLY_DTE} days out — the master is stale (backend index_derivatives.sync "
+                  f"refreshes it every 12h). Refusing to trade a non-weekly contract.", flush=True)
+            exp = None
         self._weekly_expiry = (today, exp)
         return exp
 
@@ -369,7 +421,8 @@ class PreLiveEngine:
                     "option_type": option_type, "symbol": {"$regex": "^NIFTY-"}})
                 if doc:
                     return {"security_id": doc["security_id"], "strike": float(s),
-                            "exchange_segment": doc["exchange_segment"], "symbol": doc["symbol"]}
+                            "exchange_segment": doc["exchange_segment"], "symbol": doc["symbol"],
+                            "lot_size": int(doc.get("lot_size") or 0) or None, "expiry": exp}
         return None
 
     # ---- balance / capital ------------------------------------------------
@@ -400,7 +453,7 @@ class PreLiveEngine:
 
     def deployed_capital(self) -> float:
         """Premium currently locked in open paper positions."""
-        return round(sum(p.entry_premium * LOT_SIZE * p.lots for p in self.positions.values()), 2)
+        return round(sum(p.entry_premium * p.qty for p in self.positions.values()), 2)
 
     def available_cash(self) -> float:
         """Desk-wide cash free to open new positions. Not used for per-strategy sizing in
@@ -429,7 +482,7 @@ class PreLiveEngine:
         self.day_start_equity = self.balance()["balance"]
         self.breaker_tripped = False
         self.breaker_reason = None
-        self.dropped_signals = {"no_contract": 0, "no_premium": 0, "cant_afford": 0}
+        self.dropped_signals = {"no_contract": 0, "no_premium": 0, "cant_afford": 0, "no_weekly_expiry": 0}
         self.regime_skips = 0
         self.low_vol_regime = self._is_low_vol_regime()
         if self.low_vol_regime:
@@ -486,7 +539,7 @@ class PreLiveEngine:
         unrealized = 0.0
         for pos in self.positions.values():
             ltp = fetch_ltp(pos.security_id, "NSE_FNO") or pos.entry_premium
-            unrealized += (ltp - pos.entry_premium) * (LOT_SIZE * pos.lots)
+            unrealized += (ltp - pos.entry_premium) * pos.qty
         return realized, unrealized
 
     def check_breaker(self, fetch_ltp) -> bool:
@@ -521,7 +574,7 @@ class PreLiveEngine:
                 "to refresh the qualified universe, or set PRELIVE_FALLBACK_TOP20=1 to use the "
                 "original 20-strategy basket as a stopgap.")
 
-    def on_bar(self, strategy_id: str, tf: str, bar: Bar, fetch_ltp) -> dict | None:
+    def on_bar(self, strategy_id: str, tf: str, bar: Bar, fetch_ltp, fetch_quote=None) -> dict | None:
         """Feed one FINALIZED bar to its strategy; open a paper position on a fresh
         signal. `fetch_ltp(security_id, exchange_segment)` returns the live option LTP.
         Returns a trade-open event dict for logging, or None."""
@@ -555,6 +608,9 @@ class PreLiveEngine:
         # Past this point a strategy HAS signalled, so any drop below is an execution
         # failure, not a quiet no-setup. Each is logged and counted so it can never again
         # masquerade as "no signal" in a zero-trade session summary.
+        if self.current_weekly_expiry() is None:
+            self.dropped_signals["no_weekly_expiry"] += 1
+            return None
         contract = self.atm_contract(bar.close, option_type)
         if not contract:
             self.dropped_signals["no_contract"] += 1
@@ -570,7 +626,8 @@ class PreLiveEngine:
                   f"price this leg this tick", flush=True)
             return None
 
-        one_lot_cost = premium * LOT_SIZE
+        lot_size = contract.get("lot_size") or DEFAULT_LOT_SIZE
+        one_lot_cost = premium * lot_size
         if TRADE_ALL_STRATEGIES:
             # Flat 1 lot, checked against THIS strategy's own ₹10L account (starting capital
             # + its own realized P&L). Independent accounts, so one strategy can never starve
@@ -593,12 +650,15 @@ class PreLiveEngine:
 
         cat = STRATEGY_REGISTRY[strategy_id].metadata.category
         style = OPTION_BUYING_CATEGORIES.get(cat, OPTION_BUYING_CATEGORIES["options_intraday"])
+        # The book at the fill — a real buy pays the ASK, not the last traded price.
+        q = fetch_quote(contract["security_id"], contract["exchange_segment"]) if fetch_quote else None
         pos = PaperPosition(
             key=key, strategy_id=strategy_id, tf=tf, option_type=option_type,
             strike=contract["strike"], security_id=contract["security_id"],
             entry_premium=premium, entry_ts=datetime.now(IST),
             stop_pct=style["premium_stop_pct"], target_pct=style["premium_target_pct"],
-            lots=lots,
+            lots=lots, lot_size=lot_size, expiry=contract.get("expiry"), spot_entry=round(bar.close, 2),
+            entry_bid=(q or {}).get("bid"), entry_ask=(q or {}).get("ask"),
         )
         self.positions[key] = pos
         self.trades_today[key] += 1
@@ -606,7 +666,7 @@ class PreLiveEngine:
         return {"event": "OPEN", "key": key, "type": option_type, "strike": contract["strike"],
                 "premium": premium, "lots": lots, "reason": signal.reasoning}
 
-    def manage_open(self, fetch_ltp, force_eod: bool = False) -> list[dict]:
+    def manage_open(self, fetch_ltp, force_eod: bool = False, fetch_quote=None) -> list[dict]:
         """Re-price every open position at its live option LTP; close on stop/target/EOD.
         Returns a list of close events."""
         closes = []
@@ -627,11 +687,12 @@ class PreLiveEngine:
                 # (falling back to entry premium) and label the pricing honestly.
                 doc = positions_collection.find_one({"key": key}, {"mark": 1}) or {}
                 fallback = doc.get("mark") or pos.entry_premium
-                closes.append(self._close(pos, fallback, "eod", now, pricing="fallback_last_mark"))
+                closes.append(self._close(pos, fallback, "eod", now, pricing="fallback_last_mark",
+                                          spot=fetch_ltp(13, "IDX_I")))
                 continue
             # keep the persisted mark current so the dashboard shows live MTM and
             # the EOD fallback above always has a recent price to close against
-            qty = LOT_SIZE * pos.lots
+            qty = pos.qty
             positions_collection.update_one({"key": key}, {"$set": {
                 "mark": round(ltp, 2), "unrealized": round((ltp - pos.entry_premium) * qty, 2)}})
             move = (ltp - pos.entry_premium) / pos.entry_premium
@@ -643,22 +704,50 @@ class PreLiveEngine:
             elif eod:
                 reason = "eod"
             if reason:
-                closes.append(self._close(pos, ltp, reason, now))
+                q = fetch_quote(pos.security_id, "NSE_FNO") if fetch_quote else None
+                closes.append(self._close(pos, ltp, reason, now, quote=q, spot=fetch_ltp(13, "IDX_I")))
         return closes
 
     def _close(self, pos: PaperPosition, exit_premium: float, reason: str, now,
-               pricing: str = "real_dhan_ltp") -> dict:
-        qty = LOT_SIZE * pos.lots
+               pricing: str = "real_dhan_ltp", quote: dict | None = None, spot: float | None = None) -> dict:
+        """Book a closed paper trade twice over:
+          pnl       the PAPER result — filled at the option's last traded price, as this
+                    desk always has (so its record stays comparable over time)
+          real_pnl  what a real account would have made — bought at the ASK, sold at the
+                    BID from the order book at those moments (or, where the book was not
+                    available, the LTP moved by an estimated half spread, labelled so)
+        Both charge the shared Angel One rate card (tradingai_shared.option_fees)."""
+        qty = pos.qty
+        session = now.date().isoformat()
         gross = (exit_premium - pos.entry_premium) * qty
-        charges = _option_charges(pos.entry_premium, qty, sell=False) + _option_charges(exit_premium, qty, sell=True)
+        charges = option_round_trip(pos.entry_premium, exit_premium, qty, on=session)["total"]
         pnl = round(gross - charges, 2)
+        exit_bid, exit_ask = (quote or {}).get("bid"), (quote or {}).get("ask")
+        est = lambda px: max(0.05, px * EST_HALF_SPREAD_PCT)  # noqa: E731
+        real_entry = pos.entry_ask if pos.entry_ask else pos.entry_premium + est(pos.entry_premium)
+        real_exit = exit_bid if exit_bid else max(0.05, exit_premium - est(exit_premium))
+        basis = ("book" if pos.entry_ask and exit_bid else
+                 "estimated" if not pos.entry_ask and not exit_bid else "book+estimated")
+        real_charges = option_round_trip(real_entry, real_exit, qty, on=session)["total"]
+        real_pnl = round((real_exit - real_entry) * qty - real_charges, 2)
+        dte = None
+        if pos.expiry:
+            try:
+                dte = (datetime.fromisoformat(pos.expiry).date() - now.date()).days
+            except ValueError:
+                dte = None
         trade = {
             "key": pos.key, "strategy_id": pos.strategy_id, "timeframe": pos.tf,
             "option_type": pos.option_type, "strike": pos.strike, "security_id": pos.security_id,
             "entry_premium": round(pos.entry_premium, 2), "exit_premium": round(exit_premium, 2),
             "entry_ts": pos.entry_ts, "exit_ts": now, "exit_reason": reason,
-            "qty": qty, "charges": round(charges, 2), "pnl": pnl,
-            "session": now.date().isoformat(), "pricing": pricing,
+            "qty": qty, "lots": pos.lots, "lot_size": pos.lot_size, "expiry": pos.expiry, "dte": dte,
+            "charges": round(charges, 2), "pnl": pnl,
+            "session": session, "pricing": pricing, "fee_basis": "angel_rate_card",
+            "spot_entry": pos.spot_entry, "spot_exit": round(spot, 2) if spot else None,
+            "entry_bid": pos.entry_bid, "entry_ask": pos.entry_ask, "exit_bid": exit_bid, "exit_ask": exit_ask,
+            "real_entry": round(real_entry, 2), "real_exit": round(real_exit, 2),
+            "real_charges": round(real_charges, 2), "real_pnl": real_pnl, "real_basis": basis,
         }
         trades_collection.insert_one(dict(trade))
         positions_collection.delete_one({"key": pos.key})
@@ -692,15 +781,17 @@ class PreLiveEngine:
         scores_collection.replace_one({"key": key}, doc, upsert=True)
 
     def _pos_doc(self, pos: PaperPosition, mark: float) -> dict:
-        qty = LOT_SIZE * pos.lots
+        qty = pos.qty
         return {
             "key": pos.key, "strategy_id": pos.strategy_id, "timeframe": pos.tf,
             "option_type": pos.option_type, "strike": pos.strike, "security_id": pos.security_id,
             "entry_premium": round(pos.entry_premium, 2), "mark": round(mark, 2),
             "unrealized": round((mark - pos.entry_premium) * qty, 2),
-            "entry_ts": pos.entry_ts.isoformat(), "qty": qty,
+            "entry_ts": pos.entry_ts.isoformat(), "qty": qty, "lots": pos.lots, "lot_size": pos.lot_size,
             # persisted so a restart can restore exits exactly (see _restore_open_positions)
             "stop_pct": pos.stop_pct, "target_pct": pos.target_pct,
+            "expiry": pos.expiry, "spot_entry": pos.spot_entry,
+            "entry_bid": pos.entry_bid, "entry_ask": pos.entry_ask,
         }
 
     def snapshot_equity(self, fetch_ltp):
@@ -712,7 +803,7 @@ class PreLiveEngine:
         capital_locked = 0.0
         for pos in self.positions.values():
             ltp = fetch_ltp(pos.security_id, "NSE_FNO") or pos.entry_premium
-            qty = LOT_SIZE * pos.lots
+            qty = pos.qty
             unrealized += (ltp - pos.entry_premium) * qty
             capital_locked += pos.entry_premium * qty
         bal = self.balance()
@@ -728,14 +819,24 @@ class PreLiveEngine:
             "_id": "engine", "heartbeat": now.isoformat(), "session": session,
             "open_positions": len(self.positions), "day_pnl": round(realized + unrealized, 2),
             "capital_locked": round(capital_locked, 2), "status": self._status_label(running=True),
-            "initial_capital": INITIAL_CAPITAL, "balance": bal["balance"],
+            "initial_capital": bal["initial_capital"], **self._capital_meta(), "balance": bal["balance"],
             "equity": equity_value, "available_cash": bal["available_cash"],
             "realized_all_time": bal["realized_all_time"],
             "universe_size": len(self.universe), "universe_source": self.universe_source,
-            "capital_per_trade": round(INITIAL_CAPITAL * CAPITAL_PER_TRADE_PCT, 2),
+            "capital_per_trade": None if TRADE_ALL_STRATEGIES else round(INITIAL_CAPITAL * CAPITAL_PER_TRADE_PCT, 2),
             "breaker_tripped": self.breaker_tripped, "breaker_reason": self.breaker_reason,
+            "dropped_signals": dict(self.dropped_signals), "weekly_expiry": self.current_weekly_expiry(),
             "note": self._universe_note(),
         }, upsert=True)
+
+    def _capital_meta(self) -> dict:
+        """How the desk's capital is made up — so the page can say '167 accounts x Rs10 lakh'
+        instead of the single Rs1 crore basket figure it showed while running a tournament."""
+        if TRADE_ALL_STRATEGIES:
+            return {"capital_mode": "tournament", "accounts": len(self.universe),
+                    "per_strategy_capital": PER_STRATEGY_CAPITAL, "lots_per_position": TOURNAMENT_LOTS}
+        return {"capital_mode": "basket", "accounts": 1, "per_strategy_capital": None,
+                "lots_per_position": None}
 
     def publish_idle_state(self, status: str | None = None):
         """Keep the account balance visible on the dashboard even when the market is
@@ -749,18 +850,19 @@ class PreLiveEngine:
             "_id": "engine", "heartbeat": now.isoformat(),
             "status": status or self._status_label(running=False),
             "open_positions": len(self.positions),
-            "initial_capital": INITIAL_CAPITAL, "balance": bal["balance"],
+            "initial_capital": bal["initial_capital"], **self._capital_meta(), "balance": bal["balance"],
             "equity": bal["balance"], "available_cash": bal["available_cash"],
             "realized_all_time": bal["realized_all_time"], "capital_locked": bal["deployed"],
             "universe_size": len(self.universe), "universe_source": self.universe_source,
-            "capital_per_trade": round(INITIAL_CAPITAL * CAPITAL_PER_TRADE_PCT, 2),
+            "capital_per_trade": None if TRADE_ALL_STRATEGIES else round(INITIAL_CAPITAL * CAPITAL_PER_TRADE_PCT, 2),
             "breaker_tripped": self.breaker_tripped, "breaker_reason": self.breaker_reason,
+            "weekly_expiry": self.current_weekly_expiry(),
             "note": self._universe_note(),
         }, upsert=True)
 
-    def close_session(self, fetch_ltp):
+    def close_session(self, fetch_ltp, fetch_quote=None):
         """Force EOD square-off of anything still open, write the daily P&L doc."""
-        self.manage_open(fetch_ltp, force_eod=True)
+        self.manage_open(fetch_ltp, force_eod=True, fetch_quote=fetch_quote)
         now = datetime.now(IST)
         session = now.date().isoformat()
         trades = list(trades_collection.find({"session": session}))
@@ -768,6 +870,7 @@ class PreLiveEngine:
         peak_cap = _peak_capital(session)
         daily_pnl_collection.replace_one({"session": session}, {
             "session": session, "trades": len(trades), "net_pnl": net,
+            "real_net_pnl": round(sum(t.get("real_pnl", t["pnl"]) for t in trades), 2),
             "peak_capital": peak_cap, "roi_pct": round(net / peak_cap * 100, 2) if peak_cap else None,
             "wins": sum(1 for t in trades if t["pnl"] > 0),
             "closed_at": now.isoformat(),
@@ -781,26 +884,6 @@ class PreLiveEngine:
 def _ist_minutes(ts: datetime) -> int:
     ist = ts.astimezone(IST) if ts.tzinfo else ts
     return ist.hour * 60 + ist.minute
-
-
-OPT_STT_SELL = 0.0015       # 0.15% of premium sold, from 2026-04-01 (Budget 2026-27; was 0.10%)
-OPT_STAMP_BUY = 0.00003     # 0.003% of premium bought
-OPT_SEBI = 0.000001         # Rs10 per crore
-
-
-def _option_charges(premium: float, qty: int, sell: bool = False) -> float:
-    """One leg of an option trade: flat brokerage + exchange + SEBI + GST, plus STT on the
-    SELL leg and stamp duty on the BUY leg. Until 2026-10-02 this charged neither STT nor
-    stamp duty — the docstring said STT was "handled by caller pairing", but the caller
-    just added two of these together, so no option sale on this desk ever paid STT."""
-    turnover = max(premium, 0.05) * qty
-    brokerage = min(20.0, turnover * 0.0003)
-    exch = turnover * 0.0003503
-    sebi = turnover * OPT_SEBI
-    gst = (brokerage + exch + sebi) * 0.18
-    stt = turnover * OPT_STT_SELL if sell else 0.0
-    stamp = 0.0 if sell else turnover * OPT_STAMP_BUY
-    return brokerage + exch + sebi + gst + stt + stamp
 
 
 def _peak_capital(session: str) -> float:

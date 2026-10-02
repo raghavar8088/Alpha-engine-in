@@ -65,6 +65,31 @@ class AngelOneFeed:
         self.client = client or AngelSyncClient(AngelCredentials.from_env())
         self.available = self.client.configured()
         self._cache: dict[tuple[str, str], float] = {}
+        self._qcache: dict[tuple[str, str], dict | None] = {}
+
+    def reset_quotes(self) -> None:
+        """New tick: depth goes stale fast, so quotes are cached only within one tick."""
+        self._qcache = {}
+
+    def quote(self, security_id, exchange_segment) -> dict | None:
+        """Best bid/ask (and LTP, OI, volume) for one contract from Angel's FULL quote —
+        the order book a market order would actually hit. Cached for the tick, so the
+        dozens of strategies that signal the same ATM leg on one bar cost one request.
+        None when unmapped or the book is unavailable — never guessed."""
+        key = (str(security_id), exchange_segment)
+        if key in self._qcache:
+            return self._qcache[key]
+        q = None
+        if self.available:
+            ref = _angel_ref(security_id, exchange_segment)
+            if ref is not None:
+                token, exchange = ref
+                try:
+                    q = self.client.full_quote({exchange: [token]}).get(token)
+                except AngelAPIError as exc:
+                    print(f"[angel] depth quote failed for {security_id}: {exc}", flush=True)
+        self._qcache[key] = q
+        return q
 
     def prefetch(self, segment_ids: dict[str, list]) -> None:
         self._cache = {}
@@ -157,7 +182,14 @@ class FailoverFeed:
     def auth_failed_ticks(self):
         return self.dhan.auth_failed_ticks
 
+    def quote(self, security_id, exchange_segment) -> dict | None:
+        """Bid/ask for one contract. Depth comes from Angel's FULL quote only: Dhan's quote
+        endpoint shares the per-account token that 401s whenever another component
+        re-logs in, and a missing book must read as missing, not as a stale price."""
+        return self.angel.quote(security_id, exchange_segment)
+
     def prefetch(self, segment_ids: dict[str, list]) -> None:
+        self.angel.reset_quotes()
         self.dhan.prefetch(segment_ids)
         # Which securities did Dhan fail to price this tick?
         missing: dict[str, list] = {}

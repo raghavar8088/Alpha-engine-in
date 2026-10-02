@@ -39,10 +39,18 @@ re-deciding on the same candle a minute later as it changed. Signals are now tak
 per timeframe per COMPLETED bar. The last bar evaluated is persisted, so a restart does
 not re-decide a bar that was already acted on.
 
-NO BROKER COSTS ARE CHARGED — deliberately, and it is a real gap. The P&L is premium
-movement × quantity, the same basis as the tournament record these strategies were picked
-on, so the two stay comparable. Real Angel brokerage, STT and exchange charges would make
-every number here lower, by more on the ₹50k book than the ₹2L one.
+COSTS. Until 2026-10-02 no broker costs were charged here. Positions closed from then on
+pay Angel One's option rate card (tradingai_shared.option_fees: Rs20 an order, STT 0.15% of
+the premium sold, exchange, SEBI, stamp, GST), and each closed trade says which basis it is on.
+
+PAUSED BY THE GATE (2026-10-02). This roster is the ANTI of the tournament's 21 "best"
+rows of 2026-09-29. Those rows were read-time sign flips of the WORST strategies' records,
+never traded; and the Pre-Live audit found that no strategy in the library predicts NIFTY's
+direction (two-year replay: 47.8-48.4% hit), so the leaderboard cannot select. A real ANTI
+buys the OPPOSITE option, which is not even the trade the flipped record described. New
+entries now require the strategy to hold a CONFIRMED verdict in the option-hypothesis
+registry (app.services.option_hypotheses); none does, so the books open nothing and keep
+their records. LIVE_PAPER_REQUIRE_GATE=0 restores the old behaviour.
 
 MECHANICS UNCHANGED FROM THE FIRST VERSION
 Signals buy the ATM CE (bullish) or PE (bearish) of the nearest weekly expiry. Managed to a
@@ -65,6 +73,7 @@ from app.core.db import (
 )
 from app.services.angel_client import angel_client
 from app.services.anti_strategies import register_anti_buying
+from tradingai_shared.option_fees import option_round_trip
 from app.services.stock_options import batched_ltp
 from tradingai_shared.contracts import STRATEGY_REGISTRY, StrategyContext
 from tradingai_shared.domain import Bar, SignalAction, Timeframe
@@ -82,6 +91,11 @@ ENTRY_CUTOFF = os.getenv("LIVE_PAPER_ENTRY_CUTOFF", "15:00")
 SQUAREOFF = os.getenv("LIVE_PAPER_SQUAREOFF", "15:15")
 MARKET_OPEN = "09:15"
 LOTS_PER_POSITION = 1
+REQUIRE_GATE = os.getenv("LIVE_PAPER_REQUIRE_GATE", "1").lower() not in ("0", "false", "no")
+COSTS_FROM = "2026-10-02"           # trades closed on/after this date pay the rate card
+SELECTION_BASIS = ("Picked on 2026-09-29 from the Pre-Live leaderboard's ANTI rows — sign flips of the worst "
+                   "strategies' records that never traded. No strategy in the library predicts NIFTY's direction "
+                   "(two-year replay, 47.8-48.4% hit), so these picks have no evidence behind them.")
 
 # ── the books ────────────────────────────────────────────────────────────────────
 BOOKS: dict[str, float] = {
@@ -374,6 +388,14 @@ async def run_cycle(force: bool = False) -> dict:
         return {"opened": 0, "managed": managed, "signals": 0, "notes": notes, "books": {}}
 
     wants, spot = await _signals(notes)
+    if REQUIRE_GATE and wants:
+        from app.services.option_hypotheses import confirmed_ids
+        ok = await confirmed_ids()
+        blocked = [w for w in wants if w[0]["strategy_id"] not in ok and w[0]["base_id"] not in ok]
+        wants = [w for w in wants if w not in blocked]
+        if blocked:
+            notes.append(f"{len(blocked)} signal{'s' if len(blocked) > 1 else ''} not taken: no roster strategy holds "
+                         "a CONFIRMED verdict in the option-hypothesis registry (paused by the 2026-10-02 gate).")
     expiry = await _weekly_expiry()
     past_cutoff = _hhmm() >= ENTRY_CUTOFF
     if past_cutoff:
@@ -466,7 +488,8 @@ async def _manage() -> int:
             if not (eod or stale):
                 continue
             cur = 0.0
-        pnl = round((cur - p["entry_premium"]) * p["qty"], 2)
+        gross = round((cur - p["entry_premium"]) * p["qty"], 2)
+        pnl = gross
         reason = None
         if cur >= p["target_premium"]:
             reason = "target"
@@ -477,8 +500,11 @@ async def _manage() -> int:
         changes = {"ltp": round(cur, 2), "unrealized_pnl": pnl, "updated_at": _now()}
         if reason:
             book = p.get("book") or DEFAULT_BOOK
+            fees = option_round_trip(p["entry_premium"], cur, p["qty"], on=today)["total"] if today >= COSTS_FROM else 0.0
+            pnl = round(gross - fees, 2)
             changes.update({"status": "CLOSED", "exit_premium": round(cur, 2),
-                            "exit_reason": reason, "realized_pnl": pnl,
+                            "exit_reason": reason, "realized_pnl": pnl, "gross_pnl": gross,
+                            "fees": fees, "fee_basis": "angel_rate_card" if fees else "none",
                             "unrealized_pnl": 0.0, "closed_at": _now(),
                             "closed_on": _today()})
             await live_paper_trades_collection.insert_one({
@@ -488,7 +514,8 @@ async def _manage() -> int:
                 "option_type": p["option_type"], "strike": p["strike"],
                 "qty": p["qty"], "lots": p.get("lots"),
                 "entry_premium": p["entry_premium"], "exit_premium": round(cur, 2),
-                "cost": p.get("cost"), "realized_pnl": pnl, "exit_reason": reason,
+                "cost": p.get("cost"), "realized_pnl": pnl, "gross_pnl": gross, "fees": fees,
+                "fee_basis": "angel_rate_card" if fees else "none", "exit_reason": reason,
                 "session": p.get("session"), "opened_at": p["opened_at"], "closed_at": _now(),
             })
             touched.add((book, p["strategy_id"]))
@@ -556,7 +583,8 @@ async def summary(book: str | None = None) -> dict:
             {"book": book, "status": "OPEN"}),
         "closed_positions": closed, "wins": wins,
         "win_rate": round(wins / closed, 4) if closed else 0.0,
-        "market_open": _market_open(), "costs_charged": False,
+        "market_open": _market_open(), "costs_charged": True, "costs_from": COSTS_FROM,
+        "gate_required": REQUIRE_GATE, "paused_by_gate": REQUIRE_GATE, "selection_basis": SELECTION_BASIS,
         "entry_cutoff": ENTRY_CUTOFF, "squareoff": SQUAREOFF,
         "last_run_at": st.get("last_run_at").isoformat() if st.get("last_run_at") else None,
         "last_opened": (last_opened or {}).get(book, 0) if isinstance(last_opened, dict) else 0,

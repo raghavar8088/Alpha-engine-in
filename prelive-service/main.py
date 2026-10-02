@@ -242,7 +242,7 @@ def run_session(engine: PreLiveEngine, feed: DhanFeed):
                             if stf != tf:
                                 continue
                             drove += 1
-                            ev = engine.on_bar(sid, tf, fin, feed.ltp)
+                            ev = engine.on_bar(sid, tf, fin, feed.ltp, fetch_quote=getattr(feed, "quote", None))
                             if ev:
                                 opened += 1
                                 print(f"[OPEN] {ev['key']} {ev['type']} {ev['strike']:.0f} "
@@ -259,7 +259,7 @@ def run_session(engine: PreLiveEngine, feed: DhanFeed):
                     cur[4] = spot
 
         # manage open paper positions on live option prices
-        for ev in engine.manage_open(feed.ltp):
+        for ev in engine.manage_open(feed.ltp, fetch_quote=getattr(feed, "quote", None)):
             print(f"[CLOSE] {ev['key']} {ev['exit_reason']} pnl Rs{ev['pnl']:+,.0f}", flush=True)
 
         # equity snapshot ~ every 60s
@@ -274,7 +274,7 @@ def run_session(engine: PreLiveEngine, feed: DhanFeed):
         time.sleep(POLL_SECONDS * 4 if feed.rate_limited else POLL_SECONDS)
 
     print(f"[prelive] squaring off + closing session {ist_now():%H:%M}", flush=True)
-    engine.close_session(feed.ltp)
+    engine.close_session(feed.ltp, fetch_quote=getattr(feed, "quote", None))
     doc = _db["prelive_daily_pnl"].find_one({"session": ist_now().date().isoformat()})
     if doc:
         print(f"[prelive] DAY {doc['session']}: net Rs{doc['net_pnl']:+,.0f} on "

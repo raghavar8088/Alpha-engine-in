@@ -301,6 +301,10 @@ async def options_backtest_all(request: OptionsSweepRequest, _current_user: dict
         "adx_regime": request.adx_regime,
         "overlap_threshold": overlap_threshold,
         "pricing_model": "black_scholes_realized_vol_proxy",
+        "superseded": ("2026-10-02: this sweep prices options at realized vol x 1.15 and qualifies on win rate; "
+                       "the Pre-Live audit found both misleading. The Buying Lab v2 (options_service.buying_lab, run "
+                       "by `python -m app.services.buying_lab_job`, shown at /api/prelive/lab) replaces it, and the "
+                       "Pre-Live basket mode now trades only what that gate passes."),
         # The funnel, so a qualifier count is never quoted without the independent one.
         "qualified_count": sum(1 for e in results if e.get("qualified")),
         "basket_count": sum(1 for e in results if e.get("in_basket")),
