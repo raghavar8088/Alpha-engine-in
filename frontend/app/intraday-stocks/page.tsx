@@ -5,6 +5,8 @@ import GlassPanel from "../../components/GlassPanel";
 import DeskHistory from "../../components/DeskHistory";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
+import V2Validation from "./V2Validation";
+import { AlarmBanner, EdgeReportPanel } from "./IntradayOps";
 import LineChart from "../../components/charts/LineChart";
 import {
   refreshing,
@@ -563,6 +565,7 @@ export default function IntradayStocksPage() {
 
       {tab === "tournament" && (
       <DataGate ready={!!status} error={error} what={"the tournament"} onRetry={() => once("tournament", load)} lastOkAt={lastOkAt}>
+      <AlarmBanner />
       <div className="desk-banner">
         <strong>V2 — REAL INTRADAY BARS, BOTH SIDES.</strong> Each rule is evaluated once, at the
         close of its own 15m, 45m or 1h bar, and its stop and target are sized in that
@@ -778,6 +781,10 @@ export default function IntradayStocksPage() {
           </div>
         )}
       </GlassPanel>
+
+      <EdgeReportPanel />
+
+      <V2Validation />
 
       <DailyRoiPanel rows={labDaily} capital={status?.initial_capital ?? 0} />
 

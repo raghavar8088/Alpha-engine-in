@@ -55,6 +55,17 @@ async def intraday_data_loop() -> None:
                 reconciled_on = today
                 await intraday_backfill.reconcile(now.date())
                 await store.flush_dirty()
+                # Phase 3: test each incubating strategy's forward record against the
+                # expectation frozen when it was registered.
+                from app.services.intraday_v2_registry import evaluate_forward
+                r = await evaluate_forward()
+                if r.get("decided"):
+                    logger.warning("incubation verdicts: %s", r["decided"])
+                # Phase 4: the day's edge report — gross, slippage, fees, net per strategy,
+                # and the forward record against the backtest's expectation.
+                from app.services.intraday_ops import build_edge_report
+                rep = await build_edge_report(now.date())
+                logger.info("edge report %s: %s", now.date(), rep["desk"])
 
             if intraday_backfill.off_hours(now) and time.monotonic() - last_backfill > BACKFILL_RETRY_S \
                     and (not trading or hhmm >= RECONCILE_FROM and reconciled_on == today):

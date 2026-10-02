@@ -33,6 +33,7 @@ from app.api.routes import (
     fno_positions,
     intraday_data,
     intraday_lab,
+    intraday_ops,
     live,
     live_intraday,
     live_trading,
@@ -442,6 +443,8 @@ async def start_intraday_data() -> None:
             asyncio.create_task(intraday_data_loop())
         if STREAM_ON:
             asyncio.create_task(stream_loop())
+        from app.services.intraday_ops import monitor_loop
+        asyncio.create_task(monitor_loop())
         from app.services.intraday_lab_engine import V2 as TOURNAMENT_V2
         if TOURNAMENT_V2 and os.getenv("INTRADAY_LAB_ENABLED", "1").lower() not in ("0", "false"):
             from app.services.intraday_v2_engine import describe as v2_describe, v2_loop
@@ -944,6 +947,7 @@ app.include_router(natgas_book.router)
 app.include_router(gold_desk.router)
 app.include_router(diagnostics.router)
 app.include_router(intraday_data.router)
+app.include_router(intraday_ops.router)
 
 if settings.enable_live_trading:
     app.include_router(live.router)

@@ -255,7 +255,7 @@ async def evaluate_close(boundary: datetime, open_positions: bool = True) -> dic
     day_setup = boundary.strftime("%H:%M") == v2.ENTRY_FROM
     notes: list[str] = []
     ranked = await in_play.ranked(top=len(members), now=boundary + timedelta(seconds=1))
-    rv = {r["symbol"]: (r["rvol"], i + 1) for i, r in enumerate(ranked["top"])}
+    rv = {r["symbol"]: (r["rvol_raw"], i + 1) for i, r in enumerate(ranked["top"])}
     nifty = await _nifty_ret(boundary + timedelta(seconds=1))
     if nifty is None:
         notes.append("NIFTY bars missing for today — trend strategies (which trade only with "
@@ -292,6 +292,7 @@ async def evaluate_close(boundary: datetime, open_positions: bool = True) -> dic
         opened = await _take(cands, boundary)
     status["last_eval"] = {"boundary": boundary.strftime("%H:%M"), "timeframes": tfs,
                            "day_setups": day_setup, "signals": len(cands), "opened": opened,
+                           "incomplete": incomplete, "universe": len(members),
                            "nifty_ret_pct": round(nifty, 2) if nifty is not None else None}
     status["last_notes"] = notes
     return status["last_eval"]

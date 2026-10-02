@@ -996,6 +996,120 @@ export async function panicCloseAllLiveTrading(): Promise<{ result: { closed: nu
 export async function fetchIntradayEquity(limit = 500): Promise<IntradayEquityPoint[]> {
   return apiFetch(`/api/intraday-lab/equity?limit=${limit}`);
 }
+// ---- Intraday tournament v2: walk-forward validation + incubation (Phase 3) ----
+
+export interface V2Metrics {
+  trades: number;
+  net_pnl: number;
+  gross_pnl: number;
+  fees: number;
+  win_rate: number;
+  expectancy: number;
+  profit_factor: number | null;
+  max_drawdown_pct: number;
+  sharpe_annual: number | null;
+  t_stat: number | null;
+  positive_month_share: number | null;
+  months?: Record<string, number>;
+  by_reason?: Record<string, number>;
+}
+
+export interface V2BacktestResult {
+  strategy_id: string;
+  name: string;
+  family: string;
+  timeframe: string;
+  kind: string;
+  dsr: number | null;
+  passed: boolean;
+  checks: Record<string, boolean>;
+  selection: V2Metrics;
+  holdout: V2Metrics;
+  full: V2Metrics;
+  optimistic_bound?: {
+    selection_net: number;
+    selection_pf: number | null;
+    selection_win_rate: number;
+    holdout_net: number;
+    ambiguous: boolean;
+    note: string;
+  } | null;
+}
+
+export interface V2BacktestRun {
+  run_id: string;
+  first_day: string;
+  holdout_from: string | null;
+  sessions: number;
+  selection_sessions: number;
+  holdout_sessions: number;
+  symbols: number;
+  coverage_median: number;
+  candidate_trades: number;
+  taken_trades: number;
+  n_trials: number;
+  pbo: { pbo: number | null; combinations: number; median_logit?: number } | null;
+  gate: Record<string, number | boolean>;
+  passed: string[];
+  fill_model: string;
+}
+
+export interface V2RegistryEntry {
+  strategy_id: string;
+  name: string;
+  status: "INCUBATING" | "CONFIRMED" | "FAILED";
+  registered_at: string | null;
+  run_id: string;
+  expected: { per_trade_net_mean: number | null; [k: string]: unknown };
+  thresholds: { min_trades: number; [k: string]: number };
+  forward: { trades?: number; mean?: number; z_vs_expected?: number | null; t?: number | null };
+  eligible_for_live?: boolean;
+}
+
+export async function fetchV2Backtest(): Promise<{ run: V2BacktestRun | null; results: V2BacktestResult[] }> {
+  return apiFetch("/api/intraday-lab/v2/backtest");
+}
+
+export async function fetchV2Registry(): Promise<{ strategies: V2RegistryEntry[] }> {
+  return apiFetch("/api/intraday-lab/v2/registry");
+}
+
+// ---- Intraday ops (Phase 4): alarms + daily edge report ----
+
+export interface OpsAlarm {
+  id: string;
+  kind: string;
+  session: string;
+  active: boolean;
+  resolved?: boolean;
+  count?: number;
+  first_at?: string;
+  last_at?: string;
+  detail?: Record<string, unknown>;
+}
+
+export interface EdgeReport {
+  date: string;
+  desk: { trades: number; gross_pnl: number; fees: number; slippage_est: number; net_pnl: number };
+  strategies: {
+    strategy_id: string; name: string; trades: number; gross_pnl: number; fees: number;
+    slippage_est: number; net_pnl: number; win_rate: number; backtest_per_trade: number | null;
+  }[];
+  calibration: { strategies_compared: number; median_gap_per_trade: number | null; share_below_backtest: number | null };
+  stream_quality: {
+    bars_compared?: number;
+    close_bp?: { median: number | null; p95: number | null; max?: number | null };
+  } | null;
+}
+
+export async function fetchIntradayAlarms(days = 2): Promise<{ active: OpsAlarm[]; recent: OpsAlarm[] }> {
+  return apiFetch(`/api/intraday-ops/alarms?days=${days}`);
+}
+
+export async function fetchEdgeReport(date?: string): Promise<EdgeReport | Record<string, never>> {
+  return apiFetch(`/api/intraday-ops/edge-report${date ? `?date=${date}` : ""}`);
+}
+
 export async function fetchIntradayDaily(limit = 60): Promise<IntradayDay[]> {
   return apiFetch(`/api/intraday-lab/daily?limit=${limit}`);
 }

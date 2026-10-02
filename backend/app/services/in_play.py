@@ -84,6 +84,9 @@ def measure(symbol: str, now: datetime | None = None, k: int | None = None) -> d
         "symbol": symbol, "bars": k,
         "as_of": _ist(bars_today[k - 1][0] + 900).strftime("%H:%M"),
         "rvol": round(vol_today / baseline, 2) if baseline else None,
+        # Unrounded: rules compare against thresholds (rvol >= 1.0) and must not be decided
+        # by display rounding — 0.996 shown as 1.00 fired a live rule the backtest did not.
+        "rvol_raw": vol_today / baseline if baseline else None,
         "volume": vol_today, "baseline_volume": round(baseline) if baseline else None,
         "baseline_sessions": len(base),
         "gap_pct": round((first[1] - prev_close) / prev_close * 100, 2) if prev_close else None,
@@ -111,7 +114,7 @@ async def ranked(top: int = 25, k: int | None = None, now: datetime | None = Non
         r["turnover_cr"] = m.get("turnover_cr")
         r["cas"] = m.get("cas")
         rows.append(r)
-    rows.sort(key=lambda r: -r["rvol"])
+    rows.sort(key=lambda r: -r["rvol_raw"])
     return {"as_of": rows[0]["as_of"] if rows else None, "measured": len(rows),
             "not_measurable": missing, "universe": len(members), "top": rows[:top],
             "rule": f"rvol = first-k-bars volume / mean of the same window over the previous "

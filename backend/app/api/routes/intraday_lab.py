@@ -293,3 +293,38 @@ async def daily(
         r["net_pnl"] = round(r["net_pnl"], 2)
         r["win_rate"] = round(r["wins"] / r["trades"], 4) if r["trades"] else 0.0
     return rows
+
+
+# ── v2 validation (Phase 3) ──────────────────────────────────────────────────────
+
+
+@router.get("/v2/backtest")
+async def v2_backtest(current_user: dict = Depends(get_current_user)):
+    """The latest walk-forward backtest of the v2 catalog: run summary (sessions, holdout,
+    probability of backtest overfitting, the gate it applied) and every strategy's
+    selection-window, holdout and full-period record with the checks it passed or failed."""
+    from app.services.intraday_v2_registry import backtests
+    latest = await backtests.find_one({"_id": "latest"})
+    if not latest:
+        return {"run": None, "results": []}
+    run = await backtests.find_one({"_id": f"v2bt:{latest['run_id']}"}) or {}
+    res = await backtests.find_one({"_id": f"v2bt:{latest['run_id']}:strategies"}) or {}
+    run.pop("_id", None)
+    for r in res.get("results", []):
+        for part in ("holdout", "full"):          # the selection window keeps its months
+            r.get(part, {}).pop("months", None)
+    return {"run": run, "results": res.get("results", [])}
+
+
+@router.get("/v2/registry")
+async def v2_registry(current_user: dict = Depends(get_current_user)):
+    """Strategies in incubation: their frozen expectation and forward record."""
+    from app.services.intraday_v2_registry import THRESHOLDS, listing
+    return {"thresholds": THRESHOLDS, "strategies": await listing()}
+
+
+@router.get("/v2/engine")
+async def v2_engine(current_user: dict = Depends(get_current_user)):
+    """The v2 engine's own state: last bar-close evaluation, signals, skips, exit source."""
+    from app.services.intraday_v2_engine import describe
+    return describe()

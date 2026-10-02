@@ -93,21 +93,28 @@ class V2Signal:
 
 @dataclass
 class Ctx:
+    """What a rule may read at bar `i` of `s` — nothing at or after i+1 exists for it.
+
+    Live, `s` is a recent window and `i` its last bar. In a backtest `s` is the whole
+    history (indicators computed once) and `i` walks through it; the rules are the same
+    functions either way, which is the point."""
     symbol: str
     tf: str
     now: datetime
-    s: Series                  # closed bars of `tf`, oldest first (prior sessions included)
-    i0: int                    # index in `s` of today's first bar (len(s) if none yet)
-    s15: Series                # closed 15m bars (for VWAP, opening range, day stats)
+    s: Series                  # bars of `tf`, oldest first (prior sessions included)
+    i: int                     # the bar just closed
+    i0: int                    # index in `s` of today's first bar
+    s15: Series                # 15m bars (for VWAP, opening range, day stats)
+    j: int                     # the last closed 15m bar at `now`
     j0: int                    # index in `s15` of today's first bar
-    atr: float                 # ATR(14) of `tf`
-    atr_day: float | None      # 14-session daily ATR (from 15m bars)
-    vwap: list[float]          # session VWAP after each of today's 15m bars
+    atr: float                 # ATR(14) of `tf` at i
+    atr_day: float | None      # 14-session daily ATR (from 15m bars, prior sessions)
+    vwap: list[float]          # session VWAP after each of today's 15m bars up to j
     prev_close: float | None
     pdh: float | None
     pdl: float | None
     day_open: float | None
-    or_high: float | None      # 09:15-09:45 range (two 15m bars)
+    or_high: float | None      # 09:15-09:45 range (two 15m bars), once both have closed
     or_low: float | None
     or_open: float | None
     or_close: float | None
@@ -135,40 +142,51 @@ def _epoch_day(epoch: int):
     return d
 
 
-def today_index(s: Series, day) -> int:
+def _dayof(s: Series):
+    ep = getattr(s, "epochs", None)
+    return (lambda k: _epoch_day(ep[k])) if ep is not None else (lambda k: _day(s.ts[k]))
+
+
+def today_index(s: Series, day, upto: int | None = None) -> int:
+    """Index of `day`'s first bar at or before `upto` (default: the last bar)."""
+    upto = len(s) - 1 if upto is None else upto
     ep = getattr(s, "epochs", None)
     if ep is not None:
         from bisect import bisect_left
         start = int(datetime(day.year, day.month, day.day, tzinfo=IST).timestamp())
-        return bisect_left(ep, start)
-    for i in range(len(s) - 1, -1, -1):
-        if _day(s.ts[i]) != day:
-            return i + 1
+        return bisect_left(ep, start, 0, upto + 1)
+    for k in range(upto, -1, -1):
+        if _day(s.ts[k]) != day:
+            return k + 1
     return 0
 
 
-def session_vwap(s15: Series, j0: int) -> list[float]:
+def session_vwap(s15: Series, j0: int, j: int | None = None) -> list[float]:
+    j = len(s15) - 1 if j is None else j
     out, pv, vv = [], 0.0, 0.0
-    for i in range(j0, len(s15)):
-        tp = (s15.h[i] + s15.l[i] + s15.c[i]) / 3
-        pv += tp * s15.v[i]; vv += s15.v[i]
-        out.append(pv / vv if vv else s15.c[i])
+    for k in range(j0, j + 1):
+        tp = (s15.h[k] + s15.l[k] + s15.c[k]) / 3
+        pv += tp * s15.v[k]; vv += s15.v[k]
+        out.append(pv / vv if vv else s15.c[k])
     return out
 
 
-def daily_atr(s15: Series, day, n: int = 14) -> float | None:
+def daily_atr(s15: Series, day, n: int = 14, j0: int | None = None) -> float | None:
+    """14-session ATR from the sessions BEFORE `day` (bars before index j0)."""
+    dayof = _dayof(s15)
+    end = today_index(s15, day) if j0 is None else j0
     days: dict = {}
     order = []
-    ep = getattr(s15, "epochs", None)
-    for i in range(len(s15)):
-        d = _epoch_day(ep[i]) if ep is not None else _day(s15.ts[i])
-        if d >= day:
-            break
+    k = end - 1
+    while k >= 0 and len(order) <= n + 1:
+        d = dayof(k)
         if d not in days:
-            days[d] = [s15.h[i], s15.l[i], s15.c[i]]
+            days[d] = [s15.h[k], s15.l[k], s15.c[k]]      # walking back: first seen = last bar
             order.append(d)
         else:
-            x = days[d]; x[0] = max(x[0], s15.h[i]); x[1] = min(x[1], s15.l[i]); x[2] = s15.c[i]
+            x = days[d]; x[0] = max(x[0], s15.h[k]); x[1] = min(x[1], s15.l[k])
+        k -= 1
+    order.reverse()
     order = order[-(n + 1):]
     if len(order) < n + 1:
         return None
@@ -184,18 +202,21 @@ _ATR_DAY: dict = {}       # (symbol, date) -> 14-session daily ATR; changes once
 
 def build_ctx(symbol: str, tf: str, now: datetime, s: Series, s15: Series,
               rvol: float | None = None, rvol_rank: int | None = None,
-              nifty_ret: float | None = None, prev_close: float | None = None) -> Ctx | None:
-    """Everything a rule may read, computed from closed bars only."""
-    if len(s) < 30 or len(s15) < 30:
+              nifty_ret: float | None = None, prev_close: float | None = None,
+              i: int | None = None, j: int | None = None,
+              vwap: list[float] | None = None) -> Ctx | None:
+    """Everything a rule may read at bar i (default: the last bar), from closed bars only."""
+    i = len(s) - 1 if i is None else i
+    j = len(s15) - 1 if j is None else j
+    if i < 29 or j < 29:
         return None
     day = now.astimezone(IST).date()
-    i0, j0 = today_index(s, day), today_index(s15, day)
-    a = atr(s, 14)[-1]
+    i0, j0 = today_index(s, day, i), today_index(s15, day, j)
+    a = atr(s, 14)[i]
     if a <= 0:
         return None
     pdh = pdl = None
-    ep15 = getattr(s15, "epochs", None)
-    dayof = (lambda i: _epoch_day(ep15[i])) if ep15 is not None else (lambda i: _day(s15.ts[i]))
+    dayof = _dayof(s15)
     if j0:
         k, prev_day = j0 - 1, dayof(j0 - 1)
         pdh, pdl = s15.h[k], s15.l[k]
@@ -204,17 +225,17 @@ def build_ctx(symbol: str, tf: str, now: datetime, s: Series, s15: Series,
             pdh, pdl = max(pdh, s15.h[k]), min(pdl, s15.l[k])
     key = (symbol, day)
     if key not in _ATR_DAY:
-        if len(_ATR_DAY) > 2000:
+        if len(_ATR_DAY) > 5000:
             _ATR_DAY.clear()
-        _ATR_DAY[key] = daily_atr(s15, day)
+        _ATR_DAY[key] = daily_atr(s15, day, j0=j0)
     pc = prev_close if prev_close else (s15.c[j0 - 1] if j0 else None)
-    today15 = len(s15) - j0
+    today15 = j + 1 - j0
     or_ok = today15 >= 2
-    vols = s.v[-21:-1]
+    vols = s.v[max(0, i - 20):i]
     return Ctx(
-        symbol=symbol, tf=tf, now=now, s=s, i0=i0, s15=s15, j0=j0, atr=a,
-        atr_day=_ATR_DAY[key], vwap=session_vwap(s15, j0), prev_close=pc,
-        pdh=pdh, pdl=pdl, day_open=s15.o[j0] if today15 else None,
+        symbol=symbol, tf=tf, now=now, s=s, i=i, i0=i0, s15=s15, j=j, j0=j0, atr=a,
+        atr_day=_ATR_DAY[key], vwap=vwap if vwap is not None else session_vwap(s15, j0, j),
+        prev_close=pc, pdh=pdh, pdl=pdl, day_open=s15.o[j0] if today15 > 0 else None,
         or_high=max(s15.h[j0:j0 + 2]) if or_ok else None,
         or_low=min(s15.l[j0:j0 + 2]) if or_ok else None,
         or_open=s15.o[j0] if or_ok else None, or_close=s15.c[j0 + 1] if or_ok else None,
@@ -238,16 +259,16 @@ def _not_in_play(ctx: Ctx, limit: float = 1.8) -> bool:
 
 
 def _today_bars(ctx: Ctx) -> int:
-    return len(ctx.s) - ctx.i0
+    return ctx.i + 1 - ctx.i0
 
 
 def _vol_ok(ctx: Ctx, mult: float = 1.2) -> bool:
-    return bool(ctx.avg_vol) and ctx.s.v[-1] >= mult * ctx.avg_vol
+    return bool(ctx.avg_vol) and ctx.s.v[ctx.i] >= mult * ctx.avg_vol
 
 
 def _sig(ctx: Ctx, side: str, stop_atr: float, tgt_atr: float | None, why: str,
          priority: float | None = None, target_price: float | None = None) -> V2Signal:
-    return V2Signal(side=side, entry=ctx.s.c[-1], stop_dist=stop_atr * ctx.atr,
+    return V2Signal(side=side, entry=ctx.s.c[ctx.i], stop_dist=stop_atr * ctx.atr,
                     target_dist=tgt_atr * ctx.atr if tgt_atr else None,
                     max_bars=MAX_BARS.get(ctx.tf, 0),
                     priority=priority if priority is not None else (ctx.rvol or 0.0),
@@ -258,82 +279,82 @@ def _sig(ctx: Ctx, side: str, stop_atr: float, tgt_atr: float | None, why: str,
 
 
 def f_donchian(ctx: Ctx, p: dict):
-    s, n = ctx.s, p.get("n", 20)
-    if len(s) < n + 2:
+    s, n, i = ctx.s, p.get("n", 20), ctx.i
+    if i < n + 1:
         return None
-    hi, lo = max(s.h[-n - 1:-1]), min(s.l[-n - 1:-1])
-    c = s.c[-1]
-    if c > hi and s.c[-2] <= hi and _vol_ok(ctx) and _aligned(ctx, "BUY"):
+    hi, lo = max(s.h[i - n:i]), min(s.l[i - n:i])
+    c = s.c[i]
+    if c > hi and s.c[i - 1] <= hi and _vol_ok(ctx) and _aligned(ctx, "BUY"):
         return _sig(ctx, "BUY", 1.0, 2.0, f"close {c:.2f} broke the {n}-bar high {hi:.2f} on volume, NIFTY up on the day")
-    if c < lo and s.c[-2] >= lo and _vol_ok(ctx) and _aligned(ctx, "SELL"):
+    if c < lo and s.c[i - 1] >= lo and _vol_ok(ctx) and _aligned(ctx, "SELL"):
         return _sig(ctx, "SELL", 1.0, 2.0, f"close {c:.2f} broke the {n}-bar low {lo:.2f} on volume, NIFTY down on the day")
     return None
 
 
 def f_ema_pullback(ctx: Ctx, p: dict):
-    s = ctx.s
+    s, i = ctx.s, ctx.i
     e9, e21, e50 = (s.cached(("ema", k), lambda k=k: ema(s.c, k)) for k in (9, 21, 50))
-    c, o = s.c[-1], s.o[-1]
-    if e9[-1] > e21[-1] > e50[-1] and s.l[-2] <= e21[-2] and c > e9[-1] and c > o and _aligned(ctx, "BUY"):
+    c, o = s.c[i], s.o[i]
+    if e9[i] > e21[i] > e50[i] and s.l[i - 1] <= e21[i - 1] and c > e9[i] and c > o and _aligned(ctx, "BUY"):
         return _sig(ctx, "BUY", 1.0, 1.8, "EMA 9>21>50 uptrend; pulled back to EMA21 and closed back above EMA9")
-    if e9[-1] < e21[-1] < e50[-1] and s.h[-2] >= e21[-2] and c < e9[-1] and c < o and _aligned(ctx, "SELL"):
+    if e9[i] < e21[i] < e50[i] and s.h[i - 1] >= e21[i - 1] and c < e9[i] and c < o and _aligned(ctx, "SELL"):
         return _sig(ctx, "SELL", 1.0, 1.8, "EMA 9<21<50 downtrend; rallied to EMA21 and closed back below EMA9")
     return None
 
 
 def f_macd_trend(ctx: Ctx, p: dict):
-    s = ctx.s
+    s, i = ctx.s, ctx.i
     _, _, hist = s.cached(("macd",), lambda: macd(s.c, 12, 26, 9))
     e50 = s.cached(("ema", 50), lambda: ema(s.c, 50))
-    if hist[-2] <= 0 < hist[-1] and s.c[-1] > e50[-1] and _aligned(ctx, "BUY"):
+    if hist[i - 1] <= 0 < hist[i] and s.c[i] > e50[i] and _aligned(ctx, "BUY"):
         return _sig(ctx, "BUY", 1.2, 2.0, "MACD histogram turned positive above EMA50")
-    if hist[-2] >= 0 > hist[-1] and s.c[-1] < e50[-1] and _aligned(ctx, "SELL"):
+    if hist[i - 1] >= 0 > hist[i] and s.c[i] < e50[i] and _aligned(ctx, "SELL"):
         return _sig(ctx, "SELL", 1.2, 2.0, "MACD histogram turned negative below EMA50")
     return None
 
 
 def f_keltner(ctx: Ctx, p: dict):
-    s = ctx.s
+    s, i = ctx.s, ctx.i
     mid = s.cached(("ema", 20), lambda: ema(s.c, 20))
     a10 = atr(s, 10)
-    up = [m + 2 * x for m, x in zip(mid, a10)]
-    dn = [m - 2 * x for m, x in zip(mid, a10)]
-    if s.c[-1] > up[-1] and s.c[-2] <= up[-2] and _aligned(ctx, "BUY"):
+    up_i, up_p = mid[i] + 2 * a10[i], mid[i - 1] + 2 * a10[i - 1]
+    dn_i, dn_p = mid[i] - 2 * a10[i], mid[i - 1] - 2 * a10[i - 1]
+    if s.c[i] > up_i and s.c[i - 1] <= up_p and _aligned(ctx, "BUY"):
         return _sig(ctx, "BUY", 1.0, 2.0, "closed above the upper Keltner band (EMA20 + 2 ATR)")
-    if s.c[-1] < dn[-1] and s.c[-2] >= dn[-2] and _aligned(ctx, "SELL"):
+    if s.c[i] < dn_i and s.c[i - 1] >= dn_p and _aligned(ctx, "SELL"):
         return _sig(ctx, "SELL", 1.0, 2.0, "closed below the lower Keltner band (EMA20 - 2 ATR)")
     return None
 
 
 def f_supertrend(ctx: Ctx, p: dict):
-    s = ctx.s
+    s, i = ctx.s, ctx.i
     d = s.cached(("st", 10, 3.0), lambda: supertrend(s, 10, 3.0))
-    if d[-2] < 0 < d[-1] and _aligned(ctx, "BUY"):
+    if d[i - 1] < 0 < d[i] and _aligned(ctx, "BUY"):
         return _sig(ctx, "BUY", 1.5, 2.5, "Supertrend(10,3) flipped up")
-    if d[-2] > 0 > d[-1] and _aligned(ctx, "SELL"):
+    if d[i - 1] > 0 > d[i] and _aligned(ctx, "SELL"):
         return _sig(ctx, "SELL", 1.5, 2.5, "Supertrend(10,3) flipped down")
     return None
 
 
 def f_adx_dmi(ctx: Ctx, p: dict):
-    s = ctx.s
+    s, i = ctx.s, ctx.i
     adx, pdi, ndi = s.cached(("adx", 14), lambda: adx_di(s, 14))
-    if adx[-2] < 25 <= adx[-1]:
-        if pdi[-1] > ndi[-1] and _aligned(ctx, "BUY"):
-            return _sig(ctx, "BUY", 1.2, 2.4, f"ADX rose through 25 ({adx[-1]:.0f}) with +DI leading")
-        if ndi[-1] > pdi[-1] and _aligned(ctx, "SELL"):
-            return _sig(ctx, "SELL", 1.2, 2.4, f"ADX rose through 25 ({adx[-1]:.0f}) with -DI leading")
+    if adx[i - 1] < 25 <= adx[i]:
+        if pdi[i] > ndi[i] and _aligned(ctx, "BUY"):
+            return _sig(ctx, "BUY", 1.2, 2.4, f"ADX rose through 25 ({adx[i]:.0f}) with +DI leading")
+        if ndi[i] > pdi[i] and _aligned(ctx, "SELL"):
+            return _sig(ctx, "SELL", 1.2, 2.4, f"ADX rose through 25 ({adx[i]:.0f}) with -DI leading")
     return None
 
 
 def f_rsi_momentum(ctx: Ctx, p: dict):
-    s = ctx.s
+    s, i = ctx.s, ctx.i
     r = s.cached(("rsi", 14), lambda: rsi(s.c, 14))
     e50 = s.cached(("ema", 50), lambda: ema(s.c, 50))
-    if r[-2] < 60 <= r[-1] and s.c[-1] > e50[-1] and _aligned(ctx, "BUY"):
-        return _sig(ctx, "BUY", 1.0, 2.0, f"RSI14 crossed up through 60 ({r[-1]:.0f}) above EMA50")
-    if r[-2] > 40 >= r[-1] and s.c[-1] < e50[-1] and _aligned(ctx, "SELL"):
-        return _sig(ctx, "SELL", 1.0, 2.0, f"RSI14 crossed down through 40 ({r[-1]:.0f}) below EMA50")
+    if r[i - 1] < 60 <= r[i] and s.c[i] > e50[i] and _aligned(ctx, "BUY"):
+        return _sig(ctx, "BUY", 1.0, 2.0, f"RSI14 crossed up through 60 ({r[i]:.0f}) above EMA50")
+    if r[i - 1] > 40 >= r[i] and s.c[i] < e50[i] and _aligned(ctx, "SELL"):
+        return _sig(ctx, "SELL", 1.0, 2.0, f"RSI14 crossed down through 40 ({r[i]:.0f}) below EMA50")
     return None
 
 
@@ -341,11 +362,11 @@ def f_vwap_trend(ctx: Ctx, p: dict):
     v = ctx.vwap
     if len(v) < 4 or ctx.rvol is None or ctx.rvol < 1.0:
         return None
-    s = ctx.s
+    s, i = ctx.s, ctx.i
     rising, falling = v[-1] > v[-3], v[-1] < v[-3]
-    if s.c[-2] < v[-1] < s.c[-1] and rising and _aligned(ctx, "BUY"):
+    if s.c[i - 1] < v[-1] < s.c[i] and rising and _aligned(ctx, "BUY"):
         return _sig(ctx, "BUY", 1.0, 1.8, f"reclaimed a rising session VWAP {v[-1]:.2f} (rvol {ctx.rvol:.1f})")
-    if s.c[-2] > v[-1] > s.c[-1] and falling and _aligned(ctx, "SELL"):
+    if s.c[i - 1] > v[-1] > s.c[i] and falling and _aligned(ctx, "SELL"):
         return _sig(ctx, "SELL", 1.0, 1.8, f"lost a falling session VWAP {v[-1]:.2f} (rvol {ctx.rvol:.1f})")
     return None
 
@@ -353,11 +374,12 @@ def f_vwap_trend(ctx: Ctx, p: dict):
 def f_pdh_pdl(ctx: Ctx, p: dict):
     if ctx.pdh is None or _today_bars(ctx) < 1:
         return None
-    s = ctx.s
+    s, i = ctx.s, ctx.i
+    prior = s.c[ctx.i0:i]
     # The first close beyond yesterday's extreme today (an earlier bar may not have closed there)
-    if s.c[-1] > ctx.pdh and max(s.c[ctx.i0:-1] or [0]) <= ctx.pdh and _vol_ok(ctx) and _aligned(ctx, "BUY"):
+    if s.c[i] > ctx.pdh and max(prior or [0]) <= ctx.pdh and _vol_ok(ctx) and _aligned(ctx, "BUY"):
         return _sig(ctx, "BUY", 1.0, 2.0, f"first close above the previous day's high {ctx.pdh:.2f}")
-    if s.c[-1] < ctx.pdl and min(s.c[ctx.i0:-1] or [1e18]) >= ctx.pdl and _vol_ok(ctx) and _aligned(ctx, "SELL"):
+    if s.c[i] < ctx.pdl and min(prior or [1e18]) >= ctx.pdl and _vol_ok(ctx) and _aligned(ctx, "SELL"):
         return _sig(ctx, "SELL", 1.0, 2.0, f"first close below the previous day's low {ctx.pdl:.2f}")
     return None
 
@@ -365,11 +387,11 @@ def f_pdh_pdl(ctx: Ctx, p: dict):
 def f_or_close_break(ctx: Ctx, p: dict):
     if ctx.or_high is None or ctx.rvol is None or ctx.rvol < 1.2:
         return None
-    s = ctx.s
-    prior = s.c[ctx.i0:-1]
-    if s.c[-1] > ctx.or_high and all(c <= ctx.or_high for c in prior) and _aligned(ctx, "BUY"):
+    s, i = ctx.s, ctx.i
+    prior = s.c[ctx.i0:i]
+    if s.c[i] > ctx.or_high and all(c <= ctx.or_high for c in prior) and _aligned(ctx, "BUY"):
         return _sig(ctx, "BUY", 1.0, 2.0, f"first close above the 30-min range high {ctx.or_high:.2f} (rvol {ctx.rvol:.1f})")
-    if s.c[-1] < ctx.or_low and all(c >= ctx.or_low for c in prior) and _aligned(ctx, "SELL"):
+    if s.c[i] < ctx.or_low and all(c >= ctx.or_low for c in prior) and _aligned(ctx, "SELL"):
         return _sig(ctx, "SELL", 1.0, 2.0, f"first close below the 30-min range low {ctx.or_low:.2f} (rvol {ctx.rvol:.1f})")
     return None
 
@@ -381,14 +403,14 @@ def f_vwap_reversion(ctx: Ctx, p: dict):
     v = ctx.vwap
     if len(v) < 3 or not _not_in_play(ctx):
         return None
-    s = ctx.s
-    c, k = s.c[-1], p.get("k", 1.5)
+    s, i = ctx.s, ctx.i
+    c, k = s.c[i], p.get("k", 1.5)
     z = (c - v[-1]) / ctx.atr
-    rng = s.h[-1] - s.l[-1]
-    if z <= -k and rng and (c - s.l[-1]) / rng >= 0.3:
+    rng = s.h[i] - s.l[i]
+    if z <= -k and rng and (c - s.l[i]) / rng >= 0.3:
         return _sig(ctx, "BUY", 1.0, None, f"{-z:.1f} ATR below session VWAP {v[-1]:.2f}, closed off the low",
                     priority=-z, target_price=v[-1])
-    if z >= k and rng and (s.h[-1] - c) / rng >= 0.3:
+    if z >= k and rng and (s.h[i] - c) / rng >= 0.3:
         return _sig(ctx, "SELL", 1.0, None, f"{z:.1f} ATR above session VWAP {v[-1]:.2f}, closed off the high",
                     priority=z, target_price=v[-1])
     return None
@@ -397,73 +419,71 @@ def f_vwap_reversion(ctx: Ctx, p: dict):
 def f_rsi2(ctx: Ctx, p: dict):
     if not _not_in_play(ctx):
         return None
-    s = ctx.s
+    s, i = ctx.s, ctx.i
     r2 = s.cached(("rsi", 2), lambda: rsi(s.c, 2))
     e50 = s.cached(("ema", 50), lambda: ema(s.c, 50))
-    if r2[-1] < 5 and s.c[-1] > e50[-1]:
-        return _sig(ctx, "BUY", 1.2, 1.0, f"RSI(2) {r2[-1]:.0f} — a sharp dip inside an uptrend", priority=5 - r2[-1])
-    if r2[-1] > 95 and s.c[-1] < e50[-1]:
-        return _sig(ctx, "SELL", 1.2, 1.0, f"RSI(2) {r2[-1]:.0f} — a sharp pop inside a downtrend", priority=r2[-1] - 95)
+    if r2[i] < 5 and s.c[i] > e50[i]:
+        return _sig(ctx, "BUY", 1.2, 1.0, f"RSI(2) {r2[i]:.0f} — a sharp dip inside an uptrend", priority=5 - r2[i])
+    if r2[i] > 95 and s.c[i] < e50[i]:
+        return _sig(ctx, "SELL", 1.2, 1.0, f"RSI(2) {r2[i]:.0f} — a sharp pop inside a downtrend", priority=r2[i] - 95)
     return None
 
 
 def f_bollinger_snap(ctx: Ctx, p: dict):
     if not _not_in_play(ctx):
         return None
-    s = ctx.s
+    s, i = ctx.s, ctx.i
     m = s.cached(("sma", 20), lambda: sma(s.c, 20))
     sd = s.cached(("sd", 20), lambda: stdev(s.c, 20))
-    lo = [a - 2 * b for a, b in zip(m, sd)]
-    hi = [a + 2 * b for a, b in zip(m, sd)]
-    if s.c[-2] < lo[-2] and s.c[-1] > lo[-1]:
-        return _sig(ctx, "BUY", 1.0, None, "closed back inside the lower Bollinger band", target_price=m[-1])
-    if s.c[-2] > hi[-2] and s.c[-1] < hi[-1]:
-        return _sig(ctx, "SELL", 1.0, None, "closed back inside the upper Bollinger band", target_price=m[-1])
+    if s.c[i - 1] < m[i - 1] - 2 * sd[i - 1] and s.c[i] > m[i] - 2 * sd[i]:
+        return _sig(ctx, "BUY", 1.0, None, "closed back inside the lower Bollinger band", target_price=m[i])
+    if s.c[i - 1] > m[i - 1] + 2 * sd[i - 1] and s.c[i] < m[i] + 2 * sd[i]:
+        return _sig(ctx, "SELL", 1.0, None, "closed back inside the upper Bollinger band", target_price=m[i])
     return None
 
 
 def f_zscore(ctx: Ctx, p: dict):
     if not _not_in_play(ctx):
         return None
-    s = ctx.s
+    s, i = ctx.s, ctx.i
     adx, _, _ = s.cached(("adx", 14), lambda: adx_di(s, 14))
-    if adx[-1] >= 25:
+    if adx[i] >= 25:
         return None
     m = s.cached(("sma", 20), lambda: sma(s.c, 20))
     sd = s.cached(("sd", 20), lambda: stdev(s.c, 20))
-    if not sd[-1]:
+    if not sd[i]:
         return None
-    z = (s.c[-1] - m[-1]) / sd[-1]
+    z = (s.c[i] - m[i]) / sd[i]
     if z <= -2.5:
-        return _sig(ctx, "BUY", 1.2, None, f"z-score {z:.1f} in a range (ADX {adx[-1]:.0f})", priority=-z, target_price=m[-1])
+        return _sig(ctx, "BUY", 1.2, None, f"z-score {z:.1f} in a range (ADX {adx[i]:.0f})", priority=-z, target_price=m[i])
     if z >= 2.5:
-        return _sig(ctx, "SELL", 1.2, None, f"z-score {z:.1f} in a range (ADX {adx[-1]:.0f})", priority=z, target_price=m[-1])
+        return _sig(ctx, "SELL", 1.2, None, f"z-score {z:.1f} in a range (ADX {adx[i]:.0f})", priority=z, target_price=m[i])
     return None
 
 
 def f_stoch_range(ctx: Ctx, p: dict):
     if not _not_in_play(ctx):
         return None
-    s = ctx.s
+    s, i = ctx.s, ctx.i
     adx, _, _ = s.cached(("adx", 14), lambda: adx_di(s, 14))
-    if adx[-1] >= 20:
+    if adx[i] >= 20:
         return None
     k, d = s.cached(("stoch", 14, 3), lambda: stoch(s, 14, 3))
-    if k[-2] <= d[-2] and k[-1] > d[-1] and k[-1] < 20:
-        return _sig(ctx, "BUY", 1.0, 1.0, f"stochastic turned up below 20 in a range (ADX {adx[-1]:.0f})")
-    if k[-2] >= d[-2] and k[-1] < d[-1] and k[-1] > 80:
-        return _sig(ctx, "SELL", 1.0, 1.0, f"stochastic turned down above 80 in a range (ADX {adx[-1]:.0f})")
+    if k[i - 1] <= d[i - 1] and k[i] > d[i] and k[i] < 20:
+        return _sig(ctx, "BUY", 1.0, 1.0, f"stochastic turned up below 20 in a range (ADX {adx[i]:.0f})")
+    if k[i - 1] >= d[i - 1] and k[i] < d[i] and k[i] > 80:
+        return _sig(ctx, "SELL", 1.0, 1.0, f"stochastic turned down above 80 in a range (ADX {adx[i]:.0f})")
     return None
 
 
 def f_cci_extreme(ctx: Ctx, p: dict):
     if not _not_in_play(ctx):
         return None
-    s = ctx.s
+    s, i = ctx.s, ctx.i
     c = s.cached(("cci", 20), lambda: cci(s, 20))
-    if c[-2] < -200 <= c[-1]:
+    if c[i - 1] < -200 <= c[i]:
         return _sig(ctx, "BUY", 1.2, 1.0, "CCI(20) came back up through -200")
-    if c[-2] > 200 >= c[-1]:
+    if c[i - 1] > 200 >= c[i]:
         return _sig(ctx, "SELL", 1.2, 1.0, "CCI(20) came back down through +200")
     return None
 
