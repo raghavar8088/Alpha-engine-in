@@ -1100,6 +1100,13 @@ export interface EdgeReport {
     bars_compared?: number;
     close_bp?: { median: number | null; p95: number | null; max?: number | null };
   } | null;
+  selection?: {
+    expected_move: { rank_ic: number; top20_move_bp: number; all_move_bp: number; lift_top20: number | null; n: number } | null;
+    nifty_gap: { forecast_bp: number; call: string; actual_bp: number | null; direction_right?: boolean } | null;
+    incubation: { strategy_id: string; status: string; trades: number; forward_mean: number | null;
+                  t: number | null; z_vs_expected: number | null; expected_mean: number | null }[];
+    slippage_note: string;
+  };
 }
 
 export async function fetchIntradayAlarms(days = 2): Promise<{ active: OpsAlarm[]; recent: OpsAlarm[] }> {
@@ -1108,6 +1115,161 @@ export async function fetchIntradayAlarms(days = 2): Promise<{ active: OpsAlarm[
 
 export async function fetchEdgeReport(date?: string): Promise<EdgeReport | Record<string, never>> {
   return apiFetch(`/api/intraday-ops/edge-report${date ? `?date=${date}` : ""}`);
+}
+
+// --- Stock selection: Scanner Board, pre-market brief, evidence (Today's Playbook) ---
+
+/** What a list may be used for, as the 2026-10-02 research found. */
+export type EvidenceStatus = "proven" | "candidate" | "context" | "forward";
+
+export interface ScannerRow {
+  symbol: string;
+  score: number | null;
+  value: string;
+  side: "LONG" | "SHORT" | null;
+  reasons: string[];
+  sector: string | null;
+  last: number | null;
+  chg_pct: number | null;
+  expected_move_bp: number | null;
+  turnover_cr: number | null;
+  variant?: string;
+  or_high?: number;
+  or_low?: number;
+}
+
+export interface ScannerList {
+  status: EvidenceStatus;
+  use: "where" | "side" | "none";
+  title: string;
+  evidence: string;
+  count: number;
+  rows: ScannerRow[];
+}
+
+export interface HeldOut {
+  days?: number;
+  rank_ic?: number;
+  ic_positive_days?: number;
+  top20_move_bp?: number;
+  all_move_bp?: number;
+}
+
+export interface ScannerBoard {
+  at: string;
+  hhmm: string;
+  date: string;
+  session: string;
+  label?: string;
+  nifty_chg_pct: number | null;
+  sector_chg_pct: Record<string, number>;
+  universe: number;
+  stocks: number;
+  archives_from: string | null;
+  preopen: boolean;
+  results_today: number;
+  model: { trained_at: string; samples: number; oos: Record<string, HeldOut>; y_mean_bp: number;
+           variants: Record<string, number> } | null;
+  scanners: Record<string, ScannerList>;
+  expected_move_all: Record<string, number>;
+  or_levels: Record<string, [number, number]>;
+}
+
+export interface GapHeldOut {
+  sessions: number; from: string; corr: number; mae_bp: number; naive_mae_bp: number;
+  direction_hit: number; big_calls: number; big_direction_hit: number | null;
+}
+
+export interface GapForecast {
+  us_move_bp: number;
+  pred_bp: number;
+  basis: string;
+  call: "gap up" | "gap down" | "flat open";
+  confidence: "high" | "moderate" | "low";
+  typical_abs_gap_bp: number;
+  model: { slope: number; intercept_bp: number; held_out: GapHeldOut };
+  provisional?: boolean;
+  note?: string;
+  made_at?: string;
+}
+
+export interface EvidenceEntry {
+  status: EvidenceStatus;
+  title: string;
+  evidence: string;
+  predicts?: string;
+  use?: string;
+}
+
+export interface SelectionEvidence {
+  market: Record<string, EvidenceEntry>;
+  stock_lists: Record<string, EvidenceEntry>;
+  statuses: Record<EvidenceStatus, string>;
+}
+
+export interface PositioningRow {
+  index_fut_long: number; index_fut_short: number; long_share: number | null; net: number; net_change?: number;
+}
+
+export interface SelectionBrief {
+  at: string;
+  date: string;
+  session: string;
+  trading_today: boolean;
+  closed_reason: string | null;
+  global: {
+    snapshot_of: string | null;
+    series: { key: string; label: string; group: string; session_ret_pct: number | null;
+              session_date: string | null; live_chg_pct: number | null; used_for: string }[];
+  };
+  gap_forecast: GapForecast | null;
+  vix: { level: number; prev_close: number; live: boolean; percentile_1y: number;
+         regime: "high" | "normal" | "low"; means: string } | null;
+  breadth_prev: { session: string; market: { advances: number; declines: number; ratio: number | null };
+                  universe: { advances: number; declines: number; ratio: number | null } } | null;
+  positioning: ({ session: string } & Record<string, PositioningRow | string>) | null;
+  results: { today: { symbol: string; kind: string; at: string | null; source: string }[];
+             in_universe_today: string[]; next_7_days: number };
+  preopen: { nse_time?: string; stocks?: number; advances?: number; declines?: number;
+             universe_movers?: { symbol: string; pchange: number; iep: number; imbalance: number | null }[] } | null;
+  expected_day: { universe_expected_move_bp: number; typical_bp: number; ratio: number; as_of: string; note: string } | null;
+  stock_bias: { status: EvidenceStatus; rule: string; rows: ScannerRow[] };
+  gap_record: { days: { date: string; pred_bp: number | null; call: string | null; actual_bp: number | null }[];
+                scored: number; direction_hit: number | null; mae_bp: number | null };
+  evidence: SelectionEvidence;
+}
+
+export interface SelectionModel {
+  model: { weights: Record<string, number[]>; features: Record<string, string[]>; samples: number;
+           sessions: number; holdout_sessions: number; oos: Record<string, HeldOut>; y_mean_bp: number;
+           trained_at: string; note: string } | null;
+  live_record: { days: { date: string; rank_ic: number; top20_move_bp: number; all_move_bp: number;
+                         lift_top20: number | null; n: number }[];
+                 mean_rank_ic: number | null; mean_lift_top20: number | null };
+  gap_model: { series: string; slope: number; intercept_bp: number; sessions: number; corr_all: number;
+               held_out: GapHeldOut } | null;
+  gap_record: SelectionBrief["gap_record"];
+}
+
+export async function fetchSelectionBoard(): Promise<ScannerBoard> {
+  return apiFetch(`/api/selection/board`);
+}
+
+export async function fetchSelectionBrief(): Promise<SelectionBrief> {
+  return apiFetch(`/api/selection/brief`, { timeoutMs: 45000 });
+}
+
+export async function fetchSelectionSnapshots(date?: string):
+    Promise<{ days: string[]; date: string | null; times: string[]; schedule: string[] }> {
+  return apiFetch(`/api/selection/snapshots${date ? `?date=${date}` : ""}`);
+}
+
+export async function fetchSelectionSnapshot(date: string, time: string): Promise<ScannerBoard> {
+  return apiFetch(`/api/selection/snapshot?date=${date}&time=${encodeURIComponent(time)}`);
+}
+
+export async function fetchSelectionModel(): Promise<SelectionModel> {
+  return apiFetch(`/api/selection/model`);
 }
 
 export async function fetchIntradayDaily(limit = 60): Promise<IntradayDay[]> {

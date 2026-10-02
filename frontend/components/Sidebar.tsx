@@ -424,6 +424,19 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // The stock-selection layer for the intraday desks: which names to watch today and
+        // what the evidence says about each list. A clipboard-checklist icon: a plan, not a desk.
+        href: "/todays-playbook",
+        label: "Today's Playbook",
+        icon: (
+          <>
+            <rect x="5" y="4" width="14" height="17" rx="2" />
+            <path d="M9 4V3h6v1" />
+            <path d="M8.5 10l1.5 1.5 3-3M8.5 15.5l1.5 1.5 3-3M15 11h1M15 16.5h1" />
+          </>
+        ),
+      },
+      {
         // Months-long basket holds, not single ticks — a calendar-page icon rather than
         // Intraday Stocks' clock-candlestick mark, to read as "slow" at a glance.
         href: "/long-horizon",
