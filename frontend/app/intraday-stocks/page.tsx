@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import GlassPanel from "../../components/GlassPanel";
 import DeskHistory from "../../components/DeskHistory";
 import PageHeader from "../../components/PageHeader";
@@ -209,6 +209,58 @@ const HISTORY_SCOPE: Record<IntradayTab, { deskKey: string; scope?: string; labe
   "10k": { deskKey: "live-intraday", scope: "10k", label: "Live Intraday · ₹10k" },
 };
 
+/** What a tab shows before its data has arrived, or when it could not be loaded.
+ *
+ *  Without this the tiles rendered their empty defaults — "₹-", "0 strategies", "+0.00%",
+ *  "IDLE" — whenever a load was slow or failed, which reads exactly like a real desk that
+ *  has done nothing. A desk with no data and a desk we could not reach must never look the
+ *  same. Once a tab HAS loaded, a later failed refresh keeps the last good figures on screen
+ *  but marks them stale with the time they were taken. Styles live here, not in the page:
+ *  styled-jsx scopes CSS to the component that declares it. */
+function DataGate({
+  ready, error, what, onRetry, lastOkAt, children,
+}: {
+  ready: boolean;
+  error: string | null;
+  what: string;
+  onRetry: () => void;
+  lastOkAt: Date | null;
+  children: React.ReactNode;
+}) {
+  if (!ready) {
+    if (error) {
+      return (
+        <ErrorBanner
+          onRetry={onRetry}
+          message={`Couldn't load ${what}. ${error} Nothing is shown rather than zeros that would look like a real, empty desk.`}
+        />
+      );
+    }
+    return (
+      <div className="gate">
+        Loading {what}…
+        <style jsx>{`
+          .gate { border: 1px dashed var(--panel-border); border-radius: 12px; padding: 22px 20px;
+                  background: var(--canvas-soft); font-size: 13px; color: var(--text-muted); }
+        `}</style>
+      </div>
+    );
+  }
+  return (
+    <>
+      {error && (
+        <ErrorBanner
+          onRetry={onRetry}
+          message={`${lastOkAt
+            ? `Showing figures from ${lastOkAt.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}`
+            : "Showing earlier figures"} — the latest refresh failed, so they are not current. ${error}`}
+        />
+      )}
+      {children}
+    </>
+  );
+}
+
 const REFRESH_MS = 15000;
 
 const inr = (v: number | null | undefined) =>
@@ -252,7 +304,27 @@ export default function IntradayStocksPage() {
   const [trades, setTrades] = useState<IntradayTrade[]>([]);
   const [equity, setEquity] = useState<IntradayEquityPoint[]>([]);
   const [days, setDays] = useState<IntradayDay[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  // Each data source keeps its OWN error and last-good time. They used to share one `error`,
+  // so the tournament poll — which runs on every tab — cleared a failure on the Live tab
+  // fifteen seconds later and the failure vanished from the screen with nothing loaded.
+  const [errs, setErrs] = useState<Record<string, string | null>>({});
+  const [okAt, setOkAt] = useState<Record<string, Date>>({});
+  const settle = useCallback((src: string, err: string | null) => {
+    setErrs((m) => ({ ...m, [src]: err }));
+    if (!err) setOkAt((m) => ({ ...m, [src]: new Date() }));
+  }, []);
+  // One load of each kind at a time. Without this a slow backend gets a fresh batch of five
+  // requests every 15 s on top of the ones it has not answered yet.
+  const inflight = useRef(new Set<string>());
+  const once = useCallback(async (key: string, fn: () => Promise<void>) => {
+    if (inflight.current.has(key)) return;
+    inflight.current.add(key);
+    try {
+      await fn();
+    } finally {
+      inflight.current.delete(key);
+    }
+  }, []);
 
   // Live Intraday desk (curated ₹80k shortlist)
   const [liveSummary, setLiveSummary] = useState<LiveIntradaySummary | null>(null);
@@ -286,6 +358,12 @@ export default function IntradayStocksPage() {
   const [patOpen, setPatOpen] = useState<PatternPosition[]>([]);
   const [patTf, setPatTf] = useState<string | null>(null);
   const [patFam, setPatFam] = useState<string | null>(null);
+  // Which filter a pattern load was started for. A load that finishes after the filter has
+  // changed is dropped, so an old answer never paints over the view the user asked for.
+  const patKey = `${patTf ?? ""}|${patFam ?? ""}`;
+  const patKeyRef = useRef(patKey);
+  const liveBookRef = useRef(liveBook);
+  const pbKeyRef = useRef(pbKey);
 
   const loadPatterns = useCallback(async () => {
     try {
@@ -295,19 +373,26 @@ export default function IntradayStocksPage() {
         fetchPatternTimeframes(),
         fetchPatternPositions("OPEN", patTf ?? undefined),
       ]);
+      if (patKeyRef.current !== patKey) return;     // the filter changed while this ran
       setPatSummary(s); setPatBoard(lb); setPatFrames(tf); setPatOpen(op);
-      setError(null);
+      settle("patterns", null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load the pattern desk");
+      if (patKeyRef.current !== patKey) return;
+      settle("patterns", e instanceof Error ? e.message : "Failed to load the pattern desk");
     }
-  }, [patTf, patFam]);
+  }, [patTf, patFam, patKey, settle]);
+
+  useEffect(() => {
+    patKeyRef.current = patKey;
+  }, [patKey]);
 
   useEffect(() => {
     if (tab !== "patterns") return;
-    loadPatterns();
-    const id = setInterval(loadPatterns, REFRESH_MS);
+    const run = () => once(`patterns:${patKey}`, loadPatterns);
+    run();
+    const id = setInterval(run, REFRESH_MS);
     return () => clearInterval(id);
-  }, [tab, loadPatterns]);
+  }, [tab, patKey, loadPatterns, once]);
 
   const loadPatternBook = useCallback(async () => {
     try {
@@ -318,6 +403,7 @@ export default function IntradayStocksPage() {
         fetchPatternBookPositions(pbKey, "ALL"),
         fetchPatternBookTrades(pbKey, 60),
       ]);
+      if (pbKeyRef.current !== pbKey) return;       // the user switched book while this ran
       setPbSummary(sm);
       setPbBoard(lb.rows ?? []);
       setPbOpen(op);
@@ -326,18 +412,26 @@ export default function IntradayStocksPage() {
       // keeping them in the same collection is what stops one being counted twice.
       setPbDeclined((dec ?? []).filter((r) => r.status === "DECLINED"));
       setPbTrades(tr);
-      setError(null);
+      settle(`book:${pbKey}`, null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load the pattern paper book");
+      settle(`book:${pbKey}`, e instanceof Error ? e.message : "Failed to load the pattern paper book");
     }
+  }, [pbKey, settle]);
+
+  // A different book is a different account: hide the previous one's figures until this
+  // one's arrive, rather than showing ₹50k numbers under the ₹2L tab for a refresh cycle.
+  useEffect(() => {
+    pbKeyRef.current = pbKey;
+    setPbSummary(null);
   }, [pbKey]);
 
   useEffect(() => {
     if (!isPatternBook) return;
-    loadPatternBook();
-    const id = setInterval(loadPatternBook, REFRESH_MS);
+    const run = () => once(`book:${pbKey}`, loadPatternBook);
+    run();
+    const id = setInterval(run, REFRESH_MS);
     return () => clearInterval(id);
-  }, [isPatternBook, loadPatternBook]);
+  }, [isPatternBook, pbKey, loadPatternBook, once]);
 
   const load = useCallback(async () => {
     try {
@@ -354,11 +448,11 @@ export default function IntradayStocksPage() {
       setEquity(e);
       setDays(d);
       setLabDaily(await fetchIntradayLabDaily(60));
-      setError(null);
+      settle("tournament", null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load the intraday desk");
+      settle("tournament", err instanceof Error ? err.message : "Failed to load the intraday desk");
     }
-  }, []);
+  }, [settle]);
 
   const [isRefreshing, setIsRefreshing] = useState(false);
   const handleRefresh = useCallback(async () => {
@@ -378,29 +472,45 @@ export default function IntradayStocksPage() {
         fetchLiveIntradayTrades(100, liveBook),
         fetchLiveIntradayDaily(liveBook),
       ]);
+      if (liveBookRef.current !== liveBook) return;   // the user switched book while this ran
       setLiveScores(lb);
       setLivePositions(pos.positions);
       setLiveSummary(pos.summary);
       setLiveTrades(tr);
       setLiveDaily(dl);
-      setError(null);
+      settle(`live:${liveBook}`, null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load the Live Intraday desk");
+      settle(`live:${liveBook}`, err instanceof Error ? err.message : "Failed to load the Live Intraday desk");
     }
+  }, [liveBook, settle]);
+
+  useEffect(() => {
+    const run = () => once("tournament", load);
+    run();
+    const id = setInterval(run, REFRESH_MS);
+    return () => clearInterval(id);
+  }, [load, once]);
+
+  useEffect(() => {
+    liveBookRef.current = liveBook;
+    setLiveSummary(null);
   }, [liveBook]);
 
   useEffect(() => {
-    load();
-    const id = setInterval(load, REFRESH_MS);
-    return () => clearInterval(id);
-  }, [load]);
-
-  useEffect(() => {
     if (!isLive) return;
-    loadLive();
-    const id = setInterval(loadLive, REFRESH_MS);
+    const run = () => once(`live:${liveBook}`, loadLive);
+    run();
+    const id = setInterval(run, REFRESH_MS);
     return () => clearInterval(id);
-  }, [tab, loadLive]);
+  }, [isLive, liveBook, loadLive, once]);
+
+  // The source behind the tab on screen — its failure is the one the banner and gate show.
+  const src =
+    tab === "tournament" ? "tournament" :
+    tab === "patterns" ? "patterns" :
+    isPatternBook ? `book:${pbKey}` : `live:${liveBook}`;
+  const error = errs[src] ?? null;
+  const lastOkAt = okAt[src] ?? null;
 
   const heartbeatAge = status?.heartbeat
     ? (Date.now() - new Date(status.heartbeat).getTime()) / 1000
@@ -421,7 +531,7 @@ export default function IntradayStocksPage() {
         refreshing={isRefreshing}
         crumb="Intraday Stocks"
         title="Intraday Stocks"
-        subtitle="Paper strategy-selection tournament: auto-trades 150 intraday NSE-equity strategies on live Angel One prices. Each strategy runs its own independent ₹10 lakh account (₹15 cr across the desk) and takes a uniform ₹10 lakh per position, so the leaderboard ranks timing edge, not bet size. Long-only cash equities; scalping/momentum/mean-reversion styles square off at 15:15 IST, swing styles may carry a few days."
+        subtitle="Paper strategy-selection tournament: auto-trades 150 intraday NSE-equity strategies on live Angel One prices. Each strategy runs its own independent ₹10 lakh account (₹15 cr across the desk) and takes a uniform ₹10 lakh per position, so the leaderboard ranks timing edge, not bet size. Long-only cash equities; scalping/momentum/mean-reversion styles take no new entries after 14:30 IST and square off at 15:05 in closing-auction (F&O) stocks and 15:12 in the rest — inside Angel One's own MIS cut-offs; swing styles may carry a few days."
       />
 
       <div className="tabs">
@@ -451,10 +561,8 @@ export default function IntradayStocksPage() {
         ))}
       </div>
 
-      {error && <ErrorBanner message={error} />}
-
       {tab === "tournament" && (
-      <>
+      <DataGate ready={!!status} error={error} what={"the tournament"} onRetry={() => once("tournament", load)} lastOkAt={lastOkAt}>
       <div className="desk-banner">
         <strong>LONG-ONLY CASH EQUITIES.</strong> Every position is a paper buy sized by its
         strategy&rsquo;s capital slice, with the target and stop taken from the signal itself.
@@ -712,11 +820,11 @@ export default function IntradayStocksPage() {
           </div>
         )}
       </GlassPanel>
-      </>
+      </DataGate>
       )}
 
       {tab === "patterns" && (
-      <>
+      <DataGate ready={!!patSummary} error={error} what={"the pattern desk"} onRetry={() => once(`patterns:${patKey}`, loadPatterns)} lastOkAt={lastOkAt}>
       <div className="desk-banner">
         <strong>PATTERN DESK · {patSummary?.template_count ?? 63} TEMPLATES × {patSummary?.timeframes?.length ?? 8} TIMEFRAMES.</strong>{" "}
         13 geometric chart patterns (head &amp; shoulders, double/triple tops, triangles,
@@ -812,7 +920,7 @@ export default function IntradayStocksPage() {
 
       <GlassPanel title={`Open positions (${patOpen.length})`}>
         {!patOpen.length ? (
-          <div className="empty">No open positions — entries run during market hours up to 15:00 IST.</div>
+          <div className="empty">No open positions — entries run during market hours up to 14:30 IST.</div>
         ) : (
           <div className="table-scroll">
             <table className="data-table">
@@ -837,11 +945,11 @@ export default function IntradayStocksPage() {
           </div>
         )}
       </GlassPanel>
-      </>
+      </DataGate>
       )}
 
       {isPatternBook && (
-      <>
+      <DataGate ready={!!pbSummary} error={error} what={"this paper book"} onRetry={() => once(`book:${pbKey}`, loadPatternBook)} lastOkAt={lastOkAt}>
       <div className="desk-banner">
         <strong>PATTERN PAPER BOOK · ₹{inr(pbSummary?.desk_capital)}.</strong> The{" "}
         <strong>{pbSummary?.strategies ?? 8} shortlisted pattern strategies</strong> run here on{" "}
@@ -1000,11 +1108,11 @@ export default function IntradayStocksPage() {
           </div>
         )}
       </GlassPanel>
-      </>
+      </DataGate>
       )}
 
       {isLive && (
-      <>
+      <DataGate ready={!!liveSummary} error={error} what={"this Live Intraday book"} onRetry={() => once(`live:${liveBook}`, loadLive)} lastOkAt={lastOkAt}>
       <div className="desk-banner">
         <strong>LIVE INTRADAY · ₹{bookCapital.toLocaleString("en-IN")} PAPER.</strong> The same 8-strategy
         shortlist runs in three books that differ only in capital — ₹80k, ₹30k and ₹10k — each strategy opening
@@ -1062,7 +1170,7 @@ export default function IntradayStocksPage() {
 
       <GlassPanel title={`Open positions (${liveSummary?.open_positions ?? 0})`}>
         {!livePositions.filter((p) => p.status === "OPEN").length ? (
-          <div className="empty">No open positions yet — the desk trades during market hours (09:15–15:30 IST).</div>
+          <div className="empty">No open positions yet — the desk takes new entries until 14:30 IST and is flat by the close.</div>
         ) : (
           <div className="table-scroll">
             <table className="data-table">
@@ -1114,7 +1222,7 @@ export default function IntradayStocksPage() {
           </div>
         )}
       </GlassPanel>
-      </>
+      </DataGate>
       )}
 
       {/* History must answer for the desk you are LOOKING at. It was pinned to

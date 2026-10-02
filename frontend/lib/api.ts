@@ -62,17 +62,43 @@ export async function refreshing<T>(fn: () => Promise<T>): Promise<T> {
   }
 }
 
-async function apiFetch(path: string, init?: RequestInit) {
+/** How long a GET may take before the page is told it failed. A GET that never answers is
+ *  the worst case for a dashboard: no error is thrown, so no banner appears, and every tile
+ *  keeps showing its empty default — "₹-", "0 strategies", "IDLE" — which reads exactly like a
+ *  real, empty desk. That is what the Intraday Stocks page showed while the backend was
+ *  swapping. Writes (POST/PUT/DELETE) get no default timeout: a long-running action such as
+ *  a 40-stock fundamental rating must not be cut off half way. Pass `timeoutMs` to override. */
+const DEFAULT_GET_TIMEOUT_MS = 60000;
+
+async function apiFetch(path: string, init?: RequestInit & { timeoutMs?: number }) {
   if (FORCE_FRESH) {
     path += `${path.includes("?") ? "&" : "?"}fresh=true`;
   }
-  const res = await fetch(`${API_URL}${path}`, {
-    ...init,
-    headers: {
-      ...(init?.headers || {}),
-      ...(init?.body ? { "Content-Type": "application/json" } : {}),
-    },
-  });
+  const { timeoutMs: requested, ...rest } = init ?? {};
+  const method = (rest.method || "GET").toUpperCase();
+  const timeoutMs = requested ?? (method === "GET" ? DEFAULT_GET_TIMEOUT_MS : 0);
+  const controller = timeoutMs > 0 && !rest.signal ? new AbortController() : null;
+  const timer = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      ...rest,
+      signal: controller?.signal ?? rest.signal,
+      headers: {
+        ...(rest.headers || {}),
+        ...(rest.body ? { "Content-Type": "application/json" } : {}),
+      },
+    });
+  } catch (e) {
+    if (controller?.signal.aborted) {
+      throw new Error(
+        `The server did not answer within ${Math.round(timeoutMs / 1000)}s — it may be overloaded.`,
+      );
+    }
+    throw new Error(`Could not reach the server (${e instanceof Error ? e.message : "network error"}).`);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.detail || `Request failed: ${res.status}`);
@@ -1667,7 +1693,7 @@ export async function explainTrade(trade: Record<string, unknown>): Promise<AIRe
 }
 
 export async function fetchStrategyRanking(): Promise<AIResult> {
-  return apiFetch("/api/ai/rank-strategies");
+  return apiFetch("/api/ai/rank-strategies", { timeoutMs: 120000 });   // waits on an LLM
 }
 
 export async function compareStrategies(strategyIdA: string, strategyIdB: string): Promise<AIResult> {
@@ -1682,7 +1708,7 @@ export async function detectUnusualActivity(symbol: string, marketData: Record<s
 }
 
 export async function fetchTradeIdeas(): Promise<AIResult> {
-  return apiFetch("/api/ai/trade-ideas");
+  return apiFetch("/api/ai/trade-ideas", { timeoutMs: 120000 });   // waits on an LLM
 }
 
 export async function summarizeNews(limit = 20, symbol?: string): Promise<AIResult> {
