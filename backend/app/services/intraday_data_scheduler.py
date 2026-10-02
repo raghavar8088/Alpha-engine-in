@@ -29,7 +29,7 @@ RECONCILE_FROM = "15:50"
 async def intraday_data_loop() -> None:
     last_gapfill = 0.0
     last_backfill = 0.0
-    flushed_on = reconciled_on = None
+    flushed_on = reconciled_on = preloaded_on = None
     while True:
         try:
             now = datetime.now(market_calendar.IST)
@@ -39,6 +39,11 @@ async def intraday_data_loop() -> None:
 
             if trading and hhmm >= UNIVERSE_FROM:
                 await intraday_universe.today()                     # builds once a day
+                if preloaded_on != today and hhmm <= "15:30":
+                    syms = await intraday_universe.symbols()
+                    n = await store.preload(syms + ["NIFTY"])
+                    preloaded_on = today
+                    logger.info("bar store preloaded: %d of %d symbols read from disk", n, len(syms) + 1)
 
             if trading and "09:30" <= hhmm <= "15:35" and time.monotonic() - last_gapfill > GAPFILL_EVERY_S:
                 last_gapfill = time.monotonic()

@@ -256,6 +256,24 @@ class Store:
             self._mem[symbol] = b
         return b
 
+    async def preload(self, symbols: list[str]) -> int:
+        """Load each symbol's recent window from disk in a worker thread, so the first
+        stream bar of the day (09:30:05) and the first evaluation (09:45) never read 200
+        files synchronously on the event loop."""
+        loaded = 0
+        for sym in symbols:
+            if sym in self._mem:
+                continue
+            try:
+                b = await asyncio.to_thread(read_file, sym)
+            except (OSError, ValueError, zlib.error):
+                logger.exception("preload failed for %s", sym)
+                continue
+            b.trim_sessions(MEMORY_SESSIONS)
+            self._mem.setdefault(sym, b)
+            loaded += 1
+        return loaded
+
     def merge(self, symbol: str, rows) -> int:
         changed = self.get(symbol).merge(rows)
         if changed:
