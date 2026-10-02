@@ -33,7 +33,9 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import sys
 import time
+from collections import Counter
 
 from tradingai_broker_clients.angel import AngelAPIError, AngelClient, AngelCredentials
 
@@ -64,6 +66,10 @@ class CandlePacer:
         self._strikes = 0
         self._last_normal = 0.0
         self.stats = {"calls": 0, "refused": 0, "bulk_calls": 0, "waited_s": 0.0}
+        # Who spends the candle budget — the endpoint is shared by a dozen desks, and
+        # "the backfill is slow" is only answerable by knowing who else is calling.
+        self.by_caller: Counter = Counter()
+        self.refused_by_caller: Counter = Counter()
 
     async def acquire(self, bulk: bool = False) -> None:
         if bulk:
@@ -99,7 +105,9 @@ class CandlePacer:
         now = time.monotonic()
         return {**{k: round(v, 1) if isinstance(v, float) else v for k, v in self.stats.items()},
                 "min_gap_s": self.gap, "cooling_for_s": round(max(0.0, self._cool_until - now), 1),
-                "consecutive_refusals": self._strikes}
+                "consecutive_refusals": self._strikes,
+                "by_caller": dict(self.by_caller.most_common(12)),
+                "refused_by_caller": dict(self.refused_by_caller.most_common(12))}
 
 
 candle_pacer = CandlePacer(CANDLE_MIN_GAP, CANDLE_COOLDOWN_BASE, CANDLE_COOLDOWN_MAX)
@@ -108,12 +116,15 @@ candle_pacer = CandlePacer(CANDLE_MIN_GAP, CANDLE_COOLDOWN_BASE, CANDLE_COOLDOWN
 class _PacedAngelClient(AngelClient):
     async def candles(self, exchange, symbol_token, resolution, from_dt, to_dt, *,
                       bulk: bool = False):
+        caller = sys._getframe(1).f_globals.get("__name__", "?").rsplit(".", 1)[-1]
+        candle_pacer.by_caller[caller] += 1
         await candle_pacer.acquire(bulk=bulk)
         try:
             rows = await super().candles(exchange, symbol_token, resolution, from_dt, to_dt)
         except AngelAPIError as exc:
             if is_rate_limited(exc):
                 candle_pacer.refused()
+                candle_pacer.refused_by_caller[caller] += 1
             raise
         candle_pacer.succeeded()
         return rows
