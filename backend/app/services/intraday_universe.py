@@ -102,8 +102,15 @@ async def today(build_if_missing: bool = True) -> dict | None:
         if _cache["date"] == day and _cache["doc"]:
             return _cache["doc"]
         doc = await universe_collection.find_one({"_id": day})
-        if doc is None and build_if_missing and market_calendar.is_trading_day():
-            doc = await build(day)
+        if doc is None and build_if_missing:
+            if market_calendar.is_trading_day():
+                doc = await build(day)
+            else:
+                # A closed day: the universe that matters is the NEXT session's. No daily
+                # bar arrives in between, so building it now gives exactly what that
+                # morning would — and lets the history backfill use the holiday.
+                nxt = market_calendar.next_trading_day().isoformat()
+                doc = await universe_collection.find_one({"_id": nxt}) or await build(nxt)
         if doc is None:
             doc = await universe_collection.find_one({}, sort=[("_id", -1)])
         if doc is not None:
