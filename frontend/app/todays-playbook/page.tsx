@@ -145,12 +145,15 @@ export default function TodaysPlaybook() {
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [notify, setNotify] = useState(false);
+  const notifyRef = useRef(false);            // read by the poller without re-creating it
   const seenBreaks = useRef<Set<string> | null>(null);
   const [fresh, setFresh] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     try {
-      setNotify(localStorage.getItem(NOTIFY_KEY) === "1");
+      const on = localStorage.getItem(NOTIFY_KEY) === "1";
+      setNotify(on);
+      notifyRef.current = on;
     } catch {
       /* private window: the toggle simply starts off */
     }
@@ -168,7 +171,7 @@ export default function TodaysPlaybook() {
         const added = [...now].filter((k) => !seenBreaks.current!.has(k));
         if (added.length) {
           setFresh(new Set(added));
-          if (notify && typeof Notification !== "undefined" && Notification.permission === "granted") {
+          if (notifyRef.current && typeof Notification !== "undefined" && Notification.permission === "granted") {
             new Notification("Opening-range break (candidate)", {
               body: added.map((k) => k.replace(":", " ")).join(", ") + " — under test, not a proven signal",
             });
@@ -177,33 +180,43 @@ export default function TodaysPlaybook() {
       }
       seenBreaks.current = now;
     }
-  }, [view, notify]);
+  }, [view]);
+
+  // Everything except the board (which follows the live/snapshot pick on its own).
+  const loadRest = useCallback(async () => {
+    const [br, md, ed, sn] = await Promise.all([
+      fetchSelectionBrief(),
+      fetchSelectionModel().catch(() => null),
+      fetchEdgeReport().catch(() => ({})),
+      fetchSelectionSnapshots().catch(() => null),
+    ]);
+    setBrief(br);
+    setModel(md);
+    setEdge(ed && "date" in ed ? (ed as EdgeReport) : null);
+    if (sn) setSnapDays(sn.days);
+  }, []);
 
   const loadAll = useCallback(async () => {
     setBusy(true);
     try {
-      const [br, , md, ed, sn] = await Promise.all([
-        fetchSelectionBrief(),
-        loadBoard(),
-        fetchSelectionModel().catch(() => null),
-        fetchEdgeReport().catch(() => ({})),
-        fetchSelectionSnapshots().catch(() => null),
-      ]);
-      setBrief(br);
-      setModel(md);
-      setEdge(ed && "date" in ed ? (ed as EdgeReport) : null);
-      if (sn) setSnapDays(sn.days);
+      await Promise.all([loadRest(), loadBoard()]);
       setErr(null);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "failed to load");
     } finally {
       setBusy(false);
     }
-  }, [loadBoard]);
+  }, [loadRest, loadBoard]);
 
   useEffect(() => {
-    loadAll();
-  }, [loadAll]);
+    loadRest().catch((e) => setErr(e instanceof Error ? e.message : "failed to load"));
+  }, [loadRest]);
+
+  useEffect(() => {
+    loadBoard()
+      .then(() => setErr(null))
+      .catch((e) => setErr(e instanceof Error ? e.message : "failed to load the board"));
+  }, [loadBoard]);
 
   // Live view in the session: the board every minute, the brief every five.
   useEffect(() => {
@@ -232,6 +245,7 @@ export default function TodaysPlaybook() {
       on = (await Notification.requestPermission()) === "granted";
     }
     setNotify(on);
+    notifyRef.current = on;
     try {
       localStorage.setItem(NOTIFY_KEY, on ? "1" : "0");
     } catch {
