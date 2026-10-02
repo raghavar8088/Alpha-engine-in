@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+from bisect import bisect_left, bisect_right
 import logging
 import os
 import threading
@@ -78,6 +79,18 @@ def parse_stamp(value) -> int | None:
         return int(dt.timestamp())
     except (TypeError, ValueError):
         return None
+
+
+def day_key(epoch: int) -> int:
+    """The IST calendar day of an epoch as an integer — integer arithmetic, so grouping
+    thousands of bars by day costs nothing (datetime conversion per bar did: it was most
+    of a 9.6-second bar-close evaluation)."""
+    return (epoch + 19800) // 86400
+
+
+def day_start(epoch: int) -> int:
+    """Epoch of 00:00 IST on `epoch`'s day."""
+    return day_key(epoch) * 86400 - 19800
 
 
 def session_minute(epoch: int) -> int:
@@ -251,18 +264,34 @@ class Store:
 
     def series(self, symbol: str, tf: str = "15m", n: int | None = None,
                now: datetime | None = None) -> Series:
-        """CLOSED bars only, session-anchored for 30m/45m/1h. `n` keeps the last n bars."""
+        """CLOSED bars only, session-anchored for 30m/45m/1h. `n` keeps the last n bars.
+
+        The returned Series also carries `epochs` (bar start times) so callers can find a
+        day's bars by binary search instead of parsing timestamps."""
         minutes = AGG_MINUTES[tf]
+        factor = minutes // BASE_MIN
         cutoff = int((now or datetime.now(IST)).timestamp())
         b = self.get(symbol)
-        closed = [r for r in b.rows() if bar_end(r[0]) <= cutoff]
+        # A grid 15m bar ends 15 minutes after it starts (15:15 + 15 = the 15:30 close),
+        # so "closed by cutoff" is simply start <= cutoff - 900.
+        hi = bisect_right(b.t, cutoff - BASE_MIN * 60)
+        lo = 0 if n is None else max(0, hi - (n + 2) * factor - BARS_PER_SESSION)
+        rows = [(b.t[i], b.o[i], b.h[i], b.l[i], b.c[i], b.v[i], b.src[i]) for i in range(lo, hi)]
         if minutes != BASE_MIN:
-            closed = aggregate(closed, minutes, cutoff)
+            rows = aggregate(rows, minutes, cutoff)
+            if lo > 0 and rows:
+                rows = rows[1:]          # the first bucket may be missing its early bars
         if n is not None:
-            closed = closed[-n:]
-        return Series([stamp(r[0]) for r in closed], [r[1] for r in closed],
-                      [r[2] for r in closed], [r[3] for r in closed],
-                      [r[4] for r in closed], [float(r[5]) for r in closed])
+            rows = rows[-n:]
+        out = Series([stamp(r[0]) for r in rows], [r[1] for r in rows], [r[2] for r in rows],
+                     [r[3] for r in rows], [r[4] for r in rows], [float(r[5]) for r in rows])
+        out.epochs = [r[0] for r in rows]
+        return out
+
+    def count_between(self, symbol: str, start: int, end: int) -> int:
+        """How many bars start in [start, end]."""
+        b = self.get(symbol)
+        return bisect_right(b.t, end) - bisect_left(b.t, start)
 
     # File work runs in a worker thread; the arrays it writes are SNAPSHOTS taken on the
     # event-loop thread first, because the stream keeps merging into the live arrays and a

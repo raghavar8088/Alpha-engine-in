@@ -681,7 +681,8 @@ export interface IntradayPosition {
   entry_price: number;
   qty: number;
   capital_deployed: number;
-  target: number;
+  /** null for v2 rules that exit only on their stop, time stop or the close (ORB). */
+  target: number | null;
   stoploss: number;
   ltp: number;
   ltp_source: string;
@@ -691,13 +692,17 @@ export interface IntradayPosition {
   exit_price: number | null;
   exit_reason: string | null;
   status: string;
-  confidence: number;
+  confidence: number | null;
   rationale: string;
   max_hold_days: number;
   opened_at: string | null;
   opened_on: string | null;
   closed_at: string | null;
   is_anti?: boolean;
+  /** v2 tournament only */
+  engine?: string;
+  timeframe?: string;
+  fill_basis?: string;
 }
 
 export interface IntradayGate {

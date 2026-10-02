@@ -442,6 +442,13 @@ async def start_intraday_data() -> None:
             asyncio.create_task(intraday_data_loop())
         if STREAM_ON:
             asyncio.create_task(stream_loop())
+        from app.services.intraday_lab_engine import V2 as TOURNAMENT_V2
+        if TOURNAMENT_V2 and os.getenv("INTRADAY_LAB_ENABLED", "1").lower() not in ("0", "false"):
+            from app.services.intraday_v2_engine import describe as v2_describe, v2_loop
+            asyncio.create_task(v2_loop())
+            logger.info("Intraday tournament v2 engine started — %s",
+                        {k: v2_describe()[k] for k in ("strategies", "slots_per_strategy",
+                                                       "slot_notional", "paused")})
         logger.info("Intraday data: loop %s, stream %s, bar store %s (writable=%s)",
                     "on" if DATA_ON else "OFF", "on" if STREAM_ON else "OFF",
                     store.coverage([])["dir"], store.writable)

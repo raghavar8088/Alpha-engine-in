@@ -54,7 +54,19 @@ from app.services.promotion_gate import (
     t_threshold,
 )
 from app.services import intraday_session as session
-from app.services.intraday_strategies import STRATEGY_CATALOG, STRATEGY_BY_ID, evaluate
+from app.services.intraday_strategies import (STRATEGY_BY_ID as LEGACY_BY_ID,
+                                              STRATEGY_CATALOG as LEGACY_CATALOG, evaluate)
+from app.services import intraday_v2_strategies as _v2
+
+# WHICH CATALOG THE TOURNAMENT TRADES. "v2" (default since 2026-10-02): 52 strategies that
+# decide on real 15m/45m/1h bars, two-sided, run by `intraday_v2_engine` on its own fast
+# task. "legacy": the first 150-strategy catalog that decides on daily bars + one quote
+# (still the catalog Live Intraday's shortlist is drawn from). The legacy record was
+# quarantined at 03dc428; the two must never share one leaderboard.
+CATALOG_VERSION = os.getenv("INTRADAY_LAB_CATALOG", "v2").strip().lower()
+V2 = CATALOG_VERSION == "v2"
+STRATEGY_CATALOG = _v2.CATALOG if V2 else LEGACY_CATALOG
+STRATEGY_BY_ID = _v2.BY_ID if V2 else LEGACY_BY_ID
 from backtesting_service.service import load_bars
 from tradingai_shared.domain import Timeframe
 
@@ -499,11 +511,18 @@ async def manage_cycle(dhan: DhanClient | None) -> int:
     close-out job likes."""
     async with _manage_lock:
         await session.ensure_cas()
-        return await _manage_cycle(dhan)
+        managed = await _manage_cycle(dhan)
+    if V2:
+        from app.services import intraday_v2_engine
+        managed += await intraday_v2_engine.manage(force_marks=True)
+    return managed
 
 
 async def _manage_cycle(dhan: DhanClient | None) -> int:
-    open_positions = [p async for p in intraday_lab_positions_collection.find({"status": "OPEN"})]
+    # Legacy positions only: v2 positions carry their own stop/target/time rules and are
+    # managed by intraday_v2_engine (see manage_cycle).
+    open_positions = [p async for p in intraday_lab_positions_collection.find(
+        {"status": "OPEN", "engine": {"$ne": "v2"}})]
     if not open_positions:
         return 0
 
@@ -625,7 +644,17 @@ async def run_cycle(dhan: DhanClient | None) -> dict:
     """One full scan+manage pass — used by both the background loop and the
     manual 'Run now' endpoint."""
     managed = await manage_cycle(dhan)
-    if PAUSE_NEW_ENTRIES:
+    if V2:
+        # v2 enters on its own fast task at each bar close (intraday_v2_engine.v2_loop);
+        # this 3-minute tick only marks, snapshots the equity curve and records state.
+        from app.services import intraday_v2_engine
+        st = intraday_v2_engine.describe()
+        scan_result = {"opened": 0, "scanned_symbols": len(intraday_v2_engine._members),
+                       "notes": (st.get("last_notes") or []) + (
+                           [f"v2: last bar close {st['last_eval']['boundary']} — "
+                            f"{st['last_eval']['signals']} signals, {st['last_eval']['opened']} opened"]
+                           if st.get("last_eval") else [])}
+    elif PAUSE_NEW_ENTRIES:
         # Every open position is still managed above; only new entries are withheld.
         scan_result = {"opened": 0, "scanned_symbols": 0,
                        "notes": ["INTRADAY_LAB_PAUSE_ENTRIES is set — no new positions are "

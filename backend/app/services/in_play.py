@@ -21,24 +21,27 @@ Only CLOSED bars are used (intraday_store guarantees it), so nothing here looks 
 
 from __future__ import annotations
 
+import asyncio
 from datetime import date, datetime, timedelta, timezone
 
 from app.services import intraday_universe
-from app.services.intraday_store import _ist, store
+from bisect import bisect_right
+
+from app.services.intraday_store import _ist, day_key, store
 
 IST = timezone(timedelta(hours=5, minutes=30))
 BASELINE_SESSIONS = 14
 ATR_SESSIONS = 14
 
 
-def _by_day(rows) -> dict[date, list[tuple]]:
-    out: dict[date, list[tuple]] = {}
+def _by_day(rows) -> dict[int, list[tuple]]:
+    out: dict[int, list[tuple]] = {}
     for r in rows:
-        out.setdefault(_ist(r[0]).date(), []).append(r)
+        out.setdefault(day_key(r[0]), []).append(r)
     return out
 
 
-def _daily_atr(days: dict[date, list[tuple]], before: date, n: int) -> float | None:
+def _daily_atr(days: dict[int, list[tuple]], before: int, n: int) -> float | None:
     past = sorted(d for d in days if d < before)[-(n + 1):]
     if len(past) < n + 1:
         return None
@@ -54,9 +57,12 @@ def measure(symbol: str, now: datetime | None = None, k: int | None = None) -> d
     """In-play measures for one symbol at the last closed 15m boundary (or after k bars)."""
     now = (now or datetime.now(IST)).astimezone(IST)
     cutoff = int(now.timestamp())
-    rows = [r for r in store.get(symbol).rows() if r[0] + 900 <= cutoff]
+    b = store.get(symbol)
+    hi = bisect_right(b.t, cutoff - 900)                  # closed bars only
+    lo = max(0, hi - (max(BASELINE_SESSIONS, ATR_SESSIONS) + 2) * 25 - 25)
+    rows = [(b.t[i], b.o[i], b.h[i], b.l[i], b.c[i], b.v[i], b.src[i]) for i in range(lo, hi)]
     days = _by_day(rows)
-    today = now.date()
+    today = day_key(cutoff)
     bars_today = days.get(today, [])
     if not bars_today:
         return None
@@ -95,7 +101,9 @@ async def ranked(top: int = 25, k: int | None = None, now: datetime | None = Non
     """The universe ranked by relative volume, highest first."""
     members = await intraday_universe.members()
     rows, missing = [], 0
-    for m in members:
+    for i, m in enumerate(members):
+        if i % 20 == 0:
+            await asyncio.sleep(0)          # never hold the event loop for the whole universe
         r = measure(m["symbol"], now, k)
         if r is None or r["rvol"] is None:
             missing += 1

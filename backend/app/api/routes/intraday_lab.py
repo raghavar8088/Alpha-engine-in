@@ -33,10 +33,11 @@ from app.services.intraday_lab_engine import (
     daily as lab_daily,
     PER_STRATEGY_ALLOCATION,
     STATE_ID,
+    STRATEGY_CATALOG,
+    V2,
     run_cycle,
     summary as lab_summary,
 )
-from app.services.intraday_strategies import STRATEGY_CATALOG
 
 router = APIRouter(prefix="/api/intraday-lab", tags=["intraday-lab"])
 
@@ -108,9 +109,13 @@ async def leaderboard(current_user: dict = Depends(get_current_user)):
             "trades": trades, "win_rate": win_rate, "net_pnl": round(net_pnl, 2),
             "allocated_capital": allocated,
         })
-        # ANTI-<name>: the exact inverse (take the reverse trade — SL/TP swapped). Same
-        # entries, opposite outcome: when the original loses, this gains. Computed here so
-        # the live trading engines are never touched. See intraday_lab.py leaderboard.
+        # ANTI-<name>: a READ-TIME negation that never traded. Shown only for the legacy
+        # long-only catalog. The v2 catalog trades both sides itself, and a negated row
+        # is not the reverse trade anyway: the reverse trade would pay its own fees, so
+        # "ANTI" of a loser overstates what the inverse would have earned by twice the
+        # costs.
+        if V2:
+            continue
         rows.append({
             "strategy_id": f"anti_{spec.strategy_id}", "name": f"ANTI {spec.name}", "category": spec.category,
             "trades": trades,

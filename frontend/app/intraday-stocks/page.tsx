@@ -200,7 +200,7 @@ function PnlRow({
 /** Which desk each tab's history belongs to. The pattern desk and the two pattern books
  *  are registered server-side alongside the tournament and the Live Intraday books. */
 const HISTORY_SCOPE: Record<IntradayTab, { deskKey: string; scope?: string; label: string }> = {
-  tournament: { deskKey: "intraday-lab", label: "Tournament · 150 strategies" },
+  tournament: { deskKey: "intraday-lab", label: "Tournament" },
   patterns: { deskKey: "pattern", label: "Pattern desk" },
   pb50k: { deskKey: "pattern-books", scope: "50k", label: "Paper Trade · ₹50k" },
   pb2L: { deskKey: "pattern-books", scope: "2L", label: "Paper Trade · ₹2 lakh" },
@@ -531,12 +531,12 @@ export default function IntradayStocksPage() {
         refreshing={isRefreshing}
         crumb="Intraday Stocks"
         title="Intraday Stocks"
-        subtitle="Paper strategy-selection tournament: auto-trades 150 intraday NSE-equity strategies on live Angel One prices. Each strategy runs its own independent ₹10 lakh account (₹15 cr across the desk) and takes a uniform ₹10 lakh per position, so the leaderboard ranks timing edge, not bet size. Long-only cash equities; scalping/momentum/mean-reversion styles take no new entries after 14:30 IST and square off at 15:05 in closing-auction (F&O) stocks and 15:12 in the rest — inside Angel One's own MIS cut-offs; swing styles may carry a few days."
+        subtitle="Paper strategy-selection tournament on the 200 most-traded NSE stocks. Every strategy decides on real 15-minute, 45-minute and 1-hour bars from Angel One's live stream, trades both sides (MIS shorts included) with its own ₹10 lakh account split into five ₹2 lakh slots, and pays real Angel One costs plus slippage. Entries only between 09:45 and 14:30 IST; everything is flat by 15:05 in closing-auction (F&O) stocks and 15:12 in the rest."
       />
 
       <div className="tabs">
         <button className={tab === "tournament" ? "tab active" : "tab"} onClick={() => setTab("tournament")}>
-          Tournament · 150 strategies
+          Tournament · {status?.strategy_count ?? 52} strategies
         </button>
         <button className={tab === "patterns" ? "tab active" : "tab"} onClick={() => setTab("patterns")}>
           Patterns · {patSummary?.strategy_count ?? 504}
@@ -564,19 +564,20 @@ export default function IntradayStocksPage() {
       {tab === "tournament" && (
       <DataGate ready={!!status} error={error} what={"the tournament"} onRetry={() => once("tournament", load)} lastOkAt={lastOkAt}>
       <div className="desk-banner">
-        <strong>LONG-ONLY CASH EQUITIES.</strong> Every position is a paper buy sized by its
-        strategy&rsquo;s capital slice, with the target and stop taken from the signal itself.
-        Prices come from <strong>Angel One</strong> first, Dhan as a per-tick fallback, and the
-        last daily-bar close only when neither can price a name — each mark is labelled with its
-        source, never faked.
+        <strong>V2 — REAL INTRADAY BARS, BOTH SIDES.</strong> Each rule is evaluated once, at the
+        close of its own 15m, 45m or 1h bar, and its stop and target are sized in that
+        bar&rsquo;s ATR. Trend rules trade only with NIFTY&rsquo;s direction on the day; fade
+        rules skip stocks that are in play. Stops and targets fill where they would really
+        have triggered — found on the stream&rsquo;s minute bars, stop first when one minute
+        crosses both — and every market fill pays slippage by liquidity plus Angel One&rsquo;s
+        intraday costs. The record restarted on 5 Oct 2026; nothing before it is comparable.
       </div>
 
       {status?.paused && (
         <div className="breaker">
-          <strong>NEW ENTRIES PAUSED.</strong> This catalog lost 16/16 measurable strategies
-          to real NSE costs in backtest and is losing live even before costs — the desk is
-          paused while it&rsquo;s reworked. Every already-open position is still being marked,
-          stopped, targeted and squared off normally; nothing new is being opened.
+          <strong>NEW ENTRIES PAUSED</strong> (INTRADAY_LAB_PAUSE_ENTRIES). Every already-open
+          position is still being marked, stopped, targeted and squared off normally; nothing
+          new is being opened.
         </div>
       )}
 
@@ -668,6 +669,7 @@ export default function IntradayStocksPage() {
                 <tr>
                   <th style={{ textAlign: "left" }}>Symbol</th>
                   <th style={{ textAlign: "left" }}>Strategy</th>
+                  <th>Side</th>
                   <th>Qty</th>
                   <th>Entry</th>
                   <th>LTP</th>
@@ -682,12 +684,15 @@ export default function IntradayStocksPage() {
                 {status.open_positions_detail.map((p: IntradayPosition) => (
                   <tr key={p.position_id}>
                     <td style={{ textAlign: "left" }}>{p.display_name || p.symbol}</td>
-                    <td style={{ textAlign: "left", fontSize: 11 }}>{p.strategy_name}</td>
+                    <td style={{ textAlign: "left", fontSize: 11 }} title={p.fill_basis || p.rationale}>{p.strategy_name}</td>
+                    <td className={p.side === "SELL" ? "loss" : "gain"} style={{ fontWeight: 700, fontSize: 11 }}>
+                      {p.side === "SELL" ? "SHORT" : "LONG"}
+                    </td>
                     <td>{p.qty}</td>
                     <td>₹{inr2(p.entry_price)}</td>
                     <td>₹{inr2(p.ltp)}</td>
                     <td><SourcePill source={p.ltp_source} /></td>
-                    <td>₹{inr2(p.target)}</td>
+                    <td>{p.target != null ? `₹${inr2(p.target)}` : "close"}</td>
                     <td>₹{inr2(p.stoploss)}</td>
                     <td className={(p.unrealized_pnl ?? 0) >= 0 ? "gain" : "loss"}>
                       {(p.unrealized_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(p.unrealized_pnl)}

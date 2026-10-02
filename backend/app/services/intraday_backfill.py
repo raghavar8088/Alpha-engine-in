@@ -48,6 +48,15 @@ status: dict = {"backfill": {"running": False, "done_symbols": 0, "requests": 0,
                 "reconcile": {"last_date": None}}
 
 
+NIFTY_MEMBER = {"symbol": "NIFTY", "token": "99926000", "exchange": "NSE", "turnover_cr": None}
+
+
+async def _members() -> list[dict]:
+    """The universe plus NIFTY: the v2 trend rules trade only with the index's direction on
+    the day, so its bars are needed live and in every backtest."""
+    return list(await intraday_universe.members()) + [NIFTY_MEMBER]
+
+
 def off_hours(now: datetime | None = None) -> bool:
     now = (now or datetime.now(IST)).astimezone(IST)
     if not market_calendar.is_trading_day(now):
@@ -152,7 +161,7 @@ async def backfill(symbols: list[str] | None = None, days: int = HISTORY_DAYS) -
         return {"already_running": True}
     status["backfill"].update({"running": True, "done_symbols": 0, "started": datetime.now(IST).isoformat()})
     try:
-        members = await intraday_universe.members()
+        members = await _members()
         if symbols:
             members = [m for m in members if m["symbol"] in set(symbols)]
         earliest = datetime.now(IST).date() - timedelta(days=days)
@@ -198,7 +207,7 @@ async def gapfill(now: datetime | None = None) -> dict:
     """Fill today's holes. One request per symbol that has any."""
     now = (now or datetime.now(IST)).astimezone(IST)
     filled = asked = 0
-    for m in await intraday_universe.members():
+    for m in await _members():
         holes = holes_today(m["symbol"], now)
         if not holes:
             continue
@@ -227,7 +236,7 @@ async def reconcile(day: date | None = None) -> dict:
     d_close, d_high, d_low, d_vol = [], [], [], []
     compared = replaced = missing_stream = symbols = 0
     worst: list[tuple[float, str, str]] = []
-    for m in await intraday_universe.members():
+    for m in await _members():
         sym = m["symbol"]
         rows = await _fetch(m, frm, to, bulk=True)
         if rows is None:
