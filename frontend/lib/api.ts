@@ -2053,7 +2053,9 @@ export interface PreLiveStatus {
     capital_locked?: number; initial_capital?: number; balance?: number; equity?: number;
     available_cash?: number; realized_all_time?: number;
     universe_size?: number; universe_source?: PreLiveUniverseSource | null;
-    capital_per_trade?: number; note?: string | null;
+    capital_per_trade?: number | null; note?: string | null;
+    capital_mode?: string; accounts?: number; per_strategy_capital?: number | null; lots_per_position?: number | null;
+    weekly_expiry?: string | null; dropped_signals?: Record<string, number>;
     // Only present when heartbeat_watchdog.py has actually run and written them —
     // that script isn't wired into the Docker/Linux deployment yet (Windows-Task-
     // Scheduler-only design), so treat both as possibly absent.
@@ -2062,24 +2064,95 @@ export interface PreLiveStatus {
   open_positions: Array<{ key: string; strategy_id: string; timeframe: string; option_type: string; strike: number; entry_premium: number; mark: number; unrealized: number; qty: number; entry_ts: string }>;
   today: { session: string; trades: number; net_pnl: number; peak_capital: number; roi_pct: number | null; wins: number } | null;
 }
+/** One strategy's research record (2026-10-02: records, not a ranking — no ANTI rows). */
 export interface PreLiveScore {
-  key: string; strategy_id: string; timeframe: string; trades: number; wins: number;
-  win_rate: number; profit_factor: number | null; expectancy: number; net_pnl: number;
+  key: string; strategy_id: string; timeframe: string; trades: number; name?: string | null;
+  net_pnl: number; per_trade?: number; win_rate?: number; profit_factor?: number | null;
+  t_stat?: number | null; direction_hit?: number | null; direction_n?: number; direction_z?: number | null;
+  real_net?: number; real_per_trade?: number; real_basis?: string; dte_mix?: Record<string, number>;
   allocated_capital?: number;
+}
+export interface PreLiveRecords {
+  count: number; strategies: PreLiveScore[]; ranking: boolean; note: string; real_money_basis: string;
+  luck: { strategies_with_20_trades: number; expected_t_above_2_by_chance: number; observed_t_above_2: number;
+          observed_t_below_minus_2: number; direction_z_above_2: number; reading: string };
+  desk: { trades: number; paper_net: number; real_net_estimate: number; direction_hit: number;
+          by_days_to_expiry: Record<string, { trades: number; real_per_trade: number }> };
+  computed_at: string;
+}
+export interface OptionHypothesis {
+  id: string; name: string; rule: string; status: string; origin?: string;
+  expected: Record<string, unknown>; thresholds: Record<string, number>;
+  forward: Record<string, unknown>; registered_at: string;
+}
+export interface VolDeskLeg {
+  kind: string; symbol: string; strike: number; lot_size: number; entry_ltp: number; entry_bid: number | null;
+  entry_ask: number | null; real_entry: number; exit_ltp?: number; exit_bid?: number | null; real_exit?: number;
+}
+export interface VolDeskSummary {
+  status: { enabled: boolean; last_decision: { _id: string; prediction: number; threshold: number; flagged: boolean } | null;
+            last_action: string | null; errors: number; last_error: string | null };
+  open: { hypothesis: string; session: string; expiry: string; legs: VolDeskLeg[] }[];
+  trades: { hypothesis: string; session: string; expiry: string; paper_pnl: number; real_pnl: number; real_basis: string;
+            closed_at: string; legs: VolDeskLeg[] }[];
+  decisions: { date: string; prediction: number; threshold: number; flagged: boolean; next_week_expiry: string | null;
+               features: Record<string, number> }[];
+  H1: { trades: number; real_net: number; paper_net: number };
+  H1b: { trades: number; real_net: number; paper_net: number };
+}
+export interface LabPeriod { trades: number; net_per_trade?: number; direction_hit?: number; direction_t?: number | null }
+export interface LabRun {
+  run_id: string; seconds: number; data: { from: string; to: string; sessions: number }; pairs: number;
+  passed: string[]; pbo: number | null; trials: number; gate: Record<string, number>;
+  luck: { strategies: number; direction_t_above_2_expected_by_chance: number; direction_t_above_2_observed: number };
+  model: Record<string, unknown>;
+  rows: { key: string; explore: LabPeriod; holdout: LabPeriod; dsr: number | null; gate: Record<string, boolean>; passed: boolean }[];
+}
+export interface RealMoneyReadiness {
+  state: { armed: boolean; armed_hypothesis: string | null; kill_switch: boolean; env_enabled: boolean; dry_run: boolean;
+           max_lots: number; daily_loss_cap: number; disarmed_reason: string | null };
+  hypotheses: { hypothesis: string; name: string; status: string; can_arm: boolean; why_not: string[] }[];
+  slippage: { fills: number; mean_slippage_pct: number | null; alarm_at_pct: number; alarm?: boolean };
+  recent_orders: Record<string, unknown>[];
+  confirm_phrase: string;
+  checks: string[];
+}
+export interface ChainRecorder {
+  status: { enabled: boolean; today_rows: number; last_t: string | null; contracts: number; errors: number;
+            last_error: string | null; last_ms?: number };
+  coverage: { days: number; first?: string | null; last?: string | null; bytes?: number };
+  instrument_master: { last_sync: string | null; contracts: number; nifty_expiries: string[]; error: string | null };
+}
+
+export async function fetchPreLiveRecords(): Promise<PreLiveRecords> { return apiFetch("/api/prelive/leaderboard"); }
+export async function fetchOptionHypotheses(): Promise<{ hypotheses: OptionHypothesis[] }> { return apiFetch("/api/prelive/hypotheses"); }
+export async function fetchVolDesk(): Promise<VolDeskSummary> { return apiFetch("/api/prelive/vol-desk"); }
+export async function fetchBuyingLab(): Promise<{ run: LabRun | null }> { return apiFetch("/api/prelive/lab"); }
+export async function fetchRealMoney(): Promise<RealMoneyReadiness> { return apiFetch("/api/prelive/real-money"); }
+export async function fetchChainRecorder(): Promise<ChainRecorder> { return apiFetch("/api/prelive/chain-recorder"); }
+export async function armRealMoney(hypothesis: string, confirm: string) {
+  return apiFetch("/api/prelive/real-money/arm", { method: "POST", body: JSON.stringify({ hypothesis, confirm }) });
+}
+export async function disarmRealMoney() { return apiFetch("/api/prelive/real-money/disarm", { method: "POST", body: "{}" }); }
+export async function killRealMoney(panic: boolean) {
+  return apiFetch("/api/prelive/real-money/kill", { method: "POST", body: JSON.stringify({ active: true, panic }) });
 }
 export interface PreLiveTrade {
   id: string; strategy_id: string; timeframe: string; option_type: string; strike: number;
   entry_premium: number; exit_premium: number; entry_ts: string; exit_ts: string;
   exit_reason: string; qty: number; pnl: number; session: string;
+  // from 2026-10-05: the order book at the fills and the real-money result
+  expiry?: string; dte?: number | null; real_entry?: number; real_exit?: number; real_pnl?: number; real_basis?: string;
 }
 export interface PreLiveDay {
-  session: string; trades: number; net_pnl: number; peak_capital: number; roi_pct: number | null; wins: number; cumulative_pnl: number;
+  session: string; trades: number; net_pnl: number; peak_capital: number | null; roi_pct: number | null; wins: number;
+  cumulative_pnl: number; real_net?: number; cumulative_real?: number; daily_doc?: boolean;
 }
 
 export async function fetchPreLiveStatus(): Promise<PreLiveStatus> { return apiFetch("/api/prelive/status"); }
 export async function fetchPreLiveLeaderboard(): Promise<{ count: number; strategies: PreLiveScore[] }> { return apiFetch("/api/prelive/leaderboard"); }
 export async function fetchPreLiveTrades(limit = 100): Promise<{ count: number; trades: PreLiveTrade[] }> { return apiFetch(`/api/prelive/trades?limit=${limit}`); }
-export async function fetchPreLiveDaily(limit = 60): Promise<{ count: number; days: PreLiveDay[] }> { return apiFetch(`/api/prelive/daily?limit=${limit}`); }
+export async function fetchPreLiveDaily(limit = 60): Promise<{ count: number; days: PreLiveDay[]; sessions_total?: number; total_net?: number; total_real_net?: number }> { return apiFetch(`/api/prelive/daily?limit=${limit}`); }
 
 // --- Watchlist (user-created named lists with live price tracking) ---
 
@@ -3266,6 +3339,12 @@ export interface LivePaperSummary {
   squareoff: string;
   last_run_at: string | null;
   last_notes: string[];
+  /** 2026-10-02: new entries need a CONFIRMED hypothesis verdict; none exists, so the books
+   *  are paused and only keep their record. */
+  paused_by_gate?: boolean;
+  gate_required?: boolean;
+  selection_basis?: string;
+  costs_from?: string;
 }
 export interface LivePaperScore {
   strategy_id: string;

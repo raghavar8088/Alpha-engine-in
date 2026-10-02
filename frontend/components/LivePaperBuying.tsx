@@ -67,6 +67,15 @@ export default function LivePaperBuying({ book = "50k" }: { book?: LivePaperBook
     <div className="lp">
       {error && <ErrorBanner message={error} />}
 
+      {summary?.paused_by_gate && (
+        <div className="paused">
+          <b>Paused — no new entries since 2 Oct 2026.</b> {summary.selection_basis} New positions now need a
+          CONFIRMED verdict in the option-hypothesis registry (see the Pre-Live tournament tab); none exists yet.
+          The record below is kept. Trades closed from {summary.costs_from} pay Angel One&apos;s rate card; earlier
+          ones were charged nothing.
+        </div>
+      )}
+
       <div className="intro">
         <b>{summary?.label ?? "Live Paper Buying"}.</b> The top {summary?.strategy_count ?? 21} strategies of
         the Pre-Live tournament, traded on one realistic {inr(summary?.total_capital)} book instead of the
@@ -218,6 +227,8 @@ export default function LivePaperBuying({ book = "50k" }: { book?: LivePaperBook
         .ppct { font-size: 12.5px; font-weight: 650; font-variant-numeric: tabular-nums; margin-top: 1px; }
         .psub { margin-top: 4px; font-size: 10.5px; color: var(--text-faint); line-height: 1.4; }
         .intro { padding: 12px 16px; border-radius: 10px; background: var(--canvas-soft); border: 1px solid var(--panel-border); font-size: 12.5px; line-height: 1.65; color: var(--text-muted); }
+        .paused { padding: 12px 16px; border-radius: 10px; background: var(--warn-dim); border: 1px solid rgba(185, 119, 14, 0.3); font-size: 12.5px; line-height: 1.6; color: var(--text); }
+        .paused b { color: var(--warn); }
         .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
         .note { padding: 10px 14px; border-radius: 9px; background: var(--canvas-soft); border: 1px solid var(--panel-border); font-size: 12px; color: var(--text-muted); }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
