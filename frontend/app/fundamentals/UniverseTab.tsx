@@ -24,6 +24,7 @@ import {
   fetchUniverseStocks,
   startUniverseScan,
 } from "../../lib/api";
+import TvExport from "./TvExport";
 
 const POLL_MS = 2500;
 
@@ -40,7 +41,6 @@ export default function UniverseTab() {
   const [status, setStatus] = useState<ScanStatus | null>(null);
   const [stocks, setStocks] = useState<UniverseStock[]>([]);
   const [picked, setPicked] = useState<Set<string>>(new Set());
-  const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -131,7 +131,6 @@ export default function UniverseTab() {
       else next.add(sym);
       return next;
     });
-    setCopied(false);
   };
 
   const selected = useMemo(
@@ -139,21 +138,17 @@ export default function UniverseTab() {
     [stocks, picked],
   );
 
-  /** TradingView takes a comma-separated exchange-prefixed list in its watchlist import. */
-  const tvList = useMemo(
-    () => (selected.length ? selected : stocks).map((s) => `NSE:${s.symbol}`).join(","),
+  /** What goes to TradingView: the picked rows, or the whole filtered list when none are
+   *  picked. Spelled by the shared exporter - "NSE:" + the bare symbol used to send
+   *  BAJAJ-AUTO and J&KBANK as tickers TradingView does not have (it wants BAJAJ_AUTO). */
+  const tvItems = useMemo(
+    () =>
+      (selected.length ? selected : stocks).map((s) => ({
+        symbol: s.symbol,
+        group: s.grade_key || "unrated",
+      })),
     [selected, stocks],
   );
-
-  const copyTv = async () => {
-    try {
-      await navigator.clipboard.writeText(tvList);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-    } catch {
-      setError("Clipboard blocked by the browser — the list is in the box below, select and copy it.");
-    }
-  };
 
   const pct = status && status.total ? Math.round((status.done / status.total) * 100) : 0;
   const scopeList =
@@ -370,12 +365,12 @@ export default function UniverseTab() {
         title={`${stocks.length} stocks`}
         note={picked.size ? `${picked.size} picked` : "click a row to pick"}
       >
+        <TvExport
+          items={tvItems}
+          name={`Universe - ${selected.length ? `${selected.length} picked` : `${stocks.length} filtered`}`}
+          groupOrder={[...GRADE_ORDER].reverse().concat(["unrated"])}
+        />
         <div className="tvbar">
-          <button className="primary" onClick={copyTv} disabled={!stocks.length}>
-            {copied
-              ? "Copied"
-              : `Copy ${selected.length || stocks.length} for TradingView`}
-          </button>
           <button className="ghost" onClick={() => setPicked(new Set())} disabled={!picked.size}>
             Clear picks
           </button>
@@ -387,12 +382,9 @@ export default function UniverseTab() {
             Select all
           </button>
           <span className="hint">
-            Paste into TradingView → Watchlist → Import. Picks none = copies the whole filtered list.
+            Click rows to pick them. With nothing picked, the whole filtered list goes to TradingView.
           </span>
         </div>
-        {stocks.length > 0 && (
-          <textarea className="tvbox" readOnly rows={2} value={tvList} onFocus={(e) => e.target.select()} />
-        )}
 
         <div className="tablewrap">
           <table>

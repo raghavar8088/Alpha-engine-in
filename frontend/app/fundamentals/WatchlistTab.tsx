@@ -6,11 +6,12 @@
  * the daily rows — is there to make that table trustworthy.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import GlassPanel from "../../components/GlassPanel";
 import {
   BookDay,
   GRADE_COLOR,
+  GRADE_ORDER,
   GradeKey,
   PaperBook,
   FundWatchlist,
@@ -22,6 +23,11 @@ import {
   saveFundWatchlist,
   snapshotBook,
 } from "../../lib/api";
+import TvExport from "./TvExport";
+import { downloadTxt, prettyGroup, tvFilename, tvSections } from "./tradingview";
+
+/** Best grade first, then the two "no grade" buckets - the order sections and chips use. */
+const BEST_FIRST: string[] = ([...GRADE_ORDER] as string[]).reverse().concat(["unrated", "not-in-book"]);
 
 const rs = (v: number | null | undefined, dp = 0) =>
   v === null || v === undefined
@@ -51,6 +57,8 @@ export default function WatchlistTab() {
   const [msg, setMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
+  // Grade-at-entry filter on Positions. Empty = every grade.
+  const [fGrades, setFGrades] = useState<string[]>([]);
 
   const loadLists = useCallback(async () => {
     try {
@@ -78,7 +86,60 @@ export default function WatchlistTab() {
 
   useEffect(() => {
     if (active) loadBook(active);
+    setFGrades([]);
   }, [active, loadBook]);
+
+  const activeList = lists.find((w) => w.name === active) ?? null;
+  const positions = useMemo(() => book?.positions ?? [], [book]);
+
+  /** Grade at entry per symbol, from the book. A list name that never made it into the book
+   *  (no price when funded, say) has no entry grade, and is exported under its own section
+   *  rather than being passed off as one of the grades. */
+  const gradeOf = useMemo(() => {
+    const m: Record<string, string> = {};
+    for (const p of positions) m[p.symbol] = p.grade_key_at_entry || "unrated";
+    return m;
+  }, [positions]);
+
+  const listItems = useMemo(
+    () =>
+      (activeList?.symbols ?? []).map((sym) => ({
+        symbol: sym,
+        group: gradeOf[sym] ?? (book?.funded ? "not-in-book" : null),
+      })),
+    [activeList, gradeOf, book],
+  );
+
+  const gradeCounts = useMemo(() => {
+    const c: Record<string, number> = {};
+    for (const p of positions) {
+      const g = p.grade_key_at_entry || "unrated";
+      c[g] = (c[g] ?? 0) + 1;
+    }
+    return c;
+  }, [positions]);
+  const gradesPresent = BEST_FIRST.filter((g) => gradeCounts[g]);
+
+  const shownPositions = useMemo(
+    () =>
+      fGrades.length
+        ? positions.filter((p) => fGrades.includes(p.grade_key_at_entry || "unrated"))
+        : positions,
+    [positions, fGrades],
+  );
+
+  const toggleGrade = (g: string) =>
+    setFGrades((prev) => (prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g]));
+
+  /** Every list in one TradingView file, a ###section per list. TradingView will not hold a
+   *  symbol twice in one watchlist, so a name in two lists lands in the first one's section. */
+  const exportAll = () => {
+    const items = lists.flatMap((w) => w.symbols.map((sym) => ({ symbol: sym, group: w.name })));
+    downloadTxt(
+      tvFilename("Fundamental Rating - all lists"),
+      tvSections(items, lists.map((w) => w.name), (g) => g),
+    );
+  };
 
   const save = async () => {
     setBusy(true);
@@ -164,6 +225,22 @@ export default function WatchlistTab() {
             </button>
           )}
         </div>
+
+        {activeList && !showAdd && (
+          <div className="tvwrap">
+            <TvExport
+              items={listItems}
+              name={activeList.name}
+              groupOrder={BEST_FIRST}
+              sectionsLabel="sections by grade at entry"
+            />
+            {lists.length > 1 && (
+              <button className="ghost" onClick={exportAll}>
+                All {lists.length} lists in one .txt
+              </button>
+            )}
+          </div>
+        )}
 
         {showAdd && (
           <div className="addbox">
@@ -257,7 +334,12 @@ export default function WatchlistTab() {
                   </thead>
                   <tbody>
                     {book.tiers.map((t) => (
-                      <tr key={t.grade_key}>
+                      <tr
+                        key={t.grade_key}
+                        className={`tier ${fGrades.includes(t.grade_key || "unrated") ? "sel" : ""}`}
+                        onClick={() => toggleGrade(t.grade_key || "unrated")}
+                        title="Show only this grade in Positions below"
+                      >
                         <td className="l">
                           <span
                             className="pill"
@@ -340,6 +422,47 @@ export default function WatchlistTab() {
               )}
 
               <h4 className="h">Positions</h4>
+              <div className="gfilter" role="group" aria-label="Filter by grade at entry">
+                <span className="gl">Grade at entry</span>
+                <button
+                  className={`gchip ${fGrades.length === 0 ? "on" : ""}`}
+                  onClick={() => setFGrades([])}
+                >
+                  All <span className="n">{positions.length}</span>
+                </button>
+                {gradesPresent.map((g) => {
+                  const c = GRADE_COLOR[g as GradeKey] ?? "#888";
+                  const on = fGrades.includes(g);
+                  return (
+                    <button
+                      key={g}
+                      className={`gchip ${on ? "on" : ""}`}
+                      style={on ? { borderColor: c, color: c, background: `${c}14` } : { borderColor: `${c}55` }}
+                      onClick={() => toggleGrade(g)}
+                      aria-pressed={on}
+                    >
+                      {prettyGroup(g)} <span className="n">{gradeCounts[g]}</span>
+                    </button>
+                  );
+                })}
+                {fGrades.length > 0 && (
+                  <span className="shown">
+                    Showing {shownPositions.length} of {positions.length}
+                  </span>
+                )}
+              </div>
+              <div className="tvwrap">
+                <TvExport
+                  items={shownPositions.map((p) => ({
+                    symbol: p.symbol,
+                    group: p.grade_key_at_entry || "unrated",
+                  }))}
+                  name={`${active} - ${fGrades.length ? fGrades.map(prettyGroup).join(" + ") : "all grades"}`}
+                  groupOrder={BEST_FIRST}
+                  sectionsLabel="sections by grade at entry"
+                  hint={false}
+                />
+              </div>
               <div className="wrap">
                 <table>
                   <thead>
@@ -356,7 +479,7 @@ export default function WatchlistTab() {
                     </tr>
                   </thead>
                   <tbody>
-                    {book.positions.map((p) => (
+                    {shownPositions.map((p) => (
                       <tr key={p.symbol}>
                         <td className="l">
                           <b>{p.symbol}</b>
@@ -575,6 +698,62 @@ export default function WatchlistTab() {
         }
         .down {
           color: #d4443c;
+        }
+        .tvwrap {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: flex-start;
+          gap: 8px;
+          margin-top: 12px;
+        }
+        .gfilter {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 6px;
+          margin: 4px 0 2px;
+        }
+        .gl {
+          font-size: 10.5px;
+          text-transform: uppercase;
+          letter-spacing: 0.4px;
+          color: var(--text-faint);
+          font-weight: 600;
+          margin-right: 4px;
+        }
+        .gchip {
+          border: 1px solid var(--panel-border);
+          background: var(--panel);
+          color: var(--text-muted);
+          border-radius: 20px;
+          padding: 4px 11px;
+          font-size: 11.5px;
+          font-weight: 650;
+          cursor: pointer;
+        }
+        .gchip.on {
+          color: var(--purple);
+          border-color: var(--purple);
+          background: var(--purple-dim);
+        }
+        .gchip .n {
+          opacity: 0.65;
+          margin-left: 3px;
+          font-weight: 600;
+        }
+        .shown {
+          font-size: 11.5px;
+          color: var(--text-muted);
+          margin-left: 4px;
+        }
+        tr.tier {
+          cursor: pointer;
+        }
+        tr.tier:hover td {
+          background: var(--canvas-soft);
+        }
+        tr.tier.sel td {
+          background: var(--purple-dim);
         }
         .pill {
           border: 1px solid;

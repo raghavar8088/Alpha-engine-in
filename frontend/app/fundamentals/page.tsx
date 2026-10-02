@@ -6,6 +6,10 @@ import GlassPanel from "../../components/GlassPanel";
 import ErrorBanner from "../../components/ErrorBanner";
 import UniverseTab from "./UniverseTab";
 import WatchlistTab from "./WatchlistTab";
+import TvExport from "./TvExport";
+
+/** Rating bands best first - section order for the TradingView export. */
+const BAND_ORDER = ["strong", "good", "mixed", "weak", "poor", "unknown"];
 import {
   GRADE_COLOR,
   GradeKey,
@@ -236,6 +240,14 @@ export default function FundamentalsPage() {
             title={`Ratings — ${result.rated} of ${result.requested}`}
             note="Best first"
           >
+            <div className="tvrow">
+              <TvExport
+                items={ratings.map((r) => ({ symbol: r.symbol, group: r.band }))}
+                name={`Rated ${new Date().toISOString().slice(0, 10)}`}
+                groupOrder={BAND_ORDER}
+                sectionsLabel="sections by rating"
+              />
+            </div>
             <div className="cards">
               {ratings.map((r) => (
                 <div key={r.symbol} className="card">
@@ -546,6 +558,14 @@ export default function FundamentalsPage() {
 
       {!result && recent.length > 0 && (
         <GlassPanel title="Rated earlier" note="Click to re-run">
+          <div className="tvrow">
+            <TvExport
+              items={recent.map((r) => ({ symbol: r.symbol, group: r.band }))}
+              name="Rated earlier"
+              groupOrder={BAND_ORDER}
+              sectionsLabel="sections by rating"
+            />
+          </div>
           <div className="chips">
             {recent.map((r) => (
               <button
@@ -568,6 +588,9 @@ export default function FundamentalsPage() {
       )}
 
       <style jsx>{`
+        .tvrow {
+          margin-bottom: 14px;
+        }
         .tabs {
           display: flex;
           gap: 6px;
