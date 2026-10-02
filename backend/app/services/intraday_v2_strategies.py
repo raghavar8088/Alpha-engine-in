@@ -40,6 +40,7 @@ handed; the engine and the Phase 3 backtest call the same functions.
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Callable
@@ -76,6 +77,13 @@ class V2Spec:
 
 
 SLOTS_PER_STRATEGY = 5     # concurrent positions per strategy; each takes 1/5 of its capital
+# Rs 10 lakh per position (S0 of the stock-selection plan, 2026-10-02). Angel's Rs 20 flat
+# brokerage per order is 2 bp of a Rs 2 lakh order but 0.4 bp of Rs 10 lakh: measured over
+# two years of the v2 catalog, Rs 10 lakh slots cut costs from 9.35 to 7.5 bp a trade with
+# the same gross. One definition here, read by the live engine, the tournament's capital
+# tiles and the backtest, so the three can never disagree.
+SLOT_NOTIONAL = float(os.getenv("INTRADAY_V2_SLOT_NOTIONAL", "1000000"))
+STRATEGY_CAPITAL = SLOT_NOTIONAL * SLOTS_PER_STRATEGY
 
 
 @dataclass
@@ -246,9 +254,22 @@ def build_ctx(symbol: str, tf: str, now: datetime, s: Series, s15: Series,
 # ── shared conditions ────────────────────────────────────────────────────────────
 
 
+# Whether trend rules may only trade WITH NIFTY's direction on the day. OFF since
+# 2026-10-02: the stock-selection research (516 sessions, 200 names) found no support for
+# it — NIFTY's first 30 minutes do not predict its rest of day (corr -0.07), restricting
+# opening-range breaks to NIFTY's side made them worse out of sample — and the S0 backtest
+# of the whole v2 catalog over two years found it changes nothing: trend rules' gross was
+# -2.37 bp a trade with it and -2.46 bp without. A filter with no evidence behind it is
+# an assumption, so it is dropped. INTRADAY_V2_NIFTY_ALIGN=1 restores it.
+ALIGN_WITH_NIFTY = os.getenv("INTRADAY_V2_NIFTY_ALIGN", "0").lower() not in ("0", "false", "no")
+
+
 def _aligned(ctx: Ctx, side: str) -> bool:
-    """Trend entries go with the market's direction on the day. Unknown NIFTY -> no trade
-    (a filter that silently passes when its input is missing is not a filter)."""
+    """Trend entries go with the market's direction on the day, when ALIGN_WITH_NIFTY is on.
+    Unknown NIFTY -> no trade (a filter that silently passes when its input is missing is
+    not a filter)."""
+    if not ALIGN_WITH_NIFTY:
+        return True
     if ctx.nifty_ret is None:
         return False
     return ctx.nifty_ret > 0 if side == "BUY" else ctx.nifty_ret < 0

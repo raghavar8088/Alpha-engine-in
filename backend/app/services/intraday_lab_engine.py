@@ -76,7 +76,10 @@ logger = logging.getLogger("intraday_lab")
 # independent account (₹10 lakh by default), never a shared pool — one strategy can never
 # starve another and each is judged against its own capital. The desk total is that times
 # the catalog size (50 × ₹10L = ₹5 crore).
-PER_STRATEGY_ALLOCATION = float(os.getenv("INTRADAY_LAB_PER_STRATEGY_CAPITAL", "1000000"))  # ₹10 lakh each
+# v2: five Rs 10 lakh slots per strategy (intraday_v2_strategies.STRATEGY_CAPITAL);
+# legacy: Rs 10 lakh each.
+PER_STRATEGY_ALLOCATION = float(os.getenv("INTRADAY_LAB_PER_STRATEGY_CAPITAL",
+                                          str(_v2.STRATEGY_CAPITAL if V2 else 1000000)))
 INTRADAY_LAB_INITIAL_CAPITAL = PER_STRATEGY_ALLOCATION * max(len(STRATEGY_CATALOG), 1)
 # Every position is a uniform ₹1 lakh notional — the equity analog of the option desks'
 # "1 lot everywhere". The leaderboard then ranks a strategy on WHICH stocks it picks and

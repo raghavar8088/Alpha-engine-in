@@ -50,8 +50,8 @@ from app.services.promotion_gate import grade
 logger = logging.getLogger("intraday_v2_engine")
 
 IST = timezone(timedelta(hours=5, minutes=30))
-PER_STRATEGY_CAPITAL = float(os.getenv("INTRADAY_LAB_PER_STRATEGY_CAPITAL", "1000000"))
-SLOT_NOTIONAL = PER_STRATEGY_CAPITAL / v2.SLOTS_PER_STRATEGY
+PER_STRATEGY_CAPITAL = v2.STRATEGY_CAPITAL
+SLOT_NOTIONAL = v2.SLOT_NOTIONAL
 MAX_STRATEGIES_PER_SYMBOL = int(os.getenv("INTRADAY_LAB_MAX_STRATEGIES_PER_SYMBOL", "2"))
 DAILY_LOSS_BREAKER_PCT = float(os.getenv("INTRADAY_LAB_DAILY_LOSS_PCT", "0.03"))
 PAUSE_NEW_ENTRIES = os.getenv("INTRADAY_LAB_PAUSE_ENTRIES", "1").lower() not in ("0", "false", "")

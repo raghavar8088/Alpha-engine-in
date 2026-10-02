@@ -75,9 +75,9 @@ from app.services.intraday_store import (BARS_PER_SESSION, DATA_DIR, SESSION_OPE
 logger = logging.getLogger("intraday_v2_backtest")
 
 IST = timezone(timedelta(hours=5, minutes=30))
-CAPITAL = 1_000_000.0
+CAPITAL = v2.STRATEGY_CAPITAL          # the live sizing, unless --slot overrides it
 SLOTS = v2.SLOTS_PER_STRATEGY
-SLOT = CAPITAL / SLOTS
+SLOT = v2.SLOT_NOTIONAL
 HOLDOUT_FRAC = 0.20
 CSCV_BLOCKS = 16
 GATE = {"min_trades": 100, "min_dsr": 0.95, "max_pbo": 0.5, "min_profit_factor": 1.1,
@@ -713,8 +713,17 @@ def main() -> None:
     ap.add_argument("--symbols", default="")
     ap.add_argument("--no-pit", action="store_true")
     ap.add_argument("--dry", action="store_true", help="do not save results")
+    ap.add_argument("--no-align", action="store_true", help="trend rules ignore NIFTY's direction")
+    ap.add_argument("--slot", type=float, default=None, help="rupees per position (capital = 5 x slot)")
     a = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
+    global CAPITAL, SLOT
+    if a.slot:
+        SLOT = a.slot
+        CAPITAL = a.slot * SLOTS
+    if a.no_align:
+        v2.ALIGN_WITH_NIFTY = False
+    print(f"config: slot Rs {SLOT:,.0f}, capital Rs {CAPITAL:,.0f}, NIFTY alignment {v2.ALIGN_WITH_NIFTY}")
     out = asyncio.run(run(a.days, [s for s in a.symbols.split(",") if s] or None,
                           pit=not a.no_pit, save=not a.dry))
     res = out.pop("results")

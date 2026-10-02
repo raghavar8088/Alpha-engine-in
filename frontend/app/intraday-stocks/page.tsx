@@ -533,7 +533,7 @@ export default function IntradayStocksPage() {
         refreshing={isRefreshing}
         crumb="Intraday Stocks"
         title="Intraday Stocks"
-        subtitle="Paper strategy-selection tournament on the 200 most-traded NSE stocks. Every strategy decides on real 15-minute, 45-minute and 1-hour bars from Angel One's live stream, trades both sides (MIS shorts included) with its own ₹10 lakh account split into five ₹2 lakh slots, and pays real Angel One costs plus slippage. Entries only between 09:45 and 14:30 IST; everything is flat by 15:05 in closing-auction (F&O) stocks and 15:12 in the rest."
+        subtitle="Paper strategy-selection tournament on the 200 most-traded NSE stocks. Every strategy decides on real 15-minute, 45-minute and 1-hour bars from Angel One's live stream, trades both sides (MIS shorts included) with its own ₹50 lakh account split into five ₹10 lakh slots, and pays real Angel One costs plus slippage. Entries only between 09:45 and 14:30 IST; everything is flat by 15:05 in closing-auction (F&O) stocks and 15:12 in the rest."
       />
 
       <div className="tabs">
@@ -569,8 +569,8 @@ export default function IntradayStocksPage() {
       <div className="desk-banner">
         <strong>V2 — REAL INTRADAY BARS, BOTH SIDES.</strong> Each rule is evaluated once, at the
         close of its own 15m, 45m or 1h bar, and its stop and target are sized in that
-        bar&rsquo;s ATR. Trend rules trade only with NIFTY&rsquo;s direction on the day; fade
-        rules skip stocks that are in play. Stops and targets fill where they would really
+        bar&rsquo;s ATR. Fade rules skip stocks that are in play. (Trend rules are no longer
+        tied to NIFTY&rsquo;s direction: two years of data showed it made no difference.) Stops and targets fill where they would really
         have triggered — found on the stream&rsquo;s minute bars, stop first when one minute
         crosses both — and every market fill pays slippage by liquidity plus Angel One&rsquo;s
         intraday costs. The record restarted on 5 Oct 2026; nothing before it is comparable.
