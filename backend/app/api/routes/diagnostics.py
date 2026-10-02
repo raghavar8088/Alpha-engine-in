@@ -135,7 +135,33 @@ def _cache_sizes() -> list[dict]:
         except Exception:                               # noqa: BLE001
             continue
 
-    rows.sort(key=lambda r: (r["approx_mb"] or 0, r["entries"] or 0), reverse=True)
+    # THE CONTENT, NOT THE ENTRY COUNT.
+    #
+    # This is the lesson of the bug that produced this file. The intraday pattern cache
+    # showed 164 entries — a number that looks harmless beside a cap of 800 somewhere
+    # else — while holding 343,642 Bar objects, because one entry is a whole timeframe's
+    # lookback. A cache of bars is sized by its bars. Any module exposing a `*_stats()`
+    # that counts them gets to say so here.
+    for mod, fn, label in (
+        ("app.services.intraday_pattern_engine", "cache_stats", "intraday_patterns.series"),
+        ("app.services.screener.horizons", "bars_cache_stats", "screener.horizons.bars"),
+    ):
+        try:
+            m = sys.modules.get(mod) or __import__(mod, fromlist=["x"])
+            st = getattr(m, fn)()
+            held = st.get("bars_held") or st.get("symbols_held")
+            if held is None:
+                continue
+            for r in rows:
+                if r["cache"] == label:
+                    r["holds"] = held
+                    r["max_entries"] = st.get("max_entries", r["max_entries"])
+                    break
+        except Exception:                               # noqa: BLE001
+            continue
+
+    rows.sort(key=lambda r: (r["approx_mb"] or 0, r.get("holds") or 0,
+                             r["entries"] or 0), reverse=True)
     return rows
 
 

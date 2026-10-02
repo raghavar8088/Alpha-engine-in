@@ -147,6 +147,50 @@ def _hhmm():
 
 _cache: dict[tuple[str, str], tuple[float, Series]] = {}
 
+# The cache is keyed by (symbol, timeframe) and used to be evicted by nothing at all: an
+# entry was replaced only when that exact pair was fetched again. The universe is the top
+# 25 symbols by score and it ROTATES, so yesterday's symbols kept their candles for ever
+# while today's were added beside them.
+#
+# Measured on production 2026-10-02: 164 live entries holding 343,642 Bar objects — the
+# single largest thing on a heap that had climbed to 90% of the container's limit in nine
+# hours. One series is a timeframe's whole lookback (the 1m series is five days of
+# minutes), so a handful of entries is tens of megabytes; the ENTRY count being small is
+# exactly what made this invisible.
+#
+# Two entries per (symbol, timeframe) the current universe can produce, so a full rotation
+# can be held at once and nothing in flight is ever dropped.
+CACHE_MAX = int(os.getenv("PAT_CACHE_MAX", str(UNIVERSE_SIZE * len(TIMEFRAMES) * 2)))
+
+# How far past its own TTL an entry may sit before it is dropped. Generous on purpose:
+# `_series` deliberately returns a STALE series when the per-cycle fetch budget is spent,
+# so same-cycle staleness is a feature and must survive pruning. A 1m series four TTLs old
+# is 4 minutes stale and still a reasonable fallback; one from yesterday is not.
+CACHE_STALE_MULTIPLE = float(os.getenv("PAT_CACHE_STALE_MULT", "4"))
+
+
+def _prune_cache(now: float) -> None:
+    """Drop long-dead entries, then the oldest until the cache is within its cap.
+
+    Called on every write, which is the only place the cache can grow."""
+    for key in [k for k, (ts, _) in _cache.items()
+                if now - ts >= max(TF_BY_KEY[k[1]].ttl if k[1] in TF_BY_KEY else 3600, 1)
+                * CACHE_STALE_MULTIPLE]:
+        _cache.pop(key, None)
+    while len(_cache) > CACHE_MAX:
+        _cache.pop(min(_cache, key=lambda k: _cache[k][0]), None)
+
+
+def cache_stats() -> dict:
+    """Surfaced so this can never quietly grow again unnoticed — the same treatment the
+    screener's bar cache got after it ate a container."""
+    return {
+        "entries": len(_cache),
+        "max_entries": CACHE_MAX,
+        "bars_held": sum(len(getattr(v, "bars", v) or []) for _, v in _cache.values()),
+        "stale_multiple": CACHE_STALE_MULTIPLE,
+    }
+
 
 async def _universe() -> list[dict]:
     scored = await _scored_daily_symbols()
@@ -189,7 +233,9 @@ async def _series(inst: dict, tf: TF, budget: list[int]) -> Series | None:
     s = from_rows(rows)
     if tf.aggregate > 1:
         s = resample(s, tf.aggregate)
-    _cache[key] = (time.monotonic(), s)
+    now = time.monotonic()
+    _cache[key] = (now, s)
+    _prune_cache(now)
     return s
 
 
