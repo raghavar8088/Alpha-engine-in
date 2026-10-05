@@ -124,9 +124,28 @@ async def commodity_research_loop() -> None:
                 last_eval_day = day_done.date()
             if now.weekday() == LAB_WEEKDAY and now.hour >= LAB_HOUR_IST and last_lab_day != now.date():
                 last_lab_day = now.date()
-                proc = await asyncio.create_subprocess_exec(sys.executable, "-m", "app.services.commodity_lab_job")
-                asyncio.create_task(proc.wait())
-                logger.info("[commodity] weekly Commodity Lab job started (pid %s)", proc.pid)
+                if lab_memory_ok():
+                    proc = await asyncio.create_subprocess_exec(sys.executable, "-m", "app.services.commodity_lab_job")
+                    asyncio.create_task(proc.wait())
+                    logger.info("[commodity] weekly Commodity Lab job started (pid %s)", proc.pid)
+                else:
+                    logger.warning("[commodity] weekly Lab job skipped: worker RSS too high for a ~110 MB child")
         except Exception:
             logger.exception("[commodity] research loop tick failed — will retry")
         await asyncio.sleep(TREND_TICK_SECONDS)
+
+
+LAB_MAX_PARENT_RSS_MB = float(os.getenv("COMMODITY_LAB_MAX_PARENT_RSS_MB", "600"))
+
+
+def lab_memory_ok() -> bool:
+    """The Lab job is a ~110 MB child of this worker (measured 2026-10-05) and the
+    container is capped at 800 MB; start it only when the worker leaves room for it."""
+    try:
+        with open("/proc/self/status") as f:
+            for line in f:
+                if line.startswith("VmRSS:"):
+                    return int(line.split()[1]) / 1024 < LAB_MAX_PARENT_RSS_MB
+    except OSError:
+        return True
+    return True

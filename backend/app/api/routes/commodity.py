@@ -303,9 +303,14 @@ async def lab_run_endpoint(_user: dict = Depends(get_current_user)):
     """Start the Lab job in its own process (minutes of CPU). Poll GET /lab for the result."""
     import sys
 
+    from app.services.commodity_scheduler import LAB_MAX_PARENT_RSS_MB, lab_memory_ok
+
     p = _LAB_PROC.get("proc")
     if p is not None and p.returncode is None:
         return {"started": False, "note": f"a Lab run is already in progress (pid {p.pid})"}
+    if not lab_memory_ok():
+        return {"started": False, "note": f"not started: the server worker is above {LAB_MAX_PARENT_RSS_MB:.0f} MB "
+                                          "and the Lab job needs ~110 MB more. It also runs weekly on Sunday."}
     proc = await asyncio.create_subprocess_exec(sys.executable, "-m", "app.services.commodity_lab_job")
     _LAB_PROC["proc"] = proc
     task = asyncio.create_task(proc.wait())
