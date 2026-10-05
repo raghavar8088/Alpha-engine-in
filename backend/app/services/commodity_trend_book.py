@@ -234,7 +234,9 @@ async def mark() -> dict:
     """Mark every leg at the side it would exit on (bid for a long, ask for a short)."""
     legs = [l async for l in legs_collection.find({})]
     open_legs = [l for l in legs if l.get("lots")]
-    qs = await mcx_market.quotes([{"angel_token": l["token"]} for l in open_legs]) if open_legs else {}
+    qs = await mcx_market.quotes([{"angel_token": l["token"], "underlying_symbol": l.get("underlying"),
+                                   "expiry": l.get("expiry"), "symbol": l.get("contract")}
+                                  for l in open_legs]) if open_legs else {}
     unreal, realized, fees = 0.0, 0.0, 0.0
     for l in legs:
         realized += l.get("realized_pnl") or 0.0
