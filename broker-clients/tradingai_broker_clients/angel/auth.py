@@ -154,5 +154,10 @@ def parse_full(body: dict) -> dict[str, dict]:
             "ask": float(sell[0]["price"]) if sell else None,
             "ask_qty": int(sell[0].get("quantity") or 0) if sell else None,
             "exch_time": row.get("exchFeedTime"),
+            # The time of the LAST TRADE ("01-Oct-2026 23:29:59"). `exchFeedTime` is just the
+            # feed's clock and reads "now" even on a holiday, so only this one can say a
+            # quote is frozen — on 2026-10-02 every MCX contract still showed 1 Oct 23:29.
+            "trade_time": row.get("exchTradeTime"),
+            "last_trade_qty": row.get("lastTradeQty"),
         }
     return out

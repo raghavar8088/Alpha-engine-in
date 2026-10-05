@@ -3870,6 +3870,141 @@ export async function refreshCommodityBars(): Promise<{ symbols: number; seconds
   return apiFetch("/api/commodity/refresh-bars", { method: "POST" });
 }
 
+// --- Commodity upgrade (2026-10-03): honest records, MCX market rules, Lab, hypotheses,
+// the HC1 trend book and the locked real-money executor. The desk no longer promotes
+// anything; these are records, and the Lab is the only door.
+
+export interface CmdRecordRow {
+  key: unknown;
+  trades: number;
+  net_bp: number;
+  net_t: number | null;
+  net_ci95: [number, number] | null;
+  raw_bp: number;
+  raw_t: number | null;
+  direction_hit: number | null;
+  win_rate: number | null;
+  net_pnl: number;
+  real_trades: number;
+  real_bp: number | null;
+}
+export interface CmdStrategyRecord extends CmdRecordRow {
+  strategy_id: string;
+  name: string;
+  template: string;
+  timeframe: string;
+  family: string;
+  family_label: string;
+  retired: boolean;
+}
+export interface CmdRecords {
+  desk: { all: CmdRecordRow | null; not_void: CmdRecordRow | null; honest: CmdRecordRow | null };
+  by_fill_basis: CmdRecordRow[];
+  by_timeframe: CmdRecordRow[];
+  by_timeframe_all: CmdRecordRow[];
+  by_contract: CmdRecordRow[];
+  by_family: CmdRecordRow[];
+  strategies: CmdStrategyRecord[];
+  luck: { strategies_judged: number; min_trades: number; t_above_2: number; t_below_minus_2: number;
+          expected_by_chance_each_tail: number; positive: number; note: string };
+  labels: Record<string, number | string>;
+  retired_timeframes: string[];
+  definitions: Record<string, string>;
+}
+export async function fetchCommodityRecords(fresh = false): Promise<CmdRecords> {
+  return apiFetch(`/api/commodity/records${fresh ? "?fresh=true" : ""}`);
+}
+
+export interface CmdContractRule {
+  underlying: string;
+  settlement: string;
+  exit_days: number;
+  trading: string | null;
+  contracts: { symbol: string; expiry: string; trading_days_left: number; in_exit_window: boolean; tradable: boolean }[];
+}
+export interface CmdMarket {
+  calendar: {
+    now_ist: string; session: string | null; open: boolean; close_today: string; us_daylight_saving: boolean;
+    today_holiday: { name: string; morning_closed: boolean; evening_closed: boolean } | null;
+    list_covers_through: string; list_expired: boolean;
+    upcoming_holidays: { date: string; name: string; morning_closed: boolean; evening_closed: boolean }[];
+  };
+  contracts: CmdContractRule[];
+  spreads_30d: { underlying: string; samples: number; median_bp: number; p90_bp: number; half_spread_bp: number }[];
+  stale_after_min: number;
+  curve_recorder: { documents: number; first_date: string | null; trading_days_recorded: number; next_slot: string;
+                    next_at: string; error: string | null; underlyings: string[] };
+}
+export async function fetchCommodityMarket(): Promise<CmdMarket> {
+  return apiFetch("/api/commodity/market");
+}
+
+export interface CmdPeriod { months?: number; ann_ret_pct?: number; sharpe?: number | null; t?: number | null; max_dd_pct?: number }
+export interface CmdLabCandidate {
+  key: string; kind: "trend" | "pattern"; rule?: string; series?: string; template?: string; name?: string;
+  legs: string[]; explore: CmdPeriod; heldout: CmdPeriod; dsr: number | null;
+  alpha: { alpha_ann_pct?: number; beta?: number; alpha_t?: number | null };
+  benchmark_heldout_sharpe: number | null; feasible_legs: number; passes_history: boolean; reasons: string[];
+}
+export interface CmdLabRun {
+  at: string; n_trials_registry: number; pbo: { pbo: number | null; combinations?: number; trials?: number };
+  data_span: Record<string, [string, string, number]>; book_capital: number;
+  benchmark: { name: string; heldout: CmdPeriod; explore: CmdPeriod };
+  feasibility: Record<string, { vol_60d: number | null; target_notional: number; feasible: boolean;
+                                vehicle: { contract: string; price: number; lot_value: number; lots: number } | null }>;
+  candidates: CmdLabCandidate[]; passed_history: string[]; verdict_counts: Record<string, number>;
+  gate: { dsr_min: number; pbo_max: number; alpha_t_min: number; min_feasible_legs: number; incubation_sessions: number };
+}
+export interface CmdLabVerdict { key: string; kind: string; verdict: string; reasons: string[]; dsr: number | null; summary: string }
+export async function fetchCommodityLab(): Promise<{ run: CmdLabRun | null; verdicts: CmdLabVerdict[] }> {
+  return apiFetch("/api/commodity/lab");
+}
+export async function runCommodityLab(): Promise<{ started: boolean; note: string }> {
+  return apiFetch("/api/commodity/lab/run", { method: "POST" });
+}
+
+export interface CmdHypothesis {
+  id: string; name: string; status: string; rule: string; test?: string; prior?: Record<string, unknown>;
+  thresholds?: Record<string, unknown>; expectation?: string; verdict_reason?: string; decision_date?: string;
+  forward?: Record<string, unknown> | null; registered_at?: string; evaluated_at?: string; book?: string;
+}
+export async function fetchCommodityHypotheses(): Promise<{ hypotheses: CmdHypothesis[] }> {
+  return apiFetch("/api/commodity/hypotheses");
+}
+
+export interface CmdTrendBook {
+  book: string; capital: number; start_date: string; vehicles: Record<string, string>;
+  legs: { commodity: string; side: string | null; lots: number; contract: string; expiry: string; avg_price: number;
+          mark?: number; unrealized_pnl?: number; realized_pnl: number; fees: number; multiplier: number }[];
+  equity: { date: string; equity: number; realized: number; fees: number; unrealized: number }[];
+  trades: { trade_id: string; commodity: string; contract: string; side: string; lots: number; price: number;
+            spread_bp: number | null; fees: number; purpose: string; at: string; realized_pnl?: number }[];
+  state: { last_targets?: { legs: Record<string, { side: string; lots: number; contract: string; price: number | null;
+                                                   notional: number; vol_60d: number; ret_12m: number;
+                                                   not_held_reason: string | null }>;
+                            stress: { worst_day_loss: number; worst_day_pct: number | null; margin: number; ok: boolean } };
+           rebalanced_month?: string; last_notes?: string[]; last_mark?: { equity: number } };
+}
+export async function fetchCommodityTrendBook(): Promise<CmdTrendBook> {
+  return apiFetch("/api/commodity/trend-book");
+}
+
+export interface CmdRealMoney {
+  state: { armed: boolean; armed_for: string | null; kill_switch: boolean; env_enabled: boolean; dry_run: boolean;
+           qty_verified: boolean; max_order_notional: number; daily_loss_cap: number; disarmed_reason: string | null };
+  strategies: { strategy: string; name: string; status: string; can_arm: boolean; why_not: string[] }[];
+  recent_orders: { strategy: string; purpose: string; status: string; tradingsymbol: string; side: string; lots: number;
+                   ref_price: number; at: string; refused?: string[] | null }[];
+  checks: string[];
+  confirm_phrase: string;
+}
+export async function fetchCommodityRealMoney(): Promise<CmdRealMoney> {
+  return apiFetch("/api/commodity/real-money");
+}
+export async function setCommodityKillSwitch(active: boolean): Promise<unknown> {
+  return apiFetch("/api/commodity/real-money/kill", { method: "POST", body: JSON.stringify({ active }) });
+}
+
 // ── Swing Trading ──────────────────────────────────────────────────────────────
 // You name the buy price; the desk waits for the market to reach it, then manages the
 // position to a stop and target you can change at any time.
@@ -6243,6 +6378,9 @@ export interface CommodityPreliveSummary {
   open_positions: number;
   closed_positions: number;
   admitted_total: number;
+  /** Set while admission comes only from the Commodity Lab and nothing is confirmed. */
+  paused_reason?: string | null;
+  admission_source?: string;
   admitted_by_script: Record<string, number>;
   admission_counts: {
     per_script: Record<string, number>;

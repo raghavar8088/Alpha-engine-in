@@ -75,9 +75,14 @@ from app.services.commodity_bars import (
     TIMEFRAMES,
     front_month_universe,
     is_market_open,
+    last_contract_price,
     load_bars,
 )
+from tradingai_shared import mcx_calendar as mcal
+
+from app.services import mcx_market
 from app.services.commodity_engine import (
+    RETIRED_TIMEFRAMES,
     MAX_DRAWDOWN_PCT,
     MIN_PROFIT_FACTOR,
     MIN_T_STAT,
@@ -151,6 +156,18 @@ DAILY_LOSS_BREAKER_PCT = float(os.getenv("COMMODITY_PRELIVE_DAILY_LOSS_PCT", "0.
 
 ADMISSION_MODES = ("per_script", "blended")
 DEFAULT_ADMISSION = os.getenv("COMMODITY_PRELIVE_ADMISSION", "per_script")
+
+# PAUSED BY EVIDENCE (2026-10-03). Admission used to come from the pattern desk's READY
+# verdicts: 30 trades and t >= 1.5 among ~350 strategies with no correction for how many
+# were tried. Of the 16 READY strategies, 11 lost money in the half of the record that came
+# after; strategy rankings did not persist from one half to the other (Spearman -0.035).
+# This desk traded that list for -Rs41,447 since 2026-09-08. From now on only the
+# Commodity Lab's CONFIRMED list may admit anything (`commodity_lab.admitted()`), so until
+# the Lab confirms a strategy this desk opens nothing — its record and switches stay.
+REQUIRE_LAB = os.getenv("COMMODITY_PRELIVE_REQUIRE_LAB", "1").lower() not in ("0", "false", "")
+PAUSE_REASON = ("Paused 2026-10-03: admission now comes only from the Commodity Lab's CONFIRMED "
+                "list. The pattern desk's READY verdicts were selection luck — 11 of its 16 READY "
+                "strategies lost money afterwards.")
 
 
 class PreliveError(Exception):
@@ -314,11 +331,29 @@ async def admissions(fresh: bool = False) -> dict:
     state = await get_state()
     mode = state["admission_mode"]
     now = _time.monotonic()
-    if not fresh and _ADMIT_CACHE and _ADMIT_CACHE.get("mode") == mode and now - _ADMIT_AT < ADMIT_TTL:
+    cache_mode = "lab" if REQUIRE_LAB else mode
+    if not fresh and _ADMIT_CACHE and _ADMIT_CACHE.get("mode") == cache_mode and now - _ADMIT_AT < ADMIT_TTL:
         return _ADMIT_CACHE
 
     universe = sorted(await prelive_universe())
     per: dict[str, dict[str, dict]] = {s: {} for s in universe}
+
+    if REQUIRE_LAB:
+        # The Lab's CONFIRMED list is the only door (see PAUSE_REASON). It returns
+        # {symbol: {strategy_id: evidence}} for strategies that passed the history gate AND
+        # their paper incubation; empty until something does.
+        try:
+            from app.services.commodity_lab import admitted as lab_admitted
+            lab = await lab_admitted(universe)
+        except Exception as exc:  # noqa: BLE001 — no Lab answer admits nothing, never everything
+            logger.warning("[commodity_prelive] Lab admission unavailable: %s", exc)
+            lab = {}
+        for sym in universe:
+            per[sym] = dict(lab.get(sym) or {})
+        out = {"mode": "lab", "per_symbol": per, "counts": {s: len(per[s]) for s in universe},
+               "total": sum(len(v) for v in per.values()), "paused_reason": PAUSE_REASON}
+        _ADMIT_CACHE, _ADMIT_AT = out, now
+        return out
 
     if mode == "blended":
         # The main page's badges: one blended record per strategy, applied to every
@@ -561,8 +596,10 @@ async def _open_position(spec, symbol: str, inst: dict, sig, bar_ts: datetime,
         "template": spec.template, "timeframe": spec.timeframe, "pattern": sig.pattern,
         "symbol": symbol, "display_name": inst.get("symbol"),
         "instrument": {"symbol": inst.get("symbol"), "security_id": str(inst.get("security_id")),
+                       "angel_token": str(inst.get("angel_token") or inst.get("security_id")),
                        "exchange_segment": inst.get("exchange_segment"),
-                       "expiry": inst.get("expiry"), "lot_size": inst.get("lot_size", 1)},
+                       "expiry": inst.get("expiry"), "lot_size": inst.get("lot_size", 1),
+                       "underlying_symbol": symbol},
         "side": sig.side, "signal_price": round(sig.entry, 4), "entry_price": round(fill, 4),
         "lots": lots, "multiplier": mult, "qty": qty,
         "notional": round(fill * qty, 2), "margin_used": round(margin_used, 2),
@@ -582,8 +619,8 @@ async def _open_position(spec, symbol: str, inst: dict, sig, bar_ts: datetime,
     return True, None, margin_used
 
 
-async def _close(pos: dict, ltp: float, reason: str) -> float:
-    slip = SLIPPAGE_BPS / 10000.0
+async def _close(pos: dict, ltp: float, reason: str, slippage: bool = True) -> float:
+    slip = SLIPPAGE_BPS / 10000.0 if slippage else 0.0
     is_long = pos["side"] == "BUY"
     fill = ltp * (1 - slip) if is_long else ltp * (1 + slip)
     qty = pos["qty"]
@@ -670,6 +707,9 @@ async def scan_cycle() -> dict:
     admit = await admissions()
     roster = admit["per_symbol"]
     if not admit["total"]:
+        if admit.get("paused_reason"):
+            return {"opened": 0, "evaluated": 0, "notes": [
+                admit["paused_reason"] + " Nothing is confirmed yet, so nothing trades here."]}
         return {"opened": 0, "evaluated": 0, "notes": [
             f"No strategy has been admitted yet under the '{admit['mode']}' rule — nothing on "
             "the paper desk has cleared its promotion gate on these contracts. This desk "
@@ -697,9 +737,15 @@ async def scan_cycle() -> dict:
         book = await _book(symbol)
         free = book["available_margin"]
         opens = book["open_positions"]
-        _px, _src = await get_ltp(None, str(inst.get("security_id")), inst.get("exchange_segment"))
-        market_px = float(_px) if _px else None
+        # Live quote with a last-trade check, the same as the pattern desk: a frozen quote
+        # (holiday, no trade this session) fills nothing.
+        _q = (await mcx_market.quotes([inst])).get(str(inst.get("angel_token") or inst.get("security_id")))
+        market_px = float(_q.ltp) if (_q is not None and _q.fresh and _q.ltp) else None
+        if market_px is None:
+            continue
         for tf, specs in by_tf.items():
+            if tf in RETIRED_TIMEFRAMES:
+                continue
             tf_specs = [s for s in specs if s.strategy_id in allowed]
             if not tf_specs:
                 continue
@@ -709,7 +755,8 @@ async def scan_cycle() -> dict:
             # catalog's worst case: a contract admitting two short-lookback strategies
             # should not be starved because some unrelated 60-bar pattern exists.
             need = max(s.min_bars for s in tf_specs) + 5
-            bars = await load_bars(symbol, tf, limit=max(need, 250))
+            bars = await load_bars(symbol, tf, limit=max(need, 250), closed_only=True,
+                                   prefer_expiry=inst.get("expiry"))
             if len(bars) < need:
                 thin.append(f"{symbol}/{tf}({len(bars)})")
                 continue
@@ -752,44 +799,34 @@ async def scan_cycle() -> dict:
 
 async def manage_cycle() -> int:
     """Always runs, engine on or off. An open position is real exposure and must be taken
-    to its target, stop or hold limit regardless of whether new entries are allowed."""
+    to its target, stop or hold limit regardless of whether new entries are allowed.
+
+    Priced on the position's OWN contract (stamped at entry), never the underlying's current
+    front month — after a roll that is a different contract. A contract inside its exit
+    window closes at its own price ("roll_exit"); one already expired settles at its last
+    recorded price; a frozen quote moves nothing."""
     open_positions = [p async for p in commodity_prelive_positions_collection.find({"status": "OPEN"})]
     if not open_positions:
         return 0
-    # Deliberately the FULL master, not this desk's universe. A position can outlive its
-    # contract's membership — the universe is a config list and it changes — and a position
-    # that can no longer be priced is one that can never hit its stop. Managing an orphan
-    # out is exactly what you want; stranding it open for ever is not.
-    universe = await front_month_universe()
-    prices: dict[str, tuple] = {}
-    orphans: set[str] = set()
-    for symbol in {p["symbol"] for p in open_positions}:
-        inst = universe.get(symbol)
-        if not inst:
-            # Not even in the master any more (expired roll, delisting): fall back to the
-            # instrument stamped on the position itself when it was opened.
-            for p in open_positions:
-                if p["symbol"] == symbol and p.get("instrument", {}).get("security_id"):
-                    inst = p["instrument"]
-                    break
-        if not inst:
-            continue
-        if symbol not in PRELIVE_UNDERLYINGS:
-            orphans.add(symbol)
-        price, src = await get_ltp(None, str(inst.get("security_id")), inst.get("exchange_segment"))
-        if price:
-            prices[symbol] = (float(price), src)
-    if orphans:
-        logger.info("[commodity_prelive] managing %d position(s) on contracts no longer in "
-                    "this desk's universe: %s", len(orphans), ", ".join(sorted(orphans)))
+    today = _today_ist()
+    qmap = await mcx_market.quotes([mcx_market.position_contract(p) for p in open_positions])
 
     updated = 0
     touched = set()
     for pos in open_positions:
-        got = prices.get(pos["symbol"])
-        if not got:
+        forced = mcx_market.forced_exit(pos, today)
+        if forced == "contract_expired":
+            inst = pos.get("instrument") or {}
+            got = await last_contract_price(pos["symbol"], inst.get("expiry")) if inst.get("expiry") else None
+            px = got[0] if got else float(pos.get("ltp") or 0.0)
+            if px > 0:
+                await _close(pos, px, "contract_expired", slippage=False)
+                touched.add((pos["strategy_id"], pos["symbol"]))
             continue
-        ltp, src = got
+        q = qmap.get(mcx_market.position_token(pos))
+        if q is None or not q.fresh or not q.ltp:
+            continue
+        ltp, src = float(q.ltp), "market_quote"
         is_long = pos["side"] == "BUY"
         qty = pos["qty"]
         gross = (ltp - pos["entry_price"]) * qty * (1 if is_long else -1)
@@ -802,7 +839,7 @@ async def manage_cycle() -> int:
             entry_ts = entry_ts.replace(tzinfo=timezone.utc)
         bars_held = 0
         if entry_ts is not None:
-            bars_held = int((datetime.now(timezone.utc) - entry_ts).total_seconds() // 60 // max(tf_minutes, 1))
+            bars_held = mcal.bars_elapsed(entry_ts, tf_minutes)  # trading time, not wall clock
 
         margin = pos.get("margin_used") or 0.0
         changes = {
@@ -817,7 +854,8 @@ async def manage_cycle() -> int:
         hit_target = ltp >= pos["target"] if is_long else ltp <= pos["target"]
         hit_stop = ltp <= pos["stoploss"] if is_long else ltp >= pos["stoploss"]
         expired = bars_held >= pos.get("max_hold_bars", MAX_HOLD_BARS)
-        reason = "target" if hit_target else "stoploss" if hit_stop else "max_hold_expired" if expired else None
+        reason = ("target" if hit_target else "stoploss" if hit_stop
+                  else "max_hold_expired" if expired else forced)
 
         await commodity_prelive_positions_collection.update_one({"_id": pos["_id"]}, {"$set": changes})
         if reason:
@@ -830,30 +868,26 @@ async def manage_cycle() -> int:
 
 
 async def close_all(symbol: str | None = None, reason: str = "manual_close_all") -> dict:
-    """Square off every open position, or every one on a single contract."""
+    """Square off every open position, or every one on a single contract — each at a quote
+    of its OWN contract, else its last mark."""
     q: dict = {"status": "OPEN"}
     if symbol:
         q["symbol"] = symbol.strip().upper()
     open_positions = [p async for p in commodity_prelive_positions_collection.find(q)]
     if not open_positions:
         return {"closed": 0, "skipped": 0, "net_pnl": 0.0}
-    # Full master, same reason as manage_cycle: squaring off must reach a position on a
-    # contract this desk no longer lists, which is precisely when you need it most.
-    universe = await front_month_universe()
+    qmap = await mcx_market.quotes([mcx_market.position_contract(p) for p in open_positions])
     closed = skipped = 0
     net = 0.0
     touched = set()
     for pos in open_positions:
-        inst = universe.get(pos["symbol"]) or pos.get("instrument")
-        price = None
-        if inst:
-            price, _src = await get_ltp(None, str(inst.get("security_id")), inst.get("exchange_segment"))
-        # No live quote: fall back to the last mark rather than leaving the position open.
-        ltp = float(price) if price else float(pos.get("ltp") or 0.0)
+        qt = qmap.get(mcx_market.position_token(pos))
+        live = qt is not None and qt.fresh and qt.ltp
+        ltp = float(qt.ltp) if live else float(pos.get("ltp") or 0.0)
         if ltp <= 0:
             skipped += 1
             continue
-        net += await _close(pos, ltp, reason)
+        net += await _close(pos, ltp, reason, slippage=bool(live))
         touched.add((pos["strategy_id"], pos["symbol"]))
         closed += 1
     await _update_scores(touched)
@@ -1083,6 +1117,7 @@ async def summary() -> dict:
         "open_positions": open_n,
         "closed_positions": closed_n,
         "admitted_total": admit["total"], "admitted_by_script": admit["counts"],
+        "paused_reason": admit.get("paused_reason"), "admission_source": admit.get("mode"),
         "admission_counts": await admission_counts_both(),
         "ready_count": verdicts["READY"], "rejected_count": verdicts["REJECTED"],
         "pending_count": verdicts["PENDING"],

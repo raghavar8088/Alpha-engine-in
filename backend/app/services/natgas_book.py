@@ -52,8 +52,11 @@ from app.core.db import (
     natgas_book_trades_collection,
 )
 from app.services.broker_data import get_ltp
-from app.services.commodity_bars import TIMEFRAMES, is_market_open, load_bars
-from app.services.commodity_engine import _trade_stats, _verdict, order_charges
+from tradingai_shared import mcx_calendar as mcal
+
+from app.services import mcx_market
+from app.services.commodity_bars import TIMEFRAMES, is_market_open, last_contract_price, load_bars
+from app.services.commodity_engine import RETIRED_TIMEFRAMES, _trade_stats, _verdict, order_charges
 from app.services.commodity_patterns import COMMODITY_CATALOG, FAMILY_LABELS, evaluate
 from app.services.commodity_positions import multiplier
 from app.services.commodity_prelive import (
@@ -198,8 +201,9 @@ async def _open(spec, inst: dict, sig, bar_ts, free: float, market: float) -> tu
         "timeframe": spec.timeframe, "pattern": sig.pattern,
         "symbol": SYMBOL, "display_name": inst.get("symbol"),
         "instrument": {"symbol": inst.get("symbol"), "security_id": str(inst.get("security_id")),
+                       "angel_token": str(inst.get("angel_token") or inst.get("security_id")),
                        "exchange_segment": inst.get("exchange_segment"),
-                       "expiry": inst.get("expiry")},
+                       "expiry": inst.get("expiry"), "underlying_symbol": SYMBOL},
         "side": sig.side, "signal_price": round(sig.entry, 4), "entry_price": round(fill, 4),
         "lots": lots, "multiplier": mult, "qty": qty,
         "notional": round(fill * qty, 2), "margin_used": round(margin_used, 2),
@@ -258,16 +262,23 @@ async def manage_cycle() -> int:
     open_pos = [p async for p in natgas_book_positions_collection.find({"status": "OPEN"})]
     if not open_pos:
         return 0
-    universe = await prelive_universe()
-    inst = universe.get(SYMBOL) or open_pos[0].get("instrument") or {}
-    if not inst.get("security_id"):
-        return 0
-    price, src = await get_ltp(None, str(inst.get("security_id")), inst.get("exchange_segment"))
-    if not price:
-        return 0
-    ltp = float(price)
+    # Each position on its OWN contract (stamped at entry), never the current front month.
+    qmap = await mcx_market.quotes([mcx_market.position_contract(p) for p in open_pos])
+    today = _today_ist()
     updated = 0
     for pos in open_pos:
+        forced = mcx_market.forced_exit(pos, today)
+        if forced == "contract_expired":
+            inst = pos.get("instrument") or {}
+            got = await last_contract_price(SYMBOL, inst.get("expiry")) if inst.get("expiry") else None
+            px = got[0] if got else float(pos.get("ltp") or 0.0)
+            if px > 0:
+                await _close(pos, px, "contract_expired")
+            continue
+        q = qmap.get(mcx_market.position_token(pos))
+        if q is None or not q.fresh or not q.ltp:
+            continue
+        ltp, src = float(q.ltp), "market_quote"
         is_long = pos["side"] == "BUY"
         qty = pos["qty"]
         gross = (ltp - pos["entry_price"]) * qty * (1 if is_long else -1)
@@ -276,7 +287,7 @@ async def manage_cycle() -> int:
         entry_ts = pos.get("entry_bar_ts")
         if entry_ts is not None and entry_ts.tzinfo is None:
             entry_ts = entry_ts.replace(tzinfo=timezone.utc)
-        bars_held = (int((_now() - entry_ts).total_seconds() // 60 // max(tf_minutes, 1))
+        bars_held = (mcal.bars_elapsed(entry_ts, tf_minutes)
                      if entry_ts else 0)
         margin = pos.get("margin_used") or 0.0
         changes = {"ltp": round(ltp, 4), "ltp_source": src,
@@ -286,7 +297,8 @@ async def manage_cycle() -> int:
         hit_t = ltp >= pos["target"] if is_long else ltp <= pos["target"]
         hit_s = ltp <= pos["stoploss"] if is_long else ltp >= pos["stoploss"]
         expired = bars_held >= pos.get("max_hold_bars", MAX_HOLD_BARS)
-        reason = "target" if hit_t else "stoploss" if hit_s else "max_hold_expired" if expired else None
+        reason = ("target" if hit_t else "stoploss" if hit_s
+                  else "max_hold_expired" if expired else forced)
         await natgas_book_positions_collection.update_one({"_id": pos["_id"]}, {"$set": changes})
         if reason:
             await _close({**pos, **changes}, ltp, reason)
@@ -315,17 +327,30 @@ async def scan_cycle() -> dict:
         missing = [f"{t}·{tf}" for t, tf in ROSTER if (t, tf) not in found]
         logger.warning("natgas book: roster entries not in catalog: %s", missing)
 
+    # RETIRED: both picked strategies are 1m / 5m, the timeframes the Commodity desk retired
+    # on 2026-10-05 (27,642 trades, -Rs1.72 cr; honest 5m fills lost before costs). They
+    # were picked on 21 trades each, which no gate here would call evidence. The book keeps
+    # its record and its switch; it opens nothing on a retired timeframe.
+    live_specs = [sp for sp in specs if sp.timeframe not in RETIRED_TIMEFRAMES]
+    if not live_specs:
+        return {"opened": 0, "notes": [
+            "Both picked strategies run on retired timeframes (1m / 5m) — no new entries since "
+            "2026-10-05. Open positions, if any, are still managed to their exits."]}
+    specs = live_specs
     b = await book()
     free = b["available_margin"]
-    px, _src = await get_ltp(None, str(inst.get("security_id")), inst.get("exchange_segment"))
-    market = float(px) if px else 0.0
+    _q = (await mcx_market.quotes([inst])).get(str(inst.get("angel_token") or inst.get("security_id")))
+    if _q is None or not _q.fresh or not _q.ltp:
+        return {"opened": 0, "notes": [f"{SYMBOL} quote not live ({_q.why if _q else 'no quote'}) — no fills."]}
+    market = float(_q.ltp)
 
     guard_doc = await natgas_book_state_collection.find_one({"_id": "entry_bars"}) or {}
     last_bar = guard_doc.get("last", {})
     fresh: dict[str, str] = {}
     opened, notes = 0, []
     for spec in specs:
-        bars = await load_bars(SYMBOL, spec.timeframe, limit=max(spec.min_bars + 5, 250))
+        bars = await load_bars(SYMBOL, spec.timeframe, limit=max(spec.min_bars + 5, 250), closed_only=True,
+                               prefer_expiry=inst.get("expiry"))
         if len(bars) < spec.min_bars + 5:
             notes.append(f"{spec.name}: only {len(bars)} bars in the store.")
             continue
@@ -368,15 +393,12 @@ async def close_all(reason: str = "manual_close_all") -> dict:
     open_pos = [p async for p in natgas_book_positions_collection.find({"status": "OPEN"})]
     if not open_pos:
         return {"closed": 0, "net_pnl": 0.0}
-    universe = await prelive_universe()
-    inst = universe.get(SYMBOL) or open_pos[0].get("instrument") or {}
-    price = None
-    if inst.get("security_id"):
-        price, _ = await get_ltp(None, str(inst["security_id"]), inst.get("exchange_segment"))
+    qmap = await mcx_market.quotes([mcx_market.position_contract(p) for p in open_pos])
     net = 0.0
     closed = 0
     for pos in open_pos:
-        ltp = float(price) if price else float(pos.get("ltp") or 0.0)
+        q = qmap.get(mcx_market.position_token(pos))
+        ltp = float(q.ltp) if (q is not None and q.fresh and q.ltp) else float(pos.get("ltp") or 0.0)
         if ltp <= 0:
             continue
         net += await _close(pos, ltp, reason)

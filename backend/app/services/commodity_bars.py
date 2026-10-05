@@ -104,32 +104,25 @@ def _now_ist() -> datetime:
 
 
 def is_market_open(now: datetime | None = None) -> bool:
-    now = now or _now_ist()
-    if now.weekday() >= 5:
-        return False
-    hhmm = now.strftime("%H:%M")
-    return f"{SESSION_OPEN_HHMM[0]:02d}:{SESSION_OPEN_HHMM[1]:02d}" <= hhmm <= \
-           f"{SESSION_CLOSE_HHMM[0]:02d}:{SESSION_CLOSE_HHMM[1]:02d}"
+    """MCX's own calendar: two sessions, holidays that shut only the morning, and the
+    23:30 / 23:55 close that follows US daylight saving. The old test was weekday + a fixed
+    09:00-23:30 window, which traded the whole of 2026-10-02 (both sessions shut) on a
+    frozen quote and missed 23:30-23:55 every winter evening."""
+    from tradingai_shared.mcx_calendar import is_open
+
+    return is_open(now or _now_ist())
 
 
 async def front_month_universe() -> dict[str, dict]:
-    """One front-month future per liquid underlying — the tradable set.
+    """One contract per liquid underlying — the one NEW entries go to.
 
-    Nearest unexpired expiry wins. Expired contracts are excluded explicitly because the
-    instrument master keeps months of history and sorting by expiry ascending otherwise
-    hands back contracts that stopped trading weeks ago."""
-    today = date.today().isoformat()
-    out: dict[str, dict] = {}
-    async for d in instruments_collection.find({
-        "asset_class": "COMMODITY_FUTURE",
-        "expiry": {"$gte": today},
-        "underlying_symbol": {"$in": LIQUID_UNDERLYINGS},
-        "angel_token": {"$ne": None},
-    }):
-        u = d["underlying_symbol"]
-        if u not in out or (d.get("expiry") or "9999") < (out[u].get("expiry") or "9999"):
-            out[u] = d
-    return out
+    Not simply the nearest expiry: a contract inside its exit window (the delivery tender
+    days for bullion and base metals, the last two sessions for energy) is skipped, so the
+    desk rolls to the next month before delivery rather than trading into it. The rules
+    live in `mcx_market`; positions already open are priced on their OWN contract there."""
+    from app.services.mcx_market import tradable_universe
+
+    return await tradable_universe(LIQUID_UNDERLYINGS)
 
 
 async def _paced_candles(exchange: str, token: str, resolution: str, days: int) -> list[list]:
@@ -197,9 +190,14 @@ async def refresh_symbol(symbol: str, inst: dict) -> dict:
         ops = []
         from pymongo import UpdateOne
 
+        # KEYED BY CONTRACT. The key used to be (symbol, timeframe, ts), so every pass
+        # rewrote the whole fetched window with whatever was front month that day: a bar
+        # dated in September came to carry October's price, and a roll silently spliced two
+        # contracts with no adjustment. With the expiry in the key each contract keeps its
+        # own history, and `load_bars` joins them with a ratio adjustment at the overlap.
         for b in bars:
             ops.append(UpdateOne(
-                {"symbol": symbol, "timeframe": tf, "ts": b.ts},
+                {"symbol": symbol, "timeframe": tf, "expiry": inst.get("expiry"), "ts": b.ts},
                 {"$set": {"symbol": symbol, "timeframe": tf, "ts": b.ts,
                           "open": b.open, "high": b.high, "low": b.low,
                           "close": b.close, "volume": b.volume,
@@ -273,28 +271,167 @@ def resample(bars: list[Bar], minutes: int) -> list[Bar]:
     return out
 
 
-async def load_bars(symbol: str, timeframe: str, limit: int = 400) -> list[Bar]:
-    """Bars for (symbol, timeframe) — read from the store for native intervals,
-    resampled from the parent interval for 30m / 45m / 4h."""
-    if timeframe in DERIVED_FROM:
-        parent = DERIVED_FROM[timeframe]
-        factor = TIMEFRAMES[timeframe][1] // TIMEFRAMES[parent][1]
-        src = await load_bars(symbol, parent, limit * factor + factor)
-        return resample(src, TIMEFRAMES[timeframe][1])[-limit:]
+def bar_end(b: Bar, minutes: int) -> datetime:
+    """When a bar stops changing. Intraday: its start plus its length, but never past the
+    session close (the last 4h bucket of an evening ends at 23:30, not 01:00). Daily: the
+    close of that date's last session."""
+    from tradingai_shared.mcx_calendar import session_close
 
-    docs = [
-        d async for d in commodity_bars_collection.find(
-            {"symbol": symbol, "timeframe": timeframe}
-        ).sort("ts", -1).limit(limit)
-    ]
-    docs.reverse()
-    out = []
+    day_close = datetime.combine(b.ts.date(), session_close(b.ts.date()), IST)
+    if minutes >= 1440:
+        return day_close
+    return min(b.ts + timedelta(minutes=minutes), day_close)
+
+
+def drop_forming(bars: list[Bar], minutes: int, now: datetime | None = None) -> list[Bar]:
+    """Remove trailing bars that have not closed yet.
+
+    Angel returns the bar still being built, and its high, low and close move until it
+    ends. A pattern evaluated on it can fire, disappear and fire again inside one bar — and
+    on 1d the "signal bar" was today's half-made candle for the whole session."""
+    now = now or _now_ist()
+    while bars and bar_end(bars[-1], minutes) > now:
+        bars = bars[:-1]
+    return bars
+
+
+def _continuous(docs: list[dict], prefer_expiry: str | None = None) -> tuple[list[Bar], dict]:
+    """Join per-contract bars into one back-adjusted series, newest contract first.
+
+    Walking back in time, the series stays on the newest contract for as long as it has
+    bars. Where it runs out, it steps to the next-older contract, scaled by the ratio of the
+    two contracts' closes at the most recent time BOTH printed — the standard ratio
+    back-adjustment, so a 1.8% calendar spread is not read as a 1.8% move. When the two
+    never overlap (history written before the store was keyed by contract), the join is
+    left unadjusted and counted in `info["unadjusted_joins"]`."""
+    by_ts: dict[datetime, dict[str, dict]] = {}
     for d in docs:
         ts = d["ts"]
         if ts.tzinfo is None:
             ts = ts.replace(tzinfo=timezone.utc)
-        out.append(Bar(ts.astimezone(IST), d["open"], d["high"], d["low"], d["close"], d.get("volume") or 0))
-    return out
+        by_ts.setdefault(ts, {})[str(d.get("expiry") or "")] = d
+    ts_desc = sorted(by_ts, reverse=True)
+    info = {"contracts": [], "adjusted_joins": 0, "unadjusted_joins": 0}
+    if not ts_desc:
+        return [], info
+    newest = by_ts[ts_desc[0]]
+    cur = prefer_expiry if prefer_expiry in newest else max(newest)
+    info["contracts"].append(cur)
+    factor = 1.0
+    out: list[Bar] = []
+    for ts in ts_desc:
+        row = by_ts[ts]
+        if cur not in row:
+            older = sorted((e for e in row if e < cur), reverse=True) or sorted(row)
+            nxt = older[0]
+            ratio = None
+            for t2 in ts_desc:                       # most recent time both printed
+                both = by_ts[t2]
+                if cur in both and nxt in both and both[nxt].get("close"):
+                    ratio = float(both[cur]["close"]) / float(both[nxt]["close"])
+                    break
+            if ratio and ratio > 0:
+                factor *= ratio
+                info["adjusted_joins"] += 1
+            else:
+                info["unadjusted_joins"] += 1
+            cur = nxt
+            info["contracts"].append(cur)
+        d = row[cur]
+        out.append(Bar(ts.astimezone(IST), d["open"] * factor, d["high"] * factor, d["low"] * factor,
+                       d["close"] * factor, d.get("volume") or 0))
+    out.reverse()
+    return out, info
+
+
+_PROJ = {"_id": 0, "ts": 1, "expiry": 1, "open": 1, "high": 1, "low": 1, "close": 1, "volume": 1}
+JOIN_OVERLAP_BARS = 20
+
+
+async def _contract_docs(symbol: str, timeframe: str, limit: int, minutes: int,
+                         prefer_expiry: str | None) -> list[dict]:
+    """The documents `_continuous` needs and no more: the newest contract's latest `limit`
+    bars, then each older contract only for the stretch before that (plus a small overlap
+    so the join has a ratio). Reading the newest N documents regardless of contract would
+    fail once contracts overlap — daily bars keep ~500 days per contract, so six gold
+    contracts would crowd a 250-bar window down to a few dozen distinct days."""
+    raw = await commodity_bars_collection.distinct("expiry", {"symbol": symbol, "timeframe": timeframe})
+    expiries = sorted((str(e) if e else "" for e in raw), reverse=True)
+    if prefer_expiry and prefer_expiry in expiries:
+        expiries.remove(prefer_expiry)
+        expiries.insert(0, prefer_expiry)
+    docs: list[dict] = []
+    seen: set = set()
+    boundary: datetime | None = None
+    for e in expiries:
+        q: dict = {"symbol": symbol, "timeframe": timeframe, "expiry": e or None}
+        if boundary is not None:
+            q["ts"] = {"$lte": boundary + timedelta(minutes=minutes * JOIN_OVERLAP_BARS)}
+        part = [d async for d in commodity_bars_collection.find(q, _PROJ).sort("ts", -1).limit(limit + JOIN_OVERLAP_BARS)]
+        if not part:
+            continue
+        docs.extend(part)
+        for d in part:
+            seen.add(d["ts"])
+        oldest = min(d["ts"] for d in part)
+        boundary = oldest if boundary is None else min(boundary, oldest)
+        if len(seen) >= limit + 5:
+            break
+    return docs
+
+
+async def load_bars(symbol: str, timeframe: str, limit: int = 400, closed_only: bool = False,
+                    prefer_expiry: str | None = None) -> list[Bar]:
+    """Bars for (symbol, timeframe) — read from the store for native intervals,
+    resampled from the parent interval for 30m / 45m / 4h.
+
+    One continuous, back-adjusted series across contracts (see `_continuous`); the newest
+    bars are always the newest contract's own, unadjusted prices. `closed_only` drops the
+    bar still forming — what any signal should be computed on."""
+    minutes = TIMEFRAMES.get(timeframe, (None, 1440))[1]
+    if timeframe in DERIVED_FROM:
+        parent = DERIVED_FROM[timeframe]
+        factor = TIMEFRAMES[timeframe][1] // TIMEFRAMES[parent][1]
+        src = await load_bars(symbol, parent, limit * factor + factor, prefer_expiry=prefer_expiry)
+        out = resample(src, minutes)
+        if closed_only:
+            out = drop_forming(out, minutes)
+        return out[-limit:]
+
+    docs = await _contract_docs(symbol, timeframe, limit, minutes, prefer_expiry)
+    out, _info = _continuous(docs, prefer_expiry)
+    if closed_only:
+        out = drop_forming(out, minutes)
+    return out[-limit:]
+
+
+async def last_contract_price(symbol: str, expiry: str, on_or_before: datetime | None = None) -> tuple[float, datetime] | None:
+    """The last close the store holds for ONE contract — what an expired position settles
+    at. Angel returns nothing for an expired token (no quote, no candles; probed
+    2026-10-03 on COPPER/ZINC Sep-30 and NATURALGAS Sep-25), so the store's own bars are
+    the only record of where that contract last traded. Any timeframe: the latest bar wins."""
+    q: dict = {"symbol": symbol, "expiry": expiry}
+    if on_or_before is not None:
+        q["ts"] = {"$lte": on_or_before}
+    doc = await commodity_bars_collection.find_one(q, {"_id": 0, "close": 1, "ts": 1}, sort=[("ts", -1)])
+    if not doc or not doc.get("close"):
+        return None
+    ts = doc["ts"] if doc["ts"].tzinfo else doc["ts"].replace(tzinfo=timezone.utc)
+    return float(doc["close"]), ts
+
+
+async def ensure_indexes() -> None:
+    """The per-contract key. Best-effort: an index is a speed-up, never a precondition."""
+    try:
+        await commodity_bars_collection.create_index(
+            [("symbol", 1), ("expiry", 1), ("ts", -1)], name="cb_symbol_expiry_ts", background=True)
+        await commodity_bars_collection.create_index(
+            [("symbol", 1), ("timeframe", 1), ("expiry", 1), ("ts", 1)],
+            name="cb_symbol_tf_expiry_ts", background=True)
+        await commodity_bars_collection.create_index(
+            [("symbol", 1), ("timeframe", 1), ("ts", -1)], name="cb_symbol_tf_ts_desc", background=True)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("commodity_bars indexes skipped: %s", exc)
 
 
 async def coverage() -> dict:

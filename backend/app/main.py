@@ -374,6 +374,10 @@ async def ensure_indexes() -> None:
     await cmi_ensure_indexes()
     from app.services.commodity_prelive import ensure_indexes as cmpl_ensure_indexes
     await _try("commodity_prelive", cmpl_ensure_indexes())
+    from app.services.commodity_bars import ensure_indexes as cmb_ensure_indexes
+    await _try("commodity_bars", cmb_ensure_indexes())
+    from app.services.mcx_market import ensure_indexes as mcx_ensure_indexes
+    await _try("mcx_market", mcx_ensure_indexes())
     from app.services.pattern_books_engine import ensure_indexes as pb_ensure_indexes
     await _try("pattern_books", pb_ensure_indexes())
     from app.services.selling_paper_books import ensure_indexes as sb_ensure_indexes
@@ -518,12 +522,23 @@ async def start_commodity_scheduler() -> None:
     from app.services.commodity_patterns import COMMODITY_CATALOG
     from app.services.commodity_scheduler import (
         BARS_TICK_SECONDS, DESK_TICK_SECONDS, ENABLED as COMMODITY_ON,
-        commodity_bars_loop, commodity_desk_loop,
+        commodity_bars_loop, commodity_desk_loop, commodity_relabel_once, commodity_research_loop,
     )
 
+    # The record labels (honest / stale / void / repriced) are needed whether or not the
+    # desk trades, so they run even when the loops are disabled.
+    asyncio.create_task(commodity_relabel_once())
+    # The MCX curve recorder (every listed expiry, 3x a trading day) feeds future carry
+    # research; it needs nothing from the desk and runs on its own switch.
+    if os.getenv("MCX_CURVE_RECORDER", "1").lower() not in ("0", "false", "no"):
+        from app.services.mcx_curve_recorder import ensure_indexes as curve_indexes, mcx_curve_loop
+        await curve_indexes()
+        asyncio.create_task(mcx_curve_loop())
     if COMMODITY_ON:
         asyncio.create_task(commodity_bars_loop())
         asyncio.create_task(commodity_desk_loop())
+        # C4/C5: the HC1 trend book, daily hypothesis evaluation, the weekly Lab job.
+        asyncio.create_task(commodity_research_loop())
         logger.info(
             "Commodity Trading desk enabled — %d pattern strategies on MCX front-month "
             "futures (bars every %ss, desk every %ss, 09:00-23:30 IST, paper)",

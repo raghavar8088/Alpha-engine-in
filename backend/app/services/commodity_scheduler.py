@@ -70,3 +70,63 @@ async def commodity_desk_loop() -> None:
         except Exception:
             logger.exception("[commodity] desk cycle failed — will retry next tick")
         await asyncio.sleep(DESK_TICK_SECONDS if is_market_open() else IDLE_TICK_SECONDS)
+
+
+async def commodity_relabel_once() -> None:
+    """Label every position once per labels version (commodity_records), then rebuild the
+    per-strategy records from honest trades. Idempotent; a few seconds on ~37k documents."""
+    from app.services.commodity_engine import rescore_all
+    from app.services.commodity_records import LABELS_VERSION, relabel
+
+    try:
+        before = await relabel()
+        if before.get("version") == LABELS_VERSION:
+            n = await rescore_all()
+            logger.info("[commodity] labels v%s ready (%s); %d records rebuilt",
+                        LABELS_VERSION, {k: before.get(k) for k in ("positions", "honest", "void")}, n)
+    except Exception:
+        logger.exception("[commodity] relabel failed — records keep their previous labels")
+
+
+TREND_TICK_SECONDS = int(os.getenv("COMMODITY_TREND_TICK_SECONDS", "600"))
+LAB_WEEKDAY = int(os.getenv("COMMODITY_LAB_WEEKDAY", "6"))         # Sunday
+LAB_HOUR_IST = int(os.getenv("COMMODITY_LAB_HOUR_IST", "8"))
+
+
+async def commodity_research_loop() -> None:
+    """C4/C5 on one slow clock:
+      * the HC1 paper book (commodity_trend_book) every TREND_TICK_SECONDS while MCX trades;
+      * the pre-registered hypotheses re-evaluated once a day after the close;
+      * the Commodity Lab job once a week, in its OWN PROCESS — replaying 22 years of daily
+        templates is minutes of CPU the web worker must not spend."""
+    import sys
+
+    from tradingai_shared import mcx_calendar as mcal
+
+    from app.services.desk_switches import is_on
+
+    last_eval_day = None
+    last_lab_day = None
+    while True:
+        now = datetime.now(IST)
+        try:
+            if mcal.session_at(now) is not None and await is_on("commodity"):
+                from app.services.commodity_trend_book import cycle
+
+                r = await cycle()
+                if r.get("rebalance"):
+                    logger.info("[commodity] HC1 rebalance: %s", {k: r["rebalance"].get(k) for k in ("complete", "notes")})
+            day_done = mcal.last_session_end(now)
+            if day_done is not None and day_done.date() != last_eval_day and (now - day_done).total_seconds() > 300:
+                from app.services.commodity_hypotheses import evaluate_all
+
+                await evaluate_all()
+                last_eval_day = day_done.date()
+            if now.weekday() == LAB_WEEKDAY and now.hour >= LAB_HOUR_IST and last_lab_day != now.date():
+                last_lab_day = now.date()
+                proc = await asyncio.create_subprocess_exec(sys.executable, "-m", "app.services.commodity_lab_job")
+                asyncio.create_task(proc.wait())
+                logger.info("[commodity] weekly Commodity Lab job started (pid %s)", proc.pid)
+        except Exception:
+            logger.exception("[commodity] research loop tick failed — will retry")
+        await asyncio.sleep(TREND_TICK_SECONDS)

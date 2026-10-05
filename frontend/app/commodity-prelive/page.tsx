@@ -185,6 +185,13 @@ export default function CommodityPrelivePage() {
       />
 
       {error && <ErrorBanner message={error} onRetry={load} />}
+      {summary?.paused_reason && (
+        <div className="paused">
+          <b>Paused by evidence.</b> {summary.paused_reason} The engine and contract switches still work, but no
+          strategy is admitted until the Commodity Lab confirms one — see Commodity Trading → Lab &amp; hypotheses.
+          The Natural Gas book&rsquo;s two strategies run on 1m and 5m, which the desk retired on 2026-10-05.
+        </div>
+      )}
       {notice && (
         <div className="notice" onClick={() => setNotice(null)}>
           {notice}
@@ -738,6 +745,7 @@ export default function CommodityPrelivePage() {
       )}
 
       <style jsx>{`
+        .paused { border-radius: 12px; padding: 12px 16px; font-size: 12.5px; line-height: 1.5; background: var(--warn-dim); border: 1px solid rgba(185,119,14,.3); }
         .page { display: flex; flex-direction: column; gap: 16px; }
         .page-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
         .ptab { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted);

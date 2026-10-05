@@ -12,11 +12,21 @@
   GET  /api/commodity/universe      the 8 front-month contracts being traded
   POST /api/commodity/refresh-bars  force one paced bar refresh
   POST /api/commodity/run           force one scan+manage cycle
+  GET  /api/commodity/records       honest per-strategy records, luck line, data quality (C1)
+  POST /api/commodity/relabel       re-run the trade labels (honest / stale / void / repriced)
+  GET  /api/commodity/market        MCX calendar, contract roll rules, quoted spreads (C0/C2)
+  GET  /api/commodity/lab           latest Commodity Lab run + every verdict (C4)
+  POST /api/commodity/lab/run       start the Lab job in its own process
+  GET  /api/commodity/hypotheses    pre-registered HC1-HC4 with forward status (C5)
+  GET  /api/commodity/trend-book    the HC1 paper book: legs, equity, trades, last targets
+  GET  /api/commodity/real-money    MCX executor readiness — locked (C6)
+  POST /api/commodity/real-money/arm | /disarm | /kill
 """
 
 import asyncio
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
 
 from app.api.deps import get_current_user
 from app.core.db import (
@@ -222,3 +232,138 @@ async def refresh_bars_endpoint(_user: dict = Depends(get_current_user)):
 @router.post("/run")
 async def run_endpoint(_user: dict = Depends(get_current_user)):
     return await run_cycle()
+
+
+@router.get("/records")
+async def records_endpoint(fresh: bool = Query(False), _user: dict = Depends(get_current_user)):
+    """The desk's honest record: what each strategy did on trades filled at a live quote,
+    with MCX open, on its own contract — and how many strong-looking records luck alone
+    would produce among this many strategies."""
+    from app.services.commodity_records import records
+
+    return await records(fresh)
+
+
+@router.post("/relabel")
+async def relabel_endpoint(_user: dict = Depends(get_current_user)):
+    from app.services.commodity_engine import rescore_all
+    from app.services.commodity_records import relabel
+
+    out = await relabel(force=True)
+    out["rescored"] = await rescore_all()
+    if out.get("at") is not None and hasattr(out["at"], "isoformat"):
+        out["at"] = out["at"].isoformat()
+    return out
+
+
+@router.get("/market")
+async def market_endpoint(_user: dict = Depends(get_current_user)):
+    """MCX sessions and holidays, which contract each underlying trades and when it must be
+    left (delivery window), and the spreads the market has actually quoted."""
+    from tradingai_shared import mcx_calendar as mcal
+
+    from app.services import mcx_market
+    from app.services.commodity_bars import LIQUID_UNDERLYINGS
+
+    listed = await mcx_market.listed_futures(LIQUID_UNDERLYINGS)
+    today = mcal.as_date(None)
+    rows = []
+    for u in LIQUID_UNDERLYINGS:
+        tradable = mcx_market.tradable_contract(listed.get(u, []), u, today)
+        contracts = []
+        for d in listed.get(u, [])[:4]:
+            exp = d.get("expiry")
+            contracts.append({"symbol": d.get("symbol"), "expiry": exp,
+                              "trading_days_left": mcal.trading_days_to(exp, today),
+                              "in_exit_window": mcx_market.in_exit_window(u, exp, today),
+                              "tradable": bool(tradable and tradable.get("expiry") == exp)})
+        rows.append({"underlying": u, "settlement": mcx_market.settlement(u),
+                     "exit_days": mcx_market.exit_days(u),
+                     "trading": tradable.get("symbol") if tradable else None, "contracts": contracts})
+    from app.services.mcx_curve_recorder import status as curve_status
+
+    return {"calendar": mcal.describe(), "contracts": rows,
+            "spreads_30d": await mcx_market.spread_stats(30),
+            "stale_after_min": mcx_market.STALE_AFTER_MIN,
+            "curve_recorder": await curve_status()}
+
+
+@router.get("/lab")
+async def lab_endpoint(full: bool = Query(False), _user: dict = Depends(get_current_user)):
+    from app.services.commodity_lab import latest_run, verdicts
+
+    return {"run": await latest_run(full), "verdicts": await verdicts()}
+
+
+_LAB_PROC: dict = {}
+
+
+@router.post("/lab/run")
+async def lab_run_endpoint(_user: dict = Depends(get_current_user)):
+    """Start the Lab job in its own process (minutes of CPU). Poll GET /lab for the result."""
+    import sys
+
+    p = _LAB_PROC.get("proc")
+    if p is not None and p.returncode is None:
+        return {"started": False, "note": f"a Lab run is already in progress (pid {p.pid})"}
+    proc = await asyncio.create_subprocess_exec(sys.executable, "-m", "app.services.commodity_lab_job")
+    _LAB_PROC["proc"] = proc
+    task = asyncio.create_task(proc.wait())
+    _BACKGROUND.add(task)
+    task.add_done_callback(_BACKGROUND.discard)
+    return {"started": True, "pid": proc.pid, "note": "Runs for a few minutes; GET /api/commodity/lab shows the result."}
+
+
+@router.get("/hypotheses")
+async def hypotheses_endpoint(_user: dict = Depends(get_current_user)):
+    from app.services.commodity_hypotheses import listing
+
+    return {"hypotheses": await listing()}
+
+
+@router.get("/trend-book")
+async def trend_book_endpoint(_user: dict = Depends(get_current_user)):
+    from app.services.commodity_trend_book import summary
+
+    return await summary()
+
+
+@router.get("/real-money")
+async def real_money_endpoint(_user: dict = Depends(get_current_user)):
+    from app.services.mcx_live_executor import readiness
+
+    return await readiness()
+
+
+class ArmRequest(BaseModel):
+    strategy: str
+    confirm: str
+
+
+class KillRequest(BaseModel):
+    active: bool
+    reason: str | None = None
+
+
+@router.post("/real-money/arm")
+async def real_money_arm(req: ArmRequest, user: dict = Depends(get_current_user)):
+    from app.services.mcx_live_executor import arm
+
+    out = await arm(req.strategy, req.confirm, str(user.get("email") or user.get("sub") or "user"))
+    if not out.get("armed"):
+        raise HTTPException(status_code=409, detail={"refused": out.get("refused")})
+    return out
+
+
+@router.post("/real-money/disarm")
+async def real_money_disarm(_user: dict = Depends(get_current_user)):
+    from app.services.mcx_live_executor import disarm
+
+    return await disarm("disarmed by the user")
+
+
+@router.post("/real-money/kill")
+async def real_money_kill(req: KillRequest, _user: dict = Depends(get_current_user)):
+    from app.services.mcx_live_executor import set_kill_switch
+
+    return await set_kill_switch(req.active, req.reason or "manual")

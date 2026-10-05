@@ -40,12 +40,15 @@ from app.core.db import (
     commodity_state_collection,
     commodity_trades_collection,
 )
-from app.services.broker_data import get_ltp
+from tradingai_shared import mcx_calendar as mcal
+
+from app.services import mcx_market
 from app.services.commodity_bars import (
     IST,
     TIMEFRAMES,
     front_month_universe,
     is_market_open,
+    last_contract_price,
     load_bars,
 )
 from app.services.commodity_patterns import (
@@ -74,32 +77,29 @@ DAILY_LOSS_BREAKER_PCT = float(os.getenv("COMMODITY_DAILY_LOSS_PCT", "0.03"))
 PAUSE_NEW_ENTRIES = os.getenv("COMMODITY_PAUSE_ENTRIES", "0").lower() not in ("0", "false", "")
 SLIPPAGE_BPS = float(os.getenv("COMMODITY_SLIPPAGE_BPS", "5"))
 
+# RETIRED TIMEFRAMES take no new entries; their open positions run to their own exits and
+# their records stay. Evidence (live record 2026-08-17..10-02): 1m + 5m were 27,642 trades
+# and -Rs1.72 cr, 64% of the desk's whole loss. 1m's raw move before slippage and charges
+# was -0.1 bp even with the flattering stale fills; honestly filled 5m lost 8.5 bp BEFORE
+# costs (t -4.0). A 1m trade was held ~6 minutes while its bars reached the store every 5
+# and the desk ticked every 2 — the signal was older than the trade. The strategy ids stay
+# in the catalog (ids are positional; removing them would re-label every other record).
+RETIRED_TIMEFRAMES = {t.strip() for t in os.getenv("COMMODITY_RETIRED_TIMEFRAMES", "1m,5m").split(",") if t.strip()}
+RETIRED_ON = "2026-10-05"
+# Every position opened from here carries this, so records can be split at the fix.
+DATA_VERSION = 2
+
 # ── MCX charges (non-agri futures) ───────────────────────────────────────────────
-# Deliberately local rather than added to backtesting_service.costs: that CostModel is
-# shared by six other desks and is built on the NSE rate card (STT, equity exchange
-# rates). Commodities have a different tax entirely — CTT, not STT — so bending the
-# shared model to fit would risk changing what every other desk charges.
-BROKERAGE_FLAT = float(os.getenv("COMMODITY_BROKERAGE_FLAT", "20"))
-BROKERAGE_PCT = float(os.getenv("COMMODITY_BROKERAGE_PCT", "0.0003"))
-CTT_SELL_PCT = float(os.getenv("COMMODITY_CTT_PCT", "0.0001"))       # 0.01%, sell side
-EXCH_PCT = float(os.getenv("COMMODITY_EXCH_PCT", "0.000026"))         # ~0.0026%
-SEBI_PCT = 0.000001
-STAMP_BUY_PCT = float(os.getenv("COMMODITY_STAMP_PCT", "0.00002"))    # 0.002%, buy side
-GST_PCT = 0.18
+# ONE schedule, shared (tradingai_shared.mcx_fees): Angel's card — Rs 20 an order, MCX
+# exchange 0.0021% (this desk had 0.0026%, MCX's rate before 2024-10-01), CTT 0.01% on
+# sells, stamp 0.002% on buys, SEBI Rs 10/crore, GST 18%. The Pre-Live desk, the Natural
+# Gas book and the Gold desk all import `order_charges` from here, so they move together.
+from tradingai_shared.mcx_fees import leg_breakdown as _mcx_leg  # noqa: E402
 
 
 def order_charges(price: float, qty: float, is_buy: bool) -> float:
-    """Total MCX charges for one executed side."""
-    turnover = price * qty
-    if turnover <= 0:
-        return 0.0
-    brokerage = min(BROKERAGE_FLAT, turnover * BROKERAGE_PCT)
-    ctt = 0.0 if is_buy else turnover * CTT_SELL_PCT
-    exch = turnover * EXCH_PCT
-    sebi = turnover * SEBI_PCT
-    stamp = turnover * STAMP_BUY_PCT if is_buy else 0.0
-    gst = GST_PCT * (brokerage + exch + sebi)
-    return brokerage + ctt + exch + sebi + stamp + gst
+    """Total MCX charges for one executed side (qty in price units)."""
+    return _mcx_leg(price, qty, is_buy)["total"]
 
 
 # ── promotion gate (same shape as the Momentum desk's) ───────────────────────────
@@ -250,15 +250,37 @@ def _verdict(s: dict) -> tuple[str, list[str]]:
     ]
 
 
+def _record_status(s: dict) -> tuple[str, list[str]]:
+    """No promotion from this desk any more — every strategy is a RECORD.
+
+    The READY verdict promoted the luckiest of ~350 strategies (11 of 16 READY lost money
+    afterwards; rankings did not persist, Spearman -0.035). A record states what happened
+    on honest fills; deciding what deserves money is the Commodity Lab's job, on history it
+    did not choose and with the number of tries counted."""
+    if s["trades"] < 20:
+        return "RECORD", [f"{s['trades']} honest trades — too few for a t-statistic to mean anything."]
+    t = s.get("t_stat")
+    return "RECORD", [f"{s['trades']} honest trades, net Rs{s['net_pnl']:,.0f}, t {t if t is not None else 'n/a'}. "
+                      "A record, not a verdict: with ~350 strategies about 8 clear t > 2 by luck alone. "
+                      "Only the Commodity Lab can promote a strategy."]
+
+
+# Honest trades only: filled at a live quote, MCX open at entry and exit, on their own
+# contract (see commodity_records). `record_pnl` is the repriced P&L where the old loop
+# closed a trade on the next month's contract.
+HONEST = {"honest": True}
+
+
 async def _update_score(strategy_id: str) -> None:
     spec = COMMODITY_BY_ID.get(strategy_id)
     if spec is None:
         return
-    closed = [p async for p in commodity_positions_collection.find(
-        {"strategy_id": strategy_id, "status": {"$ne": "OPEN"}},
-        {"realized_pnl": 1, "costs": 1, "closed_at": 1}).sort("closed_at", 1)]
+    closed = [{"realized_pnl": p.get("record_pnl"), "costs": p.get("costs")}
+              async for p in commodity_positions_collection.find(
+                  {"strategy_id": strategy_id, "status": {"$ne": "OPEN"}, **HONEST},
+                  {"record_pnl": 1, "costs": 1, "closed_at": 1}).sort("closed_at", 1)]
     stats = _trade_stats(closed)
-    verdict, reasons = _verdict(stats)
+    verdict, reasons = _record_status(stats)
     await commodity_scores_collection.update_one(
         {"strategy_id": strategy_id},
         {"$set": {"strategy_id": strategy_id, "name": spec.name, "family": spec.family,
@@ -270,11 +292,34 @@ async def _update_score(strategy_id: str) -> None:
     )
 
 
+async def rescore_all() -> int:
+    """Recompute every strategy's record from honest trades (after a relabel)."""
+    n = 0
+    for spec in COMMODITY_CATALOG:
+        await _update_score(spec.strategy_id)
+        n += 1
+    return n
+
+
 # ── position lifecycle ───────────────────────────────────────────────────────────
 
 
+def signal_key(spec, inst: dict, sig) -> str:
+    """One signal's identity: strategy, contract, side and the level it fired at.
+
+    THE CHURN THIS STOPS. A breakout fires at a level that does not move from bar to bar,
+    so after a stop-out the very next bar re-offers the same breakout at the same level and
+    the desk bought it again — 14,945 of 37,053 closed trades were such repeats (same
+    strategy, contract, side and signal price on the same day). The per-bar guard could not
+    see them because the bar changes; the level does not."""
+    return f"{spec.strategy_id}|{inst.get('expiry')}|{sig.side}|{float(sig.entry):.6g}"
+
+
 async def _open_position(spec, symbol: str, inst: dict, sig, bar_ts: datetime,
-                         market: float | None = None) -> bool:
+                         quote: "mcx_market.McxQuote | None" = None, key: str | None = None) -> bool:
+    if quote is None or not quote.fresh or not quote.ltp:
+        return False          # no live market this cycle — no fill is invented
+    market = float(quote.ltp)
     if await commodity_positions_collection.count_documents(
         {"strategy_id": spec.strategy_id, "status": "OPEN"}
     ) >= MAX_POSITIONS_PER_STRATEGY:
@@ -309,12 +354,21 @@ async def _open_position(spec, symbol: str, inst: dict, sig, bar_ts: datetime,
         "template": spec.template, "timeframe": spec.timeframe, "pattern": sig.pattern,
         "symbol": symbol, "display_name": inst.get("symbol"),
         "instrument": {"symbol": inst.get("symbol"), "security_id": str(inst.get("security_id")),
+                       "angel_token": str(inst.get("angel_token") or inst.get("security_id")),
                        "exchange_segment": inst.get("exchange_segment"), "expiry": inst.get("expiry"),
-                       "lot_size": inst.get("lot_size", 1)},
+                       "lot_size": inst.get("lot_size", 1), "underlying_symbol": symbol},
         "side": sig.side, "signal_price": round(sig.entry, 4), "entry_price": round(fill, 4),
         "qty": qty, "capital_deployed": round(fill * qty, 2), "entry_costs": round(entry_costs, 2),
         "target": round(target, 4), "stoploss": round(stoploss, 4),
-        "ltp": round(fill, 4), "ltp_source": "signal_bar",
+        "ltp": round(fill, 4), "ltp_source": "market_quote",
+        # What the market showed at the fill: the paper fill is LTP +- slippage, and the
+        # touch (ask for a buy, bid for a sell) is kept beside it so the real-money price
+        # can be measured against the paper one.
+        "fill_basis": "market_quote", "entry_quote": quote.as_doc(),
+        "entry_touch": quote.touch(sig.side), "entry_spread_bp": (round(quote.spread_bp, 2)
+                                                                  if quote.spread_bp is not None else None),
+        "session": quote.session, "signal_key": key, "data_version": DATA_VERSION,
+        "contract_exit_days": mcx_market.exit_days(symbol),
         "unrealized_pnl": 0.0, "pnl_pct": 0.0, "realized_pnl": None, "costs": None,
         "exit_price": None, "exit_reason": None, "status": "OPEN",
         "confidence": round(sig.confidence, 2), "rationale": sig.rationale,
@@ -325,14 +379,32 @@ async def _open_position(spec, symbol: str, inst: dict, sig, bar_ts: datetime,
     return True
 
 
-async def _close(pos: dict, ltp: float, reason: str) -> float:
-    slip = SLIPPAGE_BPS / 10000.0
+async def _close(pos: dict, ltp: float, reason: str, quote: "mcx_market.McxQuote | None" = None,
+                 exit_basis: str = "market_quote") -> float:
+    """Close at `ltp` — always a price of the position's OWN contract.
+
+    `exit_basis` says where that price came from: "market_quote" (a live quote of the
+    contract), or "contract_last_bar" / "last_mark" for a contract that has already
+    expired and that Angel no longer quotes."""
+    slip = SLIPPAGE_BPS / 10000.0 if exit_basis == "market_quote" else 0.0
     is_long = pos["side"] == "BUY"
     fill = ltp * (1 - slip) if is_long else ltp * (1 + slip)
     qty = pos["qty"]
     gross = (fill - pos["entry_price"]) * qty * (1 if is_long else -1)
     costs = (pos.get("entry_costs") or 0.0) + order_charges(fill, qty, not is_long)
     net = gross - costs
+    exit_side = "SELL" if is_long else "BUY"
+    extra = {
+        "exit_basis": exit_basis, "contract_ok": True,
+        "exit_quote": quote.as_doc() if quote is not None else None,
+        "exit_touch": quote.touch(exit_side) if quote is not None else None,
+    }
+    # What one real lot of this contract would have made: in at the touch the market showed
+    # at entry, out at the touch at exit (a settlement exits at the settlement price),
+    # Angel's charges. None for trades from before quotes were recorded.
+    from app.services.mcx_risk import real_trade
+    real_exit = extra["exit_touch"] or (ltp if exit_basis != "market_quote" else None)
+    extra["real"] = real_trade(pos["symbol"], pos["side"], pos.get("entry_touch"), real_exit)
     await commodity_trades_collection.insert_one({
         "trade_id": uuid4().hex[:12], "strategy_id": pos["strategy_id"],
         "strategy_name": pos["strategy_name"], "family": pos.get("family"),
@@ -341,13 +413,18 @@ async def _close(pos: dict, ltp: float, reason: str) -> float:
         "entry_price": pos["entry_price"], "exit_price": round(fill, 4), "qty": qty,
         "gross_pnl": round(gross, 2), "costs": round(costs, 2), "realized_pnl": round(net, 2),
         "exit_reason": reason, "rationale": pos.get("rationale"),
+        "expiry": (pos.get("instrument") or {}).get("expiry"),
+        "data_version": pos.get("data_version"), **extra,
         "opened_at": pos["opened_at"], "closed_at": _now(),
     })
     await commodity_positions_collection.update_one({"_id": pos["_id"]}, {"$set": {
         "status": "CLOSED", "exit_price": round(fill, 4), "exit_reason": reason,
         "gross_pnl": round(gross, 2), "costs": round(costs, 2), "realized_pnl": round(net, 2),
         "unrealized_pnl": 0.0, "closed_at": _now(), "updated_at": _now(), "ltp": round(ltp, 4),
+        **extra,
     }})
+    from app.services.commodity_records import label_one
+    await label_one(pos["_id"])
     return net
 
 
@@ -375,27 +452,46 @@ async def scan_cycle() -> dict:
     for spec in COMMODITY_CATALOG:
         by_tf.setdefault(spec.timeframe, []).append(spec)
 
-    # One live quote per contract for the whole sweep. Quotes are the permissive endpoint
-    # (the candle one is what throttles), so this is 8-10 calls a cycle, and it is what
-    # lets a fill happen at a price that actually existed.
-    market: dict[str, float] = {}
+    # One FULL quote per contract for the whole sweep: last price, the two-sided book and
+    # the time of the last trade. A contract whose quote is frozen (no trade this session,
+    # or none for MCX_STALE_AFTER_MIN) is skipped outright — on 2026-10-02 the old LTP-only
+    # quote kept answering with the previous day's price and the desk traded on it all day.
+    qmap = await mcx_market.quotes(list(universe.values()))
+    market: dict[str, mcx_market.McxQuote] = {}
+    frozen: list[str] = []
     for _sym, _inst in universe.items():
-        _px, _src = await get_ltp(None, str(_inst.get("security_id")), _inst.get("exchange_segment"))
-        if _px:
-            market[_sym] = float(_px)
+        q = qmap.get(str(_inst.get("angel_token") or _inst.get("security_id")))
+        if q is not None and q.fresh:
+            market[_sym] = q
+        else:
+            frozen.append(f"{_sym} ({q.why if q else 'no quote'})")
 
     # ONE ENTRY PER (strategy, contract) PER BAR. Without it an unchanged 1d/4h candle
     # re-offers the same signal on every 2-minute tick.
     bar_state = await commodity_state_collection.find_one({"_id": "entry_bars"}) or {}
     last_entry_bar: dict = bar_state.get("last", {})
     fresh_bars: dict[str, str] = {}
+    # ...and ONE ENTRY PER SIGNAL PER DAY (see `signal_key`).
+    today = _today_ist().isoformat()
+    sk_doc = await commodity_state_collection.find_one({"_id": "signal_keys"}) or {}
+    traded_keys: set[str] = set(sk_doc.get("keys", [])) if sk_doc.get("date") == today else set()
+    new_keys: list[str] = []
 
-    opened = evaluated = capped = 0
+    opened = evaluated = capped = repeats = 0
+    retired = 0
     thin: list[str] = []
     for tf, specs in by_tf.items():
+        if tf in RETIRED_TIMEFRAMES:
+            retired += len(specs)
+            continue
         need = max(s.min_bars for s in specs) + 5
         for symbol, inst in universe.items():
-            bars = await load_bars(symbol, tf, limit=max(need, 250))
+            q = market.get(symbol)
+            if q is None:
+                continue
+            # Closed bars only, on one back-adjusted series that ends on THIS contract.
+            bars = await load_bars(symbol, tf, limit=max(need, 250), closed_only=True,
+                                   prefer_expiry=inst.get("expiry"))
             if len(bars) < need:
                 thin.append(f"{symbol}/{tf}({len(bars)})")
                 continue
@@ -412,14 +508,36 @@ async def scan_cycle() -> dict:
                 if sig is None:
                     continue
                 fresh_bars[guard] = str(bar_ts)
-                if await _open_position(spec, symbol, inst, sig, bar_ts, market.get(symbol)):
+                key = signal_key(spec, inst, sig)
+                if key in traded_keys:
+                    repeats += 1
+                    continue
+                if await _open_position(spec, symbol, inst, sig, bar_ts, q, key):
                     opened += 1
                     holders[symbol] = holders.get(symbol, 0) + 1
+                    traded_keys.add(key)
+                    new_keys.append(key)
     if fresh_bars:
         await commodity_state_collection.update_one(
             {"_id": "entry_bars"},
             {"$set": {f"last.{k}": v for k, v in fresh_bars.items()}}, upsert=True)
+    if new_keys:
+        if sk_doc.get("date") == today:
+            await commodity_state_collection.update_one(
+                {"_id": "signal_keys"}, {"$addToSet": {"keys": {"$each": new_keys}}}, upsert=True)
+        else:
+            await commodity_state_collection.update_one(
+                {"_id": "signal_keys"}, {"$set": {"date": today, "keys": new_keys}}, upsert=True)
 
+    if frozen:
+        notes.append(f"No entries on {len(frozen)} contract(s) — quote not live: {', '.join(frozen[:6])}"
+                     f"{'…' if len(frozen) > 6 else ''}")
+    if retired:
+        notes.append(f"{retired} strategies on retired timeframes ({', '.join(sorted(RETIRED_TIMEFRAMES))}) "
+                     f"take no new entries since {RETIRED_ON}; their records stay.")
+    if repeats:
+        notes.append(f"{repeats} repeat signal(s) skipped — the same strategy, contract, side and level "
+                     "already traded today.")
     if thin:
         notes.append(f"{len(thin)} (symbol, timeframe) series had too few bars to evaluate — "
                      f"the store is still filling: {', '.join(thin[:8])}"
@@ -431,24 +549,55 @@ async def scan_cycle() -> dict:
     return {"opened": opened, "evaluated": evaluated, "notes": notes}
 
 
+async def settle_expired(pos: dict, reason: str = "contract_expired") -> float | None:
+    """Close a position whose contract has already expired, at that contract's last price.
+
+    Angel quotes nothing for an expired token, so the price is the store's last bar of
+    THAT contract, else the position's own last mark. Never the next contract's price —
+    that is the roll bug this replaces (148 trades closed on a different contract)."""
+    inst = pos.get("instrument") or {}
+    got = await last_contract_price(pos["symbol"], inst.get("expiry")) if inst.get("expiry") else None
+    if got:
+        price, basis = got[0], "contract_last_bar"
+    elif pos.get("ltp"):
+        price, basis = float(pos["ltp"]), "last_mark"
+    else:
+        return None
+    return await _close(pos, price, reason, None, exit_basis=basis)
+
+
 async def manage_cycle() -> int:
+    """Mark and exit every open position ON ITS OWN CONTRACT.
+
+    The old loop priced a position at its underlying's CURRENT front month. After a roll
+    that is another contract, so a position opened on COPPER-Sep was valued, stopped out or
+    "won" on COPPER-Oct's price — the calendar spread booked as a move. Now:
+      * the contract stamped on the position is the one quoted;
+      * a contract inside its exit window (delivery tender days for bullion and base
+        metals, the last two sessions for energy) is closed at its own price ("roll_exit");
+      * a contract already expired is settled at its last recorded price;
+      * a frozen quote (market shut, or no trade for MCX_STALE_AFTER_MIN) moves nothing —
+        no stop or target fires on a price nobody is trading at."""
     open_positions = [p async for p in commodity_positions_collection.find({"status": "OPEN"})]
     if not open_positions:
         return 0
-    universe = await front_month_universe()
-    prices: dict[str, tuple[float, str]] = {}
-    for symbol, inst in universe.items():
-        price, src = await get_ltp(None, str(inst.get("security_id")), inst.get("exchange_segment"))
-        if price:
-            prices[symbol] = (float(price), src)
+    today = mcal.as_date(None)
+    qmap = await mcx_market.quotes([mcx_market.position_contract(p) for p in open_positions])
 
     updated = 0
     touched: set[str] = set()
     for pos in open_positions:
-        got = prices.get(pos["symbol"])
-        if not got:
+        forced = mcx_market.forced_exit(pos, today)
+        if forced == "contract_expired":
+            if await settle_expired(pos) is not None:
+                touched.add(pos["strategy_id"])
             continue
-        ltp, src = got
+        q = qmap.get(mcx_market.position_token(pos))
+        if q is None or not q.fresh or not q.ltp:
+            await commodity_positions_collection.update_one({"_id": pos["_id"]}, {"$set": {
+                "quote_status": (q.why if q else "no quote"), "updated_at": _now()}})
+            continue
+        ltp, src = float(q.ltp), "market_quote"
         is_long = pos["side"] == "BUY"
         qty = pos["qty"]
         gross = (ltp - pos["entry_price"]) * qty * (1 if is_long else -1)
@@ -462,21 +611,22 @@ async def manage_cycle() -> int:
             entry_ts = entry_ts.replace(tzinfo=timezone.utc)
         bars_held = 0
         if entry_ts is not None:
-            bars_held = int((datetime.now(timezone.utc) - entry_ts).total_seconds() // 60 // max(tf_minutes, 1))
+            bars_held = mcal.bars_elapsed(entry_ts, tf_minutes)  # trading time, not wall clock
 
         changes = {"ltp": round(ltp, 4), "ltp_source": src, "unrealized_pnl": round(unrealized, 2),
                    "pnl_pct": round((ltp - pos["entry_price"]) / pos["entry_price"] * 100 * (1 if is_long else -1), 3)
                    if pos["entry_price"] else 0.0,
-                   "bars_held": bars_held, "updated_at": _now()}
+                   "bars_held": bars_held, "updated_at": _now(), "quote_status": "live"}
 
         hit_target = ltp >= pos["target"] if is_long else ltp <= pos["target"]
         hit_stop = ltp <= pos["stoploss"] if is_long else ltp >= pos["stoploss"]
         expired = bars_held >= pos.get("max_hold_bars", MAX_HOLD_BARS)
-        reason = "target" if hit_target else "stoploss" if hit_stop else "max_hold_expired" if expired else None
+        reason = ("target" if hit_target else "stoploss" if hit_stop
+                  else "max_hold_expired" if expired else forced)       # forced = "roll_exit" or None
 
         await commodity_positions_collection.update_one({"_id": pos["_id"]}, {"$set": changes})
         if reason:
-            await _close({**pos, **changes}, ltp, reason)
+            await _close({**pos, **changes}, ltp, reason, q)
             touched.add(pos["strategy_id"])
         updated += 1
 
@@ -653,9 +803,9 @@ async def _script_stats(fresh: bool = False) -> dict:
     # `realized_pnl` is pushed as an ARRAY rather than summed: max drawdown, standard
     # deviation and the t-statistic all need the individual trade results, not a total.
     async for g in commodity_positions_collection.aggregate([
-        {"$match": {"status": {"$ne": "OPEN"}}},
+        {"$match": {"status": {"$ne": "OPEN"}, **HONEST}},
         {"$group": {"_id": {"s": "$strategy_id", "y": "$symbol"},
-                    "pnls": {"$push": {"$ifNull": ["$realized_pnl", 0.0]}},
+                    "pnls": {"$push": {"$ifNull": ["$record_pnl", 0.0]}},
                     "costs": {"$sum": {"$ifNull": ["$costs", 0.0]}}}},
     ]):
         sid, sym = g["_id"].get("s"), g["_id"].get("y")
@@ -689,10 +839,10 @@ async def _script_stats(fresh: bool = False) -> dict:
             if not trades and not opens:
                 continue          # this strategy has never touched this contract
             st = _trade_stats(trades)
-            verdict, reasons = _verdict(st)
+            verdict, reasons = _record_status(st)
             rows[spec.strategy_id] = {**st, "verdict": verdict, "verdict_reasons": reasons,
                                       "open_positions": opens}
-        v = {"READY": 0, "REJECTED": 0, "PENDING": 0}
+        v = {"READY": 0, "REJECTED": 0, "PENDING": 0, "RECORD": 0}
         for r in rows.values():
             v[r["verdict"]] = v.get(r["verdict"], 0) + 1
         out["per_symbol"][sym] = rows
