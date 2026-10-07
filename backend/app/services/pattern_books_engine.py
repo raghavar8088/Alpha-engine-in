@@ -13,9 +13,16 @@ WHY TWO SIZES RATHER THAN ONE SCALED NUMBER
 Scaling one book's returns would hide the two things that actually decide whether a small
 account works, because neither is linear in capital:
 
-  * **Whole shares.** Rs 50,000 across eight strategies is Rs 6,250 each, which cannot buy
-    a single Rs 7,000 share — that signal is simply skipped, while the Rs 25,000 slice in
-    the larger book takes 3. The parent desk, on Rs 10 lakh, took 142 and never noticed.
+  * **Whole shares.** The desk's capital is split EQUALLY across the shortlist, so a
+    Rs 50,000 book across eight strategies was Rs 6,250 each — already not enough for a
+    single Rs 7,000 share, while the Rs 25,000 slice in the larger book took 3 and the
+    parent desk, on Rs 10 lakh, took 142 and never noticed.
+
+    THE SLICE MOVES WHEN THE SHORTLIST DOES. At nineteen strategies (2026-10-07) the same
+    two books are Rs 2,632 and Rs 10,526 a strategy. That is not a side effect to fix —
+    it is the measurement: a book is a fixed amount of money and adding a strategy takes
+    capital from the others. It does mean a strategy's trades before and after a shortlist
+    change were sized differently, so its P&L either side of that date is not one series.
   * **Fees are near-fixed per round trip.** The same trade costs roughly the same rupees in
     both books, so it is four times the drag on the smaller one.
 
@@ -73,6 +80,44 @@ SELECTED_SPECS: list[tuple[str, str]] = [
     ("CCI Zero Cross",         "1h"),
     ("EMA Fast Cross",         "30m"),
     ("MACD Zero Line",         "30m"),
+
+    # Added 2026-10-07 at the owner's direction, from the pattern desk's own board.
+    # Every one is the 1-MINUTE variant, which is a different strategy from the same
+    # template on 30m or 1h — "Bollinger %B Extreme" and "Three Soldiers / Crows" appear
+    # twice in this list for that reason, and the two entries are not duplicates.
+    #
+    # The first five were the top of the board by ROI; the last six were the top by TRADE
+    # COUNT, which is a different question and deliberately a different cut:
+    #
+    #   template                   n    win%     fees       net        ROI
+    #   Donchian Fast Break       18   72.2%   -7,254   +1,12,114   +11.21%   <- by ROI
+    #   Donchian Slow Break       14   78.6%   -5,644   +1,09,900   +10.99%
+    #   Bollinger %B Extreme      13   76.9%   -5,236   +1,06,786   +10.68%
+    #   Prior Extreme Breakout    12   75.0%   -4,837   +1,01,146   +10.11%
+    #   Three Soldiers / Crows    15   86.7%   -6,039     +99,001    +9.90%
+    #   TTM Squeeze Release       28   50.0%  -11,252     +37,263    +3.73%   <- by trades
+    #   Hammer / Shooting Star    23   56.5%   -9,240     +13,975    +1.40%
+    #   RSI Divergence            23   52.2%   -9,209      +5,492    +0.55%
+    #   Fibonacci 61.8% Bounce    22   50.0%   -8,840     +12,550    +1.25%
+    #   ATR Expansion Thrust      20   60.0%   -8,043     +59,846    +5.98%
+    #   WMA Cross                 20   50.0%   -8,032     +22,234    +2.22%
+    #
+    # READ THESE AS A SORT, NOT A TEST. Twelve to twenty-eight closed trades each, taken
+    # from the top of a 548-strategy board, is the right tail of a large sample — the same
+    # caveat every other desk in this app carries. The ROI column is also against the
+    # parent's Rs 10,00,000 per strategy; on these books the same trades are sized at a
+    # fraction of that, which is the whole point of running them here.
+    ("Donchian Fast Break",     "1m"),
+    ("Donchian Slow Break",     "1m"),
+    ("Bollinger %B Extreme",    "1m"),
+    ("Prior Extreme Breakout",  "1m"),
+    ("Three Soldiers / Crows",  "1m"),
+    ("TTM Squeeze Release",     "1m"),
+    ("Hammer / Shooting Star",  "1m"),
+    ("RSI Divergence",          "1m"),
+    ("Fibonacci 61.8% Bounce",  "1m"),
+    ("ATR Expansion Thrust",    "1m"),
+    ("WMA Cross",               "1m"),
 ]
 
 
