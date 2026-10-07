@@ -39,17 +39,31 @@ import time
 from collections import Counter
 
 from tradingai_broker_clients.angel import AngelAPIError, AngelClient, AngelCredentials
+from tradingai_broker_clients.angel.auth import QUOTE_PATH
 
 from app.core.config import settings
 
 __all__ = ["angel_client", "AngelClient", "AngelCredentials", "AngelAPIError",
-           "candle_pacer", "is_rate_limited"]
+           "candle_pacer", "quote_pacer", "is_rate_limited"]
 
 logger = logging.getLogger("angel_client")
 
 CANDLE_MIN_GAP = float(os.getenv("ANGEL_CANDLE_MIN_GAP", "1.1"))
 CANDLE_COOLDOWN_BASE = float(os.getenv("ANGEL_CANDLE_COOLDOWN", "3"))
 CANDLE_COOLDOWN_MAX = float(os.getenv("ANGEL_CANDLE_COOLDOWN_MAX", "60"))
+
+# QUOTES get a pacer too, since 2026-10-07 - and the reason is a speed-up, not a symptom.
+# Quote and candle reads now reuse one kept-alive connection (tradingai_broker_clients
+# AngelClient._read_post): 24 ms a quote instead of 82 ms with a fresh TLS handshake each.
+# That handshake had been throttling every quote loop by accident - `ltp()` sends its
+# 50-token batches back to back, so a desk quoting a few hundred symbols ran at ~12
+# calls/s and Angel, which documents ~10/s for quotes, refused it once in 48 h. At 24 ms a
+# call the same loop runs at ~40/s, and a 12-call burst measured right after the change was
+# refused with a 403. So the spacing the handshake used to impose is now explicit: no
+# faster than it was before, and a short growing pause after any refusal.
+QUOTE_MIN_GAP = float(os.getenv("ANGEL_QUOTE_MIN_GAP", "0.11"))
+QUOTE_COOLDOWN_BASE = float(os.getenv("ANGEL_QUOTE_COOLDOWN", "1"))
+QUOTE_COOLDOWN_MAX = float(os.getenv("ANGEL_QUOTE_COOLDOWN_MAX", "10"))
 
 
 def is_rate_limited(exc: Exception) -> bool:
@@ -58,8 +72,10 @@ def is_rate_limited(exc: Exception) -> bool:
 
 
 class CandlePacer:
-    def __init__(self, gap: float, cooldown: float, cooldown_max: float):
+    def __init__(self, gap: float, cooldown: float, cooldown_max: float,
+                 name: str = "candle"):
         self.gap, self.cooldown, self.cooldown_max = gap, cooldown, cooldown_max
+        self.name = name
         self._lock = asyncio.Lock()
         self._next = 0.0
         self._cool_until = 0.0
@@ -98,8 +114,9 @@ class CandlePacer:
         self._cool_until = max(self._cool_until, time.monotonic() + pause)
         self.stats["refused"] += 1
         if self._strikes in (1, 3, 6):
-            logger.warning("Angel candle endpoint refused (%d in a row) — every candle call in "
-                           "this process pauses %.0fs", self._strikes, pause)
+            logger.warning("Angel %s endpoint refused (%d in a row) — every %s call in "
+                           "this process pauses %.0fs", self.name, self._strikes, self.name,
+                           pause)
 
     def succeeded(self) -> None:
         self._strikes = 0
@@ -114,9 +131,25 @@ class CandlePacer:
 
 
 candle_pacer = CandlePacer(CANDLE_MIN_GAP, CANDLE_COOLDOWN_BASE, CANDLE_COOLDOWN_MAX)
+quote_pacer = CandlePacer(QUOTE_MIN_GAP, QUOTE_COOLDOWN_BASE, QUOTE_COOLDOWN_MAX, name="quote")
 
 
 class _PacedAngelClient(AngelClient):
+    async def _read_post(self, path, payload):
+        # Candles are paced in candles() below (with caller attribution); everything else
+        # that is not a quote passes straight through.
+        if path != QUOTE_PATH:
+            return await super()._read_post(path, payload)
+        await quote_pacer.acquire()
+        try:
+            body = await super()._read_post(path, payload)
+        except AngelAPIError as exc:
+            if is_rate_limited(exc):
+                quote_pacer.refused()
+            raise
+        quote_pacer.succeeded()
+        return body
+
     async def candles(self, exchange, symbol_token, resolution, from_dt, to_dt, *,
                       bulk: bool = False):
         caller = sys._getframe(1).f_globals.get("__name__", "?").rsplit(".", 1)[-1]
