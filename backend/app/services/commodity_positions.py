@@ -139,7 +139,19 @@ SCAN_FAMILY: dict[str, str] = {
 }
 DEFAULT_SCAN = float(os.getenv("COMMODITY_MARGIN_SCAN_PCT", "0.08"))
 EXPOSURE_PCT = float(os.getenv("COMMODITY_MARGIN_EXPOSURE_PCT", "0.02"))
-QUOTE_PACE_S = float(os.getenv("COMMODITY_POSITIONS_QUOTE_PACE", "0.25"))
+# Pause BETWEEN quote batches (never after the last one). It was 0.25 s and also slept after
+# the final batch, so an 82-token chain spent 504 ms of its 737 ms asleep (measured on
+# production, 2026-10-07). The pause was copied from the candle endpoint, which Angel does
+# refuse hard - 4,093 candle refusals in 48 h of logs - but the QUOTE endpoint refused once
+# app-wide in the same 48 h and this module's quote batches not at all.
+QUOTE_PACE_S = float(os.getenv("COMMODITY_POSITIONS_QUOTE_PACE", "0.05"))
+# How old a quote may be when it is only DISPLAYED or used to SIZE a ticket - the chain, the
+# max-lots pre-fill, the basket estimate. One page load asks for the same contracts three
+# times within a second (the chain, then sizing SELL and BUY on the same ATM pair, each also
+# pricing the underlying future); this lets them share one Angel round trip. Anything that
+# FILLS, EXITS, RE-OPENS or RE-MARGINS still asks with max_age=0 - a fresh quote, as before.
+DISPLAY_QUOTE_MAX_AGE_S = float(os.getenv("COMMODITY_DISPLAY_QUOTE_MAX_AGE", "3"))
+_QUOTE_CACHE: dict[str, tuple[float, float]] = {}       # token -> (monotonic ts, price)
 # Angel's quote endpoint takes at most this many tokens per call.
 QUOTE_BATCH = 50
 
@@ -392,6 +404,19 @@ async def delete_account(account_id: str) -> dict:
 # --------------------------------------------------------------------------------
 
 
+# The board of underlyings only changes when the instrument master does - a sync every 12 h
+# or a manual reload - yet it was rebuilt on every page load: a scan of the live futures for
+# lot sizes, then an aggregation over every live MCX contract (thousands of option rows),
+# ~170 ms together. Held for a few minutes; a manual reload clears it at once.
+UNDERLYINGS_TTL_S = float(os.getenv("COMMODITY_UNDERLYINGS_TTL", "300"))
+_UNDERLYINGS_CACHE: tuple[float, list[dict]] | None = None
+
+
+def invalidate_underlyings() -> None:
+    global _UNDERLYINGS_CACHE
+    _UNDERLYINGS_CACHE = None
+
+
 async def underlyings() -> list[dict]:
     """The MCX underlyings with at least one unexpired, Angel-mapped contract.
 
@@ -404,15 +429,30 @@ async def underlyings() -> list[dict]:
 
     Counts are reported per underlying so an underlying whose options have not been
     token-mapped reads as a coverage gap rather than as an empty chain later."""
-    await prime_lotsizes()
+    global _UNDERLYINGS_CACHE
+    hit = _UNDERLYINGS_CACHE
+    if hit is not None and time.monotonic() - hit[0] < UNDERLYINGS_TTL_S:
+        return [dict(r) for r in hit[1]]
+    rows = await _build_underlyings()
+    _UNDERLYINGS_CACHE = (time.monotonic(), rows)
+    return [dict(r) for r in rows]
+
+
+async def _build_underlyings() -> list[dict]:
     pipeline = [
         {"$match": {"asset_class": {"$in": [FUTURE_CLASS, OPTION_CLASS]},
                     "expiry": {"$gte": _today()}, "angel_token": {"$ne": None}}},
         {"$group": {"_id": {"u": "$underlying_symbol", "c": "$asset_class"},
                     "n": {"$sum": 1}}},
     ]
+    # The lot-size scan and the aggregation are independent; run them together. The lot
+    # sizes only have to be in place before spec_doc() is read, which is below.
+    async def tally_rows() -> list[dict]:
+        return [r async for r in instruments_collection.aggregate(pipeline)]
+
+    _lots, grouped = await asyncio.gather(prime_lotsizes(), tally_rows())
     tally: dict[str, dict[str, int]] = {}
-    async for row in instruments_collection.aggregate(pipeline):
+    for row in grouped:
         key = row["_id"]
         sym = key.get("u")
         if not sym:
@@ -489,32 +529,54 @@ async def underlying_future(symbol: str, option_expiry: str | None = None) -> di
 # --------------------------------------------------------------------------------
 
 
-async def _quote_tokens(tokens: list[str]) -> dict[str, float]:
-    """LTP for a list of MCX tokens, batched and paced.
+async def _quote_tokens(tokens: list[str], max_age: float = 0.0) -> dict[str, float]:
+    """LTP for a list of MCX tokens, batched, with a short pause between batches.
 
-    Angel throttles hard; the commodity bar poller already learned that the hard way. One
-    failing chunk is skipped rather than aborting the rest, so a chain renders the strikes
+    `max_age` > 0 lets a token be answered from a quote fetched at most that many seconds
+    ago (display and sizing only - see DISPLAY_QUOTE_MAX_AGE_S). The default, 0, always asks
+    Angel, which is what every fill path uses. Every price fetched refreshes the cache either
+    way, so a fill also keeps the next display current.
+
+    One failing chunk is skipped rather than aborting the rest, so a chain renders the strikes
     that answered instead of nothing at all."""
     out: dict[str, float] = {}
     if not tokens:
         return out
-    for i in range(0, len(tokens), QUOTE_BATCH):
-        chunk = tokens[i:i + QUOTE_BATCH]
+    now = time.monotonic()
+    want: list[str] = []
+    for tok in dict.fromkeys(str(t) for t in tokens):          # de-duplicated, order kept
+        hit = _QUOTE_CACHE.get(tok) if max_age > 0 else None
+        if hit is not None and now - hit[0] <= max_age:
+            out[tok] = hit[1]
+        else:
+            want.append(tok)
+    for i in range(0, len(want), QUOTE_BATCH):
+        if i:
+            await asyncio.sleep(QUOTE_PACE_S)
+        chunk = want[i:i + QUOTE_BATCH]
         try:
-            out.update(await angel_client.ltp({MCX_EXCHANGE: chunk}))
+            got = await angel_client.ltp({MCX_EXCHANGE: chunk})
         except AngelAPIError as exc:
             logger.info("[commodity_positions] quote chunk failed (%d tokens): %s",
                         len(chunk), exc)
-        if len(tokens) > QUOTE_BATCH:
-            await asyncio.sleep(QUOTE_PACE_S)
+            continue
+        stamp = time.monotonic()
+        for tok, px in got.items():
+            if px:
+                _QUOTE_CACHE[str(tok)] = (stamp, float(px))
+        out.update({str(k): v for k, v in got.items()})
+    if len(_QUOTE_CACHE) > 5000:                              # bounded: drop the stale
+        cutoff = time.monotonic() - 60
+        for tok in [t for t, (ts, _) in _QUOTE_CACHE.items() if ts < cutoff]:
+            _QUOTE_CACHE.pop(tok, None)
     return out
 
 
-async def ltp_for(inst: dict) -> float | None:
+async def ltp_for(inst: dict, max_age: float = 0.0) -> float | None:
     token = inst.get("angel_token")
     if not token:
         return None
-    prices = await _quote_tokens([str(token)])
+    prices = await _quote_tokens([str(token)], max_age=max_age)
     val = prices.get(str(token))
     return float(val) if val else None
 
@@ -800,11 +862,12 @@ async def settlement_price(inst: dict, last_mark: float | None = None) -> tuple[
         "at. Refresh the commodity bar store from the Commodity module, then close again.")
 
 
-async def future_price(symbol: str, option_expiry: str | None = None) -> tuple[float | None, dict | None]:
+async def future_price(symbol: str, option_expiry: str | None = None,
+                       max_age: float = 0.0) -> tuple[float | None, dict | None]:
     fut = await underlying_future(symbol, option_expiry)
     if fut is None:
         return None, None
-    return await ltp_for(fut), fut
+    return await ltp_for(fut, max_age=max_age), fut
 
 
 # --------------------------------------------------------------------------------
@@ -850,7 +913,7 @@ async def option_chain(symbol: str, expiry: str, around: int = 20) -> dict:
             f"{symbol} has no listed option expiries at all — MCX lists options on ten "
             "underlyings only. Use the Futures tab for this one.")
 
-    fut_px, fut = await future_price(symbol, expiry)
+    fut_px, fut = await future_price(symbol, expiry, max_age=DISPLAY_QUOTE_MAX_AGE_S)
 
     strikes_all = sorted({float(c["strike"]) for c in contracts if c.get("strike") is not None})
     keep = set(strikes_all)
@@ -864,7 +927,7 @@ async def option_chain(symbol: str, expiry: str, around: int = 20) -> dict:
             continue
         tokmap[str(c["angel_token"])] = (float(c["strike"]), str(c["option_type"]).upper())
 
-    quotes = await _quote_tokens(list(tokmap))
+    quotes = await _quote_tokens(list(tokmap), max_age=DISPLAY_QUOTE_MAX_AGE_S)
 
     legs: dict[float, dict] = {}
     for tok, (strike, ot) in tokmap.items():
@@ -911,7 +974,8 @@ async def futures_board(symbol: str | None = None) -> dict:
         q["underlying_symbol"] = symbol.upper()
     rows = [d async for d in instruments_collection.find(q).sort([("underlying_symbol", 1),
                                                                  ("expiry", 1)])]
-    prices = await _quote_tokens([str(r["angel_token"]) for r in rows])
+    prices = await _quote_tokens([str(r["angel_token"]) for r in rows],
+                                 max_age=DISPLAY_QUOTE_MAX_AGE_S)
 
     out: list[dict] = []
     front: dict[str, float] = {}
@@ -1543,15 +1607,21 @@ MAX_BASKET_LEGS = int(os.getenv("COMMODITY_MAX_BASKET_LEGS", "10"))
 MAX_LOTS_PER_ORDER = int(os.getenv("COMMODITY_MAX_LOTS_PER_ORDER", "500"))
 
 
-async def _price_basket(legs: list[dict]) -> list[dict]:
+async def _price_basket(legs: list[dict], max_age: float = 0.0,
+                        prefetch_futures: bool = False) -> list[dict]:
     """Resolve and live-price every leg. The WHOLE basket fails if any one leg cannot be
-    priced — a basket goes on complete or not at all."""
+    priced — a basket goes on complete or not at all.
+
+    Every leg is quoted in ONE Angel call rather than one call each, which also prices the
+    legs at the same instant - for a straddle that is the more correct number anyway.
+    `prefetch_futures` adds each group's underlying future to that same call, so the margin
+    step right after finds its reference price already fetched instead of quoting again."""
     if not legs:
         raise OrderError("The basket is empty")
     if len(legs) > MAX_BASKET_LEGS:
         raise OrderError(f"A basket can hold at most {MAX_BASKET_LEGS} legs")
 
-    priced: list[dict] = []
+    parsed: list[tuple] = []
     for leg in legs:
         kind = str(leg.get("instrument_kind", "OPTION")).upper()
         side = str(leg.get("transaction_type", "")).upper()
@@ -1560,12 +1630,32 @@ async def _price_basket(legs: list[dict]) -> list[dict]:
             raise OrderError("Every basket leg needs at least 1 lot")
         if side not in ("BUY", "SELL"):
             raise OrderError("Each leg must be BUY or SELL")
-        symbol = str(leg["symbol"]).upper()
-        inst = await _resolve_contract(kind, symbol, leg["expiry"],
-                                       leg.get("strike"), leg.get("option_type"))
+        parsed.append((leg, kind, side, lots, str(leg["symbol"]).upper()))
+
+    # Resolve concurrently, but report a failure in LEG order, not completion order.
+    resolved = await asyncio.gather(
+        *(_resolve_contract(kind, symbol, leg["expiry"], leg.get("strike"),
+                            leg.get("option_type"))
+          for leg, kind, side, lots, symbol in parsed),
+        return_exceptions=True)
+    for r in resolved:
+        if isinstance(r, BaseException):
+            raise r
+
+    tokens = [str(inst["angel_token"]) for inst in resolved if inst.get("angel_token")]
+    if prefetch_futures:
+        groups = list(dict.fromkeys((p[4], inst.get("expiry"))
+                                    for p, inst in zip(parsed, resolved)))
+        futs = await asyncio.gather(*(underlying_future(sym, exp) for sym, exp in groups))
+        tokens += [str(f["angel_token"]) for f in futs if f and f.get("angel_token")]
+    prices = await _quote_tokens(tokens, max_age=max_age)
+
+    priced: list[dict] = []
+    for (leg, kind, side, lots, symbol), inst in zip(parsed, resolved):
         label = (f"{symbol} {leg['expiry']} {float(leg['strike']):g}{leg.get('option_type')}"
                  if kind == "OPTION" else f"{symbol} {leg['expiry']} FUT")
-        ltp = await ltp_for(inst)
+        val = prices.get(str(inst.get("angel_token") or ""))
+        ltp = float(val) if val else None
         if ltp is None:
             raise OrderError(
                 f"Angel returned no price for {label}. The basket is not priced and nothing "
@@ -1602,7 +1692,8 @@ async def _open_group(account_id: str, underlying: str, expiry: str) -> list[dic
          "underlying_symbol": underlying, "instrument.expiry": expiry})]
 
 
-async def basket_margin_delta(account_id: str, priced: list[dict]) -> tuple[float, float]:
+async def basket_margin_delta(account_id: str, priced: list[dict],
+                              max_age: float = 0.0) -> tuple[float, float]:
     """(added_margin, net_premium).
 
     The added margin is the RISE in this account's netted portfolio margin once every leg
@@ -1624,7 +1715,7 @@ async def basket_margin_delta(account_id: str, priced: list[dict]) -> tuple[floa
     added = 0.0
     for (underlying, expiry), plist in groups.items():
         t = _years_to_expiry(expiry)
-        ref, _fut = await future_price(underlying, expiry)
+        ref, _fut = await future_price(underlying, expiry, max_age=max_age)
         ref = ref or plist[0]["ltp"]
         existing = await _open_group(account_id, underlying, expiry)
         old_legs = [_pos_to_leg(q, ref, t) for q in existing]
@@ -1661,16 +1752,21 @@ def basket_allowed(added: float, cash: float) -> bool:
 
 
 async def estimate_basket(account_id: str, legs: list[dict]) -> dict:
-    """What this basket would cost, and whether the account can carry it."""
-    await get_account(account_id)
-    priced = await _price_basket(legs)
-    added, net_premium = await basket_margin_delta(account_id, priced)
-    cash = await available_cash(account_id)
+    """What this basket would cost, and whether the account can carry it.
+
+    A preview: it may use quotes up to DISPLAY_QUOTE_MAX_AGE_S old. The fill re-prices fresh."""
+    account = await get_account(account_id)
+    priced, cash = await asyncio.gather(
+        _price_basket(legs, max_age=DISPLAY_QUOTE_MAX_AGE_S, prefetch_futures=True),
+        available_cash(account_id, account))
+    added, net_premium = await basket_margin_delta(account_id, priced,
+                                                   max_age=DISPLAY_QUOTE_MAX_AGE_S)
     exposure = sum(p["contract_value"] for p in priced)
     naive = 0.0
     for p in priced:
         t = _years_to_expiry(p["inst"].get("expiry"))
-        ref, _f = await future_price(p["symbol"], p["inst"].get("expiry"))
+        ref, _f = await future_price(p["symbol"], p["inst"].get("expiry"),
+                                     max_age=DISPLAY_QUOTE_MAX_AGE_S)
         ref = ref or p["ltp"]
         naive += _margin_for([_leg_from(p["inst"], p["side"], p["qty"], p["ltp"], ref, t)],
                              p["symbol"], ref, t)["total"]
@@ -1716,32 +1812,44 @@ async def max_lots(account_id: str, legs: list[dict], cap: int = MAX_LOTS_PER_OR
     is pure arithmetic. Prices are fetched once at one lot, not once per probe; the naive
     version re-quoted every leg through Angel on each of ~18 iterations.
 
-    Returns 0 when even one lot does not fit. That is an answer, not an error."""
-    await get_account(account_id)
+    Returns 0 when even one lot does not fit. That is an answer, not an error.
+
+    Sizing is a PREVIEW, so its quotes may be up to DISPLAY_QUOTE_MAX_AGE_S old - which is
+    what lets the page's two sizing calls reuse the prices its chain fetched a moment
+    earlier. The fill re-prices fresh."""
+    account = await get_account(account_id)
     if not legs:
         raise OrderError("Nothing to size — pick a contract first")
-    cash = await available_cash(account_id)
-    priced = await _price_basket([{**leg, "lots": 1} for leg in legs])
+    priced, cash = await asyncio.gather(
+        _price_basket([{**leg, "lots": 1} for leg in legs],
+                      max_age=DISPLAY_QUOTE_MAX_AGE_S, prefetch_futures=True),
+        available_cash(account_id, account))
 
     groups: dict[tuple, list[dict]] = {}
     for p in priced:
         groups.setdefault((p["symbol"], p["inst"].get("expiry")), []).append(p)
 
-    context: list[tuple] = []
-    for (underlying, expiry), plist in groups.items():
+    async def group_context(underlying: str, expiry, plist: list[dict]) -> tuple:
         t = _years_to_expiry(expiry)
-        ref, _fut = await future_price(underlying, expiry)
+        ref, _fut = await future_price(underlying, expiry, max_age=DISPLAY_QUOTE_MAX_AGE_S)
         ref = ref or plist[0]["ltp"]
         open_legs = [_pos_to_leg(q, ref, t)
                      for q in await _open_group(account_id, underlying, expiry)]
         before = _margin_for(open_legs, underlying, ref, t)["total"] if open_legs else 0.0
-        context.append((underlying, ref, t, open_legs, before, plist))
+        # The new legs at ONE lot, built once. `_leg_from` solves implied volatility, and IV
+        # depends on premium, price, strike and time - never on size - so re-solving it for
+        # each of up to 500 probe sizes was pure repetition.
+        unit = [(_leg_from(p["inst"], p["side"], p["multiplier"], p["ltp"], ref, t),
+                 p["multiplier"]) for p in plist]
+        return (underlying, ref, t, open_legs, before, unit)
+
+    context = await asyncio.gather(*(group_context(u, e, pl)
+                                     for (u, e), pl in groups.items()))
 
     def margin_for(n: int) -> float:
         added = 0.0
-        for underlying, ref, t, open_legs, before, plist in context:
-            add = [_leg_from(p["inst"], p["side"], n * p["multiplier"], p["ltp"], ref, t)
-                   for p in plist]
+        for underlying, ref, t, open_legs, before, unit in context:
+            add = [{**leg, "qty": n * mult} for leg, mult in unit]
             added += _margin_for(open_legs + add, underlying, ref, t)["total"] - before
         return round(added, 2)
 
@@ -1750,14 +1858,45 @@ async def max_lots(account_id: str, legs: list[dict], cap: int = MAX_LOTS_PER_OR
     shape = {"legs": len(priced), "premium_per_lot": premium,
              "margin_per_lot": margin_for(1), "available_cash": round(cash, 2)}
 
-    # Scan DOWN from the cap for the largest size that passes, rather than binary
-    # searching up. Added margin is not monotonic in lots when the basket hedges something
-    # already open: it falls as the new legs offset the existing risk, bottoms out near the
-    # size that balances it, then climbs once the new side dominates. A binary search
-    # assumes one crossing and can settle on the wrong side of that dip. `margin_for` is
-    # pure arithmetic on a handful of legs — prices were fetched once, above — so scanning
-    # the whole range costs a few milliseconds and is correct whatever the shape.
-    for n in range(cap, 0, -1):
+    # Two searches, chosen by whether anything is ALREADY OPEN in the contract groups.
+    #
+    # Something open: added margin is not monotonic in lots - it falls as the new legs
+    # offset the existing risk, bottoms out near the size that balances it, then climbs once
+    # the new side dominates. A binary search assumes one crossing and can settle on the
+    # wrong side of that dip, so this scans DOWN from the cap, correct whatever the shape.
+    # It runs in a worker thread: up to 500 margin evaluations is ~0.5 s of CPU, and on the
+    # event loop that froze every other request the backend was serving for that long.
+    #
+    # Nothing open: the margin of a fresh basket scales exactly with its size. Every scenario
+    # loss in `portfolio_margin` is a sum of (value - premium) x qty, and the exposure term
+    # is pct x spot x net short units, so multiplying every quantity by n multiplies the
+    # total by n. Added margin is then non-decreasing in lots and `basket_allowed` flips
+    # once, so a binary search returns the SAME n as the scan in ~10 evaluations instead of
+    # 500. That is the common case - sizing a contract you do not already hold - and it is
+    # the one the page asks for twice on every load.
+    hedged = any(open_legs for _u, _r, _t, open_legs, _b, _unit in context)
+
+    def largest_fitting() -> int:
+        if hedged:
+            for n in range(cap, 0, -1):
+                if basket_allowed(margin_for(n), cash):
+                    return n
+            return 0
+        if not basket_allowed(margin_for(1), cash):
+            return 0
+        if basket_allowed(margin_for(cap), cash):
+            return cap
+        lo, hi = 1, cap                     # lo fits, hi does not
+        while hi - lo > 1:
+            mid = (lo + hi) // 2
+            if basket_allowed(margin_for(mid), cash):
+                lo = mid
+            else:
+                hi = mid
+        return lo
+
+    best = await asyncio.to_thread(largest_fitting) if hedged else largest_fitting()
+    for n in ([best] if best else []):
         added = margin_for(n)
         if basket_allowed(added, cash):
             note = (f"{n} lot{'s' if n > 1 else ''} per leg "
@@ -1833,11 +1972,19 @@ async def _realized_all_time(account_id: str) -> float:
     return total
 
 
-async def available_cash(account_id: str) -> float:
-    account = await get_account(account_id)
-    return (float(account.get("initial_capital") or 0)
-            + await _realized_all_time(account_id)
-            - await _deployed_margin(account_id))
+async def available_cash(account_id: str, account: dict | None = None) -> float:
+    """Capital + everything realised - margin held by open positions.
+
+    One read of the account's positions rather than two (realised over all of them, margin
+    over the open ones), and the account itself is reused when the caller already has it."""
+    account = account or await get_account(account_id)
+    realized = deployed = 0.0
+    async for p in commodity_pos_positions_collection.find(
+            {"account_id": account_id}, {"status": 1, "margin_used": 1, "realized_pnl": 1}):
+        realized += p.get("realized_pnl") or 0.0
+        if p.get("status") == "OPEN":
+            deployed += p.get("margin_used") or 0.0
+    return float(account.get("initial_capital") or 0) + realized - deployed
 
 
 async def sync_positions() -> int:
@@ -1858,6 +2005,7 @@ async def sync_positions() -> int:
 
     today = _today()
     updated = 0
+    writes: list = []
     for pos in positions:
         tok = str(pos["instrument"].get("angel_token") or "")
         px = prices.get(tok)
@@ -1875,13 +2023,16 @@ async def sync_positions() -> int:
             continue
         direction = 1 if pos["side"] == "BUY" else -1
         pnl = (float(px) - pos["entry_price"]) * pos["quantity"] * direction
-        await commodity_pos_positions_collection.update_one({"_id": pos["_id"]}, {"$set": {
+        writes.append(commodity_pos_positions_collection.update_one({"_id": pos["_id"]}, {"$set": {
             "ltp": round(float(px), 4), "unrealized_pnl": round(pnl, 2),
             "contract_value": contract_value(pos.get("underlying_symbol", ""),
                                              float(px), pos["lots"]),
             "expired": expired, "price_basis": basis,
-            "updated_at": _now()}})
+            "updated_at": _now()}}))
         updated += 1
+    # Independent rows, so their writes need not queue behind one another.
+    for i in range(0, len(writes), 25):
+        await asyncio.gather(*writes[i:i + 25])
     return updated
 
 

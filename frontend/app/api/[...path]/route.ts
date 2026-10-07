@@ -6,6 +6,17 @@ import { NextRequest, NextResponse } from "next/server";
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
 const APP_SHARED_SECRET = process.env.APP_SHARED_SECRET || "";
 
+// Run this proxy in MUMBAI, next to the backend (AWS ap-south-1) and the users.
+//
+// Without it Vercel ran the function in its default region, Washington DC (iad1). Every API
+// call from a browser in India went Mumbai edge -> Washington -> the Mumbai backend ->
+// Washington -> Mumbai: response headers read `x-vercel-id: bom1::iad1::...`. Measured on
+// 2026-10-07 the same request took 0.86 s median that way against 0.022 s at the backend
+// itself - about 840 ms of every single call was the trip across the world, and a page that
+// loads in five dependent steps paid it five times. frontend/vercel.json sets the same
+// region for the project; this keeps the route pinned even if that file is ever lost.
+export const preferredRegion = "bom1";
+
 async function proxy(req: NextRequest, path: string[]): Promise<NextResponse> {
   const targetUrl = `${BACKEND_URL}/api/${path.join("/")}${req.nextUrl.search}`;
 

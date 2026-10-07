@@ -33,6 +33,9 @@ There is no Dhan anywhere in this module. Dhan does not cover MCX, so quotes com
 Angel and margin is computed locally — both stated in the payloads rather than implied.
 """
 
+import asyncio
+import logging
+import os
 import time
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -69,10 +72,24 @@ from app.services.commodity_positions import (
 
 router = APIRouter(prefix="/api/commodity-positions", tags=["commodity-positions"])
 
+logger = logging.getLogger("commodity_positions.api")
+
 # MCX runs to 23:30 and Angel throttles hard, so the mark-to-market pass is throttled the
 # same way the F&O desk throttles its own.
 REFRESH_THROTTLE_SECONDS = 20
 _last_refresh = 0.0
+_mark_task: asyncio.Task | None = None
+
+# How long a positions read waits for the mark-to-market it just started. The pass used to
+# run INSIDE the request with no limit: one batched Angel quote plus a write per position,
+# and - for a contract past expiry - a settlement lookup on the candle endpoint, which the
+# process-wide pacer spaces 1.1 s apart. Now the read waits this long and no longer: a
+# normal pass (one quote over a kept-alive connection, concurrent writes) finishes well
+# inside it, so the book still comes back freshly marked; a slow one finishes in the
+# background and the response says `marks_refreshing`, so the page asks again shortly.
+MARK_WAIT_S = float(os.getenv("COMMODITY_MARK_WAIT_S", "0.8"))
+# The first paint is worth more than the last few hundred milliseconds of mark freshness.
+BOOTSTRAP_MARK_WAIT_S = float(os.getenv("COMMODITY_BOOTSTRAP_MARK_WAIT_S", "0.35"))
 
 
 class CreateAccountRequest(BaseModel):
@@ -267,7 +284,11 @@ async def sync_instruments_endpoint(_u: dict = Depends(get_current_user)):
     The instrument master carried 8 of MCX's 28 underlyings and `lot_size: 1` on all of
     them; this is what closes both gaps. Safe to re-run — it upserts and never deletes."""
     from app.services.commodity_instruments import sync
-    return await sync()
+    from app.services.commodity_positions import invalidate_underlyings
+    try:
+        return await sync()
+    finally:
+        invalidate_underlyings()          # the board must reflect the reload at once
 
 
 @router.get("/instrument-coverage")
@@ -376,20 +397,37 @@ async def orders_endpoint(account_id: str = Query(...), limit: int = Query(200, 
     return {"orders": rows}
 
 
-@router.get("/positions")
-async def positions_endpoint(account_id: str = Query(...), refresh: bool = Query(True),
-                             _u: dict = Depends(get_current_user)):
-    """Open + closed positions and the account summary.
+async def _run_marks() -> None:
+    try:
+        await sync_positions()
+    except Exception:  # noqa: BLE001 — a stale mark must never 500 the book
+        logger.warning("commodity mark-to-market pass failed", exc_info=True)
 
-    Marks to market on read, throttled — MCX runs a long session and Angel's quote limit
-    is the binding constraint, so a page left open does not become a quote firehose."""
-    global _last_refresh
-    if refresh and (time.time() - _last_refresh) > REFRESH_THROTTLE_SECONDS:
-        _last_refresh = time.time()
+
+def _start_marks() -> asyncio.Task | None:
+    """The pass already running, or a new one if one is due; None when the last is recent.
+
+    Single-flight: two tabs (or the bootstrap and the first poll) arriving together share
+    one pass instead of quoting the same tokens twice."""
+    global _last_refresh, _mark_task
+    if _mark_task is not None and not _mark_task.done():
+        return _mark_task
+    if (time.time() - _last_refresh) <= REFRESH_THROTTLE_SECONDS:
+        return None
+    _last_refresh = time.time()
+    _mark_task = asyncio.create_task(_run_marks())
+    return _mark_task
+
+
+async def _book(account_id: str, refresh: bool, wait_s: float) -> dict:
+    refreshing = False
+    task = _start_marks() if refresh else None
+    if task is not None:
         try:
-            await sync_positions()
-        except Exception:  # noqa: BLE001 — a stale mark must never 500 the book
-            pass
+            # shield: running out of patience must not cancel the pass itself.
+            await asyncio.wait_for(asyncio.shield(task), timeout=wait_s)
+        except asyncio.TimeoutError:
+            refreshing = True
     try:
         data = await summary(account_id)
     except OrderError as exc:
@@ -399,7 +437,112 @@ async def positions_endpoint(account_id: str = Query(...), refresh: bool = Query
     acc = data.get("account") or {}
     if acc.get("created_at") is not None and not isinstance(acc["created_at"], str):
         acc["created_at"] = acc["created_at"].isoformat()
+    data["marks_refreshing"] = refreshing
     return data
+
+
+@router.get("/positions")
+async def positions_endpoint(account_id: str = Query(...), refresh: bool = Query(True),
+                             _u: dict = Depends(get_current_user)):
+    """Open + closed positions and the account summary.
+
+    Marks to market on read, throttled — MCX runs a long session and Angel's quote limit
+    is the binding constraint, so a page left open does not become a quote firehose. The
+    read waits up to MARK_WAIT_S for the pass; past that it answers with the marks it has
+    and sets `marks_refreshing`."""
+    return await _book(account_id, refresh, MARK_WAIT_S)
+
+
+@router.get("/bootstrap")
+async def bootstrap_endpoint(account_id: str | None = Query(None),
+                             symbol: str | None = Query(None),
+                             expiry: str | None = Query(None),
+                             around: int = Query(20, ge=3, le=80),
+                             with_chain: bool = Query(False),
+                             _u: dict = Depends(get_current_user)):
+    """Everything the page needs to first paint, in ONE request.
+
+    The page used to load in a waterfall - accounts and underlyings, THEN the chosen
+    commodity's expiries, THEN its chain, THEN two sizing calls - five dependent round trips
+    before the ticket was usable, each one crossing the network on its own. Here the
+    independent parts run concurrently on the server and the dependent ones follow each
+    other in-process, where a hop costs microseconds rather than a network round trip.
+
+    Every part has exactly the shape its own endpoint returns, so the page seeds the same
+    state it would have fetched. A part that fails comes back empty with its reason instead
+    of failing the whole response; the page then fetches that part the old way.
+
+    The option chain (and the ATM sizing that hangs off it) is opt-in with `with_chain`: the
+    page opens on its Positions tab, and holding the first paint for an Angel round trip on
+    a chain nobody is looking at yet would be the wrong trade. The page fetches the chain in
+    the background right after, so the tab is ready by the time it is clicked."""
+    accounts, unders = await asyncio.gather(list_accounts(), underlyings())
+
+    acc = next((a["account_id"] for a in accounts if a["account_id"] == account_id),
+               accounts[0]["account_id"] if accounts else None)
+    wanted = (symbol or "").upper()
+    sym = (wanted if any(u["symbol"] == wanted for u in unders)
+           else next((u["symbol"] for u in unders if u.get("has_options")),
+                     unders[0]["symbol"] if unders else None))
+
+    opt_exps, fut_exps = (await asyncio.gather(option_expiries(sym), future_expiries(sym))
+                          if sym else ([], []))
+    exp = expiry if expiry in opt_exps else (opt_exps[0] if opt_exps else None)
+
+    async def chain_part() -> tuple[dict | None, str | None]:
+        if not (with_chain and sym and exp):
+            return None, None
+        try:
+            return await option_chain(sym, exp, around=around), None
+        except OrderError as exc:
+            return None, exc.detail
+
+    async def book_part() -> tuple[dict | None, str | None]:
+        if not acc:
+            return None, None
+        try:
+            return await _book(acc, True, BOOTSTRAP_MARK_WAIT_S), None
+        except HTTPException as exc:
+            return None, str(exc.detail)
+
+    (chain, chain_error), (book, book_error) = await asyncio.gather(chain_part(), book_part())
+
+    # The ATM pair, sized both ways - picked by the SAME rule the page uses (the first strike
+    # nearest the reference future), so the page can show it without asking again. The
+    # chain has just quoted these contracts, so sizing reuses those prices.
+    sizing = None
+    if chain and acc and chain.get("strikes"):
+        atm = min(chain["strikes"], key=lambda r: abs(r["strike"] - chain["spot"]))["strike"]
+
+        def pair(side: str) -> list[dict]:
+            return [{"instrument_kind": "OPTION", "symbol": chain["symbol"],
+                     "expiry": chain["expiry"], "strike": atm, "option_type": ot,
+                     "transaction_type": side, "lots": 1} for ot in ("CE", "PE")]
+
+        async def size(side: str) -> dict | None:
+            try:
+                return await max_lots(acc, pair(side))
+            except OrderError:
+                return None
+
+        sell, buy = await asyncio.gather(size("SELL"), size("BUY"))
+        sizing = {"account_id": acc, "symbol": chain["symbol"], "expiry": chain["expiry"],
+                  "strike": atm, "sell": sell, "buy": buy}
+
+    return {
+        "accounts": accounts,
+        "account_id": acc,
+        "underlyings": unders,
+        "symbol": sym,
+        "option_expiries": opt_exps,
+        "future_expiries": fut_exps,
+        "expiry": exp,
+        "chain": chain,
+        "chain_error": chain_error,
+        "positions": book,
+        "positions_error": book_error,
+        "sizing": sizing,
+    }
 
 
 @router.post("/positions/{position_id}/exit")

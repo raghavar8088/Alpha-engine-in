@@ -6101,6 +6101,9 @@ export interface CmpOrder {
 export interface CmpSummary {
   account: CmpAccount;
   performance?: CmpPerformance;
+  /** The mark-to-market pass outlived the read's wait budget and is finishing in the
+   *  background: these marks are the previous ones. Ask again shortly, with fresh=true. */
+  marks_refreshing?: boolean;
   initial_capital: number;
   available_cash: number;
   margin_deployed: number;
@@ -6191,8 +6194,44 @@ export async function placeCmpOrder(body: {
 export async function fetchCmpOrders(account_id: string): Promise<{ orders: CmpOrder[] }> {
   return apiFetch(`${cmp}/orders?account_id=${encodeURIComponent(account_id)}`);
 }
-export async function fetchCmpPositions(account_id: string): Promise<CmpSummary> {
-  return apiFetch(`${cmp}/positions?account_id=${encodeURIComponent(account_id)}`);
+export async function fetchCmpPositions(account_id: string, fresh = false): Promise<CmpSummary> {
+  // fresh=true skips the backend's 20 s response cache - needed for the quick re-ask after
+  // `marks_refreshing`, which would otherwise be answered with the same stale body.
+  return apiFetch(
+    `${cmp}/positions?account_id=${encodeURIComponent(account_id)}${fresh ? "&fresh=true" : ""}`);
+}
+
+/** Everything the Commodity Positions page needs to first paint, in one request - see
+ *  `bootstrap_endpoint`. Each part has the shape its own endpoint returns; a part that
+ *  failed is null with its reason, and the page then fetches that part on its own. */
+export interface CmpBootstrap {
+  accounts: CmpAccount[];
+  account_id: string | null;
+  underlyings: CmpUnderlying[];
+  symbol: string | null;
+  option_expiries: string[];
+  future_expiries: string[];
+  expiry: string | null;
+  chain: CmpChain | null;
+  chain_error: string | null;
+  positions: CmpSummary | null;
+  positions_error: string | null;
+  sizing: {
+    account_id: string; symbol: string; expiry: string; strike: number;
+    sell: CmpMaxLots | null; buy: CmpMaxLots | null;
+  } | null;
+}
+
+export async function fetchCmpBootstrap(p: {
+  account_id?: string; symbol?: string; expiry?: string; with_chain?: boolean;
+} = {}): Promise<CmpBootstrap> {
+  const q = new URLSearchParams();
+  if (p.account_id) q.set("account_id", p.account_id);
+  if (p.symbol) q.set("symbol", p.symbol);
+  if (p.expiry) q.set("expiry", p.expiry);
+  if (p.with_chain) q.set("with_chain", "true");
+  const qs = q.toString();
+  return apiFetch(`${cmp}/bootstrap${qs ? `?${qs}` : ""}`);
 }
 export async function exitCmpPosition(position_id: string, account_id: string, lots?: number): Promise<CmpOrder> {
   return apiFetch(`${cmp}/positions/${position_id}/exit`, {

@@ -43,6 +43,7 @@ import {
   executeCmpBasket,
   exitCmpPosition,
   fetchCmpAccounts,
+  fetchCmpBootstrap,
   fetchCmpChain,
   fetchCmpFutureExpiries,
   fetchCmpFutures,
@@ -61,6 +62,10 @@ import {
 } from "../../lib/api";
 
 const REFRESH_MS = 20000;
+// A prefetched chain is re-quoted when the Option Chain tab is opened after this long.
+const CHAIN_STALE_MS = 20000;
+// After a positions read that says its marks are still being taken, ask again this soon.
+const MARKS_RECHECK_MS = 1500;
 type Tab = "chain" | "futures" | "positions" | "orders" | "specs" | "history";
 
 const inr = (v: number | null | undefined, dp = 0) =>
@@ -241,17 +246,62 @@ export default function CommodityPositionsPage() {
     }
   }, []);
 
-  useEffect(() => { loadAccounts(); loadUnderlyings(); }, [loadAccounts, loadUnderlyings]);
+  // What the bootstrap already answered, consumed by the effects below instead of asking
+  // again. Each field is cleared once used, so later changes (a new symbol, another
+  // account) go back to fetching normally.
+  const seed = useRef<{
+    symbol?: string; opt?: string[]; fut?: string[]; expiry?: string | null;
+    book?: CmpSummary | null; bookFor?: string;
+  } | null>(null);
+  // Which (symbol|expiry) the chain on screen belongs to, and when it was quoted. Refs, not
+  // state: they only decide whether to fetch, and as state they would re-run that effect.
+  const chainKey = useRef("");
+  const chainAt = useRef(0);
+
+  // ONE request for the first paint. The page used to load in a waterfall - accounts and
+  // underlyings, then the chosen commodity's expiries, then the book - each a separate
+  // round trip; the server now does the dependent steps in-process. If it fails (an older
+  // backend, say) the page falls back to the two independent loads it always had.
+  useEffect(() => {
+    let live = true;
+    fetchCmpBootstrap()
+      .then((b) => {
+        if (!live) return;
+        seed.current = {
+          symbol: b.symbol ?? undefined, opt: b.option_expiries, fut: b.future_expiries,
+          expiry: b.expiry, book: b.positions, bookFor: b.account_id ?? undefined,
+        };
+        setAccounts(b.accounts);
+        setAccountId((cur) => cur || b.account_id || "");
+        setUnders(b.underlyings);
+        setUndersError(null);
+        setLoadingUnders(false);
+        setSymbol((cur) => cur || b.symbol || "");
+        setError(null);
+      })
+      .catch(() => { if (live) { loadAccounts(); loadUnderlyings(); } });
+    return () => { live = false; };
+  }, [loadAccounts, loadUnderlyings]);
 
   // ---- expiries follow the underlying ----------------------------------------
   useEffect(() => {
     if (!symbol) return;
+    const sd = seed.current;
+    if (sd?.symbol === symbol && sd.opt) {
+      setOptExpiries(sd.opt);
+      setOptExpiry(sd.expiry ?? sd.opt[0] ?? "");
+      setFutExpiries(sd.fut ?? []);
+      setExpiriesFor(symbol);
+      sd.symbol = undefined;
+      return;
+    }
     // Drop the previous commodity's expiries immediately, so nothing downstream can pair
     // them with the new symbol while the new list is in flight.
     setExpiriesFor("");
     setOptExpiries([]);
     setOptExpiry("");
     setChain(null);
+    chainKey.current = "";
     let live = true;
     fetchCmpOptionExpiries(symbol).then((r) => {
       if (!live) return;
@@ -267,12 +317,26 @@ export default function CommodityPositionsPage() {
   useEffect(() => {
     // Only fetch once the expiry list is known to belong to THIS symbol and the chosen
     // expiry is one of its own.
-    if (tab !== "chain" || !symbol || !optExpiry) return;
+    if (!symbol || !optExpiry) return;
     if (expiriesFor !== symbol || !optExpiries.includes(optExpiry)) return;
+    // Prefetched in the background as soon as the contract is known, so the Option Chain
+    // tab - the page's main tool - opens on a chain already there, with the ATM pair
+    // already sized. It used to start loading only when the tab was clicked, and the chain
+    // plus its two sizing calls took 5-9 s from that click. A held chain is re-quoted
+    // only while it is actually being looked at and has gone stale.
+    const key = `${symbol}|${optExpiry}`;
+    const held = chainKey.current === key;
+    if (held && (tab !== "chain" || Date.now() - chainAt.current < CHAIN_STALE_MS)) return;
     let live = true;
-    setChain(null);
+    if (!held) setChain(null);          // a different contract: never show the old one
     fetchCmpChain(symbol, optExpiry)
-      .then((c) => { if (live) { setChain(c); setError(null); } })
+      .then((c) => {
+        if (!live) return;
+        setChain(c);
+        chainKey.current = key;
+        chainAt.current = Date.now();
+        setError(null);
+      })
       .catch((e) => live && setError(e instanceof Error ? e.message : "Chain unavailable"));
     return () => { live = false; };
   }, [tab, symbol, optExpiry, expiriesFor, optExpiries]);
@@ -287,24 +351,37 @@ export default function CommodityPositionsPage() {
     if (tab === "specs" && !specs.length) fetchCmpSpecCheck().then((r) => setSpecs(r.spec_check)).catch(() => {});
   }, [tab, specs.length]);
 
-  const loadBook = useCallback(async () => {
+  const recheck = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const applyBook = useCallback((s: CmpSummary) => {
+    setSummary(s);
+    // The server already computed the window for the stored start date, so the tiles
+    // fill on the same round trip. The calendar only calls out again when it MOVES.
+    if (s.performance) {
+      setPerf(s.performance);
+      setSince((prev) => prev || s.performance!.start_date);
+    }
+    setError(null);
+  }, []);
+
+  const loadBook = useCallback(async (fresh = false) => {
     if (!accountId) { setLoadingBook(false); return; }
     try {
-      const s = await fetchCmpPositions(accountId);
-      setSummary(s);
-      // The server already computed the window for the stored start date, so the tiles
-      // fill on the same round trip. The calendar only calls out again when it MOVES.
-      if (s.performance) {
-        setPerf(s.performance);
-        setSince((prev) => prev || s.performance!.start_date);
+      const s = await fetchCmpPositions(accountId, fresh);
+      applyBook(s);
+      // The server answered with the previous marks because the new pass was still
+      // running. Ask once more shortly - past the response cache - instead of making this
+      // read wait for it, or leaving the old marks up until the next 20 s poll.
+      if (s.marks_refreshing && !fresh) {
+        if (recheck.current) clearTimeout(recheck.current);
+        recheck.current = setTimeout(() => { loadBook(true); }, MARKS_RECHECK_MS);
       }
-      setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load positions");
     } finally {
       setLoadingBook(false);
     }
-  }, [accountId]);
+  }, [accountId, applyBook]);
 
   /** Preview a start date without committing it. */
   const previewSince = useCallback(async (d: string) => {
@@ -335,10 +412,33 @@ export default function CommodityPositionsPage() {
   useEffect(() => { setSince(""); setPerf(null); setPerfSaved(false); }, [accountId]);
 
   useEffect(() => {
-    loadBook();
-    const id = setInterval(loadBook, REFRESH_MS);
-    return () => clearInterval(id);
-  }, [loadBook]);
+    const sd = seed.current;
+    if (sd?.book && sd.bookFor === accountId) {
+      // First paint from the bootstrap - no second request for the same book.
+      const b = sd.book;
+      sd.book = null;
+      applyBook(b);
+      setLoadingBook(false);
+      if (b.marks_refreshing) {
+        if (recheck.current) clearTimeout(recheck.current);
+        recheck.current = setTimeout(() => { loadBook(true); }, MARKS_RECHECK_MS);
+      }
+    } else {
+      loadBook();
+    }
+    // A hidden tab does not poll: it would only spend the backend's time (and Angel quotes)
+    // on numbers nobody is looking at. It catches up the moment it is shown again.
+    const id = setInterval(() => {
+      if (document.visibilityState !== "hidden") loadBook();
+    }, REFRESH_MS);
+    const onShow = () => { if (document.visibilityState === "visible") loadBook(); };
+    document.addEventListener("visibilitychange", onShow);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", onShow);
+      if (recheck.current) clearTimeout(recheck.current);
+    };
+  }, [loadBook, accountId, applyBook]);
 
   useEffect(() => {
     if (tab === "orders" && accountId) {
