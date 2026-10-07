@@ -18,8 +18,8 @@ account works, because neither is linear in capital:
     single Rs 7,000 share, while the Rs 25,000 slice in the larger book took 3 and the
     parent desk, on Rs 10 lakh, took 142 and never noticed.
 
-    THE SLICE MOVES WHEN THE SHORTLIST DOES. At nineteen strategies (2026-10-07) the same
-    two books are Rs 2,632 and Rs 10,526 a strategy. That is not a side effect to fix —
+    THE SLICE MOVES WHEN THE SHORTLIST DOES. At eleven strategies (2026-10-07, after the
+    original eight were retired) the same two books are Rs 4,545 and Rs 18,182 a strategy. That is not a side effect to fix —
     it is the measurement: a book is a fixed amount of money and adding a strategy takes
     capital from the others. It does mean a strategy's trades before and after a shortlist
     change were sized differently, so its P&L either side of that date is not one series.
@@ -71,20 +71,27 @@ logger = logging.getLogger("pattern_books")
 # rather than strategy_id because the id encodes the template's INDEX in the catalog
 # (`pat_30m_15`), so inserting a template upstream would silently repoint every id — the
 # names are what a person actually chose.
+# RETIRED 2026-10-07, at the owner's direction, and their rows deleted from both books:
+#
+#     Williams %R Reversal 30m, Bollinger %B Extreme 30m, Bollinger Mean Revert 30m,
+#     Pivot R1/S1 Break 1m, Three Soldiers / Crows 1h, CCI Zero Cross 1h,
+#     EMA Fast Cross 30m, MACD Zero Line 30m
+#
+# They had 26 closed trades per book between them — Rs -288.95 on the Rs 50,000 book and
+# Rs +1,034.70 on the Rs 2,00,000 one — and removing those rows returns both books to
+# exactly their starting capital. The 120 deleted documents were dumped first to
+# backups/patbook-retired8/ on the server and kept off it as well.
+#
+# Two of the names below LOOK like two of those: Bollinger %B Extreme and Three Soldiers /
+# Crows. They are different strategies — pat_30m_23 and pat_1h_39 were retired, pat_1m_23
+# and pat_1m_39 remain — which is exactly why this list is keyed by (template, timeframe)
+# and why the deletion was filtered by strategy_id rather than by name.
 SELECTED_SPECS: list[tuple[str, str]] = [
-    ("Williams %R Reversal",   "30m"),
-    ("Bollinger %B Extreme",   "30m"),
-    ("Bollinger Mean Revert",  "30m"),
-    ("Pivot R1/S1 Break",      "1m"),
-    ("Three Soldiers / Crows", "1h"),
-    ("CCI Zero Cross",         "1h"),
-    ("EMA Fast Cross",         "30m"),
-    ("MACD Zero Line",         "30m"),
-
-    # Added 2026-10-07 at the owner's direction, from the pattern desk's own board.
-    # Every one is the 1-MINUTE variant, which is a different strategy from the same
-    # template on 30m or 1h — "Bollinger %B Extreme" and "Three Soldiers / Crows" appear
-    # twice in this list for that reason, and the two entries are not duplicates.
+    # From the pattern desk's own board, 2026-10-07.
+    # Every one is the 1-MINUTE variant. Two of these templates also ran on 30m and 1h
+    # until today and were retired above; the same template on another candle is a
+    # different strategy with a different id, which is why this list is keyed by
+    # (template, timeframe).
     #
     # The first five were the top of the board by ROI; the last six were the top by TRADE
     # COUNT, which is a different question and deliberately a different cut:
