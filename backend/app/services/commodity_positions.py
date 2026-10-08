@@ -218,7 +218,91 @@ def tick_rupees(inst: dict) -> float:
 
 
 def contract_value(underlying: str, price: float, lots: int = 1) -> float:
+    """price x multiplier x lots.
+
+    Correct as a NOTIONAL only when `price` is the underlying's own price — i.e. for a
+    future. For an option this returns the premium value; use `notional_value`, which
+    knows the difference."""
     return round(float(price) * multiplier(underlying) * max(lots, 1), 2)
+
+
+def notional_value(underlying: str, kind: str, price: float, lots: int = 1,
+                   strike: float | None = None) -> float:
+    """What the contract actually CONTROLS, in rupees.
+
+    For a FUTURE the quoted price IS the underlying, so notional is price x multiplier.
+    For an OPTION it is not: the premium is what the option COSTS, while the contract
+    controls `multiplier` units of the underlying at the STRIKE.
+
+    Measured on production 2026-10-08, before this existed: a 9-lot CRUDEOILM 9000
+    straddle reported Rs 47,920 of "full notional controlled" — which was the premium, and
+    the identical number the page showed beside it as net premium received. It controlled
+    Rs 16,20,000. Understating exposure 34x on the screen where someone decides whether a
+    short straddle is safe is the wrong direction to be wrong in: that account held
+    Rs 66,000, so the true leverage was 24.5x and a 2% move in crude was a quarter of it.
+
+    The strike is used rather than the underlying's live price because it is what the
+    contract obliges, it needs no second quote, and for the near-the-money strikes these
+    desks trade the two differ by well under a percent."""
+    lots = max(lots, 1)
+    if str(kind).upper() == "OPTION" and strike:
+        return round(float(strike) * multiplier(underlying) * lots, 2)
+    return contract_value(underlying, price, lots)
+
+
+# THE ONE PLAUSIBILITY BAND. `check_specs` had these numbers inline and this gate was
+# written with its own, slightly tighter pair — which a test immediately caught: at a
+# Rs 15,000 floor a real 1-gram GOLDPETAL lot (Rs 14,896 on 2026-10-08) reads as
+# implausible. Two hardcoded bands in one file is how they drift, so there is now one.
+#
+# MCX lots run from that GOLDPETAL to a 1 kg GOLD bar at ~Rs 1.5 crore, so the band is
+# wide on purpose. Outside it, a multiplier is out by a power of ten and every P&L on
+# that underlying is wrong by the same factor.
+SPEC_VALUE_MIN = float(os.getenv("COMMODITY_SPEC_MIN_VALUE", "10000"))
+SPEC_VALUE_MAX = float(os.getenv("COMMODITY_SPEC_MAX_VALUE", "50000000"))
+
+# Underlyings allowed to trade despite failing the band — an escape hatch so a genuinely
+# small contract does not need a deploy to unblock. Comma-separated.
+SPEC_OVERRIDE = {s.strip().upper() for s in
+                 os.getenv("COMMODITY_SPEC_OVERRIDE", "").split(",") if s.strip()}
+
+
+async def spec_gate(symbol: str) -> None:
+    """Refuse to OPEN a position whose lot value cannot be trusted.
+
+    Only underlyings with no published MCX spec are judged: those fall back to the
+    broker's order-quantity unit, which is not the value multiplier and is sometimes out
+    by a factor of fifty. Two of the seven on this exchange fail the band today —
+    COTTONOIL at Rs 7,650 a lot and KAPAS at Rs 7,200 — and no MCX contract is worth
+    Rs 7,000.
+
+    Warning about a number while still letting someone trade on it is the weaker half of a
+    safeguard, so this raises. It never blocks a CLOSE: a book must always be able to get
+    out of a position it should not have been allowed into.
+
+    A quote failure is not a verdict — if the underlying cannot be priced right now this
+    says nothing rather than blocking on absence of evidence."""
+    sym = (symbol or "").upper()
+    if CONTRACT_SPEC.get(sym) or sym in SPEC_OVERRIDE:
+        return
+    px, _fut = await future_price(sym)
+    if not px:
+        return
+    value = contract_value(sym, px)
+    if SPEC_VALUE_MIN <= value <= SPEC_VALUE_MAX:
+        return
+    lot = _LOTSIZE.get(sym)
+    raise OrderError(
+        f"{sym} is not tradable here: its lot value cannot be trusted. This module has no "
+        f"published MCX contract specification for it, so it falls back to the broker's "
+        f"order-quantity unit ({lot or 'unknown'}), which gives one lot a value of "
+        f"Rs {value:,.0f} at the current price of {px:,.2f}. No MCX lot is worth that — "
+        f"the plausible band is Rs {SPEC_VALUE_MIN:,.0f} to Rs {SPEC_VALUE_MAX:,.0f}, so "
+        f"the multiplier is wrong and every P&L on this contract would be wrong by the "
+        f"same factor. Confirm the spec against the exchange and add it to CONTRACT_SPEC, "
+        f"or set COMMODITY_SPEC_OVERRIDE={sym} if you know the value is right. "
+        f"Closing an existing position is still allowed."
+    )
 
 
 def spec_doc(underlying: str) -> dict:
@@ -243,10 +327,10 @@ def spec_doc(underlying: str) -> dict:
 def check_specs(prices: dict[str, float]) -> list[dict]:
     """Re-derive each contract value from live prices so a stale spec is visible.
 
-    An MCX lot is worth roughly Rs 2 lakh to Rs 4 crore. Anything outside that band means
-    the multiplier is off by a power of ten and every P&L on that underlying is wrong by
-    the same factor — better surfaced on a diagnostics endpoint than discovered in a
-    trade."""
+    The band is SPEC_VALUE_MIN..SPEC_VALUE_MAX, shared with the order gate so the thing
+    the page calls implausible is exactly the thing that cannot be traded. (This docstring
+    used to say "roughly Rs 2 lakh to Rs 4 crore" while the code tested Rs 10,000 to
+    Rs 5 crore — the prose was never true.)"""
     out = []
     for sym, px in sorted(prices.items()):
         if not px:
@@ -255,10 +339,7 @@ def check_specs(prices: dict[str, float]) -> list[dict]:
         out.append({
             "underlying": sym, "price": px, "contract_value": value,
             "multiplier": multiplier(sym),
-            # MCX lots run from a 1-gram GOLDPETAL (~Rs 16k) to a 1 kg GOLD bar
-            # (~Rs 1.6 crore), so the band is wide on purpose. Outside it, a
-            # multiplier is out by a power of ten.
-            "plausible": 1e4 <= value <= 5e7,
+            "plausible": SPEC_VALUE_MIN <= value <= SPEC_VALUE_MAX,
             **spec_doc(sym),
         })
     return out
@@ -1046,7 +1127,9 @@ async def estimate_margin(*, symbol: str, expiry: str, instrument_kind: str,
     m = _margin_for([leg], symbol, ref, t)
     return {
         "margin_required": m["total"], "span": m["span"], "exposure": m["exposure"],
-        "notional_value": contract_value(symbol, price, lots),
+        "notional_value": notional_value(symbol, instrument_kind, price, lots,
+                                         inst.get("strike")),
+        "premium_value": round(price * qty, 2),
         "quantity": qty, "multiplier": mult,
         "scan_pct": _scan_pct(symbol), "reference_price": ref,
         "source": "span_lite_mcx",
@@ -1111,6 +1194,11 @@ async def place_order(*, account_id: str, instrument_kind: str, symbol: str, exp
     if order_type == "LIMIT" and limit_price <= 0:
         raise OrderError("Limit orders need a positive limit_price")
 
+    # The basket path is gated inside `_price_basket`; this is the other way a position
+    # can be OPENED, so it is gated here. `exit_position` is deliberately gated by
+    # neither — a book must always be able to close.
+    await spec_gate(symbol)
+
     inst = await _resolve_contract(instrument_kind, symbol, expiry, strike, option_type)
     ltp = await ltp_for(inst)
     if ltp is None:
@@ -1149,10 +1237,15 @@ async def _fill(base_order: dict, fill_price: float, check_margin: bool = True) 
     if check_margin:
         cash = await available_cash(account_id)
         if margin > cash:
+            # The whole job of this message is to say how big the thing you tried to
+            # trade is, so it has to quote what the contract CONTROLS. It used to quote
+            # premium x quantity, which on a sold option is a small fraction of it.
             raise OrderError(
                 f"Margin ₹{margin:,.0f} exceeds the ₹{cash:,.0f} available in this account. "
                 f"One {symbol} lot is {spec_doc(symbol).get('lot_quantity', 'one contract')} "
-                f"— contract value ₹{contract_value(symbol, fill_price, base_order['lots']):,.0f}.")
+                f"— you would be controlling ₹"
+                f"{notional_value(symbol, base_order['instrument_kind'], fill_price, base_order['lots'], inst.get('strike')):,.0f}"
+                f" of {symbol}.")
 
     now = _now()
     existing = await commodity_pos_positions_collection.find_one(
@@ -1175,7 +1268,10 @@ async def _fill(base_order: dict, fill_price: float, check_margin: bool = True) 
             "product_type": base_order["product_type"],
             "margin_used": round(margin, 2),
             "capital_deployed": round(margin, 2),
-            "contract_value": contract_value(symbol, fill_price, base_order["lots"]),
+            "contract_value": notional_value(symbol, base_order["instrument_kind"],
+                                             fill_price, base_order["lots"],
+                                             inst.get("strike")),
+            "premium_value": round(fill_price * quantity, 2),
             "unrealized_pnl": 0.0, "realized_pnl": 0.0, "status": "OPEN",
             "opened_at": now, "updated_at": now, "closed_at": None, "closed_on": None,
         })
@@ -1186,7 +1282,10 @@ async def _fill(base_order: dict, fill_price: float, check_margin: bool = True) 
 
     doc = {**base_order, "status": "FILLED", "fill_price": round(fill_price, 4),
            "filled_at": now, "margin_used": round(margin, 2), "position_id": position_id,
-           "contract_value": contract_value(symbol, fill_price, base_order["lots"])}
+           "contract_value": notional_value(symbol, base_order["instrument_kind"],
+                                            fill_price, base_order["lots"],
+                                            inst.get("strike")),
+           "premium_value": round(fill_price * quantity, 2)}
     await commodity_pos_orders_collection.insert_one(dict(doc))
     return doc
 
@@ -1661,12 +1760,28 @@ async def _price_basket(legs: list[dict], max_age: float = 0.0,
                 f"Angel returned no price for {label}. The basket is not priced and nothing "
                 "was filled — MCX may be closed.")
         mult = multiplier(symbol)
+        qty = lots * mult
         priced.append({
             "leg": leg, "inst": inst, "kind": kind, "side": side, "lots": lots,
-            "symbol": symbol, "qty": lots * mult, "multiplier": mult,
+            "symbol": symbol, "qty": qty, "multiplier": mult,
             "ltp": ltp, "label": label,
-            "contract_value": contract_value(symbol, ltp, lots),
+            # What the leg CONTROLS. For a future this is unchanged; for an option it is
+            # the strike's notional rather than the premium, which is what it reported
+            # before and which made a short straddle look 34x smaller than it was.
+            "contract_value": notional_value(symbol, kind, ltp, lots,
+                                             inst.get("strike")),
+            # What the leg is WORTH right now — the old "contract value", kept because it
+            # is a genuinely useful number, under a name that says which one it is.
+            "premium_value": round(ltp * qty, 2),
         })
+
+    # Nothing is priced into a basket on an underlying whose lot value is not trustworthy.
+    # Checked here rather than at the fill so the refusal appears in the PREVIEW, before
+    # the button is pressed — and because `_price_basket` is the one path both
+    # `estimate_basket` and `execute_basket` share, while `exit_position` does not touch
+    # it and so stays able to close.
+    for sym in dict.fromkeys(p["symbol"] for p in priced):
+        await spec_gate(sym)
     return priced
 
 
@@ -1762,6 +1877,7 @@ async def estimate_basket(account_id: str, legs: list[dict]) -> dict:
     added, net_premium = await basket_margin_delta(account_id, priced,
                                                    max_age=DISPLAY_QUOTE_MAX_AGE_S)
     exposure = sum(p["contract_value"] for p in priced)
+    premium_value = sum(p["premium_value"] for p in priced)
     naive = 0.0
     for p in priced:
         t = _years_to_expiry(p["inst"].get("expiry"))
@@ -1779,6 +1895,7 @@ async def estimate_basket(account_id: str, legs: list[dict]) -> dict:
             "side": p["side"], "lots": p["lots"], "qty": p["qty"],
             "multiplier": p["multiplier"], "ltp": round(p["ltp"], 2),
             "contract_value": p["contract_value"],
+            "premium_value": p["premium_value"],
             **spec_doc(p["symbol"]),
         } for p in priced],
         "margin_required": added,
@@ -1789,13 +1906,17 @@ async def estimate_basket(account_id: str, legs: list[dict]) -> dict:
         "hedge_benefit": round(max(0.0, naive - added), 2),
         "net_premium": net_premium,
         "contract_exposure": round(exposure, 2),
+        "premium_value": round(premium_value, 2),
         "available_cash": round(cash, 2),
         "cash_after": round(cash - added, 2),
         "affordable": basket_allowed(added, cash),
         "shortfall": round(max(0.0, added - cash), 2) if added > 0.01 else 0.0,
         "note": "Margin is the portfolio figure for the whole basket, so legs that hedge "
                 "each other cost less together than apart. Contract exposure is the full "
-                "notional you are controlling, which on MCX is many times the margin.",
+                "notional you are controlling — a future at its own price, an option at "
+                "its STRIKE, because the premium is what an option costs and not what it "
+                "controls. On MCX that notional is many times the margin, and for a sold "
+                "option it is many times the premium received.",
     }
 
 
@@ -2025,8 +2146,12 @@ async def sync_positions() -> int:
         pnl = (float(px) - pos["entry_price"]) * pos["quantity"] * direction
         writes.append(commodity_pos_positions_collection.update_one({"_id": pos["_id"]}, {"$set": {
             "ltp": round(float(px), 4), "unrealized_pnl": round(pnl, 2),
-            "contract_value": contract_value(pos.get("underlying_symbol", ""),
-                                             float(px), pos["lots"]),
+            # Re-marked every tick, so this is what kept overwriting a position's
+            # notional with its premium even after the fill wrote the right number.
+            "contract_value": notional_value(
+                pos.get("underlying_symbol", ""), pos.get("instrument_kind", "FUTURE"),
+                float(px), pos["lots"], (pos.get("instrument") or {}).get("strike")),
+            "premium_value": round(float(px) * pos["quantity"], 2),
             "expired": expired, "price_basis": basis,
             "updated_at": _now()}}))
         updated += 1
@@ -2221,7 +2346,8 @@ async def summary(account_id: str) -> dict:
 
 __all__ = [
     "OrderError", "ensure_indexes", "CONTRACT_SPEC", "PRICE_SCAN", "SCAN_FAMILY", "DEFAULT_INITIAL_CAPITAL",
-    "multiplier", "contract_value", "spec_doc", "check_specs", "tick_rupees",
+    "multiplier", "contract_value", "notional_value", "spec_gate",
+    "spec_doc", "check_specs", "tick_rupees",
     "prime_lotsizes",
     "ensure_default_account", "list_accounts", "get_account", "create_account",
     "delete_account", "max_lots", "performance",

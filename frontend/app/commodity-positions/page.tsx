@@ -759,7 +759,11 @@ export default function CommodityPositionsPage() {
               <thead>
                 <tr>
                   <th className="l">Contract</th><th>Side</th><th>Lots</th>
-                  <th className="l">1 lot</th><th>Price</th><th>Contract value</th><th />
+                  <th className="l">1 lot</th><th>Price</th>
+                  {/* Two different numbers that used to be one. "Premium" is what the
+                      option costs or pays; "Controls" is the notional it obliges — for a
+                      sold option the second is tens of times the first. */}
+                  <th>Premium</th><th>Controls</th><th />
                 </tr>
               </thead>
               <tbody>
@@ -776,6 +780,7 @@ export default function CommodityPositionsPage() {
                     </td>
                     <td className="l dim">{l.lot_quantity}</td>
                     <td className="px">{num(l.ltp, 2)}</td>
+                    <td className="px dim">{compact(l.premium_value ?? 0)}</td>
                     <td className="px">{compact(l.contract_value)}</td>
                     <td>
                       <button className="mini" onClick={() => dropLeg(i)} title="Remove leg">×</button>
@@ -821,7 +826,7 @@ export default function CommodityPositionsPage() {
                       tone={(quote?.available_cash ?? 0) < 0 ? "loss" : undefined}
                       sub={quote ? `${compact(quote.cash_after)} left after` : "in this account"} />
               <Figure label="Contract exposure" value={compact(quote?.contract_exposure)}
-                      sub="full notional controlled" />
+                      sub="notional controlled — options at their strike" />
               <Figure label="Net premium" value={signed(quote?.net_premium)}
                       tone={(quote?.net_premium ?? 0) >= 0 ? "gain" : "loss"}
                       sub={(quote?.net_premium ?? 0) >= 0 ? "received" : "paid"} />

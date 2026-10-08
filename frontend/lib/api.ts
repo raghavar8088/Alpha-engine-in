@@ -476,8 +476,16 @@ export async function fetchQualifiedStrategies(): Promise<OptionsSweep> {
 export interface OptionsSellingSweepRequest {
   symbol?: string;
   years?: number;
+  lot_size?: number;
+  quantity_lots?: number;
   min_profit_factor?: number;
   min_trades?: number;
+  train_fraction?: number;
+  validation_fraction?: number;
+  purge_days?: number;
+  min_validation_trades?: number;
+  min_test_trades?: number;
+  overlap_threshold?: number;
   max_worst_trade_pct_capital?: number;
   max_drawdown_pct?: number;
   naked_min_profit_factor?: number;
@@ -492,6 +500,7 @@ export interface SellingGate {
   naked_min_profit_factor: number;
   naked_max_worst_trade_pct_capital: number;
   naked_threshold_pct?: number;
+  min_validation_trades?: number;
 }
 
 export interface SellingSweepEntry {
@@ -503,8 +512,21 @@ export interface SellingSweepEntry {
   data_from?: string;
   data_to?: string;
   metrics?: Record<string, any>;
+  training_metrics?: Record<string, any>;
+  validation_metrics?: Record<string, any>;
+  final_test_metrics?: Record<string, any>;
+  research_windows?: Record<string, any>;
   structure?: Record<string, any>;
   qualified?: boolean;
+  training_qualified?: boolean;
+  validation_qualified?: boolean;
+  validation_selected?: boolean;
+  validation_failures?: string[];
+  in_basket?: boolean;
+  final_test_sample_sufficient?: boolean;
+  final_test_passed?: boolean;
+  final_test_failures?: string[];
+  final_test_error?: string;
   naked?: boolean;
   gate_failures?: string[];
   error?: string;
@@ -516,11 +538,24 @@ export interface OptionsSellingSweep {
   symbol?: string;
   years?: number;
   desk?: string;
+  lot_size?: number;
+  lot_size_source?: string;
+  lot_size_mode?: string;
+  train_fraction?: number;
+  validation_fraction?: number;
+  purge_days?: number;
+  min_validation_trades?: number;
+  min_test_trades?: number;
   gate?: SellingGate;
   pricing_model?: string;
+  fee_model?: string;
   margin_model?: string;
+  selection_policy?: string;
   qualified_count: number;
   strategy_count: number;
+  robust_count?: number;
+  validation_selected_count?: number;
+  basket_count?: number;
   results: SellingSweepEntry[];
 }
 
@@ -551,6 +586,10 @@ export interface SellingLeg {
   security_id: string;
   symbol?: string;
   entry_premium: number;
+  entry_ltp?: number;
+  entry_bid?: number | null;
+  entry_ask?: number | null;
+  entry_basis?: string;
 }
 
 export interface SellingPosition {
@@ -561,7 +600,10 @@ export interface SellingPosition {
   structure: string;
   credit: number;
   lots: number;
+  lot_size?: number;
   qty: number;
+  entry_basis?: string;
+  exit_basis?: string;
   margin: number;
   margin_basis: "defined_risk" | "naked_span" | string;
   expiry: string | null;
@@ -582,9 +624,15 @@ export interface SellingDeskStatus {
   open_structures: number;
   breaker_tripped: boolean;
   breaker_reason: string | null;
+  breaker_scope?: "per_strategy" | "desk_wide";
+  strategy_breakers?: Record<string, string>;
+  strategy_breaker_count?: number;
   initial_capital: number;
   realized: number;
   balance: number;
+  paper_account_realized?: number;
+  legacy_realized_unverified?: number;
+  mixed_realized_unverified?: number;
   margin_deployed: number;
   free_margin: number;
   realized_all_time: number;
@@ -615,6 +663,7 @@ export interface SellingTrade {
   credit: number;
   exit_cost: number;
   lots: number;
+  lot_size?: number;
   qty: number;
   margin: number;
   margin_basis: string;
@@ -625,6 +674,15 @@ export interface SellingTrade {
   exit_spot: number | null;
   exit_reason: string;
   pnl: number;
+  gross_pnl?: number;
+  charges?: number;
+  entry_charges?: number;
+  exit_charges?: number;
+  execution_model_version?: number;
+  pnl_quality?: string;
+  entry_basis?: string;
+  exit_basis?: string;
+  ltp_pnl?: number;
   held_days: number;
 }
 
@@ -3094,6 +3152,10 @@ export interface SellingBookSummary {
   mode: string;
   enabled: boolean;
   capital: number;
+  pnl_model_version?: number;
+  selection_status?: string;
+  fill_model?: string;
+  notes?: string[];
   position_cap: number;
   cash: number;
   deployed: number;
@@ -3101,7 +3163,13 @@ export interface SellingBookSummary {
   unrealized_pnl: number;
   gross_pnl: number;
   fees: number;
+  legacy_realized_pnl?: number;
+  legacy_unrealized_pnl?: number;
+  legacy_fees?: number;
+  legacy_open_positions?: number;
+  legacy_closed_positions?: number;
   equity: number;
+  model_equity?: number;
   roi_pct: number;
   open_positions: number;
   closed_positions: number;
@@ -3126,6 +3194,9 @@ export interface SellingBookPick {
   net_pnl: number;
   open: number;
   unrealized_pnl: number;
+  legacy_trades?: number;
+  legacy_open?: number;
+  legacy_net_pnl?: number;
   declined_expiry_day: number;
   declined_duplicate: number;
   declined_money: number;
@@ -3140,6 +3211,10 @@ export interface SellingBookPosition {
   structure: string;
   expiry: string;
   credit: number;
+  parent_credit?: number;
+  pnl_model_version?: number;
+  entry_quote_quality?: string;
+  quote_quality?: string;
   lots: number;
   lot_size: number;
   qty: number;
@@ -6327,7 +6402,11 @@ export interface CmpPricedLeg extends CmpSpec {
   lots: number;
   qty: number;
   ltp: number;
+  /** What the leg CONTROLS: a future at its own price, an option at its STRIKE. */
   contract_value: number;
+  /** What the leg is WORTH right now — premium x quantity. On a sold option this is a
+   *  small fraction of `contract_value`; they were once the same field. */
+  premium_value?: number;
 }
 
 export interface CmpBasketEstimate {
@@ -6339,7 +6418,10 @@ export interface CmpBasketEstimate {
   margin_if_legged_separately: number;
   hedge_benefit: number;
   net_premium: number;
+  /** Notional controlled by the whole basket — options valued at their strike. */
   contract_exposure: number;
+  /** The basket's premium value, which is what `contract_exposure` used to report. */
+  premium_value?: number;
   available_cash: number;
   cash_after: number;
   affordable: boolean;
