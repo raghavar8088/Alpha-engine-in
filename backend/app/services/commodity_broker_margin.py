@@ -74,7 +74,7 @@ __all__ = ["basket_margin", "MEASURED_RATE", "SHORT_OPTION_FACTOR", "measured_ra
 # rate: a mini is the same commodity in a smaller wrapper and carries the same percentage.
 MEASURED_RATE: dict[str, float] = {
     "GOLD": 0.092,          # GOLD, GOLDM, GOLDTEN, GOLDGUINEA, GOLDPETAL all 9.2%
-    "SILVER": 0.126,        # SILVER, SILVERM, SILVERMIC all 12.6%
+    "SILVER": 0.127,        # SILVER 12.7%, SILVERM and SILVERMIC 12.6%
     "CRUDEOIL": 0.311,      # the parent; CRUDEOILM's own figure is the broken one
     "NATURALGAS": 0.167,    # NATURALGAS and NATGASMINI both 16.7%
     "COPPER": 0.092,
@@ -86,15 +86,17 @@ MEASURED_RATE: dict[str, float] = {
     "COTTON": 0.093,
     "MENTHAOIL": 0.113,
     "STEELREBAR": 0.099,
-    "ELECDMBL": 0.309,
+    "ELECDMBL": 0.310,
 }
 
-# Above the measured futures rate for the same commodity, every short option came in at
-# 1.11-1.16x of it: COPPER 10.2/9.2, GOLD 10.4/9.2, GOLDM 10.5/9.2, NATGAS 19.0/16.7,
-# SILVER 14.3/12.6, SILVERM 14.6/12.6, CRUDEOIL 35.2/31.1, ZINC 10.4/9.1. Rounded UP, so
-# the fallback errs expensive - the direction that refuses a trade rather than allowing an
-# unaffordable one.
-SHORT_OPTION_FACTOR = float(os.getenv("COMMODITY_SHORT_OPTION_FACTOR", "1.15"))
+# Above the measured futures rate for the same commodity, every short option came in
+# between 1.13x and 1.19x of it: NATGAS 19.0/16.7, CRUDEOIL 35.2/31.1, COPPER 10.5/9.2,
+# GOLDM 10.8/9.2, ZINC 10.7/9.1, SILVERM 14.8/12.6, GOLD 10.9/9.2, SILVER 15.2/12.7.
+# Rounded UP past the top of that range, so the fallback errs expensive - the direction
+# that refuses a trade rather than allowing one the account cannot carry. (It was first
+# set to 1.15 from a narrower sample; re-measuring the full board put the top at 1.19,
+# which is the whole reason `scripts/measure_mcx_margin.py` prints this range.)
+SHORT_OPTION_FACTOR = float(os.getenv("COMMODITY_SHORT_OPTION_FACTOR", "1.20"))
 
 # For an underlying with no measured rate: above all but crude and power. A contract nobody
 # has measured should cost more to carry than one that has been, not less.

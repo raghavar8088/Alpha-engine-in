@@ -977,6 +977,13 @@ export default function CommodityPositionsPage() {
                   </div>
                   <div className="dim">
                     ~{inr(lots * (lotSizing.margin_per_lot_est ?? 0))} margin
+                    {lotSizing.margin_per_lot_short_option_est ? (
+                      <span className="dim">
+                        {" ("}
+                        {inr(lots * lotSizing.margin_per_lot_short_option_est)}
+                        {" if sold as an option)"}
+                      </span>
+                    ) : null}
                     {lotSizing.capital ? (
                       <>
                         {" · "}

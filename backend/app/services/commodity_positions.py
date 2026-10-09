@@ -1227,10 +1227,13 @@ async def sizing_preview(symbol: str, account_id: str | None = None) -> dict:
         except OrderError:
             capital = free = None
 
-    # A futures lot's margin, as the order-ticket estimate. An option leg is margined on
-    # its own risk and is quoted properly once a contract is picked; this is the
-    # order-of-magnitude figure the ticket needs before that.
+    # What one lot costs to CARRY, at the rates measured from the broker. Both are quoted
+    # because this ticket places either a future or an option and a single number cannot be
+    # right for both — a sold option costs ~1.2x a future on the same commodity. The exact
+    # figure is asked of the broker once a contract is actually picked.
     margin_per_lot = round(margin_pct_for(sym) * one_lot, 2) if one_lot else None
+    margin_per_lot_short = (round(margin_pct_for_short_option(sym) * one_lot, 2)
+                            if one_lot else None)
 
     return {
         "symbol": sym,
@@ -1238,6 +1241,9 @@ async def sizing_preview(symbol: str, account_id: str | None = None) -> dict:
         "price_contract": (fut or {}).get("symbol"),
         "one_lot_value": one_lot,
         "margin_per_lot_est": margin_per_lot,
+        "margin_per_lot_short_option_est": margin_per_lot_short,
+        "margin_rate": round(margin_pct_for(sym), 4),
+        "margin_rate_short_option": round(margin_pct_for_short_option(sym), 4),
         "capital": capital,
         "available_cash": free,
         # How many lots the account's own CAPITAL would cover at full notional. Not a
@@ -1246,7 +1252,9 @@ async def sizing_preview(symbol: str, account_id: str | None = None) -> dict:
         **spec_doc(sym),
         "note": ("One lot is what you control, not what you pay. Margin is a fraction of "
                  "it, which is why a book can carry many times its own capital in "
-                 "notional without running out of cash."),
+                 "notional without running out of cash. The margin figures here are "
+                 "estimates at rates measured from Angel on 2026-10-09; the exact charge "
+                 "is asked of the broker once a contract is picked."),
     }
 
 
