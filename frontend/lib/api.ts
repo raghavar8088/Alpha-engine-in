@@ -6222,7 +6222,13 @@ export interface CmpSizing {
   price: number | null;
   price_contract?: string | null;
   one_lot_value: number | null;
+  /** Estimated margin for one FUTURES lot, at the measured broker rate. */
   margin_per_lot_est: number | null;
+  /** The same for one SOLD OPTION lot, which costs ~1.2x a future on the same commodity.
+   *  Both are quoted because this ticket places either from the same box. */
+  margin_per_lot_short_option_est?: number | null;
+  margin_rate?: number;
+  margin_rate_short_option?: number;
   capital: number | null;
   available_cash: number | null;
   lots_at_1x_capital: number | null;
@@ -6436,9 +6442,21 @@ export interface CmpBasketEstimate {
   legs: CmpPricedLeg[];
   /** Signed. Negative when the basket hedges an open position and FREES margin. */
   margin_required: number;
+  /** Where the margin figure came from: "angel" (the broker's own calculator, the same
+   *  figure its app shows) or "measured[:why]" (rates measured from the broker on
+   *  2026-10-09, used when it could not be asked — throttled, unreachable, the contract
+   *  unmapped, or its answer not believable). Shown on the page, never implied: the local
+   *  model this replaced was 8.2x too light on short MCX options and nothing on screen
+   *  said which model had produced the number. */
+  margin_source?: string;
   /** How much the basket frees, as a positive number. Zero when it consumes margin. */
   margin_released: number;
+  /** Each leg's own margin at the measured rates, summed. */
   margin_if_legged_separately: number;
+  /** Always 0 now. SPAN nets almost nothing across the baskets this desk trades — 0% on
+   *  a straddle, 1.8% on a vertical — so the gap between the two numbers above is
+   *  calibration drift, not a saving anyone earned. The old model claimed Rs 69,181 of it
+   *  on a straddle that in fact nets nothing. */
   hedge_benefit: number;
   net_premium: number;
   /** Notional controlled, with opposing option sides netted per expiry — a short
@@ -6467,8 +6485,16 @@ export interface CmpMaxLots {
   margin: number;
   available_cash: number;
   margin_per_lot: number;
-  /** Margin at one lot MORE, from the same price snapshot. null when capped. */
+  /** Margin at one lot MORE, projected from `margin_per_lot`. Margin is exactly linear in
+   *  size, so this needs no extra broker call. null when capped. */
   margin_at_next: number | null;
+  /** Where the margin figure came from: "angel" (the broker's own calculator, the same
+   *  figure its app shows) or "measured[:why]" (rates measured from the broker on
+   *  2026-10-09, used when it could not be asked — throttled, unreachable, the contract
+   *  unmapped, or its answer not believable). Shown on the page, never implied: the local
+   *  model this replaced was 8.2x too light on short MCX options and nothing on screen
+   *  said which model had produced the number. */
+  margin_source?: string;
   premium_per_lot: number;
   legs: number;
   reason: string;
