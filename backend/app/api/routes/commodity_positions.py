@@ -60,6 +60,7 @@ from app.services.commodity_positions import (
     exit_position,
     future_expiries,
     futures_board,
+    sizing_preview,
     list_accounts,
     option_chain,
     option_expiries,
@@ -316,6 +317,20 @@ async def spec_check_endpoint(_u: dict = Depends(get_current_user)):
 # --------------------------------------------------------------------------------
 # Trading
 # --------------------------------------------------------------------------------
+
+
+@router.get("/sizing")
+async def sizing_endpoint(symbol: str = Query(...),
+                          account_id: str | None = Query(None),
+                          _u: dict = Depends(get_current_user)):
+    """What one lot of `symbol` costs and controls, for the order ticket.
+
+    Priced per underlying, not per lot count — the page multiplies client-side, so typing
+    in the lots box costs nothing."""
+    try:
+        return await sizing_preview(symbol, account_id)
+    except OrderError as exc:
+        raise HTTPException(400, exc.detail)
 
 
 @router.get("/margin")

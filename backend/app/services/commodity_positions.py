@@ -1113,6 +1113,63 @@ def _margin_for(legs: list[dict], underlying: str, ref_price: float, t_years: fl
                             exposure_pct=EXPOSURE_PCT)
 
 
+async def sizing_preview(symbol: str, account_id: str | None = None) -> dict:
+    """What one lot of this underlying costs and controls, and against what capital.
+
+    THE GAP THIS FILLS. The order ticket told you a COPPER lot is "2500 kg" and left the
+    only question that matters unanswered: 2,500 kg of WHAT, in rupees? One lot is
+    Rs 35 lakh. Nothing on the ticket said so, so a lot count was chosen against a number
+    nobody had — which is how a Rs 2,00,000 natural-gas account came to carry 40 lots and
+    Rs 59,00,000 of notional, 29.5x its own capital.
+
+    Priced ONCE per underlying rather than per lot count: the price does not change when
+    the lot box does, so the page multiplies this client-side as it is typed and makes no
+    round trip per keystroke.
+
+    Reports, never refuses. Whether 29.5x is too much is the operator's call, and this
+    gives them the number to make it with."""
+    sym = (symbol or "").upper()
+    px, fut = await future_price(sym, max_age=DISPLAY_QUOTE_MAX_AGE_S)
+    mult = multiplier(sym)
+    one_lot = round(float(px) * mult, 2) if px else None
+
+    capital = free = None
+    if account_id:
+        try:
+            account = await get_account(account_id)
+            capital = float(account.get("initial_capital") or 0) or None
+            free = round(await available_cash(account_id, account), 2)
+        except OrderError:
+            capital = free = None
+
+    # A futures lot's margin, as the order-ticket estimate. An option leg is margined on
+    # its own risk and is quoted properly once a contract is picked; this is the
+    # order-of-magnitude figure the ticket needs before that.
+    margin_per_lot = round(margin_pct_for(sym) * one_lot, 2) if one_lot else None
+
+    return {
+        "symbol": sym,
+        "price": round(float(px), 2) if px else None,
+        "price_contract": (fut or {}).get("symbol"),
+        "one_lot_value": one_lot,
+        "margin_per_lot_est": margin_per_lot,
+        "capital": capital,
+        "available_cash": free,
+        # How many lots the account's own CAPITAL would cover at full notional. Not a
+        # limit — a reference point, so "40 lots" can be read against something.
+        "lots_at_1x_capital": (int(capital // one_lot) if capital and one_lot else None),
+        **spec_doc(sym),
+        "note": ("One lot is what you control, not what you pay. Margin is a fraction of "
+                 "it, which is why a book can carry many times its own capital in "
+                 "notional without running out of cash."),
+    }
+
+
+def margin_pct_for(underlying: str) -> float:
+    """Scan band plus exposure — the fraction of notional one futures lot ties up."""
+    return _scan_pct(underlying) + EXPOSURE_PCT
+
+
 async def estimate_margin(*, symbol: str, expiry: str, instrument_kind: str,
                           transaction_type: str, lots: int, price: float,
                           strike: float | None = None,
@@ -2346,7 +2403,7 @@ async def summary(account_id: str) -> dict:
 
 __all__ = [
     "OrderError", "ensure_indexes", "CONTRACT_SPEC", "PRICE_SCAN", "SCAN_FAMILY", "DEFAULT_INITIAL_CAPITAL",
-    "multiplier", "contract_value", "notional_value", "spec_gate",
+    "multiplier", "contract_value", "notional_value", "spec_gate", "sizing_preview",
     "spec_doc", "check_specs", "tick_rupees",
     "prime_lotsizes",
     "ensure_default_account", "list_accounts", "get_account", "create_account",

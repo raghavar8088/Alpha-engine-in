@@ -6215,7 +6215,30 @@ export interface CmpSpecCheckRow extends CmpSpec {
   plausible: boolean;
 }
 
+/** What one lot of an underlying costs and controls — for the order ticket. Priced per
+ *  underlying, so the page multiplies by the lot count client-side. */
+export interface CmpSizing {
+  symbol: string;
+  price: number | null;
+  price_contract?: string | null;
+  one_lot_value: number | null;
+  margin_per_lot_est: number | null;
+  capital: number | null;
+  available_cash: number | null;
+  lots_at_1x_capital: number | null;
+  lot_quantity: string;
+  price_unit: string;
+  multiplier: number;
+  verified: boolean;
+  note: string;
+}
+
 const cmp = "/api/commodity-positions";
+
+export async function fetchCmpSizing(symbol: string, accountId?: string): Promise<CmpSizing> {
+  const q = accountId ? `&account_id=${encodeURIComponent(accountId)}` : "";
+  return apiFetch(`${cmp}/sizing?symbol=${encodeURIComponent(symbol)}${q}`);
+}
 
 export async function fetchCmpAccounts(): Promise<{ accounts: CmpAccount[] }> {
   return apiFetch(`${cmp}/accounts`);

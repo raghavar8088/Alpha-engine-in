@@ -26,6 +26,7 @@ import EmptyState from "../../components/EmptyState";
 import DeskHistory from "../../components/DeskHistory";
 import {
   CmpBasketEstimate,
+  CmpSizing,
   CmpBasketLeg,
   CmpMaxLots,
   CmpChain,
@@ -43,6 +44,7 @@ import {
   executeCmpBasket,
   exitCmpPosition,
   fetchCmpAccounts,
+  fetchCmpSizing,
   fetchCmpBootstrap,
   fetchCmpChain,
   fetchCmpFutureExpiries,
@@ -146,6 +148,20 @@ export default function CommodityPositionsPage() {
   const [formCapital, setFormCapital] = useState("");
 
   const spec = useMemo(() => unders.find((u) => u.symbol === symbol), [unders, symbol]);
+
+  // What one lot of the chosen underlying is worth, so the ticket can say what the lot
+  // count in the box actually controls. Fetched once per (underlying, account) — the
+  // price does not move when the lots box does, so typing costs no round trip.
+  const [lotSizing, setLotSizing] = useState<CmpSizing | null>(null);
+  useEffect(() => {
+    if (!symbol) { setLotSizing(null); return; }
+    let live = true;
+    setLotSizing(null);
+    fetchCmpSizing(symbol, accountId || undefined)
+      .then((r) => { if (live) setLotSizing(r); })
+      .catch(() => { if (live) setLotSizing(null); });
+    return () => { live = false; };
+  }, [symbol, accountId]);
 
   // True when the basket REDUCES the account's required margin rather than consuming any:
   // it hedges a position already open, so less is held against the pair than against the
@@ -928,6 +944,35 @@ export default function CommodityPositionsPage() {
                 multiplier ×{spec.multiplier.toLocaleString("en-IN")} · {spec.futures} futures
                 {spec.options ? ` · ${spec.options} options` : " · no options listed"}
               </div>
+              {/* The number the ticket never showed. "1 lot = 2500 kg" leaves the only
+                  question that matters unanswered — 2,500 kg of what, in rupees? One
+                  COPPER lot is Rs 35 lakh. Shown against this book's own capital,
+                  because a lot count means nothing on its own. */}
+              {lotSizing?.one_lot_value ? (
+                <div className="sizing">
+                  <div>
+                    <b>{lots.toLocaleString("en-IN")} lot{lots === 1 ? "" : "s"}</b>
+                    {" = "}<b>{inr(lots * lotSizing.one_lot_value)}</b>
+                    <span className="dim"> of {symbol}</span>
+                  </div>
+                  <div className="dim">
+                    ~{inr(lots * (lotSizing.margin_per_lot_est ?? 0))} margin
+                    {lotSizing.capital ? (
+                      <>
+                        {" · "}
+                        <span className={
+                          (lots * lotSizing.one_lot_value) / lotSizing.capital >= 10
+                            ? "lev-high"
+                            : (lots * lotSizing.one_lot_value) / lotSizing.capital >= 3
+                              ? "lev-warn" : "lev-ok"}>
+                          {((lots * lotSizing.one_lot_value) / lotSizing.capital).toFixed(1)}×
+                          {" "}this book&apos;s capital
+                        </span>
+                      </>
+                    ) : null}
+                  </div>
+                </div>
+              ) : null}
               {!spec.verified && (
                 <div className="warn">
                   Contract spec unverified — the lot value below comes from the broker&apos;s
@@ -1375,6 +1420,11 @@ export default function CommodityPositionsPage() {
         .ticket { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; padding: 16px 20px; }
         .ticket label { display: flex; flex-direction: column; gap: 5px; font-size: 10.5px;
                         font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); }
+        .sizing { margin-top: 7px; padding-top: 7px; border-top: 1px solid var(--panel-border);
+                  font-size: 12px; line-height: 1.55; }
+        .sizing .lev-warn { color: var(--warn); font-weight: 700; }
+        .sizing .lev-high { color: var(--loss); font-weight: 700; }
+        .sizing .lev-ok { color: var(--text-muted); }
         .specbox { margin-left: auto; font-size: 12px; max-width: 420px; }
         .specbox .dim { color: var(--text-muted); font-size: 11.5px; margin-top: 2px; }
         .specbox .warn { color: #b45309; font-size: 11.5px; margin-top: 5px; line-height: 1.45; }
