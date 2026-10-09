@@ -48,6 +48,7 @@ only place that conversion happens.
 import asyncio
 import logging
 import os
+import re
 import time
 from datetime import date, datetime, timedelta, timezone
 from uuid import uuid4
@@ -2240,11 +2241,69 @@ async def remargin_account(account_id: str | None = None) -> dict:
     return {"groups": len(out), "detail": out}
 
 
+# Where a reset parks what it is about to delete.
+RESET_BACKUP_DIR = os.getenv("COMMODITY_RESET_BACKUP_DIR", "/app/data/backups")
+
+
+async def _dump_account(account_id: str, name: str) -> tuple[str | None, int]:
+    """Write every row of one account to a gzipped jsonl, and read it back.
+
+    A dump nobody verified is not a backup. This project lost months of record to a reset
+    that kept none, so a reset here writes the rows out and re-parses them BEFORE it
+    deletes anything; if the verify fails, the caller does not delete."""
+    import gzip
+    import json
+
+    from bson import json_util
+
+    try:
+        os.makedirs(RESET_BACKUP_DIR, exist_ok=True)
+        safe = re.sub(r"[^A-Za-z0-9_-]+", "-", (name or account_id))[:40].strip("-")
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        path = f"{RESET_BACKUP_DIR}/commodity_reset_{safe}_{stamp}.jsonl.gz"
+        written = 0
+        with gzip.open(path, "wt", encoding="utf-8") as fh:
+            for coll_name, coll in (("commodity_pos_positions", commodity_pos_positions_collection),
+                                    ("commodity_pos_orders", commodity_pos_orders_collection)):
+                async for doc in coll.find({"account_id": account_id}):
+                    fh.write(json.dumps({"_collection": coll_name, "doc": doc},
+                                        default=json_util.default) + chr(10))
+                    written += 1
+        read_back = 0
+        with gzip.open(path, "rt", encoding="utf-8") as fh:
+            for line in fh:
+                json.loads(line)
+                read_back += 1
+        if read_back != written:
+            raise OSError(f"backup wrote {written} rows but read back {read_back}")
+        return path, written
+    except Exception as exc:                            # noqa: BLE001
+        logger.warning("[commodity] reset backup failed: %s", str(exc)[:200])
+        return None, -1
+
+
 async def reset_account(account_id: str) -> dict:
-    await get_account(account_id)
+    """Empty one account's book — every position and every order.
+
+    BACKED UP FIRST, always. The rows are dumped and re-parsed before a single delete
+    runs, and a dump that does not verify ABORTS the reset rather than proceeding
+    without one. Deleting is the easy half; being able to undo it is the half that was
+    missing."""
+    account = await get_account(account_id)
+    backup_path, rows = await _dump_account(account_id, account.get("name") or "")
+    if rows < 0:
+        raise OrderError(
+            "Nothing was deleted: this account's rows could not be backed up, and a reset "
+            "without a backup is not recoverable. Check that the server can write to "
+            f"{RESET_BACKUP_DIR} and try again.")
+
     pos = await commodity_pos_positions_collection.delete_many({"account_id": account_id})
     orders = await commodity_pos_orders_collection.delete_many({"account_id": account_id})
-    return {"positions_deleted": pos.deleted_count, "orders_deleted": orders.deleted_count}
+    logger.warning("[commodity] reset %s (%s): %d positions, %d orders deleted, backup %s",
+                   account.get("name"), account_id, pos.deleted_count, orders.deleted_count,
+                   backup_path)
+    return {"positions_deleted": pos.deleted_count, "orders_deleted": orders.deleted_count,
+            "backed_up_rows": rows, "backup_path": backup_path}
 
 
 def _parse_start(value: str | None) -> str:
