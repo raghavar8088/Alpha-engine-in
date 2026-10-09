@@ -25,7 +25,7 @@ from datetime import date
 
 from tradingai_shared.mcx_fees import mcx_round_trip
 
-from app.services.commodity_positions import EXPOSURE_PCT, SCAN_FAMILY, _scan_pct, multiplier
+from app.services.commodity_positions import SCAN_FAMILY, margin_pct_for, multiplier
 
 WORST_DAY_MOVE: dict[str, float] = {
     "GOLD": 0.11, "SILVER": 0.31, "CRUDEOIL": 0.25, "NATURALGAS": 0.30,
@@ -56,7 +56,8 @@ def lot_value(symbol: str, price: float) -> float:
 
 
 def margin_per_lot(symbol: str, price: float) -> float:
-    return (_scan_pct(symbol) + EXPOSURE_PCT) * lot_value(symbol, price)
+    """The broker's own rate, measured per commodity on 2026-10-09 — not a scan band."""
+    return margin_pct_for(symbol) * lot_value(symbol, price)
 
 
 def worst_day_loss(symbol: str, price: float, lots: int) -> float:

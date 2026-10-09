@@ -23,6 +23,7 @@ POSITION_PATH = "/rest/secure/angelbroking/order/v1/getPosition"
 TRADEBOOK_PATH = "/rest/secure/angelbroking/order/v1/getTradeBook"   # executed fills
 ORDERBOOK_PATH = "/rest/secure/angelbroking/order/v1/getOrderBook"   # order status
 HOLDING_PATH = "/rest/secure/angelbroking/portfolio/v1/getHolding"
+MARGIN_PATH = "/rest/secure/angelbroking/margin/v1/batch"      # SPAN+exposure calculator
 
 # Angel caps a quote request at 50 tokens; chunk anything larger.
 QUOTE_BATCH_SIZE = 50

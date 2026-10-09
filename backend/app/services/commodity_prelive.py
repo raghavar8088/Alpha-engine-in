@@ -103,9 +103,8 @@ from app.services.commodity_patterns import (
 # than restated. `multiplier` is the number that turns a quote into contract value, and
 # getting it wrong is not a rounding error — a bare 1 understates a ZINC lot by 5,000x.
 from app.services.commodity_positions import (
-    EXPOSURE_PCT,
     SCAN_FAMILY,
-    _scan_pct,
+    margin_pct_for,
     multiplier,
     spec_doc,
 )
@@ -192,15 +191,14 @@ def _session_start_utc() -> datetime:
 
 
 def margin_pct(symbol: str) -> float:
-    """Fraction of notional a single futures lot ties up.
+    """Fraction of notional a single futures lot ties up, as the BROKER charges it.
 
-    For ONE futures leg `fno_margin.portfolio_margin` reduces exactly to this: a future's
-    P&L is linear, so the worst loss across a ± scan band is `scan × notional`, and there
-    is no optionality for the vol shift to bite on. Calling the full portfolio walk here
-    would return the same number for eight times the work — but the calibration is taken
-    from that module rather than restated, so a change to the scan bands moves both desks
-    together."""
-    return _scan_pct(symbol) + EXPOSURE_PCT
+    Taken from the Commodity Positions desk rather than restated, so both desks move
+    together — and that shared number is now one measured against Angel's own margin
+    calculator on 2026-10-09, contract by contract, instead of a SPAN-lite scan band. The
+    band this used to return was 7-15% where the broker wanted 7.4-31%; on crude it was
+    out by nearly 3x, and this desk sizes WHOLE MCX lots against it."""
+    return margin_pct_for(symbol)
 
 
 def margin_per_lot(symbol: str, price: float) -> float:

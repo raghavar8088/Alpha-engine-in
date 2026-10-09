@@ -86,6 +86,25 @@ const MAX_LOTS = 500;
 const num = (v: number | null | undefined, dp = 2) =>
   v === null || v === undefined ? "—" : v.toFixed(dp);
 
+/** Where a margin figure came from.
+ *
+ * Always shown, never implied. The local SPAN-lite model this desk used until 2026-10-09
+ * was 8.2x too lenient on short MCX options — it sized a CRUDEOILM straddle at 8 lots on
+ * a Rs 66,000 book where the broker allows 1 — and the only reason that survived is that
+ * nothing on the screen said which model had produced the number. */
+function marginSourceLabel(src?: string): string {
+  if (!src) return "portfolio margin for the whole basket";
+  if (src === "angel") return "as Angel One charges it";
+  const why = src.startsWith("measured:") ? src.slice("measured:".length) : "";
+  const reason: Record<string, string> = {
+    throttled: "broker throttled",
+    "broker-unavailable": "broker unreachable",
+    "below-floor": "broker figure not believable",
+    unmapped: "contract not mapped at the broker",
+  };
+  return why ? `measured rates — ${reason[why] ?? why}` : "measured rates";
+}
+
 export default function CommodityPositionsPage() {
   const [accounts, setAccounts] = useState<CmpSummary["account"][]>([]);
   const [accountId, setAccountId] = useState("");
@@ -834,9 +853,7 @@ export default function CommodityPositionsPage() {
               ) : (
                 <Figure label="Margin required" value={compact(quote?.margin_required)}
                         tone={quote && !quote.affordable ? "loss" : undefined}
-                        sub={quote && quote.hedge_benefit > 0
-                          ? `${compact(quote.hedge_benefit)} saved by hedging`
-                          : "portfolio margin for the whole basket"} />
+                        sub={marginSourceLabel(quote?.margin_source)} />
               )}
               <Figure label="Available cash" value={compact(quote?.available_cash)}
                       tone={(quote?.available_cash ?? 0) < 0 ? "loss" : undefined}

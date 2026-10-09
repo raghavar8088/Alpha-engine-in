@@ -8,7 +8,9 @@ than assumed.
 1. ANGEL ONLY. Dhan cannot price MCX at all — every quote and candle path in this app has
    failed there, which is why the Commodity Trading desk already runs entirely on Angel.
    So there is no `DhanClient` in this module: quotes, chains and spot all come from
-   `angel_client`, and margin is computed locally rather than asked of a broker.
+   `angel_client` — including MARGIN, which is asked of Angel's own calculator (see
+   `commodity_broker_margin`) because the local model was 8.2x too lenient on short
+   MCX options.
 
 2. THE INSTRUMENT MASTER'S `lot_size` IS WRONG FOR MCX — it says 1 for every contract.
    Angel's own scrip master carries the real order-quantity unit, but that is NOT the same
@@ -34,10 +36,13 @@ than assumed.
    ON OR AFTER the option's expiry — not a spot price, which for a commodity does not
    exist in this system at all.
 
-4. SCAN RANGES ARE PER UNDERLYING. The F&O desk uses one 6% price-scan for everything,
-   calibrated on NIFTY. Natural gas is not gold: a single number would either wildly
-   over-margin the metals or under-margin the energies. `PRICE_SCAN` below is per
-   underlying and env-overridable.
+4. MARGIN IS THE BROKER'S NUMBER, NOT A MODEL'S. This desk used to walk a SPAN-lite
+   scenario band with a per-underlying scan range. Re-measured against Angel's own margin
+   calculator on 2026-10-09, that model was 8.2x too lenient on a short MCX straddle —
+   Rs 7,347 a lot against the broker's Rs 60,603 — and it credited a short straddle
+   Rs 69,181 of "hedge benefit" that SPAN does not give at all. The model is gone.
+   `commodity_broker_margin` asks the broker, and falls back to rates MEASURED from the
+   broker (not derived) when it cannot be reached.
 
 STRIKES AND TICKS. The instrument master stores `strike` already converted to rupees
 (SILVER 272000 against a 2,42,107 futures price), but `tick_size` is still in PAISE as the
@@ -61,7 +66,12 @@ from app.core.db import (
     instruments_collection,
 )
 from app.services.angel_client import AngelAPIError, angel_client
-from app.services.fno_margin import portfolio_margin, solve_iv
+from app.services.commodity_broker_margin import (
+    SHORT_OPTION_FACTOR,
+    basket_margin as broker_basket_margin,
+    fallback_margin as measured_margin,
+    measured_rate,
+)
 from options_service.chain import _fill_leg, _years_to_expiry, compute_max_pain, compute_pcr
 
 logger = logging.getLogger("commodity_positions")
@@ -117,29 +127,22 @@ CONTRACT_SPEC: dict[str, tuple[str, str, int]] = {
 # `angel_lotsize` and are reported `verified: false`, with the derived contract value
 # shown so it can be checked against the exchange's published spec before trading.
 
-# SPAN price-scan range per COMMODITY, not per contract. Energies move multiples of what
-# the metals do, and one shared number would over-margin gold or under-margin natural gas.
+# Which commodity FAMILY each contract belongs to. A mini is the same commodity in a
+# smaller wrapper: it has the same volatility, carries the same margin percentage, and
+# prints the same price series. Everything not named here is its own family.
 #
-# Keyed by commodity family on purpose: a mini contract is the same commodity in a smaller
-# wrapper and therefore has exactly the same volatility. The first version keyed on the
-# contract symbol, so CRUDEOILM and NATGASMINI fell through to the default — which
-# under-margined the gas mini by a third against its own parent (8% against 13%). Caught
-# by the first live round trip, not by reading the code.
-PRICE_SCAN: dict[str, float] = {
-    "GOLD": 0.05, "SILVER": 0.08, "CRUDEOIL": 0.09, "NATURALGAS": 0.13,
-    "COPPER": 0.06, "ZINC": 0.06, "ALUMINIUM": 0.06, "LEAD": 0.06, "NICKEL": 0.08,
-}
-
-# Which family each listed contract belongs to. Everything not named here falls back to
-# its own symbol and then to DEFAULT_SCAN.
+# This map used to key a SPAN-lite price-scan band. The bands are gone — margin now comes
+# from the broker, and the fallback rates live in `commodity_broker_margin.MEASURED_RATE`,
+# which this map still keys. The reasoning that justified sharing a band across a family
+# is the reasoning that justifies sharing a measured rate, and it was confirmed when the
+# measurement came in: GOLD, GOLDM, GOLDTEN, GOLDGUINEA and GOLDPETAL all came back at
+# 9.2% of notional, and SILVER, SILVERM and SILVERMIC all at 12.6%.
 SCAN_FAMILY: dict[str, str] = {
     "GOLDM": "GOLD", "GOLDTEN": "GOLD", "GOLDGUINEA": "GOLD", "GOLDPETAL": "GOLD",
     "SILVERM": "SILVER", "SILVERMIC": "SILVER", "SILVER100": "SILVER",
     "CRUDEOILM": "CRUDEOIL", "NATGASMINI": "NATURALGAS",
     "ZINCMINI": "ZINC", "ALUMINI": "ALUMINIUM", "LEADMINI": "LEAD",
 }
-DEFAULT_SCAN = float(os.getenv("COMMODITY_MARGIN_SCAN_PCT", "0.08"))
-EXPOSURE_PCT = float(os.getenv("COMMODITY_MARGIN_EXPOSURE_PCT", "0.02"))
 # Pause BETWEEN quote batches (never after the last one). It was 0.25 s and also slept after
 # the final batch, so an 82-token chain spent 504 ms of its 737 ms asleep (measured on
 # production, 2026-10-07). The pause was copied from the candle endpoint, which Angel does
@@ -189,6 +192,32 @@ def multiplier(underlying: str) -> int:
     if spec:
         return spec[2]
     return _LOTSIZE.get(sym, 1)
+
+
+def family_of(underlying: str) -> str:
+    sym = (underlying or "").upper()
+    return SCAN_FAMILY.get(sym, sym)
+
+
+def broker_order_qty(underlying: str) -> int | None:
+    """Angel's ORDER quantity for ONE lot — its `lotsize`, which on MCX is NOT the value
+    multiplier and must never stand in for it.
+
+    `multiplier()` answers "what is one lot WORTH"; this answers "what number does the
+    broker want in the quantity field". They are different for half the master: GOLD
+    trades in lots of 1 while one lot is worth 100x the quoted 10-gram price, and ZINC
+    trades in lots of 5 while one lot is 5,000 kg of zinc. Sending the multiplier where
+    the lotsize belongs asks the margin calculator about a position thousands of times the
+    intended size — and it answers, plausibly, which is worse than failing.
+
+    Verified 2026-10-09: `angel_lotsize` is a single value per underlying, identical on
+    futures and options for all 28 live MCX underlyings, so it can be looked up by
+    underlying alone and needs no per-contract storage.
+
+    None when the master has no lotsize, which makes the broker margin path decline the
+    basket and say so rather than guess.
+    """
+    return _LOTSIZE.get((underlying or "").upper()) or None
 
 
 async def prime_lotsizes() -> dict[str, int]:
@@ -1116,36 +1145,57 @@ async def futures_board(symbol: str | None = None) -> dict:
 # --------------------------------------------------------------------------------
 
 
-def _scan_pct(underlying: str) -> float:
-    """The price-scan band for this contract's COMMODITY.
+def _broker_leg(inst: dict, side: str, lots: int, *, ref_price: float | None = None,
+                product: str = "MARGIN", underlying: str | None = None) -> dict:
+    """One leg in the shape `commodity_broker_margin` speaks.
 
-    A mini is the same commodity as its parent, so it inherits the parent's band rather
-    than the generic default."""
-    sym = (underlying or "").upper()
-    family = SCAN_FAMILY.get(sym, sym)
-    return PRICE_SCAN.get(family, DEFAULT_SCAN)
-
-
-def _leg_from(inst: dict, side: str, quantity: int, premium: float,
-              ref_price: float, t_years: float) -> dict:
+    Carries the two sizes separately and on purpose: `notional` is what one lot is WORTH
+    (for the measured-rate fallback) and `order_qty` is what the BROKER counts in
+    (for the margin API). On MCX they differ by up to 5,000x."""
+    sym = (underlying or inst.get("underlying_symbol") or "").upper()
     option_type = inst.get("option_type")
-    iv = (solve_iv(premium, ref_price, inst.get("strike"), t_years, option_type)
-          if option_type else None)
-    return {"kind": "OPTION" if option_type else "FUTURE", "option_type": option_type,
-            "strike": inst.get("strike"), "qty": quantity, "side": side,
-            "premium": premium, "iv": iv}
+    strike = inst.get("strike")
+    if option_type and strike:
+        # An option's obligation is its STRIKE, not the premium it cost. Getting this
+        # wrong understated a short straddle's exposure 34x before it was fixed.
+        notional = float(strike) * multiplier(sym)
+    else:
+        notional = float(ref_price or 0.0) * multiplier(sym)
+    token = inst.get("angel_token") or None
+    return {
+        "symbol": sym, "family": family_of(sym),
+        "kind": "OPTION" if option_type else "FUTURE",
+        "side": "SELL" if str(side).upper() == "SELL" else "BUY",
+        "lots": max(int(lots or 1), 1), "notional": round(notional, 2),
+        "token": str(token) if token else None,
+        "order_qty": broker_order_qty(sym), "product": product,
+    }
 
 
-def _margin_for(legs: list[dict], underlying: str, ref_price: float, t_years: float) -> dict:
-    """SPAN-lite with this underlying's own scan range.
+def _broker_leg_from_pos(pos: dict, ref_price: float | None = None) -> dict:
+    """An OPEN position as a margin leg, at its CURRENT size.
 
-    `fno_margin.portfolio_margin` is pure and broker-independent — it walks the underlying
-    across a price-scan band, reprices every leg with Black-Scholes and takes the worst
-    portfolio loss — so it transfers to MCX unchanged. What must NOT transfer is NIFTY's
-    6% calibration: natural gas routinely moves that in a session."""
-    return portfolio_margin(legs, ref_price, t_years,
-                            price_scan_pct=_scan_pct(underlying),
-                            exposure_pct=EXPOSURE_PCT)
+    Lots are taken from the row, and reconstructed from quantity/multiplier only if the
+    row predates lots being stored — a position that has been added to must margin as what
+    it is now, not as what it was at its first fill."""
+    inst = pos.get("instrument") or {}
+    sym = inst.get("underlying_symbol") or pos.get("underlying_symbol") or ""
+    lots = int(pos.get("lots") or 0)
+    if lots < 1:
+        mult = int(inst.get("multiplier") or multiplier(sym)) or 1
+        lots = max(int(round((pos.get("quantity") or 0) / mult)), 1)
+    return _broker_leg(inst, pos.get("side", "BUY"), lots, ref_price=ref_price,
+                       product=pos.get("product_type", "MARGIN"), underlying=sym)
+
+
+async def _margin_now(broker_legs: list[dict], lots: int = 1) -> dict:
+    """{"total", "source", "note"} — the broker's margin for these legs, or the measured
+    fallback with the reason it was used.
+
+    Every margin figure on this desk comes through here, so the number that decides an
+    order can never disagree with the number on the screen beside it."""
+    total, source, note = await broker_basket_margin(broker_legs, lots)
+    return {"total": round(total, 2), "source": source, "note": note}
 
 
 async def sizing_preview(symbol: str, account_id: str | None = None) -> dict:
@@ -1201,8 +1251,20 @@ async def sizing_preview(symbol: str, account_id: str | None = None) -> dict:
 
 
 def margin_pct_for(underlying: str) -> float:
-    """Scan band plus exposure — the fraction of notional one futures lot ties up."""
-    return _scan_pct(underlying) + EXPOSURE_PCT
+    """The fraction of notional one FUTURES lot ties up, as the broker charged it.
+
+    Measured against Angel's calculator on 2026-10-09, contract by contract — not derived
+    from a scan band. The band this used to return was 7-15% where the broker wanted
+    7.4-31%, and on crude it was off by nearly 3x."""
+    return measured_rate(family_of(underlying))
+
+
+def margin_pct_for_short_option(underlying: str) -> float:
+    """The same, for a SOLD option, against its STRIKE notional.
+
+    Every measured short option sat 1.11-1.16x above the futures rate for the same
+    commodity; `SHORT_OPTION_FACTOR` rounds that up."""
+    return margin_pct_for(underlying) * SHORT_OPTION_FACTOR
 
 
 async def estimate_margin(*, symbol: str, expiry: str, instrument_kind: str,
@@ -1214,19 +1276,30 @@ async def estimate_margin(*, symbol: str, expiry: str, instrument_kind: str,
     qty = lots * mult
     ref, _fut = await future_price(symbol, expiry if instrument_kind == "OPTION" else None)
     ref = ref or price
-    t = _years_to_expiry(expiry)
-    leg = _leg_from(inst, transaction_type, qty, price, ref, t)
-    m = _margin_for([leg], symbol, ref, t)
+    leg = _broker_leg(inst, transaction_type, lots, ref_price=ref, underlying=symbol)
+    m = await _margin_now([leg])
+    notional = notional_value(symbol, instrument_kind, price, lots, inst.get("strike"))
+    order_qty = broker_order_qty(symbol)
     return {
-        "margin_required": m["total"], "span": m["span"], "exposure": m["exposure"],
-        "notional_value": notional_value(symbol, instrument_kind, price, lots,
-                                         inst.get("strike")),
+        "margin_required": m["total"],
+        "margin_source": m["source"], "margin_note": m["note"],
+        # What the measured rates say, alongside what was actually used. When the two
+        # differ the broker was reachable and is the one quoted; keeping both visible is
+        # what makes a drifting calibration noticeable instead of invisible.
+        "margin_measured": measured_margin([leg]),
+        "margin_pct_of_notional": (round(m["total"] / notional * 100, 2)
+                                   if notional else None),
+        "notional_value": notional,
         "premium_value": round(price * qty, 2),
         "quantity": qty, "multiplier": mult,
-        "scan_pct": _scan_pct(symbol), "reference_price": ref,
-        "source": "span_lite_mcx",
-        "note": "Computed locally. Dhan's margin calculator does not cover MCX, so no "
-                "broker figure is available to quote here.",
+        # The broker's own quantity unit, which is NOT `quantity` above. Reported so the
+        # figure can be reconciled against the broker app, where this is what is shown.
+        "broker_order_quantity": (order_qty * lots) if order_qty else None,
+        "reference_price": ref,
+        "source": m["source"],
+        "note": ("Angel One's own margin calculator, the same figure the broker app shows."
+                 if m["source"] == "angel" else
+                 f"Rates measured from Angel on 2026-10-09, used because {m['note']}"),
     }
 
 
@@ -1322,9 +1395,9 @@ async def _fill(base_order: dict, fill_price: float, check_margin: bool = True) 
     ref, _fut = await future_price(
         symbol, inst["expiry"] if base_order["instrument_kind"] == "OPTION" else None)
     ref = ref or fill_price
-    t = _years_to_expiry(inst.get("expiry"))
-    leg = _leg_from(inst, side, quantity, fill_price, ref, t)
-    margin = _margin_for([leg], symbol, ref, t)["total"]
+    leg = _broker_leg(inst, side, base_order["lots"], ref_price=ref,
+                      product=base_order.get("product_type", "MARGIN"), underlying=symbol)
+    margin = (await _margin_now([leg]))["total"]
 
     if check_margin:
         cash = await available_cash(account_id)
@@ -1433,7 +1506,6 @@ async def remargin_group(account_id: str, underlying: str, expiry: str) -> float
     if not positions:
         return 0.0
 
-    t = _years_to_expiry(expiry)
     ref, _fut = await future_price(underlying, expiry)
     if not ref:
         # No reference price means no honest margin. Leave what is stored rather than
@@ -1443,9 +1515,13 @@ async def remargin_group(account_id: str, underlying: str, expiry: str) -> float
                        "stored for %d positions", underlying, expiry, len(positions))
         return sum(p.get("margin_used") or 0.0 for p in positions)
 
-    legs = [_pos_to_leg(p, ref, t) for p in positions]
-    total = _margin_for(legs, underlying, ref, t)["total"]
-    standalone = [_margin_for([leg], underlying, ref, t)["total"] for leg in legs]
+    legs = [_broker_leg_from_pos(p, ref) for p in positions]
+    total = (await _margin_now(legs))["total"]
+    # The TOTAL is the broker's; this split is only a RATIO, and a ratio taken from the
+    # measured model is the ratio the broker would give, because both are additive across
+    # legs — a straddle nets nothing at SPAN (measured 2026-10-09: the two legs apart cost
+    # exactly what they cost together).
+    standalone = [measured_margin([leg]) for leg in legs]
     denom = sum(standalone) or 1.0
 
     for pos, alone in zip(positions, standalone):
@@ -1525,13 +1601,13 @@ async def reopen_at_the_money(account_id: str, position_id: str) -> dict:
     priced = await _price_basket([new_leg])
 
     # Project the end state: this group with the old leg REMOVED and the new one added.
-    t = _years_to_expiry(expiry)
     group = await _open_group(account_id, underlying, expiry)
     survivors = [q for q in group if q["position_id"] != position_id]
-    before = _margin_for([_pos_to_leg(q, ref, t) for q in group], underlying, ref, t)["total"]
-    after_legs = [_pos_to_leg(q, ref, t) for q in survivors] + [
-        _leg_from(p["inst"], p["side"], p["qty"], p["ltp"], ref, t) for p in priced]
-    after = _margin_for(after_legs, underlying, ref, t)["total"]
+    before = (await _margin_now([_broker_leg_from_pos(q, ref) for q in group]))["total"]
+    after_legs = [_broker_leg_from_pos(q, ref) for q in survivors] + [
+        _broker_leg(p["inst"], p["side"], p["lots"], ref_price=ref, underlying=p["symbol"])
+        for p in priced]
+    after = (await _margin_now(after_legs))["total"]
     delta = round(after - before, 2)
     cash = await available_cash(account_id)
     if not basket_allowed(delta, cash):
@@ -1642,7 +1718,6 @@ async def reopen_all_at_the_money(account_id: str,
 
     plans, total_delta = [], 0.0
     for (underlying, expiry), members in groups.items():
-        t = _years_to_expiry(expiry)
         legs, moves = [], []
         ref = None
         for pos in members:
@@ -1665,11 +1740,12 @@ async def reopen_all_at_the_money(account_id: str,
         whole = await _open_group(account_id, underlying, expiry)
         ids = {pos["position_id"] for pos in members}
         survivors = [q for q in whole if q["position_id"] not in ids]
-        before = _margin_for([_pos_to_leg(q, ref, t) for q in whole], underlying, ref, t)["total"]
-        after = _margin_for(
-            [_pos_to_leg(q, ref, t) for q in survivors]
-            + [_leg_from(x["inst"], x["side"], x["qty"], x["ltp"], ref, t) for x in priced],
-            underlying, ref, t)["total"]
+        before = (await _margin_now(
+            [_broker_leg_from_pos(q, ref) for q in whole]))["total"]
+        after = (await _margin_now(
+            [_broker_leg_from_pos(q, ref) for q in survivors]
+            + [_broker_leg(x["inst"], x["side"], x["lots"], ref_price=ref,
+                           underlying=x["symbol"]) for x in priced]))["total"]
         total_delta += after - before
         plans.append({"underlying": underlying, "expiry": expiry, "members": members,
                       "legs": legs, "moves": moves, "ref": round(float(ref), 2),
@@ -1877,20 +1953,6 @@ async def _price_basket(legs: list[dict], max_age: float = 0.0,
     return priced
 
 
-def _pos_to_leg(pos: dict, ref: float | None = None, t_years: float = 0.0) -> dict:
-    """An open position as a margin leg, at its CURRENT size.
-
-    `qty` comes from the stored quantity, so a position that has been added to margins as
-    what it is now rather than as what it was when it opened."""
-    inst = pos.get("instrument") or {}
-    option_type = inst.get("option_type")
-    premium = pos.get("ltp") or pos.get("entry_price") or 0.0
-    iv = (solve_iv(premium, ref, inst.get("strike"), t_years, option_type)
-          if option_type and ref else None)
-    return {"kind": pos.get("instrument_kind", "FUTURE"),
-            "option_type": option_type, "strike": inst.get("strike"),
-            "qty": pos.get("quantity", 0), "side": pos.get("side", "BUY"),
-            "premium": premium, "iv": iv}
 
 
 async def _open_group(account_id: str, underlying: str, expiry: str) -> list[dict]:
@@ -1900,8 +1962,8 @@ async def _open_group(account_id: str, underlying: str, expiry: str) -> list[dic
 
 
 async def basket_margin_delta(account_id: str, priced: list[dict],
-                              max_age: float = 0.0) -> tuple[float, float]:
-    """(added_margin, net_premium).
+                              max_age: float = 0.0) -> tuple[float, float, str]:
+    """(added_margin, net_premium, margin_source).
 
     The added margin is the RISE in this account's netted portfolio margin once every leg
     is added — computed per (underlying, expiry) group, so a spread inside the basket nets
@@ -1920,22 +1982,28 @@ async def basket_margin_delta(account_id: str, priced: list[dict],
         net_premium += p["ltp"] * p["qty"] * (1 if p["side"] == "SELL" else -1)
 
     added = 0.0
+    sources: set[str] = set()
     for (underlying, expiry), plist in groups.items():
-        t = _years_to_expiry(expiry)
         ref, _fut = await future_price(underlying, expiry, max_age=max_age)
         ref = ref or plist[0]["ltp"]
         existing = await _open_group(account_id, underlying, expiry)
-        old_legs = [_pos_to_leg(q, ref, t) for q in existing]
-        add_legs = [_leg_from(p["inst"], p["side"], p["qty"], p["ltp"], ref, t) for p in plist]
-        before = _margin_for(old_legs, underlying, ref, t)["total"] if old_legs else 0.0
-        after = _margin_for(old_legs + add_legs, underlying, ref, t)["total"]
-        added += after - before
+        old_legs = [_broker_leg_from_pos(q, ref) for q in existing]
+        add_legs = [_broker_leg(p["inst"], p["side"], p["lots"], ref_price=ref,
+                                underlying=p["symbol"]) for p in plist]
+        before = (await _margin_now(old_legs))["total"] if old_legs else 0.0
+        after = await _margin_now(old_legs + add_legs)
+        added += after["total"] - before
+        # The weakest link wins: if ANY group had to fall back, the basket's figure is not
+        # the broker's and must not be labelled as though it were.
+        if after["source"] != "angel":
+            sources.add(after["source"])
     # SIGNED, deliberately. A basket that re-hedges an existing position genuinely REDUCES
     # this account's required margin, and clamping that to zero was not a cosmetic choice:
     # `added <= available_cash` is just `deployed + added <= capital + realised` rearranged,
     # so reporting 0 for a delta of -12,331 made the gate compare the WRONG total and refuse
     # a basket that would have left the book solvent.
-    return round(added, 2), round(net_premium, 2)
+    return (round(added, 2), round(net_premium, 2),
+            sorted(sources)[0] if sources else "angel")
 
 
 def basket_allowed(added: float, cash: float) -> bool:
@@ -1966,22 +2034,26 @@ async def estimate_basket(account_id: str, legs: list[dict]) -> dict:
     priced, cash = await asyncio.gather(
         _price_basket(legs, max_age=DISPLAY_QUOTE_MAX_AGE_S, prefetch_futures=True),
         available_cash(account_id, account))
-    added, net_premium = await basket_margin_delta(account_id, priced,
-                                                   max_age=DISPLAY_QUOTE_MAX_AGE_S)
+    added, net_premium, margin_source = await basket_margin_delta(
+        account_id, priced, max_age=DISPLAY_QUOTE_MAX_AGE_S)
     gross_exposure = sum(p["contract_value"] for p in priced)
     exposure = net_exposure([
         {"symbol": p["symbol"], "expiry": p["inst"].get("expiry"), "kind": p["kind"],
          "option_type": p["inst"].get("option_type"), "notional": p["contract_value"]}
         for p in priced])
     premium_value = sum(p["premium_value"] for p in priced)
+    # Each leg's own margin, at the rates measured from the broker. Used to show what the
+    # basket would cost legged separately — and no longer to claim a "hedge benefit",
+    # because measurement showed SPAN gives a short straddle none at all: the two legs
+    # cost Rs 30,805 and Rs 29,694 apart and Rs 60,499 together, the exact sum. The old
+    # model credited that straddle Rs 69,181 of benefit it never had.
     naive = 0.0
     for p in priced:
-        t = _years_to_expiry(p["inst"].get("expiry"))
         ref, _f = await future_price(p["symbol"], p["inst"].get("expiry"),
                                      max_age=DISPLAY_QUOTE_MAX_AGE_S)
         ref = ref or p["ltp"]
-        naive += _margin_for([_leg_from(p["inst"], p["side"], p["qty"], p["ltp"], ref, t)],
-                             p["symbol"], ref, t)["total"]
+        naive += measured_margin([_broker_leg(p["inst"], p["side"], p["lots"],
+                                              ref_price=ref, underlying=p["symbol"])])
 
     return {
         "legs": [{
@@ -1995,11 +2067,17 @@ async def estimate_basket(account_id: str, legs: list[dict]) -> dict:
             **spec_doc(p["symbol"]),
         } for p in priced],
         "margin_required": added,
+        "margin_source": margin_source,
         # Positive when the basket FREES margin — it hedges something already open, so the
         # book needs less held against it after the fill than before.
         "margin_released": round(max(0.0, -added), 2),
         "margin_if_legged_separately": round(naive, 2),
-        "hedge_benefit": round(max(0.0, naive - added), 2),
+        # Deliberately NOT reported as a hedge benefit any more. SPAN nets almost nothing
+        # across the baskets this desk trades — 0% on a straddle, 1.8% on a vertical
+        # (short 8750 CE / long 8800 CE: Rs 30,242 together against Rs 30,805 for the
+        # short leg alone) — so the gap between these two numbers is calibration drift
+        # between the broker and the measured rates, not a saving anyone earned.
+        "hedge_benefit": 0.0,
         "net_premium": net_premium,
         "contract_exposure": round(exposure, 2),
         # The plain sum of every leg, kept because it is the conventional "notional" and
@@ -2023,21 +2101,31 @@ async def estimate_basket(account_id: str, legs: list[dict]) -> dict:
 async def max_lots(account_id: str, legs: list[dict], cap: int = MAX_LOTS_PER_ORDER) -> dict:
     """The largest EQUAL lot count this account can carry across the given legs.
 
-    Not `cash / one_lot_margin`: margin is not linear in lots once legs hedge each other,
-    and a short straddle's margin is one side's risk rather than the sum of both, so the
-    linear guess is wrong in both directions depending on the basket. This searches the
-    real margin model instead.
+    WHY THIS IS NOW A DIVISION AND NOT A SEARCH
+    -------------------------------------------
+    It used to scan or binary-search a local SPAN-lite model, and the model was 8.2x too
+    lenient on short MCX options — so the search was efficient and the answer was wrong.
+    Measured on 2026-10-09 for a Rs 66,000 account sizing a 1-lot CRUDEOILM 8750 short
+    straddle, it returned 8 lots; the broker allows 1.
 
-    Everything that does not depend on SIZE — the reference future price, time to expiry,
-    the legs already open in the group — is resolved once and reused, so the search itself
-    is pure arithmetic. Prices are fetched once at one lot, not once per probe; the naive
-    version re-quoted every leg through Angel on each of ~18 iterations.
+    Margin now comes from the broker, and the broker's margin is EXACTLY linear in size.
+    Asked for the same straddle at 1, 3 and 9 lots Angel returned Rs 60,499, Rs 1,81,496
+    and Rs 5,44,489 — 3.000x and 9.000x — and SILVERMIC and GOLDM futures behaved the same.
+    So one question answers the whole range: what does one lot add? The rest is
+    `cash // that`.
+
+    That matters for more than elegance. The margin endpoint is the tightest-rationed one
+    this process calls and has to be paced 1.5 s apart to answer reliably at all, so the
+    old shape — up to 500 model evaluations, which would have been 500 calls — is not
+    something the broker would answer. This asks twice: once at one lot, and once more to
+    CONFIRM the size it is about to report rather than trust the arithmetic.
 
     Returns 0 when even one lot does not fit. That is an answer, not an error.
 
-    Sizing is a PREVIEW, so its quotes may be up to DISPLAY_QUOTE_MAX_AGE_S old - which is
+    Sizing is a PREVIEW, so its quotes may be up to DISPLAY_QUOTE_MAX_AGE_S old — which is
     what lets the page's two sizing calls reuse the prices its chain fetched a moment
-    earlier. The fill re-prices fresh."""
+    earlier. The fill re-prices fresh.
+    """
     account = await get_account(account_id)
     if not legs:
         raise OrderError("Nothing to size — pick a contract first")
@@ -2051,91 +2139,82 @@ async def max_lots(account_id: str, legs: list[dict], cap: int = MAX_LOTS_PER_OR
         groups.setdefault((p["symbol"], p["inst"].get("expiry")), []).append(p)
 
     async def group_context(underlying: str, expiry, plist: list[dict]) -> tuple:
-        t = _years_to_expiry(expiry)
+        """Everything that does not depend on SIZE, resolved once: the reference price, the
+        legs already open in the group, and the new legs at one lot."""
         ref, _fut = await future_price(underlying, expiry, max_age=DISPLAY_QUOTE_MAX_AGE_S)
         ref = ref or plist[0]["ltp"]
-        open_legs = [_pos_to_leg(q, ref, t)
+        open_legs = [_broker_leg_from_pos(q, ref)
                      for q in await _open_group(account_id, underlying, expiry)]
-        before = _margin_for(open_legs, underlying, ref, t)["total"] if open_legs else 0.0
-        # The new legs at ONE lot, built once. `_leg_from` solves implied volatility, and IV
-        # depends on premium, price, strike and time - never on size - so re-solving it for
-        # each of up to 500 probe sizes was pure repetition.
-        unit = [(_leg_from(p["inst"], p["side"], p["multiplier"], p["ltp"], ref, t),
-                 p["multiplier"]) for p in plist]
-        return (underlying, ref, t, open_legs, before, unit)
+        unit = [_broker_leg(p["inst"], p["side"], 1, ref_price=ref, underlying=p["symbol"])
+                for p in plist]
+        return (open_legs, unit)
 
     context = await asyncio.gather(*(group_context(u, e, pl)
                                      for (u, e), pl in groups.items()))
 
-    def margin_for(n: int) -> float:
-        added = 0.0
-        for underlying, ref, t, open_legs, before, unit in context:
-            add = [{**leg, "qty": n * mult} for leg, mult in unit]
-            added += _margin_for(open_legs + add, underlying, ref, t)["total"] - before
-        return round(added, 2)
+    async def added_at(n: int) -> tuple[float, str]:
+        """What carrying n lots per leg ADDS to this account's required margin.
+
+        A delta, not a total: a basket that re-hedges something already open genuinely
+        reduces what the book must hold, and `basket_allowed` turns on that being signed."""
+        total, source = 0.0, "angel"
+        for open_legs, unit in context:
+            before = (await _margin_now(open_legs))["total"] if open_legs else 0.0
+            after = await _margin_now(open_legs + [{**leg, "lots": n} for leg in unit])
+            total += after["total"] - before
+            if after["source"] != "angel":
+                source = after["source"]
+        return round(total, 2), source
 
     premium = round(sum(p["ltp"] * p["multiplier"] * (1 if p["side"] == "SELL" else -1)
                         for p in priced), 2)
+    per_lot, source = await added_at(1)
     shape = {"legs": len(priced), "premium_per_lot": premium,
-             "margin_per_lot": margin_for(1), "available_cash": round(cash, 2)}
+             "margin_per_lot": per_lot, "available_cash": round(cash, 2),
+             "margin_source": source}
 
-    # Two searches, chosen by whether anything is ALREADY OPEN in the contract groups.
-    #
-    # Something open: added margin is not monotonic in lots - it falls as the new legs
-    # offset the existing risk, bottoms out near the size that balances it, then climbs once
-    # the new side dominates. A binary search assumes one crossing and can settle on the
-    # wrong side of that dip, so this scans DOWN from the cap, correct whatever the shape.
-    # It runs in a worker thread: up to 500 margin evaluations is ~0.5 s of CPU, and on the
-    # event loop that froze every other request the backend was serving for that long.
-    #
-    # Nothing open: the margin of a fresh basket scales exactly with its size. Every scenario
-    # loss in `portfolio_margin` is a sum of (value - premium) x qty, and the exposure term
-    # is pct x spot x net short units, so multiplying every quantity by n multiplies the
-    # total by n. Added margin is then non-decreasing in lots and `basket_allowed` flips
-    # once, so a binary search returns the SAME n as the scan in ~10 evaluations instead of
-    # 500. That is the common case - sizing a contract you do not already hold - and it is
-    # the one the page asks for twice on every load.
-    hedged = any(open_legs for _u, _r, _t, open_legs, _b, _unit in context)
+    def answer(n: int, added: float, src: str) -> dict:
+        note = (f"{n} lot{'s' if n > 1 else ''} per leg "
+                + (f"frees ₹{-added:,.0f}" if added < 0
+                   else f"blocks ₹{added:,.0f} of ₹{cash:,.0f}")
+                + (f" (capped at {cap})" if n >= cap else "")
+                + (" · Angel One margin" if src == "angel" else " · measured rates"))
+        return {**shape, "margin_source": src, "max_lots": n, "margin": added,
+                # One more lot, projected from the per-lot figure rather than asked for.
+                # Margin is exactly linear in size, and a third paced call to re-derive a
+                # number arithmetic already gives would add 1.5 s to every page load.
+                "margin_at_next": None if n >= cap else round(added + per_lot, 2),
+                "reason": note}
 
-    def largest_fitting() -> int:
-        if hedged:
-            for n in range(cap, 0, -1):
-                if basket_allowed(margin_for(n), cash):
-                    return n
-            return 0
-        if not basket_allowed(margin_for(1), cash):
-            return 0
-        if basket_allowed(margin_for(cap), cash):
-            return cap
-        lo, hi = 1, cap                     # lo fits, hi does not
-        while hi - lo > 1:
-            mid = (lo + hi) // 2
-            if basket_allowed(margin_for(mid), cash):
-                lo = mid
-            else:
-                hi = mid
-        return lo
+    if per_lot <= 0.01:
+        # The basket does not raise required margin at all — it offsets something already
+        # open. Nothing that fails to increase margin can reduce solvency, so it is
+        # allowed at any size, which is the same rule `basket_allowed` applies.
+        return answer(cap, per_lot, source)
+    if not basket_allowed(per_lot, cash):
+        return {**shape, "max_lots": 0, "margin": per_lot, "margin_at_next": per_lot,
+                "reason": (f"one lot needs ₹{per_lot:,.0f} but only ₹{cash:,.0f} is free"
+                           if cash < per_lot
+                           else "this account cannot carry one lot here")}
 
-    best = await asyncio.to_thread(largest_fitting) if hedged else largest_fitting()
-    for n in ([best] if best else []):
-        added = margin_for(n)
-        if basket_allowed(added, cash):
-            note = (f"{n} lot{'s' if n > 1 else ''} per leg "
-                    + (f"frees ₹{-added:,.0f}" if added < 0
-                       else f"blocks ₹{added:,.0f} of ₹{cash:,.0f}")
-                    + (f" (capped at {cap})" if n >= cap else ""))
-            # What one more lot would cost, at the SAME prices this answer was computed
-            # from. Quoting it from a later snapshot is not a check on the sizer: at a
-            # boundary this fine — one gas lot is 0.2% of a 30L book — ordinary tick drift
-            # between two quote calls moves it across the line on its own.
-            return {**shape, "max_lots": n, "margin": added,
-                    "margin_at_next": None if n >= cap else margin_for(n + 1),
-                    "reason": note}
-
-    one = margin_for(1)
-    return {**shape, "max_lots": 0, "margin": one, "margin_at_next": one,
-            "reason": (f"one lot needs ₹{one:,.0f} but only ₹{cash:,.0f} is free"
-                       if cash < one else "this account cannot carry one lot here")}
+    n = max(1, min(cap, int(cash // per_lot)))
+    added = round(per_lot * n, 2)
+    # CONFIRM, do not assume. Linearity was measured exact, but the cost of being wrong
+    # here is an order the account cannot carry, so the size being reported is the size
+    # that gets asked about. Two refinements are plenty: the first correction already uses
+    # the broker's own per-lot figure at that size.
+    for _ in range(2):
+        if n <= 1:
+            n, added = 1, per_lot
+            break
+        probe, source = await added_at(n)
+        added = probe
+        if basket_allowed(probe, cash):
+            break
+        per = probe / n
+        n = max(1, min(n - 1, int(cash // per) if per > 0 else n - 1))
+        added = round(per * n, 2)
+    return answer(n, added, source)
 
 
 async def execute_basket(account_id: str, legs: list[dict],
@@ -2151,7 +2230,7 @@ async def execute_basket(account_id: str, legs: list[dict],
         raise OrderError(f"product_type must be one of {PRODUCT_TYPES}")
 
     priced = await _price_basket(legs)
-    added, net_premium = await basket_margin_delta(account_id, priced)
+    added, net_premium, _margin_source = await basket_margin_delta(account_id, priced)
     cash = await available_cash(account_id)
     if not basket_allowed(added, cash):
         raise OrderError(
@@ -2518,8 +2597,10 @@ async def summary(account_id: str) -> dict:
 
 
 __all__ = [
-    "OrderError", "ensure_indexes", "CONTRACT_SPEC", "PRICE_SCAN", "SCAN_FAMILY", "DEFAULT_INITIAL_CAPITAL",
-    "multiplier", "contract_value", "notional_value", "spec_gate", "sizing_preview",
+    "OrderError", "ensure_indexes", "CONTRACT_SPEC", "SCAN_FAMILY", "DEFAULT_INITIAL_CAPITAL",
+    "multiplier", "broker_order_qty", "family_of", "margin_pct_for",
+    "margin_pct_for_short_option",
+    "contract_value", "notional_value", "spec_gate", "sizing_preview",
     "spec_doc", "check_specs", "tick_rupees",
     "prime_lotsizes",
     "ensure_default_account", "list_accounts", "get_account", "create_account",

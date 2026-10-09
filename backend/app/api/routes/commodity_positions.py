@@ -12,7 +12,7 @@ mathematics; this router is a thin layer over it.
   GET    /api/commodity-positions/futures              the live futures board
   GET    /api/commodity-positions/options/expiries     option expiries for an underlying
   GET    /api/commodity-positions/options/chain        option chain around the future
-  GET    /api/commodity-positions/margin               SPAN-lite margin for one leg
+  GET    /api/commodity-positions/margin               broker margin for one leg
   POST   /api/commodity-positions/orders               place a BUY/SELL order
   POST   /api/commodity-positions/basket/estimate      what a basket costs, before placing
   POST   /api/commodity-positions/basket/execute       fill every leg, or none
@@ -28,9 +28,13 @@ mathematics; this router is a thin layer over it.
   GET    /api/commodity-positions/spec-check           are the contract multipliers sane?
   POST   /api/commodity-positions/sync-instruments     reload the whole MCX board
   GET    /api/commodity-positions/instrument-coverage  what the master holds per underlying
+  GET    /api/commodity-positions/margin-health        broker margin pacer + cache
 
-There is no Dhan anywhere in this module. Dhan does not cover MCX, so quotes come from
-Angel and margin is computed locally — both stated in the payloads rather than implied.
+There is no Dhan anywhere in this module. Dhan does not cover MCX, so quotes AND margin
+come from Angel — margin from its own margin calculator, which reproduces the figure the
+broker app shows (a 1-lot CRUDEOILM 8750 short straddle: Rs 60,499 here against the app's
+Rs 60,603). Every margin payload carries `margin_source`, because the local model this
+replaced was 8.2x too lenient on short MCX options and nothing on the screen said so.
 """
 
 import asyncio
@@ -568,6 +572,27 @@ async def exit_endpoint(position_id: str, payload: ExitRequest,
                     ORDER_TS)
     except OrderError as exc:
         raise HTTPException(400, exc.detail)
+
+
+@router.get("/margin-health")
+async def margin_health(_u: dict = Depends(get_current_user)):
+    """Is the broker actually answering, and how often are we falling back?
+
+    `rejected_zero` and `rejected_floor` are the two refusals: a throttled reply that came
+    back as Rs 0, and a futures figure too far below its family's measured rate to believe.
+    A climbing `rejected_zero` means the pacer is too fast for whatever else is sharing the
+    endpoint; a non-zero `errors` with a healthy `calls` is an Angel outage, which the desk
+    survives on measured rates."""
+    from app.services.angel_client import margin_pacer
+    from app.services.commodity_broker_margin import (
+        MEASURED_RATE, SHORT_OPTION_FACTOR, margin_cache_stats,
+    )
+    return {"cache": margin_cache_stats(), "pacer": margin_pacer.describe(),
+            "measured_rate": MEASURED_RATE, "short_option_factor": SHORT_OPTION_FACTOR,
+            "note": "Margin is asked of Angel's own calculator and cached per basket "
+                    "shape. MEASURED_RATE is the fallback, measured against that same "
+                    "calculator on 2026-10-09 and expressed as a fraction of one lot's "
+                    "notional."}
 
 
 @router.post("/remargin")

@@ -39,12 +39,12 @@ import time
 from collections import Counter
 
 from tradingai_broker_clients.angel import AngelAPIError, AngelClient, AngelCredentials
-from tradingai_broker_clients.angel.auth import QUOTE_PATH
+from tradingai_broker_clients.angel.auth import MARGIN_PATH, QUOTE_PATH
 
 from app.core.config import settings
 
 __all__ = ["angel_client", "AngelClient", "AngelCredentials", "AngelAPIError",
-           "candle_pacer", "quote_pacer", "is_rate_limited"]
+           "candle_pacer", "quote_pacer", "margin_pacer", "is_rate_limited"]
 
 logger = logging.getLogger("angel_client")
 
@@ -64,6 +64,21 @@ CANDLE_COOLDOWN_MAX = float(os.getenv("ANGEL_CANDLE_COOLDOWN_MAX", "60"))
 QUOTE_MIN_GAP = float(os.getenv("ANGEL_QUOTE_MIN_GAP", "0.11"))
 QUOTE_COOLDOWN_BASE = float(os.getenv("ANGEL_QUOTE_COOLDOWN", "1"))
 QUOTE_COOLDOWN_MAX = float(os.getenv("ANGEL_QUOTE_COOLDOWN_MAX", "10"))
+
+# The MARGIN calculator is the tightest-rationed endpoint this process calls, and its
+# failure mode is the dangerous kind: when throttled it answers 200 OK with
+# totalMarginRequired = 0 rather than a 403. Zero is also the TRUE answer for a long
+# option, so a throttled reply is indistinguishable from a real one by shape alone.
+#
+# Measured from this box on 2026-10-09. Unpaced bursts of ~35 calls returned 0 for a third
+# of them, scattered - GOLDM came back 0 at 1, 2, 3 and 5 lots and then Rs 1,37,545 for
+# the same contract INTRADAY. The same questions asked 1.5 s apart were bit-stable over
+# six repeats each: GOLDM Rs 1,37,546 every time, a CRUDEOILM short straddle Rs 60,497.75
+# / 60,498.00 across five. So the endpoint is dependable at this spacing and only at it,
+# and `commodity_broker_margin` additionally refuses a zero that cannot be true.
+MARGIN_MIN_GAP = float(os.getenv("ANGEL_MARGIN_MIN_GAP", "1.5"))
+MARGIN_COOLDOWN_BASE = float(os.getenv("ANGEL_MARGIN_COOLDOWN", "4"))
+MARGIN_COOLDOWN_MAX = float(os.getenv("ANGEL_MARGIN_COOLDOWN_MAX", "60"))
 
 
 def is_rate_limited(exc: Exception) -> bool:
@@ -132,22 +147,25 @@ class CandlePacer:
 
 candle_pacer = CandlePacer(CANDLE_MIN_GAP, CANDLE_COOLDOWN_BASE, CANDLE_COOLDOWN_MAX)
 quote_pacer = CandlePacer(QUOTE_MIN_GAP, QUOTE_COOLDOWN_BASE, QUOTE_COOLDOWN_MAX, name="quote")
+margin_pacer = CandlePacer(MARGIN_MIN_GAP, MARGIN_COOLDOWN_BASE,
+                          MARGIN_COOLDOWN_MAX, name="margin")
 
 
 class _PacedAngelClient(AngelClient):
     async def _read_post(self, path, payload):
         # Candles are paced in candles() below (with caller attribution); everything else
         # that is not a quote passes straight through.
-        if path != QUOTE_PATH:
+        if path not in (QUOTE_PATH, MARGIN_PATH):
             return await super()._read_post(path, payload)
-        await quote_pacer.acquire()
+        pacer = quote_pacer if path == QUOTE_PATH else margin_pacer
+        await pacer.acquire()
         try:
             body = await super()._read_post(path, payload)
         except AngelAPIError as exc:
             if is_rate_limited(exc):
-                quote_pacer.refused()
+                pacer.refused()
             raise
-        quote_pacer.succeeded()
+        pacer.succeeded()
         return body
 
     async def candles(self, exchange, symbol_token, resolution, from_dt, to_dt, *,

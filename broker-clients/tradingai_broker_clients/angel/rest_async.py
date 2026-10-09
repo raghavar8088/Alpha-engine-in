@@ -16,6 +16,7 @@ from .auth import (
     ANGEL_INTERVALS,
     CANDLE_PATH,
     HOLDING_PATH,
+    MARGIN_PATH,
     LOGIN_PATH,
     ORDER_PATH,
     ORDERBOOK_PATH,
@@ -219,6 +220,27 @@ class AngelClient:
     async def order_book(self) -> list[dict]:
         """Today's orders with their status (complete / rejected / pending)."""
         return (await self._get(ORDERBOOK_PATH)).get("data") or []
+
+    async def margin_batch(self, positions: list[dict]) -> float:
+        """SPAN + exposure for a WHOLE basket, as the broker itself would charge it.
+
+        Returns `totalMarginRequired` in rupees. Each position needs every one of:
+
+            {"exchange", "qty", "price", "productType", "token", "tradeType", "orderType"}
+
+        `orderType` is not optional even though the docs imply it — omitting it is
+        rejected with "Order type is required", which costs a round trip to discover.
+        `qty` is the broker's ORDER quantity (its `lotsize` per lot), which on MCX is NOT
+        the value multiplier: GOLD trades in lots of 1 while a lot is worth 100x the
+        quoted 10-gram price. Sending the value multiplier asks about a position 100x the
+        intended size.
+
+        Verified against the Angel One app on 2026-10-09: a 1-lot CRUDEOILM 8750 short
+        straddle returned Rs 60,499 against the app's own Rs 60,603.
+        """
+        body = await self._read_post(MARGIN_PATH, {"positions": positions})
+        data = body.get("data") or {}
+        return float(data.get("totalMarginRequired") or 0.0)
 
     async def place_order(
         self,
