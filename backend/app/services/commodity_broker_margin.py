@@ -61,7 +61,7 @@ import logging
 import os
 import time
 
-from app.services.angel_client import AngelAPIError, angel_client
+from app.services.angel_client import angel_client
 
 logger = logging.getLogger("commodity_broker_margin")
 
@@ -252,10 +252,18 @@ async def basket_margin(legs: list[dict], lots: int = 1) -> tuple[float, str, st
     try:
         _STATS["calls"] += 1
         got = await angel_client.margin_batch(positions)
-    except (AngelAPIError, asyncio.TimeoutError, OSError) as exc:
+    except asyncio.CancelledError:
+        raise                       # a cancelled request is not a broker failure
+    except Exception as exc:
+        # DELIBERATELY EVERYTHING. This function sits in the path of every order gate on
+        # the desk and promises not to raise, and a correct fallback is always in hand, so
+        # there is no exception here worth turning into a book that cannot be sized. It
+        # was first written to catch AngelAPIError/TimeoutError/OSError, which is the list
+        # of failures someone thought of — a stubbed RuntimeError walked straight through
+        # it and out through the gate.
         _STATS["errors"] += 1
-        logger.warning("[commodity_broker_margin] Angel margin call failed (%s) - using "
-                       "the measured rate instead", type(exc).__name__)
+        logger.warning("[commodity_broker_margin] Angel margin call failed (%s: %s) - "
+                       "using the measured rate instead", type(exc).__name__, exc)
         return local, "measured:broker-unavailable", f"Angel margin call failed: {exc}"
 
     reason = _implausible(got, legs, local)
