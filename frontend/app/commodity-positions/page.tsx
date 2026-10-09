@@ -842,7 +842,10 @@ export default function CommodityPositionsPage() {
                       tone={(quote?.available_cash ?? 0) < 0 ? "loss" : undefined}
                       sub={quote ? `${compact(quote.cash_after)} left after` : "in this account"} />
               <Figure label="Contract exposure" value={compact(quote?.contract_exposure)}
-                      sub="notional controlled — options at their strike" />
+                      sub={quote && quote.contract_exposure_gross
+                        && quote.contract_exposure_gross > quote.contract_exposure + 1
+                        ? `opposing sides netted · ${compact(quote.contract_exposure_gross)} summed`
+                        : "notional controlled — options at their strike"} />
               <Figure label="Net premium" value={signed(quote?.net_premium)}
                       tone={(quote?.net_premium ?? 0) >= 0 ? "gain" : "loss"}
                       sub={(quote?.net_premium ?? 0) >= 0 ? "received" : "paid"} />

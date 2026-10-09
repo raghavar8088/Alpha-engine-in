@@ -251,6 +251,40 @@ def notional_value(underlying: str, kind: str, price: float, lots: int = 1,
     return contract_value(underlying, price, lots)
 
 
+def net_exposure(rows: list[dict]) -> float:
+    """Notional controlled, with opposing option sides NETTED per underlying and expiry.
+
+    WHY NOT JUST ADD THE LEGS UP. Sell an 8750 call and an 8750 put on 80 barrels and the
+    sum says you control Rs 14,00,000 of crude. You do not. At expiry exactly one of them
+    is assigned — you finish long 80 barrels or short 80 barrels, never both — so the
+    crude you actually control is Rs 7,00,000.
+
+    The margin model had already worked this out and the exposure figure had not, which
+    left one basket described two incompatible ways on the same screen: margin
+    Rs 59,429 for the pair against Rs 1,19,854 for the legs apart ("Rs 60,425 saved by
+    hedging"), beside an exposure that counted both sides in full.
+
+    So the call side and the put side net against each other, being opposing obligations
+    on the same barrels, and futures add on top, not being.
+
+    WHAT THIS DELIBERATELY DOES NOT DO. Legs on the SAME side still sum: a bull call
+    spread counts both its calls, which overstates it, because the true exposure of a
+    spread means walking its payoff rather than netting two numbers. Overstating a spread
+    is the safe direction; telling someone a straddle controls twice what it does is not.
+
+    `rows`: {"symbol", "expiry", "kind", "option_type", "notional"}.
+    """
+    groups: dict[tuple, dict[str, float]] = {}
+    for r in rows:
+        g = groups.setdefault((r.get("symbol"), r.get("expiry")),
+                              {"CE": 0.0, "PE": 0.0, "FUT": 0.0})
+        if str(r.get("kind", "")).upper() == "OPTION":
+            g["CE" if str(r.get("option_type", "")).upper() == "CE" else "PE"] += r["notional"]
+        else:
+            g["FUT"] += r["notional"]
+    return round(sum(max(g["CE"], g["PE"]) + g["FUT"] for g in groups.values()), 2)
+
+
 # THE ONE PLAUSIBILITY BAND. `check_specs` had these numbers inline and this gate was
 # written with its own, slightly tighter pair — which a test immediately caught: at a
 # Rs 15,000 floor a real 1-gram GOLDPETAL lot (Rs 14,896 on 2026-10-08) reads as
@@ -1934,7 +1968,11 @@ async def estimate_basket(account_id: str, legs: list[dict]) -> dict:
         available_cash(account_id, account))
     added, net_premium = await basket_margin_delta(account_id, priced,
                                                    max_age=DISPLAY_QUOTE_MAX_AGE_S)
-    exposure = sum(p["contract_value"] for p in priced)
+    gross_exposure = sum(p["contract_value"] for p in priced)
+    exposure = net_exposure([
+        {"symbol": p["symbol"], "expiry": p["inst"].get("expiry"), "kind": p["kind"],
+         "option_type": p["inst"].get("option_type"), "notional": p["contract_value"]}
+        for p in priced])
     premium_value = sum(p["premium_value"] for p in priced)
     naive = 0.0
     for p in priced:
@@ -1964,6 +2002,9 @@ async def estimate_basket(account_id: str, legs: list[dict]) -> dict:
         "hedge_benefit": round(max(0.0, naive - added), 2),
         "net_premium": net_premium,
         "contract_exposure": round(exposure, 2),
+        # The plain sum of every leg, kept because it is the conventional "notional" and
+        # someone will want to reconcile against it.
+        "contract_exposure_gross": round(gross_exposure, 2),
         "premium_value": round(premium_value, 2),
         "available_cash": round(cash, 2),
         "cash_after": round(cash - added, 2),
@@ -1973,8 +2014,9 @@ async def estimate_basket(account_id: str, legs: list[dict]) -> dict:
                 "each other cost less together than apart. Contract exposure is the full "
                 "notional you are controlling — a future at its own price, an option at "
                 "its STRIKE, because the premium is what an option costs and not what it "
-                "controls. On MCX that notional is many times the margin, and for a sold "
-                "option it is many times the premium received.",
+                "controls. Opposing option sides are NETTED per expiry: a short straddle "
+                "finishes long or short the underlying, never both, so it controls one "
+                "side and not the sum of two. Legs on the same side still add up.",
     }
 
 
@@ -2436,7 +2478,18 @@ async def summary(account_id: str) -> dict:
     unrealized = sum(p.get("unrealized_pnl") or 0.0 for p in open_positions)
     realized = await _realized_all_time(account_id)
     deployed = sum(p.get("margin_used") or 0.0 for p in open_positions)
-    exposure = sum(p.get("contract_value") or 0.0 for p in open_positions)
+    # Netted the same way the basket is, and for the same reason: an account holding a
+    # short straddle controls one side of it, not two. Summing gave this book Rs 59 lakh
+    # against a Rs 2 lakh capital when the honest figure is Rs 29.5 lakh — still 14.8x,
+    # but 14.8x is the number that is true.
+    gross_exposure = sum(p.get("contract_value") or 0.0 for p in open_positions)
+    exposure = net_exposure([
+        {"symbol": p.get("underlying_symbol"),
+         "expiry": (p.get("instrument") or {}).get("expiry"),
+         "kind": p.get("instrument_kind"),
+         "option_type": (p.get("instrument") or {}).get("option_type"),
+         "notional": p.get("contract_value") or 0.0}
+        for p in open_positions])
 
     return {
         "account": account,
@@ -2444,6 +2497,7 @@ async def summary(account_id: str) -> dict:
         "available_cash": round(initial + realized - deployed, 2),
         "margin_deployed": round(deployed, 2),
         "contract_exposure": round(exposure, 2),
+        "contract_exposure_gross": round(gross_exposure, 2),
         "realized_pnl": round(realized, 2),
         "unrealized_pnl": round(unrealized, 2),
         "equity": round(initial + realized + unrealized, 2),
@@ -2455,8 +2509,11 @@ async def summary(account_id: str) -> dict:
         "performance": await performance(account_id),
         "exchange": "MCX", "priced_by": "angel",
         "note": "Margin is a local SPAN-lite estimate: Dhan does not cover MCX, so there "
-                "is no broker number to quote. Contract exposure is the full notional of "
-                "the open book, which for commodities is many times the margin blocked.",
+                "is no broker number to quote. Contract exposure is the notional of the "
+                "open book with opposing option sides netted per expiry — a short "
+                "straddle finishes long or short the underlying, never both — so it is "
+                "not the sum of every leg. For commodities it is still many times the "
+                "margin blocked.",
     }
 
 

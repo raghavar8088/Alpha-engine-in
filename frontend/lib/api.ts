@@ -6441,8 +6441,11 @@ export interface CmpBasketEstimate {
   margin_if_legged_separately: number;
   hedge_benefit: number;
   net_premium: number;
-  /** Notional controlled by the whole basket — options valued at their strike. */
+  /** Notional controlled, with opposing option sides netted per expiry — a short
+   *  straddle finishes long or short the underlying, never both. */
   contract_exposure: number;
+  /** The plain sum of every leg, before that netting. */
+  contract_exposure_gross?: number;
   /** The basket's premium value, which is what `contract_exposure` used to report. */
   premium_value?: number;
   available_cash: number;
