@@ -4,6 +4,17 @@
 
 Every figure below was measured on the production database or on the stored two-year walk-forward backtest on 2026-10-10. The scripts that produce each one are in [`backend/research/intraday_2026_10/`](backend/research/intraday_2026_10/README.md). Measured results, assumptions, and hypotheses are labelled as such.
 
+> **Implementation status — 10 Oct 2026.** C1–C4 and H1 shipped the same day; everything else below is unchanged.
+>
+> | Item | State on production |
+> |---|---|
+> | **C4** arming gate | Live. `GET /api/live-trading/arming` → `allowed: false`, 14 of 14 strategies without a forward verdict. Re-checked every scan. Tests: `backend/tests/live_trading/verify_arming_and_ledger.py` (77). |
+> | **C3** real-money ledger | Live: charges on every close; Angel's position book read before any exit; no exit orders into the broker's square-off window; a late position priced at its own day's close. **August corrected: −₹822 recorded → −₹2,507.52 net** (₹1,585 of charges had never been recorded; 49 square-offs re-priced). 17 trades on Angel's real fills, 61 estimated until Angel's records are imported (`scripts/live_trading_contract_notes.py`; template at `/app/data/live_trading_needs_contract_note.csv`). |
+> | **C1 + C2** Patterns fills and caps | Live: fills by the tournament's own rules (`intraday_fills`, moved verbatim — behaviour identical on every case tried), ≤ 2 strategies a name, ranked signals, 3% breaker; books write `closed_on`. **History re-run: +₹52,96,768 reported → −₹22,84,000**; ₹50k book −₹3,346 → −₹5,273, ₹2 lakh book −₹3,761 → −₹12,370. Originals kept on every row. Tests: `backend/tests/intraday_patterns/verify_fills_and_caps.py` (34). |
+> | **H1** slippage measurement | Live and pre-registered (fingerprint `d50a4bbecfe6e146`, stored before any sample). Collecting at every signal of the three strategies; GO thresholds 1.44 / 1.20 / 1.03 bp; 100 signals each. Panel on the Validation tab; `GET /api/intraday-lab/v2/h1`. Tests: `backend/tests/intraday_v2/verify_h1.py` (32). |
+>
+> Not started (not requested): C6 memory bound, C7 alarm resolution, I1–I4.
+
 ---
 
 ## 0. Executive summary
