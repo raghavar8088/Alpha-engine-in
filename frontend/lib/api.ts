@@ -1158,6 +1158,37 @@ export async function fetchV2Registry(): Promise<{ strategies: V2RegistryEntry[]
   return apiFetch("/api/intraday-lab/v2/registry");
 }
 
+/** H1 — what a Rs 10 lakh market order really costs, read from Angel's five-level book at
+ *  every signal of the three strategies whose verdict turns on slippage. Pre-registered:
+ *  the rule below is stored before the first sample and never edited. No order is placed. */
+export interface V2H1Strategy {
+  n: number;
+  median_bp: number | null;
+  threshold_bp: number;
+  break_even_bp: number;
+  insufficient_share: number;
+  status: "COLLECTING" | "GO" | "NO-GO";
+  progress_pct: number;
+  p25_bp: number | null;
+  p75_bp: number | null;
+  median_vs_mid_bp: number | null;
+  median_half_spread_bp: number | null;
+  exit_samples: number;
+}
+export interface V2H1Report {
+  preregistration: { title: string; written: string; hypothesis: string; decision: string;
+                     min_samples_per_strategy: number; go_fraction_of_break_even: number;
+                     notional_rs: number };
+  fingerprint: string | null;
+  code_matches_stored: boolean;
+  strategies: Record<string, V2H1Strategy>;
+  unmeasurable: number;
+  note: string;
+}
+export async function fetchV2H1(): Promise<V2H1Report> {
+  return apiFetch("/api/intraday-lab/v2/h1");
+}
+
 // ---- Intraday ops (Phase 4): alarms + daily edge report ----
 
 export interface OpsAlarm {

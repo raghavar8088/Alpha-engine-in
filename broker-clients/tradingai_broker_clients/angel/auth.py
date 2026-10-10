@@ -160,5 +160,10 @@ def parse_full(body: dict) -> dict[str, dict]:
             # quote is frozen — on 2026-10-02 every MCX contract still showed 1 Oct 23:29.
             "trade_time": row.get("exchTradeTime"),
             "last_trade_qty": row.get("lastTradeQty"),
+            # The whole visible book, best first: [[price, quantity], ...] up to 5 levels a
+            # side. What a market order of a given SIZE would really pay is a walk down
+            # this, not the best level alone (H1 in INTRADAY_STOCKS_RESEARCH_AND_UPGRADE_PLAN.md).
+            "depth_buy": [[float(lv["price"]), int(lv.get("quantity") or 0)] for lv in buy],
+            "depth_sell": [[float(lv["price"]), int(lv.get("quantity") or 0)] for lv in sell],
         }
     return out

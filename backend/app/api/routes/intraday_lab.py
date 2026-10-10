@@ -323,6 +323,15 @@ async def v2_registry(current_user: dict = Depends(get_current_user)):
     return {"thresholds": THRESHOLDS, "strategies": await listing()}
 
 
+@router.get("/v2/h1")
+async def v2_h1(current_user: dict = Depends(get_current_user)):
+    """H1: real order-book cost of a Rs 10 lakh market order for the three strategies whose
+    verdict turns on slippage — progress and status against the pre-registered rule."""
+    from app.services.h1_slippage import ensure_preregistered, report
+    await ensure_preregistered()
+    return await report()
+
+
 @router.get("/v2/engine")
 async def v2_engine(current_user: dict = Depends(get_current_user)):
     """The v2 engine's own state: last bar-close evaluation, signals, skips, exit source."""

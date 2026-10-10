@@ -52,6 +52,7 @@ from app.services.intraday_fills import scan_exit as _scan_exit
 from app.services.intraday_fills import slippage_bp  # noqa: F401
 from app.services.intraday_fills import stream_ltp as _stream_ltp
 from app.services.intraday_fills import stream_minutes as _minutes
+from app.services import h1_slippage as h1
 from app.services.promotion_gate import grade
 
 logger = logging.getLogger("intraday_v2_engine")
@@ -297,6 +298,15 @@ async def evaluate_close(boundary: datetime, open_positions: bool = True) -> dic
         notes.append(f"{incomplete} of {len(members)} names skipped: today's bars not complete "
                      "through this close (stream gap; the gap-fill will repair them).")
     opened = 0
+    if open_positions and cands and (_ist() - boundary).total_seconds() < 120:
+        # H1: what a market order of this size would really pay, read from Angel's book at the
+        # moment of decision — for every signal of the three strategies it tests, taken or not.
+        # Fire-and-forget; it never places an order and never delays this one.
+        h1.schedule([{"strategy_id": spec.strategy_id, "symbol": sym,
+                      "token": (members.get(sym) or {}).get("token"), "side": sig.side,
+                      "phase": "entry", "ltp": _stream_ltp(sym),
+                      "signal_at": boundary.astimezone(timezone.utc)}
+                     for _p, spec, sym, sig in cands if spec.strategy_id in h1.H1_STRATEGIES])
     if open_positions and cands:
         cands.sort(key=lambda c: -c[0])
         opened = await _take(cands, boundary)
@@ -502,6 +512,11 @@ async def _fill_triggers() -> int:
 
 
 async def _close(p: dict, price: float, reason: str, market: bool) -> None:
+    if market and p.get("strategy_id") in h1.H1_STRATEGIES:
+        h1.schedule([{"strategy_id": p["strategy_id"], "symbol": p["symbol"],
+                      "token": (_members.get(p["symbol"]) or {}).get("token"),
+                      "side": "SELL" if p["side"] == "BUY" else "BUY", "phase": "exit",
+                      "reason": reason, "ltp": _stream_ltp(p["symbol"]), "signal_at": _now()}])
     bp = p.get("slippage_bp") or slippage_bp(p.get("turnover_cr"))
     fill = _adverse(price, p["side"], bp, opening=False) if market else price
     sign = 1 if p["side"] == "BUY" else -1

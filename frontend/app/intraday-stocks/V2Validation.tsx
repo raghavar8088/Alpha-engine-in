@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import GlassPanel from "../../components/GlassPanel";
 import ErrorBanner from "../../components/ErrorBanner";
+import H1Panel from "./H1Panel";
 import {
   fetchV2Backtest,
   fetchV2Registry,
@@ -213,6 +214,7 @@ export default function V2Validation() {
           )}
         </>
       )}
+      <H1Panel />
       <style jsx>{`
         .empty { padding: 18px 20px; font-size: 12px; color: var(--text-faint); }
         .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; padding: 4px 4px 12px; }
