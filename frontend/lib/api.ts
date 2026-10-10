@@ -995,6 +995,26 @@ export interface LiveTradingSummary {
   today_pnl: number;
   breaker_tripped: boolean;
   daily_loss_limit: number;
+  /** How much of the real-money record is Angel's own truth. `needs_contract_note` rows
+   *  carry an estimated price or charges; `mismatch` rows disagree with Angel's book. */
+  ledger?: {
+    reconciled: number; needs_contract_note: number; mismatch: number; void: number;
+    unreconciled: number; charges_missing: number;
+  };
+}
+
+/** Whether the real-money desk may be armed. Arming is refused unless every ENABLED
+ *  strategy holds a CONFIRMED forward verdict from the incubation registry, and the ledger
+ *  agrees with Angel. `blockers` are full sentences, shown as-is. */
+export interface LiveTradingArming {
+  allowed: boolean;
+  gate: "on" | "off";
+  blockers: string[];
+  warnings: string[];
+  enabled: number;
+  validated_enabled: number;
+  strategies: { strategy_id: string; name: string; enabled: boolean; verdict: string;
+                validated: boolean; reason: string }[];
 }
 
 export interface LiveTradingScore {
@@ -1007,6 +1027,9 @@ export interface LiveTradingScore {
   net_pnl: number;
   allocated_capital: number | null;
   enabled: boolean;
+  /** NOT_REGISTERED | INCUBATING | FAILED | CONFIRMED — only CONFIRMED may trade real money. */
+  verdict?: string;
+  validated?: boolean;
 }
 
 export interface LiveTradingOpenPosition {
@@ -1038,6 +1061,9 @@ export async function fetchLiveTradingLeaderboard(): Promise<LiveTradingScore[]>
 }
 export async function fetchLiveTradingPositions(): Promise<{ open: LiveTradingOpenPosition[]; summary: LiveTradingSummary }> {
   return apiFetch("/api/live-trading/positions?status=OPEN");
+}
+export async function fetchLiveTradingArming(): Promise<LiveTradingArming> {
+  return apiFetch("/api/live-trading/arming");
 }
 export async function setLiveTradingArmed(armed: boolean): Promise<{ summary: LiveTradingSummary }> {
   return apiFetch("/api/live-trading/arm", { method: "POST", body: JSON.stringify({ armed }) });

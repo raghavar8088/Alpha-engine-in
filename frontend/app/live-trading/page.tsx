@@ -8,9 +8,11 @@ import LineChart from "../../components/charts/LineChart";
 import ErrorBanner from "../../components/ErrorBanner";
 import {
   refreshing,
+  LiveTradingArming,
   LiveTradingOpenPosition,
   LiveTradingScore,
   LiveTradingSummary,
+  fetchLiveTradingArming,
   fetchLiveTradingLeaderboard,
   fetchLiveTradingPositions,
   fetchLiveTradingSummary,
@@ -43,16 +45,20 @@ export default function LiveTradingPage() {
 
   const [equity, setEquity] = useState<LiveTradingEquityPoint[]>([]);
   const [daily, setDaily] = useState<LiveTradingDay[]>([]);
+  const [arming, setArming] = useState<LiveTradingArming | null>(null);
 
   const load = useCallback(async () => {
     try {
-      const [s, lb, pos, eq, dy] = await Promise.all([
+      const [s, lb, pos, eq, dy, arm] = await Promise.all([
         fetchLiveTradingSummary(),
         fetchLiveTradingLeaderboard(),
         fetchLiveTradingPositions(),
         fetchLiveTradingEquity(),
         fetchLiveTradingDaily(),
+        // Its own catch: an unreadable gate must not blank the rest of a real-money page.
+        fetchLiveTradingArming().catch(() => null),
       ]);
+      setArming(arm);
       setSummary(s);
       setBoard(lb);
       setPositions(pos.open ?? []);
@@ -87,12 +93,23 @@ export default function LiveTradingPage() {
   // funds, so say so plainly rather than letting the user discover it via reject counts.
   const noFunds = !!angel?.available && (angel.available_cash ?? 0) <= 0;
 
+  // The server refuses to arm unless every ENABLED strategy holds a CONFIRMED forward
+  // verdict; the switch reflects that instead of letting the click fail.
+  const armBlocked = !armed && !!arming && !arming.allowed;
+  const ledger = summary?.ledger;
+
   const toggleArm = async () => {
     if (busy || !summary) return;
+    if (armBlocked) {
+      setError(`Live Trading cannot be armed. ${arming!.blockers.join(" ")}`);
+      return;
+    }
     if (!armed) {
+      const n = arming?.enabled ?? summary.strategy_count;
       const ok = window.confirm(
-        "ARM LIVE TRADING?\n\nThis places REAL orders with real money on your Angel One account as the " +
-          "strategies fire during market hours (each capped at ₹10,000, ₹80,000 desk total). " +
+        "ARM LIVE TRADING?\n\nThis places REAL orders with real money on your Angel One account as " +
+          `${n} enabled strateg${n === 1 ? "y fires" : "ies fire"} during market hours (up to ` +
+          `${inr(summary.per_strategy_allocation)} each, ${inr(summary.desk_ceiling)} across the desk). ` +
           "You can disarm or hit the kill switch at any time.\n\nArm the desk now?",
       );
       if (!ok) return;
@@ -165,7 +182,7 @@ export default function LiveTradingPage() {
         refreshing={isRefreshing}
         crumb="Live Trading"
         title="Live Trading"
-        subtitle="REAL-MONEY desk: the same 8 intraday strategies as the Live Intraday shortlist, but routing real orders to your Angel One account when ARMED. Each strategy trades up to ₹10,000 (₹80,000 desk ceiling, server-enforced), on the live Angel One feed. Cash equities can't hold shorts overnight, so every order is INTRADAY (MIS) and squares off the same day. Ships disarmed — nothing trades until you flip the toggle."
+        subtitle={`REAL-MONEY desk: routes real orders to your Angel One account when ARMED — the Live Intraday shortlist plus six tournament picks, ${summary?.strategy_count ?? 14} strategies in all, each up to ${inr(summary?.per_strategy_allocation)} (${inr(summary?.desk_ceiling)} desk ceiling, server-enforced). Every order is INTRADAY (MIS) and squares off the same day. It can only be armed once every enabled strategy has passed its forward paper test.`}
       />
 
       {error && <ErrorBanner message={error} />}
@@ -195,15 +212,59 @@ export default function LiveTradingPage() {
           <div className="arm-sub">
             {armed
               ? "Real orders are placed on your Angel One account as strategies fire during market hours."
-              : "Disarmed — no orders are placed. Turn on to trade with real money."}
+              : armBlocked
+                ? "Disarmed, and cannot be armed yet — see why below."
+                : "Disarmed — no orders are placed. Turn on to trade with real money."}
             {summary?.disarmed_reason && !armed ? ` · last: ${summary.disarmed_reason}` : ""}
           </div>
         </div>
-        <button className={`switch ${armed ? "on" : "off"}`} onClick={toggleArm} disabled={busy} aria-label="Toggle live trading">
+        <button className={`switch ${armed ? "on" : "off"}`} onClick={toggleArm}
+                disabled={busy || armBlocked}
+                title={armBlocked ? "Arming is refused until every enabled strategy passes its forward test" : undefined}
+                aria-label="Toggle live trading">
           <span className="knob" />
           <span className="switch-label">{armed ? "ON" : "OFF"}</span>
         </button>
       </div>
+
+      {arming && !armed && (arming.blockers.length > 0 || arming.warnings.length > 0) && (
+        <div className={`gate ${arming.allowed ? "ok" : "blocked"}`}>
+          <div className="gate-title">
+            {arming.allowed ? "Arming allowed" : "Why this desk cannot be armed"}
+            <span className="gate-count">
+              {arming.validated_enabled} of {arming.enabled} enabled strategies have passed their forward test
+            </span>
+          </div>
+          {arming.blockers.length > 0 && (
+            <ul className="gate-list">
+              {arming.blockers.map((b) => <li key={b}>{b}</li>)}
+            </ul>
+          )}
+          {arming.warnings.length > 0 && (
+            <ul className="gate-list warn-list">
+              {arming.warnings.map((w) => <li key={w}>{w}</li>)}
+            </ul>
+          )}
+          <p className="gate-note">
+            A strategy reaches real money by running as a paper strategy in the Intraday Stocks
+            tournament, passing the two-year walk-forward gate, and then confirming its
+            pre-registered expectation over at least 40 forward paper trades. Disable a strategy
+            below to arm without it.
+          </p>
+        </div>
+      )}
+
+      {ledger && (ledger.needs_contract_note + ledger.mismatch + ledger.unreconciled + ledger.charges_missing) > 0 && (
+        <div className="ledger">
+          <b>Real-money record:</b>{" "}
+          {ledger.reconciled} trade{ledger.reconciled === 1 ? "" : "s"} priced at Angel&apos;s own fills
+          {ledger.needs_contract_note > 0 && <> · <span className="est">{ledger.needs_contract_note} estimated until Angel&apos;s contract notes are imported</span></>}
+          {ledger.mismatch > 0 && <> · <span className="bad">{ledger.mismatch} disagree with Angel&apos;s position book</span></>}
+          {ledger.unreconciled > 0 && <> · {ledger.unreconciled} not yet checked</>}
+          {ledger.charges_missing > 0 && <> · <span className="bad">{ledger.charges_missing} without charges</span></>}
+          {ledger.void > 0 && <> · {ledger.void} void (entry rejected by Angel)</>}
+        </div>
+      )}
 
       {/* Kill switch + panic + broker status */}
       <div className="controls">
@@ -374,6 +435,7 @@ export default function LiveTradingPage() {
                 <th>Win %</th>
                 <th>Net P&L</th>
                 <th>Account</th>
+                <th>Forward test</th>
                 <th>Live trade</th>
               </tr>
             </thead>
@@ -391,6 +453,13 @@ export default function LiveTradingPage() {
                   <td>{s.trades ? `${(s.win_rate * 100).toFixed(1)}%` : "-"}</td>
                   <td className={s.net_pnl >= 0 ? "gain" : "loss"}>{signed(s.net_pnl)}</td>
                   <td>{inr(s.allocated_capital)}</td>
+                  <td>
+                    <span className={`verdict v-${(s.verdict || "NOT_REGISTERED").toLowerCase()}`}
+                          title={s.validated ? "Confirmed by its pre-registered forward test — may trade real money"
+                                             : "Not confirmed by a forward test — cannot trade real money"}>
+                      {(s.verdict || "NOT_REGISTERED").replace("_", " ").toLowerCase()}
+                    </span>
+                  </td>
                   <td>
                     <button
                       className={`mini-switch ${s.enabled ? "on" : "off"}`}
@@ -462,6 +531,23 @@ export default function LiveTradingPage() {
         .roi-sub { margin-top: 3px; font-size: 10.5px; color: var(--text-faint); }
         .roi-note { grid-column: 1 / -1; margin: 0; font-size: 11px; line-height: 1.6; color: var(--text-faint); }
         .page { display: flex; flex-direction: column; gap: 16px; }
+        .gate { padding: 14px 18px; border-radius: 12px; border: 1px solid; font-size: 12.5px; line-height: 1.55; }
+        .gate.blocked { background: rgba(224, 49, 49, 0.06); border-color: rgba(224, 49, 49, 0.35); }
+        .gate.ok { background: var(--canvas-soft); border-color: var(--panel-border); }
+        .gate-title { font-weight: 800; font-size: 13.5px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+        .gate.blocked .gate-title { color: var(--loss); }
+        .gate-count { font-weight: 600; font-size: 11.5px; color: var(--text-muted); }
+        .gate-list { margin: 8px 0 0; padding-left: 18px; }
+        .gate-list li { margin: 3px 0; }
+        .warn-list { color: var(--text-muted); }
+        .gate-note { margin: 10px 0 0; font-size: 11.5px; color: var(--text-faint); }
+        .ledger { padding: 10px 14px; border-radius: 9px; background: var(--canvas-soft); border: 1px solid var(--panel-border); font-size: 12px; color: var(--text-muted); }
+        .ledger .est { color: var(--warn, #b7791f); }
+        .ledger .bad { color: var(--loss); font-weight: 700; }
+        .verdict { font-size: 10.5px; font-weight: 800; letter-spacing: 0.03em; text-transform: uppercase; padding: 3px 7px; border-radius: 6px; white-space: nowrap; background: var(--canvas-soft); color: var(--text-faint); border: 1px solid var(--panel-border); }
+        .verdict.v-confirmed { color: var(--gain); background: var(--gain-dim); border-color: transparent; }
+        .verdict.v-failed { color: var(--loss); background: var(--loss-dim); border-color: transparent; }
+        .verdict.v-incubating { color: var(--text-muted); }
         .notice { padding: 10px 14px; border-radius: 9px; background: var(--canvas-soft); border: 1px solid var(--panel-border); font-size: 12.5px; cursor: pointer; }
         .warn { padding: 12px 16px; border-radius: 10px; background: var(--loss-dim); border: 1px solid rgba(224,49,49,0.35); color: var(--loss); font-size: 12.5px; line-height: 1.55; }
         .who { font-size: 12px; color: var(--text-muted); padding: 2px 2px 12px; }
@@ -469,7 +555,7 @@ export default function LiveTradingPage() {
         .bpos { border-top: 1px solid var(--panel-border); padding-top: 12px; }
         .bpos-head { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
         .arm-banner { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 22px; border-radius: 14px; border: 1px solid; }
-        .arm-banner.on { background: rgba(14, 159, 110, 0.10); border-color: rgba(14, 159, 110, 0.4); }
+        .arm-banner.on { background: rgba(var(--gain-rgb), 0.10); border-color: rgba(var(--gain-rgb), 0.4); }
         .arm-banner.off { background: rgba(224, 49, 49, 0.08); border-color: rgba(224, 49, 49, 0.35); }
         .arm-title { font-family: var(--font-display); font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
         .arm-banner.on .arm-title { color: var(--gain); }
@@ -502,7 +588,7 @@ export default function LiveTradingPage() {
         .data-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--canvas-soft); }
         tr.disabled-row { opacity: 0.5; }
         .sname { font-weight: 600; display: inline-flex; align-items: center; gap: 7px; }
-        .anti { font-size: 9px; font-weight: 800; padding: 1px 5px; border-radius: 4px; background: var(--purple-dim); color: var(--purple); }
+        .anti { font-size: 9px; font-weight: 800; padding: 1px 5px; border-radius: 4px; background: var(--brand-dim); color: var(--brand); }
         .cat { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); }
         .sym { font-weight: 700; }
         .pstrat { color: var(--text-muted); display: inline-flex; align-items: center; gap: 6px; }

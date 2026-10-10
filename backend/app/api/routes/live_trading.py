@@ -4,7 +4,9 @@
   GET  /api/live-trading/leaderboard          the 8 strategies, ranked, each with its enabled flag
   GET  /api/live-trading/positions            open/closed REAL positions
   GET  /api/live-trading/trades               closed-trade blotter (with broker order ids)
-  POST /api/live-trading/arm                  {armed: bool}  — the green/red LIVE toggle
+  GET  /api/live-trading/arming               may the desk be armed, and if not, why not
+  POST /api/live-trading/arm                  {armed: bool}  — refused (409) unless every enabled
+                                              strategy holds a CONFIRMED forward verdict
   POST /api/live-trading/kill-switch          {active: bool} — halt all new orders instantly
   POST /api/live-trading/strategy-enabled     {strategy_id, enabled} — per-strategy toggle
   POST /api/live-trading/panic-close-all      square off everything, disarm, kill-switch on
@@ -26,6 +28,7 @@ from app.services.live_trading_engine import (
     equity_curve as lt_equity,
     LiveTradingError,
     angel_account,
+    arming_check,
     get_state,
     leaderboard as live_leaderboard,
     open_positions,
@@ -114,9 +117,19 @@ async def list_trades(limit: int = Query(200, ge=1, le=1000), current_user: dict
 @router.post("/arm")
 async def arm(req: ArmRequest, current_user: dict = Depends(get_current_user)):
     # Arming does NOT place orders here — it only flips the gate. Orders are placed by the
-    # scan cycle (scheduled tick / manual /run) while armed. Ships disarmed.
-    state = await set_armed(req.armed, reason=None if req.armed else "manual disarm")
+    # scan cycle (scheduled tick / manual /run) while armed. Ships disarmed, and arming is
+    # refused unless every enabled strategy has a CONFIRMED forward verdict (409, with the
+    # reasons as one readable sentence — the page shows `detail` verbatim).
+    try:
+        state = await set_armed(req.armed, reason=None if req.armed else "manual disarm")
+    except LiveTradingError as exc:
+        raise HTTPException(status_code=409, detail=exc.detail)
     return {"state": state, "summary": await live_summary()}
+
+
+@router.get("/arming")
+async def arming_endpoint(current_user: dict = Depends(get_current_user)):
+    return await arming_check()
 
 
 @router.post("/kill-switch")
