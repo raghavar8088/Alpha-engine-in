@@ -235,10 +235,10 @@ async def main() -> None:
     print(f"  wrote {len(book_upd)} book positions, their trades and scores")
 
     # ── equity marks: realised re-summed from the corrected trades ──────────────
-    desk_closes = sorted((aware(p.get("closed_at")), p.get("realized_pnl") or 0.0)
-                         async for p in db["pattern_positions"].find(
-                             {"status": "CLOSED"}, {"closed_at": 1, "realized_pnl": 1})
-                         if p.get("closed_at"))
+    desk_closes = sorted([(aware(p.get("closed_at")), p.get("realized_pnl") or 0.0)
+                          async for p in db["pattern_positions"].find(
+                              {"status": "CLOSED"}, {"closed_at": 1, "realized_pnl": 1})
+                          if p.get("closed_at")])
     n_marks = 0
     async for mk in db["pattern_equity"].find({"reported_realized": {"$exists": False}}):
         ts = aware(mk["ts"])
