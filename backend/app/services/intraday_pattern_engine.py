@@ -24,6 +24,23 @@ COSTS ARE CHARGED on the real Angel One schedule, intraday or delivery according
 the position actually slept overnight. A pattern desk fires often; on Rs10 lakh positions
 that is a smaller drag than on the little books, but it is never zero and is never assumed.
 
+FILLS (2026-10-10). This desk used to close every trade at whatever LTP its three-minute
+poll happened to see, so price that had run PAST a target was booked as profit, and it
+charged no slippage. Over its first four sessions that turned a desk losing Rs23 lakh into a
+reported +Rs53 lakh (INTRADAY_STOCKS_RESEARCH_AND_UPGRADE_PLAN.md, D1). It now fills by the
+tournament's own rules (`intraday_fills`): exits walk the Angel stream's minute bars since the
+last check, a target fills AT the target (a limit order), a stop at the stop or at a gap's
+open, the stop assumed first when one minute crosses both; every market fill pays slippage
+by the name's liquidity. Without stream bars for a name it falls back to its quote, still
+filling a target at the target, never beyond it.
+
+RISK CAPS (2026-10-10). 504 strategies on a 25-name universe meant ~20 strategies per name,
+and nothing stopped them stacking: 88% of the first four sessions' trades duplicated another
+strategy's bet, and one idea was taken by 32 strategies at once (Rs3.18 crore on a single
+trade). Now at most MAX_STRATEGIES_PER_SYMBOL strategies hold one name at a time; competing
+signals are ranked by how far their target sits beyond costs (longer timeframes first), never
+by catalog order; and a desk loss breaker stops new entries for the session.
+
 PAPER. Live Angel prices, no orders.
 """
 
@@ -45,6 +62,8 @@ from app.core.db import (
 from app.services.angel_client import AngelAPIError, angel_client
 from app.services.angel_fees import product_for, round_trip
 from app.services import intraday_session as session
+from app.services import intraday_universe
+from app.services.intraday_fills import adverse, scan_exit, slippage_bp, stream_ltp
 from app.services.call_engine import IST, _scored_daily_symbols
 from app.services.nifty_scalp_strategies import (
     TEMPLATES as _BASE_TEMPLATES, Series, from_rows, resample)
@@ -69,6 +88,9 @@ SQUAREOFF = session.NONCAS_SQUAREOFF_HHMM
 ENTRY_CUTOFF = os.getenv("PAT_ENTRY_CUTOFF", session.ENTRY_CUTOFF_HHMM)
 SWING_MAX_DAYS = int(os.getenv("PAT_SWING_MAX_DAYS", "5"))
 MAX_FETCH_PER_CYCLE = int(os.getenv("PAT_MAX_FETCH", "40"))
+# The tournament's own limits (intraday_v2_engine), so the two desks carry the same risk shape.
+MAX_STRATEGIES_PER_SYMBOL = int(os.getenv("PAT_MAX_STRATEGIES_PER_SYMBOL", "2"))
+DAILY_LOSS_BREAKER_PCT = float(os.getenv("PAT_DAILY_LOSS_PCT", "0.03"))
 
 
 class TF:
@@ -316,29 +338,56 @@ async def _update_score(strategy_id: str) -> None:
 # ── trading ───────────────────────────────────────────────────────────────────
 
 
-async def _open(st: PatternStrategy, inst: dict, price: float, direction: int, bar_ts) -> bool:
+async def _turnover() -> dict[str, float]:
+    """Each name's daily traded value (Rs crore) from today's universe — what sets its
+    slippage. A name outside the top 200 gets the thinnest bucket, which is the honest default."""
+    try:
+        return {m["symbol"]: m.get("turnover_cr") for m in await intraday_universe.members()}
+    except Exception:  # noqa: BLE001
+        return {}
+
+
+async def _holders(symbol: str) -> int:
+    """How many strategies hold `symbol` right now."""
+    return await pattern_positions_collection.count_documents({"symbol": symbol, "status": "OPEN"})
+
+
+async def _open(st: PatternStrategy, inst: dict, price: float, direction: int, bar_ts,
+                turnover_cr: float | None = None, source: str = "quote") -> bool:
     if await pattern_positions_collection.find_one(
         {"strategy_id": st.strategy_id, "status": "OPEN"}
     ):
         return False
-    cash = await _cash(st.strategy_id)
-    qty = int(min(PER_STRATEGY_CAPITAL, cash) // price) if price > 0 else 0
-    if qty < 1:
+    if await _holders(inst["symbol"]) >= MAX_STRATEGIES_PER_SYMBOL:
+        _skips["symbol_full"] = _skips.get("symbol_full", 0) + 1
         return False
     tf = TF_BY_KEY[st.timeframe]
     sign = 1 if direction > 0 else -1
+    side = "BUY" if sign > 0 else "SELL"
+    bp = slippage_bp(turnover_cr)
+    fill = adverse(price, side, bp, opening=True)          # an entry is a market order
+    cash = await _cash(st.strategy_id)
+    qty = int(min(PER_STRATEGY_CAPITAL, cash) // fill) if fill > 0 else 0
+    if qty < 1:
+        return False
     await pattern_positions_collection.insert_one({
         "position_id": uuid4().hex[:12], "strategy_id": st.strategy_id,
         "strategy_name": st.name, "template": st.template, "family": st.family,
         "timeframe": st.timeframe, "style": st.style,
-        "symbol": inst["symbol"], "side": "BUY" if sign > 0 else "SELL",
-        "entry_price": round(price, 2), "qty": qty, "ltp": round(price, 2),
-        "capital_deployed": round(price * qty, 2),
-        "target": round(price * (1 + sign * tf.target_pct / 100), 2),
-        "stoploss": round(price * (1 - sign * tf.stop_pct / 100), 2),
+        "symbol": inst["symbol"], "side": side,
+        "entry_price": round(fill, 2), "signal_price": round(price, 2),
+        "fill_basis": f"market @ {price:.2f} ({source}) + {bp:g} bp slippage",
+        "slippage_bp": bp, "turnover_cr": turnover_cr,
+        "qty": qty, "ltp": round(price, 2), "ltp_source": source,
+        "capital_deployed": round(fill * qty, 2),
+        # Levels from the FILL: a target measured from a price the desk never got would
+        # quietly award it the slippage back.
+        "target": round(fill * (1 + sign * tf.target_pct / 100), 2),
+        "stoploss": round(fill * (1 - sign * tf.stop_pct / 100), 2),
         "bars_held": 0, "max_hold_bars": tf.max_bars, "bar_ts": str(bar_ts),
         "unrealized_pnl": 0.0, "realized_pnl": None, "gross_pnl": None,
         "fees": None, "fee_breakdown": None, "exit_price": None, "exit_reason": None,
+        "checked_through": int(time.time()) // 60 * 60 + 60,   # exits scan from the next minute
         "status": "OPEN", "opened_at": _now(), "opened_on": _today(),
         "closed_at": None, "closed_on": None, "updated_at": _now(),
     })
@@ -399,61 +448,128 @@ async def manage() -> int:
         return await _manage()
 
 
+async def _close(p: dict, px: float, reason: str, market: bool, days: int, source: str) -> float:
+    """Close at `px`: a level (a target is a limit order — no slippage, never better than
+    the level) or a market price (stop, time, end of day) that pays slippage."""
+    bp = p.get("slippage_bp")
+    bp = slippage_bp(p.get("turnover_cr")) if bp is None else bp
+    fill = adverse(px, p["side"], bp, opening=False) if market else px
+    sign = 1 if p["side"] == "BUY" else -1
+    gross = round(sign * (fill - p["entry_price"]) * p["qty"], 2)
+    fb = round_trip(p["entry_price"], fill, p["qty"], side=p["side"],
+                    product=product_for(None, days))
+    net = round(gross - fb.total, 2)
+    today = _today()
+    basis = (f"{'market' if market else 'level'} @ {px:.2f} ({source})"
+             + (f" - {bp:g} bp" if market else ""))
+    await pattern_positions_collection.update_one({"_id": p["_id"], "status": "OPEN"}, {"$set": {
+        "status": "CLOSED", "exit_price": round(fill, 2), "exit_reason": reason,
+        "exit_basis": basis, "gross_pnl": gross, "fees": fb.total,
+        "fee_breakdown": fb.as_dict(), "realized_pnl": net, "unrealized_pnl": 0.0,
+        "ltp": round(px, 2), "closed_at": _now(), "closed_on": today, "updated_at": _now()}})
+    await pattern_trades_collection.insert_one({
+        "trade_id": uuid4().hex[:12], "strategy_id": p["strategy_id"],
+        "strategy_name": p["strategy_name"], "timeframe": p["timeframe"],
+        "symbol": p["symbol"], "side": p["side"], "qty": p["qty"],
+        "entry_price": p["entry_price"], "exit_price": round(fill, 2),
+        "gross_pnl": gross, "fees": fb.total, "realized_pnl": net,
+        "exit_reason": reason, "exit_basis": basis,
+        "opened_at": p["opened_at"], "closed_at": _now()})
+    return net
+
+
 async def _manage() -> int:
     positions = [p async for p in pattern_positions_collection.find({"status": "OPEN"})]
     if not positions:
         return 0
-    prices = await _quote(sorted({p["symbol"] for p in positions}))
+    # The stream first; the quote endpoint only for names it has nothing fresh on.
+    live = {p["symbol"]: stream_ltp(p["symbol"]) for p in positions}
+    need = sorted({s for s, v in live.items() if v is None})
+    quoted = await _quote(need) if need else {}
     now_ist = datetime.now(IST)
     today = _today()
     closed = 0
     touched: set[str] = set()
     for p in positions:
-        ltp = prices.get(p["symbol"])
-        if ltp is None:
-            continue
+        sym = p["symbol"]
+        ltp = live.get(sym) or quoted.get(sym)
+        source = "stream" if live.get(sym) else "quote"
         sign = 1 if p["side"] == "BUY" else -1
-        gross = round(sign * (ltp - p["entry_price"]) * p["qty"], 2)
-        bars = _bars_held(p)
-        eod = session.squareoff_due(p["symbol"], now_ist)
         days = (datetime.fromisoformat(today).date()
                 - datetime.fromisoformat(p["opened_on"]).date()).days
-        hit_t = ltp >= p["target"] if sign > 0 else ltp <= p["target"]
-        hit_s = ltp <= p["stoploss"] if sign > 0 else ltp >= p["stoploss"]
-        reason = ("target" if hit_t else "stoploss" if hit_s
-                  else "eod" if (p["style"] in ("scalping", "intraday") and (eod or days >= 1))
+
+        # 1. Levels, from the stream's minute bars since the last check: the first level a
+        #    minute actually crossed, the stop when one minute crossed both.
+        hit = scan_exit(p)
+        if hit is not None:
+            reason, px, _t = hit
+            await _close(p, px, reason, market=(reason == "stoploss"), days=days, source="stream minute")
+            touched.add(p["strategy_id"]); closed += 1
+            continue
+        if ltp is None:
+            continue
+        # 2. No minute bars for this name: the quote decides THAT a level was crossed, never
+        #    the price beyond it — a target fills at the target, as a resting limit order would.
+        if sign * (ltp - p["stoploss"]) <= 0:
+            await _close(p, ltp, "stoploss", market=True, days=days, source=source)
+            touched.add(p["strategy_id"]); closed += 1
+            continue
+        if sign * (ltp - p["target"]) >= 0:
+            await _close(p, p["target"], "target", market=False, days=days, source=source)
+            touched.add(p["strategy_id"]); closed += 1
+            continue
+        # 3. Time: end of day, the swing cap, the scalp's bar limit — market exits.
+        bars = _bars_held(p)
+        eod = session.squareoff_due(sym, now_ist)
+        reason = ("eod" if (p["style"] in ("scalping", "intraday") and (eod or days >= 1))
                   else "max_hold" if (p["style"] == "swing" and days >= SWING_MAX_DAYS)
                   else "time_stop" if (p["style"] == "scalping" and bars >= p["max_hold_bars"])
                   else None)
-        upd = {"ltp": round(ltp, 2), "unrealized_pnl": gross, "bars_held": bars,
-               "updated_at": _now()}
         if reason:
-            fb = round_trip(p["entry_price"], ltp, p["qty"], side=p["side"],
-                            product=product_for(None, days))
-            net = round(gross - fb.total, 2)
-            upd.update({"status": "CLOSED", "exit_price": round(ltp, 2),
-                        "exit_reason": reason, "gross_pnl": gross, "fees": fb.total,
-                        "fee_breakdown": fb.as_dict(), "realized_pnl": net,
-                        "unrealized_pnl": 0.0, "closed_at": _now(), "closed_on": today})
-            touched.add(p["strategy_id"])
-            closed += 1
-            await pattern_trades_collection.insert_one({
-                "trade_id": uuid4().hex[:12], "strategy_id": p["strategy_id"],
-                "strategy_name": p["strategy_name"], "timeframe": p["timeframe"],
-                "symbol": p["symbol"], "side": p["side"], "qty": p["qty"],
-                "entry_price": p["entry_price"], "exit_price": round(ltp, 2),
-                "gross_pnl": gross, "fees": fb.total, "realized_pnl": net,
-                "exit_reason": reason, "opened_at": p["opened_at"], "closed_at": _now()})
-        await pattern_positions_collection.update_one({"_id": p["_id"]}, {"$set": upd})
+            await _close(p, ltp, reason, market=True, days=days, source=source)
+            touched.add(p["strategy_id"]); closed += 1
+            continue
+        await pattern_positions_collection.update_one({"_id": p["_id"], "status": "OPEN"}, {"$set": {
+            "ltp": round(ltp, 2), "ltp_source": source,
+            "unrealized_pnl": round(sign * (ltp - p["entry_price"]) * p["qty"], 2),
+            "bars_held": bars, "checked_through": int(time.time()) // 60 * 60,
+            "updated_at": _now()}})
     for sid in touched:
         await _update_score(sid)
     return closed
+
+
+async def _today_pnl() -> float:
+    total = 0.0
+    async for p in pattern_positions_collection.find(
+            {"$or": [{"status": "OPEN"}, {"closed_on": _today()}]},
+            {"status": 1, "realized_pnl": 1, "unrealized_pnl": 1}):
+        total += (p.get("unrealized_pnl") if p.get("status") == "OPEN" else p.get("realized_pnl")) or 0.0
+    return total
+
+
+_skips: dict[str, int] = {}
+
+
+def _priority(st: PatternStrategy) -> tuple:
+    """Which of several signals on one name gets one of its few slots.
+
+    Not catalog order — that let the 1-minute strategies, evaluated first, take every slot.
+    A trade's costs are roughly fixed in basis points, so the signal whose target sits
+    furthest beyond them is the one most able to pay them: larger target first (longer
+    timeframes), then strategy id so the choice is reproducible."""
+    return (-TF_BY_KEY[st.timeframe].target_pct, st.strategy_id)
 
 
 async def scan() -> dict:
     if _hhmm() >= ENTRY_CUTOFF:
         return {"opened": 0, "evaluated": 0, "notes": [
             f"Past the {ENTRY_CUTOFF} IST entry cutoff — open positions still managed."]}
+    today_pnl = await _today_pnl()
+    if today_pnl <= -DAILY_LOSS_BREAKER_PCT * TOTAL_CAPITAL:
+        return {"opened": 0, "evaluated": 0, "notes": [
+            f"DAILY LOSS BREAKER — today's P&L Rs{today_pnl:,.0f} is past "
+            f"{DAILY_LOSS_BREAKER_PCT:.0%} of the desk. No new entries; open positions still managed."]}
     universe = await _universe()
     if not universe:
         return {"opened": 0, "evaluated": 0, "notes": ["No scored symbols to trade."]}
@@ -462,9 +578,12 @@ async def scan() -> dict:
     last_bar: dict = state.get("last", {})
     budget = [MAX_FETCH_PER_CYCLE]
     prices = await _quote([i["symbol"] for i in universe])
+    turnover = await _turnover()
+    _skips.clear()
 
-    opened = evaluated = 0
+    evaluated = 0
     fresh: dict[str, str] = {}
+    cands: list[tuple] = []
     for inst in universe:
         px = prices.get(inst["symbol"])
         if not px:
@@ -490,13 +609,21 @@ async def scan() -> dict:
                 if d not in (1, -1):
                     continue
                 fresh[guard] = bar_ts
-                if await _open(st, inst, px, d, bar_ts):
-                    opened += 1
+                cands.append((_priority(st), st, inst, px, d, bar_ts))
+
+    opened = 0
+    for _prio, st, inst, px, d, bar_ts in sorted(cands, key=lambda c: c[0]):
+        if await _open(st, inst, px, d, bar_ts, turnover.get(inst["symbol"]), "quote"):
+            opened += 1
     if fresh:
         await pattern_state_collection.update_one(
             {"_id": "bars"}, {"$set": {f"last.{k}": v for k, v in fresh.items()}}, upsert=True)
-    return {"opened": opened, "evaluated": evaluated,
-            "symbols": len(universe), "fetch_budget_left": budget[0], "notes": []}
+    notes = []
+    if _skips.get("symbol_full"):
+        notes.append(f"{_skips['symbol_full']} signal(s) skipped: their name already had "
+                     f"{MAX_STRATEGIES_PER_SYMBOL} strategies in it")
+    return {"opened": opened, "evaluated": evaluated, "signals": len(cands),
+            "symbols": len(universe), "fetch_budget_left": budget[0], "notes": notes}
 
 
 async def run_cycle() -> dict:

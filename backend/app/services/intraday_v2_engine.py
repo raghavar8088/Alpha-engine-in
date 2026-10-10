@@ -45,6 +45,13 @@ from app.services import intraday_v2_strategies as v2
 from app.services.angel_fees import round_trip
 from app.services.angel_stream import stream
 from app.services.intraday_store import BASE_MIN, SESSION_OPEN_MIN, store
+# Fill rules shared with the Patterns desk (moved verbatim, 2026-10-10). `slippage_bp` is
+# re-exported from here for the backtest and the S4 study.
+from app.services.intraday_fills import adverse as _adverse
+from app.services.intraday_fills import scan_exit as _scan_exit
+from app.services.intraday_fills import slippage_bp  # noqa: F401
+from app.services.intraday_fills import stream_ltp as _stream_ltp
+from app.services.intraday_fills import stream_minutes as _minutes
 from app.services.promotion_gate import grade
 
 logger = logging.getLogger("intraday_v2_engine")
@@ -65,26 +72,6 @@ TOTAL_CAPITAL = PER_STRATEGY_CAPITAL * len(v2.CATALOG)
 # Bars handed to the rules: enough for EMA50 to settle and for 15 sessions of daily ATR
 # (15m), no more — indicators are recomputed at every close, so window = cost.
 WINDOW = {"15m": 420, "45m": 220, "1h": 220}
-
-
-def slippage_bp(turnover_cr: float | None) -> float:
-    """Per-side cost of crossing the spread for a ~Rs 2 lakh order, by liquidity. The
-    universe is the 200 most-traded names, where ₹2 lakh is a sliver of a minute's
-    volume, so this is mostly the half-spread. Same function for the Phase 3 backtest."""
-    t = turnover_cr or 0.0
-    if t >= 1000:
-        return 1.0
-    if t >= 300:
-        return 2.0
-    if t >= 150:
-        return 3.0
-    return 4.0
-
-
-def _adverse(price: float, side: str, bp: float, opening: bool) -> float:
-    """A market fill `bp` basis points worse than `price` for the trader."""
-    buying = (side == "BUY") == opening
-    return price * (1 + bp / 1e4) if buying else price * (1 - bp / 1e4)
 
 
 def _now() -> datetime:
@@ -182,13 +169,6 @@ async def update_score(strategy_id: str) -> None:
 # ── prices ───────────────────────────────────────────────────────────────────────
 
 
-def _stream_ltp(symbol: str, max_age_s: float = 90) -> float | None:
-    st = stream.states.get(symbol)
-    if st is None or st.last_ltp is None or time.time() - st.last_tick > max_age_s:
-        return None
-    return st.last_ltp
-
-
 async def _quote_ltps(symbols: list[str]) -> dict[str, float]:
     """Fallback marks from Angel's quote endpoint when the stream has nothing fresh."""
     from app.services.angel_client import angel_client
@@ -200,17 +180,6 @@ async def _quote_ltps(symbols: list[str]) -> dict[str, float]:
     except Exception:  # noqa: BLE001
         return {}
     return {toks[t]: float(px) for t, px in res.items() if t in toks and px}
-
-
-def _minutes(symbol: str, since: int) -> list[tuple[int, float, float, float, float]]:
-    """Stream minute bars (start, o, h, l, c) from `since` on, including the forming one."""
-    st = stream.states.get(symbol)
-    if st is None:
-        return []
-    out = [(st.mt[i], st.mo[i], st.mh[i], st.ml[i], st.mc[i]) for i in range(len(st.mt)) if st.mt[i] >= since]
-    if st.cur is not None and st.cur[0] >= since:
-        out.append(tuple(st.cur))
-    return out
 
 
 # ── entries ──────────────────────────────────────────────────────────────────────
@@ -530,25 +499,6 @@ async def _fill_triggers() -> int:
 
 
 # ── exits ────────────────────────────────────────────────────────────────────────
-
-
-def _scan_exit(p: dict) -> tuple[str, float, int] | None:
-    """Walk the stream's minute bars since the last check: (reason, level price, minute)."""
-    sign = 1 if p["side"] == "BUY" else -1
-    stop, target = p["stoploss"], p.get("target")
-    for t, o, h, l, _c in _minutes(p["symbol"], p.get("checked_through", 0)):
-        lo, hi = (l, h) if sign > 0 else (-h, -l)
-        s_lvl = sign * stop
-        o_s = sign * o
-        if o_s <= s_lvl:
-            return "stoploss", o, t                      # opened through the stop
-        if target is not None and o_s >= sign * target:
-            return "target", o, t                        # opened through the target
-        if lo <= s_lvl:
-            return "stoploss", stop, t                   # stop first when both in one minute
-        if target is not None and hi >= sign * target:
-            return "target", target, t
-    return None
 
 
 async def _close(p: dict, price: float, reason: str, market: bool) -> None:

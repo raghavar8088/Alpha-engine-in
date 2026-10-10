@@ -50,7 +50,7 @@ book, against that book's own capital.
 import asyncio
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 from app.core.db import (
@@ -63,6 +63,8 @@ from app.core.db import (
 )
 from app.services.angel_fees import product_for, round_trip
 from app.services.intraday_pattern_engine import CATALOG
+
+IST_BOOKS = timezone(timedelta(hours=5, minutes=30))
 
 logger = logging.getLogger("pattern_books")
 
@@ -310,8 +312,9 @@ async def _close_mirror(pos: dict, parent: dict) -> float:
         "timeframe": pos.get("timeframe"), "symbol": pos.get("symbol"), "side": side,
         "entry_price": pos["entry_price"], "exit_price": round(exit_price, 2), "qty": qty,
         "gross_pnl": round(gross, 2), "fees": round(fees, 2), "realized_pnl": round(net, 2),
-        "exit_reason": parent.get("exit_reason"),
+        "exit_reason": parent.get("exit_reason"), "exit_basis": parent.get("exit_basis"),
         "opened_at": pos["opened_at"], "closed_at": _now(),
+        "closed_on": parent.get("closed_on") or datetime.now(IST_BOOKS).date().isoformat(),
     })
     await pattern_book_positions_collection.update_one({"_id": pos["_id"]}, {"$set": {
         "status": "CLOSED", "exit_price": round(exit_price, 2),
@@ -320,6 +323,10 @@ async def _close_mirror(pos: dict, parent: dict) -> float:
         "fee_breakdown": fb.as_dict(),
         "realized_pnl": round(net, 2), "unrealized_pnl": 0.0,
         "ltp": round(exit_price, 2), "closed_at": _now(), "updated_at": _now(),
+        # Never written before 2026-10-10, so every per-day view of these books was empty.
+        # The parent's own close day when it has one — the two closed together.
+        "closed_on": parent.get("closed_on") or datetime.now(IST_BOOKS).date().isoformat(),
+        "exit_basis": parent.get("exit_basis"),
     }})
     return net
 

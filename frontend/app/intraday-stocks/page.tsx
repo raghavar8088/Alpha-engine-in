@@ -842,12 +842,22 @@ export default function IntradayStocksPage() {
         13 geometric chart patterns (head &amp; shoulders, double/triple tops, triangles,
         wedges, flags, pennants, cup &amp; handle, rounding, diamond, broadening), 10
         candlestick patterns, and 40 indicator/structure rules — each on its own{" "}
-        ₹{inr(patSummary?.per_strategy_capital)}. Runs alongside the 150-strategy tournament,
-        not instead of it. <strong>45m and 4h are aggregated</strong>; Angel has no native
+        ₹{inr(patSummary?.per_strategy_capital)}. Runs alongside the tournament, not instead
+        of it. <strong>45m and 4h are aggregated</strong>; Angel has no native
         interval for either. Universe is capped at{" "}
         <strong>{patSummary?.universe_size ?? 25} symbols</strong> because Angel&rsquo;s candle
         endpoint rate-limits far harder than its quotes — 150 symbols × 8 timeframes would be
         1,200 requests a cycle. P&amp;L is net of real Angel One costs.
+      </div>
+      <div className="desk-banner">
+        <strong>FILLS CORRECTED ON 10 OCT 2026.</strong> Until then this desk closed each trade
+        at whatever price its three-minute check happened to see, so price that had run{" "}
+        <em>past</em> a target was booked as profit, and no slippage was charged. Its first four
+        sessions were re-run through the corrected rules — a target fills at the target, and
+        entries, stops and time exits pay slippage — which is why its record changed that day.
+        It now fills exactly like the tournament, and at most two strategies may hold one name
+        at a time. <strong>Nothing on this desk has been validated</strong> by a backtest or a
+        forward test; treat its leaderboard as a record, not a recommendation.
       </div>
 
       <div className="tiles">
@@ -972,6 +982,11 @@ export default function IntradayStocksPage() {
         <strong>P&amp;L is net of real Angel One costs</strong>, which is the point: a near-fixed
         round-trip fee is a far heavier drag on the smaller book, and a slice that cannot buy one
         share simply does not take the trade.
+      </div>
+      <div className="desk-banner">
+        <strong>FILLS CORRECTED ON 10 OCT 2026</strong>, together with the Patterns desk these
+        books copy. The shortlist was picked from the Patterns leaderboard while that leaderboard
+        overstated results, and none of its strategies has been validated.
       </div>
 
       <div className="tiles">
