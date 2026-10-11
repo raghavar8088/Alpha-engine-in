@@ -1,23 +1,18 @@
 """Background loops for the Gold Desk.
 
-TWO LOOPS, BECAUSE THE TWO VENUES KEEP DIFFERENT HOURS
-------------------------------------------------------
-The MCX leg ticks only while MCX is open (09:00-23:30 IST, weekdays) and reads the
-commodity bar store that the pattern desk already fills — no second poller, because that
-store exists precisely so one paced task owns Angel's candle endpoint and nothing else
-competes with it for a rate limit that answered five HTTP 403s to eight unpaced calls.
+TWO VENUES, TWO CLOCKS
+----------------------
+MCX ticks while MCX is open and reads the shared commodity bar store; Delta ticks around the
+clock and owns its own (incremental) bar feed.
 
-The Delta leg ticks around the clock and owns its own bar poller, because nothing else in
-this app fetches Delta candles. Perpetual futures have no session: a loop that slept when
-MCX closed would miss the London and New York hours, which is most of where gold actually
-moves.
-
-BOTH LOOPS RUN WHETHER OR NOT THE DESK IS SWITCHED ON
------------------------------------------------------
-`run_cycle` manages open positions before it looks for new ones, and a position taken
-before the switch was flipped is still exposure that still has a stop. The switch gates
-ENTRIES. That is the same rule every other desk in this app follows, and it is the rule
-the module this desk was ported from had no way to express, because it had no switch.
+WHAT EACH SWITCH GATES (C8, D12 in GOLD_DESK_RESEARCH_AND_UPGRADE_PLAN.md)
+-------------------------------------------------------------------------
+* The desk's own per-venue switch and Main Control both gate ENTRIES.
+* Neither ever stops the management of an OPEN position: its stop and target are watched
+  whenever it exists. (Main Control used to stop the whole cycle, stranding stops.)
+* A venue that is off and holds nothing does no work at all — no cycle, no equity row, no bar
+  refresh. The Delta feed then only samples the order book every few minutes for the cost
+  monitor (I5) and prunes its store; it used to rewrite ~17,000 candles every 2 minutes (C7).
 """
 
 import asyncio
@@ -31,57 +26,69 @@ logger = logging.getLogger("gold_scheduler")
 
 ENABLED = os.getenv("GOLD_DESK_SCHEDULER", "1").lower() not in ("0", "false", "")
 
-# The MCX leg rides the same 180s cadence as the Pre-Live Commodity desk: the bars
-# underneath it are 1-minute at the fastest, and a whole-lot position on margin is not
-# something to re-scan faster than the data can change.
 MCX_TICK_SECONDS = int(os.getenv("GOLD_MCX_TICK_SECONDS", "180"))
 MCX_IDLE_TICK_SECONDS = int(os.getenv("GOLD_MCX_IDLE_TICK_SECONDS", "1800"))
-
-# The Delta leg. Bars every 2 minutes, the desk every 3 — the same relationship the
-# commodity desk has between its poller and its scan, so a cycle never evaluates a series
-# it has just asked for and not yet received.
 DELTA_BARS_TICK_SECONDS = int(os.getenv("GOLD_DELTA_BARS_TICK_SECONDS", "120"))
 DELTA_TICK_SECONDS = int(os.getenv("GOLD_DELTA_TICK_SECONDS", "180"))
 
 
-async def gold_mcx_loop() -> None:
+async def venue_activity(key: str) -> tuple[bool, bool, bool]:
+    """(entries allowed, has open positions, may enter) for one venue."""
     from app.services.desk_switches import is_on
+    from app.services.gold_desk import VENUES, get_state, open_count, specs_for
+
+    v = VENUES[key]
+    on = await is_on("gold_desk")
+    has_open = await open_count(v) > 0
+    st = await get_state(v)
+    return on, has_open, bool(st["enabled"] and on and specs_for(v))
+
+
+async def gold_mcx_loop() -> None:
     from app.services.gold_desk import VENUES, run_cycle
 
     while True:
         try:
-            if is_market_open(datetime.now(IST)) and await is_on("gold_desk"):
-                r = await run_cycle(VENUES["mcx"])
-                if r["opened"] or r["managed"]:
-                    logger.info("[gold mcx] %d opened, %d managed, %d evaluated",
-                                r["opened"], r["managed"], r["evaluated"])
+            if is_market_open(datetime.now(IST)):
+                on, has_open, may_enter = await venue_activity("mcx")
+                if has_open or may_enter:
+                    r = await run_cycle(VENUES["mcx"], entries_allowed=on)
+                    if r["opened"] or r["managed"]:
+                        logger.info("[gold mcx] %d opened, %d managed, %d evaluated",
+                                    r["opened"], r["managed"], r["evaluated"])
         except Exception:
             logger.exception("[gold mcx] cycle failed — will retry next tick")
         await asyncio.sleep(MCX_TICK_SECONDS if is_market_open() else MCX_IDLE_TICK_SECONDS)
 
 
 async def gold_delta_bars_loop() -> None:
-    from app.services.gold_delta_feed import refresh_all
+    from app.services import gold_delta_feed
+    from app.services.gold_desk import VENUES, timeframes_in_use
 
     while True:
         try:
-            out = await refresh_all()
-            if out.get("failed_fetches"):
-                logger.warning("[gold delta bars] %d failed fetches: %s",
-                               out["failed_fetches"], out.get("errors"))
+            _on, has_open, may_enter = await venue_activity("delta")
+            if has_open or may_enter:
+                # 1m for walking exits, the strategies' own timeframes, 1d for H1's alpha vs XAUT.
+                intervals = sorted({"1m", "1d", *timeframes_in_use(VENUES["delta"])})
+                out = await gold_delta_feed.refresh_all(intervals)
+                if out.get("failed_fetches"):
+                    logger.warning("[gold delta bars] %d failed fetches: %s", out["failed_fetches"], out.get("errors"))
+            else:
+                await gold_delta_feed.idle_pass()
         except Exception:
             logger.exception("[gold delta bars] refresh failed — will retry next tick")
         await asyncio.sleep(DELTA_BARS_TICK_SECONDS)
 
 
 async def gold_delta_loop() -> None:
-    from app.services.desk_switches import is_on
     from app.services.gold_desk import VENUES, run_cycle
 
     while True:
         try:
-            if await is_on("gold_desk"):
-                r = await run_cycle(VENUES["delta"])
+            on, has_open, may_enter = await venue_activity("delta")
+            if has_open or may_enter:
+                r = await run_cycle(VENUES["delta"], entries_allowed=on)
                 if r["opened"] or r["managed"]:
                     logger.info("[gold delta] %d opened, %d managed, %d evaluated",
                                 r["opened"], r["managed"], r["evaluated"])

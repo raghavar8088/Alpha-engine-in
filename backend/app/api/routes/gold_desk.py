@@ -1,28 +1,26 @@
-"""Gold Desk — the pattern library on gold, on MCX futures and Delta gold perpetuals.
+"""Gold Desk — MCX gold futures and Delta's gold perpetual, after the 2026-10 research.
 
   GET  /api/gold-desk/venues              both tabs' headline numbers in one call
-  GET  /api/gold-desk/summary?venue=      book, switch, breakers, fee model
-  GET  /api/gold-desk/strategies?venue=   every strategy that has traded, with its verdict
+  GET  /api/gold-desk/summary?venue=      book, switch, breakers, what the venue trades and why
+  GET  /api/gold-desk/strategies?venue=   every enabled or traded strategy, with its RECORD
   GET  /api/gold-desk/positions?venue=    ?status=OPEN|CLOSED
   GET  /api/gold-desk/coverage?venue=     bars per symbol and timeframe
   GET  /api/gold-desk/basis               what the two venues say the same ounce is worth
-  POST /api/gold-desk/toggle?venue=       {"enabled": bool} — entries only
+  GET  /api/gold-desk/costs               measured fees, spreads and funding (I5)
+  GET  /api/gold-desk/h1                  the pre-registered forward test: rule, progress, verdict
+  POST /api/gold-desk/toggle?venue=       {"enabled": bool} — entries only; 409 when nothing can trade
   POST /api/gold-desk/run?venue=          one cycle now (manage + scan)
-  POST /api/gold-desk/close-all?venue=    square off that venue's open positions
-
-`venue` is a query parameter rather than two routes, because the two books differ in
-currency and contract and in nothing else: one set of endpoints is what keeps the MCX tab
-and the Delta tab reading the same code, and therefore the same on screen.
+  POST /api/gold-desk/close-all?venue=    square off that venue's open positions at the market
 """
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 
 from app.api.deps import get_current_user
-from app.services import gold_desk
+from app.services import gold_desk, gold_h1
 
 router = APIRouter(prefix="/api/gold-desk", tags=["gold-desk"])
 
-VenueQ = Query("mcx", pattern="^(mcx|delta)$", description="mcx | delta")
+VenueQ = Query("delta", pattern="^(mcx|delta)$", description="mcx | delta")
 
 
 def _v(key: str):
@@ -34,10 +32,8 @@ def _v(key: str):
 
 @router.get("/venues")
 async def venues(_current_user: dict = Depends(get_current_user)):
-    """Both books at once, for the tab strip — so switching tabs never shows an empty
-    header while the second book loads."""
-    return {"venues": [await gold_desk.summary(gold_desk.VENUES[k])
-                       for k in gold_desk.VENUE_KEYS]}
+    """Both books at once, for the tab strip."""
+    return {"venues": [await gold_desk.summary(gold_desk.VENUES[k]) for k in gold_desk.VENUE_KEYS]}
 
 
 @router.get("/summary")
@@ -69,15 +65,29 @@ async def basis(_current_user: dict = Depends(get_current_user)):
     return await gold_desk.basis()
 
 
+@router.get("/costs")
+async def costs(_current_user: dict = Depends(get_current_user)):
+    return await gold_desk.costs()
+
+
+@router.get("/h1")
+async def h1(_current_user: dict = Depends(get_current_user)):
+    return await gold_h1.report()
+
+
 @router.post("/toggle")
 async def toggle(venue: str = VenueQ, payload: dict = Body(...),
                  _current_user: dict = Depends(get_current_user)):
-    return await gold_desk.set_enabled(_v(venue), bool(payload.get("enabled")))
+    try:
+        return await gold_desk.set_enabled(_v(venue), bool(payload.get("enabled")))
+    except gold_desk.GoldDeskError as exc:
+        raise HTTPException(status_code=409, detail=exc.detail) from exc
 
 
 @router.post("/run")
 async def run(venue: str = VenueQ, _current_user: dict = Depends(get_current_user)):
-    return await gold_desk.run_cycle(_v(venue))
+    from app.services.desk_switches import is_on
+    return await gold_desk.run_cycle(_v(venue), entries_allowed=await is_on("gold_desk"))
 
 
 @router.post("/close-all")

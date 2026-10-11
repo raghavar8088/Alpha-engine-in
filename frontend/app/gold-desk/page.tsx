@@ -1,16 +1,18 @@
 "use client";
 
-/** Gold Desk — the pattern library on gold, on two venues that price the same metal.
+/** Gold Desk — gold on two venues, rebuilt on its research (October 2026).
  *
- * Two tabs, one page, because the comparison IS the module: MCX gold futures in rupees
- * per 10 grams during Indian hours, and Delta's gold-backed token perpetuals in dollars
- * per ounce around the clock. Each has its own book, its own switch and its own costs,
- * and no number on this page ever adds the two together.
+ * The research (GOLD_DESK_RESEARCH_AND_UPGRADE_PLAN.md) replayed all 353 pattern strategies on six
+ * gold histories with honest fills and measured costs: below 4h none earned its fees, at 1d 39 of
+ * 40 lost to simply holding gold, and run with its old rules each book hit its 50% floor within
+ * weeks. So the desk now runs only what the evidence allows:
  *
- * Ported from the antigravity app's Gold Desk. Rebuilt on this app's shared pattern
- * library and paper-book plumbing rather than proxied to that app's Go engine — that
- * engine is stopped more often than it runs, and a page that renders someone else's
- * process is a page that shows an error most days.
+ *   Delta — H1, a pre-registered two-year forward test of the nine 4h breakout / trend templates
+ *           on XAUTUSD, each in its own sleeve. Its verdict comes from its stored rule, not this page.
+ *   MCX   — off: every strategy was retired. Its machinery (own-contract pricing, roll exits,
+ *           touch fills, exposure caps) is fixed, so a record would be honest if it ever ran.
+ *
+ * Paper only. No order reaches a broker or an exchange from this page.
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -19,6 +21,8 @@ import GlassPanel from "../../components/GlassPanel";
 import StatusPill from "../../components/StatusPill";
 import ErrorBanner from "../../components/ErrorBanner";
 import DeskHistory from "../../components/DeskHistory";
+import GoldH1Panel from "./GoldH1Panel";
+import GoldCostsPanel from "./GoldCostsPanel";
 import {
   GoldBasis,
   GoldPosition,
@@ -35,9 +39,9 @@ import {
 } from "../../lib/api";
 
 const REFRESH_MS = 20000;
+const VENUE_ORDER: GoldVenueKey[] = ["delta", "mcx"];
 
-/** Money in the book's OWN currency. The two tabs are never expressed in one unit — an
- *  INR total beside a USD total that shared a symbol would read as one book. */
+/** Money in the book's OWN currency — the two tabs are never added together. */
 function money(v: number | null | undefined, ccy: string, signed = true): string {
   if (v === null || v === undefined || Number.isNaN(v)) return "—";
   const sign = signed ? (v >= 0 ? "+" : "−") : v < 0 ? "−" : "";
@@ -50,8 +54,10 @@ function money(v: number | null | undefined, ccy: string, signed = true): string
 const plain = (v: number | null | undefined, ccy: string) => money(v, ccy, false);
 const pc = (v: number | null | undefined) =>
   v === null || v === undefined ? "—" : `${v >= 0 ? "+" : ""}${v.toFixed(2)}%`;
+const bpx = (v: number | null | undefined) =>
+  v === null || v === undefined ? "—" : `${v >= 0 ? "+" : ""}${v.toFixed(2)} bp`;
 const tone = (v: number | null | undefined) => (!v ? "" : v > 0 ? "gain" : "loss");
-/** Gold quotes at 4,150 on one venue and 146,800 on the other — precision by magnitude. */
+/** Gold quotes at ~4,190 on one venue and ~1,50,000 on the other — precision by magnitude. */
 const px = (v: number | null | undefined) =>
   v === null || v === undefined || v === 0
     ? "—"
@@ -60,9 +66,22 @@ const px = (v: number | null | undefined) =>
       : v.toFixed(2);
 const when = (iso: string | null | undefined) =>
   !iso ? "—" : new Date(iso).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
+const basisLabel = (b: string | null | undefined) =>
+  !b
+    ? "—"
+    : ({
+        touch: "at the touch",
+        book_walk: "book walked",
+        minute_level: "at its level",
+        minute_gap_open: "gap — at the open",
+        minute_close: "hold limit — minute close",
+        quote_fallback: "live quote (store stale)",
+        contract_last_bar: "contract's last print",
+        last_mark: "last mark",
+      } as Record<string, string>)[b] ?? b;
 
 export default function GoldDeskPage() {
-  const [tab, setTab] = useState<GoldVenueKey>("mcx");
+  const [tab, setTab] = useState<GoldVenueKey>("delta");
   const [venues, setVenues] = useState<GoldSummary[]>([]);
   const [strats, setStrats] = useState<GoldStrategy[]>([]);
   const [open, setOpen] = useState<GoldPosition[]>([]);
@@ -117,8 +136,12 @@ export default function GoldDeskPage() {
     setRefreshing(false);
   };
 
+  const ordered = useMemo(
+    () => VENUE_ORDER.map((k) => venues.find((v) => v.venue === k)).filter(Boolean) as GoldSummary[],
+    [venues],
+  );
   const sum = useMemo(() => venues.find((v) => v.venue === tab) ?? null, [venues, tab]);
-  const ccy = sum?.currency ?? "INR";
+  const ccy = sum?.currency ?? "USD";
   const on = sum?.enabled ?? false;
 
   const act = async (key: string, fn: () => Promise<unknown>, done: (r: never) => string) => {
@@ -144,12 +167,11 @@ export default function GoldDeskPage() {
         title="Gold Desk"
         subtitle={
           <>
-            The whole pattern library — <strong>{sum?.strategy_count ?? 0} strategies</strong>, long and
-            short — traded on gold, on two venues that price the same metal differently:{" "}
-            <strong>MCX futures</strong> in rupees per 10 grams during Indian hours, and{" "}
-            <strong>Delta gold perpetuals</strong> in dollars per ounce around the clock. One shared book per
-            venue, so a win funds the next position the way a real account does. Paper only — fills are
-            simulated and charged the venue&rsquo;s real costs; no order reaches a broker from this page.
+            Gold on two venues, rebuilt on its research. All 353 pattern strategies were replayed on six gold
+            histories with honest fills and measured costs: <strong>none earned its costs below 4h</strong>, and at
+            1d <strong>39 of 40 lost to simply holding gold</strong>. Delta now runs <strong>H1</strong> — one
+            pre-registered forward test of the nine 4h breakout / trend strategies on XAUTUSD; MCX is off. Paper only —
+            no order reaches a broker from this page.
           </>
         }
         actions={
@@ -162,7 +184,8 @@ export default function GoldDeskPage() {
             )}
             <button
               className="btn"
-              disabled={!!busy}
+              disabled={!!busy || !sum?.can_enable}
+              title={sum?.can_enable ? "Manage open positions and scan the latest closed bars now" : sum?.why_off ?? ""}
               onClick={() =>
                 act("run", () => runGoldCycle(tab), (r: { opened: number; managed: number; evaluated: number }) =>
                   `Cycle run — ${r.opened} opened, ${r.managed} managed, ${r.evaluated} evaluated.`)
@@ -181,41 +204,67 @@ export default function GoldDeskPage() {
         </div>
       )}
 
-      {/* ── the two books, side by side in the tab strip so neither is hidden ─────── */}
+      {/* ── the two books ───────────────────────────────────────────────────────── */}
       <div className="page-tabs">
-        {venues.map((v) => (
-          <button
-            key={v.venue}
-            className={tab === v.venue ? "ptab on" : "ptab"}
-            onClick={() => setTab(v.venue)}
-          >
+        {ordered.map((v) => (
+          <button key={v.venue} className={tab === v.venue ? "ptab on" : "ptab"} onClick={() => setTab(v.venue)}>
             <span>{v.label}</span>
             <span className={`tv ${tone(v.total_pnl)}`}>
-              {v.closed_positions || v.open_positions ? money(v.total_pnl, v.currency) : "no trades yet"}
+              {!v.can_enable
+                ? "off — nothing earned its costs"
+                : v.closed_positions || v.open_positions
+                  ? money(v.total_pnl, v.currency)
+                  : v.enabled
+                    ? "running · no trades yet"
+                    : "off"}
             </span>
           </button>
         ))}
-        {!venues.length && <div className="ptab muted">loading books…</div>}
+        {!ordered.length && <div className="ptab muted">loading books…</div>}
       </div>
+
+      {tab === "delta" && (
+        <GlassPanel title="H1 — the pre-registered forward test" note="judged only by its stored rule">
+          <GoldH1Panel />
+        </GlassPanel>
+      )}
+
+      {tab === "mcx" && sum && !sum.can_enable && (
+        <div className="retired">
+          <div className="arm-title">MCX GOLD — OFF</div>
+          <p>
+            {sum.why_off} Replayed on MCX GOLDM and on COMEX gold in MCX hours, every timeframe below 4h lost after
+            Angel&rsquo;s charges (₹305 a GOLDM round trip) and the measured spread; the daily patterns lost to holding
+            gold; and run with its old rules the ₹30 lakh book hit its 50% floor — over May 2024 – Oct 2026 it lost
+            52% while gold rose 78%. The machinery behind this tab is fixed — positions priced on their own contract,
+            forced out before delivery, filled at the bid / ask, exits walked minute by minute, net exposure capped —
+            so any record it ever produces would be honest. It trades nothing until a strategy earns it through the
+            Commodity Lab.
+          </p>
+        </div>
+      )}
 
       {/* ── the basis: the one number neither tab can show on its own ─────────────── */}
       {basis && (basis.mcx || basis.delta) && (
-        <GlassPanel
-          title="The same ounce, two markets"
-          note="compared, never netted — nothing here can trade one against the other"
-        >
+        <GlassPanel title="The same ounce, two markets" note="compared, never netted">
           <div className="basis">
             {basis.mcx && (
               <div className="bcard">
                 <div className="blab">MCX · {basis.mcx.symbol}</div>
                 <div className="bval">₹{px(basis.mcx.price)}</div>
-                <div className="bsub">{basis.mcx.quote} · ₹{px(basis.mcx.per_oz_inr)} per troy ounce</div>
+                <div className="bsub">
+                  {basis.mcx.quote} · ₹{px(basis.mcx.per_oz_inr)} per troy ounce
+                  {basis.mcx.fresh === false ? " · last trade (market quiet)" : ""}
+                </div>
               </div>
             )}
             {basis.delta &&
               Object.entries(basis.delta.prices).map(([sym, p]) => (
                 <div className="bcard" key={sym}>
-                  <div className="blab">Delta · {sym}</div>
+                  <div className="blab">
+                    Delta · {sym}
+                    {sym === "XAUTUSD" ? " · traded" : " · shown for the basis"}
+                  </div>
                   <div className="bval">${px(p)}</div>
                   <div className="bsub">{basis.delta?.quote}</div>
                 </div>
@@ -224,16 +273,16 @@ export default function GoldDeskPage() {
               <div className="bcard">
                 <div className="blab">Token basis</div>
                 <div className="bval">${basis.delta.token_basis_usd.toFixed(2)}</div>
-                <div className="bsub">
-                  XAUT against PAXG on the same ounce — a real spread, not a data error
-                </div>
+                <div className="bsub">XAUT against PAXG on the same ounce — a real spread, not a data error</div>
               </div>
             )}
             {basis.implied?.premium_pct !== undefined && (
               <div className="bcard">
                 <div className="blab">MCX premium</div>
                 <div className="bval">{pc(basis.implied.premium_pct)}</div>
-                <div className="bsub">at ₹{basis.implied.usd_inr_used}/$ · duty and GST live inside it</div>
+                <div className="bsub">
+                  at ₹{basis.implied.usd_inr_used?.toFixed(2)}/$ (live) · import duty and the local premium live inside it
+                </div>
               </div>
             )}
           </div>
@@ -248,13 +297,14 @@ export default function GoldDeskPage() {
             {(sum?.label ?? "GOLD").toUpperCase()} {on ? "ON" : "OFF"}
           </div>
           <div className="arm-sub">
-            {on
-              ? `Running — ${plain(sum?.capital, ccy)} book on ${sum?.tradable_symbols?.join(", ") || "—"}, ` +
-                `${sum?.max_positions ?? 0} position slots, ${sum?.strategy_count ?? 0} strategies evaluated per symbol.`
-              : "Off — no new positions. Open positions are still managed to their target or stop, because " +
-                "an open position is exposure whether or not the desk may add to it."}
+            {!sum?.can_enable
+              ? "Nothing to switch on: the research retired every strategy on this venue."
+              : on
+                ? `Running — ${plain(sum?.capital, ccy)} on ${sum?.symbols?.join(", ") || "—"}, ` +
+                  `${sum?.strategy_count ?? 0} strategies, ${sum?.mode === "record" ? "one sleeve each" : `${sum?.max_positions ?? 0} slots`}.`
+                : "Off — no new positions. Open positions are still managed to their target, stop or hold limit."}
             {sum?.floor_reached &&
-              ` · BOOK FLOOR REACHED: equity is at or below ${plain(sum?.book_floor, ccy)} (${((sum?.book_floor_pct ?? 0) * 100).toFixed(0)}% of capital). No new entries.`}
+              ` · BOOK FLOOR REACHED: equity is at or below ${plain(sum?.book_floor, ccy)}. No new entries.`}
             {sum?.breaker_tripped && " · Daily loss breaker tripped: no new entries today."}
           </div>
         </div>
@@ -263,18 +313,20 @@ export default function GoldDeskPage() {
             className="btn danger"
             disabled={!!busy || !open.length}
             onClick={() =>
-              act("close", () => closeAllGold(tab), (r: { closed: number; net_pnl: number }) =>
-                `Closed ${r.closed} — net ${money(r.net_pnl, ccy)}.`)
+              act("close", () => closeAllGold(tab), (r: { closed: number; net_pnl: number; left_open_no_live_price?: string[] }) =>
+                `Closed ${r.closed} at the market — net ${money(r.net_pnl, ccy)}` +
+                (r.left_open_no_live_price?.length ? `; ${r.left_open_no_live_price.length} left open (no live price).` : "."))
             }
           >
             Close all
           </button>
           <button
             className={`switch ${on ? "on" : ""}`}
-            disabled={!!busy || !sum}
+            disabled={!!busy || !sum || (!on && !sum.can_enable)}
+            title={!sum?.can_enable ? sum?.why_off ?? "" : ""}
             onClick={() =>
               act("toggle", () => toggleGoldDesk(tab, !on), () =>
-                on ? "Desk switched OFF — open positions still managed." : "Desk switched ON.")
+                on ? "Switched OFF — open positions still managed." : "Switched ON.")
             }
             aria-label="Toggle this gold book"
           >
@@ -292,13 +344,14 @@ export default function GoldDeskPage() {
           <div className={`pct ${tone(sum?.realized_pnl)}`}>{pc(sum?.realized_pct)}</div>
           <div className="sub">
             {sum?.closed_positions ?? 0} closed · after {plain(sum?.total_costs, ccy)} of costs
+            {sum?.funding ? ` (incl. ${money(sum?.funding_paid, ccy)} funding)` : ""}
           </div>
         </div>
         <div className="card">
           <div className="lab">Unrealised P&amp;L</div>
           <div className={`val ${tone(sum?.unrealized_pnl)}`}>{money(sum?.unrealized_pnl, ccy)}</div>
           <div className={`pct ${tone(sum?.unrealized_pnl)}`}>{pc(sum?.unrealized_pct)}</div>
-          <div className="sub">{sum?.open_positions ?? 0} open · marked on the live venue price</div>
+          <div className="sub">{sum?.open_positions ?? 0} open · at the mark, after the fees to close</div>
         </div>
         <div className="card total">
           <div className="lab">Total P&amp;L</div>
@@ -318,7 +371,8 @@ export default function GoldDeskPage() {
           <div className="lab">Today</div>
           <div className={`tv ${tone(sum?.today_pnl)}`}>{money(sum?.today_pnl, ccy)}</div>
           <div className="sub">
-            {pc(sum?.today_pct)} · breaker at −{plain(sum?.daily_loss_limit, ccy)}
+            {pc(sum?.today_pct)}
+            {sum?.daily_loss_limit ? ` · breaker at −${plain(sum.daily_loss_limit, ccy)}` : " · no daily breaker (record mode)"}
           </div>
         </div>
         <div className="tile">
@@ -334,34 +388,49 @@ export default function GoldDeskPage() {
         <div className="tile">
           <div className="lab">Book floor</div>
           <div className={`tv ${sum?.floor_reached ? "loss" : ""}`}>{plain(sum?.book_floor, ccy)}</div>
-          <div className="sub">entries stop below {((sum?.book_floor_pct ?? 0) * 100).toFixed(0)}% of capital</div>
+          <div className="sub">a ruin guard: entries stop below {((sum?.book_floor_pct ?? 0) * 100).toFixed(0)}%</div>
         </div>
         <div className="tile">
           <div className="lab">Last cycle</div>
           <div className="tv sm">{when(sum?.last_run_at)}</div>
           <div className="sub">
-            {sum?.last_opened ?? 0} opened · {sum?.last_managed ?? 0} managed ·{" "}
-            {(sum?.last_evaluated ?? 0).toLocaleString("en-IN")} evaluated
+            {sum?.last_opened ?? 0} opened · {sum?.last_managed ?? 0} managed · {sum?.last_evaluated ?? 0} evaluated
           </div>
         </div>
       </div>
 
-      {/* How this book trades, in numbers rather than adjectives. */}
       <GlassPanel title="How this book trades">
         <div className="rules">
           <div className="rule">
-            <span className="rk">Instruments</span>
+            <span className="rk">Instrument</span>
             <span className="rv">
-              {sum?.tradable_symbols?.length ? sum.tradable_symbols.join(", ") : "—"}
-              {sum?.symbols?.length !== sum?.tradable_symbols?.length && sum?.symbols?.length
-                ? ` (of ${sum.symbols.join(", ")})`
-                : ""}
+              {sum?.symbols?.join(", ") || "—"} · {sum?.quote_note ?? ""}
             </span>
           </div>
           <div className="rule">
-            <span className="rk">Sizing</span>
+            <span className="rk">Strategies</span>
             <span className="rv">
-              Whole {sum?.unit_label ?? "lot"}s only · {sum?.quote_note ?? ""}
+              {sum?.strategies_enabled?.length
+                ? sum.strategies_enabled.join(" · ")
+                : "none — every strategy on this venue was retired by the research"}
+            </span>
+          </div>
+          <div className="rule">
+            <span className="rk">Signals</span>
+            <span className="rv">
+              Evaluated once on each newly CLOSED bar, and only after the store has re-read it since its close — never
+              on the bar still forming, nor on one stored while it was.
+              {sum?.max_entry_lag_s
+                ? ` A bar first seen more than ${Math.round(sum.max_entry_lag_s / 60)} minutes after its close is skipped, never traded late.`
+                : " No decision on a bar that closed more than a bar ago."}
+            </span>
+          </div>
+          <div className="rule">
+            <span className="rk">Exits</span>
+            <span className="rv">
+              Target, stop or the close of the {sum?.max_hold_bars ?? 60}th bar after the signal — walked over final
+              one-minute bars: a level fills at the level, a minute opening past it at that open, a minute touching both
+              is a stop.{sum?.funding ? " Funding is paid at every exchange the position is open across." : ""}
             </span>
           </div>
           <div className="rule">
@@ -369,25 +438,20 @@ export default function GoldDeskPage() {
             <span className="rv">{sum?.fee_note ?? "—"}</span>
           </div>
           <div className="rule">
-            <span className="rk">Exits</span>
+            <span className="rk">Retired</span>
             <span className="rv">
-              Target, stop, or {sum?.max_hold_bars ?? 60} bars held — whichever comes first. Fills carry{" "}
-              {sum?.slippage_bps ?? 5} bps of slippage each way.
-            </span>
-          </div>
-          <div className="rule">
-            <span className="rk">Slots</span>
-            <span className="rv">
-              {sum?.max_positions ?? 0} concurrent positions against{" "}
-              {(sum?.stream_count ?? 0).toLocaleString("en-IN")} strategy/symbol streams. They queue, so the
-              fastest timeframes take most of the fills — a property of the clock, not of the edge.
+              Every timeframe below 4h ({sum?.retired_timeframes?.join(", ") ?? "—"}): none earned its fees on any history.
             </span>
           </div>
         </div>
       </GlassPanel>
 
+      <GlassPanel title="What trading here costs" note="measured, not assumed">
+        <GoldCostsPanel />
+      </GlassPanel>
+
       {sum?.last_notes?.length ? (
-        <GlassPanel title="What the last cycle said" note="the desk's own reasons, not a summary">
+        <GlassPanel title="What the last cycle said" note="the desk's own reasons">
           <ul className="notes">
             {sum.last_notes.map((n, i) => (
               <li key={i}>{n}</li>
@@ -396,57 +460,50 @@ export default function GoldDeskPage() {
         </GlassPanel>
       ) : null}
 
-      <GlassPanel
-        title="Strategies that have traded in this book"
-        note={`${strats.length} of ${(sum?.stream_count ?? 0).toLocaleString("en-IN")} streams have a record`}
-      >
+      <GlassPanel title="Strategy records" note="a record states what happened — it is never a promotion">
         <div className="table-scroll">
           <table className="data-table">
             <thead>
               <tr>
                 <th className="l">Strategy</th>
-                <th>Symbol</th>
                 <th>TF</th>
                 <th>Trades</th>
                 <th>Win %</th>
+                <th>Net / trade</th>
+                <th>t</th>
                 <th>PF</th>
-                <th>Expectancy</th>
                 <th>Costs</th>
                 <th>Realised</th>
                 <th>Open</th>
-                <th>Max DD</th>
-                <th className="l">Worth real money?</th>
+                <th className="l">Record</th>
               </tr>
             </thead>
             <tbody>
               {strats.map((s) => (
                 <tr key={`${s.symbol}-${s.template}-${s.timeframe}`}>
-                  <td className="l strong">{s.name}</td>
-                  <td>{s.symbol}</td>
+                  <td className="l strong">
+                    {s.name}
+                    {s.h1 && <span className="h1tag">H1</span>}
+                  </td>
                   <td>{s.timeframe}</td>
                   <td>{s.trades}</td>
                   <td>{s.trades ? s.win_rate.toFixed(1) : "—"}</td>
+                  <td className={tone(s.net_bp_mean)}>{bpx(s.net_bp_mean)}</td>
+                  <td>{s.net_bp_t === null || s.net_bp_t === undefined ? "—" : s.net_bp_t.toFixed(2)}</td>
                   <td>{s.profit_factor === null ? "—" : s.profit_factor.toFixed(2)}</td>
-                  <td className={tone(s.expectancy)}>{money(s.expectancy, ccy)}</td>
                   <td className="muted">{plain(s.total_costs, ccy)}</td>
                   <td className={`strong ${tone(s.realized_pnl)}`}>{money(s.realized_pnl, ccy)}</td>
-                  <td className={tone(s.unrealized_pnl)}>
-                    {s.open_positions ? money(s.unrealized_pnl, ccy) : "—"}
-                  </td>
-                  <td>{s.max_drawdown_pct.toFixed(2)}%</td>
+                  <td className={tone(s.unrealized_pnl)}>{s.open_positions ? money(s.unrealized_pnl, ccy) : "—"}</td>
                   <td className="l">
-                    <span className={`verdict ${s.verdict.toLowerCase()}`}>{s.verdict}</span>
+                    <span className="verdict record">{s.verdict}</span>
                     {s.verdict_reasons?.[0] && <span className="why"> {s.verdict_reasons[0]}</span>}
                   </td>
                 </tr>
               ))}
               {!strats.length && (
                 <tr>
-                  <td className="l empty" colSpan={12}>
-                    No strategy has traded in this book yet. A record appears here the first time one of the{" "}
-                    {(sum?.stream_count ?? 0).toLocaleString("en-IN")} streams fills — and unlike the desk this
-                    was ported from, a record cannot disappear afterwards: it is the positions in the database,
-                    not a list held in memory.
+                  <td className="l empty" colSpan={11}>
+                    No strategy is enabled on this venue, and none has a record here.
                   </td>
                 </tr>
               )}
@@ -455,51 +512,59 @@ export default function GoldDeskPage() {
         </div>
       </GlassPanel>
 
-      <GlassPanel title="Open positions" note={`${open.length} of ${sum?.max_positions ?? 0} slots in use`}>
+      <GlassPanel title="Open positions" note={`${open.length} open`}>
         <div className="table-scroll">
           <table className="data-table">
             <thead>
               <tr>
                 <th className="l">Strategy</th>
-                <th>Symbol</th>
                 <th>Side</th>
                 <th>{sum?.unit_label === "contract" ? "Contracts" : "Lots"}</th>
                 <th>Entry</th>
+                <th>Filled</th>
                 <th>Mark</th>
                 <th>Stop</th>
                 <th>Target</th>
                 <th>Notional</th>
+                {sum?.funding ? <th>Funding</th> : null}
                 <th>Unrealised</th>
-                <th>Held</th>
-                <th>Opened</th>
+                <th>Hold until</th>
               </tr>
             </thead>
             <tbody>
               {open.map((p) => (
                 <tr key={p.position_id}>
-                  <td className="l strong">{p.strategy_name}</td>
-                  <td>{p.symbol}</td>
+                  <td className="l strong">
+                    {p.strategy_name}
+                    {p.h1 && <span className="h1tag">H1</span>}
+                  </td>
                   <td>
                     <span className={p.side === "BUY" ? "side buy" : "side sell"}>{p.side}</span>
                   </td>
                   <td>{p.units}</td>
                   <td>{px(p.entry_price)}</td>
-                  <td>{px(p.ltp)}</td>
+                  <td className="muted">
+                    {basisLabel(p.entry_basis)}
+                    {p.entry_spread_bp !== undefined && p.entry_spread_bp !== null ? ` · ${p.entry_spread_bp.toFixed(2)} bp spread` : ""}
+                  </td>
+                  <td>
+                    {px(p.ltp)}
+                    {p.store_stale ? <span className="warn"> · bars stale</span> : null}
+                    {p.quote_status && p.quote_status !== "live" ? <span className="warn"> · {p.quote_status}</span> : null}
+                  </td>
                   <td>{px(p.stoploss)}</td>
                   <td>{px(p.target)}</td>
                   <td className="muted">{plain(p.notional, ccy)}</td>
+                  {sum?.funding ? <td className={tone(-(p.funding_paid ?? 0))}>{money(-(p.funding_paid ?? 0), ccy)}</td> : null}
                   <td className={`strong ${tone(p.unrealized_pnl)}`}>{money(p.unrealized_pnl, ccy)}</td>
-                  <td>
-                    {p.bars_held}/{p.max_hold_bars}
-                  </td>
-                  <td className="muted">{when(p.opened_at)}</td>
+                  <td className="muted">{p.hold_until ? when(p.hold_until) : `${p.bars_held}/${p.max_hold_bars} bars`}</td>
                 </tr>
               ))}
               {!open.length && (
                 <tr>
                   <td className="l empty" colSpan={12}>
-                    Nothing open. Every position here is opened by a pattern signal and closed by its own
-                    target, stop or hold limit — never by hand.
+                    Nothing open. Every position is opened by a signal on a closed bar and closed by its own target, stop or
+                    hold limit — never by hand.
                   </td>
                 </tr>
               )}
@@ -514,35 +579,43 @@ export default function GoldDeskPage() {
             <thead>
               <tr>
                 <th className="l">Strategy</th>
-                <th>Symbol</th>
                 <th>Side</th>
                 <th>Entry</th>
                 <th>Exit</th>
                 <th>Why</th>
+                <th>Filled</th>
                 <th>Costs</th>
                 <th>Net</th>
-                <th>On margin</th>
+                <th>Net / notional</th>
                 <th>Closed</th>
               </tr>
             </thead>
             <tbody>
               {closed.map((p) => (
                 <tr key={p.position_id}>
-                  <td className="l strong">{p.strategy_name}</td>
-                  <td>{p.symbol}</td>
+                  <td className="l strong">
+                    {p.strategy_name}
+                    {p.h1 && <span className="h1tag">H1</span>}
+                  </td>
                   <td>
                     <span className={p.side === "BUY" ? "side buy" : "side sell"}>{p.side}</span>
                   </td>
                   <td>{px(p.entry_price)}</td>
                   <td>{px(p.exit_price)}</td>
                   <td>
-                    <span className={`why-chip ${p.exit_reason === "target" ? "good" : p.exit_reason === "stoploss" ? "bad" : ""}`}>
+                    <span
+                      className={`why-chip ${p.exit_reason === "target" ? "good" : p.exit_reason === "stoploss" ? "bad" : ""}`}
+                    >
                       {p.exit_reason ?? "—"}
                     </span>
                   </td>
-                  <td className="muted">{plain(p.costs, ccy)}</td>
+                  <td className="muted">{basisLabel(p.exit_basis)}</td>
+                  <td className="muted">
+                    {plain(p.costs, ccy)}
+                    {p.funding_paid ? ` · funding ${money(-p.funding_paid, ccy)}` : ""}
+                  </td>
                   <td className={`strong ${tone(p.realized_pnl)}`}>{money(p.realized_pnl, ccy)}</td>
-                  <td className={tone(p.return_on_margin_pct)}>{pc(p.return_on_margin_pct)}</td>
+                  <td className={tone(p.net_bp)}>{bpx(p.net_bp)}</td>
                   <td className="muted">{when(p.closed_at)}</td>
                 </tr>
               ))}
@@ -575,6 +648,10 @@ export default function GoldDeskPage() {
         .ptab.muted { cursor: default; font-weight: 500; }
         .ptab .tv { font-family: var(--font-data); font-size: 12px; font-weight: 600;
                     font-variant-numeric: tabular-nums; opacity: 0.9; }
+
+        .retired { border-radius: 14px; padding: 16px 20px; border: 1px solid var(--panel-border);
+                   background: var(--canvas-soft); }
+        .retired p { margin: 6px 0 0; font-size: 12.5px; line-height: 1.6; color: var(--text-muted); max-width: 980px; }
 
         .basis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
         .bcard { background: var(--canvas-soft); border: 1px solid var(--panel-border);
@@ -651,10 +728,13 @@ export default function GoldDeskPage() {
         .data-table th.l, .data-table td.l { text-align: left; }
         .strong { font-weight: 700; }
         .muted { color: var(--text-muted); }
+        .warn { color: var(--warn); }
         .gain { color: var(--gain); }
         .loss { color: var(--loss); }
         .empty { color: var(--text-muted); white-space: normal; padding: 16px 10px; max-width: 760px; }
 
+        .h1tag { margin-left: 6px; font-size: 9.5px; font-weight: 800; letter-spacing: 0.05em; padding: 1px 6px;
+                 border-radius: 100px; color: var(--warn); background: var(--warn-dim); }
         .side { font-size: 10.5px; font-weight: 800; letter-spacing: 0.05em; padding: 3px 8px;
                 border-radius: 100px; }
         .side.buy { color: var(--gain); background: var(--gain-dim); }
@@ -665,9 +745,7 @@ export default function GoldDeskPage() {
         .why-chip.bad { color: var(--loss); background: var(--loss-dim); }
         .verdict { font-size: 10.5px; font-weight: 800; letter-spacing: 0.04em; padding: 3px 8px;
                    border-radius: 100px; background: var(--canvas-soft); color: var(--text-muted); }
-        .verdict.pass { color: var(--gain); background: var(--gain-dim); }
-        .verdict.fail { color: var(--loss); background: var(--loss-dim); }
-        .verdict.pending { color: var(--warn); background: var(--warn-dim); }
+        .verdict.record { color: var(--text-muted); border: 1px solid var(--panel-border); }
         .why { margin-left: 8px; font-size: 11.5px; color: var(--text-muted); white-space: normal; }
       `}</style>
     </div>

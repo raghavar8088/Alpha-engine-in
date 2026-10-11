@@ -7611,7 +7611,7 @@ export async function closeAllNatGas(): Promise<{ closed: number; net_pnl: numbe
   return apiFetch(`${ngb}/close-all`, { method: "POST" });
 }
 
-// ---- Gold Desk (MCX gold futures + Delta gold perpetuals, one book each) ----
+// ---- Gold Desk (MCX gold futures + Delta's gold perpetual; rebuilt on its 2026-10 research) ----
 export type GoldVenueKey = "mcx" | "delta";
 
 export interface GoldSummary {
@@ -7620,6 +7620,8 @@ export interface GoldSummary {
   currency: "INR" | "USD";
   unit_label: string;
   quote_note: string;
+  /** "record": each strategy in its own sleeve (the H1 test) | "account": one shared book. */
+  mode: "record" | "account";
   symbols: string[];
   tradable_symbols: string[];
   enabled: boolean;
@@ -7634,28 +7636,39 @@ export interface GoldSummary {
   today_pnl: number;
   today_pct: number;
   margin_deployed: number;
+  open_notional: number;
   available_margin: number;
   total_costs: number;
+  funding_paid: number;
   open_positions: number;
   closed_positions: number;
   win_rate: number;
-  daily_loss_limit: number;
+  daily_loss_limit: number | null;
   breaker_tripped: boolean;
   book_floor: number;
   book_floor_pct: number;
   floor_reached: boolean;
   market_open: boolean;
   max_positions: number;
+  exit_slip_bp: number;
   slippage_bps: number;
   max_hold_bars: number;
+  /** A bar first seen later than this after its close is skipped, never traded late (null = no bound). */
+  max_entry_lag_s: number | null;
   strategy_count: number;
   stream_count: number;
+  strategies_enabled: string[];
+  retired_timeframes: string[];
+  can_enable: boolean;
+  why_off: string | null;
+  funding: boolean;
   fee_note: string;
   last_run_at: string | null;
   last_opened: number;
   last_managed: number;
   last_evaluated: number;
   last_notes: string[];
+  h1?: { preregistered: boolean; fingerprint: string | null; stored_at: string | null };
 }
 
 export interface GoldStrategy {
@@ -7665,16 +7678,21 @@ export interface GoldStrategy {
   name: string;
   family: string;
   family_label: string;
+  enabled: boolean;
+  h1: boolean;
   trades: number;
   win_rate: number;
   profit_factor: number | null;
   expectancy: number;
+  net_bp_mean: number | null;
+  net_bp_t: number | null;
   max_drawdown_pct: number;
   t_stat: number | null;
   total_costs: number;
   realized_pnl: number;
   unrealized_pnl: number;
   open_positions: number;
+  /** Always "RECORD": a record states what happened; it is never a promotion. */
   verdict: string;
   verdict_reasons: string[];
 }
@@ -7683,6 +7701,7 @@ export interface GoldPosition {
   position_id: string;
   venue: GoldVenueKey;
   currency: string;
+  mode?: string;
   strategy_name: string;
   timeframe: string;
   pattern: string | null;
@@ -7692,7 +7711,10 @@ export interface GoldPosition {
   unit_label: string;
   qty: number;
   entry_price: number;
+  entry_basis?: string;
+  entry_spread_bp?: number | null;
   exit_price: number | null;
+  exit_basis?: string | null;
   ltp: number | null;
   target: number;
   stoploss: number;
@@ -7701,19 +7723,26 @@ export interface GoldPosition {
   unrealized_pnl: number | null;
   realized_pnl: number | null;
   costs: number | null;
+  funding_paid?: number;
+  funding_events?: number;
+  net_bp?: number | null;
   return_on_margin_pct: number | null;
   exit_reason: string | null;
   status: string;
   rationale: string | null;
   bars_held: number;
   max_hold_bars: number;
+  hold_until?: string | null;
+  h1?: boolean;
+  store_stale?: boolean;
+  quote_status?: string;
   opened_at: string;
   closed_at: string | null;
 }
 
 export interface GoldBasis {
   mcx?: {
-    symbol: string; price: number; source: string; quote: string;
+    symbol: string; price: number; source: string; quote: string; fresh?: boolean;
     per_gram_inr: number; per_oz_inr: number;
   };
   delta?: {
@@ -7722,9 +7751,55 @@ export interface GoldBasis {
   implied?: {
     note: string;
     usd_inr_used?: number;
+    usd_inr_asof?: string | null;
     delta_per_oz_inr?: number;
     mcx_per_oz_inr?: number;
     premium_pct?: number;
+  };
+}
+
+export interface GoldCosts {
+  delta?: {
+    symbol?: string; error?: string;
+    taker_fee_pct?: number; maker_fee_pct?: number; gst_pct?: number; round_trip_fee_bp?: number;
+    exit_slip_bp?: number; funding_interval_h?: number; funding_rate_pct_last?: number | null;
+    funding_rate_pct_mean_7d?: number | null; funding_bp_per_day_long?: number | null;
+    spreads?: {
+      samples: number; days: number; spread_bp_median: number | null; spread_bp_p90: number | null;
+      sleeve_buy_bp_median: number | null; sleeve_sell_bp_median: number | null;
+    };
+  };
+  mcx?: {
+    symbol?: string; error?: string; lot_notional_inr?: number; round_trip_fee_inr?: number;
+    round_trip_fee_bp?: number; exit_slip_bp?: number; live_spread_bp?: number | null;
+    spreads?: { samples: number; median_bp: number; p90_bp: number; half_spread_bp: number } | null;
+  };
+}
+
+export interface GoldH1Report {
+  preregistered: boolean;
+  fingerprint: string | null;
+  code_matches_stored: boolean | null;
+  stored_at?: string;
+  status: "NOT STORED" | "COLLECTING" | "FUTILE" | "GO" | "NO-GO";
+  why?: string;
+  trades?: number;
+  weeks?: number;
+  open_positions?: number;
+  net_bp_mean?: number | null;
+  weekly_t?: number | null;
+  alpha_t?: number | null;
+  beta?: number | null;
+  /** Weeks with XAUT priced at both boundaries — the regression's sample. */
+  xaut_weeks_measured?: number;
+  progress_pct?: number;
+  rule: {
+    title: string;
+    written: string;
+    hypothesis: string;
+    rule: { templates: string[]; timeframe: string; symbol: string; capital_usd: number };
+    decision: { final_week: number; futility_week: number; go: string; futility: string; min_trades_for_any_verdict: number };
+    power: string;
   };
 }
 
@@ -7759,6 +7834,12 @@ export async function fetchGoldBasis(): Promise<GoldBasis> {
 export async function fetchGoldCoverage(venue: GoldVenueKey): Promise<GoldCoverage> {
   return apiFetch(`${gd}/coverage?venue=${venue}`);
 }
+export async function fetchGoldCosts(): Promise<GoldCosts> {
+  return apiFetch(`${gd}/costs`);
+}
+export async function fetchGoldH1(): Promise<GoldH1Report> {
+  return apiFetch(`${gd}/h1`);
+}
 export async function toggleGoldDesk(venue: GoldVenueKey, enabled: boolean): Promise<GoldSummary> {
   return apiFetch(`${gd}/toggle?venue=${venue}`, { method: "POST", body: JSON.stringify({ enabled }) });
 }
@@ -7767,6 +7848,8 @@ export async function runGoldCycle(
 ): Promise<{ venue: string; opened: number; managed: number; evaluated: number; notes: string[] }> {
   return apiFetch(`${gd}/run?venue=${venue}`, { method: "POST" });
 }
-export async function closeAllGold(venue: GoldVenueKey): Promise<{ closed: number; net_pnl: number }> {
+export async function closeAllGold(
+  venue: GoldVenueKey,
+): Promise<{ closed: number; net_pnl: number; left_open_no_live_price?: string[] }> {
   return apiFetch(`${gd}/close-all?venue=${venue}`, { method: "POST" });
 }

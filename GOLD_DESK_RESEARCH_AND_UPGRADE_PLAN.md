@@ -1,8 +1,51 @@
 # Gold Desk — Research, Profitability Validation & Upgrade Plan
 
-**Date:** 2026-10-10 · **Scope:** `/gold-desk` — both books (MCX gold futures in rupees, Delta gold-token perpetuals in dollars), the 353-strategy pattern catalogue they trade, their data feeds, loops, risk controls and page · **Status:** research complete — this document changes no code.
+**Date:** 2026-10-10 · **Scope:** `/gold-desk` — both books (MCX gold futures in rupees, Delta gold-token perpetuals in dollars), the 353-strategy pattern catalogue they trade, their data feeds, loops, risk controls and page · **Status:** research complete 2026-10-10; the plan was **implemented on 2026-10-11** — see [Implementation status](#implementation-status-2026-10-11). Sections 0–14 are the research as written; where the implementation departs from §8, the status section says so.
 
 Every figure below was measured on the production database, on the venues' public data, or by replaying the desk's own code on gold history on 2026-10-10. The scripts that produce each one are in [`backend/research/gold_2026_10/`](backend/research/gold_2026_10/README.md). Measured results, assumptions and hypotheses are labelled as such.
+
+---
+
+## Implementation status (2026-10-11)
+
+**What the desk is now:** Delta runs **H1** and nothing else — the nine 4h breakout / trend-structure templates on XAUTUSD, paper, in a pre-registered two-year forward test. MCX trades **nothing**: every strategy on it was retired, and its switch refuses to turn on. Every C-item is in code (C9 in part), and so are I1, I3 and I4; I2 and I5 are in part (see the table). Each item has a test in `backend/tests/gold_desk/`, which now runs against the repo's own `shared/` (D17).
+
+| Item | Done | Where |
+|---|---|---|
+| C1 closed bars | yes — and *final* bars (see below) | `gold_desk.load_bars`, `scan_cycle`; `gold_delta_feed.load_bars(closed_only)`, `fetched_at` |
+| C2 own contract, roll, settlement | yes | `gold_desk._manage_mcx`, `close_all` (via `mcx_market.position_contract`, `forced_exit`, `commodity_bars.last_contract_price`) |
+| C3 touch fills, walked exits, funding, fail-closed fee | yes | `gold_fills.py` (the replay's exit rule, held to `gd_replay._resolve` on 4,000 random paths); `gold_delta_feed.fill_price`, `funding_series`, `rate_at`; `gold_desk._fee` |
+| C4 hold in bars | yes | Delta: the 60th 4h bar's close (`hold_until`); MCX: `mcx_calendar.bars_elapsed` |
+| C5 exposure | yes | MCX account mode: no offsetting entry, ≤ 2 net GOLDM lots, notional ≤ book; GOLD (1 kg) and PAXGUSD dropped |
+| C6 breaker | yes (account mode) | day-open equity, every position marked; H1 has no breaker by design |
+| C7 write load | yes | incremental Delta refresh (OHLCV `$set` only, no `updated_at`), prune to `KEEP_BARS`; the bar loop is idle while the book is off and holds nothing; equity rows only when live and changed |
+| C8 records, Main Control | yes | every row is `RECORD`; Main Control gates entries only — stops are always managed |
+| C9 Delta hygiene | in part | `gap_fade` / `opening_range` never run on Delta; **weekend bars are NOT excluded** — see the H1 revision below |
+| C10 tests | yes | `backend/tests/gold_desk/` — `verify_gold_fixes.py` (88 checks), `verify_gold_book.py` (27) |
+| I1 retire below 4h | yes | `RETIRED_TIMEFRAMES` (env `GOLD_RETIRED_TIMEFRAMES`) |
+| I2 size by risk | in part | MCX: a lot whose stop risk exceeds 1.5% of equity is refused; GOLDPETAL / GOLDTEN not added (MCX trades nothing). H1 uses equal-notional sleeves — see below |
+| I3 live USD/INR | yes | Yahoo `INR=X`, cached 10 minutes, its time shown on the basis card |
+| I4 the Lab is the only door | yes (by construction) | nothing on this desk can be promoted; an H1 GO only earns the Lab gate |
+| I5 cost monitors | in part | Delta book sampled every 5 minutes into `gold_delta_book_log` (kept 180 days); GOLDM spreads from `mcx_quote_log`; both published (`GET /api/gold-desk/costs`, the page's cost panel). **No alerting** on a 2× widening yet |
+
+**Defects found while implementing**, beyond D1–D18 — each fixed and tested:
+
+1. **"Closed" was judged by the clock, not by the store.** A 4h bar stored a few seconds before its close counted as closed a moment later, so the desk could decide on it with its last seconds missing — and never decide again. Each read is now timestamped (`fetched_at`), and a bar is decided only once the store has re-read it at least 10 s after it closed.
+2. **Exits walked minutes the same way.** A minute stored mid-way was walked as complete, so a stop touched in its last seconds could be missed for good. Exits now walk final minutes only.
+3. **Funding read the future.** The rate applied at an exchange was the hourly candle that *starts* at it, which closes an hour later on the quote for the next exchange. It is now the candle that ends at the exchange.
+4. **Funding ran ahead of the walk.** An open position was charged at every exchange the clock had passed, while the exit walk still lagged by a few minutes. A later walk could find an exit before such an exchange, which would already have been paid. Funding now accrues only over the stretch the walk has cleared, and a time exit leaves before the exchange at its hold limit.
+5. **The time exit trusted a lagging store.** At the hold limit, it took the close of the last *stored* minute, which can be minutes short of the limit. It now waits until the store reaches the limit. After ten minutes it leaves on the live book, labelled `quote_fallback`.
+6. **H1's benchmark would have expired.** Daily bars were kept 600 days, and H1 runs 728. XAUT's price at each week boundary is now recorded once, as it passes (`gold_h1.snapshot_boundaries`). Daily bars are kept 1,200 days as the fallback. An unmeasured week is left out of the alpha regression, never set to zero.
+7. **A long outage would have left a hole in the exit walk.** The 1m store keeps about 50 hours, so after a longer outage the walk could skip the missing stretch. It now reads that stretch from the venue. If the venue cannot be read, the walk waits.
+
+**H1 — revisions to the §8 draft, made on 2026-10-11 before the rule was stored and before any sample.** The stored rule (in `gold_h1.PREREGISTRATION`, fingerprinted when the Delta book is switched on) governs; these are the differences from the draft in §8:
+
+- **Equal-notional sleeves, not risk-based size (I2).** Each template holds one sleeve of capital / 9 at 1x. The evidence is per-trade net bp of notional, so equal notional keeps the forward record directly comparable to it. Risk-based size would weight trades by their stop distance. Net exposure ≤ 100% (C5) holds by construction.
+- **No daily breaker, no shared slots, no netting between templates.** Each one would censor the pooled sample the hypothesis is about. The 50% book floor stays as a ruin guard.
+- **Weekend bars are evaluated** (C9's weekend exclusion is not applied to H1). The evidence was replayed on every bar of 24/7 histories, so the forward test does the same.
+- **Entry:** at the touch once the bar is final, normally within ~5 minutes of its close. A bar first seen more than 15 minutes after its close is skipped, never traded late. The replay entered at the next minute's open.
+- **Funding:** at every 4-hourly exchange the position is open across, at the rate of the hour ending at the exchange. The rate is read as **% per exchange**: the product's `annualized_funding` cap (21.9) is exactly 0.01% × 6 exchanges × 365. That is about 3 bp a day for a long at the usual 0.005%, the replay's "high" case. The pooled replay is insensitive to it, because longs were 48% of 4h trades, so their payments and the shorts' receipts nearly cancel.
+- **Metric details made explicit:** weeks are counted from the moment the rule is stored. The weekly book return is the realised P&L of trades closed that week ÷ capital. XAUT's weekly return comes from its recorded boundary prices.
 
 ---
 
@@ -485,7 +528,7 @@ Keep `mcx_quote_log`; make the Delta order-book sampler a permanent low-rate job
 
 - **Why this and nothing else:** it is the only effect in this study with the same sign on every history that can show it (+16.2, +12.2, +12.0 bp a trade net at 4h on Binance PAXG, Delta 2026, COMEX hours), with a known mechanism (short-horizon trend-following; Szakmary, Shen & Sharma 2010 for the long-horizon version) — and Delta is the cheapest place to trade it (2.4 bp a round trip).
 - **Why it may fail:** it was found in this data, so history cannot confirm it; 2024–26 was an unusually trending gold market; no single 4h strategy survives deflation; the 4h+1d books' alpha against gold is not significant (t ≤ 1.6).
-- **Rule, frozen before the first sample:** the nine breakout / trend-structure templates (Donchian 20 and 55, Keltner, prior-session break, round-number break, pivot R1/S1, HH/HL shift, ATR thrust, EMA ribbon) at **4h on Delta XAUTUSD only**; closed bars (C1); fills at the touch for the order size (C3); exits walked on 1m bars; the templates' own ATR target and stop and 60-bar hold; costs = venue fee + measured spread + funding accrued; one position per template; risk-based size (I2); net exposure ≤ 100% of equity (C5); paper only.
+- **Rule, frozen before the first sample:** the nine breakout / trend-structure templates (Donchian 20 and 55, Keltner, prior-session break, round-number break, pivot R1/S1, HH/HL shift, ATR thrust, EMA ribbon) at **4h on Delta XAUTUSD only**; closed bars (C1); fills at the touch for the order size (C3); exits walked on 1m bars; the templates' own ATR target and stop and 60-bar hold; costs = venue fee + measured spread + funding accrued; one position per template; risk-based size (I2); net exposure ≤ 100% of equity (C5); paper only. *(Draft. As stored, the rule uses equal-notional sleeves instead of risk-based size and spells out entry lag, final bars, funding and the weekly metric — see [Implementation status](#implementation-status-2026-10-11).)*
 - **Decision, frozen:** at **104 weeks**: GO (to the Lab gate) only if pooled net > 0 **and** weekly t ≥ 2 **and** weekly alpha against XAUT itself t ≥ 2; otherwise NO-GO. **Futility at 52 weeks:** stop if pooled net ≤ 0 or weekly t ≤ −1. Stored with a fingerprint before the first sample, as the Intraday H1 was; never re-tuned.
 - **Power, stated up front:** at the replay's own edge (+10 to +14 bp a trade, ~18.5 trades a week), the expected weekly t is **1.5 after one year and 2.1 after two**; at half that edge, 0.7 and 1.0. A NO-GO is the likely outcome even if a small edge exists; a GO would mean something.
 - **Prerequisites:** C1–C3, C5, C8, I1, I2. **Cost:** the desk running one venue, one symbol, nine strategies.
@@ -609,7 +652,7 @@ The best honest reading: retiring sub-4h turns a desk that destroys its book int
 **Trade-offs.** C1–C8 are real work (an estimate: one to two weeks), and the corrected desk will look worse than nothing at all — it has no trades today. I1 retires 74% of the catalogue. H1 takes two years to answer and will most likely answer "no".
 
 **Unresolved risks.**
-- Delta's funding period is undocumented (5.5% or 11% a year paid by longs — both reported; neither changes a sign below 4h).
+- Delta's funding period is undocumented (5.5% or 11% a year paid by longs — both reported; neither changes a sign below 4h). *Implemented as 11% (the rate read per 4-hourly exchange — the product's funding cap only fits that reading); see the Implementation status.*
 - Delta's weekday spreads: the sampler runs to 2026-10-13; the weekend figures (0.036 / 0.12 bp a side) are an order of magnitude below the fee — even a 20× widening would add under 1.5 bp to an XAUT round trip and change no conclusion here.
 - The 2024–26 regime: four of six histories sit inside it; the 4h result may be that regime and nothing else.
 - MCX intraday history is 2–3 months; MCX below 1h is judged mostly on international proxies that explain MCX poorly at a minute (correlation 0.62).
