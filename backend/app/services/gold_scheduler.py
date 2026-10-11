@@ -30,6 +30,8 @@ MCX_TICK_SECONDS = int(os.getenv("GOLD_MCX_TICK_SECONDS", "180"))
 MCX_IDLE_TICK_SECONDS = int(os.getenv("GOLD_MCX_IDLE_TICK_SECONDS", "1800"))
 DELTA_BARS_TICK_SECONDS = int(os.getenv("GOLD_DELTA_BARS_TICK_SECONDS", "120"))
 DELTA_TICK_SECONDS = int(os.getenv("GOLD_DELTA_TICK_SECONDS", "180"))
+LAB_TICK_SECONDS = int(os.getenv("GOLD_LAB_TICK_SECONDS", "120"))
+_TASKS: set = set()
 
 
 async def venue_activity(key: str) -> tuple[bool, bool, bool]:
@@ -81,9 +83,30 @@ async def gold_delta_bars_loop() -> None:
         await asyncio.sleep(DELTA_BARS_TICK_SECONDS)
 
 
+async def gold_lab_loop() -> None:
+    """The Gold Lab book (gold_lab): fund and mark what it holds; decide after each New York
+    close and rebalance at the next open. Main Control gates its decisions, never its funding."""
+    from app.services import gold_lab
+    from app.services.desk_switches import is_on
+
+    while True:
+        try:
+            r = await gold_lab.cycle(entries_allowed=await is_on("gold_desk"))
+            if (r.get("decision") or {}).get("decided") or (r.get("execution") or {}).get("executed"):
+                logger.info("[gold lab] decision %s | execution %s", (r.get("decision") or {}).get("bar_date"),
+                            r.get("execution"))
+        except Exception:
+            logger.exception("[gold lab] cycle failed — will retry next tick")
+        await asyncio.sleep(LAB_TICK_SECONDS)
+
+
 async def gold_delta_loop() -> None:
     from app.services.gold_desk import VENUES, run_cycle
 
+    # The lab book rides on this loop's start (main.py starts three gold tasks; the lab is the
+    # fourth, started here so no shared startup file had to change). A strong reference keeps
+    # the task from being garbage-collected mid-run.
+    _TASKS.add(asyncio.create_task(gold_lab_loop()))
     while True:
         try:
             on, has_open, may_enter = await venue_activity("delta")

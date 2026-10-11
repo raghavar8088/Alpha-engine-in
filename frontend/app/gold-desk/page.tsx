@@ -23,6 +23,7 @@ import ErrorBanner from "../../components/ErrorBanner";
 import DeskHistory from "../../components/DeskHistory";
 import GoldH1Panel from "./GoldH1Panel";
 import GoldCostsPanel from "./GoldCostsPanel";
+import GoldLabPanel from "./GoldLabPanel";
 import {
   GoldBasis,
   GoldPosition,
@@ -34,6 +35,8 @@ import {
   fetchGoldPositions,
   fetchGoldStrategies,
   fetchGoldVenues,
+  fetchGoldLab,
+  GoldLabSummary,
   runGoldCycle,
   toggleGoldDesk,
 } from "../../lib/api";
@@ -82,6 +85,8 @@ const basisLabel = (b: string | null | undefined) =>
 
 export default function GoldDeskPage() {
   const [tab, setTab] = useState<GoldVenueKey>("delta");
+  const [lab, setLab] = useState(false);                  // the Gold Lab tab (not a venue of the desk engine)
+  const [labSum, setLabSum] = useState<GoldLabSummary | null>(null);
   const [venues, setVenues] = useState<GoldSummary[]>([]);
   const [strats, setStrats] = useState<GoldStrategy[]>([]);
   const [open, setOpen] = useState<GoldPosition[]>([]);
@@ -98,6 +103,7 @@ export default function GoldDeskPage() {
       setVenues(v.venues);
       setBasis(b);
       setError(null);
+      fetchGoldLab().then(setLabSum).catch(() => setLabSum(null));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not load the Gold Desk.");
     }
@@ -125,10 +131,11 @@ export default function GoldDeskPage() {
   }, [load]);
 
   useEffect(() => {
+    if (lab) return;                                       // the lab panel loads its own data
     loadTab(tab);
     const id = setInterval(() => loadTab(tab), REFRESH_MS);
     return () => clearInterval(id);
-  }, [tab, loadTab]);
+  }, [tab, loadTab, lab]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -170,29 +177,32 @@ export default function GoldDeskPage() {
             Gold on two venues, rebuilt on its research. All 353 pattern strategies were replayed on six gold
             histories with honest fills and measured costs: <strong>none earned its costs below 4h</strong>, and at
             1d <strong>39 of 40 lost to simply holding gold</strong>. Delta now runs <strong>H1</strong> — one
-            pre-registered forward test of the nine 4h breakout / trend strategies on XAUTUSD; MCX is off. Paper only —
-            no order reaches a broker from this page.
+            pre-registered forward test of the nine 4h breakout / trend strategies on XAUTUSD; MCX is off. The{" "}
+            <strong>Gold Lab</strong> tab runs the seven daily strategies a second, 157-variant search left standing.
+            Paper only — no order reaches a broker from this page.
           </>
         }
         actions={
           <>
             <StatusPill label="Paper" tone="accent" />
-            {sum?.market_open ? (
+            {lab ? null : sum?.market_open ? (
               <StatusPill label={tab === "mcx" ? "MCX open" : "24/7"} tone="gain" pulse />
             ) : (
               <StatusPill label="MCX closed" tone="muted" />
             )}
-            <button
-              className="btn"
-              disabled={!!busy || !sum?.can_enable}
-              title={sum?.can_enable ? "Manage open positions and scan the latest closed bars now" : sum?.why_off ?? ""}
-              onClick={() =>
-                act("run", () => runGoldCycle(tab), (r: { opened: number; managed: number; evaluated: number }) =>
-                  `Cycle run — ${r.opened} opened, ${r.managed} managed, ${r.evaluated} evaluated.`)
-              }
-            >
-              {busy === "run" ? "Running…" : "Run cycle"}
-            </button>
+            {lab ? null : (
+              <button
+                className="btn"
+                disabled={!!busy || !sum?.can_enable}
+                title={sum?.can_enable ? "Manage open positions and scan the latest closed bars now" : sum?.why_off ?? ""}
+                onClick={() =>
+                  act("run", () => runGoldCycle(tab), (r: { opened: number; managed: number; evaluated: number }) =>
+                    `Cycle run — ${r.opened} opened, ${r.managed} managed, ${r.evaluated} evaluated.`)
+                }
+              >
+                {busy === "run" ? "Running…" : "Run cycle"}
+              </button>
+            )}
           </>
         }
       />
@@ -207,7 +217,14 @@ export default function GoldDeskPage() {
       {/* ── the two books ───────────────────────────────────────────────────────── */}
       <div className="page-tabs">
         {ordered.map((v) => (
-          <button key={v.venue} className={tab === v.venue ? "ptab on" : "ptab"} onClick={() => setTab(v.venue)}>
+          <button
+            key={v.venue}
+            className={!lab && tab === v.venue ? "ptab on" : "ptab"}
+            onClick={() => {
+              setLab(false);
+              setTab(v.venue);
+            }}
+          >
             <span>{v.label}</span>
             <span className={`tv ${tone(v.total_pnl)}`}>
               {!v.can_enable
@@ -221,8 +238,26 @@ export default function GoldDeskPage() {
           </button>
         ))}
         {!ordered.length && <div className="ptab muted">loading books…</div>}
+        <button className={lab ? "ptab on" : "ptab"} onClick={() => setLab(true)}>
+          <span>Gold Lab · 7 tested strategies</span>
+          <span className={`tv ${tone(labSum?.net_pnl)}`}>
+            {!labSum
+              ? "—"
+              : labSum.strategies.some((x) => x.fills > 0)
+                ? money(labSum.net_pnl, "USD")
+                : labSum.enabled
+                  ? "running · first decision after a NY close"
+                  : "off"}
+          </span>
+        </button>
       </div>
 
+      {lab ? (
+        <GlassPanel title="Gold Lab — seven tested strategies" note="Tier B: profitable in every test period, not proven better than holding gold">
+          <GoldLabPanel />
+        </GlassPanel>
+      ) : (
+      <>
       {tab === "delta" && (
         <GlassPanel title="H1 — the pre-registered forward test" note="judged only by its stored rule">
           <GoldH1Panel />
@@ -632,6 +667,8 @@ export default function GoldDeskPage() {
       </GlassPanel>
 
       <DeskHistory deskKey="gold-desk" scope={tab} title={`${sum?.label ?? "Gold"} — history`} />
+      </>
+      )}
 
       <style jsx>{`
         .page { padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 18px; }

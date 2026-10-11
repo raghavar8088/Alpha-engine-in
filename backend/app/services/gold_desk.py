@@ -1071,6 +1071,11 @@ async def ensure_indexes() -> None:
     except Exception as exc:  # noqa: BLE001
         logger.warning("gold desk indexes skipped: %s", exc)
     await gold_delta_feed.ensure_indexes()
+    try:
+        from app.services import gold_lab
+        await gold_lab.ensure_indexes()
+    except Exception as exc:  # noqa: BLE001 - never raise from a startup hook
+        logger.warning("gold lab indexes skipped: %s", exc)
 
 
 async def coverage(v: Venue) -> dict:

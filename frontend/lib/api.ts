@@ -7812,7 +7812,90 @@ export interface GoldCoverage {
   last_refresh?: Record<string, unknown>;
 }
 
+/** The Gold Lab book: seven strategies from the 2026-10 search (Tier B — profitable in every test
+ * period including an untouched holdout, NOT proven better than holding gold). */
+export interface GoldLabStrategy {
+  id: string;
+  name: string;
+  how: string;
+  cluster: "trend" | "shock" | "macro";
+  key: string;
+  evidence: {
+    sel_sharpe: number; val_sharpe: number; holdout_sharpe: number; holdout_alpha_t: number;
+    full_sharpe: number; full_alpha_t: number; delta_full_sharpe: number; beta: number;
+  };
+  target: number | null;
+  contracts: number;
+  avg_price: number;
+  mark: number;
+  notional: number;
+  realized: number;
+  fees: number;
+  funding: number;
+  unrealized: number;
+  net: number;
+  net_pct_of_sleeve: number;
+  fills: number;
+}
+
+export interface GoldLabSummary {
+  label: string;
+  venue: string;
+  currency: "USD";
+  enabled: boolean;
+  capital: number;
+  sleeve: number;
+  equity: number;
+  net_pnl: number;
+  net_pct: number;
+  realized: number;
+  fees: number;
+  funding: number;
+  unrealized: number;
+  strategies: GoldLabStrategy[];
+  decision: {
+    bar_date: string; session: string; targets: Record<string, number>; executed: boolean; skipped: boolean;
+    skip_reason?: string; decided_at?: string; executed_at?: string; fills?: number; notes?: string[];
+  } | null;
+  preregistered: boolean;
+  fingerprint: string | null;
+  stored_at: string | null;
+  last_run_at: string | null;
+  last_note: string | null;
+  calendar_through: string;
+  tier_note: string;
+}
+
+export interface GoldLabFill {
+  sid: string;
+  bar_date: string | null;
+  session: string | null;
+  contracts: number;
+  price: number;
+  basis?: string;
+  spread_bp?: number | null;
+  target?: number | null;
+  fee?: number;
+  reason?: string;
+  at: string;
+}
+
 const gd = "/api/gold-desk";
+export async function fetchGoldLab(): Promise<GoldLabSummary> {
+  return apiFetch(`${gd}/lab`);
+}
+export async function fetchGoldLabFills(limit = 100): Promise<{ fills: GoldLabFill[] }> {
+  return apiFetch(`${gd}/lab/fills?limit=${limit}`);
+}
+export async function toggleGoldLab(enabled: boolean): Promise<GoldLabSummary> {
+  return apiFetch(`${gd}/lab/toggle`, { method: "POST", body: JSON.stringify({ enabled }) });
+}
+export async function runGoldLab(): Promise<Record<string, unknown>> {
+  return apiFetch(`${gd}/lab/run`, { method: "POST" });
+}
+export async function closeAllGoldLab(): Promise<{ closed: number; left_open?: string[]; why?: string }> {
+  return apiFetch(`${gd}/lab/close-all`, { method: "POST" });
+}
 export async function fetchGoldVenues(): Promise<{ venues: GoldSummary[] }> {
   return apiFetch(`${gd}/venues`);
 }

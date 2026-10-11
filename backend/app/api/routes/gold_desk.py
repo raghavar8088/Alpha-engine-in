@@ -11,12 +11,18 @@
   POST /api/gold-desk/toggle?venue=       {"enabled": bool} — entries only; 409 when nothing can trade
   POST /api/gold-desk/run?venue=          one cycle now (manage + scan)
   POST /api/gold-desk/close-all?venue=    square off that venue's open positions at the market
+
+  GET  /api/gold-desk/lab                 the Gold Lab book: seven tested strategies, holdings, decision
+  GET  /api/gold-desk/lab/fills           its rebalancing fills, newest first
+  POST /api/gold-desk/lab/toggle          {"enabled": bool} — stores its pre-registration on first use
+  POST /api/gold-desk/lab/run             one lab cycle now (decides / executes only when due)
+  POST /api/gold-desk/lab/close-all       flatten every lab holding at the touch
 """
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 
 from app.api.deps import get_current_user
-from app.services import gold_desk, gold_h1
+from app.services import gold_desk, gold_h1, gold_lab
 
 router = APIRouter(prefix="/api/gold-desk", tags=["gold-desk"])
 
@@ -93,3 +99,35 @@ async def run(venue: str = VenueQ, _current_user: dict = Depends(get_current_use
 @router.post("/close-all")
 async def close_all(venue: str = VenueQ, _current_user: dict = Depends(get_current_user)):
     return await gold_desk.close_all(_v(venue))
+
+
+# ── the Gold Lab book: the seven Tier-B strategies of the 2026-10 search ───────────
+
+
+@router.get("/lab")
+async def lab(_current_user: dict = Depends(get_current_user)):
+    return await gold_lab.summary()
+
+
+@router.get("/lab/fills")
+async def lab_fills(limit: int = Query(200, ge=1, le=2000), _current_user: dict = Depends(get_current_user)):
+    return {"fills": await gold_lab.fills(limit)}
+
+
+@router.post("/lab/toggle")
+async def lab_toggle(payload: dict = Body(...), _current_user: dict = Depends(get_current_user)):
+    try:
+        return await gold_lab.set_enabled(bool(payload.get("enabled")))
+    except RuntimeError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@router.post("/lab/run")
+async def lab_run(_current_user: dict = Depends(get_current_user)):
+    from app.services.desk_switches import is_on
+    return await gold_lab.cycle(entries_allowed=await is_on("gold_desk"))
+
+
+@router.post("/lab/close-all")
+async def lab_close_all(_current_user: dict = Depends(get_current_user)):
+    return await gold_lab.close_all()
