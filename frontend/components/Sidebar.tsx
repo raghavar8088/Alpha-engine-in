@@ -37,7 +37,22 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
-        // Sits directly under Commodity Trading, and is to it what F&O Positions is to the
+        // Pinned third, directly above Commodity Positions, as asked. The only desk in the
+        // app that trades ONE metal across TWO venues and two currencies — so a coin mark
+        // with a second coin behind it, rather than a bullion bar that would read as
+        // another MCX desk.
+        href: "/gold-desk",
+        label: "Gold Desk",
+        icon: (
+          <>
+            <circle cx="10" cy="14" r="6" />
+            <path d="M14.5 4.2a6 6 0 013 9.3" />
+            <path d="M10 11.5v5M8.4 12.8h2.6a1.4 1.4 0 010 2.8H9a1.4 1.4 0 000 2.8h2.6" />
+          </>
+        ),
+      },
+      {
+        // Sits under Gold Desk, and is to Commodity Trading what F&O Positions is to the
         // index desks: you place the trades, it does not. A ledger/scales mark rather than
         // another bullion bar, so the manual book does not read as a second strategy desk.
         href: "/commodity-positions",
@@ -58,20 +73,6 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
           <>
             <circle cx="12" cy="12" r="9" />
             <path d="M8 10.5c0-1.4 1.2-2.5 4-2.5s4 1.1 4 2.5-1.4 2-4 2.5-4 1.1-4 2.5 1.2 2.5 4 2.5 4-1.1 4-2.5" />
-          </>
-        ),
-      },
-      {
-        // Pinned fifth. The only desk in the app that trades ONE metal across TWO venues
-        // and two currencies — so a coin mark with a second coin behind it, rather than a
-        // bullion bar that would read as another MCX desk.
-        href: "/gold-desk",
-        label: "Gold Desk",
-        icon: (
-          <>
-            <circle cx="10" cy="14" r="6" />
-            <path d="M14.5 4.2a6 6 0 013 9.3" />
-            <path d="M10 11.5v5M8.4 12.8h2.6a1.4 1.4 0 010 2.8H9a1.4 1.4 0 000 2.8h2.6" />
           </>
         ),
       },
