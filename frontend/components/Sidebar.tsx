@@ -375,7 +375,7 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
       },
       {
         href: "/prelive",
-        label: "Pre-Live Desk · Buying",
+        label: "Index Option Buying",
         icon: (
           <>
             <path d="M4 4h16v12H4z" />
@@ -389,7 +389,7 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         // have opposite risk profiles (bounded loss vs capped gain and a large tail)
         // and must never be confused for one another at a glance.
         href: "/prelive-selling",
-        label: "Pre-Live Desk · Selling",
+        label: "Index Option Selling",
         icon: (
           <>
             <path d="M4 4h16v12H4z" />

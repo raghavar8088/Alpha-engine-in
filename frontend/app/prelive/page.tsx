@@ -1,7 +1,8 @@
 "use client";
 
 /*
- * Pre-Live Paper Desk — rebuilt 2026-10-02 after the audit that found:
+ * Index Option Buying (called the Pre-Live Paper Desk until 2026-10-11) — rebuilt 2026-10-02
+ * after the audit that found:
  *   - no strategy in the 167-strategy library predicts NIFTY's direction (two-year replay:
  *     47.8-48.4% of trades went the bought option's way), so a leaderboard of them ranks luck;
  *   - the leaderboard's top rows were ANTI-<name>: sign flips of the WORST records, never traded;
@@ -88,7 +89,7 @@ export default function PreLivePage() {
       await (tab === "research" ? loadResearch() : loadTournament());
       setError(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load the Pre-Live desk");
+      setError(e instanceof Error ? e.message : "Failed to load Index Option Buying");
     }
   }, [tab, loadResearch, loadTournament]);
 
@@ -126,8 +127,8 @@ export default function PreLivePage() {
       <PageHeader
         onRefresh={handleRefresh}
         refreshing={busy}
-        crumb="Pre-Live Desk"
-        title="Pre-Live Paper Desk"
+        crumb="Index Option Buying"
+        title="Index Option Buying"
         subtitle="NIFTY option buying on live data and REAL option premiums — paper only. The 167-strategy tournament now runs as a source of real-premium research data; what may ever trade real money enters through the pre-registered hypotheses, judged on real-money (order-book) P&L."
       />
 

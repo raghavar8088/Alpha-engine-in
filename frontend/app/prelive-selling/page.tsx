@@ -118,8 +118,8 @@ export default function PreLiveSellingPage() {
       <PageHeader
         onRefresh={handleRefresh}
         refreshing={isRefreshing}
-        crumb="Pre-Live"
-        title="Pre-Live Desk · SELLING"
+        crumb="Index Option Selling"
+        title="Index Option Selling"
         subtitle="Strategy-selection tournament that SELLS option premium on NIFTY — EVERY registered option-selling strategy trades multi-leg credit structures at real live Dhan premiums, each on its own independent ₹10 lakh margin account at 1 lot/position (paper, capital pool entirely separate from the buying desk). Positions are held across sessions, so structures carried overnight are normal here."
       />
 

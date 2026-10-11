@@ -15,8 +15,8 @@ const BASE = "https://alpha-engine-in.vercel.app";
 test.describe("Selling desk end-to-end", () => {
   test("sidebar links to both desks, correctly labelled and distinct", async ({ page }) => {
     await page.goto(`${BASE}/prelive`, { waitUntil: "networkidle" });
-    const buying = page.getByRole("link", { name: /Pre-Live Desk.*Buying/i });
-    const selling = page.getByRole("link", { name: /Pre-Live Desk.*Selling/i });
+    const buying = page.getByRole("link", { name: /Index Option Buying/i });
+    const selling = page.getByRole("link", { name: /Index Option Selling/i });
     await expect(buying).toBeVisible();
     await expect(selling).toBeVisible();
   });
@@ -66,12 +66,12 @@ test.describe("Selling desk end-to-end", () => {
     await expect(page.getByText(/no win-rate gate here, on purpose/i)).toBeVisible();
   });
 
-  test("Pre-Live Desk - Selling page loads, is unmistakable vs Buying, shows the SHORT PREMIUM banner", async ({ page }) => {
+  test("Index Option Selling page loads, is unmistakable vs Buying, shows the SHORT PREMIUM banner", async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (e) => errors.push(e.message));
 
     await page.goto(`${BASE}/prelive-selling`, { waitUntil: "networkidle" });
-    await expect(page.getByRole("heading", { name: /Pre-Live Desk.*SELLING/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Index Option Selling/i })).toBeVisible();
     await expect(page.getByText(/SHORT PREMIUM/i)).toBeVisible();
 
     // Tiles that only make sense for a selling desk (not present on the buying page).
