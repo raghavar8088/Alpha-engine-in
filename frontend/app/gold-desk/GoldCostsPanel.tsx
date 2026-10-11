@@ -68,8 +68,9 @@ export default function GoldCostsPanel() {
             <li>
               <span>Funding</span>
               <b>
-                {d?.funding_rate_pct_last ?? "—"}% per {d?.funding_interval_h ?? 4} h exchange · longs pay ≈
-                {" "}{bp(d?.funding_bp_per_day_long)} a day
+                {d?.funding_rate_pct_last !== null && d?.funding_rate_pct_last !== undefined
+                  ? `${d.funding_rate_pct_last}% per ${d.funding_interval_h ?? 4} h exchange · longs pay ≈ ${bp(d.funding_bp_per_day_long)} a day`
+                  : "not read yet — the funding series is fetched while the H1 book runs"}
               </b>
             </li>
             <li>
