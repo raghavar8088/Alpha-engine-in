@@ -7936,3 +7936,30 @@ export async function closeAllGold(
 ): Promise<{ closed: number; net_pnl: number; left_open_no_live_price?: string[] }> {
   return apiFetch(`${gd}/close-all?venue=${venue}`, { method: "POST" });
 }
+
+// ---- Intraday Stocks: reset a paper book (Paper Trade ₹50k / ₹2 lakh, Live Intraday ₹80k / ₹30k / ₹10k) ----
+
+export type ResettableDesk = "pattern-books" | "live-intraday";
+
+export interface BookResetInfo {
+  at: string;
+  deleted: Record<string, number> | null;
+  open_positions_deleted: number;
+}
+
+export interface BookResetPreview {
+  desk: string;
+  book: string;
+  label: string;
+  counts: Record<string, number>;
+}
+
+export async function fetchBookResets(desk: ResettableDesk): Promise<Record<string, BookResetInfo>> {
+  return apiFetch(`/api/${desk}/resets`);
+}
+export async function fetchBookResetPreview(desk: ResettableDesk, book: string): Promise<BookResetPreview> {
+  return apiFetch(`/api/${desk}/reset-preview?book=${encodeURIComponent(book)}`);
+}
+export async function resetBook(desk: ResettableDesk, book: string, confirm: string): Promise<BookResetInfo & { backup: string }> {
+  return apiFetch(`/api/${desk}/reset`, { method: "POST", body: JSON.stringify({ book, confirm }) });
+}

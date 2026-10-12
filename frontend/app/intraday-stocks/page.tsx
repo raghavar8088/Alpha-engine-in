@@ -7,6 +7,7 @@ import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import V2Validation from "./V2Validation";
 import { AlarmBanner, EdgeReportPanel } from "./IntradayOps";
+import ResetBook from "./ResetBook";
 import LineChart from "../../components/charts/LineChart";
 import {
   refreshing,
@@ -972,6 +973,8 @@ export default function IntradayStocksPage() {
 
       {isPatternBook && (
       <DataGate ready={!!pbSummary} error={error} what={"this paper book"} onRetry={() => once(`book:${pbKey}`, loadPatternBook)} lastOkAt={lastOkAt}>
+      <ResetBook desk="pattern-books" book={pbKey} label={PATTERN_BOOKS.find((b) => b.key === pbKey)?.label ?? "Paper Trade"}
+        capital={pbSummary?.desk_capital} onDone={() => refreshing(() => loadPatternBook())} />
       <div className="desk-banner">
         <strong>PATTERN PAPER BOOK · ₹{inr(pbSummary?.desk_capital)}.</strong> The{" "}
         <strong>{pbSummary?.strategies ?? 8} shortlisted pattern strategies</strong> run here on{" "}
@@ -1140,6 +1143,8 @@ export default function IntradayStocksPage() {
 
       {isLive && (
       <DataGate ready={!!liveSummary} error={error} what={"this Live Intraday book"} onRetry={() => once(`live:${liveBook}`, loadLive)} lastOkAt={lastOkAt}>
+      <ResetBook desk="live-intraday" book={liveBook} label={`Live Intraday · ₹${liveBook}`}
+        capital={bookCapital} onDone={() => refreshing(() => loadLive())} />
       <div className="desk-banner">
         <strong>LIVE INTRADAY · ₹{bookCapital.toLocaleString("en-IN")} PAPER.</strong> The same 8-strategy
         shortlist runs in three books that differ only in capital — ₹80k, ₹30k and ₹10k — each strategy opening

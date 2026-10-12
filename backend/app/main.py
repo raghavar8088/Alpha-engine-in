@@ -19,6 +19,7 @@ from app.api.routes import (
     fundamentals,
     pattern,
     pattern_books,
+    book_resets,
     desk_history,
     swing_trading,
     nifty_scalp,
@@ -984,6 +985,9 @@ app.include_router(swing_trading.router)
 app.include_router(desk_history.router)
 app.include_router(pattern.router)
 app.include_router(pattern_books.router)
+# Reset buttons for the Intraday Stocks paper books, under each desk's own prefix
+app.include_router(book_resets.pattern_books_router)
+app.include_router(book_resets.live_intraday_router)
 app.include_router(modules.router)
 app.include_router(main_control.router)
 app.include_router(stocks_range.router)

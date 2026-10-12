@@ -61,6 +61,7 @@ from app.core.db import (
     pattern_book_trades_collection,
     pattern_positions_collection,
 )
+from app.services import book_reset
 from app.services.angel_fees import product_for, round_trip
 from app.services.intraday_pattern_engine import CATALOG
 
@@ -232,6 +233,12 @@ async def _open_mirror(book: str, parent: dict) -> bool:
         {"book": book, "strategy_id": sid, "status": "OPEN"}
     ):
         return False                                   # one position per strategy per book
+    # A book reset from the page starts clean: it must not re-copy, at their old entry
+    # prices, the parent positions that were already open when it was reset.
+    reset_at = await book_reset.reset_at("pattern-books", book)
+    opened = parent.get("opened_at")
+    if reset_at is not None and isinstance(opened, datetime) and book_reset.naive_utc(opened) < reset_at:
+        return False
 
     price = float(parent.get("entry_price") or 0.0)
     cash = await _cash(book, sid)
