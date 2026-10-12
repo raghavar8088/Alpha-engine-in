@@ -103,6 +103,12 @@ _MODULES: list[Module] = [
        note="Two books on the same metal — MCX gold futures in rupees and Delta gold "
             "perpetuals in dollars. OFF stops new entries on BOTH; open positions are "
             "still managed to their target or stop."),
+    _m("index_intraday", "Indian Index Intraday Trading", "Trading", "/index-intraday",
+       ["/api/index-intraday"],
+       note="Cash-market index intraday, paper only. OFF stops new paper entries, its Angel "
+            "stream (unless a position is open) and the after-close history append; open "
+            "positions still exit on their own rules and at the 15:12 square-off. While OFF "
+            "the page's actions — including its emergency stop — are refused like any module's."),
     _m("commodity_positions", "Commodity Positions", "Trading", "/commodity-positions",
        ["/api/commodity-positions"]),
     _m("portfolio", "Portfolio", "Trading", "/portfolio", ["/api/portfolio"]),

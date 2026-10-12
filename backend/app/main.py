@@ -15,6 +15,7 @@ from app.api.routes import (
     ath_trading,
     diagnostics,
     gold_desk,
+    index_intraday,
     natgas_book,
     fundamentals,
     pattern,
@@ -600,6 +601,22 @@ async def start_gold_desk_scheduler() -> None:
 
 
 @app.on_event("startup")
+async def start_index_intraday() -> None:
+    """Indian Index Intraday Trading: its own Angel stream, the minute paper engine, the
+    after-close history append and daily report. Paper only — it never places an order. Main
+    Control's switch gates new entries (exits and the 15:12 square-off always run). Must not
+    raise: a startup hook that raises takes the whole backend down."""
+    try:
+        from app.services.index_intraday import paper as ii_paper
+        from app.services.index_intraday import scheduler as ii_scheduler
+
+        await ii_paper.ensure_indexes()
+        ii_scheduler.start()
+    except Exception:  # noqa: BLE001
+        logger.exception("Index intraday startup failed — the rest of the app still runs")
+
+
+@app.on_event("startup")
 async def start_fno_auto_roll_scheduler() -> None:
     from app.services.fno_auto_roll import (
         ACCOUNT_NAME, ENABLED as ROLL_ENABLED, LOTS, ROLL_HHMM, SYMBOL, fno_auto_roll_loop,
@@ -1002,6 +1019,7 @@ app.include_router(telegram_signals.router)
 app.include_router(fundamentals.router)
 app.include_router(natgas_book.router)
 app.include_router(gold_desk.router)
+app.include_router(index_intraday.router)
 app.include_router(diagnostics.router)
 app.include_router(intraday_data.router)
 app.include_router(intraday_ops.router)

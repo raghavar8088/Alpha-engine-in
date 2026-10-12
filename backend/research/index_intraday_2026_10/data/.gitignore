@@ -1,0 +1,10 @@
+# 1-minute history (120 MB) and per-trial daily returns stay out of git: ii_fetch.py rebuilds the
+# history, ii_round.py the returns. The trial record, its summary and the round logs are kept —
+# for the run on corrected data (here) and the first run on the uncorrected data (run1_uncorrected_data/).
+*
+!.gitignore
+!stage3.csv
+!stage3_summary.json
+!round*.log
+!stage3.log
+!run1_uncorrected_data/

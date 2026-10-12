@@ -1,0 +1,12 @@
+{
+ "trials": 1464,
+ "trials_100_trades": 1384,
+ "effective_trials": 72.0,
+ "effective_detail": {
+  "participation_ratio": 16.3,
+  "components_90pct": 72
+ },
+ "days": 1952,
+ "luck_sharpe": 0.86,
+ "cross_sectional_sd_sharpe": 2.73
+}

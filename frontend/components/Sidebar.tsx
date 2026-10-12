@@ -52,7 +52,20 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
-        // Sits under Gold Desk, and is to Commodity Trading what F&O Positions is to the
+        // Directly below Gold Desk, as asked (2026-10-12). Cash-market intraday on the indexes
+        // themselves — no options or futures — so an index line between the session's open and
+        // close bars, not another option or bullion mark.
+        href: "/index-intraday",
+        label: "Indian Index Intraday Trading",
+        icon: (
+          <>
+            <path d="M4 5v14M20 5v14" />
+            <path d="M7.5 15l3-4 3 2 3.5-5.5" />
+          </>
+        ),
+      },
+      {
+        // Sits below Gold Desk and Index Intraday, and is to Commodity Trading what F&O Positions is to the
         // index desks: you place the trades, it does not. A ledger/scales mark rather than
         // another bullion bar, so the manual book does not read as a second strategy desk.
         href: "/commodity-positions",
