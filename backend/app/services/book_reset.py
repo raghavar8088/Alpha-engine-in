@@ -1,7 +1,7 @@
 """Reset a PAPER book on the Intraday Stocks page back to its starting capital (2026-10-12).
 
 Behind the "Reset account" button on the Paper Trade (Rs50k / Rs2 lakh - the pattern books) and
-Live Intraday (Rs80k / Rs30k / Rs10k) tabs. These books never place an order, so a reset moves no
+Live Intraday (Rs80k / Rs30k / Rs10k / Rs2 lakh / Rs10 lakh) tabs. These books never place an order, so a reset moves no
 money anywhere; it deletes the book's paper record so it starts again from its capital.
 
 A RESET IS A FULL RESTART OF THAT ONE BOOK
@@ -48,7 +48,8 @@ DESKS: dict[str, dict] = {
     },
     "live-intraday": {
         "label": "Live Intraday",
-        "books": {"80k": "Rs80,000", "30k": "Rs30,000", "10k": "Rs10,000"},
+        "books": {"80k": "Rs80,000", "30k": "Rs30,000", "10k": "Rs10,000",
+                  "2L": "Rs2,00,000", "10L": "Rs10,00,000"},
         "collections": ["live_intraday_positions", "live_intraday_trades", "live_intraday_scores", "live_intraday_equity"],
     },
 }

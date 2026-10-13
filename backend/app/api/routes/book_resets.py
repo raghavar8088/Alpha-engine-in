@@ -5,7 +5,8 @@ exactly as it gates the desk's other endpoints:
   GET  /api/pattern-books/resets            last reset of the Rs50k / Rs2 lakh books
   GET  /api/pattern-books/reset-preview     what a reset of ?book= would delete
   POST /api/pattern-books/reset             {"book": "50k" | "2L", "confirm": "RESET"}
-  (and the same three under /api/live-intraday for the Rs80k / Rs30k / Rs10k books)
+  (and the same three under /api/live-intraday for the Rs80k / Rs30k / Rs10k / Rs2 lakh /
+  Rs10 lakh books)
 """
 
 from fastapi import APIRouter, HTTPException

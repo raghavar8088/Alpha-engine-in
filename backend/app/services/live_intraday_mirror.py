@@ -214,11 +214,28 @@ async def _mirror_start() -> datetime:
     return naive_utc(doc["started_at"])
 
 
+async def _book_start(book: str) -> datetime:
+    """When THIS book began copying - the first time a pass saw it. Set once.
+
+    A book added later (the Rs 2 lakh and Rs 10 lakh books, 2026-10-13) starts from the
+    moment it exists. It does not replay the tournament's earlier trades into a record that
+    would then read as live paper trading when it was really a backfill."""
+    key = f"{START_ID}:{book}"
+    doc = await live_intraday_state_collection.find_one({"_id": key})
+    if doc and doc.get("started_at"):
+        return naive_utc(doc["started_at"])
+    await live_intraday_state_collection.update_one(
+        {"_id": key}, {"$setOnInsert": {"started_at": _now(), "book": book}}, upsert=True)
+    doc = await live_intraday_state_collection.find_one({"_id": key})
+    return naive_utc(doc["started_at"])
+
+
 async def _floor(book: str, start: datetime) -> datetime:
-    """The earliest tournament entry this book may copy: the later of the copy start and its
-    last reset."""
+    """The earliest tournament entry this book may copy: the latest of the desk's copy start,
+    this book's own start and its last reset."""
+    floor = max(start, await _book_start(book))
     r = await reset_at(RESET_DESK, book)
-    return max(start, r) if r else start
+    return max(floor, r) if r else floor
 
 
 async def _parents(since: datetime, extra_ids: list[str]) -> list[dict]:
@@ -466,9 +483,17 @@ async def skipped_totals(book: str) -> dict[str, int]:
     return out
 
 
-async def started_at() -> datetime | None:
+async def started_at(book: str | None = None) -> datetime | None:
+    """When copying began - for one book, the later of the desk's start and that book's."""
     doc = await live_intraday_state_collection.find_one({"_id": START_ID})
-    return doc.get("started_at") if doc else None
+    desk = doc.get("started_at") if doc else None
+    if book is None:
+        return desk
+    bdoc = await live_intraday_state_collection.find_one({"_id": f"{START_ID}:{book}"})
+    own = bdoc.get("started_at") if bdoc else None
+    if desk and own:
+        return max(naive_utc(desk), naive_utc(own))
+    return own or desk
 
 
 async def ensure_indexes() -> None:

@@ -875,7 +875,7 @@ export async function fetchIntradayTrades(limit = 100): Promise<IntradayTrade[]>
 }
 
 // ---- Live Intraday desk (curated ₹80k shortlist inside Intraday Stocks) ----
-export type LiveIntradayBook = "80k" | "30k" | "10k";
+export type LiveIntradayBook = "80k" | "30k" | "10k" | "2L" | "10L";
 
 export interface DailyRoi {
   date: string;
@@ -925,7 +925,7 @@ export interface LiveIntradaySummary {
 }
 
 // Every Live Intraday call is scoped to one book. The books are separate accounts on
-// the same eight strategies, so an unscoped call would blend three desks into nonsense.
+// the same strategies, so an unscoped call would blend five desks into nonsense.
 export async function fetchLiveIntradaySummary(book: LiveIntradayBook = "80k"): Promise<LiveIntradaySummary> {
   return apiFetch(`/api/live-intraday/summary?book=${book}`);
 }

@@ -2,7 +2,7 @@
 module, paper-trading on the live Angel-One feed across three books that differ only in
 capital: Rs80,000, Rs30,000 and Rs10,000.
 
-Every endpoint takes `?book=80k|30k|10k` (default 80k). The books are separate accounts,
+Every endpoint takes `?book=80k|30k|10k|2L|10L` (default 80k). The books are separate accounts,
 not filters over one account, so a request without a book returns the 80k desk rather
 than a blend of all three.
 

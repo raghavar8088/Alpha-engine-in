@@ -49,9 +49,9 @@ import {
   fetchPatternBookTrades,
 } from "../../lib/api";
 
-// The three live books are TABS rather than a dropdown because they are separate
+// The live books are TABS rather than a dropdown because they are separate
 // accounts, not a filter: switching replaces every number on the page.
-type IntradayTab = "tournament" | "patterns" | "pb50k" | "pb2L" | "80k" | "30k" | "10k";
+type IntradayTab = "tournament" | "patterns" | "pb50k" | "pb2L" | "80k" | "30k" | "10k" | "2L" | "10L";
 // Families as the desk names them, so a filter maps 1:1 onto the catalog.
 const PAT_FAMILIES: { key: string; label: string }[] = [
   { key: "chart_pattern", label: "Chart patterns" },
@@ -68,10 +68,15 @@ const PATTERN_BOOKS: { tab: "pb50k" | "pb2L"; key: PatternBookKey; label: string
   { tab: "pb2L", key: "2L", label: "Paper Trade · ₹2 lakh" },
 ];
 
-const LIVE_BOOKS: { key: "80k" | "30k" | "10k"; capital: number }[] = [
-  { key: "80k", capital: 80000 },
-  { key: "30k", capital: 30000 },
-  { key: "10k", capital: 10000 },
+// "2L" / "10L" need no "pb" prefix: the pattern books' tabs are "pb50k" / "pb2L", so a bare
+// "2L" tab is free - and it is this desk's book key, which the API and Reset expect as-is.
+type LiveBookKey = "80k" | "30k" | "10k" | "2L" | "10L";
+const LIVE_BOOKS: { key: LiveBookKey; capital: number; label: string }[] = [
+  { key: "80k", capital: 80000, label: "₹80k" },
+  { key: "30k", capital: 30000, label: "₹30k" },
+  { key: "10k", capital: 10000, label: "₹10k" },
+  { key: "2L", capital: 200000, label: "₹2 lakh" },
+  { key: "10L", capital: 1000000, label: "₹10 lakh" },
 ];
 
 // Signed, because a return of "0.42%" and "-0.42%" must not look alike at a glance.
@@ -210,6 +215,8 @@ const HISTORY_SCOPE: Record<IntradayTab, { deskKey: string; scope?: string; labe
   "80k": { deskKey: "live-intraday", scope: "80k", label: "Live Intraday · ₹80k" },
   "30k": { deskKey: "live-intraday", scope: "30k", label: "Live Intraday · ₹30k" },
   "10k": { deskKey: "live-intraday", scope: "10k", label: "Live Intraday · ₹10k" },
+  "2L": { deskKey: "live-intraday", scope: "2L", label: "Live Intraday · ₹2 lakh" },
+  "10L": { deskKey: "live-intraday", scope: "10L", label: "Live Intraday · ₹10 lakh" },
 };
 
 /** What a tab shows before its data has arrived, or when it could not be loaded.
@@ -338,7 +345,7 @@ export default function IntradayStocksPage() {
   const [labDaily, setLabDaily] = useState<DailyRoi[]>([]);
   // Only the three book tabs name a book; tournament and patterns are their own
   // views, so both must fall back rather than leak a non-book value downstream.
-  const liveBook: "80k" | "30k" | "10k" =
+  const liveBook: LiveBookKey =
     tab === "tournament" || tab === "patterns" || tab === "pb50k" || tab === "pb2L"
       ? "80k"
       : tab;
@@ -559,7 +566,7 @@ export default function IntradayStocksPage() {
             className={tab === b.key ? "tab active" : "tab"}
             onClick={() => setTab(b.key)}
           >
-            Live Intraday · ₹{b.key}
+            Live Intraday · {b.label}
           </button>
         ))}
       </div>
@@ -1143,7 +1150,8 @@ export default function IntradayStocksPage() {
 
       {isLive && (
       <DataGate ready={!!liveSummary} error={error} what={"this Live Intraday book"} onRetry={() => once(`live:${liveBook}`, loadLive)} lastOkAt={lastOkAt}>
-      <ResetBook desk="live-intraday" book={liveBook} label={`Live Intraday · ₹${liveBook}`}
+      <ResetBook desk="live-intraday" book={liveBook}
+        label={`Live Intraday · ${LIVE_BOOKS.find((b) => b.key === liveBook)?.label ?? liveBook}`}
         capital={bookCapital} onDone={() => refreshing(() => loadLive())} />
       {liveSummary?.source === "tournament" ? (
       <div className="desk-banner">
@@ -1161,7 +1169,7 @@ export default function IntradayStocksPage() {
       ) : (
       <div className="desk-banner">
         <strong>LIVE INTRADAY · ₹{bookCapital.toLocaleString("en-IN")} PAPER.</strong> The same 8-strategy
-        shortlist runs in three books that differ only in capital — ₹80k, ₹30k and ₹10k — each strategy opening
+        shortlist runs in five books that differ only in capital — ₹80k, ₹30k, ₹10k, ₹2 lakh and ₹10 lakh — each strategy opening
         on ₹{inr(liveSummary?.per_strategy_allocation)} here, which is also its cap on any ONE position.
         A strategy may hold several positions at once (one per symbol) and{" "}
         <strong>reinvests its own realised profit</strong>, so deployed capital can exceed the

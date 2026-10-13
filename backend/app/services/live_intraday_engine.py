@@ -4,7 +4,9 @@ separate from the 150-strategy tournament (intraday_lab_engine).
 Unlike the tournament (every strategy, Rs10 lakh each), these are the hand-picked
 shortlist the user selected to take toward real money. The SAME eight strategies run in
 THREE independent books that differ only in capital — Rs80,000, Rs30,000 and Rs10,000 —
-so the same signals can be judged at the size a real account would actually use.
+so the same signals can be judged at the size a real account would actually use. (Since
+2026-10-13 the books copy the tournament instead - see live_intraday_mirror - and there are
+five: Rs 2 lakh and Rs 10 lakh were added; see BOOK_CAPITAL.)
 
 WHY THREE SIZES AND NOT ONE SCALED NUMBER: position size is not a free parameter on a
 small account. Sizing is whole shares, so a Rs1,250 slice simply cannot buy a Rs3,000
@@ -81,13 +83,21 @@ SELECTED_NAMES = [n.strip() for n in os.getenv("LIVE_INTRADAY_STRATEGIES", "|".j
 SOURCE = os.getenv("LIVE_INTRADAY_SOURCE", "tournament").strip().lower()
 COPIES_TOURNAMENT = SOURCE != "legacy"
 
-# The three books. Capital is the DESK total; each of the eight strategies gets an equal
-# slice, and a position may use up to that slice. Rs80k/8 = Rs10,000, which is exactly
-# what the original single desk used — so the 80k book's history carries over unchanged.
+# The books. Capital is the DESK total. Copying the tournament (the default), each book is
+# ONE account of up to five positions, each capped at capital / 5 (live_intraday_mirror). On
+# the legacy eight, each strategy gets an equal slice instead: Rs80k/8 = Rs10,000, exactly what
+# the original single desk used, so the 80k book's history carries over unchanged.
+#
+# Rs 2 lakh and Rs 10 lakh added 2026-10-13 at the owner's request, beside the three small
+# ones: the same signals at sizes where Angel's min(Rs20, 0.25%) per order stops being most of
+# a small position's move - the five books together show how much of the result is account size.
+# DEFAULT_BOOK stays "80k": the real-money desk derives its sizing from that book.
 BOOK_CAPITAL: dict[str, float] = {
     "80k": float(os.getenv("LIVE_INTRADAY_CAPITAL_80K", "80000")),
     "30k": float(os.getenv("LIVE_INTRADAY_CAPITAL_30K", "30000")),
     "10k": float(os.getenv("LIVE_INTRADAY_CAPITAL_10K", "10000")),
+    "2L": float(os.getenv("LIVE_INTRADAY_CAPITAL_2L", "200000")),
+    "10L": float(os.getenv("LIVE_INTRADAY_CAPITAL_10L", "1000000")),
 }
 BOOKS = list(BOOK_CAPITAL)
 DEFAULT_BOOK = "80k"
@@ -569,7 +579,7 @@ async def summary(book: str = DEFAULT_BOOK) -> dict:
         # One shared account: no per-strategy slice exists, so the figure that used to be the
         # slice is the per-POSITION cap instead.
         alloc = mirror.position_cap(capital)
-        started = await mirror.started_at()
+        started = await mirror.started_at(book)
         copy = {"source": "tournament", "max_open_positions": mirror.MAX_OPEN,
                 "position_cap": round(alloc, 2), "tournament_strategies": len(v2.CATALOG),
                 "skipped": await mirror.skipped_totals(book),
