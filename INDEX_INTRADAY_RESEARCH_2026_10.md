@@ -324,6 +324,12 @@ correction, and none passed selection. Run 1's record is kept in `data/run1_unco
 - **VIX days.** On the 3% of days whose VIX minutes were dropped as incomplete, the research had no
   VIX regime. Live, today's VIX row always exists. No engine can know at 09:16 that today's VIX data
   will later be judged incomplete.
+- **The closing auction.** Since 2026-08-03, Angel serves almost none of the index minutes from
+  15:15 to 15:29: NSE's closing auction session. These days are kept when 345 of the 360 minutes
+  before 15:15 are present (earlier days keep the original rule, so the 2016–23 data is unchanged).
+  The missing minutes are filled flat. Every strategy squares off by 15:12, so no trade depends on
+  them. But since August a day's last quarter-hour is flat, which slightly changes its close and the
+  next day's previous close and ATR. This affects only the 2024–26 holdout era and live trading.
 - **The luck correction is an estimate.** The effective number of independent trials is estimated
   from their return correlations.
 - **The 2022 break is a hypothesis.** One candidate is the weekly-options era moving intraday

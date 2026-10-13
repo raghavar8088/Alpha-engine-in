@@ -9,6 +9,8 @@ Every series becomes, per trading day, the 375 session minutes 09:15 .. 15:29 IS
 QUALITY (each rule counted and reported, never silent)
 * A day is KEPT only if it is a normal session: its first minute is 09:15 and it has at least
   MIN_MINUTES of the 375 minutes. Muhurat / special / half sessions and broken downloads drop.
+  From 2026-08-03 (NSE's closing auction: Angel serves almost no index minute in 15:15-15:29) a
+  day needs MIN_MINUTES_BEFORE_AUCTION of the 360 minutes before 15:15 instead.
 * A missing minute inside a kept day is a FLAT minute at the previous close (volume 0) — the
   index printed nothing new; no move is invented and none is hidden.
 * Rows outside 09:15-15:29 are ignored (pre-open is folded into Angel's 09:15 bar already).
@@ -41,6 +43,12 @@ IST = timezone(timedelta(hours=5, minutes=30))
 SESSION_MIN = 375                       # 09:15 .. 15:29
 OPEN_MIN = 9 * 60 + 15
 MIN_MINUTES = 360                       # a kept day has at least this many of the 375 minutes
+# From 2026-08-03 Angel serves almost none of the index minutes 15:15-15:29 (NSE's closing auction):
+# a day from then on is kept with MIN_MINUTES_BEFORE_AUCTION of the 360 minutes before 15:15 — the
+# part every strategy trades (all square off by 15:12). Earlier days keep the original rule, so the
+# research's 2016-2023 data is unchanged.
+CLOSING_AUCTION_FROM = np.datetime64("2026-08-03", "D")
+MIN_MINUTES_BEFORE_AUCTION = 345
 MAX_DEVIATION = 0.15                    # an index / ETF print this far from its day's median is not real
 VIX_SCALE_BELOW = 2.0                   # India VIX under 2 was served divided by 100
 
@@ -179,7 +187,9 @@ def _build(name: str, rows: np.ndarray) -> Days:
     r, day, m = r[~bad], day[~bad], m[~bad]
     days_u, first_row, counts = np.unique(day, return_index=True, return_counts=True)
     has_open = m[first_row] == 0 if len(days_u) else np.zeros(0, bool)
-    keep_day = has_open & (counts >= MIN_MINUTES)
+    pre = np.bincount(np.searchsorted(days_u, day[m < 360]), minlength=len(days_u)) if len(days_u) else counts
+    auction = days_u >= CLOSING_AUCTION_FROM.astype(np.int64)
+    keep_day = has_open & ((counts >= MIN_MINUTES) | (auction & (pre >= MIN_MINUTES_BEFORE_AUCTION)))
     n = int(keep_day.sum())
     slot = np.full(len(days_u), -1)
     slot[keep_day] = np.arange(n)
@@ -204,7 +214,7 @@ def _build(name: str, rows: np.ndarray) -> Days:
     kept = days_u[keep_day].astype("datetime64[D]")
     q = {"rows": int(len(rows)), "outside_session": outside, "days_seen": days_seen, "days_kept": n,
          "bad_prints_dropped": bad_prints, "vix_rows_rescaled": rescaled,
-         "dropped_no_0915": int((~has_open).sum()), "dropped_short": int((has_open & (counts < MIN_MINUTES)).sum()),
+         "dropped_no_0915": int((~has_open).sum()), "dropped_short": int((has_open & ~keep_day).sum()),
          "minutes_filled_flat": int(miss.sum()),
          "first": str(kept[0]) if n else None, "last": str(kept[-1]) if n else None}
     return Days(name, kept, O, H, L, C, V, q)

@@ -115,8 +115,8 @@ export default function BacktestLab({ initialSid }: { initialSid: string | null 
     }
   };
 
-  const equity = useMemo(() => (res?.equity_bp ?? []).map(([d, v]) => ({ ts: d, value: v })), [res]);
-  const drawdown = useMemo(() => (res?.drawdown_bp ?? []).map(([d, v]) => ({ ts: d, value: v })), [res]);
+  const equity = useMemo(() => (res?.equity_bp ?? []).map(([d, v]) => ({ ts: d, value: v / 100 })), [res]);
+  const drawdown = useMemo(() => (res?.drawdown_bp ?? []).map(([d, v]) => ({ ts: d, value: v / 100 })), [res]);
   const st = res?.stats;
   const total = st?.total_bp ?? (equity.length ? equity[equity.length - 1].value : null);
 
@@ -276,7 +276,7 @@ export default function BacktestLab({ initialSid }: { initialSid: string | null 
             </div>
             <div className="stat">
               <div className="k">Worst drawdown</div>
-              <div className="v loss">{st.max_dd_bp === null || st.max_dd_bp === undefined ? dash : `−${st.max_dd_bp.toFixed(0)} bp`}</div>
+              <div className="v loss">{st.max_dd_bp === null || st.max_dd_bp === undefined ? dash : `−${(st.max_dd_bp / 100).toFixed(2)}%`}</div>
               <div className="s">
                 months positive {frac(st.months_positive, 0)} · years {num(st.years_positive, 0)} of {num(st.years, 0)}
               </div>
@@ -285,12 +285,12 @@ export default function BacktestLab({ initialSid }: { initialSid: string | null 
 
           <GlassPanel
             title="Cumulative net"
-            note={`bp of the position · charges ${num(res.costs.fee_rt_bp)} bp a round trip + spread ${num(res.costs.slip_bp_a_side)} bp a side (${res.costs.basis}, ${res.costs.scale}×)`}
+            note={`% of the position · charges ${(res.costs.fee_rt_bp / 100).toFixed(3)}% a round trip + spread ${(res.costs.slip_bp_a_side / 100).toFixed(3)}% a side (${res.costs.basis}, ${res.costs.scale}×)`}
           >
-            <LineChart points={equity} height={220} valueSuffix=" bp" fillToZero />
+            <LineChart points={equity} height={220} valueSuffix="%" fillToZero />
           </GlassPanel>
-          <GlassPanel title="Drawdown" note="bp below the running peak">
-            <LineChart points={drawdown} height={140} valueSuffix=" bp" color="var(--loss)" />
+          <GlassPanel title="Drawdown" note="percentage below the running peak">
+            <LineChart points={drawdown} height={140} valueSuffix="%" color="var(--loss)" />
           </GlassPanel>
 
           <GlassPanel title="Trades" note={`the last ${res.trades.length} of ${num(st.trades, 0)}`}>

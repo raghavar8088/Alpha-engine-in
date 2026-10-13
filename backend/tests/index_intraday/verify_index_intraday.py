@@ -183,6 +183,19 @@ else:
     check("no index or ETF minute is at or below zero or more than 15% from its day's median, anywhere",
           max(worst.values()) <= 0.15, max(worst.items(), key=lambda kv: kv[1]))
 
+
+def _session(day, drop):
+    base = int(datetime(day.year, day.month, day.day, 9, 15, tzinfo=IST).timestamp())
+    return [[base + 60 * k, 100.0, 101.0, 99.0, 100.5, 0.0] for k in range(375) if k not in drop]
+
+
+gaps = set(range(360, 375)) | set(range(100, 110))          # the closing window, and 10 minutes mid-day
+synthetic = DM._build("NIFTY", np.array(_session(date(2023, 9, 15), gaps) + _session(date(2026, 9, 15), gaps)))
+check("from NSE's closing auction (2026-08-03) a day missing 15:15-15:29 and 10 more minutes is kept; "
+      "the same day before it is not (the research's rule, unchanged)",
+      [str(x) for x in synthetic.dates] == ["2026-09-15"] and synthetic.quality["dropped_short"] == 1,
+      [str(x) for x in synthetic.dates])
+
 # ═════════════════════════════════════════════════════════════════════════════════
 section("NO PEEK — what the engine sees at minute u gives what the research computed")
 

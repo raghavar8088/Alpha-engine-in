@@ -14,10 +14,10 @@ export function inr(v: number | null | undefined, signed = true, digits = 0): st
   return `${sign}₹${Math.abs(v).toLocaleString("en-IN", { minimumFractionDigits: digits, maximumFractionDigits: digits })}`;
 }
 
-/** Basis points (1 bp = 0.01% of the position's value). */
+/** Percentage return converted from the API's basis-point representation. */
 export function bp(v: number | null | undefined, digits = 2, signed = true): string {
   if (v === null || v === undefined || Number.isNaN(v)) return dash;
-  return `${signed && v > 0 ? "+" : ""}${v.toFixed(digits)} bp`;
+  return `${signed && v > 0 ? "+" : ""}${(v / 100).toFixed(Math.max(digits + 1, 2))}%`;
 }
 
 export function num(v: number | null | undefined, digits = 2, signed = false): string {

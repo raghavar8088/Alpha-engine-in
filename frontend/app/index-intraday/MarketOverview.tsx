@@ -110,9 +110,9 @@ export default function MarketOverview({ research }: { research: IIResearch | nu
                     {px(r.low)} – {px(r.high)}
                   </td>
                   <td className="l">{r.etf ?? <span className="warn">no ETF — simulation only</span>}</td>
-                  <td>{num(r.fee_rt_bp)} bp</td>
-                  <td>{num(r.slip_bp, 1)} bp a side</td>
-                  <td className="strong">{num(r.all_in_rt_bp)} bp</td>
+                  <td>{r.fee_rt_bp == null ? "—" : `${(r.fee_rt_bp / 100).toFixed(3)}%`}</td>
+                  <td>{r.slip_bp == null ? "—" : `${(r.slip_bp / 100).toFixed(3)}% a side`}</td>
+                  <td className="strong">{r.all_in_rt_bp == null ? "—" : `${(r.all_in_rt_bp / 100).toFixed(3)}%`}</td>
                   <td>{r.etf_minute_value_lakh !== null && r.etf_minute_value_lakh !== undefined ? `₹${num(r.etf_minute_value_lakh, 1)} L` : dash}</td>
                   <td>{r.etf ? inr(r.etf_order_cap, false) : dash}</td>
                   <td className="l">

@@ -20,7 +20,7 @@ import { INDEXES, INDEX_LABEL, StatusTag, bp, dash, frac, num, paramText, tone }
 
 const SORTS: [string, string][] = [
   ["sv_sharpe", "Sharpe, 2016–23"],
-  ["sv_net", "Net bp a trade, 2016–23"],
+  ["sv_net", "Net return a trade, 2016–23"],
   ["sel_sharpe", "Sharpe, selection 2016–21"],
   ["dsr", "Deflated Sharpe"],
 ];
@@ -122,7 +122,7 @@ export default function StrategyDashboard({
           <div className="k">Passed selection</div>
           <div className="v">{funnel.stage1 || dash}</div>
           <div className="s">
-            2016–21: 150+ trades, +1 bp a trade after costs, Sharpe 0.5, profit factor 1.1, 4 of 6 years up, still positive
+            2016–21: 150+ trades, +0.01% a trade after costs, Sharpe 0.5, profit factor 1.1, 4 of 6 years up, still positive
             at 1.5× costs
           </div>
         </div>
@@ -231,8 +231,8 @@ export default function StrategyDashboard({
           </table>
         </div>
         <p className="foot">
-          Net is the mean result of a trade after Angel One&rsquo;s charges and the spread, in basis points of the position
-          (100 bp = 1%). A deflated Sharpe of 0.95 means a 95% chance the edge is not luck, after accounting for how many
+          Net is the mean percentage return of a trade after Angel One&rsquo;s charges and the spread. A deflated Sharpe of
+          0.95 means a 95% chance the edge is not luck, after accounting for how many
           variants were tried. &ldquo;On the ETF itself&rdquo; replays the rules on the tracking ETF&rsquo;s own one-minute
           prices — what a real order could have traded. On NIFTY NEXT 50 the index&rsquo;s minute prices lag its
           constituents (its one-minute returns are positively autocorrelated, +0.08 in 2022–23, where JUNIORBEES&rsquo;s are
@@ -428,7 +428,7 @@ const PERIOD_ROWS: [string, keyof IIStats, (v: number | null | undefined) => str
   ["Sharpe (annual)", "sharpe", (v) => num(v)],
   ["Sortino", "sortino", (v) => num(v)],
   ["Return a year", "ann_bp", (v) => bp(v, 0)],
-  ["Worst drawdown", "max_dd_bp", (v) => (v === null || v === undefined ? dash : `−${v.toFixed(0)} bp`)],
+  ["Worst drawdown", "max_dd_bp", (v) => (v === null || v === undefined ? dash : `−${(v / 100).toFixed(2)}%`)],
   ["Months positive", "months_positive", (v) => frac(v, 0)],
   ["Years positive", "years_positive", (v) => num(v, 0)],
 ];
@@ -565,8 +565,8 @@ function StrategyDetail({
 
         {curve.length > 1 && (
           <>
-            <div className="dsec">Cumulative net, 2016–23 (bp of the position, summed by month)</div>
-            <LineChart points={curve} height={180} valueSuffix=" bp" fillToZero />
+            <div className="dsec">Cumulative net, 2016–23 (% of the position, summed by month)</div>
+            <LineChart points={curve.map((p) => ({ ...p, value: p.value / 100 }))} height={180} valueSuffix="%" fillToZero />
           </>
         )}
 
