@@ -19,6 +19,7 @@ import GlassPanel from "../../components/GlassPanel";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import LivePaperBuying from "../../components/LivePaperBuying";
+import BankNiftyDesk from "./BankNiftyDesk";
 import {
   refreshing,
   type ChainRecorder,
@@ -57,6 +58,10 @@ const STATUS_TONE: Record<string, string> = {
 
 export default function PreLivePage() {
   const [tab, setTab] = useState<Tab>("tournament");
+  // Index tabs: NIFTY 50 (everything this page has always shown) and NIFTY BANK (the 2026-10
+  // BANKNIFTY research and its paper desk). ?index=banknifty links straight to the second.
+  const [index, setIndex] = useState<"NIFTY" | "BANKNIFTY">("NIFTY");
+  const [bnRefresh, setBnRefresh] = useState(0);
   const [status, setStatus] = useState<PreLiveStatus | null>(null);
   const [records, setRecords] = useState<PreLiveRecords | null>(null);
   const [trades, setTrades] = useState<PreLiveTrade[]>([]);
@@ -94,16 +99,28 @@ export default function PreLivePage() {
   }, [tab, loadResearch, loadTournament]);
 
   useEffect(() => {
-    if (tab === "livepaper" || tab === "livepaper2L") return;
+    if (new URLSearchParams(window.location.search).get("index") === "banknifty") setIndex("BANKNIFTY");
+  }, []);
+  const chooseIndex = (i: "NIFTY" | "BANKNIFTY") => {
+    setIndex(i);
+    window.history.replaceState(null, "", i === "BANKNIFTY" ? "?index=banknifty" : window.location.pathname);
+  };
+
+  useEffect(() => {
+    if (index !== "NIFTY" || tab === "livepaper" || tab === "livepaper2L") return;
     load();
     const id = setInterval(load, 30000);
     return () => clearInterval(id);
-  }, [tab, load]);
+  }, [index, tab, load]);
 
   const handleRefresh = useCallback(async () => {
+    if (index === "BANKNIFTY") {
+      setBnRefresh((n) => n + 1);
+      return;
+    }
     setBusy(true);
     try { await refreshing(() => load()); } finally { setBusy(false); }
-  }, [load]);
+  }, [index, load]);
 
   const doMoney = async (fn: () => Promise<unknown>) => {
     try {
@@ -129,9 +146,17 @@ export default function PreLivePage() {
         refreshing={busy}
         crumb="Index Option Buying"
         title="Index Option Buying"
-        subtitle="NIFTY option buying on live data and REAL option premiums — paper only. The 167-strategy tournament now runs as a source of real-premium research data; what may ever trade real money enters through the pre-registered hypotheses, judged on real-money (order-book) P&L."
+        subtitle={index === "BANKNIFTY"
+          ? "BANKNIFTY option buying — the ten strategies a 297-strategy study of 2016–2026 chose at real option prices, traded on paper at the real order book. None is statistically proven: read the verdict before the numbers."
+          : "NIFTY option buying on live data and REAL option premiums — paper only. The 167-strategy tournament now runs as a source of real-premium research data; what may ever trade real money enters through the pre-registered hypotheses, judged on real-money (order-book) P&L."}
       />
 
+      <div className="index-tabs" role="tablist" aria-label="Index">
+        <button role="tab" aria-selected={index === "NIFTY"} className={index === "NIFTY" ? "it active" : "it"} onClick={() => chooseIndex("NIFTY")}>NIFTY 50</button>
+        <button role="tab" aria-selected={index === "BANKNIFTY"} className={index === "BANKNIFTY" ? "it active" : "it"} onClick={() => chooseIndex("BANKNIFTY")}>NIFTY BANK</button>
+      </div>
+
+      {index === "BANKNIFTY" ? <BankNiftyDesk refreshKey={bnRefresh} /> : (<>
       <div className="desk-tabs">
         <button className={tab === "tournament" ? "dt active" : "dt"} onClick={() => setTab("tournament")}>Tournament · research records</button>
         <button className={tab === "research" ? "dt active" : "dt"} onClick={() => setTab("research")}>Hypotheses &amp; real money</button>
@@ -402,6 +427,7 @@ export default function PreLivePage() {
           </GlassPanel>
         </>
       )}
+      </>)}
 
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 18px; }
@@ -433,6 +459,9 @@ export default function PreLivePage() {
         .note { font-size: 11.5px; color: var(--text-muted); padding: 6px 2px 10px; line-height: 1.5; }
         .empty { padding: 28px 20px; text-align: center; color: var(--text-faint); font-size: 13px; }
         .desk-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+        .index-tabs { display: inline-flex; align-self: flex-start; gap: 4px; padding: 4px; border-radius: 12px; background: var(--canvas-soft); border: 1px solid var(--panel-border); }
+        .it { border: 0; background: transparent; color: var(--text-muted); font-size: 13px; font-weight: 700; letter-spacing: 0.02em; padding: 8px 20px; border-radius: 9px; cursor: pointer; }
+        .it.active { background: var(--panel); color: var(--text); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); }
         .dt { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
         .dt.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
         .hyps { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }

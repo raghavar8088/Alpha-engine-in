@@ -7937,6 +7937,126 @@ export async function closeAllGold(
   return apiFetch(`${gd}/close-all?venue=${venue}`, { method: "POST" });
 }
 
+// ---- Index Option Buying > NIFTY BANK (paper desk over the 2026-10 BANKNIFTY research) ----
+
+export interface BnPeriodStats {
+  trades: number;
+  net: number;
+  mean: number | null;
+  t: number | null;
+  win_rate: number | null;
+  profit_factor: number | null;
+  max_drawdown: number;
+  mean_stressed: number | null;
+  fav_bp: number | null;
+  direction_hit: number | null;
+}
+
+export interface BnStrategy {
+  rank: number;
+  key: string;
+  sid: string;
+  tf: string;
+  source: "library_intraday" | "custom_intraday" | "daily";
+  tier: "A" | "B" | "C";
+  family: string;
+  label: string;
+  params: Record<string, unknown>;
+  stop?: number | null;
+  target?: number | null;
+  research: {
+    explore: BnPeriodStats;
+    holdout: BnPeriodStats;
+    all: BnPeriodStats;
+    dsr: number | null;
+    years: Record<string, { trades: number; net: number }>;
+    equity: [string, number][];
+    exits: Record<string, number>;
+    avg_hold_min: number | null;
+    kinds: Record<string, number>;
+  };
+  forward: { trades: number; wins: number; real_net: number; paper_net: number; open: boolean };
+}
+
+export interface BnLeg {
+  type: "CE" | "PE";
+  strike: number;
+  expiry: string;
+  tradingsymbol: string | null;
+  qty: number;
+  entry_ltp: number;
+  real_entry: number;
+  entry_basis: string;
+  exit_ltp?: number;
+  real_exit?: number;
+  mark?: number | null;
+  mark_bid?: number | null;
+}
+
+export interface BnPosition {
+  strategy: string;
+  kind: "CE" | "PE" | "STRADDLE";
+  tier: string | null;
+  session: string;
+  opened_at: string;
+  closed_at?: string;
+  spot_entry: number;
+  expiry: string;
+  legs: BnLeg[];
+  exit_reason?: string;
+  paper_pnl?: number;
+  real_pnl?: number;
+  real_basis?: string;
+  unrealized_real?: number | null;
+  decision?: { why?: string };
+}
+
+export interface BnResearchMeta {
+  generated_at: string;
+  window: { from: string; to: string; sessions: number };
+  periods: { explore: string; holdout: string };
+  trials: number;
+  trials_by_source: Record<string, number>;
+  tiers: Record<string, number>;
+  luck: { eligible: number; expected_C_or_better_by_luck: number; expected_B_or_better_by_luck: number; expected_A_by_luck: number };
+  model: Record<string, unknown>;
+  costs: string;
+  contract: string;
+  data: string;
+  verdict: string;
+  selection_note: string;
+}
+
+export interface BnDesk {
+  engine: { running: boolean; session: string | null; last_cycle: string | null; last_action: string | null;
+    errors: number; last_error: string | null; notes: string[]; switch_on: boolean };
+  account: { per_strategy_capital: number; strategies: number; total_capital: number; lots_per_trade: number; lot_size: number };
+  totals: { trades: number; wins: number; real_net: number; paper_net: number; unrealized_real: number; open: number };
+  strategies: BnStrategy[];
+  open: BnPosition[];
+  trades: BnPosition[];
+  research: BnResearchMeta;
+}
+
+export interface BnTrial {
+  key: string;
+  source: string;
+  family: string;
+  label: string;
+  tf: string;
+  tier: string;
+  explore: { trades: number; mean: number | null; t: number | null };
+  holdout: { trades: number; mean: number | null; t: number | null };
+  dsr: number | null;
+  chosen: boolean;
+  skipped?: string;
+}
+
+export async function fetchBankNiftyDesk(): Promise<BnDesk> { return apiFetch("/api/banknifty-desk/summary"); }
+export async function fetchBankNiftyResearch(): Promise<{ meta: BnResearchMeta; trials: BnTrial[] }> {
+  return apiFetch("/api/banknifty-desk/research");
+}
+
 // ---- Intraday Stocks: reset a paper book (Paper Trade ₹50k / ₹2 lakh, Live Intraday ₹80k / ₹30k / ₹10k) ----
 
 export type ResettableDesk = "pattern-books" | "live-intraday";

@@ -44,6 +44,7 @@ from app.api.routes import (
     manual_positions,
     market_data,
     main_control,
+    banknifty_desk,
     modules,
     momentum,
     options,
@@ -462,6 +463,12 @@ async def start_option_research_desk() -> None:
             asyncio.create_task(vol_desk_loop())
     except Exception:  # noqa: BLE001
         logger.exception("could not start the option recorder / volatility desk")
+    try:
+        # Index Option Buying > NIFTY BANK: the paper desk over the 2026-10 BANKNIFTY research
+        from app.services.banknifty_desk import banknifty_desk_loop
+        asyncio.create_task(banknifty_desk_loop())
+    except Exception:  # noqa: BLE001
+        logger.exception("could not start the NIFTY BANK desk")
 
 
 @app.on_event("startup")
@@ -1007,6 +1014,7 @@ app.include_router(book_resets.pattern_books_router)
 app.include_router(book_resets.live_intraday_router)
 app.include_router(modules.router)
 app.include_router(main_control.router)
+app.include_router(banknifty_desk.router)
 app.include_router(stocks_range.router)
 app.include_router(bullish_stocks.router)
 app.include_router(screener.router)

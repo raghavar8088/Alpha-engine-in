@@ -135,6 +135,8 @@ _MODULES: list[Module] = [
     _m("prelive", "Index Option Buying", "Strategy Lab", "/prelive", ["/api/prelive"]),
     _m("prelive_selling", "Index Option Selling", "Strategy Lab", "/prelive-selling",
        ["/api/prelive-selling"]),
+    _m("banknifty_desk", "Index Option Buying - NIFTY BANK", "Strategy Lab", "/prelive",
+       ["/api/banknifty-desk"]),
     _m("stock_desk", "Stock Pre-Live (buying + selling)", "Strategy Lab",
        "/stock-prelive-buying", ["/api/stock-desk"]),
     _m("stock_books", "Stock Pre-Live - Paper Books (Rs 10L / Rs 2L)", "Strategy Lab",
