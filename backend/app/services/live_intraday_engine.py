@@ -73,6 +73,14 @@ _DEFAULT_SELECTION = [
 ]
 SELECTED_NAMES = [n.strip() for n in os.getenv("LIVE_INTRADAY_STRATEGIES", "|".join(_DEFAULT_SELECTION)).split("|") if n.strip()]
 
+# What the three books TRADE (2026-10-13). "tournament": they copy the tournament's 54
+# strategies' trades at their own size (see live_intraday_mirror) - the owner asked for the
+# books to run the Tournament tab's strategies. "legacy": they scan the eight above, as before.
+# The eight - SELECTED - stay defined either way: the real-money Live Trading desk imports
+# them as its own shortlist, and that must not change because the paper books did.
+SOURCE = os.getenv("LIVE_INTRADAY_SOURCE", "tournament").strip().lower()
+COPIES_TOURNAMENT = SOURCE != "legacy"
+
 # The three books. Capital is the DESK total; each of the eight strategies gets an equal
 # slice, and a position may use up to that slice. Rs80k/8 = Rs10,000, which is exactly
 # what the original single desk used — so the 80k book's history carries over unchanged.
@@ -453,11 +461,21 @@ async def manage_cycle(dhan: DhanClient | None) -> int:
     """Manage every book's open positions off a single quote sweep. Idempotent."""
     async with _manage_lock:
         await session.ensure_cas()
-        return await _manage_cycle(dhan)
+        managed = await _manage_cycle(dhan)
+        # The close-out job calls this every few seconds near the square-off and alarms on any
+        # intraday position still open, so copied positions close HERE, in the same pass as
+        # their tournament parent. Runs in legacy mode too, so a switch back never strands one.
+        from app.services import live_intraday_mirror as mirror
+        synced = await mirror.sync(entries=False)
+        return managed + synced["closed"]
 
 
 async def _manage_cycle(dhan: DhanClient | None) -> int:
-    open_positions = [p async for p in live_intraday_positions_collection.find({"status": "OPEN"})]
+    # Copied tournament positions are NOT managed here: they close when the tournament closes
+    # them, at the tournament's price (live_intraday_mirror). Checking them against this
+    # cycle's own 3-minute quotes as well would close one trade twice, by two different rules.
+    open_positions = [p async for p in live_intraday_positions_collection.find(
+        {"status": "OPEN", "source": {"$ne": "tournament"}})]
     if not open_positions:
         return 0
     by_symbol: dict[str, list[dict]] = {}
@@ -544,7 +562,20 @@ async def summary(book: str = DEFAULT_BOOK) -> dict:
     open_count, closed_count = op["n"], cl["n"]
     equity = capital + realized + unrealized
     alloc = per_strategy_allocation(book)
+    copy: dict = {"source": "legacy"}
+    if COPIES_TOURNAMENT:
+        from app.services import intraday_v2_strategies as v2
+        from app.services import live_intraday_mirror as mirror
+        # One shared account: no per-strategy slice exists, so the figure that used to be the
+        # slice is the per-POSITION cap instead.
+        alloc = mirror.position_cap(capital)
+        started = await mirror.started_at()
+        copy = {"source": "tournament", "max_open_positions": mirror.MAX_OPEN,
+                "position_cap": round(alloc, 2), "tournament_strategies": len(v2.CATALOG),
+                "skipped": await mirror.skipped_totals(book),
+                "copying_since": started.isoformat() if started else None}
     return {
+        **copy,
         "book": book, "books": BOOKS,
         "book_capitals": {b: BOOK_CAPITAL[b] for b in BOOKS},
         "initial_capital": capital,
@@ -561,7 +592,7 @@ async def summary(book: str = DEFAULT_BOOK) -> dict:
         "roi_pct": round((equity - capital) / capital * 100, 2) if capital else 0.0,
         "open_positions": open_count,
         "closed_positions": closed_count,
-        "strategy_count": len(SELECTED),
+        "strategy_count": copy.get("tournament_strategies") or len(SELECTED),
         "paused": PAUSE_NEW_ENTRIES,
         "mode": "paper",
         **(await breaker_state(book)),
@@ -570,6 +601,9 @@ async def summary(book: str = DEFAULT_BOOK) -> dict:
 
 async def leaderboard(book: str = DEFAULT_BOOK) -> list[dict]:
     book = normalize_book(book)
+    if COPIES_TOURNAMENT:
+        from app.services import live_intraday_mirror as mirror
+        return await mirror.leaderboard_rows(book, book_capital(book))
     alloc = per_strategy_allocation(book)
     scores = {s["strategy_id"]: s async for s in live_intraday_scores_collection.find({"book": book})}
     rows = []
@@ -629,6 +663,14 @@ async def run_cycle(dhan: DhanClient | None) -> dict:
     if PAUSE_NEW_ENTRIES:
         scan_result = {"opened": 0, "opened_by_book": {b: 0 for b in BOOKS}, "scanned_symbols": 0,
                        "notes": ["Live Intraday entries are paused; open positions still managed."]}
+    elif COPIES_TOURNAMENT:
+        from app.services import live_intraday_mirror as mirror
+        synced = await mirror.sync(entries=True)
+        scan_result = {"opened": synced["opened"], "opened_by_book": {b: 0 for b in BOOKS},
+                       "scanned_symbols": 0,
+                       "notes": [f"Copying the tournament: {synced['opened']} opened, "
+                                 f"{synced['closed']} closed, {synced['skipped']} signals no book "
+                                 "could take this cycle."]}
     else:
         scan_result = await scan_cycle(dhan)
 

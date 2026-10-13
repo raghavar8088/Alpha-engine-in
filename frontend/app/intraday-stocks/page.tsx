@@ -1145,6 +1145,20 @@ export default function IntradayStocksPage() {
       <DataGate ready={!!liveSummary} error={error} what={"this Live Intraday book"} onRetry={() => once(`live:${liveBook}`, loadLive)} lastOkAt={lastOkAt}>
       <ResetBook desk="live-intraday" book={liveBook} label={`Live Intraday · ₹${liveBook}`}
         capital={bookCapital} onDone={() => refreshing(() => loadLive())} />
+      {liveSummary?.source === "tournament" ? (
+      <div className="desk-banner">
+        <strong>LIVE INTRADAY · ₹{bookCapital.toLocaleString("en-IN")} PAPER · COPYING THE TOURNAMENT.</strong>{" "}
+        This book trades the tournament&apos;s {liveSummary?.tournament_strategies ?? 54} strategies by copying
+        the tournament&apos;s own trades — the same entry and exit prices (slippage already in them), sized to this
+        account and charged real Angel One costs on <em>its</em> quantity. It is <strong>one account</strong>, as a
+        real one would be: at most {liveSummary?.max_open_positions ?? 5} positions at a time, each up to
+        ₹{inr(liveSummary?.position_cap)}, whole shares, never two positions in the same stock, no leverage.
+        The tournament takes ~450 trades a day, so <strong>most signals cannot get a slot</strong> — the
+        &ldquo;Skipped&rdquo; column counts them, by reason. Small positions pay roughly 0.3–0.6% a round trip in
+        costs, against an average signal worth a few hundredths of a percent: that gap is what this book measures.
+        {liveSummary?.copying_since ? ` Copying since ${new Date(liveSummary.copying_since).toLocaleDateString("en-IN")}.` : ""}
+      </div>
+      ) : (
       <div className="desk-banner">
         <strong>LIVE INTRADAY · ₹{bookCapital.toLocaleString("en-IN")} PAPER.</strong> The same 8-strategy
         shortlist runs in three books that differ only in capital — ₹80k, ₹30k and ₹10k — each strategy opening
@@ -1158,10 +1172,11 @@ export default function IntradayStocksPage() {
         duty, GST, and a DP charge on delivery exits. On a book this small a signal must clear roughly
         ₹50 a round trip before it earns anything, which is exactly what the smaller books are here to test.
       </div>
+      )}
 
       <div className="tiles">
         <div className="tile"><div className="tile-label">Mode</div><div className="tile-value gain">PAPER</div><div className="tile-sub">{liveSummary?.paused ? "entries paused" : "armed · live Angel feed"}</div></div>
-        <div className="tile"><div className="tile-label">Equity</div><div className="tile-value">₹{inr(liveSummary?.equity)}</div><div className="tile-sub">from ₹{inr(liveSummary?.initial_capital)} ({liveSummary?.strategy_count ?? 8} × ₹{inr(liveSummary?.per_strategy_allocation)})</div></div>
+        <div className="tile"><div className="tile-label">Equity</div><div className="tile-value">₹{inr(liveSummary?.equity)}</div><div className="tile-sub">from ₹{inr(liveSummary?.initial_capital)} {liveSummary?.source === "tournament" ? `· one account, up to ${liveSummary?.max_open_positions ?? 5} positions` : `(${liveSummary?.strategy_count ?? 8} × ₹${inr(liveSummary?.per_strategy_allocation)})`}</div></div>
         <div className="tile"><div className="tile-label">ROI</div><div className={`tile-value ${(liveSummary?.roi_pct ?? 0) >= 0 ? "gain" : "loss"}`}>{roiPct(liveSummary?.roi_pct, 2)}</div><div className="tile-sub">compounded, on the ₹{inr(liveSummary?.initial_capital)} opened with</div></div>
         <div className="tile"><div className="tile-label">Today P&amp;L</div><div className={`tile-value ${(liveSummary?.today_pnl ?? 0) >= 0 ? "gain" : "loss"}`}>{(liveSummary?.today_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(liveSummary?.today_pnl)}</div><div className="tile-sub">{roiPct(liveSummary?.today_roi_pct)} today · breaker at −₹{inr(liveSummary?.daily_loss_limit)}</div></div>
         <div className="tile"><div className="tile-label">Realised P&amp;L</div><div className={`tile-value ${(liveSummary?.realized_pnl ?? 0) >= 0 ? "gain" : "loss"}`}>{(liveSummary?.realized_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(liveSummary?.realized_pnl)}</div><div className="tile-sub">{liveSummary?.closed_positions ?? 0} trades closed</div></div>
@@ -1174,13 +1189,18 @@ export default function IntradayStocksPage() {
       <PnlRow capital={liveSummary?.initial_capital} realized={liveSummary?.realized_pnl}
               unrealized={liveSummary?.unrealized_pnl} fees={liveSummary?.total_fees} />
 
-      <GlassPanel title="Selected strategies">
+      <GlassPanel title={liveSummary?.source === "tournament"
+        ? `Tournament strategies in this book (${liveScores.length})` : "Selected strategies"}>
         {!liveScores.length ? (
           <div className="empty">Loading the shortlist…</div>
         ) : (
           <div className="table-scroll">
             <table className="data-table">
-              <thead><tr><th style={{ textAlign: "left" }}>Strategy</th><th style={{ textAlign: "left" }}>Category</th><th>Trades</th><th>Win %</th><th>Net P&amp;L</th><th>Account</th></tr></thead>
+              <thead><tr><th style={{ textAlign: "left" }}>Strategy</th><th style={{ textAlign: "left" }}>Category</th><th>Trades</th><th>Win %</th><th>Net P&amp;L</th>
+                {liveSummary?.source === "tournament"
+                  ? <><th title="Net P&L as a share of this book's capital">Share of book</th><th title="Signals this book could not take: slots full / stock already held / share price above the per-position cap / no cash / loss breaker">Skipped</th></>
+                  : <th>Account</th>}
+              </tr></thead>
               <tbody>
                 {liveScores.map((s) => (
                   <tr key={s.strategy_id}>
@@ -1189,7 +1209,16 @@ export default function IntradayStocksPage() {
                     <td>{s.trades}</td>
                     <td>{s.trades ? `${(s.win_rate * 100).toFixed(1)}%` : "-"}</td>
                     <td className={s.net_pnl >= 0 ? "gain" : "loss"}>{s.net_pnl >= 0 ? "+" : ""}₹{inr(s.net_pnl)}</td>
-                    <td>₹{inr(s.allocated_capital)}</td>
+                    {liveSummary?.source === "tournament" ? (
+                      <>
+                        <td className={(s.roi_pct ?? 0) >= 0 ? "gain" : "loss"}>{(s.roi_pct ?? 0) >= 0 ? "+" : ""}{(s.roi_pct ?? 0).toFixed(3)}%</td>
+                        <td title={s.skipped ? `slots full ${s.skipped.full} · stock held ${s.skipped.symbol_held} · price above cap ${s.skipped.price_above_cap} · no cash ${s.skipped.no_cash} · breaker ${s.skipped.breaker}` : ""}>
+                          {s.skipped_total ? s.skipped_total : "-"}
+                        </td>
+                      </>
+                    ) : (
+                      <td>₹{inr(s.allocated_capital)}</td>
+                    )}
                   </tr>
                 ))}
               </tbody>

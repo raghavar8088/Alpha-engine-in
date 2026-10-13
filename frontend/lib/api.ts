@@ -806,6 +806,9 @@ export interface IntradayDeskStatus {
 
 export interface IntradayScore {
   roi_pct?: number;
+  // Live Intraday books copying the tournament: signals this book could not take, by reason.
+  skipped?: Record<"breaker" | "full" | "symbol_held" | "price_above_cap" | "no_cash", number>;
+  skipped_total?: number;
   fees?: number;
   gross_pnl?: number;
   strategy_id: string;
@@ -886,6 +889,14 @@ export interface DailyRoi {
 }
 
 export interface LiveIntradaySummary {
+  // "tournament" (since 2026-10-13): the book copies the tournament's trades as ONE account
+  // of up to max_open_positions, each capped at position_cap. "legacy": the old 8-strategy scan.
+  source?: "tournament" | "legacy";
+  max_open_positions?: number;
+  position_cap?: number;
+  tournament_strategies?: number;
+  skipped?: Record<"breaker" | "full" | "symbol_held" | "price_above_cap" | "no_cash", number>;
+  copying_since?: string | null;
   book: LiveIntradayBook;
   books: LiveIntradayBook[];
   initial_capital: number;
