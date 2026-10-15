@@ -1,6 +1,6 @@
 """Reset a PAPER book on the Intraday Stocks page back to its starting capital (2026-10-12).
 
-Behind the "Reset account" button on the Paper Trade (Rs50k / Rs2 lakh - the pattern books) and
+Behind the "Reset account" button on the Paper Trade (Rs50k / Rs2 lakh / Rs10 lakh - the pattern books) and
 Live Intraday (Rs80k / Rs30k / Rs10k / Rs2 lakh / Rs10 lakh) tabs. These books never place an order, so a reset moves no
 money anywhere; it deletes the book's paper record so it starts again from its capital.
 
@@ -43,7 +43,7 @@ resets = db["book_resets"]
 DESKS: dict[str, dict] = {
     "pattern-books": {
         "label": "Paper Trade",
-        "books": {"50k": "Rs50,000", "2L": "Rs2,00,000"},
+        "books": {"50k": "Rs50,000", "2L": "Rs2,00,000", "10L": "Rs10,00,000"},
         "collections": ["pattern_book_positions", "pattern_book_trades", "pattern_book_scores", "pattern_book_equity"],
     },
     "live-intraday": {

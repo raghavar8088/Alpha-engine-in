@@ -113,21 +113,33 @@ def _closed(p: dict) -> bool:
 
 def plan_book(*, capital: float, realized: float, deployed: float, open_rows: list[dict],
               parents: list[dict], decided: set[str], breaker_tripped: bool,
-              entries: bool) -> dict:
+              entries: bool, max_open: int | None = None, net_fn=None) -> dict:
     """Replay one book against the tournament, in time order. Pure - no I/O.
 
     open_rows: the book's OPEN positions from ANY source (they hold cash, slots, symbols).
     parents:   tournament positions in scope (opened on/after the book's floor), any status.
     decided:   parent ids this book has already taken or skipped.
     Returns {"opens": [...], "closes": [...], "skips": [...]}; an open may carry its own close
-    when the parent opened and closed between two looks."""
+    when the parent opened and closed between two looks.
+
+    Shared with the Pattern paper books (pattern_books_copy), which copy a different desk by
+    the same rules: `max_open` is that desk's slot count, and `net_fn(row, parent)` its fee
+    schedule - delivery when a copy was held overnight, which an intraday book never is. Left
+    as None, both are this module's own: MAX_OPEN slots, Angel's intraday card."""
+    slots = MAX_OPEN if max_open is None else max_open
+
+    def close_net(row: dict, parent: dict):
+        if net_fn is not None:
+            return net_fn(row, parent)
+        return _net(row["side"], row["entry_price"], float(parent["exit_price"]), row["qty"])
+
     cash = capital + realized - deployed
     held: dict[str, int] = {}
     for r in open_rows:
         held[r["symbol"]] = held.get(r["symbol"], 0) + 1
     n_open = len(open_rows)
     by_id = {p["position_id"]: p for p in parents}
-    cap = position_cap(capital)
+    cap = capital / max(slots, 1)
 
     events: list[tuple] = []
     seq = 0
@@ -155,8 +167,7 @@ def plan_book(*, capital: float, realized: float, deployed: float, open_rows: li
 
         if kind in ("close_existing", "close_new"):
             row, parent = payload
-            gross, net, fb = _net(row["side"], row["entry_price"], float(parent["exit_price"]),
-                                  row["qty"])
+            gross, net, fb = close_net(row, parent)
             cash += row["capital_deployed"] + net
             n_open -= 1
             held[row["symbol"]] = held.get(row["symbol"], 1) - 1
@@ -172,7 +183,7 @@ def plan_book(*, capital: float, realized: float, deployed: float, open_rows: li
         qty = int(min(cap, max(cash, 0.0)) // price) if price > 0 else 0
         if breaker_tripped:
             reason = "breaker"
-        elif n_open >= MAX_OPEN:
+        elif n_open >= slots:
             reason = "full"
         elif held.get(p["symbol"], 0) > 0:
             reason = "symbol_held"

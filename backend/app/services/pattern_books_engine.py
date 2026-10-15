@@ -160,10 +160,19 @@ SELECTED_BY_ID = {s.strategy_id: s for s in SELECTED}
 BOOK_CAPITAL: dict[str, float] = {
     "50k": float(os.getenv("PATBOOK_CAPITAL_50K", "50000")),
     "2L": float(os.getenv("PATBOOK_CAPITAL_2L", "200000")),
+    # Added 2026-10-15 at the owner's request, beside the two smaller books.
+    "10L": float(os.getenv("PATBOOK_CAPITAL_10L", "1000000")),
 }
 BOOKS = list(BOOK_CAPITAL)
 DEFAULT_BOOK = "50k"
-BOOK_LABEL = {"50k": "Paper Trade · ₹50k", "2L": "Paper Trade · ₹2 lakh"}
+BOOK_LABEL = {"50k": "Paper Trade · ₹50k", "2L": "Paper Trade · ₹2 lakh",
+              "10L": "Paper Trade · ₹10 lakh"}
+
+# What the books TRADE (2026-10-15). "desk": they copy every one of the Patterns desk's 548
+# strategies as one account each (pattern_books_copy) - the owner asked for the Patterns tab's
+# strategies in these books. "shortlist": the eleven below, each on its own slice, as before.
+SOURCE = os.getenv("PATBOOK_SOURCE", "desk").strip().lower()
+COPIES_DESK = SOURCE != "shortlist"
 
 ENABLED = os.getenv("PATBOOK_ENABLED", "1").lower() not in ("0", "false", "")
 
@@ -405,7 +414,10 @@ _sync_lock = asyncio.Lock()
 async def _close_closed_parents(parents: dict) -> tuple[int, set]:
     closed = 0
     touched: set = set()
-    open_books = [p async for p in pattern_book_positions_collection.find({"status": "OPEN"})]
+    # Desk copies close through pattern_books_copy, at their parent's price and fee rule; this
+    # shortlist path closing them as well would close one trade twice.
+    open_books = [p async for p in pattern_book_positions_collection.find(
+        {"status": "OPEN", "source": {"$ne": "desk"}})]
     for pos in open_books:
         parent = parents.get(pos["parent_position_id"])
         if parent is None:
@@ -424,15 +436,23 @@ async def sync_closes() -> int:
     What the intraday close-out job calls: once the pattern desk squares a position off,
     its mirrors have to follow in the same pass. Opening mirrors is left to `run_cycle`,
     which never does so after the entry cutoff anyway."""
-    if not ENABLED or not SELECTED:
+    if not ENABLED:
         return 0
+    closed = 0
+    if COPIES_DESK:
+        from app.services import pattern_books_copy as copy
+        closed += (await copy.sync(entries=False))["closed"]
+    if not SELECTED:
+        return closed
+    # Shortlist rows (any left from before the switch, or all of them on PATBOOK_SOURCE=
+    # shortlist) still close their old way - a switch must never strand an open position.
     async with _sync_lock:
         sids = list(SELECTED_BY_ID)
         parents = {p["position_id"]: p async for p in pattern_positions_collection.find(
             {"strategy_id": {"$in": sids}})}
-        closed, touched = await _close_closed_parents(parents)
+        legacy_closed, touched = await _close_closed_parents(parents)
         await _update_scores(touched)
-        return closed
+    return closed + legacy_closed
 
 
 async def run_cycle() -> dict:
@@ -443,6 +463,8 @@ async def run_cycle() -> dict:
     signal on the same strategy in the same cycle."""
     if not ENABLED:
         return {"opened": 0, "closed": 0, "notes": ["pattern books disabled"]}
+    if COPIES_DESK:
+        return await _run_copy_cycle()
     if not SELECTED:
         return {"opened": 0, "closed": 0,
                 "notes": ["No shortlisted strategies resolved against the pattern catalog."]}
@@ -486,6 +508,35 @@ async def run_cycle() -> dict:
     return {"opened": opened, "closed": closed, "books": BOOKS, "notes": []}
 
 
+async def _run_copy_cycle() -> dict:
+    """Copy the whole Patterns desk into every book, then snapshot each book."""
+    from app.services import pattern_books_copy as copy
+    synced = await copy.sync(entries=True)
+    legacy_closed = 0
+    if SELECTED:
+        # Any shortlist rows still open from before the switch close their old way.
+        async with _sync_lock:
+            sids = list(SELECTED_BY_ID)
+            parents = {p["position_id"]: p async for p in pattern_positions_collection.find(
+                {"strategy_id": {"$in": sids}})}
+            legacy_closed, touched = await _close_closed_parents(parents)
+            await _update_scores(touched)
+    for book in BOOKS:
+        snap = await summary(book)
+        await pattern_book_equity_collection.insert_one({
+            "ts": _now(), "book": book, "equity": snap["equity"],
+            "realized": snap["realized_pnl"], "unrealized": snap["unrealized_pnl"],
+            "open_positions": snap["open_positions"],
+        })
+    await pattern_book_state_collection.update_one({"_id": "engine"}, {"$set": {
+        "last_run_at": _now(), "last_opened": synced["opened"],
+        "last_closed": synced["closed"] + legacy_closed, "last_skipped": synced["skipped"],
+        "source": "desk"}}, upsert=True)
+    return {"opened": synced["opened"], "closed": synced["closed"] + legacy_closed,
+            "books": BOOKS, "notes": [f"Copying the Patterns desk: {synced['skipped']} signals "
+                                      "no book could take this cycle."]}
+
+
 # ── read models ──────────────────────────────────────────────────────────────────
 
 
@@ -518,14 +569,33 @@ async def summary(book: str = DEFAULT_BOOK) -> dict:
         last_decline = d.get("decline_reason")
     state = await pattern_book_state_collection.find_one({"_id": "engine"}) or {}
     equity = cap + realized + unrealized
+    copy_info: dict = {"copy_mode": "shortlist"}
+    strategies = len(SELECTED)
+    alloc = per_strategy_allocation(book)
+    source_line = "mirrors the 548-strategy pattern desk's fills for the shortlist"
+    if COPIES_DESK:
+        from app.services import pattern_books_copy as copy
+        skipped = await copy.skipped_totals(book)
+        started = await copy.started_at(book)
+        strategies = len(CATALOG)
+        alloc = copy.position_cap(cap)          # one account: the cap is per POSITION
+        # "Couldn't afford" keeps its meaning: the signals this book could not pay for. Slots
+        # being full or the stock already held are the account's limits, reported apart.
+        declined = skipped["price_above_cap"] + skipped["no_cash"]
+        last_decline = None
+        source_line = "copies every strategy of the 548-strategy Patterns desk"
+        copy_info = {"copy_mode": "desk", "max_open_positions": copy.MAX_OPEN,
+                     "position_cap": round(alloc, 2), "skipped": skipped,
+                     "copying_since": started.isoformat() if started else None}
     return {
+        **copy_info,
         "book": book, "books": BOOKS, "label": BOOK_LABEL.get(book, book),
         "book_capitals": {b: BOOK_CAPITAL[b] for b in BOOKS},
         "book_labels": BOOK_LABEL,
         "mode": "paper", "enabled": ENABLED,
         "desk_capital": cap,
-        "strategies": len(SELECTED),
-        "per_strategy_allocation": round(per_strategy_allocation(book), 2),
+        "strategies": strategies,
+        "per_strategy_allocation": round(alloc, 2),
         "equity": round(equity, 2),
         "realized_pnl": round(realized, 2), "unrealized_pnl": round(unrealized, 2),
         "gross_pnl": round(gross, 2), "fees": round(fees, 2),
@@ -538,12 +608,15 @@ async def summary(book: str = DEFAULT_BOOK) -> dict:
         "skipped_unaffordable": declined,
         "last_skip": last_decline,
         "last_run_at": state["last_run_at"].isoformat() if state.get("last_run_at") else None,
-        "source": "mirrors the 548-strategy pattern desk's fills for the shortlist",
+        "source": source_line,
     }
 
 
 async def leaderboard(book: str = DEFAULT_BOOK) -> list[dict]:
     book = normalize_book(book)
+    if COPIES_DESK:
+        from app.services import pattern_books_copy as copy
+        return await copy.leaderboard_rows(book, book_capital(book))
     scores = {s["strategy_id"]: s async for s in
               pattern_book_scores_collection.find({"book": book})}
     open_counts: dict = {}

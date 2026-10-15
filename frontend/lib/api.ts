@@ -6862,9 +6862,16 @@ export async function closeAllCommodityPrelive(symbol?: string) {
 // so any difference between them is caused by ACCOUNT SIZE and nothing else.
 const pbk = "/api/pattern-books";
 
-export type PatternBookKey = "50k" | "2L";
+export type PatternBookKey = "50k" | "2L" | "10L";
 
 export interface PatternBookSummary {
+  // "desk" (since 2026-10-15): the book copies ALL of the Patterns desk as one account of up
+  // to max_open_positions, each capped at position_cap. "shortlist": the 11, a slice each.
+  copy_mode?: "desk" | "shortlist";
+  max_open_positions?: number;
+  position_cap?: number;
+  skipped?: Record<"breaker" | "full" | "symbol_held" | "price_above_cap" | "no_cash", number>;
+  copying_since?: string | null;
   book: PatternBookKey;
   books: PatternBookKey[];
   label: string;
@@ -6906,6 +6913,8 @@ export interface PatternBookScore {
   net_pnl: number;
   roi_pct: number;
   open_positions: number;
+  skipped?: Record<"breaker" | "full" | "symbol_held" | "price_above_cap" | "no_cash", number>;
+  skipped_total?: number;
 }
 
 export interface PatternBookPosition {

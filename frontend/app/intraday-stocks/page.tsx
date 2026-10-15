@@ -51,7 +51,7 @@ import {
 
 // The live books are TABS rather than a dropdown because they are separate
 // accounts, not a filter: switching replaces every number on the page.
-type IntradayTab = "tournament" | "patterns" | "pb50k" | "pb2L" | "80k" | "30k" | "10k" | "2L" | "10L";
+type IntradayTab = "tournament" | "patterns" | "pb50k" | "pb2L" | "pb10L" | "80k" | "30k" | "10k" | "2L" | "10L";
 // Families as the desk names them, so a filter maps 1:1 onto the catalog.
 const PAT_FAMILIES: { key: string; label: string }[] = [
   { key: "chart_pattern", label: "Chart patterns" },
@@ -63,12 +63,13 @@ const PAT_FAMILIES: { key: string; label: string }[] = [
 ];
 // The pattern shortlist's two paper books. `tab` carries a "pb" prefix because "50k"
 // alone would collide with the Live Intraday book keys, which are a different desk.
-const PATTERN_BOOKS: { tab: "pb50k" | "pb2L"; key: PatternBookKey; label: string }[] = [
+const PATTERN_BOOKS: { tab: "pb50k" | "pb2L" | "pb10L"; key: PatternBookKey; label: string }[] = [
   { tab: "pb50k", key: "50k", label: "Paper Trade · ₹50k" },
   { tab: "pb2L", key: "2L", label: "Paper Trade · ₹2 lakh" },
+  { tab: "pb10L", key: "10L", label: "Paper Trade · ₹10 lakh" },
 ];
 
-// "2L" / "10L" need no "pb" prefix: the pattern books' tabs are "pb50k" / "pb2L", so a bare
+// "2L" / "10L" need no "pb" prefix: the pattern books' tabs are "pb50k" / "pb2L" / "pb10L", so a bare
 // "2L" tab is free - and it is this desk's book key, which the API and Reset expect as-is.
 type LiveBookKey = "80k" | "30k" | "10k" | "2L" | "10L";
 const LIVE_BOOKS: { key: LiveBookKey; capital: number; label: string }[] = [
@@ -212,6 +213,7 @@ const HISTORY_SCOPE: Record<IntradayTab, { deskKey: string; scope?: string; labe
   patterns: { deskKey: "pattern", label: "Pattern desk" },
   pb50k: { deskKey: "pattern-books", scope: "50k", label: "Paper Trade · ₹50k" },
   pb2L: { deskKey: "pattern-books", scope: "2L", label: "Paper Trade · ₹2 lakh" },
+  pb10L: { deskKey: "pattern-books", scope: "10L", label: "Paper Trade · ₹10 lakh" },
   "80k": { deskKey: "live-intraday", scope: "80k", label: "Live Intraday · ₹80k" },
   "30k": { deskKey: "live-intraday", scope: "30k", label: "Live Intraday · ₹30k" },
   "10k": { deskKey: "live-intraday", scope: "10k", label: "Live Intraday · ₹10k" },
@@ -346,11 +348,11 @@ export default function IntradayStocksPage() {
   // Only the three book tabs name a book; tournament and patterns are their own
   // views, so both must fall back rather than leak a non-book value downstream.
   const liveBook: LiveBookKey =
-    tab === "tournament" || tab === "patterns" || tab === "pb50k" || tab === "pb2L"
+    tab === "tournament" || tab === "patterns" || tab === "pb50k" || tab === "pb2L" || tab === "pb10L"
       ? "80k"
       : tab;
   const isLive =
-    tab !== "tournament" && tab !== "patterns" && tab !== "pb50k" && tab !== "pb2L";
+    tab !== "tournament" && tab !== "patterns" && tab !== "pb50k" && tab !== "pb2L" && tab !== "pb10L";
   const bookCapital = LIVE_BOOKS.find((b) => b.key === liveBook)?.capital ?? 80000;
 
   // Pattern paper books (₹50k / ₹2L) — the shortlist at a real account's size.
@@ -359,8 +361,8 @@ export default function IntradayStocksPage() {
   const [pbOpen, setPbOpen] = useState<PatternBookPosition[]>([]);
   const [pbDeclined, setPbDeclined] = useState<PatternBookPosition[]>([]);
   const [pbTrades, setPbTrades] = useState<PatternBookTrade[]>([]);
-  const isPatternBook = tab === "pb50k" || tab === "pb2L";
-  const pbKey: PatternBookKey = tab === "pb2L" ? "2L" : "50k";
+  const isPatternBook = tab === "pb50k" || tab === "pb2L" || tab === "pb10L";
+  const pbKey: PatternBookKey = PATTERN_BOOKS.find((b) => b.tab === tab)?.key ?? "50k";
 
   const [patSummary, setPatSummary] = useState<PatternSummary | null>(null);
   const [patBoard, setPatBoard] = useState<PatternScore[]>([]);
@@ -982,6 +984,19 @@ export default function IntradayStocksPage() {
       <DataGate ready={!!pbSummary} error={error} what={"this paper book"} onRetry={() => once(`book:${pbKey}`, loadPatternBook)} lastOkAt={lastOkAt}>
       <ResetBook desk="pattern-books" book={pbKey} label={PATTERN_BOOKS.find((b) => b.key === pbKey)?.label ?? "Paper Trade"}
         capital={pbSummary?.desk_capital} onDone={() => refreshing(() => loadPatternBook())} />
+      {pbSummary?.copy_mode === "desk" ? (
+      <div className="desk-banner">
+        <strong>PATTERN PAPER BOOK · ₹{inr(pbSummary?.desk_capital)} · COPYING THE PATTERNS DESK.</strong>{" "}
+        This book trades <strong>all {pbSummary?.strategies ?? 548} Patterns strategies</strong> by copying the
+        desk&apos;s own trades — the same entry and exit prices, sized to this account, with real Angel One costs
+        on <em>its</em> quantity (delivery rates when a 4h or daily strategy holds overnight). It is{" "}
+        <strong>one account</strong>: at most {pbSummary?.max_open_positions ?? 5} positions at a time, each up to
+        ₹{inr(pbSummary?.position_cap)}, whole shares, never two in one stock, no leverage. The desk takes about
+        20 trades a day, so this book copies a real share of it; the signals it cannot take are counted below,
+        by reason.
+        {pbSummary?.copying_since ? ` Copying since ${new Date(pbSummary.copying_since).toLocaleDateString("en-IN")}.` : ""}
+      </div>
+      ) : (
       <div className="desk-banner">
         <strong>PATTERN PAPER BOOK · ₹{inr(pbSummary?.desk_capital)}.</strong> The{" "}
         <strong>{pbSummary?.strategies ?? 8} shortlisted pattern strategies</strong> run here on{" "}
@@ -993,15 +1008,18 @@ export default function IntradayStocksPage() {
         round-trip fee is a far heavier drag on the smaller book, and a slice that cannot buy one
         share simply does not take the trade.
       </div>
+      )}
       <div className="desk-banner">
         <strong>FILLS CORRECTED ON 10 OCT 2026</strong>, together with the Patterns desk these
-        books copy. The shortlist was picked from the Patterns leaderboard while that leaderboard
-        overstated results, and none of its strategies has been validated.
+        books copy.{" "}
+        {pbSummary?.copy_mode === "desk"
+          ? "Since 15 Oct they copy every Patterns strategy, not a shortlist picked from a leaderboard that overstated results — and none of those strategies has been validated."
+          : "The shortlist was picked from the Patterns leaderboard while that leaderboard overstated results, and none of its strategies has been validated."}
       </div>
 
       <div className="tiles">
         <div className="tile"><div className="tile-label">Mode</div><div className="tile-value gain">PAPER</div><div className="tile-sub">{pbSummary?.enabled ? "mirrors the pattern desk" : "disabled"}</div></div>
-        <div className="tile"><div className="tile-label">Desk capital</div><div className="tile-value">₹{inr(pbSummary?.desk_capital)}</div><div className="tile-sub">{pbSummary?.strategies ?? 0} × ₹{inr(pbSummary?.per_strategy_allocation)}</div></div>
+        <div className="tile"><div className="tile-label">Desk capital</div><div className="tile-value">₹{inr(pbSummary?.desk_capital)}</div><div className="tile-sub">{pbSummary?.copy_mode === "desk" ? `one account · up to ${pbSummary?.max_open_positions ?? 5} × ₹${inr(pbSummary?.position_cap)}` : `${pbSummary?.strategies ?? 0} × ₹${inr(pbSummary?.per_strategy_allocation)}`}</div></div>
         <div className="tile"><div className="tile-label">Equity</div><div className="tile-value">₹{inr2(pbSummary?.equity)}</div><div className="tile-sub">₹{inr2(pbSummary?.unrealized_pnl)} unrealised</div></div>
         <div className="tile"><div className="tile-label">ROI</div><div className={`tile-value ${(pbSummary?.roi_pct ?? 0) >= 0 ? "gain" : "loss"}`}>{roiPct(pbSummary?.roi_pct)}</div><div className="tile-sub">on ₹{inr(pbSummary?.desk_capital)} book</div></div>
         <div className="tile"><div className="tile-label">Angel fees</div><div className="tile-value loss">−₹{inr2(pbSummary?.fees)}</div><div className="tile-sub">gross ₹{inr2(pbSummary?.gross_pnl)} before costs</div></div>
@@ -1010,13 +1028,60 @@ export default function IntradayStocksPage() {
         <div className="tile">
           <div className="tile-label">Couldn&rsquo;t afford</div>
           <div className={`tile-value ${(pbSummary?.skipped_unaffordable ?? 0) > 0 ? "loss" : ""}`}>{pbSummary?.skipped_unaffordable ?? 0}</div>
-          <div className="tile-sub">signals this book had to skip</div>
+          <div className="tile-sub">{pbSummary?.copy_mode === "desk" && pbSummary?.skipped
+            ? `share price above the cap, or no cash · ${pbSummary.skipped.full + pbSummary.skipped.symbol_held} more skipped (slots full / stock held)`
+            : "signals this book had to skip"}</div>
         </div>
       </div>
 
       <PnlRow capital={pbSummary?.desk_capital} realized={pbSummary?.realized_pnl}
               unrealized={pbSummary?.unrealized_pnl} fees={pbSummary?.fees} />
 
+      {pbSummary?.copy_mode === "desk" ? (() => {
+        const active = pbBoard.filter((r) => r.trades > 0 || (r.skipped_total ?? 0) > 0 || r.open_positions > 0);
+        return (
+      <GlassPanel title={`Patterns strategies in this book — ${active.length} of ${pbSummary?.strategies ?? 548} have signalled`}>
+        {!active.length ? (
+          <div className="feed-note">
+            No Patterns strategy has signalled since this book began copying. The desk takes about 20 trades a
+            day between 09:45 and 14:30; each one appears here as this book takes it or has to skip it.
+          </div>
+        ) : (
+        <div className="table-wrap">
+          <table className="data-table">
+            <thead><tr>
+              <th style={{ textAlign: "left" }}>Strategy</th><th>TF</th><th>Family</th>
+              <th>Trades</th><th>Win %</th><th>Fees</th><th>Net P&amp;L</th>
+              <th title="Net P&L as a share of this book's capital">Share of book</th>
+              <th title="Signals this book could not take: slots full / stock already held / share price above the per-position cap / no cash">Skipped</th>
+            </tr></thead>
+            <tbody>
+              {active.map((r) => (
+                <tr key={r.strategy_id}>
+                  <td style={{ textAlign: "left", fontSize: 11 }}>{r.template}</td>
+                  <td><span className="badge">{r.timeframe}</span></td>
+                  <td style={{ fontSize: 11 }}>{r.family}</td>
+                  <td>{r.trades}{r.open_positions ? ` (+${r.open_positions} open)` : ""}</td>
+                  <td>{r.trades ? `${(r.win_rate * 100).toFixed(1)}%` : "—"}</td>
+                  <td className="loss">{r.fees ? `−₹${inr2(r.fees)}` : "—"}</td>
+                  <td className={r.net_pnl >= 0 ? "gain" : "loss"}>{r.trades ? `${r.net_pnl >= 0 ? "+" : ""}₹${inr2(r.net_pnl)}` : "—"}</td>
+                  <td className={r.roi_pct >= 0 ? "gain" : "loss"}>{r.trades ? roiPct(r.roi_pct, 3) : "—"}</td>
+                  <td title={r.skipped ? `slots full ${r.skipped.full} · stock held ${r.skipped.symbol_held} · price above cap ${r.skipped.price_above_cap} · no cash ${r.skipped.no_cash}` : ""}>
+                    {r.skipped_total ? r.skipped_total : "—"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        )}
+        <div className="feed-note">
+          &ldquo;Share of book&rdquo; is each strategy&rsquo;s net P&amp;L against this book&rsquo;s whole
+          ₹{inr(pbSummary?.desk_capital)}, so the column adds up to the book&rsquo;s own return.
+        </div>
+      </GlassPanel>
+        );
+      })() : (
       <GlassPanel title={`The shortlist — ${pbSummary?.strategies ?? 8} strategies on ₹${inr(pbSummary?.per_strategy_allocation)} each`}>
         <div className="table-wrap">
           <table className="data-table">
@@ -1047,12 +1112,13 @@ export default function IntradayStocksPage() {
           what the book actually made.
         </div>
       </GlassPanel>
+      )}
 
       <GlassPanel title={`Open positions (${pbOpen.length})`}>
         {!pbOpen.length ? (
           <div className="feed-note">
-            Nothing open. This book takes a position when the Patterns desk opens one of the
-            shortlisted strategies.
+            Nothing open. This book takes a position when the Patterns desk opens one
+            {pbSummary?.copy_mode === "desk" ? " and this book has a free slot" : " of the shortlisted strategies"}.
           </div>
         ) : (
           <div className="table-wrap">

@@ -153,9 +153,12 @@ def _desks() -> list[dict]:
         {"name": "pattern", "module": "app.services.intraday_pattern_engine",
          "fn": "manage", "dhan": False, "coll": D.pattern_positions_collection,
          "intraday": {"style": {"$in": ["scalping", "intraday"]}}},
+        # Since 2026-10-15 these books copy ALL of the Patterns desk, including its 4h and
+        # daily strategies, whose copies legitimately hold overnight - so the alarm checks the
+        # intraday styles only, exactly as it does for the desk itself just above.
         {"name": "pattern_books", "module": "app.services.pattern_books_engine",
          "fn": "sync_closes", "dhan": False, "coll": D.pattern_book_positions_collection,
-         "intraday": None},
+         "intraday": {"style": {"$in": ["scalping", "intraday"]}}},
         {"name": "live_intraday", "module": "app.services.live_intraday_engine",
          "fn": "manage_cycle", "dhan": True, "coll": D.live_intraday_positions_collection,
          "intraday": {"category": {"$in": ["scalping", "momentum", "mean_reversion"]}}},
