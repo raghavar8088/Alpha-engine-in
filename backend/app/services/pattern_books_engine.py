@@ -586,7 +586,8 @@ async def summary(book: str = DEFAULT_BOOK) -> dict:
         source_line = "copies every strategy of the 548-strategy Patterns desk"
         copy_info = {"copy_mode": "desk", "max_open_positions": copy.MAX_OPEN,
                      "position_cap": round(alloc, 2), "skipped": skipped,
-                     "copying_since": started.isoformat() if started else None}
+                     "copying_since": (started if started.tzinfo else started.replace(
+                    tzinfo=timezone.utc)).isoformat() if started else None}
     return {
         **copy_info,
         "book": book, "books": BOOKS, "label": BOOK_LABEL.get(book, book),

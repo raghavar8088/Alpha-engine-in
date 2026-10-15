@@ -114,7 +114,7 @@ export default function V2Validation() {
             it was never selected on, and a desk-wide probability of overfitting under 50%.
             {!passed.length && (
               <>
-                {" "}<strong>None passed.</strong> On this history these rules do not beat their
+                {" "}<strong>None passed.</strong>{" "}On this history these rules do not beat their
                 costs; the tournament keeps trading them on paper so the backtest&rsquo;s fill model
                 can be checked against what really happens, but nothing here is a candidate for
                 real money.

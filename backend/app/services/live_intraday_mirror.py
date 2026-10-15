@@ -74,6 +74,7 @@ MAX_OPEN = int(os.getenv("LIVE_INTRADAY_MAX_OPEN", "5"))
 SKIP_REASONS = ("breaker", "full", "symbol_held", "price_above_cap", "no_cash")
 START_ID = "mirror_start"
 RESET_DESK = "live-intraday"
+LOOKBACK = timedelta(days=int(os.getenv("LIVE_INTRADAY_LOOKBACK_DAYS", "4")))
 # The close-out job (closes only) and the shared loop (entries) can both call `sync`; one at a
 # time, so two passes can never copy the same tournament trade twice. The unique index in
 # ensure_indexes is the second line of defence.
@@ -113,20 +114,33 @@ def _closed(p: dict) -> bool:
 
 def plan_book(*, capital: float, realized: float, deployed: float, open_rows: list[dict],
               parents: list[dict], decided: set[str], breaker_tripped: bool,
-              entries: bool, max_open: int | None = None, net_fn=None) -> dict:
+              entries: bool, max_open: int | None = None, net_fn=None,
+              source_tag: str | None = None, closed_rows: list[dict] | None = None) -> dict:
     """Replay one book against the tournament, in time order. Pure - no I/O.
 
-    open_rows: the book's OPEN positions from ANY source (they hold cash, slots, symbols).
-    parents:   tournament positions in scope (opened on/after the book's floor), any status.
-    decided:   parent ids this book has already taken or skipped.
+    open_rows:   the book's OPEN positions from ANY source (they hold cash, slots, symbols).
+    parents:     tournament positions in scope (opened on/after the book's floor), any status.
+    decided:     parent ids this book has already taken or skipped.
+    closed_rows: the book's CLOSED rows whose close came after the earliest parent still to be
+                 decided (any source). See REWIND below.
     Returns {"opens": [...], "closes": [...], "skips": [...]}; an open may carry its own close
     when the parent opened and closed between two looks.
 
+    REWIND (fixed 2026-10-15). The manage cycle writes every close (entries=False) just BEFORE
+    the entries pass, and the shared loop comes round every 10-35 minutes, not 3. Started from
+    the book as it is NOW, an entries pass let a tournament trade opened at 11:45:21 take a slot
+    freed by a close at 11:45:29 - eight positions open at once and cash below zero, on the
+    trades' own clock. So the replay starts at the earliest pending entry, t0: a row closed
+    after t0 holds its slot, its stock and its cash until its own close time. Each entry then
+    sees the book as it stood at that instant, whatever earlier passes wrote.
+
     Shared with the Pattern paper books (pattern_books_copy), which copy a different desk by
-    the same rules: `max_open` is that desk's slot count, and `net_fn(row, parent)` its fee
-    schedule - delivery when a copy was held overnight, which an intraday book never is. Left
-    as None, both are this module's own: MAX_OPEN slots, Angel's intraday card."""
+    the same rules: `max_open` is that desk's slot count, `net_fn(row, parent)` its fee
+    schedule - delivery when a copy was held overnight, which an intraday book never is - and
+    `source_tag` the tag ITS copies carry ("desk"; matching on this module's "tournament"
+    meant no Patterns copy ever closed). Left as None, all three are this module's own."""
     slots = MAX_OPEN if max_open is None else max_open
+    tag = SOURCE_TAG if source_tag is None else source_tag
 
     def close_net(row: dict, parent: dict):
         if net_fn is not None:
@@ -147,23 +161,46 @@ def plan_book(*, capital: float, realized: float, deployed: float, open_rows: li
     def push(at, order: int, kind: str, payload) -> None:
         nonlocal seq
         seq += 1
-        heapq.heappush(events, (at if at is not None else datetime.min, order, seq, kind, payload))
+        at = naive_utc(at) if at is not None else datetime.min
+        heapq.heappush(events, (at, order, seq, kind, payload))
 
     mirrored_open = {r["parent_position_id"]: r for r in open_rows
-                     if r.get("source") == SOURCE_TAG and r.get("parent_position_id")}
+                     if r.get("source") == tag and r.get("parent_position_id")}
+    pending = [p for p in parents if p["position_id"] not in decided
+               and p["position_id"] not in mirrored_open] if entries else []
+    t0 = min((naive_utc(p["opened_at"]) for p in pending if p.get("opened_at")), default=None)
+    if t0 is not None:
+        # REWIND to t0: a row this book closed after t0 is put back - slot, stock and cash -
+        # and freed again at its own close time. Its figures are already written; it changes
+        # nothing else. A recorded row counts as held from t0 even if it opened a little later
+        # (a parent written seconds late can make that happen): slightly conservative, and it
+        # makes "never more than the slots, never below zero cash, never one stock twice" hold
+        # on the trades' own clock whatever order the passes ran in.
+        for r in closed_rows or []:
+            ca = naive_utc(r.get("closed_at"))
+            if ca is None or ca <= t0:
+                continue
+            n_open += 1
+            held[r["symbol"]] = held.get(r["symbol"], 0) + 1
+            cash -= float(r.get("capital_deployed") or 0.0) + float(r.get("realized_pnl") or 0.0)
+            push(ca, 0, "replay_close", r)
+
     for pid, row in mirrored_open.items():
         parent = by_id.get(pid)
         if parent is not None and _closed(parent):
             push(parent.get("closed_at"), 0, "close_existing", (row, parent))
-    if entries:
-        for p in parents:
-            pid = p["position_id"]
-            if pid not in decided and pid not in mirrored_open:
-                push(p.get("opened_at"), 1, "open", p)
+    for p in pending:
+        push(p.get("opened_at"), 1, "open", p)
 
     out: dict = {"opens": [], "closes": [], "skips": []}
     while events:
         _at, _order, _seq, kind, payload = heapq.heappop(events)
+
+        if kind == "replay_close":
+            n_open -= 1
+            held[payload["symbol"]] = held.get(payload["symbol"], 1) - 1
+            cash += float(payload.get("capital_deployed") or 0.0) + float(payload.get("realized_pnl") or 0.0)
+            continue
 
         if kind in ("close_existing", "close_new"):
             row, parent = payload
@@ -247,6 +284,32 @@ async def _floor(book: str, start: datetime) -> datetime:
     floor = max(start, await _book_start(book))
     r = await reset_at(RESET_DESK, book)
     return max(floor, r) if r else floor
+
+
+def window_start(floor: datetime) -> datetime:
+    """Where a pass starts reading parents: the book's floor, but never more than LOOKBACK ago.
+    Every entries pass decides all it can see, so an older parent is already decided - and one
+    that was not would be a back-dated entry now. Without this, every pass re-read the whole
+    copied history (~450 tournament trades a day) once per book."""
+    return max(floor, naive_utc(_now()) - LOOKBACK)
+
+
+def pending_since(parents: list[dict], decided: set[str], open_rows: list[dict],
+                  tag: str) -> datetime | None:
+    """When the earliest parent this pass will decide was opened - plan_book's t0."""
+    held = {r.get("parent_position_id") for r in open_rows if r.get("source") == tag}
+    return min((naive_utc(p["opened_at"]) for p in parents
+                if p.get("opened_at") and p["position_id"] not in decided
+                and p["position_id"] not in held), default=None)
+
+
+async def closed_after(coll, book: str, t0: datetime | None) -> list[dict]:
+    """The book's rows closed after t0: they still held a slot when those entries happened."""
+    if t0 is None:
+        return []
+    return [r async for r in coll.find(
+        {"book": book, "status": "CLOSED", "closed_at": {"$gt": t0}},
+        {"symbol": 1, "capital_deployed": 1, "realized_pnl": 1, "opened_at": 1, "closed_at": 1})]
 
 
 async def _parents(since: datetime, extra_ids: list[str]) -> list[dict]:
@@ -388,13 +451,16 @@ async def _sync(*, entries: bool) -> dict:
             {"book": book, "status": "OPEN"})]
         pointed = [r["parent_position_id"] for r in open_rows
                    if r.get("source") == SOURCE_TAG and r.get("parent_position_id")]
-        parents = await _parents(floor, pointed)
+        parents = await _parents(window_start(floor), pointed)
         op, cl = await li._totals_split(live_intraday_positions_collection, {"book": book})
         breaker = (await li.breaker_state(book))["breaker_tripped"] if entries else False
+        decided = await _decided(book, parents) if entries else set()
+        closed_rows = await closed_after(
+            live_intraday_positions_collection, book,
+            pending_since(parents, decided, open_rows, SOURCE_TAG)) if entries else []
         plan = plan_book(capital=capital, realized=cl["realized"], deployed=op["deployed"],
-                         open_rows=open_rows, parents=parents,
-                         decided=await _decided(book, parents) if entries else set(),
-                         breaker_tripped=breaker, entries=entries)
+                         open_rows=open_rows, parents=parents, decided=decided,
+                         breaker_tripped=breaker, entries=entries, closed_rows=closed_rows)
 
         touched: dict[str, dict[str, int]] = {}
         for c in plan["closes"]:

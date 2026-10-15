@@ -47,7 +47,8 @@ from app.core.db import (pattern_book_positions_collection, pattern_book_scores_
 from app.services.angel_fees import product_for, round_trip
 from app.services.book_reset import naive_utc, reset_at
 from app.services.intraday_pattern_engine import CATALOG
-from app.services.live_intraday_mirror import plan_book
+from app.services.live_intraday_mirror import (closed_after, pending_since, plan_book,
+                                               window_start)
 
 logger = logging.getLogger("pattern_books_copy")
 
@@ -266,13 +267,19 @@ async def _sync(*, entries: bool) -> dict:
             {"book": book, "status": "OPEN"})]
         pointed = [r["parent_position_id"] for r in open_rows
                    if r.get("source") == SOURCE_TAG and r.get("parent_position_id")]
-        parents = await _parents(floor, pointed)
+        parents = await _parents(window_start(floor), pointed)
         realized, deployed = await _totals(book)
+        decided = await _decided(book, parents) if entries else set()
+        closed_rows = await closed_after(
+            pattern_book_positions_collection, book,
+            pending_since(parents, decided, open_rows, SOURCE_TAG)) if entries else []
+        # source_tag: these copies are tagged "desk". Without it plan_book looked for its own
+        # "tournament" tag, found no copy here, and so never closed one (fixed 2026-10-15).
         plan = plan_book(capital=capital, realized=realized, deployed=deployed,
-                         open_rows=open_rows, parents=parents,
-                         decided=await _decided(book, parents) if entries else set(),
+                         open_rows=open_rows, parents=parents, decided=decided,
                          breaker_tripped=False, entries=entries,
-                         max_open=MAX_OPEN, net_fn=_net)
+                         max_open=MAX_OPEN, net_fn=_net, source_tag=SOURCE_TAG,
+                         closed_rows=closed_rows)
 
         touched: dict[str, dict[str, int]] = {}
         for c in plan["closes"]:

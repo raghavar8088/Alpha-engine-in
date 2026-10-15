@@ -583,7 +583,8 @@ async def summary(book: str = DEFAULT_BOOK) -> dict:
         copy = {"source": "tournament", "max_open_positions": mirror.MAX_OPEN,
                 "position_cap": round(alloc, 2), "tournament_strategies": len(v2.CATALOG),
                 "skipped": await mirror.skipped_totals(book),
-                "copying_since": started.isoformat() if started else None}
+                "copying_since": (started if started.tzinfo else started.replace(
+                    tzinfo=timezone.utc)).isoformat() if started else None}
     return {
         **copy,
         "book": book, "books": BOOKS,

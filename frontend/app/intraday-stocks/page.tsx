@@ -577,7 +577,7 @@ export default function IntradayStocksPage() {
       <DataGate ready={!!status} error={error} what={"the tournament"} onRetry={() => once("tournament", load)} lastOkAt={lastOkAt}>
       <AlarmBanner />
       <div className="desk-banner">
-        <strong>V2 — REAL INTRADAY BARS, BOTH SIDES.</strong> Each rule is evaluated once, at the
+        <strong>V2 — REAL INTRADAY BARS, BOTH SIDES.</strong>{" "}Each rule is evaluated once, at the
         close of its own 15m, 45m or 1h bar, and its stop and target are sized in that
         bar&rsquo;s ATR. Fade rules skip stocks that are in play. (Trend rules are no longer
         tied to NIFTY&rsquo;s direction: two years of data showed it made no difference.) Stops and targets fill where they would really
@@ -855,7 +855,7 @@ export default function IntradayStocksPage() {
         ₹{inr(patSummary?.per_strategy_capital)}. Runs alongside the tournament, not instead
         of it. <strong>45m and 4h are aggregated</strong>; Angel has no native
         interval for either. Universe is capped at{" "}
-        <strong>{patSummary?.universe_size ?? 25} symbols</strong> because Angel&rsquo;s candle
+        <strong>{patSummary?.universe_size ?? 25} symbols</strong>{" "}because Angel&rsquo;s candle
         endpoint rate-limits far harder than its quotes — 150 symbols × 8 timeframes would be
         1,200 requests a cycle. P&amp;L is net of real Angel One costs.
       </div>
@@ -987,7 +987,7 @@ export default function IntradayStocksPage() {
       {pbSummary?.copy_mode === "desk" ? (
       <div className="desk-banner">
         <strong>PATTERN PAPER BOOK · ₹{inr(pbSummary?.desk_capital)} · COPYING THE PATTERNS DESK.</strong>{" "}
-        This book trades <strong>all {pbSummary?.strategies ?? 548} Patterns strategies</strong> by copying the
+        This book trades <strong>all {pbSummary?.strategies ?? 548} Patterns strategies</strong>{" "}by copying the
         desk&apos;s own trades — the same entry and exit prices, sized to this account, with real Angel One costs
         on <em>its</em> quantity (delivery rates when a 4h or daily strategy holds overnight). It is{" "}
         <strong>one account</strong>: at most {pbSummary?.max_open_positions ?? 5} positions at a time, each up to
@@ -1222,12 +1222,12 @@ export default function IntradayStocksPage() {
       {liveSummary?.source === "tournament" ? (
       <div className="desk-banner">
         <strong>LIVE INTRADAY · ₹{bookCapital.toLocaleString("en-IN")} PAPER · COPYING THE TOURNAMENT.</strong>{" "}
-        This book trades the tournament&apos;s {liveSummary?.tournament_strategies ?? 54} strategies by copying
+        This book trades the tournament&apos;s {liveSummary?.tournament_strategies ?? 54}{" "}strategies by copying
         the tournament&apos;s own trades — the same entry and exit prices (slippage already in them), sized to this
         account and charged real Angel One costs on <em>its</em> quantity. It is <strong>one account</strong>, as a
         real one would be: at most {liveSummary?.max_open_positions ?? 5} positions at a time, each up to
         ₹{inr(liveSummary?.position_cap)}, whole shares, never two positions in the same stock, no leverage.
-        The tournament takes ~450 trades a day, so <strong>most signals cannot get a slot</strong> — the
+        The tournament takes ~450 trades a day, so <strong>most signals cannot get a slot</strong>{" "}— the
         &ldquo;Skipped&rdquo; column counts them, by reason. Small positions pay roughly 0.3–0.6% a round trip in
         costs, against an average signal worth a few hundredths of a percent: that gap is what this book measures.
         {liveSummary?.copying_since ? ` Copying since ${new Date(liveSummary.copying_since).toLocaleDateString("en-IN")}.` : ""}

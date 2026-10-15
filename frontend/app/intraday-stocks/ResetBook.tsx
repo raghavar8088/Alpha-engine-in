@@ -102,7 +102,7 @@ export default function ResetBook({
       {open && (
         <div className="reset-confirm" role="alertdialog" aria-label={`Reset ${label}`}>
           <div>
-            <b>Reset {label}?</b> This permanently deletes the book&apos;s paper record
+            <b>Reset {label}?</b>{" "}This permanently deletes the book&apos;s paper record
             {preview ? ` — ${describe(preview.counts)}` : ""}
             {openCount ? `, including ${openCount} open position${openCount === 1 ? "" : "s"}` : ""} — and restarts it
             {capital ? ` at ₹${Math.round(capital).toLocaleString("en-IN")}` : " at its starting capital"}.
