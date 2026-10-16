@@ -147,6 +147,9 @@ def describe() -> dict:
 def _desks() -> list[dict]:
     from app.core import db as D
     return [
+        {"name": "intraday_focus", "module": "app.services.intraday_focus",
+         "fn": "manage", "dhan": False, "coll": D.db["intraday_focus_accounts"],
+         "intraday": {}},
         {"name": "intraday_lab", "module": "app.services.intraday_lab_engine",
          "fn": "manage_cycle", "dhan": True, "coll": D.intraday_lab_positions_collection,
          "intraday": {"category": {"$in": ["scalping", "momentum", "mean_reversion"]}}},
@@ -170,6 +173,10 @@ def _desks() -> list[dict]:
 
 async def _still_open(desk: dict, today: str) -> list[dict]:
     """Same-day intraday positions this desk still holds."""
+    if desk["name"] == "intraday_focus":
+        # This desk commits cash and positions together in one atomic account document.
+        return [p async for account in desk["coll"].find({}, {"positions": 1})
+                for p in account.get("positions", [])]
     if desk["intraday"] is None:            # a mirror book: it is flat when its parent is
         q: dict = {"status": "OPEN"}
     else:

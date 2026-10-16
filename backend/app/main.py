@@ -34,6 +34,7 @@ from app.api.routes import (
     commodity_prelive,
     fno_positions,
     intraday_data,
+    intraday_focus,
     intraday_lab,
     intraday_ops,
     live,
@@ -500,6 +501,18 @@ async def start_intraday_data() -> None:
                     store.coverage([])["dir"], store.writable)
     except Exception:  # noqa: BLE001
         logger.exception("intraday data startup failed — the desks still run without it")
+
+
+@app.on_event("startup")
+async def start_intraday_focus() -> None:
+    """Five isolated paper accounts; shares the existing real equity data feed."""
+    try:
+        from app.services.intraday_focus import focus_loop
+        # The loop always manages existing paper positions, even with entries disabled.
+        asyncio.create_task(focus_loop())
+        logger.info("Intraday Focus Five paper desk started; broker orders are unavailable")
+    except Exception:
+        logger.exception("Intraday Focus Five startup failed")
 
 
 @app.on_event("startup")
@@ -990,6 +1003,7 @@ app.include_router(watchlist.router)
 app.include_router(manual_positions.router)
 app.include_router(fno_positions.router)
 app.include_router(intraday_lab.router)
+app.include_router(intraday_focus.router)
 app.include_router(live_intraday.router)
 app.include_router(live_trading.router)
 app.include_router(momentum.router)

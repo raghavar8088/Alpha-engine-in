@@ -145,6 +145,10 @@ _MODULES: list[Module] = [
        "/prelive-selling", ["/api/selling-books"]),
     _m("intraday_lab", "Intraday Stocks - Tournament", "Strategy Lab", "/intraday-stocks",
        ["/api/intraday-lab"]),
+    _m("intraday_focus", "Intraday Stocks - Five-Strategy Paper Desk", "Strategy Lab",
+       "/intraday-stocks/focus-five", ["/api/intraday-focus"],
+       note="Five independent Rs 10 lakh paper accounts using real stock data. No broker orders. "
+            "OFF stops new entries; exits continue. Requires the Intraday Stocks switch ON."),
     _m("live_intraday", "Intraday Stocks - Live Intraday books", "Strategy Lab",
        "/intraday-stocks", ["/api/live-intraday"]),
     _m("pattern", "Intraday Stocks - Patterns", "Strategy Lab", "/intraday-stocks",

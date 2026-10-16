@@ -92,7 +92,8 @@ class TokenState:
 
     __slots__ = ("symbol", "token", "day", "joined_at", "cum_vol", "day_high", "day_low",
                  "day_open", "prev_close", "last_ltp", "last_tick", "cur", "cur_v0",
-                 "last_closed", "mt", "mo", "mh", "ml", "mc", "mv", "ticks")
+                 "last_closed", "mt", "mo", "mh", "ml", "mc", "mv", "ticks",
+                 "last_price_exchange_at", "last_price_received_at")
 
     def __init__(self, symbol: str, token: str):
         self.symbol, self.token = symbol, token
@@ -106,6 +107,9 @@ class TokenState:
         self.day_high = self.day_low = self.day_open = self.prev_close = None
         self.last_ltp = None
         self.last_tick = 0.0
+        # Price freshness must not be renewed by a heartbeat or an invalid-price packet.
+        self.last_price_exchange_at = 0.0
+        self.last_price_received_at = 0.0
         self.cur = None            # [minute_start, o, h, l, c]
         self.cur_v0 = 0
         self.last_closed = 0       # start of the last minute already closed
@@ -180,6 +184,8 @@ class TokenState:
         if cum is not None and cum > self.cum_vol:
             self.cum_vol = int(cum)
         self.last_ltp = ltp
+        self.last_price_exchange_at = float(exch)
+        self.last_price_received_at = self.last_tick
 
     def close_through(self, boundary: int) -> None:
         """Close the running minute if it ends at or before `boundary`."""

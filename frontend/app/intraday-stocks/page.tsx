@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import GlassPanel from "../../components/GlassPanel";
 import DeskHistory from "../../components/DeskHistory";
 import PageHeader from "../../components/PageHeader";
@@ -547,6 +548,9 @@ export default function IntradayStocksPage() {
       />
 
       <div className="tabs">
+        <Link href="/intraday-stocks/focus-five" className="tab" style={{ textDecoration: "none", borderColor: "var(--brand-border)", color: "var(--brand)" }}>
+          Five-Strategy Desk · ₹10 lakh each
+        </Link>
         <button className={tab === "tournament" ? "tab active" : "tab"} onClick={() => setTab("tournament")}>
           Tournament · {status?.strategy_count ?? 52} strategies
         </button>
