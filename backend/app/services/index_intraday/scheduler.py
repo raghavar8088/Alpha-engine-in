@@ -100,8 +100,8 @@ async def history_pass(now: datetime | None = None) -> dict:
     """One heal of the history store, outside busy hours, module ON. Returns what it filled."""
     from app.services.desk_switches import is_on
 
-    from .feed import feed
-    from .report import note_history
+    from .feed import STORE, feed
+    from .report import note_history, reconcile
     now = now or datetime.now(IST)
     if busy_hours(now) or not await is_on("index_intraday"):
         return {}
@@ -109,6 +109,7 @@ async def history_pass(now: datetime | None = None) -> dict:
     if healed:
         await note_history(healed)
         logger.info("[index intraday] history healed: %s", healed)
+    await reconcile(STORE)                 # reports name what the store now holds, however it got there
     return healed
 
 

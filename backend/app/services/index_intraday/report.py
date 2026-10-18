@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import asyncio
+import gzip
+import os
 from datetime import date, datetime, timezone
 
 from app.core.db import db
@@ -48,6 +51,31 @@ async def note_history(filled: dict) -> int:
             r = await REPORTS.update_one({"_id": day}, {"$set": {f"history_appended.{sym}": rows}})
             n += r.modified_count
     return n
+
+
+def _stored_rows(path: str) -> int:
+    """Data rows in one stored session file (0 when there is none)."""
+    try:
+        with gzip.open(path, "rt") as fh:
+            return max(0, sum(1 for _ in fh) - 1)          # less the header
+    except OSError:
+        return 0
+
+
+async def reconcile(store: str, days: int = 10) -> int:
+    """Make the recent reports say what the store holds. An instrument logged as an error at 15:40
+    may have been stored since — by a heal, a restart's heal, or by hand — and a report that still
+    says "error" then misstates the history. Reads only the files those entries name."""
+    fixed = 0
+    async for doc in REPORTS.find({}, {"history_appended": 1}).sort("_id", -1).limit(days):
+        for sym, v in list((doc.get("history_appended") or {}).items()):
+            if sym == "healed" or not isinstance(v, str):
+                continue
+            rows = await asyncio.to_thread(_stored_rows, os.path.join(store, sym, f"{doc['_id']}.csv.gz"))
+            if rows:
+                await REPORTS.update_one({"_id": doc["_id"]}, {"$set": {f"history_appended.{sym}": rows}})
+                fixed += 1
+    return fixed
 
 
 async def get(day: date) -> dict:

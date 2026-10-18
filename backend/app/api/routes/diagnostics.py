@@ -142,9 +142,22 @@ def _cache_sizes() -> list[dict]:
     # else — while holding 343,642 Bar objects, because one entry is a whole timeframe's
     # lookback. A cache of bars is sized by its bars. Any module exposing a `*_stats()`
     # that counts them gets to say so here.
+    # The screener's daily-bar cache reports SYMBOLS held ("525"); its bars are counted here
+    # (197,462 on 2026-10-18: each symbol carries ~376 daily bars).
+    try:
+        hz = sys.modules.get("app.services.screener.horizons")
+        if hz is not None:
+            held = sum(len(bars) for _ts, by_sym in list(hz._bars_cache.values()) for bars in by_sym.values())
+            for r in rows:
+                if r["cache"] == "screener.horizons.bars":
+                    r["holds"] = held
+                    r["note"] = "daily bars across every symbol held"
+                    break
+    except Exception:                                   # noqa: BLE001
+        pass
+
     for mod, fn, label in (
         ("app.services.intraday_pattern_engine", "cache_stats", "intraday_patterns.series"),
-        ("app.services.screener.horizons", "bars_cache_stats", "screener.horizons.bars"),
     ):
         try:
             m = sys.modules.get(mod) or __import__(mod, fromlist=["x"])
@@ -238,6 +251,7 @@ def _size_and_children(o) -> tuple[int, list]:
     try:
         d = object.__getattribute__(o, "__dict__")
         if isinstance(d, dict):
+            size += sys.getsizeof(d)                    # the attribute table itself is memory too
             kids.extend(d.values())
     except Exception:                                   # noqa: BLE001
         pass
@@ -344,18 +358,166 @@ def holders_report(types_wanted: list[str], task_coros: list[tuple[str, object]]
             "total_mb_reached": round(sum(r["mb"] for r in rows), 1), "holders": rows[:top]}
 
 
+# The walk remembers every object it has visited (~60 bytes each: about 100 MB for the 1.6
+# million objects of a fresh worker). Run on a worker already near its limit, that alone would
+# push it into swap — so it needs this much headroom unless forced.
+HOLDERS_MIN_HEADROOM_MB = float(os.getenv("DIAG_HOLDERS_MIN_HEADROOM_MB", "200"))
+
+
 @router.get("/memory/holders")
 async def memory_holders(types: str = Query("Bar,set,dict,list", description="type names to count"),
                          top: int = Query(25, ge=1, le=200),
                          max_seconds: float = Query(90.0, ge=1, le=600),
+                         force: bool = Query(False, description="run even with little headroom"),
                          _user: dict = Depends(get_current_user)):
     """Which globals and task locals keep the heap alive. COSTLY: walks every reachable app
-    object (tens of seconds, in a worker thread). Read-only; meant for the day the footprint
-    is already wrong."""
+    object (tens of seconds, in a worker thread, ~100 MB of bookkeeping). Read-only; meant for a
+    quiet hour — the scheduled census below is the cheap record of the busy ones."""
     import asyncio
+    proc = _proc_memory()
+    headroom = proc.get("headroom_mb")
+    if not force and headroom is not None and headroom < HOLDERS_MIN_HEADROOM_MB:
+        return {"refused": True, "process": proc,
+                "why": f"{headroom:.0f} MB of headroom; the walk needs ~{HOLDERS_MIN_HEADROOM_MB:.0f}. Run it at a "
+                       "quiet hour, read /memory/snapshots, or pass force=true."}
     task_coros = [(t.get_name(), t.get_coro()) for t in asyncio.all_tasks()]
     wanted = [t.strip() for t in types.split(",") if t.strip()]
     return await asyncio.to_thread(holders_report, wanted, task_coros, top, 6_000_000, max_seconds)
+
+
+# ── the scheduled census ─────────────────────────────────────────────────────────
+#
+# The footprint climbs from ~225 MB at boot to the 800 MB limit within one trading day and is
+# back at the floor after every deploy, so the moment worth measuring is when nobody is
+# looking. Twice each trading day the process records, cheaply, what it holds: its memory, the
+# type histogram, and every container of 1,000+ items held by an app module (top-level length
+# only — no deep walk). A container that grows day after day is the leak.
+
+SNAPSHOT_SLOTS_IST = tuple(t.strip() for t in os.getenv("DIAG_SNAPSHOT_SLOTS", "15:45,22:00").split(",") if t.strip())
+SNAPSHOT_KEEP = 40
+SNAPSHOTS_ENABLED = os.getenv("DIAG_MEMORY_SNAPSHOTS", "1").lower() not in ("0", "false", "")
+_SNAPSHOT_TASKS: set = set()
+
+
+def shallow_census(min_len: int = 1000, top: int = 40,
+                   prefixes: tuple[str, ...] = ("app.", "tradingai_shared")) -> list[dict]:
+    """Every app-module container (and attribute of a module-level object) with >= `min_len`
+    items, by top-level length. Cheap: no recursion, nothing walked."""
+    import types
+    from collections import deque
+    sized = (dict, list, set, frozenset, tuple, deque)
+    rows: list[dict] = []
+    for name, mod in list(sys.modules.items()):
+        if mod is None or not name.startswith(prefixes):
+            continue
+        try:
+            items = list(vars(mod).items())
+        except Exception:                               # noqa: BLE001
+            continue
+        for attr, val in items:
+            if attr.startswith("__") or isinstance(val, (types.ModuleType, type, types.FunctionType,
+                                                         types.BuiltinFunctionType)):
+                continue
+            cands = [(f"{name}.{attr}", val)]
+            if not isinstance(val, sized) and not _never_enter(val):
+                try:
+                    cands += [(f"{name}.{attr}.{k}", v)
+                              for k, v in list(object.__getattribute__(val, "__dict__").items())]
+                except Exception:                       # noqa: BLE001
+                    pass
+            for label, obj in cands:
+                if isinstance(obj, sized):
+                    try:
+                        n = len(obj)
+                    except Exception:                   # noqa: BLE001
+                        continue
+                    if n >= min_len:
+                        rows.append({"holder": label, "type": type(obj).__name__, "len": n})
+    rows.sort(key=lambda r: r["len"], reverse=True)
+    return rows[:top]
+
+
+def _type_histogram(top: int = 25) -> dict:
+    hist: dict[str, int] = {}
+    for o in gc.get_objects():
+        n = type(o).__name__
+        hist[n] = hist.get(n, 0) + 1
+    return dict(sorted(hist.items(), key=lambda kv: kv[1], reverse=True)[:top])
+
+
+async def take_snapshot(slot: str, coll=None) -> dict:
+    """One census, stored; the oldest beyond SNAPSHOT_KEEP are dropped."""
+    import asyncio
+    from datetime import datetime, timezone
+    if coll is None:
+        from app.core.db import db
+        coll = db["diagnostics_memory_snapshots"]
+    census = await asyncio.to_thread(shallow_census)
+    doc = {"at": datetime.now(timezone.utc), "slot": slot, "uptime_hours": round((time.time() - _STARTED) / 3600, 2),
+           "process": _proc_memory(), "objects": await asyncio.to_thread(_type_histogram),
+           "containers": census, "caches": _cache_sizes()}
+    await coll.insert_one(doc)
+    old = [d["_id"] async for d in coll.find({}, {"_id": 1}).sort("at", -1).skip(SNAPSHOT_KEEP)]
+    if old:
+        await coll.delete_many({"_id": {"$in": old}})
+    return doc
+
+
+def _due_slots(now, done: set) -> list[str]:
+    """The slots whose half-hour window `now` falls in and that have not been taken today."""
+    from datetime import datetime, timedelta
+    hhmm = now.strftime("%H:%M")
+    out = []
+    for slot in SNAPSHOT_SLOTS_IST:
+        late = (datetime.strptime(slot, "%H:%M") + timedelta(minutes=30)).strftime("%H:%M")
+        if f"{now.date()}:{slot}" not in done and slot <= hhmm < late:
+            out.append(slot)
+    return out
+
+
+async def _snapshot_loop() -> None:
+    import asyncio
+    import logging
+    from datetime import datetime, timedelta, timezone
+    ist = timezone(timedelta(hours=5, minutes=30))
+    done: set[str] = set()
+    while True:
+        try:
+            from app.services import market_calendar
+            now = datetime.now(ist)
+            if market_calendar.is_trading_day(now):
+                for slot in _due_slots(now, done):
+                    done.add(f"{now.date()}:{slot}")
+                    await take_snapshot(slot)
+        except Exception:                               # noqa: BLE001 - a census must never take anything down
+            logging.getLogger("diagnostics").warning("memory snapshot failed", exc_info=True)
+        await asyncio.sleep(60)
+
+
+async def _start_snapshots() -> None:
+    """Started by this router's own startup handler (FastAPI runs a router's handlers when the
+    app includes it), so main.py needs no edit. Never raises."""
+    import asyncio
+    try:
+        if SNAPSHOTS_ENABLED:
+            _SNAPSHOT_TASKS.add(asyncio.create_task(_snapshot_loop()))
+    except Exception:                                   # noqa: BLE001
+        pass
+
+
+router.add_event_handler("startup", _start_snapshots)
+
+
+@router.get("/memory/snapshots")
+async def memory_snapshots(limit: int = Query(10, ge=1, le=SNAPSHOT_KEEP),
+                           _user: dict = Depends(get_current_user)):
+    """The stored censuses, newest first: process memory, type histogram, large containers."""
+    from app.core.db import db
+    rows = []
+    async for d in db["diagnostics_memory_snapshots"].find({}).sort("at", -1).limit(limit):
+        d["_id"] = str(d["_id"])
+        rows.append(d)
+    return {"slots_ist": list(SNAPSHOT_SLOTS_IST), "enabled": SNAPSHOTS_ENABLED, "snapshots": rows}
 
 
 @router.get("/memory")

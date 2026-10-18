@@ -412,6 +412,9 @@ try:
     real_reports, real_is_on, real_instruments = REP.REPORTS, DS.is_on, FD.INSTRUMENTS
     REP.REPORTS = Coll("reports")
     REP.REPORTS.docs.append({"_id": "2026-10-12", "history_appended": {"NIFTY": "error: Angel returned non-JSON (403)"}})
+    # a day stored by some other path (an old heal, a restart, by hand) while its report kept the error
+    REP.REPORTS.docs.append({"_id": "2026-10-09", "history_appended": {"NIFTY": "error: Angel returned non-JSON (403)",
+                                                                       "BANKNIFTY": "error: Angel returned non-JSON (403)"}})
 
     async def on(key):
         return True
@@ -428,6 +431,10 @@ try:
               os.path.exists(os.path.join(FD.STORE, "NIFTY", "2026-10-12.csv.gz")), done)
         check("…and the day's report now shows the instrument stored, not the error",
               REP.REPORTS.docs[0]["history_appended"]["NIFTY"] == 375, REP.REPORTS.docs[0])
+        check("…and an older report is reconciled with the store: NIFTY's file exists (375 rows), BANKNIFTY's does "
+              "not (its error stays)",
+              REP.REPORTS.docs[1]["history_appended"]["NIFTY"] == 375
+              and str(REP.REPORTS.docs[1]["history_appended"]["BANKNIFTY"]).startswith("error"), REP.REPORTS.docs[1])
         asked.clear()
         again = run(SCH.history_pass(datetime(2026, 10, 12, 19, 0, tzinfo=IST)))
         check("…and the next hour has nothing to do: no broker call", again == {} and not asked, (again, asked))
