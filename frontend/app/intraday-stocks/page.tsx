@@ -812,6 +812,7 @@ export default function IntradayStocksPage() {
                 <tr>
                   <th style={{ textAlign: "left" }}>Symbol</th>
                   <th style={{ textAlign: "left" }}>Strategy</th>
+                  <th>Side</th>
                   <th>Qty</th>
                   <th>Entry</th>
                   <th>Exit</th>
@@ -825,6 +826,7 @@ export default function IntradayStocksPage() {
                   <tr key={`${t.trade_id}-${i}`}>
                     <td style={{ textAlign: "left" }}>{t.symbol}</td>
                     <td style={{ textAlign: "left", fontSize: 11 }}>{t.strategy_name}</td>
+                    <td>{t.side}</td>
                     <td>{t.qty}</td>
                     <td>₹{inr2(t.entry_price)}</td>
                     <td>₹{inr2(t.exit_price)}</td>
