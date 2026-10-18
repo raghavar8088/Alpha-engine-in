@@ -175,6 +175,189 @@ def _loaded_heavy() -> dict:
     return {"loaded": sorted(loaded), "total_modules": len(sys.modules)}
 
 
+# ── who is holding it ──────────────────────────────────────────────────────────────
+#
+# The type histogram says WHAT fills the heap ("349,802 Bar objects") but not WHO keeps it
+# alive, and four modules define a class called Bar. This walk answers the second question:
+# from every global of the app's own modules — and from the local variables of every running
+# task, where a loop that loads a whole universe of candles each cycle keeps them — it follows
+# containers and instance attributes and charges each object to the FIRST holder that reaches
+# it. Infrastructure (the event loop, the Mongo driver, FastAPI's routing) is never entered:
+# its graphs are huge and never the app's leak.
+
+_SKIP_TYPE_MODULES = ("asyncio", "motor", "pymongo", "bson", "fastapi", "starlette", "pydantic",
+                      "pydantic_core", "uvicorn", "ssl", "socket", "selectors", "threading",
+                      "concurrent", "logging", "httpx", "httpcore", "anyio", "websockets", "h11",
+                      "multiprocessing", "typing", "inspect", "importlib", "_frozen_importlib",
+                      "weakref", "abc", "enum", "functools", "contextvars", "_contextvars")
+_LEAF_TYPES = (str, bytes, bytearray, int, float, bool, complex, type(None), range, memoryview)
+
+
+def _never_enter(o) -> bool:
+    import types
+    if isinstance(o, (types.ModuleType, type, types.FunctionType, types.BuiltinFunctionType,
+                      types.MethodType, types.CodeType, types.FrameType, types.GeneratorType,
+                      types.CoroutineType, types.AsyncGeneratorType, property, staticmethod,
+                      classmethod)):
+        return True
+    mod = getattr(type(o), "__module__", "") or ""
+    return mod.startswith(_SKIP_TYPE_MODULES)
+
+
+def _size_and_children(o) -> tuple[int, list]:
+    """Shallow size of `o` (an array counts its buffer) and what it keeps alive."""
+    from collections import deque
+
+    try:
+        size = sys.getsizeof(o)
+    except Exception:                                   # noqa: BLE001
+        size = 0
+    if isinstance(o, _LEAF_TYPES):
+        return size, []
+    tname = type(o).__name__
+    tmod = getattr(type(o), "__module__", "") or ""
+    if tmod.startswith("numpy") and hasattr(o, "nbytes"):
+        return size + (int(o.nbytes) if getattr(o, "base", None) is None else 0), []
+    if tmod.startswith("pandas") and tname in ("DataFrame", "Series", "Index"):
+        try:
+            mu = o.memory_usage(index=True, deep=False)
+            return size + int(mu.sum() if hasattr(mu, "sum") else mu), []
+        except Exception:                               # noqa: BLE001
+            return size, []
+    try:
+        if isinstance(o, dict):
+            items = list(o.items())
+            return size, [k for k, _ in items if not isinstance(k, _LEAF_TYPES)] + [v for _, v in items]
+        if isinstance(o, (list, tuple, set, frozenset, deque)):
+            return size, list(o)
+    except RuntimeError:                                # changed while copied: skip it this time
+        return size, []
+    if _never_enter(o):
+        return size, []
+    kids: list = []
+    try:
+        d = object.__getattribute__(o, "__dict__")
+        if isinstance(d, dict):
+            kids.extend(d.values())
+    except Exception:                                   # noqa: BLE001
+        pass
+    for cls in type(o).__mro__:
+        slots = cls.__dict__.get("__slots__", ())
+        for s in (slots,) if isinstance(slots, str) else slots:
+            if s in ("__dict__", "__weakref__"):
+                continue
+            try:
+                kids.append(object.__getattribute__(o, s))
+            except Exception:                           # noqa: BLE001
+                pass
+    return size, kids
+
+
+def _roots(task_coros: list[tuple[str, object]], prefixes: tuple[str, ...]) -> list[tuple[str, object]]:
+    """Module globals first (a cache is charged to the module that owns it), then class-level
+    attributes of the app's classes, then the locals of every frame in each running task."""
+    import types
+    roots: list[tuple[str, object]] = []
+    for name, mod in sorted(sys.modules.items()):
+        if mod is None or not name.startswith(prefixes):
+            continue
+        try:
+            items = list(vars(mod).items())
+        except Exception:                               # noqa: BLE001
+            continue
+        for attr, val in items:
+            if attr.startswith("__"):
+                continue
+            if isinstance(val, type) and getattr(val, "__module__", None) == name:
+                for k, v in list(vars(val).items()):
+                    if not k.startswith("__") and not callable(v) and not isinstance(
+                            v, (property, staticmethod, classmethod)):
+                        roots.append((f"{name}.{val.__name__}.{k}", v))
+                continue
+            if isinstance(val, (types.ModuleType, type, types.FunctionType, types.BuiltinFunctionType)):
+                continue
+            roots.append((f"{name}.{attr}", val))
+    for task_name, coro in task_coros:
+        c, depth = coro, 0
+        while c is not None and depth < 12:
+            frame = getattr(c, "cr_frame", None) or getattr(c, "gi_frame", None)
+            if frame is not None:
+                code = frame.f_code
+                label = f"task:{task_name}:{code.co_filename.rsplit('/', 1)[-1]}:{code.co_name}"
+                try:
+                    for k, v in list(frame.f_locals.items()):
+                        roots.append((f"{label}.{k}", v))
+                except Exception:                       # noqa: BLE001
+                    pass
+            c = getattr(c, "cr_await", None) or getattr(c, "gi_yieldfrom", None)
+            depth += 1
+    return roots
+
+
+def holders_report(types_wanted: list[str], task_coros: list[tuple[str, object]], top: int = 25,
+                   max_nodes: int = 6_000_000, max_seconds: float = 90.0,
+                   prefixes: tuple[str, ...] = ("app.", "tradingai_shared")) -> dict:
+    """Charge every object reachable from the app's roots to the first root that reaches it."""
+    t0 = time.monotonic()
+    wanted = set(types_wanted)
+    in_heap = {t: 0 for t in wanted}
+    for o in gc.get_objects():
+        n = type(o).__name__
+        if n in in_heap:
+            in_heap[n] += 1
+    seen: set[int] = set()
+    rows: list[dict] = []
+    nodes, budget_hit = 0, False
+    for label, root in _roots(task_coros, prefixes):
+        if id(root) in seen or isinstance(root, _LEAF_TYPES):
+            continue
+        size, objs, counts = 0, 0, dict.fromkeys(wanted, 0)
+        stack = [root]
+        while stack:
+            o = stack.pop()
+            oid = id(o)
+            if oid in seen:
+                continue
+            seen.add(oid)
+            nodes += 1
+            tn = type(o).__name__
+            if tn in counts:
+                counts[tn] += 1
+            s, kids = _size_and_children(o)
+            size += s
+            objs += 1
+            for k in kids:
+                if id(k) not in seen:
+                    stack.append(k)
+            if nodes >= max_nodes or time.monotonic() - t0 > max_seconds:
+                budget_hit = True
+                break
+        if objs > 1 or any(counts.values()):
+            rows.append({"root": label, "mb": round(size / 1048576, 2), "objects": objs,
+                         "counts": {k: v for k, v in counts.items() if v}})
+        if budget_hit:
+            break
+    rows.sort(key=lambda r: r["mb"], reverse=True)
+    reached = {t: sum(r["counts"].get(t, 0) for r in rows) for t in wanted}
+    return {"took_s": round(time.monotonic() - t0, 1), "nodes": nodes, "budget_hit": budget_hit,
+            "types": {t: {"in_heap": in_heap[t], "reached": reached[t]} for t in sorted(wanted)},
+            "total_mb_reached": round(sum(r["mb"] for r in rows), 1), "holders": rows[:top]}
+
+
+@router.get("/memory/holders")
+async def memory_holders(types: str = Query("Bar,set,dict,list", description="type names to count"),
+                         top: int = Query(25, ge=1, le=200),
+                         max_seconds: float = Query(90.0, ge=1, le=600),
+                         _user: dict = Depends(get_current_user)):
+    """Which globals and task locals keep the heap alive. COSTLY: walks every reachable app
+    object (tens of seconds, in a worker thread). Read-only; meant for the day the footprint
+    is already wrong."""
+    import asyncio
+    task_coros = [(t.get_name(), t.get_coro()) for t in asyncio.all_tasks()]
+    wanted = [t.strip() for t in types.split(",") if t.strip()]
+    return await asyncio.to_thread(holders_report, wanted, task_coros, top, 6_000_000, max_seconds)
+
+
 @router.get("/memory")
 async def memory(objects: bool = Query(False, description="also walk the GC object list"),
                  _user: dict = Depends(get_current_user)):

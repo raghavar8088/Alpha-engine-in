@@ -41,6 +41,7 @@ logger = logging.getLogger("index_intraday.feed")
 IST = timezone(timedelta(hours=5, minutes=30))
 STORE = str(DATA)                      # each session is appended where the engine and the Lab read from
 CONNECT_FROM, CONNECT_UNTIL = "09:05", "15:36"
+SESSION_DONE = "15:35"                 # after this a session's 1-minute candles are complete
 EXCH_TYPE = {"NSE": 1, "BSE": 3}
 
 # symbol -> (exchange, token, kind, the index an ETF tracks)
@@ -289,21 +290,30 @@ class IndexFeed:
             out[s] = self._write_day(s, day, rows) if rows else 0
         return out
 
-    async def heal(self, symbols: list[str] | None = None, lookback_days: int = 30, now: datetime | None = None) -> dict:
-        """Fill whole trading days missing from the history store: an append that failed, or the
-        days between the research download (to 2026-10-09) and the first deploy. The families
-        read YESTERDAY's high, low, close and ATR, so a missing day would hand the engine the
-        wrong yesterday. Finished days only (never today), at most `lookback_days` back (Angel
-        serves 30 days of minutes a request) — one candle request a symbol, only when needed."""
+    async def heal(self, symbols: list[str] | None = None, lookback_days: int = 30, now: datetime | None = None,
+                   include_today: bool = False) -> dict:
+        """Fill whole trading days missing from the history store: an append that failed (Angel's
+        candle endpoint refuses ~1 call in 3 at busy hours — 7 of 16 instruments failed on
+        2026-10-16), or the days between the research download (to 2026-10-09) and the first
+        deploy. The families read YESTERDAY's high, low, close and ATR, so a missing day would
+        hand the engine the wrong yesterday. Finished days only: today counts once its session
+        is over (`include_today`, from SESSION_DONE). At most `lookback_days` back (Angel serves
+        30 days of minutes a request) — one candle request a symbol, only when something is
+        missing. A day stored as its own file is found without reading it, so a heal with
+        nothing to do costs no broker call and almost no CPU."""
         now = now or datetime.now(IST)
         today = now.date()
         since = today - timedelta(days=lookback_days)
-        want = [since + timedelta(days=k) for k in range(lookback_days)]
-        want = [d for d in want if d < today and market_calendar.is_trading_day(d)]
+        today_done = include_today and now.strftime("%H:%M") >= SESSION_DONE
+        want = [since + timedelta(days=k) for k in range(lookback_days + 1)]
+        want = [d for d in want if (d < today or (d == today and today_done)) and market_calendar.is_trading_day(d)]
         out: dict[str, object] = {}
         for s in symbols or list(INSTRUMENTS):
-            have = await asyncio.to_thread(days_with_rows, s, since)
-            missing = [d for d in want if d not in have]
+            unknown = [d for d in want if not os.path.exists(os.path.join(STORE, s, f"{d.isoformat()}.csv.gz"))]
+            if not unknown:
+                continue
+            have = await asyncio.to_thread(days_with_rows, s, min(unknown))    # inside a 30-day window file?
+            missing = [d for d in unknown if d not in have]
             if not missing:
                 continue
             e, tok, _k, _t = INSTRUMENTS[s]
@@ -319,8 +329,10 @@ class IndexFeed:
                 except Exception:  # noqa: BLE001
                     continue
                 by_day.setdefault(d, []).append(r)
-            filled = [d.isoformat() for d in missing if by_day.get(d) and self._write_day(s, d, by_day[d])]
-            out[s] = {"missing": [d.isoformat() for d in missing], "filled": filled}
+            rows_by_day = {d.isoformat(): self._write_day(s, d, by_day[d]) for d in missing if by_day.get(d)}
+            filled = [d for d, n in rows_by_day.items() if n]
+            out[s] = {"missing": [d.isoformat() for d in missing], "filled": filled,
+                      "rows": {d: rows_by_day[d] for d in filled}}
         if out:
             logger.info("index intraday history healed: %s", out)
         return out

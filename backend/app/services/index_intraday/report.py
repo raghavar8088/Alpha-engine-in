@@ -37,6 +37,19 @@ async def write_daily(day: date, appended: dict | None = None) -> dict:
     return rep
 
 
+async def note_history(filled: dict) -> int:
+    """Record, on each day's report, instruments a later heal stored (`heal()`'s output) — so a
+    day whose append was refused at 15:40 stops reading as an error once the gap is filled."""
+    n = 0
+    for sym, res in (filled or {}).items():
+        if not isinstance(res, dict):
+            continue
+        for day, rows in (res.get("rows") or {}).items():
+            r = await REPORTS.update_one({"_id": day}, {"$set": {f"history_appended.{sym}": rows}})
+            n += r.modified_count
+    return n
+
+
 async def get(day: date) -> dict:
     doc = await REPORTS.find_one({"_id": day.isoformat()})
     if doc:

@@ -104,6 +104,9 @@ async def trending_eod_loop() -> None:
                 last_run_date = now.date()
         except Exception:
             logger.exception("[trending_stocks] nightly pass failed — will retry tomorrow")
+            # As the message says: tomorrow. Leaving the date unset re-ran the whole pass — a
+            # candle refresh of the basket and the sweep — every 20 minutes until midnight.
+            last_run_date = datetime.now(IST).date()
         await asyncio.sleep(EOD_CHECK_SECONDS)
 
 

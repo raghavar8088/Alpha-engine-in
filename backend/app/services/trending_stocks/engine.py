@@ -368,7 +368,10 @@ async def run_backtests(symbols: list[str] | None = None,
     await _refresh_scores()
     await ts_state_collection.update_one({"_id": STATE_ID}, {"$set": {
         "last_backtest_at": _now(), "backtests_written": written,
-        "backtests_skipped": skipped, "grade_histogram": graded,
+        # BSON keys must be strings. Keyed by the grade int, this write failed every night since
+        # 2026-08-21: the pass re-ran every 20 minutes until one found nothing left to sweep
+        # (an empty histogram encodes) — two or three full passes a night, an empty record.
+        "backtests_skipped": skipped, "grade_histogram": {str(k): v for k, v in graded.items()},
         "failed_rr": failed_rr, "rejection_totals": rejection_totals,
     }}, upsert=True)
     return {"written": written, "skipped_thin_history": skipped, "already_done": resumed,

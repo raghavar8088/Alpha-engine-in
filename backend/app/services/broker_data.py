@@ -96,7 +96,9 @@ async def get_ltp(dhan, security_id: str, exchange_segment: str) -> tuple[float 
     Returns (None, "unavailable") when neither broker can price it — callers already
     treat a missing price as "skip this one" rather than as zero.
     """
-    if not await dhan_is_cooling_down():
+    # An instrument known only to Angel carries a synthetic id ("ANGEL123456"): Dhan cannot
+    # price it, so go straight to Angel instead of failing a Dhan call and logging it.
+    if str(security_id).isdigit() and not await dhan_is_cooling_down():
         try:
             raw = await dhan.quote_data({exchange_segment: [int(security_id)]})
             data = raw.get("data", {}) if isinstance(raw, dict) else {}

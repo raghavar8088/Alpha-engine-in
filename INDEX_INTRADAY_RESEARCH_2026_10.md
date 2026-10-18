@@ -302,7 +302,10 @@ correction, and none passed selection. Run 1's record is kept in `data/run1_unco
   the equity curve; CSV export; the engine's log of entries, exits, refusals and missed signals.
 - **Data upkeep:**
   - each session's candles are appended at 15:40;
-  - any missing day in the last 30 is fetched again;
+  - Angel's candle endpoint refuses many calls at busy hours (7 of 16 instruments failed on
+    2026-10-16). A refused instrument is retried at once, then every hour outside market hours
+    (weekends included), until the store is complete. Any other missing day in the last 30 is
+    fetched the same way, and the day's report is corrected;
   - the history is warmed before the open.
   Main Control's switch stops new entries, the feed (unless a position is open) and the append.
 

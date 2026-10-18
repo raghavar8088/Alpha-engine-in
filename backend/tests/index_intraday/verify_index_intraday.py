@@ -18,6 +18,7 @@ CATALOG   1,208 trials, unique ids, a status from the ladder, a stated failure f
 from __future__ import annotations
 
 import asyncio
+import os
 import random
 import sys
 import types
@@ -315,7 +316,7 @@ check("an ETF order is capped at a quarter of a median minute's value (NIFTYBEES
       abs(max_etf_order("NIFTYBEES") - 505_000) < 1 and max_etf_order(None) == 0.0)
 
 # ═════════════════════════════════════════════════════════════════════════════════
-section("HISTORY HEAL — a missing day is fetched and stored, never today, only once")
+section("HISTORY HEAL — a missing or refused day is fetched again until stored; today only after its close")
 
 import shutil  # noqa: E402
 import tempfile  # noqa: E402
@@ -373,6 +374,65 @@ try:
     d = DM._build("NIFTY", DM._read("NIFTY", date(2026, 9, 12)))
     check("the healed store loads as complete sessions (none dropped, the gap closed)",
           set(d.dates.astype(object).tolist()) == set(trading), (len(d.dates), len(trading)))
+
+    # today: never before its session is over; once it is, fetched like any missing day
+    asked.clear()
+    run(FD.feed.heal(["NIFTY"], now=datetime(2026, 10, 12, 14, 0, tzinfo=IST), include_today=True))
+    check("include_today before 15:35: today's unfinished session is not fetched", not asked, asked)
+    out = run(FD.feed.heal(["NIFTY"], now=datetime(2026, 10, 12, 16, 0, tzinfo=IST), include_today=True))
+    check("include_today after the close: today is fetched, stored and its rows reported",
+          out.get("NIFTY", {}).get("rows") == {"2026-10-12": 375} and len(asked) == 1, (out, asked))
+
+    # nothing missing = no broker call and no data read: each day is its own file
+    reads = []
+    real_dwr = FD.days_with_rows
+    FD.days_with_rows = lambda *a, **k: (reads.append(a), real_dwr(*a, **k))[1]
+    asked.clear()
+    run(FD.feed.heal(["NIFTY"], now=datetime(2026, 10, 12, 16, 5, tzinfo=IST), include_today=True))
+    FD.days_with_rows = real_dwr
+    check("a heal with nothing missing makes no broker call and reads no history file", not asked and not reads,
+          (asked, reads))
+
+    # a refused fetch: reported as an error; the next out-of-hours pass fills it and fixes the report
+    from app.services import desk_switches as DS
+    from app.services.index_intraday import report as REP
+    from app.services.index_intraday import scheduler as SCH
+    os.remove(os.path.join(FD.STORE, "NIFTY", "2026-10-12.csv.gz"))
+
+    async def refused(*a, **k):
+        asked.append(a[3:5])
+        raise RuntimeError("Angel returned non-JSON (403)")
+    FD.angel_client = types.SimpleNamespace(candles=refused)
+    asked.clear()
+    out = run(FD.feed.heal(["NIFTY"], now=datetime(2026, 10, 12, 16, 10, tzinfo=IST), include_today=True))
+    check("a refused fetch is reported as an error, nothing is written",
+          str(out.get("NIFTY", "")).startswith("error") and
+          not os.path.exists(os.path.join(FD.STORE, "NIFTY", "2026-10-12.csv.gz")), out)
+    FD.angel_client = types.SimpleNamespace(candles=fake_candles)
+    real_reports, real_is_on, real_instruments = REP.REPORTS, DS.is_on, FD.INSTRUMENTS
+    REP.REPORTS = Coll("reports")
+    REP.REPORTS.docs.append({"_id": "2026-10-12", "history_appended": {"NIFTY": "error: Angel returned non-JSON (403)"}})
+
+    async def on(key):
+        return True
+    DS.is_on = on
+    FD.INSTRUMENTS = {"NIFTY": real_instruments["NIFTY"]}
+    try:
+        asked.clear()
+        busy = run(SCH.history_pass(datetime(2026, 10, 12, 15, 50, tzinfo=IST)))
+        check("the hourly pass stays out of the trading day (until 16:30): no heal at 15:50", busy == {} and not asked,
+              (busy, asked))
+        done = run(SCH.history_pass(datetime(2026, 10, 12, 18, 0, tzinfo=IST)))
+        check("…after it, the refused day is fetched again and stored",
+              done.get("NIFTY", {}).get("filled") == ["2026-10-12"] and
+              os.path.exists(os.path.join(FD.STORE, "NIFTY", "2026-10-12.csv.gz")), done)
+        check("…and the day's report now shows the instrument stored, not the error",
+              REP.REPORTS.docs[0]["history_appended"]["NIFTY"] == 375, REP.REPORTS.docs[0])
+        asked.clear()
+        again = run(SCH.history_pass(datetime(2026, 10, 12, 19, 0, tzinfo=IST)))
+        check("…and the next hour has nothing to do: no broker call", again == {} and not asked, (again, asked))
+    finally:
+        REP.REPORTS, DS.is_on, FD.INSTRUMENTS = real_reports, real_is_on, real_instruments
 finally:
     FD.STORE, DM.DATA, FD.angel_client = real_store, real_data, real_client
     shutil.rmtree(tmp, ignore_errors=True)
