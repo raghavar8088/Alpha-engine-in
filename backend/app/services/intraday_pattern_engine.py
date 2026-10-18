@@ -63,7 +63,7 @@ from app.services.angel_client import AngelAPIError, angel_client
 from app.services.angel_fees import product_for, round_trip
 from app.services import intraday_session as session
 from app.services import intraday_universe
-from app.services.intraday_fills import adverse, scan_exit, slippage_bp, stream_ltp
+from app.services.intraday_fills import adverse, scan_exit, slippage_bp, stream_covers, stream_ltp
 from app.services.call_engine import IST, _scored_daily_symbols
 from app.services.nifty_scalp_strategies import (
     TEMPLATES as _BASE_TEMPLATES, Series, from_rows, resample)
@@ -420,6 +420,69 @@ async def _quote(symbols: list[str]) -> dict[str, float]:
     return out
 
 
+# Angel's 1-minute candles for open names the stream does not carry, kept a few seconds: the
+# close-out job calls manage every few seconds near the square-off.
+_REST_MINUTES: dict[str, tuple[float, int, list[tuple]]] = {}
+REST_MINUTES_TTL = float(os.getenv("PAT_REST_MINUTES_TTL", "30"))
+
+
+async def _rest_minutes(positions: list[dict]) -> dict[str, list[tuple]]:
+    """(start, o, h, l, c) minute bars per symbol since its oldest unchecked minute, for the
+    names the stream does not carry - about half of what this desk trades.
+
+    Without them those names were managed by a quote poll: a stop filled at whatever the poll
+    saw minutes later (BLUSPRING, 16 Oct: stop 167.12 crossed at 11:13, closed 11:47 at 166.16)
+    and a target touched between two polls was never taken (JINDALSAW 302.19 at 13:18, then
+    stopped out at 13:47). One fetch per name per pass, paced like every candle fetch here; a
+    name whose fetch fails is left to the quote, as before."""
+    floor = int(time.time()) - 86400                      # never reach past yesterday
+    since: dict[str, int] = {}
+    for p in positions:
+        s = max(int(p.get("checked_through") or 0), floor)
+        since[p["symbol"]] = min(since.get(p["symbol"], s), s)
+    out: dict[str, list[tuple]] = {}
+    mono = time.monotonic()
+    todo = []
+    for sym, s in since.items():
+        hit = _REST_MINUTES.get(sym)
+        if hit and mono - hit[0] < REST_MINUTES_TTL and hit[1] <= s:
+            out[sym] = hit[2]
+        else:
+            todo.append(sym)
+    if not todo:
+        return out
+    insts = {d["symbol"]: d async for d in instruments_collection.find(
+        {"asset_class": "EQUITY", "symbol": {"$in": todo}, "angel_token": {"$ne": None}},
+        {"symbol": 1, "angel_token": 1, "angel_exchange": 1})}
+    now = datetime.now(IST)
+    for sym in todo:
+        inst = insts.get(sym)
+        if not inst:
+            continue
+        frm = datetime.fromtimestamp(since[sym], IST).strftime("%Y-%m-%d %H:%M")
+        try:
+            rows = await angel_client.candles(inst.get("angel_exchange") or "NSE", str(inst["angel_token"]),
+                                              "1", frm, now.strftime("%Y-%m-%d %H:%M"))
+        except AngelAPIError as exc:
+            logger.warning("pattern: minute candles failed %s (%s) - quote decides", sym, exc)
+            continue
+        finally:
+            await asyncio.sleep(CANDLE_PACE)
+        bars = []
+        for r in rows or []:
+            try:
+                t = int(datetime.fromisoformat(str(r[0])).timestamp())
+                bars.append((t - t % 60, float(r[1]), float(r[2]), float(r[3]), float(r[4])))
+            except (TypeError, ValueError, IndexError):
+                continue
+        bars.sort()
+        _REST_MINUTES[sym] = (time.monotonic(), since[sym], bars)
+        out[sym] = bars
+    for sym in [s for s, v in _REST_MINUTES.items() if time.monotonic() - v[0] > REST_MINUTES_TTL * 20]:
+        _REST_MINUTES.pop(sym, None)                      # names no longer held
+    return out
+
+
 # Serialises manage between the shared loop and the independent close-out job.
 _manage_lock = asyncio.Lock()
 
@@ -486,6 +549,7 @@ async def _manage() -> int:
     live = {p["symbol"]: stream_ltp(p["symbol"]) for p in positions}
     need = sorted({s for s, v in live.items() if v is None})
     quoted = await _quote(need) if need else {}
+    rest = await _rest_minutes([p for p in positions if not stream_covers(p["symbol"])])
     now_ist = datetime.now(IST)
     today = _today()
     closed = 0
@@ -498,12 +562,14 @@ async def _manage() -> int:
         days = (datetime.fromisoformat(today).date()
                 - datetime.fromisoformat(p["opened_on"]).date()).days
 
-        # 1. Levels, from the stream's minute bars since the last check: the first level a
-        #    minute actually crossed, the stop when one minute crossed both.
-        hit = scan_exit(p)
+        # 1. Levels, from minute bars since the last check - the stream's, or Angel's own
+        #    1-minute candles for a name the stream does not carry: the first level a minute
+        #    actually crossed, the stop when one minute crossed both.
+        hit = scan_exit(p, rest[sym]) if sym in rest else scan_exit(p)
         if hit is not None:
             reason, px, _t = hit
-            await _close(p, px, reason, market=(reason == "stoploss"), days=days, source="stream minute")
+            await _close(p, px, reason, market=(reason == "stoploss"), days=days,
+                         source="angel minute" if sym in rest else "stream minute")
             touched.add(p["strategy_id"]); closed += 1
             continue
         if ltp is None:
@@ -611,9 +677,21 @@ async def scan() -> dict:
                 fresh[guard] = bar_ts
                 cands.append((_priority(st), st, inst, px, d, bar_ts))
 
+    # Price each entry when it is placed, not when the scan began: the scan spends minutes on
+    # candle fetches, and the quote it started with is that old by now. On 16 Oct half the
+    # entries were at prices that did not trade then (BALRAMCHIN "sold" at 724.25 at 09:38,
+    # its opening price, while it traded 719-721). The stream when it has a fresh print, one
+    # quote call for the rest; no fresh price, no entry.
+    syms = sorted({c[2]["symbol"] for c in cands})
+    at_entry = {s: stream_ltp(s) for s in syms}
+    requoted = await _quote([s for s in syms if at_entry[s] is None]) if syms else {}
     opened = 0
-    for _prio, st, inst, px, d, bar_ts in sorted(cands, key=lambda c: c[0]):
-        if await _open(st, inst, px, d, bar_ts, turnover.get(inst["symbol"]), "quote"):
+    for _prio, st, inst, _scan_px, d, bar_ts in sorted(cands, key=lambda c: c[0]):
+        sym = inst["symbol"]
+        px, source = (at_entry[sym], "stream") if at_entry.get(sym) else (requoted.get(sym), "quote")
+        if not px:
+            continue
+        if await _open(st, inst, px, d, bar_ts, turnover.get(sym), source):
             opened += 1
     if fresh:
         await pattern_state_collection.update_one(

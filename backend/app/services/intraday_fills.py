@@ -65,11 +65,23 @@ def stream_minutes(symbol: str, since: int) -> list[tuple[int, float, float, flo
     return out
 
 
-def scan_exit(p: dict) -> tuple[str, float, int] | None:
-    """Walk the stream's minute bars since the last check: (reason, level price, minute)."""
+def stream_covers(symbol: str) -> bool:
+    """Whether the stream carries this name at all - it subscribes the ~200-name universe."""
+    return symbol in stream.states
+
+
+def scan_exit(p: dict, minutes: list[tuple[int, float, float, float, float]] | None = None
+              ) -> tuple[str, float, int] | None:
+    """Walk minute bars since the last check: (reason, level price, minute).
+
+    The stream's bars by default. `minutes` (start, o, h, l, c) for a name the stream does
+    not carry - Angel's own 1-minute candles - so every name fills by this one rule (added
+    2026-10-18; the tournament never passes it)."""
     sign = 1 if p["side"] == "BUY" else -1
     stop, target = p["stoploss"], p.get("target")
-    for t, o, h, l, _c in stream_minutes(p["symbol"], p.get("checked_through", 0)):
+    since = p.get("checked_through", 0)
+    bars = stream_minutes(p["symbol"], since) if minutes is None else [m for m in minutes if m[0] >= since]
+    for t, o, h, l, _c in bars:
         lo, hi = (l, h) if sign > 0 else (-h, -l)
         s_lvl = sign * stop
         o_s = sign * o
