@@ -8123,6 +8123,15 @@ export interface AcPosition {
   pnl: number;
   lot_units: number | null;
   cf_qty: number;
+  token?: string | null;
+  kind?: string;
+  expiry?: string | null;
+  strike?: number | null;
+  option_type?: string | null;
+  netavg?: number;
+  close?: number;
+  cf_buyavg?: number;
+  cf_sellavg?: number;
 }
 
 export interface AcFill {
@@ -8172,6 +8181,11 @@ export interface AcDay {
   contracts?: string[];
   capital_now?: number;
   available_cash?: number;
+  funds?: Record<string, number>;
+  funds_open?: Record<string, number>;
+  charges_breakdown?: Record<string, number>;
+  realised?: number;
+  unrealised?: number;
 }
 
 export interface AcAverages {
@@ -8225,3 +8239,204 @@ export async function syncAngelCommodity(): Promise<Record<string, unknown>> {
 export async function importAngelCommodity(csv: string, apply: boolean): Promise<AcImportResult> {
   return apiFetch("/api/angel-commodity/import", { method: "POST", body: JSON.stringify({ csv, apply }) });
 }
+// ---- Angel One Commodity Live Trading Data: analytics, risk and day drill-down ----
+
+export interface AcTrip {
+  tradingsymbol: string;
+  underlying: string;
+  kind: string;
+  strike: number | null;
+  expiry: string | null;
+  long: boolean;
+  style: string;
+  qty: number;
+  lots: number | null;
+  entry_date: string;
+  entry_time: string | null;
+  exit_date: string;
+  exit_time: string | null;
+  entry_avg: number | null;
+  exit_avg: number | null;
+  gross: number;
+  charges: number;
+  net: number;
+  hold_days: number;
+  hold_minutes: number | null;
+  hold_bucket: string;
+  entry_hour: number | null;
+  weekday: string;
+  dte_at_entry: number | null;
+  return_on_premium?: number;
+  carried_in?: boolean;
+  source?: string;
+}
+
+export interface AcTradeStats {
+  trades: number;
+  wins?: number;
+  losses?: number;
+  win_rate?: number;
+  avg_win?: number | null;
+  avg_loss?: number | null;
+  payoff?: number | null;
+  profit_factor?: number | null;
+  expectancy?: number;
+  median?: number;
+  largest_win?: number;
+  largest_loss?: number;
+  gross?: number;
+  charges?: number;
+  net?: number;
+  charges_share_of_gross?: number | null;
+  max_win_streak?: number;
+  max_loss_streak?: number;
+  current_streak?: number;
+  avg_hold_minutes?: number | null;
+  median_hold_minutes?: number | null;
+  overnight_trades?: number;
+}
+
+export interface AcBreakdownRow {
+  key: string;
+  trades: number;
+  wins: number;
+  win_rate: number;
+  gross: number;
+  charges: number;
+  net: number;
+  avg_net: number;
+}
+
+export interface AcPerformance {
+  days: number;
+  series?: { date: string; cum: number; drawdown: number }[];
+  max_drawdown?: number;
+  max_drawdown_pct_avg_capital?: number | null;
+  drawdown_from?: string | null;
+  drawdown_to?: string | null;
+  current_drawdown?: number;
+  longest_drawdown_days?: number;
+  peak?: number;
+  mean_roi?: number | null;
+  median_roi?: number | null;
+  sd_roi?: number | null;
+  sharpe?: number | null;
+  sortino?: number | null;
+  calmar?: number | null;
+  green_days?: number;
+  red_days?: number;
+  avg_green?: number | null;
+  avg_red?: number | null;
+  profit_factor_days?: number | null;
+  best?: { date: string; net: number; roi: number | null };
+  worst?: { date: string; net: number; roi: number | null };
+  current_streak?: number;
+  histogram?: { from: number; to: number; count: number }[];
+}
+
+export interface AcPeriodRow {
+  period: string;
+  days: number;
+  net: number;
+  charges: number;
+  avg_capital: number;
+  roi: number | null;
+  green_days: number;
+  best: number;
+  worst: number;
+  turnover: number;
+}
+
+export interface AcAnalytics {
+  generated_at: string;
+  trips: AcTrip[];
+  trip_count: number;
+  open_fifo: { tradingsymbol: string; qty: number; avg: number; since: string }[];
+  stats: AcTradeStats;
+  by_style: AcBreakdownRow[];
+  by_underlying: AcBreakdownRow[];
+  by_hour: AcBreakdownRow[];
+  by_weekday: AcBreakdownRow[];
+  by_hold: AcBreakdownRow[];
+  by_dte: AcBreakdownRow[];
+  performance: AcPerformance;
+  periods: { weeks: AcPeriodRow[]; months: AcPeriodRow[]; heatmap: { year: number; month: number; return_pct: number }[] };
+  charges: {
+    total: number;
+    by_component: Record<string, number>;
+    turnover: number;
+    orders: number;
+    per_order: number | null;
+    per_trade: number | null;
+    pct_of_turnover: number | null;
+    pct_of_gross_profit_days: number | null;
+    days: { date: string; charges: number; breakdown: Record<string, number>; orders: number; turnover: number; gross: number | null }[];
+  };
+  orders: {
+    orders: number;
+    by_status: Record<string, number>;
+    by_type: Record<string, number>;
+    rejections: { reason: string; count: number }[];
+    limit_fill_vs_limit_price: number | null;
+    limit_fills: number;
+  };
+  coverage: { days: number; first?: string; last?: string; live?: number; imported?: number; weekdays_without_a_record?: string[] };
+}
+
+export interface AcRiskRow {
+  tradingsymbol: string;
+  underlying: string;
+  kind: string;
+  strike: number | null;
+  expiry: string | null;
+  product: string | null;
+  qty: number;
+  lots: number;
+  ltp: number;
+  avg: number | null;
+  dte: number | null;
+  future?: string | null;
+  future_price?: number | null;
+  iv?: number | null;
+  iv_assumed?: boolean;
+  delta?: number;
+  delta_rupees_1pct?: number;
+  gamma_rupees_1pct?: number;
+  theta_day?: number;
+  vega_point?: number;
+  intrinsic?: number;
+  time_value?: number;
+  moneyness?: string;
+  moneyness_pct?: number;
+  breakeven?: number;
+  margin?: number | null;
+  margin_source?: string;
+  capital?: number | null;
+}
+
+export interface AcRisk {
+  as_of: string | null;
+  positions: AcRiskRow[];
+  by_underlying?: { underlying: string; delta_rupees_1pct: number; theta_day: number; vega_point: number; gamma_rupees_1pct: number; value: number; positions: number }[];
+  scenarios?: { move_pct: number; pnl: number }[];
+  one_day_no_move?: number;
+  iv_minus_20pct?: number;
+  iv_plus_20pct?: number;
+  basket_margin?: number | null;
+  basket_margin_source?: string;
+  angel_in_use?: number | null;
+  note?: string;
+}
+
+export interface AcDayDetail {
+  day: AcDay & { found: boolean; positions?: AcPosition[]; funds?: Record<string, number>; charges_breakdown?: Record<string, number> };
+  fills: AcFill[];
+  orders: AcOrder[];
+  points: { slot: string; capital: number; gross_pnl: number; realised?: number; unrealised?: number }[];
+  trips: AcTrip[];
+  order_charges: { order: string; turnover: number; charges: number; breakdown: Record<string, number> | null }[];
+}
+
+export async function fetchAngelCommodityAnalytics(): Promise<AcAnalytics> { return apiFetch("/api/angel-commodity/analytics"); }
+export async function fetchAngelCommodityRisk(): Promise<AcRisk> { return apiFetch("/api/angel-commodity/risk", { timeoutMs: 90000 }); }
+export async function fetchAngelCommodityDay(day: string): Promise<AcDayDetail> { return apiFetch(`/api/angel-commodity/day/${day}`); }

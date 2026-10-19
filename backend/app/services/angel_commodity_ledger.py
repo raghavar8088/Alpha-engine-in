@@ -91,6 +91,31 @@ def parse_symbol(tradingsymbol: str) -> dict:
     return {"underlying": und, "expiry": expiry, "strike": float(strike) if strike else None, "kind": kind}
 
 
+def spec_factor(underlying: str, lot_units: float | None) -> float | None:
+    """Rupees per unit of Angel's QUANTITY: the contract's value multiplier over Angel's
+    order quantity for one lot (CRUDEOILM 10 barrels / 10 = 1; GOLD 100 / 1 = 100).
+    None when the published spec or the lot is unknown."""
+    try:
+        from app.services.commodity_positions import CONTRACT_SPEC
+        spec = CONTRACT_SPEC.get((underlying or "").upper())
+    except Exception:  # noqa: BLE001
+        spec = None
+    if spec and lot_units:
+        return spec[2] / float(lot_units)
+    return None
+
+
+def value_factor(underlying: str, lot_units: float | None, price: float, qty: float, tradevalue: float) -> float:
+    """The published spec first; Angel's own trade value (tradevalue / (price x qty)) when the
+    spec is unknown; 1 when neither is available."""
+    sf = spec_factor(underlying, lot_units)
+    if sf:
+        return sf
+    if tradevalue and price > 0 and qty > 0:
+        return round(tradevalue / (price * qty), 6)
+    return 1.0
+
+
 def _family(underlying: str) -> str:
     try:
         from app.services.commodity_positions import family_of
@@ -102,38 +127,58 @@ def _family(underlying: str) -> str:
 # ── charges (Angel's published commodity rate card) ─────────────────────────────
 
 
-def _option_order_charges(turnover: float, sell: bool, on: date) -> float:
+COMPONENTS = ("brokerage", "exchange", "ctt", "stamp", "sebi", "gst")
+
+
+def _option_order_breakdown(turnover: float, sell: bool, on: date) -> dict:
+    """One commodity-OPTION order's charges, by component (premium turnover)."""
     try:  # the shared schedule, once it is committed
         from tradingai_shared.mcx_option_fees import mcx_option_leg
-        return float(mcx_option_leg(turnover, 1, sell=sell, on=on)["total"])
+        b = mcx_option_leg(turnover, 1, sell=sell, on=on)
+        return {**{k: float(b.get(k, 0.0)) for k in COMPONENTS}, "total": float(b["total"])}
     except Exception:  # noqa: BLE001
         brokerage, exchange, sebi = 20.0, turnover * 0.000418, turnover * 0.000001
-        ctt = turnover * 0.0005 if sell else 0.0
-        stamp = 0.0 if sell else turnover * 0.00003
-        return round(brokerage + exchange + sebi + ctt + stamp + 0.18 * (brokerage + exchange + sebi), 2)
+        parts = {"brokerage": brokerage, "exchange": exchange, "ctt": turnover * 0.0005 if sell else 0.0,
+                 "stamp": 0.0 if sell else turnover * 0.00003, "sebi": sebi,
+                 "gst": 0.18 * (brokerage + exchange + sebi)}
+        return {**{k: round(v, 2) for k, v in parts.items()}, "total": round(sum(parts.values()), 2)}
 
 
-def _future_order_charges(turnover: float, sell: bool, on: date) -> float:
-    from tradingai_shared.mcx_fees import mcx_leg
-    return float(mcx_leg(turnover, 1, not sell, on))
+def _future_order_breakdown(turnover: float, sell: bool, on: date) -> dict:
+    """One commodity-FUTURES order's charges, by component (tradingai_shared.mcx_fees)."""
+    from tradingai_shared.mcx_fees import leg_breakdown
+    b = leg_breakdown(turnover, 1, not sell, on)
+    return {**{k: round(float(b.get(k, 0.0)), 2) for k in COMPONENTS}, "total": round(float(b["total"]), 2)}
 
 
-def day_charges(day_fills: list[dict], on: date) -> tuple[float, dict]:
-    """Charges per executed ORDER (brokerage is per order, not per fill)."""
+def day_charges(day_fills: list[dict], on: date) -> tuple[float, dict, dict]:
+    """Charges per executed ORDER (brokerage is per order, not per fill): the day's total,
+    each order's charges, and the day's total by component."""
     by_order: dict[str, dict] = {}
     for x in day_fills:
         o = by_order.setdefault(str(x.get("orderid") or x.get("fillid")), {"turnover": 0.0, "sell": x["side"] == "SELL",
                                                                              "option": x["kind"] in ("CE", "PE")})
         o["turnover"] += x["value"]
-    total = 0.0
+    total, parts = 0.0, {k: 0.0 for k in COMPONENTS}
     for o in by_order.values():
-        fn = _option_order_charges if o["option"] else _future_order_charges
-        o["charges"] = fn(o["turnover"], o["sell"], on)
-        total += o["charges"]
-    return round(total, 2), by_order
+        b = (_option_order_breakdown if o["option"] else _future_order_breakdown)(o["turnover"], o["sell"], on)
+        o["charges"], o["breakdown"] = b["total"], b
+        total += b["total"]
+        for k in COMPONENTS:
+            parts[k] += b.get(k, 0.0)
+    return round(total, 2), by_order, {k: round(v, 2) for k, v in parts.items()}
 
 
 # ── capital, reconstructed from fills (for days without an RMS snapshot) ─────────
+
+
+def fill_factor(x: dict) -> float:
+    """Rupees per unit of quantity for a stored fill (older rows predate the field)."""
+    f = x.get("value_factor")
+    if f:
+        return float(f)
+    return spec_factor(x.get("underlying") or parse_symbol(x.get("tradingsymbol", ""))["underlying"],
+                       x.get("lot_units")) or 1.0
 
 
 def _position_capital(sym: dict, qty: float, avg_price: float, lot_units: float) -> float:
@@ -157,13 +202,14 @@ def reconstruct(all_fills: list[dict]) -> dict[str, dict]:
     out: dict[str, dict] = defaultdict(lambda: {"realised": 0.0, "capital_peak": 0.0})
     open_lots: dict[str, list[list[float]]] = defaultdict(list)      # symbol -> [[signed qty, price], ...]
     meta: dict[str, dict] = {}
+    factors: dict[str, float] = {}
 
     def book_capital() -> float:
         cap = 0.0
         for s, lots in open_lots.items():
             q = sum(l[0] for l in lots)
             if q:
-                cap += _position_capital(meta[s], q, sum(l[0] * l[1] for l in lots) / q, 1.0)
+                cap += _position_capital(meta[s], q, sum(l[0] * l[1] for l in lots) / q, 1.0) * factors.get(s, 1.0)
         return cap
 
     current = None
@@ -174,6 +220,7 @@ def reconstruct(all_fills: list[dict]) -> dict[str, dict]:
             out[current]["capital_peak"] = max(out[current]["capital_peak"], book_capital())
         sym = x["tradingsymbol"]
         meta.setdefault(sym, parse_symbol(sym))
+        factors[sym] = fill_factor(x)
         signed = x["qty"] if x["side"] == "BUY" else -x["qty"]
         book = open_lots[sym]
         remaining = signed
@@ -181,7 +228,7 @@ def reconstruct(all_fills: list[dict]) -> dict[str, dict]:
             q0, p0 = book[0]
             take = min(abs(q0), abs(remaining))
             gain = (x["price"] - p0) * take if q0 > 0 else (p0 - x["price"]) * take
-            out[x["date"]]["realised"] += gain
+            out[x["date"]]["realised"] += gain * fill_factor(x)
             q0 = q0 - take if q0 > 0 else q0 + take
             remaining = remaining + take if remaining < 0 else remaining - take
             if q0 == 0:
@@ -201,12 +248,44 @@ def reconstruct(all_fills: list[dict]) -> dict[str, dict]:
 def _fill_doc(r: dict, day: str, seq: int) -> dict:
     sym = parse_symbol(r.get("tradingsymbol"))
     qty, price = _f(r.get("fillsize")), _f(r.get("fillprice"))
+    lot = _f(r.get("marketlot")) or None
+    tv = _f(r.get("tradevalue"))
+    factor = value_factor(sym["underlying"], lot, price, qty, tv)
     return {"date": day, "time": r.get("filltime"), "seq": seq, "tradingsymbol": r.get("tradingsymbol"),
             "underlying": sym["underlying"], "expiry": sym["expiry"], "strike": sym["strike"], "kind": sym["kind"],
             "instrumenttype": r.get("instrumenttype"), "side": (r.get("transactiontype") or "").upper(),
-            "qty": qty, "price": price, "value": _f(r.get("tradevalue")) or qty * price,
-            "lot_units": _f(r.get("marketlot")) or None, "product": r.get("producttype"),
+            "qty": qty, "price": price, "value": round(price * qty * factor, 2), "angel_tradevalue": tv or None,
+            "value_factor": factor, "lot_units": lot, "product": r.get("producttype"),
             "orderid": str(r.get("orderid") or ""), "fillid": str(r.get("fillid") or ""), "source": "angel-api"}
+
+
+def _expiry(v) -> str | None:
+    for fmt in ("%d%b%Y", "%d-%b-%Y", "%Y-%m-%d", "%d%b%y"):
+        try:
+            return datetime.strptime(str(v or "").strip().upper(), fmt).date().isoformat()
+        except ValueError:
+            continue
+    return None
+
+
+def _position_doc(r: dict) -> dict:
+    """One MCX row of Angel's position book, as kept here."""
+    sym = parse_symbol(r.get("tradingsymbol"))
+    return {"tradingsymbol": r.get("tradingsymbol"), "underlying": r.get("symbolname") or sym["underlying"],
+            "token": str(r.get("symboltoken") or "") or None, "product": r.get("producttype"),
+            "instrumenttype": r.get("instrumenttype"), "kind": sym["kind"],
+            "expiry": _expiry(r.get("expirydate")) or sym["expiry"],
+            "strike": _f(r.get("strikeprice")) or sym["strike"], "option_type": r.get("optiontype") or None,
+            "netqty": _f(r.get("netqty")), "buyqty": _f(r.get("buyqty")), "sellqty": _f(r.get("sellqty")),
+            "buyavg": _f(r.get("buyavgprice")), "sellavg": _f(r.get("sellavgprice")),
+            "buyamount": _f(r.get("buyamount")), "sellamount": _f(r.get("sellamount")),
+            "netavg": _f(r.get("avgnetprice")) or _f(r.get("netprice")), "netvalue": _f(r.get("netvalue")),
+            "ltp": _f(r.get("ltp")), "close": _f(r.get("close")),
+            "realised": _f(r.get("realised")), "unrealised": _f(r.get("unrealised")), "pnl": _f(r.get("pnl")),
+            "lot_units": _f(r.get("lotsize")) or None,
+            "cf_qty": _f(r.get("cfbuyqty")) - _f(r.get("cfsellqty")),
+            "cf_buyqty": _f(r.get("cfbuyqty")), "cf_sellqty": _f(r.get("cfsellqty")),
+            "cf_buyavg": _f(r.get("cfbuyavgprice")), "cf_sellavg": _f(r.get("cfsellavgprice"))}
 
 
 def in_window(now: datetime) -> bool:
@@ -242,30 +321,30 @@ async def capture(now: datetime | None = None) -> dict:
             "ordertype": r.get("ordertype"), "product": r.get("producttype"), "time": r.get("updatetime"),
             "text": r.get("text")}}, upsert=True)
     mcx_p = [r for r in (pos or []) if r.get("exchange") == "MCX"]
-    positions = [{"tradingsymbol": r.get("tradingsymbol"), "underlying": r.get("symbolname"), "product": r.get("producttype"),
-                  "instrumenttype": r.get("instrumenttype"), "netqty": _f(r.get("netqty")), "buyqty": _f(r.get("buyqty")),
-                  "sellqty": _f(r.get("sellqty")), "buyavg": _f(r.get("buyavgprice")), "sellavg": _f(r.get("sellavgprice")),
-                  "buyamount": _f(r.get("buyamount")), "sellamount": _f(r.get("sellamount")), "ltp": _f(r.get("ltp")),
-                  "realised": _f(r.get("realised")), "unrealised": _f(r.get("unrealised")), "pnl": _f(r.get("pnl")),
-                  "lot_units": _f(r.get("lotsize")) or None, "cf_qty": _f(r.get("cfbuyqty")) - _f(r.get("cfsellqty"))}
-                 for r in mcx_p]
-    in_use = _f((fund or {}).get("utiliseddebits"))
+    positions = [_position_doc(r) for r in mcx_p]
+    funds_now = {k: _f(v) for k, v in (fund or {}).items() if v is not None}
+    in_use = funds_now.get("utiliseddebits", 0.0)
     gross = round(sum(p["pnl"] for p in positions), 2)
     active = bool(mcx_t or positions)
     prev = await days.find_one({"_id": day}) or {}
     upd = {"date": day, "basis": "angel-api", "positions": positions, "gross_pnl": gross,
            "realised": round(sum(p["realised"] for p in positions), 2),
            "unrealised": round(sum(p["unrealised"] for p in positions), 2),
-           "capital_now": in_use, "available_cash": _f((fund or {}).get("availablecash")),
-           "account_net": _f((fund or {}).get("net")), "updated_at": datetime.now(timezone.utc), "active": active}
+           "capital_now": in_use, "available_cash": funds_now.get("availablecash", 0.0),
+           "account_net": funds_now.get("net", 0.0), "funds": funds_now,
+           "updated_at": datetime.now(timezone.utc), "active": active}
     if active:
         upd["capital_peak"] = max(prev.get("capital_peak") or 0.0, in_use)
         upd.setdefault("capital_source", "angel-rms")
-    await days.update_one({"_id": day}, {"$set": upd, "$setOnInsert": {"first_sync": datetime.now(timezone.utc)}}, upsert=True)
+    await days.update_one({"_id": day}, {"$set": upd, "$setOnInsert": {"first_sync": datetime.now(timezone.utc),
+                                                                         "funds_open": funds_now}}, upsert=True)
     if active and (now.minute % 5 == 0 or not await points.find_one({"date": day})):
         # one intraday point every 5 minutes (the Atlas cluster's quota is small)
         await points.update_one({"date": day, "slot": now.strftime("%H:%M")},
-                                {"$set": {"ts": datetime.now(timezone.utc), "capital": in_use, "gross_pnl": gross}},
+                                {"$set": {"ts": datetime.now(timezone.utc), "capital": in_use, "gross_pnl": gross,
+                                          "realised": upd["realised"], "unrealised": upd["unrealised"],
+                                          "available_cash": upd["available_cash"],
+                                          "open_positions": sum(1 for p in positions if p["netqty"])}},
                                 upsert=True)
     await finalise(day)
     status["last_sync"] = datetime.now(timezone.utc).isoformat()
@@ -279,7 +358,7 @@ async def finalise(day: str) -> dict | None:
         return None
     dfills = [x async for x in fills.find({"date": day})]
     on = date.fromisoformat(day)
-    charges, by_order = day_charges(dfills, on)
+    charges, by_order, parts = day_charges(dfills, on)
     capital = d.get("capital_peak") or 0.0
     source = d.get("capital_source") or "angel-rms"
     if not capital:
@@ -288,7 +367,7 @@ async def finalise(day: str) -> dict | None:
     gross = d.get("gross_pnl") if d.get("basis") == "angel-api" else d.get("realised_fifo", 0.0)
     net = round((gross or 0.0) - charges, 2)
     roi = net / capital if capital > 0 else None
-    upd = {"charges": charges, "orders": len(by_order), "fills": len(dfills),
+    upd = {"charges": charges, "charges_breakdown": parts, "orders": len(by_order), "fills": len(dfills),
            "turnover": round(sum(x["value"] for x in dfills), 2), "net_pnl": net, "capital": round(capital, 2),
            "capital_source": source, "roi": roi,
            "contracts": sorted({x["tradingsymbol"] for x in dfills} | {p["tradingsymbol"] for p in d.get("positions") or []})}
@@ -388,10 +467,18 @@ def parse_tradebook(text: str) -> tuple[list[dict], dict]:
         trade = str(r.get(cols["trade"]) or "").strip() if cols.get("trade") else ""
         if not trade:   # stable across re-imports of the same rows, whatever their order in the file
             trade = "h" + hashlib.sha1(f"{d}|{t}|{sym}|{side}|{qty}|{price}|{order}".encode()).hexdigest()[:16]
+        factor = 1.0
+        try:
+            from app.services.commodity_positions import CONTRACT_SPEC, broker_order_qty
+            lot = broker_order_qty(p["underlying"])
+            if CONTRACT_SPEC.get(p["underlying"]) and lot:
+                factor = CONTRACT_SPEC[p["underlying"]][2] / lot
+        except Exception:  # noqa: BLE001
+            pass
         out.append({"date": d, "time": t, "seq": i, "tradingsymbol": sym, "underlying": p["underlying"],
                     "expiry": p["expiry"], "strike": p["strike"], "kind": p["kind"], "side": side, "qty": qty,
-                    "price": price, "value": qty * price, "orderid": order, "fillid": trade,
-                    "source": "angel-tradebook-csv"})
+                    "price": price, "value": round(qty * price * factor, 2), "value_factor": factor,
+                    "orderid": order, "fillid": trade, "source": "angel-tradebook-csv"})
     return out, cols
 
 
