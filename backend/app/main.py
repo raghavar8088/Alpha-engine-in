@@ -33,6 +33,7 @@ from app.api.routes import (
     commodity_positions,
     commodity_prelive,
     fno_positions,
+    angel_commodity,
     intraday_data,
     intraday_focus,
     intraday_lab,
@@ -470,6 +471,12 @@ async def start_option_research_desk() -> None:
         asyncio.create_task(banknifty_desk_loop())
     except Exception:  # noqa: BLE001
         logger.exception("could not start the NIFTY BANK desk")
+    try:
+        # Angel One Commodity Live Trading Data: READ-ONLY polling of the real MCX account
+        from app.services.angel_commodity_ledger import angel_commodity_loop
+        asyncio.create_task(angel_commodity_loop())
+    except Exception:  # noqa: BLE001
+        logger.exception("could not start the Angel commodity ledger")
 
 
 @app.on_event("startup")
@@ -1002,6 +1009,7 @@ app.include_router(prelive_selling.router)
 app.include_router(watchlist.router)
 app.include_router(manual_positions.router)
 app.include_router(fno_positions.router)
+app.include_router(angel_commodity.router)
 app.include_router(intraday_lab.router)
 app.include_router(intraday_focus.router)
 app.include_router(live_intraday.router)

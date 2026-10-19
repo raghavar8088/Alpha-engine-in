@@ -120,6 +120,9 @@ _MODULES: list[Module] = [
        ["/api/bullish-stocks"]),
     _m("fno_positions", "F&O Positions", "Trading", "/fno-positions",
        ["/api/fno-positions", "/api/manual-positions"]),
+    _m("angel_commodity", "Angel One Commodity Live Trading Data", "Trading", "/angel-commodity",
+       ["/api/angel-commodity"],
+       note="Read-only view of the real Angel One account (MCX). Off stops the polling."),
     _m("watchlist", "Watchlist", "Trading", "/watchlist", ["/api/watchlist"]),
 
     # -- Strategy Lab ----------------------------------------------------------------

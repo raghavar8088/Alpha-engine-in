@@ -90,6 +90,19 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // Directly under F&O Positions, as asked: the owner's REAL Angel One account, MCX side,
+        // read-only - every trade, Angel's own P&L, and ROI on the capital in use each day. A
+        // receipt mark, not a chart: it is a ledger of what actually happened.
+        href: "/angel-commodity",
+        label: "Angel One Commodity Live Trading Data",
+        icon: (
+          <>
+            <path d="M6 3h12v18l-3-2-3 2-3-2-3 2z" />
+            <path d="M9 8h6M9 12h6M9 16h3" />
+          </>
+        ),
+      },
+      {
         href: "/dashboard",
         label: "Market Data",
         icon: <path d="M3 17l6-6 4 4 8-8M15 6h6v6" />,

@@ -8103,3 +8103,125 @@ export async function fetchBookResetPreview(desk: ResettableDesk, book: string):
 export async function resetBook(desk: ResettableDesk, book: string, confirm: string): Promise<BookResetInfo & { backup: string }> {
   return apiFetch(`/api/${desk}/reset`, { method: "POST", body: JSON.stringify({ book, confirm }) });
 }
+// ---- Angel One Commodity Live Trading Data (the owner's real Angel One MCX account, read-only) ----
+
+export interface AcPosition {
+  tradingsymbol: string;
+  underlying: string | null;
+  product: string;
+  instrumenttype: string;
+  netqty: number;
+  buyqty: number;
+  sellqty: number;
+  buyavg: number;
+  sellavg: number;
+  buyamount: number;
+  sellamount: number;
+  ltp: number;
+  realised: number;
+  unrealised: number;
+  pnl: number;
+  lot_units: number | null;
+  cf_qty: number;
+}
+
+export interface AcFill {
+  date: string;
+  time: string;
+  tradingsymbol: string;
+  kind: string;
+  side: "BUY" | "SELL";
+  qty: number;
+  price: number;
+  value: number;
+  lot_units: number | null;
+  product: string | null;
+  orderid: string;
+  fillid: string;
+  source: string;
+}
+
+export interface AcOrder {
+  orderid: string;
+  tradingsymbol: string;
+  side: string;
+  qty: number;
+  filled: number;
+  price: number;
+  avg_price: number;
+  status: string;
+  ordertype: string;
+  product: string;
+  time: string;
+  text: string | null;
+}
+
+export interface AcDay {
+  date: string;
+  basis: "angel-api" | "imported";
+  fills?: number;
+  orders?: number;
+  turnover?: number;
+  capital: number;
+  capital_source: string;
+  gross_pnl?: number;
+  realised_fifo?: number;
+  charges: number;
+  net_pnl: number;
+  roi: number | null;
+  contracts?: string[];
+  capital_now?: number;
+  available_cash?: number;
+}
+
+export interface AcAverages {
+  days: number;
+  first?: string;
+  last?: string;
+  avg_capital?: number;
+  avg_net_pnl?: number;
+  avg_return_pct?: number;
+  mean_daily_roi?: number | null;
+  total_net_pnl?: number;
+  total_charges?: number;
+  green_days?: number;
+  t_stat?: number | null;
+  best_day?: number;
+  worst_day?: number;
+  projection?: {
+    sessions_month: number;
+    sessions_year: number;
+    month_rupees: number;
+    year_rupees: number;
+    month_pct_simple: number;
+    year_pct_simple: number;
+    month_pct_compound: number | null;
+    year_pct_compound: number | null;
+  };
+}
+
+export interface AcSummary {
+  status: { running: boolean; last_sync: string | null; last_error: string | null; errors: number;
+    angel_ok: boolean | null; switch_on: boolean; window_open: boolean };
+  today: { date: string; day: AcDay | null; positions: AcPosition[]; fills: AcFill[]; orders: AcOrder[];
+    points: { slot: string; capital: number; gross_pnl: number }[] };
+  days: AcDay[];
+  averages: AcAverages;
+}
+
+export interface AcImportResult {
+  columns: Record<string, string | null>;
+  rows_read: number;
+  days: string[];
+  skipped_live_days: string[];
+  fills: number;
+  applied: boolean;
+}
+
+export async function fetchAngelCommodity(): Promise<AcSummary> { return apiFetch("/api/angel-commodity/summary"); }
+export async function syncAngelCommodity(): Promise<Record<string, unknown>> {
+  return apiFetch("/api/angel-commodity/sync", { method: "POST" });
+}
+export async function importAngelCommodity(csv: string, apply: boolean): Promise<AcImportResult> {
+  return apiFetch("/api/angel-commodity/import", { method: "POST", body: JSON.stringify({ csv, apply }) });
+}
