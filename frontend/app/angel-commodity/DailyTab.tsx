@@ -5,8 +5,12 @@ import GlassPanel from "../../components/GlassPanel";
 import Histogram from "../../components/charts/Histogram";
 import LineChart from "../../components/charts/LineChart";
 import MonthlyHeatmap from "../../components/charts/MonthlyHeatmap";
-import { type AcAnalytics, type AcDay, type AcDayDetail, type AcSummary, fetchAngelCommodityDay } from "../../lib/api";
+import { type AcAnalytics, type AcDay, type AcDayDetail, type AcStatement, type AcSummary, fetchAngelCommodityDay } from "../../lib/api";
+import { longDate, periodText } from "./StatementView";
 import { CalendarHeat, Tile, holdText, inr, num, pct, signed, tone } from "./ui";
+
+/** A row of the day-by-day table: a recorded day, or a P&L-report period (no dates inside it). */
+type Entry = { kind: "day"; key: string; at: string; d: AcDay } | { kind: "period"; key: string; at: string; s: AcStatement };
 
 function dayPnl(d: AcDay): number | undefined {
   return d.basis === "angel-api" ? d.gross_pnl : d.realised_fifo;
@@ -130,17 +134,47 @@ function DayDetail({ day, onClose }: { day: string; onClose: () => void }) {
 export default function DailyTab({ data, analytics }: { data: AcSummary; analytics: AcAnalytics | null }) {
   const [picked, setPicked] = useState<string | null>(null);
   const days = useMemo(() => data.days ?? [], [data]);
+  const stmts = useMemo(() => data.statements ?? [], [data]);
+  // newest first; a counted report sits at its last date, and the running total runs through it
+  const entries = useMemo<Entry[]>(() => [
+    ...days.map((d) => ({ kind: "day" as const, key: d.date, at: d.date, d })),
+    ...stmts.filter((s) => s.counted !== false).map((s) => ({ kind: "period" as const, key: s.id ?? `${s.from}|${s.to}`, at: s.to, s })),
+  ].sort((a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0)), [days, stmts]);
   const cum = useMemo(() => {
     const m: Record<string, number> = {};
     let c = 0;
-    [...days].reverse().forEach((d) => { c += d.net_pnl ?? 0; m[d.date] = c; });
+    [...entries].reverse().forEach((x) => { c += x.kind === "day" ? x.d.net_pnl ?? 0 : x.s.net; m[x.key] = c; });
     return m;
-  }, [days]);
+  }, [entries]);
   const perf = analytics?.performance;
   const periods = analytics?.periods;
   return (
     <>
       {picked && <DayDetail day={picked} onClose={() => setPicked(null)} />}
+
+      {stmts.length > 0 && (
+        <GlassPanel title="Before the page began — Angel's P&L report" note="one block per report: it has no trade dates">
+          {stmts.map((s) => (
+            <div key={s.id ?? `${s.from}-${s.to}`} className="period">
+              <div className="period-main">
+                <div><b>{periodText(s)}</b></div>
+                <div className="small muted">
+                  {s.positions} closed position{s.positions === 1 ? "" : "s"}, {s.wins} won · gross {signed(s.gross, 2)} · charges −₹{s.charges_total.toFixed(2)} (Angel&apos;s actual)
+                  {s.stats.sessions ? ` · ${s.stats.sessions} MCX sessions, ${signed(s.stats.net_per_session, 2)} a session on average` : ""}
+                </div>
+                {s.counted === false && s.reason && <div className="small warn">Not in the totals: {s.reason}.</div>}
+              </div>
+              <div className={`period-net ${tone(s.net)}`}>{signed(s.net, 2)}</div>
+            </div>
+          ))}
+          <div className="note">
+            Angel&apos;s P&amp;L report gives the closed positions of a period and their P&amp;L, but no trade dates — so those
+            sessions cannot show one by one in the calendar, the daily ROI or the months below, and the report carries no capital
+            for an ROI. It is in the running total of the table below as one row. To see each of those days, download Angel&apos;s
+            <b> Trade History</b> for the same dates and import it in the Data tab; the report then steps aside so nothing is counted twice.
+          </div>
+        </GlassPanel>
+      )}
 
       <GlassPanel title="Calendar" note="net P&L per day — click a day in the table below for the full day">
         <CalendarHeat days={days.map((d) => ({ date: d.date, net: d.net_pnl ?? 0, roi: d.roi }))} />
@@ -155,22 +189,34 @@ export default function DailyTab({ data, analytics }: { data: AcSummary; analyti
         </GlassPanel>
       </div>
 
-      <GlassPanel title="Day by day" note="click a row for the day in full">
+      <GlassPanel title="Day by day" note={stmts.some((s) => s.counted !== false) ? "click a day for it in full · the shaded row is Angel's P&L report" : "click a row for the day in full"}>
         <div className="table-scroll">
           <table className="data-table">
             <thead><tr><th>Date</th><th>Trades</th><th>Turnover</th><th>Capital invested</th><th>P&amp;L</th><th>Charges</th><th>Net P&amp;L</th><th>ROI</th><th>Cumulative</th></tr></thead>
             <tbody>
-              {days.map((d) => (
-                <tr key={d.date} className={`click ${picked === d.date ? "on" : ""}`} onClick={() => setPicked(d.date)}>
-                  <td><b>{d.date}</b></td>
-                  <td>{d.fills ?? 0}</td>
-                  <td>{inr(d.turnover)}</td>
-                  <td>{inr(d.capital)}<div className="small muted">{d.capital_source === "angel-rms" ? "Angel, peak" : "estimated"}</div></td>
-                  <td className={tone(dayPnl(d))}>{signed(dayPnl(d), 2)}</td>
-                  <td className="loss">{d.charges ? `−₹${d.charges.toFixed(2)}` : "–"}</td>
-                  <td className={tone(d.net_pnl)}><b>{signed(d.net_pnl, 2)}</b></td>
-                  <td className={tone(d.roi)}>{pct(d.roi)}</td>
-                  <td className={tone(cum[d.date])}>{signed(cum[d.date])}</td>
+              {entries.map((x) => x.kind === "period" ? (
+                <tr key={x.key} className="period-row" title="Angel's P&L report: one block, no trade dates">
+                  <td><b>{longDate(x.s.from)} → {longDate(x.s.to)}</b><div className="small muted">Angel P&amp;L report{x.s.stats.sessions ? ` · ${x.s.stats.sessions} sessions` : ""}</div></td>
+                  <td>{x.s.positions}<div className="small muted">closed</div></td>
+                  <td>{inr((x.s.stats.buy_value ?? 0) + (x.s.stats.sell_value ?? 0))}</td>
+                  <td className="small muted">not in the report</td>
+                  <td className={tone(x.s.gross)}>{signed(x.s.gross, 2)}</td>
+                  <td className="loss">−₹{x.s.charges_total.toFixed(2)}<div className="small muted">Angel&apos;s actual</div></td>
+                  <td className={tone(x.s.net)}><b>{signed(x.s.net, 2)}</b></td>
+                  <td className="muted">–</td>
+                  <td className={tone(cum[x.key])}>{signed(cum[x.key])}</td>
+                </tr>
+              ) : (
+                <tr key={x.key} className={`click ${picked === x.d.date ? "on" : ""}`} onClick={() => setPicked(x.d.date)}>
+                  <td><b>{x.d.date}</b></td>
+                  <td>{x.d.fills ?? 0}</td>
+                  <td>{inr(x.d.turnover)}</td>
+                  <td>{inr(x.d.capital)}<div className="small muted">{x.d.capital_source === "angel-rms" ? "Angel, peak" : "estimated"}</div></td>
+                  <td className={tone(dayPnl(x.d))}>{signed(dayPnl(x.d), 2)}</td>
+                  <td className="loss">{x.d.charges ? `−₹${x.d.charges.toFixed(2)}` : "–"}</td>
+                  <td className={tone(x.d.net_pnl)}><b>{signed(x.d.net_pnl, 2)}</b></td>
+                  <td className={tone(x.d.roi)}>{pct(x.d.roi)}</td>
+                  <td className={tone(cum[x.key])}>{signed(cum[x.key])}</td>
                 </tr>
               ))}
             </tbody>
@@ -213,6 +259,13 @@ export default function DailyTab({ data, analytics }: { data: AcSummary; analyti
         .data-table td { padding: 7px 8px; text-align: center; border-bottom: 1px solid var(--canvas-soft); }
         .click { cursor: pointer; }
         .click:hover td, .click.on td { background: var(--canvas-soft); }
+        .period-row td { background: var(--canvas-soft); }
+        .period { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 10px 2px; border-bottom: 1px solid var(--canvas-soft); font-size: 12.5px; }
+        .period-main { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+        .period-net { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .note { font-size: 11.5px; color: var(--text-muted); padding: 10px 2px 0; line-height: 1.6; }
+        .note b { color: var(--text); }
+        .warn { color: var(--warn); }
         .gain { color: var(--gain); }
         .loss { color: var(--loss); }
         .small { font-size: 11px; }

@@ -3,6 +3,7 @@
 import GlassPanel from "../../components/GlassPanel";
 import LineChart from "../../components/charts/LineChart";
 import type { AcAnalytics, AcSummary } from "../../lib/api";
+import { longDate } from "./StatementView";
 import { BarList, Kv, Tile, holdText, inr, num, pct, plainPct, signed, tone } from "./ui";
 
 const FUNDS: [string, string][] = [
@@ -35,6 +36,12 @@ export default function OverviewTab({ data, analytics }: { data: AcSummary; anal
   const capCurve = today.points.map((p) => ({ ts: p.slot, value: Math.round(p.capital) }));
   const breakdown = Object.entries(td?.charges_breakdown ?? {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
   const openNow = today.positions.filter((p) => p.netqty).length;
+  const life = data.lifetime;
+  const stmts = data.statements ?? [];
+  const counted = stmts.filter((s) => s.counted !== false);
+  const lastReport = counted[0];
+  const dayFirst = data.days.length ? data.days[data.days.length - 1].date : null;
+  const dayLast = data.days.length ? data.days[0].date : null;
 
   return (
     <>
@@ -62,6 +69,31 @@ export default function OverviewTab({ data, analytics }: { data: AcSummary; anal
           </div>
         )}
       </GlassPanel>
+
+      {life && stmts.length > 0 && (
+        <GlassPanel title="Your record with Angel One" note={life.from ? `${longDate(life.from)} → ${longDate(life.to)}` : undefined}>
+          <div className="tiles">
+            <Tile label="Net P&L, everything recorded" value={signed(life.net, 2)} valueClass={tone(life.net)}
+              sub={`gross ${signed(life.gross, 2)} · charges −₹${life.charges.toFixed(2)}`} />
+            {counted.map((s) => (
+              <Tile key={s.id ?? s.from} label={`${longDate(s.from)} → ${longDate(s.to)}`} value={signed(s.net, 2)} valueClass={tone(s.net)}
+                sub={`Angel's P&L report · ${s.positions} closed positions, ${s.wins} won${s.stats.sessions ? ` · ${signed(s.stats.net_per_session, 0)} a session` : ""}`} />
+            ))}
+            <Tile label={`Day by day · ${life.days} day${life.days === 1 ? "" : "s"}`} value={signed(life.days_net, 2)} valueClass={tone(life.days_net)}
+              sub={dayFirst ? `${longDate(dayFirst)}${dayLast !== dayFirst ? ` → ${longDate(dayLast)}` : ""} · with capital and ROI` : "from the next MCX session"} />
+            <Tile label="Charges" value={`−₹${life.charges.toFixed(2)}`} valueClass="loss"
+              sub={`₹${life.charges_actual.toFixed(2)} Angel's actual (report) + ₹${life.charges_estimated.toFixed(2)} estimated (days)`} />
+          </div>
+          {stmts.filter((s) => s.counted === false).map((s) => (
+            <div key={`out-${s.id ?? s.from}`} className="note warn">Angel&apos;s report for {longDate(s.from)} → {longDate(s.to)} is not in this total: {s.reason}.</div>
+          ))}
+          <div className="note">
+            Angel&apos;s P&amp;L report adds the period before this page began, with Angel&apos;s own P&amp;L and charges. It has no trade
+            dates and no capital, so it counts here but not in the daily ROI, the averages or the projections below — those rest on the
+            days recorded one by one. The Trades tab lists its positions; Angel&apos;s Trade History (Data tab) would give its days one by one.
+          </div>
+        </GlassPanel>
+      )}
 
       <div className="grid-2">
         <GlassPanel title="Account and margin (Angel RMS)">
@@ -94,6 +126,11 @@ export default function OverviewTab({ data, analytics }: { data: AcSummary; anal
               <Kv k={`One month (${pj?.sessions_month} sessions)`} v={<>{signed(pj?.month_rupees)} · {pct(pj?.month_pct_simple)} simple · {pct(pj?.month_pct_compound)} compounded</>} vClass={tone(pj?.month_rupees)} />
               <Kv k={`One year (${pj?.sessions_year} sessions)`} v={<>{signed(pj?.year_rupees)} · {pct(pj?.year_pct_simple)} simple · {pj?.year_pct_compound === null ? "compounding too large to state" : `${pct(pj?.year_pct_compound)} compounded`}</>} vClass={tone(pj?.year_rupees)} />
               <Kv k="Record so far" v={<>{signed(av.total_net_pnl)} · {av.green_days} of {av.days} days green</>} vClass={tone(av.total_net_pnl)} />
+              {lastReport && (
+                <Kv k={`Actual, ${longDate(lastReport.from)} → ${longDate(lastReport.to)} (Angel's P&L report)`}
+                  v={<>{signed(lastReport.net, 2)}{lastReport.stats.sessions ? ` · ${signed(lastReport.stats.net_per_session, 0)} a session over ${lastReport.stats.sessions}` : ""}</>}
+                  vClass={tone(lastReport.net)} />
+              )}
               <div className="note">
                 Month and year repeat the past average — arithmetic, not a forecast. They rest on {av.days} day(s)
                 {av.t_stat !== null && av.t_stat !== undefined ? ` (t = ${av.t_stat})` : ""}
@@ -161,6 +198,7 @@ export default function OverviewTab({ data, analytics }: { data: AcSummary; anal
         .small { font-size: 11px; }
         .muted { color: var(--text-muted); }
         .note { font-size: 11.5px; color: var(--text-muted); padding: 8px 2px 0; line-height: 1.55; }
+        .note.warn { color: var(--warn); }
         .empty { padding: 22px; text-align: center; color: var(--text-faint); font-size: 12.5px; }
       `}</style>
     </>

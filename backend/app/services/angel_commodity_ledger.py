@@ -13,7 +13,8 @@ WHERE THE NUMBERS COME FROM
   charges    Angel's published commodity rate card applied to the day's ORDERS (brokerage is
              per executed order, not per fill): options - Rs20, 0.0418% MCX charge, 0.05% CTT
              on sells, 0.003% stamp on buys, SEBI, 18% GST; futures - tradingai_shared.mcx_fees.
-             An estimate until Angel's contract note says otherwise; labelled as such.
+             An estimate, labelled as such - but checked against Angel's actual charges in its
+             P&L report for this account (Rs361.29 against Rs361.35 on seven positions).
   capital    "capital invested that day" = the PEAK of Angel's `utiliseddebits` (RMS) seen in
              the day's polls - the broker's own figure for margin + premium in use. For days
              imported from Angel's trade-history download, where no RMS snapshot exists, it is
@@ -23,8 +24,10 @@ WHERE THE NUMBERS COME FROM
 
 OLDER DAYS
   The API cannot return past sessions. Angel One web -> Reports -> Trade History, downloaded as
-  CSV, can be imported (preview first): those days' P&L is the REALISED P&L of trades closed
-  that day, matched first-in-first-out per contract.
+  CSV or Excel, can be imported (preview first): those days' P&L is the REALISED P&L of trades
+  closed that day, matched first-in-first-out per contract. Angel's P&L report (closed positions
+  over a date range, with Angel's actual charges but no dates) is kept as a period record by
+  app.services.angel_commodity_statements.
 
 AVERAGES AND PROJECTIONS
   Over the days with MCX activity: average capital, average net P&L a day, average return % a
@@ -131,17 +134,18 @@ COMPONENTS = ("brokerage", "exchange", "ctt", "stamp", "sebi", "gst")
 
 
 def _option_order_breakdown(turnover: float, sell: bool, on: date) -> dict:
-    """One commodity-OPTION order's charges, by component (premium turnover)."""
-    try:  # the shared schedule, once it is committed
-        from tradingai_shared.mcx_option_fees import mcx_option_leg
-        b = mcx_option_leg(turnover, 1, sell=sell, on=on)
-        return {**{k: float(b.get(k, 0.0)) for k in COMPONENTS}, "total": float(b["total"])}
-    except Exception:  # noqa: BLE001
-        brokerage, exchange, sebi = 20.0, turnover * 0.000418, turnover * 0.000001
-        parts = {"brokerage": brokerage, "exchange": exchange, "ctt": turnover * 0.0005 if sell else 0.0,
-                 "stamp": 0.0 if sell else turnover * 0.00003, "sebi": sebi,
-                 "gst": 0.18 * (brokerage + exchange + sebi)}
-        return {**{k: round(v, 2) for k, v in parts.items()}, "total": round(sum(parts.values()), 2)}
+    """One commodity-OPTION order's charges, by component (premium turnover).
+
+    Checked against Angel's own P&L report for this account (19 Sep - 18 Oct 2026, seven
+    CRUDEOILM option positions): this card gives Rs361.29 where Angel charged Rs361.35, every
+    component within paise. Angel charges CTT and stamp duty to the PAISA on each order, so a
+    schedule that rounds them to whole rupees (stamp on a small buy becomes 0) does not match
+    the account and is deliberately not used here."""
+    brokerage, exchange, sebi = 20.0, turnover * 0.000418, turnover * 0.000001
+    parts = {"brokerage": brokerage, "exchange": exchange, "ctt": turnover * 0.0005 if sell else 0.0,
+             "stamp": 0.0 if sell else turnover * 0.00003, "sebi": sebi,
+             "gst": 0.18 * (brokerage + exchange + sebi)}
+    return {**{k: round(v, 2) for k, v in parts.items()}, "total": round(sum(parts.values()), 2)}
 
 
 def _future_order_breakdown(turnover: float, sell: bool, on: date) -> dict:
@@ -418,12 +422,19 @@ OPTIONAL = {"order": ("order id", "order no", "orderid", "order number"),
 
 
 def _pick(norm: dict[str, str], names: tuple, required: bool, key: str) -> str | None:
-    hits = [h for h, n in norm.items() if n in names] or [h for h, n in norm.items() if any(x in n for x in names)]
-    if len(hits) == 1:
-        return hits[0]
-    if not hits and not required:
-        return None
-    raise ValueError(f"column for '{key}' is {'missing' if not hits else 'ambiguous: ' + ', '.join(hits)}")
+    """The column for `key`: the first of `names`, in priority order, that is exactly one
+    column's name, else the first contained in exactly one column's name - so "Trade Date"
+    beside "Trade Time" is the date, not an ambiguity."""
+    for match in (lambda n, x: n == x, lambda n, x: x in n):
+        for x in names:
+            hits = [h for h, n in norm.items() if match(n, x)]
+            if len(hits) == 1:
+                return hits[0]
+            if len(hits) > 1:
+                raise ValueError(f"column for '{key}' is ambiguous: {', '.join(hits)}")
+    if required:
+        raise ValueError(f"column for '{key}' is missing")
+    return None
 
 
 def _date(v: str) -> str | None:
@@ -568,7 +579,9 @@ async def summary() -> dict:
         sw = await desk_switches.is_on(SWITCH_KEY)
     except Exception:  # noqa: BLE001
         pass
+    from app.services import angel_commodity_statements as S
+    stmts = await S.listing()
     return {"status": {**status, "switch_on": sw, "window_open": in_window(datetime.now(IST))},
             "today": {"date": today, "day": tdoc, "positions": (await days.find_one({"_id": today}) or {}).get("positions") or [],
                       "fills": tfills, "orders": tords, "points": pts},
-            "days": rows, "averages": averages(rows)}
+            "days": rows, "averages": averages(rows), "statements": stmts, "lifetime": S.lifetime(rows, stmts)}

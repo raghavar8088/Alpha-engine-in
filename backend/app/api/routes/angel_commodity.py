@@ -9,8 +9,11 @@
   GET  /api/angel-commodity/analytics trades, statistics, breakdowns, performance, periods, charges
   GET  /api/angel-commodity/risk      open positions now: Greeks, margin, scenarios
   GET  /api/angel-commodity/day/{d}   one day in full
+  POST /api/angel-commodity/import-file  {"filename", "content_b64", "apply"} - Angel's P&L report or trade history
+  GET  /api/angel-commodity/statements   imported P&L-report periods
 """
 
+import zipfile
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -19,12 +22,19 @@ from pydantic import BaseModel, Field
 from app.api.deps import get_current_user
 from app.services import angel_commodity_analytics as A
 from app.services import angel_commodity_ledger as L
+from app.services import angel_commodity_statements as S
 
 router = APIRouter(prefix="/api/angel-commodity", tags=["angel-commodity"])
 
 
 class ImportRequest(BaseModel):
     csv: str = Field(..., max_length=20_000_000)
+    apply: bool = False
+
+
+class FileImportRequest(BaseModel):
+    filename: str = Field("", max_length=300)
+    content_b64: str = Field(..., max_length=30_000_000)
     apply: bool = False
 
 
@@ -47,6 +57,22 @@ async def import_tradebook(req: ImportRequest, current_user: dict = Depends(get_
         return await L.import_tradebook(req.csv, apply=req.apply)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=f"Could not read the file: {exc}") from exc
+
+
+@router.post("/import-file")
+async def import_file(req: FileImportRequest, current_user: dict = Depends(get_current_user)) -> dict:
+    """Any Angel One download - the P&L report (.xlsx) or a trade history (.xlsx / .csv) - detected
+    from its content. Preview first; apply=true writes it."""
+    try:
+        return await S.import_file(req.filename, req.content_b64, apply=req.apply)
+    except (ValueError, KeyError, zipfile.BadZipFile) as exc:
+        raise HTTPException(status_code=400, detail=f"Could not read the file: {exc}") from exc
+
+
+@router.get("/statements")
+async def statements(current_user: dict = Depends(get_current_user)) -> list:
+    """Angel P&L-report periods imported so far, with their closed positions."""
+    return await S.listing()
 
 
 @router.get("/analytics")

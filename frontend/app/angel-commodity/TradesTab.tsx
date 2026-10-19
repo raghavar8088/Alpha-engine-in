@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import GlassPanel from "../../components/GlassPanel";
 import type { AcAnalytics, AcBreakdownRow, AcSummary } from "../../lib/api";
+import StatementView from "./StatementView";
 import { BarList, Tile, downloadCsv, holdText, num, pct, plainPct, signed, tone } from "./ui";
 
 function Breakdown({ title, rows, label = (k: string) => k }: { title: string; rows: AcBreakdownRow[]; label?: (k: string) => string }) {
@@ -27,6 +28,7 @@ export default function TradesTab({ data, analytics }: { data: AcSummary; analyt
   const styles = useMemo(() => Array.from(new Set(trips.map((t) => t.style))), [trips]);
   const unds = useMemo(() => Array.from(new Set(trips.map((t) => t.underlying))), [trips]);
   const st = analytics?.stats;
+  const stmts = data.statements ?? [];
 
   // Today, per contract: Angel's own realised P&L against the round trips closed today
   const today = data.today.date;
@@ -46,7 +48,7 @@ export default function TradesTab({ data, analytics }: { data: AcSummary; analyt
 
   return (
     <>
-      <GlassPanel title="Completed trades" note={`${analytics.trip_count} matched first-in-first-out from Angel's fills`}>
+      <GlassPanel title="Completed trades" note={`${analytics.trip_count} matched first-in-first-out from Angel's fills${analytics.coverage.first ? ` since ${analytics.coverage.first}` : ""}`}>
         {st && st.trades ? (
           <div className="tiles">
             <Tile label="Win rate" value={plainPct(st.win_rate)} sub={`${st.wins} won · ${st.losses} lost of ${st.trades}`} />
@@ -63,6 +65,8 @@ export default function TradesTab({ data, analytics }: { data: AcSummary; analyt
           </div>
         ) : <div className="empty">No trade has been closed since the page began recording.</div>}
       </GlassPanel>
+
+      {stmts.map((s) => <StatementView key={s.id ?? `${s.from}-${s.to}`} s={s} />)}
 
       <div className="grid-3">
         <Breakdown title="By style" rows={analytics.by_style} />

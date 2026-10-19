@@ -166,7 +166,7 @@ export default function AngelCommodityPage() {
       ) : tab === "daily" ? (
         <DailyTab data={data} analytics={analytics} />
       ) : tab === "charges" ? (
-        <ChargesTab analytics={analytics} />
+        <ChargesTab data={data} analytics={analytics} />
       ) : tab === "orders" ? (
         <OrdersTab data={data} analytics={analytics} />
       ) : (

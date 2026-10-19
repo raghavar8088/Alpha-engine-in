@@ -8221,6 +8221,8 @@ export interface AcSummary {
     points: { slot: string; capital: number; gross_pnl: number }[] };
   days: AcDay[];
   averages: AcAverages;
+  statements?: AcStatement[];
+  lifetime?: AcLifetime;
 }
 
 export interface AcImportResult {
@@ -8440,3 +8442,114 @@ export interface AcDayDetail {
 export async function fetchAngelCommodityAnalytics(): Promise<AcAnalytics> { return apiFetch("/api/angel-commodity/analytics"); }
 export async function fetchAngelCommodityRisk(): Promise<AcRisk> { return apiFetch("/api/angel-commodity/risk", { timeoutMs: 90000 }); }
 export async function fetchAngelCommodityDay(day: string): Promise<AcDayDetail> { return apiFetch(`/api/angel-commodity/day/${day}`); }
+
+// ---- Angel One Commodity Live Trading Data: Angel's own reports (P&L report, trade history) ----
+
+export interface AcStatementRow {
+  scrip: string;
+  instrument: string | null;
+  underlying: string;
+  expiry: string | null;
+  strike: number | null;
+  kind: string | null;
+  qty: number;
+  lots: number | null;
+  avg_buy: number;
+  buy_value: number;
+  avg_sell: number;
+  sell_value: number;
+  points: number;
+  gross: number;
+  charges: Record<string, number>;
+  charges_total: number;
+  net: number;
+  sheet: string;
+  seq: number;
+}
+
+export interface AcStatementGroup { key: string; positions: number; wins: number; gross: number; charges: number; net: number }
+
+export interface AcStatementStats {
+  positions: number;
+  wins?: number;
+  losses?: number;
+  win_rate?: number;
+  avg_win?: number | null;
+  avg_loss?: number | null;
+  payoff?: number | null;
+  profit_factor?: number | null;
+  expectancy?: number;
+  median?: number;
+  largest_win?: number;
+  largest_loss?: number;
+  charges_share_of_gross?: number | null;
+  charges_per_position?: number;
+  lots?: number | null;
+  buy_value?: number;
+  sell_value?: number;
+  sessions?: number | null;
+  net_per_session?: number | null;
+  by_type?: AcStatementGroup[];
+  by_expiry?: AcStatementGroup[];
+  by_underlying?: AcStatementGroup[];
+}
+
+export interface AcRateCardCheck {
+  estimate: number;
+  actual: number;
+  difference: number;
+  by_component: { key: string; actual: number; estimate: number }[];
+}
+
+/** Angel's P&L report: closed positions over a date range with Angel's actual charges, no dates. */
+export interface AcStatement {
+  id?: string;
+  kind: "pnl-report";
+  from: string;
+  to: string;
+  downloaded?: string | null;
+  rows: AcStatementRow[];
+  positions: number;
+  gross: number;
+  charges: Record<string, number>;
+  charges_total: number;
+  net: number;
+  wins: number;
+  totals_source: "angel-summary" | "row-sums";
+  rows_net: number;
+  non_commodity_rows_ignored: number;
+  filename?: string;
+  imported_at?: string;
+  stats: AcStatementStats;
+  rate_card: AcRateCardCheck | null;
+  counted?: boolean;
+  reason?: string | null;
+}
+
+export interface AcLifetime {
+  net: number;
+  gross: number;
+  charges: number;
+  charges_actual: number;
+  charges_estimated: number;
+  from: string | null;
+  to: string | null;
+  days: number;
+  days_net: number;
+  statement_periods: number;
+  statements_net: number;
+  statements_left_out: number;
+  closed_positions_in_statements: number;
+  wins_in_statements: number;
+}
+
+export type AcFileImportResult =
+  | (AcStatement & { filename: string; recorded_days_inside: string[]; overlaps_reports: string[]; replaces_existing: boolean; applied: boolean })
+  | (AcImportResult & { kind: "trade-history" });
+
+/** Any Angel One download (P&L report .xlsx, trade history .xlsx / .csv), base64; preview unless apply. */
+export async function importAngelCommodityFile(filename: string, contentB64: string, apply: boolean): Promise<AcFileImportResult> {
+  return apiFetch("/api/angel-commodity/import-file", {
+    method: "POST", body: JSON.stringify({ filename, content_b64: contentB64, apply }), timeoutMs: 90000,
+  });
+}
