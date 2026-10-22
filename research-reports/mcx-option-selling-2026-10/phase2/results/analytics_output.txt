@@ -1,0 +1,181 @@
+
+################ CRUDE discovery: 53 cycles, 53,047 traded option-days
+
+== A1 PREMIUM MAP (crude): short and hold to expiry, per-trade return on margin, cycle-averaged
+  PE: mean return on margin % (rows |delta|, cols trading days to expiry)
+tb      1-3   4-7  8-12  13-17  18-22
+db                                   
+02-05  0.00  0.19  0.38  -1.55  -1.85
+05-10  0.24  0.51 -0.29  -0.44  -0.65
+10-15  0.58  1.00  0.37   0.61   0.19
+15-20  0.84  1.32  1.13   1.85   1.21
+20-30  0.98  1.44  2.01   2.88   2.33
+30-40  0.80  1.64  3.09   3.47   2.53
+40-60  0.85  2.20  5.18   4.63   3.07
+  PE: t-stat across cycles
+tb     1-3  4-7  8-12  13-17  18-22
+db                                 
+02-05  0.1  3.9   5.1   -0.8   -0.8
+05-10  7.5  3.5  -0.2   -0.2   -0.3
+10-15  8.6  4.1   0.3    0.3    0.1
+15-20  6.9  3.1   0.7    1.0    0.6
+20-30  3.2  2.1   1.1    1.5    1.1
+30-40  1.3  1.4   1.5    1.5    1.0
+40-60  1.1  1.5   1.5    1.5    1.1
+  CE: mean return on margin % (rows |delta|, cols trading days to expiry)
+tb      1-3   4-7  8-12  13-17  18-22
+db                                   
+02-05 -0.05  0.14  0.24   0.32   0.36
+05-10  0.15  0.50  0.69   0.60   0.69
+10-15  0.26  0.96  1.31   1.29   1.29
+15-20  0.26  1.18  1.82   1.43   1.23
+20-30  0.71  1.55  1.86   1.65   1.66
+30-40  0.65  1.70  1.42   0.74   1.36
+40-60  0.82  1.51  0.69  -0.74   0.85
+  CE: t-stat across cycles
+tb     1-3   4-7  8-12  13-17  18-22
+db                                  
+02-05 -3.2   5.8   8.8    8.5   11.0
+05-10  4.7   9.9   9.3    2.5    2.7
+10-15  1.7  10.1   8.9    3.8    3.3
+15-20  1.0   5.3   6.9    2.5    1.8
+20-30  2.3   4.2   3.9    2.0    1.8
+30-40  1.2   2.7   1.3    0.6    1.0
+40-60  1.2   1.5   0.4   -0.3    0.4
+  cells positive in BOTH halves (2022-03-17 split): 53 of 70
+
+== A2/A3/A4 at T-15 (crude), 53 cycles
+   A2 skew -> short 25-delta PUT: corr +0.15 | skew above median: mean +2.73% (26 cycles, 88% positive) | below: +3.64% (27, 96%)
+   A2 skew -> short 25-delta CALL: corr +0.06 | skew above median: mean +1.87% (26 cycles, 81% positive) | below: +1.59% (27, 85%)
+   A3 IV/RV -> short 25-delta STRANGLE: corr +0.00 | iv_rv above median: mean +1.34% (26 cycles, 85% positive) | below: +8.36% (27, 81%)
+   A3 IV level -> short 25-delta STRANGLE: corr +0.54 | atm_iv above median: mean +11.28% (26 cycles, 96% positive) | below: -1.20% (27, 70%)
+   A4 put/call OI ratio -> short PUT: corr +0.04 | pcr_oi above median: mean +4.32% (26 cycles, 96% positive) | below: +2.11% (27, 89%)
+   A4 put/call OI ratio -> short CALL: corr -0.06 | pcr_oi above median: mean +1.62% (26 cycles, 77% positive) | below: +1.83% (27, 89%)
+   A4 OI walls: futures finished ABOVE the max-OI call strike in 45% of cycles (that call's delta said 39%); BELOW the max-OI put strike in 38% (delta said 33%)
+   A4 selling AT the walls: call-wall mean +1.44% (77% positive), put-wall mean +2.45% (81% positive)
+
+== A2/A3/A4 at T-10 (crude), 53 cycles
+   A2 skew -> short 25-delta PUT: corr +0.08 | skew above median: mean +1.34% (26 cycles, 88% positive) | below: +3.01% (27, 89%)
+   A2 skew -> short 25-delta CALL: corr -0.07 | skew above median: mean +1.80% (26 cycles, 88% positive) | below: +2.25% (27, 89%)
+   A3 IV/RV -> short 25-delta STRANGLE: corr +0.02 | iv_rv above median: mean +4.98% (26 cycles, 81% positive) | below: +3.49% (27, 85%)
+   A3 IV level -> short 25-delta STRANGLE: corr +0.45 | atm_iv above median: mean +6.39% (26 cycles, 92% positive) | below: +2.13% (27, 74%)
+   A4 put/call OI ratio -> short PUT: corr +0.03 | pcr_oi above median: mean +2.29% (26 cycles, 88% positive) | below: +2.11% (27, 89%)
+   A4 put/call OI ratio -> short CALL: corr -0.34 | pcr_oi above median: mean +1.03% (26 cycles, 81% positive) | below: +2.98% (27, 96%)
+   A4 OI walls: futures finished ABOVE the max-OI call strike in 32% of cycles (that call's delta said 35%); BELOW the max-OI put strike in 23% (delta said 30%)
+   A4 selling AT the walls: call-wall mean +1.55% (77% positive), put-wall mean +1.95% (83% positive)
+
+== A5 weekday (crude): short ATM straddle, close-to-close P&L as % of the future (positive = seller gains)
+            mean  count
+wday                   
+Monday     0.191    206
+Tuesday   -0.004    202
+Wednesday  0.100    211
+Thursday   0.240    210
+Friday     0.016    199
+
+== A7 delta-hedged short ATM straddle (crude, 10 lots, hedged daily with mini futures)
+   T-20: 25 cycles | delta-hedged net per 10-lot straddle mean Rs7,346 (t 2.46, 72% positive, worst Rs-30,729) | unhedged mean Rs12,134 (worst Rs-51,441) | margin ~Rs431,727
+   T-15: 18 cycles | delta-hedged net per 10-lot straddle mean Rs5,782 (t 1.15, 83% positive, worst Rs-46,259) | unhedged mean Rs10,130 (worst Rs-65,756) | margin ~Rs428,052
+   T-10: 25 cycles | delta-hedged net per 10-lot straddle mean Rs6,304 (t 2.07, 68% positive, worst Rs-33,857) | unhedged mean Rs10,786 (worst Rs-27,990) | margin ~Rs451,085
+
+################ NATGAS discovery: 26 cycles, 32,102 traded option-days
+
+== A1 PREMIUM MAP (natgas): short and hold to expiry, per-trade return on margin, cycle-averaged
+  PE: mean return on margin % (rows |delta|, cols trading days to expiry)
+tb      1-3   4-7   8-12  13-17  18-22
+db                                    
+02-05 -0.08  0.16   0.64   1.01   1.30
+05-10  0.36 -1.70  -1.23   1.10   1.13
+10-15 -0.25 -3.52  -2.69  -1.47  -2.54
+15-20  0.11 -5.01  -3.62  -3.74  -5.21
+20-30 -2.00 -5.82  -6.14  -6.21  -8.15
+30-40 -1.29 -7.83  -8.92  -8.02 -10.32
+40-60 -1.47 -8.18 -10.56 -10.62 -13.53
+  PE: t-stat across cycles
+tb     1-3  4-7  8-12  13-17  18-22
+db                                 
+02-05 -1.1  1.2   5.3    8.5    8.6
+05-10  1.4 -1.1  -0.6    1.0    0.9
+10-15 -0.3 -1.3  -0.9   -0.6   -0.9
+15-20  0.1 -1.4  -0.9   -1.0   -1.1
+20-30 -0.8 -1.2  -1.2   -1.2   -1.2
+30-40 -0.5 -1.3  -1.3   -1.1   -1.1
+40-60 -0.4 -1.1  -1.2   -1.1   -1.1
+  CE: mean return on margin % (rows |delta|, cols trading days to expiry)
+tb      1-3   4-7  8-12  13-17  18-22
+db                                   
+02-05 -0.04  0.28  0.59   0.86   1.10
+05-10  0.65  1.50  1.54   2.06   2.85
+10-15  1.50  2.52  2.10   2.52   5.34
+15-20  1.86  3.25  2.89   3.48   5.16
+20-30  2.93  3.29  3.23   4.30   7.86
+30-40  2.70  3.06  2.63   3.78   9.92
+40-60  4.06  3.52  3.57   5.86  13.17
+  CE: t-stat across cycles
+tb     1-3  4-7  8-12  13-17  18-22
+db                                 
+02-05 -0.6  3.1   7.0    8.8    8.9
+05-10  5.6  9.7   3.1    4.3   15.8
+10-15  8.2  5.7   1.0    1.1   18.0
+15-20  2.9  3.3   1.0    0.9    2.0
+20-30  2.9  1.5   0.9    0.9    2.8
+30-40  1.2  0.9   0.5    0.6    2.0
+40-60  1.4  0.7   0.5    0.6    1.6
+  cells positive in BOTH halves (2023-04-21 split): 33 of 70
+
+== A2/A3/A4 at T-15 (natgas), 26 cycles
+   A2 skew -> short 25-delta PUT: corr +0.13 | skew above median: mean -2.20% (13 cycles, 77% positive) | below: -13.54% (13, 54%)
+   A2 skew -> short 25-delta CALL: corr +0.07 | skew above median: mean +8.03% (13 cycles, 92% positive) | below: +1.54% (13, 85%)
+   A3 IV/RV -> short 25-delta STRANGLE: corr +0.12 | iv_rv above median: mean -0.23% (13 cycles, 62% positive) | below: -5.94% (13, 54%)
+   A3 IV level -> short 25-delta STRANGLE: corr -0.34 | atm_iv above median: mean -9.66% (13 cycles, 46% positive) | below: +3.49% (13, 69%)
+   A4 put/call OI ratio -> short PUT: corr +0.17 | pcr_oi above median: mean -3.34% (13 cycles, 77% positive) | below: -12.40% (13, 54%)
+   A4 put/call OI ratio -> short CALL: corr +0.04 | pcr_oi above median: mean +7.87% (13 cycles, 92% positive) | below: +1.71% (13, 85%)
+   A4 OI walls: futures finished ABOVE the max-OI call strike in 23% of cycles (that call's delta said 31%); BELOW the max-OI put strike in 54% (delta said 29%)
+   A4 selling AT the walls: call-wall mean +1.99% (81% positive), put-wall mean -7.92% (58% positive)
+
+== A2/A3/A4 at T-10 (natgas), 26 cycles
+   A2 skew -> short 25-delta PUT: corr -0.06 | skew above median: mean -15.27% (13 cycles, 54% positive) | below: +1.22% (13, 69%)
+   A2 skew -> short 25-delta CALL: corr +0.15 | skew above median: mean +1.64% (13 cycles, 85% positive) | below: +1.76% (13, 77%)
+   A3 IV/RV -> short 25-delta STRANGLE: corr +0.12 | iv_rv above median: mean -7.95% (13 cycles, 54% positive) | below: -2.70% (13, 54%)
+   A3 IV level -> short 25-delta STRANGLE: corr -0.23 | atm_iv above median: mean -14.91% (13 cycles, 46% positive) | below: +4.26% (13, 62%)
+   A4 put/call OI ratio -> short PUT: corr -0.13 | pcr_oi above median: mean -6.61% (13 cycles, 69% positive) | below: -7.43% (13, 54%)
+   A4 put/call OI ratio -> short CALL: corr +0.09 | pcr_oi above median: mean -3.69% (13 cycles, 69% positive) | below: +7.08% (13, 92%)
+   A4 OI walls: futures finished ABOVE the max-OI call strike in 19% of cycles (that call's delta said 28%); BELOW the max-OI put strike in 46% (delta said 24%)
+   A4 selling AT the walls: call-wall mean +4.81% (85% positive), put-wall mean -9.39% (58% positive)
+
+== A5 weekday (natgas): short ATM straddle, close-to-close P&L as % of the future (positive = seller gains)
+            mean  count
+wday                   
+Monday     0.274    100
+Tuesday    0.104    105
+Wednesday  0.199    105
+Thursday   0.095    101
+Friday     0.377     99
+
+== A7 delta-hedged short ATM straddle (natgas, 10 lots, hedged daily with mini futures)
+Traceback (most recent call last):
+  File "D:\INDIAN MARKET\TradingAI\backtesting-service\.venv\Lib\site-packages\pandas\core\indexes\base.py", line 3641, in get_loc
+    return self._engine.get_loc(casted_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/index.pyx", line 168, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 197, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7668, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7676, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'CE'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\INDIAN MARKET\research-reports\mcx-option-selling-2026-10\phase2\analytics.py", line 297, in <module>
+    main(sys.argv[1])
+  File "D:\INDIAN MARKET\research-reports\mcx-option-selling-2026-10\phase2\analytics.py", line 293, in main
+    a7_delta_hedged(o, fut, key, n)
+  File "D:\INDIAN MARKET\research-reports\mcx-option-selling-2026-10\phase2\analytics.py", line 200, in a7_delta_hedged
+    straddle = legs["close"]["CE"] + legs["close"]["PE"]
+               ~~~~~~~~~~~~~^^^^^^
+  File "D:\INDIAN MARKET\TradingAI\backtesting-service\.venv\Lib\site-packages\pandas\core\frame.py", line 4378, in __getitem__
+    indexer = self.columns.get_loc(key)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\INDIAN MARKET\TradingAI\backtesting-service\.venv\Lib\site-packages\pandas\core\indexes\base.py", line 3648, in get_loc
+    raise KeyError(key) from err
+KeyError: 'CE'

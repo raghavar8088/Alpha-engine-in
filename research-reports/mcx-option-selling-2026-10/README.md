@@ -18,5 +18,15 @@ The rules are in `PROTOCOL.md` (pre-registered; sha256 in `PROTOCOL.sha256`). Th
 deviation is in `DEVIATIONS.md`. The method is explained in `METHOD.md`, and the results are
 in `REPORT.md`.
 
+## Phase 2 (`phase2/`): strategies built from the option data
+| Step | Command | What it does |
+|---|---|---|
+| 9 | `python phase2/analytics.py <work>` | Premium map, skew, IV level, OI walls, weekday and delta-hedged straddle, on discovery data only |
+| 10 | `python phase2/run_phase2.py <work> discover` | Best variant per family (rules in `phase2/AMENDMENT_A2.md`); freeze `p2_candidates.json` |
+| 11 | `python phase2/run_phase2.py <work> holdout` | One-time holdout on the minis' prices, plus a walk-forward per family |
+| 12 | `python phase2/robust2.py <work>` | Robustness, last 30 days and ₹10 lakh sizing |
+
+Results are in `phase2/REPORT_PHASE2.md`.
+
 `engine.py` is the backtest. `test_engine.py` is its hand-checked tests, and `b76.py` is
 Black-76 (implied vol and delta only; no P&L ever comes from a model price).

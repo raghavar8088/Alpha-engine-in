@@ -1,0 +1,190 @@
+[
+ {
+  "family": "C-A",
+  "inst": "CRUDEOILM",
+  "variant": [
+   "dcall",
+   0.2,
+   7,
+   null,
+   null
+  ],
+  "key": "C-A|dcall|d=0.2|e=7|f=none|sl=None",
+  "disc": {
+   "family": "C-A",
+   "key": "C-A|dcall|d=0.2|e=7|f=none|sl=None",
+   "n": 53,
+   "coverage": 1.0,
+   "net": 20905.230000000003,
+   "pf": 32.67507083440659,
+   "t": 8.410658749996983,
+   "worst_roc": -0.01316673112928893,
+   "mean_roc": 0.019412890726467714,
+   "net_2x": 20632.959999999995,
+   "eligible": 1.0,
+   "p5": 0.01622738137626507
+  }
+ },
+ {
+  "family": "C-B",
+  "inst": "CRUDEOILM",
+  "variant": [
+   "dput",
+   0.15,
+   5,
+   null,
+   null
+  ],
+  "key": "C-B|dput|d=0.15|e=5|f=none|sl=None",
+  "disc": {
+   "family": "C-B",
+   "key": "C-B|dput|d=0.15|e=5|f=none|sl=None",
+   "n": 53,
+   "coverage": 1.0,
+   "net": 12284.369999999999,
+   "pf": 7.351925582742146,
+   "t": 5.100215109525886,
+   "worst_roc": -0.08255696591154936,
+   "mean_roc": 0.012427990801160835,
+   "net_2x": 12078.199999999999,
+   "eligible": 1.0,
+   "p5": 0.008525359896381963
+  }
+ },
+ {
+  "family": "C-C",
+  "inst": "CRUDEOILM",
+  "variant": [
+   "dstrangle",
+   0.15,
+   5,
+   null,
+   null
+  ],
+  "key": "C-C|dstrangle|d=0.15|e=5|f=none|sl=None",
+  "disc": {
+   "family": "C-C",
+   "key": "C-C|dstrangle|d=0.15|e=5|f=none|sl=None",
+   "n": 51,
+   "coverage": 0.9622641509433962,
+   "net": 19615.39,
+   "pf": 6.634695706628213,
+   "t": 5.436690904823709,
+   "worst_roc": -0.0358340500655603,
+   "mean_roc": 0.010574292374817544,
+   "net_2x": 19233.26,
+   "eligible": 1.0,
+   "p5": 0.007734002906884351
+  }
+ },
+ {
+  "family": "C-D",
+  "inst": "CRUDEOILM",
+  "variant": [
+   "dstrangle",
+   0.25,
+   15,
+   [
+    "ge",
+    67
+   ],
+   null
+  ],
+  "key": "C-D|dstrangle|d=0.25|e=15|f=ge67|sl=None",
+  "disc": {
+   "family": "C-D",
+   "key": "C-D|dstrangle|d=0.25|e=15|f=ge67|sl=None",
+   "n": 12,
+   "coverage": 1.0,
+   "net": 29990.470000000005,
+   "pf": Infinity,
+   "t": 9.183961875239321,
+   "worst_roc": 0.025154843302922447,
+   "mean_roc": 0.0763520008772151,
+   "net_2x": 29613.8,
+   "eligible": 1.0,
+   "p5": 0.047994238984257705
+  }
+ },
+ {
+  "family": "C-E",
+  "inst": "CRUDEOILM",
+  "variant": [
+   "dh",
+   null,
+   10,
+   null,
+   null
+  ],
+  "key": "C-E|dh|d=None|e=10|f=none|sl=None",
+  "disc": {
+   "family": "C-E",
+   "key": "C-E|dh|d=None|e=10|f=none|sl=None",
+   "n": 53,
+   "coverage": 1.0,
+   "net": 356772.7785128001,
+   "pf": 3.942191283707447,
+   "t": 3.822812168671016,
+   "worst_roc": -0.10326547225583581,
+   "mean_roc": 0.02085966706649759,
+   "net_2x": 315051.9385128,
+   "eligible": 1.0,
+   "p5": 0.01174394240293472
+  }
+ },
+ {
+  "family": "N-A",
+  "inst": "NATGASMINI",
+  "variant": [
+   "dstrangle",
+   0.08,
+   15,
+   null,
+   null
+  ],
+  "key": "N-A|dstrangle|d=0.08|e=15|f=none|sl=None",
+  "disc": {
+   "family": "N-A",
+   "key": "N-A|dstrangle|d=0.08|e=15|f=none|sl=None",
+   "n": 23,
+   "coverage": 0.8846153846153846,
+   "net": 18404.679999999997,
+   "pf": 20.16605139152847,
+   "t": 3.6703207795808,
+   "worst_roc": -0.009112509946699043,
+   "mean_roc": 0.02242817717720739,
+   "net_2x": 18142.75,
+   "eligible": 1.0,
+   "p5": 0.016611886828780308
+  }
+ },
+ {
+  "family": "N-B",
+  "inst": "NATGASMINI",
+  "variant": [
+   "dstrangle",
+   0.1,
+   10,
+   [
+    "le",
+    50
+   ],
+   null
+  ],
+  "key": "N-B|dstrangle|d=0.1|e=10|f=le50|sl=None",
+  "disc": {
+   "family": "N-B",
+   "key": "N-B|dstrangle|d=0.1|e=10|f=le50|sl=None",
+   "n": 16,
+   "coverage": 1.0,
+   "net": 11076.5,
+   "pf": Infinity,
+   "t": 4.449699304594126,
+   "worst_roc": 0.018040643406932105,
+   "mean_roc": 0.024549183564213005,
+   "net_2x": 11033.77,
+   "eligible": 1.0,
+   "p5": 0.02218743150567952
+  }
+ }
+]

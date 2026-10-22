@@ -1,0 +1,265 @@
+{
+ "C-B": {
+  "full_history": {
+   "n": 82,
+   "net": 14841,
+   "win": 0.951,
+   "pf": 2.87,
+   "worst": -4778,
+   "worst_roc": -0.152,
+   "maxdd": 4778,
+   "mean_roc": 0.0094,
+   "avg_capital": 21922
+  },
+  "holdout_mini": {
+   "n": 29,
+   "net": 2984,
+   "win": 0.897,
+   "pf": 1.5,
+   "worst": -4779,
+   "worst_roc": -0.152,
+   "maxdd": 4779,
+   "mean_roc": 0.0046,
+   "avg_capital": 24265
+  },
+  "entry_shift": {
+   "3": 9583,
+   "7": 5194
+  },
+  "delta_shift": {
+   "0.1": 9487,
+   "0.2": 17424
+  },
+  "full_without_best": 13682,
+  "by_year_full": {
+   "2020": 2512,
+   "2021": 2492,
+   "2022": 5482,
+   "2023": 911,
+   "2024": 1774,
+   "2025": 940,
+   "2026": 730
+  },
+  "last30": {
+   "trade": "SPE8200 entered 2026-10-08 exit 2026-10-15 (time)",
+   "pnl_per_lot": 546,
+   "capital_per_lot": 33077,
+   "sizing_10_lakh": [
+    {
+     "label": "half kept as buffer",
+     "units": 15,
+     "pnl": 8198,
+     "pct": 0.82,
+     "worst_month_same_size": -71684
+    },
+    {
+     "label": "all as margin",
+     "units": 30,
+     "pnl": 16395,
+     "pct": 1.64,
+     "worst_month_same_size": -143368
+    }
+   ],
+   "worst_month": "2026-06-16"
+  }
+ },
+ "C-C": {
+  "full_history": {
+   "n": 80,
+   "net": 21935,
+   "win": 0.875,
+   "pf": 2.32,
+   "worst": -4228,
+   "worst_roc": -0.07,
+   "maxdd": 4594,
+   "mean_roc": 0.0069,
+   "avg_capital": 43696
+  },
+  "holdout_mini": {
+   "n": 29,
+   "net": 4386,
+   "win": 0.793,
+   "pf": 1.36,
+   "worst": -4191,
+   "worst_roc": -0.069,
+   "maxdd": 4239,
+   "mean_roc": 0.0018,
+   "avg_capital": 48530
+  },
+  "entry_shift": {
+   "3": 16286,
+   "7": 20421
+  },
+  "delta_shift": {
+   "0.1": 16075,
+   "0.2": 25712
+  },
+  "full_without_best": 19497,
+  "by_year_full": {
+   "2020": 4259,
+   "2021": 3629,
+   "2022": 6593,
+   "2023": 3478,
+   "2024": 2342,
+   "2025": -3250,
+   "2026": 4884
+  },
+  "last30": {
+   "trade": "SCE9650;SPE8200 entered 2026-10-08 exit 2026-10-15 (time)",
+   "pnl_per_lot": 1007,
+   "capital_per_lot": 66153,
+   "sizing_10_lakh": [
+    {
+     "label": "half kept as buffer",
+     "units": 7,
+     "pnl": 7048,
+     "pct": 0.7,
+     "worst_month_same_size": -29340
+    },
+    {
+     "label": "all as margin",
+     "units": 15,
+     "pnl": 15104,
+     "pct": 1.51,
+     "worst_month_same_size": -62871
+    }
+   ],
+   "worst_month": "2026-06-16"
+  }
+ },
+ "C-E": {
+  "full_history": {
+   "n": 82,
+   "net": 535711,
+   "win": 0.756,
+   "pf": 3.12,
+   "worst": -48233,
+   "worst_roc": -0.103,
+   "maxdd": 48233,
+   "mean_roc": 0.0172,
+   "avg_capital": 440182
+  },
+  "holdout_mini": {
+   "n": 29,
+   "net": 235909,
+   "win": 0.793,
+   "pf": 2.84,
+   "worst": -52969,
+   "worst_roc": -0.102,
+   "maxdd": 52969,
+   "mean_roc": 0.0155,
+   "avg_capital": 489016
+  },
+  "entry_shift": {
+   "8": 376073,
+   "12": 548160
+  },
+  "hedge_granularity_per10lots": {
+   "5 lots": 506398.0,
+   "20 lots": 543934.0
+  },
+  "capital_incl_hedge_margin": {
+   "avg": 641681,
+   "max": 921157,
+   "avg_peak_hedge_lots": 7.5
+  },
+  "full_without_best": 447903,
+  "by_year_full": {
+   "2020": 64573,
+   "2021": 74184,
+   "2022": 90060,
+   "2023": 77363,
+   "2024": 83553,
+   "2025": 49713,
+   "2026": 96264
+  },
+  "last30": {
+   "trade": "S10xCE8750;S10xPE8750+hedge entered 2026-09-30 exit 2026-10-15 (time)",
+   "pnl_per_10-lot unit": 38672,
+   "capital_per_10-lot unit": 869307,
+   "sizing_10_lakh": [
+    {
+     "label": "half kept as buffer",
+     "units": 0,
+     "pnl": 0,
+     "pct": 0.0,
+     "worst_month_same_size": 0
+    },
+    {
+     "label": "all as margin",
+     "units": 1,
+     "pnl": 38672,
+     "pct": 3.87,
+     "worst_month_same_size": -52969
+    }
+   ],
+   "worst_month": "2026-03-17"
+  }
+ },
+ "N-B": {
+  "full_history": {
+   "n": 32,
+   "net": 16267,
+   "win": 0.969,
+   "pf": 5.77,
+   "worst": -3413,
+   "worst_roc": -0.115,
+   "maxdd": 3413,
+   "mean_roc": 0.0182,
+   "avg_capital": 26717
+  },
+  "holdout_mini": {
+   "n": 15,
+   "net": 6287,
+   "win": 0.933,
+   "pf": 3.88,
+   "worst": -2186,
+   "worst_roc": -0.074,
+   "maxdd": 2186,
+   "mean_roc": 0.0149,
+   "avg_capital": 28242
+  },
+  "entry_shift": {
+   "8": 9898,
+   "12": 9727
+  },
+  "delta_shift": {
+   "0.08": 12623,
+   "0.15": 23526
+  },
+  "filter_shift": {
+   "le40": 14042,
+   "le60": 9816
+  },
+  "full_without_best": 13705,
+  "by_year_full": {
+   "2022": 4440,
+   "2023": 5758,
+   "2024": 2082,
+   "2025": 818,
+   "2026": 3169
+  },
+  "last30": {
+   "trade": "SCE315;SPE240 entered 2026-09-09 exit 2026-09-23 (time)",
+   "pnl_per_lot": 393,
+   "capital_per_lot": 27044,
+   "sizing_10_lakh": [
+    {
+     "label": "half kept as buffer",
+     "units": 18,
+     "pnl": 7071,
+     "pct": 0.71,
+     "worst_month_same_size": -39351
+    },
+    {
+     "label": "all as margin",
+     "units": 36,
+     "pnl": 14142,
+     "pct": 1.41,
+     "worst_month_same_size": -78702
+    }
+   ],
+   "worst_month": "2025-02-21"
+  }
+ }
+}
