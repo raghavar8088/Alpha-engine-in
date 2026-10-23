@@ -1,0 +1,855 @@
+{
+ "G2": {
+  "test_T2_mini": {
+   "n": 15,
+   "net": 62743,
+   "win": 0.667,
+   "pf": 1.68,
+   "worst": -27950,
+   "worst_roc": -0.07,
+   "maxdd": 53909,
+   "avg_capital": 371724
+  },
+  "by_year_T2": {
+   "2024": -33470,
+   "2025": -20439,
+   "2026": 116651
+  },
+  "T2_without_best_trade": 34533,
+  "best_trade": {
+   "expiry": "2026-07-24",
+   "pnl": 28210
+  },
+  "neighbours_T2": {
+   "(50, 15)": {
+    "n": 17,
+    "net": 57765,
+    "win": 0.588,
+    "pf": 1.44,
+    "worst": -44004,
+    "worst_roc": -0.115,
+    "maxdd": 115878,
+    "avg_capital": 377097
+   },
+   "(40, 10)": {
+    "n": 11,
+    "net": 130494,
+    "win": 0.818,
+    "pf": 7.88,
+    "worst": -11497,
+    "worst_roc": -0.03,
+    "maxdd": 11497,
+    "avg_capital": 350501
+   },
+   "(40, 15)": {
+    "n": 14,
+    "net": 44269,
+    "win": 0.571,
+    "pf": 1.42,
+    "worst": -44004,
+    "worst_roc": -0.115,
+    "maxdd": 90853,
+    "avg_capital": 367361
+   }
+  },
+  "entry_shift_T2": {
+   "8": {
+    "n": 14,
+    "net": 79368,
+    "win": 0.643,
+    "pf": 2.15,
+    "worst": -30020,
+    "worst_roc": -0.071,
+    "maxdd": 33566,
+    "avg_capital": 358895
+   },
+   "12": {
+    "n": 14,
+    "net": -20663,
+    "win": 0.5,
+    "pf": 0.83,
+    "worst": -32440,
+    "worst_roc": -0.082,
+    "maxdd": 78784,
+    "avg_capital": 376501
+   }
+  },
+  "hedge_band2_T2": {
+   "n": 15,
+   "net": 74205,
+   "win": 0.533,
+   "pf": 1.95,
+   "worst": -28399,
+   "worst_roc": -0.066,
+   "maxdd": 43927,
+   "avg_capital": 368575
+  },
+  "lots_T2_per10": {
+   "5 lots": 30189,
+   "20 lots": 45309
+  },
+  "futures_slip_2x_T2": {
+   "n": 15,
+   "net": 57660,
+   "win": 0.667,
+   "pf": 1.61,
+   "worst": -28363,
+   "worst_roc": -0.071,
+   "maxdd": 57162,
+   "avg_capital": 371724
+  },
+  "futures_and_option_slip_2x_T2": {
+   "n": 15,
+   "net": 40688,
+   "win": 0.667,
+   "pf": 1.4,
+   "worst": -30411,
+   "worst_roc": -0.075,
+   "maxdd": 69950,
+   "avg_capital": 371724
+  },
+  "same_trade_when_ivpct_above_50_T2": {
+   "n": 13,
+   "net": -34399,
+   "win": 0.538,
+   "pf": 0.88,
+   "worst": -153308,
+   "worst_roc": -0.363,
+   "maxdd": 188389,
+   "avg_capital": 372020
+  },
+  "same_trade_unfiltered_T2": {
+   "n": 28,
+   "net": 28344,
+   "win": 0.607,
+   "pf": 1.08,
+   "worst": -153308,
+   "worst_roc": -0.363,
+   "maxdd": 208828,
+   "avg_capital": 371861
+  },
+  "parent_2022_26_by_year": {
+   "2022": 12823,
+   "2023": 87247,
+   "2024": -41401,
+   "2025": -22728,
+   "2026": 108109
+  },
+  "parent_2022_26_unfiltered_by_year": {
+   "2022": -85367,
+   "2023": 66249,
+   "2024": -44505,
+   "2025": 93376,
+   "2026": 82320
+  },
+  "capital_incl_hedge_margin_T2": {
+   "avg": 371724,
+   "max": 581824,
+   "avg_peak_hedge_lots": 7.5
+  },
+  "trades_T2": [
+   {
+    "expiry": "2024-07-24",
+    "entry": "2024-07-10",
+    "ivpct": 7.6,
+    "iv0": 0.517,
+    "pnl": -7459,
+    "capital": 260520,
+    "max_hedge_lots": 8
+   },
+   {
+    "expiry": "2024-12-23",
+    "entry": "2024-12-09",
+    "ivpct": 43.6,
+    "iv0": 0.617,
+    "pnl": -26011,
+    "capital": 374059,
+    "max_hedge_lots": 9
+   },
+   {
+    "expiry": "2025-02-21",
+    "entry": "2025-02-07",
+    "ivpct": 46.0,
+    "iv0": 0.617,
+    "pnl": -19120,
+    "capital": 394254,
+    "max_hedge_lots": 8
+   },
+   {
+    "expiry": "2025-06-23",
+    "entry": "2025-06-09",
+    "ivpct": 36.8,
+    "iv0": 0.614,
+    "pnl": 18546,
+    "capital": 428894,
+    "max_hedge_lots": 9
+   },
+   {
+    "expiry": "2025-07-24",
+    "entry": "2025-07-10",
+    "ivpct": 33.2,
+    "iv0": 0.609,
+    "pnl": 10704,
+    "capital": 381294,
+    "max_hedge_lots": 8
+   },
+   {
+    "expiry": "2025-08-22",
+    "entry": "2025-08-07",
+    "ivpct": 49.6,
+    "iv0": 0.629,
+    "pnl": 5330,
+    "capital": 370201,
+    "max_hedge_lots": 9
+   },
+   {
+    "expiry": "2025-09-23",
+    "entry": "2025-09-09",
+    "ivpct": 7.2,
+    "iv0": 0.528,
+    "pnl": 3548,
+    "capital": 375575,
+    "max_hedge_lots": 9
+   },
+   {
+    "expiry": "2025-10-24",
+    "entry": "2025-10-10",
+    "ivpct": 34.4,
+    "iv0": 0.597,
+    "pnl": -11497,
+    "capital": 379983,
+    "max_hedge_lots": 9
+   },
+   {
+    "expiry": "2025-12-23",
+    "entry": "2025-12-09",
+    "ivpct": 41.6,
+    "iv0": 0.613,
+    "pnl": -27950,
+    "capital": 581824,
+    "max_hedge_lots": 9
+   },
+   {
+    "expiry": "2026-04-23",
+    "entry": "2026-04-09",
+    "ivpct": 8.0,
+    "iv0": 0.556,
+    "pnl": 25957,
+    "capital": 303414,
+    "max_hedge_lots": 5
+   },
+   {
+    "expiry": "2026-05-22",
+    "entry": "2026-05-08",
+    "ivpct": 9.6,
+    "iv0": 0.538,
+    "pnl": 2721,
+    "capital": 359868,
+    "max_hedge_lots": 9
+   },
+   {
+    "expiry": "2026-06-23",
+    "entry": "2026-06-09",
+    "ivpct": 6.4,
+    "iv0": 0.507,
+    "pnl": 27879,
+    "capital": 377879,
+    "max_hedge_lots": 6
+   },
+   {
+    "expiry": "2026-07-24",
+    "entry": "2026-07-10",
+    "ivpct": 7.2,
+    "iv0": 0.473,
+    "pnl": 28210,
+    "capital": 316081,
+    "max_hedge_lots": 3
+   },
+   {
+    "expiry": "2026-08-24",
+    "entry": "2026-08-10",
+    "ivpct": 6.4,
+    "iv0": 0.458,
+    "pnl": 21831,
+    "capital": 311422,
+    "max_hedge_lots": 4
+   },
+   {
+    "expiry": "2026-09-23",
+    "entry": "2026-09-09",
+    "ivpct": 19.6,
+    "iv0": 0.475,
+    "pnl": 10054,
+    "capital": 360586,
+    "max_hedge_lots": 8
+   }
+  ]
+ },
+ "C-E_diagnosis": {
+  "by_period": [
+   {
+    "period": "T1 2018-19 (parent)",
+    "n": 19,
+    "net_per10": 9514,
+    "avg_per_cycle": 501,
+    "pf": 1.11,
+    "mean_iv_entry": 0.351,
+    "mean_rv_hold": 0.329,
+    "mean_iv_minus_rv": 0.021,
+    "share_iv_above_rv": 0.74,
+    "corr_gap_pnl": 0.94,
+    "avg_fees_per_cycle": 588
+   },
+   {
+    "period": "discovery 2020-24 (parent)",
+    "n": 53,
+    "net_per10": 356773,
+    "avg_per_cycle": 6732,
+    "pf": 3.94,
+    "mean_iv_entry": 0.518,
+    "mean_rv_hold": 0.416,
+    "mean_iv_minus_rv": 0.103,
+    "share_iv_above_rv": 0.85,
+    "corr_gap_pnl": 0.62,
+    "avg_fees_per_cycle": 696
+   },
+   {
+    "period": "T2 2024-26 (mini)",
+    "n": 29,
+    "net_per10": 235909,
+    "avg_per_cycle": 8135,
+    "pf": 2.84,
+    "mean_iv_entry": 0.454,
+    "mean_rv_hold": 0.406,
+    "mean_iv_minus_rv": 0.048,
+    "share_iv_above_rv": 0.66,
+    "corr_gap_pnl": 0.65,
+    "avg_fees_per_cycle": 803
+   }
+  ],
+  "T1_by_year": {
+   "2018": 12251,
+   "2019": -2737
+  },
+  "T1_trades": [
+   {
+    "expiry": "2018-06-15",
+    "iv0": 0.287,
+    "rv_hold": 0.193,
+    "pnl": 10446,
+    "fees": 582
+   },
+   {
+    "expiry": "2018-07-17",
+    "iv0": 0.301,
+    "rv_hold": 0.367,
+    "pnl": -8032,
+    "fees": 639
+   },
+   {
+    "expiry": "2018-08-16",
+    "iv0": 0.29,
+    "rv_hold": 0.32,
+    "pnl": 1015,
+    "fees": 775
+   },
+   {
+    "expiry": "2018-09-17",
+    "iv0": 0.289,
+    "rv_hold": 0.244,
+    "pnl": 6854,
+    "fees": 698
+   },
+   {
+    "expiry": "2018-10-17",
+    "iv0": 0.378,
+    "rv_hold": 0.315,
+    "pnl": 5821,
+    "fees": 711
+   },
+   {
+    "expiry": "2018-11-14",
+    "iv0": 0.32,
+    "rv_hold": 0.49,
+    "pnl": -11900,
+    "fees": 504
+   },
+   {
+    "expiry": "2018-12-14",
+    "iv0": 0.599,
+    "rv_hold": 0.47,
+    "pnl": 8047,
+    "fees": 598
+   },
+   {
+    "expiry": "2019-01-16",
+    "iv0": 0.536,
+    "rv_hold": 0.367,
+    "pnl": 1367,
+    "fees": 513
+   },
+   {
+    "expiry": "2019-02-15",
+    "iv0": 0.325,
+    "rv_hold": 0.295,
+    "pnl": 7089,
+    "fees": 459
+   },
+   {
+    "expiry": "2019-03-15",
+    "iv0": 0.301,
+    "rv_hold": 0.214,
+    "pnl": 8238,
+    "fees": 624
+   },
+   {
+    "expiry": "2019-04-16",
+    "iv0": 0.259,
+    "rv_hold": 0.213,
+    "pnl": 2334,
+    "fees": 510
+   },
+   {
+    "expiry": "2019-05-16",
+    "iv0": 0.296,
+    "rv_hold": 0.16,
+    "pnl": 9278,
+    "fees": 582
+   },
+   {
+    "expiry": "2019-06-17",
+    "iv0": 0.412,
+    "rv_hold": 0.317,
+    "pnl": 9066,
+    "fees": 584
+   },
+   {
+    "expiry": "2019-07-17",
+    "iv0": 0.321,
+    "rv_hold": 0.28,
+    "pnl": 6350,
+    "fees": 555
+   },
+   {
+    "expiry": "2019-08-14",
+    "iv0": 0.293,
+    "rv_hold": 0.572,
+    "pnl": -20853,
+    "fees": 637
+   },
+   {
+    "expiry": "2019-09-17",
+    "iv0": 0.376,
+    "rv_hold": 0.866,
+    "pnl": -42865,
+    "fees": 683
+   },
+   {
+    "expiry": "2019-10-17",
+    "iv0": 0.424,
+    "rv_hold": 0.162,
+    "pnl": 12506,
+    "fees": 532
+   },
+   {
+    "expiry": "2019-11-15",
+    "iv0": 0.312,
+    "rv_hold": 0.204,
+    "pnl": 2302,
+    "fees": 452
+   },
+   {
+    "expiry": "2019-12-16",
+    "iv0": 0.341,
+    "rv_hold": 0.213,
+    "pnl": 2449,
+    "fees": 536
+   }
+  ]
+ },
+ "earlier_T1": {
+  "CO-1": {
+   "stats": {
+    "n": 11,
+    "net": 5026,
+    "win": 0.909,
+    "pf": 3.33,
+    "worst": -2161,
+    "worst_roc": -0.125,
+    "maxdd": 2161,
+    "avg_capital": 15730
+   },
+   "by_year": {
+    "2018": 2315,
+    "2019": 2711
+   }
+  },
+  "CO-2": {
+   "stats": {
+    "n": 7,
+    "net": 1576,
+    "win": 0.857,
+    "pf": 2.97,
+    "worst": -799,
+    "worst_roc": -0.046,
+    "maxdd": 799,
+    "avg_capital": 15858
+   },
+   "by_year": {
+    "2018": 1108,
+    "2019": 467
+   }
+  },
+  "CO-3": {
+   "stats": {
+    "n": 10,
+    "net": -347,
+    "win": 0.6,
+    "pf": 0.92,
+    "worst": -1969,
+    "worst_roc": -0.093,
+    "maxdd": 2717,
+    "avg_capital": 16503
+   },
+   "by_year": {
+    "2018": -973,
+    "2019": 625
+   }
+  },
+  "C-B": {
+   "stats": {
+    "n": 18,
+    "net": -1136,
+    "win": 0.889,
+    "pf": 0.61,
+    "worst": -2457,
+    "worst_roc": -0.13,
+    "maxdd": 2733,
+    "avg_capital": 15785
+   },
+   "by_year": {
+    "2018": -2520,
+    "2019": 1384
+   }
+  },
+  "C-C": {
+   "stats": {
+    "n": 18,
+    "net": 163,
+    "win": 0.833,
+    "pf": 1.06,
+    "worst": -2352,
+    "worst_roc": -0.062,
+    "maxdd": 2352,
+    "avg_capital": 31571
+   },
+   "by_year": {
+    "2018": -1762,
+    "2019": 1926
+   }
+  }
+ },
+ "portfolios": {
+  "per_strategy": {
+   "CO-1": {
+    "T2": {
+     "n": 24,
+     "net": 12088,
+     "win": 0.833,
+     "pf": 1.76,
+     "worst": -9291,
+     "worst_roc": -0.276,
+     "maxdd": 9291,
+     "avg_capital": 24091
+    },
+    "T1": {
+     "n": 11,
+     "net": 5026,
+     "win": 0.909,
+     "pf": 3.33,
+     "worst": -2161,
+     "worst_roc": -0.125,
+     "maxdd": 2161,
+     "avg_capital": 15730
+    }
+   },
+   "CO-2": {
+    "T2": {
+     "n": 23,
+     "net": 8690,
+     "win": 0.826,
+     "pf": 3.06,
+     "worst": -1687,
+     "worst_roc": -0.077,
+     "maxdd": 1687,
+     "avg_capital": 23649
+    },
+    "T1": {
+     "n": 7,
+     "net": 1576,
+     "win": 0.857,
+     "pf": 2.97,
+     "worst": -799,
+     "worst_roc": -0.046,
+     "maxdd": 799,
+     "avg_capital": 15858
+    }
+   },
+   "C-E5": {
+    "T2": {
+     "n": 29,
+     "net": 94341,
+     "win": 0.69,
+     "pf": 2.31,
+     "worst": -42193,
+     "worst_roc": -0.162,
+     "maxdd": 46086,
+     "avg_capital": 244508
+    },
+    "T1": {
+     "n": 19,
+     "net": 2010,
+     "win": 0.789,
+     "pf": 1.05,
+     "worst": -19652,
+     "worst_roc": -0.136,
+     "maxdd": 30410,
+     "avg_capital": 157854
+    }
+   },
+   "N-B": {
+    "T2": {
+     "n": 15,
+     "net": 6287,
+     "win": 0.933,
+     "pf": 3.88,
+     "worst": -2186,
+     "worst_roc": -0.074,
+     "maxdd": 2186,
+     "avg_capital": 28242
+    }
+   },
+   "G2-5": {
+    "T2": {
+     "n": 15,
+     "net": 15094,
+     "win": 0.533,
+     "pf": 1.3,
+     "worst": -15902,
+     "worst_roc": -0.081,
+     "maxdd": 32035,
+     "avg_capital": 186801
+    }
+   }
+  },
+  "A_phase2_portfolio_T2": {
+   "net": 188108,
+   "pct_of_10L": 18.8,
+   "months": 29,
+   "avg_per_month": 6486,
+   "months_positive": 21,
+   "worst_month": -35650,
+   "worst_month_at": "2026-03",
+   "max_drawdown_trade_by_trade": 46086,
+   "max_drawdown_month_end": 36267,
+   "peak_capital_in_use": 826330,
+   "avg_capital_in_use": 283379,
+   "last_30_days": 32106,
+   "by_strategy": {
+    "C-E 5 lots": 94341,
+    "CO-1 3 lots": 36264,
+    "CO-2 3 lots": 26069,
+    "N-B 5 lots": 31434
+   },
+   "by_year": {
+    "2024": 52354,
+    "2025": 72529,
+    "2026": 63225
+   },
+   "by_strategy_year": {
+    "C-E 5 lots 2024": 25350,
+    "C-E 5 lots 2025": 53245,
+    "C-E 5 lots 2026": 15747,
+    "CO-1 3 lots 2024": 18664,
+    "CO-1 3 lots 2025": 1087,
+    "CO-1 3 lots 2026": 16513,
+    "CO-2 3 lots 2024": 3726,
+    "CO-2 3 lots 2025": 7411,
+    "CO-2 3 lots 2026": 14933,
+    "N-B 5 lots 2024": 4615,
+    "N-B 5 lots 2025": 10786,
+    "N-B 5 lots 2026": 16032
+   }
+  },
+  "A_phase2_portfolio_T1_crude_part": {
+   "net": 21813,
+   "pct_of_10L": 2.2,
+   "months": 19,
+   "avg_per_month": 1148,
+   "months_positive": 14,
+   "worst_month": -19652,
+   "worst_month_at": "2019-09",
+   "max_drawdown_trade_by_trade": 28567,
+   "max_drawdown_month_end": 27812,
+   "peak_capital_in_use": 398973,
+   "avg_capital_in_use": 137864,
+   "last_30_days": 0,
+   "by_strategy": {
+    "C-E 5 lots": 2010,
+    "CO-1 3 lots": 15077,
+    "CO-2 3 lots": 4727
+   },
+   "by_year": {
+    "2018": 13527,
+    "2019": 8287
+   },
+   "by_strategy_year": {
+    "C-E 5 lots 2018": 3257,
+    "C-E 5 lots 2019": -1247,
+    "CO-1 3 lots 2018": 6944,
+    "CO-1 3 lots 2019": 8132,
+    "CO-2 3 lots 2018": 3325,
+    "CO-2 3 lots 2019": 1402
+   }
+  },
+  "B_revised_T2": {
+   "net": 108861,
+   "pct_of_10L": 10.9,
+   "months": 29,
+   "avg_per_month": 3754,
+   "months_positive": 20,
+   "worst_month": -22306,
+   "worst_month_at": "2025-02",
+   "max_drawdown_trade_by_trade": 40138,
+   "max_drawdown_month_end": 34843,
+   "peak_capital_in_use": 611294,
+   "avg_capital_in_use": 166484,
+   "last_30_days": 18566,
+   "by_strategy": {
+    "CO-1 3 lots": 36264,
+    "CO-2 3 lots": 26069,
+    "G2 5 lots": 15094,
+    "N-B 5 lots": 31434
+   },
+   "by_year": {
+    "2024": 10872,
+    "2025": 3800,
+    "2026": 94189
+   },
+   "by_strategy_year": {
+    "CO-1 3 lots 2024": 18664,
+    "CO-1 3 lots 2025": 1087,
+    "CO-1 3 lots 2026": 16513,
+    "CO-2 3 lots 2024": 3726,
+    "CO-2 3 lots 2025": 7411,
+    "CO-2 3 lots 2026": 14933,
+    "G2 5 lots 2024": -16133,
+    "G2 5 lots 2025": -15484,
+    "G2 5 lots 2026": 46711,
+    "N-B 5 lots 2024": 4615,
+    "N-B 5 lots 2025": 10786,
+    "N-B 5 lots 2026": 16032
+   }
+  },
+  "B_revised_T1_crude_part": {
+   "net": 19804,
+   "pct_of_10L": 2.0,
+   "months": 19,
+   "avg_per_month": 1042,
+   "months_positive": 10,
+   "worst_month": -6484,
+   "worst_month_at": "2019-05",
+   "max_drawdown_trade_by_trade": 8880,
+   "max_drawdown_month_end": 6484,
+   "peak_capital_in_use": 118028,
+   "avg_capital_in_use": 31932,
+   "last_30_days": 0,
+   "by_strategy": {
+    "CO-1 3 lots": 15077,
+    "CO-2 3 lots": 4727
+   },
+   "by_year": {
+    "2018": 10270,
+    "2019": 9534
+   },
+   "by_strategy_year": {
+    "CO-1 3 lots 2018": 6944,
+    "CO-1 3 lots 2019": 8132,
+    "CO-2 3 lots 2018": 3325,
+    "CO-2 3 lots 2019": 1402
+   }
+  },
+  "B_without_G2_T2": {
+   "net": 93767,
+   "pct_of_10L": 9.4,
+   "months": 29,
+   "avg_per_month": 3233,
+   "months_positive": 22,
+   "worst_month": -18420,
+   "worst_month_at": "2026-06",
+   "max_drawdown_trade_by_trade": 27872,
+   "max_drawdown_month_end": 18941,
+   "peak_capital_in_use": 353038,
+   "avg_capital_in_use": 116863,
+   "last_30_days": 14066,
+   "by_strategy": {
+    "CO-1 3 lots": 36264,
+    "CO-2 3 lots": 26069,
+    "N-B 5 lots": 31434
+   },
+   "by_year": {
+    "2024": 27005,
+    "2025": 19284,
+    "2026": 47478
+   },
+   "by_strategy_year": {
+    "CO-1 3 lots 2024": 18664,
+    "CO-1 3 lots 2025": 1087,
+    "CO-1 3 lots 2026": 16513,
+    "CO-2 3 lots 2024": 3726,
+    "CO-2 3 lots 2025": 7411,
+    "CO-2 3 lots 2026": 14933,
+    "N-B 5 lots 2024": 4615,
+    "N-B 5 lots 2025": 10786,
+    "N-B 5 lots 2026": 16032
+   }
+  },
+  "T2_per_expiry_corr": {
+   "N-B": {
+    "N-B": 1.0,
+    "G2-5": 0.44,
+    "CO-1": NaN,
+    "CO-2": NaN,
+    "C-E5": NaN
+   },
+   "G2-5": {
+    "N-B": 0.44,
+    "G2-5": 1.0,
+    "CO-1": NaN,
+    "CO-2": NaN,
+    "C-E5": NaN
+   },
+   "CO-1": {
+    "N-B": NaN,
+    "G2-5": NaN,
+    "CO-1": 1.0,
+    "CO-2": -0.24,
+    "C-E5": 0.22
+   },
+   "CO-2": {
+    "N-B": NaN,
+    "G2-5": NaN,
+    "CO-1": -0.24,
+    "CO-2": 1.0,
+    "C-E5": -0.18
+   },
+   "C-E5": {
+    "N-B": NaN,
+    "G2-5": NaN,
+    "CO-1": 0.22,
+    "CO-2": -0.18,
+    "C-E5": 1.0
+   }
+  }
+ }
+}

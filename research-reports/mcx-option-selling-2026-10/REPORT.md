@@ -2,6 +2,11 @@
 
 Research and backtest on real MCX prices, 22 Oct 2026.
 
+> **Updated 23 Oct 2026 by Phase 3.** Every crude strategy here was re-tested once on Jun 2018 –
+> Dec 2019, a period no strategy had ever seen. **CO-1 and CO-2 passed** (so they have now
+> survived two separate untouched periods). **CO-3 failed** (−₹347, PF 0.92) and should be
+> dropped. CO-5 and NG-X were not re-tested and are unchanged. See `phase3/REPORT_PHASE3.md`.
+
 ## The answer first
 
 You asked for 5 option-selling strategies on Crude Oil Mini and Natural Gas Mini that make money in the real market.

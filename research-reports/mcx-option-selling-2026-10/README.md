@@ -28,5 +28,17 @@ in `REPORT.md`.
 
 Results are in `phase2/REPORT_PHASE2.md`.
 
+## Phase 3 (`phase3/`): more structures, and a second untouched test period
+| Step | Command | What it does |
+|---|---|---|
+| 13 | `python phase3/run_phase3.py <work> build` | Cycles for both parents and both minis, front and next month, plus the natural-gas IV percentile |
+| 14 | `python phase3/run_phase3.py <work> discover` | Best variant of each of 11 new families (rules in `phase3/AMENDMENT_A3.md`); freeze `p3_candidates.json` |
+| 15 | `python phase3/run_phase3.py <work> test` | One-time tests: crude 2018–19 AND 2024–26, a walk-forward per family, and a 2018–19 re-test of every earlier passer |
+| 16 | `python phase3/robust3.py <work>` | G2 robustness, why C-E weakened in 2018–19, 2018–19 trade lists, ₹10 lakh portfolios |
+
+Results are in `phase3/REPORT_PHASE3.md`. Phase 3 added `require_expiry` to
+`engine.build_cycles`, so a calendar's back month can be loaded before it expires; the
+default behaviour is unchanged.
+
 `engine.py` is the backtest. `test_engine.py` is its hand-checked tests, and `b76.py` is
 Black-76 (implied vol and delta only; no P&L ever comes from a model price).

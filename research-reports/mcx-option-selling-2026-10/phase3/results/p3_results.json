@@ -1,0 +1,564 @@
+{
+ "phase3": [
+  {
+   "family": "K3",
+   "kind": "dhstrangle",
+   "inst": "CRUDEOILM",
+   "variant": "(0.35, 15)",
+   "disc": {
+    "family": "K3",
+    "variant": "(0.35, 15)",
+    "n": 53,
+    "coverage": 1.0,
+    "net": 370018.7702628001,
+    "pf": 4.196778696867525,
+    "t": 4.049576058307096,
+    "worst_roc": -0.054615129683185146,
+    "net_2x": 341538.03026280005,
+    "eligible": 1.0,
+    "p5": 0.011077724334656407
+   },
+   "T1_2018_19": {
+    "n": 19,
+    "net": -36784,
+    "win": 0.579,
+    "pf": 0.65,
+    "worst": -47744,
+    "worst_roc": -0.115,
+    "maxdd": 67289,
+    "avg_capital": 408540,
+    "net_2x": -43268,
+    "pass": false
+   },
+   "T2_2024_26_mini": {
+    "n": 29,
+    "net": 140074,
+    "win": 0.69,
+    "pf": 1.94,
+    "worst": -72428,
+    "worst_roc": -0.117,
+    "maxdd": 72428,
+    "avg_capital": 613863,
+    "net_2x": 121304,
+    "pass": true
+   },
+   "T2_parent_crosscheck": {
+    "n": 29,
+    "net": 107804,
+    "win": 0.69,
+    "pf": 1.58,
+    "worst": -101569,
+    "worst_roc": -0.165,
+    "maxdd": 101569,
+    "avg_capital": 617114,
+    "net_2x": 89066,
+    "pass": true
+   },
+   "walkforward": [
+    {
+     "year": 2022,
+     "pick": "(0.25, 15)",
+     "net": 124246,
+     "n": 12
+    },
+    {
+     "year": 2023,
+     "pick": "(0.25, 15)",
+     "net": 34079,
+     "n": 12
+    },
+    {
+     "year": 2024,
+     "pick": "(0.35, 15)",
+     "net": 44150,
+     "n": 12
+    },
+    {
+     "year": 2025,
+     "pick": "(0.35, 15)",
+     "net": 60970,
+     "n": 12
+    },
+    {
+     "year": 2026,
+     "pick": "(0.35, 15)",
+     "net": 37879,
+     "n": 10
+    }
+   ],
+   "walkforward_total": 301324,
+   "PASSED": false
+  },
+  {
+   "family": "K4",
+   "kind": "dhband",
+   "inst": "CRUDEOILM",
+   "variant": "(2, 10)",
+   "disc": {
+    "family": "K4",
+    "variant": "(2, 10)",
+    "n": 53,
+    "coverage": 1.0,
+    "net": 376830.50791280007,
+    "pf": 4.2074694314867696,
+    "t": 4.106570247466711,
+    "worst_roc": -0.06789281642301258,
+    "net_2x": 335109.6679127999,
+    "eligible": 1.0,
+    "p5": 0.01097073353716326
+   },
+   "T1_2018_19": {
+    "n": 19,
+    "net": 5028,
+    "win": 0.789,
+    "pf": 1.06,
+    "worst": -48893,
+    "worst_roc": -0.123,
+    "maxdd": 69426,
+    "avg_capital": 409487,
+    "net_2x": -2965,
+    "pass": false
+   },
+   "T2_2024_26_mini": {
+    "n": 29,
+    "net": 229997,
+    "win": 0.724,
+    "pf": 2.81,
+    "worst": -57603,
+    "worst_roc": -0.086,
+    "maxdd": 57603,
+    "avg_capital": 635243,
+    "net_2x": 203449,
+    "pass": true
+   },
+   "T2_parent_crosscheck": {
+    "n": 29,
+    "net": 170138,
+    "win": 0.69,
+    "pf": 2.22,
+    "worst": -51670,
+    "worst_roc": -0.077,
+    "maxdd": 51670,
+    "avg_capital": 637928,
+    "net_2x": 143130,
+    "pass": true
+   },
+   "walkforward": [
+    {
+     "year": 2022,
+     "pick": "(3, 5)",
+     "net": 79770,
+     "n": 12
+    },
+    {
+     "year": 2023,
+     "pick": "(3, 5)",
+     "net": 60050,
+     "n": 12
+    },
+    {
+     "year": 2024,
+     "pick": "(3, 5)",
+     "net": 33040,
+     "n": 12
+    },
+    {
+     "year": 2025,
+     "pick": "(2, 10)",
+     "net": 50284,
+     "n": 12
+    },
+    {
+     "year": 2026,
+     "pick": "(2, 10)",
+     "net": 93045,
+     "n": 10
+    }
+   ],
+   "walkforward_total": 316189,
+   "PASSED": false
+  },
+  {
+   "family": "K5",
+   "kind": "roll",
+   "inst": "CRUDEOILM",
+   "variant": "(0.15, 0.4, 15)",
+   "disc": {
+    "family": "K5",
+    "variant": "(0.15, 0.4, 15)",
+    "n": 47,
+    "coverage": 0.8867924528301887,
+    "net": 20279.260000000002,
+    "pf": 3.2606862570230972,
+    "t": 3.414830914947663,
+    "worst_roc": -0.045361901047457354,
+    "net_2x": 19372.92,
+    "eligible": 1.0,
+    "p5": 0.006661769923650034
+   },
+   "T1_2018_19": {
+    "n": 17,
+    "net": -2372,
+    "win": 0.471,
+    "pf": 0.59,
+    "worst": -2026,
+    "worst_roc": -0.069,
+    "maxdd": 4315,
+    "avg_capital": 31947,
+    "net_2x": -2580,
+    "pass": false
+   },
+   "T2_2024_26_mini": {
+    "n": 29,
+    "net": -2376,
+    "win": 0.517,
+    "pf": 0.88,
+    "worst": -5762,
+    "worst_roc": -0.128,
+    "maxdd": 6866,
+    "avg_capital": 48279,
+    "net_2x": -3256,
+    "pass": false
+   },
+   "T2_parent_crosscheck": {
+    "n": 29,
+    "net": -3795,
+    "win": 0.552,
+    "pf": 0.82,
+    "worst": -5843,
+    "worst_roc": -0.13,
+    "maxdd": 8988,
+    "avg_capital": 48268,
+    "net_2x": -4671,
+    "pass": false
+   },
+   "walkforward": [
+    {
+     "year": 2022,
+     "pick": "(0.15, 0.3, 15)",
+     "net": 10187,
+     "n": 11
+    },
+    {
+     "year": 2023,
+     "pick": "(0.15, 0.3, 15)",
+     "net": -1185,
+     "n": 12
+    },
+    {
+     "year": 2024,
+     "pick": "(0.15, 0.4, 15)",
+     "net": 2204,
+     "n": 12
+    },
+    {
+     "year": 2025,
+     "pick": "(0.15, 0.4, 15)",
+     "net": -2773,
+     "n": 12
+    },
+    {
+     "year": 2026,
+     "pick": "(0.15, 0.3, 15)",
+     "net": -2155,
+     "n": 10
+    }
+   ],
+   "walkforward_total": 6278,
+   "PASSED": false
+  },
+  {
+   "family": "K6",
+   "kind": "expweek",
+   "inst": "CRUDEOILM",
+   "variant": "('dstrangle', 0.2, 2)",
+   "disc": {
+    "family": "K6",
+    "variant": "('dstrangle', 0.2, 2)",
+    "n": 53,
+    "coverage": 1.0,
+    "net": 16461.469999999998,
+    "pf": 7.898063602344964,
+    "t": 6.228544059137618,
+    "worst_roc": -0.046705089663766575,
+    "net_2x": 16105.85,
+    "eligible": 1.0,
+    "p5": 0.0047440188001079
+   },
+   "T1_2018_19": {
+    "n": 19,
+    "net": -2712,
+    "win": 0.789,
+    "pf": 0.51,
+    "worst": -2503,
+    "worst_roc": -0.086,
+    "maxdd": 3367,
+    "avg_capital": 31585,
+    "net_2x": -2837,
+    "pass": false
+   },
+   "T2_2024_26_mini": {
+    "n": 29,
+    "net": 10164,
+    "win": 0.862,
+    "pf": 3.35,
+    "worst": -3835,
+    "worst_roc": -0.064,
+    "maxdd": 3835,
+    "avg_capital": 49551,
+    "net_2x": 9883,
+    "pass": true
+   },
+   "T2_parent_crosscheck": {
+    "n": 29,
+    "net": 8448,
+    "win": 0.828,
+    "pf": 2.73,
+    "worst": -4277,
+    "worst_roc": -0.071,
+    "maxdd": 4277,
+    "avg_capital": 49552,
+    "net_2x": 8173,
+    "pass": true
+   },
+   "walkforward": [
+    {
+     "year": 2022,
+     "pick": "('dstrangle', 0.15, 2)",
+     "net": 5862,
+     "n": 12
+    },
+    {
+     "year": 2023,
+     "pick": "('dstrangle', 0.15, 2)",
+     "net": 2378,
+     "n": 12
+    },
+    {
+     "year": 2024,
+     "pick": "('dstrangle', 0.2, 2)",
+     "net": 2914,
+     "n": 12
+    },
+    {
+     "year": 2025,
+     "pick": "('dstrangle', 0.2, 2)",
+     "net": 2061,
+     "n": 12
+    },
+    {
+     "year": 2026,
+     "pick": "('dstrangle', 0.2, 2)",
+     "net": 4883,
+     "n": 10
+    }
+   ],
+   "walkforward_total": 18098,
+   "PASSED": false
+  },
+  {
+   "family": "G2",
+   "kind": "calmdh",
+   "inst": "NATGASMINI",
+   "variant": "(50, 10)",
+   "disc": {
+    "family": "G2",
+    "variant": "(50, 10)",
+    "n": 16,
+    "coverage": 1.0,
+    "net": 96341.40209299991,
+    "pf": 5.08246299398394,
+    "t": 2.4131844090467496,
+    "worst_roc": -0.06773330929004635,
+    "net_2x": 74121.56209299987,
+    "eligible": 1.0,
+    "p5": 0.005231068298315925
+   },
+   "T2_2024_26_mini": {
+    "n": 15,
+    "net": 62743,
+    "win": 0.667,
+    "pf": 1.68,
+    "worst": -27950,
+    "worst_roc": -0.07,
+    "maxdd": 53909,
+    "avg_capital": 371724,
+    "net_2x": 45771,
+    "pass": true
+   },
+   "T2_parent_crosscheck": {
+    "n": 15,
+    "net": 49442,
+    "win": 0.667,
+    "pf": 1.53,
+    "worst": -36378,
+    "worst_roc": -0.067,
+    "maxdd": 58667,
+    "avg_capital": 372361,
+    "net_2x": 32538,
+    "pass": true
+   },
+   "walkforward": [
+    {
+     "year": 2024,
+     "pick": "(50, 10)",
+     "net": -41401,
+     "n": 6
+    },
+    {
+     "year": 2025,
+     "pick": null,
+     "net": 0.0,
+     "n": 0
+    },
+    {
+     "year": 2026,
+     "pick": "(40, 10)",
+     "net": 108109,
+     "n": 6
+    }
+   ],
+   "walkforward_total": 66708,
+   "PASSED": true
+  },
+  {
+   "family": "G5",
+   "kind": "ratio",
+   "inst": "NATGASMINI",
+   "variant": "('PE', 0.25, 0.1, 15, None)",
+   "disc": {
+    "family": "G5",
+    "variant": "('PE', 0.25, 0.1, 15, None)",
+    "n": 26,
+    "coverage": 1.0,
+    "net": 39636.46499999998,
+    "pf": 2.9916035169709647,
+    "t": 1.5221211670183707,
+    "worst_roc": -0.06616337923472695,
+    "net_2x": 37000.02999999999,
+    "eligible": 1.0,
+    "p5": 0.0007969482072223281
+   },
+   "T2_2024_26_mini": {
+    "n": 25,
+    "net": 992,
+    "win": 0.24,
+    "pf": 1.05,
+    "worst": -4837,
+    "worst_roc": -0.135,
+    "maxdd": 11623,
+    "avg_capital": 31641,
+    "net_2x": -221,
+    "pass": false
+   },
+   "T2_parent_crosscheck": {
+    "n": 28,
+    "net": 4009,
+    "win": 0.25,
+    "pf": 1.23,
+    "worst": -2687,
+    "worst_roc": -0.075,
+    "maxdd": 9076,
+    "avg_capital": 30478,
+    "net_2x": 2732,
+    "pass": true
+   },
+   "walkforward": [
+    {
+     "year": 2024,
+     "pick": "('CE', 0.3, 0.15, 10, None)",
+     "net": 7408,
+     "n": 12
+    },
+    {
+     "year": 2025,
+     "pick": "('CE', 0.3, 0.15, 10, None)",
+     "net": -7038,
+     "n": 12
+    },
+    {
+     "year": 2026,
+     "pick": null,
+     "net": 0.0,
+     "n": 0
+    }
+   ],
+   "walkforward_total": 370,
+   "PASSED": false
+  }
+ ],
+ "earlier_on_T1": {
+  "CO-1": {
+   "n": 11,
+   "net": 5026,
+   "win": 0.909,
+   "pf": 3.33,
+   "worst": -2161,
+   "worst_roc": -0.125,
+   "maxdd": 2161,
+   "avg_capital": 15730,
+   "net_2x": 4889,
+   "pass": true
+  },
+  "CO-2": {
+   "n": 7,
+   "net": 1576,
+   "win": 0.857,
+   "pf": 2.97,
+   "worst": -799,
+   "worst_roc": -0.046,
+   "maxdd": 799,
+   "avg_capital": 15858,
+   "net_2x": 1531,
+   "pass": true
+  },
+  "CO-3": {
+   "n": 10,
+   "net": -347,
+   "win": 0.6,
+   "pf": 0.92,
+   "worst": -1969,
+   "worst_roc": -0.093,
+   "maxdd": 2717,
+   "avg_capital": 16503,
+   "net_2x": -532,
+   "pass": false
+  },
+  "C-B": {
+   "n": 18,
+   "net": -1136,
+   "win": 0.889,
+   "pf": 0.61,
+   "worst": -2457,
+   "worst_roc": -0.13,
+   "maxdd": 2733,
+   "avg_capital": 15785,
+   "net_2x": -1199,
+   "pass": false
+  },
+  "C-C": {
+   "n": 18,
+   "net": 163,
+   "win": 0.833,
+   "pf": 1.06,
+   "worst": -2352,
+   "worst_roc": -0.062,
+   "maxdd": 2352,
+   "avg_capital": 31571,
+   "net_2x": 68,
+   "pass": false
+  },
+  "C-E (10 lots)": {
+   "n": 19,
+   "net": 9514,
+   "win": 0.789,
+   "pf": 1.11,
+   "worst": -42865,
+   "worst_roc": -0.148,
+   "maxdd": 63718,
+   "avg_capital": 315708,
+   "net_2x": 1520,
+   "pass": false
+  }
+ }
+}

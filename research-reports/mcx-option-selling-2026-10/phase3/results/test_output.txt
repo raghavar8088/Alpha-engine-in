@@ -1,0 +1,42 @@
+
+K3 dhstrangle (0.35, 15) (CRUDEOILM) -> fail
+   T1_2018_19: {'n': 19, 'net': -36784, 'win': 0.579, 'pf': 0.65, 'worst': -47744, 'worst_roc': -0.115, 'maxdd': 67289, 'avg_capital': 408540, 'net_2x': -43268, 'pass': False}
+   T2_2024_26_mini: {'n': 29, 'net': 140074, 'win': 0.69, 'pf': 1.94, 'worst': -72428, 'worst_roc': -0.117, 'maxdd': 72428, 'avg_capital': 613863, 'net_2x': 121304, 'pass': True}
+   T2_parent_crosscheck: {'n': 29, 'net': 107804, 'win': 0.69, 'pf': 1.58, 'worst': -101569, 'worst_roc': -0.165, 'maxdd': 101569, 'avg_capital': 617114, 'net_2x': 89066, 'pass': True}
+   walk-forward: [(2022, 124246), (2023, 34079), (2024, 44150), (2025, 60970), (2026, 37879)] total 301324
+
+K4 dhband (2, 10) (CRUDEOILM) -> fail
+   T1_2018_19: {'n': 19, 'net': 5028, 'win': 0.789, 'pf': 1.06, 'worst': -48893, 'worst_roc': -0.123, 'maxdd': 69426, 'avg_capital': 409487, 'net_2x': -2965, 'pass': False}
+   T2_2024_26_mini: {'n': 29, 'net': 229997, 'win': 0.724, 'pf': 2.81, 'worst': -57603, 'worst_roc': -0.086, 'maxdd': 57603, 'avg_capital': 635243, 'net_2x': 203449, 'pass': True}
+   T2_parent_crosscheck: {'n': 29, 'net': 170138, 'win': 0.69, 'pf': 2.22, 'worst': -51670, 'worst_roc': -0.077, 'maxdd': 51670, 'avg_capital': 637928, 'net_2x': 143130, 'pass': True}
+   walk-forward: [(2022, 79770), (2023, 60050), (2024, 33040), (2025, 50284), (2026, 93045)] total 316189
+
+K5 roll (0.15, 0.4, 15) (CRUDEOILM) -> fail
+   T1_2018_19: {'n': 17, 'net': -2372, 'win': 0.471, 'pf': 0.59, 'worst': -2026, 'worst_roc': -0.069, 'maxdd': 4315, 'avg_capital': 31947, 'net_2x': -2580, 'pass': False}
+   T2_2024_26_mini: {'n': 29, 'net': -2376, 'win': 0.517, 'pf': 0.88, 'worst': -5762, 'worst_roc': -0.128, 'maxdd': 6866, 'avg_capital': 48279, 'net_2x': -3256, 'pass': False}
+   T2_parent_crosscheck: {'n': 29, 'net': -3795, 'win': 0.552, 'pf': 0.82, 'worst': -5843, 'worst_roc': -0.13, 'maxdd': 8988, 'avg_capital': 48268, 'net_2x': -4671, 'pass': False}
+   walk-forward: [(2022, 10187), (2023, -1185), (2024, 2204), (2025, -2773), (2026, -2155)] total 6278
+
+K6 expweek ('dstrangle', 0.2, 2) (CRUDEOILM) -> fail
+   T1_2018_19: {'n': 19, 'net': -2712, 'win': 0.789, 'pf': 0.51, 'worst': -2503, 'worst_roc': -0.086, 'maxdd': 3367, 'avg_capital': 31585, 'net_2x': -2837, 'pass': False}
+   T2_2024_26_mini: {'n': 29, 'net': 10164, 'win': 0.862, 'pf': 3.35, 'worst': -3835, 'worst_roc': -0.064, 'maxdd': 3835, 'avg_capital': 49551, 'net_2x': 9883, 'pass': True}
+   T2_parent_crosscheck: {'n': 29, 'net': 8448, 'win': 0.828, 'pf': 2.73, 'worst': -4277, 'worst_roc': -0.071, 'maxdd': 4277, 'avg_capital': 49552, 'net_2x': 8173, 'pass': True}
+   walk-forward: [(2022, 5862), (2023, 2378), (2024, 2914), (2025, 2061), (2026, 4883)] total 18098
+
+G2 calmdh (50, 10) (NATGASMINI) -> PASS
+   T2_2024_26_mini: {'n': 15, 'net': 62743, 'win': 0.667, 'pf': 1.68, 'worst': -27950, 'worst_roc': -0.07, 'maxdd': 53909, 'avg_capital': 371724, 'net_2x': 45771, 'pass': True}
+   T2_parent_crosscheck: {'n': 15, 'net': 49442, 'win': 0.667, 'pf': 1.53, 'worst': -36378, 'worst_roc': -0.067, 'maxdd': 58667, 'avg_capital': 372361, 'net_2x': 32538, 'pass': True}
+   walk-forward: [(2024, -41401), (2025, 0.0), (2026, 108109)] total 66708
+
+G5 ratio ('PE', 0.25, 0.1, 15, None) (NATGASMINI) -> fail
+   T2_2024_26_mini: {'n': 25, 'net': 992, 'win': 0.24, 'pf': 1.05, 'worst': -4837, 'worst_roc': -0.135, 'maxdd': 11623, 'avg_capital': 31641, 'net_2x': -221, 'pass': False}
+   T2_parent_crosscheck: {'n': 28, 'net': 4009, 'win': 0.25, 'pf': 1.23, 'worst': -2687, 'worst_roc': -0.075, 'maxdd': 9076, 'avg_capital': 30478, 'net_2x': 2732, 'pass': True}
+   walk-forward: [(2024, 7408), (2025, -7038), (2026, 0.0)] total 370
+
+=== earlier crude passers on T1 (2018-19, never seen):
+   CO-1: PASS {'n': 11, 'net': 5026, 'win': 0.909, 'pf': 3.33, 'worst': -2161, 'worst_roc': -0.125, 'maxdd': 2161, 'avg_capital': 15730, 'net_2x': 4889, 'pass': True}
+   CO-2: PASS {'n': 7, 'net': 1576, 'win': 0.857, 'pf': 2.97, 'worst': -799, 'worst_roc': -0.046, 'maxdd': 799, 'avg_capital': 15858, 'net_2x': 1531, 'pass': True}
+   CO-3: FAIL {'n': 10, 'net': -347, 'win': 0.6, 'pf': 0.92, 'worst': -1969, 'worst_roc': -0.093, 'maxdd': 2717, 'avg_capital': 16503, 'net_2x': -532, 'pass': False}
+   C-B: FAIL {'n': 18, 'net': -1136, 'win': 0.889, 'pf': 0.61, 'worst': -2457, 'worst_roc': -0.13, 'maxdd': 2733, 'avg_capital': 15785, 'net_2x': -1199, 'pass': False}
+   C-C: FAIL {'n': 18, 'net': 163, 'win': 0.833, 'pf': 1.06, 'worst': -2352, 'worst_roc': -0.062, 'maxdd': 2352, 'avg_capital': 31571, 'net_2x': 68, 'pass': False}
+   C-E (10 lots): FAIL {'n': 19, 'net': 9514, 'win': 0.789, 'pf': 1.11, 'worst': -42865, 'worst_roc': -0.148, 'maxdd': 63718, 'avg_capital': 315708, 'net_2x': 1520, 'pass': False}

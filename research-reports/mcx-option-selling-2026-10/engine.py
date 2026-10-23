@@ -91,7 +91,7 @@ def underlying_map(fut: pd.DataFrame, sym: str) -> dict:
 
 
 def build_cycles(opt: pd.DataFrame, fut: pd.DataFrame, sym: str, fut_sym: str,
-                 exp_from: str, exp_to: str) -> list[Cycle]:
+                 exp_from: str, exp_to: str, require_expiry: bool = True) -> list[Cycle]:
     o = opt[(opt.sym == sym) & (opt.expiry >= exp_from) & (opt.expiry <= exp_to)]
     f = fut[fut.sym == fut_sym]
     umap = underlying_map(fut, fut_sym)
@@ -103,10 +103,12 @@ def build_cycles(opt: pd.DataFrame, fut: pd.DataFrame, sym: str, fut_sym: str,
         fc = f[f.expiry == fe].set_index("date").sort_index()
         dates = sorted(d for d in g.date.unique() if d <= exp)
         dates = [d for d in dates if d in fc.index]
-        if len(dates) < 6 or dates[-1] != exp:
-            continue
+        if len(dates) < 6 or (require_expiry and dates[-1] != exp):
+            continue      # a calendar's BACK month may still be live (A3)
         n = len(dates)
         tdte = np.arange(n - 1, -1, -1)
+        if dates[-1] != exp:            # unfinished back month: count to the expiry by trading days left
+            tdte = tdte + 10 ** 6
         Fv = np.array([fc.at[d, "close"] if fc.at[d, "traded"] else np.nan for d in dates], dtype=float)
         # realised vol: the underlying contract's own closes, 20 sessions back
         fcl = fc["close"].where(fc["traded"]).astype(float)

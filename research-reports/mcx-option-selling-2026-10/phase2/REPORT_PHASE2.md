@@ -1,5 +1,14 @@
 # Phase 2: strategies built from the option data itself (22 Oct 2026)
 
+> **Updated 23 Oct 2026 by Phase 3.** All three crude strategies here were re-tested once on
+> Jun 2018 – Dec 2019, a period they had never seen, and **all three missed the bar**:
+> **C-E** +₹9,514 per 10 lots at PF 1.11 (needed 1.15), essentially break-even on ~₹3.2 lakh;
+> **C-B** −₹1,136; **C-C** +₹163 at PF 1.06. C-E's profit turns out to depend on implied vol
+> running well above the volatility that follows, which it did in 2020–26 but not in 2018–19.
+> **C-E is now paper-only, and C-B and C-C should be dropped.** N-B is unchanged (natural gas
+> has no 2018–19 option data), and Phase 3 found a second calm-volatility natural-gas
+> strategy, G2. The ₹10 lakh portfolio below is superseded: see `phase3/REPORT_PHASE3.md`.
+
 ## The answer first
 - I analysed the MCX option data to find where the premium actually is.
 - From that, I built 7 new strategy families.
