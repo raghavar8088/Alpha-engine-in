@@ -40,5 +40,19 @@ Results are in `phase3/REPORT_PHASE3.md`. Phase 3 added `require_expiry` to
 `engine.build_cycles`, so a calendar's back month can be loaded before it expires; the
 default behaviour is unchanged.
 
+## Phase 4 (`phase4/`): one trade a week, selling and buying; target "2% every week"
+| Step | Command | What it does |
+|---|---|---|
+| 17 | `python phase4/refresh_mcx.py <data> 2026-10-23 2026-10-20` | Re-fetches the contracts still trading, so the data runs to 23 Oct 2026 |
+| 18 | `python build_dataset.py <data> <work4>` | Clean tables from the refreshed data (a separate work folder) |
+| 19 | `python phase4/run_phase4.py <work4> build` | Cycles (finished and live) and the causal IV percentile for both instruments |
+| 20 | `python phase4/test_engine4.py <work4>` | Weekly trades must reproduce the audited engines exactly |
+| 21 | `python phase4/run_phase4.py <work4> discover` | 988 weekly variants (rules in `phase4/AMENDMENT_A4.md`); freeze `p4_candidates.json` |
+| 22 | `python phase4/run_phase4.py <work4> test` | One-time tests on 2018–19 and 2024–26, plus a walk-forward per family |
+| 23 | `python phase4/reference4.py <work4>` | CO-1, CO-2, N-B and the ₹10 lakh core, marked to market every week |
+| 24 | `python phase4/robust4.py <work4>` | Robustness of the one pass, and what 2% a week would take |
+
+Results are in `phase4/REPORT_PHASE4.md`.
+
 `engine.py` is the backtest. `test_engine.py` is its hand-checked tests, and `b76.py` is
 Black-76 (implied vol and delta only; no P&L ever comes from a model price).

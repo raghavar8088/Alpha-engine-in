@@ -1,0 +1,62 @@
+CRUDEOILM WS1 strangle    22/90 eligible | highest mean: (0.3, None, 'none', 'trade') mean 0.28%/wk, profitable weeks 68%, >=2% weeks 21%
+      -> FROZEN (0.2, None, 'ivp<=50', 'trade'): n=137 net=Rs16,658 pf=1.89 t=2.74 mean 0.16%/wk, profitable weeks 42%, >=2% weeks 1%, worst -5.2%
+CRUDEOILM WS2 straddle     0/18 eligible | highest mean: (None, 'none', 'trade') mean 0.12%/wk, profitable weeks 63%, >=2% weeks 24%
+      -> no eligible variant
+CRUDEOILM WS3 put         14/72 eligible | highest mean: (0.2, None, 'none', 'trade') mean 0.46%/wk, profitable weeks 77%, >=2% weeks 23%
+      -> FROZEN (0.2, None, 'ivp<=50', 'trade'): n=143 net=Rs16,462 pf=2.00 t=2.83 mean 0.38%/wk, profitable weeks 49%, >=2% weeks 7%, worst -11.8%
+CRUDEOILM WS4 call         8/72 eligible | highest mean: (0.3, 2.0, 'ivp>=50', 'trade') mean 0.24%/wk, profitable weeks 28%, >=2% weeks 19%
+      -> FROZEN (0.1, 1.0, 'none', 'trade'): n=196 net=Rs9,732 pf=2.15 t=3.40 mean 0.18%/wk, profitable weeks 63%, >=2% weeks 2%, worst -4.4%
+CRUDEOILM WS5 trendside   25/54 eligible | highest mean: (0.25, None, 'none', 'trade') mean 0.54%/wk, profitable weeks 75%, >=2% weeks 32%
+      -> FROZEN (0.15, 2.0, 'none', 'trade'): n=221 net=Rs17,453 pf=1.90 t=3.02 mean 0.40%/wk, profitable weeks 76%, >=2% weeks 5%, worst -10.7%
+CRUDEOILM WS6 condor       0/36 eligible | highest mean: (0.2, 0.08, None, 'ivp>=50', 'skip') mean 0.01%/wk, profitable weeks 11%, >=2% weeks 1%
+      -> no eligible variant
+CRUDEOILM WS7 dh           4/6 eligible | highest mean: ('none', 'trade') mean 0.39%/wk, profitable weeks 68%, >=2% weeks 16%
+      -> FROZEN ('ivp<=50', 'trade'): n=143 net=Rs270,404 pf=2.22 t=3.76 mean 0.24%/wk, profitable weeks 42%, >=2% weeks 6%, worst -3.5%
+CRUDEOILM WB1 lstraddle    0/16 eligible | highest mean: ('iv<rv', 'tp50sl40', 'skip') mean -0.59%/wk, profitable weeks 3%, >=2% weeks 3%
+      -> no eligible variant
+CRUDEOILM WB2 lstrangle    0/24 eligible | highest mean: (0.25, 'ivp<=20', 'week', 'skip') mean -4.11%/wk, profitable weeks 6%, >=2% weeks 6%
+      -> no eligible variant
+CRUDEOILM WB3 trend        0/18 eligible | highest mean: (0.35, 'tp50sl50', 'skip') mean 0.36%/wk, profitable weeks 26%, >=2% weeks 26%
+      -> no eligible variant
+CRUDEOILM WB4 breakout     0/24 eligible | highest mean: (20, 0.3, 'tp50sl50', 'skip') mean -0.83%/wk, profitable weeks 9%, >=2% weeks 9%
+      -> no eligible variant
+CRUDEOILM WB5 momentum     0/24 eligible | highest mean: (0.02, 0.3, 'tp50sl50', 'skip') mean -4.32%/wk, profitable weeks 19%, >=2% weeks 19%
+      -> no eligible variant
+CRUDEOILM WB6 reversal     0/24 eligible | highest mean: (0.04, 0.5, 'tp50sl50', 'skip') mean -4.39%/wk, profitable weeks 9%, >=2% weeks 9%
+      -> no eligible variant
+CRUDEOILM WB7 lottery      0/12 eligible | highest mean: ('put', 'tp200', 'expiry') mean -21.73%/wk, profitable weeks 1%, >=2% weeks 1%
+      -> no eligible variant
+CRUDEOILM WB8 report       0/4 eligible | highest mean: ('straddle', 'skip') mean -5.17%/wk, profitable weeks 16%, >=2% weeks 13%
+      -> no eligible variant
+NATGASMINI WS1 strangle     3/90 eligible | highest mean: (0.2, 1.0, 'none', 'trade') mean 0.43%/wk, profitable weeks 67%, >=2% weeks 47%
+      -> FROZEN (0.1, None, 'ivp<=50', 'trade'): n=68 net=Rs10,114 pf=2.04 t=1.80 mean 0.21%/wk, profitable weeks 43%, >=2% weeks 5%, worst -5.8%
+NATGASMINI WS2 straddle     0/18 eligible | highest mean: (None, 'ivp<=50', 'trade') mean 0.36%/wk, profitable weeks 41%, >=2% weeks 31%
+      -> no eligible variant
+NATGASMINI WS3 put          0/72 eligible | highest mean: (0.2, 1.0, 'ivp>=50', 'trade') mean 0.07%/wk, profitable weeks 19%, >=2% weeks 19%
+      -> no eligible variant
+NATGASMINI WS4 call        33/72 eligible | highest mean: (0.3, None, 'ivp<=50', 'trade') mean 1.95%/wk, profitable weeks 50%, >=2% weeks 48%
+      -> FROZEN (0.2, None, 'ivp<=50', 'trade'): n=70 net=Rs25,936 pf=2.69 t=2.53 mean 1.33%/wk, profitable weeks 51%, >=2% weeks 47%, worst -25.4%
+NATGASMINI WS5 trendside    5/54 eligible | highest mean: (0.35, None, 'none', 'trade') mean 2.16%/wk, profitable weeks 71%, >=2% weeks 69%
+      -> FROZEN (0.15, 2.0, 'none', 'trade'): n=113 net=Rs26,056 pf=1.79 t=1.98 mean 0.84%/wk, profitable weeks 75%, >=2% weeks 62%, worst -24.7%
+NATGASMINI WS6 condor       0/36 eligible | highest mean: (0.2, 0.08, 1.0, 'ivp>=50', 'skip') mean -0.18%/wk, profitable weeks 10%, >=2% weeks 4%
+      -> no eligible variant
+NATGASMINI WS7 dh           0/6 eligible | highest mean: ('none', 'trade') mean 0.75%/wk, profitable weeks 56%, >=2% weeks 38%
+      -> no eligible variant
+NATGASMINI WB1 lstraddle    0/16 eligible | highest mean: ('ivp<=20', 'tp50sl40', 'skip') mean 0.11%/wk, profitable weeks 7%, >=2% weeks 7%
+      -> no eligible variant
+NATGASMINI WB2 lstrangle    0/24 eligible | highest mean: (0.25, 'ivp<=20', 'tp100sl50', 'skip') mean -0.25%/wk, profitable weeks 9%, >=2% weeks 9%
+      -> no eligible variant
+NATGASMINI WB3 trend        0/18 eligible | highest mean: (0.35, 'week', 'trade') mean 0.94%/wk, profitable weeks 30%, >=2% weeks 30%
+      -> no eligible variant
+NATGASMINI WB4 breakout     3/24 eligible | highest mean: (10, 0.3, 'tp50sl50', 'skip') mean 3.67%/wk, profitable weeks 12%, >=2% weeks 12%
+      -> FROZEN (10, 0.5, 'tp50sl50', 'skip'): n=29 net=Rs32,469 pf=2.10 t=1.53 mean 3.09%/wk, profitable weeks 12%, >=2% weeks 12%, worst -75.0%
+NATGASMINI WB5 momentum     0/24 eligible | highest mean: (0.04, 0.3, 'week', 'trade') mean 8.65%/wk, profitable weeks 24%, >=2% weeks 24%
+      -> no eligible variant
+NATGASMINI WB6 reversal     0/24 eligible | highest mean: (0.02, 0.5, 'tp50sl50', 'skip') mean -4.87%/wk, profitable weeks 21%, >=2% weeks 20%
+      -> no eligible variant
+NATGASMINI WB7 lottery      0/12 eligible | highest mean: ('put', 'week', 'expiry') mean -12.87%/wk, profitable weeks 3%, >=2% weeks 3%
+      -> no eligible variant
+NATGASMINI WB8 report       0/4 eligible | highest mean: ('straddle', 'skip') mean -4.51%/wk, profitable weeks 17%, >=2% weeks 16%
+      -> no eligible variant
+
+9 candidates frozen

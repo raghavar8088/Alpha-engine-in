@@ -1,0 +1,279 @@
+[
+ {
+  "family": "WS1",
+  "inst": "CRUDEOILM",
+  "variant": [
+   0.2,
+   null,
+   "ivp<=50",
+   "trade"
+  ],
+  "disc": {
+   "family": "WS1",
+   "inst": "CRUDEOILM",
+   "variant": "(0.2, None, 'ivp<=50', 'trade')",
+   "weeks": 231,
+   "allowed": 143,
+   "traded": 137,
+   "coverage": 0.958041958041958,
+   "net": 16657.91,
+   "pf": 1.8941727086365054,
+   "t": 2.735012628016816,
+   "mean_ret": 0.0015846183172085488,
+   "pos_weeks": 0.42424242424242425,
+   "ge2_weeks": 0.008658008658008658,
+   "worst_ret": -0.051830731736285045,
+   "maxdd": 3092.199999999999,
+   "avg_capital": 43489.73150364964,
+   "net_2x": 14099.51,
+   "eligible": true,
+   "p5": 0.0005859995792244633
+  }
+ },
+ {
+  "family": "WS3",
+  "inst": "CRUDEOILM",
+  "variant": [
+   0.2,
+   null,
+   "ivp<=50",
+   "trade"
+  ],
+  "disc": {
+   "family": "WS3",
+   "inst": "CRUDEOILM",
+   "variant": "(0.2, None, 'ivp<=50', 'trade')",
+   "weeks": 231,
+   "allowed": 143,
+   "traded": 143,
+   "coverage": 1.0,
+   "net": 16461.95,
+   "pf": 2.0026299168573525,
+   "t": 2.8270899955368636,
+   "mean_ret": 0.0038471224161885547,
+   "pos_weeks": 0.4935064935064935,
+   "ge2_weeks": 0.0735930735930736,
+   "worst_ret": -0.11800602249425594,
+   "maxdd": 2921.9400000000005,
+   "avg_capital": 21414.52917482517,
+   "net_2x": 15045.280000000002,
+   "eligible": true,
+   "p5": 0.0018569060762083063
+  }
+ },
+ {
+  "family": "WS4",
+  "inst": "CRUDEOILM",
+  "variant": [
+   0.1,
+   1.0,
+   "none",
+   "trade"
+  ],
+  "disc": {
+   "family": "WS4",
+   "inst": "CRUDEOILM",
+   "variant": "(0.1, 1.0, 'none', 'trade')",
+   "weeks": 231,
+   "allowed": 231,
+   "traded": 196,
+   "coverage": 0.8484848484848485,
+   "net": 9731.940000000002,
+   "pf": 2.1450176365805507,
+   "t": 3.401435708562867,
+   "mean_ret": 0.0017612513547460402,
+   "pos_weeks": 0.6320346320346321,
+   "ge2_weeks": 0.021645021645021644,
+   "worst_ret": -0.04434805955265192,
+   "maxdd": 2136.3999999999996,
+   "avg_capital": 21739.852040816328,
+   "net_2x": 8482.82,
+   "eligible": true,
+   "p5": 0.0007734099198846102
+  }
+ },
+ {
+  "family": "WS5",
+  "inst": "CRUDEOILM",
+  "variant": [
+   0.15,
+   2.0,
+   "none",
+   "trade"
+  ],
+  "disc": {
+   "family": "WS5",
+   "inst": "CRUDEOILM",
+   "variant": "(0.15, 2.0, 'none', 'trade')",
+   "weeks": 231,
+   "allowed": 230,
+   "traded": 221,
+   "coverage": 0.9608695652173913,
+   "net": 17453.24,
+   "pf": 1.8986019422674338,
+   "t": 3.0248186913486568,
+   "mean_ret": 0.004029261190472905,
+   "pos_weeks": 0.7575757575757576,
+   "ge2_weeks": 0.05194805194805195,
+   "worst_ret": -0.10696846212690053,
+   "maxdd": 2730.3099999999995,
+   "avg_capital": 21083.030552036198,
+   "net_2x": 15730.54,
+   "eligible": true,
+   "p5": 0.0019490097531679293
+  }
+ },
+ {
+  "family": "WS7",
+  "inst": "CRUDEOILM",
+  "variant": [
+   "ivp<=50",
+   "trade"
+  ],
+  "disc": {
+   "family": "WS7",
+   "inst": "CRUDEOILM",
+   "variant": "('ivp<=50', 'trade')",
+   "weeks": 231,
+   "allowed": 143,
+   "traded": 143,
+   "coverage": 1.0,
+   "net": 270404.21617080003,
+   "pf": 2.217043398868565,
+   "t": 3.7569213874961758,
+   "mean_ret": 0.0024051924696002393,
+   "pos_weeks": 0.42424242424242425,
+   "ge2_weeks": 0.06060606060606061,
+   "worst_ret": -0.03472981885484889,
+   "maxdd": 34611.89375999999,
+   "avg_capital": 495706.55370629375,
+   "net_2x": 170173.94617080007,
+   "eligible": true,
+   "p5": 0.0013178177185254288
+  }
+ },
+ {
+  "family": "WS1",
+  "inst": "NATGASMINI",
+  "variant": [
+   0.1,
+   null,
+   "ivp<=50",
+   "trade"
+  ],
+  "disc": {
+   "family": "WS1",
+   "inst": "NATGASMINI",
+   "variant": "(0.1, None, 'ivp<=50', 'trade')",
+   "weeks": 113,
+   "allowed": 70,
+   "traded": 68,
+   "coverage": 0.9714285714285714,
+   "net": 10114.054999999998,
+   "pf": 2.040255958760257,
+   "t": 1.802238681992861,
+   "mean_ret": 0.002052272692135127,
+   "pos_weeks": 0.4336283185840708,
+   "ge2_weeks": 0.05309734513274336,
+   "worst_ret": -0.05836019953556938,
+   "maxdd": 1715.9349999999995,
+   "avg_capital": 27758.347058823532,
+   "net_2x": 9538.889999999998,
+   "eligible": true,
+   "p5": -0.0002551118134040633
+  }
+ },
+ {
+  "family": "WS4",
+  "inst": "NATGASMINI",
+  "variant": [
+   0.2,
+   null,
+   "ivp<=50",
+   "trade"
+  ],
+  "disc": {
+   "family": "WS4",
+   "inst": "NATGASMINI",
+   "variant": "(0.2, None, 'ivp<=50', 'trade')",
+   "weeks": 113,
+   "allowed": 70,
+   "traded": 70,
+   "coverage": 1.0,
+   "net": 25935.855,
+   "pf": 2.6857555588776303,
+   "t": 2.5283450174314313,
+   "mean_ret": 0.013296518417533109,
+   "pos_weeks": 0.5132743362831859,
+   "ge2_weeks": 0.4690265486725664,
+   "worst_ret": -0.25429659401944943,
+   "maxdd": 6617.795,
+   "avg_capital": 14481.762857142858,
+   "net_2x": 24851.05,
+   "eligible": true,
+   "p5": 0.0044980850433259155
+  }
+ },
+ {
+  "family": "WS5",
+  "inst": "NATGASMINI",
+  "variant": [
+   0.15,
+   2.0,
+   "none",
+   "trade"
+  ],
+  "disc": {
+   "family": "WS5",
+   "inst": "NATGASMINI",
+   "variant": "(0.15, 2.0, 'none', 'trade')",
+   "weeks": 113,
+   "allowed": 113,
+   "traded": 113,
+   "coverage": 1.0,
+   "net": 26055.555,
+   "pf": 1.7890455674329633,
+   "t": 1.9775214389960623,
+   "mean_ret": 0.008375653931392706,
+   "pos_weeks": 0.7522123893805309,
+   "ge2_weeks": 0.6194690265486725,
+   "worst_ret": -0.2465179246352982,
+   "maxdd": 9670.14,
+   "avg_capital": 17231.917168141594,
+   "net_2x": 24196.019999999993,
+   "eligible": true,
+   "p5": -0.0012289385074268576
+  }
+ },
+ {
+  "family": "WB4",
+  "inst": "NATGASMINI",
+  "variant": [
+   10,
+   0.5,
+   "tp50sl50",
+   "skip"
+  ],
+  "disc": {
+   "family": "WB4",
+   "inst": "NATGASMINI",
+   "variant": "(10, 0.5, 'tp50sl50', 'skip')",
+   "weeks": 113,
+   "allowed": 29,
+   "traded": 29,
+   "coverage": 1.0,
+   "net": 32469.45,
+   "pf": 2.0989938806293713,
+   "t": 1.5295660795068011,
+   "mean_ret": 0.03088496236057981,
+   "pos_weeks": 0.11504424778761062,
+   "ge2_weeks": 0.11504424778761062,
+   "worst_ret": -0.7499131137603555,
+   "maxdd": 10221.399999999998,
+   "avg_capital": 6428.301724137931,
+   "net_2x": 17980.339999999997,
+   "eligible": true,
+   "p5": -0.020261664641864765
+  }
+ }
+]

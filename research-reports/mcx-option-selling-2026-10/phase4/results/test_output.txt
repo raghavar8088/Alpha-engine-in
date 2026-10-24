@@ -1,0 +1,50 @@
+
+CRUDEOILM WS1 strangle (0.2, None, 'ivp<=50', 'trade') -> tradeable fail | near-target fail | literal fail
+   T1_2018_19: weeks 83 traded 38 net Rs-6,402 pf 0.35 mean -0.26%/wk profitable 25% >=2% 0% worst -8.6% 2x Rs-6,901 f* nan
+   T2_2024_26_mini: weeks 125 traded 50 net Rs-9,711 pf 0.49 mean -0.17%/wk profitable 23% >=2% 1% worst -10.8% 2x Rs-10,719 f* nan
+   T2_parent_crosscheck: weeks 125 traded 51 net Rs-10,755 pf 0.44 mean -0.19%/wk profitable 24% >=2% 0% worst -10.7% 2x Rs-11,747 f* nan
+   walk-forward: [(2022, 4302), (2023, 1530), (2024, 1507), (2025, -7394), (2026, 3064)] total 3009
+
+CRUDEOILM WS3 put (0.2, None, 'ivp<=50', 'trade') -> tradeable fail | near-target fail | literal fail
+   T1_2018_19: weeks 83 traded 38 net Rs-3,037 pf 0.55 mean -0.25%/wk profitable 33% >=2% 0% worst -14.3% 2x Rs-3,293 f* nan
+   T2_2024_26_mini: weeks 125 traded 51 net Rs860 pf 1.09 mean 0.01%/wk profitable 30% >=2% 3% worst -15.5% 2x Rs373 f* 248.37
+   T2_parent_crosscheck: weeks 125 traded 51 net Rs198 pf 1.02 mean -0.02%/wk profitable 30% >=2% 1% worst -15.6% 2x Rs-259 f* nan
+   walk-forward: [(2022, 2384), (2023, 1840), (2024, -59), (2025, -1322), (2026, 3243)] total 6086
+
+CRUDEOILM WS4 call (0.1, 1.0, 'none', 'trade') -> tradeable fail | near-target fail | literal fail
+   T1_2018_19: weeks 83 traded 70 net Rs-4,550 pf 0.37 mean -0.38%/wk profitable 52% >=2% 0% worst -29.2% 2x Rs-4,762 f* nan
+   T2_2024_26_mini: weeks 125 traded 109 net Rs-5,144 pf 0.73 mean -0.16%/wk profitable 65% >=2% 2% worst -9.2% 2x Rs-5,341 f* nan
+   T2_parent_crosscheck: weeks 125 traded 120 net Rs-2,234 pf 0.87 mean -0.08%/wk profitable 70% >=2% 2% worst -9.1% 2x Rs-2,988 f* nan
+   walk-forward: [(2022, -1130), (2023, 2358), (2024, 1552), (2025, 196), (2026, -2898)] total 78
+
+CRUDEOILM WS5 trendside (0.15, 2.0, 'none', 'trade') -> tradeable fail | near-target fail | literal fail
+   T1_2018_19: weeks 83 traded 83 net Rs-5,227 pf 0.54 mean -0.42%/wk profitable 67% >=2% 0% worst -29.2% 2x Rs-5,626 f* nan
+   T2_2024_26_mini: weeks 125 traded 124 net Rs8,719 pf 1.49 mean 0.16%/wk profitable 74% >=2% 7% worst -11.5% 2x Rs7,480 f* 12.49
+   T2_parent_crosscheck: weeks 125 traded 125 net Rs-1,177 pf 0.95 mean -0.12%/wk profitable 70% >=2% 6% worst -13.8% 2x Rs-2,426 f* nan
+   walk-forward: [(2022, 3736), (2023, -3003), (2024, 490), (2025, -3546), (2026, 942)] total -1381
+
+CRUDEOILM WS7 dh ('ivp<=50', 'trade') -> tradeable fail | near-target fail | literal fail
+   T1_2018_19: weeks 83 traded 38 net Rs-112,247 pf 0.28 mean -0.33%/wk profitable 19% >=2% 2% worst -10.8% 2x Rs-129,790 f* nan
+   T2_2024_26_mini: weeks 125 traded 51 net Rs-82,931 pf 0.57 mean -0.10%/wk profitable 22% >=2% 1% worst -7.7% 2x Rs-115,953 f* nan
+   T2_parent_crosscheck: weeks 125 traded 51 net Rs-104,897 pf 0.50 mean -0.13%/wk profitable 22% >=2% 0% worst -7.9% 2x Rs-137,530 f* nan
+   walk-forward: [(2022, 65511), (2023, 68260), (2024, 33818), (2025, -52010), (2026, 55271)] total 170850
+
+NATGASMINI WS1 strangle (0.1, None, 'ivp<=50', 'trade') -> tradeable PASS | near-target fail | literal fail
+   T2_2024_26_mini: weeks 125 traded 73 net Rs8,346 pf 1.85 mean 0.26%/wk profitable 45% >=2% 3% worst -7.5% 2x Rs8,109 f* 7.57
+   T2_parent_crosscheck: weeks 125 traded 79 net Rs2,501 pf 1.20 mean 0.08%/wk profitable 46% >=2% 2% worst -7.8% 2x Rs2,231 f* 25.34
+   walk-forward: [(2024, -10805), (2025, 0.0), (2026, 0.0)] total -10805
+
+NATGASMINI WS4 call (0.2, None, 'ivp<=50', 'trade') -> tradeable fail | near-target fail | literal fail
+   T2_2024_26_mini: weeks 125 traded 81 net Rs2,313 pf 1.08 mean 0.13%/wk profitable 47% >=2% 42% worst -30.4% 2x Rs1,327 f* 15.83
+   T2_parent_crosscheck: weeks 125 traded 81 net Rs1,703 pf 1.06 mean 0.09%/wk profitable 46% >=2% 41% worst -29.0% 2x Rs723 f* 21.15
+   walk-forward: [(2024, -3877), (2025, -1190), (2026, 1469)] total -3598
+
+NATGASMINI WS5 trendside (0.15, 2.0, 'none', 'trade') -> tradeable fail | near-target fail | literal fail
+   T2_2024_26_mini: weeks 125 traded 125 net Rs-12,865 pf 0.73 mean -0.60%/wk profitable 69% >=2% 52% worst -45.9% 2x Rs-14,086 f* nan
+   T2_parent_crosscheck: weeks 125 traded 125 net Rs-14,697 pf 0.71 mean -0.75%/wk profitable 68% >=2% 54% worst -46.4% 2x Rs-15,918 f* nan
+   walk-forward: [(2024, -4960), (2025, -1834), (2026, -1961)] total -8755
+
+NATGASMINI WB4 breakout (10, 0.5, 'tp50sl50', 'skip') -> tradeable fail | near-target fail | literal fail
+   T2_2024_26_mini: weeks 125 traded 36 net Rs-22,203 pf 0.55 mean -4.50%/wk profitable 10% >=2% 10% worst -83.0% 2x Rs-24,761 f* nan
+   T2_parent_crosscheck: weeks 125 traded 37 net Rs-26,274 pf 0.47 mean -5.14%/wk profitable 10% >=2% 10% worst -83.6% 2x Rs-24,215 f* nan
+   walk-forward: [(2024, -611), (2025, -7578), (2026, 0.0)] total -8189
