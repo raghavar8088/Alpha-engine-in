@@ -1,0 +1,71 @@
+moves {"GOLD": {"2017": -1.5, "2018": 7.8, "2019": 19.7, "2020": 22.9, "2021": -4.3, "2022": 15.3, "2023": 14.5, "2024": 21.2, "2025": 76.1, "2026": 4.6}, "SILVER": {"2018": -4.1, "2019": 18.5, "2020": 55.4, "2021": -8.0, "2022": 12.4, "2023": 7.0, "2024": 17.3, "2025": 169.1, "2026": -17.0}, "COPPER": {"2018": -12.1, "2019": 8.2, "2020": 34.9, "2021": 25.8, "2022": -3.5, "2023": 1.3, "2024": 8.5, "2025": 61.9, "2026": 7.0}, "ZINC": {"2018": -16.5, "2019": 6.6, "2020": 21.1, "2021": 34.0, "2022": -6.4, "2023": -13.6, "2024": 19.6, "2025": 10.0, "2026": 30.0}, "GOLDM": {"2022": 6.7, "2023": 14.8, "2024": 21.2, "2025": 76.2, "2026": 3.4}, "SILVERM": {"2021": -6.8, "2022": 11.8, "2023": 7.0, "2024": 17.4, "2025": 171.2, "2026": -16.9}}
+CO-1  GOLD     n= 28 net Rs   1,347,120 | w/o best Rs   1,118,509 | pre-2024 Rs    291,732 (16) | 2024+ Rs  1,055,388 (12) | losing years 2/9 | 18.3%/yr on margin | worst -21.6% | {2017: 9593, 2019: 30610, 2020: 42476, 2021: -4718, 2022: 164771, 2023: 48999, 2024: -85790, 2025: 419531, 2026: 721647}
+      before 2024: PF 3.07, wins 0.88
+CO-1  SILVER   n= 31 net Rs     672,418 | w/o best Rs     526,769 | pre-2024 Rs    -49,610 (16) | 2024+ Rs    722,028 (15) | losing years 3/9 | 18.4%/yr on margin | worst -34.9% | {2018: -9641, 2019: 18298, 2020: 15754, 2021: -63145, 2022: 47176, 2023: -58053, 2024: 15314, 2025: 326975, 2026: 379739}
+      before 2024: PF 0.82, wins 0.62
+CO-1  COPPER   n= 44 net Rs     419,611 | w/o best Rs     322,736 | pre-2024 Rs     89,503 (17) | 2024+ Rs    330,107 (27) | losing years 2/8 | 22.4%/yr on margin | worst -54.3% | {2018: -2417, 2019: 45948, 2021: 7955, 2022: 35546, 2023: 2471, 2024: -35604, 2025: 77858, 2026: 287853}
+      before 2024: PF 1.95, wins 0.76
+CO-1  ZINC     n= 26 net Rs     189,357 | w/o best Rs     164,828 | pre-2024 Rs    -66,241 (8) | 2024+ Rs    255,598 (18) | losing years 2/5 | 15.8%/yr on margin | worst -39.7% | {2018: -35651, 2019: -30589, 2024: 64081, 2025: 142279, 2026: 49238}
+      before 2024: PF 0.29, wins 0.38
+CO-1  GOLDM    n= 28 net Rs     119,335 | w/o best Rs      98,944 | pre-2024 Rs     11,771 (11) | 2024+ Rs    107,565 (17) | losing years 0/5 | 30.1%/yr on margin | worst -19.5% | {2022: 4281, 2023: 7490, 2024: 16568, 2025: 23497, 2026: 67500}
+      before 2024: PF 2.04, wins 0.73
+CO-1  SILVERM  n= 25 net Rs      -5,872 | w/o best Rs     -28,629 | pre-2024 Rs      6,741 (9) | 2024+ Rs    -12,613 (16) | losing years 4/6 | -1.4%/yr on margin | worst -38.2% | {2021: -7226, 2022: 15835, 2023: -1868, 2024: -23805, 2025: 49986, 2026: -38795}
+      before 2024: PF 1.43, wins 0.67
+CO-2  GOLD     n= 16 net Rs     182,767 | w/o best Rs      58,801 | pre-2024 Rs   -157,480 (6) | 2024+ Rs    340,247 (10) | losing years 4/6 | 3.5%/yr on margin | worst -16.0% | {2021: -6567, 2022: -26303, 2023: -124610, 2024: -51115, 2025: 171709, 2026: 219653}
+      before 2024: PF 0.21, wins 0.33
+CO-2  SILVER   n= 23 net Rs     501,171 | w/o best Rs     297,300 | pre-2024 Rs    -21,633 (10) | 2024+ Rs    522,804 (13) | losing years 2/8 | 12.8%/yr on margin | worst -12.7% | {2018: 7859, 2019: 8268, 2020: 5070, 2021: -12561, 2023: -30270, 2024: 58342, 2025: 94582, 2026: 369880}
+      before 2024: PF 0.7, wins 0.6
+CO-2  COPPER   n= 38 net Rs     170,638 | w/o best Rs      68,447 | pre-2024 Rs    -20,209 (12) | 2024+ Rs    190,847 (26) | losing years 2/7 | 9.0%/yr on margin | worst -14.6% | {2018: 4567, 2019: 9149, 2022: -25137, 2023: -8788, 2024: 21641, 2025: 42168, 2026: 127038}
+      before 2024: PF 0.72, wins 0.58
+CO-2  ZINC     n= 19 net Rs      23,007 | w/o best Rs       4,218 | pre-2024 Rs      9,141 (6) | 2024+ Rs     13,866 (13) | losing years 2/5 | 2.0%/yr on margin | worst -11.8% | {2018: -2384, 2019: 11526, 2024: -27848, 2025: 24095, 2026: 17619}
+      before 2024: PF 1.71, wins 0.67
+CO-2  GOLDM    n= 15 net Rs      23,780 | w/o best Rs      11,094 | pre-2024 Rs     -7,747 (4) | 2024+ Rs     31,527 (11) | losing years 2/5 | 5.5%/yr on margin | worst -20.6% | {2022: 4487, 2023: -12234, 2024: -2338, 2025: 11861, 2026: 22003}
+      before 2024: PF 0.4, wins 0.75
+CO-2  SILVERM  n= 21 net Rs      36,333 | w/o best Rs       6,725 | pre-2024 Rs      2,101 (6) | 2024+ Rs     34,232 (15) | losing years 2/6 | 8.5%/yr on margin | worst -15.3% | {2021: -3513, 2022: 1667, 2023: 3948, 2024: -8110, 2025: 10246, 2026: 32096}
+      before 2024: PF 1.3, wins 0.67
+N-B   GOLD     n= 19 net Rs     161,944 | w/o best Rs      77,232 | pre-2024 Rs    149,594 (14) | 2024+ Rs     12,350 (5) | losing years 1/8 | 1.2%/yr on margin | worst -5.1% | {2018: 6252, 2020: 12391, 2021: 63641, 2022: 33056, 2023: 34255, 2024: 15529, 2025: 25160, 2026: -28339}
+      before 2024: PF inf, wins 1.0
+N-B   SILVER   n= 18 net Rs     287,590 | w/o best Rs     231,548 | pre-2024 Rs    110,755 (13) | 2024+ Rs    176,835 (5) | losing years 0/7 | 4.4%/yr on margin | worst 0.6% | {2019: 4021, 2021: 44205, 2022: 35535, 2023: 26994, 2024: 6996, 2025: 17663, 2026: 152177}
+      before 2024: PF inf, wins 1.0
+N-B   COPPER   n= 15 net Rs     117,691 | w/o best Rs      99,539 | pre-2024 Rs     17,340 (5) | 2024+ Rs    100,351 (10) | losing years 0/6 | 3.1%/yr on margin | worst 0.5% | {2018: 5291, 2019: 5580, 2023: 6469, 2024: 16592, 2025: 36770, 2026: 46988}
+      before 2024: PF inf, wins 1.0
+N-B   ZINC     n=  4 net Rs       7,597 | w/o best Rs         999 | pre-2024 Rs        999 (3) | 2024+ Rs      6,599 (1) | losing years 0/2 | 0.6%/yr on margin | worst -2.9% | {2019: 999, 2024: 6599}
+      before 2024: PF 1.18, wins 0.67
+N-B   GOLDM    n= 12 net Rs       7,933 | w/o best Rs       2,158 | pre-2024 Rs     -5,846 (8) | 2024+ Rs     13,779 (4) | losing years 1/4 | 1.2%/yr on margin | worst -8.5% | {2022: 979, 2023: -6825, 2024: 2417, 2026: 11362}
+      before 2024: PF 0.54, wins 0.75
+N-B   SILVERM  n=  9 net Rs      46,037 | w/o best Rs      34,059 | pre-2024 Rs      3,874 (3) | 2024+ Rs     42,164 (6) | losing years 0/5 | 4.8%/yr on margin | worst 1.1% | {2022: 2586, 2023: 1288, 2024: 1516, 2025: 2259, 2026: 38389}
+      before 2024: PF inf, wins 1.0
+C-E   GOLD     n= 60 net Rs   5,430,681 | w/o best Rs   2,459,186 | pre-2024 Rs  1,532,496 (32) | 2024+ Rs  3,898,185 (28) | losing years 5/10 | 2.8%/yr on margin | worst -16.2% | {2017: 179875, 2018: -378675, 2019: 541952, 2020: -452885, 2021: 534944, 2022: 1262590, 2023: -155304, 2024: -187833, 2025: 4202746, 2026: -116729}
+      before 2024: PF 1.61, wins 0.5
+C-E   SILVER   n= 46 net Rs   7,884,624 | w/o best Rs   5,011,719 | pre-2024 Rs  1,802,658 (23) | 2024+ Rs  6,081,967 (23) | losing years 3/9 | 7.1%/yr on margin | worst -15.2% | {2018: -239159, 2019: -203341, 2020: 1236107, 2021: 434241, 2022: 27093, 2023: 547717, 2024: -198757, 2025: 3177170, 2026: 3103554}
+      before 2024: PF 2.03, wins 0.48
+C-E   COPPER   n= 57 net Rs  11,565,456 | w/o best Rs   9,978,182 | pre-2024 Rs  2,103,725 (25) | 2024+ Rs  9,461,731 (32) | losing years 1/9 | 23.7%/yr on margin | worst -20.6% | {2018: 74175, 2019: 118296, 2020: 167239, 2021: -369256, 2022: 472607, 2023: 1640664, 2024: 418571, 2025: 2969119, 2026: 6074041}
+      before 2024: PF 2.65, wins 0.72
+C-E   ZINC     n= 42 net Rs   3,996,445 | w/o best Rs   3,457,758 | pre-2024 Rs    349,009 (15) | 2024+ Rs  3,647,436 (27) | losing years 1/6 | 13.4%/yr on margin | worst -13.7% | {2018: -307256, 2019: 438127, 2023: 218138, 2024: 942900, 2025: 816923, 2026: 1887613}
+      before 2024: PF 1.64, wins 0.53
+C-E   GOLDM    n= 53 net Rs    -217,681 | w/o best Rs    -524,778 | pre-2024 Rs    161,352 (20) | 2024+ Rs   -379,033 (33) | losing years 3/5 | -2.0%/yr on margin | worst -31.2% | {2022: 136983, 2023: 24369, 2024: -95222, 2025: -5989, 2026: -277823}
+      before 2024: PF 1.89, wins 0.65
+C-E   SILVERM  n= 35 net Rs   1,469,696 | w/o best Rs     957,364 | pre-2024 Rs    309,170 (12) | 2024+ Rs  1,160,525 (23) | losing years 1/6 | 10.9%/yr on margin | worst -12.4% | {2021: -41307, 2022: 149688, 2023: 200789, 2024: 311266, 2025: 59348, 2026: 789912}
+      before 2024: PF 4.07, wins 0.75
+
+{'rule': 'CO-1', 'market': 'COPPER', 'margin_per_lot': 226016, 'lots_at_40pct_of_10L': 1, 'profit_per_year_at_that_size': 50565, 'worst_trade_at_that_size': -133846}
+{'rule': 'CO-1', 'market': 'ZINC', 'margin_per_lot': 144504, 'lots_at_40pct_of_10L': 2, 'profit_per_year_at_that_size': 45636, 'worst_trade_at_that_size': -82678}
+{'rule': 'CO-1', 'market': 'GOLDM', 'margin_per_lot': 90287, 'lots_at_40pct_of_10L': 4, 'profit_per_year_at_that_size': 108628, 'worst_trade_at_that_size': -77808}
+{'rule': 'CO-1', 'market': 'SILVERM', 'margin_per_lot': 82773, 'lots_at_40pct_of_10L': 4, 'profit_per_year_at_that_size': -4560, 'worst_trade_at_that_size': -312956}
+{'rule': 'CO-2', 'market': 'COPPER', 'margin_per_lot': 230519, 'lots_at_40pct_of_10L': 1, 'profit_per_year_at_that_size': 20665, 'worst_trade_at_that_size': -33324}
+{'rule': 'CO-2', 'market': 'ZINC', 'margin_per_lot': 140917, 'lots_at_40pct_of_10L': 2, 'profit_per_year_at_that_size': 5602, 'worst_trade_at_that_size': -34558}
+{'rule': 'CO-2', 'market': 'GOLDM', 'margin_per_lot': 98041, 'lots_at_40pct_of_10L': 4, 'profit_per_year_at_that_size': 21660, 'worst_trade_at_that_size': -51316}
+{'rule': 'CO-2', 'market': 'SILVERM', 'margin_per_lot': 86881, 'lots_at_40pct_of_10L': 4, 'profit_per_year_at_that_size': 29656, 'worst_trade_at_that_size': -52144}
+{'rule': 'N-B', 'market': 'COPPER', 'margin_per_lot': 477053, 'lots_at_40pct_of_10L': 0, 'profit_per_year_at_that_size': 0, 'worst_trade_at_that_size': 0}
+{'rule': 'N-B', 'market': 'ZINC', 'margin_per_lot': 232651, 'lots_at_40pct_of_10L': 1, 'profit_per_year_at_that_size': 1282, 'worst_trade_at_that_size': -5654}
+{'rule': 'N-B', 'market': 'GOLDM', 'margin_per_lot': 164713, 'lots_at_40pct_of_10L': 2, 'profit_per_year_at_that_size': 4092, 'worst_trade_at_that_size': -21734}
+{'rule': 'N-B', 'market': 'SILVERM', 'margin_per_lot': 225433, 'lots_at_40pct_of_10L': 1, 'profit_per_year_at_that_size': 10710, 'worst_trade_at_that_size': 1092}
+
+F2 crude_T2_2024-26_mini {'by_year': {2024: -490, 2025: 759, 2026: 3679}, 'net_before_2024': 0, 'net_2024_on': 3949}
+F2 natural_gas_2022-26 {'by_year': {2022: -29364, 2023: 375, 2024: -1551, 2025: -7542, 2026: -2656}, 'net_before_2024': -28988, 'net_2024_on': -11749}
+F2 GOLD {'by_year': {2018: 3330, 2019: 9468, 2020: -133728, 2021: -198527, 2022: -92230, 2023: -122423, 2024: -97138, 2025: -275792, 2026: 1198379}, 'net_before_2024': -534110, 'net_2024_on': 825450}
+F2 SILVER {'by_year': {2018: 30343, 2019: -2162, 2020: -46154, 2021: 133056, 2022: 48801, 2023: -42060, 2024: -91716, 2025: -345029, 2026: 225101}, 'net_before_2024': 121824, 'net_2024_on': -211644}
+F2 COPPER {'by_year': {2018: 10880, 2019: 19594, 2020: -41476, 2021: 7688, 2022: 32714, 2023: 54406, 2024: 35142, 2025: 94982, 2026: 222219}, 'net_before_2024': 83805, 'net_2024_on': 352343}
+F2 ZINC {'by_year': {2018: 12589, 2019: 28177, 2022: 34726, 2024: 43243, 2025: 2487, 2026: 104223}, 'net_before_2024': 75491, 'net_2024_on': 149952}
+F2 GOLDM {'by_year': {2022: 14305, 2023: 3167, 2024: -11721, 2025: -66075, 2026: 105197}, 'net_before_2024': 17472, 'net_2024_on': 27402}
+F2 SILVERM {'by_year': {2021: -13208, 2022: 2442, 2023: 13, 2024: -19088, 2025: -59498, 2026: 122485}, 'net_before_2024': -10753, 'net_2024_on': 43899}

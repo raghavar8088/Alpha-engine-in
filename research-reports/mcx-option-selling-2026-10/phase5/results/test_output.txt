@@ -1,0 +1,62 @@
+=== Part A: transfer test (frozen rules, untouched markets)
+
+CO-1: GENERALISES (3 passes of 4 markets with a verdict)
+   GOLD     pass     n=  28 net Rs   1,347,120 pf  5.11 win 89% worst -21.6% 2x Rs1,321,201
+   SILVER   pass     n=  31 net Rs     672,418 pf  2.58 win 74% worst -34.9% 2x Rs647,308
+   COPPER   fail     n=  44 net Rs     419,611 pf  2.12 win 75% worst -54.2% 2x Rs403,280
+   ZINC     pass     n=  26 net Rs     189,357 pf  2.69 win 77% worst -39.7% 2x Rs187,348
+   NICKEL   too few  n=   1 net Rs      35,927 pf   inf win 100% worst 13.7% 2x Rs35,562
+   GOLDM    pass     n=  28 net Rs     119,335 pf  3.61 win 82% worst -19.5% 2x Rs116,514
+   SILVERM  fail     n=  25 net Rs      -5,872 pf  0.96 win 72% worst -38.2% 2x Rs-7,180
+
+CO-2: GENERALISES (4 passes of 4 markets with a verdict)
+   GOLD     pass     n=  16 net Rs     182,767 pf  1.51 win 62% worst -16.0% 2x Rs170,277
+   SILVER   pass     n=  23 net Rs     501,171 pf  4.82 win 78% worst -12.7% 2x Rs491,284
+   COPPER   pass     n=  38 net Rs     170,638 pf  1.82 win 66% worst -14.6% 2x Rs160,574
+   ZINC     pass     n=  19 net Rs      23,007 pf  1.33 win 63% worst -11.8% 2x Rs20,208
+   NICKEL   too few  n=   1 net Rs      26,431 pf   inf win 100% worst 10.1% 2x Rs26,160
+   GOLDM    pass     n=  15 net Rs      23,780 pf  1.84 win 80% worst -20.6% 2x Rs26,511
+   SILVERM  pass     n=  21 net Rs      36,333 pf  1.75 win 67% worst -15.3% 2x Rs34,298
+
+N-B: GENERALISES (3 passes of 3 markets with a verdict)
+   GOLD     pass     n=  19 net Rs     161,944 pf  1.94 win 95% worst -5.1% 2x Rs155,286
+   SILVER   pass     n=  18 net Rs     287,590 pf   inf win 100% worst 0.6% 2x Rs284,546
+   COPPER   pass     n=  15 net Rs     117,691 pf   inf win 100% worst 0.5% 2x Rs116,491
+   ZINC     too few  n=   4 net Rs       7,597 pf  2.34 win 75% worst -2.9% 2x Rs7,440
+   NICKEL   too few  n=   0 net Rs           0 pf  0.00 win 0% worst 0.0% 2x Rs0
+   GOLDM    pass     n=  12 net Rs       7,933 pf  1.63 win 83% worst -8.5% 2x Rs7,550
+   SILVERM  too few  n=   9 net Rs      46,037 pf   inf win 100% worst 1.1% 2x Rs45,562
+
+C-E: GENERALISES (4 passes of 4 markets with a verdict)
+   GOLD     pass     n=  60 net Rs   5,430,681 pf  1.32 win 58% worst -16.2% 2x Rs2,120,925
+   SILVER   pass     n=  46 net Rs   7,884,624 pf  1.97 win 54% worst -15.2% 2x Rs5,774,507
+   COPPER   pass     n=  57 net Rs  11,565,456 pf  4.99 win 81% worst -20.6% 2x Rs10,711,143
+   ZINC     pass     n=  42 net Rs   3,996,445 pf  3.82 win 67% worst -13.7% 2x Rs3,529,537
+   NICKEL   too few  n=   1 net Rs     778,229 pf   inf win 100% worst 14.8% 2x Rs727,327
+   GOLDM    fail     n=  53 net Rs    -217,681 pf  0.92 win 62% worst -31.2% 2x Rs-560,107
+   SILVERM  pass     n=  35 net Rs   1,469,696 pf  2.22 win 69% worst -12.4% 2x Rs1,026,224
+
+P4-W: does not generalise (2 passes of 4 markets with a verdict)
+   GOLD     fail     n= 167 net Rs    -645,128 pf  0.58 win 68% worst -12.9% 2x Rs-720,994
+   SILVER   fail     n= 144 net Rs    -268,663 pf  0.75 win 64% worst -20.0% 2x Rs-330,393
+   COPPER   pass     n=  52 net Rs      95,497 pf  1.72 win 90% worst -21.0% 2x Rs87,839
+   ZINC     pass     n=  28 net Rs      45,306 pf  4.64 win 82% worst -2.6% 2x Rs44,214
+   NICKEL   too few  n=   0 net Rs           0 pf  0.00 win 0% worst 0.0% 2x Rs0
+   GOLDM    fail     n=  86 net Rs     -29,608 pf  0.71 win 70% worst -11.0% 2x Rs-34,698
+   SILVERM  fail     n= 108 net Rs     -12,765 pf  0.90 win 59% worst -20.1% 2x Rs-21,716
+
+=== Part B: new families (picked on crude 2020-24), run once everywhere else
+
+F2 shock (2.5, 'next', 'strangle25', 10): GENERALISES (4 passes of 6 markets with a verdict)
+   crude T1 2018-19                 too few  n=   8 net Rs      -2,643 pf  0.44 win 62% worst -8.9% 2x Rs-2,808
+   crude T2 2024-26 mini            pass     n=  18 net Rs       3,949 pf  1.25 win 56% worst -16.3% 2x Rs3,253
+   natural gas 2022-26              fail     n=  29 net Rs     -40,737 pf  0.43 win 55% worst -35.9% 2x Rs-42,900
+   crude T2 parent (check)          pass     n=  17 net Rs       5,148 pf  1.37 win 59% worst -16.3% 2x Rs4,508
+   natural gas mini 2024-26 (check) fail     n=  13 net Rs      -9,551 pf  0.64 win 69% worst -38.2% 2x Rs-10,390
+   GOLD                             pass     n=  48 net Rs     291,339 pf  1.19 win 56% worst -17.6% 2x Rs202,386
+   SILVER                           fail     n=  55 net Rs     -89,820 pf  0.94 win 60% worst -26.7% 2x Rs-176,570
+   COPPER                           pass     n=  36 net Rs     436,148 pf  7.20 win 83% worst -18.4% 2x Rs414,711
+   ZINC                             pass     n=  17 net Rs     225,443 pf 16.42 win 88% worst -3.0% 2x Rs218,996
+   NICKEL                           too few  n=   0 net Rs           0 pf  0.00 win 0% worst 0.0% 2x Rs0
+   GOLDM                            pass     n=  27 net Rs      44,873 pf  1.42 win 70% worst -14.6% 2x Rs38,735
+   SILVERM                          fail     n=  41 net Rs      33,146 pf  1.13 win 54% worst -21.7% 2x Rs19,234

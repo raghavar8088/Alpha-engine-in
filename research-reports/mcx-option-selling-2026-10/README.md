@@ -54,5 +54,20 @@ default behaviour is unchanged.
 
 Results are in `phase4/REPORT_PHASE4.md`.
 
+## Phase 5 (`phase5/`): the winners on markets they never saw, and three new families
+| Step | Command | What it does |
+|---|---|---|
+| 25 | `python phase5/download_more.py <data5> 2026-10-23` | GOLD, SILVER, COPPER, ZINC, NICKEL, GOLDM, SILVERM options and futures (836 contracts) |
+| 26 | `python build_dataset.py <data5> <work5>` | Clean tables for the new markets |
+| 27 | `python phase5/run_phase5.py specs <data5> <work5>` | Multipliers checked against traded value; ticks from the data |
+| 28 | `python phase5/run_phase5.py build_energy <work4> <work5>` | Crude / natural-gas cycles with opening prices |
+| 29 | `python phase5/run_phase5.py build_metals <work5>` | Metal cycles with opening prices, IV percentiles |
+| 30 | `python phase5/test_engine5.py <work4> <work5>` | 16 checks: opens, open exits, shock days, no overlaps |
+| 31 | `python phase5/run_phase5.py discover <work5>` | New families on crude 2020–24 (rules in `phase5/AMENDMENT_A5.md`) |
+| 32 | `python phase5/run_phase5.py test <work5>` | Every frozen rule once on every market |
+| 33 | `python phase5/robust5.py <work5>` | By year, before / after 2024, ₹10 lakh sizing |
+
+Results are in `phase5/REPORT_PHASE5.md`.
+
 `engine.py` is the backtest. `test_engine.py` is its hand-checked tests, and `b76.py` is
 Black-76 (implied vol and delta only; no P&L ever comes from a model price).

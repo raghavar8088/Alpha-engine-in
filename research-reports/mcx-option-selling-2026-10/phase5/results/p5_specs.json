@@ -1,0 +1,44 @@
+{
+ "GOLD": {
+  "multiplier_from_data": 99.985,
+  "declared": 100,
+  "tick": 0.5,
+  "n_futures_rows": 4688
+ },
+ "SILVER": {
+  "multiplier_from_data": 29.997,
+  "declared": 30,
+  "tick": 0.5,
+  "n_futures_rows": 3658
+ },
+ "COPPER": {
+  "multiplier_from_data": 2499.307,
+  "declared": 2500,
+  "tick": 0.01,
+  "n_futures_rows": 5962
+ },
+ "ZINC": {
+  "multiplier_from_data": 5000.0,
+  "declared": 5000,
+  "tick": 0.01,
+  "n_futures_rows": 5335
+ },
+ "NICKEL": {
+  "multiplier_from_data": 1500.0,
+  "declared": 1500,
+  "tick": 0.05,
+  "n_futures_rows": 256
+ },
+ "GOLDM": {
+  "multiplier_from_data": 9.999,
+  "declared": 10,
+  "tick": 0.5,
+  "n_futures_rows": 3781
+ },
+ "SILVERM": {
+  "multiplier_from_data": 5.0,
+  "declared": 5,
+  "tick": 0.5,
+  "n_futures_rows": 2291
+ }
+}

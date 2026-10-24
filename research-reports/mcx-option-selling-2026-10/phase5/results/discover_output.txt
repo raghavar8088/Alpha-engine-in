@@ -1,0 +1,6 @@
+F1 weekend  0/12 eligible | most profitable ('straddle', 'ivp>=50', 'close'): n=89 net Rs-7,593 pf 0.67 t -1.02
+      -> no eligible variant
+F2 shock    4/24 eligible | most profitable (2.5, 'next', 'strangle25', 10): n=28 net Rs17,043 pf 2.56 t 1.75
+      -> FROZEN (2.5, 'next', 'strangle25', 10): n=28 net Rs17,043 pf 2.56 t 1.75 worst -14.3% p5 0.510%
+F3 report   0/6 eligible | most profitable ('strangle15', 'ivp>=50'): n=91 net Rs-6,337 pf 0.45 t -1.99
+      -> no eligible variant

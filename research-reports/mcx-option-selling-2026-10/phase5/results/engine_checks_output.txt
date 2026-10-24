@@ -1,0 +1,18 @@
+ok   engine tables hold the new markets 
+ok   CRUDEOILM_parent opens match the bhavcopy (0 mismatches)
+ok   CRUDEOILM_parent open exits match a hand calculation (50 trades)
+ok   CRUDEOILM_parent every F2 entry is a shock day (108/108 trades, 110 shocks taken)
+ok   CRUDEOILM_parent F2 never overlaps positions (0 overlaps)
+ok   CRUDEOILM_parent close exit == run_legs 
+ok   GOLD opens match the bhavcopy (0 mismatches)
+ok   GOLD open exits match a hand calculation (47 trades)
+ok   GOLD every F2 entry is a shock day (95/95 trades, 108 shocks taken)
+ok   GOLD F2 never overlaps positions (0 overlaps)
+ok   GOLD close exit == run_legs 
+ok   COPPER opens match the bhavcopy (0 mismatches)
+ok   COPPER open exits match a hand calculation (41 trades)
+ok   COPPER every F2 entry is a shock day (60/60 trades, 127 shocks taken)
+ok   COPPER F2 never overlaps positions (0 overlaps)
+ok   COPPER close exit == run_legs 
+
+0 failure(s)
