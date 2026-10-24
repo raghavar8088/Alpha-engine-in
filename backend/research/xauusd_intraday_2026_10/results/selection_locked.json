@@ -1,0 +1,172 @@
+{
+ "locked_at": "2026-10-24T12:22:33+00:00",
+ "code_hash": "6afbfebbaaa71054",
+ "in_sample": [
+  "2010-01-04",
+  "2021-09-30"
+ ],
+ "out_of_sample_from": "2021-10-01",
+ "rules": {
+  "target_account_per_trade": 0.02,
+  "max_leverage": 20.0,
+  "target_position_per_trade": 0.001,
+  "min_is_trades": 100,
+  "min_oos_trades": 50,
+  "selection": "max in-sample t-stat among configs with >= min trades and an average >= +0.10% a trade (C1)",
+  "pass": "OOS (C1): trades >= 50, average >= +0.10% a trade (2% of the account at 20x), profit factor > 1"
+ },
+ "configurations_tested": 100,
+ "families": {
+  "orb_first_bar": {
+   "status": "failed in-sample",
+   "config": {
+    "anchor": "comex",
+    "or_len": 5,
+    "target": "10R",
+    "exit": "end"
+   },
+   "label": "anchor=comex, or_len=5, target=10R, exit=end",
+   "best_is_avg": -0.00022815445075103773,
+   "best_is_label": "anchor=london, or_len=30, target=none, exit=comex_close",
+   "best_is_trades": 3019,
+   "eligible_configs": 0,
+   "configs": 24
+  },
+  "crabel": {
+   "status": "failed in-sample",
+   "config": {
+    "anchor": "comex",
+    "k": 1.0,
+    "stop": "opposite"
+   },
+   "label": "anchor=comex, k=1.0, stop=opposite",
+   "best_is_avg": -0.000255955608850438,
+   "best_is_label": "anchor=comex, k=2.0, stop=opposite",
+   "best_is_trades": 2493,
+   "eligible_configs": 0,
+   "configs": 12
+  },
+  "williams_day": {
+   "status": "failed in-sample",
+   "config": {
+    "k": 0.5,
+    "direction": "long_short",
+    "stop": "none"
+   },
+   "label": "k=0.5, direction=long_short, stop=none",
+   "best_is_avg": 0.0003967696219467889,
+   "best_is_label": "k=0.7, direction=long, stop=none",
+   "best_is_trades": 492,
+   "eligible_configs": 0,
+   "configs": 16
+  },
+  "london_breakout": {
+   "status": "failed in-sample",
+   "config": {
+    "tp_r": 2.5,
+    "range_filter": true,
+    "breakeven": true
+   },
+   "label": "tp_r=2.5, range_filter=True, breakeven=True",
+   "best_is_avg": -4.64551634578091e-05,
+   "best_is_label": "tp_r=5.0, range_filter=True, breakeven=False",
+   "best_is_trades": 1949,
+   "eligible_configs": 0,
+   "configs": 8
+  },
+  "intraday_momentum": {
+   "status": "failed in-sample",
+   "config": {
+    "window": "comex",
+    "predictor": "first"
+   },
+   "label": "window=comex, predictor=first",
+   "best_is_avg": -0.0004004338600719791,
+   "best_is_label": "window=comex, predictor=first_and_penultimate",
+   "best_is_trades": 1498,
+   "eligible_configs": 0,
+   "configs": 6
+  },
+  "noise_area": {
+   "status": "failed in-sample",
+   "config": {
+    "anchor": "comex",
+    "check": 30,
+    "mult": 1.0
+   },
+   "label": "anchor=comex, check=30, mult=1.0",
+   "best_is_avg": -0.00034910582807301147,
+   "best_is_label": "anchor=london, check=60, mult=1.5",
+   "best_is_trades": 3032,
+   "eligible_configs": 0,
+   "configs": 8
+  },
+  "session_drift": {
+   "status": "failed in-sample",
+   "config": {
+    "exit": "ny0800"
+   },
+   "label": "exit=ny0800",
+   "best_is_avg": -0.0002139770892506709,
+   "best_is_label": "exit=london",
+   "best_is_trades": 1817,
+   "eligible_configs": 0,
+   "configs": 2
+  },
+  "london_fix": {
+   "status": "failed in-sample",
+   "config": {
+    "fix": "pm",
+    "window": 2
+   },
+   "label": "fix=pm, window=2",
+   "best_is_avg": -0.0004917730624690897,
+   "best_is_label": "fix=pm, window=2",
+   "best_is_trades": 3007,
+   "eligible_configs": 0,
+   "configs": 4
+  },
+  "nfp": {
+   "status": "selected",
+   "config": {
+    "mode": "straddle",
+    "exit": "end",
+    "tp": "3R"
+   },
+   "label": "mode=straddle, exit=end, tp=3R",
+   "IS_trades": 135,
+   "IS_avg": 0.0012327146971107656,
+   "IS_t": 2.047137911825728,
+   "eligible_configs": 4,
+   "configs": 8
+  },
+  "pivots": {
+   "status": "failed in-sample",
+   "config": {
+    "mode": "fade",
+    "window": "london_ny"
+   },
+   "label": "mode=fade, window=london_ny",
+   "best_is_avg": -0.0003689358787183167,
+   "best_is_label": "mode=fade, window=london_ny",
+   "best_is_trades": 1828,
+   "eligible_configs": 0,
+   "configs": 4
+  },
+  "bb_intraday": {
+   "status": "failed in-sample",
+   "config": {
+    "tf": 15,
+    "k": 2.0,
+    "direction": "long_short"
+   },
+   "label": "tf=15, k=2.0, direction=long_short",
+   "best_is_avg": -0.0003460437469966812,
+   "best_is_label": "tf=15, k=2.0, direction=long",
+   "best_is_trades": 5531,
+   "eligible_configs": 0,
+   "configs": 8
+  }
+ },
+ "lock_sha256": "df8df29dab201b56"
+}
