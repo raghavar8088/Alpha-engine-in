@@ -56,6 +56,18 @@
 
 Harsh-cost OOS average +3.48%; random entries average +5.64% (timing p 0.628, Holm 1.000); bootstrap 95% interval −4.65% to +19.65%; neighbours passing 4/8.
 
+## Returns per month (1x notional, after costs and financing, C1)
+
+| Strategy | In-sample, a month (compounded) | Out-of-sample, a month (compounded) | OOS average month | OOS months up | Best / worst OOS month | OOS, no financing | 2010 → latest |
+|---|---|---|---|---|---|---|---|
+| Time-series momentum (Moskowitz, Ooi & Pedersen; Bartsch et al.) (`lookback=6, direction=long_short`) | +0.39% | +0.41% | +0.55% | 54% | +13.9% (2026-01) / −12.7% (2026-06) | +0.54% | +0.40% |
+| Winter effect (Potrykus & Augustynowicz 2024) (`mode=dec_feb`) | +0.27% | +0.62% | +0.64% | 18% | +13.1% (2026-01) / −5.6% (2023-02) | +0.69% | +0.38% |
+| Faber monthly SMA timing (`months=8, direction=long`) | +0.27% | +1.26% | +1.35% | 48% | +13.9% (2026-01) / −12.4% (2026-03) | +1.44% | +0.57% |
+| Gold monthly moving-average rules (Bartsch, Baur, Dichtl & Drobetz) (`pair=(2, 9)`) | +0.26% | +0.93% | +1.03% | 44% | +13.9% (2026-01) / −12.7% (2026-06) | +1.11% | +0.46% |
+| Moving-average crossover (Brock, Lakonishok & LeBaron; golden cross) (`pair=(1, 200), band=0.01, direction=long`) | +0.27% | +1.02% | +1.12% | 48% | +13.9% (2026-01) / −12.4% (2026-03) | +1.20% | +0.49% |
+| Bollinger Band squeeze breakout (`tol=0.1, window=20, exit=mid, direction=long`) | +0.26% | +0.20% | +0.21% | 16% | +6.8% (2024-03) / −4.6% (2025-04) | +0.26% | +0.24% |
+| Holding gold | +0.28% | +1.19% | +1.32% | 57% | +13.5% (2026-01) / −12.0% (2026-10) | +1.35% | +0.55% |
+
 ## Two more out-of-sample checks (added after the locked run)
 
 **2005–2009** (never read by any stage; gold +139% after financing):

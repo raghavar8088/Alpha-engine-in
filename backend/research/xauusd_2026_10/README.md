@@ -10,7 +10,8 @@ Re-runnable study behind the report. Python 3.12 with pandas and numpy only; no 
 | 4 | `python xa_run.py select` | **In-sample only (2010-01-01 → 2021-09-30).** Backtests every configuration, picks one per family by the fixed rule, and writes `results/selection_locked.json` with a hash of the code. |
 | 5 | `python xa_run.py evaluate` | **Out of sample (2021-10-01 → latest)**, once, for the locked choices; refuses to run if the code changed after the lock. Writes `results/summary.csv`, `results/oos_detail.json`, `results/trades/*.csv`. |
 | 6 | `python xa_walkforward.py presample` then `walk` | Two checks added after the locked run (rules fixed before they ran; they change no verdict): the locked choices on 2005–2009, which no stage had read, and an expanding-window walk-forward from 2014 that re-chooses each year's parameters from earlier years only. Writes `results/supplementary.json`. |
-| 7 | `python xa_report.py` | Builds the report page (`report/xauusd-2pct-study.html`) and `REPORT.md` from the results. |
+| 7 | `python xa_monthly.py` | Month-by-month returns of the six configurations chosen in-sample and of holding gold, rebuilt from the stored trades as daily marked-to-market equity (checks that it reproduces each trade's stored net return exactly). Writes `results/monthly.json`. |
+| 8 | `python xa_report.py` | Builds the report page (`report/xauusd-2pct-study.html`) and `REPORT.md` from the results. |
 
 `python xa_spotcheck.py` prints a few trades of five strategies next to the values that should have produced them (in-sample dates only), to confirm the rules fire where the published rules say.
 

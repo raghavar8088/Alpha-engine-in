@@ -72,7 +72,9 @@ def load(resdir: Path) -> dict:
     for f in (resdir / "trades").glob("*.csv"):
         trades[f.stem] = pd.read_csv(f)
     sup = json.loads((resdir / "supplementary.json").read_text()) if (resdir / "supplementary.json").exists() else {}
-    return {"lock": lock, "det": det, "summ": summ, "isall": isall, "dq": dq, "trades": trades, "resdir": resdir, "sup": sup}
+    monthly = json.loads((resdir / "monthly.json").read_text()) if (resdir / "monthly.json").exists() else {}
+    return {"lock": lock, "det": det, "summ": summ, "isall": isall, "dq": dq, "trades": trades, "resdir": resdir, "sup": sup,
+            "monthly": monthly}
 
 
 def oos_concentration(R: dict, key: str) -> dict:
@@ -530,6 +532,10 @@ table.data tr:last-child td {{ border-bottom: none; }}
 table.data .l {{ text-align: left; font-family: var(--body); font-size: 13.5px; }}
 table.data tr.pass td {{ background: var(--gold-soft); }}
 table.compact td, table.compact th {{ padding: 6px 10px; }}
+table.grid td, table.grid th {{ padding: 5px 7px; font-size: 11.5px; }}
+table.grid td.oos-start {{ box-shadow: inset 2px 0 0 var(--gold); }}
+table.data tr.bench td {{ background: var(--bg); }}
+.strong {{ font-weight: 700; }}
 .sub {{ font-size: 12px; color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0; font-family: var(--body); }}
 .why {{ margin-top: 3px; max-width: 34ch; }}
 .pos {{ color: var(--pos); }} .neg {{ color: var(--neg); }} .muted {{ color: var(--muted); }}
@@ -579,6 +585,8 @@ The two OOS return columns come from the strategy's equity curve; holding gold r
 "Drift alone" is what the same trades average when entered on random dates in the same period: the part of the result gold's rise pays for any timing.
 For families that failed in-sample, the IS and OOS columns show their published default configuration, for information only: they were never eligible.</p>
 </section>
+
+{monthly_section(R)}
 
 <section id="passed"><h2>{"The strategies that pass" if passed else "No strategy passed"}</h2>
 {cards if passed else "<p>No configuration chosen in-sample reached the target out of sample. The closest are shown next.</p>"}
@@ -647,6 +655,80 @@ def session_line(dq) -> str:
     return (f"From 2010 the median session spanned {sm['median_high_low_range_pct']:.2f}% from high to low; "
             f"{sm['share_range_2pct_or_more'] * 100:.0f}% of sessions had a range of 2% or more, and "
             f"{sm['share_open_to_close_2pct_or_more'] * 100:.0f}% moved 2% from open to close.")
+
+
+MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+
+def monthly_section(R: dict) -> str:
+    mo = R.get("monthly") or {}
+    if not mo.get("strategies"):
+        return ""
+    det = R["det"]
+    names = {f.key: f.name for f in S.FAMILIES}
+    keys = [k for k in mo["strategies"] if k != "gold"] + ["gold"]
+
+    def label(k):
+        if k == "gold":
+            return "Holding gold", "the same costs and financing"
+        return names[k], det["families"][k]["label"]
+
+    rows = []
+    for k in keys:
+        v = mo["strategies"][k]
+        i, o, a = v["C1"]["IS"]["summary"], v["C1"]["OOS"]["summary"], v["C1"]["ALL"]["summary"]
+        o0 = v["C0"]["OOS"]["summary"]
+        n, cfg = label(k)
+        rows.append(f'<tr class="{"bench" if k == "gold" else ""}"><td class="l"><b>{esc(n)}</b><div class="sub">{esc(cfg)}</div></td>'
+                    f'<td class="{tone(i["compounded"])}">{pct(i["compounded"])}</td><td>{pct(i["positive_share"], 0, False)}</td>'
+                    f'<td class="{tone(o["compounded"])}"><b>{pct(o["compounded"])}</b></td><td class="{tone(o["mean"])}">{pct(o["mean"])}</td>'
+                    f'<td>{pct(o["positive_share"], 0, False)}</td><td class="pos">{pct(o["best"], 1)}<div class="sub">{esc(o["best_month"])}</div></td>'
+                    f'<td class="neg">{pct(o["worst"], 1)}<div class="sub">{esc(o["worst_month"])}</div></td>'
+                    f'<td class="{tone(o0["compounded"])}">{pct(o0["compounded"])}</td><td class="{tone(a["compounded"])}">{pct(a["compounded"])}</td></tr>')
+    summary = ('<div class="tw"><table class="data"><thead><tr><th class="l">Strategy</th><th>In-sample<br><span class="sub">a month, compounded</span></th>'
+               '<th>In-sample<br><span class="sub">months up</span></th><th>Out-of-sample<br><span class="sub">a month, compounded</span></th>'
+               '<th>Out-of-sample<br><span class="sub">a month, average</span></th><th>Out-of-sample<br><span class="sub">months up</span></th>'
+               '<th>Best month</th><th>Worst month</th><th>OOS, no financing<br><span class="sub">a month, compounded</span></th>'
+               '<th>2010 → latest<br><span class="sub">a month, compounded</span></th></tr></thead><tbody>' + "".join(rows) + "</tbody></table></div>")
+    grids = []
+    for k in keys:
+        v = mo["strategies"][k]["C1"]
+        months = {}
+        for wn in ("IS", "OOS"):
+            months.update(v[wn]["months"])
+        by_year = {}
+        for ym, r in months.items():
+            y, mth = int(ym[:4]), int(ym[5:7])
+            by_year.setdefault(y, {})[mth] = r
+        body = []
+        for y in sorted(by_year):
+            cells = []
+            for mth in range(1, 13):
+                r = by_year[y].get(mth)
+                if r is None:
+                    cells.append("<td></td>")
+                else:
+                    strong = " strong" if abs(r) >= 0.05 else ""
+                    edge = ' class="oos-start"' if (y, mth) == (2021, 10) else ""
+                    cells.append(f'<td{edge}><span class="{tone(r)}{strong}">{pct(r, 1)}</span></td>')
+            yr = float(np.prod([1 + x for x in by_year[y].values()]) - 1)
+            body.append(f'<tr><td class="l"><b>{y}</b></td>{"".join(cells)}<td class="{tone(yr)}"><b>{pct(yr, 1)}</b></td></tr>')
+        n, cfg = label(k)
+        head = "".join(f"<th>{m_}</th>" for m_ in MONTHS)
+        grids.append(f'<h4>{esc(n)} <span class="sub">({esc(cfg)})</span></h4>'
+                     f'<div class="tw"><table class="data compact grid"><thead><tr><th class="l">Year</th>{head}<th>Year</th></tr></thead><tbody>{"".join(body)}</tbody></table></div>')
+    w = mo.get("windows", {})
+    return f'''
+<section id="monthly"><h2>Returns per month</h2>
+<p>The six configurations chosen in-sample, ranked as above, and holding gold under the same costs. Returns are on the whole account at 1× notional (no leverage),
+after spread, commission, slippage and overnight financing (base costs C1), from each strategy's daily marked-to-market equity. "A month, compounded" is the steady
+monthly rate that gives the same total: (1 + total)^(1/months) − 1. In-sample is {esc(w.get("IS", ["", ""])[0][:7])} → {esc(w.get("IS", ["", ""])[1][:7])};
+out-of-sample is {esc(w.get("OOS", ["", ""])[0][:7])} → {esc(w.get("OOS", ["", ""])[1])}, and its last month is partial.</p>
+{summary}
+<p class="sub">A month with no position earns 0% (cash earns nothing in this test). The out-of-sample run starts flat on 2021-10-01, so October 2021 begins a new account (outlined in the grids).
+"No financing" is the brief's cost set alone (C0): holding gold long costs the T-bill rate plus 0.5% a year, up to about 0.5% a month in 2023–25.</p>
+{"".join(grids)}
+</section>'''
 
 
 def why_section(R: dict, V: list[dict]) -> str:
@@ -805,6 +887,17 @@ def markdown(R: dict, V: list[dict]) -> str:
         lines += ["", f"Harsh-cost OOS average {pct(d['OOS']['C2'].get('avg'))}; random entries average {pct(ra.get('random_mean_avg'))} "
                       f"(timing p {num(x['r']['timing_p'], 3)}, Holm {num(x['r']['timing_p_holm'], 3)}); bootstrap 95% interval {pct(d['oos_ci95'][0])} to {pct(d['oos_ci95'][1])}; "
                       f"neighbours passing {d['neighbours']['pass']}/{d['neighbours']['count']}."]
+    mo = R.get("monthly") or {}
+    if mo.get("strategies"):
+        names_m = {f.key: f.name for f in S.FAMILIES}
+        lines += ["", "## Returns per month (1x notional, after costs and financing, C1)", "",
+                  "| Strategy | In-sample, a month (compounded) | Out-of-sample, a month (compounded) | OOS average month | OOS months up | Best / worst OOS month | OOS, no financing | 2010 → latest |",
+                  "|---|---|---|---|---|---|---|---|"]
+        for k, v in mo["strategies"].items():
+            i, o, a, o0 = v["C1"]["IS"]["summary"], v["C1"]["OOS"]["summary"], v["C1"]["ALL"]["summary"], v["C0"]["OOS"]["summary"]
+            nm = "Holding gold" if k == "gold" else f"{names_m[k]} (`{det['families'][k]['label']}`)"
+            lines.append(f"| {nm} | {pct(i['compounded'])} | {pct(o['compounded'])} | {pct(o['mean'])} | {pct(o['positive_share'], 0, False)} | "
+                         f"{pct(o['best'], 1)} ({o['best_month']}) / {pct(o['worst'], 1)} ({o['worst_month']}) | {pct(o0['compounded'])} | {pct(a['compounded'])} |")
     sup = R.get("sup") or {}
     if sup.get("presample") and sup.get("walk_forward"):
         names = {f.key: f.name for f in S.FAMILIES}
