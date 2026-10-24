@@ -1,0 +1,95 @@
+<title>Trader-Style Gold Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..800&family=JetBrains+Mono:wght@400;600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: one reading column for prose; tables and the strategy card run full width in the same gutter. */
+:root {
+  --bg: #f6f7f5; --panel: #ffffff; --ink: #17191d; --muted: #5d636c; --rule: #d9dbd6;
+  --gold: #8b6414; --gold-soft: #f2ead8; --pos: #1d7a4b; --neg: #b23a30; --warn: #94650a;
+  --display: "Archivo", "Helvetica Neue", Arial, sans-serif; --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121316; --panel: #191b1f; --ink: #ebe8e1; --muted: #a3a8b0; --rule: #2d3036;
+  --gold: #d8aa47; --gold-soft: #2c2616; --pos: #55c38b; --neg: #f07a6c; --warn: #e3b14c; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #121316; --panel: #191b1f; --ink: #ebe8e1; --muted: #a3a8b0; --rule: #2d3036;
+  --gold: #d8aa47; --gold-soft: #2c2616; --pos: #55c38b; --neg: #f07a6c; --warn: #e3b14c; color-scheme: dark; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: flex; flex-direction: column; gap: 32px; }
+h1, h2, h3, h4 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; font-stretch: 85%; line-height: 1.05; }
+h2 { font-size: 24px; font-weight: 750; font-stretch: 90%; padding-bottom: 6px; border-bottom: 2px solid var(--gold); }
+h3 { font-size: 21px; font-weight: 750; font-stretch: 92%; }
+h4 { font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-top: 8px; }
+section { display: flex; flex-direction: column; gap: 14px; }
+p { margin: 0; max-width: 74ch; }
+.lede { font-size: 19px; max-width: 68ch; }
+.eyebrow { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); font-weight: 700; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13.5px; color: var(--muted); }
+.meta b { color: var(--ink); font-weight: 600; }
+a { color: var(--gold); }
+code, pre { font-family: var(--mono); font-size: 12.5px; }
+code { background: var(--gold-soft); padding: 1px 5px; border-radius: 4px; }
+pre { background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 14px; overflow-x: auto; margin: 0; }
+pre code { background: none; padding: 0; }
+.tw { overflow-x: auto; border: 1px solid var(--rule); border-radius: 8px; background: var(--panel); }
+table.data { border-collapse: collapse; width: 100%; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+table.data th { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); text-align: right; padding: 9px 10px; border-bottom: 1px solid var(--rule); vertical-align: bottom; }
+table.data td { padding: 8px 10px; border-bottom: 1px solid var(--rule); text-align: right; font-family: var(--mono); font-size: 12.5px; vertical-align: top; }
+table.data tr:last-child td { border-bottom: none; }
+table.data .l { text-align: left; font-family: var(--body); font-size: 13.5px; }
+table.data tr.pass td { background: var(--gold-soft); }
+table.compact td, table.compact th { padding: 6px 10px; }
+table.grid td, table.grid th { padding: 5px 7px; font-size: 11.5px; }
+.sub { font-size: 12px; color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0; font-family: var(--body); }
+.why { margin-top: 3px; max-width: 36ch; }
+.pos { color: var(--pos); } .neg { color: var(--neg); }
+.chip { display: inline-block; font-size: 11.5px; font-weight: 700; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; border: 1px solid currentColor; margin: 0 4px 3px 0; }
+.chip.ok { color: var(--pos); } .chip.no { color: var(--neg); } .chip.warn { color: var(--warn); }
+.card { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.callout { border-left: 3px solid var(--gold); padding: 10px 14px; background: var(--panel); border-radius: 0 8px 8px 0; max-width: 82ch; }
+ul.plain { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; max-width: 84ch; }
+</style>
+<div class="wrap">
+<header style="display:flex;flex-direction:column;gap:12px">
+  <div class="eyebrow">Backtest · how profitable gold traders say they trade · one-minute bars · 2010–2026</div>
+  <h1>Do the profitable traders' rules work when coded?</h1>
+  <div class="meta"><span><b>3</b> setups</span><span><b>24</b> parameter sets</span><span>chosen on gold <b>2010-01 → 2021-09</b></span>
+  <span>then run unchanged on <b>silver, EUR/USD, GBP/USD</b></span><span>rules registered before any result · code <code>76f1dda2c224c8d9</code></span></div>
+  <div class="lede">No. The rules were coded the way successful gold traders describe them:
+  <ul class="plain">
+    <li>risk 1% of the account per trade with a fixed stop;</li>
+    <li>target 2–3 times the risk;</li>
+    <li>one setup at a fixed time (the London open or the New York open);</li>
+    <li>at most one trade a day, and only in the direction of the daily trend.</li>
+  </ul>
+  On gold 2010–2021 the best setting of each setup still lost money after costs, and the same rules lost on silver, EUR/USD and GBP/USD.
+  Only gold 2021–2026, a strong bull market, showed a small profit, below the bar set in advance.</div>
+  <p class="callout"><b>Why.</b> The setups are slightly better than chance before costs: +0.00R to +0.14R a trade. Costs take 0.04R to 0.43R a trade, because the stops are tight and a fixed cost is a large share of a small stop.
+  Risk control decides how fast an account wins or loses; it cannot make a setup with no edge after costs profitable. (R = the amount risked on the trade.)</p>
+  <p class="sub">Rules: <a href="https://github.com/raghavar8088/Alpha-engine-in/tree/main/backend/research/xauusd_trader_style_2026_10/PREREGISTRATION.md" target="_blank" rel="noopener">PREREGISTRATION.md</a>, written before any result. Earlier studies: <a href="https://claude.ai/artifact/YVNZjkqgMz3mKhQYe74N4S" target="_blank" rel="noopener">intraday</a>.
+  Backtests on past prices; not a forecast.</p>
+</header>
+
+<section><h2>Average result per trade, after base costs</h2>
+<div class="tw"><table class="data"><thead><tr><th class="l">Setup (default settings shown; none qualified in-sample)</th><th>Gold 2010–21</th><th>Gold 2021–26</th><th>Silver 2010–26</th><th>EUR/USD 2010–26</th><th>GBP/USD 2010–26</th></tr></thead><tbody><tr><td class="l"><b>London-open breakout with the trend</b><div class="sub">k=2, trend=20/50, exit=1659</div><div class="sub">in-sample best −0.045R (k=3, trend=50/200, exit=1659)</div></td><td class="neg"><b>−0.089R</b><div class="sub">1116 trades · 40% won</div></td><td class="pos"><b>+0.060R</b><div class="sub">448 trades · 48% won</div></td><td class="neg"><b>−0.202R</b><div class="sub">1480 trades · 38% won</div></td><td class="neg"><b>−0.001R</b><div class="sub">1763 trades · 43% won</div></td><td class="neg"><b>−0.036R</b><div class="sub">1960 trades · 42% won</div></td></tr><tr><td class="l"><b>New York pullback with the trend</b><div class="sub">k=2, trend=20/50, breakeven=off</div><div class="sub">in-sample best −0.162R (k=3, trend=20/50, breakeven=off)</div></td><td class="neg"><b>−0.183R</b><div class="sub">1236 trades · 38% won</div></td><td class="neg"><b>−0.032R</b><div class="sub">840 trades · 41% won</div></td><td class="neg"><b>−0.418R</b><div class="sub">2029 trades · 35% won</div></td><td class="pos"><b>+0.542R</b><div class="sub">22 trades · 73% won</div></td><td class="pos"><b>+0.069R</b><div class="sub">35 trades · 49% won</div></td></tr><tr><td class="l"><b>New York opening-range breakout with the trend</b><div class="sub">k=2, trend=20/50, breakeven=off</div><div class="sub">in-sample best −0.092R (k=2, trend=20/50, breakeven=1R)</div></td><td class="neg"><b>−0.093R</b><div class="sub">1481 trades · 40% won</div></td><td class="pos"><b>+0.057R</b><div class="sub">641 trades · 45% won</div></td><td class="neg"><b>−0.328R</b><div class="sub">2160 trades · 35% won</div></td><td class="neg"><b>−0.046R</b><div class="sub">2075 trades · 40% won</div></td><td class="neg"><b>−0.051R</b><div class="sub">2157 trades · 40% won</div></td></tr></tbody></table></div>
+<p class="sub">Pass needed +0.15R a trade on gold out of sample (profit factor above 1.2) and a positive result in at least 2 of the 3 other markets. No setup reached +0.15R in-sample, so none was eligible.
+The New York pullback rarely triggers on EUR/USD and GBP/USD: its stop must sit 0.1–0.5 daily ATRs away, and a five-minute pullback there is usually smaller.</p>
+</section>
+
+<section><h2>Where the money goes</h2>
+<div class="tw"><table class="data"><thead><tr><th class="l">Setup</th><th class="l">Market</th><th>Before costs</th><th>Costs</th><th>After base costs</th><th>Low-cost account (gold)</th><th>Same trades, random days</th><th>Average stop (price)</th></tr></thead><tbody><tr><td class="l">London-open breakout with the trend</td><td class="l">Gold 2010–21</td><td class="pos">+0.031R</td><td class="neg">−0.120R</td><td class="neg"><b>−0.089R</b></td><td class="neg">−0.045R</td><td>−0.121R</td><td>6.741</td></tr><tr><td class="l">London-open breakout with the trend</td><td class="l">Gold 2021–26</td><td class="pos">+0.119R</td><td class="neg">−0.058R</td><td class="pos"><b>+0.060R</b></td><td class="pos">+0.082R</td><td>−0.064R</td><td>18.46</td></tr><tr><td class="l">London-open breakout with the trend</td><td class="l">Silver 2010–26</td><td class="pos">+0.025R</td><td class="neg">−0.227R</td><td class="neg"><b>−0.202R</b></td><td class="">–</td><td>−0.222R</td><td>0.2703</td></tr><tr><td class="l">London-open breakout with the trend</td><td class="l">EUR/USD 2010–26</td><td class="pos">+0.038R</td><td class="neg">−0.039R</td><td class="neg"><b>−0.001R</b></td><td class="">–</td><td>−0.036R</td><td>0.00332</td></tr><tr><td class="l">London-open breakout with the trend</td><td class="l">GBP/USD 2010–26</td><td class="pos">+0.008R</td><td class="neg">−0.044R</td><td class="neg"><b>−0.036R</b></td><td class="">–</td><td>−0.045R</td><td>0.003964</td></tr><tr><td class="l">New York pullback with the trend</td><td class="l">Gold 2010–21</td><td class="pos">+0.052R</td><td class="neg">−0.235R</td><td class="neg"><b>−0.183R</b></td><td class="neg">−0.096R</td><td>−0.237R</td><td>3.572</td></tr><tr><td class="l">New York pullback with the trend</td><td class="l">Gold 2021–26</td><td class="pos">+0.082R</td><td class="neg">−0.114R</td><td class="neg"><b>−0.032R</b></td><td class="pos">+0.011R</td><td>−0.117R</td><td>9.071</td></tr><tr><td class="l">New York pullback with the trend</td><td class="l">Silver 2010–26</td><td class="pos">+0.014R</td><td class="neg">−0.432R</td><td class="neg"><b>−0.418R</b></td><td class="">–</td><td>−0.431R</td><td>0.1484</td></tr><tr><td class="l">New York pullback with the trend</td><td class="l">EUR/USD 2010–26</td><td class="pos">+0.632R</td><td class="neg">−0.090R</td><td class="pos"><b>+0.542R</b></td><td class="">–</td><td>−0.088R</td><td>0.001376</td></tr><tr><td class="l">New York pullback with the trend</td><td class="l">GBP/USD 2010–26</td><td class="pos">+0.156R</td><td class="neg">−0.087R</td><td class="pos"><b>+0.069R</b></td><td class="">–</td><td>−0.074R</td><td>0.002049</td></tr><tr><td class="l">New York opening-range breakout with the trend</td><td class="l">Gold 2010–21</td><td class="pos">+0.084R</td><td class="neg">−0.177R</td><td class="neg"><b>−0.093R</b></td><td class="neg">−0.027R</td><td>−0.180R</td><td>4.775</td></tr><tr><td class="l">New York opening-range breakout with the trend</td><td class="l">Gold 2021–26</td><td class="pos">+0.143R</td><td class="neg">−0.086R</td><td class="pos"><b>+0.057R</b></td><td class="pos">+0.089R</td><td>−0.091R</td><td>11.29</td></tr><tr><td class="l">New York opening-range breakout with the trend</td><td class="l">Silver 2010–26</td><td class="pos">+0.002R</td><td class="neg">−0.330R</td><td class="neg"><b>−0.328R</b></td><td class="">–</td><td>−0.324R</td><td>0.1804</td></tr><tr><td class="l">New York opening-range breakout with the trend</td><td class="l">EUR/USD 2010–26</td><td class="pos">+0.020R</td><td class="neg">−0.066R</td><td class="neg"><b>−0.046R</b></td><td class="">–</td><td>−0.067R</td><td>0.002057</td></tr><tr><td class="l">New York opening-range breakout with the trend</td><td class="l">GBP/USD 2010–26</td><td class="pos">+0.022R</td><td class="neg">−0.074R</td><td class="neg"><b>−0.051R</b></td><td class="">–</td><td>−0.074R</td><td>0.002411</td></tr></tbody></table></div>
+<p class="sub">Costs in R = the round-trip cost ÷ the stop distance. Gold's round trip is about $0.67 an ounce at base costs. With a $3.60 stop that is 0.19R; with an $18 stop it is 0.04R. The setups beat the same trades placed on random days, so the timing has some value, but less than the costs.</p>
+</section>
+
+<section><h2>The account at 1% risk a trade</h2>
+<div class="tw"><table class="data"><thead><tr><th class="l">Setup</th><th class="l">Market</th><th>Trades a month</th><th>A month, compounded</th><th>Months up</th><th>Worst month</th><th>Max drawdown</th><th>Total</th><th>Longest losing streak (trades)</th></tr></thead><tbody><tr><td class="l">London-open breakout with the trend</td><td class="l">Gold 2010–21</td><td>7.9</td><td class="neg"><b>−0.76%</b></td><td>38%</td><td class="neg">−7.2%</td><td class="neg">−68%</td><td class="neg">−66%</td><td>13</td></tr><tr><td class="l">London-open breakout with the trend</td><td class="l">Gold 2021–26</td><td>7.4</td><td class="pos"><b>+0.40%</b></td><td>59%</td><td class="neg">−9.2%</td><td class="neg">−26%</td><td class="pos">+27%</td><td>9</td></tr><tr><td class="l">London-open breakout with the trend</td><td class="l">Silver 2010–26</td><td>7.4</td><td class="neg"><b>−1.52%</b></td><td>32%</td><td class="neg">−13.0%</td><td class="neg">−97%</td><td class="neg">−95%</td><td>12</td></tr><tr><td class="l">London-open breakout with the trend</td><td class="l">EUR/USD 2010–26</td><td>8.8</td><td class="neg"><b>−0.07%</b></td><td>47%</td><td class="neg">−7.4%</td><td class="neg">−53%</td><td class="neg">−13%</td><td>14</td></tr><tr><td class="l">London-open breakout with the trend</td><td class="l">GBP/USD 2010–26</td><td>9.7</td><td class="neg"><b>−0.41%</b></td><td>42%</td><td class="neg">−6.9%</td><td class="neg">−64%</td><td class="neg">−57%</td><td>12</td></tr><tr><td class="l">New York pullback with the trend</td><td class="l">Gold 2010–21</td><td>8.8</td><td class="neg"><b>−1.66%</b></td><td>26%</td><td class="neg">−11.5%</td><td class="neg">−91%</td><td class="neg">−91%</td><td>15</td></tr><tr><td class="l">New York pullback with the trend</td><td class="l">Gold 2021–26</td><td>13.9</td><td class="neg"><b>−0.55%</b></td><td>44%</td><td class="neg">−11.0%</td><td class="neg">−46%</td><td class="neg">−29%</td><td>14</td></tr><tr><td class="l">New York pullback with the trend</td><td class="l">Silver 2010–26</td><td>10.1</td><td class="neg"><b>−4.20%</b></td><td>20%</td><td class="neg">−20.5%</td><td class="neg">−100%</td><td class="neg">−100%</td><td>18</td></tr><tr><td class="l">New York pullback with the trend</td><td class="l">EUR/USD 2010–26</td><td>0.1</td><td class="pos"><b>+0.06%</b></td><td>4%</td><td class="neg">−1.1%</td><td class="neg">−3%</td><td class="pos">+12%</td><td>2</td></tr><tr><td class="l">New York pullback with the trend</td><td class="l">GBP/USD 2010–26</td><td>0.2</td><td class="pos"><b>+0.01%</b></td><td>3%</td><td class="neg">−2.5%</td><td class="neg">−6%</td><td class="pos">+2%</td><td>3</td></tr><tr><td class="l">New York opening-range breakout with the trend</td><td class="l">Gold 2010–21</td><td>10.5</td><td class="neg"><b>−1.05%</b></td><td>35%</td><td class="neg">−8.9%</td><td class="neg">−86%</td><td class="neg">−78%</td><td>13</td></tr><tr><td class="l">New York opening-range breakout with the trend</td><td class="l">Gold 2021–26</td><td>10.6</td><td class="pos"><b>+0.52%</b></td><td>51%</td><td class="neg">−8.4%</td><td class="neg">−18%</td><td class="pos">+37%</td><td>9</td></tr><tr><td class="l">New York opening-range breakout with the trend</td><td class="l">Silver 2010–26</td><td>10.7</td><td class="neg"><b>−3.53%</b></td><td>21%</td><td class="neg">−15.4%</td><td class="neg">−100%</td><td class="neg">−100%</td><td>15</td></tr><tr><td class="l">New York opening-range breakout with the trend</td><td class="l">EUR/USD 2010–26</td><td>10.3</td><td class="neg"><b>−0.54%</b></td><td>43%</td><td class="neg">−10.6%</td><td class="neg">−72%</td><td class="neg">−67%</td><td>19</td></tr><tr><td class="l">New York opening-range breakout with the trend</td><td class="l">GBP/USD 2010–26</td><td>10.7</td><td class="neg"><b>−0.62%</b></td><td>42%</td><td class="neg">−9.1%</td><td class="neg">−72%</td><td class="neg">−72%</td><td>13</td></tr></tbody></table></div>
+</section>
+
+<section><h2>What this rules in, and out</h2>
+<ul class="plain">
+<li><b>Ruled out:</b> trend-aligned session breakouts and pullbacks with fixed stops and 2–3R targets, as commonly taught, on gold, silver, EUR/USD and GBP/USD, at ordinary retail costs.</li>
+<li><b>Not tested:</b> the trader's judgment, meaning which days to skip, how to read the news and how to manage a trade by feel. That can only be tested by keeping a journal of real or paper trades over months.</li>
+<li><b>One lead:</b> costs were smallest in R where the stops were widest (gold 2021–26, stops of about $11–18). A setup that trades less often with wider stops faces a lower cost hurdle. It would still need a real edge before costs of at least +0.2R.</li>
+</ul></section>
+</div>

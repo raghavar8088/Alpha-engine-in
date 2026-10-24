@@ -1,0 +1,55 @@
+{
+ "locked_at": "2026-10-24T12:58:13+00:00",
+ "code_hash": "76f1dda2c224c8d9",
+ "gold_in_sample": [
+  "2010-01-04",
+  "2021-09-30"
+ ],
+ "rules": {
+  "min_is_trades": 100,
+  "min_oos_trades": 40,
+  "target_R": 0.15,
+  "profit_factor_min": 1.2,
+  "cross_market": "expectancy > 0 in >= 2 of XAGUSD, EURUSD, GBPUSD (base costs)"
+ },
+ "configurations_tested": 24,
+ "setups": {
+  "london": {
+   "status": "failed in-sample",
+   "config": {
+    "k": 2,
+    "trend": "20/50",
+    "exit": "1659"
+   },
+   "label": "k=2, trend=20/50, exit=1659",
+   "best_IS_expectancy_R": -0.04483548665485122,
+   "best_label": "k=3, trend=50/200, exit=1659",
+   "best_trades": 1221
+  },
+  "ny_pullback": {
+   "status": "failed in-sample",
+   "config": {
+    "k": 2,
+    "trend": "20/50",
+    "breakeven": "off"
+   },
+   "label": "k=2, trend=20/50, breakeven=off",
+   "best_IS_expectancy_R": -0.16242351690842355,
+   "best_label": "k=3, trend=20/50, breakeven=off",
+   "best_trades": 1236
+  },
+  "ny_orb": {
+   "status": "failed in-sample",
+   "config": {
+    "k": 2,
+    "trend": "20/50",
+    "breakeven": "off"
+   },
+   "label": "k=2, trend=20/50, breakeven=off",
+   "best_IS_expectancy_R": -0.09222191627134065,
+   "best_label": "k=2, trend=20/50, breakeven=1R",
+   "best_trades": 1481
+  }
+ },
+ "lock_sha256": "4ed028e3d99d0837"
+}
