@@ -1,0 +1,16 @@
+CRUDEOIL   TS: years with an eligible pick 0/10, walk-forward net 0.0% mean 0.000%/wk
+CRUDEOIL   MA: years with an eligible pick 4/10, walk-forward net 0.6% mean 0.003%/wk
+CRUDEOIL   BO: years with an eligible pick 0/10, walk-forward net 0.0% mean 0.000%/wk
+CRUDEOIL   CY: years with an eligible pick 0/10, walk-forward net 0.0% mean 0.000%/wk
+CRUDEOIL   CT: years with an eligible pick 1/10, walk-forward net -30.0% mean -0.578%/wk
+CRUDEOIL   SE: years with an eligible pick 0/10, walk-forward net 0.0% mean 0.000%/wk
+CRUDEOIL   MR: years with an eligible pick 0/10, walk-forward net 0.0% mean 0.000%/wk
+CRUDEOIL   BH: years with an eligible pick 0/10, walk-forward net 0.0% mean 0.000%/wk
+NATURALGAS TS: years with an eligible pick 1/10, walk-forward net -18.6% mean -0.352%/wk
+NATURALGAS MA: years with an eligible pick 6/10, walk-forward net 3.9% mean 0.013%/wk
+NATURALGAS BO: years with an eligible pick 0/10, walk-forward net 0.0% mean 0.000%/wk
+NATURALGAS CY: years with an eligible pick 0/10, walk-forward net 0.0% mean 0.000%/wk
+NATURALGAS CT: years with an eligible pick 0/10, walk-forward net 0.0% mean 0.000%/wk
+NATURALGAS SE: years with an eligible pick 0/10, walk-forward net 0.0% mean 0.000%/wk
+NATURALGAS MR: years with an eligible pick 0/10, walk-forward net 0.0% mean 0.000%/wk
+NATURALGAS BH: years with an eligible pick 1/10, walk-forward net -40.1% mean -0.756%/wk

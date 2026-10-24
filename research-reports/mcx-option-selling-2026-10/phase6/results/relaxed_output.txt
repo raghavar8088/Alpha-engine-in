@@ -1,0 +1,16 @@
+CRUDEOIL   TS (13, 'so', '1x')             2008-16 0.277%/wk -> 2017-26 -0.065%/wk, Sharpe -0.10, net -33%, maxDD 169%
+CRUDEOIL   MA (5, 20, 'so', '1x')          2008-16 0.279%/wk -> 2017-26 -0.032%/wk, Sharpe -0.05, net -17%, maxDD 141%
+CRUDEOIL   BO (55, 20, 'lo', '1x')         2008-16 0.010%/wk -> 2017-26 0.123%/wk, Sharpe 0.27, net 63%, maxDD 44% | 2%/wk needs x16.2 (avg exposure 6.2x, cap 3.2x), maxDD then 716%
+CRUDEOIL   CY (0.05, 'ls', 'vol')          2008-16 0.216%/wk -> 2017-26 -0.033%/wk, Sharpe -0.09, net -17%, maxDD 89%
+CRUDEOIL   CT (13, '1x')                   2008-16 0.311%/wk -> 2017-26 0.037%/wk, Sharpe 0.05, net 19%, maxDD 140% | 2%/wk needs x54.2 (avg exposure 32.4x, cap 3.2x), maxDD then 7583%
+CRUDEOIL   SE ('1x',)                      2008-16 0.230%/wk -> 2017-26 -0.498%/wk, Sharpe -0.60, net -255%, maxDD 261%
+CRUDEOIL   MR: nothing made money on 2008-16
+CRUDEOIL   BH ('short', 'vol')             2008-16 0.186%/wk -> 2017-26 -0.115%/wk, Sharpe -0.26, net -59%, maxDD 109%
+NATURALGAS TS (26, 'so', '1x')             2008-16 0.430%/wk -> 2017-26 0.035%/wk, Sharpe 0.04, net 18%, maxDD 132% | 2%/wk needs x56.4 (avg exposure 38.9x, cap 6.0x), maxDD then 7462%
+NATURALGAS MA (50, 200, 'so', '1x')        2008-16 0.468%/wk -> 2017-26 0.254%/wk, Sharpe 0.28, net 130%, maxDD 90% | 2%/wk needs x7.9 (avg exposure 5.6x, cap 6.0x), maxDD then 706%
+NATURALGAS BO (55, 20, 'ls', 'vol')        2008-16 0.045%/wk -> 2017-26 -0.086%/wk, Sharpe -0.26, net -44%, maxDD 85%
+NATURALGAS CY (0.0, 'so', 'vol')           2008-16 0.239%/wk -> 2017-26 -0.045%/wk, Sharpe -0.14, net -23%, maxDD 83%
+NATURALGAS CT (26, 'vol')                  2008-16 0.205%/wk -> 2017-26 -0.054%/wk, Sharpe -0.18, net -28%, maxDD 47%
+NATURALGAS SE: nothing made money on 2008-16
+NATURALGAS MR: nothing made money on 2008-16
+NATURALGAS BH ('short', '1x')              2008-16 0.448%/wk -> 2017-26 0.239%/wk, Sharpe 0.22, net 122%, maxDD 164% | 2%/wk needs x8.4 (avg exposure 8.4x, cap 6.0x), maxDD then 1369%

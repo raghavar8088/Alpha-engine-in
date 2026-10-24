@@ -1,0 +1,1050 @@
+[
+ {
+  "sym": "CRUDEOIL",
+  "family": "TS",
+  "years": [
+   {
+    "year": 2017,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2018,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2019,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2020,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2021,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2022,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2023,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2024,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2025,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2026,
+    "pick": null,
+    "net_pct": 0.0
+   }
+  ],
+  "stats": {
+   "weeks": 0,
+   "net_pct": 0.0,
+   "mean": 0.0
+  }
+ },
+ {
+  "sym": "CRUDEOIL",
+  "family": "MA",
+  "years": [
+   {
+    "year": 2017,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2018,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2019,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2020,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2021,
+    "pick": "(5, 20, 'ls', '1x')",
+    "net_pct": 42.41
+   },
+   {
+    "year": 2022,
+    "pick": "(5, 20, 'ls', '1x')",
+    "net_pct": -0.41
+   },
+   {
+    "year": 2023,
+    "pick": "(5, 20, 'ls', '1x')",
+    "net_pct": -22.62
+   },
+   {
+    "year": 2024,
+    "pick": "(5, 20, 'ls', '1x')",
+    "net_pct": -18.75
+   },
+   {
+    "year": 2025,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2026,
+    "pick": null,
+    "net_pct": 0.0
+   }
+  ],
+  "stats": {
+   "weeks": 209,
+   "weeks_in_market": 209,
+   "net_pct": 0.6298247466476781,
+   "mean": 3.0135155341994166e-05,
+   "sharpe": 0.004481575572279313,
+   "t": 0.008984671346350647,
+   "pf": 1.001659925172053,
+   "pos_weeks": 0.5263157894736842,
+   "ge2_weeks": 0.3253588516746411,
+   "worst_week": -0.16638629759902157,
+   "best_week": 0.2545693814885217,
+   "maxdd": 0.9114531399800629,
+   "avg_gross_exposure": 1.0,
+   "max_gross_exposure": 1.0,
+   "cost_pct": 6.340510353035933,
+   "L_star": 663.6766850220762,
+   "exposure_needed_avg": 663.6766850220762,
+   "exposure_needed_max": 663.6766850220762,
+   "maxdd_at_L": 604.9101984949306,
+   "worst_week_at_L": -110.42670642361527,
+   "ge2_weeks_at_L": 0.5263157894736842
+  }
+ },
+ {
+  "sym": "CRUDEOIL",
+  "family": "BO",
+  "years": [
+   {
+    "year": 2017,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2018,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2019,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2020,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2021,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2022,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2023,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2024,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2025,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2026,
+    "pick": null,
+    "net_pct": 0.0
+   }
+  ],
+  "stats": {
+   "weeks": 0,
+   "net_pct": 0.0,
+   "mean": 0.0
+  }
+ },
+ {
+  "sym": "CRUDEOIL",
+  "family": "CY",
+  "years": [
+   {
+    "year": 2017,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2018,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2019,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2020,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2021,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2022,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2023,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2024,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2025,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2026,
+    "pick": null,
+    "net_pct": 0.0
+   }
+  ],
+  "stats": {
+   "weeks": 0,
+   "net_pct": 0.0,
+   "mean": 0.0
+  }
+ },
+ {
+  "sym": "CRUDEOIL",
+  "family": "CT",
+  "years": [
+   {
+    "year": 2017,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2018,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2019,
+    "pick": "(13, '1x')",
+    "net_pct": -30.04
+   },
+   {
+    "year": 2020,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2021,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2022,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2023,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2024,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2025,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2026,
+    "pick": null,
+    "net_pct": 0.0
+   }
+  ],
+  "stats": {
+   "weeks": 52,
+   "weeks_in_market": 29,
+   "net_pct": -30.036379500759676,
+   "mean": -0.005776226827069168,
+   "sharpe": -1.2921975440256783,
+   "t": -1.2921975440256783,
+   "pf": 0.5511083003824042,
+   "pos_weeks": 0.21153846153846154,
+   "ge2_weeks": 0.09615384615384616,
+   "worst_week": -0.08482676224611718,
+   "best_week": 0.07862383389496055,
+   "maxdd": 0.31145750350774637,
+   "avg_gross_exposure": 0.5576923076923077,
+   "max_gross_exposure": 1.0,
+   "cost_pct": 0.7564634495931576
+  }
+ },
+ {
+  "sym": "CRUDEOIL",
+  "family": "SE",
+  "years": [
+   {
+    "year": 2017,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2018,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2019,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2020,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2021,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2022,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2023,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2024,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2025,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2026,
+    "pick": null,
+    "net_pct": 0.0
+   }
+  ],
+  "stats": {
+   "weeks": 0,
+   "net_pct": 0.0,
+   "mean": 0.0
+  }
+ },
+ {
+  "sym": "CRUDEOIL",
+  "family": "MR",
+  "years": [
+   {
+    "year": 2017,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2018,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2019,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2020,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2021,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2022,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2023,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2024,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2025,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2026,
+    "pick": null,
+    "net_pct": 0.0
+   }
+  ],
+  "stats": {
+   "weeks": 0,
+   "net_pct": 0.0,
+   "mean": 0.0
+  }
+ },
+ {
+  "sym": "CRUDEOIL",
+  "family": "BH",
+  "years": [
+   {
+    "year": 2017,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2018,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2019,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2020,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2021,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2022,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2023,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2024,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2025,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2026,
+    "pick": null,
+    "net_pct": 0.0
+   }
+  ],
+  "stats": {
+   "weeks": 0,
+   "net_pct": 0.0,
+   "mean": 0.0
+  }
+ },
+ {
+  "sym": "NATURALGAS",
+  "family": "TS",
+  "years": [
+   {
+    "year": 2017,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2018,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2019,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2020,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2021,
+    "pick": "(26, 'so', '1x')",
+    "net_pct": -18.63
+   },
+   {
+    "year": 2022,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2023,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2024,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2025,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2026,
+    "pick": null,
+    "net_pct": 0.0
+   }
+  ],
+  "stats": {
+   "weeks": 53,
+   "weeks_in_market": 23,
+   "net_pct": -18.63203319327388,
+   "mean": -0.003515477960995072,
+   "sharpe": -0.8138325238475221,
+   "t": -0.821620572337863,
+   "pf": 0.6331864771327448,
+   "pos_weeks": 0.20754716981132076,
+   "ge2_weeks": 0.11320754716981132,
+   "worst_week": -0.127415143603133,
+   "best_week": 0.09734428342595179,
+   "maxdd": 0.23163360922844506,
+   "avg_gross_exposure": 0.4339622641509434,
+   "max_gross_exposure": 1.0,
+   "cost_pct": 0.8201688954025907
+  }
+ },
+ {
+  "sym": "NATURALGAS",
+  "family": "MA",
+  "years": [
+   {
+    "year": 2017,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2018,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2019,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2020,
+    "pick": "(50, 200, 'so', '1x')",
+    "net_pct": 50.19
+   },
+   {
+    "year": 2021,
+    "pick": "(50, 200, 'so', '1x')",
+    "net_pct": -23.67
+   },
+   {
+    "year": 2022,
+    "pick": "(50, 200, 'so', '1x')",
+    "net_pct": -8.95
+   },
+   {
+    "year": 2023,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2024,
+    "pick": "(50, 200, 'so', '1x')",
+    "net_pct": 20.08
+   },
+   {
+    "year": 2025,
+    "pick": "(50, 200, 'so', '1x')",
+    "net_pct": 1.27
+   },
+   {
+    "year": 2026,
+    "pick": "(50, 200, 'so', '1x')",
+    "net_pct": -35.05
+   }
+  ],
+  "stats": {
+   "weeks": 304,
+   "weeks_in_market": 197,
+   "net_pct": 3.869431689958752,
+   "mean": 0.0001272839371696958,
+   "sharpe": 0.012384515439002798,
+   "t": 0.029944298188567878,
+   "pf": 1.0060653484285353,
+   "pos_weeks": 0.34868421052631576,
+   "ge2_weeks": 0.26973684210526316,
+   "worst_week": -0.6061416813885527,
+   "best_week": 0.23029197080291963,
+   "maxdd": 0.8972443115198248,
+   "avg_gross_exposure": 0.6480263157894737,
+   "max_gross_exposure": 1.0,
+   "cost_pct": 5.48029696942688,
+   "L_star": 157.12901757066066,
+   "exposure_needed_avg": 101.82373835993471,
+   "exposure_needed_max": 157.12901757066066,
+   "maxdd_at_L": 140.98311718997388,
+   "worst_week_at_L": -95.24244690521171,
+   "ge2_weeks_at_L": 0.34868421052631576
+  }
+ },
+ {
+  "sym": "NATURALGAS",
+  "family": "BO",
+  "years": [
+   {
+    "year": 2017,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2018,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2019,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2020,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2021,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2022,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2023,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2024,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2025,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2026,
+    "pick": null,
+    "net_pct": 0.0
+   }
+  ],
+  "stats": {
+   "weeks": 0,
+   "net_pct": 0.0,
+   "mean": 0.0
+  }
+ },
+ {
+  "sym": "NATURALGAS",
+  "family": "CY",
+  "years": [
+   {
+    "year": 2017,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2018,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2019,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2020,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2021,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2022,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2023,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2024,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2025,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2026,
+    "pick": null,
+    "net_pct": 0.0
+   }
+  ],
+  "stats": {
+   "weeks": 0,
+   "net_pct": 0.0,
+   "mean": 0.0
+  }
+ },
+ {
+  "sym": "NATURALGAS",
+  "family": "CT",
+  "years": [
+   {
+    "year": 2017,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2018,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2019,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2020,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2021,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2022,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2023,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2024,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2025,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2026,
+    "pick": null,
+    "net_pct": 0.0
+   }
+  ],
+  "stats": {
+   "weeks": 0,
+   "net_pct": 0.0,
+   "mean": 0.0
+  }
+ },
+ {
+  "sym": "NATURALGAS",
+  "family": "SE",
+  "years": [
+   {
+    "year": 2017,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2018,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2019,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2020,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2021,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2022,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2023,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2024,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2025,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2026,
+    "pick": null,
+    "net_pct": 0.0
+   }
+  ],
+  "stats": {
+   "weeks": 0,
+   "net_pct": 0.0,
+   "mean": 0.0
+  }
+ },
+ {
+  "sym": "NATURALGAS",
+  "family": "MR",
+  "years": [
+   {
+    "year": 2017,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2018,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2019,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2020,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2021,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2022,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2023,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2024,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2025,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2026,
+    "pick": null,
+    "net_pct": 0.0
+   }
+  ],
+  "stats": {
+   "weeks": 0,
+   "net_pct": 0.0,
+   "mean": 0.0
+  }
+ },
+ {
+  "sym": "NATURALGAS",
+  "family": "BH",
+  "years": [
+   {
+    "year": 2017,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2018,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2019,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2020,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2021,
+    "pick": "('short', '1x')",
+    "net_pct": -40.08
+   },
+   {
+    "year": 2022,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2023,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2024,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2025,
+    "pick": null,
+    "net_pct": 0.0
+   },
+   {
+    "year": 2026,
+    "pick": null,
+    "net_pct": 0.0
+   }
+  ],
+  "stats": {
+   "weeks": 53,
+   "weeks_in_market": 53,
+   "net_pct": -40.081125817940425,
+   "mean": -0.007562476569422722,
+   "sharpe": -0.884104300242862,
+   "t": -0.8925648212457069,
+   "pf": 0.7163328076005455,
+   "pos_weeks": 0.4716981132075472,
+   "ge2_weeks": 0.2641509433962264,
+   "worst_week": -0.127415143603133,
+   "best_week": 0.21569595261599217,
+   "maxdd": 0.8516061435653963,
+   "avg_gross_exposure": 1.0,
+   "max_gross_exposure": 1.0,
+   "cost_pct": 1.2053724803209134
+  }
+ }
+]

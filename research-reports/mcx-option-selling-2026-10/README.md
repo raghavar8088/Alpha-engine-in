@@ -69,5 +69,17 @@ Results are in `phase4/REPORT_PHASE4.md`.
 
 Results are in `phase5/REPORT_PHASE5.md`.
 
+## Phase 6 (`phase6/`): crude-oil and natural-gas FUTURES, week by week; target 2% a week
+| Step | Command | What it does |
+|---|---|---|
+| 34 | `python phase6/download_futures.py <data6> 2026-10-23 <data4>` | Every CRUDEOIL (2005–) and NATURALGAS (2006–) futures contract, plus the minis (663) |
+| 35 | `python phase6/build_futures.py <data6> <work6>` | The futures table |
+| 36 | `python phase6/test_engine6.py <work6>` | 16 checks: index = held contract, rolls, carry, costs, no look-ahead |
+| 37 | `python phase6/run_phase6.py <work6> discover` | 208 weekly variants on 2008–16 (rules and stop rule in `phase6/AMENDMENT_A6.md`) |
+| 38 | `python phase6/run_phase6.py <work6> walkforward` | Re-pick every year 2017–26 on all earlier years |
+| 39 | `python phase6/run_phase6.py <work6> relaxed` | Descriptive: each family's best of 2008–16 run on 2017–26, with the 2%-a-week arithmetic |
+
+Results are in `phase6/REPORT_PHASE6.md`.
+
 `engine.py` is the backtest. `test_engine.py` is its hand-checked tests, and `b76.py` is
 Black-76 (implied vol and delta only; no P&L ever comes from a model price).

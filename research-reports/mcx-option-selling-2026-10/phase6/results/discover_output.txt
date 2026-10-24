@@ -1,0 +1,38 @@
+
+=== CRUDEOIL: index 2005-02-09..2026-10-23, 1133 weeks, 261 rolls
+CRUDEOIL   TS  0/30 eligible | best mean (13, 'ls', '1x'): 0.288%/wk, Sharpe 0.44, weeks >=2% 32%
+           -> no eligible variant
+CRUDEOIL   MA  0/24 eligible | best mean (5, 20, 'ls', '1x'): 0.289%/wk, Sharpe 0.44, weeks >=2% 31%
+           -> no eligible variant
+CRUDEOIL   BO  0/16 eligible | best mean (55, 20, 'ls', '1x'): 0.107%/wk, Sharpe 0.22, weeks >=2% 21%
+           -> no eligible variant
+CRUDEOIL   CY  0/18 eligible | best mean (0.0, 'ls', '1x'): 0.313%/wk, Sharpe 0.48, weeks >=2% 30%
+           -> no eligible variant
+CRUDEOIL   CT  0/4 eligible | best mean (13, '1x'): 0.311%/wk, Sharpe 0.55, weeks >=2% 20%
+           -> no eligible variant
+CRUDEOIL   SE  0/2 eligible | best mean ('1x',): 0.230%/wk, Sharpe 0.35, weeks >=2% 31%
+           -> no eligible variant
+CRUDEOIL   MR  0/6 eligible | best mean (2.0, '1x'): -0.040%/wk, Sharpe -0.25, weeks >=2% 1%
+           -> no eligible variant
+CRUDEOIL   BH  0/4 eligible | best mean ('short', '1x'): 0.254%/wk, Sharpe 0.39, weeks >=2% 31%
+           -> no eligible variant
+
+=== NATURALGAS: index 2006-07-10..2026-10-23, 1059 weeks, 243 rolls
+NATURALGAS TS  0/30 eligible | best mean (26, 'so', '1x'): 0.430%/wk, Sharpe 0.59, weeks >=2% 31%
+           -> no eligible variant
+NATURALGAS MA  0/24 eligible | best mean (50, 200, 'ls', '1x'): 0.475%/wk, Sharpe 0.56, weeks >=2% 42%
+           -> no eligible variant
+NATURALGAS BO  0/16 eligible | best mean (55, 20, 'ls', '1x'): 0.072%/wk, Sharpe 0.10, weeks >=2% 29%
+           -> no eligible variant
+NATURALGAS CY  0/18 eligible | best mean (0.0, 'so', '1x'): 0.403%/wk, Sharpe 0.51, weeks >=2% 37%
+           -> no eligible variant
+NATURALGAS CT  0/4 eligible | best mean (26, '1x'): 0.353%/wk, Sharpe 0.49, weeks >=2% 29%
+           -> no eligible variant
+NATURALGAS SE  0/2 eligible | best mean ('vol',): 0.015%/wk, Sharpe 0.03, weeks >=2% 30%
+           -> no eligible variant
+NATURALGAS MR  0/6 eligible | best mean (2.0, '1x'): -0.000%/wk, Sharpe -0.00, weeks >=2% 3%
+           -> no eligible variant
+NATURALGAS BH  0/4 eligible | best mean ('short', '1x'): 0.448%/wk, Sharpe 0.53, weeks >=2% 41%
+           -> no eligible variant
+
+0 candidates
