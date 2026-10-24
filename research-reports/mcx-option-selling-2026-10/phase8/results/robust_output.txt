@@ -1,0 +1,49 @@
+  ratios = np.array([d.o[0] / r.open, d.h.max() / r.high, d.l.min() / r.low])
+  if (np.abs(ratios - 1) < 0.003).all() or (ratios.max() - ratios.min()) < 0.003:
+days kept / flagged against MCX's official open-high-low: {'CRUDEOIL 5m': {'kept': 39, 'flagged': 15}, 'CRUDEOIL 15m': {'kept': 24, 'flagged': 41}, 'CRUDEOIL 1h': {'kept': 21, 'flagged': 84}, 'NATURALGAS 5m': {'kept': 39, 'flagged': 15}, 'NATURALGAS 15m': {'kept': 25, 'flagged': 41}, 'NATURALGAS 1h': {'kept': 21, 'flagged': 82}}
+   clean: {'sym': 'CRUDEOIL', 'strategy': 'ORB-AM', 'days': 39, 'trades': 38, 'net_pct': -7.7, 'net_pct_2tick': -8.5, 't': -1.19, 'halves': (-6.4, -1.2), 'week_mean_pct': -0.64, 'weeks_profitable': 0.42}
+   clean: {'sym': 'CRUDEOIL', 'strategy': 'ORB-US', 'days': 39, 'trades': 39, 'net_pct': -9.4, 'net_pct_2tick': -10.3, 't': -1.52, 'halves': (-2.8, -6.6), 'week_mean_pct': -0.78, 'weeks_profitable': 0.42}
+   clean: {'sym': 'CRUDEOIL', 'strategy': 'PDHL', 'days': 39, 'trades': 29, 'net_pct': 8.9, 'net_pct_2tick': 8.4, 't': 0.76, 'halves': (-0.3, 9.2), 'week_mean_pct': 0.74, 'weeks_profitable': 0.5}
+   clean: {'sym': 'CRUDEOIL', 'strategy': 'VWAP-REV', 'days': 39, 'trades': 117, 'net_pct': -9.8, 'net_pct_2tick': -11.8, 't': -5.5, 'halves': (-4.2, -5.7), 'week_mean_pct': -0.82, 'weeks_profitable': 0.0}
+   clean: {'sym': 'CRUDEOIL', 'strategy': 'RSI2', 'days': 39, 'trades': 814, 'net_pct': -38.2, 'net_pct_2tick': -59.2, 't': -4.63, 'halves': (-13.6, -24.6), 'week_mean_pct': -3.18, 'weeks_profitable': 0.0}
+   clean: {'sym': 'CRUDEOIL', 'strategy': 'EMA-X', 'days': 39, 'trades': 329, 'net_pct': 13.1, 'net_pct_2tick': 5.3, 't': 0.9, 'halves': (6.7, 6.3), 'week_mean_pct': 1.09, 'weeks_profitable': 0.75}
+   clean: {'sym': 'CRUDEOIL', 'strategy': 'MOM-LH-a', 'days': 39, 'trades': 38, 'net_pct': 10.1, 'net_pct_2tick': 9.2, 't': 2.56, 'halves': (4.3, 5.8), 'week_mean_pct': 0.84, 'weeks_profitable': 0.75}
+   clean: {'sym': 'CRUDEOIL', 'strategy': 'MOM-LH-b', 'days': 39, 'trades': 38, 'net_pct': -2.4, 'net_pct_2tick': -3.2, 't': -0.53, 'halves': (-1.5, -0.8), 'week_mean_pct': -0.2, 'weeks_profitable': 0.5}
+   clean: {'sym': 'CRUDEOIL', 'strategy': 'EVT', 'days': 39, 'trades': 8, 'net_pct': 0.4, 'net_pct_2tick': 0.2, 't': 0.28, 'halves': (1.1, -0.7), 'week_mean_pct': 0.03, 'weeks_profitable': 0.17}
+   clean: {'sym': 'CRUDEOIL', 'strategy': 'BB-BREAK', 'days': 24, 'trades': 43, 'net_pct': -5.8, 'net_pct_2tick': -6.8, 't': -0.91, 'halves': (-4.0, -1.8), 'week_mean_pct': -0.65, 'weeks_profitable': 0.22}
+   clean: {'sym': 'CRUDEOIL', 'strategy': 'GAP-FADE', 'days': 39, 'trades': 24, 'net_pct': -5.5, 'net_pct_2tick': -5.8, 't': -1.47, 'halves': (-2.2, -3.3), 'week_mean_pct': -0.46, 'weeks_profitable': 0.17}
+   clean: {'sym': 'CRUDEOIL', 'strategy': 'LONG-DAY', 'days': 39, 'trades': 38, 'net_pct': 27.9, 'net_pct_2tick': 27.1, 't': 1.95, 'halves': (13.9, 14.0), 'week_mean_pct': 2.33, 'weeks_profitable': 0.67}
+   clean: {'sym': 'CRUDEOIL', 'strategy': 'LONG-US', 'days': 39, 'trades': 39, 'net_pct': 22.9, 'net_pct_2tick': 22.0, 't': 2.96, 'halves': (15.0, 8.0), 'week_mean_pct': 1.91, 'weeks_profitable': 1.0}
+   clean: {'sym': 'CRUDEOIL', 'strategy': 'MOM-LH-1h', 'days': 21, 'trades': 21, 'net_pct': 4.8, 'net_pct_2tick': 4.3, 't': 1.23, 'halves': (1.6, 3.2), 'week_mean_pct': 0.69, 'weeks_profitable': 0.86}
+   clean: {'sym': 'CRUDEOIL', 'strategy': 'EMA-X-1h', 'days': 21, 'trades': 34, 'net_pct': -8.8, 'net_pct_2tick': -9.6, 't': -0.79, 'halves': (-6.4, -2.4), 'week_mean_pct': -1.26, 'weeks_profitable': 0.14}
+   clean: {'sym': 'CRUDEOIL', 'strategy': 'ORB-US-1h', 'days': 21, 'trades': 21, 'net_pct': -7.5, 'net_pct_2tick': -8.0, 't': -1.71, 'halves': (-5.0, -2.5), 'week_mean_pct': -1.07, 'weeks_profitable': 0.43}
+   clean: {'sym': 'NATURALGAS', 'strategy': 'ORB-AM', 'days': 39, 'trades': 39, 'net_pct': 2.0, 'net_pct_2tick': -0.8, 't': 0.21, 'halves': (-2.4, 4.3), 'week_mean_pct': 0.2, 'weeks_profitable': 0.5}
+   clean: {'sym': 'NATURALGAS', 'strategy': 'ORB-US', 'days': 39, 'trades': 38, 'net_pct': 0.0, 'net_pct_2tick': -2.7, 't': 0.01, 'halves': (1.1, -1.1), 'week_mean_pct': 0.0, 'weeks_profitable': 0.4}
+   clean: {'sym': 'NATURALGAS', 'strategy': 'PDHL', 'days': 39, 'trades': 31, 'net_pct': -1.8, 'net_pct_2tick': -3.6, 't': -0.18, 'halves': (-7.0, 5.3), 'week_mean_pct': -0.18, 'weeks_profitable': 0.3}
+   clean: {'sym': 'NATURALGAS', 'strategy': 'VWAP-REV', 'days': 39, 'trades': 117, 'net_pct': -6.8, 'net_pct_2tick': -15.6, 't': -2.82, 'halves': (-5.7, -1.1), 'week_mean_pct': -0.68, 'weeks_profitable': 0.3}
+   clean: {'sym': 'NATURALGAS', 'strategy': 'RSI2', 'days': 39, 'trades': 817, 'net_pct': -70.5, 'net_pct_2tick': -131.2, 't': -8.79, 'halves': (-38.2, -32.3), 'week_mean_pct': -7.05, 'weeks_profitable': 0.0}
+   clean: {'sym': 'NATURALGAS', 'strategy': 'EMA-X', 'days': 39, 'trades': 401, 'net_pct': -51.8, 'net_pct_2tick': -80.3, 't': -4.22, 'halves': (-26.4, -25.3), 'week_mean_pct': -5.18, 'weeks_profitable': 0.1}
+   clean: {'sym': 'NATURALGAS', 'strategy': 'MOM-LH-a', 'days': 39, 'trades': 39, 'net_pct': -0.2, 'net_pct_2tick': -3.0, 't': -0.06, 'halves': (0.4, -0.6), 'week_mean_pct': -0.02, 'weeks_profitable': 0.4}
+   clean: {'sym': 'NATURALGAS', 'strategy': 'MOM-LH-b', 'days': 39, 'trades': 39, 'net_pct': 0.4, 'net_pct_2tick': -2.4, 't': 0.16, 'halves': (1.8, -1.4), 'week_mean_pct': 0.04, 'weeks_profitable': 0.6}
+   clean: {'sym': 'NATURALGAS', 'strategy': 'EVT', 'days': 39, 'trades': 9, 'net_pct': -0.3, 'net_pct_2tick': -1.0, 't': -0.13, 'halves': (-0.8, 0.4), 'week_mean_pct': -0.03, 'weeks_profitable': 0.3}
+   clean: {'sym': 'NATURALGAS', 'strategy': 'BB-BREAK', 'days': 25, 'trades': 52, 'net_pct': -8.4, 'net_pct_2tick': -12.0, 't': -0.96, 'halves': (-7.3, -1.1), 'week_mean_pct': -0.93, 'weeks_profitable': 0.11}
+   clean: {'sym': 'NATURALGAS', 'strategy': 'GAP-FADE', 'days': 39, 'trades': 24, 'net_pct': -0.2, 'net_pct_2tick': -1.0, 't': -0.03, 'halves': (-1.7, 1.5), 'week_mean_pct': -0.02, 'weeks_profitable': 0.4}
+   clean: {'sym': 'NATURALGAS', 'strategy': 'LONG-DAY', 'days': 39, 'trades': 39, 'net_pct': -22.6, 'net_pct_2tick': -25.4, 't': -1.74, 'halves': (0.8, -23.4), 'week_mean_pct': -2.26, 'weeks_profitable': 0.5}
+   clean: {'sym': 'NATURALGAS', 'strategy': 'LONG-US', 'days': 39, 'trades': 39, 'net_pct': -12.7, 'net_pct_2tick': -15.4, 't': -1.3, 'halves': (-1.3, -11.3), 'week_mean_pct': -1.27, 'weeks_profitable': 0.3}
+   clean: {'sym': 'NATURALGAS', 'strategy': 'MOM-LH-1h', 'days': 21, 'trades': 20, 'net_pct': -0.3, 'net_pct_2tick': -1.7, 't': -0.12, 'halves': (0.9, -1.2), 'week_mean_pct': -0.04, 'weeks_profitable': 0.56}
+   clean: {'sym': 'NATURALGAS', 'strategy': 'EMA-X-1h', 'days': 21, 'trades': 29, 'net_pct': -10.4, 'net_pct_2tick': -12.4, 't': -0.91, 'halves': (-7.3, -3.1), 'week_mean_pct': -1.16, 'weeks_profitable': 0.11}
+   clean: {'sym': 'NATURALGAS', 'strategy': 'ORB-US-1h', 'days': 21, 'trades': 21, 'net_pct': -1.4, 'net_pct_2tick': -2.8, 't': -0.24, 'halves': (-2.9, 1.5), 'week_mean_pct': -0.15, 'weeks_profitable': 0.67}
+CRUDEOIL long 18:00 -> close (2026-05-22..2026-08-05): {'n': 51, 'net_pct': -6.7, 'mean_bp': -13.2, 't': -0.55, 'win': 0.47}
+CRUDEOIL long 09:00 -> close (2026-05-22..2026-08-05): {'n': 51, 'net_pct': -21.9, 'mean_bp': -42.9, 't': -1.02, 'win': 0.45}
+CRUDEOIL price 2026-05-22 -> 2026-08-05: 9415.0 -> 7125.0
+NATURALGAS long 18:00 -> close (2026-05-22..2026-08-05): {'n': 49, 'net_pct': -22.2, 'mean_bp': -45.3, 't': -1.76, 'win': 0.39}
+NATURALGAS long 09:00 -> close (2026-05-22..2026-08-05): {'n': 49, 'net_pct': -25.4, 'mean_bp': -51.8, 't': -1.52, 'win': 0.41}
+NATURALGAS price 2026-05-22 -> 2026-08-05: 288.1 -> 256.9
+
+CRUDEOIL: every session since the market opened, long 09:00 open -> 23:30 close: {'n': 5965, 'net_pct': -481.5, 'mean_bp': -8.1, 't': -2.95, 'win': 0.49}; short: {'n': 5965, 'net_pct': -380.3, 'mean_bp': -6.4, 't': -2.33, 'win': 0.46}; gross mean -0.85 bp; years positive (long) 5/22
+   by year (long, net): {2005: (-10.2, -0.47), 2006: (-47.1, -2.04), 2007: (-8.3, -0.36), 2008: (-93.6, -2.23), 2009: (-17.3, -0.44), 2010: (-36.7, -1.71), 2011: (-3.9, -0.14), 2012: (-36.4, -1.78), 2013: (2.4, 0.11), 2014: (-66.5, -3.27), 2015: (-70.8, -1.88), 2016: (-12.8, -0.32), 2017: (-37.4, -1.61), 2018: (-30.4, -1.06), 2019: (0.6, 0.02), 2020: (-44.9, -0.55), 2021: (21.8, 0.71), 2022: (18.4, 0.45), 2023: (-13.8, -0.46), 2024: (-2.5, -0.1), 2025: (-26.0, -0.97), 2026: (33.8, 0.72)}
+   Aug-Oct 2026 on daily open/close: {'n': 53, 'net_pct': 29.7, 'mean_bp': 56.0, 't': 1.83, 'win': 0.6}
+
+NATURALGAS: every session since the market opened, long 09:00 open -> 23:30 close: {'n': 5572, 'net_pct': -1215.6, 'mean_bp': -21.8, 't': -5.82, 'win': 0.46}; short: {'n': 5572, 'net_pct': -58.7, 'mean_bp': -1.1, 't': -0.28, 'win': 0.49}; gross mean -10.39 bp; years positive (long) 1/21
+   by year (long, net): {2006: (-48.0, -1.21), 2007: (-55.2, -1.44), 2008: (-56.7, -1.38), 2009: (-111.7, -2.02), 2010: (-98.8, -2.47), 2011: (-77.9, -2.67), 2012: (-73.1, -1.63), 2013: (-20.4, -0.66), 2014: (-46.5, -1.26), 2015: (-75.4, -1.89), 2016: (-17.5, -0.44), 2017: (-99.2, -2.96), 2018: (-20.1, -0.49), 2019: (-93.6, -2.6), 2020: (-92.4, -1.71), 2021: (33.5, 0.72), 2022: (-21.1, -0.3), 2023: (-107.3, -1.95), 2024: (-64.5, -1.15), 2025: (-56.6, -1.11), 2026: (-13.1, -0.24)}
+   Aug-Oct 2026 on daily open/close: {'n': 53, 'net_pct': 2.7, 'mean_bp': 5.1, 't': 0.18, 'win': 0.49}

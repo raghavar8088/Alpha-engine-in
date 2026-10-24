@@ -81,5 +81,19 @@ Results are in `phase5/REPORT_PHASE5.md`.
 
 Results are in `phase6/REPORT_PHASE6.md`.
 
+## Phase 7 (`phase7/`): not run
+Registered, then stopped before any backtest when the owner switched to intraday only. See
+`phase7/NOT_RUN.md`.
+
+## Phase 8 (`phase8/`): INTRADAY strategies on the app's recorded MCX bars
+| Step | Command | What it does |
+|---|---|---|
+| 40 | `export_bars.py` in a one-off, memory-capped container on the server (`--env-file .env`, read-only) | The app's recorded crude/gas 1m/5m/15m/1h bars → `bars.csv.gz` (raw bars are not committed) |
+| 41 | `python phase8/test_engine8.py <bars.csv.gz>` | 10 checks: fills, gapped stops, stop-before-target, RSI, no look-ahead, a real day by hand |
+| 42 | `python phase8/run_phase8.py <bars.csv.gz> <work8>` | The 32 pre-registered intraday strategies, once (`phase8/AMENDMENT_A8*.md`) |
+| 43 | `python phase8/robust8.py <bars.csv.gz> <phase-6 fut.pkl> <work8>` | Rally checks, 20 years of session drift on MCX daily open/close, verified-days rerun |
+
+Results are in `phase8/REPORT_PHASE8.md`.
+
 `engine.py` is the backtest. `test_engine.py` is its hand-checked tests, and `b76.py` is
 Black-76 (implied vol and delta only; no P&L ever comes from a model price).
