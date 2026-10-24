@@ -1,0 +1,300 @@
+{
+ "members": [
+  "XAUUSD:crabel_nr",
+  "SPXUSD:crabel_nr",
+  "SPXUSD:williams_vbo",
+  "SPXUSD:unger_range",
+  "NSXUSD:crabel_orb",
+  "NSXUSD:crabel_nr",
+  "NSXUSD:williams_vbo",
+  "NSXUSD:williams_oops",
+  "NSXUSD:unger_range",
+  "GRXEUR:crabel_orb",
+  "GRXEUR:crabel_nr",
+  "GRXEUR:williams_vbo",
+  "GRXEUR:williams_oops",
+  "GRXEUR:unger_range"
+ ],
+ "portfolio_1x": {
+  "mean": 0.002533380352747351,
+  "t": 2.762051357652347,
+  "months": 61
+ },
+ "contributions": {
+  "NSXUSD:crabel_orb": {
+   "sum_of_returns_per_share": 0.04867949259075342,
+   "trades": 1083,
+   "long_sum": 0.03514342724101138,
+   "short_sum": 0.013536065349742039
+  },
+  "GRXEUR:crabel_orb": {
+   "sum_of_returns_per_share": 0.027257642187256764,
+   "trades": 717,
+   "long_sum": 0.014081022319298466,
+   "short_sum": 0.013176619867958305
+  },
+  "NSXUSD:unger_range": {
+   "sum_of_returns_per_share": 0.02709450622773196,
+   "trades": 875,
+   "long_sum": 0.023535060415095104,
+   "short_sum": 0.003559445812636848
+  },
+  "NSXUSD:williams_vbo": {
+   "sum_of_returns_per_share": 0.024058548172443742,
+   "trades": 432,
+   "long_sum": 0.024058548172443742,
+   "short_sum": 0.0
+  },
+  "SPXUSD:williams_vbo": {
+   "sum_of_returns_per_share": 0.015155456486011808,
+   "trades": 425,
+   "long_sum": 0.015155456486011808,
+   "short_sum": 0.0
+  },
+  "SPXUSD:unger_range": {
+   "sum_of_returns_per_share": 0.010817351850039526,
+   "trades": 500,
+   "long_sum": 0.010201318163587639,
+   "short_sum": 0.0006160336864518863
+  },
+  "NSXUSD:williams_oops": {
+   "sum_of_returns_per_share": 0.006317801486314169,
+   "trades": 107,
+   "long_sum": 0.006317801486314169,
+   "short_sum": 0.0
+  },
+  "GRXEUR:unger_range": {
+   "sum_of_returns_per_share": 0.002420627793344131,
+   "trades": 637,
+   "long_sum": -0.0008059860591483668,
+   "short_sum": 0.0032266138524924964
+  },
+  "GRXEUR:crabel_nr": {
+   "sum_of_returns_per_share": 0.0005434943161073353,
+   "trades": 38,
+   "long_sum": 0.0007461731689467715,
+   "short_sum": -0.00020267885283943574
+  },
+  "SPXUSD:crabel_nr": {
+   "sum_of_returns_per_share": 0.0004904986587476718,
+   "trades": 53,
+   "long_sum": 0.0010692915872933001,
+   "short_sum": -0.0005787929285456285
+  },
+  "GRXEUR:williams_vbo": {
+   "sum_of_returns_per_share": 0.00031541067233272033,
+   "trades": 549,
+   "long_sum": -0.001717921430414505,
+   "short_sum": 0.0020333321027472266
+  },
+  "NSXUSD:crabel_nr": {
+   "sum_of_returns_per_share": -0.0006536639161595568,
+   "trades": 42,
+   "long_sum": -0.0016257916649864998,
+   "short_sum": 0.0009721277488269429
+  },
+  "XAUUSD:crabel_nr": {
+   "sum_of_returns_per_share": -0.0036305740012529176,
+   "trades": 81,
+   "long_sum": 0.0010012600295050429,
+   "short_sum": -0.004631834030757961
+  },
+  "GRXEUR:williams_oops": {
+   "sum_of_returns_per_share": -0.004535184378871634,
+   "trades": 125,
+   "long_sum": -0.002271734083289786,
+   "short_sum": -0.0022634502955818487
+  }
+ },
+ "by_market": {
+  "GRXEUR": {
+   "members": 5,
+   "mean": 0.00042393894271358006,
+   "t": 1.1989834733965523,
+   "months": 61
+  },
+  "NSXUSD": {
+   "members": 5,
+   "mean": 0.001731427548804231,
+   "t": 2.4158774922057327,
+   "months": 61
+  },
+  "SPXUSD": {
+   "members": 3,
+   "mean": 0.0004340467829311337,
+   "t": 1.8538640736729914,
+   "months": 61
+  },
+  "XAUUSD": {
+   "members": 1,
+   "mean": -5.9536078970313274e-05,
+   "t": -1.41568837997656,
+   "months": 61
+  }
+ },
+ "without_best_1": {
+  "mean": 0.002059513972433968,
+  "t": 2.5791719212203854,
+  "months": 60
+ },
+ "without_best_3": {
+  "mean": 0.001589460866207807,
+  "t": 2.11439716701065,
+  "months": 58
+ },
+ "best_months": {
+  "2025-04": 0.030965363171550297,
+  "2022-04": 0.017196418808047786,
+  "2022-07": 0.01418568929793751,
+  "2026-03": 0.014010997130782243,
+  "2023-08": 0.012468055153644464
+ },
+ "worst_months": {
+  "2022-09": -0.00810304039828147,
+  "2026-09": -0.008108590709972496,
+  "2022-06": -0.008518814232132521,
+  "2026-06": -0.009289325895678768,
+  "2025-06": -0.009350934769747132
+ },
+ "placebo": {
+  "sims": 2000,
+  "mean_month_placebo_avg": -0.0004776892948166226,
+  "p_value": 0.0,
+  "note": "placebo months compound each member's trades on random sessions; one trade's return per placement"
+ },
+ "drift_benchmark": {
+  "mean": 0.0008616961358272185,
+  "t": 0.27603757361778225,
+  "months": 61
+ },
+ "leverage": {
+  "IS_1x": {
+   "mean_month": 0.001311642378055846,
+   "median_month": 0.0003480390293371105,
+   "worst_month": -0.03802011971661534,
+   "max_drawdown": -0.06352015106578801,
+   "cagr": 0.015537035320950299
+  },
+  "IS_2x": {
+   "mean_month": 0.002626426067382765,
+   "median_month": 0.0006010499692497007,
+   "worst_month": -0.07515802315816722,
+   "max_drawdown": -0.1235771116412705,
+   "cagr": 0.030627799825235558
+  },
+  "IS_3x": {
+   "mean_month": 0.00394417884785624,
+   "median_month": 0.000901574953874551,
+   "worst_month": -0.1114082435567264,
+   "max_drawdown": -0.1803230022606258,
+   "cagr": 0.045248427415078174
+  },
+  "IS_5x": {
+   "mean_month": 0.006587865192875801,
+   "median_month": 0.0015026249231242517,
+   "worst_month": -0.18123092454552558,
+   "max_drawdown": -0.2844675807836635,
+   "cagr": 0.07298676464285214
+  },
+  "IS_10x": {
+   "mean_month": 0.013235645371303534,
+   "median_month": 0.0030052498462482813,
+   "worst_month": -0.3401360518043991,
+   "max_drawdown": -0.49667143946130266,
+   "cagr": 0.132560360335771
+  },
+  "OOS_1x": {
+   "mean_month": 0.002533380352747351,
+   "median_month": 0.0020882417786212137,
+   "worst_month": -0.009350934769747132,
+   "max_drawdown": -0.01988518199362599,
+   "cagr": 0.030782595909298882
+  },
+  "OOS_2x": {
+   "mean_month": 0.005073414416823116,
+   "median_month": 0.0041211774857414785,
+   "worst_month": -0.018632828316889394,
+   "max_drawdown": -0.03954834160046916,
+   "cagr": 0.0618783708236228
+  },
+  "OOS_3x": {
+   "mean_month": 0.007620008327150861,
+   "median_month": 0.006098595627229475,
+   "worst_month": -0.02784603236621086,
+   "max_drawdown": -0.0589866606915469,
+   "cagr": 0.09326554777330043
+  },
+  "OOS_5x": {
+   "mean_month": 0.012732482720844448,
+   "median_month": 0.009886066533101756,
+   "worst_month": -0.046067775934728994,
+   "max_drawdown": -0.09717849383986799,
+   "cagr": 0.15682240191162222
+  },
+  "OOS_10x": {
+   "mean_month": 0.02562122229831083,
+   "median_month": 0.01836966792819794,
+   "worst_month": -0.09060408120881613,
+   "max_drawdown": -0.18856351632072776,
+   "cagr": 0.3191178456181547
+  }
+ },
+ "cost_multiple": {
+  "0x": {
+   "mean": 0.0031506127970091823,
+   "t": 3.419727074300798,
+   "months": 61
+  },
+  "1x": {
+   "mean": 0.002533380352747311,
+   "t": 2.7620513576522945,
+   "months": 61
+  },
+  "2x": {
+   "mean": 0.0019165841042586835,
+   "t": 2.09597192439856,
+   "months": 61
+  },
+  "3x": {
+   "mean": 0.001300223729048987,
+   "t": 1.4242416452285658,
+   "months": 61
+  },
+  "4x": {
+   "mean": 0.0006842989048746782,
+   "t": 0.7497162851094186,
+   "months": 61
+  },
+  "6x": {
+   "mean": -0.0005462453780877222,
+   "t": -0.5961448915463337,
+   "months": 61
+  }
+ },
+ "years": {
+  "2021": {
+   "1x": 0.010371218098200075,
+   "10x": 0.10485150055962644
+  },
+  "2022": {
+   "1x": 0.03128943274025553,
+   "10x": 0.3010953881604965
+  },
+  "2023": {
+   "1x": 0.02320539118240883,
+   "10x": 0.2493467621688712
+  },
+  "2024": {
+   "1x": 0.018338734172686832,
+   "10x": 0.1830353364963877
+  },
+  "2025": {
+   "1x": 0.0656398439856769,
+   "10x": 0.8124875478727147
+  },
+  "2026": {
+   "1x": 0.007024527894702981,
+   "10x": 0.048833705663413385
+  }
+ }
+}

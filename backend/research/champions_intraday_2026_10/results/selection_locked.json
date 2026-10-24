@@ -1,0 +1,538 @@
+{
+ "locked_at": "2026-10-24T13:55:03+00:00",
+ "code_hash": "9d807cc9aad5ffd1",
+ "debug_windows": false,
+ "windows": {
+  "XAUUSD": {
+   "IS": [
+    "2010-01-04",
+    "2021-09-30"
+   ],
+   "OOS": [
+    "2021-10-01",
+    "2026-10-16"
+   ]
+  },
+  "SPXUSD": {
+   "IS": [
+    "2010-11-15",
+    "2021-09-30"
+   ],
+   "OOS": [
+    "2021-10-01",
+    "2026-10-16"
+   ]
+  },
+  "NSXUSD": {
+   "IS": [
+    "2010-11-15",
+    "2021-09-30"
+   ],
+   "OOS": [
+    "2021-10-01",
+    "2026-10-16"
+   ]
+  },
+  "GRXEUR": {
+   "IS": [
+    "2010-11-15",
+    "2020-06-12"
+   ],
+   "OOS": [
+    "2023-12-04",
+    "2026-10-16"
+   ]
+  }
+ },
+ "out_of_sample_from": "2021-10-01",
+ "configurations_tested": 332,
+ "rules": {
+  "selection": "per market and rule: highest in-sample t-statistic (base costs) among configurations with >= 100 trades",
+  "edge": "IS avg > 0; OOS >= 50 trades, avg > 0 at base and harsh costs, Holm-adjusted one-sided p < 0.05, timing p < 0.05",
+  "target": "EDGE and avg >= +0.10% a trade in- and out-of-sample (2% of the account at 20x)",
+  "portfolio": "locked rules with IS avg > 0, equal shares; WORKING if OOS mean monthly return > 0 with t >= 2 and > 0 at harsh costs"
+ },
+ "selected": {
+  "XAUUSD": {
+   "crabel_orb": {
+    "status": "locked",
+    "config": {
+     "k": 0.5,
+     "stop": "none"
+    },
+    "label": "k=0.5, stop=none",
+    "configs": 6,
+    "IS_trades": 3016,
+    "IS_avg": -0.00015237737657706815,
+    "IS_t": -1.2677359317915473,
+    "IS_profit_factor": 0.9359731483719949,
+    "IS_win_rate": 0.4844164456233422,
+    "configs_with_positive_IS_avg": 0,
+    "configs_reaching_target_IS": 0
+   },
+   "crabel_nr": {
+    "status": "locked",
+    "config": {
+     "pattern": "ID_NR4",
+     "k": 1.5,
+     "stop": "opposite"
+    },
+    "label": "pattern=ID_NR4, k=1.5, stop=opposite",
+    "configs": 18,
+    "IS_trades": 231,
+    "IS_avg": 0.0006276311699568313,
+    "IS_t": 1.7025821418928184,
+    "IS_profit_factor": 1.3376832343864913,
+    "IS_win_rate": 0.4675324675324675,
+    "configs_with_positive_IS_avg": 8,
+    "configs_reaching_target_IS": 0
+   },
+   "williams_vbo": {
+    "status": "locked",
+    "config": {
+     "k": 0.7,
+     "direction": "long",
+     "stop": "none"
+    },
+    "label": "k=0.7, direction=long, stop=none",
+    "configs": 12,
+    "IS_trades": 818,
+    "IS_avg": -8.391050850144965e-05,
+    "IS_t": -0.4237941855568564,
+    "IS_profit_factor": 0.958032928470632,
+    "IS_win_rate": 0.4669926650366748,
+    "configs_with_positive_IS_avg": 0,
+    "configs_reaching_target_IS": 0
+   },
+   "williams_oops": {
+    "status": "locked",
+    "config": {
+     "direction": "long",
+     "gap": 0.1,
+     "stop": "none"
+    },
+    "label": "direction=long, gap=0.1, stop=none",
+    "configs": 8,
+    "IS_trades": 251,
+    "IS_avg": -0.0002281529065933858,
+    "IS_t": -0.5909338573512799,
+    "IS_profit_factor": 0.8911486547216994,
+    "IS_win_rate": 0.46215139442231074,
+    "configs_with_positive_IS_avg": 0,
+    "configs_reaching_target_IS": 0
+   },
+   "unger_range": {
+    "status": "locked",
+    "config": {
+     "hours": 2,
+     "stop": "opposite",
+     "filt": "compression"
+    },
+    "label": "hours=2, stop=opposite, filt=compression",
+    "configs": 8,
+    "IS_trades": 1246,
+    "IS_avg": -0.00010851622388079163,
+    "IS_t": -0.9915495559080896,
+    "IS_profit_factor": 0.9211109849073144,
+    "IS_win_rate": 0.4157303370786517,
+    "configs_with_positive_IS_avg": 0,
+    "configs_reaching_target_IS": 0
+   },
+   "unger_reversal": {
+    "status": "locked",
+    "config": {
+     "tf": 30,
+     "stop": "extreme",
+     "target": "2R"
+    },
+    "label": "tf=30, stop=extreme, target=2R",
+    "configs": 8,
+    "IS_trades": 1364,
+    "IS_avg": -0.0004904103244905537,
+    "IS_t": -5.3789999518516565,
+    "IS_profit_factor": 0.6897057779743514,
+    "IS_win_rate": 0.3914956011730205,
+    "configs_with_positive_IS_avg": 0,
+    "configs_reaching_target_IS": 0
+   },
+   "unger_bias": {
+    "status": "locked",
+    "config": {
+     "start": 0,
+     "hold": 120,
+     "side": -1
+    },
+    "label": "start=0, hold=120, side=-1",
+    "configs": 18,
+    "IS_trades": 3024,
+    "IS_avg": -0.00038619883968279766,
+    "IS_t": -4.279321012525301,
+    "IS_profit_factor": 0.7996391180372839,
+    "IS_win_rate": 0.4408068783068783,
+    "configs_with_positive_IS_avg": 0,
+    "configs_reaching_target_IS": 0
+   }
+  },
+  "SPXUSD": {
+   "crabel_orb": {
+    "status": "locked",
+    "config": {
+     "k": 0.5,
+     "stop": "none"
+    },
+    "label": "k=0.5, stop=none",
+    "configs": 6,
+    "IS_trades": 2588,
+    "IS_avg": -9.121074879143607e-05,
+    "IS_t": -0.6202560062952948,
+    "IS_profit_factor": 0.964640828106416,
+    "IS_win_rate": 0.49690880989180836,
+    "configs_with_positive_IS_avg": 0,
+    "configs_reaching_target_IS": 0
+   },
+   "crabel_nr": {
+    "status": "locked",
+    "config": {
+     "pattern": "ID_NR4",
+     "k": 0.5,
+     "stop": "opposite"
+    },
+    "label": "pattern=ID_NR4, k=0.5, stop=opposite",
+    "configs": 18,
+    "IS_trades": 137,
+    "IS_avg": 0.00020208192415864773,
+    "IS_t": 0.4991713952985642,
+    "IS_profit_factor": 1.1429944636190787,
+    "IS_win_rate": 0.2846715328467153,
+    "configs_with_positive_IS_avg": 6,
+    "configs_reaching_target_IS": 0
+   },
+   "williams_vbo": {
+    "status": "locked",
+    "config": {
+     "k": 0.5,
+     "direction": "long",
+     "stop": "half_range"
+    },
+    "label": "k=0.5, direction=long, stop=half_range",
+    "configs": 12,
+    "IS_trades": 979,
+    "IS_avg": 1.1589167055946227e-05,
+    "IS_t": 0.07944447969404883,
+    "IS_profit_factor": 1.0070303244273786,
+    "IS_win_rate": 0.491317671092952,
+    "configs_with_positive_IS_avg": 1,
+    "configs_reaching_target_IS": 0
+   },
+   "williams_oops": {
+    "status": "locked",
+    "config": {
+     "direction": "long",
+     "gap": 0.0,
+     "stop": "none"
+    },
+    "label": "direction=long, gap=0.0, stop=none",
+    "configs": 8,
+    "IS_trades": 261,
+    "IS_avg": -6.424848856503489e-05,
+    "IS_t": -0.12030342751207462,
+    "IS_profit_factor": 0.9770561231171553,
+    "IS_win_rate": 0.5363984674329502,
+    "configs_with_positive_IS_avg": 0,
+    "configs_reaching_target_IS": 0
+   },
+   "unger_range": {
+    "status": "locked",
+    "config": {
+     "hours": 2,
+     "stop": "opposite",
+     "filt": "compression"
+    },
+    "label": "hours=2, stop=opposite, filt=compression",
+    "configs": 8,
+    "IS_trades": 1182,
+    "IS_avg": 1.377633336147942e-05,
+    "IS_t": 0.10388249732886695,
+    "IS_profit_factor": 1.008941553278342,
+    "IS_win_rate": 0.4746192893401015,
+    "configs_with_positive_IS_avg": 2,
+    "configs_reaching_target_IS": 0
+   },
+   "unger_reversal": {
+    "status": "locked",
+    "config": {
+     "tf": 30,
+     "stop": "extreme",
+     "target": "2R"
+    },
+    "label": "tf=30, stop=extreme, target=2R",
+    "configs": 8,
+    "IS_trades": 1342,
+    "IS_avg": -0.00021895158353162674,
+    "IS_t": -1.8711918313715643,
+    "IS_profit_factor": 0.8698482586495677,
+    "IS_win_rate": 0.4076005961251863,
+    "configs_with_positive_IS_avg": 0,
+    "configs_reaching_target_IS": 0
+   },
+   "unger_bias": {
+    "status": "locked",
+    "config": {
+     "start": 0,
+     "hold": 120,
+     "side": 1
+    },
+    "label": "start=0, hold=120, side=1",
+    "configs": 22,
+    "IS_trades": 2596,
+    "IS_avg": -0.00018177529556053534,
+    "IS_t": -1.9584796010328833,
+    "IS_profit_factor": 0.8966728756720598,
+    "IS_win_rate": 0.50231124807396,
+    "configs_with_positive_IS_avg": 0,
+    "configs_reaching_target_IS": 0
+   }
+  },
+  "NSXUSD": {
+   "crabel_orb": {
+    "status": "locked",
+    "config": {
+     "k": 0.5,
+     "stop": "none"
+    },
+    "label": "k=0.5, stop=none",
+    "configs": 6,
+    "IS_trades": 2608,
+    "IS_avg": 0.00012600470503593668,
+    "IS_t": 0.7092733702315414,
+    "IS_profit_factor": 1.0399799261651483,
+    "IS_win_rate": 0.5099693251533742,
+    "configs_with_positive_IS_avg": 1,
+    "configs_reaching_target_IS": 0
+   },
+   "crabel_nr": {
+    "status": "locked",
+    "config": {
+     "pattern": "ID_NR4",
+     "k": 0.5,
+     "stop": "opposite"
+    },
+    "label": "pattern=ID_NR4, k=0.5, stop=opposite",
+    "configs": 18,
+    "IS_trades": 127,
+    "IS_avg": 0.000793061114971764,
+    "IS_t": 1.2895857701290816,
+    "IS_profit_factor": 1.428325286695979,
+    "IS_win_rate": 0.3228346456692913,
+    "configs_with_positive_IS_avg": 10,
+    "configs_reaching_target_IS": 0
+   },
+   "williams_vbo": {
+    "status": "locked",
+    "config": {
+     "k": 0.5,
+     "direction": "long",
+     "stop": "half_range"
+    },
+    "label": "k=0.5, direction=long, stop=half_range",
+    "configs": 12,
+    "IS_trades": 1004,
+    "IS_avg": 0.00022220735500822468,
+    "IS_t": 1.2712510688259857,
+    "IS_profit_factor": 1.1121675627154863,
+    "IS_win_rate": 0.49701195219123506,
+    "configs_with_positive_IS_avg": 7,
+    "configs_reaching_target_IS": 0
+   },
+   "williams_oops": {
+    "status": "locked",
+    "config": {
+     "direction": "long",
+     "gap": 0.0,
+     "stop": "none"
+    },
+    "label": "direction=long, gap=0.0, stop=none",
+    "configs": 8,
+    "IS_trades": 246,
+    "IS_avg": 0.0005468410201641215,
+    "IS_t": 0.8809898812848496,
+    "IS_profit_factor": 1.1697026580060805,
+    "IS_win_rate": 0.5975609756097561,
+    "configs_with_positive_IS_avg": 7,
+    "configs_reaching_target_IS": 0
+   },
+   "unger_range": {
+    "status": "locked",
+    "config": {
+     "hours": 2,
+     "stop": "atr",
+     "filt": "none"
+    },
+    "label": "hours=2, stop=atr, filt=none",
+    "configs": 8,
+    "IS_trades": 2059,
+    "IS_avg": 3.6694786389275975e-05,
+    "IS_t": 0.2863694634321026,
+    "IS_profit_factor": 1.0181330480386597,
+    "IS_win_rate": 0.4881010199125789,
+    "configs_with_positive_IS_avg": 1,
+    "configs_reaching_target_IS": 0
+   },
+   "unger_reversal": {
+    "status": "locked",
+    "config": {
+     "tf": 15,
+     "stop": "extreme",
+     "target": "none"
+    },
+    "label": "tf=15, stop=extreme, target=none",
+    "configs": 8,
+    "IS_trades": 1574,
+    "IS_avg": -0.00023028173863953982,
+    "IS_t": -1.6090377643468354,
+    "IS_profit_factor": 0.8881664169743662,
+    "IS_win_rate": 0.3189326556543837,
+    "configs_with_positive_IS_avg": 0,
+    "configs_reaching_target_IS": 0
+   },
+   "unger_bias": {
+    "status": "locked",
+    "config": {
+     "start": 0,
+     "hold": 120,
+     "side": 1
+    },
+    "label": "start=0, hold=120, side=1",
+    "configs": 22,
+    "IS_trades": 2616,
+    "IS_avg": -8.884864748787836e-05,
+    "IS_t": -0.7350360059187337,
+    "IS_profit_factor": 0.9615780608833787,
+    "IS_win_rate": 0.5168195718654435,
+    "configs_with_positive_IS_avg": 0,
+    "configs_reaching_target_IS": 0
+   }
+  },
+  "GRXEUR": {
+   "crabel_orb": {
+    "status": "locked",
+    "config": {
+     "k": 1.0,
+     "stop": "none"
+    },
+    "label": "k=1.0, stop=none",
+    "configs": 6,
+    "IS_trades": 2366,
+    "IS_avg": 0.0002525630056582314,
+    "IS_t": 1.2872637988924753,
+    "IS_profit_factor": 1.0785465593489132,
+    "IS_win_rate": 0.4987320371935757,
+    "configs_with_positive_IS_avg": 6,
+    "configs_reaching_target_IS": 0
+   },
+   "crabel_nr": {
+    "status": "locked",
+    "config": {
+     "pattern": "ID_NR4",
+     "k": 0.5,
+     "stop": "none"
+    },
+    "label": "pattern=ID_NR4, k=0.5, stop=none",
+    "configs": 18,
+    "IS_trades": 160,
+    "IS_avg": 0.0011246692266853853,
+    "IS_t": 1.5848841645473617,
+    "IS_profit_factor": 1.4120597631329328,
+    "IS_win_rate": 0.5625,
+    "configs_with_positive_IS_avg": 10,
+    "configs_reaching_target_IS": 1
+   },
+   "williams_vbo": {
+    "status": "locked",
+    "config": {
+     "k": 0.5,
+     "direction": "both",
+     "stop": "none"
+    },
+    "label": "k=0.5, direction=both, stop=none",
+    "configs": 12,
+    "IS_trades": 1714,
+    "IS_avg": 0.00018376588123714287,
+    "IS_t": 0.8972357280255503,
+    "IS_profit_factor": 1.063985549676529,
+    "IS_win_rate": 0.48774795799299886,
+    "configs_with_positive_IS_avg": 10,
+    "configs_reaching_target_IS": 0
+   },
+   "williams_oops": {
+    "status": "locked",
+    "config": {
+     "direction": "both",
+     "gap": 0.1,
+     "stop": "extreme"
+    },
+    "label": "direction=both, gap=0.1, stop=extreme",
+    "configs": 8,
+    "IS_trades": 330,
+    "IS_avg": 0.0001814096979409151,
+    "IS_t": 0.3996391982329661,
+    "IS_profit_factor": 1.068499863331587,
+    "IS_win_rate": 0.396969696969697,
+    "configs_with_positive_IS_avg": 2,
+    "configs_reaching_target_IS": 0
+   },
+   "unger_range": {
+    "status": "locked",
+    "config": {
+     "hours": 3,
+     "stop": "atr",
+     "filt": "none"
+    },
+    "label": "hours=3, stop=atr, filt=none",
+    "configs": 8,
+    "IS_trades": 1989,
+    "IS_avg": 0.00018643089119670803,
+    "IS_t": 1.2078883801480995,
+    "IS_profit_factor": 1.079281043967594,
+    "IS_win_rate": 0.4796380090497738,
+    "configs_with_positive_IS_avg": 4,
+    "configs_reaching_target_IS": 0
+   },
+   "unger_reversal": {
+    "status": "locked",
+    "config": {
+     "tf": 30,
+     "stop": "extreme",
+     "target": "none"
+    },
+    "label": "tf=30, stop=extreme, target=none",
+    "configs": 8,
+    "IS_trades": 1341,
+    "IS_avg": -7.453110961873302e-05,
+    "IS_t": -0.41784927342704714,
+    "IS_profit_factor": 0.966514688149581,
+    "IS_win_rate": 0.3504847129008203,
+    "configs_with_positive_IS_avg": 0,
+    "configs_reaching_target_IS": 0
+   },
+   "unger_bias": {
+    "status": "locked",
+    "config": {
+     "start": 300,
+     "hold": 120,
+     "side": -1
+    },
+    "label": "start=300, hold=120, side=-1",
+    "configs": 30,
+    "IS_trades": 2416,
+    "IS_avg": -7.073382985164799e-05,
+    "IS_t": -0.6988539246326337,
+    "IS_profit_factor": 0.9565460845958988,
+    "IS_win_rate": 0.47144039735099336,
+    "configs_with_positive_IS_avg": 0,
+    "configs_reaching_target_IS": 0
+   }
+  }
+ },
+ "lock_sha256": "d54431d2ee79f68f"
+}

@@ -1,0 +1,30 @@
+{
+ "XAUUSD": {
+  "sessions": 4406,
+  "first": "2009-03-16",
+  "last": "2026-10-16",
+  "minutes": 1363132,
+  "dropped_sessions": 6
+ },
+ "SPXUSD": {
+  "sessions": 3829,
+  "first": "2010-11-15",
+  "last": "2026-10-16",
+  "minutes": 1440349,
+  "dropped_sessions": 141
+ },
+ "NSXUSD": {
+  "sessions": 3837,
+  "first": "2010-11-15",
+  "last": "2026-10-16",
+  "minutes": 1488412,
+  "dropped_sessions": 133
+ },
+ "GRXEUR": {
+  "sessions": 3162,
+  "first": "2010-11-15",
+  "last": "2026-10-16",
+  "minutes": 1609752,
+  "dropped_sessions": 5
+ }
+}
