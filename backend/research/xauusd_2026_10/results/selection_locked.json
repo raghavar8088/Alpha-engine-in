@@ -1,0 +1,340 @@
+{
+ "locked_at": "2026-10-24T07:55:51+00:00",
+ "code_hash": "2e704d054e71ff37",
+ "in_sample": [
+  "2010-01-01",
+  "2021-09-30"
+ ],
+ "out_of_sample_from": "2021-10-01",
+ "rules": {
+  "target_avg_per_trade": 0.02,
+  "min_is_trades": 12,
+  "min_oos_trades": 8,
+  "selection": "max in-sample t-stat among configs with >= min trades and avg >= target (costs C1)",
+  "pass": "OOS (C1): trades >= min, avg >= target, profit factor > 1"
+ },
+ "configurations_tested": 238,
+ "families": {
+  "faber_sma": {
+   "status": "selected",
+   "config": {
+    "months": 8,
+    "direction": "long"
+   },
+   "label": "months=8, direction=long",
+   "IS_trades": 14,
+   "IS_avg": 0.03681233166303675,
+   "IS_t": 0.8801043091925848,
+   "eligible_configs": 2,
+   "configs": 8
+  },
+  "bbdd_ma": {
+   "status": "selected",
+   "config": {
+    "pair": [
+     2,
+     9
+    ]
+   },
+   "label": "pair=(2, 9)",
+   "IS_trades": 12,
+   "IS_avg": 0.04796192047599501,
+   "IS_t": 0.7568821449432789,
+   "eligible_configs": 3,
+   "configs": 10
+  },
+  "tsmom": {
+   "status": "selected",
+   "config": {
+    "lookback": 6,
+    "direction": "long_short"
+   },
+   "label": "lookback=6, direction=long_short",
+   "IS_trades": 27,
+   "IS_avg": 0.02826327528225931,
+   "IS_t": 1.038503827726862,
+   "eligible_configs": 2,
+   "configs": 16
+  },
+  "ma_cross": {
+   "status": "selected",
+   "config": {
+    "pair": [
+     1,
+     200
+    ],
+    "band": 0.01,
+    "direction": "long"
+   },
+   "label": "pair=(1, 200), band=0.01, direction=long",
+   "IS_trades": 17,
+   "IS_avg": 0.027589018252580443,
+   "IS_t": 0.9692609184554872,
+   "eligible_configs": 6,
+   "configs": 24
+  },
+  "turtle": {
+   "status": "failed in-sample",
+   "config": {
+    "entry_exit": [
+     55,
+     20
+    ],
+    "stop_n": 2.0,
+    "direction": "long_short",
+    "filter_s1": false
+   },
+   "label": "entry_exit=(55, 20), stop_n=2.0, direction=long_short, filter_s1=False",
+   "best_is_avg_with_enough_trades": 0.014078724540015167,
+   "best_is_label": "entry_exit=(55, 20), stop_n=None, direction=long, filter_s1=False",
+   "eligible_configs": 0,
+   "configs": 14,
+   "why": "no configuration reached a 2% average with >= 12 trades"
+  },
+  "clenow": {
+   "status": "failed in-sample",
+   "config": {
+    "breakout": 50,
+    "atr_mult": 3.0,
+    "direction": "long_short"
+   },
+   "label": "breakout=50, atr_mult=3.0, direction=long_short",
+   "best_is_avg_with_enough_trades": 0.009895070657752145,
+   "best_is_label": "breakout=50, atr_mult=2.0, direction=long",
+   "eligible_configs": 0,
+   "configs": 12,
+   "why": "no configuration reached a 2% average with >= 12 trades"
+  },
+  "macd": {
+   "status": "failed in-sample",
+   "config": {
+    "timeframe": "daily",
+    "zero_filter": false,
+    "direction": "long"
+   },
+   "label": "timeframe=daily, zero_filter=False, direction=long",
+   "best_is_avg_with_enough_trades": 0.005487393366019834,
+   "best_is_label": "timeframe=weekly, zero_filter=False, direction=long",
+   "eligible_configs": 0,
+   "configs": 8,
+   "why": "no configuration reached a 2% average with >= 12 trades"
+  },
+  "weinstein": {
+   "status": "failed in-sample",
+   "config": {
+    "weeks": 30,
+    "rising": true,
+    "direction": "long"
+   },
+   "label": "weeks=30, rising=True, direction=long",
+   "best_is_avg_with_enough_trades": 0.019883635156915307,
+   "best_is_label": "weeks=30, rising=True, direction=long",
+   "eligible_configs": 0,
+   "configs": 8,
+   "why": "no configuration reached a 2% average with >= 12 trades"
+  },
+  "ichimoku": {
+   "status": "failed in-sample",
+   "config": {
+    "timeframe": "daily",
+    "exit": "kijun",
+    "direction": "long"
+   },
+   "label": "timeframe=daily, exit=kijun, direction=long",
+   "best_is_avg_with_enough_trades": 0.019939331383039504,
+   "best_is_label": "timeframe=weekly, exit=cloud, direction=long_short",
+   "eligible_configs": 0,
+   "configs": 8,
+   "why": "no configuration reached a 2% average with >= 12 trades"
+  },
+  "wilder_dmi": {
+   "status": "failed in-sample",
+   "config": {
+    "adx_min": 25,
+    "direction": "long_short"
+   },
+   "label": "adx_min=25, direction=long_short",
+   "best_is_avg_with_enough_trades": 0.008223422777708631,
+   "best_is_label": "adx_min=20, direction=long",
+   "eligible_configs": 0,
+   "configs": 4,
+   "why": "no configuration reached a 2% average with >= 12 trades"
+  },
+  "chandelier": {
+   "status": "failed in-sample",
+   "config": {
+    "entry_n": 50,
+    "k": 3.0,
+    "direction": "long_short"
+   },
+   "label": "entry_n=50, k=3.0, direction=long_short",
+   "best_is_avg_with_enough_trades": 0.012859774768717108,
+   "best_is_label": "entry_n=50, k=2.5, direction=long",
+   "eligible_configs": 0,
+   "configs": 18,
+   "why": "no configuration reached a 2% average with >= 12 trades"
+  },
+  "bollinger_squeeze": {
+   "status": "selected",
+   "config": {
+    "tol": 0.1,
+    "window": 20,
+    "exit": "mid",
+    "direction": "long"
+   },
+   "label": "tol=0.1, window=20, exit=mid, direction=long",
+   "IS_trades": 17,
+   "IS_avg": 0.023512317660248486,
+   "IS_t": 1.6695485243578165,
+   "eligible_configs": 1,
+   "configs": 16
+  },
+  "keltner": {
+   "status": "failed in-sample",
+   "config": {
+    "n": 20,
+    "k": 2.0,
+    "direction": "long_short"
+   },
+   "label": "n=20, k=2.0, direction=long_short",
+   "best_is_avg_with_enough_trades": 0.01393675132294162,
+   "best_is_label": "n=50, k=2.0, direction=long",
+   "eligible_configs": 0,
+   "configs": 12,
+   "why": "no configuration reached a 2% average with >= 12 trades"
+  },
+  "williams_vbo": {
+   "status": "failed in-sample",
+   "config": {
+    "k": 0.75,
+    "exit": "bailout",
+    "direction": "long_short"
+   },
+   "label": "k=0.75, exit=bailout, direction=long_short",
+   "best_is_avg_with_enough_trades": 0.0014555819666500728,
+   "best_is_label": "k=0.5, exit=hold10, direction=long",
+   "eligible_configs": 0,
+   "configs": 18,
+   "why": "no configuration reached a 2% average with >= 12 trades"
+  },
+  "nr_breakout": {
+   "status": "failed in-sample",
+   "config": {
+    "pattern": "NR7",
+    "hold": 1,
+    "direction": "long_short"
+   },
+   "label": "pattern=NR7, hold=1, direction=long_short",
+   "best_is_avg_with_enough_trades": 0.0024243570155572953,
+   "best_is_label": "pattern=NR7, hold=20, direction=long",
+   "eligible_configs": 0,
+   "configs": 12,
+   "why": "no configuration reached a 2% average with >= 12 trades"
+  },
+  "shock": {
+   "status": "failed in-sample",
+   "config": {
+    "k": 2.5,
+    "hold": 10,
+    "stop": "none"
+   },
+   "label": "k=2.5, hold=10, stop=none",
+   "best_is_avg_with_enough_trades": 0.005948237754188104,
+   "best_is_label": "k=3.0, hold=10, stop=none",
+   "eligible_configs": 0,
+   "configs": 18,
+   "why": "no configuration reached a 2% average with >= 12 trades"
+  },
+  "connors_rsi2": {
+   "status": "failed in-sample",
+   "config": {
+    "threshold": 10,
+    "exit_ma": 5,
+    "direction": "long"
+   },
+   "label": "threshold=10, exit_ma=5, direction=long",
+   "best_is_avg_with_enough_trades": 0.008752083351525232,
+   "best_is_label": "threshold=5, exit_ma=10, direction=long",
+   "eligible_configs": 0,
+   "configs": 8,
+   "why": "no configuration reached a 2% average with >= 12 trades"
+  },
+  "double_seven": {
+   "status": "failed in-sample",
+   "config": {
+    "n": 7,
+    "direction": "long"
+   },
+   "label": "n=7, direction=long",
+   "best_is_avg_with_enough_trades": 0.0035256325123957737,
+   "best_is_label": "n=10, direction=long",
+   "eligible_configs": 0,
+   "configs": 6,
+   "why": "no configuration reached a 2% average with >= 12 trades"
+  },
+  "bb_reversion": {
+   "status": "failed in-sample",
+   "config": {
+    "k": 2.0,
+    "trend": "none",
+    "direction": "long"
+   },
+   "label": "k=2.0, trend=none, direction=long",
+   "best_is_avg_with_enough_trades": 0.009825934681058131,
+   "best_is_label": "k=2.0, trend=sma200, direction=long",
+   "eligible_configs": 0,
+   "configs": 8,
+   "why": "no configuration reached a 2% average with >= 12 trades"
+  },
+  "london_breakout": {
+   "status": "failed in-sample",
+   "config": {
+    "tp_r": 2.5,
+    "range_filter": true
+   },
+   "label": "tp_r=2.5, range_filter=True",
+   "best_is_avg_with_enough_trades": -0.00015405382324418823,
+   "best_is_label": "tp_r=5.0, range_filter=True",
+   "eligible_configs": 0,
+   "configs": 4,
+   "why": "no configuration reached a 2% average with >= 12 trades"
+  },
+  "session_drift": {
+   "status": "failed in-sample",
+   "config": {
+    "exit_hour": 8
+   },
+   "label": "exit_hour=8",
+   "best_is_avg_with_enough_trades": -0.00020866469816203993,
+   "best_is_label": "exit_hour=3",
+   "eligible_configs": 0,
+   "configs": 2,
+   "why": "no configuration reached a 2% average with >= 12 trades"
+  },
+  "autumn": {
+   "status": "failed in-sample",
+   "config": {
+    "mode": "sep_and_nov"
+   },
+   "label": "mode=sep_and_nov",
+   "best_is_avg_with_enough_trades": -0.024820229297128345,
+   "best_is_label": "mode=sep_and_nov",
+   "eligible_configs": 0,
+   "configs": 2,
+   "why": "no configuration reached a 2% average with >= 12 trades"
+  },
+  "winter": {
+   "status": "selected",
+   "config": {
+    "mode": "dec_feb"
+   },
+   "label": "mode=dec_feb",
+   "IS_trades": 12,
+   "IS_avg": 0.034180457946870836,
+   "IS_t": 1.9024802848674747,
+   "eligible_configs": 2,
+   "configs": 2
+  }
+ },
+ "lock_sha256": "0b73dd53bc113bec"
+}

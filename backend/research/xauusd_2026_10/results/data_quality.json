@@ -1,0 +1,438 @@
+{
+ "source": "Dukascopy Bank SA public datafeed (datafeed.dukascopy.com), XAUUSD BID+ASK hourly candles; current month from minute candles",
+ "timezone": "UTC timestamps (hour start); sessions roll at 17:00 America/New_York",
+ "first_hour": "2004-01-01 00:00:00+00:00",
+ "last_hour": "2026-10-23 20:00:00+00:00",
+ "hours": 138332,
+ "sessions": 5912,
+ "one_sided_hours_dropped": 0,
+ "stray_sessions_dropped": [
+  "2013-01-01",
+  "2014-04-18",
+  "2015-04-03"
+ ],
+ "by_year": {
+  "2004": {
+   "hours": 6272,
+   "sessions": 262,
+   "median_hours_per_session": 24.0,
+   "spread_median": 0.504,
+   "spread_p90": 0.504,
+   "spread_max": 0.504,
+   "ask_below_bid_hours": 0,
+   "price_first": 414.85,
+   "price_last": 437.81
+  },
+  "2005": {
+   "hours": 6236,
+   "sessions": 260,
+   "median_hours_per_session": 24.0,
+   "spread_median": 0.504,
+   "spread_p90": 0.504,
+   "spread_max": 0.504,
+   "ask_below_bid_hours": 0,
+   "price_first": 438.02,
+   "price_last": 515.69
+  },
+  "2006": {
+   "hours": 6242,
+   "sessions": 260,
+   "median_hours_per_session": 24.0,
+   "spread_median": 0.504,
+   "spread_p90": 0.504,
+   "spread_max": 0.504,
+   "ask_below_bid_hours": 0,
+   "price_first": 516.22,
+   "price_last": 636.11
+  },
+  "2007": {
+   "hours": 6264,
+   "sessions": 261,
+   "median_hours_per_session": 24.0,
+   "spread_median": 0.504,
+   "spread_p90": 0.504,
+   "spread_max": 0.504,
+   "ask_below_bid_hours": 0,
+   "price_first": 635.88,
+   "price_last": 833.3
+  },
+  "2008": {
+   "hours": 6288,
+   "sessions": 262,
+   "median_hours_per_session": 24.0,
+   "spread_median": 0.46,
+   "spread_p90": 0.554,
+   "spread_max": 0.706,
+   "ask_below_bid_hours": 0,
+   "price_first": 833.26,
+   "price_last": 880.14
+  },
+  "2009": {
+   "hours": 6264,
+   "sessions": 261,
+   "median_hours_per_session": 24.0,
+   "spread_median": 0.504,
+   "spread_p90": 0.556,
+   "spread_max": 0.706,
+   "ask_below_bid_hours": 0,
+   "price_first": 880.14,
+   "price_last": 1096.35
+  },
+  "2010": {
+   "hours": 6262,
+   "sessions": 261,
+   "median_hours_per_session": 24.0,
+   "spread_median": 0.506,
+   "spread_p90": 0.704,
+   "spread_max": 0.96,
+   "ask_below_bid_hours": 0,
+   "price_first": 1096.36,
+   "price_last": 1419.23
+  },
+  "2011": {
+   "hours": 6220,
+   "sessions": 260,
+   "median_hours_per_session": 24.0,
+   "spread_median": 0.426,
+   "spread_p90": 0.638,
+   "spread_max": 2.574,
+   "ask_below_bid_hours": 0,
+   "price_first": 1420.82,
+   "price_last": 1565.58
+  },
+  "2012": {
+   "hours": 6240,
+   "sessions": 261,
+   "median_hours_per_session": 24.0,
+   "spread_median": 0.364,
+   "spread_p90": 0.496,
+   "spread_max": 2.44,
+   "ask_below_bid_hours": 0,
+   "price_first": 1565.3,
+   "price_last": 1675.3
+  },
+  "2013": {
+   "hours": 6049,
+   "sessions": 258,
+   "median_hours_per_session": 24.0,
+   "spread_median": 0.358,
+   "spread_p90": 0.584,
+   "spread_max": 2.945,
+   "ask_below_bid_hours": 0,
+   "price_first": 1671.07,
+   "price_last": 1205.71
+  },
+  "2014": {
+   "hours": 6048,
+   "sessions": 258,
+   "median_hours_per_session": 24.0,
+   "spread_median": 0.298,
+   "spread_p90": 0.395,
+   "spread_max": 2.8,
+   "ask_below_bid_hours": 0,
+   "price_first": 1206.08,
+   "price_last": 1184.18
+  },
+  "2015": {
+   "hours": 5988,
+   "sessions": 258,
+   "median_hours_per_session": 23.0,
+   "spread_median": 0.315,
+   "spread_p90": 0.402,
+   "spread_max": 2.95,
+   "ask_below_bid_hours": 0,
+   "price_first": 1186.89,
+   "price_last": 1061.29
+  },
+  "2016": {
+   "hours": 5927,
+   "sessions": 258,
+   "median_hours_per_session": 23.0,
+   "spread_median": 0.312,
+   "spread_p90": 0.394,
+   "spread_max": 2.954,
+   "ask_below_bid_hours": 0,
+   "price_first": 1063.25,
+   "price_last": 1151.44
+  },
+  "2017": {
+   "hours": 5912,
+   "sessions": 257,
+   "median_hours_per_session": 23.0,
+   "spread_median": 0.245,
+   "spread_p90": 0.292,
+   "spread_max": 2.952,
+   "ask_below_bid_hours": 0,
+   "price_first": 1150.52,
+   "price_last": 1302.86
+  },
+  "2018": {
+   "hours": 5906,
+   "sessions": 258,
+   "median_hours_per_session": 23.0,
+   "spread_median": 0.24,
+   "spread_p90": 0.307,
+   "spread_max": 2.952,
+   "ask_below_bid_hours": 0,
+   "price_first": 1306.84,
+   "price_last": 1282.55
+  },
+  "2019": {
+   "hours": 5910,
+   "sessions": 258,
+   "median_hours_per_session": 23.0,
+   "spread_median": 0.294,
+   "spread_p90": 0.337,
+   "spread_max": 3.0,
+   "ask_below_bid_hours": 0,
+   "price_first": 1281.3,
+   "price_last": 1517.47
+  },
+  "2020": {
+   "hours": 5927,
+   "sessions": 259,
+   "median_hours_per_session": 23.0,
+   "spread_median": 0.407,
+   "spread_p90": 0.904,
+   "spread_max": 9.257,
+   "ask_below_bid_hours": 0,
+   "price_first": 1518.44,
+   "price_last": 1898.41
+  },
+  "2021": {
+   "hours": 5907,
+   "sessions": 258,
+   "median_hours_per_session": 23.0,
+   "spread_median": 0.357,
+   "spread_p90": 0.444,
+   "spread_max": 4.404,
+   "ask_below_bid_hours": 0,
+   "price_first": 1913.31,
+   "price_last": 1829.51
+  },
+  "2022": {
+   "hours": 5915,
+   "sessions": 258,
+   "median_hours_per_session": 23.0,
+   "spread_median": 0.372,
+   "spread_p90": 0.474,
+   "spread_max": 4.236,
+   "ask_below_bid_hours": 0,
+   "price_first": 1828.56,
+   "price_last": 1823.86
+  },
+  "2023": {
+   "hours": 5890,
+   "sessions": 257,
+   "median_hours_per_session": 23.0,
+   "spread_median": 0.33,
+   "spread_p90": 0.417,
+   "spread_max": 2.76,
+   "ask_below_bid_hours": 0,
+   "price_first": 1829.47,
+   "price_last": 2062.9
+  },
+  "2024": {
+   "hours": 5938,
+   "sessions": 259,
+   "median_hours_per_session": 23.0,
+   "spread_median": 0.377,
+   "spread_p90": 0.487,
+   "spread_max": 3.225,
+   "ask_below_bid_hours": 0,
+   "price_first": 2063.81,
+   "price_last": 2624.53
+  },
+  "2025": {
+   "hours": 5913,
+   "sessions": 258,
+   "median_hours_per_session": 23.0,
+   "spread_median": 0.587,
+   "spread_p90": 0.87,
+   "spread_max": 4.64,
+   "ask_below_bid_hours": 0,
+   "price_first": 2623.85,
+   "price_last": 4319.19
+  },
+  "2026": {
+   "hours": 4814,
+   "sessions": 210,
+   "median_hours_per_session": 23.0,
+   "spread_median": 0.69,
+   "spread_p90": 1.04,
+   "spread_max": 9.65,
+   "ask_below_bid_hours": 0,
+   "price_first": 4348.26,
+   "price_last": 3996.52
+  }
+ },
+ "session_moves_2010_on": {
+  "sessions": 4346,
+  "median_high_low_range_pct": 1.25,
+  "share_range_2pct_or_more": 0.1797,
+  "share_open_to_close_2pct_or_more": 0.0536
+ },
+ "weekdays_without_a_session": [
+  "2013-01-01",
+  "2013-03-29",
+  "2013-12-25",
+  "2014-01-01",
+  "2014-04-18",
+  "2014-12-25",
+  "2015-01-01",
+  "2015-04-03",
+  "2015-12-25",
+  "2016-01-01",
+  "2016-03-25",
+  "2016-12-26",
+  "2017-01-02",
+  "2017-04-14",
+  "2017-12-25",
+  "2018-01-01",
+  "2018-03-30",
+  "2018-12-25",
+  "2019-01-01",
+  "2019-04-19",
+  "2019-12-25",
+  "2020-01-01",
+  "2020-04-10",
+  "2020-12-25",
+  "2021-01-01",
+  "2021-04-02",
+  "2021-12-24",
+  "2022-04-15",
+  "2022-12-26",
+  "2023-01-02",
+  "2023-04-07",
+  "2023-12-25",
+  "2024-01-01",
+  "2024-03-29",
+  "2024-12-25",
+  "2025-01-01",
+  "2025-04-18",
+  "2025-12-25",
+  "2026-01-01",
+  "2026-04-03"
+ ],
+ "intra_session_gaps_over_2h": [
+  {
+   "from": "2005-01-18 14:00:00+00:00",
+   "to": "2005-01-18 18:00:00+00:00",
+   "hours": 3
+  },
+  {
+   "from": "2011-12-26 07:00:00+00:00",
+   "to": "2011-12-26 11:00:00+00:00",
+   "hours": 3
+  },
+  {
+   "from": "2012-01-01 23:00:00+00:00",
+   "to": "2012-01-02 05:00:00+00:00",
+   "hours": 5
+  },
+  {
+   "from": "2012-01-02 08:00:00+00:00",
+   "to": "2012-01-02 12:00:00+00:00",
+   "hours": 3
+  },
+  {
+   "from": "2012-12-25 01:00:00+00:00",
+   "to": "2012-12-25 05:00:00+00:00",
+   "hours": 3
+  },
+  {
+   "from": "2012-12-25 06:00:00+00:00",
+   "to": "2012-12-25 12:00:00+00:00",
+   "hours": 5
+  }
+ ],
+ "largest_hourly_moves": [
+  {
+   "hour": "2026-01-29 15:00:00+00:00",
+   "log_return_pct": -5.89,
+   "close": 5182.82
+  },
+  {
+   "hour": "2008-09-18 19:00:00+00:00",
+   "log_return_pct": -5.52,
+   "close": 840.86
+  },
+  {
+   "hour": "2021-08-08 22:00:00+00:00",
+   "log_return_pct": -4.6,
+   "close": 1683.9
+  },
+  {
+   "hour": "2008-10-10 17:00:00+00:00",
+   "log_return_pct": -3.95,
+   "close": 834.35
+  },
+  {
+   "hour": "2009-03-18 18:00:00+00:00",
+   "log_return_pct": 3.94,
+   "close": 928.66
+  },
+  {
+   "hour": "2008-09-17 14:00:00+00:00",
+   "log_return_pct": 3.63,
+   "close": 826.05
+  },
+  {
+   "hour": "2008-10-16 13:00:00+00:00",
+   "log_return_pct": -3.56,
+   "close": 805.54
+  },
+  {
+   "hour": "2013-10-17 07:00:00+00:00",
+   "log_return_pct": 3.39,
+   "close": 1320.47
+  },
+  {
+   "hour": "2020-03-16 10:00:00+00:00",
+   "log_return_pct": -3.28,
+   "close": 1478.01
+  },
+  {
+   "hour": "2026-02-01 23:00:00+00:00",
+   "log_return_pct": -3.17,
+   "close": 4742.9
+  },
+  {
+   "hour": "2008-11-19 14:00:00+00:00",
+   "log_return_pct": 3.13,
+   "close": 757.92
+  },
+  {
+   "hour": "2008-09-17 17:00:00+00:00",
+   "log_return_pct": 3.1,
+   "close": 864.04
+  }
+ ],
+ "vs_dukascopy_daily_candles_note": "46 of the 50 days that differ by more than $1 are Friday closes (the daily candle includes ticks after the last hourly bar). The others: 2012-12-25 ($-6.51); 2017-07-12 ($-1.29); 2022-10-18 ($-4.18); 2024-12-12 ($+34.94). On 2024-12-12 Dukascopy's daily candle ($2,714-2,717) contradicts its own hourly file (~$2,680) and COMEX; the hourly file is used.",
+ "vs_dukascopy_daily_candles": {
+  "days_compared": 6859,
+  "close_abs_diff_median": 0.0,
+  "close_abs_diff_max": 34.94,
+  "days_close_diff_over_1usd": 50
+ },
+ "vs_comex_daily_at_settlement": {
+  "days": 4225,
+  "return_correlation": 0.9749,
+  "days_return_diff_over_1pct": 32,
+  "note": "Dukascopy at 13:00 New York against Yahoo's GC=F close (the COMEX settlement)"
+ },
+ "vs_comex_daily": {
+  "days": 5731,
+  "return_correlation": 0.8963,
+  "days_return_diff_over_1pct": 302,
+  "median_abs_return_diff_bp": 20.3,
+  "basis_median_pct": 0.033,
+  "note": "COMEX continuous front month: roll days carry the futures basis; Yahoo's daily close is not exactly 17:00 New York, so single-day differences are expected"
+ },
+ "vs_comex_hourly": {
+  "hours": 13093,
+  "from": "2024-06-02 22:00:00+00:00",
+  "return_correlation": 0.9791,
+  "hours_return_diff_over_0.5pct": 38
+ }
+}
