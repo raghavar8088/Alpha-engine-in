@@ -283,6 +283,28 @@ const inr2 = (v: number | null | undefined) =>
 const pct = (v: number | null | undefined, d = 1) =>
   v === null || v === undefined ? "-" : `${v.toFixed(d)}%`;
 
+/** The hover breakdown of one leaderboard rank: each factor's value and where it stands. */
+function rankTitle(s: IntradayScore): string {
+  if (s.rank_score == null) return "No closed trades yet, so no rank.";
+  const shown = (key: string, v: number | null): string => {
+    if (v === null) return key === "profit_factor" ? "no losing trade" : "n/a";
+    if (key === "t_stat" || key === "profit_factor") return v.toFixed(2);
+    if (key === "net_bp_per_trade") return `${v.toFixed(1)} bp`;
+    if (key === "max_drawdown_pct") return `${v.toFixed(2)}%`;
+    if (key === "positive_days_pct") return `${v.toFixed(0)}%`;
+    if (key === "win_rate") return `${(v * 100).toFixed(1)}%`;
+    if (key === "recent_pnl") return `${v >= 0 ? "+" : "-"}₹${inr(Math.abs(v))}`;
+    return String(v);
+  };
+  const lines = (s.rank_factors ?? []).map((f) =>
+    `${f.label} ${shown(f.key, f.value)}: ${f.percentile == null ? "no figure, counted as middle" : `better than ${f.percentile.toFixed(0)}%`} (weight ${f.weight}%)`);
+  return [
+    `Rank ${s.rank} · score ${s.rank_score.toFixed(1)} / 100`,
+    ...lines,
+    ...(s.rank_shrunk ? [`Only ${s.trades} trades: score pulled toward 50 until the record is long enough.`] : []),
+  ].join("\n");
+}
+
 /** How each price was sourced. Angel is the desk's primary equity feed; a Dhan or
  *  last-bar mark is the honest fallback and is labelled so the page never implies a
  *  live Angel print when the number came from somewhere else. */
@@ -314,6 +336,8 @@ export default function IntradayStocksPage() {
   const [tab, setTab] = useState<IntradayTab>("tournament");
   const [status, setStatus] = useState<IntradayDeskStatus | null>(null);
   const [scores, setScores] = useState<IntradayScore[]>([]);
+  // The rank's factors and weights, as the backend reports them (empty on the legacy catalog).
+  const rankFactors = scores.find((s) => s.rank_factors?.length)?.rank_factors ?? [];
   const [trades, setTrades] = useState<IntradayTrade[]>([]);
   const [equity, setEquity] = useState<IntradayEquityPoint[]>([]);
   const [days, setDays] = useState<IntradayDay[]>([]);
@@ -732,7 +756,7 @@ export default function IntradayStocksPage() {
       </GlassPanel>
 
       <div className="gate-note">
-        <strong>Ranked by P&amp;L, judged by the gate.</strong> The top of a{" "}
+        <strong>{rankFactors.length ? `Ranked on ${rankFactors.length} factors, judged by the gate.` : "Ranked by P&L, judged by the gate."}</strong> The top of a{" "}
         {status?.gate?.strategies_tested ?? scores.length}-strategy board is where luck
         collects: run that many and a handful finish well ahead having proved nothing. A
         strategy is only <strong>READY</strong> if its record would be surprising from a
@@ -753,10 +777,22 @@ export default function IntradayStocksPage() {
         {!scores.length ? (
           <div className="empty">No strategy stats yet.</div>
         ) : (
+          <>
+          {rankFactors.length > 0 && (
+            <div className="rank-note">
+              <strong>Rank</strong> blends {rankFactors.length} factors, each scored as a percentile
+              among these {scores.length} strategies:{" "}
+              {rankFactors.map((f) => `${f.label} ${f.weight}%${f.higher_is_better ? "" : " (lower is better)"}`).join(", ")}.
+              A record under {status?.gate?.min_trades ?? 30} trades is pulled toward the middle. Hover a rank
+              for its breakdown. A rank is relative: #1 is the best of this board, not proof of an
+              edge. Only <strong>READY</strong> means that.
+            </div>
+          )}
           <div className="table-scroll">
             <table className="data-table">
               <thead>
                 <tr>
+                  {rankFactors.length > 0 && <th>Rank</th>}
                   <th style={{ textAlign: "left" }}>Strategy</th>
                   <th style={{ textAlign: "left" }}>Category</th>
                   <th>Trades</th>
@@ -774,6 +810,14 @@ export default function IntradayStocksPage() {
                   const clears = (s.t_stat ?? -99) >= bar;
                   return (
                   <tr key={s.strategy_id}>
+                    {rankFactors.length > 0 && (
+                      // The score is drawn by CSS (::after) so the cell's text stays the bare
+                      // rank: SortableTables sorts on textContent, and "1 · 91.5" would not parse.
+                      <td className="rank-cell" title={rankTitle(s)}
+                          data-score={s.rank_score == null ? "" : s.rank_score.toFixed(1)}>
+                        {s.rank ?? "-"}
+                      </td>
+                    )}
                     <td style={{ textAlign: "left" }}>{s.name}</td>
                     <td style={{ textAlign: "left" }}>
                       <span className="badge">{s.category}</span>
@@ -799,6 +843,7 @@ export default function IntradayStocksPage() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </GlassPanel>
 
@@ -1384,6 +1429,10 @@ export default function IntradayStocksPage() {
 
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 16px; }
+        .rank-note { font-size: 12px; line-height: 1.5; color: var(--text-muted); margin-bottom: 10px; }
+        .rank-cell { font-weight: 700; font-variant-numeric: tabular-nums; cursor: help; white-space: nowrap; }
+        .rank-cell::after { content: " · " attr(data-score); font-weight: 500; font-size: 11px; color: var(--text-faint); }
+        .rank-cell[data-score=""]::after { content: ""; }
         .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
         .tab { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
         .tab.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }

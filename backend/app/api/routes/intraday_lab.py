@@ -28,6 +28,8 @@ from app.core.db import (
 )
 from app.services.intraday_backtest import run_intraday_backtest
 from app.services.call_engine import IST
+from app.services.promotion_gate import MIN_TRADES as PG_MIN_TRADES
+from app.services.strategy_rank import day_factors, rank_rows
 from app.services.dhan_client import DhanClient
 from app.services.intraday_lab_engine import (
     daily as lab_daily,
@@ -92,9 +94,31 @@ async def list_positions(
     return {"positions": positions}
 
 
+async def _rank_inputs() -> tuple[dict[str, dict], list[str]]:
+    """Per strategy: mean net return per trade in bp of the position, and its net P&L per
+    session - two small aggregations (about 50 x 15 rows), not a stream of every trade."""
+    match = {"$match": {"engine": "v2", "status": {"$ne": "OPEN"}}}
+    per: dict[str, dict] = {}
+    async for r in intraday_lab_positions_collection.aggregate([match, {"$group": {
+            "_id": "$strategy_id",
+            "bp": {"$avg": {"$cond": [{"$gt": ["$capital_deployed", 0]},
+                                      {"$divide": ["$realized_pnl", "$capital_deployed"]}, None]}}}}]):
+        per[r["_id"]] = {"net_bp_per_trade": round(r["bp"] * 1e4, 2) if r.get("bp") is not None else None,
+                         "daily": {}}
+    sessions: set[str] = set()
+    async for r in intraday_lab_positions_collection.aggregate([match, {"$group": {
+            "_id": {"s": "$strategy_id", "d": "$closed_on"}, "net": {"$sum": "$realized_pnl"}}}]):
+        sid, day = r["_id"].get("s"), r["_id"].get("d")
+        if sid in per and day:
+            per[sid]["daily"][day] = r["net"] or 0.0
+            sessions.add(day)
+    return per, sorted(sessions)
+
+
 @router.get("/leaderboard")
 async def leaderboard(current_user: dict = Depends(get_current_user)):
     scores = {s["strategy_id"]: s async for s in intraday_lab_scores_collection.find({})}
+    per, sessions = await _rank_inputs() if V2 else ({}, [])
     rows = []
     for spec in STRATEGY_CATALOG:
         score = scores.get(spec.strategy_id) or {}
@@ -104,10 +128,18 @@ async def leaderboard(current_user: dict = Depends(get_current_user)):
         allocated = (
             score.get("allocated_capital") if score.get("allocated_capital") is not None else PER_STRATEGY_ALLOCATION
         )
+        extra = per.get(spec.strategy_id) or {}
         rows.append({
             "strategy_id": spec.strategy_id, "name": spec.name, "category": spec.category,
             "trades": trades, "win_rate": win_rate, "net_pnl": round(net_pnl, 2),
             "allocated_capital": allocated,
+            # The gate's figures were stored on every score and never sent, so PF, t-stat
+            # and Verdict showed "-" on every row.
+            **{k: score.get(k) for k in (
+                "profit_factor", "t_stat", "t_threshold", "expectancy", "max_drawdown_pct",
+                "gross_profit", "gross_loss", "verdict", "verdict_reasons", "strategies_tested")},
+            "net_bp_per_trade": extra.get("net_bp_per_trade"),
+            **day_factors(extra.get("daily") or {}, sessions),
         })
         # ANTI-<name>: a READ-TIME negation that never traded. Shown only for the legacy
         # long-only catalog. The v2 catalog trades both sides itself, and a negated row
@@ -124,8 +156,11 @@ async def leaderboard(current_user: dict = Depends(get_current_user)):
             "allocated_capital": round(PER_STRATEGY_ALLOCATION - net_pnl, 2),
             "is_anti": True,
         })
-    rows.sort(key=lambda r: r["net_pnl"], reverse=True)
-    return {"leaderboard": rows}
+    if not V2:
+        rows.sort(key=lambda r: r["net_pnl"], reverse=True)
+        return {"leaderboard": rows}
+    # Ordered by the multi-factor rank, not by net P&L alone; see strategy_rank.
+    return {"leaderboard": rank_rows(rows, min_trades=PG_MIN_TRADES)}
 
 
 @router.get("/summary")

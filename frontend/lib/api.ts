@@ -829,6 +829,25 @@ export interface IntradayScore {
   t_stat?: number | null;
   t_threshold?: number;
   strategies_tested?: number;
+  // Tournament multi-factor rank (backend strategy_rank): an ORDER among the strategies on
+  // the board, 1 = best there. It is relative, never a verdict - that stays `verdict`.
+  rank?: number | null;
+  rank_score?: number | null;
+  rank_shrunk?: boolean;
+  rank_factors?: IntradayRankFactor[];
+  net_bp_per_trade?: number | null;
+  positive_days_pct?: number | null;
+  recent_pnl?: number | null;
+  sessions_traded?: number;
+}
+
+export interface IntradayRankFactor {
+  key: string;
+  label: string;
+  weight: number;
+  higher_is_better: boolean;
+  value: number | null;
+  percentile: number | null;
 }
 
 export interface IntradayTrade {
