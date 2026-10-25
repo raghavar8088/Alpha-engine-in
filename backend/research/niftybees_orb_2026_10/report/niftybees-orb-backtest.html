@@ -1,0 +1,697 @@
+<title>NIFTYBEES Opening-Range Breakout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: one 72rem frame; prose holds a 46rem measure, charts and tables take the full frame. */
+:root {
+  --paper: #f4f5f7;
+  --panel: #fdfdfe;
+  --ink: #131824;
+  --ink-2: #48505f;
+  --muted: #687081;
+  --rule: #dde1e7;
+  --axis: #b9bfca;
+  --gain: #2a78d6;
+  --loss: #e34948;
+  --context: #7a8291;
+  --wash-gain: rgba(42, 120, 214, 0.13);
+  --wash-raw: rgba(122, 130, 145, 0.16);
+  --hl: rgba(42, 120, 214, 0.07);
+  --accent: #1e4f9a;
+  --font-display: "IBM Plex Sans Condensed", "Roboto Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "Cascadia Mono", "SF Mono", Consolas, monospace;
+  --s-1: 0.8125rem;
+  --s0: 1rem;
+  --s1: 1.1875rem;
+  --s2: 1.5rem;
+  --s3: clamp(2rem, 1.4rem + 2.6vw, 2.875rem);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0f1217; --panel: #161a21; --ink: #e9ecf1; --ink-2: #b5bcc8; --muted: #8d95a3;
+    --rule: #272d36; --axis: #3d444f; --gain: #3987e5; --loss: #e66767; --context: #7d8592;
+    --wash-gain: rgba(57, 135, 229, 0.20); --wash-raw: rgba(125, 133, 146, 0.20); --hl: rgba(57, 135, 229, 0.10);
+    --accent: #8fb6f0; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0f1217; --panel: #161a21; --ink: #e9ecf1; --ink-2: #b5bcc8; --muted: #8d95a3;
+  --rule: #272d36; --axis: #3d444f; --gain: #3987e5; --loss: #e66767; --context: #7d8592;
+  --wash-gain: rgba(57, 135, 229, 0.20); --wash-raw: rgba(125, 133, 146, 0.20); --hl: rgba(57, 135, 229, 0.10);
+  --accent: #8fb6f0; color-scheme: dark;
+}
+body { background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: var(--s0); line-height: 1.55; }
+.page { max-width: 72rem; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); padding-block: 40px 72px; display: grid; gap: 56px; }
+.prose { max-width: 46rem; }
+.prose p { margin: 0 0 0.9em; }
+.prose p:last-child { margin-bottom: 0; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: -0.005em; }
+h1 { font-size: var(--s3); font-weight: 700; line-height: 1.05; }
+h2 { font-size: var(--s2); font-weight: 600; line-height: 1.15; }
+h3 { font-size: var(--s1); font-weight: 600; }
+section { display: grid; gap: 20px; min-width: 0; }
+.eyebrow { font-family: var(--font-data); font-size: var(--s-1); color: var(--muted); letter-spacing: 0.02em; margin: 0; }
+.masthead { display: grid; gap: 18px; }
+.dek { font-size: var(--s1); color: var(--ink-2); max-width: 46rem; margin: 0; }
+.verdict { font-size: var(--s1); max-width: 46rem; margin: 0; }
+.verdict strong { font-weight: 600; }
+code, .mono { font-family: var(--font-data); font-size: 0.86em; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--gain); outline-offset: 3px; border-radius: 2px; }
+
+.kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0 24px; margin: 8px 0 0; }
+.kpi { border-top: 1px solid var(--axis); padding-top: 12px; min-width: 0; }
+.kpi dt { font-size: var(--s-1); color: var(--muted); letter-spacing: 0.01em; }
+.kpi dd { margin: 4px 0 0; display: grid; gap: 4px; }
+.kv { font-family: var(--font-display); font-weight: 600; font-size: 1.625rem; line-height: 1.1; }
+.kn { font-size: var(--s-1); color: var(--ink-2); line-height: 1.35; }
+@media (max-width: 1000px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 24px; } }
+@media (max-width: 560px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kv { font-size: 1.375rem; } }
+
+figure { margin: 0; background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 16px 16px 12px; min-width: 0; display: grid; gap: 10px; }
+figcaption { font-size: var(--s-1); color: var(--ink-2); max-width: 52rem; }
+.chart { width: 100%; min-height: 120px; }
+.chart svg { display: block; overflow: visible; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: var(--s-1); color: var(--ink-2); margin: 0; padding: 0; list-style: none; }
+.legend li { display: inline-flex; align-items: center; gap: 7px; }
+.key { display: inline-block; width: 16px; height: 0; border-top: 2px solid; }
+.key.net, .key.tgt { border-color: var(--gain); }
+.key.pre { border-color: var(--context); }
+.key.stop { border-color: var(--loss); }
+.key.trig { border-color: var(--ink-2); border-top-width: 1px; }
+.key.box { width: 14px; height: 10px; border: 0; border-radius: 2px; }
+.key.box.raw { background: var(--wash-raw); }
+.key.box.clean { background: var(--wash-gain); }
+.key.dot { width: 9px; height: 9px; border: 0; border-radius: 50%; }
+.key.dot.entry { background: var(--ink); }
+.key.dot.exit { background: var(--gain); }
+
+svg text { font-family: var(--font-body); font-size: 12px; fill: var(--muted); }
+svg .ax { fill: var(--muted); font-variant-numeric: tabular-nums; }
+svg .mono { font-family: var(--font-data); font-size: 11px; }
+svg .lab { fill: var(--ink-2); }
+svg .lab.strong { fill: var(--ink); font-weight: 600; }
+svg .val { fill: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+svg .note { fill: var(--ink-2); paint-order: stroke; stroke: var(--panel); stroke-width: 4px; stroke-linejoin: round; }
+svg .grid { stroke: var(--rule); stroke-width: 1; }
+svg .base { stroke: var(--axis); stroke-width: 1; }
+svg .tick { stroke: var(--axis); stroke-width: 1; }
+svg .ln { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+svg .ln-net { stroke: var(--gain); }
+svg .ln-pre { stroke: var(--context); }
+svg .dot-net { fill: var(--gain); stroke: var(--panel); stroke-width: 2; }
+svg .dot-pre { fill: var(--context); stroke: var(--panel); stroke-width: 2; }
+svg .cross { stroke: var(--axis); stroke-width: 1; }
+svg .hit { fill: transparent; }
+svg .bar-pos { fill: var(--gain); }
+svg .bar-neg { fill: var(--loss); }
+svg .bar-pos:hover, svg .bar-neg:hover { opacity: 0.82; }
+svg .conn { stroke: var(--axis); stroke-width: 1; }
+svg .wick { stroke: var(--ink-2); stroke-width: 1; }
+svg .c-up { fill: var(--panel); stroke: var(--ink-2); stroke-width: 1; }
+svg .c-dn { fill: var(--ink-2); stroke: var(--ink-2); stroke-width: 1; }
+svg .band-raw { fill: var(--wash-raw); }
+svg .band-clean { fill: var(--wash-gain); }
+svg .lv-stop { stroke: var(--loss); stroke-width: 1.5; }
+svg .lv-tgt { stroke: var(--gain); stroke-width: 1.5; }
+svg .lv-trig { stroke: var(--ink-2); stroke-width: 1; }
+svg .dot-entry { fill: var(--ink); stroke: var(--panel); stroke-width: 2; }
+svg .dot-exit { fill: var(--gain); stroke: var(--panel); stroke-width: 2; }
+
+.tablewrap { overflow-x: auto; min-width: 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+th, td { padding: 8px 10px; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; vertical-align: baseline; }
+thead th { font-weight: 500; color: var(--muted); font-size: var(--s-1); border-bottom-color: var(--axis); vertical-align: bottom; white-space: normal; }
+tbody th { text-align: left; font-weight: 500; }
+th:first-child, td:first-child { padding-left: 0; }
+th:last-child, td:last-child { padding-right: 0; }
+td.strong { font-weight: 600; }
+tr.total th, tr.total td { font-weight: 600; border-top: 1px solid var(--axis); }
+tr.primary th, tr.primary td { background: var(--hl); }
+.sub { display: block; font-size: 0.75rem; color: var(--muted); font-weight: 400; }
+.flag { display: block; font-size: 0.75rem; color: var(--loss); font-weight: 500; }
+.wrapcol { white-space: normal; text-align: left; min-width: 16rem; }
+td.barcol { width: 120px; padding-inline: 6px; }
+.ibar { position: relative; display: block; width: 112px; height: 10px; }
+.ibar::before { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; border-left: 1px solid var(--axis); }
+.ibar .neg, .ibar .pos { position: absolute; top: 0; height: 100%; width: var(--w); }
+.ibar .neg { right: 50%; background: var(--loss); border-radius: 3px 0 0 3px; }
+.ibar .pos { left: 50%; background: var(--gain); border-radius: 0 3px 3px 0; }
+
+.rules { display: grid; grid-template-columns: minmax(9rem, 12rem) minmax(0, 1fr); margin: 0; max-width: 60rem; }
+.rule { display: contents; }
+.rule dt, .rule dd { padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.rule dt { font-weight: 600; padding-right: 20px; }
+.rule dd { margin: 0; color: var(--ink-2); }
+@media (max-width: 640px) {
+  .rules { grid-template-columns: minmax(0, 1fr); }
+  .rule dt { border-bottom: 0; padding-bottom: 2px; }
+  .rule dd { padding-top: 0; }
+}
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; align-items: start; }
+@media (max-width: 860px) { .two { grid-template-columns: minmax(0, 1fr); } }
+details { border-top: 1px solid var(--rule); padding-top: 10px; }
+summary { cursor: pointer; color: var(--accent); font-size: var(--s-1); }
+details .tablewrap { margin-top: 10px; max-height: 420px; overflow: auto; }
+footer { border-top: 1px solid var(--axis); padding-top: 18px; font-size: var(--s-1); color: var(--ink-2); display: grid; gap: 10px; }
+footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+.tip { position: fixed; z-index: 10; pointer-events: none; background: var(--ink); color: var(--paper); font-size: 12px; line-height: 1.4; padding: 8px 10px; border-radius: 4px; display: grid; gap: 3px; max-width: 280px; }
+.tip .tr { display: flex; align-items: center; gap: 7px; }
+.tip .tr span { opacity: 0.8; }
+.tip .tk { display: inline-block; width: 12px; height: 0; border-top: 2px solid; opacity: 1; }
+.tip .tk.k-net, .tip .tk.k-pos { border-color: var(--gain); }
+.tip .tk.k-pre { border-color: var(--context); }
+.tip .tk.k-neg { border-color: var(--loss); }
+@media (prefers-reduced-motion: no-preference) { svg .bar-pos, svg .bar-neg { transition: opacity 120ms; } }
+</style>
+
+<div class="page">
+  <header class="masthead">
+    <p class="eyebrow">Backtest · NSE: NIFTYBEES · 5-minute candles · 25 Oct 2021 to 23 Oct 2026</p>
+    <h1>NIFTYBEES Opening-Range Breakout</h1>
+    <p class="dek">The first 15 minutes set a range. A break above it buys and a break below it sells, with the stop at the other side of the range and the target at twice the risk. One trade a day, out by 15:15, with Angel One's charges and slippage.</p>
+    <p class="verdict"><strong>The rules lose money after costs.</strong> Before costs the 1,205 trades made +₹1,92,872, about ₹160 a trade. Angel One's charges (₹402 a trade) and slippage (₹214) turned that into −₹5,48,885. STT alone, about ₹250 a trade, is larger than the whole edge.</p>
+    <dl class="kpis">
+<div class="kpi"><dt>Net result</dt><dd><span class="kv">−₹5,48,885</span><span class="kn">−54.9% of the ₹10 lakh account</span></dd></div>
+<div class="kpi"><dt>Trades</dt><dd><span class="kv">1,205</span><span class="kn">622 long, 583 short, in 1,225 sessions</span></dd></div>
+<div class="kpi"><dt>Win rate</dt><dd><span class="kv">40.7%</span><span class="kn">after costs; 13% reached the target</span></dd></div>
+<div class="kpi"><dt>Profit factor</dt><dd><span class="kv">0.77</span><span class="kn">winning ₹ ÷ losing ₹, after costs</span></dd></div>
+<div class="kpi"><dt>Max drawdown</dt><dd><span class="kv">₹6,05,212</span><span class="kn">60.5% of the account, not recovered</span></dd></div>
+<div class="kpi"><dt>Average trade</dt><dd><span class="kv">−₹456</span><span class="kn">−0.16R after costs, +0.03R before</span></dd></div>
+    </dl>
+  </header>
+
+  <section id="equity" aria-labelledby="h-equity">
+    <h2 id="h-equity">Account value</h2>
+    <figure>
+      <ul class="legend">
+        <li><span class="key net"></span>After costs: the result</li>
+        <li><span class="key pre"></span>Before costs: the same trades with no charges or slippage</li>
+      </ul>
+      <div class="chart" id="eq-chart"></div>
+      <figcaption>After costs the account peaked at ₹10,21,323 on 25 Jan 2022 and fell to ₹4,16,111 on 7 Oct 2026, a drawdown of ₹6,05,212 that was never recovered. It ends at ₹4,51,115. Before costs the same trades end at ₹11,92,872. Hover or use the arrow keys for any day's values.</figcaption>
+    </figure>
+    <details>
+      <summary>Account value at each month end</summary>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Month</th><th>After costs</th><th>Before costs</th></tr></thead>
+          <tbody>
+<tr><th scope="row">2021-10</th><td>₹9,79,103</td><td>₹9,82,028</td></tr>
+<tr><th scope="row">2021-11</th><td>₹9,78,676</td><td>₹9,92,679</td></tr>
+<tr><th scope="row">2021-12</th><td>₹10,03,897</td><td>₹10,30,729</td></tr>
+<tr><th scope="row">2022-01</th><td>₹10,07,043</td><td>₹10,45,568</td></tr>
+<tr><th scope="row">2022-02</th><td>₹9,82,578</td><td>₹10,33,114</td></tr>
+<tr><th scope="row">2022-03</th><td>₹9,82,601</td><td>₹10,45,867</td></tr>
+<tr><th scope="row">2022-04</th><td>₹9,60,596</td><td>₹10,35,317</td></tr>
+<tr><th scope="row">2022-05</th><td>₹9,60,218</td><td>₹10,47,575</td></tr>
+<tr><th scope="row">2022-06</th><td>₹9,50,677</td><td>₹10,50,756</td></tr>
+<tr><th scope="row">2022-07</th><td>₹9,35,437</td><td>₹10,48,473</td></tr>
+<tr><th scope="row">2022-08</th><td>₹9,45,959</td><td>₹10,70,902</td></tr>
+<tr><th scope="row">2022-09</th><td>₹9,56,639</td><td>₹10,94,480</td></tr>
+<tr><th scope="row">2022-10</th><td>₹9,40,077</td><td>₹10,88,839</td></tr>
+<tr><th scope="row">2022-11</th><td>₹9,27,992</td><td>₹10,90,245</td></tr>
+<tr><th scope="row">2022-12</th><td>₹9,41,673</td><td>₹11,17,775</td></tr>
+<tr><th scope="row">2023-01</th><td>₹9,38,040</td><td>₹11,26,335</td></tr>
+<tr><th scope="row">2023-02</th><td>₹9,17,831</td><td>₹11,18,177</td></tr>
+<tr><th scope="row">2023-03</th><td>₹9,09,051</td><td>₹11,21,651</td></tr>
+<tr><th scope="row">2023-04</th><td>₹8,83,744</td><td>₹11,05,277</td></tr>
+<tr><th scope="row">2023-05</th><td>₹8,70,768</td><td>₹11,05,729</td></tr>
+<tr><th scope="row">2023-06</th><td>₹8,52,262</td><td>₹11,00,517</td></tr>
+<tr><th scope="row">2023-07</th><td>₹8,39,270</td><td>₹11,01,406</td></tr>
+<tr><th scope="row">2023-08</th><td>₹8,06,383</td><td>₹10,83,375</td></tr>
+<tr><th scope="row">2023-09</th><td>₹8,00,650</td><td>₹10,90,911</td></tr>
+<tr><th scope="row">2023-10</th><td>₹7,99,538</td><td>₹11,02,998</td></tr>
+<tr><th scope="row">2023-11</th><td>₹7,78,921</td><td>₹10,95,826</td></tr>
+<tr><th scope="row">2023-12</th><td>₹7,63,399</td><td>₹10,93,237</td></tr>
+<tr><th scope="row">2024-01</th><td>₹7,80,543</td><td>₹11,24,367</td></tr>
+<tr><th scope="row">2024-02</th><td>₹7,45,391</td><td>₹11,02,597</td></tr>
+<tr><th scope="row">2024-03</th><td>₹7,52,950</td><td>₹11,21,183</td></tr>
+<tr><th scope="row">2024-04</th><td>₹7,34,675</td><td>₹11,15,412</td></tr>
+<tr><th scope="row">2024-05</th><td>₹7,26,489</td><td>₹11,20,473</td></tr>
+<tr><th scope="row">2024-06</th><td>₹7,45,543</td><td>₹11,50,074</td></tr>
+<tr><th scope="row">2024-07</th><td>₹7,48,916</td><td>₹11,66,814</td></tr>
+<tr><th scope="row">2024-08</th><td>₹7,45,909</td><td>₹11,74,876</td></tr>
+<tr><th scope="row">2024-09</th><td>₹7,51,172</td><td>₹11,91,584</td></tr>
+<tr><th scope="row">2024-10</th><td>₹7,50,047</td><td>₹12,03,619</td></tr>
+<tr><th scope="row">2024-11</th><td>₹7,59,667</td><td>₹12,24,280</td></tr>
+<tr><th scope="row">2024-12</th><td>₹7,13,401</td><td>₹11,90,254</td></tr>
+<tr><th scope="row">2025-01</th><td>₹6,85,557</td><td>₹11,75,960</td></tr>
+<tr><th scope="row">2025-02</th><td>₹6,89,547</td><td>₹11,92,158</td></tr>
+<tr><th scope="row">2025-03</th><td>₹6,88,332</td><td>₹12,02,925</td></tr>
+<tr><th scope="row">2025-04</th><td>₹6,89,935</td><td>₹12,16,159</td></tr>
+<tr><th scope="row">2025-05</th><td>₹6,72,457</td><td>₹12,10,956</td></tr>
+<tr><th scope="row">2025-06</th><td>₹6,58,557</td><td>₹12,09,274</td></tr>
+<tr><th scope="row">2025-07</th><td>₹6,48,291</td><td>₹12,13,120</td></tr>
+<tr><th scope="row">2025-08</th><td>₹6,38,759</td><td>₹12,14,586</td></tr>
+<tr><th scope="row">2025-09</th><td>₹6,24,985</td><td>₹12,14,337</td></tr>
+<tr><th scope="row">2025-10</th><td>₹6,28,890</td><td>₹12,29,529</td></tr>
+<tr><th scope="row">2025-11</th><td>₹6,05,000</td><td>₹12,15,959</td></tr>
+<tr><th scope="row">2025-12</th><td>₹6,06,233</td><td>₹12,29,921</td></tr>
+<tr><th scope="row">2026-01</th><td>₹5,79,224</td><td>₹12,14,875</td></tr>
+<tr><th scope="row">2026-02</th><td>₹5,56,215</td><td>₹12,03,938</td></tr>
+<tr><th scope="row">2026-03</th><td>₹5,22,285</td><td>₹11,81,558</td></tr>
+<tr><th scope="row">2026-04</th><td>₹5,14,065</td><td>₹11,85,607</td></tr>
+<tr><th scope="row">2026-05</th><td>₹4,70,147</td><td>₹11,53,207</td></tr>
+<tr><th scope="row">2026-06</th><td>₹4,42,197</td><td>₹11,38,272</td></tr>
+<tr><th scope="row">2026-07</th><td>₹4,37,907</td><td>₹11,46,791</td></tr>
+<tr><th scope="row">2026-08</th><td>₹4,32,829</td><td>₹11,53,349</td></tr>
+<tr><th scope="row">2026-09</th><td>₹4,26,763</td><td>₹11,59,476</td></tr>
+<tr><th scope="row">2026-10</th><td>₹4,51,115</td><td>₹11,92,872</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+
+  <section id="years" aria-labelledby="h-years">
+    <h2 id="h-years">Year by year</h2>
+    <div class="prose"><p>Calendar years on the ₹10 lakh account. Before costs means the same trades at the trigger, stop and 15:15 prices, with no slippage and no charges. Exits are counted as target / stop-loss / 15:15 close.</p></div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Year</th><th>Sessions</th><th>Trades</th><th>Win rate</th><th>Exits T / S / 15:15</th><th>Before costs</th><th>Costs</th><th></th><th>Net P&amp;L</th><th>Return</th><th>Profit factor</th><th>Max drawdown</th></tr></thead>
+        <tbody>
+<tr><th scope="row">2021<span class=sub>from 25 Oct</span></th><td>46</td><td>46</td><td>45.7%</td><td class="mono">13 / 22 / 11</td><td>+₹30,729</td><td>−₹26,832</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:1.1%"></span></span></td><td class="strong">+₹3,897</td><td>+0.4%</td><td>1.03</td><td>₹37,790</td></tr>
+<tr><th scope="row">2022</th><td>246</td><td>246</td><td>42.3%</td><td class="mono">41 / 113 / 92</td><td>+₹87,046</td><td>−₹1,49,270</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:17.5%"></span></span></td><td class="strong">−₹62,224</td><td>−6.2%</td><td>0.88</td><td>₹1,00,691</td></tr>
+<tr><th scope="row">2023</th><td>244</td><td>241</td><td>35.7%</td><td class="mono">33 / 125 / 83</td><td>−₹24,538</td><td>−₹1,53,736</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:50.0%"></span></span></td><td class="strong">−₹1,78,274</td><td>−17.8%</td><td>0.60</td><td>₹1,99,077</td></tr>
+<tr><th scope="row">2024</th><td>245</td><td>238</td><td>40.8%</td><td class="mono">31 / 103 / 104</td><td>+₹97,017</td><td>−₹1,47,015</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:14.0%"></span></span></td><td class="strong">−₹49,998</td><td>−5.0%</td><td>0.89</td><td>₹67,142</td></tr>
+<tr><th scope="row">2025</th><td>245</td><td>240</td><td>45.0%</td><td class="mono">17 / 81 / 142</td><td>+₹39,667</td><td>−₹1,46,835</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:30.1%"></span></span></td><td class="strong">−₹1,07,168</td><td>−10.7%</td><td>0.75</td><td>₹1,14,792</td></tr>
+<tr><th scope="row">2026<span class=sub>to 23 Oct</span></th><td>199</td><td>194</td><td>38.7%</td><td class="mono">22 / 79 / 93</td><td>−₹37,048</td><td>−₹1,18,069</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:43.5%"></span></span></td><td class="strong">−₹1,55,118</td><td>−15.5%</td><td>0.66</td><td>₹1,96,952</td></tr>
+<tr class="total"><th scope="row">All</th><td>1,225</td><td>1,205</td><td>40.7%</td><td class="mono">157 / 523 / 525</td><td>+₹1,92,872</td><td>−₹7,41,757</td><td class="barcol"></td><td class="strong">−₹5,48,885</td><td>−54.9%</td><td>0.77</td><td>₹6,05,212</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="rules" aria-labelledby="h-rules">
+    <h2 id="h-rules">The rules as tested</h2>
+    <div class="prose"><p>Your rules, plus the execution rules this test had to define. All of them were fixed before any result was seen.</p></div>
+    <dl class="rules">
+<div class="rule"><dt>Data</dt><dd>NIFTYBEES (NSE) 5-minute candles, 09:15 to 15:30 IST, built from Angel One&#x27;s 1-minute candles. 1,225 sessions, 25 Oct 2021 to 23 Oct 2026.</dd></div>
+<div class="rule"><dt>Opening range</dt><dd>The highest high and lowest low of the 09:15, 09:20 and 09:25 candles (09:15:00 to 09:29:59), after stray pre-open prints are removed (see Data and gaps). No entry before 09:30.</dd></div>
+<div class="rule"><dt>Breakout</dt><dd>By price crossing, not by a candle close. From 09:30 a buy-stop rests ₹0.01 above the range high and a sell-stop ₹0.01 below the range low. When one fills, the other is cancelled.</dd></div>
+<div class="rule"><dt>Entry fill</dt><dd>At the trigger price, or at the candle&#x27;s open when the candle opens beyond the trigger, plus slippage.</dd></div>
+<div class="rule"><dt>Stop-loss</dt><dd>A long&#x27;s stop is the range low and a short&#x27;s the range high. It triggers when price touches it and fills at that price, or at a worse candle open, less slippage.</dd></div>
+<div class="rule"><dt>Target</dt><dd>Twice the distance from the actual entry fill to the stop (1:2). It is a resting limit order, so it has no slippage, but it counts as filled only when price trades ₹0.01 through it.</dd></div>
+<div class="rule"><dt>Trades a day</dt><dd>One. After an exit there is no re-entry and no reversal.</dd></div>
+<div class="rule"><dt>Entry window</dt><dd>09:30 to 15:00. Entry orders not filled by 15:00 are cancelled.</dd></div>
+<div class="rule"><dt>End of day</dt><dd>Anything still open is closed at 15:15, at the close of the 15:10 to 15:15 candle, less slippage.</dd></div>
+<div class="rule"><dt>Position size</dt><dd>₹10,00,000 of NIFTYBEES a trade in whole units (3,366 to 6,023 units), on a ₹10,00,000 account. No leverage and no compounding.</dd></div>
+<div class="rule"><dt>Charges</dt><dd>Angel One&#x27;s intraday rate card from the app&#x27;s fee model (<code>backend/app/services/angel_fees.py</code>): brokerage the lower of ₹20 and 0.25% an order, STT 0.025% on the sell, NSE 0.00297%, SEBI and IPFT 0.0001% each, stamp duty 0.003% on the buy, GST 18% on brokerage and fees. About ₹402 a round trip (4.0 bp). Today&#x27;s schedule is charged in every year; the older schedules differ by less than 0.1 bp.</dd></div>
+<div class="rule"><dt>Slippage</dt><dd>1 bp of price on every market or stop fill (the entry, a stop-loss and the 15:15 exit), rounded to the next ₹0.01 tick against the trade: ₹0.02 to ₹0.04 a unit. 1 bp is the effective half-spread the app&#x27;s index module measured from NIFTYBEES&#x27;s own minute prices (2024 to 2026).</dd></div>
+<div class="rule"><dt>Inside a candle</dt><dd>The order of the high and the low is unknown, so each candle is walked both ways and the way worse for the account is used. See the section on candles that touch both levels.</dd></div>
+    </dl>
+    <figure>
+      <ul class="legend">
+        <li><span class="key box raw"></span>Raw opening range</li>
+        <li><span class="key box clean"></span>Cleaned opening range</li>
+        <li><span class="key trig"></span>Sell-stop</li>
+        <li><span class="key stop"></span>Stop-loss</li>
+        <li><span class="key tgt"></span>Target</li>
+        <li><span class="key dot entry"></span>Entry</li>
+        <li><span class="key dot exit"></span>Exit</li>
+      </ul>
+      <div class="chart" id="day-chart"></div>
+      <figcaption>23 Oct 2026, the last session tested. The 09:15 candle opens at ₹260.94, a pre-open print above the range NIFTY 50 implied; cleaned, the opening range is ₹259.23 to ₹260.33 (raw ₹258.74 to ₹260.94). Price breaks below it in the 09:30 candle and the sell-stop at ₹259.22 fills at ₹259.19. The stop is ₹260.33 and the target ₹256.91, twice the ₹1.14 risk. The target fills in the 10:15 candle: +₹8,395 on 3,858 units after ₹401 of charges.</figcaption>
+    </figure>
+  </section>
+
+  <section id="costs" aria-labelledby="h-costs">
+    <h2 id="h-costs">Where the money went</h2>
+    <figure>
+      <div class="chart" id="bridge-chart"></div>
+      <figcaption>Costs per trade came to ₹616 (6.2 bp of the ₹10 lakh traded), about 0.19R at the median stop of 36 bp. The trades earned +0.032R before costs.</figcaption>
+    </figure>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>One round trip of 4,044 units at ₹247.24, the median entry price</th><th>₹</th><th>bp of ₹10 lakh</th></tr></thead>
+        <tbody>
+<tr><th scope="row">Brokerage, ₹20 an order × 2</th><td>40.00</td><td>0.40</td></tr>
+<tr><th scope="row">STT, 0.025% of the sell</th><td>249.96</td><td>2.50</td></tr>
+<tr><th scope="row">NSE transaction charge, 0.00297% of both legs</th><td>59.39</td><td>0.59</td></tr>
+<tr><th scope="row">SEBI fee, ₹10 a crore</th><td>2.00</td><td>0.02</td></tr>
+<tr><th scope="row">NSE IPFT, ₹10 a crore</th><td>2.00</td><td>0.02</td></tr>
+<tr><th scope="row">Stamp duty, 0.003% of the buy</th><td>30.00</td><td>0.30</td></tr>
+<tr><th scope="row">GST, 18% of brokerage and fees</th><td>18.61</td><td>0.19</td></tr>
+<tr class="total"><th scope="row">Charges per round trip</th><td>401.95</td><td>4.02</td></tr>
+<tr><th scope="row">Slippage, average per trade</th><td>213.61</td><td>2.14</td></tr>
+<tr class="total"><th scope="row">All costs per trade</th><td>615.57</td><td>6.16</td></tr>
+<tr><th scope="row">The trades' edge before costs, per trade</th><td>160.06</td><td>1.60</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="candles" aria-labelledby="h-candles">
+    <h2 id="h-candles">Candles that touch both the stop and the target</h2>
+    <div class="prose">
+<p>A 5-minute candle gives its high and low but not which came first. The simulator walks every candle both ways, open to high to low to close and open to low to high to close, and keeps the way that leaves the account worse at the candle&#x27;s close. So a candle that reaches both the stop and the target counts as a stop-loss. An entry candle that also reaches the stop counts as stopped in that candle. A candle that triggers both the long and the short counts as whichever loses more, and only one trade is taken.</p>
+<p>It decided 8 of 1,205 trades. 6 were candles that triggered both breakouts and 2 were entry candles that also reached the stop. No open trade had its stop and its target inside one 5-minute candle, because the target sits about 71 bp away. All 8 were scored as stop-losses.</p>
+<p>The 1-minute candles inside them show 6 were stop-losses, 1 was stopped on the other side, and 1 actually lasted to 15:15. Using the 1-minute order on these 8 trades adds +₹4,208. Running the whole test on 1-minute candles gives −₹5,52,890, against −₹5,48,885 on 5-minute candles. That run is a little worse because 1-minute candles show small jumps between minutes, so a few entries and stops fill some paise worse than the smooth path a 5-minute candle assumes. Taking the better order in every 5-minute candle gives −₹5,44,647. No candle was still ambiguous at 1 minute. For this strategy the assumption does not change the answer.</p>
+    </div>
+  </section>
+
+  <section id="data" aria-labelledby="h-data">
+    <h2 id="h-data">Data and gaps</h2>
+    <div class="prose">
+<p><strong>Source.</strong> Angel One&#x27;s 1-minute candles for NSE NIFTYBEES (token 10576), the app&#x27;s licensed broker feed, turned into 5-minute candles anchored at 09:15 (75 a session): open of the first minute, highest high, lowest low, close of the last minute, summed volume. Angel&#x27;s own 5-minute candles are built from the same trades. The 1-minute candles were kept to check what happened inside a 5-minute candle. Sessions up to 9 Oct 2026 come from the bulk download of 11 Oct 2026, and 12 to 23 Oct 2026 from the app&#x27;s daily store on the server.</p>
+<p><strong>Calendar.</strong> The window holds 1,235 NSE sessions: weekdays, less 75 exchange holidays, plus 5 weekend sessions (20 Jan 2024, 2 Mar 2024, 18 May 2024, 1 Feb 2025 and 1 Feb 2026). NIFTYBEES has data on every one of them. Its only other prints are the Diwali Muhurat hours, which are not regular sessions: evening sessions in 2021 to 2024, outside 09:15 to 15:30, and 13:45 to 14:45 on 21 Oct 2025. 1,225 sessions are used. The table below lists the 10 expected sessions left out, and the 2025 Muhurat hour.</p>
+<p><strong>Inside the sessions used.</strong> 6 minutes are missing in all (7 Mar 2022: 09:25, 09:27, 09:28, 09:30; 16 Mar 2022: 15:00, 15:02). Each is filled flat at the previous close with no volume, so no move is invented. 1 minute printed with zero volume. There are no duplicate minutes and no zero, negative or more-than-15%-off prints.</p>
+<p><strong>Stray opening prints.</strong> Angel&#x27;s 09:15 candle begins with NIFTYBEES&#x27;s pre-open auction price, which is set before 09:15 by a thin book. Its open lies a median 0.49% from where NIFTY 50 puts the ETF, and on 1 day in 10 more than 2.3% away. By comparison, the 09:15 close lies 0.04% away, and minutes from 09:45 lie 0.02% away (99% within 0.17%). On 11 May 2022 the 09:15 minute printed ₹153.30 and ₹181.90 while NIFTY put the ETF at about ₹176.6. Taken raw, these prints set the opening range on most days: its median width is 94 bp, against 34 bp for NIFTY 50 itself. So each 09:15 to 09:29 print more than 0.2% outside the range NIFTY implies for that minute is replaced by the same minute&#x27;s in-band open or close. Every level stays a NIFTYBEES price. That gives a median width of 34.4 bp; it changed the range on 1,044 of 1,225 sessions, almost all through the 09:15 minute. The band was fixed before any backtest ran. The raw range and a 0.5% band were run as well (see If one rule changes): both lose.</p>
+<p><strong>Second vendor.</strong> Yahoo&#x27;s 5-minute NIFTYBEES candles for the last 60 sessions (29 Jul 2026 to 23 Oct 2026) agree with these candles to the paisa on 77% of highs and 57% of lows, and within one tick on 89% and 72%. Volumes match (median ratio 1.00). Where they differ, Angel&#x27;s candles hold the extra extremes: Angel&#x27;s high is above Yahoo&#x27;s in 23% of candles and below it in 0.3%, and its low is below Yahoo&#x27;s in 42% and above in 0.1%. Yahoo&#x27;s 09:15 candles carry none of the stray opening prints: their median opening range is 27 bp, against 84 bp raw and 34 bp cleaned here.</p>
+    </div>
+    <h3>Sessions not used</h3>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Date</th><th>Present</th><th class="wrapcol">Why it is not used</th></tr></thead>
+        <tbody>
+<tr><th scope="row">16 Dec 2021</th><td>13:25 to 15:29 only (125 minutes)</td><td>The bulk download lost the morning: it is the first day of a 30-day request, and Angel returned the newest 8,000 or so minutes. No opening range.</td></tr>
+<tr><th scope="row">14 Jun 2022</th><td>13:25 to 15:29 only (125 minutes)</td><td>The bulk download lost the morning: it is the first day of a 30-day request, and Angel returned the newest 8,000 or so minutes. No opening range.</td></tr>
+<tr><th scope="row">10 May 2023</th><td>13:25 to 15:29 only (125 minutes)</td><td>The bulk download lost the morning: it is the first day of a 30-day request, and Angel returned the newest 8,000 or so minutes. No opening range.</td></tr>
+<tr><th scope="row">2 Mar 2024</th><td>116 minutes</td><td>Saturday disaster-recovery drill: two short sessions, not a full day.</td></tr>
+<tr><th scope="row">18 May 2024</th><td>105 minutes</td><td>Saturday disaster-recovery drill: two short sessions, not a full day.</td></tr>
+<tr><th scope="row">30 Dec 2024</th><td>13:25 to 15:29 only (125 minutes)</td><td>The bulk download lost the morning: it is the first day of a 30-day request, and Angel returned the newest 8,000 or so minutes. No opening range.</td></tr>
+<tr><th scope="row">29 Jan 2025</th><td>13:25 to 15:29 only (125 minutes)</td><td>The bulk download lost the morning: it is the first day of a 30-day request, and Angel returned the newest 8,000 or so minutes. No opening range.</td></tr>
+<tr><th scope="row">29 May 2025</th><td>13:25 to 15:29 only (125 minutes)</td><td>The bulk download lost the morning: it is the first day of a 30-day request, and Angel returned the newest 8,000 or so minutes. No opening range.</td></tr>
+<tr><th scope="row">21 Oct 2025</th><td>13:45 to 14:44 (60 minutes)</td><td>Diwali Muhurat session, not a regular session (the exchange holiday list counts the day as closed).</td></tr>
+<tr><th scope="row">25 Nov 2025</th><td>13:25 to 15:29 only (125 minutes)</td><td>The bulk download lost the morning: it is the first day of a 30-day request, and Angel returned the newest 8,000 or so minutes. No opening range.</td></tr>
+<tr><th scope="row">23 Jul 2026</th><td>13:25 to 15:29 only (125 minutes)</td><td>The bulk download lost the morning: it is the first day of a 30-day request, and Angel returned the newest 8,000 or so minutes. No opening range.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="variants" aria-labelledby="h-variants">
+    <h2 id="h-variants">If one rule changes</h2>
+    <div class="prose"><p>Each row changes one rule of the primary test and keeps the rest. All of them were fixed before the first run, and none was chosen for its result. R is a trade's risk: the distance from the entry fill to the stop.</p></div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th class="wrapcol">Run</th><th>Trades</th><th>Win rate</th><th></th><th>Net P&amp;L</th><th>Profit factor</th><th>Max drawdown</th><th>Net R a trade</th><th>R before costs</th></tr></thead>
+        <tbody>
+<tr class="primary"><th scope="row">Primary rules, as above</th><td>1,205</td><td>40.7%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:16.1%"></span></span></td><td class="strong">−₹5,48,885</td><td>0.77</td><td>₹6,05,212<span class=sub>60.5%</span></td><td>−0.159</td><td>+0.032</td></tr>
+<tr><th scope="row">Primary, but the path inside each 5-min candle read from its 1-min candles</th><td>1,205</td><td>40.8%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:16.3%"></span></span></td><td class="strong">−₹5,52,890</td><td>0.77</td><td>₹6,09,136<span class=sub>60.9%</span></td><td>−0.159</td><td>+0.031</td></tr>
+<tr><th scope="row">Primary, but ambiguous candles resolved in the trade&#x27;s favour (bound)</th><td>1,205</td><td>40.8%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:16.0%"></span></span></td><td class="strong">−₹5,44,647</td><td>0.77</td><td>₹6,05,176<span class=sub>60.5%</span></td><td>−0.157</td><td>+0.034</td></tr>
+<tr><th scope="row">Primary, but the opening range from the raw prints (no cleaning)</th><td>870</td><td>45.1%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:11.9%"></span></span></td><td class="strong">−₹4,06,417</td><td>0.79</td><td>₹5,05,823<span class=sub>50.6%</span></td><td>−0.046</td><td>+0.035</td></tr>
+<tr><th scope="row">Primary, but opening prints cleaned with a 0.5% band instead of 0.2%</th><td>1,115</td><td>43.9%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:12.1%"></span></span></td><td class="strong">−₹4,10,757</td><td>0.82</td><td>₹4,89,305<span class=sub>48.9%</span></td><td>−0.109</td><td>+0.031</td></tr>
+<tr><th scope="row">Entry on a 5-min close beyond the range, filled at the next candle&#x27;s open</th><td>1,181</td><td>43.2%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:12.9%"></span></span></td><td class="strong">−₹4,39,083</td><td>0.81</td><td>₹5,18,481<span class=sub>51.8%</span></td><td>−0.109</td><td>+0.062</td></tr>
+<tr><th scope="row">After a stop-loss, the opposite breakout is taken once (max 2 trades a day)</th><td>1,706</td><td>40.0%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:24.0%"></span></span></td><td class="strong">−₹8,15,112</td><td>0.75</td><td>₹8,66,767<span class=sub>86.7%</span></td><td>−0.165</td><td>+0.033</td></tr>
+<tr><th scope="row">No slippage</th><td>1,205</td><td>42.7%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:8.5%"></span></span></td><td class="strong">−₹2,89,922</td><td>0.87</td><td>₹3,57,440<span class=sub>35.7%</span></td><td>−0.097</td><td>+0.033</td></tr>
+<tr><th scope="row">2 bp slippage a side</th><td>1,205</td><td>38.8%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:21.8%"></span></span></td><td class="strong">−₹7,42,680</td><td>0.71</td><td>₹7,92,652<span class=sub>79.3%</span></td><td>−0.198</td><td>+0.043</td></tr>
+<tr><th scope="row">3 bp slippage a side<span class="flag">account at zero on 10 Aug 2026</span></th><td>1,205</td><td>37.5%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:29.5%"></span></span></td><td class="strong">−₹10,02,344</td><td>0.63</td><td>₹10,44,260<span class=sub>104.4%</span></td><td>−0.250</td><td>+0.038</td></tr>
+<tr><th scope="row">No charges and no slippage (the raw price edge)</th><td>1,205</td><td>45.1%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:5.7%"></span></span></td><td class="strong">+₹1,94,461</td><td>1.10</td><td>₹1,10,900<span class=sub>11.1%</span></td><td>+0.033</td><td>+0.033</td></tr>
+<tr><th scope="row">Target fills when price touches it (no tick through)</th><td>1,205</td><td>40.9%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:15.8%"></span></span></td><td class="strong">−₹5,37,432</td><td>0.78</td><td>₹5,93,759<span class=sub>59.4%</span></td><td>−0.153</td><td>+0.038</td></tr>
+<tr><th scope="row">Size: lose ₹10,000 (1%) at the stop, notional capped at 5x (₹50 lakh)<span class="flag">account at zero on 28 Aug 2024</span></th><td>1,205</td><td>40.7%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:50.0%"></span></span></td><td class="strong">−₹17,00,560</td><td>0.74</td><td>₹18,49,499<span class=sub>184.9%</span></td><td>−0.149</td><td>+0.032</td></tr>
+<tr><th scope="row">₹1 lakh a trade on a ₹1 lakh account (brokerage weighs more)<span class="flag">account at zero on 19 May 2026</span></th><td>1,205</td><td>37.8%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:3.1%"></span></span></td><td class="strong">−₹1,06,012</td><td>0.61</td><td>₹1,09,040<span class=sub>109.0%</span></td><td>−0.291</td><td>+0.032</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="profile" aria-labelledby="h-profile">
+    <h2 id="h-profile">Trade profile</h2>
+    <div class="prose"><p>Descriptive cuts of the primary trades. Nothing was tuned on them, and choosing a filter from them now would fit it to the same five years it would be judged on. In the first table, R before costs is after slippage but before charges.</p></div>
+    <div class="two">
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Stop distance, bp</th><th>Trades</th><th>Win rate</th><th>R before charges</th><th>Net R</th><th>Net P&amp;L</th><th>Reached target</th></tr></thead>
+          <tbody>
+<tr><th scope="row" class="mono">9-24</th><td>241</td><td>29.0%</td><td>−0.234</td><td>−0.448</td><td>−₹2,07,286</td><td>19.1%</td></tr>
+<tr><th scope="row" class="mono">24-32</th><td>241</td><td>35.7%</td><td>−0.101</td><td>−0.244</td><td>−₹1,66,234</td><td>14.9%</td></tr>
+<tr><th scope="row" class="mono">32-40</th><td>241</td><td>49.4%</td><td>+0.137</td><td>+0.024</td><td>+₹22,746</td><td>15.4%</td></tr>
+<tr><th scope="row" class="mono">40-51</th><td>241</td><td>49.4%</td><td>+0.110</td><td>+0.021</td><td>+₹18,839</td><td>10.8%</td></tr>
+<tr><th scope="row" class="mono">51-215</th><td>241</td><td>40.2%</td><td>−0.083</td><td>−0.147</td><td>−₹2,16,950</td><td>5.0%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Entry time</th><th>Trades</th><th>Win rate</th><th>Net R</th><th>Net P&amp;L</th></tr></thead>
+          <tbody>
+<tr><th scope="row" class="mono">09:30-09:45</th><td>842</td><td>40.1%</td><td>−0.178</td><td>−₹3,84,275</td></tr>
+<tr><th scope="row" class="mono">09:45-10:15</th><td>215</td><td>41.9%</td><td>−0.145</td><td>−₹1,10,950</td></tr>
+<tr><th scope="row" class="mono">10:15-11:15</th><td>90</td><td>43.3%</td><td>−0.058</td><td>−₹33,576</td></tr>
+<tr><th scope="row" class="mono">11:15-13:15</th><td>46</td><td>39.1%</td><td>−0.119</td><td>−₹20,592</td></tr>
+<tr><th scope="row" class="mono">13:15-15:00</th><td>12</td><td>50.0%</td><td>−0.003</td><td>+₹508</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Code and outputs are in <code>backend/research/niftybees_orb_2026_10/</code> of the app repository; <code>orb_report.py</code> rebuilds this page from them.</p>
+    <ul>
+<li><code>orb_data.py</code> builds the 5-minute candles, the cleaned opening ranges and results/data_quality.json</li>
+<li><code>orb_engine.py</code> the rules and the simulator</li>
+<li><code>orb_verify.py</code> 49 checks of the simulator, on hand-built sessions and on the real run</li>
+<li><code>orb_run.py</code> the primary test and the comparison runs; results/summary.json, sensitivity.csv, the trade logs, yearly tables and daily equity</li>
+<li><code>orb_crosscheck.py</code> the comparison with Yahoo&#x27;s 5-minute candles (results/crosscheck_yahoo.json)</li>
+<li><code>orb_report.py</code> this report and report/niftybees-orb-backtest.html</li>
+<li><code>results/trades_primary.csv</code> every trade of the primary test</li>
+<li><code>data/</code> the candles themselves (NIFTYBEES_5m.csv.gz and the minutes); not in git, because Angel&#x27;s data is licensed and the repository is public</li>
+    </ul>
+  </footer>
+</div>
+<div class="tip" id="tip" role="status" hidden></div>
+
+<script>
+(function () {
+  "use strict";
+  const D = {"eq":{"dates":["2021-10-25","2021-10-26","2021-10-27","2021-10-28","2021-10-29","2021-11-01","2021-11-02","2021-11-03","2021-11-08","2021-11-09","2021-11-10","2021-11-11","2021-11-12","2021-11-15","2021-11-16","2021-11-17","2021-11-18","2021-11-22","2021-11-23","2021-11-24","2021-11-25","2021-11-26","2021-11-29","2021-11-30","2021-12-01","2021-12-02","2021-12-03","2021-12-06","2021-12-07","2021-12-08","2021-12-09","2021-12-10","2021-12-13","2021-12-14","2021-12-15","2021-12-17","2021-12-20","2021-12-21","2021-12-22","2021-12-23","2021-12-24","2021-12-27","2021-12-28","2021-12-29","2021-12-30","2021-12-31","2022-01-03","2022-01-04","2022-01-05","2022-01-06","2022-01-07","2022-01-10","2022-01-11","2022-01-12","2022-01-13","2022-01-14","2022-01-17","2022-01-18","2022-01-19","2022-01-20","2022-01-21","2022-01-24","2022-01-25","2022-01-27","2022-01-28","2022-01-31","2022-02-01","2022-02-02","2022-02-03","2022-02-04","2022-02-07","2022-02-08","2022-02-09","2022-02-10","2022-02-11","2022-02-14","2022-02-15","2022-02-16","2022-02-17","2022-02-18","2022-02-21","2022-02-22","2022-02-23","2022-02-24","2022-02-25","2022-02-28","2022-03-02","2022-03-03","2022-03-04","2022-03-07","2022-03-08","2022-03-09","2022-03-10","2022-03-11","2022-03-14","2022-03-15","2022-03-16","2022-03-17","2022-03-21","2022-03-22","2022-03-23","2022-03-24","2022-03-25","2022-03-28","2022-03-29","2022-03-30","2022-03-31","2022-04-01","2022-04-04","2022-04-05","2022-04-06","2022-04-07","2022-04-08","2022-04-11","2022-04-12","2022-04-13","2022-04-18","2022-04-19","2022-04-20","2022-04-21","2022-04-22","2022-04-25","2022-04-26","2022-04-27","2022-04-28","2022-04-29","2022-05-02","2022-05-04","2022-05-05","2022-05-06","2022-05-09","2022-05-10","2022-05-11","2022-05-12","2022-05-13","2022-05-16","2022-05-17","2022-05-18","2022-05-19","2022-05-20","2022-05-23","2022-05-24","2022-05-25","2022-05-26","2022-05-27","2022-05-30","2022-05-31","2022-06-01","2022-06-02","2022-06-03","2022-06-06","2022-06-07","2022-06-08","2022-06-09","2022-06-10","2022-06-13","2022-06-15","2022-06-16","2022-06-17","2022-06-20","2022-06-21","2022-06-22","2022-06-23","2022-06-24","2022-06-27","2022-06-28","2022-06-29","2022-06-30","2022-07-01","2022-07-04","2022-07-05","2022-07-06","2022-07-07","2022-07-08","2022-07-11","2022-07-12","2022-07-13","2022-07-14","2022-07-15","2022-07-18","2022-07-19","2022-07-20","2022-07-21","2022-07-22","2022-07-25","2022-07-26","2022-07-27","2022-07-28","2022-07-29","2022-08-01","2022-08-02","2022-08-03","2022-08-04","2022-08-05","2022-08-08","2022-08-10","2022-08-11","2022-08-12","2022-08-16","2022-08-17","2022-08-18","2022-08-19","2022-08-22","2022-08-23","2022-08-24","2022-08-25","2022-08-26","2022-08-29","2022-08-30","2022-09-01","2022-09-02","2022-09-05","2022-09-06","2022-09-07","2022-09-08","2022-09-09","2022-09-12","2022-09-13","2022-09-14","2022-09-15","2022-09-16","2022-09-19","2022-09-20","2022-09-21","2022-09-22","2022-09-23","2022-09-26","2022-09-27","2022-09-28","2022-09-29","2022-09-30","2022-10-03","2022-10-04","2022-10-06","2022-10-07","2022-10-10","2022-10-11","2022-10-12","2022-10-13","2022-10-14","2022-10-17","2022-10-18","2022-10-19","2022-10-20","2022-10-21","2022-10-25","2022-10-27","2022-10-28","2022-10-31","2022-11-01","2022-11-02","2022-11-03","2022-11-04","2022-11-07","2022-11-09","2022-11-10","2022-11-11","2022-11-14","2022-11-15","2022-11-16","2022-11-17","2022-11-18","2022-11-21","2022-11-22","2022-11-23","2022-11-24","2022-11-25","2022-11-28","2022-11-29","2022-11-30","2022-12-01","2022-12-02","2022-12-05","2022-12-06","2022-12-07","2022-12-08","2022-12-09","2022-12-12","2022-12-13","2022-12-14","2022-12-15","2022-12-16","2022-12-19","2022-12-20","2022-12-21","2022-12-22","2022-12-23","2022-12-26","2022-12-27","2022-12-28","2022-12-29","2022-12-30","2023-01-02","2023-01-03","2023-01-04","2023-01-05","2023-01-06","2023-01-09","2023-01-10","2023-01-11","2023-01-12","2023-01-13","2023-01-16","2023-01-17","2023-01-18","2023-01-19","2023-01-20","2023-01-23","2023-01-24","2023-01-25","2023-01-27","2023-01-30","2023-01-31","2023-02-01","2023-02-02","2023-02-03","2023-02-06","2023-02-07","2023-02-08","2023-02-09","2023-02-10","2023-02-13","2023-02-14","2023-02-15","2023-02-16","2023-02-17","2023-02-20","2023-02-21","2023-02-22","2023-02-23","2023-02-24","2023-02-27","2023-02-28","2023-03-01","2023-03-02","2023-03-03","2023-03-06","2023-03-08","2023-03-09","2023-03-10","2023-03-13","2023-03-14","2023-03-15","2023-03-16","2023-03-17","2023-03-20","2023-03-21","2023-03-22","2023-03-23","2023-03-24","2023-03-27","2023-03-28","2023-03-29","2023-03-31","2023-04-03","2023-04-05","2023-04-06","2023-04-10","2023-04-11","2023-04-12","2023-04-13","2023-04-17","2023-04-18","2023-04-19","2023-04-20","2023-04-21","2023-04-24","2023-04-25","2023-04-26","2023-04-27","2023-04-28","2023-05-02","2023-05-03","2023-05-04","2023-05-05","2023-05-08","2023-05-09","2023-05-11","2023-05-12","2023-05-15","2023-05-16","2023-05-17","2023-05-18","2023-05-19","2023-05-22","2023-05-23","2023-05-24","2023-05-25","2023-05-26","2023-05-29","2023-05-30","2023-05-31","2023-06-01","2023-06-02","2023-06-05","2023-06-06","2023-06-07","2023-06-08","2023-06-09","2023-06-12","2023-06-13","2023-06-14","2023-06-15","2023-06-16","2023-06-19","2023-06-20","2023-06-21","2023-06-22","2023-06-23","2023-06-26","2023-06-27","2023-06-28","2023-06-30","2023-07-03","2023-07-04","2023-07-05","2023-07-06","2023-07-07","2023-07-10","2023-07-11","2023-07-12","2023-07-13","2023-07-14","2023-07-17","2023-07-18","2023-07-19","2023-07-20","2023-07-21","2023-07-24","2023-07-25","2023-07-26","2023-07-27","2023-07-28","2023-07-31","2023-08-01","2023-08-02","2023-08-03","2023-08-04","2023-08-07","2023-08-08","2023-08-09","2023-08-10","2023-08-11","2023-08-14","2023-08-16","2023-08-17","2023-08-18","2023-08-21","2023-08-22","2023-08-23","2023-08-24","2023-08-25","2023-08-28","2023-08-29","2023-08-30","2023-08-31","2023-09-01","2023-09-04","2023-09-05","2023-09-06","2023-09-07","2023-09-08","2023-09-11","2023-09-12","2023-09-13","2023-09-14","2023-09-15","2023-09-18","2023-09-20","2023-09-21","2023-09-22","2023-09-25","2023-09-26","2023-09-27","2023-09-28","2023-09-29","2023-10-03","2023-10-04","2023-10-05","2023-10-06","2023-10-09","2023-10-10","2023-10-11","2023-10-12","2023-10-13","2023-10-16","2023-10-17","2023-10-18","2023-10-19","2023-10-20","2023-10-23","2023-10-25","2023-10-26","2023-10-27","2023-10-30","2023-10-31","2023-11-01","2023-11-02","2023-11-03","2023-11-06","2023-11-07","2023-11-08","2023-11-09","2023-11-10","2023-11-13","2023-11-15","2023-11-16","2023-11-17","2023-11-20","2023-11-21","2023-11-22","2023-11-23","2023-11-24","2023-11-28","2023-11-29","2023-11-30","2023-12-01","2023-12-04","2023-12-05","2023-12-06","2023-12-07","2023-12-08","2023-12-11","2023-12-12","2023-12-13","2023-12-14","2023-12-15","2023-12-18","2023-12-19","2023-12-20","2023-12-21","2023-12-22","2023-12-26","2023-12-27","2023-12-28","2023-12-29","2024-01-01","2024-01-02","2024-01-03","2024-01-04","2024-01-05","2024-01-08","2024-01-09","2024-01-10","2024-01-11","2024-01-12","2024-01-15","2024-01-16","2024-01-17","2024-01-18","2024-01-19","2024-01-20","2024-01-23","2024-01-24","2024-01-25","2024-01-29","2024-01-30","2024-01-31","2024-02-01","2024-02-02","2024-02-05","2024-02-06","2024-02-07","2024-02-08","2024-02-09","2024-02-12","2024-02-13","2024-02-14","2024-02-15","2024-02-16","2024-02-19","2024-02-20","2024-02-21","2024-02-22","2024-02-23","2024-02-26","2024-02-27","2024-02-28","2024-02-29","2024-03-01","2024-03-04","2024-03-05","2024-03-06","2024-03-07","2024-03-11","2024-03-12","2024-03-13","2024-03-14","2024-03-15","2024-03-18","2024-03-19","2024-03-20","2024-03-21","2024-03-22","2024-03-26","2024-03-27","2024-03-28","2024-04-01","2024-04-02","2024-04-03","2024-04-04","2024-04-05","2024-04-08","2024-04-09","2024-04-10","2024-04-12","2024-04-15","2024-04-16","2024-04-18","2024-04-19","2024-04-22","2024-04-23","2024-04-24","2024-04-25","2024-04-26","2024-04-29","2024-04-30","2024-05-02","2024-05-03","2024-05-06","2024-05-07","2024-05-08","2024-05-09","2024-05-10","2024-05-13","2024-05-14","2024-05-15","2024-05-16","2024-05-17","2024-05-21","2024-05-22","2024-05-23","2024-05-24","2024-05-27","2024-05-28","2024-05-29","2024-05-30","2024-05-31","2024-06-03","2024-06-04","2024-06-05","2024-06-06","2024-06-07","2024-06-10","2024-06-11","2024-06-12","2024-06-13","2024-06-14","2024-06-18","2024-06-19","2024-06-20","2024-06-21","2024-06-24","2024-06-25","2024-06-26","2024-06-27","2024-06-28","2024-07-01","2024-07-02","2024-07-03","2024-07-04","2024-07-05","2024-07-08","2024-07-09","2024-07-10","2024-07-11","2024-07-12","2024-07-15","2024-07-16","2024-07-18","2024-07-19","2024-07-22","2024-07-23","2024-07-24","2024-07-25","2024-07-26","2024-07-29","2024-07-30","2024-07-31","2024-08-01","2024-08-02","2024-08-05","2024-08-06","2024-08-07","2024-08-08","2024-08-09","2024-08-12","2024-08-13","2024-08-14","2024-08-16","2024-08-19","2024-08-20","2024-08-21","2024-08-22","2024-08-23","2024-08-26","2024-08-27","2024-08-28","2024-08-29","2024-08-30","2024-09-02","2024-09-03","2024-09-04","2024-09-05","2024-09-06","2024-09-09","2024-09-10","2024-09-11","2024-09-12","2024-09-13","2024-09-16","2024-09-17","2024-09-18","2024-09-19","2024-09-20","2024-09-23","2024-09-24","2024-09-25","2024-09-26","2024-09-27","2024-09-30","2024-10-01","2024-10-03","2024-10-04","2024-10-07","2024-10-08","2024-10-09","2024-10-10","2024-10-11","2024-10-14","2024-10-15","2024-10-16","2024-10-17","2024-10-18","2024-10-21","2024-10-22","2024-10-23","2024-10-24","2024-10-25","2024-10-28","2024-10-29","2024-10-30","2024-10-31","2024-11-04","2024-11-05","2024-11-06","2024-11-07","2024-11-08","2024-11-11","2024-11-12","2024-11-13","2024-11-14","2024-11-18","2024-11-19","2024-11-21","2024-11-22","2024-11-25","2024-11-26","2024-11-27","2024-11-28","2024-11-29","2024-12-02","2024-12-03","2024-12-04","2024-12-05","2024-12-06","2024-12-09","2024-12-10","2024-12-11","2024-12-12","2024-12-13","2024-12-16","2024-12-17","2024-12-18","2024-12-19","2024-12-20","2024-12-23","2024-12-24","2024-12-26","2024-12-27","2024-12-31","2025-01-01","2025-01-02","2025-01-03","2025-01-06","2025-01-07","2025-01-08","2025-01-09","2025-01-10","2025-01-13","2025-01-14","2025-01-15","2025-01-16","2025-01-17","2025-01-20","2025-01-21","2025-01-22","2025-01-23","2025-01-24","2025-01-27","2025-01-28","2025-01-30","2025-01-31","2025-02-01","2025-02-03","2025-02-04","2025-02-05","2025-02-06","2025-02-07","2025-02-10","2025-02-11","2025-02-12","2025-02-13","2025-02-14","2025-02-17","2025-02-18","2025-02-19","2025-02-20","2025-02-21","2025-02-24","2025-02-25","2025-02-27","2025-02-28","2025-03-03","2025-03-04","2025-03-05","2025-03-06","2025-03-07","2025-03-10","2025-03-11","2025-03-12","2025-03-13","2025-03-17","2025-03-18","2025-03-19","2025-03-20","2025-03-21","2025-03-24","2025-03-25","2025-03-26","2025-03-27","2025-03-28","2025-04-01","2025-04-02","2025-04-03","2025-04-04","2025-04-07","2025-04-08","2025-04-09","2025-04-11","2025-04-15","2025-04-16","2025-04-17","2025-04-21","2025-04-22","2025-04-23","2025-04-24","2025-04-25","2025-04-28","2025-04-29","2025-04-30","2025-05-02","2025-05-05","2025-05-06","2025-05-07","2025-05-08","2025-05-09","2025-05-12","2025-05-13","2025-05-14","2025-05-15","2025-05-16","2025-05-19","2025-05-20","2025-05-21","2025-05-22","2025-05-23","2025-05-26","2025-05-27","2025-05-28","2025-05-30","2025-06-02","2025-06-03","2025-06-04","2025-06-05","2025-06-06","2025-06-09","2025-06-10","2025-06-11","2025-06-12","2025-06-13","2025-06-16","2025-06-17","2025-06-18","2025-06-19","2025-06-20","2025-06-23","2025-06-24","2025-06-25","2025-06-26","2025-06-27","2025-06-30","2025-07-01","2025-07-02","2025-07-03","2025-07-04","2025-07-07","2025-07-08","2025-07-09","2025-07-10","2025-07-11","2025-07-14","2025-07-15","2025-07-16","2025-07-17","2025-07-18","2025-07-21","2025-07-22","2025-07-23","2025-07-24","2025-07-25","2025-07-28","2025-07-29","2025-07-30","2025-07-31","2025-08-01","2025-08-04","2025-08-05","2025-08-06","2025-08-07","2025-08-08","2025-08-11","2025-08-12","2025-08-13","2025-08-14","2025-08-18","2025-08-19","2025-08-20","2025-08-21","2025-08-22","2025-08-25","2025-08-26","2025-08-28","2025-08-29","2025-09-01","2025-09-02","2025-09-03","2025-09-04","2025-09-05","2025-09-08","2025-09-09","2025-09-10","2025-09-11","2025-09-12","2025-09-15","2025-09-16","2025-09-17","2025-09-18","2025-09-19","2025-09-22","2025-09-23","2025-09-24","2025-09-25","2025-09-26","2025-09-29","2025-09-30","2025-10-01","2025-10-03","2025-10-06","2025-10-07","2025-10-08","2025-10-09","2025-10-10","2025-10-13","2025-10-14","2025-10-15","2025-10-16","2025-10-17","2025-10-20","2025-10-23","2025-10-24","2025-10-27","2025-10-28","2025-10-29","2025-10-30","2025-10-31","2025-11-03","2025-11-04","2025-11-06","2025-11-07","2025-11-10","2025-11-11","2025-11-12","2025-11-13","2025-11-14","2025-11-17","2025-11-18","2025-11-19","2025-11-20","2025-11-21","2025-11-24","2025-11-26","2025-11-27","2025-11-28","2025-12-01","2025-12-02","2025-12-03","2025-12-04","2025-12-05","2025-12-08","2025-12-09","2025-12-10","2025-12-11","2025-12-12","2025-12-15","2025-12-16","2025-12-17","2025-12-18","2025-12-19","2025-12-22","2025-12-23","2025-12-24","2025-12-26","2025-12-29","2025-12-30","2025-12-31","2026-01-01","2026-01-02","2026-01-05","2026-01-06","2026-01-07","2026-01-08","2026-01-09","2026-01-12","2026-01-13","2026-01-14","2026-01-16","2026-01-19","2026-01-20","2026-01-21","2026-01-22","2026-01-23","2026-01-27","2026-01-28","2026-01-29","2026-01-30","2026-02-01","2026-02-02","2026-02-03","2026-02-04","2026-02-05","2026-02-06","2026-02-09","2026-02-10","2026-02-11","2026-02-12","2026-02-13","2026-02-16","2026-02-17","2026-02-18","2026-02-19","2026-02-20","2026-02-23","2026-02-24","2026-02-25","2026-02-26","2026-02-27","2026-03-02","2026-03-04","2026-03-05","2026-03-06","2026-03-09","2026-03-10","2026-03-11","2026-03-12","2026-03-13","2026-03-16","2026-03-17","2026-03-18","2026-03-19","2026-03-20","2026-03-23","2026-03-24","2026-03-25","2026-03-27","2026-03-30","2026-04-01","2026-04-02","2026-04-06","2026-04-07","2026-04-08","2026-04-09","2026-04-10","2026-04-13","2026-04-15","2026-04-16","2026-04-17","2026-04-20","2026-04-21","2026-04-22","2026-04-23","2026-04-24","2026-04-27","2026-04-28","2026-04-29","2026-04-30","2026-05-04","2026-05-05","2026-05-06","2026-05-07","2026-05-08","2026-05-11","2026-05-12","2026-05-13","2026-05-14","2026-05-15","2026-05-18","2026-05-19","2026-05-20","2026-05-21","2026-05-22","2026-05-25","2026-05-26","2026-05-27","2026-05-29","2026-06-01","2026-06-02","2026-06-03","2026-06-04","2026-06-05","2026-06-08","2026-06-09","2026-06-10","2026-06-11","2026-06-12","2026-06-15","2026-06-16","2026-06-17","2026-06-18","2026-06-19","2026-06-22","2026-06-23","2026-06-24","2026-06-25","2026-06-29","2026-06-30","2026-07-01","2026-07-02","2026-07-03","2026-07-06","2026-07-07","2026-07-08","2026-07-09","2026-07-10","2026-07-13","2026-07-14","2026-07-15","2026-07-16","2026-07-17","2026-07-20","2026-07-21","2026-07-22","2026-07-24","2026-07-27","2026-07-28","2026-07-29","2026-07-30","2026-07-31","2026-08-03","2026-08-04","2026-08-05","2026-08-06","2026-08-07","2026-08-10","2026-08-11","2026-08-12","2026-08-13","2026-08-14","2026-08-17","2026-08-18","2026-08-19","2026-08-20","2026-08-21","2026-08-24","2026-08-25","2026-08-26","2026-08-27","2026-08-28","2026-08-31","2026-09-01","2026-09-02","2026-09-03","2026-09-04","2026-09-07","2026-09-08","2026-09-09","2026-09-10","2026-09-11","2026-09-15","2026-09-16","2026-09-17","2026-09-18","2026-09-21","2026-09-22","2026-09-23","2026-09-24","2026-09-25","2026-09-28","2026-09-29","2026-09-30","2026-10-01","2026-10-05","2026-10-06","2026-10-07","2026-10-08","2026-10-09","2026-10-12","2026-10-13","2026-10-14","2026-10-15","2026-10-16","2026-10-19","2026-10-21","2026-10-22","2026-10-23"],"net":[996059.48,991291.66,987097.29,989965.93,979103.38,972127.56,973894.2,971225.09,964659.68,962210.32,965208.98,969247.48,964729.07,968713.37,965850.24,962565.12,968372.33,978123.07,987257.25,982591.06,978199.6,986044.87,984560.59,978675.67,971867.39,977478.11,983878.5,991460.21,998642.63,1001967.07,995187.85,990166.73,987190.54,983209.75,985004.72,993233.73,1000448.49,993621.55,989885.08,986342.16,987844.28,996130.73,993681.55,993333.26,999484.45,1003896.97,1007520.32,1004133.62,1001759.22,998013.0,993257.68,994969.05,990908.89,988768.02,985723.62,992353.45,988043.43,989661.59,997157.28,1001156.87,997505.19,1008301.81,1021322.71,1015425.95,1010591.38,1007043.22,1003474.76,1006049.06,1009510.89,1006533.69,1017260.37,1010608.87,1013124.33,1010130.05,1005248.91,997434.64,992559.26,984998.5,988595.81,984879.04,977612.26,984051.38,986609.13,997179.08,992889.07,982577.65,977415.23,986418.3,982273.21,977913.35,972090.06,984961.62,980404.3,981281.47,977323.41,985160.02,981702.44,984470.8,989110.41,984376.11,992070.2,992205.66,990672.31,985945.22,982871.48,985281.95,982601.26,989824.75,999196.94,994167.76,989485.06,986423.73,983039.3,977770.32,975788.16,972668.92,973660.87,984107.05,985863.23,983262.68,979164.04,974207.21,970418.71,967364.19,963884.58,960596.09,955122.46,962181.25,967474.76,966510.52,956640.9,952790.34,959418.4,964863.68,959002.64,951426.85,949179.31,946799.71,951666.05,956807.02,949282.09,951956.71,956791.72,963378.34,959916.52,963464.55,960218.09,966478.96,972648.88,976316.46,970384.97,969647.11,965205.63,972790.29,975492.71,976021.34,970766.86,979311.35,971982.42,966595.11,962387.42,965008.42,957811.91,954306.06,953614.37,950179.03,953396.78,950676.68,958135.65,952826.04,949601.01,945962.59,940757.15,938025.41,940467.59,937731.32,933858.81,930994.9,927954.19,930435.96,934323.69,933087.33,937523.77,934755.77,933581.63,935009.64,941382.8,938790.7,935436.63,940364.09,936409.45,941200.84,938277.18,934139.52,939005.01,934714.08,931873.04,933549.63,934126.8,937008.33,933782.45,931136.24,936980.65,942861.27,938386.61,934575.39,940189.56,942382.34,945959.34,939054.25,939745.82,942774.19,943046.84,944781.96,941748.61,941911.2,942276.26,941519.08,947358.06,949249.42,943147.01,945345.78,943813.75,945679.68,939791.68,948876.19,954823.28,949946.24,955597.23,960363.25,956638.96,963561.1,965821.38,962299.89,957855.95,964598.16,968776.0,964248.01,964543.42,960971.38,956191.13,954897.9,951676.3,948535.82,944654.18,940742.37,940547.06,937365.45,940077.27,936441.69,936140.98,938124.97,934677.76,934175.08,933823.42,934233.34,935081.5,933379.68,930079.83,929876.86,927035.86,926283.95,924723.16,927037.66,924786.22,929582.77,929625.26,931740.43,929964.06,927991.76,927103.16,926505.96,923800.85,923594.69,920836.73,920631.24,925435.25,930389.63,933828.8,932791.42,939076.99,931235.67,935819.23,930617.87,935175.25,937031.55,946385.77,949804.68,943369.03,940443.3,936850.63,941672.92,938389.37,941501.75,938396.74,934413.84,930874.33,935949.64,943751.87,943451.88,941167.13,937481.1,940940.97,944860.01,948298.7,944913.49,941384.54,940177.37,938318.86,942977.24,956465.02,943422.25,938040.44,946567.35,945130.29,941933.09,941016.7,941798.14,944420.83,941555.78,938794.8,940239.06,943729.42,940923.72,937798.2,933332.61,929052.87,930950.56,929007.96,924854.53,927833.43,922104.53,917830.52,919418.77,921484.01,926097.55,922502.87,926041.86,930237.06,927052.37,920705.86,915215.42,920558.38,916273.18,922068.35,918056.87,914708.31,914040.26,911550.5,905942.19,902755.34,907398.67,904368.09,909050.7,905379.26,909370.9,911988.7,909562.47,906055.28,907197.26,903714.58,897871.11,895817.19,893497.03,890615.64,888658.38,885300.78,885300.78,880561.57,883743.94,883743.94,882939.09,880262.58,884605.32,879480.29,883099.53,879945.68,877544.37,871823.98,873214.62,876489.96,873193.44,876294.5,872573.83,874317.76,871632.98,874718.12,872016.01,876581.6,876326.53,873725.57,870768.11,867767.75,865106.53,862551.48,860240.98,858569.53,856709.35,858847.72,858847.72,859030.01,856826.38,856959.89,861118.45,865363.17,861255.92,857811.32,854273.35,849921.52,846696.92,843765.01,848181.66,852262.17,854409.86,851702.81,850691.2,854556.79,850743.8,846776.21,844736.73,844850.16,842441.09,839560.12,842315.19,838500.08,835573.8,832826.17,835356.22,832326.96,832755.56,833318.5,837312.69,835151.2,839269.68,838223.79,847066.46,843225.93,839600.72,837572.2,837216.53,835235.15,832014.57,833568.22,827955.55,830966.07,831965.5,829167.41,826988.67,824622.92,822298.31,818603.61,815063.6,812593.51,811393.32,809076.34,806383.29,811332.08,809721.72,807977.15,805534.31,803230.62,800169.53,803319.43,805227.39,808995.52,806882.91,807695.06,804587.5,807091.29,808935.14,805680.95,802692.17,800026.71,798004.11,800728.32,800649.5,799087.18,796396.25,795484.15,793368.98,794035.05,797049.42,798846.14,797574.85,798457.73,798606.62,796788.99,795014.59,792806.01,789077.84,793230.25,800242.13,804371.0,800643.56,797860.43,799538.06,796721.4,791980.12,790310.56,792103.76,789976.23,788923.43,786521.64,784292.8,782632.03,783521.92,785976.74,785024.82,786230.54,786286.52,782774.47,779955.89,778502.87,776820.08,780901.53,778920.56,780578.76,784797.57,785612.99,782999.98,780684.72,778641.66,775386.94,773306.12,770266.01,773380.04,770504.2,768793.78,765128.29,761324.46,757388.08,762347.14,764611.79,768705.73,766132.59,763398.93,764122.28,764514.2,765078.73,765765.34,763613.32,759792.92,755338.52,750885.05,751862.57,757706.35,753364.71,748817.86,755976.71,751914.79,749382.12,750944.42,754378.2,762008.28,762494.45,768380.16,774066.81,780542.69,777728.58,771310.21,766528.48,770111.28,770574.81,778755.54,773977.91,770388.33,766765.27,763552.45,760293.7,762645.31,759048.26,756808.09,762841.88,755577.4,755703.93,753510.81,750661.54,748547.58,745391.39,748582.29,748301.23,744171.13,741585.52,739412.01,741752.02,739206.08,751173.48,756175.37,760930.96,757170.43,760519.71,757181.69,754196.79,749878.67,746819.01,749690.47,752949.52,749454.59,750541.85,752800.27,752679.0,753039.67,756197.61,754798.29,752368.14,749659.03,745290.74,740865.6,738923.96,748661.62,744886.28,742183.11,738803.54,742116.41,739754.55,737068.13,734674.7,733476.37,729941.38,725981.34,723370.69,723980.91,733503.11,733182.78,728178.45,724268.32,721885.37,729256.05,730021.25,727048.26,725326.99,729071.39,730318.25,724738.87,725867.73,727758.63,730541.65,726489.3,719263.61,717381.87,741561.66,734214.95,747171.1,748819.27,744656.34,744562.96,741967.49,741967.49,739921.72,735315.27,735315.27,732855.42,737635.95,740851.48,745258.91,749485.33,745542.74,746035.76,743401.03,743258.05,739138.37,740253.0,739258.33,739999.31,739043.79,737828.61,738861.82,738533.07,736562.08,733043.84,738534.18,737069.38,744228.09,740487.36,743220.18,753730.78,749355.36,752857.52,748915.53,747830.65,747830.65,762411.09,771560.97,767975.93,763383.64,760486.15,757584.55,763197.7,761718.0,755511.35,752226.44,752694.92,751822.51,751822.51,749429.42,751831.54,747548.91,743806.17,745909.49,745909.49,745578.57,745578.57,749027.83,751221.17,755901.77,754888.29,751897.02,749452.16,756778.65,749706.01,748597.57,748597.57,746258.56,742916.63,737231.29,740153.85,740166.59,742008.48,745495.96,743452.89,751172.24,748580.9,753103.05,748318.26,757198.93,753413.98,748523.91,745909.16,742465.97,744456.52,747011.17,743141.46,748237.18,756392.47,762830.98,758534.54,754159.61,754784.48,762182.57,758825.99,752192.53,748532.32,750047.23,752355.98,745253.61,750211.23,755903.55,751448.11,752862.57,750277.46,756257.75,753088.91,753220.1,748285.86,746542.93,760341.45,755596.01,756559.05,760147.6,757356.28,759666.97,765134.64,759023.64,754754.82,749042.57,746034.98,744031.78,741271.64,739670.83,736547.89,731189.7,730751.39,736402.19,731964.35,731823.51,725067.26,720744.23,717666.8,717791.37,716152.25,713400.54,709853.53,707531.77,708914.07,714185.1,710812.01,706928.56,709481.43,704778.39,701063.5,698464.57,697021.7,696658.06,694752.53,688382.63,697319.2,693865.56,694929.96,689239.47,684328.69,678662.71,678760.67,685557.07,678300.75,680120.13,676605.55,675939.77,677049.07,674864.74,677052.4,683241.87,678724.7,674619.13,677744.53,679874.86,676663.24,683275.64,679756.15,683878.48,685606.41,682523.28,682596.15,689547.33,690594.14,690434.58,697102.22,691190.88,690235.97,683950.18,687371.74,685419.01,687281.82,685811.25,693046.78,692177.79,689607.03,694787.37,692364.9,686661.41,689781.55,689683.02,688331.7,684584.08,687172.53,685620.36,688590.75,677068.28,673308.04,671510.17,672124.49,671722.5,667912.84,676141.61,680469.04,676930.59,673948.25,669687.55,680808.53,687071.85,689859.51,689935.3,684351.85,685373.76,686654.62,680876.94,683373.68,684979.07,697728.41,701950.13,695450.72,690078.11,687710.3,687809.43,692564.5,687341.27,684396.78,688467.49,683648.63,674125.36,673038.62,672456.8,668571.76,672357.7,669199.76,670166.57,667277.67,667277.67,666342.58,665125.98,660828.93,661293.61,658659.47,658293.4,654275.64,651827.93,659152.26,653490.27,647912.23,649099.68,655021.12,654619.11,658557.4,656346.89,659186.2,654045.97,651156.05,650055.72,651537.77,650647.2,653041.45,655314.14,651826.96,651848.04,648370.4,649204.03,651776.74,647880.84,649812.8,647179.82,649921.53,650019.08,646865.95,650550.84,647545.68,648290.6,645626.78,647849.15,646260.1,646974.8,644407.46,649356.03,654463.99,648990.31,646928.07,644726.47,642302.7,641865.34,644194.6,642306.6,644744.86,641860.05,643924.99,638758.87,638758.87,641456.32,637472.43,638469.02,641634.31,641268.11,638298.61,636540.29,636705.84,636941.25,633214.3,632741.71,636533.25,636725.82,635171.73,634979.6,630622.61,629798.46,627170.6,629993.88,627556.35,622727.58,624985.4,630828.23,631173.45,635846.57,634035.05,628426.47,630387.57,631422.66,631422.66,633936.66,636126.94,640004.13,643371.43,641013.06,636400.02,633742.81,636960.79,632715.71,630376.35,633518.97,628889.83,625488.82,628218.42,630582.25,623897.89,621289.16,616660.8,616702.89,612418.05,609041.54,608911.69,606637.0,608208.19,605056.93,600664.22,602674.33,608968.49,604999.6,604999.6,607123.04,609159.16,607599.07,608182.21,611507.09,615477.27,612780.35,609204.24,605160.96,606219.74,608130.45,609228.99,610503.42,605292.08,605606.0,605914.52,603243.07,602096.32,599393.27,602896.97,602896.97,606232.88,605526.12,610186.69,606350.11,603449.0,600336.43,605803.04,613062.37,607677.69,607584.59,602140.48,597956.47,595236.8,601486.13,595890.47,590520.7,585699.13,587369.84,582834.05,578404.55,579223.75,572321.65,564837.73,561956.6,561931.65,561460.88,557013.98,557013.98,556373.69,553584.61,550789.18,553079.94,557097.79,557451.11,552891.35,560846.91,555330.46,549675.96,552769.88,549192.04,549101.94,556215.09,543486.48,538116.55,532858.32,528024.58,532632.75,528793.95,537510.13,532613.14,528796.91,520874.94,523583.73,526679.45,533786.11,526877.54,521126.82,512739.76,521305.6,528112.04,522285.08,515040.99,510552.71,504211.45,511282.12,513019.71,505773.08,508061.15,509963.07,507474.74,513327.14,519673.85,517315.48,520455.18,519327.12,515976.01,521588.3,521333.08,515032.13,519394.6,514064.68,505721.05,499670.45,494582.05,487920.59,486239.26,481331.51,490190.51,485558.04,480907.02,475491.26,467973.04,463332.65,470667.87,472721.23,470760.67,468514.09,462864.06,460655.99,470146.56,476288.31,480527.05,471670.54,473267.64,469939.93,467942.02,464999.43,459948.18,456339.71,452808.46,450197.95,450090.48,450201.29,445380.51,441964.06,440212.32,447136.83,444415.27,441316.77,443261.17,442196.79,443446.8,444285.11,441388.79,443479.72,439805.39,446603.18,443239.1,443455.04,448902.62,449450.78,442180.6,439007.46,443146.72,440745.38,439397.47,440200.42,439835.27,439213.96,439213.96,439573.86,440511.67,437906.85,437469.22,439961.59,437277.23,436768.43,436768.43,434295.19,434000.65,438339.1,435126.62,436631.56,434714.09,435505.51,436049.01,436370.42,436370.42,437885.11,440416.08,437749.3,438904.04,435567.51,432829.34,430024.97,430024.97,426631.66,426193.15,427813.63,427337.64,427010.23,427916.69,433681.02,440391.21,435339.5,436253.9,433634.6,435141.48,439003.38,438265.3,434667.41,430555.25,434320.6,429973.01,426762.81,422255.54,418559.95,422500.07,416110.61,422957.57,429598.81,438263.44,448772.71,443283.65,454523.47,447008.4,447982.08,441846.76,442720.2,451115.04],"pre":[996666.8,992502.84,988911.66,992284.26,982027.86,975663.12,978038.1,975976.5,970020.65,968177.45,971785.25,976328.69,972416.97,976904.97,974649.09,971971.09,978283.37,988540.05,998292.12,994237.3,990460.81,998814.61,997948.53,992679.07,986486.32,992608.12,999516.32,1007607.32,1015302.3,1019242.8,1013078.56,1008672.09,1006307.34,1002941.25,1005352.35,1014198.51,1021925.11,1015718.02,1012601.26,1009676.08,1011797.68,1020707.26,1018875.0,1019143.4,1025805.92,1030728.84,1034861.28,1032086.2,1030320.92,1027185.92,1023038.72,1025358.92,1021907.08,1020372.88,1017933.04,1025068.84,1021364.09,1023485.09,1031484.77,1036093.19,1033052.25,1044355.73,1057999.01,1052722.21,1048502.03,1045568.33,1042612.09,1045798.12,1049766.08,1047400.43,1058634.31,1052596.72,1055727.26,1053346.76,1049081.16,1041883.2,1037628.3,1030683.7,1034895.98,1031794.14,1025145.99,1032206.29,1035381.08,1046463.08,1042797.44,1033113.84,1028573.5,1038088.54,1034572.52,1030847.72,1025659.91,1039166.19,1035231.37,1036733.38,1033399.78,1041747.62,1038909.46,1042295.71,1047551.45,1043436.05,1051638.09,1052390.73,1051474.94,1047366.38,1044907.68,1047933.24,1045866.63,1053600.25,1063584.14,1059162.88,1055087.27,1052636.69,1049863.73,1045206.36,1043836.94,1041327.98,1042936.28,1053891.08,1056265.76,1054281.82,1050798.47,1046459.27,1043286.84,1040850.99,1037989.52,1035317.02,1030463.85,1038032.25,1043838.93,1043501.61,1034262.75,1031040.54,1038183.48,1044261.93,1039031.25,1032086.85,1030471.53,1028720.03,1034219.58,1039992.74,1033098.16,1036402.42,1041752.9,1048855.62,1046022.62,1050196.37,1047575.18,1054348.62,1061145.24,1065324.48,1060018.73,1059906.77,1056091.97,1064193.41,1067523.37,1068686.57,1064068.23,1073130.27,1066444.74,1061700.0,1058132.4,1061392.25,1054832.15,1051962.71,1051904.77,1049104.93,1052842.53,1050755.61,1058733.37,1054059.77,1051466.42,1048460.3,1043885.9,1041783.56,1044856.16,1042749.01,1039505.14,1037271.61,1034862.49,1037973.29,1042490.09,1041878.05,1046940.38,1044793.82,1044242.32,1046293.97,1053182.17,1051211.17,1048472.98,1054017.22,1050675.7,1055974.7,1053662.5,1050136.29,1055616.05,1051937.55,1049705.42,1051992.54,1053178.19,1056667.95,1054049.61,1052008.81,1058463.01,1064956.89,1061093.35,1057889.81,1064009.29,1066816.7,1070901.56,1064604.72,1065906.47,1069441.79,1070323.92,1072670.22,1070244.55,1071014.35,1071986.2,1071833.92,1078179.0,1080676.04,1075179.45,1077989.07,1077064.23,1079538.15,1074257.61,1083847.69,1090409.74,1086146.54,1092309.38,1097584.72,1094480.5,1102019.5,1104895.54,1101987.69,1098158.73,1105518.27,1110204.27,1106291.47,1107203.35,1104243.75,1100079.33,1099397.61,1096786.11,1094258.43,1090985.58,1087681.26,1088094.62,1085520.12,1088839.02,1085806.62,1086110.4,1088700.18,1085858.18,1085958.9,1086210.55,1087225.35,1088725.95,1087726.15,1085128.23,1085625.83,1083484.86,1083434.87,1082477.65,1085396.21,1083746.21,1089046.21,1089787.21,1092601.3,1091521.1,1090245.28,1090050.64,1090148.26,1088139.26,1088628.86,1086567.5,1087058.8,1092411.79,1097918.5,1102056.34,1101714.11,1108548.74,1101404.9,1106541.51,1102042.41,1107150.18,1109609.0,1119466.14,1123491.98,1117661.48,1115338.94,1112350.0,1117774.84,1115095.69,1118711.53,1116208.03,1112827.88,1109891.92,1115472.22,1123777.18,1124083.18,1122403.48,1119324.88,1123389.68,1127915.33,1131959.33,1129178.53,1126252.43,1125648.35,1124392.35,1129553.55,1143545.23,1131107.22,1126335.18,1135369.26,1134540.94,1131952.94,1131644.3,1133033.45,1136264.09,1134006.45,1131852.69,1133903.89,1138002.29,1135803.27,1133280.77,1129419.21,1125745.77,1128249.67,1126914.05,1123371.25,1126959.94,1121840.42,1118176.62,1120377.0,1123053.99,1128175.47,1125187.89,1129233.75,1134037.2,1131464.7,1125727.1,1120849.26,1126700.16,1123032.92,1129336.48,1125942.67,1123210.6,1123157.39,1121283.84,1116292.53,1113721.17,1118873.49,1116458.79,1121650.83,1118592.49,1123092.01,1126216.81,1124400.31,1121502.31,1123252.63,1120376.47,1115142.65,1113697.29,1111986.57,1109713.09,1108365.25,1105617.2,1105617.2,1101486.8,1105277.08,1105277.08,1105075.6,1103002.64,1107849.68,1103326.28,1107549.8,1105048.3,1103348.98,1098281.81,1100373.83,1104349.03,1101703.27,1105406.23,1102288.87,1104734.95,1102749.35,1106386.94,1104336.94,1109455.01,1109895.83,1107989.51,1105729.07,1103424.19,1101459.79,1099600.45,1097985.1,1097008.3,1095841.42,1098528.17,1098528.17,1099404.77,1097895.38,1098722.94,1103430.35,1108221.95,1104809.45,1102055.78,1099208.44,1095551.44,1093020.08,1090782.18,1095746.78,1100516.78,1103350.58,1101327.86,1100999.49,1105549.76,1102418.18,1099133.08,1097775.88,1098572.33,1096844.8,1094646.61,1097943.85,1094807.69,1092558.1,1090488.55,1093557.82,1091207.23,1092314.59,1093555.51,1098088.72,1096607.12,1101405.68,1101037.76,1110420.42,1107259.78,1104317.05,1102969.42,1103293.73,1101993.13,1099451.03,1101685.91,1096757.21,1100451.25,1102132.81,1100018.71,1098522.07,1096838.35,1095197.2,1092181.85,1089324.0,1087538.0,1087021.55,1085386.35,1083375.24,1088868.39,1087938.59,1086873.46,1085111.02,1083487.72,1081103.0,1084929.2,1087510.73,1091954.05,1090513.09,1091997.43,1089562.57,1092740.57,1095261.22,1092685.22,1090375.72,1088389.55,1087046.85,1090310.72,1090911.06,1090029.27,1088020.74,1087788.79,1086353.49,1087700.54,1091256.4,1093593.22,1092998.47,1094559.07,1095385.63,1094243.63,1093145.39,1091616.83,1088566.97,1093260.44,1100955.32,1105772.01,1102730.73,1100635.45,1102998.45,1100867.25,1096809.77,1095823.61,1098299.77,1096853.62,1096481.62,1094760.38,1093214.66,1092235.64,1093804.74,1096800.59,1096525.55,1098408.68,1099141.64,1096305.14,1094161.47,1093384.4,1092378.12,1097134.62,1095826.43,1098156.03,1103042.25,1104520.91,1102570.16,1100917.92,1099535.52,1096942.32,1095521.34,1093142.04,1096787.69,1094569.89,1093514.39,1090505.41,1087354.66,1084079.06,1089569.3,1092490.76,1097240.15,1095319.65,1093237.15,1094612.92,1095657.42,1096876.0,1098216.16,1096715.68,1093546.48,1089743.59,1085945.59,1087575.79,1094073.19,1090378.69,1086478.94,1094163.84,1090755.36,1088874.81,1091089.68,1095050.23,1103339.68,1104481.51,1111022.59,1117360.99,1124366.64,1122203.44,1116432.64,1112299.64,1116534.68,1117647.35,1126353.21,1122227.88,1119287.77,1116317.84,1113758.89,1111150.69,1114151.72,1111202.6,1109609.06,1116166.59,1109551.1,1110323.45,1108776.09,1106572.89,1105105.53,1102597.21,1106313.65,1106676.44,1103191.72,1101250.12,1099720.24,1102703.92,1100802.77,1113292.55,1118943.65,1124223.62,1121109.9,1125108.24,1122420.49,1120082.92,1116414.34,1114001.24,1117398.43,1121182.6,1118329.82,1120061.0,1122843.08,1123364.38,1124368.13,1128169.08,1127411.17,1125621.07,1123551.99,1119828.75,1116048.3,1114751.34,1125017.61,1121888.33,1119829.46,1117092.46,1120929.51,1119209.08,1117164.49,1115411.53,1114853.91,1111958.0,1108638.83,1106670.5,1107926.0,1118093.5,1118420.22,1114064.68,1110801.48,1109062.56,1116956.16,1118365.26,1116035.4,1114955.67,1119222.83,1121107.79,1116166.07,1117932.32,1120462.24,1123885.9,1120472.56,1113883.25,1112643.56,1137354.53,1130644.63,1144124.53,1146406.65,1142878.58,1143418.7,1141456.22,1141456.22,1140041.34,1136066.46,1136066.46,1134236.7,1139651.1,1143498.19,1148536.23,1153391.79,1150073.87,1151192.87,1149183.53,1149664.66,1146166.76,1147905.76,1147535.36,1148899.92,1148567.82,1147976.46,1149632.91,1149925.87,1148575.37,1145679.23,1151789.39,1150946.21,1158616.51,1155497.01,1158854.0,1169879.63,1166123.15,1170136.91,1166813.87,1166346.65,1166346.65,1181438.75,1191212.03,1188251.23,1184283.67,1182007.65,1179727.91,1185964.01,1185109.33,1179526.86,1176863.09,1177951.49,1177698.09,1177698.09,1175924.29,1178944.93,1175280.07,1172155.03,1174875.83,1174875.83,1175160.07,1175160.07,1179226.45,1182034.9,1187331.82,1186936.04,1184562.68,1182734.33,1190572.34,1184114.98,1183620.5,1183620.5,1181894.23,1179163.45,1174091.77,1177625.05,1178247.31,1180698.94,1184796.11,1183359.71,1191583.7,1189602.95,1194737.77,1190569.06,1199958.16,1196790.16,1192514.56,1190515.36,1187687.95,1190295.51,1193465.69,1190211.53,1195924.4,1204592.93,1211540.93,1207861.79,1204106.41,1205353.19,1213263.04,1210530.22,1204520.41,1201480.95,1203618.83,1206552.1,1200076.71,1205658.15,1211972.27,1208138.83,1210178.23,1208217.23,1214711.65,1212172.35,1212933.95,1208627.03,1207516.04,1221948.44,1217824.6,1219410.87,1223513.43,1221344.0,1224280.43,1230263.19,1224775.52,1221126.52,1216036.34,1213647.14,1212264.32,1210123.21,1209142.03,1206638.02,1201902.43,1202083.93,1208245.67,1204428.87,1204913.9,1198780.85,1195086.25,1192637.05,1193389.25,1192376.75,1190253.79,1187336.26,1185642.46,1187649.64,1193434.24,1190687.98,1187433.74,1190615.66,1186543.24,1183461.64,1181496.1,1180686.55,1180955.0,1179682.85,1173946.35,1183399.04,1180578.32,1182276.72,1177220.12,1172943.32,1167913.61,1168644.54,1175959.84,1169330.84,1171782.68,1168896.96,1168859.27,1170597.15,1169042.43,1171860.35,1178566.35,1174684.35,1171211.25,1174970.97,1177737.84,1175162.52,1182295.86,1179411.34,1184052.34,1186418.74,1183973.46,1184685.72,1192158.24,1193848.32,1194333.36,1201525.58,1196256.14,1195940.06,1190291.56,1194355.24,1193043.16,1195546.15,1194714.76,1202590.76,1202357.18,1200420.18,1206235.19,1204443.55,1199366.2,1203115.33,1203646.49,1202925.06,1199806.6,1203028.0,1202107.6,1205712.28,1194827.77,1191705.69,1190549.17,1191800.37,1192030.47,1188851.57,1197599.37,1202553.62,1199637.73,1197278.69,1193639.45,1205272.4,1212050.72,1215460.1,1216158.54,1211194.54,1212837.94,1214740.1,1209582.32,1212700.97,1214931.17,1228304.29,1233144.37,1227261.7,1222509.02,1220757.76,1221473.56,1226737.63,1222130.91,1219806.43,1224496.83,1220292.49,1211388.14,1210919.62,1210955.59,1207690.39,1212094.59,1209556.39,1211141.71,1208871.19,1208871.19,1208551.33,1207949.02,1204265.34,1205348.94,1203332.94,1203584.03,1200182.08,1198351.18,1206187.0,1201142.02,1196179.02,1197980.85,1204516.89,1204725.27,1209273.59,1207673.25,1211123.4,1206592.9,1204315.3,1203826.28,1205920.28,1205641.08,1208646.78,1211532.36,1208660.1,1209294.78,1206431.43,1207878.73,1211065.63,1207785.83,1210331.75,1208313.38,1211668.78,1212382.38,1209844.84,1214148.04,1211758.15,1213120.45,1211074.15,1213914.99,1212943.8,1214276.54,1212327.14,1217785.79,1223514.87,1218657.57,1217213.97,1215630.41,1213820.93,1213998.23,1216943.07,1215669.39,1218722.39,1216451.67,1219132.92,1214585.58,1214585.58,1217902.18,1214534.16,1216148.31,1219929.33,1220179.58,1217825.36,1216683.28,1217463.84,1218313.92,1215201.36,1215342.6,1219748.85,1220553.39,1219610.82,1220030.46,1216284.39,1216073.31,1214059.5,1217497.18,1215675.97,1211462.19,1214337.39,1220691.69,1221652.62,1226942.12,1225743.62,1220746.64,1223322.08,1224969.9,1224969.9,1228096.47,1230899.67,1235388.87,1239366.72,1237616.4,1233607.94,1231557.14,1235280.58,1231640.44,1229906.44,1233553.0,1229529.2,1226737.13,1230074.9,1233047.92,1226975.32,1224974.9,1220956.66,1221605.89,1217926.33,1215156.13,1215632.41,1213963.47,1216141.39,1213595.89,1209806.93,1212422.62,1219324.62,1215958.62,1215958.62,1218685.89,1221326.97,1220373.29,1221562.59,1225493.83,1230068.98,1227979.73,1225009.55,1221574.55,1223239.57,1225757.05,1227462.05,1229343.6,1224740.7,1225661.4,1226575.08,1224509.01,1223967.41,1221868.71,1225977.87,1225977.87,1229920.71,1229819.1,1235085.66,1231853.34,1229556.98,1227049.86,1233121.54,1240884.94,1236110.14,1236624.94,1231787.23,1228211.71,1226101.72,1232856.52,1227873.74,1223112.99,1218900.98,1221185.08,1217261.72,1213444.54,1214875.44,1208582.07,1201710.59,1199438.21,1200020.97,1200158.65,1196321.38,1196321.38,1196287.32,1194104.92,1191916.76,1194816.44,1199444.8,1200406.32,1196454.92,1204914.67,1200009.28,1194961.3,1198664.57,1195694.99,1196214.74,1203938.12,1191819.93,1187069.87,1182429.74,1178211.24,1183443.94,1180226.66,1189453.57,1185180.17,1181990.12,1174699.65,1178036.26,1181758.26,1189493.94,1183212.5,1178094.86,1170342.86,1179427.25,1186750.19,1181557.87,1174944.47,1171096.48,1165388.47,1173094.47,1175456.07,1168830.27,1171742.21,1174269.77,1172403.17,1178766.17,1185735.76,1183996.24,1187755.84,1187247.64,1184516.14,1190750.04,1191116.94,1185436.19,1190311.97,1185606.62,1177881.34,1172451.22,1167984.8,1161944.06,1160884.11,1156600.23,1165972.57,1161968.95,1157945.75,1153153.4,1146264.7,1142248.18,1150100.31,1152778.71,1151442.39,1149819.23,1144789.96,1143204.55,1153207.16,1159974.75,1164843.21,1156616.74,1158842.81,1156141.37,1154773.01,1152459.28,1148035.51,1145058.25,1142155.35,1140167.07,1140682.55,1141415.35,1137214.4,1134420.64,1133289.45,1140725.34,1138626.03,1136147.43,1138713.63,1138272.03,1140144.75,1141604.35,1139326.27,1142036.77,1138979.32,1146287.68,1143544.18,1144380.46,1150341.37,1151510.65,1144858.6,1142306.4,1147066.94,1145285.79,1144558.19,1145982.08,1146240.17,1146240.17,1146240.17,1147220.0,1148777.46,1146791.41,1146970.01,1150078.52,1148010.24,1148117.07,1148117.07,1146260.15,1146582.53,1151430.38,1148836.22,1150959.63,1149660.75,1151070.99,1152234.51,1153175.19,1153175.19,1155308.63,1158459.77,1156410.05,1158183.85,1155465.85,1153348.85,1151164.25,1151164.25,1148391.01,1148573.91,1150816.88,1150964.92,1151263.16,1152795.74,1159076.61,1166300.6,1161878.0,1163420.42,1161428.68,1163562.76,1167938.56,1167826.48,1164855.29,1161371.25,1165767.7,1162054.42,1159476.26,1155602.26,1152540.22,1157116.26,1151358.9,1158724.23,1165886.85,1175186.34,1186334.62,1181477.32,1193238.12,1186354.92,1187959.74,1182452.64,1183960.38,1192872.36],"peak":62,"trough":1213,"cap":1000000.0},"bridge":[["Before costs",192872.36000000004],["Slippage",-257400.33000000002],["Charges",-484356.99],["Result",-548884.96]],"day":{"date":"2026-10-23","candles":[["09:15",260.94,260.94,258.74,259.69],["09:20",259.71,259.83,259.23,259.41],["09:25",259.41,259.95,259.41,259.59],["09:30",259.6,259.69,258.95,259.12],["09:35",259.12,259.19,258.85,259.13],["09:40",259.14,259.5,259.1,259.23],["09:45",259.22,259.39,258.96,258.96],["09:50",258.96,259.05,258.52,258.69],["09:55",258.61,258.78,258.21,258.32],["10:00",258.34,258.36,257.8,257.81],["10:05",257.85,258.1,257.23,257.38],["10:10",257.31,257.48,257.01,257.19],["10:15",257.19,257.23,256.6,257.06],["10:20",257.06,257.46,256.84,257.3],["10:25",257.3,257.52,257.16,257.31],["10:30",257.31,257.42,256.85,256.91],["10:35",256.9,257.17,256.65,256.84],["10:40",256.8,257.3,256.75,257.19],["10:45",257.19,257.19,256.76,256.98],["10:50",256.98,256.98,256.65,256.87],["10:55",256.86,256.87,256.3,256.36],["11:00",256.36,256.82,256.25,256.44]],"or_raw":[258.74,260.94],"or_clean":[259.23,260.33],"trade":{"side":"SHORT","entry_candle":"09:30","trigger":259.22,"entry":259.19,"stop":260.33,"target":256.91,"exit_candle":"10:15","exit_reason":"target","exit":256.91,"qty":3858,"net":8394.84,"charges":401.4,"slippage":115.74,"gross":8796.24}}};
+  const NS = "http://www.w3.org/2000/svg";
+  const tip = document.getElementById("tip");
+  const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const MINUS = "−", RS = "₹";
+
+  function group(n) {
+    const s = String(Math.abs(Math.round(n)));
+    if (s.length <= 3) return s;
+    let head = s.slice(0, -3);
+    const parts = [];
+    while (head.length > 2) { parts.unshift(head.slice(-2)); head = head.slice(0, -2); }
+    if (head) parts.unshift(head);
+    return parts.join(",") + "," + s.slice(-3);
+  }
+  const inr = (v, plus) => (Math.round(v) < 0 ? MINUS : (plus && Math.round(v) > 0 ? "+" : "")) + RS + group(v);
+  const lakh = (v, plus) => (v < 0 ? MINUS : (plus && v > 0 ? "+" : "")) + RS + (Math.abs(v) / 1e5).toFixed(2) + " lakh";
+  const fdate = iso => { const p = iso.split("-"); return (+p[2]) + " " + MON[+p[1] - 1] + " " + p[0]; };
+
+  function S(tag, attrs, parent) {
+    const el = document.createElementNS(NS, tag);
+    for (const k in attrs) el.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(el);
+    return el;
+  }
+  function T(parent, x, y, s, cls, anchor) {
+    const t = S("text", { x: x, y: y, class: cls || "ax", "text-anchor": anchor || "start" }, parent);
+    t.textContent = s;
+    return t;
+  }
+  function tipShow(cx, cy, rows) {
+    tip.replaceChildren();
+    rows.forEach(function (r) {
+      const row = document.createElement("div");
+      row.className = "tr";
+      if (r[2]) { const k = document.createElement("span"); k.className = "tk " + r[2]; row.appendChild(k); }
+      const v = document.createElement("strong");
+      v.textContent = r[0];
+      row.appendChild(v);
+      if (r[1]) { const l = document.createElement("span"); l.textContent = r[1]; row.appendChild(l); }
+      tip.appendChild(row);
+    });
+    tip.hidden = false;
+    const w = tip.offsetWidth, h = tip.offsetHeight, pad = 14;
+    let left = cx + pad, top = cy + pad;
+    if (left + w > window.innerWidth - 8) left = cx - w - pad;
+    if (top + h > window.innerHeight - 8) top = cy - h - pad;
+    tip.style.left = Math.max(8, left) + "px";
+    tip.style.top = Math.max(8, top) + "px";
+  }
+  function tipHide() { tip.hidden = true; }
+
+  function svgFor(host, W, H, label) {
+    return S("svg", { width: W, height: H, viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": label }, host);
+  }
+
+  // Account value: two lines on one rupee axis, crosshair readout
+  function equity(host) {
+    const W = host.clientWidth, narrow = W < 620, H = narrow ? 260 : 330;
+    const m = { l: 50, r: narrow ? 10 : 118, t: 18, b: 30 };
+    const E = D.eq, n = E.dates.length, net = E.net, pre = E.pre;
+    const svg = svgFor(host, W, H, "Account value after costs falls from 10 lakh to " + lakh(net[n - 1]) + "; before costs it ends at " + lakh(pre[n - 1]));
+    svg.setAttribute("tabindex", "0");
+    const all = net.concat(pre), step = 2e5;
+    const lo = Math.floor(Math.min.apply(null, all) / step) * step;
+    const hi = Math.ceil(Math.max.apply(null, all) / step) * step;
+    const pw = W - m.l - m.r, ph = H - m.t - m.b;
+    const x = i => m.l + pw * i / (n - 1);
+    const y = v => m.t + ph * (hi - v) / (hi - lo);
+    for (let v = lo; v <= hi + 1; v += step) {
+      S("line", { x1: m.l, x2: m.l + pw, y1: y(v), y2: y(v), class: Math.abs(v - E.cap) < 1 ? "base" : "grid" }, svg);
+      T(svg, m.l - 8, y(v) + 4, RS + (v / 1e5) + "L", "ax", "end");
+    }
+    let prev = E.dates[0].slice(0, 4);
+    E.dates.forEach(function (d, i) {
+      const yr = d.slice(0, 4);
+      if (yr !== prev) {
+        S("line", { x1: x(i), x2: x(i), y1: m.t + ph, y2: m.t + ph + 4, class: "tick" }, svg);
+        T(svg, x(i), H - 8, yr, "ax", "middle");
+        prev = yr;
+      }
+    });
+    const path = a => a.map((v, i) => (i ? "L" : "M") + x(i).toFixed(1) + "," + y(v).toFixed(1)).join("");
+    S("path", { d: path(pre), class: "ln ln-pre" }, svg);
+    S("path", { d: path(net), class: "ln ln-net" }, svg);
+    const pk = E.peak, tr = E.trough;
+    S("circle", { cx: x(pk), cy: y(net[pk]), r: 4, class: "dot-net" }, svg);
+    S("circle", { cx: x(tr), cy: y(net[tr]), r: 4, class: "dot-net" }, svg);
+    if (!narrow) {
+      // labels sit in clear space (below the line after the peak, above it before the low) on short leaders
+      const py = y(net[pk]), ly = y(net[tr]);
+      S("line", { x1: x(pk) + 3, y1: py + 5, x2: x(pk) + 22, y2: py + 40, class: "conn" }, svg);
+      T(svg, x(pk) + 26, py + 52, "Peak " + lakh(net[pk]) + ", " + fdate(E.dates[pk]), "lab", "start");
+      S("line", { x1: x(tr) - 3, y1: ly - 5, x2: x(tr) - 22, y2: ly - 72, class: "conn" }, svg);
+      T(svg, x(tr) - 26, ly - 78, "Low " + lakh(net[tr]) + ", " + fdate(E.dates[tr]), "lab", "end");
+      [[pre, "Before costs"], [net, "After costs"]].forEach(function (s) {
+        const yy = y(s[0][n - 1]);
+        T(svg, m.l + pw + 10, yy - 3, s[1], "lab", "start");
+        T(svg, m.l + pw + 10, yy + 13, lakh(s[0][n - 1]), "val", "start");
+      });
+    }
+    const cross = S("line", { y1: m.t, y2: m.t + ph, class: "cross", visibility: "hidden" }, svg);
+    const d2 = S("circle", { r: 4, class: "dot-pre", visibility: "hidden" }, svg);
+    const d1 = S("circle", { r: 4, class: "dot-net", visibility: "hidden" }, svg);
+    let cur = n - 1;
+    function show(i, cx, cy) {
+      cur = i;
+      const X = x(i);
+      cross.setAttribute("x1", X); cross.setAttribute("x2", X);
+      d1.setAttribute("cx", X); d1.setAttribute("cy", y(net[i]));
+      d2.setAttribute("cx", X); d2.setAttribute("cy", y(pre[i]));
+      [cross, d1, d2].forEach(el => el.setAttribute("visibility", "visible"));
+      tipShow(cx, cy, [[fdate(E.dates[i]), "", ""], [inr(net[i]), "after costs", "k-net"], [inr(pre[i]), "before costs", "k-pre"]]);
+    }
+    function hide() { [cross, d1, d2].forEach(el => el.setAttribute("visibility", "hidden")); tipHide(); }
+    const hit = S("rect", { x: m.l, y: m.t, width: pw, height: ph, class: "hit", "pointer-events": "all" }, svg);
+    hit.addEventListener("pointermove", function (ev) {
+      const r = svg.getBoundingClientRect();
+      const i = Math.max(0, Math.min(n - 1, Math.round((ev.clientX - r.left - m.l) / pw * (n - 1))));
+      show(i, ev.clientX, ev.clientY);
+    });
+    hit.addEventListener("pointerleave", hide);
+    svg.addEventListener("keydown", function (ev) {
+      if (ev.key !== "ArrowLeft" && ev.key !== "ArrowRight") return;
+      ev.preventDefault();
+      const st = ev.shiftKey ? 20 : 1;
+      cur = Math.max(0, Math.min(n - 1, cur + (ev.key === "ArrowLeft" ? -st : st)));
+      const r = svg.getBoundingClientRect();
+      show(cur, r.left + x(cur), r.top + y(net[cur]));
+    });
+    svg.addEventListener("focus", function () { const r = svg.getBoundingClientRect(); show(cur, r.left + x(cur), r.top + y(net[cur])); });
+    svg.addEventListener("blur", hide);
+  }
+
+  // From the edge before costs to the result: a horizontal bridge
+  function bridge(host) {
+    const W = host.clientWidth, narrow = W < 620;
+    const rowH = 58, m = { l: narrow ? 92 : 118, r: 14, t: 6, b: 28 };
+    const H = m.t + D.bridge.length * rowH + m.b;
+    const svg = svgFor(host, W, H, "Before costs the trades made " + lakh(D.bridge[0][1], true) + "; slippage and charges took the result to " + lakh(D.bridge[3][1]));
+    let run = 0;
+    const segs = D.bridge.map(function (b, k) {
+      let a, z;
+      if (k === D.bridge.length - 1) { a = 0; z = b[1]; } else { a = run; z = run + b[1]; run = z; }
+      return { lab: b[0], v: b[1], a: a, z: z };
+    });
+    const ext = [0];
+    segs.forEach(s => { ext.push(s.a, s.z); });
+    const step = 2e5;
+    const lo = Math.floor(Math.min.apply(null, ext) / step) * step, hi = Math.ceil(Math.max.apply(null, ext) / step) * step;
+    const pw = W - m.l - m.r, x = v => m.l + pw * (v - lo) / (hi - lo);
+    for (let v = lo; v <= hi + 1; v += step) {
+      S("line", { x1: x(v), x2: x(v), y1: m.t, y2: H - m.b, class: Math.abs(v) < 1 ? "base" : "grid" }, svg);
+      T(svg, x(v), H - 8, Math.abs(v) < 1 ? "0" : (v > 0 ? "+" : MINUS) + RS + Math.abs(v / 1e5) + "L", "ax", "middle");
+    }
+    const bh = 24;
+    segs.forEach(function (s, k) {
+      const top = m.t + k * rowH + 22, x0 = x(Math.min(s.a, s.z)), x1 = x(Math.max(s.a, s.z));
+      const last = k === segs.length - 1;
+      T(svg, m.l - 12, top + bh / 2 + 4, s.lab, last ? "lab strong" : "lab", "end");
+      const bar = S("rect", { x: x0, y: top, width: Math.max(2, x1 - x0), height: bh, rx: 3, class: s.v >= 0 ? "bar-pos" : "bar-neg" }, svg);
+      const tipX = s.v >= 0 ? x1 : x0;
+      T(svg, tipX, top - 6, lakh(s.v, true), "val", s.v >= 0 ? "end" : "start");
+      if (k < segs.length - 2) S("line", { x1: x(s.z), x2: x(s.z), y1: top + bh, y2: top + rowH, class: "conn" }, svg);
+      const what = last ? "net result after costs" : (k === 0 ? "the trades before any cost" : (s.lab === "Slippage" ? "1 bp a side on market and stop fills" : "Angel One charges, about " + RS + "402 a trade"));
+      bar.addEventListener("pointermove", ev => tipShow(ev.clientX, ev.clientY, [[inr(s.v, true), s.lab, s.v >= 0 ? "k-pos" : "k-neg"], [what, "", ""]]));
+      bar.addEventListener("pointerleave", tipHide);
+    });
+  }
+
+  // One session: candles, the opening range and the trade's levels
+  function day(host) {
+    const W = host.clientWidth, narrow = W < 620, H = narrow ? 300 : 360;
+    const m = { l: 52, r: narrow ? 10 : 150, t: 16, b: 30 };
+    const C = D.day.candles, tr = D.day.trade, raw = D.day.or_raw, cl = D.day.or_clean;
+    const lows = C.map(c => c[3]).concat([raw[0], tr.target]), highs = C.map(c => c[2]).concat([raw[1], tr.stop]);
+    const lo = Math.min.apply(null, lows) - 0.3, hi = Math.max.apply(null, highs) + 0.5;
+    const pw = W - m.l - m.r, ph = H - m.t - m.b, slot = pw / C.length;
+    const svg = svgFor(host, W, H, "Five-minute candles of " + fdate(D.day.date) + " with the opening range, the short entry, its stop and its target");
+    const xl = k => m.l + slot * k, xc = k => m.l + slot * (k + 0.5), y = v => m.t + ph * (hi - v) / (hi - lo);
+    for (let v = Math.ceil(lo); v <= hi; v += 1) {
+      S("line", { x1: m.l, x2: m.l + pw, y1: y(v), y2: y(v), class: "grid" }, svg);
+      T(svg, m.l - 8, y(v) + 4, RS + v.toFixed(0), "ax", "end");
+    }
+    C.forEach(function (c, k) {
+      if (c[0].slice(3) === "00" || c[0].slice(3) === "30" || (k === 0)) {
+        S("line", { x1: xl(k), x2: xl(k), y1: m.t + ph, y2: m.t + ph + 4, class: "tick" }, svg);
+        T(svg, xl(k), H - 8, c[0], "ax mono", "middle");
+      }
+    });
+    const k930 = C.findIndex(c => c[0] === "09:30"), kx = C.findIndex(c => c[0] === tr.exit_candle);
+    S("rect", { x: xl(0), y: y(raw[1]), width: xl(k930) - xl(0), height: y(raw[0]) - y(raw[1]), class: "band-raw" }, svg);
+    S("rect", { x: xl(0), y: y(cl[1]), width: xl(k930) - xl(0), height: y(cl[0]) - y(cl[1]), class: "band-clean" }, svg);
+    const lv = [[tr.stop, "lv-stop", "Stop " + tr.stop.toFixed(2)], [tr.trigger, "lv-trig", "Sell-stop " + tr.trigger.toFixed(2)],
+                [tr.target, "lv-tgt", "Target " + tr.target.toFixed(2)]];
+    lv.forEach(l => S("line", { x1: xl(k930), x2: xl(kx + 1), y1: y(l[0]), y2: y(l[0]), class: l[1] }, svg));
+    const bw = Math.max(3, Math.min(12, slot * 0.58));
+    C.forEach(function (c, k) {
+      const o = c[1], h = c[2], l = c[3], z = c[4];
+      S("line", { x1: xc(k), x2: xc(k), y1: y(h), y2: y(l), class: "wick" }, svg);
+      S("rect", { x: xc(k) - bw / 2, y: y(Math.max(o, z)), width: bw, height: Math.max(1, Math.abs(y(o) - y(z))), class: z >= o ? "c-up" : "c-dn" }, svg);
+    });
+    S("circle", { cx: xc(k930), cy: y(tr.entry), r: 4.5, class: "dot-entry" }, svg);
+    S("circle", { cx: xc(kx), cy: y(tr.target), r: 4.5, class: "dot-exit" }, svg);
+    if (!narrow) {
+      lv.forEach(function (l) { T(svg, m.l + pw + 12, y(l[0]) + 4, l[2], "lab", "start"); });
+      T(svg, xl(0), y(raw[1]) - 7, "Raw range " + raw[0].toFixed(2) + " to " + raw[1].toFixed(2), "note", "start");
+    }
+    C.forEach(function (c, k) {
+      const r = S("rect", { x: xl(k), y: m.t, width: slot, height: ph, class: "hit", "pointer-events": "all" }, svg);
+      r.addEventListener("pointermove", ev => tipShow(ev.clientX, ev.clientY, [[c[0] + " candle", "", ""],
+        ["O " + c[1].toFixed(2) + "   H " + c[2].toFixed(2), "", ""], ["L " + c[3].toFixed(2) + "   C " + c[4].toFixed(2), "", ""]]));
+      r.addEventListener("pointerleave", tipHide);
+    });
+  }
+
+  const charts = [["eq-chart", equity], ["bridge-chart", bridge], ["day-chart", day]];
+  let lastW = 0;
+  function draw() {
+    const w = document.querySelector(".page").clientWidth;
+    if (w === lastW) return;
+    lastW = w;
+    charts.forEach(function (c) {
+      const host = document.getElementById(c[0]);
+      if (!host) return;
+      host.replaceChildren();
+      try { c[1](host); } catch (err) { host.textContent = "This chart could not be drawn: " + err.message; }
+    });
+  }
+  draw();
+  if ("ResizeObserver" in window) {
+    let t;
+    new ResizeObserver(function () { clearTimeout(t); t = setTimeout(draw, 80); }).observe(document.querySelector(".page"));
+  }
+})();
+</script>

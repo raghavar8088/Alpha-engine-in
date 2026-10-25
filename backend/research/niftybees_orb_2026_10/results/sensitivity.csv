@@ -1,0 +1,15 @@
+run,what,trades,win_rate,net_pnl,return_pct,profit_factor,max_dd,max_dd_pct_of_capital,avg_r_net,avg_r_gross,t_stat
+primary,"Primary rules, as above",1205,40.7,-548885.0,-54.9,0.773,605212.0,60.5,-0.159,-0.034,-3.7
+1m_inside_candles,"Primary, but the path inside each 5-min candle read from its 1-min candles",1205,40.8,-552890.0,-55.3,0.772,609136.0,60.9,-0.159,-0.035,-3.73
+best_case_inside_candles,"Primary, but ambiguous candles resolved in the trade's favour (bound)",1205,40.8,-544647.0,-54.5,0.775,605176.0,60.5,-0.157,-0.033,-3.67
+raw_opening_range,"Primary, but the opening range from the raw prints (no cleaning)",870,45.1,-406417.0,-40.6,0.786,505823.0,50.6,-0.046,0.006,-2.71
+opening_band_0.5pct,"Primary, but opening prints cleaned with a 0.5% band instead of 0.2%",1115,43.9,-410757.0,-41.1,0.821,489305.0,48.9,-0.109,-0.018,-2.66
+candle_close_entry,"Entry on a 5-min close beyond the range, filled at the next candle's open",1181,43.2,-439083.0,-43.9,0.814,518481.0,51.8,-0.109,0.002,-2.88
+stop_and_reverse,"After a stop-loss, the opposite breakout is taken once (max 2 trades a day)",1706,40.0,-815112.0,-81.5,0.755,866767.0,86.7,-0.165,-0.036,-4.81
+slippage_0bp,No slippage,1205,42.7,-289922.0,-29.0,0.871,357440.0,35.7,-0.097,0.033,-1.98
+slippage_2bp,2 bp slippage a side,1205,38.8,-742680.0,-74.3,0.712,792652.0,79.3,-0.198,-0.078,-4.91
+slippage_3bp,3 bp slippage a side,1205,37.5,-1002344.0,-100.2,0.634,1044260.0,104.4,-0.25,-0.134,-6.6
+no_costs_no_slippage,No charges and no slippage (the raw price edge),1205,45.1,194461.0,19.4,1.098,110900.0,11.1,0.033,0.033,1.33
+target_fills_on_touch,Target fills when price touches it (no tick through),1205,40.9,-537432.0,-53.7,0.778,593759.0,59.4,-0.153,-0.028,-3.62
+risk_1pct_max_5x,"Size: lose ₹10,000 (1%) at the stop, notional capped at 5x (₹50 lakh)",1205,40.7,-1700560.0,-170.1,0.744,1849499.0,184.9,-0.149,-0.034,-4.53
+rs1_lakh_account,₹1 lakh a trade on a ₹1 lakh account (brokerage weighs more),1205,37.8,-106012.0,-106.0,0.612,109040.0,109.0,-0.291,-0.034,-7.16

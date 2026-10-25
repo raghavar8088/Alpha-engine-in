@@ -1,0 +1,158 @@
+{
+ "yahoo_bars": 4496,
+ "common_bars": 4496,
+ "days": [
+  "2026-07-29",
+  "2026-10-23"
+ ],
+ "sessions": 60,
+ "09:30-15:10 (the bars the strategy trades)": {
+  "bars": 4138,
+  "o_exact_pct": 61.2,
+  "h_exact_pct": 76.8,
+  "l_exact_pct": 57.4,
+  "c_exact_pct": 65.1,
+  "o_within_1_tick_pct": 74.4,
+  "h_within_1_tick_pct": 89.0,
+  "l_within_1_tick_pct": 71.7,
+  "c_within_1_tick_pct": 75.8,
+  "max_abs_diff_rs": 0.51,
+  "angel_high_above_yahoo_pct": 23.0,
+  "angel_high_below_yahoo_pct": 0.3,
+  "angel_low_below_yahoo_pct": 42.5,
+  "angel_low_above_yahoo_pct": 0.1,
+  "volume_ratio_yahoo_to_angel_median": 1.0
+ },
+ "09:15 bar": {
+  "bars": 60,
+  "o_exact_pct": 0.0,
+  "h_exact_pct": 1.7,
+  "l_exact_pct": 5.0,
+  "c_exact_pct": 28.3,
+  "o_within_1_tick_pct": 0.0,
+  "h_within_1_tick_pct": 3.3,
+  "l_within_1_tick_pct": 10.0,
+  "c_within_1_tick_pct": 46.7,
+  "max_abs_diff_rs": 7.89,
+  "angel_high_above_yahoo_pct": 98.3,
+  "angel_high_below_yahoo_pct": 0.0,
+  "angel_low_below_yahoo_pct": 95.0,
+  "angel_low_above_yahoo_pct": 0.0,
+  "volume_ratio_yahoo_to_angel_median": 0.0
+ },
+ "09:20 and 09:25 bars": {
+  "bars": 120,
+  "o_exact_pct": 37.5,
+  "h_exact_pct": 55.0,
+  "l_exact_pct": 27.5,
+  "c_exact_pct": 49.2,
+  "o_within_1_tick_pct": 48.3,
+  "h_within_1_tick_pct": 78.3,
+  "l_within_1_tick_pct": 42.5,
+  "c_within_1_tick_pct": 65.0,
+  "max_abs_diff_rs": 0.27,
+  "angel_high_above_yahoo_pct": 45.0,
+  "angel_high_below_yahoo_pct": 0.0,
+  "angel_low_below_yahoo_pct": 72.5,
+  "angel_low_above_yahoo_pct": 0.0,
+  "volume_ratio_yahoo_to_angel_median": 1.0
+ },
+ "opening_range": {
+  "sessions": 60,
+  "yahoo_equals_angel_raw": 0,
+  "yahoo_equals_clean": 1,
+  "same_0915_open": 0,
+  "median_width_bp": {
+   "yahoo": 27.2,
+   "angel_raw": 83.5,
+   "clean": 34.2
+  },
+  "examples": [
+   {
+    "date": "2026-10-16",
+    "yahoo": [
+     261.5,
+     262.73
+    ],
+    "angel_raw": [
+     261.5,
+     263.29
+    ],
+    "clean": [
+     261.5,
+     263.29
+    ],
+    "yahoo_0915_open": 262.69,
+    "angel_0915_open": 261.51
+   },
+   {
+    "date": "2026-10-19",
+    "yahoo": [
+     261.94,
+     264.2
+    ],
+    "angel_raw": [
+     261.41,
+     264.69
+    ],
+    "clean": [
+     261.72,
+     264.35
+    ],
+    "yahoo_0915_open": 263.89,
+    "angel_0915_open": 264.69
+   },
+   {
+    "date": "2026-10-21",
+    "yahoo": [
+     262.29,
+     263.23
+    ],
+    "angel_raw": [
+     261.8,
+     266.42
+    ],
+    "clean": [
+     261.8,
+     263.24
+    ],
+    "yahoo_0915_open": 262.53,
+    "angel_0915_open": 266.42
+   },
+   {
+    "date": "2026-10-22",
+    "yahoo": [
+     257.8,
+     258.6
+    ],
+    "angel_raw": [
+     257.53,
+     265.5
+    ],
+    "clean": [
+     257.53,
+     258.6
+    ],
+    "yahoo_0915_open": 258.27,
+    "angel_0915_open": 264.76
+   },
+   {
+    "date": "2026-10-23",
+    "yahoo": [
+     259.37,
+     260.25
+    ],
+    "angel_raw": [
+     258.74,
+     260.94
+    ],
+    "clean": [
+     259.23,
+     260.33
+    ],
+    "yahoo_0915_open": 260.18,
+    "angel_0915_open": 260.94
+   }
+  ]
+ }
+}

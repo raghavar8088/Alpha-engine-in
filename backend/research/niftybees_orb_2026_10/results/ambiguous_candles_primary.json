@@ -1,0 +1,68 @@
+{
+ "summary": {
+  "ambiguous_candles": 8,
+  "by_kind": {
+   "entry candle also reached the stop (or the target)": 2,
+   "both breakouts in one candle": 6
+  },
+  "ambiguous_trades": 8,
+  "same_trade_days_unambiguous_matching_1m": 1196,
+  "ambiguous_trades_resolved_by_1m": {
+   "5m stop -> 1m eod": 1,
+   "5m stop -> 1m stop": 6,
+   "5m stop -> 1m stop (other side)": 1
+  },
+  "net_change_if_1m_used_on_ambiguous_trades": 4207.95,
+  "candles_still_ambiguous_at_1m": 0
+ },
+ "candles": [
+  {
+   "date": "2021-12-28",
+   "bar": 15,
+   "chosen": "long>stop",
+   "other": "long"
+  },
+  {
+   "date": "2022-03-31",
+   "bar": 15,
+   "chosen": "short>stop",
+   "other": "long>stop"
+  },
+  {
+   "date": "2023-03-23",
+   "bar": 15,
+   "chosen": "short>stop",
+   "other": "long>stop"
+  },
+  {
+   "date": "2023-06-01",
+   "bar": 15,
+   "chosen": "long>stop",
+   "other": "long"
+  },
+  {
+   "date": "2024-03-12",
+   "bar": 15,
+   "chosen": "short>stop",
+   "other": "long>stop"
+  },
+  {
+   "date": "2025-06-16",
+   "bar": 15,
+   "chosen": "short>stop",
+   "other": "long>stop"
+  },
+  {
+   "date": "2025-08-01",
+   "bar": 15,
+   "chosen": "short>stop",
+   "other": "long>stop"
+  },
+  {
+   "date": "2026-01-06",
+   "bar": 15,
+   "chosen": "short>stop",
+   "other": "long>stop"
+  }
+ ]
+}

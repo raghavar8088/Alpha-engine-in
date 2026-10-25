@@ -1,0 +1,560 @@
+<title>NIFTYBEES Opening-Range Breakout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: one 72rem frame; prose holds a 46rem measure, charts and tables take the full frame. */
+:root {
+  --paper: #f4f5f7;
+  --panel: #fdfdfe;
+  --ink: #131824;
+  --ink-2: #48505f;
+  --muted: #687081;
+  --rule: #dde1e7;
+  --axis: #b9bfca;
+  --gain: #2a78d6;
+  --loss: #e34948;
+  --context: #7a8291;
+  --wash-gain: rgba(42, 120, 214, 0.13);
+  --wash-raw: rgba(122, 130, 145, 0.16);
+  --hl: rgba(42, 120, 214, 0.07);
+  --accent: #1e4f9a;
+  --font-display: "IBM Plex Sans Condensed", "Roboto Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "Cascadia Mono", "SF Mono", Consolas, monospace;
+  --s-1: 0.8125rem;
+  --s0: 1rem;
+  --s1: 1.1875rem;
+  --s2: 1.5rem;
+  --s3: clamp(2rem, 1.4rem + 2.6vw, 2.875rem);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0f1217; --panel: #161a21; --ink: #e9ecf1; --ink-2: #b5bcc8; --muted: #8d95a3;
+    --rule: #272d36; --axis: #3d444f; --gain: #3987e5; --loss: #e66767; --context: #7d8592;
+    --wash-gain: rgba(57, 135, 229, 0.20); --wash-raw: rgba(125, 133, 146, 0.20); --hl: rgba(57, 135, 229, 0.10);
+    --accent: #8fb6f0; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0f1217; --panel: #161a21; --ink: #e9ecf1; --ink-2: #b5bcc8; --muted: #8d95a3;
+  --rule: #272d36; --axis: #3d444f; --gain: #3987e5; --loss: #e66767; --context: #7d8592;
+  --wash-gain: rgba(57, 135, 229, 0.20); --wash-raw: rgba(125, 133, 146, 0.20); --hl: rgba(57, 135, 229, 0.10);
+  --accent: #8fb6f0; color-scheme: dark;
+}
+body { background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: var(--s0); line-height: 1.55; }
+.page { max-width: 72rem; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); padding-block: 40px 72px; display: grid; gap: 56px; }
+.prose { max-width: 46rem; }
+.prose p { margin: 0 0 0.9em; }
+.prose p:last-child { margin-bottom: 0; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: -0.005em; }
+h1 { font-size: var(--s3); font-weight: 700; line-height: 1.05; }
+h2 { font-size: var(--s2); font-weight: 600; line-height: 1.15; }
+h3 { font-size: var(--s1); font-weight: 600; }
+section { display: grid; gap: 20px; min-width: 0; }
+.eyebrow { font-family: var(--font-data); font-size: var(--s-1); color: var(--muted); letter-spacing: 0.02em; margin: 0; }
+.masthead { display: grid; gap: 18px; }
+.dek { font-size: var(--s1); color: var(--ink-2); max-width: 46rem; margin: 0; }
+.verdict { font-size: var(--s1); max-width: 46rem; margin: 0; }
+.verdict strong { font-weight: 600; }
+code, .mono { font-family: var(--font-data); font-size: 0.86em; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--gain); outline-offset: 3px; border-radius: 2px; }
+
+.kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0 24px; margin: 8px 0 0; }
+.kpi { border-top: 1px solid var(--axis); padding-top: 12px; min-width: 0; }
+.kpi dt { font-size: var(--s-1); color: var(--muted); letter-spacing: 0.01em; }
+.kpi dd { margin: 4px 0 0; display: grid; gap: 4px; }
+.kv { font-family: var(--font-display); font-weight: 600; font-size: 1.625rem; line-height: 1.1; }
+.kn { font-size: var(--s-1); color: var(--ink-2); line-height: 1.35; }
+@media (max-width: 1000px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 24px; } }
+@media (max-width: 560px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kv { font-size: 1.375rem; } }
+
+figure { margin: 0; background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 16px 16px 12px; min-width: 0; display: grid; gap: 10px; }
+figcaption { font-size: var(--s-1); color: var(--ink-2); max-width: 52rem; }
+.chart { width: 100%; min-height: 120px; }
+.chart svg { display: block; overflow: visible; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: var(--s-1); color: var(--ink-2); margin: 0; padding: 0; list-style: none; }
+.legend li { display: inline-flex; align-items: center; gap: 7px; }
+.key { display: inline-block; width: 16px; height: 0; border-top: 2px solid; }
+.key.net, .key.tgt { border-color: var(--gain); }
+.key.pre { border-color: var(--context); }
+.key.stop { border-color: var(--loss); }
+.key.trig { border-color: var(--ink-2); border-top-width: 1px; }
+.key.box { width: 14px; height: 10px; border: 0; border-radius: 2px; }
+.key.box.raw { background: var(--wash-raw); }
+.key.box.clean { background: var(--wash-gain); }
+.key.dot { width: 9px; height: 9px; border: 0; border-radius: 50%; }
+.key.dot.entry { background: var(--ink); }
+.key.dot.exit { background: var(--gain); }
+
+svg text { font-family: var(--font-body); font-size: 12px; fill: var(--muted); }
+svg .ax { fill: var(--muted); font-variant-numeric: tabular-nums; }
+svg .mono { font-family: var(--font-data); font-size: 11px; }
+svg .lab { fill: var(--ink-2); }
+svg .lab.strong { fill: var(--ink); font-weight: 600; }
+svg .val { fill: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+svg .note { fill: var(--ink-2); paint-order: stroke; stroke: var(--panel); stroke-width: 4px; stroke-linejoin: round; }
+svg .grid { stroke: var(--rule); stroke-width: 1; }
+svg .base { stroke: var(--axis); stroke-width: 1; }
+svg .tick { stroke: var(--axis); stroke-width: 1; }
+svg .ln { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+svg .ln-net { stroke: var(--gain); }
+svg .ln-pre { stroke: var(--context); }
+svg .dot-net { fill: var(--gain); stroke: var(--panel); stroke-width: 2; }
+svg .dot-pre { fill: var(--context); stroke: var(--panel); stroke-width: 2; }
+svg .cross { stroke: var(--axis); stroke-width: 1; }
+svg .hit { fill: transparent; }
+svg .bar-pos { fill: var(--gain); }
+svg .bar-neg { fill: var(--loss); }
+svg .bar-pos:hover, svg .bar-neg:hover { opacity: 0.82; }
+svg .conn { stroke: var(--axis); stroke-width: 1; }
+svg .wick { stroke: var(--ink-2); stroke-width: 1; }
+svg .c-up { fill: var(--panel); stroke: var(--ink-2); stroke-width: 1; }
+svg .c-dn { fill: var(--ink-2); stroke: var(--ink-2); stroke-width: 1; }
+svg .band-raw { fill: var(--wash-raw); }
+svg .band-clean { fill: var(--wash-gain); }
+svg .lv-stop { stroke: var(--loss); stroke-width: 1.5; }
+svg .lv-tgt { stroke: var(--gain); stroke-width: 1.5; }
+svg .lv-trig { stroke: var(--ink-2); stroke-width: 1; }
+svg .dot-entry { fill: var(--ink); stroke: var(--panel); stroke-width: 2; }
+svg .dot-exit { fill: var(--gain); stroke: var(--panel); stroke-width: 2; }
+
+.tablewrap { overflow-x: auto; min-width: 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+th, td { padding: 8px 10px; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; vertical-align: baseline; }
+thead th { font-weight: 500; color: var(--muted); font-size: var(--s-1); border-bottom-color: var(--axis); vertical-align: bottom; white-space: normal; }
+tbody th { text-align: left; font-weight: 500; }
+th:first-child, td:first-child { padding-left: 0; }
+th:last-child, td:last-child { padding-right: 0; }
+td.strong { font-weight: 600; }
+tr.total th, tr.total td { font-weight: 600; border-top: 1px solid var(--axis); }
+tr.primary th, tr.primary td { background: var(--hl); }
+.sub { display: block; font-size: 0.75rem; color: var(--muted); font-weight: 400; }
+.flag { display: block; font-size: 0.75rem; color: var(--loss); font-weight: 500; }
+.wrapcol { white-space: normal; text-align: left; min-width: 16rem; }
+td.barcol { width: 120px; padding-inline: 6px; }
+.ibar { position: relative; display: block; width: 112px; height: 10px; }
+.ibar::before { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; border-left: 1px solid var(--axis); }
+.ibar .neg, .ibar .pos { position: absolute; top: 0; height: 100%; width: var(--w); }
+.ibar .neg { right: 50%; background: var(--loss); border-radius: 3px 0 0 3px; }
+.ibar .pos { left: 50%; background: var(--gain); border-radius: 0 3px 3px 0; }
+
+.rules { display: grid; grid-template-columns: minmax(9rem, 12rem) minmax(0, 1fr); margin: 0; max-width: 60rem; }
+.rule { display: contents; }
+.rule dt, .rule dd { padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.rule dt { font-weight: 600; padding-right: 20px; }
+.rule dd { margin: 0; color: var(--ink-2); }
+@media (max-width: 640px) {
+  .rules { grid-template-columns: minmax(0, 1fr); }
+  .rule dt { border-bottom: 0; padding-bottom: 2px; }
+  .rule dd { padding-top: 0; }
+}
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; align-items: start; }
+@media (max-width: 860px) { .two { grid-template-columns: minmax(0, 1fr); } }
+details { border-top: 1px solid var(--rule); padding-top: 10px; }
+summary { cursor: pointer; color: var(--accent); font-size: var(--s-1); }
+details .tablewrap { margin-top: 10px; max-height: 420px; overflow: auto; }
+footer { border-top: 1px solid var(--axis); padding-top: 18px; font-size: var(--s-1); color: var(--ink-2); display: grid; gap: 10px; }
+footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+.tip { position: fixed; z-index: 10; pointer-events: none; background: var(--ink); color: var(--paper); font-size: 12px; line-height: 1.4; padding: 8px 10px; border-radius: 4px; display: grid; gap: 3px; max-width: 280px; }
+.tip .tr { display: flex; align-items: center; gap: 7px; }
+.tip .tr span { opacity: 0.8; }
+.tip .tk { display: inline-block; width: 12px; height: 0; border-top: 2px solid; opacity: 1; }
+.tip .tk.k-net, .tip .tk.k-pos { border-color: var(--gain); }
+.tip .tk.k-pre { border-color: var(--context); }
+.tip .tk.k-neg { border-color: var(--loss); }
+@media (prefers-reduced-motion: no-preference) { svg .bar-pos, svg .bar-neg { transition: opacity 120ms; } }
+</style>
+
+<div class="page">
+  <header class="masthead">
+    <p class="eyebrow">{{EYEBROW}}</p>
+    <h1>NIFTYBEES Opening-Range Breakout</h1>
+    <p class="dek">The first 15 minutes set a range. A break above it buys and a break below it sells, with the stop at the other side of the range and the target at twice the risk. One trade a day, out by 15:15, with Angel One's charges and slippage.</p>
+    <p class="verdict">{{VERDICT}}</p>
+    <dl class="kpis">
+{{KPIS}}
+    </dl>
+  </header>
+
+  <section id="equity" aria-labelledby="h-equity">
+    <h2 id="h-equity">Account value</h2>
+    <figure>
+      <ul class="legend">
+        <li><span class="key net"></span>After costs: the result</li>
+        <li><span class="key pre"></span>Before costs: the same trades with no charges or slippage</li>
+      </ul>
+      <div class="chart" id="eq-chart"></div>
+      <figcaption>{{EQ_CAPTION}} Hover or use the arrow keys for any day's values.</figcaption>
+    </figure>
+    <details>
+      <summary>Account value at each month end</summary>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Month</th><th>After costs</th><th>Before costs</th></tr></thead>
+          <tbody>
+{{ME_ROWS}}
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+
+  <section id="years" aria-labelledby="h-years">
+    <h2 id="h-years">Year by year</h2>
+    <div class="prose"><p>Calendar years on the ₹10 lakh account. Before costs means the same trades at the trigger, stop and 15:15 prices, with no slippage and no charges. Exits are counted as target / stop-loss / 15:15 close.</p></div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Year</th><th>Sessions</th><th>Trades</th><th>Win rate</th><th>Exits T / S / 15:15</th><th>Before costs</th><th>Costs</th><th></th><th>Net P&amp;L</th><th>Return</th><th>Profit factor</th><th>Max drawdown</th></tr></thead>
+        <tbody>
+{{YEAR_ROWS}}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="rules" aria-labelledby="h-rules">
+    <h2 id="h-rules">The rules as tested</h2>
+    <div class="prose"><p>Your rules, plus the execution rules this test had to define. All of them were fixed before any result was seen.</p></div>
+    <dl class="rules">
+{{RULES}}
+    </dl>
+    <figure>
+      <ul class="legend">
+        <li><span class="key box raw"></span>Raw opening range</li>
+        <li><span class="key box clean"></span>Cleaned opening range</li>
+        <li><span class="key trig"></span>Sell-stop</li>
+        <li><span class="key stop"></span>Stop-loss</li>
+        <li><span class="key tgt"></span>Target</li>
+        <li><span class="key dot entry"></span>Entry</li>
+        <li><span class="key dot exit"></span>Exit</li>
+      </ul>
+      <div class="chart" id="day-chart"></div>
+      <figcaption>{{DAY_CAPTION}}</figcaption>
+    </figure>
+  </section>
+
+  <section id="costs" aria-labelledby="h-costs">
+    <h2 id="h-costs">Where the money went</h2>
+    <figure>
+      <div class="chart" id="bridge-chart"></div>
+      <figcaption>{{BRIDGE_NOTE}}</figcaption>
+    </figure>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>{{COST_HEAD}}</th><th>₹</th><th>bp of ₹10 lakh</th></tr></thead>
+        <tbody>
+{{COST_ROWS}}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="candles" aria-labelledby="h-candles">
+    <h2 id="h-candles">Candles that touch both the stop and the target</h2>
+    <div class="prose">
+{{AMB}}
+    </div>
+  </section>
+
+  <section id="data" aria-labelledby="h-data">
+    <h2 id="h-data">Data and gaps</h2>
+    <div class="prose">
+{{DATA}}
+    </div>
+    <h3>Sessions not used</h3>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Date</th><th>Present</th><th class="wrapcol">Why it is not used</th></tr></thead>
+        <tbody>
+{{EXCLUDED}}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="variants" aria-labelledby="h-variants">
+    <h2 id="h-variants">If one rule changes</h2>
+    <div class="prose"><p>Each row changes one rule of the primary test and keeps the rest. All of them were fixed before the first run, and none was chosen for its result. R is a trade's risk: the distance from the entry fill to the stop.</p></div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th class="wrapcol">Run</th><th>Trades</th><th>Win rate</th><th></th><th>Net P&amp;L</th><th>Profit factor</th><th>Max drawdown</th><th>Net R a trade</th><th>R before costs</th></tr></thead>
+        <tbody>
+{{SENS_ROWS}}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="profile" aria-labelledby="h-profile">
+    <h2 id="h-profile">Trade profile</h2>
+    <div class="prose"><p>Descriptive cuts of the primary trades. Nothing was tuned on them, and choosing a filter from them now would fit it to the same five years it would be judged on. In the first table, R before costs is after slippage but before charges.</p></div>
+    <div class="two">
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Stop distance, bp</th><th>Trades</th><th>Win rate</th><th>R before charges</th><th>Net R</th><th>Net P&amp;L</th><th>Reached target</th></tr></thead>
+          <tbody>
+{{Q_ROWS}}
+          </tbody>
+        </table>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Entry time</th><th>Trades</th><th>Win rate</th><th>Net R</th><th>Net P&amp;L</th></tr></thead>
+          <tbody>
+{{T_ROWS}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Code and outputs are in <code>backend/research/niftybees_orb_2026_10/</code> of the app repository; <code>orb_report.py</code> rebuilds this page from them.</p>
+    <ul>
+{{FILES}}
+    </ul>
+  </footer>
+</div>
+<div class="tip" id="tip" role="status" hidden></div>
+
+<script>
+(function () {
+  "use strict";
+  const D = {{DATA_JSON}};
+  const NS = "http://www.w3.org/2000/svg";
+  const tip = document.getElementById("tip");
+  const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const MINUS = "−", RS = "₹";
+
+  function group(n) {
+    const s = String(Math.abs(Math.round(n)));
+    if (s.length <= 3) return s;
+    let head = s.slice(0, -3);
+    const parts = [];
+    while (head.length > 2) { parts.unshift(head.slice(-2)); head = head.slice(0, -2); }
+    if (head) parts.unshift(head);
+    return parts.join(",") + "," + s.slice(-3);
+  }
+  const inr = (v, plus) => (Math.round(v) < 0 ? MINUS : (plus && Math.round(v) > 0 ? "+" : "")) + RS + group(v);
+  const lakh = (v, plus) => (v < 0 ? MINUS : (plus && v > 0 ? "+" : "")) + RS + (Math.abs(v) / 1e5).toFixed(2) + " lakh";
+  const fdate = iso => { const p = iso.split("-"); return (+p[2]) + " " + MON[+p[1] - 1] + " " + p[0]; };
+
+  function S(tag, attrs, parent) {
+    const el = document.createElementNS(NS, tag);
+    for (const k in attrs) el.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(el);
+    return el;
+  }
+  function T(parent, x, y, s, cls, anchor) {
+    const t = S("text", { x: x, y: y, class: cls || "ax", "text-anchor": anchor || "start" }, parent);
+    t.textContent = s;
+    return t;
+  }
+  function tipShow(cx, cy, rows) {
+    tip.replaceChildren();
+    rows.forEach(function (r) {
+      const row = document.createElement("div");
+      row.className = "tr";
+      if (r[2]) { const k = document.createElement("span"); k.className = "tk " + r[2]; row.appendChild(k); }
+      const v = document.createElement("strong");
+      v.textContent = r[0];
+      row.appendChild(v);
+      if (r[1]) { const l = document.createElement("span"); l.textContent = r[1]; row.appendChild(l); }
+      tip.appendChild(row);
+    });
+    tip.hidden = false;
+    const w = tip.offsetWidth, h = tip.offsetHeight, pad = 14;
+    let left = cx + pad, top = cy + pad;
+    if (left + w > window.innerWidth - 8) left = cx - w - pad;
+    if (top + h > window.innerHeight - 8) top = cy - h - pad;
+    tip.style.left = Math.max(8, left) + "px";
+    tip.style.top = Math.max(8, top) + "px";
+  }
+  function tipHide() { tip.hidden = true; }
+
+  function svgFor(host, W, H, label) {
+    return S("svg", { width: W, height: H, viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": label }, host);
+  }
+
+  // Account value: two lines on one rupee axis, crosshair readout
+  function equity(host) {
+    const W = host.clientWidth, narrow = W < 620, H = narrow ? 260 : 330;
+    const m = { l: 50, r: narrow ? 10 : 118, t: 18, b: 30 };
+    const E = D.eq, n = E.dates.length, net = E.net, pre = E.pre;
+    const svg = svgFor(host, W, H, "Account value after costs falls from 10 lakh to " + lakh(net[n - 1]) + "; before costs it ends at " + lakh(pre[n - 1]));
+    svg.setAttribute("tabindex", "0");
+    const all = net.concat(pre), step = 2e5;
+    const lo = Math.floor(Math.min.apply(null, all) / step) * step;
+    const hi = Math.ceil(Math.max.apply(null, all) / step) * step;
+    const pw = W - m.l - m.r, ph = H - m.t - m.b;
+    const x = i => m.l + pw * i / (n - 1);
+    const y = v => m.t + ph * (hi - v) / (hi - lo);
+    for (let v = lo; v <= hi + 1; v += step) {
+      S("line", { x1: m.l, x2: m.l + pw, y1: y(v), y2: y(v), class: Math.abs(v - E.cap) < 1 ? "base" : "grid" }, svg);
+      T(svg, m.l - 8, y(v) + 4, RS + (v / 1e5) + "L", "ax", "end");
+    }
+    let prev = E.dates[0].slice(0, 4);
+    E.dates.forEach(function (d, i) {
+      const yr = d.slice(0, 4);
+      if (yr !== prev) {
+        S("line", { x1: x(i), x2: x(i), y1: m.t + ph, y2: m.t + ph + 4, class: "tick" }, svg);
+        T(svg, x(i), H - 8, yr, "ax", "middle");
+        prev = yr;
+      }
+    });
+    const path = a => a.map((v, i) => (i ? "L" : "M") + x(i).toFixed(1) + "," + y(v).toFixed(1)).join("");
+    S("path", { d: path(pre), class: "ln ln-pre" }, svg);
+    S("path", { d: path(net), class: "ln ln-net" }, svg);
+    const pk = E.peak, tr = E.trough;
+    S("circle", { cx: x(pk), cy: y(net[pk]), r: 4, class: "dot-net" }, svg);
+    S("circle", { cx: x(tr), cy: y(net[tr]), r: 4, class: "dot-net" }, svg);
+    if (!narrow) {
+      // labels sit in clear space (below the line after the peak, above it before the low) on short leaders
+      const py = y(net[pk]), ly = y(net[tr]);
+      S("line", { x1: x(pk) + 3, y1: py + 5, x2: x(pk) + 22, y2: py + 40, class: "conn" }, svg);
+      T(svg, x(pk) + 26, py + 52, "Peak " + lakh(net[pk]) + ", " + fdate(E.dates[pk]), "lab", "start");
+      S("line", { x1: x(tr) - 3, y1: ly - 5, x2: x(tr) - 22, y2: ly - 72, class: "conn" }, svg);
+      T(svg, x(tr) - 26, ly - 78, "Low " + lakh(net[tr]) + ", " + fdate(E.dates[tr]), "lab", "end");
+      [[pre, "Before costs"], [net, "After costs"]].forEach(function (s) {
+        const yy = y(s[0][n - 1]);
+        T(svg, m.l + pw + 10, yy - 3, s[1], "lab", "start");
+        T(svg, m.l + pw + 10, yy + 13, lakh(s[0][n - 1]), "val", "start");
+      });
+    }
+    const cross = S("line", { y1: m.t, y2: m.t + ph, class: "cross", visibility: "hidden" }, svg);
+    const d2 = S("circle", { r: 4, class: "dot-pre", visibility: "hidden" }, svg);
+    const d1 = S("circle", { r: 4, class: "dot-net", visibility: "hidden" }, svg);
+    let cur = n - 1;
+    function show(i, cx, cy) {
+      cur = i;
+      const X = x(i);
+      cross.setAttribute("x1", X); cross.setAttribute("x2", X);
+      d1.setAttribute("cx", X); d1.setAttribute("cy", y(net[i]));
+      d2.setAttribute("cx", X); d2.setAttribute("cy", y(pre[i]));
+      [cross, d1, d2].forEach(el => el.setAttribute("visibility", "visible"));
+      tipShow(cx, cy, [[fdate(E.dates[i]), "", ""], [inr(net[i]), "after costs", "k-net"], [inr(pre[i]), "before costs", "k-pre"]]);
+    }
+    function hide() { [cross, d1, d2].forEach(el => el.setAttribute("visibility", "hidden")); tipHide(); }
+    const hit = S("rect", { x: m.l, y: m.t, width: pw, height: ph, class: "hit", "pointer-events": "all" }, svg);
+    hit.addEventListener("pointermove", function (ev) {
+      const r = svg.getBoundingClientRect();
+      const i = Math.max(0, Math.min(n - 1, Math.round((ev.clientX - r.left - m.l) / pw * (n - 1))));
+      show(i, ev.clientX, ev.clientY);
+    });
+    hit.addEventListener("pointerleave", hide);
+    svg.addEventListener("keydown", function (ev) {
+      if (ev.key !== "ArrowLeft" && ev.key !== "ArrowRight") return;
+      ev.preventDefault();
+      const st = ev.shiftKey ? 20 : 1;
+      cur = Math.max(0, Math.min(n - 1, cur + (ev.key === "ArrowLeft" ? -st : st)));
+      const r = svg.getBoundingClientRect();
+      show(cur, r.left + x(cur), r.top + y(net[cur]));
+    });
+    svg.addEventListener("focus", function () { const r = svg.getBoundingClientRect(); show(cur, r.left + x(cur), r.top + y(net[cur])); });
+    svg.addEventListener("blur", hide);
+  }
+
+  // From the edge before costs to the result: a horizontal bridge
+  function bridge(host) {
+    const W = host.clientWidth, narrow = W < 620;
+    const rowH = 58, m = { l: narrow ? 92 : 118, r: 14, t: 6, b: 28 };
+    const H = m.t + D.bridge.length * rowH + m.b;
+    const svg = svgFor(host, W, H, "Before costs the trades made " + lakh(D.bridge[0][1], true) + "; slippage and charges took the result to " + lakh(D.bridge[3][1]));
+    let run = 0;
+    const segs = D.bridge.map(function (b, k) {
+      let a, z;
+      if (k === D.bridge.length - 1) { a = 0; z = b[1]; } else { a = run; z = run + b[1]; run = z; }
+      return { lab: b[0], v: b[1], a: a, z: z };
+    });
+    const ext = [0];
+    segs.forEach(s => { ext.push(s.a, s.z); });
+    const step = 2e5;
+    const lo = Math.floor(Math.min.apply(null, ext) / step) * step, hi = Math.ceil(Math.max.apply(null, ext) / step) * step;
+    const pw = W - m.l - m.r, x = v => m.l + pw * (v - lo) / (hi - lo);
+    for (let v = lo; v <= hi + 1; v += step) {
+      S("line", { x1: x(v), x2: x(v), y1: m.t, y2: H - m.b, class: Math.abs(v) < 1 ? "base" : "grid" }, svg);
+      T(svg, x(v), H - 8, Math.abs(v) < 1 ? "0" : (v > 0 ? "+" : MINUS) + RS + Math.abs(v / 1e5) + "L", "ax", "middle");
+    }
+    const bh = 24;
+    segs.forEach(function (s, k) {
+      const top = m.t + k * rowH + 22, x0 = x(Math.min(s.a, s.z)), x1 = x(Math.max(s.a, s.z));
+      const last = k === segs.length - 1;
+      T(svg, m.l - 12, top + bh / 2 + 4, s.lab, last ? "lab strong" : "lab", "end");
+      const bar = S("rect", { x: x0, y: top, width: Math.max(2, x1 - x0), height: bh, rx: 3, class: s.v >= 0 ? "bar-pos" : "bar-neg" }, svg);
+      const tipX = s.v >= 0 ? x1 : x0;
+      T(svg, tipX, top - 6, lakh(s.v, true), "val", s.v >= 0 ? "end" : "start");
+      if (k < segs.length - 2) S("line", { x1: x(s.z), x2: x(s.z), y1: top + bh, y2: top + rowH, class: "conn" }, svg);
+      const what = last ? "net result after costs" : (k === 0 ? "the trades before any cost" : (s.lab === "Slippage" ? "1 bp a side on market and stop fills" : "Angel One charges, about " + RS + "402 a trade"));
+      bar.addEventListener("pointermove", ev => tipShow(ev.clientX, ev.clientY, [[inr(s.v, true), s.lab, s.v >= 0 ? "k-pos" : "k-neg"], [what, "", ""]]));
+      bar.addEventListener("pointerleave", tipHide);
+    });
+  }
+
+  // One session: candles, the opening range and the trade's levels
+  function day(host) {
+    const W = host.clientWidth, narrow = W < 620, H = narrow ? 300 : 360;
+    const m = { l: 52, r: narrow ? 10 : 150, t: 16, b: 30 };
+    const C = D.day.candles, tr = D.day.trade, raw = D.day.or_raw, cl = D.day.or_clean;
+    const lows = C.map(c => c[3]).concat([raw[0], tr.target]), highs = C.map(c => c[2]).concat([raw[1], tr.stop]);
+    const lo = Math.min.apply(null, lows) - 0.3, hi = Math.max.apply(null, highs) + 0.5;
+    const pw = W - m.l - m.r, ph = H - m.t - m.b, slot = pw / C.length;
+    const svg = svgFor(host, W, H, "Five-minute candles of " + fdate(D.day.date) + " with the opening range, the short entry, its stop and its target");
+    const xl = k => m.l + slot * k, xc = k => m.l + slot * (k + 0.5), y = v => m.t + ph * (hi - v) / (hi - lo);
+    for (let v = Math.ceil(lo); v <= hi; v += 1) {
+      S("line", { x1: m.l, x2: m.l + pw, y1: y(v), y2: y(v), class: "grid" }, svg);
+      T(svg, m.l - 8, y(v) + 4, RS + v.toFixed(0), "ax", "end");
+    }
+    C.forEach(function (c, k) {
+      if (c[0].slice(3) === "00" || c[0].slice(3) === "30" || (k === 0)) {
+        S("line", { x1: xl(k), x2: xl(k), y1: m.t + ph, y2: m.t + ph + 4, class: "tick" }, svg);
+        T(svg, xl(k), H - 8, c[0], "ax mono", "middle");
+      }
+    });
+    const k930 = C.findIndex(c => c[0] === "09:30"), kx = C.findIndex(c => c[0] === tr.exit_candle);
+    S("rect", { x: xl(0), y: y(raw[1]), width: xl(k930) - xl(0), height: y(raw[0]) - y(raw[1]), class: "band-raw" }, svg);
+    S("rect", { x: xl(0), y: y(cl[1]), width: xl(k930) - xl(0), height: y(cl[0]) - y(cl[1]), class: "band-clean" }, svg);
+    const lv = [[tr.stop, "lv-stop", "Stop " + tr.stop.toFixed(2)], [tr.trigger, "lv-trig", "Sell-stop " + tr.trigger.toFixed(2)],
+                [tr.target, "lv-tgt", "Target " + tr.target.toFixed(2)]];
+    lv.forEach(l => S("line", { x1: xl(k930), x2: xl(kx + 1), y1: y(l[0]), y2: y(l[0]), class: l[1] }, svg));
+    const bw = Math.max(3, Math.min(12, slot * 0.58));
+    C.forEach(function (c, k) {
+      const o = c[1], h = c[2], l = c[3], z = c[4];
+      S("line", { x1: xc(k), x2: xc(k), y1: y(h), y2: y(l), class: "wick" }, svg);
+      S("rect", { x: xc(k) - bw / 2, y: y(Math.max(o, z)), width: bw, height: Math.max(1, Math.abs(y(o) - y(z))), class: z >= o ? "c-up" : "c-dn" }, svg);
+    });
+    S("circle", { cx: xc(k930), cy: y(tr.entry), r: 4.5, class: "dot-entry" }, svg);
+    S("circle", { cx: xc(kx), cy: y(tr.target), r: 4.5, class: "dot-exit" }, svg);
+    if (!narrow) {
+      lv.forEach(function (l) { T(svg, m.l + pw + 12, y(l[0]) + 4, l[2], "lab", "start"); });
+      T(svg, xl(0), y(raw[1]) - 7, "Raw range " + raw[0].toFixed(2) + " to " + raw[1].toFixed(2), "note", "start");
+    }
+    C.forEach(function (c, k) {
+      const r = S("rect", { x: xl(k), y: m.t, width: slot, height: ph, class: "hit", "pointer-events": "all" }, svg);
+      r.addEventListener("pointermove", ev => tipShow(ev.clientX, ev.clientY, [[c[0] + " candle", "", ""],
+        ["O " + c[1].toFixed(2) + "   H " + c[2].toFixed(2), "", ""], ["L " + c[3].toFixed(2) + "   C " + c[4].toFixed(2), "", ""]]));
+      r.addEventListener("pointerleave", tipHide);
+    });
+  }
+
+  const charts = [["eq-chart", equity], ["bridge-chart", bridge], ["day-chart", day]];
+  let lastW = 0;
+  function draw() {
+    const w = document.querySelector(".page").clientWidth;
+    if (w === lastW) return;
+    lastW = w;
+    charts.forEach(function (c) {
+      const host = document.getElementById(c[0]);
+      if (!host) return;
+      host.replaceChildren();
+      try { c[1](host); } catch (err) { host.textContent = "This chart could not be drawn: " + err.message; }
+    });
+  }
+  draw();
+  if ("ResizeObserver" in window) {
+    let t;
+    new ResizeObserver(function () { clearTimeout(t); t = setTimeout(draw, 80); }).observe(document.querySelector(".page"));
+  }
+})();
+</script>
