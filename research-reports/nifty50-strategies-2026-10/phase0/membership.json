@@ -1,0 +1,17 @@
+{
+ "note": "NIFTY 50 membership by date, rebuilt from NSE's index-change announcements. A stock is a member from its 'from' date (inclusive) to its 'to' date (exclusive). Dates are the changes' effective dates. Two members of the period have no Angel history (see 'no_data'); TATAMOTORS is one continuous series through its Oct 2025 rename to TMPV.",
+ "start_members_2021_10_01": ["ADANIPORTS", "ASIANPAINT", "AXISBANK", "BAJAJ-AUTO", "BAJFINANCE", "BAJAJFINSV", "BHARTIARTL", "BPCL", "BRITANNIA", "CIPLA", "COALINDIA", "DIVISLAB", "DRREDDY", "EICHERMOT", "GRASIM", "HCLTECH", "HDFC", "HDFCBANK", "HDFCLIFE", "HEROMOTOCO", "HINDALCO", "HINDUNILVR", "ICICIBANK", "INDUSINDBK", "INFY", "IOC", "ITC", "JSWSTEEL", "KOTAKBANK", "LT", "M&M", "MARUTI", "NESTLEIND", "NTPC", "ONGC", "POWERGRID", "RELIANCE", "SBILIFE", "SBIN", "SHREECEM", "SUNPHARMA", "TATACONSUM", "TATAMOTORS", "TATASTEEL", "TCS", "TECHM", "TITAN", "ULTRACEMCO", "UPL", "WIPRO"],
+ "changes": [
+  {"date": "2022-03-31", "in": ["APOLLOHOSP"], "out": ["IOC"]},
+  {"date": "2022-09-30", "in": ["ADANIENT"], "out": ["SHREECEM"]},
+  {"date": "2023-07-13", "in": ["LTIM"], "out": ["HDFC"]},
+  {"date": "2024-03-28", "in": ["SHRIRAMFIN"], "out": ["UPL"]},
+  {"date": "2024-09-30", "in": ["TRENT", "BEL"], "out": ["DIVISLAB", "LTIM"]},
+  {"date": "2025-03-28", "in": ["ETERNAL", "JIOFIN"], "out": ["BPCL", "BRITANNIA"]},
+  {"date": "2025-09-30", "in": ["INDIGO", "MAXHEALTH"], "out": ["HEROMOTOCO", "INDUSINDBK"]},
+  {"date": "2026-03-31", "in": ["BSE"], "out": ["WIPRO"], "uncertain": "Today's list (stock_universe) has BSE in and WIPRO out; the announcement itself was not available, so the effective date is taken as the March 2026 review. The September 2026 review is the alternative and is run as a sensitivity."}
+ ],
+ "no_data": {"HDFC": "Delisted 2023-07-13 on its merger into HDFC Bank; Angel serves no history. NIFTY 50 has 49 tradable members until then.",
+             "LTIM": "Not in the app's instrument master. Member 2023-07-13 .. 2024-09-30 only; 49 tradable members in that span."},
+ "renamed": {"TATAMOTORS": "Tata Motors Passenger Vehicles (TMPV) from the Oct 2025 demerger; Angel's series is continuous (no jump at the record date)."}
+}
