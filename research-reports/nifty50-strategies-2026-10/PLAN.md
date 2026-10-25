@@ -1,5 +1,7 @@
 # NIFTY 50 stocks: intraday momentum strategies from the first 15 minutes. Research plan (revised 24 Oct 2026)
 
+> **Status, 25 Oct 2026: done. No strategy showed a reliable edge after costs. See `REPORT.md`.**
+
 ## Scope
 **Intraday only.** Decisions are made from 09:30 IST on. Every position is squared off at **15:10 IST** the
 same day. There are no positional, swing or overnight trades.

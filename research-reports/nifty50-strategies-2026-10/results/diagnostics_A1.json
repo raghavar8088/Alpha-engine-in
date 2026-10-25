@@ -1,0 +1,615 @@
+{
+ "zero_cost": {
+  "S1 long": {
+   "dev": {
+    "trades": 468,
+    "mean_R": 0.0387,
+    "net": 59163.0
+   },
+   "val": {
+    "trades": 209,
+    "mean_R": 0.1274,
+    "net": 129020.0
+   },
+   "final": {
+    "trades": 447,
+    "mean_R": 0.0087,
+    "net": 37593.0
+   }
+  },
+  "S1 short": {
+   "dev": {
+    "trades": 585,
+    "mean_R": 0.1149,
+    "net": 310466.0
+   },
+   "val": {
+    "trades": 302,
+    "mean_R": 0.0376,
+    "net": 39877.0
+   },
+   "final": {
+    "trades": 508,
+    "mean_R": 0.0637,
+    "net": 155062.0
+   }
+  },
+  "S1 both": {
+   "dev": {
+    "trades": 1024,
+    "mean_R": 0.0798,
+    "net": 352744.0
+   },
+   "val": {
+    "trades": 488,
+    "mean_R": 0.0662,
+    "net": 147667.0
+   },
+   "final": {
+    "trades": 929,
+    "mean_R": 0.04,
+    "net": 198193.0
+   }
+  },
+  "S2 long": {
+   "dev": {
+    "trades": 532,
+    "mean_R": 0.0248,
+    "net": 35576.0
+   },
+   "val": {
+    "trades": 226,
+    "mean_R": 0.1201,
+    "net": 132450.0
+   },
+   "final": {
+    "trades": 501,
+    "mean_R": 0.0327,
+    "net": 103081.0
+   }
+  },
+  "S2 short": {
+   "dev": {
+    "trades": 296,
+    "mean_R": 0.041,
+    "net": 42485.0
+   },
+   "val": {
+    "trades": 153,
+    "mean_R": 0.1043,
+    "net": 64291.0
+   },
+   "final": {
+    "trades": 297,
+    "mean_R": 0.0509,
+    "net": 84492.0
+   }
+  },
+  "S2 both": {
+   "dev": {
+    "trades": 811,
+    "mean_R": 0.0264,
+    "net": 74365.0
+   },
+   "val": {
+    "trades": 368,
+    "mean_R": 0.1073,
+    "net": 185386.0
+   },
+   "final": {
+    "trades": 769,
+    "mean_R": 0.0345,
+    "net": 159975.0
+   }
+  },
+  "S3 long": {
+   "dev": {
+    "trades": 332,
+    "mean_R": 0.05,
+    "net": 53981.0
+   },
+   "val": {
+    "trades": 157,
+    "mean_R": 0.0523,
+    "net": 37867.0
+   },
+   "final": {
+    "trades": 337,
+    "mean_R": -0.0403,
+    "net": -30632.0
+   }
+  },
+  "S3 short": {
+   "dev": {
+    "trades": 383,
+    "mean_R": 0.2639,
+    "net": 318887.0
+   },
+   "val": {
+    "trades": 190,
+    "mean_R": 0.1779,
+    "net": 113412.0
+   },
+   "final": {
+    "trades": 334,
+    "mean_R": 0.1935,
+    "net": 199165.0
+   }
+  },
+  "S3 both": {
+   "dev": {
+    "trades": 709,
+    "mean_R": 0.1684,
+    "net": 381921.0
+   },
+   "val": {
+    "trades": 342,
+    "mean_R": 0.109,
+    "net": 143875.0
+   },
+   "final": {
+    "trades": 662,
+    "mean_R": 0.0793,
+    "net": 177850.0
+   }
+  }
+ },
+ "cost_per_round_trip": {
+  "S1 long": {
+   "dev": {
+    "fees_bp": 5.76,
+    "slippage_bp": 9.92,
+    "fees_R": 0.0326,
+    "risk_bp_of_notional": 204.4
+   },
+   "val": {
+    "fees_bp": 5.56,
+    "slippage_bp": 10.44,
+    "fees_R": 0.0296,
+    "risk_bp_of_notional": 207.0
+   },
+   "final": {
+    "fees_bp": 5.63,
+    "slippage_bp": 9.81,
+    "fees_R": 0.0309,
+    "risk_bp_of_notional": 207.3
+   }
+  },
+  "S1 short": {
+   "dev": {
+    "fees_bp": 5.91,
+    "slippage_bp": 9.82,
+    "fees_R": 0.0336,
+    "risk_bp_of_notional": 209.7
+   },
+   "val": {
+    "fees_bp": 5.7,
+    "slippage_bp": 10.45,
+    "fees_R": 0.0299,
+    "risk_bp_of_notional": 219.4
+   },
+   "final": {
+    "fees_bp": 5.74,
+    "slippage_bp": 9.81,
+    "fees_R": 0.0302,
+    "risk_bp_of_notional": 218.8
+   }
+  },
+  "S1 both": {
+   "dev": {
+    "fees_bp": 5.84,
+    "slippage_bp": 9.87,
+    "fees_R": 0.0332,
+    "risk_bp_of_notional": 207.2
+   },
+   "val": {
+    "fees_bp": 5.65,
+    "slippage_bp": 10.45,
+    "fees_R": 0.0297,
+    "risk_bp_of_notional": 215.4
+   },
+   "final": {
+    "fees_bp": 5.68,
+    "slippage_bp": 9.8,
+    "fees_R": 0.0306,
+    "risk_bp_of_notional": 212.5
+   }
+  },
+  "S2 long": {
+   "dev": {
+    "fees_bp": 5.61,
+    "slippage_bp": 9.87,
+    "fees_R": 0.0357,
+    "risk_bp_of_notional": 183.6
+   },
+   "val": {
+    "fees_bp": 5.41,
+    "slippage_bp": 10.48,
+    "fees_R": 0.0316,
+    "risk_bp_of_notional": 190.0
+   },
+   "final": {
+    "fees_bp": 5.46,
+    "slippage_bp": 9.81,
+    "fees_R": 0.0335,
+    "risk_bp_of_notional": 187.8
+   }
+  },
+  "S2 short": {
+   "dev": {
+    "fees_bp": 5.76,
+    "slippage_bp": 9.86,
+    "fees_R": 0.0341,
+    "risk_bp_of_notional": 197.3
+   },
+   "val": {
+    "fees_bp": 5.63,
+    "slippage_bp": 10.41,
+    "fees_R": 0.0313,
+    "risk_bp_of_notional": 212.7
+   },
+   "final": {
+    "fees_bp": 5.66,
+    "slippage_bp": 9.83,
+    "fees_R": 0.0317,
+    "risk_bp_of_notional": 210.0
+   }
+  },
+  "S2 both": {
+   "dev": {
+    "fees_bp": 5.68,
+    "slippage_bp": 9.87,
+    "fees_R": 0.0349,
+    "risk_bp_of_notional": 190.0
+   },
+   "val": {
+    "fees_bp": 5.52,
+    "slippage_bp": 10.46,
+    "fees_R": 0.0311,
+    "risk_bp_of_notional": 201.8
+   },
+   "final": {
+    "fees_bp": 5.54,
+    "slippage_bp": 9.81,
+    "fees_R": 0.0326,
+    "risk_bp_of_notional": 197.4
+   }
+  },
+  "S3 long": {
+   "dev": {
+    "fees_bp": 5.15,
+    "slippage_bp": 9.89,
+    "fees_R": 0.0785,
+    "risk_bp_of_notional": 82.0
+   },
+   "val": {
+    "fees_bp": 4.75,
+    "slippage_bp": 10.5,
+    "fees_R": 0.067,
+    "risk_bp_of_notional": 92.9
+   },
+   "final": {
+    "fees_bp": 4.81,
+    "slippage_bp": 9.79,
+    "fees_R": 0.0706,
+    "risk_bp_of_notional": 86.8
+   }
+  },
+  "S3 short": {
+   "dev": {
+    "fees_bp": 5.22,
+    "slippage_bp": 9.86,
+    "fees_R": 0.0843,
+    "risk_bp_of_notional": 86.5
+   },
+   "val": {
+    "fees_bp": 4.72,
+    "slippage_bp": 10.47,
+    "fees_R": 0.0669,
+    "risk_bp_of_notional": 89.9
+   },
+   "final": {
+    "fees_bp": 4.75,
+    "slippage_bp": 9.79,
+    "fees_R": 0.0749,
+    "risk_bp_of_notional": 80.2
+   }
+  },
+  "S3 both": {
+   "dev": {
+    "fees_bp": 5.19,
+    "slippage_bp": 9.88,
+    "fees_R": 0.0819,
+    "risk_bp_of_notional": 84.3
+   },
+   "val": {
+    "fees_bp": 4.74,
+    "slippage_bp": 10.48,
+    "fees_R": 0.0666,
+    "risk_bp_of_notional": 91.7
+   },
+   "final": {
+    "fees_bp": 4.78,
+    "slippage_bp": 9.78,
+    "fees_R": 0.0729,
+    "risk_bp_of_notional": 83.4
+   }
+  }
+ },
+ "continuation_bp": {
+  "base screen": {
+   "long": {
+    "dev": {
+     "n": 2448,
+     "mean_bp": -1.33,
+     "t": -0.34
+    },
+    "val": {
+     "n": 1112,
+     "mean_bp": 0.61,
+     "t": 0.12
+    },
+    "final": {
+     "n": 2024,
+     "mean_bp": -0.77,
+     "t": -0.19
+    }
+   },
+   "short": {
+    "dev": {
+     "n": 2447,
+     "mean_bp": 6.33,
+     "t": 1.72
+    },
+    "val": {
+     "n": 1148,
+     "mean_bp": 7.76,
+     "t": 1.21
+    },
+    "final": {
+     "n": 2067,
+     "mean_bp": 0.39,
+     "t": 0.1
+    }
+   }
+  },
+  "frozen filters": {
+   "long": {
+    "dev": {
+     "n": 532,
+     "mean_bp": 0.18,
+     "t": 0.02
+    },
+    "val": {
+     "n": 226,
+     "mean_bp": 11.47,
+     "t": 0.8
+    },
+    "final": {
+     "n": 501,
+     "mean_bp": 3.52,
+     "t": 0.45
+    }
+   },
+   "short": {
+    "dev": {
+     "n": 296,
+     "mean_bp": 10.57,
+     "t": 0.7
+    },
+    "val": {
+     "n": 153,
+     "mean_bp": 7.23,
+     "t": 0.34
+    },
+    "final": {
+     "n": 297,
+     "mean_bp": 14.81,
+     "t": 1.61
+    }
+   }
+  }
+ },
+ "charges_only": {
+  "S1 long": {
+   "dev": {
+    "trades": 468,
+    "mean_R": 0.0051,
+    "net": -5967.0
+   },
+   "val": {
+    "trades": 209,
+    "mean_R": 0.0971,
+    "net": 98633.0
+   },
+   "final": {
+    "trades": 447,
+    "mean_R": -0.0229,
+    "net": -26796.0
+   }
+  },
+  "S1 short": {
+   "dev": {
+    "trades": 585,
+    "mean_R": 0.0802,
+    "net": 229858.0
+   },
+   "val": {
+    "trades": 302,
+    "mean_R": 0.0069,
+    "net": -3435.0
+   },
+   "final": {
+    "trades": 508,
+    "mean_R": 0.0327,
+    "net": 83367.0
+   }
+  },
+  "S1 both": {
+   "dev": {
+    "trades": 1024,
+    "mean_R": 0.0456,
+    "net": 211086.0
+   },
+   "val": {
+    "trades": 488,
+    "mean_R": 0.0358,
+    "net": 77336.0
+   },
+   "final": {
+    "trades": 929,
+    "mean_R": 0.0086,
+    "net": 65582.0
+   }
+  },
+  "S2 long": {
+   "dev": {
+    "trades": 532,
+    "mean_R": -0.0122,
+    "net": -42612.0
+   },
+   "val": {
+    "trades": 226,
+    "mean_R": 0.0875,
+    "net": 97866.0
+   },
+   "final": {
+    "trades": 501,
+    "mean_R": -0.0018,
+    "net": 26425.0
+   }
+  },
+  "S2 short": {
+   "dev": {
+    "trades": 296,
+    "mean_R": 0.0058,
+    "net": 433.0
+   },
+   "val": {
+    "trades": 153,
+    "mean_R": 0.072,
+    "net": 41222.0
+   },
+   "final": {
+    "trades": 297,
+    "mean_R": 0.0183,
+    "net": 41365.0
+   }
+  },
+  "S2 both": {
+   "dev": {
+    "trades": 811,
+    "mean_R": -0.0096,
+    "net": -42436.0
+   },
+   "val": {
+    "trades": 368,
+    "mean_R": 0.0753,
+    "net": 129905.0
+   },
+   "final": {
+    "trades": 769,
+    "mean_R": 0.0009,
+    "net": 44981.0
+   }
+  },
+  "S3 long": {
+   "dev": {
+    "trades": 332,
+    "mean_R": -0.0366,
+    "net": -9784.0
+   },
+   "val": {
+    "trades": 157,
+    "mean_R": -0.0216,
+    "net": 3301.0
+   },
+   "final": {
+    "trades": 337,
+    "mean_R": -0.1179,
+    "net": -104242.0
+   }
+  },
+  "S3 short": {
+   "dev": {
+    "trades": 383,
+    "mean_R": 0.1701,
+    "net": 244601.0
+   },
+   "val": {
+    "trades": 190,
+    "mean_R": 0.1042,
+    "net": 69942.0
+   },
+   "final": {
+    "trades": 334,
+    "mean_R": 0.1106,
+    "net": 123216.0
+   }
+  },
+  "S3 both": {
+   "dev": {
+    "trades": 709,
+    "mean_R": 0.0776,
+    "net": 245061.0
+   },
+   "val": {
+    "trades": 342,
+    "mean_R": 0.0357,
+    "net": 67147.0
+   },
+   "final": {
+    "trades": 662,
+    "mean_R": -0.0011,
+    "net": 30180.0
+   }
+  }
+ },
+ "breakeven_slippage_bp_round_trip": {
+  "S1 long": {
+   "dev": 1.0,
+   "val": 19.6,
+   "final": -4.6
+  },
+  "S1 short": {
+   "dev": 16.4,
+   "val": 1.5,
+   "final": 7.0
+  },
+  "S1 both": {
+   "dev": 9.2,
+   "val": 7.5,
+   "final": 1.8
+  },
+  "S2 long": {
+   "dev": -2.2,
+   "val": 16.2,
+   "final": -0.3
+  },
+  "S2 short": {
+   "dev": 1.1,
+   "val": 14.9,
+   "final": 3.7
+  },
+  "S2 both": {
+   "dev": -1.8,
+   "val": 14.8,
+   "final": 0.2
+  },
+  "S3 long": {
+   "dev": -2.8,
+   "val": -1.9,
+   "final": -9.7
+  },
+  "S3 short": {
+   "dev": 13.9,
+   "val": 8.8,
+   "final": 8.3
+  },
+  "S3 both": {
+   "dev": 6.2,
+   "val": 3.1,
+   "final": -0.1
+  }
+ }
+}
