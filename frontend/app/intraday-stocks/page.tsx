@@ -366,6 +366,10 @@ export default function IntradayStocksPage() {
   const pbKey: PatternBookKey = PATTERN_BOOKS.find((b) => b.tab === tab)?.key ?? "50k";
 
   const [patSummary, setPatSummary] = useState<PatternSummary | null>(null);
+  // Shown on the source tabs AND on every paper book's tab, often before that desk has loaded,
+  // so the fallbacks are the catalogs' real sizes.
+  const tournamentCount = status?.strategy_count ?? 54;
+  const patternCount = patSummary?.strategy_count ?? 548;
   const [patBoard, setPatBoard] = useState<PatternScore[]>([]);
   const [patFrames, setPatFrames] = useState<PatternTimeframeStat[]>([]);
   const [patOpen, setPatOpen] = useState<PatternPosition[]>([]);
@@ -552,18 +556,20 @@ export default function IntradayStocksPage() {
           Five-Strategy Desk · ₹10 lakh each
         </Link>
         <button className={tab === "tournament" ? "tab active" : "tab"} onClick={() => setTab("tournament")}>
-          Tournament · {status?.strategy_count ?? 52} strategies
+          Tournament · {tournamentCount} strategies
         </button>
         <button className={tab === "patterns" ? "tab active" : "tab"} onClick={() => setTab("patterns")}>
-          Patterns · {patSummary?.strategy_count ?? 504}
+          Patterns · {patternCount}
         </button>
+        {/* Each paper book's tab names the desk it copies: Paper Trade copies Patterns, Live
+            Intraday copies the Tournament. */}
         {PATTERN_BOOKS.map((b) => (
           <button
             key={b.tab}
             className={tab === b.tab ? "tab active" : "tab"}
             onClick={() => setTab(b.tab)}
           >
-            {b.label}
+            Patterns · {patternCount} {b.label}
           </button>
         ))}
         {LIVE_BOOKS.map((b) => (
@@ -572,7 +578,7 @@ export default function IntradayStocksPage() {
             className={tab === b.key ? "tab active" : "tab"}
             onClick={() => setTab(b.key)}
           >
-            Live Intraday · {b.label}
+            Tournament · {tournamentCount} Live Intraday · {b.label}
           </button>
         ))}
       </div>
