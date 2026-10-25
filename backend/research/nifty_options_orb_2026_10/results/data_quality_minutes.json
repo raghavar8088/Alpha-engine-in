@@ -1,0 +1,112 @@
+{
+ "window": [
+  "2021-10-01",
+  "2026-10-23"
+ ],
+ "nifty": {
+  "rows_in_window": 465679,
+  "rows_outside_0915_1529": 241,
+  "days_with_rows_outside_session": [
+   "2021-11-04",
+   "2022-10-24",
+   "2023-11-12",
+   "2024-11-01"
+  ],
+  "duplicate_minutes": 0,
+  "prints_dropped_nonpositive_or_15pct": [],
+  "days_with_any_row": 1250,
+  "days_dropped": [
+   {
+    "date": "2021-11-30",
+    "minutes": 125,
+    "first_minute": "13:25",
+    "reason": "no 09:15 minute"
+   },
+   {
+    "date": "2022-01-04",
+    "minutes": 374,
+    "first_minute": "09:16",
+    "reason": "no 09:15 minute"
+   },
+   {
+    "date": "2022-03-07",
+    "minutes": 370,
+    "first_minute": "09:16",
+    "reason": "no 09:15 minute"
+   },
+   {
+    "date": "2022-06-28",
+    "minutes": 126,
+    "first_minute": "13:24",
+    "reason": "no 09:15 minute"
+   },
+   {
+    "date": "2022-07-01",
+    "minutes": 374,
+    "first_minute": "09:16",
+    "reason": "no 09:15 minute"
+   },
+   {
+    "date": "2023-05-24",
+    "minutes": 125,
+    "first_minute": "13:25",
+    "reason": "no 09:15 minute"
+   },
+   {
+    "date": "2025-01-14",
+    "minutes": 125,
+    "first_minute": "13:25",
+    "reason": "no 09:15 minute"
+   },
+   {
+    "date": "2025-05-13",
+    "minutes": 125,
+    "first_minute": "13:25",
+    "reason": "no 09:15 minute"
+   },
+   {
+    "date": "2025-06-12",
+    "minutes": 125,
+    "first_minute": "13:25",
+    "reason": "no 09:15 minute"
+   },
+   {
+    "date": "2025-10-21",
+    "minutes": 72,
+    "first_minute": "11:17",
+    "reason": "no 09:15 minute"
+   },
+   {
+    "date": "2026-07-07",
+    "minutes": 139,
+    "first_minute": "13:11",
+    "reason": "no 09:15 minute"
+   }
+  ],
+  "kept_days": 1237,
+  "minutes_filled_flat": 1267,
+  "zero_volume_printed_minutes": 463358,
+  "days_dropped_short": [
+   {
+    "date": "2024-03-02",
+    "minutes": 116
+   },
+   {
+    "date": "2024-05-18",
+    "minutes": 105
+   }
+  ]
+ },
+ "nifty_days_with_missing_minutes": 60,
+ "vix": {
+  "vix_prints_dropped": 0,
+  "nifty_days_without_vix": [],
+  "nifty_days_vix_starts_after_0930": [
+   "2021-12-06",
+   "2022-12-22",
+   "2023-02-14",
+   "2026-08-06"
+  ]
+ },
+ "nifty_days_without_vix": []
+}

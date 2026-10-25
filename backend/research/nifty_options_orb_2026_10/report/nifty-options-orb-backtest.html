@@ -1,0 +1,576 @@
+<title>NIFTY Options Opening-Range Breakout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: one 72rem frame; prose holds a 46rem measure, charts and tables take the full frame. */
+:root {
+  --paper: #f4f5f7;
+  --panel: #fdfdfe;
+  --ink: #131824;
+  --ink-2: #48505f;
+  --muted: #687081;
+  --rule: #dde1e7;
+  --axis: #b9bfca;
+  --gain: #2a78d6;
+  --loss: #e34948;
+  --context: #7a8291;
+  --wash-gain: rgba(42, 120, 214, 0.13);
+  --wash-raw: rgba(122, 130, 145, 0.16);
+  --hl: rgba(42, 120, 214, 0.07);
+  --accent: #1e4f9a;
+  --font-display: "IBM Plex Sans Condensed", "Roboto Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "Cascadia Mono", "SF Mono", Consolas, monospace;
+  --s-1: 0.8125rem;
+  --s0: 1rem;
+  --s1: 1.1875rem;
+  --s2: 1.5rem;
+  --s3: clamp(2rem, 1.4rem + 2.6vw, 2.875rem);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0f1217; --panel: #161a21; --ink: #e9ecf1; --ink-2: #b5bcc8; --muted: #8d95a3;
+    --rule: #272d36; --axis: #3d444f; --gain: #3987e5; --loss: #e66767; --context: #7d8592;
+    --wash-gain: rgba(57, 135, 229, 0.20); --wash-raw: rgba(125, 133, 146, 0.20); --hl: rgba(57, 135, 229, 0.10);
+    --accent: #8fb6f0; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0f1217; --panel: #161a21; --ink: #e9ecf1; --ink-2: #b5bcc8; --muted: #8d95a3;
+  --rule: #272d36; --axis: #3d444f; --gain: #3987e5; --loss: #e66767; --context: #7d8592;
+  --wash-gain: rgba(57, 135, 229, 0.20); --wash-raw: rgba(125, 133, 146, 0.20); --hl: rgba(57, 135, 229, 0.10);
+  --accent: #8fb6f0; color-scheme: dark;
+}
+body { background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: var(--s0); line-height: 1.55; }
+.page { max-width: 72rem; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); padding-block: 40px 72px; display: grid; gap: 56px; }
+.prose { max-width: 46rem; }
+.prose p { margin: 0 0 0.9em; }
+.prose p:last-child { margin-bottom: 0; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: -0.005em; }
+h1 { font-size: var(--s3); font-weight: 700; line-height: 1.05; }
+h2 { font-size: var(--s2); font-weight: 600; line-height: 1.15; }
+h3 { font-size: var(--s1); font-weight: 600; }
+section { display: grid; gap: 20px; min-width: 0; }
+.eyebrow { font-family: var(--font-data); font-size: var(--s-1); color: var(--muted); letter-spacing: 0.02em; margin: 0; }
+.masthead { display: grid; gap: 18px; }
+.dek { font-size: var(--s1); color: var(--ink-2); max-width: 46rem; margin: 0; }
+.verdict { font-size: var(--s1); max-width: 46rem; margin: 0; }
+.verdict strong { font-weight: 600; }
+code, .mono { font-family: var(--font-data); font-size: 0.86em; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--gain); outline-offset: 3px; border-radius: 2px; }
+
+.kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0 24px; margin: 8px 0 0; }
+.kpi { border-top: 1px solid var(--axis); padding-top: 12px; min-width: 0; }
+.kpi dt { font-size: var(--s-1); color: var(--muted); letter-spacing: 0.01em; }
+.kpi dd { margin: 4px 0 0; display: grid; gap: 4px; }
+.kv { font-family: var(--font-display); font-weight: 600; font-size: 1.625rem; line-height: 1.1; }
+.kn { font-size: var(--s-1); color: var(--ink-2); line-height: 1.35; }
+@media (max-width: 1000px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 24px; } }
+@media (max-width: 560px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kv { font-size: 1.375rem; } }
+
+figure { margin: 0; background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 16px 16px 12px; min-width: 0; display: grid; gap: 10px; }
+figcaption { font-size: var(--s-1); color: var(--ink-2); max-width: 52rem; }
+.chart { width: 100%; min-height: 120px; }
+.chart svg { display: block; overflow: visible; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: var(--s-1); color: var(--ink-2); margin: 0; padding: 0; list-style: none; }
+.legend li { display: inline-flex; align-items: center; gap: 7px; }
+.key { display: inline-block; width: 16px; height: 0; border-top: 2px solid; }
+.key.net, .key.tgt { border-color: var(--gain); }
+.key.pre { border-color: var(--context); }
+.key.stop { border-color: var(--loss); }
+.key.trig { border-color: var(--ink-2); border-top-width: 1px; }
+.key.box { width: 14px; height: 10px; border: 0; border-radius: 2px; }
+.key.box.raw { background: var(--wash-raw); }
+.key.box.clean { background: var(--wash-gain); }
+.key.dot { width: 9px; height: 9px; border: 0; border-radius: 50%; }
+.key.dot.entry { background: var(--ink); }
+.key.dot.exit { background: var(--gain); }
+
+svg text { font-family: var(--font-body); font-size: 12px; fill: var(--muted); }
+svg .ax { fill: var(--muted); font-variant-numeric: tabular-nums; }
+svg .mono { font-family: var(--font-data); font-size: 11px; }
+svg .lab { fill: var(--ink-2); }
+svg .lab.strong { fill: var(--ink); font-weight: 600; }
+svg .val { fill: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+svg .note { fill: var(--ink-2); paint-order: stroke; stroke: var(--panel); stroke-width: 4px; stroke-linejoin: round; }
+svg .grid { stroke: var(--rule); stroke-width: 1; }
+svg .base { stroke: var(--axis); stroke-width: 1; }
+svg .tick { stroke: var(--axis); stroke-width: 1; }
+svg .ln { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+svg .ln-net { stroke: var(--gain); }
+svg .ln-pre { stroke: var(--context); }
+svg .dot-net { fill: var(--gain); stroke: var(--panel); stroke-width: 2; }
+svg .dot-pre { fill: var(--context); stroke: var(--panel); stroke-width: 2; }
+svg .cross { stroke: var(--axis); stroke-width: 1; }
+svg .hit { fill: transparent; }
+svg .bar-pos { fill: var(--gain); }
+svg .bar-neg { fill: var(--loss); }
+svg .bar-pos:hover, svg .bar-neg:hover { opacity: 0.82; }
+svg .conn { stroke: var(--axis); stroke-width: 1; }
+svg .wick { stroke: var(--ink-2); stroke-width: 1; }
+svg .c-up { fill: var(--panel); stroke: var(--ink-2); stroke-width: 1; }
+svg .c-dn { fill: var(--ink-2); stroke: var(--ink-2); stroke-width: 1; }
+svg .band-raw { fill: var(--wash-raw); }
+svg .band-clean { fill: var(--wash-gain); }
+svg .lv-stop { stroke: var(--loss); stroke-width: 1.5; }
+svg .lv-tgt { stroke: var(--gain); stroke-width: 1.5; }
+svg .lv-trig { stroke: var(--ink-2); stroke-width: 1; }
+svg .dot-entry { fill: var(--ink); stroke: var(--panel); stroke-width: 2; }
+svg .dot-exit { fill: var(--gain); stroke: var(--panel); stroke-width: 2; }
+
+.tablewrap { overflow-x: auto; min-width: 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+caption { caption-side: top; text-align: left; font-family: var(--font-display); font-weight: 600; font-size: var(--s1); color: var(--ink); padding-bottom: 6px; }
+th, td { padding: 8px 10px; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; vertical-align: baseline; }
+thead th { font-weight: 500; color: var(--muted); font-size: var(--s-1); border-bottom-color: var(--axis); vertical-align: bottom; white-space: normal; }
+tbody th { text-align: left; font-weight: 500; }
+thead th:first-child { text-align: left; }
+table.fit { width: auto; }
+table.fit th, table.fit td { padding-inline: 14px; }
+table.fit th:first-child, table.fit td:first-child { padding-left: 0; }
+th:first-child, td:first-child { padding-left: 0; }
+th:last-child, td:last-child { padding-right: 0; }
+td.strong { font-weight: 600; }
+tr.total th, tr.total td { font-weight: 600; border-top: 1px solid var(--axis); }
+tr.primary th, tr.primary td { background: var(--hl); }
+.sub { display: block; font-size: 0.75rem; color: var(--muted); font-weight: 400; }
+.flag { display: block; font-size: 0.75rem; color: var(--loss); font-weight: 500; }
+.wrapcol { white-space: normal; text-align: left; min-width: 16rem; }
+td.barcol { width: 120px; padding-inline: 6px; }
+.ibar { position: relative; display: block; width: 112px; height: 10px; }
+.ibar::before { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; border-left: 1px solid var(--axis); }
+.ibar .neg, .ibar .pos { position: absolute; top: 0; height: 100%; width: var(--w); }
+.ibar .neg { right: 50%; background: var(--loss); border-radius: 3px 0 0 3px; }
+.ibar .pos { left: 50%; background: var(--gain); border-radius: 0 3px 3px 0; }
+
+.rules { display: grid; grid-template-columns: minmax(9rem, 12rem) minmax(0, 1fr); margin: 0; max-width: 60rem; }
+.rule { display: contents; }
+.rule dt, .rule dd { padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.rule dt { font-weight: 600; padding-right: 20px; }
+.rule dd { margin: 0; color: var(--ink-2); }
+@media (max-width: 640px) {
+  .rules { grid-template-columns: minmax(0, 1fr); }
+  .rule dt { border-bottom: 0; padding-bottom: 2px; }
+  .rule dd { padding-top: 0; }
+}
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; align-items: start; }
+@media (max-width: 860px) { .two { grid-template-columns: minmax(0, 1fr); } }
+details { border-top: 1px solid var(--rule); padding-top: 10px; }
+summary { cursor: pointer; color: var(--accent); font-size: var(--s-1); }
+details .tablewrap { margin-top: 10px; max-height: 420px; overflow: auto; }
+footer { border-top: 1px solid var(--axis); padding-top: 18px; font-size: var(--s-1); color: var(--ink-2); display: grid; gap: 10px; }
+footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+.tip { position: fixed; z-index: 10; pointer-events: none; background: var(--ink); color: var(--paper); font-size: 12px; line-height: 1.4; padding: 8px 10px; border-radius: 4px; display: grid; gap: 3px; max-width: 280px; }
+.tip .tr { display: flex; align-items: center; gap: 7px; }
+.tip .tr span { opacity: 0.8; }
+.tip .tk { display: inline-block; width: 12px; height: 0; border-top: 2px solid; opacity: 1; }
+.tip .tk.k-net, .tip .tk.k-pos { border-color: var(--gain); }
+.tip .tk.k-pre { border-color: var(--context); }
+.tip .tk.k-neg { border-color: var(--loss); }
+@media (prefers-reduced-motion: no-preference) { svg .bar-pos, svg .bar-neg { transition: opacity 120ms; } }
+</style>
+
+<style>
+:root { --sell: #eb6834; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --sell: #d95926; } }
+:root[data-theme="dark"] { --sell: #d95926; }
+svg .ln-pre { stroke: var(--sell); }
+svg .dot-pre { fill: var(--sell); }
+.key.pre { border-color: var(--sell); }
+.tip .tk.k-pre { border-color: var(--sell); }
+.invest td, .invest th { white-space: normal; text-align: left; vertical-align: top; }
+.invest td { min-width: 14rem; }
+</style>
+<div class="page">
+  <header class="masthead">
+    <p class="eyebrow">Backtest · NSE: NIFTY 50 weekly options · ATM, same-week expiry · 25 Oct 2021 to 23 Oct 2026</p>
+    <h1>NIFTY Options Opening-Range Breakout</h1>
+    <p class="dek">The NIFTYBEES opening-range rules, read on the NIFTY 50 index and traded with the at-the-money call or put of the nearest weekly expiry: bought, and then the exact opposite, sold. One lot, the stop and target on the index, out by 15:15.</p>
+    <div class="verdict prose"><p><strong>Buying loses at every ratio.</strong> At 1:2 the 1,218 trades made −₹2,71,175 on one lot (−₹4,445 a month, −2.22% a month on a ₹2,00,000 account; t = −2.23). 1:3 to 1:6 lost between ₹2,05,370 and ₹2,58,776. Before any cost the options already lost ₹1,56,115: time decay costs more than the breakouts earn.</p><p><strong>Selling (the mirror) is about break-even after costs.</strong> Doing the opposite earns the buyer&#x27;s pre-cost loss, +₹1,56,115, but pays the spread and the charges again (₹1,15,317): net +₹40,798 at 1:2 (+₹669 a month, +0.33% a month on ₹2,00,000; t = +0.33, not significant). It ranges from −₹25,343 to +₹40,798 across the ratios.</p><p><strong>The seller&#x27;s small profit is not reliable.</strong> It all comes from expiry-day trades (+₹49,664), the one place the model is still off, and off in the seller&#x27;s favour (it lets expiry-day options decay 7–11% of their premium faster than the recorded real quotes). Without expiry-day trades the seller made −₹8,866; selling next week&#x27;s expiry instead made −₹1,31,564.</p></div>
+    <dl class="kpis">
+<div class="kpi"><dt>Buying, 1:2</dt><dd><span class="kv">−₹2,71,175</span><span class="kn">−2.22% a month on ₹2 lakh</span></dd></div>
+<div class="kpi"><dt>Selling, 1:2</dt><dd><span class="kv">+₹40,798</span><span class="kn">+0.33% a month on ₹2 lakh</span></dd></div>
+<div class="kpi"><dt>Buying ties up</dt><dd><span class="kv">₹7,125</span><span class="kn">premium of one lot, average</span></dd></div>
+<div class="kpi"><dt>Selling ties up</dt><dd><span class="kv">₹1,24,468</span><span class="kn">margin of one lot, average</span></dd></div>
+<div class="kpi"><dt>Trades</dt><dd><span class="kv">1,218</span><span class="kn">about 20 a month</span></dd></div>
+<div class="kpi"><dt>Costs a trade</dt><dd><span class="kv">₹94</span><span class="kn">spread, slippage, charges</span></dd></div>
+    </dl>
+  </header>
+  <section id="invest" aria-labelledby="h-invest">
+    <h2 id="h-invest">Investment and monthly return, 1:2</h2>
+    <div class="tablewrap"><table class="invest"><thead><tr><th></th><th>Buying</th><th>Selling (mirror)</th></tr></thead><tbody>
+<tr><th scope="row">What one trade ties up</th><td>the premium: ₹7,125 a lot on average (expiry day ~₹4,013, 2-4 days out ~₹8,684)</td><td>the margin: ₹1,24,468 a lot on average (expiry day ~₹1,48,907 with the extra 2% ELM), up to ₹1,84,177</td></tr>
+<tr><th scope="row">Trades a month</th><td>20, one at a time</td><td>20, one at a time</td></tr>
+<tr><th scope="row">Premium spent / margin blocked over a month</th><td>₹1,42,263 of premium in total (recycled; never more than one lot at once)</td><td>₹1,24,468 blocked during each trade; the premium received, ~₹7,094, is credited</td></tr>
+<tr><th scope="row">Net P&amp;L a month (average)</th><td>−₹4,445</td><td>+₹669</td></tr>
+<tr><th scope="row">Return a month on a ₹2,00,000 account</th><td>−2.22%</td><td>+0.33%</td></tr>
+<tr><th scope="row">Monthly net as a share of what one trade ties up</th><td>−62.4% of one lot&#x27;s premium</td><td>+0.54% of one lot&#x27;s margin</td></tr>
+<tr><th scope="row">Months up</th><td>23 of 61</td><td>34 of 61</td></tr>
+<tr><th scope="row">Median / best / worst month</th><td>−₹6,575 / +₹29,092 / −₹30,620</td><td>+₹2,839 / +₹26,466 / −₹32,181</td></tr>
+<tr><th scope="row">Five years in total</th><td>−₹2,71,175; max drawdown ₹3,45,184; a ₹2 lakh account hits zero on 2 Feb 2026</td><td>+₹40,798; max drawdown ₹92,791</td></tr>
+</tbody></table></div>
+  </section>
+  <section id="equity" aria-labelledby="h-equity">
+    <h2 id="h-equity">Account value, 1:2</h2>
+    <figure>
+      <ul class="legend">
+        <li><span class="key net"></span>Buying the option</li>
+        <li><span class="key pre"></span>Selling it (the mirror)</li>
+      </ul>
+      <div class="chart" id="eq-chart"></div>
+      <figcaption>One lot of 65 on a ₹2,00,000 account, no compounding, after every cost. Hover or use the arrow keys for any day&#x27;s values.</figcaption>
+    </figure>
+  </section>
+  <section id="buy" aria-labelledby="h-buy">
+    <h2 id="h-buy">Buying: every risk : reward</h2>
+    <div class="tablewrap"><table><thead><tr><th>Risk : reward</th><th>Trades</th><th>Win rate</th><th>Index T / S / 15:15</th><th>Before costs</th><th>Costs</th><th></th><th>Net P&amp;L</th><th>Profit factor</th><th>Max drawdown</th><th>Net a month</th><th>% a month on ₹2L</th></tr></thead><tbody>
+<tr><th scope="row">1:2</th><td>1,218</td><td>35.6%</td><td><span class=mono>200 / 548 / 470</span></td><td>−₹1,56,115</td><td>−₹1,15,060</td><td><span class="ibar" aria-hidden="true"><span class="neg" style="--w:50.0%"></span></span></td><td><strong>−₹2,71,175</strong></td><td>0.85</td><td>₹3,45,184</td><td>−₹4,445</td><td>−2.22%</td></tr>
+<tr><th scope="row">1:3</th><td>1,218</td><td>33.7%</td><td><span class=mono>85 / 558 / 575</span></td><td>−₹1,43,685</td><td>−₹1,15,091</td><td><span class="ibar" aria-hidden="true"><span class="neg" style="--w:47.7%"></span></span></td><td><strong>−₹2,58,776</strong></td><td>0.86</td><td>₹3,45,708</td><td>−₹4,242</td><td>−2.12%</td></tr>
+<tr><th scope="row">1:4</th><td>1,218</td><td>33.7%</td><td><span class=mono>40 / 558 / 620</span></td><td>−₹90,096</td><td>−₹1,15,274</td><td><span class="ibar" aria-hidden="true"><span class="neg" style="--w:37.9%"></span></span></td><td><strong>−₹2,05,370</strong></td><td>0.89</td><td>₹2,83,511</td><td>−₹3,367</td><td>−1.68%</td></tr>
+<tr><th scope="row">1:5</th><td>1,218</td><td>33.7%</td><td><span class=mono>19 / 559 / 640</span></td><td>−₹93,946</td><td>−₹1,15,250</td><td><span class="ibar" aria-hidden="true"><span class="neg" style="--w:38.6%"></span></span></td><td><strong>−₹2,09,196</strong></td><td>0.89</td><td>₹2,90,011</td><td>−₹3,429</td><td>−1.71%</td></tr>
+<tr><th scope="row">1:6</th><td>1,218</td><td>33.6%</td><td><span class=mono>10 / 559 / 649</span></td><td>−₹99,467</td><td>−₹1,15,242</td><td><span class="ibar" aria-hidden="true"><span class="neg" style="--w:39.6%"></span></span></td><td><strong>−₹2,14,709</strong></td><td>0.89</td><td>₹2,98,866</td><td>−₹3,520</td><td>−1.76%</td></tr>
+</tbody></table></div>
+    <h3>Net P&amp;L by year</h3>
+    <div class="tablewrap"><table class="fit"><thead><tr><th>Year</th><th>1:2</th><th>1:3</th><th>1:4</th><th>1:5</th><th>1:6</th></tr></thead><tbody>
+<tr><th scope="row">2021<span class=sub>from 25 Oct</span></th><td>+₹14,865</td><td>+₹27,507</td><td>+₹28,623</td><td>+₹30,377</td><td>+₹32,323</td></tr>
+<tr><th scope="row">2022</th><td>−₹44,901</td><td>−₹38,901</td><td>−₹23,194</td><td>−₹6,481</td><td>−₹6,420</td></tr>
+<tr><th scope="row">2023</th><td>−₹92,663</td><td>−₹81,436</td><td>−₹78,787</td><td>−₹84,667</td><td>−₹80,885</td></tr>
+<tr><th scope="row">2024</th><td>−₹7,663</td><td>−₹3,509</td><td>+₹29,321</td><td>+₹15,693</td><td>−₹2,261</td></tr>
+<tr><th scope="row">2025</th><td>−₹62,761</td><td>−₹85,706</td><td>−₹78,853</td><td>−₹84,458</td><td>−₹77,452</td></tr>
+<tr><th scope="row">2026<span class=sub>to 23 Oct</span></th><td>−₹78,053</td><td>−₹76,731</td><td>−₹82,480</td><td>−₹79,661</td><td>−₹80,014</td></tr>
+<tr><th scope="row">All</th><td><strong>−₹2,71,175</strong></td><td><strong>−₹2,58,776</strong></td><td><strong>−₹2,05,370</strong></td><td><strong>−₹2,09,196</strong></td><td><strong>−₹2,14,709</strong></td></tr>
+</tbody></table></div>
+  </section>
+  <section id="sell" aria-labelledby="h-sell">
+    <h2 id="h-sell">Selling (the mirror): every risk : reward</h2>
+    <div class="tablewrap"><table><thead><tr><th>Risk : reward</th><th>Trades</th><th>Win rate</th><th>Index T / S / 15:15</th><th>Before costs</th><th>Costs</th><th></th><th>Net P&amp;L</th><th>Profit factor</th><th>Max drawdown</th><th>Net a month</th><th>% a month on ₹2L</th></tr></thead><tbody>
+<tr><th scope="row">1:2</th><td>1,218</td><td>63.1%</td><td><span class=mono>200 / 548 / 470</span></td><td>+₹1,56,115</td><td>−₹1,15,317</td><td><span class="ibar" aria-hidden="true"><span class="pos" style="--w:50.0%"></span></span></td><td><strong>+₹40,798</strong></td><td>1.02</td><td>₹92,791</td><td>+₹669</td><td>+0.33%</td></tr>
+<tr><th scope="row">1:3</th><td>1,218</td><td>64.9%</td><td><span class=mono>85 / 558 / 575</span></td><td>+₹1,43,685</td><td>−₹1,15,333</td><td><span class="ibar" aria-hidden="true"><span class="pos" style="--w:34.7%"></span></span></td><td><strong>+₹28,352</strong></td><td>1.02</td><td>₹1,00,406</td><td>+₹465</td><td>+0.23%</td></tr>
+<tr><th scope="row">1:4</th><td>1,218</td><td>64.9%</td><td><span class=mono>40 / 558 / 620</span></td><td>+₹90,096</td><td>−₹1,15,439</td><td><span class="ibar" aria-hidden="true"><span class="neg" style="--w:31.1%"></span></span></td><td><strong>−₹25,343</strong></td><td>0.99</td><td>₹1,43,667</td><td>−₹415</td><td>−0.21%</td></tr>
+<tr><th scope="row">1:5</th><td>1,218</td><td>65.0%</td><td><span class=mono>19 / 559 / 640</span></td><td>+₹93,946</td><td>−₹1,15,440</td><td><span class="ibar" aria-hidden="true"><span class="neg" style="--w:26.3%"></span></span></td><td><strong>−₹21,494</strong></td><td>0.99</td><td>₹1,42,828</td><td>−₹352</td><td>−0.18%</td></tr>
+<tr><th scope="row">1:6</th><td>1,218</td><td>65.1%</td><td><span class=mono>10 / 559 / 649</span></td><td>+₹99,467</td><td>−₹1,15,439</td><td><span class="ibar" aria-hidden="true"><span class="neg" style="--w:19.6%"></span></span></td><td><strong>−₹15,972</strong></td><td>0.99</td><td>₹1,38,222</td><td>−₹262</td><td>−0.13%</td></tr>
+</tbody></table></div>
+    <h3>Net P&amp;L by year</h3>
+    <div class="tablewrap"><table class="fit"><thead><tr><th>Year</th><th>1:2</th><th>1:3</th><th>1:4</th><th>1:5</th><th>1:6</th></tr></thead><tbody>
+<tr><th scope="row">2021<span class=sub>from 25 Oct</span></th><td>−₹23,373</td><td>−₹36,079</td><td>−₹37,197</td><td>−₹38,959</td><td>−₹40,920</td></tr>
+<tr><th scope="row">2022</th><td>−₹1,863</td><td>−₹7,892</td><td>−₹23,682</td><td>−₹40,489</td><td>−₹40,553</td></tr>
+<tr><th scope="row">2023</th><td>+₹52,708</td><td>+₹41,426</td><td>+₹38,763</td><td>+₹44,677</td><td>+₹40,873</td></tr>
+<tr><th scope="row">2024</th><td>−₹40,414</td><td>−₹44,574</td><td>−₹77,587</td><td>−₹63,882</td><td>−₹45,837</td></tr>
+<tr><th scope="row">2025</th><td>+₹16,559</td><td>+₹39,631</td><td>+₹32,744</td><td>+₹38,376</td><td>+₹31,327</td></tr>
+<tr><th scope="row">2026<span class=sub>to 23 Oct</span></th><td>+₹37,182</td><td>+₹35,840</td><td>+₹41,616</td><td>+₹38,784</td><td>+₹39,138</td></tr>
+<tr><th scope="row">All</th><td><strong>+₹40,798</strong></td><td><strong>+₹28,352</strong></td><td><strong>−₹25,343</strong></td><td><strong>−₹21,494</strong></td><td><strong>−₹15,972</strong></td></tr>
+</tbody></table></div>
+  </section>
+  <section id="costs" aria-labelledby="h-costs">
+    <h2 id="h-costs">Where the money went, 1:2</h2>
+    <div class="two">
+      <figure><div class="chart" id="bridge-chart" data-src="bridge"></div><figcaption>Buying: the options lose before any cost; spread and charges add to it.</figcaption></figure>
+      <figure><div class="chart" id="bridge-chart-sell" data-src="bridge_sell"></div><figcaption>Selling: the same pre-cost amount the other way, then the same costs again.</figcaption></figure>
+    </div>
+    <h3>By days to expiry</h3>
+    <div class="tablewrap"><table><thead><tr><th>Contract</th><th>Trades</th><th>Buying: premium</th><th>Buying: net</th><th>Selling: margin</th><th>Selling: net</th></tr></thead><tbody>
+<tr><th scope="row">expiry day (0DTE)</th><td>259</td><td>₹4,013</td><td>−₹89,800</td><td>₹1,48,907</td><td>+₹49,664</td></tr>
+<tr><th scope="row">1 session left</th><td>260</td><td>₹5,968</td><td>−₹66,690</td><td>₹1,19,581</td><td>+₹20,773</td></tr>
+<tr><th scope="row">2-4 sessions left</th><td>697</td><td>₹8,684</td><td>−₹1,12,901</td><td>₹1,17,205</td><td>−₹30,836</td></tr>
+<tr><th scope="row">5+ sessions left</th><td>2</td><td>₹17,160</td><td>−₹1,785</td><td>₹1,26,164</td><td>+₹1,197</td></tr>
+</tbody></table></div>
+  </section>
+  <section id="rules" aria-labelledby="h-rules">
+    <h2 id="h-rules">The rules as tested</h2>
+    <dl class="rules">
+<div class="rule"><dt>Signal</dt><dd>The NIFTYBEES study&#x27;s rules, read on the NIFTY 50 index itself: the opening range is the high and low of 09:15:00 to 09:29:59; from 09:30 the first move above the high or below the low is the breakout.</dd></div><div class="rule"><dt>Contract</dt><dd>A break above uses the at-the-money CALL, a break below the at-the-money PUT: the strike nearest NIFTY at the breakout (50 apart), of the nearest weekly expiry on or after the trade day as NSE listed it (Thursdays to August 2025, Tuesdays after). On expiry day that is the contract expiring that afternoon.</dd></div><div class="rule"><dt>Buying</dt><dd>The option is bought at the breakout and sold at the exit.</dd></div><div class="rule"><dt>Selling (the mirror)</dt><dd>The same option is SOLD at the same moment and bought back at the same exits. Nothing else changes.</dd></div><div class="rule"><dt>Exits</dt><dd>Levels on the index, as before: the stop is the other side of the opening range, the target 2 (3, 4, 5, 6) times the entry-to-stop distance beyond the entry. When NIFTY touches either, the option is closed at market. Anything still open is closed at 15:15. For a seller the index &#x27;target&#x27; is the losing exit and the &#x27;stop&#x27; the winning one.</dd></div><div class="rule"><dt>Trades a day</dt><dd>One. No re-entry, no reversal. No entry from 15:00.</dd></div><div class="rule"><dt>Size</dt><dd>One lot of 65 units (today&#x27;s NIFTY lot; it was 50, then 25, then 75 during the five years).</dd></div><div class="rule"><dt>Fills</dt><dd>Every fill pays half the spread (0.15% of the premium) and one ₹0.05 tick: bought above the mid, sold below it. The recorded at-the-money same-week spread is a median 0.23% of the premium, so this is a little worse.</dd></div><div class="rule"><dt>Charges</dt><dd>Angel One&#x27;s option rate card at today&#x27;s rates (the app&#x27;s fee model): ₹20 an order, STT 0.15% of the premium sold (a seller pays it on the opening sale), NSE 0.03503%, SEBI and stamp duty, GST 18%.</dd></div><div class="rule"><dt>Margin (selling)</dt><dd>The app&#x27;s SPAN-lite engine (±6% scan plus 3% exposure, calibrated on NIFTY), plus the extra 2% ELM on short options on their expiry day.</dd></div><div class="rule"><dt>Account</dt><dd>₹2,00,000, no compounding: drawdowns and monthly returns are measured on it.</dd></div>
+    </dl>
+  </section>
+  <section id="model" aria-labelledby="h-model">
+    <h2 id="h-model">How the option prices were obtained</h2>
+    <div class="prose"><p>No source this app can reach keeps intraday prices of EXPIRED NIFTY options: Angel One and Dhan serve candles only for live contracts, and the app&#x27;s own option-chain recorder started on 5 Oct 2026. So every entry and exit premium is modelled, with the method the NIFTY BANK study built and validated, redone for weekly options.</p><p>Each contract&#x27;s volatility comes from the previous session&#x27;s REAL NSE closing prices (bhavcopy) for that very expiry; nothing from the trade day&#x27;s own option prices is used. During the day it moves with India VIX (exponent 1.5, smile rule &#x27;moneyness&#x27;, chosen on 2021-23 only). Time runs on a clock of trading minutes plus 0.2 of a session a night.</p><p>Check 1, real closing prices, 2024-26 (not used for any choice): the model&#x27;s day-over-day change was off by −1.40% of the premium on average over 4,060 option-days.</p><p>Check 2, the real intraday quotes the recorder kept (14 sessions, 5-23 Oct 2026, entries every 30 minutes). The first model ran the clock flat through the day; it overpriced expiry-day options at entry and decayed them too fast (change to 15:15 −14.3% of the premium on expiry day). NIFTY&#x27;s variance is not flat: 15% of an expiry day&#x27;s has gone by 09:30, against 4% of its minutes. So the final model counts each minute by its share of a day&#x27;s variance, measured on NIFTY&#x27;s own 2021-23 minutes (no option prices). Change errors with it: 2-4 days to expiry +0.6% (60 min) and +2.6% (to 15:15); 1 day −0.5% and +0.9%; expiry day still −7.2% (120 min) and −11.3% (to 15:15). Expiry-day options still decay too fast in the model: that makes buying look a little worse and selling a little better than they were.</p><p>Check 3, the strategy&#x27;s own trades: 14 of its October 2026 trades fall inside the recorded sessions. At the real quotes of their minutes the buyer made +₹35,670 before costs; the model said +₹33,213 (the seller: the same amounts with the sign flipped).</p><p>The first (flat-clock) model gave buying −₹4,30,345 and selling +₹1,98,145 at 1:2. Both are reported; the conclusions are the same.</p></div>
+    <h3>Model minus real, change in the premium over the hold (recorded quotes, % of premium)</h3>
+    <div class="tablewrap"><table><thead><tr><th>Option</th><th>60 min, first model</th><th>60 min, final</th><th>To 15:15, first</th><th>To 15:15, final</th></tr></thead><tbody>
+<tr><th scope="row">Expiry day</th><td>−8.6%</td><td>−5.4%</td><td>−14.3%</td><td>−11.3%</td></tr>
+<tr><th scope="row">1 day to expiry</th><td>−1.5%</td><td>−0.5%</td><td>−1.3%</td><td>+0.9%</td></tr>
+<tr><th scope="row">2–4 days</th><td>0.0%</td><td>+0.6%</td><td>+1.3%</td><td>+2.6%</td></tr>
+<tr><th scope="row">5+ days</th><td>−0.4%</td><td>−0.1%</td><td>−0.2%</td><td>+0.3%</td></tr>
+</tbody></table></div>
+    <h3>The strategy's own October 2026 trades at real quotes</h3>
+    <div class="tablewrap"><table><thead><tr><th>Date</th><th>Option</th><th>Held</th><th>Entry, model / real</th><th>Exit, model / real</th><th>Buyer, model</th><th>Buyer, real</th></tr></thead><tbody>
+<tr><th scope="row">5 Oct 2026</th><td>CALL 22550</td><td><span class=mono>09:30–10:24</span></td><td>116.48 / 124.78</td><td>81.86 / 98.97</td><td>−₹2,250</td><td><strong>−₹1,677</strong></td></tr>
+<tr><th scope="row">6 Oct 2026</th><td>CALL 22650</td><td><span class=mono>09:40–15:15</span></td><td>54.11 / 47.83</td><td>67.82 / 76.45</td><td>+₹891</td><td><strong>+₹1,861</strong></td></tr>
+<tr><th scope="row">7 Oct 2026</th><td>PUT 22600</td><td><span class=mono>09:39–10:29</span></td><td>145.13 / 156.57</td><td>99.43 / 113.08</td><td>−₹2,970</td><td><strong>−₹2,828</strong></td></tr>
+<tr><th scope="row">8 Oct 2026</th><td>PUT 22500</td><td><span class=mono>09:43–13:30</span></td><td>135.87 / 138.05</td><td>301.34 / 297.10</td><td>+₹10,755</td><td><strong>+₹10,338</strong></td></tr>
+<tr><th scope="row">9 Oct 2026</th><td>CALL 22400</td><td><span class=mono>09:30–14:18</span></td><td>125.53 / 130.20</td><td>222.86 / 231.88</td><td>+₹6,326</td><td><strong>+₹6,609</strong></td></tr>
+<tr><th scope="row">12 Oct 2026</th><td>PUT 22500</td><td><span class=mono>09:40–15:15</span></td><td>84.55 / 87.12</td><td>195.70 / 196.22</td><td>+₹7,225</td><td><strong>+₹7,092</strong></td></tr>
+<tr><th scope="row">13 Oct 2026</th><td>CALL 22500</td><td><span class=mono>09:30–15:15</span></td><td>54.98 / 56.83</td><td>199.58 / 201.25</td><td>+₹9,399</td><td><strong>+₹9,388</strong></td></tr>
+<tr><th scope="row">14 Oct 2026</th><td>CALL 22750</td><td><span class=mono>09:47–11:35</span></td><td>155.40 / 152.18</td><td>107.93 / 109.67</td><td>−₹3,086</td><td><strong>−₹2,762</strong></td></tr>
+<tr><th scope="row">15 Oct 2026</th><td>CALL 22750</td><td><span class=mono>09:30–11:50</span></td><td>140.78 / 128.50</td><td>291.57 / 282.65</td><td>+₹9,801</td><td><strong>+₹10,020</strong></td></tr>
+<tr><th scope="row">16 Oct 2026</th><td>PUT 22950</td><td><span class=mono>09:31–10:12</span></td><td>109.41 / 130.75</td><td>54.66 / 73.75</td><td>−₹3,559</td><td><strong>−₹3,705</strong></td></tr>
+<tr><th scope="row">19 Oct 2026</th><td>PUT 22950</td><td><span class=mono>12:03–15:15</span></td><td>46.11 / 49.62</td><td>76.93 / 79.17</td><td>+₹2,004</td><td><strong>+₹1,921</strong></td></tr>
+<tr><th scope="row">21 Oct 2026</th><td>CALL 23100</td><td><span class=mono>09:30–10:05</span></td><td>171.25 / 169.18</td><td>117.13 / 123.92</td><td>−₹3,517</td><td><strong>−₹2,941</strong></td></tr>
+<tr><th scope="row">22 Oct 2026</th><td>PUT 22550</td><td><span class=mono>09:35–10:22</span></td><td>158.84 / 159.03</td><td>91.34 / 97.47</td><td>−₹4,388</td><td><strong>−₹4,001</strong></td></tr>
+<tr><th scope="row">23 Oct 2026</th><td>PUT 22700</td><td><span class=mono>09:31–10:09</span></td><td>144.87 / 125.12</td><td>246.12 / 222.93</td><td>+₹6,581</td><td><strong>+₹6,357</strong></td></tr>
+</tbody></table></div>
+  </section>
+  <section id="variants" aria-labelledby="h-variants">
+    <h2 id="h-variants">If one assumption changes</h2>
+    <div class="tablewrap"><table><thead><tr><th>Change (1:2)</th><th>Buying net</th><th>Selling net</th></tr></thead><tbody>
+<tr><th scope="row">None (the results above)</th><td>−₹2,71,175</td><td>+₹40,798</td></tr>
+<tr><th scope="row">VIX pass-through off (beta 0; chosen 1.5)</th><td>−₹2,35,413</td><td>+₹5,672</td></tr>
+<tr><th scope="row">VIX pass-through beta 0.4 (chosen 1.5)</th><td>−₹2,46,233</td><td>+₹16,307</td></tr>
+<tr><th scope="row">smile rule &#x27;strike&#x27; (chosen &#x27;moneyness&#x27;)</th><td>−₹3,13,605</td><td>+₹82,774</td></tr>
+<tr><th scope="row">double the spread (0.30% a side)</th><td>−₹2,96,885</td><td>+₹15,119</td></tr>
+<tr><th scope="row">next week&#x27;s expiry instead</th><td>−₹1,73,548</td><td>−₹1,31,564</td></tr>
+<tr><th scope="row">no trades on the contract&#x27;s expiry day</th><td>−₹1,81,375</td><td>−₹8,866</td></tr>
+<tr><th scope="row">The first model (flat clock)</th><td>−₹4,30,345</td><td>+₹1,98,145</td></tr>
+</tbody></table></div>
+  </section>
+  <section id="data" aria-labelledby="h-data">
+    <h2 id="h-data">Data and gaps</h2>
+    <ul class="prose"><li>NSE F&amp;O bhavcopies for 1,249 sessions (2021-10-01 to 2026-10-23); exchange holidays have none. 1,245 sessions gave a smile; Diwali Muhurat files are not used.</li><li>NSE moved the 2023 Bakri Id holiday from 28 to 29 June at short notice: its files list that week&#x27;s expiry as 29 June until 27 June, but the contracts expired on 28 June. The one such case; corrected.</li><li>NIFTY 50 and India VIX 1-minute candles from Angel One. 13 sessions in the window have no 09:15 minute or are not full sessions and are left out: 30 Nov 2021, 4 Jan 2022, 7 Mar 2022, 28 Jun 2022, 1 Jul 2022, 24 May 2023, 2 Mar 2024, 18 May 2024, 14 Jan 2025, 13 May 2025, 12 Jun 2025, 21 Oct 2025, 7 Jul 2026.</li><li>Since 3 Aug 2026 Angel serves almost no index minutes after 15:14 (NSE&#x27;s closing auction); the 15:15 exit uses the 15:14 minute.</li><li>Intraday option quotes: the app&#x27;s recorder, 14 sessions, every minute, ATM ±10 strikes. Lot sizes in the window: 50, 25 (Jul-Dec 2024 in NSE&#x27;s files), 75, now 65; every trade here uses 65.</li></ul>
+  </section>
+  <footer>
+    <p>Code and outputs are in <code>backend/research/nifty_options_orb_2026_10/</code> of the app repository; <code>nopt_report.py</code> rebuilds this page. The ETF version of the same rules is in <code>backend/research/niftybees_orb_2026_10/</code>.</p>
+  </footer>
+</div>
+<div class="tip" id="tip" role="status" hidden></div>
+
+<script>
+(function () {
+  "use strict";
+  const D = {"eq":{"dates":["2021-10-25","2021-10-26","2021-10-27","2021-10-28","2021-10-29","2021-11-01","2021-11-02","2021-11-03","2021-11-08","2021-11-09","2021-11-10","2021-11-11","2021-11-12","2021-11-15","2021-11-16","2021-11-17","2021-11-18","2021-11-22","2021-11-23","2021-11-24","2021-11-25","2021-11-26","2021-11-29","2021-12-01","2021-12-02","2021-12-03","2021-12-06","2021-12-07","2021-12-08","2021-12-09","2021-12-10","2021-12-13","2021-12-14","2021-12-15","2021-12-16","2021-12-17","2021-12-20","2021-12-21","2021-12-22","2021-12-23","2021-12-24","2021-12-27","2021-12-28","2021-12-29","2021-12-30","2021-12-31","2022-01-03","2022-01-05","2022-01-06","2022-01-07","2022-01-10","2022-01-11","2022-01-12","2022-01-13","2022-01-14","2022-01-17","2022-01-18","2022-01-19","2022-01-20","2022-01-21","2022-01-24","2022-01-25","2022-01-27","2022-01-28","2022-01-31","2022-02-01","2022-02-02","2022-02-03","2022-02-04","2022-02-07","2022-02-08","2022-02-09","2022-02-10","2022-02-11","2022-02-14","2022-02-15","2022-02-16","2022-02-17","2022-02-18","2022-02-21","2022-02-22","2022-02-23","2022-02-24","2022-02-25","2022-02-28","2022-03-02","2022-03-03","2022-03-04","2022-03-08","2022-03-09","2022-03-10","2022-03-11","2022-03-14","2022-03-15","2022-03-16","2022-03-17","2022-03-21","2022-03-22","2022-03-23","2022-03-24","2022-03-25","2022-03-28","2022-03-29","2022-03-30","2022-03-31","2022-04-01","2022-04-04","2022-04-05","2022-04-06","2022-04-07","2022-04-08","2022-04-11","2022-04-12","2022-04-13","2022-04-18","2022-04-19","2022-04-20","2022-04-21","2022-04-22","2022-04-25","2022-04-26","2022-04-27","2022-04-28","2022-04-29","2022-05-02","2022-05-04","2022-05-05","2022-05-06","2022-05-09","2022-05-10","2022-05-11","2022-05-12","2022-05-13","2022-05-16","2022-05-17","2022-05-18","2022-05-19","2022-05-20","2022-05-23","2022-05-24","2022-05-25","2022-05-26","2022-05-27","2022-05-30","2022-05-31","2022-06-01","2022-06-02","2022-06-03","2022-06-06","2022-06-07","2022-06-08","2022-06-09","2022-06-10","2022-06-13","2022-06-14","2022-06-15","2022-06-16","2022-06-17","2022-06-20","2022-06-21","2022-06-22","2022-06-23","2022-06-24","2022-06-27","2022-06-29","2022-06-30","2022-07-04","2022-07-05","2022-07-06","2022-07-07","2022-07-08","2022-07-11","2022-07-12","2022-07-13","2022-07-14","2022-07-15","2022-07-18","2022-07-19","2022-07-20","2022-07-21","2022-07-22","2022-07-25","2022-07-26","2022-07-27","2022-07-28","2022-07-29","2022-08-01","2022-08-02","2022-08-03","2022-08-04","2022-08-05","2022-08-08","2022-08-10","2022-08-11","2022-08-12","2022-08-16","2022-08-17","2022-08-18","2022-08-19","2022-08-22","2022-08-23","2022-08-24","2022-08-25","2022-08-26","2022-08-29","2022-08-30","2022-09-01","2022-09-02","2022-09-05","2022-09-06","2022-09-07","2022-09-08","2022-09-09","2022-09-12","2022-09-13","2022-09-14","2022-09-15","2022-09-16","2022-09-19","2022-09-20","2022-09-21","2022-09-22","2022-09-23","2022-09-26","2022-09-27","2022-09-28","2022-09-29","2022-09-30","2022-10-03","2022-10-04","2022-10-06","2022-10-07","2022-10-10","2022-10-11","2022-10-12","2022-10-13","2022-10-14","2022-10-17","2022-10-18","2022-10-19","2022-10-20","2022-10-21","2022-10-25","2022-10-27","2022-10-28","2022-10-31","2022-11-01","2022-11-02","2022-11-03","2022-11-04","2022-11-07","2022-11-09","2022-11-10","2022-11-11","2022-11-14","2022-11-15","2022-11-16","2022-11-17","2022-11-18","2022-11-21","2022-11-22","2022-11-23","2022-11-24","2022-11-25","2022-11-28","2022-11-29","2022-11-30","2022-12-01","2022-12-02","2022-12-05","2022-12-06","2022-12-07","2022-12-08","2022-12-09","2022-12-12","2022-12-13","2022-12-14","2022-12-15","2022-12-16","2022-12-19","2022-12-20","2022-12-21","2022-12-22","2022-12-23","2022-12-26","2022-12-27","2022-12-28","2022-12-29","2022-12-30","2023-01-02","2023-01-03","2023-01-04","2023-01-05","2023-01-06","2023-01-09","2023-01-10","2023-01-11","2023-01-12","2023-01-13","2023-01-16","2023-01-17","2023-01-18","2023-01-19","2023-01-20","2023-01-23","2023-01-24","2023-01-25","2023-01-27","2023-01-30","2023-01-31","2023-02-01","2023-02-02","2023-02-03","2023-02-06","2023-02-07","2023-02-08","2023-02-09","2023-02-10","2023-02-13","2023-02-14","2023-02-15","2023-02-16","2023-02-17","2023-02-20","2023-02-21","2023-02-22","2023-02-23","2023-02-24","2023-02-27","2023-02-28","2023-03-01","2023-03-02","2023-03-03","2023-03-06","2023-03-08","2023-03-09","2023-03-10","2023-03-13","2023-03-14","2023-03-15","2023-03-16","2023-03-17","2023-03-20","2023-03-21","2023-03-22","2023-03-23","2023-03-24","2023-03-27","2023-03-28","2023-03-29","2023-03-31","2023-04-03","2023-04-05","2023-04-06","2023-04-10","2023-04-11","2023-04-12","2023-04-13","2023-04-17","2023-04-18","2023-04-19","2023-04-20","2023-04-21","2023-04-24","2023-04-25","2023-04-26","2023-04-27","2023-04-28","2023-05-02","2023-05-03","2023-05-04","2023-05-05","2023-05-08","2023-05-09","2023-05-10","2023-05-11","2023-05-12","2023-05-15","2023-05-16","2023-05-17","2023-05-18","2023-05-19","2023-05-22","2023-05-23","2023-05-25","2023-05-26","2023-05-29","2023-05-30","2023-05-31","2023-06-01","2023-06-02","2023-06-05","2023-06-06","2023-06-07","2023-06-08","2023-06-09","2023-06-12","2023-06-13","2023-06-14","2023-06-15","2023-06-16","2023-06-19","2023-06-20","2023-06-21","2023-06-22","2023-06-23","2023-06-26","2023-06-27","2023-06-28","2023-06-30","2023-07-03","2023-07-04","2023-07-05","2023-07-06","2023-07-07","2023-07-10","2023-07-11","2023-07-12","2023-07-13","2023-07-14","2023-07-17","2023-07-18","2023-07-19","2023-07-20","2023-07-21","2023-07-24","2023-07-25","2023-07-26","2023-07-27","2023-07-28","2023-07-31","2023-08-01","2023-08-02","2023-08-03","2023-08-04","2023-08-07","2023-08-08","2023-08-09","2023-08-10","2023-08-11","2023-08-14","2023-08-16","2023-08-17","2023-08-18","2023-08-21","2023-08-22","2023-08-23","2023-08-24","2023-08-25","2023-08-28","2023-08-29","2023-08-30","2023-08-31","2023-09-01","2023-09-04","2023-09-05","2023-09-06","2023-09-07","2023-09-08","2023-09-11","2023-09-12","2023-09-13","2023-09-14","2023-09-15","2023-09-18","2023-09-20","2023-09-21","2023-09-22","2023-09-25","2023-09-26","2023-09-27","2023-09-28","2023-09-29","2023-10-03","2023-10-04","2023-10-05","2023-10-06","2023-10-09","2023-10-10","2023-10-11","2023-10-12","2023-10-13","2023-10-16","2023-10-17","2023-10-18","2023-10-19","2023-10-20","2023-10-23","2023-10-25","2023-10-26","2023-10-27","2023-10-30","2023-10-31","2023-11-01","2023-11-02","2023-11-03","2023-11-06","2023-11-07","2023-11-08","2023-11-09","2023-11-10","2023-11-13","2023-11-15","2023-11-16","2023-11-17","2023-11-20","2023-11-21","2023-11-22","2023-11-23","2023-11-24","2023-11-28","2023-11-29","2023-11-30","2023-12-01","2023-12-04","2023-12-05","2023-12-06","2023-12-07","2023-12-08","2023-12-11","2023-12-12","2023-12-13","2023-12-14","2023-12-15","2023-12-18","2023-12-19","2023-12-20","2023-12-21","2023-12-22","2023-12-26","2023-12-27","2023-12-28","2023-12-29","2024-01-01","2024-01-02","2024-01-03","2024-01-04","2024-01-05","2024-01-08","2024-01-09","2024-01-10","2024-01-11","2024-01-12","2024-01-15","2024-01-16","2024-01-17","2024-01-18","2024-01-19","2024-01-20","2024-01-23","2024-01-24","2024-01-25","2024-01-29","2024-01-30","2024-01-31","2024-02-01","2024-02-02","2024-02-05","2024-02-06","2024-02-07","2024-02-08","2024-02-09","2024-02-12","2024-02-13","2024-02-14","2024-02-15","2024-02-16","2024-02-19","2024-02-20","2024-02-21","2024-02-22","2024-02-23","2024-02-26","2024-02-27","2024-02-28","2024-02-29","2024-03-01","2024-03-04","2024-03-05","2024-03-06","2024-03-07","2024-03-11","2024-03-12","2024-03-13","2024-03-14","2024-03-15","2024-03-18","2024-03-19","2024-03-20","2024-03-21","2024-03-22","2024-03-26","2024-03-27","2024-03-28","2024-04-01","2024-04-02","2024-04-03","2024-04-04","2024-04-05","2024-04-08","2024-04-09","2024-04-10","2024-04-12","2024-04-15","2024-04-16","2024-04-18","2024-04-19","2024-04-22","2024-04-23","2024-04-24","2024-04-25","2024-04-26","2024-04-29","2024-04-30","2024-05-02","2024-05-03","2024-05-06","2024-05-07","2024-05-08","2024-05-09","2024-05-10","2024-05-13","2024-05-14","2024-05-15","2024-05-16","2024-05-17","2024-05-21","2024-05-22","2024-05-23","2024-05-24","2024-05-27","2024-05-28","2024-05-29","2024-05-30","2024-05-31","2024-06-03","2024-06-04","2024-06-05","2024-06-06","2024-06-07","2024-06-10","2024-06-11","2024-06-12","2024-06-13","2024-06-14","2024-06-18","2024-06-19","2024-06-20","2024-06-21","2024-06-24","2024-06-25","2024-06-26","2024-06-27","2024-06-28","2024-07-01","2024-07-02","2024-07-03","2024-07-04","2024-07-05","2024-07-08","2024-07-09","2024-07-10","2024-07-11","2024-07-12","2024-07-15","2024-07-16","2024-07-18","2024-07-19","2024-07-22","2024-07-23","2024-07-24","2024-07-25","2024-07-26","2024-07-29","2024-07-30","2024-07-31","2024-08-01","2024-08-02","2024-08-05","2024-08-06","2024-08-07","2024-08-08","2024-08-09","2024-08-12","2024-08-13","2024-08-14","2024-08-16","2024-08-19","2024-08-20","2024-08-21","2024-08-22","2024-08-23","2024-08-26","2024-08-27","2024-08-28","2024-08-29","2024-08-30","2024-09-02","2024-09-03","2024-09-04","2024-09-05","2024-09-06","2024-09-09","2024-09-10","2024-09-11","2024-09-12","2024-09-13","2024-09-16","2024-09-17","2024-09-18","2024-09-19","2024-09-20","2024-09-23","2024-09-24","2024-09-25","2024-09-26","2024-09-27","2024-09-30","2024-10-01","2024-10-03","2024-10-04","2024-10-07","2024-10-08","2024-10-09","2024-10-10","2024-10-11","2024-10-14","2024-10-15","2024-10-16","2024-10-17","2024-10-18","2024-10-21","2024-10-22","2024-10-23","2024-10-24","2024-10-25","2024-10-28","2024-10-29","2024-10-30","2024-10-31","2024-11-04","2024-11-05","2024-11-06","2024-11-07","2024-11-08","2024-11-11","2024-11-12","2024-11-13","2024-11-14","2024-11-18","2024-11-19","2024-11-21","2024-11-22","2024-11-25","2024-11-26","2024-11-27","2024-11-28","2024-11-29","2024-12-02","2024-12-03","2024-12-04","2024-12-05","2024-12-06","2024-12-09","2024-12-10","2024-12-11","2024-12-12","2024-12-13","2024-12-16","2024-12-17","2024-12-18","2024-12-19","2024-12-20","2024-12-23","2024-12-24","2024-12-26","2024-12-27","2024-12-30","2024-12-31","2025-01-01","2025-01-02","2025-01-03","2025-01-06","2025-01-07","2025-01-08","2025-01-09","2025-01-10","2025-01-15","2025-01-16","2025-01-17","2025-01-20","2025-01-21","2025-01-22","2025-01-23","2025-01-24","2025-01-27","2025-01-28","2025-01-29","2025-01-30","2025-01-31","2025-02-01","2025-02-03","2025-02-04","2025-02-05","2025-02-06","2025-02-07","2025-02-10","2025-02-11","2025-02-12","2025-02-13","2025-02-14","2025-02-17","2025-02-18","2025-02-19","2025-02-20","2025-02-21","2025-02-24","2025-02-25","2025-02-27","2025-02-28","2025-03-03","2025-03-04","2025-03-05","2025-03-06","2025-03-07","2025-03-10","2025-03-11","2025-03-12","2025-03-13","2025-03-17","2025-03-18","2025-03-19","2025-03-20","2025-03-21","2025-03-24","2025-03-25","2025-03-26","2025-03-27","2025-03-28","2025-04-01","2025-04-02","2025-04-03","2025-04-04","2025-04-07","2025-04-08","2025-04-09","2025-04-11","2025-04-15","2025-04-16","2025-04-17","2025-04-21","2025-04-22","2025-04-23","2025-04-24","2025-04-25","2025-04-28","2025-04-29","2025-04-30","2025-05-02","2025-05-05","2025-05-06","2025-05-07","2025-05-08","2025-05-09","2025-05-12","2025-05-14","2025-05-15","2025-05-16","2025-05-19","2025-05-20","2025-05-21","2025-05-22","2025-05-23","2025-05-26","2025-05-27","2025-05-28","2025-05-29","2025-05-30","2025-06-02","2025-06-03","2025-06-04","2025-06-05","2025-06-06","2025-06-09","2025-06-10","2025-06-11","2025-06-13","2025-06-16","2025-06-17","2025-06-18","2025-06-19","2025-06-20","2025-06-23","2025-06-24","2025-06-25","2025-06-26","2025-06-27","2025-06-30","2025-07-01","2025-07-02","2025-07-03","2025-07-04","2025-07-07","2025-07-08","2025-07-09","2025-07-10","2025-07-11","2025-07-14","2025-07-15","2025-07-16","2025-07-17","2025-07-18","2025-07-21","2025-07-22","2025-07-23","2025-07-24","2025-07-25","2025-07-28","2025-07-29","2025-07-30","2025-07-31","2025-08-01","2025-08-04","2025-08-05","2025-08-06","2025-08-07","2025-08-08","2025-08-11","2025-08-12","2025-08-13","2025-08-14","2025-08-18","2025-08-19","2025-08-20","2025-08-21","2025-08-22","2025-08-25","2025-08-26","2025-08-28","2025-08-29","2025-09-01","2025-09-02","2025-09-03","2025-09-04","2025-09-05","2025-09-08","2025-09-09","2025-09-10","2025-09-11","2025-09-12","2025-09-15","2025-09-16","2025-09-17","2025-09-18","2025-09-19","2025-09-22","2025-09-23","2025-09-24","2025-09-25","2025-09-26","2025-09-29","2025-09-30","2025-10-01","2025-10-03","2025-10-06","2025-10-07","2025-10-08","2025-10-09","2025-10-10","2025-10-13","2025-10-14","2025-10-15","2025-10-16","2025-10-17","2025-10-20","2025-10-23","2025-10-24","2025-10-27","2025-10-28","2025-10-29","2025-10-30","2025-10-31","2025-11-03","2025-11-04","2025-11-06","2025-11-07","2025-11-10","2025-11-11","2025-11-12","2025-11-13","2025-11-14","2025-11-17","2025-11-18","2025-11-19","2025-11-20","2025-11-21","2025-11-24","2025-11-25","2025-11-26","2025-11-27","2025-11-28","2025-12-01","2025-12-02","2025-12-03","2025-12-04","2025-12-05","2025-12-08","2025-12-09","2025-12-10","2025-12-11","2025-12-12","2025-12-15","2025-12-16","2025-12-17","2025-12-18","2025-12-19","2025-12-22","2025-12-23","2025-12-24","2025-12-26","2025-12-29","2025-12-30","2025-12-31","2026-01-01","2026-01-02","2026-01-05","2026-01-06","2026-01-07","2026-01-08","2026-01-09","2026-01-12","2026-01-13","2026-01-14","2026-01-16","2026-01-19","2026-01-20","2026-01-21","2026-01-22","2026-01-23","2026-01-27","2026-01-28","2026-01-29","2026-01-30","2026-02-01","2026-02-02","2026-02-03","2026-02-04","2026-02-05","2026-02-06","2026-02-09","2026-02-10","2026-02-11","2026-02-12","2026-02-13","2026-02-16","2026-02-17","2026-02-18","2026-02-19","2026-02-20","2026-02-23","2026-02-24","2026-02-25","2026-02-26","2026-02-27","2026-03-02","2026-03-04","2026-03-05","2026-03-06","2026-03-09","2026-03-10","2026-03-11","2026-03-12","2026-03-13","2026-03-16","2026-03-17","2026-03-18","2026-03-19","2026-03-20","2026-03-23","2026-03-24","2026-03-25","2026-03-27","2026-03-30","2026-04-01","2026-04-02","2026-04-06","2026-04-07","2026-04-08","2026-04-09","2026-04-10","2026-04-13","2026-04-15","2026-04-16","2026-04-17","2026-04-20","2026-04-21","2026-04-22","2026-04-23","2026-04-24","2026-04-27","2026-04-28","2026-04-29","2026-04-30","2026-05-04","2026-05-05","2026-05-06","2026-05-07","2026-05-08","2026-05-11","2026-05-12","2026-05-13","2026-05-14","2026-05-15","2026-05-18","2026-05-19","2026-05-20","2026-05-21","2026-05-22","2026-05-25","2026-05-26","2026-05-27","2026-05-29","2026-06-01","2026-06-02","2026-06-03","2026-06-04","2026-06-05","2026-06-08","2026-06-09","2026-06-10","2026-06-11","2026-06-12","2026-06-15","2026-06-16","2026-06-17","2026-06-18","2026-06-19","2026-06-22","2026-06-23","2026-06-24","2026-06-25","2026-06-29","2026-06-30","2026-07-01","2026-07-02","2026-07-03","2026-07-06","2026-07-08","2026-07-09","2026-07-10","2026-07-13","2026-07-14","2026-07-15","2026-07-16","2026-07-17","2026-07-20","2026-07-21","2026-07-22","2026-07-23","2026-07-24","2026-07-27","2026-07-28","2026-07-29","2026-07-30","2026-07-31","2026-08-03","2026-08-04","2026-08-05","2026-08-06","2026-08-07","2026-08-10","2026-08-11","2026-08-12","2026-08-13","2026-08-14","2026-08-17","2026-08-18","2026-08-19","2026-08-20","2026-08-21","2026-08-24","2026-08-25","2026-08-26","2026-08-27","2026-08-28","2026-08-31","2026-09-01","2026-09-02","2026-09-03","2026-09-04","2026-09-07","2026-09-08","2026-09-09","2026-09-10","2026-09-11","2026-09-15","2026-09-16","2026-09-17","2026-09-18","2026-09-21","2026-09-22","2026-09-23","2026-09-24","2026-09-25","2026-09-28","2026-09-29","2026-09-30","2026-10-01","2026-10-05","2026-10-06","2026-10-07","2026-10-08","2026-10-09","2026-10-12","2026-10-13","2026-10-14","2026-10-15","2026-10-16","2026-10-19","2026-10-21","2026-10-22","2026-10-23"],"net":[196975.2,193949.97,191628.67,196641.33,190316.05,193350.34,193936.04,192188.64,186720.34,185306.56,183380.39,186949.67,185186.56,185909.11,186981.18,184095.86,190128.05,199400.68,204706.59,201630.84,198586.03,205704.8,203681.61,199586.86,205931.19,210464.59,217651.84,223136.63,225237.91,221240.31,217971.56,220510.12,218011.73,218134.07,218711.44,224132.54,225192.11,220972.14,218633.17,216675.83,217559.28,222551.61,220061.35,217517.28,214706.73,214865.31,219793.94,218345.86,215782.05,212744.34,210376.28,207833.97,206239.6,204156.98,205333.36,204563.36,206397.93,207655.43,215344.38,211075.75,221789.14,231347.1,226385.6,222180.48,219608.03,216579.0,216015.33,220184.46,216016.76,224922.32,220965.93,221218.49,219319.65,217857.19,220389.25,216879.9,213149.41,213237.87,210941.67,206740.1,210233.31,212378.44,226696.08,226807.29,222357.45,217542.99,222593.39,217545.5,213155.74,222228.83,219338.23,218280.35,215756.7,220118.08,218971.36,216972.0,220512.66,217348.07,221772.99,218479.4,218114.92,213979.6,211788.44,212114.08,209846.41,214369.21,218107.81,215726.61,214775.92,212888.64,209836.01,206602.77,203807.08,201766.96,200123.76,208151.26,207392.25,206345.48,203749.94,201109.06,198326.44,196473.48,193260.93,191353.13,192033.93,198123.42,194773.24,192205.71,188649.23,184619.89,188955.22,189357.18,186337.52,182844.52,188467.41,185172.41,188395.01,192853.93,188995.01,190184.41,193044.9,198257.94,195877.24,196634.2,194332.66,194206.34,197627.67,199481.83,195962.7,194805.55,191492.65,198338.02,199226.71,199037.45,196388.38,192904.66,197101.26,193471.83,190203.47,188185.31,189128.69,185165.09,182563.26,182596.39,184978.93,181374.6,177964.66,180607.02,177937.95,175317.41,173003.15,171569.67,169543.13,168322.69,166368.84,163880.58,165772.14,168587.07,166234.98,168890.28,166927.01,166783.27,168021.18,165865.93,164655.19,162294.01,165073.12,163020.25,159885.84,163184.73,160629.86,162752.53,159480.61,156892.45,155140.77,154837.46,156159.54,154805.34,157283.57,160514.56,162778.18,159902.33,158364.81,159427.06,159450.96,164426.86,160084.99,159663.29,160555.12,160798.0,160608.17,158839.81,161599.66,160930.78,159578.88,160699.79,164787.5,172477.12,173061.9,170936.25,168444.39,164461.69,172290.9,172584.64,169478.81,174180.03,177877.48,183694.12,186538.54,186472.53,184103.73,182358.54,185810.81,191566.98,188990.38,190870.46,188650.73,186336.43,184839.43,183046.38,181874.23,179776.08,180556.84,182545.53,179929.12,181505.0,179881.19,179725.45,176441.48,174010.17,177998.89,179350.47,177459.61,177836.03,177552.38,175227.69,173673.45,171961.81,171345.98,170410.01,171551.76,171488.82,173088.57,170598.24,171683.42,170584.79,168795.03,168565.96,168851.28,166474.55,166252.4,164992.6,163658.07,166245.34,168660.39,167662.38,166129.68,168988.34,165753.3,169417.06,166996.4,170380.19,170063.74,175769.45,177862.48,174917.24,173797.17,171605.9,169964.26,167908.48,168655.51,171949.73,170059.06,168344.22,172229.18,176129.8,173759.56,172553.61,169554.5,174220.99,177318.75,178783.84,176480.33,174957.34,174266.77,173225.2,179937.0,184329.56,178087.34,173144.2,170528.7,167100.17,164314.18,162939.4,163040.82,164184.4,161578.17,159850.52,163976.07,162596.44,161315.37,159612.95,157522.94,155738.17,154384.6,158157.26,155890.86,158504.37,156337.91,154632.62,155120.61,154559.72,158489.62,156334.44,159481.07,162731.3,161125.74,157827.66,155273.77,159808.38,157216.79,161556.91,158993.4,156892.08,156011.18,154274.97,155824.79,154324.76,155393.03,153501.14,156190.66,153105.51,156071.18,155195.03,154221.73,152467.62,152916.81,150925.39,147708.27,148933.14,147197.14,145808.97,144741.19,142893.0,142744.06,141277.76,142828.83,140850.47,139594.34,137403.3,142045.19,139821.54,142090.26,141137.7,143724.89,141588.77,139706.37,140140.99,142352.29,146264.33,149147.3,146993.61,148483.56,146746.09,145359.65,148364.81,147770.16,146625.86,146720.33,145052.57,144433.56,143136.49,141982.29,143438.97,142130.47,144211.93,144211.93,144804.32,143225.73,141922.14,145146.71,147485.15,144689.07,142985.43,141714.21,141023.62,139320.05,137780.82,136554.92,140145.35,140461.5,139240.75,136392.85,139765.33,137675.13,136225.03,134466.46,136535.04,134282.08,132282.89,136078.34,134963.37,133697.38,131790.35,132397.7,130526.94,129731.92,129725.85,128392.78,126094.69,128441.48,128254.74,131891.88,129694.19,128284.93,126864.66,127043.63,125000.43,123358.9,124967.57,121766.48,123825.41,123739.62,121913.0,119902.32,118707.69,116952.2,115477.96,113499.84,111442.07,110332.11,109022.21,107666.44,110840.58,109312.65,107898.52,106689.04,105238.94,103722.3,106748.52,111335.49,112594.16,111111.95,110182.5,108204.55,110754.44,113403.03,111091.92,108816.1,107535.53,106039.94,109480.69,107982.28,106851.12,103765.96,102551.71,101583.25,100102.35,103257.09,102378.08,100219.21,100374.12,99678.46,98453.03,96656.64,95346.44,93301.61,95794.64,93839.08,96151.45,97022.29,94363.16,95500.12,93768.95,91696.12,90655.95,89154.32,87229.4,85688.63,84199.54,86193.15,85505.65,86021.43,90575.68,89034.95,87830.52,87123.67,85561.67,84128.19,83341.85,82000.67,84624.94,87085.27,87918.52,91149.88,92122.99,90890.89,88536.86,87032.02,85793.7,84582.81,81863.24,81055.11,79730.63,77185.1,75084.97,73311.82,79795.78,77400.09,78308.23,80490.51,78994.89,77301.34,75401.72,79595.48,81339.06,80633.75,79403.3,83175.66,81761.58,78998.41,81790.36,85138.85,83004.76,80558.26,81460.91,79055.26,76724.67,79367.36,82343.49,89561.29,86845.0,93729.79,98018.5,103021.86,100114.01,96071.26,92153.87,93655.43,93548.58,97119.25,93785.59,97904.65,94744.68,92504.79,89565.39,88477.02,86744.65,84769.84,82916.96,79061.11,78538.71,76887.42,78070.24,76516.23,74030.82,80907.66,78939.88,76370.19,74571.01,72061.12,75866.54,74442.57,83937.74,92270.54,89693.05,86987.11,90504.72,94397.27,93243.59,90280.48,90280.48,89432.09,95149.05,91935.43,89759.18,89479.74,98378.41,98052.24,100774.73,97801.6,96086.78,93899.23,91711.24,88632.55,86491.5,92918.02,89167.85,88586.19,86955.62,91498.69,93934.98,92230.38,94845.07,90644.29,89238.69,86960.4,91228.84,88777.61,94980.29,94436.42,89852.47,87134.75,86018.46,89937.39,87553.13,87267.84,85337.0,88452.2,86455.22,84194.6,83101.05,80846.74,87077.07,84306.22,79579.17,100536.36,122437.47,117890.7,129813.07,129651.38,127475.11,124767.26,121561.19,117342.81,115584.26,112970.05,109668.01,114489.52,111916.6,110764.73,108597.84,106647.31,103620.69,106856.91,106166.34,104833.83,102709.34,100147.88,98696.93,100494.24,106957.57,112489.24,109539.32,107538.67,105048.17,103317.18,109695.27,110003.92,114487.53,112202.4,115759.98,122137.64,119738.93,118252.29,116732.83,113657.2,114009.16,128799.11,135953.86,133650.5,131660.8,128536.83,126358.71,129024.24,125107.87,122047.38,121290.25,121716.72,122811.55,119931.03,119050.79,122479.16,120792.1,119129.02,115877.46,114584.23,114537.41,113167.07,115019.48,114649.27,112214.85,109889.01,108063.7,105770.32,102938.56,100850.34,98937.35,96978.55,95323.76,92251.54,89529.35,86902.73,85771.55,83459.9,87331.46,85739.13,92394.55,91135.03,87477.2,82893.08,87742.2,84769.82,82956.26,81031.46,78297.57,79314.67,82558.97,80909.36,86878.27,91681.73,98270.5,95179.01,90785.39,87462.28,92134.14,89775.95,85962.29,82896.15,81958.32,82691.42,79167.49,81999.14,86900.04,83018.47,90633.07,95290.33,102862.5,99841.99,98620.39,93690.04,88977.54,104411.14,99305.9,103395.73,100061.63,98445.91,100258.48,104181.15,100990.66,97829.03,102546.36,100594.78,99495.24,96847.52,95360.55,93148.47,89940.18,90420.54,94306.97,91714.68,86907.37,84237.53,80821.02,79070.21,76797.39,73591.0,71318.95,69638.36,67118.76,65263.93,68874.26,73963.72,71065.97,67270.59,68027.15,73732.96,71600.54,69071.07,67815.5,63779.57,67477.18,65386.94,69209.83,65336.35,62734.1,59559.61,57298.77,60152.57,61942.01,57383.02,53527.33,51926.42,52664.79,54468.2,51030.35,52495.95,59604.67,55462.66,50070.16,58232.82,60850.07,56941.16,61128.32,59340.07,59673.95,59754.2,57429.79,55182.87,61464.48,61582.42,61735.62,66361.94,62299.07,60810.88,56827.0,60129.94,58236.59,55583.25,53327.24,58545.4,58279.07,55663.73,60779.17,59388.16,56111.14,60876.97,58690.56,56280.48,52434.45,54337.54,50395.54,53756.96,56696.11,52761.16,49087.5,48140.23,48140.23,45692.06,55559.47,58542.43,56371.22,62945.32,61606.09,68773.73,76103.96,76026.45,72934.2,67401.22,65254.25,65601.3,63316.06,67943.94,67943.94,81865.14,77062.97,73314.31,70348.33,66854.09,72070.8,77784.82,72327.14,75931.35,73300.27,67583.55,64958.76,59348.29,56336.63,51030.84,52454.6,49648.96,47610.46,46294.22,44503.6,42405.69,41233.67,43234.7,48088.71,46771.06,42799.56,38886.4,46431.64,43094.63,40414.45,41174.17,48655.01,45644.66,46923.35,44519.62,47526.12,44142.93,41732.47,40082.95,40512.65,38716.51,40181.44,37506.1,35731.65,36427.89,33524.28,35418.51,37945.98,34329.12,35113.06,33414.55,39022.27,40650.69,38225.83,41015.04,38927.62,47102.86,44310.62,41183.52,39930.44,42386.13,40232.04,44409.43,49939.45,46719.0,44849.65,42375.77,39152.69,37260.67,35547.33,33345.92,36853.29,35214.87,38185.66,35090.25,32427.75,34455.42,32020.34,35097.41,39102.43,43481.33,40637.82,37804.53,36268.7,35428.76,35770.61,35436.26,39398.67,39022.01,37757.62,38273.59,35436.68,32051.97,31320.7,35317.55,40569.28,38210.51,37246.91,41209.99,42184.09,40773.55,37728.59,34732.61,32312.58,33101.68,30219.58,34489.03,36244.2,40153.17,43704.43,40233.48,36852.9,37250.27,38413.01,36000.48,33914.08,36054.25,32934.71,30499.79,33956.88,36170.53,32467.39,30440.16,27173.97,25407.38,24013.12,22204.48,21832.89,20828.41,25176.61,23250.61,20505.24,18475.24,14825.41,24116.08,21240.5,19140.58,22895.2,22734.51,21281.58,21705.18,26276.36,30190.37,27094.95,24902.51,22342.51,20372.36,17645.99,17621.62,15154.7,13355.17,13136.55,13523.99,10315.07,6844.93,7830.8,11344.88,8555.37,6877.66,5200.13,9836.03,7718.13,5448.73,3713.15,8945.26,17312.06,13030.25,10443.83,6591.72,11645.43,8485.31,18052.04,14263.24,11186.22,19210.33,16407.89,12833.89,8822.28,7049.52,3529.0,-1638.64,-4822.94,-6711.26,-7180.62,-9805.51,-13104.08,-16657.69,-17608.38,-17469.4,-14673.96,-7924.69,-8308.13,-10617.45,-5134.57,-2966.35,-8030.32,-391.69,-3580.77,-6485.54,68.75,-6744.71,-11166.04,-14280.38,-9529.99,-7394.09,-16606.97,-10368.81,-14461.92,-16959.1,-21651.64,-21819.81,-20948.79,-14169.24,-21115.1,-19148.21,-24865.18,-24243.3,-19383.11,-25633.46,-29798.15,-35859.8,-42857.91,-39044.65,-38535.61,-39446.54,-38954.28,-36519.89,-39646.33,-35497.5,-32969.75,-35524.57,-36805.46,-36263.89,-40439.37,-35448.84,-36741.87,-40451.74,-36231.13,-40797.23,-46368.11,-50680.85,-54278.0,-58030.76,-60268.65,-64450.8,-53194.5,-57267.51,-59821.91,-64675.84,-69009.51,-71831.67,-66528.5,-63939.37,-66835.68,-66875.94,-70407.18,-72923.07,-63921.31,-56532.73,-51848.31,-57001.43,-56348.49,-50764.27,-53413.78,-57555.97,-62568.91,-57121.34,-59416.1,-57405.59,-59195.21,-58953.45,-61435.22,-63520.58,-65874.26,-68132.31,-61309.52,-63950.75,-66783.78,-69178.08,-66934.82,-66586.38,-66277.02,-64329.03,-66461.48,-70981.74,-71546.91,-68497.76,-71854.44,-76745.5,-78502.14,-74651.45,-77969.27,-80035.56,-79618.62,-82154.12,-85938.15,-88145.71,-89987.31,-89136.16,-88582.71,-90591.7,-91547.15,-86728.02,-85872.29,-87121.76,-90819.74,-92720.0,-93955.21,-93651.81,-95446.06,-97529.96,-100350.09,-100942.99,-100347.07,-101414.78,-102797.83,-99982.97,-103452.02,-105395.84,-103745.22,-105796.6,-107348.76,-109632.45,-110345.39,-109110.68,-110802.89,-109831.83,-111933.61,-113836.46,-113804.75,-111064.55,-97462.49,-100712.95,-100991.76,-104010.12,-104435.87,-98598.6,-100747.46,-94131.38,-97163.05,-94074.84,-97465.92,-100266.46,-102912.63,-105254.77,-104441.29,-107508.18,-96894.07,-90690.54,-83575.39,-74285.28,-77470.69,-67807.7,-71449.14,-69524.19,-73145.78,-77628.83,-71174.96],"pre":[202840.7,205689.73,207863.44,202682.35,208818.33,205577.61,204815.56,206426.67,211717.62,212963.6,214736.18,210985.96,212555.35,211647.39,210397.71,213124.4,206916.35,197408.23,191873.64,194795.64,197697.58,190355.08,192150.89,196084.15,189552.2,184791.09,177354.58,171642.36,169363.38,173228.03,176308.04,173569.35,175883.46,175593.05,174864.92,169208.27,167926.57,171975.12,174144.15,175953.81,174859.01,169634.83,171950.58,174339.28,177010.72,176626.56,171484.93,172787.61,175221.56,178046.12,180218.56,182583.0,184012.38,185953.52,184554.64,185125.89,183108.95,181677.44,173804.38,177872.5,166884.37,157047.32,161861.32,165789.21,168087.75,170868.96,171243.54,166907.9,170859.21,161701.26,165470.62,165035.18,166805.85,168068.14,165306.69,168607.59,172174.85,171926.32,173964.87,177944.04,174204.49,171857.89,157280.25,156861.71,161054.13,165638.16,160363.81,165140.18,169278.93,159931.02,162684.94,163450.31,165719.67,161086.8,162022.33,163845.22,160043.62,162990.54,158335.45,161475.11,161598.14,165533.07,167533.65,167034.79,169164.61,164386.4,160428.5,162639.8,163426.87,165176.6,168037.23,171094.23,173728.54,175630.92,177078.73,168806.47,169388.71,170294.2,172680.16,175108.54,177700.66,179380.7,182455.16,184161.6,183248.66,176935.4,180142.98,182476.71,185821.49,189661.91,185118.74,184549.96,187334.06,190605.81,184734.95,187869.95,184470.79,179743.7,183389.53,181964.68,178908.67,173505.46,175658.74,174681.2,176790.18,176741.85,173135.17,171053.34,174383.46,175353.06,178499.42,171458.78,170353.96,170314.21,172774.38,176081.41,171694.26,175089.6,178145.01,179963.1,178830.72,182648.13,185038.55,184795.43,182225.72,185677.64,188892.7,186049.81,188557.24,191048.21,193157.44,194403.21,196248.66,197304.47,199114.37,201403.86,199310.67,196295.85,198494.01,195670.57,197428.8,197372.81,195944.48,197939.74,199006.24,201156.31,198160.93,200044.05,203024.4,199558.53,201890.91,199558.58,202659.16,205111.0,206675.56,206794.76,205307.59,206528.64,203839.12,200396.36,197937.48,200653.14,202051.62,200784.62,200543.02,195344.65,199537.78,199736.83,198611.4,198168.54,198183.47,199812.62,196823.97,197299.1,198467.2,197155.86,192884.06,184935.91,184111.19,186048.29,188368.93,192183.48,184082.43,183554.9,186464.08,181550.04,177680.99,171597.64,168521.31,168403.29,170625.99,172171.05,168494.57,162523.98,164925.63,162879.45,164881.71,167010.4,168325.9,169952.11,170991.23,172890.84,171937.1,169788.29,172199.88,170420.51,171878.94,171869.45,175012.23,177257.93,173059.4,171530.22,173279.62,172695.05,172794.9,174957.72,176364.49,177939.86,178379.27,179148.55,177838.55,177746.37,176003.88,178332.56,177053.73,177998.34,179647.34,179733.51,179269.08,181483.85,181537.94,182651.9,183850.38,181079.15,178463.94,179306.67,180693.72,177671.63,180739.84,176869.6,179131.44,175565.23,175726.55,169796.5,167485.53,170266.05,171233.73,173296.95,174763.57,176640.53,175715.82,172245.28,173998.12,175527.03,171435.99,167337.86,169555.87,170620.66,173427.56,168549.29,165256.06,163629.15,165794.64,167136.15,167650.33,168548.0,161652.28,157000.57,163047.36,167795.21,170219.71,173503.93,176099.21,177286.68,177007.86,175686.68,178162.7,179709.05,175381.85,176600.22,177738.41,179315.49,181232.98,182857.72,184051.14,180098.04,182228.14,179418.15,181418.44,182969.91,182321.4,182750.74,178623.38,180618.7,177293.07,173889.05,175310.49,178453.15,180832.02,176106.88,178561.78,173987.63,176366.62,178285.8,179009.39,180601.44,178857.76,180179.98,178945.0,180697.62,177817.39,180737.48,177593.89,178338.5,179151.7,180748.6,180155.53,182009.12,185062.75,183676.62,185269.87,186534.96,187424.93,189122.75,189110.32,190433.77,188740.08,190567.73,191663.61,193707.56,188892.45,190955.8,188503.02,189296.97,186538.66,188543.29,190265.39,189648.01,187270.06,183186.58,180149.8,182133.61,180464.3,182052.84,183306.65,180096.3,180524.4,181513.36,181269.83,182811.07,183253.81,184392.24,185390.79,183791.22,184963.72,182702.93,182702.93,181950.82,183392.74,184571.16,181147.97,178631.65,181275.32,182834.92,183979.7,184506.85,186050.29,187440.56,188536.39,184745.57,184253.47,185321.96,188021.07,184476.05,186393.35,187680.0,189279.94,187049.53,189174.57,191013.86,187018.56,187978.35,189096.86,190865.84,190064.69,191752.93,192398.91,192236.84,193427.03,195552.45,193021.73,193049.5,189249.14,191312.45,192543.44,193792.67,193445.13,195350.93,196853.41,195055.83,198112.48,195888.65,195832.1,197487.49,199328.32,200377.44,201993.45,203334.96,205146.59,207044.34,208006.89,209179.0,210408.23,207025.61,208394.68,209653.32,210720.08,212043.49,213390.36,210168.58,205392.79,203962.46,205302.5,206062.05,207877.11,205149.74,202342.33,204480.72,206594.91,207724.84,209077.5,205465.25,206789.09,207765.18,210698.27,211779.78,212581.57,213895.92,210555.65,211277.9,213305.29,212966.2,213494.78,214565.1,216207.46,217375.01,219243.44,216579.47,218381.16,215907.03,214833.11,217317.98,216003.19,217580.76,219515.43,220368.0,221701.62,223481.94,224880.41,226239.58,224050.18,224573.93,223904.46,219173.95,220526.96,221566.29,222112.95,223522.69,224813.96,225433.87,226622.44,223836.2,221220.77,220190.51,216748.1,215578.19,216654.84,218872.82,220177.23,221228.17,222274.02,224838.21,225510.08,226656.85,229008.33,230948.2,232575.81,225904.01,228096.59,226988.5,224630.26,225982.9,227471.34,229177.22,224778.46,222855.79,223407.24,224453.04,220480.14,221719.32,224321.15,221361.33,217789.06,219740.48,222015.48,220930.13,223191.73,225303.14,222450.82,219269.94,211821.74,214395.7,207223.49,202675.94,197429.29,200165.93,204001.69,207702.79,205983.34,205895.98,202153.65,205269.49,200915.3,203896.08,205956.2,208754.55,209631.44,211162.32,212941.5,214621.62,218339.78,218639.62,220089.07,218699.89,220077.63,222405.73,215268.81,217030.03,219433.1,221070.42,223445.53,219430.94,220679.71,210952.11,202407.67,204766.18,207276.74,203539.85,199446.66,200446.71,203225.61,203225.61,203903.71,197994.66,201019.29,203016.29,203129.1,194036.76,194164.58,191240.32,194057.94,195636.61,197622.31,199635.82,202549.38,204549.09,197838.34,201397.92,201813.0,203289.69,198567.51,195908.56,197406.47,194597.66,198655.63,199851.29,201928.25,197437.43,199723.96,193338.63,193648.5,198034.06,200574.1,201533.56,197430.99,199619.73,199698.43,201470.59,198177.54,199950.81,202016.2,202919.4,204991.09,198574.91,200970.81,205409.28,183937.2,161686.53,166070.26,153807.87,153733.95,155695.18,158225.59,161290.28,165327.41,166897.11,169358.66,172528.88,167481.64,169867.48,170830.36,172826.99,174633.72,177448.85,173982.07,174480.01,175644.75,177615.52,179986.81,181247.61,179245.41,172575.73,166855.15,169621.22,171442.81,173768.08,175350.1,168672.2,168080.59,163320.68,165433.05,161699.37,155067.53,157280.81,158577.42,159932.21,162874.84,162303.79,147205.97,139784.71,141900.61,143729.9,146629.7,148617.33,145752.1,149515.99,152379.5,152937.62,152321.84,151049.41,153797.14,154485.66,150828.52,152343.96,153853.13,156963.32,158077.33,157936.27,159141.16,157116.07,157337.36,159570.2,161697.11,163356.05,165495.93,168191.67,170084.95,171802.46,173591.16,175072.87,177999.4,180525.21,182941.85,183888.67,186038.53,181992.59,183371.99,176484.9,177566.63,181083.06,185461.94,180360.05,183119.92,184749.36,186526.56,189034.18,187794.53,184358.58,185843.23,179695.39,174638.84,167808.61,170725.62,174938.5,178120.14,173217.99,175380.81,179026.41,181941.78,182731.96,181741.3,185053.61,181998.0,176903.39,180555.83,172681.19,167820.7,160015.1,162885.09,163911.5,168675.41,173238.91,157468.47,162337.0,158008.82,161182.72,162655.73,160590.8,156426.97,159417.24,162389.87,157455.19,159150.36,160035.56,162483.08,163792.36,165854.28,168859.25,168167.35,164051.76,166461.47,171130.65,173559.33,176780.82,178364.77,180501.45,183479.06,185565.51,187057.17,189395.57,191080.24,187207.57,181881.28,184569.54,188192.17,187270.48,181307.02,183282.85,185679.63,186717.57,190550.38,186638.23,188552.24,184555.12,188202.65,190591.66,193561.18,195623.1,192556.14,190425.81,194733.35,198372.67,199795.52,198880.64,196897.54,200130.19,198442.04,191095.0,195065.5,200315.27,191874.93,189003.68,192707.77,188318.69,189962.7,189412.58,189128.81,191292.91,193403.48,186890.08,186570.28,186222.99,181399.79,185325.93,186585.25,190380.14,186866.33,188594.75,191111.42,193178.16,187731.32,187832.25,190293.67,184938.11,186145.12,189226.61,184259.2,186291.55,188506.47,192181.45,190083.54,193881.3,190279.71,187071.6,190755.16,194228.76,194869.75,194869.75,197152.83,187063.98,183821.68,185807.49,179014.59,180198.61,172761.0,165164.22,165060.71,168014.97,173312.73,175248.01,174721.82,176847.08,172025.45,172025.45,157798.86,162424.44,166015.79,168736.57,172007.09,166542.56,160594.82,165909.39,162034.85,164424.28,169928.32,172343.53,177809.82,180571.65,185654.62,183966.88,186594.5,188472.5,189575.5,191153.13,193056.22,194062.95,191809.48,186696.24,187823.84,191633.35,195410.2,187587.43,190719.42,193212.48,192273.45,184591.03,187389.94,185898.38,188119.65,184929.15,188180.72,190394.26,191852.99,191230.69,192860.3,191229.99,193698.66,195289.2,194400.43,197150.08,195095.3,192365.02,195805.41,194845.1,196394.58,190602.79,188769.71,191008.86,188008.32,189947.9,181583.87,184169.63,187086.79,188161.96,185515.9,187531.81,183135.21,177379.47,180442.76,182151.92,184481.8,187503.49,189222.48,190775.63,192840.72,189121.84,190571.17,187413.2,190370.8,192868.55,190664.48,192964.9,189670.46,185458.98,180874.87,183570.87,186261.83,187603.51,188254.32,187735.92,187908.58,183764.98,183930.09,185023.21,184340.92,187034.76,190278.31,190826.55,186629.64,181167.62,183367.85,184187.5,179989.32,178835.67,180091.38,183006.17,185825.94,188063.41,187095.25,189821.9,185380.84,183408.0,179295.46,175542.46,178881.76,182054.68,181468.31,180123.05,182386.52,184242.63,181891.04,184834.25,187112.09,183480.43,181053.82,184585.7,186458.73,189593.3,191167.96,192361.95,193980.06,194180.46,195029.73,190439.91,192170.42,194712.05,196579.04,200095.97,190543.13,193226.55,195150.38,191214.99,191220.04,192485.36,191860.21,187076.14,182968.65,185926.23,187923.28,190299.29,192089.64,194669.78,194547.91,196809.98,198442.7,198477.58,197930.02,201005.86,204290.72,203133.59,199441.91,202095.4,203615.93,205117.15,200276.55,202244.15,204378.74,205943.16,200516.78,191927.32,196050.51,198497.6,202154.49,196877.94,199868.34,190088.81,193672.51,196547.75,188294.84,190948.4,194275.66,198054.79,199604.8,202894.52,207862.13,210891.09,212545.53,212812.91,215254.03,218391.96,221807.86,222561.42,222225.9,219233.84,212265.11,212478.65,214592.82,208887.44,206490.16,211382.69,203537.29,206514.95,209217.94,202444.23,209101.79,213208.96,216042.37,211006.52,208595.42,217646.54,211090.95,214880.6,217109.18,221581.14,221562.47,220409.73,213307.77,220000.91,217744.8,223274.59,222304.97,217113.41,223158.57,227002.39,232780.0,239537.89,235492.15,234698.94,235363.26,234641.02,232006.17,234868.73,230443.55,227668.05,230016.72,231122.59,230297.92,234221.95,228972.23,230053.95,233621.34,229111.95,233466.62,238853.26,243017.03,246394.9,249930.15,251959.77,255951.88,244457.92,248286.16,250607.0,255255.58,259401.67,262057.27,256453.93,253613.08,256286.54,256139.02,259527.53,261837.15,252580.39,244955.22,240081.87,245028.24,244125.44,238298.16,240753.65,244753.21,249548.29,243835.86,245945.1,243728.09,245368.48,244896.23,247182.45,249085.11,251278.44,253398.4,246316.95,248761.21,251423.19,253663.65,251178.91,250627.08,250137.94,248006.93,249946.98,254260.72,254630.54,251386.18,254603.49,259283.18,260846.05,256762.99,259920.67,261845.63,261209.55,263535.31,267140.04,269186.97,270892.37,269817.26,269058.7,270891.46,271693.26,266691.39,265630.62,266676.9,270182.43,271912.67,272992.71,272484.6,274086.86,276010.45,278675.56,279129.17,278328.58,279218.62,280440.09,277458.7,280790.16,282545.09,280703.97,282578.84,283965.92,286099.23,286610.55,285182.25,286707.79,285571.59,287535.79,289244.95,289033.91,286097.1,272255.64,275296.44,275352.38,278202.77,278461.77,272439.03,274411.42,267569.49,270412.08,267128.78,270378.95,272979.16,275431.5,277590.89,276622.12,279492.23,268612.82,262174.1,254850.73,245360.07,248342.42,238414.39,241884.45,239805.14,243210.56,247496.53,240797.89],"peak":61,"trough":1192,"cap":200000.0},"bridge":[["Before costs",-156114.86000000002],["Spread & slippage",-37617.64],["Charges",-77442.46],["Result",-271174.96]],"bridge_sell":[["Before costs",156114.86000000002],["Spread & slippage",-37616.61],["Charges",-77700.36],["Result",40797.88999999998]],"day":{}};
+  const NS = "http://www.w3.org/2000/svg";
+  const tip = document.getElementById("tip");
+  const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const MINUS = "−", RS = "₹";
+
+  function group(n) {
+    const s = String(Math.abs(Math.round(n)));
+    if (s.length <= 3) return s;
+    let head = s.slice(0, -3);
+    const parts = [];
+    while (head.length > 2) { parts.unshift(head.slice(-2)); head = head.slice(0, -2); }
+    if (head) parts.unshift(head);
+    return parts.join(",") + "," + s.slice(-3);
+  }
+  const inr = (v, plus) => (Math.round(v) < 0 ? MINUS : (plus && Math.round(v) > 0 ? "+" : "")) + RS + group(v);
+  const lakh = (v, plus) => (v < 0 ? MINUS : (plus && v > 0 ? "+" : "")) + RS + (Math.abs(v) / 1e5).toFixed(2) + " lakh";
+  const fdate = iso => { const p = iso.split("-"); return (+p[2]) + " " + MON[+p[1] - 1] + " " + p[0]; };
+
+  function S(tag, attrs, parent) {
+    const el = document.createElementNS(NS, tag);
+    for (const k in attrs) el.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(el);
+    return el;
+  }
+  function T(parent, x, y, s, cls, anchor) {
+    const t = S("text", { x: x, y: y, class: cls || "ax", "text-anchor": anchor || "start" }, parent);
+    t.textContent = s;
+    return t;
+  }
+  function tipShow(cx, cy, rows) {
+    tip.replaceChildren();
+    rows.forEach(function (r) {
+      const row = document.createElement("div");
+      row.className = "tr";
+      if (r[2]) { const k = document.createElement("span"); k.className = "tk " + r[2]; row.appendChild(k); }
+      const v = document.createElement("strong");
+      v.textContent = r[0];
+      row.appendChild(v);
+      if (r[1]) { const l = document.createElement("span"); l.textContent = r[1]; row.appendChild(l); }
+      tip.appendChild(row);
+    });
+    tip.hidden = false;
+    const w = tip.offsetWidth, h = tip.offsetHeight, pad = 14;
+    let left = cx + pad, top = cy + pad;
+    if (left + w > window.innerWidth - 8) left = cx - w - pad;
+    if (top + h > window.innerHeight - 8) top = cy - h - pad;
+    tip.style.left = Math.max(8, left) + "px";
+    tip.style.top = Math.max(8, top) + "px";
+  }
+  function tipHide() { tip.hidden = true; }
+
+  function svgFor(host, W, H, label) {
+    return S("svg", { width: W, height: H, viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": label }, host);
+  }
+
+  // Account value: two lines on one rupee axis, crosshair readout
+  function equity(host) {
+    const W = host.clientWidth, narrow = W < 620, H = narrow ? 260 : 330;
+    const m = { l: 50, r: narrow ? 10 : 118, t: 18, b: 30 };
+    const E = D.eq, n = E.dates.length, net = E.net, pre = E.pre;
+    const svg = svgFor(host, W, H, "One lot on a 2 lakh account: buying ends at " + lakh(net[n - 1]) + ", selling at " + lakh(pre[n - 1]));
+    svg.setAttribute("tabindex", "0");
+    const all = net.concat(pre); const span = (Math.max.apply(null, all) - Math.min.apply(null, all)) || 1; const step = [1e4, 2e4, 25e3, 5e4, 1e5, 2e5, 25e4, 5e5, 1e6].find(s => span / s <= 6) || 1e6;
+    const lo = Math.floor(Math.min.apply(null, all) / step) * step;
+    const hi = Math.ceil(Math.max.apply(null, all) / step) * step;
+    const pw = W - m.l - m.r, ph = H - m.t - m.b;
+    const x = i => m.l + pw * i / (n - 1);
+    const y = v => m.t + ph * (hi - v) / (hi - lo);
+    for (let v = lo; v <= hi + 1; v += step) {
+      S("line", { x1: m.l, x2: m.l + pw, y1: y(v), y2: y(v), class: Math.abs(v - E.cap) < 1 ? "base" : "grid" }, svg);
+      T(svg, m.l - 8, y(v) + 4, (v < 0 ? MINUS : "") + RS + +Math.abs(v / 1e5).toFixed(2) + "L", "ax", "end");
+    }
+    let prev = E.dates[0].slice(0, 4);
+    E.dates.forEach(function (d, i) {
+      const yr = d.slice(0, 4);
+      if (yr !== prev) {
+        S("line", { x1: x(i), x2: x(i), y1: m.t + ph, y2: m.t + ph + 4, class: "tick" }, svg);
+        T(svg, x(i), H - 8, yr, "ax", "middle");
+        prev = yr;
+      }
+    });
+    const path = a => a.map((v, i) => (i ? "L" : "M") + x(i).toFixed(1) + "," + y(v).toFixed(1)).join("");
+    S("path", { d: path(pre), class: "ln ln-pre" }, svg);
+    S("path", { d: path(net), class: "ln ln-net" }, svg);
+    const pk = E.peak, tr = E.trough;
+    S("circle", { cx: x(pk), cy: y(net[pk]), r: 4, class: "dot-net" }, svg);
+    S("circle", { cx: x(tr), cy: y(net[tr]), r: 4, class: "dot-net" }, svg);
+    if (!narrow) {
+      // labels sit in clear space (below the line after the peak, above it before the low) on short leaders
+      const py = y(net[pk]), ly = y(net[tr]);
+      S("line", { x1: x(pk) + 3, y1: py + 5, x2: x(pk) + 22, y2: py + 40, class: "conn" }, svg);
+      T(svg, x(pk) + 26, py + 52, "Buying peak " + lakh(net[pk]) + ", " + fdate(E.dates[pk]), "note", "start");
+      S("line", { x1: x(tr) - 3, y1: ly - 5, x2: x(tr) - 22, y2: ly - 72, class: "conn" }, svg);
+      T(svg, x(tr) - 26, ly - 78, "Buying low " + lakh(net[tr]) + ", " + fdate(E.dates[tr]), "note", "end");
+      [[pre, "Selling"], [net, "Buying"]].forEach(function (s) {
+        const yy = y(s[0][n - 1]);
+        T(svg, m.l + pw + 10, yy - 3, s[1], "lab", "start");
+        T(svg, m.l + pw + 10, yy + 13, lakh(s[0][n - 1]), "val", "start");
+      });
+    }
+    const cross = S("line", { y1: m.t, y2: m.t + ph, class: "cross", visibility: "hidden" }, svg);
+    const d2 = S("circle", { r: 4, class: "dot-pre", visibility: "hidden" }, svg);
+    const d1 = S("circle", { r: 4, class: "dot-net", visibility: "hidden" }, svg);
+    let cur = n - 1;
+    function show(i, cx, cy) {
+      cur = i;
+      const X = x(i);
+      cross.setAttribute("x1", X); cross.setAttribute("x2", X);
+      d1.setAttribute("cx", X); d1.setAttribute("cy", y(net[i]));
+      d2.setAttribute("cx", X); d2.setAttribute("cy", y(pre[i]));
+      [cross, d1, d2].forEach(el => el.setAttribute("visibility", "visible"));
+      tipShow(cx, cy, [[fdate(E.dates[i]), "", ""], [inr(net[i]), "buying", "k-net"], [inr(pre[i]), "selling", "k-pre"]]);
+    }
+    function hide() { [cross, d1, d2].forEach(el => el.setAttribute("visibility", "hidden")); tipHide(); }
+    const hit = S("rect", { x: m.l, y: m.t, width: pw, height: ph, class: "hit", "pointer-events": "all" }, svg);
+    hit.addEventListener("pointermove", function (ev) {
+      const r = svg.getBoundingClientRect();
+      const i = Math.max(0, Math.min(n - 1, Math.round((ev.clientX - r.left - m.l) / pw * (n - 1))));
+      show(i, ev.clientX, ev.clientY);
+    });
+    hit.addEventListener("pointerleave", hide);
+    svg.addEventListener("keydown", function (ev) {
+      if (ev.key !== "ArrowLeft" && ev.key !== "ArrowRight") return;
+      ev.preventDefault();
+      const st = ev.shiftKey ? 20 : 1;
+      cur = Math.max(0, Math.min(n - 1, cur + (ev.key === "ArrowLeft" ? -st : st)));
+      const r = svg.getBoundingClientRect();
+      show(cur, r.left + x(cur), r.top + y(net[cur]));
+    });
+    svg.addEventListener("focus", function () { const r = svg.getBoundingClientRect(); show(cur, r.left + x(cur), r.top + y(net[cur])); });
+    svg.addEventListener("blur", hide);
+  }
+
+  // From the edge before costs to the result: a horizontal bridge
+  function bridge(host) {
+    const B = D[host.dataset.src || "bridge"];
+    const W = host.clientWidth, narrow = W < 620;
+    const rowH = 58, m = { l: narrow ? 92 : 118, r: 14, t: 6, b: 28 };
+    const H = m.t + B.length * rowH + m.b;
+    const svg = svgFor(host, W, H, "Before costs the trades made " + lakh(B[0][1], true) + "; slippage and charges took the result to " + lakh(B[3][1]));
+    let run = 0;
+    const segs = B.map(function (b, k) {
+      let a, z;
+      if (k === B.length - 1) { a = 0; z = b[1]; } else { a = run; z = run + b[1]; run = z; }
+      return { lab: b[0], v: b[1], a: a, z: z };
+    });
+    const ext = [0];
+    segs.forEach(s => { ext.push(s.a, s.z); });
+    const all = ext; const span = (Math.max.apply(null, all) - Math.min.apply(null, all)) || 1; const step = [1e4, 2e4, 25e3, 5e4, 1e5, 2e5, 25e4, 5e5, 1e6].find(s => span / s <= 6) || 1e6;
+    const lo = Math.floor(Math.min.apply(null, ext) / step) * step, hi = Math.ceil(Math.max.apply(null, ext) / step) * step;
+    const pw = W - m.l - m.r, x = v => m.l + pw * (v - lo) / (hi - lo);
+    for (let v = lo; v <= hi + 1; v += step) {
+      S("line", { x1: x(v), x2: x(v), y1: m.t, y2: H - m.b, class: Math.abs(v) < 1 ? "base" : "grid" }, svg);
+      T(svg, x(v), H - 8, Math.abs(v) < 1 ? "0" : (v > 0 ? "+" : MINUS) + RS + +Math.abs(v / 1e5).toFixed(2) + "L", "ax", "middle");
+    }
+    const bh = 24;
+    segs.forEach(function (s, k) {
+      const top = m.t + k * rowH + 22, x0 = x(Math.min(s.a, s.z)), x1 = x(Math.max(s.a, s.z));
+      const last = k === segs.length - 1;
+      T(svg, m.l - 12, top + bh / 2 + 4, s.lab, last ? "lab strong" : "lab", "end");
+      const bar = S("rect", { x: x0, y: top, width: Math.max(2, x1 - x0), height: bh, rx: 3, class: s.v >= 0 ? "bar-pos" : "bar-neg" }, svg);
+      const tipX = s.v >= 0 ? x1 : x0;
+      T(svg, tipX, top - 6, lakh(s.v, true), "val", s.v >= 0 ? "end" : "start");
+      if (k < segs.length - 2) S("line", { x1: x(s.z), x2: x(s.z), y1: top + bh, y2: top + rowH, class: "conn" }, svg);
+      const what = last ? "net result after costs" : (k === 0 ? "the trades at mid prices, before any cost" : (s.lab === "Charges" ? "Angel One option charges" : "half the spread and a tick on every fill"));
+      bar.addEventListener("pointermove", ev => tipShow(ev.clientX, ev.clientY, [[inr(s.v, true), s.lab, s.v >= 0 ? "k-pos" : "k-neg"], [what, "", ""]]));
+      bar.addEventListener("pointerleave", tipHide);
+    });
+  }
+
+  // One session: candles, the opening range and the trade's levels
+  function day(host) {
+    const W = host.clientWidth, narrow = W < 620, H = narrow ? 300 : 360;
+    const m = { l: 52, r: narrow ? 10 : 150, t: 16, b: 30 };
+    const C = D.day.candles, tr = D.day.trade, raw = D.day.or_raw, cl = D.day.or_clean;
+    const lows = C.map(c => c[3]).concat([raw[0], tr.target]), highs = C.map(c => c[2]).concat([raw[1], tr.stop]);
+    const lo = Math.min.apply(null, lows) - 0.3, hi = Math.max.apply(null, highs) + 0.5;
+    const pw = W - m.l - m.r, ph = H - m.t - m.b, slot = pw / C.length;
+    const svg = svgFor(host, W, H, "Five-minute candles of " + fdate(D.day.date) + " with the opening range, the short entry, its stop and its target");
+    const xl = k => m.l + slot * k, xc = k => m.l + slot * (k + 0.5), y = v => m.t + ph * (hi - v) / (hi - lo);
+    for (let v = Math.ceil(lo); v <= hi; v += 1) {
+      S("line", { x1: m.l, x2: m.l + pw, y1: y(v), y2: y(v), class: "grid" }, svg);
+      T(svg, m.l - 8, y(v) + 4, RS + v.toFixed(0), "ax", "end");
+    }
+    C.forEach(function (c, k) {
+      if (c[0].slice(3) === "00" || c[0].slice(3) === "30" || (k === 0)) {
+        S("line", { x1: xl(k), x2: xl(k), y1: m.t + ph, y2: m.t + ph + 4, class: "tick" }, svg);
+        T(svg, xl(k), H - 8, c[0], "ax mono", "middle");
+      }
+    });
+    const k930 = C.findIndex(c => c[0] === "09:30"), kx = C.findIndex(c => c[0] === tr.exit_candle);
+    S("rect", { x: xl(0), y: y(raw[1]), width: xl(k930) - xl(0), height: y(raw[0]) - y(raw[1]), class: "band-raw" }, svg);
+    S("rect", { x: xl(0), y: y(cl[1]), width: xl(k930) - xl(0), height: y(cl[0]) - y(cl[1]), class: "band-clean" }, svg);
+    const lv = [[tr.stop, "lv-stop", "Stop " + tr.stop.toFixed(2)], [tr.trigger, "lv-trig", "Sell-stop " + tr.trigger.toFixed(2)],
+                [tr.target, "lv-tgt", "Target " + tr.target.toFixed(2)]];
+    lv.forEach(l => S("line", { x1: xl(k930), x2: xl(kx + 1), y1: y(l[0]), y2: y(l[0]), class: l[1] }, svg));
+    const bw = Math.max(3, Math.min(12, slot * 0.58));
+    C.forEach(function (c, k) {
+      const o = c[1], h = c[2], l = c[3], z = c[4];
+      S("line", { x1: xc(k), x2: xc(k), y1: y(h), y2: y(l), class: "wick" }, svg);
+      S("rect", { x: xc(k) - bw / 2, y: y(Math.max(o, z)), width: bw, height: Math.max(1, Math.abs(y(o) - y(z))), class: z >= o ? "c-up" : "c-dn" }, svg);
+    });
+    S("circle", { cx: xc(k930), cy: y(tr.entry), r: 4.5, class: "dot-entry" }, svg);
+    S("circle", { cx: xc(kx), cy: y(tr.target), r: 4.5, class: "dot-exit" }, svg);
+    if (!narrow) {
+      lv.forEach(function (l) { T(svg, m.l + pw + 12, y(l[0]) + 4, l[2], "lab", "start"); });
+      T(svg, xl(0), y(raw[1]) - 7, "Raw range " + raw[0].toFixed(2) + " to " + raw[1].toFixed(2), "note", "start");
+    }
+    C.forEach(function (c, k) {
+      const r = S("rect", { x: xl(k), y: m.t, width: slot, height: ph, class: "hit", "pointer-events": "all" }, svg);
+      r.addEventListener("pointermove", ev => tipShow(ev.clientX, ev.clientY, [[c[0] + " candle", "", ""],
+        ["O " + c[1].toFixed(2) + "   H " + c[2].toFixed(2), "", ""], ["L " + c[3].toFixed(2) + "   C " + c[4].toFixed(2), "", ""]]));
+      r.addEventListener("pointerleave", tipHide);
+    });
+  }
+
+  const charts = [["eq-chart", equity], ["bridge-chart", bridge], ["bridge-chart-sell", bridge]];
+  let lastW = 0;
+  function draw() {
+    const w = document.querySelector(".page").clientWidth;
+    if (w === lastW) return;
+    lastW = w;
+    charts.forEach(function (c) {
+      const host = document.getElementById(c[0]);
+      if (!host) return;
+      host.replaceChildren();
+      try { c[1](host); } catch (err) { host.textContent = "This chart could not be drawn: " + err.message; }
+    });
+  }
+  draw();
+  if ("ResizeObserver" in window) {
+    let t;
+    new ResizeObserver(function () { clearTimeout(t); t = setTimeout(draw, 80); }).observe(document.querySelector(".page"));
+  }
+})();
+</script>

@@ -1,0 +1,7572 @@
+{
+ "meta": {
+  "window": [
+   "2021-10-25",
+   "2026-10-23"
+  ],
+  "sessions": 1222,
+  "lot": 65,
+  "account": 200000.0,
+  "half_spread": 0.0015,
+  "slip_ticks": 1,
+  "beta": 1.5,
+  "smile": "moneyness",
+  "clock": "u"
+ },
+ "buy": {
+  "rr_1_2": {
+   "rr": 2.0,
+   "index_trades": 1218,
+   "skipped": {},
+   "stats": {
+    "trades": 1218,
+    "sessions": 1222,
+    "wins": 434,
+    "win_rate": 35.63218390804598,
+    "before_costs": -156114.86000000002,
+    "spread_slippage": 37617.64,
+    "charges": 77442.46,
+    "net_pnl": -271174.96,
+    "return_pct_of_account": -135.58748,
+    "annual_return_pct": -27.15094685855263,
+    "profit_factor": 0.8525506367450871,
+    "avg_trade": -222.63954022988509,
+    "avg_win": 3612.743571428571,
+    "avg_loss": -2345.7980484693876,
+    "t_stat": -2.227236493462411,
+    "avg_premium": 109.6129720853859,
+    "avg_capital": 7124.843185550082,
+    "max_capital": 26724.75,
+    "avg_ret_on_premium_pct": -3.879901477832512,
+    "max_win": 21901.11,
+    "max_loss": -9212.88,
+    "exit_reasons": {
+     "eod": {
+      "trades": 470,
+      "avg_net": 281.7984680851064,
+      "win_rate": 49.787234042553195
+     },
+     "stop": {
+      "trades": 548,
+      "avg_net": -2559.657408759124,
+      "win_rate": 0.0
+     },
+     "target": {
+      "trades": 200,
+      "avg_net": 4995.3601,
+      "win_rate": 100.0
+     }
+    },
+    "by_option": {
+     "CALL": {
+      "trades": 568,
+      "win_rate": 34.859154929577464,
+      "net": -205822.48
+     },
+     "PUT": {
+      "trades": 650,
+      "win_rate": 36.30769230769231,
+      "net": -65352.48
+     }
+    },
+    "by_days_to_expiry": {
+     "expiry day (0DTE)": {
+      "trades": 259,
+      "win_rate": 30.115830115830118,
+      "net": -89799.5,
+      "avg_net": -346.7162162162163,
+      "before_costs": -69780.13,
+      "avg_premium": 61.73320463320463,
+      "avg_capital": 4012.658301158301,
+      "avg_ret_on_premium_pct": -8.090810810810813
+     },
+     "1 session left": {
+      "trades": 260,
+      "win_rate": 35.38461538461539,
+      "net": -66690.25,
+      "avg_net": -256.5009615384616,
+      "before_costs": -43780.810000000005,
+      "avg_premium": 91.80826923076923,
+      "avg_capital": 5967.5375,
+      "avg_ret_on_premium_pct": -5.011807692307692
+     },
+     "2-4 sessions left": {
+      "trades": 697,
+      "win_rate": 37.73314203730273,
+      "net": -112900.65,
+      "avg_net": -161.98084648493543,
+      "before_costs": -41063.05,
+      "avg_premium": 133.60337159253945,
+      "avg_capital": 8684.219153515065,
+      "avg_ret_on_premium_pct": -1.8810473457675752
+     },
+     "5+ sessions left": {
+      "trades": 2,
+      "win_rate": 50.0,
+      "net": -1784.56,
+      "avg_net": -892.28,
+      "before_costs": -1490.87,
+      "avg_premium": 264.0,
+      "avg_capital": 17160.0,
+      "avg_ret_on_premium_pct": -8.02
+     }
+    },
+    "lowest_equity": -113836.4599999999,
+    "account_wiped_out_on": "2026-02-02",
+    "max_dd": 345183.55999999994,
+    "max_dd_pct_of_peak": 149.2059161320803,
+    "max_dd_pct_of_capital": 172.59177999999997,
+    "peak": "2022-01-25",
+    "trough": "2026-09-09",
+    "recovered": null
+   },
+   "yearly": [
+    {
+     "year": "2021",
+     "from": "2021-10-25",
+     "to": "2021-12-31",
+     "sessions": 46,
+     "trades": 46,
+     "win_rate": 50.0,
+     "before_costs": 19138.64,
+     "costs": 4273.33,
+     "net_pnl": 14865.31,
+     "return_pct": 7.432654999999999,
+     "profit_factor": 1.217758593740959,
+     "max_dd": 16619.609999999986,
+     "targets": 8,
+     "stops": 16,
+     "eod": 22
+    },
+    {
+     "year": "2022",
+     "from": "2022-01-03",
+     "to": "2022-12-30",
+     "sessions": 243,
+     "trades": 243,
+     "win_rate": 37.86008230452675,
+     "before_costs": -21540.39,
+     "costs": 23360.66,
+     "net_pnl": -44901.04999999999,
+     "return_pct": -22.450524999999992,
+     "profit_factor": 0.8686586346913403,
+     "max_dd": 76541.76000000001,
+     "targets": 42,
+     "stops": 104,
+     "eod": 97
+    },
+    {
+     "year": "2023",
+     "from": "2023-01-02",
+     "to": "2023-12-29",
+     "sessions": 244,
+     "trades": 243,
+     "win_rate": 31.68724279835391,
+     "before_costs": -72727.66,
+     "costs": 19935.260000000002,
+     "net_pnl": -92662.92000000003,
+     "return_pct": -46.331460000000014,
+     "profit_factor": 0.6715702851290428,
+     "max_dd": 111017.73999999995,
+     "targets": 35,
+     "stops": 123,
+     "eod": 85
+    },
+    {
+     "year": "2024",
+     "from": "2024-01-01",
+     "to": "2024-12-31",
+     "sessions": 246,
+     "trades": 245,
+     "win_rate": 31.428571428571427,
+     "before_costs": 16391.109999999997,
+     "costs": 24054.09,
+     "net_pnl": -7662.980000000014,
+     "return_pct": -3.8314900000000067,
+     "profit_factor": 0.9803836028096958,
+     "max_dd": 66315.49999999997,
+     "targets": 50,
+     "stops": 123,
+     "eod": 72
+    },
+    {
+     "year": "2025",
+     "from": "2025-01-01",
+     "to": "2025-12-31",
+     "sessions": 244,
+     "trades": 242,
+     "win_rate": 38.01652892561984,
+     "before_costs": -39713.76,
+     "costs": 23046.940000000002,
+     "net_pnl": -62760.69999999999,
+     "return_pct": -31.380349999999996,
+     "profit_factor": 0.8357221111881392,
+     "max_dd": 75020.21000000002,
+     "targets": 37,
+     "stops": 99,
+     "eod": 106
+    },
+    {
+     "year": "2026",
+     "from": "2026-01-01",
+     "to": "2026-10-23",
+     "sessions": 199,
+     "trades": 199,
+     "win_rate": 36.68341708542713,
+     "before_costs": -57662.8,
+     "costs": 20389.82,
+     "net_pnl": -78052.62000000002,
+     "return_pct": -39.02631000000002,
+     "profit_factor": 0.7913894105389153,
+     "max_dd": 133046.79000000004,
+     "targets": 28,
+     "stops": 83,
+     "eod": 88
+    }
+   ],
+   "monthly": {
+    "months": 61,
+    "trades_per_month": 19.9672131147541,
+    "capital_per_trade": 7124.843185550082,
+    "capital_sum_per_month": 142263.26229508198,
+    "largest_capital_in_a_month": 12270.13524590164,
+    "net_per_month": -4445.491147540984,
+    "median_month": -6574.98,
+    "return_pct_per_month_on_account": -2.2227455737704918,
+    "months_positive": 23,
+    "best_month": 29091.500000000004,
+    "worst_month": -30620.12,
+    "by_month": {
+     "2021-10": {
+      "trades": 5,
+      "capital_sum": 32873.75,
+      "capital_max": 10370.75,
+      "net": -9683.95
+     },
+     "2021-11": {
+      "trades": 18,
+      "capital_sum": 108176.25,
+      "capital_max": 11368.5,
+      "net": 13365.56
+     },
+     "2021-12": {
+      "trades": 23,
+      "capital_sum": 155987.0,
+      "capital_max": 10552.75,
+      "net": 11183.7
+     },
+     "2022-01": {
+      "trades": 19,
+      "capital_sum": 149490.25,
+      "capital_max": 17130.75,
+      "net": 4742.72
+     },
+     "2022-02": {
+      "trades": 20,
+      "capital_sum": 184141.75,
+      "capital_max": 17836.0,
+      "net": 2749.42
+     },
+     "2022-03": {
+      "trades": 20,
+      "capital_sum": 204792.25,
+      "capital_max": 17273.75,
+      "net": -12511.04
+     },
+     "2022-04": {
+      "trades": 19,
+      "capital_sum": 134095.0,
+      "capital_max": 11069.5,
+      "net": -18493.28
+     },
+     "2022-05": {
+      "trades": 21,
+      "capital_sum": 185383.25,
+      "capital_max": 13019.5,
+      "net": 2979.53
+     },
+     "2022-06": {
+      "trades": 21,
+      "capital_sum": 162597.5,
+      "capital_max": 13045.5,
+      "net": -12958.06
+     },
+     "2022-07": {
+      "trades": 20,
+      "capital_sum": 132392.0,
+      "capital_max": 10042.5,
+      "net": -19080.59
+     },
+     "2022-08": {
+      "trades": 20,
+      "capital_sum": 129899.25,
+      "capital_max": 11261.25,
+      "net": 2132.85
+     },
+     "2022-09": {
+      "trades": 22,
+      "capital_sum": 173696.25,
+      "capital_max": 11498.5,
+      "net": 19267.26
+     },
+     "2022-10": {
+      "trades": 18,
+      "capital_sum": 123620.25,
+      "capital_max": 10637.25,
+      "net": -2189.12
+     },
+     "2022-11": {
+      "trades": 21,
+      "capital_sum": 108056.0,
+      "capital_max": 8843.25,
+      "net": -12709.97
+     },
+     "2022-12": {
+      "trades": 22,
+      "capital_sum": 112797.75,
+      "capital_max": 8755.5,
+      "net": 1169.23
+     },
+     "2023-01": {
+      "trades": 21,
+      "capital_sum": 127832.25,
+      "capital_max": 11440.0,
+      "net": 3179.94
+     },
+     "2023-02": {
+      "trades": 20,
+      "capital_sum": 107422.25,
+      "capital_max": 8823.75,
+      "net": -18511.58
+     },
+     "2023-03": {
+      "trades": 21,
+      "capital_sum": 111917.0,
+      "capital_max": 9018.75,
+      "net": 1558.04
+     },
+     "2023-04": {
+      "trades": 17,
+      "capital_sum": 68877.25,
+      "capital_max": 6539.0,
+      "net": -15340.19
+     },
+     "2023-05": {
+      "trades": 21,
+      "capital_sum": 93671.5,
+      "capital_max": 6958.25,
+      "net": 5869.86
+     },
+     "2023-06": {
+      "trades": 20,
+      "capital_sum": 79228.5,
+      "capital_max": 6340.75,
+      "net": -6574.98
+     },
+     "2023-07": {
+      "trades": 21,
+      "capital_sum": 100886.5,
+      "capital_max": 7218.25,
+      "net": -11703.87
+     },
+     "2023-08": {
+      "trades": 22,
+      "capital_sum": 92394.25,
+      "capital_max": 6987.5,
+      "net": -20775.04
+     },
+     "2023-09": {
+      "trades": 20,
+      "capital_sum": 94906.5,
+      "capital_max": 6890.0,
+      "net": 315.84
+     },
+     "2023-10": {
+      "trades": 20,
+      "capital_sum": 99570.25,
+      "capital_max": 8105.5,
+      "net": -12482.16
+     },
+     "2023-11": {
+      "trades": 20,
+      "capital_sum": 89456.25,
+      "capital_max": 7611.5,
+      "net": -8414.85
+     },
+     "2023-12": {
+      "trades": 20,
+      "capital_sum": 122820.75,
+      "capital_max": 9759.75,
+      "net": -9783.93
+     },
+     "2024-01": {
+      "trades": 22,
+      "capital_sum": 155954.5,
+      "capital_max": 12580.75,
+      "net": 25720.52
+     },
+     "2024-02": {
+      "trades": 21,
+      "capital_sum": 165590.75,
+      "capital_max": 11401.0,
+      "net": -28991.04
+     },
+     "2024-03": {
+      "trades": 17,
+      "capital_sum": 115982.75,
+      "capital_max": 11118.25,
+      "net": 21118.23
+     },
+     "2024-04": {
+      "trades": 20,
+      "capital_sum": 134462.25,
+      "capital_max": 12847.25,
+      "net": -303.98
+     },
+     "2024-05": {
+      "trades": 21,
+      "capital_sum": 170647.75,
+      "capital_max": 25593.75,
+      "net": -10538.85
+     },
+     "2024-06": {
+      "trades": 19,
+      "capital_sum": 179838.75,
+      "capital_max": 26724.75,
+      "net": 19314.47
+     },
+     "2024-07": {
+      "trades": 22,
+      "capital_sum": 169806.0,
+      "capital_max": 15730.0,
+      "net": 13112.14
+     },
+     "2024-08": {
+      "trades": 21,
+      "capital_sum": 152223.5,
+      "capital_max": 11950.25,
+      "net": -2148.6
+     },
+     "2024-09": {
+      "trades": 21,
+      "capital_sum": 141537.5,
+      "capital_max": 10143.25,
+      "net": -22189.68
+     },
+     "2024-10": {
+      "trades": 22,
+      "capital_sum": 162402.5,
+      "capital_max": 11657.75,
+      "net": -10436.23
+     },
+     "2024-11": {
+      "trades": 18,
+      "capital_sum": 157651.0,
+      "capital_max": 14157.0,
+      "net": 18300.16
+     },
+     "2024-12": {
+      "trades": 21,
+      "capital_sum": 179838.75,
+      "capital_max": 14179.75,
+      "net": -30620.12
+     },
+     "2025-01": {
+      "trades": 21,
+      "capital_sum": 184655.25,
+      "capital_max": 20013.5,
+      "net": -7696.35
+     },
+     "2025-02": {
+      "trades": 20,
+      "capital_sum": 161879.25,
+      "capital_max": 15054.0,
+      "net": -477.53
+     },
+     "2025-03": {
+      "trades": 19,
+      "capital_sum": 133835.0,
+      "capital_max": 11401.0,
+      "net": -5184.0
+     },
+     "2025-04": {
+      "trades": 18,
+      "capital_sum": 157764.75,
+      "capital_max": 18343.0,
+      "net": 16653.72
+     },
+     "2025-05": {
+      "trades": 19,
+      "capital_sum": 183391.0,
+      "capital_max": 14082.25,
+      "net": -16597.57
+     },
+     "2025-06": {
+      "trades": 20,
+      "capital_sum": 173842.5,
+      "capital_max": 13273.0,
+      "net": -9413.28
+     },
+     "2025-07": {
+      "trades": 23,
+      "capital_sum": 141755.25,
+      "capital_max": 10084.75,
+      "net": 179.51
+     },
+     "2025-08": {
+      "trades": 19,
+      "capital_sum": 122460.0,
+      "capital_max": 10328.5,
+      "net": -14675.11
+     },
+     "2025-09": {
+      "trades": 22,
+      "capital_sum": 122908.5,
+      "capital_max": 9308.0,
+      "net": 4819.16
+     },
+     "2025-10": {
+      "trades": 20,
+      "capital_sum": 131404.0,
+      "capital_max": 11940.5,
+      "net": -4312.2
+     },
+     "2025-11": {
+      "trades": 19,
+      "capital_sum": 129437.75,
+      "capital_max": 9805.25,
+      "net": -13794.13
+     },
+     "2025-12": {
+      "trades": 22,
+      "capital_sum": 125911.5,
+      "capital_max": 9486.75,
+      "net": -12262.92
+     },
+     "2026-01": {
+      "trades": 20,
+      "capital_sum": 144586.0,
+      "capital_max": 14306.5,
+      "net": 171.86
+     },
+     "2026-02": {
+      "trades": 21,
+      "capital_sum": 166721.75,
+      "capital_max": 12226.5,
+      "net": -6980.77
+     },
+     "2026-03": {
+      "trades": 19,
+      "capital_sum": 275616.25,
+      "capital_max": 21547.5,
+      "net": -25702.21
+     },
+     "2026-04": {
+      "trades": 20,
+      "capital_sum": 247962.0,
+      "capital_max": 21047.0,
+      "net": -15163.77
+     },
+     "2026-05": {
+      "trades": 19,
+      "capital_sum": 183644.5,
+      "capital_max": 14706.25,
+      "net": -23124.08
+     },
+     "2026-06": {
+      "trades": 21,
+      "capital_sum": 170270.75,
+      "capital_max": 12853.75,
+      "net": -5256.77
+     },
+     "2026-07": {
+      "trades": 22,
+      "capital_sum": 166968.75,
+      "capital_max": 11459.5,
+      "net": -21413.62
+     },
+     "2026-08": {
+      "trades": 21,
+      "capital_sum": 127679.5,
+      "capital_max": 9230.0,
+      "net": -16757.06
+     },
+     "2026-09": {
+      "trades": 21,
+      "capital_sum": 136727.5,
+      "capital_max": 10344.75,
+      "net": 7082.3
+     },
+     "2026-10": {
+      "trades": 15,
+      "capital_sum": 115719.5,
+      "capital_max": 11154.0,
+      "net": 29091.5
+     }
+    }
+   },
+   "real_price_check": {
+    "trades": [
+     {
+      "date": "2026-10-05",
+      "position": "BUY",
+      "option": "CALL",
+      "strike": 22550.0,
+      "expiry": "2026-10-06",
+      "entry_time": "09:30",
+      "exit_time": "10:24",
+      "exit_reason": "stop",
+      "model_in": 116.48,
+      "real_in": 124.78,
+      "model_out": 81.86,
+      "real_out": 98.97,
+      "model_before_costs": -2250.27,
+      "real_before_costs": -1677.0
+     },
+     {
+      "date": "2026-10-06",
+      "position": "BUY",
+      "option": "CALL",
+      "strike": 22650.0,
+      "expiry": "2026-10-06",
+      "entry_time": "09:40",
+      "exit_time": "15:15",
+      "exit_reason": "eod",
+      "model_in": 54.11,
+      "real_in": 47.83,
+      "model_out": 67.82,
+      "real_out": 76.45,
+      "model_before_costs": 891.12,
+      "real_before_costs": 1860.62
+     },
+     {
+      "date": "2026-10-07",
+      "position": "BUY",
+      "option": "PUT",
+      "strike": 22600.0,
+      "expiry": "2026-10-13",
+      "entry_time": "09:39",
+      "exit_time": "10:29",
+      "exit_reason": "stop",
+      "model_in": 145.13,
+      "real_in": 156.57,
+      "model_out": 99.43,
+      "real_out": 113.08,
+      "model_before_costs": -2970.41,
+      "real_before_costs": -2827.5
+     },
+     {
+      "date": "2026-10-08",
+      "position": "BUY",
+      "option": "PUT",
+      "strike": 22500.0,
+      "expiry": "2026-10-13",
+      "entry_time": "09:43",
+      "exit_time": "13:30",
+      "exit_reason": "target",
+      "model_in": 135.87,
+      "real_in": 138.05,
+      "model_out": 301.34,
+      "real_out": 297.1,
+      "model_before_costs": 10754.91,
+      "real_before_costs": 10338.25
+     },
+     {
+      "date": "2026-10-09",
+      "position": "BUY",
+      "option": "CALL",
+      "strike": 22400.0,
+      "expiry": "2026-10-13",
+      "entry_time": "09:30",
+      "exit_time": "14:18",
+      "exit_reason": "target",
+      "model_in": 125.53,
+      "real_in": 130.2,
+      "model_out": 222.86,
+      "real_out": 231.88,
+      "model_before_costs": 6326.26,
+      "real_before_costs": 6608.88
+     },
+     {
+      "date": "2026-10-12",
+      "position": "BUY",
+      "option": "PUT",
+      "strike": 22500.0,
+      "expiry": "2026-10-13",
+      "entry_time": "09:40",
+      "exit_time": "15:15",
+      "exit_reason": "eod",
+      "model_in": 84.55,
+      "real_in": 87.12,
+      "model_out": 195.7,
+      "real_out": 196.22,
+      "model_before_costs": 7225.18,
+      "real_before_costs": 7091.5
+     },
+     {
+      "date": "2026-10-13",
+      "position": "BUY",
+      "option": "CALL",
+      "strike": 22500.0,
+      "expiry": "2026-10-13",
+      "entry_time": "09:30",
+      "exit_time": "15:15",
+      "exit_reason": "eod",
+      "model_in": 54.98,
+      "real_in": 56.83,
+      "model_out": 199.58,
+      "real_out": 201.25,
+      "model_before_costs": 9398.96,
+      "real_before_costs": 9387.62
+     },
+     {
+      "date": "2026-10-14",
+      "position": "BUY",
+      "option": "CALL",
+      "strike": 22750.0,
+      "expiry": "2026-10-19",
+      "entry_time": "09:47",
+      "exit_time": "11:35",
+      "exit_reason": "stop",
+      "model_in": 155.4,
+      "real_in": 152.18,
+      "model_out": 107.93,
+      "real_out": 109.67,
+      "model_before_costs": -3085.52,
+      "real_before_costs": -2762.5
+     },
+     {
+      "date": "2026-10-15",
+      "position": "BUY",
+      "option": "CALL",
+      "strike": 22750.0,
+      "expiry": "2026-10-19",
+      "entry_time": "09:30",
+      "exit_time": "11:50",
+      "exit_reason": "target",
+      "model_in": 140.78,
+      "real_in": 128.5,
+      "model_out": 291.57,
+      "real_out": 282.65,
+      "model_before_costs": 9801.35,
+      "real_before_costs": 10019.75
+     },
+     {
+      "date": "2026-10-16",
+      "position": "BUY",
+      "option": "PUT",
+      "strike": 22950.0,
+      "expiry": "2026-10-19",
+      "entry_time": "09:31",
+      "exit_time": "10:12",
+      "exit_reason": "stop",
+      "model_in": 109.41,
+      "real_in": 130.75,
+      "model_out": 54.66,
+      "real_out": 73.75,
+      "model_before_costs": -3558.91,
+      "real_before_costs": -3705.0
+     },
+     {
+      "date": "2026-10-19",
+      "position": "BUY",
+      "option": "PUT",
+      "strike": 22950.0,
+      "expiry": "2026-10-19",
+      "entry_time": "12:03",
+      "exit_time": "15:15",
+      "exit_reason": "eod",
+      "model_in": 46.11,
+      "real_in": 49.62,
+      "model_out": 76.93,
+      "real_out": 79.17,
+      "model_before_costs": 2003.53,
+      "real_before_costs": 1920.75
+     },
+     {
+      "date": "2026-10-21",
+      "position": "BUY",
+      "option": "CALL",
+      "strike": 23100.0,
+      "expiry": "2026-10-27",
+      "entry_time": "09:30",
+      "exit_time": "10:05",
+      "exit_reason": "stop",
+      "model_in": 171.25,
+      "real_in": 169.18,
+      "model_out": 117.13,
+      "real_out": 123.92,
+      "model_before_costs": -3517.38,
+      "real_before_costs": -2941.25
+     },
+     {
+      "date": "2026-10-22",
+      "position": "BUY",
+      "option": "PUT",
+      "strike": 22550.0,
+      "expiry": "2026-10-27",
+      "entry_time": "09:35",
+      "exit_time": "10:22",
+      "exit_reason": "stop",
+      "model_in": 158.84,
+      "real_in": 159.03,
+      "model_out": 91.34,
+      "real_out": 97.47,
+      "model_before_costs": -4387.53,
+      "real_before_costs": -4000.75
+     },
+     {
+      "date": "2026-10-23",
+      "position": "BUY",
+      "option": "PUT",
+      "strike": 22700.0,
+      "expiry": "2026-10-27",
+      "entry_time": "09:31",
+      "exit_time": "10:09",
+      "exit_reason": "target",
+      "model_in": 144.87,
+      "real_in": 125.12,
+      "model_out": 246.12,
+      "real_out": 222.93,
+      "model_before_costs": 6581.4,
+      "real_before_costs": 6357.0
+     }
+    ],
+    "n_priced": 14,
+    "model_sum": 33212.69,
+    "real_sum": 35670.37
+   }
+  },
+  "rr_1_3": {
+   "rr": 3.0,
+   "index_trades": 1218,
+   "skipped": {},
+   "stats": {
+    "trades": 1218,
+    "sessions": 1222,
+    "wins": 411,
+    "win_rate": 33.743842364532014,
+    "before_costs": -143684.73,
+    "spread_slippage": 37626.27,
+    "charges": 77464.51,
+    "net_pnl": -258775.50999999998,
+    "return_pct_of_account": -129.387755,
+    "annual_return_pct": -25.909472321134867,
+    "profit_factor": 0.8629560337184423,
+    "avg_trade": -212.45936781609194,
+    "avg_win": 3964.6979075425793,
+    "avg_loss": -2339.85916976456,
+    "t_stat": -1.9745996597478774,
+    "avg_premium": 109.6129720853859,
+    "avg_capital": 7124.843185550082,
+    "max_capital": 26724.75,
+    "avg_ret_on_premium_pct": -3.881108374384236,
+    "max_win": 21901.11,
+    "max_loss": -9212.88,
+    "exit_reasons": {
+     "eod": {
+      "trades": 575,
+      "avg_net": 967.0155652173912,
+      "win_rate": 56.69565217391305
+     },
+     "stop": {
+      "trades": 558,
+      "avg_net": -2559.2932974910395,
+      "win_rate": 0.0
+     },
+     "target": {
+      "trades": 85,
+      "avg_net": 7215.014117647058,
+      "win_rate": 100.0
+     }
+    },
+    "by_option": {
+     "CALL": {
+      "trades": 568,
+      "win_rate": 33.274647887323944,
+      "net": -209786.48
+     },
+     "PUT": {
+      "trades": 650,
+      "win_rate": 34.15384615384615,
+      "net": -48989.030000000006
+     }
+    },
+    "by_days_to_expiry": {
+     "expiry day (0DTE)": {
+      "trades": 259,
+      "win_rate": 25.868725868725868,
+      "net": -116738.08,
+      "avg_net": -450.72617760617766,
+      "before_costs": -96813.91,
+      "avg_premium": 61.73320463320463,
+      "avg_capital": 4012.658301158301,
+      "avg_ret_on_premium_pct": -10.336332046332046
+     },
+     "1 session left": {
+      "trades": 260,
+      "win_rate": 33.07692307692307,
+      "net": -62230.65,
+      "avg_net": -239.34865384615387,
+      "before_costs": -39304.770000000004,
+      "avg_premium": 91.80826923076923,
+      "avg_capital": 5967.5375,
+      "avg_ret_on_premium_pct": -4.262538461538461
+     },
+     "2-4 sessions left": {
+      "trades": 697,
+      "win_rate": 36.872309899569586,
+      "net": -79365.15,
+      "avg_net": -113.86678622668579,
+      "before_costs": -7422.460000000006,
+      "avg_premium": 133.60337159253945,
+      "avg_capital": 8684.219153515065,
+      "avg_ret_on_premium_pct": -1.337862266857963
+     },
+     "5+ sessions left": {
+      "trades": 2,
+      "win_rate": 50.0,
+      "net": -441.6300000000001,
+      "avg_net": -220.81500000000005,
+      "before_costs": -143.5899999999997,
+      "avg_premium": 264.0,
+      "avg_capital": 17160.0,
+      "avg_ret_on_premium_pct": -4.665
+     }
+    },
+    "lowest_equity": -98181.59999999974,
+    "account_wiped_out_on": "2026-02-04",
+    "max_dd": 345707.6299999998,
+    "max_dd_pct_of_peak": 139.66516168016744,
+    "max_dd_pct_of_capital": 172.85381499999988,
+    "peak": "2022-01-25",
+    "trough": "2026-09-09",
+    "recovered": null
+   },
+   "yearly": [
+    {
+     "year": "2021",
+     "from": "2021-10-25",
+     "to": "2021-12-31",
+     "sessions": 46,
+     "trades": 46,
+     "win_rate": 50.0,
+     "before_costs": 31821.39,
+     "costs": 4314.150000000001,
+     "net_pnl": 27507.24,
+     "return_pct": 13.75362,
+     "profit_factor": 1.4029473922908475,
+     "max_dd": 13260.940000000002,
+     "targets": 5,
+     "stops": 16,
+     "eod": 25
+    },
+    {
+     "year": "2022",
+     "from": "2022-01-03",
+     "to": "2022-12-30",
+     "sessions": 243,
+     "trades": 243,
+     "win_rate": 35.390946502057616,
+     "before_costs": -15516.130000000001,
+     "costs": 23385.1,
+     "net_pnl": -38901.22999999999,
+     "return_pct": -19.450614999999992,
+     "profit_factor": 0.8902860693237562,
+     "max_dd": 73538.51000000001,
+     "targets": 20,
+     "stops": 106,
+     "eod": 117
+    },
+    {
+     "year": "2023",
+     "from": "2023-01-02",
+     "to": "2023-12-29",
+     "sessions": 244,
+     "trades": 243,
+     "win_rate": 30.45267489711934,
+     "before_costs": -61474.11,
+     "costs": 19961.52,
+     "net_pnl": -81435.63,
+     "return_pct": -40.717815,
+     "profit_factor": 0.7174790591450682,
+     "max_dd": 101471.22999999998,
+     "targets": 14,
+     "stops": 125,
+     "eod": 104
+    },
+    {
+     "year": "2024",
+     "from": "2024-01-01",
+     "to": "2024-12-31",
+     "sessions": 246,
+     "trades": 245,
+     "win_rate": 28.97959183673469,
+     "before_costs": 20549.539999999997,
+     "costs": 24058.19,
+     "net_pnl": -3508.6500000000087,
+     "return_pct": -1.7543250000000046,
+     "profit_factor": 0.9913104245780069,
+     "max_dd": 62619.159999999974,
+     "targets": 23,
+     "stops": 126,
+     "eod": 96
+    },
+    {
+     "year": "2025",
+     "from": "2025-01-01",
+     "to": "2025-12-31",
+     "sessions": 244,
+     "trades": 242,
+     "win_rate": 35.53719008264463,
+     "before_costs": -62739.9,
+     "costs": 22966.36,
+     "net_pnl": -85706.25999999998,
+     "return_pct": -42.853129999999986,
+     "profit_factor": 0.7838329282241289,
+     "max_dd": 92405.86999999992,
+     "targets": 13,
+     "stops": 101,
+     "eod": 128
+    },
+    {
+     "year": "2026",
+     "from": "2026-01-01",
+     "to": "2026-10-23",
+     "sessions": 199,
+     "trades": 199,
+     "win_rate": 35.678391959798994,
+     "before_costs": -56325.520000000004,
+     "costs": 20405.46,
+     "net_pnl": -76730.98,
+     "return_pct": -38.365489999999994,
+     "profit_factor": 0.7964300068153822,
+     "max_dd": 125393.21000000004,
+     "targets": 10,
+     "stops": 84,
+     "eod": 105
+    }
+   ],
+   "monthly": {
+    "months": 61,
+    "trades_per_month": 19.9672131147541,
+    "capital_per_trade": 7124.843185550082,
+    "capital_sum_per_month": 142263.26229508198,
+    "largest_capital_in_a_month": 12270.13524590164,
+    "net_per_month": -4242.221475409834,
+    "median_month": -7262.429999999997,
+    "return_pct_per_month_on_account": -2.121110737704917,
+    "months_positive": 20,
+    "best_month": 29035.260000000002,
+    "worst_month": -36368.70999999999,
+    "by_month": {
+     "2021-10": {
+      "trades": 5,
+      "capital_sum": 32873.75,
+      "capital_max": 10370.75,
+      "net": -5482.97
+     },
+     "2021-11": {
+      "trades": 18,
+      "capital_sum": 108176.25,
+      "capital_max": 11368.5,
+      "net": 17127.96
+     },
+     "2021-12": {
+      "trades": 23,
+      "capital_sum": 155987.0,
+      "capital_max": 10552.75,
+      "net": 15862.25
+     },
+     "2022-01": {
+      "trades": 19,
+      "capital_sum": 149490.25,
+      "capital_max": 17130.75,
+      "net": 8279.72
+     },
+     "2022-02": {
+      "trades": 20,
+      "capital_sum": 184141.75,
+      "capital_max": 17836.0,
+      "net": -698.88
+     },
+     "2022-03": {
+      "trades": 20,
+      "capital_sum": 204792.25,
+      "capital_max": 17273.75,
+      "net": -15076.71
+     },
+     "2022-04": {
+      "trades": 19,
+      "capital_sum": 134095.0,
+      "capital_max": 11069.5,
+      "net": -17163.34
+     },
+     "2022-05": {
+      "trades": 21,
+      "capital_sum": 185383.25,
+      "capital_max": 13019.5,
+      "net": 5860.32
+     },
+     "2022-06": {
+      "trades": 21,
+      "capital_sum": 162597.5,
+      "capital_max": 13045.5,
+      "net": -6360.32
+     },
+     "2022-07": {
+      "trades": 20,
+      "capital_sum": 132392.0,
+      "capital_max": 10042.5,
+      "net": -23229.59
+     },
+     "2022-08": {
+      "trades": 20,
+      "capital_sum": 129899.25,
+      "capital_max": 11261.25,
+      "net": 9628.43
+     },
+     "2022-09": {
+      "trades": 22,
+      "capital_sum": 173696.25,
+      "capital_max": 11498.5,
+      "net": 18742.01
+     },
+     "2022-10": {
+      "trades": 18,
+      "capital_sum": 123620.25,
+      "capital_max": 10637.25,
+      "net": -8799.8
+     },
+     "2022-11": {
+      "trades": 21,
+      "capital_sum": 108056.0,
+      "capital_max": 8843.25,
+      "net": -16586.07
+     },
+     "2022-12": {
+      "trades": 22,
+      "capital_sum": 112797.75,
+      "capital_max": 8755.5,
+      "net": 6503.0
+     },
+     "2023-01": {
+      "trades": 21,
+      "capital_sum": 127832.25,
+      "capital_max": 11440.0,
+      "net": 2943.79
+     },
+     "2023-02": {
+      "trades": 20,
+      "capital_sum": 107422.25,
+      "capital_max": 8823.75,
+      "net": -16612.13
+     },
+     "2023-03": {
+      "trades": 21,
+      "capital_sum": 111917.0,
+      "capital_max": 9018.75,
+      "net": 2997.42
+     },
+     "2023-04": {
+      "trades": 17,
+      "capital_sum": 68877.25,
+      "capital_max": 6539.0,
+      "net": -14208.43
+     },
+     "2023-05": {
+      "trades": 21,
+      "capital_sum": 93671.5,
+      "capital_max": 6958.25,
+      "net": 6516.35
+     },
+     "2023-06": {
+      "trades": 20,
+      "capital_sum": 79228.5,
+      "capital_max": 6340.75,
+      "net": -5599.14
+     },
+     "2023-07": {
+      "trades": 21,
+      "capital_sum": 100886.5,
+      "capital_max": 7218.25,
+      "net": -10927.44
+     },
+     "2023-08": {
+      "trades": 22,
+      "capital_sum": 92394.25,
+      "capital_max": 6987.5,
+      "net": -18414.03
+     },
+     "2023-09": {
+      "trades": 20,
+      "capital_sum": 94906.5,
+      "capital_max": 6890.0,
+      "net": -124.96
+     },
+     "2023-10": {
+      "trades": 20,
+      "capital_sum": 99570.25,
+      "capital_max": 8105.5,
+      "net": -11099.24
+     },
+     "2023-11": {
+      "trades": 20,
+      "capital_sum": 89456.25,
+      "capital_max": 7611.5,
+      "net": -9040.82
+     },
+     "2023-12": {
+      "trades": 20,
+      "capital_sum": 122820.75,
+      "capital_max": 9759.75,
+      "net": -7867.0
+     },
+     "2024-01": {
+      "trades": 22,
+      "capital_sum": 155954.5,
+      "capital_max": 12580.75,
+      "net": 25305.7
+     },
+     "2024-02": {
+      "trades": 21,
+      "capital_sum": 165590.75,
+      "capital_max": 11401.0,
+      "net": -25523.24
+     },
+     "2024-03": {
+      "trades": 17,
+      "capital_sum": 115982.75,
+      "capital_max": 11118.25,
+      "net": 20956.8
+     },
+     "2024-04": {
+      "trades": 20,
+      "capital_sum": 134462.25,
+      "capital_max": 12847.25,
+      "net": -7922.99
+     },
+     "2024-05": {
+      "trades": 21,
+      "capital_sum": 170647.75,
+      "capital_max": 25593.75,
+      "net": -977.87
+     },
+     "2024-06": {
+      "trades": 19,
+      "capital_sum": 179838.75,
+      "capital_max": 26724.75,
+      "net": 19539.63
+     },
+     "2024-07": {
+      "trades": 22,
+      "capital_sum": 169806.0,
+      "capital_max": 15730.0,
+      "net": 14970.62
+     },
+     "2024-08": {
+      "trades": 21,
+      "capital_sum": 152223.5,
+      "capital_max": 11950.25,
+      "net": -7733.74
+     },
+     "2024-09": {
+      "trades": 21,
+      "capital_sum": 141537.5,
+      "capital_max": 10143.25,
+      "net": -16392.37
+     },
+     "2024-10": {
+      "trades": 22,
+      "capital_sum": 162402.5,
+      "capital_max": 11657.75,
+      "net": -6630.58
+     },
+     "2024-11": {
+      "trades": 18,
+      "capital_sum": 157651.0,
+      "capital_max": 14157.0,
+      "net": 17268.1
+     },
+     "2024-12": {
+      "trades": 21,
+      "capital_sum": 179838.75,
+      "capital_max": 14179.75,
+      "net": -36368.71
+     },
+     "2025-01": {
+      "trades": 21,
+      "capital_sum": 184655.25,
+      "capital_max": 20013.5,
+      "net": -21539.25
+     },
+     "2025-02": {
+      "trades": 20,
+      "capital_sum": 161879.25,
+      "capital_max": 15054.0,
+      "net": -5096.57
+     },
+     "2025-03": {
+      "trades": 19,
+      "capital_sum": 133835.0,
+      "capital_max": 11401.0,
+      "net": -230.32
+     },
+     "2025-04": {
+      "trades": 18,
+      "capital_sum": 157764.75,
+      "capital_max": 18343.0,
+      "net": 17507.13
+     },
+     "2025-05": {
+      "trades": 19,
+      "capital_sum": 183391.0,
+      "capital_max": 14082.25,
+      "net": -25741.48
+     },
+     "2025-06": {
+      "trades": 20,
+      "capital_sum": 173842.5,
+      "capital_max": 13273.0,
+      "net": -7262.43
+     },
+     "2025-07": {
+      "trades": 23,
+      "capital_sum": 141755.25,
+      "capital_max": 10084.75,
+      "net": -8589.56
+     },
+     "2025-08": {
+      "trades": 19,
+      "capital_sum": 122460.0,
+      "capital_max": 10328.5,
+      "net": -15373.56
+     },
+     "2025-09": {
+      "trades": 22,
+      "capital_sum": 122908.5,
+      "capital_max": 9308.0,
+      "net": 2346.68
+     },
+     "2025-10": {
+      "trades": 20,
+      "capital_sum": 131404.0,
+      "capital_max": 11940.5,
+      "net": 3537.49
+     },
+     "2025-11": {
+      "trades": 19,
+      "capital_sum": 129437.75,
+      "capital_max": 9805.25,
+      "net": -14364.89
+     },
+     "2025-12": {
+      "trades": 22,
+      "capital_sum": 125911.5,
+      "capital_max": 9486.75,
+      "net": -10899.5
+     },
+     "2026-01": {
+      "trades": 20,
+      "capital_sum": 144586.0,
+      "capital_max": 14306.5,
+      "net": -4309.53
+     },
+     "2026-02": {
+      "trades": 21,
+      "capital_sum": 166721.75,
+      "capital_max": 12226.5,
+      "net": -7705.24
+     },
+     "2026-03": {
+      "trades": 19,
+      "capital_sum": 275616.25,
+      "capital_max": 21547.5,
+      "net": -22008.02
+     },
+     "2026-04": {
+      "trades": 20,
+      "capital_sum": 247962.0,
+      "capital_max": 21047.0,
+      "net": -9847.25
+     },
+     "2026-05": {
+      "trades": 19,
+      "capital_sum": 183644.5,
+      "capital_max": 14706.25,
+      "net": -15180.17
+     },
+     "2026-06": {
+      "trades": 21,
+      "capital_sum": 170270.75,
+      "capital_max": 12853.75,
+      "net": -14706.02
+     },
+     "2026-07": {
+      "trades": 22,
+      "capital_sum": 166968.75,
+      "capital_max": 11459.5,
+      "net": -20722.66
+     },
+     "2026-08": {
+      "trades": 21,
+      "capital_sum": 127679.5,
+      "capital_max": 9230.0,
+      "net": -15170.48
+     },
+     "2026-09": {
+      "trades": 21,
+      "capital_sum": 136727.5,
+      "capital_max": 10344.75,
+      "net": 3883.13
+     },
+     "2026-10": {
+      "trades": 15,
+      "capital_sum": 115719.5,
+      "capital_max": 11154.0,
+      "net": 29035.26
+     }
+    }
+   }
+  },
+  "rr_1_4": {
+   "rr": 4.0,
+   "index_trades": 1218,
+   "skipped": {},
+   "stats": {
+    "trades": 1218,
+    "sessions": 1222,
+    "wins": 411,
+    "win_rate": 33.743842364532014,
+    "before_costs": -90095.87,
+    "spread_slippage": 37703.88,
+    "charges": 77570.11,
+    "net_pnl": -205369.85999999996,
+    "return_pct_of_account": -102.68492999999998,
+    "annual_return_pct": -20.562319453124996,
+    "profit_factor": 0.8912389345920401,
+    "avg_trade": -168.61236453201968,
+    "avg_win": 4094.638661800487,
+    "avg_loss": -2339.85916976456,
+    "t_stat": -1.4999470163608868,
+    "avg_premium": 109.6129720853859,
+    "avg_capital": 7124.843185550082,
+    "max_capital": 26724.75,
+    "avg_ret_on_premium_pct": -2.9944991789819375,
+    "max_win": 23383.46,
+    "max_loss": -9212.88,
+    "exit_reasons": {
+     "eod": {
+      "trades": 620,
+      "avg_net": 1341.691806451613,
+      "win_rate": 59.83870967741935
+     },
+     "stop": {
+      "trades": 558,
+      "avg_net": -2559.2932974910395,
+      "win_rate": 0.0
+     },
+     "target": {
+      "trades": 40,
+      "avg_net": 9771.672,
+      "win_rate": 100.0
+     }
+    },
+    "by_option": {
+     "CALL": {
+      "trades": 568,
+      "win_rate": 33.274647887323944,
+      "net": -192358.63
+     },
+     "PUT": {
+      "trades": 650,
+      "win_rate": 34.15384615384615,
+      "net": -13011.230000000007
+     }
+    },
+    "by_days_to_expiry": {
+     "expiry day (0DTE)": {
+      "trades": 259,
+      "win_rate": 25.868725868725868,
+      "net": -85553.56,
+      "avg_net": -330.32262548262554,
+      "before_costs": -65520.31,
+      "avg_premium": 61.73320463320463,
+      "avg_capital": 4012.658301158301,
+      "avg_ret_on_premium_pct": -7.045135135135136
+     },
+     "1 session left": {
+      "trades": 260,
+      "win_rate": 33.07692307692307,
+      "net": -56930.36,
+      "avg_net": -218.9629230769232,
+      "before_costs": -33988.24,
+      "avg_premium": 91.80826923076923,
+      "avg_capital": 5967.5375,
+      "avg_ret_on_premium_pct": -4.280346153846154
+     },
+     "2-4 sessions left": {
+      "trades": 697,
+      "win_rate": 36.872309899569586,
+      "net": -62749.68000000001,
+      "avg_net": -90.02823529411762,
+      "before_costs": 9248.289999999997,
+      "avg_premium": 133.60337159253945,
+      "avg_capital": 8684.219153515065,
+      "avg_ret_on_premium_pct": -1.0070588235294122
+     },
+     "5+ sessions left": {
+      "trades": 2,
+      "win_rate": 50.0,
+      "net": -136.26000000000022,
+      "avg_net": -68.13000000000011,
+      "before_costs": 164.39000000000033,
+      "avg_premium": 264.0,
+      "avg_capital": 17160.0,
+      "avg_ret_on_premium_pct": -3.8999999999999995
+     }
+    },
+    "lowest_equity": -41065.51999999993,
+    "account_wiped_out_on": "2026-07-09",
+    "max_dd": 283511.18999999994,
+    "max_dd_pct_of_peak": 116.93802986871242,
+    "max_dd_pct_of_capital": 141.75559499999997,
+    "peak": "2022-01-25",
+    "trough": "2026-09-09",
+    "recovered": null
+   },
+   "yearly": [
+    {
+     "year": "2021",
+     "from": "2021-10-25",
+     "to": "2021-12-31",
+     "sessions": 46,
+     "trades": 46,
+     "win_rate": 50.0,
+     "before_costs": 32938.659999999996,
+     "costs": 4315.9,
+     "net_pnl": 28622.76,
+     "return_pct": 14.311379999999998,
+     "profit_factor": 1.4192883946977877,
+     "max_dd": 14981.190000000002,
+     "targets": 1,
+     "stops": 16,
+     "eod": 29
+    },
+    {
+     "year": "2022",
+     "from": "2022-01-03",
+     "to": "2022-12-30",
+     "sessions": 243,
+     "trades": 243,
+     "win_rate": 35.390946502057616,
+     "before_costs": 245.19999999999956,
+     "costs": 23439.329999999998,
+     "net_pnl": -23194.129999999994,
+     "return_pct": -11.597064999999997,
+     "profit_factor": 0.9345851231203799,
+     "max_dd": 60883.600000000006,
+     "targets": 13,
+     "stops": 106,
+     "eod": 124
+    },
+    {
+     "year": "2023",
+     "from": "2023-01-02",
+     "to": "2023-12-29",
+     "sessions": 244,
+     "trades": 243,
+     "win_rate": 30.45267489711934,
+     "before_costs": -58814.15,
+     "costs": 19972.36,
+     "net_pnl": -78786.51000000001,
+     "return_pct": -39.393255,
+     "profit_factor": 0.7266695311146179,
+     "max_dd": 101335.81,
+     "targets": 5,
+     "stops": 125,
+     "eod": 113
+    },
+    {
+     "year": "2024",
+     "from": "2024-01-01",
+     "to": "2024-12-31",
+     "sessions": 246,
+     "trades": 245,
+     "win_rate": 28.97959183673469,
+     "before_costs": 53490.92,
+     "costs": 24170.18,
+     "net_pnl": 29320.73999999999,
+     "return_pct": 14.660369999999995,
+     "profit_factor": 1.0726161861851833,
+     "max_dd": 54500.830000000075,
+     "targets": 13,
+     "stops": 126,
+     "eod": 106
+    },
+    {
+     "year": "2025",
+     "from": "2025-01-01",
+     "to": "2025-12-31",
+     "sessions": 244,
+     "trades": 242,
+     "win_rate": 35.53719008264463,
+     "before_costs": -55864.54,
+     "costs": 22988.37,
+     "net_pnl": -78852.90999999997,
+     "return_pct": -39.42645499999999,
+     "profit_factor": 0.8011183470646566,
+     "max_dd": 89249.9699999999,
+     "targets": 5,
+     "stops": 101,
+     "eod": 136
+    },
+    {
+     "year": "2026",
+     "from": "2026-01-01",
+     "to": "2026-10-23",
+     "sessions": 199,
+     "trades": 199,
+     "win_rate": 35.678391959798994,
+     "before_costs": -62091.96,
+     "costs": 20387.85,
+     "net_pnl": -82479.81,
+     "return_pct": -41.239905,
+     "profit_factor": 0.7811781582931878,
+     "max_dd": 127431.61000000003,
+     "targets": 3,
+     "stops": 84,
+     "eod": 112
+    }
+   ],
+   "monthly": {
+    "months": 61,
+    "trades_per_month": 19.9672131147541,
+    "capital_per_trade": 7124.843185550082,
+    "capital_sum_per_month": 142263.26229508198,
+    "largest_capital_in_a_month": 12270.13524590164,
+    "net_per_month": -3366.719016393443,
+    "median_month": -6001.860000000002,
+    "return_pct_per_month_on_account": -1.6833595081967214,
+    "months_positive": 21,
+    "best_month": 28804.109999999997,
+    "worst_month": -34399.78999999999,
+    "by_month": {
+     "2021-10": {
+      "trades": 5,
+      "capital_sum": 32873.75,
+      "capital_max": 10370.75,
+      "net": -1769.29
+     },
+     "2021-11": {
+      "trades": 18,
+      "capital_sum": 108176.25,
+      "capital_max": 11368.5,
+      "net": 12973.47
+     },
+     "2021-12": {
+      "trades": 23,
+      "capital_sum": 155987.0,
+      "capital_max": 10552.75,
+      "net": 17418.58
+     },
+     "2022-01": {
+      "trades": 19,
+      "capital_sum": 149490.25,
+      "capital_max": 17130.75,
+      "net": 2083.84
+     },
+     "2022-02": {
+      "trades": 20,
+      "capital_sum": 184141.75,
+      "capital_max": 17836.0,
+      "net": -698.88
+     },
+     "2022-03": {
+      "trades": 20,
+      "capital_sum": 204792.25,
+      "capital_max": 17273.75,
+      "net": -17120.35
+     },
+     "2022-04": {
+      "trades": 19,
+      "capital_sum": 134095.0,
+      "capital_max": 11069.5,
+      "net": -17163.34
+     },
+     "2022-05": {
+      "trades": 21,
+      "capital_sum": 185383.25,
+      "capital_max": 13019.5,
+      "net": 16120.75
+     },
+     "2022-06": {
+      "trades": 21,
+      "capital_sum": 162597.5,
+      "capital_max": 13045.5,
+      "net": -4481.38
+     },
+     "2022-07": {
+      "trades": 20,
+      "capital_sum": 132392.0,
+      "capital_max": 10042.5,
+      "net": -23229.59
+     },
+     "2022-08": {
+      "trades": 20,
+      "capital_sum": 129899.25,
+      "capital_max": 11261.25,
+      "net": 17396.91
+     },
+     "2022-09": {
+      "trades": 22,
+      "capital_sum": 173696.25,
+      "capital_max": 11498.5,
+      "net": 13541.43
+     },
+     "2022-10": {
+      "trades": 18,
+      "capital_sum": 123620.25,
+      "capital_max": 10637.25,
+      "net": -8799.8
+     },
+     "2022-11": {
+      "trades": 21,
+      "capital_sum": 108056.0,
+      "capital_max": 8843.25,
+      "net": -14475.22
+     },
+     "2022-12": {
+      "trades": 22,
+      "capital_sum": 112797.75,
+      "capital_max": 8755.5,
+      "net": 13631.5
+     },
+     "2023-01": {
+      "trades": 21,
+      "capital_sum": 127832.25,
+      "capital_max": 11440.0,
+      "net": 4993.93
+     },
+     "2023-02": {
+      "trades": 20,
+      "capital_sum": 107422.25,
+      "capital_max": 8823.75,
+      "net": -16592.63
+     },
+     "2023-03": {
+      "trades": 21,
+      "capital_sum": 111917.0,
+      "capital_max": 9018.75,
+      "net": 422.0
+     },
+     "2023-04": {
+      "trades": 17,
+      "capital_sum": 68877.25,
+      "capital_max": 6539.0,
+      "net": -14208.43
+     },
+     "2023-05": {
+      "trades": 21,
+      "capital_sum": 93671.5,
+      "capital_max": 6958.25,
+      "net": 7015.62
+     },
+     "2023-06": {
+      "trades": 20,
+      "capital_sum": 79228.5,
+      "capital_max": 6340.75,
+      "net": -6724.4
+     },
+     "2023-07": {
+      "trades": 21,
+      "capital_sum": 100886.5,
+      "capital_max": 7218.25,
+      "net": -10927.44
+     },
+     "2023-08": {
+      "trades": 22,
+      "capital_sum": 92394.25,
+      "capital_max": 6987.5,
+      "net": -22169.96
+     },
+     "2023-09": {
+      "trades": 20,
+      "capital_sum": 94906.5,
+      "capital_max": 6890.0,
+      "net": 2151.58
+     },
+     "2023-10": {
+      "trades": 20,
+      "capital_sum": 99570.25,
+      "capital_max": 8105.5,
+      "net": -9341.48
+     },
+     "2023-11": {
+      "trades": 20,
+      "capital_sum": 89456.25,
+      "capital_max": 7611.5,
+      "net": -6001.86
+     },
+     "2023-12": {
+      "trades": 20,
+      "capital_sum": 122820.75,
+      "capital_max": 9759.75,
+      "net": -7403.44
+     },
+     "2024-01": {
+      "trades": 22,
+      "capital_sum": 155954.5,
+      "capital_max": 12580.75,
+      "net": 28501.6
+     },
+     "2024-02": {
+      "trades": 21,
+      "capital_sum": 165590.75,
+      "capital_max": 11401.0,
+      "net": -22520.01
+     },
+     "2024-03": {
+      "trades": 17,
+      "capital_sum": 115982.75,
+      "capital_max": 11118.25,
+      "net": 27437.56
+     },
+     "2024-04": {
+      "trades": 20,
+      "capital_sum": 134462.25,
+      "capital_max": 12847.25,
+      "net": -829.23
+     },
+     "2024-05": {
+      "trades": 21,
+      "capital_sum": 170647.75,
+      "capital_max": 25593.75,
+      "net": 3959.54
+     },
+     "2024-06": {
+      "trades": 19,
+      "capital_sum": 179838.75,
+      "capital_max": 26724.75,
+      "net": 19539.63
+     },
+     "2024-07": {
+      "trades": 22,
+      "capital_sum": 169806.0,
+      "capital_max": 15730.0,
+      "net": 13387.29
+     },
+     "2024-08": {
+      "trades": 21,
+      "capital_sum": 152223.5,
+      "capital_max": 11950.25,
+      "net": -6364.81
+     },
+     "2024-09": {
+      "trades": 21,
+      "capital_sum": 141537.5,
+      "capital_max": 10143.25,
+      "net": -17683.33
+     },
+     "2024-10": {
+      "trades": 22,
+      "capital_sum": 162402.5,
+      "capital_max": 11657.75,
+      "net": -2407.86
+     },
+     "2024-11": {
+      "trades": 18,
+      "capital_sum": 157651.0,
+      "capital_max": 14157.0,
+      "net": 20700.15
+     },
+     "2024-12": {
+      "trades": 21,
+      "capital_sum": 179838.75,
+      "capital_max": 14179.75,
+      "net": -34399.79
+     },
+     "2025-01": {
+      "trades": 21,
+      "capital_sum": 184655.25,
+      "capital_max": 20013.5,
+      "net": -14860.31
+     },
+     "2025-02": {
+      "trades": 20,
+      "capital_sum": 161879.25,
+      "capital_max": 15054.0,
+      "net": -8619.6
+     },
+     "2025-03": {
+      "trades": 19,
+      "capital_sum": 133835.0,
+      "capital_max": 11401.0,
+      "net": -2994.15
+     },
+     "2025-04": {
+      "trades": 18,
+      "capital_sum": 157764.75,
+      "capital_max": 18343.0,
+      "net": 28804.11
+     },
+     "2025-05": {
+      "trades": 19,
+      "capital_sum": 183391.0,
+      "capital_max": 14082.25,
+      "net": -25202.21
+     },
+     "2025-06": {
+      "trades": 20,
+      "capital_sum": 173842.5,
+      "capital_max": 13273.0,
+      "net": -7262.43
+     },
+     "2025-07": {
+      "trades": 23,
+      "capital_sum": 141755.25,
+      "capital_max": 10084.75,
+      "net": -11304.66
+     },
+     "2025-08": {
+      "trades": 19,
+      "capital_sum": 122460.0,
+      "capital_max": 10328.5,
+      "net": -15373.56
+     },
+     "2025-09": {
+      "trades": 22,
+      "capital_sum": 122908.5,
+      "capital_max": 9308.0,
+      "net": 2346.68
+     },
+     "2025-10": {
+      "trades": 20,
+      "capital_sum": 131404.0,
+      "capital_max": 11940.5,
+      "net": -2141.87
+     },
+     "2025-11": {
+      "trades": 19,
+      "capital_sum": 129437.75,
+      "capital_max": 9805.25,
+      "net": -14364.89
+     },
+     "2025-12": {
+      "trades": 22,
+      "capital_sum": 125911.5,
+      "capital_max": 9486.75,
+      "net": -7880.02
+     },
+     "2026-01": {
+      "trades": 20,
+      "capital_sum": 144586.0,
+      "capital_max": 14306.5,
+      "net": -4309.53
+     },
+     "2026-02": {
+      "trades": 21,
+      "capital_sum": 166721.75,
+      "capital_max": 12226.5,
+      "net": -4331.66
+     },
+     "2026-03": {
+      "trades": 19,
+      "capital_sum": 275616.25,
+      "capital_max": 21547.5,
+      "net": -18644.19
+     },
+     "2026-04": {
+      "trades": 20,
+      "capital_sum": 247962.0,
+      "capital_max": 21047.0,
+      "net": -18893.7
+     },
+     "2026-05": {
+      "trades": 19,
+      "capital_sum": 183644.5,
+      "capital_max": 14706.25,
+      "net": -14044.15
+     },
+     "2026-06": {
+      "trades": 21,
+      "capital_sum": 170270.75,
+      "capital_max": 12853.75,
+      "net": -15733.84
+     },
+     "2026-07": {
+      "trades": 22,
+      "capital_sum": 166968.75,
+      "capital_max": 11459.5,
+      "net": -18549.07
+     },
+     "2026-08": {
+      "trades": 21,
+      "capital_sum": 127679.5,
+      "capital_max": 9230.0,
+      "net": -17181.63
+     },
+     "2026-09": {
+      "trades": 21,
+      "capital_sum": 136727.5,
+      "capital_max": 10344.75,
+      "net": 4544.86
+     },
+     "2026-10": {
+      "trades": 15,
+      "capital_sum": 115719.5,
+      "capital_max": 11154.0,
+      "net": 24663.1
+     }
+    }
+   }
+  },
+  "rr_1_5": {
+   "rr": 5.0,
+   "index_trades": 1218,
+   "skipped": {},
+   "stats": {
+    "trades": 1218,
+    "sessions": 1222,
+    "wins": 410,
+    "win_rate": 33.66174055829228,
+    "before_costs": -93946.24,
+    "spread_slippage": 37691.76,
+    "charges": 77558.43,
+    "net_pnl": -209196.42999999993,
+    "return_pct_of_account": -104.59821499999997,
+    "annual_return_pct": -20.945448480674333,
+    "profit_factor": 0.8894332783774229,
+    "avg_trade": -171.75404761904755,
+    "avg_win": 4104.491439024391,
+    "avg_loss": -2341.6310891089106,
+    "t_stat": -1.509444971189017,
+    "avg_premium": 109.6129720853859,
+    "avg_capital": 7124.843185550082,
+    "max_capital": 26724.75,
+    "avg_ret_on_premium_pct": -3.15935960591133,
+    "max_win": 23895.74,
+    "max_loss": -9212.88,
+    "exit_reasons": {
+     "eod": {
+      "trades": 640,
+      "avg_net": 1575.5782187500001,
+      "win_rate": 61.09375
+     },
+     "stop": {
+      "trades": 559,
+      "avg_net": -2561.4619499105547,
+      "win_rate": 0.0
+     },
+     "target": {
+      "trades": 19,
+      "avg_net": 11278.46,
+      "win_rate": 100.0
+     }
+    },
+    "by_option": {
+     "CALL": {
+      "trades": 568,
+      "win_rate": 33.274647887323944,
+      "net": -209371.69
+     },
+     "PUT": {
+      "trades": 650,
+      "win_rate": 34.0,
+      "net": 175.2599999999955
+     }
+    },
+    "by_days_to_expiry": {
+     "expiry day (0DTE)": {
+      "trades": 259,
+      "win_rate": 25.482625482625483,
+      "net": -103347.51999999999,
+      "avg_net": -399.0251737451738,
+      "before_costs": -83385.79,
+      "avg_premium": 61.73320463320463,
+      "avg_capital": 4012.658301158301,
+      "avg_ret_on_premium_pct": -8.593127413127414
+     },
+     "1 session left": {
+      "trades": 260,
+      "win_rate": 33.07692307692307,
+      "net": -61305.78,
+      "avg_net": -235.7914615384616,
+      "before_costs": -38377.32,
+      "avg_premium": 91.80826923076923,
+      "avg_capital": 5967.5375,
+      "avg_ret_on_premium_pct": -4.616076923076923
+     },
+     "2-4 sessions left": {
+      "trades": 697,
+      "win_rate": 36.872309899569586,
+      "net": -44406.87,
+      "avg_net": -63.71143472022954,
+      "before_costs": 27652.48,
+      "avg_premium": 133.60337159253945,
+      "avg_capital": 8684.219153515065,
+      "avg_ret_on_premium_pct": -0.5946915351506461
+     },
+     "5+ sessions left": {
+      "trades": 2,
+      "win_rate": 50.0,
+      "net": -136.26000000000022,
+      "avg_net": -68.13000000000011,
+      "before_costs": 164.39000000000033,
+      "avg_premium": 264.0,
+      "avg_capital": 17160.0,
+      "avg_ret_on_premium_pct": -3.8999999999999995
+     }
+    },
+    "lowest_equity": -44892.090000000026,
+    "account_wiped_out_on": "2026-05-19",
+    "max_dd": 290010.63,
+    "max_dd_pct_of_peak": 118.31444084156182,
+    "max_dd_pct_of_capital": 145.005315,
+    "peak": "2022-01-25",
+    "trough": "2026-09-09",
+    "recovered": null
+   },
+   "yearly": [
+    {
+     "year": "2021",
+     "from": "2021-10-25",
+     "to": "2021-12-31",
+     "sessions": 46,
+     "trades": 46,
+     "win_rate": 50.0,
+     "before_costs": 34698.2,
+     "costs": 4320.93,
+     "net_pnl": 30377.27,
+     "return_pct": 15.188635,
+     "profit_factor": 1.4449898183683638,
+     "max_dd": 14981.190000000002,
+     "targets": 1,
+     "stops": 16,
+     "eod": 29
+    },
+    {
+     "year": "2022",
+     "from": "2022-01-03",
+     "to": "2022-12-30",
+     "sessions": 243,
+     "trades": 243,
+     "win_rate": 35.390946502057616,
+     "before_costs": 17012.38,
+     "costs": 23493.55,
+     "net_pnl": -6481.170000000002,
+     "return_pct": -3.2405850000000007,
+     "profit_factor": 0.9817210243459924,
+     "max_dd": 58796.600000000006,
+     "targets": 8,
+     "stops": 106,
+     "eod": 129
+    },
+    {
+     "year": "2023",
+     "from": "2023-01-02",
+     "to": "2023-12-29",
+     "sessions": 244,
+     "trades": 243,
+     "win_rate": 30.45267489711934,
+     "before_costs": -64716.78,
+     "costs": 19950.49,
+     "net_pnl": -84667.26999999999,
+     "return_pct": -42.333634999999994,
+     "profit_factor": 0.7062676769367593,
+     "max_dd": 105743.69,
+     "targets": 2,
+     "stops": 125,
+     "eod": 116
+    },
+    {
+     "year": "2024",
+     "from": "2024-01-01",
+     "to": "2024-12-31",
+     "sessions": 246,
+     "trades": 245,
+     "win_rate": 28.57142857142857,
+     "before_costs": 39809.61,
+     "costs": 24116.579999999998,
+     "net_pnl": 15693.029999999995,
+     "return_pct": 7.846514999999997,
+     "profit_factor": 1.038505921099106,
+     "max_dd": 51214.08999999994,
+     "targets": 5,
+     "stops": 127,
+     "eod": 113
+    },
+    {
+     "year": "2025",
+     "from": "2025-01-01",
+     "to": "2025-12-31",
+     "sessions": 244,
+     "trades": 242,
+     "win_rate": 35.53719008264463,
+     "before_costs": -61486.43,
+     "costs": 22971.12,
+     "net_pnl": -84457.54999999999,
+     "return_pct": -42.228775,
+     "profit_factor": 0.7869824062692243,
+     "max_dd": 98844.41999999991,
+     "targets": 2,
+     "stops": 101,
+     "eod": 139
+    },
+    {
+     "year": "2026",
+     "from": "2026-01-01",
+     "to": "2026-10-23",
+     "sessions": 199,
+     "trades": 199,
+     "win_rate": 35.678391959798994,
+     "before_costs": -59263.22,
+     "costs": 20397.52,
+     "net_pnl": -79660.74,
+     "return_pct": -39.83037,
+     "profit_factor": 0.7886572503194719,
+     "max_dd": 124612.54000000005,
+     "targets": 1,
+     "stops": 84,
+     "eod": 114
+    }
+   ],
+   "monthly": {
+    "months": 61,
+    "trades_per_month": 19.9672131147541,
+    "capital_per_trade": 7124.843185550082,
+    "capital_sum_per_month": 142263.26229508198,
+    "largest_capital_in_a_month": 12270.13524590164,
+    "net_per_month": -3429.449672131148,
+    "median_month": -6644.229999999999,
+    "return_pct_per_month_on_account": -1.7147248360655738,
+    "months_positive": 21,
+    "best_month": 30947.07,
+    "worst_month": -34613.189999999995,
+    "by_month": {
+     "2021-10": {
+      "trades": 5,
+      "capital_sum": 32873.75,
+      "capital_max": 10370.75,
+      "net": -1769.29
+     },
+     "2021-11": {
+      "trades": 18,
+      "capital_sum": 108176.25,
+      "capital_max": 11368.5,
+      "net": 12973.47
+     },
+     "2021-12": {
+      "trades": 23,
+      "capital_sum": 155987.0,
+      "capital_max": 10552.75,
+      "net": 19173.09
+     },
+     "2022-01": {
+      "trades": 19,
+      "capital_sum": 149490.25,
+      "capital_max": 17130.75,
+      "net": 3002.2
+     },
+     "2022-02": {
+      "trades": 20,
+      "capital_sum": 184141.75,
+      "capital_max": 17836.0,
+      "net": -698.88
+     },
+     "2022-03": {
+      "trades": 20,
+      "capital_sum": 204792.25,
+      "capital_max": 17273.75,
+      "net": -17120.35
+     },
+     "2022-04": {
+      "trades": 19,
+      "capital_sum": 134095.0,
+      "capital_max": 11069.5,
+      "net": -17163.34
+     },
+     "2022-05": {
+      "trades": 21,
+      "capital_sum": 185383.25,
+      "capital_max": 13019.5,
+      "net": 12896.6
+     },
+     "2022-06": {
+      "trades": 21,
+      "capital_sum": 162597.5,
+      "capital_max": 13045.5,
+      "net": 666.2
+     },
+     "2022-07": {
+      "trades": 20,
+      "capital_sum": 132392.0,
+      "capital_max": 10042.5,
+      "net": -23229.59
+     },
+     "2022-08": {
+      "trades": 20,
+      "capital_sum": 129899.25,
+      "capital_max": 11261.25,
+      "net": 23750.99
+     },
+     "2022-09": {
+      "trades": 22,
+      "capital_sum": 173696.25,
+      "capital_max": 11498.5,
+      "net": 13541.43
+     },
+     "2022-10": {
+      "trades": 18,
+      "capital_sum": 123620.25,
+      "capital_max": 10637.25,
+      "net": -8799.8
+     },
+     "2022-11": {
+      "trades": 21,
+      "capital_sum": 108056.0,
+      "capital_max": 8843.25,
+      "net": -12875.64
+     },
+     "2022-12": {
+      "trades": 22,
+      "capital_sum": 112797.75,
+      "capital_max": 8755.5,
+      "net": 19549.01
+     },
+     "2023-01": {
+      "trades": 21,
+      "capital_sum": 127832.25,
+      "capital_max": 11440.0,
+      "net": 3521.05
+     },
+     "2023-02": {
+      "trades": 20,
+      "capital_sum": 107422.25,
+      "capital_max": 8823.75,
+      "net": -16881.76
+     },
+     "2023-03": {
+      "trades": 21,
+      "capital_sum": 111917.0,
+      "capital_max": 9018.75,
+      "net": 422.0
+     },
+     "2023-04": {
+      "trades": 17,
+      "capital_sum": 68877.25,
+      "capital_max": 6539.0,
+      "net": -14208.43
+     },
+     "2023-05": {
+      "trades": 21,
+      "capital_sum": 93671.5,
+      "capital_max": 6958.25,
+      "net": 7015.62
+     },
+     "2023-06": {
+      "trades": 20,
+      "capital_sum": 79228.5,
+      "capital_max": 6340.75,
+      "net": -6724.4
+     },
+     "2023-07": {
+      "trades": 21,
+      "capital_sum": 100886.5,
+      "capital_max": 7218.25,
+      "net": -10927.44
+     },
+     "2023-08": {
+      "trades": 22,
+      "capital_sum": 92394.25,
+      "capital_max": 6987.5,
+      "net": -22169.96
+     },
+     "2023-09": {
+      "trades": 20,
+      "capital_sum": 94906.5,
+      "capital_max": 6890.0,
+      "net": 4740.0
+     },
+     "2023-10": {
+      "trades": 20,
+      "capital_sum": 99570.25,
+      "capital_max": 8105.5,
+      "net": -7462.51
+     },
+     "2023-11": {
+      "trades": 20,
+      "capital_sum": 89456.25,
+      "capital_max": 7611.5,
+      "net": -14588.0
+     },
+     "2023-12": {
+      "trades": 20,
+      "capital_sum": 122820.75,
+      "capital_max": 9759.75,
+      "net": -7403.44
+     },
+     "2024-01": {
+      "trades": 22,
+      "capital_sum": 155954.5,
+      "capital_max": 12580.75,
+      "net": 30947.07
+     },
+     "2024-02": {
+      "trades": 21,
+      "capital_sum": 165590.75,
+      "capital_max": 11401.0,
+      "net": -19496.28
+     },
+     "2024-03": {
+      "trades": 17,
+      "capital_sum": 115982.75,
+      "capital_max": 11118.25,
+      "net": 14656.95
+     },
+     "2024-04": {
+      "trades": 20,
+      "capital_sum": 134462.25,
+      "capital_max": 12847.25,
+      "net": -2637.96
+     },
+     "2024-05": {
+      "trades": 21,
+      "capital_sum": 170647.75,
+      "capital_max": 25593.75,
+      "net": -6644.23
+     },
+     "2024-06": {
+      "trades": 19,
+      "capital_sum": 179838.75,
+      "capital_max": 26724.75,
+      "net": 19539.63
+     },
+     "2024-07": {
+      "trades": 22,
+      "capital_sum": 169806.0,
+      "capital_max": 15730.0,
+      "net": 18567.35
+     },
+     "2024-08": {
+      "trades": 21,
+      "capital_sum": 152223.5,
+      "capital_max": 11950.25,
+      "net": -6364.81
+     },
+     "2024-09": {
+      "trades": 21,
+      "capital_sum": 141537.5,
+      "capital_max": 10143.25,
+      "net": -17683.33
+     },
+     "2024-10": {
+      "trades": 22,
+      "capital_sum": 162402.5,
+      "capital_max": 11657.75,
+      "net": -2164.21
+     },
+     "2024-11": {
+      "trades": 18,
+      "capital_sum": 157651.0,
+      "capital_max": 14157.0,
+      "net": 21586.04
+     },
+     "2024-12": {
+      "trades": 21,
+      "capital_sum": 179838.75,
+      "capital_max": 14179.75,
+      "net": -34613.19
+     },
+     "2025-01": {
+      "trades": 21,
+      "capital_sum": 184655.25,
+      "capital_max": 20013.5,
+      "net": -8583.21
+     },
+     "2025-02": {
+      "trades": 20,
+      "capital_sum": 161879.25,
+      "capital_max": 15054.0,
+      "net": -8619.6
+     },
+     "2025-03": {
+      "trades": 19,
+      "capital_sum": 133835.0,
+      "capital_max": 11401.0,
+      "net": -2994.15
+     },
+     "2025-04": {
+      "trades": 18,
+      "capital_sum": 157764.75,
+      "capital_max": 18343.0,
+      "net": 20029.56
+     },
+     "2025-05": {
+      "trades": 19,
+      "capital_sum": 183391.0,
+      "capital_max": 14082.25,
+      "net": -25202.21
+     },
+     "2025-06": {
+      "trades": 20,
+      "capital_sum": 173842.5,
+      "capital_max": 13273.0,
+      "net": -7262.43
+     },
+     "2025-07": {
+      "trades": 23,
+      "capital_sum": 141755.25,
+      "capital_max": 10084.75,
+      "net": -11304.66
+     },
+     "2025-08": {
+      "trades": 19,
+      "capital_sum": 122460.0,
+      "capital_max": 10328.5,
+      "net": -15373.56
+     },
+     "2025-09": {
+      "trades": 22,
+      "capital_sum": 122908.5,
+      "capital_max": 9308.0,
+      "net": 2346.68
+     },
+     "2025-10": {
+      "trades": 20,
+      "capital_sum": 131404.0,
+      "capital_max": 11940.5,
+      "net": -2141.87
+     },
+     "2025-11": {
+      "trades": 19,
+      "capital_sum": 129437.75,
+      "capital_max": 9805.25,
+      "net": -14364.89
+     },
+     "2025-12": {
+      "trades": 22,
+      "capital_sum": 125911.5,
+      "capital_max": 9486.75,
+      "net": -10987.21
+     },
+     "2026-01": {
+      "trades": 20,
+      "capital_sum": 144586.0,
+      "capital_max": 14306.5,
+      "net": -4309.53
+     },
+     "2026-02": {
+      "trades": 21,
+      "capital_sum": 166721.75,
+      "capital_max": 12226.5,
+      "net": -328.84
+     },
+     "2026-03": {
+      "trades": 19,
+      "capital_sum": 275616.25,
+      "capital_max": 21547.5,
+      "net": -18416.78
+     },
+     "2026-04": {
+      "trades": 20,
+      "capital_sum": 247962.0,
+      "capital_max": 21047.0,
+      "net": -18893.7
+     },
+     "2026-05": {
+      "trades": 19,
+      "capital_sum": 183644.5,
+      "capital_max": 14706.25,
+      "net": -14044.15
+     },
+     "2026-06": {
+      "trades": 21,
+      "capital_sum": 170270.75,
+      "capital_max": 12853.75,
+      "net": -15733.84
+     },
+     "2026-07": {
+      "trades": 22,
+      "capital_sum": 166968.75,
+      "capital_max": 11459.5,
+      "net": -19960.23
+     },
+     "2026-08": {
+      "trades": 21,
+      "capital_sum": 127679.5,
+      "capital_max": 9230.0,
+      "net": -17181.63
+     },
+     "2026-09": {
+      "trades": 21,
+      "capital_sum": 136727.5,
+      "capital_max": 10344.75,
+      "net": 4544.86
+     },
+     "2026-10": {
+      "trades": 15,
+      "capital_sum": 115719.5,
+      "capital_max": 11154.0,
+      "net": 24663.1
+     }
+    }
+   }
+  },
+  "rr_1_6": {
+   "rr": 6.0,
+   "index_trades": 1218,
+   "skipped": {},
+   "stats": {
+    "trades": 1218,
+    "sessions": 1222,
+    "wins": 409,
+    "win_rate": 33.579638752052546,
+    "before_costs": -99467.11,
+    "spread_slippage": 37692.64,
+    "charges": 77549.18,
+    "net_pnl": -214708.93,
+    "return_pct_of_account": -107.35446499999999,
+    "annual_return_pct": -21.497378476562496,
+    "profit_factor": 0.886709693945908,
+    "avg_trade": -176.27990968801313,
+    "avg_win": 4108.804767726161,
+    "avg_loss": -2342.6577008652657,
+    "t_stat": -1.543983845361329,
+    "avg_premium": 109.6129720853859,
+    "avg_capital": 7124.843185550082,
+    "max_capital": 26724.75,
+    "avg_ret_on_premium_pct": -3.0224302134646956,
+    "max_win": 23895.74,
+    "max_loss": -9212.88,
+    "exit_reasons": {
+     "eod": {
+      "trades": 649,
+      "avg_net": 1675.8174730354392,
+      "win_rate": 61.47919876733437
+     },
+     "stop": {
+      "trades": 559,
+      "avg_net": -2561.4619499105547,
+      "win_rate": 0.0
+     },
+     "target": {
+      "trades": 10,
+      "avg_net": 12954.276000000002,
+      "win_rate": 100.0
+     }
+    },
+    "by_option": {
+     "CALL": {
+      "trades": 568,
+      "win_rate": 33.274647887323944,
+      "net": -206857.02
+     },
+     "PUT": {
+      "trades": 650,
+      "win_rate": 33.84615384615385,
+      "net": -7851.9100000000035
+     }
+    },
+    "by_days_to_expiry": {
+     "expiry day (0DTE)": {
+      "trades": 259,
+      "win_rate": 25.482625482625483,
+      "net": -93325.54,
+      "avg_net": -360.33027027027026,
+      "before_costs": -73325.51,
+      "avg_premium": 61.73320463320463,
+      "avg_capital": 4012.658301158301,
+      "avg_ret_on_premium_pct": -7.699382239382239
+     },
+     "1 session left": {
+      "trades": 260,
+      "win_rate": 33.07692307692307,
+      "net": -63152.25,
+      "avg_net": -242.89326923076933,
+      "before_costs": -40231.32,
+      "avg_premium": 91.80826923076923,
+      "avg_capital": 5967.5375,
+      "avg_ret_on_premium_pct": -4.637961538461539
+     },
+     "2-4 sessions left": {
+      "trades": 697,
+      "win_rate": 36.728837876614065,
+      "net": -58094.880000000005,
+      "avg_net": -83.3498995695839,
+      "before_costs": 13925.329999999994,
+      "avg_premium": 133.60337159253945,
+      "avg_capital": 8684.219153515065,
+      "avg_ret_on_premium_pct": -0.6793543758967006
+     },
+     "5+ sessions left": {
+      "trades": 2,
+      "win_rate": 50.0,
+      "net": -136.26000000000022,
+      "avg_net": -68.13000000000011,
+      "before_costs": 164.39000000000033,
+      "avg_premium": 264.0,
+      "avg_capital": 17160.0,
+      "avg_ret_on_premium_pct": -3.8999999999999995
+     }
+    },
+    "lowest_equity": -50404.58999999994,
+    "account_wiped_out_on": "2026-05-11",
+    "max_dd": 298866.47,
+    "max_dd_pct_of_peak": 120.28664920349148,
+    "max_dd_pct_of_capital": 149.433235,
+    "peak": "2022-01-25",
+    "trough": "2026-09-09",
+    "recovered": null
+   },
+   "yearly": [
+    {
+     "year": "2021",
+     "from": "2021-10-25",
+     "to": "2021-12-31",
+     "sessions": 46,
+     "trades": 46,
+     "win_rate": 50.0,
+     "before_costs": 36653.619999999995,
+     "costs": 4330.17,
+     "net_pnl": 32323.45,
+     "return_pct": 16.161725,
+     "profit_factor": 1.473498972901083,
+     "max_dd": 14981.190000000002,
+     "targets": 1,
+     "stops": 16,
+     "eod": 29
+    },
+    {
+     "year": "2022",
+     "from": "2022-01-03",
+     "to": "2022-12-30",
+     "sessions": 243,
+     "trades": 243,
+     "win_rate": 35.390946502057616,
+     "before_costs": 17075.38,
+     "costs": 23495.83,
+     "net_pnl": -6420.44999999999,
+     "return_pct": -3.210224999999995,
+     "profit_factor": 0.9818922741977494,
+     "max_dd": 59692.20999999999,
+     "targets": 4,
+     "stops": 106,
+     "eod": 133
+    },
+    {
+     "year": "2023",
+     "from": "2023-01-02",
+     "to": "2023-12-29",
+     "sessions": 244,
+     "trades": 243,
+     "win_rate": 30.45267489711934,
+     "before_costs": -60919.54,
+     "costs": 19965.85,
+     "net_pnl": -80885.39000000001,
+     "return_pct": -40.44269500000001,
+     "profit_factor": 0.7193879818426149,
+     "max_dd": 101961.81,
+     "targets": 1,
+     "stops": 125,
+     "eod": 117
+    },
+    {
+     "year": "2024",
+     "from": "2024-01-01",
+     "to": "2024-12-31",
+     "sessions": 246,
+     "trades": 245,
+     "win_rate": 28.163265306122447,
+     "before_costs": 21794.44,
+     "costs": 24055.63,
+     "net_pnl": -2261.1900000000096,
+     "return_pct": -1.1305950000000047,
+     "profit_factor": 0.9944945792231287,
+     "max_dd": 70715.73000000001,
+     "targets": 2,
+     "stops": 127,
+     "eod": 116
+    },
+    {
+     "year": "2025",
+     "from": "2025-01-01",
+     "to": "2025-12-31",
+     "sessions": 244,
+     "trades": 242,
+     "win_rate": 35.53719008264463,
+     "before_costs": -54453.35,
+     "costs": 22998.15,
+     "net_pnl": -77451.5,
+     "return_pct": -38.72575,
+     "profit_factor": 0.8046529628098475,
+     "max_dd": 95828.18999999994,
+     "targets": 2,
+     "stops": 101,
+     "eod": 139
+    },
+    {
+     "year": "2026",
+     "from": "2026-01-01",
+     "to": "2026-10-23",
+     "sessions": 199,
+     "trades": 199,
+     "win_rate": 35.678391959798994,
+     "before_costs": -59617.659999999996,
+     "costs": 20396.190000000002,
+     "net_pnl": -80013.85000000002,
+     "return_pct": -40.00692500000001,
+     "profit_factor": 0.7877204370493506,
+     "max_dd": 124965.65000000005,
+     "targets": 0,
+     "stops": 84,
+     "eod": 115
+    }
+   ],
+   "monthly": {
+    "months": 61,
+    "trades_per_month": 19.9672131147541,
+    "capital_per_trade": 7124.843185550082,
+    "capital_sum_per_month": 142263.26229508198,
+    "largest_capital_in_a_month": 12270.13524590164,
+    "net_per_month": -3519.818524590164,
+    "median_month": -5380.900000000001,
+    "return_pct_per_month_on_account": -1.759909262295082,
+    "months_positive": 20,
+    "best_month": 33610.189999999995,
+    "worst_month": -34613.189999999995,
+    "by_month": {
+     "2021-10": {
+      "trades": 5,
+      "capital_sum": 32873.75,
+      "capital_max": 10370.75,
+      "net": -1769.29
+     },
+     "2021-11": {
+      "trades": 18,
+      "capital_sum": 108176.25,
+      "capital_max": 11368.5,
+      "net": 12973.47
+     },
+     "2021-12": {
+      "trades": 23,
+      "capital_sum": 155987.0,
+      "capital_max": 10552.75,
+      "net": 21119.27
+     },
+     "2022-01": {
+      "trades": 19,
+      "capital_sum": 149490.25,
+      "capital_max": 17130.75,
+      "net": 4399.36
+     },
+     "2022-02": {
+      "trades": 20,
+      "capital_sum": 184141.75,
+      "capital_max": 17836.0,
+      "net": -698.88
+     },
+     "2022-03": {
+      "trades": 20,
+      "capital_sum": 204792.25,
+      "capital_max": 17273.75,
+      "net": -17120.35
+     },
+     "2022-04": {
+      "trades": 19,
+      "capital_sum": 134095.0,
+      "capital_max": 11069.5,
+      "net": -17163.34
+     },
+     "2022-05": {
+      "trades": 21,
+      "capital_sum": 185383.25,
+      "capital_max": 13019.5,
+      "net": 8497.46
+     },
+     "2022-06": {
+      "trades": 21,
+      "capital_sum": 162597.5,
+      "capital_max": 13045.5,
+      "net": 4169.73
+     },
+     "2022-07": {
+      "trades": 20,
+      "capital_sum": 132392.0,
+      "capital_max": 10042.5,
+      "net": -23229.59
+     },
+     "2022-08": {
+      "trades": 20,
+      "capital_sum": 129899.25,
+      "capital_max": 11261.25,
+      "net": 25295.34
+     },
+     "2022-09": {
+      "trades": 22,
+      "capital_sum": 173696.25,
+      "capital_max": 11498.5,
+      "net": 13541.43
+     },
+     "2022-10": {
+      "trades": 18,
+      "capital_sum": 123620.25,
+      "capital_max": 10637.25,
+      "net": -8799.8
+     },
+     "2022-11": {
+      "trades": 21,
+      "capital_sum": 108056.0,
+      "capital_max": 8843.25,
+      "net": -12875.64
+     },
+     "2022-12": {
+      "trades": 22,
+      "capital_sum": 112797.75,
+      "capital_max": 8755.5,
+      "net": 17563.83
+     },
+     "2023-01": {
+      "trades": 21,
+      "capital_sum": 127832.25,
+      "capital_max": 11440.0,
+      "net": 3521.05
+     },
+     "2023-02": {
+      "trades": 20,
+      "capital_sum": 107422.25,
+      "capital_max": 8823.75,
+      "net": -16881.76
+     },
+     "2023-03": {
+      "trades": 21,
+      "capital_sum": 111917.0,
+      "capital_max": 9018.75,
+      "net": 422.0
+     },
+     "2023-04": {
+      "trades": 17,
+      "capital_sum": 68877.25,
+      "capital_max": 6539.0,
+      "net": -14208.43
+     },
+     "2023-05": {
+      "trades": 21,
+      "capital_sum": 93671.5,
+      "capital_max": 6958.25,
+      "net": 7015.62
+     },
+     "2023-06": {
+      "trades": 20,
+      "capital_sum": 79228.5,
+      "capital_max": 6340.75,
+      "net": -6724.4
+     },
+     "2023-07": {
+      "trades": 21,
+      "capital_sum": 100886.5,
+      "capital_max": 7218.25,
+      "net": -10927.44
+     },
+     "2023-08": {
+      "trades": 22,
+      "capital_sum": 92394.25,
+      "capital_max": 6987.5,
+      "net": -22169.96
+     },
+     "2023-09": {
+      "trades": 20,
+      "capital_sum": 94906.5,
+      "capital_max": 6890.0,
+      "net": 6440.27
+     },
+     "2023-10": {
+      "trades": 20,
+      "capital_sum": 99570.25,
+      "capital_max": 8105.5,
+      "net": -5380.9
+     },
+     "2023-11": {
+      "trades": 20,
+      "capital_sum": 89456.25,
+      "capital_max": 7611.5,
+      "net": -14588.0
+     },
+     "2023-12": {
+      "trades": 20,
+      "capital_sum": 122820.75,
+      "capital_max": 9759.75,
+      "net": -7403.44
+     },
+     "2024-01": {
+      "trades": 22,
+      "capital_sum": 155954.5,
+      "capital_max": 12580.75,
+      "net": 33610.19
+     },
+     "2024-02": {
+      "trades": 21,
+      "capital_sum": 165590.75,
+      "capital_max": 11401.0,
+      "net": -20317.19
+     },
+     "2024-03": {
+      "trades": 17,
+      "capital_sum": 115982.75,
+      "capital_max": 11118.25,
+      "net": 14656.95
+     },
+     "2024-04": {
+      "trades": 20,
+      "capital_sum": 134462.25,
+      "capital_max": 12847.25,
+      "net": -2637.96
+     },
+     "2024-05": {
+      "trades": 21,
+      "capital_sum": 170647.75,
+      "capital_max": 25593.75,
+      "net": -4129.56
+     },
+     "2024-06": {
+      "trades": 19,
+      "capital_sum": 179838.75,
+      "capital_max": 26724.75,
+      "net": 19539.63
+     },
+     "2024-07": {
+      "trades": 22,
+      "capital_sum": 169806.0,
+      "capital_max": 15730.0,
+      "net": -165.5
+     },
+     "2024-08": {
+      "trades": 21,
+      "capital_sum": 152223.5,
+      "capital_max": 11950.25,
+      "net": -6364.81
+     },
+     "2024-09": {
+      "trades": 21,
+      "capital_sum": 141537.5,
+      "capital_max": 10143.25,
+      "net": -17683.33
+     },
+     "2024-10": {
+      "trades": 22,
+      "capital_sum": 162402.5,
+      "capital_max": 11657.75,
+      "net": -5742.46
+     },
+     "2024-11": {
+      "trades": 18,
+      "capital_sum": 157651.0,
+      "capital_max": 14157.0,
+      "net": 21586.04
+     },
+     "2024-12": {
+      "trades": 21,
+      "capital_sum": 179838.75,
+      "capital_max": 14179.75,
+      "net": -34613.19
+     },
+     "2025-01": {
+      "trades": 21,
+      "capital_sum": 184655.25,
+      "capital_max": 20013.5,
+      "net": -1577.16
+     },
+     "2025-02": {
+      "trades": 20,
+      "capital_sum": 161879.25,
+      "capital_max": 15054.0,
+      "net": -8619.6
+     },
+     "2025-03": {
+      "trades": 19,
+      "capital_sum": 133835.0,
+      "capital_max": 11401.0,
+      "net": -2994.15
+     },
+     "2025-04": {
+      "trades": 18,
+      "capital_sum": 157764.75,
+      "capital_max": 18343.0,
+      "net": 20029.56
+     },
+     "2025-05": {
+      "trades": 19,
+      "capital_sum": 183391.0,
+      "capital_max": 14082.25,
+      "net": -25202.21
+     },
+     "2025-06": {
+      "trades": 20,
+      "capital_sum": 173842.5,
+      "capital_max": 13273.0,
+      "net": -7262.43
+     },
+     "2025-07": {
+      "trades": 23,
+      "capital_sum": 141755.25,
+      "capital_max": 10084.75,
+      "net": -11304.66
+     },
+     "2025-08": {
+      "trades": 19,
+      "capital_sum": 122460.0,
+      "capital_max": 10328.5,
+      "net": -15373.56
+     },
+     "2025-09": {
+      "trades": 22,
+      "capital_sum": 122908.5,
+      "capital_max": 9308.0,
+      "net": 2346.68
+     },
+     "2025-10": {
+      "trades": 20,
+      "capital_sum": 131404.0,
+      "capital_max": 11940.5,
+      "net": -2141.87
+     },
+     "2025-11": {
+      "trades": 19,
+      "capital_sum": 129437.75,
+      "capital_max": 9805.25,
+      "net": -14364.89
+     },
+     "2025-12": {
+      "trades": 22,
+      "capital_sum": 125911.5,
+      "capital_max": 9486.75,
+      "net": -10987.21
+     },
+     "2026-01": {
+      "trades": 20,
+      "capital_sum": 144586.0,
+      "capital_max": 14306.5,
+      "net": -4309.53
+     },
+     "2026-02": {
+      "trades": 21,
+      "capital_sum": 166721.75,
+      "capital_max": 12226.5,
+      "net": -681.95
+     },
+     "2026-03": {
+      "trades": 19,
+      "capital_sum": 275616.25,
+      "capital_max": 21547.5,
+      "net": -18416.78
+     },
+     "2026-04": {
+      "trades": 20,
+      "capital_sum": 247962.0,
+      "capital_max": 21047.0,
+      "net": -18893.7
+     },
+     "2026-05": {
+      "trades": 19,
+      "capital_sum": 183644.5,
+      "capital_max": 14706.25,
+      "net": -14044.15
+     },
+     "2026-06": {
+      "trades": 21,
+      "capital_sum": 170270.75,
+      "capital_max": 12853.75,
+      "net": -15733.84
+     },
+     "2026-07": {
+      "trades": 22,
+      "capital_sum": 166968.75,
+      "capital_max": 11459.5,
+      "net": -19960.23
+     },
+     "2026-08": {
+      "trades": 21,
+      "capital_sum": 127679.5,
+      "capital_max": 9230.0,
+      "net": -17181.63
+     },
+     "2026-09": {
+      "trades": 21,
+      "capital_sum": 136727.5,
+      "capital_max": 10344.75,
+      "net": 4544.86
+     },
+     "2026-10": {
+      "trades": 15,
+      "capital_sum": 115719.5,
+      "capital_max": 11154.0,
+      "net": 24663.1
+     }
+    }
+   }
+  }
+ },
+ "sell": {
+  "rr_1_2": {
+   "rr": 2.0,
+   "index_trades": 1218,
+   "skipped": {},
+   "stats": {
+    "trades": 1218,
+    "sessions": 1222,
+    "wins": 768,
+    "win_rate": 63.05418719211823,
+    "before_costs": 156114.86000000002,
+    "spread_slippage": 37616.61,
+    "charges": 77700.36,
+    "net_pnl": 40797.88999999998,
+    "return_pct_of_account": 20.398944999999987,
+    "annual_return_pct": 4.084821634457234,
+    "profit_factor": 1.0245606689318913,
+    "avg_trade": 33.49580459770113,
+    "avg_win": 2216.021510416667,
+    "avg_loss": -3691.348066666667,
+    "t_stat": 0.3332822308747559,
+    "avg_premium": 109.13505747126437,
+    "avg_capital": 124468.28134646962,
+    "max_capital": 184176.78,
+    "avg_ret_on_premium_pct": 0.8776436781609195,
+    "max_win": 9051.12,
+    "max_loss": -22250.67,
+    "exit_reasons": {
+     "eod": {
+      "trades": 470,
+      "avg_net": -475.3707872340426,
+      "win_rate": 46.808510638297875
+     },
+     "stop": {
+      "trades": 548,
+      "avg_net": 2383.24352189781,
+      "win_rate": 100.0
+     },
+     "target": {
+      "trades": 200,
+      "avg_net": -5208.976449999999,
+      "win_rate": 0.0
+     }
+    },
+    "by_option": {
+     "CALL": {
+      "trades": 568,
+      "win_rate": 64.26056338028168,
+      "net": 96814.74
+     },
+     "PUT": {
+      "trades": 650,
+      "win_rate": 62.0,
+      "net": -56016.85
+     }
+    },
+    "by_days_to_expiry": {
+     "expiry day (0DTE)": {
+      "trades": 259,
+      "win_rate": 68.72586872586872,
+      "net": 49664.1,
+      "avg_net": 191.7532818532818,
+      "before_costs": 69780.13,
+      "avg_premium": 61.40038610038609,
+      "avg_capital": 148907.35374517372,
+      "avg_ret_on_premium_pct": 3.941660231660233
+     },
+     "1 session left": {
+      "trades": 260,
+      "win_rate": 61.53846153846154,
+      "net": 20773.280000000002,
+      "avg_net": 79.89723076923075,
+      "before_costs": 43780.810000000005,
+      "avg_premium": 91.38346153846153,
+      "avg_capital": 119581.14242307693,
+      "avg_ret_on_premium_pct": 1.8537307692307696
+     },
+     "2-4 sessions left": {
+      "trades": 697,
+      "win_rate": 61.54949784791965,
+      "net": -30836.420000000002,
+      "avg_net": -44.24163558106169,
+      "before_costs": 41063.05,
+      "avg_premium": 133.05308464849355,
+      "avg_capital": 117205.07563845051,
+      "avg_ret_on_premium_pct": -0.6406743185078907
+     },
+     "5+ sessions left": {
+      "trades": 2,
+      "win_rate": 50.0,
+      "net": 1196.9300000000003,
+      "avg_net": 598.4650000000001,
+      "before_costs": 1490.87,
+      "avg_premium": 263.05,
+      "avg_capital": 126163.655,
+      "avg_ret_on_premium_pct": 6.329999999999999
+     }
+    },
+    "lowest_equity": 139784.71000000002,
+    "account_wiped_out_on": null,
+    "max_dd": 92791.09999999998,
+    "max_dd_pct_of_peak": 39.89714149549774,
+    "max_dd_pct_of_capital": 46.39554999999999,
+    "peak": "2023-12-20",
+    "trough": "2024-08-06",
+    "recovered": "2026-04-02"
+   },
+   "yearly": [
+    {
+     "year": "2021",
+     "from": "2021-10-25",
+     "to": "2021-12-31",
+     "sessions": 46,
+     "trades": 46,
+     "win_rate": 50.0,
+     "before_costs": -19138.64,
+     "costs": 4234.8,
+     "net_pnl": -23373.440000000002,
+     "return_pct": -11.686720000000001,
+     "profit_factor": 0.7338012518041508,
+     "max_dd": 46809.609999999986,
+     "targets": 8,
+     "stops": 16,
+     "eod": 22
+    },
+    {
+     "year": "2022",
+     "from": "2022-01-03",
+     "to": "2022-12-30",
+     "sessions": 243,
+     "trades": 243,
+     "win_rate": 59.67078189300411,
+     "before_costs": 21540.39,
+     "costs": 23403.38,
+     "net_pnl": -1862.9899999999943,
+     "return_pct": -0.9314949999999971,
+     "profit_factor": 0.9941172997155575,
+     "max_dd": 44270.78,
+     "targets": 42,
+     "stops": 104,
+     "eod": 97
+    },
+    {
+     "year": "2023",
+     "from": "2023-01-02",
+     "to": "2023-12-29",
+     "sessions": 244,
+     "trades": 243,
+     "win_rate": 67.07818930041152,
+     "before_costs": 72727.66,
+     "costs": 20019.89,
+     "net_pnl": 52707.770000000004,
+     "return_pct": 26.353885000000005,
+     "profit_factor": 1.2588293846391447,
+     "max_dd": 19639.959999999992,
+     "targets": 35,
+     "stops": 123,
+     "eod": 85
+    },
+    {
+     "year": "2024",
+     "from": "2024-01-01",
+     "to": "2024-12-31",
+     "sessions": 246,
+     "trades": 245,
+     "win_rate": 67.3469387755102,
+     "before_costs": -16391.109999999997,
+     "costs": 24023.06,
+     "net_pnl": -40414.17000000001,
+     "return_pct": -20.207085000000006,
+     "profit_factor": 0.8991777636188278,
+     "max_dd": 89392.51000000002,
+     "targets": 50,
+     "stops": 123,
+     "eod": 72
+    },
+    {
+     "year": "2025",
+     "from": "2025-01-01",
+     "to": "2025-12-31",
+     "sessions": 244,
+     "trades": 242,
+     "win_rate": 61.15702479338842,
+     "before_costs": 39713.76,
+     "costs": 23155.0,
+     "net_pnl": 16558.760000000017,
+     "return_pct": 8.279380000000009,
+     "profit_factor": 1.048837270346626,
+     "max_dd": 42516.41,
+     "targets": 37,
+     "stops": 99,
+     "eod": 106
+    },
+    {
+     "year": "2026",
+     "from": "2026-01-01",
+     "to": "2026-10-23",
+     "sessions": 199,
+     "trades": 199,
+     "win_rate": 62.311557788944725,
+     "before_costs": 57662.8,
+     "costs": 20480.84,
+     "net_pnl": 37181.96000000001,
+     "return_pct": 18.590980000000005,
+     "profit_factor": 1.1187664742663892,
+     "max_dd": 50830.56,
+     "targets": 28,
+     "stops": 83,
+     "eod": 88
+    }
+   ],
+   "monthly": {
+    "months": 61,
+    "trades_per_month": 19.9672131147541,
+    "capital_per_trade": 124468.28134646962,
+    "capital_sum_per_month": 2485284.6996721313,
+    "largest_capital_in_a_month": 151848.76721311477,
+    "net_per_month": 668.817868852459,
+    "median_month": 2839.430000000003,
+    "return_pct_per_month_on_account": 0.3344089344262295,
+    "months_positive": 34,
+    "best_month": 26466.37,
+    "worst_month": -32181.270000000004,
+    "by_month": {
+     "2021-10": {
+      "trades": 5,
+      "capital_sum": 517566.35,
+      "capital_max": 125243.1,
+      "net": 8818.33
+     },
+     "2021-11": {
+      "trades": 18,
+      "capital_sum": 1857631.16,
+      "capital_max": 125454.29,
+      "net": -16667.44
+     },
+     "2021-12": {
+      "trades": 23,
+      "capital_sum": 2280752.25,
+      "capital_max": 122148.7,
+      "net": -15524.33
+     },
+     "2022-01": {
+      "trades": 19,
+      "capital_sum": 1921251.59,
+      "capital_max": 127645.64,
+      "net": -8538.81
+     },
+     "2022-02": {
+      "trades": 20,
+      "capital_sum": 1914287.59,
+      "capital_max": 122621.87,
+      "net": -7033.62
+     },
+     "2022-03": {
+      "trades": 20,
+      "capital_sum": 1889138.52,
+      "capital_max": 121791.37,
+      "net": 8110.48
+     },
+     "2022-04": {
+      "trades": 19,
+      "capital_sum": 1897397.25,
+      "capital_max": 123431.17,
+      "net": 14996.99
+     },
+     "2022-05": {
+      "trades": 21,
+      "capital_sum": 1913348.74,
+      "capital_max": 116621.59,
+      "net": -7371.42
+     },
+     "2022-06": {
+      "trades": 21,
+      "capital_sum": 1902475.57,
+      "capital_max": 114771.41,
+      "net": 8887.46
+     },
+     "2022-07": {
+      "trades": 20,
+      "capital_sum": 1868064.98,
+      "capital_max": 115862.63,
+      "net": 15478.67
+     },
+     "2022-08": {
+      "trades": 20,
+      "capital_sum": 2015821.43,
+      "capital_max": 123720.97,
+      "net": -5811.66
+     },
+     "2022-09": {
+      "trades": 22,
+      "capital_sum": 2208737.99,
+      "capital_max": 124898.43,
+      "net": -23747.01
+     },
+     "2022-10": {
+      "trades": 18,
+      "capital_sum": 1797731.58,
+      "capital_max": 123890.09,
+      "net": -1177.13
+     },
+     "2022-11": {
+      "trades": 21,
+      "capital_sum": 2234948.38,
+      "capital_max": 128822.06,
+      "net": 9226.83
+     },
+     "2022-12": {
+      "trades": 22,
+      "capital_sum": 2371060.87,
+      "capital_max": 132338.72,
+      "net": -4883.77
+     },
+     "2023-01": {
+      "trades": 21,
+      "capital_sum": 2185487.8,
+      "capital_max": 126952.34,
+      "net": -6968.36
+     },
+     "2023-02": {
+      "trades": 20,
+      "capital_sum": 2061031.62,
+      "capital_max": 126232.7,
+      "net": 15174.7
+     },
+     "2023-03": {
+      "trades": 21,
+      "capital_sum": 2122539.56,
+      "capital_max": 123300.9,
+      "net": -5152.52
+     },
+     "2023-04": {
+      "trades": 17,
+      "capital_sum": 1786431.21,
+      "capital_max": 125306.85,
+      "net": 12750.34
+     },
+     "2023-05": {
+      "trades": 21,
+      "capital_sum": 2259164.47,
+      "capital_max": 128138.18,
+      "net": -9297.9
+     },
+     "2023-06": {
+      "trades": 20,
+      "capital_sum": 2235224.86,
+      "capital_max": 131993.39,
+      "net": 3475.74
+     },
+     "2023-07": {
+      "trades": 21,
+      "capital_sum": 2412659.43,
+      "capital_max": 139572.8,
+      "net": 8276.16
+     },
+     "2023-08": {
+      "trades": 22,
+      "capital_sum": 2534060.8,
+      "capital_max": 138113.25,
+      "net": 17386.5
+     },
+     "2023-09": {
+      "trades": 20,
+      "capital_sum": 2333601.18,
+      "capital_max": 141338.23,
+      "net": -3619.14
+     },
+     "2023-10": {
+      "trades": 20,
+      "capital_sum": 2286899.96,
+      "capital_max": 138788.37,
+      "net": 9214.1
+     },
+     "2023-11": {
+      "trades": 20,
+      "capital_sum": 2341459.62,
+      "capital_max": 141051.02,
+      "net": 5217.58
+     },
+     "2023-12": {
+      "trades": 20,
+      "capital_sum": 2468200.91,
+      "capital_max": 151527.68,
+      "net": 6250.57
+     },
+     "2024-01": {
+      "trades": 22,
+      "capital_sum": 2750714.46,
+      "capital_max": 152372.11,
+      "net": -30042.05
+     },
+     "2024-02": {
+      "trades": 21,
+      "capital_sum": 2680637.13,
+      "capital_max": 153218.95,
+      "net": 24976.44
+     },
+     "2024-03": {
+      "trades": 17,
+      "capital_sum": 2212507.33,
+      "capital_max": 156547.34,
+      "net": -24411.07
+     },
+     "2024-04": {
+      "trades": 20,
+      "capital_sum": 2623524.14,
+      "capital_max": 158344.4,
+      "net": -3397.0
+     },
+     "2024-05": {
+      "trades": 21,
+      "capital_sum": 2747559.02,
+      "capital_max": 158546.4,
+      "net": 6373.15
+     },
+     "2024-06": {
+      "trades": 19,
+      "capital_sum": 2540190.24,
+      "capital_max": 165642.59,
+      "net": -23521.96
+     },
+     "2024-07": {
+      "trades": 22,
+      "capital_sum": 3120568.97,
+      "capital_max": 172297.26,
+      "net": -17516.64
+     },
+     "2024-08": {
+      "trades": 21,
+      "capital_sum": 3041085.54,
+      "capital_max": 176838.56,
+      "net": -1854.88
+     },
+     "2024-09": {
+      "trades": 21,
+      "capital_sum": 3122484.63,
+      "capital_max": 182864.13,
+      "net": 18407.57
+     },
+     "2024-10": {
+      "trades": 22,
+      "capital_sum": 3194697.29,
+      "capital_max": 179141.47,
+      "net": 6247.06
+     },
+     "2024-11": {
+      "trades": 18,
+      "capital_sum": 2502708.1,
+      "capital_max": 169609.68,
+      "net": -22141.16
+     },
+     "2024-12": {
+      "trades": 21,
+      "capital_sum": 2930684.87,
+      "capital_max": 172718.91,
+      "net": 26466.37
+     },
+     "2025-01": {
+      "trades": 21,
+      "capital_sum": 2839656.12,
+      "capital_max": 164372.58,
+      "net": 3368.64
+     },
+     "2025-02": {
+      "trades": 20,
+      "capital_sum": 2664447.76,
+      "capital_max": 165353.11,
+      "net": -3535.73
+     },
+     "2025-03": {
+      "trades": 19,
+      "capital_sum": 2532138.67,
+      "capital_max": 164119.32,
+      "net": 1616.39
+     },
+     "2025-04": {
+      "trades": 18,
+      "capital_sum": 2483001.89,
+      "capital_max": 169717.03,
+      "net": -20491.5
+     },
+     "2025-05": {
+      "trades": 19,
+      "capital_sum": 2700097.79,
+      "capital_max": 171916.29,
+      "net": 12556.68
+     },
+     "2025-06": {
+      "trades": 20,
+      "capital_sum": 2849357.85,
+      "capital_max": 177038.02,
+      "net": 5326.73
+     },
+     "2025-07": {
+      "trades": 23,
+      "capital_sum": 3414734.62,
+      "capital_max": 178472.03,
+      "net": -4314.51
+     },
+     "2025-08": {
+      "trades": 19,
+      "capital_sum": 2759222.62,
+      "capital_max": 175502.5,
+      "net": 11284.68
+     },
+     "2025-09": {
+      "trades": 22,
+      "capital_sum": 3262037.55,
+      "capital_max": 177091.93,
+      "net": -8681.05
+     },
+     "2025-10": {
+      "trades": 20,
+      "capital_sum": 2998365.55,
+      "capital_max": 181923.9,
+      "net": 646.75
+     },
+     "2025-11": {
+      "trades": 19,
+      "capital_sum": 2892646.07,
+      "capital_max": 182722.94,
+      "net": 10316.13
+     },
+     "2025-12": {
+      "trades": 22,
+      "capital_sum": 3404125.87,
+      "capital_max": 183845.58,
+      "net": 8465.55
+     },
+     "2026-01": {
+      "trades": 20,
+      "capital_sum": 3001910.49,
+      "capital_max": 184176.78,
+      "net": -4011.13
+     },
+     "2026-02": {
+      "trades": 21,
+      "capital_sum": 3119545.35,
+      "capital_max": 180588.73,
+      "net": 2839.43
+     },
+     "2026-03": {
+      "trades": 19,
+      "capital_sum": 2520672.43,
+      "capital_max": 172230.87,
+      "net": 20714.34
+     },
+     "2026-04": {
+      "trades": 20,
+      "capital_sum": 2670879.99,
+      "capital_max": 168134.43,
+      "net": 10308.05
+     },
+     "2026-05": {
+      "trades": 19,
+      "capital_sum": 2591029.99,
+      "capital_max": 167006.26,
+      "net": 19113.77
+     },
+     "2026-06": {
+      "trades": 21,
+      "capital_sum": 2908964.14,
+      "capital_max": 168540.33,
+      "net": 1083.26
+     },
+     "2026-07": {
+      "trades": 22,
+      "capital_sum": 3042893.71,
+      "capital_max": 169330.47,
+      "net": 17227.81
+     },
+     "2026-08": {
+      "trades": 21,
+      "capital_sum": 3000656.11,
+      "capital_max": 172484.44,
+      "net": 13074.46
+     },
+     "2026-09": {
+      "trades": 21,
+      "capital_sum": 2896669.56,
+      "capital_max": 168577.46,
+      "net": -10986.76
+     },
+     "2026-10": {
+      "trades": 15,
+      "capital_sum": 1964975.16,
+      "capital_max": 159910.25,
+      "net": -32181.27
+     }
+    }
+   },
+   "real_price_check": {
+    "trades": [
+     {
+      "date": "2026-10-05",
+      "position": "SELL",
+      "option": "CALL",
+      "strike": 22550.0,
+      "expiry": "2026-10-06",
+      "entry_time": "09:30",
+      "exit_time": "10:24",
+      "exit_reason": "stop",
+      "model_in": 116.48,
+      "real_in": 124.78,
+      "model_out": 81.86,
+      "real_out": 98.97,
+      "model_before_costs": 2250.27,
+      "real_before_costs": 1677.0
+     },
+     {
+      "date": "2026-10-06",
+      "position": "SELL",
+      "option": "CALL",
+      "strike": 22650.0,
+      "expiry": "2026-10-06",
+      "entry_time": "09:40",
+      "exit_time": "15:15",
+      "exit_reason": "eod",
+      "model_in": 54.11,
+      "real_in": 47.83,
+      "model_out": 67.82,
+      "real_out": 76.45,
+      "model_before_costs": -891.12,
+      "real_before_costs": -1860.62
+     },
+     {
+      "date": "2026-10-07",
+      "position": "SELL",
+      "option": "PUT",
+      "strike": 22600.0,
+      "expiry": "2026-10-13",
+      "entry_time": "09:39",
+      "exit_time": "10:29",
+      "exit_reason": "stop",
+      "model_in": 145.13,
+      "real_in": 156.57,
+      "model_out": 99.43,
+      "real_out": 113.08,
+      "model_before_costs": 2970.41,
+      "real_before_costs": 2827.5
+     },
+     {
+      "date": "2026-10-08",
+      "position": "SELL",
+      "option": "PUT",
+      "strike": 22500.0,
+      "expiry": "2026-10-13",
+      "entry_time": "09:43",
+      "exit_time": "13:30",
+      "exit_reason": "target",
+      "model_in": 135.87,
+      "real_in": 138.05,
+      "model_out": 301.34,
+      "real_out": 297.1,
+      "model_before_costs": -10754.91,
+      "real_before_costs": -10338.25
+     },
+     {
+      "date": "2026-10-09",
+      "position": "SELL",
+      "option": "CALL",
+      "strike": 22400.0,
+      "expiry": "2026-10-13",
+      "entry_time": "09:30",
+      "exit_time": "14:18",
+      "exit_reason": "target",
+      "model_in": 125.53,
+      "real_in": 130.2,
+      "model_out": 222.86,
+      "real_out": 231.88,
+      "model_before_costs": -6326.26,
+      "real_before_costs": -6608.88
+     },
+     {
+      "date": "2026-10-12",
+      "position": "SELL",
+      "option": "PUT",
+      "strike": 22500.0,
+      "expiry": "2026-10-13",
+      "entry_time": "09:40",
+      "exit_time": "15:15",
+      "exit_reason": "eod",
+      "model_in": 84.55,
+      "real_in": 87.12,
+      "model_out": 195.7,
+      "real_out": 196.22,
+      "model_before_costs": -7225.18,
+      "real_before_costs": -7091.5
+     },
+     {
+      "date": "2026-10-13",
+      "position": "SELL",
+      "option": "CALL",
+      "strike": 22500.0,
+      "expiry": "2026-10-13",
+      "entry_time": "09:30",
+      "exit_time": "15:15",
+      "exit_reason": "eod",
+      "model_in": 54.98,
+      "real_in": 56.83,
+      "model_out": 199.58,
+      "real_out": 201.25,
+      "model_before_costs": -9398.96,
+      "real_before_costs": -9387.62
+     },
+     {
+      "date": "2026-10-14",
+      "position": "SELL",
+      "option": "CALL",
+      "strike": 22750.0,
+      "expiry": "2026-10-19",
+      "entry_time": "09:47",
+      "exit_time": "11:35",
+      "exit_reason": "stop",
+      "model_in": 155.4,
+      "real_in": 152.18,
+      "model_out": 107.93,
+      "real_out": 109.67,
+      "model_before_costs": 3085.52,
+      "real_before_costs": 2762.5
+     },
+     {
+      "date": "2026-10-15",
+      "position": "SELL",
+      "option": "CALL",
+      "strike": 22750.0,
+      "expiry": "2026-10-19",
+      "entry_time": "09:30",
+      "exit_time": "11:50",
+      "exit_reason": "target",
+      "model_in": 140.78,
+      "real_in": 128.5,
+      "model_out": 291.57,
+      "real_out": 282.65,
+      "model_before_costs": -9801.35,
+      "real_before_costs": -10019.75
+     },
+     {
+      "date": "2026-10-16",
+      "position": "SELL",
+      "option": "PUT",
+      "strike": 22950.0,
+      "expiry": "2026-10-19",
+      "entry_time": "09:31",
+      "exit_time": "10:12",
+      "exit_reason": "stop",
+      "model_in": 109.41,
+      "real_in": 130.75,
+      "model_out": 54.66,
+      "real_out": 73.75,
+      "model_before_costs": 3558.91,
+      "real_before_costs": 3705.0
+     },
+     {
+      "date": "2026-10-19",
+      "position": "SELL",
+      "option": "PUT",
+      "strike": 22950.0,
+      "expiry": "2026-10-19",
+      "entry_time": "12:03",
+      "exit_time": "15:15",
+      "exit_reason": "eod",
+      "model_in": 46.11,
+      "real_in": 49.62,
+      "model_out": 76.93,
+      "real_out": 79.17,
+      "model_before_costs": -2003.53,
+      "real_before_costs": -1920.75
+     },
+     {
+      "date": "2026-10-21",
+      "position": "SELL",
+      "option": "CALL",
+      "strike": 23100.0,
+      "expiry": "2026-10-27",
+      "entry_time": "09:30",
+      "exit_time": "10:05",
+      "exit_reason": "stop",
+      "model_in": 171.25,
+      "real_in": 169.18,
+      "model_out": 117.13,
+      "real_out": 123.92,
+      "model_before_costs": 3517.38,
+      "real_before_costs": 2941.25
+     },
+     {
+      "date": "2026-10-22",
+      "position": "SELL",
+      "option": "PUT",
+      "strike": 22550.0,
+      "expiry": "2026-10-27",
+      "entry_time": "09:35",
+      "exit_time": "10:22",
+      "exit_reason": "stop",
+      "model_in": 158.84,
+      "real_in": 159.03,
+      "model_out": 91.34,
+      "real_out": 97.47,
+      "model_before_costs": 4387.53,
+      "real_before_costs": 4000.75
+     },
+     {
+      "date": "2026-10-23",
+      "position": "SELL",
+      "option": "PUT",
+      "strike": 22700.0,
+      "expiry": "2026-10-27",
+      "entry_time": "09:31",
+      "exit_time": "10:09",
+      "exit_reason": "target",
+      "model_in": 144.87,
+      "real_in": 125.12,
+      "model_out": 246.12,
+      "real_out": 222.93,
+      "model_before_costs": -6581.4,
+      "real_before_costs": -6357.0
+     }
+    ],
+    "n_priced": 14,
+    "model_sum": -33212.69,
+    "real_sum": -35670.37
+   }
+  },
+  "rr_1_3": {
+   "rr": 3.0,
+   "index_trades": 1218,
+   "skipped": {},
+   "stats": {
+    "trades": 1218,
+    "sessions": 1222,
+    "wins": 791,
+    "win_rate": 64.9425287356322,
+    "before_costs": 143684.73,
+    "spread_slippage": 37617.73,
+    "charges": 77715.48,
+    "net_pnl": 28351.51999999998,
+    "return_pct_of_account": 14.17575999999999,
+    "annual_return_pct": 2.838649309210524,
+    "profit_factor": 1.0164939533034731,
+    "avg_trade": 23.277110016420345,
+    "avg_win": 2208.919570164349,
+    "avg_loss": -4025.5359718969557,
+    "t_stat": 0.21515789350079917,
+    "avg_premium": 109.13505747126437,
+    "avg_capital": 124468.28134646962,
+    "max_capital": 184176.78,
+    "avg_ret_on_premium_pct": 0.8797126436781609,
+    "max_win": 9051.12,
+    "max_loss": -22250.67,
+    "exit_reasons": {
+     "eod": {
+      "trades": 575,
+      "avg_net": -1163.2464347826085,
+      "win_rate": 40.52173913043478
+     },
+     "stop": {
+      "trades": 558,
+      "avg_net": 2383.029265232975,
+      "win_rate": 100.0
+     },
+     "target": {
+      "trades": 85,
+      "avg_net": -7441.318941176469,
+      "win_rate": 0.0
+     }
+    },
+    "by_option": {
+     "CALL": {
+      "trades": 568,
+      "win_rate": 65.84507042253522,
+      "net": 100820.40000000001
+     },
+     "PUT": {
+      "trades": 650,
+      "win_rate": 64.15384615384615,
+      "net": -72468.88
+     }
+    },
+    "by_days_to_expiry": {
+     "expiry day (0DTE)": {
+      "trades": 259,
+      "win_rate": 72.97297297297297,
+      "net": 76759.07,
+      "avg_net": 296.36706563706565,
+      "before_costs": 96813.91,
+      "avg_premium": 61.40038610038609,
+      "avg_capital": 148907.35374517372,
+      "avg_ret_on_premium_pct": 6.213783783783783
+     },
+     "1 session left": {
+      "trades": 260,
+      "win_rate": 63.84615384615384,
+      "net": 16285.650000000003,
+      "avg_net": 62.63711538461542,
+      "before_costs": 39304.770000000004,
+      "avg_premium": 91.38346153846153,
+      "avg_capital": 119581.14242307693,
+      "avg_ret_on_premium_pct": 1.0959999999999996
+     },
+     "2-4 sessions left": {
+      "trades": 697,
+      "win_rate": 62.4103299856528,
+      "net": -64540.81,
+      "avg_net": -92.59800573888094,
+      "before_costs": 7422.460000000006,
+      "avg_premium": 133.05308464849355,
+      "avg_capital": 117205.07563845051,
+      "avg_ret_on_premium_pct": -1.188995695839311
+     },
+     "5+ sessions left": {
+      "trades": 2,
+      "win_rate": 50.0,
+      "net": -152.38999999999987,
+      "avg_net": -76.19499999999994,
+      "before_costs": 143.5899999999997,
+      "avg_premium": 263.05,
+      "avg_capital": 126163.655,
+      "avg_ret_on_premium_pct": 2.9450000000000003
+     }
+    },
+    "lowest_equity": 110103.57999999991,
+    "account_wiped_out_on": null,
+    "max_dd": 100405.83000000009,
+    "max_dd_pct_of_peak": 47.69659940617386,
+    "max_dd_pct_of_capital": 50.20291500000005,
+    "peak": "2021-11-10",
+    "trough": "2024-08-06",
+    "recovered": "2026-02-09"
+   },
+   "yearly": [
+    {
+     "year": "2021",
+     "from": "2021-10-25",
+     "to": "2021-12-31",
+     "sessions": 46,
+     "trades": 46,
+     "win_rate": 50.0,
+     "before_costs": -31821.39,
+     "costs": 4257.14,
+     "net_pnl": -36078.530000000006,
+     "return_pct": -18.039265000000004,
+     "profit_factor": 0.6410437972268509,
+     "max_dd": 55287.93000000002,
+     "targets": 5,
+     "stops": 16,
+     "eod": 25
+    },
+    {
+     "year": "2022",
+     "from": "2022-01-03",
+     "to": "2022-12-30",
+     "sessions": 243,
+     "trades": 243,
+     "win_rate": 62.139917695473244,
+     "before_costs": 15516.130000000001,
+     "costs": 23408.13,
+     "net_pnl": -7892.000000000011,
+     "return_pct": -3.946000000000006,
+     "profit_factor": 0.9764041412107503,
+     "max_dd": 49628.01000000001,
+     "targets": 20,
+     "stops": 106,
+     "eod": 117
+    },
+    {
+     "year": "2023",
+     "from": "2023-01-02",
+     "to": "2023-12-29",
+     "sessions": 244,
+     "trades": 243,
+     "win_rate": 68.3127572016461,
+     "before_costs": 61474.11,
+     "costs": 20048.54,
+     "net_pnl": 41425.57,
+     "return_pct": 20.712785,
+     "profit_factor": 1.1878223767480502,
+     "max_dd": 19727.190000000002,
+     "targets": 14,
+     "stops": 125,
+     "eod": 104
+    },
+    {
+     "year": "2024",
+     "from": "2024-01-01",
+     "to": "2024-12-31",
+     "sessions": 246,
+     "trades": 245,
+     "win_rate": 69.79591836734694,
+     "before_costs": -20549.539999999997,
+     "costs": 24024.83,
+     "net_pnl": -44574.36999999999,
+     "return_pct": -22.287184999999994,
+     "profit_factor": 0.8931597880212299,
+     "max_dd": 89676.68000000004,
+     "targets": 23,
+     "stops": 126,
+     "eod": 96
+    },
+    {
+     "year": "2025",
+     "from": "2025-01-01",
+     "to": "2025-12-31",
+     "sessions": 244,
+     "trades": 242,
+     "win_rate": 63.63636363636363,
+     "before_costs": 62739.9,
+     "costs": 23109.23,
+     "net_pnl": 39630.670000000006,
+     "return_pct": 19.815335000000005,
+     "profit_factor": 1.1203114979903492,
+     "max_dd": 39731.27000000002,
+     "targets": 13,
+     "stops": 101,
+     "eod": 128
+    },
+    {
+     "year": "2026",
+     "from": "2026-01-01",
+     "to": "2026-10-23",
+     "sessions": 199,
+     "trades": 199,
+     "win_rate": 63.31658291457286,
+     "before_costs": 56325.520000000004,
+     "costs": 20485.34,
+     "net_pnl": 35840.180000000015,
+     "return_pct": 17.92009000000001,
+     "profit_factor": 1.1131443029004253,
+     "max_dd": 45179.409999999974,
+     "targets": 10,
+     "stops": 84,
+     "eod": 105
+    }
+   ],
+   "monthly": {
+    "months": 61,
+    "trades_per_month": 19.9672131147541,
+    "capital_per_trade": 124468.28134646962,
+    "capital_sum_per_month": 2485284.6996721313,
+    "largest_capital_in_a_month": 151848.76721311477,
+    "net_per_month": 464.77901639344276,
+    "median_month": 3561.220000000002,
+    "return_pct_per_month_on_account": 0.23238950819672138,
+    "months_positive": 37,
+    "best_month": 32247.3,
+    "worst_month": -32125.99,
+    "by_month": {
+     "2021-10": {
+      "trades": 5,
+      "capital_sum": 517566.35,
+      "capital_max": 125243.1,
+      "net": 4591.56
+     },
+     "2021-11": {
+      "trades": 18,
+      "capital_sum": 1857631.16,
+      "capital_max": 125454.29,
+      "net": -20446.53
+     },
+     "2021-12": {
+      "trades": 23,
+      "capital_sum": 2280752.25,
+      "capital_max": 122148.7,
+      "net": -20223.56
+     },
+     "2022-01": {
+      "trades": 19,
+      "capital_sum": 1921251.59,
+      "capital_max": 127645.64,
+      "net": -12092.55
+     },
+     "2022-02": {
+      "trades": 20,
+      "capital_sum": 1914287.59,
+      "capital_max": 122621.87,
+      "net": -3566.66
+     },
+     "2022-03": {
+      "trades": 20,
+      "capital_sum": 1889138.52,
+      "capital_max": 121791.37,
+      "net": 10692.05
+     },
+     "2022-04": {
+      "trades": 19,
+      "capital_sum": 1897397.25,
+      "capital_max": 123431.17,
+      "net": 13653.19
+     },
+     "2022-05": {
+      "trades": 21,
+      "capital_sum": 1913348.74,
+      "capital_max": 116621.59,
+      "net": -10273.64
+     },
+     "2022-06": {
+      "trades": 21,
+      "capital_sum": 1902475.57,
+      "capital_max": 114771.41,
+      "net": 2257.92
+     },
+     "2022-07": {
+      "trades": 20,
+      "capital_sum": 1868064.98,
+      "capital_max": 115862.63,
+      "net": 19653.43
+     },
+     "2022-08": {
+      "trades": 20,
+      "capital_sum": 2015821.43,
+      "capital_max": 123720.97,
+      "net": -13351.57
+     },
+     "2022-09": {
+      "trades": 22,
+      "capital_sum": 2208737.99,
+      "capital_max": 124898.43,
+      "net": -23216.03
+     },
+     "2022-10": {
+      "trades": 18,
+      "capital_sum": 1797731.58,
+      "capital_max": 123890.09,
+      "net": 5468.68
+     },
+     "2022-11": {
+      "trades": 21,
+      "capital_sum": 2234948.38,
+      "capital_max": 128822.06,
+      "net": 13128.45
+     },
+     "2022-12": {
+      "trades": 22,
+      "capital_sum": 2371060.87,
+      "capital_max": 132338.72,
+      "net": -10245.27
+     },
+     "2023-01": {
+      "trades": 21,
+      "capital_sum": 2185487.8,
+      "capital_max": 126952.34,
+      "net": -6731.01
+     },
+     "2023-02": {
+      "trades": 20,
+      "capital_sum": 2061031.62,
+      "capital_max": 126232.7,
+      "net": 13266.16
+     },
+     "2023-03": {
+      "trades": 21,
+      "capital_sum": 2122539.56,
+      "capital_max": 123300.9,
+      "net": -6596.12
+     },
+     "2023-04": {
+      "trades": 17,
+      "capital_sum": 1786431.21,
+      "capital_max": 125306.85,
+      "net": 11612.36
+     },
+     "2023-05": {
+      "trades": 21,
+      "capital_sum": 2259164.47,
+      "capital_max": 128138.18,
+      "net": -9944.93
+     },
+     "2023-06": {
+      "trades": 20,
+      "capital_sum": 2235224.86,
+      "capital_max": 131993.39,
+      "net": 2493.81
+     },
+     "2023-07": {
+      "trades": 21,
+      "capital_sum": 2412659.43,
+      "capital_max": 139572.8,
+      "net": 7499.08
+     },
+     "2023-08": {
+      "trades": 22,
+      "capital_sum": 2534060.8,
+      "capital_max": 138113.25,
+      "net": 15013.0
+     },
+     "2023-09": {
+      "trades": 20,
+      "capital_sum": 2333601.18,
+      "capital_max": 141338.23,
+      "net": -3176.94
+     },
+     "2023-10": {
+      "trades": 20,
+      "capital_sum": 2286899.96,
+      "capital_max": 138788.37,
+      "net": 7822.53
+     },
+     "2023-11": {
+      "trades": 20,
+      "capital_sum": 2341459.62,
+      "capital_max": 141051.02,
+      "net": 5845.11
+     },
+     "2023-12": {
+      "trades": 20,
+      "capital_sum": 2468200.91,
+      "capital_max": 151527.68,
+      "net": 4322.52
+     },
+     "2024-01": {
+      "trades": 22,
+      "capital_sum": 2750714.46,
+      "capital_max": 152372.11,
+      "net": -29636.6
+     },
+     "2024-02": {
+      "trades": 21,
+      "capital_sum": 2680637.13,
+      "capital_max": 153218.95,
+      "net": 21490.97
+     },
+     "2024-03": {
+      "trades": 17,
+      "capital_sum": 2212507.33,
+      "capital_max": 156547.34,
+      "net": -24236.49
+     },
+     "2024-04": {
+      "trades": 20,
+      "capital_sum": 2623524.14,
+      "capital_max": 158344.4,
+      "net": 4269.73
+     },
+     "2024-05": {
+      "trades": 21,
+      "capital_sum": 2747559.02,
+      "capital_max": 158546.4,
+      "net": -3237.89
+     },
+     "2024-06": {
+      "trades": 19,
+      "capital_sum": 2540190.24,
+      "capital_max": 165642.59,
+      "net": -23746.3
+     },
+     "2024-07": {
+      "trades": 22,
+      "capital_sum": 3120568.97,
+      "capital_max": 172297.26,
+      "net": -19390.43
+     },
+     "2024-08": {
+      "trades": 21,
+      "capital_sum": 3041085.54,
+      "capital_max": 176838.56,
+      "net": 3760.22
+     },
+     "2024-09": {
+      "trades": 21,
+      "capital_sum": 3122484.63,
+      "capital_max": 182864.13,
+      "net": 12576.86
+     },
+     "2024-10": {
+      "trades": 22,
+      "capital_sum": 3194697.29,
+      "capital_max": 179141.47,
+      "net": 2422.48
+     },
+     "2024-11": {
+      "trades": 18,
+      "capital_sum": 2502708.1,
+      "capital_max": 169609.68,
+      "net": -21094.22
+     },
+     "2024-12": {
+      "trades": 21,
+      "capital_sum": 2930684.87,
+      "capital_max": 172718.91,
+      "net": 32247.3
+     },
+     "2025-01": {
+      "trades": 21,
+      "capital_sum": 2839656.12,
+      "capital_max": 164372.58,
+      "net": 17286.76
+     },
+     "2025-02": {
+      "trades": 20,
+      "capital_sum": 2664447.76,
+      "capital_max": 165353.11,
+      "net": 1103.97
+     },
+     "2025-03": {
+      "trades": 19,
+      "capital_sum": 2532138.67,
+      "capital_max": 164119.32,
+      "net": -3362.47
+     },
+     "2025-04": {
+      "trades": 18,
+      "capital_sum": 2483001.89,
+      "capital_max": 169717.03,
+      "net": -21349.87
+     },
+     "2025-05": {
+      "trades": 19,
+      "capital_sum": 2700097.79,
+      "capital_max": 171916.29,
+      "net": 21750.54
+     },
+     "2025-06": {
+      "trades": 20,
+      "capital_sum": 2849357.85,
+      "capital_max": 177038.02,
+      "net": 3161.32
+     },
+     "2025-07": {
+      "trades": 23,
+      "capital_sum": 3414734.62,
+      "capital_max": 178472.03,
+      "net": 4503.19
+     },
+     "2025-08": {
+      "trades": 19,
+      "capital_sum": 2759222.62,
+      "capital_max": 175502.5,
+      "net": 11983.72
+     },
+     "2025-09": {
+      "trades": 22,
+      "capital_sum": 3262037.55,
+      "capital_max": 177091.93,
+      "net": -6193.77
+     },
+     "2025-10": {
+      "trades": 20,
+      "capital_sum": 2998365.55,
+      "capital_max": 181923.9,
+      "net": -7244.32
+     },
+     "2025-11": {
+      "trades": 19,
+      "capital_sum": 2892646.07,
+      "capital_max": 182722.94,
+      "net": 10891.62
+     },
+     "2025-12": {
+      "trades": 22,
+      "capital_sum": 3404125.87,
+      "capital_max": 183845.58,
+      "net": 7099.98
+     },
+     "2026-01": {
+      "trades": 20,
+      "capital_sum": 3001910.49,
+      "capital_max": 184176.78,
+      "net": 491.01
+     },
+     "2026-02": {
+      "trades": 21,
+      "capital_sum": 3119545.35,
+      "capital_max": 180588.73,
+      "net": 3561.22
+     },
+     "2026-03": {
+      "trades": 19,
+      "capital_sum": 2520672.43,
+      "capital_max": 172230.87,
+      "net": 17001.27
+     },
+     "2026-04": {
+      "trades": 20,
+      "capital_sum": 2670879.99,
+      "capital_max": 168134.43,
+      "net": 4962.81
+     },
+     "2026-05": {
+      "trades": 19,
+      "capital_sum": 2591029.99,
+      "capital_max": 167006.26,
+      "net": 11125.18
+     },
+     "2026-06": {
+      "trades": 21,
+      "capital_sum": 2908964.14,
+      "capital_max": 168540.33,
+      "net": 10589.03
+     },
+     "2026-07": {
+      "trades": 22,
+      "capital_sum": 3042893.71,
+      "capital_max": 169330.47,
+      "net": 16532.01
+     },
+     "2026-08": {
+      "trades": 21,
+      "capital_sum": 3000656.11,
+      "capital_max": 172484.44,
+      "net": 11478.03
+     },
+     "2026-09": {
+      "trades": 21,
+      "capital_sum": 2896669.56,
+      "capital_max": 168577.46,
+      "net": -7774.39
+     },
+     "2026-10": {
+      "trades": 15,
+      "capital_sum": 1964975.16,
+      "capital_max": 159910.25,
+      "net": -32125.99
+     }
+    }
+   }
+  },
+  "rr_1_4": {
+   "rr": 4.0,
+   "index_trades": 1218,
+   "skipped": {},
+   "stats": {
+    "trades": 1218,
+    "sessions": 1222,
+    "wins": 791,
+    "win_rate": 64.9425287356322,
+    "before_costs": 90095.87,
+    "spread_slippage": 37696.12,
+    "charges": 77743.08,
+    "net_pnl": -25343.329999999987,
+    "return_pct_of_account": -12.671664999999994,
+    "annual_return_pct": -2.537459233141446,
+    "profit_factor": 0.9857027256891098,
+    "avg_trade": -20.807331691297197,
+    "avg_win": 2208.919570164349,
+    "avg_loss": -4151.285035128805,
+    "t_stat": -0.18409713027842914,
+    "avg_premium": 109.13505747126437,
+    "avg_capital": 124468.28134646962,
+    "max_capital": 184176.78,
+    "avg_ret_on_premium_pct": -0.016535303776683052,
+    "max_win": 9051.12,
+    "max_loss": -23677.31,
+    "exit_reasons": {
+     "eod": {
+      "trades": 620,
+      "avg_net": -1539.871516129032,
+      "win_rate": 37.58064516129032
+     },
+     "stop": {
+      "trades": 558,
+      "avg_net": 2383.029265232975,
+      "win_rate": 100.0
+     },
+     "target": {
+      "trades": 40,
+      "avg_net": -10008.833,
+      "win_rate": 0.0
+     }
+    },
+    "by_option": {
+     "CALL": {
+      "trades": 568,
+      "win_rate": 65.84507042253522,
+      "net": 83295.59
+     },
+     "PUT": {
+      "trades": 650,
+      "win_rate": 64.15384615384615,
+      "net": -108638.92
+     }
+    },
+    "by_days_to_expiry": {
+     "expiry day (0DTE)": {
+      "trades": 259,
+      "win_rate": 72.97297297297297,
+      "net": 45397.63,
+      "avg_net": 175.2804247104247,
+      "before_costs": 65520.31,
+      "avg_premium": 61.40038610038609,
+      "avg_capital": 148907.35374517372,
+      "avg_ret_on_premium_pct": 2.884710424710428
+     },
+     "1 session left": {
+      "trades": 260,
+      "win_rate": 63.84615384615384,
+      "net": 10958.880000000005,
+      "avg_net": 42.1495384615384,
+      "before_costs": 33988.24,
+      "avg_premium": 91.38346153846153,
+      "avg_capital": 119581.14242307693,
+      "avg_ret_on_premium_pct": 1.1143076923076922
+     },
+     "2-4 sessions left": {
+      "trades": 697,
+      "win_rate": 62.4103299856528,
+      "net": -81238.57,
+      "avg_net": -116.55461979913918,
+      "before_costs": -9248.289999999997,
+      "avg_premium": 133.05308464849355,
+      "avg_capital": 117205.07563845051,
+      "avg_ret_on_premium_pct": -1.5227259684361545
+     },
+     "5+ sessions left": {
+      "trades": 2,
+      "win_rate": 50.0,
+      "net": -461.27,
+      "avg_net": -230.635,
+      "before_costs": -164.39000000000033,
+      "avg_premium": 263.05,
+      "avg_capital": 126163.655,
+      "avg_ret_on_premium_pct": 2.17
+     }
+    },
+    "lowest_equity": 64196.62999999995,
+    "account_wiped_out_on": null,
+    "max_dd": 143666.81000000006,
+    "max_dd_pct_of_peak": 69.1159590161695,
+    "max_dd_pct_of_capital": 71.83340500000003,
+    "peak": "2021-10-27",
+    "trough": "2024-11-22",
+    "recovered": "2026-08-26"
+   },
+   "yearly": [
+    {
+     "year": "2021",
+     "from": "2021-10-25",
+     "to": "2021-12-31",
+     "sessions": 46,
+     "trades": 46,
+     "win_rate": 50.0,
+     "before_costs": -32938.659999999996,
+     "costs": 4258.35,
+     "net_pnl": -37197.01,
+     "return_pct": -18.598505000000003,
+     "profit_factor": 0.6339887102024205,
+     "max_dd": 53760.44,
+     "targets": 1,
+     "stops": 16,
+     "eod": 29
+    },
+    {
+     "year": "2022",
+     "from": "2022-01-03",
+     "to": "2022-12-30",
+     "sessions": 243,
+     "trades": 243,
+     "win_rate": 62.139917695473244,
+     "before_costs": -245.19999999999956,
+     "costs": 23436.420000000002,
+     "net_pnl": -23681.620000000006,
+     "return_pct": -11.840810000000003,
+     "profit_factor": 0.9323875064884853,
+     "max_dd": 50813.72,
+     "targets": 13,
+     "stops": 106,
+     "eod": 124
+    },
+    {
+     "year": "2023",
+     "from": "2023-01-02",
+     "to": "2023-12-29",
+     "sessions": 244,
+     "trades": 243,
+     "win_rate": 68.3127572016461,
+     "before_costs": 58814.15,
+     "costs": 20051.46,
+     "net_pnl": 38762.69,
+     "return_pct": 19.381345,
+     "profit_factor": 1.173652374580705,
+     "max_dd": 21463.97,
+     "targets": 5,
+     "stops": 125,
+     "eod": 113
+    },
+    {
+     "year": "2024",
+     "from": "2024-01-01",
+     "to": "2024-12-31",
+     "sessions": 246,
+     "trades": 245,
+     "win_rate": 69.79591836734694,
+     "before_costs": -53490.92,
+     "costs": 24096.33,
+     "net_pnl": -77587.25,
+     "return_pct": -38.793625,
+     "profit_factor": 0.8276676845198894,
+     "max_dd": 115393.31000000001,
+     "targets": 13,
+     "stops": 126,
+     "eod": 106
+    },
+    {
+     "year": "2025",
+     "from": "2025-01-01",
+     "to": "2025-12-31",
+     "sessions": 244,
+     "trades": 242,
+     "win_rate": 63.63636363636363,
+     "before_costs": 55864.54,
+     "costs": 23120.27,
+     "net_pnl": 32744.270000000004,
+     "return_pct": 16.372135,
+     "profit_factor": 1.0973700374668154,
+     "max_dd": 47771.77000000002,
+     "targets": 5,
+     "stops": 101,
+     "eod": 136
+    },
+    {
+     "year": "2026",
+     "from": "2026-01-01",
+     "to": "2026-10-23",
+     "sessions": 199,
+     "trades": 199,
+     "win_rate": 63.31658291457286,
+     "before_costs": 62091.96,
+     "costs": 20476.37,
+     "net_pnl": 41615.59000000001,
+     "return_pct": 20.807795000000006,
+     "profit_factor": 1.1338165710317,
+     "max_dd": 44177.25,
+     "targets": 3,
+     "stops": 84,
+     "eod": 112
+    }
+   ],
+   "monthly": {
+    "months": 61,
+    "trades_per_month": 19.9672131147541,
+    "capital_per_trade": 124468.28134646962,
+    "capital_sum_per_month": 2485284.6996721313,
+    "largest_capital_in_a_month": 151848.76721311477,
+    "net_per_month": -415.4644262295085,
+    "median_month": 2384.8899999999985,
+    "return_pct_per_month_on_account": -0.20773221311475423,
+    "months_positive": 35,
+    "best_month": 30269.470000000005,
+    "worst_month": -32845.69,
+    "by_month": {
+     "2021-10": {
+      "trades": 5,
+      "capital_sum": 517566.35,
+      "capital_max": 125243.1,
+      "net": 862.23
+     },
+     "2021-11": {
+      "trades": 18,
+      "capital_sum": 1857631.16,
+      "capital_max": 125454.29,
+      "net": -16271.78
+     },
+     "2021-12": {
+      "trades": 23,
+      "capital_sum": 2280752.25,
+      "capital_max": 122148.7,
+      "net": -21787.46
+     },
+     "2022-01": {
+      "trades": 19,
+      "capital_sum": 1921251.59,
+      "capital_max": 127645.64,
+      "net": -5862.93
+     },
+     "2022-02": {
+      "trades": 20,
+      "capital_sum": 1914287.59,
+      "capital_max": 122621.87,
+      "net": -3566.66
+     },
+     "2022-03": {
+      "trades": 20,
+      "capital_sum": 1889138.52,
+      "capital_max": 121791.37,
+      "net": 12746.91
+     },
+     "2022-04": {
+      "trades": 19,
+      "capital_sum": 1897397.25,
+      "capital_max": 123431.17,
+      "net": 13653.19
+     },
+     "2022-05": {
+      "trades": 21,
+      "capital_sum": 1913348.74,
+      "capital_max": 116621.59,
+      "net": -20583.72
+     },
+     "2022-06": {
+      "trades": 21,
+      "capital_sum": 1902475.57,
+      "capital_max": 114771.41,
+      "net": 372.13
+     },
+     "2022-07": {
+      "trades": 20,
+      "capital_sum": 1868064.98,
+      "capital_max": 115862.63,
+      "net": 19653.43
+     },
+     "2022-08": {
+      "trades": 20,
+      "capital_sum": 2015821.43,
+      "capital_max": 123720.97,
+      "net": -21155.83
+     },
+     "2022-09": {
+      "trades": 22,
+      "capital_sum": 2208737.99,
+      "capital_max": 124898.43,
+      "net": -17994.34
+     },
+     "2022-10": {
+      "trades": 18,
+      "capital_sum": 1797731.58,
+      "capital_max": 123890.09,
+      "net": 5468.68
+     },
+     "2022-11": {
+      "trades": 21,
+      "capital_sum": 2234948.38,
+      "capital_max": 128822.06,
+      "net": 11002.06
+     },
+     "2022-12": {
+      "trades": 22,
+      "capital_sum": 2371060.87,
+      "capital_max": 132338.72,
+      "net": -17414.54
+     },
+     "2023-01": {
+      "trades": 21,
+      "capital_sum": 2185487.8,
+      "capital_max": 126952.34,
+      "net": -8792.37
+     },
+     "2023-02": {
+      "trades": 20,
+      "capital_sum": 2061031.62,
+      "capital_max": 126232.7,
+      "net": 13246.64
+     },
+     "2023-03": {
+      "trades": 21,
+      "capital_sum": 2122539.56,
+      "capital_max": 123300.9,
+      "net": -4008.04
+     },
+     "2023-04": {
+      "trades": 17,
+      "capital_sum": 1786431.21,
+      "capital_max": 125306.85,
+      "net": 11612.36
+     },
+     "2023-05": {
+      "trades": 21,
+      "capital_sum": 2259164.47,
+      "capital_max": 128138.18,
+      "net": -10445.63
+     },
+     "2023-06": {
+      "trades": 20,
+      "capital_sum": 2235224.86,
+      "capital_max": 131993.39,
+      "net": 3625.29
+     },
+     "2023-07": {
+      "trades": 21,
+      "capital_sum": 2412659.43,
+      "capital_max": 139572.8,
+      "net": 7499.08
+     },
+     "2023-08": {
+      "trades": 22,
+      "capital_sum": 2534060.8,
+      "capital_max": 138113.25,
+      "net": 18787.83
+     },
+     "2023-09": {
+      "trades": 20,
+      "capital_sum": 2333601.18,
+      "capital_max": 141338.23,
+      "net": -5462.65
+     },
+     "2023-10": {
+      "trades": 20,
+      "capital_sum": 2286899.96,
+      "capital_max": 138788.37,
+      "net": 6057.03
+     },
+     "2023-11": {
+      "trades": 20,
+      "capital_sum": 2341459.62,
+      "capital_max": 141051.02,
+      "net": 2788.83
+     },
+     "2023-12": {
+      "trades": 20,
+      "capital_sum": 2468200.91,
+      "capital_max": 151527.68,
+      "net": 3854.32
+     },
+     "2024-01": {
+      "trades": 22,
+      "capital_sum": 2750714.46,
+      "capital_max": 152372.11,
+      "net": -32845.69
+     },
+     "2024-02": {
+      "trades": 21,
+      "capital_sum": 2680637.13,
+      "capital_max": 153218.95,
+      "net": 18470.45
+     },
+     "2024-03": {
+      "trades": 17,
+      "capital_sum": 2212507.33,
+      "capital_max": 156547.34,
+      "net": -30753.24
+     },
+     "2024-04": {
+      "trades": 20,
+      "capital_sum": 2623524.14,
+      "capital_max": 158344.4,
+      "net": -2867.02
+     },
+     "2024-05": {
+      "trades": 21,
+      "capital_sum": 2747559.02,
+      "capital_max": 158546.4,
+      "net": -8206.98
+     },
+     "2024-06": {
+      "trades": 19,
+      "capital_sum": 2540190.24,
+      "capital_max": 165642.59,
+      "net": -23746.3
+     },
+     "2024-07": {
+      "trades": 22,
+      "capital_sum": 3120568.97,
+      "capital_max": 172297.26,
+      "net": -17793.99
+     },
+     "2024-08": {
+      "trades": 21,
+      "capital_sum": 3041085.54,
+      "capital_max": 176838.56,
+      "net": 2384.89
+     },
+     "2024-09": {
+      "trades": 21,
+      "capital_sum": 3122484.63,
+      "capital_max": 182864.13,
+      "net": 13874.15
+     },
+     "2024-10": {
+      "trades": 22,
+      "capital_sum": 3194697.29,
+      "capital_max": 179141.47,
+      "net": -1828.07
+     },
+     "2024-11": {
+      "trades": 18,
+      "capital_sum": 2502708.1,
+      "capital_max": 169609.68,
+      "net": -24544.92
+     },
+     "2024-12": {
+      "trades": 21,
+      "capital_sum": 2930684.87,
+      "capital_max": 172718.91,
+      "net": 30269.47
+     },
+     "2025-01": {
+      "trades": 21,
+      "capital_sum": 2839656.12,
+      "capital_max": 164372.58,
+      "net": 10568.43
+     },
+     "2025-02": {
+      "trades": 20,
+      "capital_sum": 2664447.76,
+      "capital_max": 165353.11,
+      "net": 4644.7
+     },
+     "2025-03": {
+      "trades": 19,
+      "capital_sum": 2532138.67,
+      "capital_max": 164119.32,
+      "net": -581.55
+     },
+     "2025-04": {
+      "trades": 18,
+      "capital_sum": 2483001.89,
+      "capital_max": 169717.03,
+      "net": -32706.89
+     },
+     "2025-05": {
+      "trades": 19,
+      "capital_sum": 2700097.79,
+      "capital_max": 171916.29,
+      "net": 21207.56
+     },
+     "2025-06": {
+      "trades": 20,
+      "capital_sum": 2849357.85,
+      "capital_max": 177038.02,
+      "net": 3161.32
+     },
+     "2025-07": {
+      "trades": 23,
+      "capital_sum": 3414734.62,
+      "capital_max": 178472.03,
+      "net": 7231.09
+     },
+     "2025-08": {
+      "trades": 19,
+      "capital_sum": 2759222.62,
+      "capital_max": 175502.5,
+      "net": 11983.72
+     },
+     "2025-09": {
+      "trades": 22,
+      "capital_sum": 3262037.55,
+      "capital_max": 177091.93,
+      "net": -6193.77
+     },
+     "2025-10": {
+      "trades": 20,
+      "capital_sum": 2998365.55,
+      "capital_max": 181923.9,
+      "net": -1528.4
+     },
+     "2025-11": {
+      "trades": 19,
+      "capital_sum": 2892646.07,
+      "capital_max": 182722.94,
+      "net": 10891.62
+     },
+     "2025-12": {
+      "trades": 22,
+      "capital_sum": 3404125.87,
+      "capital_max": 183845.58,
+      "net": 4066.44
+     },
+     "2026-01": {
+      "trades": 20,
+      "capital_sum": 3001910.49,
+      "capital_max": 184176.78,
+      "net": 491.01
+     },
+     "2026-02": {
+      "trades": 21,
+      "capital_sum": 3119545.35,
+      "capital_max": 180588.73,
+      "net": 169.05
+     },
+     "2026-03": {
+      "trades": 19,
+      "capital_sum": 2520672.43,
+      "capital_max": 172230.87,
+      "net": 13619.86
+     },
+     "2026-04": {
+      "trades": 20,
+      "capital_sum": 2670879.99,
+      "capital_max": 168134.43,
+      "net": 14057.87
+     },
+     "2026-05": {
+      "trades": 19,
+      "capital_sum": 2591029.99,
+      "capital_max": 167006.26,
+      "net": 9983.94
+     },
+     "2026-06": {
+      "trades": 21,
+      "capital_sum": 2908964.14,
+      "capital_max": 168540.33,
+      "net": 11619.72
+     },
+     "2026-07": {
+      "trades": 22,
+      "capital_sum": 3042893.71,
+      "capital_max": 169330.47,
+      "net": 14347.09
+     },
+     "2026-08": {
+      "trades": 21,
+      "capital_sum": 3000656.11,
+      "capital_max": 172484.44,
+      "net": 13497.13
+     },
+     "2026-09": {
+      "trades": 21,
+      "capital_sum": 2896669.56,
+      "capital_max": 168577.46,
+      "net": -8437.68
+     },
+     "2026-10": {
+      "trades": 15,
+      "capital_sum": 1964975.16,
+      "capital_max": 159910.25,
+      "net": -27732.4
+     }
+    }
+   }
+  },
+  "rr_1_5": {
+   "rr": 5.0,
+   "index_trades": 1218,
+   "skipped": {},
+   "stats": {
+    "trades": 1218,
+    "sessions": 1222,
+    "wins": 792,
+    "win_rate": 65.02463054187191,
+    "before_costs": 93946.24,
+    "spread_slippage": 37698.49,
+    "charges": 77741.51,
+    "net_pnl": -21493.760000000024,
+    "return_pct_of_account": -10.746880000000012,
+    "annual_return_pct": -2.152027368421055,
+    "profit_factor": 0.9878729500224211,
+    "avg_trade": -17.646765188834173,
+    "avg_win": 2210.7169444444444,
+    "avg_loss": -4160.52014084507,
+    "t_stat": -0.15424341045652534,
+    "avg_premium": 109.13505747126437,
+    "avg_capital": 124468.28134646962,
+    "max_capital": 184176.78,
+    "avg_ret_on_premium_pct": 0.15059113300492605,
+    "max_win": 9051.12,
+    "max_loss": -24194.28,
+    "exit_reasons": {
+     "eod": {
+      "trades": 640,
+      "avg_net": -1774.867515625,
+      "win_rate": 36.40625
+     },
+     "stop": {
+      "trades": 559,
+      "avg_net": 2385.2643470483004,
+      "win_rate": 100.0
+     },
+     "target": {
+      "trades": 19,
+      "avg_net": -11523.227368421052,
+      "win_rate": 0.0
+     }
+    },
+    "by_option": {
+     "CALL": {
+      "trades": 568,
+      "win_rate": 65.84507042253522,
+      "net": 100402.0
+     },
+     "PUT": {
+      "trades": 650,
+      "win_rate": 64.3076923076923,
+      "net": -121895.76000000001
+     }
+    },
+    "by_days_to_expiry": {
+     "expiry day (0DTE)": {
+      "trades": 259,
+      "win_rate": 73.35907335907336,
+      "net": 63299.63,
+      "avg_net": 244.40011583011574,
+      "before_costs": 83385.79,
+      "avg_premium": 61.40038610038609,
+      "avg_capital": 148907.35374517372,
+      "avg_ret_on_premium_pct": 4.451621621621624
+     },
+     "1 session left": {
+      "trades": 260,
+      "win_rate": 63.84615384615384,
+      "net": 15351.490000000002,
+      "avg_net": 59.04419230769227,
+      "before_costs": 38377.32,
+      "avg_premium": 91.38346153846153,
+      "avg_capital": 119581.14242307693,
+      "avg_ret_on_premium_pct": 1.4530769230769232
+     },
+     "2-4 sessions left": {
+      "trades": 697,
+      "win_rate": 62.4103299856528,
+      "net": -99683.61,
+      "avg_net": -143.0180918220947,
+      "before_costs": -27652.48,
+      "avg_premium": 133.05308464849355,
+      "avg_capital": 117205.07563845051,
+      "avg_ret_on_premium_pct": -1.9392969870875174
+     },
+     "5+ sessions left": {
+      "trades": 2,
+      "win_rate": 50.0,
+      "net": -461.27,
+      "avg_net": -230.635,
+      "before_costs": -164.39000000000033,
+      "avg_premium": 263.05,
+      "avg_capital": 126163.655,
+      "avg_ret_on_premium_pct": 2.17
+     }
+    },
+    "lowest_equity": 65035.44000000003,
+    "account_wiped_out_on": null,
+    "max_dd": 142827.99999999997,
+    "max_dd_pct_of_peak": 68.71242003884856,
+    "max_dd_pct_of_capital": 71.41399999999999,
+    "peak": "2021-10-27",
+    "trough": "2024-11-22",
+    "recovered": "2026-08-17"
+   },
+   "yearly": [
+    {
+     "year": "2021",
+     "from": "2021-10-25",
+     "to": "2021-12-31",
+     "sessions": 46,
+     "trades": 46,
+     "win_rate": 50.0,
+     "before_costs": -34698.2,
+     "costs": 4261.05,
+     "net_pnl": -38959.25,
+     "return_pct": -19.479625,
+     "profit_factor": 0.6231826628189807,
+     "max_dd": 55522.67999999999,
+     "targets": 1,
+     "stops": 16,
+     "eod": 29
+    },
+    {
+     "year": "2022",
+     "from": "2022-01-03",
+     "to": "2022-12-30",
+     "sessions": 243,
+     "trades": 243,
+     "win_rate": 62.139917695473244,
+     "before_costs": -17012.38,
+     "costs": 23476.56,
+     "net_pnl": -40488.94,
+     "return_pct": -20.24447,
+     "profit_factor": 0.8896946707237061,
+     "max_dd": 63814.110000000044,
+     "targets": 8,
+     "stops": 106,
+     "eod": 129
+    },
+    {
+     "year": "2023",
+     "from": "2023-01-02",
+     "to": "2023-12-29",
+     "sessions": 244,
+     "trades": 243,
+     "win_rate": 68.3127572016461,
+     "before_costs": 64716.78,
+     "costs": 20039.87,
+     "net_pnl": 44676.91,
+     "return_pct": 22.338455000000003,
+     "profit_factor": 1.2055946315657813,
+     "max_dd": 19984.599999999977,
+     "targets": 2,
+     "stops": 125,
+     "eod": 116
+    },
+    {
+     "year": "2024",
+     "from": "2024-01-01",
+     "to": "2024-12-31",
+     "sessions": 246,
+     "trades": 245,
+     "win_rate": 70.20408163265306,
+     "before_costs": -39809.61,
+     "costs": 24072.15,
+     "net_pnl": -63881.76,
+     "return_pct": -31.94088,
+     "profit_factor": 0.8548622619924818,
+     "max_dd": 101899.16000000005,
+     "targets": 5,
+     "stops": 127,
+     "eod": 113
+    },
+    {
+     "year": "2025",
+     "from": "2025-01-01",
+     "to": "2025-12-31",
+     "sessions": 244,
+     "trades": 242,
+     "win_rate": 63.63636363636363,
+     "before_costs": 61486.43,
+     "costs": 23110.800000000003,
+     "net_pnl": 38375.63000000002,
+     "return_pct": 19.18781500000001,
+     "profit_factor": 1.1160592309411037,
+     "max_dd": 38954.06999999998,
+     "targets": 2,
+     "stops": 101,
+     "eod": 139
+    },
+    {
+     "year": "2026",
+     "from": "2026-01-01",
+     "to": "2026-10-23",
+     "sessions": 199,
+     "trades": 199,
+     "win_rate": 63.31658291457286,
+     "before_costs": 59263.22,
+     "costs": 20479.57,
+     "net_pnl": 38783.65,
+     "return_pct": 19.391825,
+     "profit_factor": 1.1235849650319008,
+     "max_dd": 44177.24999999997,
+     "targets": 1,
+     "stops": 84,
+     "eod": 114
+    }
+   ],
+   "monthly": {
+    "months": 61,
+    "trades_per_month": 19.9672131147541,
+    "capital_per_trade": 124468.28134646962,
+    "capital_sum_per_month": 2485284.6996721313,
+    "largest_capital_in_a_month": 151848.76721311477,
+    "net_per_month": -352.356721311475,
+    "median_month": 2457.510000000001,
+    "return_pct_per_month_on_account": -0.1761783606557375,
+    "months_positive": 34,
+    "best_month": 30480.81,
+    "worst_month": -35304.729999999996,
+    "by_month": {
+     "2021-10": {
+      "trades": 5,
+      "capital_sum": 517566.35,
+      "capital_max": 125243.1,
+      "net": 862.23
+     },
+     "2021-11": {
+      "trades": 18,
+      "capital_sum": 1857631.16,
+      "capital_max": 125454.29,
+      "net": -16271.78
+     },
+     "2021-12": {
+      "trades": 23,
+      "capital_sum": 2280752.25,
+      "capital_max": 122148.7,
+      "net": -23549.7
+     },
+     "2022-01": {
+      "trades": 19,
+      "capital_sum": 1921251.59,
+      "capital_max": 127645.64,
+      "net": -6786.31
+     },
+     "2022-02": {
+      "trades": 20,
+      "capital_sum": 1914287.59,
+      "capital_max": 122621.87,
+      "net": -3566.66
+     },
+     "2022-03": {
+      "trades": 20,
+      "capital_sum": 1889138.52,
+      "capital_max": 121791.37,
+      "net": 12746.91
+     },
+     "2022-04": {
+      "trades": 19,
+      "capital_sum": 1897397.25,
+      "capital_max": 123431.17,
+      "net": 13653.19
+     },
+     "2022-05": {
+      "trades": 21,
+      "capital_sum": 1913348.74,
+      "capital_max": 116621.59,
+      "net": -17342.12
+     },
+     "2022-06": {
+      "trades": 21,
+      "capital_sum": 1902475.57,
+      "capital_max": 114771.41,
+      "net": -4805.06
+     },
+     "2022-07": {
+      "trades": 20,
+      "capital_sum": 1868064.98,
+      "capital_max": 115862.63,
+      "net": 19653.43
+     },
+     "2022-08": {
+      "trades": 20,
+      "capital_sum": 2015821.43,
+      "capital_max": 123720.97,
+      "net": -27548.03
+     },
+     "2022-09": {
+      "trades": 22,
+      "capital_sum": 2208737.99,
+      "capital_max": 124898.43,
+      "net": -17994.34
+     },
+     "2022-10": {
+      "trades": 18,
+      "capital_sum": 1797731.58,
+      "capital_max": 123890.09,
+      "net": 5468.68
+     },
+     "2022-11": {
+      "trades": 21,
+      "capital_sum": 2234948.38,
+      "capital_max": 128822.06,
+      "net": 9395.89
+     },
+     "2022-12": {
+      "trades": 22,
+      "capital_sum": 2371060.87,
+      "capital_max": 132338.72,
+      "net": -23364.52
+     },
+     "2023-01": {
+      "trades": 21,
+      "capital_sum": 2185487.8,
+      "capital_max": 126952.34,
+      "net": -7313.0
+     },
+     "2023-02": {
+      "trades": 20,
+      "capital_sum": 2061031.62,
+      "capital_max": 126232.7,
+      "net": 13536.01
+     },
+     "2023-03": {
+      "trades": 21,
+      "capital_sum": 2122539.56,
+      "capital_max": 123300.9,
+      "net": -4008.04
+     },
+     "2023-04": {
+      "trades": 17,
+      "capital_sum": 1786431.21,
+      "capital_max": 125306.85,
+      "net": 11612.36
+     },
+     "2023-05": {
+      "trades": 21,
+      "capital_sum": 2259164.47,
+      "capital_max": 128138.18,
+      "net": -10445.63
+     },
+     "2023-06": {
+      "trades": 20,
+      "capital_sum": 2235224.86,
+      "capital_max": 131993.39,
+      "net": 3625.29
+     },
+     "2023-07": {
+      "trades": 21,
+      "capital_sum": 2412659.43,
+      "capital_max": 139572.8,
+      "net": 7499.08
+     },
+     "2023-08": {
+      "trades": 22,
+      "capital_sum": 2534060.8,
+      "capital_max": 138113.25,
+      "net": 18787.83
+     },
+     "2023-09": {
+      "trades": 20,
+      "capital_sum": 2333601.18,
+      "capital_max": 141338.23,
+      "net": -8063.74
+     },
+     "2023-10": {
+      "trades": 20,
+      "capital_sum": 2286899.96,
+      "capital_max": 138788.37,
+      "net": 4171.24
+     },
+     "2023-11": {
+      "trades": 20,
+      "capital_sum": 2341459.62,
+      "capital_max": 141051.02,
+      "net": 11421.19
+     },
+     "2023-12": {
+      "trades": 20,
+      "capital_sum": 2468200.91,
+      "capital_max": 151527.68,
+      "net": 3854.32
+     },
+     "2024-01": {
+      "trades": 22,
+      "capital_sum": 2750714.46,
+      "capital_max": 152372.11,
+      "net": -35304.73
+     },
+     "2024-02": {
+      "trades": 21,
+      "capital_sum": 2680637.13,
+      "capital_max": 153218.95,
+      "net": 15430.41
+     },
+     "2024-03": {
+      "trades": 17,
+      "capital_sum": 2212507.33,
+      "capital_max": 156547.34,
+      "net": -17902.84
+     },
+     "2024-04": {
+      "trades": 20,
+      "capital_sum": 2623524.14,
+      "capital_max": 158344.4,
+      "net": -1046.24
+     },
+     "2024-05": {
+      "trades": 21,
+      "capital_sum": 2747559.02,
+      "capital_max": 158546.4,
+      "net": 2457.51
+     },
+     "2024-06": {
+      "trades": 19,
+      "capital_sum": 2540190.24,
+      "capital_max": 165642.59,
+      "net": -23746.3
+     },
+     "2024-07": {
+      "trades": 22,
+      "capital_sum": 3120568.97,
+      "capital_max": 172297.26,
+      "net": -23002.69
+     },
+     "2024-08": {
+      "trades": 21,
+      "capital_sum": 3041085.54,
+      "capital_max": 176838.56,
+      "net": 2384.89
+     },
+     "2024-09": {
+      "trades": 21,
+      "capital_sum": 3122484.63,
+      "capital_max": 182864.13,
+      "net": 13874.15
+     },
+     "2024-10": {
+      "trades": 22,
+      "capital_sum": 3194697.29,
+      "capital_max": 179141.47,
+      "net": -2070.93
+     },
+     "2024-11": {
+      "trades": 18,
+      "capital_sum": 2502708.1,
+      "capital_max": 169609.68,
+      "net": -25435.8
+     },
+     "2024-12": {
+      "trades": 21,
+      "capital_sum": 2930684.87,
+      "capital_max": 172718.91,
+      "net": 30480.81
+     },
+     "2025-01": {
+      "trades": 21,
+      "capital_sum": 2839656.12,
+      "capital_max": 164372.58,
+      "net": 4260.77
+     },
+     "2025-02": {
+      "trades": 20,
+      "capital_sum": 2664447.76,
+      "capital_max": 165353.11,
+      "net": 4644.7
+     },
+     "2025-03": {
+      "trades": 19,
+      "capital_sum": 2532138.67,
+      "capital_max": 164119.32,
+      "net": -581.55
+     },
+     "2025-04": {
+      "trades": 18,
+      "capital_sum": 2483001.89,
+      "capital_max": 169717.03,
+      "net": -23889.19
+     },
+     "2025-05": {
+      "trades": 19,
+      "capital_sum": 2700097.79,
+      "capital_max": 171916.29,
+      "net": 21207.56
+     },
+     "2025-06": {
+      "trades": 20,
+      "capital_sum": 2849357.85,
+      "capital_max": 177038.02,
+      "net": 3161.32
+     },
+     "2025-07": {
+      "trades": 23,
+      "capital_sum": 3414734.62,
+      "capital_max": 178472.03,
+      "net": 7231.09
+     },
+     "2025-08": {
+      "trades": 19,
+      "capital_sum": 2759222.62,
+      "capital_max": 175502.5,
+      "net": 11983.72
+     },
+     "2025-09": {
+      "trades": 22,
+      "capital_sum": 3262037.55,
+      "capital_max": 177091.93,
+      "net": -6193.77
+     },
+     "2025-10": {
+      "trades": 20,
+      "capital_sum": 2998365.55,
+      "capital_max": 181923.9,
+      "net": -1528.4
+     },
+     "2025-11": {
+      "trades": 19,
+      "capital_sum": 2892646.07,
+      "capital_max": 182722.94,
+      "net": 10891.62
+     },
+     "2025-12": {
+      "trades": 22,
+      "capital_sum": 3404125.87,
+      "capital_max": 183845.58,
+      "net": 7187.76
+     },
+     "2026-01": {
+      "trades": 20,
+      "capital_sum": 3001910.49,
+      "capital_max": 184176.78,
+      "net": 491.01
+     },
+     "2026-02": {
+      "trades": 21,
+      "capital_sum": 3119545.35,
+      "capital_max": 180588.73,
+      "net": -3852.88
+     },
+     "2026-03": {
+      "trades": 19,
+      "capital_sum": 2520672.43,
+      "capital_max": 172230.87,
+      "net": 13392.25
+     },
+     "2026-04": {
+      "trades": 20,
+      "capital_sum": 2670879.99,
+      "capital_max": 168134.43,
+      "net": 14057.87
+     },
+     "2026-05": {
+      "trades": 19,
+      "capital_sum": 2591029.99,
+      "capital_max": 167006.26,
+      "net": 9983.94
+     },
+     "2026-06": {
+      "trades": 21,
+      "capital_sum": 2908964.14,
+      "capital_max": 168540.33,
+      "net": 11619.72
+     },
+     "2026-07": {
+      "trades": 22,
+      "capital_sum": 3042893.71,
+      "capital_max": 169330.47,
+      "net": 15764.69
+     },
+     "2026-08": {
+      "trades": 21,
+      "capital_sum": 3000656.11,
+      "capital_max": 172484.44,
+      "net": 13497.13
+     },
+     "2026-09": {
+      "trades": 21,
+      "capital_sum": 2896669.56,
+      "capital_max": 168577.46,
+      "net": -8437.68
+     },
+     "2026-10": {
+      "trades": 15,
+      "capital_sum": 1964975.16,
+      "capital_max": 159910.25,
+      "net": -27732.4
+     }
+    }
+   }
+  },
+  "rr_1_6": {
+   "rr": 6.0,
+   "index_trades": 1218,
+   "skipped": {},
+   "stats": {
+    "trades": 1218,
+    "sessions": 1222,
+    "wins": 793,
+    "win_rate": 65.10673234811166,
+    "before_costs": 99467.11,
+    "spread_slippage": 37697.61,
+    "charges": 77741.18,
+    "net_pnl": -15971.68000000003,
+    "return_pct_of_account": -7.985840000000015,
+    "annual_return_pct": -1.5991381907894766,
+    "profit_factor": 0.9909754147619351,
+    "avg_trade": -13.113037766830894,
+    "avg_win": 2211.6329003783103,
+    "avg_loss": -4164.227223529411,
+    "t_stat": -0.1142364867004496,
+    "avg_premium": 109.13505747126437,
+    "avg_capital": 124468.28134646962,
+    "max_capital": 184176.78,
+    "avg_ret_on_premium_pct": 0.01163382594417064,
+    "max_win": 9051.12,
+    "max_loss": -24194.28,
+    "exit_reasons": {
+     "eod": {
+      "trades": 649,
+      "avg_net": -1875.6954083204932,
+      "win_rate": 36.05546995377504
+     },
+     "stop": {
+      "trades": 559,
+      "avg_net": 2385.2643470483004,
+      "win_rate": 100.0
+     },
+     "target": {
+      "trades": 10,
+      "avg_net": -13200.813,
+      "win_rate": 0.0
+     }
+    },
+    "by_option": {
+     "CALL": {
+      "trades": 568,
+      "win_rate": 65.84507042253522,
+      "net": 97871.43000000001
+     },
+     "PUT": {
+      "trades": 650,
+      "win_rate": 64.46153846153845,
+      "net": -113843.11
+     }
+    },
+    "by_days_to_expiry": {
+     "expiry day (0DTE)": {
+      "trades": 259,
+      "win_rate": 73.35907335907336,
+      "net": 53218.39,
+      "avg_net": 205.4764092664092,
+      "before_costs": 73325.51,
+      "avg_premium": 61.40038610038609,
+      "avg_capital": 148907.35374517372,
+      "avg_ret_on_premium_pct": 3.547837837837839
+     },
+     "1 session left": {
+      "trades": 260,
+      "win_rate": 63.84615384615384,
+      "net": 17210.260000000002,
+      "avg_net": 66.19330769230764,
+      "before_costs": 40231.32,
+      "avg_premium": 91.38346153846153,
+      "avg_capital": 119581.14242307693,
+      "avg_ret_on_premium_pct": 1.4749230769230774
+     },
+     "2-4 sessions left": {
+      "trades": 697,
+      "win_rate": 62.553802008608315,
+      "net": -85939.06,
+      "avg_net": -123.29850789096128,
+      "before_costs": -13925.329999999994,
+      "avg_premium": 133.05308464849355,
+      "avg_capital": 117205.07563845051,
+      "avg_ret_on_premium_pct": -1.8544332855093253
+     },
+     "5+ sessions left": {
+      "trades": 2,
+      "win_rate": 50.0,
+      "net": -461.27,
+      "avg_net": -230.635,
+      "before_costs": -164.39000000000033,
+      "avg_premium": 263.05,
+      "avg_capital": 126163.655,
+      "avg_ret_on_premium_pct": 2.17
+     }
+    },
+    "lowest_equity": 69641.7,
+    "account_wiped_out_on": null,
+    "max_dd": 138221.74,
+    "max_dd_pct_of_peak": 66.49641707074606,
+    "max_dd_pct_of_capital": 69.11086999999999,
+    "peak": "2021-10-27",
+    "trough": "2024-06-10",
+    "recovered": "2026-08-11"
+   },
+   "yearly": [
+    {
+     "year": "2021",
+     "from": "2021-10-25",
+     "to": "2021-12-31",
+     "sessions": 46,
+     "trades": 46,
+     "win_rate": 50.0,
+     "before_costs": -36653.619999999995,
+     "costs": 4266.21,
+     "net_pnl": -40919.83,
+     "return_pct": -20.459915000000002,
+     "profit_factor": 0.6115852305334766,
+     "max_dd": 57483.26000000001,
+     "targets": 1,
+     "stops": 16,
+     "eod": 29
+    },
+    {
+     "year": "2022",
+     "from": "2022-01-03",
+     "to": "2022-12-30",
+     "sessions": 243,
+     "trades": 243,
+     "win_rate": 62.139917695473244,
+     "before_costs": -17075.38,
+     "costs": 23477.329999999998,
+     "net_pnl": -40552.71,
+     "return_pct": -20.276355,
+     "profit_factor": 0.889540130317048,
+     "max_dd": 62748.26999999999,
+     "targets": 4,
+     "stops": 106,
+     "eod": 133
+    },
+    {
+     "year": "2023",
+     "from": "2023-01-02",
+     "to": "2023-12-29",
+     "sessions": 244,
+     "trades": 243,
+     "win_rate": 68.3127572016461,
+     "before_costs": 60919.54,
+     "costs": 20046.73,
+     "net_pnl": 40872.81,
+     "return_pct": 20.436405,
+     "profit_factor": 1.1848529003131112,
+     "max_dd": 19984.599999999977,
+     "targets": 1,
+     "stops": 125,
+     "eod": 117
+    },
+    {
+     "year": "2024",
+     "from": "2024-01-01",
+     "to": "2024-12-31",
+     "sessions": 246,
+     "trades": 245,
+     "win_rate": 70.61224489795919,
+     "before_costs": -21794.44,
+     "costs": 24042.24,
+     "net_pnl": -45836.68,
+     "return_pct": -22.91834,
+     "profit_factor": 0.8921585670919819,
+     "max_dd": 91464.45000000001,
+     "targets": 2,
+     "stops": 127,
+     "eod": 116
+    },
+    {
+     "year": "2025",
+     "from": "2025-01-01",
+     "to": "2025-12-31",
+     "sessions": 244,
+     "trades": 242,
+     "win_rate": 63.63636363636363,
+     "before_costs": 54453.35,
+     "costs": 23126.66,
+     "net_pnl": 31326.690000000002,
+     "return_pct": 15.663345000000001,
+     "profit_factor": 1.092763614343309,
+     "max_dd": 38954.06999999998,
+     "targets": 2,
+     "stops": 101,
+     "eod": 139
+    },
+    {
+     "year": "2026",
+     "from": "2026-01-01",
+     "to": "2026-10-23",
+     "sessions": 199,
+     "trades": 199,
+     "win_rate": 63.31658291457286,
+     "before_costs": 59617.659999999996,
+     "costs": 20479.62,
+     "net_pnl": 39138.04,
+     "return_pct": 19.569020000000002,
+     "profit_factor": 1.1248552321364493,
+     "max_dd": 44177.25,
+     "targets": 0,
+     "stops": 84,
+     "eod": 115
+    }
+   ],
+   "monthly": {
+    "months": 61,
+    "trades_per_month": 19.9672131147541,
+    "capital_per_trade": 124468.28134646962,
+    "capital_sum_per_month": 2485284.6996721313,
+    "largest_capital_in_a_month": 151848.76721311477,
+    "net_per_month": -261.83081967213093,
+    "median_month": 1525.08,
+    "return_pct_per_month_on_account": -0.13091540983606545,
+    "months_positive": 33,
+    "best_month": 30480.81,
+    "worst_month": -37983.85,
+    "by_month": {
+     "2021-10": {
+      "trades": 5,
+      "capital_sum": 517566.35,
+      "capital_max": 125243.1,
+      "net": 862.23
+     },
+     "2021-11": {
+      "trades": 18,
+      "capital_sum": 1857631.16,
+      "capital_max": 125454.29,
+      "net": -16271.78
+     },
+     "2021-12": {
+      "trades": 23,
+      "capital_sum": 2280752.25,
+      "capital_max": 122148.7,
+      "net": -25510.28
+     },
+     "2022-01": {
+      "trades": 19,
+      "capital_sum": 1921251.59,
+      "capital_max": 127645.64,
+      "net": -8190.9
+     },
+     "2022-02": {
+      "trades": 20,
+      "capital_sum": 1914287.59,
+      "capital_max": 122621.87,
+      "net": -3566.66
+     },
+     "2022-03": {
+      "trades": 20,
+      "capital_sum": 1889138.52,
+      "capital_max": 121791.37,
+      "net": 12746.91
+     },
+     "2022-04": {
+      "trades": 19,
+      "capital_sum": 1897397.25,
+      "capital_max": 123431.17,
+      "net": 13653.19
+     },
+     "2022-05": {
+      "trades": 21,
+      "capital_sum": 1913348.74,
+      "capital_max": 116621.59,
+      "net": -12917.01
+     },
+     "2022-06": {
+      "trades": 21,
+      "capital_sum": 1902475.57,
+      "capital_max": 114771.41,
+      "net": -8329.53
+     },
+     "2022-07": {
+      "trades": 20,
+      "capital_sum": 1868064.98,
+      "capital_max": 115862.63,
+      "net": 19653.43
+     },
+     "2022-08": {
+      "trades": 20,
+      "capital_sum": 2015821.43,
+      "capital_max": 123720.97,
+      "net": -29103.17
+     },
+     "2022-09": {
+      "trades": 22,
+      "capital_sum": 2208737.99,
+      "capital_max": 124898.43,
+      "net": -17994.34
+     },
+     "2022-10": {
+      "trades": 18,
+      "capital_sum": 1797731.58,
+      "capital_max": 123890.09,
+      "net": 5468.68
+     },
+     "2022-11": {
+      "trades": 21,
+      "capital_sum": 2234948.38,
+      "capital_max": 128822.06,
+      "net": 9395.89
+     },
+     "2022-12": {
+      "trades": 22,
+      "capital_sum": 2371060.87,
+      "capital_max": 132338.72,
+      "net": -21369.2
+     },
+     "2023-01": {
+      "trades": 21,
+      "capital_sum": 2185487.8,
+      "capital_max": 126952.34,
+      "net": -7313.0
+     },
+     "2023-02": {
+      "trades": 20,
+      "capital_sum": 2061031.62,
+      "capital_max": 126232.7,
+      "net": 13536.01
+     },
+     "2023-03": {
+      "trades": 21,
+      "capital_sum": 2122539.56,
+      "capital_max": 123300.9,
+      "net": -4008.04
+     },
+     "2023-04": {
+      "trades": 17,
+      "capital_sum": 1786431.21,
+      "capital_max": 125306.85,
+      "net": 11612.36
+     },
+     "2023-05": {
+      "trades": 21,
+      "capital_sum": 2259164.47,
+      "capital_max": 128138.18,
+      "net": -10445.63
+     },
+     "2023-06": {
+      "trades": 20,
+      "capital_sum": 2235224.86,
+      "capital_max": 131993.39,
+      "net": 3625.29
+     },
+     "2023-07": {
+      "trades": 21,
+      "capital_sum": 2412659.43,
+      "capital_max": 139572.8,
+      "net": 7499.08
+     },
+     "2023-08": {
+      "trades": 22,
+      "capital_sum": 2534060.8,
+      "capital_max": 138113.25,
+      "net": 18787.83
+     },
+     "2023-09": {
+      "trades": 20,
+      "capital_sum": 2333601.18,
+      "capital_max": 141338.23,
+      "net": -9773.97
+     },
+     "2023-10": {
+      "trades": 20,
+      "capital_sum": 2286899.96,
+      "capital_max": 138788.37,
+      "net": 2077.37
+     },
+     "2023-11": {
+      "trades": 20,
+      "capital_sum": 2341459.62,
+      "capital_max": 141051.02,
+      "net": 11421.19
+     },
+     "2023-12": {
+      "trades": 20,
+      "capital_sum": 2468200.91,
+      "capital_max": 151527.68,
+      "net": 3854.32
+     },
+     "2024-01": {
+      "trades": 22,
+      "capital_sum": 2750714.46,
+      "capital_max": 152372.11,
+      "net": -37983.85
+     },
+     "2024-02": {
+      "trades": 21,
+      "capital_sum": 2680637.13,
+      "capital_max": 153218.95,
+      "net": 16256.27
+     },
+     "2024-03": {
+      "trades": 17,
+      "capital_sum": 2212507.33,
+      "capital_max": 156547.34,
+      "net": -17902.84
+     },
+     "2024-04": {
+      "trades": 20,
+      "capital_sum": 2623524.14,
+      "capital_max": 158344.4,
+      "net": -1046.24
+     },
+     "2024-05": {
+      "trades": 21,
+      "capital_sum": 2747559.02,
+      "capital_max": 158546.4,
+      "net": -73.06
+     },
+     "2024-06": {
+      "trades": 19,
+      "capital_sum": 2540190.24,
+      "capital_max": 165642.59,
+      "net": -23746.3
+     },
+     "2024-07": {
+      "trades": 22,
+      "capital_sum": 3120568.97,
+      "capital_max": 172297.26,
+      "net": -4169.79
+     },
+     "2024-08": {
+      "trades": 21,
+      "capital_sum": 3041085.54,
+      "capital_max": 176838.56,
+      "net": 2384.89
+     },
+     "2024-09": {
+      "trades": 21,
+      "capital_sum": 3122484.63,
+      "capital_max": 182864.13,
+      "net": 13874.15
+     },
+     "2024-10": {
+      "trades": 22,
+      "capital_sum": 3194697.29,
+      "capital_max": 179141.47,
+      "net": 1525.08
+     },
+     "2024-11": {
+      "trades": 18,
+      "capital_sum": 2502708.1,
+      "capital_max": 169609.68,
+      "net": -25435.8
+     },
+     "2024-12": {
+      "trades": 21,
+      "capital_sum": 2930684.87,
+      "capital_max": 172718.91,
+      "net": 30480.81
+     },
+     "2025-01": {
+      "trades": 21,
+      "capital_sum": 2839656.12,
+      "capital_max": 164372.58,
+      "net": -2788.17
+     },
+     "2025-02": {
+      "trades": 20,
+      "capital_sum": 2664447.76,
+      "capital_max": 165353.11,
+      "net": 4644.7
+     },
+     "2025-03": {
+      "trades": 19,
+      "capital_sum": 2532138.67,
+      "capital_max": 164119.32,
+      "net": -581.55
+     },
+     "2025-04": {
+      "trades": 18,
+      "capital_sum": 2483001.89,
+      "capital_max": 169717.03,
+      "net": -23889.19
+     },
+     "2025-05": {
+      "trades": 19,
+      "capital_sum": 2700097.79,
+      "capital_max": 171916.29,
+      "net": 21207.56
+     },
+     "2025-06": {
+      "trades": 20,
+      "capital_sum": 2849357.85,
+      "capital_max": 177038.02,
+      "net": 3161.32
+     },
+     "2025-07": {
+      "trades": 23,
+      "capital_sum": 3414734.62,
+      "capital_max": 178472.03,
+      "net": 7231.09
+     },
+     "2025-08": {
+      "trades": 19,
+      "capital_sum": 2759222.62,
+      "capital_max": 175502.5,
+      "net": 11983.72
+     },
+     "2025-09": {
+      "trades": 22,
+      "capital_sum": 3262037.55,
+      "capital_max": 177091.93,
+      "net": -6193.77
+     },
+     "2025-10": {
+      "trades": 20,
+      "capital_sum": 2998365.55,
+      "capital_max": 181923.9,
+      "net": -1528.4
+     },
+     "2025-11": {
+      "trades": 19,
+      "capital_sum": 2892646.07,
+      "capital_max": 182722.94,
+      "net": 10891.62
+     },
+     "2025-12": {
+      "trades": 22,
+      "capital_sum": 3404125.87,
+      "capital_max": 183845.58,
+      "net": 7187.76
+     },
+     "2026-01": {
+      "trades": 20,
+      "capital_sum": 3001910.49,
+      "capital_max": 184176.78,
+      "net": 491.01
+     },
+     "2026-02": {
+      "trades": 21,
+      "capital_sum": 3119545.35,
+      "capital_max": 180588.73,
+      "net": -3498.49
+     },
+     "2026-03": {
+      "trades": 19,
+      "capital_sum": 2520672.43,
+      "capital_max": 172230.87,
+      "net": 13392.25
+     },
+     "2026-04": {
+      "trades": 20,
+      "capital_sum": 2670879.99,
+      "capital_max": 168134.43,
+      "net": 14057.87
+     },
+     "2026-05": {
+      "trades": 19,
+      "capital_sum": 2591029.99,
+      "capital_max": 167006.26,
+      "net": 9983.94
+     },
+     "2026-06": {
+      "trades": 21,
+      "capital_sum": 2908964.14,
+      "capital_max": 168540.33,
+      "net": 11619.72
+     },
+     "2026-07": {
+      "trades": 22,
+      "capital_sum": 3042893.71,
+      "capital_max": 169330.47,
+      "net": 15764.69
+     },
+     "2026-08": {
+      "trades": 21,
+      "capital_sum": 3000656.11,
+      "capital_max": 172484.44,
+      "net": 13497.13
+     },
+     "2026-09": {
+      "trades": 21,
+      "capital_sum": 2896669.56,
+      "capital_max": 168577.46,
+      "net": -8437.68
+     },
+     "2026-10": {
+      "trades": 15,
+      "capital_sum": 1964975.16,
+      "capital_max": 159910.25,
+      "net": -27732.4
+     }
+    }
+   }
+  }
+ },
+ "sensitivity_rr_1_2": {
+  "buy": {
+   "VIX pass-through off (beta 0; chosen 1.5)": {
+    "trades": 1218,
+    "sessions": 1222,
+    "wins": 440,
+    "win_rate": 36.1247947454844,
+    "before_costs": -120631.87999999999,
+    "spread_slippage": 37451.37,
+    "charges": 77330.24,
+    "net_pnl": -235413.49,
+    "return_pct_of_account": -117.706745,
+    "annual_return_pct": -23.570388493009865,
+    "profit_factor": 0.8686375628269444,
+    "avg_trade": -193.27872742200327,
+    "avg_win": 3537.9042727272727,
+    "avg_loss": -2303.459344473008,
+    "t_stat": -1.9713404197175206,
+    "avg_premium": 108.5596880131363,
+    "avg_capital": 7056.379720853859,
+    "max_capital": 27807.0,
+    "avg_ret_on_premium_pct": -3.2937520525451562,
+    "max_win": 20835.89,
+    "max_loss": -10927.57,
+    "exit_reasons": {
+     "eod": {
+      "trades": 470,
+      "avg_net": 349.0252765957447,
+      "win_rate": 51.06382978723404
+     },
+     "stop": {
+      "trades": 548,
+      "avg_net": -2516.2225,
+      "win_rate": 0.0
+     },
+     "target": {
+      "trades": 200,
+      "avg_net": 4897.1728,
+      "win_rate": 100.0
+     }
+    },
+    "by_option": {
+     "CALL": {
+      "trades": 568,
+      "win_rate": 35.38732394366197,
+      "net": -192790.63
+     },
+     "PUT": {
+      "trades": 650,
+      "win_rate": 36.769230769230774,
+      "net": -42622.85999999999
+     }
+    },
+    "by_days_to_expiry": {
+     "expiry day (0DTE)": {
+      "trades": 259,
+      "win_rate": 30.501930501930502,
+      "net": -85106.04,
+      "avg_net": -328.59474903474904,
+      "before_costs": -65039.8,
+      "avg_premium": 61.662934362934365,
+      "avg_capital": 4008.0907335907336,
+      "avg_ret_on_premium_pct": -6.883050193050193
+     },
+     "1 session left": {
+      "trades": 260,
+      "win_rate": 36.15384615384615,
+      "net": -60410.229999999996,
+      "avg_net": -232.34703846153846,
+      "before_costs": -37527.97,
+      "avg_premium": 91.2775,
+      "avg_capital": 5933.0375,
+      "avg_ret_on_premium_pct": -4.857346153846153
+     },
+     "2-4 sessions left": {
+      "trades": 697,
+      "win_rate": 38.1635581061693,
+      "net": -90083.64,
+      "avg_net": -129.2448206599713,
+      "before_costs": -18551.359999999997,
+      "avg_premium": 131.98249641319944,
+      "avg_capital": 8578.862266857963,
+      "avg_ret_on_premium_pct": -1.3805164992826398
+     },
+     "5+ sessions left": {
+      "trades": 2,
+      "win_rate": 50.0,
+      "net": 186.42000000000007,
+      "avg_net": 93.21000000000004,
+      "before_costs": 487.25,
+      "avg_premium": 265.525,
+      "avg_capital": 17259.125,
+      "avg_ret_on_premium_pct": -1.9750000000000003
+     }
+    },
+    "lowest_equity": -78724.26999999979,
+    "account_wiped_out_on": "2026-04-01",
+    "max_dd": 312772.6599999998,
+    "max_dd_pct_of_peak": 133.63589469681884,
+    "max_dd_pct_of_capital": 156.3863299999999,
+    "peak": "2022-02-25",
+    "trough": "2026-09-10",
+    "recovered": null
+   },
+   "VIX pass-through beta 0.4 (chosen 1.5)": {
+    "trades": 1218,
+    "sessions": 1222,
+    "wins": 436,
+    "win_rate": 35.79638752052545,
+    "before_costs": -131422.47999999998,
+    "spread_slippage": 37463.77,
+    "charges": 77346.72,
+    "net_pnl": -246232.97000000003,
+    "return_pct_of_account": -123.11648500000001,
+    "annual_return_pct": -24.6536711328125,
+    "profit_factor": 0.8635209501793737,
+    "avg_trade": -202.16171592775044,
+    "avg_win": 3573.276330275229,
+    "avg_loss": -2307.1374040920714,
+    "t_stat": -2.054903818126381,
+    "avg_premium": 108.78091133004925,
+    "avg_capital": 7070.759236453202,
+    "max_capital": 27196.0,
+    "avg_ret_on_premium_pct": -3.484532019704434,
+    "max_win": 20741.69,
+    "max_loss": -10455.04,
+    "exit_reasons": {
+     "eod": {
+      "trades": 470,
+      "avg_net": 330.01772340425526,
+      "win_rate": 50.212765957446805
+     },
+     "stop": {
+      "trades": 548,
+      "avg_net": -2527.7591423357662,
+      "win_rate": 0.0
+     },
+     "target": {
+      "trades": 200,
+      "avg_net": 4919.353549999999,
+      "win_rate": 100.0
+     }
+    },
+    "by_option": {
+     "CALL": {
+      "trades": 568,
+      "win_rate": 35.03521126760563,
+      "net": -196677.7
+     },
+     "PUT": {
+      "trades": 650,
+      "win_rate": 36.46153846153846,
+      "net": -49555.270000000004
+     }
+    },
+    "by_days_to_expiry": {
+     "expiry day (0DTE)": {
+      "trades": 259,
+      "win_rate": 30.115830115830118,
+      "net": -86180.71,
+      "avg_net": -332.744054054054,
+      "before_costs": -66152.71,
+      "avg_premium": 61.655791505791505,
+      "avg_capital": 4007.626447876448,
+      "avg_ret_on_premium_pct": -7.244942084942085
+     },
+     "1 session left": {
+      "trades": 260,
+      "win_rate": 36.15384615384615,
+      "net": -62257.17,
+      "avg_net": -239.4506538461538,
+      "before_costs": -39340.36,
+      "avg_premium": 91.3698076923077,
+      "avg_capital": 5939.0375,
+      "avg_ret_on_premium_pct": -4.936884615384616
+     },
+     "2-4 sessions left": {
+      "trades": 697,
+      "win_rate": 37.73314203730273,
+      "net": -97447.55,
+      "avg_net": -139.80997130559544,
+      "before_costs": -25881.069999999996,
+      "avg_premium": 132.33859397417504,
+      "avg_capital": 8602.008608321377,
+      "avg_ret_on_premium_pct": -1.544992826398852
+     },
+     "5+ sessions left": {
+      "trades": 2,
+      "win_rate": 50.0,
+      "net": -347.53999999999996,
+      "avg_net": -173.76999999999998,
+      "before_costs": -48.33999999999969,
+      "avg_premium": 265.075,
+      "avg_capital": 17229.875,
+      "avg_ret_on_premium_pct": -3.6350000000000007
+     }
+    },
+    "lowest_equity": -89260.19000000012,
+    "account_wiped_out_on": "2026-03-16",
+    "max_dd": 321499.14000000013,
+    "max_dd_pct_of_peak": 138.43463381142575,
+    "max_dd_pct_of_capital": 160.74957000000006,
+    "peak": "2022-01-25",
+    "trough": "2026-09-10",
+    "recovered": null
+   },
+   "smile rule 'strike' (chosen 'moneyness')": {
+    "trades": 1218,
+    "sessions": 1222,
+    "wins": 433,
+    "win_rate": 35.55008210180624,
+    "before_costs": -198327.80000000002,
+    "spread_slippage": 37765.2,
+    "charges": 77512.07,
+    "net_pnl": -313605.07000000007,
+    "return_pct_of_account": -156.80253500000003,
+    "annual_return_pct": -31.399191835937504,
+    "profit_factor": 0.831927577992449,
+    "avg_trade": -257.4754269293925,
+    "avg_win": 3584.959399538106,
+    "avg_loss": -2376.9331082802546,
+    "t_stat": -2.5838927974117363,
+    "avg_premium": 110.39367816091954,
+    "avg_capital": 7175.58908045977,
+    "max_capital": 27849.25,
+    "avg_ret_on_premium_pct": -4.469515599343186,
+    "max_win": 21582.5,
+    "max_loss": -9128.34,
+    "exit_reasons": {
+     "eod": {
+      "trades": 470,
+      "avg_net": 242.24755319148937,
+      "win_rate": 49.57446808510638
+     },
+     "stop": {
+      "trades": 548,
+      "avg_net": -2596.411879562044,
+      "win_rate": 0.0
+     },
+     "target": {
+      "trades": 200,
+      "avg_net": 4976.86145,
+      "win_rate": 100.0
+     }
+    },
+    "by_option": {
+     "CALL": {
+      "trades": 568,
+      "win_rate": 34.683098591549296,
+      "net": -214139.88
+     },
+     "PUT": {
+      "trades": 650,
+      "win_rate": 36.30769230769231,
+      "net": -99465.18999999999
+     }
+    },
+    "by_days_to_expiry": {
+     "expiry day (0DTE)": {
+      "trades": 259,
+      "win_rate": 29.72972972972973,
+      "net": -106031.62999999999,
+      "avg_net": -409.38853281853284,
+      "before_costs": -85953.48,
+      "avg_premium": 62.79826254826256,
+      "avg_capital": 4081.8870656370655,
+      "avg_ret_on_premium_pct": -9.45907335907336
+     },
+     "1 session left": {
+      "trades": 260,
+      "win_rate": 35.76923076923077,
+      "net": -75525.38,
+      "avg_net": -290.4822307692308,
+      "before_costs": -52603.64,
+      "avg_premium": 92.5621153846154,
+      "avg_capital": 6016.5375,
+      "avg_ret_on_premium_pct": -5.6124230769230765
+     },
+     "2-4 sessions left": {
+      "trades": 697,
+      "win_rate": 37.589670014347206,
+      "net": -129928.84,
+      "avg_net": -186.41153515064562,
+      "before_costs": -57940.16,
+      "avg_premium": 134.28988522238163,
+      "avg_capital": 8728.842539454807,
+      "avg_ret_on_premium_pct": -2.1762553802008604
+     },
+     "5+ sessions left": {
+      "trades": 2,
+      "win_rate": 50.0,
+      "net": -2119.2200000000003,
+      "avg_net": -1059.6100000000001,
+      "before_costs": -1830.52,
+      "avg_premium": 264.275,
+      "avg_capital": 17177.875,
+      "avg_ret_on_premium_pct": -8.945
+     }
+    },
+    "lowest_equity": -154632.60000000015,
+    "account_wiped_out_on": "2025-10-13",
+    "max_dd": 385429.12000000017,
+    "max_dd_pct_of_peak": 166.9995370814084,
+    "max_dd_pct_of_capital": 192.7145600000001,
+    "peak": "2022-01-25",
+    "trough": "2026-09-09",
+    "recovered": null
+   },
+   "double the spread (0.30% a side)": {
+    "trades": 1218,
+    "sessions": 1222,
+    "wins": 433,
+    "win_rate": 35.55008210180624,
+    "before_costs": -156114.86000000002,
+    "spread_slippage": 63344.64,
+    "charges": 77425.27,
+    "net_pnl": -296884.77,
+    "return_pct_of_account": -148.442385,
+    "annual_return_pct": -29.72509929893092,
+    "profit_factor": 0.839774179560834,
+    "avg_trade": -243.74775862068967,
+    "avg_win": 3593.6024942263275,
+    "avg_loss": -2360.4008280254775,
+    "t_stat": -2.4420411629320107,
+    "avg_premium": 109.77742200328407,
+    "avg_capital": 7135.532430213465,
+    "max_capital": 26763.75,
+    "avg_ret_on_premium_pct": -4.169392446633826,
+    "max_win": 21836.12,
+    "max_loss": -9225.88,
+    "exit_reasons": {
+     "eod": {
+      "trades": 470,
+      "avg_net": 259.4181489361702,
+      "win_rate": 49.57446808510638
+     },
+     "stop": {
+      "trades": 548,
+      "avg_net": -2577.201277372262,
+      "win_rate": 0.0
+     },
+     "target": {
+      "trades": 200,
+      "avg_net": 4967.475,
+      "win_rate": 100.0
+     }
+    },
+    "by_option": {
+     "CALL": {
+      "trades": 568,
+      "win_rate": 34.683098591549296,
+      "net": -218288.36000000002
+     },
+     "PUT": {
+      "trades": 650,
+      "win_rate": 36.30769230769231,
+      "net": -78596.41
+     }
+    },
+    "by_days_to_expiry": {
+     "expiry day (0DTE)": {
+      "trades": 259,
+      "win_rate": 30.115830115830118,
+      "net": -92825.36,
+      "avg_net": -358.3990733590733,
+      "before_costs": -69780.13,
+      "avg_premium": 61.82779922779923,
+      "avg_capital": 4018.80694980695,
+      "avg_ret_on_premium_pct": -8.37146718146718
+     },
+     "1 session left": {
+      "trades": 260,
+      "win_rate": 35.38461538461539,
+      "net": -71290.41,
+      "avg_net": -274.1938846153846,
+      "before_costs": -43780.810000000005,
+      "avg_premium": 91.94653846153845,
+      "avg_capital": 5976.525,
+      "avg_ret_on_premium_pct": -5.299153846153847
+     },
+     "2-4 sessions left": {
+      "trades": 697,
+      "win_rate": 37.589670014347206,
+      "net": -130883.68000000001,
+      "avg_net": -187.7814634146341,
+      "before_costs": -41063.05,
+      "avg_premium": 133.80286944045912,
+      "avg_capital": 8697.186513629842,
+      "avg_ret_on_premium_pct": -2.174662840746054
+     },
+     "5+ sessions left": {
+      "trades": 2,
+      "win_rate": 50.0,
+      "net": -1885.32,
+      "avg_net": -942.66,
+      "before_costs": -1490.87,
+      "avg_premium": 264.4,
+      "avg_capital": 17186.0,
+      "avg_ret_on_premium_pct": -8.295
+     }
+    },
+    "lowest_equity": -138838.81000000017,
+    "account_wiped_out_on": "2025-11-24",
+    "max_dd": 368905.43000000017,
+    "max_dd_pct_of_peak": 160.3472202964516,
+    "max_dd_pct_of_capital": 184.4527150000001,
+    "peak": "2022-01-25",
+    "trough": "2026-09-09",
+    "recovered": null
+   },
+   "next week's expiry instead": {
+    "trades": 1218,
+    "sessions": 1222,
+    "wins": 471,
+    "win_rate": 38.669950738916256,
+    "before_costs": -21050.619999999988,
+    "spread_slippage": 58512.63,
+    "charges": 93984.66,
+    "net_pnl": -173547.91,
+    "return_pct_of_account": -86.773955,
+    "annual_return_pct": -17.376199048108553,
+    "profit_factor": 0.899821918110754,
+    "avg_trade": -142.48596880131362,
+    "avg_win": 3309.6520382165604,
+    "avg_loss": -2319.135234270415,
+    "t_stat": -1.4824300882339776,
+    "avg_premium": 196.80841543513958,
+    "avg_capital": 12792.547003284073,
+    "max_capital": 33663.5,
+    "avg_ret_on_premium_pct": -1.0695648604269294,
+    "max_win": 20699.45,
+    "max_loss": -8230.76,
+    "exit_reasons": {
+     "eod": {
+      "trades": 470,
+      "avg_net": 673.6041702127659,
+      "win_rate": 57.659574468085104
+     },
+     "stop": {
+      "trades": 548,
+      "avg_net": -2609.330200729927,
+      "win_rate": 0.0
+     },
+     "target": {
+      "trades": 200,
+      "avg_net": 4698.8553999999995,
+      "win_rate": 100.0
+     }
+    },
+    "by_option": {
+     "CALL": {
+      "trades": 568,
+      "win_rate": 37.5,
+      "net": -159354.98
+     },
+     "PUT": {
+      "trades": 650,
+      "win_rate": 39.69230769230769,
+      "net": -14192.929999999991
+     }
+    },
+    "by_days_to_expiry": {
+     "2-4 sessions left": {
+      "trades": 76,
+      "win_rate": 38.15789473684211,
+      "net": 30352.21,
+      "avg_net": 399.3711842105263,
+      "before_costs": 39289.05,
+      "avg_premium": 169.9171052631579,
+      "avg_capital": 11044.611842105263,
+      "avg_ret_on_premium_pct": 4.246842105263158
+     },
+     "5+ sessions left": {
+      "trades": 1142,
+      "win_rate": 38.704028021015766,
+      "net": -203900.12,
+      "avg_net": -178.54651488616463,
+      "before_costs": -60339.66999999999,
+      "avg_premium": 198.59802977232926,
+      "avg_capital": 12908.871935201401,
+      "avg_ret_on_premium_pct": -1.423371278458844
+     }
+    },
+    "lowest_equity": -9798.159999999916,
+    "account_wiped_out_on": "2026-08-17",
+    "max_dd": 234947.5599999999,
+    "max_dd_pct_of_peak": 104.35184815060575,
+    "max_dd_pct_of_capital": 117.47377999999995,
+    "peak": "2022-01-25",
+    "trough": "2026-09-09",
+    "recovered": null
+   },
+   "no trades on the contract's expiry day": {
+    "trades": 959,
+    "sessions": 1222,
+    "wins": 356,
+    "win_rate": 37.122002085505734,
+    "before_costs": -86334.73000000001,
+    "spread_slippage": 32111.52,
+    "charges": 62929.21,
+    "net_pnl": -181375.46,
+    "return_pct_of_account": -90.68773,
+    "annual_return_pct": -18.159919617598682,
+    "profit_factor": 0.8694373957013496,
+    "avg_trade": -189.1297810218978,
+    "avg_win": 3392.720168539326,
+    "avg_loss": -2303.787462686567,
+    "t_stat": -1.716947851233515,
+    "avg_premium": 122.54400417101147,
+    "avg_capital": 7965.3602711157455,
+    "max_capital": 26724.75,
+    "avg_ret_on_premium_pct": -2.742648592283629,
+    "max_win": 21901.11,
+    "max_loss": -6998.11,
+    "exit_reasons": {
+     "eod": {
+      "trades": 386,
+      "avg_net": 615.784896373057,
+      "win_rate": 55.69948186528497
+     },
+     "stop": {
+      "trades": 432,
+      "avg_net": -2589.9549305555556,
+      "win_rate": 0.0
+     },
+     "target": {
+      "trades": 141,
+      "avg_net": 4963.064539007093,
+      "win_rate": 100.0
+     }
+    },
+    "by_option": {
+     "CALL": {
+      "trades": 458,
+      "win_rate": 37.33624454148472,
+      "net": -124557.22
+     },
+     "PUT": {
+      "trades": 501,
+      "win_rate": 36.92614770459082,
+      "net": -56818.240000000005
+     }
+    },
+    "by_days_to_expiry": {
+     "1 session left": {
+      "trades": 260,
+      "win_rate": 35.38461538461539,
+      "net": -66690.25,
+      "avg_net": -256.5009615384616,
+      "before_costs": -43780.810000000005,
+      "avg_premium": 91.80826923076923,
+      "avg_capital": 5967.5375,
+      "avg_ret_on_premium_pct": -5.011807692307692
+     },
+     "2-4 sessions left": {
+      "trades": 697,
+      "win_rate": 37.73314203730273,
+      "net": -112900.65,
+      "avg_net": -161.98084648493543,
+      "before_costs": -41063.05,
+      "avg_premium": 133.60337159253945,
+      "avg_capital": 8684.219153515065,
+      "avg_ret_on_premium_pct": -1.8810473457675752
+     },
+     "5+ sessions left": {
+      "trades": 2,
+      "win_rate": 50.0,
+      "net": -1784.56,
+      "avg_net": -892.28,
+      "before_costs": -1490.87,
+      "avg_premium": 264.0,
+      "avg_capital": 17160.0,
+      "avg_ret_on_premium_pct": -8.02
+     }
+    },
+    "lowest_equity": -6493.620000000083,
+    "account_wiped_out_on": "2026-09-21",
+    "max_dd": 226820.0700000001,
+    "max_dd_pct_of_peak": 102.94727210464293,
+    "max_dd_pct_of_capital": 113.41003500000004,
+    "peak": "2022-01-27",
+    "trough": "2026-10-07",
+    "recovered": null
+   }
+  },
+  "sell": {
+   "VIX pass-through off (beta 0; chosen 1.5)": {
+    "trades": 1218,
+    "sessions": 1222,
+    "wins": 767,
+    "win_rate": 62.972085385878486,
+    "before_costs": 120631.87999999999,
+    "spread_slippage": 37418.88,
+    "charges": 77541.45,
+    "net_pnl": 5671.550000000003,
+    "return_pct_of_account": 2.8357750000000017,
+    "annual_return_pct": 0.5678546155427635,
+    "profit_factor": 1.003436653960925,
+    "avg_trade": 4.656444991789821,
+    "avg_win": 2159.0393481095175,
+    "avg_loss": -3659.2275609756093,
+    "t_stat": 0.04724206542682666,
+    "avg_premium": 108.08501642036124,
+    "avg_capital": 124541.37921182266,
+    "max_capital": 184260.36,
+    "avg_ret_on_premium_pct": 0.2644417077175692,
+    "max_win": 10753.44,
+    "max_loss": -21282.4,
+    "exit_reasons": {
+     "eod": {
+      "trades": 470,
+      "avg_net": -541.987255319149,
+      "win_rate": 46.59574468085106
+     },
+     "stop": {
+      "trades": 548,
+      "avg_net": 2340.0981386861313,
+      "win_rate": 100.0
+     },
+     "target": {
+      "trades": 200,
+      "avg_net": -5109.8411,
+      "win_rate": 0.0
+     }
+    },
+    "by_option": {
+     "CALL": {
+      "trades": 568,
+      "win_rate": 63.38028169014085,
+      "net": 83587.38
+     },
+     "PUT": {
+      "trades": 650,
+      "win_rate": 62.61538461538462,
+      "net": -77915.83
+     }
+    },
+    "by_days_to_expiry": {
+     "expiry day (0DTE)": {
+      "trades": 259,
+      "win_rate": 69.1119691119691,
+      "net": 44870.98,
+      "avg_net": 173.24702702702706,
+      "before_costs": 65039.8,
+      "avg_premium": 61.32915057915058,
+      "avg_capital": 148911.98513513512,
+      "avg_ret_on_premium_pct": 2.6984942084942087
+     },
+     "1 session left": {
+      "trades": 260,
+      "win_rate": 62.69230769230769,
+      "net": 14591.35,
+      "avg_net": 56.12057692307689,
+      "before_costs": 37527.97,
+      "avg_premium": 90.85596153846154,
+      "avg_capital": 119615.90588461538,
+      "avg_ret_on_premium_pct": 1.6798461538461533
+     },
+     "2-4 sessions left": {
+      "trades": 697,
+      "win_rate": 60.832137733142034,
+      "net": -53003.21000000001,
+      "avg_net": -76.04477761836438,
+      "before_costs": 18551.359999999997,
+      "avg_premium": 131.43701578192253,
+      "avg_capital": 117318.51558106169,
+      "avg_ret_on_premium_pct": -1.1679483500717358
+     },
+     "5+ sessions left": {
+      "trades": 2,
+      "win_rate": 50.0,
+      "net": -787.5700000000002,
+      "avg_net": -393.7850000000001,
+      "before_costs": -487.25,
+      "avg_premium": 264.575,
+      "avg_capital": 126027.42,
+      "avg_ret_on_premium_pct": 0.23999999999999994
+     }
+    },
+    "lowest_equity": 119834.84999999995,
+    "account_wiped_out_on": null,
+    "max_dd": 93156.13000000006,
+    "max_dd_pct_of_peak": 43.73712445475393,
+    "max_dd_pct_of_capital": 46.57806500000003,
+    "peak": "2021-11-10",
+    "trough": "2024-08-06",
+    "recovered": "2026-05-05"
+   },
+   "VIX pass-through beta 0.4 (chosen 1.5)": {
+    "trades": 1218,
+    "sessions": 1222,
+    "wins": 768,
+    "win_rate": 63.05418719211823,
+    "before_costs": 131422.47999999998,
+    "spread_slippage": 37539.73,
+    "charges": 77575.39,
+    "net_pnl": 16307.359999999986,
+    "return_pct_of_account": 8.153679999999992,
+    "annual_return_pct": 1.6327475986842088,
+    "profit_factor": 1.0098750225312312,
+    "avg_trade": 13.38863711001641,
+    "avg_win": 2171.4607031250002,
+    "avg_loss": -3669.7210222222225,
+    "t_stat": 0.13537107495117945,
+    "avg_premium": 108.30513136289001,
+    "avg_capital": 124525.2424137931,
+    "max_capital": 184238.29,
+    "avg_ret_on_premium_pct": 0.4639901477832513,
+    "max_win": 10280.22,
+    "max_loss": -21207.59,
+    "exit_reasons": {
+     "eod": {
+      "trades": 470,
+      "avg_net": -523.1907021276596,
+      "win_rate": 46.808510638297875
+     },
+     "stop": {
+      "trades": 548,
+      "avg_net": 2351.5439598540147,
+      "win_rate": 100.0
+     },
+     "target": {
+      "trades": 200,
+      "avg_net": -5132.195500000001,
+      "win_rate": 0.0
+     }
+    },
+    "by_option": {
+     "CALL": {
+      "trades": 568,
+      "win_rate": 63.38028169014085,
+      "net": 87459.05
+     },
+     "PUT": {
+      "trades": 650,
+      "win_rate": 62.76923076923077,
+      "net": -71151.69
+     }
+    },
+    "by_days_to_expiry": {
+     "expiry day (0DTE)": {
+      "trades": 259,
+      "win_rate": 69.1119691119691,
+      "net": 45963.26,
+      "avg_net": 177.4643243243243,
+      "before_costs": 66152.71,
+      "avg_premium": 61.32220077220077,
+      "avg_capital": 148912.28552123552,
+      "avg_ret_on_premium_pct": 3.0765637065637073
+     },
+     "1 session left": {
+      "trades": 260,
+      "win_rate": 62.69230769230769,
+      "net": 16326.42,
+      "avg_net": 62.79392307692303,
+      "before_costs": 39340.36,
+      "avg_premium": 90.94596153846153,
+      "avg_capital": 119609.73742307692,
+      "avg_ret_on_premium_pct": 1.7603076923076937
+     },
+     "2-4 sessions left": {
+      "trades": 697,
+      "win_rate": 60.97560975609756,
+      "net": -45732.28,
+      "avg_net": -65.61302725968434,
+      "before_costs": 25881.069999999996,
+      "avg_premium": 131.79196556671448,
+      "avg_capital": 117292.39400286945,
+      "avg_ret_on_premium_pct": -0.9945337159253942
+     },
+     "5+ sessions left": {
+      "trades": 2,
+      "win_rate": 50.0,
+      "net": -250.03999999999996,
+      "avg_net": -125.01999999999998,
+      "before_costs": 48.33999999999969,
+      "avg_premium": 264.125,
+      "avg_capital": 126066.48000000001,
+      "avg_ret_on_premium_pct": 1.9100000000000006
+     }
+    },
+    "lowest_equity": 125979.5,
+    "account_wiped_out_on": null,
+    "max_dd": 88448.98000000001,
+    "max_dd_pct_of_peak": 41.248709126698095,
+    "max_dd_pct_of_capital": 44.22449,
+    "peak": "2023-12-20",
+    "trough": "2024-08-06",
+    "recovered": "2026-04-06"
+   },
+   "smile rule 'strike' (chosen 'moneyness')": {
+    "trades": 1218,
+    "sessions": 1222,
+    "wins": 769,
+    "win_rate": 63.13628899835796,
+    "before_costs": 198327.80000000002,
+    "spread_slippage": 37709.55,
+    "charges": 77844.29,
+    "net_pnl": 82773.96000000002,
+    "return_pct_of_account": 41.386980000000015,
+    "annual_return_pct": 8.287606603618423,
+    "profit_factor": 1.050299133357679,
+    "avg_trade": 67.95891625615765,
+    "avg_win": 2247.604525357607,
+    "avg_loss": -3665.1089532293986,
+    "t_stat": 0.6783002361351689,
+    "avg_premium": 109.91330049261083,
+    "avg_capital": 124417.5674958949,
+    "max_capital": 184176.15,
+    "avg_ret_on_premium_pct": 1.4884893267651893,
+    "max_win": 8966.68,
+    "max_loss": -21929.03,
+    "exit_reasons": {
+     "eod": {
+      "trades": 470,
+      "avg_net": -436.32314893617024,
+      "win_rate": 47.02127659574468
+     },
+     "stop": {
+      "trades": 548,
+      "avg_net": 2419.7737408759126,
+      "win_rate": 100.0
+     },
+     "target": {
+      "trades": 200,
+      "avg_net": -5190.95085,
+      "win_rate": 0.0
+     }
+    },
+    "by_option": {
+     "CALL": {
+      "trades": 568,
+      "win_rate": 64.26056338028168,
+      "net": 105243.26000000001
+     },
+     "PUT": {
+      "trades": 650,
+      "win_rate": 62.153846153846146,
+      "net": -22469.3
+     }
+    },
+    "by_days_to_expiry": {
+     "expiry day (0DTE)": {
+      "trades": 259,
+      "win_rate": 69.1119691119691,
+      "net": 65751.77,
+      "avg_net": 253.86783783783784,
+      "before_costs": 85953.48,
+      "avg_premium": 62.45945945945946,
+      "avg_capital": 148838.2652895753,
+      "avg_ret_on_premium_pct": 5.361776061776062
+     },
+     "1 session left": {
+      "trades": 260,
+      "win_rate": 61.53846153846154,
+      "net": 29559.170000000002,
+      "avg_net": 113.68911538461535,
+      "before_costs": 52603.64,
+      "avg_premium": 92.13634615384615,
+      "avg_capital": 119532.21773076923,
+      "avg_ret_on_premium_pct": 2.477153846153847
+     },
+     "2-4 sessions left": {
+      "trades": 697,
+      "win_rate": 61.54949784791965,
+      "net": -14075.270000000008,
+      "avg_net": -20.194074605451952,
+      "before_costs": 57940.16,
+      "avg_premium": 133.7378048780488,
+      "avg_capital": 117160.43697274031,
+      "avg_ret_on_premium_pct": -0.33622668579626985
+     },
+     "5+ sessions left": {
+      "trades": 2,
+      "win_rate": 50.0,
+      "net": 1538.2900000000002,
+      "avg_net": 769.1450000000001,
+      "before_costs": 1830.52,
+      "avg_premium": 263.35,
+      "avg_capital": 126142.66,
+      "avg_ret_on_premium_pct": 7.285
+     }
+    },
+    "lowest_equity": 157577.3,
+    "account_wiped_out_on": null,
+    "max_dd": 87458.22999999998,
+    "max_dd_pct_of_peak": 34.9266646999886,
+    "max_dd_pct_of_capital": 43.72911499999999,
+    "peak": "2023-12-20",
+    "trough": "2024-08-06",
+    "recovered": "2026-02-06"
+   },
+   "double the spread (0.30% a side)": {
+    "trades": 1218,
+    "sessions": 1222,
+    "wins": 767,
+    "win_rate": 62.972085385878486,
+    "before_costs": 156114.86000000002,
+    "spread_slippage": 63307.86,
+    "charges": 77687.5,
+    "net_pnl": 15119.499999999996,
+    "return_pct_of_account": 7.559749999999998,
+    "annual_return_pct": 1.5138150699013153,
+    "profit_factor": 1.0090355698823477,
+    "avg_trade": 12.413382594417074,
+    "avg_win": 2201.369739243807,
+    "avg_loss": -3710.268492239468,
+    "t_stat": 0.1233236607133018,
+    "avg_premium": 108.9715106732348,
+    "avg_capital": 124468.28134646962,
+    "max_capital": 184176.78,
+    "avg_ret_on_premium_pct": 0.5818308702791456,
+    "max_win": 9034.88,
+    "max_loss": -22315.69,
+    "exit_reasons": {
+     "eod": {
+      "trades": 470,
+      "avg_net": -497.7353404255319,
+      "win_rate": 46.59574468085106
+     },
+     "stop": {
+      "trades": 548,
+      "avg_net": 2365.780620437956,
+      "win_rate": 100.0
+     },
+     "target": {
+      "trades": 200,
+      "avg_net": -5236.96335,
+      "win_rate": 0.0
+     }
+    },
+    "by_option": {
+     "CALL": {
+      "trades": 568,
+      "win_rate": 64.26056338028168,
+      "net": 84346.03
+     },
+     "PUT": {
+      "trades": 650,
+      "win_rate": 61.846153846153854,
+      "net": -69226.53
+     }
+    },
+    "by_days_to_expiry": {
+     "expiry day (0DTE)": {
+      "trades": 259,
+      "win_rate": 68.33976833976834,
+      "net": 46638.51,
+      "avg_net": 180.07146718146723,
+      "before_costs": 69780.13,
+      "avg_premium": 61.307142857142864,
+      "avg_capital": 148907.35374517372,
+      "avg_ret_on_premium_pct": 3.652162162162162
+     },
+     "1 session left": {
+      "trades": 260,
+      "win_rate": 61.53846153846154,
+      "net": 16208.680000000002,
+      "avg_net": 62.34107692307687,
+      "before_costs": 43780.810000000005,
+      "avg_premium": 91.24596153846153,
+      "avg_capital": 119581.14242307693,
+      "avg_ret_on_premium_pct": 1.5615769230769239
+     },
+     "2-4 sessions left": {
+      "trades": 697,
+      "win_rate": 61.54949784791965,
+      "net": -48823.87,
+      "avg_net": -70.04859397417508,
+      "before_costs": 41063.05,
+      "avg_premium": 132.85437589670013,
+      "avg_capital": 117205.07563845051,
+      "avg_ret_on_premium_pct": -0.9402439024390243
+     },
+     "5+ sessions left": {
+      "trades": 2,
+      "win_rate": 50.0,
+      "net": 1096.1799999999998,
+      "avg_net": 548.0899999999999,
+      "before_costs": 1490.87,
+      "avg_premium": 262.65,
+      "avg_capital": 126163.655,
+      "avg_ret_on_premium_pct": 6.05
+     }
+    },
+    "lowest_equity": 126609.74,
+    "account_wiped_out_on": null,
+    "max_dd": 96403.15000000001,
+    "max_dd_pct_of_peak": 43.22761343525928,
+    "max_dd_pct_of_capital": 48.201575000000005,
+    "peak": "2023-12-20",
+    "trough": "2024-08-06",
+    "recovered": "2026-05-06"
+   },
+   "next week's expiry instead": {
+    "trades": 1218,
+    "sessions": 1222,
+    "wins": 732,
+    "win_rate": 60.09852216748769,
+    "before_costs": 21050.619999999988,
+    "spread_slippage": 58539.37,
+    "charges": 94075.43,
+    "net_pnl": -131564.18,
+    "return_pct_of_account": -65.78209,
+    "annual_return_pct": -13.172647134046052,
+    "profit_factor": 0.9220151147285348,
+    "avg_trade": -108.01656814449917,
+    "avg_win": 2124.976762295082,
+    "avg_loss": -3471.2904732510287,
+    "t_stat": -1.1179577185345553,
+    "avg_premium": 196.06839080459773,
+    "avg_capital": 113813.92676518884,
+    "max_capital": 146821.12,
+    "avg_ret_on_premium_pct": -0.9828489326765187,
+    "max_win": 7956.26,
+    "max_loss": -21279.08,
+    "exit_reasons": {
+     "eod": {
+      "trades": 470,
+      "avg_net": -931.0218085106383,
+      "win_rate": 39.148936170212764
+     },
+     "stop": {
+      "trades": 548,
+      "avg_net": 2372.8624635036495,
+      "win_rate": 100.0
+     },
+     "target": {
+      "trades": 200,
+      "avg_net": -4971.5628,
+      "win_rate": 0.0
+     }
+    },
+    "by_option": {
+     "CALL": {
+      "trades": 568,
+      "win_rate": 61.09154929577465,
+      "net": 11205.639999999998
+     },
+     "PUT": {
+      "trades": 650,
+      "win_rate": 59.23076923076923,
+      "net": -142769.82
+     }
+    },
+    "by_days_to_expiry": {
+     "2-4 sessions left": {
+      "trades": 76,
+      "win_rate": 60.526315789473685,
+      "net": -48193.75,
+      "avg_net": -634.1282894736842,
+      "before_costs": -39289.05,
+      "avg_premium": 169.2585526315789,
+      "avg_capital": 115348.09802631578,
+      "avg_ret_on_premium_pct": -6.528421052631579
+     },
+     "5+ sessions left": {
+      "trades": 1142,
+      "win_rate": 60.07005253940455,
+      "net": -83370.43000000001,
+      "avg_net": -73.00387915936953,
+      "before_costs": 60339.66999999999,
+      "avg_premium": 197.85258318739056,
+      "avg_capital": 113711.82780210157,
+      "avg_ret_on_premium_pct": -0.6137915936952716
+     }
+    },
+    "lowest_equity": 58784.0800000001,
+    "account_wiped_out_on": null,
+    "max_dd": 157553.3599999999,
+    "max_dd_pct_of_peak": 72.82759747919727,
+    "max_dd_pct_of_capital": 78.77667999999996,
+    "peak": "2021-11-10",
+    "trough": "2025-10-17",
+    "recovered": null
+   },
+   "no trades on the contract's expiry day": {
+    "trades": 959,
+    "sessions": 1222,
+    "wins": 590,
+    "win_rate": 61.52241918665277,
+    "before_costs": 86334.73000000001,
+    "spread_slippage": 32111.73,
+    "charges": 63089.21,
+    "net_pnl": -8866.210000000015,
+    "return_pct_of_account": -4.433105000000008,
+    "annual_return_pct": -0.8877146936677648,
+    "profit_factor": 0.9931086047594738,
+    "avg_trade": -9.245265901981247,
+    "avg_win": 2165.586762711864,
+    "avg_loss": -3486.6189701897015,
+    "t_stat": -0.08347957688698605,
+    "avg_premium": 122.02690302398332,
+    "avg_capital": 117867.9479249218,
+    "max_capital": 150046.3,
+    "avg_ret_on_premium_pct": 0.050135557872783884,
+    "max_win": 6757.89,
+    "max_loss": -22250.67,
+    "exit_reasons": {
+     "eod": {
+      "trades": 386,
+      "avg_net": -818.3805958549224,
+      "win_rate": 40.932642487046635
+     },
+     "stop": {
+      "trades": 432,
+      "avg_net": 2404.409166666667,
+      "win_rate": 100.0
+     },
+     "target": {
+      "trades": 141,
+      "avg_net": -5189.191914893617,
+      "win_rate": 0.0
+     }
+    },
+    "by_option": {
+     "CALL": {
+      "trades": 458,
+      "win_rate": 61.79039301310044,
+      "net": 32575.1
+     },
+     "PUT": {
+      "trades": 501,
+      "win_rate": 61.27744510978044,
+      "net": -41441.31
+     }
+    },
+    "by_days_to_expiry": {
+     "1 session left": {
+      "trades": 260,
+      "win_rate": 61.53846153846154,
+      "net": 20773.280000000002,
+      "avg_net": 79.89723076923075,
+      "before_costs": 43780.810000000005,
+      "avg_premium": 91.38346153846153,
+      "avg_capital": 119581.14242307693,
+      "avg_ret_on_premium_pct": 1.8537307692307696
+     },
+     "2-4 sessions left": {
+      "trades": 697,
+      "win_rate": 61.54949784791965,
+      "net": -30836.420000000002,
+      "avg_net": -44.24163558106169,
+      "before_costs": 41063.05,
+      "avg_premium": 133.05308464849355,
+      "avg_capital": 117205.07563845051,
+      "avg_ret_on_premium_pct": -0.6406743185078907
+     },
+     "5+ sessions left": {
+      "trades": 2,
+      "win_rate": 50.0,
+      "net": 1196.9300000000003,
+      "avg_net": 598.4650000000001,
+      "before_costs": 1490.87,
+      "avg_premium": 263.05,
+      "avg_capital": 126163.655,
+      "avg_ret_on_premium_pct": 6.329999999999999
+     }
+    },
+    "lowest_equity": 139038.22,
+    "account_wiped_out_on": null,
+    "max_dd": 96410.87,
+    "max_dd_pct_of_peak": 40.94765029671595,
+    "max_dd_pct_of_capital": 48.205434999999994,
+    "peak": "2024-06-03",
+    "trough": "2025-05-23",
+    "recovered": null
+   }
+  }
+ }
+}
