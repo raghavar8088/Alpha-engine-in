@@ -122,9 +122,14 @@ svg .dot-exit { fill: var(--gain); stroke: var(--panel); stroke-width: 2; }
 
 .tablewrap { overflow-x: auto; min-width: 0; }
 table { border-collapse: collapse; width: 100%; font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+caption { caption-side: top; text-align: left; font-family: var(--font-display); font-weight: 600; font-size: var(--s1); color: var(--ink); padding-bottom: 6px; }
 th, td { padding: 8px 10px; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; vertical-align: baseline; }
 thead th { font-weight: 500; color: var(--muted); font-size: var(--s-1); border-bottom-color: var(--axis); vertical-align: bottom; white-space: normal; }
 tbody th { text-align: left; font-weight: 500; }
+thead th:first-child { text-align: left; }
+table.fit { width: auto; }
+table.fit th, table.fit td { padding-inline: 14px; }
+table.fit th:first-child, table.fit td:first-child { padding-left: 0; }
 th:first-child, td:first-child { padding-left: 0; }
 th:last-child, td:last-child { padding-right: 0; }
 td.strong { font-weight: 600; }
@@ -172,7 +177,7 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
     <p class="eyebrow">Backtest · NSE: NIFTYBEES · 5-minute candles · 25 Oct 2021 to 23 Oct 2026</p>
     <h1>NIFTYBEES Opening-Range Breakout</h1>
     <p class="dek">The first 15 minutes set a range. A break above it buys and a break below it sells, with the stop at the other side of the range and the target at twice the risk. One trade a day, out by 15:15, with Angel One's charges and slippage.</p>
-    <p class="verdict"><strong>The rules lose money after costs.</strong> Before costs the 1,205 trades made +₹1,92,872, about ₹160 a trade. Angel One's charges (₹402 a trade) and slippage (₹214) turned that into −₹5,48,885. STT alone, about ₹250 a trade, is larger than the whole edge.</p>
+    <p class="verdict"><strong>The rules lose money after costs.</strong> Before costs the 1,205 trades made +₹1,92,872, about ₹160 a trade. Angel One's charges (₹402 a trade) and slippage (₹214) turned that into −₹5,48,885. STT alone, about ₹250 a trade, is larger than the whole edge. Wider targets do not help: at 1:3 to 1:6 the target is rarely reached and every ratio loses between ₹5,00,417 and ₹5,30,909.</p>
     <dl class="kpis">
 <div class="kpi"><dt>Net result</dt><dd><span class="kv">−₹5,48,885</span><span class="kn">−54.9% of the ₹10 lakh account</span></dd></div>
 <div class="kpi"><dt>Trades</dt><dd><span class="kv">1,205</span><span class="kn">622 long, 583 short, in 1,225 sessions</span></dd></div>
@@ -284,6 +289,45 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
       </table>
     </div>
   </section>
+
+  <section id="ratios" aria-labelledby="h-ratios">
+    <h2 id="h-ratios">Wider targets: 1:3, 1:4, 1:5 and 1:6</h2>
+    <div class="prose"><p>Only the target changes: 3, 4, 5 or 6 times the distance from the entry fill to the stop. Everything else is as in the rules below, and 1:2 is the test above. The wider the target, the less often price reaches it: 157 at 1:2, 67 at 1:3, 30 at 1:4, 14 at 1:5, 10 at 1:6, out of 1,205 trades. Most trades end at 15:15 instead, so the wider ratios lose almost the same, between ₹5,00,417 and ₹5,30,909. Costs of about ₹625 a trade decide the result whatever the target. The order inside a 5-minute candle decided 8 trades at every ratio, and walking the 1-minute candles moves each result by at most ₹16,193.</p></div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Risk : reward</th><th>Trades</th><th>Win rate</th><th>Exits T / S / 15:15</th><th>Before costs</th><th></th><th>Net P&amp;L</th><th>Return</th><th>Profit factor</th><th>Max drawdown</th><th>Net R a trade</th><th>On 1-minute candles</th></tr></thead>
+        <tbody>
+<tr><th scope="row">1:2<span class=sub>the test above</span></th><td>1,205</td><td>40.7%</td><td class="mono">157 / 523 / 525</td><td>+₹1,92,872</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:50.0%"></span></span></td><td class="strong">−₹5,48,885</td><td>−54.9%</td><td>0.77</td><td>₹6,05,212<span class=sub>60.5%</span></td><td>−0.159</td><td>−₹5,52,890</td></tr>
+<tr><th scope="row">1:3</th><td>1,205</td><td>39.9%</td><td class="mono">67 / 531 / 607</td><td>+₹2,21,156</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:48.4%"></span></span></td><td class="strong">−₹5,30,909</td><td>−53.1%</td><td>0.78</td><td>₹6,18,801<span class=sub>61.9%</span></td><td>−0.148</td><td>−₹5,47,102</td></tr>
+<tr><th scope="row">1:4</th><td>1,205</td><td>39.8%</td><td class="mono">30 / 531 / 644</td><td>+₹2,47,978</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:46.3%"></span></span></td><td class="strong">−₹5,08,368</td><td>−50.8%</td><td>0.79</td><td>₹6,07,036<span class=sub>60.7%</span></td><td>−0.135</td><td>−₹5,23,485</td></tr>
+<tr><th scope="row">1:5</th><td>1,205</td><td>39.8%</td><td class="mono">14 / 531 / 660</td><td>+₹2,39,720</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:47.2%"></span></span></td><td class="strong">−₹5,18,458</td><td>−51.8%</td><td>0.79</td><td>₹5,98,401<span class=sub>59.8%</span></td><td>−0.135</td><td>−₹5,25,516</td></tr>
+<tr><th scope="row">1:6</th><td>1,205</td><td>39.8%</td><td class="mono">10 / 531 / 664</td><td>+₹2,58,200</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:45.6%"></span></span></td><td class="strong">−₹5,00,417</td><td>−50.0%</td><td>0.80</td><td>₹5,83,271<span class=sub>58.3%</span></td><td>−0.128</td><td>−₹5,07,475</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Net P&amp;L by year</h3>
+    <div class="tablewrap">
+      <table class="fit">
+        <thead><tr><th>Year</th><th>1:2</th><th>1:3</th><th>1:4</th><th>1:5</th><th>1:6</th></tr></thead>
+        <tbody>
+<tr><th scope="row">2021<span class=sub>from 25 Oct</span></th><td>+₹3,897</td><td>+₹24,234</td><td>+₹37,161</td><td>+₹20,222</td><td>+₹21,857</td></tr>
+<tr><th scope="row">2022</th><td>−₹62,224</td><td>−₹57,442</td><td>−₹44,003</td><td>−₹44,725</td><td>−₹35,241</td></tr>
+<tr><th scope="row">2023</th><td>−₹1,78,274</td><td>−₹1,98,816</td><td>−₹1,88,973</td><td>−₹1,88,119</td><td>−₹1,85,128</td></tr>
+<tr><th scope="row">2024</th><td>−₹49,998</td><td>−₹54,356</td><td>−₹60,304</td><td>−₹54,548</td><td>−₹50,543</td></tr>
+<tr><th scope="row">2025</th><td>−₹1,07,168</td><td>−₹1,03,258</td><td>−₹98,327</td><td>−₹94,383</td><td>−₹94,458</td></tr>
+<tr><th scope="row">2026<span class=sub>to 23 Oct</span></th><td>−₹1,55,118</td><td>−₹1,41,271</td><td>−₹1,53,922</td><td>−₹1,56,904</td><td>−₹1,56,904</td></tr>
+<tr class="total"><th scope="row">All</th><td>−₹5,48,885</td><td>−₹5,30,909</td><td>−₹5,08,368</td><td>−₹5,18,458</td><td>−₹5,00,417</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="two">
+<div class="tablewrap"><table><caption>1:3 year by year</caption><thead><tr><th>Year</th><th>Trades</th><th>Win rate</th><th>Exits T / S / 15:15</th><th>Net P&amp;L</th><th>Return</th><th>Profit factor</th><th>Max drawdown</th></tr></thead><tbody><tr><th scope="row">2021</th><td>46</td><td>45.7%</td><td class="mono">9 / 22 / 15</td><td class="strong">+₹24,234</td><td>+2.4%</td><td>1.22</td><td>₹39,347</td></tr><tr><th scope="row">2022</th><td>246</td><td>40.2%</td><td class="mono">20 / 117 / 109</td><td class="strong">−₹57,442</td><td>−5.7%</td><td>0.89</td><td>₹1,09,730</td></tr><tr><th scope="row">2023</th><td>241</td><td>34.4%</td><td class="mono">14 / 127 / 100</td><td class="strong">−₹1,98,816</td><td>−19.9%</td><td>0.57</td><td>₹2,10,629</td></tr><tr><th scope="row">2024</th><td>238</td><td>39.9%</td><td class="mono">12 / 105 / 121</td><td class="strong">−₹54,356</td><td>−5.4%</td><td>0.88</td><td>₹75,757</td></tr><tr><th scope="row">2025</th><td>240</td><td>45.0%</td><td class="mono">5 / 81 / 154</td><td class="strong">−₹1,03,258</td><td>−10.3%</td><td>0.76</td><td>₹1,13,719</td></tr><tr><th scope="row">2026</th><td>194</td><td>38.7%</td><td class="mono">7 / 79 / 108</td><td class="strong">−₹1,41,271</td><td>−14.1%</td><td>0.69</td><td>₹1,85,688</td></tr></tbody></table></div>
+<div class="tablewrap"><table><caption>1:4 year by year</caption><thead><tr><th>Year</th><th>Trades</th><th>Win rate</th><th>Exits T / S / 15:15</th><th>Net P&amp;L</th><th>Return</th><th>Profit factor</th><th>Max drawdown</th></tr></thead><tbody><tr><th scope="row">2021</th><td>46</td><td>45.7%</td><td class="mono">4 / 22 / 20</td><td class="strong">+₹37,161</td><td>+3.7%</td><td>1.33</td><td>₹37,712</td></tr><tr><th scope="row">2022</th><td>246</td><td>40.2%</td><td class="mono">12 / 117 / 117</td><td class="strong">−₹44,003</td><td>−4.4%</td><td>0.92</td><td>₹99,979</td></tr><tr><th scope="row">2023</th><td>241</td><td>34.4%</td><td class="mono">5 / 127 / 109</td><td class="strong">−₹1,88,973</td><td>−18.9%</td><td>0.59</td><td>₹2,00,786</td></tr><tr><th scope="row">2024</th><td>238</td><td>39.5%</td><td class="mono">6 / 105 / 127</td><td class="strong">−₹60,304</td><td>−6.0%</td><td>0.87</td><td>₹83,623</td></tr><tr><th scope="row">2025</th><td>240</td><td>45.0%</td><td class="mono">2 / 81 / 157</td><td class="strong">−₹98,327</td><td>−9.8%</td><td>0.77</td><td>₹1,11,624</td></tr><tr><th scope="row">2026</th><td>194</td><td>38.7%</td><td class="mono">1 / 79 / 114</td><td class="strong">−₹1,53,922</td><td>−15.4%</td><td>0.66</td><td>₹1,90,999</td></tr></tbody></table></div>
+<div class="tablewrap"><table><caption>1:5 year by year</caption><thead><tr><th>Year</th><th>Trades</th><th>Win rate</th><th>Exits T / S / 15:15</th><th>Net P&amp;L</th><th>Return</th><th>Profit factor</th><th>Max drawdown</th></tr></thead><tbody><tr><th scope="row">2021</th><td>46</td><td>45.7%</td><td class="mono">1 / 22 / 23</td><td class="strong">+₹20,222</td><td>+2.0%</td><td>1.18</td><td>₹36,077</td></tr><tr><th scope="row">2022</th><td>246</td><td>40.2%</td><td class="mono">6 / 117 / 123</td><td class="strong">−₹44,725</td><td>−4.5%</td><td>0.92</td><td>₹1,01,396</td></tr><tr><th scope="row">2023</th><td>241</td><td>34.4%</td><td class="mono">2 / 127 / 112</td><td class="strong">−₹1,88,119</td><td>−18.8%</td><td>0.59</td><td>₹1,99,932</td></tr><tr><th scope="row">2024</th><td>238</td><td>39.5%</td><td class="mono">4 / 105 / 129</td><td class="strong">−₹54,548</td><td>−5.5%</td><td>0.88</td><td>₹79,784</td></tr><tr><th scope="row">2025</th><td>240</td><td>45.0%</td><td class="mono">1 / 81 / 158</td><td class="strong">−₹94,383</td><td>−9.4%</td><td>0.78</td><td>₹1,10,517</td></tr><tr><th scope="row">2026</th><td>194</td><td>38.7%</td><td class="mono">0 / 79 / 115</td><td class="strong">−₹1,56,904</td><td>−15.7%</td><td>0.66</td><td>₹1,93,980</td></tr></tbody></table></div>
+<div class="tablewrap"><table><caption>1:6 year by year</caption><thead><tr><th>Year</th><th>Trades</th><th>Win rate</th><th>Exits T / S / 15:15</th><th>Net P&amp;L</th><th>Return</th><th>Profit factor</th><th>Max drawdown</th></tr></thead><tbody><tr><th scope="row">2021</th><td>46</td><td>45.7%</td><td class="mono">1 / 22 / 23</td><td class="strong">+₹21,857</td><td>+2.2%</td><td>1.20</td><td>₹34,441</td></tr><tr><th scope="row">2022</th><td>246</td><td>40.2%</td><td class="mono">4 / 117 / 125</td><td class="strong">−₹35,241</td><td>−3.5%</td><td>0.93</td><td>₹91,287</td></tr><tr><th scope="row">2023</th><td>241</td><td>34.4%</td><td class="mono">2 / 127 / 112</td><td class="strong">−₹1,85,128</td><td>−18.5%</td><td>0.60</td><td>₹1,96,941</td></tr><tr><th scope="row">2024</th><td>238</td><td>39.5%</td><td class="mono">3 / 105 / 130</td><td class="strong">−₹50,543</td><td>−5.1%</td><td>0.89</td><td>₹77,698</td></tr><tr><th scope="row">2025</th><td>240</td><td>45.0%</td><td class="mono">0 / 81 / 159</td><td class="strong">−₹94,458</td><td>−9.4%</td><td>0.78</td><td>₹1,10,517</td></tr><tr><th scope="row">2026</th><td>194</td><td>38.7%</td><td class="mono">0 / 79 / 115</td><td class="strong">−₹1,56,904</td><td>−15.7%</td><td>0.66</td><td>₹1,93,980</td></tr></tbody></table></div>
+    </div>
+  </section>
+
 
   <section id="rules" aria-labelledby="h-rules">
     <h2 id="h-rules">The rules as tested</h2>
@@ -448,6 +492,7 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
 <li><code>orb_verify.py</code> 49 checks of the simulator, on hand-built sessions and on the real run</li>
 <li><code>orb_run.py</code> the primary test and the comparison runs; results/summary.json, sensitivity.csv, the trade logs, yearly tables and daily equity</li>
 <li><code>orb_crosscheck.py</code> the comparison with Yahoo&#x27;s 5-minute candles (results/crosscheck_yahoo.json)</li>
+<li><code>orb_rr.py</code> the same rules with the target at 1:3, 1:4, 1:5 and 1:6 (results/rr_compare.json, trade logs and yearly tables per ratio)</li>
 <li><code>orb_report.py</code> this report and report/niftybees-orb-backtest.html</li>
 <li><code>results/trades_primary.csv</code> every trade of the primary test</li>
 <li><code>data/</code> the candles themselves (NIFTYBEES_5m.csv.gz and the minutes); not in git, because Angel&#x27;s data is licensed and the repository is public</li>

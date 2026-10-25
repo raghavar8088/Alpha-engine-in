@@ -8,7 +8,7 @@ A five-year backtest of one intraday rule on NSE NIFTYBEES, as the owner specifi
 
 The execution rules the brief left open (price-crossing entry, one trade a day, no reversal, ₹10 lakh a trade, out at 15:15, Angel One charges, 1 bp slippage) are in `orb_engine.py`. They were fixed before the first run, as was every comparison run in `orb_run.py`.
 
-**Results:** [REPORT.md](REPORT.md), also published as the private page https://claude.ai/artifact/VM5cwRqaQf1qc6HtJFSk3c. **Verdict:** the rules lose money after costs: 1,205 trades, 40.7% winners, net −₹5,48,885 on ₹10 lakh, profit factor 0.77.
+**Results:** [REPORT.md](REPORT.md), also published as the private page https://claude.ai/artifact/VM5cwRqaQf1qc6HtJFSk3c. **Verdict:** the rules lose money after costs: 1,205 trades, 40.7% winners, net −₹5,48,885 on ₹10 lakh, profit factor 0.77. Wider targets do not help. At 1:3 to 1:6 the target is rarely reached (67 down to 10 times in five years), and every ratio loses ₹5.00–5.31 lakh.
 
 Python 3.12 with numpy and pandas. Run from the repository root; `-I` keeps the stale `tradingai_shared` in the local venv out of the way (each script puts the repo's `shared/` and `backend/` first itself).
 
@@ -18,6 +18,7 @@ Python 3.12 with numpy and pandas. Run from the repository root; `-I` keeps the 
 | 2 | `python -I backend/research/niftybees_orb_2026_10/orb_data.py` | Builds `data/NIFTYBEES_5m.csv.gz` (75 five-minute candles a session) and the 1-minute matrices. It also writes the raw and cleaned opening ranges and `results/data_quality.json` (calendar audit, gaps, dropped prints, opening-print cleaning). |
 | 3 | `python -I backend/research/niftybees_orb_2026_10/orb_verify.py` | 49 checks: the fee function equals the app's `angel_fees.round_trip`, hand-built sessions with known answers, and invariants on the real run. |
 | 4 | `python -I backend/research/niftybees_orb_2026_10/orb_run.py` | The primary test and 13 one-rule-changed runs. Writes `results/summary.json`, `sensitivity.csv`, the trade logs, the yearly tables, the daily equity and the ambiguous-candle record. |
+| 4b | `python -I backend/research/niftybees_orb_2026_10/orb_rr.py` | The owner's follow-up (2026-10-25): the same rules with only the target changed to 1:3, 1:4, 1:5 and 1:6, with 1:2 rerun alongside. Each ratio is also walked on 1-minute candles. Writes `results/rr_compare.json` plus a trade log and yearly table per ratio. |
 | 5 | `python -I backend/research/niftybees_orb_2026_10/orb_crosscheck.py data/yahoo_5m_60d.json` | Compares the candles with one download of Yahoo's 5-minute NIFTYBEES chart (last 60 sessions). |
 | 6 | `python -I backend/research/niftybees_orb_2026_10/orb_report.py` | Writes `REPORT.md` and `report/niftybees-orb-backtest.html` from the results. The page's design lives in `report_template.html`. |
 

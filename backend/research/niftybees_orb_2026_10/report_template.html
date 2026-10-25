@@ -122,9 +122,14 @@ svg .dot-exit { fill: var(--gain); stroke: var(--panel); stroke-width: 2; }
 
 .tablewrap { overflow-x: auto; min-width: 0; }
 table { border-collapse: collapse; width: 100%; font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+caption { caption-side: top; text-align: left; font-family: var(--font-display); font-weight: 600; font-size: var(--s1); color: var(--ink); padding-bottom: 6px; }
 th, td { padding: 8px 10px; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; vertical-align: baseline; }
 thead th { font-weight: 500; color: var(--muted); font-size: var(--s-1); border-bottom-color: var(--axis); vertical-align: bottom; white-space: normal; }
 tbody th { text-align: left; font-weight: 500; }
+thead th:first-child { text-align: left; }
+table.fit { width: auto; }
+table.fit th, table.fit td { padding-inline: 14px; }
+table.fit th:first-child, table.fit td:first-child { padding-left: 0; }
 th:first-child, td:first-child { padding-left: 0; }
 th:last-child, td:last-child { padding-right: 0; }
 td.strong { font-weight: 600; }
@@ -213,6 +218,7 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
       </table>
     </div>
   </section>
+{{RR_SECTION}}
 
   <section id="rules" aria-labelledby="h-rules">
     <h2 id="h-rules">The rules as tested</h2>

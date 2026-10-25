@@ -132,7 +132,8 @@ def gather() -> dict:
     for cfg in RUNS:
         o = summ[cfg.name]
         runs.append({"name": cfg.name, "what": WHAT[cfg.name], **o["stats"], "capital": o["config"]["capital"]})
-    return {"summ": summ, "P": P, "S": S, "dq": dq, "xc": xc, "trades": trades, "before": before, "years": years,
+    rr = json.load(open(RES / "rr_compare.json", encoding="utf-8")) if (RES / "rr_compare.json").exists() else {}
+    return {"rr": rr, "summ": summ, "P": P, "S": S, "dq": dq, "xc": xc, "trades": trades, "before": before, "years": years,
             "dates": dates, "net_curve": net_curve, "pre_curve": pre_curve, "peak_i": peak_i, "trough_i": trough_i,
             "month_end": month_end, "fee": fb, "fee_px": px, "fee_qty": qty, "day": day, "runs": runs,
             "qty_range": [min(qtys), max(qtys)], "cap": cap}
@@ -196,6 +197,12 @@ def write_md(g: dict) -> None:
       f"edge is not statistically different from zero (t = {g['summ']['no_costs_no_slippage']['stats']['t_stat']:.2f} "
       f"for the run with no costs at all).")
     w("")
+    wide = [r for r in rr_rows(g) if r["label"] != "1:2"]
+    if wide:
+        w(f"**Wider targets do not help.** At 1:3, 1:4, 1:5 and 1:6 the target is rarely reached, and every ratio loses "
+          f"between {inr(-max(r['net'] for r in wide))} and {inr(-min(r['net'] for r in wide))} "
+          "(section Wider targets).")
+        w("")
     w("## Results, primary rules")
     w("")
     w("| | |")
@@ -241,6 +248,43 @@ def write_md(g: dict) -> None:
       f"{inr(f['before'], True)} | {inr(-tot_costs)} | **{inr(f['net'])}** | {num(f['net'] / g['cap'] * 100, 1)}% | "
       f"{f['pf']:.2f} | {inr(f['dd'])} |")
     w("")
+    rrows = rr_rows(g)
+    if rrows:
+        w("## Wider targets: 1:3, 1:4, 1:5 and 1:6")
+        w("")
+        w(rr_intro(rrows))
+        w("")
+        w("| Risk : reward | Trades | Win rate | Target / stop / 15:15 | Before costs | Net P&L | Return | Profit factor | "
+          "Max drawdown | Net R a trade | Same test on 1-minute candles |")
+        w("|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|")
+        for r in rrows:
+            lab = f"**{r['label']}**" if r["label"] != "1:2" else "1:2 (the test above)"
+            w(f"| {lab} | {r['trades']:,} | {r['win']:.1f}% | {r['t']} / {r['s']} / {r['e']} | {inr(r['before'], True)} | "
+              f"**{inr(r['net'], True)}** | {num(r['ret'], 1, True)}% | {r['pf']:.2f} | {inr(r['dd'])} ({r['dd_pct']:.1f}%) | "
+              f"{num(r['r'], 3, True)} | {inr(r['net1m'], True)} |")
+        w("")
+        w("Net P&L by calendar year:")
+        w("")
+        w("| Year | " + " | ".join(r["label"] for r in rrows) + " |")
+        w("|---|" + "---:|" * len(rrows))
+        for i, y in enumerate(rrows[0]["yearly"]):
+            lab = y["year"] + (" (from 25 Oct)" if y["year"] == "2021" else " (to 23 Oct)" if y["year"] == "2026" else "")
+            w(f"| {lab} | " + " | ".join(inr(r["yearly"][i]["net_pnl"], True) for r in rrows) + " |")
+        w("| **All** | " + " | ".join(f"**{inr(r['net'], True)}**" for r in rrows) + " |")
+        w("")
+        for r in rrows:
+            if r["label"] == "1:2":
+                continue
+            w(f"### {r['label']} year by year")
+            w("")
+            w("| Year | Trades | Win rate | Target / stop / 15:15 | Before costs | Net P&L | Return | Profit factor | Max drawdown |")
+            w("|---|---:|---:|---:|---:|---:|---:|---:|---:|")
+            for y in r["yearly"]:
+                lab = y["year"] + (" (from 25 Oct)" if y["year"] == "2021" else " (to 23 Oct)" if y["year"] == "2026" else "")
+                w(f"| {lab} | {y['trades']} | {y['win_rate']:.1f}% | {y['targets']} / {y['stops']} / {y['eod']} | "
+                  f"{inr(y['before'], True)} | {inr(y['net_pnl'], True)} | {num(y['return_pct'], 1, True)}% | "
+                  f"{y['profit_factor']:.2f} | {inr(y['max_dd'])} |")
+            w("")
     w("## The rules as tested")
     w("")
     w("The rules you gave, and the execution rules this test added. All were fixed before any result was seen.")
@@ -322,6 +366,39 @@ def write_md(g: dict) -> None:
         w(f"- `{a}`: {b}")
     w("")
     (HERE / "REPORT.md").write_text("\n".join(L) + "\n", encoding="utf-8")
+
+
+def rr_rows(g: dict) -> list[dict]:
+    """One row per risk-reward ratio from results/rr_compare.json (orb_rr.py), 1:2 first."""
+    out = []
+    for o in sorted(g.get("rr", {}).values(), key=lambda o: o["rr"]):
+        s = o["stats"]
+        ex = s["exit_reasons"]
+        out.append({"label": f"1:{int(o['rr'])}", "trades": s["trades"], "win": s["win_rate"],
+                    "t": ex.get("target", {}).get("trades", 0), "s": ex.get("stop", {}).get("trades", 0),
+                    "e": ex.get("eod", {}).get("trades", 0), "before": o["before_costs"], "net": s["net_pnl"],
+                    "ret": s["return_pct_of_capital"], "pf": s["profit_factor"], "dd": s["max_dd"],
+                    "dd_pct": s["max_dd_pct_of_capital"], "r": s["avg_r_net"], "tstat": s["t_stat"],
+                    "net1m": o["one_minute"]["stats"]["net_pnl"], "amb": s["ambiguous_trades"],
+                    "costs": (o["before_costs"] - s["net_pnl"]) / s["trades"], "yearly": o["yearly"]})
+    return out
+
+
+def rr_intro(rows: list[dict]) -> str:
+    wide = [r for r in rows if r["label"] != "1:2"]
+    nets = [r["net"] for r in wide]
+    hits = ", ".join(f"{r['t']} at {r['label']}" for r in rows)
+    amb = sorted({r["amb"] for r in rows})
+    gap = max(abs(r["net1m"] - r["net"]) for r in rows)
+    return (
+        "Only the target changes: 3, 4, 5 or 6 times the distance from the entry fill to the stop. Everything else is "
+        "as in the rules below, and 1:2 is the test above. The wider the target, the less often price reaches it: "
+        f"{hits}, out of {rows[0]['trades']:,} trades. Most trades end at 15:15 instead, so the wider ratios lose "
+        f"almost the same, between {inr(-max(nets))} and {inr(-min(nets))}. Costs of about "
+        f"{inr(sum(r['costs'] for r in rows) / len(rows))} a trade decide the result whatever the target. The order "
+        f"inside a 5-minute candle decided {' or '.join(str(a) for a in amb)} trades at every ratio, and walking the "
+        f"1-minute candles moves each result by at most {inr(gap)}."
+    )
 
 
 def rules_list(g: dict, md: bool = False) -> list[tuple[str, str]]:
@@ -472,6 +549,7 @@ def files_list() -> list[tuple[str, str]]:
         ("orb_run.py", "the primary test and the comparison runs; results/summary.json, sensitivity.csv, the trade logs, "
                        "yearly tables and daily equity"),
         ("orb_crosscheck.py", "the comparison with Yahoo's 5-minute candles (results/crosscheck_yahoo.json)"),
+        ("orb_rr.py", "the same rules with the target at 1:3, 1:4, 1:5 and 1:6 (results/rr_compare.json, trade logs and yearly tables per ratio)"),
         ("orb_report.py", "this report and report/niftybees-orb-backtest.html"),
         ("results/trades_primary.csv", "every trade of the primary test"),
         ("data/", "the candles themselves (NIFTYBEES_5m.csv.gz and the minutes); not in git, because Angel's data is "
@@ -487,10 +565,77 @@ def inline_bar(v: float, vmax: float) -> str:
     return f'<span class="ibar" aria-hidden="true"><span class="{cls}" style="--w:{w:.1f}%"></span></span>'
 
 
+def rr_html(g: dict) -> str:
+    """The wider-targets section of the page (empty when orb_rr.py has not run)."""
+    rows = rr_rows(g)
+    if not rows:
+        return ""
+    vmax = max(abs(r["net"]) for r in rows)
+    comp = []
+    for r in rows:
+        lab = "1:2<span class=sub>the test above</span>" if r["label"] == "1:2" else e(r["label"])
+        comp.append(
+            f"<tr><th scope=\"row\">{lab}</th><td>{r['trades']:,}</td><td>{r['win']:.1f}%</td>"
+            f"<td class=\"mono\">{r['t']} / {r['s']} / {r['e']}</td><td>{e(inr(r['before'], True))}</td>"
+            f"<td class=\"barcol\">{inline_bar(r['net'], vmax)}</td><td class=\"strong\">{e(inr(r['net'], True))}</td>"
+            f"<td>{e(num(r['ret'], 1, True))}%</td><td>{r['pf']:.2f}</td>"
+            f"<td>{e(inr(r['dd']))}<span class=sub>{r['dd_pct']:.1f}%</span></td><td>{e(num(r['r'], 3, True))}</td>"
+            f"<td>{e(inr(r['net1m'], True))}</td></tr>")
+    years = [y["year"] for y in rows[0]["yearly"]]
+    mat = []
+    for i, yname in enumerate(years):
+        sub = "<span class=sub>from 25 Oct</span>" if yname == "2021" else "<span class=sub>to 23 Oct</span>" if yname == "2026" else ""
+        mat.append(f"<tr><th scope=\"row\">{yname}{sub}</th>"
+                   + "".join(f"<td>{e(inr(r['yearly'][i]['net_pnl'], True))}</td>" for r in rows) + "</tr>")
+    mat.append("<tr class=\"total\"><th scope=\"row\">All</th>"
+               + "".join(f"<td>{e(inr(r['net'], True))}</td>" for r in rows) + "</tr>")
+    per = []
+    for r in rows:
+        if r["label"] == "1:2":
+            continue
+        body = "".join(
+            f"<tr><th scope=\"row\">{y['year']}</th><td>{y['trades']}</td><td>{y['win_rate']:.1f}%</td>"
+            f"<td class=\"mono\">{y['targets']} / {y['stops']} / {y['eod']}</td><td class=\"strong\">{e(inr(y['net_pnl'], True))}</td>"
+            f"<td>{e(num(y['return_pct'], 1, True))}%</td><td>{y['profit_factor']:.2f}</td><td>{e(inr(y['max_dd']))}</td></tr>"
+            for y in r["yearly"])
+        per.append(
+            f"<div class=\"tablewrap\"><table><caption>{e(r['label'])} year by year</caption>"
+            "<thead><tr><th>Year</th><th>Trades</th><th>Win rate</th><th>Exits T / S / 15:15</th><th>Net P&amp;L</th>"
+            "<th>Return</th><th>Profit factor</th><th>Max drawdown</th></tr></thead>"
+            f"<tbody>{body}</tbody></table></div>")
+    return f"""
+  <section id="ratios" aria-labelledby="h-ratios">
+    <h2 id="h-ratios">Wider targets: 1:3, 1:4, 1:5 and 1:6</h2>
+    <div class="prose"><p>{e(rr_intro(rows))}</p></div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Risk : reward</th><th>Trades</th><th>Win rate</th><th>Exits T / S / 15:15</th><th>Before costs</th><th></th><th>Net P&amp;L</th><th>Return</th><th>Profit factor</th><th>Max drawdown</th><th>Net R a trade</th><th>On 1-minute candles</th></tr></thead>
+        <tbody>
+{chr(10).join(comp)}
+        </tbody>
+      </table>
+    </div>
+    <h3>Net P&amp;L by year</h3>
+    <div class="tablewrap">
+      <table class="fit">
+        <thead><tr><th>Year</th>{"".join(f"<th>{e(r['label'])}</th>" for r in rows)}</tr></thead>
+        <tbody>
+{chr(10).join(mat)}
+        </tbody>
+      </table>
+    </div>
+    <div class="two">
+{chr(10).join(per)}
+    </div>
+  </section>
+"""
+
+
 def write_html(g: dict) -> None:
     f = facts(g)
     S = g["S"]
     xc = g["xc"]
+    wide = [r for r in rr_rows(g) if r["label"] != "1:2"]
     # KPI tiles
     kpis = [
         ("Net result", inr(f["net"]), f"{num(f['net'] / g['cap'] * 100)}% of the ₹10 lakh account"),
@@ -587,7 +732,11 @@ def write_html(g: dict) -> None:
         "{{VERDICT}}": (f"<strong>The rules lose money after costs.</strong> Before costs the {f['n']:,} trades made "
                         f"{e(inr(f['before'], True))}, about {e(inr(f['per_before']))} a trade. Angel One's charges "
                         f"({e(inr(f['per_charges']))} a trade) and slippage ({e(inr(f['per_slip']))}) turned that into "
-                        f"{e(inr(f['net']))}. STT alone, about ₹250 a trade, is larger than the whole edge."),
+                        f"{e(inr(f['net']))}. STT alone, about ₹250 a trade, is larger than the whole edge."
+                        + (f" Wider targets do not help: at 1:3 to 1:6 the target is rarely reached and every ratio loses "
+                           f"between {e(inr(-max(r['net'] for r in wide)))} and {e(inr(-min(r['net'] for r in wide)))}."
+                           if wide else "")),
+        "{{RR_SECTION}}": rr_html(g),
         "{{KPIS}}": kpi_html,
         "{{EQ_CAPTION}}": e(f"After costs the account peaked at {inr(f['peak_eq'])} on {dt(f['peak'])} and fell to "
                             f"{inr(f['lowest'])} on {dt(f['trough'])}, a drawdown of {inr(f['dd'])} that was never "
