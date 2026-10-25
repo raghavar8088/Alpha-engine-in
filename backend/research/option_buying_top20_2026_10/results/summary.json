@@ -1,0 +1,3339 @@
+{
+ "window": [
+  "2026-09-24",
+  "2026-10-23"
+ ],
+ "pairs": 167,
+ "blocks": [
+  [
+   "2025-09-24",
+   "2025-10-23"
+  ],
+  [
+   "2025-10-24",
+   "2025-11-23"
+  ],
+  [
+   "2025-11-24",
+   "2025-12-23"
+  ],
+  [
+   "2025-12-24",
+   "2026-01-23"
+  ],
+  [
+   "2026-01-24",
+   "2026-02-23"
+  ],
+  [
+   "2026-02-24",
+   "2026-03-23"
+  ],
+  [
+   "2026-03-24",
+   "2026-04-23"
+  ],
+  [
+   "2026-04-24",
+   "2026-05-23"
+  ],
+  [
+   "2026-05-24",
+   "2026-06-23"
+  ],
+  [
+   "2026-06-24",
+   "2026-07-23"
+  ],
+  [
+   "2026-07-24",
+   "2026-08-23"
+  ],
+  [
+   "2026-08-24",
+   "2026-09-23"
+  ],
+  [
+   "2026-09-24",
+   "2026-10-23"
+  ]
+ ],
+ "last_month": [
+  {
+   "name": "intra_heikin_trend@15m",
+   "trades": 53,
+   "net": 26298.06,
+   "win_rate": 39.6,
+   "profit_factor": 1.518,
+   "avg": 496.19,
+   "best": 6478.13,
+   "worst": -3749.72,
+   "max_dd": 14835.04,
+   "avg_premium": 109.7,
+   "net_real": 18878.54,
+   "trades_real": 41,
+   "exits": {
+    "target": 17,
+    "stop": 21,
+    "eod": 15
+   },
+   "calls": 25
+  },
+  {
+   "name": "pta_automated_signal@15m",
+   "trades": 29,
+   "net": 25535.83,
+   "win_rate": 51.7,
+   "profit_factor": 1.956,
+   "avg": 880.55,
+   "best": 6784.13,
+   "worst": -3525.66,
+   "max_dd": 11443.28,
+   "avg_premium": 112.79,
+   "net_real": 21142.99,
+   "trades_real": 21,
+   "exits": {
+    "target": 12,
+    "stop": 9,
+    "eod": 8
+   },
+   "calls": 11
+  },
+  {
+   "name": "intra_trix@15m",
+   "trades": 28,
+   "net": 25335.2,
+   "win_rate": 46.4,
+   "profit_factor": 1.871,
+   "avg": 904.83,
+   "best": 6784.13,
+   "worst": -3525.66,
+   "max_dd": 8007.47,
+   "avg_premium": 110.91,
+   "net_real": 23756.14,
+   "trades_real": 20,
+   "exits": {
+    "target": 12,
+    "stop": 11,
+    "eod": 5
+   },
+   "calls": 12
+  },
+  {
+   "name": "mt_breakout_buying@15m",
+   "trades": 25,
+   "net": 23069.79,
+   "win_rate": 48.0,
+   "profit_factor": 1.71,
+   "avg": 922.79,
+   "best": 9569.15,
+   "worst": -3938.24,
+   "max_dd": 6958.27,
+   "avg_premium": 121.89,
+   "net_real": 13372.12,
+   "trades_real": 17,
+   "exits": {
+    "target": 6,
+    "stop": 9,
+    "eod": 10
+   },
+   "calls": 9
+  },
+  {
+   "name": "warrior_micro_pullback@5m",
+   "trades": 30,
+   "net": 22724.77,
+   "win_rate": 53.3,
+   "profit_factor": 1.726,
+   "avg": 757.49,
+   "best": 5356.33,
+   "worst": -3349.56,
+   "max_dd": 12910.34,
+   "avg_premium": 123.84,
+   "net_real": 14913.67,
+   "trades_real": 21,
+   "exits": {
+    "target": 14,
+    "stop": 12,
+    "eod": 4
+   },
+   "calls": 13
+  },
+  {
+   "name": "bb_volume_profile_poc@15m",
+   "trades": 22,
+   "net": 21624.09,
+   "win_rate": 54.5,
+   "profit_factor": 2.056,
+   "avg": 982.91,
+   "best": 6808.18,
+   "worst": -3440.6,
+   "max_dd": 7117.77,
+   "avg_premium": 108.33,
+   "net_real": 17060.59,
+   "trades_real": 18,
+   "exits": {
+    "target": 9,
+    "stop": 9,
+    "eod": 4
+   },
+   "calls": 9
+  },
+  {
+   "name": "sb_volume_profile@15m",
+   "trades": 22,
+   "net": 21624.09,
+   "win_rate": 54.5,
+   "profit_factor": 2.056,
+   "avg": 982.91,
+   "best": 6808.18,
+   "worst": -3440.6,
+   "max_dd": 7117.77,
+   "avg_premium": 108.33,
+   "net_real": 17060.59,
+   "trades_real": 18,
+   "exits": {
+    "target": 9,
+    "stop": 9,
+    "eod": 4
+   },
+   "calls": 9
+  },
+  {
+   "name": "intra_supertrend@15m",
+   "trades": 31,
+   "net": 20644.64,
+   "win_rate": 45.2,
+   "profit_factor": 1.566,
+   "avg": 665.96,
+   "best": 6784.13,
+   "worst": -3525.66,
+   "max_dd": 12007.91,
+   "avg_premium": 116.18,
+   "net_real": 15203.09,
+   "trades_real": 23,
+   "exits": {
+    "target": 12,
+    "stop": 13,
+    "eod": 6
+   },
+   "calls": 13
+  },
+  {
+   "name": "breakout_adx_surge@15m",
+   "trades": 9,
+   "net": 19760.74,
+   "win_rate": 66.7,
+   "profit_factor": 4.741,
+   "avg": 2195.64,
+   "best": 7178.85,
+   "worst": -2300.1,
+   "max_dd": 3397.43,
+   "avg_premium": 94.79,
+   "net_real": 5003.0,
+   "trades_real": 6,
+   "exits": {
+    "target": 3,
+    "stop": 2,
+    "eod": 4
+   },
+   "calls": 3
+  },
+  {
+   "name": "intra_cpr_break@15m",
+   "trades": 29,
+   "net": 19659.13,
+   "win_rate": 55.2,
+   "profit_factor": 1.566,
+   "avg": 677.9,
+   "best": 6842.3,
+   "worst": -3666.95,
+   "max_dd": 7115.9,
+   "avg_premium": 119.52,
+   "net_real": 14201.2,
+   "trades_real": 22,
+   "exits": {
+    "target": 11,
+    "stop": 13,
+    "eod": 5
+   },
+   "calls": 13
+  },
+  {
+   "name": "intra_ema_stack@15m",
+   "trades": 28,
+   "net": 19645.51,
+   "win_rate": 42.9,
+   "profit_factor": 1.695,
+   "avg": 701.63,
+   "best": 6784.13,
+   "worst": -3525.66,
+   "max_dd": 10859.28,
+   "avg_premium": 107.23,
+   "net_real": 11672.41,
+   "trades_real": 21,
+   "exits": {
+    "target": 10,
+    "stop": 12,
+    "eod": 6
+   },
+   "calls": 10
+  },
+  {
+   "name": "it_heatmap_breakout@15m",
+   "trades": 21,
+   "net": 19558.45,
+   "win_rate": 47.6,
+   "profit_factor": 1.856,
+   "avg": 931.35,
+   "best": 9569.15,
+   "worst": -3616.44,
+   "max_dd": 6859.31,
+   "avg_premium": 110.24,
+   "net_real": 11023.94,
+   "trades_real": 14,
+   "exits": {
+    "target": 5,
+    "stop": 8,
+    "eod": 8
+   },
+   "calls": 9
+  },
+  {
+   "name": "pta_breakout_direction@15m",
+   "trades": 13,
+   "net": 17813.68,
+   "win_rate": 69.2,
+   "profit_factor": 3.482,
+   "avg": 1370.28,
+   "best": 8418.03,
+   "worst": -3616.44,
+   "max_dd": 5625.72,
+   "avg_premium": 109.56,
+   "net_real": 9898.71,
+   "trades_real": 8,
+   "exits": {
+    "target": 3,
+    "stop": 2,
+    "eod": 8
+   },
+   "calls": 5
+  },
+  {
+   "name": "bb_algo_signal@15m",
+   "trades": 24,
+   "net": 17414.37,
+   "win_rate": 50.0,
+   "profit_factor": 1.621,
+   "avg": 725.6,
+   "best": 6842.3,
+   "worst": -3678.04,
+   "max_dd": 6108.33,
+   "avg_premium": 117.84,
+   "net_real": 10210.6,
+   "trades_real": 17,
+   "exits": {
+    "target": 10,
+    "stop": 10,
+    "eod": 4
+   },
+   "calls": 12
+  },
+  {
+   "name": "breakout_range_compression@15m",
+   "trades": 8,
+   "net": 17401.42,
+   "win_rate": 75.0,
+   "profit_factor": 3.428,
+   "avg": 2175.18,
+   "best": 8418.03,
+   "worst": -3938.24,
+   "max_dd": 3938.24,
+   "avg_premium": 124.5,
+   "net_real": 2710.36,
+   "trades_real": 4,
+   "exits": {
+    "target": 3,
+    "stop": 2,
+    "eod": 3
+   },
+   "calls": 1
+  },
+  {
+   "name": "scalp_roc_thrust@5m",
+   "trades": 46,
+   "net": 16517.11,
+   "win_rate": 47.8,
+   "profit_factor": 1.334,
+   "avg": 359.07,
+   "best": 5881.7,
+   "worst": -3405.32,
+   "max_dd": 11306.62,
+   "avg_premium": 117.92,
+   "net_real": -992.46,
+   "trades_real": 35,
+   "exits": {
+    "target": 19,
+    "stop": 20,
+    "eod": 7
+   },
+   "calls": 22
+  },
+  {
+   "name": "intra_orb30@15m",
+   "trades": 24,
+   "net": 16265.16,
+   "win_rate": 50.0,
+   "profit_factor": 1.629,
+   "avg": 677.72,
+   "best": 6694.48,
+   "worst": -3652.17,
+   "max_dd": 10150.8,
+   "avg_premium": 118.74,
+   "net_real": 9745.18,
+   "trades_real": 18,
+   "exits": {
+    "target": 9,
+    "stop": 9,
+    "eod": 6
+   },
+   "calls": 12
+  },
+  {
+   "name": "scalp_streak@5m",
+   "trades": 48,
+   "net": 16214.94,
+   "win_rate": 43.8,
+   "profit_factor": 1.318,
+   "avg": 337.81,
+   "best": 5605.33,
+   "worst": -3422.97,
+   "max_dd": 13807.43,
+   "avg_premium": 116.76,
+   "net_real": 16663.49,
+   "trades_real": 37,
+   "exits": {
+    "target": 17,
+    "stop": 22,
+    "eod": 9
+   },
+   "calls": 20
+  },
+  {
+   "name": "intra_aroon@15m",
+   "trades": 27,
+   "net": 16077.29,
+   "win_rate": 44.4,
+   "profit_factor": 1.609,
+   "avg": 595.46,
+   "best": 6784.13,
+   "worst": -3453.72,
+   "max_dd": 14055.13,
+   "avg_premium": 106.22,
+   "net_real": 12467.69,
+   "trades_real": 21,
+   "exits": {
+    "target": 10,
+    "stop": 9,
+    "eod": 8
+   },
+   "calls": 10
+  },
+  {
+   "name": "scalp_pctb@5m",
+   "trades": 48,
+   "net": 15687.57,
+   "win_rate": 43.8,
+   "profit_factor": 1.378,
+   "avg": 326.82,
+   "best": 5580.85,
+   "worst": -3405.32,
+   "max_dd": 9888.58,
+   "avg_premium": 110.01,
+   "net_real": 8485.39,
+   "trades_real": 35,
+   "exits": {
+    "target": 16,
+    "stop": 18,
+    "eod": 14
+   },
+   "calls": 24
+  },
+  {
+   "name": "intra_pivot_break@15m",
+   "trades": 18,
+   "net": 14989.62,
+   "win_rate": 44.4,
+   "profit_factor": 2.246,
+   "avg": 832.76,
+   "best": 5605.33,
+   "worst": -3135.33,
+   "max_dd": 5743.72,
+   "avg_premium": 96.85,
+   "net_real": 5950.56,
+   "trades_real": 12,
+   "exits": {
+    "target": 7,
+    "stop": 7,
+    "eod": 4
+   },
+   "calls": 5
+  },
+  {
+   "name": "prt_directional_mirror@15m",
+   "trades": 26,
+   "net": 13842.01,
+   "win_rate": 42.3,
+   "profit_factor": 1.464,
+   "avg": 532.39,
+   "best": 6842.3,
+   "worst": -3666.95,
+   "max_dd": 6913.32,
+   "avg_premium": 118.9,
+   "net_real": 7507.97,
+   "trades_real": 18,
+   "exits": {
+    "target": 9,
+    "stop": 11,
+    "eod": 6
+   },
+   "calls": 12
+  },
+  {
+   "name": "intra_chandelier@15m",
+   "trades": 32,
+   "net": 13043.7,
+   "win_rate": 43.8,
+   "profit_factor": 1.311,
+   "avg": 407.62,
+   "best": 6842.3,
+   "worst": -3666.95,
+   "max_dd": 10238.29,
+   "avg_premium": 116.64,
+   "net_real": 7444.23,
+   "trades_real": 21,
+   "exits": {
+    "target": 12,
+    "stop": 15,
+    "eod": 5
+   },
+   "calls": 15
+  },
+  {
+   "name": "intra_donchian@15m",
+   "trades": 19,
+   "net": 13000.54,
+   "win_rate": 57.9,
+   "profit_factor": 1.633,
+   "avg": 684.24,
+   "best": 5605.33,
+   "worst": -3525.66,
+   "max_dd": 6376.27,
+   "avg_premium": 116.2,
+   "net_real": 4967.24,
+   "trades_real": 13,
+   "exits": {
+    "target": 7,
+    "stop": 8,
+    "eod": 4
+   },
+   "calls": 6
+  },
+  {
+   "name": "intra_adx_di@15m",
+   "trades": 27,
+   "net": 12951.74,
+   "win_rate": 44.4,
+   "profit_factor": 1.403,
+   "avg": 479.69,
+   "best": 6842.3,
+   "worst": -3666.95,
+   "max_dd": 6913.32,
+   "avg_premium": 120.04,
+   "net_real": 6617.7,
+   "trades_real": 19,
+   "exits": {
+    "target": 10,
+    "stop": 11,
+    "eod": 6
+   },
+   "calls": 13
+  },
+  {
+   "name": "intra_rsi_regime@15m",
+   "trades": 27,
+   "net": 12099.22,
+   "win_rate": 44.4,
+   "profit_factor": 1.359,
+   "avg": 448.12,
+   "best": 6842.3,
+   "worst": -3666.95,
+   "max_dd": 18154.65,
+   "avg_premium": 122.65,
+   "net_real": 8781.07,
+   "trades_real": 21,
+   "exits": {
+    "target": 10,
+    "stop": 12,
+    "eod": 5
+   },
+   "calls": 11
+  },
+  {
+   "name": "scalp_keltner_surf@5m",
+   "trades": 47,
+   "net": 11931.98,
+   "win_rate": 42.6,
+   "profit_factor": 1.266,
+   "avg": 253.87,
+   "best": 5580.85,
+   "worst": -3405.32,
+   "max_dd": 13091.1,
+   "avg_premium": 113.48,
+   "net_real": 4433.32,
+   "trades_real": 33,
+   "exits": {
+    "target": 16,
+    "stop": 18,
+    "eod": 13
+   },
+   "calls": 21
+  },
+  {
+   "name": "intra_ichimoku_tk@15m",
+   "trades": 26,
+   "net": 11901.44,
+   "win_rate": 50.0,
+   "profit_factor": 1.501,
+   "avg": 457.75,
+   "best": 5605.33,
+   "worst": -3240.94,
+   "max_dd": 6570.82,
+   "avg_premium": 108.81,
+   "net_real": 9349.89,
+   "trades_real": 18,
+   "exits": {
+    "target": 8,
+    "stop": 9,
+    "eod": 9
+   },
+   "calls": 11
+  },
+  {
+   "name": "ict_judas_swing@15m",
+   "trades": 21,
+   "net": 11849.56,
+   "win_rate": 52.4,
+   "profit_factor": 1.473,
+   "avg": 564.26,
+   "best": 6694.48,
+   "worst": -3789.13,
+   "max_dd": 7441.3,
+   "avg_premium": 122.32,
+   "net_real": 5329.58,
+   "trades_real": 15,
+   "exits": {
+    "target": 8,
+    "stop": 8,
+    "eod": 5
+   },
+   "calls": 9
+  },
+  {
+   "name": "wt_sr_masterclass@15m",
+   "trades": 10,
+   "net": 11118.83,
+   "win_rate": 40.0,
+   "profit_factor": 2.305,
+   "avg": 1111.88,
+   "best": 8058.84,
+   "worst": -2649.29,
+   "max_dd": 3517.7,
+   "avg_premium": 131.66,
+   "net_real": 8670.32,
+   "trades_real": 8,
+   "exits": {
+    "target": 3,
+    "stop": 3,
+    "eod": 4
+   },
+   "calls": 7
+  },
+  {
+   "name": "intra_morning_momentum@15m",
+   "trades": 11,
+   "net": 10954.82,
+   "win_rate": 45.5,
+   "profit_factor": 2.023,
+   "avg": 995.89,
+   "best": 6234.32,
+   "worst": -3164.87,
+   "max_dd": 4448.59,
+   "avg_premium": 113.22,
+   "net_real": 14725.12,
+   "trades_real": 8,
+   "exits": {
+    "target": 4,
+    "stop": 5,
+    "eod": 2
+   },
+   "calls": 5
+  },
+  {
+   "name": "intra_woodie@15m",
+   "trades": 16,
+   "net": 10834.1,
+   "win_rate": 50.0,
+   "profit_factor": 1.707,
+   "avg": 677.13,
+   "best": 5605.33,
+   "worst": -3666.95,
+   "max_dd": 5325.76,
+   "avg_premium": 110.57,
+   "net_real": 1190.26,
+   "trades_real": 11,
+   "exits": {
+    "target": 6,
+    "stop": 6,
+    "eod": 4
+   },
+   "calls": 5
+  },
+  {
+   "name": "ema_200_trend@15m",
+   "trades": 8,
+   "net": 10675.94,
+   "win_rate": 75.0,
+   "profit_factor": 3.687,
+   "avg": 1334.49,
+   "best": 5702.52,
+   "worst": -3452.56,
+   "max_dd": 3973.5,
+   "avg_premium": 112.74,
+   "net_real": 10675.94,
+   "trades_real": 8,
+   "exits": {
+    "target": 4,
+    "stop": 1,
+    "eod": 3
+   },
+   "calls": 2
+  },
+  {
+   "name": "ema_5_close@5m",
+   "trades": 43,
+   "net": 10615.42,
+   "win_rate": 37.2,
+   "profit_factor": 1.248,
+   "avg": 246.87,
+   "best": 5548.48,
+   "worst": -3154.66,
+   "max_dd": 7141.62,
+   "avg_premium": 110.55,
+   "net_real": 14460.04,
+   "trades_real": 31,
+   "exits": {
+    "target": 15,
+    "stop": 17,
+    "eod": 11
+   },
+   "calls": 17
+  },
+  {
+   "name": "intra_camarilla@15m",
+   "trades": 16,
+   "net": 10103.13,
+   "win_rate": 50.0,
+   "profit_factor": 1.651,
+   "avg": 631.45,
+   "best": 5605.33,
+   "worst": -3666.95,
+   "max_dd": 5488.33,
+   "avg_premium": 109.18,
+   "net_real": 505.9,
+   "trades_real": 11,
+   "exits": {
+    "target": 6,
+    "stop": 6,
+    "eod": 4
+   },
+   "calls": 5
+  },
+  {
+   "name": "prt_ce_pe_checklist@15m",
+   "trades": 34,
+   "net": 9943.2,
+   "win_rate": 41.2,
+   "profit_factor": 1.229,
+   "avg": 292.45,
+   "best": 6842.3,
+   "worst": -3666.95,
+   "max_dd": 12434.84,
+   "avg_premium": 118.42,
+   "net_real": 5584.07,
+   "trades_real": 25,
+   "exits": {
+    "target": 12,
+    "stop": 16,
+    "eod": 6
+   },
+   "calls": 15
+  },
+  {
+   "name": "dr_9_20_ema@5m",
+   "trades": 36,
+   "net": 9831.83,
+   "win_rate": 41.7,
+   "profit_factor": 1.258,
+   "avg": 273.11,
+   "best": 5519.16,
+   "worst": -3169.41,
+   "max_dd": 15063.6,
+   "avg_premium": 115.54,
+   "net_real": 8385.98,
+   "trades_real": 26,
+   "exits": {
+    "target": 12,
+    "stop": 16,
+    "eod": 8
+   },
+   "calls": 18
+  },
+  {
+   "name": "ema_9_20@5m",
+   "trades": 36,
+   "net": 9831.83,
+   "win_rate": 41.7,
+   "profit_factor": 1.258,
+   "avg": 273.11,
+   "best": 5519.16,
+   "worst": -3169.41,
+   "max_dd": 15063.6,
+   "avg_premium": 115.54,
+   "net_real": 8385.98,
+   "trades_real": 26,
+   "exits": {
+    "target": 12,
+    "stop": 16,
+    "eod": 8
+   },
+   "calls": 18
+  },
+  {
+   "name": "intra_bb_ride@15m",
+   "trades": 20,
+   "net": 9807.35,
+   "win_rate": 50.0,
+   "profit_factor": 1.415,
+   "avg": 490.37,
+   "best": 5605.33,
+   "worst": -3829.52,
+   "max_dd": 8025.21,
+   "avg_premium": 118.18,
+   "net_real": 1882.2,
+   "trades_real": 13,
+   "exits": {
+    "target": 7,
+    "stop": 8,
+    "eod": 5
+   },
+   "calls": 8
+  },
+  {
+   "name": "bb_simple_entry@5m",
+   "trades": 43,
+   "net": 9580.11,
+   "win_rate": 48.8,
+   "profit_factor": 1.228,
+   "avg": 222.79,
+   "best": 5356.33,
+   "worst": -3237.94,
+   "max_dd": 11245.01,
+   "avg_premium": 108.83,
+   "net_real": 5718.74,
+   "trades_real": 34,
+   "exits": {
+    "target": 16,
+    "stop": 16,
+    "eod": 11
+   },
+   "calls": 22
+  },
+  {
+   "name": "scalp_vwap_momentum@5m",
+   "trades": 82,
+   "net": 9541.93,
+   "win_rate": 39.0,
+   "profit_factor": 1.124,
+   "avg": 116.37,
+   "best": 5536.72,
+   "worst": -3405.32,
+   "max_dd": 11205.85,
+   "avg_premium": 106.07,
+   "net_real": 8047.13,
+   "trades_real": 62,
+   "exits": {
+    "target": 25,
+    "stop": 38,
+    "eod": 19
+   },
+   "calls": 40
+  },
+  {
+   "name": "mr_1min_scalp@5m",
+   "trades": 68,
+   "net": 9489.23,
+   "win_rate": 44.1,
+   "profit_factor": 1.165,
+   "avg": 139.55,
+   "best": 5519.16,
+   "worst": -3027.76,
+   "max_dd": 20576.22,
+   "avg_premium": 106.63,
+   "net_real": 3297.12,
+   "trades_real": 49,
+   "exits": {
+    "target": 20,
+    "stop": 29,
+    "eod": 19
+   },
+   "calls": 32
+  },
+  {
+   "name": "shannon_anchored_vwap@15m",
+   "trades": 28,
+   "net": 9233.06,
+   "win_rate": 35.7,
+   "profit_factor": 1.329,
+   "avg": 329.75,
+   "best": 6471.84,
+   "worst": -3835.85,
+   "max_dd": 17646.72,
+   "avg_premium": 105.81,
+   "net_real": 1667.12,
+   "trades_real": 21,
+   "exits": {
+    "target": 8,
+    "stop": 11,
+    "eod": 9
+   },
+   "calls": 15
+  },
+  {
+   "name": "scalp_macd_flip@5m",
+   "trades": 79,
+   "net": 8996.59,
+   "win_rate": 38.0,
+   "profit_factor": 1.124,
+   "avg": 113.88,
+   "best": 5751.66,
+   "worst": -3405.32,
+   "max_dd": 23431.65,
+   "avg_premium": 112.52,
+   "net_real": -1092.61,
+   "trades_real": 60,
+   "exits": {
+    "target": 22,
+    "stop": 34,
+    "eod": 23
+   },
+   "calls": 41
+  },
+  {
+   "name": "mr_12pm_scalp@5m",
+   "trades": 28,
+   "net": 8902.32,
+   "win_rate": 50.0,
+   "profit_factor": 1.442,
+   "avg": 317.94,
+   "best": 6742.06,
+   "worst": -2638.11,
+   "max_dd": 8900.88,
+   "avg_premium": 107.1,
+   "net_real": 5967.32,
+   "trades_real": 19,
+   "exits": {
+    "target": 6,
+    "stop": 10,
+    "eod": 12
+   },
+   "calls": 15
+  },
+  {
+   "name": "sb_simple_orb@5m",
+   "trades": 30,
+   "net": 8821.61,
+   "win_rate": 43.3,
+   "profit_factor": 1.244,
+   "avg": 294.05,
+   "best": 5356.33,
+   "worst": -3237.94,
+   "max_dd": 11435.77,
+   "avg_premium": 125.65,
+   "net_real": 5251.9,
+   "trades_real": 22,
+   "exits": {
+    "target": 12,
+    "stop": 13,
+    "eod": 5
+   },
+   "calls": 14
+  },
+  {
+   "name": "scalp_orb15@5m",
+   "trades": 30,
+   "net": 8821.61,
+   "win_rate": 43.3,
+   "profit_factor": 1.244,
+   "avg": 294.05,
+   "best": 5356.33,
+   "worst": -3237.94,
+   "max_dd": 11435.77,
+   "avg_premium": 125.65,
+   "net_real": 5251.9,
+   "trades_real": 22,
+   "exits": {
+    "target": 12,
+    "stop": 13,
+    "eod": 5
+   },
+   "calls": 14
+  },
+  {
+   "name": "big_bar_scalp@5m",
+   "trades": 22,
+   "net": 7835.6,
+   "win_rate": 45.5,
+   "profit_factor": 1.353,
+   "avg": 356.16,
+   "best": 4673.39,
+   "worst": -3027.76,
+   "max_dd": 11633.63,
+   "avg_premium": 114.43,
+   "net_real": -339.98,
+   "trades_real": 15,
+   "exits": {
+    "target": 9,
+    "stop": 9,
+    "eod": 4
+   },
+   "calls": 11
+  },
+  {
+   "name": "sl_small_capital_scalp@5m",
+   "trades": 55,
+   "net": 6815.59,
+   "win_rate": 34.5,
+   "profit_factor": 1.124,
+   "avg": 123.92,
+   "best": 5519.16,
+   "worst": -3169.41,
+   "max_dd": 12385.54,
+   "avg_premium": 106.47,
+   "net_real": 6481.4,
+   "trades_real": 40,
+   "exits": {
+    "target": 16,
+    "stop": 27,
+    "eod": 12
+   },
+   "calls": 25
+  },
+  {
+   "name": "breakout_gap_and_go@15m",
+   "trades": 1,
+   "net": 6224.31,
+   "win_rate": 100.0,
+   "profit_factor": null,
+   "avg": 6224.31,
+   "best": 6224.31,
+   "worst": 6224.31,
+   "max_dd": 0.0,
+   "avg_premium": 97.7,
+   "net_real": 0,
+   "trades_real": 0,
+   "exits": {
+    "target": 1,
+    "stop": 0,
+    "eod": 0
+   },
+   "calls": 0
+  },
+  {
+   "name": "scalp_gap_run@5m",
+   "trades": 21,
+   "net": 6094.38,
+   "win_rate": 47.6,
+   "profit_factor": 1.279,
+   "avg": 290.21,
+   "best": 4499.75,
+   "worst": -3169.41,
+   "max_dd": 10948.64,
+   "avg_premium": 118.08,
+   "net_real": -7589.04,
+   "trades_real": 14,
+   "exits": {
+    "target": 8,
+    "stop": 9,
+    "eod": 4
+   },
+   "calls": 9
+  },
+  {
+   "name": "pta_super_scalping@5m",
+   "trades": 71,
+   "net": 5853.82,
+   "win_rate": 42.3,
+   "profit_factor": 1.085,
+   "avg": 82.45,
+   "best": 5548.48,
+   "worst": -3349.77,
+   "max_dd": 9724.42,
+   "avg_premium": 108.37,
+   "net_real": 1174.82,
+   "trades_real": 48,
+   "exits": {
+    "target": 22,
+    "stop": 33,
+    "eod": 16
+   },
+   "calls": 30
+  },
+  {
+   "name": "it_market_structure@15m",
+   "trades": 31,
+   "net": 5838.75,
+   "win_rate": 38.7,
+   "profit_factor": 1.185,
+   "avg": 188.35,
+   "best": 6784.13,
+   "worst": -3525.66,
+   "max_dd": 7455.82,
+   "avg_premium": 110.93,
+   "net_real": 2344.49,
+   "trades_real": 25,
+   "exits": {
+    "target": 9,
+    "stop": 10,
+    "eod": 12
+   },
+   "calls": 12
+  },
+  {
+   "name": "it_buildup_proxy@15m",
+   "trades": 22,
+   "net": 5568.01,
+   "win_rate": 50.0,
+   "profit_factor": 1.268,
+   "avg": 253.09,
+   "best": 5102.79,
+   "worst": -3566.01,
+   "max_dd": 6689.98,
+   "avg_premium": 106.8,
+   "net_real": -1647.37,
+   "trades_real": 15,
+   "exits": {
+    "target": 5,
+    "stop": 9,
+    "eod": 8
+   },
+   "calls": 11
+  },
+  {
+   "name": "mr_event_volatility@5m",
+   "trades": 40,
+   "net": 4742.32,
+   "win_rate": 37.5,
+   "profit_factor": 1.083,
+   "avg": 118.56,
+   "best": 6167.49,
+   "worst": -3870.41,
+   "max_dd": 21930.2,
+   "avg_premium": 119.6,
+   "net_real": 4751.12,
+   "trades_real": 28,
+   "exits": {
+    "target": 14,
+    "stop": 19,
+    "eod": 7
+   },
+   "calls": 18
+  },
+  {
+   "name": "tfs_gap_origin@15m",
+   "trades": 1,
+   "net": 4544.93,
+   "win_rate": 100.0,
+   "profit_factor": null,
+   "avg": 4544.93,
+   "best": 4544.93,
+   "worst": 4544.93,
+   "max_dd": 0.0,
+   "avg_premium": 113.1,
+   "net_real": 4544.93,
+   "trades_real": 1,
+   "exits": {
+    "target": 1,
+    "stop": 0,
+    "eod": 0
+   },
+   "calls": 1
+  },
+  {
+   "name": "scalp_atr_burst@5m",
+   "trades": 48,
+   "net": 4360.11,
+   "win_rate": 37.5,
+   "profit_factor": 1.095,
+   "avg": 90.84,
+   "best": 5202.08,
+   "worst": -3027.76,
+   "max_dd": 16651.57,
+   "avg_premium": 108.18,
+   "net_real": -9253.37,
+   "trades_real": 33,
+   "exits": {
+    "target": 15,
+    "stop": 20,
+    "eod": 13
+   },
+   "calls": 23
+  },
+  {
+   "name": "intra_willr_regime@15m",
+   "trades": 41,
+   "net": 4043.12,
+   "win_rate": 36.6,
+   "profit_factor": 1.076,
+   "avg": 98.61,
+   "best": 6694.48,
+   "worst": -3835.85,
+   "max_dd": 16355.09,
+   "avg_premium": 113.4,
+   "net_real": 1107.76,
+   "trades_real": 30,
+   "exits": {
+    "target": 12,
+    "stop": 21,
+    "eod": 8
+   },
+   "calls": 19
+  },
+  {
+   "name": "intra_first_hour_range@15m",
+   "trades": 25,
+   "net": 3890.54,
+   "win_rate": 40.0,
+   "profit_factor": 1.126,
+   "avg": 155.62,
+   "best": 6842.3,
+   "worst": -3652.17,
+   "max_dd": 10048.53,
+   "avg_premium": 121.21,
+   "net_real": -2605.63,
+   "trades_real": 19,
+   "exits": {
+    "target": 8,
+    "stop": 10,
+    "eod": 7
+   },
+   "calls": 12
+  },
+  {
+   "name": "intra_structure_shift@15m",
+   "trades": 32,
+   "net": 3324.37,
+   "win_rate": 37.5,
+   "profit_factor": 1.098,
+   "avg": 103.89,
+   "best": 6784.13,
+   "worst": -3525.66,
+   "max_dd": 9970.2,
+   "avg_premium": 111.15,
+   "net_real": -169.89,
+   "trades_real": 26,
+   "exits": {
+    "target": 9,
+    "stop": 11,
+    "eod": 12
+   },
+   "calls": 13
+  },
+  {
+   "name": "bb_frvp@15m",
+   "trades": 18,
+   "net": 2818.64,
+   "win_rate": 44.4,
+   "profit_factor": 1.127,
+   "avg": 156.59,
+   "best": 6808.18,
+   "worst": -3835.85,
+   "max_dd": 7488.02,
+   "avg_premium": 114.95,
+   "net_real": 6251.49,
+   "trades_real": 14,
+   "exits": {
+    "target": 7,
+    "stop": 7,
+    "eod": 4
+   },
+   "calls": 9
+  },
+  {
+   "name": "tfs_level_reversal@15m",
+   "trades": 27,
+   "net": 2738.03,
+   "win_rate": 37.0,
+   "profit_factor": 1.072,
+   "avg": 101.41,
+   "best": 6694.48,
+   "worst": -3575.63,
+   "max_dd": 13911.14,
+   "avg_premium": 120.68,
+   "net_real": -1704.55,
+   "trades_real": 21,
+   "exits": {
+    "target": 9,
+    "stop": 13,
+    "eod": 5
+   },
+   "calls": 11
+  },
+  {
+   "name": "mt_price_action_composite@15m",
+   "trades": 26,
+   "net": 2633.16,
+   "win_rate": 46.2,
+   "profit_factor": 1.082,
+   "avg": 101.28,
+   "best": 5605.33,
+   "worst": -3525.66,
+   "max_dd": 15012.48,
+   "avg_premium": 113.18,
+   "net_real": -3046.74,
+   "trades_real": 19,
+   "exits": {
+    "target": 7,
+    "stop": 13,
+    "eod": 6
+   },
+   "calls": 10
+  },
+  {
+   "name": "scalp_engulfing@5m",
+   "trades": 43,
+   "net": 2502.05,
+   "win_rate": 39.5,
+   "profit_factor": 1.065,
+   "avg": 58.19,
+   "best": 5335.46,
+   "worst": -2855.35,
+   "max_dd": 10641.9,
+   "avg_premium": 108.63,
+   "net_real": 1144.05,
+   "trades_real": 32,
+   "exits": {
+    "target": 12,
+    "stop": 18,
+    "eod": 13
+   },
+   "calls": 17
+  },
+  {
+   "name": "intra_prev_day_hl@15m",
+   "trades": 18,
+   "net": 2338.01,
+   "win_rate": 44.4,
+   "profit_factor": 1.096,
+   "avg": 129.89,
+   "best": 5605.33,
+   "worst": -3525.66,
+   "max_dd": 9626.87,
+   "avg_premium": 115.79,
+   "net_real": -2765.78,
+   "trades_real": 12,
+   "exits": {
+    "target": 6,
+    "stop": 10,
+    "eod": 2
+   },
+   "calls": 5
+  },
+  {
+   "name": "sl_event_level_trading@15m",
+   "trades": 18,
+   "net": 2338.01,
+   "win_rate": 44.4,
+   "profit_factor": 1.096,
+   "avg": 129.89,
+   "best": 5605.33,
+   "worst": -3525.66,
+   "max_dd": 9626.87,
+   "avg_premium": 115.79,
+   "net_real": -2765.78,
+   "trades_real": 12,
+   "exits": {
+    "target": 6,
+    "stop": 10,
+    "eod": 2
+   },
+   "calls": 5
+  },
+  {
+   "name": "intra_keltner_trend@15m",
+   "trades": 18,
+   "net": 2125.04,
+   "win_rate": 33.3,
+   "profit_factor": 1.092,
+   "avg": 118.06,
+   "best": 5605.33,
+   "worst": -3279.74,
+   "max_dd": 8654.55,
+   "avg_premium": 113.05,
+   "net_real": -5551.03,
+   "trades_real": 12,
+   "exits": {
+    "target": 5,
+    "stop": 10,
+    "eod": 3
+   },
+   "calls": 7
+  },
+  {
+   "name": "intra_gap_fill@15m",
+   "trades": 10,
+   "net": 1731.25,
+   "win_rate": 40.0,
+   "profit_factor": 1.123,
+   "avg": 173.13,
+   "best": 6784.13,
+   "worst": -2799.14,
+   "max_dd": 10498.22,
+   "avg_premium": 127.1,
+   "net_real": 9178.71,
+   "trades_real": 7,
+   "exits": {
+    "target": 3,
+    "stop": 5,
+    "eod": 2
+   },
+   "calls": 5
+  },
+  {
+   "name": "prt_hero_zero@15m",
+   "trades": 4,
+   "net": 1695.26,
+   "win_rate": 25.0,
+   "profit_factor": 1.397,
+   "avg": 423.82,
+   "best": 5960.64,
+   "worst": -2009.28,
+   "max_dd": 4265.38,
+   "avg_premium": 65.78,
+   "net_real": 5960.64,
+   "trades_real": 1,
+   "exits": {
+    "target": 1,
+    "stop": 3,
+    "eod": 0
+   },
+   "calls": 2
+  },
+  {
+   "name": "scalp_ema_ribbon@5m",
+   "trades": 66,
+   "net": 1624.38,
+   "win_rate": 34.8,
+   "profit_factor": 1.025,
+   "avg": 24.61,
+   "best": 5751.66,
+   "worst": -3405.32,
+   "max_dd": 14154.3,
+   "avg_premium": 111.01,
+   "net_real": -9255.48,
+   "trades_real": 52,
+   "exits": {
+    "target": 18,
+    "stop": 29,
+    "eod": 19
+   },
+   "calls": 32
+  },
+  {
+   "name": "wt_833@5m",
+   "trades": 2,
+   "net": 1559.47,
+   "win_rate": 50.0,
+   "profit_factor": 1.567,
+   "avg": 779.73,
+   "best": 4307.79,
+   "worst": -2748.32,
+   "max_dd": 2748.32,
+   "avg_premium": 138.73,
+   "net_real": 1559.47,
+   "trades_real": 2,
+   "exits": {
+    "target": 1,
+    "stop": 1,
+    "eod": 0
+   },
+   "calls": 1
+  },
+  {
+   "name": "nj_premium_discount@15m",
+   "trades": 27,
+   "net": 1424.59,
+   "win_rate": 37.0,
+   "profit_factor": 1.04,
+   "avg": 52.76,
+   "best": 6066.93,
+   "worst": -3590.24,
+   "max_dd": 13965.54,
+   "avg_premium": 121.4,
+   "net_real": 12947.7,
+   "trades_real": 20,
+   "exits": {
+    "target": 9,
+    "stop": 13,
+    "eod": 5
+   },
+   "calls": 17
+  },
+  {
+   "name": "scalp_prev_day_level@5m",
+   "trades": 22,
+   "net": 1131.37,
+   "win_rate": 45.5,
+   "profit_factor": 1.043,
+   "avg": 51.43,
+   "best": 4673.39,
+   "worst": -3018.22,
+   "max_dd": 11344.8,
+   "avg_premium": 115.75,
+   "net_real": -4822.19,
+   "trades_real": 15,
+   "exits": {
+    "target": 8,
+    "stop": 12,
+    "eod": 2
+   },
+   "calls": 8
+  },
+  {
+   "name": "prt_daily_premium_mirror@5m",
+   "trades": 37,
+   "net": 1049.39,
+   "win_rate": 32.4,
+   "profit_factor": 1.024,
+   "avg": 28.36,
+   "best": 5749.87,
+   "worst": -3340.28,
+   "max_dd": 16351.84,
+   "avg_premium": 106.56,
+   "net_real": 1291.1,
+   "trades_real": 26,
+   "exits": {
+    "target": 12,
+    "stop": 22,
+    "eod": 3
+   },
+   "calls": 14
+  },
+  {
+   "name": "scalp_range_pop@5m",
+   "trades": 4,
+   "net": 1044.22,
+   "win_rate": 50.0,
+   "profit_factor": 1.393,
+   "avg": 261.06,
+   "best": 3513.93,
+   "worst": -1742.58,
+   "max_dd": 2469.71,
+   "avg_premium": 84.3,
+   "net_real": -914.78,
+   "trades_real": 1,
+   "exits": {
+    "target": 1,
+    "stop": 2,
+    "eod": 1
+   },
+   "calls": 1
+  },
+  {
+   "name": "stockforce_zone_buy@15m",
+   "trades": 8,
+   "net": 1025.17,
+   "win_rate": 50.0,
+   "profit_factor": 1.181,
+   "avg": 128.15,
+   "best": 4064.01,
+   "worst": -2203.78,
+   "max_dd": 4801.94,
+   "avg_premium": 104.22,
+   "net_real": -4211.34,
+   "trades_real": 6,
+   "exits": {
+    "target": 0,
+    "stop": 0,
+    "eod": 8
+   },
+   "calls": 4
+  },
+  {
+   "name": "williams_oops@15m",
+   "trades": 4,
+   "net": 888.58,
+   "win_rate": 50.0,
+   "profit_factor": 1.18,
+   "avg": 222.15,
+   "best": 3949.38,
+   "worst": -2649.29,
+   "max_dd": 2649.29,
+   "avg_premium": 111.53,
+   "net_real": 1654.36,
+   "trades_real": 2,
+   "exits": {
+    "target": 1,
+    "stop": 2,
+    "eod": 1
+   },
+   "calls": 2
+  },
+  {
+   "name": "up_sniper_scalp@5m",
+   "trades": 10,
+   "net": 835.59,
+   "win_rate": 40.0,
+   "profit_factor": 1.069,
+   "avg": 83.56,
+   "best": 3920.58,
+   "worst": -2652.47,
+   "max_dd": 10470.02,
+   "avg_premium": 113.04,
+   "net_real": -10470.02,
+   "trades_real": 5,
+   "exits": {
+    "target": 4,
+    "stop": 5,
+    "eod": 1
+   },
+   "calls": 2
+  },
+  {
+   "name": "bb_daily_bias@15m",
+   "trades": 16,
+   "net": 827.79,
+   "win_rate": 31.2,
+   "profit_factor": 1.035,
+   "avg": 51.74,
+   "best": 6694.48,
+   "worst": -3650.41,
+   "max_dd": 8732.37,
+   "avg_premium": 121.15,
+   "net_real": 4881.83,
+   "trades_real": 11,
+   "exits": {
+    "target": 5,
+    "stop": 9,
+    "eod": 2
+   },
+   "calls": 8
+  },
+  {
+   "name": "nj_daily_bias@15m",
+   "trades": 16,
+   "net": 827.79,
+   "win_rate": 31.2,
+   "profit_factor": 1.035,
+   "avg": 51.74,
+   "best": 6694.48,
+   "worst": -3650.41,
+   "max_dd": 8732.37,
+   "avg_premium": 121.15,
+   "net_real": 4881.83,
+   "trades_real": 11,
+   "exits": {
+    "target": 5,
+    "stop": 9,
+    "eod": 2
+   },
+   "calls": 8
+  },
+  {
+   "name": "carter_gap_and_go@15m",
+   "trades": 7,
+   "net": 618.21,
+   "win_rate": 42.9,
+   "profit_factor": 1.046,
+   "avg": 88.32,
+   "best": 5665.02,
+   "worst": -3666.95,
+   "max_dd": 7804.65,
+   "avg_premium": 136.4,
+   "net_real": -7804.65,
+   "trades_real": 5,
+   "exits": {
+    "target": 3,
+    "stop": 4,
+    "eod": 0
+   },
+   "calls": 3
+  },
+  {
+   "name": "trade_room_915_pullback@5m",
+   "trades": 27,
+   "net": 557.87,
+   "win_rate": 37.0,
+   "profit_factor": 1.02,
+   "avg": 20.66,
+   "best": 5751.39,
+   "worst": -3141.61,
+   "max_dd": 11640.12,
+   "avg_premium": 119.09,
+   "net_real": -1089.3,
+   "trades_real": 20,
+   "exits": {
+    "target": 8,
+    "stop": 12,
+    "eod": 7
+   },
+   "calls": 11
+  },
+  {
+   "name": "breakout_failed_reversal@15m",
+   "trades": 4,
+   "net": 512.56,
+   "win_rate": 25.0,
+   "profit_factor": 1.098,
+   "avg": 128.14,
+   "best": 5736.38,
+   "worst": -3293.05,
+   "max_dd": 3293.05,
+   "avg_premium": 95.16,
+   "net_real": 3805.61,
+   "trades_real": 3,
+   "exits": {
+    "target": 1,
+    "stop": 2,
+    "eod": 1
+   },
+   "calls": 2
+  },
+  {
+   "name": "tfs_index_sniper@5m",
+   "trades": 4,
+   "net": 13.41,
+   "win_rate": 50.0,
+   "profit_factor": 1.004,
+   "avg": 3.35,
+   "best": 2222.88,
+   "worst": -1846.5,
+   "max_dd": 3059.04,
+   "avg_premium": 94.64,
+   "net_real": -836.16,
+   "trades_real": 3,
+   "exits": {
+    "target": 1,
+    "stop": 2,
+    "eod": 1
+   },
+   "calls": 1
+  },
+  {
+   "name": "bb_order_block_fvg@15m",
+   "trades": 0,
+   "net": 0.0
+  },
+  {
+   "name": "breakout_multiday_thrust@15m",
+   "trades": 0,
+   "net": 0.0
+  },
+  {
+   "name": "breakout_orb_expansion@15m",
+   "trades": 0,
+   "net": 0.0
+  },
+  {
+   "name": "breakout_vwap_reclaim@15m",
+   "trades": 0,
+   "net": 0.0
+  },
+  {
+   "name": "intra_nr7_break@15m",
+   "trades": 0,
+   "net": 0.0
+  },
+  {
+   "name": "mt_breakout_trading@15m",
+   "trades": 0,
+   "net": 0.0
+  },
+  {
+   "name": "named_time_orb@5m",
+   "trades": 0,
+   "net": 0.0
+  },
+  {
+   "name": "nj_smt_divergence@15m",
+   "trades": 0,
+   "net": 0.0
+  },
+  {
+   "name": "order_block_fvg@15m",
+   "trades": 0,
+   "net": 0.0
+  },
+  {
+   "name": "pta_rr_gate@15m",
+   "trades": 0,
+   "net": 0.0
+  },
+  {
+   "name": "pta_smart_money_flow@15m",
+   "trades": 0,
+   "net": 0.0
+  },
+  {
+   "name": "raschke_80_20@15m",
+   "trades": 0,
+   "net": 0.0
+  },
+  {
+   "name": "scalp_vwap_band@5m",
+   "trades": 0,
+   "net": 0.0
+  },
+  {
+   "name": "sl_operator_breakout@15m",
+   "trades": 0,
+   "net": 0.0
+  },
+  {
+   "name": "sl_smc_rr_setup@15m",
+   "trades": 0,
+   "net": 0.0
+  },
+  {
+   "name": "sl_top_bottom_capture@15m",
+   "trades": 0,
+   "net": 0.0
+  },
+  {
+   "name": "stockforce_liquidity_sweep@15m",
+   "trades": 0,
+   "net": 0.0
+  },
+  {
+   "name": "wt_inducement_correlation@15m",
+   "trades": 0,
+   "net": 0.0
+  },
+  {
+   "name": "scalp_3bar_reversal@5m",
+   "trades": 49,
+   "net": -365.52,
+   "win_rate": 34.7,
+   "profit_factor": 0.992,
+   "avg": -7.46,
+   "best": 6533.47,
+   "worst": -3216.31,
+   "max_dd": 14446.85,
+   "avg_premium": 104.1,
+   "net_real": -2711.8,
+   "trades_real": 35,
+   "exits": {
+    "target": 13,
+    "stop": 22,
+    "eod": 14
+   },
+   "calls": 26
+  },
+  {
+   "name": "bb_ultimate_confluence@15m",
+   "trades": 19,
+   "net": -469.15,
+   "win_rate": 42.1,
+   "profit_factor": 0.978,
+   "avg": -24.69,
+   "best": 5665.02,
+   "worst": -3063.95,
+   "max_dd": 10276.85,
+   "avg_premium": 106.67,
+   "net_real": -701.46,
+   "trades_real": 15,
+   "exits": {
+    "target": 4,
+    "stop": 5,
+    "eod": 10
+   },
+   "calls": 11
+  },
+  {
+   "name": "scalp_micro_trend@5m",
+   "trades": 60,
+   "net": -591.94,
+   "win_rate": 36.7,
+   "profit_factor": 0.991,
+   "avg": -9.87,
+   "best": 5605.33,
+   "worst": -3169.41,
+   "max_dd": 15949.77,
+   "avg_premium": 111.6,
+   "net_real": 6819.26,
+   "trades_real": 43,
+   "exits": {
+    "target": 20,
+    "stop": 28,
+    "eod": 12
+   },
+   "calls": 26
+  },
+  {
+   "name": "raschke_holy_grail@15m",
+   "trades": 11,
+   "net": -656.3,
+   "win_rate": 36.4,
+   "profit_factor": 0.946,
+   "avg": -59.66,
+   "best": 5665.02,
+   "worst": -3666.95,
+   "max_dd": 9479.81,
+   "avg_premium": 106.94,
+   "net_real": -3224.19,
+   "trades_real": 7,
+   "exits": {
+    "target": 2,
+    "stop": 4,
+    "eod": 5
+   },
+   "calls": 6
+  },
+  {
+   "name": "trade_room_915_modified@5m",
+   "trades": 20,
+   "net": -936.96,
+   "win_rate": 35.0,
+   "profit_factor": 0.961,
+   "avg": -46.85,
+   "best": 4774.5,
+   "worst": -3169.41,
+   "max_dd": 10285.15,
+   "avg_premium": 113.5,
+   "net_real": -3362.67,
+   "trades_real": 14,
+   "exits": {
+    "target": 6,
+    "stop": 11,
+    "eod": 3
+   },
+   "calls": 6
+  },
+  {
+   "name": "intra_psar@15m",
+   "trades": 40,
+   "net": -1006.9,
+   "win_rate": 37.5,
+   "profit_factor": 0.982,
+   "avg": -25.17,
+   "best": 6842.3,
+   "worst": -3666.95,
+   "max_dd": 13771.36,
+   "avg_premium": 115.33,
+   "net_real": -10362.56,
+   "trades_real": 28,
+   "exits": {
+    "target": 12,
+    "stop": 21,
+    "eod": 7
+   },
+   "calls": 18
+  },
+  {
+   "name": "scalp_hull_slope@5m",
+   "trades": 82,
+   "net": -1101.69,
+   "win_rate": 35.4,
+   "profit_factor": 0.986,
+   "avg": -13.44,
+   "best": 5751.66,
+   "worst": -3405.32,
+   "max_dd": 22588.05,
+   "avg_premium": 111.9,
+   "net_real": -6624.86,
+   "trades_real": 59,
+   "exits": {
+    "target": 20,
+    "stop": 37,
+    "eod": 25
+   },
+   "calls": 40
+  },
+  {
+   "name": "scalp_cci_burst@5m",
+   "trades": 59,
+   "net": -1303.25,
+   "win_rate": 32.2,
+   "profit_factor": 0.979,
+   "avg": -22.09,
+   "best": 5580.85,
+   "worst": -3405.32,
+   "max_dd": 19880.6,
+   "avg_premium": 110.84,
+   "net_real": -6736.43,
+   "trades_real": 44,
+   "exits": {
+    "target": 17,
+    "stop": 27,
+    "eod": 15
+   },
+   "calls": 29
+  },
+  {
+   "name": "pta_supply_demand_bn@15m",
+   "trades": 10,
+   "net": -1529.96,
+   "win_rate": 30.0,
+   "profit_factor": 0.889,
+   "avg": -153.0,
+   "best": 5702.52,
+   "worst": -3063.95,
+   "max_dd": 7232.48,
+   "avg_premium": 111.24,
+   "net_real": 3402.78,
+   "trades_real": 8,
+   "exits": {
+    "target": 3,
+    "stop": 5,
+    "eod": 2
+   },
+   "calls": 5
+  },
+  {
+   "name": "nj_liquidity_fib@15m",
+   "trades": 7,
+   "net": -1639.82,
+   "win_rate": 28.6,
+   "profit_factor": 0.768,
+   "avg": -234.26,
+   "best": 5174.16,
+   "worst": -2662.33,
+   "max_dd": 6943.78,
+   "avg_premium": 99.8,
+   "net_real": 129.8,
+   "trades_real": 3,
+   "exits": {
+    "target": 1,
+    "stop": 3,
+    "eod": 3
+   },
+   "calls": 5
+  },
+  {
+   "name": "intra_ha_reversal@15m",
+   "trades": 16,
+   "net": -1746.76,
+   "win_rate": 25.0,
+   "profit_factor": 0.907,
+   "avg": -109.17,
+   "best": 9021.24,
+   "worst": -2857.21,
+   "max_dd": 11348.84,
+   "avg_premium": 104.14,
+   "net_real": 1062.91,
+   "trades_real": 12,
+   "exits": {
+    "target": 3,
+    "stop": 9,
+    "eod": 4
+   },
+   "calls": 7
+  },
+  {
+   "name": "intra_ma_envelope@15m",
+   "trades": 27,
+   "net": -2303.27,
+   "win_rate": 44.4,
+   "profit_factor": 0.947,
+   "avg": -85.31,
+   "best": 5665.02,
+   "worst": -3789.13,
+   "max_dd": 18097.39,
+   "avg_premium": 124.88,
+   "net_real": -8376.64,
+   "trades_real": 20,
+   "exits": {
+    "target": 9,
+    "stop": 14,
+    "eod": 4
+   },
+   "calls": 10
+  },
+  {
+   "name": "nj_supply_demand_smc@15m",
+   "trades": 14,
+   "net": -2571.15,
+   "win_rate": 42.9,
+   "profit_factor": 0.85,
+   "avg": -183.65,
+   "best": 7268.28,
+   "worst": -3668.67,
+   "max_dd": 8383.67,
+   "avg_premium": 106.25,
+   "net_real": 1649.21,
+   "trades_real": 11,
+   "exits": {
+    "target": 3,
+    "stop": 5,
+    "eod": 6
+   },
+   "calls": 7
+  },
+  {
+   "name": "wt_smc_combo@15m",
+   "trades": 3,
+   "net": -2936.12,
+   "win_rate": 33.3,
+   "profit_factor": 0.308,
+   "avg": -978.71,
+   "best": 1304.76,
+   "worst": -2668.87,
+   "max_dd": 4240.88,
+   "avg_premium": 110.83,
+   "net_real": -4240.88,
+   "trades_real": 2,
+   "exits": {
+    "target": 0,
+    "stop": 2,
+    "eod": 1
+   },
+   "calls": 2
+  },
+  {
+   "name": "pta_liquidity_aware_entry@15m",
+   "trades": 30,
+   "net": -3542.81,
+   "win_rate": 33.3,
+   "profit_factor": 0.898,
+   "avg": -118.09,
+   "best": 8058.84,
+   "worst": -3005.27,
+   "max_dd": 15841.4,
+   "avg_premium": 113.12,
+   "net_real": -3442.62,
+   "trades_real": 23,
+   "exits": {
+    "target": 6,
+    "stop": 14,
+    "eod": 10
+   },
+   "calls": 19
+  },
+  {
+   "name": "bb_liquidity_concept@15m",
+   "trades": 29,
+   "net": -3820.21,
+   "win_rate": 34.5,
+   "profit_factor": 0.877,
+   "avg": -131.73,
+   "best": 8058.84,
+   "worst": -3005.27,
+   "max_dd": 14302.14,
+   "avg_premium": 111.97,
+   "net_real": -2928.8,
+   "trades_real": 21,
+   "exits": {
+    "target": 5,
+    "stop": 13,
+    "eod": 11
+   },
+   "calls": 18
+  },
+  {
+   "name": "sb_liquidity_sweep@15m",
+   "trades": 29,
+   "net": -3820.21,
+   "win_rate": 34.5,
+   "profit_factor": 0.877,
+   "avg": -131.73,
+   "best": 8058.84,
+   "worst": -3005.27,
+   "max_dd": 14302.14,
+   "avg_premium": 111.97,
+   "net_real": -2928.8,
+   "trades_real": 21,
+   "exits": {
+    "target": 5,
+    "stop": 13,
+    "eod": 11
+   },
+   "calls": 18
+  },
+  {
+   "name": "intra_linreg_slope@15m",
+   "trades": 34,
+   "net": -3858.11,
+   "win_rate": 38.2,
+   "profit_factor": 0.91,
+   "avg": -113.47,
+   "best": 6784.13,
+   "worst": -3525.66,
+   "max_dd": 13995.5,
+   "avg_premium": 118.07,
+   "net_real": -6742.21,
+   "trades_real": 25,
+   "exits": {
+    "target": 8,
+    "stop": 14,
+    "eod": 12
+   },
+   "calls": 13
+  },
+  {
+   "name": "tfs_trap_fade@15m",
+   "trades": 12,
+   "net": -3919.7,
+   "win_rate": 33.3,
+   "profit_factor": 0.758,
+   "avg": -326.64,
+   "best": 4730.4,
+   "worst": -4099.21,
+   "max_dd": 9291.58,
+   "avg_premium": 124.38,
+   "net_real": -5955.19,
+   "trades_real": 10,
+   "exits": {
+    "target": 2,
+    "stop": 6,
+    "eod": 4
+   },
+   "calls": 7
+  },
+  {
+   "name": "scalp_bb_squeeze_break@5m",
+   "trades": 17,
+   "net": -4042.39,
+   "win_rate": 29.4,
+   "profit_factor": 0.773,
+   "avg": -237.79,
+   "best": 5519.16,
+   "worst": -2904.35,
+   "max_dd": 9514.8,
+   "avg_premium": 115.94,
+   "net_real": -1315.42,
+   "trades_real": 14,
+   "exits": {
+    "target": 4,
+    "stop": 7,
+    "eod": 6
+   },
+   "calls": 9
+  },
+  {
+   "name": "intra_macd_hist_turn@15m",
+   "trades": 42,
+   "net": -4345.9,
+   "win_rate": 35.7,
+   "profit_factor": 0.912,
+   "avg": -103.47,
+   "best": 6234.32,
+   "worst": -3666.95,
+   "max_dd": 12911.42,
+   "avg_premium": 118.77,
+   "net_real": -629.63,
+   "trades_real": 30,
+   "exits": {
+    "target": 9,
+    "stop": 19,
+    "eod": 14
+   },
+   "calls": 22
+  },
+  {
+   "name": "scalp_tema_cross@5m",
+   "trades": 84,
+   "net": -4445.16,
+   "win_rate": 33.3,
+   "profit_factor": 0.944,
+   "avg": -52.92,
+   "best": 5536.72,
+   "worst": -3569.29,
+   "max_dd": 24212.86,
+   "avg_premium": 110.08,
+   "net_real": -7571.22,
+   "trades_real": 61,
+   "exits": {
+    "target": 21,
+    "stop": 39,
+    "eod": 24
+   },
+   "calls": 42
+  },
+  {
+   "name": "nj_order_block_poi@15m",
+   "trades": 4,
+   "net": -4504.23,
+   "win_rate": 25.0,
+   "profit_factor": 0.309,
+   "avg": -1126.06,
+   "best": 2012.09,
+   "worst": -2649.29,
+   "max_dd": 4504.23,
+   "avg_premium": 114.21,
+   "net_real": -1854.94,
+   "trades_real": 3,
+   "exits": {
+    "target": 0,
+    "stop": 3,
+    "eod": 1
+   },
+   "calls": 2
+  },
+  {
+   "name": "scalp_round_level@5m",
+   "trades": 63,
+   "net": -4652.5,
+   "win_rate": 36.5,
+   "profit_factor": 0.938,
+   "avg": -73.85,
+   "best": 5580.85,
+   "worst": -3422.97,
+   "max_dd": 27225.37,
+   "avg_premium": 119.38,
+   "net_real": -12433.39,
+   "trades_real": 48,
+   "exits": {
+    "target": 19,
+    "stop": 31,
+    "eod": 13
+   },
+   "calls": 32
+  },
+  {
+   "name": "trade_room_915_scalp@5m",
+   "trades": 36,
+   "net": -4721.23,
+   "win_rate": 30.6,
+   "profit_factor": 0.89,
+   "avg": -131.15,
+   "best": 5340.37,
+   "worst": -3340.28,
+   "max_dd": 20487.58,
+   "avg_premium": 118.53,
+   "net_real": -6513.51,
+   "trades_real": 26,
+   "exits": {
+    "target": 10,
+    "stop": 17,
+    "eod": 9
+   },
+   "calls": 16
+  },
+  {
+   "name": "intra_vwap_trend@15m",
+   "trades": 53,
+   "net": -5411.06,
+   "win_rate": 35.8,
+   "profit_factor": 0.907,
+   "avg": -102.1,
+   "best": 5702.52,
+   "worst": -3829.52,
+   "max_dd": 12923.99,
+   "avg_premium": 100.85,
+   "net_real": -4209.24,
+   "trades_real": 40,
+   "exits": {
+    "target": 12,
+    "stop": 24,
+    "eod": 17
+   },
+   "calls": 27
+  },
+  {
+   "name": "pta_trap@15m",
+   "trades": 25,
+   "net": -5489.57,
+   "win_rate": 36.0,
+   "profit_factor": 0.797,
+   "avg": -219.58,
+   "best": 4544.93,
+   "worst": -3005.27,
+   "max_dd": 9973.66,
+   "avg_premium": 110.07,
+   "net_real": -2071.53,
+   "trades_real": 17,
+   "exits": {
+    "target": 6,
+    "stop": 10,
+    "eod": 9
+   },
+   "calls": 15
+  },
+  {
+   "name": "scalp_pullback_ema@5m",
+   "trades": 41,
+   "net": -5579.58,
+   "win_rate": 43.9,
+   "profit_factor": 0.859,
+   "avg": -136.09,
+   "best": 4673.39,
+   "worst": -3010.02,
+   "max_dd": 19388.26,
+   "avg_premium": 99.9,
+   "net_real": -3886.73,
+   "trades_real": 33,
+   "exits": {
+    "target": 12,
+    "stop": 19,
+    "eod": 10
+   },
+   "calls": 19
+  },
+  {
+   "name": "intra_pullback_trend@15m",
+   "trades": 12,
+   "net": -5628.59,
+   "win_rate": 25.0,
+   "profit_factor": 0.712,
+   "avg": -469.05,
+   "best": 6234.32,
+   "worst": -3453.72,
+   "max_dd": 14989.51,
+   "avg_premium": 124.58,
+   "net_real": -5669.5,
+   "trades_real": 9,
+   "exits": {
+    "target": 2,
+    "stop": 6,
+    "eod": 4
+   },
+   "calls": 5
+  },
+  {
+   "name": "scalp_rsi2@5m",
+   "trades": 61,
+   "net": -5810.0,
+   "win_rate": 36.1,
+   "profit_factor": 0.909,
+   "avg": -95.25,
+   "best": 7069.95,
+   "worst": -3343.05,
+   "max_dd": 33249.43,
+   "avg_premium": 100.74,
+   "net_real": 16309.55,
+   "trades_real": 44,
+   "exits": {
+    "target": 15,
+    "stop": 35,
+    "eod": 11
+   },
+   "calls": 32
+  },
+  {
+   "name": "intra_fractal_break@15m",
+   "trades": 39,
+   "net": -5811.23,
+   "win_rate": 35.9,
+   "profit_factor": 0.893,
+   "avg": -149.01,
+   "best": 6842.3,
+   "worst": -3835.85,
+   "max_dd": 16714.71,
+   "avg_premium": 114.58,
+   "net_real": -8738.42,
+   "trades_real": 30,
+   "exits": {
+    "target": 10,
+    "stop": 21,
+    "eod": 8
+   },
+   "calls": 18
+  },
+  {
+   "name": "intra_macd_trend@15m",
+   "trades": 35,
+   "net": -6742.75,
+   "win_rate": 40.0,
+   "profit_factor": 0.869,
+   "avg": -192.65,
+   "best": 5665.02,
+   "worst": -3835.85,
+   "max_dd": 22639.26,
+   "avg_premium": 125.37,
+   "net_real": -11202.64,
+   "trades_real": 25,
+   "exits": {
+    "target": 9,
+    "stop": 18,
+    "eod": 8
+   },
+   "calls": 18
+  },
+  {
+   "name": "scalp_rsi_extreme@5m",
+   "trades": 33,
+   "net": -7673.25,
+   "win_rate": 30.3,
+   "profit_factor": 0.778,
+   "avg": -232.52,
+   "best": 5566.44,
+   "worst": -3216.31,
+   "max_dd": 13691.65,
+   "avg_premium": 110.04,
+   "net_real": -2991.52,
+   "trades_real": 22,
+   "exits": {
+    "target": 7,
+    "stop": 16,
+    "eod": 10
+   },
+   "calls": 17
+  },
+  {
+   "name": "cisd_flip@15m",
+   "trades": 10,
+   "net": -7725.41,
+   "win_rate": 20.0,
+   "profit_factor": 0.507,
+   "avg": -772.54,
+   "best": 4524.1,
+   "worst": -3525.66,
+   "max_dd": 15659.41,
+   "avg_premium": 103.14,
+   "net_real": -8689.56,
+   "trades_real": 5,
+   "exits": {
+    "target": 2,
+    "stop": 7,
+    "eod": 1
+   },
+   "calls": 1
+  },
+  {
+   "name": "intra_stoch_rsi@15m",
+   "trades": 30,
+   "net": -7741.48,
+   "win_rate": 33.3,
+   "profit_factor": 0.815,
+   "avg": -258.05,
+   "best": 6066.93,
+   "worst": -3525.66,
+   "max_dd": 24360.88,
+   "avg_premium": 113.68,
+   "net_real": -2035.67,
+   "trades_real": 23,
+   "exits": {
+    "target": 7,
+    "stop": 18,
+    "eod": 5
+   },
+   "calls": 13
+  },
+  {
+   "name": "intra_stoch_swing@15m",
+   "trades": 24,
+   "net": -7907.06,
+   "win_rate": 33.3,
+   "profit_factor": 0.731,
+   "avg": -329.46,
+   "best": 4811.83,
+   "worst": -3005.27,
+   "max_dd": 14171.9,
+   "avg_premium": 115.43,
+   "net_real": -4859.0,
+   "trades_real": 17,
+   "exits": {
+    "target": 5,
+    "stop": 11,
+    "eod": 8
+   },
+   "calls": 16
+  },
+  {
+   "name": "scalp_zscore_snap@5m",
+   "trades": 42,
+   "net": -7950.54,
+   "win_rate": 33.3,
+   "profit_factor": 0.831,
+   "avg": -189.3,
+   "best": 5387.19,
+   "worst": -3521.91,
+   "max_dd": 15541.86,
+   "avg_premium": 105.14,
+   "net_real": 1681.63,
+   "trades_real": 31,
+   "exits": {
+    "target": 9,
+    "stop": 22,
+    "eod": 11
+   },
+   "calls": 22
+  },
+  {
+   "name": "pta_sideways_buying@5m",
+   "trades": 51,
+   "net": -8000.68,
+   "win_rate": 37.3,
+   "profit_factor": 0.84,
+   "avg": -156.88,
+   "best": 5751.66,
+   "worst": -3554.7,
+   "max_dd": 19317.32,
+   "avg_premium": 99.92,
+   "net_real": 5091.66,
+   "trades_real": 39,
+   "exits": {
+    "target": 12,
+    "stop": 26,
+    "eod": 13
+   },
+   "calls": 27
+  },
+  {
+   "name": "scalp_inside_break@5m",
+   "trades": 77,
+   "net": -8021.29,
+   "win_rate": 33.8,
+   "profit_factor": 0.906,
+   "avg": -104.17,
+   "best": 5580.85,
+   "worst": -3398.55,
+   "max_dd": 18304.83,
+   "avg_premium": 105.96,
+   "net_real": -4764.16,
+   "trades_real": 53,
+   "exits": {
+    "target": 21,
+    "stop": 41,
+    "eod": 15
+   },
+   "calls": 44
+  },
+  {
+   "name": "intra_cci_trend@15m",
+   "trades": 28,
+   "net": -8659.32,
+   "win_rate": 39.3,
+   "profit_factor": 0.809,
+   "avg": -309.26,
+   "best": 5605.33,
+   "worst": -3789.13,
+   "max_dd": 20583.15,
+   "avg_premium": 126.45,
+   "net_real": -14366.12,
+   "trades_real": 20,
+   "exits": {
+    "target": 8,
+    "stop": 15,
+    "eod": 5
+   },
+   "calls": 12
+  },
+  {
+   "name": "crt_range@15m",
+   "trades": 10,
+   "net": -8795.07,
+   "win_rate": 30.0,
+   "profit_factor": 0.348,
+   "avg": -879.51,
+   "best": 4250.69,
+   "worst": -2805.37,
+   "max_dd": 13134.39,
+   "avg_premium": 114.27,
+   "net_real": -2635.15,
+   "trades_real": 7,
+   "exits": {
+    "target": 1,
+    "stop": 5,
+    "eod": 4
+   },
+   "calls": 5
+  },
+  {
+   "name": "sl_trap_trading@15m",
+   "trades": 25,
+   "net": -9294.15,
+   "win_rate": 32.0,
+   "profit_factor": 0.673,
+   "avg": -371.77,
+   "best": 4544.93,
+   "worst": -3005.27,
+   "max_dd": 9973.66,
+   "avg_premium": 110.02,
+   "net_real": -2071.53,
+   "trades_real": 17,
+   "exits": {
+    "target": 5,
+    "stop": 11,
+    "eod": 9
+   },
+   "calls": 15
+  },
+  {
+   "name": "intra_power_hour@15m",
+   "trades": 16,
+   "net": -10502.02,
+   "win_rate": 31.2,
+   "profit_factor": 0.253,
+   "avg": -656.38,
+   "best": 1093.31,
+   "worst": -2818.52,
+   "max_dd": 11595.33,
+   "avg_premium": 105.8,
+   "net_real": -7677.46,
+   "trades_real": 12,
+   "exits": {
+    "target": 1,
+    "stop": 5,
+    "eod": 10
+   },
+   "calls": 5
+  },
+  {
+   "name": "trade_room_trap@5m",
+   "trades": 20,
+   "net": -10650.4,
+   "win_rate": 20.0,
+   "profit_factor": 0.52,
+   "avg": -532.52,
+   "best": 4398.62,
+   "worst": -2796.95,
+   "max_dd": 12188.17,
+   "avg_premium": 106.43,
+   "net_real": -7626.6,
+   "trades_real": 15,
+   "exits": {
+    "target": 3,
+    "stop": 10,
+    "eod": 7
+   },
+   "calls": 15
+  },
+  {
+   "name": "it_fake_breakout@15m",
+   "trades": 23,
+   "net": -10896.19,
+   "win_rate": 30.4,
+   "profit_factor": 0.605,
+   "avg": -473.75,
+   "best": 4544.93,
+   "worst": -3005.27,
+   "max_dd": 10984.82,
+   "avg_premium": 111.96,
+   "net_real": -1972.64,
+   "trades_real": 16,
+   "exits": {
+    "target": 5,
+    "stop": 10,
+    "eod": 8
+   },
+   "calls": 13
+  },
+  {
+   "name": "intra_rsi_divergence@15m",
+   "trades": 13,
+   "net": -11037.94,
+   "win_rate": 23.1,
+   "profit_factor": 0.455,
+   "avg": -849.07,
+   "best": 6066.93,
+   "worst": -3795.47,
+   "max_dd": 11037.94,
+   "avg_premium": 129.25,
+   "net_real": -6523.47,
+   "trades_real": 10,
+   "exits": {
+    "target": 1,
+    "stop": 6,
+    "eod": 6
+   },
+   "calls": 6
+  },
+  {
+   "name": "breakout_atr_thrust@15m",
+   "trades": 11,
+   "net": -11307.72,
+   "win_rate": 27.3,
+   "profit_factor": 0.497,
+   "avg": -1027.97,
+   "best": 5960.64,
+   "worst": -4744.47,
+   "max_dd": 13145.32,
+   "avg_premium": 111.02,
+   "net_real": -5172.59,
+   "trades_real": 6,
+   "exits": {
+    "target": 1,
+    "stop": 8,
+    "eod": 2
+   },
+   "calls": 5
+  },
+  {
+   "name": "intra_zscore_fade@15m",
+   "trades": 10,
+   "net": -12911.39,
+   "win_rate": 10.0,
+   "profit_factor": 0.354,
+   "avg": -1291.14,
+   "best": 7069.95,
+   "worst": -3896.31,
+   "max_dd": 19981.34,
+   "avg_premium": 113.5,
+   "net_real": -4200.9,
+   "trades_real": 6,
+   "exits": {
+    "target": 1,
+    "stop": 9,
+    "eod": 0
+   },
+   "calls": 8
+  },
+  {
+   "name": "pta_pullback_scalping@5m",
+   "trades": 52,
+   "net": -13591.71,
+   "win_rate": 40.4,
+   "profit_factor": 0.757,
+   "avg": -261.38,
+   "best": 5444.11,
+   "worst": -3162.83,
+   "max_dd": 19460.07,
+   "avg_premium": 104.96,
+   "net_real": -9568.49,
+   "trades_real": 37,
+   "exits": {
+    "target": 14,
+    "stop": 25,
+    "eod": 13
+   },
+   "calls": 20
+  },
+  {
+   "name": "intra_midday_vwap_fade@15m",
+   "trades": 40,
+   "net": -13728.7,
+   "win_rate": 27.5,
+   "profit_factor": 0.624,
+   "avg": -343.22,
+   "best": 8058.84,
+   "worst": -3231.16,
+   "max_dd": 21876.17,
+   "avg_premium": 99.52,
+   "net_real": -8058.55,
+   "trades_real": 29,
+   "exits": {
+    "target": 4,
+    "stop": 16,
+    "eod": 20
+   },
+   "calls": 21
+  },
+  {
+   "name": "scalp_stoch_pop@5m",
+   "trades": 48,
+   "net": -14643.99,
+   "win_rate": 33.3,
+   "profit_factor": 0.724,
+   "avg": -305.08,
+   "best": 5925.85,
+   "worst": -3117.35,
+   "max_dd": 30564.61,
+   "avg_premium": 113.18,
+   "net_real": -874.38,
+   "trades_real": 35,
+   "exits": {
+    "target": 9,
+    "stop": 26,
+    "eod": 13
+   },
+   "calls": 24
+  },
+  {
+   "name": "sb_sideways_consolidation@5m",
+   "trades": 51,
+   "net": -14710.39,
+   "win_rate": 37.3,
+   "profit_factor": 0.71,
+   "avg": -288.44,
+   "best": 5751.66,
+   "worst": -3554.7,
+   "max_dd": 22162.86,
+   "avg_premium": 99.12,
+   "net_real": -4195.95,
+   "trades_real": 40,
+   "exits": {
+    "target": 10,
+    "stop": 27,
+    "eod": 14
+   },
+   "calls": 29
+  },
+  {
+   "name": "mt_breakout_failure@15m",
+   "trades": 20,
+   "net": -15470.18,
+   "win_rate": 25.0,
+   "profit_factor": 0.439,
+   "avg": -773.51,
+   "best": 3949.38,
+   "worst": -3005.27,
+   "max_dd": 15470.18,
+   "avg_premium": 113.76,
+   "net_real": -6474.95,
+   "trades_real": 13,
+   "exits": {
+    "target": 4,
+    "stop": 10,
+    "eod": 6
+   },
+   "calls": 12
+  },
+  {
+   "name": "mr_sideways_scalp@5m",
+   "trades": 56,
+   "net": -16182.29,
+   "win_rate": 35.7,
+   "profit_factor": 0.705,
+   "avg": -288.97,
+   "best": 5751.66,
+   "worst": -3554.7,
+   "max_dd": 23427.34,
+   "avg_premium": 95.8,
+   "net_real": -4849.74,
+   "trades_real": 42,
+   "exits": {
+    "target": 11,
+    "stop": 30,
+    "eod": 15
+   },
+   "calls": 31
+  },
+  {
+   "name": "intra_ttm_squeeze@15m",
+   "trades": 8,
+   "net": -20628.17,
+   "win_rate": 0.0,
+   "profit_factor": 0.0,
+   "avg": -2578.52,
+   "best": -866.22,
+   "worst": -3440.6,
+   "max_dd": 20628.17,
+   "avg_premium": 128.63,
+   "net_real": -15301.27,
+   "trades_real": 6,
+   "exits": {
+    "target": 0,
+    "stop": 7,
+    "eod": 1
+   },
+   "calls": 3
+  },
+  {
+   "name": "sl_reversal_finder@15m",
+   "trades": 20,
+   "net": -23764.33,
+   "win_rate": 15.0,
+   "profit_factor": 0.34,
+   "avg": -1188.22,
+   "best": 4918.91,
+   "worst": -3871.42,
+   "max_dd": 23764.33,
+   "avg_premium": 110.68,
+   "net_real": -16783.72,
+   "trades_real": 17,
+   "exits": {
+    "target": 3,
+    "stop": 15,
+    "eod": 2
+   },
+   "calls": 14
+  },
+  {
+   "name": "intra_dema_cross@15m",
+   "trades": 38,
+   "net": -24774.94,
+   "win_rate": 31.6,
+   "profit_factor": 0.608,
+   "avg": -651.97,
+   "best": 5665.02,
+   "worst": -3835.85,
+   "max_dd": 36592.86,
+   "avg_premium": 123.59,
+   "net_real": -24787.97,
+   "trades_real": 27,
+   "exits": {
+    "target": 8,
+    "stop": 21,
+    "eod": 9
+   },
+   "calls": 18
+  },
+  {
+   "name": "amd_session@15m",
+   "trades": 18,
+   "net": -25441.45,
+   "win_rate": 22.2,
+   "profit_factor": 0.232,
+   "avg": -1413.41,
+   "best": 4064.01,
+   "worst": -3977.55,
+   "max_dd": 25809.92,
+   "avg_premium": 131.63,
+   "net_real": -23362.61,
+   "trades_real": 12,
+   "exits": {
+    "target": 0,
+    "stop": 12,
+    "eod": 6
+   },
+   "calls": 9
+  },
+  {
+   "name": "mr_9ema_scalp@5m",
+   "trades": 68,
+   "net": -26072.93,
+   "win_rate": 29.4,
+   "profit_factor": 0.689,
+   "avg": -383.43,
+   "best": 6742.06,
+   "worst": -3422.97,
+   "max_dd": 35943.65,
+   "avg_premium": 109.51,
+   "net_real": -21856.68,
+   "trades_real": 51,
+   "exits": {
+    "target": 15,
+    "stop": 37,
+    "eod": 16
+   },
+   "calls": 33
+  },
+  {
+   "name": "scalp_psar@5m",
+   "trades": 84,
+   "net": -32172.93,
+   "win_rate": 27.4,
+   "profit_factor": 0.682,
+   "avg": -383.01,
+   "best": 5519.16,
+   "worst": -3405.32,
+   "max_dd": 39015.14,
+   "avg_premium": 111.38,
+   "net_real": -31309.55,
+   "trades_real": 64,
+   "exits": {
+    "target": 19,
+    "stop": 44,
+    "eod": 21
+   },
+   "calls": 41
+  },
+  {
+   "name": "scalp_ibs@5m",
+   "trades": 80,
+   "net": -32353.85,
+   "win_rate": 26.2,
+   "profit_factor": 0.646,
+   "avg": -404.42,
+   "best": 6703.17,
+   "worst": -3340.03,
+   "max_dd": 38172.61,
+   "avg_premium": 107.45,
+   "net_real": -27176.04,
+   "trades_real": 58,
+   "exits": {
+    "target": 14,
+    "stop": 46,
+    "eod": 20
+   },
+   "calls": 41
+  },
+  {
+   "name": "intra_hull_cross@15m",
+   "trades": 61,
+   "net": -33203.86,
+   "win_rate": 27.9,
+   "profit_factor": 0.612,
+   "avg": -544.33,
+   "best": 6121.96,
+   "worst": -3835.85,
+   "max_dd": 36959.88,
+   "avg_premium": 110.36,
+   "net_real": -35194.1,
+   "trades_real": 48,
+   "exits": {
+    "target": 12,
+    "stop": 34,
+    "eod": 15
+   },
+   "calls": 30
+  },
+  {
+   "name": "sb_9ema_bounce@5m",
+   "trades": 69,
+   "net": -33630.89,
+   "win_rate": 27.5,
+   "profit_factor": 0.58,
+   "avg": -487.4,
+   "best": 4850.7,
+   "worst": -3422.97,
+   "max_dd": 36650.62,
+   "avg_premium": 103.51,
+   "net_real": -22266.68,
+   "trades_real": 50,
+   "exits": {
+    "target": 15,
+    "stop": 39,
+    "eod": 15
+   },
+   "calls": 39
+  },
+  {
+   "name": "scalp_willr_snap@5m",
+   "trades": 40,
+   "net": -37516.8,
+   "win_rate": 25.0,
+   "profit_factor": 0.315,
+   "avg": -937.92,
+   "best": 4253.35,
+   "worst": -3554.7,
+   "max_dd": 37546.91,
+   "avg_premium": 105.22,
+   "net_real": -27285.76,
+   "trades_real": 28,
+   "exits": {
+    "target": 5,
+    "stop": 27,
+    "eod": 8
+   },
+   "calls": 21
+  },
+  {
+   "name": "intra_vwap_reject@15m",
+   "trades": 48,
+   "net": -41814.0,
+   "win_rate": 22.9,
+   "profit_factor": 0.373,
+   "avg": -871.12,
+   "best": 8058.84,
+   "worst": -3871.42,
+   "max_dd": 49229.22,
+   "avg_premium": 102.94,
+   "net_real": -37416.45,
+   "trades_real": 38,
+   "exits": {
+    "target": 5,
+    "stop": 31,
+    "eod": 12
+   },
+   "calls": 30
+  }
+ ],
+ "last_month_model_only_top20": [
+  "mt_breakout_buying@15m",
+  "intra_trix@15m",
+  "intra_heikin_trend@15m",
+  "pta_automated_signal@15m",
+  "bb_volume_profile_poc@15m",
+  "sb_volume_profile@15m",
+  "intra_cpr_break@15m",
+  "breakout_adx_surge@15m",
+  "it_heatmap_breakout@15m",
+  "scalp_macd_flip@5m",
+  "intra_supertrend@15m",
+  "intra_ema_stack@15m",
+  "pta_breakout_direction@15m",
+  "intra_donchian@15m",
+  "intra_ichimoku_tk@15m",
+  "breakout_range_compression@15m",
+  "bb_algo_signal@15m",
+  "intra_orb30@15m",
+  "warrior_micro_pullback@5m",
+  "intra_rsi_regime@15m"
+ ],
+ "persistence": [
+  {
+   "rank_on": [
+    "2025-09-24",
+    "2025-10-23"
+   ],
+   "test_on": [
+    "2025-10-24",
+    "2025-11-23"
+   ],
+   "top20_in_rank_month": 437279.51,
+   "top20_next_month": 128611.24,
+   "bottom20_next_month": -215046.99,
+   "all_avg_x20_next_month": -22237.06,
+   "top20_positive_next_month": 11
+  },
+  {
+   "rank_on": [
+    "2025-10-24",
+    "2025-11-23"
+   ],
+   "test_on": [
+    "2025-11-24",
+    "2025-12-23"
+   ],
+   "top20_in_rank_month": 382571.01,
+   "top20_next_month": -186804.12,
+   "bottom20_next_month": -129047.29,
+   "all_avg_x20_next_month": -104305.4,
+   "top20_positive_next_month": 3
+  },
+  {
+   "rank_on": [
+    "2025-11-24",
+    "2025-12-23"
+   ],
+   "test_on": [
+    "2025-12-24",
+    "2026-01-23"
+   ],
+   "top20_in_rank_month": 120427.0,
+   "top20_next_month": -84103.84,
+   "bottom20_next_month": -54853.01,
+   "all_avg_x20_next_month": -6577.06,
+   "top20_positive_next_month": 4
+  },
+  {
+   "rank_on": [
+    "2025-12-24",
+    "2026-01-23"
+   ],
+   "test_on": [
+    "2026-01-24",
+    "2026-02-23"
+   ],
+   "top20_in_rank_month": 320856.65,
+   "top20_next_month": -215608.9,
+   "bottom20_next_month": -226727.46,
+   "all_avg_x20_next_month": -240280.39,
+   "top20_positive_next_month": 7
+  },
+  {
+   "rank_on": [
+    "2026-01-24",
+    "2026-02-23"
+   ],
+   "test_on": [
+    "2026-02-24",
+    "2026-03-23"
+   ],
+   "top20_in_rank_month": 178639.17,
+   "top20_next_month": -138752.26,
+   "bottom20_next_month": -140060.64,
+   "all_avg_x20_next_month": -76553.93,
+   "top20_positive_next_month": 8
+  },
+  {
+   "rank_on": [
+    "2026-02-24",
+    "2026-03-23"
+   ],
+   "test_on": [
+    "2026-03-24",
+    "2026-04-23"
+   ],
+   "top20_in_rank_month": 378639.8,
+   "top20_next_month": -169570.47,
+   "bottom20_next_month": -354449.95,
+   "all_avg_x20_next_month": -206538.48,
+   "top20_positive_next_month": 6
+  },
+  {
+   "rank_on": [
+    "2026-03-24",
+    "2026-04-23"
+   ],
+   "test_on": [
+    "2026-04-24",
+    "2026-05-23"
+   ],
+   "top20_in_rank_month": 142628.41,
+   "top20_next_month": -374762.76,
+   "bottom20_next_month": -331417.72,
+   "all_avg_x20_next_month": -390393.41,
+   "top20_positive_next_month": 3
+  },
+  {
+   "rank_on": [
+    "2026-04-24",
+    "2026-05-23"
+   ],
+   "test_on": [
+    "2026-05-24",
+    "2026-06-23"
+   ],
+   "top20_in_rank_month": 89065.58,
+   "top20_next_month": -120709.08,
+   "bottom20_next_month": -391845.45,
+   "all_avg_x20_next_month": -260296.98,
+   "top20_positive_next_month": 5
+  },
+  {
+   "rank_on": [
+    "2026-05-24",
+    "2026-06-23"
+   ],
+   "test_on": [
+    "2026-06-24",
+    "2026-07-23"
+   ],
+   "top20_in_rank_month": 95134.0,
+   "top20_next_month": -23098.66,
+   "bottom20_next_month": -239192.52,
+   "all_avg_x20_next_month": -124641.79,
+   "top20_positive_next_month": 8
+  },
+  {
+   "rank_on": [
+    "2026-06-24",
+    "2026-07-23"
+   ],
+   "test_on": [
+    "2026-07-24",
+    "2026-08-23"
+   ],
+   "top20_in_rank_month": 176978.62,
+   "top20_next_month": -118923.92,
+   "bottom20_next_month": -316652.42,
+   "all_avg_x20_next_month": -201205.12,
+   "top20_positive_next_month": 5
+  },
+  {
+   "rank_on": [
+    "2026-07-24",
+    "2026-08-23"
+   ],
+   "test_on": [
+    "2026-08-24",
+    "2026-09-23"
+   ],
+   "top20_in_rank_month": 35162.1,
+   "top20_next_month": -94307.93,
+   "bottom20_next_month": -304338.53,
+   "all_avg_x20_next_month": -205015.89,
+   "top20_positive_next_month": 1
+  },
+  {
+   "rank_on": [
+    "2026-08-24",
+    "2026-09-23"
+   ],
+   "test_on": [
+    "2026-09-24",
+    "2026-10-23"
+   ],
+   "top20_in_rank_month": 62064.35,
+   "top20_next_month": -22974.96,
+   "bottom20_next_month": 29040.18,
+   "all_avg_x20_next_month": 31055.69,
+   "top20_positive_next_month": 8
+  }
+ ],
+ "positive_last_month": 84,
+ "runtime_s": 188
+}

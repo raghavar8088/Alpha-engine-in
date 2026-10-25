@@ -1,0 +1,244 @@
+<title>Option Buying Top 20</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: one 72rem frame; prose holds a 46rem measure, charts and tables take the full frame. */
+:root {
+  --paper: #f4f5f7;
+  --panel: #fdfdfe;
+  --ink: #131824;
+  --ink-2: #48505f;
+  --muted: #687081;
+  --rule: #dde1e7;
+  --axis: #b9bfca;
+  --gain: #2a78d6;
+  --loss: #e34948;
+  --context: #7a8291;
+  --wash-gain: rgba(42, 120, 214, 0.13);
+  --wash-raw: rgba(122, 130, 145, 0.16);
+  --hl: rgba(42, 120, 214, 0.07);
+  --accent: #1e4f9a;
+  --font-display: "IBM Plex Sans Condensed", "Roboto Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "Cascadia Mono", "SF Mono", Consolas, monospace;
+  --s-1: 0.8125rem;
+  --s0: 1rem;
+  --s1: 1.1875rem;
+  --s2: 1.5rem;
+  --s3: clamp(2rem, 1.4rem + 2.6vw, 2.875rem);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0f1217; --panel: #161a21; --ink: #e9ecf1; --ink-2: #b5bcc8; --muted: #8d95a3;
+    --rule: #272d36; --axis: #3d444f; --gain: #3987e5; --loss: #e66767; --context: #7d8592;
+    --wash-gain: rgba(57, 135, 229, 0.20); --wash-raw: rgba(125, 133, 146, 0.20); --hl: rgba(57, 135, 229, 0.10);
+    --accent: #8fb6f0; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0f1217; --panel: #161a21; --ink: #e9ecf1; --ink-2: #b5bcc8; --muted: #8d95a3;
+  --rule: #272d36; --axis: #3d444f; --gain: #3987e5; --loss: #e66767; --context: #7d8592;
+  --wash-gain: rgba(57, 135, 229, 0.20); --wash-raw: rgba(125, 133, 146, 0.20); --hl: rgba(57, 135, 229, 0.10);
+  --accent: #8fb6f0; color-scheme: dark;
+}
+body { background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: var(--s0); line-height: 1.55; }
+.page { max-width: 72rem; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); padding-block: 40px 72px; display: grid; gap: 56px; }
+.prose { max-width: 46rem; }
+.prose p { margin: 0 0 0.9em; }
+.prose p:last-child { margin-bottom: 0; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: -0.005em; }
+h1 { font-size: var(--s3); font-weight: 700; line-height: 1.05; }
+h2 { font-size: var(--s2); font-weight: 600; line-height: 1.15; }
+h3 { font-size: var(--s1); font-weight: 600; }
+section { display: grid; gap: 20px; min-width: 0; }
+.eyebrow { font-family: var(--font-data); font-size: var(--s-1); color: var(--muted); letter-spacing: 0.02em; margin: 0; }
+.masthead { display: grid; gap: 18px; }
+.dek { font-size: var(--s1); color: var(--ink-2); max-width: 46rem; margin: 0; }
+.verdict { font-size: var(--s1); max-width: 46rem; margin: 0; }
+.verdict strong { font-weight: 600; }
+code, .mono { font-family: var(--font-data); font-size: 0.86em; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--gain); outline-offset: 3px; border-radius: 2px; }
+
+.kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0 24px; margin: 8px 0 0; }
+.kpi { border-top: 1px solid var(--axis); padding-top: 12px; min-width: 0; }
+.kpi dt { font-size: var(--s-1); color: var(--muted); letter-spacing: 0.01em; }
+.kpi dd { margin: 4px 0 0; display: grid; gap: 4px; }
+.kv { font-family: var(--font-display); font-weight: 600; font-size: 1.625rem; line-height: 1.1; }
+.kn { font-size: var(--s-1); color: var(--ink-2); line-height: 1.35; }
+@media (max-width: 1000px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 24px; } }
+@media (max-width: 560px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kv { font-size: 1.375rem; } }
+
+figure { margin: 0; background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 16px 16px 12px; min-width: 0; display: grid; gap: 10px; }
+figcaption { font-size: var(--s-1); color: var(--ink-2); max-width: 52rem; }
+.chart { width: 100%; min-height: 120px; }
+.chart svg { display: block; overflow: visible; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: var(--s-1); color: var(--ink-2); margin: 0; padding: 0; list-style: none; }
+.legend li { display: inline-flex; align-items: center; gap: 7px; }
+.key { display: inline-block; width: 16px; height: 0; border-top: 2px solid; }
+.key.net, .key.tgt { border-color: var(--gain); }
+.key.pre { border-color: var(--context); }
+.key.stop { border-color: var(--loss); }
+.key.trig { border-color: var(--ink-2); border-top-width: 1px; }
+.key.box { width: 14px; height: 10px; border: 0; border-radius: 2px; }
+.key.box.raw { background: var(--wash-raw); }
+.key.box.clean { background: var(--wash-gain); }
+.key.dot { width: 9px; height: 9px; border: 0; border-radius: 50%; }
+.key.dot.entry { background: var(--ink); }
+.key.dot.exit { background: var(--gain); }
+
+svg text { font-family: var(--font-body); font-size: 12px; fill: var(--muted); }
+svg .ax { fill: var(--muted); font-variant-numeric: tabular-nums; }
+svg .mono { font-family: var(--font-data); font-size: 11px; }
+svg .lab { fill: var(--ink-2); }
+svg .lab.strong { fill: var(--ink); font-weight: 600; }
+svg .val { fill: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+svg .note { fill: var(--ink-2); paint-order: stroke; stroke: var(--panel); stroke-width: 4px; stroke-linejoin: round; }
+svg .grid { stroke: var(--rule); stroke-width: 1; }
+svg .base { stroke: var(--axis); stroke-width: 1; }
+svg .tick { stroke: var(--axis); stroke-width: 1; }
+svg .ln { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+svg .ln-net { stroke: var(--gain); }
+svg .ln-pre { stroke: var(--context); }
+svg .dot-net { fill: var(--gain); stroke: var(--panel); stroke-width: 2; }
+svg .dot-pre { fill: var(--context); stroke: var(--panel); stroke-width: 2; }
+svg .cross { stroke: var(--axis); stroke-width: 1; }
+svg .hit { fill: transparent; }
+svg .bar-pos { fill: var(--gain); }
+svg .bar-neg { fill: var(--loss); }
+svg .bar-pos:hover, svg .bar-neg:hover { opacity: 0.82; }
+svg .conn { stroke: var(--axis); stroke-width: 1; }
+svg .wick { stroke: var(--ink-2); stroke-width: 1; }
+svg .c-up { fill: var(--panel); stroke: var(--ink-2); stroke-width: 1; }
+svg .c-dn { fill: var(--ink-2); stroke: var(--ink-2); stroke-width: 1; }
+svg .band-raw { fill: var(--wash-raw); }
+svg .band-clean { fill: var(--wash-gain); }
+svg .lv-stop { stroke: var(--loss); stroke-width: 1.5; }
+svg .lv-tgt { stroke: var(--gain); stroke-width: 1.5; }
+svg .lv-trig { stroke: var(--ink-2); stroke-width: 1; }
+svg .dot-entry { fill: var(--ink); stroke: var(--panel); stroke-width: 2; }
+svg .dot-exit { fill: var(--gain); stroke: var(--panel); stroke-width: 2; }
+
+.tablewrap { overflow-x: auto; min-width: 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+caption { caption-side: top; text-align: left; font-family: var(--font-display); font-weight: 600; font-size: var(--s1); color: var(--ink); padding-bottom: 6px; }
+th, td { padding: 8px 10px; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; vertical-align: baseline; }
+thead th { font-weight: 500; color: var(--muted); font-size: var(--s-1); border-bottom-color: var(--axis); vertical-align: bottom; white-space: normal; }
+tbody th { text-align: left; font-weight: 500; }
+thead th:first-child { text-align: left; }
+table.fit { width: auto; }
+table.fit th, table.fit td { padding-inline: 14px; }
+table.fit th:first-child, table.fit td:first-child { padding-left: 0; }
+th:first-child, td:first-child { padding-left: 0; }
+th:last-child, td:last-child { padding-right: 0; }
+td.strong { font-weight: 600; }
+tr.total th, tr.total td { font-weight: 600; border-top: 1px solid var(--axis); }
+tr.primary th, tr.primary td { background: var(--hl); }
+.sub { display: block; font-size: 0.75rem; color: var(--muted); font-weight: 400; }
+.flag { display: block; font-size: 0.75rem; color: var(--loss); font-weight: 500; }
+.wrapcol { white-space: normal; text-align: left; min-width: 16rem; }
+td.barcol { width: 120px; padding-inline: 6px; }
+.ibar { position: relative; display: block; width: 112px; height: 10px; }
+.ibar::before { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; border-left: 1px solid var(--axis); }
+.ibar .neg, .ibar .pos { position: absolute; top: 0; height: 100%; width: var(--w); }
+.ibar .neg { right: 50%; background: var(--loss); border-radius: 3px 0 0 3px; }
+.ibar .pos { left: 50%; background: var(--gain); border-radius: 0 3px 3px 0; }
+
+.rules { display: grid; grid-template-columns: minmax(9rem, 12rem) minmax(0, 1fr); margin: 0; max-width: 60rem; }
+.rule { display: contents; }
+.rule dt, .rule dd { padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.rule dt { font-weight: 600; padding-right: 20px; }
+.rule dd { margin: 0; color: var(--ink-2); }
+@media (max-width: 640px) {
+  .rules { grid-template-columns: minmax(0, 1fr); }
+  .rule dt { border-bottom: 0; padding-bottom: 2px; }
+  .rule dd { padding-top: 0; }
+}
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; align-items: start; }
+@media (max-width: 860px) { .two { grid-template-columns: minmax(0, 1fr); } }
+details { border-top: 1px solid var(--rule); padding-top: 10px; }
+summary { cursor: pointer; color: var(--accent); font-size: var(--s-1); }
+details .tablewrap { margin-top: 10px; max-height: 420px; overflow: auto; }
+footer { border-top: 1px solid var(--axis); padding-top: 18px; font-size: var(--s-1); color: var(--ink-2); display: grid; gap: 10px; }
+footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+.tip { position: fixed; z-index: 10; pointer-events: none; background: var(--ink); color: var(--paper); font-size: 12px; line-height: 1.4; padding: 8px 10px; border-radius: 4px; display: grid; gap: 3px; max-width: 280px; }
+.tip .tr { display: flex; align-items: center; gap: 7px; }
+.tip .tr span { opacity: 0.8; }
+.tip .tk { display: inline-block; width: 12px; height: 0; border-top: 2px solid; opacity: 1; }
+.tip .tk.k-net, .tip .tk.k-pos { border-color: var(--gain); }
+.tip .tk.k-pre { border-color: var(--context); }
+.tip .tk.k-neg { border-color: var(--loss); }
+@media (prefers-reduced-motion: no-preference) { svg .bar-pos, svg .bar-neg { transition: opacity 120ms; } }
+</style>
+
+<div class="page">
+  <header class="masthead">
+    <p class="eyebrow">Backtest · NSE: NIFTY 50 weekly options · option buying · 24 Sep to 23 Oct 2026</p>
+    <h1>Option Buying Top 20</h1>
+    <p class="dek">Every option-buying strategy in the app, replayed over the last month with the live desk's rules, ranked by what one lot made after costs, and checked against the question that matters: does a month's top 20 keep winning?</p>
+    <div class="verdict prose"><p><strong>The top 20 of 167 option-buying strategies, 24 Sep to 23 Oct 2026.</strong> Together, one lot each, they made +₹3,92,237 in 20 sessions (561 trades, 14 of 20 days up). Running all of them at once tied up at most ₹1,55,633 of premium; the worst drawdown was ₹71,050.</p><p><strong>Half the library made money last month: 84 of 167.</strong> The median strategy made +₹13. With that many strategies, twenty will look strong in any month by luck alone.</p><p><strong>A month&#x27;s top 20 does not keep winning.</strong> Over the 12 months before, the top 20 of each month lost money the following month 11 times out of 12: −₹14,21,006 in all on one lot each. They did better than an average 20 (−₹18,06,990) and the bottom 20 (−₹26,74,592) in 8 of 12 months, but they still lost. Last month&#x27;s list is a record of what happened, not a basket to trade.</p></div>
+    <dl class="kpis">
+<div class="kpi"><dt>Top 20 together</dt><dd><span class="kv">+₹3,92,237</span><span class="kn">20 sessions, one lot each</span></dd></div>
+<div class="kpi"><dt>Most premium at once</dt><dd><span class="kv">₹1,55,633</span><span class="kn">running all twenty</span></dd></div>
+<div class="kpi"><dt>Worst drawdown</dt><dd><span class="kv">₹71,050</span><span class="kn">14 of 20 days up</span></dd></div>
+<div class="kpi"><dt>Strategies up</dt><dd><span class="kv">84 of 167</span><span class="kn">the whole library, last month</span></dd></div>
+<div class="kpi"><dt>Next month, 12 tries</dt><dd><span class="kv">−₹14,21,006</span><span class="kn">a month&#x27;s top 20 lost 11 of 12 times</span></dd></div>
+<div class="kpi"><dt>Real-quote trades</dt><dd><span class="kv">411 of 561</span><span class="kn">5–23 Oct at recorded bid/ask</span></dd></div>
+    </dl>
+  </header>
+  <section aria-labelledby="h-top">
+    <h2 id="h-top">The twenty</h2>
+    <div class="prose"><p>One lot (65) per trade. Investment is the average premium paid for one lot; return is the month's net on a ₹2,00,000 account running that one strategy.</p><p>Left out as duplicates (identical trades to a higher-ranked strategy): sb_volume_profile@15m (= bb_volume_profile_poc@15m).</p></div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>#</th><th>Strategy</th><th>Timeframe</th><th>Trades</th><th>Win rate</th><th></th><th>Net, month</th><th>On ₹2L</th><th>Profit factor</th><th>Max drawdown</th><th>Investment a trade</th><th>Real quotes</th></tr></thead>
+      <tbody>
+<tr><td>1</td><th scope="row" class="mono">intra_heikin_trend</th><td>15m</td><td>53</td><td>39.6%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:50.0%"></span></span></td><td class="strong">+₹26,298</td><td>+13.1%</td><td>1.52</td><td>₹14,835</td><td>₹7,130</td><td>41 / 53</td></tr>
+<tr><td>2</td><th scope="row" class="mono">pta_automated_signal</th><td>15m</td><td>29</td><td>51.7%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:48.6%"></span></span></td><td class="strong">+₹25,536</td><td>+12.8%</td><td>1.96</td><td>₹11,443</td><td>₹7,331</td><td>21 / 29</td></tr>
+<tr><td>3</td><th scope="row" class="mono">intra_trix</th><td>15m</td><td>28</td><td>46.4%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:48.2%"></span></span></td><td class="strong">+₹25,335</td><td>+12.7%</td><td>1.87</td><td>₹8,007</td><td>₹7,209</td><td>20 / 28</td></tr>
+<tr><td>4</td><th scope="row" class="mono">mt_breakout_buying</th><td>15m</td><td>25</td><td>48.0%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:43.9%"></span></span></td><td class="strong">+₹23,070</td><td>+11.5%</td><td>1.71</td><td>₹6,958</td><td>₹7,923</td><td>17 / 25</td></tr>
+<tr><td>5</td><th scope="row" class="mono">warrior_micro_pullback</th><td>5m</td><td>30</td><td>53.3%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:43.2%"></span></span></td><td class="strong">+₹22,725</td><td>+11.4%</td><td>1.73</td><td>₹12,910</td><td>₹8,050</td><td>21 / 30</td></tr>
+<tr><td>6</td><th scope="row" class="mono">bb_volume_profile_poc</th><td>15m</td><td>22</td><td>54.5%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:41.1%"></span></span></td><td class="strong">+₹21,624</td><td>+10.8%</td><td>2.06</td><td>₹7,118</td><td>₹7,041</td><td>18 / 22</td></tr>
+<tr><td>7</td><th scope="row" class="mono">intra_supertrend</th><td>15m</td><td>31</td><td>45.2%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:39.3%"></span></span></td><td class="strong">+₹20,645</td><td>+10.3%</td><td>1.57</td><td>₹12,008</td><td>₹7,552</td><td>23 / 31</td></tr>
+<tr><td>8</td><th scope="row" class="mono">breakout_adx_surge</th><td>15m</td><td>9</td><td>66.7%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:37.6%"></span></span></td><td class="strong">+₹19,761</td><td>+9.9%</td><td>4.74</td><td>₹3,397</td><td>₹6,161</td><td>6 / 9</td></tr>
+<tr><td>9</td><th scope="row" class="mono">intra_cpr_break</th><td>15m</td><td>29</td><td>55.2%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:37.4%"></span></span></td><td class="strong">+₹19,659</td><td>+9.8%</td><td>1.57</td><td>₹7,116</td><td>₹7,769</td><td>22 / 29</td></tr>
+<tr><td>10</td><th scope="row" class="mono">intra_ema_stack</th><td>15m</td><td>28</td><td>42.9%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:37.4%"></span></span></td><td class="strong">+₹19,646</td><td>+9.8%</td><td>1.70</td><td>₹10,859</td><td>₹6,970</td><td>21 / 28</td></tr>
+<tr><td>11</td><th scope="row" class="mono">it_heatmap_breakout</th><td>15m</td><td>21</td><td>47.6%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:37.2%"></span></span></td><td class="strong">+₹19,558</td><td>+9.8%</td><td>1.86</td><td>₹6,859</td><td>₹7,166</td><td>14 / 21</td></tr>
+<tr><td>12</td><th scope="row" class="mono">pta_breakout_direction</th><td>15m</td><td>13</td><td>69.2%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:33.9%"></span></span></td><td class="strong">+₹17,814</td><td>+8.9%</td><td>3.48</td><td>₹5,626</td><td>₹7,121</td><td>8 / 13</td></tr>
+<tr><td>13</td><th scope="row" class="mono">bb_algo_signal</th><td>15m</td><td>24</td><td>50.0%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:33.1%"></span></span></td><td class="strong">+₹17,414</td><td>+8.7%</td><td>1.62</td><td>₹6,108</td><td>₹7,660</td><td>17 / 24</td></tr>
+<tr><td>14</td><th scope="row" class="mono">breakout_range_compression</th><td>15m</td><td>8</td><td>75.0%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:33.1%"></span></span></td><td class="strong">+₹17,401</td><td>+8.7%</td><td>3.43</td><td>₹3,938</td><td>₹8,092</td><td>4 / 8</td></tr>
+<tr><td>15</td><th scope="row" class="mono">scalp_roc_thrust</th><td>5m</td><td>46</td><td>47.8%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:31.4%"></span></span></td><td class="strong">+₹16,517</td><td>+8.3%</td><td>1.33</td><td>₹11,307</td><td>₹7,665</td><td>35 / 46</td></tr>
+<tr><td>16</td><th scope="row" class="mono">intra_orb30</th><td>15m</td><td>24</td><td>50.0%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:30.9%"></span></span></td><td class="strong">+₹16,265</td><td>+8.1%</td><td>1.63</td><td>₹10,151</td><td>₹7,718</td><td>18 / 24</td></tr>
+<tr><td>17</td><th scope="row" class="mono">scalp_streak</th><td>5m</td><td>48</td><td>43.8%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:30.8%"></span></span></td><td class="strong">+₹16,215</td><td>+8.1%</td><td>1.32</td><td>₹13,807</td><td>₹7,589</td><td>37 / 48</td></tr>
+<tr><td>18</td><th scope="row" class="mono">intra_aroon</th><td>15m</td><td>27</td><td>44.4%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:30.6%"></span></span></td><td class="strong">+₹16,077</td><td>+8.0%</td><td>1.61</td><td>₹14,055</td><td>₹6,904</td><td>21 / 27</td></tr>
+<tr><td>19</td><th scope="row" class="mono">scalp_pctb</th><td>5m</td><td>48</td><td>43.8%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:29.8%"></span></span></td><td class="strong">+₹15,688</td><td>+7.8%</td><td>1.38</td><td>₹9,889</td><td>₹7,151</td><td>35 / 48</td></tr>
+<tr><td>20</td><th scope="row" class="mono">intra_pivot_break</th><td>15m</td><td>18</td><td>44.4%</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:28.5%"></span></span></td><td class="strong">+₹14,990</td><td>+7.5%</td><td>2.25</td><td>₹5,744</td><td>₹6,295</td><td>12 / 18</td></tr>
+      </tbody></table></div>
+  </section>
+  <section aria-labelledby="h-pers">
+    <h2 id="h-pers">Does a month's top 20 keep winning?</h2>
+    <div class="prose"><p>Every strategy ranked on one month; what that month's top 20 made the next month, one lot each, against an average 20 and the bottom 20 (model prices throughout).</p></div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Ranked on</th><th>Top 20 that month</th><th></th><th>Top 20 next month</th><th>Average 20 next month</th><th>Bottom 20 next month</th><th>Top 20 up next month</th></tr></thead>
+      <tbody>
+<tr><th scope="row">24 Sep 2025 – 23 Oct 2025</th><td>+₹4,37,280</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="pos" style="--w:17.2%"></span></span></td><td class="strong">+₹1,28,611</td><td>−₹22,237</td><td>−₹2,15,047</td><td>11 of 20</td></tr>
+<tr><th scope="row">24 Oct 2025 – 23 Nov 2025</th><td>+₹3,82,571</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:24.9%"></span></span></td><td class="strong">−₹1,86,804</td><td>−₹1,04,305</td><td>−₹1,29,047</td><td>3 of 20</td></tr>
+<tr><th scope="row">24 Nov 2025 – 23 Dec 2025</th><td>+₹1,20,427</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:11.2%"></span></span></td><td class="strong">−₹84,104</td><td>−₹6,577</td><td>−₹54,853</td><td>4 of 20</td></tr>
+<tr><th scope="row">24 Dec 2025 – 23 Jan 2026</th><td>+₹3,20,857</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:28.8%"></span></span></td><td class="strong">−₹2,15,609</td><td>−₹2,40,280</td><td>−₹2,26,727</td><td>7 of 20</td></tr>
+<tr><th scope="row">24 Jan 2026 – 23 Feb 2026</th><td>+₹1,78,639</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:18.5%"></span></span></td><td class="strong">−₹1,38,752</td><td>−₹76,554</td><td>−₹1,40,061</td><td>8 of 20</td></tr>
+<tr><th scope="row">24 Feb 2026 – 23 Mar 2026</th><td>+₹3,78,640</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:22.6%"></span></span></td><td class="strong">−₹1,69,570</td><td>−₹2,06,538</td><td>−₹3,54,450</td><td>6 of 20</td></tr>
+<tr><th scope="row">24 Mar 2026 – 23 Apr 2026</th><td>+₹1,42,628</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:50.0%"></span></span></td><td class="strong">−₹3,74,763</td><td>−₹3,90,393</td><td>−₹3,31,418</td><td>3 of 20</td></tr>
+<tr><th scope="row">24 Apr 2026 – 23 May 2026</th><td>+₹89,066</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:16.1%"></span></span></td><td class="strong">−₹1,20,709</td><td>−₹2,60,297</td><td>−₹3,91,845</td><td>5 of 20</td></tr>
+<tr><th scope="row">24 May 2026 – 23 Jun 2026</th><td>+₹95,134</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:3.1%"></span></span></td><td class="strong">−₹23,099</td><td>−₹1,24,642</td><td>−₹2,39,193</td><td>8 of 20</td></tr>
+<tr><th scope="row">24 Jun 2026 – 23 Jul 2026</th><td>+₹1,76,979</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:15.9%"></span></span></td><td class="strong">−₹1,18,924</td><td>−₹2,01,205</td><td>−₹3,16,652</td><td>5 of 20</td></tr>
+<tr><th scope="row">24 Jul 2026 – 23 Aug 2026</th><td>+₹35,162</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:12.6%"></span></span></td><td class="strong">−₹94,308</td><td>−₹2,05,016</td><td>−₹3,04,339</td><td>1 of 20</td></tr>
+<tr><th scope="row">24 Aug 2026 – 23 Sep 2026</th><td>+₹62,064</td><td class="barcol"><span class="ibar" aria-hidden="true"><span class="neg" style="--w:3.1%"></span></span></td><td class="strong">−₹22,975</td><td>+₹31,056</td><td>+₹29,040</td><td>8 of 20</td></tr>
+<tr class="total"><th scope="row">12 months</th><td></td><td class="barcol"></td><td class="strong">−₹14,21,006</td><td>−₹18,06,990</td><td>−₹26,74,592</td><td></td></tr>
+      </tbody></table></div>
+  </section>
+  <section aria-labelledby="h-how">
+    <h2 id="h-how">How it was tested</h2>
+    <ul class="prose"><li>The library: every option-buying strategy in the app (strategy-service `options_buying`, the Pre-Live desk&#x27;s library): 167 strategy and timeframe pairs (5-minute, 15-minute, 1-hour), on NIFTY 50.</li><li>The live desk&#x27;s rules: a fresh instance every session warmed on 400 bars; a signal at each bar close unless a position is open; at most 6 trades a day; BUY buys the at-the-money call, SELL the at-the-money put, of the nearest weekly expiry; one lot of 65; the category&#x27;s premium stop and target (scalp 25% / 50%, intraday 30% / 60%, breakout 35% / 100%), else out at 15:15.</li><li>Prices on 5–23 Oct 2026: the REAL quotes the app&#x27;s recorder kept every minute, bought at the ask and sold at the bid. On 24 Sep – 3 Oct (no recorder yet): the premium model validated in the NIFTY options study (previous day&#x27;s real NSE prices, India VIX, intraday variance clock), with half the spread and a tick on each fill. The persistence check uses the model for every month.</li><li>Charges: Angel One&#x27;s option rate card at today&#x27;s rates on every trade.</li><li>Real recorded quotes are one snapshot a minute, so a stop or target is checked once a minute, not on every tick.</li></ul>
+  </section>
+  <footer><p>Code and outputs: <code>backend/research/option_buying_top20_2026_10/</code>; <code>obt_run.py</code> replays, <code>obt_report.py</code> rebuilds this page.</p></footer>
+</div>
