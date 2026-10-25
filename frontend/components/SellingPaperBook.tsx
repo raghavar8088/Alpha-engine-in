@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import GlassPanel from "./GlassPanel";
 import ErrorBanner from "./ErrorBanner";
+import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "./StrategyRank";
 import {
   SellingBookPick,
   SellingBookPosition,
@@ -27,6 +28,7 @@ type PosTab = "OPEN" | "CLOSED" | "DECLINED";
 export default function SellingPaperBook({ book }: { book: string }) {
   const [summary, setSummary] = useState<SellingBookSummary | null>(null);
   const [board, setBoard] = useState<SellingBookPick[]>([]);
+  const ranks = useStrategyRanks("selling-books", { book });
   const [rows, setRows] = useState<SellingBookPosition[]>([]);
   const [posTab, setPosTab] = useState<PosTab>("OPEN");
   const [error, setError] = useState<string | null>(null);
@@ -116,10 +118,12 @@ export default function SellingPaperBook({ book }: { book: string }) {
       </div>
 
       <GlassPanel title={`Picked strategies (${board.length})`}>
+        {ranks && <RankNote board={ranks} />}
         <div className="table-scroll">
           <table className="data-table">
             <thead>
               <tr>
+                {ranks && <RankTh />}
                 <th style={{ textAlign: "left" }}>Strategy</th>
                 <th>Side</th>
                 <th>Trades</th>
@@ -133,8 +137,9 @@ export default function SellingPaperBook({ book }: { book: string }) {
               </tr>
             </thead>
             <tbody>
-              {board.map((r) => (
+              {sortByRank(board, ranks, (r) => r.pick).map((r) => (
                 <tr key={r.pick}>
+                  {ranks && <RankTd board={ranks} id={r.pick} />}
                   <td style={{ textAlign: "left" }}>{r.pick}</td>
                   <td>
                     <span className={r.direction === "LONG" ? "side long" : "side short"}>

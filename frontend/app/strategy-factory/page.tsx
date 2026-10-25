@@ -6,6 +6,7 @@ import GlassPanel from "../../components/GlassPanel";
 import StatusPill from "../../components/StatusPill";
 import ErrorBanner from "../../components/ErrorBanner";
 import EmptyState from "../../components/EmptyState";
+import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   SFRecipe,
   SFRow,
@@ -44,6 +45,7 @@ const num = (v: number | null | undefined, dp = 2) =>
 export default function StrategyFactoryPage() {
   const [summary, setSummary] = useState<SFSummary | null>(null);
   const [rows, setRows] = useState<SFRow[]>([]);
+  const ranks = useStrategyRanks("strategy-factory");
   const [recipes, setRecipes] = useState<SFRecipe[]>([]);
   const [positions, setPositions] = useState<any[]>([]);
   const [trades, setTrades] = useState<any[]>([]);
@@ -252,18 +254,21 @@ export default function StrategyFactoryPage() {
             <EmptyState title="No strategies match this filter" note="Clear a filter, or run the backtest to grade the library." />
           ) : (
             <div className="table-scroll">
+              {ranks && <RankNote board={ranks} />}
               <table className="data-table">
                 <thead>
                   <tr>
+                    {ranks && <RankTh />}
                     <th className="l">ID</th><th className="l">Strategy</th><th className="l">Family</th>
                     <th>TF</th><th>HTF</th><th>R:R</th><th>Trades</th><th>Win %</th><th>PF</th>
                     <th>Avg R</th><th>CAGR</th><th>Max DD</th><th>OOS net</th><th>Grade</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.slice(0, 250).map((r) => (
+                  {sortByRank(rows, ranks, (r) => r.strategy_id).slice(0, 250).map((r) => (
                     <Fragment key={r.strategy_id}>
                       <tr className={`row g${r.grade}`} onClick={() => openDetail(r.strategy_id)}>
+                        {ranks && <RankTd board={ranks} id={r.strategy_id} />}
                         <td className="l dim">{r.strategy_id}</td>
                         <td className="l sname">{r.name}{r.open_positions > 0 && <span className="dot" />}</td>
                         <td className="l"><span className="cat">{r.sub_family}</span></td>
@@ -281,7 +286,7 @@ export default function StrategyFactoryPage() {
                       </tr>
                       {detail?.strategy?.strategy_id === r.strategy_id && (
                         <tr className="expand">
-                          <td colSpan={14}><Detail d={detail} row={r} /></td>
+                          <td colSpan={ranks ? 15 : 14}><Detail d={detail} row={r} /></td>
                         </tr>
                       )}
                     </Fragment>

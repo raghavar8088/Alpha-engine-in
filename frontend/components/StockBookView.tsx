@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import GlassPanel from "./GlassPanel";
 import ErrorBanner from "./ErrorBanner";
+import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "./StrategyRank";
 import {
   StockBookKey,
   StockBookPosition,
@@ -26,6 +27,7 @@ type PosTab = "OPEN" | "CLOSED" | "DECLINED";
 export default function StockBookView({ book }: { book: StockBookKey }) {
   const [summary, setSummary] = useState<StockBookSummary | null>(null);
   const [board, setBoard] = useState<StockBookScore[]>([]);
+  const ranks = useStrategyRanks("stock-books", { book });
   const [rows, setRows] = useState<StockBookPosition[]>([]);
   const [posTab, setPosTab] = useState<PosTab>("OPEN");
   const [error, setError] = useState<string | null>(null);
@@ -130,9 +132,11 @@ export default function StockBookView({ book }: { book: StockBookKey }) {
           </div>
         ) : (
           <div className="table-scroll">
+            {ranks && <RankNote board={ranks} />}
             <table className="data-table">
               <thead>
                 <tr>
+                  {ranks && <RankTh />}
                   <th style={{ textAlign: "left" }}>Strategy</th>
                   <th>Trades</th>
                   <th>Win %</th>
@@ -144,8 +148,9 @@ export default function StockBookView({ book }: { book: StockBookKey }) {
                 </tr>
               </thead>
               <tbody>
-                {shown.map((r) => (
+                {sortByRank(shown, ranks, (r) => r.strategy_id).map((r) => (
                   <tr key={r.strategy_id}>
+                    {ranks && <RankTd board={ranks} id={r.strategy_id} />}
                     <td style={{ textAlign: "left" }}>
                       {r.is_anti && <span className="anti">ANTI</span>}
                       {r.strategy_name || r.strategy_id}

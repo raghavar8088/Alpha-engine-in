@@ -6,6 +6,7 @@ import DeskHistory from "../../components/DeskHistory";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import PaperBook from "./PaperBook";
+import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   refreshing,
   fetchNiftyScalpSummary,
@@ -65,6 +66,7 @@ export default function NiftyScalpPage() {
   const [fam, setFam] = useState<string | null>(null);
   const [summary, setSummary] = useState<NiftyScalpSummary | null>(null);
   const [board, setBoard] = useState<NiftyScalpScore[]>([]);
+  const ranks = useStrategyRanks(tab === "leaderboard" ? "nifty-scalp" : null);
   const [frames, setFrames] = useState<NiftyScalpTimeframe[]>([]);
   const [open, setOpen] = useState<NiftyScalpPosition[]>([]);
   const [closed, setClosed] = useState<NiftyScalpPosition[]>([]);
@@ -176,12 +178,14 @@ export default function NiftyScalpPage() {
 
       {tab === "leaderboard" && (
         <GlassPanel title={`Strategy leaderboard${tf ? ` · ${tf}` : ` · all ${summary?.strategy_count ?? 504}`}`}>
+          {ranks && <RankNote board={ranks} />}
           <div className="table-scroll">
             <table className="data-table">
-              <thead><tr><th style={{ textAlign: "left" }}>Strategy</th><th>TF</th><th>Style</th><th>Family</th><th>Trades</th><th>Win %</th><th>Gross</th><th>Fees</th><th>Net P&amp;L</th><th>ROI</th></tr></thead>
+              <thead><tr>{ranks && <RankTh />}<th style={{ textAlign: "left" }}>Strategy</th><th>TF</th><th>Style</th><th>Family</th><th>Trades</th><th>Win %</th><th>Gross</th><th>Fees</th><th>Net P&amp;L</th><th>ROI</th></tr></thead>
               <tbody>
-                {board.map((r) => (
+                {sortByRank(board, ranks, (r) => r.strategy_id).map((r) => (
                   <tr key={r.strategy_id}>
+                    {ranks && <RankTd board={ranks} id={r.strategy_id} />}
                     <td style={{ textAlign: "left" }}>{r.template}</td>
                     <td><span className="badge">{r.timeframe}</span></td>
                     <td style={{ fontSize: 11 }}>{r.style}</td>

@@ -7,6 +7,7 @@ import DeskHistory from "../../components/DeskHistory";
 import StatusPill from "../../components/StatusPill";
 import ErrorBanner from "../../components/ErrorBanner";
 import EmptyState from "../../components/EmptyState";
+import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   refreshing,
   MomentumPosition,
@@ -42,6 +43,7 @@ type VerdictFilter = "ALL" | "READY" | "REJECTED" | "PENDING";
 export default function MomentumPage() {
   const [summary, setSummary] = useState<MomentumSummary | null>(null);
   const [board, setBoard] = useState<MomentumScore[]>([]);
+  const ranks = useStrategyRanks("momentum");
   const [positions, setPositions] = useState<MomentumPosition[]>([]);
   const [trades, setTrades] = useState<MomentumTrade[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -250,9 +252,11 @@ export default function MomentumPage() {
           <EmptyState title="No strategies match this filter" note="Clear a filter, or wait for the desk to accrue trades." />
         ) : (
           <div className="table-scroll">
+            {ranks && <RankNote board={ranks} />}
             <table className="data-table">
               <thead>
                 <tr>
+                  {ranks && <RankTh />}
                   <th className="l">Strategy</th>
                   <th className="l">Style</th>
                   <th>Hold</th>
@@ -269,12 +273,13 @@ export default function MomentumPage() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
+                {sortByRank(rows, ranks, (r) => r.strategy_id).map((r) => (
                   <Fragment key={r.strategy_id}>
                     <tr
                       className={`row ${r.verdict.toLowerCase()}`}
                       onClick={() => setExpanded(expanded === r.strategy_id ? null : r.strategy_id)}
                     >
+                      {ranks && <RankTd board={ranks} id={r.strategy_id} />}
                       <td className="l sname">
                         {r.name}
                         {r.open_positions > 0 && <span className="live-dot" title={`${r.open_positions} open`} />}
@@ -294,7 +299,7 @@ export default function MomentumPage() {
                     </tr>
                     {expanded === r.strategy_id && (
                       <tr className="expand">
-                        <td colSpan={13}>
+                        <td colSpan={ranks ? 14 : 13}>
                           <div className="why">
                             <div className="why-rationale">{r.rationale}</div>
                             <ul>

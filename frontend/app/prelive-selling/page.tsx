@@ -6,6 +6,7 @@ import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import LineChart from "../../components/charts/LineChart";
 import SellingPaperBook from "../../components/SellingPaperBook";
+import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   refreshing,
   SellingDay,
@@ -46,6 +47,7 @@ function LegPills({ structure }: { structure: string }) {
 export default function PreLiveSellingPage() {
   const [status, setStatus] = useState<SellingDeskStatus | null>(null);
   const [scores, setScores] = useState<SellingScore[]>([]);
+  const ranks = useStrategyRanks("prelive-selling");
   const [trades, setTrades] = useState<SellingTrade[]>([]);
   const [equity, setEquity] = useState<SellingEquityPoint[]>([]);
   const [days, setDays] = useState<SellingDay[]>([]);
@@ -279,9 +281,11 @@ export default function PreLiveSellingPage() {
           <div className="empty">No closed trades yet.</div>
         ) : (
           <div className="table-scroll">
+            {ranks && <RankNote board={ranks} />}
             <table className="data-table">
               <thead>
                 <tr>
+                  {ranks && <RankTh />}
                   <th style={{ textAlign: "left" }}>Strategy</th>
                   <th>Trades</th>
                   <th className="muted-col">Win %</th>
@@ -291,8 +295,9 @@ export default function PreLiveSellingPage() {
                 </tr>
               </thead>
               <tbody>
-                {scores.map((s) => (
+                {sortByRank(scores, ranks, (s) => s.strategy_id).map((s) => (
                   <tr key={s.strategy_id}>
+                    {ranks && <RankTd board={ranks} id={s.strategy_id} />}
                     <td style={{ textAlign: "left" }}>{s.strategy_id}</td>
                     <td>{s.trades}</td>
                     {/* Shown for reference only. This desk is not judged on win rate —

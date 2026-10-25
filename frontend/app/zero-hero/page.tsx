@@ -5,6 +5,7 @@ import PageHeader from "../../components/PageHeader";
 import GlassPanel from "../../components/GlassPanel";
 import DeskHistory from "../../components/DeskHistory";
 import ErrorBanner from "../../components/ErrorBanner";
+import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   refreshing,
   ZeroHeroDaily,
@@ -35,6 +36,7 @@ export default function ZeroHeroPage() {
   const [tab, setTab] = useState<Tab>("leaderboard");
   const [summary, setSummary] = useState<ZeroHeroSummary | null>(null);
   const [board, setBoard] = useState<ZeroHeroScore[]>([]);
+  const ranks = useStrategyRanks("zero-hero");
   const [open, setOpen] = useState<ZeroHeroPosition[]>([]);
   const [closed, setClosed] = useState<ZeroHeroPosition[]>([]);
   const [trades, setTrades] = useState<ZeroHeroTrade[]>([]);
@@ -159,10 +161,12 @@ export default function ZeroHeroPage() {
           <div className="controls">
             <input className="filter" value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter by index or name…" />
           </div>
+          {ranks && <RankNote board={ranks} />}
           <div className="table-scroll">
             <table className="data-table">
               <thead>
                 <tr>
+                  {ranks && <RankTh />}
                   <th style={{ textAlign: "left" }}>Strategy</th>
                   <th>Index</th>
                   <th>OTM</th>
@@ -180,8 +184,9 @@ export default function ZeroHeroPage() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
+                {sortByRank(rows, ranks, (r) => r.strategy_id).map((r) => (
                   <tr key={r.strategy_id}>
+                    {ranks && <RankTd board={ranks} id={r.strategy_id} />}
                     <td style={{ textAlign: "left" }} className="sname">{r.name}</td>
                     <td><span className="badge">{r.index}</span></td>
                     <td>{(r.otm_pct * 100).toFixed(2)}%</td>

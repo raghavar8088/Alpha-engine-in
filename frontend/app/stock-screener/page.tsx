@@ -27,6 +27,7 @@ import SectorSpread from "../../components/charts/SectorSpread";
 import ChartinkPanel from "../../components/ChartinkPanel";
 import StockAnalysis from "../../components/StockAnalysis";
 import AnalysedStocks from "../../components/AnalysedStocks";
+import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   refreshing,
   fetchScreenerConfig, fetchScreenerSummary, fetchScreenerMomentum,
@@ -114,6 +115,8 @@ export default function StockScreenerPage() {
   const [detailFor, setDetailFor] = useState<string | null>(null);
   const [volume, setVolume] = useState<ScreenerVolumeBoard | null>(null);
   const [paper, setPaper] = useState<ScreenerPaperSummary | null>(null);
+  // The paper desk's board is one row per signal family; ranked the same way as every desk.
+  const familyRanks = useStrategyRanks(tab === "paper" ? "screener-paper" : null);
   const [paperPos, setPaperPos] = useState<ScreenerPaperPositions | null>(null);
   const [volWindow, setVolWindow] = useState("1d");
   const [volState, setVolState] = useState("");
@@ -945,9 +948,11 @@ Click for the full reason stack`,
                         + "average " + (f.avg_r ?? "—") + "R · " + f.product + " cost schedule",
                     }))}
                 />
+                {familyRanks && <RankNote board={familyRanks} />}
                 <div className="tablewrap">
                   <table>
                     <thead><tr>
+                      {familyRanks && <RankTh />}
                       <th className="l">Signal family</th><th>Open</th><th>Trades</th><th>Win %</th>
                       <th title="Gross profit divided by gross loss — above 1 means it makes money">PF</th>
                       <th title="Average net rupees per trade">Expectancy</th>
@@ -955,10 +960,11 @@ Click for the full reason stack`,
                       <th>Costs paid</th><th>Net P&amp;L</th><th>ROI</th><th>Schedule</th>
                     </tr></thead>
                     <tbody>
-                      {paper.families.map((f) => (
+                      {sortByRank(paper.families, familyRanks, (f) => f.family).map((f) => (
                         <tr key={f.family}
                           className={paperFamily === f.family ? "clickable sel" : "clickable"}
                           onClick={() => setPaperFamily(paperFamily === f.family ? "" : f.family)}>
+                          {familyRanks && <RankTd board={familyRanks} id={f.family} />}
                           <td className="l"><b>{f.label}</b></td>
                           <td className="dim">{f.open_positions}</td>
                           <td className="dim">{f.trades}</td>

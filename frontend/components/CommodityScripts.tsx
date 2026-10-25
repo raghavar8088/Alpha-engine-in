@@ -22,8 +22,9 @@ import {
   CommodityScriptOverview, CommodityScriptBoard,
 } from "../lib/api";
 import { Th, Select, SearchBox, FilterBar, cmp, SortState } from "./TableControls";
+import { RankNote, RankTd, useStrategyRanks } from "./StrategyRank";
 
-type SortKey = "name" | "family" | "tf" | "trades" | "win" | "pf" | "expectancy"
+type SortKey = "rank" | "name" | "family" | "tf" | "trades" | "win" | "pf" | "expectancy"
   | "dd" | "tstat" | "costs" | "net" | "verdict";
 
 const VERDICT_OPTS: [string, string][] = [
@@ -52,7 +53,9 @@ export default function CommodityScripts() {
   const [verdict, setVerdict] = useState("any");
   const [family, setFamily] = useState("any");
   const [tf, setTf] = useState("any");
-  const [sort, setSort] = useState<SortState<SortKey>>({ key: "net", dir: -1 });
+  // Opens in Rank order: the multi-factor rank of each strategy on THIS contract.
+  const [sort, setSort] = useState<SortState<SortKey>>({ key: "rank", dir: 1 });
+  const ranks = useStrategyRanks(symbol ? "commodity" : null, { symbol });
 
   useEffect(() => {
     fetchCommodityScripts()
@@ -94,7 +97,8 @@ export default function CommodityScripts() {
         return d !== 0 ? d : cmp(b.net_pnl, a.net_pnl, 1);
       }
       const pick = (r: typeof a) =>
-        key === "name" ? r.name : key === "family" ? r.family_label
+        key === "rank" ? ranks?.ranks[r.strategy_id]?.rank ?? null
+        : key === "name" ? r.name : key === "family" ? r.family_label
         : key === "tf" ? r.timeframe : key === "trades" ? r.trades
         : key === "win" ? r.win_rate : key === "pf" ? r.profit_factor
         : key === "expectancy" ? r.expectancy : key === "dd" ? r.max_drawdown_pct
@@ -187,8 +191,10 @@ export default function CommodityScripts() {
             note={board?.error ?? "No strategy has traded this contract under those filters."} />
         ) : (
           <div className="tw">
+            {ranks && <RankNote board={ranks} />}
             <table>
               <thead><tr>
+                {ranks && <Th k="rank" sort={sort} setSort={setSort}>Rank</Th>}
                 <Th k="name" sort={sort} setSort={setSort} align="l">Strategy</Th>
                 <Th k="family" sort={sort} setSort={setSort} align="l">Family</Th>
                 <Th k="tf" sort={sort} setSort={setSort}>TF</Th>
@@ -205,6 +211,7 @@ export default function CommodityScripts() {
               <tbody>
                 {rows.map((r) => (
                   <tr key={r.strategy_id}>
+                    {ranks && <RankTd board={ranks} id={r.strategy_id} />}
                     <td className="l nm">{r.name}
                       {r.open_positions > 0 && <span className="op">{r.open_positions} open</span>}</td>
                     <td className="l dim">{r.family_label}</td>

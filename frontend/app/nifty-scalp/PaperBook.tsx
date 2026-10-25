@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useState } from "react";
 import GlassPanel from "../../components/GlassPanel";
 import ErrorBanner from "../../components/ErrorBanner";
+import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   fetchNiftyScalpPaperSummary,
   fetchNiftyScalpPaperRoster,
@@ -34,6 +35,7 @@ const cls = (v: number | null | undefined) => ((v ?? 0) >= 0 ? "gain" : "loss");
 export default function PaperBook({ board }: { board: NiftyScalpScore[] }) {
   const [sum, setSum] = useState<NiftyScalpPaperSummary | null>(null);
   const [roster, setRoster] = useState<NiftyScalpPaperRosterRow[]>([]);
+  const ranks = useStrategyRanks("nifty-scalp-paper");
   const [open, setOpen] = useState<NiftyScalpPosition[]>([]);
   const [closed, setClosed] = useState<NiftyScalpPosition[]>([]);
   const [err, setErr] = useState<string | null>(null);
@@ -196,9 +198,11 @@ export default function PaperBook({ board }: { board: NiftyScalpScore[] }) {
           <div className="empty">No strategies on the book.</div>
         ) : (
           <div className="table-scroll">
+            {ranks && <RankNote board={ranks} />}
             <table className="data-table">
               <thead>
                 <tr>
+                  {ranks && <RankTh />}
                   <th style={{ textAlign: "left" }}>Strategy</th>
                   <th>TF</th>
                   <th>Style</th>
@@ -213,8 +217,9 @@ export default function PaperBook({ board }: { board: NiftyScalpScore[] }) {
                 </tr>
               </thead>
               <tbody>
-                {roster.map((r) => (
+                {sortByRank(roster, ranks, (r) => r.strategy_id).map((r) => (
                   <tr key={r.strategy_id}>
+                    {ranks && <RankTd board={ranks} id={r.strategy_id} />}
                     <td style={{ textAlign: "left" }}>{r.template}</td>
                     <td>
                       <span className="badge">{r.timeframe}</span>

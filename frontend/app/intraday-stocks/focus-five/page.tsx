@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import PageHeader from "../../../components/PageHeader";
 import { fetchFocusSnapshot, type FocusSnapshot } from "../../../lib/intradayFocus";
+import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../../components/StrategyRank";
 
 const rupees = (value: number) => new Intl.NumberFormat("en-IN", {
   style: "currency", currency: "INR", maximumFractionDigits: 2,
@@ -21,6 +22,7 @@ export default function FocusFivePage() {
   const [strategy, setStrategy] = useState("all");
   const [view, setView] = useState<"open" | "closed" | "daily">("open");
   const [clock, setClock] = useState(Date.now());
+  const ranks = useStrategyRanks("focus-five");
   const controller = useRef<AbortController | null>(null);
   const sequence = useRef(0);
 
@@ -96,10 +98,12 @@ export default function FocusFivePage() {
       <section className="panel">
         <div className="section-heading"><div><h2>Your five strategy accounts</h2><p>Capital is ring-fenced: no strategy can borrow another strategy’s allocation.</p></div>
           <span className="muted">{data.closed_trades} closed trades · {data.open_positions} open</span></div>
+        {ranks && <RankNote board={ranks} />}
         <div className="table-scroll"><table>
           <caption>Strategy performance since {data.started_at ? `${stamp(data.started_at)} IST` : "engine startup (not started)"}. Each return is on ₹10 lakh.</caption>
-          <thead><tr><th>Strategy / timeframe</th><th>Allocation</th><th>Equity</th><th>Available cash</th><th>Net return</th><th>Closed trades</th><th>Win rate</th><th>Open</th></tr></thead>
-          <tbody>{data.strategies.map(s => <tr key={s.strategy_id}>
+          <thead><tr>{ranks && <RankTh />}<th>Strategy / timeframe</th><th>Allocation</th><th>Equity</th><th>Available cash</th><th>Net return</th><th>Closed trades</th><th>Win rate</th><th>Open</th></tr></thead>
+          <tbody>{sortByRank(data.strategies, ranks, (s) => s.strategy_id).map(s => <tr key={s.strategy_id}>
+            {ranks && <RankTd board={ranks} id={s.strategy_id} />}
             <td><strong>{s.name}</strong><small>{s.timeframe === "1h" ? "1 hour" : "45 minutes"} · Paper / unvalidated</small></td>
             <td>{rupees(s.initial_capital)}</td><td>{rupees(s.equity)}</td><td>{rupees(s.available_cash)}</td>
             <td className={tone(s.return_pct)}><strong>{percent(s.return_pct)}</strong><small>{rupees(s.total_pnl)}</small></td>

@@ -7,6 +7,7 @@ import ErrorBanner from "../../components/ErrorBanner";
 import Histogram from "../../components/charts/Histogram";
 import LineChart from "../../components/charts/LineChart";
 import PayoffChart from "../../components/charts/PayoffChart";
+import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   refreshing,
   OptionChain,
@@ -171,6 +172,13 @@ export default function OptionsPage() {
   const [sellRunning, setSellRunning] = useState(false);
   const [sellError, setSellError] = useState<string | null>(null);
   const [sellFilter, setSellFilter] = useState<"all" | "qualified">("all");
+  // Multi-factor Rank of each sweep, shown only when it was computed from the sweep on screen.
+  const buyRanksAny = useStrategyRanks(sweep ? "options-buying" : null);
+  const buyRanks = buyRanksAny && buyRanksAny.source_id === sweep?.sweep_id ? buyRanksAny : null;
+  const sellRanksAny = useStrategyRanks(sellSweep ? "options-selling" : null);
+  const sellRanks = sellRanksAny && sellRanksAny.source_id === sellSweep?.sweep_id ? sellRanksAny : null;
+  const sweepRowId = (r: { strategy_id: string; timeframe: string }) =>
+    `${r.strategy_id}-${(r as { symbol?: string | null }).symbol ?? ""}-${r.timeframe}`;
 
   useEffect(() => {
     fetchQualifiedSellingStrategies()
@@ -455,23 +463,23 @@ export default function OptionsPage() {
                     </select>
                   </label>
                 </div>
+                {buyRanks && <RankNote board={buyRanks} />}
                 <div className="table-scroll">
                   <table className="data-table">
                     <thead>
                       <tr>
-                        <th>#</th><th style={{ textAlign: "left" }}>Strategy</th><th>Sym</th><th>Style</th><th>TF</th>
+                        {buyRanks ? <RankTh /> : <th>#</th>}<th style={{ textAlign: "left" }}>Strategy</th><th>Sym</th><th>Style</th><th>TF</th>
                         <th>Trades</th><th>Win rate</th><th>PF</th><th>Expectancy</th><th>Net P&amp;L</th>
                         <th>Max DD</th><th>Data window</th><th>Status</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {sweep.results
-                        .filter((r) => labFilter === "all" || r.qualified)
+                      {sortByRank(sweep.results.filter((r) => labFilter === "all" || r.qualified), buyRanks, sweepRowId)
                         .map((r, i) => {
                           const m = r.metrics;
                           return (
                             <tr key={`${r.strategy_id}-${(r as any).symbol ?? ""}-${r.timeframe}`}>
-                              <td>{i + 1}</td>
+                              {buyRanks ? <RankTd board={buyRanks} id={sweepRowId(r)} /> : <td>{i + 1}</td>}
                               <td style={{ textAlign: "left" }}>{r.name}</td>
                               <td>{(r as any).symbol ?? sweep.symbol}</td>
                               <td>{r.style}</td>
@@ -571,11 +579,12 @@ export default function OptionsPage() {
                     </select>
                   </label>
                 </div>
+                {sellRanks && <RankNote board={sellRanks} />}
                 <div className="table-scroll">
                   <table className="data-table">
                     <thead>
                       <tr>
-                        <th>#</th><th style={{ textAlign: "left" }}>Strategy</th><th>Style</th><th>Risk</th>
+                        {sellRanks ? <RankTh /> : <th>#</th>}<th style={{ textAlign: "left" }}>Strategy</th><th>Style</th><th>Risk</th>
                         <th>Trades</th><th className="muted-col">Win %</th><th>PF</th><th>Net P&amp;L</th>
                         <th>Credit</th><th>Avg margin</th><th>Return on margin</th>
                         <th>Worst trade</th><th>Tail</th><th>Max DD</th><th>Data window</th>
@@ -583,14 +592,13 @@ export default function OptionsPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {sellSweep.results
-                        .filter((r) => sellFilter === "all" || r.qualified)
+                      {sortByRank(sellSweep.results.filter((r) => sellFilter === "all" || r.qualified), sellRanks, (r) => r.strategy_id)
                         .map((r, i) => {
                           const m = r.metrics;
                           const s = m?.selling;
                           return (
                             <tr key={r.strategy_id}>
-                              <td>{i + 1}</td>
+                              {sellRanks ? <RankTd board={sellRanks} id={r.strategy_id} /> : <td>{i + 1}</td>}
                               <td style={{ textAlign: "left" }}>{r.name}</td>
                               <td>{r.style}</td>
                               <td>

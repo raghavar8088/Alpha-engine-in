@@ -7,6 +7,7 @@ import StatusPill from "../../components/StatusPill";
 import ErrorBanner from "../../components/ErrorBanner";
 import EmptyState from "../../components/EmptyState";
 import DeskHistory from "../../components/DeskHistory";
+import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   TSBasketRow,
   TSLibraryRow,
@@ -66,6 +67,7 @@ export default function TrendingStocksPage() {
   const [summary, setSummary] = useState<TSSummary | null>(null);
   const [basket, setBasket] = useState<TSBasketRow[]>([]);
   const [rows, setRows] = useState<TSLibraryRow[]>([]);
+  const ranks = useStrategyRanks("trending-stocks");
   const [open, setOpen] = useState<TSPosition[]>([]);
   const [closed, setClosed] = useState<TSPosition[]>([]);
   const [signals, setSignals] = useState<TSSignal[]>([]);
@@ -606,9 +608,11 @@ export default function TrendingStocksPage() {
                           note="Clear a filter, or run the backtest to grade the library." />
             ) : (
               <div className="table-scroll">
+                {ranks && <RankNote board={ranks} />}
                 <table className="data-table">
                   <thead>
                     <tr>
+                      {ranks && <RankTh />}
                       <th className="l">ID</th><th className="l">Strategy</th><th className="l">Family</th>
                       <th>TF</th><th>Style</th><th>Trades</th><th>Win %</th><th>PF</th>
                       <th>Avg R</th><th>CAGR</th><th>Max DD</th><th>OOS</th><th>WF</th>
@@ -616,9 +620,10 @@ export default function TrendingStocksPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {rows.slice(0, 250).map((r) => (
+                    {sortByRank(rows, ranks, (r) => r.strategy_id).slice(0, 250).map((r) => (
                       <Fragment key={r.strategy_id}>
                         <tr className={`row g${r.grade ?? "x"}`} onClick={() => openDetail(r.strategy_id)}>
+                          {ranks && <RankTd board={ranks} id={r.strategy_id} />}
                           <td className="l dim">{r.strategy_id}</td>
                           <td className="l sname">
                             {r.name}{r.open_positions > 0 && <span className="dot" />}
@@ -645,7 +650,7 @@ export default function TrendingStocksPage() {
                         </tr>
                         {detail?.strategy?.strategy_id === r.strategy_id && (
                           <tr className="expand">
-                            <td colSpan={15}><Detail d={detail} row={r} /></td>
+                            <td colSpan={ranks ? 16 : 15}><Detail d={detail} row={r} /></td>
                           </tr>
                         )}
                       </Fragment>

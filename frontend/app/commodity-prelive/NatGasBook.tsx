@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useState } from "react";
 import GlassPanel from "../../components/GlassPanel";
 import DeskHistory from "../../components/DeskHistory";
+import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   NatGasPosition,
   NatGasStrategy,
@@ -37,6 +38,8 @@ const tone = (v: number | null | undefined) => (!v ? "" : v > 0 ? "gain" : "loss
 export default function NatGasBook() {
   const [sum, setSum] = useState<NatGasSummary | null>(null);
   const [strats, setStrats] = useState<NatGasStrategy[]>([]);
+  const ranks = useStrategyRanks("natgas");
+  const rankId = (s: NatGasStrategy) => `${s.template}:${s.timeframe}`;
   const [open, setOpen] = useState<NatGasPosition[]>([]);
   const [closed, setClosed] = useState<NatGasPosition[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
@@ -146,18 +149,21 @@ export default function NatGasBook() {
       </div>
 
       <GlassPanel title="The two strategies — their record in THIS book">
+        {ranks && <RankNote board={ranks} />}
         <div className="wrap">
           <table>
             <thead>
               <tr>
+                {ranks && <RankTh />}
                 <th className="l">Strategy</th><th className="l">Family</th><th>TF</th><th>Trades</th>
                 <th>Win %</th><th>PF</th><th>Expectancy</th><th>Max DD</th><th>T-stat</th>
                 <th>Costs</th><th>Realised</th><th>Unrealised</th><th>Verdict</th>
               </tr>
             </thead>
             <tbody>
-              {strats.map((s) => (
+              {sortByRank(strats, ranks, rankId).map((s) => (
                 <tr key={`${s.template}:${s.timeframe}`}>
+                  {ranks && <RankTd board={ranks} id={rankId(s)} />}
                   <td className="l"><b>{s.name}</b>{s.open_positions > 0 && <span className="dot" title="position open" />}</td>
                   <td className="l"><span className="fam">{s.family_label}</span></td>
                   <td>{s.timeframe}</td>
@@ -173,7 +179,7 @@ export default function NatGasBook() {
                   <td><span className={`verdict ${s.verdict.toLowerCase()}`} title={s.verdict_reasons.join(" · ")}>{s.verdict}</span></td>
                 </tr>
               ))}
-              {!strats.length && <tr><td colSpan={13} className="empty">Loading roster…</td></tr>}
+              {!strats.length && <tr><td colSpan={ranks ? 14 : 13} className="empty">Loading roster…</td></tr>}
             </tbody>
           </table>
         </div>

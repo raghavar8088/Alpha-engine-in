@@ -846,8 +846,50 @@ export interface IntradayRankFactor {
   label: string;
   weight: number;
   higher_is_better: boolean;
+  unit?: string;
   value: number | null;
   percentile: number | null;
+}
+
+// ---- Strategy Rank: the multi-factor Rank column on every strategy leaderboard ----
+// One desk's board from /api/strategy-rank/{desk}: the factor list once, then per strategy
+// its rank (1 = best on that desk), 0-100 score and each factor's value and percentile, in
+// factor order. Relative, never a verdict.
+export interface RankFactorMeta {
+  key: string;
+  label: string;
+  weight: number;
+  higher_is_better: boolean;
+  // t | bp | ratio | pct | fraction | inr | r - how the value prints.
+  unit?: string;
+}
+export interface StrategyRankEntry {
+  rank: number;
+  score: number;
+  shrunk: boolean;
+  trades: number;
+  values: (number | null)[];
+  pct: (number | null)[];
+}
+export interface StrategyRankBoard {
+  desk: string;
+  // "trades": ranked from the desk's closed trades. "backtest": from the metrics a sweep reports.
+  basis: "trades" | "backtest";
+  min_trades: number;
+  // Backtest boards: the run (sweep id) the rank was computed from.
+  source_id?: string | null;
+  strategies: number;
+  ranked: number;
+  factors: RankFactorMeta[];
+  ranks: Record<string, StrategyRankEntry>;
+}
+export async function fetchStrategyRanks(
+  desk: string, params: Record<string, string | null | undefined> = {},
+): Promise<StrategyRankBoard> {
+  const q = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) if (v) q.set(k, v);
+  const qs = q.toString();
+  return apiFetch(`/api/strategy-rank/${encodeURIComponent(desk)}${qs ? `?${qs}` : ""}`);
 }
 
 export interface IntradayTrade {

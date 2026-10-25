@@ -6,6 +6,7 @@ import GlassPanel from "../../components/GlassPanel";
 import DeskHistory from "../../components/DeskHistory";
 import LineChart from "../../components/charts/LineChart";
 import ErrorBanner from "../../components/ErrorBanner";
+import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   refreshing,
   LiveTradingArming,
@@ -38,6 +39,7 @@ const pct = (v: number | null | undefined) =>
 export default function LiveTradingPage() {
   const [summary, setSummary] = useState<LiveTradingSummary | null>(null);
   const [board, setBoard] = useState<LiveTradingScore[]>([]);
+  const ranks = useStrategyRanks("live-trading");
   const [positions, setPositions] = useState<LiveTradingOpenPosition[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -425,10 +427,12 @@ export default function LiveTradingPage() {
       </GlassPanel>
 
       <GlassPanel title="Selected strategies">
+        {ranks && <RankNote board={ranks} />}
         <div className="table-scroll">
           <table className="data-table">
             <thead>
               <tr>
+                {ranks && <RankTh />}
                 <th style={{ textAlign: "left" }}>Strategy</th>
                 <th>Category</th>
                 <th>Trades</th>
@@ -440,8 +444,9 @@ export default function LiveTradingPage() {
               </tr>
             </thead>
             <tbody>
-              {board.map((s) => (
+              {sortByRank(board, ranks, (s) => s.strategy_id).map((s) => (
                 <tr key={s.strategy_id} className={s.enabled ? "" : "disabled-row"}>
+                  {ranks && <RankTd board={ranks} id={s.strategy_id} />}
                   <td style={{ textAlign: "left" }}>
                     <span className="sname">
                       {s.is_anti && <span className="anti">ANTI</span>}

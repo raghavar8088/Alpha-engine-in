@@ -5,6 +5,7 @@ import GlassPanel from "../../components/GlassPanel";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import LineChart from "../../components/charts/LineChart";
+import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   refreshing,
   LongHorizonEquityPoint,
@@ -30,6 +31,7 @@ const inr2 = (v: number | null | undefined) =>
 export default function LongHorizonPage() {
   const [status, setStatus] = useState<LongHorizonStatus | null>(null);
   const [scores, setScores] = useState<LongHorizonScore[]>([]);
+  const ranks = useStrategyRanks("long-horizon");
   const [trades, setTrades] = useState<LongHorizonTrade[]>([]);
   const [equity, setEquity] = useState<LongHorizonEquityPoint[]>([]);
   const [sweep, setSweep] = useState<LongHorizonSweep | null>(null);
@@ -270,9 +272,11 @@ export default function LongHorizonPage() {
           <div className="empty">No closed trades yet.</div>
         ) : (
           <div className="table-scroll">
+            {ranks && <RankNote board={ranks} />}
             <table className="data-table">
               <thead>
                 <tr>
+                  {ranks && <RankTh />}
                   <th style={{ textAlign: "left" }}>Strategy</th>
                   <th style={{ textAlign: "left" }}>Category</th>
                   <th>Trades</th>
@@ -282,8 +286,9 @@ export default function LongHorizonPage() {
                 </tr>
               </thead>
               <tbody>
-                {scores.map((s) => (
+                {sortByRank(scores, ranks, (s) => s.strategy_id).map((s) => (
                   <tr key={s.strategy_id}>
+                    {ranks && <RankTd board={ranks} id={s.strategy_id} />}
                     <td style={{ textAlign: "left" }}>{s.name}</td>
                     <td style={{ textAlign: "left" }}>
                       <span className="badge">{s.category}</span>

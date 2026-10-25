@@ -66,6 +66,7 @@ from app.api.routes import (
     zero_hero,
     stocks_range,
     strategy_factory,
+    strategy_rank,
     strategies,
     telegram_signals,
     trending_stocks,
@@ -1019,6 +1020,7 @@ app.include_router(commodity.router)
 app.include_router(commodity_positions.router)
 app.include_router(commodity_prelive.router)
 app.include_router(strategy_factory.router)
+app.include_router(strategy_rank.router)
 app.include_router(stock_desk.router)
 app.include_router(stock_desk_books.router)
 app.include_router(selling_paper_books.router)

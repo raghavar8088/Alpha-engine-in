@@ -24,6 +24,7 @@ import DeskHistory from "../../components/DeskHistory";
 import GoldH1Panel from "./GoldH1Panel";
 import GoldCostsPanel from "./GoldCostsPanel";
 import GoldLabPanel from "./GoldLabPanel";
+import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   GoldBasis,
   GoldPosition,
@@ -89,6 +90,8 @@ export default function GoldDeskPage() {
   const [labSum, setLabSum] = useState<GoldLabSummary | null>(null);
   const [venues, setVenues] = useState<GoldSummary[]>([]);
   const [strats, setStrats] = useState<GoldStrategy[]>([]);
+  const ranks = useStrategyRanks(lab ? null : "gold", { venue: tab });
+  const rankId = (s: GoldStrategy) => `${s.symbol}-${s.template}-${s.timeframe}`;
   const [open, setOpen] = useState<GoldPosition[]>([]);
   const [closed, setClosed] = useState<GoldPosition[]>([]);
   const [basis, setBasis] = useState<GoldBasis | null>(null);
@@ -496,10 +499,12 @@ export default function GoldDeskPage() {
       ) : null}
 
       <GlassPanel title="Strategy records" note="a record states what happened — it is never a promotion">
+        {ranks && <RankNote board={ranks} />}
         <div className="table-scroll">
           <table className="data-table">
             <thead>
               <tr>
+                {ranks && <RankTh />}
                 <th className="l">Strategy</th>
                 <th>TF</th>
                 <th>Trades</th>
@@ -514,8 +519,9 @@ export default function GoldDeskPage() {
               </tr>
             </thead>
             <tbody>
-              {strats.map((s) => (
+              {sortByRank(strats, ranks, rankId).map((s) => (
                 <tr key={`${s.symbol}-${s.template}-${s.timeframe}`}>
+                  {ranks && <RankTd board={ranks} id={rankId(s)} />}
                   <td className="l strong">
                     {s.name}
                     {s.h1 && <span className="h1tag">H1</span>}

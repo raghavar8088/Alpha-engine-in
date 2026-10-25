@@ -9,6 +9,7 @@ import ErrorBanner from "../../components/ErrorBanner";
 import V2Validation from "./V2Validation";
 import { AlarmBanner, EdgeReportPanel } from "./IntradayOps";
 import ResetBook from "./ResetBook";
+import { RankNote, RankTd, RankTh, boardFromRows, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import LineChart from "../../components/charts/LineChart";
 import {
   refreshing,
@@ -283,28 +284,6 @@ const inr2 = (v: number | null | undefined) =>
 const pct = (v: number | null | undefined, d = 1) =>
   v === null || v === undefined ? "-" : `${v.toFixed(d)}%`;
 
-/** The hover breakdown of one leaderboard rank: each factor's value and where it stands. */
-function rankTitle(s: IntradayScore): string {
-  if (s.rank_score == null) return "No closed trades yet, so no rank.";
-  const shown = (key: string, v: number | null): string => {
-    if (v === null) return key === "profit_factor" ? "no losing trade" : "n/a";
-    if (key === "t_stat" || key === "profit_factor") return v.toFixed(2);
-    if (key === "net_bp_per_trade") return `${v.toFixed(1)} bp`;
-    if (key === "max_drawdown_pct") return `${v.toFixed(2)}%`;
-    if (key === "positive_days_pct") return `${v.toFixed(0)}%`;
-    if (key === "win_rate") return `${(v * 100).toFixed(1)}%`;
-    if (key === "recent_pnl") return `${v >= 0 ? "+" : "-"}₹${inr(Math.abs(v))}`;
-    return String(v);
-  };
-  const lines = (s.rank_factors ?? []).map((f) =>
-    `${f.label} ${shown(f.key, f.value)}: ${f.percentile == null ? "no figure, counted as middle" : `better than ${f.percentile.toFixed(0)}%`} (weight ${f.weight}%)`);
-  return [
-    `Rank ${s.rank} · score ${s.rank_score.toFixed(1)} / 100`,
-    ...lines,
-    ...(s.rank_shrunk ? [`Only ${s.trades} trades: score pulled toward 50 until the record is long enough.`] : []),
-  ].join("\n");
-}
-
 /** How each price was sourced. Angel is the desk's primary equity feed; a Dhan or
  *  last-bar mark is the honest fallback and is labelled so the page never implies a
  *  live Angel print when the number came from somewhere else. */
@@ -336,8 +315,8 @@ export default function IntradayStocksPage() {
   const [tab, setTab] = useState<IntradayTab>("tournament");
   const [status, setStatus] = useState<IntradayDeskStatus | null>(null);
   const [scores, setScores] = useState<IntradayScore[]>([]);
-  // The rank's factors and weights, as the backend reports them (empty on the legacy catalog).
-  const rankFactors = scores.find((s) => s.rank_factors?.length)?.rank_factors ?? [];
+  // The Tournament's rank arrives inline on its rows (null on the legacy catalog).
+  const tournamentBoard = boardFromRows(scores, status?.gate?.min_trades ?? 30);
   const [trades, setTrades] = useState<IntradayTrade[]>([]);
   const [equity, setEquity] = useState<IntradayEquityPoint[]>([]);
   const [days, setDays] = useState<IntradayDay[]>([]);
@@ -405,6 +384,11 @@ export default function IntradayStocksPage() {
   const patKeyRef = useRef(patKey);
   const liveBookRef = useRef(liveBook);
   const pbKeyRef = useRef(pbKey);
+  // Multi-factor Rank for the boards below; each loads only while its tab is open.
+  const patRanks = useStrategyRanks(tab === "patterns" ? "pattern" : null);
+  const pbRanks = useStrategyRanks(isPatternBook ? "pattern-books" : null, { book: pbKey });
+  const liveRanks = useStrategyRanks(isLive && liveSummary?.source === "tournament" ? "live-intraday" : null,
+                                     { book: liveBook });
 
   const loadPatterns = useCallback(async () => {
     try {
@@ -756,7 +740,7 @@ export default function IntradayStocksPage() {
       </GlassPanel>
 
       <div className="gate-note">
-        <strong>{rankFactors.length ? `Ranked on ${rankFactors.length} factors, judged by the gate.` : "Ranked by P&L, judged by the gate."}</strong> The top of a{" "}
+        <strong>{tournamentBoard ? `Ranked on ${tournamentBoard.factors.length} factors, judged by the gate.` : "Ranked by P&L, judged by the gate."}</strong> The top of a{" "}
         {status?.gate?.strategies_tested ?? scores.length}-strategy board is where luck
         collects: run that many and a handful finish well ahead having proved nothing. A
         strategy is only <strong>READY</strong> if its record would be surprising from a
@@ -778,21 +762,14 @@ export default function IntradayStocksPage() {
           <div className="empty">No strategy stats yet.</div>
         ) : (
           <>
-          {rankFactors.length > 0 && (
-            <div className="rank-note">
-              <strong>Rank</strong> blends {rankFactors.length} factors, each scored as a percentile
-              among these {scores.length} strategies:{" "}
-              {rankFactors.map((f) => `${f.label} ${f.weight}%${f.higher_is_better ? "" : " (lower is better)"}`).join(", ")}.
-              A record under {status?.gate?.min_trades ?? 30} trades is pulled toward the middle. Hover a rank
-              for its breakdown. A rank is relative: #1 is the best of this board, not proof of an
-              edge. Only <strong>READY</strong> means that.
-            </div>
+          {tournamentBoard && (
+            <RankNote board={tournamentBoard}>Only <strong>READY</strong> means that.</RankNote>
           )}
           <div className="table-scroll">
             <table className="data-table">
               <thead>
                 <tr>
-                  {rankFactors.length > 0 && <th>Rank</th>}
+                  {tournamentBoard && <RankTh />}
                   <th style={{ textAlign: "left" }}>Strategy</th>
                   <th style={{ textAlign: "left" }}>Category</th>
                   <th>Trades</th>
@@ -810,14 +787,7 @@ export default function IntradayStocksPage() {
                   const clears = (s.t_stat ?? -99) >= bar;
                   return (
                   <tr key={s.strategy_id}>
-                    {rankFactors.length > 0 && (
-                      // The score is drawn by CSS (::after) so the cell's text stays the bare
-                      // rank: SortableTables sorts on textContent, and "1 · 91.5" would not parse.
-                      <td className="rank-cell" title={rankTitle(s)}
-                          data-score={s.rank_score == null ? "" : s.rank_score.toFixed(1)}>
-                        {s.rank ?? "-"}
-                      </td>
-                    )}
+                    {tournamentBoard && <RankTd board={tournamentBoard} id={s.strategy_id} />}
                     <td style={{ textAlign: "left" }}>{s.name}</td>
                     <td style={{ textAlign: "left" }}>
                       <span className="badge">{s.category}</span>
@@ -985,12 +955,14 @@ export default function IntradayStocksPage() {
       </GlassPanel>
 
       <GlassPanel title={`Strategy leaderboard (${patBoard.length})`}>
+        {patRanks && <RankNote board={patRanks} />}
         <div className="table-scroll">
           <table className="data-table">
-            <thead><tr><th style={{ textAlign: "left" }}>Template</th><th>TF</th><th>Family</th><th>Style</th><th>Trades</th><th>Win %</th><th>Fees</th><th>Net P&amp;L</th><th>ROI</th></tr></thead>
+            <thead><tr>{patRanks && <RankTh />}<th style={{ textAlign: "left" }}>Template</th><th>TF</th><th>Family</th><th>Style</th><th>Trades</th><th>Win %</th><th>Fees</th><th>Net P&amp;L</th><th>ROI</th></tr></thead>
             <tbody>
-              {patBoard.slice(0, 200).map((r) => (
+              {sortByRank(patBoard, patRanks, (r) => r.strategy_id).slice(0, 200).map((r) => (
                 <tr key={r.strategy_id}>
+                  {patRanks && <RankTd board={patRanks} id={r.strategy_id} />}
                   <td style={{ textAlign: "left" }}>{r.template}</td>
                   <td><span className="badge">{r.timeframe}</span></td>
                   <td style={{ fontSize: 11 }}>{r.family}</td>
@@ -1105,16 +1077,19 @@ export default function IntradayStocksPage() {
           </div>
         ) : (
         <div className="table-wrap">
+          {pbRanks && <RankNote board={pbRanks} />}
           <table className="data-table">
             <thead><tr>
+              {pbRanks && <RankTh />}
               <th style={{ textAlign: "left" }}>Strategy</th><th>TF</th><th>Family</th>
               <th>Trades</th><th>Win %</th><th>Fees</th><th>Net P&amp;L</th>
               <th title="Net P&L as a share of this book's capital">Share of book</th>
               <th title="Signals this book could not take: slots full / stock already held / share price above the per-position cap / no cash">Skipped</th>
             </tr></thead>
             <tbody>
-              {active.map((r) => (
+              {sortByRank(active, pbRanks, (r) => r.strategy_id).map((r) => (
                 <tr key={r.strategy_id}>
+                  {pbRanks && <RankTd board={pbRanks} id={r.strategy_id} />}
                   <td style={{ textAlign: "left", fontSize: 11 }}>{r.template}</td>
                   <td><span className="badge">{r.timeframe}</span></td>
                   <td style={{ fontSize: 11 }}>{r.family}</td>
@@ -1326,15 +1301,17 @@ export default function IntradayStocksPage() {
           <div className="empty">Loading the shortlist…</div>
         ) : (
           <div className="table-scroll">
+            {liveRanks && <RankNote board={liveRanks} />}
             <table className="data-table">
-              <thead><tr><th style={{ textAlign: "left" }}>Strategy</th><th style={{ textAlign: "left" }}>Category</th><th>Trades</th><th>Win %</th><th>Net P&amp;L</th>
+              <thead><tr>{liveRanks && <RankTh />}<th style={{ textAlign: "left" }}>Strategy</th><th style={{ textAlign: "left" }}>Category</th><th>Trades</th><th>Win %</th><th>Net P&amp;L</th>
                 {liveSummary?.source === "tournament"
                   ? <><th title="Net P&L as a share of this book's capital">Share of book</th><th title="Signals this book could not take: slots full / stock already held / share price above the per-position cap / no cash / loss breaker">Skipped</th></>
                   : <th>Account</th>}
               </tr></thead>
               <tbody>
-                {liveScores.map((s) => (
+                {sortByRank(liveScores, liveRanks, (s) => s.strategy_id).map((s) => (
                   <tr key={s.strategy_id}>
+                    {liveRanks && <RankTd board={liveRanks} id={s.strategy_id} />}
                     <td style={{ textAlign: "left" }}>{s.is_anti && <span className="badge anti">ANTI</span>} {s.name}</td>
                     <td style={{ textAlign: "left" }}><span className="badge">{s.category}</span></td>
                     <td>{s.trades}</td>
@@ -1429,10 +1406,6 @@ export default function IntradayStocksPage() {
 
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 16px; }
-        .rank-note { font-size: 12px; line-height: 1.5; color: var(--text-muted); margin-bottom: 10px; }
-        .rank-cell { font-weight: 700; font-variant-numeric: tabular-nums; cursor: help; white-space: nowrap; }
-        .rank-cell::after { content: " · " attr(data-score); font-weight: 500; font-size: 11px; color: var(--text-faint); }
-        .rank-cell[data-score=""]::after { content: ""; }
         .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
         .tab { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
         .tab.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }

@@ -7,6 +7,7 @@ import StatusPill from "../../components/StatusPill";
 import ErrorBanner from "../../components/ErrorBanner";
 import EmptyState from "../../components/EmptyState";
 import NatGasBook from "./NatGasBook";
+import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   refreshing,
   CommodityPreliveBoard,
@@ -56,6 +57,9 @@ export default function CommodityPrelivePage() {
   const [scripts, setScripts] = useState<CommodityPreliveScript[]>([]);
   const [scriptsNote, setScriptsNote] = useState<string>("");
   const [board, setBoard] = useState<CommodityPreliveBoard | null>(null);
+  // Ranked per (strategy, contract): the same strategy can be admitted on two contracts.
+  const ranks = useStrategyRanks(tab === "desk" ? "commodity-prelive" : null);
+  const rankId = (r: { strategy_id: string; symbol: string }) => `${r.strategy_id}|${r.symbol}`;
   const [positions, setPositions] = useState<CommodityPrelivePosition[]>([]);
   const [trades, setTrades] = useState<CommodityPreliveTrade[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -523,9 +527,11 @@ export default function CommodityPrelivePage() {
           />
         ) : (
           <div className="table-scroll">
+            {ranks && <RankNote board={ranks} />}
             <table className="data-table">
               <thead>
                 <tr>
+                  {ranks && <RankTh />}
                   <th className="l">Contract</th>
                   <th className="l">Strategy</th>
                   <th className="l">Family</th>
@@ -542,7 +548,7 @@ export default function CommodityPrelivePage() {
                 </tr>
               </thead>
               <tbody>
-                {board.rows.map((r) => {
+                {sortByRank(board.rows, ranks, rankId).map((r) => {
                   const key = `${r.symbol}:${r.strategy_id}`;
                   return (
                     <Fragment key={key}>
@@ -550,6 +556,7 @@ export default function CommodityPrelivePage() {
                         className={`row ${r.verdict.toLowerCase()}`}
                         onClick={() => setExpanded(expanded === key ? null : key)}
                       >
+                        {ranks && <RankTd board={ranks} id={rankId(r)} />}
                         <td className="l sym">{r.symbol}</td>
                         <td className="l sname">
                           {r.name}
@@ -573,7 +580,7 @@ export default function CommodityPrelivePage() {
                       </tr>
                       {expanded === key && (
                         <tr className="expand">
-                          <td colSpan={13}>
+                          <td colSpan={ranks ? 14 : 13}>
                             {r.admitted_because && (
                               <div className="why">
                                 <b>Admitted because:</b> {r.admitted_because}

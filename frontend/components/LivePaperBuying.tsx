@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import GlassPanel from "./GlassPanel";
 import ErrorBanner from "./ErrorBanner";
 import DeskHistory from "./DeskHistory";
+import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "./StrategyRank";
 import {
   LivePaperBook,
   LivePaperDaily,
@@ -32,6 +33,7 @@ const tone = (v: number | null | undefined) => (!v ? "" : v > 0 ? "gain" : "loss
 export default function LivePaperBuying({ book = "50k" }: { book?: LivePaperBook }) {
   const [summary, setSummary] = useState<LivePaperSummary | null>(null);
   const [board, setBoard] = useState<LivePaperScore[]>([]);
+  const ranks = useStrategyRanks("live-paper", { book });
   const [open, setOpen] = useState<LivePaperPosition[]>([]);
   const [closed, setClosed] = useState<LivePaperPosition[]>([]);
   const [daily, setDaily] = useState<LivePaperDaily[]>([]);
@@ -137,11 +139,15 @@ export default function LivePaperBuying({ book = "50k" }: { book?: LivePaperBook
       {summary?.last_notes?.length ? <div className="note">{summary.last_notes.join(" · ")}</div> : null}
 
       <GlassPanel title={`The ${board.length} strategies — their record in THIS book`}>
+        {ranks && <RankNote board={ranks} />}
         <div className="table-scroll">
           <table className="data-table">
             <thead>
               <tr>
-                <th title="Pre-Live tournament rank — also the capital priority">Rank</th>
+                {ranks && <RankTh />}
+                {/* The Pre-Live tournament's order, which is also who gets capital first. Named
+                    Priority so it is not confused with the multi-factor Rank beside it. */}
+                <th title="Pre-Live tournament rank — also the capital priority">Priority</th>
                 <th style={{ textAlign: "left" }}>Strategy</th>
                 <th>TF</th>
                 <th>Trades</th>
@@ -154,8 +160,9 @@ export default function LivePaperBuying({ book = "50k" }: { book?: LivePaperBook
               </tr>
             </thead>
             <tbody>
-              {board.map((r) => (
+              {sortByRank(board, ranks, (r) => r.strategy_id).map((r) => (
                 <tr key={r.strategy_id}>
+                  {ranks && <RankTd board={ranks} id={r.strategy_id} />}
                   <td>{r.rank}</td>
                   <td style={{ textAlign: "left" }}>
                     <span className="anti">ANTI</span>

@@ -9,14 +9,17 @@ Pure - no Mongo, no network. What is tested:
 - a profit factor with no losing trade is the best, not missing;
 - a short record is pulled toward 50, so five lucky trades cannot outrank a long good record;
 - rows with no trades are unranked and sort last; ranks run 1..n in score order;
-- day factors: positive-day share over the strategy's sessions, recent P&L over the DESK's last 5.
+- day factors: positive-day share over the strategy's sessions, recent P&L over the DESK's last 5;
+- a factor no strategy has is dropped and the rest re-weighted to 100; the compact board lines
+  values and percentiles up with its factor list.
 """
 
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from app.services.strategy_rank import FACTORS, _percentiles, day_factors, rank_rows  # noqa: E402
+from app.services.strategy_rank import (FACTORS, POSITION_FACTORS, _percentiles,  # noqa: E402
+                                        compact, day_factors, rank_rows)
 
 failures = 0
 
@@ -35,7 +38,8 @@ def row(sid, trades, **kw):
     return base
 
 
-check("weights sum to 100", abs(sum(w for _k, _l, w, _h in FACTORS) - 100.0) < 1e-9)
+check("weights sum to 100", abs(sum(f[2] for f in FACTORS) - 100.0) < 1e-9
+      and abs(sum(f[2] for f in POSITION_FACTORS) - 100.0) < 1e-9)
 
 p = _percentiles([1.0, 2.0, 2.0, 3.0], True)
 check("percentile ties share a rank", p == [0.0, 50.0, 50.0, 100.0], str(p))
@@ -81,6 +85,20 @@ f = day_factors({"2026-10-14": 100.0, "2026-10-15": -50.0, "2026-10-23": 25.0, "
 check("positive-day share over the strategy's own sessions", f["positive_days_pct"] == 50.0, str(f))
 check("recent P&L sums only the desk's last 5 sessions", f["recent_pnl"] == 25.0, str(f))
 check("never traded: day factors missing", day_factors({}, desk)["recent_pnl"] is None)
+
+thin = [row("x", 50, t_stat=None, positive_days_pct=None, recent_pnl=None, net_pnl=10.0, win_rate=0.6),
+        row("y", 50, t_stat=None, positive_days_pct=None, recent_pnl=None, net_pnl=-10.0, win_rate=0.4)]
+rank_rows(thin)
+keys = [f["key"] for f in thin[0]["rank_factors"]]
+check("factors nobody has are dropped", "t_stat" not in keys and "recent_pnl" not in keys, str(keys))
+check("remaining weights re-scaled to 100",
+      abs(sum(f["weight"] for f in thin[0]["rank_factors"]) - 100.0) < 0.2,
+      str([f["weight"] for f in thin[0]["rank_factors"]]))
+board = compact(rank_rows([dict(good, id="g"), dict(bad, id="b"), dict(idle, id="i")]), FACTORS, id_key="id")
+check("compact: one entry per ranked strategy", set(board["ranks"]) == {"g", "b"}, str(board["ranks"].keys()))
+check("compact: values and percentiles follow the factor list",
+      all(len(e["values"]) == len(board["factors"]) == len(e["pct"]) for e in board["ranks"].values())
+      and board["ranks"]["g"]["values"][0] == 2.0 and board["ranks"]["g"]["rank"] == 1)
 
 print(f"\n{'ALL PASSED' if not failures else f'{failures} FAILED'}")
 sys.exit(1 if failures else 0)

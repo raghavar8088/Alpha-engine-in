@@ -5,6 +5,7 @@ import PageHeader from "./PageHeader";
 import GlassPanel from "./GlassPanel";
 import ErrorBanner from "./ErrorBanner";
 import StockBookView from "./StockBookView";
+import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "./StrategyRank";
 import {
   StockBookKey,
   StockDeskPosition,
@@ -26,6 +27,7 @@ export default function StockDeskPage({ side }: { side: "buying" | "selling" }) 
   const buying = side === "buying";
   const [summary, setSummary] = useState<StockDeskSummary | null>(null);
   const [board, setBoard] = useState<StockDeskScore[]>([]);
+  const ranks = useStrategyRanks("stock-desk", { side });
   const [positions, setPositions] = useState<StockDeskPosition[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
@@ -165,9 +167,11 @@ export default function StockDeskPage({ side }: { side: "buying" | "selling" }) 
           <div className="empty">No strategy has closed a trade yet — the board fills as positions close.</div>
         ) : (
           <div className="table-scroll">
+            {ranks && <RankNote board={ranks} />}
             <table className="data-table">
               <thead>
                 <tr>
+                  {ranks && <RankTh />}
                   <th style={{ textAlign: "left" }}>Strategy</th>
                   <th>Trades</th>
                   <th>Win %</th>
@@ -177,8 +181,9 @@ export default function StockDeskPage({ side }: { side: "buying" | "selling" }) 
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
+                {sortByRank(rows, ranks, (r) => r.strategy_id).map((r) => (
                   <tr key={r.strategy_id}>
+                    {ranks && <RankTd board={ranks} id={r.strategy_id} />}
                     <td style={{ textAlign: "left" }}>
                       <span className="sname">
                         {r.is_anti && <span className="anti">ANTI</span>}
