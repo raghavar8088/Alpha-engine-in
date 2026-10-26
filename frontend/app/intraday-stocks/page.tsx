@@ -53,7 +53,8 @@ import {
 
 // The live books are TABS rather than a dropdown because they are separate
 // accounts, not a filter: switching replaces every number on the page.
-type IntradayTab = "tournament" | "patterns" | "pb50k" | "pb2L" | "pb10L" | "80k" | "30k" | "10k" | "2L" | "10L";
+type IntradayTab = "tournament" | "patterns" | "pb50k" | "pb2L" | "pb10L" | "80k" | "30k" | "10k" | "2L" | "10L"
+  | "top2L" | "top10L";
 // Families as the desk names them, so a filter maps 1:1 onto the catalog.
 const PAT_FAMILIES: { key: string; label: string }[] = [
   { key: "chart_pattern", label: "Chart patterns" },
@@ -73,14 +74,22 @@ const PATTERN_BOOKS: { tab: "pb50k" | "pb2L" | "pb10L"; key: PatternBookKey; lab
 
 // "2L" / "10L" need no "pb" prefix: the pattern books' tabs are "pb50k" / "pb2L" / "pb10L", so a bare
 // "2L" tab is free - and it is this desk's book key, which the API and Reset expect as-is.
-type LiveBookKey = "80k" | "30k" | "10k" | "2L" | "10L";
-const LIVE_BOOKS: { key: LiveBookKey; capital: number; label: string }[] = [
+type LiveBookKey = "80k" | "30k" | "10k" | "2L" | "10L" | "top2L" | "top10L";
+// `top10`: the book trades only the Tournament's top 10 by Rank, picked 26 Oct 2026 (backend
+// live_intraday_engine.TOP10_PICKS); every other rule is the Live Intraday books'.
+const LIVE_BOOKS: { key: LiveBookKey; capital: number; label: string; top10?: boolean }[] = [
   { key: "80k", capital: 80000, label: "₹80k" },
   { key: "30k", capital: 30000, label: "₹30k" },
   { key: "10k", capital: 10000, label: "₹10k" },
   { key: "2L", capital: 200000, label: "₹2 lakh" },
   { key: "10L", capital: 1000000, label: "₹10 lakh" },
+  { key: "top2L", capital: 200000, label: "₹2 lakh", top10: true },
+  { key: "top10L", capital: 1000000, label: "₹10 lakh", top10: true },
 ];
+const liveBookName = (key: LiveBookKey): string => {
+  const b = LIVE_BOOKS.find((x) => x.key === key);
+  return b ? `${b.top10 ? "Top 10 Paper Trade" : "Live Intraday"} · ${b.label}` : key;
+};
 
 // Signed, because a return of "0.42%" and "-0.42%" must not look alike at a glance.
 // Distinct from the file's existing `pct`, which formats an already-scaled percentage.
@@ -221,6 +230,8 @@ const HISTORY_SCOPE: Record<IntradayTab, { deskKey: string; scope?: string; labe
   "10k": { deskKey: "live-intraday", scope: "10k", label: "Live Intraday · ₹10k" },
   "2L": { deskKey: "live-intraday", scope: "2L", label: "Live Intraday · ₹2 lakh" },
   "10L": { deskKey: "live-intraday", scope: "10L", label: "Live Intraday · ₹10 lakh" },
+  top2L: { deskKey: "live-intraday", scope: "top2L", label: "Top 10 Paper Trade · ₹2 lakh" },
+  top10L: { deskKey: "live-intraday", scope: "top10L", label: "Top 10 Paper Trade · ₹10 lakh" },
 };
 
 /** What a tab shows before its data has arrived, or when it could not be loaded.
@@ -586,7 +597,7 @@ export default function IntradayStocksPage() {
             className={tab === b.key ? "tab active" : "tab"}
             onClick={() => setTab(b.key)}
           >
-            Tournament · {tournamentCount} Live Intraday · {b.label}
+            {b.top10 ? `Tournament · Top 10 Paper Trade · ${b.label}` : `Tournament · ${tournamentCount} Live Intraday · ${b.label}`}
           </button>
         ))}
       </div>
@@ -1249,9 +1260,23 @@ export default function IntradayStocksPage() {
       {isLive && (
       <DataGate ready={!!liveSummary} error={error} what={"this Live Intraday book"} onRetry={() => once(`live:${liveBook}`, loadLive)} lastOkAt={lastOkAt}>
       <ResetBook desk="live-intraday" book={liveBook}
-        label={`Live Intraday · ${LIVE_BOOKS.find((b) => b.key === liveBook)?.label ?? liveBook}`}
+        label={liveBookName(liveBook)}
         capital={bookCapital} onDone={() => refreshing(() => loadLive())} />
-      {liveSummary?.source === "tournament" ? (
+      {liveSummary?.roster ? (
+      <div className="desk-banner">
+        <strong>TOP 10 · ₹{bookCapital.toLocaleString("en-IN")} PAPER · THE TOURNAMENT’S TOP 10 ONLY.</strong>{" "}
+        This account copies the trades of just ten Tournament strategies: the ten ranked 1–10 on the
+        multi-factor Rank after the close on 26 Oct 2026. The list is fixed; it is not re-picked as
+        ranks move. Every other rule is the Live Intraday books’: the tournament’s own entry and exit
+        prices (slippage already in them), estimated Angel One charges on this account’s quantity, one
+        account with at most {liveSummary?.max_open_positions ?? 5} positions of up to ₹{inr(liveSummary?.position_cap)} each,
+        whole shares, never two positions in one stock, no leverage, a 3% daily loss breaker.{" "}
+        <strong>These ten led a board of 54, which is where luck collects</strong>, and none had cleared
+        the gate, so this account is the out-of-sample test of whether they keep leading. &ldquo;Picked
+        at&rdquo; is where each stood when chosen. Simulated fills, not broker-confirmed executions.
+        {liveSummary?.copying_since ? ` Copying since ${new Date(liveSummary.copying_since).toLocaleDateString("en-IN")}.` : ""}
+      </div>
+      ) : liveSummary?.source === "tournament" ? (
       <div className="desk-banner">
         <strong>LIVE INTRADAY · ₹{bookCapital.toLocaleString("en-IN")} PAPER · COPYING THE TOURNAMENT.</strong>{" "}
         This book trades the tournament&apos;s {liveSummary?.tournament_strategies ?? 54}{" "}strategies by copying
@@ -1303,7 +1328,9 @@ export default function IntradayStocksPage() {
           <div className="table-scroll">
             {liveRanks && <RankNote board={liveRanks} />}
             <table className="data-table">
-              <thead><tr>{liveRanks && <RankTh />}<th style={{ textAlign: "left" }}>Strategy</th><th style={{ textAlign: "left" }}>Category</th><th>Trades</th><th>Win %</th><th>Net P&amp;L</th>
+              <thead><tr>{liveRanks && <RankTh />}
+                {liveSummary?.roster && <th title="Its Rank and score on the Tournament board when this account was created">Picked at</th>}
+                <th style={{ textAlign: "left" }}>Strategy</th><th style={{ textAlign: "left" }}>Category</th><th>Trades</th><th>Win %</th><th>Net P&amp;L</th>
                 {liveSummary?.source === "tournament"
                   ? <><th title="Net P&L as a share of this book's capital">Share of book</th><th title="Signals this book could not take: slots full / stock already held / share price above the per-position cap / no cash / loss breaker">Skipped</th></>
                   : <th>Account</th>}
@@ -1312,6 +1339,12 @@ export default function IntradayStocksPage() {
                 {sortByRank(liveScores, liveRanks, (s) => s.strategy_id).map((s) => (
                   <tr key={s.strategy_id}>
                     {liveRanks && <RankTd board={liveRanks} id={s.strategy_id} />}
+                    {liveSummary?.roster && (
+                      <td className="srank-cell" data-score={s.picked_score == null ? "" : s.picked_score.toFixed(1)}
+                          title={s.picked_rank ? `Rank ${s.picked_rank} of 54 on the Tournament board when picked (26 Oct 2026): score ${s.picked_score?.toFixed(1)}, ${s.picked_trades} trades, ${(s.picked_net_pnl ?? 0) >= 0 ? "+" : "-"}₹${inr(Math.abs(s.picked_net_pnl ?? 0))} net there` : ""}>
+                        {s.picked_rank ?? "-"}
+                      </td>
+                    )}
                     <td style={{ textAlign: "left" }}>{s.is_anti && <span className="badge anti">ANTI</span>} {s.name}</td>
                     <td style={{ textAlign: "left" }}><span className="badge">{s.category}</span></td>
                     <td>{s.trades}</td>

@@ -98,8 +98,42 @@ BOOK_CAPITAL: dict[str, float] = {
     "10k": float(os.getenv("LIVE_INTRADAY_CAPITAL_10K", "10000")),
     "2L": float(os.getenv("LIVE_INTRADAY_CAPITAL_2L", "200000")),
     "10L": float(os.getenv("LIVE_INTRADAY_CAPITAL_10L", "1000000")),
+    # Top-10 books (2026-10-26): see TOP10_PICKS.
+    "top2L": float(os.getenv("LIVE_INTRADAY_CAPITAL_TOP2L", "200000")),
+    "top10L": float(os.getenv("LIVE_INTRADAY_CAPITAL_TOP10L", "1000000")),
 }
 BOOKS = list(BOOK_CAPITAL)
+
+# TOP-10 BOOKS. The owner asked (2026-10-26) for Rs 2 lakh and Rs 10 lakh paper accounts on
+# the Tournament's top 10 strategies. These are the ten that ranked 1-10 on the multi-factor
+# Rank (strategy_rank) after the close of 26 Oct 2026, 16:26 IST - FROZEN here, not re-picked as
+# ranks move: a book that kept swapping in whatever led lately would only ever be chasing the
+# last few weeks. Every rule is the other books' (copy the tournament's own fills, one account,
+# five slots, whole shares, one position per stock, Angel costs on the book's quantity, the 3%
+# breaker); the only difference is that signals from the other 44 strategies are not offered.
+# They led a 54-strategy board, which is where luck collects - none had cleared the gate (9
+# REJECTED, 1 PENDING) - so these books are the out-of-sample test of whether they keep leading.
+# (strategy_id, rank, score, trades, net P&L in the tournament) at the pick.
+TOP10_PICKED_AT = "2026-10-26T16:26:00+05:30"
+TOP10_PICKS: tuple[tuple[str, int, float, int, float], ...] = (
+    ("iv2_orb_inplay_25", 1, 93.4, 45, 166201.60),       # ORB Stocks-in-Play (stop 25% ATR)
+    ("iv2_supertrend_1h", 2, 91.9, 84, 226406.74),       # Supertrend Flip · 1 hour
+    ("iv2_macd_trend_1h", 3, 89.3, 107, 146040.91),      # MACD Trend Turn · 1 hour
+    ("iv2_vwap_trend_45m", 4, 88.5, 78, 124071.55),      # VWAP Reclaim · 45 min
+    ("iv2_pdh_pdl_1h", 5, 87.4, 65, 122936.34),          # Prior-Day High/Low Break · 1 hour
+    ("iv2_supertrend_45m", 6, 87.0, 98, 161514.54),      # Supertrend Flip · 45 min
+    ("iv2_or_close_break_1h", 7, 82.7, 52, 64878.44),    # Opening-Range Close Break · 1 hour
+    ("iv2_keltner_1h", 8, 81.7, 95, 131719.31),          # Keltner Breakout · 1 hour
+    ("iv2_orb_sel15", 9, 79.7, 18, 195471.78),           # Selected ORB 15-min (top-5 expected move)
+    ("iv2_adx_dmi_1h", 10, 77.7, 89, 44809.89),          # ADX Trend Start · 1 hour
+)
+TOP10_ROSTER: tuple[str, ...] = tuple(p[0] for p in TOP10_PICKS)
+# Which books trade only a roster; a book not listed copies all 54.
+BOOK_ROSTER: dict[str, tuple[str, ...]] = {"top2L": TOP10_ROSTER, "top10L": TOP10_ROSTER}
+
+
+def book_roster(book: str) -> tuple[str, ...] | None:
+    return BOOK_ROSTER.get(book)
 DEFAULT_BOOK = "80k"
 STATE_ID = "engine"  # legacy id, kept for the 80k book so old state keeps resolving
 
@@ -376,7 +410,8 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
     differ — so they are computed once here and each book decides independently whether
     it can afford the trade."""
     breakers = {b: await breaker_state(b) for b in BOOKS}
-    live_books = [b for b in BOOKS if not breakers[b]["breaker_tripped"]]
+    # A roster book trades only its Tournament roster, never the legacy eight.
+    live_books = [b for b in BOOKS if b not in BOOK_ROSTER and not breakers[b]["breaker_tripped"]]
     notes: list[str] = [
         f"{b} book: DAILY LOSS BREAKER TRIPPED — today's P&L Rs{breakers[b]['today_pnl']:,.0f} crossed the "
         f"Rs{breakers[b]['daily_loss_limit']:,.0f} limit. No new positions this session; open ones still managed."
@@ -580,11 +615,16 @@ async def summary(book: str = DEFAULT_BOOK) -> dict:
         # slice is the per-POSITION cap instead.
         alloc = mirror.position_cap(capital)
         started = await mirror.started_at(book)
+        roster = book_roster(book)
         copy = {"source": "tournament", "max_open_positions": mirror.MAX_OPEN,
-                "position_cap": round(alloc, 2), "tournament_strategies": len(v2.CATALOG),
+                "position_cap": round(alloc, 2),
+                "tournament_strategies": len(roster) if roster else len(v2.CATALOG),
                 "skipped": await mirror.skipped_totals(book),
                 "copying_since": (started if started.tzinfo else started.replace(
                     tzinfo=timezone.utc)).isoformat() if started else None}
+        if roster:
+            copy["roster"] = list(roster)
+            copy["roster_picked_at"] = TOP10_PICKED_AT
     return {
         **copy,
         "book": book, "books": BOOKS,

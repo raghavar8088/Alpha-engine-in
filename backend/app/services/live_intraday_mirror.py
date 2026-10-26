@@ -452,6 +452,12 @@ async def _sync(*, entries: bool) -> dict:
         pointed = [r["parent_position_id"] for r in open_rows
                    if r.get("source") == SOURCE_TAG and r.get("parent_position_id")]
         parents = await _parents(window_start(floor), pointed)
+        roster = li.book_roster(book)
+        if roster is not None:
+            # A roster book (the Top-10 books) is offered only its roster's trades. The rest are
+            # not candidates at all, so they are neither copied nor counted as skipped.
+            keep = set(roster)
+            parents = [p for p in parents if p["strategy_id"] in keep]
         op, cl = await li._totals_split(live_intraday_positions_collection, {"book": book})
         breaker = (await li.breaker_state(book))["breaker_tripped"] if entries else False
         decided = await _decided(book, parents) if entries else set()
@@ -527,14 +533,23 @@ async def _sync(*, entries: bool) -> dict:
 async def leaderboard_rows(book: str, capital: float) -> list[dict]:
     """One row per tournament strategy - including the ones this book never got a slot for,
     because how often a strategy was crowded out is part of what a small account learns."""
+    from app.services import live_intraday_engine as li   # late: that module imports this one
+
     scores = {s["strategy_id"]: s async for s in live_intraday_scores_collection.find(
         {"book": book, "source": SOURCE_TAG})}
+    roster = li.book_roster(book)
+    # A roster book lists its roster only, each with where it stood when it was picked - the
+    # record it earns here, beside the record that got it picked, IS the experiment.
+    picked = {sid: (rank, score, trades, net) for sid, rank, score, trades, net in li.TOP10_PICKS} \
+        if roster else {}
     rows = []
     for spec in v2.CATALOG:
+        if roster is not None and spec.strategy_id not in roster:
+            continue
         sc = scores.get(spec.strategy_id) or {}
         net = sc.get("net_pnl", 0.0) or 0.0
         skipped = {k: int((sc.get("skipped") or {}).get(k, 0)) for k in SKIP_REASONS}
-        rows.append({
+        row = {
             "strategy_id": spec.strategy_id, "name": spec.name, "category": spec.category,
             "is_anti": False, "trades": sc.get("trades", 0) or 0,
             "win_rate": sc.get("win_rate", 0.0) or 0.0,
@@ -545,7 +560,12 @@ async def leaderboard_rows(book: str, capital: float) -> list[dict]:
             "allocated_capital": None,
             "roi_pct": round(net / capital * 100, 3) if capital else 0.0,
             "skipped": skipped, "skipped_total": sum(skipped.values()),
-        })
+        }
+        if spec.strategy_id in picked:
+            rank, score, trades, pnet = picked[spec.strategy_id]
+            row.update({"picked_rank": rank, "picked_score": score, "picked_trades": trades,
+                        "picked_net_pnl": pnet})
+        rows.append(row)
     rows.sort(key=lambda r: (r["net_pnl"], r["trades"]), reverse=True)
     return rows
 

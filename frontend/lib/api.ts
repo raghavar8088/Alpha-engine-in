@@ -834,6 +834,11 @@ export interface IntradayScore {
   rank?: number | null;
   rank_score?: number | null;
   rank_shrunk?: boolean;
+  // Top-10 books: where the strategy stood on the Tournament board when it was picked.
+  picked_rank?: number;
+  picked_score?: number;
+  picked_trades?: number;
+  picked_net_pnl?: number;
   rank_factors?: IntradayRankFactor[];
   net_bp_per_trade?: number | null;
   positive_days_pct?: number | null;
@@ -936,7 +941,8 @@ export async function fetchIntradayTrades(limit = 100): Promise<IntradayTrade[]>
 }
 
 // ---- Live Intraday desk (curated ₹80k shortlist inside Intraday Stocks) ----
-export type LiveIntradayBook = "80k" | "30k" | "10k" | "2L" | "10L";
+// "top2L" / "top10L" (2026-10-26) trade only the Tournament's top 10 by Rank, frozen at the pick.
+export type LiveIntradayBook = "80k" | "30k" | "10k" | "2L" | "10L" | "top2L" | "top10L";
 
 export interface DailyRoi {
   date: string;
@@ -953,6 +959,9 @@ export interface LiveIntradaySummary {
   // "tournament" (since 2026-10-13): the book copies the tournament's trades as ONE account
   // of up to max_open_positions, each capped at position_cap. "legacy": the old 8-strategy scan.
   source?: "tournament" | "legacy";
+  // A roster book (the Top-10 books): the strategies it is limited to, and when they were picked.
+  roster?: string[];
+  roster_picked_at?: string;
   max_open_positions?: number;
   position_cap?: number;
   tournament_strategies?: number;

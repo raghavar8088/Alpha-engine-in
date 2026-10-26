@@ -49,7 +49,8 @@ DESKS: dict[str, dict] = {
     "live-intraday": {
         "label": "Live Intraday",
         "books": {"80k": "Rs80,000", "30k": "Rs30,000", "10k": "Rs10,000",
-                  "2L": "Rs2,00,000", "10L": "Rs10,00,000"},
+                  "2L": "Rs2,00,000", "10L": "Rs10,00,000",
+                  "top2L": "Top 10 Rs2,00,000", "top10L": "Top 10 Rs10,00,000"},
         "collections": ["live_intraday_positions", "live_intraday_trades", "live_intraday_scores", "live_intraday_equity"],
     },
 }
