@@ -7,8 +7,9 @@ Returns the desk's factor list once and, per strategy, its rank (1 = best on tha
 strategy id. Desks and their sources are listed in services/strategy_rank_desks.py; the
 Tournament's board carries its rank inline (/api/intraday-lab/leaderboard).
 
-Cached 60 s per desk + params: a rank moves only when a trade closes, and the heavier boards
-(the commodity desk has ~42k closed trades) should not be re-aggregated on every page poll.
+Cached 60 s per desk + params (5 min for a desk computed in Python): a rank moves only when a
+trade closes, and the heavier boards (the commodity desk has ~42k closed trades) should not be
+re-aggregated on every page poll.
 `?fresh=true` recomputes.
 """
 
@@ -16,7 +17,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.api.deps import get_current_user
 from app.services.response_cache import cached
-from app.services.strategy_rank_desks import clean_params, desk_ranks, known
+from app.services.strategy_rank_desks import TTL_BY_DESK, clean_params, desk_ranks, known
 
 router = APIRouter(prefix="/api/strategy-rank", tags=["strategy-rank"])
 
@@ -40,4 +41,5 @@ async def strategy_rank(
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
     key = "strategy-rank:" + desk + ":" + "&".join(f"{k}={v}" for k, v in sorted(params.items()))
-    return await cached(key, lambda: desk_ranks(desk, params), ttl=TTL_SECONDS, fresh=fresh)
+    return await cached(key, lambda: desk_ranks(desk, params), ttl=TTL_BY_DESK.get(desk, TTL_SECONDS),
+                        fresh=fresh)

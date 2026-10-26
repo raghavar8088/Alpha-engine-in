@@ -19,7 +19,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from app.services.strategy_rank import (FACTORS, POSITION_FACTORS, _percentiles,  # noqa: E402
-                                        compact, day_factors, rank_rows)
+                                        compact, day_factors, rank_rows, stats_from_trades)
 
 failures = 0
 
@@ -99,6 +99,25 @@ check("compact: one entry per ranked strategy", set(board["ranks"]) == {"g", "b"
 check("compact: values and percentiles follow the factor list",
       all(len(e["values"]) == len(board["factors"]) == len(e["pct"]) for e in board["ranks"].values())
       and board["ranks"]["g"]["values"][0] == 2.0 and board["ranks"]["g"]["rank"] == 1)
+
+items = [  # out of order on purpose: the drawdown walk must follow the close time
+    {"key": "a", "pnl": -50.0, "deployed": 1000.0, "day": "2026-10-02", "ts": 2},
+    {"key": "a", "pnl": 100.0, "deployed": 1000.0, "day": "2026-10-01", "ts": 1},
+    {"key": "a", "pnl": 30.0, "deployed": 1000.0, "day": "2026-10-03", "ts": 3},
+    {"key": "b", "pnl": -10.0, "deployed": 0.0, "day": "2026-10-03", "ts": 1},
+]
+st = stats_from_trades(items)
+a = st["a"]
+check("python stats: counts, net, wins", a["trades"] == 3 and a["net_pnl"] == 80.0 and a["wins"] == 2, str(a))
+check("python stats: drawdown walks in close order", a["max_drawdown"] == 50.0, str(a["max_drawdown"]))
+check("python stats: profit factor and bp per trade",
+      a["profit_factor"] == round(130 / 50, 3) and abs(a["net_bp_per_trade"] - 80 / 3 / 1000 * 1e4) < 0.01, str(a))
+m = 80 / 3
+sd = (((100 - m) ** 2 + (-50 - m) ** 2 + (30 - m) ** 2) / 2) ** 0.5
+check("python stats: t-stat", abs(a["t_stat"] - m / (sd / 3 ** 0.5)) < 0.002, str(a["t_stat"]))
+check("python stats: day factors over the desk's sessions",
+      a["positive_days_pct"] == round(2 / 3 * 100, 1) and st["b"]["recent_pnl"] == -10.0
+      and st["b"]["net_bp_per_trade"] is None, str((a["positive_days_pct"], st["b"])))
 
 print(f"\n{'ALL PASSED' if not failures else f'{failures} FAILED'}")
 sys.exit(1 if failures else 0)

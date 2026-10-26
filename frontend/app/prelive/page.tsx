@@ -20,6 +20,7 @@ import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import LivePaperBuying from "../../components/LivePaperBuying";
 import BankNiftyDesk from "./BankNiftyDesk";
+import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   refreshing,
   type ChainRecorder,
@@ -64,6 +65,8 @@ export default function PreLivePage() {
   const [bnRefresh, setBnRefresh] = useState(0);
   const [status, setStatus] = useState<PreLiveStatus | null>(null);
   const [records, setRecords] = useState<PreLiveRecords | null>(null);
+  // Multi-factor Rank of each strategy's REAL-MONEY record (not its paper fills).
+  const ranks = useStrategyRanks(index === "NIFTY" && tab === "tournament" ? "prelive" : null);
   const [trades, setTrades] = useState<PreLiveTrade[]>([]);
   const [days, setDays] = useState<PreLiveDay[]>([]);
   const [totals, setTotals] = useState<{ sessions?: number; net?: number; real?: number }>({});
@@ -246,15 +249,17 @@ export default function PreLivePage() {
             </GlassPanel>
           )}
 
-          <GlassPanel title="Strategy records — research data, not a ranking" note={records ? `${records.strategies.filter((s) => s.trades).length} traded · A–Z` : undefined}>
+          <GlassPanel title="Strategy records — research data, ranked for comparison" note={records ? `${records.strategies.filter((s) => s.trades).length} traded · ${ranks ? "by Rank" : "A–Z"}` : undefined}>
             <div className="note">{luck?.reading} {records?.real_money_basis ? `Real money: ${records.real_money_basis}.` : ""}</div>
+            {ranks && <div className="note"><RankNote board={ranks} /></div>}
             <div className="table-scroll tall">
               <table className="data-table">
-                <thead><tr><th className="l">Strategy</th><th>TF</th><th>Trades</th><th>Paper net</th><th>Per trade</th><th>t</th>
+                <thead><tr>{ranks && <RankTh />}<th className="l">Strategy</th><th>TF</th><th>Trades</th><th>Paper net</th><th>Per trade</th><th>t</th>
                   <th>Direction hit</th><th>Real / trade</th><th className="l">Days to expiry traded</th></tr></thead>
                 <tbody>
-                  {(records?.strategies ?? []).filter((s) => s.trades > 0).map((s) => (
+                  {sortByRank((records?.strategies ?? []).filter((s) => s.trades > 0), ranks, (s) => s.key).map((s) => (
                     <tr key={s.key}>
+                      {ranks && <RankTd board={ranks} id={s.key} />}
                       <td className="l">{s.strategy_id}</td><td>{s.timeframe}</td><td>{s.trades}</td>
                       <td className={tone(s.net_pnl)}>{signed(s.net_pnl)}</td>
                       <td className={tone(s.per_trade)}>{signed(s.per_trade)}</td>

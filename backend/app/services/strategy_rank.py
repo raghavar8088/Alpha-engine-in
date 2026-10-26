@@ -172,7 +172,58 @@ def compact(rows: list[dict], factors: tuple[Factor, ...], *, id_key: str = "str
     }
 
 
-# -- a desk's trade record -> the seven factors, computed inside Mongo -----------------------
+# -- a desk's trade record -> the seven factors ----------------------------------------------
+
+
+def stats_from_trades(items, recent: int = RECENT_SESSIONS) -> dict[str, dict]:
+    """The same per-strategy figures as `position_stats`, for a desk whose honest P&L is only
+    computed in Python (the NIFTY option-buying tournament's real-money estimate). `items`:
+    one dict per closed trade with key, pnl, deployed, day and ts (any orderable close time)."""
+    by: dict[str, list[dict]] = {}
+    for it in items:
+        if it.get("key") is not None:
+            by.setdefault(str(it["key"]), []).append(it)
+    sessions: set[str] = set()
+    out: dict[str, dict] = {}
+    for key, xs in by.items():
+        xs.sort(key=lambda x: (x.get("ts") is None, x.get("ts") or 0))
+        pnls = [float(x.get("pnl") or 0.0) for x in xs]
+        n, s = len(pnls), sum(pnls)
+        mean = s / n
+        t = None
+        if n >= 2:
+            sd = math.sqrt(sum((p - mean) ** 2 for p in pnls) / (n - 1))
+            if sd > 0:
+                t = round(mean / (sd / math.sqrt(n)), 3)
+        gp = sum(p for p in pnls if p > 0)
+        gl = -sum(p for p in pnls if p < 0)
+        cum = peak = dd = 0.0
+        for p in pnls:
+            cum += p
+            peak = max(peak, cum)
+            dd = max(dd, peak - cum)
+        bps = [float(x.get("pnl") or 0.0) / x["deployed"] for x in xs if (x.get("deployed") or 0) > 0]
+        daily: dict[str, float] = {}
+        for x in xs:
+            day = str(x.get("day") or "")[:10]
+            if day:
+                daily[day] = daily.get(day, 0.0) + float(x.get("pnl") or 0.0)
+                sessions.add(day)
+        wins = sum(1 for p in pnls if p > 0)
+        out[key] = {
+            "trades": n, "wins": wins, "win_rate": round(wins / n, 4), "net_pnl": round(s, 2),
+            "gross_profit": round(gp, 2), "gross_loss": round(gl, 2),
+            "profit_factor": round(gp / gl, 3) if gl > 0 else None, "t_stat": t,
+            "net_bp_per_trade": round(sum(bps) / len(bps) * 1e4, 2) if bps else None,
+            "max_drawdown": round(dd, 2), "daily": daily,
+        }
+    ordered_sessions = sorted(sessions)
+    for st in out.values():
+        st.update(day_factors(st.pop("daily"), ordered_sessions, recent))
+    return out
+
+
+# -- ... or computed inside Mongo, for the desks that store their P&L --------------------------
 
 
 def _field(expr):

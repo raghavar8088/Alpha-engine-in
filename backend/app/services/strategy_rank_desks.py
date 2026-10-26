@@ -14,13 +14,15 @@ whatever filter the page has on, so a strategy keeps its rank when the board is 
 
 from __future__ import annotations
 
+import asyncio
 import re
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from typing import Any, Awaitable, Callable
 
 from app.core.db import db
 from app.services.strategy_rank import (MIN_TRADES, POSITION_FACTORS, Factor, compact,
-                                        position_stats, rank_rows)
+                                        position_stats, rank_rows, stats_from_trades)
 
 CLOSED = {"status": "CLOSED"}
 _SAFE = re.compile(r"^[A-Za-z0-9_.\-@&|: ]{1,64}$")
@@ -40,6 +42,7 @@ class TradeSource:
     day: Any = None                      # None: closed_on, else the IST date of `ts`
     ts: str = "closed_at"
     params: dict = field(default_factory=dict)   # query param -> document field it filters
+    note: str | None = None                      # which P&L the rank is computed on, if not obvious
 
 
 DESKS: dict[str, TradeSource] = {
@@ -73,7 +76,9 @@ DESKS: dict[str, TradeSource] = {
     # each contract's own prices) - what its leaderboard and gate count; `realized_pnl` is the
     # old loop's, and trades before the honest cutover are not part of the record at all.
     "commodity": TradeSource("commodity_positions", {**CLOSED, "honest": True}, pnl="record_pnl",
-                             params={"symbol": "symbol"}),
+                             params={"symbol": "symbol"},
+                             note="honest trades only (filled at a live quote with MCX open at entry and "
+                                  "exit, on the trade's own contract), at the repriced record P&L"),
     "commodity-prelive": TradeSource("commodity_prelive_positions", CLOSED,
                                      key={"$concat": ["$strategy_id", "|", {"$ifNull": ["$symbol", ""]}]}),
     # The NatGas book's roster names a strategy by template and timeframe, not by id.
@@ -202,8 +207,65 @@ BACKTESTS: dict[str, RowSource] = {
 }
 
 
+# -- desks whose honest P&L exists only in Python -------------------------------------------
+
+def _epoch(v) -> float | None:
+    if isinstance(v, str):
+        try:
+            v = datetime.fromisoformat(v)
+        except ValueError:
+            return None
+    if isinstance(v, datetime):
+        return (v if v.tzinfo else v.replace(tzinfo=timezone.utc)).timestamp()
+    return None
+
+
+async def _prelive_items() -> list[dict]:
+    """The NIFTY option-buying tournament (Index Option Buying, NIFTY 50), one item per closed
+    trade at its REAL-MONEY estimate - prelive_stats.real_money: today's lot of 65, bought at the
+    ask and sold at the bid, Angel's rate card - which is what that page judges a strategy on.
+    The paper fill (option LTP, old 75 lot, no STT before 2 Oct) flatters every strategy."""
+    from app.services import prelive_stats as ps
+
+    fields = {"_id": 0, "key": 1, "session": 1, "exit_ts": 1, "real_pnl": 1, "real_basis": 1,
+              "lot_size": 1, "lots": 1, "qty": 1, "entry_premium": 1, "exit_premium": 1}
+    trades = [t async for t in db["prelive_trades"].find({}, fields)]
+
+    def build() -> list[dict]:
+        items = []
+        for t in trades:
+            try:
+                pnl, _basis = ps.real_money(t)
+                lots = int(t.get("lots") or max(1, round(float(t.get("qty") or 75) / float(t.get("lot_size") or 75))))
+            except (KeyError, TypeError, ValueError):
+                continue
+            items.append({"key": t.get("key"), "pnl": pnl, "day": t.get("session"),
+                          "deployed": float(t.get("entry_premium") or 0.0) * lots * ps.LOT_NOW,
+                          "ts": _epoch(t.get("exit_ts"))})
+        return items
+
+    return await asyncio.to_thread(build)
+
+
+@dataclass(frozen=True)
+class PyTradeSource:
+    load: Callable[[], Awaitable[list[dict]]]
+    note: str | None = None
+
+
+PY_TRADES: dict[str, PyTradeSource] = {
+    "prelive": PyTradeSource(_prelive_items, note=(
+        "the real-money estimate of each trade (NIFTY's lot of 65, bought at the ask and sold at "
+        "the bid - from the order book since 5 Oct, an estimated half-spread before - Angel One's "
+        "rate card), not the paper fill")),
+}
+
+# Seconds a ranked board is cached. The Python-computed desk reads ~10,000 trades.
+TTL_BY_DESK: dict[str, float] = {"prelive": 300.0}
+
+
 def known(desk: str) -> bool:
-    return desk in DESKS or desk in BACKTESTS
+    return desk in DESKS or desk in BACKTESTS or desk in PY_TRADES
 
 
 def clean_params(desk: str, raw: dict[str, str | None]) -> dict[str, str]:
@@ -231,6 +293,15 @@ async def desk_ranks(desk: str, params: dict[str, str]) -> dict:
                 "source_id": source_id, "strategies": len(rows),
                 **compact(ranked, src.factors, id_key="id")}
 
+    if desk in PY_TRADES:
+        py = PY_TRADES[desk]
+        stats = stats_from_trades(await py.load())
+        rows = [{"id": sid, **st} for sid, st in stats.items()]
+        ranked = rank_rows(rows, min_trades=MIN_TRADES, factors=POSITION_FACTORS)
+        return {"desk": desk, "params": params, "basis": "trades", "basis_note": py.note,
+                "min_trades": MIN_TRADES, "strategies": len(rows),
+                **compact(ranked, POSITION_FACTORS, id_key="id")}
+
     src = DESKS[desk]
     match = dict(src.match)
     for name, value in params.items():
@@ -240,5 +311,5 @@ async def desk_ranks(desk: str, params: dict[str, str]) -> dict:
     rows = [{"id": sid, **st} for sid, st in stats.items()]
     factors = SELLING_FACTORS if desk in SELLING_DESKS or params.get("side") == "selling" else POSITION_FACTORS
     ranked = rank_rows(rows, min_trades=MIN_TRADES, factors=factors)
-    return {"desk": desk, "params": params, "basis": "trades", "min_trades": MIN_TRADES,
-            "strategies": len(rows), **compact(ranked, factors, id_key="id")}
+    return {"desk": desk, "params": params, "basis": "trades", "basis_note": src.note,
+            "min_trades": MIN_TRADES, "strategies": len(rows), **compact(ranked, factors, id_key="id")}

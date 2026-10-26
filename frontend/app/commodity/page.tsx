@@ -16,6 +16,7 @@ import GlassPanel from "../../components/GlassPanel";
 import StatusPill from "../../components/StatusPill";
 import ErrorBanner from "../../components/ErrorBanner";
 import EmptyState from "../../components/EmptyState";
+import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   refreshing,
   CmdHypothesis,
@@ -386,27 +387,32 @@ function DataQuality({ records }: { records: CmdRecords }) {
 
 function StrategyRecords({ rows }: { rows: CmdRecords["strategies"] }) {
   const [tf, setTf] = useState("ALL");
-  const [sort, setSort] = useState<"trades" | "net" | "t">("trades");
+  // Opens in Rank order: the multi-factor rank of each strategy's honest record (whole desk).
+  const [sort, setSort] = useState<"rank" | "trades" | "net" | "t">("rank");
+  const ranks = useStrategyRanks("commodity");
   const tfs = useMemo(() => Array.from(new Set(rows.map((r) => r.timeframe))), [rows]);
   const shown = useMemo(() => {
     const xs = rows.filter((r) => tf === "ALL" || r.timeframe === tf);
+    if (sort === "rank") return sortByRank(xs, ranks, (r) => r.strategy_id);
     return [...xs].sort((a, b) => sort === "trades" ? b.trades - a.trades : sort === "net" ? b.net_bp - a.net_bp : (b.net_t ?? -99) - (a.net_t ?? -99));
-  }, [rows, tf, sort]);
+  }, [rows, tf, sort, ranks]);
   return (
-    <GlassPanel title="Strategy records" note={`${rows.length} strategies with honest trades · a record, not a ranking`}>
+    <GlassPanel title="Strategy records" note={`${rows.length} strategies with honest trades · ranked for comparison, not a recommendation`}>
       <div className="filters">
         <span className="flabel">Timeframe</span>
         {["ALL", ...tfs].map((t) => <button key={t} className={`chip ${tf === t ? "on" : ""}`} onClick={() => setTf(t)}>{t}</button>)}
         <span className="flabel" style={{ marginLeft: 12 }}>Sort</span>
-        {(["trades", "net", "t"] as const).map((s) => <button key={s} className={`chip ${sort === s ? "on" : ""}`} onClick={() => setSort(s)}>{s}</button>)}
+        {(["rank", "trades", "net", "t"] as const).map((s) => <button key={s} className={`chip ${sort === s ? "on" : ""}`} onClick={() => setSort(s)}>{s}</button>)}
       </div>
+      {ranks && <div className="rank-wrap"><RankNote board={ranks} /></div>}
       <div className="table-scroll">
         <table className="data-table">
-          <thead><tr><th className="l">Strategy</th><th>TF</th><th>Trades</th><th>Net / trade</th><th>95% range</th><th>t</th><th>Before costs</th><th>Direction</th><th>Net ₹</th></tr></thead>
+          <thead><tr>{ranks && <RankTh />}<th className="l">Strategy</th><th>TF</th><th>Trades</th><th>Net / trade</th><th>95% range</th><th>t</th><th>Before costs</th><th>Direction</th><th>Net ₹</th></tr></thead>
           <tbody>
             {shown.slice(0, 150).map((r) => (
               <Fragment key={r.strategy_id}>
                 <tr className={r.retired ? "retired" : ""}>
+                  {ranks && <RankTd board={ranks} id={r.strategy_id} />}
                   <td className="l">{r.name}{r.retired && <span className="ret">retired</span>}</td>
                   <td>{r.timeframe}</td>
                   <td>{r.trades}</td>
@@ -424,6 +430,7 @@ function StrategyRecords({ rows }: { rows: CmdRecords["strategies"] }) {
       </div>
       <style jsx>{`
         .filters { padding: 12px 20px 4px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+        .rank-wrap { padding: 6px 20px 0; }
         .flabel { font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); }
         .chip { font-size: 11.5px; font-weight: 600; padding: 4px 10px; border-radius: 100px; cursor: pointer; border: 1px solid var(--panel-border); background: var(--panel); color: var(--text-muted); }
         .chip.on { background: var(--purple-dim); border-color: rgba(125,52,220,.24); color: var(--purple); }

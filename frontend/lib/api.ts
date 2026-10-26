@@ -883,6 +883,9 @@ export interface StrategyRankBoard {
   min_trades: number;
   // Backtest boards: the run (sweep id) the rank was computed from.
   source_id?: string | null;
+  // Which P&L the rank is computed on, where a desk keeps more than one (honest vs whole record,
+  // real-money estimate vs paper fill).
+  basis_note?: string | null;
   strategies: number;
   ranked: number;
   factors: RankFactorMeta[];
