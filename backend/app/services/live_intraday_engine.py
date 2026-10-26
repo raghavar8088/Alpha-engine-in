@@ -106,7 +106,7 @@ BOOKS = list(BOOK_CAPITAL)
 
 # TOP-10 BOOKS. The owner asked (2026-10-26) for Rs 2 lakh and Rs 10 lakh paper accounts on
 # the Tournament's top 10 strategies. These are the ten that ranked 1-10 on the multi-factor
-# Rank (strategy_rank) after the close of 26 Oct 2026, 16:26 IST - FROZEN here, not re-picked as
+# Rank (strategy_rank) after the close of 26 Oct 2026, read at 21:56 IST - FROZEN here, not re-picked as
 # ranks move: a book that kept swapping in whatever led lately would only ever be chasing the
 # last few weeks. Every rule is the other books' (copy the tournament's own fills, one account,
 # five slots, whole shares, one position per stock, Angel costs on the book's quantity, the 3%
@@ -114,7 +114,7 @@ BOOKS = list(BOOK_CAPITAL)
 # They led a 54-strategy board, which is where luck collects - none had cleared the gate (9
 # REJECTED, 1 PENDING) - so these books are the out-of-sample test of whether they keep leading.
 # (strategy_id, rank, score, trades, net P&L in the tournament) at the pick.
-TOP10_PICKED_AT = "2026-10-26T16:26:00+05:30"
+TOP10_PICKED_AT = "2026-10-26T21:56:00+05:30"
 TOP10_PICKS: tuple[tuple[str, int, float, int, float], ...] = (
     ("iv2_orb_inplay_25", 1, 93.4, 45, 166201.60),       # ORB Stocks-in-Play (stop 25% ATR)
     ("iv2_supertrend_1h", 2, 91.9, 84, 226406.74),       # Supertrend Flip · 1 hour
