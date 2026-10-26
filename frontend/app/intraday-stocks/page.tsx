@@ -53,7 +53,7 @@ import {
 
 // The live books are TABS rather than a dropdown because they are separate
 // accounts, not a filter: switching replaces every number on the page.
-type IntradayTab = "tournament" | "patterns" | "pb50k" | "pb2L" | "pb10L" | "80k" | "30k" | "10k" | "2L" | "10L"
+type IntradayTab = "tournament" | "patterns" | "pb50k" | "pb2L" | "pb10L" | "pbTop2L" | "pbTop10L" | "80k" | "30k" | "10k" | "2L" | "10L"
   | "top2L" | "top10L";
 // Families as the desk names them, so a filter maps 1:1 onto the catalog.
 const PAT_FAMILIES: { key: string; label: string }[] = [
@@ -66,11 +66,17 @@ const PAT_FAMILIES: { key: string; label: string }[] = [
 ];
 // The pattern shortlist's two paper books. `tab` carries a "pb" prefix because "50k"
 // alone would collide with the Live Intraday book keys, which are a different desk.
-const PATTERN_BOOKS: { tab: "pb50k" | "pb2L" | "pb10L"; key: PatternBookKey; label: string }[] = [
+type PatternBookTab = "pb50k" | "pb2L" | "pb10L" | "pbTop2L" | "pbTop10L";
+// `top10`: the book trades only the Patterns desk's top 10 by Rank, picked 26 Oct 2026 (backend
+// pattern_books_engine.TOP10_PICKS); every other rule is the other Paper Trade books'.
+const PATTERN_BOOKS: { tab: PatternBookTab; key: PatternBookKey; label: string; top10?: boolean }[] = [
   { tab: "pb50k", key: "50k", label: "Paper Trade · ₹50k" },
   { tab: "pb2L", key: "2L", label: "Paper Trade · ₹2 lakh" },
   { tab: "pb10L", key: "10L", label: "Paper Trade · ₹10 lakh" },
+  { tab: "pbTop2L", key: "top2L", label: "Top 10 Paper Trade · ₹2 lakh", top10: true },
+  { tab: "pbTop10L", key: "top10L", label: "Top 10 Paper Trade · ₹10 lakh", top10: true },
 ];
+const isPatternBookTab = (t: IntradayTab): t is PatternBookTab => PATTERN_BOOKS.some((b) => b.tab === t);
 
 // "2L" / "10L" need no "pb" prefix: the pattern books' tabs are "pb50k" / "pb2L" / "pb10L", so a bare
 // "2L" tab is free - and it is this desk's book key, which the API and Reset expect as-is.
@@ -225,6 +231,8 @@ const HISTORY_SCOPE: Record<IntradayTab, { deskKey: string; scope?: string; labe
   pb50k: { deskKey: "pattern-books", scope: "50k", label: "Paper Trade · ₹50k" },
   pb2L: { deskKey: "pattern-books", scope: "2L", label: "Paper Trade · ₹2 lakh" },
   pb10L: { deskKey: "pattern-books", scope: "10L", label: "Paper Trade · ₹10 lakh" },
+  pbTop2L: { deskKey: "pattern-books", scope: "top2L", label: "Patterns · Top 10 Paper Trade · ₹2 lakh" },
+  pbTop10L: { deskKey: "pattern-books", scope: "top10L", label: "Patterns · Top 10 Paper Trade · ₹10 lakh" },
   "80k": { deskKey: "live-intraday", scope: "80k", label: "Live Intraday · ₹80k" },
   "30k": { deskKey: "live-intraday", scope: "30k", label: "Live Intraday · ₹30k" },
   "10k": { deskKey: "live-intraday", scope: "10k", label: "Live Intraday · ₹10k" },
@@ -363,11 +371,11 @@ export default function IntradayStocksPage() {
   // Only the three book tabs name a book; tournament and patterns are their own
   // views, so both must fall back rather than leak a non-book value downstream.
   const liveBook: LiveBookKey =
-    tab === "tournament" || tab === "patterns" || tab === "pb50k" || tab === "pb2L" || tab === "pb10L"
+    tab === "tournament" || tab === "patterns" || isPatternBookTab(tab)
       ? "80k"
       : tab;
   const isLive =
-    tab !== "tournament" && tab !== "patterns" && tab !== "pb50k" && tab !== "pb2L" && tab !== "pb10L";
+    tab !== "tournament" && tab !== "patterns" && !isPatternBookTab(tab);
   const bookCapital = LIVE_BOOKS.find((b) => b.key === liveBook)?.capital ?? 80000;
 
   // Pattern paper books (₹50k / ₹2L) — the shortlist at a real account's size.
@@ -376,7 +384,7 @@ export default function IntradayStocksPage() {
   const [pbOpen, setPbOpen] = useState<PatternBookPosition[]>([]);
   const [pbDeclined, setPbDeclined] = useState<PatternBookPosition[]>([]);
   const [pbTrades, setPbTrades] = useState<PatternBookTrade[]>([]);
-  const isPatternBook = tab === "pb50k" || tab === "pb2L" || tab === "pb10L";
+  const isPatternBook = isPatternBookTab(tab);
   const pbKey: PatternBookKey = PATTERN_BOOKS.find((b) => b.tab === tab)?.key ?? "50k";
 
   const [patSummary, setPatSummary] = useState<PatternSummary | null>(null);
@@ -588,7 +596,7 @@ export default function IntradayStocksPage() {
             className={tab === b.tab ? "tab active" : "tab"}
             onClick={() => setTab(b.tab)}
           >
-            Patterns · {patternCount} {b.label}
+            {b.top10 ? `Patterns · ${b.label}` : `Patterns · ${patternCount} ${b.label}`}
           </button>
         ))}
         {LIVE_BOOKS.map((b) => (
@@ -1024,7 +1032,23 @@ export default function IntradayStocksPage() {
       <DataGate ready={!!pbSummary} error={error} what={"this paper book"} onRetry={() => once(`book:${pbKey}`, loadPatternBook)} lastOkAt={lastOkAt}>
       <ResetBook desk="pattern-books" book={pbKey} label={PATTERN_BOOKS.find((b) => b.key === pbKey)?.label ?? "Paper Trade"}
         capital={pbSummary?.desk_capital} onDone={() => refreshing(() => loadPatternBook())} />
-      {pbSummary?.copy_mode === "desk" ? (
+      {pbSummary?.roster ? (
+      <div className="desk-banner">
+        <strong>TOP 10 · ₹{inr(pbSummary?.desk_capital)} PAPER · THE PATTERNS DESK’S TOP 10 ONLY.</strong>{" "}
+        This account copies the trades of just ten Patterns strategies: the ten ranked 1–10 on the
+        multi-factor Rank after the close on 26 Oct 2026. The list is fixed; it is not re-picked as
+        ranks move. Every other rule is the other Paper Trade books’: the desk’s own entry and exit
+        prices, Angel One costs on this account’s quantity, one account with at most{" "}
+        {pbSummary?.max_open_positions ?? 5} positions of up to ₹{inr(pbSummary?.position_cap)} each, whole shares,
+        never two positions in one stock, no leverage.{" "}
+        <strong>Expect few trades: all ten are 1- and 5-minute strategies</strong>, and since 10 Oct the desk lets
+        at most two strategies hold a stock, giving longer timeframes first claim, so these rarely get a slot.
+        Most of their record is from 6–9 Oct, before that rule. They led a board of 548 on 12–38 trades each,
+        which is where luck collects, and none is validated: this account is the out-of-sample test of
+        whether they keep leading. “Picked at” is where each stood when chosen.
+        {pbSummary?.copying_since ? ` Copying since ${new Date(pbSummary.copying_since).toLocaleDateString("en-IN")}.` : ""}
+      </div>
+      ) : pbSummary?.copy_mode === "desk" ? (
       <div className="desk-banner">
         <strong>PATTERN PAPER BOOK · ₹{inr(pbSummary?.desk_capital)} · COPYING THE PATTERNS DESK.</strong>{" "}
         This book trades <strong>all {pbSummary?.strategies ?? 548} Patterns strategies</strong>{" "}by copying the
@@ -1052,7 +1076,9 @@ export default function IntradayStocksPage() {
       <div className="desk-banner">
         <strong>FILLS CORRECTED ON 10 OCT 2026</strong>, together with the Patterns desk these
         books copy.{" "}
-        {pbSummary?.copy_mode === "desk"
+        {pbSummary?.roster
+          ? "This book's ten were picked from the Patterns leaderboard, and none of them has been validated."
+          : pbSummary?.copy_mode === "desk"
           ? "Since 15 Oct they copy every Patterns strategy, not a shortlist picked from a leaderboard that overstated results — and none of those strategies has been validated."
           : "The shortlist was picked from the Patterns leaderboard while that leaderboard overstated results, and none of its strategies has been validated."}
       </div>
@@ -1078,9 +1104,13 @@ export default function IntradayStocksPage() {
               unrealized={pbSummary?.unrealized_pnl} fees={pbSummary?.fees} />
 
       {pbSummary?.copy_mode === "desk" ? (() => {
-        const active = pbBoard.filter((r) => r.trades > 0 || (r.skipped_total ?? 0) > 0 || r.open_positions > 0);
+        // A Top-10 book lists its ten whether or not they have traded here yet.
+        const active = pbSummary?.roster ? pbBoard
+          : pbBoard.filter((r) => r.trades > 0 || (r.skipped_total ?? 0) > 0 || r.open_positions > 0);
         return (
-      <GlassPanel title={`Patterns strategies in this book — ${active.length} of ${pbSummary?.strategies ?? 548} have signalled`}>
+      <GlassPanel title={pbSummary?.roster
+        ? `The top 10 — picked on the Patterns Rank, 26 Oct 2026`
+        : `Patterns strategies in this book — ${active.length} of ${pbSummary?.strategies ?? 548} have signalled`}>
         {!active.length ? (
           <div className="feed-note">
             No Patterns strategy has signalled since this book began copying. The desk takes about 20 trades a
@@ -1092,6 +1122,7 @@ export default function IntradayStocksPage() {
           <table className="data-table">
             <thead><tr>
               {pbRanks && <RankTh />}
+              {pbSummary?.roster && <th title="Its Rank and score on the Patterns board when this account was created">Picked at</th>}
               <th style={{ textAlign: "left" }}>Strategy</th><th>TF</th><th>Family</th>
               <th>Trades</th><th>Win %</th><th>Fees</th><th>Net P&amp;L</th>
               <th title="Net P&L as a share of this book's capital">Share of book</th>
@@ -1101,6 +1132,12 @@ export default function IntradayStocksPage() {
               {sortByRank(active, pbRanks, (r) => r.strategy_id).map((r) => (
                 <tr key={r.strategy_id}>
                   {pbRanks && <RankTd board={pbRanks} id={r.strategy_id} />}
+                  {pbSummary?.roster && (
+                    <td className="srank-cell" data-score={r.picked_score == null ? "" : r.picked_score.toFixed(1)}
+                        title={r.picked_rank ? `Rank ${r.picked_rank} of 548 on the Patterns board when picked (26 Oct 2026): score ${r.picked_score?.toFixed(1)}, ${r.picked_trades} trades, ${(r.picked_net_pnl ?? 0) >= 0 ? "+" : "-"}₹${inr(Math.abs(r.picked_net_pnl ?? 0))} net there on ₹10 lakh` : ""}>
+                      {r.picked_rank ?? "-"}
+                    </td>
+                  )}
                   <td style={{ textAlign: "left", fontSize: 11 }}>{r.template}</td>
                   <td><span className="badge">{r.timeframe}</span></td>
                   <td style={{ fontSize: 11 }}>{r.family}</td>
@@ -1161,7 +1198,8 @@ export default function IntradayStocksPage() {
         {!pbOpen.length ? (
           <div className="feed-note">
             Nothing open. This book takes a position when the Patterns desk opens one
-            {pbSummary?.copy_mode === "desk" ? " and this book has a free slot" : " of the shortlisted strategies"}.
+            {pbSummary?.roster ? " for one of this book's ten and this book has a free slot"
+              : pbSummary?.copy_mode === "desk" ? " and this book has a free slot" : " of the shortlisted strategies"}.
           </div>
         ) : (
           <div className="table-wrap">

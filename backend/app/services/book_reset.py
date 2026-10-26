@@ -43,7 +43,8 @@ resets = db["book_resets"]
 DESKS: dict[str, dict] = {
     "pattern-books": {
         "label": "Paper Trade",
-        "books": {"50k": "Rs50,000", "2L": "Rs2,00,000", "10L": "Rs10,00,000"},
+        "books": {"50k": "Rs50,000", "2L": "Rs2,00,000", "10L": "Rs10,00,000",
+                  "top2L": "Top 10 Rs2,00,000", "top10L": "Top 10 Rs10,00,000"},
         "collections": ["pattern_book_positions", "pattern_book_trades", "pattern_book_scores", "pattern_book_equity"],
     },
     "live-intraday": {

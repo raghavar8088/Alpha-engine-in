@@ -6932,7 +6932,7 @@ export async function closeAllCommodityPrelive(symbol?: string) {
 // so any difference between them is caused by ACCOUNT SIZE and nothing else.
 const pbk = "/api/pattern-books";
 
-export type PatternBookKey = "50k" | "2L" | "10L";
+export type PatternBookKey = "50k" | "2L" | "10L" | "top2L" | "top10L";
 
 export interface PatternBookSummary {
   // "desk" (since 2026-10-15): the book copies ALL of the Patterns desk as one account of up
@@ -6942,6 +6942,9 @@ export interface PatternBookSummary {
   position_cap?: number;
   skipped?: Record<"breaker" | "full" | "symbol_held" | "price_above_cap" | "no_cash", number>;
   copying_since?: string | null;
+  // Top-10 books only: the strategy ids they trade (frozen 26 Oct 2026) and when they were picked.
+  roster?: string[];
+  roster_picked_at?: string;
   book: PatternBookKey;
   books: PatternBookKey[];
   label: string;
@@ -6985,6 +6988,11 @@ export interface PatternBookScore {
   open_positions: number;
   skipped?: Record<"breaker" | "full" | "symbol_held" | "price_above_cap" | "no_cash", number>;
   skipped_total?: number;
+  // Top-10 books: where the strategy stood on the Patterns board when it was picked.
+  picked_rank?: number;
+  picked_score?: number;
+  picked_trades?: number;
+  picked_net_pnl?: number;
 }
 
 export interface PatternBookPosition {

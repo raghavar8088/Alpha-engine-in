@@ -162,17 +162,77 @@ BOOK_CAPITAL: dict[str, float] = {
     "2L": float(os.getenv("PATBOOK_CAPITAL_2L", "200000")),
     # Added 2026-10-15 at the owner's request, beside the two smaller books.
     "10L": float(os.getenv("PATBOOK_CAPITAL_10L", "1000000")),
+    # Top-10 books (2026-10-26): see TOP10_PICKS.
+    "top2L": float(os.getenv("PATBOOK_CAPITAL_TOP2L", "200000")),
+    "top10L": float(os.getenv("PATBOOK_CAPITAL_TOP10L", "1000000")),
 }
 BOOKS = list(BOOK_CAPITAL)
 DEFAULT_BOOK = "50k"
 BOOK_LABEL = {"50k": "Paper Trade · ₹50k", "2L": "Paper Trade · ₹2 lakh",
-              "10L": "Paper Trade · ₹10 lakh"}
+              "10L": "Paper Trade · ₹10 lakh",
+              "top2L": "Top 10 Paper Trade · ₹2 lakh", "top10L": "Top 10 Paper Trade · ₹10 lakh"}
+
+# TOP-10 BOOKS. The owner asked (2026-10-26) for Rs 2 lakh and Rs 10 lakh paper accounts on the
+# Patterns desk's top 10 strategies: the ten ranked 1-10 on the multi-factor Rank (strategy_rank)
+# after the close of 26 Oct 2026 (read at 21:59 IST; the same ten, scores 76.6-63.0, as the board the
+# owner was looking at) - FROZEN here, not re-picked as ranks move: a book that kept swapping in whatever led lately
+# would only ever be chasing the last few weeks. Every rule is the desk-copy books' (the desk's own
+# fills, one account, five slots, whole shares, one position per stock, Angel costs on the book's
+# quantity); the only difference is that the other 538 strategies' signals are not offered. They
+# led a 548-strategy board on 12-38 closed trades each, which is where luck collects, and none is
+# validated - so these books are the out-of-sample test of whether they keep leading. All ten are
+# 1m/5m scalping strategies, flat by the close. The same day's Tournament top-10 books live in
+# live_intraday_engine (TOP10_PICKS there); the two lists are separate.
+# Keyed by (template, timeframe) like SELECTED_SPECS, because the id encodes the template's index
+# in the catalog. (template, timeframe, rank, score, trades, net P&L on the desk's Rs 10 lakh)
+TOP10_PICKED_AT = "2026-10-26T21:59:00+05:30"
+TOP10_PICKS: tuple[tuple[str, str, int, float, int, float], ...] = (
+    ("Donchian Slow Break",    "1m", 1, 76.6, 29, 55696.61),   # pat_1m_26
+    ("Prior Extreme Breakout", "1m", 2, 72.6, 26, 39767.16),   # pat_1m_44
+    ("Triple EMA Stack",       "1m", 3, 69.4, 18, 39355.80),   # pat_1m_04
+    ("Three Soldiers / Crows", "5m", 4, 69.3, 26, 54105.53),   # pat_5m_39
+    ("Prior Extreme Breakout", "5m", 5, 66.1, 16, 56337.61),   # pat_5m_44
+    ("Round Number Break",     "5m", 6, 64.8, 20, 38648.26),   # pat_5m_46
+    ("Donchian Fast Break",    "1m", 7, 63.9, 38, 32775.41),   # pat_1m_25
+    ("EMA Slow Cross",         "1m", 8, 63.8, 12, 36519.29),   # pat_1m_02
+    ("DEMA Cross",             "5m", 9, 63.2, 22, 33878.70),   # pat_5m_08
+    ("SMA Cross",              "1m", 10, 63.0, 20, 15000.28),  # pat_1m_03
+)
+
+
+def _resolve_top10() -> tuple:
+    """Picks -> (strategy_id, rank, score, trades, net). A pick missing from the catalog is logged
+    and left out rather than raising: this module is imported at startup."""
+    by_key = {(s.template, s.timeframe): s.strategy_id for s in CATALOG}
+    out = []
+    for template, tf, rank, score, trades, net in TOP10_PICKS:
+        sid = by_key.get((template, tf))
+        if sid is None:
+            logger.warning("[pattern_books] top-10 pick not in the catalog: %s · %s", template, tf)
+            continue
+        out.append((sid, rank, score, trades, net))
+    return tuple(out)
+
+
+TOP10 = _resolve_top10()
+TOP10_ROSTER: tuple[str, ...] = tuple(p[0] for p in TOP10)
+# Which books trade only a roster; a book not listed copies all 548.
+BOOK_ROSTER: dict[str, tuple[str, ...]] = {"top2L": TOP10_ROSTER, "top10L": TOP10_ROSTER}
+
+
+def book_roster(book: str) -> tuple[str, ...] | None:
+    return BOOK_ROSTER.get(book)
+
 
 # What the books TRADE (2026-10-15). "desk": they copy every one of the Patterns desk's 548
 # strategies as one account each (pattern_books_copy) - the owner asked for the Patterns tab's
 # strategies in these books. "shortlist": the eleven below, each on its own slice, as before.
 SOURCE = os.getenv("PATBOOK_SOURCE", "desk").strip().lower()
 COPIES_DESK = SOURCE != "shortlist"
+# The roster books always copy (they have no shortlist form); on PATBOOK_SOURCE=shortlist only the
+# others go back to the eleven.
+COPY_BOOKS = BOOKS if COPIES_DESK else [b for b in BOOKS if b in BOOK_ROSTER]
+LEGACY_BOOKS = [] if COPIES_DESK else [b for b in BOOKS if b not in BOOK_ROSTER]
 
 ENABLED = os.getenv("PATBOOK_ENABLED", "1").lower() not in ("0", "false", "")
 
@@ -439,7 +499,7 @@ async def sync_closes() -> int:
     if not ENABLED:
         return 0
     closed = 0
-    if COPIES_DESK:
+    if COPY_BOOKS:
         from app.services import pattern_books_copy as copy
         closed += (await copy.sync(entries=False))["closed"]
     if not SELECTED:
@@ -469,11 +529,16 @@ async def run_cycle() -> dict:
         return {"opened": 0, "closed": 0,
                 "notes": ["No shortlisted strategies resolved against the pattern catalog."]}
 
+    opened = 0
+    if COPY_BOOKS:
+        # The roster books copy the desk even when the others are back on the shortlist.
+        from app.services import pattern_books_copy as copy
+        synced = await copy.sync(entries=True)
+        opened += synced["opened"]
+
     sids = list(SELECTED_BY_ID)
     parents = {p["position_id"]: p async for p in pattern_positions_collection.find(
         {"strategy_id": {"$in": sids}})}
-
-    opened = 0
 
     # 1. Close any book position whose parent has closed.
     async with _sync_lock:
@@ -483,7 +548,7 @@ async def run_cycle() -> dict:
     for parent in parents.values():
         if parent.get("status") != "OPEN":
             continue
-        for book in BOOKS:
+        for book in LEGACY_BOOKS:
             if await _open_mirror(book, parent):
                 opened += 1
                 touched.add((book, parent["strategy_id"]))
@@ -573,21 +638,26 @@ async def summary(book: str = DEFAULT_BOOK) -> dict:
     strategies = len(SELECTED)
     alloc = per_strategy_allocation(book)
     source_line = "mirrors the 548-strategy pattern desk's fills for the shortlist"
-    if COPIES_DESK:
+    if book in COPY_BOOKS:
         from app.services import pattern_books_copy as copy
         skipped = await copy.skipped_totals(book)
         started = await copy.started_at(book)
-        strategies = len(CATALOG)
+        roster = book_roster(book)
+        strategies = len(roster) if roster else len(CATALOG)
         alloc = copy.position_cap(cap)          # one account: the cap is per POSITION
         # "Couldn't afford" keeps its meaning: the signals this book could not pay for. Slots
         # being full or the stock already held are the account's limits, reported apart.
         declined = skipped["price_above_cap"] + skipped["no_cash"]
         last_decline = None
-        source_line = "copies every strategy of the 548-strategy Patterns desk"
+        source_line = ("copies the Patterns desk's top 10 by Rank, picked 26 Oct 2026" if roster
+                       else "copies every strategy of the 548-strategy Patterns desk")
         copy_info = {"copy_mode": "desk", "max_open_positions": copy.MAX_OPEN,
                      "position_cap": round(alloc, 2), "skipped": skipped,
                      "copying_since": (started if started.tzinfo else started.replace(
                     tzinfo=timezone.utc)).isoformat() if started else None}
+        if roster:
+            copy_info["roster"] = list(roster)
+            copy_info["roster_picked_at"] = TOP10_PICKED_AT
     return {
         **copy_info,
         "book": book, "books": BOOKS, "label": BOOK_LABEL.get(book, book),
@@ -615,7 +685,7 @@ async def summary(book: str = DEFAULT_BOOK) -> dict:
 
 async def leaderboard(book: str = DEFAULT_BOOK) -> list[dict]:
     book = normalize_book(book)
-    if COPIES_DESK:
+    if book in COPY_BOOKS:
         from app.services import pattern_books_copy as copy
         return await copy.leaderboard_rows(book, book_capital(book))
     scores = {s["strategy_id"]: s async for s in

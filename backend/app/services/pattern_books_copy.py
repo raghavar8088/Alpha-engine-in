@@ -260,7 +260,7 @@ async def _sync(*, entries: bool) -> dict:
     from app.services import pattern_books_engine as pbe   # late: that module imports this one
 
     total = {"opened": 0, "closed": 0, "skipped": 0, "marked": 0}
-    for book in pbe.BOOKS:
+    for book in pbe.COPY_BOOKS:
         capital = pbe.book_capital(book)
         floor = await _floor(book)
         open_rows = [r async for r in pattern_book_positions_collection.find(
@@ -268,6 +268,12 @@ async def _sync(*, entries: bool) -> dict:
         pointed = [r["parent_position_id"] for r in open_rows
                    if r.get("source") == SOURCE_TAG and r.get("parent_position_id")]
         parents = await _parents(window_start(floor), pointed)
+        roster = pbe.book_roster(book)
+        if roster is not None:
+            # A roster book (the Top-10 books) is offered only its roster's trades. The rest are
+            # not candidates at all, so they are neither copied nor counted as skipped.
+            keep = set(roster)
+            parents = [p for p in parents if p["strategy_id"] in keep]
         realized, deployed = await _totals(book)
         decided = await _decided(book, parents) if entries else set()
         closed_rows = await closed_after(
@@ -343,7 +349,13 @@ async def _sync(*, entries: bool) -> dict:
 
 async def leaderboard_rows(book: str, capital: float) -> list[dict]:
     """Every Patterns strategy with this book's record and what it could not take. The page
-    shows the ones that have signalled; 548 rows of zeros would bury them."""
+    shows the ones that have signalled; 548 rows of zeros would bury them. A roster book lists
+    its roster only, each with where it stood when picked - the record it earns here, beside the
+    record that got it picked, IS the experiment."""
+    from app.services import pattern_books_engine as pbe   # late: that module imports this one
+
+    roster = pbe.book_roster(book)
+    picked = {sid: (rank, score, trades, net) for sid, rank, score, trades, net in pbe.TOP10}         if roster else {}
     scores = {s["strategy_id"]: s async for s in pattern_book_scores_collection.find(
         {"book": book, "source": SOURCE_TAG})}
     open_counts: dict[str, int] = {}
@@ -353,9 +365,11 @@ async def leaderboard_rows(book: str, capital: float) -> list[dict]:
     cap = position_cap(capital)
     rows = []
     for st in CATALOG:
+        if roster is not None and st.strategy_id not in roster:
+            continue
         sc = scores.get(st.strategy_id) or {}
         skipped = {k: int((sc.get("skipped") or {}).get(k, 0)) for k in SKIP_REASONS}
-        rows.append({
+        row = {
             "strategy_id": st.strategy_id, "name": st.name, "template": st.template,
             "family": st.family, "timeframe": st.timeframe, "style": st.style,
             "allocation": round(cap, 2),
@@ -366,7 +380,12 @@ async def leaderboard_rows(book: str, capital: float) -> list[dict]:
             "roi_pct": round(sc.get("roi_pct", 0.0) or 0.0, 4),
             "open_positions": open_counts.get(st.strategy_id, 0),
             "skipped": skipped, "skipped_total": sum(skipped.values()),
-        })
+        }
+        if st.strategy_id in picked:
+            rank, score, trades, pnet = picked[st.strategy_id]
+            row.update({"picked_rank": rank, "picked_score": score, "picked_trades": trades,
+                        "picked_net_pnl": pnet})
+        rows.append(row)
     rows.sort(key=lambda r: (-r["net_pnl"], -r["trades"], -r["skipped_total"], r["name"]))
     return rows
 
