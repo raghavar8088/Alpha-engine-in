@@ -5,6 +5,7 @@ import PageHeader from "../../components/PageHeader";
 import GlassPanel from "../../components/GlassPanel";
 import DeskHistory from "../../components/DeskHistory";
 import ErrorBanner from "../../components/ErrorBanner";
+import Top10Book from "../../components/Top10Book";
 import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   refreshing,
@@ -23,7 +24,8 @@ import {
 } from "../../lib/api";
 
 const REFRESH_MS = 30000;
-type Tab = "leaderboard" | "open" | "closed" | "daily" | "signals";
+// top2L / top10L: the Top-10 paper books (2026-10-27) - the ten best by Rank, copied into one account.
+type Tab = "leaderboard" | "open" | "closed" | "daily" | "signals" | "top2L" | "top10L";
 
 const inr = (v: number | null | undefined) =>
   v === null || v === undefined ? "—" : `₹${v.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
@@ -149,12 +151,16 @@ export default function ZeroHeroPage() {
           ["closed", `Closed (${closed.length})`],
           ["daily", `Daily P&L (${daily.length})`],
           ["signals", `Signals (${signals.length})`],
+          ["top2L", "Top 10 Paper Trade · ₹2 lakh"],
+          ["top10L", "Top 10 Paper Trade · ₹10 lakh"],
         ] as [Tab, string][]).map(([k, label]) => (
           <button key={k} className={tab === k ? "tab active" : "tab"} onClick={() => setTab(k)}>
             {label}
           </button>
         ))}
       </div>
+
+      {(tab === "top2L" || tab === "top10L") && <Top10Book key={tab} desk="zero-hero" book={tab} />}
 
       {tab === "leaderboard" && (
         <GlassPanel title="Strategy leaderboard">

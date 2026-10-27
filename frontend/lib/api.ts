@@ -70,7 +70,7 @@ export async function refreshing<T>(fn: () => Promise<T>): Promise<T> {
  *  a 40-stock fundamental rating must not be cut off half way. Pass `timeoutMs` to override. */
 const DEFAULT_GET_TIMEOUT_MS = 60000;
 
-async function apiFetch(path: string, init?: RequestInit & { timeoutMs?: number }) {
+export async function apiFetch(path: string, init?: RequestInit & { timeoutMs?: number }) {
   if (FORCE_FRESH) {
     path += `${path.includes("?") ? "&" : "?"}fresh=true`;
   }

@@ -54,15 +54,17 @@ export default function PreLiveSellingPage() {
   const [error, setError] = useState<string | null>(null);
   // "desk" is the 393-strategy tournament; "pt01" is Paper Trading 01, the picked roster on
   // one Rs 10 lakh account. The desk stops polling while the book is showing.
-  const [tab, setTab] = useState<"desk" | "pt01">("desk");
+  // top2L / top10L (2026-10-27): the Top-10 books - the desk's ten best by Rank, on the same book engine.
+  const [tab, setTab] = useState<"desk" | "pt01" | "top2L" | "top10L">("desk");
   useEffect(() => {
     try {
-      if (window.localStorage.getItem("sellingDeskTab") === "pt01") setTab("pt01");
+      const saved = window.localStorage.getItem("sellingDeskTab");
+      if (saved === "pt01" || saved === "top2L" || saved === "top10L") setTab(saved);
     } catch {
       /* storage blocked - start on the desk */
     }
   }, []);
-  const pickTab = (t: "desk" | "pt01") => {
+  const pickTab = (t: "desk" | "pt01" | "top2L" | "top10L") => {
     setTab(t);
     try {
       window.localStorage.setItem("sellingDeskTab", t);
@@ -138,7 +140,9 @@ export default function PreLiveSellingPage() {
         {([
           ["desk", "Desk · all strategies"],
           ["pt01", "Paper Trading 01 · ₹10 lakh"],
-        ] as ["desk" | "pt01", string][]).map(([k, label]) => (
+          ["top2L", "Top 10 Paper Trade · ₹2 lakh"],
+          ["top10L", "Top 10 Paper Trade · ₹10 lakh"],
+        ] as ["desk" | "pt01" | "top2L" | "top10L", string][]).map(([k, label]) => (
           <button
             key={k}
             role="tab"
@@ -151,7 +155,23 @@ export default function PreLiveSellingPage() {
         ))}
       </div>
 
-      {tab === "pt01" ? (
+      {tab === "top2L" || tab === "top10L" ? (
+        <>
+          <div style={{ padding: "12px 16px", borderRadius: 10, background: "var(--canvas-soft)", border: "1px solid var(--panel-border)", fontSize: 12.5, lineHeight: 1.6, color: "var(--text-muted)" }}>
+            <b style={{ color: "var(--text)" }}>Top 10 · {tab === "top2L" ? "₹2 lakh" : "₹10 lakh"} paper.</b>{" "}
+            The selling desk’s ten ranked 1–10 on its Rank (win rate left out, as for every selling desk) at 00:10 IST on
+            27 Oct 2026, fixed — not re-picked as ranks move: 1 mirror_ema_200_trend (91.4) · 2 mirror_swing_pullback_sma50 (90.8)
+            · 3 mirror_pta_trap (89.6) · 4 mirror_sl_trap_trading (89.2) · 5 mirror_scalp_stoch_pop (88.3) · 6
+            sell_sw_three_green_call_spread (86.1) · 7 mirror_bb_liquidity_concept (86.0) · 8 mirror_sb_liquidity_sweep (86.0) · 9
+            mirror_swing_bb_reversion (85.8) · 10 mirror_swing_donchian55 (85.4). Every rule is Paper Trading 01’s (expiry-day
+            entries skipped, one copy of an identical structure, whole lots, the margin the account has), with each position
+            capped at a fifth of the book. Ranks 7 and 8 take the same trades, so the book holds them once. All ten SELL; the
+            notes below about ANTI picks describe Paper Trading 01. None is validated: this account is the out-of-sample test
+            of whether they keep leading.
+          </div>
+          <SellingPaperBook key={tab} book={tab} />
+        </>
+      ) : tab === "pt01" ? (
         <SellingPaperBook book="pt01" />
       ) : (
       <>

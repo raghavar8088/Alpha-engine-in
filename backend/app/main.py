@@ -478,6 +478,13 @@ async def start_option_research_desk() -> None:
         asyncio.create_task(angel_commodity_loop())
     except Exception:  # noqa: BLE001
         logger.exception("could not start the Angel commodity ledger")
+    try:
+        # Top-10 paper books (2026-10-27): Rs 2 lakh / Rs 10 lakh accounts copying the top 10 of
+        # Zero Hero, NIFTY scalping, Index Option Buying, both stock desks and Commodity Trading.
+        from app.services.top10_books import loop as top10_books_loop
+        asyncio.create_task(top10_books_loop())
+    except Exception:  # noqa: BLE001
+        logger.exception("could not start the top-10 books")
 
 
 @app.on_event("startup")
@@ -1033,6 +1040,12 @@ app.include_router(swing_trading.router)
 app.include_router(desk_history.router)
 app.include_router(pattern.router)
 app.include_router(pattern_books.router)
+# Top-10 paper books on six desks (2026-10-27); a failure here must not stop the app.
+try:
+    from app.api.routes import top10_books as _top10_books_routes
+    app.include_router(_top10_books_routes.router)
+except Exception:  # noqa: BLE001
+    logger.exception("could not mount the top-10 books API")
 # Reset buttons for the Intraday Stocks paper books, under each desk's own prefix
 app.include_router(book_resets.pattern_books_router)
 app.include_router(book_resets.live_intraday_router)

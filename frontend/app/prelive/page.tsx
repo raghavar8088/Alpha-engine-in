@@ -18,6 +18,7 @@ import { useCallback, useEffect, useState } from "react";
 import GlassPanel from "../../components/GlassPanel";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
+import Top10Book from "../../components/Top10Book";
 import LivePaperBuying from "../../components/LivePaperBuying";
 import BankNiftyDesk from "./BankNiftyDesk";
 import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
@@ -52,7 +53,8 @@ const signed = (v: number | null | undefined) =>
   v === null || v === undefined ? "–" : `${v >= 0 ? "+" : "−"}₹${Math.abs(v).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 const pct = (v: number | null | undefined, dp = 1) => (v === null || v === undefined ? "–" : `${(v * 100).toFixed(dp)}%`);
 const tone = (v: number | null | undefined) => (v === null || v === undefined ? "" : v >= 0 ? "gain" : "loss");
-type Tab = "tournament" | "research" | "livepaper" | "livepaper2L";
+// top2L / top10L: the Top-10 paper books (2026-10-27) on the NIFTY 50 tournament's ten best by Rank.
+type Tab = "tournament" | "research" | "livepaper" | "livepaper2L" | "top2L" | "top10L";
 const STATUS_TONE: Record<string, string> = {
   CONFIRMED: "ok", INCUBATING: "wait", FAILED: "bad", REJECTED_ON_HISTORY: "bad",
 };
@@ -110,7 +112,7 @@ export default function PreLivePage() {
   };
 
   useEffect(() => {
-    if (index !== "NIFTY" || tab === "livepaper" || tab === "livepaper2L") return;
+    if (index !== "NIFTY" || tab === "livepaper" || tab === "livepaper2L" || tab === "top2L" || tab === "top10L") return;
     load();
     const id = setInterval(load, 30000);
     return () => clearInterval(id);
@@ -165,11 +167,15 @@ export default function PreLivePage() {
         <button className={tab === "research" ? "dt active" : "dt"} onClick={() => setTab("research")}>Hypotheses &amp; real money</button>
         <button className={tab === "livepaper" ? "dt active" : "dt"} onClick={() => setTab("livepaper")}>Live Paper Buying · ₹50k</button>
         <button className={tab === "livepaper2L" ? "dt active" : "dt"} onClick={() => setTab("livepaper2L")}>Live Paper Trade · ₹2 lakh</button>
+        <button className={tab === "top2L" ? "dt active" : "dt"} onClick={() => setTab("top2L")}>Top 10 Paper Trade · ₹2 lakh</button>
+        <button className={tab === "top10L" ? "dt active" : "dt"} onClick={() => setTab("top10L")}>Top 10 Paper Trade · ₹10 lakh</button>
       </div>
 
       {error && <ErrorBanner message={error} />}
 
-      {tab === "livepaper" || tab === "livepaper2L" ? (
+      {tab === "top2L" || tab === "top10L" ? (
+        <Top10Book key={tab} desk="prelive" book={tab} />
+      ) : tab === "livepaper" || tab === "livepaper2L" ? (
         <LivePaperBuying key={tab} book={tab === "livepaper2L" ? "2L" : "50k"} />
       ) : tab === "tournament" ? (
         <>

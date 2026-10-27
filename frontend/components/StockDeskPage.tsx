@@ -5,6 +5,8 @@ import PageHeader from "./PageHeader";
 import GlassPanel from "./GlassPanel";
 import ErrorBanner from "./ErrorBanner";
 import StockBookView from "./StockBookView";
+import Top10Book from "./Top10Book";
+import type { Top10BookKey } from "../lib/top10Books";
 import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "./StrategyRank";
 import {
   StockBookKey,
@@ -34,22 +36,23 @@ export default function StockDeskPage({ side }: { side: "buying" | "selling" }) 
   const [antiOnly, setAntiOnly] = useState(false);
   // "desk" is the 220-strategy desk itself; the other two are the paper books that follow it.
   // Books exist for the buying side only, so the selling page never leaves "desk".
-  const [tab, setTab] = useState<"desk" | StockBookKey>("desk");
+  // top2L / top10L (2026-10-27): the Top-10 paper books, on BOTH sides - the desk's ten best by Rank.
+  const [tab, setTab] = useState<"desk" | StockBookKey | Top10BookKey>("desk");
 
   useEffect(() => {
-    if (!buying) return;
     try {
-      const saved = window.localStorage.getItem("stockDeskTab");
-      if (saved === "10L" || saved === "2L" || saved === "desk") setTab(saved);
+      const saved = window.localStorage.getItem(buying ? "stockDeskTab" : "stockSellTab");
+      if (saved === "top2L" || saved === "top10L" || saved === "desk") setTab(saved);
+      else if (buying && (saved === "10L" || saved === "2L")) setTab(saved);
     } catch {
       /* storage blocked - the default tab is fine */
     }
   }, [buying]);
 
-  const pickTab = (t: "desk" | StockBookKey) => {
+  const pickTab = (t: "desk" | StockBookKey | Top10BookKey) => {
     setTab(t);
     try {
-      window.localStorage.setItem("stockDeskTab", t);
+      window.localStorage.setItem(buying ? "stockDeskTab" : "stockSellTab", t);
     } catch {
       /* storage blocked - selection just will not persist */
     }
@@ -101,13 +104,14 @@ export default function StockDeskPage({ side }: { side: "buying" | "selling" }) 
         }
       />
 
-      {buying && (
+      {(
         <div className="tabs" role="tablist">
           {([
-            ["desk", "Desk · 220 strategies"],
-            ["10L", "Paper Trade · ₹10 lakh"],
-            ["2L", "Paper Trade · ₹2 lakh"],
-          ] as ["desk" | StockBookKey, string][]).map(([k, label]) => (
+            ["desk", buying ? "Desk · 220 strategies" : "Desk"],
+            ...(buying ? [["10L", "Paper Trade · ₹10 lakh"], ["2L", "Paper Trade · ₹2 lakh"]] : []),
+            ["top2L", "Top 10 Paper Trade · ₹2 lakh"],
+            ["top10L", "Top 10 Paper Trade · ₹10 lakh"],
+          ] as ["desk" | StockBookKey | Top10BookKey, string][]).map(([k, label]) => (
             <button
               key={k}
               role="tab"
@@ -121,7 +125,9 @@ export default function StockDeskPage({ side }: { side: "buying" | "selling" }) 
         </div>
       )}
 
-      {tab !== "desk" ? (
+      {tab === "top2L" || tab === "top10L" ? (
+        <Top10Book key={tab} desk={buying ? "stock-buying" : "stock-selling"} book={tab} />
+      ) : tab !== "desk" ? (
         <StockBookView book={tab} />
       ) : (
       <>

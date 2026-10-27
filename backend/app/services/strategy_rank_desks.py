@@ -90,6 +90,9 @@ DESKS: dict[str, TradeSource] = {
     # Stock screener paper desk: its board is per SIGNAL FAMILY.
     "screener-paper": TradeSource("screener_paper_trades", {"status": {"$ne": "OPEN"}},
                                   key="family", pnl="net_pnl", deployed="capital"),
+    # Top-10 paper books on six desks (app.services.top10_books): one board per desk and book.
+    "top10-books": TradeSource("top10_book_positions", {**CLOSED, "source": "top10"}, key="key",
+                               params={"desk": "desk", "book": "book"}),
 }
 
 

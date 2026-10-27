@@ -16,6 +16,7 @@ import GlassPanel from "../../components/GlassPanel";
 import StatusPill from "../../components/StatusPill";
 import ErrorBanner from "../../components/ErrorBanner";
 import EmptyState from "../../components/EmptyState";
+import Top10Book from "../../components/Top10Book";
 import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   refreshing,
@@ -45,7 +46,8 @@ import {
   setCommodityKillSwitch,
 } from "../../lib/api";
 
-type Tab = "record" | "market" | "lab" | "money";
+// top2L / top10L: the Top-10 paper books (2026-10-27) - the record's ten best by Rank, on whole lots.
+type Tab = "record" | "market" | "lab" | "money" | "top2L" | "top10L";
 const REFRESH_MS = 30000;
 
 const inr = (v: number | null | undefined) =>
@@ -90,7 +92,7 @@ export default function CommodityPage() {
       } else if (tab === "lab") {
         const [l, h, bk] = await Promise.all([fetchCommodityLab(), fetchCommodityHypotheses(), fetchCommodityTrendBook()]);
         setLab(l); setHyps(h.hypotheses ?? []); setBook(bk);
-      } else {
+      } else if (tab === "money") {
         setMoney(await fetchCommodityRealMoney());
       }
       setError(null);
@@ -150,6 +152,8 @@ export default function CommodityPage() {
         <button className={tab === "market" ? "dt active" : "dt"} onClick={() => setTab("market")}>Market &amp; contracts</button>
         <button className={tab === "lab" ? "dt active" : "dt"} onClick={() => setTab("lab")}>Lab &amp; hypotheses</button>
         <button className={tab === "money" ? "dt active" : "dt"} onClick={() => setTab("money")}>Real money</button>
+        <button className={tab === "top2L" ? "dt active" : "dt"} onClick={() => setTab("top2L")}>Top 10 Paper Trade · ₹2 lakh</button>
+        <button className={tab === "top10L" ? "dt active" : "dt"} onClick={() => setTab("top10L")}>Top 10 Paper Trade · ₹10 lakh</button>
       </div>
 
       {tab === "record" && (
@@ -264,6 +268,8 @@ export default function CommodityPage() {
         <LabTab lab={lab} hyps={hyps} book={book} busy={busy}
           onRun={() => act("lab", runCommodityLab)} />
       )}
+
+      {(tab === "top2L" || tab === "top10L") && <Top10Book key={tab} desk="commodity" book={tab} />}
 
       {tab === "money" && money && (
         <MoneyTab money={money} busy={busy} onKill={(on) => act("kill", () => setCommodityKillSwitch(on))} />

@@ -23,7 +23,7 @@ import {
  * it did before, rather than gaining a column of dashes.
  */
 
-export type RankParams = Partial<Record<"book" | "side" | "symbol" | "venue", string | null | undefined>>;
+export type RankParams = Partial<Record<"book" | "desk" | "side" | "symbol" | "venue", string | null | undefined>>;
 
 const REFRESH_MS = 60_000;
 

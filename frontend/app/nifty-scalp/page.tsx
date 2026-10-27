@@ -6,6 +6,7 @@ import DeskHistory from "../../components/DeskHistory";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import PaperBook from "./PaperBook";
+import Top10Book from "../../components/Top10Book";
 import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   refreshing,
@@ -24,7 +25,7 @@ import {
 } from "../../lib/api";
 
 const REFRESH_MS = 30000;
-type Tab = "leaderboard" | "timeframes" | "open" | "closed" | "signals" | "daily" | "paper";
+type Tab = "leaderboard" | "timeframes" | "open" | "closed" | "signals" | "daily" | "paper" | "top2L" | "top10L";
 const TABS: { key: Tab; label: string }[] = [
   { key: "leaderboard", label: "Strategy leaderboard" },
   { key: "timeframes", label: "By timeframe" },
@@ -33,6 +34,9 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "signals", label: "Signal history" },
   { key: "daily", label: "Daily ROI" },
   { key: "paper", label: "Paper book · ₹2L" },
+  // The Top-10 paper books (2026-10-27): the desk's ten best by Rank, copied into one account each.
+  { key: "top2L", label: "Top 10 Paper Trade · ₹2 lakh" },
+  { key: "top10L", label: "Top 10 Paper Trade · ₹10 lakh" },
 ];
 // The timeframe and family chips filter the 504-strategy DESK. The paper book is a fixed
 // roster on one balance, so they mean nothing there and are hidden rather than left to
@@ -319,6 +323,7 @@ export default function NiftyScalpPage() {
       )}
 
       {tab === "paper" && <PaperBook board={board} />}
+      {(tab === "top2L" || tab === "top10L") && <Top10Book key={tab} desk="nifty-scalp" book={tab} />}
 
       <DeskHistory deskKey={"nifty-scalp"} />
 

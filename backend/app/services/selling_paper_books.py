@@ -109,7 +109,32 @@ class BookSpec:
     skip_expiry_day_entries: bool = True
     one_copy_per_structure: bool = True
     notes: tuple[str, ...] = field(default_factory=tuple)
+    # The most of the book one position may take; None = MAX_POSITION_PCT. The Top-10 books use
+    # 0.20 - five positions of up to a fifth of the account, the rule of every Top-10 book.
+    max_position_pct: float | None = None
 
+
+# TOP-10 BOOKS (2026-10-27). The owner asked for Rs 2 lakh and Rs 10 lakh paper accounts on the
+# desk's top 10 by Rank, as on the other desks (app.services.top10_books). These are the ten ranked
+# 1-10 on the selling desk's multi-factor Rank (win rate left out, as for every selling desk) at
+# 00:10 IST on 27 Oct 2026, after the 26 Oct close - FROZEN, not re-picked as ranks move. Every
+# rule is this module's (expiry-day entries skipped, one copy of an identical structure, whole lots,
+# margin the account has); positions are capped at a fifth of the book. Two of the ten (ranks 7
+# and 8) have identical records: they take the same trades, which the one-copy rule holds once.
+TOP10_PICKS: tuple[Pick, ...] = tuple(_pick(n) for n in (
+    "mirror_ema_200_trend",   # rank 1: score 91.4, 69 trades
+    "mirror_swing_pullback_sma50",   # rank 2: score 90.8, 43 trades
+    "mirror_pta_trap",   # rank 3: score 89.6, 165 trades
+    "mirror_sl_trap_trading",   # rank 4: score 89.2, 157 trades
+    "mirror_scalp_stoch_pop",   # rank 5: score 88.3, 160 trades
+    "sell_sw_three_green_call_spread",   # rank 6: score 86.1, 43 trades
+    "mirror_bb_liquidity_concept",   # rank 7: score 86.0, 80 trades
+    "mirror_sb_liquidity_sweep",   # rank 8: score 86.0, 80 trades
+    "mirror_swing_bb_reversion",   # rank 9: score 85.8, 103 trades
+    "mirror_swing_donchian55",   # rank 10: score 85.4, 94 trades
+))
+TOP10_NOTES = ("The selling desk's top 10 by Rank, picked at 00:10 IST on 27 Oct 2026 and fixed; "
+               "none is validated.",)
 
 BOOKS: dict[str, BookSpec] = {
     "pt01": BookSpec(
@@ -136,6 +161,22 @@ BOOKS: dict[str, BookSpec] = {
             "ANTI-sell_sw_three_red_put_spread",
         )),
     ),
+    "top2L": BookSpec(
+        key="top2L",
+        label="Top 10 Paper Trade · ₹2 lakh",
+        capital=float(os.getenv("SELLING_BOOK_TOP2L_CAPITAL", "200000")),
+        picks=TOP10_PICKS,
+        max_position_pct=0.20,
+        notes=TOP10_NOTES,
+    ),
+    "top10L": BookSpec(
+        key="top10L",
+        label="Top 10 Paper Trade · ₹10 lakh",
+        capital=float(os.getenv("SELLING_BOOK_TOP10L_CAPITAL", "1000000")),
+        picks=TOP10_PICKS,
+        max_position_pct=0.20,
+        notes=TOP10_NOTES,
+    ),
 }
 DEFAULT_BOOK = "pt01"
 
@@ -145,7 +186,7 @@ def normalize_book(book: str | None) -> str:
 
 
 def position_cap(spec: BookSpec) -> float:
-    return spec.capital * MAX_POSITION_PCT
+    return spec.capital * (spec.max_position_pct or MAX_POSITION_PCT)
 
 
 def _now() -> datetime:
