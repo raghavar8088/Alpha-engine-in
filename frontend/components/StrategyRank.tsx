@@ -174,7 +174,7 @@ export function RankNote({ board, children }: { board: StrategyRankBoard; childr
       <RankCss />
       <strong>Rank</strong> blends {board.factors.length} factors, each scored as a percentile among the{" "}
       {board.ranked} {what}:{" "}
-      {board.factors.map((f) => `${f.label} ${weightText(f.weight)}%${f.higher_is_better ? "" : " (lower is better)"}`).join(", ")}.
+      {board.factors.map((f) => `${f.label} ${weightText(f.weight)}%${f.higher_is_better ? "" : " (lower is better)"}`).join(", ")}.{" "}
       {board.basis_note ? `Computed on ${board.basis_note}. ` : ""}A record under {board.min_trades}{" "}
       trades is pulled toward the middle. Hover a rank for its breakdown. A rank is relative: #1 is
       the best here, not proof of an edge.
