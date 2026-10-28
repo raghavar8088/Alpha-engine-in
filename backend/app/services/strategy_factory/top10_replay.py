@@ -274,7 +274,7 @@ async def advance(strat, source: str, symbol: str, bars: list, htf_bars: list | 
             "last_ts": _utc(bars[-1].ts), "open_id": None, "started_at": datetime.now(timezone.utc)}},
             upsert=True)
         return n
-    last = st["last_ts"]
+    last = _utc(st["last_ts"])          # the Mongo client hands datetimes back tz-aware
     todo = [k for k in range(1, len(bars)) if _utc(bars[k].ts) > last]
     if not todo:
         return n
@@ -441,8 +441,10 @@ def parent(t: dict) -> dict | None:
     base = {
         "position_id": t["position_id"], "key": t["strategy_id"], "strategy_id": t["strategy_id"],
         "strategy_name": t.get("strategy_name") or t["strategy_id"], "side": t["side"],
-        "opened_at": t["opened_at"], "opened_on": t.get("opened_on"),
-        "closed_at": t.get("closed_at") if closed else None, "closed_on": t.get("closed_on") if closed else None,
+        # Naive UTC, as the books compare it (the Mongo client returns these tz-aware).
+        "opened_at": _utc(t["opened_at"]), "opened_on": t.get("opened_on"),
+        "closed_at": _utc(t["closed_at"]) if closed and t.get("closed_at") else None,
+        "closed_on": t.get("closed_on") if closed else None,
         "status": "CLOSED" if closed else "OPEN", "exit_reason": t.get("exit_reason"),
         "px_entry": px_entry, "px_exit": float(t["exit_price"]) if closed else None, "px_ltp": t.get("ltp"),
         "market": t.get("market"),
