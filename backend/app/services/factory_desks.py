@@ -71,9 +71,25 @@ from app.services.strategy_factory.signals import evaluate
 logger = logging.getLogger("factory_desks")
 
 IST = timezone(timedelta(hours=5, minutes=30))
-POSITIONS = db["factory_desk_positions"]
-STATE = db["factory_desk_state"]
-EQUITY = db["factory_desk_equity"]
+# The tabs' own records live in a second MongoDB when FACTORY_MONGO_URL is set (production: the box's
+# compose `mongodb` service), not on the Atlas cluster that holds everything else - 546 strategies on
+# six tabs write thousands of rows a week and Atlas is near its storage quota. Unset (local runs,
+# tests): the main database. Bars, instruments and quotes are always read from the main one.
+FACTORY_MONGO_URL = os.getenv("FACTORY_MONGO_URL", "").strip()
+FACTORY_MONGO_DB = os.getenv("FACTORY_MONGO_DB", "alpha_engine_factory")
+
+
+def _open_store():
+    if not FACTORY_MONGO_URL:
+        return db
+    from motor.motor_asyncio import AsyncIOMotorClient
+    return AsyncIOMotorClient(FACTORY_MONGO_URL, serverSelectionTimeoutMS=5000, maxPoolSize=10)[FACTORY_MONGO_DB]
+
+
+STORE = _open_store()
+POSITIONS = STORE["factory_desk_positions"]
+STATE = STORE["factory_desk_state"]
+EQUITY = STORE["factory_desk_equity"]
 ENABLED = os.getenv("FACTORY_DESKS_ENABLED", "1").lower() not in ("0", "false", "")
 TF_MINUTES = {"1m": 1, "5m": 5, "15m": 15, "30m": 30, "45m": 45, "1h": 60, "4h": 240, "1d": 1440}
 INTRADAY_TFS = {"1m", "5m", "15m", "30m", "45m", "1h"}
@@ -1043,6 +1059,8 @@ async def run_all(only: str | None = None) -> dict:
 
 async def loop() -> None:
     """Every minute: the NSE tabs in session, the gold tab around the clock."""
+    logger.info("[factory_desks] records in database %r (%s)", STORE.name,
+                "FACTORY_MONGO_URL" if FACTORY_MONGO_URL else "the main database: FACTORY_MONGO_URL is unset")
     await asyncio.sleep(45)
     while True:
         if ENABLED:

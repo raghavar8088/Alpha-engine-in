@@ -43,6 +43,12 @@ class TradeSource:
     ts: str = "closed_at"
     params: dict = field(default_factory=dict)   # query param -> document field it filters
     note: str | None = None                      # which P&L the rank is computed on, if not obvious
+    store: Callable[[], Any] | None = None       # the database `coll` lives in, if not the main one
+
+
+def _factory_store():
+    from app.services.factory_desks import STORE
+    return STORE
 
 
 DESKS: dict[str, TradeSource] = {
@@ -93,8 +99,10 @@ DESKS: dict[str, TradeSource] = {
     # Top-10 paper books on six desks (app.services.top10_books): one board per desk and book.
     "top10-books": TradeSource("top10_book_positions", {**CLOSED, "source": "top10"}, key="key",
                                params={"desk": "desk", "book": "book"}),
-    # Strategy Factory tabs on six modules (app.services.factory_desks): one board per tab.
-    "factory-desks": TradeSource("factory_desk_positions", CLOSED, params={"desk": "desk"}),
+    # Strategy Factory tabs on six modules (app.services.factory_desks): one board per tab, in that
+    # module's own database (FACTORY_MONGO_URL).
+    "factory-desks": TradeSource("factory_desk_positions", CLOSED, params={"desk": "desk"},
+                                 store=_factory_store),
 }
 
 
@@ -311,7 +319,7 @@ async def desk_ranks(desk: str, params: dict[str, str]) -> dict:
     match = dict(src.match)
     for name, value in params.items():
         match[src.params[name]] = value
-    stats = await position_stats(db[src.coll], match, key=src.key, pnl=src.pnl,
+    stats = await position_stats((src.store() if src.store else db)[src.coll], match, key=src.key, pnl=src.pnl,
                                  deployed=src.deployed, day=src.day, ts=src.ts)
     rows = [{"id": sid, **st} for sid, st in stats.items()]
     factors = SELLING_FACTORS if desk in SELLING_DESKS or params.get("side") == "selling" else POSITION_FACTORS
