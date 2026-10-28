@@ -54,3 +54,31 @@ The defects were found while the report was being written: 31 FINNIFTY trials sh
 basis points a trade in 2022–23. The loader now drops such prints and rescales VIX, and every round
 was rerun on the corrected data with the same registered variants and gates, and round 4 was added.
 The report compares the two runs.
+
+## Round F: the Strategy Factory's strategies, traded intraday (2026-10-28)
+
+`ii_factory.py` runs every Strategy Factory strategy — 69 hypotheses × 8 timeframes, 546 in all — on
+NIFTY and BANK NIFTY, intraday, with the module's rules (`app/services/index_intraday/factory.py`):
+the factory's own `evaluate()` decides at a bar close from 09:20 to 14:30, the fill is the next
+minute's open, the stop and target are the factory's (re-anchored to the fill), every position is
+flat by 15:12, and the ETF's measured costs are charged. The factory's volume rules read the
+tracking ETF's volume (an index prints none).
+
+- **Window 2019–23.** In sample 2019–21, out of sample 2022–23. The window starts in 2019 because
+  the ETF volume history does. Rows from 2024-01-01 are dropped as each file is read, so the
+  **holdout is still unused**.
+- **Nothing was fitted.** The strategies and their parameters are the factory's, fixed before this
+  round ran.
+- **Grades** follow the factory's 1–5 rules (`factory.grade`). The deflated Sharpe is taken over
+  every strategy with 20+ trades on that index.
+- **Outputs.** The catalogue the module serves is `app/services/index_intraday/factory_catalog.json.gz`.
+  One row per trial is in `factory_registry.csv`.
+- **Test.** `backend/tests/index_intraday/verify_factory.py` holds the live engine, the Lab and this run
+  to the same trades.
+
+```
+python backend/research/index_intraday_2026_10/ii_factory.py --indexes NIFTY,BANKNIFTY --workers 4
+```
+
+The other six indexes list the same 546 strategies, ungraded. The Backtesting Lab runs any of them;
+`--indexes` extends the catalogue.

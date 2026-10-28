@@ -1,0 +1,1093 @@
+id,index,timeframe,family,name,trades,total_bp,sharpe,oos_total_bp,grade,dsr
+SF0001-NIFTY,NIFTY,1m,chart,Head & Shoulders · 1m,3260,-19253.3528,-7.9184,-9776.3952,1,0.0
+SF0002-NIFTY,NIFTY,5m,chart,Head & Shoulders · 5m,839,-1656.1444,-0.6408,-1456.9491,1,0.0
+SF0003-NIFTY,NIFTY,15m,chart,Head & Shoulders · 15m,322,-1633.7973,-0.8217,-1045.8425,1,0.0
+SF0004-NIFTY,NIFTY,30m,chart,Head & Shoulders · 30m,195,-530.755,-0.3505,25.045,1,0.0
+SF0005-NIFTY,NIFTY,45m,chart,Head & Shoulders · 45m,172,-422.6035,-0.2506,27.8212,1,0.0
+SF0006-NIFTY,NIFTY,1h,chart,Head & Shoulders · 1h,137,-361.0048,-0.2308,167.6728,1,0.0
+SF0007-NIFTY,NIFTY,4h,chart,Head & Shoulders · 4h,41,-173.0929,-0.2336,-89.1014,1,0.0
+SF0008-NIFTY,NIFTY,1d,chart,Head & Shoulders · 1d,36,-63.7443,-0.0208,-332.1293,1,0.0
+SF0009-NIFTY,NIFTY,1m,chart,Double Top / Bottom · 1m,3836,-22201.4702,-8.2356,-11869.1792,1,0.0
+SF0010-NIFTY,NIFTY,5m,chart,Double Top / Bottom · 5m,2497,-7231.9458,-1.6826,-5006.1572,1,0.0
+SF0011-NIFTY,NIFTY,15m,chart,Double Top / Bottom · 15m,1129,-2967.6285,-0.6858,-2528.0176,1,0.0
+SF0012-NIFTY,NIFTY,30m,chart,Double Top / Bottom · 30m,777,-3268.9624,-0.8958,-2460.3642,1,0.0
+SF0013-NIFTY,NIFTY,45m,chart,Double Top / Bottom · 45m,627,-2625.2772,-0.7058,-1203.5948,1,0.0
+SF0014-NIFTY,NIFTY,1h,chart,Double Top / Bottom · 1h,537,-2275.0312,-0.8019,-1652.4927,1,0.0
+SF0015-NIFTY,NIFTY,4h,chart,Double Top / Bottom · 4h,185,385.3151,0.2208,-143.982,2,0.0
+SF0016-NIFTY,NIFTY,1d,chart,Double Top / Bottom · 1d,67,159.1026,0.0511,116.2576,2,0.0
+SF0017-NIFTY,NIFTY,1m,chart,Triple Top / Bottom · 1m,3836,-22861.9391,-8.2287,-11527.6881,1,0.0
+SF0018-NIFTY,NIFTY,5m,chart,Triple Top / Bottom · 5m,2162,-2850.06,-0.6211,-3465.461,1,0.0
+SF0019-NIFTY,NIFTY,15m,chart,Triple Top / Bottom · 15m,980,-1989.7175,-0.512,-1994.945,1,0.0
+SF0020-NIFTY,NIFTY,30m,chart,Triple Top / Bottom · 30m,597,-2776.5222,-0.9149,-1792.6166,1,0.0
+SF0021-NIFTY,NIFTY,45m,chart,Triple Top / Bottom · 45m,474,-1866.2332,-0.6893,-565.4943,1,0.0
+SF0022-NIFTY,NIFTY,1h,chart,Triple Top / Bottom · 1h,408,-922.7315,-0.357,-304.0336,1,0.0
+SF0023-NIFTY,NIFTY,4h,chart,Triple Top / Bottom · 4h,82,445.3227,0.3397,-239.7468,2,0.0
+SF0024-NIFTY,NIFTY,1d,chart,Triple Top / Bottom · 1d,43,236.6633,0.0776,30.4005,2,0.0
+SF0025-NIFTY,NIFTY,1m,chart,Ascending Triangle · 1m,131,-569.8028,-0.9485,-144.7096,1,0.0
+SF0026-NIFTY,NIFTY,5m,chart,Ascending Triangle · 5m,121,-1173.9426,-1.5356,-408.604,1,0.0
+SF0027-NIFTY,NIFTY,15m,chart,Ascending Triangle · 15m,88,86.4184,0.0985,20.7666,2,0.0
+SF0028-NIFTY,NIFTY,30m,chart,Ascending Triangle · 30m,54,-1123.9727,-1.3706,-314.8418,1,0.0
+SF0029-NIFTY,NIFTY,45m,chart,Ascending Triangle · 45m,38,-398.4193,-0.6471,-238.8242,1,0.0
+SF0030-NIFTY,NIFTY,1h,chart,Ascending Triangle · 1h,36,-245.7309,-0.4171,-204.9068,1,0.0
+SF0031-NIFTY,NIFTY,4h,chart,Ascending Triangle · 4h,17,134.2731,0.3728,-5.656,1,
+SF0032-NIFTY,NIFTY,1d,chart,Ascending Triangle · 1d,7,51.0326,0.1628,,1,
+SF0033-NIFTY,NIFTY,1m,chart,Descending Triangle · 1m,112,-837.1146,-1.6211,-338.2753,1,0.0
+SF0034-NIFTY,NIFTY,5m,chart,Descending Triangle · 5m,104,112.965,0.1253,43.9329,2,0.0
+SF0035-NIFTY,NIFTY,15m,chart,Descending Triangle · 15m,35,39.9996,0.0563,-235.4547,2,0.0
+SF0036-NIFTY,NIFTY,30m,chart,Descending Triangle · 30m,19,-174.5143,-0.3466,-34.7786,1,
+SF0037-NIFTY,NIFTY,45m,chart,Descending Triangle · 45m,15,230.8536,0.5332,56.7523,1,
+SF0038-NIFTY,NIFTY,1h,chart,Descending Triangle · 1h,10,107.9288,0.3107,162.8255,1,
+SF0039-NIFTY,NIFTY,4h,chart,Descending Triangle · 4h,4,72.3579,0.2095,72.3579,1,
+SF0040-NIFTY,NIFTY,1d,chart,Descending Triangle · 1d,0,,,,1,
+SF0041-NIFTY,NIFTY,1m,chart,Symmetrical Triangle · 1m,1,-65.5042,-0.4512,,1,
+SF0042-NIFTY,NIFTY,5m,chart,Symmetrical Triangle · 5m,5,60.0568,0.1993,-98.5882,1,
+SF0043-NIFTY,NIFTY,15m,chart,Symmetrical Triangle · 15m,14,227.8939,0.2466,-46.2042,1,
+SF0044-NIFTY,NIFTY,30m,chart,Symmetrical Triangle · 30m,11,82.4079,0.1779,126.8962,1,
+SF0045-NIFTY,NIFTY,45m,chart,Symmetrical Triangle · 45m,3,66.2542,0.5735,66.2542,1,
+SF0046-NIFTY,NIFTY,1h,chart,Symmetrical Triangle · 1h,2,-13.9038,-0.4084,-15.2969,1,
+SF0047-NIFTY,NIFTY,4h,chart,Symmetrical Triangle · 4h,8,185.9066,0.2554,17.8401,1,
+SF0048-NIFTY,NIFTY,1d,chart,Symmetrical Triangle · 1d,6,225.792,0.8592,225.792,1,
+SF0049-NIFTY,NIFTY,1m,chart,Rising / Falling Wedge · 1m,7,35.5841,0.1051,,1,
+SF0050-NIFTY,NIFTY,5m,chart,Rising / Falling Wedge · 5m,17,-214.8626,-0.4627,190.7135,1,
+SF0051-NIFTY,NIFTY,15m,chart,Rising / Falling Wedge · 15m,14,100.7568,0.1503,-178.7923,1,
+SF0052-NIFTY,NIFTY,30m,chart,Rising / Falling Wedge · 30m,26,-18.9472,-0.0245,-150.7878,1,0.0
+SF0053-NIFTY,NIFTY,45m,chart,Rising / Falling Wedge · 45m,26,-373.6591,-0.3267,-72.5737,1,0.0
+SF0054-NIFTY,NIFTY,1h,chart,Rising / Falling Wedge · 1h,16,-207.7438,-0.5054,-1.6134,1,
+SF0055-NIFTY,NIFTY,4h,chart,Rising / Falling Wedge · 4h,16,72.7013,0.2164,49.9766,1,
+SF0056-NIFTY,NIFTY,1d,chart,Rising / Falling Wedge · 1d,23,-587.4602,-0.6534,-262.0257,1,0.0
+SF0057-NIFTY,NIFTY,1m,chart,Bull / Bear Flag · 1m,4,-55.9724,-0.173,63.7388,1,
+SF0058-NIFTY,NIFTY,5m,chart,Bull / Bear Flag · 5m,4,-283.8656,-0.5628,,1,
+SF0059-NIFTY,NIFTY,15m,chart,Bull / Bear Flag · 15m,3,237.1509,0.3497,,1,
+SF0060-NIFTY,NIFTY,30m,chart,Bull / Bear Flag · 30m,6,16.7992,0.0496,-38.1721,1,
+SF0061-NIFTY,NIFTY,45m,chart,Bull / Bear Flag · 45m,9,-224.4347,-0.27,-21.0575,1,
+SF0062-NIFTY,NIFTY,1h,chart,Bull / Bear Flag · 1h,9,297.1767,0.4342,26.3532,1,
+SF0063-NIFTY,NIFTY,4h,chart,Bull / Bear Flag · 4h,5,-26.7209,-0.2484,5.9658,1,
+SF0064-NIFTY,NIFTY,1d,chart,Bull / Bear Flag · 1d,3,214.3421,0.4765,21.4126,1,
+SF0065-NIFTY,NIFTY,1m,chart,Pennant · 1m,6,174.784,0.5596,-32.5913,1,
+SF0066-NIFTY,NIFTY,5m,chart,Pennant · 5m,10,101.2621,0.1446,61.9731,1,
+SF0067-NIFTY,NIFTY,15m,chart,Pennant · 15m,7,161.5159,0.2301,,1,
+SF0068-NIFTY,NIFTY,30m,chart,Pennant · 30m,5,-253.1459,-0.6936,,1,
+SF0069-NIFTY,NIFTY,45m,chart,Pennant · 45m,4,15.4565,0.0349,92.1736,1,
+SF0070-NIFTY,NIFTY,1h,chart,Pennant · 1h,13,-177.7987,-0.15,-153.9471,1,
+SF0071-NIFTY,NIFTY,4h,chart,Pennant · 4h,3,164.3833,0.3311,-36.256,1,
+SF0072-NIFTY,NIFTY,1d,chart,Pennant · 1d,3,-49.0676,-0.0809,-185.4976,1,
+SF0073-NIFTY,NIFTY,1m,chart,Cup & Handle · 1m,671,-2356.8268,-1.7375,-1115.6433,1,0.0
+SF0074-NIFTY,NIFTY,5m,chart,Cup & Handle · 5m,166,608.3615,0.3392,103.1907,3,0.0
+SF0075-NIFTY,NIFTY,15m,chart,Cup & Handle · 15m,57,232.3179,0.229,-442.2434,2,0.0
+SF0076-NIFTY,NIFTY,30m,chart,Cup & Handle · 30m,28,-613.2702,-0.8681,-383.942,1,0.0
+SF0077-NIFTY,NIFTY,45m,chart,Cup & Handle · 45m,27,18.2647,0.0241,145.8747,2,0.0
+SF0078-NIFTY,NIFTY,1h,chart,Cup & Handle · 1h,14,-98.2058,-0.2086,-23.4234,1,
+SF0079-NIFTY,NIFTY,4h,chart,Cup & Handle · 4h,6,144.3383,0.8621,75.771,1,
+SF0080-NIFTY,NIFTY,1d,chart,Cup & Handle · 1d,3,95.429,0.5481,,1,
+SF0081-NIFTY,NIFTY,1m,chart,Rounding Top / Bottom · 1m,24,-349.7657,-0.3138,,1,0.0
+SF0082-NIFTY,NIFTY,5m,chart,Rounding Top / Bottom · 5m,21,730.1624,0.3547,127.145,2,0.0
+SF0083-NIFTY,NIFTY,15m,chart,Rounding Top / Bottom · 15m,39,216.9654,0.1291,177.42,2,0.0
+SF0084-NIFTY,NIFTY,30m,chart,Rounding Top / Bottom · 30m,57,371.9601,0.2084,175.8643,3,0.0
+SF0085-NIFTY,NIFTY,45m,chart,Rounding Top / Bottom · 45m,77,-353.7825,-0.2004,-299.3292,1,0.0
+SF0086-NIFTY,NIFTY,1h,chart,Rounding Top / Bottom · 1h,54,-595.4158,-0.4498,-817.4935,1,0.0
+SF0087-NIFTY,NIFTY,4h,chart,Rounding Top / Bottom · 4h,39,1.4895,0.0018,-55.6893,2,0.0
+SF0088-NIFTY,NIFTY,1d,chart,Rounding Top / Bottom · 1d,36,-8.6086,-0.0092,-72.7026,1,0.0
+SF0089-NIFTY,NIFTY,1m,chart,Diamond · 1m,2579,-12461.4347,-4.7619,-4834.4881,1,0.0
+SF0090-NIFTY,NIFTY,5m,chart,Diamond · 5m,351,-781.2595,-0.4393,-1524.8012,1,0.0
+SF0091-NIFTY,NIFTY,15m,chart,Diamond · 15m,32,-283.6091,-0.3842,-70.1014,1,0.0
+SF0092-NIFTY,NIFTY,30m,chart,Diamond · 30m,22,121.3638,0.2142,61.3473,3,0.0
+SF0093-NIFTY,NIFTY,45m,chart,Diamond · 45m,16,-182.4703,-0.2535,-185.1574,1,
+SF0094-NIFTY,NIFTY,1h,chart,Diamond · 1h,10,192.5753,0.1816,-117.812,1,
+SF0095-NIFTY,NIFTY,4h,chart,Diamond · 4h,4,59.8057,0.3533,-3.387,1,
+SF0096-NIFTY,NIFTY,1d,chart,Diamond · 1d,2,-235.6764,-0.4499,,1,
+SF0097-NIFTY,NIFTY,1m,chart,Broadening Formation · 1m,10,34.3362,0.1094,,1,
+SF0098-NIFTY,NIFTY,5m,chart,Broadening Formation · 5m,19,201.1701,0.5148,190.4228,1,
+SF0099-NIFTY,NIFTY,15m,chart,Broadening Formation · 15m,30,-1079.1897,-1.0925,-61.3792,1,0.0
+SF0100-NIFTY,NIFTY,30m,chart,Broadening Formation · 30m,15,-46.939,-0.1221,71.8129,1,
+SF0101-NIFTY,NIFTY,45m,chart,Broadening Formation · 45m,21,-239.1012,-0.491,-131.1624,1,0.0
+SF0102-NIFTY,NIFTY,1h,chart,Broadening Formation · 1h,15,-141.7814,-0.2382,94.9459,1,
+SF0103-NIFTY,NIFTY,4h,chart,Broadening Formation · 4h,13,157.3904,0.3201,-28.4164,1,
+SF0104-NIFTY,NIFTY,1d,chart,Broadening Formation · 1d,20,-32.219,-0.0647,,1,0.0
+SF0105-NIFTY,NIFTY,1m,candlestick,Engulfing Candle · 1m,4872,-26063.6531,-15.0969,-9952.9362,1,0.0
+SF0106-NIFTY,NIFTY,5m,candlestick,Engulfing Candle · 5m,3349,-16562.719,-5.8144,-6146.6217,1,0.0
+SF0107-NIFTY,NIFTY,15m,candlestick,Engulfing Candle · 15m,1254,-3466.4003,-1.301,-1114.6315,1,0.0
+SF0108-NIFTY,NIFTY,30m,candlestick,Engulfing Candle · 30m,626,-1024.1955,-0.3993,-1338.1602,1,0.0
+SF0109-NIFTY,NIFTY,45m,candlestick,Engulfing Candle · 45m,465,1276.4481,0.5405,293.0282,3,0.0
+SF0110-NIFTY,NIFTY,1h,candlestick,Engulfing Candle · 1h,330,-197.4895,-0.096,-437.821,1,0.0
+SF0111-NIFTY,NIFTY,4h,candlestick,Engulfing Candle · 4h,35,499.8694,0.8065,288.6645,4,0.0
+SF0112-NIFTY,NIFTY,1d,candlestick,Engulfing Candle · 1d,25,-917.8061,-1.0203,-144.5841,1,0.0
+SF0113-NIFTY,NIFTY,1m,candlestick,Hammer / Shooting Star · 1m,4872,-25355.1595,-14.0963,-10176.647,1,0.0
+SF0114-NIFTY,NIFTY,5m,candlestick,Hammer / Shooting Star · 5m,3966,-21323.99,-7.241,-8710.5956,1,0.0
+SF0115-NIFTY,NIFTY,15m,candlestick,Hammer / Shooting Star · 15m,1599,-7306.5821,-2.2622,-3769.3462,1,0.0
+SF0116-NIFTY,NIFTY,30m,candlestick,Hammer / Shooting Star · 30m,929,-2834.8485,-0.9408,-1366.0374,1,0.0
+SF0117-NIFTY,NIFTY,45m,candlestick,Hammer / Shooting Star · 45m,689,-4343.9067,-1.3995,-1011.1299,1,0.0
+SF0118-NIFTY,NIFTY,1h,candlestick,Hammer / Shooting Star · 1h,523,-2304.0126,-0.9553,-1096.1062,1,0.0
+SF0119-NIFTY,NIFTY,4h,candlestick,Hammer / Shooting Star · 4h,102,-980.512,-0.9608,-685.6113,1,0.0
+SF0120-NIFTY,NIFTY,1d,candlestick,Hammer / Shooting Star · 1d,132,-197.415,-0.1285,269.4638,1,0.0
+SF0121-NIFTY,NIFTY,1m,candlestick,Inverted Hammer · 1m,205,-1222.2528,-5.2309,-669.6565,1,0.0
+SF0122-NIFTY,NIFTY,5m,candlestick,Inverted Hammer · 5m,56,-312.7964,-1.9105,-101.0562,1,0.0
+SF0123-NIFTY,NIFTY,15m,candlestick,Inverted Hammer · 15m,26,-117.7832,-0.3835,-31.322,1,0.0
+SF0124-NIFTY,NIFTY,30m,candlestick,Inverted Hammer · 30m,17,-171.9201,-0.6866,-40.2136,1,
+SF0125-NIFTY,NIFTY,45m,candlestick,Inverted Hammer · 45m,12,-20.1783,-0.1145,70.2791,1,
+SF0126-NIFTY,NIFTY,1h,candlestick,Inverted Hammer · 1h,9,-163.5957,-1.0532,-101.6634,1,
+SF0127-NIFTY,NIFTY,4h,candlestick,Inverted Hammer · 4h,2,82.055,0.3031,82.055,1,
+SF0128-NIFTY,NIFTY,1d,candlestick,Inverted Hammer · 1d,0,,,,1,
+SF0129-NIFTY,NIFTY,1m,candlestick,Hanging Man · 1m,16,-88.7527,-1.345,-42.5959,1,
+SF0130-NIFTY,NIFTY,5m,candlestick,Hanging Man · 5m,5,-36.0312,-0.8093,-25.6121,1,
+SF0131-NIFTY,NIFTY,15m,candlestick,Hanging Man · 15m,1,-11.6844,-0.4512,,1,
+SF0132-NIFTY,NIFTY,30m,candlestick,Hanging Man · 30m,0,,,,1,
+SF0133-NIFTY,NIFTY,45m,candlestick,Hanging Man · 45m,0,,,,1,
+SF0134-NIFTY,NIFTY,1h,candlestick,Hanging Man · 1h,1,-20.5049,-0.4512,,1,
+SF0135-NIFTY,NIFTY,4h,candlestick,Hanging Man · 4h,0,,,,1,
+SF0136-NIFTY,NIFTY,1d,candlestick,Hanging Man · 1d,2,-138.5357,-0.6384,,1,
+SF0137-NIFTY,NIFTY,1m,candlestick,Doji Reversal · 1m,57,-289.1733,-1.8037,-205.3629,1,0.0
+SF0138-NIFTY,NIFTY,5m,candlestick,Doji Reversal · 5m,23,-42.0874,-0.1617,-82.5382,1,0.0
+SF0139-NIFTY,NIFTY,15m,candlestick,Doji Reversal · 15m,4,75.8235,0.4363,19.4798,1,
+SF0140-NIFTY,NIFTY,30m,candlestick,Doji Reversal · 30m,2,93.1841,0.4751,,1,
+SF0141-NIFTY,NIFTY,45m,candlestick,Doji Reversal · 45m,3,161.779,0.7557,48.9431,1,
+SF0142-NIFTY,NIFTY,1h,candlestick,Doji Reversal · 1h,0,,,,1,
+SF0143-NIFTY,NIFTY,4h,candlestick,Doji Reversal · 4h,0,,,,1,
+SF0144-NIFTY,NIFTY,1d,candlestick,Doji Reversal · 1d,0,,,,1,
+SF0145-NIFTY,NIFTY,1m,candlestick,Marubozu Continuation · 1m,3620,-18815.918,-12.796,-9480.7992,1,0.0
+SF0146-NIFTY,NIFTY,5m,candlestick,Marubozu Continuation · 5m,924,-4680.5406,-3.0361,-2340.4539,1,0.0
+SF0147-NIFTY,NIFTY,15m,candlestick,Marubozu Continuation · 15m,246,-1131.7055,-0.8006,-891.7221,1,0.0
+SF0148-NIFTY,NIFTY,30m,candlestick,Marubozu Continuation · 30m,130,-481.8787,-0.3609,-605.6588,1,0.0
+SF0149-NIFTY,NIFTY,45m,candlestick,Marubozu Continuation · 45m,86,251.1988,0.2202,-241.4154,2,0.0
+SF0150-NIFTY,NIFTY,1h,candlestick,Marubozu Continuation · 1h,71,-548.6382,-0.5628,-644.4633,1,0.0
+SF0151-NIFTY,NIFTY,4h,candlestick,Marubozu Continuation · 4h,16,119.2564,0.1923,-6.4299,1,
+SF0152-NIFTY,NIFTY,1d,candlestick,Marubozu Continuation · 1d,9,-11.8268,-0.0155,-60.8444,1,
+SF0153-NIFTY,NIFTY,1m,candlestick,Inside Bar Breakout · 1m,3306,-18280.2737,-11.9923,-6634.9103,1,0.0
+SF0154-NIFTY,NIFTY,5m,candlestick,Inside Bar Breakout · 5m,823,-3123.1291,-1.5,-1811.6667,1,0.0
+SF0155-NIFTY,NIFTY,15m,candlestick,Inside Bar Breakout · 15m,391,-1069.8668,-0.5874,-681.3498,1,0.0
+SF0156-NIFTY,NIFTY,30m,candlestick,Inside Bar Breakout · 30m,281,474.5014,0.2146,362.542,2,0.0
+SF0157-NIFTY,NIFTY,45m,candlestick,Inside Bar Breakout · 45m,243,714.0549,0.3202,109.5007,2,0.0
+SF0158-NIFTY,NIFTY,1h,candlestick,Inside Bar Breakout · 1h,213,-100.7816,-0.0468,-368.618,1,0.0
+SF0159-NIFTY,NIFTY,4h,candlestick,Inside Bar Breakout · 4h,38,453.1181,0.5155,-28.263,2,0.0
+SF0160-NIFTY,NIFTY,1d,candlestick,Inside Bar Breakout · 1d,9,15.2738,0.0195,-226.3443,1,
+SF0161-NIFTY,NIFTY,1m,candlestick,Multi Inside Bar Compression · 1m,654,-4657.8769,-3.7227,-1780.7253,1,0.0
+SF0162-NIFTY,NIFTY,5m,candlestick,Multi Inside Bar Compression · 5m,131,-574.8768,-0.5398,-224.9198,1,0.0
+SF0163-NIFTY,NIFTY,15m,candlestick,Multi Inside Bar Compression · 15m,42,-807.6445,-1.0106,-413.6338,1,0.0
+SF0164-NIFTY,NIFTY,30m,candlestick,Multi Inside Bar Compression · 30m,38,-10.0371,-0.0121,-140.8513,1,0.0
+SF0165-NIFTY,NIFTY,45m,candlestick,Multi Inside Bar Compression · 45m,58,-536.1984,-0.5111,-179.4713,1,0.0
+SF0166-NIFTY,NIFTY,1h,candlestick,Multi Inside Bar Compression · 1h,47,-210.8987,-0.2864,217.2005,1,0.0
+SF0167-NIFTY,NIFTY,4h,candlestick,Multi Inside Bar Compression · 4h,2,14.9504,0.5406,2.783,1,
+SF0168-NIFTY,NIFTY,1d,candlestick,Multi Inside Bar Compression · 1d,1,29.3911,0.4512,29.3911,1,
+SF0169-NIFTY,NIFTY,1m,candlestick,Outside Bar Reversal · 1m,3464,-19325.1894,-14.2957,-9967.6635,1,0.0
+SF0170-NIFTY,NIFTY,5m,candlestick,Outside Bar Reversal · 5m,1175,-6119.9292,-3.6423,-3581.5919,1,0.0
+SF0171-NIFTY,NIFTY,15m,candlestick,Outside Bar Reversal · 15m,427,-1658.1102,-0.8931,-930.6083,1,0.0
+SF0172-NIFTY,NIFTY,30m,candlestick,Outside Bar Reversal · 30m,319,-1365.7974,-0.6556,-1012.4627,1,0.0
+SF0173-NIFTY,NIFTY,45m,candlestick,Outside Bar Reversal · 45m,285,-524.2131,-0.211,-285.2918,1,0.0
+SF0174-NIFTY,NIFTY,1h,candlestick,Outside Bar Reversal · 1h,272,-105.4321,-0.0389,-408.9529,1,0.0
+SF0175-NIFTY,NIFTY,4h,candlestick,Outside Bar Reversal · 4h,71,109.3206,0.1209,26.83,2,0.0
+SF0176-NIFTY,NIFTY,1d,candlestick,Outside Bar Reversal · 1d,24,119.1646,0.1624,244.2858,3,0.0
+SF0177-NIFTY,NIFTY,1m,candlestick,Three Soldiers / Crows · 1m,4872,-25812.4981,-9.9888,-9811.1733,1,0.0
+SF0178-NIFTY,NIFTY,5m,candlestick,Three Soldiers / Crows · 5m,3856,-19176.5857,-4.5911,-7268.8707,1,0.0
+SF0179-NIFTY,NIFTY,15m,candlestick,Three Soldiers / Crows · 15m,1663,-1297.1303,-0.3177,-1892.864,1,0.0
+SF0180-NIFTY,NIFTY,30m,candlestick,Three Soldiers / Crows · 30m,952,-1355.3226,-0.3967,-1088.0145,1,0.0
+SF0181-NIFTY,NIFTY,45m,candlestick,Three Soldiers / Crows · 45m,738,-905.6683,-0.3145,-776.5462,1,0.0
+SF0182-NIFTY,NIFTY,1h,candlestick,Three Soldiers / Crows · 1h,526,-233.021,-0.0936,-340.277,1,0.0
+SF0183-NIFTY,NIFTY,4h,candlestick,Three Soldiers / Crows · 4h,166,-589.8534,-0.43,-244.1383,1,0.0
+SF0184-NIFTY,NIFTY,1d,candlestick,Three Soldiers / Crows · 1d,135,174.1003,0.0647,241.6106,2,0.0
+SF0185-NIFTY,NIFTY,1m,candlestick,Morning / Evening Star · 1m,3753,-21127.4439,-11.7659,-10976.9785,1,0.0
+SF0186-NIFTY,NIFTY,5m,candlestick,Morning / Evening Star · 5m,1312,-7308.6979,-3.1446,-2737.3702,1,0.0
+SF0187-NIFTY,NIFTY,15m,candlestick,Morning / Evening Star · 15m,549,-3609.5497,-1.392,-2698.4811,1,0.0
+SF0188-NIFTY,NIFTY,30m,candlestick,Morning / Evening Star · 30m,356,-1499.4124,-0.6309,-965.0064,1,0.0
+SF0189-NIFTY,NIFTY,45m,candlestick,Morning / Evening Star · 45m,288,-2873.3842,-1.3398,-1093.1274,1,0.0
+SF0190-NIFTY,NIFTY,1h,candlestick,Morning / Evening Star · 1h,254,-1314.0743,-0.6759,-500.9088,1,0.0
+SF0191-NIFTY,NIFTY,4h,candlestick,Morning / Evening Star · 4h,67,66.763,0.0731,-98.3158,2,0.0
+SF0192-NIFTY,NIFTY,1d,candlestick,Morning / Evening Star · 1d,27,378.6078,0.557,348.3419,4,0.0
+SF0193-NIFTY,NIFTY,1m,candlestick,Pin Bar at Extreme · 1m,3785,-19080.7016,-11.213,-8358.3572,1,0.0
+SF0194-NIFTY,NIFTY,5m,candlestick,Pin Bar at Extreme · 5m,1002,-4467.7902,-2.3121,-1449.9089,1,0.0
+SF0195-NIFTY,NIFTY,15m,candlestick,Pin Bar at Extreme · 15m,310,-2557.1152,-1.4739,-1343.4825,1,0.0
+SF0196-NIFTY,NIFTY,30m,candlestick,Pin Bar at Extreme · 30m,130,-691.7867,-0.6643,-347.7389,1,0.0
+SF0197-NIFTY,NIFTY,45m,candlestick,Pin Bar at Extreme · 45m,85,-410.8898,-0.3277,-264.2199,1,0.0
+SF0198-NIFTY,NIFTY,1h,candlestick,Pin Bar at Extreme · 1h,57,-230.6546,-0.209,-96.4554,1,0.0
+SF0199-NIFTY,NIFTY,4h,candlestick,Pin Bar at Extreme · 4h,14,41.0459,0.0759,-183.9785,1,
+SF0200-NIFTY,NIFTY,1d,candlestick,Pin Bar at Extreme · 1d,7,-256.6164,-0.6276,-68.8338,1,
+SF0201-NIFTY,NIFTY,1m,candlestick,Heikin Ashi Flip · 1m,4872,-26297.3296,-10.5794,-10773.6354,1,0.0
+SF0202-NIFTY,NIFTY,5m,candlestick,Heikin Ashi Flip · 5m,3857,-21672.8602,-5.0575,-7833.954,1,0.0
+SF0203-NIFTY,NIFTY,15m,candlestick,Heikin Ashi Flip · 15m,1817,-7346.2761,-1.6778,-3304.7595,1,0.0
+SF0204-NIFTY,NIFTY,30m,candlestick,Heikin Ashi Flip · 30m,1192,-3700.1272,-0.8198,-3000.6368,1,0.0
+SF0205-NIFTY,NIFTY,45m,candlestick,Heikin Ashi Flip · 45m,963,-2335.5456,-0.5543,-2364.4004,1,0.0
+SF0206-NIFTY,NIFTY,1h,candlestick,Heikin Ashi Flip · 1h,749,125.4193,0.035,-1265.272,2,0.0
+SF0207-NIFTY,NIFTY,4h,candlestick,Heikin Ashi Flip · 4h,125,-1906.953,-1.5443,-555.586,1,0.0
+SF0208-NIFTY,NIFTY,1d,candlestick,Heikin Ashi Flip · 1d,179,-3279.6407,-1.375,-1072.6992,1,0.0
+SF0209-NIFTY,NIFTY,1m,structure,Donchian Breakout (fast) · 1m,3835,-22089.784,-9.8427,-11417.9615,1,0.0
+SF0210-NIFTY,NIFTY,5m,structure,Donchian Breakout (fast) · 5m,2122,-5123.7009,-1.2508,-3957.5663,1,0.0
+SF0211-NIFTY,NIFTY,15m,structure,Donchian Breakout (fast) · 15m,874,-1300.3036,-0.3451,-1763.1023,1,0.0
+SF0212-NIFTY,NIFTY,30m,structure,Donchian Breakout (fast) · 30m,540,-1126.1717,-0.3355,-1420.2349,1,0.0
+SF0213-NIFTY,NIFTY,45m,structure,Donchian Breakout (fast) · 45m,443,-1311.7841,-0.4265,-656.0474,1,0.0
+SF0214-NIFTY,NIFTY,1h,structure,Donchian Breakout (fast) · 1h,392,-1807.1758,-0.6284,-1570.5634,1,0.0
+SF0215-NIFTY,NIFTY,4h,structure,Donchian Breakout (fast) · 4h,148,471.0788,0.2897,-34.8006,2,0.0
+SF0216-NIFTY,NIFTY,1d,structure,Donchian Breakout (fast) · 1d,97,-600.8015,-0.1797,348.9779,1,0.0
+SF0217-NIFTY,NIFTY,1m,structure,Donchian Breakout (slow) · 1m,4600,-27776.3558,-9.1326,-10900.1999,1,0.0
+SF0218-NIFTY,NIFTY,5m,structure,Donchian Breakout (slow) · 5m,1414,-1822.686,-0.4038,-1808.6193,1,0.0
+SF0219-NIFTY,NIFTY,15m,structure,Donchian Breakout (slow) · 15m,700,-2681.9603,-0.7359,-1040.9468,1,0.0
+SF0220-NIFTY,NIFTY,30m,structure,Donchian Breakout (slow) · 30m,454,-1612.8128,-0.5003,-159.4146,1,0.0
+SF0221-NIFTY,NIFTY,45m,structure,Donchian Breakout (slow) · 45m,377,-1904.7933,-0.6408,59.653,1,0.0
+SF0222-NIFTY,NIFTY,1h,structure,Donchian Breakout (slow) · 1h,319,-1984.8763,-0.7095,68.258,1,0.0
+SF0223-NIFTY,NIFTY,4h,structure,Donchian Breakout (slow) · 4h,160,358.1507,0.199,317.4556,2,0.0
+SF0224-NIFTY,NIFTY,1d,structure,Donchian Breakout (slow) · 1d,172,-2410.3438,-0.7725,-627.5537,1,0.0
+SF0225-NIFTY,NIFTY,1m,structure,Keltner Breakout · 1m,4826,-26682.1261,-10.0588,-10016.6585,1,0.0
+SF0226-NIFTY,NIFTY,5m,structure,Keltner Breakout · 5m,1997,-6575.9894,-1.5273,-3584.4289,1,0.0
+SF0227-NIFTY,NIFTY,15m,structure,Keltner Breakout · 15m,867,-4711.468,-1.29,-2030.3692,1,0.0
+SF0228-NIFTY,NIFTY,30m,structure,Keltner Breakout · 30m,467,-510.0928,-0.1395,-221.7894,1,0.0
+SF0229-NIFTY,NIFTY,45m,structure,Keltner Breakout · 45m,355,283.1965,0.0804,245.7492,2,0.0
+SF0230-NIFTY,NIFTY,1h,structure,Keltner Breakout · 1h,294,356.5718,0.1206,-375.7117,2,0.0
+SF0231-NIFTY,NIFTY,4h,structure,Keltner Breakout · 4h,148,716.8542,0.3602,-102.4382,2,0.0
+SF0232-NIFTY,NIFTY,1d,structure,Keltner Breakout · 1d,119,-2692.889,-0.6866,-1000.1558,1,0.0
+SF0233-NIFTY,NIFTY,1m,structure,Bollinger %B Extreme · 1m,11,-37.3311,-0.4009,-31.9739,1,
+SF0234-NIFTY,NIFTY,5m,structure,Bollinger %B Extreme · 5m,18,-194.7034,-1.1273,-16.9396,1,
+SF0235-NIFTY,NIFTY,15m,structure,Bollinger %B Extreme · 15m,2,21.9696,0.5457,4.3214,1,
+SF0236-NIFTY,NIFTY,30m,structure,Bollinger %B Extreme · 30m,1,-47.6334,-0.4512,,1,
+SF0237-NIFTY,NIFTY,45m,structure,Bollinger %B Extreme · 45m,0,,,,1,
+SF0238-NIFTY,NIFTY,1h,structure,Bollinger %B Extreme · 1h,0,,,,1,
+SF0239-NIFTY,NIFTY,4h,structure,Bollinger %B Extreme · 4h,0,,,,1,
+SF0240-NIFTY,NIFTY,1d,structure,Bollinger %B Extreme · 1d,0,,,,1,
+SF0241-NIFTY,NIFTY,1m,structure,Prior Session High/Low Break · 1m,3728,-18730.2669,-6.9539,-10330.5431,1,0.0
+SF0242-NIFTY,NIFTY,5m,structure,Prior Session High/Low Break · 5m,1798,-6823.2503,-1.7207,-3634.6504,1,0.0
+SF0243-NIFTY,NIFTY,15m,structure,Prior Session High/Low Break · 15m,940,-1773.31,-0.4471,-2223.0022,1,0.0
+SF0244-NIFTY,NIFTY,30m,structure,Prior Session High/Low Break · 30m,688,-1623.6165,-0.4279,-1552.3871,1,0.0
+SF0245-NIFTY,NIFTY,45m,structure,Prior Session High/Low Break · 45m,608,-1746.7565,-0.4444,-1269.1258,1,0.0
+SF0246-NIFTY,NIFTY,1h,structure,Prior Session High/Low Break · 1h,555,-1931.825,-0.5314,-1741.1692,1,0.0
+SF0247-NIFTY,NIFTY,4h,structure,Prior Session High/Low Break · 4h,277,137.9174,0.0662,-313.6345,2,0.0
+SF0248-NIFTY,NIFTY,1m,structure,Round Number Break · 1m,2015,-10304.3637,-8.0121,-4510.9973,1,0.0
+SF0249-NIFTY,NIFTY,5m,structure,Round Number Break · 5m,671,-4347.2135,-3.3155,-1853.0268,1,0.0
+SF0250-NIFTY,NIFTY,15m,structure,Round Number Break · 15m,266,-1607.2237,-1.1313,-1190.6666,1,0.0
+SF0251-NIFTY,NIFTY,30m,structure,Round Number Break · 30m,149,-1696.9335,-1.349,-518.7192,1,0.0
+SF0252-NIFTY,NIFTY,45m,structure,Round Number Break · 45m,113,790.6467,0.4565,-178.8979,2,0.0
+SF0253-NIFTY,NIFTY,1h,structure,Round Number Break · 1h,103,-1078.9119,-0.7745,-518.4197,1,0.0
+SF0254-NIFTY,NIFTY,4h,structure,Round Number Break · 4h,18,-39.1749,-0.0993,-14.2761,1,
+SF0255-NIFTY,NIFTY,1d,structure,Round Number Break · 1d,17,-165.6431,-0.2413,-119.6297,1,
+SF0256-NIFTY,NIFTY,1m,structure,Bollinger Squeeze Release · 1m,1913,-10848.7968,-7.4721,-5330.2611,1,0.0
+SF0257-NIFTY,NIFTY,5m,structure,Bollinger Squeeze Release · 5m,491,-1603.0241,-0.8975,-506.0316,1,0.0
+SF0258-NIFTY,NIFTY,15m,structure,Bollinger Squeeze Release · 15m,190,-1119.151,-0.7206,-104.8714,1,0.0
+SF0259-NIFTY,NIFTY,30m,structure,Bollinger Squeeze Release · 30m,86,642.4634,0.3866,74.1936,3,0.0
+SF0260-NIFTY,NIFTY,45m,structure,Bollinger Squeeze Release · 45m,74,-508.1872,-0.449,-833.1973,1,0.0
+SF0261-NIFTY,NIFTY,1h,structure,Bollinger Squeeze Release · 1h,67,-425.6446,-0.3553,-310.3452,1,0.0
+SF0262-NIFTY,NIFTY,4h,structure,Bollinger Squeeze Release · 4h,24,392.6817,0.6479,167.1422,4,0.0
+SF0263-NIFTY,NIFTY,1d,structure,Bollinger Squeeze Release · 1d,13,231.0706,0.3091,198.7249,1,
+SF0264-NIFTY,NIFTY,1m,structure,TTM Squeeze · 1m,3294,-16838.08,-8.848,-7820.3956,1,0.0
+SF0265-NIFTY,NIFTY,5m,structure,TTM Squeeze · 5m,1131,-3229.8594,-1.3244,-1466.8649,1,0.0
+SF0266-NIFTY,NIFTY,15m,structure,TTM Squeeze · 15m,351,1078.8312,0.4112,-466.1846,2,0.0
+SF0267-NIFTY,NIFTY,30m,structure,TTM Squeeze · 30m,132,-316.9472,-0.2852,-226.1959,1,0.0
+SF0268-NIFTY,NIFTY,45m,structure,TTM Squeeze · 45m,73,-574.8009,-0.6908,-352.7209,1,0.0
+SF0269-NIFTY,NIFTY,1h,structure,TTM Squeeze · 1h,54,-692.1031,-0.9337,-514.7364,1,0.0
+SF0270-NIFTY,NIFTY,4h,structure,TTM Squeeze · 4h,7,52.1842,0.3451,45.8181,1,
+SF0271-NIFTY,NIFTY,1d,structure,TTM Squeeze · 1d,13,-225.9625,-0.4284,-136.981,1,
+SF0272-NIFTY,NIFTY,1m,structure,EMA Ribbon Compression · 1m,2854,-16096.3876,-5.9694,-4103.6282,1,0.0
+SF0273-NIFTY,NIFTY,5m,structure,EMA Ribbon Compression · 5m,2435,-12943.652,-3.2157,-3794.8744,1,0.0
+SF0274-NIFTY,NIFTY,15m,structure,EMA Ribbon Compression · 15m,1194,-2327.8377,-0.6588,-2394.3593,1,0.0
+SF0275-NIFTY,NIFTY,30m,structure,EMA Ribbon Compression · 30m,702,-945.902,-0.3099,-243.1727,1,0.0
+SF0276-NIFTY,NIFTY,45m,structure,EMA Ribbon Compression · 45m,460,-1192.4784,-0.4887,-792.3996,1,0.0
+SF0277-NIFTY,NIFTY,1h,structure,EMA Ribbon Compression · 1h,347,-1031.5165,-0.4968,-1175.3119,1,0.0
+SF0278-NIFTY,NIFTY,4h,structure,EMA Ribbon Compression · 4h,33,-290.5052,-0.7094,-152.3826,1,0.0
+SF0279-NIFTY,NIFTY,1d,structure,EMA Ribbon Compression · 1d,27,-1059.1473,-1.3079,-284.3454,1,0.0
+SF0280-NIFTY,NIFTY,1m,structure,ATR Expansion Thrust · 1m,2429,-12557.6801,-10.1363,-5507.3526,1,0.0
+SF0281-NIFTY,NIFTY,5m,structure,ATR Expansion Thrust · 5m,674,-2307.1193,-1.5231,-1034.0289,1,0.0
+SF0282-NIFTY,NIFTY,15m,structure,ATR Expansion Thrust · 15m,247,-278.9002,-0.1787,-435.6537,1,0.0
+SF0283-NIFTY,NIFTY,30m,structure,ATR Expansion Thrust · 30m,149,26.3869,0.0154,-562.28,2,0.0
+SF0284-NIFTY,NIFTY,45m,structure,ATR Expansion Thrust · 45m,106,213.292,0.1584,-140.731,2,0.0
+SF0285-NIFTY,NIFTY,1h,structure,ATR Expansion Thrust · 1h,90,-827.0664,-0.6012,-457.1789,1,0.0
+SF0286-NIFTY,NIFTY,4h,structure,ATR Expansion Thrust · 4h,15,-136.9203,-0.3174,-19.2611,1,
+SF0287-NIFTY,NIFTY,1d,structure,ATR Expansion Thrust · 1d,10,-1049.8849,-0.7983,-290.4375,1,
+SF0288-NIFTY,NIFTY,1m,structure,HH/HL Structure Shift · 1m,4605,-26418.4136,-10.7143,-10717.0268,1,0.0
+SF0289-NIFTY,NIFTY,5m,structure,HH/HL Structure Shift · 5m,1293,-3910.553,-1.3204,-1188.9007,1,0.0
+SF0290-NIFTY,NIFTY,15m,structure,HH/HL Structure Shift · 15m,501,-3544.3468,-1.5749,-1348.3547,1,0.0
+SF0291-NIFTY,NIFTY,30m,structure,HH/HL Structure Shift · 30m,289,-1011.7723,-0.4546,247.4301,1,0.0
+SF0292-NIFTY,NIFTY,45m,structure,HH/HL Structure Shift · 45m,249,-1773.2648,-0.783,127.0471,1,0.0
+SF0293-NIFTY,NIFTY,1h,structure,HH/HL Structure Shift · 1h,170,225.4905,0.1444,-85.3064,2,0.0
+SF0294-NIFTY,NIFTY,4h,structure,HH/HL Structure Shift · 4h,133,-589.0915,-0.4975,-123.1024,1,0.0
+SF0295-NIFTY,NIFTY,1d,structure,HH/HL Structure Shift · 1d,97,-1047.9041,-0.6067,-105.1343,1,0.0
+SF0296-NIFTY,NIFTY,1m,structure,Break of Structure · 1m,3005,-13796.3095,-3.4978,-7333.4638,1,0.0
+SF0297-NIFTY,NIFTY,5m,structure,Break of Structure · 5m,865,-1955.4763,-0.4623,-1162.8964,1,0.0
+SF0298-NIFTY,NIFTY,15m,structure,Break of Structure · 15m,435,-4065.134,-1.2847,-1587.2903,1,0.0
+SF0299-NIFTY,NIFTY,30m,structure,Break of Structure · 30m,272,-992.4483,-0.3595,-338.4872,1,0.0
+SF0300-NIFTY,NIFTY,45m,structure,Break of Structure · 45m,225,-3029.3485,-1.3646,-1080.6119,1,0.0
+SF0301-NIFTY,NIFTY,1h,structure,Break of Structure · 1h,213,-2553.5348,-1.0838,-1063.1619,1,0.0
+SF0302-NIFTY,NIFTY,4h,structure,Break of Structure · 4h,124,297.5604,0.1978,-124.0411,2,0.0
+SF0303-NIFTY,NIFTY,1d,structure,Break of Structure · 1d,93,173.1676,0.06,-413.2807,2,0.0
+SF0304-NIFTY,NIFTY,1m,structure,Change of Character · 1m,2375,-12666.3973,-3.7241,-5559.5982,1,0.0
+SF0305-NIFTY,NIFTY,5m,structure,Change of Character · 5m,654,-2977.9169,-0.8134,-1444.6153,1,0.0
+SF0306-NIFTY,NIFTY,15m,structure,Change of Character · 15m,277,52.0107,0.0202,-466.6467,2,0.0
+SF0307-NIFTY,NIFTY,30m,structure,Change of Character · 30m,167,53.7441,0.023,-1222.1678,2,0.0
+SF0308-NIFTY,NIFTY,45m,structure,Change of Character · 45m,129,-68.1276,-0.035,-373.4018,1,0.0
+SF0309-NIFTY,NIFTY,1h,structure,Change of Character · 1h,122,-370.6761,-0.2042,-815.5565,1,0.0
+SF0310-NIFTY,NIFTY,4h,structure,Change of Character · 4h,57,-525.5325,-0.5438,40.4459,1,0.0
+SF0311-NIFTY,NIFTY,1d,structure,Change of Character · 1d,25,-201.7869,-0.3114,56.6856,1,0.0
+SF0312-NIFTY,NIFTY,1m,structure,Support / Resistance Flip · 1m,3829,-19872.3215,-7.1226,-9248.0492,1,0.0
+SF0313-NIFTY,NIFTY,5m,structure,Support / Resistance Flip · 5m,1821,-4910.881,-1.0587,-3664.859,1,0.0
+SF0314-NIFTY,NIFTY,15m,structure,Support / Resistance Flip · 15m,830,-812.4521,-0.2151,-1426.9165,1,0.0
+SF0315-NIFTY,NIFTY,30m,structure,Support / Resistance Flip · 30m,494,-2847.6416,-0.9119,-1466.9061,1,0.0
+SF0316-NIFTY,NIFTY,45m,structure,Support / Resistance Flip · 45m,406,-3433.451,-1.0805,-1532.8816,1,0.0
+SF0317-NIFTY,NIFTY,1h,structure,Support / Resistance Flip · 1h,336,-2218.5648,-0.8063,-1678.618,1,0.0
+SF0318-NIFTY,NIFTY,4h,structure,Support / Resistance Flip · 4h,88,138.9492,0.1274,181.9448,2,0.0
+SF0319-NIFTY,NIFTY,1d,structure,Support / Resistance Flip · 1d,82,-170.3029,-0.1036,14.6183,1,0.0
+SF0320-NIFTY,NIFTY,1m,structure,Opening Range Breakout · 1m,3814,-21400.0846,-11.625,-10569.1769,1,0.0
+SF0321-NIFTY,NIFTY,5m,structure,Opening Range Breakout · 5m,2522,-8837.5514,-3.1403,-4591.3715,1,0.0
+SF0322-NIFTY,NIFTY,15m,structure,Opening Range Breakout · 15m,714,72.0448,0.0301,-789.7152,2,0.0
+SF0323-NIFTY,NIFTY,30m,structure,Opening Range Breakout · 30m,314,957.9938,0.5399,-511.6181,2,0.0
+SF0324-NIFTY,NIFTY,45m,structure,Opening Range Breakout · 45m,201,250.7789,0.1954,-70.0656,2,0.0
+SF0325-NIFTY,NIFTY,1h,structure,Opening Range Breakout · 1h,0,,,,1,
+SF0326-NIFTY,NIFTY,4h,structure,Opening Range Breakout · 4h,0,,,,1,
+SF0327-NIFTY,NIFTY,1m,structure,Trend Pullback to EMA · 1m,4872,-27235.6993,-9.2018,-10135.7355,1,0.0
+SF0328-NIFTY,NIFTY,5m,structure,Trend Pullback to EMA · 5m,3161,-14201.5607,-2.7398,-6894.4414,1,0.0
+SF0329-NIFTY,NIFTY,15m,structure,Trend Pullback to EMA · 15m,1680,-7650.6595,-1.6305,-2434.6635,1,0.0
+SF0330-NIFTY,NIFTY,30m,structure,Trend Pullback to EMA · 30m,1083,-5481.6525,-1.3401,-1432.7258,1,0.0
+SF0331-NIFTY,NIFTY,45m,structure,Trend Pullback to EMA · 45m,893,-4013.1424,-1.0875,-1014.6663,1,0.0
+SF0332-NIFTY,NIFTY,1h,structure,Trend Pullback to EMA · 1h,644,-2105.1618,-0.6547,156.006,1,0.0
+SF0333-NIFTY,NIFTY,4h,structure,Trend Pullback to EMA · 4h,200,-440.4118,-0.2757,-276.3161,1,0.0
+SF0334-NIFTY,NIFTY,1d,structure,Trend Pullback to EMA · 1d,120,-248.1372,-0.1218,-374.0489,1,0.0
+SF0335-NIFTY,NIFTY,1m,structure,Previous Week High/Low Break · 1m,616,-1984.9539,-0.8544,-1496.4248,1,0.0
+SF0336-NIFTY,NIFTY,5m,structure,Previous Week High/Low Break · 5m,703,-2226.1546,-0.4639,-145.6915,1,0.0
+SF0337-NIFTY,NIFTY,15m,structure,Previous Week High/Low Break · 15m,561,-2170.0977,-0.4733,220.9037,1,0.0
+SF0338-NIFTY,NIFTY,30m,structure,Previous Week High/Low Break · 30m,501,-2446.6583,-0.5486,480.5047,1,0.0
+SF0339-NIFTY,NIFTY,45m,structure,Previous Week High/Low Break · 45m,478,-2776.9838,-0.6657,542.4374,1,0.0
+SF0340-NIFTY,NIFTY,1h,structure,Previous Week High/Low Break · 1h,448,-2927.2002,-0.728,208.7767,1,0.0
+SF0341-NIFTY,NIFTY,4h,structure,Previous Week High/Low Break · 4h,258,541.5487,0.2716,85.5005,2,0.0
+SF0342-NIFTY,NIFTY,1d,structure,Previous Week High/Low Break · 1d,187,-316.3724,-0.0826,267.7639,1,0.0
+SF0343-NIFTY,NIFTY,1m,structure,Rectangle / Trading Range Break · 1m,3730,-18804.5502,-4.5503,-8963.6177,1,0.0
+SF0344-NIFTY,NIFTY,5m,structure,Rectangle / Trading Range Break · 5m,1341,-4291.9432,-0.748,-3557.0779,1,0.0
+SF0345-NIFTY,NIFTY,15m,structure,Rectangle / Trading Range Break · 15m,674,-2211.2567,-0.5138,-2537.7395,1,0.0
+SF0346-NIFTY,NIFTY,30m,structure,Rectangle / Trading Range Break · 30m,441,-2782.7998,-0.7686,-1339.7561,1,0.0
+SF0347-NIFTY,NIFTY,45m,structure,Rectangle / Trading Range Break · 45m,351,-2481.0572,-0.741,-614.1448,1,0.0
+SF0348-NIFTY,NIFTY,1h,structure,Rectangle / Trading Range Break · 1h,303,-737.896,-0.258,-185.2495,1,0.0
+SF0349-NIFTY,NIFTY,4h,structure,Rectangle / Trading Range Break · 4h,98,245.5096,0.2002,-8.6061,2,0.0
+SF0350-NIFTY,NIFTY,1d,structure,Rectangle / Trading Range Break · 1d,52,164.1039,0.117,26.7888,2,0.0
+SF0351-NIFTY,NIFTY,1m,indicator,EMA Crossover (fast) · 1m,3232,-21546.933,-6.3991,-7460.0458,1,0.0
+SF0352-NIFTY,NIFTY,5m,indicator,EMA Crossover (fast) · 5m,886,-3619.6215,-0.9225,-2491.5624,1,0.0
+SF0353-NIFTY,NIFTY,15m,indicator,EMA Crossover (fast) · 15m,389,-763.3856,-0.2276,-1029.4958,1,0.0
+SF0354-NIFTY,NIFTY,30m,indicator,EMA Crossover (fast) · 30m,204,86.9681,0.0393,-612.8734,2,0.0
+SF0355-NIFTY,NIFTY,45m,indicator,EMA Crossover (fast) · 45m,143,-1067.8703,-0.6373,-652.1673,1,0.0
+SF0356-NIFTY,NIFTY,1h,indicator,EMA Crossover (fast) · 1h,96,-1313.1516,-1.0977,-449.056,1,0.0
+SF0357-NIFTY,NIFTY,4h,indicator,EMA Crossover (fast) · 4h,10,-219.8342,-0.9413,-37.9984,1,
+SF0358-NIFTY,NIFTY,1d,indicator,EMA Crossover (fast) · 1d,10,56.7452,0.1178,45.636,1,
+SF0359-NIFTY,NIFTY,1m,indicator,Golden / Death Cross · 1m,1666,-8507.2621,-2.7362,-2749.842,1,0.0
+SF0360-NIFTY,NIFTY,5m,indicator,Golden / Death Cross · 5m,362,771.8821,0.3352,-371.1416,2,0.0
+SF0361-NIFTY,NIFTY,15m,indicator,Golden / Death Cross · 15m,149,-1357.2862,-0.7745,-256.2408,1,0.0
+SF0362-NIFTY,NIFTY,30m,indicator,Golden / Death Cross · 30m,69,-356.4357,-0.305,-221.7982,1,0.0
+SF0363-NIFTY,NIFTY,45m,indicator,Golden / Death Cross · 45m,44,-276.589,-0.4036,-181.3931,1,0.0
+SF0364-NIFTY,NIFTY,1h,indicator,Golden / Death Cross · 1h,30,-411.7457,-0.6143,-227.0589,1,0.0
+SF0365-NIFTY,NIFTY,4h,indicator,Golden / Death Cross · 4h,6,176.4144,0.3016,-71.5869,1,
+SF0366-NIFTY,NIFTY,1d,indicator,Golden / Death Cross · 1d,8,276.5098,0.5626,127.0913,1,
+SF0367-NIFTY,NIFTY,1m,indicator,RSI Trend Regime (40/60) · 1m,4771,-26798.0154,-6.5746,-10455.5514,1,0.0
+SF0368-NIFTY,NIFTY,5m,indicator,RSI Trend Regime (40/60) · 5m,1687,-8464.237,-1.434,-4223.372,1,0.0
+SF0369-NIFTY,NIFTY,15m,indicator,RSI Trend Regime (40/60) · 15m,1088,-3145.8769,-0.6476,-2365.0396,1,0.0
+SF0370-NIFTY,NIFTY,30m,indicator,RSI Trend Regime (40/60) · 30m,723,-1983.557,-0.5169,-1349.3361,1,0.0
+SF0371-NIFTY,NIFTY,45m,indicator,RSI Trend Regime (40/60) · 45m,582,-1525.3617,-0.4374,-1271.9715,1,0.0
+SF0372-NIFTY,NIFTY,1h,indicator,RSI Trend Regime (40/60) · 1h,382,-1763.2451,-0.6135,-476.9371,1,0.0
+SF0373-NIFTY,NIFTY,4h,indicator,RSI Trend Regime (40/60) · 4h,103,-6.9041,-0.0063,115.8398,1,0.0
+SF0374-NIFTY,NIFTY,1d,indicator,RSI Trend Regime (40/60) · 1d,67,78.6762,0.0567,373.5993,2,0.0
+SF0375-NIFTY,NIFTY,1m,indicator,RSI Overbought / Oversold Reversal · 1m,2516,-13438.7682,-13.6503,-6290.3873,1,0.0
+SF0376-NIFTY,NIFTY,5m,indicator,RSI Overbought / Oversold Reversal · 5m,792,-5251.8617,-4.6873,-1939.443,1,0.0
+SF0377-NIFTY,NIFTY,15m,indicator,RSI Overbought / Oversold Reversal · 15m,509,-3034.9563,-2.3742,-987.4272,1,0.0
+SF0378-NIFTY,NIFTY,30m,indicator,RSI Overbought / Oversold Reversal · 30m,294,-1227.5529,-1.0711,-164.637,1,0.0
+SF0379-NIFTY,NIFTY,45m,indicator,RSI Overbought / Oversold Reversal · 45m,220,-1267.0874,-1.2904,-456.2195,1,0.0
+SF0380-NIFTY,NIFTY,1h,indicator,RSI Overbought / Oversold Reversal · 1h,159,-1054.2772,-1.197,-211.7322,1,0.0
+SF0381-NIFTY,NIFTY,4h,indicator,RSI Overbought / Oversold Reversal · 4h,45,-675.9047,-1.077,-424.11,1,0.0
+SF0382-NIFTY,NIFTY,1d,indicator,RSI Overbought / Oversold Reversal · 1d,33,255.5701,0.304,110.9031,3,0.0
+SF0383-NIFTY,NIFTY,1m,indicator,RSI Divergence · 1m,3157,-19100.0013,-6.4115,-9643.7474,1,0.0
+SF0384-NIFTY,NIFTY,5m,indicator,RSI Divergence · 5m,907,-5465.2715,-1.913,-3415.4191,1,0.0
+SF0385-NIFTY,NIFTY,15m,indicator,RSI Divergence · 15m,348,112.1974,0.0438,-507.6895,2,0.0
+SF0386-NIFTY,NIFTY,30m,indicator,RSI Divergence · 30m,225,-1160.6325,-0.5049,-503.8585,1,0.0
+SF0387-NIFTY,NIFTY,45m,indicator,RSI Divergence · 45m,187,-504.1506,-0.2772,-814.4321,1,0.0
+SF0388-NIFTY,NIFTY,1h,indicator,RSI Divergence · 1h,168,-960.688,-0.426,-572.5201,1,0.0
+SF0389-NIFTY,NIFTY,4h,indicator,RSI Divergence · 4h,76,-558.4634,-0.5901,-13.537,1,0.0
+SF0390-NIFTY,NIFTY,1d,indicator,RSI Divergence · 1d,41,452.261,0.4154,336.5165,4,0.0
+SF0391-NIFTY,NIFTY,1m,indicator,MACD Signal Cross · 1m,4585,-23259.4576,-5.9687,-9995.5996,1,0.0
+SF0392-NIFTY,NIFTY,5m,indicator,MACD Signal Cross · 5m,1457,-9117.6085,-1.9068,-3167.4264,1,0.0
+SF0393-NIFTY,NIFTY,15m,indicator,MACD Signal Cross · 15m,680,-1391.8276,-0.3748,-1005.2278,1,0.0
+SF0394-NIFTY,NIFTY,30m,indicator,MACD Signal Cross · 30m,408,-355.2005,-0.1135,387.2965,1,0.0
+SF0395-NIFTY,NIFTY,45m,indicator,MACD Signal Cross · 45m,314,-459.8863,-0.1576,-349.338,1,0.0
+SF0396-NIFTY,NIFTY,1h,indicator,MACD Signal Cross · 1h,223,-174.1216,-0.0695,-790.8785,1,0.0
+SF0397-NIFTY,NIFTY,4h,indicator,MACD Signal Cross · 4h,59,573.6488,0.6717,49.6278,4,0.0
+SF0398-NIFTY,NIFTY,1d,indicator,MACD Signal Cross · 1d,45,-727.0234,-0.5583,-88.6579,1,0.0
+SF0399-NIFTY,NIFTY,1m,indicator,MACD Histogram Turn · 1m,4864,-25010.5528,-11.144,-9249.8163,1,0.0
+SF0400-NIFTY,NIFTY,5m,indicator,MACD Histogram Turn · 5m,2022,-7386.6386,-2.1889,-3386.1647,1,0.0
+SF0401-NIFTY,NIFTY,15m,indicator,MACD Histogram Turn · 15m,860,-5908.3134,-1.8733,-1840.364,1,0.0
+SF0402-NIFTY,NIFTY,30m,indicator,MACD Histogram Turn · 30m,433,-1899.4845,-0.7581,-827.2205,1,0.0
+SF0403-NIFTY,NIFTY,45m,indicator,MACD Histogram Turn · 45m,351,-703.2018,-0.321,-633.9664,1,0.0
+SF0404-NIFTY,NIFTY,1h,indicator,MACD Histogram Turn · 1h,255,-2136.7593,-0.9322,-200.5769,1,0.0
+SF0405-NIFTY,NIFTY,4h,indicator,MACD Histogram Turn · 4h,75,73.8517,0.0821,-158.3419,2,0.0
+SF0406-NIFTY,NIFTY,1d,indicator,MACD Histogram Turn · 1d,73,-360.2335,-0.2576,69.5794,1,0.0
+SF0407-NIFTY,NIFTY,1m,indicator,ADX / DI Cross · 1m,3606,-24940.0334,-7.1754,-8425.212,1,0.0
+SF0408-NIFTY,NIFTY,5m,indicator,ADX / DI Cross · 5m,1030,-3695.9414,-0.9185,-2688.8491,1,0.0
+SF0409-NIFTY,NIFTY,15m,indicator,ADX / DI Cross · 15m,501,-116.9417,-0.0337,-1598.8462,1,0.0
+SF0410-NIFTY,NIFTY,30m,indicator,ADX / DI Cross · 30m,305,-1261.5858,-0.4209,-1010.5552,1,0.0
+SF0411-NIFTY,NIFTY,45m,indicator,ADX / DI Cross · 45m,236,-707.0602,-0.2706,-1189.9796,1,0.0
+SF0412-NIFTY,NIFTY,1h,indicator,ADX / DI Cross · 1h,196,-522.1261,-0.2389,-672.7814,1,0.0
+SF0413-NIFTY,NIFTY,4h,indicator,ADX / DI Cross · 4h,52,-543.906,-0.6832,-263.4773,1,0.0
+SF0414-NIFTY,NIFTY,1d,indicator,ADX / DI Cross · 1d,34,-803.9572,-0.7872,-618.7527,1,0.0
+SF0415-NIFTY,NIFTY,1m,indicator,Supertrend Flip · 1m,3905,-22276.5561,-5.3249,-9107.3781,1,0.0
+SF0416-NIFTY,NIFTY,5m,indicator,Supertrend Flip · 5m,1088,-3523.4007,-0.7373,-2658.6176,1,0.0
+SF0417-NIFTY,NIFTY,15m,indicator,Supertrend Flip · 15m,496,329.9191,0.0899,-809.2543,2,0.0
+SF0418-NIFTY,NIFTY,30m,indicator,Supertrend Flip · 30m,300,-115.0678,-0.0419,-821.2849,1,0.0
+SF0419-NIFTY,NIFTY,45m,indicator,Supertrend Flip · 45m,227,438.7961,0.1895,-701.056,2,0.0
+SF0420-NIFTY,NIFTY,1h,indicator,Supertrend Flip · 1h,129,-407.8934,-0.2565,-176.5143,1,0.0
+SF0421-NIFTY,NIFTY,4h,indicator,Supertrend Flip · 4h,28,233.9379,0.4893,186.1013,4,0.0
+SF0422-NIFTY,NIFTY,1d,indicator,Supertrend Flip · 1d,17,139.734,0.2415,20.6293,1,
+SF0423-NIFTY,NIFTY,1m,indicator,Parabolic SAR Flip · 1m,4826,-27887.6858,-7.8787,-11789.7592,1,0.0
+SF0424-NIFTY,NIFTY,5m,indicator,Parabolic SAR Flip · 5m,2069,-13190.4144,-2.5881,-7153.1119,1,0.0
+SF0425-NIFTY,NIFTY,15m,indicator,Parabolic SAR Flip · 15m,1131,-3984.3932,-0.8831,-1865.6255,1,0.0
+SF0426-NIFTY,NIFTY,30m,indicator,Parabolic SAR Flip · 30m,688,-1275.3368,-0.337,-1868.1543,1,0.0
+SF0427-NIFTY,NIFTY,45m,indicator,Parabolic SAR Flip · 45m,504,-3072.6325,-0.9418,-950.4911,1,0.0
+SF0428-NIFTY,NIFTY,1h,indicator,Parabolic SAR Flip · 1h,381,-2930.7802,-0.9454,-2088.7672,1,0.0
+SF0429-NIFTY,NIFTY,4h,indicator,Parabolic SAR Flip · 4h,99,-737.4901,-0.5708,-595.4334,1,0.0
+SF0430-NIFTY,NIFTY,1d,indicator,Parabolic SAR Flip · 1d,82,-1945.7348,-1.0142,-689.7321,1,0.0
+SF0431-NIFTY,NIFTY,1m,indicator,Stochastic Cross · 1m,4872,-26498.7623,-30.1349,-10300.4632,1,0.0
+SF0432-NIFTY,NIFTY,5m,indicator,Stochastic Cross · 5m,3072,-17532.1113,-12.2597,-7400.8685,1,0.0
+SF0433-NIFTY,NIFTY,15m,indicator,Stochastic Cross · 15m,1206,-7861.1013,-4.9388,-2510.8088,1,0.0
+SF0434-NIFTY,NIFTY,30m,indicator,Stochastic Cross · 30m,660,-3672.9199,-2.4633,-1362.5893,1,0.0
+SF0435-NIFTY,NIFTY,45m,indicator,Stochastic Cross · 45m,482,-2307.8487,-1.7728,-1150.8595,1,0.0
+SF0436-NIFTY,NIFTY,1h,indicator,Stochastic Cross · 1h,317,-2149.8434,-1.7972,-264.3153,1,0.0
+SF0437-NIFTY,NIFTY,4h,indicator,Stochastic Cross · 4h,94,-456.9785,-0.4591,-624.3058,1,0.0
+SF0438-NIFTY,NIFTY,1d,indicator,Stochastic Cross · 1d,82,796.2907,0.7024,349.126,4,0.0
+SF0439-NIFTY,NIFTY,1m,indicator,Williams %R Reversal · 1m,3999,-19047.4577,-13.5601,-8004.9142,1,0.0
+SF0440-NIFTY,NIFTY,5m,indicator,Williams %R Reversal · 5m,916,-5192.9097,-3.8045,-2334.7191,1,0.0
+SF0441-NIFTY,NIFTY,15m,indicator,Williams %R Reversal · 15m,246,-1542.5397,-1.3568,-403.2127,1,0.0
+SF0442-NIFTY,NIFTY,30m,indicator,Williams %R Reversal · 30m,97,173.0249,0.1611,-357.0194,2,0.0
+SF0443-NIFTY,NIFTY,45m,indicator,Williams %R Reversal · 45m,81,84.6988,0.0684,-60.4788,2,0.0
+SF0444-NIFTY,NIFTY,1h,indicator,Williams %R Reversal · 1h,57,177.0447,0.1345,81.3044,2,0.0
+SF0445-NIFTY,NIFTY,4h,indicator,Williams %R Reversal · 4h,24,-94.3496,-0.1473,145.8052,1,0.0
+SF0446-NIFTY,NIFTY,1d,indicator,Williams %R Reversal · 1d,12,36.2149,0.0807,-92.2255,1,
+SF0447-NIFTY,NIFTY,1m,indicator,CCI Breakout · 1m,3490,-18098.1658,-4.7805,-9146.1874,1,0.0
+SF0448-NIFTY,NIFTY,5m,indicator,CCI Breakout · 5m,1121,-5213.1132,-1.0339,-2686.3872,1,0.0
+SF0449-NIFTY,NIFTY,15m,indicator,CCI Breakout · 15m,612,-1254.1292,-0.3162,-930.985,1,0.0
+SF0450-NIFTY,NIFTY,30m,indicator,CCI Breakout · 30m,432,-1672.0975,-0.4931,-1445.8286,1,0.0
+SF0451-NIFTY,NIFTY,45m,indicator,CCI Breakout · 45m,335,-915.0474,-0.307,-468.9439,1,0.0
+SF0452-NIFTY,NIFTY,1h,indicator,CCI Breakout · 1h,256,-650.3485,-0.2674,-325.1391,1,0.0
+SF0453-NIFTY,NIFTY,4h,indicator,CCI Breakout · 4h,70,59.1676,0.0667,42.3654,2,0.0
+SF0454-NIFTY,NIFTY,1d,indicator,CCI Breakout · 1d,48,-25.1694,-0.016,-236.108,1,0.0
+SF0455-NIFTY,NIFTY,1m,hybrid,Flag + Volume + HTF Trend · 1m,2,-10.9352,-0.0336,98.1184,1,
+SF0456-NIFTY,NIFTY,5m,hybrid,Flag + Volume + HTF Trend · 5m,1,-166.9626,-0.4512,,1,
+SF0457-NIFTY,NIFTY,15m,hybrid,Flag + Volume + HTF Trend · 15m,1,-70.3134,-0.4512,,1,
+SF0458-NIFTY,NIFTY,30m,hybrid,Flag + Volume + HTF Trend · 30m,2,-38.1721,-0.2058,-38.1721,1,
+SF0459-NIFTY,NIFTY,45m,hybrid,Flag + Volume + HTF Trend · 45m,7,169.1099,0.3996,-21.0575,1,
+SF0460-NIFTY,NIFTY,1h,hybrid,Flag + Volume + HTF Trend · 1h,5,432.0663,0.8159,194.2076,1,
+SF0461-NIFTY,NIFTY,4h,hybrid,Flag + Volume + HTF Trend · 4h,3,-6.8057,-0.1329,-12.5593,1,
+SF0462-NIFTY,NIFTY,1d,hybrid,Flag + Volume + HTF Trend · 1d,3,234.9507,0.5283,54.0311,1,
+SF0463-NIFTY,NIFTY,1m,hybrid,Breakout + Volume + HTF Trend · 1m,3504,-19762.2296,-9.3471,-9607.3934,1,0.0
+SF0464-NIFTY,NIFTY,5m,hybrid,Breakout + Volume + HTF Trend · 5m,1152,-2412.6281,-0.7598,-2320.5536,1,0.0
+SF0465-NIFTY,NIFTY,15m,hybrid,Breakout + Volume + HTF Trend · 15m,497,-307.8994,-0.1059,-567.2583,1,0.0
+SF0466-NIFTY,NIFTY,30m,hybrid,Breakout + Volume + HTF Trend · 30m,288,-534.8453,-0.215,-439.7516,1,0.0
+SF0467-NIFTY,NIFTY,45m,hybrid,Breakout + Volume + HTF Trend · 45m,245,-690.48,-0.2874,-11.1059,1,0.0
+SF0468-NIFTY,NIFTY,1h,hybrid,Breakout + Volume + HTF Trend · 1h,226,-544.4881,-0.2399,-286.7568,1,0.0
+SF0469-NIFTY,NIFTY,4h,hybrid,Breakout + Volume + HTF Trend · 4h,84,42.5921,0.0363,-62.4958,2,0.0
+SF0470-NIFTY,NIFTY,1d,hybrid,Breakout + Volume + HTF Trend · 1d,59,-85.4371,-0.0275,8.3382,1,0.0
+SF0471-NIFTY,NIFTY,1m,hybrid,Pullback + EMA + RSI + VWAP · 1m,4872,-26532.7167,-9.6513,-9844.559,1,0.0
+SF0472-NIFTY,NIFTY,5m,hybrid,Pullback + EMA + RSI + VWAP · 5m,3035,-10747.0189,-2.1556,-5822.161,1,0.0
+SF0473-NIFTY,NIFTY,15m,hybrid,Pullback + EMA + RSI + VWAP · 15m,1494,-5517.0679,-1.3877,-2769.0107,1,0.0
+SF0474-NIFTY,NIFTY,30m,hybrid,Pullback + EMA + RSI + VWAP · 30m,910,-3206.6491,-0.9331,-725.5788,1,0.0
+SF0475-NIFTY,NIFTY,45m,hybrid,Pullback + EMA + RSI + VWAP · 45m,750,-1437.0231,-0.4414,-402.1018,1,0.0
+SF0476-NIFTY,NIFTY,1h,hybrid,Pullback + EMA + RSI + VWAP · 1h,516,179.1524,0.064,616.4285,2,0.0
+SF0477-NIFTY,NIFTY,4h,hybrid,Pullback + EMA + RSI + VWAP · 4h,160,-154.528,-0.109,-172.1835,1,0.0
+SF0478-NIFTY,NIFTY,1m,hybrid,Squeeze + Momentum + Volume · 1m,1615,-9273.0587,-6.436,-4673.038,1,0.0
+SF0479-NIFTY,NIFTY,5m,hybrid,Squeeze + Momentum + Volume · 5m,369,-862.1417,-0.5113,-312.8593,1,0.0
+SF0480-NIFTY,NIFTY,15m,hybrid,Squeeze + Momentum + Volume · 15m,155,-1054.9536,-0.7254,-50.66,1,0.0
+SF0481-NIFTY,NIFTY,30m,hybrid,Squeeze + Momentum + Volume · 30m,74,439.1256,0.2848,-222.1372,2,0.0
+SF0482-NIFTY,NIFTY,45m,hybrid,Squeeze + Momentum + Volume · 45m,58,-122.1638,-0.121,-718.5896,1,0.0
+SF0483-NIFTY,NIFTY,1h,hybrid,Squeeze + Momentum + Volume · 1h,47,-58.8437,-0.0577,-125.678,1,0.0
+SF0484-NIFTY,NIFTY,4h,hybrid,Squeeze + Momentum + Volume · 4h,20,352.0475,0.5929,109.9218,4,0.0
+SF0485-NIFTY,NIFTY,1d,hybrid,Squeeze + Momentum + Volume · 1d,9,132.5203,0.1826,100.1746,1,
+SF0486-NIFTY,NIFTY,1m,hybrid,Structure Break + Volume + HTF · 1m,1840,-8621.2848,-2.9909,-4481.0641,1,0.0
+SF0487-NIFTY,NIFTY,5m,hybrid,Structure Break + Volume + HTF · 5m,537,-303.8797,-0.0858,-307.8793,1,0.0
+SF0488-NIFTY,NIFTY,15m,hybrid,Structure Break + Volume + HTF · 15m,290,-2884.1176,-1.0835,-1120.8062,1,0.0
+SF0489-NIFTY,NIFTY,30m,hybrid,Structure Break + Volume + HTF · 30m,155,-976.414,-0.4429,-59.0739,1,0.0
+SF0490-NIFTY,NIFTY,45m,hybrid,Structure Break + Volume + HTF · 45m,150,-1849.7649,-1.1066,-319.7441,1,0.0
+SF0491-NIFTY,NIFTY,1h,hybrid,Structure Break + Volume + HTF · 1h,153,-1262.9042,-0.5944,-297.8426,1,0.0
+SF0492-NIFTY,NIFTY,4h,hybrid,Structure Break + Volume + HTF · 4h,98,-28.8761,-0.0204,-279.3436,1,0.0
+SF0493-NIFTY,NIFTY,1d,hybrid,Structure Break + Volume + HTF · 1d,74,604.5144,0.216,-244.8551,2,0.0
+SF0494-NIFTY,NIFTY,1m,hybrid,S/R Flip Retest + Volume · 1m,3824,-20860.5685,-7.7476,-9933.7724,1,0.0
+SF0495-NIFTY,NIFTY,5m,hybrid,S/R Flip Retest + Volume · 5m,1766,-4537.812,-0.9864,-3643.668,1,0.0
+SF0496-NIFTY,NIFTY,15m,hybrid,S/R Flip Retest + Volume · 15m,767,-1446.5119,-0.4017,-1497.9776,1,0.0
+SF0497-NIFTY,NIFTY,30m,hybrid,S/R Flip Retest + Volume · 30m,438,-1980.8304,-0.6871,-1562.7899,1,0.0
+SF0498-NIFTY,NIFTY,45m,hybrid,S/R Flip Retest + Volume · 45m,343,-2668.7237,-0.9094,-1269.169,1,0.0
+SF0499-NIFTY,NIFTY,1h,hybrid,S/R Flip Retest + Volume · 1h,286,-1870.3431,-0.7207,-1386.5947,1,0.0
+SF0500-NIFTY,NIFTY,4h,hybrid,S/R Flip Retest + Volume · 4h,74,85.764,0.084,211.3522,2,0.0
+SF0501-NIFTY,NIFTY,1d,hybrid,S/R Flip Retest + Volume · 1d,68,-336.4416,-0.2209,-95.8679,1,0.0
+SF0502-NIFTY,NIFTY,1m,hybrid,Engulfing + VWAP + Volume · 1m,2734,-14647.9083,-10.9617,-7429.8307,1,0.0
+SF0503-NIFTY,NIFTY,5m,hybrid,Engulfing + VWAP + Volume · 5m,765,-4806.6725,-2.8704,-2001.4465,1,0.0
+SF0504-NIFTY,NIFTY,15m,hybrid,Engulfing + VWAP + Volume · 15m,311,664.5539,0.4144,213.9183,2,0.0
+SF0505-NIFTY,NIFTY,30m,hybrid,Engulfing + VWAP + Volume · 30m,171,-232.3024,-0.1316,98.7301,1,0.0
+SF0506-NIFTY,NIFTY,45m,hybrid,Engulfing + VWAP + Volume · 45m,140,34.0462,0.0217,-201.0462,2,0.0
+SF0507-NIFTY,NIFTY,1h,hybrid,Engulfing + VWAP + Volume · 1h,131,-306.112,-0.1769,-242.0168,1,0.0
+SF0508-NIFTY,NIFTY,4h,hybrid,Engulfing + VWAP + Volume · 4h,20,406.8051,0.8074,213.3478,4,0.0
+SF0509-NIFTY,NIFTY,1m,hybrid,Pin Bar + Trend + ADX · 1m,469,-2649.5063,-4.0696,-1080.7531,1,0.0
+SF0510-NIFTY,NIFTY,5m,hybrid,Pin Bar + Trend + ADX · 5m,151,-444.7342,-0.572,-233.1274,1,0.0
+SF0511-NIFTY,NIFTY,15m,hybrid,Pin Bar + Trend + ADX · 15m,46,-405.7256,-0.8482,-68.3711,1,0.0
+SF0512-NIFTY,NIFTY,30m,hybrid,Pin Bar + Trend + ADX · 30m,20,76.6042,0.219,-59.8672,2,0.0
+SF0513-NIFTY,NIFTY,45m,hybrid,Pin Bar + Trend + ADX · 45m,9,103.8302,0.2891,-23.6738,1,
+SF0514-NIFTY,NIFTY,1h,hybrid,Pin Bar + Trend + ADX · 1h,19,-168.2374,-0.3752,-94.1149,1,
+SF0515-NIFTY,NIFTY,4h,hybrid,Pin Bar + Trend + ADX · 4h,3,34.8858,0.1221,-67.3846,1,
+SF0516-NIFTY,NIFTY,1d,hybrid,Pin Bar + Trend + ADX · 1d,4,-88.4269,-0.2958,48.9074,1,
+SF0517-NIFTY,NIFTY,1m,hybrid,VWAP Reclaim + Volume + HTF · 1m,1440,-8039.5612,-5.078,-3795.8018,1,0.0
+SF0518-NIFTY,NIFTY,5m,hybrid,VWAP Reclaim + Volume + HTF · 5m,876,-4994.7112,-1.9921,-2276.3497,1,0.0
+SF0519-NIFTY,NIFTY,15m,hybrid,VWAP Reclaim + Volume + HTF · 15m,597,-1679.3104,-0.5694,-1219.2287,1,0.0
+SF0520-NIFTY,NIFTY,30m,hybrid,VWAP Reclaim + Volume + HTF · 30m,448,-1322.8386,-0.4608,-794.9147,1,0.0
+SF0521-NIFTY,NIFTY,45m,hybrid,VWAP Reclaim + Volume + HTF · 45m,391,415.2114,0.1458,965.2248,2,0.0
+SF0522-NIFTY,NIFTY,1h,hybrid,VWAP Reclaim + Volume + HTF · 1h,356,489.9248,0.1836,5.0499,2,0.0
+SF0523-NIFTY,NIFTY,4h,hybrid,VWAP Reclaim + Volume + HTF · 4h,152,552.1759,0.366,1.2061,3,0.0
+SF0524-NIFTY,NIFTY,1m,hybrid,Gap Continuation + Volume · 1m,400,-1464.4239,-0.7165,-906.3268,1,0.0
+SF0525-NIFTY,NIFTY,5m,hybrid,Gap Continuation + Volume · 5m,256,832.2924,0.3526,-280.8844,2,0.0
+SF0526-NIFTY,NIFTY,15m,hybrid,Gap Continuation + Volume · 15m,169,1268.1827,0.6419,-197.4198,2,0.0
+SF0527-NIFTY,NIFTY,30m,hybrid,Gap Continuation + Volume · 30m,110,1033.6624,0.6389,-296.0747,2,0.0
+SF0528-NIFTY,NIFTY,45m,hybrid,Gap Continuation + Volume · 45m,89,450.9427,0.3233,-385.3719,2,0.0
+SF0529-NIFTY,NIFTY,1h,hybrid,Gap Continuation + Volume · 1h,65,490.8911,0.374,-516.2556,2,0.0
+SF0530-NIFTY,NIFTY,4h,hybrid,Gap Continuation + Volume · 4h,0,,,,1,
+SF0531-NIFTY,NIFTY,1m,hybrid,Fib 61.8% + RSI + HTF Trend · 1m,3860,-20423.608,-15.4008,-7682.6061,1,0.0
+SF0532-NIFTY,NIFTY,5m,hybrid,Fib 61.8% + RSI + HTF Trend · 5m,949,-5783.6374,-3.947,-1981.9742,1,0.0
+SF0533-NIFTY,NIFTY,15m,hybrid,Fib 61.8% + RSI + HTF Trend · 15m,275,-1370.6434,-0.903,-70.6858,1,0.0
+SF0534-NIFTY,NIFTY,30m,hybrid,Fib 61.8% + RSI + HTF Trend · 30m,105,-92.7946,-0.0867,-193.5989,1,0.0
+SF0535-NIFTY,NIFTY,45m,hybrid,Fib 61.8% + RSI + HTF Trend · 45m,63,-311.3423,-0.4027,-48.4136,1,0.0
+SF0536-NIFTY,NIFTY,1h,hybrid,Fib 61.8% + RSI + HTF Trend · 1h,36,274.8531,0.4201,103.9038,4,0.0
+SF0537-NIFTY,NIFTY,4h,hybrid,Fib 61.8% + RSI + HTF Trend · 4h,12,-216.4468,-0.7035,-38.5588,1,
+SF0538-NIFTY,NIFTY,1d,hybrid,Fib 61.8% + RSI + HTF Trend · 1d,9,257.256,0.4907,-63.9585,1,
+SF0539-NIFTY,NIFTY,1m,hybrid,Rectangle + Volume + ATR · 1m,2936,-11360.5379,-3.197,-6199.8271,1,0.0
+SF0540-NIFTY,NIFTY,5m,hybrid,Rectangle + Volume + ATR · 5m,972,-4248.1437,-0.8938,-3937.0535,1,0.0
+SF0541-NIFTY,NIFTY,15m,hybrid,Rectangle + Volume + ATR · 15m,458,-1965.5839,-0.5119,-1930.5251,1,0.0
+SF0542-NIFTY,NIFTY,30m,hybrid,Rectangle + Volume + ATR · 30m,255,-965.1613,-0.3107,-220.3764,1,0.0
+SF0543-NIFTY,NIFTY,45m,hybrid,Rectangle + Volume + ATR · 45m,184,14.05,0.0051,283.9278,2,0.0
+SF0544-NIFTY,NIFTY,1h,hybrid,Rectangle + Volume + ATR · 1h,153,780.9347,0.3384,586.4377,3,0.0
+SF0545-NIFTY,NIFTY,4h,hybrid,Rectangle + Volume + ATR · 4h,45,270.829,0.2525,-115.1359,2,0.0
+SF0546-NIFTY,NIFTY,1d,hybrid,Rectangle + Volume + ATR · 1d,21,288.0322,0.2315,19.8264,3,0.0
+SF0001-BANKNIFTY,BANKNIFTY,1m,chart,Head & Shoulders · 1m,3078,-23001.2631,-7.2263,-11665.5331,1,0.0
+SF0002-BANKNIFTY,BANKNIFTY,5m,chart,Head & Shoulders · 5m,807,-3698.8136,-1.0206,-1981.1283,1,0.0
+SF0003-BANKNIFTY,BANKNIFTY,15m,chart,Head & Shoulders · 15m,344,-2055.4038,-0.6317,-2004.7056,1,0.0
+SF0004-BANKNIFTY,BANKNIFTY,30m,chart,Head & Shoulders · 30m,166,822.0423,0.2833,-421.9549,2,0.0
+SF0005-BANKNIFTY,BANKNIFTY,45m,chart,Head & Shoulders · 45m,153,636.2409,0.2556,-409.352,2,0.0
+SF0006-BANKNIFTY,BANKNIFTY,1h,chart,Head & Shoulders · 1h,117,772.8075,0.3659,-62.9713,2,0.0
+SF0007-BANKNIFTY,BANKNIFTY,4h,chart,Head & Shoulders · 4h,31,-88.0538,-0.0889,-421.8485,1,0.0
+SF0008-BANKNIFTY,BANKNIFTY,1d,chart,Head & Shoulders · 1d,42,157.8472,0.0462,-462.969,2,0.0
+SF0009-BANKNIFTY,BANKNIFTY,1m,chart,Double Top / Bottom · 1m,3608,-26046.7951,-6.8847,-14939.3625,1,0.0
+SF0010-BANKNIFTY,BANKNIFTY,5m,chart,Double Top / Bottom · 5m,2353,-8966.1126,-1.4484,-6177.2778,1,0.0
+SF0011-BANKNIFTY,BANKNIFTY,15m,chart,Double Top / Bottom · 15m,1045,-4575.0077,-0.8281,-3850.9432,1,0.0
+SF0012-BANKNIFTY,BANKNIFTY,30m,chart,Double Top / Bottom · 30m,649,-5668.9672,-1.1348,-4494.0956,1,0.0
+SF0013-BANKNIFTY,BANKNIFTY,45m,chart,Double Top / Bottom · 45m,516,-2730.1901,-0.6292,-2389.1202,1,0.0
+SF0014-BANKNIFTY,BANKNIFTY,1h,chart,Double Top / Bottom · 1h,386,-2705.9769,-0.7729,-906.2826,1,0.0
+SF0015-BANKNIFTY,BANKNIFTY,4h,chart,Double Top / Bottom · 4h,142,-321.9373,-0.1339,-620.775,1,0.0
+SF0016-BANKNIFTY,BANKNIFTY,1d,chart,Double Top / Bottom · 1d,46,-1807.3966,-1.1505,-1492.2901,1,0.0
+SF0017-BANKNIFTY,BANKNIFTY,1m,chart,Triple Top / Bottom · 1m,3608,-27472.5575,-6.8483,-14755.1918,1,0.0
+SF0018-BANKNIFTY,BANKNIFTY,5m,chart,Triple Top / Bottom · 5m,2105,-7610.5343,-1.2389,-5145.1867,1,0.0
+SF0019-BANKNIFTY,BANKNIFTY,15m,chart,Triple Top / Bottom · 15m,908,-3165.3069,-0.5986,-3436.1482,1,0.0
+SF0020-BANKNIFTY,BANKNIFTY,30m,chart,Triple Top / Bottom · 30m,471,-3016.309,-0.7349,-3091.8488,1,0.0
+SF0021-BANKNIFTY,BANKNIFTY,45m,chart,Triple Top / Bottom · 45m,360,-951.068,-0.3099,-1770.8312,1,0.0
+SF0022-BANKNIFTY,BANKNIFTY,1h,chart,Triple Top / Bottom · 1h,270,-599.1223,-0.2103,-1131.0346,1,0.0
+SF0023-BANKNIFTY,BANKNIFTY,4h,chart,Triple Top / Bottom · 4h,76,-892.6101,-0.4977,-546.0003,1,0.0
+SF0024-BANKNIFTY,BANKNIFTY,1d,chart,Triple Top / Bottom · 1d,14,-707.2924,-0.7162,-389.1591,1,
+SF0025-BANKNIFTY,BANKNIFTY,1m,chart,Ascending Triangle · 1m,274,-2153.5076,-1.7154,-793.9886,1,0.0
+SF0026-BANKNIFTY,BANKNIFTY,5m,chart,Ascending Triangle · 5m,134,-1028.0492,-0.7276,-925.9544,1,0.0
+SF0027-BANKNIFTY,BANKNIFTY,15m,chart,Ascending Triangle · 15m,87,465.9718,0.3453,-125.8242,2,0.0
+SF0028-BANKNIFTY,BANKNIFTY,30m,chart,Ascending Triangle · 30m,36,-355.8173,-0.4472,-109.2254,1,0.0
+SF0029-BANKNIFTY,BANKNIFTY,45m,chart,Ascending Triangle · 45m,27,-198.2627,-0.2861,-295.82,1,0.0
+SF0030-BANKNIFTY,BANKNIFTY,1h,chart,Ascending Triangle · 1h,32,-80.486,-0.0975,-191.9851,1,0.0
+SF0031-BANKNIFTY,BANKNIFTY,4h,chart,Ascending Triangle · 4h,5,-65.3749,-0.1687,,1,
+SF0032-BANKNIFTY,BANKNIFTY,1d,chart,Ascending Triangle · 1d,4,-195.718,-0.6768,-195.718,1,
+SF0033-BANKNIFTY,BANKNIFTY,1m,chart,Descending Triangle · 1m,184,-951.6371,-0.9068,-555.8966,1,0.0
+SF0034-BANKNIFTY,BANKNIFTY,5m,chart,Descending Triangle · 5m,114,-79.198,-0.0606,-542.2828,1,0.0
+SF0035-BANKNIFTY,BANKNIFTY,15m,chart,Descending Triangle · 15m,61,-278.3942,-0.2225,-544.5621,1,0.0
+SF0036-BANKNIFTY,BANKNIFTY,30m,chart,Descending Triangle · 30m,17,-108.4916,-0.156,-150.3432,1,
+SF0037-BANKNIFTY,BANKNIFTY,45m,chart,Descending Triangle · 45m,12,375.1658,0.7611,220.2942,1,
+SF0038-BANKNIFTY,BANKNIFTY,1h,chart,Descending Triangle · 1h,11,74.175,0.0973,-159.3413,1,
+SF0039-BANKNIFTY,BANKNIFTY,4h,chart,Descending Triangle · 4h,0,,,,1,
+SF0040-BANKNIFTY,BANKNIFTY,1d,chart,Descending Triangle · 1d,0,,,,1,
+SF0041-BANKNIFTY,BANKNIFTY,1m,chart,Symmetrical Triangle · 1m,8,528.1166,0.8359,,1,
+SF0042-BANKNIFTY,BANKNIFTY,5m,chart,Symmetrical Triangle · 5m,16,605.4522,0.3366,-258.7327,1,
+SF0043-BANKNIFTY,BANKNIFTY,15m,chart,Symmetrical Triangle · 15m,22,-791.7322,-0.6542,-27.4557,1,0.0
+SF0044-BANKNIFTY,BANKNIFTY,30m,chart,Symmetrical Triangle · 30m,29,-906.2085,-0.7283,-94.9708,1,0.0
+SF0045-BANKNIFTY,BANKNIFTY,45m,chart,Symmetrical Triangle · 45m,20,141.3612,0.1606,-8.4171,2,0.0
+SF0046-BANKNIFTY,BANKNIFTY,1h,chart,Symmetrical Triangle · 1h,14,-715.7012,-0.5202,-190.2855,1,
+SF0047-BANKNIFTY,BANKNIFTY,4h,chart,Symmetrical Triangle · 4h,22,-28.2782,-0.027,-86.0612,1,0.0
+SF0048-BANKNIFTY,BANKNIFTY,1d,chart,Symmetrical Triangle · 1d,28,-798.9842,-0.7511,-184.8611,1,0.0
+SF0049-BANKNIFTY,BANKNIFTY,1m,chart,Rising / Falling Wedge · 1m,8,-401.2358,-0.9298,-71.1849,1,
+SF0050-BANKNIFTY,BANKNIFTY,5m,chart,Rising / Falling Wedge · 5m,24,-498.7887,-0.5861,54.4112,1,0.0
+SF0051-BANKNIFTY,BANKNIFTY,15m,chart,Rising / Falling Wedge · 15m,28,33.3185,0.0241,-34.552,2,0.0
+SF0052-BANKNIFTY,BANKNIFTY,30m,chart,Rising / Falling Wedge · 30m,29,65.694,0.052,-163.0774,2,0.0
+SF0053-BANKNIFTY,BANKNIFTY,45m,chart,Rising / Falling Wedge · 45m,29,-711.8879,-0.3795,-38.1589,1,0.0
+SF0054-BANKNIFTY,BANKNIFTY,1h,chart,Rising / Falling Wedge · 1h,22,-99.6055,-0.1824,57.7392,1,0.0
+SF0055-BANKNIFTY,BANKNIFTY,4h,chart,Rising / Falling Wedge · 4h,19,4.3019,0.0058,76.1846,1,
+SF0056-BANKNIFTY,BANKNIFTY,1d,chart,Rising / Falling Wedge · 1d,12,-487.7247,-0.4513,-95.8592,1,
+SF0057-BANKNIFTY,BANKNIFTY,1m,chart,Bull / Bear Flag · 1m,6,-101.3228,-0.2779,-33.9619,1,
+SF0058-BANKNIFTY,BANKNIFTY,5m,chart,Bull / Bear Flag · 5m,12,3.4805,0.0047,54.8725,1,
+SF0059-BANKNIFTY,BANKNIFTY,15m,chart,Bull / Bear Flag · 15m,13,496.4262,0.4158,5.3278,1,
+SF0060-BANKNIFTY,BANKNIFTY,30m,chart,Bull / Bear Flag · 30m,18,486.9037,0.2716,-76.2715,1,
+SF0061-BANKNIFTY,BANKNIFTY,45m,chart,Bull / Bear Flag · 45m,26,127.8099,0.0663,-172.3476,2,0.0
+SF0062-BANKNIFTY,BANKNIFTY,1h,chart,Bull / Bear Flag · 1h,29,647.6871,0.4832,-85.3692,2,0.0
+SF0063-BANKNIFTY,BANKNIFTY,4h,chart,Bull / Bear Flag · 4h,8,-278.0475,-0.6404,-128.7253,1,
+SF0064-BANKNIFTY,BANKNIFTY,1d,chart,Bull / Bear Flag · 1d,5,-243.827,-0.5802,-82.1469,1,
+SF0065-BANKNIFTY,BANKNIFTY,1m,chart,Pennant · 1m,15,-41.1423,-0.0596,44.9482,1,
+SF0066-BANKNIFTY,BANKNIFTY,5m,chart,Pennant · 5m,23,970.9219,0.8644,54.232,4,0.0
+SF0067-BANKNIFTY,BANKNIFTY,15m,chart,Pennant · 15m,14,467.8959,0.4265,84.4686,1,
+SF0068-BANKNIFTY,BANKNIFTY,30m,chart,Pennant · 30m,14,-210.6587,-0.2566,25.8552,1,
+SF0069-BANKNIFTY,BANKNIFTY,45m,chart,Pennant · 45m,10,-440.1481,-0.3671,-97.5354,1,
+SF0070-BANKNIFTY,BANKNIFTY,1h,chart,Pennant · 1h,17,-165.4124,-0.0941,-34.8707,1,
+SF0071-BANKNIFTY,BANKNIFTY,4h,chart,Pennant · 4h,5,-197.8476,-0.3851,75.258,1,
+SF0072-BANKNIFTY,BANKNIFTY,1d,chart,Pennant · 1d,4,-541.026,-0.873,-111.1005,1,
+SF0073-BANKNIFTY,BANKNIFTY,1m,chart,Cup & Handle · 1m,743,-3056.1702,-1.3541,-1955.8695,1,0.0
+SF0074-BANKNIFTY,BANKNIFTY,5m,chart,Cup & Handle · 5m,150,174.8392,0.0888,-37.6084,2,0.0
+SF0075-BANKNIFTY,BANKNIFTY,15m,chart,Cup & Handle · 15m,75,205.859,0.1149,-220.789,2,0.0
+SF0076-BANKNIFTY,BANKNIFTY,30m,chart,Cup & Handle · 30m,35,-74.2044,-0.0751,-391.8591,1,0.0
+SF0077-BANKNIFTY,BANKNIFTY,45m,chart,Cup & Handle · 45m,34,-57.2259,-0.0463,200.1768,1,0.0
+SF0078-BANKNIFTY,BANKNIFTY,1h,chart,Cup & Handle · 1h,13,173.6089,0.2806,171.9534,1,
+SF0079-BANKNIFTY,BANKNIFTY,4h,chart,Cup & Handle · 4h,6,-2.3135,-0.0132,-0.5656,1,
+SF0080-BANKNIFTY,BANKNIFTY,1d,chart,Cup & Handle · 1d,0,,,,1,
+SF0081-BANKNIFTY,BANKNIFTY,1m,chart,Rounding Top / Bottom · 1m,59,-364.1364,-0.1818,-115.2089,1,0.0
+SF0082-BANKNIFTY,BANKNIFTY,5m,chart,Rounding Top / Bottom · 5m,85,-1519.1588,-0.4573,-8.4471,1,0.0
+SF0083-BANKNIFTY,BANKNIFTY,15m,chart,Rounding Top / Bottom · 15m,92,919.5607,0.3206,-399.4371,2,0.0
+SF0084-BANKNIFTY,BANKNIFTY,30m,chart,Rounding Top / Bottom · 30m,109,1749.0203,0.5784,-469.7684,2,0.0
+SF0085-BANKNIFTY,BANKNIFTY,45m,chart,Rounding Top / Bottom · 45m,111,-679.3358,-0.2167,-710.7658,1,0.0
+SF0086-BANKNIFTY,BANKNIFTY,1h,chart,Rounding Top / Bottom · 1h,77,-803.9786,-0.4703,-1058.2113,1,0.0
+SF0087-BANKNIFTY,BANKNIFTY,4h,chart,Rounding Top / Bottom · 4h,52,-712.0289,-0.6,-19.9317,1,0.0
+SF0088-BANKNIFTY,BANKNIFTY,1d,chart,Rounding Top / Bottom · 1d,53,168.9358,0.1039,-260.9364,2,0.0
+SF0089-BANKNIFTY,BANKNIFTY,1m,chart,Diamond · 1m,2517,-16875.7417,-4.7714,-7200.6728,1,0.0
+SF0090-BANKNIFTY,BANKNIFTY,5m,chart,Diamond · 5m,293,-735.358,-0.3366,-1149.6765,1,0.0
+SF0091-BANKNIFTY,BANKNIFTY,15m,chart,Diamond · 15m,33,-762.9,-1.0303,-206.4025,1,0.0
+SF0092-BANKNIFTY,BANKNIFTY,30m,chart,Diamond · 30m,25,-133.6664,-0.1338,96.0917,1,0.0
+SF0093-BANKNIFTY,BANKNIFTY,45m,chart,Diamond · 45m,18,-300.6925,-0.4068,-189.8502,1,
+SF0094-BANKNIFTY,BANKNIFTY,1h,chart,Diamond · 1h,15,223.1291,0.437,141.0906,1,
+SF0095-BANKNIFTY,BANKNIFTY,4h,chart,Diamond · 4h,1,1.1638,0.4512,1.1638,1,
+SF0096-BANKNIFTY,BANKNIFTY,1d,chart,Diamond · 1d,2,-198.4236,-0.6276,-80.7215,1,
+SF0097-BANKNIFTY,BANKNIFTY,1m,chart,Broadening Formation · 1m,19,392.0209,0.8653,46.1986,1,
+SF0098-BANKNIFTY,BANKNIFTY,5m,chart,Broadening Formation · 5m,35,-573.0488,-0.6247,-62.2314,1,0.0
+SF0099-BANKNIFTY,BANKNIFTY,15m,chart,Broadening Formation · 15m,34,-461.0897,-0.5439,120.0409,1,0.0
+SF0100-BANKNIFTY,BANKNIFTY,30m,chart,Broadening Formation · 30m,40,362.2214,0.3064,-47.0859,2,0.0
+SF0101-BANKNIFTY,BANKNIFTY,45m,chart,Broadening Formation · 45m,36,-1411.2503,-1.3981,-731.5434,1,0.0
+SF0102-BANKNIFTY,BANKNIFTY,1h,chart,Broadening Formation · 1h,19,-572.8701,-0.7567,-60.4967,1,
+SF0103-BANKNIFTY,BANKNIFTY,4h,chart,Broadening Formation · 4h,14,-430.9867,-0.6202,-73.7619,1,
+SF0104-BANKNIFTY,BANKNIFTY,1d,chart,Broadening Formation · 1d,4,182.7008,0.5054,-19.6772,1,
+SF0105-BANKNIFTY,BANKNIFTY,1m,candlestick,Engulfing Candle · 1m,4872,-33477.5558,-13.3673,-13987.0,1,0.0
+SF0106-BANKNIFTY,BANKNIFTY,5m,candlestick,Engulfing Candle · 5m,3323,-23501.2756,-5.6759,-8982.0934,1,0.0
+SF0107-BANKNIFTY,BANKNIFTY,15m,candlestick,Engulfing Candle · 15m,1218,-6402.3988,-1.5942,-3417.5062,1,0.0
+SF0108-BANKNIFTY,BANKNIFTY,30m,candlestick,Engulfing Candle · 30m,635,-3286.1843,-0.9375,-3091.3769,1,0.0
+SF0109-BANKNIFTY,BANKNIFTY,45m,candlestick,Engulfing Candle · 45m,430,-2048.1202,-0.5975,-2659.2043,1,0.0
+SF0110-BANKNIFTY,BANKNIFTY,1h,candlestick,Engulfing Candle · 1h,343,2315.7665,0.6959,-391.5348,2,0.0
+SF0111-BANKNIFTY,BANKNIFTY,4h,candlestick,Engulfing Candle · 4h,49,95.3859,0.0985,217.0517,2,0.0
+SF0112-BANKNIFTY,BANKNIFTY,1d,candlestick,Engulfing Candle · 1d,43,275.3049,0.1781,428.0646,3,0.0
+SF0113-BANKNIFTY,BANKNIFTY,1m,candlestick,Hammer / Shooting Star · 1m,4872,-31179.0012,-11.1917,-12977.0233,1,0.0
+SF0114-BANKNIFTY,BANKNIFTY,5m,candlestick,Hammer / Shooting Star · 5m,4035,-32093.3591,-7.5413,-13032.7053,1,0.0
+SF0115-BANKNIFTY,BANKNIFTY,15m,candlestick,Hammer / Shooting Star · 15m,1653,-12889.3513,-2.8234,-5260.6753,1,0.0
+SF0116-BANKNIFTY,BANKNIFTY,30m,candlestick,Hammer / Shooting Star · 30m,899,-4338.7601,-1.008,-2182.7623,1,0.0
+SF0117-BANKNIFTY,BANKNIFTY,45m,candlestick,Hammer / Shooting Star · 45m,650,-6848.3135,-1.7079,-2279.2926,1,0.0
+SF0118-BANKNIFTY,BANKNIFTY,1h,candlestick,Hammer / Shooting Star · 1h,528,-1813.1774,-0.4911,-1449.6124,1,0.0
+SF0119-BANKNIFTY,BANKNIFTY,4h,candlestick,Hammer / Shooting Star · 4h,99,-957.6013,-0.6606,-247.9586,1,0.0
+SF0120-BANKNIFTY,BANKNIFTY,1d,candlestick,Hammer / Shooting Star · 1d,106,-540.4967,-0.2498,84.8332,1,0.0
+SF0121-BANKNIFTY,BANKNIFTY,1m,candlestick,Inverted Hammer · 1m,209,-1422.3699,-5.2388,-854.0513,1,0.0
+SF0122-BANKNIFTY,BANKNIFTY,5m,candlestick,Inverted Hammer · 5m,59,-291.4698,-1.0317,-47.5887,1,0.0
+SF0123-BANKNIFTY,BANKNIFTY,15m,candlestick,Inverted Hammer · 15m,18,-79.4465,-0.4241,-86.478,1,
+SF0124-BANKNIFTY,BANKNIFTY,30m,candlestick,Inverted Hammer · 30m,12,109.6408,0.4133,169.9677,1,
+SF0125-BANKNIFTY,BANKNIFTY,45m,candlestick,Inverted Hammer · 45m,9,-210.4526,-0.838,-177.7375,1,
+SF0126-BANKNIFTY,BANKNIFTY,1h,candlestick,Inverted Hammer · 1h,8,-77.2695,-0.321,-124.8894,1,
+SF0127-BANKNIFTY,BANKNIFTY,4h,candlestick,Inverted Hammer · 4h,4,-56.6246,-0.178,-162.9645,1,
+SF0128-BANKNIFTY,BANKNIFTY,1d,candlestick,Inverted Hammer · 1d,0,,,,1,
+SF0129-BANKNIFTY,BANKNIFTY,1m,candlestick,Hanging Man · 1m,29,-143.0756,-1.4784,-85.8915,1,0.0
+SF0130-BANKNIFTY,BANKNIFTY,5m,candlestick,Hanging Man · 5m,6,-40.1776,-0.5953,-26.9804,1,
+SF0131-BANKNIFTY,BANKNIFTY,15m,candlestick,Hanging Man · 15m,0,,,,1,
+SF0132-BANKNIFTY,BANKNIFTY,30m,candlestick,Hanging Man · 30m,1,-28.7656,-0.4512,-28.7656,1,
+SF0133-BANKNIFTY,BANKNIFTY,45m,candlestick,Hanging Man · 45m,0,,,,1,
+SF0134-BANKNIFTY,BANKNIFTY,1h,candlestick,Hanging Man · 1h,1,-24.8678,-0.4512,-24.8678,1,
+SF0135-BANKNIFTY,BANKNIFTY,4h,candlestick,Hanging Man · 4h,0,,,,1,
+SF0136-BANKNIFTY,BANKNIFTY,1d,candlestick,Hanging Man · 1d,0,,,,1,
+SF0137-BANKNIFTY,BANKNIFTY,1m,candlestick,Doji Reversal · 1m,70,-425.4491,-1.6177,-161.5265,1,0.0
+SF0138-BANKNIFTY,BANKNIFTY,5m,candlestick,Doji Reversal · 5m,29,-74.9275,-0.1871,-22.4054,1,0.0
+SF0139-BANKNIFTY,BANKNIFTY,15m,candlestick,Doji Reversal · 15m,8,-134.4186,-0.5271,-11.9833,1,
+SF0140-BANKNIFTY,BANKNIFTY,30m,candlestick,Doji Reversal · 30m,4,-9.7851,-0.0272,-42.2772,1,
+SF0141-BANKNIFTY,BANKNIFTY,45m,candlestick,Doji Reversal · 45m,0,,,,1,
+SF0142-BANKNIFTY,BANKNIFTY,1h,candlestick,Doji Reversal · 1h,0,,,,1,
+SF0143-BANKNIFTY,BANKNIFTY,4h,candlestick,Doji Reversal · 4h,0,,,,1,
+SF0144-BANKNIFTY,BANKNIFTY,1d,candlestick,Doji Reversal · 1d,0,,,,1,
+SF0145-BANKNIFTY,BANKNIFTY,1m,candlestick,Marubozu Continuation · 1m,3310,-21829.4401,-10.2806,-11567.6964,1,0.0
+SF0146-BANKNIFTY,BANKNIFTY,5m,candlestick,Marubozu Continuation · 5m,755,-5868.9148,-2.7594,-3066.8555,1,0.0
+SF0147-BANKNIFTY,BANKNIFTY,15m,candlestick,Marubozu Continuation · 15m,246,-658.3651,-0.3021,-935.696,1,0.0
+SF0148-BANKNIFTY,BANKNIFTY,30m,candlestick,Marubozu Continuation · 30m,101,-888.8842,-0.5099,-816.3246,1,0.0
+SF0149-BANKNIFTY,BANKNIFTY,45m,candlestick,Marubozu Continuation · 45m,69,300.5718,0.2287,-191.8728,2,0.0
+SF0150-BANKNIFTY,BANKNIFTY,1h,candlestick,Marubozu Continuation · 1h,55,-621.488,-0.4782,-217.0171,1,0.0
+SF0151-BANKNIFTY,BANKNIFTY,4h,candlestick,Marubozu Continuation · 4h,12,-435.3839,-0.8393,-195.4863,1,
+SF0152-BANKNIFTY,BANKNIFTY,1d,candlestick,Marubozu Continuation · 1d,7,-169.3978,-0.1207,-12.9991,1,
+SF0153-BANKNIFTY,BANKNIFTY,1m,candlestick,Inside Bar Breakout · 1m,3451,-26232.6231,-11.8156,-9135.2088,1,0.0
+SF0154-BANKNIFTY,BANKNIFTY,5m,candlestick,Inside Bar Breakout · 5m,823,-5147.6462,-1.9906,-2488.6437,1,0.0
+SF0155-BANKNIFTY,BANKNIFTY,15m,candlestick,Inside Bar Breakout · 15m,355,-3134.4133,-1.1226,-1818.1323,1,0.0
+SF0156-BANKNIFTY,BANKNIFTY,30m,candlestick,Inside Bar Breakout · 30m,257,-4283.623,-1.3007,-1823.4461,1,0.0
+SF0157-BANKNIFTY,BANKNIFTY,45m,candlestick,Inside Bar Breakout · 45m,214,1845.1627,0.5729,-986.0415,2,0.0
+SF0158-BANKNIFTY,BANKNIFTY,1h,candlestick,Inside Bar Breakout · 1h,191,1624.7064,0.5131,-329.8694,2,0.0
+SF0159-BANKNIFTY,BANKNIFTY,4h,candlestick,Inside Bar Breakout · 4h,42,323.8538,0.3411,-249.1014,2,0.0
+SF0160-BANKNIFTY,BANKNIFTY,1d,candlestick,Inside Bar Breakout · 1d,13,858.1188,0.7118,-54.5143,1,
+SF0161-BANKNIFTY,BANKNIFTY,1m,candlestick,Multi Inside Bar Compression · 1m,707,-5147.6392,-2.659,-2337.4907,1,0.0
+SF0162-BANKNIFTY,BANKNIFTY,5m,candlestick,Multi Inside Bar Compression · 5m,161,-1510.7783,-0.7578,-1015.6092,1,0.0
+SF0163-BANKNIFTY,BANKNIFTY,15m,candlestick,Multi Inside Bar Compression · 15m,53,-1637.7208,-0.8981,-837.8607,1,0.0
+SF0164-BANKNIFTY,BANKNIFTY,30m,candlestick,Multi Inside Bar Compression · 30m,44,238.0916,0.1425,-84.2858,2,0.0
+SF0165-BANKNIFTY,BANKNIFTY,45m,candlestick,Multi Inside Bar Compression · 45m,55,-954.5534,-0.4881,-666.8803,1,0.0
+SF0166-BANKNIFTY,BANKNIFTY,1h,candlestick,Multi Inside Bar Compression · 1h,57,185.3049,0.0988,-216.1637,2,0.0
+SF0167-BANKNIFTY,BANKNIFTY,4h,candlestick,Multi Inside Bar Compression · 4h,2,25.1882,0.2836,-12.781,1,
+SF0168-BANKNIFTY,BANKNIFTY,1d,candlestick,Multi Inside Bar Compression · 1d,0,,,,1,
+SF0169-BANKNIFTY,BANKNIFTY,1m,candlestick,Outside Bar Reversal · 1m,3267,-22552.075,-11.8319,-12767.4813,1,0.0
+SF0170-BANKNIFTY,BANKNIFTY,5m,candlestick,Outside Bar Reversal · 5m,1291,-9657.9876,-3.8128,-4745.0315,1,0.0
+SF0171-BANKNIFTY,BANKNIFTY,15m,candlestick,Outside Bar Reversal · 15m,444,-1291.2795,-0.4891,-1347.2228,1,0.0
+SF0172-BANKNIFTY,BANKNIFTY,30m,candlestick,Outside Bar Reversal · 30m,285,-127.6981,-0.0405,-1273.7893,1,0.0
+SF0173-BANKNIFTY,BANKNIFTY,45m,candlestick,Outside Bar Reversal · 45m,262,-536.9465,-0.1813,-1192.5105,1,0.0
+SF0174-BANKNIFTY,BANKNIFTY,1h,candlestick,Outside Bar Reversal · 1h,234,-2583.7149,-0.8688,-1394.208,1,0.0
+SF0175-BANKNIFTY,BANKNIFTY,4h,candlestick,Outside Bar Reversal · 4h,61,-473.8963,-0.4494,-393.643,1,0.0
+SF0176-BANKNIFTY,BANKNIFTY,1d,candlestick,Outside Bar Reversal · 1d,16,-672.0299,-0.873,-389.0563,1,
+SF0177-BANKNIFTY,BANKNIFTY,1m,candlestick,Three Soldiers / Crows · 1m,4872,-35361.2155,-9.4596,-14777.9649,1,0.0
+SF0178-BANKNIFTY,BANKNIFTY,5m,candlestick,Three Soldiers / Crows · 5m,3831,-24290.5105,-4.0155,-10286.8323,1,0.0
+SF0179-BANKNIFTY,BANKNIFTY,15m,candlestick,Three Soldiers / Crows · 15m,1711,-6631.5608,-1.073,-2961.8859,1,0.0
+SF0180-BANKNIFTY,BANKNIFTY,30m,candlestick,Three Soldiers / Crows · 30m,937,-1060.1071,-0.2134,-975.9911,1,0.0
+SF0181-BANKNIFTY,BANKNIFTY,45m,candlestick,Three Soldiers / Crows · 45m,750,-634.1798,-0.1368,-2316.7579,1,0.0
+SF0182-BANKNIFTY,BANKNIFTY,1h,candlestick,Three Soldiers / Crows · 1h,511,-771.947,-0.2057,-1377.542,1,0.0
+SF0183-BANKNIFTY,BANKNIFTY,4h,candlestick,Three Soldiers / Crows · 4h,182,-1743.3132,-0.8075,-604.0967,1,0.0
+SF0184-BANKNIFTY,BANKNIFTY,1d,candlestick,Three Soldiers / Crows · 1d,89,-1049.3499,-0.2965,-585.3988,1,0.0
+SF0185-BANKNIFTY,BANKNIFTY,1m,candlestick,Morning / Evening Star · 1m,3539,-24017.4077,-9.2111,-13289.806,1,0.0
+SF0186-BANKNIFTY,BANKNIFTY,5m,candlestick,Morning / Evening Star · 5m,1345,-7687.4544,-2.1324,-4516.3296,1,0.0
+SF0187-BANKNIFTY,BANKNIFTY,15m,candlestick,Morning / Evening Star · 15m,523,-4539.6685,-1.2507,-3178.5885,1,0.0
+SF0188-BANKNIFTY,BANKNIFTY,30m,candlestick,Morning / Evening Star · 30m,317,-3663.7096,-1.2222,-1563.4492,1,0.0
+SF0189-BANKNIFTY,BANKNIFTY,45m,candlestick,Morning / Evening Star · 45m,269,-1412.3306,-0.4944,-730.7849,1,0.0
+SF0190-BANKNIFTY,BANKNIFTY,1h,candlestick,Morning / Evening Star · 1h,223,-1443.8392,-0.5536,-1557.9215,1,0.0
+SF0191-BANKNIFTY,BANKNIFTY,4h,candlestick,Morning / Evening Star · 4h,49,-151.2849,-0.1128,-240.4143,1,0.0
+SF0192-BANKNIFTY,BANKNIFTY,1d,candlestick,Morning / Evening Star · 1d,38,-129.3353,-0.0841,-348.7154,1,0.0
+SF0193-BANKNIFTY,BANKNIFTY,1m,candlestick,Pin Bar at Extreme · 1m,3787,-21915.4504,-9.5423,-9737.8541,1,0.0
+SF0194-BANKNIFTY,BANKNIFTY,5m,candlestick,Pin Bar at Extreme · 5m,999,-8472.1443,-3.0009,-1907.3803,1,0.0
+SF0195-BANKNIFTY,BANKNIFTY,15m,candlestick,Pin Bar at Extreme · 15m,314,-1588.2707,-0.6206,-1072.2018,1,0.0
+SF0196-BANKNIFTY,BANKNIFTY,30m,candlestick,Pin Bar at Extreme · 30m,119,-14.7145,-0.0074,-35.6404,1,0.0
+SF0197-BANKNIFTY,BANKNIFTY,45m,candlestick,Pin Bar at Extreme · 45m,91,-179.2074,-0.1175,-143.6777,1,0.0
+SF0198-BANKNIFTY,BANKNIFTY,1h,candlestick,Pin Bar at Extreme · 1h,74,675.8931,0.3481,234.3617,3,0.0
+SF0199-BANKNIFTY,BANKNIFTY,4h,candlestick,Pin Bar at Extreme · 4h,11,-169.6301,-0.3486,-60.9937,1,
+SF0200-BANKNIFTY,BANKNIFTY,1d,candlestick,Pin Bar at Extreme · 1d,6,3.1801,0.0027,51.3416,1,
+SF0201-BANKNIFTY,BANKNIFTY,1m,candlestick,Heikin Ashi Flip · 1m,4872,-33943.5491,-9.7169,-12759.3542,1,0.0
+SF0202-BANKNIFTY,BANKNIFTY,5m,candlestick,Heikin Ashi Flip · 5m,3803,-26795.5376,-3.9809,-10996.1868,1,0.0
+SF0203-BANKNIFTY,BANKNIFTY,15m,candlestick,Heikin Ashi Flip · 15m,1827,-8310.2527,-1.2983,-4816.1856,1,0.0
+SF0204-BANKNIFTY,BANKNIFTY,30m,candlestick,Heikin Ashi Flip · 30m,1187,-1224.4701,-0.1946,-2659.1417,1,0.0
+SF0205-BANKNIFTY,BANKNIFTY,45m,candlestick,Heikin Ashi Flip · 45m,946,-1586.7188,-0.2818,-3494.7408,1,0.0
+SF0206-BANKNIFTY,BANKNIFTY,1h,candlestick,Heikin Ashi Flip · 1h,742,1252.8028,0.2542,-1563.4911,2,0.0
+SF0207-BANKNIFTY,BANKNIFTY,4h,candlestick,Heikin Ashi Flip · 4h,142,-2732.0521,-1.2556,-844.8583,1,0.0
+SF0208-BANKNIFTY,BANKNIFTY,1d,candlestick,Heikin Ashi Flip · 1d,170,-2628.6745,-0.7168,-618.7667,1,0.0
+SF0209-BANKNIFTY,BANKNIFTY,1m,structure,Donchian Breakout (fast) · 1m,3608,-24566.8225,-6.9583,-13733.3905,1,0.0
+SF0210-BANKNIFTY,BANKNIFTY,5m,structure,Donchian Breakout (fast) · 5m,2066,-9130.8821,-1.4929,-5324.9906,1,0.0
+SF0211-BANKNIFTY,BANKNIFTY,15m,structure,Donchian Breakout (fast) · 15m,854,-2792.3662,-0.5204,-3431.3518,1,0.0
+SF0212-BANKNIFTY,BANKNIFTY,30m,structure,Donchian Breakout (fast) · 30m,497,-2387.4873,-0.5112,-2492.4095,1,0.0
+SF0213-BANKNIFTY,BANKNIFTY,45m,structure,Donchian Breakout (fast) · 45m,387,-1417.798,-0.3348,-1574.2994,1,0.0
+SF0214-BANKNIFTY,BANKNIFTY,1h,structure,Donchian Breakout (fast) · 1h,314,-2218.9228,-0.5427,-1877.4184,1,0.0
+SF0215-BANKNIFTY,BANKNIFTY,4h,structure,Donchian Breakout (fast) · 4h,136,-1241.0168,-0.6239,-327.9531,1,0.0
+SF0216-BANKNIFTY,BANKNIFTY,1d,structure,Donchian Breakout (fast) · 1d,100,-1478.9998,-0.3887,-525.1822,1,0.0
+SF0217-BANKNIFTY,BANKNIFTY,1m,structure,Donchian Breakout (slow) · 1m,4488,-30178.5069,-6.0419,-13432.277,1,0.0
+SF0218-BANKNIFTY,BANKNIFTY,5m,structure,Donchian Breakout (slow) · 5m,1381,-2979.195,-0.464,-3848.7283,1,0.0
+SF0219-BANKNIFTY,BANKNIFTY,15m,structure,Donchian Breakout (slow) · 15m,664,-4162.5166,-0.759,-3423.5799,1,0.0
+SF0220-BANKNIFTY,BANKNIFTY,30m,structure,Donchian Breakout (slow) · 30m,419,-3607.6472,-0.7559,-2351.8451,1,0.0
+SF0221-BANKNIFTY,BANKNIFTY,45m,structure,Donchian Breakout (slow) · 45m,311,-1435.0247,-0.3652,-1022.5246,1,0.0
+SF0222-BANKNIFTY,BANKNIFTY,1h,structure,Donchian Breakout (slow) · 1h,277,-3073.9437,-0.8141,-1106.3902,1,0.0
+SF0223-BANKNIFTY,BANKNIFTY,4h,structure,Donchian Breakout (slow) · 4h,126,458.1658,0.2308,-109.5733,2,0.0
+SF0224-BANKNIFTY,BANKNIFTY,1d,structure,Donchian Breakout (slow) · 1d,147,-884.4785,-0.2138,-149.0837,1,0.0
+SF0225-BANKNIFTY,BANKNIFTY,1m,structure,Keltner Breakout · 1m,4795,-32897.9326,-8.3509,-13544.381,1,0.0
+SF0226-BANKNIFTY,BANKNIFTY,5m,structure,Keltner Breakout · 5m,1946,-8329.9164,-1.3587,-5813.1172,1,0.0
+SF0227-BANKNIFTY,BANKNIFTY,15m,structure,Keltner Breakout · 15m,817,-5920.9697,-1.072,-2479.5571,1,0.0
+SF0228-BANKNIFTY,BANKNIFTY,30m,structure,Keltner Breakout · 30m,440,-1642.6777,-0.3545,-1185.3896,1,0.0
+SF0229-BANKNIFTY,BANKNIFTY,45m,structure,Keltner Breakout · 45m,341,-839.7792,-0.1743,-461.4849,1,0.0
+SF0230-BANKNIFTY,BANKNIFTY,1h,structure,Keltner Breakout · 1h,279,-424.197,-0.0978,-1074.3705,1,0.0
+SF0231-BANKNIFTY,BANKNIFTY,4h,structure,Keltner Breakout · 4h,144,23.1752,0.0102,-77.1324,2,0.0
+SF0232-BANKNIFTY,BANKNIFTY,1d,structure,Keltner Breakout · 1d,139,-2758.5213,-0.5456,-1783.3545,1,0.0
+SF0233-BANKNIFTY,BANKNIFTY,1m,structure,Bollinger %B Extreme · 1m,7,-67.4564,-0.8418,-40.9056,1,
+SF0234-BANKNIFTY,BANKNIFTY,5m,structure,Bollinger %B Extreme · 5m,13,-79.6163,-0.3906,-29.4545,1,
+SF0235-BANKNIFTY,BANKNIFTY,15m,structure,Bollinger %B Extreme · 15m,6,-74.6193,-0.5002,,1,
+SF0236-BANKNIFTY,BANKNIFTY,30m,structure,Bollinger %B Extreme · 30m,0,,,,1,
+SF0237-BANKNIFTY,BANKNIFTY,45m,structure,Bollinger %B Extreme · 45m,0,,,,1,
+SF0238-BANKNIFTY,BANKNIFTY,1h,structure,Bollinger %B Extreme · 1h,0,,,,1,
+SF0239-BANKNIFTY,BANKNIFTY,4h,structure,Bollinger %B Extreme · 4h,0,,,,1,
+SF0240-BANKNIFTY,BANKNIFTY,1d,structure,Bollinger %B Extreme · 1d,0,,,,1,
+SF0241-BANKNIFTY,BANKNIFTY,1m,structure,Prior Session High/Low Break · 1m,3505,-23069.3839,-5.7757,-13776.8994,1,0.0
+SF0242-BANKNIFTY,BANKNIFTY,5m,structure,Prior Session High/Low Break · 5m,1641,-8023.4599,-1.4459,-5925.1837,1,0.0
+SF0243-BANKNIFTY,BANKNIFTY,15m,structure,Prior Session High/Low Break · 15m,870,-4347.8595,-0.7906,-3732.4729,1,0.0
+SF0244-BANKNIFTY,BANKNIFTY,30m,structure,Prior Session High/Low Break · 30m,615,-3878.6517,-0.7333,-3532.7156,1,0.0
+SF0245-BANKNIFTY,BANKNIFTY,45m,structure,Prior Session High/Low Break · 45m,553,-4255.6049,-0.8577,-3238.735,1,0.0
+SF0246-BANKNIFTY,BANKNIFTY,1h,structure,Prior Session High/Low Break · 1h,483,-4707.1406,-0.9584,-3226.2004,1,0.0
+SF0247-BANKNIFTY,BANKNIFTY,4h,structure,Prior Session High/Low Break · 4h,238,-930.9802,-0.3565,-931.1651,1,0.0
+SF0248-BANKNIFTY,BANKNIFTY,1m,structure,Round Number Break · 1m,2915,-20071.1195,-10.6783,-10199.9024,1,0.0
+SF0249-BANKNIFTY,BANKNIFTY,5m,structure,Round Number Break · 5m,874,-4327.9852,-2.0444,-2943.8245,1,0.0
+SF0250-BANKNIFTY,BANKNIFTY,15m,structure,Round Number Break · 15m,257,-2156.4508,-1.1434,-1295.1561,1,0.0
+SF0251-BANKNIFTY,BANKNIFTY,30m,structure,Round Number Break · 30m,162,-500.3075,-0.2727,64.2568,1,0.0
+SF0252-BANKNIFTY,BANKNIFTY,45m,structure,Round Number Break · 45m,127,-2544.0627,-1.3574,-1250.2814,1,0.0
+SF0253-BANKNIFTY,BANKNIFTY,1h,structure,Round Number Break · 1h,82,-824.7496,-0.5567,-254.8438,1,0.0
+SF0254-BANKNIFTY,BANKNIFTY,4h,structure,Round Number Break · 4h,35,-378.0097,-0.4552,-325.6914,1,0.0
+SF0255-BANKNIFTY,BANKNIFTY,1d,structure,Round Number Break · 1d,13,-317.5568,-0.275,329.3856,1,
+SF0256-BANKNIFTY,BANKNIFTY,1m,structure,Bollinger Squeeze Release · 1m,1934,-13061.9746,-5.2753,-6295.019,1,0.0
+SF0257-BANKNIFTY,BANKNIFTY,5m,structure,Bollinger Squeeze Release · 5m,545,-969.5472,-0.3285,-921.0904,1,0.0
+SF0258-BANKNIFTY,BANKNIFTY,15m,structure,Bollinger Squeeze Release · 15m,205,-927.8724,-0.3667,189.5918,1,0.0
+SF0259-BANKNIFTY,BANKNIFTY,30m,structure,Bollinger Squeeze Release · 30m,107,58.3573,0.0256,-135.8675,2,0.0
+SF0260-BANKNIFTY,BANKNIFTY,45m,structure,Bollinger Squeeze Release · 45m,91,-579.0742,-0.3395,-265.0106,1,0.0
+SF0261-BANKNIFTY,BANKNIFTY,1h,structure,Bollinger Squeeze Release · 1h,65,-136.2106,-0.0835,-337.7619,1,0.0
+SF0262-BANKNIFTY,BANKNIFTY,4h,structure,Bollinger Squeeze Release · 4h,18,-121.5491,-0.2202,5.2842,1,
+SF0263-BANKNIFTY,BANKNIFTY,1d,structure,Bollinger Squeeze Release · 1d,9,-82.8211,-0.149,-93.0957,1,
+SF0264-BANKNIFTY,BANKNIFTY,1m,structure,TTM Squeeze · 1m,4109,-30994.855,-11.4404,-13003.6475,1,0.0
+SF0265-BANKNIFTY,BANKNIFTY,5m,structure,TTM Squeeze · 5m,1379,-4485.856,-1.0792,-3425.423,1,0.0
+SF0266-BANKNIFTY,BANKNIFTY,15m,structure,TTM Squeeze · 15m,441,-421.7003,-0.149,-21.1609,1,0.0
+SF0267-BANKNIFTY,BANKNIFTY,30m,structure,TTM Squeeze · 30m,171,-354.393,-0.1771,-420.5121,1,0.0
+SF0268-BANKNIFTY,BANKNIFTY,45m,structure,TTM Squeeze · 45m,101,-873.6947,-0.6552,-53.6464,1,0.0
+SF0269-BANKNIFTY,BANKNIFTY,1h,structure,TTM Squeeze · 1h,67,-120.9677,-0.1117,-485.9429,1,0.0
+SF0270-BANKNIFTY,BANKNIFTY,4h,structure,TTM Squeeze · 4h,16,119.4258,0.3561,-59.8324,1,
+SF0271-BANKNIFTY,BANKNIFTY,1d,structure,TTM Squeeze · 1d,7,276.5367,0.9076,115.034,1,
+SF0272-BANKNIFTY,BANKNIFTY,1m,structure,EMA Ribbon Compression · 1m,3961,-25946.4084,-6.365,-9456.9438,1,0.0
+SF0273-BANKNIFTY,BANKNIFTY,5m,structure,EMA Ribbon Compression · 5m,2549,-15835.7151,-2.7894,-6003.5198,1,0.0
+SF0274-BANKNIFTY,BANKNIFTY,15m,structure,EMA Ribbon Compression · 15m,1060,-2172.6151,-0.4832,-2945.5851,1,0.0
+SF0275-BANKNIFTY,BANKNIFTY,30m,structure,EMA Ribbon Compression · 30m,534,-2282.0199,-0.6647,-1679.5593,1,0.0
+SF0276-BANKNIFTY,BANKNIFTY,45m,structure,EMA Ribbon Compression · 45m,369,-633.066,-0.2199,-506.9228,1,0.0
+SF0277-BANKNIFTY,BANKNIFTY,1h,structure,EMA Ribbon Compression · 1h,245,-1738.6166,-0.6989,-1262.2583,1,0.0
+SF0278-BANKNIFTY,BANKNIFTY,4h,structure,EMA Ribbon Compression · 4h,22,111.8152,0.1784,104.2278,3,0.0
+SF0279-BANKNIFTY,BANKNIFTY,1d,structure,EMA Ribbon Compression · 1d,14,-547.3941,-0.5021,156.1232,1,
+SF0280-BANKNIFTY,BANKNIFTY,1m,structure,ATR Expansion Thrust · 1m,2627,-15113.9741,-7.3321,-7241.0085,1,0.0
+SF0281-BANKNIFTY,BANKNIFTY,5m,structure,ATR Expansion Thrust · 5m,732,-3097.8253,-1.2171,-1328.9518,1,0.0
+SF0282-BANKNIFTY,BANKNIFTY,15m,structure,ATR Expansion Thrust · 15m,296,-173.5808,-0.0701,-1128.7964,1,0.0
+SF0283-BANKNIFTY,BANKNIFTY,30m,structure,ATR Expansion Thrust · 30m,159,463.5234,0.2079,-613.5173,2,0.0
+SF0284-BANKNIFTY,BANKNIFTY,45m,structure,ATR Expansion Thrust · 45m,115,955.7647,0.4299,384.6577,3,0.0
+SF0285-BANKNIFTY,BANKNIFTY,1h,structure,ATR Expansion Thrust · 1h,81,-744.3791,-0.3959,-165.5755,1,0.0
+SF0286-BANKNIFTY,BANKNIFTY,4h,structure,ATR Expansion Thrust · 4h,14,248.8361,0.351,-10.1387,1,
+SF0287-BANKNIFTY,BANKNIFTY,1d,structure,ATR Expansion Thrust · 1d,7,-761.1368,-0.4769,38.7304,1,
+SF0288-BANKNIFTY,BANKNIFTY,1m,structure,HH/HL Structure Shift · 1m,4607,-35235.7868,-10.0583,-15221.8885,1,0.0
+SF0289-BANKNIFTY,BANKNIFTY,5m,structure,HH/HL Structure Shift · 5m,1390,-8092.9915,-1.8144,-2900.1236,1,0.0
+SF0290-BANKNIFTY,BANKNIFTY,15m,structure,HH/HL Structure Shift · 15m,542,-4024.1465,-1.0803,-2829.7217,1,0.0
+SF0291-BANKNIFTY,BANKNIFTY,30m,structure,HH/HL Structure Shift · 30m,297,-572.0829,-0.1663,-1027.1466,1,0.0
+SF0292-BANKNIFTY,BANKNIFTY,45m,structure,HH/HL Structure Shift · 45m,212,-1518.0688,-0.4756,-327.875,1,0.0
+SF0293-BANKNIFTY,BANKNIFTY,1h,structure,HH/HL Structure Shift · 1h,165,74.3105,0.0321,-373.1276,2,0.0
+SF0294-BANKNIFTY,BANKNIFTY,4h,structure,HH/HL Structure Shift · 4h,86,-885.168,-0.6124,-417.3716,1,0.0
+SF0295-BANKNIFTY,BANKNIFTY,1d,structure,HH/HL Structure Shift · 1d,70,-713.9855,-0.4362,212.3809,1,0.0
+SF0296-BANKNIFTY,BANKNIFTY,1m,structure,Break of Structure · 1m,2796,-18280.0178,-3.2342,-11530.5481,1,0.0
+SF0297-BANKNIFTY,BANKNIFTY,5m,structure,Break of Structure · 5m,816,-6244.7248,-1.0336,-4071.9396,1,0.0
+SF0298-BANKNIFTY,BANKNIFTY,15m,structure,Break of Structure · 15m,412,-3680.7726,-0.7429,-2847.4935,1,0.0
+SF0299-BANKNIFTY,BANKNIFTY,30m,structure,Break of Structure · 30m,230,-891.9102,-0.2108,-256.6818,1,0.0
+SF0300-BANKNIFTY,BANKNIFTY,45m,structure,Break of Structure · 45m,185,-600.7886,-0.1659,-262.4088,1,0.0
+SF0301-BANKNIFTY,BANKNIFTY,1h,structure,Break of Structure · 1h,157,-111.4222,-0.0365,-934.2583,1,0.0
+SF0302-BANKNIFTY,BANKNIFTY,4h,structure,Break of Structure · 4h,78,-771.6957,-0.5948,-632.0345,1,0.0
+SF0303-BANKNIFTY,BANKNIFTY,1d,structure,Break of Structure · 1d,42,945.5462,0.3567,-128.8133,2,0.0
+SF0304-BANKNIFTY,BANKNIFTY,1m,structure,Change of Character · 1m,2261,-11954.8654,-2.3905,-8357.6733,1,0.0
+SF0305-BANKNIFTY,BANKNIFTY,5m,structure,Change of Character · 5m,630,-4240.8177,-0.9022,-2200.1229,1,0.0
+SF0306-BANKNIFTY,BANKNIFTY,15m,structure,Change of Character · 15m,283,3391.2159,0.8485,-282.0818,2,0.0
+SF0307-BANKNIFTY,BANKNIFTY,30m,structure,Change of Character · 30m,156,-1951.9786,-0.5824,-2162.6692,1,0.0
+SF0308-BANKNIFTY,BANKNIFTY,45m,structure,Change of Character · 45m,124,-1295.5443,-0.4954,-730.7417,1,0.0
+SF0309-BANKNIFTY,BANKNIFTY,1h,structure,Change of Character · 1h,100,-1587.5131,-0.6984,-1151.5626,1,0.0
+SF0310-BANKNIFTY,BANKNIFTY,4h,structure,Change of Character · 4h,56,280.7188,0.2023,-53.037,2,0.0
+SF0311-BANKNIFTY,BANKNIFTY,1d,structure,Change of Character · 1d,28,-993.2985,-0.6431,-211.8837,1,0.0
+SF0312-BANKNIFTY,BANKNIFTY,1m,structure,Support / Resistance Flip · 1m,3602,-30579.9477,-6.7101,-15241.0455,1,0.0
+SF0313-BANKNIFTY,BANKNIFTY,5m,structure,Support / Resistance Flip · 5m,1698,-6414.619,-1.0089,-5032.6433,1,0.0
+SF0314-BANKNIFTY,BANKNIFTY,15m,structure,Support / Resistance Flip · 15m,796,-3602.0684,-0.6204,-3040.7493,1,0.0
+SF0315-BANKNIFTY,BANKNIFTY,30m,structure,Support / Resistance Flip · 30m,463,-4604.0713,-1.0153,-2216.2056,1,0.0
+SF0316-BANKNIFTY,BANKNIFTY,45m,structure,Support / Resistance Flip · 45m,351,-1309.1603,-0.3689,-768.3272,1,0.0
+SF0317-BANKNIFTY,BANKNIFTY,1h,structure,Support / Resistance Flip · 1h,285,-2800.0995,-0.8177,-1114.253,1,0.0
+SF0318-BANKNIFTY,BANKNIFTY,4h,structure,Support / Resistance Flip · 4h,110,-1343.5111,-0.8296,-1096.0646,1,0.0
+SF0319-BANKNIFTY,BANKNIFTY,1d,structure,Support / Resistance Flip · 1d,86,-2298.3245,-0.7854,-949.471,1,0.0
+SF0320-BANKNIFTY,BANKNIFTY,1m,structure,Opening Range Breakout · 1m,3578,-26589.4195,-9.1011,-13732.1647,1,0.0
+SF0321-BANKNIFTY,BANKNIFTY,5m,structure,Opening Range Breakout · 5m,2396,-13931.9612,-3.2723,-6729.889,1,0.0
+SF0322-BANKNIFTY,BANKNIFTY,15m,structure,Opening Range Breakout · 15m,722,-392.3594,-0.1148,-1729.1802,1,0.0
+SF0323-BANKNIFTY,BANKNIFTY,30m,structure,Opening Range Breakout · 30m,299,-180.9844,-0.0769,-1817.3324,1,0.0
+SF0324-BANKNIFTY,BANKNIFTY,45m,structure,Opening Range Breakout · 45m,188,-920.4394,-0.4438,-681.7708,1,0.0
+SF0325-BANKNIFTY,BANKNIFTY,1h,structure,Opening Range Breakout · 1h,0,,,,1,
+SF0326-BANKNIFTY,BANKNIFTY,4h,structure,Opening Range Breakout · 4h,0,,,,1,
+SF0327-BANKNIFTY,BANKNIFTY,1m,structure,Trend Pullback to EMA · 1m,4872,-36048.5744,-7.904,-15492.0468,1,0.0
+SF0328-BANKNIFTY,BANKNIFTY,5m,structure,Trend Pullback to EMA · 5m,3201,-20497.0297,-2.7776,-9566.6492,1,0.0
+SF0329-BANKNIFTY,BANKNIFTY,15m,structure,Trend Pullback to EMA · 15m,1716,-10637.132,-1.5251,-4833.8152,1,0.0
+SF0330-BANKNIFTY,BANKNIFTY,30m,structure,Trend Pullback to EMA · 30m,1121,-6439.2128,-1.0097,-3338.6886,1,0.0
+SF0331-BANKNIFTY,BANKNIFTY,45m,structure,Trend Pullback to EMA · 45m,921,-5830.5463,-1.0303,-1472.2011,1,0.0
+SF0332-BANKNIFTY,BANKNIFTY,1h,structure,Trend Pullback to EMA · 1h,661,-2486.9302,-0.5322,-2611.0121,1,0.0
+SF0333-BANKNIFTY,BANKNIFTY,4h,structure,Trend Pullback to EMA · 4h,201,97.0432,0.046,-832.4601,2,0.0
+SF0334-BANKNIFTY,BANKNIFTY,1d,structure,Trend Pullback to EMA · 1d,122,-415.2746,-0.1997,-508.4915,1,0.0
+SF0335-BANKNIFTY,BANKNIFTY,1m,structure,Previous Week High/Low Break · 1m,555,-825.0702,-0.2275,-2246.2583,1,0.0
+SF0336-BANKNIFTY,BANKNIFTY,5m,structure,Previous Week High/Low Break · 5m,614,-3201.6054,-0.4744,-2920.1352,1,0.0
+SF0337-BANKNIFTY,BANKNIFTY,15m,structure,Previous Week High/Low Break · 15m,493,-3618.7998,-0.6129,-2599.1443,1,0.0
+SF0338-BANKNIFTY,BANKNIFTY,30m,structure,Previous Week High/Low Break · 30m,423,-2251.5054,-0.4341,-1918.6694,1,0.0
+SF0339-BANKNIFTY,BANKNIFTY,45m,structure,Previous Week High/Low Break · 45m,396,-1117.2633,-0.2442,-1475.6575,1,0.0
+SF0340-BANKNIFTY,BANKNIFTY,1h,structure,Previous Week High/Low Break · 1h,359,-338.5606,-0.0804,-1775.9252,1,0.0
+SF0341-BANKNIFTY,BANKNIFTY,4h,structure,Previous Week High/Low Break · 4h,219,-435.113,-0.1797,-656.0428,1,0.0
+SF0342-BANKNIFTY,BANKNIFTY,1d,structure,Previous Week High/Low Break · 1d,174,-751.6199,-0.1772,-315.65,1,0.0
+SF0343-BANKNIFTY,BANKNIFTY,1m,structure,Rectangle / Trading Range Break · 1m,3519,-23573.657,-3.8329,-11557.3182,1,0.0
+SF0344-BANKNIFTY,BANKNIFTY,5m,structure,Rectangle / Trading Range Break · 5m,1333,-10348.2605,-1.3505,-6619.3111,1,0.0
+SF0345-BANKNIFTY,BANKNIFTY,15m,structure,Rectangle / Trading Range Break · 15m,629,-4250.0392,-0.7269,-4513.6466,1,0.0
+SF0346-BANKNIFTY,BANKNIFTY,30m,structure,Rectangle / Trading Range Break · 30m,395,-4509.9679,-0.8657,-2825.1951,1,0.0
+SF0347-BANKNIFTY,BANKNIFTY,45m,structure,Rectangle / Trading Range Break · 45m,291,-740.4914,-0.1806,-1040.8597,1,0.0
+SF0348-BANKNIFTY,BANKNIFTY,1h,structure,Rectangle / Trading Range Break · 1h,235,642.2914,0.1979,-769.8931,2,0.0
+SF0349-BANKNIFTY,BANKNIFTY,4h,structure,Rectangle / Trading Range Break · 4h,89,-519.469,-0.3189,-85.0392,1,0.0
+SF0350-BANKNIFTY,BANKNIFTY,1d,structure,Rectangle / Trading Range Break · 1d,48,-989.2452,-0.4452,-612.6361,1,0.0
+SF0351-BANKNIFTY,BANKNIFTY,1m,indicator,EMA Crossover (fast) · 1m,3195,-25264.0022,-5.1658,-8175.4584,1,0.0
+SF0352-BANKNIFTY,BANKNIFTY,5m,indicator,EMA Crossover (fast) · 5m,849,-3039.944,-0.5074,-3497.3392,1,0.0
+SF0353-BANKNIFTY,BANKNIFTY,15m,indicator,EMA Crossover (fast) · 15m,371,-483.0636,-0.116,-1335.4418,1,0.0
+SF0354-BANKNIFTY,BANKNIFTY,30m,indicator,EMA Crossover (fast) · 30m,195,-377.9907,-0.1446,-776.0563,1,0.0
+SF0355-BANKNIFTY,BANKNIFTY,45m,indicator,EMA Crossover (fast) · 45m,143,-1222.7029,-0.4759,-742.2013,1,0.0
+SF0356-BANKNIFTY,BANKNIFTY,1h,indicator,EMA Crossover (fast) · 1h,93,-968.8262,-0.451,-469.7145,1,0.0
+SF0357-BANKNIFTY,BANKNIFTY,4h,indicator,EMA Crossover (fast) · 4h,10,209.4526,0.6171,19.5129,1,
+SF0358-BANKNIFTY,BANKNIFTY,1d,indicator,EMA Crossover (fast) · 1d,14,-363.7094,-0.3129,-91.5817,1,
+SF0359-BANKNIFTY,BANKNIFTY,1m,indicator,Golden / Death Cross · 1m,1672,-11289.2204,-2.6256,-5026.5538,1,0.0
+SF0360-BANKNIFTY,BANKNIFTY,5m,indicator,Golden / Death Cross · 5m,413,719.2544,0.2063,-1386.4583,2,0.0
+SF0361-BANKNIFTY,BANKNIFTY,15m,indicator,Golden / Death Cross · 15m,135,-70.5385,-0.0358,-441.7428,1,0.0
+SF0362-BANKNIFTY,BANKNIFTY,30m,indicator,Golden / Death Cross · 30m,76,-516.153,-0.3006,-237.592,1,0.0
+SF0363-BANKNIFTY,BANKNIFTY,45m,indicator,Golden / Death Cross · 45m,44,-114.2997,-0.1035,-399.7656,1,0.0
+SF0364-BANKNIFTY,BANKNIFTY,1h,indicator,Golden / Death Cross · 1h,31,-718.2563,-1.0085,-364.2234,1,0.0
+SF0365-BANKNIFTY,BANKNIFTY,4h,indicator,Golden / Death Cross · 4h,9,188.192,0.5019,253.4901,1,
+SF0366-BANKNIFTY,BANKNIFTY,1d,indicator,Golden / Death Cross · 1d,3,184.6392,0.2622,-120.5972,1,
+SF0367-BANKNIFTY,BANKNIFTY,1m,indicator,RSI Trend Regime (40/60) · 1m,4784,-33719.105,-5.4686,-15405.8828,1,0.0
+SF0368-BANKNIFTY,BANKNIFTY,5m,indicator,RSI Trend Regime (40/60) · 5m,1726,-12271.3935,-1.4459,-7587.938,1,0.0
+SF0369-BANKNIFTY,BANKNIFTY,15m,indicator,RSI Trend Regime (40/60) · 15m,1107,-2676.7449,-0.3812,-3942.8003,1,0.0
+SF0370-BANKNIFTY,BANKNIFTY,30m,indicator,RSI Trend Regime (40/60) · 30m,764,-3693.5701,-0.6231,-2775.6564,1,0.0
+SF0371-BANKNIFTY,BANKNIFTY,45m,indicator,RSI Trend Regime (40/60) · 45m,592,-1483.7372,-0.2921,-1779.7726,1,0.0
+SF0372-BANKNIFTY,BANKNIFTY,1h,indicator,RSI Trend Regime (40/60) · 1h,371,-2028.5881,-0.5056,-1466.3467,1,0.0
+SF0373-BANKNIFTY,BANKNIFTY,4h,indicator,RSI Trend Regime (40/60) · 4h,105,484.1146,0.3457,-270.8649,2,0.0
+SF0374-BANKNIFTY,BANKNIFTY,1d,indicator,RSI Trend Regime (40/60) · 1d,61,-945.9551,-0.4282,125.9139,1,0.0
+SF0375-BANKNIFTY,BANKNIFTY,1m,indicator,RSI Overbought / Oversold Reversal · 1m,2086,-13102.1466,-9.4635,-6271.007,1,0.0
+SF0376-BANKNIFTY,BANKNIFTY,5m,indicator,RSI Overbought / Oversold Reversal · 5m,659,-4981.1143,-3.2708,-1775.5558,1,0.0
+SF0377-BANKNIFTY,BANKNIFTY,15m,indicator,RSI Overbought / Oversold Reversal · 15m,422,-3594.4096,-2.3298,-1051.3034,1,0.0
+SF0378-BANKNIFTY,BANKNIFTY,30m,indicator,RSI Overbought / Oversold Reversal · 30m,215,-1123.6661,-0.7752,-266.8453,1,0.0
+SF0379-BANKNIFTY,BANKNIFTY,45m,indicator,RSI Overbought / Oversold Reversal · 45m,171,-569.9326,-0.3498,-454.3767,1,0.0
+SF0380-BANKNIFTY,BANKNIFTY,1h,indicator,RSI Overbought / Oversold Reversal · 1h,118,-100.0856,-0.0592,-499.6772,1,0.0
+SF0381-BANKNIFTY,BANKNIFTY,4h,indicator,RSI Overbought / Oversold Reversal · 4h,23,-201.1416,-0.4129,-113.1257,1,0.0
+SF0382-BANKNIFTY,BANKNIFTY,1d,indicator,RSI Overbought / Oversold Reversal · 1d,22,92.4501,0.1299,-64.4402,2,0.0
+SF0383-BANKNIFTY,BANKNIFTY,1m,indicator,RSI Divergence · 1m,2948,-22899.5003,-4.8941,-10655.9528,1,0.0
+SF0384-BANKNIFTY,BANKNIFTY,5m,indicator,RSI Divergence · 5m,860,-5088.5872,-1.2089,-2325.5055,1,0.0
+SF0385-BANKNIFTY,BANKNIFTY,15m,indicator,RSI Divergence · 15m,356,-1549.8169,-0.4705,-750.0933,1,0.0
+SF0386-BANKNIFTY,BANKNIFTY,30m,indicator,RSI Divergence · 30m,223,-940.8815,-0.286,-1520.2918,1,0.0
+SF0387-BANKNIFTY,BANKNIFTY,45m,indicator,RSI Divergence · 45m,189,-411.1952,-0.1568,148.9616,1,0.0
+SF0388-BANKNIFTY,BANKNIFTY,1h,indicator,RSI Divergence · 1h,147,-493.1522,-0.233,-86.5499,1,0.0
+SF0389-BANKNIFTY,BANKNIFTY,4h,indicator,RSI Divergence · 4h,62,-1323.0236,-0.9649,-756.3465,1,0.0
+SF0390-BANKNIFTY,BANKNIFTY,1d,indicator,RSI Divergence · 1d,28,564.6218,0.2959,290.7866,4,0.0
+SF0391-BANKNIFTY,BANKNIFTY,1m,indicator,MACD Signal Cross · 1m,4602,-32204.1805,-5.417,-14044.9098,1,0.0
+SF0392-BANKNIFTY,BANKNIFTY,5m,indicator,MACD Signal Cross · 5m,1493,-15842.2242,-2.235,-8101.7221,1,0.0
+SF0393-BANKNIFTY,BANKNIFTY,15m,indicator,MACD Signal Cross · 15m,695,-790.7795,-0.1358,-1465.3039,1,0.0
+SF0394-BANKNIFTY,BANKNIFTY,30m,indicator,MACD Signal Cross · 30m,414,786.4022,0.1895,-189.5417,2,0.0
+SF0395-BANKNIFTY,BANKNIFTY,45m,indicator,MACD Signal Cross · 45m,326,-953.1938,-0.2605,0.2941,1,0.0
+SF0396-BANKNIFTY,BANKNIFTY,1h,indicator,MACD Signal Cross · 1h,256,-2901.7915,-0.7527,-1325.5524,1,0.0
+SF0397-BANKNIFTY,BANKNIFTY,4h,indicator,MACD Signal Cross · 4h,52,58.4789,0.0512,-363.8936,2,0.0
+SF0398-BANKNIFTY,BANKNIFTY,1d,indicator,MACD Signal Cross · 1d,45,-219.6664,-0.1509,-123.0512,1,0.0
+SF0399-BANKNIFTY,BANKNIFTY,1m,indicator,MACD Histogram Turn · 1m,4866,-33059.3595,-8.5699,-14069.0264,1,0.0
+SF0400-BANKNIFTY,BANKNIFTY,5m,indicator,MACD Histogram Turn · 5m,2062,-12549.9677,-2.4082,-5993.3659,1,0.0
+SF0401-BANKNIFTY,BANKNIFTY,15m,indicator,MACD Histogram Turn · 15m,843,-10135.1118,-2.2297,-4475.2645,1,0.0
+SF0402-BANKNIFTY,BANKNIFTY,30m,indicator,MACD Histogram Turn · 30m,418,-714.1557,-0.1676,-846.9887,1,0.0
+SF0403-BANKNIFTY,BANKNIFTY,45m,indicator,MACD Histogram Turn · 45m,351,-511.48,-0.1649,-332.7268,1,0.0
+SF0404-BANKNIFTY,BANKNIFTY,1h,indicator,MACD Histogram Turn · 1h,251,-1295.1825,-0.4622,-375.0439,1,0.0
+SF0405-BANKNIFTY,BANKNIFTY,4h,indicator,MACD Histogram Turn · 4h,81,18.0946,0.014,-624.0306,2,0.0
+SF0406-BANKNIFTY,BANKNIFTY,1d,indicator,MACD Histogram Turn · 1d,58,130.0791,0.0701,246.4016,2,0.0
+SF0407-BANKNIFTY,BANKNIFTY,1m,indicator,ADX / DI Cross · 1m,3536,-28973.9116,-5.1598,-11340.1759,1,0.0
+SF0408-BANKNIFTY,BANKNIFTY,5m,indicator,ADX / DI Cross · 5m,1021,-2096.6651,-0.3431,-3188.9243,1,0.0
+SF0409-BANKNIFTY,BANKNIFTY,15m,indicator,ADX / DI Cross · 15m,501,110.9251,0.0244,-1706.823,2,0.0
+SF0410-BANKNIFTY,BANKNIFTY,30m,indicator,ADX / DI Cross · 30m,280,-278.5259,-0.0761,-1475.813,1,0.0
+SF0411-BANKNIFTY,BANKNIFTY,45m,indicator,ADX / DI Cross · 45m,228,-1264.9854,-0.41,-2029.8339,1,0.0
+SF0412-BANKNIFTY,BANKNIFTY,1h,indicator,ADX / DI Cross · 1h,164,-586.3594,-0.1777,-1775.2806,1,0.0
+SF0413-BANKNIFTY,BANKNIFTY,4h,indicator,ADX / DI Cross · 4h,43,375.2012,0.2756,-452.9335,2,0.0
+SF0414-BANKNIFTY,BANKNIFTY,1d,indicator,ADX / DI Cross · 1d,27,857.1188,0.5314,-245.1799,2,0.0
+SF0415-BANKNIFTY,BANKNIFTY,1m,indicator,Supertrend Flip · 1m,3763,-28412.1498,-4.6635,-10850.9137,1,0.0
+SF0416-BANKNIFTY,BANKNIFTY,5m,indicator,Supertrend Flip · 5m,1050,-2450.9993,-0.357,-4822.0458,1,0.0
+SF0417-BANKNIFTY,BANKNIFTY,15m,indicator,Supertrend Flip · 15m,500,1141.9373,0.2411,11.529,2,0.0
+SF0418-BANKNIFTY,BANKNIFTY,30m,indicator,Supertrend Flip · 30m,314,-1334.587,-0.3455,-2183.9678,1,0.0
+SF0419-BANKNIFTY,BANKNIFTY,45m,indicator,Supertrend Flip · 45m,216,1414.5699,0.4997,-952.2495,2,0.0
+SF0420-BANKNIFTY,BANKNIFTY,1h,indicator,Supertrend Flip · 1h,120,-49.4086,-0.0213,-997.5875,1,0.0
+SF0421-BANKNIFTY,BANKNIFTY,4h,indicator,Supertrend Flip · 4h,31,-32.7547,-0.039,-214.6536,1,0.0
+SF0422-BANKNIFTY,BANKNIFTY,1d,indicator,Supertrend Flip · 1d,21,-115.6073,-0.1139,-6.0412,1,0.0
+SF0423-BANKNIFTY,BANKNIFTY,1m,indicator,Parabolic SAR Flip · 1m,4795,-34847.1555,-6.5902,-13816.5639,1,0.0
+SF0424-BANKNIFTY,BANKNIFTY,5m,indicator,Parabolic SAR Flip · 5m,2035,-11491.9989,-1.5116,-10146.7104,1,0.0
+SF0425-BANKNIFTY,BANKNIFTY,15m,indicator,Parabolic SAR Flip · 15m,1095,-5385.0475,-0.7381,-4288.7567,1,0.0
+SF0426-BANKNIFTY,BANKNIFTY,30m,indicator,Parabolic SAR Flip · 30m,653,-666.2746,-0.1269,-1142.9955,1,0.0
+SF0427-BANKNIFTY,BANKNIFTY,45m,indicator,Parabolic SAR Flip · 45m,521,-902.9046,-0.2112,-1188.7952,1,0.0
+SF0428-BANKNIFTY,BANKNIFTY,1h,indicator,Parabolic SAR Flip · 1h,387,-2204.8722,-0.5328,-1658.8109,1,0.0
+SF0429-BANKNIFTY,BANKNIFTY,4h,indicator,Parabolic SAR Flip · 4h,98,-1502.5504,-0.7614,-1014.0846,1,0.0
+SF0430-BANKNIFTY,BANKNIFTY,1d,indicator,Parabolic SAR Flip · 1d,77,-1231.409,-0.4517,17.258,1,0.0
+SF0431-BANKNIFTY,BANKNIFTY,1m,indicator,Stochastic Cross · 1m,4871,-29980.4301,-22.5754,-12272.3925,1,0.0
+SF0432-BANKNIFTY,BANKNIFTY,5m,indicator,Stochastic Cross · 5m,2730,-17303.7196,-8.6692,-7264.6781,1,0.0
+SF0433-BANKNIFTY,BANKNIFTY,15m,indicator,Stochastic Cross · 15m,1098,-8475.2307,-4.0258,-3376.3047,1,0.0
+SF0434-BANKNIFTY,BANKNIFTY,30m,indicator,Stochastic Cross · 30m,609,-2789.0563,-1.2784,-1717.5564,1,0.0
+SF0435-BANKNIFTY,BANKNIFTY,45m,indicator,Stochastic Cross · 45m,436,-1642.3595,-0.9372,-620.6061,1,0.0
+SF0436-BANKNIFTY,BANKNIFTY,1h,indicator,Stochastic Cross · 1h,300,-1342.4562,-0.8149,-423.2372,1,0.0
+SF0437-BANKNIFTY,BANKNIFTY,4h,indicator,Stochastic Cross · 4h,76,-910.7075,-0.9435,-214.8917,1,0.0
+SF0438-BANKNIFTY,BANKNIFTY,1d,indicator,Stochastic Cross · 1d,73,-102.0041,-0.0514,-94.6097,1,0.0
+SF0439-BANKNIFTY,BANKNIFTY,1m,indicator,Williams %R Reversal · 1m,3999,-26768.5229,-13.9785,-10720.2485,1,0.0
+SF0440-BANKNIFTY,BANKNIFTY,5m,indicator,Williams %R Reversal · 5m,919,-6772.1875,-3.0769,-2364.893,1,0.0
+SF0441-BANKNIFTY,BANKNIFTY,15m,indicator,Williams %R Reversal · 15m,235,-1999.7471,-1.2833,-1409.9915,1,0.0
+SF0442-BANKNIFTY,BANKNIFTY,30m,indicator,Williams %R Reversal · 30m,126,-646.0018,-0.418,-331.8186,1,0.0
+SF0443-BANKNIFTY,BANKNIFTY,45m,indicator,Williams %R Reversal · 45m,96,42.3261,0.0242,93.8816,2,0.0
+SF0444-BANKNIFTY,BANKNIFTY,1h,indicator,Williams %R Reversal · 1h,73,-500.2341,-0.3484,-179.3148,1,0.0
+SF0445-BANKNIFTY,BANKNIFTY,4h,indicator,Williams %R Reversal · 4h,19,182.5536,0.3989,-72.596,1,
+SF0446-BANKNIFTY,BANKNIFTY,1d,indicator,Williams %R Reversal · 1d,15,181.8183,0.2189,-146.1276,1,
+SF0447-BANKNIFTY,BANKNIFTY,1m,indicator,CCI Breakout · 1m,3356,-24374.4181,-4.4091,-14088.5265,1,0.0
+SF0448-BANKNIFTY,BANKNIFTY,5m,indicator,CCI Breakout · 5m,1155,-13185.3752,-1.793,-6602.8693,1,0.0
+SF0449-BANKNIFTY,BANKNIFTY,15m,indicator,CCI Breakout · 15m,621,-3803.9396,-0.6146,-4110.1227,1,0.0
+SF0450-BANKNIFTY,BANKNIFTY,30m,indicator,CCI Breakout · 30m,370,-824.6958,-0.1619,-1978.0801,1,0.0
+SF0451-BANKNIFTY,BANKNIFTY,45m,indicator,CCI Breakout · 45m,333,-925.6018,-0.2077,-1019.0284,1,0.0
+SF0452-BANKNIFTY,BANKNIFTY,1h,indicator,CCI Breakout · 1h,246,-1283.3593,-0.3341,-757.6063,1,0.0
+SF0453-BANKNIFTY,BANKNIFTY,4h,indicator,CCI Breakout · 4h,66,-129.6061,-0.092,-154.6395,1,0.0
+SF0454-BANKNIFTY,BANKNIFTY,1d,indicator,CCI Breakout · 1d,47,579.38,0.345,-521.5754,2,0.0
+SF0455-BANKNIFTY,BANKNIFTY,1m,hybrid,Flag + Volume + HTF Trend · 1m,4,-24.4735,-0.0726,,1,
+SF0456-BANKNIFTY,BANKNIFTY,5m,hybrid,Flag + Volume + HTF Trend · 5m,7,4.1016,0.0067,95.4202,1,
+SF0457-BANKNIFTY,BANKNIFTY,15m,hybrid,Flag + Volume + HTF Trend · 15m,6,-141.8953,-0.3416,,1,
+SF0458-BANKNIFTY,BANKNIFTY,30m,hybrid,Flag + Volume + HTF Trend · 30m,7,-151.2756,-0.1914,,1,
+SF0459-BANKNIFTY,BANKNIFTY,45m,hybrid,Flag + Volume + HTF Trend · 45m,11,-47.574,-0.033,-270.2054,1,
+SF0460-BANKNIFTY,BANKNIFTY,1h,hybrid,Flag + Volume + HTF Trend · 1h,14,313.003,0.3666,-287.7917,1,
+SF0461-BANKNIFTY,BANKNIFTY,4h,hybrid,Flag + Volume + HTF Trend · 4h,4,-242.1018,-0.6127,-47.615,1,
+SF0462-BANKNIFTY,BANKNIFTY,1d,hybrid,Flag + Volume + HTF Trend · 1d,5,-243.827,-0.5802,-82.1469,1,
+SF0463-BANKNIFTY,BANKNIFTY,1m,hybrid,Breakout + Volume + HTF Trend · 1m,3316,-22867.6195,-7.2774,-12785.248,1,0.0
+SF0464-BANKNIFTY,BANKNIFTY,5m,hybrid,Breakout + Volume + HTF Trend · 5m,1092,-3220.5489,-0.7155,-2660.4399,1,0.0
+SF0465-BANKNIFTY,BANKNIFTY,15m,hybrid,Breakout + Volume + HTF Trend · 15m,481,-1838.7682,-0.478,-2241.9528,1,0.0
+SF0466-BANKNIFTY,BANKNIFTY,30m,hybrid,Breakout + Volume + HTF Trend · 30m,256,-30.8934,-0.0086,-1039.849,1,0.0
+SF0467-BANKNIFTY,BANKNIFTY,45m,hybrid,Breakout + Volume + HTF Trend · 45m,201,156.1444,0.0505,-660.2119,2,0.0
+SF0468-BANKNIFTY,BANKNIFTY,1h,hybrid,Breakout + Volume + HTF Trend · 1h,178,-564.9573,-0.1851,-1077.5493,1,0.0
+SF0469-BANKNIFTY,BANKNIFTY,4h,hybrid,Breakout + Volume + HTF Trend · 4h,72,-80.1924,-0.0613,-472.7605,1,0.0
+SF0470-BANKNIFTY,BANKNIFTY,1d,hybrid,Breakout + Volume + HTF Trend · 1d,69,-313.5844,-0.0915,-310.1889,1,0.0
+SF0471-BANKNIFTY,BANKNIFTY,1m,hybrid,Pullback + EMA + RSI + VWAP · 1m,4871,-35236.5539,-7.9139,-15466.4569,1,0.0
+SF0472-BANKNIFTY,BANKNIFTY,5m,hybrid,Pullback + EMA + RSI + VWAP · 5m,3094,-15937.9878,-2.2116,-7782.4267,1,0.0
+SF0473-BANKNIFTY,BANKNIFTY,15m,hybrid,Pullback + EMA + RSI + VWAP · 15m,1534,-8519.3619,-1.3852,-3794.3173,1,0.0
+SF0474-BANKNIFTY,BANKNIFTY,30m,hybrid,Pullback + EMA + RSI + VWAP · 30m,966,-4810.0492,-0.8651,-2443.7266,1,0.0
+SF0475-BANKNIFTY,BANKNIFTY,45m,hybrid,Pullback + EMA + RSI + VWAP · 45m,763,-2118.7153,-0.4105,-486.8986,1,0.0
+SF0476-BANKNIFTY,BANKNIFTY,1h,hybrid,Pullback + EMA + RSI + VWAP · 1h,543,-497.9025,-0.1232,-1621.013,1,0.0
+SF0477-BANKNIFTY,BANKNIFTY,4h,hybrid,Pullback + EMA + RSI + VWAP · 4h,164,572.0066,0.3015,-688.0428,2,0.0
+SF0478-BANKNIFTY,BANKNIFTY,1m,hybrid,Squeeze + Momentum + Volume · 1m,1666,-11958.8256,-5.0581,-5324.6619,1,0.0
+SF0479-BANKNIFTY,BANKNIFTY,5m,hybrid,Squeeze + Momentum + Volume · 5m,411,-418.576,-0.166,-740.3258,1,0.0
+SF0480-BANKNIFTY,BANKNIFTY,15m,hybrid,Squeeze + Momentum + Volume · 15m,158,-1751.9285,-0.846,-232.4705,1,0.0
+SF0481-BANKNIFTY,BANKNIFTY,30m,hybrid,Squeeze + Momentum + Volume · 30m,92,-540.8689,-0.2862,-53.4695,1,0.0
+SF0482-BANKNIFTY,BANKNIFTY,45m,hybrid,Squeeze + Momentum + Volume · 45m,71,-381.8912,-0.2462,17.0273,1,0.0
+SF0483-BANKNIFTY,BANKNIFTY,1h,hybrid,Squeeze + Momentum + Volume · 1h,52,411.6207,0.2461,-324.1297,2,0.0
+SF0484-BANKNIFTY,BANKNIFTY,4h,hybrid,Squeeze + Momentum + Volume · 4h,10,-65.2683,-0.1267,4.9545,1,
+SF0485-BANKNIFTY,BANKNIFTY,1d,hybrid,Squeeze + Momentum + Volume · 1d,7,-124.6712,-0.2356,-63.742,1,
+SF0486-BANKNIFTY,BANKNIFTY,1m,hybrid,Structure Break + Volume + HTF · 1m,1740,-11816.4608,-2.8357,-6368.6893,1,0.0
+SF0487-BANKNIFTY,BANKNIFTY,5m,hybrid,Structure Break + Volume + HTF · 5m,494,-4376.2537,-0.898,-3015.9559,1,0.0
+SF0488-BANKNIFTY,BANKNIFTY,15m,hybrid,Structure Break + Volume + HTF · 15m,256,-2675.1252,-0.6879,-1950.8404,1,0.0
+SF0489-BANKNIFTY,BANKNIFTY,30m,hybrid,Structure Break + Volume + HTF · 30m,128,-875.5129,-0.2661,-107.2111,1,0.0
+SF0490-BANKNIFTY,BANKNIFTY,45m,hybrid,Structure Break + Volume + HTF · 45m,109,-59.0111,-0.0208,-68.6962,1,0.0
+SF0491-BANKNIFTY,BANKNIFTY,1h,hybrid,Structure Break + Volume + HTF · 1h,96,486.9872,0.1869,-98.5445,2,0.0
+SF0492-BANKNIFTY,BANKNIFTY,4h,hybrid,Structure Break + Volume + HTF · 4h,57,-906.1651,-0.8265,-716.6125,1,0.0
+SF0493-BANKNIFTY,BANKNIFTY,1d,hybrid,Structure Break + Volume + HTF · 1d,36,1643.3995,0.7042,-117.3295,2,0.0
+SF0494-BANKNIFTY,BANKNIFTY,1m,hybrid,S/R Flip Retest + Volume · 1m,3601,-29804.3683,-6.6402,-15382.5945,1,0.0
+SF0495-BANKNIFTY,BANKNIFTY,5m,hybrid,S/R Flip Retest + Volume · 5m,1647,-5791.2523,-0.9189,-5154.0383,1,0.0
+SF0496-BANKNIFTY,BANKNIFTY,15m,hybrid,S/R Flip Retest + Volume · 15m,741,-1946.0725,-0.354,-2643.1992,1,0.0
+SF0497-BANKNIFTY,BANKNIFTY,30m,hybrid,S/R Flip Retest + Volume · 30m,411,-4650.1674,-1.1239,-2764.0388,1,0.0
+SF0498-BANKNIFTY,BANKNIFTY,45m,hybrid,S/R Flip Retest + Volume · 45m,319,-1350.1845,-0.3944,-863.4916,1,0.0
+SF0499-BANKNIFTY,BANKNIFTY,1h,hybrid,S/R Flip Retest + Volume · 1h,242,-2555.1002,-0.8334,-846.4653,1,0.0
+SF0500-BANKNIFTY,BANKNIFTY,4h,hybrid,S/R Flip Retest + Volume · 4h,96,-1503.7024,-1.0628,-892.7747,1,0.0
+SF0501-BANKNIFTY,BANKNIFTY,1d,hybrid,S/R Flip Retest + Volume · 1d,67,-1290.766,-0.5507,-890.4938,1,0.0
+SF0502-BANKNIFTY,BANKNIFTY,1m,hybrid,Engulfing + VWAP + Volume · 1m,2792,-20178.3421,-10.0803,-10114.5673,1,0.0
+SF0503-BANKNIFTY,BANKNIFTY,5m,hybrid,Engulfing + VWAP + Volume · 5m,811,-3792.2518,-1.4808,-2037.0316,1,0.0
+SF0504-BANKNIFTY,BANKNIFTY,15m,hybrid,Engulfing + VWAP + Volume · 15m,288,-628.5953,-0.2293,-1198.9931,1,0.0
+SF0505-BANKNIFTY,BANKNIFTY,30m,hybrid,Engulfing + VWAP + Volume · 30m,168,-1276.2622,-0.5999,-832.5905,1,0.0
+SF0506-BANKNIFTY,BANKNIFTY,45m,hybrid,Engulfing + VWAP + Volume · 45m,126,812.8223,0.3512,-1321.4093,2,0.0
+SF0507-BANKNIFTY,BANKNIFTY,1h,hybrid,Engulfing + VWAP + Volume · 1h,105,249.1913,0.1223,-433.9436,2,0.0
+SF0508-BANKNIFTY,BANKNIFTY,4h,hybrid,Engulfing + VWAP + Volume · 4h,23,-336.6968,-0.7602,-70.7194,1,0.0
+SF0509-BANKNIFTY,BANKNIFTY,1m,hybrid,Pin Bar + Trend + ADX · 1m,478,-2838.5974,-2.7105,-958.5973,1,0.0
+SF0510-BANKNIFTY,BANKNIFTY,5m,hybrid,Pin Bar + Trend + ADX · 5m,159,-1355.735,-1.1254,-532.8484,1,0.0
+SF0511-BANKNIFTY,BANKNIFTY,15m,hybrid,Pin Bar + Trend + ADX · 15m,53,267.1534,0.2361,-183.7066,2,0.0
+SF0512-BANKNIFTY,BANKNIFTY,30m,hybrid,Pin Bar + Trend + ADX · 30m,14,-277.8726,-0.472,-64.17,1,
+SF0513-BANKNIFTY,BANKNIFTY,45m,hybrid,Pin Bar + Trend + ADX · 45m,16,202.3489,0.3017,-23.4402,1,
+SF0514-BANKNIFTY,BANKNIFTY,1h,hybrid,Pin Bar + Trend + ADX · 1h,20,1297.3248,0.9643,147.546,4,0.0
+SF0515-BANKNIFTY,BANKNIFTY,4h,hybrid,Pin Bar + Trend + ADX · 4h,1,-104.7909,-0.4512,-104.7909,1,
+SF0516-BANKNIFTY,BANKNIFTY,1d,hybrid,Pin Bar + Trend + ADX · 1d,4,251.3356,0.4194,51.3416,1,
+SF0517-BANKNIFTY,BANKNIFTY,1m,hybrid,VWAP Reclaim + Volume + HTF · 1m,1548,-11861.7086,-4.8605,-5864.9275,1,0.0
+SF0518-BANKNIFTY,BANKNIFTY,5m,hybrid,VWAP Reclaim + Volume + HTF · 5m,826,-6584.7761,-1.7993,-2986.2335,1,0.0
+SF0519-BANKNIFTY,BANKNIFTY,15m,hybrid,VWAP Reclaim + Volume + HTF · 15m,547,-4560.1301,-1.0807,-1822.861,1,0.0
+SF0520-BANKNIFTY,BANKNIFTY,30m,hybrid,VWAP Reclaim + Volume + HTF · 30m,396,-1580.5288,-0.3611,-1435.104,1,0.0
+SF0521-BANKNIFTY,BANKNIFTY,45m,hybrid,VWAP Reclaim + Volume + HTF · 45m,344,-933.4493,-0.249,-890.8859,1,0.0
+SF0522-BANKNIFTY,BANKNIFTY,1h,hybrid,VWAP Reclaim + Volume + HTF · 1h,321,-1258.1162,-0.3473,-1948.045,1,0.0
+SF0523-BANKNIFTY,BANKNIFTY,4h,hybrid,VWAP Reclaim + Volume + HTF · 4h,123,3.5341,0.0022,-753.6492,2,0.0
+SF0524-BANKNIFTY,BANKNIFTY,1m,hybrid,Gap Continuation + Volume · 1m,479,-2403.5542,-0.6741,-1319.4742,1,0.0
+SF0525-BANKNIFTY,BANKNIFTY,5m,hybrid,Gap Continuation + Volume · 5m,309,-1819.433,-0.5016,-903.3,1,0.0
+SF0526-BANKNIFTY,BANKNIFTY,15m,hybrid,Gap Continuation + Volume · 15m,208,-1196.1712,-0.3616,-939.6444,1,0.0
+SF0527-BANKNIFTY,BANKNIFTY,30m,hybrid,Gap Continuation + Volume · 30m,134,-17.9349,-0.0078,-633.7801,1,0.0
+SF0528-BANKNIFTY,BANKNIFTY,45m,hybrid,Gap Continuation + Volume · 45m,118,-585.9022,-0.3089,-361.9354,1,0.0
+SF0529-BANKNIFTY,BANKNIFTY,1h,hybrid,Gap Continuation + Volume · 1h,83,-315.4918,-0.2097,-465.0889,1,0.0
+SF0530-BANKNIFTY,BANKNIFTY,4h,hybrid,Gap Continuation + Volume · 4h,0,,,,1,
+SF0531-BANKNIFTY,BANKNIFTY,1m,hybrid,Fib 61.8% + RSI + HTF Trend · 1m,3992,-26718.2473,-13.5729,-10609.1178,1,0.0
+SF0532-BANKNIFTY,BANKNIFTY,5m,hybrid,Fib 61.8% + RSI + HTF Trend · 5m,986,-6156.2054,-2.6086,-2770.883,1,0.0
+SF0533-BANKNIFTY,BANKNIFTY,15m,hybrid,Fib 61.8% + RSI + HTF Trend · 15m,284,-1863.5374,-0.8771,-894.4608,1,0.0
+SF0534-BANKNIFTY,BANKNIFTY,30m,hybrid,Fib 61.8% + RSI + HTF Trend · 30m,114,-519.0185,-0.4028,-137.0511,1,0.0
+SF0535-BANKNIFTY,BANKNIFTY,45m,hybrid,Fib 61.8% + RSI + HTF Trend · 45m,76,1096.3291,0.9151,93.9676,4,0.0
+SF0536-BANKNIFTY,BANKNIFTY,1h,hybrid,Fib 61.8% + RSI + HTF Trend · 1h,66,-633.2332,-0.4672,-147.4332,1,0.0
+SF0537-BANKNIFTY,BANKNIFTY,4h,hybrid,Fib 61.8% + RSI + HTF Trend · 4h,21,-48.5095,-0.0839,-211.8246,1,0.0
+SF0538-BANKNIFTY,BANKNIFTY,1d,hybrid,Fib 61.8% + RSI + HTF Trend · 1d,9,464.3467,0.6118,-65.5752,1,
+SF0539-BANKNIFTY,BANKNIFTY,1m,hybrid,Rectangle + Volume + ATR · 1m,2938,-15390.3603,-2.5158,-8562.0826,1,0.0
+SF0540-BANKNIFTY,BANKNIFTY,5m,hybrid,Rectangle + Volume + ATR · 5m,953,-8357.7644,-1.3221,-5534.088,1,0.0
+SF0541-BANKNIFTY,BANKNIFTY,15m,hybrid,Rectangle + Volume + ATR · 15m,421,-4225.9065,-0.8167,-2874.7196,1,0.0
+SF0542-BANKNIFTY,BANKNIFTY,30m,hybrid,Rectangle + Volume + ATR · 30m,231,-2185.6835,-0.5202,-366.431,1,0.0
+SF0543-BANKNIFTY,BANKNIFTY,45m,hybrid,Rectangle + Volume + ATR · 45m,167,553.5212,0.1555,83.9144,2,0.0
+SF0544-BANKNIFTY,BANKNIFTY,1h,hybrid,Rectangle + Volume + ATR · 1h,119,1571.0084,0.6132,55.9352,4,0.0
+SF0545-BANKNIFTY,BANKNIFTY,4h,hybrid,Rectangle + Volume + ATR · 4h,34,-75.9271,-0.058,-98.6866,1,0.0
+SF0546-BANKNIFTY,BANKNIFTY,1d,hybrid,Rectangle + Volume + ATR · 1d,18,-424.0084,-0.3387,-755.9278,1,

@@ -19,6 +19,14 @@
   POST /api/index-intraday/backtest          {"sid"} or {"family","params","exit","index"} + {"start","end",
                                              "cost_scale", "cost_basis": "measured"|"research"}
   POST /api/index-intraday/run               one engine tick now
+
+  THE STRATEGY FACTORY'S STRATEGIES, TRADED INTRADAY HERE (factory.py; ids like SF0123-NIFTY)
+  GET  /api/index-intraday/factory                 the library's headline + grade distribution (?index=)
+  GET  /api/index-intraday/factory/strategies      ?index=&family=&timeframe=&grade=1..5|ungraded&sort=&q=&limit=&offset=
+  GET  /api/index-intraday/factory/strategies/{id} one strategy: its rules, 2019-23 record, monthly curve
+  GET  /api/index-intraday/factory/hypotheses      the 69 hypotheses, each with its 8 timeframes' grades (?index=)
+  GET  /api/index-intraday/factory/activity        the factory strategies' paper positions, trades and signals
+  (deploy one with POST /deployments, backtest one with POST /backtest {"sid": "SF0123-NIFTY", ...})
 """
 
 from __future__ import annotations
@@ -30,6 +38,8 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from app.api.deps import get_current_user
 from app.services.index_intraday import backtest as BT
 from app.services.index_intraday import catalog as cat
+from app.services.index_intraday import factory_lib as FL
+from app.services.index_intraday.factory import parse_sid
 from app.services.index_intraday import paper as P
 from app.services.index_intraday import report as REP
 from app.services.index_intraday.costs import MINUTE_VALUE_LAKH, ROUTE, fee_rt_bp, max_etf_order
@@ -99,10 +109,62 @@ async def strategies(index: str | None = None, family: str | None = None, status
 
 @router.get("/strategies/{sid}")
 async def strategy(sid: str, _u: dict = Depends(get_current_user)):
-    s = cat.get(sid)
+    s = cat.get(sid) or (FL.get(sid) if parse_sid(sid) else None)
     if s is None:
         raise HTTPException(404, f"no strategy {sid}")
     return s
+
+
+# ── the Strategy Factory's strategies ────────────────────────────────────────────
+
+
+def _index(index: str) -> str:
+    if index not in ROUTE:
+        raise HTTPException(404, f"unknown index {index}")
+    return index
+
+
+@router.get("/factory")
+async def factory(index: str = "NIFTY", _u: dict = Depends(get_current_user)):
+    return {**FL.header(), "distribution": FL.distribution(_index(index))}
+
+
+@router.get("/factory/strategies")
+async def factory_strategies(index: str = "NIFTY", family: str | None = None, timeframe: str | None = None,
+                             grade: str | None = None, sort: str = "grade", q: str | None = None,
+                             limit: int = Query(100, ge=1, le=600), offset: int = Query(0, ge=0),
+                             _u: dict = Depends(get_current_user)):
+    rows, matched = FL.strategies(_index(index), family or None, timeframe or None, grade or None, sort, q, limit, offset)
+    on = {d["sid"]: d.get("model") for d in await P.deployments()}
+    for r in rows:
+        r["deployed"] = on.get(r["id"])
+    return {"strategies": rows, "matched": matched}
+
+
+@router.get("/factory/strategies/{sid}")
+async def factory_strategy(sid: str, _u: dict = Depends(get_current_user)):
+    s = FL.get(sid)
+    if s is None:
+        raise HTTPException(404, f"no factory strategy {sid}")
+    on = {d["sid"]: d.get("model") for d in await P.deployments()}
+    return {**s, "deployed": on.get(sid)}
+
+
+@router.get("/factory/hypotheses")
+async def factory_hypotheses(index: str = "NIFTY", _u: dict = Depends(get_current_user)):
+    return {"index": _index(index), "hypotheses": FL.hypotheses(index)}
+
+
+@router.get("/factory/activity")
+async def factory_activity(limit: int = Query(100, ge=1, le=1000), _u: dict = Depends(get_current_user)):
+    """What the factory strategies are doing in paper: open positions, closed trades and the engine's
+    entries / exits / refusals / misses for them."""
+    open_pos = [_clean(p) async for p in P.POS.find({"status": "OPEN", "family": "sf"}).sort("opened_at", -1)]
+    trades = [_clean(t) async for t in P.TRADES.find({"family": "sf"}).sort("closed_at", -1).limit(limit)]
+    events = [_clean(e) async for e in P.EVENTS.find({"$or": [{"family": "sf"}, {"text": {"$regex": "^SF[0-9]{4}-"}}]})
+              .sort("at", -1).limit(limit)]
+    deps = [d for d in await P.deployments() if d.get("family") == "sf"]
+    return {"deployments": deps, "open_positions": open_pos, "trades": trades, "events": events}
 
 
 @router.get("/deployments")

@@ -35,6 +35,8 @@ import numpy as np
 from app.core.db import db
 
 from . import catalog as cat
+from . import factory as FX
+from . import factory_lib as FL
 from . import families as F
 from . import risk as R
 from .costs import ROUTE, fee_rt_bp, max_etf_order
@@ -127,7 +129,15 @@ async def set_deployment(sid: str, enabled: bool, model: str = "etf") -> list[di
         await STATE.update_one({"_id": "deployments"}, {"$set": {"items": items}}, upsert=True)
         await event("deployment", f"{sid} OFF")
         return items
-    s = cat.get(sid)
+    fx = FX.parse_sid(sid)
+    if fx is not None:                               # a Strategy Factory strategy on an index (factory.py)
+        strat, index = fx
+        lib = FL.get(sid) or {}
+        s = {"key": sid, "family": "sf", "params": {"sf": strat.strategy_id}, "exit": f"sf_{strat.timeframe}",
+             "index": index, "status": lib.get("status") or "Experimental", "grade": lib.get("grade"),
+             "name": strat.name}
+    else:
+        s = cat.get(sid)
     if s is None:
         raise ValueError(f"no strategy {sid}")
     if model == "etf" and not ROUTE[s["index"]][0]:
@@ -140,6 +150,7 @@ async def set_deployment(sid: str, enabled: bool, model: str = "etf") -> list[di
     if enabled:
         items.append({"sid": sid, "key": s["key"], "family": s["family"], "params": s["params"], "exit": s["exit"],
                       "index": s["index"], "model": model, "status": s["status"],
+                      **({"name": s["name"], "grade": s.get("grade")} if s["family"] == "sf" else {}),
                       "added_at": datetime.now(timezone.utc).isoformat()})
     await STATE.update_one({"_id": "deployments"}, {"$set": {"items": items}}, upsert=True)
     await event("deployment", f"{sid} {'ON' if enabled else 'OFF'} ({model}) — status {s['status']}")
@@ -206,8 +217,11 @@ class Engine:
     async def warm(self, day: date) -> list[str]:
         """Before the open: fill any missing history day, then load the day's history for every
         deployed index (and VIX)."""
-        need = {d["index"] for d in await deployments()} | {p["index"] async for p in POS.find({"status": "OPEN"})}
-        syms = sorted(need | ({"INDIAVIX"} if need else set()))
+        deps = await deployments()
+        need = {d["index"] for d in deps} | {p["index"] async for p in POS.find({"status": "OPEN"})}
+        # a factory strategy reads its ETF's volume (factory.py), so that ETF's history is kept too
+        etfs = {ROUTE[d["index"]][0] for d in deps if d.get("family") == "sf" and ROUTE[d["index"]][0]}
+        syms = sorted(need | etfs | ({"INDIAVIX"} if need else set()))
         if syms:
             try:
                 await feed.heal(syms)
@@ -216,7 +230,7 @@ class Engine:
         for sym in syms:
             self.hist.pop(sym, None)
             await self.history(sym, day)
-        for sym in [s for s in self.hist if s not in need and s != "INDIAVIX"]:
+        for sym in [s for s in self.hist if s not in need and s not in etfs and s != "INDIAVIX"]:
             self.hist.pop(sym, None)                                 # switched off: drop its history
         return sorted(need)
 
@@ -244,9 +258,19 @@ class Engine:
             return {**out, "notes": ["nothing deployed"]}
         vix = await self.today_days("INDIAVIX", now, upto)
         built: dict[str, tuple] = {}
+        sf_idx = ({d["index"] for d in deps.values() if d["family"] == "sf"}
+                  | {p["index"] for p in open_pos if p["family"] == "sf"})
         for idx in need:
             D = await self.today_days(idx, now, upto)
-            built[idx] = (D, F.Ctx(D, vix))
+            ctx = F.Ctx(D, vix)
+            ctx.live = True                              # factory strategies: decisions cached per completed bar
+            ctx.etf = None
+            if idx in sf_idx and ROUTE[idx][0]:
+                try:
+                    ctx.etf = await self.today_days(ROUTE[idx][0], now, upto)
+                except FileNotFoundError:
+                    ctx.etf = None                       # volume-dependent factory rules then cannot fire
+            built[idx] = (D, ctx)
         sq = minute_of(cfg.square_off)
         # 1) open positions: walk the minutes that just completed
         for p in open_pos:
@@ -286,7 +310,10 @@ class Engine:
                 if len(done) >= max_trades:
                     continue
                 after = max([t["exit_min"] + 1 for t in done], default=0)
-                spec = day_specs(i)(after)
+                if dep["family"] == "sf":                  # the factory's evaluate() is Python bar by bar: off the loop
+                    spec = await asyncio.to_thread(day_specs(i), after)
+                else:
+                    spec = day_specs(i)(after)
                 if spec is None or spec.minute > upto:
                     continue
                 if spec.minute < upto - STALE_SIGNAL_MIN:
@@ -336,12 +363,19 @@ class Engine:
         else:
             raw = float(live_px) if live_px else float(D.c[i][upto - 1])
         stop = spec.stop
+        sf_target, sf_signal = None, None
+        if isinstance(spec, FX.SFSpec):                  # the factory's own levels, re-anchored to this fill
+            stop = raw - spec.side * spec.stop_dist
+            sf_target = raw + spec.side * spec.target_dist
+            sf_signal = spec.signal
         if stop is None and xcfg.stop == "atr" and atr > 0:
             stop = raw - spec.side * xcfg.stop_mult * atr
         elif stop is None and xcfg.stop == "pct":
             stop = raw * (1 - spec.side * xcfg.stop_mult / 100)
         risk_pts = abs(raw - stop) if stop is not None else None
         target = raw + spec.side * xcfg.target_r * risk_pts if (xcfg.target_r and risk_pts) else None
+        if sf_target is not None:
+            target = sf_target
         trail = (xcfg.trail_mult * atr) if xcfg.trail == "atr" and atr > 0 else (
             raw * xcfg.trail_mult / 100 if xcfg.trail == "pct" else None)
         notional, how = R.size(cfg, equity, raw, stop, atr)
@@ -371,11 +405,14 @@ class Engine:
             "stop": stop, "target": target, "trail": trail, "best": raw, "next_min": int(spec.minute),
             "entry_cost": entry_cost, "sizing": how, "unrealized": 0.0, "mark": fill,
             "research_status": dep.get("status"), "opened_at": datetime.now(timezone.utc),
+            **({"name": dep.get("name"), "grade": dep.get("grade"), "signal": sf_signal} if sf_signal is not None else {}),
         }
         await POS.insert_one(doc)
         st.trades += 1
         await event("entry", f"{dep['sid']} {'BUY' if spec.side > 0 else 'SELL'} {units:,.2f} {instrument} @ {fill:,.2f} "
-                             f"({spec.kind} entry, {how})")
+                             f"({spec.kind} entry, {how})"
+                             + (f" — {sf_signal.get('pattern')}" if sf_signal else ""),
+                    sid=dep["sid"], family=dep["family"])
         return True
 
     async def _close(self, p, ex, D, upto, now, cfg, st) -> None:
@@ -417,13 +454,15 @@ class Engine:
             "net_bp": round(net / float(p["notional"]) * 1e4, 3) if p["notional"] else None,
             "notional": p["notional"], "stop": p.get("stop"), "target": p.get("target"), "sizing": p.get("sizing"),
             "research_status": p.get("research_status"), "closed_at": datetime.now(timezone.utc),
+            **({"name": p.get("name"), "grade": p.get("grade"), "signal": p.get("signal")} if p.get("family") == "sf" else {}),
         }
         await TRADES.insert_one(trade)
         await POS.update_one({"_id": p["_id"]}, {"$set": {"status": "CLOSED", "exit_px": exit_px, "exit_reason": reason,
                                                           "net": round(net, 2), "closed_at": datetime.now(timezone.utc)}})
         acct = await account(cfg)
         R.after_close(cfg, st, net, now, acct["equity"])
-        await event("exit", f"{p['sid']} {reason} {p['instrument']} @ {exit_px:,.2f} net Rs{net:,.2f}")
+        await event("exit", f"{p['sid']} {reason} {p['instrument']} @ {exit_px:,.2f} net Rs{net:,.2f}",
+                    sid=p["sid"], family=p.get("family"))
 
     async def _snapshot(self, now: datetime) -> None:
         if now.minute % 5:

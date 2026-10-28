@@ -698,3 +698,10 @@ ROUND4: list[tuple[str, dict, str]] = (
 
 def variant_key(fam: str, p: dict, exit_name: str) -> str:
     return f"{fam}|{','.join(f'{k}={p[k]}' for k in sorted(p))}|{exit_name}"
+
+
+# ── the Strategy Factory's 546 strategies, traded intraday here (factory.py) ──────
+from .factory import EXITS as _SF_EXITS, fam_sf  # noqa: E402
+
+FAMILIES["sf"] = fam_sf
+EXITS.update(_SF_EXITS)

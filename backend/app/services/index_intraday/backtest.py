@@ -25,12 +25,16 @@ from datetime import date, timedelta
 import numpy as np
 
 from . import catalog as cat
+from . import factory as FX
 from . import families as F
 from .costs import ROUTE, costs_for
 from .data import Days, _build, _read, minute_of
 from .engine import ENTRY_CUTOFF, Costs, simulate_day, summarize
 
 MAX_SPAN_DAYS = 3 * 366
+# A Strategy Factory strategy calls the factory's evaluate() bar by bar, so a fast timeframe costs far
+# more than a research family: its run is capped shorter (1m ~25 s a quarter on the server).
+FACTORY_SPAN_DAYS = {"1m": 92, "5m": 366}
 WARMUP_DAYS = 420                              # >= 250 sessions before the window (the VIX regime's median)
 _ONE_AT_A_TIME = asyncio.Semaphore(1)          # a run holds ~100 MB while it loads; never two at once
 LAST_HALF_HOUR_CUTOFF = minute_of("14:45")     # the intraday-momentum family trades the last half hour
@@ -51,6 +55,8 @@ def run_sync(family: str, params: dict, exit_name: str, index: str, start: date,
              cost_scale: float = 1.0, cost_basis: str = "measured") -> dict:
     if family not in F.FAMILIES or exit_name not in F.EXITS:
         raise ValueError("unknown family or exit")
+    if family == "sf":
+        raise ValueError("a Strategy Factory strategy runs by its id, e.g. {\"sid\": \"SF0123-NIFTY\"}")
     if cost_basis not in ("measured", "research"):
         raise ValueError("cost basis must be 'measured' or 'research'")
     if not 0 < cost_scale <= 5:
@@ -79,6 +85,46 @@ def run_sync(family: str, params: dict, exit_name: str, index: str, start: date,
         raise ValueError(f"the {family} family needs the parameter {exc}") from exc
     except (TypeError, ValueError) as exc:
         raise ValueError(f"these parameters do not fit the {family} family: {exc}") from exc
+    return _pack({"family": family, "params": params, "exit": exit_name, "index": index}, d, lo, trades, costs,
+                 cost_scale, cost_basis)
+
+
+def run_factory_sync(sid: str, start: date, end: date, cost_scale: float = 1.0, cost_basis: str = "measured") -> dict:
+    """A Strategy Factory strategy (factory.py) on one index: the catalogue's own rules and code."""
+    got = FX.parse_sid(sid)
+    if got is None:
+        raise ValueError(f"no factory strategy {sid}")
+    strat, index = got
+    if cost_basis not in ("measured", "research"):
+        raise ValueError("cost basis must be 'measured' or 'research'")
+    if not 0 < cost_scale <= 5:
+        raise ValueError("cost scale must be in (0, 5]")
+    if end < start:
+        raise ValueError("the window ends before it starts")
+    cap = FACTORY_SPAN_DAYS.get(strat.timeframe, MAX_SPAN_DAYS)
+    if (end - start).days > cap:
+        raise ValueError(f"a {strat.timeframe} factory strategy runs at most {cap} days at a time (it evaluates every bar)")
+    d = _load_window(index, start, end)
+    etf = None
+    if ROUTE[index][0]:
+        try:
+            etf = _load_window(ROUTE[index][0], start, end)
+        except FileNotFoundError:
+            etf = None
+    costs: Costs = costs_for(index, scale=cost_scale, research=cost_basis == "research")
+    lo = int(np.searchsorted(d.dates, np.datetime64(start.isoformat())))
+    rej: dict = {}
+    trades = FX.run(strat, d, etf, lo, costs, rejections=rej)
+    out = _pack({"family": "sf", "params": {"sf": strat.strategy_id}, "exit": f"sf_{strat.timeframe}", "index": index,
+                 "sid": sid, "name": strat.name}, d, lo, trades, costs, cost_scale, cost_basis)
+    out["rejections"] = rej
+    out["volume_from"] = ROUTE[index][0] if etf is not None else None
+    out["note"] = ("The Strategy Factory's own evaluate() on the index's bars, traded intraday with this module's fills "
+                   "and the ETF's costs. Its grade comes from the 2019-23 catalogue run, not from this run.")
+    return out
+
+
+def _pack(head: dict, d, lo: int, trades: list, costs: Costs, cost_scale: float, cost_basis: str) -> dict:
     n = len(d.dates) - lo
     dates = d.dates[lo:]
     stats = summarize(trades, n, dates) if trades else {"trades": 0}
@@ -91,7 +137,7 @@ def run_sync(family: str, params: dict, exit_name: str, index: str, start: date,
     dd = np.maximum.accumulate(np.r_[0, eq])[1:] - eq
     step = max(1, n // 400)
     return {
-        "family": family, "params": params, "exit": exit_name, "index": index,
+        **head,
         "start": str(dates[0]) if n else None, "end": str(dates[-1]) if n else None, "days": n,
         "costs": {"fee_rt_bp": round(costs.fee_rt_bp, 3), "slip_bp_a_side": round(costs.slip_bp, 3), "scale": cost_scale,
                   "basis": cost_basis},
@@ -108,6 +154,13 @@ def run_sync(family: str, params: dict, exit_name: str, index: str, start: date,
 async def run(sid: str | None = None, family: str | None = None, params: dict | None = None,
               exit_name: str | None = None, index: str | None = None, start: str | None = None,
               end: str | None = None, cost_scale: float = 1.0, cost_basis: str = "measured") -> dict:
+    if family == "sf" and not sid and isinstance(params, dict) and params.get("sf"):
+        sid = FX.sid_for(str(params["sf"]), index or "")
+    if sid and FX.parse_sid(sid):
+        e = date.fromisoformat(end) if end else date.today()
+        st = date.fromisoformat(start) if start else e - timedelta(days=90)
+        async with _ONE_AT_A_TIME:
+            return await asyncio.to_thread(run_factory_sync, sid, st, e, cost_scale, cost_basis)
     if sid:
         s = cat.get(sid)
         if s is None:
