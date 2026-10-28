@@ -175,6 +175,7 @@ export default function MomentumPage() {
           </>
         }
       />
+      {tabBar}
 
       {error && <ErrorBanner message={error} onRetry={load} />}
 
