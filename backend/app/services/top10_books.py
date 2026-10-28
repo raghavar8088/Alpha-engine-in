@@ -178,11 +178,18 @@ def _option_parent(*, pid: str, key: str, name: str, symbol: str, label: str, lo
     }
 
 
+def _on(day):
+    """A stored ISO day as the date Angel's rate schedules take (None: today's rates)."""
+    try:
+        return datetime.fromisoformat(str(day)[:10]).date() if day else None
+    except ValueError:
+        return None
+
+
 def _bought_option_pnl(p: dict, lots: int) -> tuple[float, Fees]:
     from app.services.angel_fees import option_round_trip
     gross = (p["px_exit"] - p["px_entry"]) * p["lot_size"] * lots
-    fb = option_round_trip(p["px_entry"], max(p["px_exit"], 0.0), lots, p["lot_size"],
-                           on=p.get("closed_on"), side="BUY")
+    fb = option_round_trip(p["px_entry"], max(p["px_exit"], 0.0), lots, p["lot_size"], on=_on(p.get("closed_on")))
     return round(gross, 2), _fees_of(fb)
 
 
@@ -335,13 +342,17 @@ def _stock_loader(side: str):
 
 def _sold_spread_pnl(p: dict, lots: int) -> tuple[float, Fees]:
     """The desk's own record counts only the SOLD leg's premium (it does not record the protective
-    wing's exit), so the books do too; the wing's buy and its sale at zero are charged."""
+    wing's exit), so the books do too; the wing's buy and its sale at zero are charged.
+
+    Angel's option card is written buy-then-sell, so the short leg passes its buy-back as the buy
+    and its sale as the sell (STT on the sale, stamp duty on the buy-back); a buy-back of nothing
+    is floored at one tick so the leg is still charged."""
     from app.services.angel_fees import option_round_trip
     gross = (p["px_entry"] - p["px_exit"]) * p["lot_size"] * lots
-    short = _fees_of(option_round_trip(p["px_entry"], max(p["px_exit"], 0.0), lots, p["lot_size"],
-                                       on=p.get("closed_on"), side="SELL"))
+    short = _fees_of(option_round_trip(max(p["px_exit"], 0.05), p["px_entry"], lots, p["lot_size"],
+                                       on=_on(p.get("closed_on"))))
     wing = _fees_of(option_round_trip(p.get("px_wing") or 0.05, 0.0, lots, p["lot_size"],
-                                      on=p.get("closed_on"), side="BUY")) if (p.get("px_wing") or 0) > 0 else Fees(0.0)
+                                      on=_on(p.get("closed_on")))) if (p.get("px_wing") or 0) > 0 else Fees(0.0)
     parts = {k: short.parts.get(k, 0.0) + wing.parts.get(k, 0.0) for k in set(short.parts) | set(wing.parts)}
     return round(gross, 2), Fees(short.total + wing.total, parts)
 
