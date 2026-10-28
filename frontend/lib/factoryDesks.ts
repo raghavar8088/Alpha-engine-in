@@ -30,6 +30,7 @@ export interface FactoryDeskSummary {
   coverage: Record<string, number>;
   stale_tfs: string[];
   skipped: Record<string, number>;
+  entry_gate: string | null;
   last_cycle_at: string | null;
   last_notes: string[];
 }

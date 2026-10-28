@@ -90,6 +90,11 @@ export default function FactoryDeskView({ desk }: { desk: FactoryDeskKey }) {
           hold limit, measured on the underlying; this module’s rules apply on top. This module’s own strategies are untouched.
         </p>
         {(summary?.notes ?? []).map((n) => <p key={n}>{n}</p>)}
+        {summary?.entry_gate && (
+          <p>
+            <b>Entries held.</b> {summary.entry_gate}
+          </p>
+        )}
         <p>
           <b>Data.</b> Strategy × symbol pairs with enough bars, by timeframe:{" "}
           {TFS.map((t) => `${t} ${coverage[t] ?? 0}`).join(" · ")}. A timeframe at 0 has no bars here yet, so its

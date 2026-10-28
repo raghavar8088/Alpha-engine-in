@@ -741,18 +741,31 @@ def _evaluate_batch(jobs: list[tuple], exchange: str) -> list[tuple]:
     return out
 
 
+_held_seen: dict[str, str | None] = {}
+
+
+async def _held(tab: Tab, why: str | None) -> dict:
+    """Record what held this tab's entries in its last in-session pass (None: nothing did), so the
+    page can still say it after the session. Written only when it changes."""
+    if tab.key not in _held_seen or _held_seen[tab.key] != why:
+        await STATE.update_one({"_id": f"gate:{tab.key}"}, {"$set": {"why": why, "at": _now()}}, upsert=True)
+        _held_seen[tab.key] = why
+    return {"opened": 0, "notes": [why] if why else []}
+
+
 async def _scan(tab: Tab, book: dict[str, dict], pc: dict) -> dict:
     from app.services.desk_switches import is_on
     ok, why = _entries_open(tab)
     if not ok:
         return {"opened": 0, "notes": [why]}
     if tab.switch and not await is_on(tab.switch):
-        return {"opened": 0, "notes": [f"Main Control has {tab.module} OFF: no new entries (open positions are still managed)."]}
+        return await _held(tab, f"Main Control has {tab.module} OFF: no new entries (open positions are still managed).")
     notes: list[str] = []
     if tab.market == "equities":
         ok, why = await _regime_ok()
         if not ok:
-            return {"opened": 0, "notes": [f"Regime gate: {why} - no new longs."]}
+            return await _held(tab, f"Regime gate: {why} - no new longs.")
+    await _held(tab, None)
     busy = {sid for sid, r in book.items() if r["open"] > 0}
     candidates = [st for st in FACTORY_CATALOG if st.strategy_id not in busy]
     exchange = "DELTA" if tab.market == "xaut" else "NSE"
@@ -1059,8 +1072,9 @@ async def run_all(only: str | None = None) -> dict:
 
 async def loop() -> None:
     """Every minute: the NSE tabs in session, the gold tab around the clock."""
-    logger.info("[factory_desks] records in database %r (%s)", STORE.name,
-                "FACTORY_MONGO_URL" if FACTORY_MONGO_URL else "the main database: FACTORY_MONGO_URL is unset")
+    if not FACTORY_MONGO_URL:
+        logger.warning("[factory_desks] FACTORY_MONGO_URL is unset: the tabs' records go to the main database %r",
+                       STORE.name)
     await asyncio.sleep(45)
     while True:
         if ENABLED:
@@ -1100,6 +1114,7 @@ async def summary(key: str) -> dict:
     cyc = await STATE.find_one({"_id": f"cycle:{key}"}) or {}
     cov = await STATE.find_one({"_id": f"coverage:{key}"}) or {}
     sk = await STATE.find_one({"_id": f"skips:{key}"}) or {}
+    gate = await STATE.find_one({"_id": f"gate:{key}"}) or {}
     families: dict[str, int] = {}
     for s in FACTORY_CATALOG:
         families[s.family] = families.get(s.family, 0) + 1
@@ -1112,7 +1127,7 @@ async def summary(key: str) -> dict:
         "deployed": round(deployed, 2), "open_positions": open_n, "closed_positions": closed_n, "wins": wins,
         "roi_pct": round((realized + unrealized) / cap * 100, 4) if cap else 0.0,
         "coverage": cov.get("by_tf") or {}, "stale_tfs": cov.get("stale_tfs") or [],
-        "skipped": sk.get("by_reason") or {},
+        "skipped": sk.get("by_reason") or {}, "entry_gate": gate.get("why"),
         "last_cycle_at": naive_utc(cyc["at"]).replace(tzinfo=timezone.utc).isoformat() if cyc.get("at") else None,
         "last_notes": cyc.get("notes") or [],
     }
