@@ -274,10 +274,24 @@ def prev_period_break(bars, p) -> Optional[Setup]:
     return None
 
 
+def _session_day(b) -> object:
+    """The session a bar belongs to, for a VWAP that resets each session. `session_vwap`
+    REQUIRES this key — called without it, it raised TypeError on every bar, the detector's
+    guard swallowed it, and every VWAP setup was silently "not present"."""
+    return b.ts.date()
+
+
+def _rsi_period(p: dict) -> int:
+    """The RSI length: the timeframe profile's `rsi_period`. These detectors used to read
+    p["period"], which no RSI recipe or profile sets — a KeyError on every bar, swallowed by
+    the guard, so the three RSI hypotheses never produced a single setup."""
+    return int(p.get("rsi_period", 14))
+
+
 def vwap_reclaim(bars, p) -> Optional[Setup]:
     """Price crossing back through the session VWAP — the level institutional execution
     is benchmarked to, so a reclaim flips the intraday balance of who is offside."""
-    vw = session_vwap(bars)
+    vw = session_vwap(bars, _session_day)
     if not vw or len(vw) < 3:
         return None
     last, prev = bars[-1].close, bars[-2].close
@@ -458,7 +472,7 @@ def ema_cross(bars, p) -> Optional[Setup]:
 def rsi_regime(bars, p) -> Optional[Setup]:
     """RSI used as a TREND regime filter (40/60 bands) rather than an overbought oscillator
     — crossing 60 from below marks momentum expansion, not an exit signal."""
-    r = rsi(_c(bars), p["period"])
+    r = rsi(_c(bars), _rsi_period(p))
     if len(r) < 3:
         return None
     atr = _atr(bars)
@@ -477,7 +491,7 @@ def rsi_regime(bars, p) -> Optional[Setup]:
 def rsi_extreme_reversal(bars, p) -> Optional[Setup]:
     """The classic 30/70 mean-reversion read — turning back OUT of the extreme, which is
     what separates a reversal from standing in front of a trend."""
-    r = rsi(_c(bars), p["period"])
+    r = rsi(_c(bars), _rsi_period(p))
     if len(r) < 3:
         return None
     last = bars[-1].close
@@ -493,7 +507,7 @@ def rsi_extreme_reversal(bars, p) -> Optional[Setup]:
 def rsi_divergence(bars, p) -> Optional[Setup]:
     """Price makes a new extreme, RSI does not — the momentum behind the move is fading.
     Measured on confirmed swing pivots so the divergence cannot repaint."""
-    r = rsi(_c(bars), p["period"])
+    r = rsi(_c(bars), _rsi_period(p))
     if len(r) < p["window"] + 5:
         return None
     hi, lo = CP.pivots(bars, p["pivot"], p["pivot"])
@@ -515,7 +529,8 @@ def rsi_divergence(bars, p) -> Optional[Setup]:
 
 
 def macd_signal_cross(bars, p) -> Optional[Setup]:
-    line, sig, hist = macd(_c(bars), p["fast"], p["slow"], p["signal"])
+    # macd() returns (line, signal) — unpacking three raised ValueError on every bar
+    line, sig = macd(_c(bars), p["fast"], p["slow"], p["signal"])
     if len(line) < 3 or len(sig) < 3:
         return None
     n = min(len(line), len(sig))
@@ -533,7 +548,8 @@ def macd_signal_cross(bars, p) -> Optional[Setup]:
 def macd_histogram_turn(bars, p) -> Optional[Setup]:
     """The histogram turning while still on its own side of zero — an earlier, noisier
     read than the signal cross, and a genuinely different trade-off."""
-    _line, _sig, hist = macd(_c(bars), p["fast"], p["slow"], p["signal"])
+    line, sig = macd(_c(bars), p["fast"], p["slow"], p["signal"])
+    hist = [a - b for a, b in zip(line, sig)]
     if len(hist) < 4:
         return None
     last = bars[-1].close
@@ -606,15 +622,19 @@ def supertrend_flip(bars, p) -> Optional[Setup]:
 
 
 def psar_flip(bars, p) -> Optional[Setup]:
-    s = psar(bars, p["step"], p["max_step"])
-    if len(s) < 3:
+    # psar() returns the SAR's DIRECTION per bar (+1 below price, -1 above), not its level. This
+    # used to compare those +-1 values with prices, so it never fired; a flip is the direction
+    # changing, and the stop is the swing extreme (as for the Supertrend flip).
+    d = psar(bars, p["step"], p["max_step"])
+    if len(d) < 3:
         return None
-    off = len(bars) - len(s)
-    prev, cur = bars[off + len(s) - 2], bars[-1]
-    if s[-2] > prev.close and s[-1] < cur.close:
-        return Setup("BUY", cur.close, s[-1], None, "Parabolic SAR Flip", "PSAR flipped below price")
-    if s[-2] < prev.close and s[-1] > cur.close:
-        return Setup("SELL", cur.close, s[-1], None, "Parabolic SAR Flip", "PSAR flipped above price")
+    last = bars[-1].close
+    if d[-2] == -1 and d[-1] == 1:
+        return Setup("BUY", last, _swing_low(bars, p["stop_lookback"]), None, "Parabolic SAR Flip",
+                     "PSAR flipped below price")
+    if d[-2] == 1 and d[-1] == -1:
+        return Setup("SELL", last, _swing_high(bars, p["stop_lookback"]), None, "Parabolic SAR Flip",
+                     "PSAR flipped above price")
     return None
 
 

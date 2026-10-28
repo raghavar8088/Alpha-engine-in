@@ -53,7 +53,8 @@ def rsi_side(bars, p, side: str, htf=None) -> Result:
 
 
 def macd_agrees(bars, p, side: str, htf=None) -> Result:
-    line, sig, _hist = macd(_closes(bars), p.get("fast", 12), p.get("slow", 26), p.get("signal", 9))
+    # macd() returns (line, signal); unpacking three raised ValueError, so this always failed
+    line, sig = macd(_closes(bars), p.get("fast", 12), p.get("slow", 26), p.get("signal", 9))
     if not line or not sig:
         return False, "MACD unavailable"
     up = line[-1] > sig[-1]
@@ -73,7 +74,8 @@ def ema_trend(bars, p, side: str, htf=None) -> Result:
 
 
 def vwap_side(bars, p, side: str, htf=None) -> Result:
-    vw = session_vwap(bars)
+    # session_vwap needs the session key; without it, it raised TypeError and this always failed
+    vw = session_vwap(bars, lambda b: b.ts.date())
     if not vw:
         return False, "VWAP unavailable"
     above = bars[-1].close > vw[-1]
