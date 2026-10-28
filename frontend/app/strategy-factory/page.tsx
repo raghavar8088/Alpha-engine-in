@@ -7,6 +7,7 @@ import StatusPill from "../../components/StatusPill";
 import ErrorBanner from "../../components/ErrorBanner";
 import EmptyState from "../../components/EmptyState";
 import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
+import Top10Book from "../../components/Top10Book";
 import {
   SFRecipe,
   SFRow,
@@ -56,7 +57,9 @@ export default function StrategyFactoryPage() {
   const [family, setFamily] = useState("ALL");
   const [timeframe, setTimeframe] = useState("ALL");
   const [grade, setGrade] = useState<number | "ALL">("ALL");
-  const [tab, setTab] = useState<"library" | "recipes" | "paper" | "signals">("library");
+  // top2L / top10L: the Top-10 paper books (2026-10-27) - its ten best combined backtests, replayed
+  // forward and copied into one account each.
+  const [tab, setTab] = useState<"library" | "recipes" | "paper" | "signals" | "top2L" | "top10L">("library");
 
   const load = useCallback(async () => {
     try {
@@ -214,13 +217,16 @@ export default function StrategyFactoryPage() {
       </GlassPanel>
 
       <div className="tabs">
-        {(["library", "recipes", "paper", "signals"] as const).map((t) => (
+        {(["library", "recipes", "paper", "signals", "top2L", "top10L"] as const).map((t) => (
           <button key={t} className={`tab ${tab === t ? "on" : ""}`} onClick={() => setTab(t)}>
             {t === "library" ? "Strategy Library" : t === "recipes" ? "The 69 Hypotheses"
-              : t === "paper" ? "Paper Positions" : "Signal Feed"}
+              : t === "paper" ? "Paper Positions" : t === "signals" ? "Signal Feed"
+              : t === "top2L" ? "Top 10 Paper Trade · ₹2 lakh" : "Top 10 Paper Trade · ₹10 lakh"}
           </button>
         ))}
       </div>
+
+      {(tab === "top2L" || tab === "top10L") && <Top10Book key={tab} desk="strategy-factory" book={tab} />}
 
       {tab === "library" && (
         <GlassPanel title="Strategy library" note={`${rows.length} shown · click a row for its rules and backtest`}>

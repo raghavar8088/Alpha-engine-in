@@ -485,6 +485,13 @@ async def start_option_research_desk() -> None:
         asyncio.create_task(top10_books_loop())
     except Exception:  # noqa: BLE001
         logger.exception("could not start the top-10 books")
+    try:
+        # Strategy Factory · Top 10 (2026-10-27): the Factory has no running paper engine, so its
+        # ten are replayed forward by the backtest's own rules; the top-10 books copy that record.
+        from app.services.strategy_factory.top10_replay import loop as sf_top10_loop
+        asyncio.create_task(sf_top10_loop())
+    except Exception:  # noqa: BLE001
+        logger.exception("could not start the Strategy Factory top-10 replay")
 
 
 @app.on_event("startup")

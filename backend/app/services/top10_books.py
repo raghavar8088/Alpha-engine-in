@@ -97,7 +97,7 @@ def _fees_of(fb) -> Fees:
 class Pick:
     key: str
     rank: int
-    score: float
+    score: float | None       # its Rank score at the pick; None where the pick was not by Rank
     trades: int
     bp: float | None          # net return a trade, basis points of what it deployed
     name: str
@@ -413,6 +413,27 @@ def _futures_mark(p: dict, lots: int) -> float | None:
     return round(sign * (_f(p["px_ltp"]) - p["px_entry"]) * p["multiplier"] * lots, 2)
 
 
+# -- Strategy Factory: its trades come from its own forward replay -----------------------------
+# The Factory has no running paper engine, so app.services.strategy_factory.top10_replay runs its
+# ten forward by the backtest's own rules; these adapt that replay's trades to a book.
+
+
+async def _sf_load(since: datetime, keys: set, pointed: list) -> list[dict]:
+    from app.services.strategy_factory import top10_replay as sft
+    return await sft.load_parents(since, keys, pointed)
+
+
+def _sf_pnl(p: dict, lots: int) -> tuple[float, Fees]:
+    from app.services.strategy_factory import top10_replay as sft
+    gross, fees, parts = sft.parent_pnl(p, lots)
+    return gross, Fees(fees, parts)
+
+
+def _sf_mark(p: dict, lots: int) -> float | None:
+    from app.services.strategy_factory import top10_replay as sft
+    return sft.parent_mark(p, lots)
+
+
 # -- the desks and their frozen picks ---------------------------------------------------------
 
 
@@ -554,6 +575,45 @@ DESKS: dict[str, Desk] = {
                "contracts (GOLD, SILVER, COPPER, ZINC); those signals are skipped and counted.",
                "Each copy is priced on its own contract, in at the touch and out at the desk's exit, with "
                "Angel One's MCX charges."),
+    ),
+    # The Factory's leaderboard grades a strategy on its best single symbol; across all their symbols
+    # six of its top ten lost. These ten are the best COMBINED backtests over every stock and MCX
+    # contract each was tested on (net P&L, >= 100 trades) - no Rank score, hence score None. Ids,
+    # numbers and the reasoning: strategy_factory/top10_replay.py (PICKS), picked 27 Oct 23:35 IST.
+    "strategy-factory": Desk(
+        key="strategy-factory", label="Strategy Factory", route="/strategy-factory",
+        instrument="NSE stocks (long only) and MCX futures (minis), both sides on MCX",
+        cost_basis="a stock's price, whole shares; the broker's measured margin for one MCX lot",
+        board=("the combined backtest over every stock and MCX contract each strategy was tested on "
+               "(net P&L, at least 100 trades)"),
+        load=_sf_load, pnl=_sf_pnl, mark=_sf_mark,
+        picks=_picks([
+            ("SF0006", 1, None, 187, None, "Head & Shoulders · 1h", 352997.0),
+            ("SF0119", 2, None, 236, None, "Hammer / Shooting Star · 4h", 322344.0),
+            ("SF0277", 3, None, 258, None, "EMA Ribbon Compression · 1h", 240029.0),
+            ("SF0410", 4, None, 142, None, "ADX / DI Cross · 30m", 227103.0),
+            ("SF0230", 5, None, 411, None, "Keltner Breakout · 1h", 220529.0),
+            ("SF0420", 6, None, 123, None, "Supertrend Flip · 1h", 197268.0),
+            ("SF0183", 7, None, 183, None, "Three Soldiers / Crows · 4h", 133901.0),
+            ("SF0200", 8, None, 266, None, "Pin Bar at Extreme · 1d", 133455.0),
+            ("SF0022", 9, None, 400, None, "Triple Top / Bottom · 1h", 112348.0),
+            ("SF0298", 10, None, 192, None, "Break of Structure · 15m", 105556.0),
+        ]),
+        notes=("The Strategy Factory has no running paper engine, so these ten are run forward on every "
+               "closed bar by the backtest's own rules - signal on the completed bar, fill at the next "
+               "bar's open plus 5 bp, stop first, the backtest's maximum hold - checked trade for trade "
+               "against the backtest on 20 series.",
+               "Picked on all their symbols, not the leaderboard's best one: six of the board's top ten lost "
+               "across all of theirs. Two that qualified were left out - in the backtest their "
+               "higher-timeframe filter read a 4h bar before it had finished.",
+               "Stocks: long only (a cash account cannot hold a short overnight), whole shares. Stock bars "
+               "arrive once a day after the close, so stock trades appear after about 16:45 IST.",
+               "MCX: through the mini where there is one (GOLDM, SILVERM, CRUDEOILM, NATGASMINI), whole "
+               "lots on the broker's margin, one position per commodity, closed the day before its "
+               "contract's exit window. COPPER and ZINC have no mini and their lots need more margin than "
+               "a position here may use, so those signals are skipped and counted.",
+               "Part of the MCX backtest evidence ran across contract joins the commodity store now "
+               "refuses for decisions; weigh the MCX half of the pick with that in mind."),
     ),
 }
 

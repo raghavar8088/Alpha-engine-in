@@ -134,7 +134,7 @@ export default function Top10Book({ desk, book }: { desk: Top10Desk; book: Top10
                 <tr key={r.key}>
                   {ranks && <RankTd board={ranks} id={r.key} />}
                   <td className="srank-cell" data-score={r.picked_score == null ? "" : r.picked_score.toFixed(1)}
-                      title={`Rank ${r.picked_rank} on the desk when picked: score ${r.picked_score?.toFixed(1)}, ${r.picked_trades} trades`
+                      title={`#${r.picked_rank} when picked${r.picked_score != null ? `: score ${r.picked_score.toFixed(1)}` : ""}, ${r.picked_trades} trades`
                         + (r.picked_bp != null ? `, ${r.picked_bp >= 0 ? "+" : ""}${r.picked_bp.toFixed(0)} bp a trade` : "")
                         + (r.picked_net_pnl != null ? `, ${signed(r.picked_net_pnl)} net there` : "")}>
                     {r.picked_rank}

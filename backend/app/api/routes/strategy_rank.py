@@ -1,6 +1,10 @@
 """Strategy Rank for every leaderboard in the app.
 
-  GET /api/strategy-rank/{desk}   ?book= &side= &symbol= &venue= (only the ones that desk takes)
+  GET /api/strategy-rank/{board}  ?book= &desk= &side= &symbol= &venue= (only the ones that board takes)
+
+The path names the BOARD. `?desk=` is a query parameter of the Top-10 books' board, which holds one
+board per desk; it was ignored while the path parameter was itself called `desk` (every desk's
+Top-10 Rank was pooled into one).
 
 Returns the desk's factor list once and, per strategy, its rank (1 = best on that desk), its
 0-100 score and each factor's value and percentile. The page merges it into its own board by
@@ -24,22 +28,24 @@ router = APIRouter(prefix="/api/strategy-rank", tags=["strategy-rank"])
 TTL_SECONDS = 60.0
 
 
-@router.get("/{desk}")
+@router.get("/{board}")
 async def strategy_rank(
-    desk: str,
+    board: str,
     book: str | None = Query(None),
+    desk: str | None = Query(None),
     side: str | None = Query(None),
     symbol: str | None = Query(None),
     venue: str | None = Query(None),
     fresh: bool = Query(False),
     _user: dict = Depends(get_current_user),
 ):
-    if not known(desk):
-        raise HTTPException(404, f"no ranked leaderboard called {desk!r}")
+    if not known(board):
+        raise HTTPException(404, f"no ranked leaderboard called {board!r}")
     try:
-        params = clean_params(desk, {"book": book, "side": side, "symbol": symbol, "venue": venue})
+        params = clean_params(board, {"book": book, "desk": desk, "side": side, "symbol": symbol,
+                                      "venue": venue})
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
-    key = "strategy-rank:" + desk + ":" + "&".join(f"{k}={v}" for k, v in sorted(params.items()))
-    return await cached(key, lambda: desk_ranks(desk, params), ttl=TTL_BY_DESK.get(desk, TTL_SECONDS),
+    key = "strategy-rank:" + board + ":" + "&".join(f"{k}={v}" for k, v in sorted(params.items()))
+    return await cached(key, lambda: desk_ranks(board, params), ttl=TTL_BY_DESK.get(board, TTL_SECONDS),
                         fresh=fresh)

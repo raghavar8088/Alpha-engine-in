@@ -4,7 +4,8 @@
 import { apiFetch } from "./api";
 
 export type Top10BookKey = "top2L" | "top10L";
-export type Top10Desk = "zero-hero" | "nifty-scalp" | "prelive" | "stock-buying" | "stock-selling" | "commodity";
+export type Top10Desk = "zero-hero" | "nifty-scalp" | "prelive" | "stock-buying" | "stock-selling" | "commodity"
+  | "strategy-factory";
 
 export const TOP10_BOOKS: { key: Top10BookKey; label: string }[] = [
   { key: "top2L", label: "Top 10 Paper Trade · ₹2 lakh" },
@@ -49,7 +50,8 @@ export interface Top10Row {
   strategy_id: string;
   name: string;
   picked_rank: number;
-  picked_score: number;
+  // null where the ten were not picked by a Rank score (Strategy Factory: best combined backtest).
+  picked_score: number | null;
   picked_trades: number;
   picked_bp: number | null;
   picked_net_pnl: number | null;
