@@ -154,9 +154,11 @@ export default function TradingTerminal({ onOpenStrategies }: { onOpenStrategies
                 {t.deployments.map((x) => (
                   <tr key={x.sid}>
                     <td className="l">
-                      <div className="strong">{x.family}</div>
+                      <div className="strong">{x.family === "sf" ? x.name ?? x.sid : x.family}</div>
                       <div className="faint">
-                        {x.sid} · {paramText(x.params)} · {x.exit}
+                        {x.family === "sf"
+                          ? `${x.sid} · Strategy Factory${x.grade ? ` · grade ${x.grade}` : ""}`
+                          : `${x.sid} · ${paramText(x.params)} · ${x.exit}`}
                       </div>
                     </td>
                     <td className="l">{INDEX_LABEL[x.index] ?? x.index}</td>
@@ -218,7 +220,7 @@ export default function TradingTerminal({ onOpenStrategies }: { onOpenStrategies
                 <tr key={`${p.sid}-${p.opened_at}`}>
                   <td className="l">
                     <div className="strong">{p.sid}</div>
-                    <div className="faint">{p.family}</div>
+                    <div className="faint">{p.family === "sf" ? p.name ?? "Strategy Factory" : p.family}</div>
                   </td>
                   <td className="l">
                     {p.instrument}
@@ -276,7 +278,7 @@ export default function TradingTerminal({ onOpenStrategies }: { onOpenStrategies
                 <tr key={`${x.sid}-${x.closed_at}`}>
                   <td className="l">
                     <div className="strong">{x.sid}</div>
-                    <div className="faint">{x.family}</div>
+                    <div className="faint">{x.family === "sf" ? x.name ?? "Strategy Factory" : x.family}</div>
                   </td>
                   <td className="l">
                     {x.instrument}

@@ -21,15 +21,17 @@ import ErrorBanner from "../../components/ErrorBanner";
 import { fetchIIResearch, type IIResearch } from "../../lib/indexIntradayApi";
 import MarketOverview from "./MarketOverview";
 import StrategyDashboard from "./StrategyDashboard";
+import FactoryLibrary from "./FactoryLibrary";
 import TradingTerminal from "./TradingTerminal";
 import BacktestLab from "./BacktestLab";
 import TradeJournal from "./TradeJournal";
 import RiskPanel from "./RiskPanel";
 
-type Tab = "overview" | "strategies" | "terminal" | "lab" | "journal" | "risk";
+type Tab = "overview" | "strategies" | "factory" | "terminal" | "lab" | "journal" | "risk";
 const TABS: [Tab, string][] = [
   ["overview", "Market Overview"],
   ["strategies", "Strategy Dashboard"],
+  ["factory", "Strategy Factory"],
   ["terminal", "Paper Trading Terminal"],
   ["lab", "Backtesting Lab"],
   ["journal", "Trade Journal"],
@@ -84,6 +86,8 @@ export default function IndexIntradayPage() {
             2016–23 one-minute data with Angel One&rsquo;s charges and measured spreads:{" "}
             <strong>none reached Validated</strong>, so none is approved for paper trading, and the 2024–26 holdout was
             never opened. Any of them can still be run in paper as an observation, labelled with its research status.
+            The <strong>Strategy Factory</strong> tab adds the factory&rsquo;s 546 strategies — 69 chart-pattern,
+            candlestick, price-structure, indicator and multi-condition hypotheses on 8 timeframes — traded intraday here.
           </>
         }
         actions={
@@ -107,6 +111,7 @@ export default function IndexIntradayPage() {
       <div key={`${tab}-${nonce}`}>
         {tab === "overview" && <MarketOverview research={research} />}
         {tab === "strategies" && <StrategyDashboard research={research} onBacktest={backtest} />}
+        {tab === "factory" && <FactoryLibrary onBacktest={backtest} />}
         {tab === "terminal" && <TradingTerminal onOpenStrategies={() => go("strategies")} />}
         {tab === "lab" && <BacktestLab initialSid={labSid} />}
         {tab === "journal" && <TradeJournal />}
@@ -237,8 +242,47 @@ export default function IndexIntradayPage() {
         .iid .fl { font-size: 12.5px; font-weight: 700; color: var(--text); }
         .iid .fh { font-size: 11.5px; color: var(--text-muted); line-height: 1.45; }
 
+        .iid .grade { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px;
+                      padding: 0 6px; border-radius: 100px; font-size: 11.5px; font-weight: 800;
+                      font-variant-numeric: tabular-nums; background: var(--canvas-soft); color: var(--text-muted); }
+        .iid .grade.g5, .iid .grade.g4 { color: var(--gain); background: var(--gain-dim); }
+        .iid .grade.g3 { color: var(--purple); background: var(--purple-dim); }
+        .iid .grade.g2 { color: var(--warn); background: var(--warn-dim); }
+        .iid .grade.g1 { color: var(--loss); background: var(--loss-dim); }
+        .iid .gradebar { display: flex; flex-wrap: wrap; gap: 18px; }
+        .iid .gchip { display: flex; flex-direction: column; align-items: center; gap: 8px; background: none; border: none;
+                      cursor: pointer; padding: 0; }
+        .iid .gchip .gk { font-size: 11px; font-weight: 800; letter-spacing: 0.04em; padding: 6px 13px; border-radius: 100px;
+                          border: 1px solid transparent; background: var(--canvas-soft); color: var(--text-muted); }
+        .iid .gchip .gv { font-family: var(--font-data); font-size: 22px; font-weight: 700; color: var(--text);
+                          font-variant-numeric: tabular-nums; }
+        .iid .gchip.g5 .gk, .iid .gchip.g4 .gk { color: var(--gain); background: var(--gain-dim); }
+        .iid .gchip.g3 .gk { color: var(--purple); background: var(--purple-dim); }
+        .iid .gchip.g2 .gk { color: var(--warn); background: var(--warn-dim); }
+        .iid .gchip.g1 .gk { color: var(--loss); background: var(--loss-dim); }
+        .iid .gchip.on .gk { border-color: currentColor; }
+        .iid .subtabs { display: flex; flex-wrap: wrap; gap: 8px; }
+        .iid .stab { background: var(--panel); border: 1px solid var(--panel-border); color: var(--text-muted);
+                     border-radius: 100px; padding: 7px 15px; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+        .iid .stab:hover { color: var(--text); }
+        .iid .stab.on { color: var(--purple); background: var(--purple-dim); border-color: var(--purple); }
+        .iid .pillrow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px; }
+        .iid .pillrow .pk { width: 82px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+                            color: var(--text-faint); }
+        .iid .pill { background: var(--panel); border: 1px solid var(--panel-border); color: var(--text-muted);
+                     border-radius: 100px; padding: 4px 11px; font-size: 12px; font-weight: 600; cursor: pointer; }
+        .iid .pill:hover { color: var(--text); }
+        .iid .pill.on { color: var(--purple); background: var(--purple-dim); border-color: var(--purple); }
+        .iid .pickidx { display: flex; flex-direction: column; gap: 4px; font-size: 10px; font-weight: 700;
+                        letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); }
+        .iid .twocol { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+        .iid .hyp { max-width: 380px; font-size: 12px; color: var(--text-muted); }
+        .iid code { font-family: var(--font-data); font-size: 11.5px; background: var(--canvas-soft); padding: 1px 5px;
+                    border-radius: 5px; }
+
         @media (max-width: 640px) {
           .iid { padding: 18px 16px 40px; }
+          .iid .pillrow .pk { width: 100%; }
           .iid .drawer { padding: 18px 16px 32px; }
         }
       `}</style>

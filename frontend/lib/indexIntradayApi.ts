@@ -204,6 +204,9 @@ export interface IIDeployment {
   model: IIModel;
   status: IIStatus;
   added_at: string;
+  /** Strategy Factory deployments only */
+  name?: string;
+  grade?: number | null;
 }
 
 export interface IIRiskConfig {
@@ -270,6 +273,10 @@ export interface IIPosition {
   mark: number;
   research_status: IIStatus | null;
   opened_at: string;
+  /** Strategy Factory positions only: the strategy and the setup that fired */
+  name?: string;
+  grade?: number | null;
+  signal?: IISFSignal | null;
 }
 
 export interface IITrade {
@@ -301,6 +308,10 @@ export interface IITrade {
   sizing: string | null;
   research_status: IIStatus | null;
   closed_at: string;
+  /** Strategy Factory trades only */
+  name?: string;
+  grade?: number | null;
+  signal?: IISFSignal | null;
 }
 
 export interface IITerminal {
@@ -317,6 +328,8 @@ export interface IIEvent {
   at: string;
   kind: string;
   text: string;
+  sid?: string;
+  family?: string;
 }
 
 export interface IIEquityPoint {
@@ -376,6 +389,11 @@ export interface IIBacktest {
   drawdown_bp: [string, number][];
   trades: IIBacktestTrade[];
   note: string;
+  /** Strategy Factory runs only */
+  sid?: string;
+  name?: string;
+  rejections?: Record<string, number>;
+  volume_from?: string | null;
 }
 
 export interface IIBacktestRequest {
@@ -437,3 +455,150 @@ export const resetIIHalt = () => post<{ day: IIDayState }>("/risk/reset-halt", {
 /** A Lab run can take a while (it loads up to four years of minutes): give it two minutes. */
 export const runIIBacktest = (req: IIBacktestRequest) => post<IIBacktest>("/backtest", req, 120000);
 export const runIITick = () => post<{ opened: number; closed: number; notes: string[] }>("/run", {});
+
+// ── the Strategy Factory's strategies, traded intraday here (ids like SF0123-NIFTY) ──────────────
+
+export type IISFFamily = "chart" | "candlestick" | "structure" | "indicator" | "hybrid";
+export type IISFTimeframe = "1m" | "5m" | "15m" | "30m" | "45m" | "1h" | "4h" | "1d";
+
+export interface IISFSignal {
+  pattern: string;
+  detail: string;
+  confidence: number;
+  regime: string;
+  confirmations: string[];
+  stop_basis: string;
+  target_basis: string;
+  r_multiple: number;
+  bar: string;
+  timeframe: string;
+}
+
+export interface IISFStats {
+  trades?: number | null;
+  trades_per_day?: number | null;
+  win_rate?: number | null;
+  mean_net_bp?: number | null;
+  mean_gross_bp?: number | null;
+  t_trade?: number | null;
+  profit_factor?: number | null;
+  total_bp?: number | null;
+  ann_bp?: number | null;
+  sharpe?: number | null;
+  max_dd_bp?: number | null;
+  months_positive?: number | null;
+  years_positive?: number | null;
+  years?: number | null;
+}
+
+export interface IISFStrategy {
+  id: string;
+  index: string;
+  etf: string | null;
+  sf: string;
+  name: string;
+  recipe: string;
+  hypothesis_name: string;
+  family: IISFFamily;
+  family_label: string;
+  sub_family: string;
+  timeframe: IISFTimeframe;
+  htf: string | null;
+  detector: string;
+  hypothesis: string;
+  confirmations: string[];
+  regimes: string[];
+  target_r: number;
+  style: string;
+  volume_dependent: boolean;
+  max_trades_a_day: number;
+  max_hold_min: number;
+  lookback_bars: number;
+  status: IIStatus;
+  grade: number | null;
+  grade_reasons: string[];
+  failed: string | null;
+  all: IISFStats;
+  is: IISFStats;
+  oos: IISFStats;
+  dsr: number | null;
+  exits: Record<string, number>;
+  rejections: Record<string, number>;
+  monthly?: { start: string | null; bp: number[] };
+  deployed?: IIModel | null;
+}
+
+export interface IISFHeader {
+  generated: string | null;
+  round: string | null;
+  indexes: string[] | null;
+  strategies_per_index: number | null;
+  trials: number | null;
+  periods: { in_sample: string[]; out_of_sample: string[]; holdout: string } | null;
+  costs: Record<string, { fee_rt_bp: number; slip_bp_a_side: number; etf: string | null }> | null;
+  grade_counts: Record<string, number> | null;
+  hypotheses: number;
+  timeframes: IISFTimeframe[];
+  families: Record<IISFFamily, string>;
+  all_indexes: string[];
+  distribution: {
+    index: string;
+    grades: Record<string, number>;
+    ungraded: number;
+    families: Record<string, number>;
+    strategies: number;
+    covered: boolean;
+  };
+}
+
+export interface IISFHypothesis {
+  key: string;
+  name: string;
+  family: IISFFamily;
+  family_label: string;
+  sub_family: string;
+  hypothesis: string;
+  detector: string;
+  target_r: number;
+  regimes: string[];
+  confirmations: string[];
+  intraday_only: boolean;
+  uses_htf: boolean;
+  timeframes: { timeframe: IISFTimeframe; id: string; grade: number | null; trades: number | null; total_bp: number | null;
+                sharpe: number | null }[];
+  best: { timeframe: IISFTimeframe; id: string; grade: number | null; sharpe: number | null } | null;
+}
+
+export interface IISFActivity {
+  deployments: IIDeployment[];
+  open_positions: IIPosition[];
+  trades: IITrade[];
+  events: IIEvent[];
+}
+
+export const fetchIISFHeader = (index: string) => iiFetch<IISFHeader>(`/factory?index=${encodeURIComponent(index)}`);
+
+export function fetchIISFStrategies(q: {
+  index: string;
+  family?: string;
+  timeframe?: string;
+  grade?: string;
+  sort?: string;
+  q?: string;
+  limit?: number;
+  offset?: number;
+}) {
+  const sp = new URLSearchParams();
+  Object.entries(q).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== "") sp.set(k, String(v));
+  });
+  return iiFetch<{ strategies: IISFStrategy[]; matched: number }>(`/factory/strategies?${sp.toString()}`);
+}
+
+export const fetchIISFStrategy = (sid: string) =>
+  iiFetch<IISFStrategy>(`/factory/strategies/${encodeURIComponent(sid)}`);
+export const fetchIISFHypotheses = (index: string) =>
+  iiFetch<{ index: string; hypotheses: IISFHypothesis[] }>(`/factory/hypotheses?index=${encodeURIComponent(index)}`);
+export const fetchIISFActivity = (limit = 100) => iiFetch<IISFActivity>(`/factory/activity?limit=${limit}`);
+/** A Strategy Factory id: SF0001..SF0546 on an index, e.g. SF0123-NIFTY. */
+export const isSFId = (sid: string) => /^SF\d{4}-[A-Z0-9]+$/.test(sid.trim());

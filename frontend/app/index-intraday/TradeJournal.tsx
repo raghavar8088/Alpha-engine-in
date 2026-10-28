@@ -238,7 +238,7 @@ export default function TradeJournal() {
                   <td className="l">{t.day}</td>
                   <td className="l">
                     <div className="strong">{t.sid}</div>
-                    <div className="faint">{t.key}</div>
+                    <div className="faint">{t.family === "sf" ? t.name ?? t.key : t.key}</div>
                   </td>
                   <td className="l">
                     {t.instrument}

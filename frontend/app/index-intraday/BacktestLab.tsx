@@ -5,8 +5,11 @@ import GlassPanel from "../../components/GlassPanel";
 import LineChart from "../../components/charts/LineChart";
 import {
   fetchIIFamilies,
+  fetchIISFStrategy,
   fetchIIStrategy,
+  isSFId,
   runIIBacktest,
+  type IISFStrategy,
   type IIBacktest,
   type IIBacktestRequest,
   type IIFamily,
@@ -31,6 +34,9 @@ const WINDOWS: [string, string, string][] = [
   ["2020–21", "2020-01-01", "2021-12-31"],
 ];
 const HOLDOUT_FROM = "2024-01-01";
+// A Strategy Factory strategy evaluates every bar in Python: its runs are capped shorter on fast timeframes.
+const SF_SPAN_DAYS: Record<string, number> = { "1m": 92, "5m": 366 };
+const SF_WINDOW: Record<string, [string, string]> = { "1m": ["2023-10-01", "2023-12-31"], "5m": ["2023-01-01", "2023-12-31"] };
 const RS_PER_BP = 100; // 1 bp of a ₹10 lakh position
 
 function daysAgo(n: number): string {
@@ -42,6 +48,7 @@ export default function BacktestLab({ initialSid }: { initialSid: string | null 
   const [mode, setMode] = useState<"catalogue" | "custom">("catalogue");
   const [sid, setSid] = useState(initialSid ?? "ii1045");
   const [strategy, setStrategy] = useState<IIStrategy | null>(null);
+  const [sfStrategy, setSfStrategy] = useState<IISFStrategy | null>(null);
   const [families, setFamilies] = useState<IIFamily[]>([]);
   const [family, setFamily] = useState("volbreak");
   const [paramsText, setParamsText] = useState('{"k": 0.5}');
@@ -78,6 +85,23 @@ export default function BacktestLab({ initialSid }: { initialSid: string | null 
       .catch(() => setStrategy(null));
   }, [sid, mode]);
 
+  // a Strategy Factory id: show it, and start from a window its timeframe can run, on the catalogue's costs
+  useEffect(() => {
+    if (mode !== "catalogue" || !isSFId(sid)) {
+      setSfStrategy(null);
+      return;
+    }
+    fetchIISFStrategy(sid.trim())
+      .then((x) => {
+        setSfStrategy(x);
+        const [a, b] = SF_WINDOW[x.timeframe] ?? ["2022-01-01", "2023-12-31"];
+        setStart(a);
+        setEnd(b);
+        setBasis("measured");
+      })
+      .catch(() => setSfStrategy(null));
+  }, [sid, mode]);
+
   const pickFamily = (f: string) => {
     setFamily(f);
     const best = families.find((x) => x.family === f)?.best;
@@ -88,7 +112,8 @@ export default function BacktestLab({ initialSid }: { initialSid: string | null 
   };
 
   const holdout = end >= HOLDOUT_FROM;
-  const tooLong = (new Date(end).getTime() - new Date(start).getTime()) / 86400000 > 3 * 366;
+  const spanCap = sfStrategy ? (SF_SPAN_DAYS[sfStrategy.timeframe] ?? 3 * 366) : 3 * 366;
+  const tooLong = (new Date(end).getTime() - new Date(start).getTime()) / 86400000 > spanCap;
 
   const run = async () => {
     setErr(null);
@@ -134,7 +159,7 @@ export default function BacktestLab({ initialSid }: { initialSid: string | null 
           {mode === "catalogue" ? (
             <label>
               Strategy id
-              <input value={sid} onChange={(e) => setSid(e.target.value)} placeholder="ii1045" />
+              <input value={sid} onChange={(e) => setSid(e.target.value)} placeholder="ii1045 or SF0123-NIFTY" />
             </label>
           ) : (
             <>
@@ -229,7 +254,29 @@ export default function BacktestLab({ initialSid }: { initialSid: string | null 
             </span>
           </div>
         )}
-        {tooLong && <div className="warnbox">At most three years a run.</div>}
+        {mode === "catalogue" && sfStrategy && (
+          <div className="sel-sum">
+            <StatusTag status={sfStrategy.status} />
+            <span className="strong">{sfStrategy.name}</span>
+            <span className="muted">
+              {INDEX_LABEL[sfStrategy.index] ?? sfStrategy.index} · Strategy Factory · {sfStrategy.family_label}
+              {sfStrategy.grade ? ` · grade ${sfStrategy.grade}` : " · not graded on this index"}
+            </span>
+            {sfStrategy.all?.trades !== undefined && (
+              <span className="muted">
+                · catalogue: 2019–21 {bp(sfStrategy.is?.mean_net_bp)} ({num(sfStrategy.is?.trades, 0)} trades), 2022–23{" "}
+                {bp(sfStrategy.oos?.mean_net_bp)} ({num(sfStrategy.oos?.trades, 0)} trades) on measured costs
+              </span>
+            )}
+          </div>
+        )}
+        {tooLong && (
+          <div className="warnbox">
+            {sfStrategy && SF_SPAN_DAYS[sfStrategy.timeframe]
+              ? `A ${sfStrategy.timeframe} factory strategy runs at most ${SF_SPAN_DAYS[sfStrategy.timeframe]} days at a time — it evaluates every bar.`
+              : "At most three years a run."}
+          </div>
+        )}
         {holdout && (
           <div className="warnbox">
             This window reaches into 2024–26, the period the research kept untouched as its final test. A run here is
@@ -339,6 +386,16 @@ export default function BacktestLab({ initialSid }: { initialSid: string | null 
                 </tbody>
               </table>
             </div>
+            {res.rejections && Object.keys(res.rejections).length > 0 && (
+              <p className="foot">
+                Bars that did not trade:{" "}
+                {Object.entries(res.rejections)
+                  .sort((x, y) => y[1] - x[1])
+                  .map(([k, v]) => `${k} ${v.toLocaleString("en-IN")}`)
+                  .join(" · ")}
+                {res.volume_from ? ` · volume read from ${res.volume_from}` : ""}
+              </p>
+            )}
             <p className="foot">{res.note}</p>
           </GlassPanel>
         </>
