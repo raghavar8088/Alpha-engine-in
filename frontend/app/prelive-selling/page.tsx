@@ -6,6 +6,7 @@ import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import LineChart from "../../components/charts/LineChart";
 import SellingPaperBook from "../../components/SellingPaperBook";
+import FactoryDeskView from "../../components/FactoryDeskView";
 import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   refreshing,
@@ -55,16 +56,17 @@ export default function PreLiveSellingPage() {
   // "desk" is the 393-strategy tournament; "pt01" is Paper Trading 01, the picked roster on
   // one Rs 10 lakh account. The desk stops polling while the book is showing.
   // top2L / top10L (2026-10-27): the Top-10 books - the desk's ten best by Rank, on the same book engine.
-  const [tab, setTab] = useState<"desk" | "pt01" | "top2L" | "top10L">("desk");
+  // factory (2026-10-27): the Strategy Factory's 546 strategies as NIFTY credit spreads.
+  const [tab, setTab] = useState<"desk" | "pt01" | "top2L" | "top10L" | "factory">("desk");
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem("sellingDeskTab");
-      if (saved === "pt01" || saved === "top2L" || saved === "top10L") setTab(saved);
+      if (saved === "pt01" || saved === "top2L" || saved === "top10L" || saved === "factory") setTab(saved);
     } catch {
       /* storage blocked - start on the desk */
     }
   }, []);
-  const pickTab = (t: "desk" | "pt01" | "top2L" | "top10L") => {
+  const pickTab = (t: "desk" | "pt01" | "top2L" | "top10L" | "factory") => {
     setTab(t);
     try {
       window.localStorage.setItem("sellingDeskTab", t);
@@ -142,7 +144,8 @@ export default function PreLiveSellingPage() {
           ["pt01", "Paper Trading 01 · ₹10 lakh"],
           ["top2L", "Top 10 Paper Trade · ₹2 lakh"],
           ["top10L", "Top 10 Paper Trade · ₹10 lakh"],
-        ] as ["desk" | "pt01" | "top2L" | "top10L", string][]).map(([k, label]) => (
+          ["factory", "Strategy Factory · 546"],
+        ] as ["desk" | "pt01" | "top2L" | "top10L" | "factory", string][]).map(([k, label]) => (
           <button
             key={k}
             role="tab"
@@ -155,7 +158,9 @@ export default function PreLiveSellingPage() {
         ))}
       </div>
 
-      {tab === "top2L" || tab === "top10L" ? (
+      {tab === "factory" ? (
+        <FactoryDeskView desk="index-selling" />
+      ) : tab === "top2L" || tab === "top10L" ? (
         <>
           <div style={{ padding: "12px 16px", borderRadius: 10, background: "var(--canvas-soft)", border: "1px solid var(--panel-border)", fontSize: 12.5, lineHeight: 1.6, color: "var(--text-muted)" }}>
             <b style={{ color: "var(--text)" }}>Top 10 · {tab === "top2L" ? "₹2 lakh" : "₹10 lakh"} paper.</b>{" "}

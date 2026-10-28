@@ -492,6 +492,13 @@ async def start_option_research_desk() -> None:
         asyncio.create_task(sf_top10_loop())
     except Exception:  # noqa: BLE001
         logger.exception("could not start the Strategy Factory top-10 replay")
+    try:
+        # Strategy Factory tabs (2026-10-27): the Factory's 546 strategies on six modules' own
+        # instruments - NIFTY options bought / sold, stock options, momentum stocks, Delta gold.
+        from app.services.factory_desks import loop as factory_desks_loop
+        asyncio.create_task(factory_desks_loop())
+    except Exception:  # noqa: BLE001
+        logger.exception("could not start the Strategy Factory tabs")
 
 
 @app.on_event("startup")
@@ -1053,6 +1060,12 @@ try:
     app.include_router(_top10_books_routes.router)
 except Exception:  # noqa: BLE001
     logger.exception("could not mount the top-10 books API")
+# Strategy Factory tabs on six modules (2026-10-27); a failure here must not stop the app.
+try:
+    from app.api.routes import factory_desks as _factory_desks_routes
+    app.include_router(_factory_desks_routes.router)
+except Exception:  # noqa: BLE001
+    logger.exception("could not mount the Strategy Factory tabs API")
 # Reset buttons for the Intraday Stocks paper books, under each desk's own prefix
 app.include_router(book_resets.pattern_books_router)
 app.include_router(book_resets.live_intraday_router)

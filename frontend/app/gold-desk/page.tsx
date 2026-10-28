@@ -18,6 +18,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import PageHeader from "../../components/PageHeader";
 import GlassPanel from "../../components/GlassPanel";
+import FactoryDeskView from "../../components/FactoryDeskView";
 import StatusPill from "../../components/StatusPill";
 import ErrorBanner from "../../components/ErrorBanner";
 import DeskHistory from "../../components/DeskHistory";
@@ -87,6 +88,8 @@ const basisLabel = (b: string | null | undefined) =>
 export default function GoldDeskPage() {
   const [tab, setTab] = useState<GoldVenueKey>("delta");
   const [lab, setLab] = useState(false);                  // the Gold Lab tab (not a venue of the desk engine)
+  // The Strategy Factory tab (2026-10-27): its 546 strategies as records on Delta XAUTUSD, beside H1.
+  const [fac, setFac] = useState(false);
   const [labSum, setLabSum] = useState<GoldLabSummary | null>(null);
   const [venues, setVenues] = useState<GoldSummary[]>([]);
   const [strats, setStrats] = useState<GoldStrategy[]>([]);
@@ -222,9 +225,10 @@ export default function GoldDeskPage() {
         {ordered.map((v) => (
           <button
             key={v.venue}
-            className={!lab && tab === v.venue ? "ptab on" : "ptab"}
+            className={!lab && !fac && tab === v.venue ? "ptab on" : "ptab"}
             onClick={() => {
               setLab(false);
+              setFac(false);
               setTab(v.venue);
             }}
           >
@@ -241,7 +245,7 @@ export default function GoldDeskPage() {
           </button>
         ))}
         {!ordered.length && <div className="ptab muted">loading books…</div>}
-        <button className={lab ? "ptab on" : "ptab"} onClick={() => setLab(true)}>
+        <button className={lab && !fac ? "ptab on" : "ptab"} onClick={() => { setFac(false); setLab(true); }}>
           <span>Gold Lab · 7 tested strategies</span>
           <span className={`tv ${tone(labSum?.net_pnl)}`}>
             {!labSum
@@ -253,9 +257,15 @@ export default function GoldDeskPage() {
                   : "off"}
           </span>
         </button>
+        <button className={fac ? "ptab on" : "ptab"} onClick={() => { setLab(false); setFac(true); }}>
+          <span>Strategy Factory · 546</span>
+          <span className="tv">records beside H1 · Delta XAUTUSD</span>
+        </button>
       </div>
 
-      {lab ? (
+      {fac ? (
+        <FactoryDeskView desk="gold" />
+      ) : lab ? (
         <GlassPanel title="Gold Lab — seven tested strategies" note="Tier B: profitable in every test period, not proven better than holding gold">
           <GoldLabPanel />
         </GlassPanel>

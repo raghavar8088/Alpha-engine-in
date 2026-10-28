@@ -93,6 +93,8 @@ DESKS: dict[str, TradeSource] = {
     # Top-10 paper books on six desks (app.services.top10_books): one board per desk and book.
     "top10-books": TradeSource("top10_book_positions", {**CLOSED, "source": "top10"}, key="key",
                                params={"desk": "desk", "book": "book"}),
+    # Strategy Factory tabs on six modules (app.services.factory_desks): one board per tab.
+    "factory-desks": TradeSource("factory_desk_positions", CLOSED, params={"desk": "desk"}),
 }
 
 

@@ -7,6 +7,7 @@ import DeskHistory from "../../components/DeskHistory";
 import StatusPill from "../../components/StatusPill";
 import ErrorBanner from "../../components/ErrorBanner";
 import EmptyState from "../../components/EmptyState";
+import FactoryDeskView from "../../components/FactoryDeskView";
 import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   refreshing,
@@ -51,6 +52,8 @@ export default function MomentumPage() {
   const [verdictFilter, setVerdictFilter] = useState<VerdictFilter>("ALL");
   const [styleFilter, setStyleFilter] = useState<string>("ALL");
   const [expanded, setExpanded] = useState<string | null>(null);
+  // "factory" (2026-10-27): the Strategy Factory's 546 strategies on NSE equities, long only, ₹10,000 each.
+  const [mtab, setMtab] = useState<"desk" | "factory">("desk");
 
   const load = useCallback(async () => {
     try {
@@ -118,6 +121,29 @@ export default function MomentumPage() {
   const ready = board.filter((r) => r.verdict === "READY");
   const regime = summary?.regime;
   const gate = summary?.promotion_gate;
+
+  const tabBar = (
+    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }} role="tablist">
+      {([["desk", `Momentum desk · ${summary?.strategy_count ?? 37} strategies`], ["factory", "Strategy Factory · 546"]] as ["desk" | "factory", string][]).map(([k, label]) => (
+        <button key={k} role="tab" aria-selected={mtab === k} onClick={() => setMtab(k)}
+          style={{ background: mtab === k ? "var(--brand-dim)" : "var(--canvas-soft)", border: "1px solid var(--panel-border)",
+                   color: mtab === k ? "var(--brand)" : "var(--text-muted)", padding: "9px 16px", borderRadius: 9,
+                   fontSize: 12.5, fontWeight: 600, cursor: "pointer" }}>
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+  if (mtab === "factory") {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <PageHeader onRefresh={handleRefresh} refreshing={isRefreshing} crumb="Momentum" title="Momentum Trading"
+          subtitle="The Strategy Factory's 546 strategies on NSE equities, long only, each on its own ₹10,000 account with NSE charges and slippage. The momentum desk's own 37 strategies are on the other tab, untouched." />
+        {tabBar}
+        <FactoryDeskView desk="momentum" />
+      </div>
+    );
+  }
 
   return (
     <div className="page">

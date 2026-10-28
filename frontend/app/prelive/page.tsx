@@ -19,6 +19,7 @@ import GlassPanel from "../../components/GlassPanel";
 import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import Top10Book from "../../components/Top10Book";
+import FactoryDeskView from "../../components/FactoryDeskView";
 import LivePaperBuying from "../../components/LivePaperBuying";
 import BankNiftyDesk from "./BankNiftyDesk";
 import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
@@ -54,7 +55,8 @@ const signed = (v: number | null | undefined) =>
 const pct = (v: number | null | undefined, dp = 1) => (v === null || v === undefined ? "–" : `${(v * 100).toFixed(dp)}%`);
 const tone = (v: number | null | undefined) => (v === null || v === undefined ? "" : v >= 0 ? "gain" : "loss");
 // top2L / top10L: the Top-10 paper books (2026-10-27) on the NIFTY 50 tournament's ten best by Rank.
-type Tab = "tournament" | "research" | "livepaper" | "livepaper2L" | "top2L" | "top10L";
+// factory: the Strategy Factory's 546 strategies on NIFTY options (2026-10-27).
+type Tab = "tournament" | "research" | "livepaper" | "livepaper2L" | "top2L" | "top10L" | "factory";
 const STATUS_TONE: Record<string, string> = {
   CONFIRMED: "ok", INCUBATING: "wait", FAILED: "bad", REJECTED_ON_HISTORY: "bad",
 };
@@ -112,7 +114,7 @@ export default function PreLivePage() {
   };
 
   useEffect(() => {
-    if (index !== "NIFTY" || tab === "livepaper" || tab === "livepaper2L" || tab === "top2L" || tab === "top10L") return;
+    if (index !== "NIFTY" || tab === "livepaper" || tab === "livepaper2L" || tab === "top2L" || tab === "top10L" || tab === "factory") return;
     load();
     const id = setInterval(load, 30000);
     return () => clearInterval(id);
@@ -169,11 +171,14 @@ export default function PreLivePage() {
         <button className={tab === "livepaper2L" ? "dt active" : "dt"} onClick={() => setTab("livepaper2L")}>Live Paper Trade · ₹2 lakh</button>
         <button className={tab === "top2L" ? "dt active" : "dt"} onClick={() => setTab("top2L")}>Top 10 Paper Trade · ₹2 lakh</button>
         <button className={tab === "top10L" ? "dt active" : "dt"} onClick={() => setTab("top10L")}>Top 10 Paper Trade · ₹10 lakh</button>
+        <button className={tab === "factory" ? "dt active" : "dt"} onClick={() => setTab("factory")}>Strategy Factory · 546</button>
       </div>
 
       {error && <ErrorBanner message={error} />}
 
-      {tab === "top2L" || tab === "top10L" ? (
+      {tab === "factory" ? (
+        <FactoryDeskView desk="index-buying" />
+      ) : tab === "top2L" || tab === "top10L" ? (
         <Top10Book key={tab} desk="prelive" book={tab} />
       ) : tab === "livepaper" || tab === "livepaper2L" ? (
         <LivePaperBuying key={tab} book={tab === "livepaper2L" ? "2L" : "50k"} />
