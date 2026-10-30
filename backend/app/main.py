@@ -499,6 +499,13 @@ async def start_option_research_desk() -> None:
         asyncio.create_task(factory_desks_loop())
     except Exception:  # noqa: BLE001
         logger.exception("could not start the Strategy Factory tabs")
+    try:
+        # Commodity Auto Positions (2026-10-30): 220 paper accounts selling an MCX option call + put
+        # pair on the four minis every evening at 22:00 IST.
+        from app.services.commodity_auto import loop as commodity_auto_loop
+        asyncio.create_task(commodity_auto_loop())
+    except Exception:  # noqa: BLE001
+        logger.exception("could not start Commodity Auto Positions")
 
 
 @app.on_event("startup")
@@ -1066,6 +1073,12 @@ try:
     app.include_router(_factory_desks_routes.router)
 except Exception:  # noqa: BLE001
     logger.exception("could not mount the Strategy Factory tabs API")
+# Commodity Auto Positions (2026-10-30); a failure here must not stop the app.
+try:
+    from app.api.routes import commodity_auto as _commodity_auto_routes
+    app.include_router(_commodity_auto_routes.router)
+except Exception:  # noqa: BLE001
+    logger.exception("could not mount the Commodity Auto Positions API")
 # Reset buttons for the Intraday Stocks paper books, under each desk's own prefix
 app.include_router(book_resets.pattern_books_router)
 app.include_router(book_resets.live_intraday_router)

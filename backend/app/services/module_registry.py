@@ -111,6 +111,10 @@ _MODULES: list[Module] = [
             "the page's actions — including its emergency stop — are refused like any module's."),
     _m("commodity_positions", "Commodity Positions", "Trading", "/commodity-positions",
        ["/api/commodity-positions"]),
+    _m("commodity_auto", "Commodity Auto Positions", "Trading", "/commodity-auto-positions",
+       ["/api/commodity-auto"],
+       note="220 paper accounts selling MCX mini option pairs at 22:00 IST. OFF stops new "
+            "entries; open pairs are still managed to their stop and their exit."),
     _m("portfolio", "Portfolio", "Trading", "/portfolio", ["/api/portfolio"]),
     _m("broker_account", "Orders / Positions (broker account)", "Trading", "/orders",
        ["/api/broker"], shared=True,

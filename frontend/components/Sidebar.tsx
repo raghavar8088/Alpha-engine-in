@@ -80,6 +80,19 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // Directly below Commodity Positions, as asked: the same MCX option chains, traded by rule
+        // rather than by hand - 220 accounts selling a call + put pair every evening. A clock face,
+        // because the trades run on a schedule.
+        href: "/commodity-auto-positions",
+        label: "Commodity Auto Positions",
+        icon: (
+          <>
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 7v5l3 2" />
+          </>
+        ),
+      },
+      {
         href: "/fno-positions",
         label: "F&O Positions",
         icon: (
