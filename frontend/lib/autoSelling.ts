@@ -1,10 +1,12 @@
-// Commodity Auto Positions (2026-10-30): 220 paper accounts selling an MCX option strangle every
-// evening on the four minis. Backend: app/services/commodity_auto.py, /api/commodity-auto.
+// The auto option-selling desks: Commodity Auto Positions (MCX minis, /api/commodity-auto) and Indian
+// Market Option Auto Selling (index options, /api/index-auto). Both run 11 strike distances x 5 account
+// sizes per instrument and answer with the same shapes. Backends: app/services/commodity_auto.py and
+// app/services/index_auto.py.
 import { apiFetch } from "./api";
 
-export type CautoCommodity = "NATGASMINI" | "CRUDEOILM" | "GOLDM" | "SILVERM";
+export type AutoDeskApi = "/api/commodity-auto" | "/api/index-auto";
 
-export interface CautoTotals {
+export interface AutoTotals {
   starting: number;
   equity: number;
   realized: number;
@@ -14,14 +16,17 @@ export interface CautoTotals {
   wins: number;
 }
 
-export interface CautoSummary {
-  commodities: CautoCommodity[];
+export interface AutoSummary {
+  instruments: string[];
+  instrument_info: Record<string, { label: string; sub: string }>;
   strategies: { offset: number; label: string }[];
   sizes: number[];
   accounts: number;
   stop_pct: number;
-  per_commodity: Record<CautoCommodity, CautoTotals>;
-  mcx_open: boolean;
+  per_instrument: Record<string, AutoTotals>;
+  market_open: boolean;
+  market_label: string;
+  entry_label: string;
   switch_on: boolean;
   next_entry_at: string | null;
   last_run: {
@@ -31,14 +36,13 @@ export interface CautoSummary {
     counts: Record<string, number>;
     closed_before: Record<string, number>;
   } | null;
-  store: string;
 }
 
-export interface CautoLeg {
+export interface AutoLeg {
   strike: number;
   type: "CE" | "PE";
   token: string;
-  symbol: string;
+  symbol: string | null;
   entry: number;
   entry_bid: number | null;
   entry_ask: number | null;
@@ -46,21 +50,19 @@ export interface CautoLeg {
   touch_qty: number | null;
 }
 
-export interface CautoPosition {
+export interface AutoPosition {
   id: string;
   account_id: string;
-  commodity: CautoCommodity;
+  instrument: string;
   offset: number;
   strategy: string;
   size: number;
   entry_day: string;
   expiry: string;
-  future_at_entry: number;
   atm_strike: number;
-  call: CautoLeg;
-  put: CautoLeg;
+  call: AutoLeg;
+  put: AutoLeg;
   lots: number;
-  multiplier: number;
   qty: number;
   credit: number;
   margin_per_pair: number;
@@ -81,12 +83,11 @@ export interface CautoPosition {
   gross_pnl: number | null;
   fees: number | null;
   realized_pnl: number | null;
-  updated_at: string | null;
 }
 
-export interface CautoAccount {
+export interface AutoAccount {
   account_id: string;
-  commodity: CautoCommodity;
+  instrument: string;
   offset: number;
   strategy: string;
   size: number;
@@ -98,25 +99,26 @@ export interface CautoAccount {
   trades: number;
   wins: number;
   fees: number;
-  open: CautoPosition | null;
-  last_closed: CautoPosition | null;
+  open: AutoPosition | null;
+  last_closed: AutoPosition | null;
   last_entry: { day: string; outcome: string | null } | null;
 }
 
-const base = "/api/commodity-auto";
+// The two backends name their instrument parameter after what it is.
+const param = (api: AutoDeskApi) => (api === "/api/index-auto" ? "index" : "commodity");
 
-export async function fetchCautoSummary(): Promise<CautoSummary> {
-  return apiFetch(`${base}/summary`);
+export async function fetchAutoSummary(api: AutoDeskApi): Promise<AutoSummary> {
+  return apiFetch(`${api}/summary`);
 }
 
-export async function fetchCautoAccounts(commodity: CautoCommodity): Promise<CautoAccount[]> {
-  const r = await apiFetch(`${base}/accounts?commodity=${commodity}`);
+export async function fetchAutoAccounts(api: AutoDeskApi, instrument: string): Promise<AutoAccount[]> {
+  const r = await apiFetch(`${api}/accounts?${param(api)}=${encodeURIComponent(instrument)}`);
   return r.accounts ?? [];
 }
 
-export async function fetchCautoTrades(commodity: CautoCommodity, size?: number | null, limit = 300): Promise<CautoPosition[]> {
-  const q = new URLSearchParams({ commodity, limit: String(limit) });
+export async function fetchAutoTrades(api: AutoDeskApi, instrument: string, size?: number | null, limit = 300): Promise<AutoPosition[]> {
+  const q = new URLSearchParams({ [param(api)]: instrument, limit: String(limit) });
   if (size) q.set("size", String(size));
-  const r = await apiFetch(`${base}/trades?${q.toString()}`);
+  const r = await apiFetch(`${api}/trades?${q.toString()}`);
   return r.trades ?? [];
 }

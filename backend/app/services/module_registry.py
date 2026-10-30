@@ -115,6 +115,10 @@ _MODULES: list[Module] = [
        ["/api/commodity-auto"],
        note="220 paper accounts selling MCX mini option pairs at 22:00 IST. OFF stops new "
             "entries; open pairs are still managed to their stop and their exit."),
+    _m("index_auto", "Indian Market Option Auto Selling", "Trading", "/index-option-auto-selling",
+       ["/api/index-auto"],
+       note="220 paper accounts selling NIFTY / BANK NIFTY / SENSEX / BANKEX option pairs at 15:15 IST. "
+            "OFF stops new entries; open pairs are still managed to their stop and their exit."),
     _m("portfolio", "Portfolio", "Trading", "/portfolio", ["/api/portfolio"]),
     _m("broker_account", "Orders / Positions (broker account)", "Trading", "/orders",
        ["/api/broker"], shared=True,

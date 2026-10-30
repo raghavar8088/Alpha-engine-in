@@ -255,7 +255,7 @@ def _new_position(commodity: str, k: int, size: int, plan: dict, pair: dict, equ
     fc, fp = _order_fees(call["entry"], qty, True, day), _order_fees(put["entry"], qty, True, day)
     entry_fees = round(fc["total"] + fp["total"], 2)
     return {
-        "account_id": account_id(commodity, k, size), "commodity": commodity, "offset": k,
+        "account_id": account_id(commodity, k, size), "commodity": commodity, "instrument": commodity, "offset": k,
         "strategy": strategy_label(k), "size": size, "entry_day": day.isoformat(),
         "expiry": plan["expiry"], "future_at_entry": plan["future"], "future_symbol": plan["future_symbol"],
         "atm_strike": plan["atm"], "call": call, "put": put,
@@ -487,7 +487,7 @@ async def ensure_indexes() -> None:
 def _pos_view(p: dict | None) -> dict | None:
     if not p:
         return None
-    keep = ("commodity", "offset", "strategy", "size", "entry_day", "expiry", "future_at_entry", "atm_strike",
+    keep = ("commodity", "instrument", "offset", "strategy", "size", "entry_day", "expiry", "future_at_entry", "atm_strike",
             "call", "put", "lots", "multiplier", "qty", "credit", "margin_per_pair", "margin_source",
             "margin_blocked", "allocated", "stop_loss", "entry_fees", "status", "unrealized_pnl", "mark",
             "exit_reason", "exit_basis", "exit", "gross_pnl", "fees", "realized_pnl", "account_id")
@@ -495,7 +495,12 @@ def _pos_view(p: dict | None) -> dict | None:
     for k in ("entry_at", "scheduled_exit_at", "exit_at", "updated_at"):
         out[k] = _iso(p.get(k))
     out["id"] = str(p.get("_id"))
+    out["instrument"] = p.get("commodity")
     return out
+
+
+LOT_LABEL = {"NATGASMINI": "250 mmBtu a lot", "CRUDEOILM": "10 barrels a lot", "GOLDM": "100 grams a lot",
+             "SILVERM": "5 kg a lot"}
 
 
 async def summary() -> dict:
@@ -525,6 +530,10 @@ async def summary() -> dict:
         "commodities": list(MINIS), "strategies": [{"offset": k, "label": strategy_label(k)} for k in OFFSETS],
         "sizes": list(SIZES), "accounts": len(MINIS) * len(OFFSETS) * len(SIZES), "stop_pct": STOP_PCT,
         "per_commodity": per, "mcx_open": mc.is_open(now), "switch_on": await is_on(SWITCH),
+        # the same, under the names the shared auto-selling view reads (Indian Market Option Auto Selling too)
+        "instruments": list(MINIS), "per_instrument": per, "market_open": mc.is_open(now), "market_label": "MCX",
+        "instrument_info": {u: {"label": u, "sub": LOT_LABEL.get(u, "")} for u in MINIS},
+        "entry_label": "22:00 IST → 22:00 IST next MCX trading day",
         "next_entry_at": _iso(nxt),
         "last_run": ({"day": last["_id"], "started_at": _iso(last.get("started_at")),
                       "finished_at": _iso(last.get("finished_at")), "counts": last.get("counts") or {},
@@ -549,7 +558,8 @@ async def accounts(commodity: str) -> list[dict]:
             o = b.get("open")
             eq = _equity(s, b)
             rows.append({
-                "account_id": aid, "commodity": commodity, "offset": k, "strategy": strategy_label(k), "size": s,
+                "account_id": aid, "commodity": commodity, "instrument": commodity, "offset": k,
+                "strategy": strategy_label(k), "size": s,
                 "starting_capital": s, "equity": round(eq, 2),
                 "available": round(eq - ((o or {}).get("margin_blocked") or 0.0), 2),
                 "margin_used": round((o or {}).get("margin_blocked") or 0.0, 2),

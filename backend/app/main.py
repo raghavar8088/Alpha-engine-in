@@ -506,6 +506,13 @@ async def start_option_research_desk() -> None:
         asyncio.create_task(commodity_auto_loop())
     except Exception:  # noqa: BLE001
         logger.exception("could not start Commodity Auto Positions")
+    try:
+        # Indian Market Option Auto Selling (2026-10-30): the same 220-account rule set on index options
+        # (NIFTY 50, BANK NIFTY, SENSEX, BANKEX), 15:15 IST to 15:15 the next trading day.
+        from app.services.index_auto import loop as index_auto_loop
+        asyncio.create_task(index_auto_loop())
+    except Exception:  # noqa: BLE001
+        logger.exception("could not start Indian Market Option Auto Selling")
 
 
 @app.on_event("startup")
@@ -1079,6 +1086,12 @@ try:
     app.include_router(_commodity_auto_routes.router)
 except Exception:  # noqa: BLE001
     logger.exception("could not mount the Commodity Auto Positions API")
+# Indian Market Option Auto Selling (2026-10-30); a failure here must not stop the app.
+try:
+    from app.api.routes import index_auto as _index_auto_routes
+    app.include_router(_index_auto_routes.router)
+except Exception:  # noqa: BLE001
+    logger.exception("could not mount the Indian Market Option Auto Selling API")
 # Reset buttons for the Intraday Stocks paper books, under each desk's own prefix
 app.include_router(book_resets.pattern_books_router)
 app.include_router(book_resets.live_intraday_router)

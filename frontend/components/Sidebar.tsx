@@ -93,6 +93,19 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // Directly below Commodity Auto Positions, as asked: the same rule set on Indian index options.
+        // A clock inside a repeat arrow - the same daily cycle, on another market.
+        href: "/index-option-auto-selling",
+        label: "Indian Market Option Auto Selling",
+        icon: (
+          <>
+            <path d="M21 12a9 9 0 11-3-6.7" />
+            <path d="M21 4v5h-5" />
+            <path d="M12 8v4l3 2" />
+          </>
+        ),
+      },
+      {
         href: "/fno-positions",
         label: "F&O Positions",
         icon: (
