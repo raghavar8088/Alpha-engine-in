@@ -579,7 +579,7 @@ export default function IntradayStocksPage() {
       />
 
       <div className="tabs">
-        <Link href="/intraday-stocks/focus-five" className="tab" style={{ textDecoration: "none", borderColor: "var(--brand-border)", color: "var(--brand)" }}>
+        <Link href="/intraday-stocks/focus-five" className="tab">
           Five-Strategy Desk · ₹10 lakh each
         </Link>
         <button className={tab === "tournament" ? "tab active" : "tab"} onClick={() => setTab("tournament")}>
@@ -1478,7 +1478,8 @@ export default function IntradayStocksPage() {
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 16px; }
         .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
-        .tab { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+        .tab, .tabs :global(a.tab) { display: inline-flex; align-items: center; justify-content: center; background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; text-decoration: none; }
+        .tab:focus-visible, .tabs :global(a.tab:focus-visible) { outline: 2px solid var(--brand); outline-offset: 3px; }
         .tab.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
         .badge.anti { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); margin-right: 4px; }
         .desk-banner {
