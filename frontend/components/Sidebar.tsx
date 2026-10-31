@@ -116,6 +116,20 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // Directly under F&O Positions, as asked: the owner's crypto app (ICC, the Institutional Command
+        // Center) with every module it has. It runs on its own login and engines and cannot be framed,
+        // so its page here opens each module in that app. A coin with a B: the crypto side of the house.
+        href: "/crypto-application",
+        label: "Crypto Application",
+        icon: (
+          <>
+            <circle cx="12" cy="12" r="9" />
+            <path d="M9.5 8h3.5a2 2 0 010 4H9.5h4a2 2 0 010 4H9.5V8z" />
+            <path d="M11 6.5V8M11 16v1.5" />
+          </>
+        ),
+      },
+      {
         // Directly under F&O Positions, as asked: the owner's REAL Angel One account, MCX side,
         // read-only - every trade, Angel's own P&L, and ROI on the capital in use each day. A
         // receipt mark, not a chart: it is a ledger of what actually happened.
