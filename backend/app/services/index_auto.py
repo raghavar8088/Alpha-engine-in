@@ -83,6 +83,13 @@ TICK_S = 30
 QUOTE_STALE_MIN = 10                             # no trade for longer than this: not a price to sell at
 BSE_EXCHANGE_RATE = 0.000325                     # BSE index-option transaction charge on premium (NSE 0.03503%)
 SWITCH = "index_auto"                            # Main Control: OFF stops entries, never exits
+# One-time INITIAL entry (owner, 1 Nov 2026): the first positions go in at Monday's open instead of
+# waiting for the first 15:15 cycle - same plan, quotes, sizing, fees and stop. It is that day's
+# trade: it exits when that day's 15:15 trade would, so the day's own run finds it still open and
+# skips it (one trade per account per day stays true), and the daily rhythm runs from there.
+# "" turns it off; a date that has passed does nothing.
+INITIAL_AT = os.getenv("INDEX_AUTO_INITIAL_AT", "2026-11-02T09:30")       # IST
+INITIAL_WINDOW_MIN = 30
 
 _URL = os.getenv("FACTORY_MONGO_URL", "").strip()
 _DB = os.getenv("INDEX_AUTO_MONGO_DB", "alpha_engine_index_auto")
@@ -171,6 +178,14 @@ def _next_trading_day_at(after: datetime, at: time, same_day_ok: bool) -> dateti
 def scheduled_exit(entry: datetime) -> datetime | None:
     """EXIT_AT on the same day when it is later than the entry, else on the next trading day."""
     return _next_trading_day_at(entry, EXIT_AT, same_day_ok=EXIT_AT > _ist(entry).time())
+
+
+def initial_exit(t: datetime) -> datetime | None:
+    """An initial trade leaves with its day's 15:15 trade: at that trade's own scheduled exit."""
+    t = _ist(t)
+    if _trading_day(t.date()) and t.time() < ENTRY_AT:
+        return scheduled_exit(datetime.combine(t.date(), ENTRY_AT, tzinfo=IST))
+    return scheduled_exit(t)
 
 
 def next_entry(after: datetime) -> datetime | None:
@@ -429,7 +444,8 @@ def _leg_doc(c: dict, q: dict) -> dict:
             "entry_ask": q["ask"], "entry_ltp": q["ltp"], "touch_qty": q.get("bid_qty")}
 
 
-def _new_position(index: str, k: int, size: int, plan: dict, pair: dict, equity: float, now: datetime) -> dict | str:
+def _new_position(index: str, k: int, size: int, plan: dict, pair: dict, equity: float, now: datetime,
+                  exit_at: datetime | None = None) -> dict | str:
     m1 = float(pair["margin"])
     lots = int(equity // m1)
     if lots < 1:
@@ -449,14 +465,15 @@ def _new_position(index: str, k: int, size: int, plan: dict, pair: dict, equity:
         "margin_per_pair": round(m1, 2), "margin_source": pair["margin_source"],
         "margin_blocked": round(m1 * lots, 2), "allocated": round(equity, 2), "stop_loss": round(STOP_PCT * equity, 2),
         "entry_fees": entry_fees, "entry_fee_parts": {"call": fc, "put": fp},
-        "entry_at": now, "scheduled_exit_at": scheduled_exit(now),
+        "entry_at": now, "scheduled_exit_at": exit_at or scheduled_exit(now),
+        "entry_kind": "initial" if exit_at else "cycle",
         "status": "OPEN", "unrealized_pnl": -entry_fees, "mark": None, "updated_at": now,
         "exit_at": None, "exit_reason": None, "exit_basis": None, "exit": None,
         "gross_pnl": None, "fees": None, "realized_pnl": None,
     }
 
 
-async def _enter(now: datetime, book: dict[str, dict]) -> dict:
+async def _enter(now: datetime, book: dict[str, dict], exit_at: datetime | None = None) -> dict:
     day = _ist(now).date()
     outcome: dict[str, str] = {}
     rows: list[dict] = []
@@ -477,7 +494,7 @@ async def _enter(now: datetime, book: dict[str, dict]) -> dict:
                 if why:
                     outcome[aid] = f"skipped: {why}"
                     continue
-                doc = _new_position(ix, k, s, plan, pair, _equity(s, book.get(aid)), now)
+                doc = _new_position(ix, k, s, plan, pair, _equity(s, book.get(aid)), now, exit_at)
                 if isinstance(doc, str):
                     outcome[aid] = f"skipped: {doc}"
                     continue
@@ -615,6 +632,35 @@ async def _contracts_fresh(now: datetime) -> None:
         await STATE.update_one({"_id": "bse_contracts"}, {"$set": {"failed_at": _now()}}, upsert=True)
 
 
+async def _entry_run(run_id: str, now: datetime, out: dict, exit_at: datetime | None = None) -> dict | None:
+    """One entry pass for every account, recorded under `run_id`; None when it already ran."""
+    if await RUNS.find_one({"_id": run_id, "finished_at": {"$ne": None}}, {"_id": 1}):
+        return None
+    from app.services.desk_switches import is_on
+    await RUNS.update_one({"_id": run_id}, {"$set": {"started_at": now}}, upsert=True)
+    if not await is_on(SWITCH):
+        outcome = {account_id(x, k, s): "skipped: Main Control has Indian Market Option Auto Selling OFF"
+                   for x in INDICES for k in OFFSETS for s in SIZES}
+    else:
+        outcome = await _enter(now, await _book(), exit_at)
+    counts: dict[str, int] = {}
+    for v in outcome.values():
+        key = "opened" if v.startswith("opened") else v.split(" (")[0]
+        counts[key] = counts.get(key, 0) + 1
+    await RUNS.update_one({"_id": run_id}, {"$set": {
+        "finished_at": _now(), "outcome": outcome, "counts": counts, "closed_before": out["manage"]["closed"],
+        "kind": "initial" if exit_at else "cycle"}})
+    await _snapshot(_ist(now).date().isoformat(), await _book())
+    return counts
+
+
+def initial_at() -> datetime | None:
+    try:
+        return datetime.fromisoformat(INITIAL_AT).replace(tzinfo=IST) if INITIAL_AT else None
+    except ValueError:
+        return None
+
+
 async def tick(now: datetime | None = None) -> dict:
     """One pass: in session, manage every open trade; in the entry window on a trading day, enter."""
     global _indexed
@@ -628,27 +674,13 @@ async def tick(now: datetime | None = None) -> dict:
         return {"market": "closed"}
     async with _lock:
         out = {"manage": await _manage(now)}
+        ini = initial_at()
+        if ini is not None and ini <= ist < ini + timedelta(minutes=INITIAL_WINDOW_MIN):
+            out["initial"] = await _entry_run(f"{ini.date().isoformat()} initial", now, out, initial_exit(now))
         start = datetime.combine(ist.date(), ENTRY_AT, tzinfo=IST)
         if not (start <= ist < start + timedelta(minutes=ENTRY_WINDOW_MIN)):
             return out
-        day = ist.date().isoformat()
-        if await RUNS.find_one({"_id": day, "finished_at": {"$ne": None}}, {"_id": 1}):
-            return out
-        from app.services.desk_switches import is_on
-        await RUNS.update_one({"_id": day}, {"$set": {"started_at": now}}, upsert=True)
-        if not await is_on(SWITCH):
-            outcome = {account_id(ix, k, s): "skipped: Main Control has Indian Market Option Auto Selling OFF"
-                       for ix in INDICES for k in OFFSETS for s in SIZES}
-        else:
-            outcome = await _enter(now, await _book())
-        counts: dict[str, int] = {}
-        for v in outcome.values():
-            key = "opened" if v.startswith("opened") else v.split(" (")[0]
-            counts[key] = counts.get(key, 0) + 1
-        await RUNS.update_one({"_id": day}, {"$set": {
-            "finished_at": _now(), "outcome": outcome, "counts": counts, "closed_before": out["manage"]["closed"]}})
-        await _snapshot(day, await _book())
-        out["entry"] = counts
+        out["entry"] = await _entry_run(ist.date().isoformat(), now, out)
         return out
 
 
@@ -659,7 +691,7 @@ async def loop() -> None:
     while True:
         try:
             r = await tick()
-            if r.get("entry") or (r.get("manage") or {}).get("closed"):
+            if r.get("entry") or r.get("initial") or (r.get("manage") or {}).get("closed"):
                 logger.warning("[index_auto] %s", r)        # WARNING: the app shows no INFO lines
         except Exception:  # noqa: BLE001
             logger.warning("[index_auto] tick failed", exc_info=True)
