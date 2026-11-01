@@ -513,6 +513,13 @@ async def start_option_research_desk() -> None:
         asyncio.create_task(index_auto_loop())
     except Exception:  # noqa: BLE001
         logger.exception("could not start Indian Market Option Auto Selling")
+    try:
+        # Crypto Trading (2026-11-01): the top ten cryptocurrencies paper traded on Delta's perpetuals by
+        # the Strategy Factory's and the Strategies module's strategies - every eligible pair, live.
+        from app.services.crypto_trading.engine import loop as crypto_trading_loop
+        asyncio.create_task(crypto_trading_loop())
+    except Exception:  # noqa: BLE001
+        logger.exception("could not start Crypto Trading")
 
 
 @app.on_event("startup")
@@ -1092,6 +1099,12 @@ try:
     app.include_router(_index_auto_routes.router)
 except Exception:  # noqa: BLE001
     logger.exception("could not mount the Indian Market Option Auto Selling API")
+# Crypto Trading (2026-11-01); a failure here must not stop the app.
+try:
+    from app.api.routes import crypto_trading as _crypto_trading_routes
+    app.include_router(_crypto_trading_routes.router)
+except Exception:  # noqa: BLE001
+    logger.exception("could not mount the Crypto Trading API")
 # Reset buttons for the Intraday Stocks paper books, under each desk's own prefix
 app.include_router(book_resets.pattern_books_router)
 app.include_router(book_resets.live_intraday_router)

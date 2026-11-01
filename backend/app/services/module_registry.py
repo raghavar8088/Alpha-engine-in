@@ -119,6 +119,10 @@ _MODULES: list[Module] = [
        ["/api/index-auto"],
        note="220 paper accounts selling NIFTY / BANK NIFTY / SENSEX / BANKEX option pairs at 15:15 IST. "
             "OFF stops new entries; open pairs are still managed to their stop and their exit."),
+    _m("crypto_trading", "Crypto Trading", "Trading", "/crypto-trading", ["/api/crypto-trading"],
+       note="The top ten cryptocurrencies paper traded on Delta's perpetuals, one $10,000 account per strategy and "
+            "coin; only pairs graded 3+ on their crypto backtest trade. OFF stops new entries; open positions are "
+            "still managed to their stop, target or exit."),
     _m("portfolio", "Portfolio", "Trading", "/portfolio", ["/api/portfolio"]),
     _m("broker_account", "Orders / Positions (broker account)", "Trading", "/orders",
        ["/api/broker"], shared=True,

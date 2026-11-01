@@ -130,6 +130,21 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // Directly below Crypto Application, as asked: the top ten cryptocurrencies paper traded by the
+        // Strategy Factory's and the Strategies module's strategies, one $10,000 account per strategy and
+        // coin. A coin beside a rising line: crypto, traded.
+        href: "/crypto-trading",
+        label: "Crypto Trading",
+        icon: (
+          <>
+            <circle cx="8" cy="15" r="5" />
+            <path d="M6.5 13h2a1 1 0 010 2h-2h2.4a1 1 0 010 2H6.5v-4z" />
+            <path d="M13 11l3-3 2 2 4-5" />
+            <path d="M18 5h4v4" />
+          </>
+        ),
+      },
+      {
         // Directly under F&O Positions, as asked: the owner's REAL Angel One account, MCX side,
         // read-only - every trade, Angel's own P&L, and ROI on the capital in use each day. A
         // receipt mark, not a chart: it is a ledger of what actually happened.
