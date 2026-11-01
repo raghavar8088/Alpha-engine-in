@@ -555,6 +555,9 @@ async def summary() -> dict:
     nxt = cycle_time(now.date())
     if nxt is None or now >= nxt + timedelta(minutes=ENTRY_WINDOW_MIN):
         nxt = next_cycle_after(now)
+    ini = initial_at()
+    if ini is not None and now < ini + timedelta(minutes=INITIAL_WINDOW_MIN) and (nxt is None or ini < nxt):
+        nxt = ini                                    # the one-time initial entry comes first
     return {
         "commodities": list(MINIS), "strategies": [{"offset": k, "label": strategy_label(k)} for k in OFFSETS],
         "sizes": list(SIZES), "accounts": len(MINIS) * len(OFFSETS) * len(SIZES), "stop_pct": STOP_PCT,

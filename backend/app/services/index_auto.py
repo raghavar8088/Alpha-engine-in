@@ -188,6 +188,14 @@ def initial_exit(t: datetime) -> datetime | None:
     return scheduled_exit(t)
 
 
+def _next_with_initial(nxt: datetime | None) -> datetime | None:
+    """The one-time initial entry, while it is still ahead and comes before the next regular one."""
+    ini, now = initial_at(), _ist()
+    if ini is not None and now < ini + timedelta(minutes=INITIAL_WINDOW_MIN) and (nxt is None or ini < nxt):
+        return ini
+    return nxt
+
+
 def next_entry(after: datetime) -> datetime | None:
     t = _ist(after)
     today = datetime.combine(t.date(), ENTRY_AT, tzinfo=IST)
@@ -768,7 +776,7 @@ async def summary() -> dict:
         "sizes": list(SIZES), "accounts": len(INDICES) * len(OFFSETS) * len(SIZES), "stop_pct": STOP_PCT,
         "per_instrument": per, "market_open": in_session(), "market_label": "NSE / BSE",
         "entry_label": f"{ENTRY_AT:%H:%M} IST → {EXIT_AT:%H:%M} IST{' next trading day' if EXIT_AT <= ENTRY_AT else ''}",
-        "switch_on": await is_on(SWITCH), "next_entry_at": _iso(next_entry(_now())),
+        "switch_on": await is_on(SWITCH), "next_entry_at": _iso(_next_with_initial(next_entry(_now()))),
         "last_run": ({"day": last["_id"], "started_at": _iso(last.get("started_at")),
                       "finished_at": _iso(last.get("finished_at")), "counts": last.get("counts") or {},
                       "closed_before": last.get("closed_before") or {}} if last else None),
