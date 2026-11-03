@@ -17,7 +17,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.api.deps import get_current_user
 from app.services import (global_cues, in_play, intraday_backfill, intraday_data_scheduler,
-                          intraday_universe, market_calendar, nse_archives, preopen,
+                          intraday_universe, market_calendar, nse_archives, nse_events, preopen,
                           results_calendar)
 from app.services.angel_stream import stream
 from app.services.intraday_store import AGG_MINUTES, store, store5
@@ -42,6 +42,7 @@ async def status():
         "last_reconcile": await intraday_backfill.last_reconcile(),
         "store_5m": {**store5.coverage(syms), **store5.mem_stats()},
         "nse_archives": nse_archives.describe(),
+        "nse_events": nse_events.describe(),
         "preopen": preopen.status,
         "results_calendar": results_calendar.status,
         "scheduler": intraday_data_scheduler.describe(),

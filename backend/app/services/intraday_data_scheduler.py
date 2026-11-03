@@ -75,9 +75,15 @@ async def _history_jobs() -> None:
 
 
 async def _archive_job() -> None:
-    from app.services import nse_archives
+    from app.services import nse_archives, nse_events
     r = await nse_archives.catch_up(10)
     logger.info("NSE archives: %s", r)
+    # Phase 1 of the AI upgrade plan: ban list, bulk/block deals, corporate announcements.
+    # Its own guard: one source failing must never stop the other.
+    try:
+        logger.info("NSE events: %s", await nse_events.catch_up(10))
+    except Exception:  # noqa: BLE001
+        logger.exception("NSE events catch-up failed")
 
 
 async def _train_if_stale() -> None:

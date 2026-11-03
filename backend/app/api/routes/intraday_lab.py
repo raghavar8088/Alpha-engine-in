@@ -372,3 +372,22 @@ async def v2_engine(current_user: dict = Depends(get_current_user)):
     """The v2 engine's own state: last bar-close evaluation, signals, skips, exit source."""
     from app.services.intraday_v2_engine import describe
     return describe()
+
+
+@router.get("/v2/ledger")
+async def v2_ledger(day: str | None = Query(default=None, description="IST date, YYYY-MM-DD; default: the last day recorded"),
+                    current_user: dict = Depends(get_current_user)):
+    """The decision ledger for one day: every candidate signal's decision, the rejection
+    reasons, and the completeness check (rows written = signals the engine evaluated)."""
+    from app.services import intraday_signal_ledger as ledger
+    return await ledger.summary(day)
+
+
+@router.get("/v2/ledger/rows")
+async def v2_ledger_rows(day: str | None = Query(default=None), strategy_id: str | None = Query(default=None),
+                         symbol: str | None = Query(default=None), dec: str | None = Query(default=None),
+                         limit: int = Query(default=200, ge=1, le=2000),
+                         current_user: dict = Depends(get_current_user)):
+    """Ledger rows, oldest first: filter by day, strategy, symbol or decision."""
+    from app.services import intraday_signal_ledger as ledger
+    return {"rows": await ledger.rows(day, strategy_id, symbol, dec, limit)}

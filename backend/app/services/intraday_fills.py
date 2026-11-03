@@ -16,21 +16,57 @@ import it from there.
 
 from __future__ import annotations
 
+import math
 import time
 
 from app.services.angel_stream import stream
 
+# ── the cost of a market order ────────────────────────────────────────────────────
+# MEASURED, from 2026-11-04 (INTRADAY_STOCKS_AI_UPGRADE_PLAN.md Phase 1; October plan I4).
+# The H1 study read Angel's five-level book at 3,355 live tournament entries (12 Oct - 3 Nov
+# 2026) and priced a Rs 10 lakh market order against it. Per side, against the LTP the paper
+# desks fill at, by the name's traded value that day — 10%-trimmed mean (median):
+#     >= 1,000 cr    1.50 bp (1.17)   n 142     half-spread 0.72
+#     300-1,000 cr   2.85 bp (2.60)   n 873     half-spread 1.32
+#     150-300 cr     3.73 bp (3.53)   n 1,556   half-spread 1.54
+#     < 150 cr       4.12 bp (3.79)   n 784     half-spread 1.78
+# The average, not the median, because a cost model must charge what trades cost on average
+# and these costs are right-skewed; trimmed because a few samples read a stale LTP (-27 to
+# +58 bp). Still a LOWER bound where the book was thin: H1 prices the part of an order beyond
+# the five visible levels at the worst visible level, and the book was that thin in 11% /
+# 41% / 58% / 70% of samples by band.
+# ORDER SIZE was only measured at Rs 10 lakh. A smaller order costs less, down to the
+# half-spread; until Phase 3's cost model replaces this, cost = half-spread + (measured -
+# half-spread) x sqrt(notional / Rs 10 lakh) — the square root being the cautious choice.
+COST_MODEL = "h1-measured-2026-11-04"
+COST_CUTOVER = "2026-11-04"        # the first session filled under this model (IST)
+_MEASURED_NOTIONAL = 1_000_000.0
+_BANDS = ((1000.0, 1.50, 0.72), (300.0, 2.85, 1.32), (150.0, 3.73, 1.54), (0.0, 4.12, 1.78))
 
-def slippage_bp(turnover_cr: float | None) -> float:
-    """Per-side cost of crossing the spread for one market order, by the name's daily
-    traded value (Rs crore).
 
-    Calibrated for a ~Rs 2 lakh order, where even the thinnest of the 200 most-traded names
-    is a sliver of a minute's volume and this is mostly the half-spread. Positions have been
-    Rs 10 lakh since 2026-10-02, which in the thinnest names is about a third of a minute's
-    traded value, so the bottom bucket may be optimistic; the measurement that settles it
-    (H1 in INTRADAY_STOCKS_RESEARCH_AND_UPGRADE_PLAN.md) records real order-book depth at
-    each signal. Same function for the Phase 3 backtest."""
+def slippage_bp(turnover_cr: float | None, notional: float | None = None) -> float:
+    """Per-side cost, in bp of price, of one market order in a name with this daily traded
+    value (Rs crore), for an order of `notional` rupees (default: the measured Rs 10 lakh).
+    An unknown turnover pays the thinnest band. Same function for the backtest."""
+    t = turnover_cr or 0.0
+    cost, half_spread = _BANDS[-1][1], _BANDS[-1][2]
+    for floor, c, hs in _BANDS:
+        if t >= floor:
+            cost, half_spread = c, hs
+            break
+    if notional is None or abs(notional - _MEASURED_NOTIONAL) < 1.0:
+        return cost
+    scale = math.sqrt(max(float(notional), 0.0) / _MEASURED_NOTIONAL)
+    return round(half_spread + (cost - half_spread) * scale, 2)
+
+
+def legacy_slippage_bp(turnover_cr: float | None) -> float:
+    """The turnover-bucket model used until 2026-11-04 (1-4 bp, set for a ~Rs 2 lakh order).
+
+    Kept ONLY for pre-registered strategies (iv2_orb_sel15 / iv2_orb_sel30): their expected
+    profit was written down under this model, and changing the cost in the middle of their
+    forward test would move the verdict without the rule having changed. Everything else
+    pays the measured cost above."""
     t = turnover_cr or 0.0
     if t >= 1000:
         return 1.0

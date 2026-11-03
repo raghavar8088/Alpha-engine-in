@@ -1,6 +1,6 @@
 # Intraday Stocks — Gates and AI: 10-Phase Upgrade Plan
 
-**Written:** 4 November 2026 · **Status:** direction approved by the owner; no phase started
+**Written:** 4 November 2026 · **Status:** approved by the owner, who asked for all ten phases to be built in one go. Progress is tracked in §8.
 **Builds on:** [INTRADAY_STOCKS_RESEARCH_AND_UPGRADE_PLAN.md](INTRADAY_STOCKS_RESEARCH_AND_UPGRADE_PLAN.md) (October 2026). Item codes such as I3, I4, H1, H2, C3 and C4 refer to that plan.
 
 ---
@@ -116,7 +116,8 @@ Only one of the current Rank top 10 (`macd_trend_1h`) is among the six rules wit
   - The server disk is 96% full, so free space first and set a retention period (for example, 12 months of raw rows).
 - **Versions.** Give each strategy's rules and each gate configuration a fingerprint, and stamp it on ledger rows and positions. A change creates a new version; nothing is edited in place.
 - **Honest costs (October plan I4).**
-  - Replace the turnover-bucket slippage with H1's measured costs, by turnover band and order size.
+  - Replace the turnover-bucket slippage with H1's measured costs, by turnover band and order size. Charge the 10%-trimmed mean, not the median: a cost model must charge the average, and these costs are right-skewed.
+  - Exception: the two pre-registered strategies (`iv2_orb_sel15`, `iv2_orb_sel30`) keep the cost model their expectation was written under, so their forward test isn't moved mid-way.
   - Show the cutover date on the page, and never compare P&L across it.
 - **Start the slow data collectors now** (F&O ban list, bulk and block deals, corporate announcements; see Phases 6 and 8), so forward history builds up.
 - **Coordinate first.** Another session has uncommitted changes in `intraday_v2_engine.py` and `angel_stream.py` (a scanner re-check and fill-evidence rules). They must be committed or handed over before this phase edits the engine.
@@ -124,7 +125,7 @@ Only one of the current Rank top 10 (`macd_trend_1h`) is among the six rules wit
 **Done when**
 - Ledger rows equal signals evaluated (100%, checked daily against the engine's skip counters) for 5 sessions.
 - Backend memory is no higher than before (`/api/diagnostics/memory`).
-- Paper costs match H1's medians within 0.3 bp.
+- Paper costs equal H1's measured averages by turnover band (1.50 / 2.85 / 3.73 / 4.12 bp a side on ₹10 lakh).
 
 ### Phase 2 — Research harness, backtest fidelity and pre-registration
 
@@ -427,3 +428,20 @@ LLM rules:
 - Ask an AI to read charts or predict prices.
 - Rank strategies by one month of paper profit, as the leaderboard does.
 - Put money on anything before a CONFIRMED forward verdict.
+
+---
+
+## 8. Progress
+
+| Phase | Status | Notes |
+|---|---|---|
+| 1 | **Built, tested** (4 Nov 2026) | Decision ledger (`intraday_signal_ledger`, local MongoDB `alpha_engine_intraday`, 180-day retention) with rule and gate versions on every row and position. Measured costs: 1.50 / 2.85 / 3.73 / 4.12 bp a side by turnover band; pre-registered rules on the legacy model. NSE event collectors (`nse_events`: ban list, bulk/block deals, announcements). Functional test 21/21 on the server, against a scratch database. APIs: `/api/intraday-lab/v2/ledger`, `/v2/ledger/rows`. |
+| 2 | to do | |
+| 3 | to do | |
+| 4 | to do | |
+| 5 | to do | |
+| 6 | to do | |
+| 7 | to do | |
+| 8 | to do | |
+| 9 | to do | |
+| 10 | to do | |

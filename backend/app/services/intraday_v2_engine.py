@@ -26,6 +26,10 @@ Rs 10 lakh. When more signals arrive at one bar close than there are free slots,
 taken in order of the rule's own priority (relative volume, or stretch size) — not in the
 order the universe happens to be stored, which is how the first catalog ended up trading
 the alphabet. At most two different strategies may hold one symbol at once.
+
+EVERY DECISION RECORDED (2026-11-04). Each candidate signal — opened, armed as a stop-entry,
+or rejected with the engine's reason — goes to the decision ledger (intraday_signal_ledger)
+with its rule version and gate version; positions carry both, and the cost model they paid.
 """
 
 from __future__ import annotations
@@ -45,11 +49,13 @@ from app.services import intraday_v2_strategies as v2
 from app.services.angel_fees import round_trip
 from app.services.angel_stream import stream
 from app.services.intraday_store import BASE_MIN, SESSION_OPEN_MIN, store
+from app.services import intraday_signal_ledger as ledger
 # Fill rules shared with the Patterns desk (moved verbatim, 2026-10-10). `slippage_bp` is
 # re-exported from here for the backtest and the S4 study.
 from app.services.intraday_fills import adverse as _adverse
 from app.services.intraday_fills import scan_exit as _scan_exit
 from app.services.intraday_fills import slippage_bp  # noqa: F401
+from app.services.intraday_fills import COST_MODEL, legacy_slippage_bp
 from app.services.intraday_fills import stream_ltp as _stream_ltp
 from app.services.intraday_fills import stream_minutes as _minutes
 from app.services import h1_slippage as h1
@@ -73,6 +79,12 @@ TOTAL_CAPITAL = PER_STRATEGY_CAPITAL * len(v2.CATALOG)
 # Bars handed to the rules: enough for EMA50 to settle and for 15 sessions of daily ATR
 # (15m), no more — indicators are recomputed at every close, so window = cost.
 WINDOW = {"15m": 420, "45m": 220, "1h": 220}
+# The limits every entry passes, fingerprinted (Phase 1, decision ledger): each ledger row and
+# position records which version of them decided it. Any change makes a new version.
+GATE_VERSION = ledger.gate_version({
+    "slots_per_strategy": v2.SLOTS_PER_STRATEGY, "slot_notional": SLOT_NOTIONAL,
+    "max_strategies_per_symbol": MAX_STRATEGIES_PER_SYMBOL, "daily_loss_breaker_pct": DAILY_LOSS_BREAKER_PCT,
+    "entry_window": [v2.ENTRY_FROM, v2.ENTRY_UNTIL], "cost_model": COST_MODEL})
 
 
 def _now() -> datetime:
@@ -105,6 +117,7 @@ status: dict = {"evaluations": 0, "signals": 0, "opened": 0, "closed": 0, "skipp
 
 def _skip(reason: str) -> None:
     status["skipped"][reason] = status["skipped"].get(reason, 0) + 1
+    ledger.reject(reason)
 
 
 async def _universe() -> dict[str, dict]:
@@ -307,9 +320,13 @@ async def evaluate_close(boundary: datetime, open_positions: bool = True) -> dic
                       "phase": "entry", "ltp": _stream_ltp(sym),
                       "signal_at": boundary.astimezone(timezone.utc)}
                      for _p, spec, sym, sig in cands if spec.strategy_id in h1.H1_STRATEGIES])
+    ledger.context(rv, nifty)
     if open_positions and cands:
         cands.sort(key=lambda c: -c[0])
         opened = await _take(cands, boundary)
+    ledger.flush({"boundary": boundary, "signals": len(cands), "opened": opened,
+                  "incomplete": incomplete, "members": len(members), "nifty": nifty,
+                  "taken": True} if open_positions else None)
     status["last_eval"] = {"boundary": boundary.strftime("%H:%M"), "timeframes": tfs,
                            "day_setups": day_setup, "signals": len(cands), "opened": opened,
                            "selection_ranked": len(sel) if sel else None,
@@ -333,6 +350,9 @@ async def _take(cands, boundary: datetime) -> int:
     pending = await _pending_today()
     opened = 0
     for _prio, spec, sym, sig in cands:
+        ledger.begin(spec, sym, sig, boundary, member=_members.get(sym),
+                     slots=per_strategy.get(spec.strategy_id, 0),
+                     holders=len(per_symbol.get(sym, set()) - {spec.strategy_id}))
         if per_strategy.get(spec.strategy_id, 0) >= v2.SLOTS_PER_STRATEGY:
             _skip("strategy slots full"); continue
         if (spec.strategy_id, sym) in held:
@@ -342,6 +362,7 @@ async def _take(cands, boundary: datetime) -> int:
             _skip("symbol crowded"); continue
         if sig.oco:
             if any(x["strategy_id"] == spec.strategy_id and x["symbol"] == sym for x in pending):
+                ledger.reject("already pending")
                 continue
             group = f"{spec.strategy_id}:{sym}:{boundary:%Y%m%d}"
             for side, trig, sd, td, sp in sig.oco:
@@ -350,14 +371,17 @@ async def _take(cands, boundary: datetime) -> int:
                                 "priority": sig.priority, "rationale": sig.rationale, "oco": group,
                                 "entry_from": spec.params.get("entry_from", v2.ENTRY_FROM),
                                 "since": int(boundary.timestamp())})
+            ledger.pending()
             continue
         if sig.trigger is not None:
             if any(x["strategy_id"] == spec.strategy_id and x["symbol"] == sym for x in pending):
+                ledger.reject("already pending")
                 continue
             pending.append({"strategy_id": spec.strategy_id, "symbol": sym, "side": sig.side,
                             "trigger": sig.trigger, "stop_dist": sig.stop_dist,
                             "target_dist": sig.target_dist, "priority": sig.priority,
                             "rationale": sig.rationale, "since": int(boundary.timestamp())})
+            ledger.pending()
             continue
         price = _stream_ltp(sym)
         source = "stream"
@@ -378,7 +402,10 @@ async def _take(cands, boundary: datetime) -> int:
 async def _open(spec: v2.V2Spec, sym: str, sig: v2.V2Signal, price: float, source: str,
                 signal_at: datetime, fill_note: str = "market") -> bool:
     m = _members.get(sym) or {}
-    bp = slippage_bp(m.get("turnover_cr"))
+    # Pre-registered own-book strategies keep the cost model their expectation was written
+    # under (intraday_fills.legacy_slippage_bp); every other rule pays the measured cost.
+    bp = (legacy_slippage_bp(m.get("turnover_cr")) if _own_book(spec.strategy_id)
+          else slippage_bp(m.get("turnover_cr"), SLOT_NOTIONAL))
     fill = _adverse(price, sig.side, bp, opening=True)   # a triggered stop-entry is a market order too
     qty = int(SLOT_NOTIONAL // fill)
     if qty < 1:
@@ -418,7 +445,10 @@ async def _open(spec: v2.V2Spec, sym: str, sig: v2.V2Signal, price: float, sourc
         "opened_at": _now(), "opened_on": _ist().date().isoformat(), "updated_at": _now(),
         "closed_at": None,
     }
+    doc.update({"rule_version": ledger.rule_version(spec), "gate_version": GATE_VERSION,
+                "cost_model": "legacy-buckets" if _own_book(spec.strategy_id) else COST_MODEL})
     await intraday_lab_positions_collection.insert_one(doc)
+    ledger.opened(doc["position_id"])
     _invalidate()
     status["opened"] += 1
     return True
@@ -487,6 +517,10 @@ async def _fill_triggers() -> int:
         if not hits:
             left.extend(legs); continue
         hits.sort(key=lambda hx: hx[0][0])
+        x0 = hits[0][1]
+        ledger.begin_pending(x0, v2.BY_ID.get(x0["strategy_id"]), member=_members.get(x0["symbol"]),
+                             slots=per_strategy.get(x0["strategy_id"], 0),
+                             holders=len(per_symbol.get(x0["symbol"], set()) - {x0["strategy_id"]}))
         if len(hits) > 1 and hits[0][0][0] == hits[1][0][0]:
             _skip("both range edges crossed in one minute"); continue
         (_t, hit), x = hits[0]
@@ -633,6 +667,7 @@ async def tick() -> None:
         ok, _why = await _entries_allowed()
         if ok:
             await _fill_triggers()
+            ledger.flush()
     k = (m - SESSION_OPEN_MIN) // BASE_MIN
     boundary = now.replace(hour=0, minute=0, second=0, microsecond=0) + \
         timedelta(minutes=SESSION_OPEN_MIN + k * BASE_MIN)
@@ -646,6 +681,7 @@ async def tick() -> None:
                 logger.info("v2 %s: %s", boundary.strftime("%H:%M"), r)
             else:
                 status["last_notes"] = [why]
+                ledger.blocked(boundary, why)
     if time.monotonic() - _last_state_write > 30:
         _last_state_write = time.monotonic()
         await intraday_lab_state_collection.update_one(
@@ -665,4 +701,5 @@ async def v2_loop() -> None:
 
 def describe() -> dict:
     return {"strategies": len(v2.CATALOG), "slots_per_strategy": v2.SLOTS_PER_STRATEGY,
-            "slot_notional": SLOT_NOTIONAL, "paused": PAUSE_NEW_ENTRIES, **status}
+            "slot_notional": SLOT_NOTIONAL, "paused": PAUSE_NEW_ENTRIES, "cost_model": COST_MODEL,
+            "gate_version": GATE_VERSION, "ledger": ledger.describe(), **status}

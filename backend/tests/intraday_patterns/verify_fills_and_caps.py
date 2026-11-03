@@ -333,8 +333,10 @@ check("…exits are scanned from the next minute on", p["checked_through"] > tim
 fresh()
 run(PE._open(ST15, inst, 700.0, -1, "bar", turnover_cr=None))
 p = closed()
-check("a short entry fills below the signal; an unknown name pays the thinnest bucket",
-      abs(p["entry_price"] - round(700.0 * (1 - 4 / 1e4), 2)) < 0.011 and p["slippage_bp"] == 4.0)
+thin = F.slippage_bp(None)            # the measured cost of the thinnest band (4.12 bp since 4 Nov 2026)
+check("a short entry fills below the signal; an unknown name pays the thinnest band",
+      abs(p["entry_price"] - round(700.0 * (1 - thin / 1e4), 2)) < 0.011 and p["slippage_bp"] == thin
+      and thin == F.slippage_bp(0.0) > F.slippage_bp(5000.0))
 
 # ═════════════════════════════════════════════════════════════════════════════════
 section("C2 · NO MORE THAN TWO STRATEGIES ON ONE NAME")
