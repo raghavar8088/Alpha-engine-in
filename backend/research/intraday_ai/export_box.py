@@ -77,6 +77,15 @@ for d in db["intraday_lab_positions"].find({"engine": "v2", "opened_at": {"$gte"
             d[k] = int((v if v.tzinfo else v.replace(tzinfo=timezone.utc)).timestamp())
     sys.stdout.write(json.dumps(d, default=str) + "\\n")
 ''',
+    # results-day reactions (the expected-move model's "results" feature): {symbol: [reaction days]}
+    "results": HEAD + '''
+out = {}
+for d in db["results_calendar"].find({"kind": "filed"}, {"symbol": 1, "reaction_day": 1, "_id": 0}):
+    if d.get("symbol") and d.get("reaction_day"):
+        out.setdefault(d["symbol"], []).append(str(d["reaction_day"])[:10])
+json.dump(out, sys.stdout)
+print(f"symbols {len(out)}", file=sys.stderr)
+''',
     "h1": HEAD + '''
 U = {d["_id"]: {m["symbol"]: m.get("turnover_cr") for m in d.get("members", [])}
      for d in db["intraday_universe"].find({"_id": {"$gte": "2026-10-01"}}, {"members.symbol": 1, "members.turnover_cr": 1})}
@@ -137,6 +146,8 @@ def main() -> None:
         container("live", args, "live_v2.jsonl")
     elif kind == "h1":
         container("h1", [], "h1_cal.json")
+    elif kind == "results":
+        container("results", [], "results_reactions.json")
     else:
         raise SystemExit(__doc__)
 

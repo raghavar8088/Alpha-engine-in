@@ -1,0 +1,18 @@
+{
+ "name": "P5_big_mover",
+ "registered_at": "2026-11-03T19:50:17.164563+00:00",
+ "fingerprint": "aca4446fae55ee64",
+ "doc": {
+  "plan": "INTRADAY_STOCKS_AI_UPGRADE_PLAN.md Phase 5",
+  "hypothesis": "The six rules with a real edge before costs make money after costs when they trade only the day's biggest expected movers, because a bigger move makes the fixed costs a smaller share.",
+  "signals": "The six rules' signals in the research dataset y2 (runner.py --features six, code f8d054b), with their simulated outcome at market entry and measured costs (net_bp, pessimistic reading).",
+  "filter": "Keep a signal only if its stock is in the top 40 of that day's point-in-time universe by the expected-move model's 09:45 prediction — the model chosen by P5_move_model, as predicted walk-forward (fitted only on earlier months).",
+  "metric": "Mean net bp per signal on the holdout, t-statistic clustered by session; per rule and pooled.",
+  "split": {
+   "development": "May 2025 - 3 May 2026",
+   "holdout": "4 May 2026 - 3 Nov 2026, opened once"
+  },
+  "decision": "GO for a rule (and pooled): filtered holdout mean net per signal > 0 AND clustered t >= 2. NO-GO otherwise. Always reported: the unfiltered mean beside it, and the development period.",
+  "multiple_testing": "Six rules plus the pool: a GO makes a forward-test candidate (Phase 10), not a verdict."
+ }
+}

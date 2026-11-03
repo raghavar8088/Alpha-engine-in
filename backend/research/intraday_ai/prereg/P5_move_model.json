@@ -1,0 +1,19 @@
+{
+ "name": "P5_move_model",
+ "registered_at": "2026-11-03T19:50:17.163563+00:00",
+ "fingerprint": "dd5fcc770aeeb2d0",
+ "doc": {
+  "plan": "INTRADAY_STOCKS_AI_UPGRADE_PLAN.md Phase 5",
+  "hypothesis": "A gradient-boosted model ranks stocks by their 09:45->15:00 move better than the scanner's linear (OLS) expected-move model.",
+  "samples": "Every stock-day with complete bars, built as scanner_board._samples does (features at 09:45 from closed 15-minute bars and the 15 prior sessions; target |price at the 15:00 bar's open / 09:45 close - 1| in bp), for stocks in that day's point-in-time top 200 by 20-session traded value, sessions from 26 Nov 2024 to 3 Nov 2026. Results days from results_calendar (kind 'filed', reaction_day).",
+  "ols": "Ordinary least squares on the scanner's six BASE features (log_rvol30, atr_pct, abs_gap, abs_first30, prev_range_atr, results) plus a constant — the production form.",
+  "gbm": "LightGBM regressor, fixed settings, no tuning: n_estimators=300, learning_rate=0.05, num_leaves=31, min_child_samples=200, subsample=0.8 (every iteration), colsample_bytree=0.8, reg_lambda=1.0, random_state=7, objective l2. Features: the six BASE + gap_signed, first30_signed, day of week, log10 turnover (point-in-time), India VIX at 09:45, VIX change since the previous close, NIFTY |gap|, NIFTY |first 30 minutes|, previous day's |close-to-close return|, mean of the last 5 sessions' range / ATR.",
+  "walk_forward": "Expanding window: both models refitted at the start of every calendar month on all earlier sessions, predicting that month only. First predicted month: May 2025.",
+  "metric": "Mean daily rank correlation (Spearman, days with >= 30 stocks) between prediction and the realised move; also the top 20's mean move vs all stocks'.",
+  "split": {
+   "development": "May 2025 - 3 May 2026",
+   "holdout": "4 May 2026 - 3 Nov 2026, opened once"
+  },
+  "decision": "ADOPT the GBM if holdout IC(GBM) - IC(OLS) >= 0.03 AND development IC(GBM) - IC(OLS) > 0. Otherwise keep the OLS."
+ }
+}
