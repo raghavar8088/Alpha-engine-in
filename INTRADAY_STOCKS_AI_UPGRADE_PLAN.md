@@ -441,7 +441,7 @@ LLM rules:
 | 4 | **Built, tested** (4 Nov 2026) | `gated_books`: books A (all signals) and B (six rules), ₹10 lakh each. Event-driven from the engine, with every decision logged; risk-based size, reward/risk, open/total-risk/stock/industry caps, daily stop, drawdown pause. API `/v2/gated`; panel on the tournament tab (hidden until the backend is deployed). Server test 10/10. The comparison month starts once deployed. |
 | 5 | **Tested** (4 Nov 2026) | Pre-registered (`668be3e`): **LightGBM move model not adopted** (rank IC 0.238 vs OLS 0.246 on the holdout; worse in development too) — the scanner keeps its OLS, no production change. **Big-mover filter NO-GO** (top 40 halves the loss, pooled holdout −9.3 to −5.2 bp a signal; MACD 1h +1.3 bp, t 0.28). The expected-move rank becomes a scorer feature. |
 | 6 | **Tested** (4 Nov 2026) | Context features for every signal (`context.py`: sector vs NIFTY, stock vs sector, VIX regime, breadth, expiry, FII positioning, delivery, results day, expected-move rank). Pre-registered (`f4347f9`): **all five context filters NO-GO** — none moves the holdout net (−9.3 bp a signal either way). The features feed the scorer. |
-| 7 | to do | |
+| 7 | **Tested — NO-GO** (4 Nov 2026) | Pre-registered (`8e0b900`): LightGBM scorer on 38 point-in-time features, walk-forward, top-20% gate. Development looked promising (spread +6.8 bp, t 2.0); the **holdout did not** (spread −2.8 bp, t −0.47; gated −7.0 bp a signal, t −2.56). The shuffle control passed. **Decision point D2 reached:** the signal-quality track ends; the model is not deployed. |
 | 8 | to do | |
 | 9 | to do | |
 | 10 | to do | |

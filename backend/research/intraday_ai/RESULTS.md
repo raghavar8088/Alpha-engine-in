@@ -110,3 +110,20 @@ Pooled net bp per signal on the holdout (4 May – 3 Nov 2026):
 No context filter changes the result: it confirms the October finding that every market condition loses.
 
 Feature coverage across 147k signals: sector 97.5%, VIX and expiry 100%, breadth 95.3%, delivery 91.0%, expected-move rank 93.7%. Every feature goes into the scorer.
+
+## P7_scorer — **NO-GO** → plan decision point D2
+Registered `8e0b900`, fingerprint `191955bf7c202087`.
+
+LightGBM on 38 point-in-time features, walk-forward by month; the gate takes scores in the top 20% of the model's own training scores.
+
+| | Development | Holdout |
+|---|---|---|
+| Signals / gated | 89,712 / 11,473 (12.8%) | 48,061 / 5,936 (12.4%) |
+| Gated net bp a signal (t) | −3.28 (−0.91) | **−6.99 (−2.56)** |
+| All signals net bp | −7.26 | −9.28 |
+| Top-minus-bottom quintile spread (t) | +6.81 (2.00) | **−2.82 (−0.47)** |
+| Shuffled-label control spread (t) | −3.64 (−1.84) | +0.38 (0.14) — passes |
+
+The scorer's ability to rank signals in development did not survive unseen data. Per rule on the holdout, only macd_trend_1h's gated signals reach break-even (+0.31 bp, t 0.06).
+
+Decision point D2: the signal-quality track ends here. The decision ledger, gated paper accounts and daily review stay as risk and record-keeping tools, and the trained model is **not** deployed.
