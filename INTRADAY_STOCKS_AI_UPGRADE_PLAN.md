@@ -436,9 +436,9 @@ LLM rules:
 | Phase | Status | Notes |
 |---|---|---|
 | 1 | **Built, tested** (4 Nov 2026) | Decision ledger (`intraday_signal_ledger`, local MongoDB `alpha_engine_intraday`, 180-day retention) with rule and gate versions on every row and position. Measured costs: 1.50 / 2.85 / 3.73 / 4.12 bp a side by turnover band; pre-registered rules on the legacy model. NSE event collectors (`nse_events`: ban list, bulk/block deals, announcements). Functional test 21/21 on the server, against a scratch database. APIs: `/api/intraday-lab/v2/ledger`, `/v2/ledger/rows`. |
-| 2 | to do | |
-| 3 | to do | |
-| 4 | to do | |
+| 2 | **Built, run** (4 Nov 2026) | `--live-rules` backtest option (`intraday_v2_portfolio.accept_live`, matches the hand-written joint replay exactly). Research harness `backend/research/intraday_ai` (build from a git commit, read-only exports, runner, features, fidelity, pre-registration). Fidelity on 6 Oct – 3 Nov: 55.8% of live trades reproduced (target 60%), 94.8% same exit (target 95%) — **not met**; the causes are listed in `RESULTS.md`. Two-year dataset: 495 sessions, 147,427 signal rows for the six rules. |
+| 3 | **Built, tested** (4 Nov 2026) | Pre-registered tests (`fd2cc2a`): **limit entries NO-GO for all six rules** (fill 93–94%, +1.3 bp a signal, still −4.8 to −8.6 bp net on the holdout); **book-based cost model not adopted** (6% better than bands, 10% needed). Depth recorder `intraday_depth_recorder` (both sides' five levels with quantities at every signal of the six rules). Server test 10/10. Decision point D1 reached: only the scorer can close the gap. |
+| 4 | **Built, tested** (4 Nov 2026) | `gated_books`: books A (all signals) and B (six rules), ₹10 lakh each. Event-driven from the engine, with every decision logged; risk-based size, reward/risk, open/total-risk/stock/industry caps, daily stop, drawdown pause. API `/v2/gated`; panel on the tournament tab (hidden until the backend is deployed). Server test 10/10. The comparison month starts once deployed. |
 | 5 | to do | |
 | 6 | to do | |
 | 7 | to do | |

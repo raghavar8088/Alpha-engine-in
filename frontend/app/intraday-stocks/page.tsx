@@ -9,6 +9,7 @@ import ErrorBanner from "../../components/ErrorBanner";
 import V2Validation from "./V2Validation";
 import { AlarmBanner, EdgeReportPanel } from "./IntradayOps";
 import ResetBook from "./ResetBook";
+import GatedBooks from "../../components/GatedBooks";
 import { RankNote, RankTd, RankTh, boardFromRows, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import LineChart from "../../components/charts/LineChart";
 import {
@@ -629,6 +630,8 @@ export default function IntradayStocksPage() {
           </>
         )}
       </div>
+
+      <GatedBooks />
 
       {status?.paused && (
         <div className="breaker">

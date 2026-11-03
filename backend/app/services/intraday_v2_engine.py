@@ -59,6 +59,8 @@ from app.services.intraday_fills import COST_MODEL, legacy_slippage_bp
 from app.services.intraday_fills import stream_ltp as _stream_ltp
 from app.services.intraday_fills import stream_minutes as _minutes
 from app.services import h1_slippage as h1
+from app.services import intraday_depth_recorder as depth_recorder
+from app.services import gated_books
 from app.services.promotion_gate import grade
 
 logger = logging.getLogger("intraday_v2_engine")
@@ -320,6 +322,12 @@ async def evaluate_close(boundary: datetime, open_positions: bool = True) -> dic
                       "phase": "entry", "ltp": _stream_ltp(sym),
                       "signal_at": boundary.astimezone(timezone.utc)}
                      for _p, spec, sym, sig in cands if spec.strategy_id in h1.H1_STRATEGIES])
+        # Phase 3: the book's shape (both sides, with quantities) at every signal of the six
+        # rules with an edge before costs — features for the signal scorer. Same timing as H1.
+        depth_recorder.schedule([{"strategy_id": spec.strategy_id, "symbol": sym,
+                                  "token": (members.get(sym) or {}).get("token"), "side": sig.side,
+                                  "ltp": _stream_ltp(sym), "signal_at": boundary.astimezone(timezone.utc)}
+                                 for _p, spec, sym, sig in cands if spec.strategy_id in depth_recorder.RULES])
     ledger.context(rv, nifty)
     if open_positions and cands:
         cands.sort(key=lambda c: -c[0])
@@ -449,6 +457,7 @@ async def _open(spec: v2.V2Spec, sym: str, sig: v2.V2Signal, price: float, sourc
                 "cost_model": "legacy-buckets" if _own_book(spec.strategy_id) else COST_MODEL})
     await intraday_lab_positions_collection.insert_one(doc)
     ledger.opened(doc["position_id"])
+    gated_books.on_open(doc)            # Phase 4: the gated paper accounts copy it, or say why not
     _invalidate()
     status["opened"] += 1
     return True
@@ -571,6 +580,7 @@ async def _close(p: dict, price: float, reason: str, market: bool) -> None:
         "entry_price": p["entry_price"], "exit_price": round(fill, 2), "qty": p["qty"],
         "gross_pnl": gross, "fees": fb.total, "realized_pnl": net, "exit_reason": reason,
         "opened_at": p["opened_at"], "closed_at": _now()})
+    gated_books.on_close(p["position_id"], round(fill, 2), reason)
     _invalidate()
     status["closed"] += 1
 
@@ -663,6 +673,7 @@ async def tick() -> None:
     if not (SESSION_OPEN_MIN <= m <= 15 * 60 + 40):
         return
     await manage()
+    gated_books.maybe_reconcile()
     if await _pending_today() and v2.in_entry_window(now, v2.EARLIEST_ENTRY):
         ok, _why = await _entries_allowed()
         if ok:
@@ -702,4 +713,5 @@ async def v2_loop() -> None:
 def describe() -> dict:
     return {"strategies": len(v2.CATALOG), "slots_per_strategy": v2.SLOTS_PER_STRATEGY,
             "slot_notional": SLOT_NOTIONAL, "paused": PAUSE_NEW_ENTRIES, "cost_model": COST_MODEL,
-            "gate_version": GATE_VERSION, "ledger": ledger.describe(), **status}
+            "gate_version": GATE_VERSION, "ledger": ledger.describe(),
+            "depth_recorder": depth_recorder.describe(), "gated_books": gated_books.describe(), **status}

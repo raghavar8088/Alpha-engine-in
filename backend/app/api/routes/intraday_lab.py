@@ -395,3 +395,19 @@ async def v2_ledger_rows(day: str | None = Query(default=None), strategy_id: str
     """Ledger rows, oldest first: filter by day, strategy, symbol or decision."""
     from app.services import intraday_signal_ledger as ledger
     return {"rows": await ledger.rows(day, strategy_id, symbol, dec, limit)}
+
+
+@router.get("/v2/gated")
+async def v2_gated(current_user: dict = Depends(get_current_user)):
+    """The gated paper accounts (Phase 4): equity, P&L, open copies, today's decisions by
+    reason, and the gate configuration with its version."""
+    from app.services import gated_books
+    return await gated_books.summary()
+
+
+@router.get("/v2/gated/positions")
+async def v2_gated_positions(book: str = Query(default="A"), status: str = Query(default="CLOSED"),
+                             limit: int = Query(default=200, ge=1, le=1000),
+                             current_user: dict = Depends(get_current_user)):
+    from app.services import gated_books
+    return {"positions": await gated_books.positions(book.upper(), status, limit)}
