@@ -102,11 +102,11 @@ def run_backtest(
     }
     if with_walk_forward:
         grid = param_grid or _default_grid(strategy_id, config.params)
-        doc["walk_forward"] = walk_forward(config, bars, grid)
+        doc["walk_forward"] = walk_forward(config, bars, grid, benchmark_bars=benchmark)
     if with_monte_carlo:
         doc["monte_carlo"] = monte_carlo(run)
     if param_grid and not with_walk_forward:
-        doc["optimization"] = optimize(config, bars, param_grid)[:20]
+        doc["optimization"] = optimize(config, bars, param_grid, benchmark_bars=benchmark)[:20]
 
     if persist:
         collection = _db()["backtests"]
