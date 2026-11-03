@@ -20,7 +20,9 @@ follow `intraday_v2_engine`'s model on 15-minute bars:
 Slots are exact: a trade's outcome never depends on whether it was taken, so trades are
 simulated per symbol and then accepted in time order under the live limits (five slots
 and the strategy's own cash). The live cap of two strategies per symbol couples the
-strategies and is NOT applied — each strategy's record here is its own.
+strategies and is NOT applied by default — each strategy's record here is its own.
+`--live-rules` (Phase 2 of INTRADAY_STOCKS_AI_UPGRADE_PLAN.md) decides all strategies
+together under the live engine's caps instead (intraday_v2_portfolio.accept_live).
 
 WHAT MAKES A RESULT BELIEVABLE (the gate)
 Fifty-two strategies tried at once guarantee a few good-looking ones by luck. The gate
@@ -195,10 +197,11 @@ async def pit_universe(start: date, end: date, need: set[int], size: int = 200) 
 def replay_symbol(sym: str, s15: Series, tfs: dict[str, Series], nifty: dict[int, float],
                   allowed_days: set[int] | None, first_day: int, last_day: int,
                   turnover_cr: float | None, cas: bool, orb_ranks: dict[int, int],
-                  signals_out: list | None = None) -> list[tuple]:
+                  signals_out: list | None = None, on_signal=None) -> list[tuple]:
     """Every trade every strategy would have made in `sym`. Returns compact tuples:
     (strategy_id, sym, entry_t, exit_t, side, entry_px, exit_px, qty, gross, fees, net,
-     reason, priority)."""
+     reason, priority). `on_signal(spec, sig, ctx, t_signal, trade_or_None)`, if given, sees
+    every signal with the context it was taken in (the research dataset's hook)."""
     days = _days(s15)
     day_at = {d.key: i for i, d in enumerate(days)}
     bp = slippage_bp(turnover_cr)
@@ -310,6 +313,8 @@ def replay_symbol(sym: str, s15: Series, tfs: dict[str, Series], nifty: dict[int
                 if signals_out is not None:
                     signals_out.append((end, spec.strategy_id, sym, sig.side))
                 tr = sim(spec, sig, end, j + 1, di)
+                if on_signal is not None:
+                    on_signal(spec, sig, ctx, end, tr)
                 if tr is not None:
                     trades.append(tr)
                 if sig.trigger is not None:
@@ -502,12 +507,42 @@ def metrics(taken: list[tuple], days: list[int]) -> dict:
 # ── the job ──────────────────────────────────────────────────────────────────────
 
 
+def _live_accept(con, meta: dict) -> tuple[dict[str, list[tuple]], dict]:
+    """All strategies together under the live engine's caps, a day at a time from the
+    candidate table; the ~opt shadow records keep the per-strategy pass."""
+    from app.services.intraday_v2_engine import MAX_STRATEGIES_PER_SYMBOL
+    from app.services.intraday_v2_portfolio import accept_live
+    own = {s.strategy_id for s in v2.CATALOG if s.params.get("own_book")}
+    cat = {s.strategy_id: i for i, s in enumerate(v2.CATALOG)}
+
+    def days():
+        cur, batch = None, []
+        for r in con.execute("SELECT * FROM c WHERE sid NOT LIKE ? ORDER BY et", (f"%{OPT_SUFFIX}",)):
+            dk = day_key(r[2])
+            if dk != cur and batch:
+                yield batch
+                batch = []
+            cur = dk
+            batch.append(tuple(r))
+        if batch:
+            yield batch
+
+    skipped: dict = {}
+    taken = accept_live(days(), own, CAPITAL, SLOTS, MAX_STRATEGIES_PER_SYMBOL,
+                        tiebreak=lambda r: (-((meta.get(r[1]) or {}).get("turnover_cr") or 0.0),
+                                            cat.get(r[0], 999)),
+                        skipped=skipped)
+    return taken, skipped
+
+
 async def run(days_back: int = 730, symbols: list[str] | None = None, pit: bool = True,
-              save: bool = True) -> dict:
+              save: bool = True, live_rules: bool = False) -> dict:
     from app.core.db import db, instruments_collection
     from app.services import intraday_universe
 
     t0 = time.monotonic()
+    if live_rules:
+        save = False          # a comparison run: never the nightly gate's record until reviewed
     today = datetime.now(IST).date()
     start = today - timedelta(days=days_back)
     members = await intraday_universe.members()
@@ -570,7 +605,7 @@ async def run(days_back: int = 730, symbols: list[str] | None = None, pit: bool 
 
     # pass 2: replay. Candidate trades go to an on-disk table, not a list: two years of
     # 200 names is ~a million candidates, ~350 MB as Python tuples in a 700 MB container.
-    db_path = os.path.join("/tmp", f"v2bt-{os.getpid()}.sqlite")
+    db_path = os.path.join(os.environ.get("V2BT_TMP", "/tmp"), f"v2bt-{os.getpid()}.sqlite")
     if os.path.exists(db_path):
         os.remove(db_path)
     con = sqlite3.connect(db_path)
@@ -622,9 +657,14 @@ async def run(days_back: int = 730, symbols: list[str] | None = None, pit: bool 
     per: dict[str, dict] = {}
     n_taken = 0
     sids = [r[0] for r in con.execute("SELECT DISTINCT sid FROM c")]
+    live, live_skipped = _live_accept(con, meta) if live_rules else (None, {})
     for sid in sorted(set(sids) | {sp.strategy_id for sp in v2.CATALOG}):
-        rows = [tuple(r) for r in con.execute("SELECT * FROM c WHERE sid=? ORDER BY et, prio DESC", (sid,))]
-        tk = accept(rows).get(sid, [])
+        if live is not None and not sid.endswith(OPT_SUFFIX):
+            rows = []
+            tk = live.get(sid, [])
+        else:
+            rows = [tuple(r) for r in con.execute("SELECT * FROM c WHERE sid=? ORDER BY et, prio DESC", (sid,))]
+            tk = accept(rows).get(sid, [])
         n_taken += len(tk) if not sid.endswith(OPT_SUFFIX) else 0
         per[sid] = {
             "selection": metrics([r for r in tk if day_key(r[3]) < cut], sel_days),
@@ -686,6 +726,7 @@ async def run(days_back: int = 730, symbols: list[str] | None = None, pit: bool 
         "holdout_from": str(datetime.fromtimestamp(cut * 86400, timezone.utc).date()) if cut else None,
         "sessions": len(all_days), "selection_sessions": len(sel_days), "holdout_sessions": len(hold_days),
         "symbols": len(syms), "point_in_time": pit,
+        "live_rules": live_rules, "live_rules_skipped": live_skipped,
         "coverage_median": statistics.median([coverage[d] for d in all_days]) if all_days else 0,
         "candidate_trades": n_cand, "taken_trades": n_taken, "trades_file": trades_path,
         "pbo": pbo, "sr_variance_daily": sr_var, "n_trials": len(ids), "gate": GATE,
@@ -715,6 +756,8 @@ def main() -> None:
     ap.add_argument("--dry", action="store_true", help="do not save results")
     ap.add_argument("--no-align", action="store_true", help="trend rules ignore NIFTY's direction")
     ap.add_argument("--slot", type=float, default=None, help="rupees per position (capital = 5 x slot)")
+    ap.add_argument("--live-rules", action="store_true",
+                    help="decide all strategies together under the live engine's caps (never saved)")
     a = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
     global CAPITAL, SLOT
@@ -725,7 +768,7 @@ def main() -> None:
         v2.ALIGN_WITH_NIFTY = False
     print(f"config: slot Rs {SLOT:,.0f}, capital Rs {CAPITAL:,.0f}, NIFTY alignment {v2.ALIGN_WITH_NIFTY}")
     out = asyncio.run(run(a.days, [s for s in a.symbols.split(",") if s] or None,
-                          pit=not a.no_pit, save=not a.dry))
+                          pit=not a.no_pit, save=not a.dry, live_rules=a.live_rules))
     res = out.pop("results")
     print(json.dumps({k: v for k, v in out.items() if k != "created_at"}, default=str, indent=1))
     for r in res:
