@@ -1,0 +1,57 @@
+{
+ "name": "P6_context",
+ "registered_at": "2026-11-03T19:54:04.046976+00:00",
+ "fingerprint": "c245bf8c9090a471",
+ "doc": {
+  "plan": "INTRADAY_STOCKS_AI_UPGRADE_PLAN.md Phase 6 (gate 2: market suits the strategy)",
+  "signals": "The six rules' signals in research dataset y2 (code f8d054b), outcome = simulated net bp at market entry with measured costs (net_bp).",
+  "groups": {
+   "TB (trend and breakout)": [
+    "iv2_donchian_45m",
+    "iv2_donchian_1h",
+    "iv2_vwap_trend_1h",
+    "iv2_macd_trend_1h",
+    "iv2_rsi_momentum_45m"
+   ],
+   "R (reversion)": [
+    "iv2_bollinger_snap_1h"
+   ]
+  },
+  "sector_index": {
+   "Financial Services": "FINNIFTY",
+   "Information Technology": "NIFTYIT",
+   "Healthcare": "NIFTYPHARMA",
+   "Automobile and Auto Components": "NIFTYAUTO",
+   "Fast Moving Consumer Goods": "NIFTYFMCG",
+   "Metals & Mining": "NIFTYMETAL",
+   "Realty": "NIFTYREALTY",
+   "Oil Gas & Consumable Fuels": "NIFTYENERGY",
+   "Power": "NIFTYENERGY",
+   "Media Entertainment & Publication": "NIFTYMEDIA",
+   "Capital Goods": "NIFTYINFRA",
+   "Construction": "NIFTYINFRA",
+   "Construction Materials": "NIFTYINFRA",
+   "Telecommunication": "NIFTYINFRA",
+   "Consumer Services": "NIFTYCONSUMPTION",
+   "Consumer Durables": "NIFTYCONSUMPTION",
+   "Textiles": "NIFTYCONSUMPTION",
+   "Chemicals": "NIFTYCOMMODITIES",
+   "other": "no sector (signal excluded from sector hypotheses)"
+  },
+  "features": "All at the signal bar's close, from closed 15-minute bars: sector index return since the day's open; the stock's return since the open; India VIX at the close and the median of its last 60 daily closes; breadth = share of that day's point-in-time universe trading above its own open at the close. Monthly expiry day from the previous session's F&O bhavcopy (near_expiry of stock futures).",
+  "hypotheses": {
+   "H6_sector": "TB signals whose stock's sector index has moved in the trade's direction since the open (side x sector return > 0) make money.",
+   "H6_relative": "TB signals whose stock has outrun its sector in the trade's direction since the open (side x (stock return - sector return) > 0) make money.",
+   "H6_vix": "TB signals on high-VIX days (VIX at the close above its 60-session median) make money; R signals on low-VIX days (at or below it) make money. Tested as two separate filters.",
+   "H6_breadth": "TB signals with breadth on the trade's side (longs: more than 50% of the universe above its open; shorts: less than 50%) make money.",
+   "H6_expiry": "All six rules' signals on non-expiry days make money."
+  },
+  "metric": "Pooled mean net bp per signal of the filtered signals on the holdout, t-statistic clustered by session; per hypothesis (H6_vix: TB and R separately).",
+  "split": {
+   "development": "4 Nov 2024 - 3 May 2026",
+   "holdout": "4 May 2026 - 3 Nov 2026, opened once"
+  },
+  "decision": "GO for a hypothesis: filtered holdout mean net > 0 AND clustered t >= 2. NO-GO otherwise. Always reported: the unfiltered mean of the same group and the development period.",
+  "multiple_testing": "Six filters tested at once: a GO makes a forward-test candidate, not a verdict. Every feature also goes into the Phase 7 scorer whatever its verdict."
+ }
+}

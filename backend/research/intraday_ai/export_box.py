@@ -86,6 +86,12 @@ for d in db["results_calendar"].find({"kind": "filed"}, {"symbol": 1, "reaction_
 json.dump(out, sys.stdout)
 print(f"symbols {len(out)}", file=sys.stderr)
 ''',
+    # NSE industry label per symbol (fundamental_universe_symbols), for sector context
+    "sectors": HEAD + '''
+out = {d["_id"]: d.get("sector") for d in db["fundamental_universe_symbols"].find({}, {"sector": 1})}
+json.dump(out, sys.stdout)
+print(f"symbols {len(out)}", file=sys.stderr)
+''',
     "h1": HEAD + '''
 U = {d["_id"]: {m["symbol"]: m.get("turnover_cr") for m in d.get("members", [])}
      for d in db["intraday_universe"].find({"_id": {"$gte": "2026-10-01"}}, {"members.symbol": 1, "members.turnover_cr": 1})}
@@ -148,6 +154,8 @@ def main() -> None:
         container("h1", [], "h1_cal.json")
     elif kind == "results":
         container("results", [], "results_reactions.json")
+    elif kind == "sectors":
+        container("sectors", [], "sectors.json")
     else:
         raise SystemExit(__doc__)
 
