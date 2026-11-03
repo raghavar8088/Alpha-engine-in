@@ -92,3 +92,21 @@ Six rules' signals restricted to the day's top 40 expected movers (OLS, walk-for
 | Pooled | −5.16 (−1.92) | −9.28 |
 
 The filter roughly halves the loss for the trend and breakout rules (about +4 bp a signal), but nothing is positive with t ≥ 2. Its rank goes into the Phase 7 scorer as a feature.
+
+## P6_context — **NO-GO** (all five hypotheses)
+Registered `f4347f9`, fingerprint `c245bf8c9090a471`.
+
+Pooled net bp per signal on the holdout (4 May – 3 Nov 2026):
+
+| Filter | Filtered (t) | Whole group |
+|---|---|---|
+| H6_sector: TB with the sector moving their way | −9.34 (−3.97) | −9.29 |
+| H6_relative: TB outrunning their sector | −9.13 (−5.27) | −9.29 |
+| H6_vix (TB, high VIX) | −8.63 (−1.89) | −9.29 |
+| H6_vix (R, low VIX) | −8.10 (−3.39) | −9.19 |
+| H6_breadth: TB with breadth on their side | −8.01 (−2.69) | −9.29 |
+| H6_expiry: all six on non-expiry days | −8.98 (−6.40) | −9.28 |
+
+No context filter changes the result: it confirms the October finding that every market condition loses.
+
+Feature coverage across 147k signals: sector 97.5%, VIX and expiry 100%, breadth 95.3%, delivery 91.0%, expected-move rank 93.7%. Every feature goes into the scorer.

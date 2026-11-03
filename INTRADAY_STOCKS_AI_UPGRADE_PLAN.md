@@ -440,7 +440,7 @@ LLM rules:
 | 3 | **Built, tested** (4 Nov 2026) | Pre-registered tests (`fd2cc2a`): **limit entries NO-GO for all six rules** (fill 93–94%, +1.3 bp a signal, still −4.8 to −8.6 bp net on the holdout); **book-based cost model not adopted** (6% better than bands, 10% needed). Depth recorder `intraday_depth_recorder` (both sides' five levels with quantities at every signal of the six rules). Server test 10/10. Decision point D1 reached: only the scorer can close the gap. |
 | 4 | **Built, tested** (4 Nov 2026) | `gated_books`: books A (all signals) and B (six rules), ₹10 lakh each. Event-driven from the engine, with every decision logged; risk-based size, reward/risk, open/total-risk/stock/industry caps, daily stop, drawdown pause. API `/v2/gated`; panel on the tournament tab (hidden until the backend is deployed). Server test 10/10. The comparison month starts once deployed. |
 | 5 | **Tested** (4 Nov 2026) | Pre-registered (`668be3e`): **LightGBM move model not adopted** (rank IC 0.238 vs OLS 0.246 on the holdout; worse in development too) — the scanner keeps its OLS, no production change. **Big-mover filter NO-GO** (top 40 halves the loss, pooled holdout −9.3 to −5.2 bp a signal; MACD 1h +1.3 bp, t 0.28). The expected-move rank becomes a scorer feature. |
-| 6 | to do | |
+| 6 | **Tested** (4 Nov 2026) | Context features for every signal (`context.py`: sector vs NIFTY, stock vs sector, VIX regime, breadth, expiry, FII positioning, delivery, results day, expected-move rank). Pre-registered (`f4347f9`): **all five context filters NO-GO** — none moves the holdout net (−9.3 bp a signal either way). The features feed the scorer. |
 | 7 | to do | |
 | 8 | to do | |
 | 9 | to do | |
