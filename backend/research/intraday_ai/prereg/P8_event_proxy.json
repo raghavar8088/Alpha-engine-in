@@ -1,0 +1,22 @@
+{
+ "name": "P8_event_proxy",
+ "registered_at": "2026-11-03T20:02:29.454619+00:00",
+ "fingerprint": "a146df98d9a8d34a",
+ "doc": {
+  "plan": "INTRADAY_STOCKS_AI_UPGRADE_PLAN.md Phase 8 (event risk), tested before any LLM is paid for",
+  "hypothesis": "The six rules' signals in stocks that have just made a company announcement do worse than the rest, so an event-risk gate would cut losses. If even keyword-defined material announcements show no such effect, an LLM classifier has little to sharpen.",
+  "announcements": "NSE corporate announcements (/api/corporate-announcements, equities), one calendar day per request, 4 Nov 2025 - 3 Nov 2026, each with the exchange's dissemination time (exchdisstime, else an_dt).",
+  "signals": "The six rules' filled signals in research dataset y2 (code f8d054b), net_bp at market entry with measured costs.",
+  "affected": {
+   "H8_any": "the stock had ANY announcement disseminated after 15:30 on the previous calendar day and at or before the signal time",
+   "H8_material": "same window, but only announcements whose subject (desc) contains, case-insensitive, one of: financial result, outcome of board meeting, acquisition, amalgamation, merger, scheme of arrangement, credit rating, order, contract, resignation, cessation, change in directorate, litigation, dispute, penalty, fraud, default, insolvency, buyback, fund raising, preferential issue, qip, block deal, pledge"
+  },
+  "metric": "Per session with both kinds of signal: mean net of affected minus mean net of unaffected signals; the mean of that daily difference and its t-statistic.",
+  "split": {
+   "development": "4 Nov 2025 - 3 May 2026",
+   "holdout": "4 May 2026 - 3 Nov 2026, opened once"
+  },
+  "decision": "ADOPT an event gate (off by default until then) for a hypothesis if the holdout difference is <= -2 bp with t <= -2 AND the development difference is negative. Otherwise NO-GO for that proxy; the LLM classifier then has to show its own value on a labelled set before any gate uses it.",
+  "always_reported": "share of signals affected; development numbers; the unaffected signals' mean net."
+ }
+}
