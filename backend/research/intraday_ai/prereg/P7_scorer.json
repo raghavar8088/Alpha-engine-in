@@ -1,0 +1,71 @@
+{
+ "name": "P7_scorer",
+ "registered_at": "2026-11-03T19:56:58.787613+00:00",
+ "fingerprint": "191955bf7c202087",
+ "doc": {
+  "plan": "INTRADAY_STOCKS_AI_UPGRADE_PLAN.md Phase 7 (AI model 2)",
+  "hypothesis": "A model trained only on earlier signals can tell which of the six rules' signals will net money after costs: the signals it scores highest net more than zero, and more than its lowest-scored signals by at least the cost gap.",
+  "data": "DATA/runs/y2/features_ctx.jsonl.gz: the six rules' filled signals (research dataset y2, code f8d054b) with point-in-time context (context.py, commit bc20ca6). Label: net_bp, the simulated net at market entry with measured costs (pessimistic reading).",
+  "features": [
+   "side",
+   "mins",
+   "dow",
+   "stop_pct",
+   "tgt_pct",
+   "rr",
+   "max_bars",
+   "prio",
+   "atr_pct",
+   "atr_day_pct",
+   "day_ret",
+   "gap",
+   "vwap_dist",
+   "range_pos",
+   "day_range_pct",
+   "or_range_pct",
+   "pdh_dist",
+   "pdl_dist",
+   "bar_ret",
+   "ret_3",
+   "ret_5d",
+   "rvol",
+   "rvol_rank",
+   "nifty",
+   "nifty_raw",
+   "sector_ret",
+   "stock_vs_sector",
+   "sector_vs_nifty",
+   "vix",
+   "vix_rel",
+   "breadth_side",
+   "expiry_day",
+   "fii_idx_net_side",
+   "deliv_pct_prev",
+   "results_day",
+   "em_pred",
+   "em_rank",
+   "rule"
+  ],
+  "derived": {
+   "vix_rel": "vix / vix_med60 - 1",
+   "breadth_side": "breadth for longs, 1 - breadth for shorts",
+   "fii_idx_net_side": "side x fii_idx_net",
+   "rule": "the strategy id, categorical"
+  },
+  "excluded": "every outcome field: filled, entry_t, exit_t, ep, xp, qty, gross, fees, net, reason, gross_bp, net_bp, hold_min",
+  "model": "LightGBM regressor, fixed settings, no tuning: n_estimators=400, learning_rate=0.03, num_leaves=31, min_child_samples=500, subsample=0.8 (every iteration), colsample_bytree=0.8, reg_lambda=5.0, random_state=11, objective l2; the training target winsorised at the training sample's 1st and 99th percentiles; 'rule' as a categorical feature.",
+  "walk_forward": "Expanding window: refitted at the start of every calendar month on all signals of earlier sessions, scoring that month only. First scored month: May 2025.",
+  "gate": "Take a signal only if its score is at or above the 80th percentile of that month's model's scores on its own training signals (a cutoff known before the month starts).",
+  "leakage_controls": "Before any result is read, and any failure = NO-GO: (1) the feature list contains no outcome field; (2) label shuffle — the same procedure with each training month's labels shuffled must give a holdout top-minus-bottom quintile spread with |t| < 2.",
+  "metrics": {
+   "gated": "pooled mean net bp per gated signal on the holdout, t-statistic clustered by session",
+   "spread": "holdout signals split into quintiles by score (pooled); for each session with signals in both, the top quintile's mean net minus the bottom's; the mean of that daily spread and its t-statistic"
+  },
+  "split": {
+   "development": "May 2025 - 3 May 2026",
+   "holdout": "4 May 2026 - 3 Nov 2026, opened once"
+  },
+  "decision": "GO if: gated holdout mean net > 0 with clustered t >= 3.0 (stricter than 2: this is about the 13th filter tried in this programme) AND the quintile spread >= 4 bp with t >= 2 AND the shuffle control passes. Otherwise NO-GO — plan decision point D2: AI signal work stops, the ledger, gated books and review stay as risk tools.",
+  "always_reported": "per-rule gated means; the development period; the share of signals gated."
+ }
+}
