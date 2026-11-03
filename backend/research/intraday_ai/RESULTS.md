@@ -61,3 +61,34 @@ Reading the results:
 - **Net effect:** about 1.3 bp better per signal, but every rule stays clearly negative after the measured exit costs and charges.
 
 Plan decision point D1: limit entries fail for all six, so only the signal scorer (Phase 7) can close the gap, which is now 5–9 bp per signal.
+
+## P5_move_model — **KEEP OLS**
+Registered `668be3e`, fingerprint `dd5fcc770aeeb2d0`.
+
+64,304 stock-days (249 stocks, 480 sessions, point-in-time top 200), walk-forward by month.
+
+| | Development (247 days) | Holdout (127 days) |
+|---|---|---|
+| Rank IC, OLS (production form) | 0.244 | 0.246 |
+| Rank IC, LightGBM (+10 features) | 0.216 | 0.238 |
+| Top-20 move, OLS (bp) | 153.9 | 164.9 |
+| Mean move, all stocks (bp) | 98.3 | 102.9 |
+
+The gradient-boosted model is worse in both periods, so the scanner keeps its OLS. The OLS genuinely ranks movers: its top 20 move about 60% more than the average stock.
+
+## P5_big_mover — **NO-GO** (all six rules and the pool)
+Registered `668be3e`, fingerprint `aca4446fae55ee64`.
+
+Six rules' signals restricted to the day's top 40 expected movers (OLS, walk-forward). Holdout net bp per signal:
+
+| Rule | Filtered (t) | All signals |
+|---|---|---|
+| donchian_45m | −4.92 (−1.07) | −10.49 |
+| rsi_momentum_45m | −4.72 (−1.57) | −9.64 |
+| donchian_1h | −3.83 (−0.82) | −9.39 |
+| macd_trend_1h | +1.30 (0.28) | −6.71 |
+| bollinger_snap_1h | −9.26 (−2.02) | −9.19 |
+| vwap_trend_1h | −7.31 (−2.66) | −9.11 |
+| Pooled | −5.16 (−1.92) | −9.28 |
+
+The filter roughly halves the loss for the trend and breakout rules (about +4 bp a signal), but nothing is positive with t ≥ 2. Its rank goes into the Phase 7 scorer as a feature.
