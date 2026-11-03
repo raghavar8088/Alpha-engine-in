@@ -621,9 +621,13 @@ export default function IntradayStocksPage() {
         have triggered — found on the stream&rsquo;s minute bars, stop first when one minute
         crosses both — and every market fill pays slippage by liquidity plus Angel One&rsquo;s
         intraday costs. The record restarted on 5 Oct 2026; nothing before it is comparable.
-        From 4 Nov 2026 slippage is the cost measured from Angel’s order book (1.5–4.1 bp a
-        side on a ₹10 lakh order, by liquidity) instead of the modelled 1–4 bp, so compare P&amp;L
-        only within one side of that date.
+        {(status as (IntradayDeskStatus & { cost_model?: string }) | null)?.cost_model?.startsWith("h1-measured") && (
+          <>
+            {" "}From 4 Nov 2026 slippage is the cost measured from Angel’s order book (1.5–4.1 bp a
+            side on a ₹10 lakh order, by liquidity) instead of the modelled 1–4 bp, so compare P&amp;L
+            only within one side of that date.
+          </>
+        )}
       </div>
 
       {status?.paused && (

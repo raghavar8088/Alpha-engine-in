@@ -27,6 +27,7 @@ from app.core.db import (
     intraday_lab_trades_collection,
 )
 from app.services.intraday_backtest import run_intraday_backtest
+from app.services.intraday_fills import COST_CUTOVER as _COST_CUTOVER, COST_MODEL as _COST_MODEL
 from app.services.call_engine import IST
 from app.services.promotion_gate import MIN_TRADES as PG_MIN_TRADES
 from app.services.strategy_rank import day_factors, rank_rows
@@ -261,6 +262,9 @@ async def status(current_user: dict = Depends(get_current_user)):
         "feed_source": "angel" if angel_on else ("dhan" if dhan_on else "none"),
         "paused": bool(state.get("paused")),
         "open_positions_detail": positions,
+        # the fill cost model this backend charges; the page explains the 4 Nov cutover only
+        # once the backend that charges it is the one answering
+        "cost_model": _COST_MODEL, "cost_cutover": _COST_CUTOVER,
     }
 
 
