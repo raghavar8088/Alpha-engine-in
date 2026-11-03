@@ -1,0 +1,16 @@
+{
+ "name": "P3_cost_model",
+ "registered_at": "2026-11-03T19:35:26.756584+00:00",
+ "fingerprint": "a0b904044f6b0e0b",
+ "doc": {
+  "plan": "INTRADAY_STOCKS_AI_UPGRADE_PLAN.md Phase 3",
+  "hypothesis": "A model of a Rs 10 lakh market order's cost from what the book shows at the decision (half-spread, how much of the order the visible five levels cover, the stock's turnover, time of day, side) predicts the measured cost better than the turnover-band averages now in production.",
+  "data": "H1 entry samples (intraday_h1_samples, phase 'entry', measurable), 12 Oct - 3 Nov 2026, joined to that day's stored universe turnover.",
+  "train": "samples before 2026-10-27",
+  "test": "samples 2026-10-27 to 2026-11-03, opened once",
+  "model": "Ordinary least squares on cost_bp_vs_ltp with features: half_spread_bp, depth_covered_pct, insufficient_depth (0/1), log10(turnover crore), minutes since 09:15, minutes squared, side (BUY=1). Training targets winsorised at the training sample's 1st and 99th percentiles.",
+  "baseline": "The production form rebuilt from the TRAINING samples only: 10%-trimmed mean cost per turnover band (>= 1,000 / 300-1,000 / 150-300 / < 150 crore).",
+  "metric": "Mean absolute error on the test samples (targets not winsorised).",
+  "decision": "ADOPT for live order decisions (market vs limit, order size cap) only if the model's test MAE <= 0.90 x the baseline's. Otherwise keep the band model. Paper fills keep the band model either way until a forward check."
+ }
+}

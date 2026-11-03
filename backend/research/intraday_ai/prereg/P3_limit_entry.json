@@ -1,0 +1,30 @@
+{
+ "name": "P3_limit_entry",
+ "registered_at": "2026-11-03T19:35:26.756584+00:00",
+ "fingerprint": "7eb11697337e9c15",
+ "doc": {
+  "plan": "INTRADAY_STOCKS_AI_UPGRADE_PLAN.md Phase 3 (October plan H2)",
+  "hypothesis": "For each of the six rules with a real edge before costs, entering with a limit order at the signal price instead of a market order nets more than zero per signal after Angel's charges and the measured cost of market exits.",
+  "rules": [
+   "iv2_donchian_45m",
+   "iv2_donchian_1h",
+   "iv2_vwap_trend_1h",
+   "iv2_macd_trend_1h",
+   "iv2_rsi_momentum_45m",
+   "iv2_bollinger_snap_1h"
+  ],
+  "signals": "Every signal of the six rules in the research dataset (runner.py --name y2 --live-rules --features six; code at commit f8d054b), sessions 4 Nov 2024 - 3 Nov 2026. Each signal is judged on its own; competition for slots is the forward test's question (Phase 10).",
+  "limit_order": "Posted at the signal price (the signal bar's close) at the signal close. Fills only if one of the next three 5-minute bars (15 minutes) trades through it by max(Rs 0.05, 1 bp of price): BUY when the bar's low <= limit - that, SELL when its high >= limit + that. Fill AT the limit, no entry slippage. Unfilled = no trade. If the fill bar also reaches the stop, the trade counts as stopped (pessimistic).",
+  "after_fill": "The rule's own stop and target distances from the fill (its absolute stop/target levels where the rule gives them; a target already passed = no trade), its time stop in its own timeframe counted from the fill, end of day at the closing-auction-aware square-off (CAS: open of the 15:00 5-minute bar; others: close of the 15:10 bar). Exits walk 5-minute bars: stop first when one bar reaches both; a bar opening beyond a level fills at that open. Stops, time and end-of-day exits pay the measured per-side cost (intraday_fills.slippage_bp at Rs 10 lakh, the stock's point-in-time 20-session turnover band); targets pay none.",
+  "baseline": "The same signals entered at market: the signal price plus the measured cost, then the identical 5-minute exit walk.",
+  "charges": "Angel One intraday round trip (angel_fees.round_trip) on qty = floor(Rs 10 lakh / fill).",
+  "split": {
+   "development": "4 Nov 2024 - 3 May 2026",
+   "holdout": "4 May 2026 - 3 Nov 2026, opened once"
+  },
+  "metric": "Mean net bp per SIGNAL on the holdout (unfilled signals count as 0), with a t-statistic clustered by session.",
+  "decision": "GO for a rule: holdout mean net per signal > 0 AND clustered t >= 2 AND fill rate >= 40%. NO-GO otherwise.",
+  "always_reported": "fill rate; adverse selection = mean gross of filled limit trades minus mean gross of the same signals at market; the gross the market entry earned on the signals the limit missed; the development period's numbers beside the holdout's.",
+  "multiple_testing": "Six rules at once: a GO at t >= 2 makes a candidate for the forward test (Phase 10), not a verdict."
+ }
+}

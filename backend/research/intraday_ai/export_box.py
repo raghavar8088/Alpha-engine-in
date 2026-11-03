@@ -108,9 +108,16 @@ def files(tf: str) -> None:
     """Stream the box's bar files (or NSE archives) as a tar, unpacked under DATA/intraday."""
     tgz = DATA / "exports" / f"{tf}.tgz"
     _ssh(f"sudo tar -C {VOLUME} -czf - {tf}", None, tgz)
+    unpack(tf)
+
+
+def unpack(tf: str) -> None:
+    """Python's tarfile with the 'data' filter (Windows tar reads 'D:' as a remote host)."""
+    import tarfile
     dest = DATA / "intraday"
     dest.mkdir(parents=True, exist_ok=True)
-    subprocess.run(["tar", "-xzf", str(tgz), "-C", str(dest)], check=True)
+    with tarfile.open(DATA / "exports" / f"{tf}.tgz", "r:gz") as t:
+        t.extractall(dest, filter="data")
     print(f"unpacked {tf}: {len(list((dest / tf).iterdir()))} entries")
 
 
