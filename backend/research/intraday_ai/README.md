@@ -19,6 +19,9 @@ has 1.9 GB of RAM and the backend sits near its 800 MB limit, so research never 
 | `fetch_announcements.py`, `event_proxy.py` | Phase 8: a year of NSE announcements, and P8_event_proxy. |
 | `llm_eval.py` | Phase 8: 300 announcements for hand-labelling, then each LLM provider scored against the labels. |
 | `RESULTS.md` | Every pre-registered outcome, with the numbers that decided it. |
+| `audit54.py` | The 54-strategy audit's replay: every signal, every simulated trade, and the solo / tournament books from one run (`INTRADAY_STOCKS_54_STRATEGY_AUDIT.md`). |
+| `audit54_checks.py` | The audit's code checks: look-ahead, live window, swallowed errors, indicator definitions, bar structure, evaluation-order independence. |
+| `audit54_analyze.py`, `audit54_tables.py` | The audit's per-strategy numbers (`tables.json`) and markdown tables (`tables.md`), with day-clustered t. |
 
 The scripts that need LightGBM run with the research venv (`D:/intraday_ai_data/venv`).
 
