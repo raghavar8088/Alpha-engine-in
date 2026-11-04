@@ -433,6 +433,19 @@ LLM rules:
 
 ## 8. Progress
 
+**Deployed:** 4 Nov 2026 at 22:20 IST, at the owner's request ("deploy the code"). The server runs commit `ef63d56`; the 17 changed files were copied in place after an md5 check of the 9 they replaced, and the backup is in `/home/ubuntu/backups/intraday-ai-20261104-165050`.
+
+Post-deploy checks:
+- health ok; backend 516–541 MB of 800 MB;
+- cost model `h1-measured-2026-11-04`;
+- ledger, gated books, depth recorder and event store on;
+- AI `not_configured` (no key yet; default model `claude-opus-5-5`, server-side refusal fallback on);
+- the first daily review stored: 448 tournament trades, +₹19,452, no flags.
+
+**5 Nov is the first session** with measured costs, the ledger, the gated accounts and the depth recorder.
+
+`COST_CUTOVER` was corrected to 5 Nov in commit `6809873`. That change is display-only and ships with the next deploy.
+
 | Phase | Status | Notes |
 |---|---|---|
 | 1 | **Built, tested** (4 Nov 2026) | Decision ledger (`intraday_signal_ledger`, local MongoDB `alpha_engine_intraday`, 180-day retention) with rule and gate versions on every row and position. Measured costs: 1.50 / 2.85 / 3.73 / 4.12 bp a side by turnover band; pre-registered rules on the legacy model. NSE event collectors (`nse_events`: ban list, bulk/block deals, announcements). Functional test 21/21 on the server, against a scratch database. APIs: `/api/intraday-lab/v2/ledger`, `/v2/ledger/rows`. |
