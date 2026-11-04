@@ -127,3 +127,17 @@ LightGBM on 38 point-in-time features, walk-forward by month; the gate takes sco
 The scorer's ability to rank signals in development did not survive unseen data. Per rule on the holdout, only macd_trend_1h's gated signals reach break-even (+0.31 bp, t 0.06).
 
 Decision point D2: the signal-quality track ends here. The decision ledger, gated paper accounts and daily review stay as risk and record-keeping tools, and the trained model is **not** deployed.
+
+## P8_event_proxy — **NO-GO** (both proxies)
+Registered `0858c06`, fingerprint `a146df98d9a8d34a`.
+
+368 days of NSE announcements (4 Nov 2025 – 3 Nov 2026, none missing); 93,638 six-rule signals. The measure is the daily mean net of signals in stocks that had just announced something, minus the rest.
+
+| Proxy | Signals affected | Development diff (t) | Holdout diff (t) | Holdout affected / unaffected |
+|---|---|---|---|---|
+| H8_any: any announcement since the previous day's 15:30 | 20–23% | −0.48 bp (−0.22) | +1.26 bp (0.54) | −10.8 / −8.8 bp |
+| H8_material: keyword-material subject | 3.7–4.2% | +2.75 bp (0.71) | −4.04 bp (−0.82) | −14.7 / −9.0 bp |
+
+Fresh announcements don't measurably change how these signals do. The material subset's holdout dip is not significant, and development points the other way.
+
+The event gate stays **off**. An LLM classifier must first show its own value on the hand-labelled set (`llm_eval.py`: 300 announcements, 111 subjects, written to `D:/intraday_ai_data/llm_eval/label_me.csv`) before any gate uses it.
