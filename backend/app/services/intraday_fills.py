@@ -39,7 +39,7 @@ from app.services.angel_stream import stream
 # half-spread; until Phase 3's cost model replaces this, cost = half-spread + (measured -
 # half-spread) x sqrt(notional / Rs 10 lakh) — the square root being the cautious choice.
 COST_MODEL = "h1-measured-2026-11-04"
-COST_CUTOVER = "2026-11-04"        # the first session filled under this model (IST)
+COST_CUTOVER = "2026-11-05"        # the first session filled under this model (deployed 4 Nov, 22:20 IST)
 _MEASURED_NOTIONAL = 1_000_000.0
 _BANDS = ((1000.0, 1.50, 0.72), (300.0, 2.85, 1.32), (150.0, 3.73, 1.54), (0.0, 4.12, 1.78))
 
