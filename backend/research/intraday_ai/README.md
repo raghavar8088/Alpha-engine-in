@@ -11,6 +11,16 @@ has 1.9 GB of RAM and the backend sits near its 800 MB limit, so research never 
 | `features.py` | Point-in-time features of each signal, from the context the rule itself read, plus the simulated outcome as the label. |
 | `fidelity.py` | Backtest vs the live tournament, trade by trade, over the live period. |
 | `prereg.py`, `prereg/` | Pre-registrations: the hypothesis, metric, sample and decision rule are written and committed **before** a test runs, and never edited. |
+| `cost_model.py` | Phase 3: P3_cost_model, a book-based order-cost model vs the turnover bands. |
+| `limit_sim.py` | Phase 3: P3_limit_entry, limit vs market entries on 5-minute bars. |
+| `move_model.py` | Phase 5: P5_move_model (LightGBM vs the scanner's OLS) and P5_big_mover. |
+| `context.py` | Phase 6: point-in-time context features, and the P6_context tests. |
+| `scorer.py` | Phase 7: P7_scorer, the walk-forward LightGBM signal scorer with a shuffle control. |
+| `fetch_announcements.py`, `event_proxy.py` | Phase 8: a year of NSE announcements, and P8_event_proxy. |
+| `llm_eval.py` | Phase 8: 300 announcements for hand-labelling, then each LLM provider scored against the labels. |
+| `RESULTS.md` | Every pre-registered outcome, with the numbers that decided it. |
+
+The scripts that need LightGBM run with the research venv (`D:/intraday_ai_data/venv`).
 
 Data lives outside the repo, in `INTRADAY_AI_DATA` (default `D:/intraday_ai_data`):
 `intraday/15m`, `intraday/5m`, `intraday/nse`, `exports/*`, `pkg/<commit>`, `runs/<name>`.
