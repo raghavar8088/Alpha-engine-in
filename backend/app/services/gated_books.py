@@ -47,7 +47,14 @@ BOOKS = {
 }
 CONFIG = {"risk_per_trade_pct": 0.5, "min_reward_to_risk": 1.0, "max_open": 10, "max_open_risk_pct": 3.0,
           "max_per_stock": 1, "max_per_sector": 3, "daily_loss_stop_pct": 3.0, "drawdown_pause_pct": 8.0,
-          "est_charges_bp": 6.0}
+          "est_charges_bp": 6.0,
+          # Phase 8: refuse a stock with a high-materiality announcement in the last N minutes
+          # (event_classifier). OFF until a pre-registered test shows it cuts losses.
+          "event_gate": os.getenv("GATED_EVENT_GATE", "off").strip().lower() in ("1", "on", "true", "yes"),
+          "event_gate_minutes": 120,
+          # Phase 9: automatic demotion — after this many closed copies of one rule in a book, a
+          # mean net per trade with t <= demote_t pauses that rule in that book (owner resumes it).
+          "demote_min_trades": 30, "demote_t": -2.0}
 CONFIG_VERSION = hashlib.sha256(json.dumps(CONFIG, sort_keys=True).encode()).hexdigest()[:12]
 ENABLED = ledger.ENABLED and os.getenv("GATED_BOOKS", "1").strip().lower() not in ("0", "false", "no", "off")
 RECONCILE_EVERY_S = 300
@@ -93,6 +100,7 @@ async def _load() -> None:
         doc = await db[STATE].find_one({"_id": book}) or {}
         _state[book] = {"realized": float(doc.get("realized", 0.0)), "peak": float(doc.get("peak", cfg["capital"])),
                         "day": doc.get("day"), "day_pnl": float(doc.get("day_pnl", 0.0)),
+                        "rules": doc.get("rules") or {}, "paused": doc.get("paused") or {},
                         "open": {p["parent_id"]: p async for p in db[POS].find({"book": book, "status": "OPEN"})}}
     _loaded = True
 
@@ -101,7 +109,29 @@ async def _save_state(book: str) -> None:
     s = _state[book]
     await ledger._db()[STATE].replace_one({"_id": book}, {
         "_id": book, "realized": round(s["realized"], 2), "peak": round(s["peak"], 2), "day": s["day"],
-        "day_pnl": round(s["day_pnl"], 2), "config_version": CONFIG_VERSION, "updated_at": _now()}, upsert=True)
+        "day_pnl": round(s["day_pnl"], 2), "rules": s.get("rules", {}), "paused": s.get("paused", {}),
+        "config_version": CONFIG_VERSION, "updated_at": _now()}, upsert=True)
+
+
+def _record_rule(book: str, sid: str, net_bp: float) -> dict | None:
+    """Running per-rule record in a book; returns the demotion evidence when it trips."""
+    s = _state[book]
+    r = s.setdefault("rules", {}).setdefault(sid, {"n": 0, "s": 0.0, "ss": 0.0})
+    r["n"] += 1
+    r["s"] += net_bp
+    r["ss"] += net_bp * net_bp
+    n = r["n"]
+    if sid in s.setdefault("paused", {}) or n < CONFIG["demote_min_trades"]:
+        return None
+    mean = r["s"] / n
+    var = max((r["ss"] - n * mean * mean) / (n - 1), 0.0)
+    t = mean / math.sqrt(var / n) if var > 0 else 0.0
+    if t > CONFIG["demote_t"]:
+        return None
+    ev = {"at": _now().isoformat(), "trades": n, "mean_net_bp": round(mean, 2), "t": round(t, 2),
+          "config_version": CONFIG_VERSION}
+    s["paused"][sid] = ev
+    return ev
 
 
 async def _sector(sym: str) -> str:
@@ -138,6 +168,8 @@ async def _decide(book: str, p: dict) -> tuple[str | None, int, dict]:
     equity = capital + s["realized"]
     s["peak"] = max(s["peak"], equity)
     detail = {"equity": round(equity, 2)}
+    if p["strategy_id"] in s.get("paused", {}):
+        return "strategy paused (demoted)", 0, detail
     if equity < s["peak"] * (1 - CONFIG["drawdown_pause_pct"] / 100):
         return "drawdown pause", 0, detail
     if s["day_pnl"] <= -CONFIG["daily_loss_stop_pct"] / 100 * capital:
@@ -150,6 +182,10 @@ async def _decide(book: str, p: dict) -> tuple[str | None, int, dict]:
     detail["sector"] = sector
     if sum(1 for c in s["open"].values() if c.get("sector") == sector) >= CONFIG["max_per_sector"]:
         return "sector limit", 0, detail
+    if CONFIG["event_gate"]:
+        from app.services import event_classifier
+        if await event_classifier.recent_high(p["symbol"], CONFIG["event_gate_minutes"]):
+            return "event risk", 0, detail
     entry = float(p["entry_price"])
     stop_dist, costs = _risk_ps(p)
     if stop_dist <= 0:
@@ -219,6 +255,14 @@ async def _close(parent_id: str, exit_price: float, reason: str) -> None:
             await db[POS].update_one({"_id": c["_id"], "status": "OPEN"}, {"$set": {
                 "status": "CLOSED", "exit_price": exit_price, "exit_reason": reason, "gross_pnl": gross,
                 "fees": round(fees, 2), "realized_pnl": net, "closed_at": _now(), "closed_on": _today()}})
+            notional = c["entry_price"] * c["qty"]
+            demoted = _record_rule(book, c["strategy_id"], net / notional * 1e4) if notional else None
+            if demoted:
+                await db[DEC].insert_one({"book": book, "d": _today(), "t": _now(), "parent_id": parent_id,
+                                          "strategy_id": c["strategy_id"], "symbol": c["symbol"], "side": c["side"],
+                                          "decision": "demoted", "why": "rule paused: forward record significantly negative",
+                                          "qty": 0, "config_version": CONFIG_VERSION, **demoted})
+                logger.warning("[gated] %s paused in book %s: %s", c["strategy_id"], book, demoted)
             await _save_state(book)
 
 
@@ -303,7 +347,10 @@ async def summary() -> dict:
             "trades": len(closed), "win_rate": round(wins / len(closed), 3) if closed else None,
             "open": [{k: v for k, v in c.items() if k != "_id"} | {"opened_at": c["opened_at"].isoformat()
                      if isinstance(c.get("opened_at"), datetime) else c.get("opened_at")} for c in s["open"].values()],
-            "today_decisions": reasons, "rules": list(cfg["rules"]) if cfg["rules"] else "all"})
+            "today_decisions": reasons, "rules": list(cfg["rules"]) if cfg["rules"] else "all",
+            "paused_rules": s.get("paused", {}),
+            "rule_records": {sid: {"trades": r["n"], "mean_net_bp": round(r["s"] / r["n"], 2)}
+                             for sid, r in s.get("rules", {}).items() if r.get("n")}})
     return out
 
 

@@ -41,6 +41,7 @@ TICK_S = 30
 GAPFILL_EVERY_S = 300
 BACKFILL_RETRY_S = 1800             # a complete symbol costs no request (see _windows)
 ARCHIVE_RETRY_S = 1800
+EVENTS_EVERY_S = 300                # Phase 8: today's company announcements (event_classifier)
 UNIVERSE_FROM = "08:45"
 RECONCILE_FROM = "15:50"
 
@@ -86,6 +87,20 @@ async def _archive_job() -> None:
         logger.exception("NSE events catch-up failed")
 
 
+async def _review_job() -> None:
+    from app.services import intraday_daily_review
+    r = await intraday_daily_review.build()
+    logger.info("daily review %s: %d flag(s), summary %s", r["_id"], len(r.get("flags", [])),
+                (r.get("summary") or {}).get("status"))
+
+
+async def _events_job() -> None:
+    from app.services import event_classifier
+    r = await event_classifier.poll()
+    if r.get("new") or r.get("classified"):
+        logger.info("company announcements: %s", r)
+
+
 async def _train_if_stale() -> None:
     from datetime import timedelta, timezone
 
@@ -126,6 +141,7 @@ async def intraday_data_loop() -> None:
     last_gapfill = 0.0
     last_backfill = 0.0
     last_archive = 0.0
+    last_events = 0.0
     try:
         await results_calendar.ensure_indexes()
     except Exception:  # noqa: BLE001
@@ -176,6 +192,11 @@ async def intraday_data_loop() -> None:
                 await _snapshots(now, today)
 
             # ── in the session ───────────────────────────────────────────────────
+            if trading and "08:30" <= hhmm <= "15:35" and time.monotonic() - last_events > EVENTS_EVERY_S:
+                last_events = time.monotonic()
+                _spawn("events", _events_job())
+            if trading and hhmm >= "15:50" and _once("review", today):
+                _spawn("review", _review_job())          # Phase 9: the day's review
             if trading and "09:30" <= hhmm <= "15:35" and time.monotonic() - last_gapfill > GAPFILL_EVERY_S:
                 last_gapfill = time.monotonic()
                 r = await intraday_backfill.gapfill(now)

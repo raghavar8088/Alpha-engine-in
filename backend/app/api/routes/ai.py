@@ -19,12 +19,14 @@ router = APIRouter(prefix="/api/ai", tags=["ai"])
 @router.get("/status", response_model=AIStatus)
 async def status(_current_user: dict = Depends(get_current_user)):
     provider = get_provider()
+    name = getattr(provider, "name", "anthropic")
     return AIStatus(
         configured=provider.configured,
-        model=DEFAULT_MODEL,
-        note="ANTHROPIC_API_KEY not set — endpoints return status='not_configured' until it is"
+        model=getattr(provider, "model", None) or DEFAULT_MODEL,
+        note=(f"{name}: {'OPENAI_API_KEY and OPENAI_MODEL' if name == 'openai' else 'ANTHROPIC_API_KEY'} "
+              "not set — endpoints return status='not_configured' until it is")
         if not provider.configured
-        else "live",
+        else f"live ({name})",
     )
 
 

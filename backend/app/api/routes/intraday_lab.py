@@ -405,6 +405,25 @@ async def v2_gated(current_user: dict = Depends(get_current_user)):
     return await gated_books.summary()
 
 
+@router.get("/v2/review")
+async def v2_review(day: str | None = Query(default=None), current_user: dict = Depends(get_current_user)):
+    """The stored daily review (Phase 9): ledger completeness, the tournament's day, the gated
+    books with the forward monitor, recorders, real-money status, flags and the LLM note."""
+    from app.services import intraday_daily_review
+    return await intraday_daily_review.get(day) or {"day": day, "review": None,
+                                                    "note": "built after 15:50 IST on trading days"}
+
+
+@router.get("/v2/events")
+async def v2_events(day: str | None = Query(default=None), universe: bool = Query(default=False),
+                    limit: int = Query(default=300, ge=1, le=2000),
+                    current_user: dict = Depends(get_current_user)):
+    """Company announcements stored for a day (Phase 8), with the LLM's classification where
+    a provider is configured — category, materiality, direction, confidence, quoted evidence."""
+    from app.services import event_classifier
+    return await event_classifier.listing(day, universe, limit)
+
+
 @router.get("/v2/gated/positions")
 async def v2_gated_positions(book: str = Query(default="A"), status: str = Query(default="CLOSED"),
                              limit: int = Query(default=200, ge=1, le=1000),

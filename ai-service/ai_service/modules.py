@@ -5,7 +5,8 @@ function returns `{"status": "ok", ...}` or `{"status": "not_configured", "messa
 
 import json
 
-from ai_service.provider import AnthropicProvider, ProviderNotConfiguredError, get_provider
+from ai_service.provider import (AnthropicProvider, ProviderError, ProviderNotConfiguredError,
+                                 ProviderRefusalError, get_provider)
 from ai_service.schemas import (
     CHART_EXPLANATION_SCHEMA,
     NEWS_SUMMARY_SCHEMA,
@@ -23,12 +24,17 @@ SYSTEM_QUANT_ANALYST = (
 )
 
 
-async def _run(provider: AnthropicProvider, prompt: str, schema: dict, max_tokens: int = 1024) -> dict:
+async def _run(provider: AnthropicProvider, prompt: str, schema: dict, max_tokens: int = 16000) -> dict:
+    """16k tokens: current models think before answering, and a cut-off answer is an error."""
     try:
         raw = await provider.complete(SYSTEM_QUANT_ANALYST, prompt, max_tokens=max_tokens, json_schema=schema)
         return {"status": "ok", **json.loads(raw)}
     except ProviderNotConfiguredError as exc:
         return {"status": "not_configured", "message": str(exc)}
+    except ProviderRefusalError as exc:
+        return {"status": "refused", "message": str(exc)}
+    except ProviderError as exc:
+        return {"status": "error", "message": str(exc)}
 
 
 async def explain_trade(trade: dict, provider: AnthropicProvider | None = None) -> dict:
