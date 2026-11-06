@@ -1,0 +1,338 @@
+[
+ {
+  "id": "1",
+  "in_data": true,
+  "prev_close": 23153.25,
+  "lo": 23074.6,
+  "hi": 23175.25,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "2",
+  "in_data": true,
+  "prev_close": 22938.0,
+  "lo": 22913.8,
+  "hi": 22981.45,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "3",
+  "in_data": true,
+  "prev_close": 22603.3,
+  "lo": 22566.65,
+  "hi": 22621.8,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "4",
+  "in_data": true,
+  "prev_close": 22757.05,
+  "lo": 22726.15,
+  "hi": 22777.85,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "5",
+  "in_data": true,
+  "prev_close": 23406.35,
+  "lo": 23351.75,
+  "hi": 23414.55,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "6",
+  "in_data": true,
+  "prev_close": 23302.15,
+  "lo": 23296.1,
+  "hi": 23326.2,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "7",
+  "in_data": true,
+  "prev_close": 22587.6,
+  "lo": 22585.05,
+  "hi": 22625.9,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "8",
+  "in_data": true,
+  "prev_close": 23119.55,
+  "lo": 23116.1,
+  "hi": 23178.85,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "9",
+  "in_data": true,
+  "prev_close": 23335.8,
+  "lo": 23320.3,
+  "hi": 23344.8,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "10",
+  "in_data": true,
+  "prev_close": 24105.75,
+  "lo": 24097.1,
+  "hi": 24113.55,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "11",
+  "in_data": true,
+  "prev_close": 24036.25,
+  "lo": 24031.05,
+  "hi": 24056.95,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "12",
+  "in_data": true,
+  "prev_close": 24221.85,
+  "lo": 24214.6,
+  "hi": 24226.85,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "13",
+  "in_data": true,
+  "prev_close": 24309.1,
+  "lo": 24304.3,
+  "hi": 24336.7,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "14",
+  "in_data": true,
+  "prev_close": 24616.7,
+  "lo": 24604.55,
+  "hi": 24618.9,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "15",
+  "in_data": true,
+  "prev_close": 24143.5,
+  "lo": 24135.85,
+  "hi": 24166.4,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "16",
+  "in_data": true,
+  "prev_close": 24294.0,
+  "lo": 24270.85,
+  "hi": 24297.5,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "17",
+  "in_data": true,
+  "prev_close": 24169.55,
+  "lo": 24156.45,
+  "hi": 24175.55,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "18",
+  "in_data": true,
+  "prev_close": 24382.7,
+  "lo": 24366.3,
+  "hi": 24387.5,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "19",
+  "in_data": true,
+  "prev_close": 24074.2,
+  "lo": 24067.5,
+  "hi": 24086.2,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "20",
+  "in_data": true,
+  "prev_close": 23864.8,
+  "lo": 23845.6,
+  "hi": 23881.15,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "21",
+  "in_data": true,
+  "prev_close": 24111.35,
+  "lo": 24095.45,
+  "hi": 24114.2,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "22",
+  "in_data": true,
+  "prev_close": 23331.05,
+  "lo": 23321.6,
+  "hi": 23392.5,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "23",
+  "in_data": true,
+  "prev_close": 23216.3,
+  "lo": 23212.5,
+  "hi": 23225.7,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "24",
+  "in_data": true,
+  "prev_close": 23713.6,
+  "lo": 23675.6,
+  "hi": 23746.45,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "25",
+  "in_data": true,
+  "prev_close": 23771.95,
+  "lo": 23741.15,
+  "hi": 23782.3,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "26",
+  "in_data": true,
+  "prev_close": 23716.75,
+  "lo": 23698.3,
+  "hi": 23723.7,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "27",
+  "in_data": true,
+  "prev_close": 23538.5,
+  "lo": 23502.8,
+  "hi": 23553.6,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "28",
+  "in_data": true,
+  "prev_close": 23958.95,
+  "lo": 23943.1,
+  "hi": 23973.5,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "29",
+  "in_data": true,
+  "prev_close": 24435.15,
+  "lo": 24394.85,
+  "hi": 24460.65,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "30",
+  "in_data": true,
+  "prev_close": 23929.2,
+  "lo": 23918.15,
+  "hi": 23949.3,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "31",
+  "in_data": true,
+  "prev_close": 23317.3,
+  "lo": 23309.45,
+  "hi": 23332.15,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "32",
+  "in_data": true,
+  "prev_close": 25634.05,
+  "lo": 25618.9,
+  "hi": 25649.65,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "33",
+  "in_data": true,
+  "prev_close": 25661.95,
+  "lo": 25645.6,
+  "hi": 25675.0,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "34",
+  "in_data": true,
+  "prev_close": 25692.8,
+  "lo": 25657.2,
+  "hi": 25710.0,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "35",
+  "in_data": true,
+  "prev_close": 25417.55,
+  "lo": 25362.9,
+  "hi": 25440.9,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "36",
+  "in_data": true,
+  "prev_close": 24989.5,
+  "lo": 24940.2,
+  "hi": 25095.15,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "37",
+  "in_data": true,
+  "prev_close": 26243.25,
+  "lo": 26230.35,
+  "hi": 26252.9,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "38",
+  "in_data": true,
+  "prev_close": 25077.2,
+  "lo": 25069.25,
+  "hi": 25092.9,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "39",
+  "in_data": true,
+  "prev_close": 25712.25,
+  "lo": 25693.25,
+  "hi": 25739.7,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "40",
+  "in_data": true,
+  "prev_close": 25923.3,
+  "lo": 25907.25,
+  "hi": 25938.8,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "41",
+  "in_data": true,
+  "prev_close": 26069.2,
+  "lo": 26061.1,
+  "hi": 26094.15,
+  "entry_within_marker_candles": true
+ },
+ {
+  "id": "42",
+  "in_data": true,
+  "prev_close": 25858.25,
+  "lo": 25856.2,
+  "hi": 25933.65,
+  "entry_within_marker_candles": true
+ }
+]
