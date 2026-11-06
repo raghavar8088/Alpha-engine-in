@@ -52,6 +52,19 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // Directly below Gold Desk, as asked (2026-11-06). The VWAP study - the original two setups and the
+        // upgrades U1-U4 - with exact rules and research results; nothing on it trades. A crown mark, so it
+        // does not read as another desk.
+        href: "/premium-strategies",
+        label: "Premium Strategies",
+        icon: (
+          <>
+            <path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 10H5L3 8z" />
+            <path d="M5 21h14" />
+          </>
+        ),
+      },
+      {
         // Directly below Gold Desk, as asked (2026-10-12). Cash-market intraday on the indexes
         // themselves — no options or futures — so an index line between the session's open and
         // close bars, not another option or bullion mark.
