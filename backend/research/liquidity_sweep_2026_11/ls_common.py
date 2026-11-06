@@ -92,6 +92,14 @@ def load_minutes():
     return ii_data._build("NIFTY", rows)
 
 
+def load_minutes_named(name: str):
+    """Any index in the same stores (BANKNIFTY, SENSEX, ...), cleaned the same way."""
+    from app.services.index_intraday import data as ii_data
+
+    parts = _read_dir(STORE_1M.parent / name) + _read_dir(BOX_1M.parent / name) + _read_dir(EXTRA_1M.parent / name)
+    return ii_data._build(name, np.concatenate(parts))
+
+
 class Market:
     """Minute matrices plus candle builders and a date index."""
 

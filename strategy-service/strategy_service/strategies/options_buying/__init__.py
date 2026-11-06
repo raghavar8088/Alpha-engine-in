@@ -6,6 +6,7 @@ manages DTE/premium-stop/EOD square-off per style."""
 
 from strategy_service.strategies.options_buying import (  # noqa: F401
     booming_bulls,
+    booming_bulls_sweep_versions,
     breakout,
     devansh_umar,
     famous_traders,

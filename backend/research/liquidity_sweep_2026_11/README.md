@@ -17,4 +17,15 @@ The scripts need Python 3.12 with numpy, pandas and pydantic. Run them with `pyt
 | 4 | `python -I ls_run.py` | Runs A (5-min), B (5-min + 200-EMA) and C (3-min) over every session on disk. It fills each entry on 1-minute candles, costs it as a futures lot, replays and matches the PDF's 42 trades (`pdf_examples.csv`), and scores run A in the app's options engine. Writes `results/summary.json`, `trades_{A,B,C}.csv` and `pdf_trades.csv`. Takes about 25 s. |
 | 5 | `python -I ls_verify.py --real` | Adds 3 checks: on every real trade, the strategy's own exit candle equals the 1-minute fill's. |
 
+**Round 2: versions.** The original stays as it is. It is joined by 22 one-change versions (`bb_ls_v01_*` … `bb_ls_v22_*` in `booming_bulls_sweep_versions.py`) and 4 research-only runs.
+
+- **Rules:** [PREREGISTRATION_VERSIONS.md](PREREGISTRATION_VERSIONS.md), hash in `PREREGISTRATION_VERSIONS.sha256`.
+- **Results:** [REPORT_VERSIONS.md](REPORT_VERSIONS.md). The verdict is none works.
+
+| Step | Command | What it does |
+|---|---|---|
+| 6 | `python -I ls_versions_verify.py` | 85 checks. Each version changes exactly one rule. The engine at its defaults reproduces the original signal for signal over every session. Each new mechanism is tested on hand-built sessions, and an ANTI mirror of a version flips it. |
+| 7 | `python -I ls_versions.py` | Runs all 27 versions (NIFTY, plus BANK NIFTY and SENSEX for r3/r4) and scores them in S / V / P. Writes `results/versions/summary.json`, `scoreboard.csv` and `trades.csv.gz`. Takes about 75 s. |
+| 8 | `python -I ls_versions_verify.py --real` | Adds 27 parity checks on the real run. |
+
 `data/` is not in git. The candles are Angel One's licensed data and the repository is public.
