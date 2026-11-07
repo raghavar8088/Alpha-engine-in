@@ -1,0 +1,15 @@
+# Price-action systems and courses, 2020–2025 (partial reads)
+
+Nine videos, read as **rule digests** (opening plus top-scoring rule blocks, `bb_rule_digest.mjs`). 2020–2022 auto-captions are **badly garbled**; the two English-subtitle videos (VeRFSaOj6S4, vldS7qhIYE8) are clear. Family F12, priority P1.
+
+| Video | What can be recovered | Testability |
+|---|---|---|
+| **4iPEKSo_vwY**, Price Action Secrets, intraday strategy (2020, 23:18) | Mark the **first 15-minute candle's high and low**, drop to **5-minute**, enter when price breaks that level (Nifty examples). **The same opening-range breakout as yKtI-VEMwC0 (2026).** Stop/target not recoverable | Covered by the ORB specification (it supports that the ORB is long-standing teaching) |
+| **1TFcGjMwh4s**, Bank Nifty best intraday strategy (2021, 36:47) | Indicators: **Supertrend** and **ADX**. Start after about 09:40–10:00; take the first breakout after Supertrend says buy (or sell); stop behind the recent swing; partial exits. Details garbled | Insufficiently defined (captions) |
+| **jc3DySIdok4**, Best intraday strategy, 1 million special (2022, 39:51) | 15-minute chart with 5-minute entries; Supertrend plus a "trend clearance filter" he built. Rules garbled | Insufficiently defined (captions) |
+| **3GqxRTiOLY0**, Learn Price Action Strategy, live (2022, 36:27) | Nifty/BankNifty 5-minute levels, morning-star entries, option buying/selling live. Garbled | Insufficiently defined |
+| **TldkZHjh-54**, Intraday Trading Setup (2020, 19:00) | **Not a strategy:** his multi-screen hardware setup ("trading setup" = desk). Mislabelled P1 | Not applicable |
+| **dc57OIIJDpM**, Price Action in 3 Simple Steps (2020, 25:56) | Basics: trend; support/resistance; in a range buy support and sell resistance; after a breakout wait for the retest ("most breakouts fail"); use candlestick rejections | Concept only |
+| **_TKeU-HF8is**, Best Trading Setup (2021, 18:15) | A "5-star" confluence checklist: trend, support/resistance level, candlestick pattern, chart pattern, indicator (divergence); the moving average as target | Concept only |
+| **VeRFSaOj6S4**, How to use Price Action in Stock Market (about 2025, 26:06, English subtitles) | Levels on 15-minute, execution on 5-minute. Setups: **trap** at crucial levels (instant entry on re-entry); **double top/bottom only after the neckline breaks**; head-and-shoulders short only at the neckline; **breakouts only from box consolidations** (at least 1–2 days). Stop below the levels (equity: closing basis allowed); 1:2; a 0.5% stop example reaching 1:1.7. Stocks (Nifty/BankNifty, US stocks) | Insufficiently defined (patterns drawn by eye); trap part covered |
+| **vldS7qhIYE8**, PRICE ACTION + EMA STRATEGY (2024, 12:43, English subtitles) | Swing on the **30-minute** chart, for 24-hour markets (gold, crude, FX); about 3 entries a week. Box/resistance breakout after repeated touches; head-and-shoulders breaks; target **1:3**, or traditional **weekly pivot** levels; 50 EMA for trailing | Insufficiently defined (box rules unclear); weekly pivot as a target variant |

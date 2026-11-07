@@ -1,0 +1,80 @@
+{
+  "NIFTY": {
+    "market": "NIFTY",
+    "days": 2639,
+    "minutes": 989625,
+    "first": "2016-01-01",
+    "last": "2026-10-23",
+    "median_minutes_per_day": 375,
+    "days_under_50pct_of_median": 0,
+    "excluded_days": 0,
+    "prev_gap_over_4d": 8,
+    "median_half_spread": 0.0,
+    "zero_range_minutes_pct": 0.1
+  },
+  "BANKNIFTY": {
+    "market": "BANKNIFTY",
+    "days": 2630,
+    "minutes": 986250,
+    "first": "2016-01-01",
+    "last": "2026-10-09",
+    "median_minutes_per_day": 375,
+    "days_under_50pct_of_median": 0,
+    "excluded_days": 0,
+    "prev_gap_over_4d": 8,
+    "median_half_spread": 0.0,
+    "zero_range_minutes_pct": 0.1
+  },
+  "XAUUSD": {
+    "market": "XAUUSD",
+    "days": 4543,
+    "minutes": 6160591,
+    "first": "2009-03-16",
+    "last": "2026-10-16",
+    "median_minutes_per_day": 1379,
+    "days_under_50pct_of_median": 10,
+    "excluded_days": 128,
+    "prev_gap_over_4d": 1,
+    "median_half_spread": 0.17749999463558197,
+    "zero_range_minutes_pct": 0.6
+  },
+  "EURUSD": {
+    "market": "EURUSD",
+    "days": 4622,
+    "minutes": 6510652,
+    "first": "2009-01-02",
+    "last": "2026-10-16",
+    "median_minutes_per_day": 1435,
+    "days_under_50pct_of_median": 14,
+    "excluded_days": 129,
+    "prev_gap_over_4d": 1,
+    "median_half_spread": 1e-05,
+    "zero_range_minutes_pct": 1.9
+  },
+  "GBPUSD": {
+    "market": "GBPUSD",
+    "days": 4621,
+    "minutes": 6496907,
+    "first": "2009-01-02",
+    "last": "2026-10-16",
+    "median_minutes_per_day": 1435,
+    "days_under_50pct_of_median": 13,
+    "excluded_days": 128,
+    "prev_gap_over_4d": 1,
+    "median_half_spread": 2e-05,
+    "zero_range_minutes_pct": 2.0
+  },
+  "NAS100": {
+    "market": "NAS100",
+    "days": 3837,
+    "minutes": 1488412,
+    "first": "2010-11-15",
+    "last": "2026-10-16",
+    "median_minutes_per_day": 390,
+    "days_under_50pct_of_median": 0,
+    "excluded_days": 0,
+    "prev_gap_over_4d": 27,
+    "median_half_spread": 0.5,
+    "zero_range_minutes_pct": 0.2
+  }
+}

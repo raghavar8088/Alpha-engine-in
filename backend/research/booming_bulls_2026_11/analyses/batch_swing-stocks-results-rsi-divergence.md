@@ -1,0 +1,14 @@
+# Swing trading, stock selection, quarterly results, demand/supply, RSI divergence (partial reads)
+
+Nine videos, read as **rule digests** (opening plus top-scoring rule blocks). 2020–2022 auto-captions are badly garbled; VSsvcYq5eUw and n3aumdwdJmo have clear English subtitles.
+
+| Video | What can be recovered | Testability |
+|---|---|---|
+| **jZmra3YTQ8Y**, "The Only Swing Trading Strategy" (2022, 52:01, F15) | Gold swing on the **4-hour** chart; alerts at levels; entry on a strong-body breakout candle after a level is touched (a "touch" within about 0.7–1%). Rest garbled | Insufficiently defined (captions) |
+| **84N6qYTxgHs**, Swing Trading Strategy, Stock Selection (2022, 41:58, F15) | Daily chart, stocks (e.g. Grasim). Entry when a green candle activates at a level; stop below the previous candle's low minus a small buffer; target at least 1:2, trail after the first target. Garbled | Insufficiently defined |
+| **VSsvcYq5eUw**, Swing Trading: Quarterly Results Strategy (2024, 17:26, English subtitles, F15/F16) | Trade a stock **5–12 days before its quarterly result date** when price action shows a breakout, bull flag or retest at resistance; **stop just below the broken resistance**; target **at least 1:3**; on result day, be ready to exit (if 1:3 hasn't hit, accept 1:1.5–1:7 before the announcement; hold if the result moves in your favour). Examples: Reliance, HCL Tech, HDFC Life | **Testable with assumptions:** result dates from the NSE corporate-announcement feed; daily bhavcopy prices; the breakout definition must be fixed by me |
+| **bZYuWfbR5M4**, Quarterly Results Trading Strategy (2022, 26:16, F15/F16) | Enter 10–15 days before results on a breakout of an important resistance; after results, option plays. Garbled | Superseded by VSsvcYq5eUw |
+| **zrEeFLw322M**, Selecting stocks for intraday (2020, 41:25, F15) | Pick strong-sector stocks; trendline breaks on 5- and 15-minute; watch 2–3 stocks. Garbled | Insufficiently defined |
+| **2WkkkZ5N08c**, Trading Strategy for Banking Stocks (2023, 26:10, F15) | Mark the **10:00–10:15** high/low (bodies) of bank stocks. When BankNifty breaks its day's low after 10:00, short the **leading** bank stock (e.g. SBI, ICICI) as it breaks its low; small targets (≈1%) | Testable only with intraday stock data and assumptions (leader selection); low priority |
+| **n3aumdwdJmo**, How to Master Demand & Supply Trading (2024, 19:57, English subtitles, F14) | Use **zones** (boxes) at turning points instead of lines; supply zone → sell on the second candle; demand zone → buy. A concept for other setups | Concept only |
+| **vUAus3x-0mA** + **qtvzG4TI3HU**, RSI Divergence parts 1–2 (2020, F11) | Spot RSI divergence on 15-minute/1-hour; **enter only after a confirmed range break**, never on the divergence alone; target the next resistance. Garbled | Insufficiently defined (captions) |

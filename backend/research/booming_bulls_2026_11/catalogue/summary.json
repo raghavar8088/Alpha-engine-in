@@ -1,0 +1,48 @@
+{
+  "total": 2965,
+  "byKind": {
+    "video": {
+      "strategy": 86,
+      "psychology_mindset": 101,
+      "promo_lifestyle": 80,
+      "trade_recap": 75,
+      "tools_brokers_prop": 63,
+      "other": 47,
+      "live_trading": 86,
+      "concept": 60,
+      "education_basics": 73,
+      "applied_example": 8,
+      "commentary": 404
+    },
+    "short": {
+      "concept": 53,
+      "promo_lifestyle": 152,
+      "other": 742,
+      "tools_brokers_prop": 102,
+      "psychology_mindset": 194,
+      "live_trading": 124,
+      "commentary": 64,
+      "education_basics": 148,
+      "trade_recap": 15,
+      "strategy": 10
+    },
+    "stream": {
+      "live_stream": 273,
+      "applied_example": 5
+    }
+  },
+  "byPriority": {
+    "P1": 96,
+    "X": 2743,
+    "P2": 113,
+    "P3": 13
+  },
+  "byStatus": {
+    "analysed": 95,
+    "not_selected": 2743,
+    "transcript_ready": 124,
+    "duplicate_noted": 2,
+    "blocked_no_captions": 1
+  },
+  "unavailable": 0
+}

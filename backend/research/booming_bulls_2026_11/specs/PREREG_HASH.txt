@@ -1,0 +1,2 @@
+b7b1d48d0d1a0fdc0963fd3b6a69b0fcc61893f4fa2e0667cdffb507b6620386  PREREGISTRATION.md  (SHA-256 of LF line ends; locked 2026-11-07 before any backtest run)
+6ccca647f41f4f9a9827b9376668677901e45e1b93e1a1823b2f94eb728e1242  PREREGISTRATION.md  (amended 2026-11-07 before any run: US30/AAPL data blocker; see change log)

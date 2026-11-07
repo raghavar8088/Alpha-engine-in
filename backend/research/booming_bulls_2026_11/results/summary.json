@@ -1,0 +1,2314 @@
+{
+ "prereg_sha256": "6ccca647f41f4f9a9827b9376668677901e45e1b93e1a1823b2f94eb728e1242",
+ "holdout_tests": 44,
+ "rows": [
+  {
+   "strategy": "BB-01",
+   "market": "NIFTY",
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1054,
+    "mean_r": -0.2474,
+    "t": -5.8
+   },
+   "val": {
+    "n": 348,
+    "mean_r": -0.1032,
+    "t": -1.39
+   },
+   "hold": {
+    "n": 497,
+    "mean_r": -0.2016,
+    "mean_r_gross": 0.1031,
+    "t": -3.23,
+    "win_rate": 0.378,
+    "profit_factor": 0.74,
+    "max_dd_pct": 68.1,
+    "cagr_pct": -31.22,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 197,
+    "mean_r": -0.2332,
+    "t": -2.29,
+    "first": "2025-10-08"
+   },
+   "walk_forward_oos": {
+    "n": 1358,
+    "mean_r": -0.1547,
+    "t": -4.08
+   },
+   "inr_10_lakh_hold": {
+    "start_inr": 1000000,
+    "end_inr": 504525,
+    "return_pct": -49.5,
+    "max_dd_pct": 52.5,
+    "trades": 477,
+    "skipped_zero_lots": 20,
+    "median_lots": 2.0
+   }
+  },
+  {
+   "strategy": "BB-01",
+   "market": "NIFTY",
+   "variant": "R1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1036,
+    "mean_r": -0.2039,
+    "t": -4.68
+   },
+   "val": {
+    "n": 344,
+    "mean_r": -0.1731,
+    "t": -2.32
+   },
+   "hold": {
+    "n": 488,
+    "mean_r": -0.1601,
+    "mean_r_gross": 0.1469,
+    "t": -2.54,
+    "win_rate": 0.393,
+    "profit_factor": 0.786,
+    "max_dd_pct": 58.2,
+    "cagr_pct": -25.55,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 198,
+    "mean_r": -0.3111,
+    "t": -3.17,
+    "first": "2025-10-06"
+   },
+   "walk_forward_oos": {
+    "n": 1358,
+    "mean_r": -0.1547,
+    "t": -4.08
+   },
+   "inr_10_lakh_hold": {
+    "start_inr": 1000000,
+    "end_inr": 540621,
+    "return_pct": -45.9,
+    "max_dd_pct": 48.0,
+    "trades": 479,
+    "skipped_zero_lots": 9,
+    "median_lots": 3.0
+   }
+  },
+  {
+   "strategy": "BB-02",
+   "market": "NIFTY",
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 2385,
+    "mean_r": -0.4032,
+    "t": -14.03
+   },
+   "val": {
+    "n": 769,
+    "mean_r": -0.2306,
+    "t": -4.43
+   },
+   "hold": {
+    "n": 1079,
+    "mean_r": -0.3681,
+    "mean_r_gross": 0.0362,
+    "t": -8.5,
+    "win_rate": 0.335,
+    "profit_factor": 0.591,
+    "max_dd_pct": 98.5,
+    "cagr_pct": -76.67,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 161,
+    "mean_r": -0.7571,
+    "t": -6.95,
+    "first": "2026-05-26"
+   },
+   "walk_forward_oos": {
+    "n": 2928,
+    "mean_r": -0.3477,
+    "t": -13.02
+   },
+   "inr_10_lakh_hold": {
+    "start_inr": 1000000,
+    "end_inr": 179218,
+    "return_pct": -82.1,
+    "max_dd_pct": 83.9,
+    "trades": 902,
+    "skipped_zero_lots": 177,
+    "median_lots": 2.0
+   }
+  },
+  {
+   "strategy": "BB-02",
+   "market": "NIFTY",
+   "variant": "S2",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 2201,
+    "mean_r": -0.3563,
+    "t": -15.93
+   },
+   "val": {
+    "n": 696,
+    "mean_r": -0.2471,
+    "t": -6.34
+   },
+   "hold": {
+    "n": 992,
+    "mean_r": -0.3706,
+    "mean_r_gross": 0.0277,
+    "t": -11.23,
+    "win_rate": 0.478,
+    "profit_factor": 0.469,
+    "max_dd_pct": 97.8,
+    "cagr_pct": -73.56,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 152,
+    "mean_r": -0.7411,
+    "t": -9.02,
+    "first": "2026-05-26"
+   },
+   "walk_forward_oos": {
+    "n": 2928,
+    "mean_r": -0.3477,
+    "t": -13.02
+   },
+   "inr_10_lakh_hold": {
+    "start_inr": 1000000,
+    "end_inr": 175540,
+    "return_pct": -82.4,
+    "max_dd_pct": 83.2,
+    "trades": 871,
+    "skipped_zero_lots": 121,
+    "median_lots": 2.0
+   }
+  },
+  {
+   "strategy": "BB-03",
+   "market": "NIFTY",
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1197,
+    "mean_r": -0.2447,
+    "t": -6.0
+   },
+   "val": {
+    "n": 401,
+    "mean_r": -0.2164,
+    "t": -3.1
+   },
+   "hold": {
+    "n": 545,
+    "mean_r": -0.3032,
+    "mean_r_gross": 0.0108,
+    "t": -5.09,
+    "win_rate": 0.345,
+    "profit_factor": 0.637,
+    "max_dd_pct": 83.3,
+    "cagr_pct": -46.04,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 745,
+    "mean_r": -0.2975,
+    "t": -5.86,
+    "first": "2023-01-02"
+   },
+   "walk_forward_oos": {
+    "n": 1384,
+    "mean_r": -0.2443,
+    "t": -6.47
+   },
+   "inr_10_lakh_hold": {
+    "start_inr": 1000000,
+    "end_inr": 330537,
+    "return_pct": -66.9,
+    "max_dd_pct": 68.6,
+    "trades": 536,
+    "skipped_zero_lots": 9,
+    "median_lots": 2.0
+   }
+  },
+  {
+   "strategy": "BB-04",
+   "market": "NIFTY",
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": false,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": true
+   },
+   "dev": {
+    "n": 68,
+    "mean_r": -0.1226,
+    "t": -1.02
+   },
+   "val": {
+    "n": 24,
+    "mean_r": -0.1418,
+    "t": -0.8
+   },
+   "hold": {
+    "n": 29,
+    "mean_r": -0.2484,
+    "mean_r_gross": -0.0653,
+    "t": -1.23,
+    "win_rate": 0.345,
+    "profit_factor": 0.601,
+    "max_dd_pct": 10.1,
+    "cagr_pct": -2.73,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 63,
+    "mean_r": -0.24,
+    "t": -1.96,
+    "first": "2021-01-05"
+   },
+   "walk_forward_oos": {
+    "n": 332,
+    "mean_r": -0.1436,
+    "t": -2.5
+   },
+   "inr_10_lakh_hold": {
+    "start_inr": 1000000,
+    "end_inr": 949674,
+    "return_pct": -5.0,
+    "max_dd_pct": 7.1,
+    "trades": 27,
+    "skipped_zero_lots": 2,
+    "median_lots": 2.0
+   }
+  },
+  {
+   "strategy": "BB-04",
+   "market": "NIFTY",
+   "variant": "R1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 311,
+    "mean_r": -0.0857,
+    "t": -1.42
+   },
+   "val": {
+    "n": 92,
+    "mean_r": -0.0615,
+    "t": -0.58
+   },
+   "hold": {
+    "n": 154,
+    "mean_r": -0.0984,
+    "mean_r_gross": 0.0618,
+    "t": -1.1,
+    "win_rate": 0.396,
+    "profit_factor": 0.817,
+    "max_dd_pct": 27.0,
+    "cagr_pct": -5.62,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 306,
+    "mean_r": -0.142,
+    "t": -2.36,
+    "first": "2021-01-04"
+   },
+   "walk_forward_oos": {
+    "n": 332,
+    "mean_r": -0.1436,
+    "t": -2.5
+   },
+   "inr_10_lakh_hold": {
+    "start_inr": 1000000,
+    "end_inr": 900871,
+    "return_pct": -9.9,
+    "max_dd_pct": 20.5,
+    "trades": 144,
+    "skipped_zero_lots": 10,
+    "median_lots": 2.0
+   }
+  },
+  {
+   "strategy": "BB-05",
+   "market": "BANKNIFTY",
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 2720,
+    "mean_r": -0.3254,
+    "t": -16.16
+   },
+   "val": {
+    "n": 932,
+    "mean_r": -0.2573,
+    "t": -7.39
+   },
+   "hold": {
+    "n": 1221,
+    "mean_r": -0.3236,
+    "mean_r_gross": -0.0121,
+    "t": -10.92,
+    "win_rate": 0.429,
+    "profit_factor": 0.498,
+    "max_dd_pct": 98.2,
+    "cagr_pct": -76.59,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 1393,
+    "mean_r": -0.3105,
+    "t": -11.17,
+    "first": "2023-08-21"
+   },
+   "walk_forward_oos": {
+    "n": 3437,
+    "mean_r": -0.2954,
+    "t": -15.64
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-05",
+   "market": "BANKNIFTY",
+   "variant": "S1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 2550,
+    "mean_r": -0.3384,
+    "t": -13.21
+   },
+   "val": {
+    "n": 883,
+    "mean_r": -0.2034,
+    "t": -4.54
+   },
+   "hold": {
+    "n": 1147,
+    "mean_r": -0.3458,
+    "mean_r_gross": -0.0381,
+    "t": -9.27,
+    "win_rate": 0.33,
+    "profit_factor": 0.557,
+    "max_dd_pct": 98.3,
+    "cagr_pct": -76.94,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 1312,
+    "mean_r": -0.3218,
+    "t": -9.16,
+    "first": "2023-08-21"
+   },
+   "walk_forward_oos": {
+    "n": 3437,
+    "mean_r": -0.2954,
+    "t": -15.64
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-06",
+   "market": "NIFTY",
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": true,
+    "hold_n>=50": false,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": true
+   },
+   "dev": {
+    "n": 76,
+    "mean_r": 0.3106,
+    "t": 1.98
+   },
+   "val": {
+    "n": 24,
+    "mean_r": 0.4556,
+    "t": 1.79
+   },
+   "hold": {
+    "n": 36,
+    "mean_r": -0.0682,
+    "mean_r_gross": 0.1248,
+    "t": -0.34,
+    "win_rate": 0.5,
+    "profit_factor": 0.882,
+    "max_dd_pct": 5.9,
+    "cagr_pct": -0.96,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 49,
+    "mean_r": 0.002,
+    "t": 0.01,
+    "first": "2023-01-17"
+   },
+   "walk_forward_oos": {
+    "n": 94,
+    "mean_r": 0.0748,
+    "t": 0.57
+   },
+   "inr_10_lakh_hold": {
+    "start_inr": 1000000,
+    "end_inr": 971798,
+    "return_pct": -2.8,
+    "max_dd_pct": 5.2,
+    "trades": 31,
+    "skipped_zero_lots": 5,
+    "median_lots": 2.0
+   }
+  },
+  {
+   "strategy": "BB-07",
+   "market": "NAS100",
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1216,
+    "mean_r": -0.1735,
+    "t": -4.74
+   },
+   "val": {
+    "n": 416,
+    "mean_r": -0.1585,
+    "t": -2.47
+   },
+   "hold": {
+    "n": 439,
+    "mean_r": -0.1259,
+    "mean_r_gross": -0.0861,
+    "t": -2.04,
+    "win_rate": 0.31,
+    "profit_factor": 0.81,
+    "max_dd_pct": 46.0,
+    "cagr_pct": -14.42,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 3,
+    "mean_r": -1.0057,
+    "t": -514.61,
+    "first": "2026-10-01"
+   },
+   "walk_forward_oos": {
+    "n": 1793,
+    "mean_r": -0.16,
+    "t": -5.28
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-07",
+   "market": "XAUUSD",
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1666,
+    "mean_r": -0.2322,
+    "t": -7.2
+   },
+   "val": {
+    "n": 514,
+    "mean_r": -0.2202,
+    "t": -3.83
+   },
+   "hold": {
+    "n": 499,
+    "mean_r": -0.1825,
+    "mean_r_gross": -0.0251,
+    "t": -3.1,
+    "win_rate": 0.303,
+    "profit_factor": 0.744,
+    "max_dd_pct": 63.1,
+    "cagr_pct": -22.33,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 6,
+    "mean_r": -0.2438,
+    "t": -0.47,
+    "first": "2026-10-02"
+   },
+   "walk_forward_oos": {
+    "n": 2850,
+    "mean_r": -0.1947,
+    "t": -7.79
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-07",
+   "market": "XAUUSD",
+   "variant": "S1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 2127,
+    "mean_r": -0.2215,
+    "t": -7.67
+   },
+   "val": {
+    "n": 638,
+    "mean_r": -0.2083,
+    "t": -3.98
+   },
+   "hold": {
+    "n": 667,
+    "mean_r": -0.1563,
+    "mean_r_gross": 0.0085,
+    "t": -2.99,
+    "win_rate": 0.303,
+    "profit_factor": 0.782,
+    "max_dd_pct": 69.0,
+    "cagr_pct": -25.31,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 8,
+    "mean_r": -0.0635,
+    "t": -0.13,
+    "first": "2026-10-02"
+   },
+   "walk_forward_oos": {
+    "n": 2850,
+    "mean_r": -0.1947,
+    "t": -7.79
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-08",
+   "market": "EURUSD",
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1757,
+    "mean_r": -0.0676,
+    "t": -2.31
+   },
+   "val": {
+    "n": 525,
+    "mean_r": -0.2099,
+    "t": -4.02
+   },
+   "hold": {
+    "n": 518,
+    "mean_r": -0.1137,
+    "mean_r_gross": 0.0417,
+    "t": -2.14,
+    "win_rate": 0.403,
+    "profit_factor": 0.826,
+    "max_dd_pct": 46.6,
+    "cagr_pct": -15.27,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 431,
+    "mean_r": -0.0939,
+    "t": -1.61,
+    "first": "2024-01-02"
+   },
+   "walk_forward_oos": {
+    "n": 2331,
+    "mean_r": -0.1015,
+    "t": -3.28
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-08",
+   "market": "EURUSD",
+   "variant": "S3",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1757,
+    "mean_r": -0.0449,
+    "t": -1.34
+   },
+   "val": {
+    "n": 525,
+    "mean_r": -0.2206,
+    "t": -3.75
+   },
+   "hold": {
+    "n": 518,
+    "mean_r": -0.0811,
+    "mean_r_gross": 0.0752,
+    "t": -1.33,
+    "win_rate": 0.357,
+    "profit_factor": 0.884,
+    "max_dd_pct": 37.5,
+    "cagr_pct": -11.68,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 431,
+    "mean_r": -0.052,
+    "t": -0.77,
+    "first": "2024-01-02"
+   },
+   "walk_forward_oos": {
+    "n": 2331,
+    "mean_r": -0.1015,
+    "t": -3.28
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-08",
+   "market": "GBPUSD",
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1805,
+    "mean_r": -0.0993,
+    "t": -3.46
+   },
+   "val": {
+    "n": 520,
+    "mean_r": -0.1896,
+    "t": -3.62
+   },
+   "hold": {
+    "n": 547,
+    "mean_r": -0.1946,
+    "mean_r_gross": -0.022,
+    "t": -3.79,
+    "win_rate": 0.364,
+    "profit_factor": 0.72,
+    "max_dd_pct": 69.3,
+    "cagr_pct": -25.36,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 458,
+    "mean_r": -0.1598,
+    "t": -2.83,
+    "first": "2024-01-04"
+   },
+   "walk_forward_oos": {
+    "n": 2358,
+    "mean_r": -0.141,
+    "t": -5.17
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-08",
+   "market": "GBPUSD",
+   "variant": "S3",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1805,
+    "mean_r": -0.0919,
+    "t": -2.81
+   },
+   "val": {
+    "n": 520,
+    "mean_r": -0.169,
+    "t": -2.81
+   },
+   "hold": {
+    "n": 547,
+    "mean_r": -0.2006,
+    "mean_r_gross": -0.0265,
+    "t": -3.45,
+    "win_rate": 0.305,
+    "profit_factor": 0.735,
+    "max_dd_pct": 72.1,
+    "cagr_pct": -26.22,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 458,
+    "mean_r": -0.1876,
+    "t": -2.94,
+    "first": "2024-01-04"
+   },
+   "walk_forward_oos": {
+    "n": 2358,
+    "mean_r": -0.141,
+    "t": -5.17
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-08",
+   "market": "XAUUSD",
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1578,
+    "mean_r": -0.2752,
+    "t": -9.25
+   },
+   "val": {
+    "n": 481,
+    "mean_r": -0.2309,
+    "t": -4.28
+   },
+   "hold": {
+    "n": 466,
+    "mean_r": -0.2601,
+    "mean_r_gross": -0.0564,
+    "t": -4.9,
+    "win_rate": 0.322,
+    "profit_factor": 0.63,
+    "max_dd_pct": 72.2,
+    "cagr_pct": -28.06,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 390,
+    "mean_r": -0.263,
+    "t": -4.56,
+    "first": "2024-01-02"
+   },
+   "walk_forward_oos": {
+    "n": 2074,
+    "mean_r": -0.2905,
+    "t": -10.55
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-09",
+   "market": "XAUUSD",
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 2335,
+    "mean_r": -0.1934,
+    "t": -7.35
+   },
+   "val": {
+    "n": 693,
+    "mean_r": -0.223,
+    "t": -4.67
+   },
+   "hold": {
+    "n": 738,
+    "mean_r": -0.1261,
+    "mean_r_gross": -0.0026,
+    "t": -2.63,
+    "win_rate": 0.331,
+    "profit_factor": 0.811,
+    "max_dd_pct": 63.7,
+    "cagr_pct": -23.18,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 82,
+    "mean_r": -0.277,
+    "t": -1.9,
+    "first": "2026-06-02"
+   },
+   "walk_forward_oos": {
+    "n": 3087,
+    "mean_r": -0.1818,
+    "t": -7.94
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-09",
+   "market": "XAUUSD",
+   "variant": "R2",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 2312,
+    "mean_r": -0.1615,
+    "t": -6.05
+   },
+   "val": {
+    "n": 688,
+    "mean_r": -0.218,
+    "t": -4.56
+   },
+   "hold": {
+    "n": 700,
+    "mean_r": -0.1452,
+    "mean_r_gross": -0.0243,
+    "t": -2.99,
+    "win_rate": 0.327,
+    "profit_factor": 0.782,
+    "max_dd_pct": 66.5,
+    "cagr_pct": -24.72,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 85,
+    "mean_r": -0.3535,
+    "t": -2.56,
+    "first": "2026-06-02"
+   },
+   "walk_forward_oos": {
+    "n": 3087,
+    "mean_r": -0.1818,
+    "t": -7.94
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-10",
+   "market": "XAUUSD",
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 2069,
+    "mean_r": -0.4372,
+    "t": -15.67
+   },
+   "val": {
+    "n": 591,
+    "mean_r": -0.3322,
+    "t": -6.16
+   },
+   "hold": {
+    "n": 655,
+    "mean_r": -0.3093,
+    "mean_r_gross": -0.0581,
+    "t": -6.06,
+    "win_rate": 0.252,
+    "profit_factor": 0.61,
+    "max_dd_pct": 87.6,
+    "cagr_pct": -42.36,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 356,
+    "mean_r": -0.3121,
+    "t": -4.56,
+    "first": "2025-01-03"
+   },
+   "walk_forward_oos": {
+    "n": 2814,
+    "mean_r": -0.4079,
+    "t": -16.92
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-11",
+   "market": "EURUSD",
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": true,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1734,
+    "mean_r": -0.0303,
+    "t": -0.89
+   },
+   "val": {
+    "n": 456,
+    "mean_r": -0.1631,
+    "t": -2.55
+   },
+   "hold": {
+    "n": 488,
+    "mean_r": 0.0153,
+    "mean_r_gross": 0.1461,
+    "t": 0.24,
+    "win_rate": 0.379,
+    "profit_factor": 1.023,
+    "max_dd_pct": 22.2,
+    "cagr_pct": 0.69,
+    "top5_share_of_net": 1.317
+   },
+   "post_publication": {
+    "n": 125,
+    "mean_r": -0.0554,
+    "t": -0.44,
+    "first": "2025-12-02"
+   },
+   "walk_forward_oos": {
+    "n": 2266,
+    "mean_r": -0.0783,
+    "t": -2.69
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-11",
+   "market": "EURUSD",
+   "variant": "S1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": true,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1734,
+    "mean_r": -0.0347,
+    "t": -1.07
+   },
+   "val": {
+    "n": 456,
+    "mean_r": -0.1388,
+    "t": -2.23
+   },
+   "hold": {
+    "n": 488,
+    "mean_r": -0.0076,
+    "mean_r_gross": 0.1237,
+    "t": -0.12,
+    "win_rate": 0.34,
+    "profit_factor": 0.988,
+    "max_dd_pct": 20.6,
+    "cagr_pct": -2.13,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 125,
+    "mean_r": -0.0799,
+    "t": -0.67,
+    "first": "2025-12-02"
+   },
+   "walk_forward_oos": {
+    "n": 2266,
+    "mean_r": -0.0783,
+    "t": -2.69
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-11",
+   "market": "GBPUSD",
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1756,
+    "mean_r": -0.0933,
+    "t": -2.8
+   },
+   "val": {
+    "n": 457,
+    "mean_r": -0.0677,
+    "t": -1.04
+   },
+   "hold": {
+    "n": 524,
+    "mean_r": -0.1571,
+    "mean_r_gross": -0.0211,
+    "t": -2.61,
+    "win_rate": 0.311,
+    "profit_factor": 0.788,
+    "max_dd_pct": 60.8,
+    "cagr_pct": -20.62,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 131,
+    "mean_r": -0.1921,
+    "t": -1.6,
+    "first": "2025-12-01"
+   },
+   "walk_forward_oos": {
+    "n": 2579,
+    "mean_r": -0.1124,
+    "t": -4.14
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-11",
+   "market": "GBPUSD",
+   "variant": "R1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 2171,
+    "mean_r": -0.0759,
+    "t": -2.52
+   },
+   "val": {
+    "n": 584,
+    "mean_r": -0.0774,
+    "t": -1.35
+   },
+   "hold": {
+    "n": 642,
+    "mean_r": -0.1824,
+    "mean_r_gross": -0.044,
+    "t": -3.38,
+    "win_rate": 0.304,
+    "profit_factor": 0.757,
+    "max_dd_pct": 71.7,
+    "cagr_pct": -27.8,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 155,
+    "mean_r": -0.282,
+    "t": -2.66,
+    "first": "2025-12-01"
+   },
+   "walk_forward_oos": {
+    "n": 2579,
+    "mean_r": -0.1124,
+    "t": -4.14
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-11",
+   "market": "XAUUSD",
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1665,
+    "mean_r": -0.2336,
+    "t": -7.17
+   },
+   "val": {
+    "n": 446,
+    "mean_r": -0.2453,
+    "t": -3.99
+   },
+   "hold": {
+    "n": 476,
+    "mean_r": -0.2815,
+    "mean_r_gross": -0.1424,
+    "t": -4.71,
+    "win_rate": 0.273,
+    "profit_factor": 0.628,
+    "max_dd_pct": 74.9,
+    "cagr_pct": -30.6,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 110,
+    "mean_r": -0.3353,
+    "t": -2.54,
+    "first": "2025-12-01"
+   },
+   "walk_forward_oos": {
+    "n": 2212,
+    "mean_r": -0.2494,
+    "t": -9.07
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-11",
+   "market": "XAUUSD",
+   "variant": "R1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 2022,
+    "mean_r": -0.2456,
+    "t": -8.35
+   },
+   "val": {
+    "n": 563,
+    "mean_r": -0.1941,
+    "t": -3.48
+   },
+   "hold": {
+    "n": 582,
+    "mean_r": -0.2954,
+    "mean_r_gross": -0.1585,
+    "t": -5.55,
+    "win_rate": 0.268,
+    "profit_factor": 0.61,
+    "max_dd_pct": 83.0,
+    "cagr_pct": -37.35,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 141,
+    "mean_r": -0.3363,
+    "t": -2.97,
+    "first": "2025-12-01"
+   },
+   "walk_forward_oos": {
+    "n": 2212,
+    "mean_r": -0.2494,
+    "t": -9.07
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-12",
+   "market": "XAUUSD",
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 626,
+    "mean_r": -0.1099,
+    "t": -2.47
+   },
+   "val": {
+    "n": 201,
+    "mean_r": -0.2237,
+    "t": -2.92
+   },
+   "hold": {
+    "n": 172,
+    "mean_r": -0.1931,
+    "mean_r_gross": -0.0899,
+    "t": -2.34,
+    "win_rate": 0.343,
+    "profit_factor": 0.684,
+    "max_dd_pct": 34.4,
+    "cagr_pct": -8.67,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 89,
+    "mean_r": -0.3486,
+    "t": -3.21,
+    "first": "2025-01-06"
+   },
+   "walk_forward_oos": {
+    "n": 825,
+    "mean_r": -0.1636,
+    "t": -4.25
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-13",
+   "market": "NAS100",
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1729,
+    "mean_r": -0.2441,
+    "t": -10.22
+   },
+   "val": {
+    "n": 535,
+    "mean_r": -0.1417,
+    "t": -3.29
+   },
+   "hold": {
+    "n": 540,
+    "mean_r": -0.0111,
+    "mean_r_gross": 0.0328,
+    "t": -0.26,
+    "win_rate": 0.498,
+    "profit_factor": 0.978,
+    "max_dd_pct": 32.4,
+    "cagr_pct": -2.26,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 153,
+    "mean_r": -0.1078,
+    "t": -1.34,
+    "first": "2025-12-01"
+   },
+   "walk_forward_oos": {
+    "n": 2387,
+    "mean_r": -0.1104,
+    "t": -5.47
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-13",
+   "market": "NAS100",
+   "variant": "R1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1729,
+    "mean_r": -0.169,
+    "t": -7.12
+   },
+   "val": {
+    "n": 535,
+    "mean_r": -0.096,
+    "t": -2.24
+   },
+   "hold": {
+    "n": 540,
+    "mean_r": 0.0108,
+    "mean_r_gross": 0.0433,
+    "t": 0.26,
+    "win_rate": 0.511,
+    "profit_factor": 1.023,
+    "max_dd_pct": 27.2,
+    "cagr_pct": 0.86,
+    "top5_share_of_net": 0.858
+   },
+   "post_publication": {
+    "n": 153,
+    "mean_r": -0.0372,
+    "t": -0.48,
+    "first": "2025-12-01"
+   },
+   "walk_forward_oos": {
+    "n": 2387,
+    "mean_r": -0.1104,
+    "t": -5.47
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-13",
+   "market": "XAUUSD",
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1632,
+    "mean_r": -0.3,
+    "t": -12.22
+   },
+   "val": {
+    "n": 481,
+    "mean_r": -0.199,
+    "t": -4.36
+   },
+   "hold": {
+    "n": 501,
+    "mean_r": -0.1159,
+    "mean_r_gross": 0.0473,
+    "t": -2.58,
+    "win_rate": 0.455,
+    "profit_factor": 0.794,
+    "max_dd_pct": 48.5,
+    "cagr_pct": -14.83,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 133,
+    "mean_r": -0.1409,
+    "t": -1.63,
+    "first": "2025-12-01"
+   },
+   "walk_forward_oos": {
+    "n": 2180,
+    "mean_r": -0.2022,
+    "t": -9.62
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-13",
+   "market": "XAUUSD",
+   "variant": "R1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1632,
+    "mean_r": -0.2614,
+    "t": -10.84
+   },
+   "val": {
+    "n": 481,
+    "mean_r": -0.1518,
+    "t": -3.41
+   },
+   "hold": {
+    "n": 501,
+    "mean_r": -0.099,
+    "mean_r_gross": 0.0244,
+    "t": -2.23,
+    "win_rate": 0.459,
+    "profit_factor": 0.818,
+    "max_dd_pct": 45.5,
+    "cagr_pct": -12.89,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 133,
+    "mean_r": -0.0811,
+    "t": -0.94,
+    "first": "2025-12-01"
+   },
+   "walk_forward_oos": {
+    "n": 2180,
+    "mean_r": -0.2022,
+    "t": -9.62
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-14",
+   "market": "NAS100",
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 2735,
+    "mean_r": -0.2773,
+    "t": -12.38
+   },
+   "val": {
+    "n": 983,
+    "mean_r": -0.103,
+    "t": -2.69
+   },
+   "hold": {
+    "n": 1100,
+    "mean_r": -0.0778,
+    "mean_r_gross": -0.0185,
+    "t": -2.14,
+    "win_rate": 0.373,
+    "profit_factor": 0.876,
+    "max_dd_pct": 63.0,
+    "cagr_pct": -21.92,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 594,
+    "mean_r": -0.0382,
+    "t": -0.77,
+    "first": "2025-01-02"
+   },
+   "walk_forward_oos": {
+    "n": 3748,
+    "mean_r": -0.1156,
+    "t": -6.27
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-14",
+   "market": "NAS100",
+   "variant": "R1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 2423,
+    "mean_r": -0.1544,
+    "t": -6.77
+   },
+   "val": {
+    "n": 868,
+    "mean_r": -0.0929,
+    "t": -2.4
+   },
+   "hold": {
+    "n": 975,
+    "mean_r": -0.0503,
+    "mean_r_gross": -0.023,
+    "t": -1.38,
+    "win_rate": 0.395,
+    "profit_factor": 0.911,
+    "max_dd_pct": 45.9,
+    "cagr_pct": -13.59,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 529,
+    "mean_r": -0.058,
+    "t": -1.18,
+    "first": "2025-01-02"
+   },
+   "walk_forward_oos": {
+    "n": 3748,
+    "mean_r": -0.1156,
+    "t": -6.27
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-16",
+   "market": "XAUUSD",
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 789,
+    "mean_r": -0.3477,
+    "t": -6.87
+   },
+   "val": {
+    "n": 231,
+    "mean_r": -0.3894,
+    "t": -4.34
+   },
+   "hold": {
+    "n": 256,
+    "mean_r": -0.2462,
+    "mean_r_gross": -0.0349,
+    "t": -2.47,
+    "win_rate": 0.254,
+    "profit_factor": 0.696,
+    "max_dd_pct": 51.6,
+    "cagr_pct": -16.12,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 24,
+    "mean_r": -0.7261,
+    "t": -1.43,
+    "first": "2026-07-02"
+   },
+   "walk_forward_oos": {
+    "n": 1080,
+    "mean_r": -0.3244,
+    "t": -7.94
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-16",
+   "market": "XAUUSD",
+   "variant": "S2",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 789,
+    "mean_r": -0.3282,
+    "t": -7.03
+   },
+   "val": {
+    "n": 231,
+    "mean_r": -0.3223,
+    "t": -3.79
+   },
+   "hold": {
+    "n": 256,
+    "mean_r": -0.2009,
+    "mean_r_gross": 0.0083,
+    "t": -2.13,
+    "win_rate": 0.297,
+    "profit_factor": 0.737,
+    "max_dd_pct": 44.6,
+    "cagr_pct": -13.42,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 24,
+    "mean_r": -0.6443,
+    "t": -1.27,
+    "first": "2026-07-02"
+   },
+   "walk_forward_oos": {
+    "n": 1080,
+    "mean_r": -0.3244,
+    "t": -7.94
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-17",
+   "market": "EURUSD",
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 5000,
+    "mean_r": -0.1157,
+    "t": -5.78
+   },
+   "val": {
+    "n": 1394,
+    "mean_r": -0.1398,
+    "t": -3.72
+   },
+   "hold": {
+    "n": 1503,
+    "mean_r": -0.1955,
+    "mean_r_gross": -0.0216,
+    "t": -5.5,
+    "win_rate": 0.313,
+    "profit_factor": 0.746,
+    "max_dd_pct": 95.8,
+    "cagr_pct": -55.71,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 205,
+    "mean_r": -0.1787,
+    "t": -1.86,
+    "first": "2026-05-01"
+   },
+   "walk_forward_oos": {
+    "n": 6501,
+    "mean_r": -0.1279,
+    "t": -7.13
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-17",
+   "market": "EURUSD",
+   "variant": "S1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 4968,
+    "mean_r": -0.0952,
+    "t": -4.55
+   },
+   "val": {
+    "n": 1381,
+    "mean_r": -0.0962,
+    "t": -2.55
+   },
+   "hold": {
+    "n": 1497,
+    "mean_r": -0.197,
+    "mean_r_gross": -0.0517,
+    "t": -5.59,
+    "win_rate": 0.307,
+    "profit_factor": 0.741,
+    "max_dd_pct": 96.2,
+    "cagr_pct": -55.79,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 203,
+    "mean_r": -0.1259,
+    "t": -1.3,
+    "first": "2026-05-01"
+   },
+   "walk_forward_oos": {
+    "n": 6501,
+    "mean_r": -0.1279,
+    "t": -7.13
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-17",
+   "market": "XAUUSD",
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 4909,
+    "mean_r": -0.3864,
+    "t": -20.54
+   },
+   "val": {
+    "n": 1366,
+    "mean_r": -0.3313,
+    "t": -9.28
+   },
+   "hold": {
+    "n": 1474,
+    "mean_r": -0.3048,
+    "mean_r_gross": -0.0294,
+    "t": -8.94,
+    "win_rate": 0.256,
+    "profit_factor": 0.616,
+    "max_dd_pct": 99.1,
+    "cagr_pct": -70.54,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 197,
+    "mean_r": -0.2483,
+    "t": -2.65,
+    "first": "2026-05-01"
+   },
+   "walk_forward_oos": {
+    "n": 6409,
+    "mean_r": -0.2927,
+    "t": -17.59
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-17",
+   "market": "XAUUSD",
+   "variant": "S1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 4891,
+    "mean_r": -0.3619,
+    "t": -19.35
+   },
+   "val": {
+    "n": 1362,
+    "mean_r": -0.2316,
+    "t": -6.32
+   },
+   "hold": {
+    "n": 1461,
+    "mean_r": -0.1917,
+    "mean_r_gross": 0.008,
+    "t": -5.41,
+    "win_rate": 0.29,
+    "profit_factor": 0.742,
+    "max_dd_pct": 95.0,
+    "cagr_pct": -53.98,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 196,
+    "mean_r": -0.153,
+    "t": -1.57,
+    "first": "2026-05-01"
+   },
+   "walk_forward_oos": {
+    "n": 6409,
+    "mean_r": -0.2927,
+    "t": -17.59
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-18",
+   "market": "EURUSD",
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 745,
+    "mean_r": -0.1067,
+    "t": -2.1
+   },
+   "val": {
+    "n": 242,
+    "mean_r": -0.1569,
+    "t": -1.77
+   },
+   "hold": {
+    "n": 274,
+    "mean_r": -0.1193,
+    "mean_r_gross": 0.034,
+    "t": -1.43,
+    "win_rate": 0.336,
+    "profit_factor": 0.834,
+    "max_dd_pct": 30.5,
+    "cagr_pct": -8.92,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 274,
+    "mean_r": -0.1193,
+    "t": -1.43,
+    "first": "2023-01-04"
+   },
+   "walk_forward_oos": {
+    "n": 1092,
+    "mean_r": -0.0954,
+    "t": -1.9
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-18",
+   "market": "EURUSD",
+   "variant": "S1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 745,
+    "mean_r": -0.0726,
+    "t": -1.19
+   },
+   "val": {
+    "n": 242,
+    "mean_r": -0.1052,
+    "t": -0.98
+   },
+   "hold": {
+    "n": 274,
+    "mean_r": -0.0875,
+    "mean_r_gross": 0.0672,
+    "t": -0.88,
+    "win_rate": 0.285,
+    "profit_factor": 0.886,
+    "max_dd_pct": 29.6,
+    "cagr_pct": -7.06,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 274,
+    "mean_r": -0.0875,
+    "t": -0.88,
+    "first": "2023-01-04"
+   },
+   "walk_forward_oos": {
+    "n": 1092,
+    "mean_r": -0.0954,
+    "t": -1.9
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-18",
+   "market": "GBPUSD",
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 731,
+    "mean_r": -0.1912,
+    "t": -3.82
+   },
+   "val": {
+    "n": 240,
+    "mean_r": 0.0082,
+    "t": 0.09
+   },
+   "hold": {
+    "n": 252,
+    "mean_r": -0.1493,
+    "mean_r_gross": 0.008,
+    "t": -1.73,
+    "win_rate": 0.325,
+    "profit_factor": 0.796,
+    "max_dd_pct": 36.6,
+    "cagr_pct": -10.12,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 252,
+    "mean_r": -0.1493,
+    "t": -1.73,
+    "first": "2023-01-12"
+   },
+   "walk_forward_oos": {
+    "n": 1052,
+    "mean_r": -0.1309,
+    "t": -2.59
+   },
+   "inr_10_lakh_hold": null
+  },
+  {
+   "strategy": "BB-18",
+   "market": "GBPUSD",
+   "variant": "S1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_1min_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 731,
+    "mean_r": -0.1512,
+    "t": -2.54
+   },
+   "val": {
+    "n": 240,
+    "mean_r": 0.0766,
+    "t": 0.68
+   },
+   "hold": {
+    "n": 252,
+    "mean_r": -0.1396,
+    "mean_r_gross": 0.0198,
+    "t": -1.35,
+    "win_rate": 0.262,
+    "profit_factor": 0.825,
+    "max_dd_pct": 35.2,
+    "cagr_pct": -9.77,
+    "top5_share_of_net": NaN
+   },
+   "post_publication": {
+    "n": 252,
+    "mean_r": -0.1396,
+    "t": -1.35,
+    "first": "2023-01-12"
+   },
+   "walk_forward_oos": {
+    "n": 1052,
+    "mean_r": -0.1309,
+    "t": -2.59
+   },
+   "inr_10_lakh_hold": null
+  }
+ ]
+}

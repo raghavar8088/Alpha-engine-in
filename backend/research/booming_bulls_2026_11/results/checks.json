@@ -1,0 +1,325 @@
+{
+ "engine": {
+  "long_entry_next_minute_at_ask_plus_slip": true,
+  "long_target_fill_at_target": true,
+  "stop_first_when_both_touched": true,
+  "gap_through_stop_fills_at_open": true,
+  "short_entry_at_bid_minus_slip": true,
+  "short_stop_on_ask": true,
+  "time_exit_at_forced_row": true,
+  "breakeven_moves_stop_to_entry": true,
+  "partial_half_at_1R_then_breakeven": true,
+  "fill_after_signal_bar": true,
+  "entry_beyond_stop_rejected": true,
+  "target_ends_the_day": true
+ },
+ "fidelity_bb01_sep2025": {
+  "days": 22,
+  "video_trade_days": 15,
+  "our_trade_days": 13,
+  "both_trade": 12,
+  "both_no_trade": 6,
+  "same_setup_family": 7,
+  "direction_stated_and_both_trade": 10,
+  "same_direction": 9,
+  "rows": [
+   {
+    "date": "2025-09-01",
+    "video": [
+     "B",
+     1
+    ],
+    "ours": {
+     "setup": "R",
+     "side": 1,
+     "signal_close_ist": "13:05",
+     "stop_points": 13.1
+    }
+   },
+   {
+    "date": "2025-09-02",
+    "video": [
+     "R",
+     1
+    ],
+    "ours": null
+   },
+   {
+    "date": "2025-09-03",
+    "video": null,
+    "ours": null
+   },
+   {
+    "date": "2025-09-04",
+    "video": [
+     "G",
+     -1
+    ],
+    "ours": {
+     "setup": "G",
+     "side": -1,
+     "signal_close_ist": "10:15",
+     "stop_points": 43.2
+    }
+   },
+   {
+    "date": "2025-09-05",
+    "video": [
+     "B_big",
+     0
+    ],
+    "ours": {
+     "setup": "G",
+     "side": -1,
+     "signal_close_ist": "09:25",
+     "stop_points": 46.6
+    }
+   },
+   {
+    "date": "2025-09-08",
+    "video": [
+     "T",
+     -1
+    ],
+    "ours": {
+     "setup": "T",
+     "side": -1,
+     "signal_close_ist": "09:55",
+     "stop_points": 40.1
+    }
+   },
+   {
+    "date": "2025-09-09",
+    "video": null,
+    "ours": {
+     "setup": "G",
+     "side": -1,
+     "signal_close_ist": "09:25",
+     "stop_points": 32.5
+    }
+   },
+   {
+    "date": "2025-09-10",
+    "video": null,
+    "ours": null
+   },
+   {
+    "date": "2025-09-11",
+    "video": null,
+    "ours": null
+   },
+   {
+    "date": "2025-09-12",
+    "video": [
+     "G",
+     -1
+    ],
+    "ours": null
+   },
+   {
+    "date": "2025-09-15",
+    "video": null,
+    "ours": null
+   },
+   {
+    "date": "2025-09-16",
+    "video": [
+     "B",
+     0
+    ],
+    "ours": {
+     "setup": "R",
+     "side": 1,
+     "signal_close_ist": "09:40",
+     "stop_points": 13.5
+    }
+   },
+   {
+    "date": "2025-09-17",
+    "video": null,
+    "ours": null
+   },
+   {
+    "date": "2025-09-18",
+    "video": [
+     "G",
+     -1
+    ],
+    "ours": {
+     "setup": "G",
+     "side": -1,
+     "signal_close_ist": "09:40",
+     "stop_points": 48.9
+    }
+   },
+   {
+    "date": "2025-09-19",
+    "video": [
+     "B",
+     -1
+    ],
+    "ours": {
+     "setup": "R",
+     "side": -1,
+     "signal_close_ist": "10:00",
+     "stop_points": 28.6
+    }
+   },
+   {
+    "date": "2025-09-22",
+    "video": [
+     "G",
+     1
+    ],
+    "ours": {
+     "setup": "R",
+     "side": -1,
+     "signal_close_ist": "13:20",
+     "stop_points": 22.1
+    }
+   },
+   {
+    "date": "2025-09-23",
+    "video": [
+     "B",
+     -1
+    ],
+    "ours": {
+     "setup": "B",
+     "side": -1,
+     "signal_close_ist": "09:50",
+     "stop_points": 27.4
+    }
+   },
+   {
+    "date": "2025-09-24",
+    "video": [
+     "T",
+     1
+    ],
+    "ours": {
+     "setup": "T",
+     "side": 1,
+     "signal_close_ist": "10:00",
+     "stop_points": 48.9
+    }
+   },
+   {
+    "date": "2025-09-25",
+    "video": [
+     "B",
+     -1
+    ],
+    "ours": {
+     "setup": "B",
+     "side": -1,
+     "signal_close_ist": "11:05",
+     "stop_points": 36.2
+    }
+   },
+   {
+    "date": "2025-09-26",
+    "video": null,
+    "ours": null
+   },
+   {
+    "date": "2025-09-29",
+    "video": [
+     "T",
+     1
+    ],
+    "ours": null
+   },
+   {
+    "date": "2025-09-30",
+    "video": [
+     "T",
+     1
+    ],
+    "ours": {
+     "setup": "T",
+     "side": 1,
+     "signal_close_ist": "10:45",
+     "stop_points": 31.0
+    }
+   }
+  ]
+ },
+ "lookahead": {
+  "BB-01|NIFTY|V0": true,
+  "BB-01|NIFTY|S1": true,
+  "BB-01|NIFTY|S2": true,
+  "BB-01|NIFTY|R1": true,
+  "BB-02|NIFTY|V0": true,
+  "BB-02|NIFTY|S1": true,
+  "BB-02|NIFTY|S2": true,
+  "BB-02|NIFTY|S3": true,
+  "BB-02|NIFTY|S4": true,
+  "BB-03|NIFTY|V0": true,
+  "BB-03|NIFTY|R1": true,
+  "BB-04|NIFTY|V0": true,
+  "BB-04|NIFTY|R1": true,
+  "BB-05|BANKNIFTY|V0": true,
+  "BB-05|BANKNIFTY|S1": true,
+  "BB-06|NIFTY|V0": true,
+  "BB-06|NIFTY|S1": true,
+  "BB-07|XAUUSD|V0": true,
+  "BB-07|XAUUSD|S1": true,
+  "BB-07|NAS100|V0": true,
+  "BB-07|NAS100|S1": true,
+  "BB-08|XAUUSD|V0": true,
+  "BB-08|XAUUSD|S1": true,
+  "BB-08|XAUUSD|S2": true,
+  "BB-08|XAUUSD|S3": true,
+  "BB-08|EURUSD|V0": true,
+  "BB-08|EURUSD|S1": true,
+  "BB-08|EURUSD|S2": true,
+  "BB-08|EURUSD|S3": true,
+  "BB-08|GBPUSD|V0": true,
+  "BB-08|GBPUSD|S1": true,
+  "BB-08|GBPUSD|S2": true,
+  "BB-08|GBPUSD|S3": true,
+  "BB-09|XAUUSD|V0": true,
+  "BB-09|XAUUSD|S1": true,
+  "BB-09|XAUUSD|S2": true,
+  "BB-09|XAUUSD|R1": true,
+  "BB-09|XAUUSD|R2": true,
+  "BB-10|XAUUSD|V0": true,
+  "BB-10|XAUUSD|R1": true,
+  "BB-11|EURUSD|V0": true,
+  "BB-11|EURUSD|S1": true,
+  "BB-11|EURUSD|R1": true,
+  "BB-11|GBPUSD|V0": true,
+  "BB-11|GBPUSD|S1": true,
+  "BB-11|GBPUSD|R1": true,
+  "BB-11|XAUUSD|V0": true,
+  "BB-11|XAUUSD|S1": true,
+  "BB-11|XAUUSD|R1": true,
+  "BB-12|XAUUSD|V0": true,
+  "BB-12|XAUUSD|S1": true,
+  "BB-12|XAUUSD|R1": true,
+  "BB-13|NAS100|V0": true,
+  "BB-13|NAS100|S1": true,
+  "BB-13|NAS100|S2": true,
+  "BB-13|NAS100|R1": true,
+  "BB-13|XAUUSD|V0": true,
+  "BB-13|XAUUSD|S1": true,
+  "BB-13|XAUUSD|S2": true,
+  "BB-13|XAUUSD|R1": true,
+  "BB-14|NAS100|V0": true,
+  "BB-14|NAS100|S1": true,
+  "BB-14|NAS100|S2": true,
+  "BB-14|NAS100|R1": true,
+  "BB-16|XAUUSD|V0": true,
+  "BB-16|XAUUSD|S1": true,
+  "BB-16|XAUUSD|S2": true,
+  "BB-17|XAUUSD|V0": true,
+  "BB-17|XAUUSD|S1": true,
+  "BB-17|EURUSD|V0": true,
+  "BB-17|EURUSD|S1": true,
+  "BB-18|EURUSD|V0": true,
+  "BB-18|EURUSD|S1": true,
+  "BB-18|GBPUSD|V0": true,
+  "BB-18|GBPUSD|S1": true
+ }
+}
