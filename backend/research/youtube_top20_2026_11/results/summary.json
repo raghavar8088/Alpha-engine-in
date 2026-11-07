@@ -1,0 +1,4326 @@
+{
+ "prereg_sha256": "76f59c5325e1e22bcb924d39ae6453c64cac0801fefee3f8df9c6522e9ca8e48",
+ "holdout_tests": 80,
+ "rows": [
+  {
+   "strategy": "YT-01",
+   "name": "5 EMA alert candle",
+   "channel": "Power of Stocks; Pushkar Raj Thakur",
+   "market": "BANKNIFTY",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 3712,
+    "mean_r": -0.2619,
+    "t": -9.65
+   },
+   "val": {
+    "n": 1261,
+    "mean_r": -0.2559,
+    "t": -5.42
+   },
+   "hold": {
+    "n": 1701,
+    "mean_r": -0.3922,
+    "mean_r_gross": -0.0251,
+    "t": -10.0,
+    "win_rate": 0.258,
+    "profit_factor": 0.592,
+    "max_dd_pct": 99.9,
+    "cagr_pct": -91.73,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.3671
+   },
+   "post_publication": {
+    "n": 2704,
+    "mean_r": -0.3597,
+    "t": -11.44,
+    "first": "2022-06-01"
+   },
+   "walk_forward_oos": {
+    "n": 4811,
+    "mean_r": -0.2837,
+    "t": -10.69
+   }
+  },
+  {
+   "strategy": "YT-01",
+   "name": "5 EMA alert candle",
+   "channel": "Power of Stocks; Pushkar Raj Thakur",
+   "market": "BANKNIFTY",
+   "instruments": 1,
+   "variant": "S1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 3633,
+    "mean_r": -0.2543,
+    "t": -7.73
+   },
+   "val": {
+    "n": 1237,
+    "mean_r": -0.2622,
+    "t": -4.94
+   },
+   "hold": {
+    "n": 1667,
+    "mean_r": -0.3558,
+    "mean_r_gross": 0.0293,
+    "t": -7.72,
+    "win_rate": 0.262,
+    "profit_factor": 0.631,
+    "max_dd_pct": 99.8,
+    "cagr_pct": -89.45,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.3851
+   },
+   "post_publication": {
+    "n": 2653,
+    "mean_r": -0.3404,
+    "t": -9.39,
+    "first": "2022-06-01"
+   },
+   "walk_forward_oos": {
+    "n": 4811,
+    "mean_r": -0.2837,
+    "t": -10.69
+   }
+  },
+  {
+   "strategy": "YT-01",
+   "name": "5 EMA alert candle",
+   "channel": "Power of Stocks; Pushkar Raj Thakur",
+   "market": "NIFTY",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 3782,
+    "mean_r": -0.3498,
+    "t": -12.73
+   },
+   "val": {
+    "n": 1238,
+    "mean_r": -0.3211,
+    "t": -6.71
+   },
+   "hold": {
+    "n": 1792,
+    "mean_r": -0.447,
+    "mean_r_gross": 0.0195,
+    "t": -11.23,
+    "win_rate": 0.267,
+    "profit_factor": 0.569,
+    "max_dd_pct": 100.0,
+    "cagr_pct": -94.76,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.4665
+   },
+   "post_publication": {
+    "n": 2772,
+    "mean_r": -0.4105,
+    "t": -12.84,
+    "first": "2022-06-01"
+   },
+   "walk_forward_oos": {
+    "n": 4841,
+    "mean_r": -0.3305,
+    "t": -11.67
+   }
+  },
+  {
+   "strategy": "YT-01",
+   "name": "5 EMA alert candle",
+   "channel": "Power of Stocks; Pushkar Raj Thakur",
+   "market": "NIFTY",
+   "instruments": 1,
+   "variant": "S1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 3733,
+    "mean_r": -0.3259,
+    "t": -10.13
+   },
+   "val": {
+    "n": 1219,
+    "mean_r": -0.3331,
+    "t": -6.09
+   },
+   "hold": {
+    "n": 1750,
+    "mean_r": -0.4225,
+    "mean_r_gross": 0.0615,
+    "t": -8.93,
+    "win_rate": 0.255,
+    "profit_factor": 0.598,
+    "max_dd_pct": 100.0,
+    "cagr_pct": -93.65,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.4839
+   },
+   "post_publication": {
+    "n": 2714,
+    "mean_r": -0.4027,
+    "t": -10.78,
+    "first": "2022-06-01"
+   },
+   "walk_forward_oos": {
+    "n": 4841,
+    "mean_r": -0.3305,
+    "t": -11.67
+   }
+  },
+  {
+   "strategy": "YT-02",
+   "name": "Market-structure pullback, ATR stop",
+   "channel": "The Trading Channel",
+   "market": "EURUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 555,
+    "mean_r": -0.1471,
+    "t": -2.52
+   },
+   "val": {
+    "n": 163,
+    "mean_r": -0.0144,
+    "t": -0.13
+   },
+   "hold": {
+    "n": 182,
+    "mean_r": -0.0742,
+    "mean_r_gross": -0.0305,
+    "t": -0.71,
+    "win_rate": 0.324,
+    "profit_factor": 0.894,
+    "max_dd_pct": 20.8,
+    "cagr_pct": -3.99,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.0437
+   },
+   "post_publication": {
+    "n": 275,
+    "mean_r": -0.0911,
+    "t": -1.08,
+    "first": "2021-06-03"
+   },
+   "walk_forward_oos": {
+    "n": 782,
+    "mean_r": -0.1309,
+    "t": -3.04
+   }
+  },
+  {
+   "strategy": "YT-02",
+   "name": "Market-structure pullback, ATR stop",
+   "channel": "The Trading Channel",
+   "market": "EURUSD",
+   "instruments": 1,
+   "variant": "R1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 585,
+    "mean_r": -0.0981,
+    "t": -1.95
+   },
+   "val": {
+    "n": 166,
+    "mean_r": -0.0474,
+    "t": -0.5
+   },
+   "hold": {
+    "n": 189,
+    "mean_r": -0.1305,
+    "mean_r_gross": -0.0872,
+    "t": -1.48,
+    "win_rate": 0.365,
+    "profit_factor": 0.803,
+    "max_dd_pct": 24.8,
+    "cagr_pct": -6.7,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.0433
+   },
+   "post_publication": {
+    "n": 283,
+    "mean_r": -0.1456,
+    "t": -2.04,
+    "first": "2021-06-03"
+   },
+   "walk_forward_oos": {
+    "n": 782,
+    "mean_r": -0.1309,
+    "t": -3.04
+   }
+  },
+  {
+   "strategy": "YT-02",
+   "name": "Market-structure pullback, ATR stop",
+   "channel": "The Trading Channel",
+   "market": "GBPUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 542,
+    "mean_r": 0.0603,
+    "t": 0.97
+   },
+   "val": {
+    "n": 149,
+    "mean_r": -0.1127,
+    "t": -0.99
+   },
+   "hold": {
+    "n": 173,
+    "mean_r": -0.0824,
+    "mean_r_gross": -0.034,
+    "t": -0.78,
+    "win_rate": 0.318,
+    "profit_factor": 0.883,
+    "max_dd_pct": 20.1,
+    "cagr_pct": -4.21,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.0485
+   },
+   "post_publication": {
+    "n": 250,
+    "mean_r": -0.119,
+    "t": -1.36,
+    "first": "2021-06-11"
+   },
+   "walk_forward_oos": {
+    "n": 700,
+    "mean_r": -0.0005,
+    "t": -0.01
+   }
+  },
+  {
+   "strategy": "YT-03",
+   "name": "50 MA double bottom / top",
+   "channel": "The Trading Channel",
+   "market": "EURUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": true,
+    "hold_delay_positive": true,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": true
+   },
+   "dev": {
+    "n": 236,
+    "mean_r": -0.1049,
+    "t": -1.13
+   },
+   "val": {
+    "n": 75,
+    "mean_r": -0.0746,
+    "t": -0.46
+   },
+   "hold": {
+    "n": 81,
+    "mean_r": 0.1092,
+    "mean_r_gross": 0.1633,
+    "t": 0.67,
+    "win_rate": 0.383,
+    "profit_factor": 1.17,
+    "max_dd_pct": 13.7,
+    "cagr_pct": 2.17,
+    "top5_share_of_net": 1.124,
+    "cost_r_mean": 0.0541
+   },
+   "post_publication": {
+    "n": 107,
+    "mean_r": 0.0309,
+    "t": 0.22,
+    "first": "2022-01-25"
+   },
+   "walk_forward_oos": {
+    "n": 341,
+    "mean_r": -0.0449,
+    "t": -0.64
+   }
+  },
+  {
+   "strategy": "YT-03",
+   "name": "50 MA double bottom / top",
+   "channel": "The Trading Channel",
+   "market": "EURUSD",
+   "instruments": 1,
+   "variant": "R1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": true
+   },
+   "dev": {
+    "n": 247,
+    "mean_r": -0.0828,
+    "t": -1.04
+   },
+   "val": {
+    "n": 76,
+    "mean_r": 0.0187,
+    "t": 0.13
+   },
+   "hold": {
+    "n": 86,
+    "mean_r": 0.0078,
+    "mean_r_gross": 0.0616,
+    "t": 0.06,
+    "win_rate": 0.419,
+    "profit_factor": 1.013,
+    "max_dd_pct": 11.2,
+    "cagr_pct": 0.0,
+    "top5_share_of_net": 11.152,
+    "cost_r_mean": 0.0539
+   },
+   "post_publication": {
+    "n": 113,
+    "mean_r": 0.0055,
+    "t": 0.05,
+    "first": "2022-01-25"
+   },
+   "walk_forward_oos": {
+    "n": 341,
+    "mean_r": -0.0449,
+    "t": -0.64
+   }
+  },
+  {
+   "strategy": "YT-03",
+   "name": "50 MA double bottom / top",
+   "channel": "The Trading Channel",
+   "market": "GBPUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 240,
+    "mean_r": -0.0778,
+    "t": -0.86
+   },
+   "val": {
+    "n": 75,
+    "mean_r": -0.1865,
+    "t": -1.19
+   },
+   "hold": {
+    "n": 66,
+    "mean_r": -0.3072,
+    "mean_r_gross": -0.2487,
+    "t": -1.92,
+    "win_rate": 0.242,
+    "profit_factor": 0.609,
+    "max_dd_pct": 24.7,
+    "cagr_pct": -5.39,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.0585
+   },
+   "post_publication": {
+    "n": 91,
+    "mean_r": -0.2729,
+    "t": -1.98,
+    "first": "2022-01-07"
+   },
+   "walk_forward_oos": {
+    "n": 322,
+    "mean_r": -0.1045,
+    "t": -1.41
+   }
+  },
+  {
+   "strategy": "YT-04",
+   "name": "ICT Silver Bullet",
+   "channel": "The Inner Circle Trader",
+   "market": "EURUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 7132,
+    "mean_r": -0.5279,
+    "t": -15.75
+   },
+   "val": {
+    "n": 1960,
+    "mean_r": -0.4897,
+    "t": -7.29
+   },
+   "hold": {
+    "n": 2044,
+    "mean_r": -0.6317,
+    "mean_r_gross": -0.0283,
+    "t": -10.13,
+    "win_rate": 0.114,
+    "profit_factor": 0.509,
+    "max_dd_pct": 100.0,
+    "cagr_pct": -97.33,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.6034
+   },
+   "post_publication": {
+    "n": 1989,
+    "mean_r": -0.6327,
+    "t": -9.95,
+    "first": "2023-08-01"
+   },
+   "walk_forward_oos": {
+    "n": 9152,
+    "mean_r": -0.5508,
+    "t": -18.2
+   }
+  },
+  {
+   "strategy": "YT-04",
+   "name": "ICT Silver Bullet",
+   "channel": "The Inner Circle Trader",
+   "market": "NAS100",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 3623,
+    "mean_r": -0.5997,
+    "t": -18.53
+   },
+   "val": {
+    "n": 1303,
+    "mean_r": -0.0933,
+    "t": -1.59
+   },
+   "hold": {
+    "n": 1440,
+    "mean_r": -0.0246,
+    "mean_r_gross": 0.1004,
+    "t": -0.44,
+    "win_rate": 0.341,
+    "profit_factor": 0.964,
+    "max_dd_pct": 73.3,
+    "cagr_pct": -15.96,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.125
+   },
+   "post_publication": {
+    "n": 1403,
+    "mean_r": -0.0244,
+    "t": -0.43,
+    "first": "2023-08-01"
+   },
+   "walk_forward_oos": {
+    "n": 5584,
+    "mean_r": -0.3062,
+    "t": -11.01
+   }
+  },
+  {
+   "strategy": "YT-05",
+   "name": "ICT Judas Swing",
+   "channel": "The Inner Circle Trader",
+   "market": "EURUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": true,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": true
+   },
+   "dev": {
+    "n": 755,
+    "mean_r": -0.0695,
+    "t": -1.6
+   },
+   "val": {
+    "n": 217,
+    "mean_r": -0.0004,
+    "t": -0.0
+   },
+   "hold": {
+    "n": 219,
+    "mean_r": 0.0115,
+    "mean_r_gross": 0.0664,
+    "t": 0.14,
+    "win_rate": 0.438,
+    "profit_factor": 1.022,
+    "max_dd_pct": 16.2,
+    "cagr_pct": 0.27,
+    "top5_share_of_net": 3.925,
+    "cost_r_mean": 0.0549
+   },
+   "post_publication": {
+    "n": 607,
+    "mean_r": -0.0094,
+    "t": -0.2,
+    "first": "2018-01-10"
+   },
+   "walk_forward_oos": {
+    "n": 1057,
+    "mean_r": -0.0438,
+    "t": -1.11
+   }
+  },
+  {
+   "strategy": "YT-05",
+   "name": "ICT Judas Swing",
+   "channel": "The Inner Circle Trader",
+   "market": "EURUSD",
+   "instruments": 1,
+   "variant": "R1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": true,
+    "hold_delay_positive": true,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": true
+   },
+   "dev": {
+    "n": 755,
+    "mean_r": -0.073,
+    "t": -1.51
+   },
+   "val": {
+    "n": 217,
+    "mean_r": 0.0173,
+    "t": 0.19
+   },
+   "hold": {
+    "n": 219,
+    "mean_r": 0.0516,
+    "mean_r_gross": 0.107,
+    "t": 0.58,
+    "win_rate": 0.434,
+    "profit_factor": 1.099,
+    "max_dd_pct": 17.0,
+    "cagr_pct": 2.55,
+    "top5_share_of_net": 1.313,
+    "cost_r_mean": 0.0554
+   },
+   "post_publication": {
+    "n": 607,
+    "mean_r": -0.01,
+    "t": -0.19,
+    "first": "2018-01-10"
+   },
+   "walk_forward_oos": {
+    "n": 1057,
+    "mean_r": -0.0438,
+    "t": -1.11
+   }
+  },
+  {
+   "strategy": "YT-05",
+   "name": "ICT Judas Swing",
+   "channel": "The Inner Circle Trader",
+   "market": "GBPUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 993,
+    "mean_r": 0.0091,
+    "t": 0.23
+   },
+   "val": {
+    "n": 229,
+    "mean_r": -0.0591,
+    "t": -0.72
+   },
+   "hold": {
+    "n": 249,
+    "mean_r": -0.1251,
+    "mean_r_gross": -0.0608,
+    "t": -1.7,
+    "win_rate": 0.373,
+    "profit_factor": 0.786,
+    "max_dd_pct": 37.2,
+    "cagr_pct": -8.42,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.0643
+   },
+   "post_publication": {
+    "n": 685,
+    "mean_r": -0.0527,
+    "t": -1.12,
+    "first": "2018-01-03"
+   },
+   "walk_forward_oos": {
+    "n": 1237,
+    "mean_r": -0.0456,
+    "t": -1.29
+   }
+  },
+  {
+   "strategy": "YT-06",
+   "name": "ICT OTE 62% retracement",
+   "channel": "The Inner Circle Trader",
+   "market": "EURUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1423,
+    "mean_r": -0.0886,
+    "t": -2.61
+   },
+   "val": {
+    "n": 411,
+    "mean_r": -0.0825,
+    "t": -1.34
+   },
+   "hold": {
+    "n": 445,
+    "mean_r": -0.1015,
+    "mean_r_gross": -0.0166,
+    "t": -1.62,
+    "win_rate": 0.364,
+    "profit_factor": 0.83,
+    "max_dd_pct": 51.2,
+    "cagr_pct": -12.17,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.0849
+   },
+   "post_publication": {
+    "n": 815,
+    "mean_r": -0.098,
+    "t": -2.19,
+    "first": "2020-05-04"
+   },
+   "walk_forward_oos": {
+    "n": 1888,
+    "mean_r": -0.092,
+    "t": -3.09
+   }
+  },
+  {
+   "strategy": "YT-07",
+   "name": "Connors RSI(10) pullback, S&P 500",
+   "channel": "Rayner Teo",
+   "market": "NAS100_D",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "needs more evidence",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": true,
+    "hold_n>=50": false,
+    "hold_costs_x2_positive": true,
+    "hold_delay_positive": true,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": true
+   },
+   "dev": {
+    "n": 16,
+    "mean_r": 0.4674,
+    "t": 3.21
+   },
+   "val": {
+    "n": 7,
+    "mean_r": 0.2692,
+    "t": 2.0
+   },
+   "hold": {
+    "n": 8,
+    "mean_r": 0.3262,
+    "mean_r_gross": 0.3283,
+    "t": 1.23,
+    "win_rate": 0.875,
+    "profit_factor": 2.746,
+    "max_dd_pct": 1.5,
+    "cagr_pct": 0.94,
+    "top5_share_of_net": 1.266,
+    "cost_r_mean": 0.002
+   },
+   "post_publication": {
+    "n": 14,
+    "mean_r": 0.3176,
+    "t": 1.99,
+    "first": "2021-02-26"
+   },
+   "walk_forward_oos": {
+    "n": 2,
+    "mean_r": 0.4917,
+    "t": 4.12
+   }
+  },
+  {
+   "strategy": "YT-07",
+   "name": "Connors RSI(10) pullback, S&P 500",
+   "channel": "Rayner Teo",
+   "market": "NIFTY_D",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "unable to evaluate",
+   "holm_p": 0.0173,
+   "gates": {
+    "hold_t>=2": true,
+    "holm_p<0.05": true,
+    "dev_and_val_positive": true,
+    "hold_n>=50": false,
+    "hold_costs_x2_positive": true,
+    "hold_delay_positive": true,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": true
+   },
+   "dev": {
+    "n": 14,
+    "mean_r": 0.1385,
+    "t": 0.36
+   },
+   "val": {
+    "n": 3,
+    "mean_r": 0.6721,
+    "t": 14.97
+   },
+   "hold": {
+    "n": 5,
+    "mean_r": 0.5717,
+    "mean_r_gross": 0.5903,
+    "t": 3.52,
+    "win_rate": 1.0,
+    "profit_factor": Infinity,
+    "max_dd_pct": 0.0,
+    "cagr_pct": 2.24,
+    "top5_share_of_net": 1.0,
+    "cost_r_mean": 0.0186
+   },
+   "post_publication": {
+    "n": 11,
+    "mean_r": 0.7013,
+    "t": 6.02,
+    "first": "2021-02-01"
+   },
+   "walk_forward_oos": {
+    "n": 0,
+    "mean_r": null,
+    "t": null
+   }
+  },
+  {
+   "strategy": "YT-07",
+   "name": "Connors RSI(10) pullback, S&P 500",
+   "channel": "Rayner Teo",
+   "market": "SPX500_D",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "needs more evidence",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": true,
+    "hold_n>=50": false,
+    "hold_costs_x2_positive": true,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": true
+   },
+   "dev": {
+    "n": 17,
+    "mean_r": 0.5439,
+    "t": 4.77
+   },
+   "val": {
+    "n": 5,
+    "mean_r": 0.2112,
+    "t": 0.55
+   },
+   "hold": {
+    "n": 8,
+    "mean_r": 0.3116,
+    "mean_r_gross": 0.3169,
+    "t": 1.3,
+    "win_rate": 0.75,
+    "profit_factor": 3.096,
+    "max_dd_pct": 0.9,
+    "cagr_pct": 1.01,
+    "top5_share_of_net": 1.471,
+    "cost_r_mean": 0.0054
+   },
+   "post_publication": {
+    "n": 11,
+    "mean_r": 0.3272,
+    "t": 1.75,
+    "first": "2021-09-21"
+   },
+   "walk_forward_oos": {
+    "n": 1,
+    "mean_r": -0.2461,
+    "t": NaN
+   }
+  },
+  {
+   "strategy": "YT-08",
+   "name": "Inside candle (15m)",
+   "channel": "Power of Stocks",
+   "market": "BANKNIFTY",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1844,
+    "mean_r": -0.2165,
+    "t": -6.96
+   },
+   "val": {
+    "n": 560,
+    "mean_r": -0.1316,
+    "t": -2.35
+   },
+   "hold": {
+    "n": 812,
+    "mean_r": -0.3057,
+    "mean_r_gross": -0.0505,
+    "t": -6.74,
+    "win_rate": 0.34,
+    "profit_factor": 0.607,
+    "max_dd_pct": 92.5,
+    "cagr_pct": -60.22,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.2552
+   },
+   "post_publication": {
+    "n": 1395,
+    "mean_r": -0.2297,
+    "t": -6.54,
+    "first": "2021-12-01"
+   },
+   "walk_forward_oos": {
+    "n": 2013,
+    "mean_r": -0.1829,
+    "t": -7.46
+   }
+  },
+  {
+   "strategy": "YT-08",
+   "name": "Inside candle (15m)",
+   "channel": "Power of Stocks",
+   "market": "BANKNIFTY",
+   "instruments": 1,
+   "variant": "R1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1630,
+    "mean_r": -0.1571,
+    "t": -5.69
+   },
+   "val": {
+    "n": 492,
+    "mean_r": -0.1381,
+    "t": -2.83
+   },
+   "hold": {
+    "n": 712,
+    "mean_r": -0.2693,
+    "mean_r_gross": -0.0697,
+    "t": -6.61,
+    "win_rate": 0.393,
+    "profit_factor": 0.593,
+    "max_dd_pct": 87.5,
+    "cagr_pct": -50.74,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.1996
+   },
+   "post_publication": {
+    "n": 1225,
+    "mean_r": -0.2097,
+    "t": -6.74,
+    "first": "2021-12-01"
+   },
+   "walk_forward_oos": {
+    "n": 2013,
+    "mean_r": -0.1829,
+    "t": -7.46
+   }
+  },
+  {
+   "strategy": "YT-08",
+   "name": "Inside candle (15m)",
+   "channel": "Power of Stocks",
+   "market": "NIFTY",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1715,
+    "mean_r": -0.1763,
+    "t": -5.34
+   },
+   "val": {
+    "n": 503,
+    "mean_r": -0.0653,
+    "t": -1.09
+   },
+   "hold": {
+    "n": 776,
+    "mean_r": -0.3071,
+    "mean_r_gross": 0.0122,
+    "t": -6.34,
+    "win_rate": 0.357,
+    "profit_factor": 0.619,
+    "max_dd_pct": 91.6,
+    "cagr_pct": -58.34,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.3192
+   },
+   "post_publication": {
+    "n": 1305,
+    "mean_r": -0.2131,
+    "t": -5.7,
+    "first": "2021-12-01"
+   },
+   "walk_forward_oos": {
+    "n": 1899,
+    "mean_r": -0.1407,
+    "t": -5.43
+   }
+  },
+  {
+   "strategy": "YT-08",
+   "name": "Inside candle (15m)",
+   "channel": "Power of Stocks",
+   "market": "NIFTY",
+   "instruments": 1,
+   "variant": "R1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1525,
+    "mean_r": -0.1566,
+    "t": -5.4
+   },
+   "val": {
+    "n": 462,
+    "mean_r": -0.0618,
+    "t": -1.18
+   },
+   "hold": {
+    "n": 696,
+    "mean_r": -0.2531,
+    "mean_r_gross": -0.0125,
+    "t": -5.92,
+    "win_rate": 0.401,
+    "profit_factor": 0.624,
+    "max_dd_pct": 84.1,
+    "cagr_pct": -47.54,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.2406
+   },
+   "post_publication": {
+    "n": 1180,
+    "mean_r": -0.1795,
+    "t": -5.47,
+    "first": "2021-12-01"
+   },
+   "walk_forward_oos": {
+    "n": 1899,
+    "mean_r": -0.1407,
+    "t": -5.43
+   }
+  },
+  {
+   "strategy": "YT-08",
+   "name": "Inside candle (15m)",
+   "channel": "Power of Stocks",
+   "market": "NSE15",
+   "instruments": 268,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 56184,
+    "mean_r": -0.1662,
+    "t": -13.32
+   },
+   "val": {
+    "n": 41705,
+    "mean_r": -0.2218,
+    "t": -14.83
+   },
+   "hold": {
+    "n": 69940,
+    "mean_r": -0.1857,
+    "mean_r_gross": 0.0534,
+    "t": -14.91,
+    "win_rate": 0.36,
+    "profit_factor": 0.747,
+    "max_dd_pct": 31.0,
+    "cagr_pct": -35.78,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.2392
+   },
+   "post_publication": {
+    "n": 167829,
+    "mean_r": -0.1881,
+    "t": -24.53,
+    "first": "2024-10-03"
+   },
+   "walk_forward_oos": {
+    "n": 0,
+    "mean_r": null,
+    "t": null
+   }
+  },
+  {
+   "strategy": "YT-09",
+   "name": "Traffic light candle pair",
+   "channel": "Power of Stocks",
+   "market": "BANKNIFTY",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1424,
+    "mean_r": -0.1919,
+    "t": -4.93
+   },
+   "val": {
+    "n": 477,
+    "mean_r": -0.2015,
+    "t": -3.03
+   },
+   "hold": {
+    "n": 673,
+    "mean_r": -0.253,
+    "mean_r_gross": 0.0956,
+    "t": -4.53,
+    "win_rate": 0.351,
+    "profit_factor": 0.703,
+    "max_dd_pct": 83.4,
+    "cagr_pct": -47.31,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.3486
+   },
+   "post_publication": {
+    "n": 1111,
+    "mean_r": -0.2602,
+    "t": -6.02,
+    "first": "2022-03-02"
+   },
+   "walk_forward_oos": {
+    "n": 1855,
+    "mean_r": -0.1802,
+    "t": -5.3
+   }
+  },
+  {
+   "strategy": "YT-09",
+   "name": "Traffic light candle pair",
+   "channel": "Power of Stocks",
+   "market": "NIFTY",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1433,
+    "mean_r": -0.3262,
+    "t": -8.45
+   },
+   "val": {
+    "n": 472,
+    "mean_r": -0.2878,
+    "t": -4.32
+   },
+   "hold": {
+    "n": 678,
+    "mean_r": -0.4085,
+    "mean_r_gross": 0.0152,
+    "t": -7.42,
+    "win_rate": 0.324,
+    "profit_factor": 0.566,
+    "max_dd_pct": 94.3,
+    "cagr_pct": -63.68,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.4237
+   },
+   "post_publication": {
+    "n": 1112,
+    "mean_r": -0.3653,
+    "t": -8.46,
+    "first": "2022-03-02"
+   },
+   "walk_forward_oos": {
+    "n": 1887,
+    "mean_r": -0.1468,
+    "t": -4.42
+   }
+  },
+  {
+   "strategy": "YT-09",
+   "name": "Traffic light candle pair",
+   "channel": "Power of Stocks",
+   "market": "NIFTY",
+   "instruments": 1,
+   "variant": "S1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1442,
+    "mean_r": -0.1999,
+    "t": -5.29
+   },
+   "val": {
+    "n": 487,
+    "mean_r": -0.1243,
+    "t": -1.9
+   },
+   "hold": {
+    "n": 688,
+    "mean_r": -0.1922,
+    "mean_r_gross": 0.0942,
+    "t": -3.53,
+    "win_rate": 0.365,
+    "profit_factor": 0.758,
+    "max_dd_pct": 77.1,
+    "cagr_pct": -39.1,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.2863
+   },
+   "post_publication": {
+    "n": 1136,
+    "mean_r": -0.1693,
+    "t": -3.99,
+    "first": "2022-03-02"
+   },
+   "walk_forward_oos": {
+    "n": 1887,
+    "mean_r": -0.1468,
+    "t": -4.42
+   }
+  },
+  {
+   "strategy": "YT-10",
+   "name": "Gap + shooting star / hammer first candle",
+   "channel": "Ghanshyam Tech",
+   "market": "BANKNIFTY",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "needs more evidence",
+   "holm_p": 0.0266,
+   "gates": {
+    "hold_t>=2": true,
+    "holm_p<0.05": true,
+    "dev_and_val_positive": false,
+    "hold_n>=50": false,
+    "hold_costs_x2_positive": true,
+    "hold_delay_positive": true,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": true
+   },
+   "dev": {
+    "n": 25,
+    "mean_r": 0.55,
+    "t": 2.26
+   },
+   "val": {
+    "n": 5,
+    "mean_r": -0.0033,
+    "t": -0.01
+   },
+   "hold": {
+    "n": 7,
+    "mean_r": 1.1931,
+    "mean_r_gross": 1.2937,
+    "t": 3.4,
+    "win_rate": 0.714,
+    "profit_factor": 104.122,
+    "max_dd_pct": 0.1,
+    "cagr_pct": 3.52,
+    "top5_share_of_net": 1.01,
+    "cost_r_mean": 0.1006
+   },
+   "post_publication": {
+    "n": 12,
+    "mean_r": 0.6946,
+    "t": 2.02,
+    "first": "2022-03-23"
+   },
+   "walk_forward_oos": {
+    "n": 14,
+    "mean_r": 0.5003,
+    "t": 1.35
+   }
+  },
+  {
+   "strategy": "YT-10",
+   "name": "Gap + shooting star / hammer first candle",
+   "channel": "Ghanshyam Tech",
+   "market": "NIFTY",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": false,
+    "hold_costs_x2_positive": true,
+    "hold_delay_positive": true,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": true
+   },
+   "dev": {
+    "n": 22,
+    "mean_r": -0.3985,
+    "t": -1.85
+   },
+   "val": {
+    "n": 5,
+    "mean_r": 0.6243,
+    "t": 0.89
+   },
+   "hold": {
+    "n": 10,
+    "mean_r": 0.6167,
+    "mean_r_gross": 0.8061,
+    "t": 1.37,
+    "win_rate": 0.6,
+    "profit_factor": 2.529,
+    "max_dd_pct": 1.6,
+    "cagr_pct": 2.33,
+    "top5_share_of_net": 1.469,
+    "cost_r_mean": 0.1894
+   },
+   "post_publication": {
+    "n": 15,
+    "mean_r": 0.6193,
+    "t": 1.69,
+    "first": "2022-01-25"
+   },
+   "walk_forward_oos": {
+    "n": 18,
+    "mean_r": 0.2769,
+    "t": 0.83
+   }
+  },
+  {
+   "strategy": "YT-10",
+   "name": "Gap + shooting star / hammer first candle",
+   "channel": "Ghanshyam Tech",
+   "market": "NIFTY",
+   "instruments": 1,
+   "variant": "S1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": false,
+    "hold_costs_x2_positive": true,
+    "hold_delay_positive": true,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": true
+   },
+   "dev": {
+    "n": 35,
+    "mean_r": -0.2377,
+    "t": -1.09
+   },
+   "val": {
+    "n": 6,
+    "mean_r": 0.155,
+    "t": 0.25
+   },
+   "hold": {
+    "n": 5,
+    "mean_r": 0.5436,
+    "mean_r_gross": 0.8176,
+    "t": 0.75,
+    "win_rate": 0.6,
+    "profit_factor": 2.098,
+    "max_dd_pct": 1.3,
+    "cagr_pct": 8.89,
+    "top5_share_of_net": 1.0,
+    "cost_r_mean": 0.2741
+   },
+   "post_publication": {
+    "n": 11,
+    "mean_r": 0.3316,
+    "t": 0.74,
+    "first": "2022-03-03"
+   },
+   "walk_forward_oos": {
+    "n": 18,
+    "mean_r": 0.2769,
+    "t": 0.83
+   }
+  },
+  {
+   "strategy": "YT-11",
+   "name": "Momentum loss into a swing level",
+   "channel": "Wysetrade",
+   "market": "EURUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": true
+   },
+   "dev": {
+    "n": 331,
+    "mean_r": -0.1013,
+    "t": -1.21
+   },
+   "val": {
+    "n": 90,
+    "mean_r": 0.1507,
+    "t": 0.96
+   },
+   "hold": {
+    "n": 102,
+    "mean_r": -0.1641,
+    "mean_r_gross": -0.0177,
+    "t": -1.18,
+    "win_rate": 0.314,
+    "profit_factor": 0.784,
+    "max_dd_pct": 19.9,
+    "cagr_pct": -4.61,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.1465
+   },
+   "post_publication": {
+    "n": 160,
+    "mean_r": -0.065,
+    "t": -0.57,
+    "first": "2021-01-04"
+   },
+   "walk_forward_oos": {
+    "n": 440,
+    "mean_r": -0.1343,
+    "t": -2.14
+   }
+  },
+  {
+   "strategy": "YT-11",
+   "name": "Momentum loss into a swing level",
+   "channel": "Wysetrade",
+   "market": "EURUSD",
+   "instruments": 1,
+   "variant": "R1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 333,
+    "mean_r": -0.0451,
+    "t": -0.6
+   },
+   "val": {
+    "n": 90,
+    "mean_r": 0.1407,
+    "t": 1.06
+   },
+   "hold": {
+    "n": 102,
+    "mean_r": -0.173,
+    "mean_r_gross": -0.0275,
+    "t": -1.43,
+    "win_rate": 0.373,
+    "profit_factor": 0.751,
+    "max_dd_pct": 22.7,
+    "cagr_pct": -4.78,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.1455
+   },
+   "post_publication": {
+    "n": 160,
+    "mean_r": -0.0482,
+    "t": -0.49,
+    "first": "2021-01-04"
+   },
+   "walk_forward_oos": {
+    "n": 440,
+    "mean_r": -0.1343,
+    "t": -2.14
+   }
+  },
+  {
+   "strategy": "YT-11",
+   "name": "Momentum loss into a swing level",
+   "channel": "Wysetrade",
+   "market": "GBPUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 370,
+    "mean_r": -0.1389,
+    "t": -1.9
+   },
+   "val": {
+    "n": 100,
+    "mean_r": -0.2637,
+    "t": -1.95
+   },
+   "hold": {
+    "n": 114,
+    "mean_r": -0.0827,
+    "mean_r_gross": 0.0499,
+    "t": -0.61,
+    "win_rate": 0.333,
+    "profit_factor": 0.887,
+    "max_dd_pct": 29.0,
+    "cagr_pct": -2.78,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.1325
+   },
+   "post_publication": {
+    "n": 177,
+    "mean_r": -0.03,
+    "t": -0.27,
+    "first": "2021-01-07"
+   },
+   "walk_forward_oos": {
+    "n": 485,
+    "mean_r": -0.1326,
+    "t": -2.37
+   }
+  },
+  {
+   "strategy": "YT-11",
+   "name": "Momentum loss into a swing level",
+   "channel": "Wysetrade",
+   "market": "GBPUSD",
+   "instruments": 1,
+   "variant": "R1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 371,
+    "mean_r": -0.1223,
+    "t": -1.92
+   },
+   "val": {
+    "n": 101,
+    "mean_r": -0.2559,
+    "t": -2.15
+   },
+   "hold": {
+    "n": 114,
+    "mean_r": -0.0283,
+    "mean_r_gross": 0.1025,
+    "t": -0.24,
+    "win_rate": 0.421,
+    "profit_factor": 0.955,
+    "max_dd_pct": 22.7,
+    "cagr_pct": -1.09,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.1308
+   },
+   "post_publication": {
+    "n": 178,
+    "mean_r": -0.026,
+    "t": -0.28,
+    "first": "2021-01-07"
+   },
+   "walk_forward_oos": {
+    "n": 485,
+    "mean_r": -0.1326,
+    "t": -2.37
+   }
+  },
+  {
+   "strategy": "YT-11",
+   "name": "Momentum loss into a swing level",
+   "channel": "Wysetrade",
+   "market": "XAUUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 328,
+    "mean_r": -0.2433,
+    "t": -3.17
+   },
+   "val": {
+    "n": 111,
+    "mean_r": -0.2328,
+    "t": -1.81
+   },
+   "hold": {
+    "n": 115,
+    "mean_r": -0.1443,
+    "mean_r_gross": 0.0048,
+    "t": -1.12,
+    "win_rate": 0.296,
+    "profit_factor": 0.803,
+    "max_dd_pct": 20.2,
+    "cagr_pct": -4.58,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.1491
+   },
+   "post_publication": {
+    "n": 195,
+    "mean_r": -0.1595,
+    "t": -1.61,
+    "first": "2021-01-19"
+   },
+   "walk_forward_oos": {
+    "n": 479,
+    "mean_r": -0.2244,
+    "t": -3.71
+   }
+  },
+  {
+   "strategy": "YT-11",
+   "name": "Momentum loss into a swing level",
+   "channel": "Wysetrade",
+   "market": "XAUUSD",
+   "instruments": 1,
+   "variant": "R1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 328,
+    "mean_r": -0.2357,
+    "t": -3.48
+   },
+   "val": {
+    "n": 112,
+    "mean_r": -0.2385,
+    "t": -2.13
+   },
+   "hold": {
+    "n": 115,
+    "mean_r": -0.2265,
+    "mean_r_gross": -0.0781,
+    "t": -2.05,
+    "win_rate": 0.322,
+    "profit_factor": 0.679,
+    "max_dd_pct": 26.1,
+    "cagr_pct": -6.87,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.1484
+   },
+   "post_publication": {
+    "n": 196,
+    "mean_r": -0.2324,
+    "t": -2.75,
+    "first": "2021-01-19"
+   },
+   "walk_forward_oos": {
+    "n": 479,
+    "mean_r": -0.2244,
+    "t": -3.71
+   }
+  },
+  {
+   "strategy": "YT-12a",
+   "name": "44 SMA bullish candle (daily)",
+   "channel": "Siddharth Bhanushali",
+   "market": "NSED",
+   "instruments": 1834,
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 7253,
+    "mean_r": -0.1275,
+    "t": -6.54
+   },
+   "val": {
+    "n": 5194,
+    "mean_r": -0.0228,
+    "t": -2.28
+   },
+   "hold": {
+    "n": 11578,
+    "mean_r": -0.0536,
+    "mean_r_gross": 0.0352,
+    "t": -4.73,
+    "win_rate": 0.364,
+    "profit_factor": 0.922,
+    "max_dd_pct": 74.4,
+    "cagr_pct": -24.97,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.0889
+   },
+   "post_publication": {
+    "n": 14781,
+    "mean_r": -0.066,
+    "t": -5.91,
+    "first": "2021-06-01"
+   },
+   "walk_forward_oos": {
+    "n": 21249,
+    "mean_r": -0.0191,
+    "t": -3.4
+   }
+  },
+  {
+   "strategy": "YT-12a",
+   "name": "44 SMA bullish candle (daily)",
+   "channel": "Siddharth Bhanushali",
+   "market": "NSED",
+   "instruments": 1834,
+   "variant": "R1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 6799,
+    "mean_r": -0.0926,
+    "t": -3.82
+   },
+   "val": {
+    "n": 4865,
+    "mean_r": 0.0507,
+    "t": 0.68
+   },
+   "hold": {
+    "n": 10821,
+    "mean_r": -0.0205,
+    "mean_r_gross": 0.0685,
+    "t": -2.67,
+    "win_rate": 0.303,
+    "profit_factor": 0.973,
+    "max_dd_pct": 76.0,
+    "cagr_pct": -18.61,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.089
+   },
+   "post_publication": {
+    "n": 13849,
+    "mean_r": -0.0327,
+    "t": -3.24,
+    "first": "2021-06-01"
+   },
+   "walk_forward_oos": {
+    "n": 21249,
+    "mean_r": -0.0191,
+    "t": -3.4
+   }
+  },
+  {
+   "strategy": "YT-12b",
+   "name": "44 SMA + big green opening candle (15m)",
+   "channel": "Siddharth Bhanushali",
+   "market": "NSE15",
+   "instruments": 268,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 766,
+    "mean_r": -0.0279,
+    "t": -1.5
+   },
+   "val": {
+    "n": 1179,
+    "mean_r": -0.109,
+    "t": -2.75
+   },
+   "hold": {
+    "n": 1375,
+    "mean_r": -0.116,
+    "mean_r_gross": -0.0238,
+    "t": -3.11,
+    "win_rate": 0.399,
+    "profit_factor": 0.743,
+    "max_dd_pct": 24.2,
+    "cagr_pct": -26.09,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.0922
+   },
+   "post_publication": {
+    "n": 3320,
+    "mean_r": -0.0932,
+    "t": -4.19,
+    "first": "2024-12-16"
+   },
+   "walk_forward_oos": {
+    "n": 0,
+    "mean_r": null,
+    "t": null
+   }
+  },
+  {
+   "strategy": "YT-13",
+   "name": "Daily bear / bull trap",
+   "channel": "Siddharth Bhanushali",
+   "market": "NIFTY_D",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": false,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": true
+   },
+   "dev": {
+    "n": 18,
+    "mean_r": -0.2983,
+    "t": -1.01
+   },
+   "val": {
+    "n": 5,
+    "mean_r": -0.5503,
+    "t": -0.86
+   },
+   "hold": {
+    "n": 7,
+    "mean_r": -0.9609,
+    "mean_r_gross": -0.9451,
+    "t": -15.31,
+    "win_rate": 0.0,
+    "profit_factor": 0.0,
+    "max_dd_pct": 6.5,
+    "cagr_pct": -4.01,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.0158
+   },
+   "post_publication": {
+    "n": 16,
+    "mean_r": -0.5513,
+    "t": -2.01,
+    "first": "2021-01-18"
+   },
+   "walk_forward_oos": {
+    "n": 0,
+    "mean_r": null,
+    "t": null
+   }
+  },
+  {
+   "strategy": "YT-13",
+   "name": "Daily bear / bull trap",
+   "channel": "Siddharth Bhanushali",
+   "market": "NSED",
+   "instruments": 1834,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 5080,
+    "mean_r": -0.0568,
+    "t": -2.38
+   },
+   "val": {
+    "n": 4032,
+    "mean_r": -0.1515,
+    "t": -5.61
+   },
+   "hold": {
+    "n": 8263,
+    "mean_r": -0.0926,
+    "mean_r_gross": -0.0459,
+    "t": -4.75,
+    "win_rate": 0.39,
+    "profit_factor": 0.844,
+    "max_dd_pct": 66.3,
+    "cagr_pct": -22.85,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.0467
+   },
+   "post_publication": {
+    "n": 11260,
+    "mean_r": -0.1021,
+    "t": -6.72,
+    "first": "2021-01-01"
+   },
+   "walk_forward_oos": {
+    "n": 16406,
+    "mean_r": -0.0897,
+    "t": -5.94
+   }
+  },
+  {
+   "strategy": "YT-14",
+   "name": "MA fan + engulfing / three-line strike, RSI 50",
+   "channel": "The Moving Average",
+   "market": "EURUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 7605,
+    "mean_r": -0.1855,
+    "t": -12.19
+   },
+   "val": {
+    "n": 2166,
+    "mean_r": -0.2017,
+    "t": -7.01
+   },
+   "hold": {
+    "n": 2347,
+    "mean_r": -0.2096,
+    "mean_r_gross": -0.0097,
+    "t": -7.54,
+    "win_rate": 0.328,
+    "profit_factor": 0.722,
+    "max_dd_pct": 99.4,
+    "cagr_pct": -74.25,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.1999
+   },
+   "post_publication": {
+    "n": 2763,
+    "mean_r": -0.2083,
+    "t": -8.17,
+    "first": "2022-06-01"
+   },
+   "walk_forward_oos": {
+    "n": 10203,
+    "mean_r": -0.2055,
+    "t": -15.99
+   }
+  },
+  {
+   "strategy": "YT-14",
+   "name": "MA fan + engulfing / three-line strike, RSI 50",
+   "channel": "The Moving Average",
+   "market": "EURUSD",
+   "instruments": 1,
+   "variant": "R1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 7776,
+    "mean_r": -0.1867,
+    "t": -14.01
+   },
+   "val": {
+    "n": 2198,
+    "mean_r": -0.1955,
+    "t": -7.72
+   },
+   "hold": {
+    "n": 2382,
+    "mean_r": -0.2176,
+    "mean_r_gross": -0.0162,
+    "t": -8.93,
+    "win_rate": 0.379,
+    "profit_factor": 0.689,
+    "max_dd_pct": 99.5,
+    "cagr_pct": -75.7,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.2014
+   },
+   "post_publication": {
+    "n": 2807,
+    "mean_r": -0.2074,
+    "t": -9.25,
+    "first": "2022-06-01"
+   },
+   "walk_forward_oos": {
+    "n": 10203,
+    "mean_r": -0.2055,
+    "t": -15.99
+   }
+  },
+  {
+   "strategy": "YT-14",
+   "name": "MA fan + engulfing / three-line strike, RSI 50",
+   "channel": "The Moving Average",
+   "market": "GBPUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 7623,
+    "mean_r": -0.1687,
+    "t": -11.03
+   },
+   "val": {
+    "n": 2163,
+    "mean_r": -0.1454,
+    "t": -5.02
+   },
+   "hold": {
+    "n": 2327,
+    "mean_r": -0.23,
+    "mean_r_gross": -0.0293,
+    "t": -8.34,
+    "win_rate": 0.313,
+    "profit_factor": 0.696,
+    "max_dd_pct": 99.6,
+    "cagr_pct": -76.99,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.2007
+   },
+   "post_publication": {
+    "n": 2739,
+    "mean_r": -0.2044,
+    "t": -8.01,
+    "first": "2022-06-01"
+   },
+   "walk_forward_oos": {
+    "n": 10116,
+    "mean_r": -0.1906,
+    "t": -14.45
+   }
+  },
+  {
+   "strategy": "YT-14",
+   "name": "MA fan + engulfing / three-line strike, RSI 50",
+   "channel": "The Moving Average",
+   "market": "XAUUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 7321,
+    "mean_r": -0.3577,
+    "t": -24.07
+   },
+   "val": {
+    "n": 2113,
+    "mean_r": -0.2588,
+    "t": -9.24
+   },
+   "hold": {
+    "n": 2275,
+    "mean_r": -0.1266,
+    "mean_r_gross": 0.0582,
+    "t": -4.52,
+    "win_rate": 0.319,
+    "profit_factor": 0.816,
+    "max_dd_pct": 95.8,
+    "cagr_pct": -55.73,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.1848
+   },
+   "post_publication": {
+    "n": 2686,
+    "mean_r": -0.1362,
+    "t": -5.3,
+    "first": "2022-06-01"
+   },
+   "walk_forward_oos": {
+    "n": 9860,
+    "mean_r": -0.2893,
+    "t": -22.67
+   }
+  },
+  {
+   "strategy": "YT-14",
+   "name": "MA fan + engulfing / three-line strike, RSI 50",
+   "channel": "The Moving Average",
+   "market": "XAUUSD",
+   "instruments": 1,
+   "variant": "R1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 7477,
+    "mean_r": -0.357,
+    "t": -26.95
+   },
+   "val": {
+    "n": 2146,
+    "mean_r": -0.259,
+    "t": -10.45
+   },
+   "hold": {
+    "n": 2317,
+    "mean_r": -0.143,
+    "mean_r_gross": 0.0383,
+    "t": -5.84,
+    "win_rate": 0.363,
+    "profit_factor": 0.779,
+    "max_dd_pct": 97.1,
+    "cagr_pct": -60.1,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.1813
+   },
+   "post_publication": {
+    "n": 2734,
+    "mean_r": -0.1527,
+    "t": -6.78,
+    "first": "2022-06-01"
+   },
+   "walk_forward_oos": {
+    "n": 9860,
+    "mean_r": -0.2893,
+    "t": -22.67
+   }
+  },
+  {
+   "strategy": "YT-15",
+   "name": "MA alignment + Williams fractal, 10 pips",
+   "channel": "The Moving Average",
+   "market": "EURUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 13908,
+    "mean_r": -0.2567,
+    "t": -19.21
+   },
+   "val": {
+    "n": 3785,
+    "mean_r": -0.2645,
+    "t": -10.38
+   },
+   "hold": {
+    "n": 4128,
+    "mean_r": -0.3734,
+    "mean_r_gross": -0.0619,
+    "t": -15.4,
+    "win_rate": 0.297,
+    "profit_factor": 0.577,
+    "max_dd_pct": 100.0,
+    "cagr_pct": -98.51,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.3115
+   },
+   "post_publication": {
+    "n": 5403,
+    "mean_r": -0.3443,
+    "t": -16.63,
+    "first": "2022-01-03"
+   },
+   "walk_forward_oos": {
+    "n": 17975,
+    "mean_r": -0.3095,
+    "t": -26.74
+   }
+  },
+  {
+   "strategy": "YT-15",
+   "name": "MA alignment + Williams fractal, 10 pips",
+   "channel": "The Moving Average",
+   "market": "GBPUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 13984,
+    "mean_r": -0.2936,
+    "t": -26.84
+   },
+   "val": {
+    "n": 3833,
+    "mean_r": -0.2408,
+    "t": -11.26
+   },
+   "hold": {
+    "n": 4159,
+    "mean_r": -0.3238,
+    "mean_r_gross": 0.0002,
+    "t": -14.66,
+    "win_rate": 0.335,
+    "profit_factor": 0.602,
+    "max_dd_pct": 100.0,
+    "cagr_pct": -97.46,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.3241
+   },
+   "post_publication": {
+    "n": 5430,
+    "mean_r": -0.3002,
+    "t": -15.95,
+    "first": "2022-01-03"
+   },
+   "walk_forward_oos": {
+    "n": 18141,
+    "mean_r": -0.2992,
+    "t": -29.47
+   }
+  },
+  {
+   "strategy": "YT-16",
+   "name": "MA pullback + engulfing / pin bar, 1:2",
+   "channel": "Adam Khoo",
+   "market": "EURUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": true,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": true
+   },
+   "dev": {
+    "n": 466,
+    "mean_r": -0.1596,
+    "t": -2.49
+   },
+   "val": {
+    "n": 157,
+    "mean_r": -0.1948,
+    "t": -1.79
+   },
+   "hold": {
+    "n": 188,
+    "mean_r": 0.0359,
+    "mean_r_gross": 0.1222,
+    "t": 0.34,
+    "win_rate": 0.367,
+    "profit_factor": 1.053,
+    "max_dd_pct": 17.7,
+    "cagr_pct": 1.27,
+    "top5_share_of_net": 1.472,
+    "cost_r_mean": 0.0863
+   },
+   "post_publication": {
+    "n": 520,
+    "mean_r": -0.1038,
+    "t": -1.69,
+    "first": "2016-01-20"
+   },
+   "walk_forward_oos": {
+    "n": 690,
+    "mean_r": -0.0807,
+    "t": -1.5
+   }
+  },
+  {
+   "strategy": "YT-16",
+   "name": "MA pullback + engulfing / pin bar, 1:2",
+   "channel": "Adam Khoo",
+   "market": "GBPUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 498,
+    "mean_r": -0.0917,
+    "t": -1.45
+   },
+   "val": {
+    "n": 130,
+    "mean_r": -0.326,
+    "t": -2.88
+   },
+   "hold": {
+    "n": 151,
+    "mean_r": -0.2439,
+    "mean_r_gross": -0.1539,
+    "t": -2.22,
+    "win_rate": 0.272,
+    "profit_factor": 0.685,
+    "max_dd_pct": 37.0,
+    "cagr_pct": -9.66,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.09
+   },
+   "post_publication": {
+    "n": 461,
+    "mean_r": -0.2164,
+    "t": -3.43,
+    "first": "2016-01-04"
+   },
+   "walk_forward_oos": {
+    "n": 644,
+    "mean_r": -0.1878,
+    "t": -3.47
+   }
+  },
+  {
+   "strategy": "YT-16",
+   "name": "MA pullback + engulfing / pin bar, 1:2",
+   "channel": "Adam Khoo",
+   "market": "NAS100_D",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "unable to evaluate",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": false,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": true
+   },
+   "dev": {
+    "n": 8,
+    "mean_r": 0.4986,
+    "t": 0.88
+   },
+   "val": {
+    "n": 1,
+    "mean_r": -1.0016,
+    "t": NaN
+   },
+   "hold": {
+    "n": 3,
+    "mean_r": -1.111,
+    "mean_r_gross": -1.1076,
+    "t": -10.05,
+    "win_rate": 0.0,
+    "profit_factor": 0.0,
+    "max_dd_pct": 3.3,
+    "cagr_pct": -1.57,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.0035
+   },
+   "post_publication": {
+    "n": 9,
+    "mean_r": -0.3715,
+    "t": -0.83,
+    "first": "2016-09-13"
+   },
+   "walk_forward_oos": {
+    "n": 0,
+    "mean_r": null,
+    "t": null
+   }
+  },
+  {
+   "strategy": "YT-16",
+   "name": "MA pullback + engulfing / pin bar, 1:2",
+   "channel": "Adam Khoo",
+   "market": "SPX500_D",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "unable to evaluate",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": true,
+    "hold_n>=50": false,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": true
+   },
+   "dev": {
+    "n": 6,
+    "mean_r": 0.9976,
+    "t": 1.57
+   },
+   "val": {
+    "n": 5,
+    "mean_r": 0.199,
+    "t": 0.27
+   },
+   "hold": {
+    "n": 3,
+    "mean_r": -0.0006,
+    "mean_r_gross": 0.0085,
+    "t": -0.0,
+    "win_rate": 0.333,
+    "profit_factor": 0.999,
+    "max_dd_pct": 2.0,
+    "cagr_pct": -0.02,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.0091
+   },
+   "post_publication": {
+    "n": 10,
+    "mean_r": -0.1021,
+    "t": -0.22,
+    "first": "2016-05-09"
+   },
+   "walk_forward_oos": {
+    "n": 0,
+    "mean_r": null,
+    "t": null
+   }
+  },
+  {
+   "strategy": "YT-17",
+   "name": "Breakout, pullback, continuation",
+   "channel": "Wealth Secret",
+   "market": "BANKNIFTY",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 626,
+    "mean_r": -0.4168,
+    "t": -7.52
+   },
+   "val": {
+    "n": 224,
+    "mean_r": -0.4348,
+    "t": -4.71
+   },
+   "hold": {
+    "n": 304,
+    "mean_r": -0.4515,
+    "mean_r_gross": -0.0393,
+    "t": -5.56,
+    "win_rate": 0.303,
+    "profit_factor": 0.528,
+    "max_dd_pct": 76.6,
+    "cagr_pct": -39.95,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.4122
+   },
+   "post_publication": {
+    "n": 342,
+    "mean_r": -0.4826,
+    "t": -6.4,
+    "first": "2023-09-06"
+   },
+   "walk_forward_oos": {
+    "n": 845,
+    "mean_r": -0.4254,
+    "t": -10.11
+   }
+  },
+  {
+   "strategy": "YT-17",
+   "name": "Breakout, pullback, continuation",
+   "channel": "Wealth Secret",
+   "market": "BANKNIFTY",
+   "instruments": 1,
+   "variant": "R1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 626,
+    "mean_r": -0.3603,
+    "t": -7.25
+   },
+   "val": {
+    "n": 224,
+    "mean_r": -0.5171,
+    "t": -6.49
+   },
+   "hold": {
+    "n": 304,
+    "mean_r": -0.4562,
+    "mean_r_gross": -0.047,
+    "t": -6.41,
+    "win_rate": 0.362,
+    "profit_factor": 0.481,
+    "max_dd_pct": 76.2,
+    "cagr_pct": -40.11,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.4093
+   },
+   "post_publication": {
+    "n": 342,
+    "mean_r": -0.4783,
+    "t": -7.18,
+    "first": "2023-09-06"
+   },
+   "walk_forward_oos": {
+    "n": 845,
+    "mean_r": -0.4254,
+    "t": -10.11
+   }
+  },
+  {
+   "strategy": "YT-17",
+   "name": "Breakout, pullback, continuation",
+   "channel": "Wealth Secret",
+   "market": "NIFTY",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 659,
+    "mean_r": -0.4745,
+    "t": -8.51
+   },
+   "val": {
+    "n": 241,
+    "mean_r": -0.5097,
+    "t": -5.69
+   },
+   "hold": {
+    "n": 293,
+    "mean_r": -0.5385,
+    "mean_r_gross": -0.0391,
+    "t": -6.4,
+    "win_rate": 0.307,
+    "profit_factor": 0.473,
+    "max_dd_pct": 81.1,
+    "cagr_pct": -43.67,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.4994
+   },
+   "post_publication": {
+    "n": 330,
+    "mean_r": -0.6155,
+    "t": -7.95,
+    "first": "2023-09-04"
+   },
+   "walk_forward_oos": {
+    "n": 857,
+    "mean_r": -0.4776,
+    "t": -9.86
+   }
+  },
+  {
+   "strategy": "YT-18",
+   "name": "Heikin-Ashi colour change + RSI 50",
+   "channel": "The Secret Mindset",
+   "market": "EURUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 8562,
+    "mean_r": -0.3776,
+    "t": -18.51
+   },
+   "val": {
+    "n": 2337,
+    "mean_r": -0.2729,
+    "t": -5.76
+   },
+   "hold": {
+    "n": 2571,
+    "mean_r": -0.4681,
+    "mean_r_gross": -0.0745,
+    "t": -14.43,
+    "win_rate": 0.223,
+    "profit_factor": 0.431,
+    "max_dd_pct": 100.0,
+    "cagr_pct": -96.21,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.3936
+   },
+   "post_publication": {
+    "n": 3813,
+    "mean_r": -0.391,
+    "t": -11.91,
+    "first": "2021-06-01"
+   },
+   "walk_forward_oos": {
+    "n": 8638,
+    "mean_r": -0.1167,
+    "t": -5.49
+   }
+  },
+  {
+   "strategy": "YT-18",
+   "name": "Heikin-Ashi colour change + RSI 50",
+   "channel": "The Secret Mindset",
+   "market": "EURUSD",
+   "instruments": 1,
+   "variant": "S1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 6668,
+    "mean_r": -0.1022,
+    "t": -3.87
+   },
+   "val": {
+    "n": 1800,
+    "mean_r": -0.1193,
+    "t": -2.69
+   },
+   "hold": {
+    "n": 1991,
+    "mean_r": -0.1297,
+    "mean_r_gross": 0.0141,
+    "t": -2.99,
+    "win_rate": 0.282,
+    "profit_factor": 0.792,
+    "max_dd_pct": 95.5,
+    "cagr_pct": -53.91,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.1438
+   },
+   "post_publication": {
+    "n": 2968,
+    "mean_r": -0.1328,
+    "t": -3.69,
+    "first": "2021-06-01"
+   },
+   "walk_forward_oos": {
+    "n": 8638,
+    "mean_r": -0.1167,
+    "t": -5.49
+   }
+  },
+  {
+   "strategy": "YT-18",
+   "name": "Heikin-Ashi colour change + RSI 50",
+   "channel": "The Secret Mindset",
+   "market": "GBPUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 8559,
+    "mean_r": -0.3627,
+    "t": -17.11
+   },
+   "val": {
+    "n": 2336,
+    "mean_r": -0.276,
+    "t": -7.18
+   },
+   "hold": {
+    "n": 2571,
+    "mean_r": -0.4908,
+    "mean_r_gross": -0.0798,
+    "t": -17.59,
+    "win_rate": 0.217,
+    "profit_factor": 0.391,
+    "max_dd_pct": 100.0,
+    "cagr_pct": -96.68,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.4109
+   },
+   "post_publication": {
+    "n": 3812,
+    "mean_r": -0.4485,
+    "t": -18.18,
+    "first": "2021-06-01"
+   },
+   "walk_forward_oos": {
+    "n": 8640,
+    "mean_r": -0.1189,
+    "t": -5.52
+   }
+  },
+  {
+   "strategy": "YT-18",
+   "name": "Heikin-Ashi colour change + RSI 50",
+   "channel": "The Secret Mindset",
+   "market": "GBPUSD",
+   "instruments": 1,
+   "variant": "S1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 6674,
+    "mean_r": -0.1283,
+    "t": -5.68
+   },
+   "val": {
+    "n": 1784,
+    "mean_r": -0.0607,
+    "t": -1.09
+   },
+   "hold": {
+    "n": 2017,
+    "mean_r": -0.1643,
+    "mean_r_gross": -0.0129,
+    "t": -4.2,
+    "win_rate": 0.277,
+    "profit_factor": 0.741,
+    "max_dd_pct": 97.7,
+    "cagr_pct": -61.48,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.1514
+   },
+   "post_publication": {
+    "n": 2973,
+    "mean_r": -0.1629,
+    "t": -4.98,
+    "first": "2021-06-01"
+   },
+   "walk_forward_oos": {
+    "n": 8640,
+    "mean_r": -0.1189,
+    "t": -5.52
+   }
+  },
+  {
+   "strategy": "YT-18",
+   "name": "Heikin-Ashi colour change + RSI 50",
+   "channel": "The Secret Mindset",
+   "market": "XAUUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": false,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 8365,
+    "mean_r": -0.6096,
+    "t": -47.43
+   },
+   "val": {
+    "n": 2319,
+    "mean_r": -0.473,
+    "t": -15.93
+   },
+   "hold": {
+    "n": 2550,
+    "mean_r": -0.291,
+    "mean_r_gross": 0.0246,
+    "t": -9.67,
+    "win_rate": 0.24,
+    "profit_factor": 0.571,
+    "max_dd_pct": 100.0,
+    "cagr_pct": -86.99,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.3156
+   },
+   "post_publication": {
+    "n": 3783,
+    "mean_r": -0.3569,
+    "t": -14.25,
+    "first": "2021-06-01"
+   },
+   "walk_forward_oos": {
+    "n": 8581,
+    "mean_r": -0.2036,
+    "t": -10.37
+   }
+  },
+  {
+   "strategy": "YT-18",
+   "name": "Heikin-Ashi colour change + RSI 50",
+   "channel": "The Secret Mindset",
+   "market": "XAUUSD",
+   "instruments": 1,
+   "variant": "S1",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 6612,
+    "mean_r": -0.2255,
+    "t": -9.88
+   },
+   "val": {
+    "n": 1797,
+    "mean_r": -0.2023,
+    "t": -5.04
+   },
+   "hold": {
+    "n": 1960,
+    "mean_r": -0.1385,
+    "mean_r_gross": 0.0079,
+    "t": -3.51,
+    "win_rate": 0.273,
+    "profit_factor": 0.766,
+    "max_dd_pct": 95.1,
+    "cagr_pct": -54.68,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.1464
+   },
+   "post_publication": {
+    "n": 2901,
+    "mean_r": -0.1633,
+    "t": -5.05,
+    "first": "2021-06-01"
+   },
+   "walk_forward_oos": {
+    "n": 8581,
+    "mean_r": -0.2036,
+    "t": -10.37
+   }
+  },
+  {
+   "strategy": "YT-19",
+   "name": "Supertrend(10,3) at 09:20 (futures proxy)",
+   "channel": "Elearnmarkets / Vishal Mehta",
+   "market": "BANKNIFTY",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1459,
+    "mean_r": -0.0793,
+    "t": -1.53
+   },
+   "val": {
+    "n": 485,
+    "mean_r": -0.0946,
+    "t": -1.58
+   },
+   "hold": {
+    "n": 677,
+    "mean_r": -0.2167,
+    "mean_r_gross": 0.0875,
+    "t": -2.75,
+    "win_rate": 0.362,
+    "profit_factor": 0.694,
+    "max_dd_pct": 82.9,
+    "cagr_pct": -44.0,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.3042
+   },
+   "post_publication": {
+    "n": 1265,
+    "mean_r": -0.1605,
+    "t": -3.26,
+    "first": "2021-08-02"
+   },
+   "walk_forward_oos": {
+    "n": 1890,
+    "mean_r": -0.1177,
+    "t": -2.72
+   }
+  },
+  {
+   "strategy": "YT-19",
+   "name": "Supertrend(10,3) at 09:20 (futures proxy)",
+   "channel": "Elearnmarkets / Vishal Mehta",
+   "market": "NIFTY",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1460,
+    "mean_r": -0.1854,
+    "t": -4.66
+   },
+   "val": {
+    "n": 487,
+    "mean_r": -0.1528,
+    "t": -2.44
+   },
+   "hold": {
+    "n": 688,
+    "mean_r": -0.3699,
+    "mean_r_gross": 0.0584,
+    "t": -2.2,
+    "win_rate": 0.352,
+    "profit_factor": 0.564,
+    "max_dd_pct": 104.0,
+    "cagr_pct": -100.0,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.4283
+   },
+   "post_publication": {
+    "n": 1278,
+    "mean_r": -0.2717,
+    "t": -2.88,
+    "first": "2021-08-02"
+   },
+   "walk_forward_oos": {
+    "n": 1904,
+    "mean_r": -0.2342,
+    "t": -3.55
+   }
+  },
+  {
+   "strategy": "YT-20",
+   "name": "3-EMA 1-minute scalp",
+   "channel": "The Secret Mindset",
+   "market": "EURUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 13669,
+    "mean_r": -0.3895,
+    "t": -34.02
+   },
+   "val": {
+    "n": 3723,
+    "mean_r": -0.4733,
+    "t": -21.63
+   },
+   "hold": {
+    "n": 4057,
+    "mean_r": -0.5,
+    "mean_r_gross": 0.0115,
+    "t": -23.21,
+    "win_rate": 0.271,
+    "profit_factor": 0.475,
+    "max_dd_pct": 100.0,
+    "cagr_pct": -99.58,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.5115
+   },
+   "post_publication": {
+    "n": 6353,
+    "mean_r": -0.4885,
+    "t": -28.55,
+    "first": "2021-03-01"
+   },
+   "walk_forward_oos": {
+    "n": 17728,
+    "mean_r": -0.472,
+    "t": -47.97
+   }
+  },
+  {
+   "strategy": "YT-20",
+   "name": "3-EMA 1-minute scalp",
+   "channel": "The Secret Mindset",
+   "market": "GBPUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 13656,
+    "mean_r": -0.3582,
+    "t": -32.6
+   },
+   "val": {
+    "n": 3732,
+    "mean_r": -0.3528,
+    "t": -16.89
+   },
+   "hold": {
+    "n": 4090,
+    "mean_r": -0.4525,
+    "mean_r_gross": 0.0584,
+    "t": -21.78,
+    "win_rate": 0.25,
+    "profit_factor": 0.492,
+    "max_dd_pct": 100.0,
+    "cagr_pct": -99.32,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.511
+   },
+   "post_publication": {
+    "n": 6389,
+    "mean_r": -0.411,
+    "t": -24.93,
+    "first": "2021-03-01"
+   },
+   "walk_forward_oos": {
+    "n": 17730,
+    "mean_r": -0.394,
+    "t": -40.26
+   }
+  },
+  {
+   "strategy": "YT-21",
+   "name": "Bollinger 2.5 SD range fade",
+   "channel": "The Secret Mindset",
+   "market": "EURUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1309,
+    "mean_r": -0.1305,
+    "t": -3.46
+   },
+   "val": {
+    "n": 348,
+    "mean_r": -0.0119,
+    "t": -0.16
+   },
+   "hold": {
+    "n": 386,
+    "mean_r": -0.3156,
+    "mean_r_gross": -0.102,
+    "t": -4.82,
+    "win_rate": 0.326,
+    "profit_factor": 0.591,
+    "max_dd_pct": 72.5,
+    "cagr_pct": -28.17,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.2136
+   },
+   "post_publication": {
+    "n": 558,
+    "mean_r": -0.2213,
+    "t": -3.92,
+    "first": "2021-06-02"
+   },
+   "walk_forward_oos": {
+    "n": 1689,
+    "mean_r": -0.1599,
+    "t": -4.78
+   }
+  },
+  {
+   "strategy": "YT-21",
+   "name": "Bollinger 2.5 SD range fade",
+   "channel": "The Secret Mindset",
+   "market": "GBPUSD",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1224,
+    "mean_r": -0.152,
+    "t": -3.21
+   },
+   "val": {
+    "n": 343,
+    "mean_r": -0.2044,
+    "t": -3.08
+   },
+   "hold": {
+    "n": 376,
+    "mean_r": -0.2801,
+    "mean_r_gross": -0.0568,
+    "t": -4.56,
+    "win_rate": 0.367,
+    "profit_factor": 0.601,
+    "max_dd_pct": 69.3,
+    "cagr_pct": -24.96,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.2232
+   },
+   "post_publication": {
+    "n": 565,
+    "mean_r": -0.2365,
+    "t": -4.67,
+    "first": "2021-06-02"
+   },
+   "walk_forward_oos": {
+    "n": 1602,
+    "mean_r": -0.2029,
+    "t": -5.25
+   }
+  },
+  {
+   "strategy": "YT-22",
+   "name": "Heikin-Ashi pair + Stochastic RSI 20/80",
+   "channel": "Nitin Bhatia",
+   "market": "BANKNIFTY",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 599,
+    "mean_r": -0.5522,
+    "t": -6.62
+   },
+   "val": {
+    "n": 177,
+    "mean_r": -0.4526,
+    "t": -3.0
+   },
+   "hold": {
+    "n": 263,
+    "mean_r": -0.9348,
+    "mean_r_gross": -0.1069,
+    "t": -4.51,
+    "win_rate": 0.209,
+    "profit_factor": 0.334,
+    "max_dd_pct": 93.0,
+    "cagr_pct": -62.11,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.828
+   },
+   "post_publication": {
+    "n": 595,
+    "mean_r": -0.676,
+    "t": -6.03,
+    "first": "2020-06-01"
+   },
+   "walk_forward_oos": {
+    "n": 728,
+    "mean_r": -0.6483,
+    "t": -6.72
+   }
+  },
+  {
+   "strategy": "YT-22",
+   "name": "Heikin-Ashi pair + Stochastic RSI 20/80",
+   "channel": "Nitin Bhatia",
+   "market": "NIFTY",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 572,
+    "mean_r": -0.5984,
+    "t": -6.3
+   },
+   "val": {
+    "n": 177,
+    "mean_r": -0.3955,
+    "t": -1.89
+   },
+   "hold": {
+    "n": 226,
+    "mean_r": -1.1909,
+    "mean_r_gross": -0.0472,
+    "t": -3.62,
+    "win_rate": 0.212,
+    "profit_factor": 0.303,
+    "max_dd_pct": 95.8,
+    "cagr_pct": -67.87,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 1.1438
+   },
+   "post_publication": {
+    "n": 542,
+    "mean_r": -0.6991,
+    "t": -4.31,
+    "first": "2020-06-03"
+   },
+   "walk_forward_oos": {
+    "n": 666,
+    "mean_r": -0.6831,
+    "t": -4.93
+   }
+  },
+  {
+   "strategy": "YT-22",
+   "name": "Heikin-Ashi pair + Stochastic RSI 20/80",
+   "channel": "Nitin Bhatia",
+   "market": "NSE15",
+   "instruments": 268,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 16141,
+    "mean_r": -0.5666,
+    "t": -18.49
+   },
+   "val": {
+    "n": 11047,
+    "mean_r": -0.6472,
+    "t": -17.95
+   },
+   "hold": {
+    "n": 19771,
+    "mean_r": -0.5804,
+    "mean_r_gross": 0.011,
+    "t": -18.47,
+    "win_rate": 0.227,
+    "profit_factor": 0.481,
+    "max_dd_pct": 70.0,
+    "cagr_pct": -76.2,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.5914
+   },
+   "post_publication": {
+    "n": 46959,
+    "mean_r": -0.5914,
+    "t": -31.39,
+    "first": "2024-10-04"
+   },
+   "walk_forward_oos": {
+    "n": 0,
+    "mean_r": null,
+    "t": null
+   }
+  },
+  {
+   "strategy": "YT-23",
+   "name": "Vortex crossover outside congestion",
+   "channel": "Nitin Bhatia",
+   "market": "NIFTY",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 507,
+    "mean_r": -0.646,
+    "t": -5.68
+   },
+   "val": {
+    "n": 163,
+    "mean_r": -0.6556,
+    "t": -2.67
+   },
+   "hold": {
+    "n": 251,
+    "mean_r": -0.6173,
+    "mean_r_gross": 0.1684,
+    "t": -2.93,
+    "win_rate": 0.199,
+    "profit_factor": 0.517,
+    "max_dd_pct": 84.4,
+    "cagr_pct": -45.29,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.7857
+   },
+   "post_publication": {
+    "n": 510,
+    "mean_r": -0.6664,
+    "t": -4.65,
+    "first": "2020-09-07"
+   },
+   "walk_forward_oos": {
+    "n": 635,
+    "mean_r": -0.5772,
+    "t": -4.73
+   }
+  },
+  {
+   "strategy": "YT-23",
+   "name": "Vortex crossover outside congestion",
+   "channel": "Nitin Bhatia",
+   "market": "NSE15",
+   "instruments": 268,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 20398,
+    "mean_r": -0.6776,
+    "t": -15.04
+   },
+   "val": {
+    "n": 13958,
+    "mean_r": -0.7766,
+    "t": -23.95
+   },
+   "hold": {
+    "n": 25774,
+    "mean_r": -0.6993,
+    "mean_r_gross": 0.0301,
+    "t": -20.94,
+    "win_rate": 0.222,
+    "profit_factor": 0.418,
+    "max_dd_pct": 75.7,
+    "cagr_pct": -81.54,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.7294
+   },
+   "post_publication": {
+    "n": 60130,
+    "mean_r": -0.7099,
+    "t": -32.01,
+    "first": "2024-10-03"
+   },
+   "walk_forward_oos": {
+    "n": 0,
+    "mean_r": null,
+    "t": null
+   }
+  },
+  {
+   "strategy": "YT-24",
+   "name": "5-8-13 EMA ribbon",
+   "channel": "Nitin Bhatia",
+   "market": "BANKNIFTY",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1725,
+    "mean_r": -0.3469,
+    "t": -7.37
+   },
+   "val": {
+    "n": 572,
+    "mean_r": -0.4066,
+    "t": -5.51
+   },
+   "hold": {
+    "n": 797,
+    "mean_r": -0.4856,
+    "mean_r_gross": -0.087,
+    "t": -8.5,
+    "win_rate": 0.238,
+    "profit_factor": 0.431,
+    "max_dd_pct": 98.1,
+    "cagr_pct": -76.25,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.3986
+   },
+   "post_publication": {
+    "n": 1829,
+    "mean_r": -0.4131,
+    "t": -10.6,
+    "first": "2020-06-01"
+   },
+   "walk_forward_oos": {
+    "n": 2233,
+    "mean_r": -0.385,
+    "t": -10.53
+   }
+  },
+  {
+   "strategy": "YT-24",
+   "name": "5-8-13 EMA ribbon",
+   "channel": "Nitin Bhatia",
+   "market": "NIFTY",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 1693,
+    "mean_r": -0.3952,
+    "t": -8.19
+   },
+   "val": {
+    "n": 557,
+    "mean_r": -0.295,
+    "t": -2.75
+   },
+   "hold": {
+    "n": 777,
+    "mean_r": -0.599,
+    "mean_r_gross": -0.0267,
+    "t": -8.48,
+    "win_rate": 0.238,
+    "profit_factor": 0.416,
+    "max_dd_pct": 99.3,
+    "cagr_pct": -82.02,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.5724
+   },
+   "post_publication": {
+    "n": 1771,
+    "mean_r": -0.4488,
+    "t": -9.02,
+    "first": "2020-06-04"
+   },
+   "walk_forward_oos": {
+    "n": 2154,
+    "mean_r": -0.4328,
+    "t": -9.45
+   }
+  },
+  {
+   "strategy": "YT-24",
+   "name": "5-8-13 EMA ribbon",
+   "channel": "Nitin Bhatia",
+   "market": "NSE15",
+   "instruments": 268,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 53899,
+    "mean_r": -0.4133,
+    "t": -18.19
+   },
+   "val": {
+    "n": 40081,
+    "mean_r": -0.5326,
+    "t": -23.95
+   },
+   "hold": {
+    "n": 64849,
+    "mean_r": -0.4337,
+    "mean_r_gross": 0.0258,
+    "t": -18.11,
+    "win_rate": 0.242,
+    "profit_factor": 0.524,
+    "max_dd_pct": 57.8,
+    "cagr_pct": -64.32,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.4596
+   },
+   "post_publication": {
+    "n": 158829,
+    "mean_r": -0.4517,
+    "t": -32.67,
+    "first": "2024-10-03"
+   },
+   "walk_forward_oos": {
+    "n": 0,
+    "mean_r": null,
+    "t": null
+   }
+  },
+  {
+   "strategy": "YT-25",
+   "name": "RSI 70/30 reversal",
+   "channel": "Super Trader Lakshya",
+   "market": "NSE15",
+   "instruments": 268,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 29632,
+    "mean_r": -0.1895,
+    "t": -7.75
+   },
+   "val": {
+    "n": 19505,
+    "mean_r": -0.2167,
+    "t": -9.41
+   },
+   "hold": {
+    "n": 34591,
+    "mean_r": -0.1784,
+    "mean_r_gross": 0.0009,
+    "t": -9.23,
+    "win_rate": 0.382,
+    "profit_factor": 0.697,
+    "max_dd_pct": 29.6,
+    "cagr_pct": -34.21,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.1794
+   },
+   "post_publication": {
+    "n": 83728,
+    "mean_r": -0.1913,
+    "t": -14.94,
+    "first": "2024-10-03"
+   },
+   "walk_forward_oos": {
+    "n": 0,
+    "mean_r": null,
+    "t": null
+   }
+  },
+  {
+   "strategy": "YT-26",
+   "name": "5-minute ORB on gappers with VWAP (proxy)",
+   "channel": "Bear Bull Traders",
+   "market": "NSE5",
+   "instruments": 268,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 192,
+    "mean_r": -0.2986,
+    "t": -2.7
+   },
+   "val": {
+    "n": 101,
+    "mean_r": 0.1419,
+    "t": 0.54
+   },
+   "hold": {
+    "n": 257,
+    "mean_r": -0.2162,
+    "mean_r_gross": -0.0883,
+    "t": -1.69,
+    "win_rate": 0.366,
+    "profit_factor": 0.716,
+    "max_dd_pct": 33.0,
+    "cagr_pct": -32.1,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.1279
+   },
+   "post_publication": {
+    "n": 550,
+    "mean_r": -0.1792,
+    "t": -2.36,
+    "first": "2024-11-04"
+   },
+   "walk_forward_oos": {
+    "n": 0,
+    "mean_r": null,
+    "t": null
+   }
+  },
+  {
+   "strategy": "YT-27",
+   "name": "Camarilla R3/S3 fade, R4/S4 breakout",
+   "channel": "Bear Bull Traders",
+   "market": "BANKNIFTY",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": true,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 708,
+    "mean_r": 0.0824,
+    "t": 2.24
+   },
+   "val": {
+    "n": 201,
+    "mean_r": 0.0111,
+    "t": 0.17
+   },
+   "hold": {
+    "n": 315,
+    "mean_r": -0.0952,
+    "mean_r_gross": 0.0308,
+    "t": -1.7,
+    "win_rate": 0.473,
+    "profit_factor": 0.795,
+    "max_dd_pct": 31.0,
+    "cagr_pct": -10.77,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.126
+   },
+   "post_publication": {
+    "n": 516,
+    "mean_r": -0.0538,
+    "t": -1.25,
+    "first": "2022-01-03"
+   },
+   "walk_forward_oos": {
+    "n": 890,
+    "mean_r": 0.0103,
+    "t": 0.31
+   }
+  },
+  {
+   "strategy": "YT-27",
+   "name": "Camarilla R3/S3 fade, R4/S4 breakout",
+   "channel": "Bear Bull Traders",
+   "market": "NAS100",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "needs more evidence",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": true,
+    "hold_delay_positive": true,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": true
+   },
+   "dev": {
+    "n": 912,
+    "mean_r": -0.0208,
+    "t": -0.66
+   },
+   "val": {
+    "n": 306,
+    "mean_r": 0.1161,
+    "t": 2.07
+   },
+   "hold": {
+    "n": 312,
+    "mean_r": 0.0321,
+    "mean_r_gross": 0.0498,
+    "t": 0.59,
+    "win_rate": 0.548,
+    "profit_factor": 1.083,
+    "max_dd_pct": 10.8,
+    "cagr_pct": 2.3,
+    "top5_share_of_net": 0.997,
+    "cost_r_mean": 0.0176
+   },
+   "post_publication": {
+    "n": 421,
+    "mean_r": 0.0163,
+    "t": 0.35,
+    "first": "2022-01-04"
+   },
+   "walk_forward_oos": {
+    "n": 1322,
+    "mean_r": 0.0359,
+    "t": 1.35
+   }
+  },
+  {
+   "strategy": "YT-27",
+   "name": "Camarilla R3/S3 fade, R4/S4 breakout",
+   "channel": "Bear Bull Traders",
+   "market": "NIFTY",
+   "instruments": 1,
+   "variant": "V0",
+   "chosen": true,
+   "class": "not supported",
+   "holm_p": 1.0,
+   "gates": {
+    "hold_t>=2": false,
+    "holm_p<0.05": false,
+    "dev_and_val_positive": false,
+    "hold_n>=50": true,
+    "hold_costs_x2_positive": false,
+    "hold_delay_positive": false,
+    "hold_top5_share<0.5": false,
+    "hold_max_dd<20pct": false
+   },
+   "dev": {
+    "n": 600,
+    "mean_r": -0.0389,
+    "t": -0.95
+   },
+   "val": {
+    "n": 180,
+    "mean_r": 0.0329,
+    "t": 0.43
+   },
+   "hold": {
+    "n": 326,
+    "mean_r": -0.0777,
+    "mean_r_gross": 0.0648,
+    "t": -1.44,
+    "win_rate": 0.479,
+    "profit_factor": 0.826,
+    "max_dd_pct": 32.9,
+    "cagr_pct": -9.12,
+    "top5_share_of_net": NaN,
+    "cost_r_mean": 0.1425
+   },
+   "post_publication": {
+    "n": 506,
+    "mean_r": -0.0384,
+    "t": -0.87,
+    "first": "2022-01-03"
+   },
+   "walk_forward_oos": {
+    "n": 825,
+    "mean_r": -0.0369,
+    "t": -1.06
+   }
+  }
+ ]
+}

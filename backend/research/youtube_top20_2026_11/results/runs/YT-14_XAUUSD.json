@@ -1,0 +1,774 @@
+{
+ "strategy": "YT-14",
+ "name": "MA fan + engulfing / three-line strike, RSI 50",
+ "channel": "The Moving Average",
+ "market": "XAUUSD",
+ "instruments": 1,
+ "prereg_sha256": "3ee6d7297f3f952586d77edfbc15a90ca357044bf82c68708d602184a9c9769b",
+ "variants": {
+  "V0": {
+   "signals": 37690,
+   "trades": 12040,
+   "rejected": {
+    "position_open": 15911,
+    "day_limit": 9693,
+    "after_forced_exit": 44,
+    "entry_beyond_stop": 2
+   },
+   "sig_params": {},
+   "exits": {},
+   "dev": {
+    "n": 7321,
+    "days": 2769,
+    "per_year": 678.5,
+    "win_rate": 0.256,
+    "mean_r": -0.3577,
+    "mean_r_gross": 0.0094,
+    "t": -24.07,
+    "t_per_trade": -24.07,
+    "profit_factor": 0.552,
+    "total_return_pct_1pct_risk": -100.0,
+    "cagr_pct": -91.68,
+    "max_dd_pct": 100.0,
+    "longest_losing_streak": 23,
+    "best_r": 2.0,
+    "worst_r": -12.27,
+    "top5_share_of_net": NaN,
+    "months_positive_pct": 5.4,
+    "cost_r_mean": 0.3672,
+    "avg_rows_held": 130.4,
+    "first": "2009-03-17",
+    "last": "2019-12-31",
+    "exit_reasons": {
+     "stop": 5121,
+     "target": 1563,
+     "time": 637
+    }
+   },
+   "val": {
+    "n": 2113,
+    "days": 769,
+    "per_year": 706.1,
+    "win_rate": 0.279,
+    "mean_r": -0.2588,
+    "mean_r_gross": -0.0004,
+    "t": -9.24,
+    "t_per_trade": -9.24,
+    "profit_factor": 0.653,
+    "total_return_pct_1pct_risk": -99.6,
+    "cagr_pct": -84.87,
+    "max_dd_pct": 99.7,
+    "longest_losing_streak": 19,
+    "best_r": 2.0,
+    "worst_r": -1.26,
+    "top5_share_of_net": NaN,
+    "months_positive_pct": 5.6,
+    "cost_r_mean": 0.2584,
+    "avg_rows_held": 136.0,
+    "first": "2020-01-02",
+    "last": "2022-12-30",
+    "exit_reasons": {
+     "stop": 1440,
+     "target": 492,
+     "time": 181
+    }
+   },
+   "dev_val": {
+    "n": 9434,
+    "days": 3538,
+    "per_year": 684.2,
+    "win_rate": 0.261,
+    "mean_r": -0.3356,
+    "mean_r_gross": 0.0072,
+    "t": -25.55,
+    "t_per_trade": -25.55,
+    "profit_factor": 0.574,
+    "total_return_pct_1pct_risk": -100.0,
+    "cagr_pct": -90.52,
+    "max_dd_pct": 100.0,
+    "longest_losing_streak": 23,
+    "best_r": 2.0,
+    "worst_r": -12.27,
+    "top5_share_of_net": NaN,
+    "months_positive_pct": 5.4,
+    "cost_r_mean": 0.3428,
+    "avg_rows_held": 131.7,
+    "first": "2009-03-17",
+    "last": "2022-12-30",
+    "exit_reasons": {
+     "stop": 6561,
+     "target": 2055,
+     "time": 818
+    }
+   },
+   "hold": {
+    "n": 2275,
+    "days": 847,
+    "per_year": 601.3,
+    "win_rate": 0.319,
+    "mean_r": -0.1266,
+    "mean_r_gross": 0.0582,
+    "t": -4.52,
+    "t_per_trade": -4.52,
+    "profit_factor": 0.816,
+    "total_return_pct_1pct_risk": -95.4,
+    "cagr_pct": -55.73,
+    "max_dd_pct": 95.8,
+    "longest_losing_streak": 25,
+    "best_r": 2.0,
+    "worst_r": -1.38,
+    "top5_share_of_net": NaN,
+    "months_positive_pct": 30.0,
+    "cost_r_mean": 0.1848,
+    "avg_rows_held": 140.2,
+    "first": "2023-01-03",
+    "last": "2026-10-16",
+    "exit_reasons": {
+     "stop": 1462,
+     "target": 610,
+     "time": 203
+    }
+   },
+   "all": {
+    "n": 11709,
+    "days": 4385,
+    "per_year": 665.9,
+    "win_rate": 0.272,
+    "mean_r": -0.295,
+    "mean_r_gross": 0.0171,
+    "t": -24.74,
+    "t_per_trade": -24.74,
+    "profit_factor": 0.616,
+    "total_return_pct_1pct_risk": -100.0,
+    "cagr_pct": -86.77,
+    "max_dd_pct": 100.0,
+    "longest_losing_streak": 25,
+    "best_r": 2.0,
+    "worst_r": -12.27,
+    "top5_share_of_net": NaN,
+    "months_positive_pct": 10.2,
+    "cost_r_mean": 0.3121,
+    "avg_rows_held": 133.3,
+    "first": "2009-03-17",
+    "last": "2026-10-16",
+    "exit_reasons": {
+     "stop": 8023,
+     "target": 2665,
+     "time": 1021
+    }
+   },
+   "by_year": {
+    "2009": {
+     "n": 531,
+     "mean_r": -0.412
+    },
+    "2010": {
+     "n": 656,
+     "mean_r": -0.39
+    },
+    "2011": {
+     "n": 694,
+     "mean_r": -0.265
+    },
+    "2012": {
+     "n": 677,
+     "mean_r": -0.235
+    },
+    "2013": {
+     "n": 666,
+     "mean_r": -0.328
+    },
+    "2014": {
+     "n": 663,
+     "mean_r": -0.403
+    },
+    "2015": {
+     "n": 672,
+     "mean_r": -0.38
+    },
+    "2016": {
+     "n": 680,
+     "mean_r": -0.324
+    },
+    "2017": {
+     "n": 680,
+     "mean_r": -0.314
+    },
+    "2018": {
+     "n": 695,
+     "mean_r": -0.414
+    },
+    "2019": {
+     "n": 707,
+     "mean_r": -0.479
+    },
+    "2020": {
+     "n": 695,
+     "mean_r": -0.275
+    },
+    "2021": {
+     "n": 709,
+     "mean_r": -0.26
+    },
+    "2022": {
+     "n": 709,
+     "mean_r": -0.241
+    },
+    "2023": {
+     "n": 352,
+     "mean_r": -0.242
+    },
+    "2024": {
+     "n": 701,
+     "mean_r": -0.135
+    },
+    "2025": {
+     "n": 689,
+     "mean_r": -0.085
+    },
+    "2026": {
+     "n": 533,
+     "mean_r": -0.093
+    }
+   },
+   "post_publication": {
+    "n": 2686,
+    "days": 998,
+    "per_year": 613.9,
+    "win_rate": 0.318,
+    "mean_r": -0.1362,
+    "mean_r_gross": 0.0623,
+    "t": -5.3,
+    "t_per_trade": -5.3,
+    "profit_factor": 0.804,
+    "total_return_pct_1pct_risk": -98.0,
+    "cagr_pct": -58.97,
+    "max_dd_pct": 98.0,
+    "longest_losing_streak": 25,
+    "best_r": 2.0,
+    "worst_r": -1.38,
+    "top5_share_of_net": NaN,
+    "months_positive_pct": 27.7,
+    "cost_r_mean": 0.1985,
+    "avg_rows_held": 139.3,
+    "first": "2022-06-01",
+    "last": "2026-10-16",
+    "exit_reasons": {
+     "stop": 1730,
+     "target": 712,
+     "time": 244
+    }
+   }
+  },
+  "R1": {
+   "signals": 37690,
+   "trades": 12278,
+   "rejected": {
+    "position_open": 13907,
+    "day_limit": 11463,
+    "after_forced_exit": 39,
+    "entry_beyond_stop": 3
+   },
+   "sig_params": {},
+   "exits": {
+    "target_r": 1.5
+   },
+   "dev": {
+    "n": 7477,
+    "days": 2769,
+    "per_year": 693.0,
+    "win_rate": 0.295,
+    "mean_r": -0.357,
+    "mean_r_gross": 0.0066,
+    "t": -26.95,
+    "t_per_trade": -26.95,
+    "profit_factor": 0.53,
+    "total_return_pct_1pct_risk": -100.0,
+    "cagr_pct": -91.98,
+    "max_dd_pct": 100.0,
+    "longest_losing_streak": 20,
+    "best_r": 1.5,
+    "worst_r": -12.27,
+    "top5_share_of_net": NaN,
+    "months_positive_pct": 3.8,
+    "cost_r_mean": 0.3636,
+    "avg_rows_held": 111.6,
+    "first": "2009-03-17",
+    "last": "2019-12-31",
+    "exit_reasons": {
+     "stop": 4969,
+     "target": 2001,
+     "time": 507
+    }
+   },
+   "val": {
+    "n": 2146,
+    "days": 769,
+    "per_year": 717.1,
+    "win_rate": 0.324,
+    "mean_r": -0.259,
+    "mean_r_gross": -0.0042,
+    "t": -10.45,
+    "t_per_trade": -10.45,
+    "profit_factor": 0.631,
+    "total_return_pct_1pct_risk": -99.7,
+    "cagr_pct": -85.15,
+    "max_dd_pct": 99.7,
+    "longest_losing_streak": 19,
+    "best_r": 1.5,
+    "worst_r": -1.26,
+    "top5_share_of_net": NaN,
+    "months_positive_pct": 2.8,
+    "cost_r_mean": 0.2549,
+    "avg_rows_held": 119.6,
+    "first": "2020-01-02",
+    "last": "2022-12-30",
+    "exit_reasons": {
+     "stop": 1378,
+     "target": 624,
+     "time": 144
+    }
+   },
+   "dev_val": {
+    "n": 9623,
+    "days": 3538,
+    "per_year": 697.9,
+    "win_rate": 0.301,
+    "mean_r": -0.3351,
+    "mean_r_gross": 0.0042,
+    "t": -28.67,
+    "t_per_trade": -28.67,
+    "profit_factor": 0.551,
+    "total_return_pct_1pct_risk": -100.0,
+    "cagr_pct": -90.83,
+    "max_dd_pct": 100.0,
+    "longest_losing_streak": 20,
+    "best_r": 1.5,
+    "worst_r": -12.27,
+    "top5_share_of_net": NaN,
+    "months_positive_pct": 3.6,
+    "cost_r_mean": 0.3393,
+    "avg_rows_held": 113.4,
+    "first": "2009-03-17",
+    "last": "2022-12-30",
+    "exit_reasons": {
+     "stop": 6347,
+     "target": 2625,
+     "time": 651
+    }
+   },
+   "hold": {
+    "n": 2317,
+    "days": 847,
+    "per_year": 612.4,
+    "win_rate": 0.363,
+    "mean_r": -0.143,
+    "mean_r_gross": 0.0383,
+    "t": -5.84,
+    "t_per_trade": -5.84,
+    "profit_factor": 0.779,
+    "total_return_pct_1pct_risk": -96.9,
+    "cagr_pct": -60.1,
+    "max_dd_pct": 97.1,
+    "longest_losing_streak": 25,
+    "best_r": 1.5,
+    "worst_r": -1.38,
+    "top5_share_of_net": NaN,
+    "months_positive_pct": 25.0,
+    "cost_r_mean": 0.1813,
+    "avg_rows_held": 117.8,
+    "first": "2023-01-03",
+    "last": "2026-10-16",
+    "exit_reasons": {
+     "stop": 1406,
+     "target": 766,
+     "time": 145
+    }
+   },
+   "all": {
+    "n": 11940,
+    "days": 4385,
+    "per_year": 679.1,
+    "win_rate": 0.313,
+    "mean_r": -0.2978,
+    "mean_r_gross": 0.0108,
+    "t": -28.17,
+    "t_per_trade": -28.17,
+    "profit_factor": 0.59,
+    "total_return_pct_1pct_risk": -100.0,
+    "cagr_pct": -87.39,
+    "max_dd_pct": 100.0,
+    "longest_losing_streak": 25,
+    "best_r": 1.5,
+    "worst_r": -12.27,
+    "top5_share_of_net": NaN,
+    "months_positive_pct": 7.8,
+    "cost_r_mean": 0.3087,
+    "avg_rows_held": 114.3,
+    "first": "2009-03-17",
+    "last": "2026-10-16",
+    "exit_reasons": {
+     "stop": 7753,
+     "target": 3391,
+     "time": 796
+    }
+   },
+   "by_year": {
+    "2009": {
+     "n": 542,
+     "mean_r": -0.418
+    },
+    "2010": {
+     "n": 671,
+     "mean_r": -0.398
+    },
+    "2011": {
+     "n": 706,
+     "mean_r": -0.287
+    },
+    "2012": {
+     "n": 695,
+     "mean_r": -0.263
+    },
+    "2013": {
+     "n": 681,
+     "mean_r": -0.307
+    },
+    "2014": {
+     "n": 680,
+     "mean_r": -0.365
+    },
+    "2015": {
+     "n": 684,
+     "mean_r": -0.381
+    },
+    "2016": {
+     "n": 698,
+     "mean_r": -0.305
+    },
+    "2017": {
+     "n": 698,
+     "mean_r": -0.36
+    },
+    "2018": {
+     "n": 701,
+     "mean_r": -0.404
+    },
+    "2019": {
+     "n": 721,
+     "mean_r": -0.451
+    },
+    "2020": {
+     "n": 706,
+     "mean_r": -0.283
+    },
+    "2021": {
+     "n": 722,
+     "mean_r": -0.274
+    },
+    "2022": {
+     "n": 718,
+     "mean_r": -0.22
+    },
+    "2023": {
+     "n": 355,
+     "mean_r": -0.271
+    },
+    "2024": {
+     "n": 713,
+     "mean_r": -0.171
+    },
+    "2025": {
+     "n": 702,
+     "mean_r": -0.089
+    },
+    "2026": {
+     "n": 547,
+     "mean_r": -0.093
+    }
+   },
+   "post_publication": {
+    "n": 2734,
+    "days": 998,
+    "per_year": 624.9,
+    "win_rate": 0.361,
+    "mean_r": -0.1527,
+    "mean_r_gross": 0.0424,
+    "t": -6.78,
+    "t_per_trade": -6.78,
+    "profit_factor": 0.766,
+    "total_return_pct_1pct_risk": -98.7,
+    "cagr_pct": -63.16,
+    "max_dd_pct": 98.8,
+    "longest_losing_streak": 25,
+    "best_r": 1.5,
+    "worst_r": -1.38,
+    "top5_share_of_net": NaN,
+    "months_positive_pct": 23.4,
+    "cost_r_mean": 0.1951,
+    "avg_rows_held": 117.5,
+    "first": "2022-06-01",
+    "last": "2026-10-16",
+    "exit_reasons": {
+     "stop": 1663,
+     "target": 895,
+     "time": 176
+    }
+   }
+  }
+ },
+ "selection": {
+  "rule": "highest dev+val net mean R with >= 30 trades; tie -> V0",
+  "dev_val_mean_r": {
+   "V0": -0.3356,
+   "R1": -0.3351
+  },
+  "chosen": "R1"
+ },
+ "robustness": {
+  "V0": {
+   "gross": {
+    "dev_val": {
+     "n": 9518,
+     "mean_r": 0.003,
+     "t": 0.22,
+     "profit_factor": 1.005,
+     "max_dd_pct": 82.4
+    },
+    "hold": {
+     "n": 2286,
+     "mean_r": 0.0554,
+     "t": 1.92,
+     "profit_factor": 1.091,
+     "max_dd_pct": 25.1
+    }
+   },
+   "costs_x2": {
+    "dev_val": {
+     "n": 9403,
+     "mean_r": -0.559,
+     "t": -45.86,
+     "profit_factor": 0.381,
+     "max_dd_pct": 100.0
+    },
+    "hold": {
+     "n": 2263,
+     "mean_r": -0.2698,
+     "t": -9.92,
+     "profit_factor": 0.643,
+     "max_dd_pct": 99.8
+    }
+   },
+   "slippage_x3": {
+    "dev_val": {
+     "n": 9366,
+     "mean_r": -0.4668,
+     "t": -35.76,
+     "profit_factor": 0.465,
+     "max_dd_pct": 100.0
+    },
+    "hold": {
+     "n": 2265,
+     "mean_r": -0.1982,
+     "t": -7.06,
+     "profit_factor": 0.729,
+     "max_dd_pct": 99.1
+    }
+   },
+   "delay_1row": {
+    "dev_val": {
+     "n": 9399,
+     "mean_r": -0.3405,
+     "t": -25.99,
+     "profit_factor": 0.569,
+     "max_dd_pct": 100.0
+    },
+    "hold": {
+     "n": 2271,
+     "mean_r": -0.1285,
+     "t": -4.59,
+     "profit_factor": 0.813,
+     "max_dd_pct": 95.8
+    }
+   },
+   "target_1.5R": {
+    "dev_val": {
+     "n": 9623,
+     "mean_r": -0.3351,
+     "t": -28.67,
+     "profit_factor": 0.551,
+     "max_dd_pct": 100.0
+    },
+    "hold": {
+     "n": 2317,
+     "mean_r": -0.143,
+     "t": -5.84,
+     "profit_factor": 0.779,
+     "max_dd_pct": 97.1
+    }
+   },
+   "target_2.5R": {
+    "dev_val": {
+     "n": 9277,
+     "mean_r": -0.3321,
+     "t": -23.01,
+     "profit_factor": 0.592,
+     "max_dd_pct": 100.0
+    },
+    "hold": {
+     "n": 2230,
+     "mean_r": -0.1216,
+     "t": -3.92,
+     "profit_factor": 0.831,
+     "max_dd_pct": 95.1
+    }
+   }
+  },
+  "R1": {
+   "gross": {
+    "dev_val": {
+     "n": 9710,
+     "mean_r": -0.0037,
+     "t": -0.31,
+     "profit_factor": 0.994,
+     "max_dd_pct": 79.4
+    },
+    "hold": {
+     "n": 2329,
+     "mean_r": 0.0709,
+     "t": 2.83,
+     "profit_factor": 1.129,
+     "max_dd_pct": 17.6
+    }
+   },
+   "costs_x2": {
+    "dev_val": {
+     "n": 9575,
+     "mean_r": -0.5576,
+     "t": -50.76,
+     "profit_factor": 0.36,
+     "max_dd_pct": 100.0
+    },
+    "hold": {
+     "n": 2311,
+     "mean_r": -0.2848,
+     "t": -11.85,
+     "profit_factor": 0.606,
+     "max_dd_pct": 99.9
+    }
+   },
+   "slippage_x3": {
+    "dev_val": {
+     "n": 9550,
+     "mean_r": -0.4643,
+     "t": -39.59,
+     "profit_factor": 0.444,
+     "max_dd_pct": 100.0
+    },
+    "hold": {
+     "n": 2307,
+     "mean_r": -0.2066,
+     "t": -8.33,
+     "profit_factor": 0.701,
+     "max_dd_pct": 99.3
+    }
+   },
+   "delay_1row": {
+    "dev_val": {
+     "n": 9583,
+     "mean_r": -0.3422,
+     "t": -29.38,
+     "profit_factor": 0.544,
+     "max_dd_pct": 100.0
+    },
+    "hold": {
+     "n": 2321,
+     "mean_r": -0.1506,
+     "t": -6.17,
+     "profit_factor": 0.768,
+     "max_dd_pct": 97.5
+    }
+   },
+   "target_1R": {
+    "dev_val": {
+     "n": 9846,
+     "mean_r": -0.3348,
+     "t": -33.55,
+     "profit_factor": 0.507,
+     "max_dd_pct": 100.0
+    },
+    "hold": {
+     "n": 2387,
+     "mean_r": -0.1455,
+     "t": -7.14,
+     "profit_factor": 0.745,
+     "max_dd_pct": 97.4
+    }
+   },
+   "target_2R": {
+    "dev_val": {
+     "n": 9434,
+     "mean_r": -0.3356,
+     "t": -25.55,
+     "profit_factor": 0.574,
+     "max_dd_pct": 100.0
+    },
+    "hold": {
+     "n": 2275,
+     "mean_r": -0.1266,
+     "t": -4.52,
+     "profit_factor": 0.816,
+     "max_dd_pct": 95.8
+    }
+   }
+  }
+ },
+ "walk_forward": {
+  "picks": {
+   "2012": "V0",
+   "2013": "V0",
+   "2014": "V0",
+   "2015": "V0",
+   "2016": "V0",
+   "2017": "R1",
+   "2018": "V0",
+   "2019": "V0",
+   "2020": "R1",
+   "2021": "V0",
+   "2022": "V0",
+   "2023": "R1",
+   "2024": "V0",
+   "2025": "V0",
+   "2026": "V0"
+  },
+  "oos": {
+   "n": 9860,
+   "days": 3669,
+   "per_year": 666.9,
+   "win_rate": 0.281,
+   "mean_r": -0.2893,
+   "mean_r_gross": 0.0099,
+   "t": -22.67,
+   "t_per_trade": -22.67,
+   "profit_factor": 0.619,
+   "total_return_pct_1pct_risk": -100.0,
+   "cagr_pct": -86.27,
+   "max_dd_pct": 100.0,
+   "longest_losing_streak": 25,
+   "best_r": 2.0,
+   "worst_r": -3.0,
+   "top5_share_of_net": NaN,
+   "months_positive_pct": 8.7,
+   "cost_r_mean": 0.2992,
+   "avg_rows_held": 132.1,
+   "first": "2012-01-03",
+   "last": "2026-10-16",
+   "exit_reasons": {
+    "stop": 6691,
+    "target": 2367,
+    "time": 802
+   }
+  }
+ },
+ "seconds": 14.0
+}

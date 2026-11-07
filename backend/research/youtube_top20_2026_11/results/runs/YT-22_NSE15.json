@@ -1,0 +1,288 @@
+{
+ "strategy": "YT-22",
+ "name": "Heikin-Ashi pair + Stochastic RSI 20/80",
+ "channel": "Nitin Bhatia",
+ "market": "NSE15",
+ "instruments": 268,
+ "prereg_sha256": "3ee6d7297f3f952586d77edfbc15a90ca357044bf82c68708d602184a9c9769b",
+ "variants": {
+  "V0": {
+   "signals": 65966,
+   "trades": 46959,
+   "rejected": {
+    "position_open": 18394,
+    "day_limit": 569,
+    "entry_beyond_stop": 42,
+    "after_forced_exit": 2
+   },
+   "sig_params": {},
+   "exits": {
+    "target_r": null
+   },
+   "dev": {
+    "n": 16141,
+    "days": 182,
+    "per_year": 21916.4,
+    "win_rate": 0.232,
+    "mean_r": -0.5666,
+    "mean_r_gross": 0.0186,
+    "t": -18.49,
+    "t_per_trade": -30.9,
+    "profit_factor": 0.486,
+    "total_return_pct_1pct_risk": -64.2,
+    "cagr_pct": -75.23,
+    "max_dd_pct": 64.2,
+    "longest_losing_streak": 62,
+    "best_r": 63.43,
+    "worst_r": -26.56,
+    "top5_share_of_net": NaN,
+    "months_positive_pct": 0.0,
+    "cost_r_mean": 0.5852,
+    "avg_rows_held": 12.3,
+    "first": "2024-10-04",
+    "last": "2025-06-30",
+    "exit_reasons": {
+     "exit_signal": 1257,
+     "stop": 11117,
+     "time": 3767
+    }
+   },
+   "val": {
+    "n": 11047,
+    "days": 126,
+    "per_year": 22048.7,
+    "win_rate": 0.227,
+    "mean_r": -0.6472,
+    "mean_r_gross": 0.0598,
+    "t": -17.95,
+    "t_per_trade": -29.88,
+    "profit_factor": 0.45,
+    "total_return_pct_1pct_risk": -56.5,
+    "cagr_pct": -81.03,
+    "max_dd_pct": 56.5,
+    "longest_losing_streak": 53,
+    "best_r": 40.01,
+    "worst_r": -32.11,
+    "top5_share_of_net": NaN,
+    "months_positive_pct": 0.0,
+    "cost_r_mean": 0.7069,
+    "avg_rows_held": 12.0,
+    "first": "2025-07-01",
+    "last": "2025-12-31",
+    "exit_reasons": {
+     "exit_signal": 898,
+     "stop": 7586,
+     "time": 2563
+    }
+   },
+   "dev_val": {
+    "n": 27188,
+    "days": 308,
+    "per_year": 21921.5,
+    "win_rate": 0.23,
+    "mean_r": -0.5994,
+    "mean_r_gross": 0.0353,
+    "t": -25.57,
+    "t_per_trade": -42.81,
+    "profit_factor": 0.471,
+    "total_return_pct_1pct_risk": -84.4,
+    "cagr_pct": -77.7,
+    "max_dd_pct": 84.4,
+    "longest_losing_streak": 62,
+    "best_r": 63.43,
+    "worst_r": -32.11,
+    "top5_share_of_net": NaN,
+    "months_positive_pct": 0.0,
+    "cost_r_mean": 0.6347,
+    "avg_rows_held": 12.2,
+    "first": "2024-10-04",
+    "last": "2025-12-31",
+    "exit_reasons": {
+     "exit_signal": 2155,
+     "stop": 18703,
+     "time": 6330
+    }
+   },
+   "hold": {
+    "n": 19771,
+    "days": 207,
+    "per_year": 23599.2,
+    "win_rate": 0.227,
+    "mean_r": -0.5804,
+    "mean_r_gross": 0.011,
+    "t": -18.47,
+    "t_per_trade": -34.17,
+    "profit_factor": 0.481,
+    "total_return_pct_1pct_risk": -70.0,
+    "cagr_pct": -76.2,
+    "max_dd_pct": 70.0,
+    "longest_losing_streak": 67,
+    "best_r": 42.96,
+    "worst_r": -47.84,
+    "top5_share_of_net": NaN,
+    "months_positive_pct": 0.0,
+    "cost_r_mean": 0.5914,
+    "avg_rows_held": 12.0,
+    "first": "2026-01-01",
+    "last": "2026-11-03",
+    "exit_reasons": {
+     "exit_signal": 1521,
+     "stop": 13888,
+     "time": 4362
+    }
+   },
+   "all": {
+    "n": 46959,
+    "days": 515,
+    "per_year": 22568.1,
+    "win_rate": 0.228,
+    "mean_r": -0.5914,
+    "mean_r_gross": 0.0251,
+    "t": -31.39,
+    "t_per_trade": -54.71,
+    "profit_factor": 0.475,
+    "total_return_pct_1pct_risk": -95.3,
+    "cagr_pct": -77.06,
+    "max_dd_pct": 95.3,
+    "longest_losing_streak": 67,
+    "best_r": 63.43,
+    "worst_r": -47.84,
+    "top5_share_of_net": NaN,
+    "months_positive_pct": 0.0,
+    "cost_r_mean": 0.6165,
+    "avg_rows_held": 12.1,
+    "first": "2024-10-04",
+    "last": "2026-11-03",
+    "exit_reasons": {
+     "exit_signal": 3676,
+     "stop": 32591,
+     "time": 10692
+    }
+   },
+   "by_year": {
+    "2024": {
+     "n": 5085,
+     "mean_r": -0.583
+    },
+    "2025": {
+     "n": 22103,
+     "mean_r": -0.603
+    },
+    "2026": {
+     "n": 19771,
+     "mean_r": -0.58
+    }
+   },
+   "post_publication": {
+    "n": 46959,
+    "days": 515,
+    "per_year": 22568.1,
+    "win_rate": 0.228,
+    "mean_r": -0.5914,
+    "mean_r_gross": 0.0251,
+    "t": -31.39,
+    "t_per_trade": -54.71,
+    "profit_factor": 0.475,
+    "total_return_pct_1pct_risk": -95.3,
+    "cagr_pct": -77.06,
+    "max_dd_pct": 95.3,
+    "longest_losing_streak": 67,
+    "best_r": 63.43,
+    "worst_r": -47.84,
+    "top5_share_of_net": NaN,
+    "months_positive_pct": 0.0,
+    "cost_r_mean": 0.6165,
+    "avg_rows_held": 12.1,
+    "first": "2024-10-04",
+    "last": "2026-11-03",
+    "exit_reasons": {
+     "exit_signal": 3676,
+     "stop": 32591,
+     "time": 10692
+    }
+   }
+  }
+ },
+ "selection": {
+  "rule": "highest dev+val net mean R with >= 30 trades; tie -> V0",
+  "dev_val_mean_r": {
+   "V0": -0.5994
+  },
+  "chosen": "V0"
+ },
+ "robustness": {
+  "V0": {
+   "gross": {
+    "dev_val": {
+     "n": 26952,
+     "mean_r": 0.0644,
+     "t": 2.08,
+     "profit_factor": 1.092,
+     "max_dd_pct": 3.2
+    },
+    "hold": {
+     "n": 19617,
+     "mean_r": 0.0242,
+     "t": 0.97,
+     "profit_factor": 1.034,
+     "max_dd_pct": 6.3
+    }
+   },
+   "costs_x2": {
+    "dev_val": {
+     "n": 27200,
+     "mean_r": -1.0103,
+     "t": -39.89,
+     "profit_factor": 0.283,
+     "max_dd_pct": 95.7
+    },
+    "hold": {
+     "n": 19778,
+     "mean_r": -0.9561,
+     "t": -32.28,
+     "profit_factor": 0.301,
+     "max_dd_pct": 86.3
+    }
+   },
+   "slippage_x3": {
+    "dev_val": {
+     "n": 27205,
+     "mean_r": -0.7781,
+     "t": -39.95,
+     "profit_factor": 0.328,
+     "max_dd_pct": 91.1
+    },
+    "hold": {
+     "n": 19783,
+     "mean_r": -0.7554,
+     "t": -28.97,
+     "profit_factor": 0.342,
+     "max_dd_pct": 79.1
+    }
+   },
+   "delay_1row": {
+    "dev_val": {
+     "n": 25301,
+     "mean_r": -0.9408,
+     "t": -14.67,
+     "profit_factor": 0.345,
+     "max_dd_pct": 94.9
+    },
+    "hold": {
+     "n": 18434,
+     "mean_r": -1.206,
+     "t": -6.29,
+     "profit_factor": 0.292,
+     "max_dd_pct": 92.9
+    }
+   }
+  }
+ },
+ "walk_forward": {
+  "picks": {},
+  "oos": {
+   "n": 0
+  }
+ },
+ "seconds": 67.8
+}

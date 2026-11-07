@@ -1,0 +1,3 @@
+a5459e9fa31128bf2b04b76a50b6ce9ea8406a1ea3491f5ac538c6d3f0d9a504  PREREGISTRATION.md  (SHA-256 of LF line ends; locked 2026-11-07 before any backtest run)
+3ee6d7297f3f952586d77edfbc15a90ca357044bf82c68708d602184a9c9769b  PREREGISTRATION.md  (amended 2026-11-07 before any run: look-ahead fix, see change log)
+76f59c5325e1e22bcb924d39ae6453c64cac0801fefee3f8df9c6522e9ca8e48  PREREGISTRATION.md  (amended 2026-11-07 before the hold-out was opened: YT-06 expiry fix, see change log)

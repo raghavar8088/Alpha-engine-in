@@ -1,0 +1,4 @@
+# Stock-pool trade logs (NSE15/NSE5/NSED) are 5-9 MB each; regenerate with: python -I yt_run.py
+trades/*_NSE15_*.csv.gz
+trades/*_NSE5_*.csv.gz
+trades/*_NSED_*.csv.gz
