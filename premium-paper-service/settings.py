@@ -1,0 +1,35 @@
+"""Settings of the Premium Strategies paper desk. Everything is an environment variable so a dry run on other
+dates or another database cannot touch the real ledger."""
+
+from __future__ import annotations
+
+import os
+from datetime import date, datetime, timedelta, timezone
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
+IST = timezone(timedelta(hours=5, minutes=30))
+NY = ZoneInfo("America/New_York")
+
+PAPER_START = date.fromisoformat(os.getenv("PREMIUM_PAPER_START", "2026-11-09"))
+CAPITAL = float(os.getenv("PREMIUM_CAPITAL", "1000000"))        # Rs 10 lakh per strategy
+
+MONGO_URL = os.getenv("FACTORY_MONGO_URL", "").strip()
+MONGO_DB = os.getenv("PREMIUM_MONGO_DB", "alpha_engine_premium")
+DATA = Path(os.getenv("PREMIUM_DATA_DIR", "/data/premium"))
+INTRADAY = Path(os.getenv("INTRADAY_DATA_DIR", "/data/intraday"))
+BACKEND = os.getenv("PREMIUM_BACKEND_URL", "http://backend:8080").rstrip("/")
+APP_SECRET = os.getenv("APP_SHARED_SECRET", "").strip()
+
+# A session's bars are final (Angel's candles have replaced the stream's) by this time in the evening.
+NSE_FINAL_HHMM = "17:30"
+WARM_SESSIONS = {"index": 60, "global": 30, "stocks": 30}
+DAILY_WARM_DAYS = 700           # calendar days before the first paper day, for the 200-day averages
+
+
+def now_ist() -> datetime:
+    return datetime.now(IST)
+
+
+def now_ny() -> datetime:
+    return datetime.now(NY)

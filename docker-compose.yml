@@ -140,6 +140,26 @@ services:
     restart: unless-stopped
     mem_limit: 300m
 
+  # Premium Strategies paper desk: one Rs 10 lakh paper account per strategy. Its own container because the backend sits
+  # at its memory cap; every cycle is a short process that hands its memory back. It reads the bar store read-only, writes
+  # only its own database and volume, is given no broker credentials, and contains no broker client.
+  premium-paper:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.premium
+    environment:
+      FACTORY_MONGO_URL: ${FACTORY_MONGO_URL:-}
+      APP_SHARED_SECRET: ${APP_SHARED_SECRET:-}
+      PREMIUM_BACKEND_URL: http://backend:8080
+      IDX1M_DIR: /data/intraday/idx1m
+    depends_on:
+      - mongodb
+    volumes:
+      - intraday_data:/data/intraday:ro
+      - premium_data:/data/premium
+    restart: unless-stopped
+    mem_limit: 400m
+
   frontend:
     build:
       context: frontend
@@ -173,3 +193,4 @@ volumes:
   qdrantdata:
   mongodata:
   intraday_data:
+  premium_data:

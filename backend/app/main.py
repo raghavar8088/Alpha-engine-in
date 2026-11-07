@@ -1105,6 +1105,12 @@ try:
     app.include_router(_crypto_trading_routes.router)
 except Exception:  # noqa: BLE001
     logger.exception("could not mount the Crypto Trading API")
+# Premium Strategies paper desk, read-only (2026-11-07); a failure here must not stop the app.
+try:
+    from app.api.routes import premium_paper as _premium_paper_routes
+    app.include_router(_premium_paper_routes.router)
+except Exception:  # noqa: BLE001
+    logger.exception("could not mount the Premium Strategies paper API")
 # Reset buttons for the Intraday Stocks paper books, under each desk's own prefix
 app.include_router(book_resets.pattern_books_router)
 app.include_router(book_resets.live_intraday_router)

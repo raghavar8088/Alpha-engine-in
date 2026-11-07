@@ -103,6 +103,11 @@ _MODULES: list[Module] = [
        note="Two books on the same metal — MCX gold futures in rupees and Delta gold "
             "perpetuals in dollars. OFF stops new entries on BOTH; open positions are "
             "still managed to their target or stop."),
+    _m("premium_strategies", "Premium Strategies", "Trading", "/premium-strategies",
+       ["/api/premium-paper"],
+       note="52 research strategies, each paper trading its own Rs 10 lakh in its own container "
+            "(premium-paper). Paper only. OFF stops its cycles; a missed session is replayed "
+            "when it is switched back on, as far as its bars still exist."),
     _m("index_intraday", "Indian Index Intraday Trading", "Trading", "/index-intraday",
        ["/api/index-intraday"],
        note="Cash-market index intraday, paper only. OFF stops new paper entries, its Angel "

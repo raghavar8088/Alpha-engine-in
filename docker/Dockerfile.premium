@@ -1,0 +1,19 @@
+# Premium Strategies paper desk. Build context is the repo root, e.g.:
+#   docker build -f docker/Dockerfile.premium -t tradingai-premium .
+# It carries only the studies' strategy code and the app's index-minute cleaner, unchanged and at the same relative
+# paths as in the repo, so a paper trade comes from the code that produced the backtest. No broker client is installed.
+FROM python:3.12-slim
+
+ENV PYTHONUNBUFFERED=1
+ENV MALLOC_ARENA_MAX=2
+
+WORKDIR /app/premium-paper-service
+COPY premium-paper-service/requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY backend/research/booming_bulls_2026_11/bb_markets.py backend/research/booming_bulls_2026_11/bb_engine.py backend/research/booming_bulls_2026_11/bb_strategies.py /app/backend/research/booming_bulls_2026_11/
+COPY backend/research/youtube_top20_2026_11/yt_markets.py backend/research/youtube_top20_2026_11/yt_engine.py backend/research/youtube_top20_2026_11/yt_strategies.py backend/research/youtube_top20_2026_11/yt_ind.py /app/backend/research/youtube_top20_2026_11/
+COPY backend/app/services/index_intraday/data.py /app/backend/app/services/index_intraday/data.py
+COPY premium-paper-service/*.py ./
+
+CMD ["python", "main.py"]
