@@ -45,7 +45,7 @@ MONEY = {
     "VWAP": Money(**NSE_POOL),
 }
 ONE_LOT_MAX_RISK = 0.05         # a lot-sized market still takes 1 lot when that risks at most 5% of equity
-LABEL = {"NIFTY": "Nifty", "BANKNIFTY": "Bank Nifty", "XAUUSD": "Gold", "EURUSD": "EUR/USD", "GBPUSD": "GBP/USD",
+LABEL = {"NIFTY": "Nifty", "BANKNIFTY": "Bank Nifty", "XAUUSD": "Gold (Delta XAUTUSD)", "EURUSD": "EUR/USD", "GBPUSD": "GBP/USD",
          "NAS100": "Nasdaq 100", "AAPL": "Apple", "SPX500_D": "S&P 500 daily", "NAS100_D": "Nasdaq 100 daily",
          "NIFTY_D": "Nifty daily", "NSE15": "NSE stocks 15m", "NSE5": "NSE stocks 5m", "NSED": "NSE stocks daily",
          "VWAP": "NSE stocks 5m"}

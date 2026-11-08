@@ -4,8 +4,8 @@
                      today's finished minutes from the backend's index feed
   NSE stocks         the box's 5-minute store (/data/intraday/5m, read-only), plus today's closed bars from the backend
   EUR/USD, GBP/USD,  Yahoo 1-minute bars, kept in our own append-only store (a stored minute is never rewritten).
-  gold, Nasdaq 100,  Gold is COMEX front-month futures (GC=F), a stand-in for the spot gold the research used, with the
-  Apple              research's median spread. Nasdaq 100 is the cash index.
+  Nasdaq 100, Apple  Nasdaq 100 is the cash index. Silver (SI=F) is only CP-24's comparison market.
+  bitcoin, gold      Delta Exchange India's BTCUSD and XAUTUSD perpetuals, 1-minute candles (gold: the gold week only)
   S&P 500, Nasdaq    Yahoo daily bars, appended once each session has finished
   daily
   NSE stocks daily   the study's bhavcopy panel (seeded from research data), extended from NSE's daily bhavdata file
@@ -36,6 +36,8 @@ SESSION_ROWS = 375
 
 
 # ── the backend's live bars ──────────────────────────────────────────────────────────
+
+LIVE_LAST: dict = {}     # {feed: start of the last live bar that really arrived this cycle}, for the status page
 
 def today_bars(group: str) -> dict:
     """Today's finished bars held in the backend's memory. Empty if the backend cannot answer: the day's trades then
@@ -69,8 +71,15 @@ def index_market(name: str, since: date, live_rows, now: datetime):
     today, live_day = now.date(), None
     if live_rows and disk_last != today.isoformat():
         upto = min(SESSION_ROWS, now.hour * 60 + now.minute - (9 * 60 + 15))
+        minutes = {int(r[0]): tuple(float(x) for x in r[1:6]) for r in live_rows}
+        open_t = int(datetime(today.year, today.month, today.day, 9, 15, tzinfo=IST).timestamp())
+        real = [x for x in minutes if open_t <= x < open_t + 60 * SESSION_ROWS]
+        # The day runs to the last minute that really arrived, never further: a stalled feed stops the day instead of
+        # repeating its last price (with_today fills only the gaps before that minute, as the study's cleaner does).
+        upto = min(upto, (max(real) - open_t) // 60 + 1) if real else 0
+        if real:
+            LIVE_LAST[name] = max(real)
         if upto > 0:
-            minutes = {int(r[0]): tuple(float(x) for x in r[1:6]) for r in live_rows}
             d = II.with_today(d, minutes, today, upto)
             live_day = today.isoformat()
     dates = np.array(d.dates, dtype="datetime64[D]")
@@ -84,7 +93,8 @@ def index_market(name: str, since: date, live_rows, now: datetime):
 
 # ── Yahoo: 1-minute store ────────────────────────────────────────────────────────────
 
-YF = {"XAUUSD": "GC=F", "EURUSD": "6E=F", "GBPUSD": "6B=F", "NAS100": "NQ=F", "AAPL": "AAPL", "XAGUSD": "SI=F"}
+# gold is no longer read from Yahoo (GC=F): it comes from Delta Exchange (XAUTUSD), below
+YF = {"EURUSD": "6E=F", "GBPUSD": "6B=F", "NAS100": "NQ=F", "AAPL": "AAPL", "XAGUSD": "SI=F"}
 CASH = ("NAS100", "AAPL")                       # one regular session a day, by New York date
 GOLD_HALF = 0.18                                # the research's median half-spread on gold (Dukascopy quotes)
 MAX_DEV = {"XAUUSD": 0.03, "EURUSD": 0.015, "GBPUSD": 0.015, "NAS100": 0.05, "AAPL": 0.08, "XAGUSD": 0.05}
@@ -214,7 +224,9 @@ def slice_from(m, since: date):
         return None
     counts = (m.d1 - m.d0)[d:]
     key = np.repeat(m.date[d:].astype(np.int64), counts)
-    return BM._finish(m.name, m.t[a:], m.o[a:], m.h[a:], m.l[a:], m.c[a:], m.half[a:], m.vol[a:], key, False)
+    out = BM._finish(m.name, m.t[a:], m.o[a:], m.h[a:], m.l[a:], m.c[a:], m.half[a:], m.vol[a:], key, False)
+    out.cost = m.cost
+    return out
 
 
 def global_final_day(name: str, now: datetime | None = None) -> str:
@@ -483,6 +495,9 @@ class Panel:
             self.a = {k: z[k] for k in "ohlcv"}
         self.live = live or {}
         self.live_day = None
+        last = max((int(r[0]) for rows in self.live.values() for r in rows or []), default=None)
+        if last:
+            LIVE_LAST["NSE"] = last
         self.today_key = (now.date() - date(1970, 1, 1)).days
         if self.live and self.day_keys[-1] < self.today_key:
             self.live_day = now.date().isoformat()
@@ -575,16 +590,18 @@ def fear_greed() -> dict:
 # ── bitcoin from Delta Exchange (BTCUSD perpetual): 1-minute candles, plus the recorded order flow ─────
 
 DELTA_API = "https://api.india.delta.exchange"
-DELTA_STORE = "DELTA_BTCUSD"
+DELTA_STORES = {"BTCUSD": "DELTA_BTCUSD", "XAUTUSD": "DELTA_XAUTUSD"}
+DELTA_STORE = DELTA_STORES["BTCUSD"]
 # Delta India BTCUSD: 0.001 BTC a contract, tick $0.5, taker fee 0.05% + 18% GST = 0.059% a side; 2 bp of slippage
 DELTA_COST = YM.Cost(0.0, 0.0, 0.0, False, 1, pct_slip=0.0002, pct_comm=0.00059)
 DELTA_HALF = 0.5                                   # half a $1 spread
 
 
 def update_delta_candles(now_ts: int | None = None, symbol: str = "BTCUSD") -> dict:
-    """Append finished 1-minute candles of Delta's BTCUSD perpetual (the forming minute is never stored)."""
+    """Append finished 1-minute candles of a Delta India perpetual (BTCUSD, XAUTUSD); the forming minute is never stored."""
+    store = DELTA_STORES[symbol]
     now_ts = now_ts or int(time.time())
-    have = _read_cols(DELTA_STORE, _ym(now_ts - 60 * 86400), ("t",))[0]
+    have = _read_cols(store, _ym(now_ts - 60 * 86400), ("t",))[0]
     last = int(have[-1]) if len(have) else now_ts - 46 * 86400
     rows, start = [], last + 60
     while start < now_ts - 120:
@@ -608,7 +625,7 @@ def update_delta_candles(now_ts: int | None = None, symbol: str = "BTCUSD") -> d
     months = np.array([_ym(int(x)) for x in t])
     for ym in np.unique(months):
         m = months == ym
-        path = _month_file(DELTA_STORE, str(ym))
+        path = _month_file(store, str(ym))
         path.parent.mkdir(parents=True, exist_ok=True)
         cols = dict(t=t[m], o=a[m, 1], h=a[m, 2], l=a[m, 3], c=a[m, 4], v=a[m, 5])
         if path.exists():
@@ -638,3 +655,42 @@ def btc_market(since: date):
     m.half = np.full(len(m.t), DELTA_HALF)
     m.cost = DELTA_COST
     return m
+
+
+# ── gold from Delta Exchange: the XAUTUSD perpetual (Tether Gold, one token = one troy ounce) ─────
+# Delta India: contracts of 0.001 XAUT, tick $0.01, taker fee 0.01% + 18% GST a side. The book is tight (about $0.02 half
+# spread); $0.10 of slippage a fill is kept from the gold study. XAUTUSD trades every day, but the gold strategies follow
+# the gold market's week (Sunday 17:00 to Friday 17:00 New York), so weekend minutes are left out of their data.
+GOLD_DELTA_HALF = 0.02
+GOLD_DELTA_SLIP = 0.10
+GOLD_DELTA_FEE = 0.000118
+
+
+def gold_market(since: date):
+    t0 = int(datetime(since.year, since.month, since.day, tzinfo=timezone.utc).timestamp()) - 86400
+    t, o, h, l, c, v = _read_cols(DELTA_STORES["XAUTUSD"], _ym(t0), ("t", "o", "h", "l", "c", "v"))
+    keep = t >= t0
+    if not keep.any():
+        return None
+    t, o, h, l, c, v = (x[keep] for x in (t, o, h, l, c, v))
+    t = t.astype(np.int64)
+    ny = pd.to_datetime(t, unit="s", utc=True).tz_convert("America/New_York")
+    wd, hm = ny.weekday.to_numpy(), (ny.hour * 60 + ny.minute).to_numpy()
+    weekend = (wd == 5) | ((wd == 4) & (hm >= 17 * 60)) | ((wd == 6) & (hm < 17 * 60))
+    t, o, h, l, c, v = (x[~weekend] for x in (t, o, h, l, c, v))
+    mid = (o + c) / 2
+    sane = np.maximum(h / mid - 1, 1 - l / mid) <= MAX_DEV["XAUUSD"]      # a bad print would be a fake stop or target
+    t, o, h, l, c, v = (x[sane] for x in (t, o, h, l, c, v))
+    if not len(t):
+        return None
+    vol = np.where(v > 0, v, 1.0).astype(np.float32)
+    m = BM._finish("XAUUSD", t, o, h, l, c, np.full(len(t), GOLD_DELTA_HALF), vol, BM._ny_roll_key(t), False)
+    m.cost = BM.CostModel(None, GOLD_DELTA_SLIP, GOLD_DELTA_FEE * float(np.median(c[-1440:])))
+    return m
+
+
+def yt_cost(name: str):
+    """The YouTube engine's cost model for a market: gold on Delta's fee schedule, the others as the study set them."""
+    if name == "XAUUSD":
+        return YM.Cost(None, GOLD_DELTA_SLIP, 0.0, False, 1, pct_slip=0.0, pct_comm=GOLD_DELTA_FEE)
+    return YM.COSTS[name]

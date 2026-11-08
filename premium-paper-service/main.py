@@ -51,7 +51,7 @@ def interval_s(group: str) -> int:
     if group == "stocks":
         return 900 if session else 3600
     if group == "global":
-        return 600              # bitcoin (Delta Exchange) trades all week; on a closed forex weekend the other feeds just add nothing
+        return 120              # Delta Exchange (bitcoin, gold) every 2 minutes, all week; Yahoo is throttled to every 9 minutes inside
     return 3600
 
 

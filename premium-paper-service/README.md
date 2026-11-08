@@ -18,13 +18,38 @@ broker client and no broker credentials. None of these strategies passed its tes
 |---|---|---|
 | Nifty, Bank Nifty | `/data/intraday/idx1m` (read-only) through the app's cleaner, plus today's minutes from `/api/premium-paper/today-bars` | 5 min |
 | NSE stocks, intraday | `/data/intraday/5m` (read-only), plus today's bars from the same route | 15 min |
-| EUR/USD, GBP/USD, gold, Nasdaq 100, Apple | Yahoo 1-minute bars of 6E=F, 6B=F, GC=F, NQ=F (cash-market hours), AAPL, in our own append-only store | 10 min |
+| Bitcoin | Delta Exchange India: BTCUSD perpetual 1-minute candles (`/v2/history/candles`), plus the taker side of every trade from its websocket (`delta_flow.py`) | 2 min |
+| Gold | Delta Exchange India: XAUTUSD perpetual (Tether Gold) 1-minute candles, the gold week only (Sunday 17:00 to Friday 17:00 New York) | 2 min |
+| EUR/USD, GBP/USD, Nasdaq 100, Apple, silver | Yahoo 1-minute bars of 6E=F, 6B=F, NQ=F (cash-market hours), AAPL, SI=F, in our own append-only store | 9 min |
 | S&P 500, Nasdaq 100, Nifty daily | Yahoo ^GSPC and ^NDX daily; Nifty daily from the 1-minute store | hourly check |
 | NSE stocks, daily | seed panel from the study, extended from NSE's `sec_bhavdata_full` | hourly check, new after 19:00 IST |
 
 Why futures: Yahoo's spot forex 1-minute bars have no real high or low (100% zero-range minutes), and Dukascopy throttles this box (503s). Compared
 with the study's data on 10-16 Oct 2026, correlation of 5-minute changes: 6E 0.991, 6B 0.962, GC 0.995, NQ 1.000. Yahoo keeps about 30 days of
 1-minute bars, so a feed stopped for longer than that leaves a gap.
+
+Gold moved from Yahoo's GC=F to Delta's XAUTUSD on 8 Nov 2026, before its first paper day, so every gold trade is on Delta's prices
+and fees: 0.01% plus 18% GST a side, a $0.02 half spread and $0.10 of slippage a fill (the gold study's slippage).
+
+## Market segments and status
+
+After every cycle `segments.py` adds to the status document (`premium_meta` "status") what the page's market tabs show: Indian Market
+(Options & F&O, Equity intraday, Equity daily), Crypto, Gold, and Forex & US.
+
+- `feeds`: each feed's source, instrument, last real bar and price, and its state (live / closed / stale / no data) with the reason. The
+  state is worked out again at every refresh from the time of the last bar, so a feed that stops shows as stale within minutes; a book on
+  a stale or closed feed does not trade, and nothing is substituted for the missing price. The index's live day now ends at the last
+  minute that really arrived (it used to be filled flat up to the clock).
+- `recorder`: Delta's trade-feed recorder (connected, recording since, last message), written by `delta_flow.py` every 20 seconds.
+- `books`: every book's state and its reason: waiting for its start, market closed, stale data, in a trade, or live; for a live book
+  whose latest setup was not taken, the engine's own reason (the book is replayed without that setup, and the reject count that changes
+  names it).
+- `segments`: each segment's totals, its latest 40 closed trades and its open positions.
+
+The live day: a market's forced-exit row for today (bitcoin 23:55 UTC, gold 16:55 New York) does not exist until that time arrives,
+and the engines rejected every setup of the day as "after_forced_exit" until then. `runner.live_k_end` uses the last bar so far
+instead, so a setup is taken when it happens and its trade stays open until its exit. Checks: `python -I test_segments.py`
+(it needs `mongomock` importable; a temporary data folder and an in-memory database, so the real desk is never touched).
 
 ## Ledger
 

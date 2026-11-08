@@ -14,10 +14,15 @@ import { day, inr, num, pct, tone } from "./format";
 import LibraryCards, { PaperLine } from "./LibraryCards";
 import PaperDesk, { SOURCE_LABEL, usePaperSummary, type Account } from "./PaperDesk";
 import Sel15Nifty50 from "./Sel15Nifty50";
+import Segments from "./Segments";
 
-type Tab = "paper" | "strategies" | "results" | "november" | "daily" | "method";
+type Tab = "indian" | "crypto" | "gold" | "global" | "paper" | "strategies" | "results" | "november" | "daily" | "method";
 const TABS: { id: Tab; label: string }[] = [
-  { id: "paper", label: "Paper trading" },
+  { id: "indian", label: "Indian Market" },
+  { id: "crypto", label: "Crypto" },
+  { id: "gold", label: "Gold" },
+  { id: "global", label: "Forex & US" },
+  { id: "paper", label: "All accounts" },
   { id: "strategies", label: "Strategies" },
   { id: "results", label: "VWAP results" },
   { id: "november", label: "VWAP November" },
@@ -116,7 +121,7 @@ function Curve({ v }: { v: Version }) {
 }
 
 export default function PremiumStrategiesPage() {
-  const [tab, setTab] = useState<Tab>("paper");
+  const [tab, setTab] = useState<Tab>("indian");
   const [tradeFilter, setTradeFilter] = useState<string>("ALL");
   const [libSource, setLibSource] = useState<string>("all");
   const { summary, error } = usePaperSummary();
@@ -162,6 +167,9 @@ export default function PremiumStrategiesPage() {
       </div>
 
       {tab === "paper" && <PaperDesk summary={summary} error={error} />}
+      {(tab === "indian" || tab === "crypto" || tab === "gold" || tab === "global") && (
+        <Segments key={tab} market={tab} summary={summary} error={error} />
+      )}
 
       {tab === "strategies" && (
         <>
@@ -502,8 +510,8 @@ export default function PremiumStrategiesPage() {
             </li>
             <li>
               <b>Data.</b> Nifty, Bank Nifty and NSE stocks come from the app&apos;s Angel One feed, refreshed about every 5 and 15 minutes. Daily stock data comes from NSE&apos;s
-              daily file. Forex, gold, silver, the Nasdaq and Apple use Yahoo 1-minute bars, refreshed about every 10 minutes, and S&amp;P 500 and Nasdaq daily bars also come from Yahoo.
-              Bitcoin comes from Delta Exchange.
+              daily file. Bitcoin and gold come from Delta Exchange India (the BTCUSD and XAUTUSD perpetuals, 1-minute candles, read every 2 minutes).
+              Forex, silver, the Nasdaq and Apple use Yahoo 1-minute bars, refreshed about every 9 minutes, and S&amp;P 500 and Nasdaq daily bars also come from Yahoo.
             </li>
             <li>
               <b>Stand-ins, where the live feed differs from the test.</b> Yahoo&apos;s spot forex bars have no real high or low, so EUR/USD and GBP/USD use CME currency futures,

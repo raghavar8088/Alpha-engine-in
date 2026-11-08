@@ -153,25 +153,32 @@ def run_stocks(db, now: datetime) -> dict:
 
 # ── forex, gold, US ──────────────────────────────────────────────────────────────────
 
+YAHOO_EVERY_S = 540      # the cycle runs every 2 minutes for Delta Exchange; Yahoo is asked at most every 9 minutes
+
+
 def run_global(db, now: datetime) -> dict:
     new, errors = {}, {}
-    for name in F.YF:
+    yahoo_due = time.time() - float((db.premium_meta.find_one({"_id": "yahoo_at"}) or {}).get("t") or 0) >= YAHOO_EVERY_S
+    for name in (F.YF if yahoo_due else ()):
         try:
             new[name] = F.update_minutes(name)["new"]
         except Exception as exc:  # noqa: BLE001 - a market that cannot be fetched just waits for the next cycle
             errors[f"feed {name}"] = str(exc)[:200]
         time.sleep(0.5)
+    for _sym, _mk in (("BTCUSD", "BTCUSD"), ("XAUTUSD", "XAUUSD")):
+        try:
+            new[_mk] = F.update_delta_candles(symbol=_sym)["new"]
+        except Exception as exc:  # noqa: BLE001
+            errors[f"feed {_mk}"] = str(exc)[:200]
     try:
-        new["BTCUSD"] = F.update_delta_candles()["new"]
-    except Exception as exc:  # noqa: BLE001
-        errors["feed BTCUSD"] = str(exc)[:200]
-    try:
-        rates = F.usdinr()
+        rates = F.usdinr() if yahoo_due else None
         if rates:
             db.premium_meta.update_one({"_id": "fx"}, {"$set": {f"rates.{k}": v for k, v in rates.items()}}, upsert=True)
     except Exception as exc:  # noqa: BLE001
         errors["usdinr"] = str(exc)[:200]
-    sig = "|".join(f"{n}:{F.last_minute(n)}" for n in sorted(F.YF) + [F.DELTA_STORE]) + "|" + "|".join(F.global_final_day(n) for n in ("EURUSD", "NAS100"))
+    if yahoo_due:
+        db.premium_meta.update_one({"_id": "yahoo_at"}, {"$set": {"t": time.time()}}, upsert=True)
+    sig = "|".join(f"{n}:{F.last_minute(n)}" for n in sorted(F.YF) + sorted(F.DELTA_STORES.values())) + "|" + "|".join(F.global_final_day(n) for n in ("EURUSD", "NAS100"))
     if sig == L.signature(db, "global"):
         return {"skipped": "no new bars", "errors": errors}
     if now.date() < min(PAPER_START - timedelta(days=1), BTC_START_DATE):
@@ -180,8 +187,8 @@ def run_global(db, now: datetime) -> dict:
     books = [(a, mk, v, R.is_overnight(a.id, mk)) for a, mk, v in C.books_in("global")]
     n_docs, touched = 0, set()
     fixed_since = PAPER_START - timedelta(days=GLOBAL_WARM_DAYS)
-    for name in F.YF:
-        full = F.global_market(name, fixed_since)
+    for name in list(F.YF) + ["XAUUSD"]:
+        full = F.gold_market(fixed_since) if name == "XAUUSD" else F.global_market(name, fixed_since)
         if full is None:
             continue
         final = F.global_final_day(name)
@@ -190,7 +197,7 @@ def run_global(db, now: datetime) -> dict:
         mine = [b for b in books if b[1] == name]
         firsts = [replay_from(db, a.id, name, False) for a, _, _, on in mine if not on]
         recent = F.slice_from(full, min(firsts) - timedelta(days=GLOBAL_WARM_DAYS)) if firsts else None
-        ym_full, ym_recent = YM._as_mkt(full, name, name, YM.COSTS[name]), YM._as_mkt(recent, name, name, YM.COSTS[name]) if recent is not None else None
+        ym_full, ym_recent = YM._as_mkt(full, name, name, F.yt_cost(name)), YM._as_mkt(recent, name, name, F.yt_cost(name)) if recent is not None else None
         c_full, c_recent = {}, {}
         for a, _, v, on in mine:
             m = full if on else recent
@@ -261,7 +268,7 @@ def run_daily(db, now: datetime) -> dict:
     lasts = {k: str(v.date[-1]) if v is not None else None for k, v in idx.items()}
     sig = f"{lasts}|{info['nse'].get('last')}|btc{F.last_minute('BTCUSD') // 3600}"
     if sig == L.signature(db, "daily"):
-        return {**info, "skipped": "no new sessions"}
+        return {**info, "skipped": "no new sessions", "lasts": lasts}
     if now.date() < PAPER_START:
         L.set_signature(db, "daily", sig)
         return {**info, "waiting_for": PAPER_START.isoformat(), "lasts": lasts}
@@ -330,6 +337,8 @@ def main(group: str) -> int:
         info = GROUPS[group](db, now_ist())
         info["peak_mb"] = round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024)
         L.note_cycle(db, group, True, time.time() - t0, info)
+        import segments as SG
+        SG.refresh(db, group, info)
         log.info("%s done in %.1fs: %s", group, time.time() - t0, info)
         return 0
     except Exception as exc:  # noqa: BLE001

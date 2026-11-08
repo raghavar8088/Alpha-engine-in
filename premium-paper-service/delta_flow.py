@@ -78,6 +78,17 @@ class Recorder:
         return len(rows)
 
 
+def _status(rec: "Recorder", connected: bool, last_msg: float | None, error: str | None = None) -> None:
+    try:
+        OUT.parent.mkdir(parents=True, exist_ok=True)
+        tmp = OUT.parent / "status.json.tmp"
+        tmp.write_text(json.dumps({"connected": connected, "since": rec.covered_from, "last_msg_t": int(last_msg) if last_msg else None,
+                                   "written_to": rec.written_to, "error": error, "at": int(time.time())}))
+        tmp.replace(OUT.parent / "status.json")
+    except Exception:  # noqa: BLE001
+        pass
+
+
 def run_forever() -> None:
     import websocket          # websocket-client
 
@@ -96,10 +107,14 @@ def run_forever() -> None:
             ws.settimeout(SILENCE_S)
             ws.send(json.dumps({"type": "enable_heartbeat"}))
             ws.send(json.dumps({"type": "subscribe", "payload": {"channels": [{"name": "all_trades", "symbols": [SYMBOL]}]}}))
+            last_status = 0.0
             while True:
                 msg = json.loads(ws.recv())
                 now = time.time()
                 kind = msg.get("type")
+                if now - last_status >= 20:
+                    _status(rec, rec.covered_from is not None, now)
+                    last_status = now
                 if kind == "subscriptions" and rec.covered_from is None:
                     rec.connected(now)
                     log.info("delta trade feed connected; minutes recorded from %s", time.strftime("%H:%M:%S", time.gmtime(rec.covered_from)))
@@ -111,6 +126,7 @@ def run_forever() -> None:
                 rec.flush(now)
         except Exception as exc:  # noqa: BLE001 - any failure: drop the partial minute, reconnect
             log.warning("delta trade feed: %s; reconnecting", str(exc)[:200])
+            _status(rec, False, None, str(exc)[:200])
         finally:
             rec.lost()
             try:

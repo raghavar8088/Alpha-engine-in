@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import copy
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 
 import numpy as np
 
@@ -37,7 +38,10 @@ def run_bb(sid: str, variant: str, m, cache: dict, other=None) -> tuple[list, di
         B = _bars(m, (bb15.TF,), cache)
         ex = BE.Exits(**bb15.EXITS)
         clock, minute = bb15.EXIT_CLOCK
-        return BE.run_book(BE.Engine(m), bb15.signals(m, B), ex, bb15.LIMITS, BE.forced_exit_rows(m, clock, minute), sid, variant)
+        S, eng, ke = bb15.signals(m, B), BE.Engine(m), live_k_end(m, BE.forced_exit_rows(m, clock, minute))
+        tr, rej = BE.run_book(eng, S, ex, bb15.LIMITS, ke, sid, variant)
+        note_signals(f"{sid}|{m.name}", m, S, tr, rej, lambda S2: BE.run_book(eng, S2, ex, bb15.LIMITS, ke, sid, variant))
+        return tr, rej
     st = BS.STRATEGIES[sid]
     v = next(x for x in st.variants if x.tag == variant)
     tfs = set(st.tfs) | {v.sig.get("tf", st.base_sig.get("tf", st.tfs[0]))}
@@ -47,7 +51,10 @@ def run_bb(sid: str, variant: str, m, cache: dict, other=None) -> tuple[list, di
     S = BS.signals(st, m, B, v.sig, other)
     ex = BS.exits_for(v, B)
     clock, minute = st.exit_clock[m.name]
-    return BE.run_book(BE.Engine(m), S, ex, st.limits, BE.forced_exit_rows(m, clock, minute), sid, variant)
+    eng, ke = BE.Engine(m), live_k_end(m, BE.forced_exit_rows(m, clock, minute))
+    tr, rej = BE.run_book(eng, S, ex, st.limits, ke, sid, variant)
+    note_signals(f"{sid}|{m.name}", m, S, tr, rej, lambda S2: BE.run_book(eng, S2, ex, st.limits, ke, sid, variant))
+    return tr, rej
 
 
 def run_yt(sid: str, variant: str, market: str, m, cache: dict) -> tuple[list, dict]:
@@ -66,7 +73,11 @@ def run_yt(sid: str, variant: str, market: str, m, cache: dict) -> tuple[list, d
         return [], {}
     ex = YS.exits_for(st, v, m, B)
     clock, minute = st.exit_clock[market]
-    return YE.run_book(YE.Engine(m), S, ex, st.limits, YE.forced_exit_rows(m, clock, minute), sid, variant)
+    eng, ke = YE.Engine(m), live_k_end(m, YE.forced_exit_rows(m, clock, minute))
+    tr, rej = YE.run_book(eng, S, ex, st.limits, ke, sid, variant)
+    note_signals(f"{sid}|{market}", m, S, tr, rej,
+                 None if market in POOLS else (lambda S2: YE.run_book(eng, S2, ex, st.limits, ke, sid, variant)))
+    return tr, rej
 
 
 def run_cp(sid: str, market: str, m, cache: dict, other=None) -> tuple[list, dict]:
@@ -80,7 +91,10 @@ def run_cp(sid: str, market: str, m, cache: dict, other=None) -> tuple[list, dic
     if not S:
         return [], {}
     clock, minute = st.exit_clock[market]
-    return YE.run_book(YE.Engine(m), S, CS.exits_for(st), st.limits, YE.forced_exit_rows(m, clock, minute), sid, "V0")
+    eng, ex, ke = YE.Engine(m), CS.exits_for(st), live_k_end(m, YE.forced_exit_rows(m, clock, minute))
+    tr, rej = YE.run_book(eng, S, ex, st.limits, ke, sid, "V0")
+    note_signals(f"{sid}|{market}", m, S, tr, rej, lambda S2: YE.run_book(eng, S2, ex, st.limits, ke, sid, "V0"))
+    return tr, rej
 
 
 def fear_greed_docs(acct: str, fng: dict, btc, start: str, cost_pct: float = 0.0007) -> list[dict]:
@@ -144,3 +158,61 @@ def take_slots(docs: list[dict], max_open: int) -> list[dict]:
             taken.append(d)
             busy.append(d["exit_t"])            # None: still open
     return taken
+
+
+# ── the live day, and each book's latest setup ──────────────────────────────────────────
+
+LAST_SIGNALS: dict = {}
+WHY = {"position_open": "a trade was already open", "day_closed": "the day was already closed by a stop or a target",
+       "day_limit": "the day's trade limit was reached", "needs_prior_stop": "a second trade needs a stop first",
+       "after_forced_exit": "too close to the session's end", "no_row_left": "no bar was left to fill on",
+       "stop_entry_not_triggered": "its entry order did not trigger", "stop_entry_expired": "its entry order expired",
+       "limit_not_filled": "its limit order was not filled", "limit_expired": "its limit order expired",
+       "entry_beyond_stop": "price opened beyond the stop", "entry_beyond_target": "price opened beyond the target",
+       "oco_both_same_row": "both entry orders triggered in the same minute"}
+
+
+def live_k_end(m, f):
+    """The study's forced exit per day, except that the last, still-running day has no exit row until its session end
+    arrives: there the last bar so far is the end, so its setups are taken and its trades stay open."""
+    last_day = m.n_days - 1
+    end = int(m.d1[last_day] - 1) if m.n_days else -1
+
+    def k_end(d):
+        r = f(d)
+        return end if (r is None and d == last_day) else r
+    return k_end
+
+
+POOLS = {"NSE15", "NSE5", "NSED", "MIRROR15", "VWAP"}     # one book over many stocks, run one stock at a time
+
+
+def note_signals(key: str, m, signals, trades, rejects, rerun=None) -> None:
+    """For the status page: a book's setups on the market's latest day, and what became of the latest one. The reason
+    is the engine's own: the book is run once more without that setup, and the reject count that changes names it.
+    A pool of stocks is run one stock at a time: its counts add up and it has no single reason."""
+    try:
+        prev = LAST_SIGNALS.get(key)
+        if not len(m.t) or not m.n_days or not signals:
+            if prev is None:
+                LAST_SIGNALS[key] = {"n_today": 0, "last_t": None, "today": False, "taken": None, "why": None}
+            return
+        last_day = m.n_days - 1
+        i = max(range(len(signals)), key=lambda j: (signals[j].k, j))
+        s = signals[i]
+        info = {"n_today": sum(1 for x in signals if x.day == last_day), "last_t": int(m.t[min(s.k, len(m.t) - 1)]),
+                "today": bool(s.day == last_day), "taken": None, "why": None}
+        if prev is not None:
+            info["n_today"] += prev.get("n_today") or 0
+            if (prev.get("last_t") or 0) > info["last_t"]:
+                info["last_t"], info["today"] = prev["last_t"], prev.get("today")
+            info["pool"] = True
+        elif info["today"] and rerun is not None:
+            tr0, rej0 = rerun(signals[:i] + signals[i + 1:])
+            info["taken"] = len(trades) > len(tr0)
+            if not info["taken"]:
+                grew = [k for k, n in rejects.items() if n > rej0.get(k, 0)]
+                info["why"] = WHY.get(grew[0], grew[0]) if grew else None
+        LAST_SIGNALS[key] = info
+    except Exception:  # noqa: BLE001 - a status note must never stop a book
+        pass
