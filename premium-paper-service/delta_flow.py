@@ -117,6 +117,8 @@ def run_forever() -> None:
                     last_status = now
                 if kind == "subscriptions" and rec.covered_from is None:
                     rec.connected(now)
+                    _status(rec, True, now)
+                    last_status = now
                     log.info("delta trade feed connected; minutes recorded from %s", time.strftime("%H:%M:%S", time.gmtime(rec.covered_from)))
                 elif kind == "all_trades" and msg.get("symbol") == SYMBOL:
                     buyer = msg.get("buyer_role") == "taker"
