@@ -70,6 +70,7 @@ def run_yt(sid: str, variant: str, market: str, m, cache: dict) -> tuple[list, d
     B = _bars(m, sorted(tfs), cache)
     S = st.fn(m, B, v.sig)
     if not S:
+        note_signals(f"{sid}|{market}", m, S, [], {})
         return [], {}
     ex = YS.exits_for(st, v, m, B)
     clock, minute = st.exit_clock[market]
@@ -80,15 +81,19 @@ def run_yt(sid: str, variant: str, market: str, m, cache: dict) -> tuple[list, d
     return tr, rej
 
 
-def run_cp(sid: str, market: str, m, cache: dict, other=None) -> tuple[list, dict]:
+def run_cp(sid: str, market: str, m, cache: dict, other=None, since_t: int | None = None) -> tuple[list, dict]:
     """A Crypto-playlist strategy (backend/research/crypto_playlist_2026_11) through the YouTube study's engine.
-    `other` is the companion market of CP-24 (SMT divergence), already cut to the same span."""
+    `other` is the companion market of CP-24 (SMT divergence), already cut to the same span. `since_t`: a book that
+    starts mid-session starts flat, so only setups whose entry bar opens at or after it can trade."""
     st = CS.STRATEGIES[sid]
     tfs = CS.tfs_of(st, market)
     B = _bars(m, tfs, cache)
     o = (other, {tf: BM.bars(other, tf) for tf in tfs}) if other is not None else None
     S = CS.signals(st, market, m, B, cache, o)
+    if since_t is not None:
+        S = [s for s in S if int(m.t[min(s.k + 1, len(m.t) - 1)]) >= since_t]
     if not S:
+        note_signals(f"{sid}|{market}", m, S, [], {})
         return [], {}
     clock, minute = st.exit_clock[market]
     eng, ex, ke = YE.Engine(m), CS.exits_for(st), live_k_end(m, YE.forced_exit_rows(m, clock, minute))

@@ -78,6 +78,11 @@ check("the live-day rule takes it", len(tr_new) == 1, rej_new)
 docs = R.docs_from(tr_new, bm, "T", "BTCUSD", False, str(bm.date[last_day]))
 check("and it stays open, marked at the last bar", docs and docs[0]["open"] and docs[0]["last"] == float(bm.c[last]), docs[:1])
 check("a finished day keeps its own exit row", new_k_end(last_day - 1) == old_k_end(last_day - 1) is not None)
+since = int(bm.t[int(bm.d0[last_day])]) + 6 * 3600          # a book starting at 06:00 UTC today starts flat
+for sid in ("CP-01", "CP-02", "CP-04"):
+    tr_s, _ = R.run_cp(sid, "BTCUSD", bm, {}, since_t=since)
+    check(f"{sid}: a book that starts mid-session trades only setups from its start", all(int(bm.t[x.entry_k]) >= since for x in tr_s)
+          and f"{sid}|BTCUSD" in R.LAST_SIGNALS, len(tr_s))
 # the engine's own reason for an untaken setup: a second setup while the first is still open
 sig2 = YE.Signal(day=last_day, k=k + 10, side=1, stop=float(bm.c[k + 10]) * 0.5, setup="test2")
 R.LAST_SIGNALS.pop("T|BTCUSD", None)

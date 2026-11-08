@@ -230,7 +230,7 @@ def run_global(db, now: datetime) -> dict:
             for a, _, v, _ in btc_books:
                 start = _btc_replay_from(db, a.id)
                 try:
-                    tr, _ = R.run_cp(a.id, "BTCUSD", bm, cache)
+                    tr, _ = R.run_cp(a.id, "BTCUSD", bm, cache, since_t=BTC_START_T)
                     docs = [d for d in R.docs_from(tr, bm, a.id, "BTCUSD", False, live_day)
                             if d["date"] >= start.isoformat() and d["entry_t"] >= BTC_START_T]
                     n_docs += L.persist(db, a.id, "BTCUSD", docs, start.isoformat(), final, False)

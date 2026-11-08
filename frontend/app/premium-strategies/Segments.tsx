@@ -222,9 +222,11 @@ function SegmentView({ seg, summary, now }: { seg: SegId; summary: Summary; now:
   const tot = status.segments?.[seg];
   const [filter, setFilter] = useState<"all" | "active" | "idle">("all");
   const [openKey, setOpenKey] = useState<string | null>(null);
-  const detailRef = useRef<HTMLTableRowElement>(null);
+  // The book's trades open in a panel above the table, never as an extra table row: the app's SortableTables
+  // reorders every row of a tbody, which would carry a detail row away from its strategy.
+  const detailRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (openKey) detailRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    if (openKey) detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [openKey]);
   const byId = useMemo(() => {
     const m: Record<string, Account> = {};
@@ -245,6 +247,7 @@ function SegmentView({ seg, summary, now }: { seg: SegId; summary: Summary; now:
   const pnl = (tot?.pnl ?? 0);
   const winRate = tot && tot.closed ? (100 * tot.wins) / tot.closed : null;
   const states = Object.entries(tot?.states ?? {}).sort((a, b) => (STATE[a[0]]?.rank ?? 9) - (STATE[b[0]]?.rank ?? 9));
+  const opened = rows.find((r) => `${r.id}|${r.b.mkt}` === openKey) ?? null;
 
   return (
     <div className="sg-seg">
@@ -279,6 +282,16 @@ function SegmentView({ seg, summary, now }: { seg: SegId; summary: Summary; now:
         <div className="pd-tile"><span className="ps-stat-label">Open positions</span><span className="pd-tile-val">{tot?.open ?? 0}</span><span className="pd-tile-sub">marked to the last bar</span></div>
       </div>
 
+      {opened && (
+        <div ref={detailRef} className="pd-selected">
+          <GlassPanel title={`${opened.id} ${opened.acct?.name ?? ""} · ${opened.b.market}`} note={opened.acct?.channel ?? ""}>
+            <button className="ps-chip pd-close" onClick={() => setOpenKey(null)}>Close</button>
+            <div className="sg-open-state"><Pill state={opened.b.state} /><span>{opened.b.reason}</span></div>
+            <BookTrades acct={opened.id} mkt={opened.b.mkt} positions={tot?.positions ?? []} />
+          </GlassPanel>
+        </div>
+      )}
+
       <GlassPanel title="Strategies" note="click a row for its trades">
         <div className="ps-chips">
           {(["all", "active", "idle"] as const).map((k) => (
@@ -293,10 +306,10 @@ function SegmentView({ seg, summary, now }: { seg: SegId; summary: Summary; now:
             <table className="ps-table sg-table">
               <thead><tr><th>Strategy</th><th>Market</th><th>Status</th><th>Trades</th><th>Win rate</th><th>P&amp;L</th><th>Open</th></tr></thead>
               <tbody>
-                {shown.flatMap(({ acct, id, b }) => {
+                {shown.map(({ acct, id, b }) => {
                   const key = `${id}|${b.mkt}`;
                   const isOpen = openKey === key;
-                  const out = [
+                  return (
                     <tr key={key} className={`pd-row${isOpen ? " on" : ""}`} onClick={() => setOpenKey(isOpen ? null : key)}>
                       <td>
                         <button className="pd-name" aria-expanded={isOpen} onClick={(e) => { e.stopPropagation(); setOpenKey(isOpen ? null : key); }}>
@@ -310,16 +323,8 @@ function SegmentView({ seg, summary, now }: { seg: SegId; summary: Summary; now:
                       <td>{b.closed ? `${((100 * b.wins) / b.closed).toFixed(1)}%` : "—"}</td>
                       <td className={tone(b.pnl)}>{b.trades ? inr(b.pnl) : "—"}</td>
                       <td>{b.open || "—"}</td>
-                    </tr>,
-                  ];
-                  if (isOpen) {
-                    out.push(
-                      <tr key={`${key}-d`} ref={detailRef} className="sg-detail-row">
-                        <td colSpan={7}><BookTrades acct={id} mkt={b.mkt} positions={tot?.positions ?? []} /></td>
-                      </tr>,
-                    );
-                  }
-                  return out;
+                    </tr>
+                  );
                 })}
               </tbody>
             </table>
@@ -414,8 +419,7 @@ export default function Segments({ market, summary, error }: { market: MarketTab
         .sg-table th:nth-child(2), .sg-table th:nth-child(3) { text-align: left; }
         .sg-status { text-align: left !important; white-space: normal !important; min-width: 240px; max-width: 420px; }
         .sg-why { margin-top: 4px; font-size: 11.5px; line-height: 1.45; color: var(--text-muted); }
-        .sg-detail-row > td { background: var(--canvas-soft); white-space: normal !important; text-align: left !important; }
-        .sg-detail-row:hover > td { background: var(--canvas-soft) !important; }
+        .sg-open-state { display: flex; align-items: flex-start; gap: 10px; font-size: 12.5px; line-height: 1.5; color: var(--text-muted); margin-bottom: 10px; }
         .sg-book-detail { display: flex; flex-direction: column; gap: 10px; padding: 4px 0; }
         @media (max-width: 640px) {
           .sg-status { min-width: 200px; }
