@@ -15,6 +15,11 @@ COPY backend/research/booming_bulls_2026_11/bb_markets.py backend/research/boomi
 COPY backend/research/youtube_top20_2026_11/yt_markets.py backend/research/youtube_top20_2026_11/yt_engine.py backend/research/youtube_top20_2026_11/yt_strategies.py backend/research/youtube_top20_2026_11/yt_ind.py /app/backend/research/youtube_top20_2026_11/
 COPY backend/research/crypto_playlist_2026_11/cp_markets.py backend/research/crypto_playlist_2026_11/cp_strategies.py /app/backend/research/crypto_playlist_2026_11/
 COPY backend/app/services/index_intraday/data.py /app/backend/app/services/index_intraday/data.py
+# The liquidity-sweep books run the app's own strategy classes (liquidity_sweep.py): the shared domain/contracts package and
+# the three strategy files they import. These are not the library's package __init__s, which import every strategy.
+COPY shared/tradingai_shared /app/shared/tradingai_shared
+COPY strategy-service/strategy_service/indicators.py /app/strategy-service/strategy_service/indicators.py
+COPY strategy-service/strategy_service/strategies/options_buying/_base.py strategy-service/strategy_service/strategies/options_buying/booming_bulls.py strategy-service/strategy_service/strategies/options_buying/booming_bulls_sweep_versions.py /app/strategy-service/strategy_service/strategies/options_buying/
 COPY premium-paper-service/*.py ./
 
 CMD ["python", "main.py"]

@@ -70,6 +70,9 @@ def run_index(db, now: datetime) -> dict:
         try:
             if a.source == C.BB:
                 tr, _ = R.run_bb(a.id, v, m, caches[market], other if a.id == "BB-03" else None)
+            elif a.source == C.LS:
+                import liquidity_sweep as LSW          # here, so the other groups never load the strategy classes
+                tr = LSW.run(v, market, m, start, caches[market])
             else:
                 tr, _ = R.run_yt(a.id, v, market, yt_m[market], caches[market])
             n_docs += _save_book(db, a, market, tr, m, False, start, final, live_day)

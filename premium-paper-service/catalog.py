@@ -160,6 +160,41 @@ for _sid, _name, _mkts in (
 ):
     ACCOUNTS.append(_a(_sid, CP, _name, _CPC, *[(_m, "V0") for _m in _mkts]))
 ACCOUNTS.append(_a("CP-29", CP, "Fear & Greed accumulation", _CPC, ("BTC_SPOT", "V0")))
+# Booming Bulls' liquidity-sweep video (backend/research/liquidity_sweep_2026_11), written as the app's strategy
+# bb_liquidity_sweep (D9), plus its 22 one-change versions and three of the study's research-only runs. All were
+# pre-registered and backtested; none passed. The variant is the study's version id, and liquidity_sweep.py runs the
+# app's own strategy classes.
+LS = "liquidity_sweep"
+_LSC = "Booming Bulls (Liquidity Sweep video)"
+for _sid, _name, _mkt, _ver in (
+    ("LS-00", "Original (D9): sweep a level, close back inside", "NIFTY", "v00"),
+    ("LS-01", "Levels: previous-day high/low only", "NIFTY", "v01"),
+    ("LS-02", "Levels: previous-day close only", "NIFTY", "v02"),
+    ("LS-03", "Levels: equal highs/lows only", "NIFTY", "v03"),
+    ("LS-04", "Levels: 1-hour swings only", "NIFTY", "v04"),
+    ("LS-05", "Levels: plus round numbers", "NIFTY", "v05"),
+    ("LS-06", "Wick sweeps only", "NIFTY", "v06"),
+    ("LS-07", "Strong rejection candle", "NIFTY", "v07"),
+    ("LS-08", "Next-candle confirmation", "NIFTY", "v08"),
+    ("LS-09", "Retest-and-reject entry", "NIFTY", "v09"),
+    ("LS-10", "Market-structure shift entry", "NIFTY", "v10"),
+    ("LS-11", "Target 1:1", "NIFTY", "v11"),
+    ("LS-12", "Target 1:3", "NIFTY", "v12"),
+    ("LS-13", "Breakeven at +1R", "NIFTY", "v13"),
+    ("LS-14", "Target: the opposite liquidity", "NIFTY", "v14"),
+    ("LS-15", "No target: stop or 15:15", "NIFTY", "v15"),
+    ("LS-16", "200-EMA side filter", "NIFTY", "v16"),
+    ("LS-17", "Big sweeps only", "NIFTY", "v17"),
+    ("LS-18", "Morning only", "NIFTY", "v18"),
+    ("LS-19", "Afternoon only", "NIFTY", "v19"),
+    ("LS-20", "One trade a day", "NIFTY", "v20"),
+    ("LS-21", "Breakout and retest (the video's other entry)", "NIFTY", "v21"),
+    ("LS-22", "Full video: sweeps and breakout-retests", "NIFTY", "v22"),
+    ("LS-R1", "Original on 15-minute candles", "NIFTY", "r1"),
+    ("LS-R2", "Original on 3-minute candles", "NIFTY", "r2"),
+    ("LS-R3", "Original on Bank Nifty", "BANKNIFTY", "r3"),
+):
+    ACCOUNTS.append(_a(_sid, LS, _name, _LSC, (_mkt, _ver)))
 BY_ID = {a.id: a for a in ACCOUNTS}
 
 

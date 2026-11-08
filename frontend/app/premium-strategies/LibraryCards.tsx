@@ -85,7 +85,7 @@ function Card({ s, account }: { s: LibStrategy; account?: Account }) {
   );
 }
 
-export default function LibraryCards({ source, accounts }: { source: "booming_bulls" | "youtube_top20" | "crypto_playlist"; accounts: Record<string, Account> }) {
+export default function LibraryCards({ source, accounts }: { source: "booming_bulls" | "youtube_top20" | "crypto_playlist" | "liquidity_sweep"; accounts: Record<string, Account> }) {
   return (
     <div className="ps-cards">
       {LIBRARY.filter((s) => s.source === source).map((s) => <Card key={s.id} s={s} account={accounts[s.id]} />)}

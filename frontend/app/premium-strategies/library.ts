@@ -5,7 +5,7 @@
 export type LibRule = { label: string; text: string };
 export type LibBook = { market: string; variant: string; change: string; cls: string; n: number | null; meanR: number | null;
   grossR: number | null; winRate: number | null };
-export type LibStrategy = { id: string; source: "booming_bulls" | "youtube_top20" | "crypto_playlist"; name: string; channel: string; videos: string[];
+export type LibStrategy = { id: string; source: "booming_bulls" | "youtube_top20" | "crypto_playlist" | "liquidity_sweep"; name: string; channel: string; videos: string[];
   verdict: string; books: LibBook[]; rules: LibRule[] };
 
 export const LIBRARY: LibStrategy[] = [
@@ -3599,6 +3599,1566 @@ export const LIBRARY: LibStrategy[] = [
    {
     "label": "Account",
     "text": "the Rs 10 lakh is invested 40 buys at a time; what is not yet invested stays as cash."
+   }
+  ]
+ },
+ {
+  "id": "LS-00",
+  "source": "liquidity_sweep",
+  "name": "Original (D9): sweep a level, close back inside",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v00",
+    "change": "The original, as the baseline.",
+    "cls": "Not supported",
+    "n": 410,
+    "meanR": -0.5575,
+    "grossR": -0.0245,
+    "winRate": 33.2
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "None: this is the original."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.41R, 2023 to Sep 2025 -0.34R, 24 Sep 2025 to 23 Oct 2026 -0.56R a trade (410 trades). Before costs -0.00R, +0.01R, -0.02R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-01",
+  "source": "liquidity_sweep",
+  "name": "Levels: previous-day high/low only",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v01",
+    "change": "Levels: only PDH and PDL.",
+    "cls": "Not supported",
+    "n": 82,
+    "meanR": -0.5704,
+    "grossR": -0.133,
+    "winRate": 32.9
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "Levels: only PDH and PDL."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.45R, 2023 to Sep 2025 -0.23R, 24 Sep 2025 to 23 Oct 2026 -0.57R a trade (82 trades). Before costs -0.08R, +0.09R, -0.13R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-02",
+  "source": "liquidity_sweep",
+  "name": "Levels: previous-day close only",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v02",
+    "change": "Levels: only PDC.",
+    "cls": "Not supported",
+    "n": 93,
+    "meanR": -0.4037,
+    "grossR": -0.0362,
+    "winRate": 32.3
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "Levels: only PDC."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.39R, 2023 to Sep 2025 -0.37R, 24 Sep 2025 to 23 Oct 2026 -0.40R a trade (93 trades). Before costs -0.07R, -0.09R, -0.04R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-03",
+  "source": "liquidity_sweep",
+  "name": "Levels: equal highs/lows only",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v03",
+    "change": "Levels: only equal highs/lows.",
+    "cls": "Not supported",
+    "n": 363,
+    "meanR": -0.5693,
+    "grossR": -0.0088,
+    "winRate": 33.9
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "Levels: only equal highs/lows."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.37R, 2023 to Sep 2025 -0.35R, 24 Sep 2025 to 23 Oct 2026 -0.57R a trade (363 trades). Before costs +0.07R, +0.02R, -0.01R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-04",
+  "source": "liquidity_sweep",
+  "name": "Levels: 1-hour swings only",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v04",
+    "change": "Levels: only 1-hour swing highs/lows.",
+    "cls": "Not supported",
+    "n": 105,
+    "meanR": -0.6801,
+    "grossR": -0.1629,
+    "winRate": 30.5
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "Levels: only 1-hour swing highs/lows."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.49R, 2023 to Sep 2025 -0.40R, 24 Sep 2025 to 23 Oct 2026 -0.68R a trade (105 trades). Before costs -0.07R, -0.07R, -0.16R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-05",
+  "source": "liquidity_sweep",
+  "name": "Levels: plus round numbers",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v05",
+    "change": "Levels: the original's, plus every multiple of 100 within ±1% of the open. Round numbers are day levels, as in the PDF's \"round number trap\".",
+    "cls": "Not supported",
+    "n": 448,
+    "meanR": -0.578,
+    "grossR": -0.0829,
+    "winRate": 31.7
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "Levels: the original's, plus every multiple of 100 within ±1% of the open. Round numbers are day levels, as in the PDF's \"round number trap\"."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.44R, 2023 to Sep 2025 -0.36R, 24 Sep 2025 to 23 Oct 2026 -0.58R a trade (448 trades). Before costs -0.04R, -0.03R, -0.08R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-06",
+  "source": "liquidity_sweep",
+  "name": "Wick sweeps only",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v06",
+    "change": "Confirmation: the sweep candle itself must close back inside. A candle closing beyond the level is a breakout.",
+    "cls": "Not supported",
+    "n": 280,
+    "meanR": -0.6261,
+    "grossR": -0.0497,
+    "winRate": 32.1
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "Confirmation: the sweep candle itself must close back inside. A candle closing beyond the level is a breakout."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.49R, 2023 to Sep 2025 -0.45R, 24 Sep 2025 to 23 Oct 2026 -0.63R a trade (280 trades). Before costs -0.00R, -0.05R, -0.05R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-07",
+  "source": "liquidity_sweep",
+  "name": "Strong rejection candle",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v07",
+    "change": "Confirmation: the confirming candle must close at least 2/3 of its range away from its extreme (the low third for a short, the high third for a long).",
+    "cls": "Not supported",
+    "n": 324,
+    "meanR": -0.4567,
+    "grossR": 0.021,
+    "winRate": 34.6
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "Confirmation: the confirming candle must close at least 2/3 of its range away from its extreme (the low third for a short, the high third for a long)."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.36R, 2023 to Sep 2025 -0.26R, 24 Sep 2025 to 23 Oct 2026 -0.46R a trade (324 trades). Before costs -0.01R, +0.04R, +0.02R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-08",
+  "source": "liquidity_sweep",
+  "name": "Next-candle confirmation",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v08",
+    "change": "Confirmation: the candle after the confirming candle must close further in the trade's direction. Entry at that close. Otherwise the setup is dropped.",
+    "cls": "Not supported",
+    "n": 279,
+    "meanR": -0.2944,
+    "grossR": 0.1418,
+    "winRate": 39.4
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "Confirmation: the candle after the confirming candle must close further in the trade's direction. Entry at that close. Otherwise the setup is dropped."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.37R, 2023 to Sep 2025 -0.28R, 24 Sep 2025 to 23 Oct 2026 -0.29R a trade (279 trades). Before costs -0.02R, +0.02R, +0.14R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-09",
+  "source": "liquidity_sweep",
+  "name": "Retest-and-reject entry",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v09",
+    "change": "Entry: after the close back inside, wait up to 30 minutes for a candle that trades back to the level and closes back inside again. Entry at that close. A close beyond the level cancels the setup.",
+    "cls": "Not supported",
+    "n": 217,
+    "meanR": -0.4084,
+    "grossR": 0.1316,
+    "winRate": 38.2
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "Entry: after the close back inside, wait up to 30 minutes for a candle that trades back to the level and closes back inside again. Entry at that close. A close beyond the level cancels the setup."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.48R, 2023 to Sep 2025 -0.23R, 24 Sep 2025 to 23 Oct 2026 -0.41R a trade (217 trades). Before costs -0.06R, +0.14R, +0.13R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-10",
+  "source": "liquidity_sweep",
+  "name": "Market-structure shift entry",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v10",
+    "change": "Entry: market-structure shift. The reference is the lowest low (for a short) or highest high (for a long) of the 6 candles before the sweep began. A candle must close past it within 30 minutes of the confirmation; if the confirming candle already did, entry is immediate. A close beyond the level cancels the setup.",
+    "cls": "Not supported",
+    "n": 94,
+    "meanR": -0.2883,
+    "grossR": -0.0378,
+    "winRate": 31.9
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "Entry: market-structure shift. The reference is the lowest low (for a short) or highest high (for a long) of the 6 candles before the sweep began. A candle must close past it within 30 minutes of the confirmation; if the confirming candle already did, entry is immediate. A close beyond the level cancels the setup."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.31R, 2023 to Sep 2025 -0.18R, 24 Sep 2025 to 23 Oct 2026 -0.29R a trade (94 trades). Before costs -0.09R, -0.00R, -0.04R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-11",
+  "source": "liquidity_sweep",
+  "name": "Target 1:1",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v11",
+    "change": "Target: 1:1.",
+    "cls": "Not supported",
+    "n": 424,
+    "meanR": -0.5391,
+    "grossR": -0.0015,
+    "winRate": 45.5
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "Target: 1:1."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.41R, 2023 to Sep 2025 -0.35R, 24 Sep 2025 to 23 Oct 2026 -0.54R a trade (424 trades). Before costs +0.00R, +0.00R, -0.00R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-12",
+  "source": "liquidity_sweep",
+  "name": "Target 1:3",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v12",
+    "change": "Target: 1:3.",
+    "cls": "Not supported",
+    "n": 398,
+    "meanR": -0.5734,
+    "grossR": -0.0437,
+    "winRate": 26.6
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "Target: 1:3."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.44R, 2023 to Sep 2025 -0.36R, 24 Sep 2025 to 23 Oct 2026 -0.57R a trade (398 trades). Before costs -0.03R, -0.01R, -0.04R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-13",
+  "source": "liquidity_sweep",
+  "name": "Breakeven at +1R",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v13",
+    "change": "Exit: once a candle closes after price has reached +1R, the stop moves to the entry price.",
+    "cls": "Not supported",
+    "n": 417,
+    "meanR": -0.5181,
+    "grossR": 0.0168,
+    "winRate": 27.6
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "Exit: once a candle closes after price has reached +1R, the stop moves to the entry price."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.40R, 2023 to Sep 2025 -0.32R, 24 Sep 2025 to 23 Oct 2026 -0.52R a trade (417 trades). Before costs +0.01R, +0.02R, +0.02R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-14",
+  "source": "liquidity_sweep",
+  "name": "Target: the opposite liquidity",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v14",
+    "change": "Target: the nearest live opposite-side level at least 1R away, capped at 4R. With no such level, 4R.",
+    "cls": "Not supported",
+    "n": 399,
+    "meanR": -0.5803,
+    "grossR": -0.0491,
+    "winRate": 28.3
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "Target: the nearest live opposite-side level at least 1R away, capped at 4R. With no such level, 4R."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.39R, 2023 to Sep 2025 -0.32R, 24 Sep 2025 to 23 Oct 2026 -0.58R a trade (399 trades). Before costs +0.02R, +0.02R, -0.05R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-15",
+  "source": "liquidity_sweep",
+  "name": "No target: stop or 15:15",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v15",
+    "change": "Exit: no target. The trade closes at the stop or at 15:15.",
+    "cls": "Not supported",
+    "n": 380,
+    "meanR": -0.5534,
+    "grossR": -0.0219,
+    "winRate": 21.8
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "Exit: no target. The trade closes at the stop or at 15:15."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.34R, 2023 to Sep 2025 -0.28R, 24 Sep 2025 to 23 Oct 2026 -0.55R a trade (380 trades). Before costs +0.06R, +0.06R, -0.02R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-16",
+  "source": "liquidity_sweep",
+  "name": "200-EMA side filter",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v16",
+    "change": "Filter: longs only above the 5-minute 200 EMA, shorts only below it. Same as round 1's run B.",
+    "cls": "Not supported",
+    "n": 218,
+    "meanR": -0.4256,
+    "grossR": 0.1149,
+    "winRate": 37.6
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "Filter: longs only above the 5-minute 200 EMA, shorts only below it. Same as round 1's run B."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.38R, 2023 to Sep 2025 -0.25R, 24 Sep 2025 to 23 Oct 2026 -0.43R a trade (218 trades). Before costs +0.03R, +0.10R, +0.11R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-17",
+  "source": "liquidity_sweep",
+  "name": "Big sweeps only",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v17",
+    "change": "Filter: risk between 0.15% and 0.35% of price, i.e. PDF-sized sweeps only.",
+    "cls": "Not supported",
+    "n": 141,
+    "meanR": -0.3713,
+    "grossR": -0.1066,
+    "winRate": 31.2
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "Filter: risk between 0.15% and 0.35% of price, i.e. PDF-sized sweeps only."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.30R, 2023 to Sep 2025 -0.13R, 24 Sep 2025 to 23 Oct 2026 -0.37R a trade (141 trades). Before costs -0.08R, +0.04R, -0.11R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-18",
+  "source": "liquidity_sweep",
+  "name": "Morning only",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v18",
+    "change": "Filter: entries only from candles closing 09:20–11:15.",
+    "cls": "Not supported",
+    "n": 192,
+    "meanR": -0.4955,
+    "grossR": -0.0598,
+    "winRate": 31.8
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "Filter: entries only from candles closing 09:20–11:15."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.42R, 2023 to Sep 2025 -0.28R, 24 Sep 2025 to 23 Oct 2026 -0.50R a trade (192 trades). Before costs -0.05R, +0.03R, -0.06R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-19",
+  "source": "liquidity_sweep",
+  "name": "Afternoon only",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v19",
+    "change": "Filter: entries only from candles closing 12:05–14:45.",
+    "cls": "Not supported",
+    "n": 290,
+    "meanR": -0.5686,
+    "grossR": 0.024,
+    "winRate": 34.1
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "Filter: entries only from candles closing 12:05–14:45."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.38R, 2023 to Sep 2025 -0.36R, 24 Sep 2025 to 23 Oct 2026 -0.57R a trade (290 trades). Before costs +0.07R, +0.03R, +0.02R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-20",
+  "source": "liquidity_sweep",
+  "name": "One trade a day",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v20",
+    "change": "Filter: at most 1 trade a day.",
+    "cls": "Not supported",
+    "n": 246,
+    "meanR": -0.61,
+    "grossR": -0.1011,
+    "winRate": 30.5
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "Filter: at most 1 trade a day."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.42R, 2023 to Sep 2025 -0.36R, 24 Sep 2025 to 23 Oct 2026 -0.61R a trade (246 trades). Before costs -0.03R, -0.04R, -0.10R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-21",
+  "source": "liquidity_sweep",
+  "name": "Breakout and retest (the video's other entry)",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v21",
+    "change": "The video's other entry: when a level is broken and accepted (30 minutes beyond it), wait for a candle that comes back to it and closes on the breakout side. Enter in the breakout direction. Stop past that candle's extreme plus 0.02%, target 2R. A close back through the level cancels. No sweep trades.",
+    "cls": "Not supported",
+    "n": 47,
+    "meanR": -0.7425,
+    "grossR": -0.0547,
+    "winRate": 31.9
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "The video's other entry: when a level is broken and accepted (30 minutes beyond it), wait for a candle that comes back to it and closes on the breakout side. Enter in the breakout direction. Stop past that candle's extreme plus 0.02%, target 2R. A close back through the level cancels. No sweep trades."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.62R, 2023 to Sep 2025 -0.36R, 24 Sep 2025 to 23 Oct 2026 -0.74R a trade (47 trades). Before costs -0.08R, +0.08R, -0.05R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-22",
+  "source": "liquidity_sweep",
+  "name": "Full video: sweeps and breakout-retests",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "v22",
+    "change": "The whole video: the original's sweep trades plus v21's breakout-retest trades. They share one position and the 2-a-day limit.",
+    "cls": "Not supported",
+    "n": 428,
+    "meanR": -0.5973,
+    "grossR": -0.0553,
+    "winRate": 31.8
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "The whole video: the original's sweep trades plus v21's breakout-retest trades. They share one position and the 2-a-day limit."
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.43R, 2023 to Sep 2025 -0.33R, 24 Sep 2025 to 23 Oct 2026 -0.60R a trade (428 trades). Before costs -0.01R, +0.02R, -0.06R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-R1",
+  "source": "liquidity_sweep",
+  "name": "Original on 15-minute candles",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "r1",
+    "change": "The original on 15-minute candles",
+    "cls": "Not supported",
+    "n": 194,
+    "meanR": -0.5499,
+    "grossR": -0.1385,
+    "winRate": 30.4
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "The original on 15-minute candles"
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.45R, 2023 to Sep 2025 -0.26R, 24 Sep 2025 to 23 Oct 2026 -0.55R a trade (194 trades). Before costs -0.11R, +0.03R, -0.14R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-R2",
+  "source": "liquidity_sweep",
+  "name": "Original on 3-minute candles",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "r2",
+    "change": "The original on 3-minute candles (round 1's run C)",
+    "cls": "Not supported",
+    "n": 489,
+    "meanR": -0.5958,
+    "grossR": -0.0291,
+    "winRate": 32.5
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "The original on 3-minute candles (round 1's run C)"
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.46R, 2023 to Sep 2025 -0.39R, 24 Sep 2025 to 23 Oct 2026 -0.60R a trade (489 trades). Before costs -0.03R, -0.02R, -0.03R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
+   }
+  ]
+ },
+ {
+  "id": "LS-R3",
+  "source": "liquidity_sweep",
+  "name": "Original on Bank Nifty",
+  "channel": "Booming Bulls (Liquidity Sweep video)",
+  "videos": [
+   "iTWMIaqYLJg"
+  ],
+  "verdict": "Not supported",
+  "books": [
+   {
+    "market": "Bank Nifty",
+    "variant": "r3",
+    "change": "The original on BANK NIFTY, futures lot 30",
+    "cls": "Not supported",
+    "n": 394,
+    "meanR": -0.4639,
+    "grossR": -0.0178,
+    "winRate": 33.8
+   }
+  ],
+  "rules": [
+   {
+    "label": "Levels",
+    "text": "Previous day's high, low and close; equal highs or lows (two swings within 0.04%); 1-hour swing highs and lows. Levels that the open gaps through are dropped, and each level is used once."
+   },
+   {
+    "label": "Sweep",
+    "text": "A 5-minute candle trades beyond a level."
+   },
+   {
+    "label": "Confirmation",
+    "text": "A candle closes back inside within 30 minutes. If it does not, the break was accepted: a breakout, which is never traded."
+   },
+   {
+    "label": "Entry",
+    "text": "At that close: short after a high is swept, long after a low is swept."
+   },
+   {
+    "label": "Stop and target",
+    "text": "Stop 0.02% beyond the sweep's extreme, target 2R. The trade is skipped unless the risk is 0.05-0.35% of price."
+   },
+   {
+    "label": "Day",
+    "text": "Entries 09:20-14:45, one trade at a time, at most 2 a day, out at 15:15."
+   },
+   {
+    "label": "This version",
+    "text": "The original on BANK NIFTY, futures lot 30"
+   },
+   {
+    "label": "Backtest",
+    "text": "Net of costs: 2016-22 -0.32R, 2023 to Sep 2025 -0.29R, 24 Sep 2025 to 23 Oct 2026 -0.46R a trade (394 trades). Before costs -0.04R, -0.03R, -0.02R. Verdict: no edge."
+   },
+   {
+    "label": "Costs",
+    "text": "One futures lot: Angel One's charges on the trade date plus 1 index point of slippage a fill."
    }
   ]
  }

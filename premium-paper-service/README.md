@@ -56,3 +56,26 @@ cut). Sealed trades follow the study's engine exactly.
 - Seed once: `python -I make_seed.py nse_daily.npz`, then copy to `/data/premium/nse/data/nse_daily.npz` on the volume.
 - Main Control's `premium_strategies` switch stops all cycles. A session missed while OFF is replayed when switched back on.
 - Dry run on other dates or another database: `PREMIUM_PAPER_START`, `PREMIUM_MONGO_DB`, `PREMIUM_DATA_DIR`.
+
+## Booming Bulls liquidity sweep: LS-00 to LS-22, LS-R1 to LS-R3
+
+26 accounts from `backend/research/liquidity_sweep_2026_11`:
+
+- **LS-00:** the app's strategy `bb_liquidity_sweep` (D9).
+- **LS-01 to LS-22:** its 22 one-change versions.
+- **LS-R1 to LS-R3:** three of the study's research-only runs (15-minute candles, 3-minute candles, Bank Nifty).
+
+All were pre-registered and backtested on 2016-2026 Nifty data. None has an edge: about 0R a trade before costs and
+-0.3R to -0.7R after. Paper trading from 9 Nov 2026 is their forward test.
+
+- **The rules are imported:** `liquidity_sweep.py` runs the app's own strategy classes from strategy-service. The image
+  carries `tradingai_shared` and the three strategy files those classes import, not the library's package `__init__`s.
+  pydantic is the one new dependency.
+- **Fills as in the study's harness:** entry at the confirming candle's close, stop or target on 1-minute rows (stop
+  first), v13's breakeven, no target for v15, out at 15:15.
+- **Costs:** Angel One's futures charges on one lot (`bb_engine.futures_fees`) plus 1 index point of slippage a fill.
+- **Schedule:** the books run in the index cycle with the other Nifty and Bank Nifty books. The ledger's money rules and
+  Main Control's switch apply unchanged.
+- **Check:** `python -I test_liquidity.py 25` reproduced 681 of 681 study trades over the last 25 sessions, with the
+  desk's 20-session warm-up. The same run cut 5 times into the last session checked 337 trades: finished ones
+  unchanged, running ones flagged open, none invented.
