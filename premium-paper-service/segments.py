@@ -21,7 +21,7 @@ from datetime import date, datetime, timedelta, timezone
 
 import catalog as C
 import feeds as F
-from settings import BTC_START_T, DATA, IST, NY, PAPER_START
+from settings import BTC_START_T, DATA, IST, NY, PAPER_START, SH_START_T
 
 log = logging.getLogger("premium.segments")
 
@@ -157,7 +157,9 @@ def feeds_now(group: str, info: dict) -> dict:
     return out
 
 
-def _start_of(mk: str) -> datetime:
+def _start_of(mk: str, acct=None) -> datetime:
+    if mk == "BTCUSD" and acct is not None and acct.source == getattr(C, "SH", None):
+        return datetime.fromtimestamp(SH_START_T, timezone.utc)
     if mk == "BTCUSD":
         return datetime.fromtimestamp(BTC_START_T, timezone.utc)
     return datetime(PAPER_START.year, PAPER_START.month, PAPER_START.day, tzinfo=IST)
@@ -172,7 +174,7 @@ def refresh(db, group: str, info: dict) -> None:
 
 
 def _book_state(a, mk: str, key: str, s: dict, fd: dict | None, sig: dict, errors: dict, rec: dict, now: datetime) -> tuple[str, str]:
-    start = _start_of(mk)
+    start = _start_of(mk, a)
     if key in errors:
         return "error", f"This book could not run in the last cycle: {errors[key]}"
     if now < start:
@@ -186,7 +188,7 @@ def _book_state(a, mk: str, key: str, s: dict, fd: dict | None, sig: dict, error
         return "in trade", why
     if fd["state"] != "live":
         return fd["state"], fd.get("short") or fd["reason"]
-    if a.id in ("CP-14", "CP-15") and mk == "BTCUSD" and not rec.get("connected"):
+    if a.id in ("CP-14", "CP-15", "SH-02") and mk == "BTCUSD" and not rec.get("connected"):
         return "waiting", ("Delta's trade feed is not connected, so the order-flow delta of new minutes is unknown: "
                            "no trade on those minutes until it reconnects.")
     if sig.get("today") and sig.get("last_t") and sig.get("taken") is False:
@@ -270,7 +272,9 @@ def _refresh(db, group: str, info: dict) -> None:
     segs = {seg: {**{k: (round(v, 2) if isinstance(v, float) else v) for k, v in t.items()},
                   "recent": recent.get(seg, []), "positions": positions.get(seg, [])} for seg, t in seg_tot.items()}
     db.premium_meta.update_one({"_id": "status"}, {"$set": {"feeds": feeds, "recorder": rec, "books": books, "segments": segs,
-                                                            "segments_at": now.isoformat()}}, upsert=True)
+                                                            "segments_at": now.isoformat(),
+                                                            "sh_start": datetime.fromtimestamp(SH_START_T, timezone.utc).isoformat()}},
+                               upsert=True)
 
 
 def _trade_row(d: dict) -> dict:

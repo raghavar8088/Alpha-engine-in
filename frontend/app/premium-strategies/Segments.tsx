@@ -30,7 +30,7 @@ type SegTotals = {
 type Recorder = { connected: boolean; since?: number | null; last_msg_t?: number | null; written_to?: number | null; error?: string | null; at?: number };
 type SegStatus = Summary["status"] & {
   feeds?: Record<string, Feed>; recorder?: Recorder; books?: Record<string, BookRow[]>; segments?: Record<string, SegTotals>;
-  segments_at?: string;
+  segments_at?: string; sh_start?: string;
 };
 type AcctTrade = {
   id: string; sym: string; mkt: string; side: number; setup: string; entry_t: number; exit_t: number | null; entry: number;
@@ -242,6 +242,7 @@ function SegmentView({ seg, summary, now }: { seg: SegId; summary: Summary; now:
   const shown = rows.filter((r) => filter === "all" || (filter === "active" ? ["live", "in trade"].includes(r.b.state) : !["live", "in trade"].includes(r.b.state)));
   const active = rows.filter((r) => ["live", "in trade"].includes(r.b.state)).length;
   const btcStart = status.btc_start ? Date.parse(status.btc_start) / 1000 : null;
+  const shStart = status.sh_start ? Date.parse(status.sh_start) / 1000 : null;
   const paperStart = status.paper_start;
   const today = new Date(now + 19800000).toISOString().slice(0, 10);
   const pnl = (tot?.pnl ?? 0);
@@ -255,7 +256,7 @@ function SegmentView({ seg, summary, now }: { seg: SegId; summary: Summary; now:
       {seg === "crypto" && btcStart ? (
         <div className="ps-banner pd-wait" role="status">
           <span className="ps-pill ps-pill-neutral">Since {istTime(btcStart)} IST</span>
-          <span>{`The bitcoin strategies trade forward from ${istTime(btcStart)} IST on Delta Exchange's live candles; nothing before that is back-filled. The daily Fear & Greed book (CP-29) starts with the others${paperStart ? ` on ${day(paperStart)}` : ""}.`}</span>
+          <span>{`The bitcoin strategies trade forward from ${istTime(btcStart)} IST on Delta Exchange's live candles; nothing before that is back-filled. The daily Fear & Greed book (CP-29) starts with the others${paperStart ? ` on ${day(paperStart)}` : ""}.${shStart ? ` The Sniper-headshot books (SH-00 to SH-04) start at ${istTime(shStart)} IST, also flat and with nothing back-filled.` : ""}`}</span>
         </div>
       ) : paperStart && today < paperStart ? (
         <div className="ps-banner pd-wait" role="status">

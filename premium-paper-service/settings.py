@@ -17,6 +17,10 @@ CAPITAL = float(os.getenv("PREMIUM_CAPITAL", "1000000"))        # Rs 10 lakh per
 # bitcoin trades all week, so they do not wait for Monday. Nothing before it is back-filled.
 BTC_START_T = int(datetime.fromisoformat(os.getenv("PREMIUM_BTC_START", "2026-11-08T11:00:00+00:00")).timestamp())
 BTC_START_DATE = datetime.fromtimestamp(BTC_START_T, timezone.utc).date()
+# The Sniper-headshot books (sniper.py), asked for on 8 Nov 2026 "for the live trading", trade bitcoin forward from
+# this moment, flat at the start; nothing before it is back-filled.
+SH_START_T = int(datetime.fromisoformat(os.getenv("PREMIUM_SH_START", "2026-11-08T16:30:00+00:00")).timestamp())
+SH_START_DATE = datetime.fromtimestamp(SH_START_T, timezone.utc).date()
 
 MONGO_URL = os.getenv("FACTORY_MONGO_URL", "").strip()
 MONGO_DB = os.getenv("PREMIUM_MONGO_DB", "alpha_engine_premium")

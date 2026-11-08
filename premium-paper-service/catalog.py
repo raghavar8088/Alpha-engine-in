@@ -195,6 +195,19 @@ for _sid, _name, _mkt, _ver in (
     ("LS-R3", "Original on Bank Nifty", "BANKNIFTY", "r3"),
 ):
     ACCOUNTS.append(_a(_sid, LS, _name, _LSC, (_mkt, _ver)))
+# Booming Bulls' "Sniper Headshot Entry" video (jvzd7UPlb5Y) on bitcoin, written as exact rules (sniper.py;
+# backend/research/sniper_headshot_2026_11/RULES.md) with four one-change upgrades. Not backtested: they trade bitcoin
+# on Delta's live prices from settings.SH_START_T, and paper trading is their first test.
+SH = "sniper_headshot"
+_SHC = "Booming Bulls (Sniper Headshot Entry video)"
+for _sid, _name in (
+    ("SH-00", "Sniper headshot entry: the video's rules"),
+    ("SH-01", "Upgrade: enter on the reclaim of the swept level"),
+    ("SH-02", "Upgrade: Delta order-flow confirmation"),
+    ("SH-03", "Upgrade: 1-hour 50-EMA trend filter"),
+    ("SH-04", "Upgrade: built to pay Delta's costs (1-hour bars)"),
+):
+    ACCOUNTS.append(_a(_sid, SH, _name, _SHC, ("BTCUSD", "V0")))
 BY_ID = {a.id: a for a in ACCOUNTS}
 
 

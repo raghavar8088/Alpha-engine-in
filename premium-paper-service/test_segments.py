@@ -18,6 +18,7 @@ from pathlib import Path
 os.environ["PREMIUM_DATA_DIR"] = os.getenv("PREMIUM_TEST_DATA_DIR") or tempfile.mkdtemp(prefix="premium_seg_")
 os.environ.setdefault("PREMIUM_PAPER_START", "2026-10-26")
 os.environ.setdefault("PREMIUM_BTC_START", "2026-11-06T00:00:00+00:00")
+os.environ.setdefault("PREMIUM_SH_START", "2026-11-06T00:00:00+00:00")
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 try:
@@ -143,7 +144,7 @@ crypto_rows = [(a, r) for a, rows in books.items() for r in rows if r["segment"]
 for a, r in crypto_rows:
     print("  ", a, r["mkt"], r["state"], "|", r["reason"])
 check("books: only the order-flow books wait for the trade feed (not running in this test)",
-      all(a in ("CP-14", "CP-15", "CP-29") for a, r in crypto_rows if r["state"] == "waiting"))
+      all(a in ("CP-14", "CP-15", "SH-02", "CP-29") for a, r in crypto_rows if r["state"] == "waiting"))
 check("segments: every book counted once", sum(v["books"] for v in segs.values()) == sum(len(a.books) for a in C.ACCOUNTS))
 check("segments: crypto recent trades are bitcoin only", all(t["mkt"] in ("BTCUSD", "BTC_SPOT") for t in segs["crypto"]["recent"]))
 

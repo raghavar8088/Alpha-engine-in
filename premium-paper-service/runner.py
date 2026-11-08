@@ -132,6 +132,37 @@ def num(x):
     return x if np.isfinite(x) else None
 
 
+def run_sh(sid: str, m, cache: dict, since_t: int | None = None) -> tuple[list, dict]:
+    """A Sniper-headshot book (sniper.py) on bitcoin: its first entries through the YouTube study's engine and book rules
+    (one at a time, at most 3 a day), then each first entry's second entry, the retest add, as its own position while
+    the first is still open. `since_t` as in run_cp: the book starts flat."""
+    import sniper as SH
+    v = SH.VERSIONS[sid]
+    B = _bars(m, tuple(sorted({v.tf, v.htf})), cache)
+    S = SH.signals(sid, m, B, cache)
+    if since_t is not None:
+        S = [s for s in S if int(m.t[min(s.k + 1, len(m.t) - 1)]) >= since_t]
+    key = f"{sid}|BTCUSD"
+    if not S:
+        note_signals(key, m, S, [], {})
+        return [], {}
+    ex = SH.exits(sid)
+    clock, minute = SH.EXIT_CLOCK
+    eng, ke = YE.Engine(m), live_k_end(m, YE.forced_exit_rows(m, clock, minute))
+    tr, rej = YE.run_book(eng, S, ex, SH.LIMITS, ke, sid, "E1")
+    note_signals(key, m, S, tr, rej, lambda S2: YE.run_book(eng, S2, ex, SH.LIMITS, ke, sid, "E1"))
+    by_k = {s.k: s for s in S}
+    adds = []
+    for t in tr:
+        s2 = SH.pyramid(sid, m, B, cache, t, by_k[t.sig_k]) if t.sig_k in by_k else None
+        k_end = ke(s2.day) if s2 is not None else None
+        if s2 is not None and k_end is not None:
+            t2, _ = eng.trade(s2, ex, k_end, sid, "E2")
+            if t2 is not None:
+                adds.append(t2)
+    return sorted(tr + adds, key=lambda x: x.entry_k), rej
+
+
 def docs_from(trades, m, acct: str, market: str, overnight: bool, live_day: str | None, rank=None) -> list[dict]:
     """Engine trades as ledger documents (per-unit economics; the account sizes them later)."""
     last = len(m.t) - 1

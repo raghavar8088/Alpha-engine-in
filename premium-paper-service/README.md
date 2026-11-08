@@ -104,3 +104,24 @@ All were pre-registered and backtested on 2016-2026 Nifty data. None has an edge
 - **Check:** `python -I test_liquidity.py 25` reproduced 681 of 681 study trades over the last 25 sessions, with the
   desk's 20-session warm-up. The same run cut 5 times into the last session checked 337 trades: finished ones
   unchanged, running ones flagged open, none invented.
+
+## Sniper Headshot Entry: SH-00 to SH-04 (bitcoin)
+
+Booming Bulls' "Sniper Headshot Entry" video (jvzd7UPlb5Y) as exact rules on bitcoin from Delta Exchange (`sniper.py`;
+readable form with E/A tags in `backend/research/sniper_headshot_2026_11/RULES.md`), asked for on 8 Nov 2026 with
+upgraded versions "for the live trading". Five Rs 10 lakh accounts in the Crypto tab, paper only, trading forward from
+`settings.SH_START_T` (flat at the start, nothing back-filled). Not backtested.
+
+- **SH-00, the video:** in a 1-hour uptrend, a 5-minute double bottom is swept into a demand zone below it; a strong
+  green candle there is the first entry, stop under half its body, target 93% of the way to the range high; a second
+  entry (its own position, same target) on the retest of the swept level while the first is open. Sells mirror it.
+- **SH-01** enters on the close back above the swept level, stop under the sweep. **SH-02** needs Delta's takers to
+  have sold the sweep and bought the reversal candle (`delta_flow.py`'s recorded minutes; unrecorded = no trade).
+  **SH-03** adds a 1-hour 50-EMA filter. **SH-04** runs the pattern on 1-hour bars (4-hour trend), stop under the
+  reversal candle, and skips any trade whose round-trip cost is over 40% of its risk.
+- **Costs decide it:** Delta's round trip at market is about 0.16% of price. On 5-minute bars the video's stop is a
+  median 0.044% of price (about 3.6R of costs a trade), SH-01's 0.12% (1.3R); SH-04's 1-hour stop about 0.7% (0.2R).
+- `runner.run_sh` runs the first entries through the YouTube engine's book rules (one at a time, at most 3 a day, out
+  by 23:55 UTC) and simulates each second entry with the same engine while its first entry is open.
+- Checks: `python -I test_sniper.py` (no look-ahead at 29 cut points for every version, the rules re-checked on every
+  entry, SH-02's flow filter on a known setup, the accounts through the ledger).

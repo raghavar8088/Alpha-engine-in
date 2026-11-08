@@ -12,7 +12,7 @@ import logging
 import resource
 import sys
 import time
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 import catalog as C
 import feeds as F
@@ -20,7 +20,7 @@ import ledger as L
 import runner as R
 import vwap_run
 from research import CS, YM
-from settings import BTC_START_DATE, BTC_START_T, DAILY_WARM_DAYS, PAPER_START, now_ist
+from settings import BTC_START_DATE, BTC_START_T, DAILY_WARM_DAYS, PAPER_START, SH_START_T, now_ist
 
 log = logging.getLogger("premium.cycle")
 INDEX_WARM_DAYS, GLOBAL_WARM_DAYS = 95, 45
@@ -228,11 +228,14 @@ def run_global(db, now: datetime) -> dict:
             live_day = last_day if last_day > final else None
             cache: dict = {}
             for a, _, v, _ in btc_books:
-                start = _btc_replay_from(db, a.id)
+                start, t_start = _btc_replay_from(db, a.id), _btc_start(a.id)
                 try:
-                    tr, _ = R.run_cp(a.id, "BTCUSD", bm, cache, since_t=BTC_START_T)
+                    if a.source == C.SH:
+                        tr, _ = R.run_sh(a.id, bm, cache, since_t=t_start)
+                    else:
+                        tr, _ = R.run_cp(a.id, "BTCUSD", bm, cache, since_t=t_start)
                     docs = [d for d in R.docs_from(tr, bm, a.id, "BTCUSD", False, live_day)
-                            if d["date"] >= start.isoformat() and d["entry_t"] >= BTC_START_T]
+                            if d["date"] >= start.isoformat() and d["entry_t"] >= t_start]
                     n_docs += L.persist(db, a.id, "BTCUSD", docs, start.isoformat(), final, False)
                     touched.add(a.id)
                 except Exception as exc:  # noqa: BLE001
@@ -244,9 +247,15 @@ def run_global(db, now: datetime) -> dict:
     return {"trades": n_docs, "new": new, "errors": errors}
 
 
+def _btc_start(acct: str) -> int:
+    """When a bitcoin book starts: the Crypto-playlist books at BTC_START_T, the Sniper-headshot books at SH_START_T."""
+    return SH_START_T if C.BY_ID[acct].source == C.SH else BTC_START_T
+
+
 def _btc_replay_from(db, acct: str) -> date:
+    first = datetime.fromtimestamp(_btc_start(acct), timezone.utc).date()
     s = L.sealed_through(db, acct, "BTCUSD")
-    return max(BTC_START_DATE, _next(s)) if s else BTC_START_DATE
+    return max(first, _next(s)) if s else first
 
 
 def _companion(sid: str, market: str, m):
