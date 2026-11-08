@@ -3068,7 +3068,7 @@ export const LIBRARY: LibStrategy[] = [
   "rules": [
    {
     "label": "Market",
-    "text": "Bitcoin (E: \"it works in bitcoin too\"; real taker volume from Binance, delta = taker buy minus taker sell)."
+    "text": "Bitcoin (E: \"it works in bitcoin too\"). Delta = contracts bought by takers minus contracts sold by takers, recorded live from Delta Exchange's trade feed; a candle is used only if every minute of it was recorded."
    },
    {
     "label": "Trap candle",
@@ -3590,7 +3590,7 @@ export const LIBRARY: LibStrategy[] = [
   "rules": [
    {
     "label": "Market",
-    "text": "Bitcoin, spot, no leverage."
+    "text": "Bitcoin at Delta Exchange's BTCUSD price, no leverage."
    },
    {
     "label": "Rule",

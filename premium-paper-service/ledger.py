@@ -21,7 +21,7 @@ from datetime import datetime, timezone
 from pymongo import MongoClient, UpdateOne
 
 from catalog import ACCOUNTS, BY_ID, LABEL, MONEY, ONE_LOT_MAX_RISK
-from settings import CAPITAL, IST, MONGO_DB, MONGO_URL, PAPER_START
+from settings import BTC_START_T, CAPITAL, IST, MONGO_DB, MONGO_URL, PAPER_START
 
 log = logging.getLogger("premium.ledger")
 
@@ -232,7 +232,8 @@ def update_accounts(db, ids: list[str] | None = None) -> None:
 
 def note_cycle(db, group: str, ok: bool, seconds: float, info: dict, error: str | None = None) -> None:
     s = {"at": datetime.now(timezone.utc), "ok": ok, "seconds": round(seconds, 1), "info": info, "error": error}
-    db.premium_meta.update_one({"_id": "status"}, {"$set": {f"groups.{group}": s, "paper_start": PAPER_START.isoformat(), "capital": CAPITAL}},
+    db.premium_meta.update_one({"_id": "status"}, {"$set": {f"groups.{group}": s, "paper_start": PAPER_START.isoformat(), "capital": CAPITAL,
+                                                            "btc_start": datetime.fromtimestamp(BTC_START_T, timezone.utc).isoformat()}},
                                upsert=True)
 
 

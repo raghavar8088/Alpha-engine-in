@@ -20,7 +20,7 @@ import ledger as L
 import runner as R
 import vwap_run
 from research import CS, YM
-from settings import DAILY_WARM_DAYS, PAPER_START, now_ist
+from settings import BTC_START_DATE, BTC_START_T, DAILY_WARM_DAYS, PAPER_START, now_ist
 
 log = logging.getLogger("premium.cycle")
 INDEX_WARM_DAYS, GLOBAL_WARM_DAYS = 95, 45
@@ -162,7 +162,7 @@ def run_global(db, now: datetime) -> dict:
             errors[f"feed {name}"] = str(exc)[:200]
         time.sleep(0.5)
     try:
-        new["BTCUSD"] = F.update_binance()["new"]
+        new["BTCUSD"] = F.update_delta_candles()["new"]
     except Exception as exc:  # noqa: BLE001
         errors["feed BTCUSD"] = str(exc)[:200]
     try:
@@ -171,10 +171,10 @@ def run_global(db, now: datetime) -> dict:
             db.premium_meta.update_one({"_id": "fx"}, {"$set": {f"rates.{k}": v for k, v in rates.items()}}, upsert=True)
     except Exception as exc:  # noqa: BLE001
         errors["usdinr"] = str(exc)[:200]
-    sig = "|".join(f"{n}:{F.last_minute(n)}" for n in sorted(F.YF) + ["BTCUSD"]) + "|" + "|".join(F.global_final_day(n) for n in ("EURUSD", "NAS100"))
+    sig = "|".join(f"{n}:{F.last_minute(n)}" for n in sorted(F.YF) + [F.DELTA_STORE]) + "|" + "|".join(F.global_final_day(n) for n in ("EURUSD", "NAS100"))
     if sig == L.signature(db, "global"):
         return {"skipped": "no new bars", "errors": errors}
-    if now.date() < PAPER_START - timedelta(days=1):
+    if now.date() < min(PAPER_START - timedelta(days=1), BTC_START_DATE):
         L.set_signature(db, "global", sig)
         return {"waiting_for": PAPER_START.isoformat(), "new": new, "errors": errors}
     books = [(a, mk, v, R.is_overnight(a.id, mk)) for a, mk, v in C.books_in("global")]
@@ -210,10 +210,10 @@ def run_global(db, now: datetime) -> dict:
             except Exception as exc:  # noqa: BLE001
                 log.exception("%s %s", a.id, name)
                 errors[f"{a.id}|{name}"] = str(exc)[:200]
-    # bitcoin (Binance minutes): the Crypto-playlist books, all intraday
+    # bitcoin (Delta Exchange BTCUSD): the Crypto-playlist books, all intraday, trading from BTC_START_T
     btc_books = [b for b in books if b[1] == "BTCUSD"]
     if btc_books:
-        firsts = [replay_from(db, a.id, "BTCUSD", False) for a, _, _, _ in btc_books]
+        firsts = [_btc_replay_from(db, a.id) for a, _, _, _ in btc_books]
         bm = F.btc_market(min(firsts) - timedelta(days=GLOBAL_WARM_DAYS))
         if bm is not None:
             final = F.btc_final_day()
@@ -221,10 +221,12 @@ def run_global(db, now: datetime) -> dict:
             live_day = last_day if last_day > final else None
             cache: dict = {}
             for a, _, v, _ in btc_books:
-                start = replay_from(db, a.id, "BTCUSD", False)
+                start = _btc_replay_from(db, a.id)
                 try:
                     tr, _ = R.run_cp(a.id, "BTCUSD", bm, cache)
-                    n_docs += _save_book(db, a, "BTCUSD", tr, bm, False, start, final, live_day)
+                    docs = [d for d in R.docs_from(tr, bm, a.id, "BTCUSD", False, live_day)
+                            if d["date"] >= start.isoformat() and d["entry_t"] >= BTC_START_T]
+                    n_docs += L.persist(db, a.id, "BTCUSD", docs, start.isoformat(), final, False)
                     touched.add(a.id)
                 except Exception as exc:  # noqa: BLE001
                     log.exception("%s BTCUSD", a.id)
@@ -233,6 +235,11 @@ def run_global(db, now: datetime) -> dict:
         L.update_accounts(db, sorted(touched))
     L.set_signature(db, "global", sig)
     return {"trades": n_docs, "new": new, "errors": errors}
+
+
+def _btc_replay_from(db, acct: str) -> date:
+    s = L.sealed_through(db, acct, "BTCUSD")
+    return max(BTC_START_DATE, _next(s)) if s else BTC_START_DATE
 
 
 def _companion(sid: str, market: str, m):

@@ -2,8 +2,10 @@
     python -I test_cp.py
 1. every CP book: runner.run_cp on 40 research days, documents built, accounts sized;
 2. CP-24 with its companion market; CP-29 from a Fear & Greed series;
-3. the live feeds into a temporary folder: Binance minutes with taker volume, silver (SI=F), the Fear & Greed index."""
+3. the live feeds into a temporary folder: Delta Exchange candles, silver (SI=F), the Fear & Greed index;
+4. the order-flow recorder's minute coverage."""
 
+import json
 import os
 import sys
 import tempfile
@@ -68,15 +70,35 @@ check("CP-29 buys Rs 25,000 a time", docs and abs(f0["qty"] * docs[0]["entry"] *
 check("CP-29 marked, never closed", res["summary"]["closed"] == 0 and res["summary"]["open"] == len(docs), res["summary"]["open"])
 
 # live feeds into the temporary folder
-r = F.update_binance()
-check("binance minutes with taker volume", r["new"] > 50_000, r)
+r = F.update_delta_candles()
+check("delta exchange candles", r["new"] > 50_000, r)
 bm = F.btc_market(np.datetime64(str(np.datetime64("today") - np.timedelta64(10, "D"))).astype(object))
-check("btc market from the store", bm is not None and hasattr(bm, "bv") and len(bm.bv) == len(bm.t) and 0.3 < bm.bv.sum() / bm.vol_all.sum() < 0.7,
+check("btc market from the delta store", bm is not None and len(bm.bv) == len(bm.t) and np.isnan(bm.bv).all() and bm.cost.pct_comm == 0.00059,
       f"rows {len(bm.t) if bm is not None else 0}")
 r = F.update_minutes("XAGUSD")
 check("silver minutes (SI=F)", r["new"] > 1000, r)
 g = F.fear_greed()
 check("fear & greed index", len(g) >= 30 and all(0 <= v <= 100 for v in g.values()), f"{len(g)} days, last {max(g) if g else None}")
 tr, _ = R.run_cp("CP-14", "BTCUSD", bm, {})
-check("CP-14 on live bitcoin", True, f"{len(tr)} trades in 10 days")
+check("CP-14 makes no trade on minutes the order-flow recorder did not see", len(tr) == 0, len(tr))
+tr, _ = R.run_cp("CP-01", "BTCUSD", bm, {})
+check("CP-01 on delta bitcoin", len(tr) > 0, f"{len(tr)} trades in 10 days")
+
+# the order-flow recorder: coverage, zero minutes, a reconnect
+import delta_flow  # noqa: E402
+out = Path(os.environ["PREMIUM_DATA_DIR"]) / "flow_test"
+rec = delta_flow.Recorder(out)
+t0 = 1_794_120_000                       # a minute boundary
+rec.connected(t0 + 10)                   # coverage from t0 + 60
+rec.trade((t0 + 30) * 1_000_000, 5, True)          # before coverage: ignored
+rec.trade((t0 + 70) * 1_000_000, 10, True)
+rec.trade((t0 + 80) * 1_000_000, 4, False)
+rec.flush(t0 + 215)                      # minutes t0+60 and t0+120 have ended
+rec.trade((t0 + 200) * 1_000_000, 7, False)        # minute t0+180, still in progress
+rec.lost()                               # the connection drops: t0+180 is never written
+rec.connected(t0 + 400)                  # coverage again from t0+420
+rec.flush(t0 + 545)                      # t0+420 and t0+480 ended with no trades: zeros
+lines = [json.loads(x) for f in sorted(out.glob("*.jsonl")) for x in f.read_text().splitlines()]
+check("recorder writes only fully seen minutes", [l[0] - t0 for l in lines] == [60, 120, 420, 480] and lines[0][1:3] == [10.0, 4.0]
+      and lines[1][1:3] == [0.0, 0.0] and delta_flow.read.__module__ == "delta_flow", lines)
 sys.exit(0 if ok else 1)

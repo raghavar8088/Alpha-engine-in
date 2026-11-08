@@ -13,6 +13,7 @@ import json
 import logging
 import subprocess
 import sys
+import threading
 import time
 import urllib.request
 from pathlib import Path
@@ -50,8 +51,7 @@ def interval_s(group: str) -> int:
     if group == "stocks":
         return 900 if session else 3600
     if group == "global":
-        closed = weekday == 6 or (weekday == 5 and hhmm >= "04:00") or (weekday == 0 and hhmm < "03:00")
-        return 3600 if closed else 600
+        return 600              # bitcoin (Delta Exchange) trades all week; on a closed forex weekend the other feeds just add nothing
     return 3600
 
 
@@ -68,6 +68,8 @@ def run(group: str) -> None:
 
 def main() -> None:
     log.info("premium paper desk starting")
+    import delta_flow
+    threading.Thread(target=delta_flow.run_forever, name="delta-flow", daemon=True).start()   # bitcoin order flow, all week
     try:
         db = L.database()
         L.ensure_indexes(db)

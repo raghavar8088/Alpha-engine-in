@@ -502,7 +502,8 @@ export default function PremiumStrategiesPage() {
             </li>
             <li>
               <b>Data.</b> Nifty, Bank Nifty and NSE stocks come from the app&apos;s Angel One feed, refreshed about every 5 and 15 minutes. Daily stock data comes from NSE&apos;s
-              daily file. Forex, gold, the Nasdaq and Apple use Yahoo 1-minute bars, refreshed about every 10 minutes, and S&amp;P 500 and Nasdaq daily bars also come from Yahoo.
+              daily file. Forex, gold, silver, the Nasdaq and Apple use Yahoo 1-minute bars, refreshed about every 10 minutes, and S&amp;P 500 and Nasdaq daily bars also come from Yahoo.
+              Bitcoin comes from Delta Exchange.
             </li>
             <li>
               <b>Stand-ins, where the live feed differs from the test.</b> Yahoo&apos;s spot forex bars have no real high or low, so EUR/USD and GBP/USD use CME currency futures,
@@ -531,8 +532,9 @@ export default function PremiumStrategiesPage() {
               a signal already known.
             </li>
             <li>
-              <b>Not backtested.</b> Paper trading from 9 Nov 2026 is their first test. Bitcoin uses Binance minutes with real taker volume, so the order-flow strategies see a
-              true buy/sell delta. Silver for the gold SMT strategy comes from COMEX futures (SI=F).
+              <b>Not backtested.</b> Paper trading is their first test: from 9 Nov 2026, and for the bitcoin strategies from 8 Nov, 16:30 IST, since bitcoin trades all week.
+              Bitcoin is Delta Exchange&apos;s BTCUSD perpetual: its 1-minute candles, and the buyer or seller side of every trade, recorded live from its trade feed. The
+              order-flow strategies (CP-14, CP-15) only use candles whose every minute was recorded. Silver for the gold SMT strategy comes from COMEX futures (SI=F).
             </li>
           </ul>
         </GlassPanel>

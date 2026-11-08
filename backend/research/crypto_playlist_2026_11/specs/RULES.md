@@ -12,6 +12,7 @@ everything else is as stated (E). No strategy here was backtested before paper t
 - **Swings:** fractal pivots of 2 bars each side, known 2 bars later (A). A trend is higher high + higher low, or lower high + lower low (E).
 - **Candles:** power candle = body at least 70% of the range, range at least the mean of the previous 20 bars (A). Pin bar = wick at least half the candle (A).
 - **Exit:** gold by 16:55 New York; bitcoin by 23:55 UTC (A).
+- **Bitcoin:** Delta Exchange's BTCUSD perpetual (contracts of 0.001 BTC; taker fee 0.05% + GST), trading from 8 Nov 2026, 16:30 IST.
 - **Paper account:** Rs 10 lakh, 1% of equity at risk per trade, the desk's usual sizing.
 
 ### CP-01 Trend pullback at the 5th point (qPBdLsiEa3s, mb0AeY9YyPg)
@@ -88,7 +89,7 @@ everything else is as stated (E). No strategy here was backtested before paper t
 - **Stop:** beyond that gap (E: "drop to 5 minutes and use the FVG when the stop is too wide").
 
 ### CP-14 Order-flow absorption (ieZ--wMeSxE)
-- **Market:** Bitcoin (E: "it works in bitcoin too"; real taker volume from Binance, delta = taker buy minus taker sell).
+- **Market:** Bitcoin (E: "it works in bitcoin too"). Delta = contracts bought by takers minus contracts sold by takers, recorded live from Delta Exchange's trade feed; a candle is used only if every minute of it was recorded.
 - **Trap candle:** at the 6-hour high, a 15-minute candle with positive delta but a bearish result (red, or an upper wick at least half the candle).
 - **Entry:** the next candle closes below its low, red with negative delta -> sell. Mirror at the 6-hour low.
 - **Stop:** beyond the trap candle.
@@ -160,6 +161,6 @@ everything else is as stated (E). No strategy here was backtested before paper t
 - **Rule:** the unicorn model, only when the gap forms between 19:30 and 20:30 IST; the order expires at 20:30.
 
 ### CP-29 Fear & Greed accumulation (qPBdLsiEa3s)
-- **Market:** Bitcoin, spot, no leverage.
+- **Market:** Bitcoin at Delta Exchange's BTCUSD price, no leverage.
 - **Rule:** every Monday that the Crypto Fear & Greed Index is below 45 (fear or extreme fear), buy Rs 25,000 of Bitcoin at that day's open (A: the amount and day). Never sell (E: "hold for years").
 - **Account:** the Rs 10 lakh is invested 40 buys at a time; what is not yet invested stays as cash.

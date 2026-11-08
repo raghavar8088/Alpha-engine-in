@@ -125,7 +125,7 @@ ACCOUNTS: list[Account] = [
 # (backend/research/crypto_playlist_2026_11), not backtested; paper trading is their first test. The previous-day sweep
 # of the same playlist already trades as BB-07, and the premium/discount filter is part of CP-17 and CP-18.
 CP = "crypto_playlist"
-MONEY["BTCUSD"] = Money("global", "USD", margin=0.10, step=0.0001)        # 10x, the leverage the video starts beginners on
+MONEY["BTCUSD"] = Money("global", "USD", margin=0.10, step=0.001)        # Delta contracts of 0.001 BTC; 10x, the video's beginner leverage
 MONEY["BTC_SPOT"] = Money("daily", "USD", margin=1.0, step=0.000001, fixed_inr=25_000.0, overnight=True)
 LABEL["BTCUSD"] = "Bitcoin"
 LABEL["BTC_SPOT"] = "Bitcoin spot"

@@ -13,6 +13,10 @@ NY = ZoneInfo("America/New_York")
 
 PAPER_START = date.fromisoformat(os.getenv("PREMIUM_PAPER_START", "2026-11-09"))
 CAPITAL = float(os.getenv("PREMIUM_CAPITAL", "1000000"))        # Rs 10 lakh per strategy
+# The bitcoin books (Delta Exchange BTCUSD) trade from this moment, asked for on 8 Nov 2026 ("start from now");
+# bitcoin trades all week, so they do not wait for Monday. Nothing before it is back-filled.
+BTC_START_T = int(datetime.fromisoformat(os.getenv("PREMIUM_BTC_START", "2026-11-08T11:00:00+00:00")).timestamp())
+BTC_START_DATE = datetime.fromtimestamp(BTC_START_T, timezone.utc).date()
 
 MONGO_URL = os.getenv("FACTORY_MONGO_URL", "").strip()
 MONGO_DB = os.getenv("PREMIUM_MONGO_DB", "alpha_engine_premium")

@@ -20,7 +20,7 @@ type Detail = Account & { positions: Position[]; curve: [string, number][] };
 type Trade = { id: string; sym: string; mkt: string; side: number; setup: string; date: string; entry_t: number; exit_t: number | null;
   entry: number; exit: number | null; reason: string; open: boolean; last: number | null; qty?: number; pnl?: number; skip?: string | null; sealed: boolean };
 type GroupStatus = { at: string; ok: boolean; seconds: number; error: string | null };
-export type Summary = { accounts: Account[]; status: { paper_start?: string; capital?: number; groups?: Record<string, GroupStatus> }; configured: boolean };
+export type Summary = { accounts: Account[]; status: { paper_start?: string; btc_start?: string; capital?: number; groups?: Record<string, GroupStatus> }; configured: boolean };
 
 const POLL_MS = 60000;
 const REASON: Record<string, string> = { stop: "Stop", stop_gap: "Stop (gap)", be_stop: "Breakeven stop", target: "Target", time: "Session end",
@@ -247,7 +247,11 @@ export default function PaperDesk({ summary, error }: { summary: Summary | null;
       {start && today < start && (
         <div className="ps-banner pd-wait" role="status">
           <span className="ps-pill ps-pill-neutral">Starts {day(start)}</span>
-          <span>Forward paper trading begins on {day(start)} 2026. Every account holds its ₹10,00,000 until then; nothing is back-filled, so each result will come only from days no test has seen.</span>
+          <span>
+            Forward paper trading begins on {day(start)} 2026
+            {summary?.status?.btc_start ? `; the bitcoin strategies, which trade all week, started on ${istTime(Date.parse(summary.status.btc_start) / 1000)} IST` : ""}.
+            {" "}Every other account holds its ₹10,00,000 until then; nothing is back-filled, so each result will come only from days no test has seen.
+          </span>
         </div>
       )}
       <div className="pd-tiles">

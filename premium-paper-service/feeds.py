@@ -525,64 +525,10 @@ class Panel:
                                 np.nan_to_num(mat["v"][ok]), key)
 
 
-# ── Crypto-playlist markets: bitcoin from Binance (with taker volume), silver, Fear & Greed ─────
+# ── Crypto-playlist markets: silver, Fear & Greed (bitcoin from Delta Exchange is below) ─────
 
-BINANCE_HOSTS = ("https://data-api.binance.vision", "https://api.binance.com")
 BM.COSTS.setdefault("XAGUSD", BM.CostModel(0.01, 0.01, 0.0))
 YM.COSTS.setdefault("XAGUSD", YM.Cost(0.01, 0.01, 0.0))
-
-
-def _binance(path: str, **params) -> list:
-    last = None
-    for host in BINANCE_HOSTS:
-        url = f"{host}{path}?{urllib.parse.urlencode(params)}"
-        try:
-            with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": UA}), timeout=30) as r:
-                return json.load(r)
-        except Exception as exc:  # noqa: BLE001
-            last = exc
-    raise RuntimeError(f"binance {path}: {last}")
-
-
-def update_binance(now_ts: int | None = None, name: str = "BTCUSD", symbol: str = "BTCUSDT") -> dict:
-    """Append finished BTCUSDT minutes, each with its taker-buy volume (so a candle's delta is real), 1,000 a request."""
-    now_ts = now_ts or int(time.time())
-    have = _read_cols(name, _ym(now_ts - 60 * 86400), ("t",))[0]
-    last = int(have[-1]) if len(have) else now_ts - 46 * 86400
-    rows = []
-    start = last + 60
-    while start < now_ts - 120:
-        got = _binance("/api/v3/klines", symbol=symbol, interval="1m", startTime=start * 1000, limit=1000)
-        if not got:
-            break
-        rows += got
-        start = int(got[-1][0]) // 1000 + 60
-        if len(got) < 1000:
-            break
-        time.sleep(0.3)
-    if not rows:
-        return {"new": 0, "last": last}
-    a = np.array([[float(r[0]) / 1000, float(r[1]), float(r[2]), float(r[3]), float(r[4]), float(r[5]), float(r[9])] for r in rows])
-    t = a[:, 0].astype(np.int64)
-    keep = (t > last) & (t <= now_ts - 120)
-    a, t = a[keep], t[keep]
-    if not len(t):
-        return {"new": 0, "last": last}
-    t, idx = np.unique(t, return_index=True)
-    a = a[idx]
-    months = np.array([_ym(int(x)) for x in t])
-    for ym in np.unique(months):
-        m = months == ym
-        path = _month_file(name, str(ym))
-        path.parent.mkdir(parents=True, exist_ok=True)
-        cols = dict(t=t[m], o=a[m, 1], h=a[m, 2], l=a[m, 3], c=a[m, 4], v=a[m, 5], bv=a[m, 6])
-        if path.exists():
-            with np.load(path) as z:
-                cols = {k: np.concatenate([z[k], cols[k]]) for k in cols}
-        tmp = path.with_suffix(".tmp.npz")
-        np.savez_compressed(tmp, **cols)
-        tmp.replace(path)
-    return {"new": int(len(t)), "last": int(t[-1])}
 
 
 def _read_cols(name: str, first_ym: str, cols: tuple) -> tuple:
@@ -595,15 +541,6 @@ def _read_cols(name: str, first_ym: str, cols: tuple) -> tuple:
     if not parts:
         return tuple(np.empty(0) for _ in cols)
     return tuple(np.concatenate([p[i] for p in parts]) for i in range(len(cols)))
-
-
-def btc_market(since: date):
-    t0 = int(datetime(since.year, since.month, since.day, tzinfo=timezone.utc).timestamp())
-    t, o, h, l, c, v, bv = _read_cols("BTCUSD", _ym(t0), ("t", "o", "h", "l", "c", "v", "bv"))
-    keep = t >= t0
-    if not keep.any():
-        return None
-    return CPM.btc_market(t[keep].astype(np.int64), o[keep], h[keep], l[keep], c[keep], v[keep], bv[keep])
 
 
 def btc_final_day(now: datetime | None = None) -> str:
@@ -633,3 +570,71 @@ def fear_greed() -> dict:
     except Exception as exc:  # noqa: BLE001
         log.warning("fear & greed: %s", exc)
     return have
+
+
+# ── bitcoin from Delta Exchange (BTCUSD perpetual): 1-minute candles, plus the recorded order flow ─────
+
+DELTA_API = "https://api.india.delta.exchange"
+DELTA_STORE = "DELTA_BTCUSD"
+# Delta India BTCUSD: 0.001 BTC a contract, tick $0.5, taker fee 0.05% + 18% GST = 0.059% a side; 2 bp of slippage
+DELTA_COST = YM.Cost(0.0, 0.0, 0.0, False, 1, pct_slip=0.0002, pct_comm=0.00059)
+DELTA_HALF = 0.5                                   # half a $1 spread
+
+
+def update_delta_candles(now_ts: int | None = None, symbol: str = "BTCUSD") -> dict:
+    """Append finished 1-minute candles of Delta's BTCUSD perpetual (the forming minute is never stored)."""
+    now_ts = now_ts or int(time.time())
+    have = _read_cols(DELTA_STORE, _ym(now_ts - 60 * 86400), ("t",))[0]
+    last = int(have[-1]) if len(have) else now_ts - 46 * 86400
+    rows, start = [], last + 60
+    while start < now_ts - 120:
+        end = min(start + 2000 * 60, now_ts - 120)
+        url = f"{DELTA_API}/v2/history/candles?" + urllib.parse.urlencode({"resolution": "1m", "symbol": symbol, "start": start, "end": end})
+        with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": UA}), timeout=30) as r:
+            rows += json.load(r).get("result") or []
+        start = end
+        time.sleep(0.3)
+    if not rows:
+        return {"new": 0, "last": last}
+    a = np.array([[float(x["time"]), float(x["open"]), float(x["high"]), float(x["low"]), float(x["close"]), float(x.get("volume") or 0)]
+                  for x in rows])
+    t = a[:, 0].astype(np.int64)
+    keep = (t > last) & (t <= now_ts - 120) & (t % 60 == 0)
+    a, t = a[keep], t[keep]
+    if not len(t):
+        return {"new": 0, "last": last}
+    t, idx = np.unique(t, return_index=True)
+    a = a[idx]
+    months = np.array([_ym(int(x)) for x in t])
+    for ym in np.unique(months):
+        m = months == ym
+        path = _month_file(DELTA_STORE, str(ym))
+        path.parent.mkdir(parents=True, exist_ok=True)
+        cols = dict(t=t[m], o=a[m, 1], h=a[m, 2], l=a[m, 3], c=a[m, 4], v=a[m, 5])
+        if path.exists():
+            with np.load(path) as z:
+                cols = {k: np.concatenate([z[k], cols[k]]) for k in cols}
+        tmp = path.with_suffix(".tmp.npz")
+        np.savez_compressed(tmp, **cols)
+        tmp.replace(path)
+    return {"new": int(len(t)), "last": int(t[-1])}
+
+
+def btc_market(since: date):
+    """Delta BTCUSD minutes from `since` (UTC days), with each minute's taker buy and total taker volume where the
+    order-flow recorder saw the whole minute; NaN elsewhere, so a candle's delta is only known when it was recorded."""
+    import delta_flow
+    t0 = int(datetime(since.year, since.month, since.day, tzinfo=timezone.utc).timestamp())
+    t, o, h, l, c, v = _read_cols(DELTA_STORE, _ym(t0), ("t", "o", "h", "l", "c", "v"))
+    keep = t >= t0
+    if not keep.any():
+        return None
+    t, o, h, l, c, v = (x[keep] for x in (t, o, h, l, c, v))
+    m = CPM.btc_market(t.astype(np.int64), o, h, l, c, v, np.zeros(len(t)))
+    flow = delta_flow.read(t0)
+    buy = np.array([flow[int(x)][0] if int(x) in flow else np.nan for x in m.t])
+    sell = np.array([flow[int(x)][1] if int(x) in flow else np.nan for x in m.t])
+    m.bv, m.vol_all = buy, buy + sell
+    m.half = np.full(len(m.t), DELTA_HALF)
+    m.cost = DELTA_COST
+    return m
