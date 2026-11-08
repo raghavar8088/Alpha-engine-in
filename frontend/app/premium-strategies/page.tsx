@@ -13,6 +13,7 @@ import { PREMIUM, type Version } from "./data";
 import { day, inr, num, pct, tone } from "./format";
 import LibraryCards, { PaperLine } from "./LibraryCards";
 import PaperDesk, { SOURCE_LABEL, usePaperSummary, type Account } from "./PaperDesk";
+import Sel15Nifty50 from "./Sel15Nifty50";
 
 type Tab = "paper" | "strategies" | "results" | "november" | "daily" | "method";
 const TABS: { id: Tab; label: string }[] = [
@@ -171,6 +172,7 @@ export default function PremiumStrategiesPage() {
               </button>
             ))}
           </div>
+          {libSource === "all" && <Sel15Nifty50 />}
           {(libSource === "all" || libSource === "vwap") && (
             <>
           <div className="pd-section"><h3>{SOURCE_LABEL.vwap}</h3><p>{SOURCE_TEXT.vwap}</p></div>
