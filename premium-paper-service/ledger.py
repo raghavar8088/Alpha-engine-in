@@ -92,6 +92,11 @@ def _size(d: dict, cash: float, used_margin: float, rate: float) -> tuple[float,
     if entry <= 0 or unit <= 0:
         return 0.0, 0.0, "no risk unit"
     free = max(cash - used_margin, 0.0)
+    if cfg.fixed_inr:                     # accumulation: a fixed amount a buy, while the cash lasts
+        q = math.floor(min(cfg.fixed_inr, free) / entry / cfg.step + 1e-9) * cfg.step
+        if q <= 0:
+            return 0.0, 0.0, "no cash left"
+        return q, q * entry * cfg.margin, None
     budget = cfg.risk_pct * cash
     if cfg.lot:
         per_lot = unit * cfg.lot

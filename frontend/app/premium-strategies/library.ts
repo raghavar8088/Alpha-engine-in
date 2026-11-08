@@ -5,7 +5,7 @@
 export type LibRule = { label: string; text: string };
 export type LibBook = { market: string; variant: string; change: string; cls: string; n: number | null; meanR: number | null;
   grossR: number | null; winRate: number | null };
-export type LibStrategy = { id: string; source: "booming_bulls" | "youtube_top20"; name: string; channel: string; videos: string[];
+export type LibStrategy = { id: string; source: "booming_bulls" | "youtube_top20" | "crypto_playlist"; name: string; channel: string; videos: string[];
   verdict: string; books: LibBook[]; rules: LibRule[] };
 
 export const LIBRARY: LibStrategy[] = [
@@ -2524,6 +2524,1081 @@ export const LIBRARY: LibStrategy[] = [
    {
     "label": "Limits",
     "text": "one trade a day."
+   }
+  ]
+ },
+ {
+  "id": "CP-01",
+  "source": "crypto_playlist",
+  "name": "Trend pullback at the 5th point",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "qPBdLsiEa3s",
+   "mb0AeY9YyPg"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   },
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Markets",
+    "text": "Bitcoin and gold."
+   },
+   {
+    "label": "Setup",
+    "text": "the higher timeframe is in an uptrend (points 1-4: low, high, higher low, higher high)."
+   },
+   {
+    "label": "Entry",
+    "text": "a bullish pin bar that pulls back below the previous bar's low, into the lower half of the last swing range, above the last swing low (point 5) -> buy at the next open."
+   },
+   {
+    "label": "Stop",
+    "text": "below the pin bar (0.05% of price beyond)."
+   },
+   {
+    "label": "Mirror",
+    "text": "in a downtrend, sell a bearish pin bar in the upper half below the last swing high."
+   }
+  ]
+ },
+ {
+  "id": "CP-02",
+  "source": "crypto_playlist",
+  "name": "Power-candle breakout of the last swing",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "qPBdLsiEa3s",
+   "mb0AeY9YyPg"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   },
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Markets",
+    "text": "Bitcoin and gold."
+   },
+   {
+    "label": "Entry",
+    "text": "in an uptrend, a power candle closes above the last swing high -> buy. In a downtrend, below the last swing low -> sell."
+   },
+   {
+    "label": "Stop",
+    "text": "the far end of the breakout candle."
+   },
+   {
+    "label": "Note",
+    "text": "the \"N-shape\" of video mb0AeY9YyPg (low, high, higher low, then the break) is the uptrend condition itself."
+   }
+  ]
+ },
+ {
+  "id": "CP-03",
+  "source": "crypto_playlist",
+  "name": "Range ping-pong and range breakout",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "qPBdLsiEa3s",
+   "mb0AeY9YyPg"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   },
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Markets",
+    "text": "Bitcoin and gold."
+   },
+   {
+    "label": "Range",
+    "text": "the last 20 higher-timeframe bars, at most 4 ATRs tall, with at least 3 bars touching the top 10% and 3 touching the bottom 10% (E: \"3-4 touches\"; A: the numbers)."
+   },
+   {
+    "label": "Fade",
+    "text": "a bearish pin bar at the top that closes back inside -> sell, target the other side (only if that is at least 2R). Mirror at the bottom."
+   },
+   {
+    "label": "Breakout",
+    "text": "a power candle closing outside the range -> trade the break, 2R."
+   }
+  ]
+ },
+ {
+  "id": "CP-04",
+  "source": "crypto_playlist",
+  "name": "Trend-line rejection",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "qPBdLsiEa3s"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "Bitcoin."
+   },
+   {
+    "label": "Line",
+    "text": "through the last two falling swing highs of the 1-hour chart (A); the latest hourly close is still below it."
+   },
+   {
+    "label": "Entry",
+    "text": "a 15-minute candle reaches the line and closes back below it, red -> sell. Mirror: a line through two rising swing lows, green close back above -> buy."
+   },
+   {
+    "label": "Stop",
+    "text": "beyond the candle (0.1%)."
+   }
+  ]
+ },
+ {
+  "id": "CP-05",
+  "source": "crypto_playlist",
+  "name": "Turning-point zones (3 touches)",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "mb0AeY9YyPg"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "gold."
+   },
+   {
+    "label": "Zone",
+    "text": "three 5-minute turning points whose zones (body to wick) overlap, within the last 300 bars (E: \"2 OK, 3 best\")."
+   },
+   {
+    "label": "Entry",
+    "text": "the next touch: a pin bar that rejects the zone and closes beyond its near edge -> sell at resistance / buy at support."
+   },
+   {
+    "label": "Bias",
+    "text": "with the 15-minute trend; both directions when it is flat (E)."
+   },
+   {
+    "label": "Stop",
+    "text": "a quarter ATR beyond the zone (E: \"do not make the stop tight\")."
+   }
+  ]
+ },
+ {
+  "id": "CP-06",
+  "source": "crypto_playlist",
+  "name": "Triple top / triple bottom",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "mb0AeY9YyPg"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "gold."
+   },
+   {
+    "label": "Pattern",
+    "text": "three swing highs within a quarter ATR of each other, at least 3 bars apart, within 150 bars (E: \"triple, not double\"; A: tolerances)."
+   },
+   {
+    "label": "Entry",
+    "text": "once the third top is confirmed, if price is still within 1.5 ATR of it -> sell. Mirror for bottoms."
+   },
+   {
+    "label": "Stop",
+    "text": "just above the highest top."
+   }
+  ]
+ },
+ {
+  "id": "CP-07",
+  "source": "crypto_playlist",
+  "name": "Head and shoulders / inverted",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "mb0AeY9YyPg"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "gold."
+   },
+   {
+    "label": "Pattern",
+    "text": "three swing highs, the middle at least half an ATR above the others, shoulders within half an ATR (A)."
+   },
+   {
+    "label": "Entry",
+    "text": "the first close below the lower trough (neckline) within 24 bars -> sell. Mirror for the inverted pattern."
+   },
+   {
+    "label": "Stop",
+    "text": "above the right shoulder."
+   }
+  ]
+ },
+ {
+  "id": "CP-08",
+  "source": "crypto_playlist",
+  "name": "Flag and pole",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "mb0AeY9YyPg"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "gold."
+   },
+   {
+    "label": "Pole",
+    "text": "a 6-bar move of at least 2.5 ATR (A)."
+   },
+   {
+    "label": "Flag",
+    "text": "at least 4 bars, no taller than half the pole, retracing no more than half of it (A)."
+   },
+   {
+    "label": "Entry",
+    "text": "a close beyond the flag in the pole's direction, within 15 bars -> trade it. Stop beyond the far side of the flag."
+   }
+  ]
+ },
+ {
+  "id": "CP-09",
+  "source": "crypto_playlist",
+  "name": "Trap of a swing level",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "mb0AeY9YyPg"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "gold."
+   },
+   {
+    "label": "Trap",
+    "text": "a strong candle (body at least 60%) closes beyond the last 15-minute swing high or low."
+   },
+   {
+    "label": "Entry",
+    "text": "within 3 bars a candle closes back inside, coloured against the break -> trade against the break. Stop beyond the trap's extreme."
+   }
+  ]
+ },
+ {
+  "id": "CP-10",
+  "source": "crypto_playlist",
+  "name": "Retest of a broken level",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "mb0AeY9YyPg"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "gold."
+   },
+   {
+    "label": "Break",
+    "text": "a power candle closes beyond the last 15-minute swing level."
+   },
+   {
+    "label": "Entry",
+    "text": "within 24 bars price returns to the level and a candle rejects it in the break's direction -> enter. Stop beyond the retest."
+   }
+  ]
+ },
+ {
+  "id": "CP-12",
+  "source": "crypto_playlist",
+  "name": "Current-day high/low sweep",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "IOBoaM71MUA"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "gold."
+   },
+   {
+    "label": "Condition",
+    "text": "the day's range so far is at least 75% of the daily ATR(14) (E: \"ATR minus 20-30%\")."
+   },
+   {
+    "label": "Entry",
+    "text": "a 5-minute candle trades beyond the day's high or low and closes back inside -> trade the reversal. First one each day."
+   },
+   {
+    "label": "Stop",
+    "text": "0.07% beyond the sweep (E: \"past the round number\")."
+   },
+   {
+    "label": "Related",
+    "text": "the previous-day sweep of the same video already trades as BB-07."
+   }
+  ]
+ },
+ {
+  "id": "CP-13",
+  "source": "crypto_playlist",
+  "name": "15m order block entered on a 5m FVG",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "IOBoaM71MUA"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "gold."
+   },
+   {
+    "label": "Order block",
+    "text": "the first candle of a 15-minute fair value gap, at the lowest low (buys) or highest high (sells) of the previous 20 bars (A: video 37uPX6Li-xE's definition)."
+   },
+   {
+    "label": "Entry",
+    "text": "once price returns into the block, the next 5-minute fair value gap in the trade's direction: a limit order at the gap's edge, valid 12 bars."
+   },
+   {
+    "label": "Stop",
+    "text": "beyond that gap (E: \"drop to 5 minutes and use the FVG when the stop is too wide\")."
+   }
+  ]
+ },
+ {
+  "id": "CP-14",
+  "source": "crypto_playlist",
+  "name": "Order-flow absorption",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "ieZ--wMeSxE"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "Bitcoin (E: \"it works in bitcoin too\"; real taker volume from Binance, delta = taker buy minus taker sell)."
+   },
+   {
+    "label": "Trap candle",
+    "text": "at the 6-hour high, a 15-minute candle with positive delta but a bearish result (red, or an upper wick at least half the candle)."
+   },
+   {
+    "label": "Entry",
+    "text": "the next candle closes below its low, red with negative delta -> sell. Mirror at the 6-hour low."
+   },
+   {
+    "label": "Stop",
+    "text": "beyond the trap candle."
+   }
+  ]
+ },
+ {
+  "id": "CP-15",
+  "source": "crypto_playlist",
+  "name": "Delta-filtered morning / evening star",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "ieZ--wMeSxE"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "Bitcoin."
+   },
+   {
+    "label": "Pattern",
+    "text": "a large candle (body at least 60%), a small star (body at most 30% of it), then a candle closing past the first one's midpoint."
+   },
+   {
+    "label": "Filter",
+    "text": "at the 6-hour extreme, the star's delta shows the trapped side (negative for a morning star, positive for an evening star)."
+   },
+   {
+    "label": "Stop",
+    "text": "beyond the star."
+   }
+  ]
+ },
+ {
+  "id": "CP-16",
+  "source": "crypto_playlist",
+  "name": "ICT previous-day / week high-low sweep",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "37uPX6Li-xE"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "gold."
+   },
+   {
+    "label": "Levels",
+    "text": "the previous day's and the previous week's high and low (external range liquidity)."
+   },
+   {
+    "label": "Entry",
+    "text": "a 5-minute candle wicks beyond a level and closes back inside -> trade back into the range. Each level once a day, any hour."
+   }
+  ]
+ },
+ {
+  "id": "CP-17",
+  "source": "crypto_playlist",
+  "name": "Fair value gap, third touch",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "37uPX6Li-xE"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "gold."
+   },
+   {
+    "label": "Gap",
+    "text": "a 5-minute fair value gap in the discount half (buys) or premium half (sells) of the 15-minute dealing range (E: premium / discount)."
+   },
+   {
+    "label": "Entry",
+    "text": "the first two touches are not traded; the third must run past both and close back on the gap's side -> enter (E: \"trust it after it has held twice\")."
+   },
+   {
+    "label": "Stop",
+    "text": "beyond the third touch."
+   }
+  ]
+ },
+ {
+  "id": "CP-18",
+  "source": "crypto_playlist",
+  "name": "Order block at its 50%",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "37uPX6Li-xE"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "gold."
+   },
+   {
+    "label": "Order block",
+    "text": "the first candle of a 5-minute fair value gap (E: \"only blocks that leave a gap\"), in the discount (buys) or premium (sells) half of the 15-minute dealing range."
+   },
+   {
+    "label": "Entry",
+    "text": "a limit order at the block's middle (E: \"the right half of the block\"), valid one day."
+   },
+   {
+    "label": "Stop",
+    "text": "beyond the block."
+   }
+  ]
+ },
+ {
+  "id": "CP-20",
+  "source": "crypto_playlist",
+  "name": "Inverse fair value gap",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "37uPX6Li-xE"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "gold."
+   },
+   {
+    "label": "Entry",
+    "text": "a fair value gap that price closes through is retested from the other side within 48 bars, and a candle closes away from it -> trade in the break's direction. Stop beyond the gap."
+   }
+  ]
+ },
+ {
+  "id": "CP-21",
+  "source": "crypto_playlist",
+  "name": "Breaker block",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "37uPX6Li-xE"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "gold."
+   },
+   {
+    "label": "Entry",
+    "text": "an order block that price closes through is retested within 48 bars and rejected -> trade in the break's direction. Stop beyond the block."
+   }
+  ]
+ },
+ {
+  "id": "CP-22",
+  "source": "crypto_playlist",
+  "name": "CISD after a liquidity sweep",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "37uPX6Li-xE"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "gold."
+   },
+   {
+    "label": "Sweep",
+    "text": "a 5-minute candle wicks beyond the last 15-minute swing and closes back inside."
+   },
+   {
+    "label": "Level",
+    "text": "the body of the first opposite-coloured candle of the move into the sweep (E)."
+   },
+   {
+    "label": "Entry",
+    "text": "a close beyond that body within 12 bars -> enter. Stop beyond the sweep."
+   }
+  ]
+ },
+ {
+  "id": "CP-23",
+  "source": "crypto_playlist",
+  "name": "Inducement",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "37uPX6Li-xE"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "gold."
+   },
+   {
+    "label": "Setup",
+    "text": "after a 5-minute close beyond the last swing high (a break of structure), the swing low before it is the inducement."
+   },
+   {
+    "label": "Entry",
+    "text": "wait until price sweeps below it, then buy the first green close back above it, within 48 bars. Mirror for sells."
+   },
+   {
+    "label": "Stop",
+    "text": "below the sweep."
+   }
+  ]
+ },
+ {
+  "id": "CP-24",
+  "source": "crypto_playlist",
+  "name": "SMT divergence",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "37uPX6Li-xE"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   },
+   {
+    "market": "EUR/USD",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Markets",
+    "text": "gold against silver (E: his first example), EUR/USD against GBP/USD (E)."
+   },
+   {
+    "label": "Entry",
+    "text": "the traded market makes a higher high while its partner makes a lower high -> sell; a lower low against a higher low -> buy."
+   },
+   {
+    "label": "Stop",
+    "text": "beyond the new extreme."
+   }
+  ]
+ },
+ {
+  "id": "CP-25",
+  "source": "crypto_playlist",
+  "name": "Optimal trade entry (0.705-0.79)",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "37uPX6Li-xE"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "gold."
+   },
+   {
+    "label": "Leg",
+    "text": "a 15-minute impulse from a swing low to a swing high of at least 3 ATR."
+   },
+   {
+    "label": "Entry",
+    "text": "a limit order at the 0.705 retracement (the top of the 0.705-0.79 zone), valid 8 hours. Stop below the leg's start."
+   }
+  ]
+ },
+ {
+  "id": "CP-26",
+  "source": "crypto_playlist",
+  "name": "Turtle soup",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "37uPX6Li-xE"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "gold."
+   },
+   {
+    "label": "Entry",
+    "text": "a 5-minute candle wicks beyond the 20-bar high or low and closes back inside -> trade against it. Stop beyond the wick."
+   }
+  ]
+ },
+ {
+  "id": "CP-27",
+  "source": "crypto_playlist",
+  "name": "Unicorn model",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "37uPX6Li-xE"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "gold."
+   },
+   {
+    "label": "Steps",
+    "text": "a sweep of the last 15-minute swing; within 12 bars a displacement candle (range at least 1.5x the average) that breaks the last 5-minute swing (structure shift); the fair value gap it leaves."
+   },
+   {
+    "label": "Entry",
+    "text": "a limit order at that gap, valid 24 bars. Stop beyond the sweep."
+   }
+  ]
+ },
+ {
+  "id": "CP-28",
+  "source": "crypto_playlist",
+  "name": "Silver bullet (19:30-20:30 IST)",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "37uPX6Li-xE"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "gold."
+   },
+   {
+    "label": "Rule",
+    "text": "the unicorn model, only when the gap forms between 19:30 and 20:30 IST; the order expires at 20:30."
+   }
+  ]
+ },
+ {
+  "id": "CP-29",
+  "source": "crypto_playlist",
+  "name": "Fear & Greed accumulation",
+  "channel": "Booming Bulls (Crypto Trading playlist)",
+  "videos": [
+   "qPBdLsiEa3s"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin spot",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Market",
+    "text": "Bitcoin, spot, no leverage."
+   },
+   {
+    "label": "Rule",
+    "text": "every Monday that the Crypto Fear & Greed Index is below 45 (fear or extreme fear), buy Rs 25,000 of Bitcoin at that day's open (A: the amount and day). Never sell (E: \"hold for years\")."
+   },
+   {
+    "label": "Account",
+    "text": "the Rs 10 lakh is invested 40 buys at a time; what is not yet invested stays as cash."
    }
   ]
  }

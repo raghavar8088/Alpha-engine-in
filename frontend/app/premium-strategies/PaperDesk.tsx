@@ -26,7 +26,7 @@ const POLL_MS = 60000;
 const REASON: Record<string, string> = { stop: "Stop", stop_gap: "Stop (gap)", be_stop: "Breakeven stop", target: "Target", time: "Session end",
   exit_signal: "Exit signal", vwap_trail: "VWAP trail", open: "Open" };
 const GROUP_LABEL: Record<string, string> = { index: "Nifty and Bank Nifty", stocks: "NSE stocks", global: "Forex, gold, Nasdaq, Apple", daily: "Daily markets" };
-export const SOURCE_LABEL: Record<string, string> = { vwap: "VWAP study", booming_bulls: "Booming Bulls", youtube_top20: "YouTube top 20" };
+export const SOURCE_LABEL: Record<string, string> = { vwap: "VWAP study", booming_bulls: "Booming Bulls", youtube_top20: "YouTube top 20", crypto_playlist: "Crypto playlist" };
 
 /** The accounts, kept fresh for the whole page. An empty desk and an unreachable desk must not look the same. */
 export function usePaperSummary() {
@@ -268,7 +268,7 @@ export default function PaperDesk({ summary, error }: { summary: Summary | null;
 
       <GlassPanel title="Every strategy's account" note="best return first · click a row for its trades · click a heading to sort">
         <div className="ps-chips">
-          {["all", "vwap", "booming_bulls", "youtube_top20"].map((k) => (
+          {["all", "vwap", "booming_bulls", "youtube_top20", "crypto_playlist"].map((k) => (
             <button key={k} className={`ps-chip${source === k ? " on" : ""}`} onClick={() => setSource(k)}>
               {k === "all" ? "All" : SOURCE_LABEL[k]} · {counts[k] ?? 0}
             </button>

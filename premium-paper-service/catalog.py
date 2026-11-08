@@ -24,6 +24,7 @@ class Money:
     notional_cap: float = 0.0   # fraction of equity one position may reach (0 = no cap beyond margin)
     max_open: int = 0           # pools of many stocks: positions open at once (first come, ties to the more liquid)
     overnight: bool = False
+    fixed_inr: float = 0.0      # a fixed rupee amount per buy (accumulation) instead of risk sizing
 
 
 NSE_POOL = dict(group="stocks", risk_pct=0.0025, margin=0.20, step=1, notional_cap=0.25, max_open=4)
@@ -120,6 +121,45 @@ ACCOUNTS: list[Account] = [
     _a("YT-26", YT, "5-minute ORB on gappers with VWAP (proxy)", "Bear Bull Traders", ("NSE5", "V0")),
     _a("YT-27", YT, "Camarilla R3/S3 fade, R4/S4 breakout", "Bear Bull Traders", ("NIFTY", "V0"), ("BANKNIFTY", "V0"), ("NAS100", "V0")),
 ]
+# The Booming Bulls "Crypto Trading" playlist (PLHqOiFE9RQj8): rules written from the videos
+# (backend/research/crypto_playlist_2026_11), not backtested; paper trading is their first test. The previous-day sweep
+# of the same playlist already trades as BB-07, and the premium/discount filter is part of CP-17 and CP-18.
+CP = "crypto_playlist"
+MONEY["BTCUSD"] = Money("global", "USD", margin=0.10, step=0.0001)        # 10x, the leverage the video starts beginners on
+MONEY["BTC_SPOT"] = Money("daily", "USD", margin=1.0, step=0.000001, fixed_inr=25_000.0, overnight=True)
+LABEL["BTCUSD"] = "Bitcoin"
+LABEL["BTC_SPOT"] = "Bitcoin spot"
+_CPC = "Booming Bulls (Crypto Trading playlist)"
+for _sid, _name, _mkts in (
+    ("CP-01", "Trend pullback at the 5th point", ("BTCUSD", "XAUUSD")),
+    ("CP-02", "Power-candle breakout of the last swing", ("BTCUSD", "XAUUSD")),
+    ("CP-03", "Range ping-pong and range breakout", ("BTCUSD", "XAUUSD")),
+    ("CP-04", "Trend-line rejection", ("BTCUSD",)),
+    ("CP-05", "Turning-point zones (3 touches)", ("XAUUSD",)),
+    ("CP-06", "Triple top / triple bottom", ("XAUUSD",)),
+    ("CP-07", "Head and shoulders / inverted", ("XAUUSD",)),
+    ("CP-08", "Flag and pole", ("XAUUSD",)),
+    ("CP-09", "Trap of a swing level", ("XAUUSD",)),
+    ("CP-10", "Retest of a broken level", ("XAUUSD",)),
+    ("CP-12", "Current-day high/low sweep", ("XAUUSD",)),
+    ("CP-13", "15m order block entered on a 5m FVG", ("XAUUSD",)),
+    ("CP-14", "Order-flow absorption", ("BTCUSD",)),
+    ("CP-15", "Delta-filtered morning / evening star", ("BTCUSD",)),
+    ("CP-16", "ICT previous-day / week high-low sweep", ("XAUUSD",)),
+    ("CP-17", "Fair value gap, third touch", ("XAUUSD",)),
+    ("CP-18", "Order block at its 50%", ("XAUUSD",)),
+    ("CP-20", "Inverse fair value gap", ("XAUUSD",)),
+    ("CP-21", "Breaker block", ("XAUUSD",)),
+    ("CP-22", "CISD after a liquidity sweep", ("XAUUSD",)),
+    ("CP-23", "Inducement", ("XAUUSD",)),
+    ("CP-24", "SMT divergence", ("XAUUSD", "EURUSD")),
+    ("CP-25", "Optimal trade entry (0.705-0.79)", ("XAUUSD",)),
+    ("CP-26", "Turtle soup", ("XAUUSD",)),
+    ("CP-27", "Unicorn model", ("XAUUSD",)),
+    ("CP-28", "Silver bullet (19:30-20:30 IST)", ("XAUUSD",)),
+):
+    ACCOUNTS.append(_a(_sid, CP, _name, _CPC, *[(_m, "V0") for _m in _mkts]))
+ACCOUNTS.append(_a("CP-29", CP, "Fear & Greed accumulation", _CPC, ("BTC_SPOT", "V0")))
 BY_ID = {a.id: a for a in ACCOUNTS}
 
 

@@ -13,6 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/research/booming_bulls_2026_11/bb_markets.py backend/research/booming_bulls_2026_11/bb_engine.py backend/research/booming_bulls_2026_11/bb_strategies.py /app/backend/research/booming_bulls_2026_11/
 COPY backend/research/youtube_top20_2026_11/yt_markets.py backend/research/youtube_top20_2026_11/yt_engine.py backend/research/youtube_top20_2026_11/yt_strategies.py backend/research/youtube_top20_2026_11/yt_ind.py /app/backend/research/youtube_top20_2026_11/
+COPY backend/research/crypto_playlist_2026_11/cp_markets.py backend/research/crypto_playlist_2026_11/cp_strategies.py /app/backend/research/crypto_playlist_2026_11/
 COPY backend/app/services/index_intraday/data.py /app/backend/app/services/index_intraday/data.py
 COPY premium-paper-service/*.py ./
 

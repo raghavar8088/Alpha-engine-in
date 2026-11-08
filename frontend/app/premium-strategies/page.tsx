@@ -27,6 +27,7 @@ const SOURCE_TEXT: Record<string, string> = {
   vwap: "The two setups from a Booming Bulls VWAP video, made exact, plus four upgrades. NSE stocks, 5-minute candles.",
   booming_bulls: "18 strategies written from the Booming Bulls channel's strategy videos, on Nifty, Bank Nifty, gold, forex, the Nasdaq and Apple.",
   youtube_top20: "28 strategies from the 20 largest trading channels on YouTube, on Indian indices, NSE stocks, forex, gold and US indices.",
+  crypto_playlist: "27 strategies from the 8 videos of Booming Bulls' Crypto Trading playlist, on bitcoin, gold and EUR/USD. Written as exact rules from the videos and not backtested: paper trading is their first test.",
 };
 
 const REASON: Record<string, string> = {
@@ -132,7 +133,7 @@ export default function PremiumStrategiesPage() {
       <PageHeader
         crumb="Premium Strategies"
         title="Premium Strategies"
-        subtitle="52 strategies from YouTube's trading channels: their exact rules, their results after all costs, and each one paper trading its own ₹10 lakh account."
+        subtitle="79 strategies from YouTube's trading channels: their exact rules, their results after all costs, and each one paper trading its own ₹10 lakh account."
       />
 
       <div className="ps-banner" role="note">
@@ -163,7 +164,7 @@ export default function PremiumStrategiesPage() {
       {tab === "strategies" && (
         <>
           <div className="ps-chips">
-            {["all", "vwap", "booming_bulls", "youtube_top20"].map((k) => (
+            {["all", "vwap", "booming_bulls", "youtube_top20", "crypto_playlist"].map((k) => (
               <button key={k} className={`ps-chip${libSource === k ? " on" : ""}`} onClick={() => setLibSource(k)}>
                 {k === "all" ? "All" : SOURCE_LABEL[k]}
               </button>
@@ -223,7 +224,7 @@ export default function PremiumStrategiesPage() {
           </GlassPanel>
             </>
           )}
-          {(["booming_bulls", "youtube_top20"] as const).filter((k) => libSource === "all" || libSource === k).map((k) => (
+          {(["booming_bulls", "youtube_top20", "crypto_playlist"] as const).filter((k) => libSource === "all" || libSource === k).map((k) => (
             <div key={k} className="pd-group">
               <div className="pd-section"><h3>{SOURCE_LABEL[k]}</h3><p>{SOURCE_TEXT[k]}</p></div>
               <LibraryCards source={k} accounts={byId} />
@@ -512,6 +513,23 @@ export default function PremiumStrategiesPage() {
             <li>
               <b>When it updates.</b> A session&apos;s trades are provisional until its bars are final (17:30 IST for NSE; about half an hour after the close elsewhere). Until then a trade can still change, so read today&apos;s figures as a guide. They are then
               sealed and never rewritten. If Main Control switches this module off, no cycle runs; a missed session is replayed when it is switched on again, as far as its bars still exist.
+            </li>
+          </ul>
+        </GlassPanel>
+        <GlassPanel title="The Crypto Trading playlist">
+          <ul className="ps-list">
+            <li>
+              <b>Source.</b> All 8 videos of Booming Bulls&apos; Crypto Trading playlist, read in full from their captions. 29 strategies are taught; 27 trade here.
+              The previous-day high/low sweep already trades as BB-07, and the premium/discount filter is part of CP-17 and CP-18.
+            </li>
+            <li>
+              <b>Rules.</b> Each was written as exact code; where a video was vague the choice is marked A in its rules. All share the videos&apos; money rules: a 2R target,
+              breakeven halfway to it, at most 2 trades a day and none after a stop-loss. The code was checked for look-ahead: cutting the data at random moments never changes
+              a signal already known.
+            </li>
+            <li>
+              <b>Not backtested.</b> Paper trading from 9 Nov 2026 is their first test. Bitcoin uses Binance minutes with real taker volume, so the order-flow strategies see a
+              true buy/sell delta. Silver for the gold SMT strategy comes from COMEX futures (SI=F).
             </li>
           </ul>
         </GlassPanel>

@@ -19,7 +19,7 @@ import feeds as F
 import ledger as L
 import runner as R
 import vwap_run
-from research import YM
+from research import CS, YM
 from settings import DAILY_WARM_DAYS, PAPER_START, now_ist
 
 log = logging.getLogger("premium.cycle")
@@ -159,12 +159,16 @@ def run_global(db, now: datetime) -> dict:
             errors[f"feed {name}"] = str(exc)[:200]
         time.sleep(0.5)
     try:
+        new["BTCUSD"] = F.update_binance()["new"]
+    except Exception as exc:  # noqa: BLE001
+        errors["feed BTCUSD"] = str(exc)[:200]
+    try:
         rates = F.usdinr()
         if rates:
             db.premium_meta.update_one({"_id": "fx"}, {"$set": {f"rates.{k}": v for k, v in rates.items()}}, upsert=True)
     except Exception as exc:  # noqa: BLE001
         errors["usdinr"] = str(exc)[:200]
-    sig = "|".join(f"{n}:{F.last_minute(n)}" for n in sorted(F.YF)) + "|" + "|".join(F.global_final_day(n) for n in ("EURUSD", "NAS100"))
+    sig = "|".join(f"{n}:{F.last_minute(n)}" for n in sorted(F.YF) + ["BTCUSD"]) + "|" + "|".join(F.global_final_day(n) for n in ("EURUSD", "NAS100"))
     if sig == L.signature(db, "global"):
         return {"skipped": "no new bars", "errors": errors}
     if now.date() < PAPER_START - timedelta(days=1):
@@ -193,6 +197,9 @@ def run_global(db, now: datetime) -> dict:
             try:
                 if a.source == C.BB:
                     tr, _ = R.run_bb(a.id, v, m, c_full if on else c_recent)
+                elif a.source == C.CP:
+                    tr, _ = R.run_cp(a.id, name, ym_full if on else ym_recent, c_full if on else c_recent,
+                                     _companion(a.id, name, m))
                 else:
                     tr, _ = R.run_yt(a.id, v, name, ym_full if on else ym_recent, c_full if on else c_recent)
                 n_docs += _save_book(db, a, name, tr, m, on, start, final, live_day)
@@ -200,10 +207,39 @@ def run_global(db, now: datetime) -> dict:
             except Exception as exc:  # noqa: BLE001
                 log.exception("%s %s", a.id, name)
                 errors[f"{a.id}|{name}"] = str(exc)[:200]
+    # bitcoin (Binance minutes): the Crypto-playlist books, all intraday
+    btc_books = [b for b in books if b[1] == "BTCUSD"]
+    if btc_books:
+        firsts = [replay_from(db, a.id, "BTCUSD", False) for a, _, _, _ in btc_books]
+        bm = F.btc_market(min(firsts) - timedelta(days=GLOBAL_WARM_DAYS))
+        if bm is not None:
+            final = F.btc_final_day()
+            last_day = str(bm.date[-1])
+            live_day = last_day if last_day > final else None
+            cache: dict = {}
+            for a, _, v, _ in btc_books:
+                start = replay_from(db, a.id, "BTCUSD", False)
+                try:
+                    tr, _ = R.run_cp(a.id, "BTCUSD", bm, cache)
+                    n_docs += _save_book(db, a, "BTCUSD", tr, bm, False, start, final, live_day)
+                    touched.add(a.id)
+                except Exception as exc:  # noqa: BLE001
+                    log.exception("%s BTCUSD", a.id)
+                    errors[f"{a.id}|BTCUSD"] = str(exc)[:200]
     if touched:
         L.update_accounts(db, sorted(touched))
     L.set_signature(db, "global", sig)
     return {"trades": n_docs, "new": new, "errors": errors}
+
+
+def _companion(sid: str, market: str, m):
+    """CP-24's partner market (silver for gold, GBP/USD for EUR/USD) over the same days as `m`."""
+    comp = CS.STRATEGIES[sid].companion.get(market)
+    if not comp:
+        return None
+    since = date.fromisoformat(str(m.date[0]))
+    om = F.global_market(comp, since)
+    return YM._as_mkt(om, comp, comp, YM.COSTS[comp]) if om is not None else None
 
 
 # ── daily markets ────────────────────────────────────────────────────────────────────
@@ -213,7 +249,7 @@ def run_daily(db, now: datetime) -> dict:
     since = PAPER_START - timedelta(days=DAILY_WARM_DAYS)
     idx = {"SPX500_D": F.us_daily("SPX500_D"), "NAS100_D": F.us_daily("NAS100_D"), "NIFTY_D": F.nifty_daily(since, now)}
     lasts = {k: str(v.date[-1]) if v is not None else None for k, v in idx.items()}
-    sig = f"{lasts}|{info['nse'].get('last')}"
+    sig = f"{lasts}|{info['nse'].get('last')}|btc{F.last_minute('BTCUSD') // 3600}"
     if sig == L.signature(db, "daily"):
         return {**info, "skipped": "no new sessions"}
     if now.date() < PAPER_START:
@@ -222,7 +258,7 @@ def run_daily(db, now: datetime) -> dict:
     books = C.books_in("daily")
     n_docs, errors, touched = 0, {}, set()
     for a, mk, v in books:
-        if mk == "NSED":
+        if mk in ("NSED", "BTC_SPOT"):
             continue
         m = idx[mk]
         if m is None:
@@ -231,6 +267,16 @@ def run_daily(db, now: datetime) -> dict:
         try:
             tr, _ = R.run_yt(a.id, v, mk, m, {})
             n_docs += _save_book(db, a, mk, tr, m, True, PAPER_START, lasts[mk], None)
+            touched.add(a.id)
+        except Exception as exc:  # noqa: BLE001
+            log.exception("%s %s", a.id, mk)
+            errors[f"{a.id}|{mk}"] = str(exc)[:200]
+    for a, mk, v in [b for b in books if b[1] == "BTC_SPOT"]:
+        try:
+            fng = F.fear_greed()
+            bm = F.btc_market(PAPER_START - timedelta(days=2))
+            docs = R.fear_greed_docs(a.id, fng, bm, PAPER_START.isoformat())
+            n_docs += L.persist(db, a.id, mk, docs, PAPER_START.isoformat(), "0000-00-00", True)
             touched.add(a.id)
         except Exception as exc:  # noqa: BLE001
             log.exception("%s %s", a.id, mk)

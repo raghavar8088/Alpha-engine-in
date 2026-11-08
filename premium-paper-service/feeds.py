@@ -27,7 +27,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from research import BM, II, YM
+from research import BM, CPM, II, YM
 from settings import APP_SECRET, BACKEND, DATA, INTRADAY, IST, NSE_FINAL_HHMM, NY
 
 log = logging.getLogger("premium.feeds")
@@ -84,10 +84,10 @@ def index_market(name: str, since: date, live_rows, now: datetime):
 
 # ── Yahoo: 1-minute store ────────────────────────────────────────────────────────────
 
-YF = {"XAUUSD": "GC=F", "EURUSD": "6E=F", "GBPUSD": "6B=F", "NAS100": "NQ=F", "AAPL": "AAPL"}
+YF = {"XAUUSD": "GC=F", "EURUSD": "6E=F", "GBPUSD": "6B=F", "NAS100": "NQ=F", "AAPL": "AAPL", "XAGUSD": "SI=F"}
 CASH = ("NAS100", "AAPL")                       # one regular session a day, by New York date
 GOLD_HALF = 0.18                                # the research's median half-spread on gold (Dukascopy quotes)
-MAX_DEV = {"XAUUSD": 0.03, "EURUSD": 0.015, "GBPUSD": 0.015, "NAS100": 0.05, "AAPL": 0.08}
+MAX_DEV = {"XAUUSD": 0.03, "EURUSD": 0.015, "GBPUSD": 0.015, "NAS100": 0.05, "AAPL": 0.08, "XAGUSD": 0.05}
 
 
 def _chart(sym: str, **params) -> dict:
@@ -523,3 +523,113 @@ class Panel:
         key = np.repeat(self.day_keys, BARS_A_DAY).reshape(c.shape)[ok]
         return YM._finish_stock(self.names[i], base[ok].astype(np.int64), mat["o"][ok], mat["h"][ok], mat["l"][ok], c[ok],
                                 np.nan_to_num(mat["v"][ok]), key)
+
+
+# ── Crypto-playlist markets: bitcoin from Binance (with taker volume), silver, Fear & Greed ─────
+
+BINANCE_HOSTS = ("https://data-api.binance.vision", "https://api.binance.com")
+BM.COSTS.setdefault("XAGUSD", BM.CostModel(0.01, 0.01, 0.0))
+YM.COSTS.setdefault("XAGUSD", YM.Cost(0.01, 0.01, 0.0))
+
+
+def _binance(path: str, **params) -> list:
+    last = None
+    for host in BINANCE_HOSTS:
+        url = f"{host}{path}?{urllib.parse.urlencode(params)}"
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": UA}), timeout=30) as r:
+                return json.load(r)
+        except Exception as exc:  # noqa: BLE001
+            last = exc
+    raise RuntimeError(f"binance {path}: {last}")
+
+
+def update_binance(now_ts: int | None = None, name: str = "BTCUSD", symbol: str = "BTCUSDT") -> dict:
+    """Append finished BTCUSDT minutes, each with its taker-buy volume (so a candle's delta is real), 1,000 a request."""
+    now_ts = now_ts or int(time.time())
+    have = _read_cols(name, _ym(now_ts - 60 * 86400), ("t",))[0]
+    last = int(have[-1]) if len(have) else now_ts - 46 * 86400
+    rows = []
+    start = last + 60
+    while start < now_ts - 120:
+        got = _binance("/api/v3/klines", symbol=symbol, interval="1m", startTime=start * 1000, limit=1000)
+        if not got:
+            break
+        rows += got
+        start = int(got[-1][0]) // 1000 + 60
+        if len(got) < 1000:
+            break
+        time.sleep(0.3)
+    if not rows:
+        return {"new": 0, "last": last}
+    a = np.array([[float(r[0]) / 1000, float(r[1]), float(r[2]), float(r[3]), float(r[4]), float(r[5]), float(r[9])] for r in rows])
+    t = a[:, 0].astype(np.int64)
+    keep = (t > last) & (t <= now_ts - 120)
+    a, t = a[keep], t[keep]
+    if not len(t):
+        return {"new": 0, "last": last}
+    t, idx = np.unique(t, return_index=True)
+    a = a[idx]
+    months = np.array([_ym(int(x)) for x in t])
+    for ym in np.unique(months):
+        m = months == ym
+        path = _month_file(name, str(ym))
+        path.parent.mkdir(parents=True, exist_ok=True)
+        cols = dict(t=t[m], o=a[m, 1], h=a[m, 2], l=a[m, 3], c=a[m, 4], v=a[m, 5], bv=a[m, 6])
+        if path.exists():
+            with np.load(path) as z:
+                cols = {k: np.concatenate([z[k], cols[k]]) for k in cols}
+        tmp = path.with_suffix(".tmp.npz")
+        np.savez_compressed(tmp, **cols)
+        tmp.replace(path)
+    return {"new": int(len(t)), "last": int(t[-1])}
+
+
+def _read_cols(name: str, first_ym: str, cols: tuple) -> tuple:
+    parts = []
+    folder = DATA / "min1" / name
+    for f in sorted(folder.glob("*.npz")) if folder.exists() else []:
+        if f.stem >= first_ym:
+            with np.load(f) as z:
+                parts.append(tuple(z[k] for k in cols))
+    if not parts:
+        return tuple(np.empty(0) for _ in cols)
+    return tuple(np.concatenate([p[i] for p in parts]) for i in range(len(cols)))
+
+
+def btc_market(since: date):
+    t0 = int(datetime(since.year, since.month, since.day, tzinfo=timezone.utc).timestamp())
+    t, o, h, l, c, v, bv = _read_cols("BTCUSD", _ym(t0), ("t", "o", "h", "l", "c", "v", "bv"))
+    keep = t >= t0
+    if not keep.any():
+        return None
+    return CPM.btc_market(t[keep].astype(np.int64), o[keep], h[keep], l[keep], c[keep], v[keep], bv[keep])
+
+
+def btc_final_day(now: datetime | None = None) -> str:
+    """A UTC day is final half an hour after it ends."""
+    n = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
+    done = n.hour * 60 + n.minute >= 30
+    return ((n.date() - timedelta(days=1)) if done else (n.date() - timedelta(days=2))).isoformat()
+
+
+FNG_FILE = DATA / "daily" / "fear_greed.json"
+
+
+def fear_greed() -> dict:
+    """{UTC date: index value} of the Crypto Fear & Greed Index (alternative.me), kept on disk; stored days never change."""
+    have = {}
+    if FNG_FILE.exists():
+        have = json.loads(FNG_FILE.read_text())
+    try:
+        with urllib.request.urlopen(urllib.request.Request("https://api.alternative.me/fng/?limit=60&format=json",
+                                                           headers={"User-Agent": UA}), timeout=30) as r:
+            data = json.load(r).get("data") or []
+        for x in data:
+            d = datetime.fromtimestamp(int(x["timestamp"]), timezone.utc).date().isoformat()
+            have.setdefault(d, int(x["value"]))
+        FNG_FILE.parent.mkdir(parents=True, exist_ok=True)
+        FNG_FILE.write_text(json.dumps(dict(sorted(have.items()))))
+    except Exception as exc:  # noqa: BLE001
+        log.warning("fear & greed: %s", exc)
+    return have

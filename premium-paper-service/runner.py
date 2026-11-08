@@ -14,7 +14,7 @@ from dataclasses import dataclass
 import numpy as np
 
 import bb15
-from research import BE, BM, BS, YE, YS
+from research import BE, BM, BS, CS, YE, YS
 
 
 def _bars(m, tfs, cache: dict) -> dict:
@@ -67,6 +67,45 @@ def run_yt(sid: str, variant: str, market: str, m, cache: dict) -> tuple[list, d
     ex = YS.exits_for(st, v, m, B)
     clock, minute = st.exit_clock[market]
     return YE.run_book(YE.Engine(m), S, ex, st.limits, YE.forced_exit_rows(m, clock, minute), sid, variant)
+
+
+def run_cp(sid: str, market: str, m, cache: dict, other=None) -> tuple[list, dict]:
+    """A Crypto-playlist strategy (backend/research/crypto_playlist_2026_11) through the YouTube study's engine.
+    `other` is the companion market of CP-24 (SMT divergence), already cut to the same span."""
+    st = CS.STRATEGIES[sid]
+    tfs = CS.tfs_of(st, market)
+    B = _bars(m, tfs, cache)
+    o = (other, {tf: BM.bars(other, tf) for tf in tfs}) if other is not None else None
+    S = CS.signals(st, market, m, B, cache, o)
+    if not S:
+        return [], {}
+    clock, minute = st.exit_clock[market]
+    return YE.run_book(YE.Engine(m), S, CS.exits_for(st), st.limits, YE.forced_exit_rows(m, clock, minute), sid, "V0")
+
+
+def fear_greed_docs(acct: str, fng: dict, btc, start: str, cost_pct: float = 0.0007) -> list[dict]:
+    """CP-29: every Monday from `start` with the Fear & Greed Index below 45, a buy at that UTC day's first minute.
+    Positions are never closed; each is marked at the last price, net of a round trip of costs."""
+    if btc is None or not len(btc.t):
+        return []
+    last = float(btc.c[-1])
+    out = []
+    for d in range(btc.n_days):
+        day = str(btc.date[d])
+        if day < start or np.datetime64(day, "D").astype(object).weekday() != 0:
+            continue
+        v = fng.get(day)
+        if v is None or v >= 45:
+            continue
+        k = int(btc.d0[d])
+        entry = float(btc.o[k])
+        cost = cost_pct * (entry + last)
+        out.append({"_id": f"{acct}|BTC_SPOT|BTC|{int(btc.t[k])}|1", "acct": acct, "book": f"{acct}|BTC_SPOT", "mkt": "BTC_SPOT",
+                    "sym": "BTC", "variant": "V0", "setup": f"FEAR_{int(v)}", "side": 1, "date": day, "entry_t": int(btc.t[k]),
+                    "exit_t": None, "exit_date": day, "entry": entry, "stop": None, "target": None, "exit": last, "reason": "open",
+                    "unit": entry, "r_net": (last - entry - cost) / entry, "r_gross": (last - entry) / entry, "cost_r": cost / entry,
+                    "open": True, "last": last, "rank": None})
+    return out
 
 
 def num(x):

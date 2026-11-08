@@ -6,7 +6,7 @@ import type { Account } from "./PaperDesk";
 import { LIBRARY, type LibStrategy } from "./library";
 import { num, pct, rupees, tone } from "./format";
 
-const PILL: Record<string, string> = { "Not supported": "ps-pill-loss", "Needs more evidence": "ps-pill-warn", "Too few trades to judge": "ps-pill-neutral", "Not tested": "ps-pill-neutral" };
+const PILL: Record<string, string> = { "Paper test only": "ps-pill-neutral", "Not supported": "ps-pill-loss", "Needs more evidence": "ps-pill-warn", "Too few trades to judge": "ps-pill-neutral", "Not tested": "ps-pill-neutral" };
 
 export function PaperLine({ a }: { a?: Account }) {
   if (!a) return null;
@@ -32,6 +32,12 @@ function Card({ s, account }: { s: LibStrategy; account?: Account }) {
       </div>
       <div className="ps-card-name">{s.name}</div>
       <div className="ps-card-idea">{s.channel}</div>
+      {s.source === "crypto_playlist" ? (
+        <div className="pd-paper">
+          <span className="ps-stat-label">Markets</span>
+          <span>{s.books.map((b) => b.market).join(", ")} · not backtested</span>
+        </div>
+      ) : (
       <div className="pd-books">
         <table className="ps-table">
           <thead><tr><th>Market</th><th title="Net result per trade on data held back from the design, in R (R = result ÷ the risk at entry)">Hold-out</th><th>Trades</th></tr></thead>
@@ -46,6 +52,7 @@ function Card({ s, account }: { s: LibStrategy; account?: Account }) {
           </tbody>
         </table>
       </div>
+      )}
       <PaperLine a={account} />
       <details className="ps-rules">
         <summary>Exact rules</summary>
@@ -56,10 +63,12 @@ function Card({ s, account }: { s: LibStrategy; account?: Account }) {
               <dd>{r.text}</dd>
             </div>
           ))}
-          <div className="ps-rule">
-            <dt>Variant traded</dt>
-            <dd>{s.books.map((b) => `${b.market}: ${b.variant}${b.change && b.variant !== "V0" ? ` (${b.change})` : ""}`).join("; ")}</dd>
-          </div>
+          {s.source !== "crypto_playlist" && (
+            <div className="ps-rule">
+              <dt>Variant traded</dt>
+              <dd>{s.books.map((b) => `${b.market}: ${b.variant}${b.change && b.variant !== "V0" ? ` (${b.change})` : ""}`).join("; ")}</dd>
+            </div>
+          )}
           {s.videos.length > 0 && (
             <div className="ps-rule">
               <dt>Source</dt>
@@ -76,7 +85,7 @@ function Card({ s, account }: { s: LibStrategy; account?: Account }) {
   );
 }
 
-export default function LibraryCards({ source, accounts }: { source: "booming_bulls" | "youtube_top20"; accounts: Record<string, Account> }) {
+export default function LibraryCards({ source, accounts }: { source: "booming_bulls" | "youtube_top20" | "crypto_playlist"; accounts: Record<string, Account> }) {
   return (
     <div className="ps-cards">
       {LIBRARY.filter((s) => s.source === source).map((s) => <Card key={s.id} s={s} account={accounts[s.id]} />)}
