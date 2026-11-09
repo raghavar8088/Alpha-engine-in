@@ -28,7 +28,7 @@ YC_START_DATE = datetime.fromtimestamp(YC_START_T, IST).date()
 YC_BTC_WARM_DAYS = 150
 # The 20-channel books (catalog.YC2_STRATEGIES; backend/research/youtube_channels20_2026_11) trade forward from their
 # activation, flat at the start: indicators warm up on earlier bars, but no earlier signal ever becomes a trade.
-YC2_START_T = int(datetime.fromisoformat(os.getenv("PREMIUM_YC2_START", "2026-11-09T21:45:00+00:00")).timestamp())
+YC2_START_T = int(datetime.fromisoformat(os.getenv("PREMIUM_YC2_START", "2026-11-09T20:20:00+00:00")).timestamp())
 # the earlier of its IST and UTC dates: bitcoin days are UTC dates, NSE days IST dates (entries still start at YC2_START_T)
 YC2_START_DATE = min(datetime.fromtimestamp(YC2_START_T, IST).date(), datetime.fromtimestamp(YC2_START_T, timezone.utc).date())
 YC2_LATE_S = {"daily": 2 * 86400, "stocks": 1800, "index": 1200, "global": 1200}   # see cycle._fresh_only
