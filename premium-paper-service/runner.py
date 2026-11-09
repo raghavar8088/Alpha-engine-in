@@ -15,7 +15,7 @@ from datetime import datetime, timedelta, timezone
 import numpy as np
 
 import bb15
-from research import BE, BM, BS, CS, YE, YS
+from research import BE, BM, BS, CS, YCR, YCS, YE, YS
 
 
 def _bars(m, tfs, cache: dict) -> dict:
@@ -27,6 +27,8 @@ def _bars(m, tfs, cache: dict) -> dict:
 
 def is_overnight(sid: str, market: str) -> bool:
     """Positions may stay open across sessions, so the whole paper period is replayed every time."""
+    if sid in YCS.STRATEGIES:
+        return YCS.STRATEGIES[sid].is_overnight(market)
     if sid.startswith("YT"):
         st = YS.STRATEGIES[sid]
         return st.kind in ("overnight", "daily", "stockdaily") or market in ("SPX500_D", "NAS100_D", "NIFTY_D", "NSED")
@@ -161,6 +163,39 @@ def run_sh(sid: str, m, cache: dict, since_t: int | None = None) -> tuple[list, 
             if t2 is not None:
                 adds.append(t2)
     return sorted(tr + adds, key=lambda x: x.entry_k), rej
+
+
+def run_yc(sid: str, market: str, m, cache: dict, p: dict | None = None, other=None, since_t: int | None = None,
+           risk_pct: float = 0.01) -> tuple[list, dict]:
+    """An 11-channel book (backend/research/youtube_channels11_2026_11): yc_run.run, the code the look-ahead checks ran.
+    `since_t` as in run_cp: the book starts flat at that minute."""
+    tr, rej, S = YCR.run(sid, market, m, cache, p, other, since_t, risk_pct)
+    key = f"{sid}|{market}"
+    st = YCS.STRATEGIES[sid]
+    if st.kind == "signals" and market not in POOLS and S:
+        from yc_engine import XEngine, forced_exit_rows_x, run_book_x
+        mm = YCR.prepare(sid, market, m)
+        ex = st.exits(mm, YCR.LazyBars(mm, cache), p or {}, cache.setdefault(YCR.YC_CACHE, {}))
+        clock, minute = st.exit_clock(market)
+        ke = YCR.live_k_end(mm, forced_exit_rows_x(mm, clock, minute))
+        eng = XEngine(mm)
+        note_signals(key, mm, S, tr, rej, lambda S2: run_book_x(eng, S2, ex, st.limits, ke, sid, "V0", st.reverse))
+    else:
+        note_signals(key, m, S, tr, rej)
+    return tr, rej
+
+
+def yc_docs(trades, m, acct: str, market: str, overnight: bool, live_day: str | None, rank=None) -> list[dict]:
+    """docs_from with ids made unique: a multi-leg book (PR-12's ladder, IT-02's two lots) can open two legs of one side
+    in the same minute; the later ones get #2, #3 (trades are in a fixed order, so the ids are stable)."""
+    out = docs_from(trades, m, acct, market, overnight, live_day, rank)
+    seen: dict = {}
+    for d in out:
+        n = seen.get(d["_id"], 0) + 1
+        seen[d["_id"]] = n
+        if n > 1:
+            d["_id"] = f"{d['_id']}#{n}"
+    return out
 
 
 def docs_from(trades, m, acct: str, market: str, overnight: bool, live_day: str | None, rank=None) -> list[dict]:

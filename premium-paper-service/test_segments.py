@@ -138,13 +138,14 @@ check("books: CP-01 bitcoin is live or in a trade", cp01["BTCUSD"]["state"] in (
 segs = status["segments"]
 print({k: (v["books"], v["trades"], v["states"]) for k, v in segs.items()})
 n_crypto = sum(1 for a in C.ACCOUNTS for mk, _ in a.books if mk in ("BTCUSD", "BTC_SPOT"))
-n_gold = sum(1 for a in C.ACCOUNTS for mk, _ in a.books if mk == "XAUUSD")
+n_gold = sum(1 for a in C.ACCOUNTS for mk, _ in a.books if mk in ("XAUUSD", "XAUTUSD"))
 check("segments: crypto and gold are separate", segs["crypto"]["books"] == n_crypto and segs["gold"]["books"] == n_gold, (n_crypto, n_gold))
 crypto_rows = [(a, r) for a, rows in books.items() for r in rows if r["segment"] == "crypto"]
 for a, r in crypto_rows:
     print("  ", a, r["mkt"], r["state"], "|", r["reason"])
-check("books: only the order-flow books wait for the trade feed (not running in this test)",
-      all(a in ("CP-14", "CP-15", "SH-02", "CP-29") for a, r in crypto_rows if r["state"] == "waiting"))
+check("books: only the order-flow books wait for the trade feed (not running in this test), or a book for its start",
+      all(a in ("CP-14", "CP-15", "SH-02", "CP-29") or r["reason"].startswith("Starts ") for a, r in crypto_rows
+          if r["state"] == "waiting"))
 check("segments: every book counted once", sum(v["books"] for v in segs.values()) == sum(len(a.books) for a in C.ACCOUNTS))
 check("segments: crypto recent trades are bitcoin only", all(t["mkt"] in ("BTCUSD", "BTC_SPOT") for t in segs["crypto"]["recent"]))
 

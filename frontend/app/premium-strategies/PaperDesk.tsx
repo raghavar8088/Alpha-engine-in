@@ -24,9 +24,11 @@ export type Summary = { accounts: Account[]; status: { paper_start?: string; btc
 
 const POLL_MS = 60000;
 const REASON: Record<string, string> = { stop: "Stop", stop_gap: "Stop (gap)", be_stop: "Breakeven stop", target: "Target", time: "Session end",
-  exit_signal: "Exit signal", vwap_trail: "VWAP trail", open: "Open" };
+  exit_signal: "Exit signal", vwap_trail: "VWAP trail", open: "Open", trail_stop: "Trailing stop", flip: "Trend flip",
+  tp_close: "Take-profit close", next_open: "Next open" };
 const GROUP_LABEL: Record<string, string> = { index: "Nifty and Bank Nifty", stocks: "NSE stocks", global: "Bitcoin and gold (Delta), forex, Nasdaq, Apple", daily: "Daily markets" };
 export const SOURCE_LABEL: Record<string, string> = { vwap: "VWAP study", booming_bulls: "Booming Bulls", youtube_top20: "YouTube top 20", crypto_playlist: "Crypto playlist", liquidity_sweep: "Liquidity sweep", sniper_headshot: "Sniper headshot" };
+SOURCE_LABEL.youtube_channels11 = "11 YouTube channels";
 
 /** The accounts, kept fresh for the whole page. An empty desk and an unreachable desk must not look the same. */
 export function usePaperSummary() {
@@ -272,7 +274,7 @@ export default function PaperDesk({ summary, error }: { summary: Summary | null;
 
       <GlassPanel title="Every strategy's account" note="best return first · click a row for its trades · click a heading to sort">
         <div className="ps-chips">
-          {["all", "vwap", "booming_bulls", "youtube_top20", "crypto_playlist", "sniper_headshot", "liquidity_sweep"].map((k) => (
+          {["all", "vwap", "booming_bulls", "youtube_top20", "crypto_playlist", "sniper_headshot", "youtube_channels11", "liquidity_sweep"].map((k) => (
             <button key={k} className={`ps-chip${source === k ? " on" : ""}`} onClick={() => setSource(k)}>
               {k === "all" ? "All" : SOURCE_LABEL[k]} · {counts[k] ?? 0}
             </button>

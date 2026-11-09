@@ -35,6 +35,7 @@ const SOURCE_TEXT: Record<string, string> = {
   youtube_top20: "28 strategies from the 20 largest trading channels on YouTube, on Indian indices, NSE stocks, forex, gold and US indices.",
   crypto_playlist: "27 strategies from the 8 videos of Booming Bulls' Crypto Trading playlist, on bitcoin, gold and EUR/USD. Written as exact rules from the videos and not backtested: paper trading is their first test.",
   sniper_headshot: "Booming Bulls' Sniper Headshot Entry video as exact rules on bitcoin (Delta Exchange), and four upgrades: a reclaim entry, Delta order-flow confirmation, a 1-hour 50-EMA filter, and a 1-hour version built to pay Delta's costs. Not backtested: paper trading on live prices is their first test. On 5-minute candles the video's stop is so close that Delta's fees cost several times the risk of a trade; the cards say how each version deals with that.",
+  youtube_channels11: "103 strategies from 11 YouTube channels (Neeraj Joshi, Brad Goh, Pushkar Raj Thakur, Theta Gainers, Stock Burner, Tanisha Garg, Sagar Sinha, IITian Trader, The Trade Room, saya crypto; Conor Kenny's videos gave no testable rule), on Nifty, Bank Nifty, NSE stocks, bitcoin, gold, forex and the Nasdaq. Written as exact rules from the videos and checked for look-ahead, not backtested: paper trading is their first test.",
   liquidity_sweep: "Booming Bulls' Nifty liquidity-sweep video as the app's strategy D9, its 22 one-change versions, and three research runs (15- and 3-minute candles, Bank Nifty). All were backtested on 2016-2026 Nifty data after costs, and none has an edge. Paper trading is their forward test.",
 };
 
@@ -141,7 +142,7 @@ export default function PremiumStrategiesPage() {
       <PageHeader
         crumb="Premium Strategies"
         title="Premium Strategies"
-        subtitle="105 strategies from YouTube's trading channels: their exact rules, their results after all costs, and each one paper trading its own ₹10 lakh account."
+        subtitle="213 strategies from YouTube's trading channels: their exact rules, their results after all costs, and each one paper trading its own ₹10 lakh account."
       />
 
       <div className="ps-banner" role="note">
@@ -175,7 +176,7 @@ export default function PremiumStrategiesPage() {
       {tab === "strategies" && (
         <>
           <div className="ps-chips">
-            {["all", "vwap", "booming_bulls", "youtube_top20", "crypto_playlist", "liquidity_sweep", "sniper_headshot"].map((k) => (
+            {["all", "vwap", "booming_bulls", "youtube_top20", "crypto_playlist", "liquidity_sweep", "sniper_headshot", "youtube_channels11"].map((k) => (
               <button key={k} className={`ps-chip${libSource === k ? " on" : ""}`} onClick={() => setLibSource(k)}>
                 {k === "all" ? "All" : SOURCE_LABEL[k]}
               </button>
@@ -236,7 +237,7 @@ export default function PremiumStrategiesPage() {
           </GlassPanel>
             </>
           )}
-          {(["booming_bulls", "youtube_top20", "crypto_playlist", "liquidity_sweep", "sniper_headshot"] as const).filter((k) => libSource === "all" || libSource === k).map((k) => (
+          {(["booming_bulls", "youtube_top20", "crypto_playlist", "liquidity_sweep", "sniper_headshot", "youtube_channels11"] as const).filter((k) => libSource === "all" || libSource === k).map((k) => (
             <div key={k} className="pd-group">
               <div className="pd-section"><h3>{SOURCE_LABEL[k]}</h3><p>{SOURCE_TEXT[k]}</p></div>
               <LibraryCards source={k} accounts={byId} />

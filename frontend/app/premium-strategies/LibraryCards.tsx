@@ -32,7 +32,7 @@ function Card({ s, account }: { s: LibStrategy; account?: Account }) {
       </div>
       <div className="ps-card-name">{s.name}</div>
       <div className="ps-card-idea">{s.channel}</div>
-      {s.source === "crypto_playlist" || s.source === "sniper_headshot" ? (
+      {s.source === "crypto_playlist" || s.source === "sniper_headshot" || s.source === "youtube_channels11" ? (
         <div className="pd-paper">
           <span className="ps-stat-label">Markets</span>
           <span>{s.books.map((b) => b.market).join(", ")} · not backtested</span>
@@ -63,7 +63,7 @@ function Card({ s, account }: { s: LibStrategy; account?: Account }) {
               <dd>{r.text}</dd>
             </div>
           ))}
-          {s.source !== "crypto_playlist" && s.source !== "sniper_headshot" && (
+          {s.source !== "crypto_playlist" && s.source !== "sniper_headshot" && s.source !== "youtube_channels11" && (
             <div className="ps-rule">
               <dt>Variant traded</dt>
               <dd>{s.books.map((b) => `${b.market}: ${b.variant}${b.change && b.variant !== "V0" ? ` (${b.change})` : ""}`).join("; ")}</dd>
@@ -85,7 +85,7 @@ function Card({ s, account }: { s: LibStrategy; account?: Account }) {
   );
 }
 
-export default function LibraryCards({ source, accounts }: { source: "booming_bulls" | "youtube_top20" | "crypto_playlist" | "liquidity_sweep" | "sniper_headshot"; accounts: Record<string, Account> }) {
+export default function LibraryCards({ source, accounts }: { source: "booming_bulls" | "youtube_top20" | "crypto_playlist" | "liquidity_sweep" | "sniper_headshot" | "youtube_channels11"; accounts: Record<string, Account> }) {
   return (
     <div className="ps-cards">
       {LIBRARY.filter((s) => s.source === source).map((s) => <Card key={s.id} s={s} account={accounts[s.id]} />)}

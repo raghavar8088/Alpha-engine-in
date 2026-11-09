@@ -5,7 +5,7 @@
 export type LibRule = { label: string; text: string };
 export type LibBook = { market: string; variant: string; change: string; cls: string; n: number | null; meanR: number | null;
   grossR: number | null; winRate: number | null };
-export type LibStrategy = { id: string; source: "booming_bulls" | "youtube_top20" | "crypto_playlist" | "liquidity_sweep" | "sniper_headshot"; name: string; channel: string; videos: string[];
+export type LibStrategy = { id: string; source: "booming_bulls" | "youtube_top20" | "crypto_playlist" | "liquidity_sweep" | "sniper_headshot" | "youtube_channels11"; name: string; channel: string; videos: string[];
   verdict: string; books: LibBook[]; rules: LibRule[] };
 
 export const LIBRARY: LibStrategy[] = [
@@ -5647,6 +5647,8242 @@ export const LIBRARY: LibStrategy[] = [
    {
     "label": "Not used",
     "text": "fair value gaps (named as optional, 02:18) and averaging (promised at 02:23 and 16:09, never explained)."
+   }
+  ]
+ },
+ {
+  "id": "NJ-01",
+  "source": "youtube_channels11",
+  "name": "9:20 VWAP + EMA 7 first-candle breakout",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "GXSNSC3LHZY"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks 5m",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, 5-minute candles"
+   },
+   {
+    "label": "Video",
+    "text": "Market: NSE stocks (cash, intraday), 5-minute candles (E 00:01:30)."
+   },
+   {
+    "label": "",
+    "text": "Direction from the index (E 00:00:15-00:00:30): if Nifty opens gap-up / the market is positive, take only longs;"
+   },
+   {
+    "label": "",
+    "text": "gap-down / negative, only shorts. A: \"gap\" = Nifty's 09:15 open vs the previous close; up if open > previous close."
+   },
+   {
+    "label": "",
+    "text": "Indicators (E 00:01:30-00:03:30): VWAP (bands switched off) and EMA with its length changed from 9 to 7."
+   },
+   {
+    "label": "",
+    "text": "Long conditions on the first 5-minute candle, 09:15-09:20 (E 00:03:30-00:06:00, 00:13:00-00:13:45 his screener):"
+   },
+   {
+    "label": "",
+    "text": "1. the candle is green (close > open);"
+   },
+   {
+    "label": "",
+    "text": "2. VWAP passes through the candle body: the candle opens below VWAP and closes above VWAP (screener wording);"
+   },
+   {
+    "label": "",
+    "text": "3. EMA(7) is below VWAP (screener: \"VWAP above EMA\")."
+   },
+   {
+    "label": "",
+    "text": "Short conditions (E 00:11:00-00:12:00): first candle red; VWAP inside the body (opens above, closes below); EMA(7)"
+   },
+   {
+    "label": "",
+    "text": "above VWAP."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:06:30-00:07:00): after 09:20 mark the first candle's high and low; buy when a later candle breaks the"
+   },
+   {
+    "label": "",
+    "text": "high (sell when one breaks the low). I: a stop-entry order at the first candle's high/low, valid the rest of the day."
+   },
+   {
+    "label": "",
+    "text": "Stop (E 00:07:00, 00:12:30): the first candle's other side (low for longs, high for shorts)."
+   },
+   {
+    "label": "",
+    "text": "Exit (E 00:07:00-00:08:00, 00:15:00): no fixed target. 1:2 or 1:3 \"can be used but will not always work\"; the best"
+   },
+   {
+    "label": "",
+    "text": "way is a trailing stop. His example: buy 893, stop 885 (risk 8); at 900 the stop goes to 893; at 905 to 900; at 910"
+   },
+   {
+    "label": "",
+    "text": "to 905. I: the stop steps up behind price, first to breakeven once price is about +1R, then it trails about"
+   },
+   {
+    "label": "",
+    "text": "0.6R below the highest price reached. A: breakeven at +1R, then a trail 0.6R behind the best price; out at the"
+   },
+   {
+    "label": "",
+    "text": "session's end (intraday)."
+   },
+   {
+    "label": "",
+    "text": "Once a day per stock (E 00:14:20): the setup exists only on the first candle."
+   },
+   {
+    "label": "",
+    "text": "Stock selection (E 00:13:00-00:14:20): a screener at exactly 09:20 with the four conditions above, run over all"
+   },
+   {
+    "label": "",
+    "text": "stocks. A: the desk's NSE 5-minute pool (the same liquid universe as the other stock books)."
+   },
+   {
+    "label": "",
+    "text": "Limits (E 00:14:20-00:15:00): use only at 09:20, target unclear."
+   },
+   {
+    "label": "",
+    "text": "Frames needed: none essential (indicator settings are spoken: VWAP, EMA 7)."
+   }
+  ]
+ },
+ {
+  "id": "NJ-02",
+  "source": "youtube_channels11",
+  "name": "Pivot points with a narrow CPR, trade the open's side",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "F1S6OF5LFV8"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks 5m",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   },
+   {
+    "market": "Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, 5-minute candles; NIFTY index (1-minute data)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: shares and index (cash/futures, or options as the vehicle), intraday."
+   },
+   {
+    "label": "",
+    "text": "Levels (E 00:00:30-00:03:00): classic floor pivots from the previous day's high, low and close: P = (H+L+C)/3, with"
+   },
+   {
+    "label": "",
+    "text": "R1-R3 and S1-S3 (TradingView \"Pivot Points Standard\", traditional). CPR (E 00:09:00-00:11:30): TC, P and BC from the"
+   },
+   {
+    "label": "",
+    "text": "previous day (A: the standard formulas BC = (H+L)/2, TC = 2P - BC, swapped when BC > TC)."
+   },
+   {
+    "label": "",
+    "text": "Bias (E 00:03:00-00:04:30): opening above P means a bullish day (buy); opening below P a bearish day (sell or buy"
+   },
+   {
+    "label": "",
+    "text": "puts)."
+   },
+   {
+    "label": "",
+    "text": "Entry zone and targets (E 00:04:30-00:06:00, 00:16:30): buy when price is between P and R1; first target R1, then R2"
+   },
+   {
+    "label": "",
+    "text": "if R1 is reached. Sell when price is between P and S1; targets S1 then S2."
+   },
+   {
+    "label": "",
+    "text": "Don't chase (E 00:06:00-00:07:30): above R2 the share is \"overbought\", don't buy there; below S2 \"oversold\", don't"
+   },
+   {
+    "label": "",
+    "text": "sell there."
+   },
+   {
+    "label": "",
+    "text": "Filter (E 00:07:30-00:13:30, 00:17:30): pivots alone give many false signals. A wide CPR (gaps between the three"
+   },
+   {
+    "label": "",
+    "text": "lines) means a sideways day: no trade. A narrow CPR (the three lines nearly one line) means a trending day: trade"
+   },
+   {
+    "label": "",
+    "text": "in the direction of the open (above P buy, below P sell). The width threshold is not given. A: narrow = today's CPR"
+   },
+   {
+    "label": "",
+    "text": "width (TC - BC) is in the narrowest third of the last 20 sessions' widths; otherwise no trade."
+   },
+   {
+    "label": "",
+    "text": "Virgin CPR (E 00:14:15-00:15:30): if price never touches the day's CPR, extend it to the next day, where it acts"
+   },
+   {
+    "label": "",
+    "text": "as strong resistance/support (reversal trade). No stop or target is given: noted, not implemented."
+   },
+   {
+    "label": "",
+    "text": "Stop: not given (\"don't trade without risk management\", E 00:18:30). A: the stop is on the far side of the CPR (BC"
+   },
+   {
+    "label": "",
+    "text": "for longs, TC for shorts), which is where the open-side bias is proved wrong."
+   },
+   {
+    "label": "",
+    "text": "Entry timing: not given beyond \"opens above/below\". A: the decision is taken on the first 5-minute candle's close"
+   },
+   {
+    "label": "",
+    "text": "(09:20); enter at the next open if price is still between P and R1 (long) or P and S1 (short)."
+   },
+   {
+    "label": "",
+    "text": "Exit (A, from the two targets): half off at R1 (S1), stop to breakeven, the rest at R2 (S2); otherwise out at the"
+   },
+   {
+    "label": "",
+    "text": "session's end. The engine's partial books half at a fixed R multiple, so the R1 partial is placed at the R1 price"
+   },
+   {
+    "label": "",
+    "text": "for each trade."
+   },
+   {
+    "label": "",
+    "text": "Universe: the video uses single shares (Tata Motors examples). A: the desk's NSE 5-minute stock pool and NIFTY."
+   }
+  ]
+ },
+ {
+  "id": "NJ-03",
+  "source": "youtube_channels11",
+  "name": "EMA 9 + ADX above 25 and rising",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "tCDjjppruBo"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NIFTY index (1-minute data)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: shares and options, intraday. Timeframe not stated (A: 5-minute)."
+   },
+   {
+    "label": "",
+    "text": "Trend strength (E 00:02:15-00:05:15): ADX below about 25 means a sideways market, no trade; above 25 a trending"
+   },
+   {
+    "label": "",
+    "text": "market (it says nothing about direction)."
+   },
+   {
+    "label": "",
+    "text": "DMI cross (E 00:05:15-00:09:00): +DI crossing above -DI is bullish, -DI above +DI bearish; fails in sideways"
+   },
+   {
+    "label": "",
+    "text": "markets, which is why ADX is added. Shown as a lead-in, not the final strategy."
+   },
+   {
+    "label": "",
+    "text": "Final strategy (E 00:09:00-00:16:30): EMA 9 (default length, unchanged). Long: candles above EMA 9 (uptrend), and ADX above 25 and rising (E 00:11:45: \"not only above, it must be rising\")."
+   },
+   {
+    "label": "",
+    "text": "When ADX moves above 25, mark that candle's high and low; buy on the candle that breaks the high; stop below that"
+   },
+   {
+    "label": "",
+    "text": "candle's low (E 00:12:00-00:12:45: a big signal candle means a big stop, accepted). Short: candles below EMA 9, ADX above 25 and rising; mark the candle where price went below the EMA; sell on the"
+   },
+   {
+    "label": "",
+    "text": "break of its low; stop above its high (E 00:15:00-00:16:00). Exit (E 00:12:45-00:13:30): not on the EMA; exit as soon as the ADX line starts to fall (trend strength fading)."
+   },
+   {
+    "label": "",
+    "text": "A: the first closed candle whose ADX is below the previous candle's ADX; exit at the next open. Out at the"
+   },
+   {
+    "label": "",
+    "text": "session's end otherwise."
+   },
+   {
+    "label": "",
+    "text": "A: the signal candle is the first candle on which all conditions hold (price on the EMA side, ADX > 25 and rising);"
+   },
+   {
+    "label": "",
+    "text": "the stop-entry is valid for the next 3 candles; ADX and DI use Wilder smoothing, length 14 (TradingView default)."
+   }
+  ]
+ },
+ {
+  "id": "NJ-04",
+  "source": "youtube_channels11",
+  "name": "EMA 10 failed-pullback breakout (Anant Ladha)",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "HJu_Nxj495I"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NIFTY index (1-minute data)"
+   },
+   {
+    "label": "Video",
+    "text": "Guest: Anant Ladha. Market: \"mostly the index\" (E 00:02:00), 5- or 15-minute candles, shown on 5-minute (E 00:02:15). (Pushkar Raj Thakur's 2dnl5TggSJw is the same guest strategy: cross-checked there.)"
+   },
+   {
+    "label": "",
+    "text": "Indicator (E 00:02:00): EMA 10, default settings."
+   },
+   {
+    "label": "",
+    "text": "Short (E 00:02:30-00:04:00): candles are forming below EMA 10 (market under pressure); a green candle forms that does"
+   },
+   {
+    "label": "",
+    "text": "not touch EMA 10; if the very next candle breaks that green candle's low, short. If the next candle does not break"
+   },
+   {
+    "label": "",
+    "text": "it, it is not a trigger candle (E 00:04:30)."
+   },
+   {
+    "label": "",
+    "text": "Long (E 00:05:00-00:06:45): the mirror: above EMA 10, a red candle that does not touch EMA 10, the next candle"
+   },
+   {
+    "label": "",
+    "text": "breaks its high: buy."
+   },
+   {
+    "label": "",
+    "text": "Stop (E 00:03:30, 00:06:45): the trigger candle's other end (the lower-risk choice for new traders), or ultimately"
+   },
+   {
+    "label": "",
+    "text": "the EMA 10 line. A: the trigger candle's other end."
+   },
+   {
+    "label": "",
+    "text": "Targets (E 00:03:45, 00:06:45-00:07:30): 1:2 minimum, 1:3 normal. Trail: a candle closing back across EMA 10 ends"
+   },
+   {
+    "label": "",
+    "text": "the trade (E 00:04:00). Morning entries: trail beyond 1:2, aim for 1:3-1:4 (E 00:09:00). Entries around 12:30-13:30:"
+   },
+   {
+    "label": "",
+    "text": "book at 1:2 (E 00:09:00-00:09:30)."
+   },
+   {
+    "label": "",
+    "text": "Five extra points (E 00:08:00-00:09:45): avoid Tuesdays (volatile); Wednesday and Thursday give the best results; the"
+   },
+   {
+    "label": "",
+    "text": "two windows to watch are 09:15-10:00 and 13:45-14:15."
+   },
+   {
+    "label": "",
+    "text": "A (testable form): signals only in 09:15-10:00 and 13:45-14:15, no Tuesdays; \"below EMA 10\" = the trigger candle's"
+   },
+   {
+    "label": "",
+    "text": "high is below EMA 10 and the previous candle closed below it (mirror for longs); the stop-entry is valid for the"
+   },
+   {
+    "label": "",
+    "text": "next candle only; target 3R in the morning window and 2R in the afternoon window; exit at the next open after a"
+   },
+   {
+    "label": "",
+    "text": "5-minute close across EMA 10; out at the session's end. Market: NIFTY."
+   }
+  ]
+ },
+ {
+  "id": "NJ-05",
+  "source": "youtube_channels11",
+  "name": "EMA 50/100 + Stochastic scalp, 1 minute",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "cZYwHdF-GpM"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bank Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "BANKNIFTY index (1-minute data)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: BANKNIFTY (options as the vehicle), 1-minute candles (E 00:00:15-00:00:30)."
+   },
+   {
+    "label": "",
+    "text": "Indicators (E 00:00:30-00:03:00): EMA 50 (green), EMA 100 (red), Stochastic oscillator (default settings; A:"
+   },
+   {
+    "label": "",
+    "text": "TradingView default %K 14, smoothing 1, %D 3)."
+   },
+   {
+    "label": "",
+    "text": "Long / call (E 00:03:00-00:05:30): EMA 50 above EMA 100 (only calls then); the Stochastic %K (blue) crosses above %D"
+   },
+   {
+    "label": "",
+    "text": "(orange) near 20, the low end of its range. Buy."
+   },
+   {
+    "label": "",
+    "text": "Short / put (E 00:06:00-00:07:00): EMA 100 above EMA 50; %K crosses below %D near 80. Buy puts."
+   },
+   {
+    "label": "",
+    "text": "Stop (E 00:05:30, 00:07:00): longs: the low of the candle before the entry candle (= the cross candle); shorts: just"
+   },
+   {
+    "label": "",
+    "text": "above the candle the trade was taken on."
+   },
+   {
+    "label": "",
+    "text": "Exit (E 00:05:30-00:06:00, 00:07:15-00:07:30): either a fixed 15-25 BankNifty points, or when the Stochastic reaches"
+   },
+   {
+    "label": "",
+    "text": "80 (longs) / 20 (shorts). Live trade (E 00:09:30-00:10:00): exited at about +10% on the option premium."
+   },
+   {
+    "label": "",
+    "text": "A: \"near 20\" = %D at or below 25 on the cross candle (\"near 80\" = at or above 75); enter at the next 1-minute open;"
+   },
+   {
+    "label": "",
+    "text": "stop at the cross candle's low (long) / high (short); exit at the next open after %K reaches 80 (long) / 20"
+   },
+   {
+    "label": "",
+    "text": "(short), or the stop; out at the session's end. Up to 3 trades a day, stopping after 2 stops (A, scalping)."
+   }
+  ]
+ },
+ {
+  "id": "NJ-06",
+  "source": "youtube_channels11",
+  "name": "Bollinger squeeze breakout",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "X-cXuxvSg0c"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks 15m",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, 15-minute candles"
+   },
+   {
+    "label": "Video",
+    "text": "Market: shares (his screener \"Neeraj Joshi Bollinger Band Squeeze Breakout\"), intraday on 15-minute candles (5 or 10 also allowed, E 00:07:30)."
+   },
+   {
+    "label": "",
+    "text": "Bands (E 00:03:00): Bollinger 20, 2 standard deviations, the defaults (\"don't change them\")."
+   },
+   {
+    "label": "",
+    "text": "First use (E 00:01:00-00:06:30): buy near the lower band once a second candle confirms the turn, sell near the upper"
+   },
+   {
+    "label": "",
+    "text": "band; wait for the second candle after a touch, because price can ride outside a band. No stop given; the 2023"
+   },
+   {
+    "label": "",
+    "text": "masterclass (NJ-07) says the plain touch approach is wrong, so this use is not implemented."
+   },
+   {
+    "label": "",
+    "text": "Squeeze breakout (E 00:06:30-00:09:30): when the bands become very narrow (a squeeze), the first candle that breaks"
+   },
+   {
+    "label": "",
+    "text": "out through the upper band is an immediate buy (through the lower band, a short). Stop: the breakout candle's low"
+   },
+   {
+    "label": "",
+    "text": "(high for shorts). Target: book when any candle closes back inside the bands."
+   },
+   {
+    "label": "",
+    "text": "A: squeeze = band width (upper - lower) / middle is in the lowest 20% of the last 100 candles at some point in the"
+   },
+   {
+    "label": "",
+    "text": "5 candles before the breakout; \"breaks the upper band\" = a candle closing above the upper band; enter at the next"
+   },
+   {
+    "label": "",
+    "text": "open; exit at the next open after a close back inside the bands; out at the session's end. One trade per stock per"
+   },
+   {
+    "label": "",
+    "text": "day. Universe: the desk's NSE 15-minute stock pool."
+   }
+  ]
+ },
+ {
+  "id": "NJ-07",
+  "source": "youtube_channels11",
+  "name": "Bollinger band turn + MACD cross + volume",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "4o5OOAyuJ1Y"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks 5m",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, 5-minute candles"
+   },
+   {
+    "label": "Video",
+    "text": "Market: shares (daily examples; 5-minute for intraday, E 00:09:00)."
+   },
+   {
+    "label": "",
+    "text": "Bands (E 00:00:30-00:02:00): Bollinger 20 SMA, 2 standard deviations."
+   },
+   {
+    "label": "",
+    "text": "Way 1 (E 00:02:30-00:05:30): a touch is not a signal. Sell when price touches the upper band and turns down while"
+   },
+   {
+    "label": "",
+    "text": "volume falls; buy when price touches the lower band and turns up."
+   },
+   {
+    "label": "",
+    "text": "Way 2 (E 00:05:30-00:07:30): squeeze then expansion, with volume rising (same idea as NJ-06's squeeze)."
+   },
+   {
+    "label": "",
+    "text": "Way 3 (E 00:07:30-00:08:30): the middle band acts as support/resistance; add on a cross of it."
+   },
+   {
+    "label": "",
+    "text": "Combined strategy (E 00:09:30-00:12:00): price touches the lower band and starts rising, the MACD line crosses above"
+   },
+   {
+    "label": "",
+    "text": "its signal line, and volume is rising: buy at the MACD cross. Stop: the nearest swing low, or a little below it."
+   },
+   {
+    "label": "",
+    "text": "Target: hold until the MACD line crosses back below the signal line. Shorts mirror it at the upper band."
+   },
+   {
+    "label": "",
+    "text": "A: MACD 12/26/9; \"touched the lower band\" = a low at or below the lower band in the last 5 candles; \"rising volume\""
+   },
+   {
+    "label": "",
+    "text": "= the cross candle's volume above its 20-candle average; stop = the lowest low of the last 5 candles; exit at the"
+   },
+   {
+    "label": "",
+    "text": "next open after the opposite MACD cross; out at the session's end. Universe: the desk's NSE 5-minute stock pool"
+   },
+   {
+    "label": "",
+    "text": "(the index has no volume)."
+   }
+  ]
+ },
+ {
+  "id": "NJ-08",
+  "source": "youtube_channels11",
+  "name": "RSI 50 + EMA 14 cross",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "mEqAjWoJUBg"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NIFTY index (1-minute data)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: options, intraday and swing (E 00:00:00). Of the four strategies: 1. Traditional (E 00:00:30-00:02:30): RSI 14 above 50 = bullish, take buys only; below 50 = sells only; overbought is confirmed only when RSI comes back below 70 (oversold when back above 30). He says not to trade on this alone. 2. Divergence + price trendline break (E 00:03:00-00:05:30): on a bullish divergence draw a trendline and buy on the candle after the breakout; stop below the breakout candle; target when RSI crosses 70 and turns back down. 3. RSI trendline break (E 00:06:00-00:08:30): a trendline drawn on RSI breaks, and price breaks its own trendline too; enter on the next candle; stop beyond the breakout candle (or the nearby biggest candle); target RSI back from 70 (30 for shorts). Strategies 2 and 3 depend on hand-drawn trendlines: not implemented. 4. RSI 50 + EMA 14 (E 00:09:00-00:11:30): add an EMA with length 14 (to match RSI 14). Buy when price crosses above the EMA and RSI is above 50 (both required); enter on the candle after the cross candle; stop below the cross candle (or the nearest low if that is not too far). Short: RSI below 50 and price crosses below the EMA; stop above the cross candle; target: hold until RSI has gone below 30 and starts rising again."
+   },
+   {
+    "label": "",
+    "text": "A for strategy 4: \"price crosses the EMA\" = a close above EMA 14 after a close below it; the long target mirrors"
+   },
+   {
+    "label": "",
+    "text": "the short one (hold until RSI has gone above 70 and turns back below it); exit at the next open after that; stop ="
+   },
+   {
+    "label": "",
+    "text": "the cross candle's low (high); out at the session's end; 5-minute candles (intraday choice 5/10/15 minutes from"
+   },
+   {
+    "label": "",
+    "text": "icml_txwHdY 00:11:30); market NIFTY."
+   }
+  ]
+ },
+ {
+  "id": "NJ-09",
+  "source": "youtube_channels11",
+  "name": "MACD signal-line cross",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "zJ3FCKcin_k"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NIFTY index (1-minute data)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: shares/options, intraday on 5-minute candles (E 00:14:00-00:14:30: intraday no more than 5/10/15 minutes; the trade example is on 5-minute, E 00:17:30)."
+   },
+   {
+    "label": "",
+    "text": "Readings (E 00:05:00-00:13:30): histogram above zero = bullish momentum; MACD/signal cross; both lines crossing the"
+   },
+   {
+    "label": "",
+    "text": "zero line; divergence (confirm with a candlestick pattern)."
+   },
+   {
+    "label": "",
+    "text": "Trade (E 00:15:30-00:18:30): when the MACD line crosses above the signal line, buy on the next candle; stop a little"
+   },
+   {
+    "label": "",
+    "text": "below the lowest candle nearby (on 5-minute; on long timeframes use the nearest candle instead when the lowest one"
+   },
+   {
+    "label": "",
+    "text": "makes the stop too big, about 2%). Target: a trailing stop, or hold until a bearish divergence appears. Shorts are"
+   },
+   {
+    "label": "",
+    "text": "the mirror (stop above the highest nearby candle; hold until a bullish divergence)."
+   },
+   {
+    "label": "",
+    "text": "A: MACD 12/26/9 (default); stop = the lowest low (highest high) of the last 5 candles; the divergence exit is"
+   },
+   {
+    "label": "",
+    "text": "replaced by the opposite MACD cross (exit at the next open); out at the session's end; market NIFTY 5-minute."
+   }
+  ]
+ },
+ {
+  "id": "NJ-10",
+  "source": "youtube_channels11",
+  "name": "Heikin Ashi doji turn",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "bA4GYgh13fk"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NIFTY index (1-minute data)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: index/shares; examples on the NIFTY daily chart, timeframe for trading not stated."
+   },
+   {
+    "label": "",
+    "text": "Candle types (E 00:06:00-00:09:30): strong bullish = green Heikin Ashi candle with no lower wick; strong bearish ="
+   },
+   {
+    "label": "",
+    "text": "red with no upper wick; small-bodied candles with wicks on both sides = indecision (doji)."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:12:00-00:12:30, 00:14:30): in a falling market a green indecision doji forms, then two strong green"
+   },
+   {
+    "label": "",
+    "text": "candles: buy (on the candle after the doji's follow-through, i.e. after the second strong candle). Stop: a little"
+   },
+   {
+    "label": "",
+    "text": "below the doji. Target: a trailing stop. Check that the stop is not too big for the reward (E 00:15:00)."
+   },
+   {
+    "label": "",
+    "text": "Shorts: the mirror (implied by the four candle types; not shown in the rule part). A: mirrored."
+   },
+   {
+    "label": "",
+    "text": "A: 15-minute NIFTY; \"falling market\" = the three Heikin Ashi candles before the doji are red; doji = body at most a"
+   },
+   {
+    "label": "",
+    "text": "third of its range with both wicks present; strong = no wick on the opposite side; enter at the open after the"
+   },
+   {
+    "label": "",
+    "text": "second strong candle; stop = the doji's low; trail: exit at the next open after the first opposite-colour Heikin"
+   },
+   {
+    "label": "",
+    "text": "Ashi candle; out at the session's end."
+   }
+  ]
+ },
+ {
+  "id": "NJ-11",
+  "source": "youtube_channels11",
+  "name": "Renko 1-back / 2-back continuation",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "Vg6H5dlwzrs"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NIFTY index (1-minute data)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: index/shares; daily chart in the theory part, intraday shown with an ATR brick size on 5-minute (E 00:19:00-00:19:30: 1-min 26 points, 5-min 130, 15-min 74 points on his symbol, i.e. the brick size comes from ATR on the chosen timeframe)."
+   },
+   {
+    "label": "",
+    "text": "Bricks only form on price movement of the brick size (E 00:02:30-00:03:30)."
+   },
+   {
+    "label": "",
+    "text": "Range break (E 00:12:30-00:13:30): after a top, a pullback and a return to the same high, buy when that high breaks;"
+   },
+   {
+    "label": "",
+    "text": "stop a little below the red brick before it."
+   },
+   {
+    "label": "",
+    "text": "1-back (E 00:14:00-00:15:00): in an uptrend one red brick, then a green brick: draw a line at it and buy when the"
+   },
+   {
+    "label": "",
+    "text": "next brick goes above; stop below the red brick. 1-back bearish: the mirror (stop above the green brick)."
+   },
+   {
+    "label": "",
+    "text": "2-back (E 00:15:00-00:16:30): the uptrend needs at least three bricks; then two red bricks; when green bricks return"
+   },
+   {
+    "label": "",
+    "text": "and the high breaks, buy on the next brick; stop below the red bricks. Mirror for shorts."
+   },
+   {
+    "label": "",
+    "text": "Zig-zag (E 00:16:30-00:18:30): red, green, red, green, then a fifth green brick: buy, stop below the first and third"
+   },
+   {
+    "label": "",
+    "text": "bricks; bearish mirror. Rare."
+   },
+   {
+    "label": "",
+    "text": "Target: not given."
+   },
+   {
+    "label": "",
+    "text": "A: one strategy that takes the 1-back and 2-back continuation (the frequent patterns): bricks from 1-minute closes"
+   },
+   {
+    "label": "",
+    "text": "with a brick size fixed for the day at ATR 14 of the previous session's 5-minute bars (NIFTY); trend = at least 3"
+   },
+   {
+    "label": "",
+    "text": "bricks one way; 1 or 2 opposite bricks; enter when a new brick in the trend direction closes beyond the last trend"
+   },
+   {
+    "label": "",
+    "text": "brick; stop beyond the opposite bricks; exit at 2R or when one opposite brick forms after entry (the 2026 video's"
+   },
+   {
+    "label": "",
+    "text": "exit, below), or at the session's end."
+   },
+   {
+    "label": "",
+    "text": "td3gb3cZ_Qc (Renko masterclass, 21 Aug 2026, 22 min) repeats the same patterns (1-back, 2-back, zig-zag) and gives"
+   },
+   {
+    "label": "",
+    "text": "the exit (E 00:09:30, 00:11:00, 00:14:00, 00:18:00): a 1:2 target, or hold until one brick prints the other way."
+   },
+   {
+    "label": "",
+    "text": "Stop: below the pullback with a small margin (E 00:09:00). Brick size from ATR; a small timeframe for intraday (E"
+   },
+   {
+    "label": "",
+    "text": "00:21:00). It confirms NJ-11; no separate strategy."
+   }
+  ]
+ },
+ {
+  "id": "NJ-12",
+  "source": "youtube_channels11",
+  "name": "PVT cross of its EMA 20",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "5h7_96ioFWY"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks 5m",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, 5-minute candles"
+   },
+   {
+    "label": "Video",
+    "text": "Market: shares (swing on daily, intraday on 5-minute) and BANKNIFTY futures (the index itself has no volume, E 00:11:30-00:12:00)."
+   },
+   {
+    "label": "",
+    "text": "Indicator (E 00:00:30-00:05:00): Price Volume Trend; add an EMA of length 20 with the PVT as its source."
+   },
+   {
+    "label": "",
+    "text": "Rules (E 00:05:00-00:06:00, 00:09:00-00:09:30): PVT crossing above its EMA = buy; crossing below = sell/short. A"
+   },
+   {
+    "label": "",
+    "text": "position is closed by the opposite cross (always in the market on the swing chart)."
+   },
+   {
+    "label": "",
+    "text": "Entry on the cross candle or the next one (E 00:07:30). No stop is given."
+   },
+   {
+    "label": "",
+    "text": "A: intraday on the desk's NSE 5-minute stock pool; enter at the next open after the cross; exit at the next open"
+   },
+   {
+    "label": "",
+    "text": "after the opposite cross (no reversal into the other side within the same trade; the opposite cross can open a new"
+   },
+   {
+    "label": "",
+    "text": "trade); a protective stop 1.5 x ATR 14 from the entry because the desk needs a stop to size the trade; at most 3"
+   },
+   {
+    "label": "",
+    "text": "trades per stock per day; out at the session's end."
+   }
+  ]
+ },
+ {
+  "id": "NJ-13",
+  "source": "youtube_channels11",
+  "name": "Hammer after a fall, with volume",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "QGXmyjwJ1aE",
+   "IRBrPbPrKME"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks 15m",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, 15-minute candles"
+   },
+   {
+    "label": "Video",
+    "text": "Market: shares (his 15-minute hammer screener) and BANKNIFTY; 15- or 5-minute candles, keep to the timeframe the pattern formed on (E QGX 00:04:00-00:04:30). Both read in full (digest)."
+   },
+   {
+    "label": "",
+    "text": "Hammer (E QGX 00:01:00-00:03:30): long lower wick, small body, no upper wick (a small upper wick is acceptable,"
+   },
+   {
+    "label": "",
+    "text": "but no wick is better); colour does not matter. Meaning: sellers pushed price down, then extreme buying."
+   },
+   {
+    "label": "",
+    "text": "Where (E QGX 00:02:30-00:03:00): after the price has been falling."
+   },
+   {
+    "label": "",
+    "text": "Entry and stop (E QGX 00:05:30-00:06:00): buy once the hammer candle has closed; stop at the low of the hammer's"
+   },
+   {
+    "label": "",
+    "text": "wick. Support/resistance improves results (not quantified). No target given."
+   },
+   {
+    "label": "",
+    "text": "Volume (E IRB 00:05:30-00:10:30): volume above its moving average confirms a move; a move on below-average"
+   },
+   {
+    "label": "",
+    "text": "volume is weak. IRB 00:11:00-00:12:00: a hammer (bullish pattern) with volume rising = take the buy."
+   },
+   {
+    "label": "",
+    "text": "A: hammer = lower wick at least 2 x the body, upper wick at most 25% of the candle's range, body at least 5% of the"
+   },
+   {
+    "label": "",
+    "text": "range; \"after a fall\" = the hammer's low is the lowest low of the last 10 candles; volume above its 20-candle"
+   },
+   {
+    "label": "",
+    "text": "average; enter at the next open; stop at the hammer's low; target 2R (not given); out at the session's end; one"
+   },
+   {
+    "label": "",
+    "text": "trade per stock per day; long only (the video only teaches the bullish hammer). Universe: the desk's NSE"
+   },
+   {
+    "label": "",
+    "text": "15-minute stock pool."
+   }
+  ]
+ },
+ {
+  "id": "NJ-14",
+  "source": "youtube_channels11",
+  "name": "Supertrend 21/1 flip with RSI and its average",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "2jF09vG3HD4"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks 5m",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, 5-minute candles"
+   },
+   {
+    "label": "Video",
+    "text": "Market: shares, intraday on 5-minute (E 00:15:00-00:16:00)."
+   },
+   {
+    "label": "",
+    "text": "Chart (E 00:00:00-00:12:00): hollow candles (filled/hollow from open vs close, colour from close vs the previous"
+   },
+   {
+    "label": "",
+    "text": "close). They are the chart type; the rules below do not use their colours."
+   },
+   {
+    "label": "",
+    "text": "Supertrend (E 00:14:00-00:15:00): the default 10/3 gives many false signals; use ATR length 21, factor 1."
+   },
+   {
+    "label": "",
+    "text": "RSI (E 00:16:30-00:18:00): RSI 14 with its moving average (the two lines). Look for buys only while both lines are"
+   },
+   {
+    "label": "",
+    "text": "below 50, sells only while both are above 50."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:18:30-00:20:00): buy when Supertrend gives a buy signal and both RSI lines are below 50; sell when"
+   },
+   {
+    "label": "",
+    "text": "Supertrend gives a sell signal and both lines are above 50."
+   },
+   {
+    "label": "",
+    "text": "Exit (E 00:20:00-00:21:00): when Supertrend flips to the other signal, or both RSI lines cross to the other side of"
+   },
+   {
+    "label": "",
+    "text": "50 (\"if any of your conditions fails, take the target\")."
+   },
+   {
+    "label": "",
+    "text": "Stop (E 00:21:00): as much as you can risk, or about 2% per trade for stock intraday."
+   },
+   {
+    "label": "",
+    "text": "A: RSI's moving average is a 14-period SMA (TradingView's RSI default); enter at the next open after the flip; stop"
+   },
+   {
+    "label": "",
+    "text": "2% from the entry; exit at the next open after either exit condition; out at the session's end; up to 3 trades per"
+   },
+   {
+    "label": "",
+    "text": "stock per day. Universe: the desk's NSE 5-minute stock pool."
+   }
+  ]
+ },
+ {
+  "id": "NJ-15",
+  "source": "youtube_channels11",
+  "name": "Three-touch level breakout with volume",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "E4Q4vgRCpok"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks 5m",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, 5-minute candles"
+   },
+   {
+    "label": "Video",
+    "text": "Market: options/intraday, any chart; shown on 1-minute index charts (E 00:09:30), volume from futures for indices (E 00:07:30-00:08:00)."
+   },
+   {
+    "label": "",
+    "text": "Three-touch resistance (E 00:01:30-00:02:30): buy when price breaks out upward after touching the same resistance"
+   },
+   {
+    "label": "",
+    "text": "at least three times (three is the minimum). Three-touch support (E 00:02:30-00:03:00): short on the break down"
+   },
+   {
+    "label": "",
+    "text": "after at least three touches. A range touched at least three times on both sides works the same way (E 00:05:00)."
+   },
+   {
+    "label": "",
+    "text": "Volume (E 00:07:00-00:07:30): a breakout with volume above its moving average is a genuine one; use volume with"
+   },
+   {
+    "label": "",
+    "text": "these strategies."
+   },
+   {
+    "label": "",
+    "text": "Hacks (E 00:09:00-00:09:30): wait for the breakout candle to close beyond the level before entering; a retest of"
+   },
+   {
+    "label": "",
+    "text": "the broken level that holds is an even stronger signal; check several timeframes."
+   },
+   {
+    "label": "",
+    "text": "Stop and target: not given."
+   },
+   {
+    "label": "",
+    "text": "A: a level = at least 3 swing highs (lows) within 0.25 x ATR 14 of each other in the session so far, the first at"
+   },
+   {
+    "label": "",
+    "text": "least 6 candles before the break (5-candle fractal swings, confirmed with no look-ahead); a 5-minute close beyond"
+   },
+   {
+    "label": "",
+    "text": "the highest (lowest) touch with volume above its 20-candle average; enter at the next open; stop beyond the"
+   },
+   {
+    "label": "",
+    "text": "breakout candle's other end; target 2R; out at the session's end; one trade per stock per day. Universe: the"
+   },
+   {
+    "label": "",
+    "text": "desk's NSE 5-minute stock pool."
+   }
+  ]
+ },
+ {
+  "id": "NJ-16",
+  "source": "youtube_channels11",
+  "name": "Double bottom / double top neckline break",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "OzIt1SEisBY"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bank Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "BANKNIFTY index (1-minute data)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: BANKNIFTY options (calls on W, puts on M), any timeframe (E 00:02:30-00:03:00)."
+   },
+   {
+    "label": "",
+    "text": "W (E 00:00:30-00:02:30): in a down trend price takes support, rises to a resistance (the neckline), falls back to"
+   },
+   {
+    "label": "",
+    "text": "about the same support and rises again: two bottoms."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:03:00-00:04:00): draw the support line under the two bottoms and the neckline at the resistance; when"
+   },
+   {
+    "label": "",
+    "text": "a candle closes above the neckline, enter on the next candle. Stop: the low of the candle that closed above the"
+   },
+   {
+    "label": "",
+    "text": "neckline. Target: the support-to-neckline distance added above (example E 00:05:30: entry 39,430, stop 39,380,"
+   },
+   {
+    "label": "",
+    "text": "neckline 39,385, support 39,315, target 39,500)."
+   },
+   {
+    "label": "",
+    "text": "M (E 00:06:00-00:08:00): the mirror; puts / short."
+   },
+   {
+    "label": "",
+    "text": "A: 5-minute BANKNIFTY; bottoms = two confirmed 5-candle fractal lows within 0.25 x ATR 14 of each other, at least 5"
+   },
+   {
+    "label": "",
+    "text": "candles apart, after a lower prior trend (the first bottom is the lowest low of the 20 candles before it); neckline"
+   },
+   {
+    "label": "",
+    "text": "= the highest high between them; the close above it must come within 20 candles of the second bottom; target = the"
+   },
+   {
+    "label": "",
+    "text": "neckline plus the pattern height measured from the entry fill's neckline (as in his example); out at the session's"
+   },
+   {
+    "label": "",
+    "text": "end."
+   }
+  ]
+ },
+ {
+  "id": "NJ-17",
+  "source": "youtube_channels11",
+  "name": "Day Sniper: gap, limit at the first 15-minute close",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "5G7l_rDrnlo"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks 15m",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, 15-minute candles"
+   },
+   {
+    "label": "Video",
+    "text": "Market: shares, 15-minute candles (5 or 10 allowed, 15 recommended, E 00:09:00-00:09:30); options did not work well for him (E 00:09:00)."
+   },
+   {
+    "label": "",
+    "text": "Stock (E 00:00:30-00:02:30): one that opened gap-up (a visible space between the previous day's last candle and"
+   },
+   {
+    "label": "",
+    "text": "today's first candle; his example closes 321.50, opens 325.95)."
+   },
+   {
+    "label": "",
+    "text": "Wait (E 00:02:30-00:03:30): do not buy during the first 15-minute candle; after it closes (09:30) place a limit buy"
+   },
+   {
+    "label": "",
+    "text": "at its closing price; it must fill within the next 15 minutes, otherwise skip the stock that day (E 00:09:30-"
+   },
+   {
+    "label": "",
+    "text": "00:10:00)."
+   },
+   {
+    "label": "",
+    "text": "Stop (E 00:04:30-00:05:00, 00:08:00): just below the first candle's low (50 paise below in his example)."
+   },
+   {
+    "label": "",
+    "text": "Exit: no target; his example shows the day's high three hours later and the close (E 00:06:00-00:07:00)."
+   },
+   {
+    "label": "",
+    "text": "Gap-down (E 00:10:00-00:11:00): the mirror: limit sell at the first 15-minute candle's close; stop at its high."
+   },
+   {
+    "label": "",
+    "text": "Note: he says the limit order fills only if the next candle is positive (E 00:04:00-00:04:30). A limit buy fills"
+   },
+   {
+    "label": "",
+    "text": "when price trades down to it, not up; the testable form keeps the order he tells viewers to place (the limit)."
+   },
+   {
+    "label": "",
+    "text": "A: gap-up = the first candle's low above the previous close (gap-down: its high below the previous close); limit"
+   },
+   {
+    "label": "",
+    "text": "order at the first candle's close, valid 09:30-09:45; stop 0.05% beyond the first candle's low (high); exit at the"
+   },
+   {
+    "label": "",
+    "text": "session's end; one trade per stock per day. Universe: the desk's NSE 15-minute stock pool."
+   }
+  ]
+ },
+ {
+  "id": "NJ-18",
+  "source": "youtube_channels11",
+  "name": "Gap of 0.3% + first 15-minute range breakout",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "CdXPfxB08_o",
+   "Br8-ipCt4mg"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks 15m",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, 15-minute candles"
+   },
+   {
+    "label": "Video",
+    "text": "Market: shares, 15-minute candles (E Br8 00:01:30, CdX 00:15:00). Both read (digest; CdX strategy part in full)."
+   },
+   {
+    "label": "",
+    "text": "Br8-ipCt4mg (2023, 8 min): gap-up stock: draw lines at the first 15-minute candle's high and low; buy when a candle"
+   },
+   {
+    "label": "",
+    "text": "closes above the high (E 00:04:00); stop at the first candle's low; no fixed target: hold until a candlestick"
+   },
+   {
+    "label": "",
+    "text": "pattern says price may fall (E 00:02:30); rising volume adds confirmation (E 00:03:00-00:03:30). Gap-down: short on"
+   },
+   {
+    "label": "",
+    "text": "a close below the low, stop at the high (E 00:05:00-00:05:30). One trade a day (E 00:07:30)."
+   },
+   {
+    "label": "",
+    "text": "CdXPfxB08_o strategy 4 (2024, the later version): after a gap-up open, mark the first 15-minute candle's high and"
+   },
+   {
+    "label": "",
+    "text": "low; enter on the candle that breaks the high; stop below the first candle's low; target 2 x the stop distance, or"
+   },
+   {
+    "label": "",
+    "text": "a trailing stop for a bigger move; volume above its average raises the odds (E 00:15:00-00:17:00). Gap-down: enter"
+   },
+   {
+    "label": "",
+    "text": "on the break of the low, stop above the first candle's high, target 2x or trail (E 00:17:00-00:18:30)."
+   },
+   {
+    "label": "",
+    "text": "A (the 2024 version): gap-up = today's open above the previous close by at least 0.3%, gap-down mirrored; a"
+   },
+   {
+    "label": "",
+    "text": "stop-entry at the first candle's high (low), valid until 14:30; stop at the first candle's other end; target 2R;"
+   },
+   {
+    "label": "",
+    "text": "out at the session's end; volume is not a hard filter (the video says it only raises the odds); one trade per stock"
+   },
+   {
+    "label": "",
+    "text": "per day. Universe: the desk's NSE 15-minute stock pool."
+   }
+  ]
+ },
+ {
+  "id": "NJ-19",
+  "source": "youtube_channels11",
+  "name": "EMA 50/200 golden cross with volume, daily",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "CdXPfxB08_o"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks daily",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, daily candles"
+   },
+   {
+    "label": "",
+    "text": "E 00:12:00-00:14:30: EMA 50 (green) and EMA 200 (red) plus volume. EMA 50 crossing above EMA 200 is a buy, crossing"
+   },
+   {
+    "label": "",
+    "text": "below a sell; confirm with rising volume (a cross on normal volume is riskier). Intraday it gives many false"
+   },
+   {
+    "label": "",
+    "text": "signals; use it on daily candles for swing trades."
+   },
+   {
+    "label": "",
+    "text": "A: daily candles on the desk's NSE daily stock pool, long only (cash shares); volume on the cross day above its"
+   },
+   {
+    "label": "",
+    "text": "20-day average; enter at the next open; exit at the next open after the opposite cross; a protective stop 2 x ATR"
+   },
+   {
+    "label": "",
+    "text": "14 below the entry (none given; the desk needs one to size the trade)."
+   }
+  ]
+ },
+ {
+  "id": "NJ-20",
+  "source": "youtube_channels11",
+  "name": "200-DMA cross candidates from the top 100 by turnover",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "aFwdDq1hFgo"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks 5m",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, 5-minute candles"
+   },
+   {
+    "label": "Video",
+    "text": "Market: shares, intraday \"for tomorrow\"."
+   },
+   {
+    "label": "",
+    "text": "Universe (E 00:00:30-00:03:00): the NSE bhavcopy; sort by total traded value and keep the top 100."
+   },
+   {
+    "label": "",
+    "text": "Moving averages (E 00:07:00-00:08:30): 10, 30, 60, 90, 120 and 200-day."
+   },
+   {
+    "label": "",
+    "text": "Buy list (E 00:08:30-00:10:00): price above the 10/30/60/90/120-day averages but still below the 200-day; buy when"
+   },
+   {
+    "label": "",
+    "text": "it crosses above the 200-day (\"breakout\"). Sell list: below the 10-120-day averages but above the 200-day; short"
+   },
+   {
+    "label": "",
+    "text": "when it crosses below the 200-day. The trigger price is the 200-day average (E 00:12:00, example: short Bharti below"
+   },
+   {
+    "label": "",
+    "text": "775.17)."
+   },
+   {
+    "label": "",
+    "text": "No stop or target is given."
+   },
+   {
+    "label": "",
+    "text": "A: candidates fixed from the previous session's daily closes; a stop-entry at the 200-day average during 09:15-"
+   },
+   {
+    "label": "",
+    "text": "14:30; stop 0.5 x the daily ATR 14 beyond the trigger; target 2R; out at the session's end; one trade per stock per"
+   },
+   {
+    "label": "",
+    "text": "day. Needs 200 days of daily closes per stock: implement only if the desk's stock pool has the daily history."
+   }
+  ]
+ },
+ {
+  "id": "NJ-21",
+  "source": "youtube_channels11",
+  "name": "EMA 5/20 cross scalp, 10-minute time stop",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "YEswhH1-5Jo"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NIFTY index (1-minute data)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: options/intraday/forex (any)."
+   },
+   {
+    "label": "",
+    "text": "Strategy 1 (E 00:03:00-00:04:30): EMA 5 and EMA 20 crossover: buy when EMA 5 crosses above EMA 20, sell when it"
+   },
+   {
+    "label": "",
+    "text": "crosses below; volume helps to avoid false signals; take small points, not the whole move (E 00:04:00)."
+   },
+   {
+    "label": "",
+    "text": "Strategy 2 (E 00:05:00-00:06:00): Parabolic SAR: dots below price = buy, above = sell; with volume near or above its"
+   },
+   {
+    "label": "",
+    "text": "average; take a little and re-enter while the trend lasts. (Pushkar Raj Thakur has a full PSAR video, VShXp7GA0js:"
+   },
+   {
+    "label": "",
+    "text": "handled there.)"
+   },
+   {
+    "label": "",
+    "text": "Exit discipline (E 00:09:30): if neither the target nor the stop is hit within about 10 minutes, exit (\"10 minutes is"
+   },
+   {
+    "label": "",
+    "text": "my number, choose your own\"). Big losses must not eat the small profits (E 00:07:30)."
+   },
+   {
+    "label": "",
+    "text": "A for strategy 1: NIFTY 1-minute; enter at the next open after the cross; stop = the lowest low (highest high) of"
+   },
+   {
+    "label": "",
+    "text": "the last 5 candles; target 1R (a scalp: small points); time stop 10 minutes; up to 6 trades a day, stopping after 3"
+   },
+   {
+    "label": "",
+    "text": "stops; no volume filter (the index has none)."
+   }
+  ]
+ },
+ {
+  "id": "NJ-22",
+  "source": "youtube_channels11",
+  "name": "MACD + Stochastic 50 + Parabolic SAR",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "Idw7qPqBWSA"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bank Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "BANKNIFTY index (1-minute data)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: options (BANKNIFTY-sized moves: \"181 points in 20 minutes\"), 5-minute candles (1 or 3 also allowed, not 15: E 00:01:00)."
+   },
+   {
+    "label": "",
+    "text": "MACD (E 00:02:00-00:03:00): MACD line crossing above its signal line = buy, below = sell; alone it gives many"
+   },
+   {
+    "label": "",
+    "text": "false signals."
+   },
+   {
+    "label": "",
+    "text": "Stochastic (E 00:03:00-00:06:00): both lines above 50 = look only for buys; both below 50 = only sells."
+   },
+   {
+    "label": "",
+    "text": "Parabolic SAR (E 00:07:30-00:08:00): dots below the candle = buy, above = sell."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:08:00-00:11:30): enter on the candle where all three agree (MACD crossed up, both Stochastic lines"
+   },
+   {
+    "label": "",
+    "text": "above 50, SAR dots below the candle); shorts mirror it."
+   },
+   {
+    "label": "",
+    "text": "Exit (E 00:12:30-00:13:00): stay in while all three hold; exit as soon as any one fails (e.g. the MACD condition),"
+   },
+   {
+    "label": "",
+    "text": "or take your own target. Stop: as little as you can risk (a scalp), and it can be trailed."
+   },
+   {
+    "label": "",
+    "text": "A: BANKNIFTY 5-minute; MACD 12/26/9, Stochastic 14/1/3, SAR 0.02/0.02/0.2 (defaults); the signal is the first"
+   },
+   {
+    "label": "",
+    "text": "closed candle where all three agree with the MACD cross within the last 3 candles; enter at the next open; stop at"
+   },
+   {
+    "label": "",
+    "text": "that candle's SAR value; exit at the next open after any condition fails; out at the session's end; up to 4 trades"
+   },
+   {
+    "label": "",
+    "text": "a day."
+   }
+  ]
+ },
+ {
+  "id": "NJ-23",
+  "source": "youtube_channels11",
+  "name": "Harami with a confirmation candle",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "V5nm2aCtfN8"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NIFTY index (1-minute data)"
+   },
+   {
+    "label": "Video",
+    "text": "The video is a compilation of his strategies (chapters): range breakout/breakdown (= NJ-15 / CdX strategy 2), trendline breakout/breakdown with volume (hand-drawn: not implemented), Renko bullish/bearish (= NJ-11), double bottom/top (= NJ-16, with the same pattern-height target), candlestick patterns (new, below), MACD (= NJ-09; adds that a cross with growing histogram bars is strong, small bars weak), moving-average cross 20/50 with volume (lagging, not to be traded alone), gap up/down (= NJ-17/18)."
+   },
+   {
+    "label": "",
+    "text": "Candlestick strategy (E 00:14:40-00:17:30): in a down trend a big red candle, then a small green candle whose body"
+   },
+   {
+    "label": "",
+    "text": "sits inside the red body (bullish harami); then a green candle that closes above the red candle: enter on that"
+   },
+   {
+    "label": "",
+    "text": "candle or, for more confirmation, the next one; stop below the red candle. Bearish mirror after an up trend (big"
+   },
+   {
+    "label": "",
+    "text": "green, small red inside it, then a red candle closing below it; stop above the green candle). No target given."
+   },
+   {
+    "label": "",
+    "text": "A: NIFTY 5-minute; \"big\" = body at least 1.2 x the average body of the last 20 candles; \"down trend\" = the big"
+   },
+   {
+    "label": "",
+    "text": "candle closes below EMA 20; the confirming candle must come within 3 candles of the harami; enter at the next open"
+   },
+   {
+    "label": "",
+    "text": "after the confirming close; stop at the big candle's low (high); target 2R; out at the session's end."
+   }
+  ]
+ },
+ {
+  "id": "NJ-24",
+  "source": "youtube_channels11",
+  "name": "Ascending triangle breakout, daily",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "ogZR_2gZFxY"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks daily",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, daily candles"
+   },
+   {
+    "label": "Video",
+    "text": "Market: shares (daily examples, e.g. \"about 12% return\"), calls/puts as the vehicle."
+   },
+   {
+    "label": "",
+    "text": "Ascending triangle (E 00:07:30-00:12:30): in an up trend price makes a resistance R1, a support S1, comes back to"
+   },
+   {
+    "label": "",
+    "text": "about the same resistance (R2 at R1's level) and makes a higher support (S2 above S1). Draw the horizontal"
+   },
+   {
+    "label": "",
+    "text": "resistance through R1/R2 and the rising line through S1/S2. Buy on the candle after the one that breaks out above"
+   },
+   {
+    "label": "",
+    "text": "the resistance; stop below the breakout candle (its low); target = the resistance-to-first-support height, or a"
+   },
+   {
+    "label": "",
+    "text": "trailing stop (E 00:15:30, 00:18:30)."
+   },
+   {
+    "label": "",
+    "text": "Descending triangle (E 00:13:00-00:15:30): in a down trend, S1 and S2 at the same level and R2 below R1: short on"
+   },
+   {
+    "label": "",
+    "text": "the candle after a close below support; stop at the breakdown candle's high; same target rule (example: a 9%"
+   },
+   {
+    "label": "",
+    "text": "height, 12% achieved)."
+   },
+   {
+    "label": "",
+    "text": "Symmetrical triangle (E 00:16:00-00:19:00): lower highs and higher lows; trade the break in the direction of the"
+   },
+   {
+    "label": "",
+    "text": "prior trend; wait for a clean break if price hugs the line."
+   },
+   {
+    "label": "",
+    "text": "A: daily candles on the desk's NSE daily stock pool, long only (ascending, and symmetrical in an up trend):"
+   },
+   {
+    "label": "",
+    "text": "pivots = 3-candle fractals confirmed with no look-ahead; R1 and R2 within 1.5% of each other, S2 at least 1% above"
+   },
+   {
+    "label": "",
+    "text": "S1, the pattern spanning 10-60 sessions; up trend = the close above SMA 50 at R1; a close above max(R1, R2) within"
+   },
+   {
+    "label": "",
+    "text": "15 sessions of R2; enter at the next open; stop = the breakout candle's low; target = the entry plus (R - S1);"
+   },
+   {
+    "label": "",
+    "text": "time stop 30 sessions."
+   }
+  ]
+ },
+ {
+  "id": "NJ-25",
+  "source": "youtube_channels11",
+  "name": "BTST momentum basket",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "IKuQYg0jcO0"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks daily",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, daily candles"
+   },
+   {
+    "label": "",
+    "text": "Idea (E 00:00:00-00:02:00): the biggest moves come before the open; intraday traders' exits put selling pressure on"
+   },
+   {
+    "label": "",
+    "text": "stocks at 15:00-15:15, and their buying lifts prices at the next open."
+   },
+   {
+    "label": "",
+    "text": "Options version (E 00:02:30-00:14:30): buy both an ATM call and an ATM put of equal value between 15:00 and 15:30"
+   },
+   {
+    "label": "",
+    "text": "and sell both at 09:15-09:30 next day; it profits from a big gap either way and loses (theta) when the open is"
+   },
+   {
+    "label": "",
+    "text": "flat. Needs option prices: recorded, not implemented."
+   },
+   {
+    "label": "",
+    "text": "Stock version (E 00:15:00-00:21:00): pick 5-6 stocks with strong momentum (prices moving a lot, in an up trend),"
+   },
+   {
+    "label": "",
+    "text": "high volume, large or mid caps, each from a different sector; buy equal amounts between 15:00 and 15:30 every day"
+   },
+   {
+    "label": "",
+    "text": "and sell between 09:15 and 09:30 next day; replace a stock that stops trending (falls for several days) with a"
+   },
+   {
+    "label": "",
+    "text": "stronger one. Judge it over a long period, not one day."
+   },
+   {
+    "label": "",
+    "text": "A: daily candles on the desk's NSE daily stock pool; each day pick the 5 liquid stocks with the highest 20-day"
+   },
+   {
+    "label": "",
+    "text": "return among those closing above their 50-day average, ranked on the previous session's close (the basket is set"
+   },
+   {
+    "label": "",
+    "text": "before the session, as his list is; ranking on the same close that fills the order would peek at it); the pool has"
+   },
+   {
+    "label": "",
+    "text": "no sector data, so the one-stock-per-sector rule is dropped; buy at the close, sell at the next open; equal money"
+   },
+   {
+    "label": "",
+    "text": "per stock; no stop (the hold is one night), and a protective 3 x daily ATR 14 distance is used only to size the"
+   },
+   {
+    "label": "",
+    "text": "trade."
+   }
+  ]
+ },
+ {
+  "id": "NJ-26",
+  "source": "youtube_channels11",
+  "name": "EMA 50 cross on Heikin Ashi with volume and RSI",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "10SwCXmeTyE"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks daily",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, daily candles"
+   },
+   {
+    "label": "Video",
+    "text": "Market: shares, swing; 4-hour candles (or daily; nothing lower, nothing as high as weekly: E 00:00:00-00:00:30)."
+   },
+   {
+    "label": "",
+    "text": "Chart (E 00:00:30): Heikin Ashi candles to see the trend; EMA 50 (E 00:01:00)."
+   },
+   {
+    "label": "",
+    "text": "Long (E 00:03:00-00:04:30): a green Heikin Ashi candle crosses above EMA 50; volume above its moving average; RSI"
+   },
+   {
+    "label": "",
+    "text": "above 50. Draw a line at that candle's close; when it is broken, buy on the next candle (E 00:04:30-00:05:00)."
+   },
+   {
+    "label": "",
+    "text": "Stop (E 00:05:00, 00:10:30): a little below the candle that crossed EMA 50, or below a nearby swing low."
+   },
+   {
+    "label": "",
+    "text": "Exit (E 00:05:30-00:06:30): hide EMA 50 and add EMA 20; the target is reached when a candle closes below EMA 20, or"
+   },
+   {
+    "label": "",
+    "text": "when RSI falls below 50. Examples: 10% in 35 days, 20% in 45 days."
+   },
+   {
+    "label": "",
+    "text": "Short (E 00:11:00-00:13:00): mirror (close below EMA 50, volume above average, RSI below 50; exit on a close above"
+   },
+   {
+    "label": "",
+    "text": "EMA 20); in swing trading mostly longs."
+   },
+   {
+    "label": "",
+    "text": "A: daily candles on the desk's NSE daily stock pool, long only; the indicators are computed on the Heikin Ashi"
+   },
+   {
+    "label": "",
+    "text": "series (as TradingView does on a Heikin Ashi chart); RSI 14; volume above its 20-day average; a stop-entry at the"
+   },
+   {
+    "label": "",
+    "text": "cross candle's Heikin Ashi close, valid 3 sessions; stop at the cross candle's real low; exit at the next open after"
+   },
+   {
+    "label": "",
+    "text": "a Heikin Ashi close below EMA 20 or RSI below 50."
+   }
+  ]
+ },
+ {
+  "id": "NJ-46",
+  "source": "youtube_channels11",
+  "name": "EMA 10/20 cross with a Marubozu candle (Anant Ladha)",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "zKgQwXt3z9o"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks daily",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, daily candles"
+   },
+   {
+    "label": "Video",
+    "text": "Guest: Anant Ladha. Market: stocks on daily candles (indices also on 15 minutes or daily; crypto not tested by him, E 00:06:00)."
+   },
+   {
+    "label": "",
+    "text": "Candle (E 00:01:30-00:02:00): a Marubozu = a strong full-bodied candle (one side won the whole session; small wicks"
+   },
+   {
+    "label": "",
+    "text": "are fine)."
+   },
+   {
+    "label": "",
+    "text": "Trend (E 00:04:30-00:05:00, 00:08:00): EMA 10 above EMA 20 = bullish \"health\", below = bearish."
+   },
+   {
+    "label": "",
+    "text": "Trigger (E 00:05:00-00:05:30, 00:06:30): EMA 10 crosses above EMA 20 and a bullish Marubozu forms at the cross:"
+   },
+   {
+    "label": "",
+    "text": "that is the trigger (for shorts a bearish Marubozu at the cross down; short when its low breaks; stop around its"
+   },
+   {
+    "label": "",
+    "text": "high)."
+   },
+   {
+    "label": "",
+    "text": "Target (E 00:05:30): 1:3 is the normal reward (1:10 happened once). Retests of EMA 20 while the trend holds give"
+   },
+   {
+    "label": "",
+    "text": "re-entries (E 00:08:00). Win rate about 35%: it never misses a trend, stops come in sideways markets (E 00:08:00)."
+   },
+   {
+    "label": "",
+    "text": "A: the desk's NSE daily stock pool, long only; EMA 10 crosses above EMA 20 on the Marubozu day or one of the two"
+   },
+   {
+    "label": "",
+    "text": "days before; Marubozu = green body at least 70% of the range and the range at least 1 x ATR 14; a buy-stop at its"
+   },
+   {
+    "label": "",
+    "text": "high valid for the next 3 sessions; stop at its low; target 3R; exit also if EMA 10 crosses back below EMA 20 (next"
+   },
+   {
+    "label": "",
+    "text": "open); time stop 40 sessions."
+   }
+  ]
+ },
+ {
+  "id": "NJ-27",
+  "source": "youtube_channels11",
+  "name": "20-candle channel breakout with EMA 200 and ATR stops, 4 hours",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "sUcvpDSsQz0"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: bitcoin and ether on Delta Exchange (fees 0.05% included in his test), 4-hour candles, about 5 trades a month, backtested 5 years (E 00:00:30-00:03:00). The description links his Pine Script (public Google Doc 1xjLs3vcGU4ok3fnAA5FslJPca76r5keMcS1TvWCdw3Y); the rules below are taken from that code where the video is looser."
+   },
+   {
+    "label": "",
+    "text": "Channel (E 00:03:00-00:04:00; code): the highest high and lowest low of the previous 20 completed 4-hour candles"
+   },
+   {
+    "label": "",
+    "text": "(the current candle excluded)."
+   },
+   {
+    "label": "",
+    "text": "Trend (E 00:08:30, 00:09:30; code): longs only when the close is above EMA 200, shorts only below it."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:05:30-00:06:00; code): a 4-hour candle closes above the 20-candle high (below the 20-candle low for"
+   },
+   {
+    "label": "",
+    "text": "shorts); enter at the next candle's open."
+   },
+   {
+    "label": "",
+    "text": "Initial stop (E 00:06:00-00:07:00; code): 2.5 x ATR 14 from the entry (the code's ATR is a simple average of true"
+   },
+   {
+    "label": "",
+    "text": "range)."
+   },
+   {
+    "label": "",
+    "text": "Trail (E 00:07:00-00:07:30, 00:09:30; code): no fixed target; a trailing stop 3 x ATR behind the best price,"
+   },
+   {
+    "label": "",
+    "text": "updated after each completed candle and applied from the next one; the video also describes moving to breakeven at"
+   },
+   {
+    "label": "",
+    "text": "1:1, which the code replaces with the ATR trail."
+   },
+   {
+    "label": "",
+    "text": "Exit channel (code): a close below the lowest low of the previous 10 candles (above the highest high for shorts)"
+   },
+   {
+    "label": "",
+    "text": "closes the trade."
+   },
+   {
+    "label": "",
+    "text": "Sizing (code): 3% of the balance at risk per trade, compounding."
+   },
+   {
+    "label": "",
+    "text": "Desk form: BTCUSD on Delta (the desk has no ether account), 4-hour candles built from its minute bars (UTC 4-hour"
+   },
+   {
+    "label": "",
+    "text": "boundaries, as TradingView); exit-channel closes fill at the next open; risk per the desk's account rules."
+   }
+  ]
+ },
+ {
+  "id": "NJ-28",
+  "source": "youtube_channels11",
+  "name": "Fibonacci OTE: a 0.618 tap with an FVG",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "TQYEWBhMQM0"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: crypto (bitcoin-sized stops: \"2,000 points\"), analysis on 1-hour, entries on 5 or 15 minutes (E 00:13:00)."
+   },
+   {
+    "label": "",
+    "text": "Levels (E 00:08:00-00:09:30): draw the retracement over the last swing; 0.5, 0.618 and 0.786 are the levels (the"
+   },
+   {
+    "label": "",
+    "text": "smart-money \"optimal trade entry\"); premium above 0.5, discount below (E 00:17:00-00:18:30): buy only in discount,"
+   },
+   {
+    "label": "",
+    "text": "sell only in premium."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:08:00, 00:12:00, 00:15:00, 00:20:00): wait for price to reach 0.618; a larger-than-normal candle that"
+   },
+   {
+    "label": "",
+    "text": "leaves a fair value gap there is the confirmation; when price taps that FVG again, enter."
+   },
+   {
+    "label": "",
+    "text": "Stop (E 00:08:00, 00:13:30, 00:15:00, 00:20:00): above 0.786 for shorts (below 0.786 for longs on 15-minute; a"
+   },
+   {
+    "label": "",
+    "text": "break of 0.786 means the trend has turned)."
+   },
+   {
+    "label": "",
+    "text": "Target (E 00:12:00, 00:15:30, 00:20:00): 1:2; or the Fibonacci \"standard deviation\" levels 0, -0.5, -1, -1.5"
+   },
+   {
+    "label": "",
+    "text": "(E 00:21:30-00:22:30)."
+   },
+   {
+    "label": "",
+    "text": "Overlap: CP-25 (crypto playlist) is ICT OTE 0.705-0.79 with different entry and stop rules; NJ-28 keeps Neeraj"
+   },
+   {
+    "label": "",
+    "text": "Joshi's own version."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD; swings = 1-hour 5-candle fractals (the last confirmed swing low and high); up leg (high after low) gives"
+   },
+   {
+    "label": "",
+    "text": "longs, down leg gives shorts; a 15-minute candle with a body at least 1.5 x the average of the last 20 bodies that"
+   },
+   {
+    "label": "",
+    "text": "leaves a bullish (bearish) FVG while its range touches 0.618-0.786; enter on a limit at the FVG's near edge, valid"
+   },
+   {
+    "label": "",
+    "text": "12 candles; stop just beyond 0.786 (0.25 x ATR 14 margin); target 2R; one open trade at a time."
+   }
+  ]
+ },
+ {
+  "id": "NJ-29",
+  "source": "youtube_channels11",
+  "name": "Order block retest with a 5-minute CISD",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "NBN3iZOK6Ow",
+   "Qu9_ugsG6Z8",
+   "hkqw42lxGLg"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: crypto first (Delta links), \"works on every timeframe\"."
+   },
+   {
+    "label": "",
+    "text": "Order block (Qu9 00:00:30-00:03:00; NBN3 00:08:00): after a correction, a big momentum candle (only big money can"
+   },
+   {
+    "label": "",
+    "text": "make it); the last opposite-colour candle before that impulsive move, from its high to its low, is the order"
+   },
+   {
+    "label": "",
+    "text": "block. It is valid when the move leaves a fair value gap (Qu9 00:03:00)."
+   },
+   {
+    "label": "",
+    "text": "Simple use (Qu9 00:04:00; NBN3 00:09:00-00:11:00): when price returns to the block, enter; stop a little beyond"
+   },
+   {
+    "label": "",
+    "text": "the block; target 1:2 (NBN3). A block that price closes through becomes a breaker block for the other side (NBN3"
+   },
+   {
+    "label": "",
+    "text": "00:17:00-00:20:00)."
+   },
+   {
+    "label": "",
+    "text": "Strategy (NBN3 00:20:30-00:25:00): mark the order block on a higher timeframe (1-hour shown); when price comes back"
+   },
+   {
+    "label": "",
+    "text": "to it, do not enter at once: go to 5 minutes and wait for a CISD: draw a line at the close of the last opposite"
+   },
+   {
+    "label": "",
+    "text": "candle before the latest 5-minute impulse; a candle closing beyond that line confirms; enter when price retests"
+   },
+   {
+    "label": "",
+    "text": "the line; stop a little beyond the swing (or the block); target 1:2, or the next swing for more (book early if the"
+   },
+   {
+    "label": "",
+    "text": "move stalls)."
+   },
+   {
+    "label": "",
+    "text": "hkqw42lxGLg adds the multi-timeframe frame: support/resistance and blocks/FVGs on 4 hours, entries on 15 minutes,"
+   },
+   {
+    "label": "",
+    "text": "targets at the next 4-hour level (1:8 in his best example)."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD; order blocks on 1-hour candles (the last opposite candle before two same-direction candles whose"
+   },
+   {
+    "label": "",
+    "text": "combined body is at least 2 x ATR 14, with a 3-candle FVG inside the move); a block is live for 5 days or until a"
+   },
+   {
+    "label": "",
+    "text": "close beyond its far side; when a 5-minute candle trades into a live block, look for a CISD within the next 36"
+   },
+   {
+    "label": "",
+    "text": "five-minute candles (a close beyond the close of the last opposite candle before the latest 2-candle impulse"
+   },
+   {
+    "label": "",
+    "text": "against the move, the line he draws at E 00:20:30); enter on a limit at the CISD line, valid 12 candles; stop beyond the block's far side with a"
+   },
+   {
+    "label": "",
+    "text": "0.1 x 1-hour ATR margin; target 2R; one trade at a time."
+   }
+  ]
+ },
+ {
+  "id": "NJ-30",
+  "source": "youtube_channels11",
+  "name": "Fair value gap 50% limit entry",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "UTO6e69GGSM",
+   "1F2qE6yabfM"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "",
+    "text": "FVG (UTO 00:00:30-00:03:00; 1F2 00:02:00): three candles, the middle one larger than normal; the gap between the"
+   },
+   {
+    "label": "",
+    "text": "first candle's high and the third candle's low (bullish), or the first's low and the third's high (bearish)."
+   },
+   {
+    "label": "",
+    "text": "Without a gap there is no FVG (UTO 00:12:00)."
+   },
+   {
+    "label": "",
+    "text": "Entry (UTO 00:06:30, 00:10:00-00:12:30): when price returns into the gap, buy with a limit order at (just below)"
+   },
+   {
+    "label": "",
+    "text": "its 50% line; stop a little beyond the far edge; target the recent swing high (1:3-1:4 in his examples; skip if it"
+   },
+   {
+    "label": "",
+    "text": "only gives 1:1, UTO 00:11:00)."
+   },
+   {
+    "label": "",
+    "text": "Inverse FVG (UTO 00:13:00+; 1F2 00:04:00-00:05:00): a gap that price closes through flips to the other side."
+   },
+   {
+    "label": "",
+    "text": "CISD (1F2 00:06:00-00:07:30): line at the close of the last opposite candle before an impulse; a close beyond it"
+   },
+   {
+    "label": "",
+    "text": "confirms; enter on the retest; 1:2. (Used in NJ-29.)"
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD 15-minute; middle candle body at least 1.5 x the average of the last 20 bodies; gap at least 0.2 x ATR"
+   },
+   {
+    "label": "",
+    "text": "14; limit at the gap's 50%, valid 24 candles; stop beyond the far edge plus 0.1 x ATR; target the latest confirmed"
+   },
+   {
+    "label": "",
+    "text": "15-minute fractal high (low) beyond the entry; skip the gap when that target is less than 1.5R away (his 1:1"
+   },
+   {
+    "label": "",
+    "text": "rule), and use 2R when no such swing exists."
+   }
+  ]
+ },
+ {
+  "id": "NJ-31",
+  "source": "youtube_channels11",
+  "name": "4-hour swing sweep + 5-minute engulfing",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "WLR6S3mgOkk"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: bitcoin (78,000 levels), 5-minute candles, his 5-year backtest (397,300 bars) at 1:2 and 1% risk."
+   },
+   {
+    "label": "",
+    "text": "His test (E 00:00:30-00:07:00): four entries after a sweep: engulfing; FVG then tap; FVG without waiting for the"
+   },
+   {
+    "label": "",
+    "text": "tap (loses at every R:R and risk); inverse FVG (36.7% win rate, +84.7% in 5 years). The engulfing entry was the best"
+   },
+   {
+    "label": "",
+    "text": "(about +70% after 200 trades while the others were negative, E 00:20:00), and better still with wick-only sweeps"
+   },
+   {
+    "label": "",
+    "text": "(E 00:20:30-00:21:00). 1:2 beat 1:3 and 1:4."
+   },
+   {
+    "label": "",
+    "text": "Levels (E 00:09:00-00:10:30): mark the 4-hour highs and lows (Williams fractals on 4 hours); the nearer one matters."
+   },
+   {
+    "label": "",
+    "text": "Sweep (E 00:12:00): on 5 minutes price trades below the 4-hour low and comes back above it (stops of the earlier"
+   },
+   {
+    "label": "",
+    "text": "buyers are hit)."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:12:00-00:13:30): after the low is swept wait for a bullish engulfing candle (opens at/below the prior"
+   },
+   {
+    "label": "",
+    "text": "red candle's close, closes above its open; the red body fits inside the green body); enter on the next candle."
+   },
+   {
+    "label": "",
+    "text": "Stop below the sweep; target 1:2. Highs mirror it with a bearish engulfing."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD; 4-hour 5-candle fractals, confirmed (two 4-hour candles after the pivot); a sweep = a 5-minute low below"
+   },
+   {
+    "label": "",
+    "text": "the level with the close back above it (wick sweep); the engulfing must come within 6 five-minute candles of the"
+   },
+   {
+    "label": "",
+    "text": "sweep; enter at the next open; stop 0.1 x 5-minute ATR 14 below the lowest low since the sweep; target 2R; a level"
+   },
+   {
+    "label": "",
+    "text": "is used once."
+   }
+  ]
+ },
+ {
+  "id": "NJ-32",
+  "source": "youtube_channels11",
+  "name": "Candle range theory 2.0",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "LrILW6JRNq8"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: \"crypto, stocks, options, forex\"; 1-hour minimum, bigger is better (E 00:00:30-00:01:00)."
+   },
+   {
+    "label": "",
+    "text": "Trend (E 00:00:30): buys only in an up trend, sells only in a down trend; no trades sideways."
+   },
+   {
+    "label": "",
+    "text": "Range (E 00:01:00, 00:04:00): in an up trend a big red candle forms: its high and low are the candle range."
+   },
+   {
+    "label": "",
+    "text": "Sweep (E 00:02:00-00:02:30, 00:04:30-00:05:00): the next candle trades below the range low with a long wick and"
+   },
+   {
+    "label": "",
+    "text": "closes back above it (any colour)."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:02:30-00:03:00): buy on the next candle; stop below the range low (or below the wick when it is short);"
+   },
+   {
+    "label": "",
+    "text": "target 2 x the range height (example: 400-point range, 300-point stop, 800-point target, E 00:10:30)."
+   },
+   {
+    "label": "",
+    "text": "If the next candle does not sweep, re-draw the range on the latest candle and wait again (E 00:07:00-00:09:00)."
+   },
+   {
+    "label": "",
+    "text": "Shorts mirror it in a down trend (big green candle, a sweep of its high, a close back below)."
+   },
+   {
+    "label": "",
+    "text": "CRT 2.0 (KrEpE3TP8xk, 6 Aug 2026, 14 min): the 2025 version \"no longer works as well\", so three changes (E"
+   },
+   {
+    "label": "",
+    "text": "00:04:00-00:05:00): the range candle's location matters more than its size (at a support zone for longs); a setup is"
+   },
+   {
+    "label": "",
+    "text": "invalid if, after the low is swept and price closes back inside, the high is also swept and closed back inside;"
+   },
+   {
+    "label": "",
+    "text": "the entry waits for a 5-minute FVG (or inverse FVG) after the sweep and enters on its retest (E 00:02:30, 00:06:30-"
+   },
+   {
+    "label": "",
+    "text": "00:07:00); stop below the sweep wick; target 1:2 (E 00:05:00)."
+   },
+   {
+    "label": "",
+    "text": "The desk keeps the 2026 version (the creator's update). A: BTCUSD; 1-hour trend = close above EMA 50 and EMA 50"
+   },
+   {
+    "label": "",
+    "text": "rising over 10 candles; the range candle is an opposite-colour candle whose low is within 0.5 x 1-hour ATR 14 of a"
+   },
+   {
+    "label": "",
+    "text": "confirmed 1-hour fractal low (support; mirrored for shorts); the next 1-hour candle sweeps the range low and closes"
+   },
+   {
+    "label": "",
+    "text": "back inside; within that and the next 1-hour candle, a 5-minute bullish FVG (middle body at least 1.5 x the average)"
+   },
+   {
+    "label": "",
+    "text": "gives a limit at its near edge, valid 12 five-minute candles; cancelled if the range high is swept and closed back"
+   },
+   {
+    "label": "",
+    "text": "inside first; stop 0.1 x 5-minute ATR below the sweep wick; target 2R."
+   }
+  ]
+ },
+ {
+  "id": "NJ-33",
+  "source": "youtube_channels11",
+  "name": "BTC/ETH SMT divergence",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "oo_bmEgt6o8"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: bitcoin and ether, 5-minute candles; his one-month backtest at 1:2: 119 trades, 44% wins on BTC, 57% on ETH (E 00:00:30-00:02:30)."
+   },
+   {
+    "label": "",
+    "text": "SMT (E 00:04:00-00:07:30): BTC and ETH normally move together; when one makes a higher high and the other a lower"
+   },
+   {
+    "label": "",
+    "text": "high, buyers are weakening: sell; when one makes a lower low and the other a higher low, sellers are weakening:"
+   },
+   {
+    "label": "",
+    "text": "buy."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:14:00-00:14:30): once the SMT has formed, skip two candles (10 minutes; that is how his backtest did"
+   },
+   {
+    "label": "",
+    "text": "it), then enter."
+   },
+   {
+    "label": "",
+    "text": "Stop (E 00:14:30): above the swing high that formed the divergence (below the swing low for buys)."
+   },
+   {
+    "label": "",
+    "text": "Target (E 00:15:00): 1:2, or the opposite swing."
+   },
+   {
+    "label": "",
+    "text": "Overlap: CP-24 is an SMT strategy from the crypto playlist; this is Neeraj Joshi's own timing and stop."
+   },
+   {
+    "label": "",
+    "text": "A: trades BTCUSD; swings = 5-minute 3-candle fractals on both coins at the same timestamps; the divergence compares"
+   },
+   {
+    "label": "",
+    "text": "the two latest swing highs (lows) of each coin within 36 candles; enter at the open of the third candle after the"
+   },
+   {
+    "label": "",
+    "text": "confirming candle; stop 0.1 x ATR beyond BTC's swing; target 2R; needs ETHUSD 5-minute candles from Delta's public"
+   },
+   {
+    "label": "",
+    "text": "feed as a second input."
+   }
+  ]
+ },
+ {
+  "id": "NJ-34",
+  "source": "youtube_channels11",
+  "name": "Hidden breakeven liquidity re-entry",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "yaOGOlSBUOY"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: crypto (Delta), 5-minute candles; examples run day by day from 1 September."
+   },
+   {
+    "label": "",
+    "text": "Logic (E 00:01:00-00:02:30): when a move starts from a candle (a red candle starting a down move), many traders"
+   },
+   {
+    "label": "",
+    "text": "enter on the next candle at that candle's close/low; once the move goes their way they move the stop to breakeven"
+   },
+   {
+    "label": "",
+    "text": "at that entry. Price comes back to that level to take those breakeven stops before continuing."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:02:30): place the entry at that level (where the others have their breakeven); stop a little above the"
+   },
+   {
+    "label": "",
+    "text": "swing high; target 1:2 (often 1:3 is available). It repeats at each new candle that starts the next leg (E"
+   },
+   {
+    "label": "",
+    "text": "00:03:00-00:04:30). Buys mirror it (E 00:06:30-00:07:00: after a low, the first green candle; followers enter on"
+   },
+   {
+    "label": "",
+    "text": "the next candle)."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD 5-minute; the level L = the close of the first red candle after a confirmed 3-candle fractal swing high"
+   },
+   {
+    "label": "",
+    "text": "(the candle that starts the leg); the leg must then extend at least 1 x (swing high - L) beyond L within 12 candles"
+   },
+   {
+    "label": "",
+    "text": "(so the followers' stops have been moved to breakeven); then a limit sell at L, valid 24 candles; stop 0.1 x ATR"
+   },
+   {
+    "label": "",
+    "text": "above the swing high; target 2R; mirror for longs."
+   }
+  ]
+ },
+ {
+  "id": "NJ-35",
+  "source": "youtube_channels11",
+  "name": "Manipulation model at the New York open",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "QBIsYw8iqPY",
+   "CYYRkXeoNkQ"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: crypto (Delta), 5-minute candles."
+   },
+   {
+    "label": "",
+    "text": "Power of three (ep. 9 E 00:01:00-00:06:30): accumulation (a range), manipulation (price runs one side to take the"
+   },
+   {
+    "label": "",
+    "text": "stops of both breakout traders and range traders), distribution (the real move the other way)."
+   },
+   {
+    "label": "",
+    "text": "Time (ep. 8 E 00:07:30-00:11:30; ep. 9 E 00:12:00): the kill zone in Indian time is about 17:30-21:30; the open is"
+   },
+   {
+    "label": "",
+    "text": "manipulated, so skip its first hour; ep. 9 watches the 9:00 New York hour, i.e. 18:30-19:30 IST."
+   },
+   {
+    "label": "",
+    "text": "Entry (ep. 9 E 00:08:00, 00:12:30-00:14:00): in that hour wait for a liquidity sweep of a level; then draw the CISD"
+   },
+   {
+    "label": "",
+    "text": "line (close of the last opposite candle before the impulse away from the sweep); a close beyond it confirms; enter"
+   },
+   {
+    "label": "",
+    "text": "when price retests the line; stop a little beyond the manipulation high (low); target 1:2 or the opposite level."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD; the accumulation range = the high and low of 17:30-18:30 IST; a sweep = a 5-minute candle between 18:30"
+   },
+   {
+    "label": "",
+    "text": "and 19:30 IST trading beyond the range and closing back inside; then a CISD within 24 candles; enter on a limit at"
+   },
+   {
+    "label": "",
+    "text": "the CISD line, valid 12 candles; stop 0.1 x ATR beyond the sweep extreme; target 2R; one trade a day; out at 23:30"
+   },
+   {
+    "label": "",
+    "text": "IST."
+   }
+  ]
+ },
+ {
+  "id": "NJ-36",
+  "source": "youtube_channels11",
+  "name": "The two-hour New York range sweep",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "n2eHieivtXw"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "",
+    "text": "His July 2026 test (E 00:00:00-00:02:00): 31 days, no entry on 12, 19 trades, 10 targets, 8 stops, 1 breakeven at"
+   },
+   {
+    "label": "",
+    "text": "1:2: +12R."
+   },
+   {
+    "label": "",
+    "text": "Range (E 00:03:30-00:05:00): on the 2-hour chart mark the 17:30-19:30 IST candle (New York opens 17:30 IST; in"
+   },
+   {
+    "label": "",
+    "text": "winter use 18:30-20:30)."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:05:30-00:07:30): after 19:30, on 5 minutes, wait for price to go above the range and a candle to close"
+   },
+   {
+    "label": "",
+    "text": "back inside (a sweep of the high) - short on the next candle; a sweep of the low that closes back inside - buy."
+   },
+   {
+    "label": "",
+    "text": "Stop beyond the sweep; target 1:2; one trade a day."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD; range = 08:00-10:00 New York time; sweeps until 14:00 New York; enter at the next 5-minute open; stop"
+   },
+   {
+    "label": "",
+    "text": "0.1 x ATR beyond the sweep extreme; target 2R; out at 16:00 New York."
+   }
+  ]
+ },
+ {
+  "id": "NJ-37",
+  "source": "youtube_channels11",
+  "name": "The New York open fair value gap",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "BaF-joXcm3o"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "",
+    "text": "Setup (E 00:01:00-00:02:00): at about 19:00 IST (the US stock market open, high volume) a larger-than-normal"
+   },
+   {
+    "label": "",
+    "text": "15-minute candle forms an FVG; mark it; when price returns into it, enter (short for a bearish FVG, buy for a"
+   },
+   {
+    "label": "",
+    "text": "bullish one). Stop above the swing high with a margin; target 1:2."
+   },
+   {
+    "label": "",
+    "text": "Skip Saturdays and Sundays (the US market is shut, E 00:04:30)."
+   },
+   {
+    "label": "",
+    "text": "His test (E 00:05:00): 83 trades, 36 winners (43.37%) at 1:2."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD; the FVG's middle 15-minute candle starts between 09:15 and 10:00 New York time (19:00 IST in US summer)"
+   },
+   {
+    "label": "",
+    "text": "and its body is at least 1.5 x the average of the last 20; limit at the gap's near edge, valid until 14:30 New"
+   },
+   {
+    "label": "",
+    "text": "York; stop 0.1 x ATR beyond the FVG's first candle extreme (the swing); target 2R; weekdays only."
+   }
+  ]
+ },
+ {
+  "id": "NJ-38",
+  "source": "youtube_channels11",
+  "name": "Golden-hour 15-minute range breakout",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "t_y7c4xsBlM"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "",
+    "text": "Golden hours (E 00:05:00-00:13:30): Asia is quiet (stops get hit); the best volume with the least manipulation is"
+   },
+   {
+    "label": "",
+    "text": "in 13:45-14:45 and 18:45-19:45 IST (January, i.e. US/UK winter)."
+   },
+   {
+    "label": "",
+    "text": "Rules (E 00:13:30-00:16:00): on 15 minutes mark the first candle of the session (13:30-13:45 IST); on 5 minutes, the"
+   },
+   {
+    "label": "",
+    "text": "first candle that closes above its high is a buy (below its low a sell); stop a little below the range low; target"
+   },
+   {
+    "label": "",
+    "text": "1:2 (1:3 often available; trail if wanted). His 13-day test is shown day by day (E 00:22:00)."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD; two sessions a day: London (range 08:00-08:15 London time, signals until 09:15) and New York (range"
+   },
+   {
+    "label": "",
+    "text": "08:00-08:15 New York time, signals until 09:15); the first 5-minute close beyond the range; enter at the next open;"
+   },
+   {
+    "label": "",
+    "text": "stop 0.1 x ATR beyond the range's other side; target 2R; one trade per session."
+   }
+  ]
+ },
+ {
+  "id": "NJ-39",
+  "source": "youtube_channels11",
+  "name": "Long-wick rejection at a 1-hour support or resistance",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "eY9bWGZDN9c"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "",
+    "text": "E 00:02:30-00:06:30: breakouts of support/resistance often trap traders: a 1-hour candle drops through support"
+   },
+   {
+    "label": "",
+    "text": "(looks like a breakdown) but closes back above it with a long lower wick: sellers pushed, buyers came back."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:06:30-00:08:30): at support, a long-wick candle is a buy, not a short; enter on the next candle; stop a"
+   },
+   {
+    "label": "",
+    "text": "little below the wick's low; target the recent high (resistance). Shorts mirror it at resistance (E 00:10:30-"
+   },
+   {
+    "label": "",
+    "text": "00:11:00: long upper wick after a fake breakout; stop above the wick; target the recent low)."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD 1-hour; support = a confirmed 5-candle fractal low from the last 100 candles; the signal candle trades"
+   },
+   {
+    "label": "",
+    "text": "below it and closes back above it, with a lower wick at least 2 x its body and at least half its range; enter at"
+   },
+   {
+    "label": "",
+    "text": "the next open; stop 0.1 x ATR below the wick; target the nearest confirmed fractal high above the entry, if it is"
+   },
+   {
+    "label": "",
+    "text": "at least 1.5R away (else 2R); time stop 48 candles."
+   }
+  ]
+ },
+ {
+  "id": "NJ-40",
+  "source": "youtube_channels11",
+  "name": "Ichimoku triple confirmation, 1 hour",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "JO_HVljXOYo"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: crypto, 1-hour candles (E 00:05:30)."
+   },
+   {
+    "label": "",
+    "text": "Ichimoku (E 00:01:00-00:08:00): conversion line (blue), base line (maroon), the cloud projected 26 candles ahead."
+   },
+   {
+    "label": "",
+    "text": "Buy (E 00:08:30-00:10:30): three confirmations: the conversion line crosses above the base line; price is above"
+   },
+   {
+    "label": "",
+    "text": "the cloud; the cloud 26 candles ahead is bullish (green). Enter on the candle after the cross."
+   },
+   {
+    "label": "",
+    "text": "Stop (E 00:10:30): at the candle where the cross happened (A: its low)."
+   },
+   {
+    "label": "",
+    "text": "Exit (E 00:11:00): hold until the conversion line crosses back below the base line, or trail."
+   },
+   {
+    "label": "",
+    "text": "Shorts (E 00:12:00+): the mirror."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD 1-hour; Ichimoku 9/26/52 (defaults); \"above the cloud\" = close above both spans plotted for that candle;"
+   },
+   {
+    "label": "",
+    "text": "\"bullish future cloud\" = span A above span B as computed on the signal candle; all three true on the cross candle"
+   },
+   {
+    "label": "",
+    "text": "(or within 2 candles after it); enter at the next open; stop at the cross candle's low (high), at least 0.5 x ATR"
+   },
+   {
+    "label": "",
+    "text": "away; exit at the next open after the opposite cross."
+   }
+  ]
+ },
+ {
+  "id": "NJ-41",
+  "source": "youtube_channels11",
+  "name": "Richard Dennis zone breakout, 4 hours",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "SV5-LHF91Bw"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: ether on 4-hour candles (instead of the daily chart Dennis used, E 00:05:00)."
+   },
+   {
+    "label": "",
+    "text": "Zone (E 00:05:30): an important support/resistance zone is one price has reversed from at least twice."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:06:00-00:07:00): when an important zone breaks, trade the break (short below support, buy above"
+   },
+   {
+    "label": "",
+    "text": "resistance)."
+   },
+   {
+    "label": "",
+    "text": "Stop (E 00:04:00, 00:07:00): ATR with length 20; the stop is about 2 x ATR (80 x 2 = 160 points in his example)."
+   },
+   {
+    "label": "",
+    "text": "Target (E 00:07:00): at least 1:2."
+   },
+   {
+    "label": "",
+    "text": "Principles (E 00:07:30-00:08:00 and on): cut losses quickly (a stop-out is part of the plan), then the rest of"
+   },
+   {
+    "label": "",
+    "text": "Dennis's rules (follow the rules, let the system work over many trades)."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD 4-hour (the desk has no ether account); a zone = at least 2 confirmed 5-candle fractal highs (lows) within"
+   },
+   {
+    "label": "",
+    "text": "0.5 x ATR 20 of each other in the last 120 candles; a 4-hour close beyond the zone's outer touch; enter at the next"
+   },
+   {
+    "label": "",
+    "text": "open; stop 2 x ATR 20 from the entry; target 2R; one trade at a time."
+   }
+  ]
+ },
+ {
+  "id": "NJ-42",
+  "source": "youtube_channels11",
+  "name": "EMA 200 + double-tested level + MACD cross",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "pgiuaNZdAQw"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: crypto (his 30-day October 2025 test: 20,000 capital, 1,000 risk and 2,000 target per trade), 15-minute candles (1-hour gives fewer, better trades, E 00:02:00)."
+   },
+   {
+    "label": "",
+    "text": "Trend (E 00:04:30-00:05:00): above EMA 200 only buys; below only shorts."
+   },
+   {
+    "label": "",
+    "text": "Level (E 00:05:30): a level price has bounced from at least twice."
+   },
+   {
+    "label": "",
+    "text": "Trigger (E 00:06:00-00:07:30; 00:09:00): a MACD cross (default settings): for buys a bullish cross below the zero"
+   },
+   {
+    "label": "",
+    "text": "line at the support; for shorts a bearish cross above the zero line at the resistance."
+   },
+   {
+    "label": "",
+    "text": "Stop (E 00:07:30): a little below the recent swing low / the support; target the recent swing high (his test used a"
+   },
+   {
+    "label": "",
+    "text": "fixed 1:2)."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD 15-minute; a level = at least 2 confirmed 5-candle fractal lows (highs) within 0.5 x ATR 14 of each other"
+   },
+   {
+    "label": "",
+    "text": "in the last 100 candles, with the cross candle's low within 1 x ATR of it; MACD 12/26/9; enter at the next open;"
+   },
+   {
+    "label": "",
+    "text": "stop 0.1 x ATR beyond the level or the latest swing, whichever is farther; target 2R (his test)."
+   }
+  ]
+ },
+ {
+  "id": "NJ-43",
+  "source": "youtube_channels11",
+  "name": "Williams Alligator pullback to the teeth",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "VHUIE8sfHwk"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: crypto-style charts (any)."
+   },
+   {
+    "label": "",
+    "text": "Indicator (E 00:01:00-00:02:30): three moving averages, 5, 8 and 13 (the Alligator); phases: sleeping (the three"
+   },
+   {
+    "label": "",
+    "text": "lines together: no trade, fake moves), awakening, feeding (the gaps widen: the move is on)."
+   },
+   {
+    "label": "",
+    "text": "Buy (E 00:06:30-00:07:30): the lines spread apart and price is above all three; when price comes back to the middle"
+   },
+   {
+    "label": "",
+    "text": "line, buy; stop at the third (slowest) line; target the recent swing high."
+   },
+   {
+    "label": "",
+    "text": "Short (E 00:08:30-00:09:00): the mirror: all three lines above price, price comes back up to the middle line."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD 1-hour; TradingView's Williams Alligator (smoothed averages of the median price: jaw 13 shifted 8, teeth"
+   },
+   {
+    "label": "",
+    "text": "8 shifted 5, lips 5 shifted 3); \"spread\" = lips > teeth > jaw with lips - jaw at least 1 x ATR 14 (mirror for"
+   },
+   {
+    "label": "",
+    "text": "shorts); a limit buy at the teeth value when price trades down to it, valid while the order holds; stop 0.1 x ATR"
+   },
+   {
+    "label": "",
+    "text": "below the jaw at entry; target the latest confirmed 5-candle fractal high above the entry if at least 1.5R away,"
+   },
+   {
+    "label": "",
+    "text": "else 2R; time stop 48 candles."
+   }
+  ]
+ },
+ {
+  "id": "NJ-44",
+  "source": "youtube_channels11",
+  "name": "4-hour fractal sweep, entered on the close back inside",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "_kzobEWVgKE"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "",
+    "text": "E 00:00:30-00:02:30: Williams fractals mark the 4-hour highs and lows; on 5 minutes wait for price to go above the"
+   },
+   {
+    "label": "",
+    "text": "4-hour high and a candle to close back below it (the sweep); short right after that close; stop a little above the"
+   },
+   {
+    "label": "",
+    "text": "sweep high; target 1:2. Lows mirror it (E 00:05:00). Use the nearer level; a far level matters less (E 00:06:00)."
+   },
+   {
+    "label": "",
+    "text": "This is the no-confirmation form of NJ-31 (his later 10,000-sweep test, 31 Aug 2026, found an engulfing"
+   },
+   {
+    "label": "",
+    "text": "confirmation better); both are kept, as two separate videos with separate rules."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD; confirmed 4-hour 5-candle fractals; the 5-minute candle that trades beyond the level and closes back"
+   },
+   {
+    "label": "",
+    "text": "inside; enter at the next open; stop 0.1 x ATR beyond the sweep extreme; target 2R; a level is used once."
+   }
+  ]
+ },
+ {
+  "id": "NJ-45",
+  "source": "youtube_channels11",
+  "name": "Two-candle turn level breakout",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "UeV17V0YldM"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: crypto (BTC, ETH, gold on Delta), 15-minute chart (\"15 minat kaa taaim phrem hai\", E 00:05:00)."
+   },
+   {
+    "label": "",
+    "text": "Short (E 00:00:30-00:02:00): a red candle, then a green candle that opens where the red one closed (a U-turn): that"
+   },
+   {
+    "label": "",
+    "text": "low becomes support; do not buy there; wait for a break below it, then short. Long (E 00:02:30-00:03:30): a green"
+   },
+   {
+    "label": "",
+    "text": "candle, then a red candle opening where the green closed: that top is resistance; buy the break above it."
+   },
+   {
+    "label": "",
+    "text": "Conditions (E 00:01:30-00:02:00): trade only between 08:00 and 24:00 IST (not at 1-3 AM); the break must come within"
+   },
+   {
+    "label": "",
+    "text": "2-3 candles; avoid it after a very big move (manipulation), the market should be moving sideways near the level."
+   },
+   {
+    "label": "",
+    "text": "Entry, stop, target (E 00:04:00-00:05:00): enter on the candle after the break (or with the breaking candle); stop a"
+   },
+   {
+    "label": "",
+    "text": "little beyond the breaking candle; target 1:2."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD 15-minute; \"opens where it closed\" = |open of the second candle - close of the first| at most 0.05 x ATR"
+   },
+   {
+    "label": "",
+    "text": "14; the break = a close beyond that level within the next 3 candles; enter at the next open; stop 0.1 x ATR beyond"
+   },
+   {
+    "label": "",
+    "text": "the breaking candle's other end; target 2R; skip when the 8 candles before the pair span more than 3 x ATR;"
+   },
+   {
+    "label": "",
+    "text": "signals 08:00-23:45 IST."
+   }
+  ]
+ },
+ {
+  "id": "NJ-47",
+  "source": "youtube_channels11",
+  "name": "Smoothed Heikin Ashi retest, 1:3",
+  "channel": "Neeraj Joshi",
+  "videos": [
+   "kUIfdwlKdaM",
+   "Bj4ckno_O-w"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Neeraj Joshi"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: crypto (Delta), timeframe not stated."
+   },
+   {
+    "label": "",
+    "text": "Indicator (E 00:01:00-00:01:30): \"Smoothed Heikin Ashi\" drawn over the real candles: green = up trend, red = down"
+   },
+   {
+    "label": "",
+    "text": "trend; shrinking candles warn the trend is weakening (E 00:04:30)."
+   },
+   {
+    "label": "",
+    "text": "Trend trade (E 00:06:30-00:08:30): in an up trend, when the real price comes back to the smoothed Heikin Ashi"
+   },
+   {
+    "label": "",
+    "text": "candles, buy on the next decent green candle (not a weak one); in a down trend, when price comes back up to them"
+   },
+   {
+    "label": "",
+    "text": "and a big red candle forms, short. Stop at the recent high (low); target the swing low (high); take only trades"
+   },
+   {
+    "label": "",
+    "text": "that give 1:3 or 1:4 (E 00:12:00)."
+   },
+   {
+    "label": "",
+    "text": "Reversal trade (E 00:08:30-00:11:00): after the colour flips and the new candles grow, the first retest of the"
+   },
+   {
+    "label": "",
+    "text": "smoothed candles is the entry."
+   },
+   {
+    "label": "",
+    "text": "The 30-day test (Bj4ckno_O-w) used a fixed 1:3 (500 risk, 1,500 target)."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD 1-hour; smoothed Heikin Ashi = EMA 10 of open/high/low/close, Heikin Ashi of those, then EMA 10 of the"
+   },
+   {
+    "label": "",
+    "text": "Heikin Ashi open and close (TradingView's common script defaults); trend = smoothed close above smoothed open for"
+   },
+   {
+    "label": "",
+    "text": "the last 3 candles; retest = a real low at or below the top of the smoothed body; signal = the next green candle"
+   },
+   {
+    "label": "",
+    "text": "with a body at least the 20-candle average, closing above the smoothed body; enter at the next open; stop 0.1 x ATR"
+   },
+   {
+    "label": "",
+    "text": "below the lowest low of the last 5 candles; target 3R; mirror for shorts."
+   }
+  ]
+ },
+ {
+  "id": "TG-01",
+  "source": "youtube_channels11",
+  "name": "Failed breakout: trade the trap",
+  "channel": "Tanisha Garg",
+  "videos": [
+   "Whu0KMg9ga0"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Tanisha Garg"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NIFTY index (1-minute data)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: NIFTY shown on 15 minutes (any timeframe, 5 or 15 minutes, E 00:10:00); ETH used in her live trade."
+   },
+   {
+    "label": "",
+    "text": "Idea (E 00:04:30-00:08:00): do not try to judge whether a breakout is real. When a resistance that price has"
+   },
+   {
+    "label": "",
+    "text": "respected breaks, two cases follow: the breakout holds (the trade is simply missed) or price comes back below the"
+   },
+   {
+    "label": "",
+    "text": "resistance after the retest. In the second case the breakout buyers are trapped, their stops turn into sell orders"
+   },
+   {
+    "label": "",
+    "text": "and new sellers join: short (\"sell on top\"). About 7 of 10 breakouts fail (E 00:10:00, 00:18:00)."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:12:00-00:14:00): wait for the break, the retest, and a close back below the resistance; enter then"
+   },
+   {
+    "label": "",
+    "text": "(never on the breakout itself). Supports mirror it (a failed breakdown is a buy)."
+   },
+   {
+    "label": "",
+    "text": "A strong old resistance trapping buyers can turn the trend for the next 4-5 days (E 00:16:00)."
+   },
+   {
+    "label": "",
+    "text": "Stop and target: not stated as a rule (her trade showed a first and a second target). A: stop 0.1 x ATR above the"
+   },
+   {
+    "label": "",
+    "text": "highest high made above the level; target 2R."
+   },
+   {
+    "label": "",
+    "text": "A: NIFTY 15-minute; resistance = at least 2 confirmed 5-candle fractal highs within 0.25 x ATR 14 of each other in"
+   },
+   {
+    "label": "",
+    "text": "the last 60 candles; breakout = a close above the higher of them; trap = within 6 candles of the breakout, a close"
+   },
+   {
+    "label": "",
+    "text": "back below the level; enter at the next open; one trade a day per side; out at the session's end."
+   }
+  ]
+ },
+ {
+  "id": "TG-02",
+  "source": "youtube_channels11",
+  "name": "RSI 21 roof (60) and floor (40) break",
+  "channel": "Tanisha Garg",
+  "videos": [
+   "rZHjNu5zD9Q"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Tanisha Garg"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NIFTY index (1-minute data)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: NIFTY (calls/puts as the vehicle), 15-minute candles for beginners (30-60 minutes if you have more time, E 00:04:00-00:05:30)."
+   },
+   {
+    "label": "",
+    "text": "RSI (E 00:06:00-00:08:00): length 21; only two lines: 60 (the \"roof\") and 40 (the \"floor\")."
+   },
+   {
+    "label": "",
+    "text": "Short (E 00:08:00-00:10:30): when RSI falls below the roof (crosses down through 60), price heads for the floor:"
+   },
+   {
+    "label": "",
+    "text": "mark the low of that cross candle; when the next candle breaks it, enter (puts)."
+   },
+   {
+    "label": "",
+    "text": "Long: RSI comes up off the floor (crosses up through 40): mark the cross candle's high; buy its break."
+   },
+   {
+    "label": "",
+    "text": "Exit (E 00:10:30-00:12:00): the stop is the high (low) of the candle the trade was taken in: if it breaks, take the"
+   },
+   {
+    "label": "",
+    "text": "loss; do not wait for RSI to reach the other line: book the profit on the way."
+   },
+   {
+    "label": "",
+    "text": "A: NIFTY 15-minute; a stop-entry at the cross candle's low (high), valid for the next candle; stop at the entry"
+   },
+   {
+    "label": "",
+    "text": "candle's high (low): A uses the cross candle's other end, known in advance; exit at the next open after RSI reaches"
+   },
+   {
+    "label": "",
+    "text": "50 (half-way, \"book in the middle\"), or the stop; out at the session's end; up to 2 trades a day."
+   }
+  ]
+ },
+ {
+  "id": "TG-03",
+  "source": "youtube_channels11",
+  "name": "Candle outside the Bollinger Band, back inside",
+  "channel": "Tanisha Garg",
+  "videos": [
+   "IVwAoiwaJMg"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Tanisha Garg"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NIFTY index (1-minute data)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: not named (she says she tested it for 5 years); intraday charts."
+   },
+   {
+    "label": "",
+    "text": "Bands (E 00:06:00-00:08:00): Bollinger 20, 2 (95% of the time inside the bands; that is why 2, not 3)."
+   },
+   {
+    "label": "",
+    "text": "Wrong use (E 00:05:00): selling every touch of the upper band and buying every touch of the lower band."
+   },
+   {
+    "label": "",
+    "text": "Rule (E 00:08:30-00:11:00): when a candle (e.g. a doji) forms completely outside the band, without touching it,"
+   },
+   {
+    "label": "",
+    "text": "price must come back inside: sell when that candle's low breaks; first target the middle band, second the lower"
+   },
+   {
+    "label": "",
+    "text": "band; stop: a close above that candle's high (closing basis). Mirror: a candle completely below the lower band,"
+   },
+   {
+    "label": "",
+    "text": "buy the break of its high, targets the middle band then the upper band."
+   },
+   {
+    "label": "",
+    "text": "A: NIFTY 15-minute; \"completely outside\" = the candle's low above the upper band (high below the lower band); a"
+   },
+   {
+    "label": "",
+    "text": "stop-entry at its low (high) valid for the next 3 candles; target = the middle band at the signal candle; stop = a"
+   },
+   {
+    "label": "",
+    "text": "15-minute close beyond the signal candle's high (low), exit at the next open, with a hard stop 1.5 x ATR 14 beyond"
+   },
+   {
+    "label": "",
+    "text": "it for safety; size on the distance to the signal candle's high; out at the session's end."
+   }
+  ]
+ },
+ {
+  "id": "TG-04",
+  "source": "youtube_channels11",
+  "name": "Engulfing of several candles, daily swing",
+  "channel": "Tanisha Garg",
+  "videos": [
+   "IPXKi3fic_c"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks daily",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Tanisha Garg"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, daily candles"
+   },
+   {
+    "label": "",
+    "text": "E 00:01:30-00:04:30: after small candles in a fall, one green candle swallows the previous 3-4 candles (buyers took"
+   },
+   {
+    "label": "",
+    "text": "over); enter above its high; stop 1-2 points below its low (not exactly at the low). Bearish mirror. On daily or"
+   },
+   {
+    "label": "",
+    "text": "weekly charts for swing trades (E 00:04:30-00:05:30)."
+   },
+   {
+    "label": "",
+    "text": "No target given. A: the desk's NSE daily stock pool, long only; the green body covers the bodies of at least the"
+   },
+   {
+    "label": "",
+    "text": "previous 3 candles and closes below EMA 20 or within 1 x ATR of the 20-day low (after a fall); a buy-stop at its high"
+   },
+   {
+    "label": "",
+    "text": "valid 3 sessions; stop 0.2% below its low; target 2R; time stop 20 sessions."
+   }
+  ]
+ },
+ {
+  "id": "TG-05",
+  "source": "youtube_channels11",
+  "name": "EMA 20 cross with a held pullback candle, 1:4",
+  "channel": "Tanisha Garg",
+  "videos": [
+   "s7p-ymy_yEg"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Tanisha Garg"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: crypto (she practises it on ETH, E 00:24:00; her live short was ETH), built for range-bound markets."
+   },
+   {
+    "label": "",
+    "text": "E 00:05:30-00:06:00: EMA 20 (exponential: the latest candle weighs more)."
+   },
+   {
+    "label": "",
+    "text": "Not this (E 00:08:30): buying the first green candle that closes above EMA 20 (\"breakout\"): in a range that traps."
+   },
+   {
+    "label": "",
+    "text": "Long (E 00:09:30-00:12:30): after a green candle closes above EMA 20, one of the next two candles must be red and"
+   },
+   {
+    "label": "",
+    "text": "must not close below EMA 20 (a wick below is fine); when one of the next two candles breaks that red candle's high,"
+   },
+   {
+    "label": "",
+    "text": "buy at once (no waiting for a close)."
+   },
+   {
+    "label": "",
+    "text": "Stop (E 00:12:30-00:14:00): the lower of the two candles' lows (the green one or the red one); counted only on a"
+   },
+   {
+    "label": "",
+    "text": "candle closing below that line."
+   },
+   {
+    "label": "",
+    "text": "Target (E 00:14:00): 1:4; do not try to ride the whole rally (E 00:20:00: with 1:4 a losing week is recovered)."
+   },
+   {
+    "label": "",
+    "text": "Short: the mirror (red candle closes below EMA 20, a green candle that does not close above it, short the break of"
+   },
+   {
+    "label": "",
+    "text": "its low)."
+   },
+   {
+    "label": "",
+    "text": "Ranges filter themselves out: the conditions keep failing (E 00:16:00)."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD 15-minute (the desk has no ether account); the stop-entry at the pullback candle's high, valid for the"
+   },
+   {
+    "label": "",
+    "text": "2 candles after it; the stop counted on a 15-minute close below the line (exit at the next open) with a hard stop"
+   },
+   {
+    "label": "",
+    "text": "1.5 x ATR 14 below it; size on the line's distance; target 4R from the line distance."
+   }
+  ]
+ },
+ {
+  "id": "TG-06",
+  "source": "youtube_channels11",
+  "name": "Gann special numbers: the nearer level pulls the next session",
+  "channel": "Tanisha Garg",
+  "videos": [
+   "3_NIX-QQQyE"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Tanisha Garg"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NIFTY index (1-minute data)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: NIFTY (also any script: BTC, ETH), overnight (BTST) with options as the vehicle."
+   },
+   {
+    "label": "",
+    "text": "Special numbers (E 00:06:00-00:12:00): take the natural numbers n; n squared is a special number when n is odd; when"
+   },
+   {
+    "label": "",
+    "text": "n is even use n squared + 1 (e.g. 154 x 154 = 23,716 -> 23,717; 155 x 155 = 24,025). Around the price take the five"
+   },
+   {
+    "label": "",
+    "text": "levels below and five above."
+   },
+   {
+    "label": "",
+    "text": "Reading (E 00:18:00-00:21:00): where the session closes between two levels, the next session goes to the level the"
+   },
+   {
+    "label": "",
+    "text": "close is nearer to (\"it closed near the lower line, so it will go down\"); this also predicts the next day's gap."
+   },
+   {
+    "label": "",
+    "text": "Skip (E 00:20:00): a day on which price already touched both the upper and the lower level."
+   },
+   {
+    "label": "",
+    "text": "Risk (E 00:21:30): a wrong gap prediction loses on the overnight position; she accepts that loss."
+   },
+   {
+    "label": "",
+    "text": "A: NIFTY on the desk's daily NIFTY market; at the close, the two special levels around the close; long if the close"
+   },
+   {
+    "label": "",
+    "text": "is nearer the upper one, short if nearer the lower one; skip if the session's range touched both; enter at the"
+   },
+   {
+    "label": "",
+    "text": "close; target the nearer level; stop at the farther level; exit at the next session's close if neither is hit."
+   }
+  ]
+ },
+ {
+  "id": "IT-01",
+  "source": "youtube_channels11",
+  "name": "BankNifty first 5-minute candle theory",
+  "channel": "IITian Trader",
+  "videos": [
+   "TDQW8QUZ6LY"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bank Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "IITian Trader"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "BANKNIFTY index (1-minute data)"
+   },
+   {
+    "label": "",
+    "text": "Slots (E 00:01:30-00:02:00): pre-open 09:00-09:08, settle 09:08-09:15, the open 09:15; 09:15-09:20 is the volatile"
+   },
+   {
+    "label": "",
+    "text": "first 5-minute candle (BankNifty moves 100+ points in it)."
+   },
+   {
+    "label": "",
+    "text": "First candle theory (E 00:02:30-00:04:30): if the first 5-minute candle is green with its body at the top and its"
+   },
+   {
+    "label": "",
+    "text": "wick below (a very small upper wick is fine), buy calls at the open of the second candle with the first candle's low"
+   },
+   {
+    "label": "",
+    "text": "as the stop; a red candle with the body at the bottom and its wick above is the mirror (puts, stop at its high). On"
+   },
+   {
+    "label": "",
+    "text": "a losing day the loss is small; on a winning day hold the profit until 15:15. Only for traders who can take the"
+   },
+   {
+    "label": "",
+    "text": "risk of entering on the second candle's open."
+   },
+   {
+    "label": "",
+    "text": "After 10:30 (E 00:05:30-00:06:00): trade support/resistance from the morning's structure: discretionary, not part of"
+   },
+   {
+    "label": "",
+    "text": "IT-01."
+   },
+   {
+    "label": "",
+    "text": "A: BANKNIFTY; \"body at the top\" = green with the upper wick at most 20% of the candle's range and the body at least"
+   },
+   {
+    "label": "",
+    "text": "40% of it; enter at 09:20; stop at the first candle's low (high); exit at 15:15; one trade a day."
+   }
+  ]
+ },
+ {
+  "id": "IT-02",
+  "source": "youtube_channels11",
+  "name": "The room strategy: EMA 45 trend, EMA 9/11 entry, a second lot one room away",
+  "channel": "IITian Trader",
+  "videos": [
+   "KaGCRCXVOVc",
+   "Nze7_u29y9k",
+   "QfLoyBl5YNs"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "IITian Trader"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: crypto first (bitcoin), also NIFTY/BANKNIFTY; 15-minute candles (E 00:03:00-00:04:30)."
+   },
+   {
+    "label": "",
+    "text": "Trend (E 00:06:00-00:08:00): EMA 45 is the \"big brother\", the trend decider; EMA 9 and EMA 11 are the \"little"
+   },
+   {
+    "label": "",
+    "text": "brothers\": their cross (or price near it) is the entry point. When the little brothers run against the big brother"
+   },
+   {
+    "label": "",
+    "text": "they come back to his direction: trade only in EMA 45's direction (E 00:12:00)."
+   },
+   {
+    "label": "",
+    "text": "Sizing (E 00:08:00-00:10:00): put in only part of the planned money first (10%, then 25%: 35% of the fund in all)."
+   },
+   {
+    "label": "",
+    "text": "The room (E 00:12:00-00:16:00): BTC 15-minute candles span 300-400 points, so the second lot goes 300 points away"
+   },
+   {
+    "label": "",
+    "text": "against the first (NIFTY about 30 points, BANKNIFTY 80-90). Example: sell 0.5 lot at 60,750, then a limit to sell"
+   },
+   {
+    "label": "",
+    "text": "1 lot 300 points higher; that is the maximum size."
+   },
+   {
+    "label": "",
+    "text": "Exit (E 00:16:00): once both are in, the average sits near the second entry; put the stop 200-300 points beyond the"
+   },
+   {
+    "label": "",
+    "text": "average; if price comes back, take the target. A losing first lot is not averaged forever: two entries only (E"
+   },
+   {
+    "label": "",
+    "text": "00:02:00)."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD 15-minute; trend up = close above EMA 45 and EMA 45 rising over 4 candles; entry = EMA 9 crossing above"
+   },
+   {
+    "label": "",
+    "text": "EMA 11 (back in the trend's direction) while the trend holds; lot 1 (one third of the size) at the next open; lot 2"
+   },
+   {
+    "label": "",
+    "text": "(two thirds) on a limit one room against it, room = ATR 14 of the 15-minute candles (his 300 points was about one"
+   },
+   {
+    "label": "",
+    "text": "candle's range); stop 0.8 room beyond the average once both are in (1.8 rooms from lot 1 if only lot 1 fills);"
+   },
+   {
+    "label": "",
+    "text": "target one room in favour of the average (of lot 1 alone if lot 2 never fills); time stop 48 candles; one position"
+   },
+   {
+    "label": "",
+    "text": "at a time. Simulated as a two-lot trade with a weighted result."
+   }
+  ]
+ },
+ {
+  "id": "TR-01",
+  "source": "youtube_channels11",
+  "name": "EMA 9/15 scalp on three entry candles",
+  "channel": "The Trade Room (Mayank Raj)",
+  "videos": [
+   "RMwUsnJB40c"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bank Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "The Trade Room (Mayank Raj)"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "BANKNIFTY index (1-minute data)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: BANKNIFTY options (buy a strike about 100 points in the money, E 00:04:30), 5-minute candles for traders with a few months' experience, lower timeframes later (E 00:08:30)."
+   },
+   {
+    "label": "",
+    "text": "Indicators: EMA 9 and EMA 15; trade the side they point to (up for buys, E 00:07:30)."
+   },
+   {
+    "label": "",
+    "text": "Entry candles for buys (E 00:07:00-00:11:00), at the moving averages: (1) a pin bar (long lower wick) touching the"
+   },
+   {
+    "label": "",
+    "text": "EMAs; (2) a big-bodied bullish candle with a small lower wick (often a bullish engulfing); (3) a candle that crosses"
+   },
+   {
+    "label": "",
+    "text": "the EMA from below and closes above it. Buy above the entry candle's high; stop at its low; target 1:2 (hit within"
+   },
+   {
+    "label": "",
+    "text": "about one candle in his examples). Sells mirror it with the three opposite candles."
+   },
+   {
+    "label": "",
+    "text": "Small stop, quick exits: scalping keeps the time in the trade short (E 00:00:30-00:01:00, 00:06:30)."
+   },
+   {
+    "label": "",
+    "text": "The shorts and live episodes (u7Npiub4iAA, xMuD2ueoN-8, slUuTYS7RUQ: bitcoin on 15 minutes with the same EMA"
+   },
+   {
+    "label": "",
+    "text": "rejections; XurmC12Wp08, CeHFDebhZwA: NIFTY/BANKNIFTY live scalps adding size only when the trade moves his way,"
+   },
+   {
+    "label": "",
+    "text": "exiting on a close below a trendline or round number) show the same method traded live; they add no fixed rules."
+   },
+   {
+    "label": "",
+    "text": "A: BANKNIFTY 5-minute; trend up = EMA 9 above EMA 15 and both higher than 3 candles ago; \"touching\" = the candle's"
+   },
+   {
+    "label": "",
+    "text": "low at or below EMA 9 while its close stays above EMA 15; pin bar = lower wick at least 2 x the body; big body = body"
+   },
+   {
+    "label": "",
+    "text": "at least 60% of the range and at least the 20-candle average body; cross candle = open below EMA 9, close above it;"
+   },
+   {
+    "label": "",
+    "text": "a stop-entry at the high valid for the next 2 candles; stop at the candle's low; target 2R; up to 4 trades a day,"
+   },
+   {
+    "label": "",
+    "text": "stopping after 2 stops; out at the session's end."
+   }
+  ]
+ },
+ {
+  "id": "SS-01",
+  "source": "youtube_channels11",
+  "name": "Bollinger Band + Heikin Ashi alert candle, daily (Kushal Varshney)",
+  "channel": "Sagar Sinha",
+  "videos": [
+   "4VMQaVoK8Rk"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Nifty daily",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Sagar Sinha"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NIFTY daily candles"
+   },
+   {
+    "label": "Video",
+    "text": "Market: NIFTY positional (futures/options), daily candles; his 2025 back-test: about 15-20 trades, +6,786 NIFTY points (E 00:04:00)."
+   },
+   {
+    "label": "",
+    "text": "Set-up (E 00:04:00-00:05:00): Bollinger Bands; sells are planned only at the upper band, buys only at the lower"
+   },
+   {
+    "label": "",
+    "text": "band; Heikin Ashi candles show the trend."
+   },
+   {
+    "label": "",
+    "text": "Alert candle (E 00:06:00-00:08:00): after a Heikin Ashi candle touches the band, the next candle that closes inside"
+   },
+   {
+    "label": "",
+    "text": "the band without touching it is the alert candle (any colour)."
+   },
+   {
+    "label": "",
+    "text": "Entry and stop (E 00:08:30-00:09:30): note the alert candle's date, switch to normal candles: sell below that day's"
+   },
+   {
+    "label": "",
+    "text": "low, stop at that day's high (buy above the high, stop at the low, at the lower band). If the high breaks before the"
+   },
+   {
+    "label": "",
+    "text": "low, the alert is invalid (E 00:12:00-00:13:00)."
+   },
+   {
+    "label": "",
+    "text": "Target (E 00:10:00): the opposite (lower) band is the first target; exit earlier if the signal changes."
+   },
+   {
+    "label": "",
+    "text": "A: the desk's daily NIFTY market; Bollinger 20, 2 on the Heikin Ashi series (as TradingView plots it on a Heikin"
+   },
+   {
+    "label": "",
+    "text": "Ashi chart); a stop-entry at the alert day's real low (high), valid until filled or invalidated by a break of the"
+   },
+   {
+    "label": "",
+    "text": "other side; stop at the alert day's high (low); target the opposite band (value at the alert day); exit early at"
+   },
+   {
+    "label": "",
+    "text": "the next open if an opposite alert candle appears; time stop 25 sessions."
+   }
+  ]
+ },
+ {
+  "id": "SS-02",
+  "source": "youtube_channels11",
+  "name": "EMA 5/13 cross at the previous day's high or low",
+  "channel": "Sagar Sinha",
+  "videos": [
+   "II4B6AlOwQg"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Sagar Sinha"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: crypto (bitcoin shown; \"works in every market\"), 15-minute candles, for intraday traders and scalpers."
+   },
+   {
+    "label": "",
+    "text": "Signal (E 00:16:00-00:18:00, 00:26:00-00:28:00): EMA 5 crossing above EMA 13 = long; crossing below = short."
+   },
+   {
+    "label": "",
+    "text": "Range (E 00:19:30-00:22:00, 00:32:00-00:34:00): first mark the previous day's high (resistance) and low (support)"
+   },
+   {
+    "label": "",
+    "text": "on the daily chart; take crosses near those edges (long near support, short near resistance); ignore crosses in"
+   },
+   {
+    "label": "",
+    "text": "the middle of the range, where the market is sideways (E 00:36:00, 00:38:00)."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:40:00): after the cross wait for the next candle to complete (the gap between the EMAs widening), then"
+   },
+   {
+    "label": "",
+    "text": "enter at the start of the following candle."
+   },
+   {
+    "label": "",
+    "text": "Stop and target (E 00:42:00-00:48:00): swing to swing: the stop at the nearest swing low, the target the nearest"
+   },
+   {
+    "label": "",
+    "text": "swing high (or an equal or double distance when no swing is there); skip the trade if the reward is below 1:1, or"
+   },
+   {
+    "label": "",
+    "text": "cut the size when the swing is far."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD 15-minute; previous day = the previous UTC day (TradingView's daily candle); \"near\" = the cross candle's"
+   },
+   {
+    "label": "",
+    "text": "low within 0.5 x ATR 14 of the previous day's low or below it (high mirrored); enter at the open two candles after"
+   },
+   {
+    "label": "",
+    "text": "the cross; stop 0.1 x ATR beyond the latest confirmed 3-candle fractal low (high); target the nearest confirmed"
+   },
+   {
+    "label": "",
+    "text": "fractal high (low) beyond the entry if at least 1R away, else 2R; skip if the stop is more than 3 x ATR away."
+   }
+  ]
+ },
+ {
+  "id": "SS-03",
+  "source": "youtube_channels11",
+  "name": "Lowest-volume opposite candle (Kushal Varshney)",
+  "channel": "Sagar Sinha",
+  "videos": [
+   "b0D4mvFZa5k"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks 5m",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Sagar Sinha"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, 5-minute candles"
+   },
+   {
+    "label": "Video",
+    "text": "Market: NSE F&O stocks, 5-minute candles."
+   },
+   {
+    "label": "",
+    "text": "Direction (E 00:04:00-00:06:00): at 09:25 compare advances and declines of the NIFTY 50: more declines = a short"
+   },
+   {
+    "label": "",
+    "text": "day, more advances = a long day."
+   },
+   {
+    "label": "",
+    "text": "Stocks (E 00:06:00-00:10:00, 00:24:00): for a short day the weakest sector at 09:25 and its F&O stocks (liquid, no"
+   },
+   {
+    "label": "",
+    "text": "circuit limits); with many stocks, the top losers at 09:25-09:30."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:12:00-00:18:30): ignore the first three 5-minute candles (09:15-09:30); on a short day wait for an"
+   },
+   {
+    "label": "",
+    "text": "opposite-colour (green) candle whose volume is the lowest of the day so far (\"the train is empty\"); place a sell"
+   },
+   {
+    "label": "",
+    "text": "order below its low with the stop at its high; if a later green candle has an even lower volume before the order"
+   },
+   {
+    "label": "",
+    "text": "fills, move the order to it."
+   },
+   {
+    "label": "",
+    "text": "Exit (E 00:20:00-00:22:00): book half at 1:2 and move the stop on the rest to cost; trail the rest with EMA 10:"
+   },
+   {
+    "label": "",
+    "text": "exit when a candle closes beyond EMA 10."
+   },
+   {
+    "label": "",
+    "text": "A: the desk's NSE 5-minute stock pool; direction from the pool's stocks at 09:25 (price above / below the previous"
+   },
+   {
+    "label": "",
+    "text": "close) since the pool is not exactly the NIFTY 50, and sectors are not in the pool, so the three weakest (strongest)"
+   },
+   {
+    "label": "",
+    "text": "stocks by 09:25 change are traded instead of the weakest sector; a stop-entry at the candle's low (high), valid"
+   },
+   {
+    "label": "",
+    "text": "until 14:30 or until a newer lower-volume candle replaces it; half off at 2R with the stop to breakeven, the rest"
+   },
+   {
+    "label": "",
+    "text": "exits at the next open after a 5-minute close beyond EMA 10; out at 15:15; one trade per stock per day."
+   }
+  ]
+ },
+ {
+  "id": "SS-04",
+  "source": "youtube_channels11",
+  "name": "The same 5-minute candle every day (Power of Stocks)",
+  "channel": "Sagar Sinha",
+  "videos": [
+   "Ib29qwuKZVE"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bank Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Sagar Sinha"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "BANKNIFTY index (1-minute data)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: BANKNIFTY (any instrument), 5-minute candles; \"choose any 5-minute candle before 12:00\" - the guest builds it live on 09:45-09:50 (E 00:05:00-00:06:00)."
+   },
+   {
+    "label": "",
+    "text": "Rule (E 00:06:00-00:08:00): mark that candle's high and low; buy if price crosses above the high, sell if it goes"
+   },
+   {
+    "label": "",
+    "text": "below the low (stop at the other side); trading only one side (like an investor, only buys) raises the probability"
+   },
+   {
+    "label": "",
+    "text": "and cuts trades and charges."
+   },
+   {
+    "label": "",
+    "text": "Expect stops on sideways days and the money on trending days (1:3-1:4 when held for the day, E 00:08:00-00:10:00);"
+   },
+   {
+    "label": "",
+    "text": "judge it over 20-40 trades (E 00:15:30)."
+   },
+   {
+    "label": "",
+    "text": "A: BANKNIFTY; the 09:45-09:50 candle; both sides as stop-entries (whichever triggers first, the other side may"
+   },
+   {
+    "label": "",
+    "text": "still trigger after a stop); stop at the candle's other end; exit at 15:15; at most two trades a day."
+   }
+  ]
+ },
+ {
+  "id": "SS-05",
+  "source": "youtube_channels11",
+  "name": "BTST: Heikin Ashi close vs the real close at 15:15 (Kushal Varshney)",
+  "channel": "Sagar Sinha",
+  "videos": [
+   "LxiS75iIpPc"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Sagar Sinha"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NIFTY index (1-minute data)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: NIFTY (also BANKNIFTY), daily candles read at 15:15, the trade held overnight for the next day's gap."
+   },
+   {
+    "label": "",
+    "text": "Rule 1 (E 00:06:00-00:08:00): at 15:15 read today's daily close on the Heikin Ashi chart and on the normal chart."
+   },
+   {
+    "label": "",
+    "text": "If the Heikin Ashi close is greater than the normal close, tomorrow is likely to gap down: sell."
+   },
+   {
+    "label": "",
+    "text": "Rule 2 (E 00:08:00): if the normal close is greater than the Heikin Ashi close, tomorrow is likely to gap up: buy."
+   },
+   {
+    "label": "",
+    "text": "Filter (E 00:10:00-00:12:00): the two closes must differ by at least 10 NIFTY points; less is confusion: skip."
+   },
+   {
+    "label": "",
+    "text": "His day-by-day check (E 00:08:00-00:12:00) shows the reading matching the next day's direction repeatedly; he"
+   },
+   {
+    "label": "",
+    "text": "trades it by selling a hedged option in the predicted direction rather than buying an option (E 00:12:00)."
+   },
+   {
+    "label": "",
+    "text": "A: NIFTY on the desk's index feed; at 15:15 the day's open, high, low (so far) and the 15:15 price; Heikin Ashi close"
+   },
+   {
+    "label": "",
+    "text": "= (open + high + low + close) / 4; difference at least 10 points; enter at 15:16 in the predicted direction; exit at"
+   },
+   {
+    "label": "",
+    "text": "09:20 the next session; a protective stop of 1 x the daily ATR 14 (overnight gaps fill at the open)."
+   }
+  ]
+ },
+ {
+  "id": "SS-06",
+  "source": "youtube_channels11",
+  "name": "EMA 30/50/100 stacked, enter at EMA 30 (Priyank)",
+  "channel": "Sagar Sinha",
+  "videos": [
+   "kCxz5ESvlt4"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Sagar Sinha"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: bitcoin; daily, 4-hour and 15-minute charts; trades on 15 minutes (E 00:04:00, 00:20:00)."
+   },
+   {
+    "label": "",
+    "text": "Set-up (E 00:07:00-00:16:30): EMA 30, 50 and 100 in order (30 on top, then 50, then 100) and moving apart; when"
+   },
+   {
+    "label": "",
+    "text": "they are flat and tangled (\"lazy\"), wait; once they line up and price breaks a high, the trade is on."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:18:00): either on that breakout or, better, when price first comes back to EMA 30 (the closer to EMA"
+   },
+   {
+    "label": "",
+    "text": "30, the better the reward)."
+   },
+   {
+    "label": "",
+    "text": "Stop and target (E 00:18:00, 00:22:00): stop below the swing low; target 1.5R-2R (he mostly takes 1.5 or 2); trail"
+   },
+   {
+    "label": "",
+    "text": "below EMA 100 for a bigger move; add on later set-ups at EMA 30/50. Shorts mirror it (EMA 100 on top), e.g. on the"
+   },
+   {
+    "label": "",
+    "text": "break of a swing low."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD 15-minute; stacked = EMA 30 > EMA 50 > EMA 100, all three higher than 4 candles ago and EMA 30 - EMA 100 at"
+   },
+   {
+    "label": "",
+    "text": "least 1 x ATR 14; entry = a limit at EMA 30 on the first pullback after the stack forms (valid 12 candles); stop 0.1"
+   },
+   {
+    "label": "",
+    "text": "x ATR below the latest confirmed 3-candle fractal low; target 2R; one trade per stack."
+   }
+  ]
+ },
+ {
+  "id": "SY-01",
+  "source": "youtube_channels11",
+  "name": "Higher-timeframe structure, 1-hour trend break entered on 15 minutes",
+  "channel": "saya crypto",
+  "videos": [
+   "GuhUEZglNYE"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "saya crypto"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "Video",
+    "text": "Market: bitcoin (any market). The title's \"94% win rate\" is not tested in the video."
+   },
+   {
+    "label": "",
+    "text": "Structure (E 00:00:30-00:07:00): uptrend = higher highs and higher lows, downtrend = lower highs and lower lows;"
+   },
+   {
+    "label": "",
+    "text": "read weekly, daily and 4-hour structure to know the overall direction and realistic targets; no indicators."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:08:00-00:10:00): on 1 hour wait for the current trend to break; a break to the downside = short, to the"
+   },
+   {
+    "label": "",
+    "text": "upside = long; set an alert at the level, then drop to 15 minutes and enter when the break happens there."
+   },
+   {
+    "label": "",
+    "text": "Stop and target (E 00:10:00): stop above the previous high (short), target beyond the previous low at about 1:2"
+   },
+   {
+    "label": "",
+    "text": "(1:2-1:3)."
+   },
+   {
+    "label": "",
+    "text": "Management (E 00:12:00): at about 50% of the way to the target move the stop to breakeven and start taking profit."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD; a 1-hour uptrend = the last two confirmed 5-candle fractal highs and lows rising; the break = a 15-minute"
+   },
+   {
+    "label": "",
+    "text": "close below the last 1-hour higher low (mirror: a close above the last lower high of a 1-hour downtrend); enter at"
+   },
+   {
+    "label": "",
+    "text": "the next open; stop 0.1 x 15-minute ATR above the latest confirmed 3-candle fractal high on 15 minutes; target 2R;"
+   },
+   {
+    "label": "",
+    "text": "stop to breakeven at +1R (half-way); one trade per break."
+   }
+  ]
+ },
+ {
+  "id": "BG-01",
+  "source": "youtube_channels11",
+  "name": "Gold: 1-hour structure, 15-minute sweep at the point of interest",
+  "channel": "Brad Goh (The Trading Geek)",
+  "videos": [
+   "en8RMFRqSME"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Brad Goh (The Trading Geek)"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Gold (Delta XAUTUSD)"
+   },
+   {
+    "label": "",
+    "text": "Steps (chapters 00:03:01-00:13:45): (1) mark the market shift and the latest break of structure (bias); (2) the"
+   },
+   {
+    "label": "",
+    "text": "point of interest (supply/demand zone, order block, FVG) the move came from; (3) the obvious liquidity (swing lows,"
+   },
+   {
+    "label": "",
+    "text": "equal lows, long wicks) price must take; (4) at the point of interest wait for the sweep on 15 minutes: never enter"
+   },
+   {
+    "label": "",
+    "text": "on the first touch; (5) target the next 15-minute swing high (scalping, about 1:3), the 1-hour high is too far."
+   },
+   {
+    "label": "",
+    "text": "Entry: aggressive = right after the sweep, stop below the candle that swept (the protected low, E 00:13:00);"
+   },
+   {
+    "label": "",
+    "text": "conservative = wait for the lower-timeframe market shift and enter on the pullback to the demand zone that caused"
+   },
+   {
+    "label": "",
+    "text": "it (E 00:14:30-00:15:00). His live gold trades waited for one extra candle in the trade's direction (E 00:19:00)."
+   },
+   {
+    "label": "",
+    "text": "A: XAUUSD; 1-hour bias = the latest break of a confirmed 5-candle fractal (a close above the last fractal high ="
+   },
+   {
+    "label": "",
+    "text": "bullish); point of interest = the last bearish 1-hour candle before that break (its high-low); on 15 minutes, while"
+   },
+   {
+    "label": "",
+    "text": "price is inside the zone, a candle trades below a confirmed 3-candle fractal low and closes back above it; enter at"
+   },
+   {
+    "label": "",
+    "text": "the next open after one bullish 15-minute candle closes; stop 0.1 x ATR below the sweep low; target the nearest"
+   },
+   {
+    "label": "",
+    "text": "confirmed 15-minute fractal high if at least 1.5R away, else 2R; mirror for shorts; one trade per zone."
+   }
+  ]
+ },
+ {
+  "id": "BG-02",
+  "source": "youtube_channels11",
+  "name": "The liquidation candle scalp, 2R",
+  "channel": "Brad Goh (The Trading Geek)",
+  "videos": [
+   "xG8jxyTp7uc"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Brad Goh (The Trading Geek)"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Gold (Delta XAUTUSD)"
+   },
+   {
+    "label": "",
+    "text": "E 00:02:00-00:04:00: a candle with a long wick and a small body; the longer the wick and the smaller the body, the"
+   },
+   {
+    "label": "",
+    "text": "better; it must appear in context: where price sweeps equal lows/highs or a swing."
+   },
+   {
+    "label": "",
+    "text": "Timeframes (E 00:04:30): 5 minutes for the trend (or 1 minute when 5 minutes is ranging), entries on 1-5 minutes."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:07:30, 00:08:30): when price sweeps the lows and prints the liquidation candle, place a buy order"
+   },
+   {
+    "label": "",
+    "text": "above it; stop below its wick; target a constant 2R (for the video; normally the next point of interest)."
+   },
+   {
+    "label": "",
+    "text": "A: XAUUSD 5-minute; liquidation candle = wick on the sweep side at least 2 x the body and at least 60% of the range;"
+   },
+   {
+    "label": "",
+    "text": "it trades beyond a confirmed 3-candle fractal low (high) from the last 24 candles and closes back inside; a stop-"
+   },
+   {
+    "label": "",
+    "text": "entry above its high (below its low) valid 2 candles; stop 0.1 x ATR beyond the wick; target 2R."
+   }
+  ]
+ },
+ {
+  "id": "BG-03",
+  "source": "youtube_channels11",
+  "name": "1-minute scalp: 15-minute point of interest, 1-minute sweep zone retest",
+  "channel": "Brad Goh (The Trading Geek)",
+  "videos": [
+   "thbpmdMYuu0",
+   "cFzD500aQFM"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Brad Goh (The Trading Geek)"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Gold (Delta XAUTUSD)"
+   },
+   {
+    "label": "",
+    "text": "E 00:00:30-00:05:00: higher timeframe 15 minutes, lower 1 minute (5 minutes for less experienced traders). (1) a"
+   },
+   {
+    "label": "",
+    "text": "15-minute break of structure; (2) its point of interest (demand zone; refine it to the pivot candle that led to the"
+   },
+   {
+    "label": "",
+    "text": "break for a tighter stop, E 00:11:00-00:12:00); (3) when price taps it, on 1 minute wait for a liquidity sweep"
+   },
+   {
+    "label": "",
+    "text": "(equal lows taken) or a failed reaction, then for price to pull back to the most recent lower-timeframe zone that"
+   },
+   {
+    "label": "",
+    "text": "swept liquidity: enter there; stop below that zone; target 2R."
+   },
+   {
+    "label": "",
+    "text": "A: XAUUSD; 15-minute bias and zone as BG-01's but on 15 minutes; on 1 minute a sweep of a confirmed 3-candle fractal"
+   },
+   {
+    "label": "",
+    "text": "low inside the zone; the sweep zone = the sweeping candle's body; a limit at its top, valid 30 one-minute candles;"
+   },
+   {
+    "label": "",
+    "text": "stop 0.1 x 1-minute ATR below the sweep low; target 2R."
+   }
+  ]
+ },
+ {
+  "id": "BG-04",
+  "source": "youtube_channels11",
+  "name": "Asia range sweep at the London open",
+  "channel": "Brad Goh (The Trading Geek)",
+  "videos": [
+   "oC7ssQOn8Fs"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "GBP/USD",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Brad Goh (The Trading Geek)"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "GBP/USD"
+   },
+   {
+    "label": "",
+    "text": "Asia range (E 00:01:33-00:04:30): 19:00-03:00 New York time (a tighter 20:00-01:00 also works); the high and low"
+   },
+   {
+    "label": "",
+    "text": "are the extreme wicks."
+   },
+   {
+    "label": "",
+    "text": "When not to trade (E 00:05:13-00:06:27): news; a tiny range (no liquidity, fake-outs); no range at all (a clean"
+   },
+   {
+    "label": "",
+    "text": "trend)."
+   },
+   {
+    "label": "",
+    "text": "When (E 00:06:27-00:08:00): the London open, 03:00-06:00 New York time."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:10:00-00:12:00, 00:20:00-00:24:00): price takes out the Asia high or low, rejects it (a liquidation"
+   },
+   {
+    "label": "",
+    "text": "candle, or a close back inside) and shows displacement the other way; aggressive = enter right after the rejection;"
+   },
+   {
+    "label": "",
+    "text": "conservative = wait for the failed reaction (a higher low) and enter there."
+   },
+   {
+    "label": "",
+    "text": "Stop (E 00:12:00): a few pips beyond the liquidation candle's wick. Target 2R."
+   },
+   {
+    "label": "",
+    "text": "His GBPUSD example (1.34830 level)."
+   },
+   {
+    "label": "",
+    "text": "A: GBPUSD 5-minute; skip if the Asia range is below 25% or above 90% of the 20-day average daily range; a 5-minute"
+   },
+   {
+    "label": "",
+    "text": "candle between 03:00 and 06:00 New York trades beyond the Asia high (low) and closes back inside; within the next 3"
+   },
+   {
+    "label": "",
+    "text": "candles a candle with a body at least 1.5 x the 20-candle average closes in the reversal direction; enter at the"
+   },
+   {
+    "label": "",
+    "text": "next open; stop 0.1 x ATR beyond the sweep extreme; target 2R; one trade a day."
+   }
+  ]
+ },
+ {
+  "id": "BG-05",
+  "source": "youtube_channels11",
+  "name": "Gold supply/demand zone with an EMA 8 cross and an engulfing",
+  "channel": "Brad Goh (The Trading Geek)",
+  "videos": [
+   "AY7fWmE1CBk"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Brad Goh (The Trading Geek)"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Gold (Delta XAUTUSD)"
+   },
+   {
+    "label": "",
+    "text": "Zones (E 00:00:30-00:02:00): a demand zone is where an aggressive rally began (several green candles in a row); a"
+   },
+   {
+    "label": "",
+    "text": "supply zone where an aggressive drop began; trade the first retest."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:04:00-00:05:30): at the zone (1-hour chart), on 15 minutes wait for two confirmations: the 8 (or 9) EMA"
+   },
+   {
+    "label": "",
+    "text": "cross (price crossing back through it) and a candlestick pattern (a big engulfing candle in the trade's direction)."
+   },
+   {
+    "label": "",
+    "text": "Stop above the supply zone or above the last lower high; target the next zone (E 00:05:30)."
+   },
+   {
+    "label": "",
+    "text": "A: XAUUSD; a zone = the base candle before 3+ same-colour 1-hour candles covering at least 2 x ATR 14; first retest"
+   },
+   {
+    "label": "",
+    "text": "only; on 15 minutes a close back across EMA 8 that is also an engulfing candle; enter at the next open; stop 0.1 x"
+   },
+   {
+    "label": "",
+    "text": "ATR beyond the zone; target 2R; zones expire after 10 days."
+   }
+  ]
+ },
+ {
+  "id": "BG-06",
+  "source": "youtube_channels11",
+  "name": "EMA 8/14 cross with an engulfing candle",
+  "channel": "Brad Goh (The Trading Geek)",
+  "videos": [
+   "pitBrUMb7PE",
+   "PMxtmeOZegw"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Nasdaq 100",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Brad Goh (The Trading Geek)"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Nasdaq 100"
+   },
+   {
+    "label": "",
+    "text": "PMxtmeOZegw (E 00:00:30-00:02:30): EMA 8 (blue) and EMA 14 (red); 8 above 14 = uptrend, buys only; a cross is the"
+   },
+   {
+    "label": "",
+    "text": "entry, but most crosses are fake-outs, so require confluence (a key support/resistance level, a candlestick"
+   },
+   {
+    "label": "",
+    "text": "pattern)."
+   },
+   {
+    "label": "",
+    "text": "pitBrUMb7PE (E 00:02:00-00:03:00): his US30 trade: the EMAs crossing over plus a big bearish engulfing candle; sell,"
+   },
+   {
+    "label": "",
+    "text": "stop above, take profit at 2 x the stop."
+   },
+   {
+    "label": "",
+    "text": "A: NAS100 5-minute (the desk's US index; US30 is not on the desk); the cross candle (or the next one) is an"
+   },
+   {
+    "label": "",
+    "text": "engulfing candle in the cross direction; enter at the next open; stop beyond the engulfing candle; target 2R;"
+   },
+   {
+    "label": "",
+    "text": "New York cash session only (09:30-16:00 NY)."
+   }
+  ]
+ },
+ {
+  "id": "BG-07",
+  "source": "youtube_channels11",
+  "name": "Silver bullet, his golden-bullet version",
+  "channel": "Brad Goh (The Trading Geek)",
+  "videos": [
+   "rU0vQUTNXVE"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Nasdaq 100",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Brad Goh (The Trading Geek)"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Nasdaq 100"
+   },
+   {
+    "label": "",
+    "text": "Five steps (E 00:01:45-00:08:00): price sweeps liquidity (above a swing high / below a swing low); a clean"
+   },
+   {
+    "label": "",
+    "text": "displacement the other way; price pulls back into an entry model (FVG, order block, demand zone, flip zone); enter"
+   },
+   {
+    "label": "",
+    "text": "there with the stop beyond that point of interest; target the opposing liquidity (the next low or high)."
+   },
+   {
+    "label": "",
+    "text": "Timing (E 00:08:00): the time windows matter (the ICT silver-bullet hours); indices and forex examples."
+   },
+   {
+    "label": "",
+    "text": "Overlap: CP-28 (crypto playlist) is a silver-bullet strategy on bitcoin; BG-07 is Brad Goh's on the Nasdaq."
+   },
+   {
+    "label": "",
+    "text": "A: NAS100 5-minute, 10:00-11:00 New York; a sweep of a confirmed 3-candle fractal from the session; displacement ="
+   },
+   {
+    "label": "",
+    "text": "a candle with body at least 1.5 x average leaving an FVG; a limit at the FVG's near edge valid until 11:30; stop"
+   },
+   {
+    "label": "",
+    "text": "beyond the sweep extreme plus 0.1 x ATR; target the nearest opposing fractal if at least 2R away, else 2R."
+   }
+  ]
+ },
+ {
+  "id": "BG-08",
+  "source": "youtube_channels11",
+  "name": "Candle range theory on 15 minutes",
+  "channel": "Brad Goh (The Trading Geek)",
+  "videos": [
+   "q02_LyIXZlk"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Brad Goh (The Trading Geek)"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Gold (Delta XAUTUSD)"
+   },
+   {
+    "label": "",
+    "text": "E 00:02:09-00:10:00: the candle range = a 15-minute candle's high and low; good places: pullbacks in the higher-"
+   },
+   {
+    "label": "",
+    "text": "timeframe trend, equal highs/lows, prior session highs/lows. Wait for price to sweep the range's high or low, then"
+   },
+   {
+    "label": "",
+    "text": "drop to 5 minutes."
+   },
+   {
+    "label": "",
+    "text": "Entries (E 00:11:10-00:16:50): aggressive = after the sweep on the liquidation candle; conservative = after the 5-"
+   },
+   {
+    "label": "",
+    "text": "minute market shift (failed reaction). Stop a few pips beyond the liquidation candle (or the range low); target the"
+   },
+   {
+    "label": "",
+    "text": "opposite end of the range."
+   },
+   {
+    "label": "",
+    "text": "A: XAUUSD; a range candle = a 15-minute candle with a range at least 1.2 x ATR 14; within the next 4 fifteen-minute"
+   },
+   {
+    "label": "",
+    "text": "candles, a 5-minute candle trades beyond its low (high) and closes back inside; enter at the next 5-minute open;"
+   },
+   {
+    "label": "",
+    "text": "stop 0.1 x 5-minute ATR beyond the sweep extreme; target the range's other end if at least 1.5R away (else skip)."
+   }
+  ]
+ },
+ {
+  "id": "BG-09",
+  "source": "youtube_channels11",
+  "name": "Break and retest with a confirmation candle, 1:3",
+  "channel": "Brad Goh (The Trading Geek)",
+  "videos": [
+   "2oLhwj1E8aM"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "EUR/USD",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Brad Goh (The Trading Geek)"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "EUR/USD"
+   },
+   {
+    "label": "",
+    "text": "E 00:00:30-00:02:30: only in a clear trend; price breaks the structural high (the last high before a pullback);"
+   },
+   {
+    "label": "",
+    "text": "do not buy the break: wait for the retest of that level and for the continuation."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:07:42-00:12:00): at the retest look for a doji followed by a big candle in the trend's direction,"
+   },
+   {
+    "label": "",
+    "text": "multiple wick rejections, or an engulfing; then enter; stop beyond the key level; target 3 x the stop."
+   },
+   {
+    "label": "",
+    "text": "A: EURUSD 15-minute; trend = EMA 50 rising and price above it (mirror for shorts); structural high = a confirmed"
+   },
+   {
+    "label": "",
+    "text": "5-candle fractal high broken by a close; the retest = a low within 0.25 x ATR of that level within 20 candles; the"
+   },
+   {
+    "label": "",
+    "text": "confirmation = a bullish engulfing or a candle with a lower wick at least 2 x its body closing above the level;"
+   },
+   {
+    "label": "",
+    "text": "enter at the next open; stop 0.25 x ATR below the level; target 3R."
+   }
+  ]
+ },
+ {
+  "id": "BG-10",
+  "source": "youtube_channels11",
+  "name": "Consolidation breakout on a momentum candle",
+  "channel": "Brad Goh (The Trading Geek)",
+  "videos": [
+   "DKohGRr18ZA"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "EUR/USD",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Brad Goh (The Trading Geek)"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "EUR/USD"
+   },
+   {
+    "label": "",
+    "text": "E 00:01:30-00:03:30: skip pattern names; draw the consolidation's key levels; 80% of breakouts fail, so require a"
+   },
+   {
+    "label": "",
+    "text": "momentum candle (a big candle, or several medium ones) on the break; enter right away (most breakouts never come"
+   },
+   {
+    "label": "",
+    "text": "back for a retest)."
+   },
+   {
+    "label": "",
+    "text": "Exit (E 00:04:00): half at 1:3, stop to breakeven, the rest until the moving-average crossover (his EMA 8/14)."
+   },
+   {
+    "label": "",
+    "text": "A: EURUSD 15-minute; a consolidation = the last 16 candles inside a band no taller than 2 x ATR 14; a close beyond"
+   },
+   {
+    "label": "",
+    "text": "it by a candle whose body is at least 1.8 x the 20-candle average; enter at the next open; stop at the momentum"
+   },
+   {
+    "label": "",
+    "text": "candle's other end; half off at 3R with the stop to breakeven; the rest exits at the next open after EMA 8 crosses"
+   },
+   {
+    "label": "",
+    "text": "back through EMA 14."
+   }
+  ]
+ },
+ {
+  "id": "PR-01",
+  "source": "youtube_channels11",
+  "name": "Brahmastra: Supertrend (20, 2) + MACD + VWAP",
+  "channel": "Pushkar Raj Thakur",
+  "videos": [
+   "0EXVG4kPAm0",
+   "ctpGuhCCAtE",
+   "U3_47LWge-Y"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks 5m",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Pushkar Raj Thakur"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, 5-minute candles"
+   },
+   {
+    "label": "",
+    "text": "Indicators (E 00:02:00-00:04:00, 00:11:00-00:12:00): VWAP; Supertrend made faster, length 20 and factor 2 instead of"
+   },
+   {
+    "label": "",
+    "text": "the default 10 and 3; MACD with its default settings. He opens BankNifty futures because the spot index has no"
+   },
+   {
+    "label": "",
+    "text": "volume for VWAP (E 00:01:00-00:02:30)."
+   },
+   {
+    "label": "",
+    "text": "Timeframe (E 00:15:00): 5 minutes for intraday trades (15 minutes is slower)."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:13:30, 00:15:00-00:16:00, 00:23:00): a Supertrend buy signal and a MACD bullish cross (the MACD line"
+   },
+   {
+    "label": "",
+    "text": "crossing above the signal line); the two may come up to three or four candles apart; then wait for the next candle"
+   },
+   {
+    "label": "",
+    "text": "to break the signal candle's high."
+   },
+   {
+    "label": "",
+    "text": "VWAP (E 00:14:00-00:17:00, 00:21:00, 00:29:00): price tends to return to VWAP; never buy far above VWAP or sell far"
+   },
+   {
+    "label": "",
+    "text": "below it; the best sell is from above or near VWAP."
+   },
+   {
+    "label": "",
+    "text": "Stop (E 00:26:00): the Supertrend line (his example: entry 18,395, the Supertrend line about 50 points below)."
+   },
+   {
+    "label": "",
+    "text": "ctpGuhCCAtE puts it at the high of the third candle back (E 00:08:30-00:09:00)."
+   },
+   {
+    "label": "",
+    "text": "Exit (E 00:17:00-00:20:00, 00:27:00-00:28:00): book 50% at the next opposite MACD cross; exit the rest when the"
+   },
+   {
+    "label": "",
+    "text": "Supertrend flips; an intraday trade is closed before the session ends."
+   },
+   {
+    "label": "",
+    "text": "ctpGuhCCAtE adds: it works best in a volatile market (India VIX above about 16-20, E 00:01:00-00:02:30) and the"
+   },
+   {
+    "label": "",
+    "text": "15-minute MACD should agree (E 00:10:00-00:10:30). Adding size on a pullback doji or hammer (0EXVG4kPAm0 E"
+   },
+   {
+    "label": "",
+    "text": "00:24:00-00:27:00) is not implemented. The \"70% accuracy\" is his claim, not tested in the video."
+   },
+   {
+    "label": "",
+    "text": "A: the NSE 5-minute stock pool (he says it works on stocks too; the desk's BankNifty has no volume for VWAP);"
+   },
+   {
+    "label": "",
+    "text": "Supertrend (20, 2) with RMA-smoothed ATR; MACD (12, 26, 9); the flip and the MACD cross in the same direction at most"
+   },
+   {
+    "label": "",
+    "text": "4 candles apart, the later one being the signal candle; for a buy the signal candle closes no more than 1 x ATR 14"
+   },
+   {
+    "label": "",
+    "text": "above the session VWAP (a sell: no more than 1 x ATR below it); a stop-entry one tick above the signal candle's high"
+   },
+   {
+    "label": "",
+    "text": "(below its low) valid for the next 2 candles; a hard stop at the Supertrend value of the signal candle (skip if it is"
+   },
+   {
+    "label": "",
+    "text": "more than 3 x ATR away); half off at the next open after an opposite MACD cross; the rest at the next open after a"
+   },
+   {
+    "label": "",
+    "text": "close beyond the Supertrend line; entries 09:30-14:30, out at 15:15; one trade per stock per day."
+   }
+  ]
+ },
+ {
+  "id": "PR-02",
+  "source": "youtube_channels11",
+  "name": "9:20 opening range: wait for the retest, 1:3",
+  "channel": "Pushkar Raj Thakur",
+  "videos": [
+   "YW5oDzVfWeU"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bank Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Pushkar Raj Thakur"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "BANKNIFTY index (1-minute data)"
+   },
+   {
+    "label": "",
+    "text": "E 00:01:00-00:02:00, 00:06:00: BankNifty on 1-minute candles; the opening range is the high and low of 09:15-09:20"
+   },
+   {
+    "label": "",
+    "text": "(the first five 1-minute candles)."
+   },
+   {
+    "label": "",
+    "text": "E 00:02:30-00:04:00, 00:13:00, 00:18:00: do not buy the breakout itself (most people do and get trapped); wait for"
+   },
+   {
+    "label": "",
+    "text": "price to come back and retest the broken edge; if it falls back inside the range there is no trade; enter when a"
+   },
+   {
+    "label": "",
+    "text": "bullish candle forms after the retest (a hammer then a bullish candle in his first example)."
+   },
+   {
+    "label": "",
+    "text": "E 00:04:00, 00:11:00, 00:22:00: stop at the closest swing but at least 50 BankNifty points; target at least 1:3"
+   },
+   {
+    "label": "",
+    "text": "(1:2 for beginners)."
+   },
+   {
+    "label": "",
+    "text": "E 00:23:00-00:24:00: the trade should work within about two hours; after that, exit if the move has stalled."
+   },
+   {
+    "label": "",
+    "text": "E 00:07:30: also works on liquid NIFTY 50 stocks."
+   },
+   {
+    "label": "",
+    "text": "A: BANKNIFTY 1-minute; range = the 09:15-09:19 candles; a breakout = a close above the range high (below the low);"
+   },
+   {
+    "label": "",
+    "text": "a retest = a later candle whose low comes within 0.1 x the range height of the range high while its close stays"
+   },
+   {
+    "label": "",
+    "text": "above it; that side is cancelled when a candle closes back inside the range; entry at the next open after the first"
+   },
+   {
+    "label": "",
+    "text": "green (red) candle that follows the retest; stop 0.05% below the lowest low since the breakout, widened to at least"
+   },
+   {
+    "label": "",
+    "text": "0.1% (his 50 points at about 51,000); target 3R; time stop 120 minutes; entries until 13:00; one trade a day."
+   }
+  ]
+ },
+ {
+  "id": "PR-03",
+  "source": "youtube_channels11",
+  "name": "9:20 gap against the trend, opposite first candle",
+  "channel": "Pushkar Raj Thakur",
+  "videos": [
+   "HONlprzggHU"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bank Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Pushkar Raj Thakur"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "BANKNIFTY index (1-minute data)"
+   },
+   {
+    "label": "",
+    "text": "When (E 00:00:30-00:02:00, 00:28:00): the market has trended for three or four sessions and then opens with a big"
+   },
+   {
+    "label": "",
+    "text": "gap against that trend (300-500 BankNifty points then, at about 41,000-42,000)."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:03:30-00:04:30, 00:19:00): 5-minute chart; watch the first candle (09:15-09:20); after a gap down it"
+   },
+   {
+    "label": "",
+    "text": "must close green (the opposite colour) or there is no trade; buy as soon as its high breaks. A downtrend and a big"
+   },
+   {
+    "label": "",
+    "text": "gap up is the mirror (a red first candle, sell its low)."
+   },
+   {
+    "label": "",
+    "text": "Stop (E 00:04:30-00:05:00): 70-80 points when the first candle is under 100 points; 100 points when it is 100-150."
+   },
+   {
+    "label": "",
+    "text": "Exit (E 00:06:00, 00:09:30-00:12:00): the previous close acts as resistance and is the target; after a move of"
+   },
+   {
+    "label": "",
+    "text": "more than 150 points, exit if price falls back 50 points from the high."
+   },
+   {
+    "label": "",
+    "text": "Rare (E 00:21:00): about six trades a year."
+   },
+   {
+    "label": "",
+    "text": "A: BANKNIFTY 5-minute; trend = the previous close above (below) the close four sessions earlier; gap = the open at"
+   },
+   {
+    "label": "",
+    "text": "least 0.6% below (above) the previous close; the first candle closes green (red); a stop-entry at its high (low) from"
+   },
+   {
+    "label": "",
+    "text": "09:20, valid until 10:30; stop 0.18% (his 75 points at 41,000) when the first candle's range is under 0.25% of price,"
+   },
+   {
+    "label": "",
+    "text": "else 0.25%; target = the previous close; once the trade is 0.37% (150 points) in profit, exit when price gives back"
+   },
+   {
+    "label": "",
+    "text": "0.12% (50 points) from its best; out at 15:15; one trade a day."
+   }
+  ]
+ },
+ {
+  "id": "PR-04",
+  "source": "youtube_channels11",
+  "name": "The third 5-minute candle, exit at 15:00",
+  "channel": "Pushkar Raj Thakur",
+  "videos": [
+   "UaNEHuWiWZg"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Pushkar Raj Thakur"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NIFTY index (1-minute data)"
+   },
+   {
+    "label": "",
+    "text": "E 00:13:30-00:14:00: NIFTY futures on 5-minute candles; mark the day's third candle (09:25-09:30); buy when a later"
+   },
+   {
+    "label": "",
+    "text": "candle breaks its high plus 5 points (stop at its low); short when price breaks its low minus 5 points (stop at its"
+   },
+   {
+    "label": "",
+    "text": "high)."
+   },
+   {
+    "label": "",
+    "text": "Exit (E 00:17:00-00:20:00): at 15:00 (or book earlier at a clear technical reversal)."
+   },
+   {
+    "label": "",
+    "text": "Frequent small losses, occasional big trending days (E 00:02:30-00:03:00, 00:21:00)."
+   },
+   {
+    "label": "",
+    "text": "A: NIFTY 5-minute (the index stands in for the futures); 5 points = 0.03% (at 17,800); both sides as stop-entries;"
+   },
+   {
+    "label": "",
+    "text": "a second trade only after the first is stopped (at most two a day); exit at 15:00."
+   }
+  ]
+ },
+ {
+  "id": "PR-05",
+  "source": "youtube_channels11",
+  "name": "Ghanshyam Tech's window strategy",
+  "channel": "Pushkar Raj Thakur",
+  "videos": [
+   "EISy2AIXZrg"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bank Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Pushkar Raj Thakur"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "BANKNIFTY index (1-minute data)"
+   },
+   {
+    "label": "",
+    "text": "Window (E 00:01:30-00:03:30): the 30 points above a round hundred (x00-x30); the first 1-minute candle's high must"
+   },
+   {
+    "label": "",
+    "text": "lie inside it (x31, or x99 just below, means no trade)."
+   },
+   {
+    "label": "",
+    "text": "Trigger (E 00:02:00-00:02:30): the high must break on the second or third candle, no later; buy at once on the"
+   },
+   {
+    "label": "",
+    "text": "break."
+   },
+   {
+    "label": "",
+    "text": "Sell (E 00:05:00-00:05:30): the mirror, with the first candle's low in the 30 points below a round hundred"
+   },
+   {
+    "label": "",
+    "text": "(x70-x00)."
+   },
+   {
+    "label": "",
+    "text": "Stop (E 00:04:00): the second candle's low, about 80-90 points."
+   },
+   {
+    "label": "",
+    "text": "Exit (E 00:06:00): ride the 1-minute momentum until it reverses; do not switch to 5 minutes."
+   },
+   {
+    "label": "",
+    "text": "Frequency (E 00:01:30): about three or four set-ups a month."
+   },
+   {
+    "label": "",
+    "text": "A: BANKNIFTY 1-minute; a buy when the 09:15 candle's high mod 100 is 0-30, a sell when its low mod 100 is 70-99.99"
+   },
+   {
+    "label": "",
+    "text": "or exactly 0; a stop-entry at the high (low) valid for the 09:16 and 09:17 candles; stop at the first candle's low"
+   },
+   {
+    "label": "",
+    "text": "(high), since the trigger candle's own low is not known when the order fills; exit at the next open after the first"
+   },
+   {
+    "label": "",
+    "text": "1-minute close below the previous candle's low (above its high); out by 10:15; one trade a day."
+   }
+  ]
+ },
+ {
+  "id": "PR-06",
+  "source": "youtube_channels11",
+  "name": "Ghanshyam Yadav's 2:20 candle",
+  "channel": "Pushkar Raj Thakur",
+  "videos": [
+   "LSNX9sEyf8I"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bank Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Pushkar Raj Thakur"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "BANKNIFTY index (1-minute data)"
+   },
+   {
+    "label": "",
+    "text": "E 00:00:30-00:01:00: after the opening move the market goes sideways from about 10:30 to 13:30; the second phase"
+   },
+   {
+    "label": "",
+    "text": "comes after 13:30-14:00; he uses the 14:20 candle (13:00 and 14:00 tested worse)."
+   },
+   {
+    "label": "",
+    "text": "E 00:02:00-00:03:00: buy as the 14:20 candle's high breaks by a point, sell as its low breaks; stop at the other end"
+   },
+   {
+    "label": "",
+    "text": "(often 20-50 points)."
+   },
+   {
+    "label": "",
+    "text": "E 00:04:00, 00:07:00: exit when a candle breaks the previous candle's low (for a buy); out by 15:00."
+   },
+   {
+    "label": "",
+    "text": "Skip (E 00:05:00-00:05:30, 00:08:00-00:09:00): when the candle sits inside a range so that the break runs straight"
+   },
+   {
+    "label": "",
+    "text": "into support or resistance; the trade needs open space. Breaks against the day's earlier trend move better."
+   },
+   {
+    "label": "",
+    "text": "Targets of 70-150 points; best on expiry days (E 00:01:00)."
+   },
+   {
+    "label": "",
+    "text": "A: BANKNIFTY 5-minute (the timeframe is not stated; the candle sizes he quotes fit 5 minutes); the 14:20-14:25"
+   },
+   {
+    "label": "",
+    "text": "candle; both sides as stop-entries valid until 14:55; stop at the candle's other end; open space: a buy only if the"
+   },
+   {
+    "label": "",
+    "text": "entry is at least the 13:20-14:20 high minus 0.25 x ATR 14 (a sell: at most that hour's low plus 0.25 x ATR); exit at"
+   },
+   {
+    "label": "",
+    "text": "the next open after a close below the previous candle's low (above its high); out at 15:00; one trade a day."
+   }
+  ]
+ },
+ {
+  "id": "PR-07",
+  "source": "youtube_channels11",
+  "name": "Ghanshyam Yadav's Fibonacci 0.71 buy",
+  "channel": "Pushkar Raj Thakur",
+  "videos": [
+   "h-ro-OaL31c"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bank Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Pushkar Raj Thakur"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "BANKNIFTY index (1-minute data)"
+   },
+   {
+    "label": "",
+    "text": "Buys only (E 00:00:30): he uses it for calls, never for puts."
+   },
+   {
+    "label": "",
+    "text": "Levels (E 00:02:00): add 0.71 and 1.27 to the Fibonacci tool."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:03:00-00:05:00): after a fall, draw from the high to the low; when price rises back and crosses the 0.71"
+   },
+   {
+    "label": "",
+    "text": "level, buy at once; stop at the 0.38 level; first target the 100% level (the high), second target 1.27; after that,"
+   },
+   {
+    "label": "",
+    "text": "hold only while the momentum lasts."
+   },
+   {
+    "label": "",
+    "text": "E 00:08:00-00:08:30: connect the highest and lowest points of the timeframe traded; use 5 minutes (1 minute only for"
+   },
+   {
+    "label": "",
+    "text": "experienced traders)."
+   },
+   {
+    "label": "",
+    "text": "A: BANKNIFTY 5-minute; anchors = the session high (from 09:15) and the lowest low after it (a new low moves the"
+   },
+   {
+    "label": "",
+    "text": "anchor); the fall at least 0.5% of price; levels measured up from the low (0 = the low, 1 = the high); entry at the"
+   },
+   {
+    "label": "",
+    "text": "next open after a 5-minute close above low + 0.71 x (high - low); stop at low + 0.38 x (high - low); half at the"
+   },
+   {
+    "label": "",
+    "text": "high with the stop moved to the entry, the rest at low + 1.27 x (high - low); entries until 14:00, out at 15:15; one"
+   },
+   {
+    "label": "",
+    "text": "trade a day."
+   }
+  ]
+ },
+ {
+  "id": "PR-08",
+  "source": "youtube_channels11",
+  "name": "Pivot points: sell the rally to the pivot",
+  "channel": "Pushkar Raj Thakur",
+  "videos": [
+   "qZYsR4mivbQ"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks 5m",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Pushkar Raj Thakur"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, 5-minute candles"
+   },
+   {
+    "label": "",
+    "text": "Bias (E 00:09:30-00:11:00): at the open, is the stock above or below the day's pivot point? Below = sell on rallies"
+   },
+   {
+    "label": "",
+    "text": "only; above = buy on dips only."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:12:30-00:13:30): do not short blindly at the 09:30 close; wait for price to come back to the pivot and"
+   },
+   {
+    "label": "",
+    "text": "have a sell order there."
+   },
+   {
+    "label": "",
+    "text": "Stop and targets (E 00:14:00-00:15:00, 00:16:00): stop at R1, set one step beyond it (1,429 for an R1 of 1,428);"
+   },
+   {
+    "label": "",
+    "text": "first target S1, then S2; trail the stop."
+   },
+   {
+    "label": "",
+    "text": "E 00:18:00-00:20:00: when a stock opens far below the pivot (between S3 and S4) he does not chase it; the closer the"
+   },
+   {
+    "label": "",
+    "text": "entry to the pivot, the smaller the risk."
+   },
+   {
+    "label": "",
+    "text": "A: the NSE 5-minute stock pool (HDFC Bank and Bandhan Bank in the video); classic pivots from the previous session"
+   },
+   {
+    "label": "",
+    "text": "(P = (H + L + C) / 3, R1 = 2P - L, S1 = 2P - H, R2 = P + (H - L), S2 = P - (H - L)); bias from the 09:30 close"
+   },
+   {
+    "label": "",
+    "text": "(below P = shorts only, above = longs only, beyond S2 or R2 = no trade); a limit at P valid until 13:30; stop 0.07%"
+   },
+   {
+    "label": "",
+    "text": "beyond R1 (S1); half at S1 (R1) with the stop moved to the entry, the rest at S2 (R2); out at 15:15; one trade per"
+   },
+   {
+    "label": "",
+    "text": "stock per day."
+   }
+  ]
+ },
+ {
+  "id": "PR-09",
+  "source": "youtube_channels11",
+  "name": "Golden crossover: EMA 10 / 30 on 3 minutes",
+  "channel": "Pushkar Raj Thakur",
+  "videos": [
+   "mv2b0R1ovoQ"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Pushkar Raj Thakur"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NIFTY index (1-minute data)"
+   },
+   {
+    "label": "",
+    "text": "E 00:01:30-00:02:30, 00:04:00-00:05:00: NIFTY 3-minute chart, EMA 10 crossing EMA 30; a bullish cross buys an"
+   },
+   {
+    "label": "",
+    "text": "in-the-money call (200 points in the money), a bearish cross an in-the-money put; built on an algo platform that"
+   },
+   {
+    "label": "",
+    "text": "enters at the open of the candle after the cross candle closes (E 00:03:30-00:04:00, 00:10:30)."
+   },
+   {
+    "label": "",
+    "text": "Stop (E 00:06:00): 20 option points; at most 6 trade cycles a day; square-off at 15:15."
+   },
+   {
+    "label": "",
+    "text": "His two-year backtest on the platform showed a large profit with drawdowns (E 00:06:45-00:09:00); the last trades"
+   },
+   {
+    "label": "",
+    "text": "shown include a 1:6 winner held to 15:15 and a 1:1 exit."
+   },
+   {
+    "label": "",
+    "text": "A: NIFTY 1-minute bars resampled to 3 minutes; enter at the next open after the cross candle; stop 25 index points"
+   },
+   {
+    "label": "",
+    "text": "(20 option points / a delta of about 0.8 for a 200-point in-the-money option); exit and reverse at the next open after"
+   },
+   {
+    "label": "",
+    "text": "the opposite cross; at most 6 entries a day; out at 15:15."
+   }
+  ]
+ },
+ {
+  "id": "PR-10",
+  "source": "youtube_channels11",
+  "name": "RSI divergence with a close-line trigger",
+  "channel": "Pushkar Raj Thakur",
+  "videos": [
+   "2bHtkFnK0AM"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Pushkar Raj Thakur"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NIFTY index (1-minute data)"
+   },
+   {
+    "label": "",
+    "text": "Set-up (E 00:01:00-00:01:30, 00:03:30): the \"RSI Divergence\" indicator on TradingView; 5- or 15-minute charts (not"
+   },
+   {
+    "label": "",
+    "text": "30 or 60 minutes, which misalign with the 09:15 open)."
+   },
+   {
+    "label": "",
+    "text": "Trigger (E 00:04:30-00:06:00): draw a horizontal line at the close of the candle that gave the bullish divergence;"
+   },
+   {
+    "label": "",
+    "text": "wait for a red candle to close below it; that red candle's low must then be broken; the first green candle that"
+   },
+   {
+    "label": "",
+    "text": "closes above the line is the buy, at its close."
+   },
+   {
+    "label": "",
+    "text": "Stop (E 00:09:30): just beyond the lowest point, with a 0.1 buffer. Target (E 00:07:00-00:08:00, 00:10:00): 1:2,"
+   },
+   {
+    "label": "",
+    "text": "or the swing high where the fall began."
+   },
+   {
+    "label": "",
+    "text": "Bearish signals mirror it (E 00:08:30-00:09:30)."
+   },
+   {
+    "label": "",
+    "text": "A: NIFTY 15-minute; RSI 14; TradingView's divergence defaults (pivot lookback 5 left and 5 right, the earlier pivot"
+   },
+   {
+    "label": "",
+    "text": "5-60 bars back); a bullish signal = a price pivot low below the previous one with a higher RSI pivot low, known 5"
+   },
+   {
+    "label": "",
+    "text": "bars after the pivot; everything after that: (1) a red candle closes below the pivot candle's close, (2) a later"
+   },
+   {
+    "label": "",
+    "text": "candle trades below that red candle's low, (3) the first green candle closing above the line; enter at the next"
+   },
+   {
+    "label": "",
+    "text": "open; stop 0.05% below the lowest low since the pivot; target 2R; the set-up expires after 30 candles; entries until"
+   },
+   {
+    "label": "",
+    "text": "14:30, out at 15:15."
+   }
+  ]
+ },
+ {
+  "id": "PR-11",
+  "source": "youtube_channels11",
+  "name": "52-week-high stocks bought on a pullback to the Alligator's teeth",
+  "channel": "Pushkar Raj Thakur",
+  "videos": [
+   "_TRKQh-eDAE"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks daily",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Pushkar Raj Thakur"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, daily candles"
+   },
+   {
+    "label": "",
+    "text": "E 00:00:30-00:05:00: NSE publishes the day's 52-week-high list; momentum is in those stocks, but do not buy the"
+   },
+   {
+    "label": "",
+    "text": "high itself (E 00:06:00-00:06:30)."
+   },
+   {
+    "label": "",
+    "text": "E 00:07:30-00:10:30: the Williams Alligator on the daily chart (lips, teeth, jaw); the wider the mouth opens, the"
+   },
+   {
+    "label": "",
+    "text": "stronger the trend; wait for a retracement and enter near the middle line (the teeth); his example returned about"
+   },
+   {
+    "label": "",
+    "text": "15% within the month."
+   },
+   {
+    "label": "",
+    "text": "A: the NSE daily pool; a 52-week closing high within the last 15 sessions; the Alligator on the median price (jaw ="
+   },
+   {
+    "label": "",
+    "text": "SMMA 13 shifted 8, teeth = SMMA 8 shifted 5, lips = SMMA 5 shifted 3, as plotted); lips above teeth above jaw and the"
+   },
+   {
+    "label": "",
+    "text": "jaw higher than 5 sessions ago; entry at the next open after the first day whose low reaches the teeth while its"
+   },
+   {
+    "label": "",
+    "text": "close stays above the jaw; exit at the next open after a close below the jaw (a hard stop 1 x ATR 14 below the jaw at"
+   },
+   {
+    "label": "",
+    "text": "entry), or at +15%, or when the lips cross below the teeth; time stop 30 sessions; long only."
+   }
+  ]
+ },
+ {
+  "id": "PR-12",
+  "source": "youtube_channels11",
+  "name": "Gold: 4-hour Supertrend ladder with counter-scalps",
+  "channel": "Pushkar Raj Thakur",
+  "videos": [
+   "uROK24QxqYk"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Pushkar Raj Thakur"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Gold (Delta XAUTUSD)"
+   },
+   {
+    "label": "Video",
+    "text": "A sponsored copy-trading algo (two gold tokens, PAXG and XAUT, on a crypto exchange)."
+   },
+   {
+    "label": "",
+    "text": "Trend (E 00:03:30-00:04:00, 00:21:00): Supertrend (10, 3) on the 4-hour chart; always in the trend's direction,"
+   },
+   {
+    "label": "",
+    "text": "long or short."
+   },
+   {
+    "label": "",
+    "text": "Rule 1 (E 00:05:30): enter only half the planned size at the signal."
+   },
+   {
+    "label": "",
+    "text": "Rule 2 (E 00:08:30-00:09:00): the other half in $100 steps every 0.5% against the entry until the full size."
+   },
+   {
+    "label": "",
+    "text": "Rule 3 (E 00:09:30-00:13:00, 00:15:00-00:17:00): every 1% in favour, sell a small amount of the second gold token"
+   },
+   {
+    "label": "",
+    "text": "with a 1% target, only while the long is at least twice that size; the sideways chop pays these small profits."
+   },
+   {
+    "label": "",
+    "text": "The loss case (E 00:20:00): the grid fills and the trend flips. His 4-hour backtest on PAXG was profitable with a"
+   },
+   {
+    "label": "",
+    "text": "0.05% fee per side (E 00:20:00-00:21:00)."
+   },
+   {
+    "label": "",
+    "text": "A: XAUUSD (Delta's XAUTUSD) 1-hour bars built into 4-hour candles from 00:00 UTC; Supertrend (10, 3); the planned"
+   },
+   {
+    "label": "",
+    "text": "size = 1 x the account's equity in notional; at a flip, 50% at the next open in the new direction; five 10% limits"
+   },
+   {
+    "label": "",
+    "text": "at 0.5%, 1.0%, 1.5%, 2.0% and 2.5% against that entry; at every further 1% in favour of the first entry, a 10%"
+   },
+   {
+    "label": "",
+    "text": "opposite leg with a 1% target (opened only while the open trend legs are at least twice the open counter legs); no"
+   },
+   {
+    "label": "",
+    "text": "stop; every leg closes at the next open after the opposite flip, which starts the next phase. Each leg is a trade."
+   }
+  ]
+ },
+ {
+  "id": "PR-13",
+  "source": "youtube_channels11",
+  "name": "Bitcoin: the same ladder with a 10% take-profit",
+  "channel": "Pushkar Raj Thakur",
+  "videos": [
+   "LH_0SxIoz8Y"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Pushkar Raj Thakur"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "Video",
+    "text": "A sponsored algo (BTC/USDT long and BTC/USDC short on one exchange, 99.9% correlated)."
+   },
+   {
+    "label": "",
+    "text": "Trend (E 00:04:00-00:05:00): a Supertrend on the 4-hour chart; long when it is positive; a 10% take-profit."
+   },
+   {
+    "label": "",
+    "text": "Counter-scalps (E 00:06:00-00:09:30): short $100 of the other pair every 1% up, each with a 1% target."
+   },
+   {
+    "label": "",
+    "text": "At +10% (E 00:08:00): book the whole position, then leave a fresh small position to run."
+   },
+   {
+    "label": "",
+    "text": "Version 2 (E 00:10:00): half at the signal and the rest every 0.5% down to the full size by about 2.5% down."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD 1-hour bars built into 4-hour candles from 00:00 UTC; Supertrend (10, 3) (the settings are not stated;"
+   },
+   {
+    "label": "",
+    "text": "TradingView's default); version 2, as PR-12 (50% at the next open, five 10% grid limits every 0.5%, 10% counter legs"
+   },
+   {
+    "label": "",
+    "text": "every 1% with a 1% target); every leg closes when price reaches +10% from the first entry, after which one fresh 10%"
+   },
+   {
+    "label": "",
+    "text": "trend leg is opened at that price and runs to the flip; every open leg closes at the next open after the opposite"
+   },
+   {
+    "label": "",
+    "text": "flip; no stop."
+   }
+  ]
+ },
+ {
+  "id": "SB-01",
+  "source": "youtube_channels11",
+  "name": "9/20 EMA: ride the trend from the first pullback",
+  "channel": "Stock Burner",
+  "videos": [
+   "r96JUvEANlE",
+   "CXhidQTuhEU",
+   "RiB6hiAqscQ"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks 5m",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Stock Burner"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, 5-minute candles"
+   },
+   {
+    "label": "",
+    "text": "Set-up (E 00:04:00, 00:10:00-00:11:00, 00:21:00): a range or level breaks with rising volume; after the breakout,"
+   },
+   {
+    "label": "",
+    "text": "the first pullback takes support near EMA 9 (EMA 20 below it); enter there."
+   },
+   {
+    "label": "",
+    "text": "Stop (E 00:11:00): below the swing low, or out on a strong candle closing below EMA 20 (a weak rejection candle"
+   },
+   {
+    "label": "",
+    "text": "below it may be given one more candle, E 00:11:00-00:11:30)."
+   },
+   {
+    "label": "",
+    "text": "Exit (E 00:12:00, 00:21:00-00:23:00): hold while price stays above EMA 20; exit when a candle closes below EMA 20."
+   },
+   {
+    "label": "",
+    "text": "Add near EMA 9 while the trend holds (E 00:21:00). Shorts mirror it."
+   },
+   {
+    "label": "",
+    "text": "Works on 5 minutes intraday and on daily charts for swings (E 00:17:00, 00:20:30); his stock example gained about"
+   },
+   {
+    "label": "",
+    "text": "10% in two days (E 00:21:30)."
+   },
+   {
+    "label": "",
+    "text": "A: the NSE 5-minute stock pool; EMA 9 above EMA 20; a breakout = a close above the highest high of the previous 12"
+   },
+   {
+    "label": "",
+    "text": "candles on volume at least 1.5 x its 20-candle average; within the next 10 candles, the first candle whose low"
+   },
+   {
+    "label": "",
+    "text": "reaches EMA 9 and that closes above EMA 9 (and above EMA 20); enter at the next open; stop 0.1 x ATR 14 below that"
+   },
+   {
+    "label": "",
+    "text": "candle's low; exit at the next open after a close below EMA 20; out at 15:15; entries 09:30-14:30; one trade per"
+   },
+   {
+    "label": "",
+    "text": "stock per day; shorts mirror it."
+   }
+  ]
+ },
+ {
+  "id": "SB-02",
+  "source": "youtube_channels11",
+  "name": "9/20 EMA rejected pullback, 15 minutes",
+  "channel": "Stock Burner",
+  "videos": [
+   "ppuEOzpEYlg",
+   "lp57qG4Evj0",
+   "GZBl62jO8SY",
+   "EmGHT8ASB0M"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Stock Burner"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "",
+    "text": "Direction (E 00:03:00-00:04:00): below both EMAs = sells only; above both = buys only; when price crosses the EMAs"
+   },
+   {
+    "label": "",
+    "text": "back and forth the market is in a range: no trades."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:04:30-00:05:30): a pullback that fails to close back above EMA 20 (rejected), a negative candle, and"
+   },
+   {
+    "label": "",
+    "text": "the entry when price breaks the low of that big candle."
+   },
+   {
+    "label": "",
+    "text": "Stop and target (E 00:06:30-00:07:30): stop at the swing high; target a logical level (a round number, the next"
+   },
+   {
+    "label": "",
+    "text": "support); he made about 1:2.5. The 1-hour chart is more accurate for crypto swings (E 00:08:00, lp57qG4Evj0"
+   },
+   {
+    "label": "",
+    "text": "00:09:30)."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD 15-minute; a short set-up = EMA 9 below EMA 20 and the last two closes below both; a pullback candle whose"
+   },
+   {
+    "label": "",
+    "text": "high reaches EMA 9 but closes below EMA 20 and is red; a stop-entry one tick below its low, valid for 3 candles; stop"
+   },
+   {
+    "label": "",
+    "text": "0.1 x ATR above the highest high of the last 5 candles; target 2.5R; skip if price crossed EMA 20 more than twice in"
+   },
+   {
+    "label": "",
+    "text": "the last 12 candles (a range); longs mirror it."
+   }
+  ]
+ },
+ {
+  "id": "SB-03",
+  "source": "youtube_channels11",
+  "name": "9 EMA rejection scalp",
+  "channel": "Stock Burner",
+  "videos": [
+   "AO5tS1hqMao",
+   "Gc-xw57Zrg8"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Stock Burner"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NIFTY index (1-minute data)"
+   },
+   {
+    "label": "",
+    "text": "Direction (Gc-xw57Zrg8 E 00:04:00-00:05:00; AO5tS1hqMao E 00:08:30-00:09:30): price above EMA 9 = calls only; below"
+   },
+   {
+    "label": "",
+    "text": "= puts only (judged on the spot chart)."
+   },
+   {
+    "label": "",
+    "text": "Entry (AO5tS1hqMao E 00:09:30-00:11:30, 00:13:00): a candle that tests EMA 9 and rejects it in the trend's direction"
+   },
+   {
+    "label": "",
+    "text": "(a strong rejection or a strong trend candle); enter on it; stop at that candle's high (for a short)."
+   },
+   {
+    "label": "",
+    "text": "Exit (Gc-xw57Zrg8 E 00:06:00, AO5tS1hqMao E 00:10:00): out as soon as a candle closes on the other side of EMA 9;"
+   },
+   {
+    "label": "",
+    "text": "hold at most two or three 5-minute candles (a time stop); at least 1:2 (Gc-xw57Zrg8 E 00:05:00)."
+   },
+   {
+    "label": "",
+    "text": "Mark 15-minute support and resistance first (E 00:07:30-00:09:30): a cross-check, not a mechanical rule. Avoid"
+   },
+   {
+    "label": "",
+    "text": "ranges where price whips around EMA 9."
+   },
+   {
+    "label": "",
+    "text": "A: NIFTY 5-minute; a short = the last two closes below EMA 9 and a red candle whose high reaches EMA 9 while it closes"
+   },
+   {
+    "label": "",
+    "text": "below it, with an upper wick at least 40% of its range; enter at the next open; stop 0.02% above its high; target 2R;"
+   },
+   {
+    "label": "",
+    "text": "exit at the next open after a close above EMA 9; time stop 3 candles; skip if the closes crossed EMA 9 three or more"
+   },
+   {
+    "label": "",
+    "text": "times in the last 10 candles; entries 09:30-14:45; longs mirror it."
+   }
+  ]
+ },
+ {
+  "id": "SB-04",
+  "source": "youtube_channels11",
+  "name": "200 EMA retest with a confirmation candle",
+  "channel": "Stock Burner",
+  "videos": [
+   "vmI2dxCXPOw",
+   "Zf7feCjYLdo"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Stock Burner"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "",
+    "text": "Trend (vmI2dxCXPOw E 00:07:00, 00:10:00): above EMA 200 = longs only, below = shorts only."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:10:00-00:13:00): wait for price to come back and retest EMA 200; do not enter on the touch; wait for a"
+   },
+   {
+    "label": "",
+    "text": "confirmation candle (a rejection, then a candle in the trend's direction) and enter on it."
+   },
+   {
+    "label": "",
+    "text": "Stop and target (E 00:12:30, 00:14:00): below the last swing with a small buffer; target 1:2 (1:1-1:3)."
+   },
+   {
+    "label": "",
+    "text": "Timeframe (Zf7feCjYLdo E 00:08:00-00:12:30): 5 minutes is noisy on bitcoin; 15 minutes is his best for crypto"
+   },
+   {
+    "label": "",
+    "text": "intraday (two or three trades a day); 30 minutes gives fewer, longer trades."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD 15-minute; long when the last 10 closes are above EMA 200 and a candle's low comes within 0.1 x ATR 14 of"
+   },
+   {
+    "label": "",
+    "text": "EMA 200 (or below it) while it closes above it; the confirmation = the next candle closes green above that candle's"
+   },
+   {
+    "label": "",
+    "text": "high; enter at the next open; stop 0.1 x ATR below the lowest low of the last 5 candles; target 2R; shorts mirror it."
+   }
+  ]
+ },
+ {
+  "id": "SB-05",
+  "source": "youtube_channels11",
+  "name": "The first 5-minute candle breakout, one trade a day",
+  "channel": "Stock Burner",
+  "videos": [
+   "Jvg9c7Ba36M"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Stock Burner"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NIFTY index (1-minute data)"
+   },
+   {
+    "label": "",
+    "text": "E 00:03:00-00:04:00: the opening range is the first 5-minute candle (09:15-09:20); one set-up and one trade a day."
+   },
+   {
+    "label": "",
+    "text": "Opening (E 00:04:30-00:05:30): avoid big gap-up or gap-down days (100-250 NIFTY points); the set-up works best when"
+   },
+   {
+    "label": "",
+    "text": "the market opens near the previous close (E 00:09:00)."
+   },
+   {
+    "label": "",
+    "text": "Conditions (E 00:06:00-00:09:00, 00:15:00): a trending market, or a market in a range opening near the range's edge."
+   },
+   {
+    "label": "",
+    "text": "Breakout (E 00:09:30-00:10:00): the breakout candle must be healthy and strong; a doji or weak candle through the"
+   },
+   {
+    "label": "",
+    "text": "range is not a set-up."
+   },
+   {
+    "label": "",
+    "text": "Risk (E 00:11:30-00:12:00, 00:13:00): stop at the other side of the first candle; targets of 1:3 to 1:5; book half"
+   },
+   {
+    "label": "",
+    "text": "and hold the rest until about 14:00."
+   },
+   {
+    "label": "",
+    "text": "A: NIFTY 5-minute; skip when the open is 0.4% or more from the previous close; the trade's direction must agree with"
+   },
+   {
+    "label": "",
+    "text": "the 5-session trend (the previous close above the close 5 sessions earlier for a long); the breakout = a later candle"
+   },
+   {
+    "label": "",
+    "text": "closing beyond the first candle's high (low) with a body at least 60% of its range; enter at the next open; stop at"
+   },
+   {
+    "label": "",
+    "text": "the first candle's other end; half at 3R with the stop moved to the entry; the rest exits at 14:00; entries until"
+   },
+   {
+    "label": "",
+    "text": "12:00; one trade a day."
+   }
+  ]
+ },
+ {
+  "id": "SB-06",
+  "source": "youtube_channels11",
+  "name": "Gold liquidity sweep at a tested level, pause-candle or rejection trigger",
+  "channel": "Stock Burner",
+  "videos": [
+   "Tj_eVkcuHtM",
+   "_2dwmtv1u90",
+   "s8l4H2BeveI",
+   "_oc_SpFo12Q"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Stock Burner"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Gold (Delta XAUTUSD)"
+   },
+   {
+    "label": "",
+    "text": "Levels (Tj_eVkcuHtM E 00:08:30-00:09:30): support and resistance from the swing structure; the level must have been"
+   },
+   {
+    "label": "",
+    "text": "hit once before; the second visit sweeps it (E 00:18:00)."
+   },
+   {
+    "label": "",
+    "text": "Sweep and confirmation (E 00:16:00-00:18:00): price breaks the level with a breakout candle; then a pause candle; the"
+   },
+   {
+    "label": "",
+    "text": "next candle breaks the pause candle's high (for a long at support) = entry; or a rejection candle at the sweep"
+   },
+   {
+    "label": "",
+    "text": "(hammer, dragonfly doji)."
+   },
+   {
+    "label": "",
+    "text": "Stop and target (E 00:19:00-00:21:00): stop beyond the sweep's extreme (the invalidation); target the next"
+   },
+   {
+    "label": "",
+    "text": "liquidity point (the opposite level); at least 1:3."
+   },
+   {
+    "label": "",
+    "text": "Bias (E 00:23:00-00:25:00): trade sweeps in the higher timeframe's direction (support sweeps in an uptrend); ignore"
+   },
+   {
+    "label": "",
+    "text": "counter-trend sweeps unless at a major higher-timeframe level. Gold examples on 1-hour levels with 15-minute entries"
+   },
+   {
+    "label": "",
+    "text": "gave 1:3-1:5 (_2dwmtv1u90 E 00:09:00-00:11:30)."
+   },
+   {
+    "label": "",
+    "text": "A: XAUUSD; levels = confirmed 5-candle fractal lows (highs) on 1-hour candles from the last 5 days; a 15-minute"
+   },
+   {
+    "label": "",
+    "text": "candle trades below the level; within the next 4 candles either (a) a hammer (lower wick at least 2 x the body)"
+   },
+   {
+    "label": "",
+    "text": "closes back above the level, entry at the next open, or (b) after a red candle that closed below the level, a pause"
+   },
+   {
+    "label": "",
+    "text": "candle (body at most half of that candle's body), and a stop-entry one tick above the pause candle's high, valid 2"
+   },
+   {
+    "label": "",
+    "text": "candles; stop 0.1 x ATR 14 below the lowest low since the sweep; target the nearest 1-hour fractal high above if at"
+   },
+   {
+    "label": "",
+    "text": "least 3R away, else 3R; only with the 1-hour EMA 50 rising (falling for shorts); one trade per level; shorts mirror"
+   },
+   {
+    "label": "",
+    "text": "it."
+   }
+  ]
+ },
+ {
+  "id": "SB-07",
+  "source": "youtube_channels11",
+  "name": "Pre-breakout: buy under a tested resistance while the lows rise",
+  "channel": "Stock Burner",
+  "videos": [
+   "xTyycYmFb_k",
+   "-qnLeSGKBcM"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Stock Burner"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "",
+    "text": "Set-up (-qnLeSGKBcM E 00:05:30-00:07:30): a resistance tested once or twice, an uptrend, a strong support below,"
+   },
+   {
+    "label": "",
+    "text": "and the lows shifting up so price does not return to that support; price holds near the breakout zone."
+   },
+   {
+    "label": "",
+    "text": "Entry (xTyycYmFb_k E 00:03:00-00:04:00, -qnLeSGKBcM E 00:09:30): orders placed in the zone before the breakout"
+   },
+   {
+    "label": "",
+    "text": "(15-minute structure, 30-minute entry in his ether trade); stop below the last swing low; shift the stop once the"
+   },
+   {
+    "label": "",
+    "text": "breakout comes; target the next swing high or zone."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD 30-minute; resistance = at least two confirmed 5-candle fractal highs within 0.25% of each other in the"
+   },
+   {
+    "label": "",
+    "text": "last 80 candles; the last two confirmed fractal lows after the first of those highs are rising; price above EMA 50;"
+   },
+   {
+    "label": "",
+    "text": "entry at the next open after a close within 0.4% below the resistance (a close above it first cancels the set-up);"
+   },
+   {
+    "label": "",
+    "text": "stop 0.1 x ATR 14 below the latest higher low; target = resistance + (resistance - latest higher low); after a close"
+   },
+   {
+    "label": "",
+    "text": "above the resistance the stop moves to the entry; time stop 48 candles; long only."
+   }
+  ]
+ },
+ {
+  "id": "SB-08",
+  "source": "youtube_channels11",
+  "name": "Bollinger Band breakout on 1-hour bitcoin, 2% stop, 5% target",
+  "channel": "Stock Burner",
+  "videos": [
+   "3km2GZwV6QA"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Stock Burner"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "",
+    "text": "E 00:04:00-00:05:00: Bollinger Bands; a 1-hour close above the upper band = long; below the lower band = short."
+   },
+   {
+    "label": "",
+    "text": "E 00:05:00-00:06:30: 1-hour timeframe on bitcoin; at least 1:2.5: a 2% stop and a 5% target."
+   },
+   {
+    "label": "",
+    "text": "Exit early (E 00:06:30-00:07:00): when the move slows and price breaks the previous candle's low (for a long),"
+   },
+   {
+    "label": "",
+    "text": "take what is there."
+   },
+   {
+    "label": "",
+    "text": "His one-year backtest in an AI tool: 1,021 trades, about 2.7 a day (E 00:13:00)."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD 1-hour; Bollinger 20, 2 on closes; enter at the next open after a close beyond a band; stop 2%, target 5%"
+   },
+   {
+    "label": "",
+    "text": "from the entry; exit at the next open after a close below the previous candle's low (above its high for a short);"
+   },
+   {
+    "label": "",
+    "text": "one position at a time."
+   }
+  ]
+ },
+ {
+  "id": "TH-01",
+  "source": "youtube_channels11",
+  "name": "Bitcoin 6 PM session: anchored VWAP + EMA 25, the N pattern",
+  "channel": "Theta Gainers",
+  "videos": [
+   "57a1dixbtb4",
+   "ukIfXqaQ7hs"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Theta Gainers"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "",
+    "text": "Session (57a1dixbtb4 description; E 00:01:00-00:01:30): five years of data show the biggest bitcoin moves between"
+   },
+   {
+    "label": "",
+    "text": "18:00 and 23:00 IST; trade only then; at most two trades a day."
+   },
+   {
+    "label": "",
+    "text": "Lines (E 00:01:30-00:02:30): VWAP anchored at bitcoin's day open (06:00 IST) and EMA 25."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:03:00-00:04:30): price closes above both lines; do not chase the straight run; wait for an \"N\" on 5"
+   },
+   {
+    "label": "",
+    "text": "minutes: a pullback and then a close above the previous high (shorts mirror it below both lines)."
+   },
+   {
+    "label": "",
+    "text": "Exit (E 00:04:30-00:05:30, 00:08:00): after entry ignore the two lines; manage on 15 minutes; exit only when the"
+   },
+   {
+    "label": "",
+    "text": "15-minute chart forms the reverse \"N\" (a lower high and a break of the previous low for a long)."
+   },
+   {
+    "label": "",
+    "text": "His 5-minute stop (ukIfXqaQ7hs E 00:06:30): a close below the EMA with price action confirming. Leverage at most 5x,"
+   },
+   {
+    "label": "",
+    "text": "at most 20% of capital (57a1dixbtb4 E 00:09:30)."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD; entries 18:00-23:00 IST; VWAP from 06:00 IST (00:30 UTC) on 5-minute bars; EMA 25 of 5-minute closes; a"
+   },
+   {
+    "label": "",
+    "text": "long = a confirmed 3-candle fractal high, then a confirmed fractal low after it (the pullback), then a 5-minute close"
+   },
+   {
+    "label": "",
+    "text": "above that fractal high while above both lines; enter at the next open; hard stop 0.1 x ATR 14 below the pullback"
+   },
+   {
+    "label": "",
+    "text": "low; exit at the next open after a 15-minute close below the latest confirmed 15-minute fractal low (3-candle);"
+   },
+   {
+    "label": "",
+    "text": "at most 2 trades a day; one position at a time; shorts mirror it."
+   }
+  ]
+ },
+ {
+  "id": "TH-02",
+  "source": "youtube_channels11",
+  "name": "Standard pivots R1 / S1 with a fast Supertrend (7, 3)",
+  "channel": "Theta Gainers",
+  "videos": [
+   "-OEwOy11f5w",
+   "wXKg99kqFHk"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Nifty",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Theta Gainers"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NIFTY index (1-minute data)"
+   },
+   {
+    "label": "",
+    "text": "Lines (E 00:02:00-00:05:00): standard pivot points from the previous day; keep only R1 and S1 (quiet days give close"
+   },
+   {
+    "label": "",
+    "text": "pivots; the breakout from narrow pivots is the trade)."
+   },
+   {
+    "label": "",
+    "text": "Supertrend (E 00:06:00-00:06:30): ATR 7, factor 3 (faster than 10, 3)."
+   },
+   {
+    "label": "",
+    "text": "Rules (E 00:07:00-00:08:00; description \"Chart: NIFTY 50, 5 minute; Entry: 9:16 ke baad ... Exit: 2:59-3:00 PM (EOD),"
+   },
+   {
+    "label": "",
+    "text": "ya trailing stop par\"): inside R1-S1 no trade; any time before 15:00, above R1 with the Supertrend green = bullish;"
+   },
+   {
+    "label": "",
+    "text": "below S1 with the Supertrend red = bearish; at most three trades a day from 09:16."
+   },
+   {
+    "label": "",
+    "text": "His AlgoRooms backtest (description): 1 year, 459 trades, about 55% winners, average win about the average loss."
+   },
+   {
+    "label": "",
+    "text": "A: NIFTY 5-minute; enter at the next open after a close above R1 with the Supertrend (7, 3) up (below S1 with it"
+   },
+   {
+    "label": "",
+    "text": "down); the trailing stop = the Supertrend line (exit at the next open after a close beyond it); out at 15:00;"
+   },
+   {
+    "label": "",
+    "text": "entries 09:20-14:55; at most 3 trades a day; one position at a time."
+   }
+  ]
+ },
+ {
+  "id": "TH-03",
+  "source": "youtube_channels11",
+  "name": "Renko + Ichimoku dual system, gold",
+  "channel": "Theta Gainers",
+  "videos": [
+   "Vjt4ZKD8pbI"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Gold",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Theta Gainers"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Gold (Delta XAUTUSD)"
+   },
+   {
+    "label": "",
+    "text": "Renko (E 00:01:00-00:09:00): bricks form only on a fixed box move, so time and noise drop out; box size (description):"
+   },
+   {
+    "label": "",
+    "text": "crypto about 1% (ether 15), gold 43 (traditional)."
+   },
+   {
+    "label": "",
+    "text": "Ichimoku on the Renko chart (E 00:10:00-00:11:00): only the base line and the cloud."
+   },
+   {
+    "label": "",
+    "text": "Rules (description): long entry = a brick closes above the base line and the cloud; short entry = a brick closes below"
+   },
+   {
+    "label": "",
+    "text": "both; long exit = a brick closes inside the cloud (the cloud trails, the base line is not used); short exit = a brick"
+   },
+   {
+    "label": "",
+    "text": "closes above the base line (crypto falls fast, so shorts use the faster line; E 00:12:00-00:13:00)."
+   },
+   {
+    "label": "",
+    "text": "A: XAUUSD; traditional Renko from 1-minute closes with a 43-dollar box; Ichimoku 9 / 26 / 52 computed on the brick"
+   },
+   {
+    "label": "",
+    "text": "series (the cloud displaced 26 bricks); signals act at the next 1-minute open after the brick completes; one position"
+   },
+   {
+    "label": "",
+    "text": "at a time; no other stop."
+   }
+  ]
+ },
+ {
+  "id": "TH-04",
+  "source": "youtube_channels11",
+  "name": "Renko + Ichimoku dual system, bitcoin",
+  "channel": "Theta Gainers",
+  "videos": [
+   "Vjt4ZKD8pbI"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Theta Gainers"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "",
+    "text": "He trades it on ether with a box of about 1% (E 00:06:00-00:07:30: ether moves more than bitcoin and is about 98%"
+   },
+   {
+    "label": "",
+    "text": "correlated); the desk has no ether account."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD; box = 1% of the first close in the replay window, rounded to whole dollars and then fixed; otherwise as"
+   },
+   {
+    "label": "",
+    "text": "TH-03."
+   }
+  ]
+ },
+ {
+  "id": "TH-05",
+  "source": "youtube_channels11",
+  "name": "EMA 50/200 trend, pullback to EMA 50 with RSI 40-55",
+  "channel": "Theta Gainers",
+  "videos": [
+   "Oxy1x7_BPwQ"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Theta Gainers"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "",
+    "text": "Trend (E 00:03:00-00:05:00): EMA 50 above EMA 200 on 15 minutes with both pointing up; flat lines = no trade."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:06:45-00:08:00): price comes back to EMA 50; a green candle closes there with RSI 14 between 40 and 55;"
+   },
+   {
+    "label": "",
+    "text": "enter at its close."
+   },
+   {
+    "label": "",
+    "text": "Target (E 00:08:15-00:10:30): a 15-minute close with RSI in the 70-75 zone books the trade. Stop (E 00:10:30): the"
+   },
+   {
+    "label": "",
+    "text": "last swing low. Exit early (E 00:15:00): RSI below 40 kills a long, stop hit or not."
+   },
+   {
+    "label": "",
+    "text": "Shorts mirror it."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD 15-minute; EMA 50 above EMA 200 and both higher than 4 candles ago; a candle whose low reaches EMA 50 (within"
+   },
+   {
+    "label": "",
+    "text": "0.1 x ATR 14) and that closes green above EMA 50 with RSI 40-55; enter at the next open; stop 0.1 x ATR below the"
+   },
+   {
+    "label": "",
+    "text": "lowest low of the last 10 candles; exit at the next open after a close with RSI at or above 70, or after a close with"
+   },
+   {
+    "label": "",
+    "text": "RSI below 40; shorts mirror it (RSI 45-60, target RSI at or below 30, exit above 60)."
+   }
+  ]
+ },
+ {
+  "id": "TH-06",
+  "source": "youtube_channels11",
+  "name": "Bitcoin 07:15-07:30 IST range breakout, stop at mid-range",
+  "channel": "Theta Gainers",
+  "videos": [
+   "w6es4wcSZ0c"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Theta Gainers"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "",
+    "text": "E 00:01:00-00:02:00: bitcoin has no fixed open; he uses a time-based range: the 15-minute candle of 07:15-07:30 IST"
+   },
+   {
+    "label": "",
+    "text": "(skipping the 07:00 candle)."
+   },
+   {
+    "label": "",
+    "text": "E 00:04:30-00:05:00: trade the break of that range; stop at the middle of the range; target twice the stop."
+   },
+   {
+    "label": "",
+    "text": "One trade a day: after a stop, do not take the other side (E 00:07:30-00:08:00)."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD; the 07:15-07:30 IST 15-minute candle; stop-entries at its high and low (first trigger only) valid until"
+   },
+   {
+    "label": "",
+    "text": "23:59 IST; stop at the range midpoint; target 2R; exit at 05:25 IST next day if neither is hit."
+   }
+  ]
+ },
+ {
+  "id": "TH-07",
+  "source": "youtube_channels11",
+  "name": "Three-way confirmation on 30 minutes",
+  "channel": "Theta Gainers",
+  "videos": [
+   "JdE8PqOy6kw"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Theta Gainers"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "",
+    "text": "E 00:03:00-00:04:00: 30-minute chart for short swings; Supertrend lengthened to 13 with a larger factor so weak"
+   },
+   {
+    "label": "",
+    "text": "trends do not whip."
+   },
+   {
+    "label": "",
+    "text": "E 00:05:00-00:05:30: filter with EMA 200: above it only longs."
+   },
+   {
+    "label": "",
+    "text": "E 00:06:30-00:07:00: MACD: line and signal above zero with a green histogram confirms the long."
+   },
+   {
+    "label": "",
+    "text": "E 00:08:00-00:10:00: a single Supertrend flip against the trade is not the exit; the trade turns when price breaks"
+   },
+   {
+    "label": "",
+    "text": "EMA 200 and the Supertrend and MACD all turn the other way."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD 30-minute; Supertrend (13, 4) (the factor is not stated); a long at the next open when the Supertrend is up,"
+   },
+   {
+    "label": "",
+    "text": "the close is above EMA 200 and the MACD (12, 26, 9) line is above zero and above its signal; exit at the next open"
+   },
+   {
+    "label": "",
+    "text": "after a close below EMA 200, or when the Supertrend is down and the MACD line is below its signal at the same close;"
+   },
+   {
+    "label": "",
+    "text": "shorts mirror it; one position at a time."
+   }
+  ]
+ },
+ {
+  "id": "TH-08",
+  "source": "youtube_channels11",
+  "name": "EMA 288 trend, Supertrend signal, base break, swing trail",
+  "channel": "Theta Gainers",
+  "videos": [
+   "1yfmy2C5Yz0"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "Bitcoin",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Theta Gainers"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "Bitcoin (Delta BTCUSD)"
+   },
+   {
+    "label": "",
+    "text": "Trend (E 00:05:30-00:07:00): 5-minute candles; EMA 288 = the last 24 hours; above it bullish, below it bearish."
+   },
+   {
+    "label": "",
+    "text": "Entry (E 00:10:30-00:11:00): a Supertrend signal in the trend's direction is not enough; wait until price breaks the"
+   },
+   {
+    "label": "",
+    "text": "base it built (the swing low for a short) and enter on that candle; stop at the swing high."
+   },
+   {
+    "label": "",
+    "text": "Exit (E 00:11:30): trail the stop to each new swing; exit when the latest swing high breaks (a \"W\"); ignore the"
+   },
+   {
+    "label": "",
+    "text": "Supertrend's colour after entry."
+   },
+   {
+    "label": "",
+    "text": "A: BTCUSD 5-minute; Supertrend (10, 3) (settings not stated); a short when the close is below EMA 288, the Supertrend"
+   },
+   {
+    "label": "",
+    "text": "is down, and a candle closes below the latest confirmed 3-candle fractal low formed since the Supertrend turned down;"
+   },
+   {
+    "label": "",
+    "text": "enter at the next open; stop 0.1 x ATR above the latest confirmed fractal high; the stop moves down to each newer"
+   },
+   {
+    "label": "",
+    "text": "confirmed fractal high; longs mirror it; one position at a time."
+   }
+  ]
+ },
+ {
+  "id": "TH-09",
+  "source": "youtube_channels11",
+  "name": "Darvas box at 52-week highs",
+  "channel": "Theta Gainers",
+  "videos": [
+   "6j9aagTNFJc"
+  ],
+  "verdict": "Paper test only",
+  "books": [
+   {
+    "market": "NSE stocks daily",
+    "variant": "V0",
+    "change": "",
+    "cls": "Paper test only",
+    "n": null,
+    "meanR": null,
+    "grossR": null,
+    "winRate": null
+   }
+  ],
+  "rules": [
+   {
+    "label": "Channel",
+    "text": "Theta Gainers"
+   },
+   {
+    "label": "Paper desk market",
+    "text": "NSE stock pool, daily candles"
+   },
+   {
+    "label": "",
+    "text": "E 00:01:30-00:04:00: buy only strength: a stock at a 52-week high that pauses and forms a box (consolidation); buy"
+   },
+   {
+    "label": "",
+    "text": "the breakout of the box top; stop below the box; as new boxes form higher, trail the stop to each new box bottom;"
+   },
+   {
+    "label": "",
+    "text": "unlimited upside, risk only the box."
+   },
+   {
+    "label": "",
+    "text": "A: the NSE daily pool; Darvas's box: after a 52-week closing high, the box top = a high not exceeded for the next 3"
+   },
+   {
+    "label": "",
+    "text": "sessions, the box bottom = the lowest low after the top that is not broken for 3 sessions; entry = a close above the"
+   },
+   {
+    "label": "",
+    "text": "box top, at the next open; stop 0.1 x ATR 14 below the box bottom; each new completed box above the entry moves the"
+   },
+   {
+    "label": "",
+    "text": "stop to its bottom; time stop 60 sessions; long only."
    }
   ]
  }

@@ -125,3 +125,24 @@ upgraded versions "for the live trading". Five Rs 10 lakh accounts in the Crypto
   by 23:55 UTC) and simulates each second entry with the same engine while its first entry is open.
 - Checks: `python -I test_sniper.py` (no look-ahead at 29 cut points for every version, the rules re-checked on every
   entry, SH-02's flow filter on a known setup, the accounts through the ledger).
+
+## Eleven YouTube channels: 103 books (source `youtube_channels11`)
+
+103 strategies from Neeraj Joshi, Brad Goh (The Trading Geek), Pushkar Raj Thakur, Theta Gainers, Stock Burner,
+Tanisha Garg, Sagar Sinha, IITian Trader, The Trade Room and saya crypto, written as exact rules from the videos
+(`backend/research/youtube_channels11_2026_11`: `analyses/<channel>.md`, `specs/RULES.md`) and checked for look-ahead
+there (`python -I yc_checks.py 6`: signals and closed trades unchanged at every cut, every fill inside its bar). Not
+backtested: they trade from `settings.YC_START_T` (env `PREMIUM_YC_START`), flat at the start, and paper trading is
+their first test. `runner.run_yc` calls the study's own `yc_run.run`, so a paper trade comes from the checked code.
+
+- Markets: Nifty / Bank Nifty minutes (index group; TG-06 and SS-05 hold overnight), the NSE 5-minute pool (NJ-01 reads
+  Nifty's opening gap, NJ-20 the NSE daily candidates, SS-03 the pool's 09:25 breadth), the NSE daily pool and Nifty
+  daily (daily group; NJ-25's basket runs over the whole pool), gold, forex and the Nasdaq (global group), and bitcoin
+  from `YC_BTC_WARM_DAYS` (150) before the start, for the 4-hour EMA 200s; a one-time backfill of older Delta BTCUSD
+  minutes provides them. NJ-33 also reads Delta ETHUSD (a new store, `DELTA_ETHUSD`), never traded.
+- PR-12's gold ladder books Delta XAUTUSD at its own 0.001 contract size (book market `XAUTUSD`, the gold data): its 10%
+  legs are a fraction of an ounce, below the gold books' one-ounce step.
+- Multi-leg books (PR-12 / PR-13's ladder, IT-02's two lots) can open two legs of one side in a minute: `runner.yc_docs`
+  numbers the later ones (`#2`), so trade ids stay unique and stable.
+- Checks: `python -I test_yc.py` (every book through `run_yc`, documents and the ledger on research data; starts flat;
+  the ETHUSD reader).

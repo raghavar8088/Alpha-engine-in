@@ -1,0 +1,128 @@
+id	role	family	note
+GXSNSC3LHZY	primary	IN-intraday	9:20 am intraday strategy, VWAP + MA (1.7M views)
+F1S6OF5LFV8	primary	IN-intraday	Pivot point / CPR intraday strategy
+tCDjjppruBo	primary	IN-intraday	9 EMA + ADX intraday strategy
+HJu_Nxj495I	primary	IN-intraday	10 EMA strategy with backtesting
+cZYwHdF-GpM	primary	IN-scalping	Scalping: EMA + Stochastic oscillator (options)
+X-cXuxvSg0c	primary	IN-intraday	Bollinger Bands intraday strategy (2021)
+4o5OOAyuJ1Y	primary	IN-intraday	Bollinger Bands masterclass with S/R, RSI, MACD
+mEqAjWoJUBg	primary	IN-intraday	4 best RSI trading strategies
+icml_txwHdY	primary	IN-intraday	RSI divergence strategy
+zJ3FCKcin_k	primary	IN-intraday	MACD strategy and divergence
+pMFP4UuFmjI	primary	IN-intraday	Moving average strategy masterclass (EMA)
+RiOv30JZdt4	secondary	IN-intraday	EMA and WMA strategy
+9jr0uX4KPfI	secondary	IN-options	Moving average strategy for options
+bA4GYgh13fk	primary	IN-intraday	Heikin Ashi buy/sell indicator strategy
+Ls70aUR6R0s	secondary	IN-options	Options strategy with Heikin Ashi (live)
+kUIfdwlKdaM	secondary	general	Heikin Ashi perfect-entry strategy (2025)
+Vg6H5dlwzrs	primary	general	Renko charts strategy (2024)
+td3gb3cZ_Qc	primary	general	Renko trading strategy masterclass (2026)
+5h7_96ioFWY	primary	general	Price + volume (PVT) double confirmation
+IRBrPbPrKME	primary	IN-intraday	Volume analysis trading strategy (1.4M views)
+2jF09vG3HD4	primary	general	Hollow candle trading strategy
+QGXmyjwJ1aE	primary	IN-intraday	Hammer pattern intraday strategy
+E4Q4vgRCpok	primary	general	Support and resistance strategy (776k views)
+WsCUyzrkss0	secondary	IN-intraday	Support and resistance intraday strategy (2021)
+jWyAH_hs68A	primary	general	Fake breakout masterclass
+K9iTmZT4Y10	secondary	general	Fake breakout trading
+OzIt1SEisBY	primary	IN-options	BankNifty double bottom / double top
+5G7l_rDrnlo	primary	IN-intraday	Best intraday trading strategy (2021, 1.0M views)
+Br8-ipCt4mg	primary	IN-intraday	Intraday trading strategies (2023)
+CdXPfxB08_o	primary	IN-intraday	4 best intraday trading strategies
+lOSPQVZLixY	secondary	IN-intraday	Intraday strategies, live trading (2.0M views)
+iCtkq7jRnys	primary	IN-intraday	Intraday secret strategy (crash course part 3)
+LE4mVpBIDso	secondary	IN-intraday	Market up or down (crash course part 2)
+aFwdDq1hFgo	primary	IN-stocks	Intraday stocks for tomorrow, 1-minute selection (1.9M views)
+xEcoUrUUhWg	primary	IN-stocks	Best shares for intraday, daily (3.9M views)
+YEswhH1-5Jo	primary	IN-scalping	Scalping masterclass (2024, 1.2M views)
+Idw7qPqBWSA	primary	IN-scalping	Scalping strategy, options (849k views)
+L4ZHVgWq-co	secondary	IN-scalping	Scalping live trade testing, BankNifty
+-qzAPXVEiCI	secondary	IN-scalping	6 live BankNifty scalping trades
+IEhuHSComYk	secondary	IN-scalping	6 scalping hacks
+0rZcz6dGpOQ	primary	general	Cascade order trading strategy
+6E11fzL4_8A	primary	general	Secret trading strategy (2024)
+V5nm2aCtfN8	primary	general	Top 10 trading strategies in 25 minutes
+NPfYVbmCuCg	secondary	IN-options	India VIX trading strategies
+ogZR_2gZFxY	primary	general	Triangle chart pattern
+b4LbA6DtiVk	primary	IN-options	Expiry day options trading, BankNifty (1.8M views)
+6xIJVG4CRjk	primary	IN-options	PE + CE option strategy (4.1M views)
+NEIdghSvHOc	primary	IN-optsell	Option selling for beginners, low capital (1.3M views)
+ty1U2589_lw	secondary	IN-optsell	Ratio back spread
+otTTDxUYy4k	secondary	IN-options	Monthly option trading strategy
+IKuQYg0jcO0	primary	IN-options	BTST option trading strategy
+yoOiDanh51Y	secondary	IN-options	Advanced BankNifty options strategy
+l-U-7jTvVp0	secondary	IN-options	Option trading strategies (504k views)
+3w-fQPYWcIc	primary	IN-swing	Swing trading strategy, Mark Minervini
+10SwCXmeTyE	primary	IN-swing	Swing trading advanced EMA indicator strategy
+QNvqgdWmXco	secondary	IN-swing	Swing trading strategies
+M9js-12Hylw	secondary	IN-swing	Swing trading beginners' guide
+BxX80NBiiEI	secondary	IN-swing	Swing trading strategies (2021, 2.0M views)
+sUcvpDSsQz0	primary	IN-swing	Swing strategy backtested over 5 years (2026)
+PLUwHTK6ab0	secondary	IN-swing	Swing trading step by step (2026)
+Obrd9RI7Ce0	secondary	general	Fibonacci retracement masterclass (2024)
+mOSuaJONpXI	primary	general	Fibonacci trading strategy full course (759k views)
+TQYEWBhMQM0	primary	ICT	Fibonacci OTE strategy (2026)
+Qu9_ugsG6Z8	primary	ICT	Order block strategy for crypto, intraday, forex (816k views)
+NBN3iZOK6Ow	primary	ICT	Order block masterclass (2026)
+NGenf0zaBoQ	secondary	ICT	Order block and POI (ICT course ep. 5)
+hkqw42lxGLg	primary	ICT	Order block + FVG combined strategy
+UTO6e69GGSM	primary	ICT	FVG trading strategy (554k views)
+Z1m66Is8lJ4	secondary	ICT	FVG masterclass (2026)
+1F2qE6yabfM	primary	ICT	FVG + CISD (ICT course ep. 4)
+rzxv2IyBuK8	primary	ICT	Liquidity sweep trading strategy (863k views)
+ZjejkMjb2q8	secondary	ICT	Liquidity sweep full course (2026)
+WLR6S3mgOkk	primary	ICT	Tested 10,000 liquidity sweeps and found a strategy
+yaOGOlSBUOY	primary	ICT	Hidden liquidity strategy
+bV1OkS_-Pjg	primary	ICT	Liquidity scalping strategy 2026
+tFHyr0nRZaU	secondary	ICT	Market structure and liquidity sweep (ICT course ep. 2)
+ziqOkADp9qU	secondary	ICT	How to read liquidity on charts
+LrILW6JRNq8	primary	ICT	CRT (candle range theory) strategy
+KrEpE3TP8xk	primary	ICT	CRT strategy 2.0
+bRCLewwFH4E	primary	general	Trendline trading strategy (2025)
+VrvNUyzBwXs	primary	general	Trendline trading strategy explained (2026)
+la52ZjU-5nI	primary	general	Fixed range volume profile strategy
+WUt-mnwcQ4Q	secondary	general	Volume profile masterclass (2026)
+4iGdnVu_pwk	primary	scalping	Scalping masterclass with live demo (2025)
+dMEZFnN9HrU	primary	scalping	Scalping masterclass 2026
+_kzobEWVgKE	primary	scalping	Simple 5-minute scalping strategy
+UeV17V0YldM	primary	scalping	Simple scalping strategy, 4 trades a day
+n2eHieivtXw	primary	time	5:30 PM trading strategy
+BaF-joXcm3o	primary	time	7 PM trading strategy (7 PM to 12 AM)
+t_y7c4xsBlM	primary	time	Best time to trade crypto, 3 golden hours
+VAZXz_ieec4	primary	ICT	Daily bias strategy: which day to buy or sell
+SW4kxaqJ9QQ	secondary	ICT	What is daily bias
+oo_bmEgt6o8	primary	ICT	ICT SMT strategy launched after months of testing
+QBIsYw8iqPY	primary	ICT	Trading manipulation model (ICT course ep. 9)
+CYYRkXeoNkQ	primary	ICT	Time concept (ICT course ep. 8)
+8thmPwMx6NQ	primary	ICT	How to trade using ICT concepts (ICT course ep. 10)
+xnwf8wFfAxo	secondary	ICT	Fibonacci + liquidity sweep (ICT course ep. 6)
+lLoNbjzhMIU	primary	ICT	10 ICT trading strategies in 15 minutes
+FAt3PiB8-cM	secondary	ICT	ICT trading full course in Hindi (1.2M views)
+XC6AL1mEZIQ	primary	ICT	5 best trading strategies, SMC + ICT (course day 8)
+2QWI9nwHBvo	primary	orderflow	Order flow trading full course
+AN5-Xw2FEwA	secondary	orderflow	Order flow trading strategy masterclass
+ZnGTeEKownM	primary	ICT	Supply and demand strategy with SMC
+qM8XpTKke8s	primary	general	Big moves trading strategy
+yeDdFfEVSKE	primary	general	Perfect entry and exit with multi-timeframe analysis
+SV5-LHF91Bw	primary	general	Simple trading strategy you can start today
+LexC498CNGE	primary	general	World trading champion's single strategy
+pgiuaNZdAQw	primary	general	Tried this strategy for 30 days
+QBjhVcW0OJQ	primary	general	My favourite trading strategy for beginners
+L8cnyJ0D_NY	secondary	general	6 trades with 2 strategies
+VHUIE8sfHwk	primary	general	Try this proven strategy to beat the market
+Bj4ckno_O-w	primary	general	Tried MY strategy for 30 days
+pO1KUShSS20	secondary	general	Tried MY strategy for 20 days
+D1E9BlXsR-M	secondary	general	1-click breakout indicator
+mnI8i_DLwSc	primary	general	10 strategies that work every day
+mERN3m0kDzg	primary	general	5 strategies in 15 minutes
+MOCbUrKWVtU	primary	general	Best strategy by Pushkar Raj Thakur (guest)
+zKgQwXt3z9o	primary	general	10:20 EMA strategy by Anant Ladha (guest)
+XyqcPbXiF1k	secondary	general	News trading masterclass
+eY9bWGZDN9c	primary	crypto	Best strategy for crypto part 3, live demo
+fG5U4dsY1SA	primary	crypto	Crypto trading for beginners + strategy
+DCtyfOCigdg	primary	crypto	Crypto trading strategies in Hindi (30 min)
+-gem0ZcOhGE	primary	crypto	Crypto trading strategy, live strategies
+JO_HVljXOYo	primary	crypto	Crypto trading strategies (2025)
+U2DGJtNS03M	primary	crypto	Crypto trading free course, BTC live strategy (50 min)
+VX-JFo3w0AQ	secondary	general	Only 5 candlestick patterns that work
+aiFTeLQySsM	secondary	general	Only 3 candlestick patterns you need

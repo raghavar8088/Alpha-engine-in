@@ -110,7 +110,7 @@ print("daily stock markets", len(ms), "last", max(str(m.date[-1]) for m in ms))
 last = max(str(m.date[-1]) for m in ms)
 all_dates = sorted({str(d) for m in ms[:200] for d in m.date})
 first = all_dates[-N]
-for a, market, v in [x for x in C.books_in("daily") if x[1] == "NSED"]:
+for a, market, v in [x for x in C.books_in("daily") if x[1] == "NSED" and x[0].source == C.YT]:   # the saved study books
     got = {}
     for m in ms:
         for t in R.run_yt(a.id, v, market, m, {})[0]:

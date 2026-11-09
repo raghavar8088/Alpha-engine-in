@@ -21,15 +21,15 @@ from datetime import date, datetime, timedelta, timezone
 
 import catalog as C
 import feeds as F
-from settings import BTC_START_T, DATA, IST, NY, PAPER_START, SH_START_T
+from settings import BTC_START_T, DATA, IST, NY, PAPER_START, SH_START_T, YC_START_T
 
 log = logging.getLogger("premium.segments")
 
 SEGMENT = {"NIFTY": "in_options", "BANKNIFTY": "in_options", "NIFTY_D": "in_options",
            "VWAP": "in_equity", "NSE15": "in_equity", "NSE5": "in_equity", "MIRROR15": "in_equity", "NSED": "in_equity_daily",
-           "BTCUSD": "crypto", "BTC_SPOT": "crypto", "XAUUSD": "gold",
+           "BTCUSD": "crypto", "BTC_SPOT": "crypto", "XAUUSD": "gold", "XAUTUSD": "gold",
            "EURUSD": "global", "GBPUSD": "global", "NAS100": "global", "AAPL": "global", "SPX500_D": "global", "NAS100_D": "global"}
-FEED_OF = {"BTC_SPOT": "BTCUSD", "VWAP": "NSE", "NSE15": "NSE", "NSE5": "NSE", "MIRROR15": "NSE"}
+FEED_OF = {"XAUTUSD": "XAUUSD", "BTC_SPOT": "BTCUSD", "VWAP": "NSE", "NSE15": "NSE", "NSE5": "NSE", "MIRROR15": "NSE"}
 DAILY = ("NSED", "NIFTY_D", "SPX500_D", "NAS100_D")
 SOURCE = {
     "BTCUSD": ("Delta Exchange India", "BTCUSD perpetual, 1-minute candles"),
@@ -158,6 +158,8 @@ def feeds_now(group: str, info: dict) -> dict:
 
 
 def _start_of(mk: str, acct=None) -> datetime:
+    if acct is not None and acct.source == getattr(C, "YC", None):
+        return datetime.fromtimestamp(YC_START_T, timezone.utc)
     if mk == "BTCUSD" and acct is not None and acct.source == getattr(C, "SH", None):
         return datetime.fromtimestamp(SH_START_T, timezone.utc)
     if mk == "BTCUSD":

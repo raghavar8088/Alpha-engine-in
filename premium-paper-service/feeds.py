@@ -590,7 +590,7 @@ def fear_greed() -> dict:
 # ── bitcoin from Delta Exchange (BTCUSD perpetual): 1-minute candles, plus the recorded order flow ─────
 
 DELTA_API = "https://api.india.delta.exchange"
-DELTA_STORES = {"BTCUSD": "DELTA_BTCUSD", "XAUTUSD": "DELTA_XAUTUSD"}
+DELTA_STORES = {"BTCUSD": "DELTA_BTCUSD", "XAUTUSD": "DELTA_XAUTUSD", "ETHUSD": "DELTA_ETHUSD"}   # ETHUSD: NJ-33's second coin
 DELTA_STORE = DELTA_STORES["BTCUSD"]
 # Delta India BTCUSD: 0.001 BTC a contract, tick $0.5, taker fee 0.05% + 18% GST = 0.059% a side; 2 bp of slippage
 DELTA_COST = YM.Cost(0.0, 0.0, 0.0, False, 1, pct_slip=0.0002, pct_comm=0.00059)
@@ -655,6 +655,72 @@ def btc_market(since: date):
     m.half = np.full(len(m.t), DELTA_HALF)
     m.cost = DELTA_COST
     return m
+
+
+BM.COSTS.setdefault("ETHUSD", BM.CostModel(0.0, 0.0, 0.0))
+
+
+def eth_market(since: date):
+    """Delta ETHUSD minutes from `since` (UTC days): only read, never traded (NJ-33 compares its swings with bitcoin's)."""
+    t0 = int(datetime(since.year, since.month, since.day, tzinfo=timezone.utc).timestamp())
+    t, o, h, l, c, v = _read_cols(DELTA_STORES["ETHUSD"], _ym(t0), ("t", "o", "h", "l", "c", "v"))
+    keep = t >= t0
+    if not keep.any():
+        return None
+    t, o, h, l, c, v = (x[keep] for x in (t, o, h, l, c, v))
+    return CPM.btc_market(t.astype(np.int64), o, h, l, c, v, np.zeros(len(t)), name="ETHUSD")
+
+
+def backfill_delta_candles(symbol: str, days: int, now_ts: int | None = None) -> dict:
+    """Fetch older finished 1-minute candles once, so the store reaches `days` back (the 11-channel bitcoin books read
+    4-hour EMA 200s). A marker file records the attempt, so a history the exchange does not serve is not asked again."""
+    store = DELTA_STORES[symbol]
+    folder = DATA / "min1" / store
+    now_ts = now_ts or int(time.time())
+    want = (now_ts - days * 86400) // 60 * 60
+    files = sorted(folder.glob("*.npz")) if folder.exists() else []
+    marker = folder / "backfill.json"
+    if not files:
+        return {"new": 0, "why": "empty store"}
+    done = json.loads(marker.read_text()) if marker.exists() else {}
+    if int(done.get("want") or 1e18) <= want:
+        return {"new": 0, "why": "already tried"}
+    with np.load(files[0]) as z:
+        first = int(z["t"][0])
+    rows, start = [], want
+    while start < first - 60:
+        end = min(start + 2000 * 60, first - 60)
+        url = f"{DELTA_API}/v2/history/candles?" + urllib.parse.urlencode({"resolution": "1m", "symbol": symbol, "start": start, "end": end})
+        with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": UA}), timeout=30) as r:
+            rows += json.load(r).get("result") or []
+        start = end
+        time.sleep(0.3)
+    marker.write_text(json.dumps({"want": want, "at": now_ts, "rows": len(rows)}))
+    if not rows:
+        return {"new": 0, "first": first}
+    a = np.array([[float(x["time"]), float(x["open"]), float(x["high"]), float(x["low"]), float(x["close"]), float(x.get("volume") or 0)]
+                  for x in rows])
+    t = a[:, 0].astype(np.int64)
+    keep = (t < first) & (t >= want) & (t % 60 == 0)
+    a, t = a[keep], t[keep]
+    if not len(t):
+        return {"new": 0, "first": first}
+    t, idx = np.unique(t, return_index=True)
+    a = a[idx]
+    months = np.array([_ym(int(x)) for x in t])
+    for ym in np.unique(months):
+        mm = months == ym
+        path = _month_file(store, str(ym))
+        cols = dict(t=t[mm], o=a[mm, 1], h=a[mm, 2], l=a[mm, 3], c=a[mm, 4], v=a[mm, 5])
+        if path.exists():
+            with np.load(path) as z:
+                cols = {k: np.concatenate([cols[k], z[k]]) for k in cols}
+            tt, ix = np.unique(cols["t"], return_index=True)
+            cols = {k: (tt if k == "t" else cols[k][ix]) for k in cols}
+        tmp = path.with_suffix(".tmp.npz")
+        np.savez_compressed(tmp, **cols)
+        tmp.replace(path)
+    return {"new": int(len(t)), "from": int(t[0]), "first_before": first}
 
 
 # ── gold from Delta Exchange: the XAUTUSD perpetual (Tether Gold, one token = one troy ounce) ─────

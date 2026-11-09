@@ -27,7 +27,7 @@ t0 = time.time()
 panel = F.Panel(None, now)
 print("load", f"{time.time() - t0:.1f}s", "days", panel.days[0], panel.days[-1], flush=True)
 days = set(panel.days[-compare:])
-books = [(a, mk, v) for a, mk, v in C.books_in("stocks") if mk != "VWAP"]
+books = [(a, mk, v) for a, mk, v in C.books_in("stocks") if mk != "VWAP" and a.source == C.YT]   # the saved study books
 got = {(a.id, mk): [] for a, mk, _ in books}
 t0 = time.time()
 per = {}
