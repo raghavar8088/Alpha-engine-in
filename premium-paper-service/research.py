@@ -27,6 +27,8 @@ import cp_strategies as CS  # noqa: E402
 import yc_run as YCR  # noqa: E402
 import yc_strategies as YCS  # noqa: E402
 import zc_strategies as ZCS  # noqa: E402,F401  (adds the 20-channel strategies to YCS.STRATEGIES)
+YM.SPLITS.setdefault("ETHUSD", YM.SPLITS["BTCUSD"])      # DR-04 trades ether (Delta ETHUSD) through the same engine
+YM.COSTS.setdefault("ETHUSD", CPM.BTC_COST)                # as bitcoin: the same Delta fee and slippage model
 
 _spec = importlib.util.spec_from_file_location("ii_data", ROOT / "backend" / "app" / "services" / "index_intraday" / "data.py")
 II = importlib.util.module_from_spec(_spec)     # the app's own index-minute cleaner, without importing the app
