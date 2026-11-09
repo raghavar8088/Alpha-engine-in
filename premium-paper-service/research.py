@@ -14,6 +14,7 @@ sys.path.insert(0, str(RESEARCH / "youtube_top20_2026_11"))
 sys.path.insert(0, str(RESEARCH / "booming_bulls_2026_11"))
 sys.path.insert(0, str(RESEARCH / "crypto_playlist_2026_11"))
 sys.path.insert(0, str(RESEARCH / "youtube_channels11_2026_11"))
+sys.path.insert(0, str(RESEARCH / "youtube_channels20_2026_11"))
 
 import bb_engine as BE  # noqa: E402
 import bb_markets as BM  # noqa: E402
@@ -25,6 +26,7 @@ import cp_markets as CPM  # noqa: E402
 import cp_strategies as CS  # noqa: E402
 import yc_run as YCR  # noqa: E402
 import yc_strategies as YCS  # noqa: E402
+import zc_strategies as ZCS  # noqa: E402,F401  (adds the 20-channel strategies to YCS.STRATEGIES)
 
 _spec = importlib.util.spec_from_file_location("ii_data", ROOT / "backend" / "app" / "services" / "index_intraday" / "data.py")
 II = importlib.util.module_from_spec(_spec)     # the app's own index-minute cleaner, without importing the app

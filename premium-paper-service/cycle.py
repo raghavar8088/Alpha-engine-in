@@ -25,6 +25,8 @@ from research import CS, YM
 from settings import (BTC_START_DATE, BTC_START_T, DAILY_WARM_DAYS, PAPER_START, SH_START_T, YC_BTC_WARM_DAYS, YC_START_DATE,
                       YC_START_T, now_ist)
 
+from settings import YC2_LATE_S, YC2_START_DATE, YC2_START_T  # noqa: E402
+
 log = logging.getLogger("premium.cycle")
 INDEX_WARM_DAYS, GLOBAL_WARM_DAYS = 95, 45
 POOLS = ("NSE15", "NSE5", "NSED")
@@ -41,22 +43,45 @@ def replay_from(db, acct: str, market: str, overnight: bool) -> date:
     return max(PAPER_START, _next(s)) if s else PAPER_START
 
 
+def _is_yc(a) -> bool:
+    """The YouTube-channel books (11 and 20 channels): yc_run's rules, each source from its own start."""
+    return a.source in C.YC_SOURCES
+
+
+def _yc_start(a) -> tuple[int, date]:
+    return (YC2_START_T, YC2_START_DATE) if a.source == C.YC2 else (YC_START_T, YC_START_DATE)
+
+
+def _fresh_only(db, a, market: str, docs: list[dict]) -> list[dict]:
+    """The 20-channel books enter only on fresh bars: a trade this desk has not recorded before is taken only if its entry
+    bar is recent (settings.YC2_LATE_S for the market's group). After a stale or missing feed, or while the desk was down,
+    bars that arrive late are used for indicators and exits, but never for new entries."""
+    if a.source != C.YC2 or not docs:
+        return docs
+    known = {d["_id"] for d in db.premium_trades.find({"book": f"{a.id}|{market}"}, {"_id": 1})}
+    late = time.time() - YC2_LATE_S.get(C.MONEY[market].group, 1200)
+    return [d for d in docs if d["_id"] in known or d["entry_t"] >= late]
+
+
 def _save_book(db, a, market, trades, m, overnight, start, final, live_day):
-    to_docs = R.yc_docs if a.source == C.YC else R.docs_from
+    to_docs = R.yc_docs if _is_yc(a) else R.docs_from
     docs = [d for d in to_docs(trades, m, a.id, market, overnight, live_day) if d["date"] >= start.isoformat()]
+    docs = _fresh_only(db, a, market, docs)
     return L.persist(db, a.id, market, docs, start.isoformat(), final, overnight)
 
 
-def _yc_from(db, acct: str, market: str, overnight: bool) -> date:
-    """An 11-channel book replays from its start day; an overnight one replays all of its period every time."""
+def _yc_from(db, acct: str, market: str, overnight: bool, first: date | None = None) -> date:
+    """A YouTube-channel book replays from its start day; an overnight one replays all of its period every time."""
+    first = first or YC_START_DATE
     if overnight:
-        return YC_START_DATE
+        return first
     s = L.sealed_through(db, acct, market)
-    return max(YC_START_DATE, _next(s)) if s else YC_START_DATE
+    return max(first, _next(s)) if s else first
 
 
 def _from(db, a, market: str, overnight: bool = False) -> date:
-    return _yc_from(db, a.id, market, R.is_overnight(a.id, market)) if a.source == C.YC else replay_from(db, a.id, market, overnight)
+    return (_yc_from(db, a.id, market, R.is_overnight(a.id, market), _yc_start(a)[1]) if _is_yc(a)
+            else replay_from(db, a.id, market, overnight))
 
 
 # ── index ────────────────────────────────────────────────────────────────────────────
@@ -89,11 +114,12 @@ def run_index(db, now: datetime) -> dict:
             elif a.source == C.LS:
                 import liquidity_sweep as LSW          # here, so the other groups never load the strategy classes
                 tr = LSW.run(v, market, m, start, caches[market])
-            elif a.source == C.YC:
-                tr, _ = R.run_yc(a.id, market, yt_m[market], caches[market], since_t=YC_START_T)
+            elif _is_yc(a):
+                comp = yt_m.get("BANKNIFTY") if "BANKNIFTY" in R.YCS.STRATEGIES[a.id].needs else None
+                tr, _ = R.run_yc(a.id, market, yt_m[market], caches[market], other=comp, since_t=_yc_start(a)[0])
             else:
                 tr, _ = R.run_yt(a.id, v, market, yt_m[market], caches[market])
-            n_docs += _save_book(db, a, market, tr, m, R.is_overnight(a.id, market) if a.source == C.YC else False, start, final,
+            n_docs += _save_book(db, a, market, tr, m, R.is_overnight(a.id, market) if _is_yc(a) else False, start, final,
                                  live_day)
             touched.add(a.id)
         except Exception as exc:  # noqa: BLE001 - one broken book must not stop the others
@@ -145,20 +171,21 @@ def run_stocks(db, now: datetime) -> dict:
         rank = lambda t, i=i: panel.rank_on(day_index[t.date], i)  # noqa: E731
         for a, mk, v, start in pool_books:
             try:
-                if a.source == C.YC:
-                    tr, _ = R.run_yc(a.id, mk, m, cache, {"ctx": yc_ctx}, since_t=YC_START_T)
+                if _is_yc(a):
+                    tr, _ = R.run_yc(a.id, mk, m, cache, {"ctx": yc_ctx}, since_t=_yc_start(a)[0])
                 else:
                     tr, _ = R.run_yt(a.id, v, mk, m, cache)
             except Exception as exc:  # noqa: BLE001
                 errors.setdefault(f"{a.id}|{mk}", str(exc)[:200])
                 continue
             if tr:
-                to_docs = R.yc_docs if a.source == C.YC else R.docs_from
-                collected[(a.id, mk)] += [d for d in to_docs(tr, m, a.id, mk, False, panel.live_day, rank) if d["date"] >= start.isoformat()]
+                to_docs = R.yc_docs if _is_yc(a) else R.docs_from
+                ov = _is_yc(a) and R.is_overnight(a.id, mk)           # AB-04 holds stocks overnight (BTST / swing)
+                collected[(a.id, mk)] += [d for d in to_docs(tr, m, a.id, mk, ov, panel.live_day, rank) if d["date"] >= start.isoformat()]
     n_docs, touched = 0, set()
     for a, mk, v, start in pool_books:
-        docs = R.take_slots(collected[(a.id, mk)], C.MONEY[mk].max_open)
-        n_docs += L.persist(db, a.id, mk, docs, start.isoformat(), final, False)
+        docs = _fresh_only(db, a, mk, R.take_slots(collected[(a.id, mk)], C.MONEY[mk].max_open))
+        n_docs += L.persist(db, a.id, mk, docs, start.isoformat(), final, bool(_is_yc(a) and R.is_overnight(a.id, mk)))
         touched.add(a.id)
     vw_books = {a.id: replay_from(db, a.id, "VWAP", False) for a, mk, _ in C.books_in("stocks") if mk == "VWAP"}
     days = {d for d in panel.days if d >= min(vw_books.values()).isoformat()}
@@ -178,7 +205,7 @@ def run_stocks(db, now: datetime) -> dict:
 def _yc_stock_context(pool_books, panel, now: datetime) -> dict:
     """What the 11-channel stock books read beyond each stock's own bars: NIFTY's opening gap (NJ-01), the NSE daily
     candidates (NJ-20) and the pool's 09:25 breadth (SS-03). Built only when such a book is in the cycle."""
-    needs = R.YCR.needs_of([a.id for a, _, _, _ in pool_books if a.source == C.YC])
+    needs = R.YCR.needs_of([a.id for a, _, _, _ in pool_books if _is_yc(a)])
     ctx: dict = {}
     try:
         if "nifty_gap" in needs:
@@ -191,6 +218,9 @@ def _yc_stock_context(pool_books, panel, now: datetime) -> dict:
                                       symbols=set(panel.names)))
         if "ss03" in needs:
             ctx.update(R.YCR.contexts({"ss03"}, pool=(panel.market(i) for i in range(len(panel.names)))))
+        if "movers" in needs:                                  # DH-02: the pool's 09:20 top gainers and losers
+            ctx.update(R.YCR.contexts({"movers"}, pool=(x for x in (panel.market(i) for i in range(len(panel.names)))
+                                                        if x is not None)))
     except Exception:  # noqa: BLE001 - a missing context only leaves its book without setups
         log.exception("11-channel stock context")
     return ctx
@@ -222,6 +252,12 @@ def run_global(db, now: datetime) -> dict:
             new["BTCUSD_backfill"] = bf["new"]
     except Exception as exc:  # noqa: BLE001
         errors["feed BTCUSD backfill"] = str(exc)[:200]
+    try:                                       # once: older ether minutes for the 20-channel ether book's warm-up
+        ef = F.backfill_delta_candles("ETHUSD", (now.date() - YC2_START_DATE).days + 12)
+        if ef.get("new"):
+            new["ETHUSD_backfill"] = ef["new"]
+    except Exception as exc:  # noqa: BLE001
+        errors["feed ETHUSD backfill"] = str(exc)[:200]
     try:
         rates = F.usdinr() if yahoo_due else None
         if rates:
@@ -259,8 +295,8 @@ def run_global(db, now: datetime) -> dict:
             try:
                 if a.source == C.BB:
                     tr, _ = R.run_bb(a.id, v, m, c_full if on else c_recent)
-                elif a.source == C.YC:
-                    tr, _ = R.run_yc(a.id, bmk, ym_full if on else ym_recent, c_full if on else c_recent, since_t=YC_START_T,
+                elif _is_yc(a):
+                    tr, _ = R.run_yc(a.id, bmk, ym_full if on else ym_recent, c_full if on else c_recent, since_t=_yc_start(a)[0],
                                      risk_pct=C.MONEY[bmk].risk_pct)
                 elif a.source == C.CP:
                     tr, _ = R.run_cp(a.id, name, ym_full if on else ym_recent, c_full if on else c_recent,
@@ -273,7 +309,7 @@ def run_global(db, now: datetime) -> dict:
                 log.exception("%s %s", a.id, bmk)
                 errors[f"{a.id}|{bmk}"] = str(exc)[:200]
     # bitcoin (Delta Exchange BTCUSD): the Crypto-playlist books, all intraday, trading from BTC_START_T
-    btc_books = [b for b in books if b[1] == "BTCUSD" and b[0].source != C.YC]
+    btc_books = [b for b in books if b[1] == "BTCUSD" and not _is_yc(b[0])]
     if btc_books:
         firsts = [_btc_replay_from(db, a.id) for a, _, _, _ in btc_books]
         bm = F.btc_market(min(firsts) - timedelta(days=GLOBAL_WARM_DAYS))
@@ -296,9 +332,12 @@ def run_global(db, now: datetime) -> dict:
                 except Exception as exc:  # noqa: BLE001
                     log.exception("%s BTCUSD", a.id)
                     errors[f"{a.id}|BTCUSD"] = str(exc)[:200]
-    yc_btc = [b for b in books if b[1] == "BTCUSD" and b[0].source == C.YC]
+    yc_btc = [b for b in books if b[1] == "BTCUSD" and _is_yc(b[0])]
     if yc_btc:
         n_docs += _run_yc_btc(db, yc_btc, errors, touched)
+    yc_eth = [b for b in books if b[1] == "ETHUSD" and _is_yc(b[0])]
+    if yc_eth:
+        n_docs += _run_yc_eth(db, yc_eth, errors, touched)
     if touched:
         L.update_accounts(db, sorted(touched))
     L.set_signature(db, "global", sig)
@@ -325,16 +364,42 @@ def _run_yc_btc(db, books, errors: dict, touched: set) -> int:
     cache: dict = {}
     n_docs = 0
     for a, _, _v, on in books:
-        start = _yc_from(db, a.id, "BTCUSD", on)
+        start = _yc_from(db, a.id, "BTCUSD", on, _yc_start(a)[1])
         try:
             st = R.YCS.STRATEGIES[a.id]
             tr, _ = R.run_yc(a.id, "BTCUSD", bm, cache, {"box": box} if "box" in st.needs else {},
-                             eth if "ETHUSD" in st.needs else None, since_t=YC_START_T, risk_pct=C.MONEY["BTCUSD"].risk_pct)
+                             eth if "ETHUSD" in st.needs else None, since_t=_yc_start(a)[0], risk_pct=C.MONEY["BTCUSD"].risk_pct)
             n_docs += _save_book(db, a, "BTCUSD", tr, bm, on, start, final, live_day)
             touched.add(a.id)
         except Exception as exc:  # noqa: BLE001
             log.exception("%s BTCUSD", a.id)
             errors[f"{a.id}|BTCUSD"] = str(exc)[:200]
+    return n_docs
+
+
+def _run_yc_eth(db, books, errors: dict, touched: set) -> int:
+    """The 20-channel ether book (DR-04): Delta ETHUSD minutes from 12 days before its start, flat at YC2_START_T."""
+    try:
+        em = F.eth_market(YC2_START_DATE - timedelta(days=12))
+    except Exception as exc:  # noqa: BLE001
+        errors["feed ETHUSD"] = str(exc)[:200]
+        return 0
+    if em is None:
+        return 0
+    final = F.btc_final_day()
+    last_day = str(em.date[-1])
+    live_day = last_day if last_day > final else None
+    cache: dict = {}
+    n_docs = 0
+    for a, _, _v, on in books:
+        start = _yc_from(db, a.id, "ETHUSD", on, _yc_start(a)[1])
+        try:
+            tr, _ = R.run_yc(a.id, "ETHUSD", em, cache, {}, None, since_t=_yc_start(a)[0], risk_pct=C.MONEY["ETHUSD"].risk_pct)
+            n_docs += _save_book(db, a, "ETHUSD", tr, em, on, start, final, live_day)
+            touched.add(a.id)
+        except Exception as exc:  # noqa: BLE001
+            log.exception("%s ETHUSD", a.id)
+            errors[f"{a.id}|ETHUSD"] = str(exc)[:200]
     return n_docs
 
 
@@ -382,9 +447,9 @@ def run_daily(db, now: datetime) -> dict:
             errors[f"{a.id}|{mk}"] = "no data"
             continue
         try:
-            if a.source == C.YC:
-                tr, _ = R.run_yc(a.id, mk, m, {}, since_t=YC_START_T)
-                n_docs += _save_book(db, a, mk, tr, m, True, YC_START_DATE, lasts[mk], None)
+            if _is_yc(a):
+                tr, _ = R.run_yc(a.id, mk, m, {}, since_t=_yc_start(a)[0])
+                n_docs += _save_book(db, a, mk, tr, m, True, _yc_start(a)[1], lasts[mk], None)
                 touched.add(a.id)
                 continue
             tr, _ = R.run_yt(a.id, v, mk, m, {})
@@ -415,21 +480,21 @@ def run_daily(db, now: datetime) -> dict:
             rank = lambda t, m=m: -float(m.turnover20[t.entry_k])  # noqa: E731
             for a, mk, v in pool:
                 try:
-                    if a.source == C.YC:
+                    if _is_yc(a):
                         if R.YCS.STRATEGIES[a.id].kind == "basket":
                             continue
-                        tr, _ = R.run_yc(a.id, mk, m, cache, since_t=YC_START_T)
+                        tr, _ = R.run_yc(a.id, mk, m, cache, since_t=_yc_start(a)[0])
                     else:
                         tr, _ = R.run_yt(a.id, v, mk, m, cache)
                 except Exception as exc:  # noqa: BLE001
                     errors.setdefault(f"{a.id}|NSED", str(exc)[:200])
                     continue
                 if tr:
-                    to_docs, first = (R.yc_docs, YC_START_DATE) if a.source == C.YC else (R.docs_from, PAPER_START)
+                    to_docs, first = (R.yc_docs, _yc_start(a)[1]) if _is_yc(a) else (R.docs_from, PAPER_START)
                     collected[a.id] += [d for d in to_docs(tr, m, a.id, mk, True, None, rank) if d["date"] >= first.isoformat()]
         by_sym = {m.name: m for m in markets}
         for a, mk, v in pool:
-            if a.source != C.YC or R.YCS.STRATEGIES[a.id].kind != "basket":
+            if not _is_yc(a) or R.YCS.STRATEGIES[a.id].kind != "basket":
                 continue
             try:                                        # NJ-25: the whole pool's basket at once
                 for sym, tr in R.YCR.run_basket(a.id, markets, since_t=YC_START_T).items():
@@ -441,8 +506,8 @@ def run_daily(db, now: datetime) -> dict:
                 log.exception("%s NSED", a.id)
                 errors[f"{a.id}|NSED"] = str(exc)[:200]
         for a, mk, _ in pool:
-            docs = R.take_slots(collected[a.id], C.MONEY["NSED"].max_open)
-            first = YC_START_DATE if a.source == C.YC else PAPER_START
+            docs = _fresh_only(db, a, "NSED", R.take_slots(collected[a.id], C.MONEY["NSED"].max_open))
+            first = _yc_start(a)[1] if _is_yc(a) else PAPER_START
             n_docs += L.persist(db, a.id, mk, docs, first.isoformat(), final, True)
             touched.add(a.id)
     if touched:

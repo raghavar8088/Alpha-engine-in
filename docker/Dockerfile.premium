@@ -16,6 +16,8 @@ COPY backend/research/youtube_top20_2026_11/yt_markets.py backend/research/youtu
 COPY backend/research/crypto_playlist_2026_11/cp_markets.py backend/research/crypto_playlist_2026_11/cp_strategies.py /app/backend/research/crypto_playlist_2026_11/
 # The 11-channel strategies: their rules, indicators, fill engine and book runner (the code the look-ahead checks ran).
 COPY backend/research/youtube_channels11_2026_11/yc_common.py backend/research/youtube_channels11_2026_11/yc_ind.py backend/research/youtube_channels11_2026_11/yc_engine.py backend/research/youtube_channels11_2026_11/yc_nj_india.py backend/research/youtube_channels11_2026_11/yc_nj_crypto.py backend/research/youtube_channels11_2026_11/yc_channels.py backend/research/youtube_channels11_2026_11/yc_more.py backend/research/youtube_channels11_2026_11/yc_strategies.py backend/research/youtube_channels11_2026_11/yc_run.py /app/backend/research/youtube_channels11_2026_11/
+# The 20-channel strategies (registered into the 11-channel registry by zc_strategies; run by the same yc_run).
+COPY backend/research/youtube_channels20_2026_11/zc_common.py backend/research/youtube_channels20_2026_11/zc_india.py backend/research/youtube_channels20_2026_11/zc_global_a.py backend/research/youtube_channels20_2026_11/zc_global_b.py backend/research/youtube_channels20_2026_11/zc_strategies.py /app/backend/research/youtube_channels20_2026_11/
 COPY backend/app/services/index_intraday/data.py /app/backend/app/services/index_intraday/data.py
 # The liquidity-sweep books run the app's own strategy classes (liquidity_sweep.py): the shared domain/contracts package and
 # the three strategy files they import. These are not the library's package __init__s, which import every strategy.

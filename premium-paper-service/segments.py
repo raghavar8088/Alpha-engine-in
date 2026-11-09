@@ -22,17 +22,19 @@ from datetime import date, datetime, timedelta, timezone
 import catalog as C
 import feeds as F
 from settings import BTC_START_T, DATA, IST, NY, PAPER_START, SH_START_T, YC_START_T
+from settings import YC2_START_T  # noqa: E402
 
 log = logging.getLogger("premium.segments")
 
 SEGMENT = {"NIFTY": "in_options", "BANKNIFTY": "in_options", "NIFTY_D": "in_options",
            "VWAP": "in_equity", "NSE15": "in_equity", "NSE5": "in_equity", "MIRROR15": "in_equity", "NSED": "in_equity_daily",
-           "BTCUSD": "crypto", "BTC_SPOT": "crypto", "XAUUSD": "gold", "XAUTUSD": "gold",
+           "BTCUSD": "crypto", "BTC_SPOT": "crypto", "ETHUSD": "crypto", "XAUUSD": "gold", "XAUTUSD": "gold",
            "EURUSD": "global", "GBPUSD": "global", "NAS100": "global", "AAPL": "global", "SPX500_D": "global", "NAS100_D": "global"}
 FEED_OF = {"XAUTUSD": "XAUUSD", "BTC_SPOT": "BTCUSD", "VWAP": "NSE", "NSE15": "NSE", "NSE5": "NSE", "MIRROR15": "NSE"}
 DAILY = ("NSED", "NIFTY_D", "SPX500_D", "NAS100_D")
 SOURCE = {
     "BTCUSD": ("Delta Exchange India", "BTCUSD perpetual, 1-minute candles"),
+    "ETHUSD": ("Delta Exchange India", "ETHUSD perpetual, 1-minute candles"),
     "XAUUSD": ("Delta Exchange India", "XAUTUSD perpetual (Tether Gold, 1 token = 1 troy ounce), 1-minute candles"),
     "XAGUSD": ("Yahoo Finance", "SI=F COMEX silver futures, 1-minute (CP-24's companion)"),
     "EURUSD": ("Yahoo Finance", "6E=F CME euro futures, 1-minute"), "GBPUSD": ("Yahoo Finance", "6B=F CME pound futures, 1-minute"),
@@ -138,7 +140,8 @@ def feeds_now(group: str, info: dict) -> dict:
     out: dict = {}
     errors = info.get("errors") or {}
     if group == "global":
-        for fid, store in (("BTCUSD", F.DELTA_STORES["BTCUSD"]), ("XAUUSD", F.DELTA_STORES["XAUTUSD"]), ("EURUSD", "EURUSD"),
+        for fid, store in (("BTCUSD", F.DELTA_STORES["BTCUSD"]), ("ETHUSD", F.DELTA_STORES["ETHUSD"]),
+                           ("XAUUSD", F.DELTA_STORES["XAUTUSD"]), ("EURUSD", "EURUSD"),
                            ("GBPUSD", "GBPUSD"), ("NAS100", "NAS100"), ("AAPL", "AAPL"), ("XAGUSD", "XAGUSD")):
             t, p = _last_bar(store)
             out[fid] = {"last_t": t, "last_price": p, "fetch_error": errors.get(f"feed {fid}")}
@@ -158,6 +161,8 @@ def feeds_now(group: str, info: dict) -> dict:
 
 
 def _start_of(mk: str, acct=None) -> datetime:
+    if acct is not None and acct.source == getattr(C, "YC2", None):
+        return datetime.fromtimestamp(YC2_START_T, timezone.utc)
     if acct is not None and acct.source == getattr(C, "YC", None):
         return datetime.fromtimestamp(YC_START_T, timezone.utc)
     if mk == "BTCUSD" and acct is not None and acct.source == getattr(C, "SH", None):
@@ -188,7 +193,12 @@ def _book_state(a, mk: str, key: str, s: dict, fd: dict | None, sig: dict, error
         if fd["state"] != "live":
             why += f" Its feed: {fd.get('short') or fd['reason']}"
         return "in trade", why
+    yc2 = a.source == getattr(C, "YC2", None)
     if fd["state"] != "live":
+        if yc2 and fd["state"] == "closed":
+            return "armed", f"Armed — waiting for market open. {fd.get('short') or fd['reason']}"
+        if yc2:
+            return fd["state"], f"No new entries: {fd.get('short') or fd['reason']}"
         return fd["state"], fd.get("short") or fd["reason"]
     if a.id in ("CP-14", "CP-15", "SH-02") and mk == "BTCUSD" and not rec.get("connected"):
         return "waiting", ("Delta's trade feed is not connected, so the order-flow delta of new minutes is unknown: "
@@ -198,6 +208,9 @@ def _book_state(a, mk: str, key: str, s: dict, fd: dict | None, sig: dict, error
     if mk in DAILY or mk == "BTC_SPOT":
         return "live", "A daily book: it acts once a day, on each finished daily bar."
     n = sig.get("n_today") or 0
+    if yc2:
+        return "running", ("Running — waiting for signal." if not n
+                           else f"Running — {n} setup{'s' if n != 1 else ''} in the current session.")
     return "live", ("Watching every new bar; no setup yet in the current session." if not n
                     else f"{n} setup{'s' if n != 1 else ''} in the current session.")
 
@@ -252,7 +265,12 @@ def _refresh(db, group: str, info: dict) -> None:
             s = stats.get(key, blank)
             fid = FEED_OF.get(mk, mk)
             state, why = _book_state(a, mk, key, s, feeds.get(fid), signals.get(key) or {}, errors, rec, now)
-            rows.append({"mkt": mk, "market": C.LABEL.get(mk, mk), "segment": seg, "feed": fid, "state": state, "reason": why,
+            if a.source == getattr(C, "YC2", None):
+                sg = signals.get(key) or {}
+                extra = {"signal": {k: sg.get(k) for k in ("last_t", "today", "taken", "why", "n_today")}}
+            else:
+                extra = {}
+            rows.append({**extra, "mkt": mk, "market": C.LABEL.get(mk, mk), "segment": seg, "feed": fid, "state": state, "reason": why,
                          **{k: (round(v, 2) if isinstance(v, float) else v) for k, v in s.items()}})
             t = seg_tot.setdefault(seg, {"books": 0, "trades": 0, "closed": 0, "wins": 0, "pnl": 0.0, "open": 0, "unrealised": 0.0,
                                          "states": {}})
@@ -275,7 +293,8 @@ def _refresh(db, group: str, info: dict) -> None:
                   "recent": recent.get(seg, []), "positions": positions.get(seg, [])} for seg, t in seg_tot.items()}
     db.premium_meta.update_one({"_id": "status"}, {"$set": {"feeds": feeds, "recorder": rec, "books": books, "segments": segs,
                                                             "segments_at": now.isoformat(),
-                                                            "sh_start": datetime.fromtimestamp(SH_START_T, timezone.utc).isoformat()}},
+                                                            "sh_start": datetime.fromtimestamp(SH_START_T, timezone.utc).isoformat(),
+                                                            "yc2_start": datetime.fromtimestamp(YC2_START_T, timezone.utc).isoformat()}},
                                upsert=True)
 
 

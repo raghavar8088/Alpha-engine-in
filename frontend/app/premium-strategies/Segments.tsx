@@ -58,8 +58,8 @@ const SEG: Record<SegId, { label: string; feeds: string[]; note: string }> = {
   },
   crypto: {
     label: "Crypto",
-    feeds: ["BTCUSD"],
-    note: "Bitcoin from Delta Exchange India: the BTCUSD perpetual's 1-minute candles, read every 2 minutes, with Delta's taker fee (0.05% plus 18% GST a side), half a $1 spread and 2 bp of slippage. The order-flow strategies (CP-14, CP-15) also need Delta's live trade feed, recorded minute by minute.",
+    feeds: ["BTCUSD", "ETHUSD"],
+    note: "Bitcoin from Delta Exchange India: the BTCUSD perpetual's 1-minute candles, read every 2 minutes, with Delta's taker fee (0.05% plus 18% GST a side), half a $1 spread and 2 bp of slippage. The order-flow strategies (CP-14, CP-15) also need Delta's live trade feed, recorded minute by minute. Ether (Delta ETHUSD, 0.01 contracts) is NJ-33's comparison market and DR-04's own market.",
   },
   gold: {
     label: "Gold",
@@ -74,13 +74,15 @@ const SEG: Record<SegId, { label: string; feeds: string[]; note: string }> = {
 };
 const MARKET_SEGS: Record<MarketTab, SegId[]> = { indian: ["in_options", "in_equity", "in_equity_daily"], crypto: ["crypto"], gold: ["gold"], global: ["global"] };
 const FEED_NAME: Record<string, string> = {
-  NIFTY: "Nifty 50", BANKNIFTY: "Nifty Bank", NIFTY_D: "Nifty 50 daily", NSE: "NSE stocks", NSED: "NSE stocks daily", BTCUSD: "Bitcoin",
+  NIFTY: "Nifty 50", BANKNIFTY: "Nifty Bank", NIFTY_D: "Nifty 50 daily", NSE: "NSE stocks", NSED: "NSE stocks daily", BTCUSD: "Bitcoin", ETHUSD: "Ether",
   XAUUSD: "Gold", XAGUSD: "Silver", EURUSD: "EUR/USD", GBPUSD: "GBP/USD", NAS100: "Nasdaq 100", AAPL: "Apple",
   SPX500_D: "S&P 500 daily", NAS100_D: "Nasdaq 100 daily",
 };
 const STATE: Record<string, { label: string; cls: string; rank: number }> = {
   "in trade": { label: "In a trade", cls: "trade", rank: 0 },
   live: { label: "Live", cls: "live", rank: 1 },
+  running: { label: "Running", cls: "live", rank: 1 },
+  armed: { label: "Armed", cls: "idle", rank: 2 },
   waiting: { label: "Waiting", cls: "idle", rank: 2 },
   closed: { label: "Market closed", cls: "idle", rank: 3 },
   stale: { label: "Stale data", cls: "bad", rank: 4 },
@@ -90,6 +92,7 @@ const STATE: Record<string, { label: string; cls: string; rank: number }> = {
 const REASON: Record<string, string> = { stop: "Stop", stop_gap: "Stop (gap)", be_stop: "Breakeven stop", target: "Target", time: "Session end",
   exit_signal: "Exit signal", vwap_trail: "VWAP trail", open: "Open" };
 const STALE_DESK_MIN = 15;
+const ACTIVE = ["live", "running", "in trade"];
 
 function Pill({ state }: { state: string }) {
   const s = STATE[state] ?? { label: state, cls: "idle" };
@@ -239,8 +242,8 @@ function SegmentView({ seg, summary, now }: { seg: SegId; summary: Summary; now:
     return out.sort((x, y) => (STATE[x.b.state]?.rank ?? 9) - (STATE[y.b.state]?.rank ?? 9) || y.b.pnl - x.b.pnl
       || x.id.localeCompare(y.id, "en", { numeric: true }));
   }, [status.books, seg, byId]);
-  const shown = rows.filter((r) => filter === "all" || (filter === "active" ? ["live", "in trade"].includes(r.b.state) : !["live", "in trade"].includes(r.b.state)));
-  const active = rows.filter((r) => ["live", "in trade"].includes(r.b.state)).length;
+  const shown = rows.filter((r) => filter === "all" || (filter === "active" ? ACTIVE.includes(r.b.state) : !ACTIVE.includes(r.b.state)));
+  const active = rows.filter((r) => ACTIVE.includes(r.b.state)).length;
   const btcStart = status.btc_start ? Date.parse(status.btc_start) / 1000 : null;
   const shStart = status.sh_start ? Date.parse(status.sh_start) / 1000 : null;
   const paperStart = status.paper_start;

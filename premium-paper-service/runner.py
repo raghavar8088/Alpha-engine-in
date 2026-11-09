@@ -169,20 +169,24 @@ def run_yc(sid: str, market: str, m, cache: dict, p: dict | None = None, other=N
            risk_pct: float = 0.01) -> tuple[list, dict]:
     """An 11-channel book (backend/research/youtube_channels11_2026_11): yc_run.run, the code the look-ahead checks ran.
     `since_t` as in run_cp: the book starts flat at that minute."""
-    tr, rej, S = YCR.run(sid, market, m, cache, p, other, since_t, risk_pct)
+    rules_mk = YC_RULES_MARKET.get(market, market)
+    tr, rej, S = YCR.run(sid, rules_mk, m, cache, p, other, since_t, risk_pct)
     key = f"{sid}|{market}"
     st = YCS.STRATEGIES[sid]
     if st.kind == "signals" and market not in POOLS and S:
         from yc_engine import XEngine, forced_exit_rows_x, run_book_x
-        mm = YCR.prepare(sid, market, m)
-        ex = st.exits(mm, YCR.LazyBars(mm, cache), p or {}, cache.setdefault(YCR.YC_CACHE, {}))
-        clock, minute = st.exit_clock(market)
+        mm = YCR.prepare(sid, rules_mk, m)
+        ex = st.exits(mm, YCR.LazyBars(mm, cache), {**st.params, **(p or {})}, cache.setdefault(YCR.YC_CACHE, {}))
+        clock, minute = st.exit_clock(rules_mk)
         ke = YCR.live_k_end(mm, forced_exit_rows_x(mm, clock, minute))
         eng = XEngine(mm)
         note_signals(key, mm, S, tr, rej, lambda S2: run_book_x(eng, S2, ex, st.limits, ke, sid, "V0", st.reverse))
     else:
         note_signals(key, m, S, tr, rej)
     return tr, rej
+
+
+YC_RULES_MARKET = {"XAUTUSD": "XAUUSD"}       # a book market -> the market its strategy's rules were written for
 
 
 def yc_docs(trades, m, acct: str, market: str, overnight: bool, live_day: str | None, rank=None) -> list[dict]:

@@ -15,13 +15,15 @@ import LibraryCards, { PaperLine } from "./LibraryCards";
 import PaperDesk, { SOURCE_LABEL, usePaperSummary, type Account } from "./PaperDesk";
 import Sel15Nifty50 from "./Sel15Nifty50";
 import Segments from "./Segments";
+import Channels20 from "./Channels20";
 
-type Tab = "indian" | "crypto" | "gold" | "global" | "paper" | "strategies" | "results" | "november" | "daily" | "method";
+type Tab = "indian" | "crypto" | "gold" | "global" | "paper" | "strategies" | "results" | "november" | "daily" | "method" | "channels20";
 const TABS: { id: Tab; label: string }[] = [
   { id: "indian", label: "Indian Market" },
   { id: "crypto", label: "Crypto" },
   { id: "gold", label: "Gold" },
   { id: "global", label: "Forex & US" },
+  { id: "channels20", label: "20 channels (new)" },
   { id: "paper", label: "All accounts" },
   { id: "strategies", label: "Strategies" },
   { id: "results", label: "VWAP results" },
@@ -172,6 +174,8 @@ export default function PremiumStrategiesPage() {
       {(tab === "indian" || tab === "crypto" || tab === "gold" || tab === "global") && (
         <Segments key={tab} market={tab} summary={summary} error={error} />
       )}
+
+      {tab === "channels20" && <Channels20 summary={summary} error={error} />}
 
       {tab === "strategies" && (
         <>

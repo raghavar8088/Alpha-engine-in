@@ -63,6 +63,10 @@ class YC:
     clock: tuple | None = None           # the forced exit; None = the market's intraday default (or the data's end)
     needs: tuple = ()
     reverse: bool = False                # stop and reverse on the opposite signal (PR-09)
+    version: str = "v1"                  # a changed rule or number is a new version, never an edit of this one
+    params: dict = field(default_factory=dict)   # the rule's numbers, passed to fn/exits as p (configurable defaults)
+    readiness: str = "ready"             # ready | assumptions (needs documented research assumptions) | blocked
+    blocked_reason: str = ""
 
     @property
     def channel(self) -> str:

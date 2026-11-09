@@ -57,8 +57,8 @@ def signals(sid: str, market: str, m, cache: dict, p: dict | None = None, other=
     m = prepare(sid, market, m)
     yc = cache.setdefault(YC_CACHE, {})
     B = LazyBars(m, cache)
-    p = p or {}
-    if "ETHUSD" in st.needs:
+    p = {**st.params, **(p or {})}
+    if "ETHUSD" in st.needs or "BANKNIFTY" in st.needs:      # a companion market (NJ-33's ether, AB-06's Bank Nifty)
         o = None if other is None else (other, LazyBars(other, {}))
         S = st.fn(m, B, p, yc, o)
     else:
@@ -76,7 +76,7 @@ def run(sid: str, market: str, m, cache: dict, p: dict | None = None, other=None
     m = prepare(sid, market, m)
     yc = cache.setdefault(YC_CACHE, {})
     B = LazyBars(m, cache)
-    p = p or {}
+    p = {**st.params, **(p or {})}
     eng = XEngine(m)
     clock, minute = st.exit_clock(market)
     ke = live_k_end(m, forced_exit_rows_x(m, clock, minute))
@@ -157,6 +157,9 @@ def contexts(needs: set, *, nifty=None, nsed=None, pool=None, since: str | None 
     if "ss03" in needs and pool is not None:
         import yc_channels as C
         ctx["ss03"] = C.ss03_context(pool)
+    if "movers" in needs and pool is not None:               # the 20-channel study's DH-02: 09:20 top gainers / losers
+        import zc_india as ZI
+        ctx["movers"] = ZI.movers_context(pool)
     return ctx
 
 

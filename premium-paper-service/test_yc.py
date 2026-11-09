@@ -37,7 +37,7 @@ def check(name, cond, detail=""):
 
 # 1. catalog = registry
 ys = {a.id: a for a in C.ACCOUNTS if a.source == C.YC}
-reg = R.YCS.STRATEGIES
+reg = {k: v for k, v in R.YCS.STRATEGIES.items() if getattr(v.fn, "__module__", "").startswith("yc_")}
 check("103 accounts, one per strategy", set(ys) == set(reg) and len(ys) == 103, f"{len(ys)} accounts")
 bad = [s for s, a in ys.items() if a.name != reg[s].name or tuple(C.YC_BOOK_MARKET.get(mk, mk) for mk, _ in a.books) != reg[s].markets
        or a.channel != C.YC_CHANNELS[reg[s].channel]]

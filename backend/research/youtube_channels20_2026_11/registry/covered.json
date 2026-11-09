@@ -1,0 +1,10525 @@
+{
+ "built": "2026-11-09T09:46:05+00:00",
+ "channels": [
+  {
+   "id": "UCK-aOjEvZNJl3HINja0gAiQ",
+   "handle": null,
+   "title": "Adam Khoo",
+   "studies": [
+    "youtube_top20",
+    "youtube_top20_pool",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCfO2yCpx6_XU-xovhpJuaYw",
+   "handle": null,
+   "title": "Bear Bull Traders",
+   "studies": [
+    "youtube_top20",
+    "youtube_top20_pool"
+   ],
+   "status": "analyzed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UC2sIhf108S02F0Qlb2a88eQ",
+   "handle": "@BoomingBulls",
+   "title": "Booming Bulls",
+   "studies": [
+    "booming_bulls",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": ""
+  },
+  {
+   "id": "UC2I5dxN4qhaV1dw55u31JWw",
+   "handle": "@TheTradingGeek",
+   "title": "Brad Goh (The Trading Geek)",
+   "studies": [
+    "youtube_channels11",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": ""
+  },
+  {
+   "id": "UCJQY1CkwtFNfJfIzROc8KiA",
+   "handle": "@ConorKenny",
+   "title": "Conor Kenny",
+   "studies": [
+    "youtube_channels11",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": ""
+  },
+  {
+   "id": "UCMec1m9iUC3agiEK-nsndSg",
+   "handle": null,
+   "title": "Elearnmarkets",
+   "studies": [
+    "youtube_top20",
+    "youtube_top20_pool",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCw4496t84F_8HvhQPwtmWpQ",
+   "handle": null,
+   "title": "Ghanshyam Tech",
+   "studies": [
+    "youtube_top20",
+    "youtube_top20_pool",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCcIvNGMBSQWwo1v3n-ZRBCw",
+   "handle": null,
+   "title": "Humbled Trader",
+   "studies": [
+    "youtube_top20",
+    "youtube_top20_pool",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCDMXq5B7zaiM3AxIG-kQHiw",
+   "handle": "@iitiantrader",
+   "title": "IITian Trader ",
+   "studies": [
+    "youtube_channels11",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": ""
+  },
+  {
+   "id": "UCfYHvYyFICHwHVO9lHwmiig",
+   "handle": "@Neerajjoshi",
+   "title": "Neeraj joshi",
+   "studies": [
+    "youtube_channels11",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": ""
+  },
+  {
+   "id": "UCqvVj1LkOpA8tjb7RadTvOg",
+   "handle": null,
+   "title": "Nitin Bhatia",
+   "studies": [
+    "youtube_top20",
+    "youtube_top20_pool",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCE5wDMNEZElnuRDk6TDPOYg",
+   "handle": null,
+   "title": "Power of Stocks",
+   "studies": [
+    "youtube_top20",
+    "youtube_top20_pool",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCEAAzv2OBqxsSczKJ2QZyGQ",
+   "handle": null,
+   "title": "Pushkar Raj Thakur",
+   "studies": [
+    "youtube_top20",
+    "youtube_top20_pool",
+    "youtube_channels11",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCFSn-h8wTnhpKJMteN76Abg",
+   "handle": null,
+   "title": "Rayner Teo",
+   "studies": [
+    "youtube_top20",
+    "youtube_top20_pool",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCTR1Tk8SaMO9qw930kIOMHQ",
+   "handle": "@coachsagarsinha",
+   "title": "Sagar Sinha ",
+   "studies": [
+    "youtube_channels11",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": ""
+  },
+  {
+   "id": "UCoi7mlbUebBpQmDtB3L557A",
+   "handle": null,
+   "title": "Siddharth Bhanushali",
+   "studies": [
+    "youtube_top20",
+    "youtube_top20_pool",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCJrAfJ39rplnIFssSedUQOQ",
+   "handle": "@stockburnerofficial",
+   "title": "Stock Burner",
+   "studies": [
+    "youtube_channels11",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": ""
+  },
+  {
+   "id": "UCS8WLwuVszq1g2oeBzboUmQ",
+   "handle": null,
+   "title": "Sunil Minglani",
+   "studies": [
+    "youtube_top20",
+    "youtube_top20_pool",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCp1p92dYtC6cINJ4rSwJEXw",
+   "handle": null,
+   "title": "Super Trader Lakshya",
+   "studies": [
+    "youtube_top20",
+    "youtube_top20_pool",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UChiJI6aZx9XflzWBg98p6TA",
+   "handle": "@TanishaGarg101",
+   "title": "Tanisha Garg",
+   "studies": [
+    "youtube_channels11",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": ""
+  },
+  {
+   "id": "UCtjxa77NqamhVC8atV85Rog",
+   "handle": null,
+   "title": "The Inner Circle Trader",
+   "studies": [
+    "youtube_top20",
+    "youtube_top20_pool",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCYFQzaZyTUzY-Tiytyv3HhA",
+   "handle": null,
+   "title": "The Moving Average",
+   "studies": [
+    "youtube_top20",
+    "youtube_top20_pool",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UC9yk_6ks1g1ipJJsxtLKLcA",
+   "handle": null,
+   "title": "The Secret Mindset",
+   "studies": [
+    "youtube_top20",
+    "youtube_top20_pool",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UC9zh516XCUhN1EVIdblTXXQ",
+   "handle": "@thetraderoomsss",
+   "title": "The Trade Room",
+   "studies": [
+    "youtube_channels11",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": ""
+  },
+  {
+   "id": "UCGL9ubdGcvZh_dvSV2z1hoQ",
+   "handle": null,
+   "title": "The Trading Channel",
+   "studies": [
+    "youtube_top20",
+    "youtube_top20_pool",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCuiMhf2qe2sA0kCDOTl1dow",
+   "handle": "@ThetaGainers",
+   "title": "Theta Gainers",
+   "studies": [
+    "youtube_top20_pool",
+    "youtube_channels11",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UC0ep2A36j7gTFdqW2Yvngbg",
+   "handle": null,
+   "title": "Tori Trades",
+   "studies": [
+    "youtube_top20",
+    "youtube_top20_pool",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCBayuhgYpKNbhJxfExYkPfA",
+   "handle": null,
+   "title": "Warrior Trading",
+   "studies": [
+    "youtube_top20",
+    "youtube_top20_pool",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCBKVf2eWgShfOmW04Okafcw",
+   "handle": null,
+   "title": "Wealth Secret",
+   "studies": [
+    "youtube_top20",
+    "youtube_top20_pool",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UC32oVb-nfyRBNlWzUw3dC5Q",
+   "handle": null,
+   "title": "Wysetrade",
+   "studies": [
+    "youtube_top20",
+    "youtube_top20_pool",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCNc4FB7ylWM0LBx0rx8SyZA",
+   "handle": "@sayacrypto",
+   "title": "saya crypto",
+   "studies": [
+    "youtube_channels11",
+    "video_lab_list"
+   ],
+   "status": "analyzed",
+   "note": ""
+  },
+  {
+   "id": null,
+   "handle": "@stockforceofficial",
+   "title": "Stock Force",
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "status": "partial",
+   "note": "35 of 70 transcripts; YouTube rate limit"
+  },
+  {
+   "id": "UCcanCrgSWVYW7ZFNKQZso0g",
+   "handle": "@AbhishekKar",
+   "title": "Abhishek Kar",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCsNxHPbaCWL1tKw2hxGQD6g",
+   "handle": "@AssetYogi",
+   "title": "Asset Yogi",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCRvqjQPSeaWn-uEx-w0XOIg",
+   "handle": "@benjaminjcowen",
+   "title": "Benjamin Cowen",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCe3qdG0A_gr-sEdat5y2twQ",
+   "handle": "@CARachanaRanade",
+   "title": "CA Rachana Phadke Ranade",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UC2GyeAMRDA4cRIiISejML2g",
+   "handle": "@chart-fanatics",
+   "title": "Chart Fanatics",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCn2JOViAAWssWefchGpTNvw",
+   "handle": "@claytrader",
+   "title": "ClayTrader",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCn3s3x5R7ozaSM-hdbPDq7w",
+   "handle": "@DATATRADER",
+   "title": "DATA TRADER (DATA TRADER)",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCeEP6GESh2t4-e2132uj3Sg",
+   "handle": "@daytradertelugu",
+   "title": "DAY TRADER తెలుగు",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCUMccND2H_CVS0dMZKCPCXA",
+   "handle": "@namaskarprasad",
+   "title": "FinnovationZ by Prasad",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCqTeFwC8riZWFgXqpDluutg",
+   "handle": "@HANNAHFOREX",
+   "title": "HANNAH FOREX",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCfMiRVQJuTj3NpZZP1tKShQ",
+   "handle": "@InTheMoneyAdam",
+   "title": "InTheMoney",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCt4n6w2o4dexydr77KXJ4mw",
+   "handle": "@investorsunderground",
+   "title": "Investors Underground",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCCDu1S_OmR5XtM-AzL-_U1Q",
+   "handle": "@JasonGraystone",
+   "title": "Jason Graystone",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCnwxzpFzZNtLH8NgTeAROFA",
+   "handle": "@ECKrown",
+   "title": "Krown",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCYqir63K2DuEpLoIpAUWqnQ",
+   "handle": "@mjopo",
+   "title": "MJ OPO Forex Trading",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCQAvjhqp559qSQx2dcg9WVg",
+   "handle": "@OptionAlpha",
+   "title": "Option Alpha",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCS2NdYUmv_PUyyKeDAo5zYA",
+   "handle": "@PRSundar64",
+   "title": "P R Sundar",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCwAdQUuPT6laN-AQR17fe1g",
+   "handle": "@pranjalkamra",
+   "title": "Pranjal Kamra",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCtlAFoYl2aWb6pMiHCctQHA",
+   "handle": "@RickyGutierrezz",
+   "title": "Ricky Gutierrez",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCzpFLG-QcFbs2OcAmi2u03g",
+   "handle": "@sharemarketgurukul",
+   "title": "SHARE MARKET GURUKUL",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCPRmFsWPlkvtrbC008Wg5Cw",
+   "handle": "@SahiTrade",
+   "title": "Sahi Trade",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UC7Xf4yml02QYUoKQ5nOdwqQ",
+   "handle": "@StockMarketTelugu",
+   "title": "Stock Market తెలుగు",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UC54LMqQyA-IA0sNZ2qjH62w",
+   "handle": "@Stockstotrade",
+   "title": "StocksToTrade",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCgY_eHY4NCTcRnU6CCZXWng",
+   "handle": "@TRADINGRUSH",
+   "title": "TRADING RUSH",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCBhORXMwPfJtNtsZcUJHO6w",
+   "handle": "@ThomasKralow",
+   "title": "Thomas Kralow",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCJwKCyEIFHwUOPQQ-4kC1Zw",
+   "handle": "@TomNashTV",
+   "title": "Tom Nash",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCPgT-N-DQ0K0H88skjaDgkA",
+   "handle": "@TradeWithTrend",
+   "title": "Trade With Trend - Raunak A",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCPCPE5MoI7DS1WiVB_-mzNw",
+   "handle": "@TraderNick",
+   "title": "TraderNick",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCxs9Bj2OWO55PqBOfmOnJqQ",
+   "handle": "@Tradeswing",
+   "title": "Tradewing ࿐",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCUgUjyt6jcyxfM4FCmxZcgw",
+   "handle": "@TradingChanakya",
+   "title": "Trading Chanakya",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCtLQeko40jF3QZ_fXObqURg",
+   "handle": "@TradingFuel-mk6ux",
+   "title": "Trading Fuel",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCnKPQUoCRb1Vu-qWwWituGQ",
+   "handle": "@ukspreadbetting",
+   "title": "UKspreadbetting",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCUy6cn93Nijaz1_Q_tbrPDg",
+   "handle": "@urbanforex",
+   "title": "Urban Forex",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UC57i-OYeEn5JTpdUlzzaOgg",
+   "handle": "@waqarasim",
+   "title": "Waqar Asim",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCAln8cncsISvvLl7NHSABEA",
+   "handle": "@WaqarAsim.",
+   "title": "Waqar Asim",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCaSuDZx2LFPyUjqLy0_2ilQ",
+   "handle": "@smartrisk",
+   "title": "smartrisk",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCUuX7IEfu8cC13Wr6_J5o6A",
+   "handle": "@smartrisk1",
+   "title": "smartrisk1",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  },
+  {
+   "id": "UCLJiSMXJ9K-1AOTqIqdXJgQ",
+   "handle": "@tastyliveshow",
+   "title": "tastylive",
+   "studies": [
+    "youtube_top20_pool"
+   ],
+   "status": "listed",
+   "note": "candidate pool of the top-20 study"
+  }
+ ],
+ "videos": {
+  "-0f2mu2LU1M": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "-23qZlF2Dw0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "-AHJGdaVYJ4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "-BhaccOV3Lc": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "-M72xdjAbFM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "-OEwOy11f5w": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "-TV0ftuQ9RQ": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "-aKsGNhT1c8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "-ctjPFOozr8": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "-gem0ZcOhGE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "-ogElzwPKeo": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "-qnLeSGKBcM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "-qzAPXVEiCI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "-w-Q2AEfqq0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "000-comment": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "0EXVG4kPAm0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "0MasZZQiL5s": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "0Rp4go9i8Ds": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "0W921dFlW94": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "0ZD3TMFBxck": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "0igedWz9xD0": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "0jzwrqtzeiU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "0rZcz6dGpOQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "0tD0PtNIjCg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "0uHk9vj-7Xg": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "0yINMOx9ihw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "100-deposit": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "10SwCXmeTyE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "1F2qE6yabfM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "1HkTNXLEI9U": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "1MdYQPVT5AY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "1P2q17kSyxI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "1REfmPEfvVk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "1TFcGjMwh4s": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "1Y0KMUSfHRk": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "1e4-gkQnhQs": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "1eZGoLFK7Xg": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "1hZMOSd34vQ": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "1jiVUtvOLmk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "1tRIFrumUkM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "1vXLP1eFvTs": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "1w2WL4VGsEE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "1yfmy2C5Yz0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "266rKWgcplU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "2G9fHBEsauE": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "2GJb9c4R0iU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "2HXxuefh6a0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "2IRxYnfbQaI": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "2PCXlKwzNms": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "2Q0-P8s37OA": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "2QWI9nwHBvo": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "2UkFIQAesN0": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "2WkkkZ5N08c": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "2aw70ZxW_Dg": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "2bHtkFnK0AM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "2dnl5TggSJw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "2h5ryPi6ZYo": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "2hQZdrWIJUI": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "2jF09vG3HD4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "2l6JbbbRU9A": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "2lTCVsai2-4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "2oLhwj1E8aM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "2vpuDzAhCLU": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "2vrb_LMQeW0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "2w_7l7x9Zu8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "37h6TLZQQoU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "37uPX6Li-xE": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "crypto_playlist_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "3GqxRTiOLY0": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "3QXl4h4Xb40": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "3Qdk64LmzV4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "3TAUXo6As4I": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "3_NIX-QQQyE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "3dJcozAX2ug": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "3dyf3VCygWE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "3f7TFHpHrFc": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "3gj7MbZ0vHs": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "3kHLk5tWBRg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "3km2GZwV6QA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "3uzWMWOpJoY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "3v9nvXaW0QQ": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "3w-fQPYWcIc": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "42J_foitsdI": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "4JmCYtfjEvM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "4QFQ3PnohEg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "4VMQaVoK8Rk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "4Z-zR1Mx90Y": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "4dVB_g5YeSE": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "4gxJfEprl_o": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "4iGdnVu_pwk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "4iPEKSo_vwY": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "4jIX7v-Tqy8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "4jd1vv9nxP0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "4k8N6q3PVUI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "4kfGvMdPYBA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "4o5OOAyuJ1Y": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "4utw6IHd5lY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "4z-S6Cp8mDc": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "50rVEJhAWdA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "53lNVg9yqV8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "57a1dixbtb4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "5G7l_rDrnlo": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "5X_ZcifasBg": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "5glwOHR6nEA": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "5h7_96ioFWY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "5i4VRyFPaxg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "5k5t8nonFb4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "5pp6TMGC35g": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "5sBhLQjof7M": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "615D-5qOtag": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "61LsfgoRJFk": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "64kNx-FY1Uw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "68_65YqI_BQ": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "68gMJewN8FE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "6E11fzL4_8A": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "6EaGJoDm26c": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "6FIqehLVShw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "6GATLN2ncsk": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "6Jbghwe8fao": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "6SV6EDXkKJk": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "6UvWqu-c1Ic": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "6gQ0lq7U7Qs": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "6j9aagTNFJc": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "6nMqpn8O9NE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "6pcjJ6t91ZU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "6rc19A3AgnY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "6xIJVG4CRjk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "7-f2OEHyYMM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "75XG-w0ZHdA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "75p1o5qQuYs": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "7ANo_8k18zg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "7ASY4PtZUTQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "7Aq8Pu_pXhQ": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "7LLm0HSarPc": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "7Tz6XWlaQgY": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "7XhVy9z5SbM": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "7bK0aRbS8nc": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "7es2AnoWe1w": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "7k_Bo7Szms0": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "84N6qYTxgHs": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "8Huu4P25ZEA": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "8KWifV8fZiQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "8LQsR7B2vQ0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "8OurAiVyhE4": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "8UGQcAVWQ3Y": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "8X67v5NfY6I": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "8X6wMkpLiqY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "8ZfPIVt4IBs": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "8cgqRS7s3jo": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "8lpFBXGTeDY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "8pu3cRe8hIQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "8thmPwMx6NQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "99fQ_As8Wuo": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "9FCmraBvyVc": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "9MontuYKzR4": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "9NUQcCwLT20": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "9Nvljrq0dQc": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "9UMXvhbZ8AY": {
+   "studies": [
+    "youtube_top20",
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "selected",
+    "evidence"
+   ]
+  },
+  "9a41ZKEicts": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "9aeO8pEHSv8": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "9h6AN12aPgI": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "9hJ_TtYGdzQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "9jr0uX4KPfI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "9m2_bt0vMeA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "9sW4LAVYY4U": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "A-MdplrMAzE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "A2rZqzCz73A": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "A8ouQQGu4Io": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "AN5-Xw2FEwA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "AO5tS1hqMao": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "APUVNDWelRI": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "AXQOIfp7sXI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "AY7fWmE1CBk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "AuArOT-tK9M": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "B9DW6O8VvlQ": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "BDWoHttOCN8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "BQly-9yUQwo": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "BaF-joXcm3o": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Bh1C7zPZNXs": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Bj4ckno_O-w": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Br8-ipCt4mg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "BxWVG9qlG94": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "BxX80NBiiEI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "BzBDmNeQyco": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "C-DuAT2WvuQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "C6j1zQCXbao": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "CB1FA0xnJ7A": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "CF-3gUqJ0Vs": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "CHD5Rx8Sj8I": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "CXhidQTuhEU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "CYHhcevI8IA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "CYYRkXeoNkQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "C_73IFsYZFg": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "Calculation": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "Candlestick": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "CbHImtZ7VgE": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "CdXPfxB08_o": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "CeHFDebhZwA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Ci1hKIHL9VY": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Combination": {
+   "studies": [
+    "youtube_top20"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "ComhuOUqlaI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Confluences": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "CsHhtVrsIkg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Cs_9RcJzbJU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "CtOhJaYQX0k": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "CtXMNGn6-vE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "Current-day": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "crypto_playlist_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "D1E9BlXsR-M": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "D9ZubFgO19o": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "DCtyfOCigdg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "DI3ydbq9b6M": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "DKohGRr18ZA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "DLVXDjDFfmE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "DPuLOvRHBEc": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "DYXUb6S2rz0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "Definitions": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "Demand-zone": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "DlxwEbnS3L8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Dr3V_7ELUHE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "DsZ0mYyQXec": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "E2OMijlhCBo": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "E4Q4vgRCpok": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "E7o6WmS4TPM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "E9F_aT9f038": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "E9lxz6H-m54": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "EDXIy6YMmJ4": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "EE3AftNnVNk": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "EIA095N86Vk": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "EISy2AIXZrg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "EITmOSIhzn4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "EItKEq6wwB8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "ELmqM-mGKlo": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "ETEsU6iNqYg": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "EU3R57BUKGI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "EV8weAD-pyU": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "E_oFVW6rrVM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "EdjMiGow3XI": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "EeEer9BnXi8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "EmDQPX7DO8g": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "EmGHT8ASB0M": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "EpeP3xBlrR8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "ErYF1NutmLc": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "Experienced": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "Exponential": {
+   "studies": [
+    "youtube_top20"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "EyYCPbZpf0g": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Ezlqgr74DC0": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "F1S6OF5LFV8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "F9W8clfvp2k": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "FAt3PiB8-cM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "FB4F-6njl3E": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "FVG-forming": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "FYyANknORCo": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "FZRFbOrI7ug": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "FZ_feWDhzhk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "Fc9o39iHrII": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "FjxG1-dGzyU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "GFgUSeNA_NA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "GM3S0Zg1twM": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "GPWdCK5P-ZI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "GQIf3qSDl0M": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "GTOyBPNPk5c": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "GUKg_sTMwGk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "GXSNSC3LHZY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "GZBl62jO8SY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Gc-xw57Zrg8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "GcXF_Jp5GyA": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "Golden-hour": {
+   "studies": [
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "GuhUEZglNYE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Gv2irT8javk": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "H3AeKS2APdk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "H75naz3lJOg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "HCoHOzZ6cCM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "HJFAfD67aPI": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "HJu_Nxj495I": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "HONU7mM0RGo": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "HONlprzggHU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "HSoePo8WzS0": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "HSpzdiie99s": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "HT0WnagbS4M": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "HbSrmk1nD8w": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Heikin-Ashi": {
+   "studies": [
+    "youtube_top20"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "Hj56fabq2c8": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "Hn52t3ltqqg": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "HpzCDBNOZUs": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "HwIQ-7ug2K4": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "HxBwAconvqA": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "HzVEPVuG1ZA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "HzjhGbaTgQI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "I4_l9hny42U": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "ICu87PqKg3Y": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "ID48Wsb30Ns": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "IEhuHSComYk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "II4B6AlOwQg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "IKuQYg0jcO0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "IOBoaM71MUA": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "crypto_playlist_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "IPM0sg4m534": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "IPXKi3fic_c": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "IRBrPbPrKME": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "IVwAoiwaJMg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "IWk9kf2wQJo": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "IaEjcuBNPgg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Ib29qwuKZVE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "IbBVdsqIcOc": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Idw7qPqBWSA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "IuCIjXMX1Ss": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "J7pDrWcJ16c": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "J9FA7Ouc9i0": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "J9mz71XaF3I": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "JO_HVljXOYo": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "JSRIpkHfjUA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "JSetkeDxS1g": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "JdE8PqOy6kw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Jh5rJskkEkU": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "JjR7XUXFFJ4": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "JqCoDJzooFc": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "Jvg9c7Ba36M": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "K0EtGJeLpjI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "K9iTmZT4Y10": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "KaGCRCXVOVc": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "KbiMALYzYMc": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "KkoIG1DUVeI": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "KrEpE3TP8xk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "L4ZHVgWq-co": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "L5CFrgSK8wY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "L8cnyJ0D_NY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "LBSyM7DwzIg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "LE4mVpBIDso": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "LH_0SxIoz8Y": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "LOJPJyUd66o": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "LPJXdaxfB5c": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "LSNX9sEyf8I": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Lb4yel3nCws": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "LexC498CNGE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "LgI3TLiTBtk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "LnVRWQqfIZs": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "LrILW6JRNq8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Ls70aUR6R0s": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "LxiS75iIpPc": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "M2vonvlfrZ4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "M51L5OXN-E4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "M5NISnxBzeU": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "M94Rv1TI8fQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "M9js-12Hylw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "MAz8kT_AoAI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "MG2FtsJTV0Q": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "MJNDpdvnVZ4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "MK47z07tGNM": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "MOCbUrKWVtU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "MSi8byaWnII": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "MVI7Jm_abrg": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Ma1HnAXxww4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "Masterclass": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "Methodology": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "Mislabelled": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "MjSUrUnqce8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "Mt0uebHIu7s": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Mu5LM_akbrI": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "MypSrcfiqtM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "N1EwDo3fdmU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "N1arMmZpS2M": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "N3VDbcqilys": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "N8SsGMpUgYk": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "NBN3iZOK6Ow": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "NDaepsNi8hs": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "NEIdghSvHOc": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "NGUOON2mNw8": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "NGenf0zaBoQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "NPfYVbmCuCg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "NSE-VWAP-01": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "NSU_ZGiy_go": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "NUu9LZNLf-4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Neerajjoshi": {
+   "studies": [
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "NqlaqMvPjO8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Nuorx9oVz8o": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "NwCyONUCsC0": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "NxFh8Kog33A": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "NyFSauMDY0A": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "Nyc8KXziAQU": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Nze7_u29y9k": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "O3-Z2LALHJY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "O8r0oBtNIfw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "OCFwki7DH9U": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "OEu-B6gMijU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "OFbl_R4dB6k": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "OPt8YGE1vaI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "Obrd9RI7Ce0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "OjBHTSxE4Lg": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "Olv3IrKacP0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "OnsOQ5MtuSo": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "OoilOgjzUdQ": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "Order-block": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "Oxy1x7_BPwQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "OzIt1SEisBY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "P1K4qwXT1hw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "P58WDtNkkX8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "PFEJFWxoODU": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "PH0m1eWvU2E": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "PLUwHTK6ab0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "PMxtmeOZegw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "PRGia9PO5Zw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "PSTNeIbQ88I": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "PkAtVH6YVM8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "PlqCP0d5DsM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "PnIkSLm2yRk": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "PpyM8gwfJoY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "Promotional": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "PtloOrPMD-Y": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "PvObytxaLTw": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "Pw74EDSHYSw": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "PzVyGPzrzAg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Q9gjxphhdwc": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "QBIsYw8iqPY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "QBjhVcW0OJQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "QGXmyjwJ1aE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "QH3KAJGumos": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "QNR1iJQD9RY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "QNvqgdWmXco": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "QRFCRf2PPSA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "QTDX-f7_phI": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "QVHGHFBfur8": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "QfLoyBl5YNs": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "QgGXXRbiEm4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "QhowsVqI2NI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "QlRqLRx2jaA": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "QqQLqWMjcsc": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Qt5-q9TbMBc": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "Qu9_ugsG6Z8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "QyEhAuFem6Y": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "R2hZlnh37fQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "RD7hrmPTWm0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "RMwUsnJB40c": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "ROShVG0ylGg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "RRkBg1ytgzg": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "RTbVZfriRrw": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "RYV_0mUZ7RA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "R_9sMl4crLU": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "Recognition": {
+   "studies": [
+    "youtube_top20"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "Registering": {
+   "studies": [
+    "liquidity_sweep_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "Replication": {
+   "studies": [
+    "liquidity_sweep_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "Retracement": {
+   "studies": [
+    "youtube_top20"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "RiB6hiAqscQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "RiMGGWnlFdU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "RiOv30JZdt4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "RnpUmpjEsN0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "RqNZkVIM-8M": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "Rsx2DpdtjA8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "RunUl7eFx44": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "S09RnVo_T2U": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "S46SaUYIpNg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "SE5AzlAsZec": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "SFpFkQfr-pI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "SV5-LHF91Bw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "SW4kxaqJ9QQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "SXWlUXVX8Ko": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "SZMabgLYzwE": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "S_KmUlBla_o": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "Sa8q2sY8174": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "SduNtuHVPXw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "Smart-money": {
+   "studies": [
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "SoCTj459O6Y": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "SxQwiHBfHUs": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "Symmetrical": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "T-rRIVOi0jY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "T04vDiuAG4w": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "T2RG0Fn_t0Q": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "T2szoJq_rFc": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "T3AyXqau_QA": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "T3nYP3Ca0mQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "T4skXSeY3mM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "T9w_j3qyb14": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "TDQW8QUZ6LY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "TFLcWx-Eufk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "TI8rigg6mpo": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "TIQeTWWc1-8": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "TOpg1R0QqTA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "TQYEWBhMQM0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "TZf3HOM5Xe8": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "T_VlPXyqj0U": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "Testability": {
+   "studies": [
+    "youtube_top20",
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "Three-touch": {
+   "studies": [
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "Time-of-day": {
+   "studies": [
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "Tj_eVkcuHtM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "TldkZHjh-54": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "TradingView": {
+   "studies": [
+    "youtube_top20",
+    "booming_bulls_2026_11",
+    "liquidity_sweep_2026_11",
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "Traditional": {
+   "studies": [
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "Transcripts": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "TrnwDFPfk0c": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "TtboAdRE3hY": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "TvWTYw5nONI": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "U2DGJtNS03M": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "U3_47LWge-Y": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "UAMqfnoFw68": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "UOPJbSLBoO8": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "USA30IDXUSD": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "UTO6e69GGSM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "UUbubd80xco": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "UUpP6l35u1A": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "UYf6aJEwIr0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "UaNEHuWiWZg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Ucrfbg-EvGA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "UeV17V0YldM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Uucmji4XbWU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "V4fYRC5sZYE": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "V5nm2aCtfN8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "V9JRjzLAjNI": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "VAZXz_ieec4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "VEWpdKQJWlg": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "VHUIE8sfHwk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "VKVBzL--SE8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "VShXp7GA0js": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "VSsvcYq5eUw": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "VX-JFo3w0AQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "VXahxp3hNQg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "VYNEvDhcV1k": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "VeRFSaOj6S4": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "Vg6H5dlwzrs": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Vjt4ZKD8pbI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "VrvNUyzBwXs": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Vw1zn3GkCxs": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "Vzbsx-8onHI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "W0CslQHEPrk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "W8ENIXvcGlQ": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "W8XueRV63Ao": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "WB2b4EOYORc": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "WBGwNX0K9w4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "WLR6S3mgOkk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "WMTzy-xbBRg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "WRIWzdPA-x4": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "WScZLXOHkAk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "WUskSpW7AyY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "WUt-mnwcQ4Q": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "W_2LWsTpVqg": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "W_3Znj5l8ps": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "WaW2vvqONI4": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "Whu0KMg9ga0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "WsCUyzrkss0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "X-cXuxvSg0c": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "XC447eCThUI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "XC6AL1mEZIQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "XDCW2kXVbc8": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "XKl6w91JFY4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "XLYELAeF0cQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "XOAPW8nUYSk": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "Xa0m_ytnDW4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "XjsG8Ygl3sI": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "Xk4MrKCrxb8": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "XkcFmUUvwP4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "XlfMEKV3lNo": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "XniIt3tDSI0": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "XurmC12Wp08": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "XyRHb7YEYxs": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "XyqcPbXiF1k": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "YBUrHpGUst0": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "YEswhH1-5Jo": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "YIgNsAwNCC8": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "YKk2WmtZNS0": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "YQ89wl4NE1c": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "YScZi-qNCEY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "YW5oDzVfWeU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "YZHlP2Ng0t4": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "YpGl4oJB2sE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Z0T-OWvruGo": {
+   "studies": [
+    "crypto_playlist_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "Z1m66Is8lJ4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "ZEqfiVSbDG0": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "ZNc9Lt1f3pQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "Zf7feCjYLdo": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "Zi0Jb1o7ltA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "ZjejkMjb2q8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "ZkSHMniltv4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "ZnGTeEKownM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "_2dwmtv1u90": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "_IDVjawvx8g": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "_TKeU-HF8is": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "_TRKQh-eDAE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "_YJh5jrEgzQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "_d1lHMbIcSg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "_jAJB8xBuvQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "_kRoHbfzK3I": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "_kzobEWVgKE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "_oc_SpFo12Q": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "_rLZ0Ga3Uu4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "_xCBmGoH_9g": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "a-VAXIg4gZc": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "a15pKb19MDU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "a2mPpV6qK_4": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "a675iO0U7RI": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "aFwdDq1hFgo": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "aHusxL16OGI": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "aJ0HwwtPQbo": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "aLwpyla5Hrk": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "aSN1RjRChwE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "aVUFnXN_D2s": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "aXxxaJlTO1A": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "aiFTeLQySsM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "apx3r6rRjvI": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "asDBegQaupM": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "auto-dubbed": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "b0D4mvFZa5k": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "b4LbA6DtiVk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "bA4GYgh13fk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "bLVNs9HD1dw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "bNdyeSxKVfE": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "bQiim3mZEZo": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "bRCLewwFH4E": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "bV1OkS_-Pjg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "bYIHPBm1CIY": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "bZYuWfbR5M4": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "bcXd6rB8JYs": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "beaten-down": {
+   "studies": [
+    "youtube_top20"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "before-cost": {
+   "studies": [
+    "liquidity_sweep_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "bh-QJayhADM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "bhwg7B3NG2s": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "bj6hVKjweZ8": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "bottom-most": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "bqFFSaYZnjg": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "btp0qIIa0Qw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "c2pBpSdxQZ0": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "cFqdpiHokDw": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "cFzD500aQFM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "cH9Sjpo9Cl8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "cSWC2WwbhHE": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "cX-V38wxSBM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "cZYwHdF-GpM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "chGE1IpB5pE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "cpGQRKPOnXo": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "cq-LP4K2AHU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "cross-check": {
+   "studies": [
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "csAIsLYDADA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "ctpGuhCCAtE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "current-day": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "d--zlXbSWUA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "d41zCFpEoio": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "dGplrlV-itY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "dJ4QitUYo90": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "dMEZFnN9HrU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "dMQJgSv_NPI": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "dWVIXC-j7Qo": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "dc57OIIJDpM": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "djC2hSdNo74": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "drS8GY1Bnsg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "dwuTRDcsgDg": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "dyxZq1_DLPg": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "e32cqnu8wVU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "eOv7LBJnHNY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "eT4kr2HDXoE": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "eY9bWGZDN9c": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "eaIuQ-gtYZk": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "en8RMFRqSME": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "eob4wv2v--k": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "exit-candle": {
+   "studies": [
+    "liquidity_sweep_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "f2o8csdl5o8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "fBTMspiqjS4": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "fBbwDhtER9c": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "fEQadvrrXl4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "fFCnqLuq-Gw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "fG5U4dsY1SA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "fJQk4Zs8bmY": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "fN8E6oLjuY0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "f_L7xwlu2Jg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "false-break": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "fejUiGncDT8": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "ffnjYy6HYZE": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "first-touch": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "five-minute": {
+   "studies": [
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "fmHPUP-6abc": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "fpek3NsEXyI": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "full-bodied": {
+   "studies": [
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "fxJBob4qORo": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "g6cP4JVpsTA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "g7ROmikPfm4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "gDaxOMHgN-Y": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "gECKHjUnEjU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "gM3x9cqizfI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "gNoByC3ZEOo": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "gcuQXj0zT2w": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "gi1h5Fvn7nY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "gk7sfzWgkaI": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "good-volume": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "gzk4_cv_X1U": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "h-ro-OaL31c": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "hC-USE9kW7o": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "hGYfGHEtkJc": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "hQUzPpf5qMU": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "hSMdshUMEjY": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "hTDVTH8umR8": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "hXtpVnpjuXg": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "hZUMOKzeq8U": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "half-profit": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "hand-picked": {
+   "studies": [
+    "youtube_top20",
+    "liquidity_sweep_2026_11",
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "high-volume": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "higher-high": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "hkqw42lxGLg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "hrXGvuRvQWQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "hrr0tQypElY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "hvG7tOqhUgo": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "hxzRM3Fb41I": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "iCtkq7jRnys": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "iHCzV0vUay4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "iTWMIaqYLJg": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "iUIIVADq_TM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "icml_txwHdY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "ieZ--wMeSxE": {
+   "studies": [
+    "crypto_playlist_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "inverse-FVG": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "iogYnOEDzdk": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "iorriHcOpdU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "jAdedNX4pus": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "jG_RCGhYd1U": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "jTrkyhQ49Lk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "jU5OociN7_E": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "jWyAH_hs68A": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "jZmra3YTQ8Y": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "jc3DySIdok4": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "jdYNaE5GJ0k": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "jhxQSEsud04": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "jpdXGnhLfOc": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "jvzd7UPlb5Y": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "sniper_headshot_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "jw0AZCQOXOQ": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "jzdRAoxRMyc": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "k0k6mJZsljk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "k2rj2UWnA9s": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "k5tcx5y4yVI": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "k805sEB58YU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "k9r_OGTlqFA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "kCMZhMTXgwo": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "kCxz5ESvlt4": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "kUIfdwlKdaM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "kYahbSjbubQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "kakFchv-ylo": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "koBt4wka7C0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "ktfUPAoOjnE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "l-U-7jTvVp0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "l-fcCGE5AA0": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "lFoalF0ehc8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "lHhtVfeoCdQ": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "lHuS74qpflI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "lLoNbjzhMIU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "lMMdvriN0d8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "lNmBBd2MIhU": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "lOSPQVZLixY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "lYr7pBtCORs": {
+   "studies": [
+    "crypto_playlist_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "la52ZjU-5nI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "leH4wnHSDxw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "lhRNne1m25w": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "lmZenCehacw": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "lmuTmzFA9q0": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "local051216": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "local568960": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "local911880": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "lp57qG4Evj0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "ls2sDLoGh4M": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "ls_versions": {
+   "studies": [
+    "liquidity_sweep_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "lxx5PQJr16c": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "mERN3m0kDzg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "mEqAjWoJUBg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "mJG5XiMHjFw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "mMqk5s8Vycs": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "mOSuaJONpXI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "mTEvVQ3AWf0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "market-wide": {
+   "studies": [
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "mb0AeY9YyPg": {
+   "studies": [
+    "crypto_playlist_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "mdR4xijBaKE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "mfGQr2tHoX0": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "mlrWUBI_Bp8": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "mnI8i_DLwSc": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "money-maker": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "multi-touch": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "mv2b0R1ovoQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "n2eHieivtXw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "n3aumdwdJmo": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "nCJgzNpnKiA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "nF7De_Z2Wnc": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "nKd4HWjje2Q": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "nLn3_C361j8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "nMJKsFMqz7Q": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "nPVISNpXmtQ": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "nRV866IWnnU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "nTcMWVe_Ntk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "nY5mbAP00iM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "narxkmahIfY": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "ndwgVZ9D1_w": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "news-driven": {
+   "studies": [
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "next-candle": {
+   "studies": [
+    "liquidity_sweep_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "ngEcBdQxs00": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "ng_QCb1jI8w": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "npQLCh0c2ro": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "nwxm6LD04sI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "nySh1Ij5Srg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "o-0xo5CMU20": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "o1-9lWz4EHs": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "oC7ssQOn8Fs": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "oDAbyG_ZKjU": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "oDOCBTYgCQM": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "oEc3_vjg6PE": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "oNU6slsE0L0": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "oP_oYRAzRHw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "oYGPy18Q06I": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "ogZR_2gZFxY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "olf3i2Eiw5I": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "oo_bmEgt6o8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "oq39-WbyaxU": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "oqzgq4StNS8": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "order-block": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "otTTDxUYy4k": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "oveeCcTxXsY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "own-capital": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "p8Ywu5jvTUI": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "pDuMtj60Efc": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "pMFP4UuFmjI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "pO1KUShSS20": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "pgiuaNZdAQw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "pitBrUMb7PE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "ppuEOzpEYlg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "pre-decides": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "price-based": {
+   "studies": [
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "pzrqtyzwOM8": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "q-PVrUCuUWI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "q02_LyIXZlk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "q08rNVGEtrc": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "q3NL2z0a-sk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "qDaEKmJ2AI4": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "qGtAd3wqPZ0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "qIT0Kk2Ne28": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "qLtq73bTPBA": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "qM8XpTKke8s": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "qMQnQLo_39I": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "qPBdLsiEa3s": {
+   "studies": [
+    "crypto_playlist_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "qXQbWGzKovQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "qZYsR4mivbQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "qZaY5z7m5SQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "qd6hCjK0y_4": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "qdxmpwLYq0g": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "qeE1CJ84h3k": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "qg5CZFys7GQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "qs_8OH_Vt7o": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "qtvzG4TI3HU": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "qz345WaXKPs": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "r-QH1NC1Nlc": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "r1hSvWDu5Pg": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "r2LzjTUs3lo": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "r3cbKsUItwM": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "r96JUvEANlE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "rFrFhpwJJOc": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "rU0vQUTNXVE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "rZHjNu5zD9Q": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "raW-ZcsXXgs": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "range-bound": {
+   "studies": [
+    "youtube_channels11",
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "re-entering": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "risk-reward": {
+   "studies": [
+    "youtube_channels11",
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "rqgWWqDmsfI": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "rzxv2IyBuK8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "s6Y4higMT1Y": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "evidence"
+   ]
+  },
+  "s7p-ymy_yEg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "s8l4H2BeveI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "s95D05i_6ao": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "sO5RXkEdbOU": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "sUcvpDSsQz0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "sXh-MKPjHYg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "saFmyPH2y1U": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "same-colour": {
+   "studies": [
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "signal-line": {
+   "studies": [
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "slUuTYS7RUQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "smart-money": {
+   "studies": [
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "stand-alone": {
+   "studies": [
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "strong-body": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "swing-level": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "swing-range": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "swing-trade": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "sx2g9SX7QL8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "sy5RwezT_CE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "t-statistic": {
+   "studies": [
+    "liquidity_sweep_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "t5ItITJlaPQ": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "tCDjjppruBo": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "tFHyr0nRZaU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "tI-SlBodbSE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "tIbfEf3soUI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "tLQuEUQAvYE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "tRq1hyGGtl4": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "tT5zA0o0Zzs": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "tTtwhV2u5Kg": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "t_y7c4xsBlM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "t_ziTZLkiXA": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "take-profit": {
+   "studies": [
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "tbNwlGBwfYk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "td3gb3cZ_Qc": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "tdjrwxzY4fI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "tfFTiv6H4mc": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "thbpmdMYuu0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "third-party": {
+   "studies": [
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "three-touch": {
+   "studies": [
+    "youtube_channels11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "top-scoring": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "touch-count": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "trend-based": {
+   "studies": [
+    "booming_bulls_2026_11"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "ts2BtezyWSg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "tuLqO33fihU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "tw0ChZ5DoDs": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "ty1U2589_lw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "u2MDljbzU4Y": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "u3XqxZrnBDY": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "u3g1Zk7GiL0": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "u6CumeL2gx8": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "u6GxOhxB3AQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "u7Npiub4iAA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "uGoNkUWrPZ8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "uLw-qdpV3uk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "uROK24QxqYk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "uUa61jN45vM": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "u_CEsr1RKEA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "ueO1AQS6LMk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "ukIfXqaQ7hs": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "ul22YYIrP3U": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "urbBcx_IWMw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "uu3zGIXaG8g": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "uxkMQ7MH55A": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "uy7GXqCmhNY": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "v3lfIdpKSiU": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "v5AUeTSUiiM": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "vRc6v4764fQ": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "vS1VRU3hkxk": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "vSaOXIwMp8c": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "vUAus3x-0mA": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "v_qLalOIJaA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "vdgAQ0mI8N0": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "vlA_5VdNZhw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "vldS7qhIYE8": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "vmI2dxCXPOw": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "vp-3Morug0Y": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "vr6ZsreYRAI": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "vxf1SuPNViU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "w5LcPFWpw2E": {
+   "studies": [
+    "stockforce_2026_07"
+   ],
+   "kinds": [
+    "cited"
+   ]
+  },
+  "w6es4wcSZ0c": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "wLIdaNFAWVQ": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "wR92IZKSgsY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "wXKg99kqFHk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "wZcXGU0v7zU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "wbfXaqjIrJ0": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "wpXFQlig3-M": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "wqyBXMct7EI": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "wvPzUW4Hvgw": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "x0Gq-RFkHSQ": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "xEcoUrUUhWg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "xG8jxyTp7uc": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "xJMbva8SjzE": {
+   "studies": [
+    "youtube_top20",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "analyzed",
+    "cited",
+    "evidence"
+   ]
+  },
+  "xJi3L2TFw-c": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "xMuD2ueoN-8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "xTyycYmFb_k": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "xWU-1_eAk8s": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "xWl9BZ1_uHc": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "xc0WviiF8NA": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "xd1N7Eb4PEs": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "xmRyk4y2j2c": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "xnG5aeOzJZc": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "xnwf8wFfAxo": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "xt1Ktfu3cx8": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "xyqoSTHBgaM": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "yKtI-VEMwC0": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "yUCYvEDhBBI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "yaOGOlSBUOY": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "yeDdFfEVSKE": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "yoOiDanh51Y": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "z3ajxStNPSs": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "z87w-ZdQQxg": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "zDWQIKtzoMQ": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "zFlkxysCa1U": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "zJ1PnnhMOLM": {
+   "studies": [
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "evidence"
+   ]
+  },
+  "zJ3FCKcin_k": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "zKVrLvNsd5o": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "zKgQwXt3z9o": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "zO_VOqEwqxk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "zRqkK40oW38": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "zYGUL82NsS4": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "zhCyKBzUopk": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  },
+  "ziqOkADp9qU": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "zm9emzopBi0": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "zpFH6GhsBR8": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "evidence"
+   ]
+  },
+  "zrEeFLw322M": {
+   "studies": [
+    "booming_bulls_2026_11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "cited",
+    "evidence"
+   ]
+  },
+  "ztt9o64MPgI": {
+   "studies": [
+    "youtube_channels11",
+    "video_lab_evidence"
+   ],
+   "kinds": [
+    "selected",
+    "cited",
+    "evidence"
+   ]
+  }
+ }
+}
