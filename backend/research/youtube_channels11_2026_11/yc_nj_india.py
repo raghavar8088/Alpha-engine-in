@@ -703,26 +703,34 @@ def nj19_x(m, B, p, cache):
 
 # ── NJ-20 200-DMA cross candidates from the top 100 by turnover (NSE 5-minute pool) ────
 
-def nj20_context(daily_markets) -> dict:
+def nj20_context(daily_markets, since: str | None = None, symbols: set | None = None) -> dict:
     """The candidates' inputs from NSE daily rows, keyed by session date: ctx["daily"][symbol][date] = (close, SMA 10,
     30, 60, 90, 120, 200, daily ATR 14) at that session's close; ctx["top100"][date] = the 100 symbols with the
-    highest traded value that session. A 5-minute session reads the entries of the session before it."""
+    highest traded value that session (ranked over every daily market). A 5-minute session reads the entries of the
+    session before it. `since` (ISO date) and `symbols` keep only the sessions and stocks a book will read (the averages
+    still use the whole history)."""
     daily, by_date = {}, {}
     for m in daily_markets:
         c = np.asarray(m.c, float)
         val = _value(m)
         if val is None or len(c) < 2:
             continue
-        s = [I.sma(c, n) for n in (10, 30, 60, 90, 120, 200)]
-        pc = np.r_[c[0], c[:-1]]
-        tr = np.maximum(m.h, pc) - np.minimum(m.l, pc)
-        a = I.rma(tr, 14)
+        j0 = 0 if since is None else int(np.searchsorted(m.date, np.datetime64(since)))
+        if j0 >= len(c):
+            continue
+        keep = symbols is None or m.name in symbols
+        if keep:
+            s = [I.sma(c, n) for n in (10, 30, 60, 90, 120, 200)]
+            pc = np.r_[c[0], c[:-1]]
+            a = I.rma(np.maximum(m.h, pc) - np.minimum(m.l, pc), 14)
         rows = {}
-        for j in range(len(c)):
+        for j in range(j0, len(c)):
             key = str(m.date[j])
-            rows[key] = (float(c[j]), *(float(x[j]) for x in s), float(a[j]))
+            if keep:
+                rows[key] = (float(c[j]), *(float(x[j]) for x in s), float(a[j]))
             by_date.setdefault(key, []).append((float(val[j]), m.name))
-        daily[m.name] = rows
+        if keep:
+            daily[m.name] = rows
     top = {d: {sym for _, sym in sorted(v, reverse=True)[:100]} for d, v in by_date.items()}
     return {"daily": daily, "top100": top}
 

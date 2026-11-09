@@ -146,14 +146,14 @@ def attach_value(daily_markets, npz_path) -> None:
             m.value = np.asarray(value[a:b], float)
 
 
-def contexts(needs: set, *, nifty=None, nsed=None, pool=None) -> dict:
-    """The p["ctx"] a pool book needs."""
+def contexts(needs: set, *, nifty=None, nsed=None, pool=None, since: str | None = None, symbols: set | None = None) -> dict:
+    """The p["ctx"] a pool book needs (`since` / `symbols`: only the sessions and stocks the books will read)."""
     ctx = {}
     if "nifty_gap" in needs:
         ctx["nifty_gap"] = nifty_gap(nifty)
     if "nj20" in needs and nsed is not None:
         import yc_nj_india as NI
-        ctx.update(NI.nj20_context(nsed))
+        ctx.update(NI.nj20_context(nsed, since, symbols))
     if "ss03" in needs and pool is not None:
         import yc_channels as C
         ctx["ss03"] = C.ss03_context(pool)

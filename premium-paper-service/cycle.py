@@ -187,7 +187,8 @@ def _yc_stock_context(pool_books, panel, now: datetime) -> dict:
         if "nj20" in needs:
             dm = F.nse_daily_markets()
             R.YCR.attach_value(dm, F.NSE_FILE)
-            ctx.update(R.YCR.contexts({"nj20"}, nsed=dm))
+            ctx.update(R.YCR.contexts({"nj20"}, nsed=dm, since=(YC_START_DATE - timedelta(days=10)).isoformat(),
+                                      symbols=set(panel.names)))
         if "ss03" in needs:
             ctx.update(R.YCR.contexts({"ss03"}, pool=(panel.market(i) for i in range(len(panel.names)))))
     except Exception:  # noqa: BLE001 - a missing context only leaves its book without setups
