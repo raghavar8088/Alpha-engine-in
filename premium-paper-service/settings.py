@@ -23,7 +23,7 @@ SH_START_T = int(datetime.fromisoformat(os.getenv("PREMIUM_SH_START", "2026-11-0
 SH_START_DATE = datetime.fromtimestamp(SH_START_T, timezone.utc).date()
 # The 11-channel books (catalog.YC_STRATEGIES) trade every market forward from this moment, flat at the start; nothing
 # before it is back-filled. Bitcoin's books need longer history for their indicators (EMA 200 on 4-hour candles).
-YC_START_T = int(datetime.fromisoformat(os.getenv("PREMIUM_YC_START", "2026-11-09T03:45:00+00:00")).timestamp())
+YC_START_T = int(datetime.fromisoformat(os.getenv("PREMIUM_YC_START", "2026-11-09T10:00:00+00:00")).timestamp())
 YC_START_DATE = datetime.fromtimestamp(YC_START_T, IST).date()
 YC_BTC_WARM_DAYS = 150
 
