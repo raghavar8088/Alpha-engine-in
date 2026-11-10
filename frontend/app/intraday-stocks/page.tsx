@@ -11,7 +11,7 @@ import V2Validation from "./V2Validation";
 import { AlarmBanner, EdgeReportPanel } from "./IntradayOps";
 import ResetBook from "./ResetBook";
 import GatedBooks from "../../components/GatedBooks";
-import { RankNote, RankTd, RankTh, boardFromRows, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
+import { RankNote, RankTd, RankTh, boardFromRows, rankDays, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import LineChart from "../../components/charts/LineChart";
 import {
   refreshing,
@@ -103,6 +103,17 @@ const liveBookName = (key: LiveBookKey): string => {
 // Distinct from the file's existing `pct`, which formats an already-scaled percentage.
 const roiPct = (v: number | null | undefined, dp = 2) =>
   `${(v ?? 0) >= 0 ? "+" : ""}${(v ?? 0).toFixed(dp)}%`;
+
+// The three return columns on every leaderboard here (10 Nov 2026):
+//   Return %             net P&L as a share of the capital the strategy invests (each header says which);
+//   Trading days         sessions on which it closed at least one trade - the Rank's own day count;
+//   Avg % / trading day  Return % spread over those days. A mean of the past, not a forecast.
+const returnOn = (net: number | null | undefined, capital: number | null | undefined) =>
+  net != null && capital ? (net / capital) * 100 : null;
+const perDay = (ret: number | null | undefined, days: number | null | undefined) =>
+  ret != null && days ? ret / days : null;
+const signedPct = (v: number | null, dp = 2) => (v == null ? "—" : roiPct(v, dp));
+const toneOf = (v: number | null | undefined) => (v == null || v === 0 ? "" : v > 0 ? "gain" : "loss");
 
 /** Realised P&L per session, net of Angel One costs, expressed against desk capital. */
 function DailyRoiPanel({ rows, capital }: { rows: DailyRoi[]; capital: number }) {
@@ -809,6 +820,9 @@ export default function IntradayStocksPage() {
                   <th>PF</th>
                   <th>t-stat</th>
                   <th>Net P&amp;L</th>
+                  <th title="Net P&L as a share of the strategy's own allocation (Allocated − Net P&L)">Return %</th>
+                  <th title="Sessions on which it closed at least one trade">Trading days</th>
+                  <th title="Return % divided by its trading days">Avg % / trading day</th>
                   <th>Allocated</th>
                   <th>Verdict</th>
                 </tr>
@@ -817,6 +831,9 @@ export default function IntradayStocksPage() {
                 {scores.map((s) => {
                   const bar = s.t_threshold ?? status?.gate?.t_threshold ?? 1.96;
                   const clears = (s.t_stat ?? -99) >= bar;
+                  const ret = returnOn(s.net_pnl, s.allocated_capital == null ? null : s.allocated_capital - s.net_pnl);
+                  const days = s.trades ? s.sessions_traded ?? null : null;
+                  const avg = perDay(ret, days);
                   return (
                   <tr key={s.strategy_id}>
                     {tournamentBoard && <RankTd board={tournamentBoard} id={s.strategy_id} />}
@@ -830,9 +847,12 @@ export default function IntradayStocksPage() {
                     <td className={clears ? "gain" : ""} title={`needs ${bar.toFixed(2)}`}>
                       {s.t_stat == null ? "-" : s.t_stat.toFixed(2)}
                     </td>
-                    <td className={s.net_pnl >= 0 ? "gain" : "loss"}>
+                    <td className={s.net_pnl >= 0 ? "gain" : "loss"} style={{ whiteSpace: "nowrap" }}>
                       {s.net_pnl >= 0 ? "+" : ""}₹{inr(s.net_pnl)}
                     </td>
+                    <td className={toneOf(ret)}>{s.trades ? signedPct(ret) : "—"}</td>
+                    <td>{days ?? "—"}</td>
+                    <td className={toneOf(avg)}>{signedPct(avg, 3)}</td>
                     <td>₹{inr(s.allocated_capital)}</td>
                     <td>
                       <span className={`badge ${s.verdict === "READY" ? "gain" : s.verdict === "REJECTED" ? "loss" : ""}`}>
@@ -990,7 +1010,7 @@ export default function IntradayStocksPage() {
         {patRanks && <RankNote board={patRanks} />}
         <div className="table-scroll">
           <table className="data-table">
-            <thead><tr>{patRanks && <RankTh />}<th style={{ textAlign: "left" }}>Template</th><th>TF</th><th>Family</th><th>Style</th><th>Trades</th><th>Win %</th><th>Fees</th><th>Net P&amp;L</th><th>ROI</th></tr></thead>
+            <thead><tr>{patRanks && <RankTh />}<th style={{ textAlign: "left" }}>Template</th><th>TF</th><th>Family</th><th>Style</th><th>Trades</th><th>Win %</th><th>Fees</th><th>Net P&amp;L</th><th title="Net P&L as a share of the strategy's own capital">Return %</th><th title="Sessions on which it closed at least one trade">Trading days</th><th title="Return % divided by its trading days">Avg % / trading day</th></tr></thead>
             <tbody>
               {sortByRank(patBoard, patRanks, (r) => r.strategy_id).slice(0, 200).map((r) => (
                 <tr key={r.strategy_id}>
@@ -1004,6 +1024,9 @@ export default function IntradayStocksPage() {
                   <td className="loss">−₹{inr(r.fees)}</td>
                   <td className={r.net_pnl >= 0 ? "gain" : "loss"}>{r.net_pnl >= 0 ? "+" : ""}₹{inr(r.net_pnl)}</td>
                   <td className={r.roi_pct >= 0 ? "gain" : "loss"}>{roiPct(r.roi_pct)}</td>
+                  {(() => { const days = rankDays(patRanks, r.strategy_id); const avg = perDay(r.roi_pct, days); return (<>
+                    <td>{days ?? "—"}</td><td className={toneOf(avg)}>{signedPct(avg, 3)}</td>
+                  </>); })()}
                 </tr>
               ))}
             </tbody>
@@ -1139,6 +1162,9 @@ export default function IntradayStocksPage() {
               <th style={{ textAlign: "left" }}>Strategy</th><th>TF</th><th>Family</th>
               <th>Trades</th><th>Win %</th><th>Fees</th><th>Net P&amp;L</th>
               <th title="Net P&L as a share of this book's capital">Share of book</th>
+              <th title="Net P&L as a share of one position's capital in this book (its slice), the most a trade invests">Return %</th>
+              <th title="Sessions on which it closed at least one trade">Trading days</th>
+              <th title="Return % divided by its trading days">Avg % / trading day</th>
               <th title="Signals this book could not take: slots full / stock already held / share price above the per-position cap / no cash">Skipped</th>
             </tr></thead>
             <tbody>
@@ -1159,6 +1185,9 @@ export default function IntradayStocksPage() {
                   <td className="loss">{r.fees ? `−₹${inr2(r.fees)}` : "—"}</td>
                   <td className={r.net_pnl >= 0 ? "gain" : "loss"}>{r.trades ? `${r.net_pnl >= 0 ? "+" : ""}₹${inr2(r.net_pnl)}` : "—"}</td>
                   <td className={r.roi_pct >= 0 ? "gain" : "loss"}>{r.trades ? roiPct(r.roi_pct, 3) : "—"}</td>
+                  {(() => { const ret = r.trades ? returnOn(r.net_pnl, r.allocation) : null; const days = r.trades ? rankDays(pbRanks, r.strategy_id) : null; const avg = perDay(ret, days); return (<>
+                    <td className={toneOf(ret)}>{signedPct(ret, 3)}</td><td>{days ?? "—"}</td><td className={toneOf(avg)}>{signedPct(avg, 3)}</td>
+                  </>); })()}
                   <td title={r.skipped ? `slots full ${r.skipped.full} · stock held ${r.skipped.symbol_held} · price above cap ${r.skipped.price_above_cap} · no cash ${r.skipped.no_cash}` : ""}>
                     {r.skipped_total ? r.skipped_total : "—"}
                   </td>
@@ -1180,7 +1209,7 @@ export default function IntradayStocksPage() {
           <table className="data-table">
             <thead><tr>
               <th style={{ textAlign: "left" }}>Strategy</th><th>TF</th><th>Family</th>
-              <th>Slice</th><th>Trades</th><th>Win %</th><th>Fees</th><th>Net P&amp;L</th><th>ROI</th>
+              <th>Slice</th><th>Trades</th><th>Win %</th><th>Fees</th><th>Net P&amp;L</th><th title="Net P&L as a share of the strategy's own slice">Return %</th><th title="Sessions on which it closed at least one trade">Trading days</th><th title="Return % divided by its trading days">Avg % / trading day</th>
             </tr></thead>
             <tbody>
               {pbBoard.map((r) => (
@@ -1194,6 +1223,9 @@ export default function IntradayStocksPage() {
                   <td className="loss">{r.fees ? `−₹${inr2(r.fees)}` : "—"}</td>
                   <td className={r.net_pnl >= 0 ? "gain" : "loss"}>{r.trades ? `${r.net_pnl >= 0 ? "+" : ""}₹${inr2(r.net_pnl)}` : "—"}</td>
                   <td className={r.roi_pct >= 0 ? "gain" : "loss"}>{r.trades ? roiPct(r.roi_pct) : "—"}</td>
+                  {(() => { const days = r.trades ? rankDays(pbRanks, r.strategy_id) : null; const avg = r.trades ? perDay(r.roi_pct, days) : null; return (<>
+                    <td>{days ?? "—"}</td><td className={toneOf(avg)}>{signedPct(avg, 3)}</td>
+                  </>); })()}
                 </tr>
               ))}
             </tbody>
@@ -1383,8 +1415,8 @@ export default function IntradayStocksPage() {
                 {liveSummary?.roster && <th title="Its Rank and score on the Tournament board when this account was created">Picked at</th>}
                 <th style={{ textAlign: "left" }}>Strategy</th><th style={{ textAlign: "left" }}>Category</th><th>Trades</th><th>Win %</th><th>Net P&amp;L</th>
                 {liveSummary?.source === "tournament"
-                  ? <><th title="Net P&L as a share of this book's capital">Share of book</th><th title="Signals this book could not take: slots full / stock already held / share price above the per-position cap / no cash / loss breaker">Skipped</th></>
-                  : <th>Account</th>}
+                  ? <><th title="Net P&L as a share of this book's capital">Share of book</th><th title="Net P&L as a share of one slot's capital in this book, the most a trade invests">Return %</th><th title="Sessions on which it closed at least one trade">Trading days</th><th title="Return % divided by its trading days">Avg % / trading day</th><th title="Signals this book could not take: slots full / stock already held / share price above the per-position cap / no cash / loss breaker">Skipped</th></>
+                  : <><th>Account</th><th title="Net P&L as a share of the capital this strategy invests">Return %</th><th title="Sessions on which it closed at least one trade">Trading days</th><th title="Return % divided by its trading days">Avg % / trading day</th></>}
               </tr></thead>
               <tbody>
                 {sortByRank(liveScores, liveRanks, (s) => s.strategy_id).map((s) => (
@@ -1404,12 +1436,20 @@ export default function IntradayStocksPage() {
                     {liveSummary?.source === "tournament" ? (
                       <>
                         <td className={(s.roi_pct ?? 0) >= 0 ? "gain" : "loss"}>{(s.roi_pct ?? 0) >= 0 ? "+" : ""}{(s.roi_pct ?? 0).toFixed(3)}%</td>
+                        {(() => { const ret = s.trades ? returnOn(s.net_pnl, liveSummary?.per_strategy_allocation) : null; const days = s.trades ? rankDays(liveRanks, s.strategy_id) : null; const avg = perDay(ret, days); return (<>
+                          <td className={toneOf(ret)}>{signedPct(ret, 3)}</td><td>{days ?? "—"}</td><td className={toneOf(avg)}>{signedPct(avg, 3)}</td>
+                        </>); })()}
                         <td title={s.skipped ? `slots full ${s.skipped.full} · stock held ${s.skipped.symbol_held} · price above cap ${s.skipped.price_above_cap} · no cash ${s.skipped.no_cash} · breaker ${s.skipped.breaker}` : ""}>
                           {s.skipped_total ? s.skipped_total : "-"}
                         </td>
                       </>
                     ) : (
-                      <td>₹{inr(s.allocated_capital)}</td>
+                      <>
+                        <td>₹{inr(s.allocated_capital)}</td>
+                        {(() => { const ret = s.trades ? returnOn(s.net_pnl, s.allocated_capital == null ? null : s.allocated_capital - s.net_pnl) : null; const days = s.trades ? rankDays(liveRanks, s.strategy_id) : null; const avg = perDay(ret, days); return (<>
+                          <td className={toneOf(ret)}>{signedPct(ret, 3)}</td><td>{days ?? "—"}</td><td className={toneOf(avg)}>{signedPct(avg, 3)}</td>
+                        </>); })()}
+                      </>
                     )}
                   </tr>
                 ))}

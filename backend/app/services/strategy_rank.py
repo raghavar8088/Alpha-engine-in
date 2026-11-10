@@ -162,6 +162,9 @@ def compact(rows: list[dict], factors: tuple[Factor, ...], *, id_key: str = "str
         ranks[str(r[id_key])] = {
             "rank": r["rank"], "score": r["rank_score"], "shrunk": r["rank_shrunk"],
             "trades": r.get("trades") or 0,
+            # Sessions on which it closed at least one trade (`day_factors`); the leaderboards
+            # print it beside each return. None on a backtest board, which has no sessions.
+            "days": r.get("sessions_traded"),
             "values": [by_key.get(f[0], {}).get("value") for f in used],
             "pct": [by_key.get(f[0], {}).get("percentile") for f in used],
         }

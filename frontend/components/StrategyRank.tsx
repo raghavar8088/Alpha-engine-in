@@ -64,6 +64,13 @@ export function sortByRank<T>(rows: T[], board: StrategyRankBoard | null, idOf: 
     .map((x) => x.r);
 }
 
+/** Sessions on which the strategy closed at least one trade, from its rank board; null when the
+ *  board has no day count (a backtest board, or a server older than the field). */
+export function rankDays(board: StrategyRankBoard | null, id: string): number | null {
+  const e = board?.ranks[id] as (StrategyRankEntry & { days?: number | null }) | undefined;
+  return typeof e?.days === "number" ? e.days : null;
+}
+
 /** The Tournament's board carries its rank inline on each row; same shape as a fetched one. */
 export function boardFromRows(
   rows: { strategy_id: string; trades: number; rank?: number | null; rank_score?: number | null;

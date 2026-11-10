@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import PageHeader from "../../../components/PageHeader";
 import { fetchFocusSnapshot, type FocusSnapshot } from "../../../lib/intradayFocus";
-import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../../components/StrategyRank";
+import { RankNote, RankTd, RankTh, rankDays, sortByRank, useStrategyRanks } from "../../../components/StrategyRank";
 
 const rupees = (value: number) => new Intl.NumberFormat("en-IN", {
   style: "currency", currency: "INR", maximumFractionDigits: 2,
@@ -101,12 +101,15 @@ export default function FocusFivePage() {
         {ranks && <RankNote board={ranks} />}
         <div className="table-scroll"><table>
           <caption>Strategy performance since {data.started_at ? `${stamp(data.started_at)} IST` : "engine startup (not started)"}. Each return is on ₹10 lakh.</caption>
-          <thead><tr>{ranks && <RankTh />}<th>Strategy / timeframe</th><th>Allocation</th><th>Equity</th><th>Available cash</th><th>Net return</th><th>Closed trades</th><th>Win rate</th><th>Open</th></tr></thead>
+          <thead><tr>{ranks && <RankTh />}<th>Strategy / timeframe</th><th>Allocation</th><th>Equity</th><th>Available cash</th><th>Net return</th><th title="Sessions on which it closed at least one trade">Trading days</th><th title="Net return divided by its trading days">Avg % / trading day</th><th>Closed trades</th><th>Win rate</th><th>Open</th></tr></thead>
           <tbody>{sortByRank(data.strategies, ranks, (s) => s.strategy_id).map(s => <tr key={s.strategy_id}>
             {ranks && <RankTd board={ranks} id={s.strategy_id} />}
             <td><strong>{s.name}</strong><small>{s.timeframe === "1h" ? "1 hour" : "45 minutes"} · Paper / unvalidated</small></td>
             <td>{rupees(s.initial_capital)}</td><td>{rupees(s.equity)}</td><td>{rupees(s.available_cash)}</td>
             <td className={tone(s.return_pct)}><strong>{percent(s.return_pct)}</strong><small>{rupees(s.total_pnl)}</small></td>
+            {(() => { const days = rankDays(ranks, s.strategy_id); const avg = days ? s.return_pct / days : null; return (<>
+              <td>{days ?? "—"}</td><td className={avg == null ? "" : tone(avg)}>{avg == null ? "—" : percent(avg)}</td>
+            </>); })()}
             <td>{s.trades}</td><td>{s.trades ? `${(s.win_rate * 100).toFixed(1)}%` : "—"}</td><td>{s.open_positions} / {data.slots_per_strategy}</td>
           </tr>)}</tbody>
         </table></div>
