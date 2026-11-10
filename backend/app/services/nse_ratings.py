@@ -44,6 +44,7 @@ and it stops when Main Control switches the Fundamental Rating module off.
 from __future__ import annotations
 
 import asyncio
+import bisect
 import csv
 import io
 import logging
@@ -65,6 +66,7 @@ from app.services import (
     results_strength,
     screener_in,
 )
+from app.services import nse_market
 from app.services import nse_ratings_logic as L
 from app.services.desk_switches import is_on
 from app.services.fundamental_rating import rate
@@ -84,16 +86,11 @@ CYCLE_SECONDS = float(os.getenv("NSE_RATINGS_CYCLE", "900"))
 REFRESH_BUDGET = float(os.getenv("NSE_RATINGS_BUDGET", "2400"))
 PACE_SECONDS = float(os.getenv("NSE_RATINGS_PACE", str(fundamental_universe.SCAN_PACE_SECONDS)))
 COOLDOWN = fundamental_universe.RATE_LIMIT_COOLDOWN
-RETURNS_AFTER_HHMM = "19:30"
 
 EQUITY_LIST = "https://nsearchives.nseindia.com/content/equities/EQUITY_L.csv"
 INDEX_CSV = "https://niftyindices.com/IndexConstituent/{name}.csv"
-BHAV = "https://nsearchives.nseindia.com/products/content/sec_bhavdata_full_{ddmmyyyy}.csv"
-SYMBOL_CHANGES = "https://nsearchives.nseindia.com/content/equities/symbolchange.csv"
 BM_API = "/api/corporate-board-meetings?index=equities&from_date={a}&to_date={b}"
 BM_REFERER = "/companies-listing/corporate-filings-board-meetings"
-CA_API = "/api/corporates-corporateActions?index=equities&from_date={a}&to_date={b}"
-CA_REFERER = "/companies-listing/corporate-filings-actions"
 KEEP_SERIES = ("EQ", "BE", "BZ")
 
 # The cached page minus what no score reads, so a rebuild of every row moves far fewer
@@ -104,38 +101,71 @@ CACHE_PROJ = {"about": 0, "pros": 0, "cons": 0, "ratios_table": 0, "ratios_table
 # What a rebuild needs from the existing row: everything that does not come from the page.
 CTX_PROJ = {"name": 1, "series": 1, "nse_sector": 1, "indices": 1, "listed": 1, "listed_on": 1,
             "meetings": 1, "refresh": 1, "fetched_at": 1, "fetch_error": 1, "v": 1,
-            "ret_asof": 1, "r1y": 1}
+            "ret_asof": 1, "r1y": 1, "val_rel_score": 1, "mom_score": 1, "mom_pct": 1,
+            "pe_rel": 1}
 
 TIME_KEYS = ("freshness", "behind", "next_q", "next_due", "last_meeting", "next_meeting",
              "pending", "pending_key", "tflags", "overall", "ovr_key", "ovr_tier", "ovr_status",
-             "ovr_reasons", "ovr_components", "ovr_formula", "t_day")
+             "ovr_reasons", "ovr_components", "ovr_formula", "ovr_explain", "rating_parts", "t_day")
+# Everything time_fields and the stock rating read, including the facts its one-line
+# explanation quotes.
 TIME_PROJ = {k: 1 for k in (*TIME_KEYS, "qend", "qlabel", "meetings", "fund", "quarter", "pnl",
                             "coverage", "pillars_n", "pillars_applicable", "fetch_error",
-                            "fetched_at")}
+                            "fetched_at", "pillar_scores", "val_rel_score", "mom_score", "mom_pct",
+                            "rev_yoy", "op_yoy", "roce", "roe", "pe", "pe_rel", "sales_cagr",
+                            "profit_cagr", "de", "r1y", "is_lender")}
 
 # What the table reads. Kept explicit so a row's bookkeeping never rides along to the page.
 TABLE_FIELDS = (
     "name", "screener_name", "series", "sector", "industry", "index_label", "index_tier",
     "idx_rank", "overall", "ovr_key", "ovr_tier", "ovr_status", "ovr_reasons", "ovr_formula",
+    "ovr_explain", "rating_parts",
     "fund", "fund_key", "fund_tier", "coverage", "is_lender", "quarter", "q_key", "q_tier",
     "pnl", "pnl_key", "pnl_tier", "qlabel", "qend", "qyoy_label", "qprev_label", "rev",
     "rev_yoy", "rev_qoq", "np", "np_yoy", "np_qoq", "np_flag", "np_note", "op_yoy", "roce",
-    "roe", "de", "opm", "net_margin", "sales_cagr", "profit_cagr", "pe", "promoter",
-    "no_promoter", "institutional", "mcap", "r3m", "r6m", "r1y", "r2y", "ret_asof",
-    "ret_notes", "ret_check", "explain", "tflags", "sflags", "freshness", "behind", "next_q",
+    "roe", "de", "int_cover", "opm", "net_margin", "sales_cagr", "profit_cagr", "profit_ttm",
+    "pe", "pe_rel", "pe_sector_med", "pb", "div_yield", "promoter", "promoter_drift",
+    "no_promoter", "institutional", "mcap",
+    "r1d", "r1w", "r1m", "r2m", "r3m", "r6m", "r1y", "r2y", "r5y", "r1y_vs_n500",
+    "r1y_vs_sector", "r3m_vs_sector", "ret_asof", "ret_close", "ret_notes", "ret_check",
+    "vol_1y", "mdd_1y", "beta_1y", "from_high", "tv_3m", "notrade_3m", "deliv_20d",
+    "mom_score", "mom_pct", "mom_12_1", "vol_tercile", "est", "est_asof",
+    "explain", "tflags", "sflags", "freshness", "behind", "next_q",
     "next_due", "pending", "last_meeting", "next_meeting", "basis", "source_url",
     "fetched_at", "fetch_error", "listed",
 )
 
 SORTS = {
     "overall": "overall", "fundamentals": "fund", "quarter": "quarter", "pnl": "pnl",
+    "c_quality": "rating_parts.quality", "c_growth": "rating_parts.growth",
+    "c_valuation": "rating_parts.valuation", "c_strength": "rating_parts.strength",
+    "c_momentum": "rating_parts.momentum",
     "name": "name", "symbol": "_id", "sector": "sector", "index": "idx_rank",
     "latest_quarter": "qend", "revenue": "rev", "rev_yoy": "rev_yoy", "rev_qoq": "rev_qoq",
     "profit": "np", "np_yoy": "np_yoy", "np_qoq": "np_qoq", "roce": "roce", "roe": "roe",
     "de": "de", "opm": "opm", "sales_cagr": "sales_cagr", "profit_cagr": "profit_cagr",
-    "pe": "pe", "promoter": "promoter", "mcap": "mcap", "r3m": "r3m", "r6m": "r6m",
-    "r1y": "r1y", "r2y": "r2y", "updated": "fetched_at",
+    "pe": "pe", "pe_rel": "pe_rel", "pb": "pb", "div_yield": "div_yield",
+    "promoter": "promoter", "mcap": "mcap",
+    "r1d": "r1d", "r1w": "r1w", "r1m": "r1m", "r2m": "r2m", "r3m": "r3m", "r6m": "r6m",
+    "r1y": "r1y", "r2y": "r2y", "r5y": "r5y", "r1y_vs_n500": "r1y_vs_n500",
+    "r1y_vs_sector": "r1y_vs_sector", "vol": "vol_1y", "mdd": "mdd_1y", "beta": "beta_1y",
+    "from_high": "from_high", "liquidity": "tv_3m", "deliv": "deliv_20d",
+    "e1d": "e1d_base", "e1w": "e1w_base", "e1m": "e1m_base", "e3m": "e3m_base",
+    "e1m_down": "e1m_down", "e3m_down": "e3m_down",
+    "updated": "fetched_at",
 }
+LIQUIDITY_FILTERS = {
+    "10": ("Rs 10 Cr+ a day", {"tv_3m": {"$gte": 10}}),
+    "1": ("Rs 1 Cr+ a day", {"tv_3m": {"$gte": 1}}),
+    "thin": ("Under Rs 50 lakh a day", {"tv_3m": {"$lt": 0.5}}),
+}
+VOL_FILTERS = {
+    "low": ("Lowest third", {"vol_tercile": 0}),
+    "mid": ("Middle third", {"vol_tercile": 1}),
+    "high": ("Highest third", {"vol_tercile": 2}),
+}
+CONF_FILTERS = {k: (k.capitalize() if k != "insufficient" else "Insufficient data", {"e1m_conf": k})
+                for k in ("high", "medium", "low", "insufficient")}
 
 QUARTER_FILTERS = {
     "strong": ("Strong quarter (7.8+)", {"quarter": {"$gte": 7.8}}),
@@ -382,10 +412,57 @@ async def refresh_meetings(days_back: int = 10, days_ahead: int = 35) -> dict:
 # ── the date-dependent fields ────────────────────────────────────────────────────
 
 
+MIN_SECTOR_PEERS = 8
+
+
+async def valuation_cross_section() -> set[str]:
+    """P/E against the sector median, and its percentile as a 0-10 valuation score.
+
+    Recomputed every cycle because P/E moves whenever a company is read again. Only a
+    sector with MIN_SECTOR_PEERS or more positive P/Es gets a median: a median of three
+    is an anecdote. Returns the rows whose values changed.
+    """
+    docs = [d async for d in rows.find({"listed": True}, {
+        "sector": 1, "pe": 1, "pe_rel": 1, "val_rel_score": 1, "pe_sector_med": 1})]
+    by_sector: dict[str, list[dict]] = {}
+    for d in docs:
+        sec = d.get("sector") or "Unclassified"
+        if d.get("pe") and d["pe"] > 0 and sec != "Unclassified":
+            by_sector.setdefault(sec, []).append(d)
+    new: dict[str, dict] = {}
+    for sec, items in by_sector.items():
+        if len(items) < MIN_SECTOR_PEERS:
+            continue
+        pes = sorted(x["pe"] for x in items)
+        n = len(pes)
+        med = pes[n // 2] if n % 2 else (pes[n // 2 - 1] + pes[n // 2]) / 2
+        for x in items:
+            below = bisect.bisect_left(pes, x["pe"])
+            equal = bisect.bisect_right(pes, x["pe"]) - below
+            pct = (below + 0.5 * equal) / n
+            new[x["_id"]] = {"pe_sector_med": round(med, 1), "pe_rel": round(x["pe"] / med, 2),
+                             "val_rel_score": round(10 * (1 - pct), 1)}
+    blank = {"pe_sector_med": None, "pe_rel": None, "val_rel_score": None}
+    ops, changed = [], set()
+    for d in docs:
+        want = new.get(d["_id"], blank)
+        if any(d.get(k) != v for k, v in want.items()):
+            ops.append(UpdateOne({"_id": d["_id"]}, {"$set": want}))
+            changed.add(d["_id"])
+    await _bulk(ops)
+    return changed
+
+
 async def reevaluate(force: bool = False) -> dict:
-    """Recompute freshness, pending and the overall for rows whose inputs have aged."""
+    """Recompute freshness, pending and the stock rating for rows whose inputs moved."""
     today = _ist_now().date()
-    query = {} if force else {"t_day": {"$ne": today.isoformat()}}
+    changed = await valuation_cross_section()
+    if force:
+        query = {}
+    elif changed:
+        query = {"$or": [{"t_day": {"$ne": today.isoformat()}}, {"_id": {"$in": list(changed)}}]}
+    else:
+        query = {"t_day": {"$ne": today.isoformat()}}
     ops, seen = [], 0
     async for d in rows.find(query, TIME_PROJ):
         seen += 1
@@ -396,7 +473,7 @@ async def reevaluate(force: bool = False) -> dict:
             await _bulk(ops)
             ops = []
     await _bulk(ops)
-    return {"checked": seen}
+    return {"checked": seen, "valuation_changed": len(changed)}
 
 
 # ── rows from the cached pages ───────────────────────────────────────────────────
@@ -543,182 +620,12 @@ async def refresh_due(budget_seconds: float = REFRESH_BUDGET) -> dict:
             "failed": status["failed"], "stopped": stopped, "reasons": dict(reasons)}
 
 
-# ── price returns ────────────────────────────────────────────────────────────────
-
-
-async def _bhav(day: date, cache: dict) -> dict | None:
-    """{symbol: (close, prev_close)} for EQ/BE/BZ on `day`, or None when NSE has no file."""
-    if day in cache:
-        return cache[day]
-    resp = await nse.get(BHAV.format(ddmmyyyy=day.strftime("%d%m%Y")), tries=2)
-    out = None
-    if resp is not None:
-        got = {}
-        for raw in csv.DictReader(io.StringIO(resp.text)):
-            x = {(k or "").strip(): (v or "").strip() for k, v in raw.items()}
-            if x.get("SERIES") not in KEEP_SERIES:
-                continue
-            sym, close = x.get("SYMBOL", "").upper(), L.num(x.get("CLOSE_PRICE"))
-            if sym and close:
-                got[sym] = (close, L.num(x.get("PREV_CLOSE")))
-        out = got if len(got) > 500 else None          # a block page is not a market
-    cache[day] = out
-    return out
-
-
-def _maybe_session(d: date) -> bool:
-    return d.weekday() < 5 and market_calendar.is_listed_trading_day(d)
-
-
-async def _bhav_on_or_before(day: date, cache: dict, tries: int = 8) -> tuple[date | None, dict | None]:
-    d = day
-    for _ in range(tries):
-        if _maybe_session(d):
-            got = await _bhav(d, cache)
-            if got:
-                return d, got
-        d -= timedelta(days=1)
-    return None, None
-
-
-async def _bhav_after(day: date, limit: date, cache: dict, tries: int = 8) -> dict | None:
-    d = day + timedelta(days=1)
-    for _ in range(tries):
-        if d > limit:
-            return None
-        if _maybe_session(d):
-            got = await _bhav(d, cache)
-            if got:
-                return got
-        d += timedelta(days=1)
-    return None
-
-
-async def _corporate_actions(frm: date, to: date) -> dict[str, list[dict]] | None:
-    body = await nse.api(CA_API.format(a=frm.strftime("%d-%m-%Y"), b=to.strftime("%d-%m-%Y")),
-                         CA_REFERER)
-    items = body if isinstance(body, list) else (body.get("data") if isinstance(body, dict) else None)
-    if items is None:
-        return None
-    out: dict[str, list[dict]] = {}
-    for it in items:
-        if not isinstance(it, dict) or (it.get("series") or "EQ") not in KEEP_SERIES:
-            continue
-        act = L.parse_action(it.get("subject") or "")
-        ex = L.parse_nse_date(it.get("exDate"))
-        sym = (it.get("symbol") or "").strip().upper()
-        if act and ex and sym:
-            out.setdefault(sym, []).append({**act, "ex": ex, "subject": it.get("subject")})
-    return out
-
-
-async def _symbol_changes(since: date) -> dict[str, list[tuple[str, date]]]:
-    """new symbol -> [(old symbol, effective date)] for changes on or after `since`."""
-    resp = await nse.get(SYMBOL_CHANGES, tries=2)
-    out: dict[str, list[tuple[str, date]]] = {}
-    if resp is None:
-        return out
-    for raw in csv.DictReader(io.StringIO(resp.text)):
-        x = {(k or "").strip().upper(): (v or "").strip() for k, v in raw.items()}
-        old, new = x.get("OLD SYMBOL", "").upper(), x.get("NEW SYMBOL", "").upper()
-        eff = L.parse_nse_date(x.get("EFFECTIVE DATE"))
-        if old and new and eff and eff >= since:
-            out.setdefault(new, []).append((old, eff))
-    return out
-
-
-def _names(sym: str, changes: dict, after: date | None = None) -> list[str]:
-    """The symbol, then the names it traded under before a change after `after`."""
-    names, frontier = [sym], [sym]
-    for _ in range(3):
-        nxt = []
-        for s in frontier:
-            for old, eff in changes.get(s, []):
-                if (after is None or eff > after) and old not in names:
-                    names.append(old)
-                    nxt.append(old)
-        frontier = nxt
-    return names
-
-
-def _expected_close_day(now: datetime) -> date:
-    d = now.date()
-    if _maybe_session(d) and now.strftime("%H:%M") >= RETURNS_AFTER_HHMM:
-        return d
-    d -= timedelta(days=1)
-    while not _maybe_session(d):
-        d -= timedelta(days=1)
-    return d
+# ── market data: returns, risk, momentum and estimates ─────────────────────────
 
 
 async def refresh_returns(force: bool = False) -> dict:
-    """3M / 6M / 1Y / 2Y price returns for every listed row, as of the latest bhavcopy."""
-    cache: dict[date, dict | None] = {}
-    latest_day, latest = await _bhav_on_or_before(_expected_close_day(_ist_now()), cache)
-    if not latest:
-        raise RuntimeError("no NSE bhavcopy found in the last week")
-    stored = await meta.find_one({"_id": "returns"}, {"as_of": 1, "v": 1})
-    if (not force and stored and stored.get("as_of") == latest_day.isoformat()
-            and stored.get("v") == L.ROW_VERSION):
-        # Tonight's file is not out yet; what is stored is already as of the last close.
-        await meta.update_one({"_id": "returns"}, {"$set": {"checked_at": _now()}})
-        return {"skipped": f"no bhavcopy newer than {latest_day.isoformat()}"}
-    prev_day, prev = await _bhav_on_or_before(latest_day - timedelta(days=1), cache)
-
-    anchors: dict[str, tuple[date | None, dict | None, dict | None]] = {}
-    for key, months, _label in L.HORIZONS:
-        ad, adata = await _bhav_on_or_before(L.months_back(latest_day, months), cache)
-        ndata = await _bhav_after(ad, latest_day, cache) if ad else None
-        anchors[key] = (ad, adata, ndata)
-
-    since = L.months_back(latest_day, 24) - timedelta(days=10)
-    ca = await _corporate_actions(since, latest_day)
-    if ca is None:
-        raise RuntimeError("NSE's corporate-actions feed did not answer; returns not recomputed")
-    changes = await _symbol_changes(since)
-
-    ops, covered = [], 0
-    async for d in rows.find({"listed": True}, {"listed_on": 1, "screener_1y": 1, "fetched_at": 1}):
-        sym = d["_id"]
-        all_names = _names(sym, changes)
-        lt = None
-        for day_, data in ((latest_day, latest), (prev_day, prev)):
-            hit = next((data[n][0] for n in all_names if data and n in data), None)
-            if hit:
-                lt = (day_, hit)
-                break
-        vals = {}
-        for key, (ad, adata, ndata) in anchors.items():
-            if ad is None:
-                vals[key] = (None, None)
-                continue
-            close = None
-            for n in _names(sym, changes, after=ad):
-                close = (adata or {}).get(n, (None, None))[0] or (ndata or {}).get(n, (None, None))[1]
-                if close:
-                    break
-            vals[key] = (ad, close)
-        acts = [a for n in all_names for a in ca.get(n, [])]
-        res = L.compute_returns(lt, vals, acts, L.as_date(d.get("listed_on")))
-        res["ret_asof"] = lt[0].isoformat() if lt else None
-        # Only re-judged while the screener.in read is recent. Otherwise the verdict made
-        # at the read stands until the next read (see screener_check).
-        fetched = L.as_date(d.get("fetched_at"))
-        if lt and fetched and abs((lt[0] - fetched).days) <= 4:
-            res["ret_check"] = L.screener_check({**d, **res}, lt[0])
-        covered += res.get("r1y") is not None
-        ops.append(UpdateOne({"_id": sym}, {"$set": res}))
-    await _bulk(ops)
-    doc = {"_id": "returns", "at": _now(), "checked_at": _now(),
-           "as_of": latest_day.isoformat(), "v": L.ROW_VERSION,
-           "anchors": {k: (v[0].isoformat() if v[0] else None) for k, v in anchors.items()},
-           "files_read": sum(1 for v in cache.values() if v), "actions_symbols": len(ca),
-           "symbol_changes": sum(len(v) for v in changes.values()),
-           "rows": len(ops), "with_1y": covered, "last_error": None}
-    await meta.replace_one({"_id": "returns"}, doc, upsert=True)
-    logger.info("nse ratings returns as of %s: %d rows, %d with a 1Y return, %d bhavcopies read",
-                latest_day, len(ops), covered, doc["files_read"])
-    return {k: v for k, v in doc.items() if k != "_id"}
+    """The market step. It lives in nse_market, which also keeps the price store."""
+    return await nse_market.refresh_market(force=force)
 
 
 # ── the loop ─────────────────────────────────────────────────────────────────────
@@ -773,15 +680,20 @@ async def run_cycle(force: frozenset[str] = frozenset()) -> dict:
 
             out["sync"] = await _step("sync", sync_from_cache, force_all="rebuild" in force)
 
-            ret = await meta.find_one({"_id": "returns"}, {"as_of": 1, "v": 1, "checked_at": 1})
-            want = _expected_close_day(_ist_now()).isoformat()
-            stale = ret is None or ret.get("as_of") != want or ret.get("v") != L.ROW_VERSION
-            checked_h = _age_h(ret, "checked_at")
-            if "returns" in force or (stale and (checked_h is None or checked_h > 0.5)
+            mkt = await meta.find_one({"_id": "market"}, {"as_of": 1, "v": 1, "cal": 1, "checked_at": 1})
+            want = nse_market.expected_close_day(_ist_now()).isoformat()
+            # A new row version or calibration recomputes at once; waiting for tonight's
+            # bhavcopy is only re-checked every half hour.
+            outdated_code = mkt is None or mkt.get("v") != L.ROW_VERSION or mkt.get("cal") != L.calibration().get("version")
+            stale = outdated_code or mkt.get("as_of") != want
+            checked_h = _age_h(mkt, "checked_at")
+            market_ran = False
+            if "returns" in force or (stale and (outdated_code or checked_h is None or checked_h > 0.5)
                                       and not await _error_recent("returns", 1)):
                 out["returns"] = await _step("returns", refresh_returns, force="returns" in force)
+                market_ran = bool(out["returns"]) and not (out["returns"] or {}).get("skipped")
 
-            out["reevaluate"] = await _step("reevaluate", reevaluate, force=meetings_ran)
+            out["reevaluate"] = await _step("reevaluate", reevaluate, force=meetings_ran or market_ran)
             if "norefresh" not in force:
                 out["refresh"] = await _step("refresh", refresh_due)
         finally:
@@ -835,7 +747,7 @@ def status_view() -> dict:
 
 
 def _query(search=None, index=None, sector=None, ratings=None, quarter=None, data=None,
-           include_delisted=False) -> dict:
+           include_delisted=False, liquidity=None, vol=None, conf=None) -> dict:
     q: dict = {} if include_delisted else {"listed": True}
     clauses = []
     if index:
@@ -848,6 +760,12 @@ def _query(search=None, index=None, sector=None, ratings=None, quarter=None, dat
         clauses.append(QUARTER_FILTERS[quarter][1])
     if data in DATA_FILTERS:
         clauses.append(DATA_FILTERS[data][1])
+    if liquidity in LIQUIDITY_FILTERS:
+        clauses.append(LIQUIDITY_FILTERS[liquidity][1])
+    if vol in VOL_FILTERS:
+        clauses.append(VOL_FILTERS[vol][1])
+    if conf in CONF_FILTERS:
+        clauses.append(CONF_FILTERS[conf][1])
     if search and search.strip():
         s = search.strip()
         clauses.append({"$or": [
@@ -861,8 +779,8 @@ def _query(search=None, index=None, sector=None, ratings=None, quarter=None, dat
 
 async def browse(search=None, index=None, sector=None, ratings=None, quarter=None, data=None,
                  sort="overall", order="desc", page=1, page_size=50, fields=None,
-                 include_delisted=False) -> dict:
-    q = _query(search, index, sector, ratings, quarter, data, include_delisted)
+                 include_delisted=False, liquidity=None, vol=None, conf=None) -> dict:
+    q = _query(search, index, sector, ratings, quarter, data, include_delisted, liquidity, vol, conf)
     total = await rows.count_documents(q)
     field = SORTS.get(sort, "overall")
     direction = 1 if order == "asc" else -1
@@ -892,9 +810,24 @@ async def summary() -> dict:
     else:
         counts = Counter()
         by_index, by_sector, by_rating, by_quarter, by_series = (Counter() for _ in range(5))
+        by_conf, by_vol, by_liq = Counter(), Counter(), Counter()
+        read_first = read_last = None
         async for d in rows.find({"listed": True}, {
                 "indices": 1, "sector": 1, "ovr_key": 1, "freshness": 1, "pending": 1,
-                "quarter": 1, "fetched_at": 1, "fetch_error": 1, "series": 1}):
+                "quarter": 1, "fetched_at": 1, "fetch_error": 1, "series": 1,
+                "e1m_conf": 1, "vol_tercile": 1, "tv_3m": 1}):
+            fa = L.aware(d.get("fetched_at"))
+            if fa:
+                read_first = fa if read_first is None or fa < read_first else read_first
+                read_last = fa if read_last is None or fa > read_last else read_last
+            by_conf[d.get("e1m_conf") or "insufficient"] += 1
+            if d.get("vol_tercile") is not None:
+                by_vol[("low", "mid", "high")[int(d["vol_tercile"])]] += 1
+            tv = d.get("tv_3m")
+            if tv is not None:
+                by_liq["10"] += tv >= 10
+                by_liq["1"] += tv >= 1
+                by_liq["thin"] += tv < 0.5
             counts["listed"] += 1
             for k in d.get("indices") or []:
                 by_index[k] += 1
@@ -917,31 +850,42 @@ async def summary() -> dict:
             "series": dict(by_series),
             "quarter_filters": [{"key": k, "label": v[0]} for k, v in QUARTER_FILTERS.items()],
             "data_filters": [{"key": k, "label": v[0]} for k, v in DATA_FILTERS.items()],
+            "liquidity_filters": [{"key": k, "label": v[0], "count": by_liq.get(k, 0)}
+                                  for k, v in LIQUIDITY_FILTERS.items()],
+            "vol_filters": [{"key": k, "label": v[0], "count": by_vol.get(k, 0)} for k, v in VOL_FILTERS.items()],
+            "conf_filters": [{"key": k, "label": v[0], "count": by_conf.get(k, 0)} for k, v in CONF_FILTERS.items()],
+            "fundamentals_read": {"first": read_first, "last": read_last},
         }
         _summary_cache = (time.monotonic(), base)
 
     docs = {d["_id"]: d async for d in meta.find({"_id": {"$in": [
-        "universe", "meetings", "returns", "status", "universe_error", "meetings_error",
+        "universe", "meetings", "market", "status", "universe_error", "meetings_error",
         "returns_error"]}}, {"slices": 0, "sectors": 0})}
+    cal = L.calibration()
     persisted = docs.get("status") or {}
     live = status_view()
     return {
         **base,
         "jobs": {
             "universe": docs.get("universe"), "meetings": docs.get("meetings"),
-            "returns": docs.get("returns"),
+            "returns": docs.get("market"),
             "errors": {k.replace("_error", ""): v.get("error") for k, v in docs.items()
                        if k.endswith("_error") and v.get("error")},
         },
         "status": live if (live["running"] or live.get("finished_at")) else
         {k: v for k, v in persisted.items() if k != "_id"},
         "methodology": L.METHODOLOGY,
+        "estimates": {
+            "version": cal.get("version"), "method": cal.get("method"),
+            "validation": cal.get("validation") or {}, "data": cal.get("data") or {},
+            "signals": cal.get("signals_summary"),
+        },
         "sources": {
             "companies": "NSE EQUITY_L.csv (mainboard EQ, BE, BZ series)",
-            "indices": "niftyindices.com constituent lists",
-            "fundamentals": "screener.in company pages (consolidated where published)",
+            "indices": "niftyindices.com constituent lists; NSE daily index closes",
+            "fundamentals": "screener.in company pages (consolidated where current)",
             "results_dates": "NSE corporate board-meetings feed",
-            "returns": "NSE bhavcopy closes + NSE corporate actions",
+            "prices": "NSE end-of-day bhavcopy, adjusted with NSE corporate actions",
         },
     }
 
@@ -960,7 +904,8 @@ async def detail(symbol: str) -> dict | None:
     data = await screener_fundamentals_collection.find_one({"_id": sym}, {"ratios_table": 0})
     out = {"row": None, "rating": None, "results": None, "pnl": None, "brief": None,
            "statements": None, "about": None,
-           "weights": L.OVERALL_WEIGHTS}
+           "weights": L.RATING_WEIGHTS,
+           "estimate_validation": (L.calibration().get("validation") or {})}
     if data:
         r, q, p = _score(data)
         r["symbol"] = sym

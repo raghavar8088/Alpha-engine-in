@@ -15,6 +15,7 @@ What this pins down, because each one was easy to get wrong:
     and Insufficient Data replaces the number rather than sitting next to it.
 """
 
+import math
 import sys
 from datetime import date, datetime
 from pathlib import Path
@@ -125,15 +126,37 @@ check("other income flagged", qn["np_flag"], "distorted")
 check("note says why", "other income drives net profit in Sep 2026" in qn["np_note"]
       and "turned profitable" in qn["np_note"], True)
 
-# ── the overall ──────────────────────────────────────────────────────────────────
+# ── the stock rating: six components ────────────────────────────────────────────
+ps = {"returns": 6.0, "profitability": 8.0, "cash": 9.0, "ownership": 7.0, "growth": 8.0,
+      "balance_sheet": 10.0, "valuation": 4.0}
 base = {"fund": 7.8, "quarter": 10.0, "pnl": 7.0, "pillars_n": 7, "pillars_applicable": 7,
-        "coverage": 1.0, "fetched_at": datetime(2026, 11, 10), "qlabel": "Sep 2026"}
+        "coverage": 1.0, "fetched_at": datetime(2026, 11, 10), "qlabel": "Sep 2026",
+        "pillar_scores": ps, "val_rel_score": 2.0, "mom_score": 9.0, "mom_pct": 91.0, "r1y": 41.0,
+        "rev_yoy": 28.3, "op_yoy": 88.4, "pe": 43.0, "pe_rel": 1.4}
 cur = L.freshness(d(2026, 9, 30), t)
+quality = round((6 * .22 + 8 * .14 + 9 * .12 + 7 * .08) / .56, 1)          # 7.3
+parts = {"quality": quality, "growth": 7.5, "quarter": 10.0, "valuation": 3.0, "strength": 10.0, "momentum": 9.0}
+check("components", L.rating_components(base), parts)
+want = round(sum(parts[k] * w for k, w in L.RATING_WEIGHTS.items()), 1)
 o = L.overall_rating(base, cur)
-check("Bliss GVS overall", (o["overall"], o["ovr_key"]), (8.0, "excellent"))
-check("formula", o["ovr_formula"], "70% × 7.8 + 15% × 10.0 + 15% × 7.0 = 8.0")
-o = L.overall_rating({**base, "quarter": None}, cur)
-check("missing quarter is dropped, not zeroed", o["overall"], 7.7)
+check("rating is the weighted six", (o["overall"], o["ovr_status"]), (want, "rated"))
+check("weights sum to 1", round(sum(L.RATING_WEIGHTS.values()), 6), 1.0)
+check("explanation names best (either of the two at 10.0) and worst",
+      (o["ovr_explain"].startswith("Strongest: quarterly results 10.0 (Sep 2026: sales +28%, op. profit +88% YoY)")
+       or o["ovr_explain"].startswith("Strongest: financial strength 10.0"))
+      and "Weakest: valuation 3.0 (P/E 43, 1.4x the sector median)" in o["ovr_explain"], True)
+o = L.overall_rating({**base, "mom_score": None, "val_rel_score": None}, cur)
+check("missing momentum is dropped, valuation falls back to the pillar",
+      (o["rating_parts"]["momentum"], o["rating_parts"]["valuation"], "price momentum" in o["ovr_explain"]),
+      (None, 4.0, True))
+lender = {**base, "pillar_scores": {**ps, "balance_sheet": None, "cash": None}}
+check("lender: strength not scored, still rated", (L.overall_rating(lender, cur)["rating_parts"]["strength"],
+                                                    L.overall_rating(lender, cur)["ovr_status"]), (None, "rated"))
+check("insufficient: no quality pillar",
+      L.overall_rating({**base, "pillar_scores": {"growth": 8.0, "valuation": 4.0, "balance_sheet": 9.0}}, cur)["ovr_reasons"][0]
+      .startswith("none of the quality pillars"), True)
+thin = {**base, "pillar_scores": {"returns": 6.0}, "quarter": None, "pnl": None, "val_rel_score": None, "mom_score": None}
+check("insufficient: too few components", L.overall_rating(thin, cur)["ovr_reasons"], ["only 1 of the 6 rating components had data"])
 check("insufficient: no fundamentals",
       L.overall_rating({**base, "fund": None}, cur)["ovr_key"], L.INSUFFICIENT_KEY)
 check("insufficient: three pillars",
@@ -148,6 +171,36 @@ check("one quarter overdue keeps the rating",
 tf = L.time_fields({"meetings": []}, t)
 check("never read", (tf["ovr_tier"], tf["ovr_reasons"]),
       ("Insufficient Data", ["not read from screener.in yet; queued"]))
+
+# ── momentum score ───────────────────────────────────────────────────────────────
+check("momentum blends percentiles", L.momentum_score(0.9, 0.8, 0.7), (8.3, 83.0))
+check("young listing: scored on what it has", L.momentum_score(None, 0.5, None), (5.0, 50.0))
+check("no 6M or 12M figure: not scored", L.momentum_score(None, None, 0.9), (None, None))
+
+# ── forward estimates ────────────────────────────────────────────────────────────
+cal = {"version": "test", "drift_log_per_session": 0.0004, "vol_floor": 0.004, "vol_cap": 0.10,
+       "horizons": {"1m": {"sessions": 21, "ewma_weight": 0.5,
+                           "z": {"0.05": -1.8, "0.1": -1.3, "0.5": 0.0, "0.9": 1.3, "0.95": 1.8}}},
+       "validation": {"1m": {"by_liquidity": {"liquid": 0.80, "thin": 0.70}, "by_vol": {"1": 0.81},
+                             "passed": True, "period": "Nov 2024 - Nov 2026"}}}
+e = L.estimate(100.0, 0.0004, 0.0004, 250, 0.0, 0, None, "EQ", 1, 20.0, cal)
+s1m = 0.02 * math.sqrt(21)
+check("1m bear is the 10th percentile", e["1m"]["bear"], round(math.expm1(0.0084 - 1.3 * s1m) * 100, 2))
+check("1m base is the drift", e["1m"]["base"], round(math.expm1(0.0084) * 100, 2))
+check("target price follows the return", e["1m"]["bull_px"], round(100 * math.exp(0.0084 + 1.3 * s1m), 2))
+check("downside is the 5th percentile", e["1m"]["down"], round(math.expm1(0.0084 - 1.8 * s1m) * 100, 2))
+check("liquid, well-calibrated bucket -> high confidence", e["1m"]["conf"], "high")
+check("horizon without calibration -> insufficient", e["1d"]["status"], "insufficient")
+e = L.estimate(100.0, 0.0004, 0.0004, 250, 0.15, 0, None, "EQ", 1, 0.2, cal)
+check("thin and patchy -> low confidence", e["1m"]["conf"], "low")
+check("too little history", L.estimate(100.0, 0.0004, 0.0004, 50, 0.0, 0, None, "EQ", 1, 20.0, cal)["1m"]["reason"],
+      "only 50 daily returns in the last year; 120 are needed")
+check("BZ series", L.estimate(100.0, 0.0004, 0.0004, 250, 0.0, 0, None, "BZ", 1, 20.0, cal)["1m"]["status"], "insufficient")
+check("stale price", L.estimate(100.0, 0.0004, 0.0004, 250, 0.0, 6, None, "EQ", 1, 20.0, cal)["1m"]["reason"],
+      "no trade in the last 6 sessions")
+check("a recent unadjustable action",
+      L.estimate(100.0, 0.0004, 0.0004, 250, 0.0, 0, "a demerger (ex 1 Oct 2026)", "EQ", 1, 20.0, cal)["1m"]["status"],
+      "insufficient")
 
 # ── what the refresher picks up ──────────────────────────────────────────────────
 noon = datetime(2026, 11, 10, 12, 0, tzinfo=L.IST)

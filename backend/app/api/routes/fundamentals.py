@@ -384,6 +384,9 @@ async def nse_ratings_table(
     page_size: int = Query(50, ge=1, le=3000),
     fields: str | None = None,
     include_delisted: bool = False,
+    liquidity: str | None = None,
+    vol: str | None = None,
+    conf: str | None = None,
     _current_user: dict = Depends(get_current_user),
 ):
     keys = [k for k in (rating or "").split(",")
@@ -391,7 +394,8 @@ async def nse_ratings_table(
     return await nse_ratings.browse(
         search=search, index=index or None, sector=sector or None, ratings=keys,
         quarter=quarter or None, data=data or None, sort=sort, order=order, page=page,
-        page_size=page_size, fields=fields, include_delisted=include_delisted)
+        page_size=page_size, fields=fields, include_delisted=include_delisted,
+        liquidity=liquidity or None, vol=vol or None, conf=conf or None)
 
 
 @router.get("/nse-ratings/summary")

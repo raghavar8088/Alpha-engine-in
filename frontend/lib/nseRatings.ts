@@ -19,8 +19,10 @@ export interface RowFlag {
   t: string;
 }
 
+export type RatingPartKey = "quality" | "growth" | "quarter" | "valuation" | "strength" | "momentum";
+
 export interface OverallComponent {
-  key: "fundamentals" | "quarter" | "pnl";
+  key: RatingPartKey;
   label: string;
   score: number;
   weight: number;
@@ -45,6 +47,9 @@ export interface NseRatingRow {
   ovr_reasons?: string[];
   ovr_formula?: string | null;
   ovr_components?: OverallComponent[];
+  /** One line: the strongest and weakest component, each with its number. */
+  ovr_explain?: string | null;
+  rating_parts?: Partial<Record<RatingPartKey, number | null>>;
 
   fund: number | null;
   fund_key: GradeKey | null;
@@ -77,20 +82,47 @@ export interface NseRatingRow {
   roce: number | null;
   roe: number | null;
   de: number | null;
+  int_cover?: number | null;
   opm: number | null;
   net_margin?: number | null;
   sales_cagr: number | null;
   profit_cagr: number | null;
+  profit_ttm?: number | null;
   pe: number | null;
+  pe_rel?: number | null;
+  pe_sector_med?: number | null;
+  pb?: number | null;
+  div_yield?: number | null;
   promoter: number | null;
   no_promoter?: boolean;
   institutional?: number | null;
   mcap: number | null;
 
+  r1d?: number | null;
+  r1w?: number | null;
+  r1m?: number | null;
+  r2m?: number | null;
   r3m: number | null;
   r6m: number | null;
   r1y: number | null;
   r2y: number | null;
+  r5y?: number | null;
+  r1y_vs_n500?: number | null;
+  r1y_vs_sector?: number | null;
+  r3m_vs_sector?: number | null;
+  vol_1y?: number | null;
+  mdd_1y?: number | null;
+  beta_1y?: number | null;
+  from_high?: number | null;
+  tv_3m?: number | null;
+  notrade_3m?: number | null;
+  deliv_20d?: number | null;
+  mom_score?: number | null;
+  mom_pct?: number | null;
+  mom_12_1?: number | null;
+  vol_tercile?: number | null;
+  est?: Partial<Record<EstimateHorizon, Estimate>>;
+  est_asof?: string | null;
   ret_asof?: string | null;
   ret_close?: number | null;
   ret_notes?: string[];
@@ -126,6 +158,39 @@ export interface NseRatingRow {
   listed?: boolean;
 }
 
+export type EstimateHorizon = "1d" | "1w" | "1m" | "3m";
+
+/** A forward-return estimate for one horizon. A range, not a promise: see the methodology. */
+export interface Estimate {
+  status: "ok" | "insufficient";
+  reason?: string;
+  base?: number;
+  bear?: number;
+  bull?: number;
+  down?: number;
+  base_px?: number;
+  bear_px?: number;
+  bull_px?: number;
+  down_px?: number;
+  conf?: "high" | "medium" | "low";
+  conf_why?: string;
+  sigma_pct?: number;
+}
+
+export interface EstimateValidation {
+  period?: string;
+  passed?: boolean;
+  n?: number;
+  coverage_80?: number;
+  below_p05?: number;
+  above_base?: number;
+  median_outcome_pct?: number;
+  base_pct?: number;
+  naive_coverage_80?: number;
+  by_liquidity?: Record<string, number>;
+  by_vol?: Record<string, number>;
+}
+
 export interface NseRatingsPage {
   rows: NseRatingRow[];
   total: number;
@@ -147,6 +212,9 @@ export interface NseRatingsQuery {
   order?: "asc" | "desc";
   page?: number;
   pageSize?: number;
+  liquidity?: string;
+  vol?: string;
+  conf?: string;
 }
 
 export interface NseRatingsStatus {
@@ -173,15 +241,33 @@ export interface NseRatingsSummary {
   series: Record<string, number>;
   quarter_filters: { key: string; label: string }[];
   data_filters: { key: string; label: string }[];
+  liquidity_filters?: { key: string; label: string; count: number }[];
+  vol_filters?: { key: string; label: string; count: number }[];
+  conf_filters?: { key: string; label: string; count: number }[];
+  fundamentals_read?: { first: string | null; last: string | null };
   jobs: {
     universe?: { at?: string; listed?: number; by_series?: Record<string, number>; in_index?: number } | null;
     meetings?: { at?: string; from?: string; to?: string; symbols?: number } | null;
-    returns?: { at?: string; as_of?: string; anchors?: Record<string, string | null>; with_1y?: number } | null;
+    returns?: {
+      at?: string;
+      as_of?: string;
+      sessions?: number;
+      symbols_priced?: number;
+      indices?: Record<string, Record<string, number | null>>;
+    } | null;
     errors: Record<string, string>;
+  };
+  estimates?: {
+    version?: string;
+    method?: string;
+    validation?: Partial<Record<EstimateHorizon, EstimateValidation>>;
+    data?: Record<string, unknown>;
+    signals?: string | null;
   };
   status: NseRatingsStatus;
   methodology: {
-    overall_weights: Record<string, number>;
+    rating_weights: Record<string, number>;
+    rating_labels?: Record<string, string>;
     min_pillars: number;
     min_applicable_coverage: number;
     overdue_insufficient: number;
@@ -220,6 +306,7 @@ export interface NseRatingDetail {
   } | null;
   about: string | null;
   weights: Record<string, number>;
+  estimate_validation?: Partial<Record<EstimateHorizon, EstimateValidation>>;
   refresh?: { ok: boolean; error?: string; quarter?: string | null; live?: boolean };
 }
 
@@ -235,6 +322,9 @@ function query(q: NseRatingsQuery, fields?: "export"): string {
   if (q.order) p.set("order", q.order);
   if (q.page) p.set("page", String(q.page));
   if (q.pageSize) p.set("page_size", String(q.pageSize));
+  if (q.liquidity) p.set("liquidity", q.liquidity);
+  if (q.vol) p.set("vol", q.vol);
+  if (q.conf) p.set("conf", q.conf);
   if (fields) p.set("fields", fields);
   return p.toString();
 }

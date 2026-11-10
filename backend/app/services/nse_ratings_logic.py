@@ -14,15 +14,16 @@ own helpers (`_growth`, `_is_distorted`). So a growth rate off a loss is "not me
 in this table exactly when it is on the card, and a net profit driven by other income is
 flagged in both places or in neither.
 
-THE OVERALL RATING IS A BLEND OF THE MODULE'S THREE GRADES, AND THE WEIGHTS ARE WRITTEN DOWN
-    overall = 70% fundamentals + 15% latest quarter + 15% P&L record
-The seven-pillar fundamentals score is the lasting judgement of the business, so it
-carries most of the weight. The latest quarter and the P&L record can each move it, but
-neither can lift a weak business into a strong grade on its own: a perfect quarter raises
-the overall by at most 0.15 x (10 - fundamentals). A grade with no data is dropped and its
-weight is shared over the others. That is the module's rule for a missing pillar too,
-because a missing number is not a bad number. The overall uses the same nine-tier scale as
-every other grade here.
+THE STOCK RATING HAS SIX COMPONENTS, AND THE WEIGHTS ARE WRITTEN DOWN
+    quality 25%  growth 20%  quarterly results 15%  valuation 15%
+    financial strength 15%  price momentum 10%
+Each component is a 0-10 score the module already computes, or a percentile of NSE (see
+RATING_WEIGHTS below for what goes into each). The business carries most of the weight:
+quality, growth and strength are 60%. A single quarter and the price trend move the
+rating, but cannot carry a weak business into a strong grade. A component with no data
+is dropped and its weight shared over the others. That is the module's rule for a missing
+pillar too, because a missing number is not a bad number. The rating uses the same
+nine-tier scale as every other grade here.
 
 INSUFFICIENT DATA IS ITS OWN VERDICT, NEVER A LOW SCORE
 A company is marked "Insufficient Data", with the reason written out, when:
@@ -58,8 +59,11 @@ returns.
 from __future__ import annotations
 
 import calendar
+import json
+import math
 import re
 from datetime import date, datetime, timedelta, timezone
+from pathlib import Path
 
 from app.services.fundamental_rating import PILLARS, PILLAR_LABELS
 from app.services.grades import grade
@@ -69,11 +73,8 @@ IST = timezone(timedelta(hours=5, minutes=30))
 
 # Bump when a rule below changes what a row holds: the refresher then rebuilds every row
 # from the cached screener.in pages, without fetching any of them again.
-ROW_VERSION = 2   # 2: balance sheet skips an unpublished half-year column
+ROW_VERSION = 3   # 2: balance sheet skips an unpublished half-year column; 3: six-part rating, P/B
 
-OVERALL_WEIGHTS = {"fundamentals": 0.70, "quarter": 0.15, "pnl": 0.15}
-OVERALL_LABELS = {"fundamentals": "Fundamentals", "quarter": "Latest quarter",
-                  "pnl": "P&L record"}
 MIN_PILLARS = 4
 MIN_APPLICABLE_COVERAGE = 0.60
 INDICATIVE_COVERAGE = 0.75          # below this a rating is flagged as indicative
@@ -383,7 +384,9 @@ def metrics(f: dict, r: dict) -> dict:
     fii = [v for v in (sh.get("FIIs") or []) if v is not None]
     dii = [v for v in (sh.get("DIIs") or []) if v is not None]
     pe = num(ratios.get("Stock P/E"))
+    price, bv = num(ratios.get("Current Price")), num(ratios.get("Book Value"))
     return {
+        "pb": round(price / bv, 2) if (price and bv and bv > 0) else None,
         # A lender's ROCE is meaningless (see fundamental_rating), so it is not shown.
         "roce": None if lender else num(ratios.get("ROCE")),
         "roe": num(ratios.get("ROE")),
@@ -589,8 +592,80 @@ def static_row(f: dict, r: dict, q: dict, p: dict, series: str | None = None) ->
     }
 
 
+# ── the stock rating: six components, each 0-10, with its weight written down ────
+# The rating answers "how good is this stock on everything the tab can measure", so it
+# draws on the business AND the price. The weights favour what lasts: the quality and
+# growth of the business carry 45%, a single quarter and the price trend 25% together.
+# Each component reuses a score the module already computes, so nothing in here is a
+# second opinion on the filings:
+#   quarter    results_strength's score for the latest quarter
+#   quality    the quality pillars: return on capital, profitability, cash, ownership
+#   valuation  the valuation pillar (P/E, PEG), blended with P/E against the sector
+#   growth     the growth pillar (3-5y CAGR), blended with the P&L-record score
+#   strength   the balance-sheet pillar (debt, interest cover); not scored for lenders
+#   momentum   12-1 month, 6-month and 52-week-high percentiles across NSE (nse_market)
+RATING_WEIGHTS = {"quality": 0.25, "growth": 0.20, "quarter": 0.15, "valuation": 0.15,
+                  "strength": 0.15, "momentum": 0.10}
+RATING_LABELS = {"quality": "Fundamentals (quality)", "growth": "Growth",
+                 "quarter": "Quarterly results", "valuation": "Valuation",
+                 "strength": "Financial strength", "momentum": "Price momentum"}
+QUALITY_PILLARS = {"returns": 0.22, "profitability": 0.14, "cash": 0.12, "ownership": 0.08}
+MIN_COMPONENTS = 4
+
+
+def _wmean(items) -> float | None:
+    live = [(v, w) for v, w in items if v is not None]
+    if not live:
+        return None
+    return round(sum(v * w for v, w in live) / sum(w for _, w in live), 1)
+
+
+def rating_components(row: dict) -> dict:
+    ps = row.get("pillar_scores") or {}
+    return {
+        "quality": _wmean([(ps.get(k), w) for k, w in QUALITY_PILLARS.items()]),
+        "growth": _wmean([(ps.get("growth"), 0.5), (row.get("pnl"), 0.5)]),
+        "quarter": row.get("quarter"),
+        "valuation": _wmean([(ps.get("valuation"), 0.5), (row.get("val_rel_score"), 0.5)]),
+        "strength": ps.get("balance_sheet"),
+        "momentum": row.get("mom_score"),
+    }
+
+
+def _component_fact(key: str, row: dict) -> str | None:
+    """The number behind a component, in a few words."""
+    try:
+        if key == "quarter" and row.get("qlabel"):
+            bits = [f"sales {row['rev_yoy']:+.0f}%" if row.get("rev_yoy") is not None else None,
+                    f"op. profit {row['op_yoy']:+.0f}%" if row.get("op_yoy") is not None else None]
+            bits = [b for b in bits if b]
+            return f"{row['qlabel']}: " + ", ".join(bits) + " YoY" if bits else row["qlabel"]
+        if key == "quality":
+            if row.get("roce") is not None:
+                return f"ROCE {row['roce']:.0f}%"
+            if row.get("roe") is not None:
+                return f"ROE {row['roe']:.0f}%"
+        if key == "valuation" and row.get("pe") is not None:
+            rel = f", {row['pe_rel']:.1f}x the sector median" if row.get("pe_rel") else ""
+            return f"P/E {row['pe']:.0f}{rel}"
+        if key == "growth":
+            bits = [f"sales {row['sales_cagr']:+.0f}%/yr" if row.get("sales_cagr") is not None else None,
+                    f"profit {row['profit_cagr']:+.0f}%/yr" if row.get("profit_cagr") is not None else None]
+            bits = [b for b in bits if b]
+            return ", ".join(bits) if bits else None
+        if key == "strength" and row.get("de") is not None:
+            return f"debt {row['de']:.2f}x net worth"
+        if key == "momentum" and row.get("r1y") is not None:
+            pct = row.get("mom_pct")
+            return f"1Y {row['r1y']:+.0f}%" + (f", top {max(1, round(100 - pct))}% of NSE" if pct is not None and pct >= 50
+                                               else f", bottom {max(1, round(pct))}% of NSE" if pct is not None else "")
+    except (TypeError, ValueError, KeyError):
+        return None
+    return None
+
+
 def overall_rating(row: dict, fr: dict) -> dict:
-    """The blended rating, or Insufficient Data with the reasons written out."""
+    """The stock rating, or Insufficient Data with the reasons written out."""
     reasons: list[str] = []
     if row.get("fund") is None:
         if row.get("fetch_error"):
@@ -609,17 +684,20 @@ def overall_rating(row: dict, fr: dict) -> dict:
     if fr.get("state") == "outdated" and (fr.get("behind") or 0) >= OVERDUE_INSUFFICIENT:
         reasons.append(f"its latest filed quarter, {row.get('qlabel')}, is {fr['behind']} "
                        "quarters past the filing deadline")
+    parts = rating_components(row)
+    present = {k: v for k, v in parts.items() if v is not None}
+    if not reasons and parts["quality"] is None:
+        reasons.append("none of the quality pillars (return on capital, margins, cash, ownership) had data")
+    elif not reasons and len(present) < MIN_COMPONENTS:
+        reasons.append(f"only {len(present)} of the 6 rating components had data")
     if reasons:
         return {"overall": None, "ovr_key": INSUFFICIENT_KEY, "ovr_tier": INSUFFICIENT_LABEL,
                 "ovr_status": "insufficient", "ovr_reasons": reasons, "ovr_components": [],
-                "ovr_formula": None}
+                "ovr_formula": None, "ovr_explain": "Insufficient Data: " + "; ".join(reasons) + ".",
+                "rating_parts": parts}
 
-    comps = []
-    for key, field in (("fundamentals", "fund"), ("quarter", "quarter"), ("pnl", "pnl")):
-        s = row.get(field)
-        if s is not None:
-            comps.append({"key": key, "label": OVERALL_LABELS[key], "score": s,
-                          "weight": OVERALL_WEIGHTS[key]})
+    comps = [{"key": k, "label": RATING_LABELS[k], "score": v, "weight": RATING_WEIGHTS[k]}
+             for k, v in present.items()]
     live = sum(c["weight"] for c in comps)
     raw = sum(c["score"] * c["weight"] for c in comps) / live
     for c in comps:
@@ -627,9 +705,22 @@ def overall_rating(row: dict, fr: dict) -> dict:
     score = round(max(1.0, min(10.0, raw)), 1)
     g = grade(score, "company")
     formula = " + ".join(f"{c['eff'] * 100:.0f}% × {c['score']:.1f}" for c in comps) + f" = {score:.1f}"
+
+    ranked = sorted(comps, key=lambda c: c["score"])
+    best, worst = ranked[-1], ranked[0]
+    sentences = []
+    for lead, c in (("Strongest", best), ("Weakest", worst)):
+        if lead == "Weakest" and c["key"] == best["key"]:
+            continue
+        fact = _component_fact(c["key"], row)
+        sentences.append(f"{lead}: {c['label'].lower()} {c['score']:.1f}" + (f" ({fact})" if fact else ""))
+    missing = [RATING_LABELS[k].lower() for k, v in parts.items() if v is None]
+    if missing:
+        sentences.append("Not scored: " + ", ".join(missing))
     return {"overall": score, "ovr_key": g["grade_key"], "ovr_tier": g["tier"],
             "ovr_status": "rated", "ovr_reasons": [], "ovr_components": comps,
-            "ovr_formula": formula}
+            "ovr_formula": formula, "ovr_explain": ". ".join(sentences) + ".",
+            "rating_parts": parts}
 
 
 def time_fields(row: dict, today: date) -> dict:
@@ -772,13 +863,15 @@ def parse_action(subject: str) -> dict | None:
 
 def compute_returns(latest: tuple[date, float] | None,
                     anchors: dict[str, tuple[date | None, float | None]],
-                    actions: list[dict], listed_on: date | None = None) -> dict:
-    """3M / 6M / 1Y / 2Y price returns for one stock, with what was adjusted and what was not.
+                    actions: list[dict], listed_on: date | None = None,
+                    horizons=HORIZONS) -> dict:
+    """Price returns for one stock, with what was adjusted and what was not.
 
     `anchors` maps a horizon key to (anchor trading date, close on it or None).
     `actions` holds {"ex": date, "factor", "adjusted", "unadjusted"} dicts.
     """
-    out = {k: None for k, _, _ in HORIZONS}
+    HORIZONS_ = horizons
+    out = {k: None for k, _, _ in HORIZONS_}
     detail: dict[str, dict] = {}
     notes: list[str] = []
     if not latest or not latest[1] or latest[1] <= 0:
@@ -786,7 +879,7 @@ def compute_returns(latest: tuple[date, float] | None,
                 "ret_notes": ["no close in the last two sessions"]}
     ld, lc = latest
     unadj_by: dict[str, list[str]] = {}
-    for key, _, label in HORIZONS:
+    for key, _, label in HORIZONS_:
         ad, ac = anchors.get(key, (None, None))
         if ad is None:
             detail[key] = {"date": None, "reason": "no bhavcopy found for that date"}
@@ -840,6 +933,158 @@ def screener_check(row: dict, as_of: date | None) -> str | None:
     return None
 
 
+# ── forward-return estimates ─────────────────────────────────────────────────────
+# A range, not a call. The model and the validation that justifies it live in
+# backend/research/nse_forecast_2026_11 (validate.py, REPORT.md), and the fitted constants
+# ship as app/data/nse_forecast_calibration.json. In one line: the 80% range is the stock's
+# own volatility, scaled to the horizon and widened to the fat tails NSE stocks actually
+# show, around India's long-run market drift. Direction is not forecast unless a price
+# signal passed the validation rule, and the report records which ones did.
+
+EST_HORIZONS = (("1d", "1 day"), ("1w", "1 week"), ("1m", "1 month"), ("3m", "3 months"))
+EST_MIN_RETURNS = 120       # daily returns in the last year before any estimate is made
+EST_FULL_RETURNS = 200      # under this, confidence drops a level
+EST_MAX_NOTRADE = 0.25      # share of the last 63 sessions with no trade
+EST_THIN_NOTRADE = 0.10     # above this, confidence drops a level
+EST_STALE_SESSIONS = 3
+
+_CAL_PATH = Path(__file__).resolve().parents[1] / "data" / "nse_forecast_calibration.json"
+_cal_cache: dict | None = None
+
+
+def calibration() -> dict:
+    """The shipped calibration, or {} when it is missing (then no estimate is made)."""
+    global _cal_cache
+    if _cal_cache is None:
+        try:
+            with open(_CAL_PATH, encoding="utf-8") as fh:
+                _cal_cache = json.load(fh)
+        except (OSError, ValueError):
+            _cal_cache = {}
+    return _cal_cache
+
+
+def liquidity_bucket(tv_cr: float | None) -> str:
+    """The validation's liquidity buckets, by median daily traded value in Rs crore."""
+    if tv_cr is None:
+        return "thin"
+    return "liquid" if tv_cr >= 5 else "mid" if tv_cr >= 0.5 else "thin"
+
+
+def estimate_insufficient(close, n_returns, notrade, stale_sessions, recent_break, series) -> str | None:
+    """Why no estimate can be made for this stock, or None when one can."""
+    if close is None or close <= 0:
+        return "no recent close"
+    if series == "BZ":
+        return "BZ series: NSE has flagged it for non-compliance and restricts its trading"
+    if stale_sessions is not None and stale_sessions > EST_STALE_SESSIONS:
+        return f"no trade in the last {stale_sessions} sessions"
+    if (n_returns or 0) < EST_MIN_RETURNS:
+        return f"only {n_returns or 0} daily returns in the last year; {EST_MIN_RETURNS} are needed"
+    if notrade is not None and notrade > EST_MAX_NOTRADE:
+        return f"no trade on {notrade * 100:.0f}% of the last 63 sessions"
+    if recent_break:
+        return f"{recent_break} in the last 3 months; the price history cannot be read across it"
+    return None
+
+
+def confidence(hk: str, cal: dict, liq: str, vol_tercile: int | None, notrade, n_returns) -> tuple[str, str]:
+    """High / medium / low, from how well ranges held for stocks like this in the hold-out."""
+    v = (cal.get("validation") or {}).get(hk) or {}
+    covs = [c for c in ((v.get("by_liquidity") or {}).get(liq),
+                        (v.get("by_vol") or {}).get(str(vol_tercile)) if vol_tercile is not None else None)
+            if c is not None]
+    if not covs:
+        return "low", "no validation result for stocks like this"
+    worst = max(covs, key=lambda c: abs(c - 0.80))
+    level = 2 if abs(worst - 0.80) <= 0.03 else 1 if abs(worst - 0.80) <= 0.07 else 0
+    why = [f"for comparable stocks the 80% range held {worst * 100:.0f}% of the time in the "
+           f"{v.get('period', 'hold-out')} test"]
+    if notrade is not None and notrade > EST_THIN_NOTRADE:
+        level -= 1
+        why.append(f"no trade on {notrade * 100:.0f}% of recent sessions")
+    if (n_returns or 0) < EST_FULL_RETURNS:
+        level -= 1
+        why.append("less than a year of trading history")
+    if v.get("passed") is False:
+        level = min(level, 0)
+        if v.get("below_p05") is not None:
+            why.append(f"in that test the 1-in-20 downside was breached {v['below_p05'] * 100:.0f}% of the "
+                       "time, against the 5% it claims")
+        else:
+            why.append("this horizon missed the validation bar overall")
+    return ("low", "medium", "high")[max(0, min(2, level))], "; ".join(why)
+
+
+def estimate(close: float | None, ew_var: float | None, lr_var: float | None, n_returns: int,
+             notrade: float | None, stale_sessions: int | None, recent_break: str | None,
+             series: str | None, vol_tercile: int | None, tv_cr: float | None,
+             cal: dict | None = None, signals: dict | None = None) -> dict:
+    """Bear / base / bull returns and prices for each horizon, or why there are none.
+
+    bear and bull bound the 80% range (10th and 90th percentiles), base is the median
+    and the downside is the 5th percentile: a 1-in-20 bad outcome. `signals` holds the
+    stock's percentiles (0-1) on the price signals the validation kept as a tilt for a
+    horizon: {"mom_12_1", "prox_52w", "low_vol"}.
+    """
+    cal = cal if cal is not None else calibration()
+    reason = estimate_insufficient(close, n_returns, notrade, stale_sessions, recent_break, series)
+    if not reason and (ew_var is None or lr_var is None):
+        reason = "volatility could not be measured"
+    if not reason and not cal.get("horizons"):
+        reason = "the forecast calibration is not installed"
+    out: dict = {}
+    liq = liquidity_bucket(tv_cr)
+    for hk, _label in EST_HORIZONS:
+        h = (cal.get("horizons") or {}).get(hk)
+        if reason or not h:
+            out[hk] = {"status": "insufficient", "reason": reason or "no calibration for this horizon"}
+            continue
+        w = h["ewma_weight"]
+        sd = min(max(math.sqrt(w * ew_var + (1 - w) * lr_var), cal.get("vol_floor", 0.004)),
+                 cal.get("vol_cap", 0.10))
+        sig = sd * math.sqrt(h["sessions"])
+        mu = cal.get("drift_log_per_session", 0.0) * h["sessions"]
+        tilt = h.get("tilt")
+        if tilt and signals:
+            # The validated tilt: the mean percentile of the kept signals, centred at 0.5,
+            # times the slope fitted on the outcomes (see the research REPORT).
+            got = [signals.get(n) for n in tilt.get("signals") or [] if signals.get(n) is not None]
+            if got:
+                mu += float(tilt.get("beta") or 0.0) * (sum(got) / len(got) - 0.5)
+        zq = h["z"]
+        if h.get("use_buckets") and vol_tercile is not None:
+            # The validation chose per-volatility-tercile quantiles for this horizon.
+            keys = [str(q) for q in cal.get("quantiles", [])]
+            row = (h.get("z_by_vol_tercile") or {}).get(str(vol_tercile))
+            if row and len(row) == len(keys):
+                zq = dict(zip(keys, row))
+        q = {p: mu + float(zq[p]) * sig for p in ("0.05", "0.1", "0.5", "0.9")}
+        pct = {k: round(math.expm1(v) * 100, 2) for k, v in q.items()}
+        px = {k: round(close * math.exp(v), 2) for k, v in q.items()}
+        conf, why = confidence(hk, cal, liq, vol_tercile, notrade, n_returns)
+        out[hk] = {"status": "ok", "base": pct["0.5"], "bear": pct["0.1"], "bull": pct["0.9"],
+                   "down": pct["0.05"], "base_px": px["0.5"], "bear_px": px["0.1"],
+                   "bull_px": px["0.9"], "down_px": px["0.05"], "conf": conf, "conf_why": why,
+                   "sigma_pct": round(sig * 100, 2)}
+    return out
+
+
+def momentum_score(p_mom: float | None, p_6m: float | None, p_high: float | None) -> tuple[float | None, float | None]:
+    """(score 0-10, composite percentile 0-100) from cross-sectional percentiles in 0-1.
+
+    12-1 month momentum carries half the weight because it is the measure with the most
+    evidence behind it. The last month is skipped because one-month returns tend to
+    reverse. A listing too young for a 12-month figure is scored on what it has, and one
+    with neither a 6-month nor a 12-month figure is not scored at all.
+    """
+    if p_mom is None and p_6m is None:
+        return None, None
+    live = [(v, w) for v, w in ((p_mom, 0.5), (p_6m, 0.3), (p_high, 0.2)) if v is not None]
+    comp = sum(v * w for v, w in live) / sum(w for _, w in live)   # unrounded: these are 0-1
+    return round(comp * 10, 1), round(comp * 100, 1)
+
+
 def quarter_band(score: float | None) -> str:
     """The Quarter filter's bands: the nine tiers, grouped in pairs a person can pick."""
     if score is None:
@@ -854,29 +1099,36 @@ def quarter_band(score: float | None) -> str:
 
 
 METHODOLOGY = {
-    "overall_weights": OVERALL_WEIGHTS,
+    "rating_weights": RATING_WEIGHTS,
+    "rating_labels": RATING_LABELS,
     "min_pillars": MIN_PILLARS,
     "min_applicable_coverage": MIN_APPLICABLE_COVERAGE,
     "overdue_insufficient": OVERDUE_INSUFFICIENT,
     "rules": [
-        "Fundamentals, latest quarter and P&L record are the Rate tab's own three scores, "
-        "computed by the same code from the same screener.in page.",
-        "Overall = 70% fundamentals + 15% latest quarter + 15% P&L record. A grade with no "
-        "data is dropped and its weight shared over the others, the module's rule for a "
-        "missing pillar.",
+        "Stock rating = 25% quality + 20% growth + 15% quarterly results + 15% valuation + "
+        "15% financial strength + 10% price momentum, each scored 0-10. A component with no "
+        "data is dropped and its weight shared over the others.",
+        "Quality is the Rate tab's return-on-capital, profitability, cash-conversion and "
+        "ownership pillars. Growth blends its growth pillar with the P&L-record score. "
+        "Valuation blends its valuation pillar (P/E, PEG) with P/E against the sector "
+        "median. Financial strength is the balance-sheet pillar; it is not scored for "
+        "banks and NBFCs, whose borrowing is the business.",
+        "Price momentum is the stock's percentile across NSE on 12-1 month return (50%), "
+        "6-month return (30%) and closeness to its 52-week high (20%). It describes the "
+        "trend; it is not a forecast.",
         f"Insufficient Data: no fundamentals score, fewer than {MIN_PILLARS} applicable "
-        f"pillars or under {MIN_APPLICABLE_COVERAGE:.0%} of their weight, or a latest "
-        f"quarter {OVERDUE_INSUFFICIENT}+ quarters past its filing deadline. Banks and "
-        "NBFCs have five applicable pillars, everyone else seven.",
+        f"pillars or under {MIN_APPLICABLE_COVERAGE:.0%} of their weight, no quality pillar, "
+        f"fewer than {MIN_COMPONENTS} of the 6 components, or a latest quarter "
+        f"{OVERDUE_INSUFFICIENT}+ quarters past its filing deadline.",
         f"Freshness follows SEBI LODR Reg 33: results within {RESULT_DAYS} days of a "
         f"quarter's end ({ANNUAL_RESULT_DAYS} for the March quarter), plus a {GRACE_DAYS}-day "
         "grace before a quarter counts as overdue.",
         "A results board meeting on NSE dated after the rating's latest quarter queues the "
-        "stock for a fresh screener.in read. Same-day meetings are read after 20:00 IST, "
-        "and each event is retried for about a week if screener.in has not caught up.",
-        "Returns are price returns from NSE's end-of-day bhavcopy. Bonus issues, splits and "
-        "consolidations from NSE's corporate-actions feed are adjusted for. Rights issues "
-        "and demergers are named on the return, not adjusted. Dividends are excluded.",
+        "stock for a fresh screener.in read. Same-day meetings are read after 20:00 IST.",
+        "Historical returns are price returns on NSE's end-of-day closes, adjusted for "
+        "bonuses, splits and consolidations. Rights issues and demergers are named, not "
+        "adjusted; a return across a one-day move no NSE price band allows is withheld. "
+        "Dividends are not included.",
         "QoQ growth is shown but never scored, because most Indian businesses are seasonal. "
         "Growth off a loss or a zero base is reported as not meaningful.",
     ],
