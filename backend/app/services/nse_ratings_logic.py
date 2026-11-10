@@ -519,7 +519,9 @@ def static_flags(f: dict, r: dict, q: dict, qn: dict, coverage: float | None) ->
     if r.get("is_lender"):
         flags.append({"k": "lender", "lvl": "info",
                       "t": "Scored as a lender: the debt and cash-conversion pillars do not apply"})
-    if f.get("basis") == "standalone":
+    if f.get("basis_note"):
+        flags.append({"k": "standalone", "lvl": "info", "t": f.get("basis_note")[:1].upper() + f.get("basis_note")[1:]})
+    elif f.get("basis") == "standalone":
         flags.append({"k": "standalone", "lvl": "info",
                       "t": "Standalone figures: screener.in has no consolidated accounts for it"})
     if coverage is not None and MIN_APPLICABLE_COVERAGE <= coverage < INDICATIVE_COVERAGE:

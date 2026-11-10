@@ -170,6 +170,18 @@ check("overdue recheck", L.refresh_reason({"listed": True, "fetched_at": datetim
                                            "freshness": "outdated"}, noon), (3, "overdue"))
 check("delisted is left alone", L.refresh_reason({"listed": False}, noon), None)
 
+# ── a stale consolidated page swapped for standalone says so ─────────────────────
+note = ("screener.in's consolidated quarterly results stop at Jun 2024, so the standalone "
+        "figures, which run to Sep 2026, are used")
+fl = L.static_flags({"basis": "standalone", "basis_note": note}, {"pillars": []},
+                    {"rated": True}, {}, 1.0)
+check("basis note becomes the standalone flag",
+      [x["t"] for x in fl if x["k"] == "standalone"], ["S" + note[1:]])
+fl = L.static_flags({"basis": "standalone"}, {"pillars": []}, {"rated": True}, {}, 1.0)
+check("plain standalone keeps its own wording",
+      [x["t"] for x in fl if x["k"] == "standalone"],
+      ["Standalone figures: screener.in has no consolidated accounts for it"])
+
 # ── index slices ─────────────────────────────────────────────────────────────────
 f = L.index_fields("niftymidcap150")
 check("midcap composites", f["indices"], ["niftymidcap150", "nifty250", "nifty500", "niftytotalmarket"])

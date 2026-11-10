@@ -30,10 +30,11 @@ claim than "screener did not give us this".
 """
 
 import asyncio
+import calendar
 import html as _html
 import logging
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
 import httpx
 
@@ -46,6 +47,10 @@ TIMEOUT = httpx.Timeout(20.0, connect=10.0)
 CACHE_HOURS = 24          # the underlying numbers move once a quarter
 PACE_SECONDS = 1.2        # between live fetches, so a 30-symbol paste stays polite
 MAX_CONCURRENCY = 2
+# A consolidated page whose newest quarter is older than this is checked against the
+# standalone page (see fetch_company). 150 days lets a quarter run its 45-day filing
+# window and then some before an extra page is ever asked for.
+STALE_CONSOLIDATED_DAYS = 150
 
 BROWSER_HEADERS = {
     "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -146,6 +151,20 @@ def _labelled(rows: list[list[str]]) -> dict[str, list]:
 
 def _periods(rows: list[list[str]]) -> list[str]:
     return list(rows[0][1:]) if rows and rows[0] else []
+
+
+_MONTHS = {m.lower(): i for i, m in enumerate(calendar.month_abbr) if m}
+
+
+def latest_quarter_end(parsed: dict) -> date | None:
+    """The newest quarter on a parsed page ('Sep 2026' -> 2026-09-30), or None."""
+    for label in reversed(parsed.get("quarters_periods") or []):
+        m = re.match(r"^\s*([A-Za-z]{3})[A-Za-z]*\s+(\d{4})\s*$", str(label))
+        mon = _MONTHS.get(m.group(1).lower()) if m else None
+        if mon:
+            y = int(m.group(2))
+            return date(y, mon, calendar.monthrange(y, mon)[1])
+    return None
 
 
 # ── parsing ──────────────────────────────────────────────────────────────────────
@@ -274,6 +293,28 @@ async def fetch_company(symbol: str, client: httpx.AsyncClient | None = None) ->
             if alt:
                 alt_parsed = parse_company(alt)
                 if alt_parsed.get("profit_loss"):
+                    basis, parsed = "standalone", alt_parsed
+
+        # A consolidated page can also outlive the group it described. Once a company
+        # sells or merges its last subsidiary, screener.in keeps the old consolidated
+        # columns and stops adding quarters to them, while the standalone page carries
+        # on. On 10 Nov 2026, 3M India, Aavas and Aakash all had consolidated quarters
+        # ending in 2023-24 and standalone quarters to Sep 2026. Rating them on the
+        # consolidated page judged a two-year-old quarter as "the latest". So a stale
+        # consolidated page is checked against the standalone one, and the newer wins.
+        if basis == "consolidated":
+            latest = latest_quarter_end(parsed)
+            today = datetime.now(timezone.utc).date()
+            if latest is not None and (today - latest).days > STALE_CONSOLIDATED_DAYS:
+                alt = await _get(c, f"{BASE}/company/{symbol}/")
+                alt_parsed = parse_company(alt) if alt else {}
+                alt_latest = latest_quarter_end(alt_parsed) if alt_parsed else None
+                if alt_latest is not None and alt_latest > latest and alt_parsed.get("profit_loss"):
+                    alt_parsed["basis_note"] = (
+                        f"screener.in's consolidated quarterly results stop at "
+                        f"{calendar.month_abbr[latest.month]} {latest.year}, so the standalone "
+                        f"figures, which run to {calendar.month_abbr[alt_latest.month]} "
+                        f"{alt_latest.year}, are used")
                     basis, parsed = "standalone", alt_parsed
 
         parsed["basis"] = basis
