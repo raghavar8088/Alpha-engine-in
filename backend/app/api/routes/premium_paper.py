@@ -43,7 +43,8 @@ async def summary(_user: dict = Depends(get_current_user)):
     db = _database()
     if db is None:
         return {"accounts": [], "status": {}, "configured": False}
-    rows = await db.premium_accounts.find({}, {"positions": 0, "curve": 0}).to_list(200)
+    # every account (277 on 10 Nov 2026 with the 20-channel books; a cap of 200 hid the newest ones)
+    rows = await db.premium_accounts.find({}, {"positions": 0, "curve": 0}).to_list(1000)
     for r in rows:
         r["id"] = r.pop("_id")
     status = await db.premium_meta.find_one({"_id": "status"}) or {}
