@@ -17,6 +17,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import PageHeader from "../../components/PageHeader";
+import AIGatePanel from "../../components/AIGatePanel";
 import GlassPanel from "../../components/GlassPanel";
 import FactoryDeskView from "../../components/FactoryDeskView";
 import StatusPill from "../../components/StatusPill";
@@ -212,6 +213,8 @@ export default function GoldDeskPage() {
           </>
         }
       />
+
+      <AIGatePanel module="gold" />
 
       {error && <ErrorBanner message={error} onRetry={handleRefresh} />}
       {notice && (

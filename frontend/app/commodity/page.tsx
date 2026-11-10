@@ -12,6 +12,7 @@
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import PageHeader from "../../components/PageHeader";
+import AIGatePanel from "../../components/AIGatePanel";
 import GlassPanel from "../../components/GlassPanel";
 import StatusPill from "../../components/StatusPill";
 import ErrorBanner from "../../components/ErrorBanner";
@@ -146,6 +147,8 @@ export default function CommodityPage() {
       />
 
       {error && <ErrorBanner message={error} onRetry={load} />}
+
+      <AIGatePanel module="commodity" />
 
       <div className="desk-tabs">
         <button className={tab === "record" ? "dt active" : "dt"} onClick={() => setTab("record")}>Research record</button>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import GlassPanel from "../../components/GlassPanel";
 import DeskHistory from "../../components/DeskHistory";
 import PageHeader from "../../components/PageHeader";
+import AIGatePanel from "../../components/AIGatePanel";
 import ErrorBanner from "../../components/ErrorBanner";
 import V2Validation from "./V2Validation";
 import { AlarmBanner, EdgeReportPanel } from "./IntradayOps";
@@ -578,6 +579,8 @@ export default function IntradayStocksPage() {
         title="Intraday Stocks"
         subtitle="Paper strategy-selection tournament on the 200 most-traded NSE stocks. Every strategy decides on real 15-minute, 45-minute and 1-hour bars from Angel One's live stream, trades both sides (MIS shorts included) with its own ₹50 lakh account split into five ₹10 lakh slots, and pays real Angel One costs plus slippage. Entries only between 09:45 and 14:30 IST; everything is flat by 15:05 in closing-auction (F&O) stocks and 15:12 in the rest."
       />
+
+      <AIGatePanel module="intraday" />
 
       <div className="tabs">
         <Link href="/intraday-stocks/focus-five" className="tab">

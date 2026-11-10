@@ -1111,6 +1111,21 @@ try:
     app.include_router(_premium_paper_routes.router)
 except Exception:  # noqa: BLE001
     logger.exception("could not mount the Premium Strategies paper API")
+# AI final gate (2026-11-10): Claude reviews every new position of Intraday Stocks, Commodity Trading, Gold Desk and
+# Premium Strategies; approvals become separate AI positions (an A/B test: no module's own positions change).
+# app/services/ai_gate.py. A failure here must not stop the app.
+try:
+    from app.api.routes import ai_gate as _ai_gate_routes
+    app.include_router(_ai_gate_routes.router)
+
+    @app.on_event("startup")
+    async def start_ai_gate() -> None:
+        from app.services import ai_gate as _ai_gate
+        if _ai_gate.ENABLED:
+            asyncio.create_task(_ai_gate.loop())
+            logger.info("AI final gate started: %s, key configured %s", _ai_gate.MODEL, _ai_gate.configured())
+except Exception:  # noqa: BLE001
+    logger.exception("could not mount the AI final gate")
 # Reset buttons for the Intraday Stocks paper books, under each desk's own prefix
 app.include_router(book_resets.pattern_books_router)
 app.include_router(book_resets.live_intraday_router)
