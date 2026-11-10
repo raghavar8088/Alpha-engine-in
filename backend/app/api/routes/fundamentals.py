@@ -4,6 +4,13 @@
   GET  /api/fundamentals/{symbol}  one company, rating + the parsed statements behind it
   GET  /api/fundamentals/recent    what was rated lately, newest first
 
+  GET  /api/fundamentals/nse-ratings                every NSE-listed stock, filtered + sorted
+  GET  /api/fundamentals/nse-ratings/summary        counts, filters, job status, methodology
+  GET  /api/fundamentals/nse-ratings/stock/{sym}    one row with the calculation behind it
+  POST /api/fundamentals/nse-ratings/stock/{sym}/refresh   read screener.in again now
+  POST /api/fundamentals/nse-ratings/refresh        {"what": "due" | "universe" | "meetings"
+                                                     | "returns" | "rebuild"}
+
 `symbols` takes either the raw pasted text or an already-split list; the service does the
 splitting so the UI never has to guess at the user's separators.
 
@@ -13,6 +20,9 @@ free public site. Anything already cached inside the day does not re-fetch, so a
 pass over the same basket returns immediately.
 """
 
+import asyncio
+import logging
+import os
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
@@ -23,6 +33,7 @@ from app.services import (
     fundamental_brief,
     fundamental_universe,
     fundamental_watchlist,
+    nse_ratings,
     pnl_strength,
     results_strength,
     screener_in,
@@ -31,8 +42,29 @@ from app.services.fundamental_rating import PILLARS, PILLAR_LABELS, rate
 from app.services.grades import ORDER as GRADE_ORDER, scale as grade_scale
 
 router = APIRouter(prefix="/api/fundamentals", tags=["fundamentals"])
+logger = logging.getLogger("fundamentals")
 
 MAX_SYMBOLS = 40
+
+
+async def _start_nse_ratings_loop() -> None:
+    """The NSE Stock Ratings refresher, started with this router (see nse_ratings).
+
+    Registered here rather than in main.py so the tab ships as one module. It is an
+    ordinary startup handler, so FastAPI's include_router hands it to the app.
+    """
+    if os.getenv("NSE_RATINGS_ENABLED", "1") == "0":
+        logger.info("NSE Stock Ratings refresher disabled (NSE_RATINGS_ENABLED=0)")
+        return
+    try:
+        asyncio.create_task(nse_ratings.loop())
+        logger.info("NSE Stock Ratings refresher started: first cycle in %.0fs, then every %.0fs",
+                    nse_ratings.START_DELAY, nse_ratings.CYCLE_SECONDS)
+    except Exception:                                    # a startup hook must never raise
+        logger.exception("NSE Stock Ratings refresher failed to start")
+
+
+router.add_event_handler("startup", _start_nse_ratings_loop)
 
 
 def _clean(doc: dict | None) -> dict | None:
@@ -331,6 +363,78 @@ async def rate_symbols(payload: dict = Body(...),
         "note": (f"Only the first {MAX_SYMBOLS} symbols were rated; {len(truncated)} were "
                  "left out." if truncated else None),
     }
+
+
+# ── NSE Stock Ratings: every NSE-listed company on one table ─────────────────────
+# Declared before /{symbol} below, which would otherwise take "nse-ratings" as a ticker.
+
+
+@router.get("/nse-ratings")
+async def nse_ratings_table(
+    search: str | None = None,
+    index: str | None = None,
+    sector: str | None = None,
+    rating: str | None = Query(None, description="Comma-separated overall grade keys, "
+                                                 "or 'insufficient' for Insufficient Data."),
+    quarter: str | None = None,
+    data: str | None = None,
+    sort: str = "overall",
+    order: str = "desc",
+    page: int = Query(1, ge=1),
+    page_size: int = Query(50, ge=1, le=3000),
+    fields: str | None = None,
+    include_delisted: bool = False,
+    _current_user: dict = Depends(get_current_user),
+):
+    keys = [k for k in (rating or "").split(",")
+            if k in GRADE_ORDER or k == "insufficient"] or None
+    return await nse_ratings.browse(
+        search=search, index=index or None, sector=sector or None, ratings=keys,
+        quarter=quarter or None, data=data or None, sort=sort, order=order, page=page,
+        page_size=page_size, fields=fields, include_delisted=include_delisted)
+
+
+@router.get("/nse-ratings/summary")
+async def nse_ratings_summary(_current_user: dict = Depends(get_current_user)):
+    return await nse_ratings.summary()
+
+
+@router.get("/nse-ratings/stock/{symbol}")
+async def nse_rating_detail(symbol: str, _current_user: dict = Depends(get_current_user)):
+    out = await nse_ratings.detail(symbol)
+    if out is None:
+        raise HTTPException(status_code=404, detail=f"{symbol} is not on NSE's listed-equity list.")
+    return out
+
+
+@router.post("/nse-ratings/stock/{symbol}/refresh")
+async def nse_rating_refresh_one(symbol: str, _current_user: dict = Depends(get_current_user)):
+    """Read this one company from screener.in now, rather than waiting for the refresher."""
+    from app.services.desk_switches import is_on
+
+    if not await is_on(nse_ratings.SWITCH):
+        raise HTTPException(status_code=409,
+                            detail="Fundamental Rating is switched off in Main Control.")
+    try:
+        res = await nse_ratings.refresh_one(symbol, reason="manual")
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"{symbol} is not on NSE's listed-equity list.")
+    except nse_ratings.RateLimited:
+        raise HTTPException(status_code=429,
+                            detail="screener.in is rate-limiting this server; try again in a minute.")
+    out = await nse_ratings.detail(symbol)
+    return {**(out or {}), "refresh": res}
+
+
+@router.post("/nse-ratings/refresh")
+async def nse_ratings_refresh(payload: dict = Body(default={}),
+                              _current_user: dict = Depends(get_current_user)):
+    """Run the refresher now. `what` forces one job even when it is not due."""
+    what = (payload.get("what") or "due").strip()
+    if what not in ("due", "universe", "meetings", "returns", "rebuild"):
+        raise HTTPException(status_code=400,
+                            detail="what must be due, universe, meetings, returns or rebuild.")
+    return await nse_ratings.trigger(what)
 
 
 @router.get("/{symbol}")

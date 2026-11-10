@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import PageHeader from "../../components/PageHeader";
 import GlassPanel from "../../components/GlassPanel";
 import ErrorBanner from "../../components/ErrorBanner";
 import UniverseTab from "./UniverseTab";
 import WatchlistTab from "./WatchlistTab";
+import NseRatingsTab from "./NseRatingsTab";
 import TvExport from "./TvExport";
 
 /** Rating bands best first - section order for the TradingView export. */
@@ -49,7 +50,7 @@ export default function FundamentalsPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showMethod, setShowMethod] = useState(false);
-  const [tab, setTab] = useState<"rate" | "universe" | "watchlist">("rate");
+  const [tab, setTab] = useState<"rate" | "nse" | "universe" | "watchlist">("rate");
   const [copiedSym, setCopiedSym] = useState<string | null>(null);
 
   const loadSide = useCallback(async () => {
@@ -65,6 +66,26 @@ export default function FundamentalsPage() {
   useEffect(() => {
     loadSide();
   }, [loadSide]);
+
+  // #nse-ratings opens the NSE Stock Ratings tab directly, so the table can be bookmarked.
+  const hashRead = useRef(false);
+  useEffect(() => {
+    if (!hashRead.current) {
+      hashRead.current = true;
+      if (window.location.hash === "#nse-ratings") {
+        setTab("nse");
+        return;
+      }
+    }
+    const want = tab === "nse" ? "#nse-ratings" : "";
+    if (window.location.hash !== want) {
+      try {
+        window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}${want}`);
+      } catch {
+        /* a locked-down history API only costs the bookmark; the tab still switches */
+      }
+    }
+  }, [tab]);
 
   const run = useCallback(
     async (force: boolean) => {
@@ -126,7 +147,7 @@ export default function FundamentalsPage() {
   }, []);
 
   return (
-    <div className="page">
+    <div className={tab === "nse" ? "page wide" : "page"}>
       <PageHeader
         crumb="Fundamental Rating"
         title="Fundamental Rating"
@@ -150,6 +171,9 @@ export default function FundamentalsPage() {
         <button className={tab === "rate" ? "on" : ""} onClick={() => setTab("rate")}>
           Rate stocks
         </button>
+        <button className={tab === "nse" ? "on" : ""} onClick={() => setTab("nse")}>
+          NSE Stock Ratings
+        </button>
         <button className={tab === "universe" ? "on" : ""} onClick={() => setTab("universe")}>
           Universe &amp; picker
         </button>
@@ -158,6 +182,7 @@ export default function FundamentalsPage() {
         </button>
       </div>
 
+      {tab === "nse" && <NseRatingsTab />}
       {tab === "universe" && <UniverseTab />}
       {tab === "watchlist" && <WatchlistTab />}
 
@@ -616,6 +641,9 @@ export default function FundamentalsPage() {
           padding: 28px 32px 64px;
           max-width: 1180px;
           margin: 0 auto;
+        }
+        .page.wide {
+          max-width: 1560px;
         }
         .paste {
           width: 100%;
