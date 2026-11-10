@@ -69,7 +69,7 @@ IST = timezone(timedelta(hours=5, minutes=30))
 
 # Bump when a rule below changes what a row holds: the refresher then rebuilds every row
 # from the cached screener.in pages, without fetching any of them again.
-ROW_VERSION = 1
+ROW_VERSION = 2   # 2: balance sheet skips an unpublished half-year column
 
 OVERALL_WEIGHTS = {"fundamentals": 0.70, "quarter": 0.15, "pnl": 0.15}
 OVERALL_LABELS = {"fundamentals": "Fundamentals", "quarter": "Latest quarter",

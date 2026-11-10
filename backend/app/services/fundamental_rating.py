@@ -279,10 +279,27 @@ def _p_profitability(f: dict):
             {"opm_now": now, "opm_3y_ago": then, "drift": round(drift, 2)})
 
 
+def _published(bs: dict) -> dict:
+    """The balance sheet up to its newest column that actually has share capital in it.
+
+    screener.in adds the half-year column ("Sep 2026") as results land, and on some pages
+    every line in it reads 0 until the statement is filled in (3M India, standalone, on
+    10 Nov 2026). Read at face value that column has a net worth of zero, and a debt-free
+    business scored 0.5/10 as "impaired". A listed company's share capital is never zero,
+    so a trailing column without it is unpublished, and the column before it is the
+    latest real balance sheet. Pages whose newest column is populated are unchanged.
+    """
+    eq = bs.get("Equity Capital") or []
+    last = max((i for i, v in enumerate(eq) if v not in (None, 0)), default=None)
+    if last is None or last == len(eq) - 1:
+        return bs
+    return {k: (v[: last + 1] if isinstance(v, list) else v) for k, v in bs.items()}
+
+
 def _p_balance_sheet(f: dict):
     if is_lender(f):
         return None                      # see the module docstring
-    bs = f.get("balance_sheet") or {}
+    bs = _published(f.get("balance_sheet") or {})
     pl = f.get("profit_loss") or {}
     borrow = _latest(bs.get("Borrowings"))
     equity = _latest(bs.get("Equity Capital"))

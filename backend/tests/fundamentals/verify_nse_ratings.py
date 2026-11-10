@@ -182,6 +182,19 @@ check("plain standalone keeps its own wording",
       [x["t"] for x in fl if x["k"] == "standalone"],
       ["Standalone figures: screener.in has no consolidated accounts for it"])
 
+# ── an unpublished half-year balance-sheet column is skipped, not read as zero ───
+from app.services.fundamental_rating import _p_balance_sheet  # noqa: E402
+
+bs_page = {"sector": "Diversified", "profit_loss": {"Operating Profit": [300.0, 320.0], "Interest": [5.0, 6.0]},
+           "balance_sheet": {"Equity Capital": [11.0, 11.0, 0.0], "Reserves": [1835.0, 1757.0, 0.0],
+                             "Borrowings": [100.0, 170.0, 0.0]}}
+got = _p_balance_sheet(bs_page)
+check("zero half-year column skipped", (got[2]["net_worth"], got[2]["debt_to_equity"]), (1768.0, 0.1))
+check("...and scored on the real column", got[0] >= 9, True)
+populated = {**bs_page, "balance_sheet": {"Equity Capital": [11.0, 11.0], "Reserves": [1835.0, 1757.0],
+                                          "Borrowings": [100.0, 170.0]}}
+check("a populated page is unchanged", _p_balance_sheet(populated)[2], got[2])
+
 # ── index slices ─────────────────────────────────────────────────────────────────
 f = L.index_fields("niftymidcap150")
 check("midcap composites", f["indices"], ["niftymidcap150", "nifty250", "nifty500", "niftytotalmarket"])
