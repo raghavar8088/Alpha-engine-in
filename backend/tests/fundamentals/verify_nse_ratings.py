@@ -157,6 +157,9 @@ check("insufficient: no quality pillar",
       .startswith("none of the quality pillars"), True)
 thin = {**base, "pillar_scores": {"returns": 6.0}, "quarter": None, "pnl": None, "val_rel_score": None, "mom_score": None}
 check("insufficient: too few components", L.overall_rating(thin, cur)["ovr_reasons"], ["only 1 of the 6 rating components had data"])
+young = {**base, "pillar_scores": {**ps, "growth": None}, "pnl": None, "mom_score": None}
+check("insufficient: a new listing with no growth record or price trend",
+      L.overall_rating(young, cur)["ovr_reasons"], ["only 4 of the 6 rating components had data"])
 check("insufficient: no fundamentals",
       L.overall_rating({**base, "fund": None}, cur)["ovr_key"], L.INSUFFICIENT_KEY)
 check("insufficient: three pillars",

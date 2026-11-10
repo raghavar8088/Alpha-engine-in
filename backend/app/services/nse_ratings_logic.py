@@ -73,7 +73,7 @@ IST = timezone(timedelta(hours=5, minutes=30))
 
 # Bump when a rule below changes what a row holds: the refresher then rebuilds every row
 # from the cached screener.in pages, without fetching any of them again.
-ROW_VERSION = 3   # 2: balance sheet skips an unpublished half-year column; 3: six-part rating, P/B
+ROW_VERSION = 4   # 2: half-year balance sheet; 3: six-part rating, P/B; 4: rating needs 5 of 6 parts
 
 MIN_PILLARS = 4
 MIN_APPLICABLE_COVERAGE = 0.60
@@ -610,7 +610,9 @@ RATING_LABELS = {"quality": "Fundamentals (quality)", "growth": "Growth",
                  "quarter": "Quarterly results", "valuation": "Valuation",
                  "strength": "Financial strength", "momentum": "Price momentum"}
 QUALITY_PILLARS = {"returns": 0.22, "profitability": 0.14, "cash": 0.12, "ownership": 0.08}
-MIN_COMPONENTS = 4
+# Five of six: a company listed weeks ago has neither a growth record nor a price trend, and a
+# rating on the remaining four put two such listings at the top of the whole table.
+MIN_COMPONENTS = 5
 
 
 def _wmean(items) -> float | None:
