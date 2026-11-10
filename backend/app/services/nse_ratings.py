@@ -84,6 +84,9 @@ IST = L.IST
 START_DELAY = float(os.getenv("NSE_RATINGS_START_DELAY", "240"))
 CYCLE_SECONDS = float(os.getenv("NSE_RATINGS_CYCLE", "900"))
 REFRESH_BUDGET = float(os.getenv("NSE_RATINGS_BUDGET", "2400"))
+# Full-history highs walked per cycle for listed stocks that stock_highs does not have yet, outside the trading day
+# only (Angel's history endpoint is rate-limited and the live desks need it in session). 0 turns the walk off.
+HIGHS_PER_CYCLE = int(os.getenv("NSE_RATINGS_HIGHS_PER_CYCLE", "40"))
 PACE_SECONDS = float(os.getenv("NSE_RATINGS_PACE", str(fundamental_universe.SCAN_PACE_SECONDS)))
 COOLDOWN = fundamental_universe.RATE_LIMIT_COOLDOWN
 
@@ -129,6 +132,7 @@ TABLE_FIELDS = (
     "r1d", "r1w", "r1m", "r2m", "r3m", "r6m", "r1y", "r2y", "r5y", "r1y_vs_n500",
     "r1y_vs_sector", "r3m_vs_sector", "ret_asof", "ret_close", "ret_notes", "ret_check",
     "vol_1y", "mdd_1y", "beta_1y", "from_high", "tv_3m", "notrade_3m", "deliv_20d",
+    "ath", "ath_date", "from_ath", "ath_new", "ath_basis",
     "mom_score", "mom_pct", "mom_12_1", "vol_tercile", "est", "est_asof",
     "explain", "tflags", "sflags", "freshness", "behind", "next_q",
     "next_due", "pending", "last_meeting", "next_meeting", "basis", "source_url",
@@ -149,7 +153,7 @@ SORTS = {
     "r1d": "r1d", "r1w": "r1w", "r1m": "r1m", "r2m": "r2m", "r3m": "r3m", "r6m": "r6m",
     "r1y": "r1y", "r2y": "r2y", "r5y": "r5y", "r1y_vs_n500": "r1y_vs_n500",
     "r1y_vs_sector": "r1y_vs_sector", "vol": "vol_1y", "mdd": "mdd_1y", "beta": "beta_1y",
-    "from_high": "from_high", "liquidity": "tv_3m", "deliv": "deliv_20d",
+    "from_high": "from_high", "from_ath": "from_ath", "liquidity": "tv_3m", "deliv": "deliv_20d",
     "e1d": "e1d_base", "e1w": "e1w_base", "e1m": "e1m_base", "e3m": "e3m_base",
     "e1m_down": "e1m_down", "e3m_down": "e3m_down",
     "updated": "fetched_at",
@@ -163,6 +167,18 @@ VOL_FILTERS = {
     "low": ("Lowest third", {"vol_tercile": 0}),
     "mid": ("Middle third", {"vol_tercile": 1}),
     "high": ("Highest third", {"vol_tercile": 2}),
+}
+# All-time high: from_ath is the latest close against the higher of the stock's full-history high (stock_highs) and
+# its highest adjusted close in the store (nse_market.ath_fields). A stock whose high is not known sits in no band
+# but "unknown".
+ATH_FILTERS = {
+    "new": ("New all-time high in the latest session", {"ath_new": True}),
+    "2": ("Within 2% of its all-time high", {"from_ath": {"$gte": -2}}),
+    "5": ("Within 5% of its all-time high", {"from_ath": {"$gte": -5}}),
+    "10": ("Within 10% of its all-time high", {"from_ath": {"$gte": -10}}),
+    "25": ("Within 25% of its all-time high", {"from_ath": {"$gte": -25}}),
+    "far": ("More than 25% below it", {"from_ath": {"$lt": -25}}),
+    "unknown": ("All-time high not known", {"from_ath": None}),
 }
 CONF_FILTERS = {k: (k.capitalize() if k != "insufficient" else "Insufficient data", {"e1m_conf": k})
                 for k in ("high", "medium", "low", "insufficient")}
@@ -628,6 +644,37 @@ async def refresh_returns(force: bool = False) -> dict:
     return await nse_market.refresh_market(force=force)
 
 
+async def seed_missing_highs(limit: int | None = None) -> dict:
+    """Walk the full history of a few listed stocks that stock_highs does not cover yet, so their all-time high
+    becomes known.
+
+    This is the All Time High desk's own walker (stock_highs.backfill_all_time_highs: Angel's daily candles back to the
+    listing date). It runs only outside the trading day, because Angel's history endpoint is rate-limited and the live
+    desks need it in session. Only stocks with an Angel token are tried, in a random order, so a stock Angel keeps
+    refusing cannot block the rest. A new high counts from the next market step.
+    """
+    limit = HIGHS_PER_CYCLE if limit is None else limit
+    if limit <= 0:
+        return {"skipped": "off"}
+    from app.services import market_calendar
+    now = _ist_now()
+    if market_calendar.is_trading_day(now) and "08:30" <= now.strftime("%H:%M") < "16:30":
+        return {"skipped": "trading hours"}
+    import random
+
+    from app.core.db import instruments_collection, stock_highs_collection
+    from app.services.stock_highs import backfill_all_time_highs
+    have = set(await stock_highs_collection.distinct("symbol"))
+    missing = [d["_id"] async for d in rows.find({"listed": True}, {"_id": 1}) if d["_id"] not in have]
+    if not missing:
+        return {"missing": 0}
+    tokened = [d["symbol"] async for d in instruments_collection.find(
+        {"asset_class": "EQUITY", "symbol": {"$in": missing}, "angel_token": {"$ne": None}}, {"symbol": 1})]
+    random.shuffle(tokened)
+    res = await backfill_all_time_highs(only_missing=True, symbols=tokened, limit=limit) if tokened else {}
+    return {**res, "missing": len(missing), "walkable": len(tokened)}
+
+
 # ── the loop ─────────────────────────────────────────────────────────────────────
 
 
@@ -680,11 +727,12 @@ async def run_cycle(force: frozenset[str] = frozenset()) -> dict:
 
             out["sync"] = await _step("sync", sync_from_cache, force_all="rebuild" in force)
 
-            mkt = await meta.find_one({"_id": "market"}, {"as_of": 1, "v": 1, "cal": 1, "checked_at": 1})
+            mkt = await meta.find_one({"_id": "market"}, {"as_of": 1, "v": 1, "cal": 1, "mv": 1, "checked_at": 1})
             want = nse_market.expected_close_day(_ist_now()).isoformat()
             # A new row version or calibration recomputes at once; waiting for tonight's
             # bhavcopy is only re-checked every half hour.
-            outdated_code = mkt is None or mkt.get("v") != L.ROW_VERSION or mkt.get("cal") != L.calibration().get("version")
+            outdated_code = (mkt is None or mkt.get("v") != L.ROW_VERSION
+                             or mkt.get("cal") != L.calibration().get("version") or mkt.get("mv") != nse_market.MARKET_V)
             stale = outdated_code or mkt.get("as_of") != want
             checked_h = _age_h(mkt, "checked_at")
             market_ran = False
@@ -696,6 +744,7 @@ async def run_cycle(force: frozenset[str] = frozenset()) -> dict:
             out["reevaluate"] = await _step("reevaluate", reevaluate, force=meetings_ran or market_ran)
             if "norefresh" not in force:
                 out["refresh"] = await _step("refresh", refresh_due)
+            out["highs"] = await _step("highs", seed_missing_highs)
         finally:
             status.update(running=False, finished_at=_now(), last_cycle=out)
             try:
@@ -747,7 +796,7 @@ def status_view() -> dict:
 
 
 def _query(search=None, index=None, sector=None, ratings=None, quarter=None, data=None,
-           include_delisted=False, liquidity=None, vol=None, conf=None) -> dict:
+           include_delisted=False, liquidity=None, vol=None, conf=None, ath=None) -> dict:
     q: dict = {} if include_delisted else {"listed": True}
     clauses = []
     if index:
@@ -766,6 +815,8 @@ def _query(search=None, index=None, sector=None, ratings=None, quarter=None, dat
         clauses.append(VOL_FILTERS[vol][1])
     if conf in CONF_FILTERS:
         clauses.append(CONF_FILTERS[conf][1])
+    if ath in ATH_FILTERS:
+        clauses.append(ATH_FILTERS[ath][1])
     if search and search.strip():
         s = search.strip()
         clauses.append({"$or": [
@@ -779,8 +830,8 @@ def _query(search=None, index=None, sector=None, ratings=None, quarter=None, dat
 
 async def browse(search=None, index=None, sector=None, ratings=None, quarter=None, data=None,
                  sort="overall", order="desc", page=1, page_size=50, fields=None,
-                 include_delisted=False, liquidity=None, vol=None, conf=None) -> dict:
-    q = _query(search, index, sector, ratings, quarter, data, include_delisted, liquidity, vol, conf)
+                 include_delisted=False, liquidity=None, vol=None, conf=None, ath=None) -> dict:
+    q = _query(search, index, sector, ratings, quarter, data, include_delisted, liquidity, vol, conf, ath)
     total = await rows.count_documents(q)
     field = SORTS.get(sort, "overall")
     direction = 1 if order == "asc" else -1
@@ -810,12 +861,12 @@ async def summary() -> dict:
     else:
         counts = Counter()
         by_index, by_sector, by_rating, by_quarter, by_series = (Counter() for _ in range(5))
-        by_conf, by_vol, by_liq = Counter(), Counter(), Counter()
+        by_conf, by_vol, by_liq, by_ath = Counter(), Counter(), Counter(), Counter()
         read_first = read_last = None
         async for d in rows.find({"listed": True}, {
                 "indices": 1, "sector": 1, "ovr_key": 1, "freshness": 1, "pending": 1,
                 "quarter": 1, "fetched_at": 1, "fetch_error": 1, "series": 1,
-                "e1m_conf": 1, "vol_tercile": 1, "tv_3m": 1}):
+                "e1m_conf": 1, "vol_tercile": 1, "tv_3m": 1, "from_ath": 1, "ath_new": 1}):
             fa = L.aware(d.get("fetched_at"))
             if fa:
                 read_first = fa if read_first is None or fa < read_first else read_first
@@ -823,6 +874,14 @@ async def summary() -> dict:
             by_conf[d.get("e1m_conf") or "insufficient"] += 1
             if d.get("vol_tercile") is not None:
                 by_vol[("low", "mid", "high")[int(d["vol_tercile"])]] += 1
+            fath = d.get("from_ath")
+            if fath is None:
+                by_ath["unknown"] += 1
+            else:
+                by_ath["new"] += bool(d.get("ath_new"))
+                for band in ("2", "5", "10", "25"):
+                    by_ath[band] += fath >= -float(band)
+                by_ath["far"] += fath < -25
             tv = d.get("tv_3m")
             if tv is not None:
                 by_liq["10"] += tv >= 10
@@ -854,6 +913,7 @@ async def summary() -> dict:
                                   for k, v in LIQUIDITY_FILTERS.items()],
             "vol_filters": [{"key": k, "label": v[0], "count": by_vol.get(k, 0)} for k, v in VOL_FILTERS.items()],
             "conf_filters": [{"key": k, "label": v[0], "count": by_conf.get(k, 0)} for k, v in CONF_FILTERS.items()],
+            "ath_filters": [{"key": k, "label": v[0], "count": by_ath.get(k, 0)} for k, v in ATH_FILTERS.items()],
             "fundamentals_read": {"first": read_first, "last": read_last},
         }
         _summary_cache = (time.monotonic(), base)

@@ -114,6 +114,12 @@ export interface NseRatingRow {
   mdd_1y?: number | null;
   beta_1y?: number | null;
   from_high?: number | null;
+  /** All-time high: the higher of the full-history high (stock_highs) and the store's highest adjusted close. */
+  ath?: number | null;
+  ath_date?: string | null;
+  from_ath?: number | null;
+  ath_new?: boolean | null;
+  ath_basis?: "history" | "listing" | null;
   tv_3m?: number | null;
   notrade_3m?: number | null;
   deliv_20d?: number | null;
@@ -215,6 +221,7 @@ export interface NseRatingsQuery {
   liquidity?: string;
   vol?: string;
   conf?: string;
+  ath?: string;
 }
 
 export interface NseRatingsStatus {
@@ -244,6 +251,7 @@ export interface NseRatingsSummary {
   liquidity_filters?: { key: string; label: string; count: number }[];
   vol_filters?: { key: string; label: string; count: number }[];
   conf_filters?: { key: string; label: string; count: number }[];
+  ath_filters?: { key: string; label: string; count: number }[];
   fundamentals_read?: { first: string | null; last: string | null };
   jobs: {
     universe?: { at?: string; listed?: number; by_series?: Record<string, number>; in_index?: number } | null;
@@ -325,6 +333,7 @@ function query(q: NseRatingsQuery, fields?: "export"): string {
   if (q.liquidity) p.set("liquidity", q.liquidity);
   if (q.vol) p.set("vol", q.vol);
   if (q.conf) p.set("conf", q.conf);
+  if (q.ath) p.set("ath", q.ath);
   if (fields) p.set("fields", fields);
   return p.toString();
 }

@@ -74,6 +74,45 @@ INDEX_NAMES = ("Nifty 50", "Nifty 500", "Nifty Midcap 150", "Nifty Smallcap 250"
 STORE_HORIZONS = (("r1d", None, 1), ("r1w", None, 5), ("r1m", 1, None), ("r2m", 2, None),
                   ("r3m", 3, None), ("r6m", 6, None), ("r1y", 12, None))
 ANCHOR_HORIZONS = (("r2y", 24, "2Y"), ("r5y", 60, "5Y"))
+# Version of the market fields alone. A bump recomputes them on the next cycle without rebuilding the rating rows
+# (L.ROW_VERSION does that). 2 = the all-time-high fields.
+MARKET_V = 2
+
+
+def ath_fields(close: float | None, traded_today: bool, store_hi: float | None, store_hi_day: str | None,
+               prior_hi: float | None, stored: float | None, stored_day: str | None, listed_on: date | None,
+               store_start: date, today: str) -> dict:
+    """A stock's all-time high and how far its latest close is below it.
+
+    The high is the higher of two numbers:
+      - `stored`: the All Time High desk's full-history high (stock_highs). It is Angel's daily candles walked back to
+        the listing date, and is the app's one genuine all-time-high source;
+      - `store_hi`: the highest adjusted close in this module's own price store, which keeps it current where
+        stock_highs has not been raised since it was seeded.
+    With no stored high, the store alone answers only for a stock that listed inside the store, since it then holds the
+    whole history. Anything else is unknown and stays out of every all-time-high filter, never guessed.
+
+    `ath_new`: the latest session made a new all-time high. Either stock_highs moved to today, or today's close is above
+    every earlier high, including the stored intraday peak.
+    """
+    none = {"ath": None, "ath_date": None, "from_ath": None, "ath_new": None, "ath_basis": None}
+    if close is None or close <= 0:
+        return none
+    if stored:
+        basis = "history"
+    elif store_hi is not None and listed_on is not None and listed_on >= store_start:
+        basis = "listing"
+    else:
+        return none
+    cands = [(float(stored), stored_day)] if stored else []
+    if store_hi is not None:
+        cands.append((float(store_hi), store_hi_day))
+    ath, ath_day = max(cands, key=lambda x: x[0])
+    earlier = max([x for x in (prior_hi, float(stored) if stored and stored_day != today else None) if x is not None],
+                  default=None)
+    new = bool(stored and stored_day == today) or (traded_today and earlier is not None and close >= earlier)
+    return {"ath": round(ath, 2), "ath_date": ath_day, "from_ath": round(min(0.0, (close / ath - 1) * 100), 2),
+            "ath_new": new, "ath_basis": basis}
 
 
 def _ist_now() -> datetime:
@@ -300,16 +339,18 @@ def _months_idx(days: list[date], latest: date, months: int) -> int | None:
 
 
 def compute(days: list[date], renames: dict, actions: dict, meta_rows: dict,
-            anchors: dict, cal: dict) -> tuple[dict, dict]:
-    """Every market field for every listed symbol, plus index returns for the header."""
+            anchors: dict, cal: dict, highs: dict | None = None) -> tuple[dict, dict]:
+    """Every market field for every listed symbol, plus index returns for the header.
+    `highs`: {symbol: stock_highs document} for the all-time-high fields (empty: listing-only)."""
     # Stocks with no trade in a window produce all-NaN slices; that is expected, not news.
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", RuntimeWarning)
-        return _compute(days, renames, actions, meta_rows, anchors, cal)
+        return _compute(days, renames, actions, meta_rows, anchors, cal, highs or {})
 
 
 def _compute(days: list[date], renames: dict, actions: dict, meta_rows: dict,
-             anchors: dict, cal: dict) -> tuple[dict, dict]:
+             anchors: dict, cal: dict, highs: dict | None = None) -> tuple[dict, dict]:
+    highs = highs or {}
     # Two passes over the files, keeping none of them: 330 parsed days held at once would be
     # some 350 MB of Python objects in a backend that runs near its 800 MB cap. float32 and
     # int16 keep the whole computation near 35 MB.
@@ -377,6 +418,14 @@ def _compute(days: list[date], renames: dict, actions: dict, meta_rows: dict,
     lastidx = np.where(traded.any(axis=0), T - 1 - np.argmax(traded[::-1], axis=0), -1)
     stale = np.where(lastidx >= 0, t0 - lastidx, 999)
     close = np.where(stale <= 5, C[np.clip(lastidx, 0, None), np.arange(N)], np.nan)
+
+    # all-time high inputs (ath_fields): the highest adjusted close in the store and on which day, and the highest
+    # before the latest session
+    Cm = np.where(np.isnan(C), -np.inf, C)
+    hi_t = np.argmax(Cm, axis=0)
+    store_hi = Cm[hi_t, np.arange(N)]
+    prior_hi = Cm[:t0].max(axis=0) if t0 > 0 else np.full(N, -np.inf, dtype=np.float32)
+    del Cm
 
     # volatility state
     v = np.full(N, np.nan, dtype=np.float64)
@@ -540,6 +589,14 @@ def _compute(days: list[date], renames: dict, actions: dict, meta_rows: dict,
             "mom_score": score, "mom_pct": comp, "vol_tercile": terc,
             "est": est, "est_asof": days[t0].isoformat(),
         })
+        hdoc = highs.get(s) or {}
+        doc.update(ath_fields(
+            None if np.isnan(close[j]) else float(close[j]), bool(lastidx[j] == t0),
+            None if np.isinf(store_hi[j]) else float(store_hi[j]),
+            None if np.isinf(store_hi[j]) else days[int(hi_t[j])].isoformat(),
+            None if np.isinf(prior_hi[j]) else float(prior_hi[j]),
+            hdoc.get("all_time_high"), hdoc.get("all_time_high_date"), L.as_date(m.get("listed_on")),
+            days[0], days[t0].isoformat()))
         for hk, _lbl in L.EST_HORIZONS:
             e = est.get(hk) or {}
             ok = e.get("status") == "ok"
@@ -631,7 +688,7 @@ async def anchor_returns(latest_day: date, latest: dict, renames: dict, actions:
 async def refresh_market(force: bool = False) -> dict:
     """Bring the store up to the latest close and recompute every market field."""
     want = expected_close_day(_ist_now())
-    stored = await meta.find_one({"_id": "market"}, {"as_of": 1, "v": 1, "cal": 1})
+    stored = await meta.find_one({"_id": "market"}, {"as_of": 1, "v": 1, "cal": 1, "mv": 1})
     cal = L.calibration()
     cal_version = cal.get("version")
     synced = await sync_store(want)
@@ -640,7 +697,8 @@ async def refresh_market(force: bool = False) -> dict:
         raise RuntimeError(f"the price store holds only {len(days)} sessions")
     latest_day = days[-1]
     if (not force and stored and stored.get("as_of") == latest_day.isoformat()
-            and stored.get("v") == L.ROW_VERSION and stored.get("cal") == cal_version):
+            and stored.get("v") == L.ROW_VERSION and stored.get("cal") == cal_version
+            and stored.get("mv") == MARKET_V):
         await meta.update_one({"_id": "market"}, {"$set": {"checked_at": datetime.now(timezone.utc)}})
         return {"skipped": f"already computed for {latest_day.isoformat()}", "store": synced}
 
@@ -653,8 +711,14 @@ async def refresh_market(force: bool = False) -> dict:
         {"listed": True}, {"sector": 1, "series": 1, "listed_on": 1})}
     latest = _read(_path("prices", latest_day)) or {}
     anchors = await anchor_returns(latest_day, latest, renames, actions, meta_rows)
+    try:                                     # the All Time High desk's full-history highs; without them, listing-only
+        highs = {d["symbol"]: d async for d in db["stock_highs"].find(
+            {}, {"_id": 0, "symbol": 1, "all_time_high": 1, "all_time_high_date": 1})}
+    except Exception:                        # noqa: BLE001 - never let it stop the returns
+        logger.warning("nse market: stock_highs unreadable; all-time highs from the store only")
+        highs = {}
 
-    result, header = await asyncio.to_thread(compute, days, renames, actions, meta_rows, anchors, cal)
+    result, header = await asyncio.to_thread(compute, days, renames, actions, meta_rows, anchors, cal, highs)
 
     ops = []
     for sym, doc in result.items():
@@ -663,7 +727,7 @@ async def refresh_market(force: bool = False) -> dict:
     for i in range(0, len(ops), 500):
         await rows.bulk_write(ops[i:i + 500], ordered=False)
     doc = {"_id": "market", "at": datetime.now(timezone.utc), "checked_at": datetime.now(timezone.utc),
-           "as_of": latest_day.isoformat(), "v": L.ROW_VERSION, "cal": cal_version,
+           "as_of": latest_day.isoformat(), "v": L.ROW_VERSION, "cal": cal_version, "mv": MARKET_V,
            "store": synced, "rows": len(ops), **header}
     await meta.replace_one({"_id": "market"}, doc, upsert=True)
     logger.info("nse market fields as of %s: %d rows, %d sessions in the store", latest_day, len(ops), header["sessions"])

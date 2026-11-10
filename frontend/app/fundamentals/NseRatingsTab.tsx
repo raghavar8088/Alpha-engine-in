@@ -10,7 +10,7 @@
  * enough data says "Insufficient Data" and why, and so does an estimate that cannot be made.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import GlassPanel from "../../components/GlassPanel";
 import { GRADE_COLOR, GRADE_ORDER, GradeKey } from "../../lib/api";
 import {
@@ -144,6 +144,8 @@ const COLS: Col[] = [
   { key: "beta", label: "Beta", section: "risk", sort: "beta", num: true, first: "asc",
     title: "Sensitivity of daily returns to the Nifty 500 over the last year" },
   { key: "from_high", label: "From 52w high", section: "risk", sort: "from_high", num: true },
+  { key: "from_ath", label: "From all-time high", section: "risk", sort: "from_ath", num: true,
+    title: "Latest close against the stock's all-time high (its full price history back to listing). \"New high\" = a new all-time high in the latest session" },
   { key: "liquidity", label: "Traded/day", section: "risk", sort: "liquidity", num: true,
     title: "Median daily traded value over the last 3 months; no-trade days count as zero" },
   { key: "deliv", label: "Delivery", section: "risk", sort: "deliv", num: true,
@@ -216,6 +218,21 @@ function crore(v: number | null | undefined): string {
   if (Math.abs(v) >= 100000) return `₹${(v / 100000).toFixed(2)}L Cr`;
   return `₹${v.toLocaleString("en-IN", { maximumFractionDigits: Math.abs(v) < 100 ? 1 : 0 })} Cr`;
 }
+/** The all-time-high quick filters shown under the column presets, in this order. */
+const ATH_CHIPS: { key: string; label: string }[] = [
+  { key: "new", label: "New all-time high" },
+  { key: "2", label: "Within 2%" },
+  { key: "5", label: "Within 5%" },
+  { key: "10", label: "Within 10%" },
+  { key: "25", label: "Within 25%" },
+];
+const athText = (r: NseRatingRow) =>
+  r.from_ath == null ? "—" : r.ath_new ? "New high" : `${r.from_ath.toFixed(1)}%`;
+function athTitle(r: NseRatingRow): string {
+  if (r.ath == null) return "All-time high not known yet: no full-history high is stored for this stock";
+  const since = r.ath_basis === "listing" ? ", its whole history since listing" : "";
+  return `All-time high ${rupees(r.ath)} on ${day(r.ath_date)}${since}`;
+}
 const rupees = (v: number | null | undefined) =>
   v === null || v === undefined ? "—" : `₹${v.toLocaleString("en-IN", { maximumFractionDigits: v < 100 ? 2 : 0 })}`;
 const signed = (v: number | null | undefined, d = 1) =>
@@ -267,6 +284,56 @@ interface Prefs {
   pageSize?: number;
 }
 
+/** A second horizontal scrollbar ABOVE a scrolling box, moving in step with the box's own bar (which stays at the
+ *  bottom). The strip's range is made equal to the box's even when the box also shows a vertical scrollbar, and it
+ *  re-measures whenever the table inside changes width (columns picked, a new page). Hidden when nothing overflows. */
+function TopScrollbar({ target }: { target: RefObject<HTMLDivElement | null> }) {
+  const barRef = useRef<HTMLDivElement>(null);
+  const [inner, setInner] = useState(0);
+  const [overflows, setOverflows] = useState(false);
+
+  useEffect(() => {
+    const box = target.current;
+    const bar = barRef.current;
+    if (!box || !bar) return;
+    const measure = () => {
+      const range = box.scrollWidth - box.clientWidth;
+      setOverflows(range > 1);
+      setInner(bar.clientWidth + Math.max(0, range));
+      bar.scrollLeft = box.scrollLeft;
+    };
+    const fromBox = () => {
+      if (Math.abs(bar.scrollLeft - box.scrollLeft) > 0.5) bar.scrollLeft = box.scrollLeft;
+    };
+    const fromBar = () => {
+      if (Math.abs(box.scrollLeft - bar.scrollLeft) > 0.5) box.scrollLeft = bar.scrollLeft;
+    };
+    box.addEventListener("scroll", fromBox, { passive: true });
+    bar.addEventListener("scroll", fromBar, { passive: true });
+    const ro = new ResizeObserver(measure);
+    ro.observe(box);
+    if (box.firstElementChild) ro.observe(box.firstElementChild);
+    measure();
+    return () => {
+      box.removeEventListener("scroll", fromBox);
+      bar.removeEventListener("scroll", fromBar);
+      ro.disconnect();
+    };
+  }, [target]);
+
+  useEffect(() => {          // after the strip re-renders at a new width, line it up with the table again
+    const box = target.current;
+    const bar = barRef.current;
+    if (box && bar) bar.scrollLeft = box.scrollLeft;
+  }, [inner, target]);
+
+  return (
+    <div ref={barRef} className={`nsr-topscroll${overflows ? "" : " off"}`} aria-hidden="true">
+      <div style={{ width: inner }} />
+    </div>
+  );
+}
+
 function readPrefs(): Prefs {
   try {
     const raw = window.localStorage.getItem(PREFS_KEY);
@@ -293,6 +360,7 @@ export default function NseRatingsTab() {
   const [liquidity, setLiquidity] = useState("");
   const [vol, setVol] = useState("");
   const [conf, setConf] = useState("");
+  const [ath, setAth] = useState("");
   const [sort, setSort] = useState("overall");
   const [order, setOrder] = useState<"asc" | "desc">("desc");
   const [page, setPage] = useState(1);
@@ -309,6 +377,7 @@ export default function NseRatingsTab() {
   const reqId = useRef(0);
   const lastDone = useRef(0);
   const prefsLoaded = useRef(false);
+  const tableBoxRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const p = readPrefs();
@@ -347,12 +416,13 @@ export default function NseRatingsTab() {
       liquidity: liquidity || undefined,
       vol: vol || undefined,
       conf: conf || undefined,
+      ath: ath || undefined,
       sort,
       order,
       page,
       pageSize,
     }),
-    [search, index, sector, ratings, quarter, dataFilter, liquidity, vol, conf, sort, order, page, pageSize],
+    [search, index, sector, ratings, quarter, dataFilter, liquidity, vol, conf, ath, sort, order, page, pageSize],
   );
 
   const load = useCallback(async () => {
@@ -376,7 +446,7 @@ export default function NseRatingsTab() {
 
   useEffect(() => {
     setExportItems(null);
-  }, [search, index, sector, ratings, quarter, dataFilter, liquidity, vol, conf]);
+  }, [search, index, sector, ratings, quarter, dataFilter, liquidity, vol, conf, ath]);
 
   const loadSummary = useCallback(async () => {
     try {
@@ -411,6 +481,12 @@ export default function NseRatingsTab() {
     setPage(1);
   };
 
+  const pickAth = (k: string) => {
+    const next = ath === k ? "" : k;
+    setFilter(setAth)(next);
+    if (next && !cols.has("from_ath")) setCols((prev) => new Set([...prev, "from_ath"]));
+  };
+
   const onSort = (c: Col) => {
     if (!c.sort) return;
     if (sort === c.sort) setOrder((o) => (o === "asc" ? "desc" : "asc"));
@@ -437,6 +513,7 @@ export default function NseRatingsTab() {
     setLiquidity("");
     setVol("");
     setConf("");
+    setAth("");
     setPage(1);
   };
 
@@ -491,7 +568,7 @@ export default function NseRatingsTab() {
   const visible = COLS.filter((c) => c.fixed || cols.has(c.key));
   const rows = data?.rows ?? [];
   const total = data?.total ?? 0;
-  const filtersOn = !!(search || index || sector || ratings.length || quarter || dataFilter || liquidity || vol || conf);
+  const filtersOn = !!(search || index || sector || ratings.length || quarter || dataFilter || liquidity || vol || conf || ath);
   const bestFirst: OverallKey[] = [...GRADE_ORDER].reverse();
   const testPeriod = Object.values(validation)[0]?.period;
   const read = summary?.fundamentals_read;
@@ -699,6 +776,10 @@ export default function NseRatingsTab() {
         return <td key={c.key} className="nsr-n">{fixed(r.beta_1y, 2)}</td>;
       case "from_high":
         return <td key={c.key} className="nsr-n">{r.from_high != null ? `${r.from_high.toFixed(0)}%` : "—"}</td>;
+      case "from_ath":
+        return (
+          <td key={c.key} className={`nsr-n${r.ath_new ? " nsr-athnew" : ""}`} title={athTitle(r)}>{athText(r)}</td>
+        );
       case "liquidity":
         return (
           <td key={c.key} className="nsr-n" title={r.notrade_3m != null ? `No trade on ${r.notrade_3m.toFixed(0)}% of the last 63 sessions` : undefined}>
@@ -854,6 +935,15 @@ export default function NseRatingsTab() {
               {(summary?.vol_filters ?? []).map((f) => <option key={f.key} value={f.key}>{f.label} ({f.count})</option>)}
             </select>
           </label>
+          {summary?.ath_filters && (
+            <label>
+              <span>All-time high</span>
+              <select value={ath} onChange={(e) => setFilter(setAth)(e.target.value)}>
+                <option value="">Any</option>
+                {summary.ath_filters.map((f) => <option key={f.key} value={f.key}>{f.label} ({f.count})</option>)}
+              </select>
+            </label>
+          )}
           <label>
             <span>1-month estimate</span>
             <select value={conf} onChange={(e) => setFilter(setConf)(e.target.value)}>
@@ -930,6 +1020,24 @@ export default function NseRatingsTab() {
           )}
         </div>
 
+        {summary?.ath_filters && (
+          <div className="nsr-presets nsr-athbar" role="group" aria-label="All-time high filter">
+            <span className="nsr-chiplabel">All-time high</span>
+            {ATH_CHIPS.map((c) => {
+              const n = summary.ath_filters?.find((f) => f.key === c.key)?.count;
+              return (
+                <button key={c.key} className={`nsr-preset${ath === c.key ? " on" : ""}`} aria-pressed={ath === c.key}
+                  onClick={() => pickAth(c.key)}>
+                  {c.label}{n != null ? ` · ${n.toLocaleString("en-IN")}` : ""}
+                </button>
+              );
+            })}
+            {ath && (
+              <button className="nsr-ghost nsr-small" onClick={() => setFilter(setAth)("")}>Clear</button>
+            )}
+          </div>
+        )}
+
         {pickerOpen && (
           <div className="nsr-picker">
             {SECTIONS.map((s) => {
@@ -956,7 +1064,8 @@ export default function NseRatingsTab() {
           </div>
         )}
 
-        <div className="nsr-tablewrap">
+        <TopScrollbar target={tableBoxRef} />
+        <div className="nsr-tablewrap" ref={tableBoxRef}>
           <table className="nsr-table">
             <thead>
               <tr className="nsr-bands">
@@ -1289,6 +1398,26 @@ export default function NseRatingsTab() {
         }
         .nsr-pick legend {
           padding: 0 4px;
+        }
+        .nsr-athbar {
+          margin: -4px 0 12px;
+        }
+        .nsr-athnew {
+          color: var(--gain) !important;
+          font-weight: 700;
+        }
+        .nsr-topscroll {
+          overflow-x: auto;
+          overflow-y: hidden;
+          margin: 0 1px 4px;
+        }
+        .nsr-topscroll > div {
+          height: 1px;
+        }
+        .nsr-topscroll.off {
+          visibility: hidden;
+          height: 0;
+          margin-bottom: 0;
         }
         .nsr-tablewrap {
           overflow: auto;
@@ -1957,6 +2086,7 @@ function RatingDrawer({ symbol, indices, onClose, onRefreshed }: {
                 <span>Max drawdown <b className="down">{r.mdd_1y != null ? `${r.mdd_1y.toFixed(0)}%` : "—"}</b></span>
                 <span>Beta to Nifty 500 <b>{fixed(r.beta_1y, 2)}</b></span>
                 <span>From 52-week high <b>{r.from_high != null ? `${r.from_high.toFixed(0)}%` : "—"}</b></span>
+                <span>From all-time high <b title={athTitle(r)}>{athText(r)}</b></span>
                 <span>Traded per day <b>{r.tv_3m != null ? `₹${r.tv_3m.toFixed(1)} Cr` : "—"}</b></span>
                 <span>No-trade sessions <b>{r.notrade_3m != null ? `${r.notrade_3m.toFixed(0)}%` : "—"}</b></span>
                 <span>Delivery <b>{fixed(r.deliv_20d, 0, "%")}</b></span>
