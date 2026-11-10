@@ -115,8 +115,8 @@ export default function LiveTradingPage() {
       const ok = window.confirm(
         "ARM LIVE TRADING?\n\nThis places REAL orders with real money on your Angel One account: every " +
           "new Selected ORB 15-min position the Intraday Stocks tournament opens is copied within seconds, " +
-          `one position at a time, about ${inr(desk.copy_notional ?? summary.position_notional)} each on ` +
-          `Angel's intraday (MIS) leverage, and closed at the same stop, when the tournament closes it, or ` +
+          `up to ${desk.max_open_positions ?? 5} positions at a time, about ${inr(desk.copy_notional ?? summary.position_notional)} each on ` +
+          `Angel's ${desk.mis_leverage ?? 5}x intraday (MIS) leverage, and closed at the same stop, when the tournament closes it, or ` +
           "at the session square-off. You can disarm or hit the kill switch at any time.\n\nArm the desk now?",
       );
       if (!ok) return;
@@ -189,7 +189,7 @@ export default function LiveTradingPage() {
         refreshing={isRefreshing}
         crumb="Live Trading"
         title="Live Trading"
-        subtitle={`REAL-MONEY desk: when ARMED, copies the Intraday Stocks tournament's Selected ORB 15-min positions into real Angel One orders within seconds — one position at a time, about ${inr((summary as (LiveTradingSummary & CopyDesk) | null)?.copy_notional ?? summary?.position_notional)} each on intraday (MIS) leverage, closed at the same stop, when the tournament closes it, or at the session square-off. Every order is INTRADAY (MIS). The forward-test gate is overridden for this strategy by your decision of 10 Nov 2026.`}
+        subtitle={`REAL-MONEY desk: when ARMED, copies the Intraday Stocks tournament's Selected ORB 15-min positions into real Angel One orders within seconds — up to ${(summary as (LiveTradingSummary & CopyDesk) | null)?.max_open_positions ?? 5} positions at a time, about ${inr((summary as (LiveTradingSummary & CopyDesk) | null)?.copy_notional ?? summary?.position_notional)} each on ${(summary as (LiveTradingSummary & CopyDesk) | null)?.mis_leverage ?? 5}x intraday (MIS) leverage, closed at the same stop, when the tournament closes it, or at the session square-off. Every order is INTRADAY (MIS). The forward-test gate is overridden for this strategy by your decision of 10 Nov 2026.`}
       />
 
       {error && <ErrorBanner message={error} />}

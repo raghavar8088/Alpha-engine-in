@@ -612,8 +612,9 @@ SEL = "iv2_orb_sel15"
 check("the desk trades exactly one strategy: the tournament's Selected ORB 15-min",
       [ls.strategy_id for ls in LT.SELECTED] == [SEL], [ls.strategy_id for ls in LT.SELECTED])
 check("its override is written down, dated, in the code", "10 Nov 2026" in LT.OWNER_OVERRIDE.get(SEL, ""))
-check("one real position at a time, about Rs 50,000 of notional",
-      LT.MAX_OPEN_POSITIONS == 1 and LT.COPY_NOTIONAL == 50000.0 and LT.DESK_CEILING == 50000.0)
+check("up to five real positions at once, about Rs 10,000 each on 5x (Rs 50,000 across the desk)",
+      LT.MAX_OPEN_POSITIONS == 5 and LT.COPY_NOTIONAL == 10000.0 and LT.MIS_LEVERAGE == 5.0
+      and LT.DESK_CEILING == 50000.0 and LT.PER_STRATEGY_ALLOCATION == 50000.0)
 
 fresh()
 chk = run(LT.arming_check())
@@ -657,8 +658,9 @@ check("a paper entry older than the window is final", cc(parent(opened_at=NOW - 
       and "old" in cc(parent(opened_at=NOW - timedelta(seconds=400)), 1501.0, 0, NOW)[0])
 check("a naive (Mongo) timestamp is read as UTC",
       cc(parent(opened_at=(NOW - timedelta(seconds=20)).replace(tzinfo=None)), 1501.0, 0, NOW) == (None, True))
-w, f = cc(parent(), 1501.0, 1, NOW)
-check("one real position open: wait (not final)", w and "one real position" in w and f is False, w)
+check("four real positions open: a fifth is copied", cc(parent(), 1501.0, 4, NOW) == (None, True))
+w, f = cc(parent(), 1501.0, 5, NOW)
+check("five real positions open: wait (not final)", w and "the most at once is 5" in w and f is False, w)
 w, f = cc(parent(), None, 0, NOW)
 check("no live quote: wait (not final)", w == "no live quote" and f is False)
 w, f = cc(parent(), 1484.0, 0, NOW)
@@ -728,7 +730,7 @@ rows = real_rows()
 check("an armed desk copies a fresh tournament entry: ONE real order", r["opened"] == 1 and len(a.orders) == 1, r)
 check("…same side, MIS market order", a.orders[0]["transactiontype"] == "BUY"
       and a.orders[0]["producttype"] == "INTRADAY" and a.orders[0]["ordertype"] == "MARKET")
-check("…sized to about Rs 50,000 at the live price", a.orders[0]["quantity"] == int(50000 // 1501.0),
+check("…sized to about Rs 10,000 at the live price", a.orders[0]["quantity"] == int(10000 // 1501.0),
       a.orders[0]["quantity"])
 check("…recorded with its tournament parent, the paper stop and no fixed target",
       rows and rows[0]["parent_id"] == "T1" and rows[0]["stoploss"] == 1485.0 and rows[0]["target"] is None
@@ -744,14 +746,30 @@ LT._equity_quote_map = lambda dhan, eqs: _async((
     {("NSE_EQ", "1594"): {"last_price": 1501.0}, ("NSE_EQ", "11536"): {"last_price": 1501.0}},
     {("NSE_EQ", "1594"): "test", ("NSE_EQ", "11536"): "test"}))
 r = run(LT.scan_cycle(None))
-check("two tournament entries at once: only the first is copied (one at a time)",
-      len(a.orders) == 1 and a.orders[0]["tradingsymbol"] == "INFY-EQ", [o["tradingsymbol"] for o in a.orders])
-check("…the second waits, unclaimed, while its paper entry is fresh",
-      claim("T2") is None and "T2" in LT._copy_waiting, LT._copy_waiting)
-LT.live_trading_positions_collection.docs[0]["status"] = "CLOSED"     # the first one closes
+check("two tournament entries at once: both are copied",
+      [o["tradingsymbol"] for o in a.orders] == ["INFY-EQ", "TCS-EQ"], [o["tradingsymbol"] for o in a.orders])
+
+SIX = ["INFY", "TCS", "SBIN", "ITC", "LT", "WIPRO"]
+SIX_INST = [{**INST, "symbol": s, "security_id": str(100 + i), "angel_token": str(100 + i),
+             "angel_tradingsymbol": f"{s}-EQ"} for i, s in enumerate(SIX)]
+a = copy_desk([parent(position_id=f"S{i}", symbol=s, opened_at=NOW - timedelta(seconds=30 - i))
+               for i, s in enumerate(SIX)], angel=CashAngel(cash="13397"))
+LT.instruments_collection = FakeCollection(SIX_INST)
+LT._equity_quote_map = lambda dhan, eqs: _async((
+    {("NSE_EQ", str(100 + i)): {"last_price": 1501.0} for i in range(6)},
+    {("NSE_EQ", str(100 + i)): "test" for i in range(6)}))
 run(LT.scan_cycle(None))
-check("…and is copied once the first real position has closed (still fresh)",
-      len(a.orders) == 2 and a.orders[1]["tradingsymbol"] == "TCS-EQ", [o["tradingsymbol"] for o in a.orders])
+check("six tournament entries at once: the first five are copied, each about Rs 10,000",
+      [o["tradingsymbol"] for o in a.orders] == [f"{s}-EQ" for s in SIX[:5]]
+      and all(o["quantity"] == int(10000 // 1501.0) for o in a.orders), [(o["tradingsymbol"], o["quantity"]) for o in a.orders])
+check("…the sixth waits, unclaimed, while its paper entry is fresh",
+      claim("S5") is None and "S5" in LT._copy_waiting, LT._copy_waiting)
+check("…and the desk never holds more than Rs 50,000 of notional",
+      sum(p["capital_deployed"] for p in real_rows()) <= 50000.0, sum(p["capital_deployed"] for p in real_rows()))
+next(d for d in LT.live_trading_positions_collection.docs if d["symbol"] == "TCS")["status"] = "CLOSED"
+run(LT.scan_cycle(None))
+check("…and is copied once a slot frees (still fresh)",
+      len(a.orders) == 6 and a.orders[-1]["tradingsymbol"] == "WIPRO-EQ", [o["tradingsymbol"] for o in a.orders])
 
 a = copy_desk([parent(opened_at=NOW - timedelta(seconds=200))])
 run(LT.scan_cycle(None))
@@ -788,10 +806,13 @@ a = copy_desk([parent(strategy_id="iv2_orb_5m"), parent(position_id="T3", status
 run(LT.scan_cycle(None))
 check("other strategies, closed, earlier-day and non-v2 paper positions are never copied", a.orders == [])
 
-a = copy_desk([parent()], angel=CashAngel(cash="10000"))
+a = copy_desk([parent()], angel=CashAngel(cash="1500"))
 run(LT.scan_cycle(None))
-check("a Rs 10,000 account funds about 4.5x on MIS, never more",
-      len(a.orders) == 1 and a.orders[0]["quantity"] == int(10000 * LT.MIS_LEVERAGE // 1501.0), a.orders)
+check("a Rs 1,500 account funds 5x on MIS (Rs 7,500), never more",
+      len(a.orders) == 1 and a.orders[0]["quantity"] == int(1500 * LT.MIS_LEVERAGE // 1501.0), a.orders)
+a = copy_desk([parent()], angel=CashAngel(cash="200"))
+run(LT.scan_cycle(None))
+check("an account that cannot fund one share orders nothing", a.orders == [], a.orders)
 
 a = copy_desk([parent()], angel=CashAngel(fail_order="RMS: insufficient margin"))
 run(LT.scan_cycle(None))
@@ -927,7 +948,9 @@ def ticks(seconds=0.3):
     run(go())
 
 
-a = copy_desk([parent()], angel=CashAngel(book=held, order_book=[{"orderid": "EXIT1", "status": "complete"}]))
+# the broker holds exactly what the loop bought (a different quantity would be a mismatch: never auto-exited)
+held_copy = [{**held[0], "netqty": str(int(LT.COPY_NOTIONAL // 1501.0))}]
+a = copy_desk([parent()], angel=CashAngel(book=held_copy, order_book=[{"orderid": "EXIT1", "status": "complete"}]))
 ticks()
 check("an armed desk: the loop copies the tournament entry once, however many ticks run",
       len(a.orders) == 1 and len(real_rows()) == 1, len(a.orders))
@@ -959,7 +982,7 @@ section("WHAT THE PAGE READS")
 a = copy_desk([parent()], positions=[copied()])
 sm = run(LT.summary())
 check("the summary names the copied strategy, the size and the override",
-      sm["copy_source"] == SEL and sm["copy_notional"] == 50000.0 and sm["max_open_positions"] == 1
+      sm["copy_source"] == SEL and sm["copy_notional"] == 10000.0 and sm["max_open_positions"] == 5
       and SEL in sm["gate_override"], {k: sm.get(k) for k in ("copy_source", "copy_notional", "gate_override")})
 op = run(LT.open_positions())
 check("open positions carry their tournament parent and no target", op[0]["parent_id"] == "T1" and op[0]["target"] is None)

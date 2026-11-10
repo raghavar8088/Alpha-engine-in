@@ -5,9 +5,9 @@ pre-registered Selected ORB 15-min (iv2_orb_sel15). When the tournament's paper 
 iv2_orb_sel15 position, this desk places the same-side REAL Angel One MIS market order within
 seconds (`copy_loop`), holds it to the same stop (the opposite edge of the 09:15-09:30 range),
 and squares it off with the session (15:05 in closing-auction stocks, 15:12 otherwise), or as
-soon as the tournament's own position closes. One real position at a time, about Rs 50,000 of
-notional on Angel's intraday leverage. The fourteen earlier strategies and their record were
-removed at the owner's request. Angel is also the price feed; Dhan only fills quote gaps and
+soon as the tournament's own position closes. Up to five real positions at a time, about
+Rs 10,000 each on Angel's 5x intraday leverage (Rs 2,000 of margin each). The fourteen earlier
+strategies and their record were removed at the owner's request. Angel is also the price feed; Dhan only fills quote gaps and
 never receives an order. (This needs an Angel TRADING API key.)
 
 Safety model (mirrors the Antigravity Live Engine the user already runs):
@@ -79,10 +79,10 @@ STATE_ID = "engine"
 # square-off. Real positions are COPIED from the tournament's paper positions, so the two
 # cannot drift apart.
 #
-# SIZE: Angel charges about Rs 51 a round trip on a Rs 10,000 position (0.51%) but about Rs 67
-# on Rs 50,000 (0.13%), so small positions lose to charges alone. One position at a time, about
-# Rs 50,000 of notional on Angel's intraday (MIS) leverage, never more than MIS_LEVERAGE x the
-# cash Angel reports.
+# SIZE (the owner's choice, 10 Nov 2026): up to five positions at once, about Rs 10,000 each
+# (Rs 2,000 of margin each at 5x), never more than MIS_LEVERAGE x the cash Angel reports. Angel
+# charges about Rs 51 a round trip on Rs 10,000 (0.51%) against about Rs 67 on Rs 50,000 (0.13%);
+# the owner chose the smaller size knowing that.
 
 
 @dataclass(frozen=True)
@@ -96,16 +96,16 @@ class CopyStrategy:
 COPY_SOURCE = "iv2_orb_sel15"
 SELECTED = [CopyStrategy(COPY_SOURCE, "Selected ORB 15-min (top-5 expected move)", "momentum")]
 SELECTED_BY_ID = {ls.strategy_id: ls for ls in SELECTED}
-COPY_NOTIONAL = float(os.getenv("LIVE_TRADING_COPY_NOTIONAL", "50000"))     # one position, ~Rs 50k notional
-MIS_LEVERAGE = float(os.getenv("LIVE_TRADING_MIS_LEVERAGE", "4.5"))        # Angel gives up to 5x on MIS
-MAX_OPEN_POSITIONS = 1                                                       # one real position at a time
+COPY_NOTIONAL = float(os.getenv("LIVE_TRADING_COPY_NOTIONAL", "10000"))     # each position, ~Rs 10k notional
+MIS_LEVERAGE = float(os.getenv("LIVE_TRADING_MIS_LEVERAGE", "5"))          # 5x on MIS: ~Rs 2,000 of margin each
+MAX_OPEN_POSITIONS = int(os.getenv("LIVE_TRADING_MAX_OPEN", "5"))            # real positions open at once
 COPY_WINDOW_S = float(os.getenv("LIVE_TRADING_COPY_WINDOW_S", "180"))       # copy a paper entry only this fresh
 COPY_MAX_DRIFT_R = 0.5      # skip when the price has run more than half the stop distance since the paper fill
 COPY_TICK_S = float(os.getenv("LIVE_TRADING_COPY_TICK_S", "10"))            # the fast loop's cadence
 COPY_LOOP_ON = os.getenv("LIVE_TRADING_COPY_LOOP", "on").lower() != "off"   # off: only the 3-minute tick copies
 COPY_START_DELAY_S = 45.0                                                    # let the app finish starting
 COPY_SESSION = ("09:15", "15:25")                                            # IST, the fast loop's hours
-PER_STRATEGY_ALLOCATION = COPY_NOTIONAL
+PER_STRATEGY_ALLOCATION = COPY_NOTIONAL * MAX_OPEN_POSITIONS    # the one strategy's notional across its open positions
 POSITION_NOTIONAL = COPY_NOTIONAL
 DESK_CEILING = COPY_NOTIONAL * MAX_OPEN_POSITIONS
 MAX_CONSECUTIVE_REJECTS = 3        # auto-disarm after this many failed real orders in a row
@@ -426,15 +426,15 @@ async def _realized_pnl(strategy_id: str) -> float:
 
 
 async def _available_cash(strategy_id: str) -> float:
-    """The tighter of two real limits, in NOTIONAL rupees: this strategy's own one-position
-    ceiling, and what the ACCOUNT's cash can fund on MIS at MIS_LEVERAGE.
+    """The tighter of two real limits, in NOTIONAL rupees: this strategy's own ceiling (its
+    MAX_OPEN_POSITIONS positions), and what the ACCOUNT's cash can fund on MIS at MIS_LEVERAGE.
 
     The account limit has to be desk-wide. Checking each strategy against Angel's balance
     separately let eleven idle strategies each treat the same rupees as theirs; fired in the
     same cycle they would have ordered several times the cash on hand, been rejected on
     margin, and auto-disarmed the desk for a shortfall that was our arithmetic rather than
     the broker's."""
-    # Notional room (10 Nov 2026): the strategy's one-position ceiling minus what is open, and what
+    # Notional room (10 Nov 2026): the strategy's five-position ceiling minus what is open, and what
     # Angel's cash can fund on MIS at MIS_LEVERAGE; positions opened after the balance was read count
     # at their margin.
     slice_left = PER_STRATEGY_ALLOCATION - await _deployed_capital(strategy_id)
@@ -658,7 +658,7 @@ async def _open_position(ls, symbol: str, inst: dict, signal, ltp_source: str,
     if qty < 1:
         return False
     new_notional = ref * qty
-    # ₹80k desk-wide ceiling (the per-strategy ₹10k cap is already in `cash` above)
+    # the desk-wide notional ceiling (MAX_OPEN_POSITIONS positions); the strategy's room is in `cash` above
     if await _desk_deployed() + new_notional > DESK_CEILING + 1:
         return False
 
@@ -749,8 +749,8 @@ def copy_check(parent: dict, ltp: float | None, open_positions: int,
     """(why not, final) for copying a tournament position now; (None, True) means copy it.
 
     A FINAL reason is recorded once and the position is never looked at again. A passing one
-    (no quote yet, a real position already open, the price has run) is retried on the next
-    tick for as long as the paper entry is younger than COPY_WINDOW_S."""
+    (no quote yet, every real slot taken, the price has run) is retried on the next tick for
+    as long as the paper entry is younger than COPY_WINDOW_S."""
     entry, stop = float(parent.get("entry_price") or 0.0), float(parent.get("stoploss") or 0.0)
     if entry <= 0 or stop <= 0 or entry == stop or parent.get("side") not in ("BUY", "SELL"):
         return "the paper position has no usable side, entry or stop", True
@@ -762,7 +762,7 @@ def copy_check(parent: dict, ltp: float | None, open_positions: int,
     if (now_utc - opened).total_seconds() > COPY_WINDOW_S:
         return f"the paper entry is more than {COPY_WINDOW_S:.0f} s old", True
     if open_positions >= MAX_OPEN_POSITIONS:
-        return "one real position at a time, and one is open", False
+        return f"{open_positions} real positions already open (the most at once is {MAX_OPEN_POSITIONS})", False
     if not ltp:
         return "no live quote", False
     sign = 1 if parent["side"] == "BUY" else -1
