@@ -17,7 +17,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import PageHeader from "../../components/PageHeader";
-import AIGatePanel from "../../components/AIGatePanel";
 import GlassPanel from "../../components/GlassPanel";
 import FactoryDeskView from "../../components/FactoryDeskView";
 import StatusPill from "../../components/StatusPill";
@@ -214,8 +213,6 @@ export default function GoldDeskPage() {
         }
       />
 
-      <AIGatePanel module="gold" />
-
       {error && <ErrorBanner message={error} onRetry={handleRefresh} />}
       {notice && (
         <div className="notice" onClick={() => setNotice(null)}>
@@ -264,6 +261,10 @@ export default function GoldDeskPage() {
           <span>Strategy Factory · 546</span>
           <span className="tv">records beside H1 · Delta XAUTUSD</span>
         </button>
+        <a href="/gold-desk/ai-approved" className="ptab" style={{ textDecoration: "none" }}>
+          <span>AI Approved</span>
+          <span className="tv">positions the AI final gate approved</span>
+        </a>
       </div>
 
       {fac ? (

@@ -8,7 +8,7 @@
 // only: none of these passed its test, and nothing here can place a real order.
 import { useMemo, useState } from "react";
 import PageHeader from "../../components/PageHeader";
-import AIGatePanel from "../../components/AIGatePanel";
+import Link from "next/link";
 import GlassPanel from "../../components/GlassPanel";
 import { PREMIUM, type Version } from "./data";
 import { day, inr, num, pct, tone } from "./format";
@@ -148,8 +148,6 @@ export default function PremiumStrategiesPage() {
         subtitle="213 strategies from YouTube's trading channels: their exact rules, their results after all costs, and each one paper trading its own ₹10 lakh account."
       />
 
-      <AIGatePanel module="premium" />
-
       <div className="ps-banner" role="note">
         <span className="ps-pill ps-pill-warn">Paper only</span>
         <span>
@@ -171,6 +169,7 @@ export default function PremiumStrategiesPage() {
             {t.label}
           </button>
         ))}
+        <Link href="/premium-strategies/ai-approved" className="ps-tab">AI Approved</Link>
       </div>
 
       {tab === "paper" && <PaperDesk summary={summary} error={error} />}

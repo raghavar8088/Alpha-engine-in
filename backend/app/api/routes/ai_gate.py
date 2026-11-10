@@ -3,6 +3,8 @@
   GET /api/ai-gate/status                              model, switches, daily caps, the last cycle
   GET /api/ai-gate/summary?module=                     the A/B picture: every position the module took since the gate
                                                        started, the AI-approved book, and what the AI skipped
+  GET /api/ai-gate/leaderboard?module=                 every reviewed strategy: approvals, the AI book, the module's own
+  GET /api/ai-gate/daily?module=                       per day: the AI book and the module
   GET /api/ai-gate/positions?module=&status=&limit=    AI positions (their own ai_position_id and timestamps)
   GET /api/ai-gate/decisions?module=&decision=&limit=  every review, with the AI's reasons
 
@@ -38,6 +40,22 @@ async def status(_user: dict = Depends(get_current_user)):
 async def summary(module: str = Query(...), _user: dict = Depends(get_current_user)):
     m = _module(module)
     return _off(m) or await ai_gate.summary(m)
+
+
+@router.get("/leaderboard")
+async def leaderboard(module: str = Query(...), _user: dict = Depends(get_current_user)):
+    m = _module(module)
+    if _off(m):
+        return {"rows": [], **_off(m)}
+    return await ai_gate.leaderboard(m)
+
+
+@router.get("/daily")
+async def daily(module: str = Query(...), _user: dict = Depends(get_current_user)):
+    m = _module(module)
+    if _off(m):
+        return {"rows": [], **_off(m)}
+    return await ai_gate.daily(m)
 
 
 @router.get("/positions")

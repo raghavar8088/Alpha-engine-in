@@ -12,7 +12,6 @@
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import PageHeader from "../../components/PageHeader";
-import AIGatePanel from "../../components/AIGatePanel";
 import GlassPanel from "../../components/GlassPanel";
 import StatusPill from "../../components/StatusPill";
 import ErrorBanner from "../../components/ErrorBanner";
@@ -148,8 +147,6 @@ export default function CommodityPage() {
 
       {error && <ErrorBanner message={error} onRetry={load} />}
 
-      <AIGatePanel module="commodity" />
-
       <div className="desk-tabs">
         <button className={tab === "record" ? "dt active" : "dt"} onClick={() => setTab("record")}>Research record</button>
         <button className={tab === "market" ? "dt active" : "dt"} onClick={() => setTab("market")}>Market &amp; contracts</button>
@@ -157,6 +154,7 @@ export default function CommodityPage() {
         <button className={tab === "money" ? "dt active" : "dt"} onClick={() => setTab("money")}>Real money</button>
         <button className={tab === "top2L" ? "dt active" : "dt"} onClick={() => setTab("top2L")}>Top 10 Paper Trade · ₹2 lakh</button>
         <button className={tab === "top10L" ? "dt active" : "dt"} onClick={() => setTab("top10L")}>Top 10 Paper Trade · ₹10 lakh</button>
+        <a href="/commodity/ai-approved" className="dt" style={{ textDecoration: "none" }}>AI Approved</a>
       </div>
 
       {tab === "record" && (

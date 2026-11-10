@@ -431,6 +431,16 @@ class MongoRepo:
         return [d["parent_id"] async for d in self.db[DEC].find({"module": module, "decision": decision},
                                                                {"parent_id": 1}).limit(limit)]
 
+    async def decision_counts(self, module: str) -> list[dict]:
+        return [r async for r in self.db[DEC].aggregate([
+            {"$match": {"module": module}},
+            {"$group": {"_id": {"sid": "$strategy_id", "dec": "$decision"}, "n": {"$sum": 1},
+                        "name": {"$first": "$strategy_name"}}}])]
+
+    async def all_positions(self, module: str) -> list[dict]:
+        return [d async for d in self.db[POS].find({"module": module}, {
+            "strategy_id": 1, "strategy_name": 1, "status": 1, "pnl": 1, "currency": 1, "closed_at": 1})]
+
     async def closed_positions(self, module: str) -> list[dict]:
         return [d async for d in self.db[POS].find({"module": module, "status": "CLOSED"},
                                                    {"pnl": 1, "currency": 1})]
@@ -538,6 +548,13 @@ class IntradayAdapter:
         return {"INR": await _record(self._coll(), {"engine": "v2", "opened_at": {"$gte": since}, "status": {"$ne": "OPEN"},
                                                     "realized_pnl": {"$ne": None}})}
 
+    async def closed_since(self, since: datetime) -> list[dict]:
+        return [{"strategy_id": d.get("strategy_id"), "strategy_name": d.get("strategy_name"), "currency": "INR",
+                 "pnl": _f(d.get("realized_pnl")) or 0.0, "closed_at": _aware(d.get("closed_at"))}
+                async for d in self._coll().find(
+                    {"engine": "v2", "opened_at": {"$gte": since}, "status": {"$ne": "OPEN"}, "realized_pnl": {"$ne": None}},
+                    {"strategy_id": 1, "strategy_name": 1, "realized_pnl": 1, "closed_at": 1})]
+
 
 class CommodityAdapter:
     """Commodity Trading (commodity_engine): every row of commodity_positions."""
@@ -596,6 +613,13 @@ class CommodityAdapter:
     async def control(self, since: datetime) -> dict:
         return {"INR": await _record(self._coll(), {"opened_at": {"$gte": since}, "status": {"$ne": "OPEN"},
                                                     "realized_pnl": {"$ne": None}})}
+
+    async def closed_since(self, since: datetime) -> list[dict]:
+        return [{"strategy_id": d.get("strategy_id"), "strategy_name": d.get("strategy_name"), "currency": "INR",
+                 "pnl": _f(d.get("realized_pnl")) or 0.0, "closed_at": _aware(d.get("closed_at"))}
+                async for d in self._coll().find(
+                    {"opened_at": {"$gte": since}, "status": {"$ne": "OPEN"}, "realized_pnl": {"$ne": None}},
+                    {"strategy_id": 1, "strategy_name": 1, "realized_pnl": 1, "closed_at": 1})]
 
 
 class GoldAdapter:
@@ -666,6 +690,15 @@ class GoldAdapter:
             if r["n"]:
                 out[cur] = r
         return out or {"USD": {"n": 0, "wins": 0, "net": 0.0}}
+
+    async def closed_since(self, since: datetime) -> list[dict]:
+        return [{"strategy_id": d.get("strategy_id") or d.get("strategy_template"), "strategy_name": d.get("strategy_name"),
+                 "currency": d.get("currency") or "INR", "pnl": _f(d.get("realized_pnl")) or 0.0,
+                 "closed_at": _aware(d.get("closed_at"))}
+                async for d in self._coll().find(
+                    {"opened_at": {"$gte": since}, "status": {"$ne": "OPEN"}, "void": {"$ne": True}, "realized_pnl": {"$ne": None}},
+                    {"strategy_id": 1, "strategy_template": 1, "strategy_name": 1, "currency": 1, "realized_pnl": 1,
+                     "closed_at": 1})]
 
 
 class PremiumAdapter:
@@ -743,6 +776,21 @@ class PremiumAdapter:
             return {"INR": {"n": 0, "wins": 0, "net": 0.0}}
         return {"INR": await _record(db.premium_trades, {"entry_t": {"$gte": int(since.timestamp())}, "qty": {"$gt": 0},
                                                          "open": False}, "$pnl")}
+
+    async def closed_since(self, since: datetime) -> list[dict]:
+        db = self._db()
+        if db is None:
+            return []
+        rows = [d async for d in db.premium_trades.find(
+            {"entry_t": {"$gte": int(since.timestamp())}, "qty": {"$gt": 0}, "open": False},
+            {"acct": 1, "pnl": 1, "exit_t": 1})]
+        names: dict = {}
+        accts = sorted({d.get("acct") for d in rows if d.get("acct")})
+        if accts:
+            async for a in db.premium_accounts.find({"_id": {"$in": accts}}, {"name": 1}):
+                names[a["_id"]] = a.get("name")
+        return [{"strategy_id": d.get("acct"), "strategy_name": names.get(d.get("acct")) or d.get("acct"), "currency": "INR",
+                 "pnl": _f(d.get("pnl")) or 0.0, "closed_at": _aware(d.get("exit_t"))} for d in rows]
 
 
 ADAPTERS = {a.module: a for a in (IntradayAdapter(), CommodityAdapter(), GoldAdapter(), PremiumAdapter())}
@@ -977,6 +1025,105 @@ async def summary(module: str) -> dict:
 def status_brief(module: str) -> dict:
     return {"enabled": ENABLED, "configured": configured(), "model": MODEL, "daily_max": MODULES[module]["daily_max"],
             "lookback_min": MODULES[module]["lookback_min"]}
+
+
+def _primary(by: dict) -> str:
+    """The currency most of a strategy's trades are in (gold on Delta: USD)."""
+    return max(by, key=lambda c: by[c]["n"]) if by else "INR"
+
+
+def _flat(by: dict, cur: str, prefix: str) -> dict:
+    s = by.get(cur) or {"n": 0, "wins": 0, "net": 0.0}
+    n = s["n"]
+    return {f"{prefix}_trades": n, f"{prefix}_wins": s["wins"],
+            f"{prefix}_win_rate": round(s["wins"] / n * 100, 1) if n else None,
+            f"{prefix}_net": round(s["net"], 2), f"{prefix}_avg": round(s["net"] / n, 2) if n else None}
+
+
+def _add(s: dict, pnl: float) -> None:
+    s["n"] += 1
+    s["wins"] += pnl > 0
+    s["net"] += pnl
+
+
+async def leaderboard(module: str) -> dict:
+    """Every strategy the gate has reviewed: its reviews and approvals, the AI-approved book's result, and the
+    module's own result for that strategy since the gate started. Ranked by the AI book's net P&L."""
+    rp = repo()
+    await rp.ensure()
+    ds = await rp.decision_stats(module, _now().astimezone(IST).date().isoformat())
+    since = _aware(ds["first_seen"])
+    rows: dict = {}
+
+    def row(sid, name):
+        r = rows.setdefault(sid or "?", {"strategy_id": sid, "strategy_name": name or sid, "reviewed": 0, "approved": 0,
+                                         "skipped": 0, "not_reviewed": 0, "ai_open": 0, "ai": {}, "mod": {}})
+        if name and (not r["strategy_name"] or r["strategy_name"] == sid):
+            r["strategy_name"] = name
+        return r
+
+    for g in await rp.decision_counts(module):
+        r = row(g["_id"].get("sid"), g.get("name"))
+        dec, n = g["_id"].get("dec"), int(g["n"])
+        if dec == "take":
+            r["approved"] += n
+            r["reviewed"] += n
+        elif dec == "skip":
+            r["skipped"] += n
+            r["reviewed"] += n
+        elif dec == "not_reviewed":
+            r["not_reviewed"] += n
+    for p in await rp.all_positions(module):
+        r = row(p.get("strategy_id"), p.get("strategy_name"))
+        if p.get("status") == "OPEN":
+            r["ai_open"] += 1
+        elif p.get("status") == "CLOSED":
+            _add(r["ai"].setdefault(p.get("currency") or "INR", {"n": 0, "wins": 0, "net": 0.0}), _f(p.get("pnl")) or 0.0)
+    if since:
+        for c in await ADAPTERS[module].closed_since(since):
+            r = rows.get(c.get("strategy_id") or "?")
+            if r is None:                      # a strategy the gate never reviewed (opened while the gate was down)
+                continue
+            _add(r["mod"].setdefault(c.get("currency") or "INR", {"n": 0, "wins": 0, "net": 0.0}), c["pnl"])
+    out = []
+    for r in rows.values():
+        cur = _primary({**r["mod"], **r["ai"]})
+        out.append({"strategy_id": r["strategy_id"], "strategy_name": r["strategy_name"], "currency": cur,
+                    "reviewed": r["reviewed"], "approved": r["approved"], "skipped": r["skipped"],
+                    "not_reviewed": r["not_reviewed"],
+                    "approval_rate": round(r["approved"] / r["reviewed"] * 100, 1) if r["reviewed"] else None,
+                    "ai_open": r["ai_open"], **_flat(r["ai"], cur, "ai"), **_flat(r["mod"], cur, "module")})
+    out.sort(key=lambda x: (-(x["ai_net"] if x["ai_trades"] else -1e18), -x["approved"], str(x["strategy_name"])))
+    for i, x in enumerate(out, 1):
+        x["rank"] = i
+    return {"module": module, "since": since.isoformat() if since else None, "rows": out}
+
+
+async def daily(module: str) -> dict:
+    """Per IST day: the AI-approved book's closed positions and the module's own, since the gate started."""
+    rp = repo()
+    await rp.ensure()
+    ds = await rp.decision_stats(module, _now().astimezone(IST).date().isoformat())
+    since = _aware(ds["first_seen"])
+    days: dict = {}
+
+    def cell(t, cur):
+        d = (t or _now()).astimezone(IST).date().isoformat()
+        return days.setdefault((d, cur), {"day": d, "currency": cur, "ai": {"n": 0, "wins": 0, "net": 0.0},
+                                          "mod": {"n": 0, "wins": 0, "net": 0.0}})
+
+    for p in await rp.all_positions(module):
+        if p.get("status") == "CLOSED":
+            _add(cell(_aware(p.get("closed_at")), p.get("currency") or "INR")["ai"], _f(p.get("pnl")) or 0.0)
+    if since:
+        for x in await ADAPTERS[module].closed_since(since):
+            _add(cell(x.get("closed_at"), x.get("currency") or "INR")["mod"], x["pnl"])
+    rows = []
+    for v in sorted(days.values(), key=lambda v: (v["day"], v["currency"]), reverse=True):
+        rows.append({"day": v["day"], "currency": v["currency"],
+                     **_flat({v["currency"]: v["ai"]}, v["currency"], "ai"),
+                     **_flat({v["currency"]: v["mod"]}, v["currency"], "module")})
+    return {"module": module, "since": since.isoformat() if since else None, "rows": rows}
 
 
 async def positions(module: str, status_: str | None = None, limit: int = 100) -> list[dict]:
