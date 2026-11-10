@@ -296,7 +296,7 @@ export default function MainControlPage() {
         .btn.danger { color: var(--loss); border-color: rgba(217,45,63,.3); }
         .btn:disabled { opacity: .55; cursor: default; }
         .notice { border-radius: 12px; padding: 11px 16px; font-size: 12.5px; cursor: pointer; line-height: 1.5;
-                  background: var(--purple-dim); border: 1px solid rgba(125,52,220,.24); color: var(--purple); }
+                  background: var(--purple-dim); border: 1px solid rgba(var(--brand-rgb), .24); color: var(--purple); }
         .warn { border-radius: 12px; padding: 12px 16px; font-size: 12.5px; line-height: 1.55;
                 background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); }
         .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 14px 20px 0; }
@@ -340,7 +340,7 @@ export default function MainControlPage() {
         .switch.off .s-label { right: 9px; }
         .only { padding: 2px 7px; border-radius: 6px; font-size: 9.5px; font-weight: 700; cursor: pointer;
                 border: 1px solid var(--panel-border); background: transparent; color: var(--text-faint); }
-        .only:hover:not(:disabled) { color: var(--purple); border-color: rgba(125,52,220,.34); }
+        .only:hover:not(:disabled) { color: var(--purple); border-color: rgba(var(--brand-rgb), .34); }
         .only:disabled { opacity: .5; cursor: default; }
         .m-note { margin-top: 9px; padding-top: 8px; border-top: 1px solid var(--panel-border);
                   font-size: 10.5px; color: var(--text-muted); line-height: 1.45; }

@@ -658,7 +658,7 @@ export default function FundamentalsPage() {
         }
         .paste:focus {
           outline: none;
-          border-color: rgba(125, 52, 220, 0.45);
+          border-color: rgba(var(--brand-rgb), 0.45);
         }
         .controls {
           display: flex;
@@ -750,7 +750,7 @@ export default function FundamentalsPage() {
         }
         .headcopy:hover {
           color: var(--purple);
-          border-color: rgba(125, 52, 220, 0.4);
+          border-color: rgba(var(--brand-rgb), 0.4);
           background: var(--purple-dim);
         }
         .score {
@@ -857,7 +857,7 @@ export default function FundamentalsPage() {
         }
         .copybtn:hover {
           color: var(--purple);
-          border-color: rgba(125, 52, 220, 0.35);
+          border-color: rgba(var(--brand-rgb), 0.35);
           background: var(--purple-dim);
         }
         .detail {

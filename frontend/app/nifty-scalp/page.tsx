@@ -337,7 +337,7 @@ export default function NiftyScalpPage() {
         .tile-sub { margin-top: 3px; font-size: 10.5px; color: var(--text-faint); line-height: 1.4; }
         .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
         .tab { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
-        .tab.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .tab.active { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--purple); }
         .table-scroll { overflow-x: auto; max-height: 460px; overflow-y: auto; }
         .data-table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
         .data-table th { text-align: center; padding: 8px 10px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--panel-border); position: sticky; top: 0; background: var(--panel); }
@@ -353,7 +353,7 @@ export default function NiftyScalpPage() {
         .filters { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
         .flabel { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-right: 3px; }
         .chip { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 5px 12px; border-radius: 999px; cursor: pointer; font-size: 11.5px; font-weight: 600; }
-        .chip.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .chip.active { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--purple); }
       `}</style>
     </div>
   );

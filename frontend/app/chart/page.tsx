@@ -146,7 +146,7 @@ const BRUSH_SAMPLE_MIN_PIXELS = 6;
 
 // Palette offered for drawings. Kept small and legible on the chart background
 // rather than exposing a full colour wheel.
-const DRAW_COLORS = ["#f2b705", "#7d34dc", "#0e9f6e", "#d92d3f", "#2f80ed", "#e0e0e0"];
+const DRAW_COLORS = ["#f2b705", "#ff6700", "#0e9f6e", "#d92d3f", "#2f80ed", "#e0e0e0"];
 
 /** Hex (#rgb or #rrggbb) to rgba() so a zone can be filled semi-transparently.
  *  Anything already in a functional form is returned untouched. */
@@ -389,7 +389,7 @@ export default function ChartPage() {
     });
     c.priceScale("vol").applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
     const trendSeries = c.addSeries(LineSeries, {
-      color: "#7d34dc", lineWidth: 2, lineStyle: 2, crosshairMarkerVisible: false, lastValueVisible: false,
+      color: "#ff6700", lineWidth: 2, lineStyle: 2, crosshairMarkerVisible: false, lastValueVisible: false,
     });
 
     chartRef.current = c;
@@ -688,7 +688,7 @@ export default function ChartPage() {
     if (config.rsi.on && rsiPoints.length) {
       const rsiSeries = chart.addSeries(
         LineSeries,
-        { color: "#7d34dc", lineWidth: 2, priceLineVisible: false, lastValueVisible: true },
+        { color: "#ff6700", lineWidth: 2, priceLineVisible: false, lastValueVisible: true },
         pane,
       );
       rsiSeries.setData(rsiPoints.map((p) => ({ time: p.time as UTCTimestamp, value: p.value })));
@@ -875,7 +875,7 @@ export default function ChartPage() {
       for (const p of positions) {
         // Entry only — this app's positions carry no stop-loss or target field,
         // and drawing invented levels would be worse than drawing none.
-        add(p.entry_price, `${p.side === "BUY" ? "LONG" : "SHORT"} ${p.quantity}`, "#7d34dc", LineStyle.Solid);
+        add(p.entry_price, `${p.side === "BUY" ? "LONG" : "SHORT"} ${p.quantity}`, "#ff6700", LineStyle.Solid);
       }
     }
   }, [positions, overlayConfig.positions, loadSeq]);
@@ -1921,7 +1921,7 @@ export default function ChartPage() {
         value: valueAt(o.data, hudBar.time),
       }));
     if (config.rsi.on) {
-      rows.push({ label: `RSI ${config.rsi.period}`, color: "#7d34dc", value: valueAt(computed.rsiPoints, hudBar.time) });
+      rows.push({ label: `RSI ${config.rsi.period}`, color: "#ff6700", value: valueAt(computed.rsiPoints, hudBar.time) });
     }
     if (config.macd.on && computed.macdResult) {
       rows.push({ label: "MACD", color: "#2196f3", value: valueAt(computed.macdResult.macd, hudBar.time) });
@@ -2227,7 +2227,7 @@ export default function ChartPage() {
 
         <div className="footnote">
           Candles and volume are live Dhan data (intraday resolutions are capped to the last ~30 days of history — Dhan
-          doesn&apos;t serve much further back intraday). The dashed purple line is an automatically detected swing-based
+          doesn&apos;t serve much further back intraday). The dashed orange line is an automatically detected swing-based
           trend line over the visible lookback, not a guarantee of future direction. Indicators are computed in your
           browser from the candles already loaded — they add no extra data requests, and they are always calculated from
           the real OHLC values even when Heikin-Ashi rendering is on.
@@ -2249,10 +2249,10 @@ export default function ChartPage() {
         .dropdown-empty { padding: 14px 12px; font-size: 13px; color: var(--text-faint); text-align: center; }
         .res-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
         .res-btn { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 8px; padding: 7px 14px; font-size: 12.5px; font-weight: 700; color: var(--text-muted); cursor: pointer; }
-        .res-btn.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .res-btn.active { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--purple); }
         .trend-btn { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 700; color: var(--text-muted); cursor: pointer; }
         .trend-btn:first-of-type { margin-left: auto; }
-        .trend-btn.active { background: rgba(125, 52, 220, 0.12); border-color: rgba(125, 52, 220, 0.35); color: var(--purple); }
+        .trend-btn.active { background: rgba(var(--brand-rgb), 0.12); border-color: rgba(var(--brand-rgb), 0.35); color: var(--purple); }
         .symbol-line { display: flex; align-items: center; gap: 10px; padding: 12px 20px 0; flex-wrap: wrap; }
         .sym-name { font-weight: 700; font-size: 14px; }
         .sym-tag { font-size: 10px; font-weight: 800; color: var(--text-faint); background: var(--canvas-soft); border-radius: 6px; padding: 2px 7px; }

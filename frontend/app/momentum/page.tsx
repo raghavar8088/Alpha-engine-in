@@ -491,7 +491,7 @@ export default function MomentumPage() {
           font-size: 11.5px; font-weight: 600; padding: 5px 11px; border-radius: 100px; cursor: pointer;
           border: 1px solid var(--panel-border); background: var(--panel); color: var(--text-muted);
         }
-        .chip.on { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.24); color: var(--purple); }
+        .chip.on { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.24); color: var(--purple); }
 
         .table-scroll { overflow-x: auto; }
         .data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }

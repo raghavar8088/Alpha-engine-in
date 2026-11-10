@@ -454,13 +454,13 @@ export default function LivePage() {
           text-transform: uppercase;
         }
         .mode-badge.live { color: var(--loss); background: var(--loss-dim); border: 1px solid rgba(217, 45, 63, 0.3); }
-        .mode-badge.paper { color: var(--accent); background: var(--accent-dim); border: 1px solid rgba(200, 147, 63, 0.3); }
+        .mode-badge.paper { color: var(--accent); background: var(--accent-dim); border: 1px solid rgba(var(--accent-rgb), 0.3); }
         .mode-badge.replay, .mode-badge.simulation, .mode-badge.backtest, .mode-badge.historical {
           color: var(--text-muted); background: var(--canvas-soft); border: 1px solid var(--panel-border);
         }
         .status-badge.running { color: var(--gain); background: var(--gain-dim); border: 1px solid rgba(14, 159, 110, 0.3); }
         .status-badge.stopped { color: var(--text-faint); background: var(--canvas-soft); border: 1px solid var(--panel-border); }
-        .status-badge.completed { color: var(--accent); background: var(--accent-dim); border: 1px solid rgba(200, 147, 63, 0.3); }
+        .status-badge.completed { color: var(--accent); background: var(--accent-dim); border: 1px solid rgba(var(--accent-rgb), 0.3); }
         .status-badge.error { color: var(--loss); background: var(--loss-dim); border: 1px solid rgba(217, 45, 63, 0.26); }
         .detail {
           padding: 4px 20px 18px;

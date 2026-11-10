@@ -86,7 +86,7 @@ export default function GlassPanel({
         }
         .panel-refresh:hover:not(:disabled) {
           color: var(--purple);
-          border-color: rgba(125, 52, 220, 0.3);
+          border-color: rgba(var(--brand-rgb), 0.3);
           background: var(--purple-dim);
         }
         .panel-refresh:disabled {

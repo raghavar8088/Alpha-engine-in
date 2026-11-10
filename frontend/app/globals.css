@@ -12,127 +12,203 @@
    Miss either and the toggle works in one direction only. Every colour below is a
    token: a literal anywhere else renders one theme's ink on the other theme's paper,
    which is exactly what the cream radial glow in `body` used to do.
+
+   PALETTE (10 Nov 2026): Bajaj Finance's web app, sampled from bajajfinserv.in —
+     navy   #002953  selected pills, table headers, the "Pay EMIs" button
+     navy   #002142  the menu bar
+     orange #ff6700 → #ff8700  the "OPEN FD" call to action; #ff6700 for links
+     tints  #fff2ea (orange), #fff5da (info box), #f2f4fb (table stripe), page #f4f6f8
+   Readable ink is kept separate from filled controls: orange TEXT is #c94e00
+   (4.6:1 on white), the bright #ff6700 only fills buttons. Navy ink is 14.6:1.
    ───────────────────────────────────────────────────────────────────────────── */
 :root {
-  --canvas: #ffffff;
-  --canvas-soft: #f7f5fb;
-  --canvas-edge: #f1eef9;
-  --canvas-glow: #faf6ec;
+  --canvas: #f4f6f8;
+  --canvas-soft: #f2f4fb;
+  --canvas-edge: #eaf0f8;
+  --canvas-glow: #fff6ef;
   --panel: #ffffff;
-  --panel-tint: #faf9fc;
-  --panel-border: #e8e5ef;
-  --panel-border-hover: #d9d2ec;
-  --scroll-thumb: #ded8ec;
-  --scroll-thumb-hover: #c9c0e0;
-  --skeleton: #efedf5;
+  --panel-tint: #f8f9fc;
+  --panel-border: #e1e6ee;
+  --panel-border-hover: #c3cddb;
+  --scroll-thumb: #cfd6e0;
+  --scroll-thumb-hover: #aab6c6;
+  --skeleton: #e9edf3;
   --skeleton-sheen: rgba(255, 255, 255, 0.7);
-  --brand-deep: #5a1fae;
-  --on-accent: #211404;
-  --scrim: rgba(20, 15, 35, 0.35);
-  --shadow-sm: 0 1px 2px rgba(20, 20, 30, 0.04);
-  --shadow-md: 0 10px 30px -14px rgba(40, 20, 70, 0.14);
-  --shadow-lg: 0 20px 48px -18px rgba(40, 20, 70, 0.18);
-  --accent: #c8933f;
-  --accent-hover: #b57f2e;
-  --accent-dim: rgba(200, 147, 63, 0.12);
-  --purple: #7d34dc;
-  --purple-dim: rgba(125, 52, 220, 0.1);
-  --purple-hover: #6b23c9;
-  --purple-glow: rgba(125, 52, 220, 0.45);
-  --warn: #b9770e;
-  --warn-dim: rgba(185, 119, 14, 0.12);
-  --gain: #0e9f6e;
-  --gain-dim: rgba(14, 159, 110, 0.1);
-  --loss: #d92d3f;
-  --loss-dim: rgba(217, 45, 63, 0.1);
-  --text: #17151f;
-  --text-muted: #63606f;
-  --text-faint: #9e9aab;
+
+  /* Brand = Bajaj navy. --purple* are kept as aliases so every existing module
+     follows the palette without being edited. */
+  --brand: #002953;
+  --brand-rgb: 0, 41, 83;
+  --brand-solid: #002953;
+  --brand-hover: #003b75;
+  --brand-deep: #002142;
+  --on-brand: #ffffff;
+  /* Selected chips and tabs: a light Bajaj-blue wash under navy ink. A navy wash
+     reads as grey (disabled) rather than selected. */
+  --brand-dim: rgba(0, 97, 174, 0.09);
+  --brand-border: rgba(0, 97, 174, 0.3);
+  --brand-glow: rgba(var(--brand-rgb), 0.2);
+  --brand-gradient: linear-gradient(135deg, #003b75, #002953 60%, #002142);
+
+  /* Accent = Bajaj orange. */
+  --accent: #c94e00;
+  --accent-rgb: 255, 103, 0;
+  --accent-hover: #a94100;
+  --accent-dim: rgba(var(--accent-rgb), 0.09);
+  --accent-border: rgba(var(--accent-rgb), 0.32);
+  --action: #ff6700;
+  --action-gradient: linear-gradient(100deg, #f25f00 0%, #ff6700 55%, #ff8700 100%);
+  --on-accent: #ffffff;
+
+  --purple: var(--brand);
+  --purple-dim: var(--brand-dim);
+  --purple-hover: var(--brand-hover);
+  --purple-glow: var(--brand-glow);
+
+  /* The sidebar is Bajaj's navy chrome. */
+  --chrome: #002953;
+  --chrome-deep: #002142;
+  --chrome-text: #c9d6e6;
+  --chrome-strong: #ffffff;
+  --chrome-faint: #93a9c4;
+  --chrome-icon: #7fb0e6;
+  --chrome-hover: rgba(255, 255, 255, 0.08);
+  --chrome-border: rgba(255, 255, 255, 0.12);
+  --chrome-active-bg: #ffffff;
+  --chrome-active-text: #002953;
+  --chrome-active-icon: #f25f00;
+
+  --scrim: rgba(0, 20, 41, 0.46);
+  --shadow-sm: 0 1px 3px rgba(0, 41, 83, 0.07);
+  --shadow-md: 0 8px 24px -12px rgba(0, 41, 83, 0.16);
+  --shadow-lg: 0 20px 48px -18px rgba(0, 33, 66, 0.24);
+  --warn: #8a5d00;
+  --warn-rgb: 255, 184, 0;
+  --warn-dim: rgba(var(--warn-rgb), 0.15);
+  --warn-border: rgba(var(--warn-rgb), 0.45);
+  --warn-soft: var(--warn-dim);
+  --gain: #087c59;
+  --gain-solid: #087c59;
+  --gain-rgb: 8, 124, 89;
+  --gain-dim: rgba(var(--gain-rgb), 0.09);
+  --loss: #c52e43;
+  --loss-solid: #c52e43;
+  --loss-rgb: 197, 46, 67;
+  --loss-dim: rgba(var(--loss-rgb), 0.08);
+  --text: #1b2431;
+  --text-muted: #4f5b6b;
+  --text-faint: #6b7788;
+  --text-primary: var(--text);
+  --text-secondary: var(--text-muted);
+  --border: var(--panel-border);
+  --border-soft: var(--panel-border);
+  --font-mono: var(--font-data);
+  --tooltip: #002953;
+  --tooltip-text: #ffffff;
+  --tooltip-muted: #c9d6e6;
   color-scheme: light;
 }
 
-/* The dark palette, written once and applied by both selectors below.
-
-   gain/loss are NOT the light values dimmed. On a dark ground the light pair sits at
-   deltaE 3.5 under deuteranopia — a red-green colourblind reader cannot separate a
-   profit from a loss at all. Shifting the green toward teal and the red toward coral
-   takes that to 12.7 while still reading unmistakably as gain and loss (deltaE 36.9 to
-   normal vision). Measured with the palette validator, not guessed. */
+/* Dark: matching navy surfaces. Navy ink would vanish on them, so brand ink becomes
+   a light blue and orange ink a light orange. Gains and losses keep their teal/coral
+   distinction; brand colours never replace them. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --canvas: #0d0b14;
-    --canvas-soft: #141120;
-    --canvas-edge: #191527;
-    --canvas-glow: #17131f;
-    --panel: #15121f;
-    --panel-tint: #1a1626;
-    --panel-border: #272233;
-    --panel-border-hover: #3a3249;
-    --scroll-thumb: #2f2940;
-    --scroll-thumb-hover: #443b5c;
-    --skeleton: #1d1929;
+    --canvas: #091827;
+    --canvas-soft: #10263b;
+    --canvas-edge: #14324d;
+    --canvas-glow: #0d2238;
+    --panel: #102337;
+    --panel-tint: #142b42;
+    --panel-border: #27425b;
+    --panel-border-hover: #466c90;
+    --scroll-thumb: #35516d;
+    --scroll-thumb-hover: #50769a;
+    --skeleton: #20394f;
     --skeleton-sheen: rgba(255, 255, 255, 0.06);
-    --brand-deep: #6b2bc0;
-    --on-accent: #1a1204;
-    --scrim: rgba(4, 2, 10, 0.66);
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
-    --shadow-md: 0 10px 30px -14px rgba(0, 0, 0, 0.72);
-    --shadow-lg: 0 20px 48px -18px rgba(0, 0, 0, 0.8);
-    --accent: #e0ab52;
-    --accent-hover: #edbb68;
-    --accent-dim: rgba(224, 171, 82, 0.16);
-    --purple: #a97bff;
-    --purple-dim: rgba(169, 123, 255, 0.16);
-    --purple-hover: #bb95ff;
-    --purple-glow: rgba(169, 123, 255, 0.4);
-    --warn: #e0a54b;
-    --warn-dim: rgba(224, 165, 75, 0.16);
+    --brand: #78bfff;
+    --brand-rgb: 120, 191, 255;
+    --brand-solid: #0061ae;
+    --brand-hover: #9dd0ff;
+    --brand-dim: rgba(var(--brand-rgb), 0.12);
+    --brand-border: rgba(var(--brand-rgb), 0.3);
+    --brand-glow: rgba(var(--brand-rgb), 0.18);
+    --accent: #ff9a4d;
+    --accent-rgb: 255, 154, 77;
+    --accent-hover: #ffb27a;
+    --accent-dim: rgba(var(--accent-rgb), 0.12);
+    --chrome: #04182e;
+    --chrome-deep: #031224;
+    --chrome-active-bg: rgba(120, 191, 255, 0.14);
+    --chrome-active-text: #ffffff;
+    --chrome-active-icon: #ff9a4d;
+    --scrim: rgba(2, 12, 24, 0.72);
+    --shadow-sm: 0 2px 8px -3px rgba(0, 0, 0, 0.28);
+    --shadow-md: 0 10px 30px -14px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 22px 54px -18px rgba(0, 0, 0, 0.64);
+    --warn: #f4c46b;
+    --warn-rgb: 244, 196, 107;
+    --warn-dim: rgba(var(--warn-rgb), 0.13);
+    --warn-border: rgba(var(--warn-rgb), 0.3);
     --gain: #2ee6b0;
-    --gain-dim: rgba(46, 230, 176, 0.14);
-    --loss: #ff5c6c;
-    --loss-dim: rgba(255, 92, 108, 0.14);
-    --text: #eceaf3;
-    --text-muted: #a09cb0;
-    --text-faint: #6f6a82;
+    --gain-rgb: 46, 230, 176;
+    --gain-dim: rgba(var(--gain-rgb), 0.12);
+    --loss: #ff7a89;
+    --loss-rgb: 255, 122, 137;
+    --loss-dim: rgba(var(--loss-rgb), 0.12);
+    --text: #e8f1fa;
+    --text-muted: #b0c3d6;
+    --text-faint: #9aafc3;
     color-scheme: dark;
   }
 }
 
 :root[data-theme="dark"] {
-  --canvas: #0d0b14;
-  --canvas-soft: #141120;
-  --canvas-edge: #191527;
-  --canvas-glow: #17131f;
-  --panel: #15121f;
-  --panel-tint: #1a1626;
-  --panel-border: #272233;
-  --panel-border-hover: #3a3249;
-  --scroll-thumb: #2f2940;
-  --scroll-thumb-hover: #443b5c;
-  --skeleton: #1d1929;
+  --canvas: #091827;
+  --canvas-soft: #10263b;
+  --canvas-edge: #14324d;
+  --canvas-glow: #0d2238;
+  --panel: #102337;
+  --panel-tint: #142b42;
+  --panel-border: #27425b;
+  --panel-border-hover: #466c90;
+  --scroll-thumb: #35516d;
+  --scroll-thumb-hover: #50769a;
+  --skeleton: #20394f;
   --skeleton-sheen: rgba(255, 255, 255, 0.06);
-  --brand-deep: #6b2bc0;
-  --on-accent: #1a1204;
-  --scrim: rgba(4, 2, 10, 0.66);
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 10px 30px -14px rgba(0, 0, 0, 0.72);
-  --shadow-lg: 0 20px 48px -18px rgba(0, 0, 0, 0.8);
-  --accent: #e0ab52;
-  --accent-hover: #edbb68;
-  --accent-dim: rgba(224, 171, 82, 0.16);
-  --purple: #a97bff;
-  --purple-dim: rgba(169, 123, 255, 0.16);
-  --purple-hover: #bb95ff;
-  --purple-glow: rgba(169, 123, 255, 0.4);
-  --warn: #e0a54b;
-  --warn-dim: rgba(224, 165, 75, 0.16);
+  --brand: #78bfff;
+  --brand-rgb: 120, 191, 255;
+  --brand-solid: #0061ae;
+  --brand-hover: #9dd0ff;
+  --brand-dim: rgba(var(--brand-rgb), 0.12);
+  --brand-border: rgba(var(--brand-rgb), 0.3);
+  --brand-glow: rgba(var(--brand-rgb), 0.18);
+  --accent: #ff9a4d;
+  --accent-rgb: 255, 154, 77;
+  --accent-hover: #ffb27a;
+  --accent-dim: rgba(var(--accent-rgb), 0.12);
+  --chrome: #04182e;
+  --chrome-deep: #031224;
+  --chrome-active-bg: rgba(120, 191, 255, 0.14);
+  --chrome-active-text: #ffffff;
+  --chrome-active-icon: #ff9a4d;
+  --scrim: rgba(2, 12, 24, 0.72);
+  --shadow-sm: 0 2px 8px -3px rgba(0, 0, 0, 0.28);
+  --shadow-md: 0 10px 30px -14px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 22px 54px -18px rgba(0, 0, 0, 0.64);
+  --warn: #f4c46b;
+  --warn-rgb: 244, 196, 107;
+  --warn-dim: rgba(var(--warn-rgb), 0.13);
+  --warn-border: rgba(var(--warn-rgb), 0.3);
   --gain: #2ee6b0;
-  --gain-dim: rgba(46, 230, 176, 0.14);
-  --loss: #ff5c6c;
-  --loss-dim: rgba(255, 92, 108, 0.14);
-  --text: #eceaf3;
-  --text-muted: #a09cb0;
-  --text-faint: #6f6a82;
+  --gain-rgb: 46, 230, 176;
+  --gain-dim: rgba(var(--gain-rgb), 0.12);
+  --loss: #ff7a89;
+  --loss-rgb: 255, 122, 137;
+  --loss-dim: rgba(var(--loss-rgb), 0.12);
+  --text: #e8f1fa;
+  --text-muted: #b0c3d6;
+  --text-faint: #9aafc3;
   color-scheme: dark;
 }
 
@@ -183,6 +259,18 @@ button,
 textarea {
   font-family: inherit;
   color: inherit;
+  accent-color: var(--brand-solid);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-faint);
+  opacity: 1;
+}
+
+select option {
+  background: var(--panel);
+  color: var(--text);
 }
 
 button {
@@ -194,7 +282,7 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 a:focus-visible {
-  outline: 2px solid var(--purple);
+  outline: 2px solid var(--brand);
   outline-offset: 2px;
 }
 
@@ -257,10 +345,10 @@ a:focus-visible {
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
+  background: var(--chrome);
+  border: 1px solid var(--chrome-border);
   box-shadow: var(--shadow-sm);
-  color: var(--text);
+  color: var(--chrome-strong);
   align-items: center;
   justify-content: center;
 }
@@ -271,35 +359,46 @@ a:focus-visible {
 .scrim {
   display: none;
 }
+
+/* The sidebar is Bajaj's navy header turned on its side: navy chrome, light-blue
+   icons, the active module a white pill with an orange icon and an orange rail. */
 .sidebar {
   width: 240px;
   flex-shrink: 0;
-  padding: 26px 14px;
+  padding: 22px 14px;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  border-right: 1px solid var(--panel-border);
-  background: var(--panel);
+  background: linear-gradient(180deg, var(--chrome) 0%, var(--chrome-deep) 100%);
+  color: var(--chrome-text);
   min-height: 100vh;
   position: sticky;
   top: 0;
   height: 100vh;
   overflow-y: auto;
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  background-clip: padding-box;
 }
 .sidebar .brand {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 6px 12px 26px;
+  padding: 8px 10px 18px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--chrome-border);
+  color: var(--chrome-strong);
 }
 .sidebar .brand-mark {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 9px;
-  background: linear-gradient(145deg, var(--purple), var(--brand-deep));
+  background: var(--action-gradient);
   display: grid;
   place-items: center;
-  box-shadow: 0 6px 16px -4px var(--purple-glow);
+  box-shadow: 0 6px 14px -6px rgba(255, 103, 0, 0.65);
   flex-shrink: 0;
 }
 .sidebar .brand-mark svg {
@@ -309,15 +408,16 @@ a:focus-visible {
 .sidebar .brand-name {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 15.5px;
+  font-size: 16px;
   letter-spacing: 0.1px;
+  color: var(--chrome-strong);
 }
 .sidebar .close-btn {
   display: none;
   margin-left: auto;
   background: none;
   border: none;
-  color: var(--text-muted);
+  color: var(--chrome-strong);
   padding: 4px;
 }
 .sidebar .close-btn svg {
@@ -340,7 +440,7 @@ a:focus-visible {
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--text-faint);
+  color: var(--chrome-faint);
   padding: 6px 12px 4px;
 }
 .sidebar .nav-item {
@@ -350,7 +450,7 @@ a:focus-visible {
   padding: 10px 12px;
   border-radius: 10px;
   text-decoration: none;
-  color: var(--text-muted);
+  color: var(--chrome-text);
   font-size: 13.5px;
   font-weight: 500;
   position: relative;
@@ -360,16 +460,23 @@ a:focus-visible {
   width: 17px;
   height: 17px;
   flex-shrink: 0;
-  opacity: 0.85;
+  color: var(--chrome-icon);
 }
 .sidebar .nav-item:hover {
-  color: var(--text);
-  background: var(--canvas-soft);
+  color: var(--chrome-strong);
+  background: var(--chrome-hover);
+}
+.sidebar .nav-item:hover svg {
+  color: var(--chrome-strong);
 }
 .sidebar .nav-item.active {
-  color: var(--purple);
-  background: var(--purple-dim);
+  color: var(--chrome-active-text);
+  background: var(--chrome-active-bg);
+  box-shadow: 0 6px 16px -10px rgba(0, 0, 0, 0.6);
   font-weight: 700;
+}
+.sidebar .nav-item.active svg {
+  color: var(--chrome-active-icon);
 }
 .sidebar .nav-item.active::before {
   content: "";
@@ -377,9 +484,12 @@ a:focus-visible {
   left: -14px;
   top: 8px;
   bottom: 8px;
-  width: 3px;
-  border-radius: 3px;
-  background: var(--accent);
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  background: var(--action-gradient);
+}
+.sidebar a:focus-visible {
+  outline-color: var(--chrome-active-icon);
 }
 /* Wraps the theme toggle and the broker CTA. The sidebar is a flex column with the nav
    growing, so this stays pinned to the bottom regardless of how many modules the nav
@@ -388,10 +498,11 @@ a:focus-visible {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding-top: 10px;
-  border-top: 1px solid var(--panel-border);
+  padding-top: 12px;
+  border-top: 1px solid var(--chrome-border);
 }
 
+/* Bajaj's "OPEN FD" button: the orange gradient with white type. */
 .sidebar .connect-cta {
   margin-top: 0;
   display: flex;
@@ -399,16 +510,17 @@ a:focus-visible {
   justify-content: center;
   padding: 12px;
   border-radius: 999px;
-  background: linear-gradient(145deg, var(--accent), var(--accent-hover));
-  color: var(--on-accent);
-  font-weight: 700;
+  background: var(--action-gradient);
+  color: #ffffff;
+  font-weight: 800;
   font-size: 13px;
+  letter-spacing: 0.02em;
   text-decoration: none;
-  box-shadow: 0 8px 20px -8px var(--accent-dim);
+  box-shadow: 0 10px 22px -12px rgba(255, 103, 0, 0.9);
   transition: filter 0.15s ease;
 }
 .sidebar .connect-cta:hover {
-  filter: brightness(1.04);
+  filter: brightness(1.05);
 }
 
 @media (max-width: 900px) {

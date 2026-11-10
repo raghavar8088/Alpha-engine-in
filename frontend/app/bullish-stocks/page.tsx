@@ -367,7 +367,7 @@ export default function BullishStocksPage() {
         .index-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
         .right-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1; justify-content: flex-end; }
         .tab { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
-        .tab.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .tab.active { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--purple); }
         .toggle { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 9px 14px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
         .toggle.on { background: var(--gain-dim); border-color: rgba(14, 159, 110, 0.35); color: var(--gain); }
         .filter { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 9px; padding: 9px 14px; font-size: 13px; min-width: 240px; max-width: 320px; }

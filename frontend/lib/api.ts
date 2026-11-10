@@ -7369,7 +7369,7 @@ export const GRADE_COLOR: Record<GradeKey, string> = {
   "very-good": "#3f9c34",
   excellent: "#1a9c5b",
   extraordinary: "#0e8f8f",
-  explosive: "#7d34dc",
+  explosive: "#ff6700",
   unrated: "#8a8a99",
 };
 

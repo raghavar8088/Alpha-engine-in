@@ -228,7 +228,7 @@ export default function LivePaperBuying({ book = "50k" }: { book?: LivePaperBook
         .lp { display: flex; flex-direction: column; gap: 16px; }
         .pnl { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
         .pcard { border: 1px solid var(--panel-border); border-radius: 12px; padding: 13px 15px; background: var(--panel); }
-        .pcard.total { background: var(--canvas-soft); border-color: rgba(125, 52, 220, 0.28); }
+        .pcard.total { background: var(--canvas-soft); border-color: rgba(var(--brand-rgb), 0.28); }
         .plab { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); }
         .pval { font-size: 22px; font-weight: 750; font-variant-numeric: tabular-nums; margin-top: 4px; }
         .ppct { font-size: 12.5px; font-weight: 650; font-variant-numeric: tabular-nums; margin-top: 1px; }

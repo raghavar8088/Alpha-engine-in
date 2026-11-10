@@ -1378,11 +1378,11 @@ export default function CommodityPositionsPage() {
         .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
         .tab { padding: 7px 14px; border-radius: 100px; font-size: 12.5px; font-weight: 600; cursor: pointer;
                border: 1px solid var(--panel-border); background: var(--panel); color: var(--text-muted); }
-        .tab.on { background: var(--purple-dim); border-color: rgba(125,52,220,.24); color: var(--purple); }
+        .tab.on { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), .24); color: var(--purple); }
         .sel, .inp { border-radius: 10px; border: 1px solid var(--panel-border); background: var(--panel);
                      padding: 8px 11px; font-size: 12.5px; color: var(--text);
                      font-family: var(--font-ui); transition: border-color .15s, box-shadow .15s; }
-        .sel:focus, .inp:focus { outline: none; border-color: rgba(125,52,220,.45);
+        .sel:focus, .inp:focus { outline: none; border-color: rgba(var(--brand-rgb), .45);
                                  box-shadow: 0 0 0 3px var(--purple-dim); }
         .inp { width: 90px; font-family: var(--font-data); }
         .inp.wide { width: 260px; }
@@ -1398,12 +1398,12 @@ export default function CommodityPositionsPage() {
                color: var(--text-muted); padding: 8px 14px; font-size: 12.5px;
                font-weight: 600; cursor: pointer; font-family: var(--font-ui);
                transition: background .15s, color .15s, border-color .15s, transform .06s; }
-        .btn:hover:not(:disabled) { color: var(--purple); border-color: rgba(125,52,220,.32);
+        .btn:hover:not(:disabled) { color: var(--purple); border-color: rgba(var(--brand-rgb), .32);
                                     background: var(--purple-dim); }
         .btn:active:not(:disabled) { transform: translateY(1px); }
         .btn:disabled { opacity: .5; cursor: default; }
         .btn.primary { background: var(--purple); border-color: var(--purple); color: #fff;
-                       box-shadow: 0 1px 2px rgba(125,52,220,.35); }
+                       box-shadow: 0 1px 2px rgba(var(--brand-rgb), .35); }
         .btn.primary:hover:not(:disabled) { background: #6a2cbb; border-color: #6a2cbb; color: #fff; }
         .btn.danger { color: var(--loss); }
         .btn.danger:hover:not(:disabled) { color: #fff; background: var(--loss);
@@ -1432,7 +1432,7 @@ export default function CommodityPositionsPage() {
         .chip { font-size: 11.5px; font-weight: 600; padding: 6px 11px; border-radius: 100px;
                 cursor: pointer; border: 1px solid var(--panel-border);
                 background: var(--panel); color: var(--text-muted); font-family: var(--font-ui); }
-        .chip.on { background: var(--purple-dim); border-color: rgba(125,52,220,.3); color: var(--purple); }
+        .chip.on { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), .3); color: var(--purple); }
         .editor-actions { display: flex; gap: 8px; align-self: flex-end; margin-left: auto;
                           padding-bottom: 2px; }
         .accountbar { display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap;
@@ -1481,7 +1481,7 @@ export default function CommodityPositionsPage() {
         .btn.rollall {
           flex: none;
           color: var(--purple); background: var(--purple-dim);
-          border-color: rgba(125, 52, 220, .28);
+          border-color: rgba(var(--brand-rgb), .28);
         }
         .btn.rollall:hover:not(:disabled) { border-color: var(--purple); }
 
@@ -1636,7 +1636,7 @@ function LotsInputStyles() {
       }
       .cmp-inp:focus {
         outline: none;
-        border-color: rgba(125, 52, 220, .45);
+        border-color: rgba(var(--brand-rgb), .45);
         box-shadow: 0 0 0 3px var(--purple-dim);
       }
       .cmp-inp.tiny { width: 68px; padding: 6px 9px; font-size: 12px; }
@@ -1861,7 +1861,7 @@ function UnderlyingPicker({ value, onChange, unders, loading }: {
         .picker:hover:not(:disabled) { border-color: var(--panel-border-hover); }
         .picker.open, .picker:focus-visible {
           outline: none;
-          border-color: rgba(125, 52, 220, .45);
+          border-color: rgba(var(--brand-rgb), .45);
           box-shadow: 0 0 0 3px var(--purple-dim);
         }
         .picker:disabled { opacity: .55; cursor: default; }
@@ -1879,7 +1879,7 @@ function UnderlyingPicker({ value, onChange, unders, loading }: {
         .minitag {
           font-size: 9px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
           color: var(--purple); background: var(--purple-dim);
-          border: 1px solid rgba(125, 52, 220, .24);
+          border: 1px solid rgba(var(--brand-rgb), .24);
           border-radius: 100px; padding: 2px 7px; line-height: 1.35;
         }
         .chev { color: var(--text-faint); flex: none; transition: transform .18s ease; }
@@ -2156,7 +2156,7 @@ function PositionTable({ rows, live, busy, onExit, onReopenAtm, picked, onPick }
         /* The roll button carries a word, so it cannot use the square close-button box. */
         .mini.roll { width: auto; height: 24px; padding: 0 11px; white-space: nowrap;
                      font-size: 11px; font-weight: 700; letter-spacing: .01em;
-                     color: var(--purple); border-color: rgba(125, 52, 220, .28);
+                     color: var(--purple); border-color: rgba(var(--brand-rgb), .28);
                      background: var(--purple-dim); border-radius: 100px;
                      transition: background .15s, border-color .15s; }
         .mini.roll:hover:not(:disabled) { border-color: var(--purple); }

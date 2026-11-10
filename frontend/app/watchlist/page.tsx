@@ -291,7 +291,7 @@ export default function WatchlistPage() {
           background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted);
           padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer;
         }
-        .tab.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .tab.active { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--purple); }
         .count { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 20px; padding: 1px 8px; font-size: 10.5px; }
         .tab.active .count { background: var(--purple); color: #fff; border-color: transparent; }
         .delete-list-btn { background: var(--loss-dim); color: var(--loss); border: 1px solid rgba(217, 45, 63, 0.26); border-radius: 8px; padding: 7px 12px; font-size: 11.5px; font-weight: 600; cursor: pointer; }

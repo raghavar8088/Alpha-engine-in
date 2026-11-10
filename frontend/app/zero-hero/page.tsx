@@ -407,7 +407,7 @@ export default function ZeroHeroPage() {
         .note { padding: 10px 14px; border-radius: 9px; background: var(--canvas-soft); border: 1px solid var(--panel-border); font-size: 12px; color: var(--text-muted); line-height: 1.6; }
         .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
         .tab { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 9px 15px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
-        .tab.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .tab.active { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--purple); }
         .controls { padding-bottom: 10px; }
         .filter { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 9px; padding: 8px 13px; font-size: 12.5px; min-width: 240px; }
         .empty { padding: 22px 20px; font-size: 13px; color: var(--text-faint); }

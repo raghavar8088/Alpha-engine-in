@@ -261,7 +261,7 @@ export default function SellingPaperBook({ book }: { book: string }) {
         .dim { color: var(--text-faint); }
         .controls { display: flex; gap: 10px; align-items: center; padding-bottom: 10px; flex-wrap: wrap; }
         .toggle { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 8px 13px; border-radius: 9px; font-size: 12px; font-weight: 700; cursor: pointer; }
-        .toggle.on { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.35); color: var(--purple); }
+        .toggle.on { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.35); color: var(--purple); }
         .empty { padding: 22px 20px; font-size: 13px; color: var(--text-faint); line-height: 1.5; }
         .table-scroll { overflow-x: auto; max-height: 620px; overflow-y: auto; }
         .data-table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }

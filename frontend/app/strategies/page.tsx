@@ -267,8 +267,8 @@ export default function StrategiesPage() {
         .badge.realmoney {
           color: var(--accent);
           background: var(--accent-dim);
-          border: 1px solid rgba(200, 147, 63, 0.4);
-          box-shadow: 0 0 14px rgba(200, 147, 63, 0.22);
+          border: 1px solid rgba(var(--accent-rgb), 0.4);
+          box-shadow: 0 0 14px rgba(var(--accent-rgb), 0.22);
         }
         .desc {
           margin-top: 8px;

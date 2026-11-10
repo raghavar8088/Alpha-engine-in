@@ -757,14 +757,14 @@ export default function CommodityPrelivePage() {
         .page-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
         .ptab { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted);
                 padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
-        .ptab.on { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .ptab.on { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--purple); }
         .btn { padding: 7px 14px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer;
                border: 1px solid var(--panel-border); background: var(--panel); color: var(--text); }
         .btn.sm { padding: 5px 11px; font-size: 11.5px; }
         .btn.danger { color: var(--loss); border-color: rgba(217,45,63,.3); }
         .btn:disabled { opacity: 0.55; cursor: default; }
         .notice { border-radius: 12px; padding: 11px 16px; font-size: 12.5px; cursor: pointer;
-                  background: var(--purple-dim); border: 1px solid rgba(125,52,220,.24); color: var(--purple); }
+                  background: var(--purple-dim); border: 1px solid rgba(var(--brand-rgb), .24); color: var(--purple); }
         .breaker { border-radius: 12px; padding: 12px 16px; font-size: 12.5px; font-weight: 600;
                    background: var(--loss-dim); border: 1px solid rgba(217,45,63,.24); color: var(--loss); }
         .warnbar { border-radius: 12px; padding: 12px 16px; font-size: 12.5px; line-height: 1.5;
@@ -821,7 +821,7 @@ export default function CommodityPrelivePage() {
         .modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
         .mode { text-align: left; border: 1px solid var(--panel-border); border-radius: 12px; padding: 13px 15px;
                 background: var(--canvas-soft); cursor: pointer; color: var(--text); }
-        .mode.on { border-color: rgba(125,52,220,.34); background: var(--purple-dim); }
+        .mode.on { border-color: rgba(var(--brand-rgb), .34); background: var(--purple-dim); }
         .mode:disabled { opacity: .6; cursor: default; }
         .m-title { font-size: 12.5px; font-weight: 800; }
         .mode.on .m-title { color: var(--purple); }
@@ -840,7 +840,7 @@ export default function CommodityPrelivePage() {
                   color: var(--text-muted); min-width: 66px; }
         .chip { font-size: 11.5px; font-weight: 600; padding: 4px 10px; border-radius: 100px; cursor: pointer;
                 border: 1px solid var(--panel-border); background: var(--panel); color: var(--text-muted); }
-        .chip.on { background: var(--purple-dim); border-color: rgba(125,52,220,.24); color: var(--purple); }
+        .chip.on { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), .24); color: var(--purple); }
 
         .table-scroll { overflow-x: auto; }
         .data-table { width: 100%; border-collapse: collapse; font-size: 12.5px;

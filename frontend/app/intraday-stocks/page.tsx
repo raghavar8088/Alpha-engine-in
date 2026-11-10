@@ -209,7 +209,7 @@ function PnlRow({
         .pnl-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
         .pnl-card { border: 1px solid var(--panel-border); border-radius: 12px; padding: 12px 14px;
                     background: var(--panel); }
-        .pnl-card.total { background: var(--canvas-soft); border-color: rgba(125, 52, 220, 0.28); }
+        .pnl-card.total { background: var(--canvas-soft); border-color: rgba(var(--brand-rgb), 0.28); }
         .pnl-label { font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
                      text-transform: uppercase; color: var(--text-faint); }
         .pnl-value { font-size: 21px; font-weight: 750; font-variant-numeric: tabular-nums;
@@ -1490,8 +1490,8 @@ export default function IntradayStocksPage() {
         .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
         .tab, .tabs :global(a.tab) { display: inline-flex; align-items: center; justify-content: center; background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; text-decoration: none; }
         .tab:focus-visible, .tabs :global(a.tab:focus-visible) { outline: 2px solid var(--brand); outline-offset: 3px; }
-        .tab.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
-        .badge.anti { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); margin-right: 4px; }
+        .tab.active { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--purple); }
+        .badge.anti { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--purple); margin-right: 4px; }
         .desk-banner {
           padding: 10px 16px; border-radius: 8px; font-size: 12px; line-height: 1.5;
           background: var(--canvas-soft); border: 1px solid var(--panel-border);

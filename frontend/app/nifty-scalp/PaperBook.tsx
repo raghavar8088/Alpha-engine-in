@@ -340,7 +340,7 @@ export default function PaperBook({ board }: { board: NiftyScalpScore[] }) {
         }
         .chip.active {
           background: var(--purple-dim);
-          border-color: rgba(125, 52, 220, 0.3);
+          border-color: rgba(var(--brand-rgb), 0.3);
           color: var(--purple);
         }
         .chip:disabled {

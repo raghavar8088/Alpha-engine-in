@@ -411,7 +411,7 @@ export default function StocksRangePage() {
         .controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
         .index-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
         .tab { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
-        .tab.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .tab.active { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--purple); }
         .filter { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 9px; padding: 9px 14px; font-size: 13px; min-width: 260px; flex: 1; max-width: 360px; }
         .notice { padding: 10px 14px; border-radius: 9px; background: var(--canvas-soft); border: 1px solid var(--panel-border); font-size: 12.5px; }
         .stat-row { display: flex; gap: 20px; font-size: 12.5px; color: var(--text-muted); flex-wrap: wrap; }
@@ -426,7 +426,7 @@ export default function StocksRangePage() {
         .viewb:hover { border-color: var(--panel-border-hover); }
         .viewn { font-family: var(--font-data); font-variant-numeric: tabular-nums;
                  font-size: 11px; font-weight: 700; color: var(--text-faint); }
-        .viewb.on { background: var(--purple-dim); border-color: rgba(125, 52, 220, .28);
+        .viewb.on { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), .28);
                     color: var(--purple); }
         .viewb.on .viewn { color: var(--purple); }
         /* The buy-zone chip carries the page's own green, so the control and the rows it
@@ -443,7 +443,7 @@ export default function StocksRangePage() {
                  font-size: 12px; font-weight: 600; cursor: pointer;
                  transition: border-color .14s; white-space: nowrap; }
         .copyb:hover:not(:disabled) { border-color: var(--panel-border-hover); }
-        .copyb.primary { color: var(--accent); border-color: rgba(200, 147, 63, .34);
+        .copyb.primary { color: var(--accent); border-color: rgba(var(--accent-rgb), .34);
                          background: var(--accent-dim); }
         .copyb.primary:hover:not(:disabled) { border-color: var(--accent); }
         .copyb:disabled { opacity: .45; cursor: default; }
@@ -474,7 +474,7 @@ export default function StocksRangePage() {
         .trend.down { background: var(--loss-dim); color: var(--loss); }
         .trend.flat { background: var(--canvas-soft); color: var(--text-muted); }
         .range-btn { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 7px; padding: 5px 10px; font-size: 11.5px; font-weight: 700; cursor: pointer; color: var(--text-muted); }
-        .range-btn.set { color: var(--purple); border-color: rgba(125, 52, 220, 0.3); background: var(--purple-dim); }
+        .range-btn.set { color: var(--purple); border-color: rgba(var(--brand-rgb), 0.3); background: var(--purple-dim); }
         .zone-yes { color: var(--gain); font-weight: 800; font-size: 11px; }
         .zone-no { color: var(--text-faint); font-size: 11px; }
         .muted { color: var(--text-faint); }
@@ -614,7 +614,7 @@ function AddRangeDialog({
         .field input { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 9px; padding: 11px 12px; font-size: 16px; width: 100%; }
         .results { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; max-height: 260px; overflow-y: auto; }
         .result { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; text-align: left; background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 12.5px; }
-        .result:hover { border-color: rgba(125, 52, 220, 0.4); }
+        .result:hover { border-color: rgba(var(--brand-rgb), 0.4); }
         .rsym { font-weight: 700; }
         .rname { color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .rbel { font-size: 10px; color: var(--text-faint); }

@@ -438,7 +438,7 @@ export default function SwingTradingPage() {
         .tile-sub { margin-top: 3px; font-size: 10.5px; color: var(--text-faint); line-height: 1.4; }
         .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
         .tab { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
-        .tab.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .tab.active { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--purple); }
         .table-scroll { overflow-x: auto; max-height: 460px; overflow-y: auto; }
         .data-table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
         .data-table th { text-align: center; padding: 8px 10px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--panel-border); position: sticky; top: 0; background: var(--panel); }
@@ -450,7 +450,7 @@ export default function SwingTradingPage() {
         .loss { color: var(--loss); }
         .sub { font-size: 10.5px; color: var(--text-faint); }
         .desk-banner { background: var(--canvas-edge); border: 1px solid var(--panel-border); border-radius: 12px; padding: 12px 16px; font-size: 12px; line-height: 1.7; color: var(--text-muted); }
-        .notice { background: var(--purple-dim); border: 1px solid rgba(125, 52, 220, 0.3); color: var(--purple); border-radius: 10px; padding: 9px 14px; font-size: 12px; cursor: pointer; }
+        .notice { background: var(--purple-dim); border: 1px solid rgba(var(--brand-rgb), 0.3); color: var(--purple); border-radius: 10px; padding: 9px 14px; font-size: 12px; cursor: pointer; }
         .addwrap { padding: 16px 20px 18px; }
         .addbox { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
         .field { display: flex; flex-direction: column; gap: 5px; }
@@ -474,7 +474,7 @@ export default function SwingTradingPage() {
         .preview { margin: 12px 0 0; font-size: 11.5px; color: var(--text-muted); line-height: 1.6; }
         .acts { display: flex; gap: 4px; justify-content: center; }
         .acts button { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); border-radius: 6px; padding: 3px 8px; font-size: 10px; font-weight: 600; cursor: pointer; }
-        .acts button:hover { color: var(--purple); border-color: rgba(125, 52, 220, 0.3); background: var(--purple-dim); }
+        .acts button:hover { color: var(--purple); border-color: rgba(var(--brand-rgb), 0.3); background: var(--purple-dim); }
         .acts button.danger:hover { color: var(--loss); border-color: rgba(217, 45, 63, 0.3); background: var(--loss-dim); }
         .badge.dip { background: var(--gain-dim); border-color: rgba(16, 150, 90, 0.3); color: var(--gain); }
         /* DRIFTED is neither an error nor an ordinary fill, so it takes the app's WARN

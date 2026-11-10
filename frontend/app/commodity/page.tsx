@@ -279,7 +279,7 @@ export default function CommodityPage() {
         .page { display: flex; flex-direction: column; gap: 16px; }
         .desk-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
         .dt { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
-        .dt.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .dt.active { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--purple); }
         .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
         .explain { font-size: 12.5px; line-height: 1.5; color: var(--text-muted); background: var(--canvas-soft);
                    border: 1px solid var(--panel-border); border-radius: 12px; padding: 12px 16px; }
@@ -439,7 +439,7 @@ function StrategyRecords({ rows }: { rows: CmdRecords["strategies"] }) {
         .rank-wrap { padding: 6px 20px 0; }
         .flabel { font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); }
         .chip { font-size: 11.5px; font-weight: 600; padding: 4px 10px; border-radius: 100px; cursor: pointer; border: 1px solid var(--panel-border); background: var(--panel); color: var(--text-muted); }
-        .chip.on { background: var(--purple-dim); border-color: rgba(125,52,220,.24); color: var(--purple); }
+        .chip.on { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), .24); color: var(--purple); }
         .retired td { opacity: .6; }
         .ret { margin-left: 8px; font-size: 9.5px; font-weight: 700; padding: 1px 6px; border-radius: 5px; background: var(--loss-dim); color: var(--loss); text-transform: uppercase; }
         .table-scroll { overflow-x: auto; }

@@ -4,7 +4,7 @@ const TONE_STYLES: Record<PillTone, { color: string; border: string; bg: string;
   gain: { color: "var(--gain)", border: "rgba(14,159,110,.25)", bg: "var(--gain-dim)", dot: "var(--gain)" },
   loss: { color: "var(--loss)", border: "rgba(217,45,63,.22)", bg: "var(--loss-dim)" },
   warn: { color: "var(--warn)", border: "rgba(185,119,14,.3)", bg: "var(--warn-dim)" },
-  accent: { color: "var(--purple)", border: "rgba(125,52,220,.22)", bg: "var(--purple-dim)" },
+  accent: { color: "var(--purple)", border: "rgba(var(--brand-rgb), .22)", bg: "var(--purple-dim)" },
   muted: { color: "var(--text-muted)", border: "var(--panel-border)", bg: "var(--canvas-soft)" },
 };
 

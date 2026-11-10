@@ -479,7 +479,7 @@ export default function PreLivePage() {
         .it { border: 0; background: transparent; color: var(--text-muted); font-size: 13px; font-weight: 700; letter-spacing: 0.02em; padding: 8px 20px; border-radius: 9px; cursor: pointer; }
         .it.active { background: var(--panel); color: var(--text); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); }
         .dt { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
-        .dt.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .dt.active { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--purple); }
         .hyps { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
         .hyp { border: 1px solid var(--panel-border); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
         .hyp-head { font-size: 13px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }

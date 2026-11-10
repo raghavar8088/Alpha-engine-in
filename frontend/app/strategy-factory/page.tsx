@@ -445,14 +445,14 @@ export default function StrategyFactoryPage() {
         .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
         .tab { padding: 7px 14px; border-radius: 100px; font-size: 12.5px; font-weight: 600; cursor: pointer;
                border: 1px solid var(--panel-border); background: var(--panel); color: var(--text-muted); }
-        .tab.on { background: var(--purple-dim); border-color: rgba(125,52,220,.24); color: var(--purple); }
+        .tab.on { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), .24); color: var(--purple); }
         .filters { padding: 14px 20px 4px; display: flex; flex-direction: column; gap: 8px; }
         .frow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
         .flabel { font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
                   color: var(--text-muted); min-width: 70px; }
         .chip { font-size: 11.5px; font-weight: 600; padding: 4px 10px; border-radius: 100px; cursor: pointer;
                 border: 1px solid var(--panel-border); background: var(--panel); color: var(--text-muted); }
-        .chip.on { background: var(--purple-dim); border-color: rgba(125,52,220,.24); color: var(--purple); }
+        .chip.on { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), .24); color: var(--purple); }
         .table-scroll { overflow-x: auto; }
         .data-table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
         .data-table th { text-align: center; padding: 8px 9px; font-size: 9.5px; font-weight: 700; letter-spacing: .04em;

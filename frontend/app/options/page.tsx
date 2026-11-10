@@ -656,7 +656,7 @@ export default function OptionsPage() {
           background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted);
           padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer;
         }
-        .tab.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .tab.active { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--purple); }
         .form { display: flex; flex-wrap: wrap; gap: 14px; padding: 18px 20px; align-items: flex-end; }
         label { display: flex; flex-direction: column; gap: 6px; font-size: 11.5px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase; }
         input, select { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 9px; padding: 9px 12px; font-size: 13.5px; min-width: 100px; }

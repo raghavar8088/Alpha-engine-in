@@ -948,7 +948,7 @@ export default function FnoPositionsPage() {
         .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
         .tabs-row { display: flex; justify-content: flex-end; margin-bottom: 10px; }
         .tab { display: flex; align-items: center; gap: 7px; background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
-        .tab.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .tab.active { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--purple); }
         .count { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 20px; padding: 1px 8px; font-size: 10.5px; }
         .tab.active .count { background: var(--purple); color: #fff; border-color: transparent; }
         select { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 9px; padding: 9px 12px; font-size: 13px; }
@@ -978,7 +978,7 @@ export default function FnoPositionsPage() {
                             background: var(--loss-dim); }
         .ghost-btn.danger:hover:not(:disabled) { border-color: var(--loss); }
         .ghost-btn.roll { flex: none; color: var(--purple); background: var(--purple-dim);
-                          border-color: rgba(125, 52, 220, 0.28); }
+                          border-color: rgba(var(--brand-rgb), 0.28); }
         .ghost-btn.roll:hover:not(:disabled) { border-color: var(--purple); }
 
         .rollbar { display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
@@ -998,14 +998,14 @@ export default function FnoPositionsPage() {
                           cursor: pointer; vertical-align: middle; }
         tr.picked { background: var(--purple-dim); }
         .roll-btn { background: var(--purple-dim); color: var(--purple);
-                    border: 1px solid rgba(125, 52, 220, 0.26); border-radius: 100px;
+                    border: 1px solid rgba(var(--brand-rgb), 0.26); border-radius: 100px;
                     padding: 6px 12px; font-size: 11px; font-weight: 700;
                     white-space: nowrap; cursor: pointer; }
         .roll-btn:hover:not(:disabled) { border-color: var(--purple); }
         .roll-btn:disabled { opacity: 0.45; cursor: default; }
         .muted-cell { font-size: 11px; color: var(--text-faint); }
         .buy-chip { background: linear-gradient(145deg, var(--accent), var(--accent-hover)); color: #241404; font-weight: 700; font-size: 11px; border: none; border-radius: 7px; padding: 6px 10px; cursor: pointer; }
-        .buy-chip.pe { background: linear-gradient(145deg, #7d34dc, #5b23a8); color: #fff; }
+        .buy-chip.pe { background: linear-gradient(145deg, #003b75, #002142); color: #fff; }
         .chip-pair { display: flex; align-items: center; gap: 6px; justify-content: center; }
         .sell-chip { background: var(--loss-dim); color: var(--loss); border: 1px solid rgba(217, 45, 63, 0.3); font-weight: 700; font-size: 11px; border-radius: 7px; padding: 5px 10px; cursor: pointer; }
         .sell-chip:hover { background: rgba(217, 45, 63, 0.18); }
@@ -1027,7 +1027,7 @@ export default function FnoPositionsPage() {
         .basket-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; padding-top: 8px; border-top: 1px solid var(--panel-border); }
         .product-row { display: flex; gap: 6px; }
         .product-btn { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 8px; padding: 8px 12px; font-size: 11.5px; font-weight: 600; color: var(--text-muted); cursor: pointer; }
-        .product-btn.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .product-btn.active { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--purple); }
         .basket-metrics { display: flex; gap: 22px; }
         .metric { display: flex; flex-direction: column; gap: 2px; }
         .mlabel { font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); font-weight: 700; }
@@ -1158,7 +1158,7 @@ function OrderModal({ draft, accountId, onClose, onDone }: { draft: OrderDraft; 
         .field-row .field { flex: 1; min-width: 0; }
         .product-row { display: flex; flex-wrap: wrap; gap: 6px; }
         .product-btn { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 8px; padding: 8px 10px; font-size: 11.5px; font-weight: 600; color: var(--text-muted); cursor: pointer; }
-        .product-btn.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .product-btn.active { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--purple); }
         .ltp-line { font-size: 12.5px; color: var(--text-muted); }
         .sell-warn { background: var(--loss-dim); border: 1px solid rgba(217, 45, 63, 0.26); border-radius: 8px; padding: 9px 11px; font-size: 11.5px; line-height: 1.5; color: var(--loss); }
         .err { color: var(--loss); font-size: 12px; }
@@ -1263,7 +1263,7 @@ function AccountModal({
         .balance-line { font-size: 12.5px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
         .quick-row { display: flex; flex-wrap: wrap; gap: 6px; }
         .quick-btn { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; }
-        .quick-btn.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .quick-btn.active { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--purple); }
         .edit-note { font-size: 11.5px; line-height: 1.5; color: var(--text-faint); background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 8px; padding: 9px 11px; }
         .err { color: var(--loss); font-size: 12px; }
         .submit-btn { background: linear-gradient(145deg, var(--accent), var(--accent-hover)); color: #241404; font-weight: 700; font-size: 13.5px; border: none; border-radius: 10px; padding: 12px; cursor: pointer; }

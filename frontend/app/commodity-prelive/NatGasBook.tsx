@@ -284,7 +284,7 @@ export default function NatGasBook() {
         .switch:not(.on) .lbl { right: 14px; color: var(--text-muted); }
         .pnl { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
         .card, .tile { border: 1px solid var(--panel-border); border-radius: 12px; padding: 13px 15px; background: var(--panel); }
-        .card.total { background: var(--canvas-soft); border-color: rgba(125, 52, 220, 0.28); }
+        .card.total { background: var(--canvas-soft); border-color: rgba(var(--brand-rgb), 0.28); }
         .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
         .lab { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); }
         .val { font-size: 22px; font-weight: 750; font-variant-numeric: tabular-nums; margin-top: 4px; }

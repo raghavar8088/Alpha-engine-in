@@ -455,7 +455,7 @@ export default function PositionsPage() {
           background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted);
           padding: 9px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer;
         }
-        .tab.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .tab.active { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--purple); }
         .count { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 20px; padding: 1px 8px; font-size: 10.5px; }
         .tab.active .count { background: var(--purple); color: #fff; border-color: transparent; }
         select { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 9px; padding: 9px 12px; font-size: 13px; }
@@ -770,7 +770,7 @@ function BuyModal({
         .dropdown-empty { padding: 14px 12px; font-size: 13px; color: var(--text-faint); text-align: center; }
         .product-row { display: flex; flex-wrap: wrap; gap: 6px; }
         .product-btn { background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 8px; padding: 8px 10px; font-size: 11.5px; font-weight: 600; color: var(--text-muted); cursor: pointer; }
-        .product-btn.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .product-btn.active { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--purple); }
         .margin-box { display: flex; flex-direction: column; gap: 4px; background: var(--canvas-soft); border: 1px solid var(--panel-border); border-radius: 9px; padding: 10px 12px; font-size: 12px; }
         .margin-box .leverage { font-weight: 700; color: var(--purple); }
         .margin-box.warn { background: rgba(217, 160, 45, 0.1); border-color: rgba(217, 160, 45, 0.35); }

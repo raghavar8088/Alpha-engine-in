@@ -688,7 +688,7 @@ export default function GoldDeskPage() {
 
       <style jsx>{`
         .page { padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 18px; }
-        .notice { background: var(--purple-dim); border: 1px solid rgba(125, 52, 220, 0.3);
+        .notice { background: var(--purple-dim); border: 1px solid rgba(var(--brand-rgb), 0.3);
                   color: var(--purple); border-radius: 10px; padding: 10px 14px; font-size: 12.5px;
                   cursor: pointer; }
 
@@ -697,7 +697,7 @@ export default function GoldDeskPage() {
                 background: var(--canvas-soft); border: 1px solid var(--panel-border);
                 color: var(--text-muted); border-radius: 10px; padding: 9px 16px;
                 font-size: 12.5px; font-weight: 700; cursor: pointer; }
-        .ptab.on { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.3); color: var(--purple); }
+        .ptab.on { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.3); color: var(--purple); }
         .ptab.muted { cursor: default; font-weight: 500; }
         .ptab .tv { font-family: var(--font-data); font-size: 12px; font-weight: 600;
                     font-variant-numeric: tabular-nums; opacity: 0.9; }
@@ -728,7 +728,7 @@ export default function GoldDeskPage() {
         .btn { background: var(--canvas-soft); border: 1px solid var(--panel-border);
                color: var(--text-muted); border-radius: 9px; padding: 8px 14px; font-size: 12.5px;
                font-weight: 600; cursor: pointer; }
-        .btn:hover:not(:disabled) { color: var(--purple); border-color: rgba(125, 52, 220, 0.3); }
+        .btn:hover:not(:disabled) { color: var(--purple); border-color: rgba(var(--brand-rgb), 0.3); }
         .btn:disabled { opacity: 0.55; cursor: default; }
         .btn.danger:hover:not(:disabled) { color: var(--loss); border-color: rgba(217, 45, 63, 0.3); }
 
@@ -747,7 +747,7 @@ export default function GoldDeskPage() {
         .pnl { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
         .card { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 14px;
                 padding: 16px 18px; }
-        .card.total { border-color: rgba(125, 52, 220, 0.25); background: var(--purple-dim); }
+        .card.total { border-color: rgba(var(--brand-rgb), 0.25); background: var(--purple-dim); }
         .lab { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
                color: var(--text-faint); }
         .val { margin-top: 8px; font-family: var(--font-data); font-size: 23px; font-weight: 700;

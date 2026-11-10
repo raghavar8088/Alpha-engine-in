@@ -245,7 +245,7 @@ export default function WorkspacePanel({
         .group-title { font-size: 10px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); }
         .tools { display: flex; flex-wrap: wrap; gap: 4px; }
         .tool { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 7px; padding: 5px 8px; font-size: 11px; font-weight: 600; color: var(--text-muted); cursor: pointer; }
-        .tool.active { background: var(--purple-dim); border-color: rgba(125, 52, 220, 0.35); color: var(--purple); }
+        .tool.active { background: var(--purple-dim); border-color: rgba(var(--brand-rgb), 0.35); color: var(--purple); }
         .tool:disabled { opacity: 0.45; cursor: not-allowed; }
         .hint { font-size: 10px; color: var(--text-faint); line-height: 1.45; }
         .swatches { display: flex; gap: 5px; margin-top: 6px; }
@@ -254,7 +254,7 @@ export default function WorkspacePanel({
         .swatch:disabled { opacity: 0.4; cursor: default; }
         .row { display: flex; gap: 5px; }
         .row input, .row select, .note-input { flex: 1; min-width: 0; background: var(--panel); border: 1px solid var(--panel-border); border-radius: 7px; padding: 5px 7px; font-size: 11px; }
-        .go { background: var(--purple-dim); border: 1px solid rgba(125, 52, 220, 0.3); color: var(--purple); border-radius: 7px; padding: 5px 9px; font-size: 11px; font-weight: 700; cursor: pointer; flex-shrink: 0; }
+        .go { background: var(--purple-dim); border: 1px solid rgba(var(--brand-rgb), 0.3); color: var(--purple); border-radius: 7px; padding: 5px 9px; font-size: 11px; font-weight: 700; cursor: pointer; flex-shrink: 0; }
         .go:disabled { opacity: 0.45; cursor: not-allowed; }
         .go.wide { width: 100%; }
         .list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }

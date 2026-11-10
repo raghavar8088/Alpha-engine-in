@@ -181,7 +181,7 @@ export default function AnalysisPanel({
         li { font-size: 10.5px; line-height: 1.45; color: var(--text-muted); }
         .note { font-size: 10.5px; color: var(--text-faint); line-height: 1.45; }
         .err { font-size: 10.5px; color: var(--loss); line-height: 1.45; }
-        .explain { background: var(--purple-dim); border: 1px solid rgba(125, 52, 220, 0.3); color: var(--purple); border-radius: 8px; padding: 7px 10px; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .explain { background: var(--purple-dim); border: 1px solid rgba(var(--brand-rgb), 0.3); color: var(--purple); border-radius: 8px; padding: 7px 10px; font-size: 12px; font-weight: 700; cursor: pointer; }
         .explain:disabled { opacity: 0.5; cursor: not-allowed; }
         .disclaimer { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--panel-border); font-size: 9.5px; color: var(--text-faint); line-height: 1.45; }
       `}</style>

@@ -236,7 +236,7 @@ export default function GoldLabPanel() {
         .ctl { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .btn { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted);
                border-radius: 9px; padding: 8px 14px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
-        .btn:hover:not(:disabled) { color: var(--purple); border-color: rgba(125, 52, 220, 0.3); }
+        .btn:hover:not(:disabled) { color: var(--purple); border-color: rgba(var(--brand-rgb), 0.3); }
         .btn:disabled { opacity: 0.55; cursor: default; }
         .btn.danger:hover:not(:disabled) { color: var(--loss); border-color: rgba(217, 45, 63, 0.3); }
         .switch { position: relative; width: 74px; height: 32px; border-radius: 100px; border: 1px solid var(--panel-border);

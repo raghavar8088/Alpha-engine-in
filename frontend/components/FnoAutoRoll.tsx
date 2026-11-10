@@ -193,7 +193,7 @@ export default function FnoAutoRoll({ accountName }: { accountName: string | nul
       <style jsx>{`
         .ar { border-radius: 12px; border: 1px solid var(--panel-border); background: var(--panel); overflow: hidden; }
         .ar.armed { border-color: rgba(14, 159, 110, 0.3); background: var(--gain-dim); }
-        .ar.done { border-color: rgba(125, 52, 220, 0.24); background: var(--purple-dim); }
+        .ar.done { border-color: rgba(var(--brand-rgb), 0.24); background: var(--purple-dim); }
         .ar.off { border-color: rgba(185, 119, 14, 0.3); background: var(--warn-dim); }
         .ar-head { display: flex; align-items: center; gap: 12px; padding: 10px 14px; cursor: pointer; flex-wrap: wrap; }
         .ar-tag { font-size: 10.5px; font-weight: 800; letter-spacing: 0.05em; white-space: nowrap; }
