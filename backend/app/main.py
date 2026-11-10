@@ -1126,6 +1126,20 @@ try:
             logger.info("AI final gate started: %s, key configured %s", _ai_gate.MODEL, _ai_gate.configured())
 except Exception:  # noqa: BLE001
     logger.exception("could not mount the AI final gate")
+# Live Trading (REAL MONEY) copies the Intraday Stocks tournament's Selected ORB 15-min into Angel One orders
+# (2026-11-10, the owner's decision): a 10-second loop copies each new paper entry within seconds and follows
+# its exits; it acts only while the desk is ARMED or holds a real position, and obeys Main Control.
+# app/services/live_trading_engine.py. A failure here must not stop the app.
+try:
+    @app.on_event("startup")
+    async def start_live_trading_copy() -> None:
+        from app.services import live_trading_engine as _lt
+        if _lt.COPY_LOOP_ON:
+            asyncio.create_task(_lt.copy_loop())
+            logger.info("Live Trading copy loop started: %s, about Rs %.0f a position, one at a time",
+                        _lt.COPY_SOURCE, _lt.COPY_NOTIONAL)
+except Exception:  # noqa: BLE001
+    logger.exception("could not start the Live Trading copy loop")
 # Reset buttons for the Intraday Stocks paper books, under each desk's own prefix
 app.include_router(book_resets.pattern_books_router)
 app.include_router(book_resets.live_intraday_router)

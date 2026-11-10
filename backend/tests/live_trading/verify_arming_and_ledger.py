@@ -13,6 +13,9 @@ WHY THIS EXISTS (measured 2026-10-10, see INTRADAY_STOCKS_RESEARCH_AND_UPGRADE_P
 - 49 positions Angel squared off on its own were booked a day later at the next session's
   price. -> C3: Angel's position book is read BEFORE any exit decision, and a position the
   broker already closed is closed at the broker's fill, with no order sent.
+- 10 Nov 2026: the desk now COPIES one tournament strategy (Selected ORB 15-min) whose gate the
+  owner overrode. The gate's machinery is still checked, on eight stand-in strategies without an
+  override; the copy desk has its own sections at the end.
 """
 
 import asyncio
@@ -152,11 +155,13 @@ class FakeCollection:
         for d in self.docs:
             if _matches(d, query):
                 d.update(update.get("$set", {}))
-                return
+                return types.SimpleNamespace(matched_count=1, modified_count=1, upserted_id=None)
         if upsert:
-            self.docs.append(self._with_id({**{k: v for k, v in query.items()
-                                               if not isinstance(v, dict)},
-                                            **update.get("$set", {})}))
+            doc = self._with_id({**{k: v for k, v in query.items() if not isinstance(v, dict)},
+                                 **update.get("$setOnInsert", {}), **update.get("$set", {})})
+            self.docs.append(doc)
+            return types.SimpleNamespace(matched_count=0, modified_count=0, upserted_id=doc["_id"])
+        return types.SimpleNamespace(matched_count=0, modified_count=0, upserted_id=None)
 
     async def update_many(self, query, update):
         n = 0
@@ -197,6 +202,8 @@ class FakeAngel:
         return self.trades
 
     async def order_book(self):
+        if self._orders == "fail":
+            raise RuntimeError("Angel 502 on the order book")
         return self._orders
 
     async def place_order(self, **kw):
@@ -243,6 +250,21 @@ def run(coro):
     return asyncio.run(coro)
 
 
+# The desk itself trades ONE strategy whose gate the owner overrode (10 Nov 2026). The gate's own
+# machinery is checked on eight stand-ins with no override: it must still hold for anything added.
+REAL_DESK = (LT.SELECTED, LT.SELECTED_BY_ID, dict(LT.OWNER_OVERRIDE))
+GATE_SET = [LT.CopyStrategy(f"gate_s{i}", f"Gate stand-in {i}", "momentum") for i in range(8)]
+
+
+def use_gate_set():
+    LT.SELECTED, LT.SELECTED_BY_ID, LT.OWNER_OVERRIDE = GATE_SET, {g.strategy_id: g for g in GATE_SET}, {}
+
+
+def use_real_desk():
+    LT.SELECTED, LT.SELECTED_BY_ID, LT.OWNER_OVERRIDE = REAL_DESK[0], REAL_DESK[1], dict(REAL_DESK[2])
+
+
+use_gate_set()
 IDS = [ls.strategy_id for ls in LT.SELECTED]
 ONE = IDS[0]
 
@@ -264,8 +286,8 @@ def pos(**kw):
 # ═════════════════════════════════════════════════════════════════════════════════
 section("C4 · THE ARMING GATE")
 
-check("the desk carries more strategies than the eight the page used to describe",
-      len(IDS) >= 8, f"{len(IDS)} strategies")
+check("the gate's machinery is checked on eight stand-in strategies, none overridden",
+      len(IDS) == 8 and LT.OWNER_OVERRIDE == {}, f"{len(IDS)} strategies")
 
 fresh()
 chk = run(LT.arming_check())
@@ -581,6 +603,366 @@ h = run(LT.ledger_health())
 check("the summary reports how much of the record is the broker's truth",
       h["reconciled"] == 1 and h["needs_contract_note"] == 1 and h["void"] == 1, h)
 check("…and how many closed trades still have no charges", h["charges_missing"] == 1)
+
+# ═════════════════════════════════════════════════════════════════════════════════
+section("THE OWNER'S OVERRIDE (10 Nov 2026)")
+
+use_real_desk()
+SEL = "iv2_orb_sel15"
+check("the desk trades exactly one strategy: the tournament's Selected ORB 15-min",
+      [ls.strategy_id for ls in LT.SELECTED] == [SEL], [ls.strategy_id for ls in LT.SELECTED])
+check("its override is written down, dated, in the code", "10 Nov 2026" in LT.OWNER_OVERRIDE.get(SEL, ""))
+check("one real position at a time, about Rs 50,000 of notional",
+      LT.MAX_OPEN_POSITIONS == 1 and LT.COPY_NOTIONAL == 50000.0 and LT.DESK_CEILING == 50000.0)
+
+fresh()
+chk = run(LT.arming_check())
+row = chk["strategies"][0]
+check("with no verdict on file, the overridden strategy may be armed", chk["allowed"] is True, chk["blockers"])
+check("…the override is announced first among the warnings", "OVERRIDDEN" in (chk["warnings"] or [""])[0],
+      chk["warnings"][:1])
+check("…its row keeps its real verdict and says why it may trade",
+      row["verdict"] == "NOT_REGISTERED" and row["validated"] is True and "overridden" in row["reason"], row)
+check("…and the overridden count is reported apart", chk.get("overridden_enabled") == 1)
+run(LT.set_armed(True))
+check("set_armed(True) succeeds", run(LT.get_state())["armed"] is True)
+
+fresh(positions=[pos(opened_on=YESTERDAY, strategy_id=SEL)])
+check("the override never bypasses the ledger: a stale OPEN position still blocks arming",
+      run(LT.arming_check())["allowed"] is False)
+fresh(flags=[{"strategy_id": SEL, "enabled": False}])
+check("disabled, there is nothing to arm", run(LT.arming_check())["allowed"] is False)
+
+board = run(LT.leaderboard())
+check("the leaderboard shows the override beside the verdict",
+      board[0]["validated"] is True and board[0]["override"] and board[0]["verdict"] == "NOT_REGISTERED")
+
+# ═════════════════════════════════════════════════════════════════════════════════
+section("COPYING THE TOURNAMENT — copy_check")
+
+NOW = datetime.now(timezone.utc)
+
+
+def parent(**kw):
+    base = {"position_id": "T1", "engine": "v2", "strategy_id": SEL, "symbol": "INFY", "side": "BUY",
+            "entry_price": 1500.0, "stoploss": 1485.0, "target": None, "status": "OPEN",
+            "opened_on": TODAY, "opened_at": NOW - timedelta(seconds=20), "rationale": "range break"}
+    base.update(kw)
+    return base
+
+
+cc = LT.copy_check
+check("a fresh BUY near its paper fill is copied", cc(parent(), 1501.0, 0, NOW) == (None, True))
+check("a paper entry older than the window is final", cc(parent(opened_at=NOW - timedelta(seconds=400)), 1501.0, 0, NOW)[1] is True
+      and "old" in cc(parent(opened_at=NOW - timedelta(seconds=400)), 1501.0, 0, NOW)[0])
+check("a naive (Mongo) timestamp is read as UTC",
+      cc(parent(opened_at=(NOW - timedelta(seconds=20)).replace(tzinfo=None)), 1501.0, 0, NOW) == (None, True))
+w, f = cc(parent(), 1501.0, 1, NOW)
+check("one real position open: wait (not final)", w and "one real position" in w and f is False, w)
+w, f = cc(parent(), None, 0, NOW)
+check("no live quote: wait (not final)", w == "no live quote" and f is False)
+w, f = cc(parent(), 1484.0, 0, NOW)
+check("a BUY with the price already under its stop: final", w and "beyond the stop" in w and f is True)
+w, f = cc(parent(), 1509.0, 0, NOW)
+check("a BUY that ran more than half the stop distance: wait (not final)", w and "moved" in w and f is False, w)
+check("a BUY within half the stop distance is copied", cc(parent(), 1507.0, 0, NOW) == (None, True))
+check("a SELL above its stop: final", cc(parent(side="SELL", stoploss=1515.0), 1516.0, 0, NOW)[1] is True
+      and cc(parent(side="SELL", stoploss=1515.0), 1516.0, 0, NOW)[0])
+check("a SELL that fell more than half the stop distance waits",
+      cc(parent(side="SELL", stoploss=1515.0), 1492.0, 0, NOW)[1] is False)
+check("a SELL near its fill is copied", cc(parent(side="SELL", stoploss=1515.0), 1499.0, 0, NOW) == (None, True))
+check("no usable stop: final", cc(parent(stoploss=None), 1501.0, 0, NOW)[1] is True)
+
+# ═════════════════════════════════════════════════════════════════════════════════
+section("COPYING THE TOURNAMENT — real entries")
+
+INST = {"symbol": "INFY", "asset_class": "EQUITY", "exchange_segment": "NSE_EQ", "security_id": "1594",
+        "angel_token": "1594", "angel_tradingsymbol": "INFY-EQ"}
+
+
+class CashAngel(FakeAngel):
+    def __init__(self, cash="50000", fail_order=None, **kw):
+        super().__init__(**kw)
+        self.cash = cash
+        self.fail_order = fail_order
+
+    async def funds(self):
+        return {"availablecash": self.cash, "net": self.cash}
+
+    async def place_order(self, **kw):
+        if self.fail_order:
+            self.orders.append({**kw, "refused": True})
+            raise RuntimeError(self.fail_order)
+        return await super().place_order(**kw)
+
+
+def quote(ltp):
+    return lambda dhan, eqs: _async(({("NSE_EQ", "1594"): {"last_price": ltp}} if ltp else {},
+                                     {("NSE_EQ", "1594"): "test"} if ltp else {}))
+
+
+def copy_desk(parents, ltp=1501.0, positions=None, angel=None, armed=True):
+    a = fresh(angel=angel or CashAngel(), positions=positions)
+    LT.live_trading_state_collection.docs[0]["armed"] = armed
+    LT.intraday_lab_positions_collection = FakeCollection(parents)
+    LT.instruments_collection = FakeCollection([INST])
+    LT._equity_quote_map = quote(ltp)
+    LT._copy_waiting.clear()
+    LT._refused_symbols.clear()
+    return a
+
+
+def claim(pid):
+    return next((d for d in LT.live_trading_state_collection.docs if d["_id"] == f"copy|{pid}"), None)
+
+
+def real_rows(status="OPEN"):
+    return [d for d in LT.live_trading_positions_collection.docs if d.get("status") == status]
+
+
+LT.ENTRY_CUTOFF_HHMM = "24:00"          # the tests run at any hour; the cutoff is checked on its own below
+
+a = copy_desk([parent()])
+r = run(LT.scan_cycle(None))
+rows = real_rows()
+check("an armed desk copies a fresh tournament entry: ONE real order", r["opened"] == 1 and len(a.orders) == 1, r)
+check("…same side, MIS market order", a.orders[0]["transactiontype"] == "BUY"
+      and a.orders[0]["producttype"] == "INTRADAY" and a.orders[0]["ordertype"] == "MARKET")
+check("…sized to about Rs 50,000 at the live price", a.orders[0]["quantity"] == int(50000 // 1501.0),
+      a.orders[0]["quantity"])
+check("…recorded with its tournament parent, the paper stop and no fixed target",
+      rows and rows[0]["parent_id"] == "T1" and rows[0]["stoploss"] == 1485.0 and rows[0]["target"] is None
+      and rows[0]["copied_from"] == "tournament")
+check("…and the decision is claimed in the ledger", (claim("T1") or {}).get("decision") == "opened", claim("T1"))
+run(LT.scan_cycle(None))
+check("the same tournament position is never ordered twice", len(a.orders) == 1, len(a.orders))
+
+a = copy_desk([parent(), parent(position_id="T2", symbol="TCS")])
+LT.instruments_collection = FakeCollection([INST, {**INST, "symbol": "TCS", "security_id": "11536",
+                                                   "angel_token": "11536", "angel_tradingsymbol": "TCS-EQ"}])
+LT._equity_quote_map = lambda dhan, eqs: _async((
+    {("NSE_EQ", "1594"): {"last_price": 1501.0}, ("NSE_EQ", "11536"): {"last_price": 1501.0}},
+    {("NSE_EQ", "1594"): "test", ("NSE_EQ", "11536"): "test"}))
+r = run(LT.scan_cycle(None))
+check("two tournament entries at once: only the first is copied (one at a time)",
+      len(a.orders) == 1 and a.orders[0]["tradingsymbol"] == "INFY-EQ", [o["tradingsymbol"] for o in a.orders])
+check("…the second waits, unclaimed, while its paper entry is fresh",
+      claim("T2") is None and "T2" in LT._copy_waiting, LT._copy_waiting)
+LT.live_trading_positions_collection.docs[0]["status"] = "CLOSED"     # the first one closes
+run(LT.scan_cycle(None))
+check("…and is copied once the first real position has closed (still fresh)",
+      len(a.orders) == 2 and a.orders[1]["tradingsymbol"] == "TCS-EQ", [o["tradingsymbol"] for o in a.orders])
+
+a = copy_desk([parent(opened_at=NOW - timedelta(seconds=200))])
+run(LT.scan_cycle(None))
+check("a paper entry past the window is not copied, and the decision is final",
+      a.orders == [] and "old" in (claim("T1") or {}).get("decision", ""), claim("T1"))
+
+a = copy_desk([parent()], ltp=None)
+run(LT.scan_cycle(None))
+check("no live quote: no order, no claim (retried next tick)", a.orders == [] and claim("T1") is None)
+LT._equity_quote_map = quote(1502.0)
+run(LT.scan_cycle(None))
+check("…and copied on the next tick once a quote arrives", len(a.orders) == 1)
+
+a = copy_desk([parent()], ltp=1480.0)
+run(LT.scan_cycle(None))
+check("price already through the paper stop: no order, final",
+      a.orders == [] and "beyond the stop" in (claim("T1") or {}).get("decision", ""))
+
+a = copy_desk([parent()], ltp=1510.0)
+run(LT.scan_cycle(None))
+check("price ran past half the stop distance: no order, waiting", a.orders == [] and claim("T1") is None)
+
+for label, kw in (("a disarmed desk", dict(armed=False)),):
+    a = copy_desk([parent()], **kw)
+    run(LT.scan_cycle(None))
+    check(f"{label} places no order", a.orders == [])
+a = copy_desk([parent()])
+LT.live_trading_state_collection.docs[0]["kill_switch"] = True
+run(LT.scan_cycle(None))
+check("the kill switch places no order", a.orders == [])
+
+a = copy_desk([parent(strategy_id="iv2_orb_5m"), parent(position_id="T3", status="CLOSED"),
+               parent(position_id="T4", opened_on=YESTERDAY), parent(position_id="T5", engine="v1")])
+run(LT.scan_cycle(None))
+check("other strategies, closed, earlier-day and non-v2 paper positions are never copied", a.orders == [])
+
+a = copy_desk([parent()], angel=CashAngel(cash="10000"))
+run(LT.scan_cycle(None))
+check("a Rs 10,000 account funds about 4.5x on MIS, never more",
+      len(a.orders) == 1 and a.orders[0]["quantity"] == int(10000 * LT.MIS_LEVERAGE // 1501.0), a.orders)
+
+a = copy_desk([parent()], angel=CashAngel(fail_order="RMS: insufficient margin"))
+run(LT.scan_cycle(None))
+check("an order Angel refuses records no position", real_rows() == [] and len(a.orders) == 1)
+check("…counts toward the auto-disarm streak", run(LT.get_state())["consecutive_rejects"] == 1)
+check("…and is final: never retried", "not opened" in (claim("T1") or {}).get("decision", ""))
+run(LT.scan_cycle(None))
+check("…(no second attempt)", len(a.orders) == 1)
+
+a = copy_desk([parent()])
+LT.ENTRY_CUTOFF_HHMM = "00:00"
+r = run(LT.scan_cycle(None))
+LT.ENTRY_CUTOFF_HHMM = "24:00"
+check("past the entry cutoff nothing is copied", a.orders == [] and "cutoff" in r["notes"][0])
+
+# ═════════════════════════════════════════════════════════════════════════════════
+section("COPYING THE TOURNAMENT — exits")
+
+LT._broker_squaring_off = lambda sym, now: False
+LT.load_bars = lambda symbol, tf, years=None: []
+
+
+def copied(**kw):
+    base = pos(strategy_id=SEL, parent_id="T1", target=None, entry_fill_price=None, qty=33,
+               entry_order_id="E1", capital_deployed=49500.0)
+    base.update(kw)
+    return base
+
+
+held = [{**{"tradingsymbol": "INFY-EQ", "producttype": "INTRADAY"}, "netqty": "33",
+         "buyavgprice": "1500", "sellavgprice": "0"}]
+done = [{"orderid": "E1", "status": "complete"}]
+
+a = copy_desk([parent(status="CLOSED", exit_reason="stoploss")], ltp=1490.0, positions=[copied()],
+              angel=CashAngel(book=held, order_book=done))
+run(LT.manage_cycle(None))
+p = LT.live_trading_positions_collection.docs[0]
+check("the tournament closes its position -> the real one is closed: ONE opposite order",
+      len(a.orders) == 1 and a.orders[0]["transactiontype"] == "SELL" and a.orders[0]["quantity"] == 33, a.orders)
+check("…labelled with the tournament's reason", p["exit_reason"] == "tournament closed (stoploss)", p["exit_reason"])
+
+a = copy_desk([parent()], ltp=1490.0, positions=[copied()], angel=CashAngel(book=held, order_book=done))
+run(LT.manage_cycle(None))
+check("tournament still open, price between stop and entry, no target: no order",
+      a.orders == [] and real_rows() and real_rows()[0]["unrealized_pnl"] == round((1490.0 - 1500.0) * 33, 2))
+
+a = copy_desk([parent()], ltp=1480.0, positions=[copied()], angel=CashAngel(book=held, order_book=done))
+run(LT.manage_cycle(None))
+check("the paper stop on the live price closes the real position", len(a.orders) == 1
+      and LT.live_trading_positions_collection.docs[0]["exit_reason"] == "stoploss")
+check("…after confirming with Angel that the entry filled",
+      LT.live_trading_positions_collection.docs[0].get("entry_confirmed") is True)
+
+a = copy_desk([parent()], ltp=1480.0, positions=[copied()],
+              angel=CashAngel(book=[], order_book=[{"orderid": "E1", "status": "rejected", "text": "RMS margin"}]))
+run(LT.manage_cycle(None))
+p = LT.live_trading_positions_collection.docs[0]
+check("an entry Angel REJECTED gets NO exit order (it would open a new position)", a.orders == [], a.orders)
+check("…and is voided with Angel's reason", p["status"] == "VOID" and "RMS margin" in (p.get("reconcile_note") or ""))
+
+a = copy_desk([parent()], ltp=1480.0, positions=[copied()],
+              angel=CashAngel(book=[], order_book=[{"orderid": "E1", "status": "open"}]))
+run(LT.manage_cycle(None))
+check("an entry still pending at Angel: no exit yet, position kept", a.orders == [] and real_rows())
+
+a = copy_desk([parent()], ltp=1480.0, positions=[copied()], angel=CashAngel(book=[], order_book="fail"))
+run(LT.manage_cycle(None))
+check("an unreadable order book: no exit this tick, position kept", a.orders == [] and real_rows())
+
+a = copy_desk([parent()], ltp=1480.0, positions=[copied(entry_fill_price=1500.5)],
+              angel=CashAngel(book=held, order_book="fail"))
+run(LT.manage_cycle(None))
+check("an entry whose real fill is already known exits without asking the order book", len(a.orders) == 1)
+
+flat = [{**held[0], "netqty": "0", "sellavgprice": "1488"}]
+fill = [{"tradingsymbol": "INFY-EQ", "producttype": "INTRADAY", "transactiontype": "SELL",
+         "orderid": "RMS9", "fillprice": "1488.0", "fillsize": "33"}]
+a = copy_desk([parent(status="CLOSED", exit_reason="stoploss")], ltp=1488.0,
+              positions=[copied(entry_confirmed=True)], angel=CashAngel(book=flat, trades=fill, order_book=done))
+import time as _time  # noqa: E402
+LT._broker_checked_at = _time.monotonic()          # the 30-second check has just run: throttled
+run(LT.manage_cycle(None))
+p = LT.live_trading_positions_collection.docs[0]
+check("before an exit the broker is asked even inside the throttle: Angel already flat -> NO order",
+      a.orders == [] and p["status"] == "CLOSED" and p["exit_reason"] == "broker_squared_off", (a.orders, p.get("exit_reason")))
+
+class _Bar2:
+    def __init__(self, close):
+        self.ts = datetime.now(timezone.utc)
+        self.close = close
+
+
+a = copy_desk([parent()], ltp=None, positions=[copied(entry_confirmed=True)], angel=CashAngel(book=held, order_book=done))
+LT.load_bars = lambda symbol, tf, years=None: [_Bar2(1400.0)]
+run(LT.manage_cycle(None))
+LT.load_bars = lambda symbol, tf, years=None: []
+check("no live quote: a daily bar's close never triggers a stop", a.orders == [] and real_rows())
+
+a = copy_desk([parent(status="CLOSED", exit_reason="eod")], ltp=None, positions=[copied(entry_confirmed=True)],
+              angel=CashAngel(book=held, order_book=done))
+LT.load_bars = lambda symbol, tf, years=None: [_Bar2(1490.0)]
+run(LT.manage_cycle(None))
+LT.load_bars = lambda symbol, tf, years=None: []
+check("…but the tournament's close is still followed without a live quote", len(a.orders) == 1)
+
+# ═════════════════════════════════════════════════════════════════════════════════
+section("THE FAST LOOP — a few real ticks")
+
+import app.services.desk_switches as _DS  # noqa: E402
+import app.services.market_calendar as _MC  # noqa: E402
+
+_switch = {"on": True}
+
+
+async def _is_on(key):
+    return _switch["on"]
+
+
+_DS.is_on = _is_on
+_MC.is_trading_day = lambda when=None: True
+LT.COPY_START_DELAY_S, LT.COPY_TICK_S, LT.COPY_SESSION = 0.0, 0.02, ("00:00", "24:00")
+
+
+def ticks(seconds=0.3):
+    async def go():
+        task = asyncio.create_task(LT.copy_loop())
+        await asyncio.sleep(seconds)
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+    run(go())
+
+
+a = copy_desk([parent()], angel=CashAngel(book=held, order_book=[{"orderid": "EXIT1", "status": "complete"}]))
+ticks()
+check("an armed desk: the loop copies the tournament entry once, however many ticks run",
+      len(a.orders) == 1 and len(real_rows()) == 1, len(a.orders))
+LT.intraday_lab_positions_collection.docs[0].update(status="CLOSED", exit_reason="target")
+LT._equity_quote_map = quote(1503.0)
+ticks()
+check("…and closes it within ticks of the tournament's close", len(a.orders) == 2
+      and a.orders[1]["transactiontype"] == "SELL" and real_rows() == [], [o["transactiontype"] for o in a.orders])
+
+a = copy_desk([parent()], armed=False)
+ticks()
+check("a disarmed desk: the loop places nothing", a.orders == [])
+
+a = copy_desk([parent()], angel=CashAngel(book=held, order_book=done))
+_switch["on"] = False
+ticks()
+_switch["on"] = True
+check("Main Control switched off: the loop places nothing", a.orders == [])
+
+a = copy_desk([parent()], angel=CashAngel(book=held, order_book=done))
+_MC.is_trading_day = lambda when=None: False
+ticks()
+_MC.is_trading_day = lambda when=None: True
+check("a market holiday: the loop places nothing", a.orders == [])
+
+# ═════════════════════════════════════════════════════════════════════════════════
+section("WHAT THE PAGE READS")
+
+a = copy_desk([parent()], positions=[copied()])
+sm = run(LT.summary())
+check("the summary names the copied strategy, the size and the override",
+      sm["copy_source"] == SEL and sm["copy_notional"] == 50000.0 and sm["max_open_positions"] == 1
+      and SEL in sm["gate_override"], {k: sm.get(k) for k in ("copy_source", "copy_notional", "gate_override")})
+op = run(LT.open_positions())
+check("open positions carry their tournament parent and no target", op[0]["parent_id"] == "T1" and op[0]["target"] is None)
 
 print()
 if FAILURES:

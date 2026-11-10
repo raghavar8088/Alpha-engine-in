@@ -1,12 +1,14 @@
-"""Live Trading desk — the REAL-MONEY twin of the Live Intraday shortlist.
+"""Live Trading desk — REAL MONEY: Selected ORB 15-min, copied from the Intraday Stocks tournament.
 
-Same eight strategies, same ₹10,000-per-strategy / ₹10,000-per-position structure as the
-paper Live Intraday desk (it imports that desk's exact selection and signal logic, so the
-two can never drift apart). The difference is execution: when this desk is ARMED it routes
-REAL orders to Angel One via SmartAPI placeOrder. Angel is also the price/signal feed, so
-the whole desk is on one broker. (This needs an Angel TRADING API key — a market-data-only
-key is rejected at order time.) Dhan is still consulted for quotes with an Angel fallback,
-but never for orders here.
+Since 10 Nov 2026 (the owner's decision) this desk trades ONE strategy: the tournament's
+pre-registered Selected ORB 15-min (iv2_orb_sel15). When the tournament's paper engine opens an
+iv2_orb_sel15 position, this desk places the same-side REAL Angel One MIS market order within
+seconds (`copy_loop`), holds it to the same stop (the opposite edge of the 09:15-09:30 range),
+and squares it off with the session (15:05 in closing-auction stocks, 15:12 otherwise), or as
+soon as the tournament's own position closes. One real position at a time, about Rs 50,000 of
+notional on Angel's intraday leverage. The fourteen earlier strategies and their record were
+removed at the owner's request. Angel is also the price feed; Dhan only fills quote gaps and
+never receives an order. (This needs an Angel TRADING API key.)
 
 Safety model (mirrors the Antigravity Live Engine the user already runs):
   * ARMED flag — ships OFF. Nothing is ordered until the desk is armed. Disarming stops
@@ -37,13 +39,16 @@ import asyncio
 import logging
 import os
 import time
-from datetime import datetime, timezone
+from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
+from types import SimpleNamespace
 from uuid import uuid4
 
 from anyio import to_thread
 
 from app.core.db import (
     instruments_collection,
+    intraday_lab_positions_collection,
     live_trading_equity_collection,
     live_trading_flags_collection,
     live_trading_positions_collection,
@@ -54,19 +59,10 @@ from app.core.db import (
 from app.services.angel_client import angel_client
 from app.services.angel_fees import round_trip
 from app.services import intraday_session as session
-from app.services.call_engine import IST, _scored_daily_symbols
+from app.services.call_engine import IST
 from app.services.dhan_client import DhanClient
 from app.services.intraday_lab_engine import _equity_quote_map, _size
-from app.services.live_intraday_engine import (
-    ENTRY_CUTOFF_HHMM,
-    INTRADAY_CATEGORIES,
-    MAX_SYMBOLS_PER_SCAN,
-    PER_STRATEGY_ALLOCATION,
-    POSITION_NOTIONAL,
-    SELECTED as _PAPER_SHORTLIST,
-    _live_signal,
-    resolve_names,
-)
+from app.services.live_intraday_engine import ENTRY_CUTOFF_HHMM
 from backtesting_service.service import load_bars
 from tradingai_shared.domain import Timeframe
 
@@ -74,31 +70,55 @@ logger = logging.getLogger("live_trading")
 
 STATE_ID = "engine"
 
-# Six additions taken from the Intraday Stocks tournament leaderboard. All are same-day
-# categories (momentum, scalping, mean reversion) with max_hold_days = 0, which is what
-# INTRADAY/MIS requires — a swing pick here would be force-closed at 15:15 and never trade
-# the edge it was selected for.
-EXTRA_STRATEGY_NAMES = [
-    "ANTI Gap-Go 0.30%",
-    "ANTI ORB 0.25% Scalp",
-    "ANTI Gap-Go 0.50%",
-    "ANTI Bollinger Snap-Back 2.25sd",
-    "ANTI ORB 0.15% Scalp",
-    "ANTI ORB 0.35% Scalp",
-]
+# ── the strategy: Selected ORB 15-min, copied from the tournament ─────────────────
+#
+# THE OWNER'S DECISION (10 Nov 2026): this desk trades only the Intraday Stocks tournament's
+# Selected ORB 15-min, the one candidate with a pre-registered expectation, a positive two-year
+# replay and a positive forward record (the others lose over two years after costs). It trades
+# it the way the tournament does on paper: same signal, same side, same stop, same session
+# square-off. Real positions are COPIED from the tournament's paper positions, so the two
+# cannot drift apart.
+#
+# SIZE: Angel charges about Rs 51 a round trip on a Rs 10,000 position (0.51%) but about Rs 67
+# on Rs 50,000 (0.13%), so small positions lose to charges alone. One position at a time, about
+# Rs 50,000 of notional on Angel's intraday (MIS) leverage, never more than MIS_LEVERAGE x the
+# cash Angel reports.
 
-# This desk owns its selection rather than importing the paper desk's, so adding here does
-# not change what Live Intraday trades. The original eight are kept in front, untouched.
-_EXTRAS = [ls for ls in resolve_names(EXTRA_STRATEGY_NAMES)
-           if ls.strategy_id not in {p.strategy_id for p in _PAPER_SHORTLIST}]
-SELECTED = list(_PAPER_SHORTLIST) + _EXTRAS
+
+@dataclass(frozen=True)
+class CopyStrategy:
+    strategy_id: str
+    name: str
+    category: str
+    is_anti: bool = False
+
+
+COPY_SOURCE = "iv2_orb_sel15"
+SELECTED = [CopyStrategy(COPY_SOURCE, "Selected ORB 15-min (top-5 expected move)", "momentum")]
 SELECTED_BY_ID = {ls.strategy_id: ls for ls in SELECTED}
-DESK_CEILING = PER_STRATEGY_ALLOCATION * max(len(SELECTED), 1)  # ₹80k across the 8 names
+COPY_NOTIONAL = float(os.getenv("LIVE_TRADING_COPY_NOTIONAL", "50000"))     # one position, ~Rs 50k notional
+MIS_LEVERAGE = float(os.getenv("LIVE_TRADING_MIS_LEVERAGE", "4.5"))        # Angel gives up to 5x on MIS
+MAX_OPEN_POSITIONS = 1                                                       # one real position at a time
+COPY_WINDOW_S = float(os.getenv("LIVE_TRADING_COPY_WINDOW_S", "180"))       # copy a paper entry only this fresh
+COPY_MAX_DRIFT_R = 0.5      # skip when the price has run more than half the stop distance since the paper fill
+COPY_TICK_S = float(os.getenv("LIVE_TRADING_COPY_TICK_S", "10"))            # the fast loop's cadence
+COPY_LOOP_ON = os.getenv("LIVE_TRADING_COPY_LOOP", "on").lower() != "off"   # off: only the 3-minute tick copies
+COPY_START_DELAY_S = 45.0                                                    # let the app finish starting
+COPY_SESSION = ("09:15", "15:25")                                            # IST, the fast loop's hours
+PER_STRATEGY_ALLOCATION = COPY_NOTIONAL
+POSITION_NOTIONAL = COPY_NOTIONAL
+DESK_CEILING = COPY_NOTIONAL * MAX_OPEN_POSITIONS
 MAX_CONSECUTIVE_REJECTS = 3        # auto-disarm after this many failed real orders in a row
 PRODUCT_TYPE = "INTRADAY"          # MIS: intraday shorts allowed, everything squares off EOD
 DAILY_LOSS_BREAKER_PCT = 0.03      # same 3% desk breaker as the paper desk
-INITIAL_CAPITAL = PER_STRATEGY_ALLOCATION * max(len(SELECTED), 1)
+INITIAL_CAPITAL = DESK_CEILING     # the desk's notional ceiling, not money held (the real account is reported apart)
 
+# THE ARMING GATE IS OVERRIDDEN FOR THIS STRATEGY by the owner's explicit decision of 10 Nov 2026:
+# it may place real orders without a CONFIRMED forward verdict. The override is per strategy and
+# written here, so the gate still stands for anything added later, and the page shows it.
+OWNER_OVERRIDE = {
+    COPY_SOURCE: "the owner's decision of 10 Nov 2026 (real orders without a CONFIRMED forward verdict)",
+}
 
 class LiveTradingError(Exception):
     def __init__(self, detail: str):
@@ -152,6 +172,8 @@ async def get_state() -> dict:
 # None of the fourteen strategies below is registered, so this desk cannot be armed today.
 # That is the intended outcome. A strategy reaches real money by running as a paper
 # strategy, passing the walk-forward gate, being registered, and confirming forward.
+# (Until 10 Nov 2026: the owner then overrode the gate for the one strategy this desk now
+# trades, by name, in OWNER_OVERRIDE. Everything else still needs its verdict.)
 #
 # The verdict is re-checked on EVERY scan, not only when arming: a CONFIRMED strategy can
 # later FAIL its forward test, and the desk must stop ordering it on the cycle that happens.
@@ -192,7 +214,8 @@ async def _validated_ids() -> set[str]:
     if not ARMING_GATE:
         return set(SELECTED_BY_ID)
     vs = await _verdicts(list(SELECTED_BY_ID))
-    return {sid for sid, v in vs.items() if _verdict_of(v) == "CONFIRMED"}
+    allowed = {sid for sid, v in vs.items() if _verdict_of(v) == "CONFIRMED"}
+    return allowed | {sid for sid in OWNER_OVERRIDE if sid in SELECTED_BY_ID}
 
 
 async def arming_check() -> dict:
@@ -208,11 +231,14 @@ async def arming_check() -> dict:
     rows = []
     for ls in SELECTED:
         status = _verdict_of(verdicts.get(ls.strategy_id))
+        override = OWNER_OVERRIDE.get(ls.strategy_id)
+        plain = _VERDICT_TEXT.get(status, status.lower())
         rows.append({
             "strategy_id": ls.strategy_id, "name": ls.name,
             "enabled": enabled.get(ls.strategy_id, True),
-            "verdict": status, "validated": status == "CONFIRMED",
-            "reason": _VERDICT_TEXT.get(status, status.lower()),
+            "verdict": status, "validated": status == "CONFIRMED" or bool(override), "override": override,
+            "reason": (f"gate overridden by {override}; its own forward test: {plain}"
+                       if override and status != "CONFIRMED" else plain),
         })
     verdict_blockers: list[str] = []
     ledger_blockers: list[str] = []
@@ -252,6 +278,9 @@ async def arming_check() -> dict:
         warnings.append(
             f"{needs_note} past real trade(s) carry estimated prices or charges until Angel's "
             "contract notes are imported (see scripts/live_trading_contract_notes.py).")
+    for r in rows:
+        if r.get("override") and r["verdict"] != "CONFIRMED" and r["enabled"]:
+            warnings.insert(0, f"The forward-test gate is OVERRIDDEN for {r['name']}: {r['override']}.")
     if not ARMING_GATE:
         warnings.insert(0, "The arming gate is DISABLED on the server "
                            "(LIVE_TRADING_ARMING_GATE=off): verdicts are not being enforced.")
@@ -264,6 +293,7 @@ async def arming_check() -> dict:
                                 [f"(would block) {b}" for b in verdict_blockers]),
         "strategies": rows,
         "validated_enabled": sum(1 for r in on if r["validated"]),
+        "overridden_enabled": sum(1 for r in on if r.get("override") and r["verdict"] != "CONFIRMED"),
         "enabled": len(on),
     }
 
@@ -396,19 +426,23 @@ async def _realized_pnl(strategy_id: str) -> float:
 
 
 async def _available_cash(strategy_id: str) -> float:
-    """The tightest of three real limits: this strategy's own slice, and what the ACCOUNT
-    can still fund across every strategy.
+    """The tighter of two real limits, in NOTIONAL rupees: this strategy's own one-position
+    ceiling, and what the ACCOUNT's cash can fund on MIS at MIS_LEVERAGE.
 
     The account limit has to be desk-wide. Checking each strategy against Angel's balance
     separately let eleven idle strategies each treat the same rupees as theirs; fired in the
     same cycle they would have ordered several times the cash on hand, been rejected on
     margin, and auto-disarmed the desk for a shortfall that was our arithmetic rather than
     the broker's."""
-    slice_left = PER_STRATEGY_ALLOCATION + await _realized_pnl(strategy_id) - await _deployed_capital(strategy_id)
+    # Notional room (10 Nov 2026): the strategy's one-position ceiling minus what is open, and what
+    # Angel's cash can fund on MIS at MIS_LEVERAGE; positions opened after the balance was read count
+    # at their margin.
+    slice_left = PER_STRATEGY_ALLOCATION - await _deployed_capital(strategy_id)
     bal = await account_balance()
     if not bal["ok"]:
         return 0.0            # cannot confirm the money exists, so do not spend it
-    desk_room = bal["available"] - await _desk_unseen_notional(bal.get("fetched_at"))
+    unseen = await _desk_unseen_notional(bal.get("fetched_at"))
+    desk_room = (bal["available"] - unseen / MIS_LEVERAGE) * MIS_LEVERAGE
     return max(0.0, min(slice_left, desk_room))
 
 
@@ -601,7 +635,7 @@ async def _place_angel_order(inst: dict, side: str, qty: int) -> str | None:
 
 
 async def _open_position(ls, symbol: str, inst: dict, signal, ltp_source: str,
-                         fill_price: float | None = None) -> bool:
+                         fill_price: float | None = None, parent: dict | None = None) -> bool:
     """Place one REAL order. Sized on the live quote, never on the signal's bar price.
 
     The paper twin sized on `signal.entry`, a daily bar's price that does not move
@@ -653,12 +687,15 @@ async def _open_position(ls, symbol: str, inst: dict, signal, ltp_source: str,
         "signal_price": round(signal.entry, 2),
         "entry_fill_price": None, "exit_fill_price": None, "entry_slippage": None,
         "capital_deployed": round(ref * qty, 2),
-        "target": round(signal.target, 2), "stoploss": round(signal.stoploss, 2),
+        "target": round(signal.target, 2) if signal.target is not None else None,
+        "stoploss": round(signal.stoploss, 2),
         "ltp": round(ref, 2), "ltp_source": ltp_source,
         "unrealized_pnl": 0.0, "pnl_pct": 0.0, "realized_pnl": None,
         "exit_price": None, "exit_reason": None, "status": "OPEN",
         "confidence": round(signal.confidence, 2), "rationale": signal.rationale,
         "product_type": PRODUCT_TYPE, "mode": "real",
+        "parent_id": (parent or {}).get("position_id"), "copied_from": "tournament" if parent else None,
+        "parent_entry_price": (parent or {}).get("entry_price"), "parent_opened_at": (parent or {}).get("opened_at"),
         "entry_order_id": order_id, "exit_order_id": None,
         # entry_price is the reference/signal price; the true fill price comes from Angel and
         # is not reconciled into this ledger in v1 (matches the app's existing LiveExecutor).
@@ -699,88 +736,110 @@ async def scan_cycle(dhan: DhanClient | None) -> dict:
         return {"opened": 0, "scanned_symbols": 0, "notes": [
             "DISARMED by the arming gate — no enabled strategy holds a CONFIRMED forward verdict."]}
 
-    scored = await _scored_daily_symbols()
-    if not scored:
-        return {"opened": 0, "scanned_symbols": 0, "notes": ["No scored symbols — backfill daily bars first."]}
-    scored = scored[:MAX_SYMBOLS_PER_SCAN]
-    symbols = [s for s, *_ in scored]
-    equities = {d["symbol"]: d async for d in instruments_collection.find(
-        {"asset_class": "EQUITY", "symbol": {"$in": symbols}}
-    )}
-    quotes, quote_source = await _equity_quote_map(dhan, list(equities.values()))
-    enabled = await _enabled_map()
+    async with _entry_lock:
+        return await _copy_entries(dhan, validated, enabled_now)
 
+
+_entry_lock = asyncio.Lock()
+_copy_waiting: dict[str, str] = {}      # tournament position id -> why it is still waiting (this process)
+
+
+def copy_check(parent: dict, ltp: float | None, open_positions: int,
+               now_utc: datetime) -> tuple[str | None, bool]:
+    """(why not, final) for copying a tournament position now; (None, True) means copy it.
+
+    A FINAL reason is recorded once and the position is never looked at again. A passing one
+    (no quote yet, a real position already open, the price has run) is retried on the next
+    tick for as long as the paper entry is younger than COPY_WINDOW_S."""
+    entry, stop = float(parent.get("entry_price") or 0.0), float(parent.get("stoploss") or 0.0)
+    if entry <= 0 or stop <= 0 or entry == stop or parent.get("side") not in ("BUY", "SELL"):
+        return "the paper position has no usable side, entry or stop", True
+    opened = parent.get("opened_at")
+    if not isinstance(opened, datetime):
+        return "the paper position has no opening time", True
+    if opened.tzinfo is None:
+        opened = opened.replace(tzinfo=timezone.utc)
+    if (now_utc - opened).total_seconds() > COPY_WINDOW_S:
+        return f"the paper entry is more than {COPY_WINDOW_S:.0f} s old", True
+    if open_positions >= MAX_OPEN_POSITIONS:
+        return "one real position at a time, and one is open", False
+    if not ltp:
+        return "no live quote", False
+    sign = 1 if parent["side"] == "BUY" else -1
+    if sign * (ltp - stop) <= 0:
+        return "the price is already beyond the stop", True
+    if abs(ltp - entry) > COPY_MAX_DRIFT_R * abs(entry - stop):
+        return (f"the price has moved more than {COPY_MAX_DRIFT_R:g} of the stop distance "
+                "since the paper fill"), False
+    return None, True
+
+
+async def _copy_entries(dhan: DhanClient | None, validated: set, enabled: dict) -> dict:
+    """Copy the tournament's new Selected ORB 15-min paper positions into REAL orders."""
+    if datetime.now(IST).strftime("%H:%M") >= ENTRY_CUTOFF_HHMM:
+        return {"opened": 0, "scanned_symbols": 0, "notes": [
+            f"Past the {ENTRY_CUTOFF_HHMM} IST entry cutoff — no new entries; open positions still managed."]}
+    ls = SELECTED_BY_ID[COPY_SOURCE]
+    if ls.strategy_id not in validated or not enabled.get(ls.strategy_id, True):
+        return {"opened": 0, "scanned_symbols": 0, "notes": [f"{ls.name} is disabled for real trading."]}
+    since = _now() - timedelta(seconds=COPY_WINDOW_S + 4 * COPY_TICK_S)   # a waiting one gets its final word
+    parents = [p async for p in intraday_lab_positions_collection.find(
+        {"engine": "v2", "strategy_id": COPY_SOURCE, "status": "OPEN",
+         "opened_on": _today_ist().isoformat(), "opened_at": {"$gte": since}}).sort("opened_at", 1)]
     notes: list[str] = []
-    if not quotes:
-        notes.append("No live equity quotes this cycle — only daily-bar swing signals can fire.")
-    intraday_entries_closed = datetime.now(IST).strftime("%H:%M") >= ENTRY_CUTOFF_HHMM
-    if intraday_entries_closed:
-        notes.append(f"Past the {ENTRY_CUTOFF_HHMM} IST entry cutoff — no new entries; open positions still managed.")
-
     opened = 0
-    # ONE REAL ENTRY PER (strategy, symbol) PER BAR. A swing strategy reads DAILY bars,
-    # which do not change during the session, so without this the same unchanged signal
-    # is re-offered on every tick — on the paper twin that turned one SBIN setup into 183
-    # round trips. Here each repeat would be a REAL order at the broker.
-    bar_state = await live_trading_state_collection.find_one({"_id": "entry_bars"}) or {}
-    last_entry_bar: dict = bar_state.get("last", {})
-    fresh_bars: dict[str, str] = {}
-
-    for symbol, score, reasons, atr14, bars in scored:
-        inst = equities.get(symbol)
-        if inst is None or atr14 <= 0 or len(bars) < 2:
+    for par in parents:
+        claim = f"copy|{par['position_id']}"
+        if await live_trading_state_collection.find_one({"_id": claim}, {"_id": 1}):
+            continue                                    # decided before: never ordered twice
+        symbol = par["symbol"]
+        inst = await instruments_collection.find_one({"asset_class": "EQUITY", "symbol": symbol})
+        ltp, ltp_source = None, "none"
+        if inst:
+            quotes, sources = await _equity_quote_map(dhan, [inst])
+            key = (inst["exchange_segment"], str(inst["security_id"]))
+            q = quotes.get(key)
+            if q:
+                ltp = float(q.get("last_price") or q.get("ltp") or 0.0) or None
+                ltp_source = sources.get(key, "quote")
+        n_open = await live_trading_positions_collection.count_documents({"status": "OPEN"})
+        if inst is None:
+            why, final = "no instrument record for the symbol", True
+        else:
+            why, final = copy_check(par, ltp, n_open, _now())
+        if why and not final:
+            _copy_waiting[par["position_id"]] = why
+            notes.append(f"Waiting to copy {par.get('side')} {symbol}: {why}.")
             continue
-        key = (inst["exchange_segment"], str(inst["security_id"]))
-        quote = quotes.get(key)
-        ltp_source = quote_source.get(key, "last_bar_close")
-        ctx = {"bars": bars, "atr14": atr14, "quote": quote, "prev_bar": bars[-2]}
-        bar_ts = str(getattr(bars[-1], "ts", None) or (
-            bars[-1].get("ts") if isinstance(bars[-1], dict) else ""))
-        # The quote dict's price key is `last_price` — see angel_equity_feed, which maps
-        # Angel's own "ltp" onto it, and the Dhan path returns the same shape. Reading
-        # "ltp" here would silently find nothing and stop the desk opening ANY position,
-        # so `last_price` is read first and "ltp" kept only as a defensive fallback.
-        fill_price = None
-        if quote:
-            fill_price = float(quote.get("last_price") or quote.get("ltp") or 0.0) or None
-        for ls in SELECTED:
-            if not enabled.get(ls.strategy_id, True):
-                continue  # this strategy is disabled for real trading
-            if ls.strategy_id not in validated:
-                continue  # no CONFIRMED forward verdict: never a real order
-            if intraday_entries_closed:
-                continue
-            if quote is None:
-                continue  # a real MARKET order needs a live quote to size and to be fillable
-            guard = f"{ls.strategy_id}:{symbol}"
-            if bar_ts and last_entry_bar.get(guard) == bar_ts:
-                continue  # already acted on this bar — never re-order it on the next tick
-            signal = _live_signal(ls, symbol, ctx)
-            if signal is None:
-                continue
-            # re-check the gate right before each order — arm/kill can flip mid-cycle
-            live = await get_state()
-            if not live["armed"] or live["kill_switch"]:
-                notes.append("Desk was disarmed / kill-switched mid-scan — stopped placing new orders.")
-                if fresh_bars:
-                    await live_trading_state_collection.update_one(
-                        {"_id": "entry_bars"},
-                        {"$set": {f"last.{k}": v for k, v in fresh_bars.items()}}, upsert=True)
-                return {"opened": opened, "scanned_symbols": len(scored), "notes": notes}
-            # Burn the bar BEFORE ordering. If the order throws after the broker has
-            # accepted it, the retry must not place a second one.
-            if bar_ts:
-                fresh_bars[guard] = bar_ts
-                await live_trading_state_collection.update_one(
-                    {"_id": "entry_bars"}, {"$set": {f"last.{guard}": bar_ts}}, upsert=True)
-            if await _open_position(ls, symbol, inst, signal, ltp_source, fill_price):
-                opened += 1
-    if fresh_bars:
-        await live_trading_state_collection.update_one(
-            {"_id": "entry_bars"},
-            {"$set": {f"last.{k}": v for k, v in fresh_bars.items()}}, upsert=True)
-    return {"opened": opened, "scanned_symbols": len(scored), "notes": notes}
-
+        if why and par["position_id"] in _copy_waiting:
+            why = f"{why} (last wait: {_copy_waiting[par['position_id']]})"
+        _copy_waiting.pop(par["position_id"], None)
+        # Claim BEFORE ordering: a retry, the other loop or a restart must never order this twice.
+        res = await live_trading_state_collection.update_one(
+            {"_id": claim}, {"$setOnInsert": {"at": _now(), "symbol": symbol, "side": par.get("side"),
+                                             "parent_opened_at": par.get("opened_at"),
+                                             "decision": why or "ordering", "ltp": ltp}}, upsert=True)
+        if res.upserted_id is None:
+            continue
+        if why:
+            notes.append(f"Not copied: {par.get('side')} {symbol}: {why}.")
+            continue
+        live = await get_state()
+        if not live["armed"] or live["kill_switch"]:
+            await live_trading_state_collection.update_one({"_id": claim}, {"$set": {"decision": "desk disarmed"}})
+            notes.append("Desk was disarmed / kill-switched mid-scan — stopped placing new orders.")
+            break
+        signal = SimpleNamespace(
+            side=par["side"], entry=float(par["entry_price"]), target=None, stoploss=float(par["stoploss"]),
+            confidence=float(par.get("confidence") or 0.0),
+            rationale=f"copy of tournament position {par['position_id']}: {par.get('rationale') or ''}"[:400])
+        ok = await _open_position(ls, symbol, inst, signal, ltp_source, ltp, parent=par)
+        await live_trading_state_collection.update_one({"_id": claim}, {"$set": {
+            "decision": "opened" if ok else "not opened (size, cash, ceiling or order refused)"}})
+        if ok:
+            opened += 1
+            notes.append(f"REAL entry copied: {par['side']} {symbol} (tournament position {par['position_id']}).")
+    return {"opened": opened, "scanned_symbols": len(parents), "notes": notes}
 
 # ── manage (always runs, even disarmed — open real positions must be exited) ─────
 
@@ -815,6 +874,39 @@ async def _close_real(pos: dict, ltp: float, reason: str) -> bool:
     logger.warning("[live_trading] REAL EXIT %s %s x%s @~%.2f (%s, net %.2f after %.2f charges, order %s)",
                    exit_side, pos["symbol"], pos["qty"], ltp, reason, realized, money["fees"], oid)
     return True
+
+
+async def _confirm_entry(pos: dict) -> str:
+    """What Angel did with a position's ENTRY order, asked before its first exit when no fill
+    has been seen yet: 'filled' (recorded on the position), 'void' (Angel rejected or cancelled
+    it: the position is voided and no order is sent) or 'unknown' (still pending, or the order
+    book is unreadable: no exit this tick, the next one asks again). An exit for an entry that
+    never filled would open a brand-new real position."""
+    try:
+        orders = await angel_client.order_book()
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("[live_trading] order book unavailable before an exit: %s", exc)
+        return "unknown"
+    oid = str(pos.get("entry_order_id") or "")
+    o = next((o for o in (orders or []) if oid and str(o.get("orderid") or "") == oid), None)
+    st = str((o or {}).get("status") or (o or {}).get("orderstatus") or "").lower()
+    if st == "complete":
+        await live_trading_positions_collection.update_one(
+            {"_id": pos["_id"]}, {"$set": {"entry_confirmed": True, "updated_at": _now()}})
+        return "filled"
+    if st in ("rejected", "cancelled", "canceled"):
+        await live_trading_positions_collection.update_one({"_id": pos["_id"]}, {"$set": {
+            "status": "VOID", "exit_reason": "entry_rejected", "realized_pnl": 0.0,
+            "gross_pnl": 0.0, "fees": 0.0, "unrealized_pnl": 0.0,
+            "reconcile_status": "void", "reconciled_at": _now(),
+            "reconcile_note": f"Angel {st} the entry order: {str((o or {}).get('text') or '')[:120]}",
+            "closed_at": _now(), "closed_on": _today_ist().isoformat(), "updated_at": _now()}})
+        logger.error("[live_trading] entry order %s for %s was %s by Angel: position voided, no exit sent",
+                     oid, pos.get("symbol"), st)
+        return "void"
+    logger.warning("[live_trading] entry order %s for %s is '%s' at Angel: exit held until it is seen filled",
+                   oid, pos.get("symbol"), st or "not in the order book")
+    return "unknown"
 
 
 # REAL MONEY. Every close decided below sends an opposite-side market order. Two concurrent
@@ -1068,9 +1160,18 @@ async def _manage_cycle(dhan: DhanClient | None) -> int:
 
     now_ist = datetime.now(IST)
     today_iso = _today_ist().isoformat()
+    # Copied positions follow their tournament position: once the paper position has closed (its
+    # stop on minute bars, or its square-off), the real one is closed too.
+    parent_ids = [p["parent_id"] for p in open_positions if p.get("parent_id")]
+    parent_closed: dict[str, str] = {}
+    if parent_ids:
+        async for par in intraday_lab_positions_collection.find(
+                {"position_id": {"$in": parent_ids}, "status": {"$ne": "OPEN"}}, {"position_id": 1, "exit_reason": 1}):
+            parent_closed[par["position_id"]] = par.get("exit_reason") or "closed"
 
     updated = 0
     touched: set[str] = set()
+    broker_checked = False
     for symbol, positions in by_symbol.items():
         inst = equities.get(symbol)
         ltp, ltp_source = None, None
@@ -1145,19 +1246,45 @@ async def _manage_cycle(dhan: DhanClient | None) -> int:
             }})
             updated += 1
 
-            hit_target = ltp >= pos["target"] if sign > 0 else ltp <= pos["target"]
-            hit_stop = ltp <= pos["stoploss"] if sign > 0 else ltp >= pos["stoploss"]
+            # A daily bar's close is not a live price: never take a stop or target on it.
+            live_px = ltp_source != "last_bar_close"
+            target = pos.get("target")
+            hit_target = live_px and target is not None and (ltp >= target if sign > 0 else ltp <= target)
+            hit_stop = live_px and (ltp <= pos["stoploss"] if sign > 0 else ltp >= pos["stoploss"])
             # INTRADAY product: every position squares off same day. The time is per SYMBOL:
             # Angel auto-squares MIS at 15:10 in closing-auction stocks, so exiting at 15:15
             # (the old rule) would send an exit for a position the broker had already closed —
             # which opens a new opposite position instead of closing anything.
             is_eod = session.squareoff_due(symbol, now_ist)
             reason = "target" if hit_target else "stoploss" if hit_stop else "eod" if is_eod else None
+            if reason is None and pos.get("parent_id") in parent_closed:
+                reason = f"tournament closed ({parent_closed[pos['parent_id']]})"
             if reason and _broker_squaring_off(symbol, now_ist):
                 # Angel is squaring MIS off itself now. An exit sent into that window races
                 # the broker's own and can land after it — as a NEW position. Leave it to the
                 # broker; `reconcile_broker_closes` books it at the broker's fill.
                 continue
+            if reason and pos.get("entry_fill_price") is None and not pos.get("entry_confirmed"):
+                verdict = await _confirm_entry(pos)
+                if verdict == "void":
+                    touched.add(pos["strategy_id"])
+                if verdict != "filled":
+                    continue                    # no exit for an entry nobody has seen fill
+            if reason and not broker_checked:
+                # Ask Angel before the first exit order of this pass. The fast copy loop can reach
+                # an exit within seconds of an entry, before the 30-second broker check has seen
+                # it: an entry Angel rejected, or a position Angel already squared off, would turn
+                # this "exit" into a brand-new real position.
+                broker_checked = True
+                try:
+                    await reconcile_broker_closes(force=True)
+                except Exception:  # noqa: BLE001 - an unreadable book must not block a real exit
+                    logger.exception("[live_trading] broker check before an exit failed")
+            if reason:
+                fresh = await live_trading_positions_collection.find_one(
+                    {"_id": pos["_id"]}, {"status": 1, "reconcile_status": 1})
+                if not fresh or fresh.get("status") != "OPEN" or fresh.get("reconcile_status") == "mismatch":
+                    continue                    # the broker check settled it: no order
             if reason and await _close_real(pos, ltp, reason):
                 touched.add(pos["strategy_id"])
 
@@ -1319,6 +1446,8 @@ async def summary() -> dict:
         "open_positions": open_count,
         "closed_positions": closed_count,
         "strategy_count": len(SELECTED),
+        "copy_source": COPY_SOURCE, "copy_notional": COPY_NOTIONAL, "mis_leverage": MIS_LEVERAGE,
+        "max_open_positions": MAX_OPEN_POSITIONS, "gate_override": OWNER_OVERRIDE,
         # The REAL account. `equity` above is only the desk's notional allocation + P&L;
         # on a real-money desk what matters is the money Angel actually holds.
         "angel": await angel_account(),
@@ -1357,7 +1486,9 @@ async def leaderboard() -> list[dict]:
             "allocated_capital": round(PER_STRATEGY_ALLOCATION + net_pnl, 2),
             "enabled": enabled.get(ls.strategy_id, True),
             "verdict": _verdict_of(verdicts.get(ls.strategy_id)),
-            "validated": _verdict_of(verdicts.get(ls.strategy_id)) == "CONFIRMED",
+            "validated": (_verdict_of(verdicts.get(ls.strategy_id)) == "CONFIRMED"
+                          or ls.strategy_id in OWNER_OVERRIDE),
+            "override": OWNER_OVERRIDE.get(ls.strategy_id),
         })
     rows.sort(key=lambda r: r["net_pnl"], reverse=True)
     return rows
@@ -1370,7 +1501,7 @@ async def open_positions() -> list[dict]:
             "position_id": p.get("position_id"), "symbol": p["symbol"], "strategy_name": p.get("strategy_name"),
             "is_anti": p.get("is_anti", False), "side": p["side"], "qty": p["qty"],
             "entry_price": p["entry_price"], "ltp": p.get("ltp"), "ltp_source": p.get("ltp_source"),
-            "target": p["target"], "stoploss": p["stoploss"],
+            "target": p.get("target"), "stoploss": p["stoploss"], "parent_id": p.get("parent_id"),
             "unrealized_pnl": p.get("unrealized_pnl") or 0.0, "pnl_pct": p.get("pnl_pct") or 0.0,
             "entry_order_id": p.get("entry_order_id"),
         })
@@ -1513,6 +1644,31 @@ async def run_cycle(dhan: DhanClient | None) -> dict:
     )
     return {"opened": scan_result["opened"], "managed": managed, "fills": fills,
             "scanned_symbols": scan_result["scanned_symbols"], "notes": scan_result["notes"]}
+
+
+async def copy_loop() -> None:
+    """The fast loop (10 Nov 2026): every COPY_TICK_S seconds in the session, exits first (broker
+    first, the stop on live prices, the square-off, the tournament's close), then new entries while
+    ARMED. The shared 3-minute tick keeps running too; `_manage_lock`, `_entry_lock` and the claim
+    per tournament position keep the two from ever acting twice. Started from main.py; obeys the
+    Main Control switch of this desk."""
+    from app.services import market_calendar
+    from app.services.desk_switches import is_on
+    await asyncio.sleep(COPY_START_DELAY_S)
+    while True:
+        try:
+            now = datetime.now(IST)
+            hhmm = now.strftime("%H:%M")
+            if (market_calendar.is_trading_day(now) and COPY_SESSION[0] <= hhmm <= COPY_SESSION[1]
+                    and await is_on("live_trading")):
+                if await live_trading_positions_collection.count_documents({"status": "OPEN"}):
+                    await manage_cycle(None)
+                state = await get_state()
+                if state["armed"] and not state["kill_switch"] and hhmm < ENTRY_CUTOFF_HHMM:
+                    await scan_cycle(None)
+        except Exception:  # noqa: BLE001 - the loop must survive any one bad tick
+            logger.exception("[live_trading] copy loop tick failed")
+        await asyncio.sleep(COPY_TICK_S)
 
 
 # ── history ────────────────────────────────────────────────────────────────────

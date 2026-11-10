@@ -36,6 +36,10 @@ const signed = (v: number | null | undefined) =>
 const pct = (v: number | null | undefined) =>
   v === null || v === undefined ? "-" : `${v >= 0 ? "+" : ""}${v.toFixed(2)}%`;
 
+// Since 10 Nov 2026 the desk copies one tournament strategy; these fields come with it.
+type CopyDesk = { copy_notional?: number; mis_leverage?: number; max_open_positions?: number };
+type Overridable = { override?: string | null };
+
 export default function LiveTradingPage() {
   const [summary, setSummary] = useState<LiveTradingSummary | null>(null);
   const [board, setBoard] = useState<LiveTradingScore[]>([]);
@@ -107,12 +111,13 @@ export default function LiveTradingPage() {
       return;
     }
     if (!armed) {
-      const n = arming?.enabled ?? summary.strategy_count;
+      const desk = summary as LiveTradingSummary & CopyDesk;
       const ok = window.confirm(
-        "ARM LIVE TRADING?\n\nThis places REAL orders with real money on your Angel One account as " +
-          `${n} enabled strateg${n === 1 ? "y fires" : "ies fire"} during market hours (up to ` +
-          `${inr(summary.per_strategy_allocation)} each, ${inr(summary.desk_ceiling)} across the desk). ` +
-          "You can disarm or hit the kill switch at any time.\n\nArm the desk now?",
+        "ARM LIVE TRADING?\n\nThis places REAL orders with real money on your Angel One account: every " +
+          "new Selected ORB 15-min position the Intraday Stocks tournament opens is copied within seconds, " +
+          `one position at a time, about ${inr(desk.copy_notional ?? summary.position_notional)} each on ` +
+          `Angel's intraday (MIS) leverage, and closed at the same stop, when the tournament closes it, or ` +
+          "at the session square-off. You can disarm or hit the kill switch at any time.\n\nArm the desk now?",
       );
       if (!ok) return;
     }
@@ -184,7 +189,7 @@ export default function LiveTradingPage() {
         refreshing={isRefreshing}
         crumb="Live Trading"
         title="Live Trading"
-        subtitle={`REAL-MONEY desk: routes real orders to your Angel One account when ARMED — the Live Intraday shortlist plus six tournament picks, ${summary?.strategy_count ?? 14} strategies in all, each up to ${inr(summary?.per_strategy_allocation)} (${inr(summary?.desk_ceiling)} desk ceiling, server-enforced). Every order is INTRADAY (MIS) and squares off the same day. It can only be armed once every enabled strategy has passed its forward paper test.`}
+        subtitle={`REAL-MONEY desk: when ARMED, copies the Intraday Stocks tournament's Selected ORB 15-min positions into real Angel One orders within seconds — one position at a time, about ${inr((summary as (LiveTradingSummary & CopyDesk) | null)?.copy_notional ?? summary?.position_notional)} each on intraday (MIS) leverage, closed at the same stop, when the tournament closes it, or at the session square-off. Every order is INTRADAY (MIS). The forward-test gate is overridden for this strategy by your decision of 10 Nov 2026.`}
       />
 
       {error && <ErrorBanner message={error} />}
@@ -234,7 +239,12 @@ export default function LiveTradingPage() {
           <div className="gate-title">
             {arming.allowed ? "Arming allowed" : "Why this desk cannot be armed"}
             <span className="gate-count">
-              {arming.validated_enabled} of {arming.enabled} enabled strategies have passed their forward test
+              {(() => {
+                const ov = (arming as LiveTradingArming & { overridden_enabled?: number }).overridden_enabled ?? 0;
+                return ov > 0
+                  ? `${arming.validated_enabled} of ${arming.enabled} enabled may trade, ${ov} by your override of the forward-test gate`
+                  : `${arming.validated_enabled} of ${arming.enabled} enabled strategies have passed their forward test`;
+              })()}
             </span>
           </div>
           {arming.blockers.length > 0 && (
@@ -251,7 +261,8 @@ export default function LiveTradingPage() {
             A strategy reaches real money by running as a paper strategy in the Intraday Stocks
             tournament, passing the two-year walk-forward gate, and then confirming its
             pre-registered expectation over at least 40 forward paper trades. Disable a strategy
-            below to arm without it.
+            below to arm without it. Selected ORB 15-min trades without that confirmation: you
+            overrode the gate for it on 10 Nov 2026.
           </p>
         </div>
       )}
@@ -460,9 +471,12 @@ export default function LiveTradingPage() {
                   <td>{inr(s.allocated_capital)}</td>
                   <td>
                     <span className={`verdict v-${(s.verdict || "NOT_REGISTERED").toLowerCase()}`}
-                          title={s.validated ? "Confirmed by its pre-registered forward test — may trade real money"
-                                             : "Not confirmed by a forward test — cannot trade real money"}>
+                          title={(s as LiveTradingScore & Overridable).override && s.verdict !== "CONFIRMED"
+                            ? `Not confirmed by a forward test — trades real money by ${(s as LiveTradingScore & Overridable).override}`
+                            : s.validated ? "Confirmed by its pre-registered forward test — may trade real money"
+                                          : "Not confirmed by a forward test — cannot trade real money"}>
                       {(s.verdict || "NOT_REGISTERED").replace("_", " ").toLowerCase()}
+                      {(s as LiveTradingScore & Overridable).override && s.verdict !== "CONFIRMED" ? " · overridden" : ""}
                     </span>
                   </td>
                   <td>
@@ -514,7 +528,11 @@ export default function LiveTradingPage() {
                     <td>{p.qty}</td>
                     <td>{inr(p.entry_price)}</td>
                     <td>{inr(p.ltp)}</td>
-                    <td className="gain">{inr(p.target)}</td>
+                    <td className="gain">
+                      {p.target === null || p.target === undefined
+                        ? <span className="muted" title="No fixed target: the real position closes when the tournament's paper position closes, at the stop, or at the session square-off">tournament</span>
+                        : inr(p.target)}
+                    </td>
                     <td className="loss">{inr(p.stoploss)}</td>
                     <td className={p.unrealized_pnl >= 0 ? "gain" : "loss"}>{signed(p.unrealized_pnl)} <span className="muted">({pct(p.pnl_pct)})</span></td>
                     <td className="muted oid">{p.entry_order_id || "-"}</td>
