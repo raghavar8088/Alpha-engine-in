@@ -51,7 +51,14 @@ DESKS: dict[str, dict] = {
         "label": "Live Intraday",
         "books": {"80k": "Rs80,000", "30k": "Rs30,000", "10k": "Rs10,000",
                   "2L": "Rs2,00,000", "10L": "Rs10,00,000",
-                  "top2L": "Top 10 Rs2,00,000", "top10L": "Top 10 Rs10,00,000"},
+                  "top2L": "Top 10 Rs2,00,000", "top10L": "Top 10 Rs10,00,000",
+                  # A Grade Strategies (2026-11-11): one strategy, Rs 10 lakh, compounding
+                  "ag_gap_go": "A Grade Gap and Go Rs10,00,000",
+                  "ag_orb_sel15": "A Grade Selected ORB 15 Rs10,00,000",
+                  "ag_rsi_momentum_15m": "A Grade RSI Momentum 15m Rs10,00,000",
+                  "ag_donchian_1h": "A Grade Donchian 1h Rs10,00,000",
+                  "ag_pdh_pdl_15m": "A Grade Prior-Day High/Low 15m Rs10,00,000",
+                  "ag_supertrend_45m": "A Grade Supertrend 45m Rs10,00,000"},
         "collections": ["live_intraday_positions", "live_intraday_trades", "live_intraday_scores", "live_intraday_equity"],
     },
 }

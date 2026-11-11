@@ -115,7 +115,8 @@ def _closed(p: dict) -> bool:
 def plan_book(*, capital: float, realized: float, deployed: float, open_rows: list[dict],
               parents: list[dict], decided: set[str], breaker_tripped: bool,
               entries: bool, max_open: int | None = None, net_fn=None,
-              source_tag: str | None = None, closed_rows: list[dict] | None = None) -> dict:
+              source_tag: str | None = None, closed_rows: list[dict] | None = None,
+              compound: bool = False) -> dict:
     """Replay one book against the tournament, in time order. Pure - no I/O.
 
     open_rows:   the book's OPEN positions from ANY source (they hold cash, slots, symbols).
@@ -138,7 +139,12 @@ def plan_book(*, capital: float, realized: float, deployed: float, open_rows: li
     the same rules: `max_open` is that desk's slot count, `net_fn(row, parent)` its fee
     schedule - delivery when a copy was held overnight, which an intraday book never is - and
     `source_tag` the tag ITS copies carry ("desk"; matching on this module's "tournament"
-    meant no Patterns copy ever closed). Left as None, all three are this module's own."""
+    meant no Patterns copy ever closed). Left as None, all three are this module's own.
+
+    COMPOUND (the A Grade books, 2026-11-11): each entry's cap is the book's realised equity at that
+    instant / slots, not capital / slots - profit is reinvested in the book (and a loss shrinks it).
+    Realised equity is followed through the replay: closes add their net when they happen, and a
+    rewound row's profit counts only from its own close time."""
     slots = MAX_OPEN if max_open is None else max_open
     tag = SOURCE_TAG if source_tag is None else source_tag
 
@@ -154,6 +160,7 @@ def plan_book(*, capital: float, realized: float, deployed: float, open_rows: li
     n_open = len(open_rows)
     by_id = {p["position_id"]: p for p in parents}
     cap = capital / max(slots, 1)
+    eq = capital + realized          # realised equity, followed through the replay (compound sizing)
 
     events: list[tuple] = []
     seq = 0
@@ -183,6 +190,7 @@ def plan_book(*, capital: float, realized: float, deployed: float, open_rows: li
             n_open += 1
             held[r["symbol"]] = held.get(r["symbol"], 0) + 1
             cash -= float(r.get("capital_deployed") or 0.0) + float(r.get("realized_pnl") or 0.0)
+            eq -= float(r.get("realized_pnl") or 0.0)
             push(ca, 0, "replay_close", r)
 
     for pid, row in mirrored_open.items():
@@ -200,12 +208,14 @@ def plan_book(*, capital: float, realized: float, deployed: float, open_rows: li
             n_open -= 1
             held[payload["symbol"]] = held.get(payload["symbol"], 1) - 1
             cash += float(payload.get("capital_deployed") or 0.0) + float(payload.get("realized_pnl") or 0.0)
+            eq += float(payload.get("realized_pnl") or 0.0)
             continue
 
         if kind in ("close_existing", "close_new"):
             row, parent = payload
             gross, net, fb = close_net(row, parent)
             cash += row["capital_deployed"] + net
+            eq += net
             n_open -= 1
             held[row["symbol"]] = held.get(row["symbol"], 1) - 1
             close = {"gross": gross, "net": net, "fb": fb}
@@ -217,7 +227,8 @@ def plan_book(*, capital: float, realized: float, deployed: float, open_rows: li
 
         p = payload                                         # kind == "open"
         price = float(p.get("entry_price") or 0.0)
-        qty = int(min(cap, max(cash, 0.0)) // price) if price > 0 else 0
+        cap_now = max(eq, 0.0) / max(slots, 1) if compound else cap
+        qty = int(min(cap_now, max(cash, 0.0)) // price) if price > 0 else 0
         if breaker_tripped:
             reason = "breaker"
         elif n_open >= slots:
@@ -225,7 +236,7 @@ def plan_book(*, capital: float, realized: float, deployed: float, open_rows: li
         elif held.get(p["symbol"], 0) > 0:
             reason = "symbol_held"
         elif qty < 1:
-            reason = "price_above_cap" if price > cap else "no_cash"
+            reason = "price_above_cap" if price > cap_now else "no_cash"
         else:
             reason = None
         if reason:
@@ -466,7 +477,8 @@ async def _sync(*, entries: bool) -> dict:
             pending_since(parents, decided, open_rows, SOURCE_TAG)) if entries else []
         plan = plan_book(capital=capital, realized=cl["realized"], deployed=op["deployed"],
                          open_rows=open_rows, parents=parents, decided=decided,
-                         breaker_tripped=breaker, entries=entries, closed_rows=closed_rows)
+                         breaker_tripped=breaker, entries=entries, closed_rows=closed_rows,
+                         compound=li.book_compounds(book))
 
         touched: dict[str, dict[str, int]] = {}
         for c in plan["closes"]:
@@ -540,8 +552,7 @@ async def leaderboard_rows(book: str, capital: float) -> list[dict]:
     roster = li.book_roster(book)
     # A roster book lists its roster only, each with where it stood when it was picked - the
     # record it earns here, beside the record that got it picked, IS the experiment.
-    picked = {sid: (rank, score, trades, net) for sid, rank, score, trades, net in li.TOP10_PICKS} \
-        if roster else {}
+    picked = li.book_picks(book) if roster else {}
     rows = []
     for spec in v2.CATALOG:
         if roster is not None and spec.strategy_id not in roster:

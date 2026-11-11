@@ -9,6 +9,7 @@ import ErrorBanner from "../../components/ErrorBanner";
 import V2Validation from "./V2Validation";
 import { AlarmBanner, EdgeReportPanel } from "./IntradayOps";
 import ResetBook from "./ResetBook";
+import AGradeStrategies from "./AGradeStrategies";
 import GatedBooks from "../../components/GatedBooks";
 import { RankNote, RankTd, RankTh, boardFromRows, rankDays, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import LineChart from "../../components/charts/LineChart";
@@ -55,7 +56,7 @@ import {
 // The live books are TABS rather than a dropdown because they are separate
 // accounts, not a filter: switching replaces every number on the page.
 type IntradayTab = "tournament" | "patterns" | "pb50k" | "pb2L" | "pb10L" | "pbTop2L" | "pbTop10L" | "80k" | "30k" | "10k" | "2L" | "10L"
-  | "top2L" | "top10L";
+  | "top2L" | "top10L" | "agrade";
 // Families as the desk names them, so a filter maps 1:1 onto the catalog.
 const PAT_FAMILIES: { key: string; label: string }[] = [
   { key: "chart_pattern", label: "Chart patterns" },
@@ -239,6 +240,7 @@ function PnlRow({
  *  are registered server-side alongside the tournament and the Live Intraday books. */
 const HISTORY_SCOPE: Record<IntradayTab, { deskKey: string; scope?: string; label: string }> = {
   tournament: { deskKey: "intraday-lab", label: "Tournament" },
+  agrade: { deskKey: "live-intraday", label: "A Grade Strategies" },
   patterns: { deskKey: "pattern", label: "Pattern desk" },
   pb50k: { deskKey: "pattern-books", scope: "50k", label: "Paper Trade · ₹50k" },
   pb2L: { deskKey: "pattern-books", scope: "2L", label: "Paper Trade · ₹2 lakh" },
@@ -383,11 +385,11 @@ export default function IntradayStocksPage() {
   // Only the three book tabs name a book; tournament and patterns are their own
   // views, so both must fall back rather than leak a non-book value downstream.
   const liveBook: LiveBookKey =
-    tab === "tournament" || tab === "patterns" || isPatternBookTab(tab)
+    tab === "tournament" || tab === "patterns" || tab === "agrade" || isPatternBookTab(tab)
       ? "80k"
       : tab;
   const isLive =
-    tab !== "tournament" && tab !== "patterns" && !isPatternBookTab(tab);
+    tab !== "tournament" && tab !== "patterns" && tab !== "agrade" && !isPatternBookTab(tab);
   const bookCapital = LIVE_BOOKS.find((b) => b.key === liveBook)?.capital ?? 80000;
 
   // Pattern paper books (₹50k / ₹2L) — the shortlist at a real account's size.
@@ -597,6 +599,9 @@ export default function IntradayStocksPage() {
         <Link href="/intraday-stocks/ai-approved" className="tab">
           AI Approved
         </Link>
+        <button className={tab === "agrade" ? "tab active" : "tab"} onClick={() => setTab("agrade")}>
+          A Grade Strategies · 6
+        </button>
         <button className={tab === "tournament" ? "tab active" : "tab"} onClick={() => setTab("tournament")}>
           Tournament · {tournamentCount} strategies
         </button>
@@ -624,6 +629,8 @@ export default function IntradayStocksPage() {
           </button>
         ))}
       </div>
+
+      {tab === "agrade" && <AGradeStrategies />}
 
       {tab === "tournament" && (
       <DataGate ready={!!status} error={error} what={"the tournament"} onRetry={() => once("tournament", load)} lastOkAt={lastOkAt}>
@@ -1522,11 +1529,14 @@ export default function IntradayStocksPage() {
           "intraday-lab", so all seven tabs showed the tournament's history — including the
           pattern desk and the four paper books, which have their own capital and their own
           trades and were never the thing on screen. */}
+      {/* A Grade is six accounts; each strategy's own history is on its card. */}
+      {tab !== "agrade" && (
       <DeskHistory
         deskKey={HISTORY_SCOPE[tab].deskKey}
         scope={HISTORY_SCOPE[tab].scope}
         title={`History — ${HISTORY_SCOPE[tab].label}`}
       />
+      )}
 
       <style jsx>{`
         .page { display: flex; flex-direction: column; gap: 16px; }

@@ -102,6 +102,29 @@ BOOK_CAPITAL: dict[str, float] = {
     "top2L": float(os.getenv("LIVE_INTRADAY_CAPITAL_TOP2L", "200000")),
     "top10L": float(os.getenv("LIVE_INTRADAY_CAPITAL_TOP10L", "1000000")),
 }
+# A GRADE STRATEGIES (2026-11-11). The owner picked six tournament strategies off the paper books'
+# boards (their screenshots of 11 Nov 2026: five from the Rs 10 lakh Live Intraday book, Supertrend
+# Flip 45 min from the Top-10 Rs 10 lakh book) and asked for each to trade its OWN Rs 10 lakh paper
+# account: one strategy's money is never used by another, and an account's realised profit is
+# reinvested in that strategy alone - each position is sized on the account's realised equity at
+# the moment of entry (live_intraday_mirror.plan_book(compound=True)), so Rs 50k of profit makes
+# every later position a tenth bigger. Losses shrink it the same way. Every other rule is the
+# books': copy the tournament's own fills, five slots, whole shares, one position per stock, no
+# leverage, Angel costs on the book's quantity, the 3% daily breaker. FROZEN: a changed roster or
+# rule is a new book, never an edit of these.
+# (book, strategy_id, the board it was picked from, rank, score, trades, net P&L there at the pick)
+A_GRADE_PICKED_AT = "2026-11-11"
+A_GRADE: tuple[tuple[str, str, str, int, float, int, float], ...] = (
+    ("ag_gap_go", "iv2_gap_go", "10L", 1, 63.6, 25, 19346.0),                    # Gap and Go
+    ("ag_orb_sel15", "iv2_orb_sel15", "10L", 2, 58.9, 23, 34975.0),              # Selected ORB 15-min
+    ("ag_rsi_momentum_15m", "iv2_rsi_momentum_15m", "10L", 3, 58.0, 7, 6643.0),  # RSI Momentum 60/40 · 15 min
+    ("ag_donchian_1h", "iv2_donchian_1h", "10L", 4, 57.6, 5, 12087.0),           # Donchian 20 Breakout · 1 hour
+    ("ag_pdh_pdl_15m", "iv2_pdh_pdl_15m", "10L", 5, 54.1, 3, 11228.0),           # Prior-Day High/Low Break · 15 min
+    ("ag_supertrend_45m", "iv2_supertrend_45m", "top10L", 1, 64.9, 25, 8883.0),  # Supertrend Flip · 45 min
+)
+A_GRADE_CAPITAL = float(os.getenv("LIVE_INTRADAY_CAPITAL_AGRADE", "1000000"))
+A_GRADE_BOOKS: tuple[str, ...] = tuple(b for b, *_ in A_GRADE)
+BOOK_CAPITAL.update({b: A_GRADE_CAPITAL for b in A_GRADE_BOOKS})
 BOOKS = list(BOOK_CAPITAL)
 
 # TOP-10 BOOKS. The owner asked (2026-10-26) for Rs 2 lakh and Rs 10 lakh paper accounts on
@@ -130,10 +153,27 @@ TOP10_PICKS: tuple[tuple[str, int, float, int, float], ...] = (
 TOP10_ROSTER: tuple[str, ...] = tuple(p[0] for p in TOP10_PICKS)
 # Which books trade only a roster; a book not listed copies all 54.
 BOOK_ROSTER: dict[str, tuple[str, ...]] = {"top2L": TOP10_ROSTER, "top10L": TOP10_ROSTER}
+BOOK_ROSTER.update({b: (sid,) for b, sid, *_ in A_GRADE})      # one strategy per A Grade book
+# Books whose positions are sized on their own realised equity (profit reinvested): the A Grade ones.
+COMPOUND_BOOKS: frozenset[str] = frozenset(A_GRADE_BOOKS)
 
 
 def book_roster(book: str) -> tuple[str, ...] | None:
     return BOOK_ROSTER.get(book)
+
+
+def book_compounds(book: str) -> bool:
+    return book in COMPOUND_BOOKS
+
+
+def book_picks(book: str) -> dict:
+    """{strategy_id: (rank, score, trades, net)}: where a roster book's strategies stood when picked."""
+    for b, sid, _board, rank, score, trades, net in A_GRADE:
+        if b == book:
+            return {sid: (rank, score, trades, net)}
+    if book in ("top2L", "top10L"):
+        return {sid: (rank, score, trades, net) for sid, rank, score, trades, net in TOP10_PICKS}
+    return {}
 DEFAULT_BOOK = "80k"
 STATE_ID = "engine"  # legacy id, kept for the 80k book so old state keeps resolving
 
@@ -613,7 +653,8 @@ async def summary(book: str = DEFAULT_BOOK) -> dict:
         from app.services import live_intraday_mirror as mirror
         # One shared account: no per-strategy slice exists, so the figure that used to be the
         # slice is the per-POSITION cap instead.
-        alloc = mirror.position_cap(capital)
+        # A compounding book's cap moves with its realised equity (A Grade); the others' is fixed.
+        alloc = mirror.position_cap(capital + realized if book_compounds(book) else capital)
         started = await mirror.started_at(book)
         roster = book_roster(book)
         copy = {"source": "tournament", "max_open_positions": mirror.MAX_OPEN,
@@ -624,7 +665,8 @@ async def summary(book: str = DEFAULT_BOOK) -> dict:
                     tzinfo=timezone.utc)).isoformat() if started else None}
         if roster:
             copy["roster"] = list(roster)
-            copy["roster_picked_at"] = TOP10_PICKED_AT
+            copy["roster_picked_at"] = A_GRADE_PICKED_AT if book in A_GRADE_BOOKS else TOP10_PICKED_AT
+        copy["compounding"] = book_compounds(book)
     return {
         **copy,
         "book": book, "books": BOOKS,
