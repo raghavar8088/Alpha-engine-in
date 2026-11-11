@@ -9,11 +9,12 @@ import GlassPanel from "../../components/GlassPanel";
 import { CH20, CH20_BLOCKED, CH20_CHANNELS, CH20_DUPLICATES, CH20_META, CH20_SKIPPED, type Ch20Book, type Ch20Strategy } from "./channels20Data";
 import { istTime, num, pct, rupees, tone } from "./format";
 import type { Account, Summary } from "./PaperDesk";
+import { SEG_PLACE, type SegFocus, type SegId } from "./Segments";
 import type { StrategyRankBoard } from "../../lib/api";
 import { RankNote, rankOnClient, rankTitle, sortByRank } from "../../components/StrategyRank";
 import { ACCOUNT_RANK_NOTE, PREMIUM_RANK_FACTORS, accountRankRow } from "./rank";
 
-type BookRow = { mkt: string; market: string; state: string; reason: string; trades: number; closed: number; open: number; pnl: number;
+type BookRow = { mkt: string; market: string; segment?: string; state: string; reason: string; trades: number; closed: number; open: number; pnl: number;
   unrealised: number; signal?: { last_t: number | null; today: boolean | null; taken: boolean | null; why: string | null; n_today: number | null } | null };
 type Feed = { state: string; reason: string; source?: string; instrument?: string; last_t?: number | null };
 type Status = { books?: Record<string, BookRow[]>; feeds?: Record<string, Feed>; yc2_start?: string };
@@ -29,6 +30,10 @@ const SECTIONS = [
     note: "Gold on Delta Exchange India's XAUTUSD perpetual at its 0.001 contract size, following the gold market's week (closed Friday 17:00 to Sunday 17:00 New York), as tested." },
 ] as const;
 type SectionId = (typeof SECTIONS)[number]["id"];
+/** The desk's name for this study: its accounts' `source`, which the market tabs filter on. */
+const STUDY = "youtube_channels20";
+const isSeg = (s?: string): s is SegId => !!s && s in SEG_PLACE;
+type OpenFn = (f: Omit<SegFocus, "at">) => void;
 
 const STATE: Record<string, { label: string; cls: string }> = {
   "in trade": { label: "Running — in a trade", cls: "c20-run" }, running: { label: "Running", cls: "c20-run" },
@@ -72,8 +77,8 @@ function BacktestTable({ books }: { books: Ch20Book[] }) {
   );
 }
 
-function Card({ s, account, rows, feeds, started, startAt, board }: { s: Ch20Strategy; account?: Account; rows?: BookRow[]; feeds: Record<string, Feed>;
-  board?: StrategyRankBoard;
+function Card({ s, account, rows, feeds, started, startAt, board, onOpen }: { s: Ch20Strategy; account?: Account; rows?: BookRow[]; feeds: Record<string, Feed>;
+  board?: StrategyRankBoard; onOpen?: OpenFn;
   started: boolean; startAt: string | null }) {
   const st = strategyState(rows, started);
   const verdicts = Array.from(new Set(s.books.map((b) => b.verdict)));
@@ -127,10 +132,18 @@ function Card({ s, account, rows, feeds, started, startAt, board }: { s: Ch20Str
         <div><span className="ps-stat-label">Activation</span> {startAt ? istTime(Date.parse(startAt) / 1000) + " IST" : "—"} · simulated orders only, entries on fresh signals after it</div>
         {(rows ?? []).map((r) => {
           const f = feeds[r.mkt === "XAUTUSD" ? "XAUUSD" : r.mkt.startsWith("NSE") && r.mkt !== "NSED" ? "NSE" : r.mkt];
+          const seg = isSeg(r.segment) ? r.segment : null;
           return (
             <div key={r.mkt} className="c20-row">
               <span className={`c20-state ${(STATE[r.state] ?? { cls: "c20-idle" }).cls}`}>{(STATE[r.state] ?? { label: r.state }).label}</span>
-              <span><b>{r.market}</b> — {r.reason}{f ? <span className="c20-dim"> · data: {f.state}{f.source ? ` (${f.source})` : ""}</span> : null}</span>
+              <span>
+                <b>{r.market}</b> — {r.reason}{f ? <span className="c20-dim"> · data: {f.state}{f.source ? ` (${f.source})` : ""}</span> : null}
+                {onOpen && seg ? (
+                  <button className="c20-open" onClick={() => onOpen({ seg, study: STUDY, book: `${s.id}|${r.mkt}` })}>
+                    {`Open in ${SEG_PLACE[seg].label} →`}
+                  </button>
+                ) : null}
+              </span>
             </div>
           );
         })}
@@ -145,7 +158,7 @@ function Card({ s, account, rows, feeds, started, startAt, board }: { s: Ch20Str
   );
 }
 
-export default function Channels20({ summary, error }: { summary: Summary | null; error: string | null }) {
+export default function Channels20({ summary, error, onOpen }: { summary: Summary | null; error: string | null; onOpen?: OpenFn }) {
   const [sec, setSec] = useState<SectionId>("india_intraday");
   const [q, setQ] = useState("");
   const status = (summary?.status ?? {}) as Status;
@@ -162,6 +175,17 @@ export default function Channels20({ summary, error }: { summary: Summary | null
     board, (s) => s.id);
   const blocked = CH20_BLOCKED.filter((b) => S.has(b.section));
   const m = CH20_META;
+  // Where this section's strategies paper trade: every book is a row of one market tab (Indian Market has three
+  // sub-tabs). A button's count is what that tab shows with this study's filter on: all 20-channel rows there.
+  const inSec = CH20.filter((s) => S.has(s.section));
+  const onDesk = inSec.filter((s) => byId[s.id]).length;
+  const here = new Set<SegId>();
+  inSec.forEach((s) => (status.books?.[s.id] ?? []).forEach((b) => { if (isSeg(b.segment)) here.add(b.segment); }));
+  const rowsIn: Partial<Record<SegId, number>> = {};
+  (summary?.accounts ?? []).forEach((a) => {
+    if (a.source === STUDY) (status.books?.[a.id] ?? []).forEach((b) => { if (isSeg(b.segment)) rowsIn[b.segment] = (rowsIn[b.segment] ?? 0) + 1; });
+  });
+  const places = (Object.keys(SEG_PLACE) as SegId[]).filter((g) => here.has(g));
   return (
     <>
       <GlassPanel title="20 more YouTube channels — research to paper trading" note={`${m.coded} strategies coded · ${m.blocked} blocked · paper only`}>
@@ -186,10 +210,22 @@ export default function Channels20({ summary, error }: { summary: Summary | null
         <input className="c20-q" placeholder="Search id, name, channel" value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
       <p className="c20-note">{S.note}</p>
+      {summary && (
+        <div className="c20-where">
+          <span className="ps-stat-label">Paper trading</span>
+          <span>
+            {`${onDesk === inSec.length ? `All ${inSec.length}` : `${onDesk} of these ${inSec.length}`} paper trade their own ₹10,00,000 account on real market data${places.length ? ". Each market's rows are in its tab:" : "; no book has reached the desk yet."}`}
+          </span>
+          {places.map((g) => (
+            <button key={g} className="ps-chip" onClick={() => onOpen?.({ seg: g, study: STUDY })}>{`${SEG_PLACE[g].label} · ${rowsIn[g] ?? 0} →`}</button>
+          ))}
+        </div>
+      )}
       <RankNote board={board} />
       <div className="ps-cards c20-cards">
         {list.map((s) => (
-          <Card key={s.id} s={s} account={byId[s.id]} rows={status.books?.[s.id]} feeds={status.feeds ?? {}} started={started} startAt={startAt} board={board} />
+          <Card key={s.id} s={s} account={byId[s.id]} rows={status.books?.[s.id]} feeds={status.feeds ?? {}} started={started} startAt={startAt} board={board}
+            onOpen={onOpen} />
         ))}
       </div>
       {blocked.length > 0 && (
@@ -250,6 +286,11 @@ export default function Channels20({ summary, error }: { summary: Summary | null
         .c20-bt th, .c20-bt td { padding: 4px 6px; border-bottom: 1px solid rgba(148, 163, 184, 0.15); text-align: left; vertical-align: top; }
         .c20-paper { margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(148, 163, 184, 0.2); font-size: 12px; line-height: 1.6; display: grid; gap: 4px; }
         .c20-row { display: flex; gap: 8px; align-items: flex-start; }
+        .c20-where { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 12px; font-size: 12.5px; line-height: 1.5;
+                     color: var(--text-muted); }
+        .c20-where .ps-chip { font-weight: 700; }
+        .c20-open { margin-left: 8px; padding: 0; border: 0; background: none; color: var(--purple); font: inherit; font-size: 11.5px;
+                    font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
         .c20-blocked { font-size: 12.5px; line-height: 1.6; padding-left: 18px; }
         .c20-blocked a { margin-right: 4px; }
       `}</style>

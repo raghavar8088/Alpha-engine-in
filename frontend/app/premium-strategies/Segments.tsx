@@ -8,7 +8,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import GlassPanel from "../../components/GlassPanel";
 import { apiFetch } from "../../lib/api";
 import { ago, day, inr, istTime, price, tone } from "./format";
-import type { Account, Summary } from "./PaperDesk";
+import { SOURCE_LABEL, type Account, type Summary } from "./PaperDesk";
 import { RankNote, RankTd, RankTh, rankOnClient, sortByRank } from "../../components/StrategyRank";
 import { BOOK_RANK_NOTE, PREMIUM_RANK_FACTORS, bookRankRow } from "./rank";
 
@@ -40,7 +40,23 @@ type AcctTrade = {
 };
 
 export type MarketTab = "indian" | "crypto" | "gold" | "global";
-type SegId = "in_options" | "in_equity" | "in_equity_daily" | "crypto" | "gold" | "global";
+export type SegId = "in_options" | "in_equity" | "in_equity_daily" | "crypto" | "gold" | "global";
+/** Where each segment sits on the page (Indian Market has three sub-tabs), for the links from the 20-channel tab. */
+export const SEG_PLACE: Record<SegId, { tab: MarketTab; label: string }> = {
+  in_options: { tab: "indian", label: "Indian Market › Options & F&O" },
+  in_equity: { tab: "indian", label: "Indian Market › Equity intraday" },
+  in_equity_daily: { tab: "indian", label: "Indian Market › Equity daily" },
+  crypto: { tab: "crypto", label: "Crypto" },
+  gold: { tab: "gold", label: "Gold" },
+  global: { tab: "global", label: "Forex & US" },
+};
+/** Opens a market tab on one sub-tab with one study's strategies shown, and optionally one book's trades
+ *  (`acct|mkt`). `at` makes every click a fresh open. */
+export type SegFocus = { seg: SegId; study: string; book?: string; at: number };
+/** The study chips' order: the 20-channel study (its own tab) first; a study not listed here follows, by name. */
+const STUDY_ORDER = ["youtube_channels20", "youtube_channels11", "youtube_top20", "booming_bulls", "crypto_playlist", "sniper_headshot",
+  "vwap", "liquidity_sweep"];
+const studyLabel = (s: string) => (s === "youtube_channels20" ? "20 channels (new)" : SOURCE_LABEL[s] ?? s);
 
 const SEG: Record<SegId, { label: string; feeds: string[]; note: string }> = {
   in_options: {
@@ -221,12 +237,29 @@ function TradeTable({ rows, open }: { rows: SegTrade[]; open?: boolean }) {
   );
 }
 
-function SegmentView({ seg, summary, now }: { seg: SegId; summary: Summary; now: number }) {
+/** One study's share of a segment, in the shape the desk writes for the whole segment. */
+function totalsOf(rows: { b: BookRow }[], positions: SegTrade[], recent: SegTrade[]): SegTotals {
+  const t: SegTotals = { books: rows.length, trades: 0, closed: 0, wins: 0, pnl: 0, open: 0, unrealised: 0, states: {}, recent, positions };
+  rows.forEach(({ b }) => {
+    t.trades += b.trades;
+    t.closed += b.closed;
+    t.wins += b.wins;
+    t.pnl += b.pnl;
+    t.open += b.open;
+    t.unrealised += b.unrealised;
+    t.states[b.state] = (t.states[b.state] ?? 0) + 1;
+  });
+  return t;
+}
+
+function SegmentView({ seg, summary, now, study, setStudy, initialOpen }: {
+  seg: SegId; summary: Summary; now: number; study: string; setStudy: (s: string) => void; initialOpen?: string | null;
+}) {
   const status = summary.status as SegStatus;
   const def = SEG[seg];
-  const tot = status.segments?.[seg];
+  const segTot = status.segments?.[seg];
   const [filter, setFilter] = useState<"all" | "active" | "idle">("all");
-  const [openKey, setOpenKey] = useState<string | null>(null);
+  const [openKey, setOpenKey] = useState<string | null>(initialOpen ?? null);
   // The book's trades open in a panel above the table, never as an extra table row: the app's SortableTables
   // reorders every row of a tbody, which would carry a detail row away from its strategy.
   const detailRef = useRef<HTMLDivElement>(null);
@@ -248,9 +281,25 @@ function SegmentView({ seg, summary, now }: { seg: SegId; summary: Summary; now:
   const board = useMemo(() => rankOnClient(
     rows.map(({ acct, id, b }) => bookRankRow(`${id}|${b.mkt}`, b, acct, (status.books?.[id]?.length ?? 0) === 1)),
     PREMIUM_RANK_FACTORS, { desk: `premium-${seg}`, basisNote: BOOK_RANK_NOTE }), [rows, status.books, seg]);
-  const shown = sortByRank(rows.filter((r) => filter === "all" || (filter === "active" ? ACTIVE.includes(r.b.state) : !ACTIVE.includes(r.b.state))),
+  // The study filter: which study (its own tab, or a section of the Strategies tab) each strategy comes from. The board
+  // above stays the whole market's, so a filtered row keeps its Rank among every strategy here.
+  const studies = useMemo(() => {
+    const n: Record<string, number> = {};
+    rows.forEach((r) => { const s = r.acct?.source ?? "other"; n[s] = (n[s] ?? 0) + 1; });
+    return n;
+  }, [rows]);
+  const studyKeys = ["all", ...STUDY_ORDER.filter((s) => studies[s] || s === study),
+    ...Object.keys(studies).filter((s) => !STUDY_ORDER.includes(s)).sort(),
+    ...(study !== "all" && !STUDY_ORDER.includes(study) && !studies[study] ? [study] : [])];
+  const inStudy = useMemo(() => (study === "all" ? rows : rows.filter((r) => (r.acct?.source ?? "other") === study)), [rows, study]);
+  const tot = useMemo(() => {
+    if (study === "all" || !segTot) return segTot;
+    const mine = (t: SegTrade) => byId[t.acct]?.source === study;
+    return totalsOf(inStudy, (segTot.positions ?? []).filter(mine), (segTot.recent ?? []).filter(mine));
+  }, [study, segTot, inStudy, byId]);
+  const shown = sortByRank(inStudy.filter((r) => filter === "all" || (filter === "active" ? ACTIVE.includes(r.b.state) : !ACTIVE.includes(r.b.state))),
     board, (r) => `${r.id}|${r.b.mkt}`);
-  const active = rows.filter((r) => ACTIVE.includes(r.b.state)).length;
+  const active = inStudy.filter((r) => ACTIVE.includes(r.b.state)).length;
   const btcStart = status.btc_start ? Date.parse(status.btc_start) / 1000 : null;
   const shStart = status.sh_start ? Date.parse(status.sh_start) / 1000 : null;
   const paperStart = status.paper_start;
@@ -286,8 +335,17 @@ function SegmentView({ seg, summary, now }: { seg: SegId; summary: Summary; now:
         </p>
       </GlassPanel>
 
+      <div className="ps-chips sg-studies" role="group" aria-label="Study">
+        <span className="sg-chiplabel">Study</span>
+        {studyKeys.map((k) => (
+          <button key={k} className={`ps-chip${study === k ? " on" : ""}`} aria-pressed={study === k} onClick={() => setStudy(k)}>
+            {k === "all" ? `All studies · ${rows.length}` : `${studyLabel(k)} · ${studies[k] ?? 0}`}
+          </button>
+        ))}
+      </div>
+
       <div className="pd-tiles">
-        <div className="pd-tile"><span className="ps-stat-label">Strategies</span><span className="pd-tile-val">{tot?.books ?? rows.length}</span><span className="pd-tile-sub">{active} live or in a trade now</span></div>
+        <div className="pd-tile"><span className="ps-stat-label">Strategies</span><span className="pd-tile-val">{tot?.books ?? inStudy.length}</span><span className="pd-tile-sub">{active} live or in a trade now</span></div>
         <div className="pd-tile"><span className="ps-stat-label">P&amp;L, after costs</span><span className={`pd-tile-val ${tone(pnl)}`}>{inr(pnl)}</span><span className="pd-tile-sub">closed {inr((tot?.pnl ?? 0) - (tot?.unrealised ?? 0))} · open {inr(tot?.unrealised ?? 0)}</span></div>
         <div className="pd-tile"><span className="ps-stat-label">Trades closed</span><span className="pd-tile-val">{(tot?.closed ?? 0).toLocaleString("en-US")}</span><span className="pd-tile-sub">{winRate == null ? "no closed trade yet" : `${winRate.toFixed(1)}% won`}</span></div>
         <div className="pd-tile"><span className="ps-stat-label">Open positions</span><span className="pd-tile-val">{tot?.open ?? 0}</span><span className="pd-tile-sub">marked to the last bar</span></div>
@@ -298,7 +356,7 @@ function SegmentView({ seg, summary, now }: { seg: SegId; summary: Summary; now:
           <GlassPanel title={`${opened.id} ${opened.acct?.name ?? ""} · ${opened.b.market}`} note={opened.acct?.channel ?? ""}>
             <button className="ps-chip pd-close" onClick={() => setOpenKey(null)}>Close</button>
             <div className="sg-open-state"><Pill state={opened.b.state} /><span>{opened.b.reason}</span></div>
-            <BookTrades acct={opened.id} mkt={opened.b.mkt} positions={tot?.positions ?? []} />
+            <BookTrades acct={opened.id} mkt={opened.b.mkt} positions={segTot?.positions ?? []} />
           </GlassPanel>
         </div>
       )}
@@ -307,13 +365,18 @@ function SegmentView({ seg, summary, now }: { seg: SegId; summary: Summary; now:
         <div className="ps-chips">
           {(["all", "active", "idle"] as const).map((k) => (
             <button key={k} className={`ps-chip${filter === k ? " on" : ""}`} onClick={() => setFilter(k)}>
-              {k === "all" ? `All · ${rows.length}` : k === "active" ? `Live or in a trade · ${active}` : `Not trading now · ${rows.length - active}`}
+              {k === "all" ? `All · ${inStudy.length}` : k === "active" ? `Live or in a trade · ${active}` : `Not trading now · ${inStudy.length - active}`}
             </button>
           ))}
           <span className="sg-states">{states.map(([s, n]) => `${n} ${(STATE[s]?.label ?? s).toLowerCase()}`).join(" · ")}</span>
         </div>
-        {rows.length === 0 ? <p className="ps-foot">No strategy trades this market.</p> : (<>
+        {inStudy.length === 0 ? (
+          <p className="ps-foot">{study === "all" ? "No strategy trades this market." : `No strategy from ${studyLabel(study)} trades this market.`}</p>
+        ) : (<>
           <RankNote board={board} />
+          {study !== "all" && (
+            <p className="ps-foot">{`Showing ${inStudy.length === 1 ? "the one strategy" : `the ${inStudy.length} strategies`} from ${studyLabel(study)}; each Rank is its place among all ${rows.length} strategies of this market.`}</p>
+          )}
           <div className="ps-scroll">
             <table className="ps-table sg-table">
               <thead><tr><RankTh /><th>Strategy</th><th>Market</th><th>Status</th><th>Trades</th><th>Win rate</th><th>P&amp;L</th><th>Open</th></tr></thead>
@@ -328,7 +391,7 @@ function SegmentView({ seg, summary, now }: { seg: SegId; summary: Summary; now:
                         <button className="pd-name" aria-expanded={isOpen} onClick={(e) => { e.stopPropagation(); setOpenKey(isOpen ? null : key); }}>
                           <span className="pd-id">{id}</span> {acct?.name ?? ""}
                         </button>
-                        <div className="pd-sub">{acct?.channel ?? ""}</div>
+                        <div className="pd-sub">{[acct?.channel, acct ? studyLabel(acct.source) : null].filter(Boolean).join(" · ")}</div>
                       </td>
                       <td className="pd-mkts">{b.market}</td>
                       <td className="sg-status"><Pill state={b.state} /><div className="sg-why">{b.reason}</div></td>
@@ -349,17 +412,25 @@ function SegmentView({ seg, summary, now }: { seg: SegId; summary: Summary; now:
         {tot && tot.positions.length ? <TradeTable rows={tot.positions} open /> : <p className="ps-foot">No open position.</p>}
       </GlassPanel>
 
-      <GlassPanel title="Latest closed trades" note="the newest 40">
-        {tot && tot.recent.length ? <TradeTable rows={tot.recent} /> : <p className="ps-foot">No closed trade yet.</p>}
+      <GlassPanel title="Latest closed trades" note={study === "all" ? "the newest 40" : `${studyLabel(study)}, among the market's newest 40`}>
+        {tot && tot.recent.length ? <TradeTable rows={tot.recent} /> : (
+          <p className="ps-foot">{study === "all" ? "No closed trade yet." : "None of the market's newest 40 closed trades is from this study."}</p>
+        )}
         <p className="ps-foot">Today&apos;s trades are provisional until the session&apos;s bars are final; they are then sealed and never rewritten. Dollar markets are converted to rupees at the entry date&apos;s rate.</p>
       </GlassPanel>
     </div>
   );
 }
 
-export default function Segments({ market, summary, error }: { market: MarketTab; summary: Summary | null; error: string | null }) {
+export default function Segments({ market, summary, error, focus }: {
+  market: MarketTab; summary: Summary | null; error: string | null; focus?: SegFocus | null;
+}) {
   const segs = MARKET_SEGS[market];
-  const [sub, setSub] = useState<SegId>(segs[0]);
+  const [sub, setSub] = useState<SegId>(focus && segs.includes(focus.seg) ? focus.seg : segs[0]);
+  // The study filter holds across Indian Market's sub-tabs, so a study opened from its own tab stays shown.
+  const [study, setStudy] = useState<string>(focus?.study ?? "all");
+  // A book opened from a link shows its trades once, on its own sub-tab; switching sub-tabs drops it.
+  const [pendingBook, setPendingBook] = useState<string | null>(focus?.book ?? null);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 30000);
@@ -371,19 +442,22 @@ export default function Segments({ market, summary, error }: { market: MarketTab
   if (!summary) return <GlassPanel title="Paper trading"><p className="ps-foot">Loading the desk…</p></GlassPanel>;
   const status = summary.status as SegStatus;
   const at = status.segments_at;
+  const srcOf: Record<string, string> = {};
+  summary.accounts.forEach((a) => { srcOf[a.id] = a.source; });
+  // A sub-tab's count follows the study filter, so it says how many rows that sub-tab will show.
+  const countIn = (s: SegId) => (study === "all" ? status.segments?.[s]?.books ?? 0
+    : Object.entries(status.books ?? {}).reduce((n, [id, bs]) => n + (srcOf[id] === study ? bs.filter((b) => b.segment === s).length : 0), 0));
   const deskMin = at ? Math.round((now - Date.parse(at)) / 60000) : null;
   return (
     <>
       {segs.length > 1 && (
         <div className="sg-subtabs" role="tablist">
-          {segs.map((s) => {
-            const t = status.segments?.[s];
-            return (
-              <button key={s} role="tab" aria-selected={seg === s} className={`sg-subtab${seg === s ? " on" : ""}`} onClick={() => setSub(s)}>
-                {SEG[s].label}<span className="sg-count">{t?.books ?? 0}</span>
-              </button>
-            );
-          })}
+          {segs.map((s) => (
+            <button key={s} role="tab" aria-selected={seg === s} className={`sg-subtab${seg === s ? " on" : ""}`}
+              onClick={() => { setSub(s); setPendingBook(null); }}>
+              {SEG[s].label}<span className="sg-count">{countIn(s)}</span>
+            </button>
+          ))}
         </div>
       )}
       {!at ? (
@@ -399,7 +473,7 @@ export default function Segments({ market, summary, error }: { market: MarketTab
             </div>
           )}
           {error && <p className="ps-foot ps-neg">The last refresh failed ({error}); showing the previous figures.</p>}
-          <SegmentView key={seg} seg={seg} summary={summary} now={now} />
+          <SegmentView key={seg} seg={seg} summary={summary} now={now} study={study} setStudy={setStudy} initialOpen={pendingBook} />
         </>
       )}
       <style jsx global>{`
@@ -428,6 +502,8 @@ export default function Segments({ market, summary, error }: { market: MarketTab
         .sg-pill.idle { background: var(--panel); color: var(--text-muted); border: 1px solid var(--panel-border); }
         .sg-pill.bad { background: var(--loss-dim); color: var(--loss); }
         .sg-states { align-self: center; font-size: 12px; color: var(--text-faint); }
+        .sg-studies { align-items: center; }
+        .sg-chiplabel { font-size: 11px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-faint); margin-right: 2px; }
         .sg-table td { vertical-align: top; }
         .sg-table th:nth-child(2), .sg-table th:nth-child(3) { text-align: left; }
         .sg-status { text-align: left !important; white-space: normal !important; min-width: 240px; max-width: 420px; }
