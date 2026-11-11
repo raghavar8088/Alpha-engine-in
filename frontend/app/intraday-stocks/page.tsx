@@ -600,7 +600,7 @@ export default function IntradayStocksPage() {
           AI Approved
         </Link>
         <button className={tab === "agrade" ? "tab active" : "tab"} onClick={() => setTab("agrade")}>
-          A Grade Strategies · 6
+          A Grade Strategies · 7
         </button>
         <button className={tab === "tournament" ? "tab active" : "tab"} onClick={() => setTab("tournament")}>
           Tournament · {tournamentCount} strategies

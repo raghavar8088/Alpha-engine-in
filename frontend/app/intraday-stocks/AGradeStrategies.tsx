@@ -1,6 +1,7 @@
 "use client";
 
-// A Grade Strategies (2026-11-11): six tournament strategies the owner picked off the paper books' boards, each
+// A Grade Strategies (2026-11-11): seven tournament strategies the owner picked off the paper books' boards and the
+// Five-Strategy Desk, each
 // trading its OWN Rs 10 lakh paper account (live_intraday_engine.A_GRADE). One strategy's money is never used by
 // another, and each account's realised profit is reinvested in that strategy alone: every position is sized on the
 // account's realised equity / 5 at the moment of entry. The books copy the tournament's own fills (same entry and exit
@@ -17,6 +18,7 @@ const BOOKS: Book[] = [
   { book: "ag_donchian_1h", strategy: "iv2_donchian_1h", name: "Donchian 20 Breakout · 1 hour", board: "Live Intraday ₹10 lakh", rank: 4, score: 57.6, trades: 5, net: 12087 },
   { book: "ag_pdh_pdl_15m", strategy: "iv2_pdh_pdl_15m", name: "Prior-Day High/Low Break · 15 min", board: "Live Intraday ₹10 lakh", rank: 5, score: 54.1, trades: 3, net: 11228 },
   { book: "ag_supertrend_45m", strategy: "iv2_supertrend_45m", name: "Supertrend Flip · 45 min", board: "Top 10 ₹10 lakh", rank: 1, score: 64.9, trades: 25, net: 8883 },
+  { book: "ag_supertrend_1h", strategy: "iv2_supertrend_1h", name: "Supertrend Flip · 1 hour", board: "Five-Strategy Desk", rank: 1, score: 100.0, trades: 123, net: 53746.91 },
 ];
 const POLL_MS = 60000;
 
@@ -98,7 +100,7 @@ export default function AGradeStrategies() {
   return (
     <div className="ag">
       <div className="ag-banner">
-        <strong>A GRADE STRATEGIES · 6 ACCOUNTS · ₹10 LAKH EACH · PAPER ONLY.</strong>{" "}
+        <strong>A GRADE STRATEGIES · 7 ACCOUNTS · ₹10 LAKH EACH · PAPER ONLY.</strong>{" "}
         Each strategy trades <strong>its own ₹10 lakh account</strong> — one strategy&apos;s money is never used by
         another — and <strong>its profit is reinvested in that strategy alone</strong>: every new position is sized on
         the account&apos;s realised equity ÷ 5 at the moment of entry, so ₹50,000 of profit makes each later position
@@ -108,8 +110,10 @@ export default function AGradeStrategies() {
         daily-loss breaker. They started when they were added{started ? ` (${ist(started)} IST)` : ""}; nothing earlier is
         back-filled. Simulated fills, not broker orders.
         <div className="ag-note">
-          Picked from the paper books&apos; boards on 11 Nov 2026, on 3 to 25 trades each. A few weeks at the top of a
-          54-strategy board is where luck collects; the record these accounts earn from here is the real test.
+          Picked on 11 Nov 2026: six from the paper books&apos; boards on 3 to 25 trades each, and Supertrend Flip ·
+          1 hour from the Five-Strategy Desk on 123 trades (that desk fills the same rule at its own live quotes; this
+          account copies the tournament&apos;s fills, like the other six). A few weeks at the top of a board is where
+          luck collects; the record these accounts earn from here is the real test.
         </div>
       </div>
 

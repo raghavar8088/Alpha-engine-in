@@ -113,6 +113,9 @@ BOOK_CAPITAL: dict[str, float] = {
 # leverage, Angel costs on the book's quantity, the 3% daily breaker. FROZEN: a changed roster or
 # rule is a new book, never an edit of these.
 # (book, strategy_id, the board it was picked from, rank, score, trades, net P&L there at the pick)
+# A seventh the same evening: Supertrend Flip 1 hour, #1 on the Five-Strategy Desk (intraday_focus: the same v2
+# rule, but its own entries at live quotes and its own fills; this book copies the TOURNAMENT's fills of that rule,
+# like the other six, so its record will not match that desk's exactly).
 A_GRADE_PICKED_AT = "2026-11-11"
 A_GRADE: tuple[tuple[str, str, str, int, float, int, float], ...] = (
     ("ag_gap_go", "iv2_gap_go", "10L", 1, 63.6, 25, 19346.0),                    # Gap and Go
@@ -121,6 +124,7 @@ A_GRADE: tuple[tuple[str, str, str, int, float, int, float], ...] = (
     ("ag_donchian_1h", "iv2_donchian_1h", "10L", 4, 57.6, 5, 12087.0),           # Donchian 20 Breakout · 1 hour
     ("ag_pdh_pdl_15m", "iv2_pdh_pdl_15m", "10L", 5, 54.1, 3, 11228.0),           # Prior-Day High/Low Break · 15 min
     ("ag_supertrend_45m", "iv2_supertrend_45m", "top10L", 1, 64.9, 25, 8883.0),  # Supertrend Flip · 45 min
+    ("ag_supertrend_1h", "iv2_supertrend_1h", "focus-five", 1, 100.0, 123, 53746.91),  # Supertrend Flip · 1 hour
 )
 A_GRADE_CAPITAL = float(os.getenv("LIVE_INTRADAY_CAPITAL_AGRADE", "1000000"))
 A_GRADE_BOOKS: tuple[str, ...] = tuple(b for b, *_ in A_GRADE)
