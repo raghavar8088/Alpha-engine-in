@@ -71,6 +71,87 @@ export function rankDays(board: StrategyRankBoard | null, id: string): number | 
   return typeof e?.days === "number" ? e.days : null;
 }
 
+/** A board for a desk whose server sends no rank, computed here with the backend's own maths
+ *  (services/strategy_rank.py rank_rows + compact): each factor an average-rank percentile among the strategies with
+ *  closed trades (ties share a rank); a factor nobody has is dropped and the rest re-weighted to 100; a figure one
+ *  strategy lacks counts as the middle (50); a record under `minTrades` trades is pulled toward 50. A value may be
+ *  Infinity (a profit factor with no losing trade): it ranks best and prints as "no losing trade". */
+export type ClientRankRow = { id: string; trades: number; tiebreak?: number; values: Record<string, number | null | undefined> };
+
+function round1(x: number): number {
+  // Python's round(x, 1), which the backend uses: the exact binary value, an exact half going to the even digit
+  // (81.25 -> 81.2). JavaScript's toFixed rounds an exact half up, so the halves are handled here first.
+  const s = Math.abs(x).toFixed(60);
+  const dot = s.indexOf(".");
+  if (/^50*$/.test(s.slice(dot + 2))) {
+    const tenths = Number(s.slice(0, dot) + s[dot + 1]);
+    return ((x < 0 ? -1 : 1) * (tenths % 2 === 0 ? tenths : tenths + 1)) / 10;
+  }
+  return Number(x.toFixed(1));
+}
+
+function percentiles(values: (number | null)[], higherIsBetter: boolean): (number | null)[] {
+  const present = values
+    .map((v, i) => [v, i] as [number | null, number])
+    .filter((x): x is [number, number] => x[0] !== null)
+    .map(([v, i]) => [higherIsBetter ? v : -v, i] as [number, number])
+    .sort((a, b) => (a[0] === b[0] ? a[1] - b[1] : a[0] < b[0] ? -1 : 1));
+  const out: (number | null)[] = values.map(() => null);
+  const n = present.length;
+  if (n === 0) return out;
+  if (n === 1) {
+    out[present[0][1]] = 100;
+    return out;
+  }
+  let j = 0;
+  while (j < n) {
+    let k = j;
+    while (k + 1 < n && present[k + 1][0] === present[j][0]) k++;
+    const p = ((j + k) / 2 / (n - 1)) * 100;
+    for (let m = j; m <= k; m++) out[present[m][1]] = p;
+    j = k + 1;
+  }
+  return out;
+}
+
+export function rankOnClient(rows: ClientRankRow[], factors: RankFactorMeta[],
+                             opts: { desk: string; minTrades?: number; basisNote?: string }): StrategyRankBoard {
+  const minTrades = opts.minTrades ?? 30;
+  const value = (r: ClientRankRow, key: string): number | null => {
+    const v = r.values[key];
+    return v == null || Number.isNaN(v) ? null : v;
+  };
+  const scored = rows.filter((r) => r.trades > 0);
+  const used = factors.filter((f) => scored.some((r) => value(r, f.key) !== null));
+  const total = used.reduce((s, f) => s + f.weight, 0) || 1;
+  const pcts = used.map((f) => percentiles(scored.map((r) => value(r, f.key)), f.higher_is_better));
+  const entries = scored.map((r, i) => {
+    const raw = used.reduce((s, f, j) => s + f.weight * (pcts[j][i] ?? 50), 0) / total;
+    const trust = Math.min(1, r.trades / Math.max(minTrades, 1));
+    return { r, i, score: round1(50 + (raw - 50) * trust), shrunk: trust < 1 };
+  });
+  entries.sort((a, b) => b.score - a.score || (b.r.tiebreak ?? 0) - (a.r.tiebreak ?? 0));
+  const ranks: Record<string, StrategyRankEntry> = {};
+  entries.forEach((e, n) => {
+    ranks[e.r.id] = {
+      rank: n + 1, score: e.score, shrunk: e.shrunk, trades: e.r.trades,
+      values: used.map((f) => {
+        const v = value(e.r, f.key);
+        return v != null && Number.isFinite(v) ? v : null;
+      }),
+      pct: used.map((_, j) => {
+        const p = pcts[j][e.i];
+        return p == null ? null : round1(p);
+      }),
+    };
+  });
+  return {
+    desk: opts.desk, basis: "trades", basis_note: opts.basisNote ?? null, min_trades: minTrades,
+    strategies: rows.length, ranked: entries.length,
+    factors: used.map((f) => ({ ...f, weight: round1((f.weight / total) * 100) })), ranks,
+  };
+}
+
 /** The Tournament's board carries its rank inline on each row; same shape as a fetched one. */
 export function boardFromRows(
   rows: { strategy_id: string; trades: number; rank?: number | null; rank_score?: number | null;

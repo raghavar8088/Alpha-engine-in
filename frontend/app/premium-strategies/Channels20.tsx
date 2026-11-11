@@ -9,6 +9,9 @@ import GlassPanel from "../../components/GlassPanel";
 import { CH20, CH20_BLOCKED, CH20_CHANNELS, CH20_DUPLICATES, CH20_META, CH20_SKIPPED, type Ch20Book, type Ch20Strategy } from "./channels20Data";
 import { istTime, num, pct, rupees, tone } from "./format";
 import type { Account, Summary } from "./PaperDesk";
+import type { StrategyRankBoard } from "../../lib/api";
+import { RankNote, rankOnClient, rankTitle, sortByRank } from "../../components/StrategyRank";
+import { ACCOUNT_RANK_NOTE, PREMIUM_RANK_FACTORS, accountRankRow } from "./rank";
 
 type BookRow = { mkt: string; market: string; state: string; reason: string; trades: number; closed: number; open: number; pnl: number;
   unrealised: number; signal?: { last_t: number | null; today: boolean | null; taken: boolean | null; why: string | null; n_today: number | null } | null };
@@ -69,7 +72,8 @@ function BacktestTable({ books }: { books: Ch20Book[] }) {
   );
 }
 
-function Card({ s, account, rows, feeds, started, startAt }: { s: Ch20Strategy; account?: Account; rows?: BookRow[]; feeds: Record<string, Feed>;
+function Card({ s, account, rows, feeds, started, startAt, board }: { s: Ch20Strategy; account?: Account; rows?: BookRow[]; feeds: Record<string, Feed>;
+  board?: StrategyRankBoard;
   started: boolean; startAt: string | null }) {
   const st = strategyState(rows, started);
   const verdicts = Array.from(new Set(s.books.map((b) => b.verdict)));
@@ -81,6 +85,9 @@ function Card({ s, account, rows, feeds, started, startAt }: { s: Ch20Strategy; 
     <div className="ps-card c20-card">
       <div className="ps-card-top">
         <span className="ps-fam up">{s.id} · {s.version}</span>
+        {board && (board.ranks[s.id]
+          ? <span className="srank-cell c20-rank" title={rankTitle(board, board.ranks[s.id])} data-score={board.ranks[s.id].score.toFixed(1)}>Rank {board.ranks[s.id].rank}</span>
+          : <span className="c20-rank c20-dim" title={rankTitle(board, undefined)}>Not ranked yet</span>)}
         <span className={`c20-state ${st.cls}`}>{st.label}</span>
       </div>
       <div className="ps-card-name">{s.name}</div>
@@ -147,7 +154,12 @@ export default function Channels20({ summary, error }: { summary: Summary | null
   const started = startAt ? Date.now() >= Date.parse(startAt) : false;
   const S = SECTIONS.find((x) => x.id === sec)!;
   const ql = q.trim().toLowerCase();
-  const list = CH20.filter((s) => S.has(s.section) && (!ql || `${s.id} ${s.name} ${s.channel}`.toLowerCase().includes(ql)));
+  // Ranked within the section, on each strategy's paper account (rank.ts); the search only filters the cards.
+  const board = useMemo(() => rankOnClient(
+    CH20.filter((s) => S.has(s.section)).map((s) => (byId[s.id] ? accountRankRow(byId[s.id]) : { id: s.id, trades: 0, values: {} })),
+    PREMIUM_RANK_FACTORS, { desk: `premium-c20-${sec}`, basisNote: ACCOUNT_RANK_NOTE }), [S, byId, sec]);
+  const list = sortByRank(CH20.filter((s) => S.has(s.section) && (!ql || `${s.id} ${s.name} ${s.channel}`.toLowerCase().includes(ql))),
+    board, (s) => s.id);
   const blocked = CH20_BLOCKED.filter((b) => S.has(b.section));
   const m = CH20_META;
   return (
@@ -174,9 +186,10 @@ export default function Channels20({ summary, error }: { summary: Summary | null
         <input className="c20-q" placeholder="Search id, name, channel" value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
       <p className="c20-note">{S.note}</p>
+      <RankNote board={board} />
       <div className="ps-cards c20-cards">
         {list.map((s) => (
-          <Card key={s.id} s={s} account={byId[s.id]} rows={status.books?.[s.id]} feeds={status.feeds ?? {}} started={started} startAt={startAt} />
+          <Card key={s.id} s={s} account={byId[s.id]} rows={status.books?.[s.id]} feeds={status.feeds ?? {}} started={started} startAt={startAt} board={board} />
         ))}
       </div>
       {blocked.length > 0 && (
@@ -207,7 +220,9 @@ export default function Channels20({ summary, error }: { summary: Summary | null
           {CH20_DUPLICATES.map((d) => <li key={d.video}><b>{d.video}</b> ({d.channel}) — {d.what}: duplicate of {d.duplicateOf}</li>)}
         </ul>
       </details>
-      <style jsx>{`
+      {/* global: the cards are drawn by <Card>, a child component, which scoped styles never reach; every
+          selector here is c20-prefixed, so nothing outside this tab is touched. */}
+      <style jsx global>{`
         .c20-intro { font-size: 13px; line-height: 1.6; color: var(--text-muted); margin: 0; }
         .c20-err { color: #f87171; font-size: 12.5px; }
         .c20-secs { margin: 14px 0 6px; align-items: center; }

@@ -9,6 +9,8 @@ import GlassPanel from "../../components/GlassPanel";
 import { apiFetch } from "../../lib/api";
 import { ago, day, inr, istTime, price, tone } from "./format";
 import type { Account, Summary } from "./PaperDesk";
+import { RankNote, RankTd, RankTh, rankOnClient, sortByRank } from "../../components/StrategyRank";
+import { BOOK_RANK_NOTE, PREMIUM_RANK_FACTORS, bookRankRow } from "./rank";
 
 type Feed = {
   source?: string; instrument?: string; last_t?: number | null; last_price?: number | null; last_session?: string;
@@ -242,7 +244,12 @@ function SegmentView({ seg, summary, now }: { seg: SegId; summary: Summary; now:
     return out.sort((x, y) => (STATE[x.b.state]?.rank ?? 9) - (STATE[y.b.state]?.rank ?? 9) || y.b.pnl - x.b.pnl
       || x.id.localeCompare(y.id, "en", { numeric: true }));
   }, [status.books, seg, byId]);
-  const shown = rows.filter((r) => filter === "all" || (filter === "active" ? ACTIVE.includes(r.b.state) : !ACTIVE.includes(r.b.state)));
+  // The tab's own board: every strategy's book in this segment, ranked on its trades here (rank.ts).
+  const board = useMemo(() => rankOnClient(
+    rows.map(({ acct, id, b }) => bookRankRow(`${id}|${b.mkt}`, b, acct, (status.books?.[id]?.length ?? 0) === 1)),
+    PREMIUM_RANK_FACTORS, { desk: `premium-${seg}`, basisNote: BOOK_RANK_NOTE }), [rows, status.books, seg]);
+  const shown = sortByRank(rows.filter((r) => filter === "all" || (filter === "active" ? ACTIVE.includes(r.b.state) : !ACTIVE.includes(r.b.state))),
+    board, (r) => `${r.id}|${r.b.mkt}`);
   const active = rows.filter((r) => ACTIVE.includes(r.b.state)).length;
   const btcStart = status.btc_start ? Date.parse(status.btc_start) / 1000 : null;
   const shStart = status.sh_start ? Date.parse(status.sh_start) / 1000 : null;
@@ -296,7 +303,7 @@ function SegmentView({ seg, summary, now }: { seg: SegId; summary: Summary; now:
         </div>
       )}
 
-      <GlassPanel title="Strategies" note="click a row for its trades">
+      <GlassPanel title="Strategies" note="ranked · click a row for its trades">
         <div className="ps-chips">
           {(["all", "active", "idle"] as const).map((k) => (
             <button key={k} className={`ps-chip${filter === k ? " on" : ""}`} onClick={() => setFilter(k)}>
@@ -305,16 +312,18 @@ function SegmentView({ seg, summary, now }: { seg: SegId; summary: Summary; now:
           ))}
           <span className="sg-states">{states.map(([s, n]) => `${n} ${(STATE[s]?.label ?? s).toLowerCase()}`).join(" · ")}</span>
         </div>
-        {rows.length === 0 ? <p className="ps-foot">No strategy trades this market.</p> : (
+        {rows.length === 0 ? <p className="ps-foot">No strategy trades this market.</p> : (<>
+          <RankNote board={board} />
           <div className="ps-scroll">
             <table className="ps-table sg-table">
-              <thead><tr><th>Strategy</th><th>Market</th><th>Status</th><th>Trades</th><th>Win rate</th><th>P&amp;L</th><th>Open</th></tr></thead>
+              <thead><tr><RankTh /><th>Strategy</th><th>Market</th><th>Status</th><th>Trades</th><th>Win rate</th><th>P&amp;L</th><th>Open</th></tr></thead>
               <tbody>
                 {shown.map(({ acct, id, b }) => {
                   const key = `${id}|${b.mkt}`;
                   const isOpen = openKey === key;
                   return (
                     <tr key={key} className={`pd-row${isOpen ? " on" : ""}`} onClick={() => setOpenKey(isOpen ? null : key)}>
+                      <RankTd board={board} id={key} />
                       <td>
                         <button className="pd-name" aria-expanded={isOpen} onClick={(e) => { e.stopPropagation(); setOpenKey(isOpen ? null : key); }}>
                           <span className="pd-id">{id}</span> {acct?.name ?? ""}
@@ -333,7 +342,7 @@ function SegmentView({ seg, summary, now }: { seg: SegId; summary: Summary; now:
               </tbody>
             </table>
           </div>
-        )}
+        </>)}
       </GlassPanel>
 
       <GlassPanel title={`Open positions (${tot?.positions.length ?? 0})`}>

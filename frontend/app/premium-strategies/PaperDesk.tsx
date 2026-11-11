@@ -6,6 +6,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import GlassPanel from "../../components/GlassPanel";
 import { apiFetch } from "../../lib/api";
 import { ago, day, inr, istTime, pct, price, rupees, tone } from "./format";
+import { RankNote, RankTd, RankTh, rankOnClient, sortByRank } from "../../components/StrategyRank";
+import { ACCOUNT_RANK_NOTE, PREMIUM_RANK_FACTORS, accountRankRow } from "./rank";
 
 export type MarketPnl = { market: string; trades: number; pnl: number };
 export type Account = {
@@ -225,6 +227,10 @@ export default function PaperDesk({ summary, error }: { summary: Summary | null;
   }, [accounts]);
   const rows = useMemo(() => accounts.filter((a) => source === "all" || a.source === source)
     .sort((a, b) => b.return_pct - a.return_pct || a.id.localeCompare(b.id, "en", { numeric: true })), [accounts, source]);
+  // Ranked among the accounts shown (the source chip picks the board), on the desk's account figures (rank.ts).
+  const board = useMemo(() => rankOnClient(rows.map(accountRankRow), PREMIUM_RANK_FACTORS,
+    { desk: `premium-${source}`, basisNote: ACCOUNT_RANK_NOTE }), [rows, source]);
+  const ranked = useMemo(() => sortByRank(rows, board, (a) => a.id), [rows, board]);
   const start = summary?.status?.paper_start;
   const traded = accounts.filter((a) => a.closed + a.open > 0);
   const green = traded.filter((a) => a.equity > a.capital).length;
@@ -273,7 +279,7 @@ export default function PaperDesk({ summary, error }: { summary: Summary | null;
         </div>
       )}
 
-      <GlassPanel title="Every strategy's account" note="best return first · click a row for its trades · click a heading to sort">
+      <GlassPanel title="Every strategy's account" note="ranked · click a row for its trades · click a heading to sort">
         <div className="ps-chips">
           {["all", "vwap", "booming_bulls", "youtube_top20", "crypto_playlist", "sniper_headshot", "youtube_channels11", "youtube_channels20", "liquidity_sweep"].map((k) => (
             <button key={k} className={`ps-chip${source === k ? " on" : ""}`} onClick={() => setSource(k)}>
@@ -281,17 +287,19 @@ export default function PaperDesk({ summary, error }: { summary: Summary | null;
             </button>
           ))}
         </div>
+        <RankNote board={board} />
         <div className="ps-scroll">
           <table className="ps-table pd-table">
             <thead>
-              <tr><th>Strategy</th><th>Markets</th><th>Equity</th><th>P&amp;L</th><th>Return</th><th>Today</th><th>Trades</th><th>Win rate</th><th>Max drawdown</th><th>Open</th></tr>
+              <tr><RankTh /><th>Strategy</th><th>Markets</th><th>Equity</th><th>P&amp;L</th><th>Return</th><th>Today</th><th>Trades</th><th>Win rate</th><th>Max drawdown</th><th>Open</th></tr>
             </thead>
             <tbody>
-              {rows.flatMap((a) => {
+              {ranked.flatMap((a) => {
                 const pnl = a.equity - a.capital;
                 const isOpen = openId === a.id;
                 return [
                   <tr key={a.id} className={`pd-row${isOpen ? " on" : ""}`} onClick={() => setOpenId(isOpen ? null : a.id)}>
+                    <RankTd board={board} id={a.id} />
                     <td>
                       <button className="pd-name" aria-expanded={isOpen} onClick={(e) => { e.stopPropagation(); setOpenId(isOpen ? null : a.id); }}>
                         <span className="pd-id">{a.id}</span> {a.name}
