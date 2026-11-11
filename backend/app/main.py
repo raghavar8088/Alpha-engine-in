@@ -1127,7 +1127,7 @@ try:
 except Exception:  # noqa: BLE001
     logger.exception("could not mount the AI final gate")
 # Live Trading (REAL MONEY) copies the Intraday Stocks tournament's Selected ORB 15-min into Angel One orders
-# (2026-11-10, the owner's decision; up to five Rs 10,000 positions at once): a 10-second loop copies each new
+# (2026-11-10, the owner's decision; since 11 Nov up to five Rs 30,000 positions at once): a 10-second loop copies each new
 # paper entry within seconds and follows
 # its exits; it acts only while the desk is ARMED or holds a real position, and obeys Main Control.
 # app/services/live_trading_engine.py. A failure here must not stop the app.

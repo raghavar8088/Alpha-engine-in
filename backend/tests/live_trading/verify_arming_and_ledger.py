@@ -612,9 +612,9 @@ SEL = "iv2_orb_sel15"
 check("the desk trades exactly one strategy: the tournament's Selected ORB 15-min",
       [ls.strategy_id for ls in LT.SELECTED] == [SEL], [ls.strategy_id for ls in LT.SELECTED])
 check("its override is written down, dated, in the code", "10 Nov 2026" in LT.OWNER_OVERRIDE.get(SEL, ""))
-check("up to five real positions at once, about Rs 10,000 each on 5x (Rs 50,000 across the desk)",
-      LT.MAX_OPEN_POSITIONS == 5 and LT.COPY_NOTIONAL == 10000.0 and LT.MIS_LEVERAGE == 5.0
-      and LT.DESK_CEILING == 50000.0 and LT.PER_STRATEGY_ALLOCATION == 50000.0)
+check("up to five real positions at once, about Rs 30,000 each on 5x (Rs 1.5 lakh across the desk)",
+      LT.MAX_OPEN_POSITIONS == 5 and LT.COPY_NOTIONAL == 30000.0 and LT.MIS_LEVERAGE == 5.0
+      and LT.DESK_CEILING == 150000.0 and LT.PER_STRATEGY_ALLOCATION == 150000.0)
 
 fresh()
 chk = run(LT.arming_check())
@@ -730,7 +730,7 @@ rows = real_rows()
 check("an armed desk copies a fresh tournament entry: ONE real order", r["opened"] == 1 and len(a.orders) == 1, r)
 check("…same side, MIS market order", a.orders[0]["transactiontype"] == "BUY"
       and a.orders[0]["producttype"] == "INTRADAY" and a.orders[0]["ordertype"] == "MARKET")
-check("…sized to about Rs 10,000 at the live price", a.orders[0]["quantity"] == int(10000 // 1501.0),
+check("…sized to about Rs 30,000 at the live price", a.orders[0]["quantity"] == int(30000 // 1501.0),
       a.orders[0]["quantity"])
 check("…recorded with its tournament parent, the paper stop and no fixed target",
       rows and rows[0]["parent_id"] == "T1" and rows[0]["stoploss"] == 1485.0 and rows[0]["target"] is None
@@ -753,19 +753,19 @@ SIX = ["INFY", "TCS", "SBIN", "ITC", "LT", "WIPRO"]
 SIX_INST = [{**INST, "symbol": s, "security_id": str(100 + i), "angel_token": str(100 + i),
              "angel_tradingsymbol": f"{s}-EQ"} for i, s in enumerate(SIX)]
 a = copy_desk([parent(position_id=f"S{i}", symbol=s, opened_at=NOW - timedelta(seconds=30 - i))
-               for i, s in enumerate(SIX)], angel=CashAngel(cash="13397"))
+               for i, s in enumerate(SIX)], angel=CashAngel(cash="34272"))
 LT.instruments_collection = FakeCollection(SIX_INST)
 LT._equity_quote_map = lambda dhan, eqs: _async((
     {("NSE_EQ", str(100 + i)): {"last_price": 1501.0} for i in range(6)},
     {("NSE_EQ", str(100 + i)): "test" for i in range(6)}))
 run(LT.scan_cycle(None))
-check("six tournament entries at once: the first five are copied, each about Rs 10,000",
+check("six tournament entries at once (Rs 34,272 account): the first five are copied, each about Rs 30,000",
       [o["tradingsymbol"] for o in a.orders] == [f"{s}-EQ" for s in SIX[:5]]
-      and all(o["quantity"] == int(10000 // 1501.0) for o in a.orders), [(o["tradingsymbol"], o["quantity"]) for o in a.orders])
+      and all(o["quantity"] == int(30000 // 1501.0) for o in a.orders), [(o["tradingsymbol"], o["quantity"]) for o in a.orders])
 check("…the sixth waits, unclaimed, while its paper entry is fresh",
       claim("S5") is None and "S5" in LT._copy_waiting, LT._copy_waiting)
-check("…and the desk never holds more than Rs 50,000 of notional",
-      sum(p["capital_deployed"] for p in real_rows()) <= 50000.0, sum(p["capital_deployed"] for p in real_rows()))
+check("…and the desk never holds more than Rs 1.5 lakh of notional, or 5x the cash",
+      sum(p["capital_deployed"] for p in real_rows()) <= min(150000.0, 34272 * 5), sum(p["capital_deployed"] for p in real_rows()))
 next(d for d in LT.live_trading_positions_collection.docs if d["symbol"] == "TCS")["status"] = "CLOSED"
 run(LT.scan_cycle(None))
 check("…and is copied once a slot frees (still fresh)",
@@ -982,7 +982,7 @@ section("WHAT THE PAGE READS")
 a = copy_desk([parent()], positions=[copied()])
 sm = run(LT.summary())
 check("the summary names the copied strategy, the size and the override",
-      sm["copy_source"] == SEL and sm["copy_notional"] == 10000.0 and sm["max_open_positions"] == 5
+      sm["copy_source"] == SEL and sm["copy_notional"] == 30000.0 and sm["max_open_positions"] == 5
       and SEL in sm["gate_override"], {k: sm.get(k) for k in ("copy_source", "copy_notional", "gate_override")})
 op = run(LT.open_positions())
 check("open positions carry their tournament parent and no target", op[0]["parent_id"] == "T1" and op[0]["target"] is None)

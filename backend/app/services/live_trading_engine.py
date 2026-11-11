@@ -6,7 +6,7 @@ iv2_orb_sel15 position, this desk places the same-side REAL Angel One MIS market
 seconds (`copy_loop`), holds it to the same stop (the opposite edge of the 09:15-09:30 range),
 and squares it off with the session (15:05 in closing-auction stocks, 15:12 otherwise), or as
 soon as the tournament's own position closes. Up to five real positions at a time, about
-Rs 10,000 each on Angel's 5x intraday leverage (Rs 2,000 of margin each). The fourteen earlier
+Rs 30,000 each on Angel's 5x intraday leverage (Rs 6,000 of margin each). The fourteen earlier
 strategies and their record were removed at the owner's request. Angel is also the price feed; Dhan only fills quote gaps and
 never receives an order. (This needs an Angel TRADING API key.)
 
@@ -79,10 +79,10 @@ STATE_ID = "engine"
 # square-off. Real positions are COPIED from the tournament's paper positions, so the two
 # cannot drift apart.
 #
-# SIZE (the owner's choice, 10 Nov 2026): up to five positions at once, about Rs 10,000 each
-# (Rs 2,000 of margin each at 5x), never more than MIS_LEVERAGE x the cash Angel reports. Angel
-# charges about Rs 51 a round trip on Rs 10,000 (0.51%) against about Rs 67 on Rs 50,000 (0.13%);
-# the owner chose the smaller size knowing that.
+# SIZE (the owner's choice, 11 Nov 2026, with Rs 34,272 in the Angel account): up to five positions
+# at once, about Rs 30,000 each (Rs 6,000 of margin each at 5x; Rs 1.5 lakh and about Rs 30,000 of
+# margin with all five open), never more than MIS_LEVERAGE x the cash Angel reports. Angel charges
+# about Rs 58 a round trip on Rs 30,000 (0.19%).
 
 
 @dataclass(frozen=True)
@@ -96,8 +96,8 @@ class CopyStrategy:
 COPY_SOURCE = "iv2_orb_sel15"
 SELECTED = [CopyStrategy(COPY_SOURCE, "Selected ORB 15-min (top-5 expected move)", "momentum")]
 SELECTED_BY_ID = {ls.strategy_id: ls for ls in SELECTED}
-COPY_NOTIONAL = float(os.getenv("LIVE_TRADING_COPY_NOTIONAL", "10000"))     # each position, ~Rs 10k notional
-MIS_LEVERAGE = float(os.getenv("LIVE_TRADING_MIS_LEVERAGE", "5"))          # 5x on MIS: ~Rs 2,000 of margin each
+COPY_NOTIONAL = float(os.getenv("LIVE_TRADING_COPY_NOTIONAL", "30000"))     # each position, ~Rs 30k notional
+MIS_LEVERAGE = float(os.getenv("LIVE_TRADING_MIS_LEVERAGE", "5"))          # 5x on MIS: ~Rs 6,000 of margin each
 MAX_OPEN_POSITIONS = int(os.getenv("LIVE_TRADING_MAX_OPEN", "5"))            # real positions open at once
 COPY_WINDOW_S = float(os.getenv("LIVE_TRADING_COPY_WINDOW_S", "180"))       # copy a paper entry only this fresh
 COPY_MAX_DRIFT_R = 0.5      # skip when the price has run more than half the stop distance since the paper fill
