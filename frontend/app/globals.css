@@ -491,6 +491,51 @@ a:focus-visible {
 .sidebar a:focus-visible {
   outline-color: var(--chrome-active-icon);
 }
+/* "View all modules" (2026-11-12): the modules moved out of the main list, one click away. The button is a
+   nav-item, so it looks and hovers like the links around it. */
+.sidebar .more-btn {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  line-height: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.sidebar .more-btn:focus-visible {
+  outline: 2px solid var(--chrome-active-icon);
+  outline-offset: 2px;
+}
+.sidebar .more-btn .more-count {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--chrome-border);
+  color: var(--chrome-text);
+}
+.sidebar .more-btn .more-chev {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.15s ease;
+}
+.sidebar .more-btn.open .more-chev {
+  transform: rotate(180deg);
+}
+.sidebar .more-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 6px 0 0 6px;
+  padding-left: 8px;
+  border-left: 1px solid var(--chrome-border);
+}
+/* The list is indented 15px (6 margin + 1 border + 8 padding), so its active bar moves 15px further left to sit
+   at the sidebar's edge like the main list's. */
+.sidebar .more-list .nav-item.active::before {
+  left: -29px;
+}
 /* Wraps the theme toggle and the broker CTA. The sidebar is a flex column with the nav
    growing, so this stays pinned to the bottom regardless of how many modules the nav
    holds — and the list has grown a lot. */

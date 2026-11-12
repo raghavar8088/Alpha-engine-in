@@ -612,12 +612,34 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
   },
 ];
 
+// Modules moved behind "View all modules" at the end of the menu (owner, 12 Nov 2026): out of the main list,
+// one click away. Listed by link rather than flagged inside GROUPS, so the module list itself never changes;
+// a module added to GROUPS later shows in the main list unless it is added here.
+const MORE: ReadonlySet<string> = new Set([
+  "/index-intraday", "/commodity-positions", "/commodity-auto-positions", "/index-option-auto-selling",
+  "/fno-positions", "/crypto-application", "/crypto-trading",
+  "/stock-paper-trading", "/stock-paper-trading/fno", "/chart", "/momentum", "/trending-stocks",
+  "/commodity-prelive", "/portfolio", "/orders", "/positions", "/stocks-range", "/bullish-stocks", "/watchlist",
+  "/strategy-factory", "/strategies", "/zero-hero", "/backtesting", "/stock-research",
+  "/todays-playbook", "/long-horizon",
+]);
+
 export default function Sidebar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  // The hidden modules' panel: closed by default, opened by the button, and opened by itself when the page on
+  // screen is one of them, so the current page is never invisible in the menu.
+  const [moreOpen, setMoreOpen] = useState(() => MORE.has(pathname));
+  const shown = GROUPS.map((g) => ({ label: g.label, links: g.links.filter((l) => !MORE.has(l.href)) })).filter((g) => g.links.length);
+  const hidden = GROUPS.map((g) => ({ label: g.label, links: g.links.filter((l) => MORE.has(l.href)) })).filter((g) => g.links.length);
+  const hiddenCount = hidden.reduce((n, g) => n + g.links.length, 0);
 
   useEffect(() => {
     setOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (MORE.has(pathname)) setMoreOpen(true);
   }, [pathname]);
 
   return (
@@ -643,7 +665,7 @@ export default function Sidebar() {
         </div>
 
         <nav>
-          {GROUPS.map((group) => (
+          {shown.map((group) => (
             <div className="nav-group" key={group.label}>
               <div className="group-label">{group.label}</div>
               {group.links.map((link) => {
@@ -659,6 +681,49 @@ export default function Sidebar() {
               })}
             </div>
           ))}
+          {hiddenCount > 0 && (
+            <div className="nav-group more-group">
+              <button
+                type="button"
+                className={`nav-item more-btn${moreOpen ? " open" : ""}`}
+                aria-expanded={moreOpen}
+                aria-controls="sidebar-more"
+                onClick={() => setMoreOpen((v) => !v)}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="4" y="4" width="6" height="6" rx="1.5" />
+                  <rect x="14" y="4" width="6" height="6" rx="1.5" />
+                  <rect x="4" y="14" width="6" height="6" rx="1.5" />
+                  <rect x="14" y="14" width="6" height="6" rx="1.5" />
+                </svg>
+                {moreOpen ? "Hide modules" : "View all modules"}
+                <span className="more-count">{hiddenCount}</span>
+                <svg className="more-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+              {moreOpen && (
+                <div id="sidebar-more" className="more-list">
+                  {hidden.map((group) => (
+                    <div className="nav-group" key={group.label}>
+                      <div className="group-label">{group.label}</div>
+                      {group.links.map((link) => {
+                        const active = pathname === link.href;
+                        return (
+                          <Link key={link.href} href={link.href} className={`nav-item${active ? " active" : ""}`}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                              {link.icon}
+                            </svg>
+                            {link.label}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </nav>
 
         <div className="sidebar-foot">
