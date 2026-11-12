@@ -17,6 +17,7 @@ import StatusPill from "../../components/StatusPill";
 import ErrorBanner from "../../components/ErrorBanner";
 import EmptyState from "../../components/EmptyState";
 import Top10Book from "../../components/Top10Book";
+import RankBandBook, { RANK_BANDS, type RankBandKey } from "../../components/RankBandBook";
 import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   refreshing,
@@ -47,7 +48,8 @@ import {
 } from "../../lib/api";
 
 // top2L / top10L: the Top-10 paper books (2026-10-27) - the record's ten best by Rank, on whole lots.
-type Tab = "record" | "market" | "lab" | "money" | "top2L" | "top10L";
+// top5 / top5_10 / top10_15 / top15_20: the rank-band paper accounts (2026-11-12) - five strategies each, Rs 10 lakh a strategy.
+type Tab = "record" | "market" | "lab" | "money" | "top2L" | "top10L" | RankBandKey;
 const REFRESH_MS = 30000;
 
 const inr = (v: number | null | undefined) =>
@@ -154,6 +156,9 @@ export default function CommodityPage() {
         <button className={tab === "money" ? "dt active" : "dt"} onClick={() => setTab("money")}>Real money</button>
         <button className={tab === "top2L" ? "dt active" : "dt"} onClick={() => setTab("top2L")}>Top 10 Paper Trade · ₹2 lakh</button>
         <button className={tab === "top10L" ? "dt active" : "dt"} onClick={() => setTab("top10L")}>Top 10 Paper Trade · ₹10 lakh</button>
+        {RANK_BANDS.map((b) => (
+          <button key={b.key} className={tab === b.key ? "dt active" : "dt"} onClick={() => setTab(b.key)}>{b.label}</button>
+        ))}
         <a href="/commodity/ai-approved" className="dt" style={{ textDecoration: "none" }}>AI Approved</a>
       </div>
 
@@ -271,6 +276,7 @@ export default function CommodityPage() {
       )}
 
       {(tab === "top2L" || tab === "top10L") && <Top10Book key={tab} desk="commodity" book={tab} />}
+      {RANK_BANDS.some((b) => b.key === tab) && <RankBandBook key={tab} book={tab as RankBandKey} />}
 
       {tab === "money" && money && (
         <MoneyTab money={money} busy={busy} onKill={(on) => act("kill", () => setCommodityKillSwitch(on))} />

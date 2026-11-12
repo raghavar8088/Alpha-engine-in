@@ -486,6 +486,13 @@ async def start_option_research_desk() -> None:
     except Exception:  # noqa: BLE001
         logger.exception("could not start the top-10 books")
     try:
+        # Commodity Trading rank-band books (2026-11-12): Top 5 / 5-10 / 10-15 / 15-20, Rs 10 lakh a strategy,
+        # copying the desk's own trades of five frozen picks each (app.services.rank_band_books).
+        from app.services.rank_band_books import loop as rank_band_books_loop
+        asyncio.create_task(rank_band_books_loop())
+    except Exception:  # noqa: BLE001
+        logger.exception("could not start the rank-band books")
+    try:
         # Strategy Factory · Top 10 (2026-10-27): the Factory has no running paper engine, so its
         # ten are replayed forward by the backtest's own rules; the top-10 books copy that record.
         from app.services.strategy_factory.top10_replay import loop as sf_top10_loop
@@ -1081,6 +1088,12 @@ try:
     app.include_router(_top10_books_routes.router)
 except Exception:  # noqa: BLE001
     logger.exception("could not mount the top-10 books API")
+# Commodity Trading rank-band books (2026-11-12), read only; a failure here must not stop the app.
+try:
+    from app.api.routes import rank_band_books as _rank_band_books_routes
+    app.include_router(_rank_band_books_routes.router)
+except Exception:  # noqa: BLE001
+    logger.exception("could not mount the rank-band books API")
 # Strategy Factory tabs on six modules (2026-10-27); a failure here must not stop the app.
 try:
     from app.api.routes import factory_desks as _factory_desks_routes
