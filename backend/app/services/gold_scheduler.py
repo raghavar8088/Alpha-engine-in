@@ -108,9 +108,12 @@ async def gold_delta_loop() -> None:
     # the task from being garbage-collected mid-run.
     _TASKS.add(asyncio.create_task(gold_lab_loop()))
     # The Top-5 paper books (gold_top5_books, 2026-11-12) copy this venue's H1 trades: started here
-    # for the same reason.
-    from app.services import gold_top5_books
-    _TASKS.add(asyncio.create_task(gold_top5_books.loop()))
+    # for the same reason. Guarded: nothing in the books may ever stop the desk they copy.
+    try:
+        from app.services import gold_top5_books
+        _TASKS.add(asyncio.create_task(gold_top5_books.loop()))
+    except Exception:  # noqa: BLE001
+        logger.exception("[gold top5] books not started - the desk runs on without them")
     while True:
         try:
             on, has_open, may_enter = await venue_activity("delta")

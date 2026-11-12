@@ -26,7 +26,7 @@
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 
 from app.api.deps import get_current_user
-from app.services import gold_desk, gold_h1, gold_lab, gold_top5_books
+from app.services import gold_desk, gold_h1, gold_lab
 
 router = APIRouter(prefix="/api/gold-desk", tags=["gold-desk"])
 
@@ -138,16 +138,19 @@ async def lab_close_all(_current_user: dict = Depends(get_current_user)):
 
 
 # ── the Top-5 paper books: three accounts on the board's top five (2026-11-12) ─────
+# Imported inside each route, so a fault in the books can only break these three, never the desk's routes or startup.
 
 
 @router.get("/top5")
 async def top5(_current_user: dict = Depends(get_current_user)):
+    from app.services import gold_top5_books
     return await gold_top5_books.overview()
 
 
 @router.get("/top5/positions")
 async def top5_positions(book: str = Query("top5_2L"), status: str = Query("OPEN", pattern="^(OPEN|CLOSED|ALL)$"),
                          limit: int = Query(200, ge=1, le=1000), _current_user: dict = Depends(get_current_user)):
+    from app.services import gold_top5_books
     if book not in gold_top5_books.BOOK:
         raise HTTPException(status_code=404, detail=f"No Top-5 book '{book}'")
     return {"book": book, "status": status, "positions": await gold_top5_books.positions(book, status, limit)}
@@ -155,5 +158,6 @@ async def top5_positions(book: str = Query("top5_2L"), status: str = Query("OPEN
 
 @router.post("/top5/run")
 async def top5_run(_current_user: dict = Depends(get_current_user)):
+    from app.services import gold_top5_books
     from app.services.desk_switches import is_on
     return await gold_top5_books.sync(entries=await is_on("gold_desk"))
