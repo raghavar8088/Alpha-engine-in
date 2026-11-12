@@ -127,9 +127,21 @@ async def main():
     check("each strategy holds its own position: its 'symbol' is its board id", p["symbol"] == p["key"] != "XAUTUSD")
 
     # ── 2. a week of real trades ────────────────────────────────────────────────────────
-    section("2. A week of the desk's real trades through every book")
+    section("2. A week of the desk's real trades through every book (on an engine without `compound`)")
+    real_plan = M.plan_book
+
+    def older_engine(*, capital, realized, deployed, open_rows, parents, decided, breaker_tripped, entries,
+                     max_open=None, net_fn=None, source_tag=None, closed_rows=None):
+        """plan_book as a server whose shared engine predates 11 Nov has it: no `compound` flag at all."""
+        return real_plan(capital=capital, realized=realized, deployed=deployed, open_rows=open_rows, parents=parents,
+                         decided=decided, breaker_tripped=breaker_tripped, entries=entries, max_open=max_open,
+                         net_fn=net_fn, source_tag=source_tag, closed_rows=closed_rows)
+
+    M.plan_book = older_engine
     fresh(docs=CLOSED)
     out = await M.sync(entries=True)
+    check("every book ran on the older engine (nothing passed it a flag it does not have)",
+          not any("error" in v for v in out["books"].values()), {k: v for k, v in out["books"].items() if "error" in v})
     check("the pass made new copies with a rate", out["entries"] is True and out["usd_inr"] == FX, out.get("note", ""))
     n_picks = len(CLOSED_PICKS)
     for bid, cap in (("top5_2L", 40000.0), ("top5_10L", 200000.0)):
@@ -168,6 +180,7 @@ async def main():
     await M.sync(entries=True)
     check("a second pass changes nothing", M.POSITIONS.docs == snap)
     check("the desk's records were never written", M.PARENTS.writes == 0)
+    M.plan_book = real_plan
 
     # ── 3. an open trade, then its close ────────────────────────────────────────────────
     section("3. An open desk trade: copied, marked, closed when the desk closes it")

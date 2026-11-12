@@ -36,9 +36,11 @@ at a time trade. Each copy is instead its own position, as each of H1's sleeves 
 mode does not net), so a long and a short can be held at once. One real Delta account would net them.
 
 SLOTS AND CASH are live_intraday_mirror.plan_book's: entries are decided on the trades' own clock,
-closes before opens at the same instant, cash = capital + realised - tied up, never below zero. The
-Rs 10 lakh-each accounts use its `compound` sizing: an entry is sized on that account's realised
-equity at that instant.
+closes before opens at the same instant, cash = capital + realised - tied up, never below zero. A
+Rs 10 lakh-each account sizes an entry on its realised equity at that instant. It does this without
+plan_book's newer `compound` flag, which a server running an older copy of that shared file would
+reject. Instead the account takes one new entry per round, and each round's capital is its equity
+then. Its strategy holds one position at a time, so this is exact.
 
 A book starts the first time it runs and never back-fills: a position H1 already held then is not
 copied. A desk trade that ends VOID (no recorded price) voids its copy - no P&L, the money back.
@@ -357,8 +359,9 @@ def _close_fields(p: dict, c: dict) -> dict:
     }
 
 
-async def _sync_book(book: Book, parents_all: list[dict], entries: bool, fx_asof: str | None) -> dict:
-    n = {"opened": 0, "closed": 0, "skipped": 0, "marked": 0, "voided": 0}
+async def _sync_book(book: Book, parents_all: list[dict], entries: bool, fx_asof: str | None,
+                     first_pending_only: bool = False) -> dict:
+    n = {"opened": 0, "closed": 0, "skipped": 0, "marked": 0, "voided": 0, "pending": 0}
     by_id = {p["position_id"]: p for p in parents_all}
     floor = max(await _start(book.id), naive_utc(_now()) - LOOKBACK)
     open_rows = []
@@ -379,12 +382,20 @@ async def _sync_book(book: Book, parents_all: list[dict], entries: bool, fx_asof
     parents.sort(key=lambda p: (p["opened_at"], p["position_id"]))
     realized, deployed = await _totals(book.id)
     decided = await _decided(book.id, parents) if entries else set()
+    if first_pending_only and entries:
+        # One new entry per round (sync runs rounds until none waits), so each is sized on the equity the
+        # ones before it left.
+        waiting = [p for p in parents if p["position_id"] not in decided and p["position_id"] not in pointed]
+        later = {p["position_id"] for p in waiting[1:]}
+        parents = [p for p in parents if p["position_id"] not in later]
+        n["pending"] = len(later)
     t0 = pending_since(parents, decided, open_rows, SOURCE_TAG) if entries else None
     closed_rows = await _closed_after(book.id, t0) if entries else []
-    plan = plan_book(capital=book.capital, realized=realized, deployed=deployed, open_rows=open_rows,
+    # An each-strategy account's capital is its realised equity now: its one position may use all of it.
+    capital, realized_in = (book.capital + realized, 0.0) if book.compound else (book.capital, realized)
+    plan = plan_book(capital=capital, realized=realized_in, deployed=deployed, open_rows=open_rows,
                      parents=parents, decided=decided, breaker_tripped=False, entries=entries,
-                     max_open=book.max_open, net_fn=pnl, source_tag=SOURCE_TAG, closed_rows=closed_rows,
-                     compound=book.compound)
+                     max_open=book.max_open, net_fn=pnl, source_tag=SOURCE_TAG, closed_rows=closed_rows)
 
     for c in plan["closes"]:
         res = await POSITIONS.update_one({"_id": c["row"]["_id"], "status": "OPEN"},
@@ -451,7 +462,17 @@ async def sync(entries: bool = True) -> dict:
             out["note"] = "No USD/INR rate this pass: open copies were managed and no new copy was made."
         for b in BOOKS:
             try:
-                out["books"][b.id] = await _sync_book(b, parents, allow, asof)
+                if not b.compound:
+                    out["books"][b.id] = await _sync_book(b, parents, allow, asof)
+                    continue
+                tot = {"opened": 0, "closed": 0, "skipped": 0, "marked": 0, "voided": 0}
+                for _round in range(200):           # a strategy takes a few trades a week; 200 is a guard
+                    r = await _sync_book(b, parents, allow, asof, first_pending_only=True)
+                    for k in tot:
+                        tot[k] += r.get(k, 0)
+                    if not r.get("pending"):
+                        break
+                out["books"][b.id] = tot
             except Exception as exc:  # noqa: BLE001 - one book's bad row must not stop the others
                 logger.warning("[gold top5] %s failed: %s", b.id, exc, exc_info=True)
                 out["books"][b.id] = {"error": str(exc)[:200]}
