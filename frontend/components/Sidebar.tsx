@@ -685,7 +685,7 @@ export default function Sidebar() {
             <div className="nav-group more-group">
               <button
                 type="button"
-                className={`nav-item more-btn${moreOpen ? " open" : ""}`}
+                className="nav-item more-btn"
                 aria-expanded={moreOpen}
                 aria-controls="sidebar-more"
                 onClick={() => setMoreOpen((v) => !v)}
@@ -698,9 +698,6 @@ export default function Sidebar() {
                 </svg>
                 {moreOpen ? "Hide modules" : "View all modules"}
                 <span className="more-count">{hiddenCount}</span>
-                <svg className="more-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
               </button>
               {moreOpen && (
                 <div id="sidebar-more" className="more-list">

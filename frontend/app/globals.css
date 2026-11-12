@@ -493,8 +493,11 @@ a:focus-visible {
 }
 /* "View all modules" (2026-11-12): the modules moved out of the main list, one click away. The button is a
    nav-item, so it looks and hovers like the links around it. */
+/* 10px gaps (links use 12): with the sidebar's scrollbar showing, the button has 173px inside, and icon + "View all
+   modules" + count need 169. */
 .sidebar .more-btn {
   width: 100%;
+  gap: 10px;
   border: 0;
   background: transparent;
   font-family: inherit;
@@ -510,18 +513,10 @@ a:focus-visible {
   margin-left: auto;
   font-size: 11px;
   font-weight: 700;
-  padding: 1px 8px;
+  padding: 1px 7px;
   border-radius: 999px;
   background: var(--chrome-border);
   color: var(--chrome-text);
-}
-.sidebar .more-btn .more-chev {
-  width: 14px;
-  height: 14px;
-  transition: transform 0.15s ease;
-}
-.sidebar .more-btn.open .more-chev {
-  transform: rotate(180deg);
 }
 .sidebar .more-list {
   display: flex;
