@@ -17,12 +17,16 @@
   POST /api/gold-desk/lab/toggle          {"enabled": bool} — stores its pre-registration on first use
   POST /api/gold-desk/lab/run             one lab cycle now (decides / executes only when due)
   POST /api/gold-desk/lab/close-all       flatten every lab holding at the touch
+
+  GET  /api/gold-desk/top5                the Top-5 paper books: the five, the three account types, each book
+  GET  /api/gold-desk/top5/positions      ?book=top5_2L|top5_10L|each10L_1..5&status=OPEN|CLOSED|ALL
+  POST /api/gold-desk/top5/run            copy the desk into the books once, now
 """
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 
 from app.api.deps import get_current_user
-from app.services import gold_desk, gold_h1, gold_lab
+from app.services import gold_desk, gold_h1, gold_lab, gold_top5_books
 
 router = APIRouter(prefix="/api/gold-desk", tags=["gold-desk"])
 
@@ -131,3 +135,25 @@ async def lab_run(_current_user: dict = Depends(get_current_user)):
 @router.post("/lab/close-all")
 async def lab_close_all(_current_user: dict = Depends(get_current_user)):
     return await gold_lab.close_all()
+
+
+# ── the Top-5 paper books: three accounts on the board's top five (2026-11-12) ─────
+
+
+@router.get("/top5")
+async def top5(_current_user: dict = Depends(get_current_user)):
+    return await gold_top5_books.overview()
+
+
+@router.get("/top5/positions")
+async def top5_positions(book: str = Query("top5_2L"), status: str = Query("OPEN", pattern="^(OPEN|CLOSED|ALL)$"),
+                         limit: int = Query(200, ge=1, le=1000), _current_user: dict = Depends(get_current_user)):
+    if book not in gold_top5_books.BOOK:
+        raise HTTPException(status_code=404, detail=f"No Top-5 book '{book}'")
+    return {"book": book, "status": status, "positions": await gold_top5_books.positions(book, status, limit)}
+
+
+@router.post("/top5/run")
+async def top5_run(_current_user: dict = Depends(get_current_user)):
+    from app.services.desk_switches import is_on
+    return await gold_top5_books.sync(entries=await is_on("gold_desk"))

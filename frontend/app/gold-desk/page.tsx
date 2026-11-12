@@ -25,6 +25,7 @@ import DeskHistory from "../../components/DeskHistory";
 import GoldH1Panel from "./GoldH1Panel";
 import GoldCostsPanel from "./GoldCostsPanel";
 import GoldLabPanel from "./GoldLabPanel";
+import GoldTop5Panel from "./GoldTop5Panel";
 import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   GoldBasis,
@@ -90,6 +91,8 @@ export default function GoldDeskPage() {
   const [lab, setLab] = useState(false);                  // the Gold Lab tab (not a venue of the desk engine)
   // The Strategy Factory tab (2026-10-27): its 546 strategies as records on Delta XAUTUSD, beside H1.
   const [fac, setFac] = useState(false);
+  // The Top-5 paper books tab (2026-11-12): three accounts on the Delta board's top five, copying H1's trades.
+  const [t5, setT5] = useState(false);
   const [labSum, setLabSum] = useState<GoldLabSummary | null>(null);
   const [venues, setVenues] = useState<GoldSummary[]>([]);
   const [strats, setStrats] = useState<GoldStrategy[]>([]);
@@ -196,7 +199,7 @@ export default function GoldDeskPage() {
             ) : (
               <StatusPill label="MCX closed" tone="muted" />
             )}
-            {lab ? null : (
+            {lab || t5 ? null : (
               <button
                 className="btn"
                 disabled={!!busy || !sum?.can_enable}
@@ -225,10 +228,11 @@ export default function GoldDeskPage() {
         {ordered.map((v) => (
           <button
             key={v.venue}
-            className={!lab && !fac && tab === v.venue ? "ptab on" : "ptab"}
+            className={!lab && !fac && !t5 && tab === v.venue ? "ptab on" : "ptab"}
             onClick={() => {
               setLab(false);
               setFac(false);
+              setT5(false);
               setTab(v.venue);
             }}
           >
@@ -245,7 +249,7 @@ export default function GoldDeskPage() {
           </button>
         ))}
         {!ordered.length && <div className="ptab muted">loading books…</div>}
-        <button className={lab && !fac ? "ptab on" : "ptab"} onClick={() => { setFac(false); setLab(true); }}>
+        <button className={lab && !fac && !t5 ? "ptab on" : "ptab"} onClick={() => { setFac(false); setT5(false); setLab(true); }}>
           <span>Gold Lab · 7 tested strategies</span>
           <span className={`tv ${tone(labSum?.net_pnl)}`}>
             {!labSum
@@ -257,9 +261,13 @@ export default function GoldDeskPage() {
                   : "off"}
           </span>
         </button>
-        <button className={fac ? "ptab on" : "ptab"} onClick={() => { setLab(false); setFac(true); }}>
+        <button className={fac && !t5 ? "ptab on" : "ptab"} onClick={() => { setLab(false); setT5(false); setFac(true); }}>
           <span>Strategy Factory · 546</span>
           <span className="tv">records beside H1 · Delta XAUTUSD</span>
+        </button>
+        <button className={t5 ? "ptab on" : "ptab"} onClick={() => { setLab(false); setFac(false); setT5(true); }}>
+          <span>Top 5 · 3 paper accounts</span>
+          <span className="tv">₹2 lakh · ₹10 lakh · ₹10 lakh each</span>
         </button>
         <a href="/gold-desk/ai-approved" className="ptab" style={{ textDecoration: "none" }}>
           <span>AI Approved</span>
@@ -267,7 +275,11 @@ export default function GoldDeskPage() {
         </a>
       </div>
 
-      {fac ? (
+      {t5 ? (
+        <GlassPanel title="Top 5 — three paper accounts" note="the board's five best-ranked strategies, copied at their own size">
+          <GoldTop5Panel />
+        </GlassPanel>
+      ) : fac ? (
         <FactoryDeskView desk="gold" />
       ) : lab ? (
         <GlassPanel title="Gold Lab — seven tested strategies" note="Tier B: profitable in every test period, not proven better than holding gold">
