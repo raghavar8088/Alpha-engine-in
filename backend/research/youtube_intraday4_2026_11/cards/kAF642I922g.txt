@@ -1,0 +1,22 @@
+video: kAF642I922g
+topic: stock_intraday
+summary: Mukul Choudhary (Dhan) uses VWAP as the institutions' fair price on a fixed list of about 10 NIFTY 50 stocks: look for a consolidation range around a flat VWAP - best the previous day's 14:00-15:30 range - then trade the breakout or breakdown after a pullback, entering on an engulfing / break of the pullback candle, stop beyond the range or the pullback candle, target 1:2-1:3; no new trades after 14:00.
+instruments: NSE NIFTY 50 stocks (fixed list of about 10); NIFTY / Bank Nifty
+timeframes: 5m
+style: intraday
+= SI-08 | Previous afternoon (14:00-15:30) range around VWAP: break, pullback, engulfing entry, 1:2 (fixed list)
+R market E 00:46,01:28 | A fixed list of about 10 liquid NIFTY 50 stocks (Titan, Trent, Bajaj Finance, Bajaj Finserv, Maruti, HDFC Bank, SBI...) plus NIFTY / Bank Nifty; avoid easily manipulated stocks. | "aise karake aap apane kuchh 10 stoks kee list banaa leejie"
+R indicator E 02:51,03:35 | VWAP, default settings (resets every day; flat in sideways markets). | "sab saaree bilkul diफ़olt seting hai"
+R setup E 04:18,07:12,11:21 | A consolidation range around VWAP: best the previous day's 14:00-15:30 range (or a range built today). | "2:00 baje se leke 3:30 ke andar vaalee koee renj ho to jyaadaa betar rahegaa"
+R entry E 05:02,05:43,07:12 | When price breaks out of (down from) the range, do not enter on the break: wait for a pullback and enter on a bullish (bearish) engulfing or a close above (below) the first candle after the pullback. | "kyaa daayarektalee baay karoge? naheen. ek usakee vet kar lo sam sort oफ़ pulabak kee"
+R stop E 05:02,06:26 | Stop beyond the range (above the range high for shorts) or below the pullback candle. | "stop los jo bhee renj thee naa usake haaee ke oopar lagaa deejie"
+R target E 05:02,05:43 | Target 1:2 or 1:3. | "taaraget 1:2 1:3 aise karake apan taaraget kar sakate hain"
+R no_trade E 10:40,12:02 | No new trades after 14:00; no trade when candles are messy inside the range. | "mainne aapako kyaa bataayaa ki 2:00 baje ke baad treding mat karie"
+R sizing E 06:26 | Buy in two halves (half on the pullback, half on the breakout) if desired. | "mainne abhee 250 le lie. baakee 250 main brekaaaut jab ho jaaegaa naa tab le loongaa"
+R setup A - | Desk version: the 10 most liquid NIFTY 50 stocks of the NSE 5-minute pool (previous month's turnover) and NIFTY; range = the previous session's 14:00-15:30 high and low, used only if it is narrower than 1.2% and VWAP moved less than 0.3% in that window. | ""
+R entry A - | Break = a 5-minute close beyond the range from 09:20; pullback = a later bar trading back within 0.15% of the broken level; entry at the next open after an engulfing in the break direction; stop 0.05% beyond the pullback's extreme, at least 0.2%; target 2R; entries until 14:00; exit 15:15; one trade per stock per day. | ""
+T with_assumptions | The range and the pullback need numbers (A)
+V flat VWAP | R3 | 03:35 | No slope test | VWAP moving less than 0.3% across the range window
+X - | 05:02 | Titan | short | range breakdown, pullback, bearish engulfing | 3697 | 3708 | 1:2 = 3681 | target | 1:2 reached
+P 00:05 | 00:46 | Dhan app download
+U Is the previous day's afternoon range required, or is any range fine?

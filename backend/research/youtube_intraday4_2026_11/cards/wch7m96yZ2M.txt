@@ -1,0 +1,19 @@
+video: wch7m96yZ2M
+topic: stock_intraday
+summary: Nataraj Malavade's opening range breakout: the first hour (9:15-10:15) sets the range because NIFTY/Bank Nifty make the day's high or low in it on 64-70% of days; enter when price touches beyond the range, stop at the opposite side, square off at 15:15, one trade per instrument per day; best on volatile, liquid instruments (Bank Nifty over NIFTY). His AmiBroker test on Bank Nifty 5-minute data: 48% win rate, profit factor 1.22, drawdown 11.5%.
+instruments: Bank Nifty; NIFTY; liquid high-beta stocks
+timeframes: 5m, 60m
+style: intraday
+= SI-13 | First-hour (9:15-10:15) range breakout, touch entry, opposite-side stop, out at 15:15, one trade a day
+R market E 08:32,09:13 | Volatile and liquid instruments: Bank Nifty preferred over NIFTY; high-beta liquid stocks. | "higher beta stocks or higher beta indexes works better for this particular strategy"
+R setup E 04:57,05:37 | Opening range = the first hour's high and low (9:15-10:15), because the day's high/low is set in the first hour on about 64% (NIFTY) / 70% (Bank Nifty) of days. | "this is why we are going to consider the one hour the first one hour as our opening range"
+R entry E 06:46,07:04,16:24 | Long when price breaks the range high, short when it breaks the low; he prefers a touch entry (closing entry also tested). | "typically in my personal view so I will take it as a touch entry"
+R stop E 07:04,17:08 | Stop at the opposite side of the range (ATR or percent stops are optional variations). | "we are going to keep our stop loss to the opening range low"
+R exit E 07:48,14:22 | Square off at 15:15-15:20 if the stop is not hit; no target. | "typically 315 or 320 where you can close your position"
+R filter E 09:13,09:55 | One trade per instrument per day. | "one trade for one instrument for one day that's the basic thumb rule"
+R entry A - | Coded on NIFTY and BANKNIFTY index minutes: stop orders at the 9:15-10:15 high and low from 10:15 (OCO, first touch wins), valid until 15:00; stop at the opposite side; exit 15:15. | ""
+T ready | Every rule is stated (touch entry, opposite stop, 15:15 exit, one trade)
+C win_rate | 17:48 | 48.12% win rate, profit factor 1.22, max drawdown 11.52% | Bank Nifty 5-minute, about 2009-2023 | "it is 48.12 percentage accuracy"
+C other | 04:57 | day high and low set in the first hour on 64% (NIFTY) and 70% (Bank Nifty) of 3,066/3,090 days | about 2010-2022 | "64 of the time Nifty is days high and day lows where have established well within the first one hour"
+P 00:46 | 01:27 | Paid ORB AFL course and his book
+U None for the core rule.

@@ -1,0 +1,25 @@
+video: nVG4mXMcsAA
+topic: nifty_option_buying
+summary: Pro Trader Aakash's backtested NIFTY scalp on 5 minutes with two Supertrends, (10, 1) and (10, 3): buy at the close of a strong green candle when both are in buy mode and one of them has just flipped from sell to buy (sell mirror); stop 10 futures points, target 20 points (1:2). Claimed 2015-2025 backtest: about 9,000 trades, 62% accuracy, +79,000 futures points. Traded via options, futures or selling the opposite option.
+instruments: NIFTY futures (or ATM options)
+timeframes: 5m
+style: scalping
+= OB-08 | Supertrend (10, 1) + (10, 3) both bullish with a fresh flip and a strong candle, 10-point stop, 20-point target (5-minute NIFTY)
+R market E 00:04,10:37 | NIFTY index; trade futures, buy options or sell the opposite option. | "vo bhee niphtee indeks men"
+R timeframe E 00:49 | 5-minute chart. | "taaim phrem jo ham yooज़ karane vaale hain vo hai 5 minats kaa chaart"
+R indicator E 00:04,02:16 | Two Supertrends: length 10 factor 1, and length 10 factor 3. | "supar trend 101 aur 103"
+R setup E 02:16,02:56 | Buy only when both Supertrends are in buy mode (green). | "olavej baay vhen both supar trend aar in baay mod"
+R entry E 02:56,04:20,06:26 | ...and one of them has just changed from sell to buy (within the last 5-minute bar): a fresh trend after a pullback; enter at that candle's close. | "donon men se ek trend pichhale 5 minat men sel honaa chaahie thaa"
+R filter E 04:20,05:03,05:44 | The signal candle must be a proper strong candle (big body, not long wicks with a small body). | "kaindal strenth shud bee haaee meens propar green kaindal"
+R entry E 08:33,09:17 | Sell: both in sell mode, one just flipped from buy to sell, a proper red candle; enter at its close. | "olavej baay vhen both supar net aar in a sel mod"
+R stop E 07:09,09:57 | Stop 10 points on the futures chart. | "stop los mainne 10 points kaa rakhaa hai"
+R target E 07:09,09:57 | Target 20 points (1:2); trades end within about half an hour. | "taaraget mainne 20 points kaa rakhaa hai"
+R entry A - | Proper candle = body at least 60% of the range and in the trade's direction; 10 and 20 points coded as 0.04% and 0.08% of NIFTY (10/20 points at about 25,000); entries 09:20-15:00, exit 15:15; many trades a day, one at a time. | ""
+T with_assumptions | 'Proper candle' needs a number (A); points scaled to the index level (A)
+V proper candle | R6 | 04:20 | No size rule | body at least 60% of the candle range
+C trade_count | 00:49 | about 9,000 trades | 2015-2025 | "9000 treds isane lie the"
+C win_rate | 00:49 | 62% accuracy, average win 20, average loss 10 | 2015-2025 | "ekyooresee 62% evarej vin 20 evarej los 10"
+C points | 01:33 | +79,000 futures points | 2015-2025 | "79,000 points isane prophit kiyaa hai phyoochars men"
+X - | 04:20 | NIFTY | long | both green, the faster one just turned green, proper green candle | candle close | 10 points | 20 points | target | 40 points in the next candle
+P 09:57 | 10:37 | Free Telegram alert group via a Dhan account
+U Does 'just flipped' mean on the signal bar itself or the bar before?

@@ -1,0 +1,25 @@
+video: wx-DyDEz2Xg
+topic: commodity_intraday
+summary: Dhan (Himanshu) natural gas setup on 1-hour candles: a Money Flow Index stretched to length 140 with levels 40 and 60 marks where money is leaving one side; near 40 buy when price is above Supertrend and EMA 9 crosses above EMA 26 (mirror near 60 for sells). Take 0.6-0.8% intraday or 1-1.25% if carried overnight; exit on a close through Supertrend or the opposite EMA cross.
+instruments: MCX Natural Gas; Natural Gas Mini
+timeframes: 1h
+style: intraday
+= CI-07 | Natural gas MFI(140) 40/60 zone + Supertrend side + EMA 9/26 cross (1 hour)
+R market E 02:14 | MCX natural gas or natural gas mini (Rs 1,250 vs Rs 250 per rupee; mini needs about Rs 10,000). | "nechural gais yaa nechural gais minee aap stretajee ko kisee bhee cheej pe aplaaee kar sakate hain"
+R timeframe E 02:56 | 1-hour chart; often runs a few days (swing), sometimes done the same day. | "ham aaenge aavaralee chaart pe"
+R indicator E 03:37 | Money Flow Index with length 140 (not the default); horizontal lines at 40 and 60. | "main isake pairaameetar ko baढ़aa ke 140 kar detaa hoon"
+R indicator E 04:21,05:04 | Supertrend and an EMA 9 / EMA 26 crossover as the two confirmations. | "pahalaa yooज़ karataa hoon supar trend aur doosaraa yooज़ karataa hoon eeemae kros"
+R entry E 04:21,05:04 | Buy near MFI 40 when price goes above Supertrend and EMA 9 crosses above EMA 26 together. | "40 ke paas aane par jab yahaan par praaises supar trend ke oopar jaate hain aur eeemae kros bhee dete hain"
+R entry E 06:28 | Sell near MFI 60 (overbought) when price falls below Supertrend and the EMAs cross bearish. | "emaephaaaee ovarabot ho jaataa hai aur yahaan se aapako sel signal milataa hai"
+R target E 05:44 | Exit at 0.6-0.8% intraday; if carried to the next day take about 1-1.25%. | "intraade men agar 0.6 se 0.8% ritarn milataa hai, ham yahaan se lekar baahar ho jaaenge"
+R exit E 05:44 | Trailing stop: exit when price closes below Supertrend or the EMAs cross the other way. | "yaa to praaises supar trend ke neeche aa jaae yaa eeemae kaa biyarish krosaovar"
+R filter E 00:47,07:09 | The Thursday EIA inventory data (20:00, 21:00 in winter) sets the next week's trend; MFI often stretches after it and reversals follow within a day. | "tharsade ko raat ko 8:00 baje aur vintars men tharsade ko raat ko 9:00 baje"
+R indicator A - | Supertrend (10, 3) (settings not given); 'near 40' = MFI(140) at or below 42 at some point in the last 10 hourly bars (at or above 58 for sells). | ""
+R target A - | Coded: target 0.8% from entry; exit on the trailing condition otherwise; protective stop at the Supertrend line at entry; one position at a time; MCX hours, positions may be held across sessions up to 3 days. | ""
+T with_assumptions | Supertrend settings and 'near 40/60' need numbers (A)
+V near 40 | R5 | 04:21 | Distance to 40 not given | MFI at or below 42 within 10 bars
+C other | 05:04 | moves of 1.5-6.5% after signals | Aug 2025 examples | "1 din ke andar aapako 2% ke aasapaas kaa moov"
+X - | 05:04 | MCX Natural Gas | long | MFI near 40, above Supertrend, EMA 9/26 bullish | - | Supertrend | 0.6-0.8% | target | 2% in a day
+X - | 06:28 | MCX Natural Gas | short | MFI overbought, below Supertrend, bearish cross | - | Supertrend | 1% | target | 2.5% in 19 hours
+P 07:54 | 08:30 | Dhan ScanX inventory updates and weekly reels
+U What Supertrend settings are used?

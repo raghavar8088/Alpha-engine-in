@@ -1,0 +1,16 @@
+video: 1EPFJY4Mhws
+topic: stock_intraday
+summary: Dhan's stock-selection routine for intraday: from the futures 'OI gainers' list pick large companies with a big open interest and a big OI change, check the intraday OI build-up (no short build-up for longs), then trade on 5 minutes only when EMA 20 > 50 > 200 (longs) or the reverse; no new trades after 14:30. The chart trigger itself is left to the trader.
+instruments: NSE F&O stocks (stock futures OI)
+timeframes: 5m
+style: intraday
+= SI-05 | Futures OI-gainer selection + long build-up check + EMA 20/50/200 stack (5 minutes)
+R setup E 02:14,03:41 | Pick large companies from the futures OI-gainers list with a large OI, a large OI change and a large percentage OI change. | "baree kanpanee bhee honee chaahie. oaaee baraa honaa chaahie. oaaee chenj baraa honaa chaahie"
+R filter E 02:56,04:26,05:50 | Check the intraday OI build-up: for longs there must be no short build-up (long build-up, short covering or long unwinding are fine). | "agar aapako yahaan par short bild ap jyaadaa dikh rahe hain to chhor deejie"
+R indicator E 04:26,07:16 | 5-minute chart with EMA 20, 50 and 200. | "5 minats ke chaart pe 20, 50, 200 peeriyad mooving evarej"
+R entry E 05:08,05:50 | Buy when EMA 20 is above EMA 50 and EMA 50 above EMA 200 and the build-up does not oppose; hold while the stack holds. | "20 eeemae iज़ treding abav 50 eeemae end 50 eeemae iज़ treding abav 200 emae"
+R no_trade E 06:33 | No new intraday trades after 14:30. | "2:30 baje ke baad main intraade treding naheen karataa hoon"
+T not_testable | Needs intraday stock-futures open interest and OI build-up by interval, which the desk does not have; the entry trigger is not defined beyond the EMA stack
+X - | 04:26 | Paytm | long | OI gainer, long build-up, EMA 20 > 50 > 200 | 5-minute chart | - | - | target | moved up
+P 00:49 | 01:33 | Dhan Options Trader web insights
+U What exact candle triggers the entry once the EMAs are stacked?

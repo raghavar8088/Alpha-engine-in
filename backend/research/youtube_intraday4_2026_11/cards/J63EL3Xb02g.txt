@@ -1,0 +1,23 @@
+video: J63EL3Xb02g
+topic: nifty_option_buying
+summary: Dhan's 'advanced' intraday option buy: a very slow Williams %R (280) on the index's 60-, 20- and 5-minute charts; when the 60- and 20-minute readings are overbought, buy an ATM or slightly ITM call at the 5-minute chart's fresh entry into overbought (puts mirror on oversold); confirm on the option's own 5-minute chart and its IV; book 10-12% of the premium the same day. No stop is given.
+instruments: Bank Nifty / Sensex / NIFTY 50 stocks options (ATM or slightly ITM)
+timeframes: 60m, 20m, 5m
+style: options_buying
+= OB-03 | Williams %R (280) overbought on 60, 20 and 5 minutes: ATM call on the fresh 5-minute signal, +10-12% premium
+R market E 01:30 | Index options (Bank Nifty, Sensex shown) or NIFTY 50 stock options for liquidity; ATM or slightly ITM strike. | "sirph aur sirph aapako niphttee 50 ke stoks men kaam karanaa hai"
+R timeframe E 02:10 | Three timeframes on the underlying: 60 minutes, 20 minutes (one third), 5 minutes; plus the option's 5-minute chart. | "60 minats, 20 minats aur teesare taaim phrem pe jo ki hai meraa 5 minats"
+R indicator E 02:51 | Williams %R with length 280 instead of 14 on every chart (fewer but stronger signals). | "viliyam parasentej ke pairaameetar ko 14 kee jagah 280 kar detaa hoon"
+R setup E 03:32 | Calls: the 60-minute and 20-minute Williams %R are in the overbought zone; puts: both oversold. | "aavaralee chaart men viliyam parasentej aar ovarabot ho jaataa hai"
+R entry E 04:12,07:05 | Enter when the 5-minute Williams %R makes a fresh move into overbought (oversold for puts) inside that phase - not while it is already there. | "aapakaa phresh opshan baaing kab trigar huee hai"
+R filter E 08:28,09:59 | The option's own 5-minute chart should also show the signal; rising IV (vega) helps, especially for puts. | "agar yah put 5 minats ke taaim phrem pe ovarabot hamen dikhatee hai"
+R target E 08:28,09:14 | Target 10-12% of the premium within the day (Rs 200 option -> 220). | "1 din men 10 se 12% ke aasapaas kaa moov kaa taaraget aapako rakhanaa chaahie"
+R exit E 00:48 | Intraday; at most 1-2 days for swing; an option not in profit within four days rarely recovers. | "iseelie inportent hai ki ham intraade men hee egjit karen"
+R market A - | Desk proxy on NIFTY (index minutes): an ATM weekly premium is about 0.6% of NIFTY with delta 0.5, so +10-12% premium = +0.12% on NIFTY; overbought = %R above -20, oversold below -80. | ""
+R stop A - | No stop is stated: coded stop 0.12% against the entry (the same 10% of premium), target 0.12%; entries 09:30-14:30, one trade a day, exit 15:15. | ""
+T with_assumptions | No stop loss is given (A); the target is on premiums (A: index proxy)
+V fresh | R5 | 04:12 | How far back the previous non-overbought reading must be | the 5-minute %R crosses above -20 after being below -50 within the last 12 bars
+X 2025-06-17 | 04:12 | Bank Nifty 57400 CE | long | 60m and 20m overbought, fresh 5m overbought | ATM call | - | 10-12% | target | 60 points in an hour, 150 in a day
+X 2025-06-23 | 08:28 | Infosys 140 PE | short | overbought put chart, oversold underlying | 140 PE | - | 10-12% | target | 15% in 1.5 hours
+P 09:59 | 11:16 | Dhan Options Trader web (OI, futures build-up, IV)
+U Where is the stop loss?

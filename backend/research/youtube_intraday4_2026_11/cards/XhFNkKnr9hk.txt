@@ -1,0 +1,27 @@
+video: XhFNkKnr9hk
+topic: stock_intraday
+summary: Neha Gupta (Upsurge Club) 9:25 momentum strategy for F&O stocks, traded with ATM stock options or futures: read Nifty/Bank Nifty from 9:15 to 9:25; pick top gainers (or losers) that did not gap and have not already run 4-5%; mark the 9:15-9:25 body range on 3-minute candles and buy the ATM call (put) when a 3-minute candle closes beyond it; stop below the range, target about 1% of the stock, trail with EMA 9; no new trades after 10:30.
+instruments: NSE F&O stocks (ATM calls/puts or futures)
+timeframes: 3m, 1m
+style: options_buying
+= SI-01 | 9:25 F&O top-mover body-range breakout on 3 minutes (no-gap stocks, index-aligned), ATM option buy
+R market E 03:41,13:50 | NSE F&O stocks, traded through ATM (or near-ATM) calls/puts or futures; purely intraday. | "aap is stretajee ko phyoochar men bhee yooj kar sakate hain aur opshans baaing men bhee"
+R session E 03:41,04:28 | 9:15-9:25: only observe; Nifty and Bank Nifty above the previous close (any amount, 1-2 minute charts) = positive day, below = negative. | "ज़eero se nanbar oopar vaale ko pojitiv lenge"
+R filter E 14:34,21:00 | If Nifty and Bank Nifty disagree, trade stocks with their own index (Nifty stocks with Nifty, banks with Bank Nifty). | "Reliance kaa baay karenge aur usakaa short sel karenge"
+R setup E 05:11,07:59 | Scan the NSE F&O top gainers on a positive day (top losers on a negative day). | "enaesasee kee vebasaait par. vahaan pe taaip karenge top genars end loojars"
+R filter E 05:11,05:52 | Drop stocks that gapped up or down (even 0.5%) and stocks that moved 4-5% in the first 10 minutes (exhausted), unless they then built a range. | "ivan aadhaa parasent bhee agar gaip ap gaip daaun hai to ham usako hataa denge"
+R setup E 05:52,10:51 | Mark the 9:15-9:25 range from candle bodies (closes), ignoring wicks, on 3-minute candles. | "hamen viks naheen lenee hai hamen klojings lenee hai"
+R entry E 06:39,07:19,10:05 | Enter when a 3-minute candle (from the 9:24-9:27 candle on) closes beyond the range: buy at that close (ATM call for gainers, put for losers). | "three minats kee kaindal pe hamane klojing dee hai to ... vaheen par ham baay kar lenge"
+R stop E 11:37,12:22 | Stop below the range / the previous candle with a small buffer. | "renj ke neeche kaa hamane stop los le liyaa"
+R target E 12:22,15:59 | Target about 1% of the stock (10-12 points on TCS); then trail with EMA 9 after the first 10 points; book in parts with several lots. | "parasentej tarms se ham 1% likhenge"
+R no_trade E 15:59,16:44 | No new trades after 10:30 (open ones may be carried); most trades close by 9:45-10:00; 1-2 trades a day. | "10:30 tak hee treds plaan karo, usake baad aap avoid kar do"
+R no_trade E 18:10 | Avoid banking stocks on RBI press-conference days. | "11:00 aarabeeaaee kee pres konphrens hai ... bainking stoks ko phir ham avoid karenge"
+R market A - | Desk proxy: the stock itself on the NSE 5-minute pool's own 5-minute bars (the pool has no 1-minute rows to build 3-minute bars; option premiums are not available); universe = the pool's stocks ranked by change from the previous close at 9:25; gap = |open/prev close - 1| >= 0.5% excluded; more than 4% move by 9:25 excluded. | ""
+R target A - | Coded: stop 0.05% beyond the body range's far side; half at 1% of the stock price, then the rest exits on a 5-minute close back across EMA 9 (or at 15:15); entries from the first close beyond the range, 09:25-10:30; one trade per stock a day; the three biggest qualifying movers on NIFTY's side are eligible. | ""
+T with_assumptions | Option premiums replaced by the stock (A); target and trail mix need numbers (A)
+V range from bodies | R6 | 10:51 | Which candles count to 9:25 | 3-minute bodies 9:15-9:24
+C other | 15:59 | 4-5 trades a week | not stated | "aapako phor too phaaiv treds mil jaate hain"
+X 2025-10-09 | 09:24 | TCS | long | top gainer, 9:25 body range, 3-minute close above at 9:36 | 2170 (2120 CE at 75) | below the range | 1% | target | option 75 to 100
+X 2025-09-30 | 23:50 | Coforge | long | top gainer, range breakout | 1780 CE | below the range | 1% | target | strong move
+P 00:02 | 00:47 | Upsurge course discount
+U How is the trail split between the 1% target and EMA 9?

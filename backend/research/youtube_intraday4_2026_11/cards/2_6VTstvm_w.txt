@@ -1,0 +1,30 @@
+video: 2_6VTstvm_w
+topic: btc_intraday
+summary: The Trading Pinnacle's "BTC Brahmastra" 5-minute scalp: in a trend, three back-to-back candles of the trend's colour mark a zone (first to third candle); when price returns into the zone and prints a rejection candle closing with the trend, enter on the next candle. No stop or target number is given beyond 'a small stop' and claimed 1:5 to 1:10 moves.
+instruments: Bitcoin
+timeframes: 5m
+style: scalping
+= BI-07 | Three-candle zone retest with a rejection candle (5-minute bitcoin)
+R market E 00:52 | Bitcoin (crypto scalping). | "BTC kaa 5 minat kaa taaim phrem opan karanaa hai"
+R timeframe E 00:52 | 5-minute chart. | "isakaa taaim phrem phrends 5 minat rahane vaalaa hai"
+R setup E 00:52,01:32 | Identify the trend; in an uptrend find three back-to-back green candles with no red candle between them (three red in a downtrend); size, wicks and bodies do not matter. | "teen green kaindal aaidentiphaaee karanee hai phrends baik tu baik"
+R setup E 01:32,02:56 | Mark a zone (box) from the first to the third candle. | "pahalee vaalee kaindal se leke aur thard vaalee kaindal tak kaa pooraa ek jon maark karanaa hai"
+R entry E 01:32,02:13,05:01 | When price comes back into the zone and makes a rejection candle that closes in the trend's direction, enter on the next candle. | "rijekshan kaindal banaae aur apasaaid kee taraph klojing de, to nekst kaindal men aapakee entree"
+R no_trade E 05:41,06:24 | If price breaks through the zone instead, the setup fails; look for the opposite setup. | "agar praais isako brek karake neeche chalaa jaataa hai to ... setaap yahaan pe phel ho jaaegaa"
+R stop E 02:13 | The stop is very small (5-minute timeframe); its exact place is not stated. | "isamen hamaaraa stop los bahut hee jyaadaa chhotaa hai"
+R target E 00:52,02:56,04:21 | No fixed target: 1:5 to 1:10 claimed, 'hold for bigger'. | "minimam 1:5 se leke 1:10 eejeelee"
+R setup A - | Trend: close above EMA 50 for longs (below for shorts) at the third candle; the zone is the low-high span of the three candles; it stays valid for 48 bars (4 hours) or until a close beyond its far side. | ""
+R entry A - | Rejection candle coded as: the low trades into the zone (long) and the candle closes green above the zone midpoint; entry at the next open. | ""
+R stop A - | Stop 0.02% beyond the zone's far side; target 3R (below the video's claimed 1:5); exit at 23:55 UTC; one position at a time. | ""
+T with_assumptions | Stop place and target are not given (A); trend has no rule (A)
+V rejection candle | R5 | 01:32 | Shape not defined | trades into the zone and closes in the trend direction above the zone's midpoint
+V trend | R3 | 00:52 | Read by eye | close vs EMA 50
+V small stop | R7 | 02:13 | No place given | beyond the zone's far side
+C guarantee | 00:06 | 110% guarantee you will need no other strategy | not stated | "main aapako 110% kee gaarantee de sakataa hoon"
+C r_multiple | 00:52 | minimum 1:5 to 1:10 in one trade | backtested 2-3 months | "minimam 1:5 se leke 1:10"
+C other | 02:56 | a no-loss strategy: the stop will not be hit | not stated | "BTC kee no los treding stretajee"
+X - | 02:56 | BTC | short | three red candles boxed, price back in the box, rejection | next candle | not stated | not stated | target | about 1:6
+X - | 04:21 | BTC | long | three green candles boxed, retest, rejection | next candle | not stated | not stated | target | about 1:10
+P 06:24 | 06:50 | Telegram link for live trades
+U Where exactly is the stop?
+U What is the target, given 1:5 to 1:10 is only a claim?

@@ -1,0 +1,16 @@
+video: rOBS_fgFIZE
+topic: stock_intraday
+summary: Kushal Varshney on Sagar Kummar's channel: let 9:15-9:25 volatility settle (two 5-minute candles); after at least three candles of a move, the first opposite-colour candle is a 'stoppage'; if that candle has the lowest volume of the move's candles, buy above its high with its low as the stop (sell below its low in a fall) - the 'world's smallest stop-loss'.
+instruments: NSE stocks (selected by his rules)
+timeframes: 5m
+style: intraday
+= SI-07 | Lowest-volume opposite candle after a three-candle move (Kushal Varshney)
+R session E 04:20,05:01 | No trades from 9:15 to 9:25 (let the first two 5-minute candles absorb volatility). | "9:15 se kam se kam 9:25 tak voletilitee hotee hai"
+R setup E 05:42,06:26 | After at least three candles of a move, wait for the first opposite-colour candle (a red candle in a rise = stoppage). | "teen kaindal ke baad yaanee teen kaindal ke baad aapako ab alart honaa hai"
+R entry E 07:06,07:50,08:33 | If that opposite candle has the lowest volume of the move's candles, buy above its high (sell below its low in a fall). | "agar ye apojit kalar kee kaindal men sabase kam volyoom hai ham. to isee ke haaee ke oopar baay"
+R stop E 08:33,09:17 | Stop at that candle's low (high for sells). | "isee kaa lo stop los"
+T with_assumptions | Stock selection and target are explained later in the video (not coded here)
+D SS-03 | SS-03 (Kushal Varshney via Sagar Sinha, 11-channel study) already trades the lowest-volume opposite candle with a stop at its far end
+C other | 00:07 | the world's smallest stop-loss and the biggest target | not stated | "duniyaa kaa sabase chhotaa stop los aur sabase baraa taaraget"
+P 09:17 | 11:27 | Sunday webinars and an in-person mentorship in Noida
+U What is the stock-selection rule and the target?

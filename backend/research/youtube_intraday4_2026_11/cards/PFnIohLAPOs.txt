@@ -1,0 +1,20 @@
+video: PFnIohLAPOs
+topic: btc_intraday
+summary: The Market Place's 5 EMA rule for crypto on 15 minutes: an alert candle that does not touch EMA 5 (and whose previous candle did not touch it either); the next candle's body must cross the EMA by at least 30% of the body (50% better); enter on that candle, stop at the alert candle, take 1:2 to 1:4. Claimed 80-90% success.
+instruments: Bitcoin perpetual (Delta Exchange); ether
+timeframes: 15m
+style: intraday
+= BI-10 | 5 EMA untouched alert candle, next body crossing at least 30% (15-minute bitcoin)
+R market E 00:03,00:46 | Bitcoin and ether on Delta Exchange. | "beeteesee men tred karate hain"
+R timeframe E 00:46,01:27 | 15 minutes only (5 or 10 minutes gives big stop losses in crypto). | "15 minat taaim phrem men usase kam mat karanaa"
+R indicator E 01:27 | EMA with length 5 (smoothing length left at 9). | "naain ke jagah phaaiv kar denaa hai"
+R setup E 02:54,03:38 | Alert candle: a candle that does not touch EMA 5 (below it: plan buys; above it: plan sells); the candle before it must not touch the EMA either. | "preeviyas kaindal tach naheen honaa chaahie"
+R entry E 03:38,05:01,05:42 | The very next candle's body must cross the EMA by at least 30% of its body (50% or more is best); a wick touch is not enough. | "minimam 30 par to kros ovar honaa chaahie 50 par hotaa hai to bahut best hai"
+R stop E 06:27 | Stop at the alert candle (the candle that did not touch the EMA). | "isee kaindal ke neeche el honaa chaahie"
+R target E 07:09,08:36,10:01 | 1:1 comes easily; take 1:2, up to 1:3-1:4. | "exit kar sakate ho 1:2 jyaadaa lenaa hai 1:4"
+T with_assumptions | Entry price within the crossing candle and target choice need numbers (A)
+D DR-03 | DR-03 (Devansh Rai) already trades the 5 EMA untouched candle on 15-minute bitcoin with a close beyond it and 1:2; YT-01 is the same alert candle on Indian indices; the 30%-of-body crossing is a small variation
+C win_rate | 01:27 | 80-90% success, 70-80% | not stated | "isakaa jo sakses reshiyo hai main maan ke chalataa hoon 80 par se 90 par"
+C money | 00:46 | account grown from 5,000 to about 20,800 | not stated | "5000 se treding akaaunt chaaloo kiyaa thaa abhee 20000"
+P 00:03 | 00:10 | Delta Exchange discount link and Telegram in the description
+U Is the entry at the crossing candle's close or during it?

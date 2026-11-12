@@ -1,0 +1,26 @@
+video: WOWeE7XuWOM
+topic: btc_intraday
+summary: Trading Techstreet: on 5-minute bitcoin, trade a 9/20 EMA crossover only when it happens at a support (demand) or resistance (supply) level touched at least twice in the last few days; enter on the crossing candle, stop at the swing, take 1:1.5 or more.
+instruments: Bitcoin
+timeframes: 5m
+style: scalping
+= BI-03 | EMA 9/20 crossover at a twice-touched support or resistance, 5-minute bitcoin
+R market E 06:33 | Bitcoin only (later also gold and ether). | "aap bitakoin men tred karenge keval"
+R timeframe E 06:33 | 5-minute chart only. | "yor taaim phrem vil bee 5 minats onalee"
+R indicator E 02:59,03:41 | EMA 9 and EMA 20 on close. | "ek ho hogaa ham logon kaa eeemae naain peeriyad kaa doosaraa hogaa 20"
+R setup E 05:47,06:33,07:17 | Mark support (demand) and resistance (supply) levels from the last 2-6 days; a level touched twice counts. | "do baar tach ho gayaa. rejistens"
+R entry E 05:07,06:33,08:43 | Buy when EMA 9 crosses above EMA 20 at a support/demand level; sell when it crosses below at resistance/supply; enter on the crossing candle at once, without waiting for its close. | "jaise hee kros hogaa usee kaindal pe turant tred lenaa hai"
+R no_trade E 09:30 | A level break without a crossover is not a trade. | "yahaan pe eeemae krosaovar naheen huaa. ab aapane sel kar dee. no"
+R stop E 08:01,08:43 | Stop at the recent swing (a candle or two beyond). | "sving aaee stop los"
+R target E 08:43 | Target at least 1:1.5 (book profit if 1.4 is all that comes); toward 1:2-1:3 take 70% out with the stop at cost and trail the rest. | "1:15 rakh lo ... 1:2 1:3"
+R filter A - | Level: a 5-minute swing high (low) confirmed by 2 bars each side, touched again within 0.15% at least once in the previous 3 days; the cross must happen within 0.15% of the level. | ""
+R target A - | Target 1.5R; stop 0.05% beyond the latest confirmed 5-minute swing on the far side; exit at 23:55 UTC. | ""
+T with_assumptions | Level and swing need numbers (A)
+D TD-01 | TD-01 (Trading Data) already trades a 9/20 EMA cross at a tested level with a 1.5R target; this video's version only drops TD-01's trend and discount filters
+V support/resistance | R4 | 06:33 | Levels drawn by eye | swing levels touched twice within 0.15%
+V swing | R7 | 08:43 | Which swing is not fixed | the latest confirmed swing beyond the entry
+C money | 01:33 | earned in 2-3 months of crypto what took 2 years in Indian markets | not stated | "2 se 3 maheene men kripto maarket men banaayaa hoon"
+C other | 10:53 | a universal setup that works in every market and trend | not stated | "ye yoonivarsal setaap hai"
+P 08:43 | 09:30 | Free Telegram channels and a VIP group
+P 12:18 | 12:58 | Broker sign-up for a free course and VIP group access (partner codes in the description)
+U How old may a level be, and how close must the cross be to it?

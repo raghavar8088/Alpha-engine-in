@@ -1,0 +1,20 @@
+video: g0xJhdy4asQ
+topic: stock_intraday
+summary: Anant Ladha's 9:15 strategy (with Neeraj Joshi): mark the high and low of NIFTY's first 15-minute candle (wicks included), switch to 5 minutes and trade the first break; stop at the candle's other end, target 1:2; skip the day if nothing breaks by 10:00 and skip Tuesdays (range days lately); on a fast target book half and trail the rest with the 5-minute 10 MA.
+instruments: NIFTY 50 (index, futures or options)
+timeframes: 15m, 5m
+style: intraday
+= SI-09 | First 15-minute candle breakout on 5 minutes, stop at the far side, 1:2, nothing after 10:00, no Tuesdays
+R market E 01:33 | NIFTY intraday (directional / option buying). | "15 minat kaa intraade kaa chaart redee rakhanaa hai"
+R setup E 01:33,02:14 | Mark the first 15-minute candle's high and low including the wicks. | "aapakaa haaee ekadam vik ke top point hogaa lo ekadam vik kaa loest point"
+R entry E 02:14,02:54 | On the 5-minute chart, buy the break above the high, sell the break below the low. | "oopar kee saaid brekaaaut aa rahaa hai to aap yahaan pe baay kee tred"
+R stop E 02:54 | Stop at the 15-minute candle's other end. | "jo aapakee 15 minat kee kaindal kaa haaee hogaa vo is sichueshan men stop los"
+R target E 02:54,04:14 | Target 1:2 (always keep at least 1:2). | "1:2 kaa isakaa normal taaraget hotaa hai"
+R no_trade E 03:34 | If there is no break before 10:00, skip the day. | "10 baje ke baad isamen koee tred naheen lenee hai"
+R no_trade E 03:34 | Avoid Tuesdays (currently range-bound). | "tyoosade ko aap isako avoid karenge"
+R management E 04:14 | If the target comes within minutes, book 50% and trail the rest with the 5-minute 10-period moving average. | "10 de mooving evarej kee laain 5 minat pe vo aapakaa treling stop los"
+T ready | Every rule is stated (the trail is optional)
+D BB-02 | BB-02 (Booming Bulls) already trades the NIFTY 15-minute opening-range breakout on 5 minutes with the opposite-side stop; this version adds a 10:00 cut-off and a Tuesday skip, which change no rule of the core setup
+C r_multiple | 08:22 | 1:4 to 1:5 on a trend day | example | "1:2 chhoro yahaan pe 1:4 1:5 kaa aapako taaraget mil gayaa hai"
+U Is the break a 5-minute close or a touch?
+P 01:33 | 02:14 | Free demat account links

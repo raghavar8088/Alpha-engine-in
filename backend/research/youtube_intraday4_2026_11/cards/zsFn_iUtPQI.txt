@@ -1,0 +1,23 @@
+video: zsFn_iUtPQI
+topic: commodity_intraday
+summary: Commodities by Dhan's time-based Silver Micro breakout for busy people: on 30 minutes mark the high and low of the 18:30 IST candle (done at 19:00), add a 50-point buffer each side; buy the break above, sell the break below, stop at the other side (and reverse there with a double order), target 1:2 with trailing after 1:1, close by 23:15. No indicators.
+instruments: MCX Silver Micro
+timeframes: 30m
+style: intraday
+= CI-10 | Silver Micro 18:30 IST 30-minute candle breakout with a 50-point buffer, stop and reverse, 1:2
+R market E 00:49 | MCX Silver Micro (Rs 1 per point, so 100 points against you costs Rs 100). | "silvar emaaaeesee jisako silvar maaikro bolate hain"
+R timeframe E 01:29 | 30-minute chart, no indicators or trend lines. | "30 minats kaa aapako taaim phrem rakhanaa hai"
+R session E 01:29,02:11 | Mark the 18:30 IST candle at 19:00, when global markets move commodities most. | "6:30 PM ke kaindal ko maark karanaa hai. kab? 7:00 bajane vaalee jab hogee"
+R setup E 02:11,03:33 | Add a 50-point buffer: high + 50 and low - 50. | "usake haaee aur lo pe 50-50 point kaa baphar lagaanaa hai"
+R entry E 02:11 | Buy when price breaks above high + 50; sell when it breaks below low - 50. | "agar apasaaid kee brek huee baay karenge. loar saaid brek huee sel karenge"
+R stop E 04:16 | Stop at the other side; when it is hit, exit and reverse with a double order. | "jaise hee ek stop los kategee, sel saaid staart hogaa"
+R target E 02:11 | Target 1:2; trail after 1:1. | "taaraget aapakee 1:2 rahegee ... 1:1 baad aap trel kar sakate ho"
+R exit E 02:11 | Close everything by 23:15 IST. | "11:15 tak aap kloj kar doge"
+R sizing E 00:49 | Start with single micro lots (low capital); several lots possible. | "jisamen aap lots malteepal bhee le paao, singal bhee"
+R entry A - | Stop orders at high + 50 and low - 50 points (scaled to 0.04% of price for a continuous silver series), re-placed at every 5-minute close from 19:00 to 23:00 IST; the first fill opens the trade; stop at the opposite trigger; after a stop the other side's order can fill (at the next open if price is already through it); one long and one short at most a day; target 2R. | ""
+T with_assumptions | Trailing after 1:1 is not described (A: fixed 2R); one reversal assumed (A)
+V double order | R6 | 04:16 | Size of the reversal not clear | one reversal at normal size
+C win_rate | 05:38 | 6-7 of 10 trades profitable; a month's trades covered in a day; up to 1:10 | Aug-Sep 2025 | "ovar ol siks too sevan tred prophit hue"
+X 2025-08-31 | 03:33 | MCX Silver Micro | short | 18:30 candle, upside break failed, downside break | low - 50 | high + 50 | 1:2 | target | big down move until 23:00
+X 2025-08-24 | 04:57 | MCX Silver Micro | short | 18:30 candle break | 255900 | - | 1:2 | target | 3,000 points vs 1,500 lost
+U Is the stop exactly the opposite trigger or the candle's other side?

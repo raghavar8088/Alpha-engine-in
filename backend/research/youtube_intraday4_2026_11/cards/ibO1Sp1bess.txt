@@ -1,0 +1,22 @@
+video: ibO1Sp1bess
+topic: stock_intraday
+summary: Bazaar Ke Mahir's sectoral intraday strategy (17 years in the market): at 9:20-9:25 read NIFTY 50 advances vs declines; trade stocks of the weakest sector on a declining day (strongest on an advancing day); a stock qualifies when a 5-minute 'master' candle closes below the previous day's low and the next candle is also red; sell below that confirmation candle with its high as the stop (at most 1% of the price; skip a first candle bigger than 3%); book half at 1:2, hold the rest to 15:15. Longs mirror above the previous day's high.
+instruments: NSE stocks of the day's leading sector (11 sector indices)
+timeframes: 5m
+style: intraday
+= SI-10 | Breadth-chosen sector, previous-day high/low break with two same-colour 5-minute candles, half at 1:2, rest to 15:15
+R session E 05:05,06:28 | At 9:20-9:25 check NIFTY 50 advances vs declines on the NSE site: more declines = short the weakest sector; more advances = buy the strongest. | "agar diklaain jyaadaa hai to dait de vee vil chooj d daaun saaid sektar"
+R setup E 06:28,07:49 | Rank the 11 sector indices (metal, PSU banks, financial services, FMCG, private banks, auto, IT, media, energy, realty, pharma) by % change; take the top (or bottom) sector's stocks from a prepared watchlist. | "sabase jyaadaa giraa huaa kaun sektar hai"
+R setup E 09:11,09:59 | Use the previous day's high and low; a stock inside that range is not traded; for shorts it must break the previous day's low. | "jo bhee stok meediyaa sektar kaa is renj ke beech men tred kar rahaa hai main kaam naheen karoongaa"
+R entry E 10:39,11:28,12:53 | 5-minute chart: a 'master' red candle closes below the previous day's low, the next 'confirmation' candle is also red; sell below the confirmation candle (low). | "mujhe baik too baik 5 minat taaim phrem pe do kaindal red chaahie"
+R no_trade E 11:28 | Ignore the setup if the first (master) candle is bigger than 3%. | "3 par se jyaadaa agar pahalaa kaindal ban gayaa hai to main kyaa karoongaa ignor kar doongaa"
+R stop E 12:11,12:53 | Stop at the confirmation candle's high; the stop may be at most 1% of the stock price. | "maiksimam 1 par oph dee stok vailyoo"
+R target E 13:36 | Book half at 1:2 and hold the rest until 15:15. | "1:2 p ham haaph kvaantitee buk karenge aur rimening kvaantitee vee vil hold til 315"
+R entry E 13:36,14:18 | Longs: a master green candle closing above the previous day's high, a green confirmation candle, buy above it, same 3% and 1% rules. | "preeviyas de haaee ke oopar ... pahalaa paa minat kaa kaindal brek aaut chaahie"
+R setup A - | Desk version: breadth = pool stocks up vs down from the previous close at 9:25 (the NIFTY 50 list itself is not stored); the sector ranking is dropped (no sector map in the pool) - every pool stock on the chosen side may trade; documented as a simplification. | ""
+R entry A - | Sell-stop at the confirmation candle's low valid for 2 bars; stop 0.02% beyond its high; skip if the stop exceeds 1% or the master candle exceeds 3%; half at 2R, rest to 15:15; entries 09:20-13:30; each stock is its own book (the video's few-stocks-a-day limit is not coded). | ""
+T with_assumptions | The sector ranking cannot be coded on the desk pool (A: dropped); order life not stated (A)
+V weakest sector | R2 | 07:49 | Needs sector membership | dropped in the desk version
+X - | 10:39 | Saregama (media) | short | media weakest, master candle below previous-day low, red confirmation | below the confirmation candle | its high | half 1:2, rest 15:15 | target | -
+P 00:09 | 00:54 | Channel and broker mentions
+U Which sector list and stock watchlist are used exactly?

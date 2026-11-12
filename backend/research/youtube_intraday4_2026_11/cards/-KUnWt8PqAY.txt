@@ -1,0 +1,22 @@
+video: -KUnWt8PqAY
+topic: stock_intraday
+summary: Pawan Sharma (Upsurge Club, 14 years full-time) trades a smoothed-MA crossover filtered by a higher timeframe: SMMA 11 crossing SMMA 21 on the trading chart (3 minutes for NIFTY/Bank Nifty, 5 minutes for stocks, 15 minutes for swings), taken only on the side of a 21-period moving average from the higher timeframe (15 minutes; 30-60 minutes for swings) and within 2-5 candles of the cross; nothing in 9:15-9:30, no new trades after 14:30; half booked at the planned result.
+instruments: NIFTY; Bank Nifty; NSE stocks
+timeframes: 5m, 3m, 15m
+style: intraday
+= SI-06 | SMMA 11/21 crossover on the side of the higher-timeframe 21 average (5-minute stocks / 3-minute index)
+R market E 05:41,20:07 | Any instrument (NIFTY, Bank Nifty, stocks, commodities); intraday on 3 minutes for indices, at least 5 minutes for stocks; 15 minutes for swings. | "3 minat iज़ a veree disent taaim phrem phor niphtee treding"
+R indicator E 07:42,08:22 | Two smoothed moving averages (SMMA) of 11 and 21 on the trading chart. | "ek to esaemaemae kaa dabal mooving evarej le liyaa hai ... 11 aur 21"
+R indicator E 09:48,10:27 | A 21-period moving average from the higher timeframe (15 minutes for a 5-minute chart; 30 or 60 minutes for a 15-minute chart), plotted with TradingView's 'Moving Average HTF'. | "isako ham yooज़ karenge 21 ... ye 15 minat pe hai"
+R entry E 09:07,13:14,14:38 | Buy on SMMA 11 crossing above SMMA 21 only while price is above the higher-timeframe MA; sell on the bearish cross only below it; ignore every cross against that side. | "jab bhee aisaa koee setaap banataa hai jahaan par aapako praais aapake haayar taaim phrem ke mooving evarej ke neeche milataa hai baay bilkul mat keejiegaa"
+R entry E 16:41,17:24 | Enter on the confirmation candle after the cross (the second candle), with price above all three averages; up to 4-5 candles after the cross is acceptable, not when price has already run 15-16 candles. | "chaar yaa paanch kaindal tak aap kanseedar kar sakate hain. usase oopar mat keejiegaa"
+R no_trade E 18:47,20:07 | Ignore crosses between 9:15 and 9:30; no new trades after 14:30 (open trades continue). | "9:15 se leke 9:30 tak agar koee krosaovar banataa bhee hai usako aankh band karake ignor keejiegaa"
+R stop E 19:27 | Entered after the setup matures the stop is about 30-35 NIFTY points (10-15 in options). | "es par dis setaap aapakaa 30 35 points ke aasapaas kaa stop los banataa hai"
+R target E 23:38 | Book 50% at the expected result and let the rest run. | "main vo vaalaa tred jo 50% apanaa prophit buk karake baith jaataa hoon"
+R setup A - | Desk version: the NSE 5-minute stock pool with the higher-timeframe MA = SMA 21 of completed 15-minute bars, plus NIFTY on 3-minute bars with the same 15-minute filter; SMMA = Wilder (RMA) smoothing of closes. | ""
+R stop A - | Entry at the next open after the first close beyond all three averages within 4 bars of the cross; stop below the lowest low of the last 6 bars (above the highest high for shorts), at least 0.15% and at most 0.6%; half at 2R, the rest exits on the opposite SMMA cross or at 15:15. | ""
+T with_assumptions | Stop and target are only approximate in the video (A)
+V expected result | R8 | 23:38 | No number | 2R for the first half
+X 2025-08-21 | 11:08 | NIFTY | short | bearish SMMA cross below the 15-minute MA, bullish crosses ignored | confirmation candle | about 30-35 points | half at target | target | trend day down
+P 00:03 | 00:47 | Upsurge course for Pawan Sharma's intraday options
+U What exactly is the first target?

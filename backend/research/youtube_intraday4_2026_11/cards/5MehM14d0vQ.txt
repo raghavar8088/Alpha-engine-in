@@ -1,0 +1,28 @@
+video: 5MehM14d0vQ
+topic: commodity_intraday
+summary: Siddharth Bhanushali's crude oil system: the slope of a 66-period moving average sets the side; a Stochastic (14, smoothing 2) with levels 75 and 35 gives the trigger. Sell below the low of the candle that brings the Stochastic back under 75 while the average falls (buy above the high of the candle that lifts it over 35 while the average rises); stop beyond the two-candle extreme, target 1:2. Skip sideways patches and pick the timeframe with the clearest trend.
+instruments: MCX Crude Oil futures
+timeframes: 15m, 5m, 75m, 5h
+style: intraday
+= CI-02 | Crude oil 66 moving-average slope + Stochastic 75/35 re-cross, 1:2
+R market E 00:05,00:50 | MCX crude oil (trades 09:00 to 23:00-23:30, so more intraday time). | "subah 9:00 baje shuroo hotaa hai. raat ko 11 12 baje"
+R timeframe E 07:15,24:28 | 15 minutes shown; any timeframe from 1 minute to daily works (5 minutes, 75 minutes, 5 hours shown). | "aap 5 minat kaa bhee chaart yooj kar sakate ho. aap 75 bhee"
+R indicator E 02:59 | Moving average 66 (simple). | "aid karoongaa 66"
+R setup E 05:05,07:15,07:56 | A falling 66 average allows only shorts; a rising one only buys; where price sits versus the average does not matter. | "66 mooving evarej jabhee bhee pholing hai tabhee aapako short karanaa hai"
+R indicator E 08:36,09:17,10:38 | Stochastic: length 14, %K smoothing 2, %D hidden; levels 75 (upper) and 35 (lower). | "lenth karoongaa 14 end parasentej ke ko smooth kar doongaa 2"
+R entry E 11:19,22:24,22:24 | Short: the Stochastic goes above 75, then the candle that brings it back below 75 is the trigger; sell below that candle's low. | "jis kaindal ne 75 ke neeche leke aayaa vo kaindal hamaaraa trigar kaindal"
+R entry E 23:46 | Buy: with a rising average the Stochastic drops below 35; the candle that takes it back above 35 is the trigger; buy above its high. | "staicstik 35 ke oopar gayaa yaa aapakaa trigar kaindal banaa"
+R stop E 14:04,22:24,23:46 | Stop above the higher high of the trigger candle and the candle before it (below the lower low for buys). | "do kaindal kaa haayar haaee"
+R target E 12:41,14:44 | Target 1:2. | "1:2 taaraget"
+R management E 17:28,18:54 | After a stop, keep taking new triggers while the average still slopes the same way. | "pholing mooving evarej intaikt hai ... so aaee vil go bilo d short"
+R no_trade E 19:38,27:12,27:55 | Skip sideways phases (flat average, choppy price) and setups where the Stochastic jumps from below 35 to about 70 in one big candle. | "jabhee bhee maarket is tareeke se saaidavej hotaa hai ... tred naheen karanaa hai"
+R filter E 28:39,31:36 | Choose the timeframe that shows a clear trend (daily, 5 hours, 75 minutes, 15, 5 minutes) - timeframe switching. | "taaim phrem sviching vi ij d bigest thing"
+R setup A - | Coded on 15 minutes: the average falls when SMA66 now is below SMA66 five bars ago by more than 0.05% of price (rises when above by more); otherwise flat (no trade). | ""
+R entry A - | The stop-entry order is valid for the 3 bars after the trigger; MCX hours 09:00-23:30 IST, no entry after 23:00, exit at 23:25. | ""
+T with_assumptions | Slope and sideways need numbers (A); timeframe switching is discretionary (coded on 15 minutes)
+V falling / rising | R4 | 05:05 | Slope read by eye | SMA66 change over 5 bars beyond 0.05% of price
+V sideways | R11 | 27:12 | 'Visual concept' | flat average by the same test
+X - | 14:04 | MCX Crude | short | falling MA66, Stochastic back below 75 | trigger low 8600 | about 400 points above | 1:2, 7800 | target | 5-hour chart
+X - | 17:28 | MCX Crude | short | re-entry below a doji after a stop | 7800 | about 150 points | 7500 | target | made money on the second try
+P 31:36 | 33:52 | Risk-management videos and a paid program
+U How is a falling average measured?

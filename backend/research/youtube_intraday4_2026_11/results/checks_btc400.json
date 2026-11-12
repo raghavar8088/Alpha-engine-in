@@ -1,0 +1,31 @@
+{
+ "results": {
+  "BI-02": {
+   "signals": 8,
+   "trades": 8,
+   "reasons": {
+    "stop": 5,
+    "be_stop": 3
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 0.7
+  },
+  "BI-04": {
+   "signals": 537,
+   "trades": 478,
+   "reasons": {
+    "stop": 226,
+    "target": 120,
+    "time": 76,
+    "be_stop": 56
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 9.9
+  }
+ },
+ "problems": {}
+}

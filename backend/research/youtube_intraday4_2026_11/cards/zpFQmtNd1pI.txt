@@ -1,0 +1,25 @@
+video: zpFQmtNd1pI
+topic: btc_intraday
+summary: MoneyZG scalps bitcoin on 5 minutes with three filters: price above the 100-period simple moving average, higher-timeframe Heikin Ashi candles (Candle Plot MTF) pointing up, and a bullish MACD crossover; enter on the next candle, stop at the previous candle low or nearby support (about 10-20 basis points), target at least 2:1, risk 1-3% a trade.
+instruments: Bitcoin perpetual futures (Apex Pro)
+timeframes: 5m
+style: scalping
+= BI-09 | SMA 100 side + higher-timeframe Heikin Ashi trend + MACD cross, 2R (5-minute bitcoin)
+R market E 00:01,02:51 | Bitcoin futures (also ether); 5-minute chart (1 or 15 minutes possible). | "we're going to look at trading Bitcoin right here"
+R indicator E 02:51,03:34 | Simple moving average of 100 periods: no longs below it. | "I've put 100 periods"
+R indicator E 03:34,04:21 | Candle Plot MTF indicator set to Heikin Ashi, showing the higher-timeframe trend; purple (down) candles mean no longs. | "candle type I've just put hake in ashy"
+R indicator E 05:05,05:45 | MACD (custom multi-timeframe MACD): the signal is a bullish crossover (momentum turning green). | "the actual signal is when the momentum is green"
+R entry E 07:06,07:48 | Long when price is above the SMA 100, the higher-timeframe candles point up and the MACD crosses bullish; enter on the next candle. | "we would look to enter on the next Candlestick"
+R stop E 07:48,08:31,15:40 | Stop at the previous candle's low or a nearby support (9-18 basis points in the example; 15-20 bp gives room). | "the low of the previous Candlestick or the previous move"
+R target E 09:12,16:22 | Take profit at least 2:1 (2-2.5:1). | "a ratio of at least 2 to one"
+R sizing E 10:40 | Risk 1-3% of the balance a trade (2% in the example), sized from the stop distance. | "balance risk 2% so maybe risk 1 to 3%"
+R no_trade E 05:45,17:47 | No trade against the filters, and avoid news spikes and very fast markets. | "when price action is bearish like this even if we get a bullish indicator we do not trade"
+R indicator A - | Higher-timeframe Heikin Ashi = Heikin Ashi built from 15-minute bars (the last completed one); up = HA close above HA open. MACD = (12, 26, 9) on 5-minute closes; cross = MACD line crossing its signal line. | ""
+R stop A - | Stop = the lower of the signal candle's low and the previous candle's low, at least 0.15% below entry; target 2R; shorts mirror the rules (the video shows longs); exit 23:55 UTC. | ""
+T with_assumptions | The MTF candle timeframe and MACD settings are not stated (A); shorts not shown (A)
+U Near DT-01 (MACD cross in an EMA 100 trend on 1 hour): kept as the 5-minute version with the Heikin Ashi filter.
+V higher timeframe | R3 | 03:34 | The Candle Plot MTF timeframe is not given | 15-minute Heikin Ashi
+V previous move | R6 | 08:31 | Stop place left to the trader | the lower of the two last lows, at least 0.15%
+X - | 09:12 | BTC | long | above SMA 100, HA up, MACD cross | 26774 | 26727 | 26880 | unknown | about 18 bp risk, 40 bp target
+P 02:07 | 02:51 | Apex Pro exchange and TradingView sign-up links
+U Which timeframe do the Heikin Ashi candles use?

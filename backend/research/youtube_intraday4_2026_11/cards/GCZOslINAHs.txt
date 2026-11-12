@@ -1,0 +1,23 @@
+video: GCZOslINAHs
+topic: nifty_option_buying
+summary: Virendra Pandey decides buy-or-sell days from the NIFTY ATM straddle chart (call + put premium of the 9:30 ATM strike, 5 minutes): a break of the straddle's first-15-minute low with its RSI under 40 is a selling day (short straddle, stop at the previous swing high, EMA 34 trail); buying is only allowed after that straddle stop is hit (premium expansion), then on the NIFTY spot 5-minute chart a close beyond a band of EMA 5 (of highs) and SMA 3 (of lows) gives the call/put entry, stop at the previous low, 1:2 to 1:4. Avoid Wednesdays (new contract).
+instruments: NIFTY weekly options (ATM straddle chart; ITM call/put for buying)
+timeframes: 5m, 15m
+style: mixed
+= OB-07 | NIFTY ATM straddle-chart day filter: buy options only after the straddle sell stops out, then a 5-minute band breakout on spot
+R market E 01:27,03:34 | NIFTY 50 options; ATM strike taken at the 9:15 open or 9:30 (e.g. 23350). | "23300350 ke aasapaas chal rahaa hai"
+R setup E 04:16,04:58,07:06 | Plot the ATM call + put as one combined (straddle) premium chart on 5 minutes (Insta Options tool); mark its first 15-minute candle. | "aap donon kaa joड़aa lagaate hain"
+R indicator E 08:32,09:16 | RSI with levels 60 and 40, and EMA 34 on the straddle chart. | "40 60 too 40 rakhanaa hai"
+R no_trade E 05:38,06:22,10:42 | If the straddle chart breaks its first 15-minute low with RSI under 40, premium is decaying: a selling day - do not buy options. | "aapako maaloom hai ki agar isakaa lo tootegaa to yahaan par opshan selar leed karegaa"
+R entry E 10:42 | Selling version: sell the straddle on that break, stop at the previous swing high of the straddle chart, trail with EMA 34. | "preeviyas sving haaee hai ... 34 ke eem men ej a treling stop los"
+R setup E 12:47,13:27,19:02 | Buying is allowed only after the straddle sell is stopped (the straddle breaks a previous swing high: premium expanding), often around 10:00-11:00. | "jab tak koee preeviyas sving haaee brek naheen kare eteeem stadal kaa tab tak aapako opshan baay karanaa hee naheen hai"
+R indicator E 15:30,19:44 | Then on the NIFTY spot 5-minute chart: EMA 5 of highs and SMA 3 of lows form a band. | "paanch kaa eeemae lagaao aur lagaao teen kaa esaemae aur esaemae kaa sors kar denaa lo"
+R entry E 16:15,16:55 | Buy (call) above a candle that closes above the band; buy the put when a candle closes below it; ITM strike. | "jo kaindal kloj ho usake oopar jaaie aur yahaan se opshan baay karake"
+R stop E 16:15,16:55 | Stop at the previous low (high for puts). | "preeviyas stop los rakh deejie jo bhee preeviyas lo"
+R target E 16:15 | Targets 1:2, 1:3 or 1:4; exit when a candle closes back inside the band. | "1 = 2 1 = 3 1 = 4 taaraget kar sakate hain"
+R no_trade E 12:04 | Do not run it on Wednesdays (the new weekly contract after Tuesday expiry). | "vedanesade ke din aap isamen naa lagaao"
+T not_testable | The day filter and both triggers are read from the intraday ATM straddle premium chart, which the paper desk does not have
+C money | 11:24 | Rs 3,59,000 on about Rs 2.2 lakh, max drawdown 2.6% (his forward-tested selling algorithm) | forward test | "slot men 359,000 bane"
+X 2026-09-22 | 14:48 | NIFTY 23400 PE | short | straddle sell stopped, spot band break down at 12:50 | 147 | 137 | 1:2+ | target | ran to 198
+P 10:42 | 11:24 | Paid indicator and algorithm subscriptions; CoinSwitch demat link
+U How is the straddle stop-out confirmed before switching to buying?

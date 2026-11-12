@@ -1,0 +1,20 @@
+video: HeZUP-j1tN8
+topic: stock_intraday
+summary: Jabalpur Share Bazar's intraday stock method: NIFTY's first 15-minute candle colour picks the side (red = trade the NSE top decliners short, green = top advancers long); take the top three movers around 9:20-9:25; on each, skip its first 15-minute candle and trade the break of the second candle's low (high), stop at that candle's other end, target 1:2 to 1:3.
+instruments: NSE stocks (top advancers / decliners)
+timeframes: 15m
+style: intraday
+= SI-04 | NIFTY first 15-minute candle colour picks the side; top three movers, break of their second 15-minute candle, 1:2
+R market E 00:42,02:45 | NSE stocks from the NSE website's advance/decline (top gainers/losers) lists; a 52-week high/low list is also mentioned. | "edavaans diklaain vaale reshyo men jaanaa hai"
+R timeframe E 01:22,02:45 | 15-minute candles. | "15 minat kaa taaim phrem lagaanaa hai"
+R setup E 01:22,02:03 | NIFTY's first 15-minute candle: red = pick stocks from the decliners and sell; green = from the advancers and buy. | "niफ़ee kee agar shuruaat kee 15 minat kee kaindal agar doston red banee to ... diklaain vaale jo stoks hai usako nikaalanaa hai"
+R setup E 03:27,06:16 | Take the first three stocks of that list around 9:20-9:25. | "main regular teen stok dhoondhataa hoon"
+R entry E 04:49,05:32,06:56 | On each stock skip the first 15-minute candle; mark the second 15-minute candle's high and low; for sells enter when its low breaks (high for buys); a break the other way is not traded. | "sekand 15 minat kaindal kaa lo brek karegaa to yahaan par doston aapakee banegee entree"
+R stop E 05:32,07:38 | Stop at the other end of the second candle. | "oopar kaa eriyaa doston ban jaaegaa aapakaa stop los"
+R target E 07:38 | Target 1:2 or 1:3. | "taaraget aap log 1:2 1:3 kaa rakh sakate ho"
+R setup A - | Desk version: the NSE 5-minute pool on 15-minute bars; movers = the three pool stocks with the largest fall (rise) from the previous close at 9:30 on the chosen side. | ""
+R entry A - | Stop-entry at the second candle's low (high) from 09:45, valid until 11:00; stop 0.05% beyond its other end; target 2R; one trade per stock; exit 15:15. | ""
+T with_assumptions | The 52-week list's role is unclear; order life not stated (A)
+V top three | R4 | 03:27 | Which ranking | largest % move from the previous close at 9:30
+X 2025-12-08 | 04:09 | IndiGo | short | NIFTY first candle red, IndiGo top decliner, second-candle low broken | below the low | candle high | 1:2 | target | strong fall
+U What does the 52-week high/low list add?

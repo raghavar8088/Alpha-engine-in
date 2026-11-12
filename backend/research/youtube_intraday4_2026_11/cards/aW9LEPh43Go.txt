@@ -1,0 +1,20 @@
+video: aW9LEPh43Go
+topic: stock_intraday
+summary: Radhe The Trader's stock setup: on the NSE heatmap at 9:20-9:25 find the most bearish (bullish) sector and its weakest (strongest) stock; on 5 minutes with VWAP, if the 9:20 candle is red and below VWAP, sell when its low breaks with its high as the stop (capped at 0.6%); book half at 1:1.5, move the stop to cost, rest at 1:2. Mirror above VWAP for longs.
+instruments: NSE F&O stocks (the leading sector's top mover)
+timeframes: 5m
+style: intraday
+= SI-12 | Leading sector's top mover: 9:20 five-minute candle on the VWAP side, break of it, 1:1.5 then 1:2
+R setup E 00:02,00:44,01:25 | At 9:20-9:25 open the NSE heatmap (sectoral indices); pick the most bearish (bullish) sector and its weakest (strongest) stock, e.g. TCS in a weak IT sector. | "9:25 par jo bhee sektar yahaan par sabase jyaadaa bulish hogaa yaa berish hogaa us sektar kaa ham log stok lenge"
+R timeframe E 02:07 | 5-minute chart with VWAP (centre line only). | "taaim phrem 5 minat kaa rakh die aur yahaan se indiketar men jaaenge aur yahaan par taaip karenge veevap"
+R entry E 02:47,03:29 | Bearish: the 9:20-9:25 candle closes red below VWAP; sell only when its low breaks (no red candle or no break = no trade). | "jab bhee veevap ke neeche 9:20 kaa kaindal red banegaa ... aur usakaa lo brek karegaa tab jaake ham tred karenge"
+R stop E 03:29,04:09 | Stop at that candle's high, but at most 0.6% (if the candle is bigger, use 0.6%). | "maiksimam 6% ham log yahaan par stop los rakhenge"
+R target E 04:09 | First target 1:1.5 for half, then stop to cost, rest at 1:2. | "pharst taaraget aap 1:1.5 rakho. yahaan par aap haaph kvaantitee buk kar sakate ho"
+R entry E 04:53,05:36 | Bullish: the 9:20 candle green above VWAP; buy when its high breaks; stop at its low (same cap). | "is veevap ke oopar jaake green kaindal banaa hai aur isakaa haaee brek huaa"
+R setup A - | Desk version: the NSE 5-minute pool; the sector step is dropped (no sector map); the stock = the pool's largest loser (gainer) from the previous close at 9:25 on the side of NIFTY's change; VWAP from the stock's own volume. | ""
+R entry A - | Stop-entry at the 9:20 candle's low (high) from 9:25 until 10:30; stop at its other end, capped at 0.6%; half at 1.5R then stop to entry, rest at 2R; exit 15:15; one trade a day. | ""
+T with_assumptions | The sector ranking cannot be coded on the desk pool (A: dropped); order life not stated (A)
+V maximum 6% | R4 | 03:29 | Said as '6%', shown as 0.6% on the tool | 0.6%
+X 2026-06-04 | 03:29 | TCS | short | IT weakest, 9:20 red candle below VWAP, low broken | below the low | candle high (max 0.6%) | 1:1.5 then 1:2 | target | fell all day
+P 06:17 | 07:43 | 'Brahmastra' indicator and Lemonn broker referral
+U Is the 0.6% cap applied to all stocks?

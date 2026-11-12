@@ -1,0 +1,26 @@
+video: fcU8iz__qfE
+topic: commodity_intraday
+summary: Commodities by Dhan's crude oil 'slingshot' pullback on 15 minutes: when price stretches about 7% away from its 200-period moving average (Distance from Moving Average in percent), wait for a Stochastic RSI (140, 140, 30, 30) signal back toward the average; target 50-100 points or the opposite Stochastic RSI signal, stop on an EMA 5/15 cross against the trade.
+instruments: MCX Crude Oil futures
+timeframes: 15m
+style: intraday
+= CI-08 | Crude oil 7% stretch from the 200 average + slow Stochastic RSI turn (15 minutes)
+R market E 02:10 | MCX crude oil (gold and silver need other thresholds). | "main aapako ye stretajee krood oyal ke 15 minats ke taaim phrem pe dikhaa rahaa hoon"
+R timeframe E 02:10 | 15-minute chart. | "aplaaee kar letaa hoon usako 15 minats ke taaim phrem pe"
+R indicator E 06:23,07:07 | Distance from Moving Average: 200-period average, shown as a percentage difference. | "hamen 200 peeriyad mooving evarej chaahie ... dipharens in parasentej"
+R setup E 07:47,08:31 | A stretch is about 7% (5-9%) above or below the 200 average; lines at +7% and -7%. | "krood oyal ke 15 minats ke taaim phrem pe 7% ke aasapaas kaa moov"
+R indicator E 09:14 | Stochastic RSI with ten times the usual parameters: 140, 140, 30, 30. | "140, 140, 30 end 30"
+R entry E 09:14,10:39 | Sell when stretched above +7% and the Stochastic RSI gives a sell signal; buy when stretched below -7% and it gives a buy signal. | "jab aapako stocstik aaraesaaaee yahaan se sel signal degaa"
+R target E 09:55,11:21,12:02 | On 15 minutes aim for Rs 50-100 a barrel (a monetary target), or hold until the opposite Stochastic RSI signal. | "hamen sirph krood oyal kaa 50 se ₹100 ke aasapaas kaa moov chaahie"
+R stop E 11:21 | Stop: exit when EMA 5 crosses below EMA 15 (above for shorts); re-enter if it crosses back. | "jaise hee 5 eeemae 15 ke neeche jaaegaa aap pojeeshan men egjit kar jaaenge"
+R sizing E 12:02 | Trade 10 small lots instead of one big lot to book partial profits. | "ek bare lot men tred karate hain. usakee jagah aap 10 chhote lot men tred keejie"
+R entry A - | Coded: a K line crossing below (above) the D line of Stochastic RSI (RSI 140, stochastic 140, smoothing 30/30), while the distance is beyond 6.5% or was within the last 20 bars; entry at the next open. | ""
+R target A - | Target 1.5% of price (about 80 points), else exit on the EMA 5/15 cross against the trade or the opposite Stochastic RSI cross; a 2% safety stop from the fill (the video names no price stop); one position at a time; MCX hours; held across sessions. | ""
+T with_assumptions | The stretch threshold is given as a range (A: 6.5%); signal definition of Stochastic RSI not spelled out (A)
+V about 7% | R4 | 08:31 | Given as 5-9% | 6.5%
+V sell signal | R6 | 09:14 | Which crossover is meant | K crossing D
+C other | 09:55 | 4.5% fall in 11 hours; 8.5-9% in 3 days; losses only 50-60 points vs profits of thousands of rupees | examples | "3 din men 8.5 9% ke beech men"
+X - | 09:14 | MCX Crude | short | stretched above +7%, Stochastic RSI sell | - | EMA 5/15 cross | Stochastic RSI buy | target | 4.5% in 11 hours
+X - | 10:39 | MCX Crude | long | stretched below -7%, Stochastic RSI buy | - | EMA 5/15 cross | 50-100 points | target | 4.5% in 7 hours
+P 04:18 | 05:01 | Free MTF leverage Excel sheet via a Google form
+U Is the stretch measured at the signal bar or any recent bar?

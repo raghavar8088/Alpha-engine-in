@@ -1,0 +1,24 @@
+video: pvmvkiS1cx4
+topic: nifty_option_buying
+summary: Mukul Choudhary (Dhan) scalps NIFTY / Bank Nifty / Sensex on the 2-minute spot chart with EMA 10 and EMA 20, buying ITM options (delta 0.55-0.6): trade only with the EMA stack, never chase big candles; wait for a pullback that hunts stops (below the big candle or its 50%, ideally to EMA 20), then enter on a morning/evening star (preferred) or an engulfing candle; stop beyond the pattern (skip if more than 15-18 points), at most 3 entries, stop trading by 11:30-12:00, no option buying when India VIX is above 15-16.
+instruments: NIFTY / Bank Nifty / Sensex ITM options (100-200 points ITM)
+timeframes: 2m
+style: scalping
+= OB-09 | 2-minute EMA 10/20 trend pullback after a stop hunt, star or engulfing entry, done by noon (VIX filter)
+R market E 00:49,01:30 | NIFTY (preferred), Bank Nifty or Sensex: signals on the spot chart, trades in ITM options 100-200 points in the money (delta 0.55-0.6). | "in d manee opshans men hee baat karoongaa"
+R timeframe E 01:30 | 2-minute chart (only after mastering 5 minutes). | "yahaan par ham log 2 minats yooज़ karenge"
+R indicator E 02:15,03:45 | EMA 10 and EMA 20 (exponential), nothing else. | "indiketars ham yooज़ karane vaale hain do 10 end 20 eeemae"
+R setup E 05:56 | Direction: EMA 10 above EMA 20 with price above them = longs only; EMA 10 below EMA 20 with price below = shorts only. | "10 mooving evarej oopar hai. 20 usake neeche hai. end praais iज़ treding abav it"
+R no_trade E 04:27,17:54 | Never chase: after a big candle, wait for the pullback. | "jab bhee baree kaindals aatee hain, skip it"
+R setup E 06:37,07:21,11:38 | The pullback must hunt stops: below the big candle's low or its 50%; better, price comes back to EMA 20 (not just EMA 10). | "esael hant aapako kahaan dikhegaa? yaa to usake neeche dikhegaa yaa 50% ke neeche"
+R entry E 08:48,09:31,10:55 | Entry candles: three-candle morning star (long) / evening star (short), preferred for the first trade, or two-candle bullish / bearish engulfing; enter as the pattern candle closes. | "pahalee entree hameshaa aap plaan karie three kaindalastik paitarn vaalee"
+R stop E 11:38,16:33 | Stop beyond the pattern; with VIX near 12-13 it should not exceed 15-18 points, otherwise skip. | "stop los shud not bee mor den 15 too 18 points"
+R session E 12:23,17:13,18:37 | At most three entries a day; stop trading by 11:00-12:00. | "aapane poore din men teen entree plaan karanee hai"
+R no_trade E 13:04 | No option-buying scalps when India VIX is above 15-16 (sell or hedge instead). | "India VIX agar 15-16 ke oopar hai to biginars ko opshan baaing men skailping naheen karanee chaahie"
+R market A - | Desk proxy on NIFTY 2-minute bars built from index minutes; the VIX filter is not applied (no VIX feed on the desk). | ""
+R entry A - | Coded: a 'big candle' = range at least 2x the 20-bar average range in the trend direction; the pullback must trade below its 50% level (above for shorts) and touch EMA 20 within 15 bars; then a morning/evening star or engulfing closing back in the trend direction; entry at the next open; stop 0.02% beyond the pattern extreme, skipped if more than 18 points (0.07%); target 2R (no target is stated); entries 09:20-11:30, exit 12:00; at most 3 trades. | ""
+T with_assumptions | No target is stated (A: 2R); 'big candle' and the stop hunt need numbers (A); VIX filter not available (A)
+V big candle | R5 | 04:27 | No size | range 2x the 20-bar average
+V stop hunt | R6 | 07:21 | Depth not given | trades through the big candle's 50% level and touches EMA 20
+U What is the target?
+P 00:04 | 00:49 | Dhan app; free MTF calculator

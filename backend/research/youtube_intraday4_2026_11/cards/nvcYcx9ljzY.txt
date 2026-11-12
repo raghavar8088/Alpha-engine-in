@@ -1,0 +1,27 @@
+video: nvcYcx9ljzY
+topic: commodity_intraday
+summary: Pivot Call's crude oil 15-minute scalp in strong uptrends: the first 'bald' green candle (no lower wick at all, medium 20-30 point range) after a run of red candles or pin bars/dojis, ideally near the 20/50 MA, CPR or a swing low; take 20-30 points on the next candle (or the third if momentum is strong), stop below the bald candle with some room; add on a pin bar at its low.
+instruments: MCX Crude Oil (WTI chart shown)
+timeframes: 15m
+style: scalping
+= CI-12 | Crude oil 'bald' green candle (no lower wick) after a red series, 15-minute scalp
+R market E 00:10 | Crude oil (MCX; the chart shown is WTI crude). | "applicable for crude oil"
+R timeframe E 07:27,10:15 | 15-minute candles only (not 5 minutes). | "time frame 15 minutes okay 15 minutes Candlestick not 5 minutes"
+R filter E 01:37,02:18 | Overall trend must be a strong uptrend: the 20 MA sloping up and higher lows. | "you have to plot 20 ma and 20 ma is sloping upside"
+R setup E 02:18,03:02,03:47 | Entry candle: a green body with zero lower wick (an upper wick is fine); not too big or small, about 20-30 points of range. | "bottom should not have any Wix"
+R setup E 04:29,05:14,05:58 | It must be the first such candle after a series of red candles (3 or more, no green just before) or a series of pin bars/dojis. | "the entry candle should be the first candle after series of doy or red candle"
+R filter E 01:37,05:14 | Higher probability near the 20 MA, 50 MA, CPR, the day's low or a swing low. | "near 20 ma 50 ma or near the CPR"
+R entry E 05:58,06:40 | Take the entry on that bald candle. | "the candle which you take entry that should be the first candle after doy"
+R target E 06:40 | Scalp 20-30 points: profit on the next candle, or the third candle if momentum is strong. | "next candle only you can take the profit ... third candle"
+R stop E 07:27,10:15 | Stop below the bald green candle's low, with some room. | "keep some room don't keep just below the green candle"
+R management E 06:40,07:27 | If price comes back to the bald candle's low and makes a bullish pin bar, add; stop below the pin bar. | "if price retraces back to green Bal candle low ... add to my position"
+R setup A - | Coded long only (the video teaches the uptrend case): uptrend = SMA 20 now above SMA 20 four bars ago and the bar's low above the low of 8 bars ago; zero lower wick = open within 0.02% of the low; range 0.3%-0.55% of price (20-30 points at about Rs 5,500). | ""
+R exit A - | Entry at the next open; stop 0.1% below the bald low; target 0.45% (25 points) or exit at the close of the third bar after entry; the add-on is not coded; MCX hours, exit 23:25 IST. | ""
+T with_assumptions | 'Strong uptrend' and the exit candle need numbers (A); shorts are not taught
+V strong uptrend | R3 | 02:18 | Read by eye | SMA 20 rising over 4 bars and higher lows
+V some room | R9 | 10:15 | Distance not given | 0.1% below the low
+C win_rate | 00:10 | one of the highest win rates | not stated | "this strategy have one of the highest win rate"
+X 2024-06-12 | 11:01 | WTI crude | long | bald green candles in an uptrend | candle close | below the low | next candle | target | strong moves after
+X 2024-06-27 | 12:28 | WTI crude | long | bald green candle, retest of its low rejected | candle close | below the low | 20-30 points | target | -
+P 00:10 | 01:05 | Paid crude oil course with 10 strategies
+U Is the entry at the bald candle's close or the next open?

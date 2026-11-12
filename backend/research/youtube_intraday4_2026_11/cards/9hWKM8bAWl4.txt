@@ -1,0 +1,22 @@
+video: 9hWKM8bAWl4
+topic: stock_intraday
+summary: Mukul Choudhary (Dhan) trades a fixed watchlist of 5-10 liquid NIFTY 50 F&O stocks (one per sector) instead of scanners: once a stock breaks its 9:15-9:30 opening range with price on the same side of VWAP, wait for a pullback toward VWAP/the averages and enter on a bearish (bullish) engulfing; stop beyond VWAP; split the day's risk across the 3-4 entries the list can give.
+instruments: NSE NIFTY 50 F&O stocks (fixed list of 5-10)
+timeframes: 5m
+style: intraday
+= SI-02 | Fixed watchlist: 9:15-9:30 range break on the VWAP side, pullback engulfing entry, stop beyond VWAP
+R market E 01:26,02:07 | A fixed list of 5-6 (at most 10) liquid NIFTY 50 F&O stocks, one per sector, used for at least two months; no scanners. | "phaaiv yaa siks stoks pik kar leejie. isase jyaadaa mat karie"
+R indicator E 02:07,02:48 | VWAP (default) and the opening-range indicator set to 9:15-9:30 (15 minutes). | "seting baay diफ़olt sem rahegee 9:15 too 9:30"
+R setup E 02:48,03:33 | Around 9:20-9:30 sort the list into trending-up and trending-down stocks; trade only a stock whose opening range has broken. | "agar koee see saaid pe bhee renj brekaaaut hotaa hai"
+R filter E 02:48,03:33 | Short only with price below VWAP after a downside break (long only above VWAP after an upside break). | "renj brekaaaut hotaa hai aur praais veevap ke neeche hotee hai"
+R entry E 03:33,04:16,07:02 | Wait for a pullback toward VWAP / the averages and enter on a bearish engulfing (bullish engulfing for longs); the closer to VWAP the better; no trade without a pullback. | "pulabaik pe mujhe berish engalphing milegee. main tred le loongaa"
+R stop E 04:16,04:56 | Stop above VWAP for shorts (below for longs). | "stop los aapakaa veevap ke oopar rahegaa"
+R sizing E 04:56,06:19 | Divide the daily risk by the 3-4 trades the list can give (e.g. Rs 5,000 a day = Rs 1,000-1,250 a stock). | "har stoks men ₹1000 aap daal denge"
+R entry A - | Desk version: the 6 most liquid NIFTY 50 stocks of the NSE 5-minute pool by the previous month's turnover, fixed for a month; break = a 5-minute close beyond the 9:15-9:30 range on the VWAP side; pullback = a later bar trading within 0.2% of VWAP; engulfing as in yc_common; entry at the next open, 09:35-13:30. | ""
+R target A - | No target is stated: coded 2R; stop 0.05% beyond VWAP at the signal bar (at least 0.3% from entry); one trade per stock per day; exit 15:15. | ""
+T with_assumptions | No target is given (A); the list is the trader's own choice (A: top 6 by turnover)
+V close to VWAP | R5 | 06:19 | Distance not given | within 0.2% of VWAP
+X - | 04:16 | Titan | short | range broken down, below VWAP, bearish engulfing on the pullback | engulfing close | above VWAP | - | stop | stop hit
+X - | 04:56 | Maruti | short | trend down below VWAP, bearish engulfing | engulfing close | above VWAP | - | target | ran in the direction
+P 00:45 | 01:26 | Dhan app download
+U What is the target or exit?

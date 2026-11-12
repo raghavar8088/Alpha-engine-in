@@ -1,0 +1,19 @@
+video: jUNSZnP9MVI
+topic: nifty_option_buying
+summary: Pankaj Sahu's 'gamma blast' on Upsurge Club: only on NIFTY expiry day, 14:00-15:00, find a call strike and a put strike whose premiums have fallen below Rs 10; buy the side whose option theta is more negative (sellers are crowded there and get trapped); risk only about Rs 1,000 of capital, stop Rs 500, target Rs 8,000-10,000. A zero-to-hero bet with about 50% accuracy.
+instruments: NIFTY weekly options on expiry day (premium under Rs 10)
+timeframes: 1m
+style: options_buying
+= OB-11 | NIFTY expiry-day 'gamma blast': sub-Rs 10 option on the more-negative-theta side, 14:00-15:00
+R market E 03:37,04:19 | NIFTY 50 options, on NIFTY's weekly expiry day only. | "niphttee 50 ke eksapaayaree ke din hee karanaa hai"
+R session E 04:19 | Watch only from 14:00 to 15:00. | "aaphtar 2 PM ham end biphor 3 PM"
+R setup E 05:01,05:41 | In that hour find the call strike and the put strike whose premiums have dropped below Rs 10 (strikes may differ). | "kol saaid men kaun se straaik praais kaa jo preemiyam hai vo bilo ₹10 ke neeche aa gayaa hai"
+R entry E 05:41,07:11,07:51 | Compare the two options' theta on expiry day: buy the side with the more negative theta (seller trap). | "jidhar jyaadaa maainas theetaa udhar banataa hai selar traip"
+R sizing E 08:34,09:16 | Use about Rs 1,000 of capital (as many lots as that buys), not big capital; try for 1-2 months first. | "1000 kaa kaipital se 1000 isase jyaadaa kaipital abhee koee bhee yooज़ naheen karegaa"
+R stop E 09:16 | Stop Rs 500 (half the capital). | "stop los rakhanaa hai ₹500 kaa"
+R target E 09:16,09:56 | Target Rs 8,000-10,000; do not book below that. | "taaraget rakhanaa hai 8 too 10,000 kaa. isase neeche kaatanaa naheen hai"
+T not_testable | Needs NIFTY option premiums and option Greeks (theta) by strike on expiry afternoons; the paper desk has no option data
+C other | 02:53 | a Rs 3 Sensex premium went to Rs 140 (more than 50x) | recent expiry | "₹3 kaa preemiyam ₹140 chalaa gayaa thaa"
+C win_rate | 11:20 | zero-to-hero accuracy about 50% | not stated | "jeero too heeroi stretajee men naa 50 50% ekyooresee"
+P 10:37 | 11:20 | Paid Upsurge course with the Lorentz setup
+U How is theta compared when the two strikes differ?

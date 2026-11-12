@@ -1,0 +1,21 @@
+video: eVqCSx887G8
+topic: btc_intraday
+summary: ETM FX trades bitcoin with smart-money ranges on an 8-hour operating timeframe: after a break of structure and a return inside the old range, buy the bottom quarter (discount) of the new swing range with a stop below the swing, first target the previous range, second the liquidity beyond; drop to 1 hour or 30 minutes when volume makes the 8-hour swings unreadable.
+instruments: Bitcoin
+timeframes: 8h, 1h, 30m
+style: swing
+= BI-05 | Bitcoin 8-hour structure range: buy the discount quarter after a break of structure (smart money)
+R market E 00:01 | Bitcoin. | "how to use Smart money Concepts while trading Bitcoin"
+R timeframe E 02:53,09:55 | Operating timeframe 8 hours (6 hours possible); lower it to 1 hour or 30 minutes when high volume makes swings unclear. | "Bitcoin is moving in the 8 hour time frame"
+R setup E 00:44,01:28 | Range: when price breaks a swing high and comes back inside the previous range, the new high is the top and the swing low that started the move is the bottom. | "That Swing high and price comes back inside of the range that new high is the top"
+R indicator E 01:28,02:09 | Fibonacci in quarters (0, 0.25, 0.5, 0.75, 1): the bottom quarter is discount (buy), the top quarter premium (sell). | "your bottom quarter is your discount your top quarter is your premium"
+R entry E 02:09,05:39 | Buy when price retraces into the discount quarter (the extreme level) of the current range in a bullish cycle; mirror for sells. | "we're waiting for price to get down here for us to purchase"
+R stop E 02:09,05:39 | Stop a little below the swing low (the origin of the extreme level). | "our stop loss being right below this swing"
+R target E 05:39,06:20 | First target back to the previous range (then breakeven at 1:1), second target the liquidity beyond. | "our first DP back to our previous range and then our second CP would be clearing this liquidity"
+R management E 07:46 | Move the stop to breakeven conservatively; early breakeven can stop a good trade. | "you always want to be modered with the way you move your stop loss"
+T with_assumptions | Swing and break-of-structure definitions by eye; an 8-hour swing method, not intraday
+D CP-25 | The same deep-retracement buy of a structure range already trades as CP-25 (OTE 0.705-0.79) and YT-06 (OTE 62%); this is the 8-hour version with a 0.75 level
+V extreme level | R5 | 04:57 | Extreme demand chosen by eye | the 0.75-1.0 retracement of the current range
+X - | 05:39 | BTC | long | break of structure, back inside the range, discount entry | discount quarter | below the swing low | previous range, then liquidity | target | both targets hit
+P 02:53 | 03:35 | Like/subscribe; website for more lessons
+U How is a break of structure confirmed (close or wick)?

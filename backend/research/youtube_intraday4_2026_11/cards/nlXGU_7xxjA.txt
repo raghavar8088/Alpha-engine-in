@@ -1,0 +1,21 @@
+video: nlXGU_7xxjA
+topic: stock_intraday
+summary: Rajesh Jain's 9:30 setup (distinct from his 9:15 'morning tea'): at 9:28-9:30 take the NIFTY 50 top gainers whose open equals the low (losers whose open equals the high); when the first 15-minute candle completes, buy the break of its high with the low (the open) as the stop; take a target equal to the risk or hold to 14:00; futures, equity or an option strike whose own open equals its low.
+instruments: NIFTY 50 stocks (equity, futures or options)
+timeframes: 15m
+style: intraday
+= SI-11 | 9:30 open-equals-low gainer (open-equals-high loser): first 15-minute candle breakout, stop at the open
+R market E 02:08,02:51 | NIFTY 50 stocks from the NSE top gainers / losers list (equity, futures, or an option whose own open equals its low). | "niphttee 50 ko yahaan sikyoritee men daalenge aur top genar top loojar kaa list aa gayaa"
+R setup E 02:51,03:32 | Gainers: open equals low (e.g. Persistent 5335.80 open and low); losers: open equals high. | "parsistent 5335.80 5335.80 ab isakaa opan end los sem ho gayaa"
+R session E 02:51,03:32 | Check at 9:28-9:30, after the first 15-minute candle completes. | "ye 9:28 pe hamako bataa degaa. 30 minat pe hamako ye maarket men jaanaa hai"
+R entry E 03:32,04:15 | Buy when the first 15-minute candle's high breaks (sell when the low breaks for open = high). | "jaise ye 15 minat kee kaindals khatm hotee hai aur usakaa haaee brek hotaa hai. yahaan pe aap entree lo"
+R stop E 03:32,09:16 | Stop at the low (= the open) for buys; at the high for sells. | "lo praais kaa stop los lagaao aur baithe raho"
+R target E 09:16,10:00 | Target equal to the stop distance (40 points of risk = 40 points of target), or hold until 14:00 while the stop holds. | "abhee 40 point honaa chaahie. 195 + 40"
+R exit E 00:02,09:16 | Otherwise exit by 14:00. | "baithe raho 2:00 baje tak"
+R market A - | Desk version: every stock of the NSE 5-minute pool (the pool stands in for the NIFTY 50 list); gainer = up from the previous close at 9:30 and the 9:15-9:30 low within 0.02% of the open; loser mirror. | ""
+R entry A - | Buy-stop 0.02% above the 9:15-9:30 high from 9:30 until 10:30; stop at the open minus 0.02%; target 1R; exit 14:00; at most 2 stocks a day, the two biggest movers that qualify. | ""
+T with_assumptions | 'Open equals low' needs a tolerance on 5-minute data (A); order life not stated (A)
+V open equals low | R2 | 02:51 | Exact equality on tick data | low within 0.02% of the open
+X 2025-08-19 | 04:15 | Persistent | long | gainer with open = low, 15-minute high 5448 broken | 5448 | 5335.80 | 1:1 or 14:00 | target | 5515 in three candles, 5548 by 11:00
+P 21:22 | 22:19 | Upsurge course links for Rajesh Jain's setups
+U Does the order expire if the high is not broken by a set time?

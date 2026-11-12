@@ -1,0 +1,28 @@
+video: 2ZTBqEduoe0
+topic: commodity_intraday
+summary: Candle Pe Command's crude oil setup on 15 minutes, only after 12:00 IST: at a top, a red candle that first takes out the previous green candle's high and then closes red is a rejection; sell the break of its low with the stop two points above its high. At a bottom, a green candle that first breaks the previous red candle's low and closes green; buy the break of its high. Take 1.5 times the risk or a standard 50 points.
+instruments: MCX Crude Oil futures (mega and mini lots); crude options*
+timeframes: 15m
+style: intraday
+= CI-05 | Crude oil 15-minute two-candle rejection after 12:00 IST (sweep of the prior candle, break of the signal candle)
+R market E 02:15,03:38 | MCX crude oil (March future shown); backtested only on crude, other scripts untested. | "ye krood oyal ke chaart ke oopar hee yah sistam vark karegaa"
+R sizing E 03:38,04:18 | Mega lot Rs 100 a point (about Rs 28,000 margin), mini lot Rs 10 a point (about Rs 21,000). | "megaa ₹100 kaa phlakchueshan detaa hai ek point pe"
+R timeframe E 02:15,05:45 | 15-minute chart. | "15 minat kaa taaim phrem lagaa rakhaa hai"
+R session E 05:03,05:45 | Skip the first 13 fifteen-minute candles: trade only after 12:00 IST; earlier signals trap you. | "12:00 baje ke baad hee aanaa"
+R setup E 05:45,06:26 | Sell setup: after a rise, a green candle, then a red candle whose high takes out the green candle's high and which closes red (rejection). | "green kaindal kaa haaee brek karane ke baad ye kaindal rijekt ho gaee hai"
+R entry E 06:26 | Sell when the red candle's low breaks. | "yah jo red kaindal banee hai ab isakaa lo toot jaataa hai to yahaan par sel ban jaataa hai"
+R stop E 06:26 | Stop 2 points above the red candle's high. | "isee kaindal ke haaee se do point oopar apanaa stop los"
+R setup E 07:50,09:59 | Buy setup: after a fall, a red candle, then a green candle that first breaks the red candle's low and closes green. | "is red kaindal kaa aage chal ke green kaindal ne lo brek kiyaa hai"
+R entry E 08:32,09:59 | Buy when the green candle's high breaks; stop at its low. | "is kaindal kaa haaee brek hote hee ham baay ke saaid men jaate hain"
+R target E 07:07,08:32 | Exit at 1.5 times the risk, or a standard 50 points (moves of 100-230 points happen). | "aap jo risk le rakhe ho usakaa derh gunaa aapako prophit milataa hai to aap egjit ho jaao"
+R management E 00:47,11:22 | One or two signals a day; filters to remove fake signals exist but are not given. | "isamen jo phek signal aate hain vo matalab hat jaate hain"
+R setup A - | 'After a rise' coded as: the green candle's high is the highest high of the last 8 candles (the red candle's low the lowest of 8 for buys). | ""
+R entry A - | The stop-entry is valid for the 3 bars after the signal candle; stop 0.04% (2 points) beyond its extreme; target 1.5R; at most 2 trades a day; entries 12:00-23:00 IST, exit 23:25. | ""
+T with_assumptions | 'After a rise' and the order life need numbers (A); the extra filters are not given
+V after a rise / top | R5 | 05:45 | Not measured | the green candle's high is the 8-bar high
+C money | 00:05 | one candle gave Rs 13,000; another Rs 23,600 (mega lot) | single trades | "sirph yah ek singal kaindal ₹13,000 kee hai"
+C other | 00:05 | the signal forms every day | not stated | "koee aisaa din naheen hai jis din is is tareeke kaa signal naheen ban rahaa ho"
+X - | 05:45 | MCX Crude | short | red candle swept the green high after 12:00 | red low break | red high + 2 | 1.5R or 50 points | target | -
+X - | 09:59 | MCX Crude | long | green candle swept the red low, closed green | green high break | green low | 50 points | target | 230 points move
+P 12:05 | 12:30 | Filters promised in a later video
+U What are the filters that remove fake signals?

@@ -1,0 +1,29 @@
+video: e3R9bi_coug
+topic: btc_intraday
+summary: Priyank Sharma (SEBI-registered research analyst) scalps bitcoin on 5 minutes with Bollinger Bands and a W/M pattern: after price first leaves a band and makes a swing outside it, wait for a fakeout of that swing (a wick through it, or a close through it reversed by the next candle), then enter on the break of the neckline; stop beyond the band or swing, 50-60% at 1:1, rest to where the move began.
+instruments: Bitcoin (BTC/USD)
+timeframes: 5m
+style: scalping
+= BI-04 | Bollinger W/M fakeout: first swing outside the band, fakeout of it, neckline break (5-minute bitcoin)
+R market E 01:26 | Bitcoin against the dollar; the same works in stocks. | "skreen par opan kar liyaa hai bitakoin dolar kaa chaart"
+R timeframe E 01:26 | 5-minute chart (1 or 15 minutes also usable). | "taaim phrem yahaan par selekt kar rakhaa hai 5 minat"
+R indicator E 05:37,06:18 | Bollinger Bands: 20-period moving average middle line, bands 2 standard deviations away. | "mooving evarej 20 ... too staindard devieshan"
+R setup E 08:24,09:04 | Get ready only when price leaves a band for the first time (by wick, body or breakout). | "jaise hee maarket pahalee baar isake baahar nikale, hamen taiyaar ho jaanaa hai"
+R setup E 09:04,10:25,11:05 | Mark the first swing low (high) that forms outside the lower (upper) band. | "sving lo kahaan banaa hai? bailinjar baind ke baahar banaa hai"
+R setup E 01:26,04:14,04:56 | Price must come back to that swing level and fake out: a wick through it with the close back inside (weak fakeout), or an immediate fakeout: one candle closes through the level and the next candle closes back. | "agalee kaindalastik ne klojing jo hai vaapas se isee leval ke neeche kar diyaa"
+R filter E 11:41,12:25 | The opposite band must not be tested between the first swing and the fakeout; if it is, watch the opposite setup instead. | "lo banaane se pahale praais apar baind ko test naa kar le"
+R entry E 11:05,12:25,13:06 | Entry when price breaks the neckline (the swing high between the two lows of the W; mirror for M); a breakout is confirmed by the closes of two candles. | "jaise hee yah sentar vaalaa haaee hai, jaise hee yah brek karegaa, ham log entree"
+R no_trade E 13:06,15:14 | Skip the trade if price is already far from the ideal entry (about two candles away). | "do kaindal stik door hai to aap isamen entree naheen lenge"
+R stop E 09:45,13:46,15:14 | Stop below the lower band or below the swing low (beyond the band for shorts). | "is bulinjar baind ke neeche yaa phir is sving lo ke neeche"
+R target E 09:45,13:46,14:28 | Target 1 at 1:1 at least: book 50-60% and move the stop to entry; target 2 where the previous move began. | "50 se 60% pojeeshan taaraget van par buk kar lenge aur apane stop los ko entree par"
+R setup A - | First exit: a bar whose low (high) is beyond the band while the 5 bars before stayed inside; the swing is a 2-bar fractal low (high) beyond the band within 20 bars; the fakeout must come within 30 bars of the swing. | ""
+R entry A - | Entry at the next open after the first 5-minute close beyond the neckline; skipped if that close is more than 0.5R past the neckline. | ""
+R stop A - | Stop at the lower of the fakeout low and the band at the fakeout bar, plus 0.02%; half at 1R (the engine books halves), then stop to entry; second target = the extreme of the 30 bars before the first exit, at least 1.5R; out at 23:55 UTC. | ""
+T with_assumptions | Swing, fakeout window and second target need numbers (A)
+V first time | R4 | 08:24 | How long price must stay inside before an exit counts as first | 5 bars inside the band before the exit
+V far from entry | R9 | 15:14 | Two candles away is not a distance | 0.5R beyond the neckline
+V where the move began | R11 | 13:46 | Start of the move is read by eye | extreme of the 30 bars before the first band exit
+X - | 10:25 | BTC/USD | long | first exit below the lower band, swing low outside, immediate fakeout, neckline break | neckline break | below the band | 1:1 then the move start | target | 1:1 reached (1.12 at recording)
+P 00:02 | 00:43 | Introduces himself as a SEBI-registered research analyst; exchange referral links in the description
+U Does the neckline break need one close or two?
+U How far beyond the band does the stop go?

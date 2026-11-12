@@ -1,0 +1,22 @@
+video: 0Qvy_S_giCI
+topic: btc_intraday
+summary: Delta Exchange's long-only momentum setup for any timeframe (5 minutes shown on bitcoin and ether): price above EMA 200, the RSI-divergence indicator's RSI above 50, and a bullish engulfing candle; stop at the engulfing low (or out if price closes below EMA 200), target at least 1:2.
+instruments: Bitcoin; Ether
+timeframes: 5m
+style: intraday
+= BI-11 | EMA 200 + RSI above 50 + bullish engulfing, long only, 1:2
+R market E 03:29 | Ether and bitcoin (Indian markets and forex also possible). | "ithariyas aur bitakoin men"
+R timeframe E 01:26,03:29 | Any timeframe; 5 minutes shown. | "phaaiv minats kaa baik test karake dikhaataa hoon"
+R indicator E 00:45 | EMA 200. | "lenth 200 kar denaa"
+R indicator E 01:26,02:08 | RSI Divergence indicator (by Mohan): middle line 50; trade only when its RSI is above 50. | "ye 50 ke oopar ho 50 ke neeche vaalaa aapako kanpleet avoid karanaa hai"
+R indicator E 02:08,02:49 | Engulfing-candle indicator: a candle whose body fully covers the previous candle's body. | "jisane pichhale kaindal ke bodee ko kanpleet khaayaa hai"
+R entry E 01:26,04:11 | Long only: price above EMA 200, RSI above 50 and a bullish engulfing candle; enter long. | "ye setaap aap sirph aur sirph bulish nes ke lie yooj karoge"
+R stop E 04:53,06:55 | Stop at the engulfing candle's low; exit if price goes below EMA 200. | "stop los aapako lagaanaa hai isake lo kaa"
+R target E 03:29,04:53 | Target at least 1:2. | "risk rivord minimam 1:2"
+R filter E 03:29,05:33 | The closer the entry is to EMA 200, the smaller the stop and the better the setup. | "jitanaa 200 eee ke paas utanaa hee ye setaap bahut hee amejing"
+T with_assumptions | RSI length unstated (default 14 assumed); entry at the next open (A)
+D TL-04 | TL-04 (TradingLab) already trades EMA 200 + RSI 50 + engulfing with a 2R target; this video is its long-only version with the stop at the engulfing low
+C win_rate | 04:53 | 7 to 8 of 10 trades profitable at 1:2 | not stated | "10 men se saat se aath tred prophitebal honge"
+X 2024-07-29 | 07:37 | BTC | long | above EMA 200, RSI above 50, bullish engulfing | engulfing close | engulfing low | 1:2 | target | 500-600 points
+P 00:04 | 00:45 | Like, share, subscribe
+U What RSI length does the divergence indicator use?

@@ -1,0 +1,21 @@
+video: K_qNy37g1eA
+topic: commodity_intraday
+summary: Trade with Sanchit's crude oil '5:45 formula' for people who trade after office: take the 17:45-18:00 IST 15-minute candle, mark its high, low and 50% level ('three magic lines'); on 5 minutes (or 1 minute) trade the side whose line a candle closes beyond, stop at that candle's low (high), aiming for about 1:3 or more; two trades an evening.
+instruments: MCX Crude Oil futures; crude options*
+timeframes: 15m, 5m
+style: intraday
+= CI-09 | Crude oil 17:45 IST 15-minute candle: three lines (high, low, 50%), 5-minute close beyond
+R market E 02:04,04:05 | MCX crude oil (also natural gas, silver, gold). | "krood tel aur gold par thoraa saa skraip egjaanpal karake dikhaaoongaa"
+R session E 01:22,04:45,13:55 | Evening only: the inventory data around 17:30 gives a one-sided move; trade after 17:45, two trades a day. | "din men do trets karane hain shaam ko 5:45 ke baad"
+R setup E 05:27,06:10,06:51 | On 15 minutes take the 17:45 candle and mark its 50% level, its high and its low: three lines. | "is kaindal ke 3 pvaaints aapane maark karane hain pahale point hai 50%"
+R entry E 07:31,08:54 | On 5 minutes (1 minute also fine), after 18:00, a candle closing beyond the upper line is a buy, beyond the lower line a sell; an early entry is possible beyond the 50% zone. | "jab aapakee oopar vaalee laain tootee"
+R stop E 07:31 | Stop at the low of the candle that closed beyond the line (high for sells). | "use kaindal kaa lo"
+R target E 04:45,09:39,11:07 | Profit at least 1:3; 1:4 in the example; one stop and one 5x winner a day is the claim. | "jab ham prophit denge to minimam 1:3 kaa denge"
+T with_assumptions | Stop side and target choice need numbers (A)
+D CI-03 | Same evening inventory-candle method as CI-03 (Dr Devendra's 17:30 30-minute candle with its 50% level, break on 3 minutes): here the 17:45 15-minute candle and 5-minute closes; recorded as a second source of CI-03
+C win_rate | 04:05 | 80% accuracy | not stated | "jisakee ekyooresee 80% se oopar hai"
+C money | 00:02 | Rs 7,200 profit against Rs 800 risk in one shot | single trade | "7200 tak kaa prophit milegaa vith en smol risk oph 800"
+X - | 09:39 | MCX Crude | long | close above the upper line after 18:00 | - | breakout candle low | 1:4 | target | 48 points, Rs 4,800 vs Rs 1,300 risk
+P 01:22 | 02:04 | Live trading sessions
+P 11:51 | 12:33 | Paid mentorship (Rs 399 code), Telegram
+U Is the early entry above the 50% level a separate rule with its own stop?

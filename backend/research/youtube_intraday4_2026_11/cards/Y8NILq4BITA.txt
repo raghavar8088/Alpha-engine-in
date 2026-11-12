@@ -1,0 +1,29 @@
+video: Y8NILq4BITA
+topic: commodity_intraday
+summary: Dr Devendra's "5:30 formula" for office-goers trading MCX crude in the evening: mark the high, low and 50% level of the 17:30-18:00 IST 30-minute candle; after 18:00 trade on 3 minutes (1 or 5 also fine) with a 20-period average: a break below the candle with price under the 50% level is a short, a positive bar closing above with price over the 50% level is a long; stop at the previous candle, target at least 1:2.
+instruments: MCX Crude Oil futures (near month); its options*
+timeframes: 30m, 3m
+style: intraday
+= CI-03 | Crude oil 17:30-18:00 IST 30-minute candle: 50% side and break after 18:00 on 3 minutes, 1:2
+R market E 02:44,03:25 | MCX crude oil futures (or its options via the same levels). | "krood tel kaa phyoochar yaanee kee jaise kee phyoochars kyaa hote hain agast phyoochar"
+R session E 05:38,07:38 | Evening only: wait for the 17:30-18:00 IST 30-minute candle; trade after 18:00 (crude often reverses or breaks out around 18:00 when inventories come). | "5:30 kee kaindal kaa intajaar karanaa hai yaanee kee 5:30 se lek 6 baje tak"
+R setup E 07:38,09:05 | On the 30-minute chart mark that candle's high, low and its 50% level. | "ye meraa 50% leval hai"
+R setup E 08:23 | Its colour sets the interest: green = upside, red = downside. | "agar ye green baar bantaa hai to mujhe green kee taraph intarest rahegaa"
+R filter E 09:05,12:02 | Price trading above the 50% level is positive (no shorts once it crosses above after 18:00); below it is negative. | "agar praais 50% ke oopar tred karane lagataa hai to ye mere lie pojitiv sanket hai"
+R timeframe E 09:51 | Execute on a 3-minute chart (1 or 5 minutes also fine). | "3 minat pe isako tred karenge"
+R indicator E 10:37 | 20-period moving average; holding above it means positive sentiment. | "isamen lagaaie 20 peeriyad mooving evarej"
+R entry E 10:37,13:22,14:04 | After 18:00: when a candle breaks the candle's low (short) or a positive bar closes above (long) on the right side of the 50% level, enter. | "6:00 baje ke baad isamen brek kaaree to isakee pichhalee kaindal pe stop los lek aap tred ineeshiet"
+R stop E 10:37,14:04 | Stop at the previous candle (12-15 points in the examples). | "isakee pichhalee kaindal pe stop los"
+R target E 11:22,14:04 | Target at least 1:2 (1:3 and 1:4 reached in the examples). | "et list 1:2 kaa taaraget"
+R management E 11:22,12:02 | After a stop, the move the other way is the momentum trade: take it with the new risk and at least 1:2. | "yahee vakt hai momentam karane kaa"
+R entry A - | Coded: long when a 3-minute candle closes above the 30-minute candle's high with the close above its 50% level and above SMA 20; short mirror below its low; entry at the next open; colour is not used as a filter (his own examples trade both sides). | ""
+R stop A - | Stop beyond the previous 3-minute candle's extreme; target 2R; at most 2 trades a day; entries 18:00-23:00 IST, exit 23:25 IST. | ""
+T with_assumptions | 'Break' and the colour preference need rules (A)
+V break | R8 | 10:37 | Whether a wick or a close counts | a 3-minute close beyond the 30-minute candle's high/low
+V previous candle | R9 | 10:37 | Which side of which candle | the extreme of the candle before the entry candle
+C win_rate | 07:38 | 90% accuracy | not stated | "ekyooresee 90% yas 90% ke saath kam karenge"
+X - | 10:37 | MCX Crude | short | break below after 18:00 | - | previous candle, 15 points | 1:2 | stop | then reversed long
+X - | 11:22 | MCX Crude | long | momentum after the stop, close above | - | 30 points | 1:2 | target | 1:3 reached (90 points)
+X 2023-08-17 | 13:22 | MCX Crude | long | above the 50% level after 18:00, positive bar close | - | 12 points | 1:2 | target | 1:3-1:4
+P 06:18 | 06:58 | Telegram community via broker sign-up links
+U Is the long trigger a close above the candle's high or any positive bar above the 50% level?

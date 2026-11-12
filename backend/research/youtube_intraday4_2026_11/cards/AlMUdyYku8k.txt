@@ -1,0 +1,28 @@
+video: AlMUdyYku8k
+topic: commodity_intraday
+summary: Chart Commando's crude oil method: analyse the US Oil (WTI) chart, trade MCX crude futures. On 15 minutes with SMA 89 and RSI levels 60/40: the candle on which RSI crosses above 60 while price is above SMA 89 is the trigger; buy above its high (trailing the buy order down on pullbacks), stop at its low, target 1:2 (half out, trail the rest). Shorts mirror below 40. Trade 18:00-22:00 IST and be careful on Wednesdays.
+instruments: MCX Crude Oil futures; US Oil (WTI) chart for analysis*
+timeframes: 15m
+style: intraday
+= CI-06 | Crude oil RSI 60/40 cross on the SMA 89 side, 15 minutes, 18:00-22:00 IST, 1:2
+R market E 01:25,02:06,10:28 | Analyse on the US Oil (WTI) chart, which is continuous; place the trade in MCX crude futures. | "yooes oil kaa chaart lagaanaa hai ... krood oyal emaseeeks naheen lagaanaa hai"
+R timeframe E 18:52 | 15-minute chart. | "15 minat vaalaa chaart hamane yooj kiyaa hai"
+R session E 18:52 | Trade between 18:00 and 22:00 IST (most setups come then); no entries after that (market to 23:55). | "6 peeem too 10 peeem isamen tred karanaa hai"
+R no_trade E 19:33 | Be very careful on Wednesdays (high volatility). | "venasade ke din bahut baj ke rahanaa chaahie"
+R indicator E 04:50,05:31 | Simple moving average 89 (not exponential). | "89 kaa esam lagaanaa hai sinpal mooving evarej"
+R indicator E 06:56 | RSI (from the RSI Divergence indicator) with the levels moved from 70/30 to 60/40. | "jo 70 thaa usako mainne 60 kar diyaa hai ovar sold ko 40"
+R setup E 06:56,07:38 | Long trigger candle: the candle on which RSI crosses above 60 while price is above SMA 89. | "jo kaindal is 60 ko kros kar rahaa hai ... agar 89 emae ke oopar hai to hamaaree vo trigar kaindal"
+R entry E 07:38,08:18,09:44 | Buy above the trigger candle's high (a follow-up candle breaking it); if price pulls back toward SMA 89, trail the buy order down to the newer candles' highs and enter when one breaks. | "phir ham dobaaraa ordar trel karate jaaenge aur phir jaise hee brek hotaa hai ham entree"
+R stop E 10:28,13:57 | Stop at the trigger candle's low (for shorts its high or the swing high). | "hamaaraa stop los usee trigar kaindal kaa lo"
+R target E 10:28,11:11,13:15 | Target 1:2 minimum; take 50% there and trail the rest along SMA 89, or book all at 1:2 while learning. | "abhee y 1 e2 hee lene kaa aap seekho"
+R setup E 13:57,14:40 | Short trigger: the candle on which RSI crosses below 40 while price is below SMA 89; sell below its low; a retest gives another entry. | "aar esaaaee ne 40 ko kros kiyaa neeche ... y kee neeche bhee aaee hai"
+R sizing E 19:33 | Futures only for this strategy. | "isamen tred jo hai aap phyoochar men hee karie"
+R entry A - | Coded on one crude series (no separate WTI analysis chart): the buy-stop starts at the trigger high and is lowered to each later candle's high while price stays above SMA 89 and RSI above 50, for up to 8 bars; fill when a candle trades through it. | ""
+R stop A - | Stop 0.02% beyond the trigger candle's extreme; target 2R; one position at a time; no entries on Wednesdays; entries 18:00-22:00 IST, exit 23:25. | ""
+T with_assumptions | How long to keep trailing the entry order is not stated (A); WTI-for-analysis is folded into one series (A)
+V trail the order | R9 | 09:02 | No rule for how far or how long | lower it to each new candle's high for up to 8 bars
+C other | 01:25 | consistent profit, excellent accuracy, can change your life | not stated | "yahaan pe aapako kansistent prophit hogaa"
+X - | 09:44 | US Oil / MCX Crude | long | RSI crossed 60 above SMA 89, order trailed on the pullback | 70.97 | trigger low | 1:2 | target | went beyond 1:3
+X - | 15:21 | US Oil / MCX Crude | short | RSI crossed 40 below SMA 89 | trigger low | trigger high or swing high | 1:2 | target | more than 1:5
+P 12:33 | 13:15 | Broker sign-up links for a VIP group and two free courses
+U How long does the trailed entry order stay live?

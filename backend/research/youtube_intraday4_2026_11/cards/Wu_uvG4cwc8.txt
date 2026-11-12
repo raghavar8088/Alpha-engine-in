@@ -1,0 +1,22 @@
+video: Wu_uvG4cwc8
+topic: nifty_option_buying
+summary: Kunal Saraogi (SEBI-registered RA) uses one indicator for option buying: ADX alone (no DI lines). Buy a call only when ADX turns up from a decline while price breaks out with a big green candle (a put on a breakdown with a big red candle); stop 20% of the premium, a fixed pre-set target (premiums often double), hold while ADX keeps rising; no option buying while ADX falls (range, time decay). 15-minute index chart (Bank Nifty shown).
+instruments: Bank Nifty / NIFTY ATM or 1-ITM options
+timeframes: 15m
+style: options_buying
+= OB-06 | ADX turning up + price breakout + big candle (15 minutes), ATM option, 20% premium stop
+R market E 03:06,08:39 | Index options (Bank Nifty shown; any chart can be tested); ATM or one strike ITM. | "ed d manee kol khareedenge yaa ek in d manee kol"
+R timeframe E 03:47,04:29 | 15-minute intraday chart (10 or 5 minutes also fine). | "yah baink niphtee kaa 15 minat kaa intraade chaart hai"
+R indicator E 04:29 | ADX line only (hide the two DI lines). | "keval plen vaneelaa riyal edeeeks hamen yahaan par chaahie"
+R no_trade E 05:54,11:26 | No option buying while ADX is falling (range trade, time decay). | "jab edeeeks diklaain ho rahaa hai ... renj men tred kar rahaa hotaa hai"
+R entry E 06:38,07:19,08:39 | Three conditions together: ADX turns up (was falling, now rising), price breaks down (up), and a big red (green) candle: buy the put (call). | "edeeeks men brekaaaut praais men brekadaaun aur ek baraa red kaindal teen kandeeshans ek saath"
+R stop E 07:19,09:19 | Stop 20% below the premium paid. | "usakaa 20 par yaanee ki 0 neeche stop los rakh denge"
+R target E 08:39,09:19 | A fixed pre-set target on the premium (e.g. doubling); hold while ADX rises and no resistance is near; intraday or 1-2 days. | "jab tak edeeeks barh rahaa hai yaa koee rejistens saamane naa hai tab tak aap pojeeshan ko hold karenge"
+R market A - | Desk proxy on NIFTY 15-minute bars (ATM premium about 0.5% of NIFTY, delta 0.5): stop 0.2% against entry (20% of premium), target 0.5% (premium doubling would be about 1%; 0.5% = +50%); ADX(14) with Wilder smoothing. | ""
+R entry A - | ADX turn = ADX higher than the bar before after at least 3 falling bars; breakout = close beyond the highest high (lowest low) of the previous 8 bars; big candle = body at least 1.5x the average body of the last 20 bars; entry at the next open, 09:30-14:45; exit if ADX turns down (two falling bars) or at 15:15; one trade a day. | ""
+T with_assumptions | 'Breakout', 'big candle' and the target need numbers (A); premium rules mapped to the index (A)
+V price breakout | R5 | 07:19 | No level is defined | close beyond the 8-bar high/low
+V big candle | R5 | 07:19 | No size given | body 1.5x the 20-bar average body
+X 2023-09-18 | 06:38 | Bank Nifty | short | ADX turning up, breakdown at 15:00, big red candle | ATM put about Rs 100 | 20% of premium | pre-set | target | 600-700 points down next day, put multiplied
+X 2023-09-01 | 10:03 | Bank Nifty | long | ADX turned up, breakout above 44150, big green candle | call at 150 | 30 (20%) | 300 | target | premium doubled on a 300-point rally
+U What is the pre-set target?

@@ -1,0 +1,23 @@
+video: Hn6N3JpOcuA
+topic: nifty_option_buying
+summary: Maninder (on Sagar Kummar's channel) gives a no-indicator NIFTY option-buying rule for the last 20 minutes: mark the high and low of the 14:55-15:00 five-minute candle; enter on the side that breaks in the next candles with a 4-5 point buffer, stop at the candle's other end (plus 1-2 points), exit at the close of the 15:10-15:15 candle (or take 1:2 early); skip days when that candle is wider than 50-60 points.
+instruments: NIFTY 50 (options or futures)
+timeframes: 5m
+style: options_buying
+= OB-04 | NIFTY 14:55 five-minute candle breakout with a 5-point buffer, out at 15:15
+R market E 01:28 | NIFTY 50 only (tested there); traded through option buying or futures. | "sirph niphtee men kaam karegee"
+R timeframe E 01:28,02:10 | 5-minute chart, no indicators. | "taaim phrem hamaaraa rahegaa 5 minat kaa"
+R setup E 02:10,02:50 | Mark the high and low of the 14:55-15:00 IST five-minute candle. | "255 se leke aur 3:00 baje tak kee jo 5 minat kee kaindal hogee usamen usakaa hamen haaee end lo maark karanaa hai"
+R entry E 03:30,10:38,12:02 | Enter on the side that breaks first in the following candles, with a 4-5 point buffer beyond the level to avoid wick traps. | "aap kuchh chaar points kaa paanch points kaa usamen gaip rakho"
+R stop E 03:30,04:15 | Stop at the opposite end of the 14:55 candle, 1-2 points beyond it. | "usee kaindal kaa apojit end jo hai vo hamaaraa esael hai"
+R exit E 04:15,04:55,05:37 | Exit at the close of the 15:10-15:15 candle. | "3:10 se 3:15 vaalee kaindal kee jaise hee klojing huee to ham ho gae egjit"
+R target E 06:25,07:10 | Optional: if 1:2 comes earlier, take it. | "1:2 mil rahaa hai to aap nikal sakate ho"
+R no_trade E 07:50,08:31 | Skip the day if the 14:55 candle is wider than about 50-60 points (stop too big). | "50 se 60 point se jyaadaa kaa esael aapako naheen lenaa chaahie"
+R entry A - | Coded: stop orders 5 points (0.02%) beyond the candle's high and low from 15:00, the first fill wins (OCO), valid until 15:10; stop 2 points beyond the other end; skip if the candle range exceeds 55 points (0.22% of NIFTY); exit at 15:15; no 1:2 early exit in v1. | ""
+T with_assumptions | Order life after 15:00 and the optional 1:2 need choices (A)
+C other | 12:43 | 1% move in one candle on 29 May | 2025-05-29 | "ek kaindal men 1% kaa moovament aapako mil gayaa"
+X 2025-06-09 | 02:50 | NIFTY | short | 14:55 candle low broken next candle | below the low | candle high + 2 | 15:15 close | target | profit
+X 2025-06-07 | 07:50 | NIFTY | short | low broken | below the low | candle high | 15:15 close | closed_early | small loss at 15:15
+X - | 10:38 | NIFTY | long | high broken by a wick, then reversal | above 23453 | low | 15:15 | stop | trap day: buffer advice
+P 00:06 | 00:46 | Demat and CoinDCX referral links
+U Does the entry order stay valid until 15:10?

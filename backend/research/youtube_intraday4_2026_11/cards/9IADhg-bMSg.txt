@@ -1,0 +1,21 @@
+video: 9IADhg-bMSg
+topic: nifty_option_buying
+summary: Sanket (Trading Edge by PhonePe Invest) argues NIFTY's gains since 2016 came overnight (+39,000 points) while intraday lost (-19,000), so his rule-based option buy is a BTST: at 9:20 mark the weekly call and put priced nearest Rs 62.5 (within 50-75); buy whichever first rises 50% from its 9:20 price; stop 50% below entry; target +75 points, otherwise sell at 9:25 the next morning; if both sides stop out in a day, stop for the day. Backtested 2019-2026 with costs.
+instruments: NIFTY weekly options (call or put nearest Rs 62.5)
+timeframes: 1m
+style: options_buying
+= OB-02 | NIFTY 9:20 Rs 62.5 option, buy on a 50% premium rise, hold overnight (BTST), 50% stop, +75 target
+R market E 00:47 | NIFTY weekly-expiry options. | "vo niphtee ke lie hai spesiphikalee end it iज़ phor veekalee eksapaayaree"
+R setup E 05:00,05:42,06:25 | At 9:20 mark one call and one put whose premium is nearest Rs 62.5, only within Rs 50-75 (no trade outside that band). | "it shud bee bitaveen d renj oफ़ 50 too 75. 602.5 ke najadeek"
+R entry E 07:05,07:45,08:26 | After 9:20, buy whichever marked option first rises 50% above its 9:20 price (e.g. 50 to 75). | "vee vil baay onalee iph it inkreeses baay 50%"
+R stop E 08:26 | Stop 50% below the entry price. | "stop los dait vil bee bilo 50% oph a entree praais"
+R target E 09:06,09:49 | Book at +70-75 premium points, today or next morning. | "70 point mil jaae yaa 75 points mil jaae opshan men to ham log prophit buk kar lenge"
+R exit E 10:32 | If neither target nor stop is hit, sell at 9:25 the next day (BTST); the strategy is built on overnight moves. | "agale din morning men 925 ko jo bhee praais ho, ham us praais pe usako bech hee denge"
+R no_trade E 09:49 | If both the call and the put trigger and stop out in a day, no more trades that day. | "din men agar aapakaa pahalee baar donon men stop los hit ho gayaa to phir hamen vo din kuchh naheen karanaa hai"
+R sizing E 10:32,16:08 | One lot (about Rs 3,000-4,000 premium); keep about Rs 75,000 for the backtest's Rs 72,000 drawdown. | "maarjin aapako ₹3,800 lagegaa"
+T ready | Every rule is explicit; but it is written on option premiums and held overnight, so it needs NIFTY weekly option prices by strike (intraday and next morning)
+C return_pct | 12:41 | yearly returns 890%, 1800%, 200-600%, 400%, 800-900%, 1600% on Rs 3,000; 120% in 2026 so far | 2019-2026 | "it giv 890% ritarn in dait eeyar"
+C money | 16:52 | Rs 3,94,000 total net profit; max drawdown Rs 72,000 | 2019-2026 | "total 3,94,000 kaa ritarn janaret kiyaa"
+C win_rate | 16:52 | hit ratio 46% | 2019-2026 | "men reshiyo aap dekhoge to 46% hai"
+C other | 03:36 | overnight +39,000 points vs intraday -19,000 points in NIFTY since 2016 | 2016-2026 | "ovaranaait gen ... plas 39,000 points end intraade ... -1 19,000"
+U How are the 50% trigger and stop filled in a fast market (slippage beyond the 0.5% assumed)?

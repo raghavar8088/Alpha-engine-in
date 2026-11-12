@@ -1,0 +1,23 @@
+video: uvut8SRcFGY
+topic: nifty_option_buying
+summary: A&A Trading Blog's 9:30 NIFTY option-buying rule that needs no chart: at 9:25 find the in-the-money call and put (current weekly expiry) trading nearest Rs 180; whichever first breaks and holds above 180 around 9:30 is bought; stop 20 points (160), target 40 points (220); exit at 9:45 if neither is hit, or move the stop to cost and hold to 10:00 when in profit.
+instruments: NIFTY weekly options (ITM call or put near Rs 180)
+timeframes: 1m
+style: options_buying
+= OB-01 | NIFTY 9:30 premium-180 breakout: ITM call or put that first breaks Rs 180, stop 20, target 40
+R market E 01:32,02:56 | NIFTY current-week options; no chart needed, only the premium. | "You need to open Nifty's current expiry option chain data"
+R session E 01:32,02:14 | At exactly 9:25 note NIFTY's price and the at-the-money strike. | "exactly at 9:25 you have to open nifty option chain data"
+R setup E 02:56,03:39,04:23 | Watch the in-the-money call and the in-the-money put whose premiums are closest to Rs 180 (e.g. 165-180). | "any one of the in the money strike price will be trading very close to 180 rupees"
+R entry E 05:10,05:54 | Around 9:30, whichever of the two first breaks above Rs 180 and sustains is bought immediately. | "Whichever breaks 180 price level first that strike price without thinking too much we will take entry"
+R stop E 05:54,06:34 | Stop 20 premium points (exit at 160). | "The stop loss for the trade will be 20 points"
+R target E 08:38,09:19 | Target 40 premium points (220): 1:2; moves to 260-280 are a bonus. | "Stop loss will be 160 and target will be 220"
+R exit E 10:40,11:21 | Beginners exit at 9:45 whatever the result if neither stop nor target was hit. | "Entry is at 9:30 a.m. exit at 9:45 a.m."
+R management E 12:04,12:46 | Experienced: if in profit by 9:40-9:45 move the stop to cost and hold until 10:00 for the target. | "you will bring your stop loss to 180 which is cost to cost"
+R market A - | Desk proxy (no intraday option premiums): the premium rule is mapped to NIFTY with delta 0.6 - long when NIFTY rises 15 points above the 9:25 close (about +9 on a 171 premium reaching 180), short when it falls 15 points first; stop 33 index points (20 premium), target 67 (40 premium); one trade a day. | ""
+R exit A - | The stop moves to entry once the trade is 0.5R in profit; everything is closed by 10:00 (the video's experienced-trader version; the beginner 9:45 exit is not coded). | ""
+T with_assumptions | The rule is written on option premiums; the desk trades it as a delta-0.6 NIFTY proxy (A)
+V sustaining above 180 | R4 | 05:10 | 'Sustain' is not measured | a stop order at the trigger (the first touch fills)
+C win_rate | 00:49 | 70-75% success month on month (a friend's results) | monthly | "he he's having good success rate 70 to 75%"
+X 2025-08-12 | 14:58 | NIFTY 24500 CE / 24750 PE | unclear | 9:26 strikes near 180 (175 and 166) | 180 | 160 | 220 | unknown | live example
+P 14:14 | 14:58 | Telegram group for strike calls
+U Does 'sustains above 180' need a close, and over which candle?

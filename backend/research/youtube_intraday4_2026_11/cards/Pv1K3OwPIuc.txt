@@ -1,0 +1,17 @@
+video: Pv1K3OwPIuc
+topic: stock_intraday
+summary: AbhishekXTrades' free version of his paid course setup on NIFTY 15-minute candles: ignore the 9:15 candle, mark the high and low of the second and third candles (9:30-10:00), and enter in the running candle on the first side that breaks; stop at the other side. He backtests a month of days for direction only and promises stop-and-reverse and risk rules in a series.
+instruments: NIFTY 50 (and its options)
+timeframes: 15m
+style: intraday
+= SI-03 | NIFTY second-and-third 15-minute candle range (9:30-10:00), first break in the running candle
+R market E 04:12 | NIFTY on 15-minute candles. | "15 minat kaa taaim phrem lagaanaa aataa hai"
+R session E 04:12,04:55 | Wait for the first three 15-minute candles (until 9:45-10:00); forget the 9:15-9:30 candle. | "9:15 se 9:30 vaalee kaindal bhool jaanee hai"
+R setup E 05:37 | Mark the highest high and lowest low of the second and third candles: the trigger range. | "donon kaindal men se jo haaeeest point hai vo haaee ho jaaegaa"
+R entry E 06:18,07:03 | Enter on the side whose line breaks first, inside the running candle (no close needed). | "klojing kaa vet naheen karanaa ... raning kaindal men entree hotee hai"
+R stop E 06:18 | Stop at the opposite line. | "oojit hamaaraa stop los hogaa"
+T with_assumptions | No target is given in this part; stop-and-reverse and risk rules promised separately
+D AX-03 | AX-03 (AbhishekXTrades, 20-channel study) already trades this 9:30-10:00 range break on NIFTY 15-minute candles (with a fixed 25-point scalp); TB-02 is the 5-minute version
+C points | 09:09 | 400-500 points of momentum in 3 days (70, 114, 112, 147 points) | examples | "3 din men aapako 400 se 500 point mil gae"
+P 00:01 | 00:46 | Paid course and workshop links; private community
+U What is the target and the stop-and-reverse rule?

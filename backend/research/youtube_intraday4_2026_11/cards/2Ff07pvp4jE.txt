@@ -1,0 +1,31 @@
+video: 2Ff07pvp4jE
+topic: btc_intraday
+summary: Adib Noorani (CoinDCX) filters supply and demand zones: mark the 4-hour zone, refine it into 15-minute zones inside it, keep only the two outermost zones that price has never touched since they formed, and trade a reversal candle pattern inside one of them; 50% at 1:1, the rest at cost to 1:2-1:3. Shown on XAU/USDT on CoinDCX for crypto traders.
+instruments: Gold perpetual XAU/USDT on CoinDCX; Bitcoin*
+timeframes: 4h, 15m
+style: intraday
+= BI-02 | Fresh zone inside a zone: 4-hour supply/demand refined to the two outermost untouched 15-minute zones, reversal-candle entry
+R market E 08:32,09:16 | Shown on XAU/USDT on CoinDCX; the method is presented for all demand/supply trading on the platform (crypto). | "yahaan pe aap Xiau yooesadee tred karo"
+R timeframe E 05:38,06:21 | Higher timeframe 4 hours for the big zone, lower timeframe 15 minutes for the precise zones (cheat sheet: weekly/4h, daily/1h, 4h/15m, 15m/1m). | "4 aavars aur 15 minats kaa"
+R setup E 09:16 | Supply zone: the last green candle before price fell hard with red candles; demand zone: the last red candle before strong green candles; the box extends right. | "aakhiree green kaindal se jor se jahaan red kaindal banee vo hamaaraa saplaaee jon hai"
+R setup E 10:38,11:20 | Inside the 4-hour zone, mark the 15-minute zones built the same way; a 15-minute zone counts as inside if more than 50% of it overlaps the 4-hour zone. | "mor den 50% andar hai, to vo andar hee ginaa jaaegaa"
+R setup E 12:04,12:46,27:25 | Only the two outermost 15-minute zones are valid: the top two in a supply zone, the bottom two in a demand zone (smaller stop, better risk-reward). | "oopar ke do jon dimaand ... neeche ke do jon"
+R filter E 13:27,14:07,23:18 | Zones must be fresh: never touched by price after they formed (both the 4-hour and the 15-minute zone); a touched zone is dropped and the next one counts instead. | "phresh usako bolate hain ki jon banane ke baad ek bhee baar praais usako tach naheen kiyaa ho"
+R session E 21:54,24:40 | Trades are taken only after the 4-hour zone is complete (a vertical line after its last candle). | "mujhe tred is laain ke baad karanaa hai"
+R entry E 25:21,26:05 | No blind limit orders: enter only when price comes into a valid 15-minute zone and forms one of six patterns: bullish/bearish engulfing, morning/evening star, hammer/inverted hammer. | "jab us jon men gayaa, tach kiyaa, paitarn banaayaa, to hee tred karenge"
+R stop E 12:46,26:05 | Stop above the supply zone's highest point (below the demand zone's lowest point). | "yahaan usakaa esael thaa haaeeest point pe"
+R target E 26:45 | Book 50% at 1:1, move the rest to cost and aim for 1:2-1:3 or the opposite zone. | "1:1 pe 50% buk karate hain. baakee 50% kost too kost"
+R sizing E 04:58 | Risk 1-2% of capital per trade even on strong zones. | "jo ham 1% 2% risk lete hain"
+R setup A - | Strong move from a base coded as: the two candles after the base candle move at least 1.5 ATR(14) away from it (closing beyond the base candle's far side); the zone is the base candle's full range. | ""
+R entry A - | Pattern coded as: a bearish engulfing / evening star / shooting star (inverted hammer) closing inside or after touching a valid supply zone (mirror for demand); entry at the next 15-minute open. | ""
+R stop A - | Stop 0.05% beyond the 15-minute zone's far side; the second half's target 2R. | ""
+R exit A - | Coded on bitcoin only: exit at 23:55 UTC if neither stop nor target is reached; one position at a time; a 4-hour zone is watched for ten days or until a 15-minute close beyond its far side. | ""
+T with_assumptions | 'Strong move' and the pattern shapes need numbers (A); entry on the next open after the pattern
+V hard fall / strong candles | R3 | 09:16 | No size given for the move away from the base | two candles moving at least 1.5 ATR(14)
+V touched | R6 | 14:07 | Whether a wick into the zone counts | any later bar's high/low entering the zone marks it tested
+V pattern | R8 | 25:21 | Six patterns named, shapes not defined | standard definitions: engulf = body covers the previous body; hammer = lower wick at least 2x body
+O 07:03 | Buy and sell rule slides shown for screenshots, not read out
+X 2026-10-12 | 21:54 | XAU/USDT | short | 4-hour supply zone, 15-minute zone no. 2 rejected with a bearish engulfing | inside zone 2 | zone high | 1:1 half, rest to cost | target | move reached about 1:7 per the presenter
+P 07:48 | 08:32 | Asks for likes and subscriptions; promotes CoinDCX as a registered platform
+U How strong must the move away from a base be?
+U Is the entry at the pattern's close or at a break of its extreme?

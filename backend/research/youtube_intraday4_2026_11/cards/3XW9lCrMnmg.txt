@@ -1,0 +1,32 @@
+video: 3XW9lCrMnmg
+topic: btc_intraday
+summary: Adib Noorani (CoinDCX) adapts the opening range breakout to bitcoin: the first 4-hour candle after the 05:30 IST (00:00 UTC) daily reset sets the range; a strong 15-minute close outside it starts a stop-entry trade with a 2 ATR stop from the range line, half booked at 1:1 and the rest at 1:2 with the stop moved to cost.
+instruments: Bitcoin futures (CoinDCX)
+timeframes: 4h, 15m
+style: intraday
+= BI-01 | Bitcoin 05:30-09:30 IST four-hour opening range, 15-minute breakout, 2 ATR stop from the range line
+R market E 05:35 | Bitcoin (BTC futures on CoinDCX). | "yah stretajee ham bitakoin pe yooz karenge"
+R session E 02:47,06:21 | The range is the high and low of the first 4-hour candle of the day, 05:30-09:30 IST: the chart resets at 00:00 GMT = 05:30 IST. | "4 aavars kee jo pahalee kaindal hai 5:30 se 9:30 usakaa haaee lo aap maark karoge"
+R timeframe E 06:21,11:54 | Trades are taken on the 15-minute chart, only after 09:30 IST (a vertical line marks 09:30). | "15 minat pe aa jaaoge aur 15 minat pe tred karoge"
+R setup E 06:21 | A break above the range high allows longs only; a break below the range low allows shorts only. | "oopar kaa brekaaaut huaa to ham sirph long tred karenge"
+R setup E 06:21,07:01 | The breakout candle must close strongly: at least 40-50% of its body beyond the range line (body, not wicks). | "kam se kam 40 50% bodee oopar kee taraf kloj honee chaahie"
+R entry E 07:01,12:36,14:48 | Entry: a stop order 0.03% beyond the breakout candle's extreme (below its low for shorts, above its high for longs); 0.01% for aggressive traders. | "isake lo ke neeche 0.03% kaa baphar rakh ke aap sel tred karoge"
+R entry E 12:36,13:20 | If the breakout candle's extreme is not taken out, there is no trade from it; a later prominent close or follow-up candle beyond the line gives the new trigger (its extreme plus the buffer). | "yahaan prominent kloj yaa pholo ap kaindal ... is lo ke neeche ham tred karenge"
+R indicator E 04:52 | ATR, default length 14, read on the 15-minute chart. | "isakee diफ़olt seting hai. yah 14 ke lenth pe hotaa hai"
+R stop E 07:41,13:20,17:37 | Stop: 2 x ATR of the 15-minute breakout candle, measured from the broken range line (above the range low for shorts, below the range high for longs), not from the candle. | "jo aapakee brekaaaut laain hai usase 2 eteeaar door"
+R target E 07:41,15:31 | Trade two lots: book 50% at 1:1, move the stop on the rest to cost, book the rest at 1:2 (for the first 100 trades). | "aadhee kvaantitee 50% aap buk karoge 1:1 pe ... rimening 1:2 pe"
+R management E 08:23,15:31 | After 100 trades: the second half may run to 1:3-1:4 or be trailed (ATR, swing, previous two candles); trailing is not detailed. | "1:3 1:4 yaa treling stop los"
+R sizing E 07:41 | Quantity is split into two equal halves (dual lots). | "do lot se aap tred karoge"
+R exit A - | Exit at the end of the bitcoin day (23:55 UTC, 05:25 IST) if neither target nor stop is reached (the video lets a trade run into the next morning). | ""
+R filter A - | At most one trade a day: every qualifying 15-minute candle places its own stop order (live until 23:55 UTC) and the first to fill is the day's trade. | ""
+R setup A - | "At least 40-50% of the body beyond the line" coded as: the 15-minute close beyond the line and at least 40% of the candle's body beyond it. | ""
+T with_assumptions | No exit time or trade cap is stated (A); body threshold given as a range (40-50%)
+V strong close | R5 | 06:21 | Given as 40-50% of the body | 40% of the body beyond the line (the stated minimum)
+V follow-up candle | R7 | 12:36 | Not defined beyond 'a candle after the breakout' | any later 15-minute candle that closes beyond the line with 40% of its body
+V trail | R11 | 08:23 | Methods listed, not specified | not coded: fixed 1:2 for the second half
+C other | 01:24 | back tested for multiple years, very successful | multiple years | "aaee baik tested phor malteepal iyars"
+X 2025-10-13 | 09:48 | BTC | short | 4-hour range broken down; follow-up candle low broken with 0.03% buffer | 113980 | range line + 2 ATR (ATR about 290: 580 points) | 1:1, then 1:2 | target | 1:1, 1:2 and 1:3 all reached per the presenter
+X 2025-10-15 | 16:52 | BTC | short | 4-hour range broken down at 111765, prominent close | 111280 | 2 x ATR 372 above 111765 | 1:1 | unknown | live trade, result left to viewers
+P 19:39 | 20:23 | Like, share and subscribe for CoinDCX
+U What is the exit time if neither target nor stop is hit?
+U Is more than one trade a day allowed (both sides of the range)?

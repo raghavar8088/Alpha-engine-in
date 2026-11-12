@@ -1,0 +1,25 @@
+video: ZniDTRbVMsw
+topic: commodity_intraday
+summary: Commodities by Dhan: MCX crude oil with two MACDs. The 1-hour MACD (12, 26, 9) gives the side; inside a 1-hour buy (sell) phase take only fresh 15-minute MACD buy (sell) crossovers at the candle close, and exit on the opposite 15-minute crossover; partial profits from about 30 points, all out by about 50 points. Positions may run overnight.
+instruments: MCX Crude Oil futures (front month)
+timeframes: 1h, 15m
+style: intraday
+= CI-01 | Crude oil 1-hour MACD side, fresh 15-minute MACD crossovers, exit on the opposite cross
+R market E 01:28 | MCX crude oil futures (the near-month contract on Dhan charts). | "mainne krood oyal kaa janavaree phyoochar opan kar liyaa hai"
+R timeframe E 01:28,04:12 | Parent timeframe 1 hour; child timeframe one third or one quarter of it: 15 minutes (20 minutes possible). | "jo main parsanalee apane lie 15 minat kaa chaart yooज़ karataa hoon vo aapakaa chaaild taaim phrem"
+R indicator E 01:28,02:50 | MACD with default settings (12, 26, 9) on both timeframes. | "isake pairaameetar men hamane kuchh chenj naheen kiyaa hai"
+R setup E 03:30 | Side: the 1-hour MACD buy signal (MACD line above the signal line) allows only buys; a 1-hour sell signal allows only sells. | "bloo laain aapakee orenj laain ke oopar hai"
+R entry E 04:12,06:23,07:50 | Inside the 1-hour phase, enter on each fresh 15-minute MACD crossover in the same direction, at that 15-minute candle's close; never join an old 15-minute signal. | "hamen phresh baay signal hee chaahie"
+R exit E 04:57,07:04 | Exit on the opposite 15-minute MACD crossover. | "baay signal se lekar sel signal tak"
+R target E 07:50,08:31,09:12 | Book part from about 30 points (every 15-20 points with mini lots) and the rest by about 50 points. | "30 40 50 points aaraam se buk kar lenge"
+R management E 04:57 | Trades may be carried overnight (bought 23:30, result by 12:30 next day). | "ovaranaait aapane kairee kiyaa aur dopahar ko 12:30 tak"
+R sizing E 08:31,09:55 | Start with the mini contract; quantity in lots. | "aap minee kontraikt se staart kar sakate hain"
+R exit A - | Coded: target 0.9% of price (50 points at about Rs 5,500 a barrel) or the opposite 15-minute cross, whichever comes first; a protective stop at the 15-minute swing low (high) of the last 6 bars minus 0.1%; positions held across sessions until an exit. | ""
+R filter A - | Coded on MCX hours 09:00-23:30 IST; no new entry after 23:00. | ""
+T with_assumptions | No stop is stated (A: swing stop); targets given as a range of points (A: 0.9%)
+V fresh signal | R5 | 06:23 | Only crossovers after the 1-hour phase began count | crossovers on 15-minute bars after the last 1-hour MACD cross
+C r_multiple | 08:31 | losses 7-12 points, profits 40-50 points | Dec 2025 examples | "loses jab bhee ho rahe hain vo saat se leke 12 points"
+X 2025-12-12 | 07:04 | MCX Crude | long | 1-hour buy phase, 15-minute buy cross | 15-minute close | - | opposite cross | stop | about 13 points lost
+X 2025-12-15 | 07:50 | MCX Crude | short | 1-hour sell phase, fresh 15-minute sell cross | 15-minute close | - | opposite cross | target | about 54 points down move
+P 09:55 | 10:30 | Dhan app and its scalper tool
+U Is there any stop besides the opposite crossover?

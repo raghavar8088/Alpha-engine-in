@@ -1,0 +1,17 @@
+video: rA5N0eznRaI
+topic: commodity_intraday
+summary: MCX Winning Trade's no-indicator crude/natural gas study: on the daily chart find an inside-candle formation (a 'baby' candle inside the 'mother' candle) and mark the mother candle's high and low; intraday trades are taken only near those levels, with an entry confirmation that is not specified. The auto-captions are badly garbled, so the rules are partly unreadable.
+instruments: MCX Crude Oil; MCX Natural Gas*
+timeframes: 1d, intraday
+style: intraday
+= CI-11 | Daily inside-candle (mother/baby) levels traded intraday (crude oil)
+R timeframe E 00:43 | Start on the daily timeframe. | "pahale dillee taaim SIM par jaanaa hai"
+R setup E 01:31,02:27,04:34 | Find an inside-candle formation: the next candle's whole range (high to low) inside the previous 'mother' candle; mark the mother candle's high and low. | "isakaa haay lutab skaindal isake andar"
+R filter E 02:27,03:13 | Trade only near those levels; nothing in between. | "jo bhee hai vah sirph niyukt unheen laingvej men"
+R entry E 08:44 | At a level wait for an entry confirmation (not described). | "sirph aapako chaahie entree kee kanpharmeshan"
+R stop E 10:46 | Stop beyond the level (as far as the captions show). | "aapako isalie ke neeche lagaanaa hai"
+R target E 09:24,10:46 | Targets toward the next level / resistance (moves of 125-500 points shown). | "oopar hamaaraa ek aur rejistens leval hai"
+T concept_only | The entry confirmation is not given and the auto-captions are too garbled to recover exact rules
+U What confirms an entry at the mother-candle level?
+U Is it a breakout or a rejection trade at the level?
+P 01:31 | 02:27 | Subscribe requests

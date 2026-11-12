@@ -1,0 +1,25 @@
+video: BPF2RjINDeI
+topic: nifty_option_buying
+summary: Trader Chitra's 5-minute intraday setup for NIFTY, Bank Nifty and stocks (and their ITM options): buy above a green candle that closes above VWAP when EMA 5 has crossed above EMA 13 and RSI is above 50; stop at that candle's low; trail by exiting when a candle closes back across EMA 5 (half can be booked with the rest at cost). Sells mirror below VWAP, bearish cross, RSI under 50.
+instruments: NIFTY; Bank Nifty; NSE stocks; their ITM options
+timeframes: 5m
+style: intraday
+= OB-10 | VWAP side + EMA 5/13 cross + RSI 50, break of the signal candle, EMA 5 trail (5 minutes)
+R market E 00:02,24:03 | NIFTY, Bank Nifty and stocks; option buyers use ITM strikes (the same setup also works on the option chart). | "As an option buyer the strike price you have to choose is the ITM strike price"
+R timeframe E 02:13,07:56 | 5-minute chart, intraday only. | "The time frame we are going to use for this particular strategy is 5 minutes"
+R indicator E 02:13,03:36,04:59 | VWAP (session, typical price, default), EMA 5, EMA 13, RSI with only the 50 line. | "First is RSI. Second is VWAP. And we need two EMAs that is EMA 5 and EMA 13"
+R setup E 06:28,08:36 | Long: a green candle closing above VWAP, EMA 5 crossed above EMA 13 (bullish crossover in place), RSI above 50. | "price should above the VWAP. Second rule is five and 3 13 MA should give the crossover"
+R entry E 08:36,10:52 | Enter above that green candle's high. | "we can enter into the long trade above this green candle"
+R stop E 09:21,12:26 | Stop at the signal candle's low (high for shorts). | "The stop loss is always low of the green candle"
+R exit E 05:44,09:21 | Trail with EMA 5: exit when a red candle closes below EMA 5 (green above for shorts), or book by risk-reward. | "If any red candle is closing below the 5 EMA, you can book your targets there"
+R management E 28:34 | Book half after entry moves and keep the rest at cost. | "make sure that you should book half of your positions and keep the rest cost to cost"
+R setup E 07:56,11:34 | Short: a red candle closing below VWAP, bearish EMA 5/13 crossover, RSI below 50; sell below its low, stop above its high. | "price should be below VWAP and five and three 13 EMA should give the crossover and RSI should be below 50"
+R no_trade E 11:34,25:33,26:18 | No long while price is below VWAP even with a bullish cross; no long when both EMAs are below VWAP. | "we are not supposed to enter into the long trade because the price is below the VWAP"
+R market A - | Coded on NIFTY 5-minute index bars (no volume: VWAP = session average of typical price, as the desk does); 'crossover in place' = EMA 5 above EMA 13 with the cross within the last 6 bars. | ""
+R entry A - | Stop-entry above the signal candle's high valid for the next 2 bars; stop 0.02% beyond its low; exit on a 5-minute close back across EMA 5 or at 15:15; half at 1R then stop to entry for the rest; entries 09:20-14:45; one position at a time, up to 3 trades a day. | ""
+T with_assumptions | Crossover recency and order life need numbers (A); NIFTY has no volume, so VWAP is the typical-price average (A)
+V crossover | R4 | 08:36 | How recent the cross must be | within the last 6 bars
+C r_multiple | 14:20 | 1:4 and 1:8 trades shown (33-point stop, 290-point target) | examples | "with the stop loss of 33 points, we got the target of 290 points which is 1 is to 8"
+X - | 09:21 | Bank Nifty | long | green above VWAP, 5/13 bull cross, RSI above 50 | above the candle | its low | EMA 5 trail | target | 400 points vs 100 stop
+X - | 11:34 | Bank Nifty | short | 9:30 red below VWAP, RSI under 50, bearish cross | below the candle | its high | EMA 5 trail | target | 290 points vs 33
+U Is half booked at a fixed R before the EMA 5 trail?

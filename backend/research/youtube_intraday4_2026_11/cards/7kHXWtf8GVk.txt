@@ -1,0 +1,28 @@
+video: 7kHXWtf8GVk
+topic: commodity_intraday
+summary: Commodities by Dhan treats crude oil as a mean-reverting 'trading product': on 20 minutes, candles that form outside a Donchian channel (length 200, offset 3) mark an extreme; then on 5 minutes take the reversal when EMA 9 crosses back below (above) its slower averages, book the first 40 points and trail the rest, exit when EMA 9 crosses back over EMA 100. Losses 8-15 points, profits 40-70.
+instruments: MCX Crude Oil; Crude Oil Mini
+timeframes: 20m, 5m
+style: intraday
+= CI-04 | Crude oil Donchian-200 extreme on 20 minutes, 5-minute EMA 9 reversal, 40 points then trail
+R market E 02:58,03:38 | MCX crude oil and crude oil mini (10 barrels; about Rs 15,000 margin). | "yah stretajee krood oil pe bhee kaam karegee. krood oil minee pe bhee"
+R setup E 01:28,02:13 | Crude, gold, silver, copper and USDINR are range ('trading') products: catch reversals and book small profits; never try to ride a big trend. | "aapako in prodakts men kabhee bhee baraa trend kaich karane kee koshish naheen karanee hai"
+R timeframe E 03:38,04:19 | Extremes on the 20-minute chart (intraday or BTST); 1-3 hours for longer holds. | "ham yahaan par aplaaee kar rahe hain 20 minats kaa chaart"
+R indicator E 05:01 | Donchian channel: length 200, offset 3, middle line hidden. | "isakaa 200 kee lenth aur three kaa ophaset"
+R setup E 05:01,05:43 | Mark the area where 20-minute candles form outside the channel (beyond the upper or lower band - a touch is not enough); a reversal is expected from there. | "hamen tach naheen chaahie. hamen oopar nikalanaa chaahie"
+R timeframe E 05:43,06:24 | Execute on the 5-minute chart with moving averages only. | "ab ham aaenge doston 5 minats ke chaart pe"
+R entry E 06:24 | Short after an upper extreme when EMA 9 is below EMA 30 and below the slow average (heard as '300'); long mirror after a lower extreme. | "9 eeemae 30 ke neeche aur 300 ke neeche milegee vahaan par hamen short sel karanaa hai"
+R exit E 06:24,07:08 | Exit the short when EMA 9 goes back above EMA 100 (mirror for longs); positions may be carried to the next day. | "jab aapakaa 9 eeemae 100 ke oopar chalaa jaaegaa to aap short sel vaalee pojeeshan se egjit"
+R target E 07:51,08:34 | Book the first profit at 40 points without fail and trail the rest (intraday aim 60-70 points). | "aapako pahalaa prophit 40 point pe jaroor buk karanaa hai"
+R management E 09:14,10:01 | About 2-3 trades a day on this timeframe; one usually pays, the others lose a little or scratch. | "din men eproksimametalee do se teen treds banate hain"
+R indicator A - | Slow average read as EMA 100 (the exit uses 100; '300' is taken as a caption error); an extreme counts for 6 hours after a 20-minute close beyond the band. | ""
+R target A - | Coded: half at 0.7% of price (40 points at about Rs 5,500), the rest exits on EMA 9 crossing EMA 100; protective stop at the 5-minute swing extreme of the last 12 bars plus 0.1%; MCX hours, exit 23:25 IST. | ""
+T with_assumptions | The slow average length is ambiguous ('300' vs 100); no stop is stated (A)
+V outside the channel | R5 | 05:43 | How far and for how long counts | a 20-minute close beyond the offset band
+V 300 | R7 | 06:24 | Heard as 300; the exit uses 100 | EMA 100
+C r_multiple | 07:51 | losses 8-15 points, profits 40-60 points | Nov-Dec 2025 examples | "loses honge sirph 8 10 12 ₹15 ke aasapaas. jabaki prophit honge 40 50 60"
+X - | 06:24 | MCX Crude | short | above the Donchian band on 20 minutes, 5-minute EMA 9 below its averages | - | - | 40 points | target | 44 points in 4 hours, 60 by the close
+X 2025-11-12 | 07:51 | MCX Crude | long | below the lower band, buy signal | - | - | 40 points | closed_early | 31 points, exited at cost on the reversal
+P 10:01 | 10:46 | Dhan Super Order and scalper tools
+U Is the slow average 100 or 300?
+U Where is the protective stop?

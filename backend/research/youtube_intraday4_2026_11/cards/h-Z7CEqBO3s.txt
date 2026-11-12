@@ -1,0 +1,27 @@
+video: h-Z7CEqBO3s
+topic: btc_intraday
+summary: MambaFx's 1-minute scalp: the 5-minute chart gives the direction from a support or resistance touched several times; on 1 minute wait for bullish (bearish) structure and buy the break of a 1-minute resistance (sell the break of a support or trend line), tight stop, 1:3 to 1:5 managed at the next zones; about 30 minutes a day.
+instruments: US30 and other indices*; Bitcoin*
+timeframes: 5m, 1m
+style: scalping
+= BI-08 | 5-minute multi-touch level for direction, 1-minute structure breakout (scalp)
+R market E 04:10 | Shown on index CFDs (US30); presented as working on any market. | "I'm up $44,000 on a US30 sell"
+R timeframe E 00:43 | Direction from the 5-minute chart; every entry on the 1-minute chart. | "we always start on our 5-minute ... then we go down to our 1-minute to find entry"
+R setup E 00:43,05:33 | 5-minute direction: a strong support touched several times (four touches in the example) with a push up means buys; a resistance rejected with big wicks means sells. | "1 2 3 4, four touches in total on a push to the upside"
+R setup E 01:23,02:05 | 1-minute structure must agree: higher high, higher low, then a new higher high (mirror for sells). | "a higher high followed by a higher low then once again a higher high"
+R entry E 01:23,02:45,06:16 | Enter on a breakout on 1 minute: a resistance break for buys, a support or trend-line break for sells; more confirmations (level + trend line + 5-minute) are better. | "Breakouts will always be key"
+R stop E 02:45,06:59 | A nice tight stop (place not given). | "with a nice tight stop loss"
+R target E 03:30,06:59 | 1:3 to 1:5, managed at the next support/resistance zones; move to breakeven at the first zone. | "we can go for a 1:5, we can go for a 1:3"
+R management E 08:23 | A second position may be added on the next break after a retest. | "we can take another sell position here"
+R session E 09:07 | About 30 minutes of trading a day. | "Within 30 minutes, we're done"
+R setup A - | 5-minute level: a 2-bar fractal low (high) touched again within 0.05% at least twice more in the last 6 hours, with the last 5-minute close above (below) it; the 1-minute break is a close above the latest 2-bar fractal high (below the low) after a higher low (lower high). | ""
+R stop A - | The break must happen within 0.5% of the 5-minute level; stop 0.02% beyond the 1-minute higher low (lower high) that preceded the break; target 3R; at most 3 trades a day; exit at 23:55 UTC. | ""
+T with_assumptions | Levels and structure are read by eye; stop place not given (A)
+V several touches | R3 | 00:43 | No count or tolerance | 3+ touches within 0.05% in 6 hours
+V tight stop | R6 | 02:45 | No place given | beyond the last 1-minute higher low
+C money | 04:10 | up $44,000 on a live US30 trade; made nearly $50,000 today with this strategy | that day | "made me nearly $50,000 today"
+C win_rate | 06:59 | three confirmations take the chance from 50% to 75-80% | not stated | "from a 50% chance to a 75, and in some situations, even 80%"
+P 00:01 | 00:43 | Prop firm (Clarity Traders) discount codes
+P 04:50 | 05:33 | Paid live-trading membership at $39.99 a month
+U Where exactly is the stop?
+U Which 1-minute level counts as the breakout level?

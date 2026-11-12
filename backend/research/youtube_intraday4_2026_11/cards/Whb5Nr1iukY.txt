@@ -1,0 +1,19 @@
+video: Whb5Nr1iukY
+topic: nifty_option_buying
+summary: Rajesh Jain (26 years in markets) on 'Strategy in minutes': sit at 9:15, leave by 9:30. Take the first F&O stock at the top of the NSE gainers/losers list; after the first 30-50 seconds, if price made a high and then breaks back below the open, buy the ATM put (a red first candle tends to stay red for 15 minutes); mirror for calls; ATM strikes only; exit by 9:25-9:30. A stop is used but not given as a number.
+instruments: NSE F&O stocks (ATM options); NIFTY rarely
+timeframes: 1m
+style: options_buying
+= OB-05 | 9:15 open-price cross after 30 seconds, ATM option, out by 9:30 (Rajesh Jain)
+R market E 01:21,05:42 | F&O stocks rather than indices (NIFTY 'rarely works'); capital about Rs 40,000-70,000. | "main kahataa hoon stok men aao"
+R session E 00:01,02:54 | Sit at 9:15, enter around 9:15:40-9:16, be out by 9:30. | "9:15 ko maarket men baitho. 9:30 baje maarket se baahar ho jaao"
+R setup E 04:57,05:42 | Pick the first stock that appears at the top of the NSE F&O gainers or losers list after 9:15 (he prefers selling losers); avoid slow stocks. | "savaa5 baje ke baad koee bhee skript pahalee jo aatee hai usako aap pakaro"
+R entry E 06:25,11:56,13:21 | Wait 30-50 seconds; if price made a high and then breaks back below the open price, buy the ATM put; a red first candle mostly stays red for 15 minutes (mirror for calls). | "jaise hee ye vaapas se opan praais ko brek karatee hai"
+R market E 14:45 | Only ATM strikes, never OTM. | "eteeem eteeem hee khareedanaa hai hameshaa"
+R exit E 17:29 | Exit around 9:25-9:30. | "9:30 9:25 ke aasapaas karo"
+R stop E 17:29 | A stop-loss is used (about 3 stop days in 20); its level is not given. | "isalie to ham stop los rakhate hain naa"
+T with_assumptions | Stop level not given
+D UP-01 | UP-01 (Upsurge Club, Rajesh Jain, GAr-2Cw4LIQ) already trades this exact 9:15 open-price cross with an ATM option and a 9:30 exit; this is a second interview of the same rule
+C money | 02:54 | Rs 2,000-8,000 a day by 9:30, every day | daily | "2000 se leke 8000 tak kaa aur yah roj ham karate hain"
+X - | 05:42 | Power India | short | first loser, made a high then broke below the open 35435 | ATM put | - | 9:30 exit | target | red all 15 minutes
+U What is the stop level?

@@ -1,0 +1,23 @@
+video: RW-bR1YKrNk
+topic: btc_intraday
+summary: Priyank Sharma (SEBI-registered RA) teaches the EMA 21 break-and-retest on 15-minute bitcoin: after a candle closes across EMA 21, wait up to three candles for an opposite-colour candle that stays on the new side; enter on the break of its high (low), stop at the low (high) made before the trigger, first target 1.5R with half booked and the stop to entry, second target 3R or trail until a candle closes back across the EMA.
+instruments: Bitcoin (crypto futures, options or spot)
+timeframes: 15m, 5m
+style: intraday
+= BI-12 | EMA 21 break and retest: opposite candle within three bars, enter on its high/low (15-minute bitcoin)
+R market E 00:01 | Crypto futures, options or spot; bitcoin chart. | "kripto men phyoochars kar rahe ho, opshans kar rahe ho yaa spot"
+R timeframe E 00:42,16:32 | 15 minutes for beginners (5 minutes for experienced traders, 1h/4h for swings); a single-timeframe strategy. | "main janaralee prephar karataa hoon 15 minat"
+R indicator E 06:26,07:06 | EMA 21 (the average count of trading days in a month); 20 or 22 also fine. | "isako hamane kar lenaa hai 21"
+R setup E 13:45,14:26 | A candle closes across EMA 21 (up = long side, down = short side). | "jabhee bhee praais is mooving evarej ko brek karake"
+R setup E 14:26,15:10 | Within the next three candles an opposite-colour candle must form (a bearish candle after an upside break); if all three are the breakout colour, there is no setup. | "agalee teen kaindal stik men koee bhee berish kaindal stik ban jaae"
+R no_trade E 17:57,18:37 | Before entry no candle may close back across EMA 21 (wicks are fine); a close back cancels the setup. | "is mooving evarej ke neeche vaapas kloj naheen honee chaahie"
+R entry E 15:50,17:14 | Entry: a buy-stop at the opposite candle's high (sell-stop at its low); it triggers intrabar, no close needed. | "isakaa haaee aapakee entree hai. jaise hee praais isake haaee ke oopar gayaa kloj bhee naa hone do"
+R stop E 15:50,20:46 | Stop just below the lowest low formed before the trigger (a point or two below for spread). | "ye jo lo banegaa ye aapakaa stop los ho gayaa"
+R target E 16:32,22:07 | First target 1.5R: book 40-60% and move the stop to entry. | "jitanaa aapakaa stop los hai ... usakaa derh gunaa aapako pahalaa taaraget"
+R target E 21:26,27:05 | Second target 3R (his choice; 4R or a previous high also fine), or trail: hold until a candle closes back across EMA 21. | "main teen aar par nikal jaataa hoon"
+R management E 30:33 | In a choppy market book the whole (or 80%) position at 1.5R. | "jab aapako lag rahaa hai maarket chaupee hai, saaidavej hai to pooree pojeeshan 1ढ़ aavar par"
+T with_assumptions | Order life after the third candle and the split need numbers (A)
+D PV-02 | PV-02 (HOLD with Priyank, 20-channel study) already trades this exact rule set (EMA 21 close-through, opposite candle within 2-3 bars, break of its high, 1.5R) on Nifty and NSE stocks; this video adds bitcoin 15-minute and a 3R second target
+C other | 31:17 | traded since 2018 and still working | 2018-2026 | "main to isako bahut taaim se kar rahaa hoon 2018 se"
+X - | 20:03 | BTC | long | close above EMA 21, then a bearish candle | its high | lowest low before trigger | 1.5R, 3R | target | 1.65R reached live
+U Does the buy-stop stay live after the third candle?
