@@ -492,6 +492,8 @@ async def today_pnl() -> float:
 # balance does not move between those reads.
 
 _BALANCE_TTL = float(os.getenv("LIVE_TRADING_BALANCE_TTL", "60"))
+_BALANCE_FAIL_TTL = 5.0      # a FAILED read is asked again after this long, not after the full TTL
+_BALANCE_RETRY_S = 0.5       # one quick retry before a read counts as failed
 _balance_cache: dict = {"at": 0.0, "data": None}
 
 
@@ -503,10 +505,22 @@ async def account_balance(force: bool = False) -> dict:
     it cannot confirm the money is there."""
     now = time.time()
     cached = _balance_cache["data"]
-    if not force and cached and now - _balance_cache["at"] < _BALANCE_TTL:
+    ttl = _BALANCE_TTL if (cached or {}).get("ok") else _BALANCE_FAIL_TTL
+    if not force and cached and now - _balance_cache["at"] < ttl:
         return cached
-    try:
-        f = await angel_client.funds()
+    # 12 Nov 2026: 24 reads failed in one session, one call at a time ('NoneType' object has no
+    # attribute 'getpeername', timeouts) - and each failure was believed for the full TTL, leaving
+    # the desk sure it had no cash for a minute. One quick retry, and a failure is kept 5 s.
+    f, err = None, None
+    for attempt in range(2):
+        try:
+            f = await angel_client.funds()
+            break
+        except Exception as exc:  # noqa: BLE001
+            err = exc
+            if attempt == 0:
+                await asyncio.sleep(_BALANCE_RETRY_S)
+    if f is not None:
         data = {
             "ok": True,
             "available": float(f.get("availablecash") or 0.0),
@@ -516,11 +530,11 @@ async def account_balance(force: bool = False) -> dict:
             "m2m_unrealized": float(f.get("m2munrealized") or 0.0),
             "fetched_at": _now().isoformat(),
         }
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("[live_trading] could not read Angel balance: %s", exc)
+    else:
+        logger.warning("[live_trading] could not read Angel balance (after a retry): %r", err)
         data = {"ok": False, "available": 0.0, "net": 0.0, "utilised": 0.0,
                 "m2m_realized": 0.0, "m2m_unrealized": 0.0,
-                "error": str(exc)[:160], "fetched_at": _now().isoformat()}
+                "error": repr(err)[:160], "fetched_at": _now().isoformat()}
     _balance_cache.update({"at": now, "data": data})
     return data
 
@@ -807,6 +821,8 @@ async def _copy_entries(dhan: DhanClient | None, validated: set, enabled: dict) 
             why, final = "no instrument record for the symbol", True
         else:
             why, final = copy_check(par, ltp, n_open, _now())
+        if why is None and not (await account_balance())["ok"]:
+            why, final = "the Angel balance could not be read", False      # retried next tick
         if why and not final:
             _copy_waiting[par["position_id"]] = why
             notes.append(f"Waiting to copy {par.get('side')} {symbol}: {why}.")
@@ -834,8 +850,17 @@ async def _copy_entries(dhan: DhanClient | None, validated: set, enabled: dict) 
             confidence=float(par.get("confidence") or 0.0),
             rationale=f"copy of tournament position {par['position_id']}: {par.get('rationale') or ''}"[:400])
         ok = await _open_position(ls, symbol, inst, signal, ltp_source, ltp, parent=par)
-        await live_trading_state_collection.update_one({"_id": claim}, {"$set": {
-            "decision": "opened" if ok else "not opened (size, cash, ceiling or order refused)"}})
+        if ok:
+            decision = "opened"
+        elif symbol in _refused_symbols:
+            msg = _refused_symbols[symbol]
+            decision = ("Angel refused: the exchange has this stock on its caution (surveillance) list"
+                        if "cautionary" in msg.lower() else f"Angel refused the stock: {msg}")
+        else:
+            decision = "not opened (size, cash, ceiling or an order failure)"
+        await live_trading_state_collection.update_one({"_id": claim}, {"$set": {"decision": decision}})
+        if not ok:
+            notes.append(f"Not copied: {par['side']} {symbol}: {decision}.")
         if ok:
             opened += 1
             notes.append(f"REAL entry copied: {par['side']} {symbol} (tournament position {par['position_id']}).")
@@ -1448,6 +1473,7 @@ async def summary() -> dict:
         "strategy_count": len(SELECTED),
         "copy_source": COPY_SOURCE, "copy_notional": COPY_NOTIONAL, "mis_leverage": MIS_LEVERAGE,
         "max_open_positions": MAX_OPEN_POSITIONS, "gate_override": OWNER_OVERRIDE,
+        "copy_today": await copy_decisions_today(),
         # The REAL account. `equity` above is only the desk's notional allocation + P&L;
         # on a real-money desk what matters is the money Angel actually holds.
         "angel": await angel_account(),
@@ -1644,6 +1670,25 @@ async def run_cycle(dhan: DhanClient | None) -> dict:
     )
     return {"opened": scan_result["opened"], "managed": managed, "fills": fills,
             "scanned_symbols": scan_result["scanned_symbols"], "notes": scan_result["notes"]}
+
+
+def _iso(x) -> str | None:
+    if not isinstance(x, datetime):
+        return None
+    return (x if x.tzinfo else x.replace(tzinfo=timezone.utc)).isoformat()
+
+
+async def copy_decisions_today() -> list[dict]:
+    """Today's tournament signals and what this desk did with each, oldest first (the page's panel)."""
+    rows = []
+    async for d in live_trading_state_collection.find(
+            {"_id": {"$regex": "^copy\\|"}, "at": {"$gte": _session_start_utc()}}).sort("at", 1):
+        if not str(d.get("_id", "")).startswith("copy|"):
+            continue
+        rows.append({"at": _iso(d.get("at")), "paper_opened_at": _iso(d.get("parent_opened_at")),
+                     "symbol": d.get("symbol"), "side": d.get("side"), "decision": d.get("decision"),
+                     "parent_id": str(d["_id"]).split("|", 1)[1]})
+    return rows
 
 
 async def copy_loop() -> None:

@@ -37,7 +37,11 @@ const pct = (v: number | null | undefined) =>
   v === null || v === undefined ? "-" : `${v >= 0 ? "+" : ""}${v.toFixed(2)}%`;
 
 // Since 10 Nov 2026 the desk copies one tournament strategy; these fields come with it.
-type CopyDesk = { copy_notional?: number; mis_leverage?: number; max_open_positions?: number };
+type CopyDesk = {
+  copy_notional?: number; mis_leverage?: number; max_open_positions?: number;
+  // Today's tournament signals and what the desk did with each (since 12 Nov 2026).
+  copy_today?: { at: string | null; symbol: string; side: string; decision: string; parent_id: string }[];
+};
 type Overridable = { override?: string | null };
 
 export default function LiveTradingPage() {
@@ -496,6 +500,48 @@ export default function LiveTradingPage() {
           </table>
         </div>
       </GlassPanel>
+
+      {(() => {
+        const today = (summary as (LiveTradingSummary & CopyDesk) | null)?.copy_today;
+        if (!today) return null;
+        return (
+          <GlassPanel title={`Today's tournament signals (${today.length})`}>
+            {today.length === 0 ? (
+              <p className="muted">
+                No Selected ORB 15-min signal from the tournament yet today. While the desk is armed, each one is
+                copied within seconds.
+              </p>
+            ) : (
+              <div className="table-scroll">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ textAlign: "left" }}>Time (IST)</th>
+                      <th style={{ textAlign: "left" }}>Symbol</th>
+                      <th>Side</th>
+                      <th style={{ textAlign: "left" }}>What the desk did</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {today.map((c) => (
+                      <tr key={c.parent_id}>
+                        <td style={{ textAlign: "left" }}>
+                          {c.at ? new Date(c.at).toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour12: false }) : "-"}
+                        </td>
+                        <td style={{ textAlign: "left" }} className="sym">{c.symbol}</td>
+                        <td><span className={c.side === "BUY" ? "side buy" : "side sell"}>{c.side}</span></td>
+                        <td style={{ textAlign: "left" }} className={c.decision === "opened" ? "gain" : "muted"}>
+                          {c.decision === "opened" ? "Copied: real order placed" : c.decision}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </GlassPanel>
+        );
+      })()}
 
       <GlassPanel title={`Open positions (${positions.length})`}>
         {!positions.length ? (

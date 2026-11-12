@@ -977,6 +977,54 @@ _MC.is_trading_day = lambda when=None: True
 check("a market holiday: the loop places nothing", a.orders == [])
 
 # ═════════════════════════════════════════════════════════════════════════════════
+section("BALANCE READS AND REASONS (12 Nov 2026)")
+
+
+class FlakyAngel(CashAngel):
+    """funds() fails its first `fails` calls, the way Angel's RMS read failed 24 times on 12 Nov."""
+
+    def __init__(self, fails=1, **kw):
+        super().__init__(**kw)
+        self.fails, self.funds_calls = fails, 0
+
+    async def funds(self):
+        self.funds_calls += 1
+        if self.funds_calls <= self.fails:
+            raise AttributeError("'NoneType' object has no attribute 'getpeername'")
+        return await super().funds()
+
+
+LT._BALANCE_RETRY_S = 0.0
+a = fresh(angel=FlakyAngel(fails=1))
+b = run(LT.account_balance(force=True))
+check("one failed balance read is retried at once and succeeds", b["ok"] and a.funds_calls == 2, (b, a.funds_calls))
+a = fresh(angel=FlakyAngel(fails=2))
+b = run(LT.account_balance(force=True))
+check("two in a row: the read fails, and says what failed", b["ok"] is False and "getpeername" in b["error"], b.get("error"))
+LT._balance_cache["at"] -= LT._BALANCE_FAIL_TTL + 1
+b = run(LT.account_balance())
+check("a failure is kept seconds, not a minute: the next read asks Angel again", b["ok"] and a.funds_calls == 3, a.funds_calls)
+
+a = copy_desk([parent()], angel=FlakyAngel(fails=2))
+run(LT.scan_cycle(None))
+check("a signal while the balance cannot be read: no order, no claim, waiting",
+      a.orders == [] and claim("T1") is None and "balance" in LT._copy_waiting.get("T1", ""), LT._copy_waiting)
+LT._balance_cache["at"] -= LT._BALANCE_FAIL_TTL + 1
+run(LT.scan_cycle(None))
+check("…and copied on the next tick once the balance reads again", len(a.orders) == 1, len(a.orders))
+
+a = copy_desk([parent()], angel=CashAngel(
+    fail_order="Angel error: The order cannot be processed as the token is categorised under cautionary listings by the exchange."))
+run(LT.scan_cycle(None))
+d = (claim("T1") or {}).get("decision", "")
+check("a stock on the exchange's caution list: the record says so", "caution" in d and "surveillance" in d, d)
+st = run(LT.get_state())
+check("…it is not counted as a reject, and the desk stays armed", st["consecutive_rejects"] == 0 and st["armed"], st)
+ct = run(LT.copy_decisions_today())
+check("today's signals are listed for the page, with what happened",
+      len(ct) == 1 and ct[0]["symbol"] == "INFY" and "caution" in ct[0]["decision"] and ct[0]["at"], ct)
+
+# ═════════════════════════════════════════════════════════════════════════════════
 section("WHAT THE PAGE READS")
 
 a = copy_desk([parent()], positions=[copied()])
@@ -984,6 +1032,7 @@ sm = run(LT.summary())
 check("the summary names the copied strategy, the size and the override",
       sm["copy_source"] == SEL and sm["copy_notional"] == 30000.0 and sm["max_open_positions"] == 5
       and SEL in sm["gate_override"], {k: sm.get(k) for k in ("copy_source", "copy_notional", "gate_override")})
+check("…and today's tournament signals", isinstance(sm.get("copy_today"), list))
 op = run(LT.open_positions())
 check("open positions carry their tournament parent and no target", op[0]["parent_id"] == "T1" and op[0]["target"] is None)
 
