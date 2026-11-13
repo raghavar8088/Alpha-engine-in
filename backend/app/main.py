@@ -1095,6 +1095,13 @@ try:
     app.include_router(_top10_books_routes.router)
 except Exception:  # noqa: BLE001
     logger.exception("could not mount the top-10 books API")
+# Index Option Buying picked-strategy books (2026-11-12): Best Strategies of Top 10 (Rs 2 lakh) and the
+# Strategy Factory tab's Rank 1-10 / 11-20 (Rs 10 lakh each). Its router starts the copy loop.
+try:
+    from app.api.routes import prelive_pick_books as _prelive_pick_books_routes
+    app.include_router(_prelive_pick_books_routes.router)
+except Exception:  # noqa: BLE001
+    logger.exception("could not mount the Index Option Buying pick books API")
 # Commodity Trading rank-band books (2026-11-12), read only; a failure here must not stop the app.
 try:
     from app.api.routes import rank_band_books as _rank_band_books_routes
