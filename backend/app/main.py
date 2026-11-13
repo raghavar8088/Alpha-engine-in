@@ -486,6 +486,13 @@ async def start_option_research_desk() -> None:
     except Exception:  # noqa: BLE001
         logger.exception("could not start the top-10 books")
     try:
+        # Index Option Selling, Rs 10 lakh for EACH strategy (2026-11-13): the top 10 of the Strategy Factory · 546
+        # tab and the desk's top 10, copying their parents' trades (app.services.selling_each_books).
+        from app.services.selling_each_books import loop as selling_each_loop
+        asyncio.create_task(selling_each_loop())
+    except Exception:  # noqa: BLE001
+        logger.exception("could not start the selling each-strategy accounts")
+    try:
         # Commodity Trading rank-band books (2026-11-12): Top 5 / 5-10 / 10-15 / 15-20, Rs 10 lakh a strategy,
         # copying the desk's own trades of five frozen picks each (app.services.rank_band_books).
         from app.services.rank_band_books import loop as rank_band_books_loop

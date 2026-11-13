@@ -7,6 +7,7 @@ import ErrorBanner from "../../components/ErrorBanner";
 import LineChart from "../../components/charts/LineChart";
 import SellingPaperBook from "../../components/SellingPaperBook";
 import FactoryDeskView from "../../components/FactoryDeskView";
+import SellingEachAccounts from "./SellingEachAccounts";
 import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   refreshing,
@@ -57,16 +58,18 @@ export default function PreLiveSellingPage() {
   // one Rs 10 lakh account. The desk stops polling while the book is showing.
   // top2L / top10L (2026-10-27): the Top-10 books - the desk's ten best by Rank, on the same book engine.
   // factory (2026-10-27): the Strategy Factory's 546 strategies as NIFTY credit spreads.
-  const [tab, setTab] = useState<"desk" | "pt01" | "top2L" | "top10L" | "factory">("desk");
+  // sf10 / desk10 (2026-11-13): Rs 10 lakh for EACH strategy - the top 10 of the 546 tab, and the desk's top 10.
+  const [tab, setTab] = useState<"desk" | "pt01" | "top2L" | "top10L" | "factory" | "sf10" | "desk10">("desk");
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem("sellingDeskTab");
-      if (saved === "pt01" || saved === "top2L" || saved === "top10L" || saved === "factory") setTab(saved);
+      if (saved === "pt01" || saved === "top2L" || saved === "top10L" || saved === "factory" ||
+          saved === "sf10" || saved === "desk10") setTab(saved);
     } catch {
       /* storage blocked - start on the desk */
     }
   }, []);
-  const pickTab = (t: "desk" | "pt01" | "top2L" | "top10L" | "factory") => {
+  const pickTab = (t: "desk" | "pt01" | "top2L" | "top10L" | "factory" | "sf10" | "desk10") => {
     setTab(t);
     try {
       window.localStorage.setItem("sellingDeskTab", t);
@@ -145,7 +148,9 @@ export default function PreLiveSellingPage() {
           ["top2L", "Top 10 Paper Trade · ₹2 lakh"],
           ["top10L", "Top 10 Paper Trade · ₹10 lakh"],
           ["factory", "Strategy Factory · 546"],
-        ] as ["desk" | "pt01" | "top2L" | "top10L" | "factory", string][]).map(([k, label]) => (
+          ["sf10", "Top 10 of the 546 · ₹10 lakh each"],
+          ["desk10", "Top 10 of the desk · ₹10 lakh each"],
+        ] as ["desk" | "pt01" | "top2L" | "top10L" | "factory" | "sf10" | "desk10", string][]).map(([k, label]) => (
           <button
             key={k}
             role="tab"
@@ -160,6 +165,8 @@ export default function PreLiveSellingPage() {
 
       {tab === "factory" ? (
         <FactoryDeskView desk="index-selling" />
+      ) : tab === "sf10" || tab === "desk10" ? (
+        <SellingEachAccounts key={tab} account={tab} />
       ) : tab === "top2L" || tab === "top10L" ? (
         <>
           <div style={{ padding: "12px 16px", borderRadius: 10, background: "var(--canvas-soft)", border: "1px solid var(--panel-border)", fontSize: 12.5, lineHeight: 1.6, color: "var(--text-muted)" }}>
