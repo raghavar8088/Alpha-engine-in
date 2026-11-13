@@ -1,0 +1,20 @@
+video: Rk-Oxn5GzOo
+topic: forex_us
+summary: Part Time Larry codes the 5-minute opening range breakout from the paper 'Can Day Trading Really Be Profitable?' in PyBroker, on QQQ minute data. At the close of the 09:34 New York bar he goes long if the first five minutes closed above the day's open, and short if they closed below it. The stop is at the opening range's other end, the profit target is 10 times the range, and any trade still open is closed on the 15:58 bar. Positions are sized from the risk to the stop, not a fixed 250 shares. His runs: January 2016 +25% ($25,000 to $31,257); 2016-2023 $25,000 to about $200,000+ with a 23% win rate (no slippage or commissions); out of sample, 2024-2025 strong but 2026 down about 8% while QQQ rose.
+instruments: QQQ (TQQQ mentioned)
+timeframes: 1m (5-minute opening range)
+style: intraday
+= PL-01 | First five minutes' colour picks the side at 09:35 New York, stop at the range's far end, 10x-range target, out at the close (Nasdaq)
+R market E 01:27,03:37 | QQQ minute bars from 09:30 to 15:59 New York (the paper's QQQ test). | "this one specifically operated on QQQ"
+R setup E 08:37,12:47 | The opening range is the first five one-minute bars: 09:30 up to the 09:34 bar, which ends at 09:35. | "since we're doing a 5-minute opening range uh breakout"
+R entry E 14:15 | On the 09:34 bar, buy if its close is above the day's open (green first five minutes); sell short if it is below. | "if the close of that bar is a greater than the open of the day, so the first 5 minutes is green, then we're going to buy and go long"
+R stop E 19:14,21:56 | Stop at the opening range low for longs (high for shorts). | "then you set your stop loss at the opening range low"
+R target E 19:54,22:39 | Take profit at 10 times the opening range's size. | "multiply them times 10. That's going to be our profit target level"
+R exit E 15:00,15:40 | Otherwise close on the 15:58 bar, never overnight. | "that's why I'm describing the order on the bar before the last last bar"
+R sizing E 19:54,20:36 | Size from the planned entry and stop, not a fixed 250 shares. | "the other thing we're going to do is calculate a position size"
+R market A - | Desk version: the Nasdaq 100 cash session (NQ futures prices) on one-minute bars. Enter at the 09:35 open, at most one trade a day, sized by the desk's 1%-of-equity risk. A doji first five minutes means no trade. The target is 10 times the risk from the fill to the stop. | ""
+T with_assumptions | QQQ is replaced by the Nasdaq 100 cash session (A); his code sets the stop one range-size from the entry, while the desk uses the range's far end as stated; his backtests ignore slippage and commissions
+C money | 23:23 | $25,000 to $31,257 (+25%) | January 2016, QQQ, with the stop and target | "we go from $25,000 to $31,257 for a total return percentage of 25%"
+C money | 26:54 | $25,000 to about $200,000+ | January 2016 to December 2023, QQQ, no slippage or commissions | "it ends at 200 and something thousand"
+C win_rate | 26:54 | 23% | January 2016 to December 2023, QQQ | "win rate 23%"
+C return_pct | 29:40 | about -8% in 2026 while QQQ rose | 2026 to 27 October, out of sample | "I think it's down like 8% for the year whereas QQQ is actually up"

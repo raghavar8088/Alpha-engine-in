@@ -1,0 +1,12 @@
+video: 8qEzjJWAe3c
+topic: forex_us
+summary: A Bookmap webinar with Bruce Pringle trading the opening range breakout live on S&P futures and Nvidia, with order flow. Traders take the break after the first 15-minute candle closes (sometimes 30 minutes). He prefers it after a gap, with volume picking up on the break. He enters with a one-cancels-the-other bracket (take profit in front of a round number), then manages using the order book's liquidity, stop runs, icebergs, volume pressure and the pace of the tape. Much of the session is chop and platform demonstration.
+instruments: E-mini S&P 500 futures, Nvidia
+timeframes: 15m range, order book
+style: intraday
+= BK-01 | 15-minute opening range break after a gap with volume picking up, managed by order-book liquidity
+R setup E 02:07,04:53 | Take the breakout after the first 15-minute candle closes (sometimes 30 minutes). | "Traders on the breakout following this 15minute close of the opening range"
+R filter E 11:10,12:32 | First the gap, then volume picking up on the break. | "we're looking for the volume to pick up uh we already know we gapped up"
+R management E 08:29 | A one-cancels-the-other bracket: target in front of a round number, stop below, then manage by the liquidity. | "an Co order here uh one cancels the other"
+T with_assumptions | the order-flow reads (heatmap liquidity, icebergs, pace of tape) need Bookmap data the desk does not have
+D TW-01 | a 15-minute opening range break on a volume pick-up is already coded (TW-01; CV-01 on the Nasdaq)

@@ -258,7 +258,7 @@ def uk02(m, B, p, cache):
             dev = float(b.c[j] - vw[j])
             if not armed and abs(dev) > thr:
                 armed = 1 if dev > 0 else -1
-            if not armed or idx + 1 >= len(js) or not _session_ok(m, b, j):
+            if not armed or not _session_ok(m, b, j):
                 continue
             L = float(vw[j])
             if (b.c[j] - L) * armed <= 0:
@@ -266,7 +266,7 @@ def uk02(m, B, p, cache):
             ext = float(b.h[js[0]:j + 1].max()) if armed > 0 else float(b.l[js[0]:j + 1].min())
             stop = L - armed * abs(ext - L) / 3
             out.append(sig(b, j, armed, stop, "UK02_VWAP_PULLBACK_" + ("LONG" if armed > 0 else "SHORT"),
-                           entry_limit=L, expire_k=int(b.i1[js[idx + 1]]), target_px=ext, info={"group": f"{d}"}))
+                           entry_limit=L, expire_k=int(b.i1[j]) + 15, target_px=ext, info={"group": f"{d}"}))
     return sorted_out(out)
 
 
@@ -283,7 +283,7 @@ def af01(m, B, p, cache):
     for d in range(1, m.n_days):
         pc = Z.prev_close(m, d)
         js = _days(b, d)
-        if not (pc > 0 and len(js) > 8) or int(b.ny0[js[0]]) != 9 * 60 + 30:
+        if not (pc > 0 and js) or int(b.ny0[js[0]]) != 9 * 60 + 30:
             continue
         gap = float(b.o[js[0]]) / pc - 1
         if abs(gap) < 0.003:
@@ -296,14 +296,14 @@ def af01(m, B, p, cache):
             t = int(b.ny0[j])
             if t < 10 * 60 - 5 or not np.isfinite(vw[j]):
                 continue
-            if t >= 15 * 60 + 30 or idx + 1 >= len(js):
+            if t >= 15 * 60 + 30:
                 break
             L = float(vw[j])
             if (b.c[j] - L) * side <= 0:
                 break
             ext = float(b.h[js[0]:j + 1].max()) if side > 0 else float(b.l[js[0]:j + 1].min())
             out.append(sig(b, j, side, L * (1 - side * 0.0025), "AF01_GAP_DAY_VWAP_" + ("LONG" if side > 0 else "SHORT"),
-                           entry_limit=L, expire_k=int(b.i1[js[idx + 1]]), target_px=ext, info={"group": f"{d}"}))
+                           entry_limit=L, expire_k=int(b.i1[j]) + 5, target_px=ext, info={"group": f"{d}"}))
     return sorted_out(out)
 
 

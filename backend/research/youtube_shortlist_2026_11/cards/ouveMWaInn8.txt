@@ -1,0 +1,16 @@
+video: ouveMWaInn8
+topic: forex_us
+summary: Part Time Larry backtests a long-only opening range breakout in Backtrader, on a year (2020) of minute data for every Nasdaq 100 stock, after a viewer sent him a Warrior Trading claim. The opening range is the first 15 minutes (30 and 60 are optimisation options). He buys once a day when a minute closes above the range high. He exits on a close above the high plus the range size, on a close below the high minus the range (the range low), or at the end of the day. Each trade goes nearly all in (a 95% sizer). AMD grew $100,000 to $132,000 and Marriott to $164,000 (the best); he notes the March 2020 volatility drove most of the gains and that the short side was not shown.
+instruments: Nasdaq 100 stocks (2020 minute data)
+timeframes: 1m (15-minute opening range)
+style: intraday
+= PL-02 | 15-minute opening range, long on a one-minute close above it, stop at the range low, target one range above the high, out at the close (long only)
+R setup E 18:35,19:18 | The opening range is the first 15 minutes from 09:30; track its highest high and lowest low. | "the start time is 9 30 right and then to get the end bar end time of the opening range i just add the number of opening bars"
+R entry E 20:46 | Buy once a day when a bar closes above the opening range high. | "that's our buy trigger if we closed above the opening range high"
+R target E 21:28,34:34 | Close on a close above the opening range high plus the range size. | "plus the opening range which was 5 in my example so that means if apple went to 130 then we could close the position"
+R stop E 34:34 | Stop on a close below the opening range high minus the range (the range low). | "we can get stopped out by saying if we're in the position and the close is less than the opening range high minus the opening range"
+R sizing E 07:58 | Nearly all in on every trade (95% of the account). | "basically i'm essentially going all in on this strategy"
+T with_assumptions | the end-of-day exit time is not stated; the desk has no US single stocks
+D CV-01 | the same 15-minute opening-range break on the Nasdaq is already coded (CV-01); only the exits differ (one range up, range-low stop, long only), and his test ran on Nasdaq 100 stocks the desk does not carry
+C money | 46:58 | $100,000 to $132,000 | AMD, 2020, 15-minute range | "you see this little number on the right is 132 000"
+C money | 42:33 | $100,000 to $164,000, the best performer | Marriott, 2020 | "big winner finished at 164 thousand"

@@ -1,0 +1,10 @@
+video: w58D9peiorg
+topic: forex_us
+summary: A Price Action Trading System end-of-day chart lesson on the E-mini (Al Brooks-style reading): trend lines and channels, overshoots and measured moves, first and second entries off the 20 EMA and the trend line, failed breaks of a trading range, reversal signal bars, runners managed by personal preference; every trade is judged bar by bar on the day's chart.
+instruments: E-mini S&P 500
+timeframes: 5m
+style: intraday
+= PT-11 | Second entries at the EMA and trend line with reversal signal bars, measured-move targets (chart lesson)
+R entry E 02:06,04:55 | Second-entry shorts (longs) off the EMA or a trend line, on a reversal-type signal bar. | "this is a second entry short too. uh it's right off where you would expect the trend line to be"
+R target E 01:23,11:23 | Targets from measured moves (two equal legs, equal overshoots). | "You measured your two legs and lo and behold, that's the exact target we reached"
+T concept_only | a discretionary bar-by-bar review: trend lines, channels and signal bars are drawn by eye, and runners are managed by personal preference

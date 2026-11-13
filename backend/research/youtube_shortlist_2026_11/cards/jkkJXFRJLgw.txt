@@ -1,0 +1,13 @@
+video: jkkJXFRJLgw
+topic: forex_us
+summary: PAV Trader's four uses of the session VWAP when day trading ES and NQ futures on tick charts: a trend bias (below the VWAP sellers control, above it buyers), the standard-deviation bands (on range days price mean-reverts from the second band; on trend days it rides between the first and second bands), the VWAP as dynamic support and resistance (after a break, buy or sell the retest for continuation; avoid fading it on choppy days), and the VWAP as a profit target.
+instruments: S&P 500 and Nasdaq 100 futures (ES, NQ)
+timeframes: 3,000-tick charts
+style: intraday
+= PV-11 | Session VWAP as bias, bands, break-and-retest level and target (principles)
+R setup E 04:19,11:28 | Below the VWAP shorts are the higher-conviction side, above it longs. | "if price is below vwap sellers are in control so shorting is the more um you know the highest conviction trade"
+R setup E 07:16,07:57 | Range days: the second deviation band marks overextension back to the mean; trend days ride between the first and second bands. | "every time VAP came to about the second deviation we had some return to the mean"
+R entry E 10:46,12:52 | After price breaks through the VWAP, buy (sell) the pullback retest for continuation. | "once I see price has broken through then I'm looking for a pullback into VAP for a retest and then a continuation"
+R target E 14:16,14:57 | The VWAP is an excellent first target when trading toward it. | "vwap makes for excellent targets if you're coming into it"
+T concept_only | principles without a fixed trigger, stop or target; the break-and-retest and band ideas are already coded here as DE-10, CH-01 and AC-02
+P 01:33 | 01:33 | Paid day-trading course

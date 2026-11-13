@@ -1,0 +1,19 @@
+video: h-erJbnBj6A
+topic: india_stocks
+summary: The Art of Trading (Matthew Slabosz) codes JB Marwood's simple pullback strategy in Pine Script: buy at the next open when the daily close is above the 200-day moving average and below the 10-day moving average; sell at the next open after a close back above the 10-day average, or after a 10% loss on a closing basis. It uses 100% of capital with no leverage. Marwood's AmiBroker figures: about 7.6% a year against 10% for buy and hold on the S&P 500, a 12% maximum drawdown against 55%, a 75% win rate and about 0.5% per trade; Slabosz's TradingView run on SPY from 1995 shows 457 trades. He then tries a 'lower close' exit (sell only after a close above the 10-day average that is also below the prior bar's low), which lifted the average trade.
+instruments: SPY / S&P 500 (daily)
+timeframes: 1d
+style: swing
+= MS-01 | Close above the 200-day SMA and below the 10-day SMA, sell on a close back above the 10-day SMA or a 10% loss (long only)
+R entry E 04:17,15:32 | Buy when the close is above the 200-day moving average and below the 10-day moving average. | "we're going to want a close a above the 200 day moving average and a close below the 10day moving average"
+R exit E 04:17,17:00 | Sell when the close rises back above the 10-day moving average. | "we're going to sell when the close Rises back above that 10-day moving average"
+R stop E 05:00,07:02 | Sell at the next open after a 10% loss on a closing basis. | "we have a 10% loss on a closing basis we exit on the next bars open"
+R entry E 07:02,22:38 | Trades are entered and exited at the next bar's open. | "execution is entering trades on the next bars open"
+R sizing E 07:02 | 100% of capital per trade, no leverage, one position at a time. | "we have a position size of 100% of our Capital no Leverage is used"
+R market A - | Desk version: the NSE daily stock pool (long only, overnight) in place of SPY, sized by the desk's stock-pool risk rule. | ""
+R stop A - | The 10% stop is a stop order 10% below the fill; the video exits at the next open after a close 10% down. | ""
+T with_assumptions | the stock pool replaces SPY and the closing-basis stop becomes a 10% stop order (A); the 'lower close' exit is his later variant and is not coded
+C return_pct | 08:25 | about 7.6% a year against about 10% for buy and hold | S&P 500, JB Marwood's AmiBroker test | "this strategy returns about 7.6%"
+C other | 09:09 | maximum drawdown 12% against 55% for buy and hold | S&P 500, JB Marwood's AmiBroker test | "look at the max draw down 12%"
+C win_rate | 09:09 | 75% | S&P 500, JB Marwood's AmiBroker test | "75% win rate is pretty impressive"
+C trade_count | 28:23 | 457 trades | SPY, TradingView, 1995 to 2022 | "over 457 trades over several years"

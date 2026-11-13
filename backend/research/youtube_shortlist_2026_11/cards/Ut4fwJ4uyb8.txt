@@ -1,0 +1,12 @@
+video: Ut4fwJ4uyb8
+topic: forex_us
+summary: Nick Shawn's 'easy way' of scalping forex. He looks at a chart, decides whether price is likely to go up or down from experience and intuition, and enters at a zone with the stop beyond it. Favourite spots are reversions after big one-hour extensions that fail to continue. Most trades end at break-even or a partial profit and about a quarter reach the target; he aims for about 2R a week. He calls trades with screenshots in a paid group and contrasts scalping with his swing trading and an old averaging-down (DCA) structure that cost him $30,000 on USD/CAD.
+instruments: EUR/USD, USD/JPY, USD/CAD and other pairs
+timeframes: 1h context, 5m-15m entries
+style: scalping
+= NS-01 | Intuitive forex scalping at zones after one-hour overextensions, about 2R a week (no fixed rules)
+R entry E 00:05,00:46 | Buy or sell on whether he believes price will go up or down; no fixed strategy. | "I look at a chart and ask myself if I think it's going to go up or down"
+R setup E 05:40,06:24 | Favour pairs with big one-hour extensions that fail to continue. | "seeing pairs that have had big extensions in One Direction"
+R stop E 02:55 | Stop beyond the zone, target on the other side. | "I'll put a stop loss above the Zone Target below"
+T concept_only | entries come from intuition and experience by his own account; zones and extensions are judged by eye
+C r_multiple | 16:19 | about 2R a week, 8R a month | his called trades | "plus two R per week that is about eight R per month"

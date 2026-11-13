@@ -35,6 +35,7 @@ import ze_global as G  # noqa: E402
 import ze_india as N  # noqa: E402
 import ze_more as X  # noqa: E402
 import ze_more2 as X2  # noqa: E402
+import ze_more3 as X3  # noqa: E402
 
 SOURCE = "youtube_shortlist"
 STUDY = "youtube_shortlist_2026_11"
@@ -63,7 +64,8 @@ def _r(sid, name, fn, ex, markets, tfs, limits=FREE, **kw):
 L2 = Limits(2, False, False)
 L3 = Limits(3, False, False)
 L4 = Limits(4, False, False)
-IX = ("NIFTY", "BANKNIFTY")
+L5 = Limits(5, False, False)
+IX =("NIFTY", "BANKNIFTY")
 FX = ("EURUSD", "GBPUSD")
 
 _NEW = [
@@ -210,6 +212,49 @@ _NEW = [
        X2.cd02, X2.cd02_x, ("XAUUSD",), (1,), L4, clock=("utc", 8 * 60 + 30), readiness=A),
     _r("RT-01", "Above the 200-day MA, close below the lower Bollinger Band (20, 2.5), buy limit 3% lower, RSI(2) exit",
        X2.rt01, X2.rt01_x, ("NSED",), (1,), readiness=A),
+    # ── fourth batch (13 Nov 2026: cards read after the third deploy; ze_more3) ──
+    _r("BT-01", "Fade a cash-open gap smaller than 40% of the 5-day ATR to the prior close, stop 30% of the ATR",
+       X3.bt01, X3.bt01_x, ("NAS100",) + IX, (1,), ONE, readiness=A),
+    _r("PL-01", "First five minutes' colour at 09:35 New York, stop at the range's far end, 10R, out at 15:58",
+       X3.pl01, X3.pl01_x, ("NAS100",), (1,), ONE, clock=("ny", 15 * 60 + 58), readiness=A),
+    _r("LT-01", "Two-minute close beyond 70.5% of the regular-hours gap, played for the full fill, stop at the gap's 50%",
+       X3.lt01, X3.lt01_x, ("NAS100",), (2,), ONE, readiness=A),
+    _r("ET-01", "Quad rotation (stochastics 9-3, 14-3, 40-4, 60-10) + 9-3 divergence super signal, pattern-low stop, 2R",
+       X3.et01, X3.et01_x, ("NAS100",), (1,), L3, readiness=A),
+    _r("ET-02", "20-20 flag: 60-10 above 80, 9-3 back to 20 over the 20 EMA (bear flag under the 200 EMA), 1R",
+       X3.et02, X3.et02_x, ("NAS100",), (1,), L3, readiness=A),
+    _r("MB-01", "MACD (3, 9, 5) consolidation at zero, expansion, re-cross on the trend side, dip stop, opposite-cross exit",
+       X3.mb01, X3.mb01_x, ("NAS100",), (1,), L3, clock=("ny", 15 * 60 + 55), readiness=A),
+    _r("BR-01", "Two consecutive strong trend bars (Always In): stop entry a tick beyond, scalp half a bar (two minutes)",
+       X3.br01, X3.br01_x, ("NAS100",), (2,), L5, readiness=A),
+    _r("CI-21", "EMA 5 / 20 cross candle broken (five minutes), stop at its other end, 2R or a close back through EMA 5",
+       X3.ci21, X3.ci21_x, IX, (5,), L3, readiness=A),
+    _r("CI-22", "3-minute close back over (under) the 21 EMA beyond S3 / previous-day low (R3 / high), next-level target",
+       X3.ci22, X3.ci22_x, IX, (3,), L3, readiness=A),
+    _r("SP-02", "Heikin Ashi flat-bottomed candle above the 20 SMA, RSI over 50, one-hour HA side, out on an SMA close",
+       X3.sp02, X3.sp02_x, IX, (5, 60), L3, readiness=A),
+    _r("FP-01", "Spot touches the daily pivot, R1 or S1: 60-point OCO bracket (ATM option proxy), 1:1, one a day",
+       X3.fp01, X3.fp01_x, IX, (1,), ONE, clock=("ist", 15 * 60 + 14), readiness=A),
+    _r("TM-01", "Daily open gap up after a downtrend: buy at 15:15, target the gap day's high plus the prior range",
+       X3.tm01, X3.tm01_x, IX, (1,), ONE, overnight=True, readiness=A),
+    _r("QI-02", "Overnight gap beyond 0.25 SD of 40 sessions: trade its side from 09:20 to the close (stock pool)",
+       X3.qi02, X3.qi02_x, ("NSE5",), (5,), ONE, readiness=A),
+    _r("QI-01", "Daily close crossing above the upper Bollinger Band (20, 2), out on a close below the middle band",
+       X3.qi01, X3.qi01_x, ("NSED",), (1,), readiness=A),
+    _r("MS-01", "Close above the 200-day SMA and below the 10-day SMA, out above the 10-day SMA or at -10% (long)",
+       X3.ms01, X3.ms01_x, ("NSED",), (1,), readiness=A),
+    _r("AV-01", "The first UTC hour's direction held to the end of the day (bitcoin; the presenter's own null result)",
+       X3.av01, X3.av01_x, ("BTCUSD",), (60,), ONE, clock=("utc", 23 * 60 + 59), readiness=A),
+    _r("FS-01", "RSI (14) beyond 70/30, then a close back through the 9 EMA, swing stop, 1.5R", X3.fs01, X3.fs01_x,
+       FX + ("BTCUSD",), (30, 5), L3, readiness=A),
+    _r("TT-01", "Three tests of a support above the 50 EMA, green close above the EMA, stop under the lowest test, 1.6R",
+       X3.tt01, X3.tt01_x, FX, (15,), L2, readiness=A),
+    _r("TD-11", "First pullback to the previous session's point of control after price moves away, 1:1 at 15% of ADR",
+       X3.td11, X3.td11_x, FX + ("BTCUSD",), (1,), ONE, readiness=A),
+    _r("TD-12", "Week-anchored VWAP: the first pullback after 12 closes away from it, 1:1 at 15% of the daily range",
+       X3.td12, X3.td12_x, FX + ("BTCUSD",), (30,), ONE, readiness=A),
+    _r("DX-01", "Limit at 70% of a structure-breaking impulse, stop at 100%, half at 38.2% with break-even, rest at 10%",
+       X3.dx01, X3.dx01_x, ("XAUUSD",) + FX, (5,), L3, readiness=A),
 ]
 
 NEW = [r.sid for r in _NEW]

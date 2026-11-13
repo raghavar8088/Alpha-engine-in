@@ -1,0 +1,12 @@
+video: 899BPDopwEE
+topic: forex_us
+summary: Flow Zone Trader on day trading the previous day's high, low, open and close. Read the daily candle: where buyers and sellers stepped in on lower timeframes, where stops sit, and whether the trend is up, down or ranging. Each day has two setups at those levels: a breakout (or breakout and retest) in the trend's direction, or a failed breakout back inside, entered on a lower-timeframe failure pattern or structure shift. Supply and demand blocks, anchored VWAPs and liquidity left at highs and lows serve as targets. The examples are replayed on forex and index charts.
+instruments: Forex, indices
+timeframes: Daily levels, 1h-15m entries
+style: intraday
+= FW-02 | Previous-day high/low/open/close: breakout and retest with the trend, or failed breakout back inside
+R setup E 15:26,16:06 | Two setups at the previous day's levels: a breakout or breakout-and-retest, and a failed breakout. | "the second setup you will be looking for is a failed breakout"
+R entry E 20:56,21:37 | Wait for a failure pattern at the level before fading it; the trigger can be a structure shift or an anchored VWAP. | "I'm waiting for a failure pattern"
+R target E 33:36 | Target the liquidity left at highs and the previous day's high. | "potentially for a run up to the previous day high"
+T with_assumptions | the triggers and blocks are read by eye on lower timeframes
+D CH-03 | the previous-day high/low sweep-and-reclaim or acceptance-beyond rule is already coded (CH-03; BB-01 in the library)

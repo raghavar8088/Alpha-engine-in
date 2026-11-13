@@ -1,0 +1,10 @@
+video: YWNloLjXqeI
+topic: forex_us
+summary: No Nonsense Forex (VP) on finding trend-confirmation indicators for his NNFX algorithm. Most of the thousands of free indicators fail. There are three kinds worth testing: oscillators that cross a zero line (rate of change shown), two lines that cross (stochastic shown) and on-chart indicators (Parabolic SAR shown). Test them on common pairs on the daily chart without cherry-picking, judge each signal candle, and play with the settings. The examples are shown as weak; he does not reveal his own indicators.
+instruments: Forex pairs
+timeframes: 1d
+style: unclear
+= NN-02 | Choosing NNFX confirmation indicators: zero-cross, two-line cross and on-chart types, tested on the daily chart (method only)
+R indicator E 11:19 | Three kinds of trend-confirmation indicator: zero-line crosses, two-line crosses and on-chart indicators. | "first off is the zero cross so it's an oscillator that goes below your chart"
+R timeframe E 12:00 | Test on common pairs on the daily chart, without cherry-picking. | "I always use the daily chart we don't cherry-pick here"
+T concept_only | a method for searching indicators; the examples are shown as poor and no indicator or trading rule is recommended

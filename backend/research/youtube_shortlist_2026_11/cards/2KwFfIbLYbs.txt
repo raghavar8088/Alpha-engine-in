@@ -1,0 +1,13 @@
+video: 2KwFfIbLYbs
+topic: india_stocks
+summary: ICICI Direct's Breeze API webinar codes an opening range breakout for Nifty 50 stocks. The range is the first 30-minute candle (09:15-09:45). Buy when the live price breaks its high, sell when it breaks its low. The target and stop percentages are user inputs (a 1% target in the BPCL example), with a maximum number of orders per stock. No new orders after 15:00, and everything is squared off around 15:15. Most of the session covers the API, credentials and the tick-saving code.
+instruments: Nifty 50 stocks
+timeframes: 30m range, ticks
+style: intraday
+= IC-02 | 30-minute opening range break on Nifty 50 stocks, user-set percentage target and stop, no entries after 15:00 (API demo)
+R setup E 12:41 | The opening range is the 30-minute candle from 09:15 to 09:45. | "30 30 minutes candle from 9:15 a.m. to 9:45 a.m."
+R entry E 14:44 | Buy on a break of the range high, sell on a break of the low. | "If the high is broken, we will place a buy order or if the low is broken, we will place a sell order"
+R target E 15:29,16:10 | Target and stop are percentages the user enters (1% target in the example). | "we will take the input from you users. What will be your target percentage or what will be your stop loss percentage?"
+R no_trade E 20:25 | No new orders after 15:00; intraday positions are squared off around 15:15. | "after 3:00 p.m. it will not place any order"
+T with_assumptions | the stop percentage is never given; the target is an example input
+D QC-01 | the 30-minute opening range break is already coded in this study (QC-01; TW-01 and CV-01 for 15-minute ranges); here the exits are left to the user

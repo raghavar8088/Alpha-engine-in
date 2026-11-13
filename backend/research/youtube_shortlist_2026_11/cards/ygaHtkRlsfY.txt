@@ -1,0 +1,10 @@
+video: ygaHtkRlsfY
+topic: forex_us
+summary: An Urban Forex webinar on day trading with support and resistance, explained as supply and demand ('shoe shopping': buy where sellers are desperate, sell where buyers cannot get filled). Identify the flow top-down from the weekly to the four-hour chart, then the support or resistance in it. Ignore the lower level when buyers turn aggressive, and judge candles by how smoothly they move rather than by pattern names. Live CAD/JPY trades are shown. Much of the hour is about mindset and position size.
+instruments: CAD/JPY and other forex pairs
+timeframes: Weekly to 5m
+style: unclear
+= UF-01 | Support and resistance from supply and demand, read top-down and by the feel of the candles (webinar)
+R setup E 35:31 | When buyers get more aggressive, ignore the lower support level. | "this SNR the lower one you must ignore"
+R entry E 44:12 | Read the candles' behaviour, not pattern names. | "feel it feel feel it right don't gues"
+T concept_only | levels and entries are judged by eye and feel; no entry, stop or exit rule is given

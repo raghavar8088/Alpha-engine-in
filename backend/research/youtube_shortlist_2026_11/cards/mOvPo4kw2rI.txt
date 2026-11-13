@@ -1,0 +1,12 @@
+video: mOvPo4kw2rI
+topic: india_stocks
+summary: An Alice Blue webinar with Amar Mandekar (Trade4wealth, in Hindi with garbled auto-captions) on his 'Brahmastra' approach, which is unrelated to the library's Supertrend 'Brahmastra' (PR-01). Stocks from his scanner rally and then consolidate in a range. Buy above the range once a green candle closes outside it (sell below on a red candle), with the stop at that candle's low. The target is the previous swing high, reached '70-80%' of the time, at about 1:2.5. Beginners use 15-minute charts for three to six months, then 5 minutes. For Bank Nifty, his 'Brahmastra tool' reads option writers: put writing above call writing (puts positive, calls negative) is strongly bullish, and the reverse strongly bearish. Live examples include BPCL, Polycab, Bajaj Finance and Reliance.
+instruments: NSE stocks (scanner), Bank Nifty
+timeframes: 15m then 5m
+style: intraday
+= AL-01 | Rally-then-range stocks: buy a green candle close above the range, stop at its low, target the previous swing high; option writers set Bank Nifty's side
+R entry E 04:14,05:00 | Buy above a green candle that closes above the range (sell below a red one). | "agar meraa koee green kaindal kloj hotaa hai to isake abav aaee vil tek d entree"
+R target E 06:20 | Target the previous swing high. | "ye jo preeviyas sving haaee thaa vahaan tak"
+R timeframe E 08:29 | 15-minute charts for the first three to six months, then 5 minutes. | "inishiyal praiktis phor three too siks manths 15 minats"
+R filter E 33:32,34:12 | For Bank Nifty, put writing above call writing is strongly bullish. | "put raaitar gretar den kol raaitar hone chaahie"
+T concept_only | the stocks come from his scanner and the ranges are drawn by eye; the Bank Nifty tool needs option-writing data the desk does not have

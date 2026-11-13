@@ -1,0 +1,11 @@
+video: Lvq0t0eQOG4
+topic: forex_us
+summary: No Nonsense Forex (VP) on what he calls the number-one forex strategy: know your enemy. The big banks see where retail orders sit and move price against the majority, as in the 2015 EUR/CHF peg removal. IG's client sentiment chart shows price usually going against what most traders hold. Avoid being in the majority: stop using the popular tools (trend lines, RSI, breakouts the crowd watches), consider dropping dollar pairs for crosses such as GBP/JPY, look for better indicators, and tighten money management. He trades mostly from the daily chart.
+instruments: Forex pairs (crosses rather than dollar pairs)
+timeframes: 1d
+style: unclear
+= NN-01 | Trade against the retail majority: IG client sentiment, unpopular tools and non-dollar crosses (principles)
+R setup E 20:05 | When most traders are short, price almost always goes long (IG client sentiment). | "if most people are going short You know price is almost always gonna go long"
+R no_trade E 24:57,25:39 | Avoid the popular tools and the popular dollar pairs. | "stop using the same tools that everybody else uses"
+R market E 25:39,29:17 | Trade the less crowded crosses instead of dollar pairs, avoiding exotics. | "what would it be like if you just stopped trading them?"
+T not_testable | the one rule-like idea needs IG's client sentiment data, which the desk does not have; the rest is advice with no entry, stop or exit

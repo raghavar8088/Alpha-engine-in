@@ -1,0 +1,19 @@
+video: uDvT4uDWgB4
+topic: forex_us
+summary: Trader Dale's simplest volume-profile strategy: once a day's session volume profile is complete, wait for price to move away from that day's point of control and trade the first pullback to it (long when it comes back down from above, short when it comes back up from below), only the first test; a fixed stop and target of 10-20% of the average daily range (1:1, for example 12 pips on EUR/USD with an 80-pip range); avoid high-impact news; when price slices straight through a point of control, trade its retest from the other side; his journal shows 59-71% wins by market.
+instruments: EUR/USD, AUD/USD, USD/CAD, ES
+timeframes: Intraday (daily profiles)
+style: intraday
+= TD-11 | First pullback to the previous day's point of control after price moves away, fixed 1:1 at 15% of the average daily range
+R indicator E 01:24,02:08 | Session volume profile with the point of control extended to the right. | "you want to select this extend point of control to the right"
+R setup E 02:51,03:36 | Wait until the day's profile is complete, then for price to move away from its point of control. | "the first step for the long trade entry is wait until the daily profile is fully formed ... price moves away from the point of control"
+R entry E 03:36,04:21 | When price comes back to the point of control from above, go long (from below, go short); trade only the first test. | "when the price hits the point of control from above then you go long ... you only want to trade the first test"
+R stop E 05:07,05:49 | A fixed stop and target, each 10-20% of the average daily volatility (risk-reward 1:1). | "I recommend using 10 to 20% of av ... that means that your takeprofit and stop loss should be between eight to 16 pips"
+R no_trade E 20:58,21:40 | Avoid high-impact news: out 5 minutes before, back 10 minutes after. | "you can for example quit your trades 5 minutes before the news is released"
+R entry E 11:46 | Flip: when price shoots through a point of control with no reaction, trade the retest of that level from the other side. | "you don't enter a short, but you enter a long, okay? Long from the exact same level"
+R market A - | Desk version: EUR/USD and GBP/USD one-minute candles (no forex volume, so the profile counts time at price) and bitcoin one-minute candles (real volume); price steps of 0.01% of the previous session's last price. | ""
+R entry A - | Away = a close at least half the stop distance from the previous session's point of control; then a limit at the point of control on the side price left from (long from above, short from below), live for the rest of the day; one trade per day per market; the flip trade and the news filter are not coded. | ""
+R stop A - | Stop and target each 15% of the 20-day average daily range (1:1); out at 16:55 New York (forex) or 23:55 UTC (bitcoin). | ""
+T with_assumptions | the 'away' distance and the profile step are ours; the forex profile is time-based (A)
+C win_rate | 18:08 | 71% wins on EUR/USD, 59% on USD/CAD, 67% on ES | his trading journal | "the win rate here is 71%. ER dollar is my best performing pair"
+P 23:03 | 23:48 | Paid trading course and live sessions

@@ -1,0 +1,11 @@
+video: iKVUPOsFyGg
+topic: forex_us
+summary: Futures Fanatic (Roderick Casilli) livestreams his 'range trader' framework for index and metals futures. Take the average true range and project the day's likely range as the prior session's point of control plus and minus one ATR. Prefer buying prior-session lows and selling highs inside that range rather than chasing breakouts. The 233 EMA ('T-line'), the prior and developing points of control and the prior session's high and low are the levels and targets. Size from a daily risk budget, aiming for 2:1. He stresses these are frameworks, not rules, and trades a live $85,000 account.
+instruments: Nasdaq, S&P, Dow, gold futures
+timeframes: Intraday (session ranges)
+style: intraday
+= FF-01 | Range trader: the prior POC plus and minus one ATR frames the day; buy prior-session lows and sell highs inside it, targets at the T-line and POCs (framework)
+R setup E 16:39,17:25 | Add and subtract one ATR from the prior session's point of control for the day's potential range. | "You take the prior session pock most of the time"
+R entry E 11:30 | Pick bottoms only at a prior session low. | "it might as well be at a prior session low on the long side"
+R target E 26:47 | Targets: the T-line (233 EMA), then the prior session POC, then the developing POC. | "Tline is a target. Then the next target is prior session PAC"
+T concept_only | he calls it a framework without rules; entries, stops and the choice of levels are discretionary

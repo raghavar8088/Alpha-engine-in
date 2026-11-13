@@ -1,0 +1,16 @@
+video: kpNb5rBQJLc
+topic: india_index
+summary: FessorPro codes an option-buying pivot strategy in Python (Fyers API, websocket, chasing limit orders, a paper mode) for Bank Nifty, Fin Nifty or Nifty. The daily pivot, resistance (R1) and support (S1) come from the previous day and stay constant for the day. From 09:30, wait until spot touches one of the three levels (within a 5-point buffer), then note the ATM call and put premiums. Buy whichever option rises 30 points first, with a stop and target of 30 premium points each (1:1). One trade a day, all closed by 15:15. The buffer and the 30 points are user settings.
+instruments: Bank Nifty ATM options (Nifty, Fin Nifty)
+timeframes: Tick / intraday
+style: intraday
+= FP-01 | Spot touches the daily pivot, R1 or S1: buy the ATM option that gains 30 points first, 30-point stop and target, one trade a day (index proxy)
+R setup E 00:46,25:32 | The daily pivot, resistance and support from the previous day stay constant for the day. | "constant for an entire day"
+R setup E 02:13,02:57 | Wait until spot touches the pivot, resistance or support, within a 5-point buffer. | "we will wait till this current price either touches pivot resistance or support"
+R entry E 03:37,05:40 | Then buy whichever ATM option, call or put, rises 30 points first. | "when the spot price touches any of the level place a limit order"
+R target E 06:23,07:48 | Stop and target 30 premium points each (1:1); one trade a day. | "the trade will end either with a 30 point loss or a 30 point profit"
+R session E 17:45 | The strategy runs from 09:30 to 15:15. | "our strategy will start at 9:30 and our strategy will end at 1515"
+R market A - | Desk version: the Nifty and Bank Nifty index rows as a labelled proxy for the ATM options. At a delta of about 0.5, a 30-point premium move is 60 index points. | ""
+R entry A - | After the first touch from 09:30, a buy-stop and a sell-stop 60 points either side of the touch price, live until 15:15. Floor pivots from the prior day's high, low and close. | ""
+R stop A - | Stop and target 60 index points from the fill; one trade a day; out at 15:15. | ""
+T with_assumptions | option premiums are not on the desk; the 60-point index bracket at delta 0.5 is our proxy (A), ignoring decay and changes in delta

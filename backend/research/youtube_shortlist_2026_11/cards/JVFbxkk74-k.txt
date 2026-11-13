@@ -1,0 +1,13 @@
+video: JVFbxkk74-k
+topic: india_index
+summary: An Upstox 'Market Ready' webinar (Amit Goel, CMT) on the 09:15 open, in Hindi with garbled auto-captions. Avoid directional bets in the first few minutes, and treat a first five-minute candle whose volume beats the average five-minute volume as strength. Three morning setups: opening range breakout, gap reversal, and narrow-range breakout or breakdown. The gap-reversal guideline: a gap greater than 3%, or an open outside the normal one-standard-deviation (about one ATR) range, whose first five-minute candle reverses favours trading the reversal, not the gap. His example trade risks 50 points for a first target of 100, then trails to cost. He calls the thresholds guidelines to adjust, and the examples are mostly illustrative.
+instruments: Nifty, Bank Nifty (options), crude oil
+timeframes: 5m (3m)
+style: intraday
+= AG-01 | The 09:15 framework: opening range breakout, gap reversal beyond the normal range when the first five-minute candle reverses, narrow-range break (guidelines)
+R setup E 06:46 | Three morning setups: opening range breakout, gap reversal, narrow-range breakout or breakdown. | "opaning renj brekaaaut, gaip rivarsal end nairo renj brekaaaut"
+R filter E 17:24,18:04 | A first five-minute candle whose volume beats the average five-minute volume shows strength. | "usakaa volyoom jo hai evarej 5 minat kaindal volyoom se jyaadaa hai"
+R setup E 33:04 | A gap greater than 3% whose first five-minute candle reverses: trade the reversal, not the gap (a guideline). | "opaning gaip vid a gretar den3%"
+R setup E 36:44,37:28 | An open beyond the normal one-standard-deviation range is where fading is favoured. | "vo renj ke baaundree ke baahar hee agar maarket khulataa huaa dikh rahaa hai"
+R stop E 29:26 | Example: a 50-point stop and a first target of at least 100 points, then trail to cost. | "50 points. aap mainual taaraget kyaa rakhoge? etaleest 100 points kaa"
+T concept_only | the setups are shown through garbled Hindi captions with thresholds he calls adjustable guidelines; the opening range part repeats BB-02 and the gap fade overlaps BT-01

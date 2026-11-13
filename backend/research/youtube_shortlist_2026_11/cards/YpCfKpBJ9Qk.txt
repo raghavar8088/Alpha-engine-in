@@ -1,0 +1,11 @@
+video: YpCfKpBJ9Qk
+topic: forex_us
+summary: Jean-François explains on Desire To Trade how he scalps forex on one-minute charts in a two-hour morning session. A bias comes from the daily candle (top-down). He buys red candles into support ahead of confirmation, layering in up to 16 'clicks' of 0.25% each. Expected moves are measured in 'boxes' (measured moves): four clicks per box, up to four boxes. A worst-case 'ejection seat' stop never gets worse; stops are tightened behind the latest swing and positions layered out. Most of the episode covers the year-end review, journaling and discipline.
+instruments: Forex pairs
+timeframes: 1m
+style: scalping
+= ET-03 | Layered one-minute scalping: buy red candles into support with the daily bias, up to 16 clicks of 0.25% across measured boxes, ejection-seat stop
+R sizing E 02:06,04:50 | Up to 16 clicks of 0.25%, four per measured box, as few as needed. | "We have 16 clicks. The intent when we start is not to use all 16"
+R entry E 02:46,13:11 | With a bias from the daily candle, buy red candles at support before confirmation. | "Hence we buy the red on support"
+R stop E 32:04 | A worst-case 'ejection seat' stop that only ever tightens. | "The ejection seat never gets worse"
+T concept_only | support, the box size and the bias are judged by eye; the layering has no fixed entry levels or exit rule

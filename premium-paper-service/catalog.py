@@ -536,9 +536,32 @@ YC3_STRATEGIES = (
     ('DE-10', 'Session VWAP bounce, rejection and break-and-retest on five minutes, no flat VWAP, 2R', 'Delta Exchange', ('BTCUSD',)),
     ('CD-02', '200 EMA side and slope, pullback touching the EMA, engulfing close, 2R (one minute, Asia session)', 'CoinDCX', ('XAUUSD',)),
     ('RT-01', 'Above the 200-day MA, close below the lower Bollinger Band (20, 2.5), buy limit 3% lower, RSI(2) exit', 'Rayner Teo', ('NSED',)),
+    # the fourth batch (13 Nov 2026: the cards read after the third deploy); trades from settings.YC3D_START_T
+    ('BT-01', 'Fade a cash-open gap smaller than 40% of the 5-day ATR to the prior close, stop 30% of the ATR', 'Better System Trader (Scott Andrews)', ('NAS100', 'NIFTY', 'BANKNIFTY')),
+    ('PL-01', 'First five minutes\' colour at 09:35 New York, stop at the range\'s far end, 10R, out at 15:58', 'Part Time Larry', ('NAS100',)),
+    ('LT-01', 'Two-minute close beyond 70.5% of the regular-hours gap, played for the full fill, stop at the gap\'s 50%', 'LumiTraders', ('NAS100',)),
+    ('ET-01', 'Quad rotation (stochastics 9-3, 14-3, 40-4, 60-10) + 9-3 divergence super signal, pattern-low stop, 2R', 'Desire To TRADE (John Kurisko)', ('NAS100',)),
+    ('ET-02', '20-20 flag: 60-10 above 80, 9-3 back to 20 over the 20 EMA (bear flag under the 200 EMA), 1R', 'Desire To TRADE (John Kurisko)', ('NAS100',)),
+    ('MB-01', 'MACD (3, 9, 5) consolidation at zero, expansion, re-cross on the trend side, dip stop, opposite-cross exit', 'SMB Capital', ('NAS100',)),
+    ('BR-01', 'Two consecutive strong trend bars (Always In): stop entry a tick beyond, scalp half a bar (two minutes)', 'Al Brooks (Brooks Trading Course)', ('NAS100',)),
+    ('CI-21', 'EMA 5 / 20 cross candle broken (five minutes), stop at its other end, 2R or a close back through EMA 5', 'Trader Chitra', ('NIFTY', 'BANKNIFTY')),
+    ('CI-22', '3-minute close back over (under) the 21 EMA beyond S3 / previous-day low (R3 / high), next-level target', 'Trader Chitra', ('NIFTY', 'BANKNIFTY')),
+    ('SP-02', 'Heikin Ashi flat-bottomed candle above the 20 SMA, RSI over 50, one-hour HA side, out on an SMA close', 'StockPro (Dr Seema Jain)', ('NIFTY', 'BANKNIFTY')),
+    ('FP-01', 'Spot touches the daily pivot, R1 or S1: 60-point OCO bracket (ATM option proxy), 1:1, one a day', 'FessorPro', ('NIFTY', 'BANKNIFTY')),
+    ('TM-01', 'Daily open gap up after a downtrend: buy at 15:15, target the gap day\'s high plus the prior range', 'TradeSmart', ('NIFTY', 'BANKNIFTY')),
+    ('QI-02', 'Overnight gap beyond 0.25 SD of 40 sessions: trade its side from 09:20 to the close (stock pool)', 'QuantInsti', ('NSE5',)),
+    ('QI-01', 'Daily close crossing above the upper Bollinger Band (20, 2), out on a close below the middle band', 'QuantInsti', ('NSED',)),
+    ('MS-01', 'Close above the 200-day SMA and below the 10-day SMA, out above the 10-day SMA or at -10% (long)', 'The Art of Trading (Matthew Slabosz)', ('NSED',)),
+    ('AV-01', 'The first UTC hour\'s direction held to the end of the day (bitcoin; the presenter\'s own null result)', 'Algovibes', ('BTCUSD',)),
+    ('FS-01', 'RSI (14) beyond 70/30, then a close back through the 9 EMA, swing stop, 1.5R', 'ForexSignals TV', ('EURUSD', 'GBPUSD', 'BTCUSD')),
+    ('TT-01', 'Three tests of a support above the 50 EMA, green close above the EMA, stop under the lowest test, 1.6R', 'The Trading Channel (Steven Hart)', ('EURUSD', 'GBPUSD')),
+    ('TD-11', 'First pullback to the previous session\'s point of control after price moves away, 1:1 at 15% of ADR', 'Trader Dale', ('EURUSD', 'GBPUSD', 'BTCUSD')),
+    ('TD-12', 'Week-anchored VWAP: the first pullback after 12 closes away from it, 1:1 at 15% of the daily range', 'Trader Dale', ('EURUSD', 'GBPUSD', 'BTCUSD')),
+    ('DX-01', 'Limit at 70% of a structure-breaking impulse, stop at 100%, half at 38.2% with break-even, rest at 10%', 'Doyle Exchange', ('XAUUSD', 'EURUSD', 'GBPUSD')),
 )
 YC3B_IDS = frozenset(('MC-01', 'MC-02', 'AO-01', 'KT-01', 'KG-01', 'KG-02', 'AO-02', 'CR-02', 'QC-03', 'CT-03', 'KS-01', 'DE-09', 'CT-02', 'CT-01', 'SK-01', 'CH-01', 'CH-02', 'QC-01', 'CV-01', 'KR-01', 'TN-02', 'AC-02', 'CR-01'))
 YC3C_IDS = frozenset(('FY-01', 'FY-02', 'AO-03', 'US-01', 'US-02', 'KS-02', 'VV-01', 'VV-02', 'BJ-01', 'KT-02', 'BJ-02', 'CD-01', 'DE-10', 'CD-02', 'RT-01'))
+YC3D_IDS = frozenset(('BT-01', 'PL-01', 'LT-01', 'ET-01', 'ET-02', 'MB-01', 'BR-01', 'CI-21', 'CI-22', 'SP-02', 'FP-01', 'TM-01', 'QI-02', 'QI-01', 'MS-01', 'AV-01', 'FS-01', 'TT-01', 'TD-11', 'TD-12', 'DX-01'))
 for _sid, _name, _ch, _mkts in YC3_STRATEGIES:
     ACCOUNTS.append(_a(_sid, YC3, _name, _ch, *[(YC2_BOOK_MARKET.get(_m, _m), "V0") for _m in _mkts]))
 BY_ID = {a.id: a for a in ACCOUNTS}

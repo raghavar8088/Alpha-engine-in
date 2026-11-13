@@ -1,0 +1,16 @@
+video: _Hj98Rstqgo
+topic: forex_us
+summary: LumiTraders (Dasha) teaches her SPX regular-hours gap models on two-minute charts. The gap runs from the 16:00 close to the 09:30 open of the SPX cash index, which she prefers to ES or NQ futures for these levels. Its 25%, 50%, 62% and 70.5% levels (62-70.5% is the optimal trade entry) frame the day. Model 1: if the first 30 minutes fail to sweep a 15- or 30-minute liquidity level, expect a shallow pullback to 25-50%. Model 2: if they sweep one, expect a deeper pullback to 62-70.5%. Both are entered on a two-minute change in the state of delivery. Model 3 trades an older gap's optimal entry zone. Model 4: when price ignores the levels, a two-minute close at least two points beyond 70.5% anticipates a complete fill. All the examples were traded live on her stream.
+instruments: SPX (S&P 500 cash index; ES futures)
+timeframes: 2m
+style: intraday
+= LT-01 | Model 4: a two-minute close beyond 70.5% of the regular-hours gap (by 2 SPX points) is played for the complete fill, stop at the gap's 50%
+R setup E 05:41 | The gap is the range between the 16:00 close and the 09:30 open. | "This range between 4:00 or 8:00 p.m. closure and 9:30 a.m. open is my gap"
+R indicator E 07:13,08:42 | The gap's 25%, 50%, 62% and 70.5% levels; 62-70.5% is the optimal trade entry. | "and 70.5%, we're going to call OTE"
+R timeframe E 05:01 | Two-minute charts. | "I personally trade on 2-minute chart"
+R setup E 22:44,23:25 | When price ignores the levels, a two-minute close at least two points beyond 70.5% anticipates a complete fill. | "Closure must be at least two points on SPX"
+R entry E 24:48 | Enter at the next candle's open (ideally after a test of 70.5%); the stop depends on the gap's size. | "stop loss really depends on gap size"
+R setup E 12:58,17:51 | Models 1-2 depend on whether the first 30 minutes sweep a 15- or 30-minute liquidity level, entered on a two-minute change in the state of delivery. | "only if SPX between 9:30 a.m. and 10:00 a.m. Eastern Time took swept liquidity level on medium timeframe"
+R market A - | Desk version: the Nasdaq 100 cash session (NQ prices) in place of SPX, on two-minute bars. Two SPX points (about 0.035%) become 0.035% of price. | ""
+R entry A - | Model 4 only, from 09:32 to 12:00 New York. The first two-minute close at least 0.035% beyond the 70.5% level toward the prior close is entered at the next open, targeting the prior close (the complete fill). Stop beyond the 50% level; one trade a day; out at the session end. | ""
+T with_assumptions | Models 1-3 need her medium-timeframe liquidity levels and two-minute change-in-delivery reads and are not coded; SPX becomes the Nasdaq 100 (A); the stop at 50% is ours (A)

@@ -1,0 +1,14 @@
+video: KFqSicS7HOo
+topic: india_stocks
+summary: SMB Capital's opening range break on US stocks with a higher-timeframe story (relative strength, a catalyst, high short interest, a higher-timeframe level): wait for the full 15- to 30-minute range (not before 09:45), enter on the break with one of the day's highest volume bars, stop a few cents beyond the breakout bar, add on further breaks, take profits into momentum, at 1 ATR from the day's extreme, on a break of the 9/21 EMA trend or a two-minute bar trail.
+instruments: US stocks (MSTR, OKLO, BBAI, RGTI, SMCI)
+timeframes: 1m, 2m (15-30 minute range)
+style: intraday
+= MB-02 | 15-30 minute opening range break on a high-volume bar with a higher-timeframe catalyst, stop past the breakout bar, profits at 1 ATR (stocks)
+R setup E 00:42,03:27 | The opening range is the first 15 or 30 minutes; never trade it before 09:45. | "I don't like to take opening range breaks before the full opening range has formed"
+R entry E 16:39 | The best breaks come on one of the day's highest-volume bars through the range. | "my favorite check and favor for these opening range breaks is when you see one of the highest volume bars of the day through that opening range level"
+R stop E 07:36 | Stop a few cents beyond the breakout bar. | "you can really simply put your stop just a few cents below that breakout bar"
+R target E 04:09,25:04 | Scale out into momentum, at 1 ATR from the day's extreme, or on a 9/21 EMA trend break or a two-minute bar trail. | "I'm taking additional profits at 282 which is 1 ATR from high of day"
+T with_assumptions | the stock selection (catalysts, relative strength, short interest) is discretionary
+D TW-01 | the 15-minute opening range break on a volume expansion is already coded in this study (TW-01; also BB-02 and YT-26 in the library)
+P 25:44 | 27:53 | Prop-firm hiring pitch

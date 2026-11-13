@@ -1,0 +1,10 @@
+video: C0Nd2pGO9_0
+topic: crypto
+summary: A TechnicalRoundup 'Casual Friday' episode (CryptoCred and a co-host) on trading strength in the November 2024 crypto breakout. Don't assume a high-timeframe breakout is false until price proves it. Take low-timeframe entries but give them high-timeframe room, rather than cutting on a 2-3% move. Trending markets need wider invalidations, fewer predefined targets and trailing by updated invalidations. Take some profit along the way. Most of the episode is market commentary on Bitcoin, Ether, Solana and meme coins.
+instruments: Bitcoin, Ether, Solana, meme coins
+timeframes: Daily to monthly (lower for entries)
+style: mixed
+= RD-01 | Trade strength in breakouts: do not fade high-timeframe breakouts, low-timeframe entries held with high-timeframe invalidation, trail instead of fixed targets
+R setup E 28:51 | Don't assume a high-timeframe breakout is false until it actually fails. | "don't assume something's false until it's actually false"
+R management E 43:51,01:13:51 | Give the high-timeframe picture room; in trends use fewer predefined targets and trail by updated invalidations. | "fewer predefined targets and more aggressive trend monitoring and updating invalidations"
+T concept_only | market commentary with management principles; no entry trigger, level rule or exit is defined

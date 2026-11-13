@@ -1,0 +1,14 @@
+video: Q_glz_a5Bz4
+topic: forex_us
+summary: A Trading Nut breakdown with Luca of a USD/JPY short from an Asian-session liquidity grab: a bearish four-hour bias with an untested four-hour demand zone as the target; on 15 minutes price wicked above the Asian range high (and yesterday's high) without a big close outside; on 5 minutes he sold the break of an indecision candle's low, took 20% off at the first target and aimed for the four-hour demand; later demand-zone buys after a break of structure; correlation across pairs as confirmation.
+instruments: USD/JPY, GBP/USD and other forex pairs
+timeframes: 4h, 15m, 5m
+style: intraday
+= TN-03 | Asian-range liquidity grab: a wick above the Asian high, five-minute indecision-candle break, target the four-hour zone (live breakdown)
+R setup E 03:25,04:07 | With a bearish higher-timeframe bias, a wick above the Asian session high (and the previous high) is the liquidity grab. | "this was actually an example of a Asian session liquidity grab of why I actually took this trade"
+R no_trade E 04:07,05:32 | Avoid big closes outside the Asian range: that may be a break and retest instead. | "you don't want too big of closures outside of the range"
+R entry E 06:16,07:39 | On 5 minutes, sell the break of an indecision candle after the grab. | "right when we got this bearish kind of dogey I took it at the F minute low"
+R target E 09:04,11:12 | Take 20% at the first target and aim the rest at the four-hour demand zone. | "I usually like take 20% and let the rest run"
+T with_assumptions | the bias, the zones and the indecision candle are read live
+D MH-03 | the Asian-session liquidity sweep into a higher-timeframe zone is already in the library (20-channel study; also TP-03, BB-08)
+P 01:22 | 03:33 | Prop-firm coupon; broker TradingView offer

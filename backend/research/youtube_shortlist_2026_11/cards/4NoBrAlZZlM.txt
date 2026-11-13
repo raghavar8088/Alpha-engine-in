@@ -1,0 +1,18 @@
+video: 4NoBrAlZZlM
+topic: forex_us
+summary: Better System Trader interviews Scott Andrews, 'the Gap Guy', on fading opening gaps in the big stock indices (Nasdaq, S&P, Dow, Russell, DAX, FTSE). Their overnight moves rarely hold through the day, so they tend to revert to the prior close. Gap size is the key: gaps up to about 40% of the prior five days' average true range fill far more often (a 10-cent SPY gap about 90%, 20 cents 80%), while larger ones fill only 40-50% of the time. He targets the prior close (or just in front of it), uses a stop of about 30% of the five-day ATR, and closes anything still open at the end of the day. Market conditions, the last three days' pattern, seasonality (Mondays) and gap zones (where the open sits against the prior day's open, high, low and close) refine his separate systems.
+instruments: Index futures (Nasdaq, S&P 500, Dow, Russell, DAX, FTSE)
+timeframes: Intraday from the cash open
+style: intraday
+= BT-01 | Fade a cash-open gap smaller than 40% of the 5-day ATR toward the prior close, stop 30% of the 5-day ATR, out at the close
+R market E 12:12 | Fade gaps in the big indices; they revert to the prior close more often than single stocks. | "they're going to be more likely revert back to the pri's close before finding a base"
+R setup E 16:20,17:02 | Fade only gaps smaller than about 40% of the prior five days' average true range; larger gaps fill far less often. | "if a gap is bigger or larger than 40% of the prior 5 days true range or U up or down it is statistically far less likely to fill"
+R target E 24:05,28:54 | Target the prior day's close (or a point just in front of it). | "I'm just targeting the pri's close or some point just in front of it"
+R stop E 24:45 | Stop about 30% of the five-day average true range. | "average tends to use around a 30% of the 5-day average true range um stop"
+R exit E 29:36,30:18 | Close the trade at the end of the day if neither the target nor the stop is hit; never turn it into another trade. | "close it out always and never turn it into another trade"
+R filter E 12:56,17:44 | Market conditions, the last three days' pattern, seasonality and gap zones refine the odds in his own systems. | "I look at three things primarily U market conditions"
+R market A - | Desk version: the Nasdaq 100 cash session (09:30 open against the prior 16:00 close) and the Nifty and Bank Nifty indices (09:15 open against the prior close). | ""
+R entry A - | Measure the gap on the first one-minute bar and enter at the next minute's open, unless the first minute already reached the prior close. The ATR uses the five prior sessions. One trade a day, out at the desk's session end. The filters and gap zones are not coded. | ""
+T with_assumptions | his market-condition, pattern, seasonality and gap-zone systems are not described in rules and are not coded (A); the entry minute is ours
+C win_rate | 16:20 | about 90% fill for the smallest gaps (10 cents on SPY), 80% at 20 cents, 60-70% at 30 cents, about 40% beyond 40% of the five-day ATR | his gap statistics | "the smallest gaps will have like a 90% probability of filling"
+U Which market conditions, three-day patterns and gap zones does he trade, and with which targets?

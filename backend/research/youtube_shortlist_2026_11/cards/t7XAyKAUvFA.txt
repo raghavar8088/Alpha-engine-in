@@ -1,0 +1,19 @@
+video: t7XAyKAUvFA
+topic: forex_us
+summary: SMB Capital's 'high win-rate' MACD scalp on one-minute charts (to regain rhythm after losses): a MACD with fast settings (3 and 9 with a short signal line) wraps around zero for 3-15 minutes of consolidation; then it expands above zero (the lines diverge), price dips and the MACD line converges back to its signal line while staying above zero; enter long when the MACD line crosses back above the signal, stop just under the dip's low, exit when it crosses back below (mirror for shorts below zero); the histogram is ignored.
+instruments: US stocks and futures
+timeframes: 1m
+style: scalping
+= MB-01 | MACD (3, 9) consolidation at zero, expansion, pullback to the signal line, re-cross on the trend side, dip-low stop, out on the opposite cross
+R indicator E 03:31,10:04 | MACD with fast settings: a 3-period and a 9-period average, plus a short signal line. | "we're using a three 95 so that's a three moving average three period moving average a nine period moving average"
+R setup E 05:04,06:25 | Setup: a consolidation of about 3-15 one-minute bars with the MACD line wrapped around zero. | "looking for this specific again three to about 15 minutes of that period of time"
+R setup E 07:06,07:50 | Then an expansion: the MACD line shoots above zero and away from its signal line, and then converges back. | "once you get that Divergence and then that convergence"
+R entry E 09:19,13:30 | Enter on the MACD line's cross back above the signal line while above zero (below zero for shorts). | "as long as this cross is occurring above the zero line for a long or below the zero line for a short"
+R stop E 08:36 | Stop just below the low of the recent dip. | "your stop is going to be below the low of where that recent little down dip occurred"
+R exit E 08:36,16:21 | Hold while the fast line stays above the slow; exit when the MACD line crosses back below its signal. | "as long as the fast moving average is above the slow we're GNA stay with our position"
+R market A - | Desk version: the Nasdaq 100 cash session on one-minute candles; MACD (3, 9, 5). | ""
+R setup A - | Consolidation = at least 3 of the bars between 15 and 4 bars ago with |MACD| at most 0.1 x ATR (14); expansion = since then the MACD reached at least 0.3 x ATR above zero (below for shorts). | ""
+R entry A - | Long at the next open after the MACD line crosses back above its signal while above zero, following the expansion; mirror for shorts; signals 09:45-15:30 New York; at most 3 trades a day. | ""
+R stop A - | Stop one tick under the lowest low since the expansion's peak; exit at the next open after the MACD line crosses back below its signal; out at 15:55. | ""
+T with_assumptions | the signal length (heard as '5'), 'wrapped around zero' and 'expansion' are ours (A)
+P 23:37 | 26:30 | Prop-firm hiring pitch

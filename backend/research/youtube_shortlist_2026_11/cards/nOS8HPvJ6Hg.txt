@@ -1,0 +1,17 @@
+video: nOS8HPvJ6Hg
+topic: india_index
+summary: Trader Chitra's 3-minute scalp for Nifty, Bank Nifty and stocks: a 21 EMA, the previous day's high and low, and Camarilla R3 and S3; buy above a green candle that closes above the 21 EMA while price is above the supports (S3, the previous day low), stop at that candle's low, book at the next resistance (R3 or the previous day high) or trail until a red candle closes below the EMA; sell the mirror below the 21 EMA and the resistances; when price is far from the EMA (after a gap), wait for a pullback to it.
+instruments: Nifty, Bank Nifty, stocks
+timeframes: 3m (1m)
+style: scalping
+= CI-22 | 3-minute close back over (under) the 21 EMA on the right side of S3 / previous-day low (R3 / high), break of that candle, target the next level
+R indicator E 00:59,04:30 | 21 EMA, previous day high and low, Camarilla R3 and S3 only. | "the indicator required are previous day high and low ,21 moving avg ,camarilla pivot point"
+R entry E 01:41,06:35 | Buy above a green candle that closes above the 21 EMA while price is above S3 and the previous day low. | "we can enter in this green candle because this candle is above S3 and above 21 moving avg"
+R stop E 07:20 | Stop at the green candle's low. | "stop loss is the low of the green candle"
+R target E 07:20,08:02 | Book at the previous day high or R3, or trail until a red candle closes below the 21 EMA. | "we can book profits at previous day high or at R3 as R3 is near by"
+R entry E 11:30,17:16 | Sell below a red candle under the 21 EMA and below R3 / the previous day high; stop at its high; book at S3 or the previous day low. | "we can enter in to short trade below this red candle stop loss is high of the red candle"
+R no_trade E 15:45,24:20 | When price is far from the 21 EMA, wait for the pullback to it. | "if the gap is more always price will attract the moving average"
+R market A - | Desk version: Nifty and Bank Nifty one-minute index rows on three-minute candles; Camarilla R3/S3 = close +/- 1.1 x (high - low) / 4 of the previous day. | ""
+R entry A - | Long: a green three-minute candle closing above the 21 EMA after a close at or below it within the last 3 bars, its close above both S3 and the previous day low and within 0.3% of the EMA: a buy-stop one point over its high, live 3 bars; mirror for shorts; 09:30-14:45; at most 3 trades a day. | ""
+R stop A - | Stop at the candle's other end; target the nearest of R3 / previous day high beyond the entry (2R when none lies ahead); exit at the next open after a red candle closes below the EMA (green above it for shorts); out at 15:15. | ""
+T with_assumptions | 'far from the EMA', the fresh-cross test and the fallback target are ours (A)

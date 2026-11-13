@@ -1,0 +1,12 @@
+video: Zm9Q0NDRxoY
+topic: forex_us
+summary: ICT's lecture on opening range theory and the first presented fair value gap (Nasdaq futures, November 2025). Read the narrative from the weekly down to the hourly chart: volume imbalances, premium wicks and the liquidity pools. Opening ranges are 30 minutes (01:30-02:00 New York for London). After the range raids one side's liquidity, a displacement leaves the first presented fair value gap. That gap acts as a suspension block, and price respects its midpoint (consequent encroachment) on the way to the opposite liquidity pool. A second rally that takes the first high is his 'turtle soup' false breakout.
+instruments: Nasdaq 100 futures
+timeframes: Weekly to 1m
+style: mixed
+= IN-01 | 30-minute opening range: after a liquidity raid, the first presented fair value gap of the displacement, traded at its midpoint toward the opposite pool
+R setup E 10:08,11:34 | The opening range is 30 minutes; look for displacement out of it. | "when we're using opening ranges, which are defined by 30 minutes, not 15 minutes, not 5 minutes"
+R entry E 13:04,13:44 | After liquidity is taken, the first presented fair value gap of the displacement is the block; price respects its midpoint. | "this first presented fair value gap is a bearish suspension block"
+R filter E 20:37 | With buy side raided and sell side intact, the draw is to the sell side across the higher timeframes. | "They've raided buy side. They've left sell side intact."
+T with_assumptions | the higher-timeframe narrative and the draw on liquidity are read by eye
+D NJ-37 | the first fair value gap after the open's liquidity raid is already coded (NJ-37, the New York open FVG; JR-01 and TP-03 are close); the 30-minute range and the narrative are his framing

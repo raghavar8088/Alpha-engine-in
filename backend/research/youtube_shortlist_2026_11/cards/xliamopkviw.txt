@@ -1,0 +1,9 @@
+video: xliamopkviw
+topic: india_index
+summary: An Elearnmarkets Face2Face interview with Bijay Sharma (a chartered accountant) on trading Bank Nifty with the VWAP, the anchored VWAP and the option chain (call and put open interest, writing at the at-the-money strikes). The Hindi auto-captions, read in Latin letters, are garbled throughout. Only fragments are readable: the VWAP and anchored VWAP as levels, option-chain writing as confirmation, and a 20-point stop. No complete entry, stop or exit rule can be recovered.
+instruments: Bank Nifty (options)
+timeframes: Intraday
+style: unclear
+= EM-01 | Bank Nifty with VWAP, anchored VWAP and option-chain writing (interview; the captions are unusable)
+R stop E 01:01:22 | A 20-point stop is mentioned; the surrounding rule is not readable. | "20 point kaa stopalos"
+T not_testable | the Hindi auto-captions are too garbled to recover the rules; a reading needs a clean transcript or the audio

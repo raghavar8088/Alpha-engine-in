@@ -1,0 +1,14 @@
+video: InAR5W5Q2bM
+topic: forex_us
+summary: Flowzone Trader's opening range breakout for traders with little time: pick the range timeframe (the first 1, 5, 15, 30 or 60 minutes), place stop orders beyond the range, take 1:1 on most of the position, then let a new range form and trade its break again (three 1:1 trades on the example morning); context from higher-timeframe supply and demand, the gap fill and volume; trail any runner with a stack of EMAs.
+instruments: Nasdaq 100 futures
+timeframes: 1m (range of 1-60 minutes)
+style: scalping
+= FW-01 | Opening range stop orders both sides, 1:1, re-arm on the next range (one-minute)
+R setup E 03:33,04:13 | The range is the first 1, 5, 15, 30 or 60 minutes; be consistent about which. | "any move above this one minute candle to the upside going to be looking for Longs and any move underneath it to the downside I am going to be looking for short"
+R entry E 02:09,02:52 | Stop orders through the range's edges. | "you could set a stop buy order and you'll be looking to trigger once it has broken out through this level"
+R target E 04:53,05:39 | Lock in 1:1 on most of the position. | "you want to be locking in for on toone profit or at least the majority of your trade"
+R entry E 05:39,08:30 | After a trade, a new range builds; trade its break the same way. | "can we create a range here trap some more liquidity trap the stops and look for a either continuation trade"
+T with_assumptions | the range choice and the re-ranging are judged live
+D UK-01 | the first one-minute range bracket at the cash open is already coded in this study (UK-01; CV-01 for the 15-minute range)
+P 00:46 | 00:46 | Channel subscription

@@ -1,0 +1,16 @@
+video: RamI3itKkIQ
+topic: forex_us
+summary: Forex Signals TV's live 9 EMA + RSI blitz: when the RSI (14) is overbought (above 70), sell on the first bar that closes back beneath the 9 EMA; when oversold (below 30), buy the first close back above it; stop a couple of ticks beyond the swing high or low; target the next structure or order block (about 1.5:1 on the example); 30-minute charts for forex pairs, 5- or 1-minute for bitcoin and US index futures (indices only after the 09:30 open).
+instruments: EUR/USD, GBP/USD, bitcoin, Nasdaq and S&P futures, gold
+timeframes: 30m (forex); 5m, 1m (bitcoin, indices)
+style: scalping
+= FS-01 | RSI (14) beyond 70/30, then a close back through the 9 EMA, swing stop, 1.5R
+R indicator E 05:53,06:34 | EMA 9 on closes and RSI 14 with default settings. | "our factory settings are nine ... our periodicity is going to be nine our source is going to be the close"
+R entry E 04:29 | Overbought (RSI above 70): sell when a bar closes beneath the 9 EMA; oversold (below 30): buy when a bar closes above it. | "if we're over 70 we're looking to sell the market when do we sell the market when we get a bar Clos beneath the 9 EMA"
+R stop E 16:32 | Stop on the swing low (high), a couple of ticks beyond. | "put your stop-loss right on the swing low don't put it one tick give it a couple of ticks"
+R target E 08:37,12:10,17:12 | Target the next structure or order block (about 1.5:1 on the example trade). | "looks like about a one and a half to one trade"
+R session E 10:05,11:30 | Forex on 30-minute charts (not much smaller); US index futures only after 09:30. | "I really don't advise going too much smaller than a 30-minu"
+R market A - | Desk version: EUR/USD and GBP/USD on 30-minute candles and bitcoin on 5-minute candles. | ""
+R entry A - | RSI at or beyond 70 (30) within the last 3 bars, then the first close below (above) the 9 EMA after a close on the other side: enter at the next open; at most 3 trades a day. | ""
+R stop A - | Stop 0.02% beyond the highest high (lowest low) of the last 5 bars; target 1.5R; out at 16:55 New York (forex) or 23:55 UTC (bitcoin). | ""
+T with_assumptions | the swing, the structure target and 'overbought state' are judged live (A)

@@ -1,0 +1,17 @@
+video: fPchKlBcwQc
+topic: india_index
+summary: Trader Chitra's 5 and 20 EMA intraday method on five-minute Nifty, Bank Nifty and stock charts (with a 200 EMA for the bigger trend): when the 5 EMA crosses above the 20 EMA (with the 200 EMA in agreement for the stronger version), buy above the crossover's green candle with the stop at its low; on a bearish cross, sell below the red candle with the stop at its high; target by risk-reward, or book when a candle closes back through the 5 EMA (ride the 5 EMA on trending days); a nearby 200 EMA can be the target; she counted 8 December Nifty trades without a stop-out.
+instruments: Nifty, Bank Nifty, stocks (Reliance)
+timeframes: 5m
+style: intraday
+= CI-21 | EMA 5 / EMA 20 cross: break of the crossover candle, stop at its other end, out on a close back through the 5 EMA or at 2R
+R indicator E 02:20,04:29 | EMA 5, EMA 20 and EMA 200 on five-minute candles. | "the ema which we are suing is 5 ema and 20 ema"
+R entry E 05:10,07:56 | Long above the green candle of a bullish cross (stop at its low); 5, 20 and 200 agreeing is the stronger version. | "5,20 and 200 has given the bullish cross over entry for the long side is above the green candle"
+R entry E 08:37,09:21 | The simpler setup: a 5/20 bearish cross, short below the red candle, stop at its high. | "5 and 20 has given cross over we can enter in to short trade below the red candle"
+R target E 05:50,09:21 | Target by risk-reward, or book when a candle closes back through the 5 EMA (trail with the 5 EMA on trending days). | "target is based on risk reward ratio or any red candle closes below 5 ema"
+R no_trade E 13:25 | Skip when the 200 EMA is right in the way (after a gap). | "don't take as 200 ema is near by as this is gap down we will not enter here"
+R market A - | Desk version: Nifty and Bank Nifty one-minute index rows on five-minute candles. | ""
+R entry A - | The 5/20 cross bar must close in the cross's direction (green for longs); a buy-stop one point over its high (sell-stop under its low) live for 3 bars; 09:30-14:45; at most 3 trades a day. | ""
+R stop A - | Stop at the cross candle's other end; target 2R; exit at the next open after a close back through the 5 EMA; out at 15:15; the 200 EMA filter is not coded. | ""
+T with_assumptions | the target ratio and the 200 EMA 'nearby' test are judged by eye (A)
+C win_rate | 14:58 | 8 trades in December on Nifty, none stopped out | her own chart count | "we got 8 trades till now but not even one stop loss"

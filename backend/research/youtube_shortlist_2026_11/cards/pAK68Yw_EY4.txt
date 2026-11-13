@@ -1,0 +1,12 @@
+video: pAK68Yw_EY4
+topic: india_stocks
+summary: EQSIS explains the 'open study' filters of its intraday scanner: gap up and gap down (relative to how many stocks gapped), open = high (bearish) and open = low (bullish), gaps filled the same day ('weak bulls', 'weak bears'), and strong gaps (a gap up that opens at its low and above the previous day's high signals short covering); the filters matter later in the day rather than at the first minute, and their success ratios were to follow in later videos.
+instruments: NSE stocks
+timeframes: 1d context, intraday
+style: intraday
+= EQ-01 | Opening-behaviour filters: gaps, open = high / low, filled gaps, strong gaps (scanner explainer)
+R setup E 07:50,09:16 | Open = low that holds is bullish; open = high that holds is bearish. | "open is equal to low then probably the stock is not able to break that low ... it indicates a kind of bullish behavior"
+R setup E 10:50,12:19 | A gap that fills the same day marks weak bulls (or weak bears): the surprise is fading. | "if it filled the gap then those stocks comes under the brasket of weak bulls and weak bears"
+R setup E 13:01,13:43 | Strong bullish gap: a gap up opening at its low and above the previous day's high (short covering). | "it is a gap up open low and interestingly it is even previous it is higher than the previous day high"
+T concept_only | scanner filters without an entry, stop or exit rule; the promised success ratios are not in this video
+P 14:27 | 15:13 | Intraday scanner subscription

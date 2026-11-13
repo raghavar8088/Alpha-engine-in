@@ -1,0 +1,17 @@
+video: _opTZIbmuTQ
+topic: forex_us
+summary: Doyle Exchange's Fibonacci 'sniper' scalp on forex pairs, US30 and gold: after price breaks market structure (a new high past the last swing high, or a new low), draw the Fibonacci from the swing that started the move to its extreme; enter at the 70% retracement with a limit (never 61.8%), at once, not on a candle close; stop at the 100% level; take half or more at the 38.2% level (slightly above 1:1) and move the stop to break-even; the 25% and 10% levels are the next targets (about 1:2); he trades four pairs because many setups never reach 70%.
+instruments: USD/CHF and other forex pairs, US30, gold
+timeframes: Intraday (5m, 15m)
+style: scalping
+= DX-01 | After a structure break, a limit at the 70% retracement of the impulse, stop at 100%, half at 38.2% with a break-even stop, the rest at the 10% level
+R setup E 12:25,13:07 | Wait for a break of market structure, then draw the Fibonacci over the impulse that broke it. | "at this point it broke structure as it breaks structure you wait for it to pull back to our entry"
+R entry E 02:51,03:33 | Enter at the 70% level only, as soon as price touches it (no candle-close wait). | "at 70 this is where i enter the trade i don't i do not enter off the 61.8"
+R stop E 02:10 | Stop at the 100% level; a break of it invalidates the setup. | "it's 100 this is your stop loss"
+R target E 05:40,06:23 | First target the 38.2% level (slightly above 1:1): close part and move the stop to break-even. | "first tp ... you have a slightly above one to one"
+R target E 09:25,10:15 | Next targets the 25% and 10% levels (about 1:2), reached only in strong trends. | "when you close half at one to one your next tp should be the ten percent"
+R market A - | Desk version: gold (booked on Delta XAUTUSD), EUR/USD and GBP/USD on five-minute candles. | ""
+R setup A - | Structure break = a close above the latest confirmed swing high (two bars each side); the impulse runs from the lowest low of the 20 bars before the break to the highest high since; once a bar fails to make a new high, a buy limit sits at 70% of the impulse, live for 24 bars (mirror for breaks of swing lows). | ""
+R stop A - | Stop at the impulse's origin (100%); half off at the 38.2% level with the stop moved to break-even; the rest at the 10% level; at most 3 trades a day; out at the session end. | ""
+T with_assumptions | swings and the impulse's origin are drawn by eye (A); a variant of MA-01 (0.618 entry) with a 70% entry and 38.2% / 10% targets
+P 00:00 | 00:44 | None (free strategy)

@@ -1,0 +1,11 @@
+video: -ZVG3voaI7Q
+topic: forex_us
+summary: A futures.io (Big Mike's) webinar with Suri Duddella on pivots, volatility, patterns and scalping in the E-mini futures. His statistics: floor pivots stop price only about 44% of the time, while the prior day's high and low act as resistance or support about 61% of the time. Pivots of all kinds (floor, Fibonacci bands at 1.38 and 1.62 of the prior range, Globex high and low, opening range) are context and targets, never entries on their own. He trades breakouts and pullbacks only from clearly defined patterns (ABC, Gartley, flags, channels) found by his own software, with 2-3.5 point initial stops trailed by the pattern. His volatility gauge marks a session as risky above 50. Scalping needs a high success rate, limit orders and very short holding times.
+instruments: E-mini S&P, Nasdaq and Dow futures; stocks
+timeframes: Intraday (and daily patterns)
+style: mixed
+= NX-01 | Pivots as context and targets, entries only from defined patterns, a volatility gauge for risk (webinar)
+R filter E 14:51 | Pivots are targets and context, never an entry on their own; trade them with patterns and setups. | "that way I'm using it as a Target but it's never an element for me to enter"
+R setup E 45:26 | Trade breakouts only from clearly defined patterns (channels, triangles). | "you must trade breakouts only from clearly defined patterns"
+R stop E 56:02,56:42 | Intraday stops of 2-3.5 points, then trailed by the pattern. | "three and a half points as the initial stop and then then I Trail the stops"
+T concept_only | the patterns come from his own detection software and quality scores; pivots and volatility are context, not a rule set

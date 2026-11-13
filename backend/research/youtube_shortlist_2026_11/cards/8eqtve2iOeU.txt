@@ -1,0 +1,16 @@
+video: 8eqtve2iOeU
+topic: india_stocks
+summary: QuantInsti codes a long-only Bollinger Band breakout on ten years of daily Nifty data in Python: buy when the close crosses above the upper band (20, 2) after closing below it the day before, hold while above the middle band, exit on the first close below the 20-day middle band; about 60 signals; it returned less than buy and hold (5.76% against 10.74% a year) but with far lower volatility (6.64% against 16.62%), a higher Sharpe ratio and an 11.79% maximum drawdown against 38.44%.
+instruments: Nifty 50 (daily)
+timeframes: 1d
+style: positional
+= QI-01 | Daily close crossing above the upper Bollinger Band (20, 2), out on a close below the middle band (long only)
+R indicator E 02:17,05:47 | Bollinger Bands with the default 20-period middle band and 2 standard deviations. | "the length window is 20 by default which I told you is 20 period moving average and the standard deviation I'm using is two"
+R entry E 08:41 | Buy when today's close is above the upper band and yesterday's close was below yesterday's upper band. | "the close of the current day is greater than the upper band and at the same time the close in the previous day is lesser than the close of the upper band in the previous day"
+R exit E 12:50 | Exit on a close below the middle band. | "the exit condition is going to be a close below the middle band"
+R sizing E 09:23 | One position at a time; a repeated signal while long is ignored. | "I might be long on a trade over here and then my condition may reappear. Does that mean that I'm going to take that trade once again? No."
+R market A - | Desk version: the NSE daily stock pool (long only, overnight) besides the index he tested. | ""
+R stop A - | Enter and exit at the next open; a protective stop at the lower band of the signal day so the book can size. | ""
+T with_assumptions | the stock pool replaces the Nifty index and a protective stop is added (A)
+C return_pct | 27:35 | 5.76% a year against 10.74% for buy and hold; volatility 6.64% against 16.62%; maximum drawdown 11.79% against 38.44% | Nifty daily, about ten years | "my volatility for the strategy return is 6.64% only"
+P 28:59 | 28:59 | Course material link

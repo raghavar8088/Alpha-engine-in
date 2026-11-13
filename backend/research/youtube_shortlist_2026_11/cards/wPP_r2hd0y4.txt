@@ -1,0 +1,15 @@
+video: wPP_r2hd0y4
+topic: forex_us
+summary: Trader Dale's three anchored-VWAP entries on 30-minute EUR/USD and ES charts: anchor the VWAP at an important swing point (where a strong move began), at the start of the week, or at the start of a sell-off or rally out of a heavy-volume rotation; then trade pullbacks to that VWAP in the move's direction ('buyers and sellers want the fair price'); skip rotations, where the VWAP is crossed back and forth; this video covers entries only, not stops or targets.
+instruments: EUR/USD, ES
+timeframes: 30m
+style: intraday
+= TD-12 | Week-anchored VWAP: after price moves away, the first pullback to it in that direction, fixed 1:1 at 15% of the daily range
+R setup E 00:43,04:14 | Anchor the VWAP to an important place: a key swing point, the start of the week, or the start of a move out of a rotation. | "you always want to anchor VWAP to important place and that place should be important to as many people ... as possible"
+R entry E 07:01,07:47 | Week anchor: when price trends away from the week's VWAP, trade each pullback to it in the trend's direction. | "you wait for pullbacks and when the price makes pullback to the VWAP, you enter your short"
+R no_trade E 08:31,15:41 | Rotations (sideways markets around the VWAP) are not traded. | "when the market is rotating, uh, VWAP setups don't really work"
+R market A - | Desk version: EUR/USD and GBP/USD (time-weighted VWAP: no forex volume) and bitcoin (real volume) on 30-minute candles; the week starts at the Sunday 17:00 New York open (bitcoin: Monday 00:00 UTC). | ""
+R entry A - | Away = the last 12 closes all on one side of the week's VWAP; then a limit at the VWAP on that side (long from above, short from below), live for 12 bars; skipped when the VWAP was crossed 3 or more times in the 24 bars before; one trade a day. | ""
+R stop A - | His fixed stop and target from his volume-profile video: each 15% of the 20-day average daily range (1:1); out at 16:55 New York (forex) or 23:55 UTC (bitcoin). | ""
+T with_assumptions | the anchor choice, 'away' and the stops are ours; this video gives entries only (A)
+P 00:02 | 00:43 | Free VWAP book (form)

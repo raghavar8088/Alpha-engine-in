@@ -1,0 +1,17 @@
+video: gOEDwTe4JuE
+topic: forex_us
+summary: Al Brooks walks bar by bar through scalping a two-minute E-mini chart. Two consecutive strong bars (big bodies closing near their extremes) make the market 'Always In' that direction: sell one tick below a strong bear bar (buy one tick above a strong bull bar). A scalp is about 2 points when bars are small, or about half the bar height when bars are big. A short sold below a bar is exited above the bull bar that reverses it. Context changes the reading: breakout-mode ii patterns, sell climaxes and parabolic wedges invite reversals, and tight trading ranges are for limit-order traders who buy low and sell high. He counts 50 or more reasonable scalps a day, about $900 per contract in two hours if traded perfectly, but says most traders cannot scalp well.
+instruments: E-mini S&P 500 futures
+timeframes: 2m
+style: scalping
+= BR-01 | Two consecutive strong trend bars ('Always In'): stop entry one tick beyond the second, scalp about half a bar, stop beyond the signal bar
+R timeframe E 00:01 | A two-minute E-mini chart. | "I’m using a 2-minute Emini chart as an example"
+R setup E 01:23 | Always In Short: two bear bars, one with a big body closing on or near its low (mirror for bulls). | "I want to see 2 bear bars, one with a big body closing on or near its low"
+R entry E 02:50,03:32 | Sell one tick below the bar; buy one tick above in a bull setup. | "Sell below, 1 tick below. Buy above, 1 tick above."
+R target E 05:39 | Scalp about 2 points with small bars; with 20-point bars, 5 or 10 points, about half a bar. | "If the bars were 20 points tall, you might scalp for 5 or 10 points"
+R stop E 08:27 | A short sold below a bar is exited above the bull bar that reverses it. | "If you sold below that bar, you’d get out above that bar"
+R market A - | Desk version: the Nasdaq 100 cash session on two-minute bars (the E-mini S&P is not on the desk). | ""
+R entry A - | A strong bar has a body of at least half its range, closes in the outer quarter, and its range is at least the 20-bar average. After two consecutive strong bars of one colour, a stop order sits one tick (0.25) beyond the second bar, live for the next bar only. From 09:36 to 15:30 New York. | ""
+R stop A - | Stop one tick beyond the second bar's other end; target half the average range of the last 10 bars; at most 5 trades a day; out at the session end. | ""
+T with_assumptions | 'strong bar', the target size and the trade cap are ours (A); his context reads (climaxes, wedges, ii breakout mode, tight ranges) are not coded; the E-mini S&P becomes the Nasdaq 100 (A)
+C money | 42:41 | about $900 per contract in a couple of hours if traded perfectly; 50 or more reasonable scalps a day | E-mini two-minute chart, one morning | "you could’ve made $900 in a couple hours per contract"

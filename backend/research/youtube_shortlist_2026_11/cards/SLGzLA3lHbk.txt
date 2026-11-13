@@ -1,0 +1,11 @@
+video: SLGzLA3lHbk
+topic: india_index
+summary: Stock Phoenix's 'HAC' (Heikin Ashi candle) strategy for Nifty futures and stocks on 15-minute Heikin Ashi charts, shown only as an invite-only TradingView script ('SP HAC positional strategy') that prints long and short reversals and webhook alerts; the rules (said to combine weighted moving averages with the Heikin Ashi candles) are taught in a paid session that requires opening a broker account through their referral link.
+instruments: Nifty futures, stocks (Infosys, Reliance)
+timeframes: 15m (Heikin Ashi)
+style: mixed
+= PX-01 | HAC: Heikin Ashi reversals from an invite-only script (rules not disclosed)
+R indicator E 01:27,08:43 | A Heikin Ashi strategy with weighted moving averages, applied on 15-minute Heikin Ashi charts. | "we have a defined entry find exit criteria which is a combination of true weighted weighted moving aver"
+R entry E 05:14,05:59 | The script reverses long and short positions on its own signals. | "long question was closed and the same same time short entry was triggered"
+T not_testable | the rules sit in an invite-only paid script and a paid session; the video discloses no entry, stop or exit rule
+P 02:12 | 03:42 | Broker referral account and paid premium session

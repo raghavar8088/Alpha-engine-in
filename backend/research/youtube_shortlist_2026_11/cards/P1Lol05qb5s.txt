@@ -1,0 +1,14 @@
+video: P1Lol05qb5s
+topic: forex_us
+summary: The Art of Trading (Matthew Slabosz) codes Trading Rush's MACD + 200 EMA system in Pine Script on 30-minute forex charts. Price must be on the trade's side of the 200 EMA, and he adds his own filter: at most one of the last five closes may be on the other side of it. Take the first MACD cross below zero for longs (above zero for shorts) and ignore later ones until the trade ends. The stop goes half an ATR(14) beyond the lowest low (highest high) of the last seven bars. Take 25% off at 1:1 and move the stop to break-even; the rest exits at 2:1. He criticises the original's claim that it works on every market and timeframe; his forex runs show 22% with a 12% drawdown and USD/JPY 38% with 11% over 356 trades.
+instruments: Forex pairs, some stocks
+timeframes: 30m
+style: intraday
+= MS-02 | MACD cross below (above) zero on the 200 EMA side, at most one close across the EMA in five bars, 25% at 1R with a break-even stop, rest at 2R
+R setup E 02:14,12:19 | Longs only above the 200 EMA (shorts below); at most one of the last five closes on the other side of it. | "only one bar can close above whoops can't spell today above or below blue above or below the 200 ema over the past five bars"
+R entry E 02:14,13:07 | Enter on the MACD cross below the zero line for longs (above it for shorts), taking only the first cross until the trade ends. | "the macd is showing a crossover below zero line of the histogram in this buy setup entry is at the macd crossover"
+R stop E 05:06,25:54 | Stop half an ATR(14) below the lowest low of the last seven bars. | "this would subtract half an atr from the lowest low over the past seven bars"
+R target E 02:55,19:01 | 25% off at 1:1 with the stop moved to break-even; the rest at 2:1. | "i will take 25 off the trade when the trade reaches one times the risk and will move the stop loss to break even"
+T with_assumptions | the five-bar EMA filter and the ATR stop are his additions to Trading Rush's rules
+D RU-01 | the Trading Rush MACD cross beyond zero in the 200 EMA trend is already in the library (RU-01; RU-06 adds a zero-lag MACD); only the exits and a closes-across-the-EMA filter differ
+C return_pct | 55:51 | 22% with a 12% drawdown; USD/JPY 38% with an 11% drawdown over 356 trades | 30-minute forex, about two years | "us yen is even better 38 return with an 11 drawdown approximately um over 356 trades"

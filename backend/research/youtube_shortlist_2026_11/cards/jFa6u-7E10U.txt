@@ -1,0 +1,17 @@
+video: jFa6u-7E10U
+topic: crypto
+summary: Algovibes asks whether the first trading hour predicts the rest of the day. On about 300 days of Binance BTC/USDT hourly candles (UTC days), he compares the first hour's return (the 00:00 UTC candle) with the return from its close to the day's last close. The correlation is 0.018 with a p-value of 0.745. He concludes there is no relation, and that buying after an up first hour (or selling after a down one) would most probably not make a meaningful strategy. He invites tests on stocks and on other first windows (the first minute, 15 minutes, two hours).
+instruments: BTC/USDT (Binance, hourly)
+timeframes: 1h
+style: intraday
+= AV-01 | First UTC hour's direction held to the end of the day (bitcoin); the presenter's own null result
+R market E 00:03,01:28 | Bitcoin against USD on one-hour candles: about 300 days of Binance data in UTC. | "I'm using intraday cryptocurrency prices"
+R setup E 07:50,09:13 | The first hour is the 00:00 UTC hourly candle; its return is its close over its open. | "is the return on the first hour candle"
+R exit E 11:22 | The rest of the day runs to the close of the day's last hourly candle. | "then you also want to have the last hour of the date"
+R entry I 20:25 | Buy after an up first hour (sell after a down one) and hold for the rest of the day; the trade rule he says will most probably not work. | "if you buy when the daily return is positive and or you sell then you won't have a meaningful trading strategy most probably"
+R market A - | Desk version: Delta's BTCUSD perpetual on one-hour candles. | ""
+R stop A - | Enter at the 01:00 UTC open and exit at 23:59 UTC. A flat first hour means no trade. A 5% stop from the fill exists only so the book can size; the video has no stop. | ""
+T with_assumptions | the trade rule is the one the presenter expects to fail (correlation 0.018, p 0.745); the stop is ours (A)
+C other | 16:53 | correlation 0.018 between first-hour and rest-of-day returns | BTC/USDT hourly, about 300 days | "we have a correlation of 0.018"
+C other | 20:25 | p-value 0.745: not significant even at the 10% level | BTC/USDT hourly, about 300 days | "0.745 so not even significant on the 10% level"
+U Would the first 15 minutes, the first two hours, or stock prices behave differently? (his own open question at 21:06)

@@ -18,7 +18,7 @@ export type SlStrategy = { id: string; version: string; name: string; topic: str
 export type SlChannel = { key: string; name: string; star: boolean; group: string; earlier: string; uploads: number;
   strategyTitles: number; picked: { video: string; why: string; analysed: boolean; id: string | null }[]; skip: string | null };
 
-export const SL_META = {"channels": 127, "coveredBefore": 20, "picked": 161, "analysed": 103, "queued": 58, "strategies": 105, "coded": 69, "blocked": 29, "duplicates": 7, "checked": 69, "paperStart": "2026-11-13T03:40:00Z", "paperStart2": "2026-11-13T05:00:00Z", "paperStart3": "2026-11-13T16:00:00Z", "batch1": 31, "batch2": 23, "batch3": 15, "built": "2026-11-13"};
+export const SL_META = {"channels": 127, "coveredBefore": 20, "picked": 161, "analysed": 156, "queued": 5, "strategies": 159, "coded": 90, "blocked": 49, "duplicates": 20, "checked": 90, "paperStart": "2026-11-13T03:40:00Z", "paperStart2": "2026-11-13T05:00:00Z", "paperStart3": "2026-11-13T16:00:00Z", "paperStart4": "2026-11-13T17:00:00Z", "batch1": 31, "batch2": 23, "batch3": 15, "batch4": 21, "built": "2026-11-13"};
 
 export const SL: SlStrategy[] = [
  {
@@ -430,6 +430,264 @@ export const SL: SlStrategy[] = [
    "fills": true,
    "signals": 118,
    "trades": 98
+  }
+ },
+ {
+  "id": "CI-21",
+  "version": "v1",
+  "name": "EMA 5 / EMA 20 cross: break of the crossover candle, stop at its other end, out on a close back through the 5 EMA or at 2R",
+  "topic": "india_index",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Trader Chitra",
+  "video": "fPchKlBcwQc",
+  "title": "5 & 20 EMA INTRADAY TRADING STRATEGY | MOST POWERFUL SIMPLE TRADING STRATEGY  (NIFTY & BANK NIFTY)",
+  "uploaded": "2022-12-10",
+  "minutes": 16,
+  "summary": "Trader Chitra's 5 and 20 EMA intraday method on five-minute Nifty, Bank Nifty and stock charts (with a 200 EMA for the bigger trend): when the 5 EMA crosses above the 20 EMA (with the 200 EMA in agreement for the stronger version), buy above the crossover's green candle with the stop at its low; on a bearish cross, sell below the red candle with the stop at its high; target by risk-reward, or book when a candle closes back through the 5 EMA (ride the 5 EMA on trending days); a nearby 200 EMA can be the target; she counted 8 December Nifty trades without a stop-out.",
+  "instruments": [
+   "Nifty, Bank Nifty, stocks (Reliance)"
+  ],
+  "timeframes": [
+   "5m"
+  ],
+  "markets": [
+   "Nifty 50",
+   "Bank Nifty"
+  ],
+  "deskMarkets": [
+   "NIFTY",
+   "BANKNIFTY"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-13T17:00:00Z",
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "EMA 5, EMA 20 and EMA 200 on five-minute candles.",
+    "times": [
+     "02:20",
+     "04:29"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Long above the green candle of a bullish cross (stop at its low); 5, 20 and 200 agreeing is the stronger version.",
+    "times": [
+     "05:10",
+     "07:56"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The simpler setup: a 5/20 bearish cross, short below the red candle, stop at its high.",
+    "times": [
+     "08:37",
+     "09:21"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Target by risk-reward, or book when a candle closes back through the 5 EMA (trail with the 5 EMA on trending days).",
+    "times": [
+     "05:50",
+     "09:21"
+    ]
+   },
+   {
+    "kind": "no_trade",
+    "label": "When not to trade",
+    "tag": "E",
+    "text": "Skip when the 200 EMA is right in the way (after a gap).",
+    "times": [
+     "13:25"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Nifty and Bank Nifty one-minute index rows on five-minute candles.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "The 5/20 cross bar must close in the cross's direction (green for longs); a buy-stop one point over its high (sell-stop under its low) live for 3 bars; 09:30-14:45; at most 3 trades a day.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Stop at the cross candle's other end; target 2R; exit at the next open after a close back through the 5 EMA; out at 15:15; the 200 EMA filter is not coded.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the target ratio and the 200 EMA 'nearby' test are judged by eye (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "win_rate",
+    "at": "14:58",
+    "value": "8 trades in December on Nifty, none stopped out",
+    "period": "her own chart count",
+    "quote": "we got 8 trades till now but not even one stop loss"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 422,
+   "trades": 283
+  }
+ },
+ {
+  "id": "CI-22",
+  "version": "v1",
+  "name": "3-minute close back over (under) the 21 EMA on the right side of S3 / previous-day low (R3 / high), break of that candle, target the next level",
+  "topic": "india_index",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Trader Chitra",
+  "video": "nOS8HPvJ6Hg",
+  "title": "3 Minutes Scalping Strategy | Intraday   ( Nifty and BankNifty )  with HIGHEST WIN RATE",
+  "uploaded": "2022-12-13",
+  "minutes": 28,
+  "summary": "Trader Chitra's 3-minute scalp for Nifty, Bank Nifty and stocks: a 21 EMA, the previous day's high and low, and Camarilla R3 and S3; buy above a green candle that closes above the 21 EMA while price is above the supports (S3, the previous day low), stop at that candle's low, book at the next resistance (R3 or the previous day high) or trail until a red candle closes below the EMA; sell the mirror below the 21 EMA and the resistances; when price is far from the EMA (after a gap), wait for a pullback to it.",
+  "instruments": [
+   "Nifty, Bank Nifty, stocks"
+  ],
+  "timeframes": [
+   "3m (1m)"
+  ],
+  "markets": [
+   "Nifty 50",
+   "Bank Nifty"
+  ],
+  "deskMarkets": [
+   "NIFTY",
+   "BANKNIFTY"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-13T17:00:00Z",
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "21 EMA, previous day high and low, Camarilla R3 and S3 only.",
+    "times": [
+     "00:59",
+     "04:30"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Buy above a green candle that closes above the 21 EMA while price is above S3 and the previous day low.",
+    "times": [
+     "01:41",
+     "06:35"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Sell below a red candle under the 21 EMA and below R3 / the previous day high; stop at its high; book at S3 or the previous day low.",
+    "times": [
+     "11:30",
+     "17:16"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop at the green candle's low.",
+    "times": [
+     "07:20"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Book at the previous day high or R3, or trail until a red candle closes below the 21 EMA.",
+    "times": [
+     "07:20",
+     "08:02"
+    ]
+   },
+   {
+    "kind": "no_trade",
+    "label": "When not to trade",
+    "tag": "E",
+    "text": "When price is far from the 21 EMA, wait for the pullback to it.",
+    "times": [
+     "15:45",
+     "24:20"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Nifty and Bank Nifty one-minute index rows on three-minute candles; Camarilla R3/S3 = close +/- 1.1 x (high - low) / 4 of the previous day.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Long: a green three-minute candle closing above the 21 EMA after a close at or below it within the last 3 bars, its close above both S3 and the previous day low and within 0.3% of the EMA: a buy-stop one point over its high, live 3 bars; mirror for shorts; 09:30-14:45; at most 3 trades a day.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Stop at the candle's other end; target the nearest of R3 / previous day high beyond the entry (2R when none lies ahead); exit at the next open after a red candle closes below the EMA (green above it for shorts); out at 15:15.",
+    "times": []
+   }
+  ],
+  "why": [
+   "'far from the EMA', the fresh-cross test and the fallback target are ours (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 2397,
+   "trades": 434
   }
  },
  {
@@ -1241,6 +1499,127 @@ export const SL: SlStrategy[] = [
    "fills": true,
    "signals": 82,
    "trades": 82
+  }
+ },
+ {
+  "id": "FP-01",
+  "version": "v1",
+  "name": "Spot touches the daily pivot, R1 or S1: buy the ATM option that gains 30 points first, 30-point stop and target, one trade a day (index proxy)",
+  "topic": "india_index",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "FessorPro",
+  "video": "kpNb5rBQJLc",
+  "title": "Option Buying Strategy",
+  "uploaded": "2025-01-21",
+  "minutes": 54,
+  "summary": "FessorPro codes an option-buying pivot strategy in Python (Fyers API, websocket, chasing limit orders, a paper mode) for Bank Nifty, Fin Nifty or Nifty. The daily pivot, resistance (R1) and support (S1) come from the previous day and stay constant for the day. From 09:30, wait until spot touches one of the three levels (within a 5-point buffer), then note the ATM call and put premiums. Buy whichever option rises 30 points first, with a stop and target of 30 premium points each (1:1). One trade a day, all closed by 15:15. The buffer and the 30 points are user settings.",
+  "instruments": [
+   "Bank Nifty ATM options (Nifty, Fin Nifty)"
+  ],
+  "timeframes": [
+   "Tick / intraday"
+  ],
+  "markets": [
+   "Nifty 50",
+   "Bank Nifty"
+  ],
+  "deskMarkets": [
+   "NIFTY",
+   "BANKNIFTY"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-13T17:00:00Z",
+  "rules": [
+   {
+    "kind": "session",
+    "label": "Session",
+    "tag": "E",
+    "text": "The strategy runs from 09:30 to 15:15.",
+    "times": [
+     "17:45"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The daily pivot, resistance and support from the previous day stay constant for the day.",
+    "times": [
+     "00:46",
+     "25:32"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Wait until spot touches the pivot, resistance or support, within a 5-point buffer.",
+    "times": [
+     "02:13",
+     "02:57"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Then buy whichever ATM option, call or put, rises 30 points first.",
+    "times": [
+     "03:37",
+     "05:40"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Stop and target 30 premium points each (1:1); one trade a day.",
+    "times": [
+     "06:23",
+     "07:48"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the Nifty and Bank Nifty index rows as a labelled proxy for the ATM options. At a delta of about 0.5, a 30-point premium move is 60 index points.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "After the first touch from 09:30, a buy-stop and a sell-stop 60 points either side of the touch price, live until 15:15. Floor pivots from the prior day's high, low and close.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Stop and target 60 index points from the fill; one trade a day; out at 15:15.",
+    "times": []
+   }
+  ],
+  "why": [
+   "option premiums are not on the desk",
+   "the 60-point index bracket at delta 0.5 is our proxy (A), ignoring decay and changes in delta"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 118,
+   "trades": 109
   }
  },
  {
@@ -2750,6 +3129,275 @@ export const SL: SlStrategy[] = [
   }
  },
  {
+  "id": "SP-02",
+  "version": "v1",
+  "name": "Heikin Ashi: flat-bottomed candle above the 20 SMA with RSI over 50, break of its high, out on a close under the SMA, higher-timeframe side",
+  "topic": "india_index",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Stock Pro",
+  "video": "neaOktXUx9o",
+  "title": "StockPro #398 | Fine-Tuning the 5-Min Heikin Ashi Strategy – Intraday Charting & Entry Precision",
+  "uploaded": "2018-12-12",
+  "minutes": 17,
+  "summary": "StockPro's five-minute Heikin Ashi setup, fine-tuned live on crude oil mini and shown on Bank Nifty: Heikin Ashi candles with a 20 SMA and an RSI whose overbought and oversold lines are both set at 50; buy when RSI crosses above 50 and a flat-bottomed green candle forms above the SMA, entering on the break of that candle's high (sell the mirror: a flat-topped red candle under the SMA, the break of its low); stay in while candles hold above the SMA; trade only in the direction of the larger timeframe (daily or hourly); about 10 points a trade on crude.",
+  "instruments": [
+   "Crude oil mini (MCX)",
+   "Bank Nifty"
+  ],
+  "timeframes": [
+   "5m (1h or 1d for direction)"
+  ],
+  "markets": [
+   "Nifty 50",
+   "Bank Nifty"
+  ],
+  "deskMarkets": [
+   "NIFTY",
+   "BANKNIFTY"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-13T17:00:00Z",
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Heikin Ashi candles, a 20-period SMA and an RSI with both levels at 50.",
+    "times": [
+     "04:56",
+     "05:38"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Buy when RSI has crossed 50 and a flat-bottomed candle forms above the SMA; mark its high and enter when the high is broken.",
+    "times": [
+     "05:38",
+     "08:28"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Sell the mirror: a flat-topped red candle below the SMA.",
+    "times": [
+     "07:45"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "About 10 points a trade on crude.",
+    "times": [
+     "04:16"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Stay in while the candles are above the SMA; exit when they come down to it or below.",
+    "times": [
+     "07:02"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Trade only in the larger timeframe's direction (one hour or one day).",
+    "times": [
+     "09:52",
+     "16:05"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Nifty and Bank Nifty one-minute index rows on five-minute Heikin Ashi candles; the SMA and RSI (14) are computed on the Heikin Ashi closes, as TradingView does on a Heikin Ashi chart.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Long: RSI above 50 after crossing it within the last 3 bars, a green Heikin Ashi candle with no lower wick whose low is above the SMA, and the last completed one-hour Heikin Ashi close above its own 20 SMA: a buy-stop one point over that candle's high, live 3 bars; mirror for shorts; 09:30-14:45; at most 3 trades a day.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Stop at the signal candle's Heikin Ashi low (high for shorts); exit at the next open after a Heikin Ashi close back through the SMA; no fixed target on the index; out at 15:15.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the SMA length wavers between 10 and 20 in the talk (20 used), and the stop and the index target are not stated (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 169,
+   "trades": 83
+  }
+ },
+ {
+  "id": "TM-01",
+  "version": "v1",
+  "name": "Daily open gap up after a downtrend, buy at 15:15, target the gap day's high plus the prior day's range, stop a point under the prior day's low (long only)",
+  "topic": "india_index",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "TradeSmart",
+  "video": "YSES85908Go",
+  "title": "Identify Trends in Nifty & BNF Gap Strategy Webinar by TradeSmart",
+  "uploaded": "2017-11-16",
+  "minutes": 69,
+  "summary": "TradeSmart's webinar (Ashwin) teaches a long-only gap strategy for Nifty and Bank Nifty futures on daily candles. Step one: an open gap, meaning today's low stays above yesterday's high. Step two: the previous trend must be down. Step three: buy carry-forward index futures between 15:15 and 15:30 on the gap day (next month's contract in expiry week). Step four: the target is the gap day's high plus the previous day's range. Step five: the stop is one point below the previous day's low, re-placed every morning until the target is hit. His backtest from June 2013: 24 trades in four years with only two stops; four trades in 2017, all winners. Stocks and shorts are excluded.",
+  "instruments": [
+   "Nifty and Bank Nifty futures"
+  ],
+  "timeframes": [
+   "1d (entry at 15:15-15:30)"
+  ],
+  "markets": [
+   "Nifty 50",
+   "Bank Nifty"
+  ],
+  "deskMarkets": [
+   "NIFTY",
+   "BANKNIFTY"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-13T17:00:00Z",
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "Nifty and Bank Nifty futures only; long only.",
+    "times": [
+     "39:30",
+     "1:01:18"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "An open gap: today's low is above yesterday's high (daily chart).",
+    "times": [
+     "02:56",
+     "08:39"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Buy index futures between 15:15 and 15:30 on the gap day, carried forward.",
+    "times": [
+     "17:11",
+     "18:33"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop one point below the previous day's low, placed every day until the target.",
+    "times": [
+     "39:30",
+     "44:27"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Target = the gap day's high plus the previous day's high-low difference.",
+    "times": [
+     "23:59",
+     "31:01"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The previous trend must be a downtrend.",
+    "times": [
+     "10:10",
+     "14:25"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the Nifty and Bank Nifty index rows (one minute) as a proxy for the futures, held overnight.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "The gap must still be open at 15:14, when the day's high so far sets the target; entry at the 15:15 open. The previous trend counts as down when the prior day closed below its 20-session average close. No time exit; one position at a time.",
+    "times": []
+   }
+  ],
+  "why": [
+   "'previous trend down' is judged by eye (A: below the 20-session average)",
+   "the index replaces futures (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "win_rate",
+    "at": "48:46",
+    "value": "22 of 24 trades profitable, two stops",
+    "period": "Nifty, June 2013 to 2017",
+    "quote": "there were 24 trades and only two trades have gone wrong guys. 22 trades have given us profit"
+   },
+   {
+    "kind": "trade_count",
+    "at": "50:54",
+    "value": "four trades in 2017 so far, all winners",
+    "period": "Nifty, 2017",
+    "quote": "in this year it was only four till now and all the four had given us profits"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 5,
+   "trades": 5
+  }
+ },
+ {
   "id": "US-01",
   "version": "v1",
   "name": "CCI (200) above 100 with a Supertrend (10, 2) trailing stop, about 150 points (Bank Nifty five minutes)",
@@ -3279,6 +3927,173 @@ export const SL: SlStrategy[] = [
   }
  },
  {
+  "id": "AG-01",
+  "version": "v1",
+  "name": "The 09:15 framework: opening range breakout, gap reversal beyond the normal range when the first five-minute candle reverses, narrow-range break (guidelines)",
+  "topic": "india_index",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Upstox",
+  "video": "JVFbxkk74-k",
+  "title": "The Exact 9:15 AM Strategy That Removes Emotional Trading | Market Ready Ep 3 | Amit Goel",
+  "uploaded": "2026-03-17",
+  "minutes": 69,
+  "summary": "An Upstox 'Market Ready' webinar (Amit Goel, CMT) on the 09:15 open, in Hindi with garbled auto-captions. Avoid directional bets in the first few minutes, and treat a first five-minute candle whose volume beats the average five-minute volume as strength. Three morning setups: opening range breakout, gap reversal, and narrow-range breakout or breakdown. The gap-reversal guideline: a gap greater than 3%, or an open outside the normal one-standard-deviation (about one ATR) range, whose first five-minute candle reverses favours trading the reversal, not the gap. His example trade risks 50 points for a first target of 100, then trails to cost. He calls the thresholds guidelines to adjust, and the examples are mostly illustrative.",
+  "instruments": [
+   "Nifty, Bank Nifty (options), crude oil"
+  ],
+  "timeframes": [
+   "5m (3m)"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Three morning setups: opening range breakout, gap reversal, narrow-range breakout or breakdown.",
+    "times": [
+     "06:46"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "A gap greater than 3% whose first five-minute candle reverses: trade the reversal, not the gap (a guideline).",
+    "times": [
+     "33:04"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "An open beyond the normal one-standard-deviation range is where fading is favoured.",
+    "times": [
+     "36:44",
+     "37:28"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Example: a 50-point stop and a first target of at least 100 points, then trail to cost.",
+    "times": [
+     "29:26"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "A first five-minute candle whose volume beats the average five-minute volume shows strength.",
+    "times": [
+     "17:24",
+     "18:04"
+    ]
+   }
+  ],
+  "why": [
+   "the setups are shown through garbled Hindi captions with thresholds he calls adjustable guidelines",
+   "the opening range part repeats BB-02 and the gap fade overlaps BT-01"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the setups are shown through garbled Hindi captions with thresholds he calls adjustable guidelines; the opening range part repeats BB-02 and the gap fade overlaps BT-01",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "AG-02",
+  "version": "v1",
+  "name": "15-30 minute opening range, five-minute close beyond it, stop at the breakout candle's midpoint, half off at 1R and trail",
+  "topic": "india_index",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Upstox",
+  "video": "NvQCerlr6co",
+  "title": "Mastering the ORB: Catch the Trend, Avoid the Noise | Intraday Trading Series | Amit Goel | Upstox",
+  "uploaded": "2025-12-01",
+  "minutes": 63,
+  "summary": "An Upstox webinar (Amit Goel, CMT, in Hindi with garbled auto-captions) on the opening range breakout for Nifty and Bank Nifty. Be patient through the first 15-30 minutes. The opening range is the first 15-30 minutes (the first five 3-minute candles), kept fixed rather than changed daily. Refine on five minutes and enter only when a candle closes beyond the range, ideally with volume, never on a wick. An optional stop sits at the breakout candle's midpoint. Targets run 1:1 to 1.5-2 times the setup box: at 1R move the stop to cost and trail the other half. Close the trade within the day.",
+  "instruments": [
+   "Nifty, Bank Nifty"
+  ],
+  "timeframes": [
+   "15m-30m range",
+   "5m (3m) entries"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The opening range is the first 15-30 minutes (five 3-minute candles), kept fixed.",
+    "times": [
+     "21:54",
+     "22:34"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Enter only on a candle close beyond the range on five minutes, not on a wick.",
+    "times": [
+     "27:32",
+     "29:37"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "An optional stop at the breakout candle's midpoint.",
+    "times": [
+     "34:26"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "At 1R bring the stop to cost and trail the remaining half.",
+    "times": [
+     "36:34",
+     "37:56"
+    ]
+   }
+  ],
+  "why": [
+   "the captions are garbled Hindi",
+   "the range length (15 or 30 minutes) is left open"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": "BB-02",
+  "duplicateWhy": "the 15-minute opening range break on a five-minute close is already in the library (BB-02; QC-01 for 30 minutes)",
+  "checks": null
+ },
+ {
   "id": "DF-03",
   "version": "v1",
   "name": "Camarilla levels on the ATM option's own one-minute chart, 200 EMA high/low channel, two lots",
@@ -3421,6 +4236,142 @@ export const SL: SlStrategy[] = [
   "blockedReason": "every entry and stop is read from the ATM option's own one-minute premium chart (its Camarilla levels and 200 EMA channel); the desk has no intraday option premiums",
   "duplicateOf": null,
   "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "EM-01",
+  "version": "v1",
+  "name": "Bank Nifty with VWAP, anchored VWAP and option-chain writing (interview; the captions are unusable)",
+  "topic": "india_index",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Trading & Investing 1M+",
+  "video": "xliamopkviw",
+  "title": "BankNifty Trading Strategy using VWAP, AVWAP by a CA #Face2Face with Bijay Sharma",
+  "uploaded": "2022-03-11",
+  "minutes": 106,
+  "summary": "An Elearnmarkets Face2Face interview with Bijay Sharma (a chartered accountant) on trading Bank Nifty with the VWAP, the anchored VWAP and the option chain (call and put open interest, writing at the at-the-money strikes). The Hindi auto-captions, read in Latin letters, are garbled throughout. Only fragments are readable: the VWAP and anchored VWAP as levels, option-chain writing as confirmation, and a 20-point stop. No complete entry, stop or exit rule can be recovered.",
+  "instruments": [
+   "Bank Nifty (options)"
+  ],
+  "timeframes": [
+   "Intraday"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "A 20-point stop is mentioned; the surrounding rule is not readable.",
+    "times": [
+     "1:01:22"
+    ]
+   }
+  ],
+  "why": [
+   "the Hindi auto-captions are too garbled to recover the rules",
+   "a reading needs a clean transcript or the audio"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the Hindi auto-captions are too garbled to recover the rules; a reading needs a clean transcript or the audio",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "HD-01",
+  "version": "v1",
+  "name": "After 10:15-10:30, buy the first green five-minute close off a VWAP touch in a buy-on-dips market (sell the red one in a sell-on-rise market), 15-20 points at 1:1",
+  "topic": "india_index",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "HDFC securities",
+  "video": "C0qe-KlfJm0",
+  "title": "Learn to Trade directly from Charts Using a Simple Intraday Setup",
+  "uploaded": "2026-07-23",
+  "minutes": 40,
+  "summary": "HDFC Securities (Sonali) teaches a VWAP intraday setup on Nifty and Sensex futures. Put the VWAP on the futures contract, not the spot, and use five-minute candles. Wait until 10:15-10:30 for the trend to show: price that keeps finding support at the VWAP is a buy-on-dips market, and repeated resistance makes it sell-on-rise. Enter on the first green candle that closes after a touch of the VWAP (red for shorts). Target 15-20 Nifty points with the same stop (1:1), traded through at-the-money options in the trend's direction. Most of the webinar demonstrates chart trading on the broker's platform.",
+  "instruments": [
+   "Nifty and Sensex futures (ATM options to execute)"
+  ],
+  "timeframes": [
+   "5m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "The VWAP goes on the futures contract, which carries volume, not on the spot index.",
+    "times": [
+     "04:41",
+     "28:46"
+    ]
+   },
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "Five-minute candles; wait until 10:15-10:30 before trading.",
+    "times": [
+     "06:54"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Repeated support at the VWAP marks a buy-on-dips market; repeated resistance marks sell-on-rise.",
+    "times": [
+     "07:35"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Enter on the first green candle that closes after touching the VWAP; a red candle there is not an entry.",
+    "times": [
+     "11:50",
+     "13:14"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Target 15-20 points with an equal stop (1:1).",
+    "times": [
+     "11:50",
+     "12:33"
+    ]
+   }
+  ],
+  "why": [
+   "'continuously taking support' is judged by eye"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": "VWAP-A",
+  "duplicateWhy": "the trend-day VWAP retest with a confirming candle is already on the desk (the VWAP study's setup A; DH-01 and AF-01 are close variants); the desk's index rows have no volume for a futures VWAP",
   "checks": null
  },
  {
@@ -3629,6 +4580,83 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "a market reading with no entry, stop or exit rule",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "NM-01",
+  "version": "v1",
+  "name": "Call/put open-interest change from 09:15 to 11:00 sets the side when the imbalance is at least 20-25%; buy 0.3-0.5 delta options near the VWAP after 11:00",
+  "topic": "india_index",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Prakash Gaba",
+  "video": "3zWyzrB7YIk",
+  "title": "Trading Strategy by Options Expert Nitin Murarka",
+  "uploaded": "2025-04-10",
+  "minutes": 52,
+  "summary": "Prakash Gaba interviews options researcher Nitin Murarka (in Hindi, garbled auto-captions) on an open-interest method for Nifty and Bank Nifty options. From 09:15 to about 11:00, record the change in call and put open interest on the at-the-money strike and three or four strikes either side. An imbalance of at least 20-25% sets the day's side: for example 81% of new positions on the call side means bearish, so buy puts. Enter after about 11:00-11:30, near the VWAP, on a price-action rejection. Buy 0.3-0.5 delta options with a stop of about 20 points at 0.3 delta (25 at 0.4), and targets of 1:1.5 and 1:1.75 on two lots. He favours hedged spreads, says 90-95% of option buyers lose, and notes the data is on the NSE site in 3-, 5- and 15-minute intervals.",
+  "instruments": [
+   "Nifty, Bank Nifty options"
+  ],
+  "timeframes": [
+   "3m-15m (open-interest snapshots)"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "09:15-11:00 is the observation period for the change in call and put open interest.",
+    "times": [
+     "30:43",
+     "31:27"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Enter near the VWAP, after about 11:00-11:30.",
+    "times": [
+     "43:23",
+     "44:52"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "At 0.3 delta, a 20-point stop.",
+    "times": [
+     "46:15"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Act only on an imbalance of at least 20-25%.",
+    "times": [
+     "37:04"
+    ]
+   }
+  ],
+  "why": [
+   "the signal is the change in call and put open interest around the ATM strikes, which the desk does not have"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the signal is the change in call and put open interest around the ATM strikes, which the desk does not have",
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -3905,6 +4933,66 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": "an opening bias, not a strategy: no entry trigger, stop or exit is stated, and the Hindi auto-captions are too garbled to recover more",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "PX-01",
+  "version": "v1",
+  "name": "HAC: Heikin Ashi reversals from an invite-only script (rules not disclosed)",
+  "topic": "india_index",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Stock Phoenix",
+  "video": "SLGzLA3lHbk",
+  "title": "HAC Intraday Strategy from Stock Phoenix | Back Testing Results | Free Alert",
+  "uploaded": "2021-09-02",
+  "minutes": 22,
+  "summary": "Stock Phoenix's 'HAC' (Heikin Ashi candle) strategy for Nifty futures and stocks on 15-minute Heikin Ashi charts, shown only as an invite-only TradingView script ('SP HAC positional strategy') that prints long and short reversals and webhook alerts; the rules (said to combine weighted moving averages with the Heikin Ashi candles) are taught in a paid session that requires opening a broker account through their referral link.",
+  "instruments": [
+   "Nifty futures, stocks (Infosys, Reliance)"
+  ],
+  "timeframes": [
+   "15m (Heikin Ashi)"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "A Heikin Ashi strategy with weighted moving averages, applied on 15-minute Heikin Ashi charts.",
+    "times": [
+     "01:27",
+     "08:43"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The script reverses long and short positions on its own signals.",
+    "times": [
+     "05:14",
+     "05:59"
+    ]
+   }
+  ],
+  "why": [
+   "the rules sit in an invite-only paid script and a paid session",
+   "the video discloses no entry, stop or exit rule"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the rules sit in an invite-only paid script and a paid session; the video discloses no entry, stop or exit rule",
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -5695,6 +6783,147 @@ export const SL: SlStrategy[] = [
   }
  },
  {
+  "id": "MS-01",
+  "version": "v1",
+  "name": "Close above the 200-day SMA and below the 10-day SMA, sell on a close back above the 10-day SMA or a 10% loss (long only)",
+  "topic": "india_stocks",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "The Art of Trading",
+  "video": "h-erJbnBj6A",
+  "title": "PINE SCRIPT: A simple pullback strategy code tutorial",
+  "uploaded": "2022-07-01",
+  "minutes": 36,
+  "summary": "The Art of Trading (Matthew Slabosz) codes JB Marwood's simple pullback strategy in Pine Script: buy at the next open when the daily close is above the 200-day moving average and below the 10-day moving average; sell at the next open after a close back above the 10-day average, or after a 10% loss on a closing basis. It uses 100% of capital with no leverage. Marwood's AmiBroker figures: about 7.6% a year against 10% for buy and hold on the S&P 500, a 12% maximum drawdown against 55%, a 75% win rate and about 0.5% per trade; Slabosz's TradingView run on SPY from 1995 shows 457 trades. He then tries a 'lower close' exit (sell only after a close above the 10-day average that is also below the prior bar's low), which lifted the average trade.",
+  "instruments": [
+   "SPY / S&P 500 (daily)"
+  ],
+  "timeframes": [
+   "1d"
+  ],
+  "markets": [
+   "NSE stocks (daily, long only)"
+  ],
+  "deskMarkets": [
+   "NSED"
+  ],
+  "overnight": true,
+  "proxy": null,
+  "paperStart": "2026-11-13T17:00:00Z",
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Buy when the close is above the 200-day moving average and below the 10-day moving average.",
+    "times": [
+     "04:17",
+     "15:32"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Trades are entered and exited at the next bar's open.",
+    "times": [
+     "07:02",
+     "22:38"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Sell at the next open after a 10% loss on a closing basis.",
+    "times": [
+     "05:00",
+     "07:02"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Sell when the close rises back above the 10-day moving average.",
+    "times": [
+     "04:17",
+     "17:00"
+    ]
+   },
+   {
+    "kind": "sizing",
+    "label": "Position sizing and risk",
+    "tag": "E",
+    "text": "100% of capital per trade, no leverage, one position at a time.",
+    "times": [
+     "07:02"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the NSE daily stock pool (long only, overnight) in place of SPY, sized by the desk's stock-pool risk rule.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "The 10% stop is a stop order 10% below the fill; the video exits at the next open after a close 10% down.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the stock pool replaces SPY and the closing-basis stop becomes a 10% stop order (A)",
+   "the 'lower close' exit is his later variant and is not coded"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "return_pct",
+    "at": "08:25",
+    "value": "about 7.6% a year against about 10% for buy and hold",
+    "period": "S&P 500, JB Marwood's AmiBroker test",
+    "quote": "this strategy returns about 7.6%"
+   },
+   {
+    "kind": "other",
+    "at": "09:09",
+    "value": "maximum drawdown 12% against 55% for buy and hold",
+    "period": "S&P 500, JB Marwood's AmiBroker test",
+    "quote": "look at the max draw down 12%"
+   },
+   {
+    "kind": "win_rate",
+    "at": "09:09",
+    "value": "75%",
+    "period": "S&P 500, JB Marwood's AmiBroker test",
+    "quote": "75% win rate is pretty impressive"
+   },
+   {
+    "kind": "trade_count",
+    "at": "28:23",
+    "value": "457 trades",
+    "period": "SPY, TradingView, 1995 to 2022",
+    "quote": "over 457 trades over several years"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 18051,
+   "trades": 3988
+  }
+ },
+ {
   "id": "MV-02",
   "version": "v1",
   "name": "Regular RSI divergence 3-10 bars apart, confirmation candle, target the middle swing, RR at least 1:3",
@@ -6100,6 +7329,250 @@ export const SL: SlStrategy[] = [
    "fills": true,
    "signals": 40,
    "trades": 40
+  }
+ },
+ {
+  "id": "QI-01",
+  "version": "v1",
+  "name": "Daily close crossing above the upper Bollinger Band (20, 2), out on a close below the middle band (long only)",
+  "topic": "india_stocks",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "QuantInsti Quantitative Learning",
+  "video": "8eqtve2iOeU",
+  "title": "Backtesting a Trading Strategy Using Bollinger Bands | Full Python Tutorial by Mohak Pachisia",
+  "uploaded": "2025-06-06",
+  "minutes": 29,
+  "summary": "QuantInsti codes a long-only Bollinger Band breakout on ten years of daily Nifty data in Python: buy when the close crosses above the upper band (20, 2) after closing below it the day before, hold while above the middle band, exit on the first close below the 20-day middle band; about 60 signals; it returned less than buy and hold (5.76% against 10.74% a year) but with far lower volatility (6.64% against 16.62%), a higher Sharpe ratio and an 11.79% maximum drawdown against 38.44%.",
+  "instruments": [
+   "Nifty 50 (daily)"
+  ],
+  "timeframes": [
+   "1d"
+  ],
+  "markets": [
+   "NSE stocks (daily, long only)"
+  ],
+  "deskMarkets": [
+   "NSED"
+  ],
+  "overnight": true,
+  "proxy": null,
+  "paperStart": "2026-11-13T17:00:00Z",
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Bollinger Bands with the default 20-period middle band and 2 standard deviations.",
+    "times": [
+     "02:17",
+     "05:47"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Buy when today's close is above the upper band and yesterday's close was below yesterday's upper band.",
+    "times": [
+     "08:41"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Exit on a close below the middle band.",
+    "times": [
+     "12:50"
+    ]
+   },
+   {
+    "kind": "sizing",
+    "label": "Position sizing and risk",
+    "tag": "E",
+    "text": "One position at a time; a repeated signal while long is ignored.",
+    "times": [
+     "09:23"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the NSE daily stock pool (long only, overnight) besides the index he tested.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Enter and exit at the next open; a protective stop at the lower band of the signal day so the book can size.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the stock pool replaces the Nifty index and a protective stop is added (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "return_pct",
+    "at": "27:35",
+    "value": "5.76% a year against 10.74% for buy and hold; volatility 6.64% against 16.62%; maximum drawdown 11.79% against 38.44%",
+    "period": "Nifty daily, about ten years",
+    "quote": "my volatility for the strategy return is 6.64% only"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 2660,
+   "trades": 1532
+  }
+ },
+ {
+  "id": "QI-02",
+  "version": "v1",
+  "name": "Trade the overnight gap's direction from the open to the close when it is beyond 0.25 of the 90-day standard deviation of overnight returns",
+  "topic": "india_stocks",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "QuantInsti Quantitative Learning",
+  "video": "Vdlw6kViw4Y",
+  "title": "Algorithmic Day Trading Strategies [Strategies and Data Analysis]",
+  "uploaded": "2023-07-29",
+  "minutes": 72,
+  "summary": "A QuantInsti webinar (Rikshit Pachnekar) builds a day-trading gap strategy in Python on Amazon (September 2018 to September 2019). Buy at the open when today's open is above yesterday's close, sell short when it is below, and close at the end of the day: 15% (cumulative 1.15). The 'optimised' version trades only when the overnight return (yesterday's close to today's open) is beyond 0.25 of the standard deviation of the previous 90 days' overnight returns (0.25 is called arbitrary, for illustration): 20% (1.2). He warns about selection bias and invites changes such as using the day's high.",
+  "instruments": [
+   "Amazon (daily open and close)"
+  ],
+  "timeframes": [
+   "1d (open to close)"
+  ],
+  "markets": [
+   "NSE stocks (5-minute pool)"
+  ],
+  "deskMarkets": [
+   "NSE5"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-13T17:00:00Z",
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "A day-trading strategy tested on Amazon.",
+    "times": [
+     "25:58"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Buy when today's open is above yesterday's close; short when it is below.",
+    "times": [
+     "26:50",
+     "33:22"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "A gap beyond that threshold upward is a buy (downward a short).",
+    "times": [
+     "45:17",
+     "50:09"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Close the trade at the end of the day.",
+    "times": [
+     "36:07"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Trade only when the overnight return is beyond 0.25 of the standard deviation of the previous 90 days' overnight returns.",
+    "times": [
+     "43:11",
+     "43:52",
+     "44:35"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the NSE stock pool on five-minute rows (the pool's slots go to the most liquid stocks first). The gap is the first bar's open against the prior close; entry at the 09:20 open, after the first five-minute bar.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "A 3% stop from the fill exists only so the book can size; the video has none. One trade per stock per day, out at the desk's session end.",
+    "times": []
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "A",
+    "text": "The standard deviation uses the 40 prior sessions, because the desk keeps about 56 sessions of five-minute stock data. Shorts need a gap below -0.25 standard deviations.",
+    "times": []
+   }
+  ],
+  "why": [
+   "40 sessions replace 90 (A)",
+   "the short threshold's sign is ambiguous in the code walk-through",
+   "entry five minutes after the open and the stop are ours (A)"
+  ],
+  "vague": [],
+  "unclear": [
+   "Is a short taken for any overnight return below +0.25 standard deviations, or only below -0.25 (his example at 50:54 fits both)?"
+  ],
+  "claims": [
+   {
+    "kind": "return_pct",
+    "at": "41:07",
+    "value": "15% (cumulative 1.15) for the plain gap rule",
+    "period": "Amazon, September 2018 to September 2019",
+    "quote": "15% is good but can we do better?"
+   },
+   {
+    "kind": "return_pct",
+    "at": "52:17",
+    "value": "20% (cumulative 1.2) with the 0.25 standard-deviation filter",
+    "period": "Amazon, September 2018 to September 2019",
+    "quote": "previously it was 1.15 but now it is 1.2"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 23,
+   "trades": 23
   }
  },
  {
@@ -6868,6 +8341,155 @@ export const SL: SlStrategy[] = [
   }
  },
  {
+  "id": "AL-01",
+  "version": "v1",
+  "name": "Rally-then-range stocks: buy a green candle close above the range, stop at its low, target the previous swing high; option writers set Bank Nifty's side",
+  "topic": "india_stocks",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Alice Blue",
+  "video": "mOvPo4kw2rI",
+  "title": "Brahmastra Strategy: The SECRET to Growing Wealth with Intraday Option Trading | Alice Blue",
+  "uploaded": "2024-09-27",
+  "minutes": 65,
+  "summary": "An Alice Blue webinar with Amar Mandekar (Trade4wealth, in Hindi with garbled auto-captions) on his 'Brahmastra' approach, which is unrelated to the library's Supertrend 'Brahmastra' (PR-01). Stocks from his scanner rally and then consolidate in a range. Buy above the range once a green candle closes outside it (sell below on a red candle), with the stop at that candle's low. The target is the previous swing high, reached '70-80%' of the time, at about 1:2.5. Beginners use 15-minute charts for three to six months, then 5 minutes. For Bank Nifty, his 'Brahmastra tool' reads option writers: put writing above call writing (puts positive, calls negative) is strongly bullish, and the reverse strongly bearish. Live examples include BPCL, Polycab, Bajaj Finance and Reliance.",
+  "instruments": [
+   "NSE stocks (scanner), Bank Nifty"
+  ],
+  "timeframes": [
+   "15m then 5m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "15-minute charts for the first three to six months, then 5 minutes.",
+    "times": [
+     "08:29"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Buy above a green candle that closes above the range (sell below a red one).",
+    "times": [
+     "04:14",
+     "05:00"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Target the previous swing high.",
+    "times": [
+     "06:20"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "For Bank Nifty, put writing above call writing is strongly bullish.",
+    "times": [
+     "33:32",
+     "34:12"
+    ]
+   }
+  ],
+  "why": [
+   "the stocks come from his scanner and the ranges are drawn by eye",
+   "the Bank Nifty tool needs option-writing data the desk does not have"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the stocks come from his scanner and the ranges are drawn by eye; the Bank Nifty tool needs option-writing data the desk does not have",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "EQ-01",
+  "version": "v1",
+  "name": "Opening-behaviour filters: gaps, open = high / low, filled gaps, strong gaps (scanner explainer)",
+  "topic": "india_stocks",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "EQSIS",
+  "video": "pAK68Yw_EY4",
+  "title": "Gap Up, Gap Down, Open High, Open Low #IntradayFilter | Advanced Intraday Scanner Explained | EQSIS",
+  "uploaded": "2021-09-17",
+  "minutes": 16,
+  "summary": "EQSIS explains the 'open study' filters of its intraday scanner: gap up and gap down (relative to how many stocks gapped), open = high (bearish) and open = low (bullish), gaps filled the same day ('weak bulls', 'weak bears'), and strong gaps (a gap up that opens at its low and above the previous day's high signals short covering); the filters matter later in the day rather than at the first minute, and their success ratios were to follow in later videos.",
+  "instruments": [
+   "NSE stocks"
+  ],
+  "timeframes": [
+   "1d context",
+   "intraday"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Open = low that holds is bullish; open = high that holds is bearish.",
+    "times": [
+     "07:50",
+     "09:16"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "A gap that fills the same day marks weak bulls (or weak bears): the surprise is fading.",
+    "times": [
+     "10:50",
+     "12:19"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Strong bullish gap: a gap up opening at its low and above the previous day's high (short covering).",
+    "times": [
+     "13:01",
+     "13:43"
+    ]
+   }
+  ],
+  "why": [
+   "scanner filters without an entry, stop or exit rule",
+   "the promised success ratios are not in this video"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "scanner filters without an entry, stop or exit rule; the promised success ratios are not in this video",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
   "id": "GR-01",
   "version": "v1",
   "name": "RSI overbought 70 / oversold 30 basics (explainer)",
@@ -6924,6 +8546,162 @@ export const SL: SlStrategy[] = [
   "blockedReason": "an indicator explainer with no trade rule; the auto-captions are too garbled to recover more; the RSI 70/30 reversal is already the library's YT-25",
   "duplicateOf": null,
   "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "IC-02",
+  "version": "v1",
+  "name": "30-minute opening range break on Nifty 50 stocks, user-set percentage target and stop, no entries after 15:00 (API demo)",
+  "topic": "india_stocks",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "ICICI Direct",
+  "video": "2KwFfIbLYbs",
+  "title": "Opening range breakout strategy in Equity using Breeze API. #icicidirect",
+  "uploaded": "2024-12-20",
+  "minutes": 32,
+  "summary": "ICICI Direct's Breeze API webinar codes an opening range breakout for Nifty 50 stocks. The range is the first 30-minute candle (09:15-09:45). Buy when the live price breaks its high, sell when it breaks its low. The target and stop percentages are user inputs (a 1% target in the BPCL example), with a maximum number of orders per stock. No new orders after 15:00, and everything is squared off around 15:15. Most of the session covers the API, credentials and the tick-saving code.",
+  "instruments": [
+   "Nifty 50 stocks"
+  ],
+  "timeframes": [
+   "30m range",
+   "ticks"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The opening range is the 30-minute candle from 09:15 to 09:45.",
+    "times": [
+     "12:41"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Buy on a break of the range high, sell on a break of the low.",
+    "times": [
+     "14:44"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Target and stop are percentages the user enters (1% target in the example).",
+    "times": [
+     "15:29",
+     "16:10"
+    ]
+   },
+   {
+    "kind": "no_trade",
+    "label": "When not to trade",
+    "tag": "E",
+    "text": "No new orders after 15:00; intraday positions are squared off around 15:15.",
+    "times": [
+     "20:25"
+    ]
+   }
+  ],
+  "why": [
+   "the stop percentage is never given",
+   "the target is an example input"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": "QC-01",
+  "duplicateWhy": "the 30-minute opening range break is already coded in this study (QC-01; TW-01 and CV-01 for 15-minute ranges); here the exits are left to the user",
+  "checks": null
+ },
+ {
+  "id": "MB-02",
+  "version": "v1",
+  "name": "15-30 minute opening range break on a high-volume bar with a higher-timeframe catalyst, stop past the breakout bar, profits at 1 ATR (stocks)",
+  "topic": "india_stocks",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "SMB Capital",
+  "video": "KFqSicS7HOo",
+  "title": "The ORB Strategy (High Odds Breakout Technique)",
+  "uploaded": "2025-03-06",
+  "minutes": 28,
+  "summary": "SMB Capital's opening range break on US stocks with a higher-timeframe story (relative strength, a catalyst, high short interest, a higher-timeframe level): wait for the full 15- to 30-minute range (not before 09:45), enter on the break with one of the day's highest volume bars, stop a few cents beyond the breakout bar, add on further breaks, take profits into momentum, at 1 ATR from the day's extreme, on a break of the 9/21 EMA trend or a two-minute bar trail.",
+  "instruments": [
+   "US stocks (MSTR, OKLO, BBAI, RGTI, SMCI)"
+  ],
+  "timeframes": [
+   "1m",
+   "2m (15-30 minute range)"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The opening range is the first 15 or 30 minutes; never trade it before 09:45.",
+    "times": [
+     "00:42",
+     "03:27"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The best breaks come on one of the day's highest-volume bars through the range.",
+    "times": [
+     "16:39"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop a few cents beyond the breakout bar.",
+    "times": [
+     "07:36"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Scale out into momentum, at 1 ATR from the day's extreme, or on a 9/21 EMA trend break or a two-minute bar trail.",
+    "times": [
+     "04:09",
+     "25:04"
+    ]
+   }
+  ],
+  "why": [
+   "the stock selection (catalysts, relative strength, short interest) is discretionary"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": "TW-01",
+  "duplicateWhy": "the 15-minute opening range break on a volume expansion is already coded in this study (TW-01; also BB-02 and YT-26 in the library)",
   "checks": null
  },
  {
@@ -7220,6 +8998,85 @@ export const SL: SlStrategy[] = [
   "checks": null
  },
  {
+  "id": "TJ-01",
+  "version": "v1",
+  "name": "RSI range rules: bull 40-80, bear 20-60; buy daily RSI 40 when weekly and monthly RSI are above 60 (with confirmation)",
+  "topic": "india_stocks",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "TRADEJINI",
+  "video": "_GJ8I-62JKQ",
+  "title": "RSI Done Right – Range Rules",
+  "uploaded": "2026-10-10",
+  "minutes": 81,
+  "summary": "A Tradejini webinar on RSI ranges, against Wilder's 70/30. In a bull market RSI(14) stays between 40 and 80; in a bear market between 20 and 60; 40-60 is sideways. A break above 60 or below 40 is a range shift, and RSI failing to cross 60 after breaking 40 is a warning to exit. For buying, monthly and weekly RSI above 60 with the daily RSI falling to 40 is a low-risk place to look, shown on USD/INR, TCS, gold, silver and crude oil. He insists on confirmation from price, candlesticks, structure or other indicators before any trade, and uses hourly and 15-minute charts only for execution. No stop, target or exit rule is given.",
+  "instruments": [
+   "Stocks, Nifty, USD/INR, gold, silver, crude oil"
+  ],
+  "timeframes": [
+   "Monthly",
+   "weekly",
+   "daily (hourly and 15m for execution)"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Above 60 is bullish, below 40 bearish, 60-40 sideways; the bull range is 80-40 and the bear range 60-20.",
+    "times": [
+     "35:18"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Monthly and weekly RSI above 60 and daily RSI at 40 is a buying location.",
+    "times": [
+     "1:02:46"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "In a bull range, RSI back at 40 is the low-risk place to buy.",
+    "times": [
+     "42:57",
+     "43:42"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Never without confirmation from price, candlesticks, structure or other indicators.",
+    "times": [
+     "44:22"
+    ]
+   }
+  ],
+  "why": [
+   "the confirmation the entry requires is left to the viewer",
+   "no stop, target or exit is given"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the confirmation the entry requires is left to the viewer; no stop, target or exit is given",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
   "id": "ZV-01",
   "version": "v1",
   "name": "Gap handling guidelines (no trade rule)",
@@ -7294,6 +9151,124 @@ export const SL: SlStrategy[] = [
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
+ },
+ {
+  "id": "AV-01",
+  "version": "v1",
+  "name": "First UTC hour's direction held to the end of the day (bitcoin); the presenter's own null result",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Algovibes",
+  "video": "jFa6u-7E10U",
+  "title": "Intraday Trading Edge? First Hour vs. Rest of Day Strategy!",
+  "uploaded": "2025-03-02",
+  "minutes": 22,
+  "summary": "Algovibes asks whether the first trading hour predicts the rest of the day. On about 300 days of Binance BTC/USDT hourly candles (UTC days), he compares the first hour's return (the 00:00 UTC candle) with the return from its close to the day's last close. The correlation is 0.018 with a p-value of 0.745. He concludes there is no relation, and that buying after an up first hour (or selling after a down one) would most probably not make a meaningful strategy. He invites tests on stocks and on other first windows (the first minute, 15 minutes, two hours).",
+  "instruments": [
+   "BTC/USDT (Binance, hourly)"
+  ],
+  "timeframes": [
+   "1h"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-13T17:00:00Z",
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "Bitcoin against USD on one-hour candles: about 300 days of Binance data in UTC.",
+    "times": [
+     "00:03",
+     "01:28"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The first hour is the 00:00 UTC hourly candle; its return is its close over its open.",
+    "times": [
+     "07:50",
+     "09:13"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "I",
+    "text": "Buy after an up first hour (sell after a down one) and hold for the rest of the day; the trade rule he says will most probably not work.",
+    "times": [
+     "20:25"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "The rest of the day runs to the close of the day's last hourly candle.",
+    "times": [
+     "11:22"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta's BTCUSD perpetual on one-hour candles.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Enter at the 01:00 UTC open and exit at 23:59 UTC. A flat first hour means no trade. A 5% stop from the fill exists only so the book can size; the video has no stop.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the trade rule is the one the presenter expects to fail (correlation 0.018, p 0.745)",
+   "the stop is ours (A)"
+  ],
+  "vague": [],
+  "unclear": [
+   "Would the first 15 minutes, the first two hours, or stock prices behave differently? (his own open question at 21:06)"
+  ],
+  "claims": [
+   {
+    "kind": "other",
+    "at": "16:53",
+    "value": "correlation 0.018 between first-hour and rest-of-day returns",
+    "period": "BTC/USDT hourly, about 300 days",
+    "quote": "we have a correlation of 0.018"
+   },
+   {
+    "kind": "other",
+    "at": "20:25",
+    "value": "p-value 0.745: not significant even at the 10% level",
+    "period": "BTC/USDT hourly, about 300 days",
+    "quote": "0.745 so not even significant on the 10% level"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 75,
+   "trades": 75
+  }
  },
  {
   "id": "BN-01",
@@ -8949,6 +10924,91 @@ export const SL: SlStrategy[] = [
   "checks": null
  },
  {
+  "id": "CC-02",
+  "version": "v1",
+  "name": "Swing failure: a spike beyond a significant high/low that closes back inside, entered on the close, targeting the range's other side",
+  "topic": "crypto",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "CryptoCred",
+  "video": "nPDk5qPbf08",
+  "title": "Technical Analysis Series - How To Use Candlestick Highs/Lows to Trade Reversals",
+  "uploaded": "2022-12-18",
+  "minutes": 53,
+  "summary": "CryptoCred's lesson on using candlestick highs and lows to trade reversals. Only significant highs and lows count: obvious swing points, previous day, week and month highs and lows, and inside-candle extremes, chosen by the eye test. A swing failure pattern (SFP) is a spike beyond such a level that closes back inside on the same candle: the breakout traders are trapped and fuel the reversal. Entry is on the candle close or on a retest of the level. A slower failed break (a close beyond, then a close back) works on the same logic. Targets are contextual: the range midpoint or far side (the other side of an inside candle), or trend continuation. He stresses that not every wick through a level reverses, and that a 5-minute spike should not be expected to produce a weekly reversal.",
+  "instruments": [
+   "Bitcoin, Ether, BNB, other crypto"
+  ],
+  "timeframes": [
+   "Any (5m to monthly)"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Mark only significant levels: obvious swings and the previous day, week and month highs and lows.",
+    "times": [
+     "09:59"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "An SFP is a spike beyond a key high or low that closes back inside on the same time frame.",
+    "times": [
+     "24:06"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "A failed break: an effort through the level, then a close back across it.",
+    "times": [
+     "38:28"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Enter on the candle close, or on a retest of the level.",
+    "times": [
+     "26:52"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "In a range, target the midpoint or the other side (the other side of an inside candle); in a trend, trend continuation.",
+    "times": [
+     "28:59",
+     "47:50"
+    ]
+   }
+  ],
+  "why": [
+   "which highs and lows are significant is judged by eye"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": "LS-00",
+  "duplicateWhy": "the sweep of a level that closes back inside is already on the desk (LS-00 and its versions; NJ-44 and CP-26 turtle soup); his failed-break variant is CC-01's double close",
+  "checks": null
+ },
+ {
   "id": "KW-01",
   "version": "v1",
   "name": "Jewel Light below 35, first white close, exit at PMARP 75, stop on a close below the range lows",
@@ -9186,6 +11246,65 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "an explanation of patterns with no entry, stop or target rule; the sweep-and-shift idea is already in the library's liquidity-sweep strategies",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "RD-01",
+  "version": "v1",
+  "name": "Trade strength in breakouts: do not fade high-timeframe breakouts, low-timeframe entries held with high-timeframe invalidation, trail instead of fixed targets",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "TechnicalRoundup",
+  "video": "C0Nd2pGO9_0",
+  "title": "Crypto Breakout - How To Trade Strength",
+  "uploaded": "2024-11-08",
+  "minutes": 96,
+  "summary": "A TechnicalRoundup 'Casual Friday' episode (CryptoCred and a co-host) on trading strength in the November 2024 crypto breakout. Don't assume a high-timeframe breakout is false until price proves it. Take low-timeframe entries but give them high-timeframe room, rather than cutting on a 2-3% move. Trending markets need wider invalidations, fewer predefined targets and trailing by updated invalidations. Take some profit along the way. Most of the episode is market commentary on Bitcoin, Ether, Solana and meme coins.",
+  "instruments": [
+   "Bitcoin, Ether, Solana, meme coins"
+  ],
+  "timeframes": [
+   "Daily to monthly (lower for entries)"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Don't assume a high-timeframe breakout is false until it actually fails.",
+    "times": [
+     "28:51"
+    ]
+   },
+   {
+    "kind": "management",
+    "label": "Trade management",
+    "tag": "E",
+    "text": "Give the high-timeframe picture room; in trends use fewer predefined targets and trail by updated invalidations.",
+    "times": [
+     "43:51",
+     "1:13:51"
+    ]
+   }
+  ],
+  "why": [
+   "market commentary with management principles",
+   "no entry trigger, level rule or exit is defined"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "market commentary with management principles; no entry trigger, level rule or exit is defined",
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -9496,6 +11615,266 @@ export const SL: SlStrategy[] = [
    "fills": true,
    "signals": 23,
    "trades": 5
+  }
+ },
+ {
+  "id": "BR-01",
+  "version": "v1",
+  "name": "Two consecutive strong trend bars ('Always In'): stop entry one tick beyond the second, scalp about half a bar, stop beyond the signal bar",
+  "topic": "forex_us",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Brooks Trading Course",
+  "video": "gOEDwTe4JuE",
+  "title": "Scalping series: #02 Scalping 2-minute Emini chart",
+  "uploaded": "2021-03-15",
+  "minutes": 46,
+  "summary": "Al Brooks walks bar by bar through scalping a two-minute E-mini chart. Two consecutive strong bars (big bodies closing near their extremes) make the market 'Always In' that direction: sell one tick below a strong bear bar (buy one tick above a strong bull bar). A scalp is about 2 points when bars are small, or about half the bar height when bars are big. A short sold below a bar is exited above the bull bar that reverses it. Context changes the reading: breakout-mode ii patterns, sell climaxes and parabolic wedges invite reversals, and tight trading ranges are for limit-order traders who buy low and sell high. He counts 50 or more reasonable scalps a day, about $900 per contract in two hours if traded perfectly, but says most traders cannot scalp well.",
+  "instruments": [
+   "E-mini S&P 500 futures"
+  ],
+  "timeframes": [
+   "2m"
+  ],
+  "markets": [
+   "Nasdaq 100 (cash session)"
+  ],
+  "deskMarkets": [
+   "NAS100"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-13T17:00:00Z",
+  "rules": [
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "A two-minute E-mini chart.",
+    "times": [
+     "00:01"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Always In Short: two bear bars, one with a big body closing on or near its low (mirror for bulls).",
+    "times": [
+     "01:23"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Sell one tick below the bar; buy one tick above in a bull setup.",
+    "times": [
+     "02:50",
+     "03:32"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "A short sold below a bar is exited above the bull bar that reverses it.",
+    "times": [
+     "08:27"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Scalp about 2 points with small bars; with 20-point bars, 5 or 10 points, about half a bar.",
+    "times": [
+     "05:39"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the Nasdaq 100 cash session on two-minute bars (the E-mini S&P is not on the desk).",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "A strong bar has a body of at least half its range, closes in the outer quarter, and its range is at least the 20-bar average. After two consecutive strong bars of one colour, a stop order sits one tick (0.25) beyond the second bar, live for the next bar only. From 09:36 to 15:30 New York.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Stop one tick beyond the second bar's other end; target half the average range of the last 10 bars; at most 5 trades a day; out at the session end.",
+    "times": []
+   }
+  ],
+  "why": [
+   "'strong bar', the target size and the trade cap are ours (A)",
+   "his context reads (climaxes, wedges, ii breakout mode, tight ranges) are not coded",
+   "the E-mini S&P becomes the Nasdaq 100 (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "money",
+    "at": "42:41",
+    "value": "about $900 per contract in a couple of hours if traded perfectly; 50 or more reasonable scalps a day",
+    "period": "E-mini two-minute chart, one morning",
+    "quote": "you could’ve made $900 in a couple hours per contract"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 357,
+   "trades": 257
+  }
+ },
+ {
+  "id": "BT-01",
+  "version": "v1",
+  "name": "Fade a cash-open gap smaller than 40% of the 5-day ATR toward the prior close, stop 30% of the 5-day ATR, out at the close",
+  "topic": "forex_us",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Better System Trader",
+  "video": "4NoBrAlZZlM",
+  "title": "018: Scott Andrews 'The Gap Guy' shares his expertise in trading opening gaps [AUDIO ONLY]",
+  "uploaded": "2015-08-03",
+  "minutes": 50,
+  "summary": "Better System Trader interviews Scott Andrews, 'the Gap Guy', on fading opening gaps in the big stock indices (Nasdaq, S&P, Dow, Russell, DAX, FTSE). Their overnight moves rarely hold through the day, so they tend to revert to the prior close. Gap size is the key: gaps up to about 40% of the prior five days' average true range fill far more often (a 10-cent SPY gap about 90%, 20 cents 80%), while larger ones fill only 40-50% of the time. He targets the prior close (or just in front of it), uses a stop of about 30% of the five-day ATR, and closes anything still open at the end of the day. Market conditions, the last three days' pattern, seasonality (Mondays) and gap zones (where the open sits against the prior day's open, high, low and close) refine his separate systems.",
+  "instruments": [
+   "Index futures (Nasdaq, S&P 500, Dow, Russell, DAX, FTSE)"
+  ],
+  "timeframes": [
+   "Intraday from the cash open"
+  ],
+  "markets": [
+   "Nasdaq 100 (cash session)",
+   "Nifty 50",
+   "Bank Nifty"
+  ],
+  "deskMarkets": [
+   "NAS100",
+   "NIFTY",
+   "BANKNIFTY"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-13T17:00:00Z",
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "Fade gaps in the big indices; they revert to the prior close more often than single stocks.",
+    "times": [
+     "12:12"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Fade only gaps smaller than about 40% of the prior five days' average true range; larger gaps fill far less often.",
+    "times": [
+     "16:20",
+     "17:02"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop about 30% of the five-day average true range.",
+    "times": [
+     "24:45"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Target the prior day's close (or a point just in front of it).",
+    "times": [
+     "24:05",
+     "28:54"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Close the trade at the end of the day if neither the target nor the stop is hit; never turn it into another trade.",
+    "times": [
+     "29:36",
+     "30:18"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Market conditions, the last three days' pattern, seasonality and gap zones refine the odds in his own systems.",
+    "times": [
+     "12:56",
+     "17:44"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the Nasdaq 100 cash session (09:30 open against the prior 16:00 close) and the Nifty and Bank Nifty indices (09:15 open against the prior close).",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Measure the gap on the first one-minute bar and enter at the next minute's open, unless the first minute already reached the prior close. The ATR uses the five prior sessions. One trade a day, out at the desk's session end. The filters and gap zones are not coded.",
+    "times": []
+   }
+  ],
+  "why": [
+   "his market-condition, pattern, seasonality and gap-zone systems are not described in rules and are not coded (A)",
+   "the entry minute is ours"
+  ],
+  "vague": [],
+  "unclear": [
+   "Which market conditions, three-day patterns and gap zones does he trade, and with which targets?"
+  ],
+  "claims": [
+   {
+    "kind": "win_rate",
+    "at": "16:20",
+    "value": "about 90% fill for the smallest gaps (10 cents on SPY), 80% at 20 cents, 60-70% at 30 cents, about 40% beyond 40% of the five-day ATR",
+    "period": "his gap statistics",
+    "quote": "the smallest gaps will have like a 90% probability of filling"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 105,
+   "trades": 105
   }
  },
  {
@@ -10153,6 +12532,496 @@ export const SL: SlStrategy[] = [
   }
  },
  {
+  "id": "DX-01",
+  "version": "v1",
+  "name": "After a structure break, a limit at the 70% retracement of the impulse, stop at 100%, half at 38.2% with a break-even stop, the rest at the 10% level",
+  "topic": "forex_us",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Doyle Exchange",
+  "video": "_opTZIbmuTQ",
+  "title": "SNIPER FOREX SCALPING STRATEGY!!! | WORKS ON US30 & XAUUSD  (FIBONACCI STRATEGY 2020)",
+  "uploaded": "2020-10-06",
+  "minutes": 26,
+  "summary": "Doyle Exchange's Fibonacci 'sniper' scalp on forex pairs, US30 and gold: after price breaks market structure (a new high past the last swing high, or a new low), draw the Fibonacci from the swing that started the move to its extreme; enter at the 70% retracement with a limit (never 61.8%), at once, not on a candle close; stop at the 100% level; take half or more at the 38.2% level (slightly above 1:1) and move the stop to break-even; the 25% and 10% levels are the next targets (about 1:2); he trades four pairs because many setups never reach 70%.",
+  "instruments": [
+   "USD/CHF and other forex pairs, US30, gold"
+  ],
+  "timeframes": [
+   "Intraday (5m",
+   "15m)"
+  ],
+  "markets": [
+   "Gold (Delta XAUTUSD)",
+   "EUR/USD",
+   "GBP/USD"
+  ],
+  "deskMarkets": [
+   "XAUUSD",
+   "EURUSD",
+   "GBPUSD"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-13T17:00:00Z",
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Wait for a break of market structure, then draw the Fibonacci over the impulse that broke it.",
+    "times": [
+     "12:25",
+     "13:07"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Enter at the 70% level only, as soon as price touches it (no candle-close wait).",
+    "times": [
+     "02:51",
+     "03:33"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop at the 100% level; a break of it invalidates the setup.",
+    "times": [
+     "02:10"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "First target the 38.2% level (slightly above 1:1): close part and move the stop to break-even.",
+    "times": [
+     "05:40",
+     "06:23"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Next targets the 25% and 10% levels (about 1:2), reached only in strong trends.",
+    "times": [
+     "09:25",
+     "10:15"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: gold (booked on Delta XAUTUSD), EUR/USD and GBP/USD on five-minute candles.",
+    "times": []
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "A",
+    "text": "Structure break = a close above the latest confirmed swing high (two bars each side); the impulse runs from the lowest low of the 20 bars before the break to the highest high since; once a bar fails to make a new high, a buy limit sits at 70% of the impulse, live for 24 bars (mirror for breaks of swing lows).",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Stop at the impulse's origin (100%); half off at the 38.2% level with the stop moved to break-even; the rest at the 10% level; at most 3 trades a day; out at the session end.",
+    "times": []
+   }
+  ],
+  "why": [
+   "swings and the impulse's origin are drawn by eye (A)",
+   "a variant of MA-01 (0.618 entry) with a 70% entry and 38.2% / 10% targets"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 4567,
+   "trades": 486
+  }
+ },
+ {
+  "id": "ET-01",
+  "version": "v1",
+  "name": "Quad rotation + 9-3 divergence 'super signal': buy the 9-3 turning back up through 20 after a lower price low, stop under the pattern low (mirror for shorts)",
+  "topic": "forex_us",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Etienne Crete - Desire To TRADE",
+  "video": "PjigwAmhiT0",
+  "title": "The 3 Scalping Setups That Make Me A Living - John Kurisko",
+  "uploaded": "2024-09-15",
+  "minutes": 46,
+  "summary": "John Kurisko (Day Trading Radio) explains on Desire To Trade how he scalps E-mini and Micro E-mini S&P futures with four stochastics, 9-3, 14-3, 40-4 and 60-10, on one chart. The 60-10 stands for the five-minute picture. Super signal: a 'quad rotation' (all four under 20) in an organised pullback, a small bounce, then price back to an equal or lower low while the 9-3 holds a higher low. Buy as the 9-3 turns back up through 20, stop one or two ticks under the pattern low. 20-20 bull flag: after a steep push off the 20 EMA, with the 60-10 'embedded' above 80 (preferably 85-90), buy when the 9-3 drops to 20 while price holds the 20 EMA; three to five points. Bear side: under the 200-period average with the 60-10 embedded under 20, sell each fast 9-3 rotation up. A long whose 60-10 stays stuck under 20-30 is weak and should be cut. Mirror rules apply for shorts.",
+  "instruments": [
+   "E-mini / Micro E-mini S&P 500 futures (also stocks and forex)"
+  ],
+  "timeframes": [
+   "1m (the 60-10 stands for 5m)"
+  ],
+  "markets": [
+   "Nasdaq 100 (cash session)"
+  ],
+  "deskMarkets": [
+   "NAS100"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-13T17:00:00Z",
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Four stochastics: 9-3, 14-3, 40-4 and 60-10; the 60-10 stands for the five-minute picture.",
+    "times": [
+     "14:14",
+     "20:41"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Quad rotation: all four stochastics under 20 at the same time.",
+    "times": [
+     "19:56",
+     "31:14"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "After a small bounce, price returns to an equal or lower low while the 9-3 holds higher; buy as the 9-3 turns back up through 20.",
+    "times": [
+     "31:14",
+     "32:40"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop one or two ticks under the pattern low candle.",
+    "times": [
+     "32:40",
+     "43:54"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "If the 60-10 stays stuck under 20-30 instead of rising above 80, the bigger trend is down: get out.",
+    "times": [
+     "37:34"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the Nasdaq 100 cash session on one-minute bars (the S&P futures are not on the desk). Slow stochastics: %K over n bars smoothed by an s-bar average.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "The quad bar starts the setup and the 9-3 must bounce 5 points off its low. A later bar must reach the first-stage low or below while the 9-3 dips under 20 again above its first-stage minimum. Entry when the 9-3 then closes above 20, within 60 bars of the quad bar. Shorts mirror at 80.",
+    "times": []
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "A",
+    "text": "Target 2R from the fill, plus his weak-trend exit: out at the next open when the 9-3 turns down through 80 while the 60-10 is still under 30 (mirror for shorts). At most 3 trades a day, out at the session end.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the bounce size, the window, the 2R target and the coded form of the weak-trend exit are ours (A)",
+   "the S&P futures become the Nasdaq 100 (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "win_rate",
+    "at": "35:27",
+    "value": "75-80% good trades; a weak-setup rule removes about half of the losers",
+    "period": "his own trading",
+    "quote": "maybe 80 75 80% of those time trades are really good trades"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 282,
+   "trades": 208
+  }
+ },
+ {
+  "id": "ET-02",
+  "version": "v1",
+  "name": "20-20 flag: with the 60-10 embedded above 80, buy the 9-3 at 20 while price holds the 20 EMA; under the 200 average with the 60-10 under 20, sell the 9-3 at 80",
+  "topic": "forex_us",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Etienne Crete - Desire To TRADE",
+  "video": "PjigwAmhiT0",
+  "title": "The 3 Scalping Setups That Make Me A Living - John Kurisko",
+  "uploaded": "2024-09-15",
+  "minutes": 46,
+  "summary": "John Kurisko (Day Trading Radio) explains on Desire To Trade how he scalps E-mini and Micro E-mini S&P futures with four stochastics, 9-3, 14-3, 40-4 and 60-10, on one chart. The 60-10 stands for the five-minute picture. Super signal: a 'quad rotation' (all four under 20) in an organised pullback, a small bounce, then price back to an equal or lower low while the 9-3 holds a higher low. Buy as the 9-3 turns back up through 20, stop one or two ticks under the pattern low. 20-20 bull flag: after a steep push off the 20 EMA, with the 60-10 'embedded' above 80 (preferably 85-90), buy when the 9-3 drops to 20 while price holds the 20 EMA; three to five points. Bear side: under the 200-period average with the 60-10 embedded under 20, sell each fast 9-3 rotation up. A long whose 60-10 stays stuck under 20-30 is weak and should be cut. Mirror rules apply for shorts.",
+  "instruments": [
+   "E-mini / Micro E-mini S&P 500 futures (also stocks and forex)"
+  ],
+  "timeframes": [
+   "1m (the 60-10 stands for 5m)"
+  ],
+  "markets": [
+   "Nasdaq 100 (cash session)"
+  ],
+  "deskMarkets": [
+   "NAS100"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-13T17:00:00Z",
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "A bull flag starts with a steep push up off the 20 EMA.",
+    "times": [
+     "33:23"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Buy when the 9-3 drops to 20 while price holds the 20 EMA; expect three to five points.",
+    "times": [
+     "34:44"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Bear flag: under the 200-period average with the 60-10 under 20, sell each fast rotation of the 9-3 up.",
+    "times": [
+     "38:18",
+     "43:54"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The 60-10 must stay above 80 (embedded), preferably 85-90.",
+    "times": [
+     "34:03"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the Nasdaq 100 cash session on one-minute bars.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Long: the 9-3 closes at or under 20 while the 60-10 is above 80 and the bar's low holds the 20 EMA (close above it); buy at the next open. Short: price closes under the 200 EMA, the 60-10 is under 20 and the 9-3 closes at or above 80.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Stop a tick beyond the extreme of the last 10 bars; target 1R; at most 3 trades a day; out at the session end.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the stop, the 1R target (his 3-5 points) and the bar tests are ours (A)",
+   "the 200-period average is taken as an EMA (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "win_rate",
+    "at": "35:27",
+    "value": "75-80% good trades; a weak-setup rule removes about half of the losers",
+    "period": "his own trading",
+    "quote": "maybe 80 75 80% of those time trades are really good trades"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 262,
+   "trades": 194
+  }
+ },
+ {
+  "id": "FS-01",
+  "version": "v1",
+  "name": "RSI (14) beyond 70/30, then a close back through the 9 EMA, swing stop, 1.5R",
+  "topic": "forex_us",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "ForexSignals TV",
+  "video": "RamI3itKkIQ",
+  "title": "10-Minute Strategy Blitz: Live 9 EMA Scalping [RSI Confirmation]",
+  "uploaded": "2024-12-14",
+  "minutes": 20,
+  "summary": "Forex Signals TV's live 9 EMA + RSI blitz: when the RSI (14) is overbought (above 70), sell on the first bar that closes back beneath the 9 EMA; when oversold (below 30), buy the first close back above it; stop a couple of ticks beyond the swing high or low; target the next structure or order block (about 1.5:1 on the example); 30-minute charts for forex pairs, 5- or 1-minute for bitcoin and US index futures (indices only after the 09:30 open).",
+  "instruments": [
+   "EUR/USD, GBP/USD, bitcoin, Nasdaq and S&P futures, gold"
+  ],
+  "timeframes": [
+   "30m (forex); 5m",
+   "1m (bitcoin",
+   "indices)"
+  ],
+  "markets": [
+   "EUR/USD",
+   "GBP/USD",
+   "Bitcoin (Delta BTCUSD)"
+  ],
+  "deskMarkets": [
+   "EURUSD",
+   "GBPUSD",
+   "BTCUSD"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-13T17:00:00Z",
+  "rules": [
+   {
+    "kind": "session",
+    "label": "Session",
+    "tag": "E",
+    "text": "Forex on 30-minute charts (not much smaller); US index futures only after 09:30.",
+    "times": [
+     "10:05",
+     "11:30"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "EMA 9 on closes and RSI 14 with default settings.",
+    "times": [
+     "05:53",
+     "06:34"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Overbought (RSI above 70): sell when a bar closes beneath the 9 EMA; oversold (below 30): buy when a bar closes above it.",
+    "times": [
+     "04:29"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop on the swing low (high), a couple of ticks beyond.",
+    "times": [
+     "16:32"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Target the next structure or order block (about 1.5:1 on the example trade).",
+    "times": [
+     "08:37",
+     "12:10",
+     "17:12"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: EUR/USD and GBP/USD on 30-minute candles and bitcoin on 5-minute candles.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "RSI at or beyond 70 (30) within the last 3 bars, then the first close below (above) the 9 EMA after a close on the other side: enter at the next open; at most 3 trades a day.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Stop 0.02% beyond the highest high (lowest low) of the last 5 bars; target 1.5R; out at 16:55 New York (forex) or 23:55 UTC (bitcoin).",
+    "times": []
+   }
+  ],
+  "why": [
+   "the swing, the structure target and 'overbought state' are judged live (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 189,
+   "trades": 175
+  }
+ },
+ {
   "id": "KR-01",
   "version": "v1",
   "name": "Open in range and in value: fade a hold at the previous value-area edge back to the naked point of control",
@@ -10292,6 +13161,128 @@ export const SL: SlStrategy[] = [
    "fills": true,
    "signals": 3,
    "trades": 3
+  }
+ },
+ {
+  "id": "LT-01",
+  "version": "v1",
+  "name": "Model 4: a two-minute close beyond 70.5% of the regular-hours gap (by 2 SPX points) is played for the complete fill, stop at the gap's 50%",
+  "topic": "forex_us",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "LumiTraders",
+  "video": "_Hj98Rstqgo",
+  "title": "SPX RTH Gap Trading Strategy — Time to Stop Trading NQ?",
+  "uploaded": "2026-10-27",
+  "minutes": 31,
+  "summary": "LumiTraders (Dasha) teaches her SPX regular-hours gap models on two-minute charts. The gap runs from the 16:00 close to the 09:30 open of the SPX cash index, which she prefers to ES or NQ futures for these levels. Its 25%, 50%, 62% and 70.5% levels (62-70.5% is the optimal trade entry) frame the day. Model 1: if the first 30 minutes fail to sweep a 15- or 30-minute liquidity level, expect a shallow pullback to 25-50%. Model 2: if they sweep one, expect a deeper pullback to 62-70.5%. Both are entered on a two-minute change in the state of delivery. Model 3 trades an older gap's optimal entry zone. Model 4: when price ignores the levels, a two-minute close at least two points beyond 70.5% anticipates a complete fill. All the examples were traded live on her stream.",
+  "instruments": [
+   "SPX (S&P 500 cash index",
+   "ES futures)"
+  ],
+  "timeframes": [
+   "2m"
+  ],
+  "markets": [
+   "Nasdaq 100 (cash session)"
+  ],
+  "deskMarkets": [
+   "NAS100"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-13T17:00:00Z",
+  "rules": [
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "Two-minute charts.",
+    "times": [
+     "05:01"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "The gap's 25%, 50%, 62% and 70.5% levels; 62-70.5% is the optimal trade entry.",
+    "times": [
+     "07:13",
+     "08:42"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The gap is the range between the 16:00 close and the 09:30 open.",
+    "times": [
+     "05:41"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "When price ignores the levels, a two-minute close at least two points beyond 70.5% anticipates a complete fill.",
+    "times": [
+     "22:44",
+     "23:25"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Models 1-2 depend on whether the first 30 minutes sweep a 15- or 30-minute liquidity level, entered on a two-minute change in the state of delivery.",
+    "times": [
+     "12:58",
+     "17:51"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Enter at the next candle's open (ideally after a test of 70.5%); the stop depends on the gap's size.",
+    "times": [
+     "24:48"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the Nasdaq 100 cash session (NQ prices) in place of SPX, on two-minute bars. Two SPX points (about 0.035%) become 0.035% of price.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Model 4 only, from 09:32 to 12:00 New York. The first two-minute close at least 0.035% beyond the 70.5% level toward the prior close is entered at the next open, targeting the prior close (the complete fill). Stop beyond the 50% level; one trade a day; out at the session end.",
+    "times": []
+   }
+  ],
+  "why": [
+   "Models 1-3 need her medium-timeframe liquidity levels and two-minute change-in-delivery reads and are not coded",
+   "SPX becomes the Nasdaq 100 (A)",
+   "the stop at 50% is ours (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 20,
+   "trades": 20
   }
  },
  {
@@ -10456,6 +13447,141 @@ export const SL: SlStrategy[] = [
   }
  },
  {
+  "id": "MB-01",
+  "version": "v1",
+  "name": "MACD (3, 9) consolidation at zero, expansion, pullback to the signal line, re-cross on the trend side, dip-low stop, out on the opposite cross",
+  "topic": "forex_us",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "SMB Capital",
+  "video": "t7XAyKAUvFA",
+  "title": "Very High Win-Rate MACD Scalping Strategy (Simple Trade)",
+  "uploaded": "2024-03-14",
+  "minutes": 24,
+  "summary": "SMB Capital's 'high win-rate' MACD scalp on one-minute charts (to regain rhythm after losses): a MACD with fast settings (3 and 9 with a short signal line) wraps around zero for 3-15 minutes of consolidation; then it expands above zero (the lines diverge), price dips and the MACD line converges back to its signal line while staying above zero; enter long when the MACD line crosses back above the signal, stop just under the dip's low, exit when it crosses back below (mirror for shorts below zero); the histogram is ignored.",
+  "instruments": [
+   "US stocks and futures"
+  ],
+  "timeframes": [
+   "1m"
+  ],
+  "markets": [
+   "Nasdaq 100 (cash session)"
+  ],
+  "deskMarkets": [
+   "NAS100"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-13T17:00:00Z",
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "MACD with fast settings: a 3-period and a 9-period average, plus a short signal line.",
+    "times": [
+     "03:31",
+     "10:04"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Setup: a consolidation of about 3-15 one-minute bars with the MACD line wrapped around zero.",
+    "times": [
+     "05:04",
+     "06:25"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Then an expansion: the MACD line shoots above zero and away from its signal line, and then converges back.",
+    "times": [
+     "07:06",
+     "07:50"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Enter on the MACD line's cross back above the signal line while above zero (below zero for shorts).",
+    "times": [
+     "09:19",
+     "13:30"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop just below the low of the recent dip.",
+    "times": [
+     "08:36"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Hold while the fast line stays above the slow; exit when the MACD line crosses back below its signal.",
+    "times": [
+     "08:36",
+     "16:21"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the Nasdaq 100 cash session on one-minute candles; MACD (3, 9, 5).",
+    "times": []
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "A",
+    "text": "Consolidation = at least 3 of the bars between 15 and 4 bars ago with |MACD| at most 0.1 x ATR (14); expansion = since then the MACD reached at least 0.3 x ATR above zero (below for shorts).",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Long at the next open after the MACD line crosses back above its signal while above zero, following the expansion; mirror for shorts; signals 09:45-15:30 New York; at most 3 trades a day.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Stop one tick under the lowest low since the expansion's peak; exit at the next open after the MACD line crosses back below its signal; out at 15:55.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the signal length (heard as '5'), 'wrapped around zero' and 'expansion' are ours (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 360,
+   "trades": 237
+  }
+ },
+ {
   "id": "NK-01",
   "version": "v1",
   "name": "Close outside the Bollinger Band (20, 2), stop at the middle line, 2R (1-hour)",
@@ -10571,6 +13697,161 @@ export const SL: SlStrategy[] = [
    "fills": true,
    "signals": 195,
    "trades": 147
+  }
+ },
+ {
+  "id": "PL-01",
+  "version": "v1",
+  "name": "First five minutes' colour picks the side at 09:35 New York, stop at the range's far end, 10x-range target, out at the close (Nasdaq)",
+  "topic": "forex_us",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Part Time Larry",
+  "video": "Rk-Oxn5GzOo",
+  "title": "PyBroker: Backtesting 5 Minute ORB Strategy on QQQ",
+  "uploaded": "2026-11-10",
+  "minutes": 31,
+  "summary": "Part Time Larry codes the 5-minute opening range breakout from the paper 'Can Day Trading Really Be Profitable?' in PyBroker, on QQQ minute data. At the close of the 09:34 New York bar he goes long if the first five minutes closed above the day's open, and short if they closed below it. The stop is at the opening range's other end, the profit target is 10 times the range, and any trade still open is closed on the 15:58 bar. Positions are sized from the risk to the stop, not a fixed 250 shares. His runs: January 2016 +25% ($25,000 to $31,257); 2016-2023 $25,000 to about $200,000+ with a 23% win rate (no slippage or commissions); out of sample, 2024-2025 strong but 2026 down about 8% while QQQ rose.",
+  "instruments": [
+   "QQQ (TQQQ mentioned)"
+  ],
+  "timeframes": [
+   "1m (5-minute opening range)"
+  ],
+  "markets": [
+   "Nasdaq 100 (cash session)"
+  ],
+  "deskMarkets": [
+   "NAS100"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-13T17:00:00Z",
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "QQQ minute bars from 09:30 to 15:59 New York (the paper's QQQ test).",
+    "times": [
+     "01:27",
+     "03:37"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The opening range is the first five one-minute bars: 09:30 up to the 09:34 bar, which ends at 09:35.",
+    "times": [
+     "08:37",
+     "12:47"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "On the 09:34 bar, buy if its close is above the day's open (green first five minutes); sell short if it is below.",
+    "times": [
+     "14:15"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop at the opening range low for longs (high for shorts).",
+    "times": [
+     "19:14",
+     "21:56"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Take profit at 10 times the opening range's size.",
+    "times": [
+     "19:54",
+     "22:39"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Otherwise close on the 15:58 bar, never overnight.",
+    "times": [
+     "15:00",
+     "15:40"
+    ]
+   },
+   {
+    "kind": "sizing",
+    "label": "Position sizing and risk",
+    "tag": "E",
+    "text": "Size from the planned entry and stop, not a fixed 250 shares.",
+    "times": [
+     "19:54",
+     "20:36"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the Nasdaq 100 cash session (NQ futures prices) on one-minute bars. Enter at the 09:35 open, at most one trade a day, sized by the desk's 1%-of-equity risk. A doji first five minutes means no trade. The target is 10 times the risk from the fill to the stop.",
+    "times": []
+   }
+  ],
+  "why": [
+   "QQQ is replaced by the Nasdaq 100 cash session (A)",
+   "his code sets the stop one range-size from the entry, while the desk uses the range's far end as stated",
+   "his backtests ignore slippage and commissions"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "money",
+    "at": "23:23",
+    "value": "$25,000 to $31,257 (+25%)",
+    "period": "January 2016, QQQ, with the stop and target",
+    "quote": "we go from $25,000 to $31,257 for a total return percentage of 25%"
+   },
+   {
+    "kind": "money",
+    "at": "26:54",
+    "value": "$25,000 to about $200,000+",
+    "period": "January 2016 to December 2023, QQQ, no slippage or commissions",
+    "quote": "it ends at 200 and something thousand"
+   },
+   {
+    "kind": "win_rate",
+    "at": "26:54",
+    "value": "23%",
+    "period": "January 2016 to December 2023, QQQ",
+    "quote": "win rate 23%"
+   },
+   {
+    "kind": "return_pct",
+    "at": "29:40",
+    "value": "about -8% in 2026 while QQQ rose",
+    "period": "2026 to 27 October, out of sample",
+    "quote": "I think it's down like 8% for the year whereas QQQ is actually up"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 90,
+   "trades": 90
   }
  },
  {
@@ -10999,6 +14280,251 @@ export const SL: SlStrategy[] = [
   }
  },
  {
+  "id": "TD-11",
+  "version": "v1",
+  "name": "First pullback to the previous day's point of control after price moves away, fixed 1:1 at 15% of the average daily range",
+  "topic": "forex_us",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Trader Dale",
+  "video": "uDvT4uDWgB4",
+  "title": "The Simplest Volume Profile Intraday Strategy for Beginners",
+  "uploaded": "2026-04-02",
+  "minutes": 24,
+  "summary": "Trader Dale's simplest volume-profile strategy: once a day's session volume profile is complete, wait for price to move away from that day's point of control and trade the first pullback to it (long when it comes back down from above, short when it comes back up from below), only the first test; a fixed stop and target of 10-20% of the average daily range (1:1, for example 12 pips on EUR/USD with an 80-pip range); avoid high-impact news; when price slices straight through a point of control, trade its retest from the other side; his journal shows 59-71% wins by market.",
+  "instruments": [
+   "EUR/USD, AUD/USD, USD/CAD, ES"
+  ],
+  "timeframes": [
+   "Intraday (daily profiles)"
+  ],
+  "markets": [
+   "EUR/USD",
+   "GBP/USD",
+   "Bitcoin (Delta BTCUSD)"
+  ],
+  "deskMarkets": [
+   "EURUSD",
+   "GBPUSD",
+   "BTCUSD"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-13T17:00:00Z",
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Session volume profile with the point of control extended to the right.",
+    "times": [
+     "01:24",
+     "02:08"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Wait until the day's profile is complete, then for price to move away from its point of control.",
+    "times": [
+     "02:51",
+     "03:36"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "When price comes back to the point of control from above, go long (from below, go short); trade only the first test.",
+    "times": [
+     "03:36",
+     "04:21"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Flip: when price shoots through a point of control with no reaction, trade the retest of that level from the other side.",
+    "times": [
+     "11:46"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "A fixed stop and target, each 10-20% of the average daily volatility (risk-reward 1:1).",
+    "times": [
+     "05:07",
+     "05:49"
+    ]
+   },
+   {
+    "kind": "no_trade",
+    "label": "When not to trade",
+    "tag": "E",
+    "text": "Avoid high-impact news: out 5 minutes before, back 10 minutes after.",
+    "times": [
+     "20:58",
+     "21:40"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: EUR/USD and GBP/USD one-minute candles (no forex volume, so the profile counts time at price) and bitcoin one-minute candles (real volume); price steps of 0.01% of the previous session's last price.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Away = a close at least half the stop distance from the previous session's point of control; then a limit at the point of control on the side price left from (long from above, short from below), live for the rest of the day; one trade per day per market; the flip trade and the news filter are not coded.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Stop and target each 15% of the 20-day average daily range (1:1); out at 16:55 New York (forex) or 23:55 UTC (bitcoin).",
+    "times": []
+   }
+  ],
+  "why": [
+   "the 'away' distance and the profile step are ours",
+   "the forex profile is time-based (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "win_rate",
+    "at": "18:08",
+    "value": "71% wins on EUR/USD, 59% on USD/CAD, 67% on ES",
+    "period": "his trading journal",
+    "quote": "the win rate here is 71%. ER dollar is my best performing pair"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 132,
+   "trades": 82
+  }
+ },
+ {
+  "id": "TD-12",
+  "version": "v1",
+  "name": "Week-anchored VWAP: after price moves away, the first pullback to it in that direction, fixed 1:1 at 15% of the daily range",
+  "topic": "forex_us",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Trader Dale",
+  "video": "wPP_r2hd0y4",
+  "title": "3 Anchored VWAP Setups That Actually Work!",
+  "uploaded": "2025-10-09",
+  "minutes": 20,
+  "summary": "Trader Dale's three anchored-VWAP entries on 30-minute EUR/USD and ES charts: anchor the VWAP at an important swing point (where a strong move began), at the start of the week, or at the start of a sell-off or rally out of a heavy-volume rotation; then trade pullbacks to that VWAP in the move's direction ('buyers and sellers want the fair price'); skip rotations, where the VWAP is crossed back and forth; this video covers entries only, not stops or targets.",
+  "instruments": [
+   "EUR/USD, ES"
+  ],
+  "timeframes": [
+   "30m"
+  ],
+  "markets": [
+   "EUR/USD",
+   "GBP/USD",
+   "Bitcoin (Delta BTCUSD)"
+  ],
+  "deskMarkets": [
+   "EURUSD",
+   "GBPUSD",
+   "BTCUSD"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-13T17:00:00Z",
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Anchor the VWAP to an important place: a key swing point, the start of the week, or the start of a move out of a rotation.",
+    "times": [
+     "00:43",
+     "04:14"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Week anchor: when price trends away from the week's VWAP, trade each pullback to it in the trend's direction.",
+    "times": [
+     "07:01",
+     "07:47"
+    ]
+   },
+   {
+    "kind": "no_trade",
+    "label": "When not to trade",
+    "tag": "E",
+    "text": "Rotations (sideways markets around the VWAP) are not traded.",
+    "times": [
+     "08:31",
+     "15:41"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: EUR/USD and GBP/USD (time-weighted VWAP: no forex volume) and bitcoin (real volume) on 30-minute candles; the week starts at the Sunday 17:00 New York open (bitcoin: Monday 00:00 UTC).",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Away = the last 12 closes all on one side of the week's VWAP; then a limit at the VWAP on that side (long from above, short from below), live for 12 bars; skipped when the VWAP was crossed 3 or more times in the 24 bars before; one trade a day.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "His fixed stop and target from his volume-profile video: each 15% of the 20-day average daily range (1:1); out at 16:55 New York (forex) or 23:55 UTC (bitcoin).",
+    "times": []
+   }
+  ],
+  "why": [
+   "the anchor choice, 'away' and the stops are ours",
+   "this video gives entries only (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 61,
+   "trades": 14
+  }
+ },
+ {
   "id": "TN-02",
   "version": "v1",
   "name": "15-minute New York opening range 'double break' with the VWAP side: break one edge, reclaim, target the other edge",
@@ -11133,6 +14659,131 @@ export const SL: SlStrategy[] = [
    "fills": true,
    "signals": 53,
    "trades": 53
+  }
+ },
+ {
+  "id": "TT-01",
+  "version": "v1",
+  "name": "Above the 50 EMA, a support tested three times, green candle closing above the EMA, stop under the lowest test, 1.6R",
+  "topic": "forex_us",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "The Trading Channel (The Trading Channel)",
+  "video": "EpV4PjjwoA0",
+  "title": "SIMPLE Forex Day Trading Strategy! (Secret To BIG Profits)",
+  "uploaded": "2020-10-01",
+  "minutes": 21,
+  "summary": "The Trading Channel's simple forex day-trading strategy (conditions, entry, stop, target): above the 50 EMA, wait for a support level tested three times (a triple bottom above the average), then buy the green candle that closes above the 50 EMA; stop below the lowest wick of the three tests; target the previous structure (about 1.6:1, at least 1:1); the bearish mirror is a triple-tested resistance below the 50 EMA and a red candle; he avoids 16:00-18:00 New York (wide spreads) and often trades in the evening.",
+  "instruments": [
+   "USD/CAD and other forex pairs"
+  ],
+  "timeframes": [
+   "Intraday (any)"
+  ],
+  "markets": [
+   "EUR/USD",
+   "GBP/USD"
+  ],
+  "deskMarkets": [
+   "EURUSD",
+   "GBPUSD"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-13T17:00:00Z",
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Conditions: the market above the 50 EMA and a support level tested three times.",
+    "times": [
+     "05:50"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Entry: a green candle that closes above the 50 EMA at the third test.",
+    "times": [
+     "06:32"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop beyond the extreme wick of the three tests.",
+    "times": [
+     "11:39"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Target the previous structure, about 1.6:1 (at least 1:1).",
+    "times": [
+     "11:39"
+    ]
+   },
+   {
+    "kind": "no_trade",
+    "label": "When not to trade",
+    "tag": "E",
+    "text": "Avoid 16:00-18:00 New York (spreads).",
+    "times": [
+     "15:53",
+     "16:33"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: EUR/USD and GBP/USD on 15-minute candles.",
+    "times": []
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "A",
+    "text": "Three tests = the last three confirmed swing lows (two bars each side) within 0.05% of each other, all made above the 50 EMA, the third within the last 3 bars.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "The first green candle closing above the 50 EMA after the third low is confirmed: long at the next open (mirror for triple tops below the EMA); none 16:00-18:00 New York; at most 2 trades a day.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Stop 0.02% beyond the lowest of the three lows; target 1.6R; out at 16:55 New York.",
+    "times": []
+   }
+  ],
+  "why": [
+   "'a level tested three times' is drawn by eye",
+   "his exact stops and targets are in a paid course (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 157,
+   "trades": 86
   }
  },
  {
@@ -11734,6 +15385,75 @@ export const SL: SlStrategy[] = [
   "checks": null
  },
  {
+  "id": "BK-01",
+  "version": "v1",
+  "name": "15-minute opening range break after a gap with volume picking up, managed by order-book liquidity",
+  "topic": "forex_us",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Bookmap",
+  "video": "8qEzjJWAe3c",
+  "title": "Opening Range Breakout Strategy & Order Flow | Bruce Pringle",
+  "uploaded": "2024-08-14",
+  "minutes": 87,
+  "summary": "A Bookmap webinar with Bruce Pringle trading the opening range breakout live on S&P futures and Nvidia, with order flow. Traders take the break after the first 15-minute candle closes (sometimes 30 minutes). He prefers it after a gap, with volume picking up on the break. He enters with a one-cancels-the-other bracket (take profit in front of a round number), then manages using the order book's liquidity, stop runs, icebergs, volume pressure and the pace of the tape. Much of the session is chop and platform demonstration.",
+  "instruments": [
+   "E-mini S&P 500 futures, Nvidia"
+  ],
+  "timeframes": [
+   "15m range",
+   "order book"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Take the breakout after the first 15-minute candle closes (sometimes 30 minutes).",
+    "times": [
+     "02:07",
+     "04:53"
+    ]
+   },
+   {
+    "kind": "management",
+    "label": "Trade management",
+    "tag": "E",
+    "text": "A one-cancels-the-other bracket: target in front of a round number, stop below, then manage by the liquidity.",
+    "times": [
+     "08:29"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "First the gap, then volume picking up on the break.",
+    "times": [
+     "11:10",
+     "12:32"
+    ]
+   }
+  ],
+  "why": [
+   "the order-flow reads (heatmap liquidity, icebergs, pace of tape) need Bookmap data the desk does not have"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": "TW-01",
+  "duplicateWhy": "a 15-minute opening range break on a volume pick-up is already coded (TW-01; CV-01 on the Nasdaq)",
+  "checks": null
+ },
+ {
   "id": "CG-01",
   "version": "v1",
   "name": "Scalping into a four-hour thesis with one-minute double tops, scaling out and re-adding (live walkthrough)",
@@ -11804,6 +15524,161 @@ export const SL: SlStrategy[] = [
   "blockedReason": "a discretionary trade-management walkthrough; the thesis, entries and adds are judged live and no stop rule is set beyond a daily loss limit",
   "duplicateOf": null,
   "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "CG-02",
+  "version": "v1",
+  "name": "EMA 12 rider: a trend guide after three holds, exit a winner on a close through it (webinar)",
+  "topic": "forex_us",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "TheChartGuys",
+  "video": "MIfZSchZ1Jk",
+  "title": "EMA Rider Strategy 📈 A Simple & Powerful Technique",
+  "uploaded": "2025-10-23",
+  "minutes": 71,
+  "summary": "The Chart Guys' 'EMA 12 rider' webinar: on whatever timeframe shows it cleanly (one minute to monthly), an EMA 12 that price has respected at least three times works like a trend line; while it holds, ride the trend and buy dips (with 'back burner' oversold entries and 15-minute higher lows off the 15-minute EMA 12); the first loss of it after a long run means the character of the chart is changing; it is useless in sideways markets; he uses it mainly to manage winning positions, waiting for a candle close only then.",
+  "instruments": [
+   "Stocks, ETFs, gold, silver, bitcoin"
+  ],
+  "timeframes": [
+   "1m to monthly"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "An EMA 12 is a valid guide after at least three clear holds (support) or rejections (resistance).",
+    "times": [
+     "07:52"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Losing it after a long hold marks a change of character: take profits on the winner.",
+    "times": [
+     "04:59",
+     "32:27"
+    ]
+   },
+   {
+    "kind": "no_trade",
+    "label": "When not to trade",
+    "tag": "E",
+    "text": "No use in sideways, choppy markets.",
+    "times": [
+     "19:05"
+    ]
+   }
+  ],
+  "why": [
+   "a trend-management guide",
+   "the entries come from his separate 'back burner' and higher-low setups, and the timeframe is chosen by eye per chart"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "a trend-management guide; the entries come from his separate 'back burner' and higher-low setups, and the timeframe is chosen by eye per chart",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "CH-03",
+  "version": "v1",
+  "name": "Previous-day high/low: sweep and reclaim back inside (fade to the VWAP), or acceptance beyond it (go with it), chop = no trade",
+  "topic": "forex_us",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Chart Champions",
+  "video": "mgK6kHH3RJI",
+  "title": "The Previous Day High & Low Method: Trade Reversals Like A Pro (Free Indicator)",
+  "uploaded": "2026-08-20",
+  "minutes": 16,
+  "summary": "Chart Champions on trading the previous day's high and low on five-minute Nasdaq futures: a sweep above the high that closes back below and cannot reclaim it is a short (stop above the sweep, target the session VWAP or the opposite side of the range); a break that is accepted (every bar opening and closing beyond the level, no retest) is traded with the break from the second close beyond, stop past the breakout candle, targets at the next levels; repeated overlapping candles around the level mean no trade; the RTH VWAP gives the session's control.",
+  "instruments": [
+   "Nasdaq 100 futures (NQ)"
+  ],
+  "timeframes": [
+   "5m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Three reactions at the previous day's high or low: a liquidity sweep and reversal, a breakout and acceptance, or unclear chop (no trade).",
+    "times": [
+     "05:40"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Sweep: price trades above the previous day high, then closes back below and cannot reclaim it: short.",
+    "times": [
+     "06:20",
+     "07:03"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Acceptance: price breaks through and every bar opens and closes beyond the level; enter on the second close beyond, stop past the breakout candle.",
+    "times": [
+     "08:25",
+     "09:07"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Sweep trade: stop above the sweep high; target the RTH VWAP or the opposite side of the range.",
+    "times": [
+     "07:03"
+    ]
+   },
+   {
+    "kind": "no_trade",
+    "label": "When not to trade",
+    "tag": "E",
+    "text": "Overlapping candles trading back and forth through the level: wait.",
+    "times": [
+     "10:36",
+     "11:17"
+    ]
+   }
+  ],
+  "why": [
+   "'cannot reclaim' and 'acceptance' are judged by eye"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": "BB-01",
+  "duplicateWhy": "the previous-day high/low breakout and trap (sweep) is already in the library (Booming Bulls study); see also CK-02 and PC-02 in this study",
   "checks": null
  },
  {
@@ -11892,6 +15767,359 @@ export const SL: SlStrategy[] = [
   "blockedReason": "several discretionary plays without fixed triggers, stops or targets",
   "duplicateOf": null,
   "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "ET-03",
+  "version": "v1",
+  "name": "Layered one-minute scalping: buy red candles into support with the daily bias, up to 16 clicks of 0.25% across measured boxes, ejection-seat stop",
+  "topic": "forex_us",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Etienne Crete - Desire To TRADE",
+  "video": "YpCfKpBJ9Qk",
+  "title": "My 1-Minute Chart Scalping Strategy (Works In 2026)",
+  "uploaded": "2025-12-28",
+  "minutes": 47,
+  "summary": "Jean-François explains on Desire To Trade how he scalps forex on one-minute charts in a two-hour morning session. A bias comes from the daily candle (top-down). He buys red candles into support ahead of confirmation, layering in up to 16 'clicks' of 0.25% each. Expected moves are measured in 'boxes' (measured moves): four clicks per box, up to four boxes. A worst-case 'ejection seat' stop never gets worse; stops are tightened behind the latest swing and positions layered out. Most of the episode covers the year-end review, journaling and discipline.",
+  "instruments": [
+   "Forex pairs"
+  ],
+  "timeframes": [
+   "1m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "With a bias from the daily candle, buy red candles at support before confirmation.",
+    "times": [
+     "02:46",
+     "13:11"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "A worst-case 'ejection seat' stop that only ever tightens.",
+    "times": [
+     "32:04"
+    ]
+   },
+   {
+    "kind": "sizing",
+    "label": "Position sizing and risk",
+    "tag": "E",
+    "text": "Up to 16 clicks of 0.25%, four per measured box, as few as needed.",
+    "times": [
+     "02:06",
+     "04:50"
+    ]
+   }
+  ],
+  "why": [
+   "support, the box size and the bias are judged by eye",
+   "the layering has no fixed entry levels or exit rule"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "support, the box size and the bias are judged by eye; the layering has no fixed entry levels or exit rule",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "FF-01",
+  "version": "v1",
+  "name": "Range trader: the prior POC plus and minus one ATR frames the day; buy prior-session lows and sell highs inside it, targets at the T-line and POCs (framework)",
+  "topic": "forex_us",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Roderick Casilli - Futures Fanatic",
+  "video": "iKVUPOsFyGg",
+  "title": "Stop Chasing Breakouts. Trade the Range Instead.",
+  "uploaded": "2026-07-16",
+  "minutes": 58,
+  "summary": "Futures Fanatic (Roderick Casilli) livestreams his 'range trader' framework for index and metals futures. Take the average true range and project the day's likely range as the prior session's point of control plus and minus one ATR. Prefer buying prior-session lows and selling highs inside that range rather than chasing breakouts. The 233 EMA ('T-line'), the prior and developing points of control and the prior session's high and low are the levels and targets. Size from a daily risk budget, aiming for 2:1. He stresses these are frameworks, not rules, and trades a live $85,000 account.",
+  "instruments": [
+   "Nasdaq, S&P, Dow, gold futures"
+  ],
+  "timeframes": [
+   "Intraday (session ranges)"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Add and subtract one ATR from the prior session's point of control for the day's potential range.",
+    "times": [
+     "16:39",
+     "17:25"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Pick bottoms only at a prior session low.",
+    "times": [
+     "11:30"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Targets: the T-line (233 EMA), then the prior session POC, then the developing POC.",
+    "times": [
+     "26:47"
+    ]
+   }
+  ],
+  "why": [
+   "he calls it a framework without rules",
+   "entries, stops and the choice of levels are discretionary"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "he calls it a framework without rules; entries, stops and the choice of levels are discretionary",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "FW-01",
+  "version": "v1",
+  "name": "Opening range stop orders both sides, 1:1, re-arm on the next range (one-minute)",
+  "topic": "forex_us",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Flow Zone Trader",
+  "video": "InAR5W5Q2bM",
+  "title": "Simple Day Trading Strategy: Opening Range Breakout ORB (STEP BY STEP TUTORIAL)",
+  "uploaded": "2024-04-26",
+  "minutes": 19,
+  "summary": "Flowzone Trader's opening range breakout for traders with little time: pick the range timeframe (the first 1, 5, 15, 30 or 60 minutes), place stop orders beyond the range, take 1:1 on most of the position, then let a new range form and trade its break again (three 1:1 trades on the example morning); context from higher-timeframe supply and demand, the gap fill and volume; trail any runner with a stack of EMAs.",
+  "instruments": [
+   "Nasdaq 100 futures"
+  ],
+  "timeframes": [
+   "1m (range of 1-60 minutes)"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The range is the first 1, 5, 15, 30 or 60 minutes; be consistent about which.",
+    "times": [
+     "03:33",
+     "04:13"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Stop orders through the range's edges.",
+    "times": [
+     "02:09",
+     "02:52"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "After a trade, a new range builds; trade its break the same way.",
+    "times": [
+     "05:39",
+     "08:30"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Lock in 1:1 on most of the position.",
+    "times": [
+     "04:53",
+     "05:39"
+    ]
+   }
+  ],
+  "why": [
+   "the range choice and the re-ranging are judged live"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": "UK-01",
+  "duplicateWhy": "the first one-minute range bracket at the cash open is already coded in this study (UK-01; CV-01 for the 15-minute range)",
+  "checks": null
+ },
+ {
+  "id": "FW-02",
+  "version": "v1",
+  "name": "Previous-day high/low/open/close: breakout and retest with the trend, or failed breakout back inside",
+  "topic": "forex_us",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Flow Zone Trader",
+  "video": "899BPDopwEE",
+  "title": "HOW TO DAY TRADE PREVIOUS DAY HIGH & LOW (SIMPLE STRATEGY)",
+  "uploaded": "2024-08-31",
+  "minutes": 36,
+  "summary": "Flow Zone Trader on day trading the previous day's high, low, open and close. Read the daily candle: where buyers and sellers stepped in on lower timeframes, where stops sit, and whether the trend is up, down or ranging. Each day has two setups at those levels: a breakout (or breakout and retest) in the trend's direction, or a failed breakout back inside, entered on a lower-timeframe failure pattern or structure shift. Supply and demand blocks, anchored VWAPs and liquidity left at highs and lows serve as targets. The examples are replayed on forex and index charts.",
+  "instruments": [
+   "Forex, indices"
+  ],
+  "timeframes": [
+   "Daily levels",
+   "1h-15m entries"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Two setups at the previous day's levels: a breakout or breakout-and-retest, and a failed breakout.",
+    "times": [
+     "15:26",
+     "16:06"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Wait for a failure pattern at the level before fading it; the trigger can be a structure shift or an anchored VWAP.",
+    "times": [
+     "20:56",
+     "21:37"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Target the liquidity left at highs and the previous day's high.",
+    "times": [
+     "33:36"
+    ]
+   }
+  ],
+  "why": [
+   "the triggers and blocks are read by eye on lower timeframes"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": "CH-03",
+  "duplicateWhy": "the previous-day high/low sweep-and-reclaim or acceptance-beyond rule is already coded (CH-03; BB-01 in the library)",
+  "checks": null
+ },
+ {
+  "id": "IN-01",
+  "version": "v1",
+  "name": "30-minute opening range: after a liquidity raid, the first presented fair value gap of the displacement, traded at its midpoint toward the opposite pool",
+  "topic": "forex_us",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "The Inner Circle Trader",
+  "video": "Zm9Q0NDRxoY",
+  "title": "ICT Opening Range Theory \\ 1st Presented FVG Logic",
+  "uploaded": "2025-11-11",
+  "minutes": 35,
+  "summary": "ICT's lecture on opening range theory and the first presented fair value gap (Nasdaq futures, November 2025). Read the narrative from the weekly down to the hourly chart: volume imbalances, premium wicks and the liquidity pools. Opening ranges are 30 minutes (01:30-02:00 New York for London). After the range raids one side's liquidity, a displacement leaves the first presented fair value gap. That gap acts as a suspension block, and price respects its midpoint (consequent encroachment) on the way to the opposite liquidity pool. A second rally that takes the first high is his 'turtle soup' false breakout.",
+  "instruments": [
+   "Nasdaq 100 futures"
+  ],
+  "timeframes": [
+   "Weekly to 1m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The opening range is 30 minutes; look for displacement out of it.",
+    "times": [
+     "10:08",
+     "11:34"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "After liquidity is taken, the first presented fair value gap of the displacement is the block; price respects its midpoint.",
+    "times": [
+     "13:04",
+     "13:44"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "With buy side raided and sell side intact, the draw is to the sell side across the higher timeframes.",
+    "times": [
+     "20:37"
+    ]
+   }
+  ],
+  "why": [
+   "the higher-timeframe narrative and the draw on liquidity are read by eye"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": "NJ-37",
+  "duplicateWhy": "the first fair value gap after the open's liquidity raid is already coded (NJ-37, the New York open FVG; JR-01 and TP-03 are close); the 30-minute range and the narrative are his framing",
   "checks": null
  },
  {
@@ -12044,6 +16272,298 @@ export const SL: SlStrategy[] = [
   "blockedReason": null,
   "duplicateOf": "NJ-09",
   "duplicateWhy": "the MACD signal-line cross is already in the library (channels11 study); this video's test says it does not work by itself",
+  "checks": null
+ },
+ {
+  "id": "MS-02",
+  "version": "v1",
+  "name": "MACD cross below (above) zero on the 200 EMA side, at most one close across the EMA in five bars, 25% at 1R with a break-even stop, rest at 2R",
+  "topic": "forex_us",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "The Art of Trading",
+  "video": "P1Lol05qb5s",
+  "title": "Pine Script: A two-target MACD Strategy example code tutorial",
+  "uploaded": "2022-09-10",
+  "minutes": 65,
+  "summary": "The Art of Trading (Matthew Slabosz) codes Trading Rush's MACD + 200 EMA system in Pine Script on 30-minute forex charts. Price must be on the trade's side of the 200 EMA, and he adds his own filter: at most one of the last five closes may be on the other side of it. Take the first MACD cross below zero for longs (above zero for shorts) and ignore later ones until the trade ends. The stop goes half an ATR(14) beyond the lowest low (highest high) of the last seven bars. Take 25% off at 1:1 and move the stop to break-even; the rest exits at 2:1. He criticises the original's claim that it works on every market and timeframe; his forex runs show 22% with a 12% drawdown and USD/JPY 38% with 11% over 356 trades.",
+  "instruments": [
+   "Forex pairs, some stocks"
+  ],
+  "timeframes": [
+   "30m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Longs only above the 200 EMA (shorts below); at most one of the last five closes on the other side of it.",
+    "times": [
+     "02:14",
+     "12:19"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Enter on the MACD cross below the zero line for longs (above it for shorts), taking only the first cross until the trade ends.",
+    "times": [
+     "02:14",
+     "13:07"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop half an ATR(14) below the lowest low of the last seven bars.",
+    "times": [
+     "05:06",
+     "25:54"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "25% off at 1:1 with the stop moved to break-even; the rest at 2:1.",
+    "times": [
+     "02:55",
+     "19:01"
+    ]
+   }
+  ],
+  "why": [
+   "the five-bar EMA filter and the ATR stop are his additions to Trading Rush's rules"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "return_pct",
+    "at": "55:51",
+    "value": "22% with a 12% drawdown; USD/JPY 38% with an 11% drawdown over 356 trades",
+    "period": "30-minute forex, about two years",
+    "quote": "us yen is even better 38 return with an 11 drawdown approximately um over 356 trades"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": "RU-01",
+  "duplicateWhy": "the Trading Rush MACD cross beyond zero in the 200 EMA trend is already in the library (RU-01; RU-06 adds a zero-lag MACD); only the exits and a closes-across-the-EMA filter differ",
+  "checks": null
+ },
+ {
+  "id": "NN-01",
+  "version": "v1",
+  "name": "Trade against the retail majority: IG client sentiment, unpopular tools and non-dollar crosses (principles)",
+  "topic": "forex_us",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "No Nonsense Forex",
+  "video": "Lvq0t0eQOG4",
+  "title": "Best FX Trading Strategies (THE Top Strategy for Forex Trading)",
+  "uploaded": "2018-02-22",
+  "minutes": 32,
+  "summary": "No Nonsense Forex (VP) on what he calls the number-one forex strategy: know your enemy. The big banks see where retail orders sit and move price against the majority, as in the 2015 EUR/CHF peg removal. IG's client sentiment chart shows price usually going against what most traders hold. Avoid being in the majority: stop using the popular tools (trend lines, RSI, breakouts the crowd watches), consider dropping dollar pairs for crosses such as GBP/JPY, look for better indicators, and tighten money management. He trades mostly from the daily chart.",
+  "instruments": [
+   "Forex pairs (crosses rather than dollar pairs)"
+  ],
+  "timeframes": [
+   "1d"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "Trade the less crowded crosses instead of dollar pairs, avoiding exotics.",
+    "times": [
+     "25:39",
+     "29:17"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "When most traders are short, price almost always goes long (IG client sentiment).",
+    "times": [
+     "20:05"
+    ]
+   },
+   {
+    "kind": "no_trade",
+    "label": "When not to trade",
+    "tag": "E",
+    "text": "Avoid the popular tools and the popular dollar pairs.",
+    "times": [
+     "24:57",
+     "25:39"
+    ]
+   }
+  ],
+  "why": [
+   "the one rule-like idea needs IG's client sentiment data, which the desk does not have",
+   "the rest is advice with no entry, stop or exit"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the one rule-like idea needs IG's client sentiment data, which the desk does not have; the rest is advice with no entry, stop or exit",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "NN-02",
+  "version": "v1",
+  "name": "Choosing NNFX confirmation indicators: zero-cross, two-line cross and on-chart types, tested on the daily chart (method only)",
+  "topic": "forex_us",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "No Nonsense Forex",
+  "video": "YWNloLjXqeI",
+  "title": "Forex Trend Indicators for the No Nonsense Forex Algorithm",
+  "uploaded": "2018-09-07",
+  "minutes": 25,
+  "summary": "No Nonsense Forex (VP) on finding trend-confirmation indicators for his NNFX algorithm. Most of the thousands of free indicators fail. There are three kinds worth testing: oscillators that cross a zero line (rate of change shown), two lines that cross (stochastic shown) and on-chart indicators (Parabolic SAR shown). Test them on common pairs on the daily chart without cherry-picking, judge each signal candle, and play with the settings. The examples are shown as weak; he does not reveal his own indicators.",
+  "instruments": [
+   "Forex pairs"
+  ],
+  "timeframes": [
+   "1d"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "Test on common pairs on the daily chart, without cherry-picking.",
+    "times": [
+     "12:00"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Three kinds of trend-confirmation indicator: zero-line crosses, two-line crosses and on-chart indicators.",
+    "times": [
+     "11:19"
+    ]
+   }
+  ],
+  "why": [
+   "a method for searching indicators",
+   "the examples are shown as poor and no indicator or trading rule is recommended"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "a method for searching indicators; the examples are shown as poor and no indicator or trading rule is recommended",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "NS-01",
+  "version": "v1",
+  "name": "Intuitive forex scalping at zones after one-hour overextensions, about 2R a week (no fixed rules)",
+  "topic": "forex_us",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Nick Shawn",
+  "video": "Ut4fwJ4uyb8",
+  "title": "My Easy Way Of Scalping The Forex Market.",
+  "uploaded": "2024-12-21",
+  "minutes": 38,
+  "summary": "Nick Shawn's 'easy way' of scalping forex. He looks at a chart, decides whether price is likely to go up or down from experience and intuition, and enters at a zone with the stop beyond it. Favourite spots are reversions after big one-hour extensions that fail to continue. Most trades end at break-even or a partial profit and about a quarter reach the target; he aims for about 2R a week. He calls trades with screenshots in a paid group and contrasts scalping with his swing trading and an old averaging-down (DCA) structure that cost him $30,000 on USD/CAD.",
+  "instruments": [
+   "EUR/USD, USD/JPY, USD/CAD and other pairs"
+  ],
+  "timeframes": [
+   "1h context",
+   "5m-15m entries"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Favour pairs with big one-hour extensions that fail to continue.",
+    "times": [
+     "05:40",
+     "06:24"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Buy or sell on whether he believes price will go up or down; no fixed strategy.",
+    "times": [
+     "00:05",
+     "00:46"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop beyond the zone, target on the other side.",
+    "times": [
+     "02:55"
+    ]
+   }
+  ],
+  "why": [
+   "entries come from intuition and experience by his own account",
+   "zones and extensions are judged by eye"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "r_multiple",
+    "at": "16:19",
+    "value": "about 2R a week, 8R a month",
+    "period": "his called trades",
+    "quote": "plus two R per week that is about eight R per month"
+   }
+  ],
+  "examples": [],
+  "blockedReason": "entries come from intuition and experience by his own account; zones and extensions are judged by eye",
+  "duplicateOf": null,
+  "duplicateWhy": null,
   "checks": null
  },
  {
@@ -12222,6 +16742,75 @@ export const SL: SlStrategy[] = [
   "checks": null
  },
  {
+  "id": "NX-01",
+  "version": "v1",
+  "name": "Pivots as context and targets, entries only from defined patterns, a volatility gauge for risk (webinar)",
+  "topic": "forex_us",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "futures io",
+  "video": "-ZVG3voaI7Q",
+  "title": "Suri Duddella Pivots, Volatility, Scalping, Patterns",
+  "uploaded": "2013-06-07",
+  "minutes": 114,
+  "summary": "A futures.io (Big Mike's) webinar with Suri Duddella on pivots, volatility, patterns and scalping in the E-mini futures. His statistics: floor pivots stop price only about 44% of the time, while the prior day's high and low act as resistance or support about 61% of the time. Pivots of all kinds (floor, Fibonacci bands at 1.38 and 1.62 of the prior range, Globex high and low, opening range) are context and targets, never entries on their own. He trades breakouts and pullbacks only from clearly defined patterns (ABC, Gartley, flags, channels) found by his own software, with 2-3.5 point initial stops trailed by the pattern. His volatility gauge marks a session as risky above 50. Scalping needs a high success rate, limit orders and very short holding times.",
+  "instruments": [
+   "E-mini S&P, Nasdaq and Dow futures",
+   "stocks"
+  ],
+  "timeframes": [
+   "Intraday (and daily patterns)"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Trade breakouts only from clearly defined patterns (channels, triangles).",
+    "times": [
+     "45:26"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Intraday stops of 2-3.5 points, then trailed by the pattern.",
+    "times": [
+     "56:02",
+     "56:42"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Pivots are targets and context, never an entry on their own; trade them with patterns and setups.",
+    "times": [
+     "14:51"
+    ]
+   }
+  ],
+  "why": [
+   "the patterns come from his own detection software and quality scores",
+   "pivots and volatility are context, not a rule set"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the patterns come from his own detection software and quality scores; pivots and volatility are context, not a rule set",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
   "id": "OF-02",
   "version": "v1",
   "name": "Futures scalping from the depth of market with automatic brackets (overview)",
@@ -12286,6 +16875,326 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "an overview of scalping tools with one live example; no setup, stop or target rule is defined",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "PA-01",
+  "version": "v1",
+  "name": "In an uptrend buy the bottom edge of a high-volume node (sell the top edge in a downtrend), stop beyond the low-volume cut, target the POC",
+  "topic": "forex_us",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Price Action Volume Trader",
+  "video": "GTErzKx0ePE",
+  "title": "#1 Volume Profile Long and Short Trading Rule (Intraday and Swing)",
+  "uploaded": "2022-03-21",
+  "minutes": 63,
+  "summary": "Price Action Volume Trader's 'number one' volume-profile rule for day and swing trades. In an uptrend, only buy the bottom edge of a high-volume node, with the stop beyond the low-volume cut below it. Targets are the point of control, the top of the node or the previous swing high. In a downtrend, only sell the top edge of a node. Wait for retracements into the edges instead of chasing breakouts, and prefer more than 1:1. Examples cover forex, E-mini futures (day-session profiles carry more weight) and bitcoin.",
+  "instruments": [
+   "Forex, E-mini S&P futures, bitcoin"
+  ],
+  "timeframes": [
+   "Intraday and swing (volume profiles)"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "In an uptrend, only buy the bottom edges of high-volume nodes.",
+    "times": [
+     "07:33",
+     "08:17"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "In a downtrend, only sell the top edges of high-volume nodes.",
+    "times": [
+     "42:12"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop beyond the low-volume node or cut.",
+    "times": [
+     "09:42"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "First target a trip back to the point of control.",
+    "times": [
+     "42:54",
+     "47:19"
+    ]
+   }
+  ],
+  "why": [
+   "the nodes, cuts, profile periods and trend are drawn by eye as 'general zones'",
+   "no fixed profile or entry trigger"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the nodes, cuts, profile periods and trend are drawn by eye as 'general zones'; no fixed profile or entry trigger",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "PL-02",
+  "version": "v1",
+  "name": "15-minute opening range, long on a one-minute close above it, stop at the range low, target one range above the high, out at the close (long only)",
+  "topic": "forex_us",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Part Time Larry",
+  "video": "ouveMWaInn8",
+  "title": "Opening Range Breakout Backtest with Python and Backtrader",
+  "uploaded": "2020-11-26",
+  "minutes": 51,
+  "summary": "Part Time Larry backtests a long-only opening range breakout in Backtrader, on a year (2020) of minute data for every Nasdaq 100 stock, after a viewer sent him a Warrior Trading claim. The opening range is the first 15 minutes (30 and 60 are optimisation options). He buys once a day when a minute closes above the range high. He exits on a close above the high plus the range size, on a close below the high minus the range (the range low), or at the end of the day. Each trade goes nearly all in (a 95% sizer). AMD grew $100,000 to $132,000 and Marriott to $164,000 (the best); he notes the March 2020 volatility drove most of the gains and that the short side was not shown.",
+  "instruments": [
+   "Nasdaq 100 stocks (2020 minute data)"
+  ],
+  "timeframes": [
+   "1m (15-minute opening range)"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The opening range is the first 15 minutes from 09:30; track its highest high and lowest low.",
+    "times": [
+     "18:35",
+     "19:18"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Buy once a day when a bar closes above the opening range high.",
+    "times": [
+     "20:46"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop on a close below the opening range high minus the range (the range low).",
+    "times": [
+     "34:34"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Close on a close above the opening range high plus the range size.",
+    "times": [
+     "21:28",
+     "34:34"
+    ]
+   },
+   {
+    "kind": "sizing",
+    "label": "Position sizing and risk",
+    "tag": "E",
+    "text": "Nearly all in on every trade (95% of the account).",
+    "times": [
+     "07:58"
+    ]
+   }
+  ],
+  "why": [
+   "the end-of-day exit time is not stated",
+   "the desk has no US single stocks"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "money",
+    "at": "46:58",
+    "value": "$100,000 to $132,000",
+    "period": "AMD, 2020, 15-minute range",
+    "quote": "you see this little number on the right is 132 000"
+   },
+   {
+    "kind": "money",
+    "at": "42:33",
+    "value": "$100,000 to $164,000, the best performer",
+    "period": "Marriott, 2020",
+    "quote": "big winner finished at 164 thousand"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": "CV-01",
+  "duplicateWhy": "the same 15-minute opening-range break on the Nasdaq is already coded (CV-01); only the exits differ (one range up, range-low stop, long only), and his test ran on Nasdaq 100 stocks the desk does not carry",
+  "checks": null
+ },
+ {
+  "id": "PT-11",
+  "version": "v1",
+  "name": "Second entries at the EMA and trend line with reversal signal bars, measured-move targets (chart lesson)",
+  "topic": "forex_us",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "PATsTrading",
+  "video": "w58D9peiorg",
+  "title": "Day Trading Price Action Entry Rules 07-06-2017",
+  "uploaded": "2017-07-07",
+  "minutes": 15,
+  "summary": "A Price Action Trading System end-of-day chart lesson on the E-mini (Al Brooks-style reading): trend lines and channels, overshoots and measured moves, first and second entries off the 20 EMA and the trend line, failed breaks of a trading range, reversal signal bars, runners managed by personal preference; every trade is judged bar by bar on the day's chart.",
+  "instruments": [
+   "E-mini S&P 500"
+  ],
+  "timeframes": [
+   "5m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Second-entry shorts (longs) off the EMA or a trend line, on a reversal-type signal bar.",
+    "times": [
+     "02:06",
+     "04:55"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Targets from measured moves (two equal legs, equal overshoots).",
+    "times": [
+     "01:23",
+     "11:23"
+    ]
+   }
+  ],
+  "why": [
+   "a discretionary bar-by-bar review: trend lines, channels and signal bars are drawn by eye, and runners are managed by personal preference"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "a discretionary bar-by-bar review: trend lines, channels and signal bars are drawn by eye, and runners are managed by personal preference",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "PV-11",
+  "version": "v1",
+  "name": "Session VWAP as bias, bands, break-and-retest level and target (principles)",
+  "topic": "forex_us",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Price Action Volume Trader",
+  "video": "jkkJXFRJLgw",
+  "title": "VWAP Day Trading Strategies",
+  "uploaded": "2024-06-01",
+  "minutes": 17,
+  "summary": "PAV Trader's four uses of the session VWAP when day trading ES and NQ futures on tick charts: a trend bias (below the VWAP sellers control, above it buyers), the standard-deviation bands (on range days price mean-reverts from the second band; on trend days it rides between the first and second bands), the VWAP as dynamic support and resistance (after a break, buy or sell the retest for continuation; avoid fading it on choppy days), and the VWAP as a profit target.",
+  "instruments": [
+   "S&P 500 and Nasdaq 100 futures (ES, NQ)"
+  ],
+  "timeframes": [
+   "3",
+   "000-tick charts"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Below the VWAP shorts are the higher-conviction side, above it longs.",
+    "times": [
+     "04:19",
+     "11:28"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Range days: the second deviation band marks overextension back to the mean; trend days ride between the first and second bands.",
+    "times": [
+     "07:16",
+     "07:57"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "After price breaks through the VWAP, buy (sell) the pullback retest for continuation.",
+    "times": [
+     "10:46",
+     "12:52"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "The VWAP is an excellent first target when trading toward it.",
+    "times": [
+     "14:16",
+     "14:57"
+    ]
+   }
+  ],
+  "why": [
+   "principles without a fixed trigger, stop or target",
+   "the break-and-retest and band ideas are already coded here as DE-10, CH-01 and AC-02"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "principles without a fixed trigger, stop or target; the break-and-retest and band ideas are already coded here as DE-10, CH-01 and AC-02",
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -12427,6 +17336,76 @@ export const SL: SlStrategy[] = [
   "checks": null
  },
  {
+  "id": "TC-03",
+  "version": "v1",
+  "name": "Five-minute price action: weekly-level fakeouts, pivot structure, dead-cat bounces, post-news fakeouts (walkthrough)",
+  "topic": "forex_us",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Tradeciety.com",
+  "video": "jyvWRssCyUI",
+  "title": "The BEST Day Trading Strategies for the 5 min Timeframe",
+  "uploaded": "2022-09-06",
+  "minutes": 21,
+  "summary": "Tradeciety's five-minute price-action walkthroughs: fakeouts of last week's high or low after an exhausted trend (with the 161 Fibonacci extension as a profit-taking area and divergence), comparing the strength of trending and corrective waves, daily and weekly pivot points (a change in how price treats the pivot marks a trend change; pivot pullbacks in a clear trend), a Friday dead-cat bounce into the 38-50% retracement, and waiting for the fakeout after high-impact news before trading.",
+  "instruments": [
+   "Forex pairs, indices"
+  ],
+  "timeframes": [
+   "5m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "A fakeout of last week's high after an exhausted trend: short once price gets back below the level.",
+    "times": [
+     "03:31",
+     "04:16"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Daily pivot only: a change from rejecting the pivot to holding above it often marks a trend change; trade pivot pullbacks in a clear trend.",
+    "times": [
+     "09:55",
+     "10:39"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "After high-impact news wait for the fakeout, then trade the break or the retest.",
+    "times": [
+     "17:49",
+     "18:31"
+    ]
+   }
+  ],
+  "why": [
+   "several discretionary readings with no fixed trigger, stop or target",
+   "the weekly-level fakeout and pivot ideas resemble TC-01/TC-02 and the library's trap strategies"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "several discretionary readings with no fixed trigger, stop or target; the weekly-level fakeout and pivot ideas resemble TC-01/TC-02 and the library's trap strategies",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
   "id": "TN-01",
   "version": "v1",
   "name": "Weekly FVG bias, sell above the daily open in London/New York, out by the session end (framework)",
@@ -12526,6 +17505,87 @@ export const SL: SlStrategy[] = [
   "checks": null
  },
  {
+  "id": "TN-03",
+  "version": "v1",
+  "name": "Asian-range liquidity grab: a wick above the Asian high, five-minute indecision-candle break, target the four-hour zone (live breakdown)",
+  "topic": "forex_us",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Trading Nut",
+  "video": "Q_glz_a5Bz4",
+  "title": "How to Day Trade Asian Session Liquidity Grabs for Massive Moves",
+  "uploaded": "2024-03-14",
+  "minutes": 23,
+  "summary": "A Trading Nut breakdown with Luca of a USD/JPY short from an Asian-session liquidity grab: a bearish four-hour bias with an untested four-hour demand zone as the target; on 15 minutes price wicked above the Asian range high (and yesterday's high) without a big close outside; on 5 minutes he sold the break of an indecision candle's low, took 20% off at the first target and aimed for the four-hour demand; later demand-zone buys after a break of structure; correlation across pairs as confirmation.",
+  "instruments": [
+   "USD/JPY, GBP/USD and other forex pairs"
+  ],
+  "timeframes": [
+   "4h",
+   "15m",
+   "5m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "With a bearish higher-timeframe bias, a wick above the Asian session high (and the previous high) is the liquidity grab.",
+    "times": [
+     "03:25",
+     "04:07"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "On 5 minutes, sell the break of an indecision candle after the grab.",
+    "times": [
+     "06:16",
+     "07:39"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Take 20% at the first target and aim the rest at the four-hour demand zone.",
+    "times": [
+     "09:04",
+     "11:12"
+    ]
+   },
+   {
+    "kind": "no_trade",
+    "label": "When not to trade",
+    "tag": "E",
+    "text": "Avoid big closes outside the Asian range: that may be a break and retest instead.",
+    "times": [
+     "04:07",
+     "05:32"
+    ]
+   }
+  ],
+  "why": [
+   "the bias, the zones and the indecision candle are read live"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": "MH-03",
+  "duplicateWhy": "the Asian-session liquidity sweep into a higher-timeframe zone is already in the library (20-channel study; also TP-03, BB-08)",
+  "checks": null
+ },
+ {
   "id": "TY-01",
   "version": "v1",
   "name": "Intraday range percentiles as scalping zones: fade inside the normal range, go with moves beyond the 95th percentile (framework)",
@@ -12599,6 +17659,64 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "range zones and a fading attitude, with no entry trigger, stop or target defined",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "UF-01",
+  "version": "v1",
+  "name": "Support and resistance from supply and demand, read top-down and by the feel of the candles (webinar)",
+  "topic": "forex_us",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Urban Forex",
+  "video": "ygaHtkRlsfY",
+  "title": "Beginner Day Trading Strategy using Support and Resistance",
+  "uploaded": "2024-12-12",
+  "minutes": 61,
+  "summary": "An Urban Forex webinar on day trading with support and resistance, explained as supply and demand ('shoe shopping': buy where sellers are desperate, sell where buyers cannot get filled). Identify the flow top-down from the weekly to the four-hour chart, then the support or resistance in it. Ignore the lower level when buyers turn aggressive, and judge candles by how smoothly they move rather than by pattern names. Live CAD/JPY trades are shown. Much of the hour is about mindset and position size.",
+  "instruments": [
+   "CAD/JPY and other forex pairs"
+  ],
+  "timeframes": [
+   "Weekly to 5m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "When buyers get more aggressive, ignore the lower support level.",
+    "times": [
+     "35:31"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Read the candles' behaviour, not pattern names.",
+    "times": [
+     "44:12"
+    ]
+   }
+  ],
+  "why": [
+   "levels and entries are judged by eye and feel",
+   "no entry, stop or exit rule is given"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "levels and entries are judged by eye and feel; no entry, stop or exit rule is given",
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -12687,8 +17805,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "xliamopkviw",
     "why": "Face2Face: Bank Nifty VWAP + anchored VWAP strategy by a named trader (most-viewed strategy title)",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "EM-01"
    }
   ],
   "skip": null
@@ -12995,8 +18113,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "nPDk5qPbf08",
     "why": "candlestick highs/lows for reversals (one of two strategy titles)",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "CC-02"
    }
   ],
   "skip": null
@@ -13013,8 +18131,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "C0Nd2pGO9_0",
     "why": "crypto breakout: how to trade strength (the channel is mostly market discussion)",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "RD-01"
    }
   ],
   "skip": null
@@ -13061,8 +18179,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "MIfZSchZ1Jk",
     "why": "EMA Rider strategy",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "CG-02"
    }
   ],
   "skip": null
@@ -13210,8 +18328,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "EpV4PjjwoA0",
     "why": "simple forex day trading strategy (new video; channel covered by the top-20 study)",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "TT-01"
    }
   ],
   "skip": null
@@ -13234,8 +18352,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "jyvWRssCyUI",
     "why": "day trading strategies for the 5-minute timeframe",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "TC-03"
    },
    {
     "video": "VKbs5iGX9xc",
@@ -13264,8 +18382,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "Q_glz_a5Bz4",
     "why": "day trading Asian-session liquidity grabs",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "TN-03"
    },
    {
     "video": "JNbJl_7GHW8",
@@ -13306,14 +18424,14 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "PjigwAmhiT0",
     "why": "John Kurisko: the 3 scalping setups",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "ET-02"
    },
    {
     "video": "YpCfKpBJ9Qk",
     "why": "1-minute chart scalping strategy",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "ET-03"
    }
   ],
   "skip": null
@@ -13330,14 +18448,14 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "Lvq0t0eQOG4",
     "why": "the NNFX top strategy (most-viewed)",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "NN-01"
    },
    {
     "video": "YWNloLjXqeI",
     "why": "trend indicators for the NNFX algorithm",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "NN-02"
    }
   ],
   "skip": null
@@ -13378,8 +18496,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "Zm9Q0NDRxoY",
     "why": "opening range theory / first presented FVG (new video; channel covered by the top-20 study)",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "IN-01"
    }
   ],
   "skip": null
@@ -13438,14 +18556,14 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "uDvT4uDWgB4",
     "why": "the simplest volume profile intraday strategy",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "TD-11"
    },
    {
     "video": "wPP_r2hd0y4",
     "why": "three anchored VWAP setups",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "TD-12"
    }
   ],
   "skip": null
@@ -13491,8 +18609,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "RamI3itKkIQ",
     "why": "9 EMA scalping with RSI confirmation",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "FS-01"
    }
   ],
   "skip": null
@@ -13555,8 +18673,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "8qEzjJWAe3c",
     "why": "opening range breakout and order flow (the ORB part is price-only)",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "BK-01"
    }
   ],
   "skip": null
@@ -13650,8 +18768,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "-ZVG3voaI7Q",
     "why": "Suri Duddella: pivots, volatility, scalping patterns",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "NX-01"
    }
   ],
   "skip": null
@@ -13668,14 +18786,14 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "t7XAyKAUvFA",
     "why": "MACD scalping strategy",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "MB-01"
    },
    {
     "video": "KFqSicS7HOo",
     "why": "the ORB strategy",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "MB-02"
    }
   ],
   "skip": null
@@ -13865,8 +18983,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "kpNb5rBQJLc",
     "why": "option buying strategy (coded in Python)",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "FP-01"
    }
   ],
   "skip": null
@@ -13883,8 +19001,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "SLGzLA3lHbk",
     "why": "HAC intraday strategy with backtest results",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "PX-01"
    }
   ],
   "skip": null
@@ -13929,8 +19047,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "mgK6kHH3RJI",
     "why": "previous day high and low reversal method",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "CH-03"
    },
    {
     "video": "D-5e_sSQwqc",
@@ -14055,8 +19173,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "ygaHtkRlsfY",
     "why": "beginner day trading strategy with support and resistance",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "UF-01"
    }
   ],
   "skip": null
@@ -14073,8 +19191,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "Ut4fwJ4uyb8",
     "why": "his way of scalping the forex market",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "NS-01"
    }
   ],
   "skip": null
@@ -14091,8 +19209,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "_opTZIbmuTQ",
     "why": "sniper scalping strategy (US30 / XAUUSD, Fibonacci)",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "DX-01"
    }
   ],
   "skip": null
@@ -14156,8 +19274,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "gOEDwTe4JuE",
     "why": "scalping series 02: the 2-minute E-mini chart",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "BR-01"
    }
   ],
   "skip": null
@@ -14174,8 +19292,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "w58D9peiorg",
     "why": "day trading price action entry rules",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "PT-11"
    }
   ],
   "skip": null
@@ -14258,14 +19376,14 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "GTErzKx0ePE",
     "why": "the number-one volume profile long and short rule",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "PA-01"
    },
    {
     "video": "jkkJXFRJLgw",
     "why": "VWAP day trading strategies",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "PV-11"
    }
   ],
   "skip": null
@@ -14304,14 +19422,14 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "InAR5W5Q2bM",
     "why": "opening range breakout step by step",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "FW-01"
    },
    {
     "video": "899BPDopwEE",
     "why": "day trading the previous day high and low",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "FW-02"
    }
   ],
   "skip": null
@@ -14328,8 +19446,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "iKVUPOsFyGg",
     "why": "trade the range instead of chasing breakouts (the rest is live sessions)",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "FF-01"
    }
   ],
   "skip": null
@@ -14346,8 +19464,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "_Hj98Rstqgo",
     "why": "SPX regular-hours gap trading strategy",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "LT-01"
    }
   ],
   "skip": null
@@ -14406,14 +19524,14 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "8eqtve2iOeU",
     "why": "backtesting a Bollinger Band strategy in Python",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "QI-01"
    },
    {
     "video": "Vdlw6kViw4Y",
     "why": "algorithmic day trading strategies",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "QI-02"
    }
   ],
   "skip": null
@@ -14460,14 +19578,14 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "ouveMWaInn8",
     "why": "opening range breakout backtest in Python",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "PL-02"
    },
    {
     "video": "Rk-Oxn5GzOo",
     "why": "5-minute ORB on QQQ (PyBroker)",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "PL-01"
    }
   ],
   "skip": null
@@ -14514,8 +19632,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "jFa6u-7E10U",
     "why": "first hour vs rest of day intraday edge",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "AV-01"
    }
   ],
   "skip": null
@@ -14574,14 +19692,14 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "h-erJbnBj6A",
     "why": "a simple pullback strategy (Pine Script)",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "MS-01"
    },
    {
     "video": "P1Lol05qb5s",
     "why": "a two-target MACD strategy (Pine Script)",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "MS-02"
    }
   ],
   "skip": null
@@ -14609,8 +19727,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "4NoBrAlZZlM",
     "why": "Scott Andrews (the gap guy) on trading opening gaps",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "BT-01"
    }
   ],
   "skip": null
@@ -14675,8 +19793,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "neaOktXUx9o",
     "why": "5-minute Heikin Ashi intraday strategy (fine-tuning episode)",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "SP-02"
    },
    {
     "video": "KbhpEhFdwTg",
@@ -14717,14 +19835,14 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "JVFbxkk74-k",
     "why": "the exact 9:15 AM strategy",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "AG-01"
    },
    {
     "video": "NvQCerlr6co",
     "why": "mastering the opening range breakout",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "AG-02"
    }
   ],
   "skip": null
@@ -14765,8 +19883,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "3zWyzrB7YIk",
     "why": "trading strategy by options expert Nitin Murarka",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "NM-01"
    }
   ],
   "skip": null
@@ -14783,14 +19901,14 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "nOS8HPvJ6Hg",
     "why": "3-minute scalping on Nifty and Bank Nifty",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "CI-22"
    },
    {
     "video": "fPchKlBcwQc",
     "why": "5 and 20 EMA intraday strategy",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "CI-21"
    }
   ],
   "skip": null
@@ -14807,8 +19925,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "pAK68Yw_EY4",
     "why": "gap up / gap down / open high / open low intraday filter",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "EQ-01"
    }
   ],
   "skip": null
@@ -14941,8 +20059,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "2KwFfIbLYbs",
     "why": "opening range breakout in equity (Breeze API)",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "IC-02"
    },
    {
     "video": "D0sM7ueBj2k",
@@ -14989,8 +20107,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "mOvPo4kw2rI",
     "why": "Brahmastra intraday option strategy",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "AL-01"
    }
   ],
   "skip": null
@@ -15018,8 +20136,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "C0qe-KlfJm0",
     "why": "a simple intraday setup from charts",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "HD-01"
    }
   ],
   "skip": null
@@ -15071,8 +20189,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "_GJ8I-62JKQ",
     "why": "RSI range rules",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "TJ-01"
    }
   ],
   "skip": null
@@ -15089,8 +20207,8 @@ export const SL_CHANNELS: SlChannel[] = [
    {
     "video": "YSES85908Go",
     "why": "Nifty and Bank Nifty gap strategy webinar",
-    "analysed": false,
-    "id": null
+    "analysed": true,
+    "id": "TM-01"
    }
   ],
   "skip": null

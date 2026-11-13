@@ -1,0 +1,11 @@
+video: jyvWRssCyUI
+topic: forex_us
+summary: Tradeciety's five-minute price-action walkthroughs: fakeouts of last week's high or low after an exhausted trend (with the 161 Fibonacci extension as a profit-taking area and divergence), comparing the strength of trending and corrective waves, daily and weekly pivot points (a change in how price treats the pivot marks a trend change; pivot pullbacks in a clear trend), a Friday dead-cat bounce into the 38-50% retracement, and waiting for the fakeout after high-impact news before trading.
+instruments: Forex pairs, indices
+timeframes: 5m
+style: intraday
+= TC-03 | Five-minute price action: weekly-level fakeouts, pivot structure, dead-cat bounces, post-news fakeouts (walkthrough)
+R setup E 03:31,04:16 | A fakeout of last week's high after an exhausted trend: short once price gets back below the level. | "the fake out is confirmed if we can get below this if the price gets below this you're looking at a high probability short"
+R setup E 09:55,10:39 | Daily pivot only: a change from rejecting the pivot to holding above it often marks a trend change; trade pivot pullbacks in a clear trend. | "a very very important event on your chart is when the pivot structure changes"
+R setup E 17:49,18:31 | After high-impact news wait for the fakeout, then trade the break or the retest. | "you never want to trade right away you really want to wait until the dust has settled"
+T concept_only | several discretionary readings with no fixed trigger, stop or target; the weekly-level fakeout and pivot ideas resemble TC-01/TC-02 and the library's trap strategies

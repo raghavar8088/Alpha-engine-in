@@ -1,0 +1,12 @@
+video: _GJ8I-62JKQ
+topic: india_stocks
+summary: A Tradejini webinar on RSI ranges, against Wilder's 70/30. In a bull market RSI(14) stays between 40 and 80; in a bear market between 20 and 60; 40-60 is sideways. A break above 60 or below 40 is a range shift, and RSI failing to cross 60 after breaking 40 is a warning to exit. For buying, monthly and weekly RSI above 60 with the daily RSI falling to 40 is a low-risk place to look, shown on USD/INR, TCS, gold, silver and crude oil. He insists on confirmation from price, candlesticks, structure or other indicators before any trade, and uses hourly and 15-minute charts only for execution. No stop, target or exit rule is given.
+instruments: Stocks, Nifty, USD/INR, gold, silver, crude oil
+timeframes: Monthly, weekly, daily (hourly and 15m for execution)
+style: positional
+= TJ-01 | RSI range rules: bull 40-80, bear 20-60; buy daily RSI 40 when weekly and monthly RSI are above 60 (with confirmation)
+R indicator E 35:18 | Above 60 is bullish, below 40 bearish, 60-40 sideways; the bull range is 80-40 and the bear range 60-20. | "above 60 is bullish, below 40 is bearish. Between 6040 is sideways"
+R entry E 42:57,43:42 | In a bull range, RSI back at 40 is the low-risk place to buy. | "40 is a good place to enter. Good place to buy"
+R filter E 44:22 | Never without confirmation from price, candlesticks, structure or other indicators. | "Without confirmations, don't take a trade"
+R setup E 01:02:46 | Monthly and weekly RSI above 60 and daily RSI at 40 is a buying location. | "monthly above 60 weekly above 60 daily at 40 is a good location to buy"
+T concept_only | the confirmation the entry requires is left to the viewer; no stop, target or exit is given

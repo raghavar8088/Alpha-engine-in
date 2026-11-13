@@ -1,0 +1,14 @@
+video: C0qe-KlfJm0
+topic: india_index
+summary: HDFC Securities (Sonali) teaches a VWAP intraday setup on Nifty and Sensex futures. Put the VWAP on the futures contract, not the spot, and use five-minute candles. Wait until 10:15-10:30 for the trend to show: price that keeps finding support at the VWAP is a buy-on-dips market, and repeated resistance makes it sell-on-rise. Enter on the first green candle that closes after a touch of the VWAP (red for shorts). Target 15-20 Nifty points with the same stop (1:1), traded through at-the-money options in the trend's direction. Most of the webinar demonstrates chart trading on the broker's platform.
+instruments: Nifty and Sensex futures (ATM options to execute)
+timeframes: 5m
+style: intraday
+= HD-01 | After 10:15-10:30, buy the first green five-minute close off a VWAP touch in a buy-on-dips market (sell the red one in a sell-on-rise market), 15-20 points at 1:1
+R timeframe E 06:54 | Five-minute candles; wait until 10:15-10:30 before trading. | "according to you know what I have experienced based on this indicator 5 minute time frame works best"
+R setup E 07:35 | Repeated support at the VWAP marks a buy-on-dips market; repeated resistance marks sell-on-rise. | "When the price is continuously taking the support at the VWAP, it's the buy-on-the-dips market"
+R entry E 11:50,13:14 | Enter on the first green candle that closes after touching the VWAP; a red candle there is not an entry. | "If it touches and the first green candle, okay? First green candle closing, we have to enter"
+R target E 11:50,12:33 | Target 15-20 points with an equal stop (1:1). | "generally in this kind of market 15 to 20 points target is sufficient"
+R market E 04:41,28:46 | The VWAP goes on the futures contract, which carries volume, not on the spot index. | "VWAP will not work on the spot chart because there is no volume"
+T with_assumptions | 'continuously taking support' is judged by eye
+D VWAP-A | the trend-day VWAP retest with a confirming candle is already on the desk (the VWAP study's setup A; DH-01 and AF-01 are close variants); the desk's index rows have no volume for a futures VWAP

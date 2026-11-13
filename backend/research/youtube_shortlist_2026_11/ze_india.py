@@ -32,7 +32,7 @@ def tw01(m, B, p, cache):
     out = []
     for d in range(m.n_days):
         js = _days(b, d)
-        if len(js) < 3 or int(b.ist0[js[0]]) != T(9, 15):
+        if len(js) < 2 or int(b.ist0[js[0]]) != T(9, 15):
             continue
         j0 = js[0]
         H, L = float(b.h[j0]), float(b.l[j0])
@@ -108,7 +108,7 @@ def df01(m, B, p, cache):
         if m.name not in names:
             continue
         js = _days(b, d)
-        if len(js) < 4:
+        if len(js) < 3:
             continue
         ref = float(b.o[js[0]])
         box = ref * 0.0015
@@ -627,7 +627,7 @@ def ec02(m, B, p, cache):
     out = []
     for d in range(1, m.n_days):
         js, pj = _days(b, d), _days(b, d - 1)
-        if len(js) < 3 or not pj or int(b.ist0[js[0]]) != T(9, 15) or int(b.ist0[pj[-1]]) != T(15, 15):
+        if len(js) < 2 or not pj or int(b.ist0[js[0]]) != T(9, 15) or int(b.ist0[pj[-1]]) != T(15, 15):
             continue
         j0, j1 = js[0], js[1]
         rg = rng(b, j0)

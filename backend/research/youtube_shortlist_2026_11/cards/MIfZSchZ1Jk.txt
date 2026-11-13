@@ -1,0 +1,11 @@
+video: MIfZSchZ1Jk
+topic: forex_us
+summary: The Chart Guys' 'EMA 12 rider' webinar: on whatever timeframe shows it cleanly (one minute to monthly), an EMA 12 that price has respected at least three times works like a trend line; while it holds, ride the trend and buy dips (with 'back burner' oversold entries and 15-minute higher lows off the 15-minute EMA 12); the first loss of it after a long run means the character of the chart is changing; it is useless in sideways markets; he uses it mainly to manage winning positions, waiting for a candle close only then.
+instruments: Stocks, ETFs, gold, silver, bitcoin
+timeframes: 1m to monthly
+style: mixed
+= CG-02 | EMA 12 rider: a trend guide after three holds, exit a winner on a close through it (webinar)
+R setup E 07:52 | An EMA 12 is a valid guide after at least three clear holds (support) or rejections (resistance). | "I want at least three clear, distinct holds if it's support or rejections if it's resistance"
+R exit E 04:59,32:27 | Losing it after a long hold marks a change of character: take profits on the winner. | "Hold it as support. Hold it as support. All right, we lost it. Take your profit"
+R no_trade E 19:05 | No use in sideways, choppy markets. | "EMA12 is for use in a solid trending market, not a choppy market"
+T concept_only | a trend-management guide; the entries come from his separate 'back burner' and higher-low setups, and the timeframe is chosen by eye per chart

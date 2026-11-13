@@ -1,0 +1,13 @@
+video: NvQCerlr6co
+topic: india_index
+summary: An Upstox webinar (Amit Goel, CMT, in Hindi with garbled auto-captions) on the opening range breakout for Nifty and Bank Nifty. Be patient through the first 15-30 minutes. The opening range is the first 15-30 minutes (the first five 3-minute candles), kept fixed rather than changed daily. Refine on five minutes and enter only when a candle closes beyond the range, ideally with volume, never on a wick. An optional stop sits at the breakout candle's midpoint. Targets run 1:1 to 1.5-2 times the setup box: at 1R move the stop to cost and trail the other half. Close the trade within the day.
+instruments: Nifty, Bank Nifty
+timeframes: 15m-30m range, 5m (3m) entries
+style: intraday
+= AG-02 | 15-30 minute opening range, five-minute close beyond it, stop at the breakout candle's midpoint, half off at 1R and trail
+R setup E 21:54,22:34 | The opening range is the first 15-30 minutes (five 3-minute candles), kept fixed. | "yor pharst 15 too 30 minats kaa renj. ye isako bolenge ham log opaning renj"
+R entry E 27:32,29:37 | Enter only on a candle close beyond the range on five minutes, not on a wick. | "kandeeshan nanbar van ki praais kroses d laain"
+R stop E 34:26 | An optional stop at the breakout candle's midpoint. | "yah jo midil point hai, dis vil bee yor opshanal stop los"
+R target E 36:34,37:56 | At 1R bring the stop to cost and trail the remaining half. | "yoo bring yor stop los too kost"
+T with_assumptions | the captions are garbled Hindi; the range length (15 or 30 minutes) is left open
+D BB-02 | the 15-minute opening range break on a five-minute close is already in the library (BB-02; QC-01 for 30 minutes)

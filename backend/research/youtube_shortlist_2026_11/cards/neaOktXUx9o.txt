@@ -1,0 +1,17 @@
+video: neaOktXUx9o
+topic: india_index
+summary: StockPro's five-minute Heikin Ashi setup, fine-tuned live on crude oil mini and shown on Bank Nifty: Heikin Ashi candles with a 20 SMA and an RSI whose overbought and oversold lines are both set at 50; buy when RSI crosses above 50 and a flat-bottomed green candle forms above the SMA, entering on the break of that candle's high (sell the mirror: a flat-topped red candle under the SMA, the break of its low); stay in while candles hold above the SMA; trade only in the direction of the larger timeframe (daily or hourly); about 10 points a trade on crude.
+instruments: Crude oil mini (MCX); Bank Nifty
+timeframes: 5m (1h or 1d for direction)
+style: intraday
+= SP-02 | Heikin Ashi: flat-bottomed candle above the 20 SMA with RSI over 50, break of its high, out on a close under the SMA, higher-timeframe side
+R indicator E 04:56,05:38 | Heikin Ashi candles, a 20-period SMA and an RSI with both levels at 50. | "use only 20 moving SMA ... this is simply RSI where overbought and oversold both of them are fifty"
+R entry E 05:38,08:28 | Buy when RSI has crossed 50 and a flat-bottomed candle forms above the SMA; mark its high and enter when the high is broken. | "the candles have to be above 10 moving average and that has to be a flat-bottomed ... you have to mark the high of the candle ... when this high is broken then only you will take an entry"
+R exit E 07:02 | Stay in while the candles are above the SMA; exit when they come down to it or below. | "remain in this as long as the candles are above 20 s ma you need to be concerned only when the candles come below touch"
+R entry E 07:45 | Sell the mirror: a flat-topped red candle below the SMA. | "the candles have to come below 10 s MA and it has to be a flathead red candle that's when you will enter"
+R filter E 09:52,16:05 | Trade only in the larger timeframe's direction (one hour or one day). | "first you will have to check the long-term direction ... either you look at the one day time frame or you look at the one hour"
+R target E 04:16 | About 10 points a trade on crude. | "my target is always going to be ten points"
+R market A - | Desk version: Nifty and Bank Nifty one-minute index rows on five-minute Heikin Ashi candles; the SMA and RSI (14) are computed on the Heikin Ashi closes, as TradingView does on a Heikin Ashi chart. | ""
+R entry A - | Long: RSI above 50 after crossing it within the last 3 bars, a green Heikin Ashi candle with no lower wick whose low is above the SMA, and the last completed one-hour Heikin Ashi close above its own 20 SMA: a buy-stop one point over that candle's high, live 3 bars; mirror for shorts; 09:30-14:45; at most 3 trades a day. | ""
+R stop A - | Stop at the signal candle's Heikin Ashi low (high for shorts); exit at the next open after a Heikin Ashi close back through the SMA; no fixed target on the index; out at 15:15. | ""
+T with_assumptions | the SMA length wavers between 10 and 20 in the talk (20 used), and the stop and the index target are not stated (A)

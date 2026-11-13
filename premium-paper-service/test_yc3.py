@@ -5,7 +5,8 @@
 2. every book runs through runner.run_yc (pool books on a few stocks, with DF-01's contexts), its documents have unique
    ids, and the ledger sizes them;
 3. a book that starts mid-way starts flat;
-4. the YC3 books get the 20-channel states and their own start (the second batch its own, later one)."""
+4. the YC3 books get the 20-channel states and their own start (the second, third and fourth batches their own,
+   later ones)."""
 
 import os
 import sys
@@ -17,6 +18,7 @@ os.environ["PREMIUM_DATA_DIR"] = tempfile.mkdtemp(prefix="premium_yc3_")
 os.environ.setdefault("PREMIUM_YC3_START", "2026-01-01T00:00:00+00:00")
 os.environ.setdefault("PREMIUM_YC3B_START", "2026-01-02T00:00:00+00:00")
 os.environ.setdefault("PREMIUM_YC3C_START", "2026-01-03T00:00:00+00:00")
+os.environ.setdefault("PREMIUM_YC3D_START", "2026-01-04T00:00:00+00:00")
 HERE = Path.cwd()
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent / "backend" / "research" / "youtube_channels11_2026_11"))
@@ -94,6 +96,9 @@ check("second-batch books start at YC3B_START_T", SG._start_of("BTCUSD", b2) == 
 check("YC3B_IDS is the registry's second batch", set(C.YC3B_IDS) == {r.sid for r in ZS._NEW[31:54]})
 b3 = C.BY_ID["CD-01"]
 check("third-batch books start at YC3C_START_T", SG._start_of("BTCUSD", b3) == datetime.fromtimestamp(S.YC3C_START_T, timezone.utc))
-check("YC3C_IDS is the registry's third batch", set(C.YC3C_IDS) == {r.sid for r in ZS._NEW[54:]})
+check("YC3C_IDS is the registry's third batch", set(C.YC3C_IDS) == {r.sid for r in ZS._NEW[54:69]})
+b4 = C.BY_ID["AV-01"]
+check("fourth-batch books start at YC3D_START_T", SG._start_of("BTCUSD", b4) == datetime.fromtimestamp(S.YC3D_START_T, timezone.utc))
+check("YC3D_IDS is the registry's fourth batch", set(C.YC3D_IDS) == {r.sid for r in ZS._NEW[69:]})
 print("ALL OK" if ok else "FAILURES")
 sys.exit(0 if ok else 1)

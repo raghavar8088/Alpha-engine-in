@@ -1,0 +1,26 @@
+video: PjigwAmhiT0
+topic: forex_us
+summary: John Kurisko (Day Trading Radio) explains on Desire To Trade how he scalps E-mini and Micro E-mini S&P futures with four stochastics, 9-3, 14-3, 40-4 and 60-10, on one chart. The 60-10 stands for the five-minute picture. Super signal: a 'quad rotation' (all four under 20) in an organised pullback, a small bounce, then price back to an equal or lower low while the 9-3 holds a higher low. Buy as the 9-3 turns back up through 20, stop one or two ticks under the pattern low. 20-20 bull flag: after a steep push off the 20 EMA, with the 60-10 'embedded' above 80 (preferably 85-90), buy when the 9-3 drops to 20 while price holds the 20 EMA; three to five points. Bear side: under the 200-period average with the 60-10 embedded under 20, sell each fast 9-3 rotation up. A long whose 60-10 stays stuck under 20-30 is weak and should be cut. Mirror rules apply for shorts.
+instruments: E-mini / Micro E-mini S&P 500 futures (also stocks and forex)
+timeframes: 1m (the 60-10 stands for 5m)
+style: scalping
+= ET-01 | Quad rotation + 9-3 divergence 'super signal': buy the 9-3 turning back up through 20 after a lower price low, stop under the pattern low (mirror for shorts)
+R indicator E 14:14,20:41 | Four stochastics: 9-3, 14-3, 40-4 and 60-10; the 60-10 stands for the five-minute picture. | "they're fast stochastic 93 14344 and 6010"
+R setup E 19:56,31:14 | Quad rotation: all four stochastics under 20 at the same time. | "when all each one of these bands get oversold under 20 at the same time that is what we call a quad rotation"
+R entry E 31:14,32:40 | After a small bounce, price returns to an equal or lower low while the 9-3 holds higher; buy as the 9-3 turns back up through 20. | "as the price then drops back equal or lower than the last the first stage price the 93 stochastics turns up above the 20 line"
+R stop E 32:40,43:54 | Stop one or two ticks under the pattern low candle. | "you place your stop one to two ticks under the pattern low candle"
+R exit E 37:34 | If the 60-10 stays stuck under 20-30 instead of rising above 80, the bigger trend is down: get out. | "if the 6010 stays under 20 2530 and is is stuck down here instead of up above the 90 or 8580 that means your bigger trend is down"
+R market A - | Desk version: the Nasdaq 100 cash session on one-minute bars (the S&P futures are not on the desk). Slow stochastics: %K over n bars smoothed by an s-bar average. | ""
+R entry A - | The quad bar starts the setup and the 9-3 must bounce 5 points off its low. A later bar must reach the first-stage low or below while the 9-3 dips under 20 again above its first-stage minimum. Entry when the 9-3 then closes above 20, within 60 bars of the quad bar. Shorts mirror at 80. | ""
+R target A - | Target 2R from the fill, plus his weak-trend exit: out at the next open when the 9-3 turns down through 80 while the 60-10 is still under 30 (mirror for shorts). At most 3 trades a day, out at the session end. | ""
+T with_assumptions | the bounce size, the window, the 2R target and the coded form of the weak-trend exit are ours (A); the S&P futures become the Nasdaq 100 (A)
+= ET-02 | 20-20 flag: with the 60-10 embedded above 80, buy the 9-3 at 20 while price holds the 20 EMA; under the 200 average with the 60-10 under 20, sell the 9-3 at 80
+R setup E 33:23 | A bull flag starts with a steep push up off the 20 EMA. | "price has an aggressive aggressively moves up off the 20 EMA with a steeper than average move"
+R filter E 34:03 | The 60-10 must stay above 80 (embedded), preferably 85-90. | "the 6010 has to be above 80"
+R entry E 34:44 | Buy when the 9-3 drops to 20 while price holds the 20 EMA; expect three to five points. | "you buy when the 93 hits the 20"
+R entry E 38:18,43:54 | Bear flag: under the 200-period average with the 60-10 under 20, sell each fast rotation of the 9-3 up. | "trend is underneath the 200 period moving average your stochastic 6010 is underneath 20"
+R market A - | Desk version: the Nasdaq 100 cash session on one-minute bars. | ""
+R entry A - | Long: the 9-3 closes at or under 20 while the 60-10 is above 80 and the bar's low holds the 20 EMA (close above it); buy at the next open. Short: price closes under the 200 EMA, the 60-10 is under 20 and the 9-3 closes at or above 80. | ""
+R stop A - | Stop a tick beyond the extreme of the last 10 bars; target 1R; at most 3 trades a day; out at the session end. | ""
+T with_assumptions | the stop, the 1R target (his 3-5 points) and the bar tests are ours (A); the 200-period average is taken as an EMA (A)
+C win_rate | 35:27 | 75-80% good trades; a weak-setup rule removes about half of the losers | his own trading | "maybe 80 75 80% of those time trades are really good trades"

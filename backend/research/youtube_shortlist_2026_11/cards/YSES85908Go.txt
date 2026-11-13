@@ -1,0 +1,18 @@
+video: YSES85908Go
+topic: india_index
+summary: TradeSmart's webinar (Ashwin) teaches a long-only gap strategy for Nifty and Bank Nifty futures on daily candles. Step one: an open gap, meaning today's low stays above yesterday's high. Step two: the previous trend must be down. Step three: buy carry-forward index futures between 15:15 and 15:30 on the gap day (next month's contract in expiry week). Step four: the target is the gap day's high plus the previous day's range. Step five: the stop is one point below the previous day's low, re-placed every morning until the target is hit. His backtest from June 2013: 24 trades in four years with only two stops; four trades in 2017, all winners. Stocks and shorts are excluded.
+instruments: Nifty and Bank Nifty futures
+timeframes: 1d (entry at 15:15-15:30)
+style: positional
+= TM-01 | Daily open gap up after a downtrend, buy at 15:15, target the gap day's high plus the prior day's range, stop a point under the prior day's low (long only)
+R setup E 02:56,08:39 | An open gap: today's low is above yesterday's high (daily chart). | "there is a difference between yesterday's high and today's low"
+R filter E 10:10,14:25 | The previous trend must be a downtrend. | "The previous trend should be a downtrend"
+R entry E 17:11,18:33 | Buy index futures between 15:15 and 15:30 on the gap day, carried forward. | "on the gap up day between 3:15 to 3:30 is when it gets confirmed that there is an open gap and you go ahead and buy index futures"
+R target E 23:59,31:01 | Target = the gap day's high plus the previous day's high-low difference. | "The difference calculated in step four plus high of entry day"
+R stop E 39:30,44:27 | Stop one point below the previous day's low, placed every day until the target. | "one point below previous day's low"
+R market E 39:30,01:01:18 | Nifty and Bank Nifty futures only; long only. | "This is only a long strategy"
+R market A - | Desk version: the Nifty and Bank Nifty index rows (one minute) as a proxy for the futures, held overnight. | ""
+R entry A - | The gap must still be open at 15:14, when the day's high so far sets the target; entry at the 15:15 open. The previous trend counts as down when the prior day closed below its 20-session average close. No time exit; one position at a time. | ""
+T with_assumptions | 'previous trend down' is judged by eye (A: below the 20-session average); the index replaces futures (A)
+C win_rate | 48:46 | 22 of 24 trades profitable, two stops | Nifty, June 2013 to 2017 | "there were 24 trades and only two trades have gone wrong guys. 22 trades have given us profit"
+C trade_count | 50:54 | four trades in 2017 so far, all winners | Nifty, 2017 | "in this year it was only four till now and all the four had given us profits"

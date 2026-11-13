@@ -1,0 +1,18 @@
+video: EpV4PjjwoA0
+topic: forex_us
+summary: The Trading Channel's simple forex day-trading strategy (conditions, entry, stop, target): above the 50 EMA, wait for a support level tested three times (a triple bottom above the average), then buy the green candle that closes above the 50 EMA; stop below the lowest wick of the three tests; target the previous structure (about 1.6:1, at least 1:1); the bearish mirror is a triple-tested resistance below the 50 EMA and a red candle; he avoids 16:00-18:00 New York (wide spreads) and often trades in the evening.
+instruments: USD/CAD and other forex pairs
+timeframes: Intraday (any)
+style: intraday
+= TT-01 | Above the 50 EMA, a support tested three times, green candle closing above the EMA, stop under the lowest test, 1.6R
+R setup E 05:50 | Conditions: the market above the 50 EMA and a support level tested three times. | "condition number two is i must see three tests of a support level test number one test number two test number three"
+R entry E 06:32 | Entry: a green candle that closes above the 50 EMA at the third test. | "my entry reason is a green candle and the conditions of that green candle is that it must close above the 50 ema"
+R stop E 11:39 | Stop beyond the extreme wick of the three tests. | "whichever one of the three has the highest wick it's where i'm putting stop"
+R target E 11:39 | Target the previous structure, about 1.6:1 (at least 1:1). | "targets where they go around previous structure support right about a one point six to one"
+R no_trade E 15:53,16:33 | Avoid 16:00-18:00 New York (spreads). | "anytime between 4 p.m and 6 p.m eastern standard time is a no-go"
+R market A - | Desk version: EUR/USD and GBP/USD on 15-minute candles. | ""
+R setup A - | Three tests = the last three confirmed swing lows (two bars each side) within 0.05% of each other, all made above the 50 EMA, the third within the last 3 bars. | ""
+R entry A - | The first green candle closing above the 50 EMA after the third low is confirmed: long at the next open (mirror for triple tops below the EMA); none 16:00-18:00 New York; at most 2 trades a day. | ""
+R stop A - | Stop 0.02% beyond the lowest of the three lows; target 1.6R; out at 16:55 New York. | ""
+T with_assumptions | 'a level tested three times' is drawn by eye; his exact stops and targets are in a paid course (A)
+P 07:19 | 07:59 | Free strategy training (email signup); paid course

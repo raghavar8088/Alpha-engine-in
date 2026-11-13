@@ -1,0 +1,12 @@
+video: 3zWyzrB7YIk
+topic: india_index
+summary: Prakash Gaba interviews options researcher Nitin Murarka (in Hindi, garbled auto-captions) on an open-interest method for Nifty and Bank Nifty options. From 09:15 to about 11:00, record the change in call and put open interest on the at-the-money strike and three or four strikes either side. An imbalance of at least 20-25% sets the day's side: for example 81% of new positions on the call side means bearish, so buy puts. Enter after about 11:00-11:30, near the VWAP, on a price-action rejection. Buy 0.3-0.5 delta options with a stop of about 20 points at 0.3 delta (25 at 0.4), and targets of 1:1.5 and 1:1.75 on two lots. He favours hedged spreads, says 90-95% of option buyers lose, and notes the data is on the NSE site in 3-, 5- and 15-minute intervals.
+instruments: Nifty, Bank Nifty options
+timeframes: 3m-15m (open-interest snapshots)
+style: intraday
+= NM-01 | Call/put open-interest change from 09:15 to 11:00 sets the side when the imbalance is at least 20-25%; buy 0.3-0.5 delta options near the VWAP after 11:00
+R setup E 30:43,31:27 | 09:15-11:00 is the observation period for the change in call and put open interest. | "savaa5 se 11:00 tak daataa objaraveshan peeriyad ho gayaa"
+R filter E 37:04 | Act only on an imbalance of at least 20-25%. | "kam se kam ye 20 se 25% kaa agar imanbailens aa rahaa hai"
+R entry E 43:23,44:52 | Enter near the VWAP, after about 11:00-11:30. | "aapakee entree hameshaa veevap pe honee chaahie"
+R stop E 46:15 | At 0.3 delta, a 20-point stop. | "3 deltaa hai to ham 20 point kaa stop los rakhate hain"
+T not_testable | the signal is the change in call and put open interest around the ATM strikes, which the desk does not have
