@@ -1,0 +1,20 @@
+video: Cah1gHEo-fM
+topic: crypto
+summary: The Birb Nest's simple scalp on 15 minutes (crypto and forex): with EMA 20, 50 and 100 evenly fanned out in a trend, wait for a retest of the 20 or 50 EMA and enter on the close when a bearish engulfing or bearish pin bar comes with a Stochastic RSI bear cross above 70 (mirror for longs below 30); stop beyond the wicks, move to entry at 1R and take profit around 2-3R.
+instruments: Bitcoin and altcoins; forex
+timeframes: 15m
+style: scalping
+= BN-01 | EMA 20/50/100 fanned trend, retest of EMA 20/50 with engulfing or pin bar + Stoch RSI cross, 2-3R
+R indicator E 00:02,00:49 | EMA 20, 50 and 100 (21/55/89 also used by others); Stochastic RSI with levels 30 and 70. | "i personally use the 20 the 50 and the 100"
+R timeframe E 01:34 | 15-minute chart recommended (5-minute once confident). | "i would recommend staying at the 15 minute"
+R setup E 02:20 | A trend with the three EMAs evenly fanned out; no trade while they criss-cross. | "you want to have these three emas being evenly and nicely fanned out"
+R setup E 03:05 | Wait for a retest of the 20 EMA or the 50 EMA. | "you're going to be watching is for a retest of either the 20 ema the yellow or the 50 ema"
+R entry E 03:46,04:28 | Valid only with a bearish engulfing or bearish pin bar together with a Stochastic RSI bear cross above 70; enter on that candle's close (mirror: bullish candle and bull cross below 30). | "the entry is only going to be valid if you have a proper bare cross above ... 70 on the stochastics rsi"
+R stop E 04:28 | Stop beyond the wicks of the setup. | "your stop loss should be above the wicks"
+R target E 05:14,05:58 | Take profit at the R that suits your win rate; he lets it run to 2-3R and moves the stop to entry at 1R (or trails above swing highs). | "i always move my stop to entry at 1 to 1 r"
+R indicator A - | Stochastic RSI (3, 3, 14, 14). Fanned out: EMA 20 below EMA 50 below EMA 100 (shorts) with each gap at least 0.1% of price. | ""
+R entry A - | Desk version: Bitcoin 15-minute candles; short at the next open when, within the last 2 candles, a candle's high touched the EMA 20 or EMA 50 and formed a bearish engulfing or pin bar (upper wick at least 2 x the body), and the Stochastic RSI %K crossed below %D with both above 70 on this or the previous candle (long mirror below 30). | ""
+R stop A - | Stop above the highest high of the last 3 candles (below the lowest low); stop to entry at 1R; target 2.5R; out at 23:55 UTC; at most 3 trades a day. | ""
+T with_assumptions | 'fanned out', 'retest' and the pin bar shape are judged by eye (A)
+V evenly fanned | R3 | 02:20 | Visual | each EMA gap at least 0.1% of price
+P 05:14 | 05:58 | The Birb Nest community free trial

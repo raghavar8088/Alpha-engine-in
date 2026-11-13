@@ -1,0 +1,20 @@
+video: kPbyvHlXK0E
+topic: crypto
+summary: Koroush AK's momentum breakout: trade breaks of objective levels (the previous one-hour and previous daily highs and lows) only when the market favours momentum - a slow staircase approach into the level (higher highs and lows), volume building into it, and few crossings of a 30-period moving average; enter on two candle closes beyond the level, stop at the nearest swing, take 1R to start.
+instruments: crypto and any market
+timeframes: intraday
+style: intraday
+= KA-01 | Break of the previous hour/day high or low after a staircase approach, two closes, swing stop, 1R
+R setup E 08:37 | Levels: the previous one-hour high/low and the previous daily high/low (objective, redrawn the same way every time). | "I like to use is just the previous 1-hour highs, the previous daily highs"
+R filter E 03:37,04:19 | Filter 1: a slow, steady staircase approach into the level (incremental higher highs and higher lows), not a sudden spike. | "a slow, steady grind into the level where each candle makes incremental progress"
+R filter E 05:43,06:29 | Filter 2: volume gradually building into the level; avoid flat or falling volume. | "What you want is volume gradually building up as price approaches your level"
+R filter E 07:09 | Filter 3: a 30-period moving average with minimal crossovers (clear direction, no chop). | "Add a 30 moving average to your chart ... What you want is minimal crossovers"
+R entry E 09:18 | Entry trigger: two candle closes beyond the level. | "you want to use two candle closes"
+R stop E 10:41,11:25 | Stop at the nearest swing low (swing high for breakdowns). | "the thing I like to use for stop losses the nearest swing lows"
+R target E 11:25 | Take profit at 1R to start; extend only after data says so. | "where I like to start is always with 1 R"
+R market A - | Desk version: Bitcoin 15-minute candles; levels = the previous completed one-hour candle's high/low and the previous UTC day's high/low. | ""
+R filter A - | Staircase: at least 4 of the last 5 candles made a higher low (lower high for breakdowns); volume: the 5-candle mean volume above the 20-candle mean; the close crossed the 30-period SMA at most once in the last 30 candles. | ""
+R entry A - | Enter at the next open after the second consecutive close beyond the level. | ""
+R stop A - | Stop at the lowest low (highest high) of the 6 candles before entry; target 1R; out at 23:55 UTC; at most 3 trades a day. | ""
+T with_assumptions | the timeframe and the filter thresholds are not stated (A)
+V staircase approach | R2 | 04:19 | Visual | at least 4 of the last 5 candles with higher lows

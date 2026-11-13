@@ -1,0 +1,21 @@
+video: XYlA-Fh1VxY
+topic: india_index
+summary: Dhan's opening range + Hull Suite: mark the 9:15-9:30 opening range, trade the range (bounces at its edges) or its breakout when higher highs/lows (lower lows/highs) follow, and take Hull Suite (bands of Hull moving averages) colour changes as the trades - on Bank Nifty's one-minute chart a buy flip at the range low and a sell flip at the range high gave the day's big moves.
+instruments: Bank Nifty, Nifty; stocks and commodities
+timeframes: 1m, 5m
+style: intraday
+= DH-10 | 9:15-9:30 opening range edges + Hull moving average colour flips, one minute
+R market E 01:29,08:27 | Nifty and Bank Nifty (also stocks and commodities). | "yah meraa baink niफ़ee kaa chaart hai"
+R setup E 01:29,02:12 | Opening range 9:15-9:30 (the three first 5-minute candles). | "meraa opaning renj brekaaaut kaa jo taaiming hai vo savaa5 se 9:30 baje kaa"
+R setup E 02:52,03:34 | Trade the range itself and also its breakout once a higher high and higher low (lower low and lower high) follows the break. | "aap usamen renj bhee tred kar sakate hain aur aap renj kaa brekaaaut bhee tred kar sakate hain"
+R indicator E 06:16 | Hull Suite: a band of Hull moving averages; when the bearish averages turn, the trend is turning bearish. | "hul ke sveet kaa matalab hai ki malteepal hul mooving evarejes kaa ek baind ban jaataa hai"
+R entry E 08:27,09:08 | On the one-minute chart take the Hull signals: a buy from the range-low support, a sell from the range-high resistance. | "jab neeche saport ke leval se isane mujhe yahaan par baay signal diyaa"
+R stop I 08:27 | A losing signal is cut quickly (80 points on the first trade of the example). | "80 points neeche jaake yahaan par mujhe egjit karaa diyaa"
+R indicator A - | Hull Suite = HMA(55) on one-minute closes, green while HMA is above its value two bars earlier, red below (the published Hull Suite default). | ""
+R entry A - | Desk version: Nifty and Bank Nifty one-minute bars after 09:30; long at the next open when the Hull colour turns green while the last 10 minutes touched the lower 25% of the opening range or below it (short: turns red after touching the upper 25% or above); signals until 14:45; at most 3 trades a day. | ""
+R exit A - | Exit at the next open after the opposite colour change; stop 0.25% from the entry; out at 15:15. | ""
+T with_assumptions | the Hull Suite settings, the 'at the level' zone, the stop and the exit are ours (A)
+V at support | R5 | 08:27 | Read by eye | the last 10 minutes touched the range's lower quarter or below
+X - | 08:27 | Bank Nifty | long | Hull buy flip from the range-low support (after an 80-point loss on an earlier flip) | the flip | none stated | none stated | target | about 180 points, then a sell flip at the range high for about 200
+P 09:08 | 09:50 | Dhan margin against pledged mutual funds
+U Which range edges count once the range breaks?

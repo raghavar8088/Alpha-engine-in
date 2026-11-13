@@ -1,0 +1,18 @@
+video: -_5iB6QNc8Q
+topic: india_index
+summary: Anmol Mittal (Trading Chanakya) scalps with Larry Connors' Connors RSI (3, 2, 100) on Nifty's 5-minute chart with 80/20 levels, filtered by a plain RSI(14) with 60/40 levels: while RSI is above 60 take only Connors RSI oversold buys, while below 40 only overbought sells, each after a confirming candle, and get out within a few candles.
+instruments: Nifty (options, stocks for scalping)
+timeframes: 5m
+style: scalping
+= CK-01 | Connors RSI (3, 2, 100) 80/20 signals in the direction of RSI(14) above 60 / below 40, 5 minutes
+R indicator E 03:35,04:15 | Connors RSI with its defaults (RSI length 3, up/down streak length 2, rate-of-change rank 100), levels set to 80 and 20. | "aar esaaaee lenth kaa yooj kiyaa gayaa hai three peeriyad kee baay dipholt"
+R timeframe E 04:56 | Nifty five-minute chart; the indicator is noisy and only for scalpers. | "philahaal hamane 5 minat kaa taaim phrem rakhaa huaa hai niphtee kaa"
+R setup E 06:18,07:01 | Above 80 (overbought) look for shorts; below 20 (oversold) look for longs. | "jab yah indiketar is leval ke oopar aataa hai to aapako short kaa tred dhoondhanaa chaahie"
+R filter E 12:34,16:48 | Trend and momentum from a plain RSI with 60/40 levels: above 60 take only buys, below 40 only sells; never trade against the trend. | "trend to aapake phevar men honaa hee chaahie"
+R entry E 15:25,16:06 | After the signal, wait for a confirming candle (a red candle for a short) and enter. | "thoraa saa vet kar leejie ek negetiv kaindal kaa"
+R exit E 08:24,17:33 | Scalp: out within three to five candles (10-30 Nifty points), or a small stop. | "is teen chaar paach kaindal men aap egjit kar doge naheen to chhotaa saa stop los lekar nikal jaaoge"
+R indicator A - | RSI(14) on closes. | ""
+R entry A - | Desk version: Nifty and Bank Nifty five-minute bars, 09:30-14:45; short at the next open after the first red candle within 2 bars of a close with Connors RSI above 80 while RSI(14) is below 40 (long: green candle after Connors RSI below 20 with RSI(14) above 60). | ""
+R stop A - | Stop at the highest high (lowest low) of the last 3 bars before entry; exit at the open after 4 bars in the trade; out at 15:15; at most 4 trades a day. | ""
+T with_assumptions | the stop and the exact hold are not stated; we use 4 bars (A)
+V a few candles | R6 | 08:24 | 3-5 candles | exit after 4 bars

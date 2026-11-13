@@ -1,0 +1,22 @@
+video: 2GAAK_JhNW0
+topic: forex_us
+summary: The Moving Average's one-minute Fibonacci scalp, backtested 100 times on EUR/USD from the London open to the New York close: in a clear trend, after an impulse that breaks structure, draw the Fibonacci from the impulse's start to its end, set a limit order at the 0.618 retracement with the stop just beyond the 1.0 (the impulse origin) and the target at the previous structure (the impulse end), about 1:1.6; skip choppy ranges, news spikes and low-volume hours.
+instruments: EUR/USD (also gold, indices, oil)
+timeframes: 1m
+style: scalping
+= MA-01 | One-minute impulse that breaks structure, limit at the 0.618, stop past the origin, target the impulse end
+R market E 06:09 | EUR/USD, tested 100 times from the London open to the New York close. | "I back tested this strategy on EuroUSD 100 times from the London open through to the New York close"
+R setup E 00:41,03:24 | A clear trend; an impulse move that breaks the previous structure (a candle close beyond it). | "You have to wait for an impulse move that breaks structure"
+R indicator E 03:24 | Fibonacci retracement from the start to the end of the impulse (wicks included); levels 0, 0.5, 0.618, 1. | "take your Fibonacci retracement tool from the top of that move to the bottom of that move"
+R entry E 04:07 | A limit order at the 0.618 level. | "You set a limit order at the 618"
+R stop E 04:07 | Stop just beyond the 1.0 level (the impulse origin). | "with a stop-loss just above the one"
+R target E 04:07,06:09 | Take profit at the previous structure (the impulse end): about 1:1.6. | "a takerit at the previous structure. That will give you a 1:1.6 risk-to-reward ratio"
+R no_trade E 02:02,02:43 | No trades in choppy ranges, around news spikes, or outside the London-New York sessions. | "Only trade Fibonacci during the high volume sessions, London open to New York close"
+R market A - | Desk version: EUR/USD and GBP/USD one-minute bars (the desk's FX futures minutes), 07:00-20:00 UTC. | ""
+R setup A - | Swing points = 5-bar pivots (a high above the 5 bars either side); an up impulse = a close above the latest swing high; the impulse runs from the swing low before it to the highest high since, fixed once a new 5-bar swing high forms. | ""
+R entry A - | Limit at the 0.618 retracement of that impulse, live for 30 bars or until price takes out the impulse high first. | ""
+R stop A - | Stop 0.02% beyond the impulse origin; target the impulse extreme; at most 4 trades a day; out at 20:00 UTC. News days are not filtered. | ""
+T with_assumptions | swing points and 'impulse' are read by eye; news is not filtered (A)
+V impulse | R2 | 03:24 | Read by eye | 5-bar pivots and a close through the last swing
+C win_rate | 08:13 | more wins than losses at 1:1.5-1:1.6 over 100 tested trades | 100 trades | "you're having substantially more wins than you are losses"
+P 09:34 | 09:34 | Earn-as-you-learn program

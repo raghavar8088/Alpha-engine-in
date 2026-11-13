@@ -1,0 +1,12 @@
+video: _ELz9v7gsTo
+topic: india_index
+summary: Vishal Malkan's Tuesday Technical Talk on reading a Nifty daily turn: a gap that holds as support (filled from above and defended) confirms the new up trend, while a failed gap means the down trend continues; candle size, frequency and colour shifting green, RSI rising from the weekly 40 support toward 60, then sectors and stocks crossing daily RSI 60 - analysis, not a trading rule.
+instruments: Nifty; Bank Nifty and bank stocks
+timeframes: 1d, 1w
+style: swing
+= MV-01 | Gap as support or resistance, candle size-frequency-colour and RSI 40/60 shifts (analysis)
+R setup E 03:28,04:09 | A gap acts as support or resistance: if price fills it from above and holds, the trend has turned up; if it falls through, the down trend continues. | "gaip hameshaa saport aur re kaa kaam karegaa"
+R setup E 04:09,04:50 | Size, frequency and colour: when green candles grow bigger and more frequent after a fall, buyers are taking over. | "saaij phreekvensee end kalar"
+R indicator E 12:33,15:21 | RSI 40 on the weekly as support and a daily RSI cross above 60 confirm the up move (monthly, weekly, daily = grandfather, father, son). | "delee 60 ko kros kar rahaa hai matalab ye pooraa sektar bulish ho rahaa hai"
+T concept_only | a market reading with no entry, stop or exit rule
+P 00:02 | 01:24 | ABCD (Anybody Can Trade) event tickets

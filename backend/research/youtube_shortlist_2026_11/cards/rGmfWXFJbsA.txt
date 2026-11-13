@@ -1,0 +1,18 @@
+video: rGmfWXFJbsA
+topic: india_stocks
+summary: Optimus Futures on Williams %R (look-back 10 on daily candles): an over-sensitive RSI that gives many false overbought/oversold signals, best used for divergence - a higher low on %R while price closes lower, and strongest when RSI is also oversold (below 30) at the same time: a rare (about five times a year) high-probability reversal; mirror for tops with RSI overbought; daily and longer timeframes work best.
+instruments: index futures and stocks (daily charts)
+timeframes: 1d
+style: swing
+= OF-01 | Williams %R (10) bullish divergence with RSI below 30 on daily candles
+R indicator E 02:18 | Williams %R with a 10-period look-back on daily candles (two trading weeks). | "I am always using a 10 period look back if I'm looking at the daily candle"
+R timeframe E 02:58 | Most useful on daily, weekly or monthly candles; intraday it gives many false signals. | "most useful and a lot less of a false signaling indicator when you're looking at it on longer time frames"
+R setup E 05:05,05:48 | Use it for divergence: price closing lower while %R makes a higher low (mirror at tops). | "The best way to use the Williams percent range is for Divergence"
+R filter E 07:10,07:51 | The strongest signal: %R divergence while RSI is oversold below 30 (overbought above 70 for tops). | "when you have positive Divergence forming on the Williams percent range and the RSI oversold that is an extremely high probability reversal indicator"
+R market A - | Desk version: NSE stocks on daily bars, long side only (cash stocks cannot be held short overnight). | ""
+R setup A - | Two pivot lows (closes lower than the 2 closes either side) 3-20 bars apart; the later close at or below the earlier; %R(10) at the later pivot higher than at the earlier; RSI(14) below 30 at the later pivot. | ""
+R entry A - | Buy at the next open after the later pivot is confirmed (2 bars after it). | ""
+R stop A - | Stop at the later pivot's low minus 1 x ATR(14); exit at the close when RSI(14) closes above 50, or after 15 trading days. | ""
+T with_assumptions | no entry trigger, stop or exit is stated (A)
+C other | 07:10 | the full signal fired only five times in a year | 1 year | "this signal is only happened five times"
+U What exits the reversal trade?

@@ -1,0 +1,16 @@
+video: q7zkTmx9MqA
+topic: forex_us
+summary: TraderNick backtests a simple Bollinger Band breakout on GBP/JPY one-hour candles: buy on a close outside the upper band, sell on a close outside the lower band, stop at the band's middle moving average (never moved), target 2:1, risk 1% per trade; 32 trades, about 44% wins, +10% before costs, with a 7-loss streak.
+instruments: GBP/JPY
+timeframes: 1h
+style: intraday
+= NK-01 | Close outside the Bollinger Band (20, 2), stop at the middle line, 2R (1-hour)
+R market E 00:04,00:49 | GBP/JPY on the one-hour chart with standard Bollinger Bands. | "we are using the standard bollinger band on a one hour chart using the pound against the japanese yen"
+R entry E 00:49 | Buy on a close above the upper band; sell on a close below the lower band. | "when we get a close and break outside of the bollinger band we are going to buy if it's above and sell if it closes below"
+R stop E 00:49 | Stop at the middle moving average, not moved during the trade. | "the stop-loss placement will be right at the moving average and we're not going to move this"
+R target E 00:49 | Target 2:1. | "we're going to be looking for a two to one risk to reward ratio"
+R sizing E 01:32 | Risk 1% of the account per trade. | "we are risking one percent of our 10 000 theoretical uh back testing account"
+R market A - | Desk version: GBP/USD and EUR/USD one-hour candles (the desk has no GBP/JPY); Bollinger (20, 2) on closes. | ""
+R entry A - | Enter at the next open after the close outside the band; one trade at a time; a new signal only after the previous trade ends; out at the desk's daily session close. | ""
+T with_assumptions | GBP/JPY is replaced by the desk's pairs (A)
+C win_rate | 09:25 | 32 trades, 43.75% wins, +$1,000 on $10,000 risking $100 (no costs) | 32 trades | "a total of 32 trades ... 44 roughly uh win rate and a total profit of one thousand dollars"

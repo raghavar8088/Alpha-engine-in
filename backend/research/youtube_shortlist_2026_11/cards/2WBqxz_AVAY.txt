@@ -1,0 +1,19 @@
+video: 2WBqxz_AVAY
+topic: india_index
+summary: Equity2Commodity's fix for Supertrend's false signals: switch to Heikin Ashi candles, add daily pivot points (five support and five resistance levels), and take a Supertrend buy only where buyers are strong - at a support level price respects, or on (or right after) a candle that breaks a resistance; mirror for sells; exit at cost when the Heikin Ashi candles turn indecisive (green candles no longer opening at their low).
+instruments: Nifty; stocks
+timeframes: intraday
+style: intraday
+= EC-01 | Supertrend signals only at pivot support or on a resistance break, Heikin Ashi candles
+R indicator E 07:44 | Heikin Ashi candles instead of normal candles. | "normal kaindal kee jagah pe hamane kyaa use kar diyaa ... hinganaa isase kaindal"
+R indicator E 07:44,08:29 | Daily pivot points: five support and five resistance levels that change every day. | "aapako ye paanch saport leval aur paanch rejistens leval bataataa hai"
+R setup E 04:43,11:21 | Take a Supertrend buy only where buyers are strong: price near a support it respects, or price breaking a resistance on that candle or the next. | "saport ke kareeb agar hamen supar tren 22 signal detaa hai to ... baaeesektar kee taraph"
+R setup E 12:49 | Sell mirror: Supertrend sell near a resistance, or on a candle breaking a support. | "koee kaindal use saport ko brek karake neeche e gayaa aur is taaim supar tren ne hamen sels signal de diyaa"
+R exit E 16:24,17:09 | Exit (at cost) when the Heikin Ashi candles stop showing open = low on green candles: the market is confused. | "un saare kaindal men hamen opan ikval too lo bhee dekhane ko naheen mil rahaa"
+R indicator A - | Supertrend (10, 3) computed on the Heikin Ashi candles; the pivots are traditional floor pivots (P, R1-R5, S1-S5) from the previous day. | ""
+R entry A - | Desk version: Nifty and Bank Nifty five-minute Heikin Ashi bars, 09:30-14:45; a buy at the next open when Supertrend turns up and either a Heikin Ashi low of the last 3 bars came within 0.1% of a support level below price, or this or the previous close broke above a resistance level; sell mirror. | ""
+R stop A - | Stop at the Supertrend line at entry; exit at the next open after the first Heikin Ashi candle with a lower (upper) wick against the trade; out at 15:15; at most 3 trades a day. | ""
+T with_assumptions | the Supertrend settings, the timeframe and 'near a level' are not stated (A)
+V near support | R3 | 11:21 | Read by eye | a Heikin Ashi low within 0.1% of the level in the last 3 bars
+C win_rate | 02:41 | filtering lifts accuracy from about 32-40% to 70-75% | not stated | "isakaa ek reskyoo leval barhakar aapakaa 70% too 75% ho jaaegaa"
+U What Supertrend settings and timeframe are used?

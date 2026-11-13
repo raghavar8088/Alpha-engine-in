@@ -1,0 +1,409 @@
+study	id	name
+library	BB-01	Previous-day high/low: breakout, trap, gap fill, retest
+library	BB-02	15-minute opening-range breakout, 5-minute close
+library	BB-03	Nifty + Bank Nifty synchronised level break
+library	BB-04	Zone trap with RSI divergence (15m)
+library	BB-05	SMC structure break into an order block
+library	BB-06	Gap day + first candle through the 15m 200 MA
+library	BB-07	Liquidity sweep of previous-day high/low
+library	BB-08	Previous-day high/low trap after 10:00 IST
+library	BB-09	Value-area (volume profile) trap
+library	BB-10	Gold 11:30-12:30 IST range sweep
+library	BB-11	Forex 10:00 IST range trap
+library	BB-12	400 EMA trap (15m)
+library	BB-13	'Prop-firm' inside-body breakout
+library	BB-14	Inside candle with the poke filter
+library	BB-15	Apple opening-range trap
+library	BB-16	Retracement-zone (Fibonacci 50-61.8%) sweep
+library	BB-17	Order-block 50% trap
+library	BB-18	15m 200 EMA breakout-retest
+library	YT-01	5 EMA alert candle
+library	YT-02	Market-structure pullback, ATR stop
+library	YT-03	50 MA double bottom / top
+library	YT-04	ICT Silver Bullet
+library	YT-05	ICT Judas Swing
+library	YT-06	ICT OTE 62% retracement
+library	YT-07	Connors RSI(10) pullback
+library	YT-08	Inside candle (15m)
+library	YT-09	Traffic light candle pair
+library	YT-10	Gap + shooting star / hammer first candle
+library	YT-11	Momentum loss into a swing level
+library	YT-13	Daily bear / bull trap
+library	YT-14	MA fan + engulfing / three-line strike, RSI 50
+library	YT-15	MA alignment + Williams fractal, 10 pips
+library	YT-16	MA pullback + engulfing / pin bar, 1:2
+library	YT-17	Breakout, pullback, continuation
+library	YT-18	Heikin-Ashi colour change + RSI 50
+library	YT-19	Supertrend(10,3) at 09:20 (futures proxy)
+library	YT-20	3-EMA 1-minute scalp
+library	YT-21	Bollinger 2.5 SD range fade
+library	YT-22	Heikin-Ashi pair + Stochastic RSI 20/80
+library	YT-23	Vortex crossover outside congestion
+library	YT-24	5-8-13 EMA ribbon
+library	YT-25	RSI 70/30 reversal
+library	YT-26	5-minute ORB on gappers with VWAP (proxy)
+library	YT-27	Camarilla R3/S3 fade, R4/S4 breakout
+library	CP-01	Trend pullback at the 5th point
+library	CP-02	Power-candle breakout of the last swing
+library	CP-03	Range ping-pong and range breakout
+library	CP-04	Trend-line rejection
+library	CP-05	Turning-point zones (3 touches)
+library	CP-06	Triple top / triple bottom
+library	CP-07	Head and shoulders / inverted
+library	CP-08	Flag and pole
+library	CP-09	Trap of a swing level
+library	CP-10	Retest of a broken level
+library	CP-12	Current-day high/low sweep
+library	CP-13	15m order block entered on a 5m FVG
+library	CP-14	Order-flow absorption
+library	CP-15	Delta-filtered morning / evening star
+library	CP-16	ICT previous-day / week high-low sweep
+library	CP-17	Fair value gap, third touch
+library	CP-18	Order block at its 50%
+library	CP-20	Inverse fair value gap
+library	CP-21	Breaker block
+library	CP-22	CISD after a liquidity sweep
+library	CP-23	Inducement
+library	CP-24	SMT divergence
+library	CP-25	Optimal trade entry (0.705-0.79)
+library	CP-26	Turtle soup
+library	CP-27	Unicorn model
+library	CP-28	Silver bullet (19:30-20:30 IST)
+library	CP-29	Fear & Greed accumulation
+library	LS-00	Original (D9): sweep a level, close back inside
+library	LS-01	Levels: previous-day high/low only
+library	LS-02	Levels: previous-day close only
+library	LS-03	Levels: equal highs/lows only
+library	LS-04	Levels: 1-hour swings only
+library	LS-05	Levels: plus round numbers
+library	LS-06	Wick sweeps only
+library	LS-07	Strong rejection candle
+library	LS-08	Next-candle confirmation
+library	LS-09	Retest-and-reject entry
+library	LS-10	Market-structure shift entry
+library	LS-11	Target 1:1
+library	LS-12	Target 1:3
+library	LS-13	Breakeven at +1R
+library	LS-14	Target: the opposite liquidity
+library	LS-15	No target: stop or 15:15
+library	LS-16	200-EMA side filter
+library	LS-17	Big sweeps only
+library	LS-18	Morning only
+library	LS-19	Afternoon only
+library	LS-20	One trade a day
+library	LS-21	Breakout and retest (the video's other entry)
+library	LS-22	Full video: sweeps and breakout-retests
+library	LS-R1	Original on 15-minute candles
+library	LS-R2	Original on 3-minute candles
+library	LS-R3	Original on Bank Nifty
+library	SH-00	Sniper headshot entry: the video's rules
+library	SH-01	Upgrade: enter on the reclaim of the swept level
+library	SH-02	Upgrade: Delta order-flow confirmation
+library	SH-03	Upgrade: 1-hour 50-EMA trend filter
+library	SH-04	Upgrade: built to pay Delta's costs (1-hour bars)
+library	NJ-01	9:20 VWAP + EMA 7 first-candle breakout
+library	NJ-02	Pivot points with a narrow CPR, trade the open's side
+library	NJ-03	EMA 9 + ADX above 25 and rising
+library	NJ-04	EMA 10 failed-pullback breakout (Anant Ladha)
+library	NJ-05	EMA 50/100 + Stochastic scalp, 1 minute
+library	NJ-06	Bollinger squeeze breakout
+library	NJ-07	Bollinger band turn + MACD cross + volume
+library	NJ-08	RSI 50 + EMA 14 cross
+library	NJ-09	MACD signal-line cross
+library	NJ-10	Heikin Ashi doji turn
+library	NJ-11	Renko 1-back / 2-back continuation
+library	NJ-12	PVT cross of its EMA 20
+library	NJ-13	Hammer after a fall, with volume
+library	NJ-14	Supertrend 21/1 flip with RSI and its average
+library	NJ-15	Three-touch level breakout with volume
+library	NJ-16	Double bottom / double top neckline break
+library	NJ-17	Day Sniper: gap, limit at the first 15-minute close
+library	NJ-18	Gap of 0.3% + first 15-minute range breakout
+library	NJ-19	EMA 50/200 golden cross with volume, daily
+library	NJ-20	200-DMA cross candidates from the top 100 by turnover
+library	NJ-21	EMA 5/20 cross scalp, 10-minute time stop
+library	NJ-22	MACD + Stochastic 50 + Parabolic SAR
+library	NJ-23	Harami with a confirmation candle
+library	NJ-24	Ascending triangle breakout, daily
+library	NJ-25	BTST momentum basket
+library	NJ-26	EMA 50 cross on Heikin Ashi with volume and RSI
+library	NJ-46	EMA 10/20 cross with a Marubozu candle (Anant Ladha)
+library	NJ-27	20-candle channel breakout with EMA 200 and ATR stops, 4 hours
+library	NJ-28	Fibonacci OTE: a 0.618 tap with an FVG
+library	NJ-29	Order block retest with a 5-minute CISD
+library	NJ-30	Fair value gap 50% limit entry
+library	NJ-31	4-hour swing sweep + 5-minute engulfing
+library	NJ-32	Candle range theory 2.0
+library	NJ-33	BTC/ETH SMT divergence
+library	NJ-34	Hidden breakeven liquidity re-entry
+library	NJ-35	Manipulation model at the New York open
+library	NJ-36	The two-hour New York range sweep
+library	NJ-37	The New York open fair value gap
+library	NJ-38	Golden-hour 15-minute range breakout
+library	NJ-39	Long-wick rejection at a 1-hour support or resistance
+library	NJ-40	Ichimoku triple confirmation, 1 hour
+library	NJ-41	Richard Dennis zone breakout, 4 hours
+library	NJ-42	EMA 200 + double-tested level + MACD cross
+library	NJ-43	Williams Alligator pullback to the teeth
+library	NJ-44	4-hour fractal sweep, entered on the close back inside
+library	NJ-45	Two-candle turn level breakout
+library	NJ-47	Smoothed Heikin Ashi retest, 1:3
+library	TG-01	Failed breakout: trade the trap
+library	TG-02	RSI 21 roof (60) and floor (40) break
+library	TG-03	Candle outside the Bollinger Band, back inside
+library	TG-04	Engulfing of several candles, daily swing
+library	TG-05	EMA 20 cross with a held pullback candle, 1:4
+library	TG-06	Gann special numbers: the nearer level pulls the next session
+library	IT-01	BankNifty first 5-minute candle theory
+library	IT-02	The room strategy: EMA 45 trend, EMA 9/11 entry, a second lot one room away
+library	TR-01	EMA 9/15 scalp on three entry candles
+library	SS-01	Bollinger Band + Heikin Ashi alert candle, daily (Kushal Varshney)
+library	SS-02	EMA 5/13 cross at the previous day's high or low
+library	SS-03	Lowest-volume opposite candle (Kushal Varshney)
+library	SS-04	The same 5-minute candle every day (Power of Stocks)
+library	SS-05	BTST: Heikin Ashi close vs the real close at 15:15 (Kushal Varshney)
+library	SS-06	EMA 30/50/100 stacked, enter at EMA 30 (Priyank)
+library	SY-01	Higher-timeframe structure, 1-hour trend break entered on 15 minutes
+library	BG-01	Gold: 1-hour structure, 15-minute sweep at the point of interest
+library	BG-02	The liquidation candle scalp, 2R
+library	BG-03	1-minute scalp: 15-minute point of interest, 1-minute sweep zone retest
+library	BG-04	Asia range sweep at the London open
+library	BG-05	Gold supply/demand zone with an EMA 8 cross and an engulfing
+library	BG-06	EMA 8/14 cross with an engulfing candle
+library	BG-07	Silver bullet, his golden-bullet version
+library	BG-08	Candle range theory on 15 minutes
+library	BG-09	Break and retest with a confirmation candle, 1:3
+library	BG-10	Consolidation breakout on a momentum candle
+library	PR-01	Brahmastra: Supertrend (20, 2) + MACD + VWAP
+library	PR-02	9:20 opening range: wait for the retest, 1:3
+library	PR-03	9:20 gap against the trend, opposite first candle
+library	PR-04	The third 5-minute candle, exit at 15:00
+library	PR-05	Ghanshyam Tech's window strategy
+library	PR-06	Ghanshyam Yadav's 2:20 candle
+library	PR-07	Ghanshyam Yadav's Fibonacci 0.71 buy
+library	PR-08	Pivot points: sell the rally to the pivot
+library	PR-09	Golden crossover: EMA 10 / 30 on 3 minutes
+library	PR-10	RSI divergence with a close-line trigger
+library	PR-11	52-week-high stocks bought on a pullback to the Alligator's teeth
+library	PR-12	Gold: 4-hour Supertrend ladder with counter-scalps
+library	PR-13	Bitcoin: the same ladder with a 10% take-profit
+library	SB-01	9/20 EMA: ride the trend from the first pullback
+library	SB-02	9/20 EMA rejected pullback, 15 minutes
+library	SB-03	9 EMA rejection scalp
+library	SB-04	200 EMA retest with a confirmation candle
+library	SB-05	The first 5-minute candle breakout, one trade a day
+library	SB-06	Gold liquidity sweep at a tested level, pause-candle or rejection trigger
+library	SB-07	Pre-breakout: buy under a tested resistance while the lows rise
+library	SB-08	Bollinger Band breakout on 1-hour bitcoin, 2% stop, 5% target
+library	TH-01	Bitcoin 6 PM session: anchored VWAP + EMA 25, the N pattern
+library	TH-02	Standard pivots R1 / S1 with a fast Supertrend (7, 3)
+library	TH-03	Renko + Ichimoku dual system, gold
+library	TH-04	Renko + Ichimoku dual system, bitcoin
+library	TH-05	EMA 50/200 trend, pullback to EMA 50 with RSI 40-55
+library	TH-06	Bitcoin 07:15-07:30 IST range breakout, stop at mid-range
+library	TH-07	Three-way confirmation on 30 minutes
+library	TH-08	EMA 288 trend, Supertrend signal, base break, swing trail
+library	TH-09	Darvas box at 52-week highs
+youtube_channels20	DH-01	VWAP pullback with an engulfing turn after a sweep
+youtube_channels20	DH-02	9:20 top movers: VWAP pullback, inside bar, engulfing break
+youtube_channels20	DH-03	3-minute Heikin Ashi pullback scalp with EMA 100
+youtube_channels20	DH-04	First 30 minutes range: break, pullback, confirmation
+youtube_channels20	DH-05	9:15-9:20 opening range breakout, RSI 55, rising ADX, Supertrend trail
+youtube_channels20	DH-06	9:20 BYR: buy the 9:20 high of a 1-4% gainer, +0.65%
+youtube_channels20	DH-07	Supertrend + Fisher Transform near zero + rising ADX (option buying, index proxy)
+youtube_channels20	DH-08	1-minute box breakout with OCO stop orders
+youtube_channels20	AX-01	EMA 5/20 cross, break of the counter candle within 3 bars
+youtube_channels20	AX-02	Previous-day high/low bias, close through the counter candle's open (option buying, index proxy)
+youtube_channels20	AX-03	9:30-10:00 range break, fixed 25-point scalp
+youtube_channels20	AX-04	All-touch candle (EMA 5/9/15 + SMA 20) before 10:00, 1:1, one reversal (options, index proxy)
+youtube_channels20	AX-05	CPR relationship bias, touch and close, 1:2, one reversal
+youtube_channels20	AX-06	Bitcoin 20-20 EMA (15-minute and 1-hour EMA 20)
+youtube_channels20	AB-01	Gap day: next day's 5-minute close through the gap day's far side
+youtube_channels20	AB-02	First two 15-minute candles one colour, the second beyond VWAP
+youtube_channels20	AB-03	EMA 9/21 cross + healthy confirmation candle (15-minute)
+youtube_channels20	AB-04	1-hour close 0.5% above the EMA 50 (BTST / swing)
+youtube_channels20	AB-06	EMA 9/15 cross + confirmation candle, Bank Nifty agreeing (options, index proxy)
+youtube_channels20	TS-01	First 1-hour candle wick zones: break or reject, 5-minute confirmation
+youtube_channels20	TS-02	First 1-hour range sweep fade on 1-hour candles
+youtube_channels20	TS-03	Two-day squeeze breakout on volume (stocks)
+youtube_channels20	TS-04	Gold: previous-day wick zones, 15-minute sweep and close-through
+youtube_channels20	TS-05	Bitcoin 1-minute Fibonacci 0.5-0.786 pullback, 1:1
+youtube_channels20	PV-02	EMA 21 continuation: buy the down-close candle's high
+youtube_channels20	PV-03	RSI divergence, enter on the close through the middle swing
+youtube_channels20	PV-04	No-bias SMC scalp: daily levels, two 1-hour candles, 15-minute sweep and break
+youtube_channels20	UP-01	The 9:15 open-price cross, out by 9:30 (options, index proxy)
+youtube_channels20	UP-02	Gap trap: first hour back across VWAP, fade the VWAP retest (stock options, stock proxy)
+youtube_channels20	UP-03	15-minute ADX curve: ADX rising through the DI lines
+youtube_channels20	UP-04	Daily Heikin Ashi side, EMA 200 band, Squeeze turning light, Supertrend (5, 1) (options, index proxy)
+youtube_channels20	UP-05	0.9% stretch from the 20 average, then EMA 20/50 cross back
+youtube_channels20	UP-06	Band-and-oscillator reversal scalp (stated approximation of a private indicator)
+youtube_channels20	VT-01	33 EMA band on 9 minutes + RSI 55/45 + VWAP (option buying, index proxy)
+youtube_channels20	VT-02	Weekly Supertrend (10, 3) king-candle breakout (stocks)
+youtube_channels20	VT-03	Rule-based swing: above EMA 20/50/200, 50-day breakout, 9 EMA exit
+youtube_channels20	TB-01	15-minute two-colour pair breakdown, short only, 1:3
+youtube_channels20	TB-02	Range of the 2nd and 3rd 5-minute candles, reverse once, hold to the close (index proxy)
+youtube_channels20	TB-04	Nifty daily EMA 9/20 cross, long only
+youtube_channels20	DE-01	EMA 9/30 cross with a strong candle, 3-minute
+youtube_channels20	DE-02	EMA 20/50/100 stack + Williams fractal, 1-minute, 4-hour side
+youtube_channels20	DE-03	Neela Peela: EMA 57/111 first retest, 1/3/5-minute agreement
+youtube_channels20	DE-04	Gold 4-hour Supertrend (10, 4), long only, 30% add on a 40-bar breakout
+youtube_channels20	DE-07	The 7:30 PM IST bitcoin candle in the 4-hour trend, 1:1
+youtube_channels20	TP-01	Gold range + impulsive FVG + discount + EMA 200 (5-minute)
+youtube_channels20	TP-01H	Gold range + impulsive FVG + discount + EMA 200 (1-hour)
+youtube_channels20	TP-02	Gold sweep of a tested level + minor trend-line break, EMA 200 side
+youtube_channels20	TP-03	Asian range, London push, New York reversal on the 9:30 displacement ORB
+youtube_channels20	TP-04	New York 15-minute ORB, limit at edge / midline / far side by impulse
+youtube_channels20	TP-05	9:30 displacement ORB without the session filter
+youtube_channels20	DT-01	MACD cross in the EMA 100 trend, swing stop, 1.5R (1-hour)
+youtube_channels20	DT-02	MACD + Parabolic SAR + EMA 200, stop at the dot, 1:1 (30-minute)
+youtube_channels20	DT-03	Stochastic oversold, RSI 50, MACD cross, 1.5R (30-minute)
+youtube_channels20	DT-04	Bitcoin daily Ichimoku lead lines, long only
+youtube_channels20	DT-05	15-minute Chaikin Money Flow side + MACD cross, 1.5R
+youtube_channels20	DT-06	First New York 4-hour range fakeout fade, 2R
+youtube_channels20	DT-07	SLC: 4-hour structure, fresh 5-minute zone, stochastic hook, 2R
+youtube_channels20	DT-08	Manipulation: swing sweep + inverse FVG, 2R
+youtube_channels20	TL-01	MACD cross beyond zero in the EMA 200 trend, stop past the EMA 200, 1.5R
+youtube_channels20	TL-02	Bollinger (30, 2) + RSI (13) mean reversion to the middle band
+youtube_channels20	TL-03	DEMA 200 + Supertrend (12, 3), exit on the opposite signal
+youtube_channels20	TL-04	EMA 200 + RSI 50 + engulfing, stop two candles, 2R
+youtube_channels20	JR-01	First Candle Rule: 9:30-9:45 range, FVG limit, candle-1 stop, 2R
+youtube_channels20	JR-02	First Candle Value: value-area failure fade (bitcoin volume)
+youtube_channels20	JR-03	9:30-9:35 range, 1-minute FVG break, market entry, 2R
+youtube_channels20	JR-04	9:30-9:35 range, retest close outside, stop at the midpoint, 2R
+youtube_channels20	JR-05	9:30-9:35 range, 1-minute FVG pullback + engulfing, 3R
+youtube_channels20	DR-01	EMA 200 side + counter-trend-line breakout, 1:2 (15-minute)
+youtube_channels20	DR-02	Gold 1-minute EMA 200 reclaim with the 15-minute side, 1:2
+youtube_channels20	DR-03	5 EMA untouched candle, close beyond it, 1:2 (bitcoin 15-minute)
+youtube_channels20	DR-04	Ether: 2% 15-minute momentum candle, then 1-minute trend-line breaks
+youtube_channels20	RU-01	MACD crossover beyond zero in the EMA 200 trend, swing stop, 1.5R (1-hour)
+youtube_channels20	RU-02	Stochastic below 20, then a MACD cross, 1.5R (30-minute)
+youtube_channels20	RU-03	Opposite RSI: RSI through 70/30 with ADX 25 in the EMA 200 trend, 1.5R
+youtube_channels20	RU-04	Williams fractal breakout in the 200 MA trend, 1.5R
+youtube_channels20	PT-01	Gold stop hunt at a tested level with the 1-hour trend, 2R
+youtube_channels20	PT-02	Gold RSI divergence + engulfing with the 1-hour trend, 2R
+youtube_channels20	PT-03	Sweep and flip: Asian range swept at the London open (15-minute)
+youtube_channels20	PT-04	4-hour inside-bar breakout in the trend, 2R
+youtube_channels20	TF-01	Fibonacci confluence continuation, -0.272 target (15-minute)
+youtube_channels20	TD-01	9/20 EMA cross at a tested level with trend and discount, 1.5R
+youtube_channels20	TD-02	9/15 EMA cross filtered by the SMI (7, 2, 2)
+youtube_channels20	TD-03	UT Bot pair + Schaff Trend Cycle, 2R (15-minute)
+youtube_channels20	TD-04	UT Bot + linear-regression candles trend ride (1-hour)
+youtube_channels20	TD-05	ADX/DI with a 200 EMA retest, 2R (15-minute)
+youtube_channels20	FZ-01	Gold 8 PM / 9 PM New York Midas model (15-minute sweep, 1-minute shift)
+youtube_channels20	FZ-02	Gold London first FVG inversion (15-minute)
+youtube_channels20	MH-01	Gold 8 PM New York hourly candle: reversal or continuation
+youtube_channels20	MH-02	15-minute fake-out with a 1-minute flip entry
+youtube_channels20	MH-03	Asian liquidity sweep into a PD array, 1-minute FVG entry
+youtube_channels20	DE-05	BTC daily-expiry short strangle at 23:30 IST
+youtube_channels20	DE-06	BTC short strangle at 21:00 IST, 70% decay target
+youtube_channels20	DE-08	Tokyo close / New York open session strategy
+youtube_channels20	TL-05	Chandelier Exit + BJ SuperScript + RSI 25/SMA 150 + EMA 200
+youtube_channels20	UP-07	Change-in-OI PCR after 11:00, entry at the option's VWAP
+youtube_channels20	TB-03	NIFTY weekly call sold at 09:25 (premium near Rs 30)
+youtube_channels20	TB-05	SENSEX weekly call bought at 14:30 (premium >= Rs 100)
+youtube_channels20	TB-06	NIFTY ADX above 50 before 10:00, long ATM straddle
+youtube_channels20	TB-07	Intraday rolling short straddle with leg re-entries
+youtube_channels20	PV-01	Opening-gap two-sided fill theory
+youtube_channels20	TF-02	Daily pivot points, two trades a day
+youtube_channels20	TF-03	Gold 10/20 EMA zone retests with COT net positioning
+youtube_channels20	TF-04	Gold point-of-control scalps with COT
+youtube_channels20	TD-06	9/20 EMA cross after two working crosses; 9/20 EMA pullback
+youtube_channels20	FZ-03	Turtle soup inside 4-hour order flow
+crypto_playlist_2026_11	CP-01	Trend pullback at the 5th point (qPBdLsiEa3s, mb0AeY9YyPg)
+crypto_playlist_2026_11	CP-02	Power-candle breakout of the last swing (qPBdLsiEa3s, mb0AeY9YyPg)
+crypto_playlist_2026_11	CP-03	Range ping-pong and range breakout (qPBdLsiEa3s, mb0AeY9YyPg)
+crypto_playlist_2026_11	CP-04	Trend-line rejection (qPBdLsiEa3s)
+crypto_playlist_2026_11	CP-05	Turning-point zones (mb0AeY9YyPg, his core method)
+crypto_playlist_2026_11	CP-06	Triple top / triple bottom (mb0AeY9YyPg)
+crypto_playlist_2026_11	CP-07	Head and shoulders / inverted (mb0AeY9YyPg)
+crypto_playlist_2026_11	CP-08	Flag and pole (mb0AeY9YyPg)
+crypto_playlist_2026_11	CP-09	Trap of a swing level (mb0AeY9YyPg: "the best strategy of all time")
+crypto_playlist_2026_11	CP-10	Retest of a broken level (mb0AeY9YyPg)
+crypto_playlist_2026_11	CP-12	Current-day high/low sweep (IOBoaM71MUA)
+crypto_playlist_2026_11	CP-13	15-minute order block entered on a 5-minute FVG (IOBoaM71MUA)
+crypto_playlist_2026_11	CP-14	Order-flow absorption (ieZ--wMeSxE)
+crypto_playlist_2026_11	CP-15	Delta-filtered morning / evening star (ieZ--wMeSxE)
+crypto_playlist_2026_11	CP-16	ICT previous-day / previous-week high-low sweep (37uPX6Li-xE)
+crypto_playlist_2026_11	CP-17	Fair value gap, third touch (37uPX6Li-xE)
+crypto_playlist_2026_11	CP-18	Order block at its 50% (37uPX6Li-xE)
+crypto_playlist_2026_11	CP-20	Inverse fair value gap (37uPX6Li-xE)
+crypto_playlist_2026_11	CP-21	Breaker block (37uPX6Li-xE)
+crypto_playlist_2026_11	CP-22	CISD after a liquidity sweep (37uPX6Li-xE)
+crypto_playlist_2026_11	CP-23	Inducement (37uPX6Li-xE)
+crypto_playlist_2026_11	CP-24	SMT divergence (37uPX6Li-xE)
+crypto_playlist_2026_11	CP-25	Optimal trade entry 0.705-0.79 (37uPX6Li-xE)
+crypto_playlist_2026_11	CP-26	Turtle soup (37uPX6Li-xE)
+crypto_playlist_2026_11	CP-27	Unicorn model (37uPX6Li-xE)
+crypto_playlist_2026_11	CP-28	Silver bullet (37uPX6Li-xE)
+crypto_playlist_2026_11	CP-29	Fear & Greed accumulation (qPBdLsiEa3s)
+sniper_headshot_2026_11	SH-00	Sniper headshot entry: the video's rules (jvzd7UPlb5Y)
+sniper_headshot_2026_11	SH-01	Upgrade: enter on the reclaim of the swept level (jvzd7UPlb5Y)
+sniper_headshot_2026_11	SH-02	Upgrade: Delta order-flow confirmation (jvzd7UPlb5Y)
+sniper_headshot_2026_11	SH-03	Upgrade: 1-hour 50-EMA trend filter (jvzd7UPlb5Y)
+sniper_headshot_2026_11	SH-04	Upgrade: built to pay Delta's costs (1-hour bars) (jvzd7UPlb5Y)
+booming_bulls_2026_11	BB-01	Nifty previous-day high/low (gNoByC3ZEOo), NIFTY 5m
+booming_bulls_2026_11	BB-02	15-minute opening-range breakout (yKtI-VEMwC0, 4iPEKSo_vwY), NIFTY 5m
+booming_bulls_2026_11	BB-03	Nifty + BankNifty synchronised break (0MasZZQiL5s), NIFTY traded, 5m
+booming_bulls_2026_11	BB-04	Zone trap with RSI divergence (SxQwiHBfHUs), NIFTY 15m
+booming_bulls_2026_11	BB-05	SMC break of structure / change of character into an order block (hXtpVnpjuXg), BANKNIFTY 5m
+booming_bulls_2026_11	BB-06	Gap day + first candle through the 15m 200 MA (zm9emzopBi0), NIFTY 15m
+booming_bulls_2026_11	BB-07	Liquidity sweep of previous-day levels, masterclass (IOBoaM71MUA), XAUUSD 5m (and NAS100)
+booming_bulls_2026_11	BB-08	Previous-day "manipulation" trap after 10:00 IST (HxBwAconvqA, 7LLm0HSarPc, TIQeTWWc1-8), XAUUSD / EURUSD / GBPUSD 5m
+booming_bulls_2026_11	BB-09	Value-area trap (zYGUL82NsS4, rFrFhpwJJOc B), XAUUSD 5m
+booming_bulls_2026_11	BB-10	Gold 11:30–12:30 IST range sweep (1hZMOSd34vQ), XAUUSD 5m
+booming_bulls_2026_11	BB-11	Forex 10:00 IST range trap (uUa61jN45vM), EURUSD 15m (GBPUSD, XAUUSD as out-of-market checks)
+booming_bulls_2026_11	BB-12	400 EMA trap (DI3ydbq9b6M), XAUUSD and US30 15m
+booming_bulls_2026_11	BB-13	"Prop-firm" inside-body breakout (Lb4yel3nCws, NwCyONUCsC0), NAS100 and XAUUSD 5m
+booming_bulls_2026_11	BB-14	Inside candle with the 10-point filter (kakFchv-ylo), US30
+booming_bulls_2026_11	BB-15	Apple opening-range trap (T_VlPXyqj0U), AAPL 3m
+booming_bulls_2026_11	BB-16	Retracement-zone sweep (rFrFhpwJJOc A, 3gj7MbZ0vHs), XAUUSD 1h + 5m
+booming_bulls_2026_11	BB-17	Order-block 50% trap (RTbVZfriRrw), XAUUSD and EURUSD 15m + 5m
+booming_bulls_2026_11	BB-18	15m 200 EMA breakout-retest (Hj56fabq2c8), EURUSD and GBPUSD 15m
+youtube_intraday4	SI-06	SMMA 11/21 crossover on the side of the higher-timeframe 21 average (5-minute stocks / 3-minute index)
+youtube_intraday4	BI-11	EMA 200 + RSI above 50 + bullish engulfing, long only, 1:2
+youtube_intraday4	SI-05	Futures OI-gainer selection + long build-up check + EMA 20/50/200 stack (5 minutes)
+youtube_intraday4	BI-07	Three-candle zone retest with a rejection candle (5-minute bitcoin)
+youtube_intraday4	BI-02	Fresh zone inside a zone: 4-hour supply/demand refined to the two outermost untouched 15-minute zones, reversal-candle entry
+youtube_intraday4	CI-05	Crude oil 15-minute two-candle rejection after 12:00 IST (sweep of the prior candle, break of the signal candle)
+youtube_intraday4	BI-01	Bitcoin 05:30-09:30 IST four-hour opening range, 15-minute breakout, 2 ATR stop from the range line
+youtube_intraday4	CI-02	Crude oil 66 moving-average slope + Stochastic 75/35 re-cross, 1:2
+youtube_intraday4	CI-04	Crude oil Donchian-200 extreme on 20 minutes, 5-minute EMA 9 reversal, 40 points then trail
+youtube_intraday4	SI-02	Fixed watchlist: 9:15-9:30 range break on the VWAP side, pullback engulfing entry, stop beyond VWAP
+youtube_intraday4	OB-02	NIFTY 9:20 Rs 62.5 option, buy on a 50% premium rise, hold overnight (BTST), 50% stop, +75 target
+youtube_intraday4	CI-06	Crude oil RSI 60/40 cross on the SMA 89 side, 15 minutes, 18:00-22:00 IST, 1:2
+youtube_intraday4	SI-12	Leading sector's top mover: 9:20 five-minute candle on the VWAP side, break of it, 1:1.5 then 1:2
+youtube_intraday4	OB-10	VWAP side + EMA 5/13 cross + RSI 50, break of the signal candle, EMA 5 trail (5 minutes)
+youtube_intraday4	BI-04	Bollinger W/M fakeout: first swing outside the band, fakeout of it, neckline break (5-minute bitcoin)
+youtube_intraday4	BI-05	Bitcoin 8-hour structure range: buy the discount quarter after a break of structure (smart money)
+youtube_intraday4	CI-08	Crude oil 7% stretch from the 200 average + slow Stochastic RSI turn (15 minutes)
+youtube_intraday4	SI-09	First 15-minute candle breakout on 5 minutes, stop at the far side, 1:2, nothing after 10:00, no Tuesdays
+youtube_intraday4	OB-07	NIFTY ATM straddle-chart day filter: buy options only after the straddle sell stops out, then a 5-minute band breakout on spot
+youtube_intraday4	BI-08	5-minute multi-touch level for direction, 1-minute structure breakout (scalp)
+youtube_intraday4	SI-04	NIFTY first 15-minute candle colour picks the side; top three movers, break of their second 15-minute candle, 1:2
+youtube_intraday4	OB-04	NIFTY 14:55 five-minute candle breakout with a 5-point buffer, out at 15:15
+youtube_intraday4	SI-10	Breadth-chosen sector, previous-day high/low break with two same-colour 5-minute candles, half at 1:2, rest to 15:15
+youtube_intraday4	OB-03	Williams %R (280) overbought on 60, 20 and 5 minutes: ATM call on the fresh 5-minute signal, +10-12% premium
+youtube_intraday4	OB-11	NIFTY expiry-day 'gamma blast': sub-Rs 10 option on the more-negative-theta side, 14:00-15:00
+youtube_intraday4	CI-09	Crude oil 17:45 IST 15-minute candle: three lines (high, low, 50%), 5-minute close beyond
+youtube_intraday4	SI-08	Previous afternoon (14:00-15:30) range around VWAP: break, pullback, engulfing entry, 1:2 (fixed list)
+youtube_intraday4	SI-11	9:30 open-equals-low gainer (open-equals-high loser): first 15-minute candle breakout, stop at the open
+youtube_intraday4	CI-12	Crude oil 'bald' green candle (no lower wick) after a red series, 15-minute scalp
+youtube_intraday4	OB-08	Supertrend (10, 1) + (10, 3) both bullish with a fresh flip and a strong candle, 10-point stop, 20-point target (5-minute NIFTY)
+youtube_intraday4	BI-10	5 EMA untouched alert candle, next body crossing at least 30% (15-minute bitcoin)
+youtube_intraday4	SI-03	NIFTY second-and-third 15-minute candle range (9:30-10:00), first break in the running candle
+youtube_intraday4	OB-09	2-minute EMA 10/20 trend pullback after a stop hunt, star or engulfing entry, done by noon (VIX filter)
+youtube_intraday4	CI-11	Daily inside-candle (mother/baby) levels traded intraday (crude oil)
+youtube_intraday4	SI-07	Lowest-volume opposite candle after a three-candle move (Kushal Varshney)
+youtube_intraday4	BI-12	EMA 21 break and retest: opposite candle within three bars, enter on its high/low (15-minute bitcoin)
+youtube_intraday4	OB-01	NIFTY 9:30 premium-180 breakout: ITM call or put that first breaks Rs 180, stop 20, target 40
+youtube_intraday4	SI-13	First-hour (9:15-10:15) range breakout, touch entry, opposite-side stop, out at 15:15, one trade a day
+youtube_intraday4	OB-05	9:15 open-price cross after 30 seconds, ATM option, out by 9:30 (Rajesh Jain)
+youtube_intraday4	BI-03	EMA 9/20 crossover at a twice-touched support or resistance, 5-minute bitcoin
+youtube_intraday4	OB-06	ADX turning up + price breakout + big candle (15 minutes), ATM option, 20% premium stop
+youtube_intraday4	CI-07	Natural gas MFI(140) 40/60 zone + Supertrend side + EMA 9/26 cross (1 hour)
+youtube_intraday4	SI-01	9:25 F&O top-mover body-range breakout on 3 minutes (no-gap stocks, index-aligned), ATM option buy
+youtube_intraday4	BI-06	Two-candle turn through EMA 6 on 1-hour bitcoin, 1:3
+youtube_intraday4	CI-03	Crude oil 17:30-18:00 IST 30-minute candle: 50% side and break after 18:00 on 3 minutes, 1:2
+youtube_intraday4	CI-01	Crude oil 1-hour MACD side, fresh 15-minute MACD crossovers, exit on the opposite cross
+youtube_intraday4	BI-09	SMA 100 side + higher-timeframe Heikin Ashi trend + MACD cross, 2R (5-minute bitcoin)
+youtube_intraday4	CI-10	Silver Micro 18:30 IST 30-minute candle breakout with a 50-point buffer, stop and reverse, 1:2

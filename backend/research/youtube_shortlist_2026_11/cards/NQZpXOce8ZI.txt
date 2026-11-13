@@ -1,0 +1,22 @@
+video: NQZpXOce8ZI
+topic: india_stocks
+summary: Anmol Mittal's version of a Larry Williams intraday breakout for high-beta stocks (3-5% daily swings, good volume): buy when price breaks the previous day's high plus a 0.5% buffer (sell below the previous low minus 0.5%), stop at the day's low (high), target twice the risk, otherwise exit at 3 PM; risk at most 1% of capital, quantity = 1% of capital / risk per share.
+instruments: NSE high-beta stocks
+timeframes: 5m, 1d
+style: intraday
+= CK-02 | Previous-day high/low break with a 0.5% buffer, day-extreme stop, 2R target, out at 3 PM (high-beta stocks)
+R market E 03:00,03:41 | High-beta stocks that move 3-5% a day with good volume; the setup fails in quiet stocks. | "jo stok 34534 parasent dileevar utaar-charhaav karate ho plas volyoom bhee honaa chaahie"
+R entry E 01:36,02:18 | Long when price breaks the previous day's high plus a 0.5% buffer; short below the previous day's low minus 0.5%. | "isamen hamen 0.5 parasent ke batar bhee rakhanaa"
+R stop E 07:49,12:48 | Stop at the day's low for a long (the day's high for a short). | "stopalos hogaa aaj ke din kaa ... lo"
+R target E 04:23,08:31 | Target twice the risk; if not reached, exit at 3 PM at whatever price. | "dabal prophit rakhanaa hai ... teen baje ekajut kar denge"
+R sizing E 04:23,10:01 | Risk at most 1% of capital per trade: quantity = 1% of capital / (entry - stop). | "maiksimam risk not mor than van par sent aaph yor kaipital"
+R filter I 19:43 | An indicator line confirming volatility (its middle line must be crossed upward) is mentioned; the captions are too garbled to recover it. | "indiketar lenge isake beech vaalee laain hotee"
+R market A - | Desk version: the NSE 5-minute pool, stocks whose 20-day mean daily range (high-low over close) is at least 3%. | ""
+R entry A - | Buy-stop at the previous day's high x 1.005 and sell-stop at the previous day's low x 0.995 from 09:20 to 14:00 (the first to fill wins, one trade per stock a day). | ""
+R stop A - | Stop at the session low (high) at the fill; target 2R; exit at 15:00. The volatility indicator is not coded. | ""
+T with_assumptions | the buffer is said as both 0.5% and 0.25% (0.5% used); the volatility indicator is unrecoverable (A)
+V buffer | R2 | 12:08 | 0.5% in the rules, 0.25% in one example | 0.5%
+X - | 05:44 | NSE stock (example) | long | previous high 108.05 + 0.5% | about 108.6 | the day's low 106.3 | +2 x 2.3 risk | target | hit about 3 PM
+X - | 13:28 | Delta Corp | long | previous high + 0.5% | about 111 | about 109.5 (risk 1.8) | 114.6 | target | target hit
+P 00:53 | 01:36 | Telegram channel for the presentation
+U Which volatility indicator filters the stocks?

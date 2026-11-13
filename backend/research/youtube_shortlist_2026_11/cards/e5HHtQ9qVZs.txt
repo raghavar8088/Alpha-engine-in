@@ -1,0 +1,19 @@
+video: e5HHtQ9qVZs
+topic: forex_us
+summary: Axia Futures' VWAP trend trade: on a steady trend day that drives early away from VWAP (best after a gap open), the first pullback to VWAP that holds is bought (buyers who could not get below VWAP accept it as their price); exit at a break of the recent high; order-flow absorption at VWAP is the confirmation they look for.
+instruments: Bund futures (example), index futures
+timeframes: intraday
+style: intraday
+= AF-01 | Early drive away from VWAP (gap day), buy the first VWAP test that holds, exit at a new high
+R setup E 01:31,02:17 | A steady (not parabolic) trend day with an early directional drive away from VWAP. | "you're looking for this directional move early on that drives away from the v-wap"
+R entry E 02:17,03:01 | Buy at VWAP on the first test back if it holds. | "you're looking to buy at vwap"
+R target E 03:01,03:44 | Exit as price breaks the recent high. | "exit as you go and break a new high giving you a really clear target"
+R filter E 04:25,05:08 | Best on gap days: the gap puts price away from where VWAP builds. | "a day where you get a gap open my first thought is this could be v day"
+R filter E 03:01 | Order flow: absorption of sellers at VWAP (not available on the desk). | "you're looking then as well from an order flow perspective to see absorption"
+R market A - | Desk version: Nasdaq 100 cash session. | ""
+R setup A - | Gap open of at least 0.3% from the previous close; within the first 30 minutes price closes at least 0.4% away from VWAP on the gap's side. | ""
+R entry A - | After 10:00 New York, a limit at VWAP for the first touch (long on an up gap, short on a down gap). | ""
+R stop A - | Stop 0.25% beyond VWAP at entry; target the session extreme at entry; out at 15:55; one trade a day. No order-flow check. | ""
+T with_assumptions | no stop is stated; 'early drive' and 'holds' are judged live (A)
+V early drive | R1 | 02:17 | Not quantified | at least 0.4% from VWAP within 30 minutes
+U Where is the stop if VWAP does not hold?

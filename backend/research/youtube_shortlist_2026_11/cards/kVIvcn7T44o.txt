@@ -1,0 +1,23 @@
+video: kVIvcn7T44o
+topic: india_stocks
+summary: Vishal Malkan's RSI divergence masterclass: a regular bullish divergence (lower closing low, higher RSI) in a down trend or bearish divergence in an up trend, strongest when the two points are 3-10 bars apart; enter on the confirming candle (green for bullish), stop beyond the second extreme (its shadow), target the swing point C between the two extremes, and take the trade only when risk-reward is at least about 1:3; a weekly divergence is executed on the daily chart.
+instruments: NSE stocks; Nifty
+timeframes: 1w, 1d
+style: swing
+= MV-02 | Regular RSI divergence 3-10 bars apart, confirmation candle, target the middle swing, RR at least 1:3
+R indicator E 02:50 | RSI as a speedometer: below 40 bearish, above 60 bullish, between sideways. | "40 ke neeche berish, 60 ke oopar bulish, 40 60 ke beech men saaidavej"
+R setup E 05:38,12:36 | Regular divergence on closing prices: bullish = lower price close with a higher RSI in a down trend; bearish = higher close with a lower RSI in an up trend. | "kanpeyar kyaa karanaa hai? kloj too kloज़"
+R filter E 13:18,18:15 | The two points must be 3-10 bars apart (6-8 typical); 15-50 bars apart dilutes the signal. | "three se leke 10 ke beech men honaa chaahie"
+R entry E 21:47,24:41 | Wait for the confirming candle (red for bearish, green for bullish), then enter. | "haau doo aaee get a kanpharmeshan dait its going too vark vhen aaee see a bulish kaindal"
+R stop E 21:47 | Stop beyond the extreme of the second point, including its shadow. | "esael ... haaee ke oopar samajho yahaan pe shaido bhee hai"
+R target E 22:29,25:21 | Target point C, the swing between A and B; once reached the trade is over. | "vans d taaraget iज़ acheevd job dan tred ovar"
+R filter E 23:10,25:21 | Take it when risk-reward is at least about 1:3 (1:4 shown). | "risk rivord reshiyo iज़ bitaveen 1 etaleest phor to 1:4"
+R timeframe E 29:33 | A weekly divergence is traded on the daily chart (enter when the daily confirms). | "veekalee men to daayarekt tred naheen hogaa ... delee chaart men jaataa hoon"
+R market A - | Desk version: NSE stocks on daily bars, long side only (bullish divergence; Indian cash stocks cannot be held short overnight). | ""
+R setup A - | Two pivot lows (a close lower than the closes 2 bars either side) 3-10 bars apart; the later close lower than the earlier, RSI(14) at the later pivot higher than at the earlier; the earlier pivot's RSI below 40. | ""
+R entry A - | Confirmation: within 3 bars after the second pivot, the first green daily candle closing above the pivot's close; buy at the next open if (highest high between the pivots - entry) is at least 3 x (entry - the second pivot's low). | ""
+R stop A - | Stop at the second pivot's low; target the highest high between the two pivots; exit at the close after 20 trading days if neither is hit. | ""
+T with_assumptions | pivots, the RSI zone and the time stop are set by us; short side not coded on cash stocks (A)
+V divergence points | R2 | 05:38 | Picked by eye | pivot closes lower than the 2 bars either side
+X - | 30:14 | Infosys (weekly divergence, daily execution) | short | weekly RSI 74 then 71 at a higher high; third daily candle red confirms | below the confirming candle | above the high (+Rs 12) | point C | target | risk-reward about 1:6-1:7
+P 00:05 | 01:26 | One-million subscriber thanks; 10X course

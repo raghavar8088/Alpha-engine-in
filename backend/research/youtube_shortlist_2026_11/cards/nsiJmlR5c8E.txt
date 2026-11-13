@@ -1,0 +1,21 @@
+video: nsiJmlR5c8E
+topic: india_stocks
+summary: Vivek Bajaj's open-market strategy: pick stocks that saw heavy delivery the day before (an operator stepped in) with rising relative strength, mark the first 15-minute candle's high and low, and trade its break on the 5-minute chart while there is time (before 2 PM, ideally by 12:30), with the stop at the high (low) of the entry candle or the one before it; square off the same day.
+instruments: NSE stocks
+timeframes: 15m, 5m
+style: intraday
+= VB-01 | High-activity stock, first 15-minute high/low break on 5 minutes before 2 PM, entry-candle stop
+R market E 11:54,13:20 | NSE stocks that had heavy delivery the previous day (StockEdge scan), optionally with rising relative strength. | "dileevaree se hee pataa lagataa hai kee seeriyas aadamee ghusaa huaa hai"
+R setup E 01:30,08:56 | Mark the high and low of the first 15-minute candle. | "pahale 15 minat kaa jo kaindal hai usakaa haay aur loko not kar lenge"
+R entry E 04:40,09:57 | Trade the break of that high or low, taking the entry on the 5-minute chart. | "is 15 minat ko aap kanvart kar deejie 5 minat men"
+R session E 03:28,15:39 | The break must come early enough to play out: before 2 PM (12-12:30 is fine); square off the same day. | "2:00 baje ke pahale agar huaa tab samay hai"
+R stop E 06:36 | Stop at the high of the candle you sold in, or of the candle before it (mirror for longs). | "jo kaindal hai jisamen aapane bechaa hai isakaa haay ko stop los banaa yaa isake ek kaindal pahale kaa"
+R target I 11:02 | Aim for about 0.5% of capital a day. | "agar aap apanaa kaipital kaa aadhaa parasent bhee ritarn jenaret kar rahaa hai"
+R market A - | Desk version: the NSE 5-minute pool; the delivery scan becomes a volume proxy (the desk has no delivery data): previous day's volume at least 2 x its 20-day mean. | ""
+R entry A - | After 09:30, enter at the next bar's open when a 5-minute candle closes above the 09:15-09:30 high (below the low); signals until 14:00; one trade per stock a day. | ""
+R stop A - | Stop beyond the extreme of the signal candle and the one before it; no target; out at 15:15. | ""
+T with_assumptions | the delivery scan is replaced by a volume proxy; the exit is the close (A)
+V heavy delivery | R1 | 11:54 | Read from StockEdge's delivery scan | previous day's volume at least 2 x its 20-day mean
+X - | 09:57 | NSE stock (example chart) | short | first 15-minute low broken | the break | the entry candle's high | none | target | fell to 13850 then reversed
+P 11:54 | 13:20 | StockEdge scans
+U Is the break a candle close or a touch?

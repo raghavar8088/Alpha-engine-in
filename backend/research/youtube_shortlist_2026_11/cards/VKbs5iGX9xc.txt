@@ -1,0 +1,21 @@
+video: VKbs5iGX9xc
+topic: forex_us
+summary: Tradeciety's 'dirty retest': on the 4-hour chart a mature trend turns into a distribution pattern (lower highs, divergence) that breaks out; price moves away, then falls back into the pattern without exceeding its extreme; on the 15-minute chart enter when the micro pattern breaks in the breakout's direction, stop above the higher-timeframe breakout level, target the next support/resistance on the left.
+instruments: forex and any market
+timeframes: 4h, 15m
+style: intraday
+= TC-01 | 4-hour breakout, dirty retest back into the pattern, 15-minute break of the retest
+R timeframe E 00:01,02:52 | Higher timeframe 4-hour for the macro plan; 15-minute for the entry. | "on the lower time frame on the 15 minute we are creating macro and micro trading plans"
+R setup E 00:47,01:27 | After a mature trend a distribution pattern forms (lower highs, divergence); wait for the breakout out of it. | "first of all we need to wait for the breakout that is always step one"
+R setup E 01:27,02:10 | Price must move away from the breakout level first, then come back INTO the pattern (the dirty retest); no immediate retest. | "we don't want to see immediate re-tests"
+R filter E 03:32 | The retest must turn before the pattern's highest high, otherwise the idea is invalid. | "we don't want to see the market break above the high here that would invalidate the setup"
+R entry E 03:32,04:13 | On 15 minutes enter when the micro pattern's low breaks (passive) or as momentum turns (aggressive). | "we wait for the market to clear the loan"
+R stop E 04:13,04:53 | Stop beyond the higher-timeframe breakout level, out of the traffic. | "this is the breakout level and you can place your stop loss here"
+R target E 04:13,05:36 | Target just before the next level on the left (the origin of the move); wider targets lower the win rate. | "we want to look left for a target"
+R market A - | Desk version: EUR/USD, GBP/USD and Bitcoin. | ""
+R setup A - | 4-hour support = the lowest low of the 12 bars before the breakout; breakout = a 4-hour close below it; moved away = within 6 bars a low at least 1 x ATR(14, 4h) below support; dirty retest = a later 4-hour close back above support but below the 12-bar pattern's high (mirror for longs). | ""
+R entry A - | Within 12 four-hour bars after the retest, short at the next 15-minute open after a 15-minute close below the lowest low of the previous 8 fifteen-minute bars. | ""
+R stop A - | Stop above the retest's highest high; target 2R; out at the day's end; one trade a day. | ""
+T with_assumptions | the distribution pattern and the levels are discretionary; ours is a mechanical approximation (A)
+V distribution pattern | R2 | 00:47 | Read by eye | the 12 four-hour bars before the breakout
+U What counts as 'moving away' before the retest?

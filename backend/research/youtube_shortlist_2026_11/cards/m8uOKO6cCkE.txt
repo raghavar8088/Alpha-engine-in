@@ -1,0 +1,12 @@
+video: m8uOKO6cCkE
+topic: india_stocks
+summary: Karthik (Zerodha Varsity) explains why gaps form (overnight demand-supply shocks such as results) and how to treat them: don't over-analyse, trail the stop on an existing position after a favourable gap, be careful with new positions because the stop can be deep, distrust gaps on low volume; he sees no merit in gap-filling trades.
+instruments: NSE stocks
+timeframes: 1d
+style: unclear
+= ZV-01 | Gap handling guidelines (no trade rule)
+R setup E 03:37,04:18 | Gaps come from demand-supply shocks; don't over-analyse them. | "firstly don't overanalyze gaps"
+R management E 04:18 | With a position already on, after a gap in your favour don't hurry to book; trail the stop. | "don't be in a hurry to book your profits enjoy the price search and don't forget to Trail your stop- loss"
+R no_trade E 04:18 | A gap on low volume needs caution (liquidity, not news); a new position after a big gap can need a deep stop. | "if a gap occurs on low volume then be careful"
+R setup E 04:18 | He sees no merit in trading the gap fill. | "I personally don't find any Merit in this"
+T concept_only | guidance on gaps with no entry, stop or exit rule

@@ -1,0 +1,22 @@
+video: -hTxqOZ_PTQ
+topic: india_index
+summary: Dhan's 5-minute index scalp (Sensex, Nifty, Bank Nifty futures): BB Trend (Bollinger's BBTrend on lengths 100 and 250, five times the daily 20/50) sets the side; trade only a FRESH MACD (48, 104, 36) cross in the same colour; book part at a fixed target (Nifty 30-40, Bank Nifty about 100, Sensex 120-130 points) and trail the rest on the EMA 5/15 cross.
+instruments: Sensex, Nifty and Bank Nifty futures
+timeframes: 5m
+style: scalping
+= DH-09 | BB Trend (100, 250) side + fresh MACD (48, 104, 36) cross, part at a fixed target, EMA 5/15 trail
+R market E 01:31 | Index futures (Sensex, Nifty, Bank Nifty); options possible but futures preferred (no theta decay). | "phyoochars aar riletivalee sephar kanpeyar too opshan"
+R timeframe E 00:49 | Five-minute chart for scalping on indices. | "main yahaan par 5 minats kaa taaim phrem yooज़ karataa hoon"
+R indicator E 01:31,02:15 | BB Trend with 20/50 Bollinger lengths multiplied by five: 100 and 250. | "isake pairaatars 20 aur 50 hain. main isako phaaiv taaims karoongaa 100 250"
+R indicator E 02:57 | MACD with four-times parameters: 48, 104, 36. | "main yahaan par 4x pairaameetars yooज़ karataa hoon. 48 104 aur 36"
+R entry E 02:57,04:18 | Not when both are merely the same colour: BB Trend must already be in a colour and the MACD must give a FRESH signal in that colour. | "beebee trend jo hai vo kisee partikular kalar kaa jo hogaa sem kalar men phresh emaeseedee kaa signal chaahie"
+R no_trade E 03:37 | He personally does not take trades right at the open. | "main parsanalee maarket khulate hee tred naheen letaa hoon"
+R target E 05:38 | Partial booking at Nifty 30-40, Bank Nifty about 100, Sensex 120-130 points. | "niphtee men tred kar rahe hain to 30 se 40 point lenge"
+R exit E 05:38 | Trail the rest on the EMA 5/15 cross: exit a long when EMA 5 goes below EMA 15 (a short when it goes above). | "baay tred men jab 5 15 ke neeche jaaegaa to yahaan par tred ko egjit kar jaanaa hai"
+R indicator A - | BB Trend = (|lower(100) - lower(250)| - |upper(100) - upper(250)|) / middle(100), Bollinger bands of 2 standard deviations on closes; green above zero, red below. | ""
+R entry A - | Desk version: Nifty and Bank Nifty five-minute bars; enter at the next bar's open when the MACD (48, 104, 36) line crosses its signal in the direction of the current BB Trend sign; signals 09:30-14:45. | ""
+R stop A - | Half booked at +35 points (Nifty) / +100 (Bank Nifty), then the stop moves to cost; the rest exits at the next open after an EMA 5/15 cross against the trade; protective stop at 2 x the partial distance (no stop is stated); out at 15:15; at most 3 trades a day. | ""
+T with_assumptions | BB Trend's formula is Bollinger's published one (Dhan's own may differ); no stop is stated (A)
+V partial size | R7 | 05:38 | 'paarshiyal' without a share | half
+X - | 03:37 | Sensex | short | BB Trend red, fresh MACD sell around 12:00 | the signal | none stated | about 1.5% by the close | target | about 1200 points
+U What is the stop before the EMA 5/15 cross?

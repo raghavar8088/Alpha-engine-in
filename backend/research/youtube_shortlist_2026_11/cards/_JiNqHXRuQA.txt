@@ -1,0 +1,19 @@
+video: _JiNqHXRuQA
+topic: forex_us
+summary: UKspreadbetting's VWAP pullback: when price has moved further from the session VWAP than at any point in the last three days (a trend/volatility filter), and not in the first or last hour of the session, buy the first test back to VWAP (sell in a down move); stop = (high - VWAP) / 3 below the entry, target = the high, so always 3:1.
+instruments: index cash sessions (Dow), large cryptos, FX with volume, stocks
+timeframes: 15m
+style: intraday
+= UK-02 | Biggest VWAP excursion in 3 days, first VWAP test outside the first/last hour, 1/3 stop, 3:1
+R market E 00:02,00:45 | Works best on index cash sessions; also thick cryptos, currencies with volume, stocks. | "works far better on the regular trading hours cash indices"
+R filter E 00:45,01:30 | Rule 1: price has moved further away from VWAP than it has in the last three days. | "price moves the first away from view up for three days"
+R filter E 02:55 | Rule 2: not in the first or last hour of the session. | "not in the first or last hour"
+R entry E 03:39 | Buy the first test of VWAP after the excursion (mirror for shorts). | "the first test of the V whap we buy it"
+R stop E 04:24,05:05 | Stop = (excursion high - VWAP) / 3 below the entry. | "our stop is going to be high - the V whap ... and then we divide it by three"
+R target E 05:05,05:45 | Target the excursion high: always 3:1; scaling out and running some is fine. | "your risk reward ratio is always going to be three to one"
+R market A - | Desk version: Nasdaq 100 cash session (09:30-16:00 New York) and Bitcoin (UTC day; 'first and last hour' = 00:00-01:00 and 23:00-24:00 UTC). | ""
+R filter A - | Excursion = the largest |close - VWAP| of the session so far; the filter passes when it exceeds the largest excursion of each of the previous 3 sessions. | ""
+R entry A - | Limit order at VWAP after the filter passes (long if the excursion was above VWAP), for the first touch only, one trade a session. | ""
+R stop A - | Stop and target as stated (1/3 of the excursion; target the excursion extreme); out at the session close. | ""
+T with_assumptions | the three-day comparison is eyeballed in the video (A)
+V furthest away | R2 | 00:45 | Eyeballed | the session's largest close-to-VWAP distance beats each of the last 3 sessions'

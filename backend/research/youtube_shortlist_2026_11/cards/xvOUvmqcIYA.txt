@@ -1,0 +1,17 @@
+video: xvOUvmqcIYA
+topic: india_stocks
+summary: Vivek Bajaj's VWAP use for intraday stocks: on a 15-minute chart with the session VWAP and a 15-minute Supertrend, buy only when both say buy and sell only when both say sell (price below Supertrend and below VWAP).
+instruments: NSE stocks
+timeframes: 15m
+style: intraday
+= VB-02 | Session VWAP and 15-minute Supertrend agreeing
+R market E 00:04 | Intraday trading in stocks around VWAP. | "veeveepee ke araaund men intraade ke achchhe straitejis devalap ho sakate hain"
+R indicator E 01:29,04:22 | Session (daily-reset) VWAP on a 15-minute chart; not the weekly VWAP for intraday. | "agar intraade kar rahe hain to veekalee viv ap naheen karanaa"
+R indicator E 05:16 | Supertrend computed on the 15-minute chart. | "det peeriyad is 15 minats ... ye supar tred nikaal rahaa hai"
+R entry E 05:16 | Sell only when both say sell: price below the Supertrend and below VWAP (mirror for buys). | "jab donon sel bolegaa to agar ye stok supar tred ke neeche chalaa gayaa aur apane viv ap ke bhee neeche tred kar rahaa hai"
+R indicator A - | Supertrend (10, 3), the platform default (the video does not state its settings). | ""
+R entry A - | Desk version: the NSE 15-minute pool; enter at the next candle's open when a 15-minute close first has both price above VWAP and Supertrend up (long) or both below (short), from 09:45 to 14:00. | ""
+R exit A - | Exit at the next open when either signal turns against the trade (close back across VWAP or a Supertrend flip); stop at the Supertrend line at entry; out at 15:15; one trade per stock a day. | ""
+T with_assumptions | the Supertrend settings and every exit are ours (A)
+V Supertrend settings | R3 | 05:16 | Not stated | (10, 3)
+U What ends the trade: one signal turning or both?

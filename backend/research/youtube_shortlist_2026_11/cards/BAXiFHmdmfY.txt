@@ -1,0 +1,17 @@
+video: BAXiFHmdmfY
+topic: forex_us
+summary: UKspreadbetting's first-five-minutes idea for index futures at the cash open (DAX, S&P 500, Nasdaq): bracket the first one-minute candle's high and low, go long on a break above it or short below it, and close at the end of the fifth minute; he suggests a stop at the other side of the first candle; untested, offered as a starting point.
+instruments: DAX, S&P 500 and Nasdaq futures (SPY, QQQ shown)
+timeframes: 1m
+style: scalping
+= UK-01 | First one-minute candle bracket at the cash open, out at the close of minute five
+R market E 00:44 | Index futures at the underlying cash market's open (DAX at 08:00 UK, the US indices at the New York open). | "when i open wanna trade it when the underlying is open"
+R setup E 01:24,02:05 | Wait for the first one-minute candle to print and bracket its high and low. | "i wait for the first one minute candle to print"
+R entry E 02:05 | Long on a break above its high, short on a break below its low. | "you'd go long then if we broke above the high ... and you go short if we broke below the low"
+R exit E 02:05 | Close at the end of the five-minute window (the close of the fifth one-minute bar). | "once you triggered that entry you would then close it at the end of that five minute period"
+R stop E 04:08,05:29 | A stop at the other side of the first one-minute bar is a likely filter (and a tight trail). | "maybe i have a stop at the low of the first of the first one minute bar"
+R market A - | Desk version: Nasdaq 100 (the desk's NQ minutes), the 09:30 New York open. | ""
+R entry A - | Buy-stop one tick above and sell-stop one tick below the 09:30 bar, live until 09:34 (the first to fill wins). | ""
+R stop A - | Stop at the other side of the 09:30 bar; exit at the close of the 09:34 bar. | ""
+T with_assumptions | the stop is a suggestion, not a rule; untested by the presenter
+C other | 00:01 | not backtested | not stated | "i've not back tested this"

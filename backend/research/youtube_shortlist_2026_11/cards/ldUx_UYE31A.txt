@@ -1,0 +1,26 @@
+video: ldUx_UYE31A
+topic: india_index
+summary: Subasish Pani's last-swing scalp for Bank Nifty / Nifty ATM options: if the previous day's last three 15-minute candles (14:45-15:30) are in a range, its edges are the levels; otherwise the nearest swing turns above and below the close (candle bodies, not wicks) are the buy and sell levels; buy the ATM option when price crosses a level (never on an opening gap through it - wait for price to come back and cross again), premium stop Rs 30-70 by premium size, target at least 1:1, two or three trades a day.
+instruments: Bank Nifty and Nifty ATM options
+timeframes: 15m
+style: scalping
+= PW-01 | Previous close's last-swing (or last-three-candle range) break, no gap entries, 1:1 (index proxy)
+R market E 06:17 | Bank Nifty (and Nifty), buying at-the-money options. | "for scalping ... you will trade ATM"
+R timeframe E 09:42 | 15-minute candles. | "the timeframe will be 15 minutes"
+R setup E 09:42,10:22 | If the previous day's last three 15-minute candles (14:45-15:30) are in a range, trade the break of that range. | "One is from 2:45 to 3:30 candle. These 3 15 minute candles must be in a range"
+R setup E 10:22,20:01 | Otherwise mark the last swing around the closing price: the nearest U-turn (rejection) above the close is the buy level, the nearest below is the sell level; use candle bodies, not wicks. | "Wherever the price has taken a rejection near the closing price, that is our swing"
+R entry E 10:22,11:04 | Buy when price crosses the buy level; sell (buy the put) when it breaks the sell level. | "If it crosses the last swing on the up side, we will buy"
+R no_trade E 12:25,15:54 | Do not buy an opening gap above the buy level: wait for price to come back down and cross the level again (mirror for gap downs). | "I want the momentum to start from below"
+R stop E 06:57,11:04 | Premium stop: Rs 50-70 (max 80) for a Rs 200-300 premium, Rs 30-50 for Rs 100-200. | "If the price of the strike price is below 200-300 rupees, then you will keep a maximum SL of 60-80 rupees"
+R target E 14:29 | Target at least 1:1 (Rs 50 stop, Rs 50 target) while learning. | "in scalping, the target must be a minimum of 1:1"
+R no_trade E 17:57,19:20 | Only two or three (at most four) trades a day. | "you will only get 2, 3, or 4 trades in a day at most"
+R market A - | Desk version: the Nifty and Bank Nifty indices as a labelled proxy for the ATM option (delta 0.5): the premium stops (Rs 40 Nifty, Rs 60 Bank Nifty, mid of the stated bands) become 80 and 120 index points. | ""
+R setup A - | Levels from the previous day's 15-minute candles: if the last three candles' bodies span at most 0.3% of the close, the levels are that span's top and bottom; otherwise the latest candle body high above the close that is higher than both neighbours' (buy level) and the latest body low below the close lower than both neighbours' (sell level). | ""
+R entry A - | Enter at the next minute's open after a one-minute close crosses a level from the other side (a gap open beyond the level waits for a cross back); one trade at a time, at most 3 a day, signals until 14:45. | ""
+R stop A - | Stop 80 points (Nifty) / 120 points (Bank Nifty), target 1R, out at 15:15. | ""
+T with_assumptions | 'in a range' and 'swing' are judged by eye; the premium stop is mapped to index points (A)
+V in a range | R3 | 09:42 | No width given | the three bodies span at most 0.3% of the close
+C win_rate | 14:29 | accuracy about 60-70% at 1:1 | not stated | "Its accuracy will be near about 60-70%"
+X 2023-04-12 | 11:44 | Bank Nifty | long | opened gap up above the buy level; came back and crossed it again | the buy level | Rs 50-60 premium | 1:1 | target | 50-60 points
+P 00:05 | 01:27 | Subscription course in his app
+U How narrow must the last three candles be to count as a range?

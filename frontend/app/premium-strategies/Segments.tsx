@@ -54,9 +54,9 @@ export const SEG_PLACE: Record<SegId, { tab: MarketTab; label: string }> = {
  *  (`acct|mkt`). `at` makes every click a fresh open. */
 export type SegFocus = { seg: SegId; study: string; book?: string; at: number };
 /** The study chips' order: the 20-channel study (its own tab) first; a study not listed here follows, by name. */
-const STUDY_ORDER = ["youtube_channels20", "youtube_channels11", "youtube_top20", "booming_bulls", "crypto_playlist", "sniper_headshot",
+const STUDY_ORDER = ["youtube_shortlist", "youtube_channels20", "youtube_channels11", "youtube_top20", "booming_bulls", "crypto_playlist", "sniper_headshot",
   "vwap", "liquidity_sweep"];
-const studyLabel = (s: string) => (s === "youtube_channels20" ? "20 channels (new)" : SOURCE_LABEL[s] ?? s);
+const studyLabel = (s: string) => (s === "youtube_shortlist" ? "Channel shortlist (new)" : s === "youtube_channels20" ? "20 channels" : SOURCE_LABEL[s] ?? s);
 
 const SEG: Record<SegId, { label: string; feeds: string[]; note: string }> = {
   in_options: {

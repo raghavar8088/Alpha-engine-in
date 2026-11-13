@@ -1,0 +1,24 @@
+video: BtqjzEpPSD4
+topic: india_stocks
+summary: Dhan's 15-minute intraday reversal (Priyanka): from 10:10 AM look for liquid stocks (market cap above Rs 5,000 crore) whose 15-minute candles have run outside the upper Bollinger Band with RSI above 70; enter short on the first red candle as RSI turns down from overbought, stop at that red candle's high, initial target 1% (toward the band's middle line), then trail; mirror below the lower band with RSI under 30.
+instruments: NSE stocks (market cap above Rs 5,000 crore); index futures or options the same way
+timeframes: 15m
+style: intraday
+= DH-11 | 15-minute Bollinger Band exhaustion + RSI 70/30, first opposite candle, 1% target
+R market E 11:32,16:33 | Liquid NSE stocks with a market cap above Rs 5,000 crore (the same logic works on Nifty or Bank Nifty). | "maarket kaip shud bee mor den 5000 karoड़"
+R timeframe E 02:53 | 15-minute candles. | "yah 15 minats kaa taaim phrem mainne yahaan pe lagaayaa huaa hai"
+R session E 08:39,09:21 | Run the screener at 10:10 AM: the explosive moves come in the first 30-40 minutes. | "is skreenar ko aapane ran karanaa hai 1010 am men"
+R setup E 05:47,06:27 | Candles forming outside the upper Bollinger Band with RSI above 70 (overbought) point to a mean reversion toward the middle line. | "jab bhee kaindals bilinjar bainds ke aproo baind jo hogaa usase baahar banengee, to ek ritresament aaegaa"
+R setup E 07:09,07:53 | Mirror: outside the lower band with RSI oversold; skip if RSI is still 40-50 (momentum still with the sellers). | "jo aaraesaaaee hai vo 40-50 kee renj men hai ... bayarars kee saaid hee hai"
+R filter E 12:56 | Visual exhaustion: long candles distinctly outside the band; skip small-bodied drifts along the band. | "unakee bodee dekhie bahut chhotee-chhotee ban rahee hai"
+R entry E 14:23,15:07 | Enter on the first red candle after the exhaustion, with RSI turning down from above 70. | "jo bhee pahalee kaindal red banegee usamen ham entree le lenge"
+R stop E 15:07 | Stop at the high of that first red candle. | "stop los kahaan lagaaenge? jo red kaindal banee thee pahale usake haaee pe"
+R target E 15:07,15:48 | Initial target 1% (toward the middle line), then trail the stop. | "intraade treding men ham 1% kaa hee inishiyal taaraget leke chalenge aur usake baad aap trel kar sakate hain"
+R indicator A - | Bollinger Bands (20, 2) and RSI (14), the platform defaults (not stated). | ""
+R entry A - | Desk version: the NSE 15-minute pool, from 10:10 to 14:30; setup when a 15-minute close is above the upper band with RSI above 70 and the candle's body is at least 60% of its range; short at the next open after the first red candle within the next 3 candles whose RSI is below the previous candle's (mirror for longs below the lower band with RSI under 30 and a green candle); one trade per stock a day. | ""
+R stop A - | Stop at the trigger candle's high (low); half booked at 1% with the stop to cost, the rest exits at the band's middle line (20-period average) or 15:15. | ""
+T with_assumptions | the band and RSI settings, 'visual exhaustion' and the trail are set by us (A)
+V exhaustion | R6 | 12:56 | Judged visually | the candle's body at least 60% of its range
+X - | 13:39 | Sun TV | short | 15-minute candles above the upper band, RSI overbought, first red candle | the red candle | its high | 1% then trail | target | reached the middle line
+P 00:05 | 00:50 | Dhan app and ScanX screener
+U What trails the stop after the 1% target?

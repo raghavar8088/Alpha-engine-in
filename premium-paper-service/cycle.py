@@ -26,6 +26,7 @@ from settings import (BTC_START_DATE, BTC_START_T, DAILY_WARM_DAYS, PAPER_START,
                       YC_START_T, now_ist)
 
 from settings import YC2_LATE_S, YC2_START_DATE, YC2_START_T  # noqa: E402
+from settings import YC3_START_DATE, YC3_START_T  # noqa: E402
 
 log = logging.getLogger("premium.cycle")
 INDEX_WARM_DAYS, GLOBAL_WARM_DAYS = 95, 45
@@ -49,6 +50,8 @@ def _is_yc(a) -> bool:
 
 
 def _yc_start(a) -> tuple[int, date]:
+    if a.source == getattr(C, "YC3", None):
+        return YC3_START_T, YC3_START_DATE
     return (YC2_START_T, YC2_START_DATE) if a.source == C.YC2 else (YC_START_T, YC_START_DATE)
 
 
@@ -56,7 +59,7 @@ def _fresh_only(db, a, market: str, docs: list[dict]) -> list[dict]:
     """The 20-channel books enter only on fresh bars: a trade this desk has not recorded before is taken only if its entry
     bar is recent (settings.YC2_LATE_S for the market's group). After a stale or missing feed, or while the desk was down,
     bars that arrive late are used for indicators and exits, but never for new entries."""
-    if a.source != C.YC2 or not docs:
+    if a.source not in (C.YC2, getattr(C, "YC3", None)) or not docs:
         return docs
     known = {d["_id"] for d in db.premium_trades.find({"book": f"{a.id}|{market}"}, {"_id": 1})}
     late = time.time() - YC2_LATE_S.get(C.MONEY[market].group, 1200)
@@ -218,6 +221,10 @@ def _yc_stock_context(pool_books, panel, now: datetime) -> dict:
                                       symbols=set(panel.names)))
         if "ss03" in needs:
             ctx.update(R.YCR.contexts({"ss03"}, pool=(panel.market(i) for i in range(len(panel.names)))))
+        if {"ze_rank930", "ze_nifty930"} & needs:               # DF-01: the pool's 09:30 momentum rank, NIFTY's side
+            zpool = [x for x in (panel.market(i) for i in range(len(panel.names))) if x is not None]
+            znf = F.index_market("NIFTY", YC3_START_DATE - timedelta(days=10), F.today_bars("index").get("NIFTY"), now)[0]
+            ctx.update(R.YCR.contexts({"ze_rank930", "ze_nifty930"}, pool=zpool, nifty=znf))
         if "movers" in needs:                                  # DH-02: the pool's 09:20 top gainers and losers
             ctx.update(R.YCR.contexts({"movers"}, pool=(x for x in (panel.market(i) for i in range(len(panel.names)))
                                                         if x is not None)))

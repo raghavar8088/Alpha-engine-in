@@ -1,0 +1,13 @@
+video: z5NByy0fXOY
+topic: india_stocks
+summary: Kishore (Trade Achievers) answers whether Rs 50,000 can make Rs 500-1,000 a day intraday: yes, with 2% risk and 1:2 targets spread over 3-4 fixed stocks whose daily character you know, trading chart patterns (triangle breakouts and their retests, double tops, head and shoulders, ranges) with Fibonacci targets; a lesson in discipline rather than a rule set.
+instruments: SBI, Bajaj Auto, Bajaj Finance, Reliance, Britannia, SBI Life; Nifty
+timeframes: intraday
+style: intraday
+= TA-01 | Chart patterns in 3-4 fixed stocks with 2% risk and 1:2 (discretionary)
+R sizing E 03:31 | Risk 2% of capital (Rs 1,000 on Rs 50,000) with a 1:2 target. | "you can keep 2% risk for 50K (i.e) 1000 rupees, so your Target must be 2000 rupees"
+R market E 03:31,04:17 | Follow only 3-4 stocks daily to learn their character. | "3 or 4 scrips is maximum for 50k Investment"
+R setup E 04:57,05:37 | Trade chart patterns: a triangle breakout and its retest, with Fibonacci levels for targets; double tops, head and shoulders, range breaks. | "After breaking the Triangle it gave Retest and went up"
+R exit E 07:01 | Take 20-30 points of a move; you cannot catch all of it. | "20/30 points is enough, we should exit with that"
+T concept_only | discretionary pattern reading; no entry or stop rule is defined
+P 17:03 | 17:47 | Trade Achievers classes in Chennai, Coimbatore and Bangalore

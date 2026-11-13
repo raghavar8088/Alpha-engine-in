@@ -1,0 +1,12 @@
+video: U8ZITaEmP5A
+topic: india_index
+summary: Vikram Prabhu explains why he scalps Nifty and Bank Nifty on the one-minute chart: entries come earlier and stops are smaller than on five minutes, and one-minute charts show intraday trends (20 MA sloping) that a sideways five-minute chart hides; his example buys the retest of a broken resistance line on one minute with the stop under the candle and the target at the next resistance (the 20 MA); scalping is not for beginners, and on expiry day he buys the next expiry.
+instruments: Nifty, Bank Nifty (options for scalping)
+timeframes: 1m, 5m
+style: scalping
+= PC-04 | Why one-minute scalping: earlier entries, smaller stops, breakout-line retests (explanation)
+R timeframe E 05:08,13:46 | One-minute candles give earlier entries and smaller stops than five-minute ones for the same breakout. | "in 1 minute your entry will be faster your stop- loss will be faster"
+R setup E 09:30,10:14 | On one minute, a sloping 20 MA defines intraday trends; shorts near the 20 MA in a down trend. | "if 20 ma is sloping that mean it's a downtrend"
+R entry E 14:27,15:09 | Example: a broken resistance retested as support on one minute; enter, stop below the candle, book at the next resistance (the 20 MA). | "resistance which was broken then it is tend to become support"
+R no_trade E 12:24 | On expiry day, do not buy that day's expiry; use the next weekly or monthly. | "on expiry days avoid buying option of the same week"
+T concept_only | an explanation of the timeframe with one example; the setups are those of PC-01/PC-02 on one-minute candles

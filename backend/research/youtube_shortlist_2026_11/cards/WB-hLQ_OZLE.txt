@@ -1,0 +1,20 @@
+video: WB-hLQ_OZLE
+topic: forex_us
+summary: Tradeciety's daily-pivot breakout: after a clearly trending day, price grinds back into the daily pivot during the Asian session; on the 5-minute chart enter the breakout in the prevailing trend's direction around the London open (8-9 AM Frankfurt; sometimes the New York open), stop beyond the pivot and the swing, targets S1/R1 (or S2/R2), at least 2:1, close by the session end.
+instruments: forex majors and crosses (EUR/GBP, AUD/USD, GBP/JPY, USD/SGD)
+timeframes: 5m
+style: intraday
+= TC-02 | Trend day, Asian grind back into the daily pivot, London-open 5-minute breakout to S1/R1
+R indicator E 00:42 | Traditional daily pivot points (P, R1-R3, S1-S3). | "we are using our pivot points traditional auto so on the daily"
+R setup E 00:42,08:22 | The previous day must be clearly trending up or down. | "the previous day has to be trending up or down clearly"
+R setup E 00:42,08:22 | During the Asian session price grinds back into the daily pivot. | "we grind back into the daily pivot during the asian session"
+R entry E 00:42,08:22 | Enter on the 5-minute breakout in the prevailing trend's direction during the London open (sometimes the New York open). | "we enter with the breakout on the 5-minute chart during the London session opening"
+R stop E 08:22 | Risk above/below the pivot and the swing high/low. | "risk above or below the pivot and swing high or low"
+R target E 01:23,08:22 | Take profit at the pivot levels, usually S1/R1 or S2/R2; take no trade below 2:1. | "I don't recommend taking trades below two-to-one"
+R exit E 02:05,09:03 | If the target is not reached, close at the end of the session. | "if your take profit was not reached ... until the end of the session you closed your trade"
+R market A - | Desk version: EUR/USD and GBP/USD (the desk's FX futures minutes). | ""
+R setup A - | Trending day: |close - open| at least 60% of the day's range, close in the top (bottom) 25%; the Asian session (00:00-07:00 UTC) range contains the pivot P. | ""
+R entry A - | From 07:00 to 10:00 UTC, short at the next open after a 5-minute close below the Asian low on a down-trend day (long above the Asian high on an up day). | ""
+R stop A - | Stop above max(P, Asian high) + 0.02%; target S1 if it gives at least 2R, else S2 if at least 2R, else no trade; exit at 16:00 UTC; one trade a day. | ""
+T with_assumptions | 'clearly trending' and the breakout structure are judged by eye (A)
+V clearly trending | R2 | 08:22 | Visual | body at least 60% of the range, close in the top/bottom quarter

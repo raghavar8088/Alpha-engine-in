@@ -1,0 +1,23 @@
+video: owF4u48hUKI
+topic: crypto
+summary: CryptoCred's 'clean double close': a horizontal level (the lowest close before a rally = support, the highest close before a drop = resistance) is closed through one way and then closed back through the other way impulsively, immediately or after some time, with no retest or wick touch in between; enter on the second close, a limit at the level or the retest, stop beyond the thrust candle (or the furthest deviation), target the next support/resistance if the risk-reward works; daily and 4-hour best, intraday works on clear levels.
+instruments: Bitcoin and crypto; EUR/USD, USD/CHF, GBP/USD
+timeframes: 1d, 4h, 1h, 15m
+style: swing
+= CC-01 | Clean double close through a level (failed flip), limit at the level, thrust-candle stop
+R setup E 08:41 | Levels: unless a clear multi-touch level, support = the lowest close before a rally, resistance = the highest close before a drop. | "I simply use the lowest close before a rally as support and the highest close before a drop as resistance"
+R setup E 03:43,04:25 | Bullish: price closes below support, then the next time it trades to the level it closes back above it impulsively; mirror for bearish. | "price closes below the level and then when price next trades to the level ... it closes above it impulsively"
+R filter E 04:25,12:18 | There must be no touch, wick or retest of the level between the first and second break. | "there must be no retest wick interaction of any kind between break one and break two"
+R filter E 11:35,28:49 | The second break should be strong and fast (ideally engulfing); a weak close with a long wick does not count. | "the second break or break back through the level should be strong and fast"
+R timeframe E 14:28,15:13 | Higher timeframes are better (daily, 4-hour); hourly and 15-minute work on very clear levels. | "higher time frames are superior especially on daily charts"
+R stop E 15:53,16:37 | Stop beyond the thrust candle that made the second break (or the furthest deviation between the breaks); never at a support/resistance level. | "option one is a thrust candle stop"
+R entry E 23:01,25:12 | Entries: a market order on the second close, a limit order at the broken level after the close (he often uses this), or a price-action entry on the retest. | "option 2 is a limit order at the broken level once the candles closed"
+R target E 23:42,24:29 | Target the next trouble area; skip if the risk-reward does not add up. | "you need to still make sure the trade is actionable"
+R market A - | Desk version: Bitcoin (Delta BTCUSD) and EUR/USD, GBP/USD on one-hour candles (the desk's day-bounded books cannot hold daily swings). | ""
+R setup A - | Levels: one-hour closes higher (resistance) or lower (support) than the 3 closes either side, from the last 120 hours; a setup when a close goes through the level and a later close (within 48 bars) goes back through it with no bar's high/low touching the level in between, and the second candle's body is at least 60% of its range. | ""
+R entry A - | A limit order at the level after the second close, live for 6 bars. | ""
+R stop A - | Stop beyond the second-break candle's extreme (if that is within 0.1% of the level, the extreme of the 3 candles before); target 2R; out at the day's end (BTC 23:55 UTC, forex the desk's session close); at most 2 trades a day. | ""
+T with_assumptions | level choice, 'impulsive' and the target are judged by eye; the hourly timeframe replaces daily/4-hour (A)
+V impulsive | R4 | 28:49 | Visual | body at least 60% of the candle's range
+X - | 18:09 | EUR/USD | short | highest close resistance broken above, then closed back below | limit at the level | above the thrust candle | next support | target | sold off
+U What target and minimum risk-reward does he use?

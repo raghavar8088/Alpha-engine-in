@@ -1,0 +1,16 @@
+video: 1eRYKQYRUro
+topic: crypto
+summary: TRADING RUSH tests RSI + Supertrend 100 times: buy when RSI crosses above 70 while Supertrend shows an up trend, sell when RSI crosses below 30 while Supertrend shows a down trend (RSI read as momentum, not reversal); stop beyond the Supertrend line, 1.5:1 reward-to-risk; result about 45% wins, a rising then falling profit curve.
+instruments: forex (Trading Rush app)
+timeframes: intraday
+style: intraday
+= RU-05 | RSI through 70 (30) with Supertrend agreeing, Supertrend stop, 1.5R
+R entry E 02:06 | Buy when RSI crosses above 70 only if Supertrend shows an up trend; sell when RSI crosses below 30 only if Supertrend shows a down trend. | "we buy, when the RSI crosses above the 70 level, only if the supertrend indicator is showing an uptrend"
+R stop E 02:46,03:28 | Stop below the Supertrend line for longs, above it for shorts. | "we can set the stop loss below it"
+R target E 05:40 | Reward-to-risk 1.5:1. | "The reward risk ratio was 1.5 to 1"
+R no_trade I 06:26 | In practice you would not take another signal a few candles after the last one. | "you are not going to take another trade, just a few candles after that"
+R indicator A - | RSI(14) and Supertrend(10, 3), the defaults (not stated). | ""
+R market A - | Desk version: Bitcoin and gold (Delta XAUTUSD) on 30-minute candles, like the channel's earlier tested books (RU-02 to RU-04). | ""
+R entry A - | Enter at the next open after the cross; one trade at a time; out at the day's end. | ""
+T with_assumptions | the timeframe and indicator settings are not stated (A)
+C win_rate | 05:40 | about 45% wins at 1.5:1 over 100 trades; 8 wins and 12 losses in a row at most | 100 trades | "the RSI Supertrend trading strategy got an approximate win rate of 45 percent"

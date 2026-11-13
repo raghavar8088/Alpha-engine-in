@@ -1,0 +1,13 @@
+video: NT9dV-1BANE
+topic: forex_us
+summary: Axia Futures on scalping as specific trades in specific moments; the worked example is a 'smash and grab' on a data release (US payrolls): when markets jump on a mis-read headline, sell five or six seconds after the spike with the stop just above the new high and take profit as price runs back through the origin of the move, exiting as momentum fades, all within about a minute on 5-second charts and the order ladder.
+instruments: S&P 500 futures, euro FX, 2- and 10-year Treasury futures
+timeframes: 5s
+style: scalping
+= AF-02 | News-spike 'smash and grab' fade back through the origin (5-second charts, ladder)
+R setup E 03:39,04:20 | A market that has over-reacted to information (a headline or comment) and gone too far one way. | "This is recognizing that a market has gone too far in one direction, has mispriced some information"
+R entry E 07:10,07:53 | Sell five or six seconds after the data spike once the initial high is in. | "you can sell five or 6 seconds after the data you know where your stop is"
+R stop E 07:53 | Stop just above the spike's high (about 3 S&P points, 10 euro ticks in the example). | "So your stops are just above the highs"
+R target E 07:53,10:42 | Target at least back through the origin of the move; exit as the move accelerates through it or its energy fades. | "Your target is a minimum of going back through the origin of the move"
+T not_testable | needs the exact release time and its content, 5-second bars and the order ladder; the desk has none of these
+X - | 09:18 | S&P 500 futures and euro FX | short | payrolls headline spike reversed on wage and unemployment details | about 12 seconds after the release | above the spike high | back through the pre-release origin | target | about 20 S&P points and 40 euro ticks in about a minute

@@ -457,6 +457,48 @@ YC2_STRATEGIES = (
 )
 for _sid, _name, _ch, _mkts in YC2_STRATEGIES:
     ACCOUNTS.append(_a(_sid, YC2, _name, YC2_CHANNELS[_ch], *[(YC2_BOOK_MARKET.get(_m, _m), "V0") for _m in _mkts]))
+# The channel-shortlist study (backend/research/youtube_shortlist_2026_11): the owner's three pasted lists of YouTube
+# channels, each distinct method written as exact rules from its video (cards/<video>.txt) and checked for look-ahead
+# and fills; each is version v1. They trade from settings.YC3_START_T, flat at the start, on real market data with
+# simulated orders only, Rs 10 lakh each. Gold trades Delta's XAUTUSD; option-buying videos trade the index as a proxy;
+# FX, Nasdaq and index rows carry no real volume, so their VWAP is time-weighted.
+YC3 = "youtube_shortlist"
+YC_SOURCES = YC_SOURCES + (YC3,)
+YC3_STRATEGIES = (
+    ('DF-02', 'RSI(14) back through 30/70 on 5 minutes, swing stop with a points filter, VWAP then 200 EMA', 'Definedge', ('NIFTY', 'BANKNIFTY')),
+    ('PW-01', 'Previous close\'s last swing (or last-three-candle range) break, no gap entries, 1:1 (index proxy)', 'POWER OF STOCKS', ('NIFTY', 'BANKNIFTY')),
+    ('DH-09', 'BB Trend (100, 250) side + fresh MACD (48, 104, 36) cross, part at a fixed target, EMA 5/15 trail', 'Dhan', ('NIFTY', 'BANKNIFTY')),
+    ('DH-10', '9:15-9:30 opening range edges + Hull MA colour flips, one minute', 'Dhan', ('NIFTY', 'BANKNIFTY')),
+    ('CK-01', 'Connors RSI (3, 2, 100) 80/20 signals in the direction of RSI(14) above 60 / below 40, 5 minutes', 'Trading Chanakya', ('NIFTY', 'BANKNIFTY')),
+    ('EC-01', 'Supertrend signals only at pivot support or on a resistance break, Heikin Ashi candles', 'Equity2Commodity', ('NIFTY', 'BANKNIFTY')),
+    ('PC-01', 'Trending day, pin bar at a sloping 20 MA, candle stop, quick exit', 'Pivot Call (Vikram Prabhu)', ('NIFTY', 'BANKNIFTY')),
+    ('PC-02', 'Rejection candle at the previous day\'s high or low, next-candle exit', 'Pivot Call (Vikram Prabhu)', ('NIFTY', 'BANKNIFTY')),
+    ('PC-03', 'Wide CPR: reversal candle at the central pivot after a fall into it, next-candle exit', 'Pivot Call (Vikram Prabhu)', ('NIFTY', 'BANKNIFTY')),
+    ('TW-01', '15-minute opening range breakout on a volume expansion, VWAP side, session-low stop', 'Trade With Trend (Raunak A)', ('NSE15',)),
+    ('DF-01', 'Ten strongest movers on Nifty\'s side, Point & Figure double-top buy / double-bottom sell', 'Definedge', ('NSE5',)),
+    ('VB-01', 'High-activity stock, first 15-minute high/low break on 5 minutes before 2 PM, entry-candle stop', 'Vivek Bajaj', ('NSE5',)),
+    ('VB-02', 'Session VWAP and 15-minute Supertrend agreeing', 'Vivek Bajaj', ('NSE15',)),
+    ('DH-11', '15-minute Bollinger Band exhaustion + RSI 70/30, first opposite candle, 1% target', 'Dhan', ('NSE15',)),
+    ('CK-02', 'Previous-day high/low break with a 0.5% buffer, day-extreme stop, 2R target, out at 3 PM (high-beta)', 'Trading Chanakya', ('NSE5',)),
+    ('EC-02', '9:15 candle on 2x closing volume: big candle side, second candle closes beyond it, 2R', 'Equity2Commodity', ('NSE15',)),
+    ('TW-02', 'Strong gap out of a range with RSI holding 40 (bullish range), range-low stop, long only on daily bars', 'Trade With Trend (Raunak A)', ('NSED',)),
+    ('MV-02', 'Regular RSI divergence 3-10 bars apart, confirmation candle, target the middle swing, RR at least 1:3', 'Malkansview', ('NSED',)),
+    ('OF-01', 'Williams %R (10) bullish divergence with RSI below 30 on daily candles', 'Optimus Futures', ('NSED',)),
+    ('CC-01', 'Clean double close through a level (failed flip), limit at the level, thrust-candle stop', 'CryptoCred', ('BTCUSD', 'EURUSD', 'GBPUSD')),
+    ('BN-01', 'EMA 20/50/100 fanned trend, retest of EMA 20/50 with engulfing or pin bar + Stoch RSI cross, 2-3R', 'The Birb Nest', ('BTCUSD',)),
+    ('TC-01', '4-hour breakout, dirty retest back into the pattern, 15-minute break of the retest', 'Tradeciety', ('EURUSD', 'GBPUSD', 'BTCUSD')),
+    ('TC-02', 'Trend day, Asian grind back into the daily pivot, London-open 5-minute breakout to S1/R1', 'Tradeciety', ('EURUSD', 'GBPUSD')),
+    ('UK-01', 'First one-minute candle bracket at the cash open, out at the close of minute five', 'UKspreadbetting', ('NAS100',)),
+    ('UK-02', 'Biggest VWAP excursion in 3 days, first VWAP test outside the first/last hour, 1/3 stop, 3:1', 'UKspreadbetting', ('NAS100', 'BTCUSD')),
+    ('AF-01', 'Early drive away from VWAP (gap day), buy the first VWAP test that holds, exit at a new high', 'Axia Futures', ('NAS100',)),
+    ('MA-01', 'One-minute impulse that breaks structure, limit at the 0.618, stop past the origin, target the impulse end', 'The Moving Average', ('EURUSD', 'GBPUSD')),
+    ('RU-05', 'RSI through 70 (30) with Supertrend agreeing, Supertrend stop, 1.5R', 'TRADING RUSH', ('BTCUSD', 'XAUUSD')),
+    ('RU-06', 'Zero-lag MACD cross below/above zero in the 200 EMA trend, pullback stop, 1.5R', 'TRADING RUSH', ('BTCUSD', 'XAUUSD')),
+    ('NK-01', 'Close outside the Bollinger Band (20, 2), stop at the middle line, 2R (1-hour)', 'TraderNick', ('EURUSD', 'GBPUSD')),
+    ('KA-01', 'Break of the previous hour/day high or low after a staircase approach, two closes, swing stop, 1R', 'Koroush AK', ('BTCUSD',)),
+)
+for _sid, _name, _ch, _mkts in YC3_STRATEGIES:
+    ACCOUNTS.append(_a(_sid, YC3, _name, _ch, *[(YC2_BOOK_MARKET.get(_m, _m), "V0") for _m in _mkts]))
 BY_ID = {a.id: a for a in ACCOUNTS}
 
 

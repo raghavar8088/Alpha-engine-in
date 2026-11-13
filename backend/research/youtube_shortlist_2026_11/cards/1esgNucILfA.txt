@@ -1,0 +1,13 @@
+video: 1esgNucILfA
+topic: forex_us
+summary: A NinjaTrader live-session clip on opening-range trading in E-mini S&P / Nasdaq futures: long above the opening range high, short below its low, a scratch stop at entry until the trade 'pays for itself' at a pay line, then size and rotations in 'equidistant swings' around the range; on a rollover day with low volume he would not trade at all.
+instruments: E-mini S&P 500 and Nasdaq futures (minis and micros)
+timeframes: 1m
+style: scalping
+= NT-01 | Opening range break with a scratch stop and equidistant-swing scaling (live discretionary)
+R market E 00:46 | S&P and Nasdaq futures around the cash open. | "opening range in Nasdaq is 625 to 560"
+R entry E 00:46,01:29 | Long above the top of the opening range, short below its bottom. | "I want to be long above 9675"
+R stop E 01:29,02:11 | A scratch stop at the entry price; re-enter if the level holds; once the trade reaches the pay line the profit funds the next risk. | "A scratch stop is your stop at entry"
+R target E 03:38 | Targets follow equidistant swings: what the market does on the downside it will do on the upside. | "always look for those equidistant swings"
+R no_trade E 00:01,00:46 | No momentum and very low volume at the open (a rollover day): he would not trade. | "if I wasn't here with you guys doing this, I would not be trading"
+T concept_only | a live discretionary session: the range's length, the pay line and the swing targets are not defined as rules

@@ -1,0 +1,21 @@
+video: tkF3HhDCJUg
+topic: india_stocks
+summary: Equity2Commodity's 9:15-9:30 setup for F&O stocks only (not indices): on the 15-minute chart, trade only when the 9:15 candle's volume is at least twice the previous day's closing candle's volume and the candle is a big one; a big red candle means sell, big green means buy; the next candle must close beyond the first candle's low (high), then enter at the third candle's open, stop at the second candle's high (or the prior swing if it is too small), target twice the stop.
+instruments: NSE F&O stocks (State Bank of India, Adani Ports in the examples)
+timeframes: 15m
+style: intraday
+= EC-02 | 9:15 candle on 2x closing volume: big candle side, second candle closes beyond it, 2R
+R market E 00:03 | F&O stocks only, not indices. | "isakaa istemaal sirph aur sirph ephaem aur stoks men hee karenge"
+R timeframe E 00:45 | 15-minute chart, intraday only. | "15 minat taaim phrem vaalaa hee chaart use karanaa hai"
+R filter E 02:49 | Trade only if the first 15-minute candle's volume is at least twice the previous day's closing candle's volume. | "preeviyas klojing ke taaim men jitanaa volyoom hai usakaa 2X volyoom hamen dekhanaa chaahie"
+R setup E 03:29,04:10 | The first candle must be big: a big red candle sets the sell side, a big green candle the buy side. | "red maaloom ke saath hamen kyaa chaahie big red kaindal"
+R entry E 04:10,04:54 | The next candle must close below the first candle's low (above its high for buys); enter at the third candle's open. | "isake andar ke lo ke neeche klojing chaahie ... teesaraa kaindal opan hogaa"
+R stop E 04:54,08:20 | Stop at the second candle's high (low); if that candle is too small, use the previous swing high. | "jo doosaraa kaindal hai usakaa jo bhee haaeeest point banataa hai vo stop los"
+R target E 04:54 | Target twice the stop. | "taaraget jo hogaa 2 * esael kar deejie"
+R market A - | Desk version: the NSE 15-minute stock pool. | ""
+R setup A - | Big candle: body at least 60% of its range and range at least 0.8% of its open; the 09:15 volume at least 2 x the previous day's 15:15 candle's volume. | ""
+R stop A - | Short at 09:45's open after the 09:30 candle closes below the 09:15 low (long mirror); stop at the 09:30 candle's high (low), or the 09:15 candle's if the 09:30 range is under 0.25%; target 2R; out at 15:15. | ""
+T with_assumptions | 'big' candle is judged by eye (A)
+V big candle | R4 | 03:29 | Visual | body at least 60% of range and range at least 0.8% of the open
+X 2024-01-25 | 05:34 | State Bank of India | short | 9:15 volume about 2x the previous close, big red candle, second candle closed below its low | at the third candle's open | 588 | 12 points (2R) | target | hit within an hour
+P 10:21 | 11:06 | Course in the channel's app

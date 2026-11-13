@@ -1,0 +1,27 @@
+video: zk9crfaIMls
+topic: india_index
+summary: Mukta Dhamankar (Definedge Trade Talks): Nifty and Bank Nifty 5-minute RSI(14) re-entry system - after RSI hovers below 30, the first 5-minute close back above 30 triggers a long at the next candle's open (mirror at 70 for shorts); stop beyond the swing with a 10-point (Nifty) or 50-point (Bank Nifty) filter; targets VWAP then the 200 EMA, booked in pairs with a swing trail; Camarilla L3/L4 (H3/H4) and the Ichimoku chikou usually line up.
+instruments: Nifty; Bank Nifty
+timeframes: 5m
+style: intraday
+= DF-02 | RSI(14) back through 30/70 on 5 minutes, swing stop with a points filter, VWAP then 200 EMA targets
+R market E 02:40,03:26 | Nifty and Bank Nifty only (stocks would need a 15-minute chart). | "I trade only Nifty and Bank Nifty using this particular system"
+R timeframe E 03:26,04:52 | Five-minute candles for the indices. | "for indices five minute chart is good enough"
+R indicator E 03:26,04:12 | RSI 14 (default); intraday Camarilla levels; Ichimoku chikou for momentum; 200 EMA and intraday VWAP for targets. | "RSI period I use is the default one that is the 14"
+R setup E 04:52 | Long setup: RSI below 30 and hovering there. | "I want the RSI to be below 30"
+R entry E 05:38,06:20 | Long when a five-minute candle closes with RSI back above 30; entry at the next candle's open. | "next five minute candle closes above RSI 30 my entry will be at the third candle opening"
+R entry E 07:02 | Short: RSI above 70, the first five-minute close back below 70 triggers; short at the next candle's open. | "the first five minute candle closes below 70 and that's where you get a trigger"
+R stop E 04:12,06:20,07:02 | Stop beyond the swing low (high) with a filter: about 10 points for Nifty, about 50 points for Bank Nifty. | "a small filter may be a 10 point filter is good enough for Nifty and Bank Nifty about 50 points"
+R target E 06:20,08:24 | Targets are VWAP and the 200 EMA (and the pivot); book in pairs at each level and trail the stop to swing lows. | "the targets would be your V web or a 200"
+R sizing E 06:20 | Trade in pairs (2, 4 or 6 lots) so a part is booked at every level. | "this trade should be taken in pairs maybe you know two lots or four Lots"
+R setup I 05:38,07:43 | Price usually sits near Camarilla L3/L4 (H3/H4) with the chikou on the far side at the setup; an observation, not a stated condition. | "usually we'll find this setup at the camera levels of H3 and H4"
+R filter E 13:18 | On trending days an RSI divergence gives the better entry. | "on trending days you will find that sometimes you will get a Divergence that would be your better entry"
+R entry A - | Desk version: Nifty and Bank Nifty five-minute bars; a long when RSI(14) closes above 30 after the previous close was below 30 (short: above 70 then below); entry at the next bar's open; signals 09:30-14:45. | ""
+R stop A - | Stop = the lowest low since RSI went below 30 minus 10 points (Nifty) or 50 points (Bank Nifty); short mirror. | ""
+R target A - | Half booked at the session VWAP when it lies beyond the entry (stop then moves to cost); the rest at the 200 EMA (5-minute) when it lies beyond the VWAP, otherwise at 2R; out at 15:15; at most 3 trades a day. | ""
+T with_assumptions | the target order (VWAP, then 200 EMA) and the swing-low definition are set by us (A); Camarilla and chikou are not used as filters (stated only as usual)
+V swing low | R7 | 04:12 | Which swing is not defined | the lowest low since RSI went below 30
+C other | 04:12 | Nifty gives about 1:2, Bank Nifty about 1:3 | not stated | "you get a Nifty one is to 2R and Bank Nifty you get one is to three era"
+X 2023-02-01 | 13:18 | Nifty | short | budget day: RSI near 70 all day, divergence, then the break of 70 | the break of 70 | above the swing high | VWAP, 200 EMA | target | RSI travelled to 13
+P 01:18 | 02:00 | Definedge TradePoint software and webinars
+U Which swing low is the stop: the setup's lowest low or the latest pivot?

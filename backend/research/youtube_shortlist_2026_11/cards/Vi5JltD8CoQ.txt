@@ -1,0 +1,15 @@
+video: Vi5JltD8CoQ
+topic: india_index
+summary: Subasish Pani reads gap openings against the previous day's candle: after a strong red day, a flat open means sellers are unaffected and the fall can continue, while a big gap up above 50% of the previous day's candle traps the overnight sellers and can start a strong reversal up (mirror after a green day); a sentiment frame for the open, with no stated entry, stop or exit.
+instruments: Nifty; Bank Nifty
+timeframes: 1d, intraday
+style: intraday
+= PW-02 | Gap against the previous day's candle: beyond its 50% = reversal, flat = continuation (bias only)
+R market E 00:49 | Index (Nifty) gap openings after the previous day's candle. | "kal kaa imejin keejie klojing praais hai"
+R setup E 05:50,06:34 | After a strong negative previous day, a flat open leaves sellers' positions intact: the move can continue down. | "phlait kholaa to koee senteement yahee naheen hogaa"
+R setup E 08:39,10:01 | A big gap up opening above 50% of the previous day's candle traps the overnight sellers: expect a reversal up with momentum. | "agar pachaas parasent ke oopar agar vyaapak khol rahaa hai preeviyas tren ke oopar to chaanses aar veree hai ki ek rivarsal hai"
+R setup E 12:44,13:26 | Mirror: after a strong green day, a big gap down below 50% of its candle points to selling; a flat open lets the up move continue. | "agar bahut bare dupleks 50% ke neeche yahaan se ham log phir immeedietalee sailee plaan kar sakate hain"
+R entry I 14:08 | He waits for price action or a breakout in the planned direction after the open before entering. | "yahaan par aapako negetiv saaid kaa chinh dekhanaa hai kis tareeke se brekaphaast ho gayaa"
+T concept_only | an opening bias, not a strategy: no entry trigger, stop or exit is stated, and the Hindi auto-captions are too garbled to recover more
+C win_rate | 02:59 | works about 60-70% of the time | not stated | "1560 70% taaim kaam karegaa"
+U What exactly triggers the entry after the gap, and where is the stop?

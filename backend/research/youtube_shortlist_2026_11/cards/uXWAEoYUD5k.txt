@@ -1,0 +1,16 @@
+video: uXWAEoYUD5k
+topic: crypto
+summary: TRADING RUSH tests the zero-lag MACD 100 times with the same rules as its MACD strategy: buy when the MACD line crosses above the signal line below the zero line and the whole candle is above the 200 EMA, sell mirror; stop beyond the pullback, 1.5:1; result about 33% wins - the worst on the channel, a loss.
+instruments: forex and stocks (Trading Rush app)
+timeframes: intraday
+style: intraday
+= RU-06 | Zero-lag MACD cross below/above zero in the 200 EMA trend, pullback stop, 1.5R
+R indicator E 00:44 | Zero-lag MACD: the MACD built from zero-lag EMAs (histogram, signal and MACD lines). | "by using a zero lag Exponential Moving Average"
+R entry E 02:53 | Buy when the MACD line crosses above the signal line below the zero line and the entire candle is above the 200-period EMA; sell when it crosses below above zero with the candle below the 200 EMA. | "Buy when the MACD line crosses above the signal line, only if the crossover is below the zero line, and the entire candle is above the 200 period moving average"
+R stop E 02:53 | Stop below the pullback (long), above it (short). | "In the long setup, stop loss is below the pullback"
+R target E 05:38 | Reward-to-risk 1.5:1. | "this strategy was tested with a 1.5 to 1 reward risk ratio"
+R indicator A - | Zero-lag EMA(n) = 2 x EMA(close, n) - EMA(EMA(close, n), n); MACD = ZLEMA(12) - ZLEMA(26), signal = ZLEMA(9) of the MACD. | ""
+R market A - | Desk version: Bitcoin and gold (Delta XAUTUSD) on 30-minute candles, like the channel's earlier books. | ""
+R stop A - | Pullback = the lowest low (highest high) of the 10 candles before the cross; entry at the next open; out at the day's end. | ""
+T with_assumptions | the zero-lag construction, the timeframe and the pullback window are ours (A)
+C win_rate | 05:38 | about 33% wins at 1.5:1, lost 1,750 on a 10,000 account over 100 trades | 100 trades | "I got a 33 percent approximate win rate, which is the worst win rate we have gotten"

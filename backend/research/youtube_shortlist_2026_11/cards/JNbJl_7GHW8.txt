@@ -1,0 +1,15 @@
+video: JNbJl_7GHW8
+topic: forex_us
+summary: Kyle (Jade Capital FX), an ICT-style funded trader, on Trading Nut: a weekly bias from a retest of a weekly fair value gap (premium) sets the week's direction toward a liquidity target (relative equal lows); intraday he sells above the daily opening price during London or New York when the day looks bearish, takes 2-4R, is out by the London close, and stops for the week after a 3-4R winner; 15-minute entries.
+instruments: forex (AUD/USD and majors)
+timeframes: 1w, 1d, 15m
+style: intraday
+= TN-01 | Weekly FVG bias, sell above the daily open in London/New York, out by the session end (framework)
+R setup E 01:33,02:13 | Weekly bias: price retests a weekly fair value gap (premium) and rejects; every week after, look only for shorts until a liquidity target (relative equal lows) is swept. | "this is a retest into an imbalance area and this was on a weekly chart"
+R entry E 07:47,09:58 | Intraday, sell above the daily opening price in a bearish market (the London or New York session). | "i'm really just trying to get short above daily opening prices"
+R timeframe E 07:47 | Entries on the 15-minute chart. | "your favorite entry time frame was 15 minutes"
+R target E 04:14,10:38 | Hold for 2-3R; after a 3-4R winner he is done for the week. | "if i'm hitting a three three to one or four to one i'm usually done for the week"
+R exit E 09:15 | Out by the London close; if wrong, done for the day. | "i'm trying to be out by london close and if i get it wrong i'm done for the day"
+R no_trade E 06:18 | New highs or lows are unlikely late in the week (Friday). | "once you start approaching friday the chances of it pushing for a new low or a new high is very low"
+T concept_only | the weekly bias is read from a weekly fair value gap by eye; entries and stops are not given as rules
+P 00:06 | 00:51 | City Traders Imperium funding; Hankotrade broker

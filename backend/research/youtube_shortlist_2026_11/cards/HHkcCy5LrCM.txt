@@ -1,0 +1,25 @@
+video: HHkcCy5LrCM
+topic: india_stocks
+summary: Raunak A's swing gap strategy: trade only runaway or continuation gaps that carry price out of a range (horizontal, triangle or channel) on a strong, wide-range, high-volume candle closing near its extreme with a gap window of at most 1-1.5%, and only when RSI was holding its bullish range (80-40, support at 40) before an up gap (bearish range 60-20 before a down gap); stop at the far side of the range, risk 1%; skip after a 20-25% prior run in a stock.
+instruments: NSE stocks; indices
+timeframes: 30m-60m (swing)
+style: swing
+= TW-02 | Strong gap out of a range with RSI holding 40 (bullish range), range-low stop, long only on daily bars
+R market E 00:01,21:57 | Stocks and indices, swing trading. | "Welcome to the Swing Trading Strategies video series"
+R timeframe E 10:22 | Prefer 30-minute to 60-minute candles for gap trading. | "For gap trading prefer 30-minute to 60-minute timeframe only"
+R setup E 02:05,02:47 | Trade only runaway (breakout) and continuation gaps; avoid common gaps inside a range and exhaustion gaps. | "you should be focusing only on two types of gaps"
+R setup E 09:42 | Strong gap: wide-range candle, higher than usual volume, close near the high (low for a gap down), gap window no wider than 1-1.5%. | "the gap window that is created, it should not be too wide, that is up to one to 1.5% is fine"
+R setup E 11:02 | The gap must carry price out of a well-defined range (horizontal, triangle or channel); gaps inside the range are ignored. | "any gap that occurs within this range should be ignored"
+R indicator E 17:11,19:56 | RSI bullish range 80-40, bearish range 60-20: before an up gap RSI should be taking support at 40 in the 80-40 range (mirror for down gaps). | "prior to the breakout that is in the form of gap, RSI should be taking support at 40"
+R no_trade E 19:15 | If the gap candle is weak, do not trade it aggressively (wait). | "If strong gap is missing do not trade this particular setup aggressively"
+R no_trade E 21:57,24:00 | After a prior rise of 10-15% in an index or 20-25% in a stock, stop looking for gaps on that side. | "once price has risen about 10 to 15%, let's say on an index and 20 to 25% on a stock"
+R stop E 24:42 | Stop at the far side of the range the breakout came from (the range high for a short). | "stop loss for this particular setup would be the recent high or low of the range"
+R sizing E 24:42 | Risk at most 1% of the account per trade. | "don't risk more than 1% of account on any given trade"
+R market A - | Desk version: NSE stocks on daily bars, long only (the desk holds swing trades only on daily stock bars; Indian cash stocks cannot be held short overnight). | ""
+R setup A - | Gap-up day: open above the previous high by at most 1.5%; the day's range at least 1.2 x the 14-day ATR; close in the top 25% of the day's range; close above the previous 20-day high (out of the range); 14-day RSI's lowest value over the previous 20 days at or above 38 and RSI now above 50; close no more than 25% above its 60-day low. The 'higher than usual volume' rule is not applied: the desk's NSE daily panel carries no volume. | ""
+R entry A - | Buy at the next day's open. | ""
+R stop A - | Stop at the lowest low of the 20 days before the gap; exit at the close of the first day RSI(14) closes below 40 (it leaves the bullish range) or after 20 trading days. | ""
+T with_assumptions | the video's 30-60 minute timeframe is replaced by daily bars; the volume rule is dropped (no daily volume on the desk); no exit is stated - ours leaves when RSI leaves the bullish range (A)
+V range | R5 | 11:02 | Drawn by eye | the previous 20-day high/low
+V wide-range candle | R4 | 09:42 | No number | range at least 1.2 x ATR(14)
+U What is the exit or target for the swing trade?

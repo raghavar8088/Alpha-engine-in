@@ -32,6 +32,7 @@ const GROUP_LABEL: Record<string, string> = { index: "Nifty and Bank Nifty", sto
 export const SOURCE_LABEL: Record<string, string> = { vwap: "VWAP study", booming_bulls: "Booming Bulls", youtube_top20: "YouTube top 20", crypto_playlist: "Crypto playlist", liquidity_sweep: "Liquidity sweep", sniper_headshot: "Sniper headshot" };
 SOURCE_LABEL.youtube_channels11 = "11 YouTube channels";
 SOURCE_LABEL.youtube_channels20 = "20 YouTube channels";
+SOURCE_LABEL.youtube_shortlist = "Channel shortlist";
 
 /** The accounts, kept fresh for the whole page. An empty desk and an unreachable desk must not look the same. */
 export function usePaperSummary() {
@@ -281,7 +282,7 @@ export default function PaperDesk({ summary, error }: { summary: Summary | null;
 
       <GlassPanel title="Every strategy's account" note="ranked · click a row for its trades · click a heading to sort">
         <div className="ps-chips">
-          {["all", "vwap", "booming_bulls", "youtube_top20", "crypto_playlist", "sniper_headshot", "youtube_channels11", "youtube_channels20", "liquidity_sweep"].map((k) => (
+          {["all", "youtube_shortlist", "vwap", "booming_bulls", "youtube_top20", "crypto_playlist", "sniper_headshot", "youtube_channels11", "youtube_channels20", "liquidity_sweep"].map((k) => (
             <button key={k} className={`ps-chip${source === k ? " on" : ""}`} onClick={() => setSource(k)}>
               {k === "all" ? "All" : SOURCE_LABEL[k]} · {counts[k] ?? 0}
             </button>

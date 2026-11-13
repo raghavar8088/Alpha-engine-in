@@ -1,0 +1,33 @@
+video: 5BljWWhIQOo
+topic: india_index
+summary: Vikram Prabhu (Pivot Call) scalps Nifty, Bank Nifty and liquid stocks on 5-minute candles only at the right location with the right candle: (1) on a trending day, a pin bar at a sloping 20 moving average; (2) a marubozu or pin bar rejecting the previous day's high or low; (3) a wide CPR, price falling into the central pivot and a bullish pin bar there (mirror); stop beyond the candle, book quickly (the next candle or the previous swing).
+instruments: Nifty, Bank Nifty, liquid stocks
+timeframes: 5m
+style: scalping
+= PC-01 | Trending day, pin bar at a sloping 20 MA, candle stop, quick exit
+R market E 03:41 | Nifty, Bank Nifty or liquid stocks (no small/mid caps). | "you can trade in Nifty you can trade in Bank Nifty or you can trade in stocks"
+R timeframe E 05:45 | Five-minute candles. | "for me five minutes candlesticks which I believe that good enough for sculping"
+R setup E 06:29 | A trending day (higher highs and higher lows) with the 20 moving average sloping. | "one parameter is that it should be like this trending day second thing 20 M should be sloping"
+R entry E 06:29,07:11 | Enter on a bullish pin bar at the 20 MA (bearish pin bar in a down trend). | "when Candlestick comes near 20 M that should be a preferably a bullish pin bar"
+R stop E 07:11 | Stop below the candle. | "stop loss can be below the candle"
+R exit E 07:11 | Book quickly once in profit (15-20 minutes, at the previous swing). | "once you are in profit exit IM immediately"
+R setup E 04:22,05:02 | Candles: marubozu (80-90% body) or pin bar (small body, long wick). | "maribu candles ... almost 80 to 90% it will be full body"
+R indicator A - | 20-period SMA on five-minute closes; trending day = the last 12 bars made at least 2 higher highs and 2 higher lows and the SMA is above its value 6 bars earlier (mirror for down trends). | ""
+R entry A - | Pin bar: lower wick at least 2 x the body and at least 60% of the range, low within 0.05% of the SMA or below it, close above it; enter at the next open; 09:30-14:45. | ""
+R stop A - | Stop below the pin bar's low; exit at the close of the 3rd bar or at 1R, whichever first; at most 3 trades a day; out at 15:15. | ""
+T with_assumptions | 'trending day', 'near' and 'quickly' are judged by eye (A)
+= PC-02 | Rejection candle at the previous day's high or low, next-candle exit
+R setup E 09:51,10:32 | At the previous day's high (low), a bearish (bullish) candle or pin bar rejecting it. | "near the previous day high this black line it is making a bearish candle immediately short here"
+R exit E 10:32,11:15 | Book in the next candle (or two-three candles). | "next candle only you can book The Profit"
+R stop E 11:15 | Stop beyond the candle. | "go long keep stop- loss here"
+R entry A - | Desk version: Nifty and Bank Nifty five-minute bars; short at the next open after a bar whose high came within 0.05% of the previous day's high (or above it) and closed red with its close below the previous day's high (long mirror at the low); 09:20-14:45, one trade per level a day. | ""
+R stop A - | Stop beyond the signal bar's extreme; exit at the close of the next bar; out at 15:15. | ""
+T with_assumptions | 'near the level' and the exit candle are judged live (A)
+= PC-03 | Wide CPR: reversal candle at the central pivot after a fall into it, next-candle exit
+R setup E 08:31 | A wide CPR (not narrow); price falling into it; a bullish pin bar or green candle at the central pivot; mirror from above. | "it should be wide CPR it should not be narrow"
+R exit E 08:31,09:51 | Book the next candle; it is a counter-trend scalp. | "you can book The Profit at the next candle itself"
+R indicator A - | CPR from the previous day: pivot P = (H+L+C)/3, BC = (H+L)/2, TC = 2P - BC; wide = |TC - BC| at least 0.25% of P. | ""
+R entry A - | Desk version: Nifty and Bank Nifty five-minute bars; long at the next open after a green bar whose low touched P from above (the previous 6 bars falling, close above P); short mirror; 09:30-14:45, one trade a day. | ""
+R stop A - | Stop beyond the signal bar's extreme; exit at the close of the next bar; out at 15:15. | ""
+T with_assumptions | the width threshold and 'falling into' are ours (A)
+P 12:42 | 13:26 | His trading webinar

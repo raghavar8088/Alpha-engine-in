@@ -18,6 +18,10 @@ COPY backend/research/crypto_playlist_2026_11/cp_markets.py backend/research/cry
 COPY backend/research/youtube_channels11_2026_11/yc_common.py backend/research/youtube_channels11_2026_11/yc_ind.py backend/research/youtube_channels11_2026_11/yc_engine.py backend/research/youtube_channels11_2026_11/yc_nj_india.py backend/research/youtube_channels11_2026_11/yc_nj_crypto.py backend/research/youtube_channels11_2026_11/yc_channels.py backend/research/youtube_channels11_2026_11/yc_more.py backend/research/youtube_channels11_2026_11/yc_strategies.py backend/research/youtube_channels11_2026_11/yc_run.py /app/backend/research/youtube_channels11_2026_11/
 # The 20-channel strategies (registered into the 11-channel registry by zc_strategies; run by the same yc_run).
 COPY backend/research/youtube_channels20_2026_11/zc_common.py backend/research/youtube_channels20_2026_11/zc_india.py backend/research/youtube_channels20_2026_11/zc_global_a.py backend/research/youtube_channels20_2026_11/zc_global_b.py backend/research/youtube_channels20_2026_11/zc_strategies.py /app/backend/research/youtube_channels20_2026_11/
+# The channel-shortlist strategies (registered into the 11-channel registry by ze_strategies; run by the same yc_run).
+COPY backend/research/youtube_intraday4_2026_11/zd_common.py /app/backend/research/youtube_intraday4_2026_11/
+COPY backend/research/youtube_shortlist_2026_11/ze_common.py backend/research/youtube_shortlist_2026_11/ze_india.py backend/research/youtube_shortlist_2026_11/ze_global.py backend/research/youtube_shortlist_2026_11/ze_strategies.py backend/research/youtube_shortlist_2026_11/ze_cardlib.py /app/backend/research/youtube_shortlist_2026_11/
+COPY backend/research/youtube_shortlist_2026_11/cards /app/backend/research/youtube_shortlist_2026_11/cards
 COPY backend/app/services/index_intraday/data.py /app/backend/app/services/index_intraday/data.py
 # The liquidity-sweep books run the app's own strategy classes (liquidity_sweep.py): the shared domain/contracts package and
 # the three strategy files they import. These are not the library's package __init__s, which import every strategy.

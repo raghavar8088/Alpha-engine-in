@@ -1,0 +1,25 @@
+video: hk4d8AxbQ3A
+topic: india_stocks
+summary: Raunak A's opening range breakout for NSE stocks: mark the first 15-minute candle's high and low, take the break only when the breakout candle carries clearly higher volume and price holds above VWAP (below for shorts), stop at the session low (high); he uses it only while India VIX is above 18-20 and scales out on wide-range candles.
+instruments: NSE stocks (Reliance, Grasim)
+timeframes: 15m, 5m
+style: intraday
+= TW-01 | 15-minute opening range breakout on a volume expansion, VWAP side, session-low stop
+R market E 08:46,10:48 | NSE large-cap stocks (Reliance, Grasim Industries in the examples). | "this is opening range breakout happening in Reliance"
+R timeframe E 00:00,07:50 | The opening range is the first 15-minute candle (or the first 30 minutes): choose one and stick with it. | "either choose a 15 minute or 30 minute timeframe, and then stick with it"
+R setup E 00:41 | Mark the opening range high and low, then wait for a breakout above the high or a breakdown below the low. | "you just mark out the high point and low point on a 15 minute timeframe chart"
+R filter E 01:21,08:06 | The breakout candle's volume must be clearly higher than recent volume; skip breakouts without a volume expansion. | "Volume should be clearly higher than the recent volume seen on the chart"
+R filter E 04:01,06:45 | Price action at VWAP shows who is in control: the long breakouts shown come with price above VWAP. | "price was clearly above the VWAP indicator"
+R stop E 03:21 | Day trade stop: the session low for a long, the session high for a short. | "use the session low as stop-loss. If the trade is on the long side"
+R filter E 08:06,12:09 | Trade the setup only while India VIX is above 18-20; avoid it in low volatility. | "much more useful when the volatility index is above 18 value"
+R filter E 10:07 | Broad market momentum is one more factor: Nifty and Bank Nifty up, advance/decline 3:1 on the long example. | "Nifty is up about 1.13%, Bank Nifty is up 1.93%. Advanced decline ratio is three is to one"
+R exit E 11:28 | Scale out on wide-range candles and trail the stop; working professionals hold 3-4 sessions with a deeper stop. | "I use such wide range candles to exit positions"
+R market A - | Desk version: the NSE 15-minute stock pool; the opening range is the 09:15-09:30 candle. | ""
+R entry A - | Enter at the next candle's open after a 15-minute close above the range high (below the low) whose volume is at least 1.5 x the mean of the 8 previous 15-minute candles, with the close above (below) the session VWAP and NIFTY above (below) its previous close; signals from 09:30 to 13:00, one trade per stock a day. | ""
+R stop A - | Stop at the session low (high) at the signal candle; no target; out at 15:15. The India VIX filter is not applied (the desk has no VIX feed) and scale-outs are not coded. | ""
+T with_assumptions | the India VIX filter is dropped (no feed); the volume threshold and the exit are not quantified (A)
+V clearly higher volume | R4 | 01:21 | No number given | 1.5 x the mean of the 8 previous 15-minute candles
+V wide-range candle exit | R9 | 11:28 | Not defined | not coded: exit at 15:15
+X - | 09:26 | Reliance | long | 15-minute opening range broken on a strong, high-volume candle above VWAP | about 1813 | 1790-1792 (day trade) | none stated (1840-1850 expected) | unknown | price 1836 later in the video
+P 05:21 | 05:40 | Channel membership (VSA series, options analysis)
+U Which candles define the "recent volume" the breakout must beat?

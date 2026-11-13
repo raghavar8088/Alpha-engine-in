@@ -1,0 +1,28 @@
+video: WiLIFP-P2BY
+topic: india_stocks
+summary: Definedge's intraday momentum system (Prashant Shah): trade with Nifty's side, scan F&O stocks and keep the ten strongest by their move against their own average volatility, then enter on Point & Figure (0.15% x 3, one-minute) double-top buys (double-bottom sells) with the pattern's opposite signal as the stop, ride the trend, square off by 15:10; D-SMART, the intraday breadth zone and D-Pivot (Definedge's own tools) confirm momentum.
+instruments: NSE F&O stocks; Nifty / Bank Nifty on big index days
+timeframes: 1m (Point & Figure 0.15% x 3), 5m
+style: intraday
+= DF-01 | Ten strongest movers on Nifty's side, Point & Figure double-top buy / double-bottom sell, pattern stop
+R market E 09:27,12:12 | NSE F&O stocks from Definedge's intraday momentum scanner; Nifty or Bank Nifty themselves on days with a big index move. | "lets se eph endo stoks"
+R filter E 09:27,10:08 | Trade with Nifty: when Nifty is bullish take only bullish stocks, when bearish only bearish ones (counter-trend only in a very strong stock). | "pahalaa rool to yah hai agar niphtee bulish hai to aap bulish opshan silekt rakhanaa"
+R setup E 08:47,11:31 | Rank the stocks by how strongly they move against their own average volatility (the scanner's value column) and keep the top 10 (bullish) or bottom 10 (bearish) as the day's universe. | "ye pahale 10 stok hai ye aapakaa ek yoonivars ho sakataa hai"
+R indicator E 03:42,07:13 | Momentum is confirmed by price outside the D-SMART cloud, above (below) all D-Pivot lines (the 'all clear zone') and the intraday breadth zone above +25 (below -25). | "intraade brik jon 25 par ke oopar hai to straang bulish momentam"
+R timeframe E 04:27 | Entries on a one-minute Point & Figure chart with a 0.15% box and 3-box reversal. | "loest posibal taaim intaraval pe ham ye chaarj plot karate hain 0.15 * 3"
+R entry E 04:27,12:58 | Long on a double-top buy pattern in a bullish stock; short on a double-bottom sell in a bearish stock. | "dabal top baay pe ham baay tred inishietiv"
+R stop E 05:11,05:51 | The initial stop is the opposite pattern signal (double-bottom sell for a long); the number of boxes keeps the initial risk small. | "inishiyal stop los aapakaa berish tred ke lie dabal top baay hai"
+R management E 05:51,12:58 | Once in the money, ride the trade with D-SMART (an optional profit-booking rule is allowed). | "ek baar praais praais aapake in d manee aa gayaa phir aap usako dee smaart se hee raaid kar sakate hain"
+R session E 13:54 | Check the scanner around 9:30-9:45 and again at 1 PM; square off around 3:10 PM. | "phir aap 31 ko vagairah aap skveyar oph kar sakate ho"
+R no_trade E 16:05 | At most two or three stop-losses a day, then stop; fixed quantity per trade. | "do yaa teen stop los ke oopar maiksimam naheen honaa chaahie usake baad us din kaam naheen karenge"
+R market A - | Desk version: the NSE 5-minute stock pool (the pool stands in for the F&O list); Nifty's side = NIFTY above (below) its previous close at 09:30. | ""
+R setup A - | Universe at 09:30: rank the pool by (price / previous close - 1) divided by the stock's 20-day mean daily range % and keep the top 10 on a bullish day (bottom 10 on a bearish day). | ""
+R entry A - | Point & Figure built from 5-minute closes from 09:15 (0.15% box of the 09:15 open, 3-box reversal); enter at the next bar's open when an X column rises above the previous X column's top (long; mirror for shorts); signals 09:30-14:30. | ""
+R stop A - | Stop one box below the low of the O column before the entry (above the high of the X column for a short); then trailed to each later O column's low; out at 15:10. D-SMART, the breadth zone and D-Pivot are not coded (Definedge's own indicators); at most 3 trades a day and none after the second stop. | ""
+T with_assumptions | D-SMART, the intraday breadth zone and D-Pivot are proprietary and not coded; the scanner's value column is approximated; 5-minute closes replace one-minute ones (A)
+V the scanner's value column | R3 | 08:47 | Defined only as move against average volatility | today's % change / 20-day mean daily range %
+V ride with D-SMART | R8 | 05:51 | Proprietary indicator | trailed Point & Figure stop (each new O column's low)
+C win_rate | 13:54 | hit ratio around 40-50% with a good risk-reward | not stated | "ho sakataa hai 50 par ke aasapaas 40 par ke aasapaas aapakaa hit resho ho"
+X - | 12:58 | NSE stock (scanner pick) | short | big gap down, below D-SMART and all D-Pivot lines, small O column then a double-bottom sell | double-bottom sell | the double-top buy level | ride with D-SMART | unknown | example shown on the chart
+P 09:27 | 10:08 | Definedge RZone app scanners
+U What exactly is the scanner's value column (the volatility-adjusted move)?
