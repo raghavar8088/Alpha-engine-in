@@ -1,0 +1,18 @@
+video: uRTBc5yAOL4
+topic: india_index
+summary: Upsurge Club (with a guest) scalps Bank Nifty on five-minute candles with a 200-length CCI (its smoothing switched from SMA to EMA) and a Supertrend (10, 2): buy when the CCI rises above 100, the Supertrend is the trailing stop and about 150 points the target; not at the 09:15 open, only once the market settles (about 09:30-09:45); after a dip below the Supertrend and a close back above it while the CCI is still above 100, buy again.
+instruments: Bank Nifty
+timeframes: 5m
+style: scalping
+= US-01 | CCI (200) above 100 with a Supertrend (10, 2) trailing stop, about 150 points (Bank Nifty five minutes)
+R indicator E 00:46,01:30 | CCI with length 200, its smoothing changed from SMA to EMA; Supertrend (10, 2), not the default (10, 3). | "seeseeaaee men ham thoree setings chenj karenge usakee lenth ham 200 kaa denge ham usakaa esaem se eeemaem chenj kar denge"
+R entry E 00:46,02:16 | Buy when the CCI goes above 100 (price is then nearly always above the Supertrend), at the candle's close. | "jab jab vo 100 ke oopar jaaegaa tab ham hamaare tred men entar karenge"
+R stop E 00:46,09:16 | The Supertrend is the trailing stop. | "supar trend bhee aplaaee kiyaa thaa jo ek tareeke se hamaaraa stop los kaa kaam karegaa"
+R target E 02:57,09:16 | Target about 150 Bank Nifty points. | "taaraget vahee rahegaa 150 points ke aasapaas kaa"
+R no_trade E 05:04 | Not at the 09:15 open: enter once the market settles (about 09:30-09:45). | "9:30 104 ke aasapaas jab maarket setal ho jaae usake baad hee hamane is tred ko egjeekyoot karanaa hai"
+R entry E 03:41,09:16 | Re-entry: price drops below the Supertrend and comes back above it while the CCI stays above 100. | "agar ye supar trend se vaapas neeche jaataa hai aur phir agar vaapas supar trend ke oopar jaataa hai"
+R market A - | Desk version: Bank Nifty one-minute index rows on five-minute candles; long only, as taught. | ""
+R entry A - | Buy at the next open after a five-minute close with the CCI (200, typical price) above 100 that either crosses 100 or closes back above the Supertrend (10, 2), the close above the Supertrend; signal bars 09:30-14:30; at most 3 trades a day. | ""
+R stop A - | Initial stop at the Supertrend line, trailing with it; target 150 points; out at 15:15. | ""
+T with_assumptions | the EMA smoothing is read as the CCI's smoothing line (the CCI itself is used); the settle time and the long-only side are (A)
+P 06:30 | 06:30 | Paid scalping course

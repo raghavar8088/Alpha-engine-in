@@ -1,0 +1,15 @@
+video: E4BEM-wONSc
+topic: crypto
+summary: Trader Mayne's whiteboard episode on fair value gaps: a three-candle pattern whose middle (displacement) candle leaves a gap between candle one's high and candle three's low (bullish; the mirror for bearish); price tends to return to fill it; the high-probability gaps sit in the discount of a dealing range (premium for shorts), after a liquidity sweep, in line with the higher-timeframe structure, with a big displacement candle; enter at the gap's edge or within its first 50%, stop below the gap or below candle one, target the external range liquidity; read from weekly to daily to four hours.
+instruments: Bitcoin and any market
+timeframes: 1w, 1d, 4h (any)
+style: swing
+= MY-01 | Fair value gap in the discount of the dealing range after a sweep, entry in its first half, stop past candle one (top-down)
+R setup E 00:44,02:10 | A fair value gap: three candles, the middle a displacement candle; the gap runs from candle one's high to candle three's low (bullish). | "It's going to be the high of candle one to the low of candle three"
+R filter E 09:49,10:35 | Higher-probability gaps: in the discount of the dealing range (below its 50%) for longs, after taking sell-side liquidity, with the higher-timeframe trend. | "where are the best longs? Near the range low, in a discount, after taking out sell-side liquidity"
+R entry E 23:33 | Enter at the gap's edge or within its first 50% (a limit order or spread orders). | "the entry itself is the fair value gap beginning. Or, in a bearish fair value gap, it's the 50% and down"
+R stop E 24:15,25:38 | Stop directly beyond the gap (tightest) or beyond candle one (more room). | "Your stop loss has two options ... directly below the fair value gap ... The second option ... below candle one"
+R target E 26:24 | Target the external range liquidity (the range's far extreme). | "Our target, obviously, is going to be the external range liquidity"
+T with_assumptions | the dealing range, structure and liquidity reads are top-down and by eye
+D TP-01 | an impulsive fair value gap in the discount of a range with the trend, entered at the gap, is already in the library (20-channel study; also NJ-30)
+P 35:35 | 35:35 | Prop-firm discount code; newsletter and Discord

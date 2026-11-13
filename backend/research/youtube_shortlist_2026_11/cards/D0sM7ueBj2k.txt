@@ -1,0 +1,11 @@
+video: D0sM7ueBj2k
+topic: india_index
+summary: An ICICI Direct webinar demonstrating the platform's execution tools for option traders: a 'scalping' order that buys in slices every few rupees lower and books each slice a few rupees higher, flat-fee brokerage per order, and multi-leg strategies (a short straddle, an iron fly with wings) run with one combined stop and target; the speaker places and closes a few live trades but states no setup or signal rule.
+instruments: Bank Nifty and Nifty options
+timeframes: 5m
+style: options_selling
+= IC-01 | Platform demo: sliced option scalping orders and combined stop/target for straddles and iron flies (no trade rule)
+R entry E 03:32,04:12 | Spread a buy across lower prices (for example every Rs 3) and auto-book each slice a fixed amount higher. | "jaisejaise ye ₹3 gire naa to aap mere lie ... spred aaut karo"
+R management E 13:21,14:48 | Multi-leg positions (short straddle, iron fly) carry one combined maximum loss and profit. | "jo bhee aap stretajee banaa rahe ho vo stretajee pe aap kanbaaind stop los aur kanbaaind prophit ke saath tred kar rahe ho"
+T concept_only | a demonstration of order tools; the straddle and grid ideas need option premiums the desk does not have, and no entry signal is defined
+P 09:52 | 10:32 | Broker platform and brokerage plan

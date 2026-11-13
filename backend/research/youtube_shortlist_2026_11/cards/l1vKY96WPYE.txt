@@ -1,0 +1,16 @@
+video: l1vKY96WPYE
+topic: india_index
+summary: Upsurge Club's guest Sahil teaches 'level to level' scalping with pivot points from each 15-minute candle of Nifty futures: the candle's high, low and close give its pivot and standard R1-R3 / S1-S3; a close below the pivot means sell only (above it, buy only); the next order is placed at once as a limit at a resistance (pivot, R1 or R2) with the stop at the next level up and the target at S1-S3 (mirror for buys at supports); he recommends R1 with an R2 stop (aggressive) or R2 with an R3 stop (fewer but more accurate trades); in the live example a sell at the pivot with an R1 stop risked 22 points.
+instruments: Nifty futures (options by the futures levels)
+timeframes: 15m
+style: scalping
+= US-02 | Pivot levels of each 15-minute candle: close below its pivot = sell limit at R1, stop R2, target S1 (mirror for buys)
+R indicator E 03:36,10:36 | Each 15-minute candle's pivot = (high + low + close) / 3, with standard R1-R3 and S1-S3 from the same candle. | "ek sikyoritee kaa haaee usakaa lo aur usakaa kloj not kiyaa jaataa hai aur isake total ko divaaided baay three kiyaa jaataa hai"
+R setup E 04:59 | Close below the pivot = sell bias only; close above it = buy bias only. | "agar usakaa kloj usake pev point ke neeche hai to meraa baayas nesesareelee sel hee rahegaa"
+R entry E 06:21,12:56 | The first order is always a sell at a resistance (or a buy at a support), entered as soon as the candle closes. | "jaise hee 11:30 baje kaa kaindal pau baje khatm hotaa hai ... agar tredar ne disaaid kiyaa hai ki main aarav par sel karoongaa vo apane ordar men jaaegaa"
+R stop E 15:05 | The stop is the next level beyond the entry (sell at R1, stop R2; sell at R2, stop R3). | "r1 p sel keejie vith stop los r2 yaa phir ... r1 r2 p sel keejie vi stop los r3"
+R target E 17:10 | Targets at S1, S2 or S3 (R levels for buys). | "s1 s2 yaa s3 pe aapakaa taaraget ordar jaaegaa"
+R entry E 24:06 | Recommended: R1 with an R2 stop (aggressive) or R2 with an R3 stop (conservative, fewer but more accurate trades). | "main stoodents ko r1 aa2 yaa r2 aa3 men janaralee hee rikamend karataa hoon"
+R market A - | Desk version: Nifty and Bank Nifty one-minute index rows on 15-minute candles (the index as the futures proxy). | ""
+R entry A - | At each 15-minute close: below its pivot, a sell limit at that candle's R1 live for the next 15-minute candle, stop at R2, target S1 (above the pivot, a buy limit at S1, stop S2, target R1); 09:30-14:45; at most 4 trades a day; out at 15:15. | ""
+T with_assumptions | the level choice (R1/R2), the order's life and the target are the trader's choice (A)

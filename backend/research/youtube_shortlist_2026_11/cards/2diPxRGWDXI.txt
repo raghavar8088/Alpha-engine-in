@@ -1,0 +1,19 @@
+video: 2diPxRGWDXI
+topic: india_stocks
+summary: Kotak Stockshaala's VWAP pullback for option buyers on five-minute charts: after price runs well above the VWAP, wait for it to pull back to the VWAP on shrinking volume (the lowest bar of the pullback); buy the at-the-money call when price crosses that low-volume candle's high, stop a little below the VWAP; book half quickly and trail the rest under each new swing low (puts mirror it below the VWAP); the active windows are 09:20-11:30 and 13:45-15:10 (lunch is choppy); skip a pullback on big volume; out by 15:00; only liquid options.
+instruments: Index and stock options (at the money)
+timeframes: 5m
+style: options_buying
+= KT-02 | VWAP pullback on the lowest volume after a run away from it, break of that candle, stop under the VWAP, half off then a swing-low trail
+R setup E 02:43 | Price runs well above the VWAP, then drops back to it. | "praais jo hai vah veevap ke kaaphee oopar chalaa jaataa hai aur phir vaapas vah drop hotaa hai veevap tak"
+R setup E 05:29,14:28 | The pullback's volume shrinks to its lowest; a pullback on big volume is not taken. | "volyoom girategirate girate olamost loest pe pahunch gayaa hai"
+R entry E 05:29 | Buy when price crosses that candle's high. | "ab vaapas se yah praais jab isakaa haaee kros karataa hai tab usake baad main isamen kol baay kar sakatee hoon"
+R stop E 05:29 | Stop just below the VWAP with a 2-3 point buffer. | "stop los bilo d veevap thoड़aa saa baphar rakh leejie do-teen point kaa"
+R management E 06:09,07:38 | Book half quickly (about Rs 5 on the option), then trail the rest under each new swing low with a small buffer. | "jo 50% bailens mere paas bachaa hogaa usako main yahaan isake neeche thoraa saa baphar rakh ke meraa stop los trel karate jaaoongee"
+R session E 02:03,02:43 | Active 09:20-11:30 and 13:45-15:10; 11:30-13:45 is often choppy; out by 15:00. | "11:30 too 145 aisaa maanaa jaataa hai ki kabhee-kabhee yah chaupee ho jaataa hai"
+R entry E 08:19,09:39 | Puts mirror it below the VWAP (a weak rally to the VWAP on low volume, then a break of its low). | "ham baay kar sakate hain put stop los isake oopar rahegaa"
+R market A - | Desk version: the NSE stock pool on five-minute candles (real volume) as the proxy for stock options. | ""
+R setup A - | 'Well above' = the high since the last VWAP touch at least 1.5 x ATR (14) above the VWAP; the pullback bar's low within 0.2% of the VWAP (or under it) with its close above, and its volume the lowest of the last 6 bars. | ""
+R entry A - | A buy-stop one tick over that bar's high, live 3 bars; mirror for shorts; signals 09:30-11:30 and 13:45-14:45; one trade per stock a day. | ""
+R stop A - | Stop 0.1% below the VWAP (above it for shorts); half off at 1R, the rest trails under the latest confirmed swing low (two bars each side); out at 15:00. | ""
+T with_assumptions | 'well above', 'lowest volume' and the quick half are judged live (A); the options are replaced by the stock

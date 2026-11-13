@@ -1,0 +1,10 @@
+video: uE-nBpFV6zs
+topic: india_stocks
+summary: Groww's beginner explainer on indicators (leading versus lagging) and the RSI: overbought above 70, oversold below 30, divergence as a warning, shown on a daily stock chart; the Hindi auto-captions are badly garbled (long stretches are noise), and no complete entry, stop or exit rule can be recovered.
+instruments: Stocks (daily)
+timeframes: 1d
+style: unclear
+= GR-01 | RSI overbought 70 / oversold 30 basics (explainer)
+R indicator E 03:00 | RSI zones: above 70 overbought, below 30 oversold. | "ham ovarabord vard joints banaate hain"
+R setup E 09:46 | Oversold for a long time can hint at a buy, overbought at a short; experiment with the settings. | "koee shauk agar ovarasold sineriyo men rahaa hai to ham shot saaph karane kaa bhee soch sakate hain"
+T concept_only | an indicator explainer with no trade rule; the auto-captions are too garbled to recover more; the RSI 70/30 reversal is already the library's YT-25

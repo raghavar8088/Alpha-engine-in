@@ -520,8 +520,25 @@ YC3_STRATEGIES = (
     ('TN-02', '15-minute opening range double break: reclaim on the VWAP side, target the far edge', 'Trading Nut', ('NAS100',)),
     ('AC-02', 'Day type from the 3-minute range vs the VWAP; VWAP 1-3 SD bands + RSI 70/30 fades and trend pullbacks', 'Anthony Crudele', ('NAS100',)),
     ('CR-01', 'Drop, base, rally on one-minute candles in a 30-minute uptrend: limit at the base top, 3R (long)', 'Carmine Rosato', ('NAS100',)),
+    # the third batch (13 Nov 2026: the cards read after the second deploy); trades from settings.YC3C_START_T
+    ('FY-01', 'VWAP flow shift: price on one side of the VWAP (14), Chaikin oscillator (3, 10) crossing zero, EMA 10 exit', 'Fyers', ('NIFTY',)),
+    ('FY-02', '11:00-11:15 range breakout on one-minute Nifty, first close beyond, far-side stop, out at 15:24', 'Fyers', ('NIFTY',)),
+    ('AO-03', 'EMA 9/21 cross, a steep 9 EMA, pullback touching it, break of a bullish candle, candle stop, 1:2', 'Angel One', ('NIFTY', 'BANKNIFTY')),
+    ('US-01', 'CCI (200) above 100 with a Supertrend (10, 2) trailing stop, 150 points (long)', 'Upsurge Club', ('BANKNIFTY',)),
+    ('US-02', 'Pivot levels of each 15-minute candle: below its pivot sell at R1 (stop R2, target S1), mirror for buys', 'Upsurge Club', ('NIFTY', 'BANKNIFTY')),
+    ('KS-02', 'EMA 10 / EMA 13 cross on 15 minutes, stop and reverse', 'Kunal Saraogi', ('NIFTY', 'BANKNIFTY')),
+    ('VV-01', 'Heikin Ashi doji, then an open = high (low) candle, break of its low (high), 0.25% stop, HA trail', 'Vibhor Varshney', ('NIFTY', 'BANKNIFTY')),
+    ('VV-02', '09:15 five-minute candle on the VWAP side, VWAP crosses with a follow-up candle, Supertrend agreeing, 1:1', 'Vibhor Varshney', ('NIFTY', 'BANKNIFTY')),
+    ('BJ-01', '5 EMA vs 200 EMA side, the cross and each close back over the 5 EMA of lows (highs) with RSI 40-50', 'Bharat Jhunjhunwala', ('NIFTY', 'BANKNIFTY')),
+    ('KT-02', 'VWAP pullback on the lowest volume after a run away from it, break of that candle, half at 1R, swing trail', 'Kotak Securities (Stockshaala)', ('NSE5',)),
+    ('BJ-02', 'One-hour middle-band side, 15-minute band pullback, five-minute strong close on 1.5x volume, 2R', 'Bharat Jhunjhunwala', ('NSE5',)),
+    ('CD-01', '05:30 IST VWAP reclaim: 20 EMA vs VWAP side, engulfing or star at the VWAP, pattern stop, 2R', 'CoinDCX', ('BTCUSD',)),
+    ('DE-10', 'Session VWAP bounce, rejection and break-and-retest on five minutes, no flat VWAP, 2R', 'Delta Exchange', ('BTCUSD',)),
+    ('CD-02', '200 EMA side and slope, pullback touching the EMA, engulfing close, 2R (one minute, Asia session)', 'CoinDCX', ('XAUUSD',)),
+    ('RT-01', 'Above the 200-day MA, close below the lower Bollinger Band (20, 2.5), buy limit 3% lower, RSI(2) exit', 'Rayner Teo', ('NSED',)),
 )
 YC3B_IDS = frozenset(('MC-01', 'MC-02', 'AO-01', 'KT-01', 'KG-01', 'KG-02', 'AO-02', 'CR-02', 'QC-03', 'CT-03', 'KS-01', 'DE-09', 'CT-02', 'CT-01', 'SK-01', 'CH-01', 'CH-02', 'QC-01', 'CV-01', 'KR-01', 'TN-02', 'AC-02', 'CR-01'))
+YC3C_IDS = frozenset(('FY-01', 'FY-02', 'AO-03', 'US-01', 'US-02', 'KS-02', 'VV-01', 'VV-02', 'BJ-01', 'KT-02', 'BJ-02', 'CD-01', 'DE-10', 'CD-02', 'RT-01'))
 for _sid, _name, _ch, _mkts in YC3_STRATEGIES:
     ACCOUNTS.append(_a(_sid, YC3, _name, _ch, *[(YC2_BOOK_MARKET.get(_m, _m), "V0") for _m in _mkts]))
 BY_ID = {a.id: a for a in ACCOUNTS}

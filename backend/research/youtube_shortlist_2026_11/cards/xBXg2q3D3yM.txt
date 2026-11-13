@@ -1,0 +1,18 @@
+video: xBXg2q3D3yM
+topic: india_index
+summary: Fyers's 'VWAP flow shift' on Nifty near-month futures, five-minute candles: buy when price is still below a 14-length VWAP but the Chaikin oscillator (3, 10) crosses above zero, the candle is green and closes above the 10 EMA (sell is the mirror above the VWAP); fresh entries only 11:30-13:00 and 13:30-14:45, one trade a day; exit on a five-minute close back through the 10 EMA, a hard Rs 4,500 stop per lot, flat at 15:15; his two-year backtest on Rs 2 lakh with zero slippage: 263 trades, 30.8% winners, average win Rs 3,700 against Rs 1,100, Rs 1.95 lakh gross but only Rs 96,500 net after Rs 98,400 of charges.
+instruments: Nifty near-month futures
+timeframes: 5m
+style: intraday
+= FY-01 | VWAP flow shift: price on one side of the VWAP (14), Chaikin oscillator (3, 10) crossing zero the other way, candle colour + EMA 10, EMA 10 exit
+R indicator E 00:47 | VWAP with a length of 14, Chaikin oscillator (3, 10), EMA 10. | "pahalaa hai veevap vid a lenth oफ़ 14. doosaraa hai chaayan oskuletar vid seting 3 end 10 aur teesaraa hai 10 eeemae"
+R setup E 01:33 | Buy setup: price below the VWAP while the Chaikin oscillator crosses above zero (volume momentum turning up). | "sabase pahale niphtee kaa praais veevap ke neeche tred kar rahaa honaa chaahie"
+R entry E 01:33,02:14 | Confirmations: a bullish candle (close above open) and the latest completed five-minute close above the EMA 10; the sell is the mirror (above the VWAP, Chaikin crossing below zero, bearish candle, close below the EMA 10). | "doosaraa hai letest kanpleeted 5 minat kaindal kaa kloj 10 eeemae ke oopar honaa chaahie"
+R session E 02:14,02:56 | Fresh entries only 11:30-13:00 and 13:30-14:45; at most one trade a day. | "phresh entreej 11:30 am se 1:00 pee.m. tak alaaud hai"
+R exit E 02:56,03:38 | No fixed target: exit when a completed five-minute candle closes back through the EMA 10. | "baay pojeeshan men kanpleeted 5 minat kaindal jab 10 eeemae ke neeche kros karake usake neeche kloj kare to pojeeshan egjit ho jaaegee"
+R stop E 03:38 | A strict Rs 4,500 stop per lot; flat at 15:15. | "risk kantrol ke lie ₹4500 kaa ek strikt stop los bhee rakhaa hai"
+R market A - | Desk version: the Nifty index one-minute rows on five-minute candles as the futures proxy; the desk's index rows carry no real volume, so the VWAP (14) is a 14-bar average of the typical price and the Chaikin oscillator works on the close location alone. | ""
+R stop A - | The Rs 4,500 per lot stop = 69 Nifty points (lot 65); enter at the next open; out at 15:15. | ""
+T with_assumptions | the desk has no Nifty futures volume, so both volume indicators become price-only proxies (A)
+C money | 04:23 | Rs 1,94,873 gross, Rs 96,500 net after Rs 98,400 of charges (48.3%, 21.8% a year); 263 trades, 81 winners (30.8%); average win Rs 3,700, average loss Rs 1,100 | 1 Oct 2024 - 1 Oct 2026, Rs 2 lakh, zero slippage | "total 263 treds mile jisamen sirph 81 treds prophitebal rahe"
+P 03:38 | 04:23 | Fyers automation assistant

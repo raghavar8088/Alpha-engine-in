@@ -1,0 +1,11 @@
+video: YCbjJhpi5jk
+topic: forex_us
+summary: The Chart Guys walk through one morning of scalping a leveraged Nasdaq ETF (SQQQ) around a four-hour thesis (a lower high after the FOMC reaction high): one-minute double tops at the high of the day for entries, scaling out in quarters and halves within minutes, re-adding on one-minute or two-minute lower highs, capping the size, a 'day loser' as the only hard risk, then a 15-minute lower high and a breakeven stop before leaving the screen; he started this style only in his seventh year with larger capital.
+instruments: Nasdaq 100 futures and leveraged ETFs (SQQQ, TQQQ)
+timeframes: 4h thesis; 1m, 2m, 5m, 15m execution
+style: scalping
+= CG-01 | Scalping into a four-hour thesis with one-minute double tops, scaling out and re-adding (live walkthrough)
+R setup E 01:31,02:15 | Start from the most likely higher-timeframe scenario (here a four-hour lower high) and only trade toward it. | "every single thing that i do from here on out once the bell rings is based on that premise"
+R entry E 02:15,02:57 | Use one-minute patterns (a double top at the high of the day) to position for it. | "in this instance it was a little double top"
+R management E 02:57,07:11 | Take partials within minutes, move the stop over the high, re-add on lower highs, cap the total size. | "out half at 9 35 or out 25 percent out 25 percent more at 9 36"
+T concept_only | a discretionary trade-management walkthrough; the thesis, entries and adds are judged live and no stop rule is set beyond a daily loss limit

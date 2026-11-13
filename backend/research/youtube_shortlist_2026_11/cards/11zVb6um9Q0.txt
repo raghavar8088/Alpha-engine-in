@@ -1,0 +1,21 @@
+video: 11zVb6um9Q0
+topic: india_stocks
+summary: Bharat Jhunjhunwala's intraday Bollinger Band strategy across three timeframes: on the one-hour chart price holding above the middle band (20 SMA) sets a long-only bias (below it, short-only); on 15 minutes wait for a pullback that holds the lower or middle band (a close below the lower band makes it aggressive, not corrective), ideally on shrinking volume; on five minutes enter on the close of a strong candle (close at its high) back over the middle band with volume at least 1.5 times its 20-bar average; stop under the lower band or 1.5 ATR; target 2 ATR, 2:1 or the 15-minute upper band; signals 09:30-14:30, flat by 15:20.
+instruments: Nifty, liquid stocks
+timeframes: 60m, 15m, 5m
+style: intraday
+= BJ-02 | One-hour middle-band side, 15-minute pullback holding the bands, five-minute strong close over the middle band on 1.5x volume, 1.5 ATR stop, 2R
+R setup E 13:29,14:11 | One hour: price above the middle band and holding it = long bias only (below = short only). | "jaise hee praais midil baind se oopar jaanaa shuroo kar de ... hamaare lie long baayas ho jaataa hai"
+R setup E 14:11,14:51 | 15 minutes: a pullback to the lower or middle band that holds (no close below the lower band = corrective). | "praais jo hai vah loar baind yaa midil baind ko hold karegee"
+R indicator E 09:54,10:34 | Bollinger Bands (20, 2) on closes; volume against its 20-period average; ATR (14). | "20 peeriyad kaa bilinjar baind hogaa. staindard devieshan too kaa hee rahegaa"
+R entry E 14:51,15:35,19:45 | Five minutes: a strong bullish candle (close equal to its high) closing over the middle band with volume at least 1.5 times average; enter when it closes. | "apane evarej se derh gunaa volyoom ho. tab yah yahaan par ek baay signal trigar karegaa"
+R stop E 15:35,16:17 | Stop under the lower band or 1.5 x ATR. | "yaa to loar baind ke neeche lagaa lo yaa aap 1.5 eteeaar le lo"
+R target E 16:17,21:48 | Target 2 x ATR, 2:1 or the 15-minute upper band. | "taaraget aapakaa 2TR hogaa yaa jo 15 minat kaa taaim phrem hai usakaa apar baind hogaa"
+R session E 12:46 | Signals 09:30-14:30 (at most three after 14:30), everything closed by 15:20. | "9:30 se 2:30 ke beech men hee aap jo hai un signals ko egjeekyoot karen"
+R entry E 27:25,29:31 | Shorts mirror it: one-hour below the middle band, a 15-minute rally that does not break the upper band, a strong five-minute close below the middle band, entry under its low. | "isake lo ke neeche ham jo hai apanee entree lenge. stop los kahaan lagaayaa? ham logon ne appar baind pe stop los lagaa diyaa"
+R market A - | Desk version: the NSE stock pool (real volume) on five-minute candles with 15- and 60-minute bars built from them (the 60-minute bars run on the clock hour, not from 09:15). | ""
+R setup A - | One-hour bias from the last completed hour's close against its middle band; the 15-minute pullback = a low within 0.2% of (or under) the middle or lower band in the last 4 bars with no 15-minute close under the lower band. | ""
+R entry A - | Five-minute candle closing above its middle band with the close in the top 10% of its range and volume at least 1.5 x the 20-bar average: long at the next open; mirror for shorts; one trade per stock a day. | ""
+R stop A - | Stop 1.5 x ATR (14, five-minute) from the entry; target 2R; out at 15:15. | ""
+T with_assumptions | the pullback test and the strong-candle test are judged by eye (A)
+P 23:08 | 25:21 | Paid template and mentorship programme; Pine script for a fee

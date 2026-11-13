@@ -213,12 +213,10 @@ def uk01(m, B, p, cache):
     out = []
     for d in range(m.n_days):
         js = _days(b, d)
-        if len(js) < 10 or int(b.ny0[js[0]]) != 9 * 60 + 30:
+        if not js or int(b.ny0[js[0]]) != 9 * 60 + 30:
             continue
         j0 = js[0]
-        exp = next((int(b.i1[j]) for j in js if int(b.ny0[j]) == 9 * 60 + 34), None)
-        if exp is None:
-            continue
+        exp = int(b.i1[j0]) + 4                       # the 09:34 row (one-minute rows; never a later bar's lookup)
         hi, lo = float(b.h[j0]), float(b.l[j0])
         s_long = sig(b, j0, 1, lo, "UK01_FIRST_MINUTE_LONG", entry_stop=hi + 0.25, expire_k=exp)
         s_long.alt = sig(b, j0, -1, hi, "UK01_FIRST_MINUTE_SHORT", entry_stop=lo - 0.25, expire_k=exp)

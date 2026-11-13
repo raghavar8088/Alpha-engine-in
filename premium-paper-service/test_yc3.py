@@ -16,6 +16,7 @@ from pathlib import Path
 os.environ["PREMIUM_DATA_DIR"] = tempfile.mkdtemp(prefix="premium_yc3_")
 os.environ.setdefault("PREMIUM_YC3_START", "2026-01-01T00:00:00+00:00")
 os.environ.setdefault("PREMIUM_YC3B_START", "2026-01-02T00:00:00+00:00")
+os.environ.setdefault("PREMIUM_YC3C_START", "2026-01-03T00:00:00+00:00")
 HERE = Path.cwd()
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent / "backend" / "research" / "youtube_channels11_2026_11"))
@@ -90,6 +91,9 @@ check("a live market without a setup is running", st == "running" and why == "Ru
 check("YC3 books start at YC3_START_T", SG._start_of("BTCUSD", acct) == datetime.fromtimestamp(S.YC3_START_T, timezone.utc))
 b2 = C.BY_ID["CT-02"]
 check("second-batch books start at YC3B_START_T", SG._start_of("BTCUSD", b2) == datetime.fromtimestamp(S.YC3B_START_T, timezone.utc))
-check("YC3B_IDS is the registry's second batch", set(C.YC3B_IDS) == {r.sid for r in ZS._NEW[31:]})
+check("YC3B_IDS is the registry's second batch", set(C.YC3B_IDS) == {r.sid for r in ZS._NEW[31:54]})
+b3 = C.BY_ID["CD-01"]
+check("third-batch books start at YC3C_START_T", SG._start_of("BTCUSD", b3) == datetime.fromtimestamp(S.YC3C_START_T, timezone.utc))
+check("YC3C_IDS is the registry's third batch", set(C.YC3C_IDS) == {r.sid for r in ZS._NEW[54:]})
 print("ALL OK" if ok else "FAILURES")
 sys.exit(0 if ok else 1)

@@ -34,6 +34,7 @@ import ze_cardlib as CL  # noqa: E402
 import ze_global as G  # noqa: E402
 import ze_india as N  # noqa: E402
 import ze_more as X  # noqa: E402
+import ze_more2 as X2  # noqa: E402
 
 SOURCE = "youtube_shortlist"
 STUDY = "youtube_shortlist_2026_11"
@@ -178,6 +179,37 @@ _NEW = [
        X.ac02, X.ac02_x, ("NAS100",), (3,), L3, readiness=A),
     _r("CR-01", "Drop, base, rally on one-minute candles in a 30-minute uptrend: limit at the base top, 3R (long)",
        X.cr01, X.cr01_x, ("NAS100",), (1, 30), L2, readiness=A),
+    # ── third batch (13 Nov 2026: cards read after the second deploy; ze_more2) ──
+    _r("FY-01", "VWAP flow shift: price on one side of the VWAP (14), Chaikin oscillator (3, 10) crossing zero, EMA 10 exit",
+       X2.fy01, X2.fy01_x, ("NIFTY",), (5,), ONE, readiness=A),
+    _r("FY-02", "11:00-11:15 range breakout on one-minute Nifty, first close beyond, far-side stop, out at 15:24",
+       X2.fy02, X2.fy02_x, ("NIFTY",), (1,), ONE, clock=("ist", 15 * 60 + 24), readiness=A),
+    _r("AO-03", "EMA 9/21 cross, a steep 9 EMA, pullback touching it, break of a bullish candle, candle stop, 1:2",
+       X2.ao03, X2.ao03_x, IX, (1,), L3, readiness=A),
+    _r("US-01", "CCI (200) above 100 with a Supertrend (10, 2) trailing stop, 150 points (long)", X2.us01, X2.us01_x,
+       ("BANKNIFTY",), (5,), L3, readiness=A),
+    _r("US-02", "Pivot levels of each 15-minute candle: below its pivot sell at R1 (stop R2, target S1), mirror for buys",
+       X2.us02, X2.us02_x, IX, (15,), L4, readiness=A),
+    _r("KS-02", "EMA 10 / EMA 13 cross on 15 minutes, stop and reverse", X2.ks02, X2.ks02_x, IX, (15,), reverse=True,
+       readiness=A),
+    _r("VV-01", "Heikin Ashi doji, then an open = high (low) candle, break of its low (high), 0.25% stop, HA trail",
+       X2.vv01, X2.vv01_x, IX, (15,), L3, readiness=A),
+    _r("VV-02", "09:15 five-minute candle on the VWAP side, VWAP crosses with a follow-up candle, Supertrend agreeing, 1:1",
+       X2.vv02, X2.vv02_x, IX, (5,), L3, readiness=A),
+    _r("BJ-01", "5 EMA vs 200 EMA side, the cross and each close back over the 5 EMA of lows (highs) with RSI 40-50",
+       X2.bj01, X2.bj01_x, IX, (15,), L3, readiness=A),
+    _r("KT-02", "VWAP pullback on the lowest volume after a run away from it, break of that candle, half at 1R, swing trail",
+       X2.kt02, X2.kt02_x, ("NSE5",), (5,), ONE, clock=("ist", 14 * 60 + 59), readiness=A),
+    _r("BJ-02", "One-hour middle-band side, 15-minute band pullback, five-minute strong close on 1.5x volume, 2R",
+       X2.bj02, X2.bj02_x, ("NSE5",), (5, 15, 60), ONE, readiness=A),
+    _r("CD-01", "05:30 IST VWAP reclaim: 20 EMA vs VWAP side, engulfing or star at the VWAP, pattern stop, 2R", X2.cd01,
+       X2.cd01_x, ("BTCUSD",), (15,), L3, readiness=A),
+    _r("DE-10", "Session VWAP bounce, rejection and break-and-retest on five minutes, no flat VWAP, 2R", X2.de10,
+       X2.de10_x, ("BTCUSD",), (5,), L4, readiness=A),
+    _r("CD-02", "200 EMA side and slope, pullback touching the EMA, engulfing close, 2R (one minute, Asia session)",
+       X2.cd02, X2.cd02_x, ("XAUUSD",), (1,), L4, clock=("utc", 8 * 60 + 30), readiness=A),
+    _r("RT-01", "Above the 200-day MA, close below the lower Bollinger Band (20, 2.5), buy limit 3% lower, RSI(2) exit",
+       X2.rt01, X2.rt01_x, ("NSED",), (1,), readiness=A),
 ]
 
 NEW = [r.sid for r in _NEW]

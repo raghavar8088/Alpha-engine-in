@@ -1,0 +1,11 @@
+video: -04DLlEl7Do
+topic: crypto
+summary: Trader Mayne's whiteboard episode on the mechanism behind chart patterns: Wyckoff schematics, double tops and bottoms, head and shoulders, wedges and flags are snapshots of liquidity (resting stops) and market structure inside an accumulation-manipulation-distribution cycle by which large players fill size; a pattern 'fails' when its context (the dealing range, the order block, the draw on liquidity) points the other way; patterns are lagging, so read liquidity and structure instead.
+instruments: Bitcoin and any market
+timeframes: Any
+style: unclear
+= MY-02 | Chart patterns as liquidity + market structure in an accumulation-manipulation-distribution cycle (explainer)
+R setup E 00:46,04:15 | Every chart pattern is a snapshot of liquidity and market structure within an AMD cycle. | "A chart pattern is simply a snapshot of those two things in that very moment. liquidity and market structure"
+R setup E 09:04,14:02 | A sweep of the range's liquidity followed by a market-structure shift the other way marks the turn (spring, double bottom, head-and-shoulders neckline). | "that was a lick sweep. Market structure is now shifting the other direction. I can now go ahead and find my trade"
+T concept_only | an explanation of patterns with no entry, stop or target rule; the sweep-and-shift idea is already in the library's liquidity-sweep strategies
+P 24:44 | 24:44 | Prop-firm discount code; newsletter and Discord

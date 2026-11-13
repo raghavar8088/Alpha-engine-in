@@ -1,0 +1,12 @@
+video: KbhpEhFdwTg
+topic: india_stocks
+summary: StockPro's market wrap uses the VWAP as an intraday tool on three- to five-minute charts only: on a trending day (a gap down with negative sentiment) a rally that is rejected at the VWAP (a doji, then a candle opening at its high breaking down) is a short with the stop above the VWAP; after a big gap, the next five-minute candle's high and low are the trigger levels (a break of the high = recovery, of the low = sell); trending stocks are picked with a proprietary method she does not share.
+instruments: Nifty, Bank Nifty; trending stocks
+timeframes: 5m (3-5m)
+style: intraday
+= SP-01 | VWAP rejection on trending days and the post-gap five-minute candle break (commentary)
+R indicator E 11:44,12:30 | The VWAP belongs on three- to five-minute charts only. | "vee vap hameshaa 5 minat pe lagaaie"
+R entry E 04:15,06:16 | On a trending day, a rally rejected at the VWAP (a doji, then a candle breaking it down): short, stop above the VWAP. | "top oph d midal laain ij yor stop los"
+R entry E 02:46,03:27 | After a big gap, mark the next five-minute candle's high and low: a break of the high is a recovery, of the low a sell. | "agar is phaaiv minats kaa lo brek ho jaataa hai den yoo kain go phor a sel"
+R setup E 18:49 | Only on trending stocks; how they are found is a paid secret. | "trending stok kaise pataa lagaayaa jaae vo yahaan naheen bataayaa jaa sakataa hai"
+T concept_only | market commentary; the stock selection is proprietary, and the two rules repeat CR-02 (VWAP rejection) and the library's five-minute ORB

@@ -12,7 +12,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.6
+   "seconds": 1.9
   },
   "PW-01": {
    "signals": 508,
@@ -25,7 +25,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.3
+   "seconds": 1.1
   },
   "DH-09": {
    "signals": 72,
@@ -39,7 +39,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 1.8
+   "seconds": 5.7
   },
   "DH-10": {
    "signals": 1201,
@@ -51,7 +51,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 1.4
+   "seconds": 3.5
   },
   "CK-01": {
    "signals": 68,
@@ -63,7 +63,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.8
+   "seconds": 2.4
   },
   "EC-01": {
    "signals": 82,
@@ -75,7 +75,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.5
+   "seconds": 1.4
   },
   "PC-01": {
    "signals": 73,
@@ -88,7 +88,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.6
+   "seconds": 2.1
   },
   "PC-02": {
    "signals": 102,
@@ -100,7 +100,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.1
+   "seconds": 0.2
   },
   "PC-03": {
    "signals": 7,
@@ -123,7 +123,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.2
+   "seconds": 0.5
   },
   "DF-01": {
    "signals": 83,
@@ -136,7 +136,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.2
+   "seconds": 0.6
   },
   "VB-01": {
    "signals": 21,
@@ -161,7 +161,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.2
+   "seconds": 0.7
   },
   "DH-11": {
    "signals": 87,
@@ -175,7 +175,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.4
+   "seconds": 1.1
   },
   "CK-02": {
    "signals": 10452,
@@ -188,7 +188,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.4
+   "seconds": 1.1
   },
   "EC-02": {
    "signals": 5,
@@ -214,7 +214,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 1.1
+   "seconds": 3.3
   },
   "MV-02": {
    "signals": 62,
@@ -227,7 +227,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 1.6
+   "seconds": 5.1
   },
   "OF-01": {
    "signals": 256,
@@ -240,7 +240,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 2.5
+   "seconds": 7.7
   },
   "CC-01": {
    "signals": 178,
@@ -253,7 +253,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.7
+   "seconds": 3.2
   },
   "BN-01": {
    "signals": 187,
@@ -267,7 +267,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.8
+   "seconds": 2.1
   },
   "TC-01": {
    "signals": 36,
@@ -280,7 +280,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.3
+   "seconds": 0.9
   },
   "TC-02": {
    "signals": 2,
@@ -291,7 +291,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.1
+   "seconds": 0.3
   },
   "UK-01": {
    "signals": 90,
@@ -303,7 +303,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.0
+   "seconds": 0.1
   },
   "UK-02": {
    "signals": 545,
@@ -316,7 +316,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.3
+   "seconds": 0.8
   },
   "AF-01": {
    "signals": 23,
@@ -327,7 +327,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.0
+   "seconds": 0.1
   },
   "MA-01": {
    "signals": 3508,
@@ -340,7 +340,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 3.3
+   "seconds": 14.1
   },
   "RU-05": {
    "signals": 156,
@@ -353,7 +353,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.8
+   "seconds": 3.0
   },
   "RU-06": {
    "signals": 203,
@@ -366,7 +366,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.6
+   "seconds": 1.8
   },
   "NK-01": {
    "signals": 195,
@@ -379,7 +379,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.7
+   "seconds": 2.6
   },
   "KA-01": {
    "signals": 47,
@@ -392,7 +392,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.4
+   "seconds": 1.0
   },
   "MC-01": {
    "signals": 190,
@@ -405,7 +405,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.7
+   "seconds": 2.3
   },
   "MC-02": {
    "signals": 86,
@@ -417,7 +417,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.2
+   "seconds": 0.5
   },
   "AO-01": {
    "signals": 1273,
@@ -430,7 +430,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 1.2
+   "seconds": 4.6
   },
   "KT-01": {
    "signals": 1568,
@@ -443,7 +443,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 1.3
+   "seconds": 5.3
   },
   "KG-01": {
    "signals": 39,
@@ -457,7 +457,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.1
+   "seconds": 0.4
   },
   "KG-02": {
    "signals": 7,
@@ -470,7 +470,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.0
+   "seconds": 0.1
   },
   "AO-02": {
    "signals": 336,
@@ -482,7 +482,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.1
+   "seconds": 0.4
   },
   "CR-02": {
    "signals": 129,
@@ -495,7 +495,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.5
+   "seconds": 1.2
   },
   "QC-03": {
    "signals": 40,
@@ -507,7 +507,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.0
+   "seconds": 0.1
   },
   "CT-03": {
    "signals": 11319,
@@ -521,7 +521,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 1.9
+   "seconds": 4.9
   },
   "KS-01": {
    "signals": 551,
@@ -535,7 +535,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.9
+   "seconds": 2.4
   },
   "DE-09": {
    "signals": 10112,
@@ -548,7 +548,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 1.5
+   "seconds": 3.5
   },
   "CT-02": {
    "signals": 553,
@@ -561,7 +561,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.2
+   "seconds": 0.5
   },
   "CT-01": {
    "signals": 506,
@@ -574,7 +574,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 3.1
+   "seconds": 11.7
   },
   "SK-01": {
    "signals": 16,
@@ -585,7 +585,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.2
+   "seconds": 0.4
   },
   "CH-01": {
    "signals": 682,
@@ -598,7 +598,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 1.4
+   "seconds": 3.5
   },
   "CH-02": {
    "signals": 90,
@@ -611,7 +611,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.1
+   "seconds": 0.3
   },
   "QC-01": {
    "signals": 86,
@@ -623,7 +623,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.1
+   "seconds": 0.3
   },
   "CV-01": {
    "signals": 90,
@@ -635,7 +635,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.0
+   "seconds": 0.1
   },
   "KR-01": {
    "signals": 3,
@@ -647,7 +647,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.2
+   "seconds": 0.5
   },
   "TN-02": {
    "signals": 53,
@@ -674,7 +674,7 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
-   "seconds": 0.2
+   "seconds": 0.5
   },
   "CR-01": {
    "signals": 20,
@@ -686,7 +686,198 @@
    "conservative_fills": 0,
    "lookahead_ok": true,
    "fill_problems": 0,
+   "seconds": 0.9
+  },
+  "FY-01": {
+   "signals": 20,
+   "trades": 19,
+   "reasons": {
+    "exit_signal": 18,
+    "time": 1
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 0.2
+  },
+  "FY-02": {
+   "signals": 90,
+   "trades": 90,
+   "reasons": {
+    "time": 33,
+    "stop": 57
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 0.3
+  },
+  "AO-03": {
+   "signals": 2663,
+   "trades": 445,
+   "reasons": {
+    "target": 130,
+    "stop": 315
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 7.9
+  },
+  "US-01": {
+   "signals": 43,
+   "trades": 27,
+   "reasons": {
+    "trail_stop": 23,
+    "time": 2,
+    "target": 2
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
    "seconds": 0.4
+  },
+  "US-02": {
+   "signals": 3148,
+   "trades": 553,
+   "reasons": {
+    "target": 199,
+    "stop": 350,
+    "time": 4
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 1.4
+  },
+  "KS-02": {
+   "signals": 140,
+   "trades": 138,
+   "reasons": {
+    "stop": 60,
+    "time": 59,
+    "exit_signal": 19
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 0.5
+  },
+  "VV-01": {
+   "signals": 103,
+   "trades": 52,
+   "reasons": {
+    "trail_stop": 44,
+    "time": 7,
+    "exit_signal": 1
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 0.3
+  },
+  "VV-02": {
+   "signals": 278,
+   "trades": 173,
+   "reasons": {
+    "stop": 76,
+    "target": 69,
+    "time": 28
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 2.2
+  },
+  "BJ-01": {
+   "signals": 118,
+   "trades": 98,
+   "reasons": {
+    "time": 42,
+    "stop": 35,
+    "trail_stop": 21
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 0.7
+  },
+  "KT-02": {
+   "signals": 303,
+   "trades": 123,
+   "reasons": {
+    "trail_stop": 86,
+    "time": 11,
+    "stop": 13,
+    "be_stop": 13
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 1.9
+  },
+  "BJ-02": {
+   "signals": 150,
+   "trades": 110,
+   "reasons": {
+    "stop": 57,
+    "target": 43,
+    "time": 10
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 5.8
+  },
+  "CD-01": {
+   "signals": 382,
+   "trades": 169,
+   "reasons": {
+    "stop": 118,
+    "target": 42,
+    "time": 9
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 1.0
+  },
+  "DE-10": {
+   "signals": 69,
+   "trades": 53,
+   "reasons": {
+    "stop": 34,
+    "target": 19
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 1.0
+  },
+  "CD-02": {
+   "signals": 273,
+   "trades": 134,
+   "reasons": {
+    "stop": 96,
+    "target": 35,
+    "time": 3
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 2.2
+  },
+  "RT-01": {
+   "signals": 409,
+   "trades": 97,
+   "reasons": {
+    "exit_signal": 90,
+    "stop": 7
+   },
+   "conservative_fills": 1,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 12.8
   }
  },
  "problems": {}

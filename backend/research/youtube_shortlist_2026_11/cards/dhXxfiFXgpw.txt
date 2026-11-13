@@ -1,0 +1,14 @@
+video: dhXxfiFXgpw
+topic: india_index
+summary: Trading Cafe India's live 5-minute option-buying ORB trade on Nifty: the 5-minute opening range squeezed into a descending triangle while its low was tested three times; with put IVs above call IVs (17 against 15) and call open interest building (a bearish read), he bought puts on the breakdown of the range low with an 8-9 point option stop, aimed at a level from his paid 'TCI institutional levels' indicator, booked most of the position near it and trailed the rest under the bases of the breakdown candles.
+instruments: Nifty options
+timeframes: 5m
+style: options_buying
+= TI-01 | 5-minute opening range breakdown after repeated tests, with an option-chain IV/OI bias and paid institutional levels (live trade)
+R setup E 00:03,12:49 | A 5-minute opening range whose support is tested again and again (a squeeze, a descending triangle) weakens; trade its break. | "saport ko baar-baar test karake veek banaa ke phir tootaa huaa hai"
+R filter E 00:03,13:34 | Option-chain bias: put IVs above call IVs and rising call open interest = bearish. | "kol ke aaeeveeज़ dekho 15 put ke aaeeज़ dekho 17"
+R target E 02:10,02:50 | Targets and resistance from the paid institutional-levels indicator. | "TCaaee kee ज़ons jo rahate hain vo olaredee yahaan pe hamaare lie ploted hai"
+R stop E 02:10 | A small option stop, about 8-9 points. | "olamost 8 se 9 point kaa meraa risk is partikular tred men rahane vaalaa hai"
+R management E 05:34,07:00 | Book most of the quantity at the target zone and trail the rest under each breakdown candle's base. | "brekaaaut brekadaaun karane vaalee kaindals ... un kaindal ke bes ko ham straang bes kanseedar karenge"
+T concept_only | a live discretionary trade that needs option IVs, open interest and a paid levels indicator the desk does not have; the range break itself is the library's 5-minute ORB family
+P 12:08 | 12:49 | Paid course and live sessions; broker referral

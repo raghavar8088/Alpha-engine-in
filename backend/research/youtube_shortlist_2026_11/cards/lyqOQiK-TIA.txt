@@ -1,0 +1,21 @@
+video: lyqOQiK-TIA
+topic: crypto
+summary: CoinDCX's 200 EMA scalp on one-minute candles, best on gold (XAU/USDT), ether and solana rather than bitcoin, in the Asia session (05:30 IST to 14:00 IST): below the 200 EMA only shorts, above it only longs, and only while the EMA slopes the same way; never trade the break itself; wait for a pullback that touches (or nearly touches) the EMA, then enter on the close of an engulfing candle in the trend's direction, stop beyond the candle that pierced the EMA, target at least 1:2 (1:3, 1:4); he expects 45-50% wins.
+instruments: Gold (XAU/USDT), ether, solana
+timeframes: 1m
+style: scalping
+= CD-02 | 200 EMA side and slope, pullback touching the EMA, engulfing close, stop past the piercing candle, 1:2 (one minute, Asia session)
+R indicator E 02:09 | A 200 EMA on a one-minute chart. | "indiketar pe aap likhenge eksaponenshiyal ... isako 200 kar denaa hai"
+R session E 03:36,04:20 | The Asia session, 05:30 to 14:00 IST (linear, no news); avoid the US-news hours. | "taaiming jee aapakee morning 5:30 til 2:00 PM"
+R setup E 05:43,06:26 | Price below the EMA = shorts only; above = longs only. | "agar praais mooving evarej ke neeche hai to ham log kyaa karenge? short karenge"
+R filter E 08:32,09:16 | The EMA's slope must agree: no longs while it slopes down, even on pullbacks; when it turns, trade the pullbacks. | "ivan on pulabaik aap long tred naheen lenge. kyon? kyonki abhee mooving evarej aisaa neeche hee jaa rahee hai"
+R entry E 09:59,11:24 | No trade on the break; wait for a pullback to the EMA (a touch, or very near it). | "pulabaik kahaan tak chaahie? mooving evarej tak chaahie"
+R entry E 11:24 | Enter on the close of a bearish engulfing at the EMA (bullish engulfing for longs). | "berish ingalphing banee hai to aap log kyaa karenge? aap yahaan par ek short tred inishiet karenge"
+R stop E 11:24,12:09 | Stop above the candle that pierced the moving average. | "stop los rahegaa jis bhee kaindal ne brek kiyaa thaa mooving evarej ko. theek hai naa? usake oopar aap stop los lagaaenge"
+R target E 12:09 | Target at least 1:2 (1:3, 1:4). | "taaraget kyaa rakhenge? minimam 1:2, 1:3"
+R market A - | Desk version: gold on one-minute bars (booked on Delta XAUTUSD); 00:00-08:30 UTC. | ""
+R setup A - | Slope = the 200 EMA below (above) its value 15 bars earlier; a touch = the bar's high within 0.02% of the EMA or above it (for shorts). | ""
+R entry A - | Short: price below a falling EMA, a pullback bar touches it, then a bearish engulfing closing below the EMA within 3 bars of the touch: short at the next open; mirror for longs; at most 4 trades a day. | ""
+R stop A - | Stop 0.02% above the highest high of the last 3 bars (the piercing candle); target 2R; out at 08:30 UTC. | ""
+T with_assumptions | the touch distance, the slope test and the timing are judged by eye (A)
+C win_rate | 07:06 | expect 45-50% wins at most | his guidance | "45 too 50% se jyaadaa ekyooresee naheen sochie"

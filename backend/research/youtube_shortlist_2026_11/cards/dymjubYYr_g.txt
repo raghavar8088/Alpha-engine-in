@@ -1,0 +1,19 @@
+video: dymjubYYr_g
+topic: crypto
+summary: CoinDCX's '5:30 AM VWAP' method for bitcoin (and ether, solana, PAX gold) on 15-minute candles: the VWAP resets at the 05:30 IST daily open; take the direction from the last one to two days (or from a 20 EMA above or below the VWAP); in an uptrend buy a pullback to the VWAP that prints a bullish engulfing or a morning star there, in a downtrend sell a rally to the VWAP that prints a bearish engulfing or an evening star; small stops beyond the pattern, targets 1:2 to 1:4; never a single-candle pattern; at least two trades a day.
+instruments: Bitcoin, ether, solana, PAX gold
+timeframes: 15m (5m, 1m also)
+style: intraday
+= CD-01 | 05:30 IST VWAP reclaim: trend side from the 20 EMA vs the VWAP, engulfing or star at the VWAP, pattern stop, 1:2
+R indicator E 02:05,03:28 | The VWAP resets each day at the 05:30 IST open (crypto's day). | "har roj morning men 5:30 maarkets opan hotee hai"
+R setup E 08:20,09:01 | Direction first (one to two days of trend): in an uptrend only longs, in a downtrend only shorts. | "aapako sabase pahale jo isamen jo preerakvvijits hote hain naa vo hote hain ki daayarekshan"
+R entry E 05:33,06:15 | Wait for price to come back to the VWAP and print a reversal pattern there, so the stop sits just beyond it. | "hamaare paas honaa chaahie ki maarket sam sort oफ़ veevap ke paas jaae. vahaan par koee beyarish engalphing yaa kuchh banaatee hai"
+R entry E 12:26,13:12 | Longs on a bullish engulfing or morning star; shorts on a bearish engulfing or evening star; never a single candle. | "kabhee bhee singal kaindalastik pe entree naheen lenge"
+R filter E 12:26 | Optional: the 20 EMA above the VWAP for longs (below for shorts). | "jab bhee 20 mooving evarej veevap ko kros kar rahee hai apasaaid pe to matalab besikalee 20 mooving evarej oopar hai"
+R stop E 07:39 | Stop just beyond the pattern. | "stop los hamane isake neeche lagaa liyaa"
+R target E 06:15 | Targets 1:2, 1:3 or 1:4. | "den vee kain taaraget 1:2, 1:3, 1:4 ke eejee treds"
+R market A - | Desk version: bitcoin 15-minute candles with real volume; the VWAP from 00:00 UTC (05:30 IST). | ""
+R setup A - | Direction = the 20 EMA (15-minute) above the VWAP for longs, below for shorts. | ""
+R entry A - | Long: a bullish engulfing (or a three-candle morning star) whose low is within 0.15% of the VWAP (or under it) and whose close is above it; enter at the next open; mirror for shorts; at most 3 trades a day; out at 23:55 UTC. | ""
+R stop A - | Stop 0.05% beyond the pattern's extreme; target 2R. | ""
+T with_assumptions | 'near the VWAP', the direction rule and the target choice are (A)

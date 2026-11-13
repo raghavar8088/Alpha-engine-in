@@ -1,0 +1,18 @@
+video: GWAIgf4outQ
+topic: india_index
+summary: Vibhor Varshney's Heikin Ashi 'jackpot' setup for intraday (15 minutes) and swing (daily, weekly): a Heikin Ashi doji, then the very next candle with open exactly equal to its high (sell) or low (buy); the third candle's break of that second candle's low (high) is the entry, at once, without waiting for a close; stop 1% beyond the doji for positions (0.25% intraday); trail the stop to the previous candle's low (high) and ride until the first opposite-colour candle; shown on Nifty, Bank Nifty and Reliance.
+instruments: Nifty, Bank Nifty, stocks (Reliance)
+timeframes: 15m (intraday); 1d, 1w (swing)
+style: mixed
+= VV-01 | Heikin Ashi doji, then an open = high (low) candle, break of its low (high), tight stop, previous-candle trail
+R setup E 06:58 | Heikin Ashi candles; the first candle must be a doji (red or green). | "1st candle should be doji, like sign of plus all these are doji"
+R setup E 07:43,08:29 | The immediately next candle has open exactly equal to its high (sell side) or to its low (buy side); not even 5 paise of difference. | "immediate next candle should be open = high means open rate = high rate no consideration of even 5paise"
+R entry E 08:29,09:33 | Enter as soon as the third candle crosses the second candle's low (sell) or high (buy), without waiting for its close; only in the third candle. | "as soon as 3rd candle cross low of 2nd candle immediate short ... have to enter in 3rd candle only"
+R stop E 16:10,19:19 | Stop 1% beyond the doji's high (sell) or low (buy) for positions; intraday 0.25%. | "doji high +1% for sell side ... intraday i keep 0.25% of SL"
+R exit E 20:55,21:43 | Trail the stop to the previous candle's low (high for shorts) and ride until the first opposite-colour candle. | "TSL will be last candle low means low of previous candle will be my SL"
+R no_trade E 13:18,17:37 | No trade when the third candle does not cross: the pattern is invalid. | "3rd candle didnt crossed high no entry"
+R market A - | Desk version: the intraday version on Nifty and Bank Nifty one-minute index rows on 15-minute Heikin Ashi candles. | ""
+R setup A - | Doji = a Heikin Ashi body at most 10% of its range; open = high means the Heikin Ashi open at or above both the real high and the Heikin Ashi close (open = low mirrors it). | ""
+R entry A - | A sell-stop one point under the second candle's Heikin Ashi low, live for the third candle only (a buy-stop over its high for longs); 09:30-15:00; at most 3 trades a day. | ""
+R stop A - | Stop 0.25% from the entry; it trails to the last completed Heikin Ashi candle's high (low for longs); exit at the next open after the first opposite-colour Heikin Ashi candle; out at 15:15. | ""
+T with_assumptions | the doji's size is judged by eye (A); the swing (daily, weekly) version is not coded

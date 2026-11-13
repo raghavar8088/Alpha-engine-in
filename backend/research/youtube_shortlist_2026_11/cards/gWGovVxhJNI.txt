@@ -1,0 +1,20 @@
+video: gWGovVxhJNI
+topic: india_index
+summary: Fyers's 11:15 range breakout, automated on its platform: on the Nifty 50 one-minute chart the 11:00-11:15 high and low form the range; the first valid break above the high buys an at-the-money call spread (a call four strikes away sold), below the low a put spread; one lot, one trade a day, exit at a Rs 3,000 loss or a profit amount lost in the captions, flat at 15:25, no re-entry; best in trending markets; a one-year backtest on Rs 1 lakh made about Rs 36,000 net, with the edge in the 11:16-11:20 entries and the short trades.
+instruments: Nifty 50 (option spreads); also Bank Nifty, gold, silver
+timeframes: 1m
+style: options_buying
+= FY-02 | 11:00-11:15 range breakout on one-minute Nifty, first break only, Rs 3,000 loss cap, flat at 15:25 (index proxy for the spread)
+R setup E 00:02,00:44 | Range: the high and low of 11:00-11:15 on the Nifty 50 one-minute chart. | "niphttee 50 ke 1 minat chaart par 11 se 11:15 ke beech jo haaee aur lo banataa hai vahee hamaaree renj hai"
+R entry E 00:44 | A break above the range high buys an at-the-money call spread; a break below the low buys a put spread. | "renj haaee ke oopar brekaaaut par eteeem kol baay"
+R sizing E 00:02,00:44 | One lot; only the first valid breakout is traded; no re-entry after the exit. | "pharst vailid brekaaaut par sirph ek tred liyaa jaaegaa"
+R stop E 00:44 | Exit when the position loses Rs 3,000 (also the daily risk cap). | "los ₹3000 tak pahunchate hee pojeeshan egjit karanee hai"
+R exit E 00:44 | A profit exit (its amount is lost in the captions), else flat at 15:25. | "agar in donon men se koee bhee kandeeshan trigar naheen hotee hai to 325 par pojeeshan kanpalasaree skv oph ho jaaegee"
+R no_trade E 01:26 | Sideways, choppy markets give false breakouts; suited to trending markets. | "saaidavej yaa chaupee maarket men phols brekaaauts mil sakate hain"
+R market A - | Desk version: the Nifty index on one-minute bars as a labelled proxy for the call or put spread (the desk has no option premiums). | ""
+R entry A - | From 11:15, enter at the next open after the first one-minute close beyond the range; one trade a day. | ""
+R stop A - | Stop at the range's far side; no target (the profit amount is unknown); out at 15:24. | ""
+T with_assumptions | the spread is traded on the index; the profit exit is missing from the captions (A)
+U What profit amount closes the position (the captions say only 'Rs 000')?
+C money | 00:02 | about Rs 36,000 net on Rs 1 lakh in one year | his platform backtest, zero slippage | "1 laakh ke inishiyal kaipital par aproksimametalee 36,000 kaa total net ritarn aayaa hai"
+P 02:06 | 03:29 | Fyers automation assistant and its GPT

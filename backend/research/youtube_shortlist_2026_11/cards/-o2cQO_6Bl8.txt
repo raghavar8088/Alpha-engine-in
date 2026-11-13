@@ -1,0 +1,14 @@
+video: -o2cQO_6Bl8
+topic: india_index
+summary: Trading Cafe India's live 'A+' one-minute option-buying scalp on a Nifty 22,900 call: a tight consolidation forms inside a buyer zone drawn by his paid 'TCI institutional levels' indicator; he buys the consolidation's breakout, keeps the stop under the consolidation, books most of the position near the seller zone above (about 1:3), and trails the rest to the consolidation level; he warns when the option premium stops following the index (premium erosion).
+instruments: Nifty options
+timeframes: 1m, 5m
+style: options_buying
+= TI-02 | One-minute consolidation breakout inside a paid indicator's buyer zone, stop under the consolidation, target the seller zone (live trade)
+R setup E 00:03,12:33 | A consolidation of small candles inside a buyer zone from the institutional-levels indicator. | "meree ek phevaret paitarn koee banatee hai jahaan par mujhe baaing karane ke lie help ho to mujhe bahut chhote-chhote kaindals mile"
+R entry E 12:33 | Enter on the clear breakout candle from that consolidation. | "usamen ek kliyar brekaaaut vaalee kaindal milee jo 938 vaalee kaindal hai vahaan pe mainne entree kee"
+R stop E 01:29,14:00 | Stop under the consolidation. | "yah kansolideshan hee mere lie risk thee usake neeche agar praais aa jaatee main vahaan par turant egjit kar loongaa"
+R target E 03:31,14:00 | Target the seller zone above (1:3 or better was available). | "taaraget jon bhee aapako kliyar pataa chal jaaegaa ki bhaaee aap entar to kar chuke lekin kahaan par selar ektiv hai"
+R management E 07:41,10:32 | Book most of the position near the target, trail the rest to the consolidation. | "isee jan p ham kyaa kar lete hain khud ke lie treling kar lenge"
+T not_testable | the zones come from a paid indicator and the trade is read live on the option's own chart; the desk has neither
+P 02:09 | 02:52 | Paid course and live sessions; broker referral

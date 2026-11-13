@@ -1,0 +1,17 @@
+video: ybigcO913kc
+topic: india_stocks
+summary: Rayner Teo's Bollinger Band pullback system on daily Russell 1000 stocks: in an uptrend (close above the 200-day moving average), after a close below the lower Bollinger Band (20, 2.5), place a buy limit 3% under that close for the next day; exit at the next open after the 2-day RSI crosses above 50, or after 10 trading days; at most five positions at 20% each, ranked by the 150-day rate of change; his 25-year test: +2,834%, about 14% a year, 66% winners, average win 4.1% against an average loss of 4.7%, maximum drawdown 27%.
+instruments: Russell 1000 stocks
+timeframes: 1d
+style: swing
+= RT-01 | Above the 200-day MA, close below the lower Bollinger Band (20, 2.5), buy limit 3% lower, out on RSI(2) above 50 or after 10 days
+R setup E 02:54,03:35 | Uptrend: the stock closes above its 200-day moving average. | "The stock price must be above the 200 day moving average"
+R setup E 04:18,09:20 | Setup: a close below the lower Bollinger Band (20 periods, 2.5 standard deviations). | "the stock price closes below the lower balling ... standard deviation 2.5"
+R entry E 05:03,10:02 | Next day, a buy limit 3% below that close. | "we're going to place a 3% buy limit or order"
+R exit E 05:46,06:32 | Sell at the next open after the 2-day RSI crosses above 50, or after 10 trading days (a time stop). | "We will sell when the 2-day RSI crosses above 50 or after 10 trading days"
+R sizing E 02:08,07:15 | At most five positions at 20% of capital each, ranked by the 150-day rate of change. | "we want to buy the strongest stocks that has increased the most in price over the last 150 days"
+R market A - | Desk version: the NSE daily stock pool (long only, overnight). | ""
+R stop A - | No price stop is taught; the desk sets a protective stop 15% under the limit price so it can size; the five-position cap and the 150-day ranking are not coded (each pool stock trades on its own). | ""
+T with_assumptions | the US universe, the ranking and the position cap are replaced by the desk's NSE pool (A)
+C return_pct | 07:55 | +2,834% over 25 years, about 14% a year, 66% winners, average win 4.1% against an average loss of 4.7%, maximum drawdown 27% | Russell 1000, about 2000-2025 | "annual return is about 14% a year on average in the long run"
+P 15:04 | 15:49 | Free systems-trading guide (email signup)

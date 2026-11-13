@@ -1,0 +1,18 @@
+video: YTFukZELnh0
+topic: india_index
+summary: Bharat Jhunjhunwala's 5 EMA + 200 EMA system for any timeframe: the 5 EMA above the 200 EMA = longs only (below = shorts only); the first entry is the cross itself (stop beyond the 200 EMA); later entries come each time price pulls back under the 5 EMA and closes back above it (stop under that swing), filtered so the RSI has pulled back into 40-50 (50-60 for shorts) and turned; his 'enhancement' uses a 5 EMA of the lows for longs and of the highs for shorts, which cuts false crosses and tightens the stops; stops trail with each new entry.
+instruments: Nifty, Bank Nifty, stocks, crypto, commodities
+timeframes: Any (5m to monthly; 15m intraday)
+style: mixed
+= BJ-01 | 5 EMA vs 200 EMA trend side, entry on the cross and on each close back over the 5 EMA of lows (highs) with RSI 40-50 (50-60), swing stops
+R setup E 03:36,04:18 | Price above the 200 EMA = major uptrend (longs only), below = downtrend (shorts only); the 5 EMA gives the trigger. | "jab mejar ap trend hotaa hai tab hamen long treds lene hote hain"
+R setup E 11:36,12:19 | Longs need the 5 EMA above the 200 EMA. | "5 din kaa eeemae 200 din ke eeemae ke oopar honaa chaahie phor long tred"
+R entry E 13:44,14:29 | First entry at the 5 EMA's cross of the 200 EMA (at the candle's close); additional entries each time price closes back above the 5 EMA after a pullback. | "jaise hee 5 din ke eeemae ke oopar praais kloj detaa hai yahaan par apanee edishanal entree hogee"
+R stop E 18:02,18:42 | The cross entry's stop beyond the 200 EMA; additional entries' stops at the swing low (high); stops may trail with each new entry. | "edishanal entreej hotee hain vo sving haaee yaa sving lo par ham jo hai apanaa stop los lagaa lenge"
+R filter E 20:08,21:33 | RSI filter: on a long pullback the RSI must come back to 40-50 and turn up (60-50 and turn down for shorts). | "aaraesaaaee jo hai 40 aur 50 ke ज़on pe vaapas aae aur pulabak kare"
+R indicator E 24:24,27:12 | Enhancement: the 5 EMA of the lows for longs, of the highs for shorts. | "lo oफ़ 5 eeemae yooज़ karanaa hai long treds ke lie aur haaee oफ़ 5 eeemae yooज़ karanaa hai short treds ke lie"
+R market A - | Desk version: Nifty and Bank Nifty one-minute index rows on 15-minute candles (intraday, out at 15:15). | ""
+R entry A - | Cross entry: the 5 EMA (closes) crosses above the 200 EMA, long at the next open, stop 0.2% under the 200 EMA. Pullback entry: while the 5 EMA is above the 200 EMA, after at least one close below the 5 EMA of lows, the first close back above it with the pullback's lowest RSI (14) between 40 and 50: long at the next open, stop under the pullback's lowest low; mirror for shorts with the 5 EMA of highs and RSI 50-60; signals 09:30-14:45; at most 3 trades a day. | ""
+R stop A - | No target is given: the stop trails to each newer pullback's low (high); out at 15:15. | ""
+T with_assumptions | the timeframe, the 'turn' of the RSI and the exit are not fixed (A)
+P 07:59 | 09:26 | Paid mentorship programme and indicator template

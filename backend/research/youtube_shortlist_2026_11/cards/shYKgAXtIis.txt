@@ -1,0 +1,9 @@
+video: shYKgAXtIis
+topic: india_index
+summary: Samco's 'Right Choice' episode with an intraday algo trader on an RSI-based Nifty futures strategy (15-minute charts, entries on an RSI move above 60 or below 50/40 rather than the 70/30 rule, a profit factor around 1.3 and roughly 50% wins over a long test on about Rs 3.5 lakh); the Hindi auto-captions are badly garbled, so the exact entry, stop and exit rules cannot be recovered.
+instruments: Nifty futures
+timeframes: 15m
+style: intraday
+= SM-01 | RSI 60/40 momentum entries on 15-minute Nifty futures (garbled interview)
+R entry I 17:50,18:33 | RSI moving above 60 is an entry (below 40-50 for shorts), instead of the 70/30 rule. | "rs.60 ke oopar jaa rahaa hai to vah pravesh hai"
+T concept_only | the auto-captions are too garbled to recover the entry, stop and exit; the RSI 60/40 break is already the library's TG-02

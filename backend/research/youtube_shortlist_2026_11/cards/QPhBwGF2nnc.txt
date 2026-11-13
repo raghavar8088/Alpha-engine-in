@@ -1,0 +1,17 @@
+video: QPhBwGF2nnc
+topic: crypto
+summary: Delta Exchange's simple VWAP scalp on five-minute crypto candles (ether in the example): a session VWAP line only; four setups at the line: a bounce from above (long), a rejection from below (short), and a break with a retest from the other side (trade the new side); entries only near the VWAP; an early entry keeps the stop at the previous candle's extreme, a retest entry at the VWAP; avoid a flat VWAP (sideways) and counter-signals after price has stayed on one side of the VWAP for a long time; higher-timeframe (30-minute, 1-hour) trend agreement is optional.
+instruments: Ether (crypto)
+timeframes: 5m
+style: scalping
+= DE-10 | Session VWAP bounce, rejection and break-and-retest on five minutes, skipping a flat VWAP and long one-sided runs
+R indicator E 01:30,02:14 | A session VWAP (the 24-hour crypto day), bands removed. | "sirph veevap kee laain ko ham rakhenge"
+R setup E 03:45,04:26 | Bounce: above the VWAP, price touches it and bounces (long); reject: below it, touches and falls back (short). | "is partikular sineriyo ko ham baauns bolate hain ... isako ham rijekt bolenge"
+R setup E 05:49,07:13 | Break and retest: price crosses the VWAP, comes back to retest it from the other side and continues: the trend has changed. | "reetest ek kanpharmeshan hai ki jo abhee trend thaa vo chenj ho chukaa hai"
+R entry E 08:34 | Trade only near the VWAP line, never far from it. | "veevap kee laain ke door ham tred ko naheen plaan karenge"
+R stop E 12:44 | An early entry: stop at the previous candle's high or low; an entry after the retest: stop at the VWAP. | "reeitest ke baad jo kaindal banatee hai usamen entree le rahe hain to ham apanaa stop los jo hai vo veevap ke leval par lagaa sakate hain"
+R no_trade E 13:30,14:12 | Avoid a flat VWAP (sideways, false signals) and counter-signals when all the price action has been on one side of the VWAP for long. | "jab veevap kee laain kaaphee jyaadaa phlait ho ... agar pooraa hee praais ekshan veevap ke kisee ek saaid hai"
+R market A - | Desk version: bitcoin five-minute candles with real volume; the VWAP from 00:00 UTC. | ""
+R entry A - | Not flat = the VWAP moved at least 0.1% over the last 12 bars. Break and retest long: a close above the VWAP after at least 6 closes below it, then within 12 bars a bar whose low touches the VWAP and closes above it: long at the next open (mirror for shorts); skipped when the side before the break lasted more than 48 bars. Reject short: at least 6 closes below the VWAP, a bar whose high touches it, closing below with an upper wick of at least half its range: short at the next open (bounce long mirrors it). At most 4 trades a day. | ""
+R stop A - | Retest entries: stop 0.05% beyond the VWAP or the bar's extreme, whichever is farther; reject and bounce entries: beyond the bar's extreme; target 2R (none is stated); out at 23:55 UTC. | ""
+T with_assumptions | 'near', 'flat', 'long on one side' and the target are judged live (A)

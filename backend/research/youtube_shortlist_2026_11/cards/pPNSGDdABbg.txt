@@ -1,0 +1,16 @@
+video: pPNSGDdABbg
+topic: india_index
+summary: A 5paisa webinar on expanded Camarilla levels (H3-H5, L3-L5 from the previous day) on five-minute Nifty and stock charts: between H3 and L3 the market is range-bound, so sell a reversal at H3 for L3 and buy a reversal at L3 for H3, with the next level beyond as the stop; between H3 and H4 (and L3 and L4) do nothing; a break above H4 is bought for H5 (stop H3), a break below L4 sold for L5 (stop L3); flat by 15:10-15:15; big gaps beyond the levels are skipped until price returns; aim for 2:1.
+instruments: Nifty, stocks
+timeframes: 5m
+style: intraday
+= P5-01 | Camarilla H3/L3 reversal for the opposite level, H4/L4 break for H5/L5 (five minutes)
+R indicator E 02:06,02:50 | Expanded Camarilla levels; keep H3, H4, H5 and L3, L4, L5 only. | "H1, L1 ye sab hataa deejie. aur sirph aapako kyaa rakhanaa hai? H3, H4, H5, L3, L4, L5"
+R entry E 04:55,05:38 | Inside H3-L3: sell a reversal at H3, buy a reversal at L3; the level must be touched. | "laal vaale pe bechanaa hai. green vaale pe khareedanaa hai"
+R target E 05:38,10:30 | A fade's target is the opposite level; its stop the level behind. | "red se ghoomegaa to aap short karoge green vaale ke lie"
+R entry E 06:19,06:59 | A break above H4 is held for H5 (below L4 for L5), stop at H3 (L3). | "agar 24838 brekaaaut karegaa to ham 24942 tak baithenge"
+R no_trade E 06:19 | Between H3 and H4 (or L3 and L4): no trade. | "ye no tred ज़on hai hamaare paas"
+R exit E 09:04 | Flat by 15:10-15:15 when the target is not reached. | "3:15 310 tak jo ret mil rahaa hai vahaan pe nikaal do"
+T with_assumptions | the reversal candle is judged by eye
+D YT-27 | the Camarilla R3/S3 fade with an R4/S4 breakout is already in the library (top-20 study)
+P 00:04 | 00:45 | Broker webinar series

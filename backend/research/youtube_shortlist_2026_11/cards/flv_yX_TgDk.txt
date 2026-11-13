@@ -1,0 +1,14 @@
+video: flv_yX_TgDk
+topic: india_index
+summary: Kunal Saraogi demonstrates a simple algo: an EMA 10 / EMA 13 crossover on 15-minute candles, always in the market (stop and reverse at each cross, positions carried across days); his roughly two-month platform backtest (November-December) showed Rs 2.6 lakh on one Bank Nifty lot, Rs 2.3 lakh on Nifty, Rs 3.5 lakh on Adani Enterprises and Rs 2.1 lakh on Titan, with about 62-63% winners; he calls it an experiment, warns that two trending months prove little and that ranges may hurt it.
+instruments: Bank Nifty, Nifty futures; Titan, Adani Enterprises
+timeframes: 15m
+style: mixed
+= KS-02 | EMA 10 / EMA 13 cross on 15 minutes, stop and reverse (algo demo)
+R indicator E 04:31,05:13 | EMA 10 and EMA 13 on the chart's candles (15 minutes in the test). | "10:00 peeriyad aaph tharteen peeriyad eksponenshiyal mooving evarej indiketar kaa istemaal aapako karanaa hai"
+R entry E 06:37 | Buy when the EMA 10 crosses above the EMA 13 and stay long while it is above; sell when it crosses below. | "green laain pink laain ko neeche se oopar kee or kaat de to turant baay kaa sanket banegaa"
+R exit E 08:40,09:20 | Each opposite cross closes the position and reverses it at the candle's close; positions are carried across days. | "kanpyootar khud-b-khud sail kee pojeeshan ko kaatakar baay saaid par aa jaaegaa"
+R market A - | Desk version: Nifty and Bank Nifty one-minute index rows on 15-minute candles; overnight holding is replaced by the desk's intraday close at 15:15. | ""
+R entry A - | Enter at the next open after a cross; the opposite cross reverses; signals 09:30-15:00; a 1 x ATR (14) stop from the entry so the book can size. | ""
+T with_assumptions | the overnight holding and the stop are replaced by the desk's intraday rules (A)
+C money | 01:37 | Rs 2.6 lakh (Bank Nifty lot), Rs 2.3 lakh (Nifty), Rs 3.5 lakh (Adani Enterprises), Rs 2.1 lakh (Titan); about 62-63% winners; about Rs 6,000 a trade | about two months, November-December | "do maheenon men banate ek laut baink niphtee par 2 laakh 60 hajaar rupaye"

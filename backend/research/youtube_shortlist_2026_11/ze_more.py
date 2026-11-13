@@ -192,7 +192,7 @@ def ao01(m, B, p, cache):
     out = []
     for d in range(m.n_days):
         js = _days(b, d)
-        if len(js) < 60:
+        if not js:
             continue
         j0, j1 = js[0], js[-1]
         for side, flags, ext in ((1, pl, b.l), (-1, ph, b.h)):
@@ -232,7 +232,7 @@ def ao02(m, B, p, cache):
     out = []
     for d in range(m.n_days):
         js = _days(b, d)
-        if len(js) < 4 or int(b.ist0[js[0]]) != T(9, 15):
+        if not js or int(b.ist0[js[0]]) != T(9, 15):
             continue
         H, L = float(b.h[js[0]]), float(b.l[js[0]])
         for j in js[1:]:
@@ -262,9 +262,9 @@ def ch01(m, B, p, cache):
     out = []
     for d in range(m.n_days):
         js = _days(b, d)
-        if len(js) < 120 or int(b.ny0[js[0]]) != T(9, 30):
+        if not js or int(b.ny0[js[0]]) != T(9, 30):
             continue
-        j0, jz = js[0], js[-1]
+        j0, jz = js[0], js[-1] + 1
         for j in js:
             t = int(b.ny0[j])
             if t < T(10, 0) or j - j0 < 60 or not np.isfinite(vw[j]):
@@ -336,9 +336,11 @@ def qc01(m, B, p, cache):
     out = []
     for d in range(m.n_days):
         js = _days(b, d)
-        if len(js) < 60 or int(b.ny0[js[0]]) != T(9, 30):
+        if not js or int(b.ny0[js[0]]) != T(9, 30):
             continue
         rj = [j for j in js if int(b.ny0[j]) < T(10, 0)]
+        if len(rj) < 25 or len(js) <= len(rj):
+            continue
         H, L = float(b.h[rj].max()), float(b.l[rj].min())
         for j in js[len(rj):]:
             if int(b.ny0[j]) >= T(13, 29):
@@ -363,12 +365,12 @@ def cv01(m, B, p, cache):
     out = []
     for d in range(m.n_days):
         js = _days(b, d)
-        if len(js) < 100 or int(b.ny0[js[0]]) != T(9, 30):
+        if not js or int(b.ny0[js[0]]) != T(9, 30):
             continue
         rj = [j for j in js if int(b.ny0[j]) < T(9, 45)]
-        exp = next((int(b.i1[j]) for j in js if int(b.ny0[j]) == T(10, 59)), None)
-        if len(rj) < 15 or exp is None:
+        if len(rj) < 15 or len(js) <= len(rj):        # the range is complete once a 09:45 row exists
             continue
+        exp = int(b.i1[rj[-1]]) + 75                 # the 10:59 row (one-minute rows)
         H, L = float(b.h[rj].max()), float(b.l[rj].min())
         s = sig(b, rj[-1], 1, H + 0.25 - 10.0, "CV01_ORB15_LONG", entry_stop=H + 0.25, expire_k=exp,
                 info={"stop_dist": 10.0})
@@ -395,12 +397,12 @@ def kt01(m, B, p, cache):
     out = []
     for d in range(m.n_days):
         js = _days(b, d)
-        if len(js) < 60:
+        if not js:
             continue
         for j in js:
             if j < 260 or not (T(9, 30) <= int(b.ist0[j]) < T(14, 45)):
                 continue
-            exp = int(b.i1[min(j + 3, js[-1])])
+            exp = int(b.i1[j]) + 3
             fresh_up = line[j] > sgl[j] and bool((line[j - 3:j] <= sgl[j - 3:j]).any())
             fresh_dn = line[j] < sgl[j] and bool((line[j - 3:j] >= sgl[j - 3:j]).any())
             if fresh_up and b.c[j] > eh[j] and bool((b.l[j - 15:j] <= eh[j - 15:j]).any()):
@@ -454,7 +456,7 @@ def kr01(m, B, p, cache):
         if not m.prev_ok[d]:
             continue
         js = _days(b, d)
-        if len(js) < 30 or int(b.ny0[js[0]]) != T(9, 30):
+        if not js or int(b.ny0[js[0]]) != T(9, 30):
             continue
         prof = _cached(cache, ("ze_tpo", d), lambda: _tpo(m, d - 1))
         if prof is None:
@@ -524,7 +526,7 @@ def kg01(m, B, p, cache):
             continue
         prevw = [x for x in weeks if x < int(wk[d])]
         js = _days(b, d)
-        if not prevw or len(js) < 10 or int(b.ist0[js[0]]) != T(9, 15):
+        if not prevw or not js or int(b.ist0[js[0]]) != T(9, 15):
             continue
         _, WBC, WTC = E.cpr(*wh[prevw[-1]])
         pv = E.floor_pivots(*pd)
@@ -569,7 +571,7 @@ def tn02(m, B, p, cache):
     out = []
     for d in range(m.n_days):
         js = _days(b, d)
-        if len(js) < 20 or int(b.ny0[js[0]]) != T(9, 30) or int(b.ny0[js[2]]) != T(9, 40):
+        if len(js) < 4 or int(b.ny0[js[0]]) != T(9, 30) or int(b.ny0[js[2]]) != T(9, 40):
             continue
         H, L = float(b.h[js[:3]].max()), float(b.l[js[:3]].min())
         broke_lo = broke_hi = False
@@ -663,7 +665,7 @@ def ch02(m, B, p, cache):
     out = []
     for d in range(m.n_days):
         js = _days(b, d)
-        if len(js) < 60 or int(b.ny0[js[0]]) != T(9, 30):
+        if not js or int(b.ny0[js[0]]) != T(9, 30):
             continue
         rj = [j for j in js if int(b.ny0[j]) < T(9, 45)]
         if len(rj) < 15:
@@ -736,7 +738,7 @@ def qc03(m, B, p, cache):
         if not m.prev_ok[d]:
             continue
         js, pj = _days(b, d), _days(b, d - 1)
-        if len(js) < 10 or len(pj) < 12 or int(b.ist0[js[0]]) != T(9, 15):
+        if not js or len(pj) < 12 or int(b.ist0[js[0]]) != T(9, 15):
             continue
         sd = float(np.std(np.asarray(b.c[pj[-12:]], float)))
         pc = float(b.c[pj[-1]])
@@ -744,11 +746,8 @@ def qc03(m, B, p, cache):
         gap = float(b.o[j0]) - pc
         if not sd > 0 or gap / sd >= -3:
             continue
-        je = next((j for j in js if int(b.ist0[j]) == T(9, 55)), None)
-        if je is None:
-            continue
         out.append(sig(b, j0, 1, float(b.c[j0]) - abs(gap), "QC03_GAP_DOWN_FADE_LONG",
-                       info={"stop_dist": abs(gap), "k_last": int(b.i1[je])}))
+                       info={"stop_dist": abs(gap), "k_last": int(b.i1[j0]) + 8}))   # the 09:55 row (5-minute rows)
     return out
 
 
@@ -765,7 +764,7 @@ def ac02(m, B, p, cache):
     out = []
     for d in range(m.n_days):
         js = _days(b, d)
-        if len(js) < 40 or int(b.ny0[js[0]]) != T(9, 30):
+        if not js or int(b.ny0[js[0]]) != T(9, 30):
             continue
         ORH, ORL = float(b.h[js[0]]), float(b.l[js[0]])
         for j in js[1:]:
@@ -806,18 +805,24 @@ def cr01(m, B, p, cache):
     out = []
     for d in range(m.n_days):
         js = _days(b, d)
-        if len(js) < 120 or int(b.ny0[js[0]]) != T(9, 30):
+        if not js or int(b.ny0[js[0]]) != T(9, 30):
             continue
         jz = js[-1]
         s = js[0] + 11
-        while s < jz - 15:
+        while s <= jz - 4:
             if not np.isfinite(a[s - 1]) or not (b.c[s - 1] <= b.c[s - 11] - 1.5 * a[s - 1]):
                 s += 1
                 continue
             best = None
             for L in range(4, 13):
                 e = s + L - 1
-                if e >= jz or float(b.h[s:e + 1].max() - b.l[s:e + 1].min()) >= 1.5 * a[s - 1]:
+                if e > jz:
+                    break
+                if best is not None:                     # a close that would be the rally ends the base
+                    ph_, pl_ = float(b.h[s:e].max()), float(b.l[s:e].min())
+                    if b.c[e] >= ph_ + 2 * (ph_ - pl_):
+                        break
+                if float(b.h[s:e + 1].max() - b.l[s:e + 1].min()) >= 1.5 * a[s - 1]:
                     break
                 best = L
             if best is None:
@@ -825,7 +830,7 @@ def cr01(m, B, p, cache):
                 continue
             e = s + best - 1
             bh, bl = float(b.h[s:e + 1].max()), float(b.l[s:e + 1].min())
-            rally = next((q for q in range(e + 1, min(e + 11, jz)) if b.c[q] >= bh + 2 * (bh - bl)), None)
+            rally = next((q for q in range(e + 1, min(e + 11, jz + 1)) if b.c[q] >= bh + 2 * (bh - bl)), None)
             if rally is None:
                 s += 1
                 continue
@@ -833,7 +838,7 @@ def cr01(m, B, p, cache):
                 k30 = int(np.searchsorted(b30.i1, b.i1[rally], "right")) - 1
                 if k30 >= 1 and _fin(e50[k30], e50[k30 - 1]) and b30.c[k30] > e50[k30] > e50[k30 - 1]:
                     out.append(sig(b, rally, 1, bl * (1 - 0.0002), "CR01_DROP_BASE_RALLY_LONG", entry_limit=bh,
-                                   expire_k=int(b.i1[min(rally + 60, jz)])))
+                                   expire_k=int(b.i1[rally]) + 60))
             s = rally + 1
     return out
 
@@ -850,7 +855,7 @@ def cr02(m, B, p, cache):
     out = []
     for d in range(m.n_days):
         js = _days(b, d)
-        if len(js) < 30 or int(b.ist0[js[0]]) != T(9, 15):
+        if not js or int(b.ist0[js[0]]) != T(9, 15):
             continue
         for i, j in enumerate(js):
             t = int(b.ist0[j])
@@ -859,7 +864,7 @@ def cr02(m, B, p, cache):
             if t >= T(14, 30):
                 break
             prev = js[i - 12:i]
-            exp = int(b.i1[js[min(i + 3, len(js) - 1)]])
+            exp = int(b.i1[j]) + 3
             if all(b.l[q] > vw[q] for q in prev) and b.l[j] <= vw[j] < b.c[j]:
                 out.append(sig(b, j, 1, float(b.l[j]) - 0.05, "CR02_VWAP_BOUNCE_LONG", entry_stop=float(b.h[j]) + 0.05,
                                expire_k=exp))
@@ -881,7 +886,7 @@ def kg02(m, B, p, cache):
     for d in range(2, m.n_days):
         pd, pd2 = E.prev_day_hlc(m, d), E.prev_day_hlc(m, d - 1)
         js = _days(b, d)
-        if not pd or not pd2 or len(js) < 20 or int(b.ist0[js[0]]) != T(9, 15):
+        if not pd or not pd2 or len(js) < 4 or int(b.ist0[js[0]]) != T(9, 15):
             continue
         _, BC, TC = E.cpr(*pd)
         _, BC2, TC2 = E.cpr(*pd2)

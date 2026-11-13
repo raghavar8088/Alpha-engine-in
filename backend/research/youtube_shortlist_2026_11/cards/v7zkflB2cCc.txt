@@ -1,0 +1,18 @@
+video: v7zkflB2cCc
+topic: india_index
+summary: Vibhor Varshney's VWAP intraday method on five-minute Nifty and Bank Nifty futures: if the 09:15 five-minute candle closes above the VWAP, buy as soon as its high is crossed (below it, sell the break of its low), aiming for a realistic 50-70 Nifty points or 100-150 Bank Nifty points with about a 1:1 stop; later in the day take VWAP crosses that get a follow-up candle; add a default Supertrend and trade only when it agrees with the VWAP side, booking partly and trailing with the Supertrend; the VWAP needs futures volume, not the spot index.
+instruments: Nifty and Bank Nifty futures
+timeframes: 5m (15m also)
+style: intraday
+= VV-02 | 09:15 five-minute candle on the VWAP side, break of its high/low, VWAP crosses with a follow-up candle, Supertrend agreement, 1:1
+R indicator E 02:57,03:41 | VWAP only (bands removed); it works on futures (with volume), not on the spot index. | "veevap jo lagegaa vo sirph niphtee indeks phyoochars men lagegaa ... spot pe naheen lagegaa"
+R entry E 05:58,07:24 | The first 09:15 five-minute candle closing above the VWAP: buy when its high is crossed (no wait for a close); closing below it: sell the break of its low. | "veevap ke oopar kloj honee chaahie. agar aapako baay saaid kaa tred lenaa hai"
+R target E 00:52,11:41 | Realistic targets: 50-70 points on Nifty, 100-150 on Bank Nifty. | "riyalastik taaraget 50 se 70 points niphtee ke lie baink niphtee ke lie 100 150 point ke aasapaas"
+R stop E 08:06,09:34 | A stop of about 1:1 against the target. | "meraa stop los 1:1 ke aasapaas trigar ho gayaa"
+R entry E 12:26,13:06 | Later in the day: a trigger candle across the VWAP and a follow-up candle confirming it (two candles). | "pahalee kaindal jo alart kaindal bolo, trigar kaindal bolo aur sekand kaindal ho gaee pholo ap kaindal"
+R filter E 15:17,16:41 | Add a default Supertrend: buy only above the VWAP with a green Supertrend, sell only below it with a red one. | "supar trend ke oopar chal rahee hai to green baind ban chukaa hai plas veevap ke bhee oopar hai to ye meraa dabal kanpharmeshan ho gayaa"
+R management E 20:57 | Book early (about 100 points on Bank Nifty), trail the rest until the Supertrend flips. | "jaise hee supar trend kaategaa to main vahaan se apanee pojeeshans vagairah buk karanaa staart kar doongaa"
+R market A - | Desk version: Nifty and Bank Nifty one-minute index rows on five-minute candles; the desk has no futures volume, so the VWAP is time-weighted (his own warning applies). | ""
+R entry A - | The 09:15 candle's rule with a buy-stop over its high (sell-stop under its low) live until 10:15, taken only when the Supertrend (10, 3) agrees; from 09:30 to 14:30, a five-minute close across the VWAP followed by a candle closing beyond the trigger candle's extreme, with the Supertrend agreeing: enter at the next open; at most 3 trades a day. | ""
+R stop A - | Target 60 points (Nifty) or 150 (Bank Nifty), stop the same distance (1:1); out at 15:15. | ""
+T with_assumptions | the desk's VWAP is time-weighted, which he says does not work on spot (A); the partial booking is not coded
