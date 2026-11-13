@@ -4,6 +4,7 @@
 // (premium-paper-service) and this page only reads its records from /api/premium-paper.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import GlassPanel from "../../components/GlassPanel";
+import { ScrollBox } from "../../components/TopScrollbar";
 import { apiFetch } from "../../lib/api";
 import { ago, day, inr, istTime, pct, price, rupees, tone } from "./format";
 import { RankNote, RankTd, RankTh, rankOnClient, sortByRank } from "../../components/StrategyRank";
@@ -290,7 +291,7 @@ export default function PaperDesk({ summary, error }: { summary: Summary | null;
           ))}
         </div>
         <RankNote board={board} />
-        <div className="ps-scroll">
+        <ScrollBox className="ps-scroll">
           <table className="ps-table pd-table">
             <thead>
               <tr><RankTh /><th>Strategy</th><th>Markets</th><th title="The strategy's own paper account">Capital</th><th>Equity</th><th>P&amp;L</th><th title="Net P&L after all costs, closed and open, as a share of the capital">Total return</th><th title="Market trading days since the strategy started, today included, whether or not it traded">Trading days</th><th title="Total return divided by the trading days (arithmetic, not compounded)">Avg daily return</th><th title="Net P&L divided by the trading days">Avg daily profit</th><th>Today</th><th>Trades</th><th>Win rate</th><th>Max drawdown</th><th>Open</th></tr>
@@ -333,7 +334,7 @@ export default function PaperDesk({ summary, error }: { summary: Summary | null;
               })}
             </tbody>
           </table>
-        </div>
+        </ScrollBox>
         <p className="ps-foot">
           Today&apos;s figures are provisional until the session&apos;s bars are final; trades are then sealed and never rewritten. Dollar markets are converted to rupees at the entry date&apos;s rate.
         </p>

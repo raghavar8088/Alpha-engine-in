@@ -6,6 +6,7 @@
 // from /api/premium-paper/summary. Paper only: live prices feed simulated trades and nothing here can place an order.
 import { useEffect, useMemo, useRef, useState } from "react";
 import GlassPanel from "../../components/GlassPanel";
+import { ScrollBox } from "../../components/TopScrollbar";
 import { apiFetch } from "../../lib/api";
 import { ago, day, inr, istTime, pct, price, rupees, tone } from "./format";
 import { SOURCE_LABEL, type Account, type Summary } from "./PaperDesk";
@@ -378,7 +379,7 @@ function SegmentView({ seg, summary, now, study, setStudy, initialOpen }: {
           {study !== "all" && (
             <p className="ps-foot">{`Showing ${inStudy.length === 1 ? "the one strategy" : `the ${inStudy.length} strategies`} from ${studyLabel(study)}; each Rank is its place among all ${rows.length} strategies of this market.`}</p>
           )}
-          <div className="ps-scroll">
+          <ScrollBox className="ps-scroll">
             <table className="ps-table sg-table">
               <thead><tr><RankTh /><th>Strategy</th><th>Market</th><th>Status</th><th>Trades</th><th>Win rate</th><th>P&amp;L</th><th title="The strategy's own paper account">Capital</th><th title="Net P&L after all costs, closed and open, as a share of the capital">Total return</th><th title="Market trading days since the strategy started, today included, whether or not it traded">Trading days</th><th title="Total return divided by the trading days (arithmetic, not compounded)">Avg daily return</th><th title="Net P&L divided by the trading days">Avg daily profit</th><th>Open</th></tr></thead>
               <tbody>
@@ -418,7 +419,7 @@ function SegmentView({ seg, summary, now, study, setStudy, initialOpen }: {
                 })}
               </tbody>
             </table>
-          </div>
+          </ScrollBox>
           <p className="ps-foot">{DAYS_NOTE} A strategy that trades several markets shows each market's share of its account here; its whole account is on the All accounts tab.</p>
         </>)}
       </GlassPanel>
