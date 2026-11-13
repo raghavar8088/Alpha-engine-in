@@ -1,17 +1,21 @@
 // Capital, total return and per-trading-day averages for the Premium Strategies leaderboards (13 Nov 2026).
 //
-// TRADING DAYS are market days since the strategy STARTED trading, counted in Indian dates, today included, whether or not
-// it traded on them. Each market keeps its own calendar:
-//   NSE (Nifty, Bank Nifty, NSE stocks)  weekdays minus NSE's holidays
-//   US (Nasdaq 100, S&P 500, Apple)      weekdays minus the NYSE/Nasdaq full-day closures
-//   gold (Delta XAUTUSD), forex          weekdays: these strategies follow the gold and forex week, as they were tested
-//   crypto (Bitcoin, Ether)              every calendar day
-// An account on several markets counts a day once if any of its markets traded that day (each from its own start).
+// TRADING DAYS are the market's sessions a strategy has been live for since it STARTED trading, whether or not it traded
+// in them: a session counts once it has opened, if the strategy started before it closed. Each market keeps its own
+// calendar:
+//   NSE (Nifty, Bank Nifty, NSE stocks)  09:15-15:30 IST, weekdays minus NSE's holidays
+//   US (Nasdaq 100, S&P 500, Apple)      09:30-16:00 New York time, weekdays minus the NYSE/Nasdaq full-day closures
+//   gold (Delta XAUTUSD), forex          each Indian weekday: these strategies follow the gold and forex week, as tested
+//   crypto (Bitcoin, Ether)              each Indian calendar day
+// The desk trades only bars from a book's start on, so a book that started after NSE's 15:30 close begins with the next
+// session, and one that started during a US session has that session. An account on several markets counts a date once
+// if any of its markets had a session on it (each from its own start); a US session counts on its New York date.
 //
-// STARTS mirror premium-paper-service (cycle.py _yc_start / _btc_start, settings.py): the 11-, 20-channel and shortlist
-// books from their study's start; bitcoin books of the Crypto playlist at btc_start and of Sniper headshot at sh_start;
-// every other book at paper_start. The desk publishes paper_start, btc_start, sh_start and yc2_start in its status; the
-// 11-channel start is settings.PREMIUM_YC_START, and each shortlist strategy carries its own start in shortlistData.
+// STARTS mirror premium-paper-service (cycle.py _yc_start / _btc_start, segments.py _start_of, settings.py): the 11-,
+// 20-channel and shortlist books from their study's start; bitcoin books of the Crypto playlist at btc_start and of
+// Sniper headshot at sh_start; every other book at paper_start (an Indian date: its midnight). The desk publishes
+// paper_start, btc_start, sh_start and yc2_start in its status; the 11-channel start is settings.PREMIUM_YC_START, and
+// each shortlist strategy carries its own start in shortlistData.
 //
 // The figures are NET of brokerage, exchange fees, taxes and slippage, and INCLUDE open positions marked to the last bar.
 // The daily averages are arithmetic (total / days), not compounded.
@@ -62,25 +66,57 @@ export function startOf(source: string, id: string, market: string, status: Star
   return status?.paper_start ?? null;
 }
 
-/** A start as an Indian date (a bare date stays as it is). */
-const istDate = (start: string): string =>
-  /^\d{4}-\d{2}-\d{2}$/.test(start) ? start : new Date(Date.parse(start) + 19_800_000).toISOString().slice(0, 10);
-const nextDay = (iso: string): string => new Date(Date.parse(`${iso}T00:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
+const HOUR = 3_600_000;
+const DAY = 24 * HOUR;
+const isoOf = (ms: number): string => new Date(ms).toISOString().slice(0, 10);       // an instant's UTC date
+const nextDay = (iso: string): string => isoOf(Date.parse(`${iso}T00:00:00Z`) + DAY);
 
-/** Trading days from each market's start to today (IST), a day counted once if any market traded; null if not started. */
-export function tradingDays(books: { start: string | null; market: string }[], now = Date.now()): number | null {
-  const today = new Date(now + 19_800_000).toISOString().slice(0, 10);
-  const known = books
-    .map((b) => ({ cal: calendarOf(b.market), from: b.start ? istDate(b.start) : null, at: b.start ? Date.parse(b.start) : NaN }))
-    .filter((b): b is { cal: Cal; from: string; at: number } => b.cal !== null && b.from !== null)
-    .filter((b) => !(b.at > now));                // a book that has not started yet adds no days
-  if (!known.length) return null;
-  let d = known.reduce((m, b) => (b.from < m ? b.from : m), known[0].from);
-  let n = 0;
-  for (let guard = 0; d <= today && guard < 4000; guard++, d = nextDay(d)) {
-    if (known.some((b) => d >= b.from && trades(b.cal, d))) n++;
+/** The n-th Sunday of a month (1-12) as a date. */
+function nthSunday(year: number, month: number, n: number): string {
+  const first = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
+  return isoOf(Date.UTC(year, month - 1, 1 + ((7 - first) % 7) + 7 * (n - 1)));
+}
+
+/** Hours New York is behind UTC on a date: 4 in US daylight time (second Sunday of March to first Sunday of November), else 5. */
+function nyBehind(iso: string): number {
+  const y = Number(iso.slice(0, 4));
+  return iso >= nthSunday(y, 3, 2) && iso < nthSunday(y, 11, 1) ? 4 : 5;
+}
+
+/** A market's session on a date as [open, close) in epoch ms; null when it does not trade that day. */
+function session(cal: Cal, iso: string): [number, number] | null {
+  if (!trades(cal, iso)) return null;
+  const utc0 = Date.parse(`${iso}T00:00:00Z`);
+  if (cal === "nse") return [utc0 + 3.75 * HOUR, utc0 + 10 * HOUR];                     // 09:15-15:30 IST
+  if (cal === "us") {
+    const behind = nyBehind(iso);
+    return [utc0 + (9.5 + behind) * HOUR, utc0 + (16 + behind) * HOUR];                  // 09:30-16:00 New York
   }
-  return n > 0 ? n : null;
+  return [utc0 - 5.5 * HOUR, utc0 + 18.5 * HOUR];                                       // the Indian calendar day
+}
+
+/** A start as an instant; a bare date is that Indian date's midnight (the desk's paper_start). */
+const startAt = (start: string): number =>
+  Date.parse(/^\d{4}-\d{2}-\d{2}$/.test(start) ? `${start}T00:00:00+05:30` : start);
+
+/** Trading days a strategy has been live for, a date counted once across its markets. null when none of its books has
+ *  started (or its market or start is unknown); 0 when it started but none of its markets has had a session since. */
+export function tradingDays(books: { start: string | null; market: string }[], now = Date.now()): number | null {
+  const live = books
+    .map((b) => ({ cal: calendarOf(b.market), at: b.start ? startAt(b.start) : NaN }))
+    .filter((b): b is { cal: Cal; at: number } => b.cal !== null && Number.isFinite(b.at) && b.at <= now);
+  if (!live.length) return null;
+  // every date from the day before the first start (an Indian day begins on the previous UTC date) to the day after
+  // now; the session test decides which count. The guard caps a broken start at about eleven years.
+  const last = isoOf(now + DAY);
+  let n = 0;
+  for (let d = isoOf(Math.min(...live.map((b) => b.at)) - DAY), guard = 0; d <= last && guard < 4000; d = nextDay(d), guard++) {
+    if (live.some((b) => {
+      const s = session(b.cal, d);
+      return s !== null && s[0] <= now && s[1] > b.at;
+    })) n++;
+  }
+  return n;
 }
 
 /** Total return (% of capital), and the arithmetic daily averages over the trading days. Null where not computable. */
@@ -96,8 +132,10 @@ export function dailyFigures(net: number | null | undefined, capital: number | n
 
 export const DAYS_NOTE =
   "Capital is the strategy's own paper account. Total return and the daily averages are after brokerage, exchange fees, " +
-  "taxes and slippage, and include open positions marked to the last bar (unrealised P&L). Trading days are market days " +
-  "since the strategy started, today included, whether or not it traded: weekends and exchange holidays are left out " +
-  "(NSE's calendar for Indian markets, the US exchanges' for Nasdaq, S&P 500 and Apple, weekdays for gold and forex), " +
-  "and crypto counts every day. Average daily return is the total return divided by those days, not compounded; " +
-  "N/A means the strategy has not started or its capital is not known.";
+  "taxes and slippage, and include open positions marked to the last bar (unrealised P&L). Trading days are the " +
+  "market's sessions since the strategy started, whether or not it traded in them: a session counts once it has opened, " +
+  "if the strategy started before it closed, so a start after NSE's 15:30 close counts from the next session. Weekends " +
+  "and exchange holidays are left out (NSE's calendar for Indian markets, the US exchanges' for Nasdaq, S&P 500 and " +
+  "Apple, weekdays for gold and forex), and crypto counts every day. Average daily return is the total return divided " +
+  "by those days, not compounded. N/A means the strategy has not started, its capital is not known, or it has had no " +
+  "session yet.";
