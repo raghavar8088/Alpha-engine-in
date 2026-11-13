@@ -5,9 +5,15 @@
   GET /api/premium-paper/accounts/{id}/trades    its trades, newest first (?limit=&offset=)
   GET /api/premium-paper/today-bars              today's finished bars from this process's memory, for the desk's cycle
 
+  GET  /api/premium-paper/live                   the Delta real-money desk on ten of these strategies (premium_live)
+  POST /api/premium-paper/live/mode              {"mode": "off" | "shadow" | "live", "pin", "confirm"}
+  POST /api/premium-paper/live/flatten           {"pin"}: close its open positions now and switch it off
+
 The desk itself runs in its own container (premium-paper-service), because this process sits at its memory cap; its
-records are in the box's second MongoDB (FACTORY_MONGO_URL), never on the near-quota Atlas cluster. Nothing here reaches
-a broker. Paper only.
+records are in the box's second MongoDB (FACTORY_MONGO_URL), never on the near-quota Atlas cluster. Everything above
+the live routes is paper. The live routes are the one part that reaches a broker: premium_live sends real orders to Delta
+Exchange India for ten strategies, at the owner's size. Going live and flattening need the owner's PIN; switching off
+never does.
 """
 
 import json
@@ -17,7 +23,7 @@ import time
 from bisect import bisect_left, bisect_right
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response
 
 from app.api.deps import get_current_user
 
@@ -104,3 +110,44 @@ async def today_bars(group: str = Query("index"), _user: dict = Depends(get_curr
     else:
         raise HTTPException(status_code=422, detail="group is index or stocks")
     return Response(content=json.dumps(out, separators=(",", ":")), media_type="application/json")
+
+
+# -- the Delta real-money desk (premium_live, 2026-11-13) ---------------------------------------------------
+# Imported inside each route and the startup hook, so a fault there can only break these routes, never the paper
+# desk's or the app's start.
+
+_live_tasks: set = set()
+
+
+@router.on_event("startup")
+async def _start_premium_live() -> None:
+    # FastAPI 0.115 runs an included router's startup handler twice (the app's list and the router's own lifespan,
+    # both). The loop must start once.
+    if _live_tasks:
+        return
+    try:
+        import asyncio
+        from app.services import premium_live
+        _live_tasks.add(asyncio.create_task(premium_live.loop()))
+    except Exception:  # noqa: BLE001
+        logger.exception("premium live desk not started")
+
+
+@router.get("/live")
+async def live_status(_user: dict = Depends(get_current_user)):
+    from app.services import premium_live
+    return await premium_live.status()
+
+
+@router.post("/live/mode")
+async def live_mode(payload: dict = Body(...), _user: dict = Depends(get_current_user)):
+    from app.services import premium_live
+    r = await premium_live.set_mode(str(payload.get("mode") or ""), payload.get("pin"), payload.get("confirm"))
+    return {**r, "status": await premium_live.status()}
+
+
+@router.post("/live/flatten")
+async def live_flatten(payload: dict = Body(...), _user: dict = Depends(get_current_user)):
+    from app.services import premium_live
+    r = await premium_live.flatten(payload.get("pin"))
+    return {**r, "status": await premium_live.status()}

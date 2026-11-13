@@ -19,13 +19,15 @@ import Segments, { SEG_PLACE, type SegFocus } from "./Segments";
 import Channels20 from "./Channels20";
 import Intraday4 from "./Intraday4";
 import Shortlist from "./Shortlist";
+import LiveDelta from "./LiveDelta";
 
-type Tab = "indian" | "crypto" | "gold" | "global" | "paper" | "strategies" | "results" | "november" | "daily" | "method" | "channels20" | "intraday4" | "shortlist";
+type Tab = "indian" | "crypto" | "gold" | "global" | "paper" | "strategies" | "results" | "november" | "daily" | "method" | "channels20" | "intraday4" | "shortlist" | "live";
 const TABS: { id: Tab; label: string }[] = [
   { id: "indian", label: "Indian Market" },
   { id: "crypto", label: "Crypto" },
   { id: "gold", label: "Gold" },
   { id: "global", label: "Forex & US" },
+  { id: "live", label: "Real money · Delta" },
   { id: "shortlist", label: "Channel shortlist (new)" },
   { id: "channels20", label: "20 channels" },
   { id: "intraday4", label: "4 intraday topics" },
@@ -194,6 +196,7 @@ export default function PremiumStrategiesPage() {
       {tab === "intraday4" && <Intraday4 />}
 
       {tab === "shortlist" && <Shortlist summary={summary} error={error} />}
+      {tab === "live" && <LiveDelta />}
 
       {tab === "strategies" && (
         <>
