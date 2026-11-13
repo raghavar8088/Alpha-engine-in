@@ -7,10 +7,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import GlassPanel from "../../components/GlassPanel";
 import { apiFetch } from "../../lib/api";
-import { ago, day, inr, istTime, price, tone } from "./format";
+import { ago, day, inr, istTime, pct, price, rupees, tone } from "./format";
 import { SOURCE_LABEL, type Account, type Summary } from "./PaperDesk";
 import { RankNote, RankTd, RankTh, rankOnClient, sortByRank } from "../../components/StrategyRank";
 import { BOOK_RANK_NOTE, PREMIUM_RANK_FACTORS, bookRankRow } from "./rank";
+import { DAYS_NOTE, dailyFigures, startOf, tradingDays, type StartStatus } from "./tradingDays";
 
 type Feed = {
   source?: string; instrument?: string; last_t?: number | null; last_price?: number | null; last_session?: string;
@@ -379,7 +380,7 @@ function SegmentView({ seg, summary, now, study, setStudy, initialOpen }: {
           )}
           <div className="ps-scroll">
             <table className="ps-table sg-table">
-              <thead><tr><RankTh /><th>Strategy</th><th>Market</th><th>Status</th><th>Trades</th><th>Win rate</th><th>P&amp;L</th><th>Open</th></tr></thead>
+              <thead><tr><RankTh /><th>Strategy</th><th>Market</th><th>Status</th><th>Trades</th><th>Win rate</th><th>P&amp;L</th><th title="The strategy's own paper account">Capital</th><th title="Net P&L after all costs, closed and open, as a share of the capital">Total return</th><th title="Market trading days since the strategy started, today included, whether or not it traded">Trading days</th><th title="Total return divided by the trading days (arithmetic, not compounded)">Avg daily return</th><th title="Net P&L divided by the trading days">Avg daily profit</th><th>Open</th></tr></thead>
               <tbody>
                 {shown.map(({ acct, id, b }) => {
                   const key = `${id}|${b.mkt}`;
@@ -398,6 +399,19 @@ function SegmentView({ seg, summary, now, study, setStudy, initialOpen }: {
                       <td>{b.closed + b.open}{b.skipped ? <div className="pd-sub">{b.skipped} not sized</div> : null}</td>
                       <td>{b.closed ? `${((100 * b.wins) / b.closed).toFixed(1)}%` : "—"}</td>
                       <td className={tone(b.pnl)}>{b.trades ? inr(b.pnl) : "—"}</td>
+                      {(() => {
+                        // this book alone: its market's calendar from its own start; capital is the account's
+                        const cap = acct?.capital || null;
+                        const days = acct ? tradingDays([{ start: startOf(acct.source, id, b.market, status as StartStatus), market: b.market }], now) : null;
+                        const f = dailyFigures(b.pnl, cap, days);
+                        return (<>
+                          <td>{cap ? rupees(cap) : "N/A"}</td>
+                          <td className={tone(f.ret)}>{f.ret == null ? "N/A" : pct(f.ret, 3)}</td>
+                          <td>{days ?? "N/A"}</td>
+                          <td className={tone(f.avgPct)}>{f.avgPct == null ? "N/A" : pct(f.avgPct, 3)}</td>
+                          <td className={tone(f.avgRs)}>{f.avgRs == null ? "N/A" : inr(f.avgRs)}</td>
+                        </>);
+                      })()}
                       <td>{b.open || "—"}</td>
                     </tr>
                   );
@@ -405,6 +419,7 @@ function SegmentView({ seg, summary, now, study, setStudy, initialOpen }: {
               </tbody>
             </table>
           </div>
+          <p className="ps-foot">{DAYS_NOTE} A strategy that trades several markets shows each market's share of its account here; its whole account is on the All accounts tab.</p>
         </>)}
       </GlassPanel>
 

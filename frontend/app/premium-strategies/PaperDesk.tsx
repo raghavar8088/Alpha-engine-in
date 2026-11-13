@@ -8,6 +8,7 @@ import { apiFetch } from "../../lib/api";
 import { ago, day, inr, istTime, pct, price, rupees, tone } from "./format";
 import { RankNote, RankTd, RankTh, rankOnClient, sortByRank } from "../../components/StrategyRank";
 import { ACCOUNT_RANK_NOTE, PREMIUM_RANK_FACTORS, accountRankRow } from "./rank";
+import { DAYS_NOTE, dailyFigures, startOf, tradingDays, type StartStatus } from "./tradingDays";
 
 export type MarketPnl = { market: string; trades: number; pnl: number };
 export type Account = {
@@ -292,7 +293,7 @@ export default function PaperDesk({ summary, error }: { summary: Summary | null;
         <div className="ps-scroll">
           <table className="ps-table pd-table">
             <thead>
-              <tr><RankTh /><th>Strategy</th><th>Markets</th><th>Equity</th><th>P&amp;L</th><th>Return</th><th>Today</th><th>Trades</th><th>Win rate</th><th>Max drawdown</th><th>Open</th></tr>
+              <tr><RankTh /><th>Strategy</th><th>Markets</th><th title="The strategy's own paper account">Capital</th><th>Equity</th><th>P&amp;L</th><th title="Net P&L after all costs, closed and open, as a share of the capital">Total return</th><th title="Market trading days since the strategy started, today included, whether or not it traded">Trading days</th><th title="Total return divided by the trading days (arithmetic, not compounded)">Avg daily return</th><th title="Net P&L divided by the trading days">Avg daily profit</th><th>Today</th><th>Trades</th><th>Win rate</th><th>Max drawdown</th><th>Open</th></tr>
             </thead>
             <tbody>
               {ranked.flatMap((a) => {
@@ -308,9 +309,20 @@ export default function PaperDesk({ summary, error }: { summary: Summary | null;
                       <div className="pd-sub">{a.channel}</div>
                     </td>
                     <td className="pd-mkts">{a.markets.join(", ")}</td>
+                    <td>{a.capital ? rupees(a.capital) : "N/A"}</td>
                     <td>{rupees(a.equity)}</td>
                     <td className={tone(pnl)}>{inr(pnl)}</td>
-                    <td className={`ps-strong ${tone(a.return_pct)}`}>{pct(a.return_pct)}</td>
+                    <td className={`ps-strong ${tone(a.return_pct)}`}>{a.capital ? pct(a.return_pct) : "N/A"}</td>
+                    {(() => {
+                      // every market of the account, each from its own start; a day counts once if any traded
+                      const days = tradingDays(a.markets.map((m) => ({ start: startOf(a.source, a.id, m, summary?.status as StartStatus), market: m })), now);
+                      const f = dailyFigures(pnl, a.capital, days);
+                      return (<>
+                        <td>{days ?? "N/A"}</td>
+                        <td className={tone(f.avgPct)}>{f.avgPct == null ? "N/A" : pct(f.avgPct, 3)}</td>
+                        <td className={tone(f.avgRs)}>{f.avgRs == null ? "N/A" : inr(f.avgRs)}</td>
+                      </>);
+                    })()}
                     <td className={tone(a.today_pnl)}>{a.today_pnl ? inr(a.today_pnl) : "—"}</td>
                     <td>{a.closed + a.open}</td>
                     <td>{a.win_rate == null ? "—" : `${a.win_rate.toFixed(1)}%`}</td>
@@ -325,6 +337,7 @@ export default function PaperDesk({ summary, error }: { summary: Summary | null;
         <p className="ps-foot">
           Today&apos;s figures are provisional until the session&apos;s bars are final; trades are then sealed and never rewritten. Dollar markets are converted to rupees at the entry date&apos;s rate.
         </p>
+        <p className="ps-foot">{DAYS_NOTE}</p>
       </GlassPanel>
 
       <GlassPanel title="Feed status">
