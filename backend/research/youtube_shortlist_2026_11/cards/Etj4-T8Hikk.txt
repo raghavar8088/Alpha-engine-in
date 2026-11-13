@@ -1,0 +1,19 @@
+video: Etj4-T8Hikk
+topic: india_stocks
+summary: Kunal Saraogi's 'greatest breakout strategy': plot the 30, 40, 50 and 60-day simple moving averages; when they tangle together (a tight consolidation) a big breakout is coming; mark the breakout line and buy when price closes above it, with a mandatory stop and a predetermined target in proportion to the stop (or the next resistance); daily charts of stocks (Mastek, MIDHANI, Vedanta).
+instruments: NSE stocks
+timeframes: 1d
+style: swing
+= KS-01 | SMA 30/40/50/60 tangled, buy the close above the breakout line, stop and proportional target (daily)
+R indicator E 02:09,02:51 | Simple moving averages of 30, 40, 50 and 60 days (simple only, not exponential or weighted). | "30 dej sinpal mooving evarej, 40 dej sinpal mooving evarej, 50 dej ... aur 60 dej"
+R setup E 02:51,03:31 | When the four averages come together and tangle, the breakout is near. | "jab brekau aane vaalaa hotaa hai theek usase pahale yah rekhaaen kareeb aakar ke aapas men guthamagthaa ho jaatee hai"
+R entry E 04:11,05:35 | Draw the breakout line in advance and buy when price closes above it. | "brekaaaut leval ke oopar bandee aane par aap khareed paaen"
+R stop E 05:35 | A stop loss is mandatory. | "stop los rakhanaa anivaary hai"
+R target E 06:16 | A predetermined target in proportion to the stop, or the next resistance. | "jo stop los hai usee ke anupaat men ek theek-thaak kaayade kaa taaraget rakhen"
+R market A - | Desk version: NSE stocks on daily bars, long only. | ""
+R setup A - | Tangled: (highest - lowest of the four SMAs) / close at most 1.5% on at least 5 of the last 10 days; breakout line = the highest high of the previous 20 days. | ""
+R entry A - | Buy at the next open after a close above the breakout line while the averages were tangled within the last 5 days. | ""
+R stop A - | Stop at the lowest low of the previous 20 days; target 2R; exit after 30 trading days if neither. | ""
+T with_assumptions | 'tangled', the breakout line, the stop and the target ratio are judged by eye (A)
+V tangled | R2 | 02:51 | Visual | the four SMAs within 1.5% of price on 5 of the last 10 days
+X - | 04:11 | Mastek | long | averages tangled in March; breakout line about 1363 | close above 1363 | not stated | not stated | target | ran to about 2000

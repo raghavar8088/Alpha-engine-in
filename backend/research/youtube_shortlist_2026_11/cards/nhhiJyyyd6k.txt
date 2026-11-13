@@ -1,0 +1,11 @@
+video: nhhiJyyyd6k
+topic: forex_us
+summary: StrategyQuant builds a 1-2-3 reversal template for its strategy generator: point 1 a five-bar fractal low, point 2 a fractal high, point 3 a higher low; while the current bar sits between points 1 and 2, a stop order rests a few pips beyond point 2 (mirror for shorts); the filters and every exit (stop, target, break-even, trailing stop) are left for the generator to pick at random; Dow Jones 30-minute data for MetaTrader 5.
+instruments: Dow Jones (CFD)
+timeframes: 30m
+style: unclear
+= SQ-01 | 1-2-3 reversal stop entry at point 2 with generator-picked filters and exits (template)
+R setup E 00:42,01:25 | Points 1, 2 and 3 are fractal swings: a lowest low, a higher high, then a higher low that does not reach point 1. | "3 is the second lowest low after the first swing where the price doesn't touch the first low again"
+R entry E 02:10,05:53 | While the current high is at or under point 2 and the current low at or over point 1, a buy-stop rests at point 2 plus a buffer of 1-10 pips. | "we will place a stop order at the level of 2"
+R exit E 06:34 | Stop, target, break-even and trailing stop are all generated randomly by the builder. | "Everything set to generate randomly"
+T concept_only | a template for a random strategy generator: the filters and exits are chosen by the software, so there is no single strategy to trade

@@ -1,0 +1,15 @@
+video: VDzmXBdBW3g
+topic: forex_us
+summary: QuantConnect's Boot Camp builds an opening range breakout on Tesla: the first 30-minute bar of the session (09:30-10:00 New York) is the range; when price closes above its high go 100% long, below its low 100% short; one position at a time; every position is closed at 13:30 by a scheduled event.
+instruments: Tesla (TSLA)
+timeframes: 30m, 1m
+style: intraday
+= QC-01 | 30-minute opening range breakout, all-in, closed at 13:30 New York
+R timeframe E 00:08,04:30 | The opening range is the first 30-minute bar starting at 09:30 Eastern. | "We need to find the bar that starts at 9:30 a.m. Eastern Time"
+R entry E 05:31,07:24 | When price closes above the range high go long; below the range low go short; skip if already invested. | "the close price of Tesla is above the high ... We want to go long"
+R sizing E 08:07 | Full position (SetHoldings 1 or -1). | "passing in the -1 we're setting up a portfolio 100% short"
+R exit E 08:47,09:31 | Close every position at 13:30 (a scheduled event) and reset the range. | "for every day that ... Tesla at 1:30 p.m. we want to call ClosePositions"
+R market A - | Desk version: the Nasdaq 100 cash session as a labelled proxy for Tesla (no single US stock minutes on the desk). | ""
+R entry A - | Enter at the next open after the first one-minute close beyond the 09:30-10:00 range, one trade a day. | ""
+R stop A - | No stop is in the tutorial; the desk needs one for sizing: the range's far side. Out at 13:30 New York. | ""
+T with_assumptions | Tesla is replaced by the Nasdaq 100; a stop is added for sizing (A)

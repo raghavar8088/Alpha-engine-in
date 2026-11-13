@@ -1,0 +1,18 @@
+video: AGOBoPqKJOw
+topic: forex_us
+summary: Cove Trader's clean 15-minute opening range breakout on Nasdaq futures: buy-stop just above the 15-minute opening range high, sell-stop just below its low, 10-point stop; in his TradingView backtest 10 points was reached on 7 of 10 upside and 11 of 12 downside trades (about 80%); skip trades into big round numbers or after a 90-point rush from one side of the range to the other.
+instruments: Nasdaq 100 futures (NQ, MNQ)
+timeframes: 15m, 1m
+style: scalping
+= CV-01 | 15-minute opening range stop orders both sides, 10-point stop and target (Nasdaq)
+R setup E 00:46 | The setup is a clean 15-minute opening range. | "the setup is just a clean 15-minute orb"
+R entry E 02:50 | Buy right above the range high, sell right below its low (stop orders). | "you basically set your buy literally like right right above it to break and right below it"
+R stop E 01:26 | A 10-point stop. | "basically you would have a 10 point stoploss"
+R target E 03:30,04:13 | Targets measured at 4, 10 and 15 points; 10 points hit 7 of 10 upside and 11 of 12 downside trades. | "seven of them would have gotten you 10 points"
+R no_trade E 05:42,08:32 | Use context: skip breaks into big round numbers (support) and moves that just travelled from one side of the range to the other. | "you literally just traveled down 90 points in two minutes ... I'm not taking this"
+R market A - | Desk version: the Nasdaq 100 cash session one-minute bars (the desk's NQ minutes). | ""
+R entry A - | At 09:45 New York, a buy-stop one tick above the 09:30-09:45 high and a sell-stop one tick below its low, OCO, live until 11:00. The round-number and context filters are not coded. | ""
+R stop A - | Stop 10 index points, target 10 index points from the fill; one trade a day; out at 15:55. | ""
+T with_assumptions | the context filters are judgement calls and are not coded (A)
+C win_rate | 04:54 | about 80% (84-85% for 4 points, high 70s for 10) over 30+ trades a side | his backtest | "the win rate was something in like the 80% range"
+P 00:03 | 00:46 | Prop firm coupon codes, live streams

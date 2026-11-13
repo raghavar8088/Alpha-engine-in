@@ -1,0 +1,17 @@
+video: e9IDuLESYv8
+topic: india_stocks
+summary: CodeTrading's 'simple VWAP rule' on 15-minute candles: buy when the close is above both the daily VWAP and the day's opening price, short when it is below both (a green or red candle condition was dropped because results were better without it); a trailing stop of 1.5 x ATR behind the close; everything closed at the end of the day; Apple 2022-2025 gave +713% with no commissions but -97% with a 0.1% commission.
+instruments: Apple, Tesla, Bitcoin (tests)
+timeframes: 15m
+style: intraday
+= CT-03 | Close above the daily VWAP and the day's open = long (below both = short), 1.5 ATR trailing stop, flat at the day's end
+R entry E 00:43,04:16,04:59 | Long when the candle's close is above the VWAP and above the day's opening price; short when below both. | "if the close is above the VWAP closing price is above the VWAP and the closing price is above the opening price ... the closing price is above the day open"
+R entry E 04:59,06:27 | The green-candle and red-candle condition is left out (it gave worse results). | "I noticed if I remove this one, the green and red candle, I get better results in the back test"
+R stop E 03:34,05:42 | Trailing stop 1.5 x ATR, moving only in the trade's favour. | "the ATR stop parameter 1.5 is going to define its coefficient"
+R exit E 01:29,05:42 | Close all trades at the end of the day (15:45 in his data). | "At the end of the day, since this is a day trading strategy, we will close all the open trades"
+R indicator E 02:11 | VWAP reset daily on intraday candles. | "Now this one is a daily reset"
+R market A - | Desk version: the NSE stock pool on 15-minute candles (real volume) and bitcoin 15-minute candles (VWAP and day from 00:00 UTC). | ""
+R entry A - | Enter at the next candle's open; ATR length 14; the stop trails at the close minus 1.5 x ATR; after a stop-out the next signal may re-enter, at most three trades a day; out at 15:15 IST (stocks) and 23:55 UTC (bitcoin). | ""
+T with_assumptions | the ATR length and the re-entry cap are (A); his own test lost 97% once a 0.1% commission was added
+C return_pct | 06:27 | +713% over three years (100% a year, 49% wins) with zero commissions; -97% with a 0.1% commission | Apple 15m 2022-2025 | "if I add 0.1% commission and I rerun the strategy, we're going to wipe probably all our gains"
+P 00:02 | 00:43 | Downloadable Python notebook

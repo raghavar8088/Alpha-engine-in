@@ -1,0 +1,11 @@
+video: wVof35ErhEY
+topic: forex_us
+summary: Wysetrade's anchored-VWAP method: anchor the VWAP at the start of a confirmed trend, then buy pullbacks where long-wick candles form at the VWAP and a key support zone, entering after a trend-line break and a higher high on a lower timeframe (mirror for downtrends); the VWAP is treated as an area rather than an exact line.
+instruments: Any (stocks, forex in the examples)
+timeframes: Multi-timeframe (intraday entries)
+style: mixed
+= WY-01 | Anchored VWAP from the trend's start, pullback to the VWAP and a key zone, trend-line break entry (discretionary)
+R setup E 01:24,03:30 | Anchor the VWAP where the new trend starts (after the trend-change confirmation). | "this point here is the start of the moving uptrend so that is where you would set your vwap Anchor Point"
+R setup E 02:44 | A pullback forms long-wick candles at a key zone that lines up with the VWAP line. | "price then pulls back and forms a long with candle right at the key Zone and the vwap line presenting a long trade opportunity"
+R entry E 02:44,06:26 | Enter after a trend line over the pullback breaks with a higher high, timed on a lower intraday timeframe. | "once price broke above the trend line and made a higher high this signals the pullback is over"
+T concept_only | anchors, key zones and trend lines are drawn by eye; no stop or target is given

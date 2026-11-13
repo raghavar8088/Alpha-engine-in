@@ -1,0 +1,15 @@
+video: 0ijuvzcn34Y
+topic: crypto
+summary: Eric Krown's long-only 15-minute bitcoin scalp: when his paid 'Jewel Light' indicator is below 35 and closes white for the first time, buy the close; exit when the free PMARP indicator closes at 75 or above; stop on a candle close below the range lows (emergency: a wick below the prior trend low); his journal: 37 of 50 wins, average win 0.74% against an average loss of 0.97%; in the extreme zone below 20, skip the first white tick and wait for the second.
+instruments: Bitcoin
+timeframes: 15m
+style: scalping
+= KW-01 | Jewel Light below 35, first white close, exit at PMARP 75, stop on a close below the range lows
+R indicator E 01:26 | The 'Jewel' or 'Jewel Light' (his paid indicator in the Krown Trading app) and PMARP (free on TradingView). | "you can use either the jewel or the jewel light of course these indicators are available on the crown chain applications"
+R entry E 02:53 | Jewel Light below 35, then the first candle that closes white: a full position at the close. | "the jewel light must be below the 35 read in this case and then once it ticks white for the first time upon closure enter into a full position"
+R exit E 03:38 | Exit when PMARP closes at 75 or above, in profit or not; 70 gives a higher hit rate and slightly lower P&L. | "when pmerp is greater than 75 upon closure take profit"
+R stop E 02:06 | Stop on a close below the range lows; emergency stop on a wick below the prior trend low. | "ideally we wait for a closure below the range lows on that time frame an emergency parameter would be a wick below the prior trend low"
+R no_trade E 09:19 | Below 20 the first white tick is usually the worst; wait for the second one. | "when you do see it go into the extremes over here below 20 and turns white for the first time those actually are the ones that are typically the worst"
+T not_testable | the entry signal is a paid, closed-source indicator (the Jewel Light), so it cannot be rebuilt; only the PMARP exit is public
+C win_rate | 04:23 | 22 of 30 (73.3%) and 37 of 50 wins; average win 0.74% against an average loss of 0.97% | his journal over about two months of a bear market | "it was a 37 out of 50 win rate"
+P 01:26 | 02:06 | Krown Trading app indicators (paid)

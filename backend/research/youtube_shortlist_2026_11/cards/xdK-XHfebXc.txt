@@ -1,0 +1,11 @@
+video: xdK-XHfebXc
+topic: india_stocks
+summary: A Streak platform demo of 'baskets': an algo that shorts a basket of banking stocks on 10-minute candles when the Supertrend crosses above the close and exits when it crosses back below, with a stop and target percentage left to the user; a feature walkthrough, not a recommended strategy.
+instruments: Banking stocks (a user basket)
+timeframes: 10m
+style: intraday
+= ST-01 | Short a banking basket on a Supertrend sell flip, exit on the buy flip (platform demo)
+R entry E 01:43 | Short when the Supertrend indicator turns to sell (Supertrend crosses above the close), on 10-minute candles. | "sell when super trend crosses about close"
+R exit E 02:43 | Exit when the Supertrend crosses back below the close (the trend reverses); stop and target percentages added but not stated. | "super trend indicator crosses below close let's add this stop loss and target profit percentage"
+T concept_only | a demo of the platform's basket feature; the Supertrend settings, stop and target are not given
+D MC-01 | the Supertrend stop-and-reverse flip is already coded from the Marketcalls video in this study

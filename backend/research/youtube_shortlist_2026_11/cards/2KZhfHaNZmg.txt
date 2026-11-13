@@ -1,0 +1,20 @@
+video: 2KZhfHaNZmg
+topic: crypto
+summary: Delta Exchange's tested 5-minute bitcoin scalp: Heikin Ashi candles with a smoothed moving average of length 5; when a candle stands away from the average (its whole range below it), place a buy order at that candle's high with a small stop under the candle, and hold until the first red Heikin Ashi candle (mirror for shorts above the average, held until a green candle); claimed about 75% accuracy with at least 1:2.
+instruments: Bitcoin (Delta Exchange BTCUSDT)
+timeframes: 5m
+style: scalping
+= DE-09 | Heikin Ashi candle away from the smoothed MA (5): stop entry at its high/low, hold until the colour turns
+R market E 00:49 | Bitcoin on Delta Exchange, 5-minute chart. | "ye deltaa eksachenj kaa beeteesee yooesadeetee hai"
+R indicator E 01:29 | Smoothed moving average with length 5. | "smooth mooving evarej us pe klik karate hee ... is lenth ko aap kar do phaain"
+R indicator E 01:29,02:10 | Heikin Ashi candles (they cut the noise). | "aap hake naasee chaarts men svich kar kar jaao"
+R setup E 02:52 | The candle must be away from the average (its high below the line for a long). | "is esam se door honaa jarooree hai"
+R entry E 02:52,03:34 | Order at that candle's high (at its low for a short). | "usakaa haaee pe aapakaa ordar honaa chaahie"
+R stop E 02:52 | A small stop just below the candle (above it for a short). | "chhotaa saa stop los is kaindal ke neeche"
+R exit E 02:52,03:34 | Hold until a red candle appears (a green candle for shorts): 1:1 to 1:5 or more. | "jab tak ek red kaindal naheen aatee hai tab tak aap is tred ko chalane de sakate ho"
+R indicator A - | Smoothed MA (5) = Wilder's running average of the Heikin Ashi close. | ""
+R entry A - | Desk version: Bitcoin 5-minute Heikin Ashi bars; after a Heikin Ashi bar whose high is below the average, a buy-stop at that bar's Heikin Ashi high valid for the next bar (mirror: low above the average, sell-stop at its low); one position at a time. | ""
+R stop A - | Stop at that bar's Heikin Ashi low (high); exit at the next open after the first red (green) Heikin Ashi bar; out at 23:55 UTC. | ""
+T with_assumptions | the moving-average type is read as Wilder's smoothing; 'away' is read as the whole candle beyond the line (A)
+C win_rate | 06:19 | works 8 times out of 10, about 75% accuracy, risk-reward above 1:2 | not stated | "10 men se aath baar ye stretejee vark karatee hai"
+X 2025-01-19 | 03:34 | BTCUSD | long | Heikin Ashi candle below the average, order at its high | the candle's high | under the candle | until a red candle | target | about 1:5

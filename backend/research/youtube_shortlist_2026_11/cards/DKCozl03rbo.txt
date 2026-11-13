@@ -1,0 +1,12 @@
+video: DKCozl03rbo
+topic: forex_us
+summary: ATAS splits the day into flat and trending VWAP phases: with a flat VWAP, fade the first deviation band back to the point of control; with a sloped VWAP, trade pullbacks to the value-area edge in the slope's direction; when a trend stalls and price re-enters the value area, aim back at the point of control; every entry trigger is read from a footprint (cluster) chart: a candle closing beyond its own volume point of control, ideally with a 'finished auction' (zero volume on one side at the extreme).
+instruments: Nasdaq and gold futures
+timeframes: Intraday (cluster chart)
+style: intraday
+= AT-01 | Flat VWAP: fade the first band to the POC; sloped VWAP: buy pullbacks to the value-area edge; footprint triggers
+R setup E 02:24,03:10 | Flat VWAP (non-trending): trade reactions at the value-area edges back to the point of control; sloped VWAP (trending): trade in the slope's direction. | "on such days it's best to trade in the direction of the vwap slope the steeper the slope the stronger the trend"
+R entry E 03:10,04:36 | Flat days: open at the first price deviation, close at the point of control; trend days: enter on pullbacks to the value-area high or low in the trend's direction. | "the goal is to open trades at the first price deviation and close them at the pocc"
+R entry E 07:30,08:17 | Trigger: a candle that closes below its own point of control for a short (above it for a long), ideally with zeros on the bid side at its top (a finished auction). | "for a short position we want the candle to close below the PC at this point you could enter a short trade targeting the PC"
+R stop E 08:17,08:58 | Stop a few ticks beyond the previous candle's extreme. | "we could place a stop loss a few ticks below the previous low marked by this red candle"
+T not_testable | the triggers need footprint data (each candle's volume point of control and bid/ask zeros), which the desk does not have; the phase calls are judged by eye

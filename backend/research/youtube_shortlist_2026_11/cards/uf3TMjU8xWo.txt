@@ -1,0 +1,15 @@
+video: uf3TMjU8xWo
+topic: india_stocks
+summary: QuantConnect's Boot Camp 'fading the gap' on Tesla: one minute after the open, measure the overnight gap (today's open minus yesterday's close) in units of the standard deviation of the last 60 one-minute closes (yesterday's final hour); when the gap is below -3 standard deviations, buy with the whole account, and close the position 45 minutes after the open; a tutorial, with no results shown.
+instruments: Tesla
+timeframes: 1m
+style: intraday
+= QC-03 | Gap down beyond -3 standard deviations of the last hour's closes: buy one minute after the open, exit 45 minutes after the open
+R setup E 06:35 | Gap = today's opening price minus yesterday's 16:00 close, measured one minute after the open. | "we want to take the close of yesterday to find our opening range from the close at 4:00 p.m. to the opening price at 9:30"
+R indicator E 08:40,09:23 | Standard deviation of the last 60 one-minute closes (yesterday's final hour at the open). | "we're going to have a standard deviation indicator that represents the last 60 minutes of the trading day from yesterday"
+R entry E 10:07 | Buy (100% of the account) when the gap divided by that standard deviation is below -3. | "Let's calculate the number of standard deviations that this price delta represents"
+R exit E 02:24 | Close the position 45 minutes after the open no matter what. | "we're going to make sure that we close out our positions 45 minutes after the market opens no matter what"
+R market A - | Desk version: the NSE stock pool on five-minute candles; the standard deviation uses the previous session's last 12 five-minute closes (its final hour). | ""
+R entry A - | Signal on the first five-minute candle (09:15) when (open - previous close) / that standard deviation is below -3; buy at the 09:20 open; long only, as taught. | ""
+R stop A - | No stop is taught; the desk sets a protective stop one gap-size below the entry; out at 10:00 (45 minutes after the open). | ""
+T with_assumptions | a coding tutorial with an untested rule; the protective stop and the five-minute stand-in for one-minute data are (A)

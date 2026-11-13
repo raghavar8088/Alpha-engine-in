@@ -1,0 +1,19 @@
+video: SWYEkdpqo1I
+topic: india_index
+summary: Kotak Stockshaala's Bank Nifty scalp (Sanket): a band of three 200 EMAs (on highs, closes and lows); in a trend, price dips back to the band; after it closes back outside the band and MACD crosses to the trend's side, buy the break of that candle's high (sell the low), stop beyond the swing, take 15-30 points (1:1 to 1:3); shown on daily and one-minute charts; ITM options with delta near 1 for option buyers.
+instruments: Bank Nifty (options, futures); Nifty, midcap options
+timeframes: 1m (also daily)
+style: scalping
+= KT-01 | 200 EMA band (high/close/low) dip, close back outside + MACD cross, break of the candle, swing stop
+R indicator E 00:43,01:23 | 200 EMAs on the high, the close and the low: a band. | "200 dej kee eksapponenshiyal mooving evarej ... jo haaee pe plot hogaa ... lo pe plot hogaa"
+R indicator E 02:05 | MACD with default settings for the trigger. | "vee vil aid emaeseedee eज़ en indiketar jast phor as too giv a baay signal"
+R setup E 02:49,03:33 | After a rally, price dips back to the 200 EMA band; wait there. | "jab bhee 200 ke paas aae to hamen ye deep ke lie rukanaa hai"
+R entry E 04:16,04:56 | Once price closes back outside the band and MACD turns positive (a crossover), enter on the break of that candle's high (mirror for shorts with a negative crossover). | "jaise hee emaeseedee trigar hotaa hai aur hamen jahaan pe kaindal kaa klojing dikhataa hai usakaa haaee brek hotaa hai"
+R stop E 04:16 | Stop below the swing low (above the swing high for shorts). | "vee vil keep d stop los bilo d lo oफ़ d sving"
+R target E 04:56,09:11 | Scalp 15-30 points; 1:1 to 1:3 is available often. | "isane 1:23 bahut saare instenses men diyaa hai"
+R no_trade E 05:38 | No trade when MACD has not crossed to the trade's side. | "aapako koee bhee dip ke baad men haaee kaa krosaovar naheen lenaa hai"
+R market A - | Desk version: Bank Nifty and Nifty one-minute bars (the index as a proxy for delta-1 options). | ""
+R entry A - | Long: within the last 15 bars a low touched the band (at or below the 200 EMA of highs), now a close above the 200 EMA of highs with the MACD line above its signal after being below it within the last 3 bars; a buy-stop one point above that candle's high, live 3 bars; mirror for shorts; 09:30-14:45; at most 4 trades a day. | ""
+R stop A - | Stop at the lowest low (highest high) of the last 10 bars; target 2R; out at 15:15. | ""
+T with_assumptions | 'dip to the band', the swing and the target ratio are judged live (A)
+X - | 07:04 | Bank Nifty (one minute) | short | at the band, MACD negative crossover, low broken | 59643 | 59743 | 25-50 points | target | 300-400 points of move

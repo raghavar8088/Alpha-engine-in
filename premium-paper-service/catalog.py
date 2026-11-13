@@ -496,7 +496,32 @@ YC3_STRATEGIES = (
     ('RU-06', 'Zero-lag MACD cross below/above zero in the 200 EMA trend, pullback stop, 1.5R', 'TRADING RUSH', ('BTCUSD', 'XAUUSD')),
     ('NK-01', 'Close outside the Bollinger Band (20, 2), stop at the middle line, 2R (1-hour)', 'TraderNick', ('EURUSD', 'GBPUSD')),
     ('KA-01', 'Break of the previous hour/day high or low after a staircase approach, two closes, swing stop, 1R', 'Koroush AK', ('BTCUSD',)),
+    # the second batch (13 Nov 2026: the cards read after the first deploy); trades from settings.YC3B_START_T
+    ('MC-01', 'Supertrend (7, 3) stop and reverse on 5 minutes', 'Marketcalls', ('NIFTY', 'BANKNIFTY')),
+    ('MC-02', 'Zero-lag EMA (20) vs EMA (20) cross on 15 minutes, stop and reverse, 1 ATR stop', 'Marketcalls', ('NIFTY', 'BANKNIFTY')),
+    ('AO-01', 'CCI (20) beyond -100/+100, then a divergence, close back over the EMA 9, 1:1 (one minute)', 'Angel One', ('NIFTY', 'BANKNIFTY')),
+    ('KT-01', '200 EMA band (high/close/low) dip, close back outside + fresh MACD cross, break of the candle, 2R', 'Kotak Securities (Stockshaala)', ('NIFTY', 'BANKNIFTY')),
+    ('KG-01', 'Weekly + daily CPR side, R1 + previous-day-high break, midpoint stop, R1-R2 midpoint then R2', 'CPR by KGS', ('NIFTY', 'BANKNIFTY')),
+    ('KG-02', 'Trend reversal CPR: open on the wrong side of a descending (ascending) CPR, fade to it or break it', 'CPR by KGS', ('NIFTY', 'BANKNIFTY')),
+    ('AO-02', 'First 5-minute candle full breakout, stop at its far side, out on a close through the EMA 9 (stocks)', 'Angel One', ('NSE5',)),
+    ('CR-02', 'VWAP bounce / rejection after an hour clear of the VWAP, stop entry past the touch candle, 2R', 'Carmine Rosato', ('NSE5',)),
+    ('QC-03', 'Gap down beyond -3 standard deviations of the last hour\'s closes: buy the open, out at 10:00', 'QuantConnect', ('NSE5',)),
+    ('CT-03', 'Close above the daily VWAP and the day\'s open = long (below both = short), 1.5 ATR trailing stop', 'CodeTrading', ('NSE15', 'BTCUSD')),
+    ('KS-01', 'SMA 30/40/50/60 tangled, close above the 20-day high, 20-day-low stop, 2R, 30 days (daily, long)', 'Kunal Saraogi', ('NSED',)),
+    ('DE-09', 'Heikin Ashi candle entirely beyond the smoothed MA (5): stop entry at its far end, out on a colour turn', 'Delta Exchange', ('BTCUSD',)),
+    ('CT-02', 'VWAP bounce: 15 bodies on one side of the VWAP, a candle within 0.2% of it, 0.8 ATR stop, 2.5R', 'CodeTrading', ('BTCUSD',)),
+    ('CT-01', 'VWAP trend (15 bodies one side) + close outside the Bollinger band (14, 2) + RSI (16) 45/55, 1.5R', 'CodeTrading', ('EURUSD', 'GBPUSD')),
+    ('SK-01', 'Exhaustive four-candle leg past the previous impulse\'s level, limit back at the level with the 20 MA, 2R', '2ndSkies Trading', ('XAUUSD',)),
+    ('CH-01', 'Trend-day VWAP retest after a one-minute reclaim, 2R, two-bar trailing stop', 'Chart Champions', ('NAS100',)),
+    ('CH-02', '15-minute opening range break on a one-minute close with the VWAP side and slope, 1.5 x range target', 'Chart Champions', ('NAS100',)),
+    ('QC-01', '30-minute opening range breakout, far-side stop, out at 13:30 New York (Nasdaq proxy for Tesla)', 'QuantConnect', ('NAS100',)),
+    ('CV-01', '15-minute opening range stop orders both sides (OCO), 10-point stop and target', 'Cove Trader', ('NAS100',)),
+    ('KR-01', 'Open in range and in value: fade a hold at the previous value-area edge back to the naked POC', 'Aaron Korbs', ('NAS100',)),
+    ('TN-02', '15-minute opening range double break: reclaim on the VWAP side, target the far edge', 'Trading Nut', ('NAS100',)),
+    ('AC-02', 'Day type from the 3-minute range vs the VWAP; VWAP 1-3 SD bands + RSI 70/30 fades and trend pullbacks', 'Anthony Crudele', ('NAS100',)),
+    ('CR-01', 'Drop, base, rally on one-minute candles in a 30-minute uptrend: limit at the base top, 3R (long)', 'Carmine Rosato', ('NAS100',)),
 )
+YC3B_IDS = frozenset(('MC-01', 'MC-02', 'AO-01', 'KT-01', 'KG-01', 'KG-02', 'AO-02', 'CR-02', 'QC-03', 'CT-03', 'KS-01', 'DE-09', 'CT-02', 'CT-01', 'SK-01', 'CH-01', 'CH-02', 'QC-01', 'CV-01', 'KR-01', 'TN-02', 'AC-02', 'CR-01'))
 for _sid, _name, _ch, _mkts in YC3_STRATEGIES:
     ACCOUNTS.append(_a(_sid, YC3, _name, _ch, *[(YC2_BOOK_MARKET.get(_m, _m), "V0") for _m in _mkts]))
 BY_ID = {a.id: a for a in ACCOUNTS}

@@ -1,0 +1,20 @@
+video: -3dwZhJ3230
+topic: crypto
+summary: Chris Capre (2nd Skies) on a 5-minute gold breakout-pullback: trade with the trend (impulse, correction, impulse); where an impulsive leg stopped becomes a 'magnet' level; after an exhaustive leg (four candles in a row, each bigger) don't chase - sell the pullback to the previous stopping level, ideally when the 20 MA is there too, without waiting for a candle trigger; stop about $1 above, target 2:1.
+instruments: Gold (XAUUSD)
+timeframes: 5m
+style: intraday
+= SK-01 | After an exhaustive impulse, a limit at the previous impulse's stopping level with the 20 MA there, 2:1
+R market E 00:13 | Gold on the 5-minute chart (the same price action as on 1-hour or daily charts). | "a price action trade that I took on a f minute chart on gold"
+R setup E 00:54 | Trade with the trend: an impulsive move, a corrective move, then expect the next impulse in the same direction. | "the general model I'm looking at is for an impulsive move move to be followed by a corrective move"
+R setup E 01:40,02:25 | Where an impulse stops is a significant level and later a breakout-pullback 'magnet' point. | "it can often become a breakout pullback area or magnetic point or gravity point"
+R no_trade E 03:06,04:31 | After an exhaustive leg (a series of increasingly large candles) do not sell the break; wait for the pullback. | "I'm not going to want to sell on a break here because that's chasing it after three legs down"
+R entry E 04:31,05:56 | Sell at the previous stopping level when the 20 MA has come down to it; no price-action trigger needed at the level. | "most ideal for me to get into the market would be selling here when the 20 ma gets down to this level"
+R stop E 06:37 | Stop about a dollar above the level (gold). | "put my stop about a dollar up"
+R target E 06:37,07:21 | Target 2:1. | "I'm looking for a two to1 target"
+R market A - | Desk version: gold on Delta XAUTUSD, 5-minute bars. | ""
+R setup A - | Down trend: SMA(20) below its value 12 bars earlier; an exhaustive leg: 4 consecutive red bars, each range larger than the previous; the level = the lowest low of the 12 bars before the leg (where the previous impulse stopped); mirror for longs. | ""
+R entry A - | A sell limit at the level, placed after the leg, live for 24 bars, only if the SMA(20) is within 0.15% of the level at placement. | ""
+R stop A - | Stop 0.08% above the level (about $1 on $1,300 gold); target 2R; out at the gold session end; at most 2 trades a day. | ""
+T with_assumptions | impulses, levels and the MA confluence are read by eye (A)
+X - | 05:56 | Gold | short | four expanding bear candles, pullback to the previous stopping level with the 20 MA | at the level | about $1 above | 2:1 | target | target reached

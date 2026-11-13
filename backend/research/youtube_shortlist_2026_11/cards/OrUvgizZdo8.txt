@@ -1,0 +1,18 @@
+video: OrUvgizZdo8
+topic: crypto
+summary: CodeTrading compares an EMA and a VWAP version of one bounce rule on bitcoin 15-minute candles (2019-2022): after a run of candles completely on one side of the curve, enter when a candle's nearer extreme comes within $100 of it, expecting a bounce in the trend's direction; stop 0.8 x ATR, target 2.5 x the stop; one trade at a time; no commissions; the VWAP version made +473% after collapsing from a +2,400% peak, the EMA version +296% (Sharpe 0.6).
+instruments: Bitcoin
+timeframes: 15m
+style: intraday
+= CT-02 | VWAP bounce: a run of candles on one side of the VWAP, then a candle reaching close to it, 0.8 ATR stop, 2.5R
+R indicator E 01:25 | VWAP = cumulative (typical price x volume) / cumulative volume, reset each session (daily here). | "it's equal to the cumulative mean price times the volume divided by the cumulative volume"
+R setup E 02:46,04:12 | Trend: a number of consecutive candles completely above the curve (VWAP or EMA) = uptrend; completely below = downtrend. | "we will look at a series or a certain number of candles that are either below or above the v-wap curve or the moving average curve"
+R entry E 02:46,05:36,06:21 | Long: in an uptrend, a candle whose low comes within the 'close distance' ($100 for bitcoin) of the curve; short: a candle whose high comes within it in a downtrend. | "if the distance between either the high or the low whichever is closer to the ma curve is below or equal to my close distance parameter"
+R stop E 07:44,08:30 | Stop 0.8 x ATR; target 2.5 x the stop distance. | "the stop loss is equal to 0.8 times the ATR"
+R sizing E 08:30 | One trade at a time (50% of equity at 1:5 margin in his test). | "we are allowing one trade at a time"
+R market A - | Desk version: bitcoin 15-minute candles with real volume; the VWAP resets at 00:00 UTC. | ""
+R setup A - | The run length is not shown: 15 candles (as in his VWAP scalp), judged on candle bodies with the signal candle included; the $100 distance becomes 0.2% of price ($100 was 0.15-2.5% of the 2019-2022 prices he tested). | ""
+R stop A - | ATR length 7 (as in his VWAP scalp); enter at the next candle's open; out at 23:55 UTC. | ""
+T with_assumptions | the run length, the distance in percent and the ATR length are not given (A); the EMA version is not coded (its length is not given)
+C return_pct | 09:56 | VWAP version +473% (after a +2,400% peak and a deep drawdown); EMA version +296%, +70% a year, Sharpe 0.6; at 1:2 margin +123%, Sharpe 1.02 | bitcoin 15m 2019-2022, no commissions | "the total return in this case is 473 percent"
+P 00:43 | 02:05 | Downloadable Python notebook

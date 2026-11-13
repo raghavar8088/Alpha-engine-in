@@ -1,0 +1,14 @@
+video: -IN3psKfXdU
+topic: forex_us
+summary: Kevin Davey tests the textbook RSI reversal as a stop-and-reverse signal (buy when RSI crosses back above the oversold level, short when it crosses back below 100 minus it; no stop or target) with walk-forward optimisation of the length (5-30) and level (10-90) on 44 futures markets, 7 bar sizes, 2007-2025: only 42% of 1,848 cases were profitable after costs; his verdict - by itself not good enough.
+instruments: 44 futures markets (ES, NQ best)
+timeframes: daily and intraday bars
+style: mixed
+= KD-01 | RSI back through oversold/overbought, stop and reverse (tested: not good enough)
+R entry E 01:27,02:12 | Buy at the next open after RSI crosses back above the oversold level; short after it crosses back below the overbought level. | "when it comes back up above 30, that's a signal to buy"
+R exit E 03:35 | No stop and no target: always in the market (stop and reverse), to test the signal alone. | "There's no stop, no profit target, so this strategy is always in the market"
+R indicator E 04:18 | RSI length 5-30 and oversold level 10-90, chosen by walk-forward optimisation. | "I'm going to use a lookback length for the RSI of 5 to 30 in steps of five"
+T with_assumptions | a test of a generic signal rather than a trading rule; its result is negative
+D YT-25 | the same RSI 70/30 reversal is already in the library (top-20 study); this video's test says it does not work by itself
+C other | 07:55 | 42% of 1,848 walk-forward cases profitable after slippage and commission; 12% over $50,000; most drawdowns $25,000-50,000 | 2007-2025 | "only 543 were even profitable"
+P 00:02 | 00:42 | Free algo signup; Strategy Factory course; MultiWalk software

@@ -1,0 +1,15 @@
+video: A5lWR0PhG3c
+topic: india_index
+summary: Marketcalls backtests a zero-lag EMA strategy on Nifty spot 15-minute charts in Amibroker: the zero-lag EMA (lag removed) against a normal EMA, two lots, four years: +Rs 5 lakh on Rs 2 lakh (about 24.8% a year), 417 trades, a low win rate, 11 losses in a row at worst, 23.6% maximum drawdown; Bank Nifty worked less well.
+instruments: Nifty; Bank Nifty
+timeframes: 15m
+style: intraday
+= MC-02 | Zero-lag EMA vs EMA cross on Nifty 15 minutes (stop and reverse)
+R market E 00:02,00:44 | Nifty spot 15-minute chart (Bank Nifty tested too); two lots. | "Nifty spot 15 minute strategy along with an uh zero lag EMA line and an normal EMA line"
+R indicator E 00:02 | A zero-lag EMA (lag removed from the EMA) and a normal EMA. | "the yellow line corresponds to uh zero lag EMA and red line corresponds to um normal uh EMA"
+R entry I 00:44 | Trade the cross of the zero-lag EMA through the EMA (the AFL code is shown, not read out). | "use the filter in a effective trading strategy"
+R indicator A - | Both averages of 20 periods on closes; zero-lag EMA = 2 x EMA - EMA of the EMA (the lengths are not stated). | ""
+R entry A - | Desk version: Nifty and Bank Nifty 15-minute bars; at the next open after the zero-lag EMA crosses above (below) the EMA, go long (short); the opposite cross reverses; 09:30-15:00; stop 1 x ATR(14) from the entry; out at 15:15. | ""
+T with_assumptions | the average lengths and the exits are not stated; the code is only shown (A)
+C money | 01:27 | +Rs 5 lakh on Rs 2 lakh in four years (24.8%), 417 trades, 11 losses in a row, 23.6% drawdown | 4 years | "returns had end with an uh um with a net profit of 5 lakhs we back tested with an initial capital of 2 lakhs"
+U What lengths do the two averages use?

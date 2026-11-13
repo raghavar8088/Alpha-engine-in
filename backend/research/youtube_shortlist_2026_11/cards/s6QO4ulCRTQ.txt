@@ -1,0 +1,16 @@
+video: s6QO4ulCRTQ
+topic: forex_us
+summary: Chart Champions' 15-minute opening range breakout with a VWAP filter on Nasdaq futures: mark the 09:30-09:45 New York high and low; go long on a one-minute close above the range high only while price is above a session-anchored VWAP that points up (short below the low with price under a falling VWAP); target 1.5 x the range's size; stop at the opposite side of the range (his own variant: target 1 x, stop near the range's 50%).
+instruments: Nasdaq 100 futures (NQ)
+timeframes: 1m (15-minute range)
+style: intraday
+= CH-02 | 15-minute New York opening range break on a one-minute close, VWAP side and slope, 1.5 x range target, stop at the far side
+R setup E 00:44,01:28 | The opening range is the high and low of 09:30-09:45 New York (regular trading hours). | "the high and the low formed during the first 15 minutes of the RTH session. And that's 9:30 to 9:45 a.m. Eastern time"
+R entry E 02:08,02:49 | Long when price breaks above the range high and is above the VWAP (anchored to the session start), on the candle close. | "we go long if price breaks above the opening range high and is above VWAP"
+R entry E 03:30 | Short on a one-minute close below the range low with price below the VWAP and the VWAP pointing down. | "we want to see price below that VWAP and we want to see the VWAP pointing to the downside. Okay, we get a one minute close"
+R target E 02:49,04:11 | Target 1.5 x the size of the opening range. | "we can go long and target the 1 and a half size of that opening range"
+R stop E 03:30,04:11 | Stop at the opposite side of the opening range (reduce size when it is wide). | "The invalidation for the trade will always be the opposite side of the opening range"
+R stop I 04:51 | His own variant: target 1 x the range with the stop near the range's 50%. | "instead of being one and a half times, I like to go for the one time the size but my stop loss to be tighter and I like to use the 50%"
+R market A - | Desk version: NAS100 cash-session one-minute bars; the desk has no real NAS100 volume, so the VWAP is a time-weighted average from 09:30. | ""
+R entry A - | 'Pointing up' = the VWAP higher than five minutes earlier; enter at the next one-minute open; the target is measured from the broken edge; signals until 12:00 New York; one trade a day; out at 15:55. | ""
+T with_assumptions | the VWAP slope test, the target's anchor and the signal window are (A); the desk VWAP is time-weighted (A)

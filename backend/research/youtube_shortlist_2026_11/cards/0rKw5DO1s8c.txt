@@ -1,0 +1,16 @@
+video: 0rKw5DO1s8c
+topic: india_index
+summary: Marketcalls (Rajandran) backtests the non-repainting Supertrend on Nifty futures 5-minute charts in Amibroker with the 'optimised' settings factor 3, ATR period 7, long and short, two lots: buy on an up flip, sell on a down flip, always in the market; one week showed 11 trades, 63.64% winners, +Rs 6,755.
+instruments: Nifty futures
+timeframes: 5m
+style: intraday
+= MC-01 | Supertrend (ATR 7, factor 3) stop-and-reverse on Nifty 5 minutes
+R market E 00:47,03:38 | Nifty futures, two lots, Rs 2 lakh capital, 15% margin. | "set position size to be two SPS shares okay this is to trade with two lots"
+R indicator E 00:47 | Non-repainting Supertrend with factor 3 and ATR period 7 (optimised for Nifty futures; defaults are 3 and 11). | "the parameters which I applied here is 3 and 7"
+R timeframe E 03:38 | Five-minute charts, long and short. | "long and short time is on 5 minute charts"
+R entry I 00:47,03:38 | Trade the Supertrend's direction: long on an up flip, short on a down flip (a reversal system). | "3 and7 captures the good captures the trend very clearly"
+R market A - | Desk version: the Nifty and Bank Nifty indices on five-minute bars (intraday: the desk's index books close at 15:15). | ""
+R entry A - | Enter at the next open after a Supertrend (7, 3) flip, 09:30-15:00; the opposite flip reverses the position (stop and reverse); stop at the Supertrend line at entry; out at 15:15. | ""
+T with_assumptions | the system's entry/exit code is shown, not explained; overnight holding is replaced by the desk's intraday close (A)
+C win_rate | 04:21 | 11 trades, 63.64% winners, net +Rs 6,755 from 27 July to 3 August | one week | "the winning ratio is 63.64% as of now and the net profit is 6,755 rupees"
+P 00:02 | 00:47 | Free AFL code on marketcalls.in

@@ -1,0 +1,12 @@
+video: T1vOWJf1jP4
+topic: crypto
+summary: Benjamin Cowen reviews bitcoin's daily RSI: months of lower RSI highs (a falling RSI trend line) were broken, a point for the bulls, but price still needs a higher high and a break of the 50-day SMA before the down trend is over; market commentary, not a rule set.
+instruments: Bitcoin
+timeframes: 1d, 4h
+style: unclear
+= BC-01 | Daily RSI trend-line break as a bullish sign (commentary)
+R indicator E 00:43,01:24 | Daily RSI(14) made lower highs for months while price rose: a weakening market. | "we're starting to have lower highs"
+R setup E 02:09 | A break of the RSI's falling trend line is a point in favour of the bulls. | "we have broken through it"
+R filter E 04:57 | Confirmation still needs a higher high in price and a move above the 50-day SMA. | "we would also want to break through the 50-day sma"
+T concept_only | market commentary on one moment; no entry, stop or exit
+P 00:02 | 00:43 | Premium membership (Into The Cryptoverse)

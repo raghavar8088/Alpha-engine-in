@@ -1,0 +1,11 @@
+video: g4PCpGwla10
+topic: forex_us
+summary: Anthony Crudele's three-minute opening range with a VWAP anchored at the open on S&P futures: when the VWAP rises above the opening range high the day is set for a trend up (VWAP as support), below the low a trend down, and a VWAP stuck inside the range means a sideways, mean-reverting day; prior days' VWAPs act as magnets; a day-type framework without entries, stops or targets.
+instruments: S&P 500 futures (ES)
+timeframes: 3m
+style: intraday
+= AC-01 | Three-minute opening range + open-anchored VWAP: day type (trend up, trend down, sideways) (framework)
+R setup E 02:48,03:32 | Mark the high and low of the first three-minute bar of regular trading hours and anchor a VWAP at that bar. | "we're going to click right on the first three minute bar of the day ... draw a horizontal line on the low and the high of the opening three minutes"
+R setup E 04:55,05:42 | VWAP above the opening range high = a trend-up day; below its low = a trend-down day. | "when we get above that initial round that first three minutes with the V web that tells me that the market is set up for potentially a trend higher type day"
+R setup E 10:42 | VWAP stuck inside the opening range = sideways and mean reverting; new extremes are unlikely. | "when the V web is stuck inside in between that three minute opening range ... the possibility of extension of extending the lower lows is unlikely"
+T concept_only | a day-type read with no entry, stop or target; his next video turns it into rules (coded as AC-02)

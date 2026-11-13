@@ -1,0 +1,19 @@
+video: 6JSIcTTZ-E4
+topic: forex_us
+summary: Randy Barnes (on Trading Nut) trades Nasdaq and S&P futures on five-minute candles around VWAPs (start of week from the Sunday 18:00 New York Globex open, the New York session, overnight), the previous day's and week's value area and point of control, and the 15-minute New York opening range: above the VWAP buy, below it sell; his 'double break' trade breaks one edge of the opening range and targets the other; he risks 0.5-1.5R (risking 23 points to make 21, taking 10 points about 70% of the time) and wins 70-80%; order flow (Bookmap, CVD) and adding only to winners are judged live.
+instruments: Nasdaq 100 and S&P 500 futures
+timeframes: 5m
+style: intraday
+= TN-02 | 15-minute New York opening range 'double break' with the VWAP side: break one edge, reclaim, target the other edge
+R indicator E 01:26,02:07 | VWAPs: start of week (from the Sunday 18:00 New York Globex open), New York session, overnight; above the VWAP buy, below it sell. | "I just know that if you're below the VWAP, you should be selling. If you're above it, you should be buying."
+R setup E 05:02 | The opening range is the high and low of the first 15 minutes of the New York open, on a five-minute chart. | "the first 15 minutes, the high and the low of the first 15 minutes is the opening range"
+R setup E 08:43 | Double break: price breaks the bottom of the opening range and the trade targets its top (mirror from the top). | "we break the bottom of this opening range, and I'm targeting the top of the opening range now, which is what we call a double break"
+R entry I 10:49,11:30 | In the example he was long after the opening range low held its retest and price broke back above the New York VWAP. | "Right here, you hold this level, it breaks back above the New York VWAP. The defend The buyers are defending."
+R target E 07:59,08:43 | Reward 0.5-1.5R; most trades take less than the risk. | "I'm risking 23 to make 21. I'm probably 70% of the time taking 10."
+R setup E 04:14,06:33 | The previous day's and week's value area high, point of control and value area low are levels to respect (discount and premium). | "these dotted lines here, which are previous day's value area high, previous day's point of control, and previous day's value area low"
+R market A - | Desk version: NAS100 cash-session one-minute bars on five-minute candles; the desk has no real NAS100 volume, so the New York VWAP is a time-weighted average from 09:30. | ""
+R entry A - | Long: after a five-minute close below the 09:30-09:45 range low, the first five-minute close back above the range low that is also above the New York VWAP; buy that close; mirror for shorts; signals 09:50-12:00 New York; one trade a day. | ""
+R stop A - | Stop below the lowest low since 09:30 (above the highest high for shorts); target the far edge of the range; skip when the target is under 0.5R; out at 15:55. | ""
+T with_assumptions | the entry moment and the stop are not stated as rules (I/A); the desk VWAP is time-weighted (A); order flow (Bookmap, CVD), the other VWAPs and the value-area levels used for management are not coded
+C win_rate | 09:26 | wins 70-80% of trades; payouts taken at win rates between 63% and 86% | his prop-firm accounts | "the lowest win rate I've taken a payout on with this strategy was like 63%"
+P 03:33 | 04:14 | Broker offer for free TradingView plans; mentor course ad at 12:58

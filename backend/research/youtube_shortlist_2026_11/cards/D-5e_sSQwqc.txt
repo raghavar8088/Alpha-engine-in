@@ -1,0 +1,18 @@
+video: D-5e_sSQwqc
+topic: forex_us
+summary: Chart Champions on VWAP as the institutions' average: above VWAP with higher highs and lows means a bullish bias (only longs), below with lower highs a bearish one; his live E-mini S&P trade buys the retest of VWAP after price reclaims a one-minute high, risking about $200 for at least $400 (1:2), trailing the stop under recent one-minute lows; anchored VWAP for events.
+instruments: E-mini S&P 500 futures (ES)
+timeframes: 1m
+style: scalping
+= CH-01 | Trend-day VWAP retest: price above VWAP in higher highs/lows, buy the retest after a one-minute reclaim, 1:2, trail
+R indicator E 01:24,02:04 | Session VWAP (resets each session); anchored VWAP for events such as earnings or FOMC. | "you will notice that on each and every single session, it will reset"
+R filter E 03:27,04:53 | Trend bias: above VWAP with higher highs and higher lows, be a buyer; below with lower highs and lows, be a seller. | "price is above the VWAP. So we're making higher highs and higher lows. So this means that the buyers are in control"
+R entry E 05:36 | Buy the retest of VWAP, confirmed by a candle reclaiming the one-minute high. | "the market has looked below reclaim that one minute high and um the pullback back down to VWAP should be a nice buy trade"
+R target E 06:22 | Risk about $200 for at least $400; anything above 1:1 is a bonus. | "we are now in this trade risking around $200 and aiming for at least uh $400"
+R management E 07:42,08:22 | Trail the stop under the previous candles' lows (one minute) once price leaves the range. | "moving my stop up to that 46 which is the previous second candle one minute low"
+R market A - | Desk version: the Nasdaq 100 cash session (the desk has no S&P minutes), one-minute bars; VWAP is time-weighted there (no volume in the desk's Nasdaq feed). | ""
+R entry A - | From 10:00 to 15:30 New York: bias long when at least 16 of the last 20 one-minute closes were above VWAP and the last 30 minutes made a higher low than the 30 before; a bar whose low touches VWAP (within 0.02%), then a later bar (within 5) closing above the touch bar's high gives a long at the next open; mirror for shorts; one trade a day. | ""
+R stop A - | Stop at the touch bar's low; target 2R; the stop trails to the low of the bar two bars back; out at 15:55. | ""
+T with_assumptions | trend bias, retest and trail are read live; confluences (previous-day midpoint, point of control) are not coded (A)
+X - | 05:36 | ES | long | above VWAP, pullback to VWAP with previous-day midpoint confluence, reclaim of the one-minute high | at VWAP | about $200 risk | $400+ | target | stopped out on the trail for about $500
+P 09:02 | 09:02 | Comment and subscribe

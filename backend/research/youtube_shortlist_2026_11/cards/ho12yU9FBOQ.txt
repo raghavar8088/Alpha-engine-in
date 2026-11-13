@@ -1,0 +1,14 @@
+video: ho12yU9FBOQ
+topic: india_index
+summary: CPR by KGS's 'trend reversal CPR' on Bank Nifty five-minute candles: after descending CPRs (bearish), a day that opens above the daily CPR signals a possible reversal: either it rallies through R1 and the previous day high, or, lacking momentum, it is pulled back to the CPR; if the open is far from the CPR, short toward the CPR; if it is close, short when price breaks below the CPR and scalp to S1 and the previous day low; mirror after ascending CPRs with an open below the CPR.
+instruments: Bank Nifty; stocks (Reliance)
+timeframes: 5m
+style: intraday
+= KG-02 | Trend reversal CPR: open on the wrong side of a descending (ascending) CPR, fade back to the CPR or break it toward S1 / previous day low
+R setup E 00:41,03:34 | Descending CPRs = bearish; candles opening and trading above the daily CPR then signal a trend reversal (mirror for ascending CPRs). | "sometimes the candles will be trading above daily cpr so that indicates a trend reversal"
+R setup E 04:24,09:19 | Without momentum in the first 15-30 minutes, price is attracted back to the daily CPR. | "in the next 15 to 30 minutes the market will not have the momentum to go up and slowly the candles will come down and they will be attracted towards the daily cpr"
+R entry E 15:09 | Far from the CPR: short toward the CPR; close to it: short when a candle breaks the CPR and scalp to S1 and the previous day low. | "if the candles are closer to daily cpr when the candle breaks daily cpr you can take a short position and you can do a quick scalping till s1 and previous day low"
+R entry E 15:56,16:38 | Mirror after ascending CPRs with an open below the CPR: long toward the CPR, or long when price comes out of the CPR. | "if the distance between the candle and the daily cpr is very high then you can take a long position and you can do a quick scalping till daily cpr"
+R market A - | Desk version: Bank Nifty and Nifty one-minute bars on five-minute candles; descending = today's CPR top below yesterday's CPR bottom (ascending = today's bottom above yesterday's top). | ""
+R entry A - | Open above today's CPR after a descending CPR: if the open is at least 0.25% above the CPR top, short on the first five-minute close below the 09:15-09:30 low (unless R1 and the previous day high broke first), stop above the day's high so far, target the CPR top; if it is closer, short on a five-minute close below the CPR bottom, stop above the CPR top, target the nearer of S1 and the previous day low; mirror for ascending CPRs; signals 09:30-13:00; one trade a day; out at 15:15. | ""
+T with_assumptions | 'distance', 'momentum' and the stops are not defined (A); his other video rejects plain CPR breakouts, so the close-to-CPR branch follows this video only

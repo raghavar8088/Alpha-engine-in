@@ -1,0 +1,21 @@
+video: yenWJ-44HuE
+topic: forex_us
+summary: Anthony Crudele's day-type VWAP band strategy on three-minute Nasdaq futures: a VWAP anchored at the regular-hours open with 1, 2 and 3 standard deviation lines plus a standard RSI; the first three-minute bar's range sets the day type; sideways (VWAP inside the range): fade the third band when RSI is beyond 70/30 and the bar closes back inside, target the VWAP; trend up (VWAP above the range): long only, buy a pullback to the lower first band with RSI oversold, tight stop below it, scale out at the VWAP and the upper bands; trend down: short only, sell a rally to an upper band with RSI overbought, stop above it, scale out at the VWAP and the lower first band.
+instruments: Nasdaq 100 futures (NQ)
+timeframes: 3m
+style: intraday
+= AC-02 | Day type from the three-minute range vs the VWAP; VWAP 1-3 SD bands + RSI 70/30: fade the third band on chop, buy (sell) the opposite first band in a trend
+R indicator E 00:03,00:44 | VWAP anchored at the regular-hours open with 1, 2 and 3 standard deviation lines; RSI with standard settings. | "just use the standard settings for the rsi ... i'm going to be adding three standard deviations"
+R setup E 01:24,02:05 | Day type: the first three-minute bar's high and low; VWAP inside them = sideways; above = trend up; below = trend down. | "if that order flow v web remains within that opening three-minute high and low then i just know that for the time being this day is going to be a choppy day"
+R entry E 02:50,03:30,04:12 | Sideways: at a band (he favours the third) with RSI 70 or more (30 or less), short once the bar closes back under the band (long back over it). | "once i see it spike and hit that close back under that standard deviation number three line that's a short for me right back to the order flow v web"
+R stop E 04:12 | Stop just above the third band or above the spike's high. | "you can put it just above that third standard deviation line or above that high"
+R target E 02:50 | Sideways target: back to the VWAP. | "what we're going to be looking for is a lot of mean reversion back to the order flow v web"
+R entry E 05:37,06:17 | Trend up: long only, on a pullback to the first band below the VWAP with RSI oversold. | "i look for any time we retest this first standard deviation line below the order flow v-web and i also include that rsi"
+R stop E 06:17 | Trend trade stop: just below that first band. | "i'll use a stop just below this order flow v-web standard deviation line"
+R management E 06:59,07:41 | Take some off at the VWAP, half or more at the first upper band, maybe the second; then move the stop under the VWAP. | "take some off at the first rotation back at the overflow v-wet"
+R entry E 09:01,09:48,10:31 | Trend down: short only, at a test of an upper band with RSI overbought; the line must hold (if RSI turns overbought above the first band, wait for the second). | "the market has to respect that line in order for me to trade off of it"
+R target E 10:31,11:15 | Trend-down exits: some at the first band, some at the VWAP, the last at the first band below the VWAP. | "we look for the first standard deviation line below the order flow v web to be the final destination"
+R no_trade E 08:21,09:01 | No counter-trend fades on trend days. | "it's a trend up day you look for long only examples"
+R market A - | Desk version: NAS100 cash-session one-minute bars on three-minute candles; the desk has no real NAS100 volume, so the VWAP and its bands are time-weighted from 09:30. | ""
+R entry A - | RSI 14. Sideways: a bar whose high reached the +3 band with RSI at least 70 closes back under it: short at the next open, stop 0.05% above the higher of the band and the bar's high, target the VWAP (mirror at the -3 band). Trend up: a bar whose low reached the -1 band with RSI at most 30 closes back over it: long, stop 0.05% under the lower of the band and the bar's low, half off at the VWAP, the rest at the +1 band (mirror for trend down at the highest upper band touched, half at the VWAP, the rest at the -1 band). Signals 09:36-15:00 New York; at most three trades a day; out at 15:55. | ""
+T with_assumptions | 'close back inside' as the trigger, the scale-out shares and the stop buffer are (A); the desk VWAP is time-weighted (A)

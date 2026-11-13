@@ -36,6 +36,9 @@ YC2_LATE_S = {"daily": 2 * 86400, "stocks": 1800, "index": 1200, "global": 1200}
 # their activation, flat at the start, entering only on fresh bars like the 20-channel books.
 YC3_START_T = int(datetime.fromisoformat(os.getenv("PREMIUM_YC3_START", "2026-11-13T03:40:00+00:00")).timestamp())
 YC3_START_DATE = min(datetime.fromtimestamp(YC3_START_T, IST).date(), datetime.fromtimestamp(YC3_START_T, timezone.utc).date())
+# The channel-shortlist second batch (catalog.YC3B_IDS) starts later, also flat.
+YC3B_START_T = int(datetime.fromisoformat(os.getenv("PREMIUM_YC3B_START", "2026-11-13T05:00:00+00:00")).timestamp())
+YC3B_START_DATE = min(datetime.fromtimestamp(YC3B_START_T, IST).date(), datetime.fromtimestamp(YC3B_START_T, timezone.utc).date())
 
 MONGO_URL = os.getenv("FACTORY_MONGO_URL", "").strip()
 MONGO_DB = os.getenv("PREMIUM_MONGO_DB", "alpha_engine_premium")

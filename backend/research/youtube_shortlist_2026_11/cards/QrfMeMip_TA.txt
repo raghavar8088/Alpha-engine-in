@@ -1,0 +1,19 @@
+video: QrfMeMip_TA
+topic: india_index
+summary: CPR by KGS lines up the weekly CPR (on one-hour candles) with the daily CPR (on five-minute candles) for Bank Nifty: below both CPRs only shorts, above both only longs; the entry is his 'S1 + previous day low breakout' (or 'R1 + previous day high breakout'), even on the first candle; stop at the midpoint of R1 and the previous day high (S1 and the previous day low); first target the R1-R2 midpoint (S1-S2), second target R2 (S2); with a wide daily CPR only quick scalps; a plain CPR breakout is not a trade.
+instruments: Bank Nifty
+timeframes: 5m, 60m
+style: intraday
+= KG-01 | Weekly + daily CPR side, R1 + previous-day-high (S1 + previous-day-low) breakout, targets at the R1-R2 midpoint and R2
+R setup E 01:34,03:39 | Bias: candles below the weekly CPR (one-hour chart) = shorts only; above it = longs only; a descending weekly CPR adds a bearish bias. | "In weekly CPR the candles are staying below the CPR. So we have to look for short opportunities only."
+R setup E 10:38,11:19 | Candles also below the daily CPR on the five-minute chart are a double confirmation (above it for longs). | "if the candles are below daily CPR it is a double confirmation for us to take a short trade"
+R entry E 02:14,02:56,04:21 | Short when S1 and the previous day low are both broken; long when R1 and the previous day high are both broken; the first five-minute candle counts. | "when our S1 previous day low breakout and when our R1 previous day high breakout happens even though it is a first candle you can confidently take position"
+R stop E 02:56,04:21 | Stop at the midpoint of R1 and the previous day high for longs; above S1 and the previous day low for shorts (the CPR-S1 midpoint as a wider choice). | "our stop loss will be 50%age of R1 and previous day high"
+R target E 02:56,05:02 | Target 1 the midpoint of S1 and S2 (R1 and R2); target 2 S2 (R2). | "50%age of S1 and S2 becomes your target one and S2 becomes your target two"
+R exit E 05:02 | When the daily CPR is wide, scalp: take the first target only. | "whenever there is a wide CPR make sure you do some quick scalping"
+R no_trade E 06:29 | A break of the CPR alone is not a trade. | "There is no strategy called CPR breakout"
+R entry I 08:35,09:16 | Re-entries on rejections from the S1 / previous-day-low zone in the bias direction (shown, judged by eye). | "the candles are getting reversed from S1 and previous day low. This is the right location to take a short position"
+R market A - | Desk version: Bank Nifty and Nifty one-minute bars on five-minute candles; Traditional pivots from the previous session (daily) and the previous week (weekly). | ""
+R entry A - | Long: a five-minute close above both R1 and the previous day high while the last completed one-hour close (the 09:15 open before the first hour completes) is above the weekly CPR top; enter at the next bar's open; mirror for shorts with S1, the previous day low and the weekly CPR bottom; 09:15-14:30; one trade a day; skip when the entry is already past the first target. | ""
+R stop A - | Stop at the R1 / previous-day-high midpoint (S1 / previous-day-low); half off at the first target, the rest at R2 (S2); a daily CPR wider than its 20-day median exits fully at the first target; out at 15:15. | ""
+T with_assumptions | the bias clock, the close-based break and the 'wide CPR' cut-off are (A); the rejection re-entries are not coded

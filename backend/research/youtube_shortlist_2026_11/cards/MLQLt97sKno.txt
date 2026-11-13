@@ -1,0 +1,13 @@
+video: MLQLt97sKno
+topic: india_index
+summary: LearnApp on the Central Pivot Range: pivot = (previous high + low + close) / 3, bottom = (high + low) / 2, top = 2 x pivot - bottom; a very narrow CPR (the three lines nearly one) points to a trending day, a wide CPR to a sideways day; trade the breakout side of a narrow CPR at the open (Nifty, Bank Nifty, HDFC Bank, Bajaj Finance examples; large, liquid names only).
+instruments: Nifty, Bank Nifty, large liquid stocks
+timeframes: 5m, 15m
+style: intraday
+= LA-01 | Narrow CPR = trending day: trade the side the market opens / breaks from the CPR
+R indicator E 00:01,00:41 | CPR: pivot = average of the previous day's high, low and close; bottom = (high + low) / 2; top from the pivot. | "preeviyas de kaa haaee lo aur kloj kaa hamane evarej banaa liyaa"
+R setup E 02:12,02:52 | Narrow CPR (lines almost one) means the next day will trend; a wide CPR means sideways. | "agar ol deej laains bikam vain solid laain veree kloj too ech aadar ... ve eksapekt kee nekst de vil bee trending"
+R entry E 05:43,06:25 | Above the CPR line it is a breakout (buy); below it a breakdown. | "isake oopar huaa to brek aaut ho gayaa"
+R no_trade E 06:25 | Only large, liquid names; not small stocks. | "pleej ko isako chhote stok pe mat karanaa agar likviditee naheen hogee"
+T concept_only | no entry candle, stop or exit is defined beyond the narrow-CPR breakout idea
+D NJ-02 | the same narrow-CPR, trade-the-open's-side rule, already coded with exact rules in the 11-channel study

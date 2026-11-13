@@ -1,0 +1,19 @@
+video: FMUhrdrygKs
+topic: india_index
+summary: Angel One's reversal scalp (CA Rajat Rawadiya) on Nifty's one-minute chart or option charts: use the Commodity Channel Index only for divergence - after CCI drops below its -100 band, wait for the next fall: if price makes a lower low while CCI makes a higher low, enter on the first close above the 9 EMA, stop near the low, target 1:1 (1.5:1 if extended); exit fast if price stalls.
+instruments: Nifty (and its options)
+timeframes: 1m
+style: scalping
+= AO-01 | CCI below -100, then a bullish divergence, entry on the close above EMA 9, 1:1 (one minute)
+R timeframe E 01:25 | One-minute chart, a scalping strategy. | "1 minat taaim phrem pe karanaa hai bikoज़ ye ek skailping stretajee hai"
+R indicator E 01:25,02:05 | Commodity Channel Index used only for divergences. | "ham is indiketar ko sirph ek hee tareeke se yooज़ karenge. vo hai sirph aur sirph daayavarjenses ke lie"
+R setup E 02:47,03:27 | Once CCI goes below the -100 band, get ready for the next fall; a lower price low with a higher CCI low is the divergence. | "-00 ke neeche jaise hee aataa huaa dikhe aapako taiyaar ho jaanaa hai dobaaraa ke phol pe"
+R entry E 03:27,04:12 | Enter on the first close above EMA 9 after the divergence. | "hamen jaise hee 9 eeemae ke oopar klojing milatee hai, aapako ek barhiyaa entree point mil jaaegaa"
+R stop E 06:21 | Stop around the low. | "lo ke aasapaas stop los rahegaa"
+R target E 06:21 | Target 1:1 (1.5:1 if extended); exit if price stalls after entry. | "ek bahut hee barhiyaa 1:1 ke taaraget vaalaa ek tred mil gayaa"
+R indicator A - | CCI(20) on typical price; EMA(9) on closes. | ""
+R setup A - | Desk version: Nifty and Bank Nifty one-minute bars; a CCI low below -100 at a price pivot low (a low under the 3 lows either side), then within 30 bars a later pivot low with a lower price low and a higher CCI; mirror for shorts above +100. | ""
+R entry A - | Long at the next open after the first close above EMA 9 within 10 bars after the later pivot is confirmed; 09:30-14:45; at most 3 trades a day. | ""
+R stop A - | Stop at the later pivot's low; target 1R; out at 15:15. | ""
+T with_assumptions | the CCI length, the pivot rule and the timing windows are ours (A)
+V divergence | R3 | 02:47 | Drawn by eye | 3-bar price pivots 30 bars apart at most

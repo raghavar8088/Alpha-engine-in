@@ -1,0 +1,13 @@
+video: buKsS3fCw1Y
+topic: india_stocks
+summary: 5paisa's explainer on the open-high / open-low (OHOL) idea: when a stock opens at its low it is a buy signal, at its high a sell signal; trade high-volume stocks, aim for 1:2, stop at the immediate support (resistance), consider the range breakout; general risk advice, no defined trigger.
+instruments: NSE stocks
+timeframes: intraday
+style: intraday
+= PS-01 | Open = low buy / open = high sell (explainer)
+R setup E 00:47,01:28 | Open equal to the low is a buy signal; open equal to the high is a sell signal. | "agar stok yaa indeks kaa opan aur haaee praais sem leval par hai to yah investar ke lie ek sel signal hotaa hai"
+R filter E 01:28 | Trade only high-volume shares. | "aapako hameshaa haaee volyoom par hee sheyars tred karane hain"
+R target E 02:12 | Risk-reward of at least 1:2. | "eksaparts 1:2 ko ek aaidiyal risk rivord reshiyo kanseedar karate hain"
+R stop E 02:12 | Stop at the immediate support for a long, the immediate resistance for a short. | "aap imeediet saport leval ko ej a stop los yooj kar sakate hain"
+T concept_only | no trigger time, entry or exact stop is defined
+D SI-11 | the same open-equals-low / open-equals-high idea, already coded with exact rules from Rajesh Jain's video (four-topic study)

@@ -1,0 +1,18 @@
+video: RbQaARxEW9o
+topic: forex_us
+summary: CodeTrading's backtested EUR/USD five-minute scalp: when the last 15 candles (including the current one) sit completely above the VWAP (uptrend), buy a candle that closes below the lower Bollinger band (14, 2) with RSI (16) under 45; mirror for shorts below the VWAP with a close above the upper band and RSI over 55; stop 1.2 x ATR (about seven candles), target 1.5 x the stop; close early when RSI crosses 90 (10 for shorts); one trade at a time; his 2019-2022 backtest at 1:10 margin: +197%, Sharpe 1.65, 45% wins, 51-minute average hold.
+instruments: EUR/USD
+timeframes: 5m
+style: scalping
+= CT-01 | VWAP trend (15 candles on one side) + close outside the Bollinger band (14, 2) + RSI (16) 45/55, 1.2 ATR stop, 1.5R
+R setup E 01:23,05:43 | Trend: 15 candles (the current one included) completely above the VWAP = uptrend, buys only; completely below = downtrend, sells only. | "if we have 15 candles above the V web curve we are in an uptrend"
+R entry E 01:23,02:05 | Long: a candle closes below the lower Bollinger band (length 14, 2 standard deviations); short: a close above the upper band. | "whenever I have a candle closing below the lower Bollinger curve this is where I have my entry signal for a buying position"
+R filter E 02:05,05:01 | RSI (length 16) below 45 confirms a buy; above 55 confirms a sell. | "if I have an RSI below 45 then I confirm a Buy Signal if I have an RSI above 55 I'm confirming a short position"
+R stop E 02:05,11:21 | Stop 1.2 x ATR (about seven candles); target 1.5 x the stop distance. | "the stop loss at R distance it's equal to 1.2 times the current ATR value"
+R exit E 11:21 | Close a long early when RSI crosses above 90 (a short when it crosses below 10). | "if the current trade is long and the RSI is crossing the value of 90. I'm closing the the trade"
+R sizing E 12:02 | One trade at a time. | "we are allowing only one trade at a time"
+R market A - | Desk version: EUR/USD (and GBP/USD) five-minute candles; the desk has no forex volume, so the VWAP is a time-weighted average from 00:00 UTC (his data's day). | ""
+R entry A - | 'Completely above the VWAP' is judged on the candle body (open and close both above), the usual test in his notebooks; enter at the next candle's open; out at 16:55 New York. | ""
+T with_assumptions | the desk VWAP is time-weighted and the body test is (A); otherwise fully specified
+C return_pct | 12:42 | +197% over three years at 1:10 margin, Sharpe 1.65, 45% wins, 51-minute average trade; first year Sharpe 2.12, +53% a year | EUR/USD 2019-2022 backtest, costs not stated | "I'm getting 197 percent in return"
+P 00:02 | 00:42 | Downloadable Python notebook

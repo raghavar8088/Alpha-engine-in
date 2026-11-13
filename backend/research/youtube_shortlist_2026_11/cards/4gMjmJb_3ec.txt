@@ -1,0 +1,20 @@
+video: 4gMjmJb_3ec
+topic: forex_us
+summary: Carmine Rosato's 'market structure demand' scalp on S&P futures: in a higher-timeframe uptrend, an intraday drop stalls into a tight base (seen on one-minute candles or smaller) and a strong rally away from it shows large buyers absorbed there; the trade is a long on the first pullback into that base, confirmed by passive bids in the order flow, never on the first rally; his examples risked about 6 points for 15-25 (realised about 3:1).
+instruments: S&P 500 futures (ES)
+timeframes: 1m, 2m, 5m
+style: scalping
+= CR-01 | Drop, base, rally on one-minute candles in a higher-timeframe uptrend: buy the first pullback into the base, stop under it, 3R
+R setup E 00:46 | Works best in a strong higher-timeframe uptrend (30-minute, 4-hour, daily higher highs and higher lows). | "This system works better in a very strong uptrending market and specifically speaking on higher time frame trending markets"
+R setup E 01:27,02:08 | Step 1: after an intraday sell-off, a balanced range (consolidation) forms; spot it on a one-minute chart or smaller. | "the first step of this process is being able to identify a balanced range after the market aggressively pulls back"
+R setup E 04:13 | Step 2: a strong rally away from the base validates it. | "on a fiveminute chart or smaller we identify a rally to the upside"
+R entry E 04:56,14:46 | Step 3: mark the base and buy the pullback into it, not the first rally. | "we wait for the market to pull back into this period of what I call market structure demand"
+R filter E 11:08,13:14 | Confirm with order flow: passive bids absorbing the sellers at the base. | "looking at the order flow ... we're going to see passive buyers filling"
+R stop E 08:24 | His example: about a 6-point stop for a 15-25 point reward. | "I had about a six-point stop loss for about a 15 to 25 point reward"
+R target E 11:51 | Take profits at an existing supply level. | "I take profits at an existing level of supply for this setup"
+R market A - | Desk version: NAS100 cash-session one-minute bars stand in for ES; trend filter: the last 30-minute close above a rising 30-minute EMA 50. | ""
+R setup A - | Drop: the close falls at least 1.5 x ATR (14, one-minute) over 10 bars; base: the next 4-12 bars stay inside a range under 1.5 x ATR; rally: within 10 bars a close at least 2 base-ranges above the base high. | ""
+R entry A - | A buy limit at the base high on the first return (within 60 bars of the rally), stop 0.02% under the base low, target 3R; longs only, as taught; 09:45-15:00 New York; at most 2 trades a day; out at 15:55. | ""
+T with_assumptions | the base, the rally's strength and the trend are judged by eye; order flow is not available on the desk (A)
+C r_multiple | 07:43 | $14,000 profit risking $4,300 (3.3:1) in 10 minutes; another $9,700 risking $3,400 (about 3:1) | his live trades | "I risked $4,300 to make a $14,000 profit"
+P 08:24 | 09:06 | Trade community; order-flow video series

@@ -1,0 +1,13 @@
+video: Jw3ZeBv19Pw
+topic: forex_us
+summary: Cove Trader's 15-minute ORB and one-hour initial balance plays on Nasdaq futures: the two ranges are support and resistance for pop-throughs (a pullback then a push through), bounces after a long fall to a level ('a basketball dropped from higher bounces higher', about 50 points away), sell-throughs of a level that fails to bounce, and sweeps under a level then back through; 10-30 point scalps, no lunch-time or news-time trades.
+instruments: Nasdaq 100 futures (NQ)
+timeframes: 15m, 60m, 1m
+style: scalping
+= CV-02 | 15-minute ORB and 1-hour initial balance levels: pop-throughs, bounces, sell-throughs, sweeps (discretionary)
+R setup E 01:28 | Levels: the 15-minute opening range and the 60-minute initial balance. | "I have the 15 drawn out. I use these scripts right here. Orb 15, orb 60"
+R entry E 01:28,02:09 | Pop-through: no break on the first push, a pullback, then a push through the level; play 5-10 points. | "I play the pop through when we come up"
+R entry E 02:51 | Bounce: only after price travelled far from the level (about 50 points). | "I like to see like 50 points"
+R entry E 03:31,04:12 | Sell-through: a level that fails to bounce; order just under it. | "I'm going to put a short order right under"
+R no_trade E 05:37 | No trading during lunch or while major news (a Trump speech) is running. | "I'm not a huge fan of trading during lunch because you do get a lot of chops"
+T concept_only | several discretionary plays without fixed triggers, stops or targets

@@ -1,0 +1,14 @@
+video: n3klgETEOtc
+topic: forex_us
+summary: NinjaTrader interviews the founder of Edgeful about statistics as a daily bias for S&P futures: gaps from the 16:00 close filled 66% (down) and 59% (up) of the time over six months and reached half the gap 78% and 73%; the 15-minute opening range broke one side or both about equally (one month showed double breaks dominating, so a break of the top suggested a short toward the far side); the last hour made no new low 81% and no new high 72% of the time; they stress these are biases, not buy or sell signals.
+instruments: S&P 500 and Nasdaq futures
+timeframes: Intraday
+style: intraday
+= NT-02 | Gap-fill, opening-range double-break and power-hour statistics as a daily bias (no signals)
+R setup E 00:42,03:37 | Gap fill: an open below the previous 16:00 close gives a bullish bias with the close as the target (above it, bearish). | "If it opens above, you can have a bearish bias targeting that previous close. And if it opens below, you have a bullish bias"
+R target E 05:02,05:46 | A partial target at half the gap raises the fill odds (78% and 73% in six months). | "let's have a databacked target of the halfway point between the open and the previous close"
+R setup E 07:47,08:28 | Opening range (09:30-09:45): if double breaks are the most frequent outcome lately, a break of one side becomes a bias toward the other side. | "the moment price breaks out to this top side, you can get short targeting a double break"
+R management E 12:03,12:48 | In the last hour a new high or low of the day is unlikely: take profits before the day's extreme. | "81% of the time in the last 6 months, a new low of day was not made"
+T concept_only | statistics used as a bias; they say entries are the trader's own and the tool never gives buy or sell signals
+C win_rate | 04:19 | gap downs filled 66%, gap ups 59%; half the gap 78% and 73% | ES, six months | "every time there was a gap down in the last 6 months 66% of the time that gap has filled"
+P 14:15 | 14:56 | Edgeful subscription; NinjaTrader platform

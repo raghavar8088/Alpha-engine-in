@@ -1,0 +1,17 @@
+video: xkpQJjxmVn8
+topic: india_stocks
+summary: Carmine Rosato's VWAP day-trading setups on liquid US stocks: the VWAP bounce (price above the VWAP pulls back into it after a clean move and bounces; enter on confirmation, stop below the VWAP or the wick, about 2:1), the VWAP rejection (below the VWAP a relief rally stalls at it, ideally with a five-minute supply zone; short), and a rising VWAP while price moves sideways as a bullish tell; he skips days that chop around the VWAP.
+instruments: Apple, Amazon, Netflix, Roku, Boeing (stocks and options)
+timeframes: 5m, 15m
+style: intraday
+= CR-02 | VWAP bounce and rejection after a clean move away, confirmation entry, stop beyond the wick, 2R
+R indicator E 03:23,04:03 | Session VWAP only (bands removed), on intraday charts. | "the only thing we care about is the middle band because that is the average"
+R entry E 04:43,06:06 | Bounce: price above the VWAP pulls back into it and bounces; take it on confirmation (a higher high, a higher low). | "you could take the trade once you get confirmation higher high higher low whatever the case may be"
+R stop E 06:06 | Stop below the VWAP or below the wick. | "putting your stop-loss below view op or putting your stop-loss maybe even below the wick"
+R target I 08:56 | His example risked about 2.5 points for 5 (2:1). | "this was about a two and a half point risk for a reward of about five points so two-to-one"
+R entry E 10:21 | Rejection: below the VWAP, a relief rally stalls at it (ideally with a five-minute supply zone): short. | "we rally to the upside and look where we stall at we stall at V WAP"
+R no_trade E 11:45,13:53 | The stock must first make a decent move with space away from the VWAP; skip days chopping around it. | "you want to see if stock make a decent move and have decent space not trading near V WAP for a while"
+R market A - | Desk version: the NSE stock pool on five-minute candles (real volume, VWAP from 09:15). | ""
+R entry A - | Long: the previous 12 candles all stayed above the VWAP; a candle's low touches the VWAP and it closes back above; a buy-stop just above that candle's high, live for 3 candles; mirror for shorts; signals 10:15-14:30; one trade per stock a day. | ""
+R stop A - | Stop just below the touch candle's low (above its high for shorts); target 2R; out at 15:15. | ""
+T with_assumptions | 'space' and 'confirmation' are judged by eye (A); supply and demand zones are not coded

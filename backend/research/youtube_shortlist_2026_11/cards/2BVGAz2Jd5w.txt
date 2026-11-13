@@ -1,0 +1,20 @@
+video: 2BVGAz2Jd5w
+topic: forex_us
+summary: Aaron Korbs's 'naked tractor beam' on S&P 500 futures with daily volume profiles: when the day opens inside the previous day's range and inside its value area, price retests the previous day's untested point of control (he cites over 90%, really about 97%, in a 2,000-day backtest); he trades it only when price first moves away from the POC, reaches a key level such as the previous value area high and holds there, then fades it back to the POC; a straight drop to the POC is no trade.
+instruments: S&P 500 futures (ES)
+timeframes: 15m (daily profiles)
+style: intraday
+= KR-01 | Open in range and in value: fade a hold at the previous value-area edge back to the naked point of control
+R indicator E 02:09,02:52 | Daily volume profile: the value area (where 70% of the volume traded) and the point of control (the most-traded price). | "value area is where 70% of all the trades have happened"
+R setup E 03:35,04:17 | Open in range and in value: today's open is inside the previous day's range and inside its value area. | "what we need is an open in range in value"
+R setup E 07:05 | The previous day's point of control is naked (not retested); the setup expects a retest of it. | "over 90% of the time we are going to retest The Naked point of control"
+R no_trade E 10:31 | If price goes straight to the point of control after the open, the setup played out without an entry. | "if we open up and we just drop straight to the point of control then this trade is done and I did not take it"
+R entry E 10:31,12:00 | When price moves away from the point of control, wait until it reaches and holds a key level (his example: the previous value area high), then fade it. | "that test and that hold of value area high that is the the kind of thing I want to see"
+R target E 12:41 | Target the point of control. | "I'm hitting the fade taking it back to the point of control"
+R market A - | Desk version: NAS100 cash-session one-minute bars stand in for ES; the desk has no real NAS100 volume, so the profile counts time at price (a TPO profile) instead of volume. | ""
+R indicator A - | Profile of the previous 09:30-16:00 New York session on 5-point price steps; value area = 70% of the counts grown out from the point of control. | ""
+R entry A - | If the 09:30 open is inside the previous value area and above the point of control: after a high reaches the previous value area high before any low has touched the point of control, short at the close of the first 5-minute bar that closes back below the value area high (mirror for longs at the value area low when the open is below the point of control); entries 09:35-13:00 New York; one trade a day. | ""
+R stop A - | Stop 0.15% beyond the session high (low) so far; target the point of control; out at 15:55. | ""
+T with_assumptions | the 'hold' at a key level and the stop are judged live (A); the desk profile is time-based, not volume-based (A)
+C win_rate | 00:42 | the naked point of control is retested on over 90% (about 97%) of open-in-range-in-value days | backtest of 2,000+ trading days on the S&P 500 | "this trade actually plays out almost 97% of the time"
+P 05:00 | 06:50 | Free one-on-one strategy calls

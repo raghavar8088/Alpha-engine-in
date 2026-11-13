@@ -24,6 +24,7 @@ import feeds as F
 from settings import BTC_START_T, DATA, IST, NY, PAPER_START, SH_START_T, YC_START_T
 from settings import YC2_START_T  # noqa: E402
 from settings import YC3_START_T  # noqa: E402
+from settings import YC3B_START_T  # noqa: E402
 
 log = logging.getLogger("premium.segments")
 
@@ -163,6 +164,8 @@ def feeds_now(group: str, info: dict) -> dict:
 
 def _start_of(mk: str, acct=None) -> datetime:
     if acct is not None and acct.source == getattr(C, "YC3", None):
+        if acct.id in getattr(C, "YC3B_IDS", ()):
+            return datetime.fromtimestamp(YC3B_START_T, timezone.utc)
         return datetime.fromtimestamp(YC3_START_T, timezone.utc)
     if acct is not None and acct.source == getattr(C, "YC2", None):
         return datetime.fromtimestamp(YC2_START_T, timezone.utc)

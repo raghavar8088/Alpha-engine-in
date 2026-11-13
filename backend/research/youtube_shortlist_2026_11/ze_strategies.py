@@ -33,6 +33,7 @@ from yt_engine import Limits  # noqa: E402
 import ze_cardlib as CL  # noqa: E402
 import ze_global as G  # noqa: E402
 import ze_india as N  # noqa: E402
+import ze_more as X  # noqa: E402
 
 SOURCE = "youtube_shortlist"
 STUDY = "youtube_shortlist_2026_11"
@@ -131,6 +132,52 @@ _NEW = [
        (60,), readiness=A),
     _r("KA-01", "Break of the previous hour/day high or low after a staircase approach, two closes, swing stop, 1R",
        G.ka01, G.ka01_x, ("BTCUSD",), (15,), L3, readiness=A),
+    # ── second batch (13 Nov 2026: cards read after the first deploy; ze_more) ──
+    _r("MC-01", "Supertrend (7, 3) stop and reverse on 5 minutes", X.mc01, X.mc01_x, IX, (5,), reverse=True, readiness=A),
+    _r("MC-02", "Zero-lag EMA (20) vs EMA (20) cross on 15 minutes, stop and reverse, 1 ATR stop", X.mc02, X.mc02_x, IX,
+       (15,), reverse=True, readiness=A),
+    _r("AO-01", "CCI (20) beyond -100/+100, then a divergence, close back over the EMA 9, 1:1 (one minute)", X.ao01,
+       X.ao01_x, IX, (1,), L3, readiness=A),
+    _r("KT-01", "200 EMA band (high/close/low) dip, close back outside + fresh MACD cross, break of the candle, 2R",
+       X.kt01, X.kt01_x, IX, (1,), L4, readiness=A),
+    _r("KG-01", "Weekly + daily CPR side, R1 + previous-day-high break, midpoint stop, R1-R2 midpoint then R2", X.kg01,
+       X.kg01_x, IX, (5, 60), ONE, readiness=A),
+    _r("KG-02", "Trend reversal CPR: open on the wrong side of a descending (ascending) CPR, fade to it or break it",
+       X.kg02, X.kg02_x, IX, (5,), ONE, readiness=A),
+    _r("AO-02", "First 5-minute candle full breakout, stop at its far side, out on a close through the EMA 9 (stocks)",
+       X.ao02, X.ao02_x, ("NSE5",), (5,), ONE, readiness=A),
+    _r("CR-02", "VWAP bounce / rejection after an hour clear of the VWAP, stop entry past the touch candle, 2R",
+       X.cr02, X.cr02_x, ("NSE5",), (5,), ONE, readiness=A),
+    _r("QC-03", "Gap down beyond -3 standard deviations of the last hour's closes: buy the open, out at 10:00",
+       X.qc03, X.qc03_x, ("NSE5",), (5,), ONE, readiness=A),
+    _r("CT-03", "Close above the daily VWAP and the day's open = long (below both = short), 1.5 ATR trailing stop",
+       X.ct03, X.ct03_x, ("NSE15", "BTCUSD"), (15,), L3, reverse=True, readiness=A),
+    _r("KS-01", "SMA 30/40/50/60 tangled, close above the 20-day high, 20-day-low stop, 2R, 30 days (daily, long)",
+       X.ks01, X.ks01_x, ("NSED",), (1,), readiness=A),
+    _r("DE-09", "Heikin Ashi candle entirely beyond the smoothed MA (5): stop entry at its far end, out on a colour turn",
+       X.de09, X.de09_x, ("BTCUSD",), (5,), readiness=A),
+    _r("CT-02", "VWAP bounce: 15 bodies on one side of the VWAP, a candle within 0.2% of it, 0.8 ATR stop, 2.5R",
+       X.ct02, X.ct02_x, ("BTCUSD",), (15,), readiness=A),
+    _r("CT-01", "VWAP trend (15 bodies one side) + close outside the Bollinger band (14, 2) + RSI (16) 45/55, 1.5R",
+       X.ct01, X.ct01_x, FX, (5,), readiness=A),
+    _r("SK-01", "Exhaustive four-candle leg past the previous impulse's level, limit back at the level with the 20 MA, 2R",
+       X.sk01, X.sk01_x, ("XAUUSD",), (5,), L2, readiness=A),
+    _r("CH-01", "Trend-day VWAP retest after a one-minute reclaim, 2R, two-bar trailing stop", X.ch01, X.ch01_x,
+       ("NAS100",), (1,), ONE, readiness=A),
+    _r("CH-02", "15-minute opening range break on a one-minute close with the VWAP side and slope, 1.5 x range target",
+       X.ch02, X.ch02_x, ("NAS100",), (1,), ONE, readiness=A),
+    _r("QC-01", "30-minute opening range breakout, far-side stop, out at 13:30 New York (Nasdaq proxy for Tesla)",
+       X.qc01, X.qc01_x, ("NAS100",), (1,), ONE, clock=("ny", 13 * 60 + 30), readiness=A),
+    _r("CV-01", "15-minute opening range stop orders both sides (OCO), 10-point stop and target", X.cv01, X.cv01_x,
+       ("NAS100",), (1,), ONE, readiness=A),
+    _r("KR-01", "Open in range and in value: fade a hold at the previous value-area edge back to the naked POC", X.kr01,
+       X.kr01_x, ("NAS100",), (5,), ONE, readiness=A),
+    _r("TN-02", "15-minute opening range double break: reclaim on the VWAP side, target the far edge", X.tn02, X.tn02_x,
+       ("NAS100",), (5,), ONE, readiness=A),
+    _r("AC-02", "Day type from the 3-minute range vs the VWAP; VWAP 1-3 SD bands + RSI 70/30 fades and trend pullbacks",
+       X.ac02, X.ac02_x, ("NAS100",), (3,), L3, readiness=A),
+    _r("CR-01", "Drop, base, rally on one-minute candles in a 30-minute uptrend: limit at the base top, 3R (long)",
+       X.cr01, X.cr01_x, ("NAS100",), (1, 30), L2, readiness=A),
 ]
 
 NEW = [r.sid for r in _NEW]

@@ -1,0 +1,18 @@
+video: XpbhO5_w9WQ
+topic: india_stocks
+summary: Angel One's opening range breakout (CA Rajat Rajoriya) with TradingView's ORB indicator: indices use the first 15 minutes, stocks the first 5 minutes; a full breakout (a close beyond the range) gives the signal; on indices he prefers selling the option on the far side of the range (theta), on news-driven stocks he buys the close above the range, stops below the range's low and trails with the 9 EMA.
+instruments: NSE stocks with news or results; Nifty, Bank Nifty (option selling)
+timeframes: 5m, 15m
+style: intraday
+= AO-02 | Stocks: first 5-minute range full breakout, stop at the far side, 9 EMA trail
+R setup E 00:43,01:27 | Opening range: 15 minutes for indices, 5 minutes for stocks. | "stoks men 5 minat kee renj bhee barhiyaa tareeke se kaam karatee hai"
+R entry E 01:27,04:16 | Signal on a full breakout: a candle close above the range high (below the low for a sell). | "phul brekaaaut kaa matalab hai jo renj kaa jo haaee yaa lo hai usake oopar yaa neeche klojing ho jaanee chaahie"
+R stop E 05:42 | Initial stop beyond the range's far side (below the low for a buy). | "yahaan pe aapakaa is lo ke neeche stop los rahegaa"
+R exit E 04:16,05:42 | Trail with the 9 EMA; exit on the close through it. | "treling stop los ke lie aap 9 kaa yooz kar sakate ho"
+R market E 04:59 | Stocks with news, results or a trigger that day (they move); heavyweights such as HDFC Bank also work. | "jin stoks men koee nyooz hai yaa trigar hai jinake rijalts vagairah aae hue hain"
+R setup E 02:08,02:53 | On indices he prefers option selling: on a buy signal sell the put below the range low and hold the day. | "isake neeche kaa put opshan aap bahut hee aaraam se sel kar sakate ho"
+R market A - | Desk version: the stock leg only, on the NSE 5-minute pool (no news filter: the desk has no news feed). The index option-selling leg is not coded (no option premiums). | ""
+R entry A - | Enter at the next open after the first 5-minute close above the 09:15 candle's high (below its low), until 13:00; one trade per stock a day. | ""
+R stop A - | Stop at the 09:15 candle's far side; exit at the next open after a 5-minute close through the 9 EMA; out at 15:15. | ""
+T with_assumptions | the news filter is dropped and the index option-selling leg is not coded (A)
+X - | 05:42 | Bank Nifty | short | first 5-minute candle's low broken | the break | above the candle | EMA 9 exit | target | good gain before the EMA 9 exit

@@ -1,0 +1,11 @@
+video: hveUvB6Vmn8
+topic: forex_us
+summary: Optimus Futures on scalping S&P futures from the depth of market: set a fast DOM refresh, use automatic stop-loss and take-profit brackets, read support and resistance from footprint charts and small ranges, move the stop to a small profit quickly, take breaks; he argues one-to-two-tick scalping is no longer sustainable and gives no specific setup.
+instruments: S&P 500 futures (ES)
+timeframes: 1m, 15m
+style: scalping
+= OF-02 | Futures scalping from the depth of market with automatic brackets (overview)
+R management E 03:43,04:24 | Every order goes in with an automatic stop and target attached. | "I utilize the automatic stoploss and the automatic takeprofit"
+R management E 12:59 | As soon as the trade is in profit, move the stop into a small profit. | "as soon as it goes into profit I'm moving my stop because it's so fast"
+R setup E 09:21 | Trades come from price action support, resistance and small ranges, not from an indicator. | "when I scalp and identify these areas that I do want to participate in I'm really just looking at Price action support and resistance ranges"
+T concept_only | an overview of scalping tools with one live example; no setup, stop or target rule is defined

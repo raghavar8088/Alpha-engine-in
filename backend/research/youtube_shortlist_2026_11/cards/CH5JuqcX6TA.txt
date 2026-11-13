@@ -1,0 +1,14 @@
+video: CH5JuqcX6TA
+topic: forex_us
+summary: Kevin Davey tests the textbook MACD crossover as a stop-and-reverse signal (buy at the next open when the MACD crosses above its signal line, short when it crosses below; no stop or target) with walk-forward optimisation of the fast (3-15), slow (20-50) and signal (10-30) lengths on 44 futures markets, 7 bar sizes, 2007-2025: only 29% of 1,848 cases were profitable after costs; verdict - not tradeable as is.
+instruments: 44 futures markets (silver and heating oil best)
+timeframes: daily and intraday bars
+style: mixed
+= KD-02 | MACD signal-line cross, stop and reverse (tested: not tradeable)
+R entry E 02:05,04:14 | Buy at the next open when the MACD crosses above its average (the difference crosses zero); sell short when it crosses below. | "if that difference crosses over zero, you buy. And if it crosses under zero, you sell short"
+R exit E 04:14 | No stop and no target: always in the market. | "I don't have any stop loss. I don't have any profit target"
+R indicator E 04:55 | Fast 3-15, slow 20-50, MACD length 10-30, chosen by walk-forward optimisation. | "The fast length I'm going 3 to 15 in steps of three. The slow length I'm going 20 to 50 in steps of 10"
+T with_assumptions | a test of a generic signal rather than a trading rule; its result is negative
+D NJ-09 | the MACD signal-line cross is already in the library (channels11 study); this video's test says it does not work by itself
+C other | 09:51 | 29% of 1,848 walk-forward cases profitable after slippage and commission; 9% over $50,000; 5% with drawdown under $25,000 | 2007-2025 | "only 29% of them were profitable"
+P 00:02 | 00:44 | Free algo signup; MultiWalk software
