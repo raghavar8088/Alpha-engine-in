@@ -48,6 +48,9 @@ YC3D_START_DATE = min(datetime.fromtimestamp(YC3D_START_T, IST).date(), datetime
 # The channel-shortlist fifth batch (catalog.YC3E_IDS) starts later again, also flat.
 YC3E_START_T = int(datetime.fromisoformat(os.getenv("PREMIUM_YC3E_START", "2026-11-14T11:00:00+00:00")).timestamp())
 YC3E_START_DATE = min(datetime.fromtimestamp(YC3E_START_T, IST).date(), datetime.fromtimestamp(YC3E_START_T, timezone.utc).date())
+# The channel-shortlist sixth batch (catalog.YC3F_IDS) starts later again, also flat.
+YC3F_START_T = int(datetime.fromisoformat(os.getenv("PREMIUM_YC3F_START", "2026-11-14T16:00:00+00:00")).timestamp())
+YC3F_START_DATE = min(datetime.fromtimestamp(YC3F_START_T, IST).date(), datetime.fromtimestamp(YC3F_START_T, timezone.utc).date())
 
 MONGO_URL = os.getenv("FACTORY_MONGO_URL", "").strip()
 MONGO_DB = os.getenv("PREMIUM_MONGO_DB", "alpha_engine_premium")

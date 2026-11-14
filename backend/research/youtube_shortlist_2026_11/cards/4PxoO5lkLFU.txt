@@ -1,0 +1,23 @@
+video: 4PxoO5lkLFU
+topic: crypto
+summary: DaviddTech codes a Bollinger Band 1-2-3 pullback from Daily Investments on 15-minute bitcoin. Point 1: price breaks above the upper band. Point 2: it falls through the middle line and breaks the lower band. Point 3: it rallies back and is rejected at the middle line. A trend line from point 1's high through point 3's high is the trigger: buy the break above it, stop at the swing low, target 1.5R (shorts the mirror). His backtest: 43.14% winners over 102 trades, +1.34% in about eight months; he would not trade it.
+instruments: Bitcoin (BTCUSDT perpetual)
+timeframes: 15m
+style: intraday
+= DD-04 | Bollinger 1-2-3: above the upper band, below the lower band, rejected at the middle line, buy the break of the 1-3 trend line, 1.5R
+R market E 00:43 | The 15-minute chart (bitcoin perpetual). | "Daily Investments has put this on the 15-minute time frame"
+R indicator E 01:27 | The Bollinger Bands are the only indicator. | "that is actually the only indicators that we'll be using for this trading strategy"
+R setup E 01:27 | Point 1: price breaks above the upper band. | "We break above it and we create our number one"
+R setup E 02:10 | Point 2: through the middle line and a break of the lower band. | "the middle line and then we break our lower Bollinger Bands here"
+R setup E 02:10 | Point 3: price comes back up and is rejected at the middle line. | "The next part of the trading strategy is for us to come back up and be rejected rejected at the medium line here"
+R entry E 02:10,02:50 | Draw a trend line from point 1's high through point 3's high and buy the break above it. | "we're going to draw a trend line from the from the point the high point of the rejection"
+R stop E 02:50 | Stop at the swing low (or the lower band). | "we're going to set our stop loss to the swing low here or onto the Bollinger Band lower Bollinger Band here"
+R target E 02:50 | Target 1.5R. | "the idea is for us to set our take profit to a 1. 5 here"
+R market A - | Desk version: Delta BTCUSD and ETHUSD on 15-minute candles, Bollinger Bands (20, 2); out by the end of the UTC day; at most 3 trades a day. | ""
+R setup A - | Long: point 1 is the highest high of a run above the upper band; then a close below the middle band and a low under the lower band (point 2: the lowest low after it); point 3 is a bar whose high comes within 0.1% of the middle band (or above it) but closes below it. A close above the middle band before point 3, or a low under point 2, cancels the setup; it expires 40 bars after point 3. | ""
+R entry A - | The first close above the line from point 1's high through point 3's high enters at the next open. Mirror for shorts. | ""
+R stop A - | Stop one tick under point 2's low; target 1.5R. | ""
+T with_assumptions | the three points and the trend line are drawn by eye; the 0.1% rejection test and the 40-bar expiry are ours (A)
+C win_rate | 07:02 | 43.14% winners | December 2021 to July 2022, 15-minute bitcoin | "We have a win rate of 43.14%"
+C trade_count | 07:02 | 102 closed trades | the same backtest | "We've done closed 102 trades"
+C return_pct | 07:02 | +1.34% net, no leverage | the same backtest | "net profit without any leverage at all is 1.34%"

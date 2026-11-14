@@ -1,0 +1,10 @@
+video: o3DO95PErAw
+topic: crypto
+summary: Mango Research explains Heikin Ashi candles as a momentum tool inside a trend. In an uptrend (higher highs and higher lows) candles with no lower wick show strong momentum; lower wicks appearing mean momentum is fading and a pullback is near. Downtrends mirror it with upper wicks. A reversal needs wicks plus strong opposite bodies.
+instruments: Bitcoin, Ether
+timeframes: Not stated (daily examples)
+style: swing
+= MR-02 | Heikin Ashi wicks as momentum: no lower wicks in an uptrend hold, lower wicks warn of a pullback
+R setup E 06:30 | First identify the uptrend from higher highs and higher lows. | "step number one of making hi Andes more actionable on an uptrend is well identify the uptrend"
+R entry E 06:30 | Lower wicks in an uptrend: momentum fades, look for a pullback. | "this is a good time for you to be looking for a pullback on the chart"
+T concept_only | wick reading as momentum inside a trend read by eye; no entry, stop or exit (a flat-bottom Heikin Ashi entry is already coded as SP-02)

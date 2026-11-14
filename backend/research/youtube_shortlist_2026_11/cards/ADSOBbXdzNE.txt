@@ -1,0 +1,11 @@
+video: ADSOBbXdzNE
+topic: crypto
+summary: Dan (Coin Bureau's trading channel) explains why bitcoin's weekend CME gaps keep getting filled: institutions running the ETF basis trade must bring the price back to where the CME future closed. He expects the gaps to end in 2026, when the CME moves to 24/7 bitcoin futures.
+instruments: Bitcoin
+timeframes: Weekend gaps
+style: unclear
+= BU-02 | Bitcoin weekend CME gaps get filled (why, and why they end)
+R setup E 06:14 | Why the CME gaps happen. | "so why do these CME gaps happen"
+R setup E 07:42 | Institutions must fill the gap to repair the basis trade. | "you have to fill that CME gap because you have to fix this trade to be back in profit as an institution"
+R market E 09:05 | The CME plans 24/7 bitcoin futures. | "they would introduce 24/7 futures trading for Bitcoin"
+T concept_only | explains why the gaps fill; no entry, stop or exit; the CME's 24/7 bitcoin futures (announced for early 2026) end weekend gaps

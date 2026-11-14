@@ -1,0 +1,11 @@
+video: 9REzGB3R6HU
+topic: crypto
+summary: TradingLab's liquidity idea: in a consolidation the stops sit just beyond the equal highs and lows, so a break of the range edge is likely a stop run. Short when price breaks the range high and target the range low; buy when it breaks the low and target the high, repeating while the range holds.
+instruments: Any
+timeframes: Not stated
+style: intraday
+= TL-08 | Consolidation range: fade the break of an edge, target the opposite edge
+R entry E 03:33 | Short a break of equal highs, buy a break of equal lows. | "So if price ever breaks equal highs, you should be looking to short"
+R target E 05:46 | Target the opposite liquidity point. | "So once price breaks this upper end of liquidity, you enter a short, target the next liquidity point"
+T with_assumptions | the range is marked by eye; no stop is stated
+D LS-14 | fading a sweep of a range edge toward the opposite liquidity is already coded (LS-14; CP-03 range ping-pong)

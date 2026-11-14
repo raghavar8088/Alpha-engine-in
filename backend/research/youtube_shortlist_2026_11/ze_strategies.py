@@ -37,6 +37,7 @@ import ze_more as X  # noqa: E402
 import ze_more2 as X2  # noqa: E402
 import ze_more3 as X3  # noqa: E402
 import ze_more4 as X4  # noqa: E402
+import ze_more5 as X5  # noqa: E402
 from yc_common import BTC_X  # noqa: E402
 
 SOURCE = "youtube_shortlist"
@@ -283,6 +284,17 @@ _NEW = [
        X4.vs03, X4.vs03_x, ("XAUUSD",), (60,), FREE, overnight=True, readiness=A),
     _r("FL-02", "Williams Alligator: the 5-minute candle clear of all three lines and engulfing, with the 1-hour EMA 50, 1R",
        X4.fl02, X4.fl02_x, ("XAUUSD", "BTCUSD", "ETHUSD"), (5, 60), L3, readiness=A),
+    # ── sixth batch (14 Nov 2026: the owner's ten extra crypto channels; ze_more5) ──
+    _r("DD-01", "Over-extended RSI: RSI (14) crossing above 70 with the SSL trend and the TDFI, 1% stop, half at 1%, rest at 2%",
+       X5.dd01, X5.dd01_x, ("BTCUSD", "ETHUSD"), (15,), FREE, readiness=A),
+    _r("DD-02", "EMA 50/200 trend, a larger-than-average 1-minute MACD histogram pullback, 0.7% target and stop, VWAP side",
+       X5.dd02, X5.dd02_x, ("BTCUSD", "ETHUSD"), (1, 5), FREE, readiness=A),
+    _r("DD-03", "Hull MA cross with the Awesome Oscillator and CMF above zero, T3 (300) and TDFI filters, 3 ATR stop, 1.3R",
+       X5.dd03, X5.dd03_x, ("BTCUSD", "ETHUSD"), (5,), FREE, readiness=A),
+    _r("DD-04", "Bollinger 1-2-3: above the upper band, under the lower, rejected at the middle, break of the 1-3 line, 1.5R",
+       X5.dd04, X5.dd04_x, ("BTCUSD", "ETHUSD"), (15,), L3, readiness=A),
+    _r("TL-06", "Range breakout confirmed by a momentum candle, stop past the level, half at 1.5R, rest on the Chandelier flip",
+       X5.tl06, X5.tl06_x, ("BTCUSD", "ETHUSD", "XAUUSD"), (15,), L3, readiness=A),
 ]
 
 NEW = [r.sid for r in _NEW]

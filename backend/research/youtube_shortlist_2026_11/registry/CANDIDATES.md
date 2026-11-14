@@ -1639,3 +1639,102 @@ videos 499, P1 13 (3%), candidates 28, cov 0
 -  8.34 | 31FZlPz__Nk | 17m | 22000 | 2026-07-14 | RSI Divergence Indicator: Identify Momentum Shifts
 -  8.32 | owKD6tLfNdw | 17m | 21000 | 2026-02-14 | Ichimoku Cloud for Trend, Impulse, and Signals: Tutorial
 
+## daviddtech - Trading with DaviddTech (Trading with DaviddTech)  [crypto] 
+videos 287, P1 102 (36%), candidates 122, cov 0
+- 11.72 | oPMiaG1Ydiw | 14m | 52000 | 2022-11-15 | 80% WIN RATE 15 minute Scalping Profitable Trading Strategy RSI Indicator Secrets
+- 11.46 | Yn0Oo8Nu2Rw | 19m | 29000 | 2021-11-15 | Scalping 1 Minute Chart with one indicator 85% Accuracy RSI Heikin Ashi Tested 100 times
+- 10.99 | jnJF0W2XgqA | 17m | 97000 | 2026-05-15 | I Let Claude Code Build a FREE 5-Minute Scalping Bot… The Results Were Insane
+- 10.75 | 00e7pj1UKWU | 21m | 556000 | 2023-11-15 | ChatGPT Trading Strategy 88% Win Rate 5 min Scalping Strategy
+- 10.49 | p-iQs2oRX6Q | 22m | 31000 | 2026-08-15 | I Let Claude Code Build a FREE 5-Minute Scalping Bot… The Results Were Insane
+- 10.32 | dCKsae9cjWQ | 13m | 21000 | 2022-11-15 | VWAP Trading Strategy For Scalping 5 minutes (For Beginners) | Become a Profitable Trader
+- 10.20 | HhWHoIB5vAw | 10m | 16000 | 2021-11-15 | ULTIMATE SCALPING | 5-Minute EMA MACD SCALPING Strategy For CRYPTO
+- 10.04 | EonI7yJ9AdA | 13m | 11000 | 2024-11-15 | Trader Review: 15-Minute Scalping Strategy Tested 500+ times | Buy Sell Signal Tradingview.
+
+## mangoresearch - Mango Research (Mango Research)  [crypto] 
+videos 1321, P1 24 (2%), candidates 74, cov 0
+-  7.51 | uBwpvn0_MG4 | 66m | 3200 | 2025-11-15 | 🔴 URGENT: It's Actually Happening..... (Bitcoin Breakout, XRP Targets, $1000 GIVE AWAY)
+-  7.36 | vq0M-MdgufQ | 64m | 2300 | 2025-11-15 | 🔴URGENT: Ignore The Noise! |  $1000 GIVE AWAY WINNERS!  (Bitcoin Breakout, XRP,  SUI)
+-  6.61 | d6EFYXc5bVM | 8m | 41000 | 2025-11-15 | XLM: The Historic BREAKOUT Is Coming... (Watch Before Trading)
+-  6.54 | A23LJ7JP5xo | 8m | 35000 | 2025-11-15 | XRP's Next BIG Breakout Move !  (Watch Soon)
+-  6.46 | o3DO95PErAw | 14m | 2900 | 2024-11-15 | The Ultimate Guide - Heikin Ashi for Crypto Mastery (WATCH BEFORE TRADING)
+-  6.38 | p4c2tCeSBos | 7m | 24000 | 2025-11-15 | XLM: Don't FOMO Before This Breakout... (Watch Before Trading)
+-  6.28 | rphAJ4_RQY0 | 9m | 19000 | 2025-11-15 | XRP's Historic Breakout is Coming! (Watch Soon)
+-  6.15 | pyCLEjJDIW4 | 9m | 14000 | 2025-11-15 | Dogecoin BREAKOUT to All Time High...  (Watch Soon)
+
+## coinbureautrading - Coin Bureau Trading (Trading Bureau)  [crypto] 
+videos 961, P1 59 (6%), candidates 123, cov 0
+-  9.34 | 7OMSX9WsMcg | 9m | 2200 | 2026-08-15 | The BEST 5-Minute Scalping Strategy | 70–80% Win Rate - Backtested
+-  8.56 | A-rsRrAnqNM | 18m | 36000 | 2025-11-15 | Bitcoin's CRITICAL Level: Will It Bounce Off The Crucial CME GAP??
+-  8.30 | hWkfdI6PE_g | 8m | 20000 | 2025-11-15 | BTC Whale DUMP!! Bitcoin CME Gap PUMP Next!?
+-  8.15 | lacIhMWxh6Q | 10m | 14000 | 2025-11-15 | CME Gap FILLED!! Crypto RALLY Next!?
+-  8.08 | _2ANpXHjYnQ | 8m | 12000 | 2025-11-15 | Crypto RALLY!! But WATCH OUT For The CME GAP!!
+-  8.08 | M98zHWko30g | 8m | 12000 | 2025-11-15 | Bitcoin CME Gap Is CLOSE!! Altcoin Season NEXT!? SOLANA Rotation!!
+-  8.04 | mnCUqEpatkM | 10m | 11000 | 2025-11-15 | Crypto CME GAP INCOMING!! US Gov. Shutdown End PUMP NEXT!?
+-  7.94 | veRBK5BH49Q | 10m | 8600 | 2025-11-15 | CME Gap FILLED!! US Gov Shutdown ENDING SOON!!
+
+## mooninpapa - Moonin Papa (Aaron Dishner aka Moonin Papa)  [crypto] 
+videos 767, P1 18 (2%), candidates 73, cov 0
+-  8.04 | RfZvaXouP_E | 28m | 11000 | 2025-11-15 | Bullish Reversal Signals Continue Amid New BTC CME Gap
+-  7.97 | QaW-suQ8NoA | 49m | 9300 | 2026-05-15 | BTC Pivot High Rejection Confirmed (so now what?)
+-  7.94 | oKljkjX4F7U | 47m | 8800 | 2026-02-15 | BTC CME Gap Bounce, But We're Still Going Lower...
+-  7.84 | s1rdaBwbq1g | 17m | 6900 | 2025-11-15 | New CME Gap at $96k for BTC on Weekend Pullback
+-  7.81 | sriOrd3u-JY | 8m | 6500 | 2024-11-15 | How I Scalp Memecoins and Make Huge Gains (Full Strategy)
+-  7.78 | opkrnNetpGQ | 56m | 6000 | 2026-02-15 | BTC CME Gap Filled - $90k Next?
+-  6.74 | S8rmtSr3TUA | 20m | 5500 | 2025-11-15 | BTC Tested Resistance - Bull Trap Confirmed
+-  6.23 | wu5f2IlmZwA | 24m | 17000 | 2025-11-15 | BTC Breakout IS COMING!
+
+## tomcrown - Tom Crown (Tom Crown)  [crypto] 
+videos 1249, P1 30 (2%), candidates 50, cov 0
+- 11.78 | SeqVUNanFeY | 9m | 605000 | 2024-11-15 | Master VWAP Trading Strategy In Under 10 Minutes
+- 10.40 | yAMaiOI9cmc | 6m | 25000 | 2026-02-15 | The 2026 Opening Range Breakout Strategy You NEED!
+-  9.00 | 1g365cw7PdU | 12m | 988 | 2026-11-12 | The Complete Fair Value Gap Trading Guide
+-  8.65 | 5MFXsjZGkDQ | 9m | 446000 | 2024-11-15 | How To Trade Fibonacci In 2026
+-  8.03 | ig0ozehO9Yk | 8m | 108000 | 2024-11-15 | MACD Strategy: 3 Simple Steps For Better Trades
+-  7.79 | tBmAb2P73SQ | 7m | 62000 | 2026-06-15 | The ONLY Volume Profile Trading Guide You NEED In 2026!
+-  7.67 | zKolq1Id-hA | 63m | 4700 | 2026-03-15 | BREAK OUT RIGHT NOW LIVE GOLD SILVER BITCOIN DAY TRADING FUTURES XAUUSD
+-  7.20 | CIsq8mHftAo | 9m | 158000 | 2024-11-15 | Why 90% of Traders FAIL the Break and Retest
+
+## hummingbot - Hummingbot (Hummingbot)  [sys] 
+videos 412, P1 7 (2%), candidates 19, cov 0
+-  5.58 | ME5osB8sX_s | 19m | 38000 | 2021-11-15 | Liquidity Mining Explained | For New Users
+-  5.28 | QksultmszQM | 59m | 19000 | 2020-11-15 | Liquidity Mining 101 - Using Hummingbot to join liquidity mining for new or inexperienced users
+-  5.08 | UX0ChdWV7uc | 14m | 1200 | 2023-11-15 | Directional Strategies Experiment - MACD Cum Diff
+-  4.93 | J7y_ajDdeSU | 8m | 834 | 2026-09-15 | Hummingbot Unveils Condor: A Solana Liquidity Protocol | MtnDAO Demo Day 2026
+-  4.77 | 7LQxaE3NtLA | 32m | 5900 | 2021-11-15 | Liquidity Mining Strategy Demo | Hummingbot Live
+-  4.70 | 1OtcO4lWBiw | 6m | 490 | 2025-11-15 | Bootstrapping Liquidity with CLMM Pools
+-  4.63 | 0I-M_k0mVf8 | 48m | 4300 | 2020-11-15 | Advanced liquidity mining - using Hummingbot's advanced market making features
+-  4.58 | YKt42GOIX_Q | 74m | 3800 | 2020-11-15 | Hummingbot X NEM: Liquidity mining demo
+
+## tradinglab - TradingLab (TradingLab)  [fx] earlier: channels20
+videos 110, P1 16 (15%), candidates 15, cov 5
+-  8.81 | ICqUb68YGcU | 8m | 65000 | 2026-02-09 | This Gap is About to Break The Stock Market
+-  8.58 | 3X95la3CCS0 | 10m | 382000 | 2026-06-09 | The Secret To Using The Volume Profile
+-  7.69 | iL76k2A9ono | 12m | 494000 | 2022-11-09 | The ULTIMATE Fibonacci Retracement Tool Guide - Best Tips & Tricks
+-  7.30 | 9REzGB3R6HU | 8m | 198000 | 2025-11-09 | The Only Liquidity Guide You'll EVER NEED
+-  6.88 | tW13N4Hll88 | 12m | 7500000 | 2022-11-09 | The ONLY Candlestick Pattern Guide You'll EVER NEED
+-  6.81 | RKU7D9PxLgY | 8m | 65000 | 2026-10-09 | You're Using Liquidity Wrong
+-  6.65 | ZudTPpJCbbA | 8m | 4500000 | 2021-11-09 | How to Avoid False Breakouts (My Secret Technique)
+-  6.62 | 2yePksvT64I | 8m | 42000 | 2026-08-09 | How to Avoid False Breakouts (Avoid The Trap)
+
+## cryptoworldjosh - Crypto World - Josh (Crypto World)  [crypto] 
+videos 2329, P1 174 (7%), candidates 148, cov 0
+-  7.15 | Nk_4kRY7Ipg | 26m | 14000 | 2025-11-15 | BITCOIN SHORT SQUEEZE STARTED: Exact Trading Plan Exposed!!
+-  6.11 | gohj5wqSxs8 | 21m | 13000 | 2025-11-15 | BITCOIN ALL TIME HIGH BREAKOUT IMMINENT (My Trading Plan)!!
+-  5.46 | ozyFnb2cizs | 25m | 29000 | 2025-11-15 | BITCOIN & ALTCOIN EMERGENCY (Trading Strategy)!!! Bitcoin, Ethereum, XRP, Solana, Chainlink, Cardano
+-  5.42 | FjJNimo5GqA | 19m | 26000 | 2025-11-15 | BITUNIX EXCHANGE REVIEW: Trade Crypto with NO KYC (Step By Step Tutorial)
+-  4.96 | ETX2RZHxtbY | 25m | 9200 | 2026-07-15 | LBANK EXCHANGE REVIEW: Trade Crypto with NO KYC (Step By Step Tutorial)
+-  4.88 | haiwVzaE12g | 19m | 7500 | 2021-11-15 | MUST WATCH!!! BITCOIN PRICE BREAKOUT NOW & ETHEREUM PRICE, CARDANO, ENJIN COIN! (Exact Price Target)
+-  4.81 | TzvmikI974E | 17m | 64000 | 2022-11-15 | Simple Method To Make Money Trading Crypto In A Sideways Market
+-  4.79 | oIr4rxDb82U | 29m | 62000 | 2021-11-15 | How To Trade Bitcoin & Ethereum On Bybit | Complete Tutorial & Review [Step By Step for Beginners]
+
+## cryptowendyo - CryptoWendyO (CryptoWendyO)  [crypto] 
+videos 2570, P1 106 (4%), candidates 93, cov 0
+-  8.23 | O6mTK2RWvZY | 30m | 17000 | 2026-10-15 | PARABOLIC XRP RALLY IMMINENT $5.40 TARGET! BITCOIN GETS HUGE LIQUIDITY CATALYST AND AI STOCKS RALLY
+-  8.11 | 9bxLnPd_OiA | 16m | 13000 | 2026-05-15 | DISGUSTING Crypto and Finance is DONE! The Final Stage of The Wealth Gap is HERE!
+-  8.04 | N4k-WN9PQTk | 14m | 11000 | 2026-04-15 | XRP Can NEVER Join Bitcoin, Ethereum & USDT – Here's the Shocking Reason (Market Cap Gap Exposed
+-  8.00 | 6J1-1nwmNzA | 27m | 10000 | 2026-02-15 | EXPOSED BlackRock CEO on AI & Wealth Gap Coinbase Leads Bermuda Crypto Revolution DAVOS
+-  6.91 | sfceRBpCP-M | 38m | 8200 | 2026-09-15 | BREAKOUT INCOMING?! ROBINHOOD CHAIN REVENUE SPARKS MASSIVE CRYPTO MOVE! TOKENIZED STOCKS HIT $200M
+-  6.86 | 0EC4kcjXhcQ | 32m | 7200 | 2026-02-15 | SHOCKING Goldman Sachs REVEALS $143M Crypto Investment White House Crypto Compromise Gains MOMENTUM
+-  6.80 | fdiT7-qbyKY | 15m | 6300 | 2026-05-15 | SCARY Aave Exploit Just Wiped $200M+ In Liquidity!
+-  6.26 | mHypt4oWpTo | 31m | 18000 | 2026-09-15 | BREAKING NEW CLARITY Act Text Just Dropped BANKS ARE PANICKING?! BITCOIN BREAKOUT!
+

@@ -1,6 +1,7 @@
 // The owner's channel shortlist (12 Nov 2026): three pasted lists - 50 cross-market channels, 50 more (51-100) and 50
 // Indian intraday-stock channels - merged into one list of unique channels; a fourth list (13 Nov 2026) of 50 crypto
-// and gold channels adds 31 new ones (group 'gold' = gold / metals channels). Each row:
+// and gold channels adds 31 new ones (group 'gold' = gold / metals channels), and ten more crypto channels (14 Nov,
+// D51-D60) add nine. Each row:
 //   [key, name as listed, search query, star (owner's list marked it a priority), list positions, market group, earlier]
 // `earlier` names the study that already covered the channel (or screened and skipped it), so this study can skip
 // the videos it read. Market groups: in = Indian stocks / index / options, crypto, fx = forex and cross-market price
@@ -122,7 +123,7 @@ export const CHANNELS = [
   // ── list 2: systematic trading and coding (91-100)
   ['quantinsti', 'QuantInsti', 'QuantInsti', 1, 'B91 C49', 'sys', ''],
   ['quantconnect', 'QuantConnect', 'QuantConnect', 1, 'B92', 'sys', ''],
-  ['parttimelarry', 'Part Time Larry', 'Part Time Larry', 1, 'B93', 'sys', ''],
+  ['parttimelarry', 'Part Time Larry', 'Part Time Larry', 1, 'B93 D56', 'sys', ''],
   ['codetrading', 'CodeTrading', 'CodeTrading', 1, 'B94', 'sys', ''],
   ['algovibes', 'Algovibes', 'Algovibes', 0, 'B95', 'sys', ''],
   ['kevindavey', 'Algo Trading With Kevin Davey', 'Kevin Davey algo trading', 1, 'B96', 'sys', ''],
@@ -190,6 +191,16 @@ export const CHANNELS = [
   ['tradewithaaro', 'Trade With Aaro', 'Trade With Aaro', 0, 'D39', 'gold', ''],
   ['forextradinglions', 'Forex Trading Lions', 'Forex Trading Lions', 0, 'D40', 'gold', ''],
   ['tradingview', 'TradingView', 'TradingView', 0, 'D49', 'sys', ''],
+  // ── ten more (14 Nov 2026): crypto channels D51-D60 after the fourth list; Part Time Larry above carries D56
+  ['daviddtech', 'Trading with DaviddTech', 'DaviddTech', 0, 'D51', 'crypto', ''],
+  ['mangoresearch', 'Mango Research', 'Mango Research', 0, 'D52', 'crypto', ''],
+  ['coinbureautrading', 'Coin Bureau Trading', 'Coin Bureau Trading', 0, 'D53', 'crypto', ''],
+  ['mooninpapa', 'Moonin Papa', 'Moonin Papa', 0, 'D54', 'crypto', ''],
+  ['tomcrown', 'Tom Crown', 'Tom Crown', 0, 'D55', 'crypto', ''],
+  ['hummingbot', 'Hummingbot', 'Hummingbot', 0, 'D57', 'sys', ''],
+  ['tradinglab', 'TradingLab', 'TradingLab', 0, 'D58', 'fx', 'channels20'],
+  ['cryptoworldjosh', 'Crypto World - Josh', 'Crypto World Josh', 0, 'D59', 'crypto', ''],
+  ['cryptowendyo', 'CryptoWendyO', 'CryptoWendyO', 0, 'D60', 'crypto', ''],
 ];
 
 const ytdlp = (args, timeout = 300_000) =>

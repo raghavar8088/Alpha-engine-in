@@ -1,0 +1,12 @@
+video: 3X95la3CCS0
+topic: crypto
+summary: TradingLab explains the fixed-range volume profile (point of control, value area high and low holding 70% of the volume): low-volume areas move fast, high-volume areas consolidate. His simple strategy: buy below the value area low, take part at the point of control and the rest at the value area high (mirror for shorts), drawn on weekly charts from a swing low to a swing high.
+instruments: Stocks (AMD, Paramount), any
+timeframes: 1w (any)
+style: swing
+= TL-07 | Fixed-range volume profile: buy below the value area low, partial at the POC, rest at the value area high (mirror)
+R setup E 03:34 | The value area holds 70% of the volume. | "this zone is where 70% of all volume was traded"
+R entry E 05:00 | Buy when price is cheap (below the value area low), sell when expensive. | "So a very easy high performing strategy, would be to buy whenever prices become cheap"
+R target E 05:00 | Partial profit at the point of control. | "take partial profits, when it hits the point of interest"
+T with_assumptions | the profile range (a swing low to a swing high on weekly charts) is chosen by eye
+D JR-02 | the value-area fade (from outside the value area back to the POC and the other edge) is already coded (JR-02; BB-09 value-area trap)

@@ -1,7 +1,7 @@
 """Writes frontend/app/premium-strategies/shortlistData.ts: every strategy of the channel-shortlist study with its video,
 rules (tagged E / I / A with their times), what is missing or ambiguous, the claims as said, the status (coded, blocked
 or duplicate) and the look-ahead / fill check of the coded ones (results/checks.json), plus the coverage of every listed
-channel (158 over the owner's four lists: picked, analysed, skipped and why). Generated: never edit the .ts by hand.      python -I ze_export.py
+channel (167 over the owner's four lists and ten extra crypto channels: picked, analysed, skipped and why). Generated: never edit the .ts by hand.      python -I ze_export.py
 """
 
 from __future__ import annotations
@@ -29,16 +29,19 @@ PROXY = {"PW-01": "the video buys ATM options; coded on the index as a labelled 
          "RT-02": "the video trades Russell 1000 stocks on daily bars; coded on bitcoin 4-hour bars with the same bands, the coin's own 300-bar average standing in for the index filter",
          "TT-02": "the video trades forex; coded on Delta bitcoin and gold, as he says he also uses it on crypto",
          "FL-02": "the video tests EUR/USD and USD/JPY; coded on Delta gold, bitcoin and ether",
-         "VS-03": "the desk's gold is Delta XAUTUSD, which also trades at weekends: its gap is the Sunday 17:00 New York open against the Friday 17:00 close, the weekend drift standing in for the spot gap"}
+         "VS-03": "the desk's gold is Delta XAUTUSD, which also trades at weekends: its gap is the Sunday 17:00 New York open against the Friday 17:00 close, the weekend drift standing in for the spot gap",
+         "TL-06": "the video is general (stocks, forex, crypto); coded on Delta bitcoin, ether and gold 15-minute bars"}
 TOPICS = ["india_index", "india_stocks", "crypto", "forex_us"]
 # when each batch's books start on the desk (premium-paper-service settings.YC3_START_T / YC3B_START_T)
 START1, START2, START3 = "2026-11-13T03:40:00Z", "2026-11-13T05:00:00Z", "2026-11-13T16:00:00Z"
 START4 = "2026-11-13T17:00:00Z"
 START5 = "2026-11-14T11:00:00Z"
+START6 = "2026-11-14T16:00:00Z"
 BATCH2 = {r.sid for r in ZS._NEW[31:54]}
 BATCH3 = {r.sid for r in ZS._NEW[54:69]}
 BATCH4 = {r.sid for r in ZS._NEW[69:90]}
-BATCH5 = {r.sid for r in ZS._NEW[90:]}
+BATCH5 = {r.sid for r in ZS._NEW[90:100]}
+BATCH6 = {r.sid for r in ZS._NEW[100:]}
 SKIP_REASON = {
     "boomingbulls": "fully covered by the Booming Bulls study (96 strategy videos analysed)",
     "sensibull": "options education (premiums, Greeks): no rule the desk can trade without option prices",
@@ -74,6 +77,8 @@ SKIP_REASON = {
     "interactivebrokers": "broker platform and indicator tutorials (TWS tools, MACD)",
     "tradewithaaro": "Hindi live gold and bitcoin trading streams and broker promotions: no stated rules",
     "tradingview": "platform tool tutorials (VWAP, volume profile, Fibonacci drawing tools), not strategies",
+    # the ten extra crypto channels
+    "cryptowendyo": "crypto news, interviews and market commentary: no trading rules",
 }
 
 
@@ -99,8 +104,8 @@ def main():
                 "markets": [MARKET_LABEL.get(x, x) for x in (rec.markets if rec else ())],
                 "deskMarkets": list(rec.markets) if rec else [], "overnight": bool(rec and (rec.overnight or "NSED" in rec.markets)),
                 "proxy": PROXY.get(sid),
-                "paperStart": (START5 if sid in BATCH5 else START4 if sid in BATCH4 else START3 if sid in BATCH3
-                               else START2 if sid in BATCH2 else START1) if rec else None,
+                "paperStart": (START6 if sid in BATCH6 else START5 if sid in BATCH5 else START4 if sid in BATCH4
+                               else START3 if sid in BATCH3 else START2 if sid in BATCH2 else START1) if rec else None,
                 "rules": [{"kind": r["kind"], "label": CL.KIND_LABEL[r["kind"]], "tag": r["tag"], "text": r["text"], "times": r["times"]}
                           for r in sorted(s["rules"], key=lambda r: (r["tag"] == "A", CL.KINDS_ORDER.index(r["kind"])))],
                 "why": s["reasons"], "vague": c["vague"], "unclear": c["unclear"], "claims": c["claims"], "examples": c["examples"],
@@ -138,13 +143,14 @@ def main():
             "duplicates": sum(1 for r in rows if r["status"] == "duplicate"),
             "checked": sum(1 for r in coded if r["checks"] and r["checks"]["lookahead"] and r["checks"]["fills"]),
             "paperStart": START1, "paperStart2": START2, "paperStart3": START3, "paperStart4": START4,
-            "paperStart5": START5,
-            "batch1": len(ZS._NEW) - len(BATCH2) - len(BATCH3) - len(BATCH4) - len(BATCH5), "batch2": len(BATCH2),
-            "batch3": len(BATCH3), "batch4": len(BATCH4), "batch5": len(BATCH5),
+            "paperStart5": START5, "paperStart6": START6,
+            "batch1": len(ZS._NEW) - len(BATCH2) - len(BATCH3) - len(BATCH4) - len(BATCH5) - len(BATCH6),
+            "batch2": len(BATCH2), "batch3": len(BATCH3), "batch4": len(BATCH4), "batch5": len(BATCH5),
+            "batch6": len(BATCH6),
             "built": "2026-11-14"}
     head = (
         "// GENERATED by backend/research/youtube_shortlist_2026_11/ze_export.py - do not edit by hand.\n"
-        "// The channel-shortlist study (Nov 2026): strategies from the owner's four lists of YouTube channels, each with its\n"
+        "// The channel-shortlist study (Nov 2026): strategies from the owner's lists of YouTube channels, each with its\n"
         "// rules (E stated / I inferred / A our assumption, with the video times), what the video leaves missing or vague, its\n"
         "// claims as said, its status and code checks; plus the coverage of every listed channel.\n\n"
         "export type SlRule = { kind: string; label: string; tag: \"E\" | \"I\" | \"A\"; text: string; times: string[] };\n"

@@ -1,0 +1,12 @@
+video: TzvmikI974E
+topic: crypto
+summary: Josh (Crypto World) shows Bybit's spot grid bot for sideways markets: set a price range just outside the recent highs and lows and a grid count (16 in his example), and the bot keeps buying the lower orders and selling the upper ones; the risk is a trend that leaves the range.
+instruments: Bitcoin (BTC/USDT spot)
+timeframes: Not stated
+style: unclear
+= CO-01 | Spot grid bot in a sideways range: 16 orders between a lower and an upper price
+R setup E 00:01 | Buy orders on the lower side of the range, sell orders on the upper side. | "placing an array of buy orders towards the lower side of a price range"
+R setup E 04:16 | Set the range's lower and upper prices. | "we need to set the lower price and the Upper price for the price range"
+R entry E 10:47 | A grid count of about 16. | "putting in something like 16 is not too bad"
+T with_assumptions | the range is chosen by eye
+D CP-03 | buying the lower part of a sideways range and selling the upper part is already coded (CP-03 range ping-pong); a 16-order grid needs a multi-order engine the desk does not run

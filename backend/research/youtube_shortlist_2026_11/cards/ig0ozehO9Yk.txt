@@ -1,0 +1,10 @@
+video: ig0ozehO9Yk
+topic: crypto
+summary: Tom Crown explains the MACD (lines, histogram, zero line, divergence) and trades its crossovers only in the higher-timeframe trend, at support or resistance, with a candle confirmation and a stop beyond the recent swing.
+instruments: Crypto, stocks
+timeframes: Not stated
+style: swing
+= TK-03 | MACD signal cross in the higher-timeframe trend, at a support or resistance level
+R entry E 02:53 | Only MACD signals that match the higher-timeframe trend. | "I only take signals from the macd that match with a higher time frame Trend"
+R setup E 05:43 | In a bearish structure, shorts only. | "we should look only for shorting opportunities"
+T concept_only | the higher-timeframe structure and the levels are read by eye

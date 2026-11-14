@@ -1,0 +1,10 @@
+video: SeqVUNanFeY
+topic: crypto
+summary: Tom Crown explains the VWAP: above it the market is bullish, below it bearish, and it acts as support or resistance. He trades it only as confluence with horizontal levels, Fibonacci areas, liquidity sweeps and candle patterns, and shows weekly and monthly anchored VWAPs.
+instruments: Crypto, stocks
+timeframes: Intraday
+style: intraday
+= TK-01 | VWAP as trend side and support / resistance, with levels, Fibonacci and candle confirmation
+R filter E 01:27 | Above the VWAP the market is bullish; below it bearish. | "when price is above the vwap line the market is considered bullish"
+R entry E 02:54 | Buy at a support that lines up with the VWAP, stop below the VWAP, target the resistance above. | "we may look to set a buy order with our stop set below the vwap and just Target resistance levels above"
+T concept_only | the levels, Fibonacci areas and candle patterns are read by eye; the VWAP only adds confluence

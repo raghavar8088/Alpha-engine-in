@@ -1,0 +1,13 @@
+video: 7OMSX9WsMcg
+topic: crypto
+summary: Jordan (Coin Bureau's trading channel, now Trading Bureau) shows the community's 5-minute crypto scalp: a Smart Money Concepts order block, a high-volume node of a fixed-range volume profile inside it, a Market Cipher trigger-wave signal, the RSI and Stochastic RSI both overbought (oversold), and optionally a parallel channel. Stop above the swing high, at least 1:3, leave a runner. He says it backtests at 70-80% winners.
+instruments: Crypto (XRP example)
+timeframes: 5m
+style: scalping
+= BU-01 | 5-minute order block + volume-profile node + Market Cipher trigger + RSI / Stochastic RSI rhyme, 1:3
+R setup E 02:08 | Start from a strong order block. | "So number one part of the strategy is to identify a strong order block"
+R indicator E 04:55 | Market Cipher's trigger wave with the VWAP cross as the entry signal. | "Here on Market Cipher, we can see the trigger wave red dot that did appear with VWAP crossing"
+R stop E 06:16 | Stop above the previous swing high. | "place your stop loss above the previous"
+R target E 06:58 | At least 1:3. | "start off with at least a 1:3 risk to reward ratio"
+T not_testable | the order blocks, the profile range and the channels are drawn by eye; Market Cipher is a paid indicator the desk does not have
+C win_rate | 00:43 | 70-80% winners | his backtests (not shown) | "it has proven to have a very high win rate between 70% and 80%"

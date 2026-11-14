@@ -1,0 +1,12 @@
+video: UX0ChdWV7uc
+topic: crypto
+summary: A Hummingbot developer builds a directional bot from TradingLab's MACD idea: the MACD histogram divided by price, a cumulative difference of the histogram as a 'sustained momentum' filter, and take-profit and stop set at 0.3 of a 100-bar volatility target, with a trailing stop. A week of live 5-minute trading on Binance perpetuals lost 4.5% with 46% winners over 400+ positions, mostly to fees.
+instruments: Crypto perpetuals (Binance)
+timeframes: 5m
+style: scalping
+= HB-01 | Normalised MACD histogram with a cumulative-difference filter, volatility-scaled take-profit and stop
+R indicator E 02:52 | The histogram's normalised cumulative relative difference. | "the monthly histogram normalized cumulative relative difference"
+R market E 04:59 | 5-minute bars on Binance perpetuals. | "we will be trading industry USD using a five minutes interval on binance for petals"
+R stop E 05:47 | Take-profit and stop multipliers of 0.3 of the volatility target. | "I have chosen 0.3 because it did well during my testing"
+T not_testable | the signal thresholds are on a settings slide but never stated; the creator's own week of live trading lost 4.5%
+C return_pct | 09:31 | -4.5% in a week, 46% winners, 400+ positions | one week live | "this represents a degrees of 4.5 percent from our initial portfolio"

@@ -569,11 +569,18 @@ YC3_STRATEGIES = (
     ('VS-02', '4-hour gold: SMA 9 over EMA 20 confirmed by the next close, 2 ATR stop trailed at EMA 20 - 1 ATR (long only)', 'VasilyTrader', ('XAUUSD',)),
     ('VS-03', 'Gold weekend gap of 0.15% or more: a 1-hour close beyond the 6-bar box toward it, target last week\'s close', 'VasilyTrader', ('XAUUSD',)),
     ('FL-02', 'Williams Alligator: the 5-minute candle clear of all three lines and engulfing, with the 1-hour EMA 50, 1R', 'Forex Trading Lions', ('XAUUSD', 'BTCUSD', 'ETHUSD')),
+    # the sixth batch (14 Nov 2026: the owner's ten extra crypto channels); trades from settings.YC3F_START_T
+    ('DD-01', 'Over-extended RSI: RSI (14) crossing above 70 with the SSL trend and the TDFI, 1% stop, half at 1%, rest at 2%', 'Trading with DaviddTech', ('BTCUSD', 'ETHUSD')),
+    ('DD-02', 'EMA 50/200 trend, a larger-than-average 1-minute MACD histogram pullback, 0.7% target and stop, VWAP side', 'Trading with DaviddTech', ('BTCUSD', 'ETHUSD')),
+    ('DD-03', 'Hull MA cross with the Awesome Oscillator and CMF above zero, T3 (300) and TDFI filters, 3 ATR stop, 1.3R', 'Trading with DaviddTech', ('BTCUSD', 'ETHUSD')),
+    ('DD-04', 'Bollinger 1-2-3: above the upper band, under the lower, rejected at the middle, break of the 1-3 line, 1.5R', 'Trading with DaviddTech', ('BTCUSD', 'ETHUSD')),
+    ('TL-06', 'Range breakout confirmed by a momentum candle, stop past the level, half at 1.5R, rest on the Chandelier flip', 'TradingLab', ('BTCUSD', 'ETHUSD', 'XAUUSD')),
 )
 YC3B_IDS = frozenset(('MC-01', 'MC-02', 'AO-01', 'KT-01', 'KG-01', 'KG-02', 'AO-02', 'CR-02', 'QC-03', 'CT-03', 'KS-01', 'DE-09', 'CT-02', 'CT-01', 'SK-01', 'CH-01', 'CH-02', 'QC-01', 'CV-01', 'KR-01', 'TN-02', 'AC-02', 'CR-01'))
 YC3C_IDS = frozenset(('FY-01', 'FY-02', 'AO-03', 'US-01', 'US-02', 'KS-02', 'VV-01', 'VV-02', 'BJ-01', 'KT-02', 'BJ-02', 'CD-01', 'DE-10', 'CD-02', 'RT-01'))
 YC3D_IDS = frozenset(('BT-01', 'PL-01', 'LT-01', 'ET-01', 'ET-02', 'MB-01', 'BR-01', 'CI-21', 'CI-22', 'SP-02', 'FP-01', 'TM-01', 'QI-02', 'QI-01', 'MS-01', 'AV-01', 'FS-01', 'TT-01', 'TD-11', 'TD-12', 'DX-01'))
 YC3E_IDS = frozenset(('NK-02', 'RT-02', 'TT-02', 'TC-04', 'BX-01', 'BX-02', 'CB-01', 'VS-02', 'VS-03', 'FL-02'))
+YC3F_IDS = frozenset(('DD-01', 'DD-02', 'DD-03', 'DD-04', 'TL-06'))
 for _sid, _name, _ch, _mkts in YC3_STRATEGIES:
     ACCOUNTS.append(_a(_sid, YC3, _name, _ch, *[(YC2_BOOK_MARKET.get(_m, _m), "V0") for _m in _mkts]))
 BY_ID = {a.id: a for a in ACCOUNTS}

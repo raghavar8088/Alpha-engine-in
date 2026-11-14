@@ -1349,6 +1349,97 @@
    "eth_cuts": 12,
    "eth_lookahead_ok": true,
    "eth_diffs": []
+  },
+  "DD-01": {
+   "signals": 338,
+   "trades": 196,
+   "reasons": {
+    "time": 61,
+    "stop": 96,
+    "target": 39
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 2.5,
+   "eth_signals": 172,
+   "eth_trades": 104,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": []
+  },
+  "DD-02": {
+   "signals": 1117,
+   "trades": 334,
+   "reasons": {
+    "time": 64,
+    "stop": 147,
+    "target": 123
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 20.2,
+   "eth_signals": 566,
+   "eth_trades": 182,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": []
+  },
+  "DD-03": {
+   "signals": 806,
+   "trades": 588,
+   "reasons": {
+    "exit_signal": 440,
+    "target": 97,
+    "stop": 37,
+    "time": 14
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 4.7,
+   "eth_signals": 395,
+   "eth_trades": 287,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": []
+  },
+  "DD-04": {
+   "signals": 322,
+   "trades": 239,
+   "reasons": {
+    "target": 61,
+    "time": 65,
+    "stop": 113
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 2.8,
+   "eth_signals": 160,
+   "eth_trades": 117,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": []
+  },
+  "TL-06": {
+   "signals": 42,
+   "trades": 41,
+   "reasons": {
+    "stop": 24,
+    "be_stop": 10,
+    "time": 7
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 5.0,
+   "eth_signals": 17,
+   "eth_trades": 16,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": []
   }
  },
  "problems": {}

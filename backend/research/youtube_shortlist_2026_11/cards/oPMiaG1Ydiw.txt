@@ -1,0 +1,24 @@
+video: oPMiaG1Ydiw
+topic: crypto
+summary: DaviddTech codes the 'over-extended super scalper' on 15-minute bitcoin: the RSI used the other way round. Buy when the RSI crosses up into overbought (above 70) and short when it crosses down into oversold (below 30), only with the SSL Channel trend and the TDFI (Trend Direction Force Index) confirming, and with the RSI on the right side of its moving average. Stop 1%, half off at 1%, the rest at 2%. His backtest (about nine months, 20x leverage) showed 79.84% winners over 258 trades and +127%; the textbook way round (buy oversold) lost 72%.
+instruments: Bitcoin (BTCUSDT)
+timeframes: 15m (5m and 1h also tried)
+style: scalping
+= DD-01 | Over-extended RSI scalper: RSI crossing above 70 with the SSL trend and the TDFI, 1% stop, half at 1%, rest at 2% (mirror for shorts)
+R market E 00:44 | Bitcoin on the 15-minute chart. | "i'm going to be doing this on a 15 minute time frame on btc"
+R indicator E 01:27,02:07 | Three indicators: the RSI (the main one), the SSL Channel for the trend and the TDFI as confirmation. | "the main one is actually going to be the rsi the ssl is going to be defining our"
+R entry E 04:18 | The RSI the other way round: buy as it goes into overbought, short as it comes back into oversold. | "i'm going to be buying or longing as i go into the over extended overbought and then i'm going to be shorting as i come back down into the oversold"
+R filter E 05:00 | Longs only above the SSL Channel, shorts only below it. | "we have to be above the ssl channel to take alongs and"
+R entry E 05:41 | Enter when the RSI crosses over the overbought line and the TDFI is green. | "we're waiting for the rsi to become above and cross this over extended uh over broad line"
+R filter E 07:10,09:19 | The RSI must be on the trade's side of its moving average (the yellow line). | "we're always making sure that the yellow line is above the purple line"
+R entry E 05:41 | Enter on the candle after the cross. | "we would have crossed over just here so we're going to take it here to be on the safe side"
+R stop E 05:41,06:30 | A 1% stop; take profit twice, at 1% and at 2%. | "we're going to be taking her profit at one percent and then we're going to be taking a second to take profit at two percent"
+R market A - | Desk version: Delta BTCUSD and ETHUSD on 15-minute candles; out by the end of the UTC day. | ""
+R indicator A - | RSI (14) and its 14-bar simple average. SSL Channel (10): the trend turns up on a close above the 10-bar average of highs and down on a close below the 10-bar average of lows. TDFI with its defaults (EMA 13 of price x 1000 and its EMA 13; the trend force normalised over 39 bars; green above 0.05, red below -0.05). | ""
+R entry A - | Long: SSL trend up, RSI (14) crosses above 70 and is above its average, TDFI above 0.05: enter at the next open. Short: SSL trend down, RSI crosses below 30 and is below its average, TDFI below -0.05. One position at a time. | ""
+R stop A - | Stop 1% from the fill; half off at +1% (the stop stays where it is), the rest at +2%. | ""
+T with_assumptions | the SSL and TDFI settings are the indicators' defaults (A); 'the yellow line' read as the RSI's own moving average (I)
+C win_rate | 09:59 | 79.84% winners | about nine months of 15-minute bitcoin | "we currently on a profitable win rate of almost 80 79.84 uh percent"
+C trade_count | 11:26 | 258 trades (206 wins, 52 losses) | the same backtest | "a number of trades in total was 258"
+C return_pct | 10:41 | +127% net profit (20x leverage) | the same backtest | "we have a net profit of 127 on the account itself"
+C return_pct | 12:06 | -72% for the textbook version (buy oversold, sell overbought) | the same backtest | "it would have been a net loss actually of minus 72 percent"
