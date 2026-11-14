@@ -3,8 +3,9 @@
 // Delta Exchange Live Trading (14 Nov 2026): REAL money on Delta Exchange India for the bitcoin Premium strategies the
 // owner picked from the Crypto tab - TH-05, TL-04 and TH-01 - at $5 risked a trade and a $20 daily loss stop. The desk
 // is premium_live's "crypto" desk: it copies the paper desk's trades of the three (their signals come from Delta's live
-// BTCUSD candles) into real Delta orders, each with its stop and target held on Delta. It starts off; going live needs
-// the owner's PIN and the words REAL MONEY; stopping never does. The gold desk stays on Premium Strategies.
+// BTCUSD candles) into real Delta orders, each with its stop and target held on Delta. One ON/OFF switch runs it: ON
+// needs the owner's PIN and one confirmation (the page sends the words REAL MONEY the server asks for); OFF never needs
+// the PIN. The gold desk stays on Premium Strategies.
 import Link from "next/link";
 import PageHeader from "../../components/PageHeader";
 import LiveDelta from "../premium-strategies/LiveDelta";
@@ -26,9 +27,10 @@ export default function DeltaLiveTradingPage() {
           a second signal is skipped while one is open.
         </p>
         <p>
-          It starts <b>off</b>. Use <b>Shadow</b> first: every decision is made and logged with simulated fills, and nothing is
-          sent. <b>Go live</b> needs your Delta API keys and PIN on the server (the deploy script sets them; they never go in
-          the repository) and the words REAL MONEY. The gold strategies stay on{" "}
+          Use the <b>Live trading</b> switch below. <b>ON</b> starts real orders: it asks for your PIN (or uses the one you let
+          this device remember) and one confirmation. <b>OFF</b> stops new trades at once and needs no PIN; a position already
+          open still closes at its stop, its target or its strategy&apos;s exit. To watch the decisions without sending
+          anything, use <b>Test without orders</b>. The gold strategies stay on{" "}
           <Link href="/premium-strategies">Premium Strategies › Real money · Delta gold</Link>, with their own switch and daily stop.
         </p>
       </div>

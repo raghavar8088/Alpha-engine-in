@@ -5,7 +5,8 @@
 // owner's size ($5 risked a trade, a $20 daily loss stop), with each trade's stop and target held on Delta. The gold
 // desk shows on Premium Strategies (the original /api/premium-paper/live routes); the crypto desk is the Delta Exchange
 // Live Trading module (/api/premium-paper/live/desk/crypto). This page shows what a desk did and holds its switches.
-// Going live and flattening need the owner's PIN; stopping never does.
+// Going live and flattening need the owner's PIN; stopping never does. Live trading has one ON/OFF switch (14 Nov): OFF
+// is instant; ON asks for the PIN (or uses one the owner let this device remember) and one confirmation.
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { apiFetch } from "../../lib/api";
 
@@ -48,6 +49,12 @@ const MODE: Record<string, { label: string; cls: string; what: string }> = {
   shadow: { label: "SHADOW — no orders", cls: "shadow", what: "Every decision is made and logged with simulated fills; nothing is sent." },
   off: { label: "OFF", cls: "off", what: "No new trade. Anything still open is managed to its close." },
 };
+export type Ask = null | "live" | "flatten";
+const PIN_KEY = "deltaLivePin";
+const readPin = () => { try { return window.localStorage.getItem(PIN_KEY) || ""; } catch { return ""; } };
+const keepPin = (p: string | null) => {
+  try { if (p) window.localStorage.setItem(PIN_KEY, p); else window.localStorage.removeItem(PIN_KEY); } catch { /* storage blocked */ }
+};
 const happened = (t: LiveTrade) => {
   if (t.status === "skipped") return `skipped: ${t.reason ?? ""}`;
   if (t.status === "error") return `error: ${t.reason ?? ""}`;
@@ -69,10 +76,13 @@ const verdict = (picks: Pick[]) => {
 };
 
 /** What the page shows, given the desk's status: no state of its own beyond its props. */
-export function LiveDeltaView({ s, now, pin, setPin, confirm, setConfirm, busy, msg, onAct, intro }: {
-  s: LiveStatus; now: number; pin: string; setPin: (v: string) => void; confirm: string; setConfirm: (v: string) => void;
-  busy: string | null; msg: string | null; onAct: (key: "shadow" | "live" | "off" | "flatten") => void; intro?: ReactNode;
+export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, saved, ask, busy, msg, onToggle, onShadow, onFlatten,
+  onSubmitPin, onCancel, onForgetPin, intro }: {
+  s: LiveStatus; now: number; pin: string; setPin: (v: string) => void; remember: boolean; setRemember: (v: boolean) => void;
+  saved: boolean; ask: Ask; busy: string | null; msg: string | null; onToggle: () => void; onShadow: () => void; onFlatten: () => void;
+  onSubmitPin: () => void; onCancel: () => void; onForgetPin: () => void; intro?: ReactNode;
 }) {
+  const isLive = s.mode === "live";
   const m = MODE[s.mode] ?? MODE.off;
   const L = s.limits;
   const live = s.totals.live;
@@ -125,21 +135,45 @@ export function LiveDeltaView({ s, now, pin, setPin, confirm, setConfirm, busy, 
       </div>
 
       <div className="ld-ctl">
-        <div className="ld-ctl-row">
-          <label>Owner PIN <input type="password" autoComplete="off" value={pin} onChange={(e) => setPin(e.target.value)} /></label>
-          <label>Type REAL MONEY to go live <input value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="REAL MONEY" /></label>
-        </div>
-        <div className="ld-ctl-row">
-          <button className="ld-btn danger" disabled={!!busy || !s.keys || !s.pin_set} onClick={() => onAct("live")}>
-            {busy === "live" ? "Checking Delta…" : "Go live — real money"}
+        <div className="ld-switch-row">
+          <button type="button" role="switch" aria-checked={isLive} aria-label="Live trading"
+            className={`ld-switch${isLive ? " on" : ""}`} disabled={!!busy || (!isLive && (!s.keys || !s.pin_set))} onClick={onToggle}>
+            <span className="ld-knob" />
           </button>
-          <button className="ld-btn" disabled={!!busy} onClick={() => onAct("shadow")}>Shadow — decide, send nothing</button>
-          <button className="ld-btn" disabled={!!busy} onClick={() => onAct("off")}>Stop new trades</button>
-          <button className="ld-btn" disabled={!!busy || !s.pin_set} onClick={() => onAct("flatten")}>
+          <div className="ld-switch-text">
+            <b>{isLive ? "Live trading: ON" : "Live trading: OFF"}</b>
+            <span>
+              {busy === "live" ? "Checking Delta and switching on…" : busy === "off" ? "Switching off…" : isLive
+                ? "Real orders go to Delta for every new signal. Switch OFF to stop new trades; a position already open still closes at its stop, its target or its strategy's exit."
+                : `Switch ON to start: a real order for every new signal, ${usd(L.risk_usd)} risked a trade, stopping for the day after a ${usd(L.daily_stop_usd)} loss.${s.mode === "shadow" ? " A shadow test is running now: decisions are logged, nothing is sent." : ""}`}
+            </span>
+          </div>
+        </div>
+        {ask && (
+          <div className="ld-ctl-row">
+            <label>{ask === "live" ? "Your PIN, to switch ON" : "Your PIN, to close every position"}
+              <input type="password" autoComplete="off" inputMode="numeric" autoFocus value={pin} onChange={(e) => setPin(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") onSubmitPin(); }} />
+            </label>
+            <label className="ld-check">
+              <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} /> Remember the PIN on this device
+            </label>
+            <button className={`ld-btn${ask === "live" ? " danger" : ""}`} disabled={!!busy || !pin} onClick={onSubmitPin}>
+              {ask === "live" ? "Switch ON — real money" : "Close every position now"}
+            </button>
+            <button className="ld-btn" disabled={!!busy} onClick={onCancel}>Cancel</button>
+          </div>
+        )}
+        <div className="ld-ctl-row ld-more">
+          <button className="ld-btn" disabled={!!busy || isLive} onClick={onShadow} title={isLive ? "Switch live trading OFF first" : undefined}>
+            {s.mode === "shadow" ? "Stop the shadow test" : "Test without orders (shadow)"}
+          </button>
+          <button className="ld-btn" disabled={!!busy || !s.pin_set} onClick={onFlatten}>
             {busy === "flatten" ? "Closing…" : "Flatten every position now"}
           </button>
+          {saved && <button className="ld-btn" disabled={!!busy} onClick={onForgetPin}>Forget the PIN saved on this device</button>}
         </div>
-        {!s.keys && <p className="ld-dim">Delta API keys are not on the server yet. The deploy script asks for them and for the PIN, and keeps both off the repository.</p>}
+        {(!s.keys || !s.pin_set) && <p className="ld-dim">Delta API keys or the owner PIN are not on the server yet, so the switch cannot turn ON. The setup script sets both and keeps them off the repository.</p>}
         {msg && <p className="ld-msg">{msg}</p>}
       </div>
 
@@ -265,6 +299,19 @@ export function LiveDeltaView({ s, now, pin, setPin, confirm, setConfirm, busy, 
         .ld .gain { color: var(--gain); }
         .ld .loss { color: var(--loss); }
         .ld .ld-notes { margin: 4px 0 0; padding-left: 18px; font-size: 12px; line-height: 1.6; color: var(--text-muted); }
+        .ld .ld-switch-row { display: flex; align-items: center; gap: 14px; }
+        .ld .ld-switch { position: relative; flex: 0 0 auto; width: 62px; height: 34px; border-radius: 999px; padding: 0; border: 0;
+                         background: var(--text-faint); cursor: pointer; transition: background 0.15s; }
+        .ld .ld-switch.on { background: var(--gain-solid); }
+        .ld .ld-switch:disabled { opacity: 0.5; cursor: not-allowed; }
+        .ld .ld-switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .ld .ld-knob { position: absolute; top: 4px; left: 4px; width: 26px; height: 26px; border-radius: 50%; background: var(--on-accent);
+                       box-shadow: var(--shadow-sm); transition: left 0.15s; }
+        .ld .ld-switch.on .ld-knob { left: 32px; }
+        .ld .ld-switch-text { display: flex; flex-direction: column; gap: 2px; font-size: 13px; line-height: 1.45; color: var(--text-muted); }
+        .ld .ld-switch-text b { font-size: 15px; color: var(--text); }
+        .ld .ld-ctl label.ld-check { flex-direction: row; align-items: center; gap: 6px; font-weight: 600; font-size: 12.5px; }
+        .ld .ld-ctl label.ld-check input { min-width: 0; width: auto; padding: 0; }
         @media (max-width: 640px) { .ld .ld-v { font-size: 19px; } .ld .ld-ctl input { min-width: 140px; } }
       `}</style>
     </div>
@@ -277,7 +324,9 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
   const [s, setS] = useState<LiveStatus | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [pin, setPin] = useState("");
-  const [confirm, setConfirm] = useState("");
+  const [remember, setRemember] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [ask, setAsk] = useState<Ask>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now() / 1000);
@@ -297,18 +346,38 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
     return () => clearInterval(t);
   }, [load]);
 
-  const onAct = async (key: "shadow" | "live" | "off" | "flatten") => {
-    if (key === "live" && !window.confirm(`Send REAL orders to Delta Exchange for the ${s?.picks.length ?? ""} strategies of this desk?`)) return;
-    if (key === "flatten" && !window.confirm("Close every open position this desk holds on Delta now, at the market?")) return;
+  // a PIN saved on this device (only when the owner ticks "Remember"): the switch then turns ON with one confirmation
+  useEffect(() => {
+    const p = readPin();
+    if (p) { setPin(p); setRemember(true); setSaved(true); }
+  }, []);
+  const forget = () => { keepPin(null); setSaved(false); setPin(""); setRemember(false); };
+
+  const act = async (key: "shadow" | "live" | "off" | "flatten", usePin = "") => {
     setBusy(key);
     setMsg(null);
     try {
       const r = key === "flatten"
-        ? await apiFetch(`${base}/flatten`, { method: "POST", body: JSON.stringify({ pin }) })
-        : await apiFetch(`${base}/mode`, { method: "POST", body: JSON.stringify({ mode: key, pin, confirm }) });
+        ? await apiFetch(`${base}/flatten`, { method: "POST", body: JSON.stringify({ pin: usePin }) })
+        : await apiFetch(`${base}/mode`, { method: "POST",
+            body: JSON.stringify(key === "live" ? { mode: "live", pin: usePin, confirm: "REAL MONEY" } : { mode: key }) });
       if (r?.status) setS(r.status);
-      setMsg(r?.ok ? (key === "live" ? "Live: real orders from the next signal." : key === "flatten" ? "Flattened, and switched off." : `Now ${key}.`) : r?.why ?? "Refused.");
-      if (r?.ok) { setPin(""); setConfirm(""); }
+      if (r?.ok) {
+        setMsg(key === "live" ? "Live trading is ON: a real order goes to Delta for the next signal."
+          : key === "flatten" ? "Every position is closed, and live trading is OFF."
+          : key === "off" ? "Live trading is OFF: no new trades." : "Shadow test running: decisions are logged, nothing is sent.");
+        setAsk(null);
+        if (key === "live" || key === "flatten") {
+          if (remember) { keepPin(usePin); setSaved(true); } else forget();
+        }
+      } else {
+        const why = r?.why ?? "Refused.";
+        setMsg(why);
+        if (/wrong PIN|locked/i.test(why)) {   // a saved PIN that no longer works is forgotten, and the PIN is asked again
+          forget();
+          if (key === "live" || key === "flatten") setAsk(key);
+        }
+      }
     } catch (e) {
       setMsg(e instanceof Error ? e.message : "The request failed.");
     } finally {
@@ -316,6 +385,27 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
       setNow(Date.now() / 1000);
     }
   };
+  const goLive = (p: string) => {
+    if (!window.confirm(`Turn live trading ON? A real order goes to Delta Exchange for every new signal of these ${s?.picks.length ?? ""} strategies.`)) return;
+    act("live", p);
+  };
+  const doFlatten = (p: string) => {
+    if (!window.confirm("Close every open position this desk holds on Delta now, at the market, and switch live trading OFF?")) return;
+    act("flatten", p);
+  };
+  const onToggle = () => {
+    if (s?.mode === "live") { act("off"); return; }   // OFF never needs the PIN: it can only stop new trades
+    if (saved && pin) goLive(pin); else setAsk("live");
+  };
+  const onFlatten = () => { if (saved && pin) doFlatten(pin); else setAsk("flatten"); };
+  const onShadow = () => act(s?.mode === "shadow" ? "off" : "shadow");
+  const onSubmitPin = () => {
+    if (!pin || busy) return;
+    if (ask === "live") goLive(pin);
+    else if (ask === "flatten") doFlatten(pin);
+  };
+  const onCancel = () => { setAsk(null); if (!saved) setPin(""); };
+  const onForgetPin = () => { forget(); setMsg("The PIN saved on this device is forgotten."); };
 
   if (err && !s) {
     return (
@@ -327,5 +417,7 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
   }
   if (!s) return <div style={{ fontSize: 13, color: "var(--text-muted)" }}>Loading the Delta desk…</div>;
   if (!s.configured_db) return <div style={{ fontSize: 13, color: "var(--loss)" }}>The paper desk&apos;s database is not configured on this server.</div>;
-  return <LiveDeltaView s={s} now={now} pin={pin} setPin={setPin} confirm={confirm} setConfirm={setConfirm} busy={busy} msg={msg} onAct={onAct} intro={intro} />;
+  return <LiveDeltaView s={s} now={now} pin={pin} setPin={setPin} remember={remember} setRemember={setRemember} saved={saved} ask={ask}
+    busy={busy} msg={msg} onToggle={onToggle} onShadow={onShadow} onFlatten={onFlatten} onSubmitPin={onSubmitPin} onCancel={onCancel}
+    onForgetPin={onForgetPin} intro={intro} />;
 }
