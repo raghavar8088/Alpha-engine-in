@@ -1,7 +1,7 @@
 """Writes frontend/app/premium-strategies/shortlistData.ts: every strategy of the channel-shortlist study with its video,
 rules (tagged E / I / A with their times), what is missing or ambiguous, the claims as said, the status (coded, blocked
 or duplicate) and the look-ahead / fill check of the coded ones (results/checks.json), plus the coverage of every listed
-channel (167 over the owner's four lists and ten extra crypto channels: picked, analysed, skipped and why). Generated: never edit the .ts by hand.      python -I ze_export.py
+channel (177 over the owner's four lists and twenty extra crypto channels: picked, analysed, skipped and why). Generated: never edit the .ts by hand.      python -I ze_export.py
 """
 
 from __future__ import annotations
@@ -30,18 +30,23 @@ PROXY = {"PW-01": "the video buys ATM options; coded on the index as a labelled 
          "TT-02": "the video trades forex; coded on Delta bitcoin and gold, as he says he also uses it on crypto",
          "FL-02": "the video tests EUR/USD and USD/JPY; coded on Delta gold, bitcoin and ether",
          "VS-03": "the desk's gold is Delta XAUTUSD, which also trades at weekends: its gap is the Sunday 17:00 New York open against the Friday 17:00 close, the weekend drift standing in for the spot gap",
-         "TL-06": "the video is general (stocks, forex, crypto); coded on Delta bitcoin, ether and gold 15-minute bars"}
+         "TL-06": "the video is general (stocks, forex, crypto); coded on Delta bitcoin, ether and gold 15-minute bars",
+         "TQ-02": "the video trades a forex pair on 1-minute bars; coded on Delta bitcoin, ether and gold",
+         "JO-01": "his cloud settings: 20, 60, 120, 30 on bitcoin and ether, 18, 52, 104, 26 (legacy) on gold, on 1-hour bars",
+         "BV-01": "his examples are daily; coded on 4-hour bars, which he suggests when the daily is noisy"}
 TOPICS = ["india_index", "india_stocks", "crypto", "forex_us"]
 # when each batch's books start on the desk (premium-paper-service settings.YC3_START_T / YC3B_START_T)
 START1, START2, START3 = "2026-11-13T03:40:00Z", "2026-11-13T05:00:00Z", "2026-11-13T16:00:00Z"
 START4 = "2026-11-13T17:00:00Z"
 START5 = "2026-11-14T11:00:00Z"
 START6 = "2026-11-14T16:00:00Z"
+START7 = "2026-11-14T16:30:00Z"
 BATCH2 = {r.sid for r in ZS._NEW[31:54]}
 BATCH3 = {r.sid for r in ZS._NEW[54:69]}
 BATCH4 = {r.sid for r in ZS._NEW[69:90]}
 BATCH5 = {r.sid for r in ZS._NEW[90:100]}
-BATCH6 = {r.sid for r in ZS._NEW[100:]}
+BATCH6 = {r.sid for r in ZS._NEW[100:105]}
+BATCH7 = {r.sid for r in ZS._NEW[105:]}
 SKIP_REASON = {
     "boomingbulls": "fully covered by the Booming Bulls study (96 strategy videos analysed)",
     "sensibull": "options education (premiums, Greeks): no rule the desk can trade without option prices",
@@ -79,6 +84,8 @@ SKIP_REASON = {
     "tradingview": "platform tool tutorials (VWAP, volume profile, Fibonacci drawing tools), not strategies",
     # the ten extra crypto channels
     "cryptowendyo": "crypto news, interviews and market commentary: no trading rules",
+    # channels 61-70
+    "cryptosavy": "chart scenarios, Elliott Wave counts and bull-trap calls: no complete rule set",
 }
 
 
@@ -104,8 +111,9 @@ def main():
                 "markets": [MARKET_LABEL.get(x, x) for x in (rec.markets if rec else ())],
                 "deskMarkets": list(rec.markets) if rec else [], "overnight": bool(rec and (rec.overnight or "NSED" in rec.markets)),
                 "proxy": PROXY.get(sid),
-                "paperStart": (START6 if sid in BATCH6 else START5 if sid in BATCH5 else START4 if sid in BATCH4
-                               else START3 if sid in BATCH3 else START2 if sid in BATCH2 else START1) if rec else None,
+                "paperStart": (START7 if sid in BATCH7 else START6 if sid in BATCH6 else START5 if sid in BATCH5
+                               else START4 if sid in BATCH4 else START3 if sid in BATCH3 else START2 if sid in BATCH2
+                               else START1) if rec else None,
                 "rules": [{"kind": r["kind"], "label": CL.KIND_LABEL[r["kind"]], "tag": r["tag"], "text": r["text"], "times": r["times"]}
                           for r in sorted(s["rules"], key=lambda r: (r["tag"] == "A", CL.KINDS_ORDER.index(r["kind"])))],
                 "why": s["reasons"], "vague": c["vague"], "unclear": c["unclear"], "claims": c["claims"], "examples": c["examples"],
@@ -143,10 +151,10 @@ def main():
             "duplicates": sum(1 for r in rows if r["status"] == "duplicate"),
             "checked": sum(1 for r in coded if r["checks"] and r["checks"]["lookahead"] and r["checks"]["fills"]),
             "paperStart": START1, "paperStart2": START2, "paperStart3": START3, "paperStart4": START4,
-            "paperStart5": START5, "paperStart6": START6,
-            "batch1": len(ZS._NEW) - len(BATCH2) - len(BATCH3) - len(BATCH4) - len(BATCH5) - len(BATCH6),
+            "paperStart5": START5, "paperStart6": START6, "paperStart7": START7,
+            "batch1": len(ZS._NEW) - len(BATCH2) - len(BATCH3) - len(BATCH4) - len(BATCH5) - len(BATCH6) - len(BATCH7),
             "batch2": len(BATCH2), "batch3": len(BATCH3), "batch4": len(BATCH4), "batch5": len(BATCH5),
-            "batch6": len(BATCH6),
+            "batch6": len(BATCH6), "batch7": len(BATCH7),
             "built": "2026-11-14"}
     head = (
         "// GENERATED by backend/research/youtube_shortlist_2026_11/ze_export.py - do not edit by hand.\n"

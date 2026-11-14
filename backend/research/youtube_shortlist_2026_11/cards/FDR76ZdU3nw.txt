@@ -1,0 +1,16 @@
+video: FDR76ZdU3nw
+topic: crypto
+summary: Josh Olszewicz's 'bread and butter' Ichimoku cloud strategies (2016). Edge to edge: once price closes inside the cloud it tends to reach the other edge, so enter on the close inside, target the far edge, and stop when price drops back out of the edge it came in through. Kijun bounce: in a trend, keep bids at the kijun. C-clamp: tenkan far from kijun means overbought. All on any market and timeframe, higher timeframes winning.
+instruments: Bitcoin, S&P 500, USD/JPY (any)
+timeframes: Any (1h to weekly examples)
+style: swing
+= JO-01 | Ichimoku edge to edge: a close inside the cloud from one side targets the other edge
+R setup E 00:42 | Price that enters the cloud tends to touch the other edge. | "the idea is that if the price enters the cloud it's going to touch the other edge of the cloud at a bare minimum"
+R entry E 02:51 | Wait for the close inside the cloud. | "the key is to wait for the close in the cloud"
+R stop E 02:07 | The stop is dropping back out through the edge it came in. | "out of the cloud in the same Edge that it came into"
+R market E 00:02 | Any timeframe and market. | "all of these strategies are applicable on any time frame in any Market"
+R entry E 06:22 | Kijun bounce: bids near the kijun in a trend (discretionary, not coded). | "you want your bids closest to the key Jun"
+R market A - | Desk version: Delta BTCUSD, ETHUSD and XAUTUSD on 1-hour candles; his crypto cloud settings (20, 60, 120, 30) for bitcoin and ether and his legacy settings (18, 52, 104, 26) for gold, from his 2024 cloud video; held across days. | ""
+R entry A - | Long: the previous close below the cloud and this close inside it: enter at the next open, target the cloud's top edge at the signal bar. Short: from above the cloud, target the bottom edge. | ""
+R stop A - | Exit at the next open after a close back out of the entry edge; a hard stop 0.3% beyond that edge so the book can size. | ""
+T with_assumptions | the target is fixed at the far edge when the trade opens (A); the 0.3% hard stop and the settings choice are ours (A); the kijun bounce and C-clamp are discretionary

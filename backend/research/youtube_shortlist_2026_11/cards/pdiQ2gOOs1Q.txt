@@ -1,0 +1,11 @@
+video: pdiQ2gOOs1Q
+topic: crypto
+summary: Jaime Merino's first intraday class (in Spanish): four ways to trade - against the trend, with the trend, bounces and breakouts - on 4- and 6-hour charts. Draw the trend line or channel, buy the bounce only after it bounces (a buy stop just above), and take a breakout only when a candle body closes beyond the line; size each trade as a tenth of the capital.
+instruments: Altcoins, bitcoin
+timeframes: 4h, 6h
+style: intraday
+= JM-02 | Trend-line bounces and breakouts on 4- and 6-hour charts (Spanish)
+R setup E 09:49 | Four ways to trade: against the trend, with it, bounces and breakouts. | "hay cuatro maneras de operar contra tendencia a favor de tendencia rebotes y rupturas"
+R entry E 13:18 | On a bounce, wait for the bounce itself. | "cuando operamos los rebotes tienes que esperar a que rebote"
+R entry E 14:43 | A valid breakout needs the candle body to close beyond the line. | "si la ruptura fuera efectiva tendría que haber cerrado el cuerpo de la vela por arriba"
+T concept_only | the trend lines and channels are drawn by eye; the bounce and breakout entries depend on them

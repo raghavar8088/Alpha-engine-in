@@ -8159,5 +8159,506 @@
   "pick_title": "CryptoWendyO",
   "pick_followers": 272000,
   "sure": true
+ },
+ "tradepro": {
+  "key": "tradepro",
+  "name": "Trade Pro",
+  "query": "Trade Pro trading",
+  "star": false,
+  "lists": "D61",
+  "group": "crypto",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCrXjzUN6EtlyhaaAerbPfkQ",
+    "title": "Trade Pro",
+    "followers": 220000,
+    "about": "I'm here to help you become a profitable trader while keeping things realistic and to the point. My focus is on creating rigid, rules ...",
+    "score": 1
+   },
+   {
+    "id": "UCGTRPMFk1WiFEIM_FW1t3Ag",
+    "title": "TradeProsTV",
+    "followers": 28200,
+    "about": "\"Welcome to TradeProsTV! Your ultimate destination for mastering both forex and crypto trading. Join us live as we navigate ...",
+    "score": 0
+   },
+   {
+    "id": "UCKywiJmo2z66ylCOQSJ64hw",
+    "title": "TRADEPRO Academy",
+    "followers": 90600,
+    "about": "Welcome to TRADEPRO Academy: free institutional-grade trading education for serious traders. I am George Papazov, futures ...",
+    "score": 0
+   },
+   {
+    "id": "UCB5dISM93_Vr5i5AvZgTGFg",
+    "title": "Pro Trading School",
+    "followers": 260000,
+    "about": "Welcome to Pro Trading School—your go-to channel for mastering advanced trading strategies and building a successful trading ...",
+    "score": 0.5
+   },
+   {
+    "id": "UCJ30l245xd2-Xj_BaTl1z0Q",
+    "title": "Pro Trading Skills ( Bolsa - OPTIONS - Crypto )",
+    "followers": 57000,
+    "about": "Aprende a invertir como un profesional. En Pro Trading Skills te enseñamos a leer correctamente el mercado, entender el entorno ...",
+    "score": 0.2
+   }
+  ],
+  "pick": "UCrXjzUN6EtlyhaaAerbPfkQ",
+  "pick_title": "Trade Pro",
+  "pick_followers": 220000,
+  "sure": true,
+  "override": "the Trade Pro channel itself; the search query matched Pro Trading School first"
+ },
+ "algotradingsaleh": {
+  "key": "algotradingsaleh",
+  "name": "Algo-trading with Saleh",
+  "query": "Algo-trading with Saleh",
+  "star": false,
+  "lists": "D63",
+  "group": "sys",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCP7GU8awozElC70LoRTXxjQ",
+    "title": "Algo-trading with Saleh",
+    "followers": 49400,
+    "about": "Practical tutorials about algo-trading with Python.",
+    "score": 1
+   },
+   {
+    "id": "UCI-qy67Bf0T9bptQqDJARIQ",
+    "title": "Osama, the Algo Trader",
+    "followers": 1850,
+    "about": "I'm Osama, the algo trader. I help you do it by building systems that automate your trading, pass prop firm challenges, and protect ...",
+    "score": 0.33
+   },
+   {
+    "id": "UCprk_sD-nWoLun6U_elO3jw",
+    "title": "Charbel Saleh",
+    "followers": null,
+    "about": "... AI tools and automated trading systems If you believe in sound money — whether digital or physical — you're in the right place.",
+    "score": 0.5
+   },
+   {
+    "id": "UCM2S0U2fRB72X_f2X9HZACg",
+    "title": "Ali Saleh",
+    "followers": 2,
+    "about": "i creat setup.",
+    "score": 0.5
+   },
+   {
+    "id": "UCX2PPf56DDob4TH80GgL0rA",
+    "title": "Saleh's Recommendation",
+    "followers": 7,
+    "about": "You can get short, mid and long term profit by following my recommendations. I will recommend US stocks with the current price ...",
+    "score": 0.5
+   }
+  ],
+  "pick": "UCP7GU8awozElC70LoRTXxjQ",
+  "pick_title": "Algo-trading with Saleh",
+  "pick_followers": 49400,
+  "sure": true
+ },
+ "kevinsvenson": {
+  "key": "kevinsvenson",
+  "name": "Kevin Svenson",
+  "query": "Kevin Svenson",
+  "star": false,
+  "lists": "D65",
+  "group": "crypto",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCVTbGN6Hzi4sSAz1bKHiDiQ",
+    "title": "Kevin Svenson",
+    "followers": 82200,
+    "about": "Channel Description: Kevin Svenson is a leading crypto analyst focused on Bitcoin. With over 200000+ follows across YouTube ...",
+    "score": 1
+   },
+   {
+    "id": "UCM4ltuGF2mPuMzOUwSP6TlQ",
+    "title": "Kevin Svenson Crypto ",
+    "followers": null,
+    "about": "",
+    "score": 0.67
+   },
+   {
+    "id": "UCzC9GXWBgDNojOrPa7LSSvg",
+    "title": "kevin svenson",
+    "followers": 28,
+    "about": "",
+    "score": 1
+   },
+   {
+    "id": "UCEU4BSYdxTujZZRAv5jnrNg",
+    "title": "Kevin Svenson",
+    "followers": 7,
+    "about": "",
+    "score": 1
+   },
+   {
+    "id": "UCFtC06LrISdE1ZeB9_S-6Ng",
+    "title": "Kevin Svenson Crypto 十①⑦②⓪⑧③①⑧②⑦⑧",
+    "followers": null,
+    "about": "",
+    "score": 0.5
+   }
+  ],
+  "pick": "UCVTbGN6Hzi4sSAz1bKHiDiQ",
+  "pick_title": "Kevin Svenson",
+  "pick_followers": 82200,
+  "sure": true
+ },
+ "charthackers": {
+  "key": "charthackers",
+  "name": "Chart Hackers - Dylan",
+  "query": "Chart Hackers",
+  "star": false,
+  "lists": "D66",
+  "group": "crypto",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCybasP-2D2b5kTLAb_kvhWQ",
+    "title": "Chart Hackers",
+    "followers": 219000,
+    "about": "Welcome to Chart Hackers — Precision Live Trading & Professional Execution Chart Hackers is a live trading community built on ...",
+    "score": 1
+   },
+   {
+    "id": "UC-R7rrj7uhPQ96Ia209Qa0w",
+    "title": "Chart Hackers",
+    "followers": 1460,
+    "about": "Welcome to our YouTube channel dedicated to Intraday Trading in Options! Our channel provides valuable information, analysis, ...",
+    "score": 1
+   },
+   {
+    "id": "UCZWkJW1EPWCBM0c8Du-U3tQ",
+    "title": "DavidSendsIt-Old",
+    "followers": 235,
+    "about": "... Co-Host of the Chart Hackers YouTube Channel. EXCLUSIVE DEALS FROM MY PARTNERS: https://linktr.ee/DavidSendsIt.",
+    "score": 0
+   },
+   {
+    "id": "UCOcD_2N04_XS6XgImIWcR1Q",
+    "title": "MR. INDIAN HACKER Vlogs",
+    "followers": 4860000,
+    "about": "Jai hind jai Bharat For business - team@mrindianhacker.com.",
+    "score": 0
+   },
+   {
+    "id": "UCX4sm9WLJe-na67yrtL1QJg",
+    "title": "Forex Hacker",
+    "followers": 657,
+    "about": "I am a professional trader.. I have been trading forex for more than 8 years. I have achieved tremendous success in forex in the ...",
+    "score": 0
+   }
+  ],
+  "pick": "UCybasP-2D2b5kTLAb_kvhWQ",
+  "pick_title": "Chart Hackers",
+  "pick_followers": 219000,
+  "sure": true
+ },
+ "cheekycrypto": {
+  "key": "cheekycrypto",
+  "name": "Cheeky Crypto",
+  "query": "Cheeky Crypto",
+  "star": false,
+  "lists": "D67",
+  "group": "crypto",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCMZs92CZAJ7O3o3RhCgcojA",
+    "title": "Cheeky Crypto Education",
+    "followers": 2800,
+    "about": "Hey guys, Cheeky Crypto Education is a channel dedicated to useful finance information and education. Trading tutorials, how-to ...",
+    "score": 0.67
+   },
+   {
+    "id": "UCd4Ys__EL_gbJrYq6JscrAw",
+    "title": "Cheeky Crypto",
+    "followers": 227000,
+    "about": "If you SUBSCRIBE, you'll get daily analysis on the Bitcoin and crypto market. Don't miss out! Our channel focuses on Bitcoin news ...",
+    "score": 1
+   },
+   {
+    "id": "UCLVcFpfmVoxcQtZ0B1go9Rg",
+    "title": "Cheeky Crypto Unfiltered",
+    "followers": 21400,
+    "about": "If you SUBSCRIBE, you'll get daily analysis on the Bitcoin and crypto market. Don't miss out! Our channel focuses on Cardano ...",
+    "score": 0.67
+   },
+   {
+    "id": "UCJRStKq_adOvScuq1V6N25g",
+    "title": "Cheeky Crypto Plus",
+    "followers": 26700,
+    "about": "If you SUBSCRIBE, you'll get to stay ahead in the fast-moving world of cryptocurrency with clear, actionable insights. We bring you ...",
+    "score": 0.67
+   },
+   {
+    "id": "UCvpBW2wOeJxGiYTABnrinhA",
+    "title": "Cheeky Crypto Market Updates",
+    "followers": 56500,
+    "about": "If you SUBSCRIBE, you'll get daily analysis on the Bitcoin and crypto market. Don't miss out! Our channel focuses on Bitcoin news ...",
+    "score": 0.5
+   }
+  ],
+  "pick": "UCd4Ys__EL_gbJrYq6JscrAw",
+  "pick_title": "Cheeky Crypto",
+  "pick_followers": 227000,
+  "sure": true
+ },
+ "tradinglatino": {
+  "key": "tradinglatino",
+  "name": "Trading Latino - Jaime Merino",
+  "query": "Trading Latino Jaime Merino",
+  "star": false,
+  "lists": "D68",
+  "group": "crypto",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCLjSq1FapG5OgvHsDKinHdA",
+    "title": "Jaime Merino | TradingLatino",
+    "followers": 354000,
+    "about": "Jaime Merino | Fundador de TradingLatino | Inversionista en Bitcoin y activos digitales | CEO de Bitwise Technologies ...",
+    "score": 0.67
+   },
+   {
+    "id": "UCOx8XHELQg8zS_otF8QWlJA",
+    "title": "Aprende TradingLatino Criptomonedas",
+    "followers": 298,
+    "about": "Canal para aprender trading de la mano del gran Tradinglatino (Jaime Merino)",
+    "score": 0
+   },
+   {
+    "id": "UCSq99RMTVK21_CUq6trTwcg",
+    "title": "Blind See",
+    "followers": 3,
+    "about": "",
+    "score": 0
+   },
+   {
+    "id": "UCHMhzkMCkUzbkS4-0VosAlA",
+    "title": "한국 무역",
+    "followers": null,
+    "about": "Trading Latino의 Jaime Merino가 작업한 비공식 더빙입니다.",
+    "score": 0
+   },
+   {
+    "id": "UCn2UHf8rO8sThlGFUo15qOg",
+    "title": "Mrpol futuros de criptomonedas ",
+    "followers": null,
+    "about": "Trading de criptomonedas usando la estrategia de Jaime Merino del canal de Trading latino Canal de señales gratis en la ...",
+    "score": 0
+   }
+  ],
+  "pick": "UCLjSq1FapG5OgvHsDKinHdA",
+  "pick_title": "Jaime Merino | TradingLatino",
+  "pick_followers": 354000,
+  "sure": true
+ },
+ "bravenewcoin": {
+  "key": "bravenewcoin",
+  "name": "Brave New Coin",
+  "query": "Brave New Coin",
+  "star": false,
+  "lists": "D69",
+  "group": "crypto",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCnh6wv9fgqD9DuHdZwZAb7A",
+    "title": "Brave New Coin",
+    "followers": 16200,
+    "about": "Brave New Coin BNC) is a world leader in crypto and blockchain news, multi-media and research. BNC's media channels include ...",
+    "score": 1
+   },
+   {
+    "id": "UCwGbJpRNZT8b7G0b08RuqSQ",
+    "title": "Brave New Gem",
+    "followers": 292,
+    "about": "I break down crypto/Web3 trends, market psychology, and risk-managed strategies into simple, actionable insights. No hype.",
+    "score": 0.67
+   },
+   {
+    "id": "UCwuE2KNSD7f7Ck2NDfl6ybA",
+    "title": "Brave Counsel",
+    "followers": 14000,
+    "about": "THE OFFICIAL CHANNEL OF BRAVE COUNSEL ! THE NUMBER 1 SOURCE FOR THE BLOCKCHAIN, DIGITAL ASSET AND ...",
+    "score": 0.5
+   },
+   {
+    "id": "UCBYgIJCAaQN0LjVZbpAZoVQ",
+    "title": "ValtaMelone",
+    "followers": 11,
+    "about": "This is a public announcement! I do what I want. XRP donations: rKubweymDNqt2UMt8LRrbSkbUNi3AmShLZ Facebook: ...",
+    "score": 0
+   },
+   {
+    "id": "UCetxkZolEBHX47BqtZktbkg",
+    "title": "Bitcoin.com - Official Channel",
+    "followers": 106000,
+    "about": "Since 2015, Bitcoin.com has helped millions get started with crypto through trusted news, education, and easy-to-use ...",
+    "score": 0
+   }
+  ],
+  "pick": "UCnh6wv9fgqD9DuHdZwZAb7A",
+  "pick_title": "Brave New Coin",
+  "pick_followers": 16200,
+  "sure": true
+ },
+ "cryptosavy": {
+  "key": "cryptosavy",
+  "name": "Crypto Savy",
+  "query": "Crypto Savy",
+  "star": false,
+  "lists": "D70",
+  "group": "crypto",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCGUwKGPkCMNXynqYQQA2vXw",
+    "title": "Crypto Savy",
+    "followers": 61100,
+    "about": "BITCOIN and Crypto and Stock Market Technical Analysis Follow me on twitter: @CryptoSavy1 Please like and subscribe to the ...",
+    "score": 1
+   },
+   {
+    "id": "UCEy3XXMPu2Ex_RG7VT48dhA",
+    "title": "Crypto Savy",
+    "followers": null,
+    "about": "Crypto Savy.",
+    "score": 1
+   },
+   {
+    "id": "UCgENMQS8HGuCX6K3QW77IGQ",
+    "title": "crypto savy",
+    "followers": 11,
+    "about": "",
+    "score": 1
+   },
+   {
+    "id": "UCrBfeQDobs8Z8fJ7vj6zx0Q",
+    "title": "Crypto savy",
+    "followers": 14,
+    "about": "",
+    "score": 1
+   },
+   {
+    "id": "UClMW7w5LIPCr98Hw17GeiYQ",
+    "title": "Savvy Finance",
+    "followers": 344000,
+    "about": "This channel is all about being savvy with your finance . We create and share videos about investments and how best you can ...",
+    "score": 0
+   }
+  ],
+  "pick": "UCGUwKGPkCMNXynqYQQA2vXw",
+  "pick_title": "Crypto Savy",
+  "pick_followers": 61100,
+  "sure": true
+ },
+ "josholszewicz": {
+  "key": "josholszewicz",
+  "name": "Josh Olszewicz",
+  "query": "Josh Olszewicz crypto trading",
+  "star": false,
+  "lists": "D62",
+  "group": "crypto",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UC587BAG9cLTYtJ7Q4CqcOnw",
+    "title": "Josh Olszewicz",
+    "followers": 36300,
+    "about": "Welcome to the trading buffet.",
+    "score": 1
+   },
+   {
+    "id": "UC0cF5mPc9qY3TxkAcPXR6mQ",
+    "title": "Canary Capital",
+    "followers": 102,
+    "about": "Maximizing value through undervalued opportunities while managing risk with strategic precision and expert market analysis.",
+    "score": 0
+   },
+   {
+    "id": "UCyzSHCLVUss0K2GEGrIGF8A",
+    "title": "Valkyrie Investments",
+    "followers": 1780,
+    "about": "Valkyrie Investments Inc. is a specialized alternative asset management firm at the intersection of traditional finance and the ...",
+    "score": 0
+   },
+   {
+    "id": "UC_aItj29BP4go7TZMtR20Ow",
+    "title": "Going Elliptic",
+    "followers": 102,
+    "about": "Objective and detailed analysis of crypto markets by best experts in the space. You normally pay $$$ for such content. We believe ...",
+    "score": 0
+   },
+   {
+    "id": "UCO0Z_tyrGJCaVeOnn2UxBaQ",
+    "title": "Crypto and Muay Thai Podcast",
+    "followers": 151,
+    "about": "Quenching the intellectual thirst of those interested in blockchain, digital assets, combat sports, and macro-finance.",
+    "score": 0.25
+   }
+  ],
+  "pick": "UC587BAG9cLTYtJ7Q4CqcOnw",
+  "pick_title": "Josh Olszewicz",
+  "pick_followers": 36300,
+  "sure": true
+ },
+ "moondev": {
+  "key": "moondev",
+  "name": "Moon Dev",
+  "query": "Moon Dev trading bots",
+  "star": false,
+  "lists": "D64",
+  "group": "sys",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCN7D80fY9xMYu5mHhUhXEFw",
+    "title": "Moon Dev",
+    "followers": 115000,
+    "about": "i believe code is the great equalizer Twitter - @MoonDevOnYT not financial advice.",
+    "score": 1
+   },
+   {
+    "id": "UCPM58bDz-eovB5ezbAXkywQ",
+    "title": "MoonDev Trades",
+    "followers": 40,
+    "about": "code is the great equalizer not financial advice follow @moondevonyt for more.",
+    "score": 0
+   },
+   {
+    "id": "UCdaDUdAtnTQSNN7Ystqp6AA",
+    "title": "Moon Dev Automated Trading",
+    "followers": 28,
+    "about": "",
+    "score": 0.67
+   },
+   {
+    "id": "UCdcFHvgPLZXIQnYyWYJ3X7w",
+    "title": "Moon Dev Snips",
+    "followers": 856,
+    "about": "I post snips and clips of @moondevonyt.",
+    "score": 0.67
+   },
+   {
+    "id": "UCa_t2wG_YY2FpGzoMcV1RBA",
+    "title": "Moon Dev Clips",
+    "followers": 103,
+    "about": "",
+    "score": 0.67
+   }
+  ],
+  "pick": "UCN7D80fY9xMYu5mHhUhXEFw",
+  "pick_title": "Moon Dev",
+  "pick_followers": 115000,
+  "sure": true
  }
 }

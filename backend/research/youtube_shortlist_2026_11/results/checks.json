@@ -1440,6 +1440,148 @@
    "eth_cuts": 12,
    "eth_lookahead_ok": true,
    "eth_diffs": []
+  },
+  "TQ-01": {
+   "signals": 21534,
+   "trades": 3482,
+   "reasons": {
+    "stop": 2448,
+    "target": 930,
+    "time": 104
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 22.5,
+   "eth_signals": 11011,
+   "eth_trades": 1811,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": []
+  },
+  "TQ-02": {
+   "signals": 1413,
+   "trades": 1391,
+   "reasons": {
+    "stop": 1030,
+    "target": 352,
+    "time": 9
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 29.9,
+   "eth_signals": 535,
+   "eth_trades": 531,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": []
+  },
+  "TQ-03": {
+   "signals": 372,
+   "trades": 372,
+   "reasons": {
+    "trail_stop": 335,
+    "stop": 24,
+    "target": 12,
+    "time": 1
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 7.8,
+   "eth_signals": 180,
+   "eth_trades": 180,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": []
+  },
+  "JO-01": {
+   "signals": 185,
+   "trades": 173,
+   "reasons": {
+    "stop": 51,
+    "target": 72,
+    "exit_signal": 50
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 2.1,
+   "eth_signals": 75,
+   "eth_trades": 71,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": []
+  },
+  "SA-01": {
+   "signals": 48,
+   "trades": 17,
+   "reasons": {
+    "target": 9,
+    "stop": 8
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 0.9,
+   "eth_signals": 27,
+   "eth_trades": 9,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": []
+  },
+  "SA-02": {
+   "signals": 40,
+   "trades": 40,
+   "reasons": {
+    "target": 22,
+    "stop": 18
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 3.3,
+   "eth_signals": 19,
+   "eth_trades": 19,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": []
+  },
+  "SA-03": {
+   "signals": 33,
+   "trades": 15,
+   "reasons": {
+    "target": 10,
+    "stop": 5
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 0.8,
+   "eth_signals": 18,
+   "eth_trades": 9,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": []
+  },
+  "BV-01": {
+   "signals": 40,
+   "trades": 31,
+   "reasons": {
+    "trail_stop": 12,
+    "exit_signal": 14,
+    "stop": 5
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 2.0,
+   "eth_signals": 12,
+   "eth_trades": 10,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": []
   }
  },
  "problems": {}

@@ -1,0 +1,12 @@
+video: KcyFhT8AdIs
+topic: crypto
+summary: Jaime Merino (Trading Latino, in Spanish) shows how he screens altcoins for scalps: TradingView's crypto screener on 15 minutes for coins at the lower Bollinger Band with the stochastic outside its band, then a CoinMarketCap rank check and a read of the 6- and 12-hour charts (double tops, rounded bottoms, inverse head and shoulders) before sending a signal with a -10% stop.
+instruments: Altcoins (REQ/BTC, PHX)
+timeframes: 15m screen, 6h and 12h charts
+style: scalping
+= JM-01 | Altcoin screen: price at the lower Bollinger Band with the stochastic outside its band, then chart patterns (Spanish)
+R setup E 04:49 | From class 1: trade the Bollinger Bands when price touches the lower band. | "operar con las bandas de bollinger cuando la gráfica está tocando la banda inferior"
+R filter E 05:34 | And the stochastic outside its purple channel. | "cuando el estocástico está por fuera del canal morado"
+R timeframe E 11:17 | He reads the 6-hour and 12-hour charts. | "yo uso 6 horas y 12 horas"
+R stop E 16:52 | A -10% stop on the signal. | "con un stop loss de menos 10%"
+T concept_only | the screen only shortlists altcoins; the trade is decided from chart patterns read by eye on the 6- and 12-hour charts

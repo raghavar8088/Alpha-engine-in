@@ -1738,3 +1738,108 @@ videos 2570, P1 106 (4%), candidates 93, cov 0
 -  6.80 | fdiT7-qbyKY | 15m | 6300 | 2026-05-15 | SCARY Aave Exploit Just Wiped $200M+ In Liquidity!
 -  6.26 | mHypt4oWpTo | 31m | 18000 | 2026-09-15 | BREAKING NEW CLARITY Act Text Just Dropped BANKS ARE PANICKING?! BITCOIN BREAKOUT!
 
+## tradepro - Trade Pro (Trade Pro)  [crypto] 
+videos 388, P1 161 (41%), candidates 172, cov 0
+- 12.62 | 0Q6iENmeUys | 9m | 417000 | 2021-11-15 | Simple But Effective 1 Minute Scalping Strategy Tested 100 Trades | EMA + Fractal Indicators
+- 12.01 | AM52D58vGQk | 9m | 102000 | 2021-11-15 | HIGH PROFIT 1 Minute Chart Scalping Strategy Proven 100 Trades - RSI+ 200 EMA+ Engulfing
+- 11.97 | e6LnibwDZKs | 11m | 94000 | 2022-11-15 | 1 Minute Bitcoin Scalping Strategy Tested 100 Trades: Heikin Ashi RSI Indicator
+- 11.79 | ohtnf4H_HMA | 11m | 622000 | 2021-11-15 | 1 Minute Scalping Strategy Just Using 50 EMA And 200 EMA
+- 11.31 | v9N4kj4-V2s | 13m | 206000 | 2021-11-15 | Extremely Profitable 1 Minute Chart Trading Strategy Proven 100 Trades - EMA + RSI + Stochastic
+- 11.11 | ofiGdsNqTP4 | 8m | 1300000 | 2021-11-15 | Simple Trading Strategy That "Turned $1000 into $50000" Tested 100 Times - Bollinger Bands + MA
+- 10.85 | 2tgmR9jzuCM | 7m | 71000 | 2020-11-15 | Stochastic+SMA+WMA Trading Strategy Tested 100 Times (5 Minute Chart) - Full Results
+- 10.79 | D1hzvCckO0M | 12m | 62000 | 2021-11-15 | "90%+" Win Rate Insane Forex Scalping Strategy Tested 100 Times - 14 EMA + RSI
+
+## algotradingsaleh - Algo-trading with Saleh (Algo-trading with Saleh)  [sys] 
+videos 84, P1 12 (14%), candidates 12, cov 0
+- 10.28 | kIudgLFh5cw | 21m | 19000 | 2025-11-15 | GPT: ADX scalping strategy in Python makes 4479%
+-  9.71 | 40HulO-CVTA | 20m | 5100 | 2024-11-15 | Bitcoin SCALPING strategy using Supertrend in Python
+-  9.38 | Rw_MlMSUEr0 | 18m | 24000 | 2024-11-15 | ChatGPT o1: Alligator Day Trading Strategy in Python Makes 1721%
+-  8.81 | uDFZsIqHjT4 | 21m | 65000 | 2025-11-15 | GPT: KAMA Scalping Strategy in Python Makes 795%
+-  8.11 | -VVfk2CE8Ao | 20m | 13000 | 2025-11-15 | Cloud Scalping Strategy in Python Makes 223%
+-  7.59 | l6rfqbd5ets | 20m | 3900 | 2025-11-15 | "Trend Wave Rider" scalping strategy in Python makes 116%
+-  7.30 | b6ClJKhEQcE | 21m | 20000 | 2025-11-15 | GPT: Triple moving average strategy in Python makes 4983%
+-  6.82 | sf4xCk5ZEIA | 14m | 6600 | 2024-11-15 | Ichimoku Cloud Strategy in Python Makes 257%
+
+## kevinsvenson - Kevin Svenson (Kevin Svenson)  [crypto] 
+videos 837, P1 40 (5%), candidates 132, cov 0
+-  8.28 | Y5bPpLl5LY8 | 12m | 19000 | 2025-11-15 | ARE YOU READY?!? #BITCOIN **Weekly RSI Breakout** HAPPENING NOW + $Alts & Dominance
+-  8.26 | -t5V1cNm5oE | 12m | 18000 | 2025-11-15 | #BITCOIN MONTHLY RSI **BREAKOUT** INCOMING?!? | #FOMC Meeting
+-  8.23 | 9svJSldvs0E | 9m | 17000 | 2024-11-15 | #BITCOIN PARABOLIC TREND BREAKDOWN | $ALT-COINS GAINING DOMINANCE!?!
+-  8.20 | VE9cd2NPA8o | 10m | 16000 | 2025-11-15 | #BITCOIN WEEKLY RSI BREAKOUT IS CLOSE!!!
+-  8.18 | vuT318el-JE | 8m | 15000 | 2024-11-15 | #BITCOIN WEEKLY RSI **BREAKOUT** 💥📈 CONFIRMED ✅
+-  8.18 | hXCln_emghs | 7m | 15000 | 2024-11-15 | 🚨 #BITCOIN IN A CRITICAL ZONE!!! ⚠️ Parabolic Trend?!?
+-  8.11 | vA--1V2sYGU | 8m | 13000 | 2024-11-15 | 🚨 #BITCOIN WEEKLY RSI NEAR A BREAKOUT?!? 🧐📊
+-  8.08 | yJe9PXowDSk | 7m | 12000 | 2024-11-15 | #Bitcoin | The Parabolic Trend is STILL IN PLAY?!?
+
+## charthackers - Chart Hackers - Dylan (Chart Hackers)  [crypto] 
+videos 896, P1 70 (8%), candidates 142, cov 0
+-  7.75 | No8jjJozMk8 | 38m | 5600 | 2025-12-15 | Bitcoin Hits Major Resistance! [Squeeze Or Reversal?]
+-  7.57 | q7o2RNoyAnU | 52m | 3700 | 2026-08-15 | Relief Bounce Bull Trap Incoming! Closing July Green? (CRYPTO TRADING LIVE)
+-  7.53 | r9yMiUQNqCU | 45m | 3400 | 2026-08-15 | WILL WE TAKE THE TRADE? BTC Liquidity Sweep or Big Short Squeeze? (CRYPTO TRADING)
+-  7.00 | ki5-rb6Vnmw | 60m | 10000 | 2025-11-15 | CPI Results To Fuel The Next Crypto Breakout?! [WATCH THIS]
+-  6.32 | ZecWx8Oej8M | 46m | 21000 | 2024-11-15 | HUGE ALTCOIN OPPORTUNITY! (While Traders Are Falling For Mt. Gox's TRAP)
+-  6.28 | fw47kLwqnXc | 57m | 19000 | 2024-11-15 | This FOMC Will Be The ULTIMATE Crypto Bear Trap! [PROOF]
+-  6.23 | EOvkdZPnLMc | 52m | 17000 | 2024-11-15 | WARNING To Altcoin Traders! (OBVIOUS TRAP)
+-  6.20 | qYrTpZKELdQ | 58m | 16000 | 2025-11-15 | Altcoin Breakout LOADING! 🚨 [Here Are Your Best Bets!]
+
+## cheekycrypto - Cheeky Crypto (Cheeky Crypto)  [crypto] 
+videos 1344, P1 20 (1%), candidates 38, cov 0
+-  6.91 | 6sZNiywd-Lg | 21m | 8200 | 2026-06-15 | XRP Explained: The $10.00 Mathematical Structure Every Crypto Investor Needs to See
+-  6.91 | WxE0XOJ04dw | 16m | 8100 | 2025-11-15 | XRP vs $10T: Liquidity Crazy Results!
+-  6.90 | 1Nj69acFfKQ | 16m | 7900 | 2025-11-15 | I Found XRP’s Secret Diet and it's a Supply Squeeze
+-  6.28 | ecWeQCiGh5k | 21m | 19000 | 2026-05-15 | IT’S OVER: The Senate Trap For Ripple Investors
+-  6.20 | SsUmhKW4SLE | 31m | 16000 | 2026-01-15 | The XRP $30 breakout has ALREADY started
+-  6.15 | HUTtw199u0Q | 26m | 14000 | 2026-09-15 | XRP Just Got a Major Liquidity Boost
+-  6.08 | jfd3bVqhCew | 18m | 12000 | 2026-05-15 | IT’S OVER: No More Waiting for the XRP Breakout
+-  6.00 | vkQEi3eh3eI | 22m | 10000 | 2026-06-15 | OFFICIAL: The $1.11 to $1.67 XRP Trap Has Been Exposed!
+
+## tradinglatino - Trading Latino - Jaime Merino (Jaime Merino | TradingLatino)  [crypto] 
+videos 1961, P1 23 (1%), candidates 56, cov 0
+-  8.44 | GRjtGiu56Qc | 22m | 276000 | 2018-11-15 | 📕Taller de Scalping: Operando en Tradingview con Broker | #BITCOIN V113
+-  8.02 | KcyFhT8AdIs | 21m | 105000 | 2018-11-15 | 📕Taller de Scalping: Clase#2 - Buscando Señales en Criptomonedas | #BITCOIN V118
+-  7.53 | VoNZMUC_EEo | 75m | 34000 | 2023-11-15 | BITCOIN RUMBO AL GAP /V1200
+-  7.43 | Sv_1K0ovqdg | 9m | 27000 | 2019-11-15 | Scalping Right During the Bitcoin Downtrend | #BITCOIN V134
+-  6.96 | U2UqB48Ye00 | 70m | 9200 | 2019-11-15 | 💯GAP CME FUTUROS Y PROYECCIÓN DE CRIPTOS | BITCOIN V267
+-  6.92 | RGWpXE_kdC0 | 10m | 8400 | 2018-11-15 | 🤭 MI PORTAFOLIO DE CRIPTOMONEDAS, TRADING INTRADIA Y SCALPING, TRADINGVIEW | BITCOIN V73
+-  6.61 | hGUZMhsajaU | 50m | 41000 | 2025-11-15 | 🚨 Bitcoin: The perfect time to buy or a death trap?
+-  6.59 | f0bnKvQPRb8 | 76m | 39000 | 2026-10-25 | 💥 MARKET PANIC OR THE BIG TRAP?
+
+## bravenewcoin - Brave New Coin (Brave New Coin)  [crypto] 
+videos 1559, P1 80 (5%), candidates 91, cov 0
+-  6.23 | rD2ltmabRLo | 6m | 1700 | 2025-11-15 | XRP Price Secrets: Multi-Timeframe Breakdown (RSI, EMAs & Order Blocks)
+-  6.00 | EdKe0TrBkCc | 16m | 1000 | 2021-11-15 | Crypto Trading Course for Beginners - Volume Profile of the Visible Range
+-  5.78 | v-9h6hoOSYA | 16m | 6000 | 2021-11-15 | Crypto Trading Tips for Beginners - how to use the Ichimoku Cloud
+-  5.34 | yCnLqCqwtOQ | 17m | 2200 | 2021-11-15 | Crypto Trading Tips for Beginners - how to use the Williams Fractal & Alligator system
+-  4.99 | pqPbZ7ZsFJA | 15m | 977 | 2021-11-15 | Crypto Trading Tips for Beginners - how to use Bollinger Bands
+-  4.97 | UmKabGi0OKY | 14m | 933 | 2021-11-15 | Crypto Trading Course for Beginners -  Parabolic SAR explained
+-  4.93 | q4rmPN1lY5g | 5m | 845 | 2025-11-15 | XRP Price Analysis: Is a Breakout Coming?
+-  4.51 | ytBe-vXeUD0 | 33m | 313 | 2024-11-15 | Eclipse Fi - A Launch and Liquidity Protocol on Cosmos
+
+## cryptosavy - Crypto Savy (Crypto Savy)  [crypto] 
+videos 1817, P1 16 (1%), candidates 84, cov 0
+-  6.99 | L839ufr8iQg | 13m | 9700 | 2023-11-15 | 👀 BITCOIN CME GAPS BELOW! 👀 (Why do markets gap and Will they fill!?)
+-  6.04 | 9x0zs6nB8Lg | 16m | 11000 | 2024-11-15 | Final Bitcoin Bull Trap or Moon Shot!? (my current trade)
+-  5.59 | 2vXzwN_KO-M | 9m | 3900 | 2024-11-15 | BITCOIN BULL TRAP!!?? (what are the markets showing?)
+-  5.43 | ObbwS8LVh4E | 7m | 2700 | 2024-11-15 | Did BITCOIN  just have a MASSIVE BULL TRAP!? (Must see charts inside!!!)
+-  5.43 | 8YwUUuOASRA | 8m | 2700 | 2024-11-15 | The end of the BITCOIN 7 month range  IS COMING! (what does this mean?)
+-  5.40 | nU1fxgbdItc | 12m | 2500 | 2026-09-15 | BITCOIN TO THE MOON! or HUGE BULL TRAP? (Elliott wave count)
+-  5.32 | TaaXmFxKy5s | 8m | 2100 | 2025-11-15 | ⚠️URGENT!!⚠️ Crypto Reserve!?!? To The Moon!!  (or just a FOMO liquidity grab)
+-  5.20 | mK2YNVlg8zE | 20m | 16000 | 2023-11-15 | BITCOIN BOTTOM IN!!? ....OR JUST ANOTHER TRAP!?
+
+## josholszewicz - Josh Olszewicz (Josh Olszewicz)  [crypto] 
+videos 993, P1 31 (3%), candidates 54, cov 0
+-  7.49 | bUilNMYUBZM | 31m | 3100 | 2024-11-15 | Actionable Ichimoku Cloud Signals: The Kumo Breakout
+-  6.65 | FDR76ZdU3nw | 14m | 45000 | 2016-11-15 | Better Know An Indicator: Ichimoku Cloud Strategies
+-  6.42 | apC2wC3xC9w | 19m | 2600 | 2016-11-15 | Muti-Timeframe & Multi-Exchange Trend Strength Analysis w/Ichimoku Cloud and RSI
+-  5.73 | wb8HU7L2Obc | 15m | 5400 | 2026-11-01 | Setup Sunday: Trend Reset
+-  5.58 | u221wm99ATY | 26m | 3800 | 2024-11-15 | Alt Coins: Insert Liquidity Here to Play Again
+-  5.57 | NYE1DNHhO3Y | 21m | 3700 | 2025-11-15 | Setup Sunday: You Get a Kumo Breakout
+-  5.53 | 4fd8dt3r9g8 | 29m | 3400 | 2024-11-15 | Setup Sunday: Is The Bull Trend All Over?
+-  5.53 | Saofm9VwKXM | 24m | 3400 | 2024-11-15 | Alt Coins: BTC Continues Absorbing Crypto Liquidity
+
+## moondev - Moon Dev (Moon Dev)  [sys] 
+videos 442, P1 3 (1%), candidates 3, cov 0
+-  8.45 | RH52FuSbEpI | 11m | 2800 | 2026-06-15 | Claude Code Found a 2,610% Trading Strategy While I Slept (Anchored VWAP)
+-  6.40 | D5KYQieIeC0 | 10m | 2500 | 2026-09-15 | AI Trading the $1 Billion/day Trading System 24/7
+-  3.86 | D-oYWpr4pxY | 74m | 7300 | 2023-11-15 | Smart Money Concepts Trading Bot (step by step tutorial)
+

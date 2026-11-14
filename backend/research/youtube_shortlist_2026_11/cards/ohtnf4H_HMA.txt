@@ -1,0 +1,19 @@
+video: ohtnf4H_HMA
+topic: crypto
+summary: Trade Pro's 1-minute scalp with the 50 and 200 EMA and the ATR: after the 50 crosses the 200, wait for the first touch of the 50, then buy the first green candle that closes back above it, as long as no more than three candles closed below the 200 since the cross. Stop 2 ATR, target 1.5R. 12 of his first 14 examples won (he had not run 100 trades yet).
+instruments: Forex (shown in pips)
+timeframes: 1m
+style: scalping
+= TQ-02 | EMA 50 / 200 cross, the first touch of the EMA 50 and a candle back beyond it, 2 ATR stop, 1.5R
+R indicator E 00:09 | The 200 EMA, the 50 EMA and the ATR. | "all this strategy uses is a 200 period ema 50 ema and the atr"
+R indicator E 00:53 | ATR 14 with RMA smoothing. | "the atr settings are 14 for length and smoothing is rma"
+R setup E 00:53 | First the 50 crosses over the 200. | "you're simply waiting for the 50 to cross over the 200 that's the first thing you need to see"
+R setup E 00:53 | Then the first touch of the 50 after the cross. | "the next thing that you wait for is the first touch on the 50 after the cross"
+R entry E 01:34 | Enter on a green candle closing above the 50, with no more than three closes below the 200. | "a green candle that closes above the 50 period without getting more than three candles closing below the 200"
+R stop E 01:34 | Stop 2 ATR from the entry candle. | "you simply place your stop loss two times the atr value below the entry candle"
+R target E 02:20 | Target 1.5R. | "you're gonna target 1.5 times the risk that is the strategy"
+R market A - | Desk version: Delta BTCUSD, ETHUSD and XAUTUSD (gold) on 1-minute candles; out at the day's end. | ""
+R entry A - | After the EMA 50 crosses above the EMA 200, the first bar whose low reaches the EMA 50 arms the setup, and the first green bar closing above the EMA 50 from then on enters at the next open; more than three closes below the EMA 200 since the cross cancel it until the next cross. One trade per cross; mirror for shorts. | ""
+R stop A - | Stop 2 x ATR (14) from the fill; target 1.5R. | ""
+T with_assumptions | 'the first touch' read as a low at or under the EMA 50 (I); a touch on the cross bar itself counts (A)
+C win_rate | 00:09 | 12 of 14 examples won | the first 14 setups on his chart | "this trading strategy that won 12 out of 14 of the trades you see on the screen right now"

@@ -38,6 +38,7 @@ import ze_more2 as X2  # noqa: E402
 import ze_more3 as X3  # noqa: E402
 import ze_more4 as X4  # noqa: E402
 import ze_more5 as X5  # noqa: E402
+import ze_more6 as X6  # noqa: E402
 from yc_common import BTC_X  # noqa: E402
 
 SOURCE = "youtube_shortlist"
@@ -295,6 +296,23 @@ _NEW = [
        X5.dd04, X5.dd04_x, ("BTCUSD", "ETHUSD"), (15,), L3, readiness=A),
     _r("TL-06", "Range breakout confirmed by a momentum candle, stop past the level, half at 1.5R, rest on the Chandelier flip",
        X5.tl06, X5.tl06_x, ("BTCUSD", "ETHUSD", "XAUUSD"), (15,), L3, readiness=A),
+    # ── seventh batch (14 Nov 2026: the owner's channels 61-70; ze_more6) ──
+    _r("TQ-01", "Heikin Ashi RSI oscillator back to zero, then the first candle with the EMA 200 trend, swing stop, 2R",
+       X6.tq01, X6.tq01_x, ("BTCUSD", "ETHUSD"), (1,), FREE, readiness=A),
+    _r("TQ-02", "EMA 50 / 200 cross, the first touch of the EMA 50 and a candle back beyond it, 2 ATR stop, 1.5R",
+       X6.tq02, X6.tq02_x, ("BTCUSD", "ETHUSD", "XAUUSD"), (1,), FREE, readiness=A),
+    _r("TQ-03", "Supertrend (7, 5) with a MACD (8, 21, 3) cross on the far side of zero, 2.5 ATR trailing stop, 4R",
+       X6.tq03, X6.tq03_x, ("BTCUSD", "ETHUSD"), (5,), FREE, overnight=True, readiness=A),
+    _r("JO-01", "Ichimoku edge to edge: a close inside the cloud from one side targets the other edge",
+       X6.jo01, X6.jo01_x, ("BTCUSD", "ETHUSD", "XAUUSD"), (60,), FREE, overnight=True, readiness=A),
+    _r("SA-01", "ADX above 50 with the DI trend and Williams %R at an extreme, stop at the SMA 50, target the 30-bar extreme",
+       X6.sa01, X6.sa01_x, ("BTCUSD", "ETHUSD"), (15,), FREE, overnight=True, readiness=A),
+    _r("SA-02", "KAMA trend on 15 minutes and 4 hours, ADX over 50, choppiness under 50, narrow bands, 2.5 ATR, 10-bar wait",
+       X6.sa02, X6.sa02_x, ("BTCUSD", "ETHUSD"), (15, 240), FREE, overnight=True, readiness=A),
+    _r("SA-03", "Alligator trend on 30 minutes and 4 hours, ADX over 30, CMO beyond 20, Stochastic RSI pullback, 2 ATR",
+       X6.sa03, X6.sa03_x, ("BTCUSD", "ETHUSD"), (30, 240), FREE, overnight=True, readiness=A),
+    _r("BV-01", "Williams Alligator side and a close beyond the last fractal, fractal trailing stop, out under the teeth",
+       X6.bv01, X6.bv01_x, ("BTCUSD", "ETHUSD", "XAUUSD"), (240,), FREE, overnight=True, readiness=A),
 ]
 
 NEW = [r.sid for r in _NEW]

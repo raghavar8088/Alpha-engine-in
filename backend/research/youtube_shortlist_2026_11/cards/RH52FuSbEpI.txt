@@ -1,0 +1,11 @@
+video: RH52FuSbEpI
+topic: crypto
+summary: Moon Dev narrates a livestream in which AI coding agents backtest anchored-VWAP ideas on top of his liquidation-data strategies. The anchored VWAP hurt the liquidation strategies; the best pure version was a 'swing low reclaim' on daily bitcoin, but no rules are given, and the headline 2,610% belongs to a liquidation strategy.
+instruments: Bitcoin, Ether
+timeframes: 5m to 1d
+style: unclear
+= MD-01 | Anchored-VWAP variants backtested by AI agents (no rules stated)
+R indicator E 00:42 | The anchored VWAP starts from a chosen anchor bar. | "the anchored VWAP is a volume weighted average price that you start calculating from a specific anchor point in time"
+R setup E 08:43 | The best pure version was a swing-low reclaim. | "The best one is the swing low reclaim"
+T not_testable | the agents' rules and anchors are never stated; his best results come from liquidation data the desk does not have
+C return_pct | 05:10 | +2,610% (a liquidation-data strategy with the anchored VWAP added) | not stated | "It got hurt, but it's at 2,610%"

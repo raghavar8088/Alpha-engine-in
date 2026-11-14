@@ -1,0 +1,18 @@
+video: k9gq3aDZmPs
+topic: crypto
+summary: Trade Pro explains his Supertrend + MACD script for 1- and 5-minute bitcoin (same settings): buy a MACD (8, 21, 3) cross up below the zero line while the Supertrend (7, 5) is green, short a cross down above zero while it is red, one entry per Supertrend colour. The stop starts 2.5 ATR away and trails at 2.5 ATR, with a 4R target. His backtest showed 48% winners.
+instruments: Bitcoin, EUR/USD
+timeframes: 1m, 5m (bitcoin), 30m (EUR/USD)
+style: scalping
+= TQ-03 | Supertrend (7, 5) with a MACD (8, 21, 3) cross on the far side of zero, 2.5 ATR trailing stop, 4R
+R indicator E 02:06 | Supertrend ATR length 7, multiplier 5. | "the super trend atr length is set to 7 the super trend atr multiplier is set to 5"
+R indicator E 02:06 | MACD 8, 21, 3 on the close. | "for the macd fast length is set to 8 slow length 21 signal length 3 and source close"
+R entry E 02:06,02:47 | Long: a MACD cross up below the zero line while the Supertrend is green (shorts the mirror). | "for a long entry you will be looking for a macd cross to the upside that happens below the zero line of the"
+R stop E 02:47,03:28 | Stop 2.5 ATR, immediately trailing at 2.5 ATR. | "immediately it's going to go into a trailing stop loss at 2.5 times the atr"
+R target E 03:28 | Target 4R. | "eventually reach that profit target which is set to four times the risk"
+R filter E 06:58 | One entry per Supertrend colour change. | "it's only going to enter one position per super trend color change"
+R market A - | Desk version: Delta BTCUSD and ETHUSD on 5-minute candles; held across days, as his backtest is continuous. | ""
+R entry A - | Long: the MACD line crosses above its signal line while the MACD line is below zero and the Supertrend (7, 5) is up: enter at the next open; one signal per Supertrend direction. Mirror for shorts. | ""
+R stop A - | Stop 2.5 x ATR (14) from the fill, trailed at 2.5 x ATR under the best price since entry; target 4R. | ""
+T with_assumptions | 'below the zero line' read as the MACD line under zero at the cross (I); his optional EMA filter stays off
+C win_rate | 05:36 | 48% winners | his 1- and 5-minute bitcoin backtests | "48 win rate"

@@ -1,0 +1,14 @@
+video: 0Q6iENmeUys
+topic: crypto
+summary: Trade Pro tests a 1-minute bitcoin scalp 100 times: the 20, 50 and 100 EMAs stacked in order, a pullback into them, and a Williams fractal signal as the entry; stop under the 100 EMA (or the 50 if it held), target 1.5R. 50 winners and 50 losers gave +25% in three days; he recommends higher timeframes because of fees.
+instruments: Bitcoin
+timeframes: 1m
+style: scalping
+= TQ-04 | EMA 20 / 50 / 100 stack, pullback into the EMAs and a Williams fractal entry, 1.5R
+R indicator E 01:32 | Three EMAs: 20, 50 and 100. | "you have three exponential moving averages a 20 ema a 50 ema and a 100 ema"
+R filter E 02:12 | Longs need the 20 over the 50 and the 50 over the 100. | "is the 20 is over the 50 and the 50 is over the 100"
+R entry E 02:12 | After the pullback into the EMAs, a Williams fractal signal. | "then we wait for a williams fractal signal"
+R stop E 02:56 | Stop below the 100 EMA (or the 50 if price never reached it); target 1.5R. | "you're going to target 1.5 times the risk"
+T with_assumptions | the fractal's printing delay is the indicator's own
+D DE-02 | the EMA 20 / 50 / 100 stack with a Williams fractal entry on 1-minute bars is already coded (the 20-channel study's DE-02; YT-15)
+C trade_count | 06:20 | 50 winners, 50 losers, +25% | three days of 1-minute bitcoin | "there were 50 winners and 50 losses"

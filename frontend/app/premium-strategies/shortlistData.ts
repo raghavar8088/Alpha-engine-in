@@ -18,7 +18,7 @@ export type SlStrategy = { id: string; version: string; name: string; topic: str
 export type SlChannel = { key: string; name: string; star: boolean; group: string; earlier: string; uploads: number;
   strategyTitles: number; picked: { video: string; why: string; analysed: boolean; id: string | null }[]; skip: string | null };
 
-export const SL_META = {"channels": 167, "coveredBefore": 23, "picked": 211, "analysed": 206, "queued": 5, "strategies": 209, "coded": 105, "blocked": 69, "duplicates": 35, "checked": 105, "paperStart": "2026-11-13T03:40:00Z", "paperStart2": "2026-11-13T05:00:00Z", "paperStart3": "2026-11-13T16:00:00Z", "paperStart4": "2026-11-13T17:00:00Z", "paperStart5": "2026-11-14T11:00:00Z", "paperStart6": "2026-11-14T16:00:00Z", "batch1": 31, "batch2": 23, "batch3": 15, "batch4": 21, "batch5": 10, "batch6": 5, "built": "2026-11-14"};
+export const SL_META = {"channels": 177, "coveredBefore": 23, "picked": 228, "analysed": 223, "queued": 5, "strategies": 226, "coded": 113, "blocked": 76, "duplicates": 37, "checked": 113, "paperStart": "2026-11-13T03:40:00Z", "paperStart2": "2026-11-13T05:00:00Z", "paperStart3": "2026-11-13T16:00:00Z", "paperStart4": "2026-11-13T17:00:00Z", "paperStart5": "2026-11-14T11:00:00Z", "paperStart6": "2026-11-14T16:00:00Z", "paperStart7": "2026-11-14T16:30:00Z", "batch1": 31, "batch2": 23, "batch3": 15, "batch4": 21, "batch5": 10, "batch6": 5, "batch7": 8, "built": "2026-11-14"};
 
 export const SL: SlStrategy[] = [
  {
@@ -9415,6 +9415,142 @@ export const SL: SlStrategy[] = [
   }
  },
  {
+  "id": "BV-01",
+  "version": "v1",
+  "name": "Williams Alligator side and a close beyond the last fractal, fractal trailing stop, out under the teeth",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Brave New Coin",
+  "video": "yCnLqCqwtOQ",
+  "title": "Crypto Trading Tips for Beginners - how to use the Williams Fractal & Alligator system",
+  "uploaded": "2020-12-23",
+  "minutes": 17,
+  "summary": "Josh Olszewicz on Brave New Coin explains the Williams Alligator and fractal system: a bullish bias once the 5 (green) is above the 8 (red) and the 13 (blue); enter on a candle close above the latest bullish fractal (shorts below a bearish fractal), trail the stop at each new opposite fractal, and treat a close under the 8 line as an exit. He boxes off sideways ranges by eye and says a bot could run it.",
+  "instruments": [
+   "Bitcoin, Ether, altcoins"
+  ],
+  "timeframes": [
+   "1d (4h and 12h when noisy",
+   "weekly for bias)"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)",
+   "Ether (Delta ETHUSD)",
+   "Gold (Delta XAUTUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD",
+   "ETHUSD",
+   "XAUUSD"
+  ],
+  "overnight": true,
+  "proxy": "his examples are daily; coded on 4-hour bars, which he suggests when the daily is noisy",
+  "paperStart": "2026-11-14T16:30:00Z",
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "Objective enough for a bot.",
+    "times": [
+     "14:52"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Fractals give both the entries and the stops.",
+    "times": [
+     "00:42"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Enter on a candle close above the latest bullish fractal.",
+    "times": [
+     "07:06"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "The 8 (middle) line also works as a stop.",
+    "times": [
+     "01:22"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "The opposite fractals act as a trailing stop.",
+    "times": [
+     "07:52"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "A bullish bias when the green line is above the red and the blue.",
+    "times": [
+     "01:22"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta BTCUSD, ETHUSD and XAUTUSD on 4-hour candles (he suggests the 4-hour or 12-hour when the daily is noisy); held across days.",
+    "times": []
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "A",
+    "text": "TradingView's Alligator (SMMA 13 / 8 / 5 of the median price shifted 8 / 5 / 3) and Williams fractals of 2 bars each side.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Long: lips above teeth above jaw and the first close above the latest confirmed fractal high: enter at the next open. Mirror for shorts.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "The first stop one tick beyond the latest fractal low, trailed to each newer fractal low when tighter; exit at the next open after a close under the teeth or the lips crossing under the teeth.",
+    "times": []
+   }
+  ],
+  "why": [
+   "his range filter (boxing off sideways markets by eye) is not coded",
+   "the 4-hour timeframe is ours (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 40,
+   "trades": 31
+  }
+ },
+ {
   "id": "BX-01",
   "version": "v1",
   "name": "Buy the first green Heikin Ashi candle while MFI is oversold, sell after MFI is overbought and a red Heikin Ashi candle prints (long only)",
@@ -11543,6 +11679,126 @@ export const SL: SlStrategy[] = [
   }
  },
  {
+  "id": "JO-01",
+  "version": "v1",
+  "name": "Ichimoku edge to edge: a close inside the cloud from one side targets the other edge",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Josh Olszewicz",
+  "video": "FDR76ZdU3nw",
+  "title": "Better Know An Indicator: Ichimoku Cloud Strategies",
+  "uploaded": "2016-06-24",
+  "minutes": 14,
+  "summary": "Josh Olszewicz's 'bread and butter' Ichimoku cloud strategies (2016). Edge to edge: once price closes inside the cloud it tends to reach the other edge, so enter on the close inside, target the far edge, and stop when price drops back out of the edge it came in through. Kijun bounce: in a trend, keep bids at the kijun. C-clamp: tenkan far from kijun means overbought. All on any market and timeframe, higher timeframes winning.",
+  "instruments": [
+   "Bitcoin, S&P 500, USD/JPY (any)"
+  ],
+  "timeframes": [
+   "Any (1h to weekly examples)"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)",
+   "Ether (Delta ETHUSD)",
+   "Gold (Delta XAUTUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD",
+   "ETHUSD",
+   "XAUUSD"
+  ],
+  "overnight": true,
+  "proxy": "his cloud settings: 20, 60, 120, 30 on bitcoin and ether, 18, 52, 104, 26 (legacy) on gold, on 1-hour bars",
+  "paperStart": "2026-11-14T16:30:00Z",
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "Any timeframe and market.",
+    "times": [
+     "00:02"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Price that enters the cloud tends to touch the other edge.",
+    "times": [
+     "00:42"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Wait for the close inside the cloud.",
+    "times": [
+     "02:51"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Kijun bounce: bids near the kijun in a trend (discretionary, not coded).",
+    "times": [
+     "06:22"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "The stop is dropping back out through the edge it came in.",
+    "times": [
+     "02:07"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta BTCUSD, ETHUSD and XAUTUSD on 1-hour candles; his crypto cloud settings (20, 60, 120, 30) for bitcoin and ether and his legacy settings (18, 52, 104, 26) for gold, from his 2024 cloud video; held across days.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Long: the previous close below the cloud and this close inside it: enter at the next open, target the cloud's top edge at the signal bar. Short: from above the cloud, target the bottom edge.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Exit at the next open after a close back out of the entry edge; a hard stop 0.3% beyond that edge so the book can size.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the target is fixed at the far edge when the trade opens (A)",
+   "the 0.3% hard stop and the settings choice are ours (A)",
+   "the kijun bounce and C-clamp are discretionary"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 185,
+   "trades": 173
+  }
+ },
+ {
   "id": "KA-01",
   "version": "v1",
   "name": "Break of the previous hour/day high or low after a staircase approach, two closes, swing stop, 1R",
@@ -12176,6 +12432,507 @@ export const SL: SlStrategy[] = [
   }
  },
  {
+  "id": "SA-01",
+  "version": "v1",
+  "name": "ADX above 50 with the DI trend and Williams %R at an extreme, stop at the SMA 50, target the 30-bar extreme",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Algo-trading with Saleh",
+  "video": "kIudgLFh5cw",
+  "title": "GPT: ADX scalping strategy in Python makes 4479%",
+  "uploaded": "2025-06-16",
+  "minutes": 21,
+  "summary": "Saleh codes an ADX scalp in Python with Jesse: trade only when ADX is above 50, in the direction of the DI lines, entering when Williams %R is oversold (below -80) for longs or overbought (above -20) for shorts. Stop at the 50 SMA, target the highest high (lowest low) of the last 30 candles, and close if the opposite entry rule turns true. On 15-minute bitcoin from 2021 he reports +4,479% with 5x the size, 61% winners and a -30% drawdown.",
+  "instruments": [
+   "Bitcoin (BTCUSDT perpetual, Binance)"
+  ],
+  "timeframes": [
+   "15m"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)",
+   "Ether (Delta ETHUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD",
+   "ETHUSD"
+  ],
+  "overnight": true,
+  "proxy": null,
+  "paperStart": "2026-11-14T16:30:00Z",
+  "rules": [
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "15-minute bitcoin.",
+    "times": [
+     "09:54"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Williams %R as the oscillator.",
+    "times": [
+     "01:27"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Longs when %R is below -80, shorts above -20.",
+    "times": [
+     "06:27"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop at a 50 SMA.",
+    "times": [
+     "02:09"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Target the extreme of the last 30 candles.",
+    "times": [
+     "02:53"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Close when the trend direction turns against the trade.",
+    "times": [
+     "02:53"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Trade only when ADX is above 50.",
+    "times": [
+     "00:44"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "DI+ above DI- is an uptrend (shorts the opposite).",
+    "times": [
+     "00:44"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta BTCUSD and ETHUSD on 15-minute candles; held across days; the desk risks 1% a trade (not his 3% times five).",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Long: DI+ above DI-, ADX (14) above 50 and Williams %R (14) below -80: enter at the next open. Short: DI- above DI+, ADX above 50 and %R above -20. One position at a time.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Stop at the SMA (50) of the signal bar, kept for the trade (a long whose SMA is above the entry is skipped); target the highest high (lowest low) of the last 30 bars; exit at the next open when the opposite entry rule is true.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the SMA stop is set once at entry, as his Jesse code does (I)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "return_pct",
+    "at": "15:36",
+    "value": "+4,400% with 5x the position size",
+    "period": "2021 to June 2025, 15-minute bitcoin",
+    "quote": "we ended up making 4,400% in P&L"
+   },
+   {
+    "kind": "win_rate",
+    "at": "15:36",
+    "value": "61% winners",
+    "period": "the same backtest",
+    "quote": "The win rate was 61%"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 48,
+   "trades": 17
+  }
+ },
+ {
+  "id": "SA-02",
+  "version": "v1",
+  "name": "KAMA trend on 15 minutes and 4 hours, ADX over 50, choppiness under 50, narrow bands, 2.5 ATR, 10-bar wait",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Algo-trading with Saleh",
+  "video": "uDFZsIqHjT4",
+  "title": "GPT: KAMA Scalping Strategy in Python Makes 795%",
+  "uploaded": "2024-11-21",
+  "minutes": 21,
+  "summary": "Saleh guides an AI to code a KAMA trend scalp in Jesse. Long when price is above the Kaufman adaptive moving average (short below), with the same KAMA on the 4-hour agreeing, ADX above 50, the choppiness index below 50 and a narrow Bollinger width (below 7), waiting 10 candles after each trade closes. Stop and target are both 2.5 ATR. On 15-minute bitcoin since 2022 the Sharpe rose to 1.9; tripling the size gave about +800% with a -24% drawdown.",
+  "instruments": [
+   "Bitcoin (BTCUSDT)"
+  ],
+  "timeframes": [
+   "15m",
+   "30m (4h as the bigger timeframe)"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)",
+   "Ether (Delta ETHUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD",
+   "ETHUSD"
+  ],
+  "overnight": true,
+  "proxy": null,
+  "paperStart": "2026-11-14T16:30:00Z",
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "The Kaufman adaptive moving average is the main indicator.",
+    "times": [
+     "00:03"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Price above it is an uptrend, below it a downtrend.",
+    "times": [
+     "00:03"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop and take-profit at 2.5 ATR.",
+    "times": [
+     "01:31"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "No trade when ADX is below 50.",
+    "times": [
+     "05:05"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The same KAMA on the 4-hour as the bigger timeframe.",
+    "times": [
+     "08:31"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Only when the choppiness index is below 50.",
+    "times": [
+     "11:25"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Only when the Bollinger width (x 100) is below 7.",
+    "times": [
+     "14:09"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Wait 10 candles after a trade closes.",
+    "times": [
+     "15:39"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta BTCUSD and ETHUSD on 15-minute candles with the 4-hour KAMA; held across days; 1% risk.",
+    "times": []
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "A",
+    "text": "Jesse's defaults: KAMA (14, fast 2, slow 30) on 15-minute and 4-hour closes, ADX (14), choppiness index (14), Bollinger Bands (20, 2) with width = (upper - lower) / middle x 100, ATR (14).",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Long when the close is above both KAMAs (the 4-hour one from the last completed 4-hour bar), ADX above 50, choppiness below 50, the width below 7 and at least 10 bars since the last trade closed: enter at the next open. Mirror for shorts.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Stop and target 2.5 x ATR (14) from the fill; one position at a time.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the indicator defaults are Jesse's (A)",
+   "the 10-bar wait is counted from our replay of the earlier trades (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "other",
+    "at": "17:46",
+    "value": "Sharpe 1.9 on 15 minutes, max drawdown under 10%",
+    "period": "2022 to November 2024, bitcoin",
+    "quote": "the sharp is upgraded to 1.9 on the 15 minutes time frame"
+   },
+   {
+    "kind": "return_pct",
+    "at": "18:30",
+    "value": "about +800% with 3x the size, -24% drawdown",
+    "period": "the same backtest",
+    "quote": "now with the max throw down of minus 24% we're making nearly 800% profit"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 40,
+   "trades": 40
+  }
+ },
+ {
+  "id": "SA-03",
+  "version": "v1",
+  "name": "Alligator trend on 30 minutes and 4 hours, ADX over 30, CMO beyond 20, Stochastic RSI pullback, 2 ATR",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Algo-trading with Saleh",
+  "video": "Rw_MlMSUEr0",
+  "title": "ChatGPT o1: Alligator Day Trading Strategy in Python Makes 1721%",
+  "uploaded": "2024-11-01",
+  "minutes": 18,
+  "summary": "Saleh builds an Alligator day-trading strategy in Jesse with ChatGPT's help. Long when the lips are above the teeth above the jaw and price is above all three, on the trading timeframe and on the 4-hour, with ADX above 30, price above the 4-hour EMA 100, CMO above 20 and the Stochastic RSI below 20 (a pullback); shorts mirror. Stop and target are 2 ATR (1:1). On 30-minute bitcoin the Sharpe reached 1.99; five times the size gave +1,721% with a -29% drawdown.",
+  "instruments": [
+   "Bitcoin (BTCUSDT)"
+  ],
+  "timeframes": [
+   "30m",
+   "1h (4h as the bigger timeframe)"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)",
+   "Ether (Delta ETHUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD",
+   "ETHUSD"
+  ],
+  "overnight": true,
+  "proxy": null,
+  "paperStart": "2026-11-14T16:30:00Z",
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The lips above the teeth, both above the jaw.",
+    "times": [
+     "00:43"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "And price above all three lines.",
+    "times": [
+     "01:27"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Stochastic RSI below 20 for longs, above 80 for shorts.",
+    "times": [
+     "14:14"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop 2 ATR from the entry.",
+    "times": [
+     "02:53"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "A fixed target at one times the risk.",
+    "times": [
+     "08:29"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "ADX above 30.",
+    "times": [
+     "04:57"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The same Alligator trend on the 4-hour.",
+    "times": [
+     "06:21"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Price on the right side of the 4-hour 100 EMA.",
+    "times": [
+     "09:12"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "CMO beyond 20 (minus 20 for shorts).",
+    "times": [
+     "12:49"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta BTCUSD and ETHUSD on 30-minute candles with the 4-hour as the bigger timeframe; held across days; 1% risk.",
+    "times": []
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "A",
+    "text": "Jesse's defaults: the Alligator of the close (SMMA 13, 8, 5 shifted 8, 5, 3), ADX (14), EMA 100 of 4-hour closes, CMO (14), Stochastic RSI (14, 14, 3, 3) %K, ATR (14).",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Long when, on 30 minutes, lips > teeth > jaw with the close above the lips, the same holds on the last completed 4-hour bar, ADX is above 30, the close is above the 4-hour EMA 100, CMO is above 20 and %K is below 20: enter at the next open. Mirror for shorts.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Stop and target 2 x ATR (14) from the fill; one position at a time.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the indicator defaults are Jesse's (A)",
+   "his first exit (on a trend flip) was replaced by the fixed target, as in his final version"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "other",
+    "at": "14:56",
+    "value": "Sharpe 1.99 on 30 minutes",
+    "period": "2022 to November 2024, bitcoin",
+    "quote": "sharp on the 30 minutes is 1.9 99"
+   },
+   {
+    "kind": "return_pct",
+    "at": "15:39",
+    "value": "+1,721% with 5x the size, -29% drawdown",
+    "period": "the same backtest",
+    "quote": "when the max Ron is minus 29% the net profit is at 1,721 per"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 33,
+   "trades": 15
+  }
+ },
+ {
   "id": "SK-01",
   "version": "v1",
   "name": "After an exhaustive impulse, a limit at the previous impulse's stopping level with the 20 MA there, 2:1",
@@ -12634,6 +13391,437 @@ export const SL: SlStrategy[] = [
    "fills": true,
    "signals": 42,
    "trades": 41
+  }
+ },
+ {
+  "id": "TQ-01",
+  "version": "v1",
+  "name": "Heikin Ashi RSI oscillator back to its zero line, then the first candle with the EMA 200 trend, swing stop, 2R",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Trade Pro",
+  "video": "e6LnibwDZKs",
+  "title": "1 Minute Bitcoin Scalping Strategy Tested 100 Trades: Heikin Ashi RSI Indicator",
+  "uploaded": "2021-12-05",
+  "minutes": 11,
+  "summary": "Trade Pro tests a 1-minute bitcoin scalp 100 times: the 200 EMA sets the side, and the entry is the Heikin Ashi RSI oscillator (JayRogers, open smoothing 7) pulling back to its zero line and then printing a candle in the trend's colour. Stop beyond the swing, target 2R. 44 winners and 56 losers gave +32% at 1% risk in three days before fees; he warns that 1-minute fees would wipe that out.",
+  "instruments": [
+   "Bitcoin (BTCUSD)"
+  ],
+  "timeframes": [
+   "1m"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)",
+   "Ether (Delta ETHUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD",
+   "ETHUSD"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-14T16:30:00Z",
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "The Heikin Ashi RSI oscillator by JayRogers.",
+    "times": [
+     "00:02"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Its open smoothing set to 7.",
+    "times": [
+     "00:52"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Short: the oscillator pulls back to the zero line, then a red bar continues.",
+    "times": [
+     "01:39"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Long: the pullback to the zero line or below, then a green bar.",
+    "times": [
+     "02:22"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop just beyond the swing; target 2R.",
+    "times": [
+     "01:39"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The 200 EMA as the trend filter: longs above it, shorts below.",
+    "times": [
+     "00:52"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta BTCUSD and ETHUSD on 1-minute candles; out by the end of the UTC day.",
+    "times": []
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "A",
+    "text": "The oscillator: Heikin Ashi candles built from RSI (14) minus 50 of the close, high and low, with the open smoothed over 7 bars (JayRogers' formula).",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Long: the close is above the EMA 200; an oscillator candle whose low reaches zero arms the setup; the next green oscillator candle enters at the next open. Short: the mirror below the EMA 200. One position at a time.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Stop one tick beyond the lowest low (highest high) of the last 10 bars; target 2R.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the 10-bar swing and the zero-line touch test are ours (A)",
+   "he says 1-minute fees make it unprofitable"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "trade_count",
+    "at": "03:50",
+    "value": "44 winners, 56 losers",
+    "period": "three days of 1-minute bitcoin",
+    "quote": "there were 44 winning trades and 56 losing trades"
+   },
+   {
+    "kind": "return_pct",
+    "at": "04:36",
+    "value": "+32% at 1% risk, before fees",
+    "period": "the same test",
+    "quote": "32 so it sounds absolutely out of this world"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 21534,
+   "trades": 3482
+  }
+ },
+ {
+  "id": "TQ-02",
+  "version": "v1",
+  "name": "EMA 50 / 200 cross, the first touch of the EMA 50 and a candle back beyond it, 2 ATR stop, 1.5R",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Trade Pro",
+  "video": "ohtnf4H_HMA",
+  "title": "1 Minute Scalping Strategy Just Using 50 EMA And 200 EMA",
+  "uploaded": "2021-02-20",
+  "minutes": 11,
+  "summary": "Trade Pro's 1-minute scalp with the 50 and 200 EMA and the ATR: after the 50 crosses the 200, wait for the first touch of the 50, then buy the first green candle that closes back above it, as long as no more than three candles closed below the 200 since the cross. Stop 2 ATR, target 1.5R. 12 of his first 14 examples won (he had not run 100 trades yet).",
+  "instruments": [
+   "Forex (shown in pips)"
+  ],
+  "timeframes": [
+   "1m"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)",
+   "Ether (Delta ETHUSD)",
+   "Gold (Delta XAUTUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD",
+   "ETHUSD",
+   "XAUUSD"
+  ],
+  "overnight": false,
+  "proxy": "the video trades a forex pair on 1-minute bars; coded on Delta bitcoin, ether and gold",
+  "paperStart": "2026-11-14T16:30:00Z",
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "The 200 EMA, the 50 EMA and the ATR.",
+    "times": [
+     "00:09"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "ATR 14 with RMA smoothing.",
+    "times": [
+     "00:53"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "First the 50 crosses over the 200.",
+    "times": [
+     "00:53"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Then the first touch of the 50 after the cross.",
+    "times": [
+     "00:53"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Enter on a green candle closing above the 50, with no more than three closes below the 200.",
+    "times": [
+     "01:34"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop 2 ATR from the entry candle.",
+    "times": [
+     "01:34"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Target 1.5R.",
+    "times": [
+     "02:20"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta BTCUSD, ETHUSD and XAUTUSD (gold) on 1-minute candles; out at the day's end.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "After the EMA 50 crosses above the EMA 200, the first bar whose low reaches the EMA 50 arms the setup, and the first green bar closing above the EMA 50 from then on enters at the next open; more than three closes below the EMA 200 since the cross cancel it until the next cross. One trade per cross; mirror for shorts.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Stop 2 x ATR (14) from the fill; target 1.5R.",
+    "times": []
+   }
+  ],
+  "why": [
+   "'the first touch' read as a low at or under the EMA 50 (I)",
+   "a touch on the cross bar itself counts (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "win_rate",
+    "at": "00:09",
+    "value": "12 of 14 examples won",
+    "period": "the first 14 setups on his chart",
+    "quote": "this trading strategy that won 12 out of 14 of the trades you see on the screen right now"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 1413,
+   "trades": 1391
+  }
+ },
+ {
+  "id": "TQ-03",
+  "version": "v1",
+  "name": "Supertrend (7, 5) with a MACD (8, 21, 3) cross on the far side of zero, 2.5 ATR trailing stop, 4R",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Trade Pro",
+  "video": "k9gq3aDZmPs",
+  "title": "Complete Supertrend + MACD Trading System for Scalping Bitcoin and Forex",
+  "uploaded": "2022-03-02",
+  "minutes": 17,
+  "summary": "Trade Pro explains his Supertrend + MACD script for 1- and 5-minute bitcoin (same settings): buy a MACD (8, 21, 3) cross up below the zero line while the Supertrend (7, 5) is green, short a cross down above zero while it is red, one entry per Supertrend colour. The stop starts 2.5 ATR away and trails at 2.5 ATR, with a 4R target. His backtest showed 48% winners.",
+  "instruments": [
+   "Bitcoin, EUR/USD"
+  ],
+  "timeframes": [
+   "1m",
+   "5m (bitcoin)",
+   "30m (EUR/USD)"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)",
+   "Ether (Delta ETHUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD",
+   "ETHUSD"
+  ],
+  "overnight": true,
+  "proxy": null,
+  "paperStart": "2026-11-14T16:30:00Z",
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Supertrend ATR length 7, multiplier 5.",
+    "times": [
+     "02:06"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "MACD 8, 21, 3 on the close.",
+    "times": [
+     "02:06"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Long: a MACD cross up below the zero line while the Supertrend is green (shorts the mirror).",
+    "times": [
+     "02:06",
+     "02:47"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop 2.5 ATR, immediately trailing at 2.5 ATR.",
+    "times": [
+     "02:47",
+     "03:28"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Target 4R.",
+    "times": [
+     "03:28"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "One entry per Supertrend colour change.",
+    "times": [
+     "06:58"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta BTCUSD and ETHUSD on 5-minute candles; held across days, as his backtest is continuous.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Long: the MACD line crosses above its signal line while the MACD line is below zero and the Supertrend (7, 5) is up: enter at the next open; one signal per Supertrend direction. Mirror for shorts.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Stop 2.5 x ATR (14) from the fill, trailed at 2.5 x ATR under the best price since entry; target 4R.",
+    "times": []
+   }
+  ],
+  "why": [
+   "'below the zero line' read as the MACD line under zero at the cross (I)",
+   "his optional EMA filter stays off"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "win_rate",
+    "at": "05:36",
+    "value": "48% winners",
+    "period": "his 1- and 5-minute bitcoin backtests",
+    "quote": "48 win rate"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 372,
+   "trades": 372
   }
  },
  {
@@ -13374,6 +14562,64 @@ export const SL: SlStrategy[] = [
   "checks": null
  },
  {
+  "id": "BV-02",
+  "version": "v1",
+  "name": "Parabolic SAR as a trend bias and trailing stop (explainer)",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Brave New Coin",
+  "video": "UmKabGi0OKY",
+  "title": "Crypto Trading Course for Beginners -  Parabolic SAR explained",
+  "uploaded": "2021-07-21",
+  "minutes": 14,
+  "summary": "Josh Olszewicz on Brave New Coin explains the Parabolic SAR: useful in strong trends on high timeframes as a bias check and a trailing stop or 'point of no return' level, noisy in ranges, and in his view not tradeable on its own; he pairs it with the 20-week SMA, the cloud and Bollinger squeezes.",
+  "instruments": [
+   "Bitcoin, Ether, altcoins"
+  ],
+  "timeframes": [
+   "1w",
+   "1d (4h)"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "SAR is stop-and-reverse and fails in ranges.",
+    "times": [
+     "00:02"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Not usable alone.",
+    "times": [
+     "07:44"
+    ]
+   }
+  ],
+  "why": [
+   "presented as a bias and trailing-stop aid to combine with other checks, not a complete rule set (SAR strategies are already coded: NJ-22, DT-02)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "presented as a bias and trailing-stop aid to combine with other checks, not a complete rule set (SAR strategies are already coded: NJ-22, DT-02)",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
   "id": "CB-02",
   "version": "v1",
   "name": "EMA ribbon (2-100) flip, first retest of the yellow EMAs with a reversal candle, stop below the ribbon, exit on a close back through",
@@ -13892,6 +15138,122 @@ export const SL: SlStrategy[] = [
   "checks": null
  },
  {
+  "id": "CX-01",
+  "version": "v1",
+  "name": "Altcoin break-and-retest and laddered entries at hand-drawn levels (live stream)",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Chart Hackers",
+  "video": "1Qh8BeiKDG8",
+  "title": "HOW I'M TRADING THIS CRYPTO MARKET BREAKOUT!",
+  "uploaded": "2024-02-12",
+  "minutes": 53,
+  "summary": "A Chart Hackers live stream on an altcoin breakout: Dylan and co-hosts walk through Matic, Avalanche, Solana, Injective and others, waiting for a break and retest of hand-drawn levels, laddering into support zones and flagging targets and invalidations coin by coin.",
+  "instruments": [
+   "Altcoins (MATIC, AVAX, SOL, INJ, ...)"
+  ],
+  "timeframes": [
+   "1h",
+   "4h"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Wait for the break, then the retest, for the entry.",
+    "times": [
+     "16:10"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Ladder into a zone after the pop.",
+    "times": [
+     "35:22"
+    ]
+   }
+  ],
+  "why": [
+   "a live stream: the levels, retests and ladders are chosen by eye, on coins the desk does not trade"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "a live stream: the levels, retests and ladders are chosen by eye, on coins the desk does not trade",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "CY-01",
+  "version": "v1",
+  "name": "XRP 2-week 21 EMA cross and retest as a price forecast",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Cheeky Crypto",
+  "video": "BwMs0QFA8fc",
+  "title": "I Saw XRP’s 21-EMA Signal - Now I’m All-In",
+  "uploaded": "2025-06-08",
+  "minutes": 17,
+  "summary": "Cheeky Crypto relays an analyst's XRP call: each time XRP crossed and retested its 21 EMA on the 2-week chart (2017, 2020-21, late 2024) a huge run followed, so he projects $10, $18 or $27 within 8-10 weeks of the retest, with warnings about leverage.",
+  "instruments": [
+   "XRP"
+  ],
+  "timeframes": [
+   "2-week candles"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "The 21-period EMA on the 2-week chart.",
+    "times": [
+     "01:24"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Targets of $10, $18 and $27 within weeks.",
+    "times": [
+     "00:44"
+    ]
+   }
+  ],
+  "why": [
+   "an XRP price forecast from a 2-week EMA retest",
+   "no entry, stop or exit, and XRP is not on the desk"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "an XRP price forecast from a 2-week EMA retest; no entry, stop or exit, and XRP is not on the desk",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
   "id": "FL-01",
   "version": "v1",
   "name": "Gold five-minute: higher-timeframe bias from the 20/50 averages, a bearish engulfing candle off the averages after a structure break, 2:1",
@@ -14214,6 +15576,283 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": "the signal thresholds are on a settings slide but never stated; the creator's own week of live trading lost 4.5%",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "JM-01",
+  "version": "v1",
+  "name": "Altcoin screen: price at the lower Bollinger Band with the stochastic outside its band, then chart patterns (Spanish)",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Jaime Merino | TradingLatino",
+  "video": "KcyFhT8AdIs",
+  "title": "📕Taller de Scalping: Clase#2 - Buscando Señales en Criptomonedas | #BITCOIN V118",
+  "uploaded": "2018-10-29",
+  "minutes": 21,
+  "summary": "Jaime Merino (Trading Latino, in Spanish) shows how he screens altcoins for scalps: TradingView's crypto screener on 15 minutes for coins at the lower Bollinger Band with the stochastic outside its band, then a CoinMarketCap rank check and a read of the 6- and 12-hour charts (double tops, rounded bottoms, inverse head and shoulders) before sending a signal with a -10% stop.",
+  "instruments": [
+   "Altcoins (REQ/BTC, PHX)"
+  ],
+  "timeframes": [
+   "15m screen",
+   "6h and 12h charts"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "He reads the 6-hour and 12-hour charts.",
+    "times": [
+     "11:17"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "From class 1: trade the Bollinger Bands when price touches the lower band.",
+    "times": [
+     "04:49"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "A -10% stop on the signal.",
+    "times": [
+     "16:52"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "And the stochastic outside its purple channel.",
+    "times": [
+     "05:34"
+    ]
+   }
+  ],
+  "why": [
+   "the screen only shortlists altcoins",
+   "the trade is decided from chart patterns read by eye on the 6- and 12-hour charts"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the screen only shortlists altcoins; the trade is decided from chart patterns read by eye on the 6- and 12-hour charts",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "JM-02",
+  "version": "v1",
+  "name": "Trend-line bounces and breakouts on 4- and 6-hour charts (Spanish)",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Jaime Merino | TradingLatino",
+  "video": "pdiQ2gOOs1Q",
+  "title": "📔TALLER INTRADIA: CLASE#1, OPERANDO REBOTES Y RUPTURAS EN CRIPTOMONEDAS  | #BITCOIN V121",
+  "uploaded": "2018-11-04",
+  "minutes": 22,
+  "summary": "Jaime Merino's first intraday class (in Spanish): four ways to trade - against the trend, with the trend, bounces and breakouts - on 4- and 6-hour charts. Draw the trend line or channel, buy the bounce only after it bounces (a buy stop just above), and take a breakout only when a candle body closes beyond the line; size each trade as a tenth of the capital.",
+  "instruments": [
+   "Altcoins, bitcoin"
+  ],
+  "timeframes": [
+   "4h",
+   "6h"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Four ways to trade: against the trend, with it, bounces and breakouts.",
+    "times": [
+     "09:49"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "On a bounce, wait for the bounce itself.",
+    "times": [
+     "13:18"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "A valid breakout needs the candle body to close beyond the line.",
+    "times": [
+     "14:43"
+    ]
+   }
+  ],
+  "why": [
+   "the trend lines and channels are drawn by eye",
+   "the bounce and breakout entries depend on them"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the trend lines and channels are drawn by eye; the bounce and breakout entries depend on them",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "JO-02",
+  "version": "v1",
+  "name": "Kumo breakout with the Ichimoku trifecta (price, cloud and TK cross aligned)",
+  "topic": "crypto",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Josh Olszewicz",
+  "video": "bUilNMYUBZM",
+  "title": "Actionable Ichimoku Cloud Signals: The Kumo Breakout",
+  "uploaded": "2024-05-07",
+  "minutes": 31,
+  "summary": "Josh Olszewicz on the Kumo breakout (2024): with his crypto cloud settings 20, 60, 120, 30, a close above (below) the cloud sets the trend, best when the cloud and the TK cross agree (his 'trifecta') and when it is the first breakout after a long trend the other way. He reads it across the 4-hour to weekly charts.",
+  "instruments": [
+   "Bitcoin, altcoins"
+  ],
+  "timeframes": [
+   "4h to weekly"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "His crypto cloud settings: 20, 60, 120, 30.",
+    "times": [
+     "00:01"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The Kumo breakout sets the tone for the trend.",
+    "times": [
+     "02:49"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The trifecta: price beyond the cloud, the cloud's colour and the TK cross all agreeing.",
+    "times": [
+     "02:09"
+    ]
+   }
+  ],
+  "why": [
+   "the higher-timeframe context and the weight of a 'first time in months' breakout are read by eye"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": "NJ-40",
+  "duplicateWhy": "price, cloud and TK cross aligned (the Ichimoku trifecta) is already coded (NJ-40; DT-04 on bitcoin's daily cloud)",
+  "checks": null
+ },
+ {
+  "id": "KV-01",
+  "version": "v1",
+  "name": "Weekly RSI trend-line breakout as a bullish signal (forecast)",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Kevin Svenson",
+  "video": "Y5bPpLl5LY8",
+  "title": "ARE YOU READY?!? #BITCOIN **Weekly RSI Breakout** HAPPENING NOW + $Alts & Dominance",
+  "uploaded": "2025-02-20",
+  "minutes": 12,
+  "summary": "Kevin Svenson's bitcoin outlook: the weekly RSI breaking its downtrend line has preceded every major leg up since 2023, global liquidity is rising, and his 'parabolic trend' bases point to 124,000-134,000 before an expected cycle end late in the year.",
+  "instruments": [
+   "Bitcoin, altcoins"
+  ],
+  "timeframes": [
+   "1w"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Weekly RSI breakouts have preceded large rises.",
+    "times": [
+     "02:41"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "A weekly close above the RSI's resistance line would signal the next leg.",
+    "times": [
+     "03:21"
+    ]
+   }
+  ],
+  "why": [
+   "a forecast from a trend line drawn by eye on the weekly RSI",
+   "no entry, stop or exit"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "other",
+    "at": "02:41",
+    "value": "+95%, +80%, +73% and +100% after past weekly RSI breakouts",
+    "period": "2023-2024",
+    "quote": "one being being right at the beginning of 2023 causing a 95% rise"
+   }
+  ],
+  "examples": [],
+  "blockedReason": "a forecast from a trend line drawn by eye on the weekly RSI; no entry, stop or exit",
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -14554,6 +16193,72 @@ export const SL: SlStrategy[] = [
   "blockedReason": null,
   "duplicateOf": "CP-02",
   "duplicateWhy": "a daily close beyond the last swing high with the stop under the broken level is already coded (CP-02, the power-candle breakout of the last swing; YT-17)",
+  "checks": null
+ },
+ {
+  "id": "MD-01",
+  "version": "v1",
+  "name": "Anchored-VWAP variants backtested by AI agents (no rules stated)",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Moon Dev",
+  "video": "RH52FuSbEpI",
+  "title": "Claude Code Found a 2,610% Trading Strategy While I Slept (Anchored VWAP)",
+  "uploaded": "2026-05-28",
+  "minutes": 11,
+  "summary": "Moon Dev narrates a livestream in which AI coding agents backtest anchored-VWAP ideas on top of his liquidation-data strategies. The anchored VWAP hurt the liquidation strategies; the best pure version was a 'swing low reclaim' on daily bitcoin, but no rules are given, and the headline 2,610% belongs to a liquidation strategy.",
+  "instruments": [
+   "Bitcoin, Ether"
+  ],
+  "timeframes": [
+   "5m to 1d"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "The anchored VWAP starts from a chosen anchor bar.",
+    "times": [
+     "00:42"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The best pure version was a swing-low reclaim.",
+    "times": [
+     "08:43"
+    ]
+   }
+  ],
+  "why": [
+   "the agents' rules and anchors are never stated",
+   "his best results come from liquidation data the desk does not have"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "return_pct",
+    "at": "05:10",
+    "value": "+2,610% (a liquidation-data strategy with the anchored VWAP added)",
+    "period": "not stated",
+    "quote": "It got hurt, but it's at 2,610%"
+   }
+  ],
+  "examples": [],
+  "blockedReason": "the agents' rules and anchors are never stated; his best results come from liquidation data the desk does not have",
+  "duplicateOf": null,
+  "duplicateWhy": null,
   "checks": null
  },
  {
@@ -15628,6 +17333,89 @@ export const SL: SlStrategy[] = [
   "blockedReason": null,
   "duplicateOf": "TP-04",
   "duplicateWhy": "the New York 15-minute ORB with limits at the edge, midline or far side is already coded from this channel (the 20-channel study's TP-04)",
+  "checks": null
+ },
+ {
+  "id": "TQ-04",
+  "version": "v1",
+  "name": "EMA 20 / 50 / 100 stack, pullback into the EMAs and a Williams fractal entry, 1.5R",
+  "topic": "crypto",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Trade Pro",
+  "video": "0Q6iENmeUys",
+  "title": "Simple But Effective 1 Minute Scalping Strategy Tested 100 Trades | EMA + Fractal Indicators",
+  "uploaded": "2021-04-04",
+  "minutes": 9,
+  "summary": "Trade Pro tests a 1-minute bitcoin scalp 100 times: the 20, 50 and 100 EMAs stacked in order, a pullback into them, and a Williams fractal signal as the entry; stop under the 100 EMA (or the 50 if it held), target 1.5R. 50 winners and 50 losers gave +25% in three days; he recommends higher timeframes because of fees.",
+  "instruments": [
+   "Bitcoin"
+  ],
+  "timeframes": [
+   "1m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Three EMAs: 20, 50 and 100.",
+    "times": [
+     "01:32"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "After the pullback into the EMAs, a Williams fractal signal.",
+    "times": [
+     "02:12"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop below the 100 EMA (or the 50 if price never reached it); target 1.5R.",
+    "times": [
+     "02:56"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Longs need the 20 over the 50 and the 50 over the 100.",
+    "times": [
+     "02:12"
+    ]
+   }
+  ],
+  "why": [
+   "the fractal's printing delay is the indicator's own"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "trade_count",
+    "at": "06:20",
+    "value": "50 winners, 50 losers, +25%",
+    "period": "three days of 1-minute bitcoin",
+    "quote": "there were 50 winners and 50 losses"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": "DE-02",
+  "duplicateWhy": "the EMA 20 / 50 / 100 stack with a Williams fractal entry on 1-minute bars is already coded (the 20-channel study's DE-02; YT-15)",
   "checks": null
  },
  {
@@ -25804,5 +27592,226 @@ export const SL_CHANNELS: SlChannel[] = [
   "strategyTitles": 106,
   "picked": [],
   "skip": "crypto news, interviews and market commentary: no trading rules"
+ },
+ {
+  "key": "tradepro",
+  "name": "Trade Pro",
+  "star": false,
+  "group": "crypto",
+  "earlier": "",
+  "uploads": 388,
+  "strategyTitles": 161,
+  "picked": [
+   {
+    "video": "e6LnibwDZKs",
+    "why": "ten more (61-70): 1-minute bitcoin scalping, Heikin Ashi + RSI, tested 100 trades",
+    "analysed": true,
+    "id": "TQ-01"
+   },
+   {
+    "video": "0Q6iENmeUys",
+    "why": "ten more (61-70): 1-minute scalping with EMAs and Williams fractals, tested 100 trades",
+    "analysed": true,
+    "id": "TQ-04"
+   },
+   {
+    "video": "ohtnf4H_HMA",
+    "why": "ten more (61-70): 1-minute scalping with the 50 and 200 EMA (most viewed)",
+    "analysed": true,
+    "id": "TQ-02"
+   },
+   {
+    "video": "k9gq3aDZmPs",
+    "why": "ten more (61-70): Supertrend + MACD scalping system for bitcoin",
+    "analysed": true,
+    "id": "TQ-03"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "algotradingsaleh",
+  "name": "Algo-trading with Saleh",
+  "star": false,
+  "group": "sys",
+  "earlier": "",
+  "uploads": 84,
+  "strategyTitles": 12,
+  "picked": [
+   {
+    "video": "kIudgLFh5cw",
+    "why": "ten more (61-70): ADX scalping strategy coded in Python (Jesse)",
+    "analysed": true,
+    "id": "SA-01"
+   },
+   {
+    "video": "uDFZsIqHjT4",
+    "why": "ten more (61-70): KAMA scalping strategy coded in Python (Jesse)",
+    "analysed": true,
+    "id": "SA-02"
+   },
+   {
+    "video": "Rw_MlMSUEr0",
+    "why": "ten more (61-70): Alligator day-trading strategy coded in Python (Jesse)",
+    "analysed": true,
+    "id": "SA-03"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "kevinsvenson",
+  "name": "Kevin Svenson",
+  "star": false,
+  "group": "crypto",
+  "earlier": "",
+  "uploads": 837,
+  "strategyTitles": 40,
+  "picked": [
+   {
+    "video": "Y5bPpLl5LY8",
+    "why": "ten more (61-70): bitcoin weekly RSI breakout (his breakout method)",
+    "analysed": true,
+    "id": "KV-01"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "charthackers",
+  "name": "Chart Hackers - Dylan",
+  "star": false,
+  "group": "crypto",
+  "earlier": "",
+  "uploads": 896,
+  "strategyTitles": 70,
+  "picked": [
+   {
+    "video": "1Qh8BeiKDG8",
+    "why": "ten more (61-70): how they trade a crypto market breakout",
+    "analysed": true,
+    "id": "CX-01"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "cheekycrypto",
+  "name": "Cheeky Crypto",
+  "star": false,
+  "group": "crypto",
+  "earlier": "",
+  "uploads": 1344,
+  "strategyTitles": 20,
+  "picked": [
+   {
+    "video": "BwMs0QFA8fc",
+    "why": "ten more (61-70): the 21-EMA signal he trades",
+    "analysed": true,
+    "id": "CY-01"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "tradinglatino",
+  "name": "Trading Latino - Jaime Merino",
+  "star": false,
+  "group": "crypto",
+  "earlier": "",
+  "uploads": 1961,
+  "strategyTitles": 23,
+  "picked": [
+   {
+    "video": "KcyFhT8AdIs",
+    "why": "ten more (61-70): scalping workshop, class 2 - finding signals (Spanish)",
+    "analysed": true,
+    "id": "JM-01"
+   },
+   {
+    "video": "pdiQ2gOOs1Q",
+    "why": "ten more (61-70): intraday workshop, class 1 - trading bounces and breakouts (Spanish)",
+    "analysed": true,
+    "id": "JM-02"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "bravenewcoin",
+  "name": "Brave New Coin",
+  "star": false,
+  "group": "crypto",
+  "earlier": "",
+  "uploads": 1559,
+  "strategyTitles": 80,
+  "picked": [
+   {
+    "video": "yCnLqCqwtOQ",
+    "why": "ten more (61-70): Williams Fractal and Alligator system lesson",
+    "analysed": true,
+    "id": "BV-01"
+   },
+   {
+    "video": "UmKabGi0OKY",
+    "why": "ten more (61-70): Parabolic SAR lesson",
+    "analysed": true,
+    "id": "BV-02"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "cryptosavy",
+  "name": "Crypto Savy",
+  "star": false,
+  "group": "crypto",
+  "earlier": "",
+  "uploads": 1817,
+  "strategyTitles": 16,
+  "picked": [],
+  "skip": "chart scenarios, Elliott Wave counts and bull-trap calls: no complete rule set"
+ },
+ {
+  "key": "josholszewicz",
+  "name": "Josh Olszewicz",
+  "star": false,
+  "group": "crypto",
+  "earlier": "",
+  "uploads": 993,
+  "strategyTitles": 31,
+  "picked": [
+   {
+    "video": "FDR76ZdU3nw",
+    "why": "ten more (61-70): Ichimoku Cloud strategies (his core method)",
+    "analysed": true,
+    "id": "JO-01"
+   },
+   {
+    "video": "bUilNMYUBZM",
+    "why": "ten more (61-70): actionable Ichimoku signals, the Kumo breakout",
+    "analysed": true,
+    "id": "JO-02"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "moondev",
+  "name": "Moon Dev",
+  "star": false,
+  "group": "sys",
+  "earlier": "",
+  "uploads": 442,
+  "strategyTitles": 3,
+  "picked": [
+   {
+    "video": "RH52FuSbEpI",
+    "why": "ten more (61-70): anchored-VWAP strategy found by an AI coding agent (claims to check)",
+    "analysed": true,
+    "id": "MD-01"
+   }
+  ],
+  "skip": null
  }
 ];

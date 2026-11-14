@@ -1,0 +1,18 @@
+video: yCnLqCqwtOQ
+topic: crypto
+summary: Josh Olszewicz on Brave New Coin explains the Williams Alligator and fractal system: a bullish bias once the 5 (green) is above the 8 (red) and the 13 (blue); enter on a candle close above the latest bullish fractal (shorts below a bearish fractal), trail the stop at each new opposite fractal, and treat a close under the 8 line as an exit. He boxes off sideways ranges by eye and says a bot could run it.
+instruments: Bitcoin, Ether, altcoins
+timeframes: 1d (4h and 12h when noisy, weekly for bias)
+style: swing
+= BV-01 | Williams Alligator side and a close beyond the last fractal, fractal trailing stop, out under the teeth
+R indicator E 00:42 | Fractals give both the entries and the stops. | "the fractals which I'll explain are used for both entries and stop losses"
+R filter E 01:22 | A bullish bias when the green line is above the red and the blue. | "you want a bullish bias when the Mas flip bullish so when the green is above the red and the blue"
+R stop E 01:22 | The 8 (middle) line also works as a stop. | "you can also use the eight the middle as a stop loss as well"
+R entry E 07:06 | Enter on a candle close above the latest bullish fractal. | "we need a candle close above that price for a long entry"
+R stop E 07:52 | The opposite fractals act as a trailing stop. | "this is what essentially acts as a trailing stop loss"
+R market E 14:52 | Objective enough for a bot. | "you could probably get a bot to do this as well"
+R market A - | Desk version: Delta BTCUSD, ETHUSD and XAUTUSD on 4-hour candles (he suggests the 4-hour or 12-hour when the daily is noisy); held across days. | ""
+R indicator A - | TradingView's Alligator (SMMA 13 / 8 / 5 of the median price shifted 8 / 5 / 3) and Williams fractals of 2 bars each side. | ""
+R entry A - | Long: lips above teeth above jaw and the first close above the latest confirmed fractal high: enter at the next open. Mirror for shorts. | ""
+R stop A - | The first stop one tick beyond the latest fractal low, trailed to each newer fractal low when tighter; exit at the next open after a close under the teeth or the lips crossing under the teeth. | ""
+T with_assumptions | his range filter (boxing off sideways markets by eye) is not coded; the 4-hour timeframe is ours (A)

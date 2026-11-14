@@ -1,0 +1,21 @@
+video: kIudgLFh5cw
+topic: crypto
+summary: Saleh codes an ADX scalp in Python with Jesse: trade only when ADX is above 50, in the direction of the DI lines, entering when Williams %R is oversold (below -80) for longs or overbought (above -20) for shorts. Stop at the 50 SMA, target the highest high (lowest low) of the last 30 candles, and close if the opposite entry rule turns true. On 15-minute bitcoin from 2021 he reports +4,479% with 5x the size, 61% winners and a -30% drawdown.
+instruments: Bitcoin (BTCUSDT perpetual, Binance)
+timeframes: 15m
+style: scalping
+= SA-01 | ADX above 50 with the DI trend and Williams %R at an extreme, stop at the SMA 50, target the 30-bar extreme
+R filter E 00:44 | Trade only when ADX is above 50. | "So let's add the threshold of 50"
+R filter E 00:44 | DI+ above DI- is an uptrend (shorts the opposite). | "If for example in here the blue line is above this orange line, we are in an uptrend"
+R indicator E 01:27 | Williams %R as the oscillator. | "in this strategy, we're going to use Williams percentage R"
+R entry E 06:27 | Longs when %R is below -80, shorts above -20. | "If the value of the Williams percentage R is below minus 80, we want to look for long positions"
+R stop E 02:09 | Stop at a 50 SMA. | "simply using an SMA or moving average. Simple but changing the value of it from 9 into 50"
+R target E 02:53 | Target the extreme of the last 30 candles. | "of the price in the last 30 candles"
+R exit E 02:53 | Close when the trend direction turns against the trade. | "but for whatever reason the direction of the trend has now changed"
+R timeframe E 09:54 | 15-minute bitcoin. | "Let's change the time frame to 15 and the symbol into BTC UC"
+R market A - | Desk version: Delta BTCUSD and ETHUSD on 15-minute candles; held across days; the desk risks 1% a trade (not his 3% times five). | ""
+R entry A - | Long: DI+ above DI-, ADX (14) above 50 and Williams %R (14) below -80: enter at the next open. Short: DI- above DI+, ADX above 50 and %R above -20. One position at a time. | ""
+R stop A - | Stop at the SMA (50) of the signal bar, kept for the trade (a long whose SMA is above the entry is skipped); target the highest high (lowest low) of the last 30 bars; exit at the next open when the opposite entry rule is true. | ""
+T with_assumptions | the SMA stop is set once at entry, as his Jesse code does (I)
+C return_pct | 15:36 | +4,400% with 5x the position size | 2021 to June 2025, 15-minute bitcoin | "we ended up making 4,400% in P&L"
+C win_rate | 15:36 | 61% winners | the same backtest | "The win rate was 61%"

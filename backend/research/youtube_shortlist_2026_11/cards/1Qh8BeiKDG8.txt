@@ -1,0 +1,10 @@
+video: 1Qh8BeiKDG8
+topic: crypto
+summary: A Chart Hackers live stream on an altcoin breakout: Dylan and co-hosts walk through Matic, Avalanche, Solana, Injective and others, waiting for a break and retest of hand-drawn levels, laddering into support zones and flagging targets and invalidations coin by coin.
+instruments: Altcoins (MATIC, AVAX, SOL, INJ, ...)
+timeframes: 1h, 4h
+style: intraday
+= CX-01 | Altcoin break-and-retest and laddered entries at hand-drawn levels (live stream)
+R entry E 16:10 | Wait for the break, then the retest, for the entry. | "wait for that break wait for that retest and uh that should give you your entry"
+R entry E 35:22 | Ladder into a zone after the pop. | "if you want to ladder in you can start jumping in again"
+T concept_only | a live stream: the levels, retests and ladders are chosen by eye, on coins the desk does not trade

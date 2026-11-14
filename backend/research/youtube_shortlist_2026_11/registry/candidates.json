@@ -49547,5 +49547,3082 @@
     "score": 5.66
    }
   ]
+ },
+ "tradepro": {
+  "key": "tradepro",
+  "name": "Trade Pro",
+  "titles": [
+   "Trade Pro"
+  ],
+  "star": false,
+  "group": "crypto",
+  "earlier": "",
+  "listed": true,
+  "videos": 388,
+  "p1": 161,
+  "covered": [],
+  "candidates": [
+   {
+    "id": "0Q6iENmeUys",
+    "title": "Simple But Effective 1 Minute Scalping Strategy Tested 100 Trades | EMA + Fractal Indicators",
+    "duration": 532,
+    "views": 417000,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators",
+     "Scalping and intraday"
+    ],
+    "market": null,
+    "score": 12.62
+   },
+   {
+    "id": "AM52D58vGQk",
+    "title": "HIGH PROFIT 1 Minute Chart Scalping Strategy Proven 100 Trades - RSI+ 200 EMA+ Engulfing",
+    "duration": 544,
+    "views": 102000,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Candlestick setups",
+     "Indicators",
+     "Scalping and intraday"
+    ],
+    "market": null,
+    "score": 12.01
+   },
+   {
+    "id": "e6LnibwDZKs",
+    "title": "1 Minute Bitcoin Scalping Strategy Tested 100 Trades: Heikin Ashi RSI Indicator",
+    "duration": 681,
+    "views": 94000,
+    "published": "2022-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators",
+     "Scalping and intraday",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 11.97
+   },
+   {
+    "id": "ohtnf4H_HMA",
+    "title": "1 Minute Scalping Strategy Just Using 50 EMA And 200 EMA",
+    "duration": 687,
+    "views": 622000,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators",
+     "Scalping and intraday"
+    ],
+    "market": null,
+    "score": 11.79
+   },
+   {
+    "id": "v9N4kj4-V2s",
+    "title": "Extremely Profitable 1 Minute Chart Trading Strategy Proven 100 Trades - EMA + RSI + Stochastic",
+    "duration": 802,
+    "views": 206000,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators",
+     "Scalping and intraday"
+    ],
+    "market": null,
+    "score": 11.31
+   },
+   {
+    "id": "ofiGdsNqTP4",
+    "title": "Simple Trading Strategy That \"Turned $1000 into $50000\" Tested 100 Times - Bollinger Bands + MA",
+    "duration": 491,
+    "views": 1300000,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators"
+    ],
+    "market": null,
+    "score": 11.11
+   },
+   {
+    "id": "2tgmR9jzuCM",
+    "title": "Stochastic+SMA+WMA Trading Strategy Tested 100 Times (5 Minute Chart) - Full Results",
+    "duration": 430,
+    "views": 71000,
+    "published": "2020-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators",
+     "Scalping and intraday"
+    ],
+    "market": null,
+    "score": 10.85
+   },
+   {
+    "id": "D1hzvCckO0M",
+    "title": "\"90%+\" Win Rate Insane Forex Scalping Strategy Tested 100 Times - 14 EMA + RSI",
+    "duration": 712,
+    "views": 62000,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators",
+     "Scalping and intraday",
+     "Gold and forex"
+    ],
+    "market": "FX",
+    "score": 10.79
+   },
+   {
+    "id": "BQdvNAepuDw",
+    "title": "Simple Money Flow Index MFI Day Trading Strategy Tested 100 Times (5 minute chart) - Full Results",
+    "duration": 442,
+    "views": 60000,
+    "published": "2020-11-15",
+    "priority": "P1",
+    "families": [
+     "Scalping and intraday"
+    ],
+    "market": null,
+    "score": 10.78
+   },
+   {
+    "id": "EVCXasEAarQ",
+    "title": "5 Minute ADX Day Trading Strategy \"Built by Professional Traders\" Tested 100 Trades",
+    "duration": 484,
+    "views": 44000,
+    "published": "2022-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators",
+     "Scalping and intraday"
+    ],
+    "market": null,
+    "score": 10.64
+   },
+   {
+    "id": "_FeK2V8Ov3o",
+    "title": "Taking 200 Forex Trades On The 1 Minute Chart - MACD Strategy - Full Results",
+    "duration": 300,
+    "views": 29000,
+    "published": "2020-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators",
+     "Scalping and intraday",
+     "Gold and forex"
+    ],
+    "market": "FX",
+    "score": 10.46
+   },
+   {
+    "id": "-pqqWHnyF58",
+    "title": "Classic MACD Trading Strategy But On The 5 Minute Chart 100 Test Results (2 Stage Take Profit)",
+    "duration": 553,
+    "views": 28000,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators",
+     "Scalping and intraday"
+    ],
+    "market": null,
+    "score": 10.45
+   },
+   {
+    "id": "RO26MKZdD2o",
+    "title": "Highly Profitable 5 Minute Scalping Strategy For Small Account Growth - MACD + Stochastic RSI",
+    "duration": 596,
+    "views": 19000,
+    "published": "2023-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators",
+     "Scalping and intraday"
+    ],
+    "market": null,
+    "score": 10.28
+   },
+   {
+    "id": "juZlrecsIts",
+    "title": "Easy 1 Minute Scalping Trading Strategy | Simple But Effective",
+    "duration": 583,
+    "views": 1000000,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Scalping and intraday"
+    ],
+    "market": null,
+    "score": 10.0
+   },
+   {
+    "id": "BlfuQ1GmtWw",
+    "title": "VWAP + 600 EMA + Williams Alligator Trading Strategy Tested 100 Times",
+    "duration": 913,
+    "views": 55000,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "VWAP",
+     "Indicators"
+    ],
+    "market": null,
+    "score": 9.74
+   },
+   {
+    "id": "MiSIIqleIOI",
+    "title": "Highest Profit Trading Strategy On The 1 Minute Chart - RSI + Stochastic + EMA",
+    "duration": 417,
+    "views": 54000,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators",
+     "Scalping and intraday"
+    ],
+    "market": null,
+    "score": 9.73
+   },
+   {
+    "id": "Lw9DPqiaMcc",
+    "title": "Simple Triple EMA Trading Strategy Put To The Test - 5 Minute Chart - 100 Trades",
+    "duration": 445,
+    "views": 46000,
+    "published": "2020-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators",
+     "Scalping and intraday"
+    ],
+    "market": "IN_OPT",
+    "score": 9.66
+   },
+   {
+    "id": "k9gq3aDZmPs",
+    "title": "Complete Supertrend + MACD Trading System for Scalping Bitcoin and Forex",
+    "duration": 1030,
+    "views": 34000,
+    "published": "2022-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators",
+     "Scalping and intraday",
+     "Gold and forex",
+     "Crypto"
+    ],
+    "market": "FX",
+    "score": 9.53
+   },
+   {
+    "id": "vQffLRJoE5s",
+    "title": "Simple Stochastic RSI Day Trading Strategy Tested 100 Times",
+    "duration": 307,
+    "views": 17000,
+    "published": "2020-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators",
+     "Scalping and intraday"
+    ],
+    "market": null,
+    "score": 9.23
+   },
+   {
+    "id": "a84mOdSY29s",
+    "title": "Simple But Highly Profitable Super Trend Trading Strategy Proven With 466 Trades",
+    "duration": 924,
+    "views": 156000,
+    "published": "2022-11-15",
+    "priority": "P2",
+    "families": [],
+    "market": null,
+    "score": 9.19
+   },
+   {
+    "id": "VMlywDFrQPA",
+    "title": "Highly Profitable 5 Minute Scalping Strategy Proven 125 Trade Results (stop loss to break even)",
+    "duration": 580,
+    "views": 14000,
+    "published": "2023-11-15",
+    "priority": "P1",
+    "families": [
+     "Scalping and intraday"
+    ],
+    "market": null,
+    "score": 9.15
+   },
+   {
+    "id": "4ATNJ4ShW7k",
+    "title": "The Most Simple Profitable 5 Minute Scalping Strategy Proven 100 Trades - 1 Indicator",
+    "duration": 508,
+    "views": 12000,
+    "published": "2023-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators",
+     "Scalping and intraday"
+    ],
+    "market": null,
+    "score": 9.08
+   },
+   {
+    "id": "LcCs613tDB4",
+    "title": "Simple 1 Minute Chart Trading Strategy Tested 100 Times- Full Results",
+    "duration": 306,
+    "views": 90000,
+    "published": "2020-11-15",
+    "priority": "P1",
+    "families": [
+     "Scalping and intraday"
+    ],
+    "market": null,
+    "score": 8.95
+   },
+   {
+    "id": "MHOX10YFN2I",
+    "title": "76% High Win Rate Full Trading Strategy Proven 100 Trades - SFP + EMA + Divergence",
+    "duration": 733,
+    "views": 8700,
+    "published": "2025-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators"
+    ],
+    "market": null,
+    "score": 8.94
+   },
+   {
+    "id": "ToUJ_kWJc-w",
+    "title": "The Ultimate VWAP Day Trading Strategy - VWAP + 600 EMA + MACD",
+    "duration": 876,
+    "views": 79000,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "VWAP",
+     "Indicators",
+     "Scalping and intraday"
+    ],
+    "market": null,
+    "score": 8.9
+   }
+  ]
+ },
+ "algotradingsaleh": {
+  "key": "algotradingsaleh",
+  "name": "Algo-trading with Saleh",
+  "titles": [
+   "Algo-trading with Saleh"
+  ],
+  "star": false,
+  "group": "sys",
+  "earlier": "",
+  "listed": true,
+  "videos": 84,
+  "p1": 12,
+  "covered": [],
+  "candidates": [
+   {
+    "id": "kIudgLFh5cw",
+    "title": "GPT: ADX scalping strategy in Python makes 4479%",
+    "duration": 1262,
+    "views": 19000,
+    "published": "2025-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators",
+     "Scalping and intraday"
+    ],
+    "market": null,
+    "score": 10.28
+   },
+   {
+    "id": "40HulO-CVTA",
+    "title": "Bitcoin SCALPING strategy using Supertrend in Python",
+    "duration": 1194,
+    "views": 5100,
+    "published": "2024-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators",
+     "Scalping and intraday",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 9.71
+   },
+   {
+    "id": "Rw_MlMSUEr0",
+    "title": "ChatGPT o1: Alligator Day Trading Strategy in Python Makes 1721%",
+    "duration": 1082,
+    "views": 24000,
+    "published": "2024-11-15",
+    "priority": "P1",
+    "families": [
+     "Scalping and intraday"
+    ],
+    "market": null,
+    "score": 9.38
+   },
+   {
+    "id": "uDFZsIqHjT4",
+    "title": "GPT: KAMA Scalping Strategy in Python Makes 795%",
+    "duration": 1241,
+    "views": 65000,
+    "published": "2025-11-15",
+    "priority": "P1",
+    "families": [
+     "Scalping and intraday"
+    ],
+    "market": null,
+    "score": 8.81
+   },
+   {
+    "id": "-VVfk2CE8Ao",
+    "title": "Cloud Scalping Strategy in Python Makes 223%",
+    "duration": 1187,
+    "views": 13000,
+    "published": "2025-11-15",
+    "priority": "P1",
+    "families": [
+     "Scalping and intraday"
+    ],
+    "market": null,
+    "score": 8.11
+   },
+   {
+    "id": "l6rfqbd5ets",
+    "title": "\"Trend Wave Rider\" scalping strategy in Python makes 116%",
+    "duration": 1206,
+    "views": 3900,
+    "published": "2025-11-15",
+    "priority": "P1",
+    "families": [
+     "Scalping and intraday"
+    ],
+    "market": null,
+    "score": 7.59
+   },
+   {
+    "id": "b6ClJKhEQcE",
+    "title": "GPT: Triple moving average strategy in Python makes 4983%",
+    "duration": 1254,
+    "views": 20000,
+    "published": "2025-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators"
+    ],
+    "market": null,
+    "score": 7.3
+   },
+   {
+    "id": "sf4xCk5ZEIA",
+    "title": "Ichimoku Cloud Strategy in Python Makes 257%",
+    "duration": 848,
+    "views": 6600,
+    "published": "2024-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators"
+    ],
+    "market": null,
+    "score": 6.82
+   },
+   {
+    "id": "ES83m_2-xrg",
+    "title": "GPT: Breakout strategy in Python makes 805%",
+    "duration": 2115,
+    "views": 9700,
+    "published": "2025-11-15",
+    "priority": "P1",
+    "families": [
+     "Breakouts and patterns"
+    ],
+    "market": null,
+    "score": 5.99
+   },
+   {
+    "id": "H54VqsCb04M",
+    "title": "Simple SWING trading strategy using EMAs in Python that delivers IMPRESSIVE results!",
+    "duration": 1023,
+    "views": 7200,
+    "published": "2024-11-15",
+    "priority": "P1",
+    "families": [
+     "Swing and stock selection"
+    ],
+    "market": null,
+    "score": 5.86
+   },
+   {
+    "id": "hopcesPukiA",
+    "title": "Claude Opus 5.5 + MCP = Gold Strategy With a Sharpe of 2.3",
+    "duration": 1652,
+    "views": 23000,
+    "published": "2026-10-15",
+    "priority": "P1",
+    "families": [
+     "Gold and forex"
+    ],
+    "market": "XAU",
+    "score": 5.36
+   },
+   {
+    "id": "zFmk6CbwjEg",
+    "title": "I Let Grok 4.6 Research Crypto Trading Strategies",
+    "duration": 1127,
+    "views": 7500,
+    "published": "2026-08-15",
+    "priority": "P1",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 4.88
+   }
+  ]
+ },
+ "kevinsvenson": {
+  "key": "kevinsvenson",
+  "name": "Kevin Svenson",
+  "titles": [
+   "Kevin Svenson"
+  ],
+  "star": false,
+  "group": "crypto",
+  "earlier": "",
+  "listed": true,
+  "videos": 837,
+  "p1": 40,
+  "covered": [],
+  "candidates": [
+   {
+    "id": "Y5bPpLl5LY8",
+    "title": "ARE YOU READY?!? #BITCOIN **Weekly RSI Breakout** HAPPENING NOW + $Alts & Dominance",
+    "duration": 741,
+    "views": 19000,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Indicators",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 8.28
+   },
+   {
+    "id": "-t5V1cNm5oE",
+    "title": "#BITCOIN MONTHLY RSI **BREAKOUT** INCOMING?!? | #FOMC Meeting",
+    "duration": 696,
+    "views": 18000,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Indicators",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 8.26
+   },
+   {
+    "id": "9svJSldvs0E",
+    "title": "#BITCOIN PARABOLIC TREND BREAKDOWN | $ALT-COINS GAINING DOMINANCE!?!",
+    "duration": 518,
+    "views": 17000,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 8.23
+   },
+   {
+    "id": "VE9cd2NPA8o",
+    "title": "#BITCOIN WEEKLY RSI BREAKOUT IS CLOSE!!!",
+    "duration": 574,
+    "views": 16000,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Indicators",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 8.2
+   },
+   {
+    "id": "vuT318el-JE",
+    "title": "#BITCOIN WEEKLY RSI **BREAKOUT** 💥📈 CONFIRMED ✅",
+    "duration": 493,
+    "views": 15000,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Indicators",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 8.18
+   },
+   {
+    "id": "hXCln_emghs",
+    "title": "🚨 #BITCOIN IN A CRITICAL ZONE!!! ⚠️ Parabolic Trend?!?",
+    "duration": 448,
+    "views": 15000,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Support, resistance and zones",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 8.18
+   },
+   {
+    "id": "vA--1V2sYGU",
+    "title": "🚨 #BITCOIN WEEKLY RSI NEAR A BREAKOUT?!? 🧐📊",
+    "duration": 498,
+    "views": 13000,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Indicators",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 8.11
+   },
+   {
+    "id": "yJe9PXowDSk",
+    "title": "#Bitcoin | The Parabolic Trend is STILL IN PLAY?!?",
+    "duration": 413,
+    "views": 12000,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 8.08
+   },
+   {
+    "id": "JZNgEwmWG4Q",
+    "title": "#BITCOIN **BULLISH HAMMER*** NOW!!! 🚨 (PARABOLIC TREND)",
+    "duration": 452,
+    "views": 12000,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Candlestick setups",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 8.08
+   },
+   {
+    "id": "rkPOSXxHi4M",
+    "title": "#BITCOIN STILL IN A BULLISH SETUP?!? Parabolic Trend Critical Zone!!!",
+    "duration": 384,
+    "views": 11000,
+    "published": "2024-11-15",
+    "priority": "P1",
+    "families": [
+     "Support, resistance and zones",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 8.04
+   },
+   {
+    "id": "tY5_pnSr3bg",
+    "title": "#BITCOIN CHRISTMAS PUMP!!! 🎅🏻🎁📈 PARABOLIC TREND",
+    "duration": 621,
+    "views": 10000,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 8.0
+   },
+   {
+    "id": "YDP0X5UtnJc",
+    "title": "#Bitcoin: PARABOLIC TREND ($48K or $60K) ???",
+    "duration": 470,
+    "views": 16000,
+    "published": "2023-11-15",
+    "priority": "P2",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 7.2
+   },
+   {
+    "id": "2wTxoqVdZ3Y",
+    "title": "#BITCOIN IS FORMING A PARABOLIC TREND!?!?! 📈",
+    "duration": 426,
+    "views": 14000,
+    "published": "2023-11-15",
+    "priority": "P2",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 7.15
+   },
+   {
+    "id": "brvKgHPMSCs",
+    "title": "#BITCOIN PARABOLIC $17k-$18k ➡️ THEN MAJOR PULLBACK?!?",
+    "duration": 453,
+    "views": 10000,
+    "published": "2020-11-15",
+    "priority": "P2",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 7.0
+   },
+   {
+    "id": "c0wjinxq6Ys",
+    "title": "THIS IS BIG! #BITCOIN PARABOLIC!!! 🎯 BUY TARGETS + $ETH BREAKOUT!",
+    "duration": 430,
+    "views": 10000,
+    "published": "2020-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 7.0
+   },
+   {
+    "id": "Y8R6N1VmE_w",
+    "title": "#BITCOIN COULD END THE BEAR MARKET SOON?!?! Weekly RSI Breakout is CLOSE!!!🚨",
+    "duration": 424,
+    "views": 8100,
+    "published": "2023-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Indicators",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.91
+   },
+   {
+    "id": "KWbOFmdVlUQ",
+    "title": "#BITCOIN'S PARABOLIC TREND CONTINUES?!?!",
+    "duration": 349,
+    "views": 8000,
+    "published": "2023-11-15",
+    "priority": "P2",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.9
+   },
+   {
+    "id": "Vxi7g2Cu1bs",
+    "title": "#BITCOIN KEY DAILY RSI LEVEL!!! BREAKOUT POSSIBLE???",
+    "duration": 679,
+    "views": 7300,
+    "published": "2022-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Indicators",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.86
+   },
+   {
+    "id": "gcTtwuw2uxk",
+    "title": "PPI REPORT 📛 #BITCOIN DAILY RSI TREND + #ETH Stake Withdraws Coming!!!",
+    "duration": 416,
+    "views": 4700,
+    "published": "2023-11-15",
+    "priority": "P2",
+    "families": [
+     "Indicators",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.67
+   },
+   {
+    "id": "JE_kAM_yXBU",
+    "title": "#BITCOIN BREAKOUT COMING?!? 🏁 $ALT SEASON IS CONFIRMED ✅",
+    "duration": 723,
+    "views": 18000,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.26
+   },
+   {
+    "id": "HkNiD0qf_lo",
+    "title": "#BITCOIN CLOSE TO A BREAKOUT?!? | Alts & Dominance",
+    "duration": 611,
+    "views": 16000,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.2
+   },
+   {
+    "id": "6LG-6XdheXo",
+    "title": "#BITCOIN = $120K+ ... **WHAT NOW**?!? | $Alt-Coin Index Breakout",
+    "duration": 624,
+    "views": 14000,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.15
+   },
+   {
+    "id": "lBhvQb0jJPQ",
+    "title": "#BITCOIN BREAKOUT SOON?!? + New $BTC (vs) #Altcoins Heatmap Indicator",
+    "duration": 539,
+    "views": 14000,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Indicators",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.15
+   },
+   {
+    "id": "L_eKH9XUCVo",
+    "title": "#BITCOIN BREAKOUT **HAPPENING NOW!!!*** $Alt-Season is Close?",
+    "duration": 542,
+    "views": 13000,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.11
+   },
+   {
+    "id": "hVhPy94SAOo",
+    "title": "WILL THE TREND CONTINUE??? #BITCOIN",
+    "duration": 421,
+    "views": 13000,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.11
+   }
+  ]
+ },
+ "charthackers": {
+  "key": "charthackers",
+  "name": "Chart Hackers - Dylan",
+  "titles": [
+   "Chart Hackers"
+  ],
+  "star": false,
+  "group": "crypto",
+  "earlier": "",
+  "listed": true,
+  "videos": 896,
+  "p1": 70,
+  "covered": [],
+  "candidates": [
+   {
+    "id": "No8jjJozMk8",
+    "title": "Bitcoin Hits Major Resistance! [Squeeze Or Reversal?]",
+    "duration": 2309,
+    "views": 5600,
+    "published": "2025-12-15",
+    "priority": "P2",
+    "families": [
+     "Support, resistance and zones",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 7.75
+   },
+   {
+    "id": "q7o2RNoyAnU",
+    "title": "Relief Bounce Bull Trap Incoming! Closing July Green? (CRYPTO TRADING LIVE)",
+    "duration": 3107,
+    "views": 3700,
+    "published": "2026-08-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto",
+     "Live trading and recaps"
+    ],
+    "market": "CRYPTO",
+    "score": 7.57
+   },
+   {
+    "id": "r9yMiUQNqCU",
+    "title": "WILL WE TAKE THE TRADE? BTC Liquidity Sweep or Big Short Squeeze? (CRYPTO TRADING)",
+    "duration": 2704,
+    "views": 3400,
+    "published": "2026-08-15",
+    "priority": "P2",
+    "families": [
+     "Liquidity and sweeps",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 7.53
+   },
+   {
+    "id": "ki5-rb6Vnmw",
+    "title": "CPI Results To Fuel The Next Crypto Breakout?! [WATCH THIS]",
+    "duration": 3585,
+    "views": 10000,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 7.0
+   },
+   {
+    "id": "ZecWx8Oej8M",
+    "title": "HUGE ALTCOIN OPPORTUNITY! (While Traders Are Falling For Mt. Gox's TRAP)",
+    "duration": 2739,
+    "views": 21000,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": null,
+    "score": 6.32
+   },
+   {
+    "id": "fw47kLwqnXc",
+    "title": "This FOMC Will Be The ULTIMATE Crypto Bear Trap! [PROOF]",
+    "duration": 3420,
+    "views": 19000,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.28
+   },
+   {
+    "id": "EOvkdZPnLMc",
+    "title": "WARNING To Altcoin Traders! (OBVIOUS TRAP)",
+    "duration": 3103,
+    "views": 17000,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": null,
+    "score": 6.23
+   },
+   {
+    "id": "qYrTpZKELdQ",
+    "title": "Altcoin Breakout LOADING! 🚨 [Here Are Your Best Bets!]",
+    "duration": 3481,
+    "views": 16000,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Crypto"
+    ],
+    "market": null,
+    "score": 6.2
+   },
+   {
+    "id": "ovgU1YgBOug",
+    "title": "Solana’s Breakout Is About To Trigger These Altcoins! [MAJOR MOVE]",
+    "duration": 4381,
+    "views": 15000,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Crypto"
+    ],
+    "market": null,
+    "score": 6.18
+   },
+   {
+    "id": "7MNKL7MT8RM",
+    "title": "DON'T Fall For This Trap! [CRYPTO DUMP IMMINENT]",
+    "duration": 2877,
+    "views": 15000,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.18
+   },
+   {
+    "id": "0Lqy-41OdXc",
+    "title": "Mega Altcoin Breakout for massive gains this month!",
+    "duration": 2909,
+    "views": 15000,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Crypto"
+    ],
+    "market": null,
+    "score": 6.18
+   },
+   {
+    "id": "mdVvA8K6Vtg",
+    "title": "WARNING! Bitcoin Will Trap You Again! [How To Trade It]",
+    "duration": 3599,
+    "views": 14000,
+    "published": "2025-11-15",
+    "priority": "P1",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.15
+   },
+   {
+    "id": "VEIc9-Jdd-M",
+    "title": "Altcoin Trap EXPOSED! Most Traders Will Fall for This!",
+    "duration": 3570,
+    "views": 14000,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": null,
+    "score": 6.15
+   },
+   {
+    "id": "1Qh8BeiKDG8",
+    "title": "HOW I'M TRADING THIS CRYPTO MARKET BREAKOUT!",
+    "duration": 3194,
+    "views": 14000,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.15
+   },
+   {
+    "id": "aB8vA7BTc7A",
+    "title": "Bitcoin Is About To TRAP Traders! [🚨What To Look For!]",
+    "duration": 2916,
+    "views": 14000,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.15
+   },
+   {
+    "id": "IPkHhadwLWw",
+    "title": "You're Walking Into The Biggest Bitcoin Trap This Week!",
+    "duration": 3787,
+    "views": 13000,
+    "published": "2026-10-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.11
+   },
+   {
+    "id": "0AFbrq9-hZY",
+    "title": "Crypto Trap Alert! Altcoins Could Be In Serious Danger!",
+    "duration": 3316,
+    "views": 13000,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.11
+   },
+   {
+    "id": "6bLWCdwN2hc",
+    "title": "Is This CPI Pump A Trap? [What Everyone SHOULD Be Doing Now!]",
+    "duration": 3045,
+    "views": 13000,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout"
+    ],
+    "market": null,
+    "score": 6.11
+   },
+   {
+    "id": "8y8Zfaih12s",
+    "title": "THIS IS WHERE WE ARE BUYING! Bitcoin Sweep & Altcoin Re-Accumulation (CRYPTO TRADING)",
+    "duration": 3224,
+    "views": 12000,
+    "published": "2026-10-15",
+    "priority": "P2",
+    "families": [
+     "Liquidity and sweeps",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.08
+   },
+   {
+    "id": "fgZOKDYiSPA",
+    "title": "This Crypto Rally Has A Hidden Trap! [Watch Before You Trade]",
+    "duration": 3301,
+    "views": 12000,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.08
+   },
+   {
+    "id": "-ejWtH7b9fE",
+    "title": "ETH BREAKOUT! Altcoin Season Incoming or Massive Bull Trap? (CRYPTO TRADING)",
+    "duration": 4853,
+    "views": 11000,
+    "published": "2026-09-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Breakouts and patterns",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.04
+   },
+   {
+    "id": "g0j6HhfkFhI",
+    "title": "The Next Bitcoin Pump Is A TRAP! [You’ve Been Warned]",
+    "duration": 3680,
+    "views": 11000,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.04
+   },
+   {
+    "id": "8lqqnS_oY20",
+    "title": "ALERT 🚨 How Serious Is This Bitcoin Rejection? [Crypto Dump]",
+    "duration": 3025,
+    "views": 11000,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.04
+   },
+   {
+    "id": "CWs-ySEstV0",
+    "title": "This Crypto Bounce Will Trap You UNLESS You Do This..",
+    "duration": 3785,
+    "views": 11000,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.04
+   },
+   {
+    "id": "pPIvpzTlB2E",
+    "title": "Take 3 Altcoin Trades NOW For The Next Breakout!",
+    "duration": 2529,
+    "views": 11000,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Crypto"
+    ],
+    "market": null,
+    "score": 6.04
+   }
+  ]
+ },
+ "cheekycrypto": {
+  "key": "cheekycrypto",
+  "name": "Cheeky Crypto",
+  "titles": [
+   "Cheeky Crypto"
+  ],
+  "star": false,
+  "group": "crypto",
+  "earlier": "",
+  "listed": true,
+  "videos": 1344,
+  "p1": 20,
+  "covered": [],
+  "candidates": [
+   {
+    "id": "6sZNiywd-Lg",
+    "title": "XRP Explained: The $10.00 Mathematical Structure Every Crypto Investor Needs to See",
+    "duration": 1282,
+    "views": 8200,
+    "published": "2026-06-15",
+    "priority": "P1",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.91
+   },
+   {
+    "id": "WxE0XOJ04dw",
+    "title": "XRP vs $10T: Liquidity Crazy Results!",
+    "duration": 939,
+    "views": 8100,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Liquidity and sweeps"
+    ],
+    "market": null,
+    "score": 6.91
+   },
+   {
+    "id": "1Nj69acFfKQ",
+    "title": "I Found XRP’s Secret Diet and it's a Supply Squeeze",
+    "duration": 968,
+    "views": 7900,
+    "published": "2025-11-15",
+    "priority": "P1",
+    "families": [
+     "Support, resistance and zones"
+    ],
+    "market": null,
+    "score": 6.9
+   },
+   {
+    "id": "ecWeQCiGh5k",
+    "title": "IT’S OVER: The Senate Trap For Ripple Investors",
+    "duration": 1266,
+    "views": 19000,
+    "published": "2026-05-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout"
+    ],
+    "market": null,
+    "score": 6.28
+   },
+   {
+    "id": "SsUmhKW4SLE",
+    "title": "The XRP $30 breakout has ALREADY started",
+    "duration": 1853,
+    "views": 16000,
+    "published": "2026-01-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns"
+    ],
+    "market": null,
+    "score": 6.2
+   },
+   {
+    "id": "HUTtw199u0Q",
+    "title": "XRP Just Got a Major Liquidity Boost",
+    "duration": 1558,
+    "views": 14000,
+    "published": "2026-09-15",
+    "priority": "P2",
+    "families": [
+     "Liquidity and sweeps"
+    ],
+    "market": null,
+    "score": 6.15
+   },
+   {
+    "id": "jfd3bVqhCew",
+    "title": "IT’S OVER: No More Waiting for the XRP Breakout",
+    "duration": 1075,
+    "views": 12000,
+    "published": "2026-05-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns"
+    ],
+    "market": null,
+    "score": 6.08
+   },
+   {
+    "id": "vkQEi3eh3eI",
+    "title": "OFFICIAL: The $1.11 to $1.67 XRP Trap Has Been Exposed!",
+    "duration": 1295,
+    "views": 10000,
+    "published": "2026-06-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout"
+    ],
+    "market": null,
+    "score": 6.0
+   },
+   {
+    "id": "12cTneAGZ14",
+    "title": "The Invisible Force Killing XRP’s Breakout",
+    "duration": 1124,
+    "views": 10000,
+    "published": "2026-05-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns"
+    ],
+    "market": null,
+    "score": 6.0
+   },
+   {
+    "id": "1wZ8N0nLeAQ",
+    "title": "JUST IN: Massive XRP Liquidity Migration CONFIRMED",
+    "duration": 1130,
+    "views": 9500,
+    "published": "2026-05-15",
+    "priority": "P2",
+    "families": [
+     "Liquidity and sweeps"
+    ],
+    "market": null,
+    "score": 5.98
+   },
+   {
+    "id": "AopTCGczSGs",
+    "title": "$1,000 XRP: The Liquidity Truth Most Holders Still Miss",
+    "duration": 1542,
+    "views": 8800,
+    "published": "2026-07-15",
+    "priority": "P2",
+    "families": [
+     "Liquidity and sweeps"
+    ],
+    "market": null,
+    "score": 5.94
+   },
+   {
+    "id": "mNrOx_Pddzo",
+    "title": "XRP WARNING: The biggest TRAP in crypto history",
+    "duration": 1359,
+    "views": 7700,
+    "published": "2026-06-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.89
+   },
+   {
+    "id": "_lI-d5Dw3YE",
+    "title": "XRP Escrow is for Global Institutional Liquidity...",
+    "duration": 1555,
+    "views": 6600,
+    "published": "2026-01-15",
+    "priority": "P2",
+    "families": [
+     "Liquidity and sweeps"
+    ],
+    "market": null,
+    "score": 5.82
+   },
+   {
+    "id": "n8KLC8LKPMg",
+    "title": "JUST IN: Ripple’s RLUSD Triggers Sudden 22% Liquidity Spike!",
+    "duration": 1080,
+    "views": 5700,
+    "published": "2026-06-15",
+    "priority": "P2",
+    "families": [
+     "Liquidity and sweeps"
+    ],
+    "market": null,
+    "score": 5.76
+   },
+   {
+    "id": "F7Xngo9Camo",
+    "title": "XRP Ledger Liquidity Finally Waking Up",
+    "duration": 1073,
+    "views": 5000,
+    "published": "2026-07-15",
+    "priority": "P2",
+    "families": [
+     "Liquidity and sweeps"
+    ],
+    "market": null,
+    "score": 5.7
+   },
+   {
+    "id": "YY3c7tCwwlw",
+    "title": "XRP Bears May Have Walked Into A Trap",
+    "duration": 1513,
+    "views": 3200,
+    "published": "2026-07-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout"
+    ],
+    "market": null,
+    "score": 5.51
+   },
+   {
+    "id": "ALSv9DZJ2Ss",
+    "title": "The 8x Scaling Gap Bitcoin Cannot Bridge",
+    "duration": 705,
+    "views": null,
+    "published": "2026-05-15",
+    "priority": "P2",
+    "families": [
+     "Gap trading",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.0
+   },
+   {
+    "id": "-YsGqrIwx-Q",
+    "title": "The 5 Altcoins With A Massive Valuation Gap",
+    "duration": 526,
+    "views": null,
+    "published": "2026-04-15",
+    "priority": "P2",
+    "families": [
+     "Gap trading",
+     "Crypto"
+    ],
+    "market": null,
+    "score": 5.0
+   },
+   {
+    "id": "l9d1nW3_Wck",
+    "title": "The G7 Crypto Conspiracy Banks, XRP, and a Secret Stablecoin",
+    "duration": 1676,
+    "views": 8300,
+    "published": "2025-11-15",
+    "priority": "P1",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 4.92
+   },
+   {
+    "id": "i9sHuDtypMA",
+    "title": "XRP’s Big Secret: 3 Cycles, 3 Breakouts?",
+    "duration": 1372,
+    "views": 8300,
+    "published": "2025-11-15",
+    "priority": "P1",
+    "families": [
+     "Breakouts and patterns"
+    ],
+    "market": null,
+    "score": 4.92
+   },
+   {
+    "id": "d0gZmRfOqQc",
+    "title": "XRP’s Big Secret: Could It Overtake Ethereum?",
+    "duration": 1539,
+    "views": 5300,
+    "published": "2025-11-15",
+    "priority": "P1",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 4.73
+   },
+   {
+    "id": "D5QoQW2LrHw",
+    "title": "Most Crypto Investors Are Not Ready for This Rule Change",
+    "duration": 1172,
+    "views": 2100,
+    "published": "2026-07-15",
+    "priority": "P1",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 4.32
+   },
+   {
+    "id": "Tqpi4SDj11A",
+    "title": "Institutions Are Prepping Your Exit Trap Right Now!",
+    "duration": 629,
+    "views": null,
+    "published": "2026-07-15",
+    "priority": "P1",
+    "families": [
+     "Trap / fake breakout"
+    ],
+    "market": null,
+    "score": 3.0
+   },
+   {
+    "id": "hiDwnFsv-Qw",
+    "title": "The Secret $189M Playbook Saving These 10 Altcoins",
+    "duration": 1035,
+    "views": null,
+    "published": "2026-07-15",
+    "priority": "P1",
+    "families": [
+     "Crypto"
+    ],
+    "market": null,
+    "score": 3.0
+   },
+   {
+    "id": "kjpyN65brcU",
+    "title": "Retail Crypto Holders Are Falling For This Trap",
+    "duration": 1071,
+    "views": null,
+    "published": "2026-07-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 3.0
+   }
+  ]
+ },
+ "tradinglatino": {
+  "key": "tradinglatino",
+  "name": "Trading Latino - Jaime Merino",
+  "titles": [
+   "Jaime Merino | TradingLatino"
+  ],
+  "star": false,
+  "group": "crypto",
+  "earlier": "",
+  "listed": true,
+  "videos": 1961,
+  "p1": 23,
+  "covered": [],
+  "candidates": [
+   {
+    "id": "GRjtGiu56Qc",
+    "title": "📕Taller de Scalping: Operando en Tradingview con Broker | #BITCOIN V113",
+    "duration": 1323,
+    "views": 276000,
+    "published": "2018-11-15",
+    "priority": "P2",
+    "families": [
+     "Scalping and intraday",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 8.44
+   },
+   {
+    "id": "KcyFhT8AdIs",
+    "title": "📕Taller de Scalping: Clase#2 - Buscando Señales en Criptomonedas | #BITCOIN V118",
+    "duration": 1254,
+    "views": 105000,
+    "published": "2018-11-15",
+    "priority": "P2",
+    "families": [
+     "Scalping and intraday",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 8.02
+   },
+   {
+    "id": "VoNZMUC_EEo",
+    "title": "BITCOIN RUMBO AL GAP /V1200",
+    "duration": 4481,
+    "views": 34000,
+    "published": "2023-11-15",
+    "priority": "P2",
+    "families": [
+     "Gap trading",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 7.53
+   },
+   {
+    "id": "Sv_1K0ovqdg",
+    "title": "Scalping Right During the Bitcoin Downtrend | #BITCOIN V134",
+    "duration": 516,
+    "views": 27000,
+    "published": "2019-11-15",
+    "priority": "P2",
+    "families": [
+     "Scalping and intraday",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 7.43
+   },
+   {
+    "id": "U2UqB48Ye00",
+    "title": "💯GAP CME FUTUROS Y PROYECCIÓN DE CRIPTOS | BITCOIN V267",
+    "duration": 4228,
+    "views": 9200,
+    "published": "2019-11-15",
+    "priority": "P2",
+    "families": [
+     "Gap trading",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.96
+   },
+   {
+    "id": "RGWpXE_kdC0",
+    "title": "🤭 MI PORTAFOLIO DE CRIPTOMONEDAS, TRADING INTRADIA Y SCALPING, TRADINGVIEW | BITCOIN V73",
+    "duration": 600,
+    "views": 8400,
+    "published": "2018-11-15",
+    "priority": "P2",
+    "families": [
+     "Scalping and intraday",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.92
+   },
+   {
+    "id": "hGUZMhsajaU",
+    "title": "🚨 Bitcoin: The perfect time to buy or a death trap?",
+    "duration": 2976,
+    "views": 41000,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.61
+   },
+   {
+    "id": "f0bnKvQPRb8",
+    "title": "💥 MARKET PANIC OR THE BIG TRAP?",
+    "duration": 4576,
+    "views": 39000,
+    "published": "2026-10-25",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout"
+    ],
+    "market": null,
+    "score": 6.59
+   },
+   {
+    "id": "KW8_sXDi-eA",
+    "title": "Don't Fall for the Trap! How to Spot Sideways Movement in Bitcoin",
+    "duration": 3918,
+    "views": 39000,
+    "published": "2024-11-15",
+    "priority": "P1",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.59
+   },
+   {
+    "id": "swFFWVscsO0",
+    "title": "🚨 BITCOIN BREAKS $85,000! LIFTOFF OR TRAP?",
+    "duration": 3786,
+    "views": 37000,
+    "published": "2026-10-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.57
+   },
+   {
+    "id": "HqZfWlNU2bQ",
+    "title": "🚨 BITCOIN AT $77,000: TAKEOFF TO $80,000 OR BULL TRAP?",
+    "duration": 3719,
+    "views": 37000,
+    "published": "2026-09-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.57
+   },
+   {
+    "id": "6I5ZKIvHWbk",
+    "title": "Bitcoin plummets! Was it manipulation or a trap for traders?",
+    "duration": 3813,
+    "views": 36000,
+    "published": "2026-10-25",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.56
+   },
+   {
+    "id": "oNUdKAsU024",
+    "title": "BITCOIN WILL BREAK THAT RANGE / LIVE!",
+    "duration": 3518,
+    "views": 36000,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Crypto",
+     "Live trading and recaps"
+    ],
+    "market": "CRYPTO",
+    "score": 6.56
+   },
+   {
+    "id": "3eY5N1WUe1Y",
+    "title": "🔥 BITCOIN LOSES $80,000: TRAP OR IS THE BIG CRASH STARTING?",
+    "duration": 3236,
+    "views": 35000,
+    "published": "2026-09-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.54
+   },
+   {
+    "id": "p74O82u3y7U",
+    "title": "Trading Bitcoin on the 1H! Strategies for Quick Profits 🚀",
+    "duration": 3720,
+    "views": 33000,
+    "published": "2025-11-15",
+    "priority": "P1",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.52
+   },
+   {
+    "id": "rQtTe7GMq1s",
+    "title": "#BITCOIN BULLRUN OR TRAP?",
+    "duration": 3599,
+    "views": 33000,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.52
+   },
+   {
+    "id": "JfWx1hBhdtM",
+    "title": "🚨 BITCOIN RECOVERS $80,000! 🔥 IS THE REBOUND STARTING OR IS IT A TRAP? | LIVE",
+    "duration": 4016,
+    "views": 32000,
+    "published": "2026-11-06",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto",
+     "Live trading and recaps"
+    ],
+    "market": "CRYPTO",
+    "score": 6.51
+   },
+   {
+    "id": "Gxm1HM8roZk",
+    "title": "🚨 Bitcoin about to break out hard: Imminent move",
+    "duration": 3793,
+    "views": 29000,
+    "published": "2026-03-15",
+    "priority": "P2",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.46
+   },
+   {
+    "id": "coAk2m-Hei8",
+    "title": "🚨 BITCOIN BREAKS $80,000: REAL BREAKOUT OR THE ULTIMATE TRAP? 🔥",
+    "duration": 3872,
+    "views": 28000,
+    "published": "2026-09-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Breakouts and patterns",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.45
+   },
+   {
+    "id": "a76RUzemcqc",
+    "title": "💥 Bitcoin Liquidity Pools: The Trap Before the Big Move",
+    "duration": 3485,
+    "views": 28000,
+    "published": "2026-03-15",
+    "priority": "P2",
+    "families": [
+     "Liquidity and sweeps",
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.45
+   },
+   {
+    "id": "bqTlA7NlGO0",
+    "title": "Bitcoin en Rango: Soporte, Resistencia y el Próximo Breakout",
+    "duration": 3801,
+    "views": 27000,
+    "published": "2026-03-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.43
+   },
+   {
+    "id": "V-ZJQNn0uCE",
+    "title": "🔥 Bitcoin at 80K: Start of the FINAL rally or death trap?",
+    "duration": 4240,
+    "views": 25000,
+    "published": "2026-05-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.4
+   },
+   {
+    "id": "xajcAq8xC2o",
+    "title": "🚨 Bitcoin this week: Bullish breakout or market trap?",
+    "duration": 2389,
+    "views": 25000,
+    "published": "2026-02-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Breakouts and patterns",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.4
+   },
+   {
+    "id": "6-SAa5j1HV4",
+    "title": "$80,000 TRAP OR IS BITCOIN GETTING READY TO EXPLODE? 🚨🔥",
+    "duration": 4091,
+    "views": 24000,
+    "published": "2026-09-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.38
+   },
+   {
+    "id": "FHcYOUxDLZo",
+    "title": "🚨 LAZY BITCOIN REBOUND! TRAP BEFORE ANOTHER DROP? 📉₿",
+    "duration": 3892,
+    "views": 24000,
+    "published": "2026-08-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.38
+   }
+  ]
+ },
+ "bravenewcoin": {
+  "key": "bravenewcoin",
+  "name": "Brave New Coin",
+  "titles": [
+   "Brave New Coin"
+  ],
+  "star": false,
+  "group": "crypto",
+  "earlier": "",
+  "listed": true,
+  "videos": 1559,
+  "p1": 80,
+  "covered": [],
+  "candidates": [
+   {
+    "id": "rD2ltmabRLo",
+    "title": "XRP Price Secrets: Multi-Timeframe Breakdown (RSI, EMAs & Order Blocks)",
+    "duration": 366,
+    "views": 1700,
+    "published": "2025-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators"
+    ],
+    "market": "US_IDX",
+    "score": 6.23
+   },
+   {
+    "id": "EdKe0TrBkCc",
+    "title": "Crypto Trading Course for Beginners - Volume Profile of the Visible Range",
+    "duration": 935,
+    "views": 1000,
+    "published": "2021-11-15",
+    "priority": "P2",
+    "families": [
+     "Volume profile",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.0
+   },
+   {
+    "id": "v-9h6hoOSYA",
+    "title": "Crypto Trading Tips for Beginners - how to use the Ichimoku Cloud",
+    "duration": 944,
+    "views": 6000,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.78
+   },
+   {
+    "id": "yCnLqCqwtOQ",
+    "title": "Crypto Trading Tips for Beginners - how to use the Williams Fractal & Alligator system",
+    "duration": 1007,
+    "views": 2200,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.34
+   },
+   {
+    "id": "pqPbZ7ZsFJA",
+    "title": "Crypto Trading Tips for Beginners - how to use Bollinger Bands",
+    "duration": 907,
+    "views": 977,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 4.99
+   },
+   {
+    "id": "UmKabGi0OKY",
+    "title": "Crypto Trading Course for Beginners -  Parabolic SAR explained",
+    "duration": 839,
+    "views": 933,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 4.97
+   },
+   {
+    "id": "q4rmPN1lY5g",
+    "title": "XRP Price Analysis: Is a Breakout Coming?",
+    "duration": 315,
+    "views": 845,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns"
+    ],
+    "market": null,
+    "score": 4.93
+   },
+   {
+    "id": "ytBe-vXeUD0",
+    "title": "Eclipse Fi - A Launch and Liquidity Protocol on Cosmos",
+    "duration": 2009,
+    "views": 313,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Liquidity and sweeps"
+    ],
+    "market": null,
+    "score": 4.51
+   },
+   {
+    "id": "c6AC8dkbDSw",
+    "title": "Crypto Trading Course for Beginners - the Bullish Reversal",
+    "duration": 622,
+    "views": 2200,
+    "published": "2021-11-15",
+    "priority": "P2",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 4.34
+   },
+   {
+    "id": "v5cHyb1-Rwo",
+    "title": "Native - Web3's Unified Liquidity Layer",
+    "duration": 2342,
+    "views": 144,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Liquidity and sweeps"
+    ],
+    "market": null,
+    "score": 4.19
+   },
+   {
+    "id": "oKOqTb42O2k",
+    "title": "Crypto Trading Tips for Beginners -  How to use 'Divergence'",
+    "duration": 725,
+    "views": 1000,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 4.0
+   },
+   {
+    "id": "ALZu7G2P3ak",
+    "title": "BTC, ALTs and ETH - Trading setup for the week of the 8th of February",
+    "duration": 837,
+    "views": 4400,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 3.64
+   },
+   {
+    "id": "GK-bC_QrRak",
+    "title": "FINXFLO - the world's first Regulated Hybrid Liquidity Aggregator",
+    "duration": 1895,
+    "views": 398,
+    "published": "2021-11-15",
+    "priority": "P2",
+    "families": [
+     "Liquidity and sweeps"
+    ],
+    "market": null,
+    "score": 3.61
+   },
+   {
+    "id": "7nnvriRd2XY",
+    "title": "Bitcoin, Ethereum & ALTs - Trading setup for the week of the 11th of October",
+    "duration": 1152,
+    "views": 3500,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 3.55
+   },
+   {
+    "id": "Nd2VATwAUUM",
+    "title": "Global Gold - The On-Chain Gold Ecosystem",
+    "duration": 1435,
+    "views": 280,
+    "published": "2025-11-15",
+    "priority": "P1",
+    "families": [
+     "Gold and forex"
+    ],
+    "market": "XAU",
+    "score": 3.46
+   },
+   {
+    "id": "C58S5H3-7U4",
+    "title": "Obol - The largest Decentralized Operator Ecosystem in Ethereum",
+    "duration": 1837,
+    "views": 281,
+    "published": "2025-11-15",
+    "priority": "P1",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 3.46
+   },
+   {
+    "id": "PfzS8WBa7r8",
+    "title": "Bitcoin, Ethereum & ALTs - Trading setup for the week of the 18th of October",
+    "duration": 1247,
+    "views": 2600,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 3.42
+   },
+   {
+    "id": "YLL5jStcvfw",
+    "title": "Bitcoin, Ethereum & ALTs - Trading setup for the week of the 14th of June",
+    "duration": 1356,
+    "views": 2500,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 3.4
+   },
+   {
+    "id": "e5ZUgsACE40",
+    "title": "The IDEX DEX - Hybrid Liquidity and the future of decentralized exchanges",
+    "duration": 2772,
+    "views": 231,
+    "published": "2021-11-15",
+    "priority": "P2",
+    "families": [
+     "Liquidity and sweeps"
+    ],
+    "market": null,
+    "score": 3.38
+   },
+   {
+    "id": "BnveURaT34U",
+    "title": "Bitcoin, Ethereum & ALTs - Trading setup for the week of the 8th of November",
+    "duration": 987,
+    "views": 2200,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 3.34
+   },
+   {
+    "id": "typz0oJrby8",
+    "title": "Bitcoin, Ethereum & ALTs - Trading setup for the week of the 28th of June",
+    "duration": 1245,
+    "views": 2200,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 3.34
+   },
+   {
+    "id": "RP8Q8kYdf4k",
+    "title": "Bitcoin, Ethereum & ALTs - Trading setup for the week of the 7th of June",
+    "duration": 951,
+    "views": 2200,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 3.34
+   },
+   {
+    "id": "PbNuF22BsCE",
+    "title": "BTC, ALTs and ETH - Trading setup for the week of the 19th of April.",
+    "duration": 1173,
+    "views": 2200,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 3.34
+   },
+   {
+    "id": "Ysoo_oQCZnI",
+    "title": "Bitcoin, Ethereum & ALTs - Trading setup for the week of the 6th Sept",
+    "duration": 987,
+    "views": 2100,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 3.32
+   },
+   {
+    "id": "rZhjO2ENsTM",
+    "title": "Bitcoin, Ethereum & ALTs - Trading setup for the week of the 9th August",
+    "duration": 1094,
+    "views": 2100,
+    "published": "2021-11-15",
+    "priority": "P1",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 3.32
+   }
+  ]
+ },
+ "cryptosavy": {
+  "key": "cryptosavy",
+  "name": "Crypto Savy",
+  "titles": [
+   "Crypto Savy"
+  ],
+  "star": false,
+  "group": "crypto",
+  "earlier": "",
+  "listed": true,
+  "videos": 1817,
+  "p1": 16,
+  "covered": [],
+  "candidates": [
+   {
+    "id": "L839ufr8iQg",
+    "title": "👀 BITCOIN CME GAPS BELOW! 👀 (Why do markets gap and Will they fill!?)",
+    "duration": 794,
+    "views": 9700,
+    "published": "2023-11-15",
+    "priority": "P2",
+    "families": [
+     "Gap trading",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.99
+   },
+   {
+    "id": "9x0zs6nB8Lg",
+    "title": "Final Bitcoin Bull Trap or Moon Shot!? (my current trade)",
+    "duration": 988,
+    "views": 11000,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 6.04
+   },
+   {
+    "id": "2vXzwN_KO-M",
+    "title": "BITCOIN BULL TRAP!!?? (what are the markets showing?)",
+    "duration": 558,
+    "views": 3900,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.59
+   },
+   {
+    "id": "ObbwS8LVh4E",
+    "title": "Did BITCOIN  just have a MASSIVE BULL TRAP!? (Must see charts inside!!!)",
+    "duration": 428,
+    "views": 2700,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.43
+   },
+   {
+    "id": "8YwUUuOASRA",
+    "title": "The end of the BITCOIN 7 month range  IS COMING! (what does this mean?)",
+    "duration": 476,
+    "views": 2700,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.43
+   },
+   {
+    "id": "nU1fxgbdItc",
+    "title": "BITCOIN TO THE MOON! or HUGE BULL TRAP? (Elliott wave count)",
+    "duration": 748,
+    "views": 2500,
+    "published": "2026-09-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.4
+   },
+   {
+    "id": "TaaXmFxKy5s",
+    "title": "⚠️URGENT!!⚠️ Crypto Reserve!?!? To The Moon!!  (or just a FOMO liquidity grab)",
+    "duration": 495,
+    "views": 2100,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Liquidity and sweeps",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.32
+   },
+   {
+    "id": "mK2YNVlg8zE",
+    "title": "BITCOIN BOTTOM IN!!? ....OR JUST ANOTHER TRAP!?",
+    "duration": 1177,
+    "views": 16000,
+    "published": "2023-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.2
+   },
+   {
+    "id": "xYi1-HzzeUU",
+    "title": "BITCOIN BREAKOUT OR BULL TRAP!?",
+    "duration": 2872,
+    "views": 16000,
+    "published": "2021-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Breakouts and patterns",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.2
+   },
+   {
+    "id": "8YJSle4VlJ0",
+    "title": "URGENT!! HAS THE BITCOIN BEAR MARKET BEGUN!!!!?? (or just a pull back)",
+    "duration": 813,
+    "views": 1500,
+    "published": "2025-12-15",
+    "priority": "P2",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.18
+   },
+   {
+    "id": "4PXsS_BedI4",
+    "title": "BITCOIN DIAMOND REVERSAL STILL IN PLAY!?",
+    "duration": 737,
+    "views": 15000,
+    "published": "2023-11-15",
+    "priority": "P2",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.18
+   },
+   {
+    "id": "LgMdPW72sUk",
+    "title": "BITCOIN BREAK OUT COMING!?",
+    "duration": 577,
+    "views": 1300,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.12
+   },
+   {
+    "id": "dBKJzEB5Ee8",
+    "title": "Don't be fooled!! BITCOIN EXIT LIQUIDITY PUMP!?",
+    "duration": 714,
+    "views": 13000,
+    "published": "2023-11-15",
+    "priority": "P1",
+    "families": [
+     "Liquidity and sweeps",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.11
+   },
+   {
+    "id": "C-9kWbO1UaI",
+    "title": "BITCOIN PERFECT REJECTION!?",
+    "duration": 2325,
+    "views": 13000,
+    "published": "2021-11-15",
+    "priority": "P2",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.11
+   },
+   {
+    "id": "HOroRJj8uqk",
+    "title": "IS THIS STILL A BITCOIN BULL TRAP!?",
+    "duration": 1584,
+    "views": 13000,
+    "published": "2021-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.11
+   },
+   {
+    "id": "NPj5ER83eHw",
+    "title": "BITCOIN RETEST THEN MORE DOWNSIDE!? OR MOON SHOT!?",
+    "duration": 3816,
+    "views": 12000,
+    "published": "2021-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.08
+   },
+   {
+    "id": "nSoLY91ypDo",
+    "title": "BITCOIN BULL TRAP!? or is the bottom in? (trading competition)",
+    "duration": 789,
+    "views": 1100,
+    "published": "2026-08-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.05
+   },
+   {
+    "id": "ZXuNTTPg04I",
+    "title": "⚠️URGENT⚠️ BITCOIN IS ABOUT TO BREAKOUT! or BREAKDOWN!? (current trade)",
+    "duration": 493,
+    "views": 1100,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.05
+   },
+   {
+    "id": "YzI9YacrYgM",
+    "title": "GREAT DEPRESSION STYLE COLLAPSE COMING!? BANKS INSOLVENT?BITCOIN BULL TRAP!?",
+    "duration": 957,
+    "views": 11000,
+    "published": "2023-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.04
+   },
+   {
+    "id": "y200evR36Qk",
+    "title": "BITCOIN Bull Market to continue? or Bull TRAP!?",
+    "duration": 728,
+    "views": 983,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.0
+   },
+   {
+    "id": "JUU1sUcIG0I",
+    "title": "CAN BITCOIN HOLD 23K!? or IS THE BULL TRAP OVER!? also looking at GOLD, SILVER, OIL and TESLA!",
+    "duration": 1092,
+    "views": 10000,
+    "published": "2023-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Gold and forex",
+     "Crypto"
+    ],
+    "market": "XAU",
+    "score": 5.0
+   },
+   {
+    "id": "J8Sw1MTlACQ",
+    "title": "BITCOIN BULLRUN BEGUN or is it a TRAP!!??",
+    "duration": 958,
+    "views": 10000,
+    "published": "2023-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.0
+   },
+   {
+    "id": "8A_UintLAcU",
+    "title": "BITCOIN BREAKOUT!? or FAKEOUT!?",
+    "duration": 2782,
+    "views": 10000,
+    "published": "2021-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.0
+   },
+   {
+    "id": "x6sjhvi0ivc",
+    "title": "BITCOIN BOTTOM IN or IS IT A TRAP!?!?",
+    "duration": 2259,
+    "views": 10000,
+    "published": "2021-11-15",
+    "priority": "P2",
+    "families": [
+     "Trap / fake breakout",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.0
+   },
+   {
+    "id": "n5BMuPFy7Tw",
+    "title": "OMG!!?? BITCOIN BREAKOUT!!??? HOW HIGH or COULD WE DUMP FROM HERE!?!!??",
+    "duration": 1223,
+    "views": 9600,
+    "published": "2022-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 4.98
+   }
+  ]
+ },
+ "josholszewicz": {
+  "key": "josholszewicz",
+  "name": "Josh Olszewicz",
+  "titles": [
+   "Josh Olszewicz"
+  ],
+  "star": false,
+  "group": "crypto",
+  "earlier": "",
+  "listed": true,
+  "videos": 993,
+  "p1": 31,
+  "covered": [],
+  "candidates": [
+   {
+    "id": "bUilNMYUBZM",
+    "title": "Actionable Ichimoku Cloud Signals: The Kumo Breakout",
+    "duration": 1836,
+    "views": 3100,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Indicators"
+    ],
+    "market": null,
+    "score": 7.49
+   },
+   {
+    "id": "FDR76ZdU3nw",
+    "title": "Better Know An Indicator: Ichimoku Cloud Strategies",
+    "duration": 824,
+    "views": 45000,
+    "published": "2016-11-15",
+    "priority": "P1",
+    "families": [
+     "Indicators"
+    ],
+    "market": null,
+    "score": 6.65
+   },
+   {
+    "id": "apC2wC3xC9w",
+    "title": "Muti-Timeframe & Multi-Exchange Trend Strength Analysis w/Ichimoku Cloud and RSI",
+    "duration": 1124,
+    "views": 2600,
+    "published": "2016-11-15",
+    "priority": "P2",
+    "families": [
+     "Indicators"
+    ],
+    "market": null,
+    "score": 6.42
+   },
+   {
+    "id": "wb8HU7L2Obc",
+    "title": "Setup Sunday: Trend Reset",
+    "duration": 872,
+    "views": 5400,
+    "published": "2026-11-01",
+    "priority": "P2",
+    "families": [],
+    "market": null,
+    "score": 5.73
+   },
+   {
+    "id": "u221wm99ATY",
+    "title": "Alt Coins: Insert Liquidity Here to Play Again",
+    "duration": 1533,
+    "views": 3800,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Liquidity and sweeps"
+    ],
+    "market": null,
+    "score": 5.58
+   },
+   {
+    "id": "NYE1DNHhO3Y",
+    "title": "Setup Sunday: You Get a Kumo Breakout",
+    "duration": 1239,
+    "views": 3700,
+    "published": "2025-11-15",
+    "priority": "P1",
+    "families": [
+     "Breakouts and patterns"
+    ],
+    "market": null,
+    "score": 5.57
+   },
+   {
+    "id": "4fd8dt3r9g8",
+    "title": "Setup Sunday: Is The Bull Trend All Over?",
+    "duration": 1767,
+    "views": 3400,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [],
+    "market": null,
+    "score": 5.53
+   },
+   {
+    "id": "Saofm9VwKXM",
+    "title": "Alt Coins: BTC Continues Absorbing Crypto Liquidity",
+    "duration": 1422,
+    "views": 3400,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Liquidity and sweeps",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.53
+   },
+   {
+    "id": "9NDhcVtWEAs",
+    "title": "Navigating The Breakout",
+    "duration": 959,
+    "views": 3000,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns"
+    ],
+    "market": null,
+    "score": 5.48
+   },
+   {
+    "id": "-DU0C6KbGkI",
+    "title": "Setup Sunday: Last-Ditch Effort to Hold the Range",
+    "duration": 1564,
+    "views": 3000,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [],
+    "market": null,
+    "score": 5.48
+   },
+   {
+    "id": "L2vu5sJe5jw",
+    "title": "Broad Market Review - Waiting for the Breakout",
+    "duration": 3532,
+    "views": 3000,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns"
+    ],
+    "market": null,
+    "score": 5.48
+   },
+   {
+    "id": "LL8bshmgZGc",
+    "title": "Macro Monday: Truflation Breakout!",
+    "duration": 967,
+    "views": 2900,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns"
+    ],
+    "market": null,
+    "score": 5.46
+   },
+   {
+    "id": "iuJFCwhqBiA",
+    "title": "Setup Sunday: Reconsolidation Post Breakout",
+    "duration": 1523,
+    "views": 2900,
+    "published": "2025-11-15",
+    "priority": "P1",
+    "families": [
+     "Breakouts and patterns"
+    ],
+    "market": null,
+    "score": 5.46
+   },
+   {
+    "id": "yAFN7YBFJso",
+    "title": "Setup Sunday: Potential Trend Reinvigoration This Week",
+    "duration": 1400,
+    "views": 2800,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [],
+    "market": null,
+    "score": 5.45
+   },
+   {
+    "id": "k3_oF9rGt-Q",
+    "title": "Alt Coins: Liquidity, Liquidity, Liquidity",
+    "duration": 1292,
+    "views": 2700,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Liquidity and sweeps"
+    ],
+    "market": null,
+    "score": 5.43
+   },
+   {
+    "id": "qioXOEH4wsI",
+    "title": "Macro Monday: Liquidity Continues to Tighten",
+    "duration": 1681,
+    "views": 2400,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Liquidity and sweeps"
+    ],
+    "market": null,
+    "score": 5.38
+   },
+   {
+    "id": "xzsivkrNQwQ",
+    "title": "Broad Market Review: Breakout",
+    "duration": 2447,
+    "views": 2400,
+    "published": "2026-09-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns"
+    ],
+    "market": null,
+    "score": 5.38
+   },
+   {
+    "id": "QcldzUuBUA0",
+    "title": "Broad Market Review: BTC Nearing Cloud Breakout",
+    "duration": 3592,
+    "views": 2200,
+    "published": "2026-05-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns",
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.34
+   },
+   {
+    "id": "-MKGYQ5M5mA",
+    "title": "Using Advanced Order Types for Breakout Trading",
+    "duration": 1692,
+    "views": 2100,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns"
+    ],
+    "market": null,
+    "score": 5.32
+   },
+   {
+    "id": "od9RFPtQ-Ns",
+    "title": "Broad Market Review: Breakout Confirmed",
+    "duration": 3724,
+    "views": 2100,
+    "published": "2026-05-15",
+    "priority": "P2",
+    "families": [
+     "Breakouts and patterns"
+    ],
+    "market": null,
+    "score": 5.32
+   },
+   {
+    "id": "NEcRK9IVGpE",
+    "title": "Setup Sunday: Range Traders Rejoice",
+    "duration": 929,
+    "views": 2000,
+    "published": "2026-08-15",
+    "priority": "P2",
+    "families": [],
+    "market": null,
+    "score": 5.3
+   },
+   {
+    "id": "9L0yKztAGCM",
+    "title": "Setup Sunday: Crypto Stays Bearish Until Proven Otherwise",
+    "duration": 1118,
+    "views": 1800,
+    "published": "2026-02-15",
+    "priority": "P1",
+    "families": [
+     "Crypto"
+    ],
+    "market": "CRYPTO",
+    "score": 5.26
+   },
+   {
+    "id": "gOR0epd8ZBI",
+    "title": "Using Stablecoins as an Alt Coin Liquidity Metric",
+    "duration": 1262,
+    "views": 1700,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Liquidity and sweeps"
+    ],
+    "market": null,
+    "score": 5.23
+   },
+   {
+    "id": "4rI1M5hB7Z8",
+    "title": "Macro Monday: RRP Down, US Liquidity Up",
+    "duration": 1412,
+    "views": 1600,
+    "published": "2024-11-15",
+    "priority": "P2",
+    "families": [
+     "Liquidity and sweeps"
+    ],
+    "market": "US_IDX",
+    "score": 5.21
+   },
+   {
+    "id": "hVE7FVzpUt8",
+    "title": "Conditions and Strategies for Contra Trend Trading",
+    "duration": 1328,
+    "views": 1500,
+    "published": "2025-11-15",
+    "priority": "P2",
+    "families": [],
+    "market": null,
+    "score": 5.18
+   }
+  ]
+ },
+ "moondev": {
+  "key": "moondev",
+  "name": "Moon Dev",
+  "titles": [
+   "Moon Dev"
+  ],
+  "star": false,
+  "group": "sys",
+  "earlier": "",
+  "listed": true,
+  "videos": 442,
+  "p1": 3,
+  "covered": [],
+  "candidates": [
+   {
+    "id": "RH52FuSbEpI",
+    "title": "Claude Code Found a 2,610% Trading Strategy While I Slept (Anchored VWAP)",
+    "duration": 672,
+    "views": 2800,
+    "published": "2026-06-15",
+    "priority": "P1",
+    "families": [
+     "VWAP"
+    ],
+    "market": null,
+    "score": 8.45
+   },
+   {
+    "id": "D5KYQieIeC0",
+    "title": "AI Trading the $1 Billion/day Trading System 24/7",
+    "duration": 621,
+    "views": 2500,
+    "published": "2026-09-15",
+    "priority": "P1",
+    "families": [
+     "Scalping and intraday"
+    ],
+    "market": null,
+    "score": 6.4
+   },
+   {
+    "id": "D-oYWpr4pxY",
+    "title": "Smart Money Concepts Trading Bot (step by step tutorial)",
+    "duration": 4432,
+    "views": 7300,
+    "published": "2023-11-15",
+    "priority": "P1",
+    "families": [
+     "SMC / ICT"
+    ],
+    "market": null,
+    "score": 3.86
+   }
+  ]
  }
 }

@@ -5,7 +5,7 @@
 2. every book runs through runner.run_yc (pool books on a few stocks, with DF-01's contexts), its documents have unique
    ids, and the ledger sizes them;
 3. a book that starts mid-way starts flat;
-4. the YC3 books get the 20-channel states and their own start (the second to sixth batches their own, later
+4. the YC3 books get the 20-channel states and their own start (the second to seventh batches their own, later
    ones)."""
 
 import os
@@ -21,6 +21,7 @@ os.environ.setdefault("PREMIUM_YC3C_START", "2026-01-03T00:00:00+00:00")
 os.environ.setdefault("PREMIUM_YC3D_START", "2026-01-04T00:00:00+00:00")
 os.environ.setdefault("PREMIUM_YC3E_START", "2026-01-05T00:00:00+00:00")
 os.environ.setdefault("PREMIUM_YC3F_START", "2026-01-06T00:00:00+00:00")
+os.environ.setdefault("PREMIUM_YC3G_START", "2026-01-07T00:00:00+00:00")
 HERE = Path.cwd()
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent / "backend" / "research" / "youtube_channels11_2026_11"))
@@ -108,7 +109,10 @@ check("fifth-batch books start at YC3E_START_T", SG._start_of("ETHUSD", b5) == d
 check("YC3E_IDS is the registry's fifth batch", set(C.YC3E_IDS) == {r.sid for r in ZS._NEW[90:100]})
 b6 = C.BY_ID["TL-06"]
 check("sixth-batch books start at YC3F_START_T", SG._start_of("XAUTUSD", b6) == datetime.fromtimestamp(S.YC3F_START_T, timezone.utc))
-check("YC3F_IDS is the registry's sixth batch", set(C.YC3F_IDS) == {r.sid for r in ZS._NEW[100:]})
+check("YC3F_IDS is the registry's sixth batch", set(C.YC3F_IDS) == {r.sid for r in ZS._NEW[100:105]})
+b7 = C.BY_ID["JO-01"]
+check("seventh-batch books start at YC3G_START_T", SG._start_of("XAUTUSD", b7) == datetime.fromtimestamp(S.YC3G_START_T, timezone.utc))
+check("YC3G_IDS is the registry's seventh batch", set(C.YC3G_IDS) == {r.sid for r in ZS._NEW[105:]})
 check("ether books close at the UTC day's end unless held overnight",
       ZS.YS.STRATEGIES["TC-04"].exit_clock("ETHUSD") == ("ist", 5 * 60 + 25) and ZS.YS.STRATEGIES["BX-02"].exit_clock("ETHUSD") == ("end", 0))
 print("ALL OK" if ok else "FAILURES")
