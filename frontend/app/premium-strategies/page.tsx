@@ -19,9 +19,10 @@ import Segments, { SEG_PLACE, type SegFocus } from "./Segments";
 import Channels20 from "./Channels20";
 import Intraday4 from "./Intraday4";
 import Shortlist from "./Shortlist";
+import WebSources from "./WebSources";
 import LiveDelta from "./LiveDelta";
 
-type Tab = "indian" | "crypto" | "gold" | "global" | "paper" | "strategies" | "results" | "november" | "daily" | "method" | "channels20" | "intraday4" | "shortlist" | "live";
+type Tab = "indian" | "crypto" | "gold" | "global" | "paper" | "strategies" | "results" | "november" | "daily" | "method" | "channels20" | "intraday4" | "shortlist" | "live" | "websources";
 const TABS: { id: Tab; label: string }[] = [
   { id: "indian", label: "Indian Market" },
   { id: "crypto", label: "Crypto" },
@@ -29,6 +30,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "global", label: "Forex & US" },
   { id: "live", label: "Real money · Delta" },
   { id: "shortlist", label: "Channel shortlist (new)" },
+  { id: "websources", label: "Web sources: crypto & gold" },
   { id: "channels20", label: "20 channels" },
   { id: "intraday4", label: "4 intraday topics" },
   { id: "paper", label: "All accounts" },
@@ -196,6 +198,7 @@ export default function PremiumStrategiesPage() {
       {tab === "intraday4" && <Intraday4 />}
 
       {tab === "shortlist" && <Shortlist summary={summary} error={error} />}
+      {tab === "websources" && <WebSources />}
       {tab === "live" && <LiveDelta />}
 
       {tab === "strategies" && (

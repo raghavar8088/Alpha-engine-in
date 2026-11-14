@@ -1,0 +1,47 @@
+{
+ "QC-11340 BTC_USDT": {
+  "cuts": 3,
+  "rows_compared": 7831,
+  "differences": 0
+ },
+ "QC-11340 ETH_USDT": {
+  "cuts": 3,
+  "rows_compared": 5644,
+  "differences": 0
+ },
+ "QC-13690 BTC_USDT": {
+  "cuts": 3,
+  "rows_compared": 7096,
+  "differences": 0
+ },
+ "QC-13690 ETH_USDT": {
+  "cuts": 3,
+  "rows_compared": 4857,
+  "differences": 0
+ },
+ "QC-15987 BTC_USDT": {
+  "cuts": 3,
+  "rows_compared": 200093,
+  "differences": 0
+ },
+ "QC-15987 ETH_USDT": {
+  "cuts": 3,
+  "rows_compared": 83354,
+  "differences": 0
+ },
+ "QC-18379 BTC_USDT": {
+  "cuts": 3,
+  "rows_compared": 5290994,
+  "differences": 0
+ },
+ "QC-20960 XAUUSD": {
+  "cuts": 3,
+  "rows_compared": 270296,
+  "differences": 0
+ },
+ "QC-5079 XAUUSD": {
+  "cuts": 3,
+  "rows_compared": 7247,
+  "differences": 0
+ }
+}

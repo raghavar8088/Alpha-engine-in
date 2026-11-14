@@ -1,0 +1,716 @@
+{
+ "lookahead": {
+  "CCIStrategy": {
+   "timerange": "20240101-20240201",
+   "pair": "BTC/USDT",
+   "result": {
+    "filename": "CCIStrategy.py",
+    "strategy": "CCIStrategy",
+    "has_bias": "True",
+    "total_signals": "17",
+    "biased_entry_signals": "0",
+    "biased_exit_signals": "0",
+    "biased_indicators": "resample_sma,resample_medium,resample_short,resample_long"
+   },
+   "error": null
+  },
+  "BinHV45": {
+   "timerange": "20200101-20210101",
+   "pair": "BTC/USDT",
+   "result": {
+    "filename": "BinHV45.py",
+    "strategy": "BinHV45",
+    "has_bias": "False",
+    "total_signals": "20",
+    "biased_entry_signals": "0",
+    "biased_exit_signals": "0",
+    "biased_indicators": ""
+   },
+   "error": null
+  },
+  "Low_BB": {
+   "timerange": "20200101-20210101",
+   "pair": "BTC/USDT",
+   "result": {
+    "filename": "Low_BB.py",
+    "strategy": "Low_BB",
+    "has_bias": "False",
+    "total_signals": "12",
+    "biased_entry_signals": "0",
+    "biased_exit_signals": "0",
+    "biased_indicators": ""
+   },
+   "error": null
+  },
+  "Scalp": {
+   "timerange": "20240101-20240201",
+   "pair": "BTC/USDT",
+   "result": {
+    "filename": "Scalp.py",
+    "strategy": "Scalp",
+    "has_bias": "False",
+    "total_signals": "20",
+    "biased_entry_signals": "0",
+    "biased_exit_signals": "0",
+    "biased_indicators": ""
+   },
+   "error": null
+  },
+  "SmoothScalp": {
+   "timerange": "20240101-20240201",
+   "pair": "BTC/USDT",
+   "result": {
+    "filename": "SmoothScalp.py",
+    "strategy": "SmoothScalp",
+    "has_bias": "False",
+    "total_signals": "20",
+    "biased_entry_signals": "0",
+    "biased_exit_signals": "0",
+    "biased_indicators": ""
+   },
+   "error": null
+  },
+  "ClucMay72018": {
+   "timerange": "20210101-20220101",
+   "pair": "BTC/USDT",
+   "result": {
+    "filename": "ClucMay72018.py",
+    "strategy": "ClucMay72018",
+    "has_bias": "False",
+    "total_signals": "20",
+    "biased_entry_signals": "0",
+    "biased_exit_signals": "0",
+    "biased_indicators": ""
+   },
+   "error": null
+  },
+  "CombinedBinHAndCluc": {
+   "timerange": "20180101-20190101",
+   "pair": "BTC/USDT",
+   "result": {
+    "filename": "CombinedBinHAndCluc.py",
+    "strategy": "CombinedBinHAndCluc",
+    "has_bias": "False",
+    "total_signals": "20",
+    "biased_entry_signals": "0",
+    "biased_exit_signals": "0",
+    "biased_indicators": ""
+   },
+   "error": null
+  },
+  "BinHV27": {
+   "timerange": "20240101-20240401",
+   "pair": "BTC/USDT",
+   "result": {
+    "filename": "BinHV27.py",
+    "strategy": "BinHV27",
+    "has_bias": "False",
+    "total_signals": "20",
+    "biased_entry_signals": "0",
+    "biased_exit_signals": "0",
+    "biased_indicators": ""
+   },
+   "error": null
+  },
+  "CofiBitStrategy": {
+   "timerange": "20240101-20240401",
+   "pair": "BTC/USDT",
+   "result": {
+    "filename": "CofiBitStrategy.py",
+    "strategy": "CofiBitStrategy",
+    "has_bias": "False",
+    "total_signals": "20",
+    "biased_entry_signals": "0",
+    "biased_exit_signals": "0",
+    "biased_indicators": ""
+   },
+   "error": null
+  },
+  "EMASkipPump": {
+   "timerange": "20240101-20240401",
+   "pair": "BTC/USDT",
+   "result": {
+    "filename": "EMASkipPump.py",
+    "strategy": "EMASkipPump",
+    "has_bias": "False",
+    "total_signals": "20",
+    "biased_entry_signals": "0",
+    "biased_exit_signals": "0",
+    "biased_indicators": ""
+   },
+   "error": null
+  },
+  "MACDStrategy": {
+   "timerange": "20240101-20240401",
+   "pair": "BTC/USDT",
+   "result": {
+    "filename": "MACDStrategy.py",
+    "strategy": "MACDStrategy",
+    "has_bias": "False",
+    "total_signals": "20",
+    "biased_entry_signals": "0",
+    "biased_exit_signals": "0",
+    "biased_indicators": ""
+   },
+   "error": null
+  },
+  "MultiRSI": {
+   "timerange": "20240101-20240401",
+   "pair": "BTC/USDT",
+   "result": {
+    "filename": "MultiRSI.py",
+    "strategy": "MultiRSI",
+    "has_bias": "False",
+    "total_signals": "20",
+    "biased_entry_signals": "0",
+    "biased_exit_signals": "0",
+    "biased_indicators": ""
+   },
+   "error": null
+  },
+  "Quickie": {
+   "timerange": "20240101-20240401",
+   "pair": "BTC/USDT",
+   "result": {
+    "filename": "Quickie.py",
+    "strategy": "Quickie",
+    "has_bias": "False",
+    "total_signals": "20",
+    "biased_entry_signals": "0",
+    "biased_exit_signals": "0",
+    "biased_indicators": ""
+   },
+   "error": null
+  },
+  "SmoothOperator": {
+   "timerange": "20240101-20240401",
+   "pair": "BTC/USDT",
+   "result": {
+    "filename": "SmoothOperator.py",
+    "strategy": "SmoothOperator",
+    "has_bias": "False",
+    "total_signals": "20",
+    "biased_entry_signals": "0",
+    "biased_exit_signals": "0",
+    "biased_indicators": ""
+   },
+   "error": null
+  },
+  "Strategy005": {
+   "timerange": "20240101-20240401",
+   "pair": "BTC/USDT",
+   "result": {
+    "filename": "Strategy005.py",
+    "strategy": "Strategy005",
+    "has_bias": "False",
+    "total_signals": "20",
+    "biased_entry_signals": "0",
+    "biased_exit_signals": "0",
+    "biased_indicators": ""
+   },
+   "error": null
+  },
+  "UniversalMACD": {
+   "timerange": "20180101-20190101",
+   "pair": "BTC/USDT",
+   "result": {
+    "filename": "UniversalMACD.py",
+    "strategy": "UniversalMACD",
+    "has_bias": "False",
+    "total_signals": "20",
+    "biased_entry_signals": "0",
+    "biased_exit_signals": "0",
+    "biased_indicators": ""
+   },
+   "error": null
+  },
+  "CMCWinner": {
+   "timerange": "20240101-20240701",
+   "pair": "BTC/USDT",
+   "result": {
+    "filename": "CMCWinner.py",
+    "strategy": "CMCWinner",
+    "has_bias": "False",
+    "total_signals": "20",
+    "biased_entry_signals": "0",
+    "biased_exit_signals": "0",
+    "biased_indicators": ""
+   },
+   "error": null
+  },
+  "Bandtastic": {
+   "timerange": "20240101-20240701",
+   "pair": "BTC/USDT",
+   "result": {
+    "filename": "Bandtastic.py",
+    "strategy": "Bandtastic",
+    "has_bias": "False",
+    "total_signals": "20",
+    "biased_entry_signals": "0",
+    "biased_exit_signals": "0",
+    "biased_indicators": ""
+   },
+   "error": null
+  },
+  "FAdxSmaStrategy": {
+   "timerange": "20230101-20240701",
+   "pair": "BTC/USDT:USDT",
+   "result": {
+    "filename": "FAdxSmaStrategy.py",
+    "strategy": "FAdxSmaStrategy",
+    "has_bias": "False",
+    "total_signals": "20",
+    "biased_entry_signals": "0",
+    "biased_exit_signals": "0",
+    "biased_indicators": ""
+   },
+   "error": null
+  },
+  "MACDStrategy_crossed": {
+   "timerange": "20240101-20240401",
+   "pair": "BTC/USDT",
+   "result": {
+    "filename": "MACDStrategy_crossed.py",
+    "strategy": "MACDStrategy_crossed",
+    "has_bias": "False",
+    "total_signals": "14",
+    "biased_entry_signals": "0",
+    "biased_exit_signals": "0",
+    "biased_indicators": ""
+   },
+   "error": null
+  },
+  "ReinforcedQuickie": {
+   "timerange": "20240101-20240401",
+   "pair": "BTC/USDT",
+   "result": {
+    "filename": "ReinforcedQuickie.py",
+    "strategy": "ReinforcedQuickie",
+    "has_bias": "True",
+    "total_signals": "20",
+    "biased_entry_signals": "1",
+    "biased_exit_signals": "0",
+    "biased_indicators": "resample_sma,enter_long"
+   },
+   "error": null
+  },
+  "ReinforcedSmoothScalp": {
+   "timerange": "20240101-20240201",
+   "pair": "BTC/USDT",
+   "result": {
+    "filename": "ReinforcedSmoothScalp.py",
+    "strategy": "ReinforcedSmoothScalp",
+    "has_bias": "False",
+    "total_signals": "16",
+    "biased_entry_signals": "0",
+    "biased_exit_signals": "0",
+    "biased_indicators": ""
+   },
+   "error": null
+  }
+ },
+ "recursive": {
+  "CCIStrategy": {
+   "timerange": "20240101-20240201",
+   "table": [
+    "|      Indicators |     199 | 200 (from strategy) |     399 |     499 |     999 |    1999 |",
+    "|-----------------+---------+---------------------+---------+---------+---------+---------|",
+    "|    resample_sma |    nan% |                nan% |    nan% |  0.000% |  0.000% |  0.000% |",
+    "| resample_medium |    nan% |                nan% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "|  resample_short | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "|   resample_long |    nan% |                nan% |    nan% |    nan% |  0.000% |  0.000% |",
+    "|         cci_one | -0.000% |             -0.000% | -0.000% |       - | -0.000% |       - |",
+    "|             rsi | -0.000% |              0.000% |  0.000% | -0.000% |       - |       - |",
+    "|             mfi |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "|             cmf |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "|    bb_lowerband | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "|    bb_upperband |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "|         cci_two |       - |              0.000% |  0.000% |  0.000% |  0.000% |       - |"
+   ],
+   "no_variance_reported": false,
+   "strategy_startup_candle_count": 0,
+   "analysis_override": "startup_candle_count 200 set in the analysis config only",
+   "error": null
+  },
+  "BinHV45": {
+   "timerange": "20200101-20210101",
+   "table": [
+    "| Indicators |     199 | 200 (from strategy) |     399 |     499 |     999 |    1999 |",
+    "|------------+---------+---------------------+---------+---------+---------+---------|",
+    "|      upper | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "|        mid | -0.000% |                   - | -0.000% |       - |       - | -0.000% |",
+    "|      lower |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "|    bbdelta | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |"
+   ],
+   "no_variance_reported": false,
+   "strategy_startup_candle_count": 0,
+   "analysis_override": "startup_candle_count 200 set in the analysis config only",
+   "error": null
+  },
+  "Low_BB": {
+   "timerange": "20200101-20210101",
+   "table": [
+    "|    Indicators |     199 | 200 (from strategy) |     399 |     499 |     999 |    1999 |",
+    "|---------------+---------+---------------------+---------+---------+---------+---------|",
+    "|  bb_lowerband | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "| bb_middleband |  0.000% |                   - |  0.000% |       - |       - |       - |",
+    "|  bb_upperband |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "|          macd | -0.000% |             -0.000% |       - |       - |       - |       - |",
+    "|    macdsignal | -0.000% |             -0.000% |  0.000% |       - |       - |       - |",
+    "|      macdhist | -0.000% |             -0.000% |  0.000% |       - |       - |       - |"
+   ],
+   "no_variance_reported": false,
+   "strategy_startup_candle_count": 0,
+   "analysis_override": "startup_candle_count 200 set in the analysis config only",
+   "error": null
+  },
+  "Scalp": {
+   "timerange": "20240101-20240201",
+   "table": [
+    "|   Indicators |     199 | 200 (from strategy) |     399 |     499 |     999 |    1999 |",
+    "|--------------+---------+---------------------+---------+---------+---------+---------|",
+    "|        fastd | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "|          adx |  0.001% |              0.001% |  0.000% |  0.000% |       - |       - |",
+    "| bb_lowerband | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "| bb_upperband |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |"
+   ],
+   "no_variance_reported": false,
+   "strategy_startup_candle_count": 0,
+   "analysis_override": "startup_candle_count 200 set in the analysis config only",
+   "error": null
+  },
+  "SmoothScalp": {
+   "timerange": "20240101-20240201",
+   "table": [
+    "|   Indicators |     199 | 200 (from strategy) |     399 |     499 |     999 |    1999 |",
+    "|--------------+---------+---------------------+---------+---------+---------+---------|",
+    "|        fastd | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "|          adx |  0.001% |              0.001% |  0.000% |  0.000% |       - |       - |",
+    "|          cci | -0.000% |                   - |       - |  0.000% |  0.000% |       - |",
+    "|          rsi | -0.000% |              0.000% |  0.000% | -0.000% |       - |       - |",
+    "|          mfi |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "| bb_lowerband | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "| bb_upperband |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "|         macd |  0.000% |              0.000% |       - |       - |       - |       - |",
+    "|   macdsignal |  0.001% |              0.001% |  0.000% |       - |       - |       - |",
+    "|     macdhist | -0.001% |             -0.001% | -0.000% |       - |       - |       - |"
+   ],
+   "no_variance_reported": false,
+   "strategy_startup_candle_count": 0,
+   "analysis_override": "startup_candle_count 200 set in the analysis config only",
+   "error": null
+  },
+  "ClucMay72018": {
+   "timerange": "20210101-20220101",
+   "table": [
+    "|   Indicators |     199 | 200 (from strategy) |     399 |     499 |     999 |    1999 |",
+    "|--------------+---------+---------------------+---------+---------+---------+---------|",
+    "|         macd |  0.003% |              0.003% |       - |       - |       - |       - |",
+    "|          adx |  0.000% |              0.000% |  0.000% |  0.000% |       - |       - |",
+    "| bb_lowerband |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "| bb_upperband | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "|       ema100 | -0.000% |             -0.000% | -0.000% |  0.000% |       - |       - |"
+   ],
+   "no_variance_reported": false,
+   "strategy_startup_candle_count": 0,
+   "analysis_override": "startup_candle_count 200 set in the analysis config only",
+   "error": null
+  },
+  "CombinedBinHAndCluc": {
+   "timerange": "20180101-20190101",
+   "table": [
+    "|    Indicators |     199 | 200 (from strategy) |     399 |     499 |     999 |    1999 |",
+    "|---------------+---------+---------------------+---------+---------+---------+---------|",
+    "|         lower |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "|       bbdelta | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "|  bb_lowerband |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "| bb_middleband | -0.000% |             -0.000% | -0.000% |       - |       - | -0.000% |",
+    "|      ema_slow |  0.000% |              0.000% |  0.000% | -0.000% |       - |       - |"
+   ],
+   "no_variance_reported": false,
+   "strategy_startup_candle_count": 0,
+   "analysis_override": "startup_candle_count 200 set in the analysis config only",
+   "error": null
+  },
+  "BinHV27": {
+   "timerange": "20240101-20240401",
+   "table": [
+    "| Indicators |        199 | 200 (from strategy) |     399 |     499 |     999 |    1999 |",
+    "|------------+------------+---------------------+---------+---------+---------+---------|",
+    "|        adx |    -0.000% |             -0.000% |  0.000% |  0.000% |       - |       - |",
+    "|    minusdi |     0.000% |              0.000% | -0.000% |       - |       - |       - |",
+    "| minusdiema |     0.000% |              0.000% | -0.000% | -0.000% |       - |       - |",
+    "|     plusdi |     0.000% |              0.000% |  0.000% |       - |       - |       - |",
+    "|  plusdiema |     0.000% |              0.000% |  0.000% |       - |       - |       - |",
+    "|     lowsma |     0.000% |              0.000% |  0.000% | -0.000% |       - |       - |",
+    "|    highsma |     0.004% |              0.003% |  0.000% |  0.000% |  0.000% |       - |",
+    "|    fastsma |    -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% |  0.000% |",
+    "|    slowsma |       nan% |                nan% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "|      bigup |       nan% |                nan% |       - |       - |       - |       - |",
+    "|    bigdown |       nan% |                nan% |       - |       - |       - |       - |",
+    "|      trend | 31682.023% |          31682.023% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "| continueup |       nan% |                nan% |       - |       - |       - |       - |"
+   ],
+   "no_variance_reported": false,
+   "strategy_startup_candle_count": 0,
+   "analysis_override": "startup_candle_count 200 set in the analysis config only",
+   "error": null
+  },
+  "CofiBitStrategy": {
+   "timerange": "20240101-20240401",
+   "table": [
+    "| Indicators |     199 | 200 (from strategy) |    399 |    499 |     999 |   1999 |",
+    "|------------+---------+---------------------+--------+--------+---------+--------|",
+    "|      fastd |  0.000% |              0.000% | 0.000% | 0.000% | -0.000% | 0.000% |",
+    "|        adx | -0.000% |             -0.000% | 0.000% | 0.000% |       - |      - |"
+   ],
+   "no_variance_reported": false,
+   "strategy_startup_candle_count": 0,
+   "analysis_override": "startup_candle_count 200 set in the analysis config only",
+   "error": null
+  },
+  "EMASkipPump": {
+   "timerange": "20240101-20240401",
+   "table": [
+    "|    Indicators |     199 | 200 (from strategy) |     399 |     499 |     999 |    1999 |",
+    "|---------------+---------+---------------------+---------+---------+---------+---------|",
+    "|        ema_21 |  0.000% |             -0.000% |       - |       - |       - |       - |",
+    "|  bb_lowerband | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "| bb_middleband | -0.000% |                   - | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "|  bb_upperband |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |"
+   ],
+   "no_variance_reported": false,
+   "strategy_startup_candle_count": 0,
+   "analysis_override": "startup_candle_count 200 set in the analysis config only",
+   "error": null
+  },
+  "MACDStrategy": {
+   "timerange": "20240101-20240401",
+   "table": [
+    "| Indicators |     199 | 200 (from strategy) |     399 |    499 | 999 | 1999 |",
+    "|------------+---------+---------------------+---------+--------+-----+------|",
+    "|       macd | -0.000% |             -0.000% |       - |      - |   - |    - |",
+    "| macdsignal | -0.000% |             -0.000% |  0.000% |      - |   - |    - |",
+    "|   macdhist |  0.000% |              0.000% | -0.000% |      - |   - |    - |",
+    "|        cci |       - |                   - |       - | 0.000% |   - |    - |"
+   ],
+   "no_variance_reported": true,
+   "strategy_startup_candle_count": 0,
+   "analysis_override": "startup_candle_count 200 set in the analysis config only",
+   "error": null
+  },
+  "MultiRSI": {
+   "timerange": "20240101-20240401",
+   "table": [
+    "|      Indicators |     199 | 200 (from strategy) |     399 |     499 |     999 |    1999 |",
+    "|-----------------+---------+---------------------+---------+---------+---------+---------|",
+    "|            sma5 |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "|          sma200 |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% | -0.000% |",
+    "| resample_10_rsi |  0.007% |             -0.009% |  0.000% | -0.000% |       - |       - |",
+    "| resample_40_rsi | -0.743% |             -0.351% | -0.370% |  0.261% | -0.001% |  0.000% |",
+    "|             rsi |  0.000% |             -0.000% |  0.000% |       - |       - |       - |"
+   ],
+   "no_variance_reported": false,
+   "strategy_startup_candle_count": 0,
+   "analysis_override": "startup_candle_count 200 set in the analysis config only",
+   "error": null
+  },
+  "Quickie": {
+   "timerange": "20240101-20240401",
+   "table": [
+    "|   Indicators |     199 | 200 (from strategy) |     399 |     499 |     999 |    1999 |",
+    "|--------------+---------+---------------------+---------+---------+---------+---------|",
+    "|         macd | -0.000% |             -0.000% |       - |       - |       - |       - |",
+    "|   macdsignal | -0.000% |             -0.000% |  0.000% |       - |       - |       - |",
+    "|     macdhist |  0.000% |              0.000% | -0.000% |       - |       - |       - |",
+    "|      sma_200 |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% | -0.000% |",
+    "|       sma_50 |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% | -0.000% |",
+    "|          adx | -0.000% |             -0.000% |  0.000% |  0.000% |       - |       - |",
+    "| bb_lowerband |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "| bb_upperband | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |"
+   ],
+   "no_variance_reported": false,
+   "strategy_startup_candle_count": 0,
+   "analysis_override": "startup_candle_count 200 set in the analysis config only",
+   "error": null
+  },
+  "SmoothOperator": {
+   "timerange": "20240101-20240401",
+   "table": [
+    "|         Indicators |     199 | 200 (from strategy) |     399 |     499 |     999 |    1999 |",
+    "|--------------------+---------+---------------------+---------+---------+---------+---------|",
+    "|                cci | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "|                rsi |  0.000% |             -0.000% |  0.000% |       - |       - |       - |",
+    "|                adx | -0.000% |             -0.000% |  0.000% |  0.000% |       - |       - |",
+    "|                mfi |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "|         mfi_smooth |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "|         cci_smooth | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "|         rsi_smooth |  0.000% |             -0.000% |  0.000% |       - |       - |       - |",
+    "|       bb_lowerband |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "|       bb_upperband | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "|               macd | -0.000% |             -0.000% |       - |       - |       - |       - |",
+    "|         macdsignal | -0.000% |             -0.000% |  0.000% |       - |       - |       - |",
+    "|           macdhist |  0.000% |              0.000% | -0.000% |       - |       - |       - |",
+    "| entry_bb_lowerband |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "| entry_bb_upperband | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "|           bpercent |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "|             bsharp | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "|        bsharp_slow | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "|      bsharp_medium | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "|        bsharp_fast | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "| mfi_rsi_cci_smooth | -0.000% |             -0.000% |  0.000% | -0.000% | -0.000% | -0.000% |",
+    "|           sma_slow |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% | -0.000% |",
+    "|         sma_medium |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "|           sma_fast |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |"
+   ],
+   "no_variance_reported": false,
+   "strategy_startup_candle_count": 0,
+   "analysis_override": "startup_candle_count 200 set in the analysis config only",
+   "error": null
+  },
+  "Strategy005": {
+   "timerange": "20240101-20240401",
+   "table": [
+    "|       Indicators |     199 | 200 (from strategy) |     399 |     499 |     999 |   1999 |",
+    "|------------------+---------+---------------------+---------+---------+---------+--------|",
+    "|             macd | -0.000% |             -0.000% |       - |       - |       - |      - |",
+    "|       macdsignal | -0.000% |             -0.000% |  0.000% |       - |       - |      - |",
+    "|         minus_di |  0.000% |              0.000% | -0.000% |       - |       - |      - |",
+    "|              rsi |  0.000% |             -0.000% |  0.000% |       - |       - |      - |",
+    "|       fisher_rsi |  0.000% |             -0.000% |  0.000% |       - |       - |      - |",
+    "| fisher_rsi_norma |  0.000% |             -0.000% |  0.000% |       - |       - |      - |",
+    "|            fastd |  0.000% |              0.000% |  0.000% |  0.000% | -0.000% | 0.000% |",
+    "|              sma | -0.000% |             -0.000% |  0.000% | -0.000% | -0.000% |      - |"
+   ],
+   "no_variance_reported": false,
+   "strategy_startup_candle_count": 0,
+   "analysis_override": "startup_candle_count 200 set in the analysis config only",
+   "error": null
+  },
+  "UniversalMACD": {
+   "timerange": "20180101-20190101",
+   "table": [
+    "| Indicators | 30 (from strategy) |     199 | 399 | 499 | 999 | 1999 |",
+    "|------------+--------------------+---------+-----+-----+-----+------|",
+    "|       ma12 |            -0.001% |       - |   - |   - |   - |    - |",
+    "|       ma26 |            -0.107% |  0.000% |   - |   - |   - |    - |",
+    "|      umacd |            89.583% | -0.000% |   - |   - |   - |    - |"
+   ],
+   "no_variance_reported": true,
+   "strategy_startup_candle_count": 30,
+   "analysis_override": null,
+   "error": null
+  },
+  "CMCWinner": {
+   "timerange": "20240101-20240701",
+   "table": [
+    "| Indicators |     199 | 200 (from strategy) |     399 |     499 |     999 |    1999 |",
+    "|------------+---------+---------------------+---------+---------+---------+---------|",
+    "|        mfi | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "|        cmo |  0.000% |              0.000% |  0.000% |       - |       - |       - |",
+    "|        cci |       - |                   - | -0.000% | -0.000% |       - | -0.000% |"
+   ],
+   "no_variance_reported": false,
+   "strategy_startup_candle_count": 0,
+   "analysis_override": "startup_candle_count 200 set in the analysis config only",
+   "error": null
+  },
+  "Bandtastic": {
+   "timerange": "20240101-20240701",
+   "table": [
+    "|     Indicators |     199 |     399 |     499 | 999 (from strategy) |    1999 |",
+    "|----------------+---------+---------+---------+---------------------+---------|",
+    "|            rsi |  0.000% |  0.000% |       - |                   - |       - |",
+    "|            mfi | -0.000% | -0.000% | -0.000% |             -0.000% | -0.000% |",
+    "|  bb_lowerband1 | -0.000% | -0.000% | -0.000% |             -0.000% |  0.000% |",
+    "|  bb_upperband1 |  0.000% |  0.000% |  0.000% |              0.000% | -0.000% |",
+    "|  bb_lowerband2 | -0.000% | -0.000% | -0.000% |             -0.000% |  0.000% |",
+    "|  bb_upperband2 |  0.000% |  0.000% |  0.000% |              0.000% | -0.000% |",
+    "|  bb_lowerband3 | -0.000% | -0.000% | -0.000% |             -0.000% |  0.000% |",
+    "|  bb_upperband3 |  0.000% |  0.000% |  0.000% |              0.000% | -0.000% |",
+    "|  bb_lowerband4 | -0.000% | -0.000% | -0.000% |             -0.000% |  0.000% |",
+    "|  bb_upperband4 |  0.000% |  0.000% |  0.000% |              0.000% | -0.000% |",
+    "|        EMA_250 |    nan% |  0.005% | -0.018% |             -0.000% | -0.000% |",
+    "|        EMA_211 |    nan% |  0.005% | -0.003% |             -0.000% |  0.000% |",
+    "| bb_middleband1 |       - |       - | -0.000% |                   - |       - |",
+    "| bb_middleband2 |       - |       - | -0.000% |                   - |       - |",
+    "| bb_middleband3 |       - |       - | -0.000% |                   - |       - |",
+    "| bb_middleband4 |       - |       - | -0.000% |                   - |       - |"
+   ],
+   "no_variance_reported": false,
+   "strategy_startup_candle_count": 999,
+   "analysis_override": null,
+   "error": null
+  },
+  "FAdxSmaStrategy": {
+   "timerange": "20230101-20240701",
+   "table": [
+    "|   Indicators | 14 (from strategy) |     199 |     399 |     499 |     999 |    1999 |",
+    "|--------------+--------------------+---------+---------+---------+---------+---------|",
+    "|       adx_14 |               nan% |  0.000% | -0.000% |  0.000% |       - |       - |",
+    "| sma_short_12 |            -0.000% | -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "|  sma_long_48 |               nan% |  0.000% |  0.000% |  0.000% |  0.000% |  0.000% |"
+   ],
+   "no_variance_reported": false,
+   "strategy_startup_candle_count": 14,
+   "analysis_override": null,
+   "error": null
+  },
+  "MACDStrategy_crossed": {
+   "timerange": "20240101-20240401",
+   "table": [
+    "| Indicators |     199 | 200 (from strategy) |     399 |    499 | 999 | 1999 |",
+    "|------------+---------+---------------------+---------+--------+-----+------|",
+    "|       macd | -0.000% |             -0.000% |       - |      - |   - |    - |",
+    "| macdsignal | -0.000% |             -0.000% |  0.000% |      - |   - |    - |",
+    "|   macdhist |  0.000% |              0.000% | -0.000% |      - |   - |    - |",
+    "|        cci |       - |                   - |       - | 0.000% |   - |    - |"
+   ],
+   "no_variance_reported": true,
+   "strategy_startup_candle_count": 0,
+   "analysis_override": "startup_candle_count 200 set in the analysis config only",
+   "error": null
+  },
+  "ReinforcedQuickie": {
+   "timerange": "20240101-20240401",
+   "table": [
+    "|   Indicators |     199 | 200 (from strategy) |     399 |     499 |     999 |    1999 |",
+    "|--------------+---------+---------------------+---------+---------+---------+---------|",
+    "| resample_sma |    nan% |                nan% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "|       ema_21 |  0.000% |             -0.000% |       - |       - |       - |       - |",
+    "| bb_lowerband |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "| bb_upperband | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "|          mfi |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "|          rsi |  0.000% |             -0.000% |       - |       - |       - |       - |",
+    "|         macd | -0.000% |             -0.000% |       - |       - |       - |       - |",
+    "|   macdsignal | -0.000% |             -0.000% |  0.000% |       - |       - |       - |",
+    "|     macdhist |  0.000% |              0.000% | -0.000% |       - |       - |       - |",
+    "|          cci |       - |                   - |       - |  0.000% |       - |  0.000% |"
+   ],
+   "no_variance_reported": false,
+   "strategy_startup_candle_count": 0,
+   "analysis_override": "startup_candle_count 200 set in the analysis config only",
+   "error": null
+  },
+  "ReinforcedSmoothScalp": {
+   "timerange": "20240101-20240201",
+   "table": [
+    "|     Indicators |     199 | 200 (from strategy) |     399 |     499 |     999 |    1999 |",
+    "|----------------+---------+---------------------+---------+---------+---------+---------|",
+    "| resample_5_sma |    nan% |                nan% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "|   resample_sma |    nan% |                nan% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "|          fastd | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "|            adx |  0.001% |              0.001% |  0.000% |  0.000% |       - |       - |",
+    "|            rsi | -0.000% |              0.000% |  0.000% | -0.000% |       - |       - |",
+    "|            mfi |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "|   bb_lowerband | -0.000% |             -0.000% | -0.000% | -0.000% | -0.000% | -0.000% |",
+    "|   bb_upperband |  0.000% |              0.000% |  0.000% |  0.000% |  0.000% |  0.000% |",
+    "|            cci |       - |             -0.000% |       - |       - |       - |       - |"
+   ],
+   "no_variance_reported": false,
+   "strategy_startup_candle_count": 0,
+   "analysis_override": "startup_candle_count 200 set in the analysis config only",
+   "error": null
+  }
+ }
+}

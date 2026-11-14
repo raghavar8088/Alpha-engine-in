@@ -1,0 +1,5473 @@
+{
+ "results": {
+  "BinHV45": {
+   "class": "BinHV45",
+   "settings": {
+    "timeframe": "1m",
+    "minimal_roi": {
+     "0": 0.0125
+    },
+    "stoploss": -0.05,
+    "trailing_stop": false,
+    "trailing_stop_positive": null,
+    "trailing_stop_positive_offset": 0.0,
+    "trailing_only_offset_is_reached": false,
+    "use_exit_signal": true,
+    "exit_profit_only": false,
+    "exit_profit_offset": 0.0,
+    "ignore_roi_if_entry_signal": false,
+    "can_short": false,
+    "callbacks": [],
+    "mode": "spot"
+   },
+   "btc_spot": {
+    "dev": {
+     "trades": 55,
+     "net": -428.10810810819373,
+     "ret_pct": -4.281081081081937,
+     "win_rate": 80.0,
+     "pf": 0.9257272539715141,
+     "max_dd_pct": -23.156658612046137,
+     "exp_usd": -7.78378378378534,
+     "exp_pct": -0.07783783783785352,
+     "gross_pct": 0.16216216216214668,
+     "funding_pct": 0.0,
+     "avg_hold_min": 169.52727272727273,
+     "trades_per_year": 11.001506024096384,
+     "exposure_pct": 0.3546002190580504,
+     "by_reason": {
+      "ROI": 44,
+      "STOP": 11
+     },
+     "ruined_on": null,
+     "t_stat": -0.22160828667697322
+    },
+    "oos": {
+     "trades": 6,
+     "net": 727.6216216216105,
+     "ret_pct": 7.276216216216105,
+     "win_rate": 100.0,
+     "pf": null,
+     "max_dd_pct": 0.0,
+     "exp_usd": 121.27027027026843,
+     "exp_pct": 1.212702702702684,
+     "gross_pct": 1.4527027027026842,
+     "funding_pct": 0.0,
+     "avg_hold_min": 577.6666666666666,
+     "trades_per_year": 1.5664760543245175,
+     "exposure_pct": 0.17204749424191884,
+     "by_reason": {
+      "ROI": 6
+     },
+     "ruined_on": null,
+     "t_stat": null
+    },
+    "full": {
+     "trades": 61,
+     "net": 299.51351351341697,
+     "ret_pct": 2.9951351351341695,
+     "win_rate": 81.9672131147541,
+     "pf": 1.0519627886039933,
+     "max_dd_pct": -23.156658612046137,
+     "exp_usd": 4.910057598580606,
+     "exp_pct": 0.04910057598580597,
+     "gross_pct": 0.2891005759858061,
+     "funding_pct": 0.0,
+     "avg_hold_min": 209.672131147541,
+     "trades_per_year": 6.908604651162791,
+     "exposure_pct": 0.2754091300602929,
+     "by_reason": {
+      "ROI": 50,
+      "STOP": 11
+     },
+     "ruined_on": null,
+     "t_stat": 0.15330949250420636
+    },
+    "yearly": {
+     "2018": 164.7,
+     "2019": -320.38,
+     "2020": -1324.95,
+     "2021": 809.97,
+     "2022": 242.54,
+     "2023": 242.54,
+     "2024": 121.27,
+     "2025": 242.54,
+     "2026": 121.27
+    }
+   },
+   "eth_spot": {
+    "dev": {
+     "trades": 23,
+     "net": 208.13513513509542,
+     "ret_pct": 2.0813513513509543,
+     "win_rate": 82.6086956521739,
+     "pf": 1.0993011140911715,
+     "max_dd_pct": -8.447730453121043,
+     "exp_usd": 9.049353701525888,
+     "exp_pct": 0.09049353701525883,
+     "gross_pct": 0.33049353701525874,
+     "funding_pct": 0.0,
+     "avg_hold_min": 46.95652173913044,
+     "trades_per_year": 11.507876712328766,
+     "exposure_pct": 0.10273972602739725,
+     "by_reason": {
+      "ROI": 19,
+      "STOP": 4
+     },
+     "ruined_on": null,
+     "t_stat": 0.17354347419154514
+    },
+    "oos": {
+     "trades": 12,
+     "net": 809.9729729729587,
+     "ret_pct": 8.099729729729587,
+     "win_rate": 91.66666666666666,
+     "pf": 2.545749948421676,
+     "max_dd_pct": -4.884586896166,
+     "exp_usd": 67.49774774774656,
+     "exp_pct": 0.6749774774774654,
+     "gross_pct": 0.9149774774774654,
+     "funding_pct": 0.0,
+     "avg_hold_min": 200.91666666666666,
+     "trades_per_year": 3.3845559845559845,
+     "exposure_pct": 0.12929000429000428,
+     "by_reason": {
+      "ROI": 11,
+      "STOP": 1
+     },
+     "ruined_on": null,
+     "t_stat": 1.2552460732984096
+    },
+    "yearly": {
+     "2021": 368.32,
+     "2022": -160.19,
+     "2023": 242.54,
+     "2024": 363.81,
+     "2025": 82.35,
+     "2026": 121.27
+    }
+   },
+   "btc_perp_adaptation": {
+    "dev": {
+     "trades": 35,
+     "net": -241.96041078136847,
+     "ret_pct": -2.4196041078136847,
+     "win_rate": 80.0,
+     "pf": 0.9330278393517384,
+     "max_dd_pct": -19.178294230564326,
+     "exp_usd": -6.913154593753385,
+     "exp_pct": -0.06913154593753384,
+     "gross_pct": 0.09563642549103761,
+     "funding_pct": 0.006767971428571429,
+     "avg_hold_min": 196.34285714285716,
+     "trades_per_year": 11.664005474452553,
+     "exposure_pct": 0.4354217356042174,
+     "by_reason": {
+      "ROI": 28,
+      "STOP": 7
+     },
+     "ruined_on": null,
+     "t_stat": -0.1583173857801665
+    },
+    "oos": {
+     "trades": 6,
+     "net": 720.545019118279,
+     "ret_pct": 7.2054501911827895,
+     "win_rate": 100.0,
+     "pf": null,
+     "max_dd_pct": 0.0,
+     "exp_usd": 120.09083651971316,
+     "exp_pct": 1.2009083651971315,
+     "gross_pct": 1.3695455318637981,
+     "funding_pct": 0.010637166666666666,
+     "avg_hold_min": 577.6666666666666,
+     "trades_per_year": 1.5664760543245175,
+     "exposure_pct": 0.17204749424191884,
+     "by_reason": {
+      "ROI": 6
+     },
+     "ruined_on": null,
+     "t_stat": 123.03928117310623
+    }
+   },
+   "btc_spot_x2_oos": {
+    "trades": 6,
+    "net": 705.4869739478927,
+    "ret_pct": 7.054869739478926,
+    "win_rate": 100.0,
+    "pf": null,
+    "max_dd_pct": 0.0,
+    "exp_usd": 117.58116232464879,
+    "exp_pct": 1.1758116232464877,
+    "gross_pct": 1.655811623246488,
+    "funding_pct": 0.0,
+    "avg_hold_min": 661.6666666666666,
+    "trades_per_year": 1.5664760543245175,
+    "exposure_pct": 0.19706536414899534,
+    "by_reason": {
+     "ROI": 6
+    },
+    "ruined_on": null,
+    "t_stat": null
+   },
+   "sensitivity_btc_spot": {
+    "stop x0.75": {
+     "dev_net": -1012.918918918988,
+     "dev_trades": 56,
+     "oos_net": 727.6216216216105,
+     "oos_trades": 6
+    },
+    "stop x1.25": {
+     "dev_net": 386.4324324323468,
+     "dev_trades": 54,
+     "oos_net": 727.6216216216105,
+     "oos_trades": 6
+    },
+    "roi x0.75": {
+     "dev_net": -577.9454454455434,
+     "dev_trades": 55,
+     "oos_net": 539.7462462462338,
+     "oos_trades": 6
+    },
+    "roi x1.25": {
+     "dev_net": -32.103853853900944,
+     "dev_trades": 53,
+     "oos_net": 915.4969969969875,
+     "oos_trades": 6
+    }
+   },
+   "seconds": 0.8
+  },
+  "Low_BB": {
+   "class": "Low_BB",
+   "settings": {
+    "timeframe": "1m",
+    "minimal_roi": {
+     "0": 0.9,
+     "1": 0.05,
+     "10": 0.04,
+     "15": 0.5
+    },
+    "stoploss": -0.015,
+    "trailing_stop": false,
+    "trailing_stop_positive": null,
+    "trailing_stop_positive_offset": 0.0,
+    "trailing_only_offset_is_reached": false,
+    "use_exit_signal": true,
+    "exit_profit_only": false,
+    "exit_profit_offset": 0.0,
+    "ignore_roi_if_entry_signal": false,
+    "can_short": false,
+    "callbacks": [],
+    "mode": "spot"
+   },
+   "btc_spot": {
+    "dev": {
+     "trades": 26,
+     "net": 1608.2536822536724,
+     "ret_pct": 16.082536822536724,
+     "win_rate": 34.61538461538461,
+     "pf": 1.5436963090783204,
+     "max_dd_pct": -8.7,
+     "exp_usd": 61.85591085591048,
+     "exp_pct": 0.618559108559105,
+     "gross_pct": 0.858559108559105,
+     "funding_pct": 0.0,
+     "avg_hold_min": 58.11538461538461,
+     "trades_per_year": 5.200711938663746,
+     "exposure_pct": 0.057464707314104906,
+     "by_reason": {
+      "ROI": 9,
+      "STOP": 17
+     },
+     "ruined_on": null,
+     "t_stat": 0.9461105275934573
+    },
+    "oos": {
+     "trades": 4,
+     "net": -117.228362712402,
+     "ret_pct": -1.17228362712402,
+     "win_rate": 25.0,
+     "pf": 0.775424592504977,
+     "max_dd_pct": -3.4015029592847252,
+     "exp_usd": -29.3070906781005,
+     "exp_pct": -0.293070906781005,
+     "gross_pct": -0.05307090678100504,
+     "funding_pct": 0.0,
+     "avg_hold_min": 12571.5,
+     "trades_per_year": 1.0443173695496784,
+     "exposure_pct": 2.4961281868000955,
+     "by_reason": {
+      "ROI": 1,
+      "STOP": 3
+     },
+     "ruined_on": null,
+     "t_stat": -0.202546833949553
+    },
+    "full": {
+     "trades": 30,
+     "net": 1491.0253195412706,
+     "ret_pct": 14.910253195412707,
+     "win_rate": 33.33333333333333,
+     "pf": 1.428455551592319,
+     "max_dd_pct": -8.7,
+     "exp_usd": 49.70084398470902,
+     "exp_pct": 0.49700843984709037,
+     "gross_pct": 0.7370084398470903,
+     "funding_pct": 0.0,
+     "avg_hold_min": 1726.5666666666666,
+     "trades_per_year": 3.3976744186046512,
+     "exposure_pct": 1.1153531438415158,
+     "by_reason": {
+      "ROI": 10,
+      "STOP": 20
+     },
+     "ruined_on": null,
+     "t_stat": 0.838251721523203
+    },
+    "yearly": {
+     "2019": -522.0,
+     "2020": 118.33,
+     "2021": 2185.93,
+     "2022": -174.0,
+     "2023": 230.77,
+     "2024": -174.0,
+     "2025": -174.0
+    }
+   },
+   "eth_spot": {
+    "dev": {
+     "trades": 15,
+     "net": 644.904904904899,
+     "ret_pct": 6.449049049048989,
+     "win_rate": 33.33333333333333,
+     "pf": 1.3706350028189072,
+     "max_dd_pct": -13.961122812553606,
+     "exp_usd": 42.993660326993265,
+     "exp_pct": 0.4299366032699327,
+     "gross_pct": 0.6699366032699325,
+     "funding_pct": 0.0,
+     "avg_hold_min": 2.8666666666666667,
+     "trades_per_year": 7.50513698630137,
+     "exposure_pct": 0.004090563165905631,
+     "by_reason": {
+      "ROI": 5,
+      "STOP": 10
+     },
+     "ruined_on": null,
+     "t_stat": 0.5227272961886166
+    },
+    "oos": {
+     "trades": 11,
+     "net": 1240.7047047046983,
+     "ret_pct": 12.407047047046984,
+     "win_rate": 45.45454545454545,
+     "pf": 2.1884144681079483,
+     "max_dd_pct": -3.331533015767026,
+     "exp_usd": 112.7913367913362,
+     "exp_pct": 1.1279133679133624,
+     "gross_pct": 1.3679133679133622,
+     "funding_pct": 0.0,
+     "avg_hold_min": 230.36363636363637,
+     "trades_per_year": 3.1025096525096525,
+     "exposure_pct": 0.1358858858858859,
+     "by_reason": {
+      "ROI": 5,
+      "STOP": 6
+     },
+     "ruined_on": null,
+     "t_stat": 1.129074617106836
+    },
+    "yearly": {
+     "2021": 644.9,
+     "2023": 48.82,
+     "2024": 545.84,
+     "2025": 149.02,
+     "2026": 497.02
+    }
+   },
+   "btc_perp_adaptation": {
+    "dev": {
+     "trades": 23,
+     "net": 2241.1632599486584,
+     "ret_pct": 22.411632599486584,
+     "win_rate": 39.130434782608695,
+     "pf": 1.9618797030435948,
+     "max_dd_pct": -6.2053025220145805,
+     "exp_usd": 97.44188086733297,
+     "exp_pct": 0.9744188086733293,
+     "gross_pct": 1.1362374608472425,
+     "funding_pct": 0.0038186521739130438,
+     "avg_hold_min": 64.30434782608695,
+     "trades_per_year": 7.664917883211678,
+     "exposure_pct": 0.09371198296836983,
+     "by_reason": {
+      "ROI": 9,
+      "STOP": 14
+     },
+     "ruined_on": null,
+     "t_stat": 1.375101639370401
+    },
+    "oos": {
+     "trades": 4,
+     "net": -106.97298558449305,
+     "ret_pct": -1.0697298558449304,
+     "win_rate": 25.0,
+     "pf": 0.8227663197070946,
+     "max_dd_pct": -4.237526753033274,
+     "exp_usd": -26.74324639612326,
+     "exp_pct": -0.26743246396123244,
+     "gross_pct": 0.1559932860387676,
+     "funding_pct": 0.26542575,
+     "avg_hold_min": 12571.5,
+     "trades_per_year": 1.0443173695496784,
+     "exposure_pct": 2.4961281868000955,
+     "by_reason": {
+      "ROI": 1,
+      "STOP": 3
+     },
+     "ruined_on": null,
+     "t_stat": -0.1517497003134026
+    }
+   },
+   "btc_spot_x2_oos": {
+    "trades": 4,
+    "net": -200.31663326653185,
+    "ret_pct": -2.0031663326653186,
+    "win_rate": 25.0,
+    "pf": 0.6627666106624043,
+    "max_dd_pct": -3.8839966459930575,
+    "exp_usd": -50.07915831663296,
+    "exp_pct": -0.5007915831663297,
+    "gross_pct": -0.020791583166329716,
+    "funding_pct": 0.0,
+    "avg_hold_min": 12572.0,
+    "trades_per_year": 1.0443173695496784,
+    "exposure_pct": 2.496227464061631,
+    "by_reason": {
+     "ROI": 1,
+     "STOP": 3
+    },
+    "ruined_on": null,
+    "t_stat": -0.3385537679932234
+   },
+   "sensitivity_btc_spot": {
+    "stop x0.75": {
+     "dev_net": 1612.2326612326565,
+     "dev_trades": 26,
+     "oos_net": -4.728362712401321,
+     "oos_trades": 4
+    },
+    "stop x1.25": {
+     "dev_net": 6399.783712283701,
+     "dev_trades": 25,
+     "oos_net": -229.72836271240269,
+     "oos_trades": 4
+    },
+    "roi x0.75": {
+     "dev_net": 1861.5719980658089,
+     "dev_trades": 26,
+     "oos_net": 395.5415415415432,
+     "oos_trades": 4
+    },
+    "roi x1.25": {
+     "dev_net": 1788.934362934351,
+     "dev_trades": 26,
+     "oos_net": 5736.53253253253,
+     "oos_trades": 4
+    }
+   },
+   "seconds": 0.7
+  },
+  "Scalp": {
+   "class": "Scalp",
+   "settings": {
+    "timeframe": "1m",
+    "minimal_roi": {
+     "0": 0.01
+    },
+    "stoploss": -0.04,
+    "trailing_stop": false,
+    "trailing_stop_positive": null,
+    "trailing_stop_positive_offset": 0.0,
+    "trailing_only_offset_is_reached": false,
+    "use_exit_signal": true,
+    "exit_profit_only": false,
+    "exit_profit_offset": 0.0,
+    "ignore_roi_if_entry_signal": false,
+    "can_short": false,
+    "callbacks": [],
+    "mode": "spot"
+   },
+   "btc_spot": {
+    "dev": {
+     "trades": 15415,
+     "net": -329084.2860747697,
+     "ret_pct": -3290.842860747697,
+     "win_rate": 11.028219266947778,
+     "pf": 0.09373095055179483,
+     "max_dd_pct": -100.0,
+     "exp_usd": -21.348315671408997,
+     "exp_pct": -0.21348315671408996,
+     "gross_pct": 0.026516843285910054,
+     "funding_pct": 0.0,
+     "avg_hold_min": 5.774375608173856,
+     "trades_per_year": 3083.4220974808322,
+     "exposure_pct": 3.38520749665328,
+     "by_reason": {
+      "EXIT_SIGNAL": 15277,
+      "ROI": 107,
+      "STOP": 31
+     },
+     "ruined_on": "2018-03-26",
+     "t_stat": -79.46298223979682
+    },
+    "oos": {
+     "trades": 19942,
+     "net": -468102.87703978666,
+     "ret_pct": -4681.0287703978665,
+     "win_rate": 2.3117039414301472,
+     "pf": 0.011836165060144836,
+     "max_dd_pct": -100.0,
+     "exp_usd": -23.473216178908167,
+     "exp_pct": -0.23473216178908166,
+     "gross_pct": 0.005267838210918369,
+     "funding_pct": 0.0,
+     "avg_hold_min": 5.549393240397151,
+     "trades_per_year": 5206.444245889921,
+     "exposure_pct": 5.493308712572472,
+     "by_reason": {
+      "EXIT_SIGNAL": 19925,
+      "ROI": 9,
+      "STOP": 8
+     },
+     "ruined_on": "2023-03-03",
+     "t_stat": -184.96820797561608
+    },
+    "full": {
+     "trades": 35357,
+     "net": -797187.1631145563,
+     "ret_pct": -7971.871631145564,
+     "win_rate": 6.111943886641966,
+     "pf": 0.047372218339526005,
+     "max_dd_pct": -100.0,
+     "exp_usd": -22.54679874182075,
+     "exp_pct": -0.22546798741820748,
+     "gross_pct": 0.014532012581792505,
+     "funding_pct": 0.0,
+     "avg_hold_min": 5.647481403965268,
+     "trades_per_year": 4004.3858139534887,
+     "exposure_pct": 4.299698535745048,
+     "by_reason": {
+      "EXIT_SIGNAL": 35202,
+      "ROI": 116,
+      "STOP": 39
+     },
+     "ruined_on": "2018-03-26",
+     "t_stat": -164.11978350182898
+    },
+    "yearly": {
+     "2018": -58434.16,
+     "2019": -57983.91,
+     "2020": -53693.17,
+     "2021": -72572.34,
+     "2022": -86400.71,
+     "2023": -125821.21,
+     "2024": -107714.19,
+     "2025": -125155.94,
+     "2026": -109411.54
+    }
+   },
+   "eth_spot": {
+    "dev": {
+     "trades": 7796,
+     "net": -174129.89043074386,
+     "ret_pct": -1741.2989043074385,
+     "win_rate": 16.07234479220113,
+     "pf": 0.12679843768510246,
+     "max_dd_pct": -100.0,
+     "exp_usd": -22.33579918300973,
+     "exp_pct": -0.22335799183009725,
+     "gross_pct": 0.016642008169902727,
+     "funding_pct": 0.0,
+     "avg_hold_min": 5.932657773217034,
+     "trades_per_year": 3900.6698630136984,
+     "exposure_pct": 4.399828767123288,
+     "by_reason": {
+      "EXIT_SIGNAL": 7707,
+      "ROI": 64,
+      "STOP": 25
+     },
+     "ruined_on": "2021-03-11",
+     "t_stat": -48.28238064841919
+    },
+    "oos": {
+     "trades": 16130,
+     "net": -379418.91994252475,
+     "ret_pct": -3794.1891994252474,
+     "win_rate": 4.91010539367638,
+     "pf": 0.02865324533869199,
+     "max_dd_pct": -100.0,
+     "exp_usd": -23.52256168273557,
+     "exp_pct": -0.2352256168273557,
+     "gross_pct": 0.004774383172644327,
+     "funding_pct": 0.0,
+     "avg_hold_min": 5.646249225046497,
+     "trades_per_year": 4549.407335907335,
+     "exposure_pct": 4.883848133848134,
+     "by_reason": {
+      "EXIT_SIGNAL": 16100,
+      "ROI": 16,
+      "STOP": 14
+     },
+     "ruined_on": "2023-01-31",
+     "t_stat": -119.49309539981566
+    },
+    "yearly": {
+     "2021": -72410.65,
+     "2022": -101719.24,
+     "2023": -126119.47,
+     "2024": -98928.07,
+     "2025": -97108.63,
+     "2026": -57262.75
+    }
+   },
+   "btc_perp_adaptation": {
+    "dev": {
+     "trades": 9824,
+     "net": -132281.10517166485,
+     "ret_pct": -1322.8110517166485,
+     "win_rate": 19.818811074918568,
+     "pf": 0.1780270272363387,
+     "max_dd_pct": -100.0,
+     "exp_usd": -13.46509621047077,
+     "exp_pct": -0.1346509621047077,
+     "gross_pct": 0.023486766111904655,
+     "funding_pct": 0.00013772821661237788,
+     "avg_hold_min": 5.78125,
+     "trades_per_year": 3273.919708029197,
+     "exposure_pct": 3.598628852392539,
+     "by_reason": {
+      "EXIT_SIGNAL": 9744,
+      "ROI": 62,
+      "STOP": 18
+     },
+     "ruined_on": "2020-05-12",
+     "t_stat": -42.41581732587048
+    },
+    "oos": {
+     "trades": 19942,
+     "net": -304718.16228505917,
+     "ret_pct": -3047.1816228505913,
+     "win_rate": 6.147828703239394,
+     "pf": 0.037874891568851106,
+     "max_dd_pct": -100.0,
+     "exp_usd": -15.280220754440837,
+     "exp_pct": -0.15280220754440837,
+     "gross_pct": 0.0052798401940331065,
+     "funding_pct": 8.20477384414803e-05,
+     "avg_hold_min": 5.548741349914753,
+     "trades_per_year": 5206.444245889921,
+     "exposure_pct": 5.492663410372488,
+     "by_reason": {
+      "EXIT_SIGNAL": 19923,
+      "ROI": 11,
+      "STOP": 8
+     },
+     "ruined_on": "2023-04-02",
+     "t_stat": -120.37041880434609
+    }
+   },
+   "btc_spot_x2_oos": {
+    "trades": 19942,
+    "net": -946618.9208991205,
+    "ret_pct": -9466.189208991203,
+    "win_rate": 0.2908434459933808,
+    "pf": 0.0014337758345176845,
+    "max_dd_pct": -100.0,
+    "exp_usd": -47.46860499945444,
+    "exp_pct": -0.4746860499945444,
+    "gross_pct": 0.005313950005455642,
+    "funding_pct": 0.0,
+    "avg_hold_min": 5.549643967505767,
+    "trades_per_year": 5206.444245889921,
+    "exposure_pct": 5.4935569057263125,
+    "by_reason": {
+     "EXIT_SIGNAL": 19927,
+     "ROI": 7,
+     "STOP": 8
+    },
+    "ruined_on": "2023-01-30",
+    "t_stat": -373.29025223073484
+   },
+   "sensitivity_btc_spot": {
+    "stop x0.75": {
+     "dev_net": -330274.5226157854,
+     "dev_trades": 15430,
+     "oos_net": -468004.8389631711,
+     "oos_trades": 19944
+    },
+    "stop x1.25": {
+     "dev_net": -329106.27917160816,
+     "dev_trades": 15405,
+     "oos_net": -468465.50851203146,
+     "oos_trades": 19940
+    },
+    "roi x0.75": {
+     "dev_net": -329243.4609768812,
+     "dev_trades": 15418,
+     "oos_net": -468145.5033585364,
+     "oos_trades": 19943
+    },
+    "roi x1.25": {
+     "dev_net": -330266.2274026712,
+     "dev_trades": 15410,
+     "oos_net": -467977.3957406954,
+     "oos_trades": 19942
+    }
+   },
+   "seconds": 40.8
+  },
+  "SmoothScalp": {
+   "class": "SmoothScalp",
+   "settings": {
+    "timeframe": "1m",
+    "minimal_roi": {
+     "0": 0.01
+    },
+    "stoploss": -0.5,
+    "trailing_stop": false,
+    "trailing_stop_positive": null,
+    "trailing_stop_positive_offset": 0.0,
+    "trailing_only_offset_is_reached": false,
+    "use_exit_signal": true,
+    "exit_profit_only": false,
+    "exit_profit_offset": 0.0,
+    "ignore_roi_if_entry_signal": false,
+    "can_short": false,
+    "callbacks": [],
+    "mode": "spot"
+   },
+   "btc_spot": {
+    "dev": {
+     "trades": 2998,
+     "net": -58225.845919461775,
+     "ret_pct": -582.2584591946178,
+     "win_rate": 39.5930620413609,
+     "pf": 0.4285442373296101,
+     "max_dd_pct": -100.0,
+     "exp_usd": -19.421563015164036,
+     "exp_pct": -0.1942156301516403,
+     "gross_pct": 0.045784369848359686,
+     "funding_pct": 0.0,
+     "avg_hold_min": 38.85390260173449,
+     "trades_per_year": 599.6820920043812,
+     "exposure_pct": 4.429992698064987,
+     "by_reason": {
+      "EXIT_SIGNAL": 2799,
+      "ROI": 199
+     },
+     "ruined_on": "2018-09-06",
+     "t_stat": -11.842339241014244
+    },
+    "oos": {
+     "trades": 3587,
+     "net": -79376.4425147491,
+     "ret_pct": -793.764425147491,
+     "win_rate": 18.399776972400332,
+     "pf": 0.15119811405154918,
+     "max_dd_pct": -100.0,
+     "exp_usd": -22.128921805059687,
+     "exp_pct": -0.22128921805059687,
+     "gross_pct": 0.01871078194940315,
+     "funding_pct": 0.0,
+     "avg_hold_min": 36.24616671313075,
+     "trades_per_year": 936.4916011436741,
+     "exposure_pct": 6.453766579302676,
+     "by_reason": {
+      "EXIT_SIGNAL": 3562,
+      "ROI": 25
+     },
+     "ruined_on": "2023-07-30",
+     "t_stat": -29.73816616750701
+    },
+    "full": {
+     "trades": 6585,
+     "net": -137602.28843421087,
+     "ret_pct": -1376.0228843421087,
+     "win_rate": 28.048595292331058,
+     "pf": 0.29581428105492996,
+     "max_dd_pct": -100.0,
+     "exp_usd": -20.89632322463339,
+     "exp_pct": -0.20896323224633392,
+     "gross_pct": 0.03103676775366612,
+     "funding_pct": 0.0,
+     "avg_hold_min": 37.4334092634776,
+     "trades_per_year": 745.789534883721,
+     "exposure_pct": 5.3079026701119725,
+     "by_reason": {
+      "EXIT_SIGNAL": 6361,
+      "ROI": 224
+     },
+     "ruined_on": "2018-09-06",
+     "t_stat": -24.593164094665667
+    },
+    "yearly": {
+     "2018": -14489.92,
+     "2019": -8899.48,
+     "2020": -8346.31,
+     "2021": -10059.37,
+     "2022": -16430.76,
+     "2023": -20941.16,
+     "2024": -17220.77,
+     "2025": -22814.24,
+     "2026": -18400.27
+    }
+   },
+   "eth_spot": {
+    "dev": {
+     "trades": 1487,
+     "net": -28689.5955453232,
+     "ret_pct": -286.89595545323203,
+     "win_rate": 45.19166106254203,
+     "pf": 0.4931632699236116,
+     "max_dd_pct": -100.0,
+     "exp_usd": -19.293608302167588,
+     "exp_pct": -0.19293608302167586,
+     "gross_pct": 0.047063916978324176,
+     "funding_pct": 0.0,
+     "avg_hold_min": 38.3261600537996,
+     "trades_per_year": 744.0092465753424,
+     "exposure_pct": 5.4215182648401825,
+     "by_reason": {
+      "EXIT_SIGNAL": 1359,
+      "ROI": 128
+     },
+     "ruined_on": "2021-12-30",
+     "t_stat": -7.909635324183288
+    },
+    "oos": {
+     "trades": 3024,
+     "net": -68563.47868309944,
+     "ret_pct": -685.6347868309945,
+     "win_rate": 28.505291005291006,
+     "pf": 0.24201533600570985,
+     "max_dd_pct": -100.0,
+     "exp_usd": -22.673108030125476,
+     "exp_pct": -0.22673108030125474,
+     "gross_pct": 0.013268919698745267,
+     "funding_pct": 0.0,
+     "avg_hold_min": 36.42824074074074,
+     "trades_per_year": 852.9081081081081,
+     "exposure_pct": 5.907282282282282,
+     "by_reason": {
+      "EXIT_SIGNAL": 2981,
+      "ROI": 43
+     },
+     "ruined_on": "2023-07-17",
+     "t_stat": -18.146453139482997
+    },
+    "yearly": {
+     "2021": -10326.49,
+     "2022": -18363.11,
+     "2023": -20749.58,
+     "2024": -18358.26,
+     "2025": -20464.02,
+     "2026": -8991.62
+    }
+   },
+   "btc_perp_adaptation": {
+    "dev": {
+     "trades": 1807,
+     "net": -20616.96097380149,
+     "ret_pct": -206.1696097380149,
+     "win_rate": 50.525733259546215,
+     "pf": 0.6037739898899804,
+     "max_dd_pct": -100.0,
+     "exp_usd": -11.409496941782784,
+     "exp_pct": -0.11409496941782787,
+     "gross_pct": 0.04554542626562535,
+     "funding_pct": 0.0016403956834532374,
+     "avg_hold_min": 38.313779745434424,
+     "trades_per_year": 602.1959397810218,
+     "exposure_pct": 4.38672191808597,
+     "by_reason": {
+      "EXIT_SIGNAL": 1675,
+      "ROI": 132
+     },
+     "ruined_on": "2022-01-22",
+     "t_stat": -5.292210900425625
+    },
+    "oos": {
+     "trades": 3587,
+     "net": -50334.19537350132,
+     "ret_pct": -503.34195373501325,
+     "win_rate": 30.275996654586006,
+     "pf": 0.2933732800419823,
+     "max_dd_pct": -100.0,
+     "exp_usd": -14.03239346905529,
+     "exp_pct": -0.14032393469055288,
+     "gross_pct": 0.018181373923888158,
+     "funding_pct": 0.0005053086144410371,
+     "avg_hold_min": 36.22023975466964,
+     "trades_per_year": 936.4916011436741,
+     "exposure_pct": 6.449150186641252,
+     "by_reason": {
+      "EXIT_SIGNAL": 3559,
+      "ROI": 28
+     },
+     "ruined_on": "2023-09-21",
+     "t_stat": -18.90938891248622
+    }
+   },
+   "btc_spot_x2_oos": {
+    "trades": 3586,
+    "net": -165742.92655990366,
+    "ret_pct": -1657.4292655990366,
+    "win_rate": 5.605131065253765,
+    "pf": 0.028573543998941506,
+    "max_dd_pct": -100.0,
+    "exp_usd": -46.219444104825335,
+    "exp_pct": -0.46219444104825325,
+    "gross_pct": 0.017805558951746757,
+    "funding_pct": 0.0,
+    "avg_hold_min": 36.326547685443394,
+    "trades_per_year": 936.2305218012866,
+    "exposure_pct": 6.466275514256214,
+    "by_reason": {
+     "EXIT_SIGNAL": 3572,
+     "ROI": 14
+    },
+    "ruined_on": "2023-05-14",
+    "t_stat": -61.89312226911977
+   },
+   "sensitivity_btc_spot": {
+    "stop x0.75": {
+     "dev_net": -58225.845919461775,
+     "dev_trades": 2998,
+     "oos_net": -79376.4425147491,
+     "oos_trades": 3587
+    },
+    "stop x1.25": {
+     "dev_net": -58225.845919461775,
+     "dev_trades": 2998,
+     "oos_net": -79376.4425147491,
+     "oos_trades": 3587
+    },
+    "roi x0.75": {
+     "dev_net": -60155.35777741264,
+     "dev_trades": 3002,
+     "oos_net": -79752.8023469406,
+     "oos_trades": 3587
+    },
+    "roi x1.25": {
+     "dev_net": -57932.871875107725,
+     "dev_trades": 2993,
+     "oos_net": -79644.2938223073,
+     "oos_trades": 3586
+    }
+   },
+   "seconds": 5.2
+  },
+  "CCIStrategy": {
+   "class": "CCIStrategy",
+   "settings": {
+    "timeframe": "1m",
+    "minimal_roi": {
+     "0": 0.1
+    },
+    "stoploss": -0.02,
+    "trailing_stop": false,
+    "trailing_stop_positive": null,
+    "trailing_stop_positive_offset": 0.0,
+    "trailing_only_offset_is_reached": false,
+    "use_exit_signal": true,
+    "exit_profit_only": false,
+    "exit_profit_offset": 0.0,
+    "ignore_roi_if_entry_signal": false,
+    "can_short": false,
+    "callbacks": [],
+    "mode": "spot"
+   },
+   "btc_spot": {
+    "dev": {
+     "trades": 898,
+     "net": -12383.511937235751,
+     "ret_pct": -123.83511937235751,
+     "win_rate": 54.4543429844098,
+     "pf": 0.8456093426835494,
+     "max_dd_pct": -100.0,
+     "exp_usd": -13.790102379995268,
+     "exp_pct": -0.1379010237999527,
+     "gross_pct": 0.10209897620004728,
+     "funding_pct": 0.0,
+     "avg_hold_min": 666.2349665924277,
+     "trades_per_year": 179.6245892661555,
+     "exposure_pct": 22.75309571619813,
+     "by_reason": {
+      "EXIT_SIGNAL": 548,
+      "ROI": 2,
+      "STOP": 348
+     },
+     "ruined_on": "2022-01-04",
+     "t_stat": -2.0403669408844234
+    },
+    "oos": {
+     "trades": 841,
+     "net": -12708.308015834808,
+     "ret_pct": -127.08308015834808,
+     "win_rate": 55.8858501783591,
+     "pf": 0.7440203982848443,
+     "max_dd_pct": -100.0,
+     "exp_usd": -15.110948889220936,
+     "exp_pct": -0.15110948889220932,
+     "gross_pct": 0.08889051110779063,
+     "funding_pct": 0.0,
+     "avg_hold_min": 652.6908442330559,
+     "trades_per_year": 219.5677269478199,
+     "exposure_pct": 27.247289730760066,
+     "by_reason": {
+      "EXIT_SIGNAL": 643,
+      "ROI": 1,
+      "STOP": 197
+     },
+     "ruined_on": "2026-03-21",
+     "t_stat": -3.095215612756277
+    },
+    "full": {
+     "trades": 1739,
+     "net": -25091.81995307056,
+     "ret_pct": -250.91819953070564,
+     "win_rate": 55.146635997699825,
+     "pf": 0.8067700737551229,
+     "max_dd_pct": -100.0,
+     "exp_usd": -14.42887863891349,
+     "exp_pct": -0.14428878638913487,
+     "gross_pct": 0.09571121361086508,
+     "funding_pct": 0.0,
+     "avg_hold_min": 659.6848763657274,
+     "trades_per_year": 196.95186046511628,
+     "exposure_pct": 24.702670111972438,
+     "by_reason": {
+      "EXIT_SIGNAL": 1191,
+      "ROI": 3,
+      "STOP": 545
+     },
+     "ruined_on": "2022-01-04",
+     "t_stat": -3.425238557096382
+    },
+    "yearly": {
+     "2018": -3548.0,
+     "2019": -2137.04,
+     "2020": 837.63,
+     "2021": -4830.99,
+     "2022": -2705.11,
+     "2023": -390.23,
+     "2024": -1692.86,
+     "2025": -7511.56,
+     "2026": -3113.66
+    }
+   },
+   "eth_spot": {
+    "dev": {
+     "trades": 456,
+     "net": -4013.386380322747,
+     "ret_pct": -40.13386380322747,
+     "win_rate": 49.780701754385966,
+     "pf": 0.9195185362459779,
+     "max_dd_pct": -59.807654921768595,
+     "exp_usd": -8.80128592176041,
+     "exp_pct": -0.08801285921760406,
+     "gross_pct": 0.15198714078239586,
+     "funding_pct": 0.0,
+     "avg_hold_min": 487.53508771929825,
+     "trades_per_year": 228.15616438356165,
+     "exposure_pct": 21.148782343987822,
+     "by_reason": {
+      "EXIT_SIGNAL": 234,
+      "STOP": 222
+     },
+     "ruined_on": null,
+     "t_stat": -0.7781393790117497
+    },
+    "oos": {
+     "trades": 792,
+     "net": -17389.87346818458,
+     "ret_pct": -173.89873468184584,
+     "win_rate": 50.378787878787875,
+     "pf": 0.7416096684246292,
+     "max_dd_pct": -100.0,
+     "exp_usd": -21.956910944677503,
+     "exp_pct": -0.21956910944677505,
+     "gross_pct": 0.02043089055322492,
+     "funding_pct": 0.0,
+     "avg_hold_min": 604.739898989899,
+     "trades_per_year": 223.38069498069495,
+     "exposure_pct": 25.683933933933933,
+     "by_reason": {
+      "EXIT_SIGNAL": 504,
+      "ROI": 2,
+      "STOP": 286
+     },
+     "ruined_on": "2025-02-26",
+     "t_stat": -3.312435883885124
+    },
+    "yearly": {
+     "2021": -695.23,
+     "2022": -3318.16,
+     "2023": -3955.89,
+     "2024": -3339.26,
+     "2025": -6759.92,
+     "2026": -3334.81
+    }
+   },
+   "btc_perp_adaptation": {
+    "dev": {
+     "trades": 558,
+     "net": -3464.86650420104,
+     "ret_pct": -34.64866504201039,
+     "win_rate": 53.76344086021505,
+     "pf": 0.930739058652344,
+     "max_dd_pct": -57.95984786873532,
+     "exp_usd": -6.209438179571756,
+     "exp_pct": -0.06209438179571754,
+     "gross_pct": 0.11979379741575205,
+     "funding_pct": 0.023888179211469535,
+     "avg_hold_min": 694.173835125448,
+     "trades_per_year": 185.9575729927007,
+     "exposure_pct": 24.543098641524736,
+     "by_reason": {
+      "EXIT_SIGNAL": 333,
+      "ROI": 1,
+      "STOP": 224
+     },
+     "ruined_on": null,
+     "t_stat": -0.6994987499959451
+    },
+    "oos": {
+     "trades": 841,
+     "net": -6508.221775135826,
+     "ret_pct": -65.08221775135826,
+     "win_rate": 60.64209274673008,
+     "pf": 0.8618597177016046,
+     "max_dd_pct": -75.47751417111485,
+     "exp_usd": -7.738670362825001,
+     "exp_pct": -0.07738670362825001,
+     "gross_pct": 0.08878308709707702,
+     "funding_pct": 0.008169790725326991,
+     "avg_hold_min": 652.6908442330559,
+     "trades_per_year": 219.5677269478199,
+     "exposure_pct": 27.247289730760066,
+     "by_reason": {
+      "EXIT_SIGNAL": 643,
+      "ROI": 1,
+      "STOP": 197
+     },
+     "ruined_on": null,
+     "t_stat": -1.5855632124706796
+    }
+   },
+   "btc_spot_x2_oos": {
+    "trades": 841,
+    "net": -32870.24186150413,
+    "ret_pct": -328.7024186150413,
+    "win_rate": 42.21165279429251,
+    "pf": 0.4517829138559393,
+    "max_dd_pct": -100.0,
+    "exp_usd": -39.08471089358399,
+    "exp_pct": -0.39084710893583985,
+    "gross_pct": 0.08915289106416026,
+    "funding_pct": 0.0,
+    "avg_hold_min": 652.6908442330559,
+    "trades_per_year": 219.5677269478199,
+    "exposure_pct": 27.247289730760066,
+    "by_reason": {
+     "EXIT_SIGNAL": 643,
+     "ROI": 1,
+     "STOP": 197
+    },
+    "ruined_on": "2024-08-20",
+    "t_stat": -7.995100902676985
+   },
+   "sensitivity_btc_spot": {
+    "stop x0.75": {
+     "dev_net": -10091.206346833194,
+     "dev_trades": 931,
+     "oos_net": -12341.267211174612,
+     "oos_trades": 846
+    },
+    "stop x1.25": {
+     "dev_net": -11263.102020055976,
+     "dev_trades": 894,
+     "oos_net": -13735.32062693193,
+     "oos_trades": 840
+    },
+    "roi x0.75": {
+     "dev_net": -13125.819915238373,
+     "dev_trades": 898,
+     "oos_net": -12390.655515018447,
+     "oos_trades": 841
+    },
+    "roi x1.25": {
+     "dev_net": -12553.982703402658,
+     "dev_trades": 898,
+     "oos_net": -12681.075509470107,
+     "oos_trades": 841
+    }
+   },
+   "seconds": 2.6
+  },
+  "ClucMay72018": {
+   "class": "ClucMay72018",
+   "settings": {
+    "timeframe": "5m",
+    "minimal_roi": {
+     "0": 0.01
+    },
+    "stoploss": -0.05,
+    "trailing_stop": false,
+    "trailing_stop_positive": null,
+    "trailing_stop_positive_offset": 0.0,
+    "trailing_only_offset_is_reached": false,
+    "use_exit_signal": true,
+    "exit_profit_only": false,
+    "exit_profit_offset": 0.0,
+    "ignore_roi_if_entry_signal": false,
+    "can_short": false,
+    "callbacks": [],
+    "mode": "spot"
+   },
+   "btc_spot": {
+    "dev": {
+     "trades": 170,
+     "net": -7615.447239942589,
+     "ret_pct": -76.15447239942588,
+     "win_rate": 64.11764705882354,
+     "pf": 0.5774028390972522,
+     "max_dd_pct": -77.1166746016281,
+     "exp_usd": -44.79674847025052,
+     "exp_pct": -0.4479674847025052,
+     "gross_pct": -0.20796748470250523,
+     "funding_pct": 0.0,
+     "avg_hold_min": 33.77647058823529,
+     "trades_per_year": 34.004654983570646,
+     "exposure_pct": 0.21837349397590364,
+     "by_reason": {
+      "EXIT_SIGNAL": 35,
+      "ROI": 108,
+      "STOP": 27
+     },
+     "ruined_on": null,
+     "t_stat": -2.569574683327348
+    },
+    "oos": {
+     "trades": 17,
+     "net": 619.9188258781547,
+     "ret_pct": 6.199188258781548,
+     "win_rate": 82.35294117647058,
+     "pf": 1.9696664160776627,
+     "max_dd_pct": -5.051012788426784,
+     "exp_usd": 36.46581328695028,
+     "exp_pct": 0.3646581328695028,
+     "gross_pct": 0.6046581328695028,
+     "funding_pct": 0.0,
+     "avg_hold_min": 19.941176470588236,
+     "trades_per_year": 4.438348820586133,
+     "exposure_pct": 0.016827495830355015,
+     "by_reason": {
+      "EXIT_SIGNAL": 3,
+      "ROI": 13,
+      "STOP": 1
+     },
+     "ruined_on": null,
+     "t_stat": 0.976293795838591
+    },
+    "full": {
+     "trades": 187,
+     "net": -6995.5284140644335,
+     "ret_pct": -69.95528414064434,
+     "win_rate": 65.77540106951871,
+     "pf": 0.6251035387220824,
+     "max_dd_pct": -77.65290175826193,
+     "exp_usd": -37.40924285595954,
+     "exp_pct": -0.37409242855959535,
+     "gross_pct": -0.13409242855959538,
+     "funding_pct": 0.0,
+     "avg_hold_min": 32.518716577540104,
+     "trades_per_year": 21.178837209302326,
+     "exposure_pct": 0.13094315245478036,
+     "by_reason": {
+      "EXIT_SIGNAL": 38,
+      "ROI": 121,
+      "STOP": 28
+     },
+     "ruined_on": null,
+     "t_stat": -2.2985122719754174
+    },
+    "yearly": {
+     "2018": -2007.14,
+     "2019": -1575.16,
+     "2020": -1457.1,
+     "2021": -1583.63,
+     "2022": -992.41,
+     "2023": 277.94,
+     "2024": 53.32,
+     "2025": 96.22,
+     "2026": 192.44
+    }
+   },
+   "eth_spot": {
+    "dev": {
+     "trades": 104,
+     "net": -2039.3887662801658,
+     "ret_pct": -20.393887662801657,
+     "win_rate": 75.96153846153845,
+     "pf": 0.7817978134615338,
+     "max_dd_pct": -28.892845120189044,
+     "exp_usd": -19.609507368078518,
+     "exp_pct": -0.19609507368078516,
+     "gross_pct": 0.043904926319214846,
+     "funding_pct": 0.0,
+     "avg_hold_min": 25.759615384615383,
+     "trades_per_year": 52.035616438356165,
+     "exposure_pct": 0.254851598173516,
+     "by_reason": {
+      "EXIT_SIGNAL": 14,
+      "ROI": 74,
+      "STOP": 16
+     },
+     "ruined_on": null,
+     "t_stat": -0.8867127670628764
+    },
+    "oos": {
+     "trades": 55,
+     "net": -856.8818568504805,
+     "ret_pct": -8.568818568504804,
+     "win_rate": 80.0,
+     "pf": 0.8251725979004755,
+     "max_dd_pct": -21.960763534927782,
+     "exp_usd": -15.579670124554191,
+     "exp_pct": -0.1557967012455418,
+     "gross_pct": 0.08420329875445826,
+     "funding_pct": 0.0,
+     "avg_hold_min": 20.181818181818183,
+     "trades_per_year": 15.512548262548261,
+     "exposure_pct": 0.05952380952380953,
+     "by_reason": {
+      "EXIT_SIGNAL": 6,
+      "ROI": 40,
+      "STOP": 9
+     },
+     "ruined_on": null,
+     "t_stat": -0.5019419391535359
+    },
+    "yearly": {
+     "2021": -1149.06,
+     "2022": -890.32,
+     "2023": 676.99,
+     "2024": -1681.63,
+     "2025": 159.96,
+     "2026": -12.2
+    }
+   },
+   "btc_perp_adaptation": {
+    "dev": {
+     "trades": 95,
+     "net": -3638.9137027911884,
+     "ret_pct": -36.389137027911886,
+     "win_rate": 73.68421052631578,
+     "pf": 0.6489793700104599,
+     "max_dd_pct": -37.93020155349045,
+     "exp_usd": -38.304354766223035,
+     "exp_pct": -0.3830435476622303,
+     "gross_pct": -0.22540671608328308,
+     "funding_pct": -0.00036316842105263154,
+     "avg_hold_min": 20.442105263157895,
+     "trades_per_year": 31.659443430656932,
+     "exposure_pct": 0.12304845904298459,
+     "by_reason": {
+      "EXIT_SIGNAL": 7,
+      "ROI": 70,
+      "STOP": 18
+     },
+     "ruined_on": null,
+     "t_stat": -1.5397847351421543
+    },
+    "oos": {
+     "trades": 17,
+     "net": 651.4814280396816,
+     "ret_pct": 6.514814280396816,
+     "win_rate": 82.35294117647058,
+     "pf": 2.0598166768877,
+     "max_dd_pct": -4.960435219653983,
+     "exp_usd": 38.32243694351069,
+     "exp_pct": 0.38322436943510685,
+     "gross_pct": 0.541224369435107,
+     "funding_pct": 0.0,
+     "avg_hold_min": 19.705882352941178,
+     "trades_per_year": 4.438348820586133,
+     "exposure_pct": 0.016628941307282978,
+     "by_reason": {
+      "EXIT_SIGNAL": 3,
+      "ROI": 13,
+      "STOP": 1
+     },
+     "ruined_on": null,
+     "t_stat": 1.0435804497961054
+    }
+   },
+   "btc_spot_x2_oos": {
+    "trades": 17,
+    "net": 475.30846802532545,
+    "ret_pct": 4.753084680253254,
+    "win_rate": 76.47058823529412,
+    "pf": 1.6538446480651625,
+    "max_dd_pct": -5.328945304661347,
+    "exp_usd": 27.959321648548556,
+    "exp_pct": 0.2795932164854856,
+    "gross_pct": 0.7595932164854855,
+    "funding_pct": 0.0,
+    "avg_hold_min": 27.235294117647058,
+    "trades_per_year": 4.438348820586133,
+    "exposure_pct": 0.02298268604558812,
+    "by_reason": {
+     "EXIT_SIGNAL": 3,
+     "ROI": 13,
+     "STOP": 1
+    },
+    "ruined_on": null,
+    "t_stat": 0.7182150154081132
+   },
+   "sensitivity_btc_spot": {
+    "stop x0.75": {
+     "dev_net": -7331.65997253311,
+     "dev_trades": 174,
+     "oos_net": 337.55142998292104,
+     "oos_trades": 17
+    },
+    "stop x1.25": {
+     "dev_net": -6139.477360194277,
+     "dev_trades": 165,
+     "oos_net": 661.8290258032353,
+     "oos_trades": 16
+    },
+    "roi x0.75": {
+     "dev_net": -5544.8819225745365,
+     "dev_trades": 175,
+     "oos_net": 294.2681752275143,
+     "oos_trades": 17
+    },
+    "roi x1.25": {
+     "dev_net": -8544.782976745428,
+     "dev_trades": 168,
+     "oos_net": 942.6207290086833,
+     "oos_trades": 17
+    }
+   },
+   "seconds": 0.5
+  },
+  "CombinedBinHAndCluc": {
+   "class": "CombinedBinHAndCluc",
+   "settings": {
+    "timeframe": "5m",
+    "minimal_roi": {
+     "0": 0.05
+    },
+    "stoploss": -0.05,
+    "trailing_stop": false,
+    "trailing_stop_positive": null,
+    "trailing_stop_positive_offset": 0.0,
+    "trailing_only_offset_is_reached": false,
+    "use_exit_signal": true,
+    "exit_profit_only": true,
+    "exit_profit_offset": 0.0,
+    "ignore_roi_if_entry_signal": false,
+    "can_short": false,
+    "callbacks": [],
+    "mode": "spot"
+   },
+   "btc_spot": {
+    "dev": {
+     "trades": 228,
+     "net": -9315.1916805444,
+     "ret_pct": -93.151916805444,
+     "win_rate": 65.35087719298247,
+     "pf": 0.7565793933356497,
+     "max_dd_pct": -100.0,
+     "exp_usd": -40.85610386203684,
+     "exp_pct": -0.40856103862036836,
+     "gross_pct": -0.16856103862036848,
+     "funding_pct": 0.0,
+     "avg_hold_min": 234.2280701754386,
+     "trades_per_year": 45.60624315443592,
+     "exposure_pct": 2.0310027990750883,
+     "by_reason": {
+      "EXIT_SIGNAL": 132,
+      "ROI": 23,
+      "STOP": 73
+     },
+     "ruined_on": "2020-03-13",
+     "t_stat": -1.7114538428880453
+    },
+    "oos": {
+     "trades": 27,
+     "net": 3040.481212976774,
+     "ret_pct": 30.404812129767738,
+     "win_rate": 88.88888888888889,
+     "pf": 3.896189814724568,
+     "max_dd_pct": -6.715280703711181,
+     "exp_usd": 112.61041529543607,
+     "exp_pct": 1.1261041529543607,
+     "gross_pct": 1.3661041529543607,
+     "funding_pct": 0.0,
+     "avg_hold_min": 227.85185185185185,
+     "trades_per_year": 7.049142244460329,
+     "exposure_pct": 0.30537685648479074,
+     "by_reason": {
+      "EXIT_SIGNAL": 21,
+      "ROI": 4,
+      "STOP": 2
+     },
+     "ruined_on": null,
+     "t_stat": 2.3577884092184473
+    },
+    "full": {
+     "trades": 255,
+     "net": -6274.7104675676255,
+     "ret_pct": -62.747104675676255,
+     "win_rate": 67.84313725490196,
+     "pf": 0.8404100555497773,
+     "max_dd_pct": -100.0,
+     "exp_usd": -24.606707715951472,
+     "exp_pct": -0.2460670771595147,
+     "gross_pct": -0.006067077159514826,
+     "funding_pct": 0.0,
+     "avg_hold_min": 233.5529411764706,
+     "trades_per_year": 28.880232558139536,
+     "exposure_pct": 1.2824289405684755,
+     "by_reason": {
+      "EXIT_SIGNAL": 153,
+      "ROI": 27,
+      "STOP": 75
+     },
+     "ruined_on": "2020-03-13",
+     "t_stat": -1.1128925504039289
+    },
+    "yearly": {
+     "2018": -4032.75,
+     "2019": -2375.53,
+     "2020": -2350.34,
+     "2021": 606.2,
+     "2022": -1162.77,
+     "2023": 915.14,
+     "2024": 758.34,
+     "2025": 728.76,
+     "2026": 638.24
+    }
+   },
+   "eth_spot": {
+    "dev": {
+     "trades": 168,
+     "net": 260.61646703625684,
+     "ret_pct": 2.6061646703625683,
+     "win_rate": 68.45238095238095,
+     "pf": 1.0101471032198963,
+     "max_dd_pct": -34.75770737229743,
+     "exp_usd": 1.5512884942634335,
+     "exp_pct": 0.015512884942634416,
+     "gross_pct": 0.25551288494263436,
+     "funding_pct": 0.0,
+     "avg_hold_min": 90.50595238095238,
+     "trades_per_year": 84.05753424657534,
+     "exposure_pct": 1.4464421613394216,
+     "by_reason": {
+      "EXIT_SIGNAL": 98,
+      "ROI": 21,
+      "STOP": 49
+     },
+     "ruined_on": null,
+     "t_stat": 0.05443299162971617
+    },
+    "oos": {
+     "trades": 68,
+     "net": 1160.1547177576476,
+     "ret_pct": 11.601547177576476,
+     "win_rate": 79.41176470588235,
+     "pf": 1.1581454086365386,
+     "max_dd_pct": -21.03228395557412,
+     "exp_usd": 17.061098790553643,
+     "exp_pct": 0.17061098790553644,
+     "gross_pct": 0.4106109879055364,
+     "funding_pct": 0.0,
+     "avg_hold_min": 112.27941176470588,
+     "trades_per_year": 19.179150579150576,
+     "exposure_pct": 0.4094272844272844,
+     "by_reason": {
+      "EXIT_SIGNAL": 49,
+      "ROI": 5,
+      "STOP": 14
+     },
+     "ruined_on": null,
+     "t_stat": 0.4566019719318483
+    },
+    "yearly": {
+     "2021": 2994.37,
+     "2022": -2733.76,
+     "2023": 1190.24,
+     "2024": -954.21,
+     "2025": 48.88,
+     "2026": 875.24
+    }
+   },
+   "btc_perp_adaptation": {
+    "dev": {
+     "trades": 114,
+     "net": -2549.8677584335264,
+     "ret_pct": -25.498677584335265,
+     "win_rate": 64.03508771929825,
+     "pf": 0.8732988341596503,
+     "max_dd_pct": -41.24345290151509,
+     "exp_usd": -22.367261038890582,
+     "exp_pct": -0.2236726103889058,
+     "gross_pct": -0.06662115424855511,
+     "funding_pct": -0.0009485438596491224,
+     "avg_hold_min": 129.21052631578948,
+     "trades_per_year": 37.99133211678832,
+     "exposure_pct": 0.9333181265206812,
+     "by_reason": {
+      "EXIT_SIGNAL": 60,
+      "ROI": 15,
+      "STOP": 39
+     },
+     "ruined_on": null,
+     "t_stat": -0.621580851172259
+    },
+    "oos": {
+     "trades": 27,
+     "net": 3206.822683537886,
+     "ret_pct": 32.06822683537886,
+     "win_rate": 88.88888888888889,
+     "pf": 4.099946690032604,
+     "max_dd_pct": -6.321829384477614,
+     "exp_usd": 118.77121050140319,
+     "exp_pct": 1.1877121050140316,
+     "gross_pct": 1.3469673272362543,
+     "funding_pct": 0.0012552222222222222,
+     "avg_hold_min": 225.22222222222223,
+     "trades_per_year": 7.049142244460329,
+     "exposure_pct": 0.30185251370026206,
+     "by_reason": {
+      "EXIT_SIGNAL": 21,
+      "ROI": 4,
+      "STOP": 2
+     },
+     "ruined_on": null,
+     "t_stat": 2.5038014232278294
+    }
+   },
+   "btc_spot_x2_oos": {
+    "trades": 27,
+    "net": 2572.881126378261,
+    "ret_pct": 25.728811263782607,
+    "win_rate": 85.18518518518519,
+    "pf": 3.3268775628000187,
+    "max_dd_pct": -7.829657737022895,
+    "exp_usd": 95.29189356956522,
+    "exp_pct": 0.952918935695652,
+    "gross_pct": 1.432918935695652,
+    "funding_pct": 0.0,
+    "avg_hold_min": 235.7037037037037,
+    "trades_per_year": 7.049142244460329,
+    "exposure_pct": 0.3159002462076086,
+    "by_reason": {
+     "EXIT_SIGNAL": 22,
+     "ROI": 3,
+     "STOP": 2
+    },
+    "ruined_on": null,
+    "t_stat": 1.9909254170131554
+   },
+   "sensitivity_btc_spot": {
+    "stop x0.75": {
+     "dev_net": -3275.5070716180285,
+     "dev_trades": 245,
+     "oos_net": 2429.11460842098,
+     "oos_trades": 28
+    },
+    "stop x1.25": {
+     "dev_net": -5517.060244223697,
+     "dev_trades": 220,
+     "oos_net": 3368.656583925901,
+     "oos_trades": 26
+    },
+    "roi x0.75": {
+     "dev_net": -7960.894862631263,
+     "dev_trades": 231,
+     "oos_net": 2884.408761930545,
+     "oos_trades": 28
+    },
+    "roi x1.25": {
+     "dev_net": -8819.096690835686,
+     "dev_trades": 228,
+     "oos_net": 3244.340113498209,
+     "oos_trades": 27
+    }
+   },
+   "seconds": 0.6
+  },
+  "BinHV27": {
+   "class": "BinHV27",
+   "settings": {
+    "timeframe": "5m",
+    "minimal_roi": {
+     "0": 1.0
+    },
+    "stoploss": -0.5,
+    "trailing_stop": false,
+    "trailing_stop_positive": null,
+    "trailing_stop_positive_offset": 0.0,
+    "trailing_only_offset_is_reached": false,
+    "use_exit_signal": true,
+    "exit_profit_only": false,
+    "exit_profit_offset": 0.0,
+    "ignore_roi_if_entry_signal": false,
+    "can_short": false,
+    "callbacks": [],
+    "mode": "spot"
+   },
+   "btc_spot": {
+    "dev": {
+     "trades": 875,
+     "net": -18513.3759066838,
+     "ret_pct": -185.133759066838,
+     "win_rate": 55.42857142857143,
+     "pf": 0.7037437343015829,
+     "max_dd_pct": -100.0,
+     "exp_usd": -21.158143893352914,
+     "exp_pct": -0.21158143893352915,
+     "gross_pct": 0.028418561066470848,
+     "funding_pct": 0.0,
+     "avg_hold_min": 319.0057142857143,
+     "trades_per_year": 175.02395947426066,
+     "exposure_pct": 10.615568333941829,
+     "by_reason": {
+      "EXIT_SIGNAL": 875
+     },
+     "ruined_on": "2020-03-16",
+     "t_stat": -3.0697684741262488
+    },
+    "oos": {
+     "trades": 673,
+     "net": -13691.142926501208,
+     "ret_pct": -136.9114292650121,
+     "win_rate": 46.80534918276374,
+     "pf": 0.5653248601427349,
+     "max_dd_pct": -100.0,
+     "exp_usd": -20.34345159955603,
+     "exp_pct": -0.20343451599556034,
+     "gross_pct": 0.03656548400443967,
+     "funding_pct": 0.0,
+     "avg_hold_min": 312.258543833581,
+     "trades_per_year": 175.7063974267334,
+     "exposure_pct": 10.43155825589707,
+     "by_reason": {
+      "EXIT_SIGNAL": 673
+     },
+     "ruined_on": "2026-01-31",
+     "t_stat": -4.672261628037015
+    },
+    "full": {
+     "trades": 1548,
+     "net": -32204.51883318501,
+     "ret_pct": -322.0451883318501,
+     "win_rate": 51.67958656330749,
+     "pf": 0.6573568190527761,
+     "max_dd_pct": -100.0,
+     "exp_usd": -20.803952734615642,
+     "exp_pct": -0.2080395273461564,
+     "gross_pct": 0.03196047265384361,
+     "funding_pct": 0.0,
+     "avg_hold_min": 316.0723514211886,
+     "trades_per_year": 175.32,
+     "exposure_pct": 10.535745047372954,
+     "by_reason": {
+      "EXIT_SIGNAL": 1548
+     },
+     "ruined_on": "2020-03-16",
+     "t_stat": -4.80434265032851
+    },
+    "yearly": {
+     "2018": -4294.11,
+     "2019": -3593.15,
+     "2020": -1615.6,
+     "2021": -4336.69,
+     "2022": -4673.82,
+     "2023": -1412.43,
+     "2024": -3458.52,
+     "2025": -4502.77,
+     "2026": -4317.42
+    }
+   },
+   "eth_spot": {
+    "dev": {
+     "trades": 439,
+     "net": -8098.844747371536,
+     "ret_pct": -80.98844747371537,
+     "win_rate": 56.264236902050115,
+     "pf": 0.8017624398811851,
+     "max_dd_pct": -90.60011233851188,
+     "exp_usd": -18.448393501985276,
+     "exp_pct": -0.18448393501985272,
+     "gross_pct": 0.055516064980147245,
+     "funding_pct": 0.0,
+     "avg_hold_min": 307.1412300683371,
+     "trades_per_year": 219.65034246575343,
+     "exposure_pct": 12.826769406392694,
+     "by_reason": {
+      "EXIT_SIGNAL": 439
+     },
+     "ruined_on": null,
+     "t_stat": -1.535970519669482
+    },
+    "oos": {
+     "trades": 687,
+     "net": -21885.89869584182,
+     "ret_pct": -218.8589869584182,
+     "win_rate": 52.69286754002911,
+     "pf": 0.5352603413955023,
+     "max_dd_pct": -100.0,
+     "exp_usd": -31.857203341836712,
+     "exp_pct": -0.31857203341836715,
+     "gross_pct": -0.07857203341836715,
+     "funding_pct": 0.0,
+     "avg_hold_min": 315.1892285298399,
+     "trades_per_year": 193.7658301158301,
+     "exposure_pct": 11.611700986700987,
+     "by_reason": {
+      "EXIT_SIGNAL": 687
+     },
+     "ruined_on": "2025-02-03",
+     "t_stat": -4.44085438232594
+    },
+    "yearly": {
+     "2021": -1851.61,
+     "2022": -6247.23,
+     "2023": -898.61,
+     "2024": -6393.17,
+     "2025": -12052.9,
+     "2026": -2541.22
+    }
+   },
+   "btc_perp_adaptation": {
+    "dev": {
+     "trades": 529,
+     "net": -6752.132201947683,
+     "ret_pct": -67.52132201947683,
+     "win_rate": 59.92438563327032,
+     "pf": 0.8135306873402737,
+     "max_dd_pct": -83.33393174177218,
+     "exp_usd": -12.763955013133616,
+     "exp_pct": -0.12763955013133615,
+     "gross_pct": 0.03912834778926875,
+     "funding_pct": 0.008767897920604915,
+     "avg_hold_min": 310.03780718336486,
+     "trades_per_year": 176.2931113138686,
+     "exposure_pct": 10.391955596107055,
+     "by_reason": {
+      "EXIT_SIGNAL": 529
+     },
+     "ruined_on": null,
+     "t_stat": -1.3919470752073684
+    },
+    "oos": {
+     "trades": 673,
+     "net": -8415.958726501209,
+     "ret_pct": -84.15958726501209,
+     "win_rate": 54.08618127786033,
+     "pf": 0.7086960198192492,
+     "max_dd_pct": -86.47043703786395,
+     "exp_usd": -12.505139266717991,
+     "exp_pct": -0.12505139266717993,
+     "gross_pct": 0.03656548400443967,
+     "funding_pct": 0.003616876671619614,
+     "avg_hold_min": 312.258543833581,
+     "trades_per_year": 175.7063974267334,
+     "exposure_pct": 10.43155825589707,
+     "by_reason": {
+      "EXIT_SIGNAL": 673
+     },
+     "ruined_on": null,
+     "t_stat": -2.8690803934670077
+    }
+   },
+   "btc_spot_x2_oos": {
+    "trades": 673,
+    "net": -29843.142926501212,
+    "ret_pct": -298.4314292650121,
+    "win_rate": 27.934621099554235,
+    "pf": 0.2844755898929463,
+    "max_dd_pct": -100.0,
+    "exp_usd": -44.34345159955603,
+    "exp_pct": -0.4434345159955604,
+    "gross_pct": 0.03656548400443967,
+    "funding_pct": 0.0,
+    "avg_hold_min": 312.258543833581,
+    "trades_per_year": 175.7063974267334,
+    "exposure_pct": 10.43155825589707,
+    "by_reason": {
+     "EXIT_SIGNAL": 673
+    },
+    "ruined_on": "2024-08-30",
+    "t_stat": -10.184319329953025
+   },
+   "sensitivity_btc_spot": {
+    "stop x0.75": {
+     "dev_net": -18513.3759066838,
+     "dev_trades": 875,
+     "oos_net": -13691.142926501208,
+     "oos_trades": 673
+    },
+    "stop x1.25": {
+     "dev_net": -18513.3759066838,
+     "dev_trades": 875,
+     "oos_net": -13691.142926501208,
+     "oos_trades": 673
+    },
+    "roi x0.75": {
+     "dev_net": -18513.3759066838,
+     "dev_trades": 875,
+     "oos_net": -13691.142926501208,
+     "oos_trades": 673
+    },
+    "roi x1.25": {
+     "dev_net": -18513.3759066838,
+     "dev_trades": 875,
+     "oos_net": -13691.142926501208,
+     "oos_trades": 673
+    }
+   },
+   "seconds": 1.9
+  },
+  "CofiBitStrategy": {
+   "class": "CofiBitStrategy",
+   "settings": {
+    "timeframe": "5m",
+    "minimal_roi": {
+     "0": 0.1,
+     "20": 0.07,
+     "30": 0.06,
+     "40": 0.05
+    },
+    "stoploss": -0.25,
+    "trailing_stop": false,
+    "trailing_stop_positive": null,
+    "trailing_stop_positive_offset": 0.0,
+    "trailing_only_offset_is_reached": false,
+    "use_exit_signal": true,
+    "exit_profit_only": false,
+    "exit_profit_offset": 0.0,
+    "ignore_roi_if_entry_signal": false,
+    "can_short": false,
+    "callbacks": [],
+    "mode": "spot"
+   },
+   "btc_spot": {
+    "dev": {
+     "trades": 2986,
+     "net": -55455.94282639382,
+     "ret_pct": -554.5594282639381,
+     "win_rate": 33.18821165438714,
+     "pf": 0.38945025314029225,
+     "max_dd_pct": -100.0,
+     "exp_usd": -18.571983531947026,
+     "exp_pct": -0.18571983531947023,
+     "gross_pct": 0.05428016468052978,
+     "funding_pct": 0.0,
+     "avg_hold_min": 33.2987273945077,
+     "trades_per_year": 597.2817634173056,
+     "exposure_pct": 3.781413532919557,
+     "by_reason": {
+      "EXIT_SIGNAL": 2985,
+      "ROI": 1
+     },
+     "ruined_on": "2018-12-07",
+     "t_stat": -12.594986880975135
+    },
+    "oos": {
+     "trades": 3491,
+     "net": -78384.34481824467,
+     "ret_pct": -783.8434481824468,
+     "win_rate": 16.78602119736465,
+     "pf": 0.11519358483040212,
+     "max_dd_pct": -100.0,
+     "exp_usd": -22.453264055641558,
+     "exp_pct": -0.22453264055641559,
+     "gross_pct": 0.015467359443584438,
+     "funding_pct": 0.0,
+     "avg_hold_min": 31.58407333142366,
+     "trades_per_year": 911.4279842744818,
+     "exposure_pct": 5.473155428480661,
+     "by_reason": {
+      "EXIT_SIGNAL": 3491
+     },
+     "ruined_on": "2023-08-14",
+     "t_stat": -32.15611621175318
+    },
+    "full": {
+     "trades": 6477,
+     "net": -133840.2876446385,
+     "ret_pct": -1338.402876446385,
+     "win_rate": 24.347691832638567,
+     "pf": 0.2540341353279944,
+     "max_dd_pct": -100.0,
+     "exp_usd": -20.663932012449976,
+     "exp_pct": -0.2066393201244998,
+     "gross_pct": 0.03336067987550026,
+     "funding_pct": 0.0,
+     "avg_hold_min": 32.374556121661264,
+     "trades_per_year": 733.5579069767442,
+     "exposure_pct": 4.515288544358312,
+     "by_reason": {
+      "EXIT_SIGNAL": 6476,
+      "ROI": 1
+     },
+     "ruined_on": "2018-12-07",
+     "t_stat": -26.583408454000935
+    },
+    "yearly": {
+     "2018": -10590.73,
+     "2019": -7689.69,
+     "2020": -9814.08,
+     "2021": -10141.41,
+     "2022": -17220.02,
+     "2023": -17450.42,
+     "2024": -18552.82,
+     "2025": -22870.29,
+     "2026": -19510.82
+    }
+   },
+   "eth_spot": {
+    "dev": {
+     "trades": 1707,
+     "net": -25901.1941633244,
+     "ret_pct": -259.01194163324396,
+     "win_rate": 42.64792032806092,
+     "pf": 0.5383019463425589,
+     "max_dd_pct": -100.0,
+     "exp_usd": -15.173517377460104,
+     "exp_pct": -0.15173517377460108,
+     "gross_pct": 0.08826482622539894,
+     "funding_pct": 0.0,
+     "avg_hold_min": 33.63503222026948,
+     "trades_per_year": 854.0845890410959,
+     "exposure_pct": 5.461853120243531,
+     "by_reason": {
+      "EXIT_SIGNAL": 1707
+     },
+     "ruined_on": "2022-03-10",
+     "t_stat": -7.338015192162429
+    },
+    "oos": {
+     "trades": 2913,
+     "net": -71902.55381085444,
+     "ret_pct": -719.0255381085444,
+     "win_rate": 24.442155853072435,
+     "pf": 0.18795773457169046,
+     "max_dd_pct": -100.0,
+     "exp_usd": -24.683334641556623,
+     "exp_pct": -0.24683334641556628,
+     "gross_pct": -0.0068333464155662365,
+     "funding_pct": 0.0,
+     "avg_hold_min": 32.12838997596979,
+     "trades_per_year": 821.6009652509651,
+     "exposure_pct": 5.018768768768768,
+     "by_reason": {
+      "EXIT_SIGNAL": 2913
+     },
+     "ruined_on": "2023-07-30",
+     "t_stat": -19.664516587048944
+    },
+    "yearly": {
+     "2021": -5507.99,
+     "2022": -20393.21,
+     "2023": -18572.45,
+     "2024": -21483.91,
+     "2025": -21021.32,
+     "2026": -10824.87
+    }
+   },
+   "btc_perp_adaptation": {
+    "dev": {
+     "trades": 1999,
+     "net": -20995.69624714524,
+     "ret_pct": -209.95696247145239,
+     "win_rate": 45.17258629314657,
+     "pf": 0.5657716611564427,
+     "max_dd_pct": -100.0,
+     "exp_usd": -10.503099673409324,
+     "exp_pct": -0.1050309967340932,
+     "gross_pct": 0.054029421475011316,
+     "funding_pct": 0.0010604182091045525,
+     "avg_hold_min": 32.56378189094547,
+     "trades_per_year": 666.1813412408759,
+     "exposure_pct": 4.124531123276562,
+     "by_reason": {
+      "EXIT_SIGNAL": 1999
+     },
+     "ruined_on": "2021-12-28",
+     "t_stat": -5.992305691187777
+    },
+    "oos": {
+     "trades": 3491,
+     "net": -49894.72981824467,
+     "ret_pct": -498.94729818244673,
+     "win_rate": 28.931538241191635,
+     "pf": 0.2501937949220828,
+     "max_dd_pct": -100.0,
+     "exp_usd": -14.292388948222477,
+     "exp_pct": -0.1429238894822248,
+     "gross_pct": 0.015467359443584438,
+     "funding_pct": 0.0003912489258092238,
+     "avg_hold_min": 31.58407333142366,
+     "trades_per_year": 911.4279842744818,
+     "exposure_pct": 5.473155428480661,
+     "by_reason": {
+      "EXIT_SIGNAL": 3491
+     },
+     "ruined_on": "2023-12-02",
+     "t_stat": -20.45931029676978
+    }
+   },
+   "btc_spot_x2_oos": {
+    "trades": 3491,
+    "net": -162168.3448182447,
+    "ret_pct": -1621.6834481824471,
+    "win_rate": 4.038957318819823,
+    "pf": 0.0180447727764224,
+    "max_dd_pct": -100.0,
+    "exp_usd": -46.45326405564156,
+    "exp_pct": -0.4645326405564157,
+    "gross_pct": 0.015467359443584438,
+    "funding_pct": 0.0,
+    "avg_hold_min": 31.58407333142366,
+    "trades_per_year": 911.4279842744818,
+    "exposure_pct": 5.473155428480661,
+    "by_reason": {
+     "EXIT_SIGNAL": 3491
+    },
+    "ruined_on": "2023-05-16",
+    "t_stat": -66.52736785559463
+   },
+   "sensitivity_btc_spot": {
+    "stop x0.75": {
+     "dev_net": -55934.57115618799,
+     "dev_trades": 2986,
+     "oos_net": -78384.34481824467,
+     "oos_trades": 3491
+    },
+    "stop x1.25": {
+     "dev_net": -55455.94282639382,
+     "dev_trades": 2986,
+     "oos_net": -78384.34481824467,
+     "oos_trades": 3491
+    },
+    "roi x0.75": {
+     "dev_net": -55706.44332689431,
+     "dev_trades": 2986,
+     "oos_net": -78384.34481824467,
+     "oos_trades": 3491
+    },
+    "roi x1.25": {
+     "dev_net": -55540.23790274893,
+     "dev_trades": 2986,
+     "oos_net": -78384.34481824467,
+     "oos_trades": 3491
+    }
+   },
+   "seconds": 4.7
+  },
+  "EMASkipPump": {
+   "class": "EMASkipPump",
+   "settings": {
+    "timeframe": "5m",
+    "minimal_roi": {
+     "0": 0.1
+    },
+    "stoploss": -0.05,
+    "trailing_stop": false,
+    "trailing_stop_positive": null,
+    "trailing_stop_positive_offset": 0.0,
+    "trailing_only_offset_is_reached": false,
+    "use_exit_signal": true,
+    "exit_profit_only": false,
+    "exit_profit_offset": 0.0,
+    "ignore_roi_if_entry_signal": false,
+    "can_short": false,
+    "callbacks": [],
+    "mode": "spot"
+   },
+   "btc_spot": {
+    "dev": {
+     "trades": 7142,
+     "net": -122250.73226624084,
+     "ret_pct": -1222.5073226624086,
+     "win_rate": 53.19238308597032,
+     "pf": 0.6683874428889873,
+     "max_dd_pct": -100.0,
+     "exp_usd": -17.117156576062847,
+     "exp_pct": -0.17117156576062845,
+     "gross_pct": 0.06882843423937156,
+     "funding_pct": 0.0,
+     "avg_hold_min": 184.2542705124615,
+     "trades_per_year": 1428.5955640744796,
+     "exposure_pct": 50.046549835706465,
+     "by_reason": {
+      "EXIT_SIGNAL": 6802,
+      "ROI": 9,
+      "STOP": 331
+     },
+     "ruined_on": "2018-03-30",
+     "t_stat": -9.488078987467366
+    },
+    "oos": {
+     "trades": 5173,
+     "net": -106848.4560765778,
+     "ret_pct": -1068.484560765778,
+     "win_rate": 41.8325923062053,
+     "pf": 0.4145099415460169,
+     "max_dd_pct": -100.0,
+     "exp_usd": -20.655027271714246,
+     "exp_pct": -0.20655027271714246,
+     "gross_pct": 0.033449727282857576,
+     "funding_pct": 0.0,
+     "avg_hold_min": 192.61763000193312,
+     "trades_per_year": 1350.5634381701216,
+     "exposure_pct": 49.46047772218251,
+     "by_reason": {
+      "EXIT_SIGNAL": 5113,
+      "STOP": 60
+     },
+     "ruined_on": "2023-05-12",
+     "t_stat": -16.562789102055884
+    },
+    "full": {
+     "trades": 12315,
+     "net": -229099.18834281864,
+     "ret_pct": -2290.9918834281866,
+     "win_rate": 48.42062525375558,
+     "pf": 0.5843246871201756,
+     "max_dd_pct": -100.0,
+     "exp_usd": -18.60326336523091,
+     "exp_pct": -0.18603263365230907,
+     "gross_pct": 0.05396736634769094,
+     "funding_pct": 0.0,
+     "avg_hold_min": 187.7673568818514,
+     "trades_per_year": 1394.7453488372093,
+     "exposure_pct": 49.792312661498705,
+     "by_reason": {
+      "EXIT_SIGNAL": 11915,
+      "ROI": 9,
+      "STOP": 391
+     },
+     "ruined_on": "2018-03-30",
+     "t_stat": -15.898375027480125
+    },
+    "yearly": {
+     "2018": -29336.94,
+     "2019": -23538.92,
+     "2020": -17410.59,
+     "2021": -17470.99,
+     "2022": -34493.29,
+     "2023": -26632.9,
+     "2024": -26308.5,
+     "2025": -29521.29,
+     "2026": -24385.77
+    }
+   },
+   "eth_spot": {
+    "dev": {
+     "trades": 2962,
+     "net": -59491.24203032317,
+     "ret_pct": -594.9124203032317,
+     "win_rate": 58.71033085752869,
+     "pf": 0.7279629080821581,
+     "max_dd_pct": -100.0,
+     "exp_usd": -20.08482175230357,
+     "exp_pct": -0.20084821752303564,
+     "gross_pct": 0.039151782476964304,
+     "funding_pct": 0.0,
+     "avg_hold_min": 178.23463875759623,
+     "trades_per_year": 1482.0143835616439,
+     "exposure_pct": 50.221746575342465,
+     "by_reason": {
+      "EXIT_SIGNAL": 2703,
+      "ROI": 6,
+      "STOP": 253
+     },
+     "ruined_on": "2021-05-19",
+     "t_stat": -5.429708381370803
+    },
+    "oos": {
+     "trades": 4831,
+     "net": -109919.99464791463,
+     "ret_pct": -1099.1999464791463,
+     "win_rate": 49.57565721382737,
+     "pf": 0.5217854225610233,
+     "max_dd_pct": -100.0,
+     "exp_usd": -22.753052090232796,
+     "exp_pct": -0.22753052090232792,
+     "gross_pct": 0.012469479097672074,
+     "funding_pct": 0.0,
+     "avg_hold_min": 192.4121299937901,
+     "trades_per_year": 1362.56583011583,
+     "exposure_pct": 49.84679322179322,
+     "by_reason": {
+      "EXIT_SIGNAL": 4682,
+      "ROI": 1,
+      "STOP": 148
+     },
+     "ruined_on": "2023-05-06",
+     "t_stat": -12.48346951613517
+    },
+    "yearly": {
+     "2021": -24845.63,
+     "2022": -34645.61,
+     "2023": -28639.57,
+     "2024": -28744.94,
+     "2025": -34015.29,
+     "2026": -18520.2
+    }
+   },
+   "btc_perp_adaptation": {
+    "dev": {
+     "trades": 4265,
+     "net": -37143.294517298535,
+     "ret_pct": -371.43294517298534,
+     "win_rate": 60.02344665885111,
+     "pf": 0.8166606386968402,
+     "max_dd_pct": -100.0,
+     "exp_usd": -8.708861551535412,
+     "exp_pct": -0.08708861551535413,
+     "gross_pct": 0.07725436338265289,
+     "funding_pct": 0.006342978898007034,
+     "avg_hold_min": 184.8736225087925,
+     "trades_per_year": 1421.3423813868612,
+     "exposure_pct": 49.95982866991079,
+     "by_reason": {
+      "EXIT_SIGNAL": 4076,
+      "ROI": 4,
+      "STOP": 185
+     },
+     "ruined_on": "2021-05-19",
+     "t_stat": -3.8047458367849885
+    },
+    "oos": {
+     "trades": 5173,
+     "net": -65686.74757657778,
+     "ret_pct": -656.8674757657778,
+     "win_rate": 51.420838971583215,
+     "pf": 0.5914590136721497,
+     "max_dd_pct": -100.0,
+     "exp_usd": -12.697998758279098,
+     "exp_pct": -0.12697998758279097,
+     "gross_pct": 0.033449727282857576,
+     "funding_pct": 0.0024297148656485597,
+     "avg_hold_min": 192.61763000193312,
+     "trades_per_year": 1350.5634381701216,
+     "exposure_pct": 49.46047772218251,
+     "by_reason": {
+      "EXIT_SIGNAL": 5113,
+      "STOP": 60
+     },
+     "ruined_on": "2023-08-11",
+     "t_stat": -10.168906686146492
+    }
+   },
+   "btc_spot_x2_oos": {
+    "trades": 5173,
+    "net": -231000.4560765778,
+    "ret_pct": -2310.004560765778,
+    "win_rate": 19.795089889812488,
+    "pf": 0.14492619679771995,
+    "max_dd_pct": -100.0,
+    "exp_usd": -44.655027271714246,
+    "exp_pct": -0.4465502727171424,
+    "gross_pct": 0.033449727282857576,
+    "funding_pct": 0.0,
+    "avg_hold_min": 192.61763000193312,
+    "trades_per_year": 1350.5634381701216,
+    "exposure_pct": 49.46047772218251,
+    "by_reason": {
+     "EXIT_SIGNAL": 5113,
+     "STOP": 60
+    },
+    "ruined_on": "2023-03-03",
+    "t_stat": -35.80783454402932
+   },
+   "sensitivity_btc_spot": {
+    "stop x0.75": {
+     "dev_net": -127471.10324245419,
+     "dev_trades": 7378,
+     "oos_net": -109327.55307342092,
+     "oos_trades": 5241
+    },
+    "stop x1.25": {
+     "dev_net": -121562.07099113702,
+     "dev_trades": 7020,
+     "oos_net": -105885.0585914008,
+     "oos_trades": 5147
+    },
+    "roi x0.75": {
+     "dev_net": -122355.92535904351,
+     "dev_trades": 7146,
+     "oos_net": -107303.7979596677,
+     "oos_trades": 5174
+    },
+    "roi x1.25": {
+     "dev_net": -122121.16935525593,
+     "dev_trades": 7141,
+     "oos_net": -106848.4560765778,
+     "oos_trades": 5173
+    }
+   },
+   "seconds": 8.5
+  },
+  "MACDStrategy": {
+   "class": "MACDStrategy",
+   "settings": {
+    "timeframe": "5m",
+    "minimal_roi": {
+     "0": 0.05,
+     "20": 0.04,
+     "30": 0.03,
+     "60": 0.01
+    },
+    "stoploss": -0.3,
+    "trailing_stop": false,
+    "trailing_stop_positive": null,
+    "trailing_stop_positive_offset": 0.0,
+    "trailing_only_offset_is_reached": false,
+    "use_exit_signal": true,
+    "exit_profit_only": false,
+    "exit_profit_offset": 0.0,
+    "ignore_roi_if_entry_signal": false,
+    "can_short": false,
+    "callbacks": [],
+    "mode": "spot"
+   },
+   "btc_spot": {
+    "dev": {
+     "trades": 524,
+     "net": -336.1092133841521,
+     "ret_pct": -3.3610921338415207,
+     "win_rate": 96.56488549618321,
+     "pf": 0.9938251540751,
+     "max_dd_pct": -100.0,
+     "exp_usd": -0.6414297965346414,
+     "exp_pct": -0.006414297965346508,
+     "gross_pct": 0.2335857020346535,
+     "funding_pct": 0.0,
+     "avg_hold_min": 4476.475190839695,
+     "trades_per_year": 104.8143483023001,
+     "exposure_pct": 89.20808232931728,
+     "by_reason": {
+      "ROI": 506,
+      "STOP": 18
+     },
+     "ruined_on": "2018-11-14",
+     "t_stat": -0.025650207788592116
+    },
+    "oos": {
+     "trades": 205,
+     "net": 6507.185068728534,
+     "ret_pct": 65.07185068728533,
+     "win_rate": 97.5609756097561,
+     "pf": 1.4942063182566772,
+     "max_dd_pct": -23.594363123174002,
+     "exp_usd": 31.74236618891968,
+     "exp_pct": 0.3174236618891967,
+     "gross_pct": 0.5574236618891967,
+     "funding_pct": 0.0,
+     "avg_hold_min": 9167.39512195122,
+     "trades_per_year": 53.521265189421015,
+     "exposure_pct": 93.2866730204114,
+     "by_reason": {
+      "END": 1,
+      "ROI": 200,
+      "STOP": 4
+     },
+     "ruined_on": null,
+     "t_stat": 1.0327065078028885
+    },
+    "full": {
+     "trades": 729,
+     "net": 6171.075855344373,
+     "ret_pct": 61.71075855344373,
+     "win_rate": 96.84499314128944,
+     "pf": 1.0912895354806658,
+     "max_dd_pct": -100.0,
+     "exp_usd": 8.46512463010202,
+     "exp_pct": 0.08465124630102025,
+     "gross_pct": 0.32465124630102027,
+     "funding_pct": 0.0,
+     "avg_hold_min": 5795.595336076817,
+     "trades_per_year": 82.56348837209303,
+     "exposure_pct": 90.97736864771748,
+     "by_reason": {
+      "END": 1,
+      "ROI": 706,
+      "STOP": 22
+     },
+     "ruined_on": "2018-11-14",
+     "t_stat": 0.4245021848778442
+    },
+    "yearly": {
+     "2018": -11783.87,
+     "2019": 1947.21,
+     "2020": 8425.05,
+     "2021": 4605.35,
+     "2022": -3529.85,
+     "2023": 7432.48,
+     "2024": 3274.33,
+     "2025": -2029.09,
+     "2026": -2170.54
+    }
+   },
+   "eth_spot": {
+    "dev": {
+     "trades": 369,
+     "net": 2564.9127814592493,
+     "ret_pct": 25.649127814592493,
+     "win_rate": 96.7479674796748,
+     "pf": 1.0706821203003543,
+     "max_dd_pct": -65.25721418857773,
+     "exp_usd": 6.950983147586042,
+     "exp_pct": 0.0695098314758603,
+     "gross_pct": 0.3095098314758605,
+     "funding_pct": 0.0,
+     "avg_hold_min": 2319.5149051490516,
+     "trades_per_year": 184.6263698630137,
+     "exposure_pct": 81.42132800608827,
+     "by_reason": {
+      "ROI": 357,
+      "STOP": 12
+     },
+     "ruined_on": null,
+     "t_stat": 0.239261739153808
+    },
+    "oos": {
+     "trades": 249,
+     "net": -712.1424037873712,
+     "ret_pct": -7.121424037873712,
+     "win_rate": 96.3855421686747,
+     "pf": 0.9708142383475682,
+     "max_dd_pct": -58.86954296951748,
+     "exp_usd": -2.860009653764543,
+     "exp_pct": -0.028600096537645392,
+     "gross_pct": 0.21139990346235463,
+     "funding_pct": 0.0,
+     "avg_hold_min": 6863.0722891566265,
+     "trades_per_year": 70.22953667953668,
+     "exposure_pct": 91.64012226512227,
+     "by_reason": {
+      "END": 1,
+      "ROI": 240,
+      "STOP": 8
+     },
+     "ruined_on": null,
+     "t_stat": -0.08174640480263551
+    },
+    "yearly": {
+     "2021": 8714.34,
+     "2022": -6149.42,
+     "2023": 4811.01,
+     "2024": -1236.95,
+     "2025": -3409.13,
+     "2026": -877.07
+    }
+   },
+   "btc_perp_adaptation": {
+    "dev": {
+     "trades": 356,
+     "net": 7635.2853444474495,
+     "ret_pct": 76.3528534444745,
+     "win_rate": 96.06741573033707,
+     "pf": 1.2948936064697445,
+     "max_dd_pct": -48.47700006867479,
+     "exp_usd": 21.447430742829916,
+     "exp_pct": 0.21447430742829926,
+     "gross_pct": 0.48306156023728797,
+     "funding_pct": 0.11058725280898878,
+     "avg_hold_min": 3908.8342696629215,
+     "trades_per_year": 118.63959854014598,
+     "exposure_pct": 88.17068379967559,
+     "by_reason": {
+      "ROI": 348,
+      "STOP": 8
+     },
+     "ruined_on": null,
+     "t_stat": 0.8408711320788091
+    },
+    "oos": {
+     "trades": 218,
+     "net": 5447.924234020216,
+     "ret_pct": 54.47924234020216,
+     "win_rate": 95.87155963302753,
+     "pf": 1.3910418296906446,
+     "max_dd_pct": -25.32175678214378,
+     "exp_usd": 24.990478137707413,
+     "exp_pct": 0.24990478137707425,
+     "gross_pct": 0.5163900336706522,
+     "funding_pct": 0.10848525229357799,
+     "avg_hold_min": 8589.114678899083,
+     "trades_per_year": 56.91529664045747,
+     "exposure_pct": 92.9447124930506,
+     "by_reason": {
+      "END": 1,
+      "ROI": 213,
+      "STOP": 4
+     },
+     "ruined_on": null,
+     "t_stat": 0.8279252716362094
+    }
+   },
+   "btc_spot_x2_oos": {
+    "trades": 191,
+    "net": 4268.655999921604,
+    "ret_pct": 42.686559999216044,
+    "win_rate": 97.38219895287958,
+    "pf": 1.3212670423971777,
+    "max_dd_pct": -27.63382493352787,
+    "exp_usd": 22.348984292783268,
+    "exp_pct": 0.22348984292783258,
+    "gross_pct": 0.7034898429278328,
+    "funding_pct": 0.0,
+    "avg_hold_min": 9967.397905759162,
+    "trades_per_year": 49.86615439599714,
+    "exposure_pct": 94.5006850131046,
+    "by_reason": {
+     "END": 1,
+     "ROI": 186,
+     "STOP": 4
+    },
+    "ruined_on": null,
+    "t_stat": 0.6734124824038314
+   },
+   "sensitivity_btc_spot": {
+    "stop x0.75": {
+     "dev_net": -4677.743177353829,
+     "dev_trades": 715,
+     "oos_net": 2851.497162431134,
+     "oos_trades": 236
+    },
+    "stop x1.25": {
+     "dev_net": 5619.603638648496,
+     "dev_trades": 494,
+     "oos_net": 7888.570506810568,
+     "oos_trades": 132
+    },
+    "roi x0.75": {
+     "dev_net": -1561.6376458364148,
+     "dev_trades": 617,
+     "oos_net": 4785.3932093490475,
+     "oos_trades": 248
+    },
+    "roi x1.25": {
+     "dev_net": 49.55406287814549,
+     "dev_trades": 451,
+     "oos_net": 8081.014540826948,
+     "oos_trades": 177
+    }
+   },
+   "seconds": 1.7
+  },
+  "MultiRSI": {
+   "class": "MultiRSI",
+   "settings": {
+    "timeframe": "5m",
+    "minimal_roi": {
+     "0": 0.01
+    },
+    "stoploss": -0.05,
+    "trailing_stop": false,
+    "trailing_stop_positive": null,
+    "trailing_stop_positive_offset": 0.0,
+    "trailing_only_offset_is_reached": false,
+    "use_exit_signal": true,
+    "exit_profit_only": false,
+    "exit_profit_offset": 0.0,
+    "ignore_roi_if_entry_signal": false,
+    "can_short": false,
+    "callbacks": [],
+    "mode": "spot"
+   },
+   "btc_spot": {
+    "dev": {
+     "trades": 2797,
+     "net": -50936.83461955184,
+     "ret_pct": -509.36834619551837,
+     "win_rate": 48.19449410082231,
+     "pf": 0.6002368670980669,
+     "max_dd_pct": -100.0,
+     "exp_usd": -18.211238691294902,
+     "exp_pct": -0.182112386912949,
+     "gross_pct": 0.05788761308705102,
+     "funding_pct": 0.0,
+     "avg_hold_min": 151.8094386843046,
+     "trades_per_year": 559.4765881708653,
+     "exposure_pct": 16.148343373493976,
+     "by_reason": {
+      "EXIT_SIGNAL": 2202,
+      "ROI": 541,
+      "STOP": 54
+     },
+     "ruined_on": "2019-02-03",
+     "t_stat": -8.592619629103645
+    },
+    "oos": {
+     "trades": 2125,
+     "net": -39296.08605944713,
+     "ret_pct": -392.9608605944713,
+     "win_rate": 38.49411764705882,
+     "pf": 0.47416443086838034,
+     "max_dd_pct": -100.0,
+     "exp_usd": -18.492275792681003,
+     "exp_pct": -0.18492275792681,
+     "gross_pct": 0.05507724207319,
+     "funding_pct": 0.0,
+     "avg_hold_min": 157.0809411764706,
+     "trades_per_year": 554.7936025732666,
+     "exposure_pct": 16.569226034469065,
+     "by_reason": {
+      "EXIT_SIGNAL": 1924,
+      "ROI": 195,
+      "STOP": 6
+     },
+     "ruined_on": "2024-06-20",
+     "t_stat": -11.388632673515874
+    },
+    "full": {
+     "trades": 4922,
+     "net": -90232.92067899895,
+     "ret_pct": -902.3292067899895,
+     "win_rate": 44.0065014221861,
+     "pf": 0.5536300533810715,
+     "max_dd_pct": -100.0,
+     "exp_usd": -18.33257226310422,
+     "exp_pct": -0.18332572263104216,
+     "gross_pct": 0.05667427736895783,
+     "funding_pct": 0.0,
+     "avg_hold_min": 154.08533116619262,
+     "trades_per_year": 557.4451162790698,
+     "exposure_pct": 16.33092161929371,
+     "by_reason": {
+      "EXIT_SIGNAL": 4126,
+      "ROI": 736,
+      "STOP": 60
+     },
+     "ruined_on": "2019-02-03",
+     "t_stat": -13.156494538261962
+    },
+    "yearly": {
+     "2018": -9042.76,
+     "2019": -11347.33,
+     "2020": -8785.26,
+     "2021": -8586.02,
+     "2022": -13175.47,
+     "2023": -7078.62,
+     "2024": -9252.9,
+     "2025": -13160.44,
+     "2026": -9804.13
+    }
+   },
+   "eth_spot": {
+    "dev": {
+     "trades": 1259,
+     "net": -25595.658957195697,
+     "ret_pct": -255.95658957195698,
+     "win_rate": 54.805401111993646,
+     "pf": 0.6433131520823248,
+     "max_dd_pct": -100.0,
+     "exp_usd": -20.330150085143526,
+     "exp_pct": -0.20330150085143525,
+     "gross_pct": 0.03669849914856478,
+     "funding_pct": 0.0,
+     "avg_hold_min": 142.61159650516282,
+     "trades_per_year": 629.9311643835616,
+     "exposure_pct": 17.080289193302892,
+     "by_reason": {
+      "EXIT_SIGNAL": 867,
+      "ROI": 353,
+      "STOP": 39
+     },
+     "ruined_on": "2021-12-08",
+     "t_stat": -5.304949824693123
+    },
+    "oos": {
+     "trades": 1964,
+     "net": -41473.42589031114,
+     "ret_pct": -414.73425890311137,
+     "win_rate": 44.55193482688391,
+     "pf": 0.5241191606084814,
+     "max_dd_pct": -100.0,
+     "exp_usd": -21.116815626431332,
+     "exp_pct": -0.21116815626431332,
+     "gross_pct": 0.028831843735686674,
+     "funding_pct": 0.0,
+     "avg_hold_min": 157.84114052953157,
+     "trades_per_year": 553.9389961389961,
+     "exposure_pct": 16.623766623766624,
+     "by_reason": {
+      "EXIT_SIGNAL": 1652,
+      "ROI": 300,
+      "STOP": 12
+     },
+     "ruined_on": "2024-01-09",
+     "t_stat": -9.70557568319521
+    },
+    "yearly": {
+     "2021": -11343.14,
+     "2022": -14252.52,
+     "2023": -9779.58,
+     "2024": -10291.82,
+     "2025": -13266.15,
+     "2026": -8135.87
+    }
+   },
+   "btc_perp_adaptation": {
+    "dev": {
+     "trades": 1703,
+     "net": -18011.734609407747,
+     "ret_pct": -180.11734609407748,
+     "win_rate": 53.3176746917205,
+     "pf": 0.7427638884273446,
+     "max_dd_pct": -100.0,
+     "exp_usd": -10.576473640286405,
+     "exp_pct": -0.10576473640286405,
+     "gross_pct": 0.05885606218785819,
+     "funding_pct": 0.006620798590722255,
+     "avg_hold_min": 153.27833235466824,
+     "trades_per_year": 567.5371806569343,
+     "exposure_pct": 16.539499695863746,
+     "by_reason": {
+      "EXIT_SIGNAL": 1315,
+      "ROI": 360,
+      "STOP": 28
+     },
+     "ruined_on": "2022-01-23",
+     "t_stat": -4.073521135246648
+    },
+    "oos": {
+     "trades": 2144,
+     "net": -22026.088074664043,
+     "ret_pct": -220.26088074664045,
+     "win_rate": 45.98880597014926,
+     "pf": 0.6612374642476596,
+     "max_dd_pct": -100.0,
+     "exp_usd": -10.273361975123155,
+     "exp_pct": -0.10273361975123155,
+     "gross_pct": 0.05766353836444009,
+     "funding_pct": 0.0023971581156716415,
+     "avg_hold_min": 155.2527985074627,
+     "trades_per_year": 559.7541100786276,
+     "exposure_pct": 16.522813914700976,
+     "by_reason": {
+      "EXIT_SIGNAL": 1907,
+      "ROI": 231,
+      "STOP": 6
+     },
+     "ruined_on": "2025-06-01",
+     "t_stat": -6.400016925929287
+    }
+   },
+   "btc_spot_x2_oos": {
+    "trades": 2092,
+    "net": -88670.85231247406,
+    "ret_pct": -886.7085231247406,
+    "win_rate": 21.367112810707457,
+    "pf": 0.1922215928898241,
+    "max_dd_pct": -100.0,
+    "exp_usd": -42.385684661794485,
+    "exp_pct": -0.4238568466179448,
+    "gross_pct": 0.05614315338205517,
+    "funding_pct": 0.0,
+    "avg_hold_min": 160.22514340344168,
+    "trades_per_year": 546.1779842744818,
+    "exposure_pct": 16.638422285759667,
+    "by_reason": {
+     "EXIT_SIGNAL": 1940,
+     "ROI": 146,
+     "STOP": 6
+    },
+    "ruined_on": "2023-07-09",
+    "t_stat": -25.437260973608694
+   },
+   "sensitivity_btc_spot": {
+    "stop x0.75": {
+     "dev_net": -52522.25077336821,
+     "dev_trades": 2820,
+     "oos_net": -40523.54305130335,
+     "oos_trades": 2128
+    },
+    "stop x1.25": {
+     "dev_net": -49625.016852439825,
+     "dev_trades": 2775,
+     "oos_net": -39499.60669718519,
+     "oos_trades": 2124
+    },
+    "roi x0.75": {
+     "dev_net": -54509.94750520434,
+     "dev_trades": 2934,
+     "oos_net": -40581.94708956219,
+     "oos_trades": 2181
+    },
+    "roi x1.25": {
+     "dev_net": -48981.70704869041,
+     "dev_trades": 2713,
+     "oos_net": -38321.94022388199,
+     "oos_trades": 2088
+    }
+   },
+   "seconds": 3.1
+  },
+  "Quickie": {
+   "class": "Quickie",
+   "settings": {
+    "timeframe": "5m",
+    "minimal_roi": {
+     "10": 0.15,
+     "15": 0.06,
+     "30": 0.03,
+     "100": 0.01
+    },
+    "stoploss": -0.25,
+    "trailing_stop": false,
+    "trailing_stop_positive": null,
+    "trailing_stop_positive_offset": 0.0,
+    "trailing_only_offset_is_reached": false,
+    "use_exit_signal": true,
+    "exit_profit_only": false,
+    "exit_profit_offset": 0.0,
+    "ignore_roi_if_entry_signal": false,
+    "can_short": false,
+    "callbacks": [],
+    "mode": "spot"
+   },
+   "btc_spot": {
+    "dev": {
+     "trades": 610,
+     "net": -12525.933981182448,
+     "ret_pct": -125.25933981182449,
+     "win_rate": 93.27868852459017,
+     "pf": 0.8328066879040957,
+     "max_dd_pct": -100.0,
+     "exp_usd": -20.53431800193844,
+     "exp_pct": -0.20534318001938445,
+     "gross_pct": 0.03465681998061559,
+     "funding_pct": 0.0,
+     "avg_hold_min": 3416.3508196721314,
+     "trades_per_year": 122.01670317634172,
+     "exposure_pct": 79.25543081416575,
+     "by_reason": {
+      "EXIT_SIGNAL": 15,
+      "ROI": 569,
+      "STOP": 26
+     },
+     "ruined_on": "2018-12-07",
+     "t_stat": -0.9241485870868542
+    },
+    "oos": {
+     "trades": 253,
+     "net": 2624.49832348053,
+     "ret_pct": 26.244983234805296,
+     "win_rate": 92.4901185770751,
+     "pf": 1.1260873156277618,
+     "max_dd_pct": -28.209288867331228,
+     "exp_usd": 10.373511160002094,
+     "exp_pct": 0.10373511160002095,
+     "gross_pct": 0.34373511160002096,
+     "funding_pct": 0.0,
+     "avg_hold_min": 6775.97233201581,
+     "trades_per_year": 66.05307362401716,
+     "exposure_pct": 85.09654713684378,
+     "by_reason": {
+      "END": 1,
+      "EXIT_SIGNAL": 13,
+      "ROI": 233,
+      "STOP": 6
+     },
+     "ruined_on": null,
+     "t_stat": 0.39175179603122423
+    },
+    "full": {
+     "trades": 863,
+     "net": -9901.435657701919,
+     "ret_pct": -99.01435657701919,
+     "win_rate": 93.04750869061414,
+     "pf": 0.8965732484804474,
+     "max_dd_pct": -100.0,
+     "exp_usd": -11.473274226769314,
+     "exp_pct": -0.11473274226769317,
+     "gross_pct": 0.12526725773230682,
+     "funding_pct": 0.0,
+     "avg_hold_min": 4401.268829663963,
+     "trades_per_year": 97.73976744186047,
+     "exposure_pct": 81.78929801894918,
+     "by_reason": {
+      "END": 1,
+      "EXIT_SIGNAL": 28,
+      "ROI": 802,
+      "STOP": 32
+     },
+     "ruined_on": "2018-12-07",
+     "t_stat": -0.6549483105273621
+    },
+    "yearly": {
+     "2018": -10839.66,
+     "2019": 873.45,
+     "2020": 3653.95,
+     "2021": -3357.68,
+     "2022": -2856.01,
+     "2023": 4348.9,
+     "2024": 1996.66,
+     "2025": -619.75,
+     "2026": -3101.31
+    }
+   },
+   "eth_spot": {
+    "dev": {
+     "trades": 353,
+     "net": -7535.796011207149,
+     "ret_pct": -75.35796011207148,
+     "win_rate": 93.20113314447592,
+     "pf": 0.8364902516621696,
+     "max_dd_pct": -90.70691154646372,
+     "exp_usd": -21.347864054411186,
+     "exp_pct": -0.21347864054411178,
+     "gross_pct": 0.02652135945588822,
+     "funding_pct": 0.0,
+     "avg_hold_min": 2119.5070821529744,
+     "trades_per_year": 176.6208904109589,
+     "exposure_pct": 71.17446727549466,
+     "by_reason": {
+      "EXIT_SIGNAL": 8,
+      "ROI": 329,
+      "STOP": 16
+     },
+     "ruined_on": null,
+     "t_stat": -0.7102746100309755
+    },
+    "oos": {
+     "trades": 320,
+     "net": -7344.797650956236,
+     "ret_pct": -73.44797650956237,
+     "win_rate": 92.8125,
+     "pf": 0.807552064328838,
+     "max_dd_pct": -86.57750358663382,
+     "exp_usd": -22.95249265923824,
+     "exp_pct": -0.22952492659238238,
+     "gross_pct": 0.010475073407617726,
+     "funding_pct": 0.0,
+     "avg_hold_min": 4847.453125,
+     "trades_per_year": 90.25482625482626,
+     "exposure_pct": 83.18237880737881,
+     "by_reason": {
+      "END": 1,
+      "EXIT_SIGNAL": 11,
+      "ROI": 295,
+      "STOP": 13
+     },
+     "ruined_on": null,
+     "t_stat": -0.7685241382226208
+    },
+    "yearly": {
+     "2021": 377.7,
+     "2022": -7913.49,
+     "2023": 5319.81,
+     "2024": -63.51,
+     "2025": -7246.34,
+     "2026": -5354.75
+    }
+   },
+   "btc_perp_adaptation": {
+    "dev": {
+     "trades": 375,
+     "net": -4814.395510206788,
+     "ret_pct": -48.14395510206788,
+     "win_rate": 92.53333333333333,
+     "pf": 0.8823708715581131,
+     "max_dd_pct": -73.90847852428108,
+     "exp_usd": -12.8383880272181,
+     "exp_pct": -0.128383880272181,
+     "gross_pct": 0.11975580506115235,
+     "funding_pct": 0.09013968533333333,
+     "avg_hold_min": 3305.912,
+     "trades_per_year": 124.97148722627736,
+     "exposure_pct": 78.55060066909975,
+     "by_reason": {
+      "EXIT_SIGNAL": 10,
+      "ROI": 352,
+      "STOP": 13
+     },
+     "ruined_on": null,
+     "t_stat": -0.48363015344349325
+    },
+    "oos": {
+     "trades": 270,
+     "net": 2478.744840234065,
+     "ret_pct": 24.78744840234065,
+     "win_rate": 92.96296296296296,
+     "pf": 1.1158141989025034,
+     "max_dd_pct": -26.054056403248115,
+     "exp_usd": 9.180536445311352,
+     "exp_pct": 0.09180536445311344,
+     "gross_pct": 0.3284800977864468,
+     "funding_pct": 0.07867473333333333,
+     "avg_hold_min": 6297.537037037037,
+     "trades_per_year": 70.49142244460329,
+     "exposure_pct": 84.4023012469224,
+     "by_reason": {
+      "END": 1,
+      "EXIT_SIGNAL": 12,
+      "ROI": 251,
+      "STOP": 6
+     },
+     "ruined_on": null,
+     "t_stat": 0.3591906079754512
+    }
+   },
+   "btc_spot_x2_oos": {
+    "trades": 231,
+    "net": -1229.0083751004968,
+    "ret_pct": -12.290083751004968,
+    "win_rate": 91.77489177489177,
+    "pf": 0.9425402923581704,
+    "max_dd_pct": -44.54289293230529,
+    "exp_usd": -5.3203825761926264,
+    "exp_pct": -0.05320382576192628,
+    "gross_pct": 0.42679617423807364,
+    "funding_pct": 0.0,
+    "avg_hold_min": 7581.969696969697,
+    "trades_per_year": 60.309328091493924,
+    "exposure_pct": 86.93883527916766,
+    "by_reason": {
+     "END": 1,
+     "EXIT_SIGNAL": 13,
+     "ROI": 211,
+     "STOP": 6
+    },
+    "ruined_on": null,
+    "t_stat": -0.18193873577371836
+   },
+   "sensitivity_btc_spot": {
+    "stop x0.75": {
+     "dev_net": -17079.16646737243,
+     "dev_trades": 672,
+     "oos_net": 108.5921423834402,
+     "oos_trades": 274
+    },
+    "stop x1.25": {
+     "dev_net": -18174.25464916811,
+     "dev_trades": 466,
+     "oos_net": 2797.8399540752375,
+     "oos_trades": 219
+    },
+    "roi x0.75": {
+     "dev_net": -19346.286750730662,
+     "dev_trades": 687,
+     "oos_net": 1914.7175895339988,
+     "oos_trades": 316
+    },
+    "roi x1.25": {
+     "dev_net": -13099.407060574002,
+     "dev_trades": 542,
+     "oos_net": 4730.568765165686,
+     "oos_trades": 226
+    }
+   },
+   "seconds": 1.5
+  },
+  "SmoothOperator": {
+   "class": "SmoothOperator",
+   "settings": {
+    "timeframe": "5m",
+    "minimal_roi": {
+     "0": 0.1
+    },
+    "stoploss": -0.05,
+    "trailing_stop": false,
+    "trailing_stop_positive": null,
+    "trailing_stop_positive_offset": 0.0,
+    "trailing_only_offset_is_reached": false,
+    "use_exit_signal": true,
+    "exit_profit_only": false,
+    "exit_profit_offset": 0.0,
+    "ignore_roi_if_entry_signal": false,
+    "can_short": false,
+    "callbacks": [],
+    "mode": "spot"
+   },
+   "btc_spot": {
+    "dev": {
+     "trades": 1365,
+     "net": -48599.88714531069,
+     "ret_pct": -485.9988714531069,
+     "win_rate": 58.681318681318686,
+     "pf": 0.7151124717343801,
+     "max_dd_pct": -100.0,
+     "exp_usd": -35.60431292696754,
+     "exp_pct": -0.35604312926967535,
+     "gross_pct": -0.11604312926967537,
+     "funding_pct": 0.0,
+     "avg_hold_min": 687.4534798534798,
+     "trades_per_year": 273.0373767798466,
+     "exposure_pct": 35.68721857125471,
+     "by_reason": {
+      "EXIT_SIGNAL": 1086,
+      "ROI": 11,
+      "STOP": 268
+     },
+     "ruined_on": "2018-08-04",
+     "t_stat": -4.473467395914489
+    },
+    "oos": {
+     "trades": 1027,
+     "net": -18347.31512900765,
+     "ret_pct": -183.4731512900765,
+     "win_rate": 58.22784810126582,
+     "pf": 0.7201671858851196,
+     "max_dd_pct": -100.0,
+     "exp_usd": -17.86496117722264,
+     "exp_pct": -0.17864961177222638,
+     "gross_pct": 0.06135038822777364,
+     "funding_pct": 0.0,
+     "avg_hold_min": 756.4780915287245,
+     "trades_per_year": 268.1284846318799,
+     "exposure_pct": 38.564401159558415,
+     "by_reason": {
+      "EXIT_SIGNAL": 965,
+      "STOP": 62
+     },
+     "ruined_on": "2025-08-25",
+     "t_stat": -3.3432162860703305
+    },
+    "full": {
+     "trades": 2392,
+     "net": -66947.20227431835,
+     "ret_pct": -669.4720227431834,
+     "win_rate": 58.4866220735786,
+     "pf": 0.7165158245475896,
+     "max_dd_pct": -100.0,
+     "exp_usd": -27.98796081702272,
+     "exp_pct": -0.2798796081702271,
+     "gross_pct": -0.03987960817022714,
+     "funding_pct": 0.0,
+     "avg_hold_min": 717.0890468227425,
+     "trades_per_year": 270.9079069767442,
+     "exposure_pct": 36.93533591731266,
+     "by_reason": {
+      "EXIT_SIGNAL": 2051,
+      "ROI": 11,
+      "STOP": 330
+     },
+     "ruined_on": "2018-08-04",
+     "t_stat": -5.497919024493954
+    },
+    "yearly": {
+     "2018": -16984.53,
+     "2019": -7660.61,
+     "2020": -2603.01,
+     "2021": -10023.52,
+     "2022": -11328.23,
+     "2023": -4063.45,
+     "2024": -658.74,
+     "2025": -8989.44,
+     "2026": -4635.69
+    }
+   },
+   "eth_spot": {
+    "dev": {
+     "trades": 669,
+     "net": -31088.075682343275,
+     "ret_pct": -310.88075682343276,
+     "win_rate": 56.65171898355755,
+     "pf": 0.7073915219227322,
+     "max_dd_pct": -100.0,
+     "exp_usd": -46.46947037719473,
+     "exp_pct": -0.46469470377194727,
+     "gross_pct": -0.2246947037719473,
+     "funding_pct": 0.0,
+     "avg_hold_min": 571.9103139013453,
+     "trades_per_year": 334.7291095890411,
+     "exposure_pct": 36.397260273972606,
+     "by_reason": {
+      "EXIT_SIGNAL": 479,
+      "ROI": 6,
+      "STOP": 184
+     },
+     "ruined_on": "2021-07-05",
+     "t_stat": -3.505761918940564
+    },
+    "oos": {
+     "trades": 1063,
+     "net": -26903.331344685226,
+     "ret_pct": -269.0333134468522,
+     "win_rate": 57.76105362182502,
+     "pf": 0.7275890334550812,
+     "max_dd_pct": -100.0,
+     "exp_usd": -25.308872384463996,
+     "exp_pct": -0.25308872384463993,
+     "gross_pct": -0.013088723844639959,
+     "funding_pct": 0.0,
+     "avg_hold_min": 663.653809971778,
+     "trades_per_year": 299.8152509652509,
+     "exposure_pct": 37.83054483054483,
+     "by_reason": {
+      "EXIT_SIGNAL": 926,
+      "ROI": 4,
+      "STOP": 133
+     },
+     "ruined_on": "2024-07-05",
+     "t_stat": -3.516930878450523
+    },
+    "yearly": {
+     "2021": -14252.83,
+     "2022": -16835.24,
+     "2023": -4985.66,
+     "2024": -7920.6,
+     "2025": -7583.29,
+     "2026": -6413.78
+    }
+   },
+   "btc_perp_adaptation": {
+    "dev": {
+     "trades": 805,
+     "net": -18991.836001905212,
+     "ret_pct": -189.91836001905213,
+     "win_rate": 61.61490683229813,
+     "pf": 0.797732739312445,
+     "max_dd_pct": -100.0,
+     "exp_usd": -23.592342859509582,
+     "exp_pct": -0.23592342859509574,
+     "gross_pct": -0.05824794039633801,
+     "funding_pct": 0.019675488198757765,
+     "avg_hold_min": 682.3068322981367,
+     "trades_per_year": 268.27212591240874,
+     "exposure_pct": 34.80186790348743,
+     "by_reason": {
+      "EXIT_SIGNAL": 648,
+      "ROI": 6,
+      "STOP": 151
+     },
+     "ruined_on": "2021-12-04",
+     "t_stat": -2.332656461519571
+    },
+    "oos": {
+     "trades": 1027,
+     "net": -10931.724829007648,
+     "ret_pct": -109.31724829007648,
+     "win_rate": 61.34371957156767,
+     "pf": 0.825769928453597,
+     "max_dd_pct": -100.0,
+     "exp_usd": -10.644327973717282,
+     "exp_pct": -0.1064432797371728,
+     "gross_pct": 0.06135038822777364,
+     "funding_pct": 0.009793667964946445,
+     "avg_hold_min": 756.4780915287245,
+     "trades_per_year": 268.1284846318799,
+     "exposure_pct": 38.564401159558415,
+     "by_reason": {
+      "EXIT_SIGNAL": 965,
+      "STOP": 62
+     },
+     "ruined_on": "2026-02-05",
+     "t_stat": -1.9886130516155234
+    }
+   },
+   "btc_spot_x2_oos": {
+    "trades": 1028,
+    "net": -43018.93592710573,
+    "ret_pct": -430.18935927105736,
+    "win_rate": 45.3307392996109,
+    "pf": 0.4445379297544233,
+    "max_dd_pct": -100.0,
+    "exp_usd": -41.84721393687328,
+    "exp_pct": -0.41847213936873284,
+    "gross_pct": 0.06152786063126723,
+    "funding_pct": 0.0,
+    "avg_hold_min": 756.0097276264592,
+    "trades_per_year": 268.38956397426733,
+    "exposure_pct": 38.57805178301962,
+    "by_reason": {
+     "EXIT_SIGNAL": 966,
+     "STOP": 62
+    },
+    "ruined_on": "2024-01-03",
+    "t_stat": -7.838797100991665
+   },
+   "sensitivity_btc_spot": {
+    "stop x0.75": {
+     "dev_net": -43355.69693222584,
+     "dev_trades": 1474,
+     "oos_net": -20457.352516898696,
+     "oos_trades": 1075
+    },
+    "stop x1.25": {
+     "dev_net": -40539.791148878874,
+     "dev_trades": 1294,
+     "oos_net": -16712.361681603375,
+     "oos_trades": 1007
+    },
+    "roi x0.75": {
+     "dev_net": -48968.72373803404,
+     "dev_trades": 1367,
+     "oos_net": -18350.260191458477,
+     "oos_trades": 1027
+    },
+    "roi x1.25": {
+     "dev_net": -47889.57673923791,
+     "dev_trades": 1364,
+     "oos_net": -18347.31512900765,
+     "oos_trades": 1027
+    }
+   },
+   "seconds": 2.2
+  },
+  "Strategy005": {
+   "class": "Strategy005",
+   "settings": {
+    "timeframe": "5m",
+    "minimal_roi": {
+     "0": 0.05,
+     "20": 0.04,
+     "40": 0.03,
+     "80": 0.02,
+     "1440": 0.01
+    },
+    "stoploss": -0.1,
+    "trailing_stop": false,
+    "trailing_stop_positive": 0.01,
+    "trailing_stop_positive_offset": 0.02,
+    "trailing_only_offset_is_reached": false,
+    "use_exit_signal": true,
+    "exit_profit_only": true,
+    "exit_profit_offset": 0.0,
+    "ignore_roi_if_entry_signal": false,
+    "can_short": false,
+    "callbacks": [],
+    "mode": "spot"
+   },
+   "btc_spot": {
+    "dev": {
+     "trades": 351,
+     "net": -10169.393694550472,
+     "ret_pct": -101.69393694550473,
+     "win_rate": 84.33048433048434,
+     "pf": 0.8194354812757374,
+     "max_dd_pct": -100.0,
+     "exp_usd": -28.9726316084059,
+     "exp_pct": -0.28972631608405897,
+     "gross_pct": -0.04972631608405905,
+     "funding_pct": 0.0,
+     "avg_hold_min": 2986.612535612536,
+     "trades_per_year": 70.20961117196056,
+     "exposure_pct": 39.86784258245102,
+     "by_reason": {
+      "ROI": 296,
+      "STOP": 55
+     },
+     "ruined_on": "2022-06-18",
+     "t_stat": -1.2532173535339546
+    },
+    "oos": {
+     "trades": 249,
+     "net": -1923.2567371562052,
+     "ret_pct": -19.23256737156205,
+     "win_rate": 87.55020080321285,
+     "pf": 0.9390100378311883,
+     "max_dd_pct": -57.52301370757487,
+     "exp_usd": -7.723922639181547,
+     "exp_pct": -0.07723922639181546,
+     "gross_pct": 0.16276077360818447,
+     "funding_pct": 0.0,
+     "avg_hold_min": 4542.658634538153,
+     "trades_per_year": 65.00875625446749,
+     "exposure_pct": 56.147347311571764,
+     "by_reason": {
+      "END": 1,
+      "ROI": 218,
+      "STOP": 30
+     },
+     "ruined_on": null,
+     "t_stat": -0.3166351303398353
+    },
+    "full": {
+     "trades": 600,
+     "net": -12092.650431706676,
+     "ret_pct": -120.92650431706676,
+     "win_rate": 85.66666666666667,
+     "pf": 0.8623551337568995,
+     "max_dd_pct": -100.0,
+     "exp_usd": -20.154417386177794,
+     "exp_pct": -0.20154417386177795,
+     "gross_pct": 0.03845582613822202,
+     "funding_pct": 0.0,
+     "avg_hold_min": 3632.3716666666664,
+     "trades_per_year": 67.95348837209302,
+     "exposure_pct": 46.92986649440138,
+     "by_reason": {
+      "END": 1,
+      "ROI": 514,
+      "STOP": 85
+     },
+     "ruined_on": "2022-06-18",
+     "t_stat": -1.1935984957539798
+    },
+    "yearly": {
+     "2018": -4162.29,
+     "2019": -3149.42,
+     "2020": 3450.98,
+     "2021": -3969.97,
+     "2022": -2338.7,
+     "2023": 1068.17,
+     "2024": -358.93,
+     "2025": -2359.36,
+     "2026": -273.15
+    }
+   },
+   "eth_spot": {
+    "dev": {
+     "trades": 225,
+     "net": -9588.874025874027,
+     "ret_pct": -95.88874025874027,
+     "win_rate": 81.77777777777779,
+     "pf": 0.7716064685148146,
+     "max_dd_pct": -100.0,
+     "exp_usd": -42.61721789277345,
+     "exp_pct": -0.4261721789277347,
+     "gross_pct": -0.18617217892773463,
+     "funding_pct": 0.0,
+     "avg_hold_min": 1323.0933333333332,
+     "trades_per_year": 112.57705479452055,
+     "exposure_pct": 28.319634703196346,
+     "by_reason": {
+      "ROI": 184,
+      "STOP": 41
+     },
+     "ruined_on": "2022-06-13",
+     "t_stat": -1.3701004900802456
+    },
+    "oos": {
+     "trades": 322,
+     "net": -16586.26243387415,
+     "ret_pct": -165.86262433874154,
+     "win_rate": 82.91925465838509,
+     "pf": 0.7054996016712687,
+     "max_dd_pct": -100.0,
+     "exp_usd": -51.51013178221786,
+     "exp_pct": -0.5151013178221786,
+     "gross_pct": -0.2751013178221786,
+     "funding_pct": 0.0,
+     "avg_hold_min": 3097.1894409937886,
+     "trades_per_year": 90.81891891891891,
+     "exposure_pct": 53.479997854997855,
+     "by_reason": {
+      "ROI": 267,
+      "STOP": 55
+     },
+     "ruined_on": "2025-11-04",
+     "t_stat": -2.077100490592689
+    },
+    "yearly": {
+     "2021": -2672.91,
+     "2022": -6915.96,
+     "2023": -232.04,
+     "2024": -3695.4,
+     "2025": -7807.61,
+     "2026": -4851.21
+    }
+   },
+   "btc_perp_adaptation": {
+    "dev": {
+     "trades": 219,
+     "net": -3009.0594479403826,
+     "ret_pct": -30.090594479403826,
+     "win_rate": 85.84474885844749,
+     "pf": 0.9057900132962329,
+     "max_dd_pct": -55.50594656694309,
+     "exp_usd": -13.739997479179829,
+     "exp_pct": -0.13739997479179833,
+     "gross_pct": 0.08225417132692327,
+     "funding_pct": 0.061654146118721456,
+     "avg_hold_min": 2836.931506849315,
+     "trades_per_year": 72.98334854014598,
+     "exposure_pct": 39.36587591240876,
+     "by_reason": {
+      "ROI": 188,
+      "STOP": 31
+     },
+     "ruined_on": null,
+     "t_stat": -0.48599138990348706
+    },
+    "oos": {
+     "trades": 254,
+     "net": -2000.1627418150251,
+     "ret_pct": -20.00162741815025,
+     "win_rate": 87.79527559055119,
+     "pf": 0.9367617028878537,
+     "max_dd_pct": -60.06893044118119,
+     "exp_usd": -7.874656463838682,
+     "exp_pct": -0.0787465646383867,
+     "gross_pct": 0.12776919126712508,
+     "funding_pct": 0.048515755905511805,
+     "avg_hold_min": 4387.472440944882,
+     "trades_per_year": 66.31415296640458,
+     "exposure_pct": 55.318183623222936,
+     "by_reason": {
+      "END": 1,
+      "ROI": 223,
+      "STOP": 30
+     },
+     "ruined_on": null,
+     "t_stat": -0.32836678346059195
+    }
+   },
+   "btc_spot_x2_oos": {
+    "trades": 235,
+    "net": -6281.306423826445,
+    "ret_pct": -62.813064238264445,
+    "win_rate": 86.80851063829788,
+    "pf": 0.8066576451666322,
+    "max_dd_pct": -81.29904276764726,
+    "exp_usd": -26.728963505644447,
+    "exp_pct": -0.26728963505644454,
+    "gross_pct": 0.21271036494355547,
+    "funding_pct": 0.0,
+    "avg_hold_min": 5092.24255319149,
+    "trades_per_year": 61.353645461043605,
+    "exposure_pct": 59.40140775156858,
+    "by_reason": {
+     "ROI": 204,
+     "STOP": 31
+    },
+    "ruined_on": null,
+    "t_stat": -1.0193678005937303
+   },
+   "sensitivity_btc_spot": {
+    "stop x0.75": {
+     "dev_net": -10687.246382360801,
+     "dev_trades": 381,
+     "oos_net": -2263.1030708989183,
+     "oos_trades": 293
+    },
+    "stop x1.25": {
+     "dev_net": -11664.2414049762,
+     "dev_trades": 338,
+     "oos_net": 369.0258458263156,
+     "oos_trades": 229
+    },
+    "roi x0.75": {
+     "dev_net": -11502.698796511515,
+     "dev_trades": 374,
+     "oos_net": -1720.5320852041737,
+     "oos_trades": 280
+    },
+    "roi x1.25": {
+     "dev_net": -13125.582149553627,
+     "dev_trades": 329,
+     "oos_net": 542.1534832886782,
+     "oos_trades": 231
+    }
+   },
+   "seconds": 1.1
+  },
+  "UniversalMACD": {
+   "class": "UniversalMACD",
+   "settings": {
+    "timeframe": "5m",
+    "minimal_roi": {
+     "0": 0.213,
+     "27": 0.099,
+     "60": 0.03,
+     "164": 0.0
+    },
+    "stoploss": -0.318,
+    "trailing_stop": false,
+    "trailing_stop_positive": null,
+    "trailing_stop_positive_offset": 0.0,
+    "trailing_only_offset_is_reached": false,
+    "use_exit_signal": true,
+    "exit_profit_only": false,
+    "exit_profit_offset": 0.0,
+    "ignore_roi_if_entry_signal": false,
+    "can_short": false,
+    "callbacks": [],
+    "mode": "spot"
+   },
+   "btc_spot": {
+    "dev": {
+     "trades": 143,
+     "net": 7451.101410747366,
+     "ret_pct": 74.51101410747366,
+     "win_rate": 58.04195804195804,
+     "pf": 1.757313578498829,
+     "max_dd_pct": -19.166420285994523,
+     "exp_usd": 52.1056042709606,
+     "exp_pct": 0.5210560427096058,
+     "gross_pct": 0.7610560427096059,
+     "funding_pct": 0.0,
+     "avg_hold_min": 2514.048951048951,
+     "trades_per_year": 28.6039156626506,
+     "exposure_pct": 13.672454971400755,
+     "by_reason": {
+      "ROI": 140,
+      "STOP": 3
+     },
+     "ruined_on": null,
+     "t_stat": 1.244181373787831
+    },
+    "oos": {
+     "trades": 16,
+     "net": 2523.4029920512667,
+     "ret_pct": 25.23402992051267,
+     "win_rate": 62.5,
+     "pf": 106.67067358561776,
+     "max_dd_pct": -0.10579211606116909,
+     "exp_usd": 157.71268700320417,
+     "exp_pct": 1.5771268700320418,
+     "gross_pct": 1.8171268700320418,
+     "funding_pct": 0.0,
+     "avg_hold_min": 188.625,
+     "trades_per_year": 4.177269478198713,
+     "exposure_pct": 0.14980938765785085,
+     "by_reason": {
+      "ROI": 16
+     },
+     "ruined_on": null,
+     "t_stat": 3.299751056248055
+    },
+    "full": {
+     "trades": 159,
+     "net": 9974.504402798631,
+     "ret_pct": 99.74504402798632,
+     "win_rate": 58.490566037735846,
+     "pf": 2.0113321124101984,
+     "max_dd_pct": -19.166420285994523,
+     "exp_usd": 62.73273209307315,
+     "exp_pct": 0.6273273209307315,
+     "gross_pct": 0.8673273209307315,
+     "funding_pct": 0.0,
+     "avg_hold_min": 2280.0440251572327,
+     "trades_per_year": 18.00767441860465,
+     "exposure_pct": 7.806352282515074,
+     "by_reason": {
+      "ROI": 156,
+      "STOP": 3
+     },
+     "ruined_on": null,
+     "t_stat": 1.6497930946260397
+    },
+    "yearly": {
+     "2018": 4215.76,
+     "2019": 2524.93,
+     "2020": -1455.88,
+     "2021": 4792.8,
+     "2022": -2626.51,
+     "2023": 446.67,
+     "2024": 831.6,
+     "2025": 300.64,
+     "2026": 944.5
+    }
+   },
+   "eth_spot": {
+    "dev": {
+     "trades": 88,
+     "net": 2656.686481867976,
+     "ret_pct": 26.566864818679758,
+     "win_rate": 53.40909090909091,
+     "pf": 1.2721111730203771,
+     "max_dd_pct": -36.04249657766652,
+     "exp_usd": 30.18961911213609,
+     "exp_pct": 0.301896191121361,
+     "gross_pct": 0.541896191121361,
+     "funding_pct": 0.0,
+     "avg_hold_min": 1682.1022727272727,
+     "trades_per_year": 44.03013698630137,
+     "exposure_pct": 14.081525875190259,
+     "by_reason": {
+      "ROI": 85,
+      "STOP": 3
+     },
+     "ruined_on": null,
+     "t_stat": 0.4456235727870062
+    },
+    "oos": {
+     "trades": 58,
+     "net": 6346.585067209395,
+     "ret_pct": 63.46585067209395,
+     "win_rate": 56.896551724137936,
+     "pf": 64.78509539376454,
+     "max_dd_pct": -0.13965421505353934,
+     "exp_usd": 109.4238804691275,
+     "exp_pct": 1.0942388046912748,
+     "gross_pct": 1.334238804691275,
+     "funding_pct": 0.0,
+     "avg_hold_min": 896.4655172413793,
+     "trades_per_year": 16.358687258687258,
+     "exposure_pct": 2.7882346632346633,
+     "by_reason": {
+      "ROI": 58
+     },
+     "ruined_on": null,
+     "t_stat": 5.34930329445718
+    },
+    "yearly": {
+     "2021": 5548.26,
+     "2022": -2891.58,
+     "2023": 739.05,
+     "2024": 1950.52,
+     "2025": 1586.16,
+     "2026": 2070.86
+    }
+   },
+   "btc_perp_adaptation": {
+    "dev": {
+     "trades": 61,
+     "net": 690.9416452583616,
+     "ret_pct": 6.909416452583617,
+     "win_rate": 59.01639344262295,
+     "pf": 1.1031043795036934,
+     "max_dd_pct": -31.736184295552057,
+     "exp_usd": 11.326912217350191,
+     "exp_pct": 0.11326912217350182,
+     "gross_pct": 0.30767589266530565,
+     "funding_pct": 0.036406770491803284,
+     "avg_hold_min": 4205.918032786885,
+     "trades_per_year": 20.32869525547445,
+     "exposure_pct": 16.25614608678021,
+     "by_reason": {
+      "ROI": 59,
+      "STOP": 2
+     },
+     "ruined_on": null,
+     "t_stat": 0.14289111273786936
+    },
+    "oos": {
+     "trades": 16,
+     "net": 2586.1619945682824,
+     "ret_pct": 25.861619945682822,
+     "win_rate": 68.75,
+     "pf": 121.80313923737947,
+     "max_dd_pct": -0.04290020765182261,
+     "exp_usd": 161.63512466051765,
+     "exp_pct": 1.6163512466051764,
+     "gross_pct": 1.7748278716051762,
+     "funding_pct": 0.00047662500000000005,
+     "avg_hold_min": 179.375,
+     "trades_per_year": 4.177269478198713,
+     "exposure_pct": 0.14246287030418553,
+     "by_reason": {
+      "ROI": 16
+     },
+     "ruined_on": null,
+     "t_stat": 3.3599505736437445
+    }
+   },
+   "btc_spot_x2_oos": {
+    "trades": 16,
+    "net": 2330.4349809076966,
+    "ret_pct": 23.304349809076967,
+    "win_rate": 62.5,
+    "pf": 50.042132906249215,
+    "max_dd_pct": -0.21305789516585424,
+    "exp_usd": 145.65218630673104,
+    "exp_pct": 1.4565218630673105,
+    "gross_pct": 1.9365218630673104,
+    "funding_pct": 0.0,
+    "avg_hold_min": 358.125,
+    "trades_per_year": 4.177269478198713,
+    "exposure_pct": 0.284429354300691,
+    "by_reason": {
+     "ROI": 16
+    },
+    "ruined_on": null,
+    "t_stat": 3.097513856218933
+   },
+   "sensitivity_btc_spot": {
+    "stop x0.75": {
+     "dev_net": 6121.11886233425,
+     "dev_trades": 151,
+     "oos_net": 2523.4029920512667,
+     "oos_trades": 16
+    },
+    "stop x1.25": {
+     "dev_net": 4456.68360426883,
+     "dev_trades": 140,
+     "oos_net": 2523.4029920512667,
+     "oos_trades": 16
+    },
+    "roi x0.75": {
+     "dev_net": 8900.98893488718,
+     "dev_trades": 146,
+     "oos_net": 2606.6047311670213,
+     "oos_trades": 16
+    },
+    "roi x1.25": {
+     "dev_net": 8230.11570122074,
+     "dev_trades": 142,
+     "oos_net": 2452.1133808753348,
+     "oos_trades": 16
+    }
+   },
+   "seconds": 0.3
+  },
+  "CMCWinner": {
+   "class": "CMCWinner",
+   "settings": {
+    "timeframe": "15m",
+    "minimal_roi": {
+     "0": 0.05,
+     "20": 0.03,
+     "30": 0.02,
+     "40": 0.0
+    },
+    "stoploss": -0.05,
+    "trailing_stop": false,
+    "trailing_stop_positive": null,
+    "trailing_stop_positive_offset": 0.0,
+    "trailing_only_offset_is_reached": false,
+    "use_exit_signal": true,
+    "exit_profit_only": false,
+    "exit_profit_offset": 0.0,
+    "ignore_roi_if_entry_signal": false,
+    "can_short": false,
+    "callbacks": [],
+    "mode": "spot"
+   },
+   "btc_spot": {
+    "dev": {
+     "trades": 563,
+     "net": -16406.162858651936,
+     "ret_pct": -164.06162858651936,
+     "win_rate": 37.83303730017762,
+     "pf": 0.5259611509278442,
+     "max_dd_pct": -100.0,
+     "exp_usd": -29.14060898517218,
+     "exp_pct": -0.2914060898517218,
+     "gross_pct": -0.051406089851721785,
+     "funding_pct": 0.0,
+     "avg_hold_min": 261.76021314387214,
+     "trades_per_year": 112.61541621029572,
+     "exposure_pct": 5.604653462334185,
+     "by_reason": {
+      "EXIT_SIGNAL": 3,
+      "ROI": 497,
+      "STOP": 63
+     },
+     "ruined_on": "2022-01-21",
+     "t_stat": -3.5395972410215157
+    },
+    "oos": {
+     "trades": 398,
+     "net": -13889.049706547103,
+     "ret_pct": -138.89049706547104,
+     "win_rate": 32.914572864321606,
+     "pf": 0.25391771159279275,
+     "max_dd_pct": -100.0,
+     "exp_usd": -34.897109815444985,
+     "exp_pct": -0.3489710981544498,
+     "gross_pct": -0.1089710981544498,
+     "funding_pct": 0.0,
+     "avg_hold_min": 465.0100502512563,
+     "trades_per_year": 103.909578270193,
+     "exposure_pct": 9.186819950758478,
+     "by_reason": {
+      "EXIT_SIGNAL": 9,
+      "ROI": 357,
+      "STOP": 32
+     },
+     "ruined_on": "2025-10-10",
+     "t_stat": -4.63464540135969
+    },
+    "full": {
+     "trades": 961,
+     "net": -30295.21256519904,
+     "ret_pct": -302.9521256519904,
+     "win_rate": 35.796045785639954,
+     "pf": 0.4308117703444194,
+     "max_dd_pct": -100.0,
+     "exp_usd": -31.524674885743018,
+     "exp_pct": -0.31524674885743015,
+     "gross_pct": -0.07524674885743016,
+     "funding_pct": 0.0,
+     "avg_hold_min": 345.93652445369406,
+     "trades_per_year": 108.83883720930233,
+     "exposure_pct": 7.158591731266149,
+     "by_reason": {
+      "EXIT_SIGNAL": 12,
+      "ROI": 854,
+      "STOP": 95
+     },
+     "ruined_on": "2022-01-21",
+     "t_stat": -5.49073386287579
+    },
+    "yearly": {
+     "2018": -3798.89,
+     "2019": -2202.2,
+     "2020": -2498.53,
+     "2021": -446.75,
+     "2022": -7459.79,
+     "2023": -2076.15,
+     "2024": -2659.09,
+     "2025": -7840.98,
+     "2026": -1312.84
+    }
+   },
+   "eth_spot": {
+    "dev": {
+     "trades": 270,
+     "net": -6973.544792268116,
+     "ret_pct": -69.73544792268116,
+     "win_rate": 39.25925925925926,
+     "pf": 0.6096318109068226,
+     "max_dd_pct": -73.47844091419236,
+     "exp_usd": -25.827943675067097,
+     "exp_pct": -0.258279436750671,
+     "gross_pct": -0.018279436750670976,
+     "funding_pct": 0.0,
+     "avg_hold_min": 167.01481481481483,
+     "trades_per_year": 135.09246575342465,
+     "exposure_pct": 4.28976407914764,
+     "by_reason": {
+      "EXIT_SIGNAL": 1,
+      "ROI": 236,
+      "STOP": 33
+     },
+     "ruined_on": null,
+     "t_stat": -2.059344046302254
+    },
+    "oos": {
+     "trades": 443,
+     "net": -11484.026071048533,
+     "ret_pct": -114.84026071048532,
+     "win_rate": 37.471783295711056,
+     "pf": 0.4644448303255158,
+     "max_dd_pct": -100.0,
+     "exp_usd": -25.923309415459443,
+     "exp_pct": -0.25923309415459445,
+     "gross_pct": -0.019233094154594427,
+     "funding_pct": 0.0,
+     "avg_hold_min": 253.29119638826185,
+     "trades_per_year": 124.9465250965251,
+     "exposure_pct": 6.017160017160017,
+     "by_reason": {
+      "END": 1,
+      "EXIT_SIGNAL": 2,
+      "ROI": 402,
+      "STOP": 38
+     },
+     "ruined_on": "2025-10-10",
+     "t_stat": -3.3309329861850285
+    },
+    "yearly": {
+     "2021": -1914.04,
+     "2022": -5059.51,
+     "2023": -2558.8,
+     "2024": -3634.2,
+     "2025": -5171.73,
+     "2026": -119.29
+    }
+   },
+   "btc_perp_adaptation": {
+    "dev": {
+     "trades": 345,
+     "net": -6473.101626945137,
+     "ret_pct": -64.73101626945137,
+     "win_rate": 42.608695652173914,
+     "pf": 0.6537928297215002,
+     "max_dd_pct": -67.6098438452822,
+     "exp_usd": -18.76261341143518,
+     "exp_pct": -0.18762613411435178,
+     "gross_pct": -0.02706631962159821,
+     "funding_pct": 0.002559814492753623,
+     "avg_hold_min": 173.83478260869566,
+     "trades_per_year": 114.97376824817518,
+     "exposure_pct": 3.799992396593674,
+     "by_reason": {
+      "EXIT_SIGNAL": 2,
+      "ROI": 309,
+      "STOP": 34
+     },
+     "ruined_on": null,
+     "t_stat": -1.8531487334102696
+    },
+    "oos": {
+     "trades": 415,
+     "net": -11073.8408267911,
+     "ret_pct": -110.738408267911,
+     "win_rate": 40.963855421686745,
+     "pf": 0.3486228889123719,
+     "max_dd_pct": -100.0,
+     "exp_usd": -26.683953799496628,
+     "exp_pct": -0.26683953799496635,
+     "gross_pct": -0.10555324160942414,
+     "funding_pct": 0.003286296385542169,
+     "avg_hold_min": 361.46506024096385,
+     "trades_per_year": 108.34792709077914,
+     "exposure_pct": 7.446191724247478,
+     "by_reason": {
+      "EXIT_SIGNAL": 6,
+      "ROI": 379,
+      "STOP": 30
+     },
+     "ruined_on": "2026-01-20",
+     "t_stat": -3.8200874270801535
+    }
+   },
+   "btc_spot_x2_oos": {
+    "trades": 369,
+    "net": -21829.34250041927,
+    "ret_pct": -218.29342500419267,
+    "win_rate": 15.718157181571815,
+    "pf": 0.09517665042329781,
+    "max_dd_pct": -100.0,
+    "exp_usd": -59.15810975723379,
+    "exp_pct": -0.5915810975723379,
+    "gross_pct": -0.11158109757233793,
+    "funding_pct": 0.0,
+    "avg_hold_min": 609.4986449864499,
+    "trades_per_year": 96.33827734095783,
+    "exposure_pct": 11.16397625287904,
+    "by_reason": {
+     "EXIT_SIGNAL": 10,
+     "ROI": 321,
+     "STOP": 38
+    },
+    "ruined_on": "2025-03-04",
+    "t_stat": -6.671741480136526
+   },
+   "sensitivity_btc_spot": {
+    "stop x0.75": {
+     "dev_net": -14294.267882779897,
+     "dev_trades": 596,
+     "oos_net": -12470.697034067915,
+     "oos_trades": 413
+    },
+    "stop x1.25": {
+     "dev_net": -18996.590580551037,
+     "dev_trades": 544,
+     "oos_net": -13146.647254129432,
+     "oos_trades": 388
+    },
+    "roi x0.75": {
+     "dev_net": -16149.37767473542,
+     "dev_trades": 569,
+     "oos_net": -14012.029143948246,
+     "oos_trades": 398
+    },
+    "roi x1.25": {
+     "dev_net": -15700.553029093619,
+     "dev_trades": 562,
+     "oos_net": -13507.679615903258,
+     "oos_trades": 398
+    }
+   },
+   "seconds": 0.6
+  },
+  "Bandtastic": {
+   "class": "Bandtastic",
+   "settings": {
+    "timeframe": "15m",
+    "minimal_roi": {
+     "0": 0.162,
+     "69": 0.097,
+     "229": 0.061,
+     "566": 0.0
+    },
+    "stoploss": -0.345,
+    "trailing_stop": true,
+    "trailing_stop_positive": 0.01,
+    "trailing_stop_positive_offset": 0.058,
+    "trailing_only_offset_is_reached": false,
+    "use_exit_signal": true,
+    "exit_profit_only": false,
+    "exit_profit_offset": 0.0,
+    "ignore_roi_if_entry_signal": false,
+    "can_short": false,
+    "callbacks": [],
+    "mode": "spot"
+   },
+   "btc_spot": {
+    "dev": {
+     "trades": 12699,
+     "net": -317757.49092033645,
+     "ret_pct": -3177.5749092033648,
+     "win_rate": 32.041893062445865,
+     "pf": 0.5123957163226629,
+     "max_dd_pct": -100.0,
+     "exp_usd": -25.02224513113918,
+     "exp_pct": -0.25022245131139187,
+     "gross_pct": -0.010222451311391817,
+     "funding_pct": 0.0,
+     "avg_hold_min": 106.19332230884322,
+     "trades_per_year": 2540.147727272727,
+     "exposure_pct": 51.286547705975416,
+     "by_reason": {
+      "EXIT_SIGNAL": 2139,
+      "ROI": 137,
+      "STOP": 69,
+      "TRAIL": 10354
+     },
+     "ruined_on": "2018-01-22",
+     "t_stat": -31.192927650129985
+    },
+    "oos": {
+     "trades": 5904,
+     "net": -133022.2050987561,
+     "ret_pct": -1330.2220509875608,
+     "win_rate": 37.042682926829265,
+     "pf": 0.5186795741878489,
+     "max_dd_pct": -100.0,
+     "exp_usd": -22.530861297214784,
+     "exp_pct": -0.22530861297214788,
+     "gross_pct": 0.014691387027852143,
+     "funding_pct": 0.0,
+     "avg_hold_min": 200.92649051490514,
+     "trades_per_year": 1541.4124374553253,
+     "exposure_pct": 58.88481852116592,
+     "by_reason": {
+      "EXIT_SIGNAL": 2049,
+      "ROI": 188,
+      "STOP": 7,
+      "TRAIL": 3660
+     },
+     "ruined_on": "2023-04-20",
+     "t_stat": -21.043463224681364
+    },
+    "full": {
+     "trades": 18603,
+     "net": -450779.69601909263,
+     "ret_pct": -4507.796960190926,
+     "win_rate": 33.6289845723808,
+     "pf": 0.514267042226875,
+     "max_dd_pct": -100.0,
+     "exp_usd": -24.231559211906287,
+     "exp_pct": -0.24231559211906284,
+     "gross_pct": -0.0023155921190628247,
+     "funding_pct": 0.0,
+     "avg_hold_min": 136.25861420201042,
+     "trades_per_year": 2106.8979069767443,
+     "exposure_pct": 54.58266580534023,
+     "by_reason": {
+      "EXIT_SIGNAL": 4188,
+      "ROI": 325,
+      "STOP": 76,
+      "TRAIL": 14014
+     },
+     "ruined_on": "2018-01-22",
+     "t_stat": -37.59781839871094
+    },
+    "yearly": {
+     "2018": -80370.8,
+     "2019": -55886.72,
+     "2020": -45400.03,
+     "2021": -79952.65,
+     "2022": -56147.28,
+     "2023": -30590.61,
+     "2024": -38992.1,
+     "2025": -35923.48,
+     "2026": -27516.01
+    }
+   },
+   "eth_spot": {
+    "dev": {
+     "trades": 7009,
+     "net": -170723.60316626925,
+     "ret_pct": -1707.2360316626928,
+     "win_rate": 29.561991724925097,
+     "pf": 0.5394549900151394,
+     "max_dd_pct": -100.0,
+     "exp_usd": -24.357769034993474,
+     "exp_pct": -0.24357769034993476,
+     "gross_pct": -0.0035776903499347267,
+     "funding_pct": 0.0,
+     "avg_hold_min": 68.31816236267656,
+     "trades_per_year": 3506.9003424657535,
+     "exposure_pct": 45.551940639269404,
+     "by_reason": {
+      "EXIT_SIGNAL": 726,
+      "ROI": 15,
+      "STOP": 47,
+      "TRAIL": 6221
+     },
+     "ruined_on": "2021-01-29",
+     "t_stat": -21.472560291146575
+    },
+    "oos": {
+     "trades": 7506,
+     "net": -182901.91392078693,
+     "ret_pct": -1829.0191392078693,
+     "win_rate": 33.26671995736744,
+     "pf": 0.5281559698362404,
+     "max_dd_pct": -100.0,
+     "exp_usd": -24.367427913773906,
+     "exp_pct": -0.24367427913773912,
+     "gross_pct": -0.0036742791377390705,
+     "funding_pct": 0.0,
+     "avg_hold_min": 138.23780975219825,
+     "trades_per_year": 2117.039768339768,
+     "exposure_pct": 55.64205276705276,
+     "by_reason": {
+      "EXIT_SIGNAL": 1709,
+      "ROI": 112,
+      "STOP": 7,
+      "TRAIL": 5678
+     },
+     "ruined_on": "2023-04-21",
+     "t_stat": -23.272364178438735
+    },
+    "yearly": {
+     "2021": -91046.98,
+     "2022": -79676.63,
+     "2023": -31304.41,
+     "2024": -52100.4,
+     "2025": -71040.69,
+     "2026": -28456.4
+    }
+   },
+   "btc_perp_adaptation": {
+    "dev": {
+     "trades": 7607,
+     "net": -121668.72592412388,
+     "ret_pct": -1216.6872592412387,
+     "win_rate": 34.54712764558959,
+     "pf": 0.6513850624665193,
+     "max_dd_pct": -100.0,
+     "exp_usd": -15.994311282256326,
+     "exp_pct": -0.1599431128225633,
+     "gross_pct": 0.00117351410000804,
+     "funding_pct": 0.003116626922571316,
+     "avg_hold_min": 107.22268962797423,
+     "trades_per_year": 2535.088275547445,
+     "exposure_pct": 51.68054288321168,
+     "by_reason": {
+      "EXIT_SIGNAL": 1348,
+      "ROI": 75,
+      "STOP": 42,
+      "TRAIL": 6142
+     },
+     "ruined_on": "2020-03-28",
+     "t_stat": -15.323335463230855
+    },
+    "oos": {
+     "trades": 5909,
+     "net": -86127.60437565885,
+     "ret_pct": -861.2760437565886,
+     "win_rate": 40.159079370451856,
+     "pf": 0.6520526438951345,
+     "max_dd_pct": -100.0,
+     "exp_usd": -14.575664981495828,
+     "exp_pct": -0.1457566498149583,
+     "gross_pct": 0.014644119519954544,
+     "funding_pct": 0.0024007693349128454,
+     "avg_hold_min": 200.57894736842104,
+     "trades_per_year": 1542.7178341672625,
+     "exposure_pct": 58.832747597490275,
+     "by_reason": {
+      "EXIT_SIGNAL": 2031,
+      "ROI": 216,
+      "STOP": 7,
+      "TRAIL": 3655
+     },
+     "ruined_on": "2023-06-14",
+     "t_stat": -13.642173779758727
+    }
+   },
+   "btc_spot_x2_oos": {
+    "trades": 5885,
+    "net": -273680.1294052048,
+    "ret_pct": -2736.801294052048,
+    "win_rate": 27.27272727272727,
+    "pf": 0.2638608515333925,
+    "max_dd_pct": -100.0,
+    "exp_usd": -46.50469488618603,
+    "exp_pct": -0.4650469488618603,
+    "gross_pct": 0.01495305113813974,
+    "funding_pct": 0.0,
+    "avg_hold_min": 202.2749362786746,
+    "trades_per_year": 1536.4519299499643,
+    "exposure_pct": 59.08923040266857,
+    "by_reason": {
+     "EXIT_SIGNAL": 2077,
+     "ROI": 131,
+     "STOP": 7,
+     "TRAIL": 3670
+    },
+    "ruined_on": "2023-03-06",
+    "t_stat": -43.24986257048713
+   },
+   "sensitivity_btc_spot": {
+    "stop x0.75": {
+     "dev_net": -317757.49092033645,
+     "dev_trades": 12699,
+     "oos_net": -133022.2050987561,
+     "oos_trades": 5904
+    },
+    "stop x1.25": {
+     "dev_net": -317757.49092033645,
+     "dev_trades": 12699,
+     "oos_net": -133022.2050987561,
+     "oos_trades": 5904
+    },
+    "roi x0.75": {
+     "dev_net": -317247.95628040854,
+     "dev_trades": 12699,
+     "oos_net": -133017.24283299077,
+     "oos_trades": 5904
+    },
+    "roi x1.25": {
+     "dev_net": -317604.68561503117,
+     "dev_trades": 12699,
+     "oos_net": -133022.2050987561,
+     "oos_trades": 5904
+    }
+   },
+   "seconds": 10.5
+  },
+  "FAdxSmaStrategy": {
+   "class": "FAdxSmaStrategy",
+   "settings": {
+    "timeframe": "1h",
+    "minimal_roi": {
+     "0": 0.05,
+     "30": 0.1,
+     "60": 0.075
+    },
+    "stoploss": -0.05,
+    "trailing_stop": false,
+    "trailing_stop_positive": null,
+    "trailing_stop_positive_offset": 0.0,
+    "trailing_only_offset_is_reached": false,
+    "use_exit_signal": true,
+    "exit_profit_only": false,
+    "exit_profit_offset": 0.0,
+    "ignore_roi_if_entry_signal": false,
+    "can_short": true,
+    "callbacks": [],
+    "mode": "futures (spot candles as the perpetual's price proxy)"
+   },
+   "btc_spot": {
+    "dev": {
+     "trades": 112,
+     "net": 477.53710727169255,
+     "ret_pct": 4.775371072716926,
+     "win_rate": 33.035714285714285,
+     "pf": 1.0457227030375553,
+     "max_dd_pct": -18.61145940142215,
+     "exp_usd": 4.263724172068684,
+     "exp_pct": 0.042637241720686656,
+     "gross_pct": 0.28263724172068677,
+     "funding_pct": 0.0,
+     "avg_hold_min": 1085.2767857142858,
+     "trades_per_year": 22.403066812705365,
+     "exposure_pct": 4.622695326761591,
+     "by_reason": {
+      "EXIT_SIGNAL": 94,
+      "ROI": 11,
+      "STOP": 7
+     },
+     "ruined_on": null,
+     "t_stat": 0.1549278164145921
+    },
+    "oos": {
+     "trades": 58,
+     "net": -5402.7315259565385,
+     "ret_pct": -54.02731525956539,
+     "win_rate": 20.689655172413794,
+     "pf": 0.3204769063885701,
+     "max_dd_pct": -55.194841312818234,
+     "exp_usd": -93.1505435509748,
+     "exp_pct": -0.9315054355097478,
+     "gross_pct": -0.6915054355097481,
+     "funding_pct": 0.0,
+     "avg_hold_min": 1203.051724137931,
+     "trades_per_year": 15.142601858470336,
+     "exposure_pct": 3.4636347390993567,
+     "by_reason": {
+      "EXIT_SIGNAL": 52,
+      "ROI": 2,
+      "STOP": 4
+     },
+     "ruined_on": null,
+     "t_stat": -2.9366443111776332
+    },
+    "full": {
+     "trades": 170,
+     "net": -4925.194418684846,
+     "ret_pct": -49.251944186848455,
+     "win_rate": 28.823529411764703,
+     "pf": 0.7322532066329844,
+     "max_dd_pct": -61.48630238243763,
+     "exp_usd": -28.97173187461674,
+     "exp_pct": -0.28971731874616746,
+     "gross_pct": -0.04971731874616747,
+     "funding_pct": 0.0,
+     "avg_hold_min": 1125.4588235294118,
+     "trades_per_year": 19.253488372093024,
+     "exposure_pct": 4.119896640826873,
+     "by_reason": {
+      "EXIT_SIGNAL": 146,
+      "ROI": 13,
+      "STOP": 11
+     },
+     "ruined_on": null,
+     "t_stat": -1.3565199265056365
+    },
+    "yearly": {
+     "2018": 269.82,
+     "2019": 816.45,
+     "2020": 1235.17,
+     "2021": -1508.2,
+     "2022": -335.7,
+     "2023": -1876.74,
+     "2024": -963.98,
+     "2025": -1395.73,
+     "2026": -1166.29
+    }
+   },
+   "eth_spot": {
+    "dev": {
+     "trades": 43,
+     "net": -2123.423309211916,
+     "ret_pct": -21.23423309211916,
+     "win_rate": 34.883720930232556,
+     "pf": 0.6806130770249432,
+     "max_dd_pct": -37.152778385086535,
+     "exp_usd": -49.38193742353293,
+     "exp_pct": -0.49381937423532957,
+     "gross_pct": -0.2538193742353295,
+     "funding_pct": 0.0,
+     "avg_hold_min": 831.0232558139535,
+     "trades_per_year": 21.51472602739726,
+     "exposure_pct": 3.399353120243531,
+     "by_reason": {
+      "EXIT_SIGNAL": 30,
+      "ROI": 5,
+      "STOP": 8
+     },
+     "ruined_on": null,
+     "t_stat": -0.9153879640105298
+    },
+    "oos": {
+     "trades": 64,
+     "net": -579.0230547342067,
+     "ret_pct": -5.790230547342066,
+     "win_rate": 29.6875,
+     "pf": 0.9100230157498443,
+     "max_dd_pct": -18.31469348800275,
+     "exp_usd": -9.047235230221979,
+     "exp_pct": -0.09047235230221978,
+     "gross_pct": 0.14952764769778026,
+     "funding_pct": 0.0,
+     "avg_hold_min": 1127.453125,
+     "trades_per_year": 18.05096525096525,
+     "exposure_pct": 3.869422994422994,
+     "by_reason": {
+      "EXIT_SIGNAL": 57,
+      "ROI": 5,
+      "STOP": 2
+     },
+     "ruined_on": null,
+     "t_stat": -0.25923248607308685
+    },
+    "yearly": {
+     "2021": -2431.02,
+     "2022": 307.59,
+     "2023": -504.24,
+     "2024": 1024.41,
+     "2025": -1863.56,
+     "2026": 764.37
+    }
+   },
+   "btc_perp_adaptation": {
+    "dev": {
+     "trades": 61,
+     "net": -162.58383663753165,
+     "ret_pct": -1.6258383663753164,
+     "win_rate": 36.0655737704918,
+     "pf": 0.9728938790880916,
+     "max_dd_pct": -17.24941534103433,
+     "exp_usd": -2.6653087973365843,
+     "exp_pct": -0.02665308797336587,
+     "gross_pct": 0.1323141251413882,
+     "funding_pct": 0.0009672131147540964,
+     "avg_hold_min": 1128.1475409836066,
+     "trades_per_year": 20.32869525547445,
+     "exposure_pct": 4.3603634428223845,
+     "by_reason": {
+      "EXIT_SIGNAL": 50,
+      "ROI": 6,
+      "STOP": 5
+     },
+     "ruined_on": null,
+     "t_stat": -0.0710963236791719
+    },
+    "oos": {
+     "trades": 58,
+     "net": -4929.676713444049,
+     "ret_pct": -49.296767134440486,
+     "win_rate": 22.413793103448278,
+     "pf": 0.34816240475069055,
+     "max_dd_pct": -50.546293187693315,
+     "exp_usd": -84.99442609386291,
+     "exp_pct": -0.8499442609386291,
+     "gross_pct": -0.694333364386905,
+     "funding_pct": -0.002389103448275862,
+     "avg_hold_min": 1190.948275862069,
+     "trades_per_year": 15.142601858470336,
+     "exposure_pct": 3.4287884203002146,
+     "by_reason": {
+      "EXIT_SIGNAL": 52,
+      "ROI": 2,
+      "STOP": 4
+     },
+     "ruined_on": null,
+     "t_stat": -2.6989644283378174
+    }
+   },
+   "btc_spot_x2_oos": {
+    "trades": 58,
+    "net": -7076.452769141459,
+    "ret_pct": -70.76452769141459,
+    "win_rate": 15.517241379310345,
+    "pf": 0.22248305053712086,
+    "max_dd_pct": -71.69205374466743,
+    "exp_usd": -122.00780636450791,
+    "exp_pct": -1.2200780636450796,
+    "gross_pct": -0.7400780636450794,
+    "funding_pct": 0.0,
+    "avg_hold_min": 1212.6896551724137,
+    "trades_per_year": 15.142601858470336,
+    "exposure_pct": 3.491382733698674,
+    "by_reason": {
+     "EXIT_SIGNAL": 53,
+     "ROI": 1,
+     "STOP": 4
+    },
+    "ruined_on": null,
+    "t_stat": -4.087429493885094
+   },
+   "sensitivity_btc_spot": {
+    "stop x0.75": {
+     "dev_net": 787.7471072828572,
+     "dev_trades": 113,
+     "oos_net": -5669.51244995042,
+     "oos_trades": 61
+    },
+    "stop x1.25": {
+     "dev_net": 1629.2814949339609,
+     "dev_trades": 111,
+     "oos_net": -3873.303108918948,
+     "oos_trades": 57
+    },
+    "roi x0.75": {
+     "dev_net": -1278.7846425579269,
+     "dev_trades": 113,
+     "oos_net": -5174.167491827571,
+     "oos_trades": 58
+    },
+    "roi x1.25": {
+     "dev_net": 870.6908095024412,
+     "dev_trades": 111,
+     "oos_net": -5518.142044589252,
+     "oos_trades": 58
+    }
+   },
+   "seconds": 0.3
+  },
+  "MACDStrategy_crossed": {
+   "class": "MACDStrategy_crossed",
+   "settings": {
+    "timeframe": "5m",
+    "minimal_roi": {
+     "0": 0.05,
+     "20": 0.04,
+     "30": 0.03,
+     "60": 0.01
+    },
+    "stoploss": -0.3,
+    "trailing_stop": false,
+    "trailing_stop_positive": null,
+    "trailing_stop_positive_offset": 0.0,
+    "trailing_only_offset_is_reached": false,
+    "use_exit_signal": true,
+    "exit_profit_only": false,
+    "exit_profit_offset": 0.0,
+    "ignore_roi_if_entry_signal": false,
+    "can_short": false,
+    "callbacks": [],
+    "mode": "spot"
+   },
+   "btc_spot": {
+    "dev": {
+     "trades": 350,
+     "net": -15528.262921996517,
+     "ret_pct": -155.28262921996517,
+     "win_rate": 87.14285714285714,
+     "pf": 0.6697059998956787,
+     "max_dd_pct": -100.0,
+     "exp_usd": -44.366465491418616,
+     "exp_pct": -0.44366465491418605,
+     "gross_pct": -0.2036646549141861,
+     "funding_pct": 0.0,
+     "avg_hold_min": 3099.582857142857,
+     "trades_per_year": 70.00958378970427,
+     "exposure_pct": 41.257986491420226,
+     "by_reason": {
+      "EXIT_SIGNAL": 41,
+      "ROI": 303,
+      "STOP": 6
+     },
+     "ruined_on": "2022-04-19",
+     "t_stat": -1.6050825062951297
+    },
+    "oos": {
+     "trades": 265,
+     "net": 232.5584323157707,
+     "ret_pct": 2.325584323157707,
+     "win_rate": 85.28301886792453,
+     "pf": 1.0108535144063784,
+     "max_dd_pct": -30.20681743055568,
+     "exp_usd": 0.8775789898708328,
+     "exp_pct": 0.008775789898708303,
+     "gross_pct": 0.24877578989870833,
+     "funding_pct": 0.0,
+     "avg_hold_min": 4353.46037735849,
+     "trades_per_year": 69.1860257326662,
+     "exposure_pct": 57.26645024223652,
+     "by_reason": {
+      "END": 1,
+      "EXIT_SIGNAL": 42,
+      "ROI": 222
+     },
+     "ruined_on": null,
+     "t_stat": 0.04908258074223992
+    },
+    "full": {
+     "trades": 615,
+     "net": -15295.704489680747,
+     "ret_pct": -152.95704489680747,
+     "win_rate": 86.34146341463415,
+     "pf": 0.7765108333636213,
+     "max_dd_pct": -100.0,
+     "exp_usd": -24.871064210863004,
+     "exp_pct": -0.24871064210862992,
+     "gross_pct": -0.008710642108629929,
+     "funding_pct": 0.0,
+     "avg_hold_min": 3639.8715447154473,
+     "trades_per_year": 69.65232558139535,
+     "exposure_pct": 48.20243324720069,
+     "by_reason": {
+      "END": 1,
+      "EXIT_SIGNAL": 83,
+      "ROI": 525,
+      "STOP": 6
+     },
+     "ruined_on": "2022-04-19",
+     "t_stat": -1.4190100409593631
+    },
+    "yearly": {
+     "2018": -6473.85,
+     "2019": 426.84,
+     "2020": 351.05,
+     "2021": -3944.87,
+     "2022": -5887.43,
+     "2023": 1507.49,
+     "2024": 253.65,
+     "2025": -87.14,
+     "2026": -1441.45
+    }
+   },
+   "eth_spot": {
+    "dev": {
+     "trades": 173,
+     "net": -10001.434912001583,
+     "ret_pct": -100.01434912001584,
+     "win_rate": 88.4393063583815,
+     "pf": 0.6216433448264902,
+     "max_dd_pct": -100.0,
+     "exp_usd": -57.81176249711898,
+     "exp_pct": -0.5781176249711899,
+     "gross_pct": -0.3381176249711898,
+     "funding_pct": 0.0,
+     "avg_hold_min": 2482.271676300578,
+     "trades_per_year": 86.55924657534247,
+     "exposure_pct": 40.85169330289193,
+     "by_reason": {
+      "EXIT_SIGNAL": 19,
+      "ROI": 150,
+      "STOP": 4
+     },
+     "ruined_on": "2022-06-13",
+     "t_stat": -1.326682484258534
+    },
+    "oos": {
+     "trades": 273,
+     "net": -4192.499518000708,
+     "ret_pct": -41.92499518000708,
+     "win_rate": 87.54578754578755,
+     "pf": 0.8453218818011474,
+     "max_dd_pct": -60.33652819728237,
+     "exp_usd": -15.357141091577686,
+     "exp_pct": -0.15357141091577683,
+     "gross_pct": 0.08642858908422324,
+     "funding_pct": 0.0,
+     "avg_hold_min": 3447.5604395604396,
+     "trades_per_year": 76.99864864864864,
+     "exposure_pct": 50.47104247104247,
+     "by_reason": {
+      "EXIT_SIGNAL": 36,
+      "ROI": 235,
+      "STOP": 2
+     },
+     "ruined_on": null,
+     "t_stat": -0.6051196673349175
+    },
+    "yearly": {
+     "2021": -3792.23,
+     "2022": -6209.2,
+     "2023": 2010.22,
+     "2024": -3518.91,
+     "2025": -923.65,
+     "2026": -1760.16
+    }
+   },
+   "btc_perp_adaptation": {
+    "dev": {
+     "trades": 213,
+     "net": -8995.782259112224,
+     "ret_pct": -89.95782259112224,
+     "win_rate": 86.85446009389672,
+     "pf": 0.6690179711008126,
+     "max_dd_pct": -93.06251187113475,
+     "exp_usd": -42.233719526348466,
+     "exp_pct": -0.4223371952634846,
+     "gross_pct": -0.2108092187376631,
+     "funding_pct": 0.0535279765258216,
+     "avg_hold_min": 3276.8638497652582,
+     "trades_per_year": 70.98380474452554,
+     "exposure_pct": 44.22470600162206,
+     "by_reason": {
+      "EXIT_SIGNAL": 26,
+      "ROI": 184,
+      "STOP": 3
+     },
+     "ruined_on": null,
+     "t_stat": -1.2426573959536307
+    },
+    "oos": {
+     "trades": 275,
+     "net": 467.2608272943778,
+     "ret_pct": 4.672608272943778,
+     "win_rate": 86.18181818181819,
+     "pf": 1.0216797207707489,
+     "max_dd_pct": -29.731848135158074,
+     "exp_usd": 1.6991302810704647,
+     "exp_pct": 0.01699130281070466,
+     "gross_pct": 0.22113341190161373,
+     "funding_pct": 0.0461421090909091,
+     "avg_hold_min": 4084.450909090909,
+     "trades_per_year": 71.7968191565404,
+     "exposure_pct": 55.75530140576602,
+     "by_reason": {
+      "END": 1,
+      "EXIT_SIGNAL": 41,
+      "ROI": 233
+     },
+     "ruined_on": null,
+     "t_stat": 0.09738691847010643
+    }
+   },
+   "btc_spot_x2_oos": {
+    "trades": 246,
+    "net": -5556.2277236920945,
+    "ret_pct": -55.56227723692094,
+    "win_rate": 82.11382113821138,
+    "pf": 0.7694120424845351,
+    "max_dd_pct": -68.33272049556189,
+    "exp_usd": -22.58629155972396,
+    "exp_pct": -0.22586291559723964,
+    "gross_pct": 0.2541370844027604,
+    "funding_pct": 0.0,
+    "avg_hold_min": 4995.426829268293,
+    "trades_per_year": 64.22551822730522,
+    "exposure_pct": 60.99967238503693,
+    "by_reason": {
+     "END": 1,
+     "EXIT_SIGNAL": 47,
+     "ROI": 198
+    },
+    "ruined_on": null,
+    "t_stat": -1.116037360412674
+   },
+   "sensitivity_btc_spot": {
+    "stop x0.75": {
+     "dev_net": -16862.29109163068,
+     "dev_trades": 363,
+     "oos_net": 232.5584323157707,
+     "oos_trades": 265
+    },
+    "stop x1.25": {
+     "dev_net": -14073.11744113288,
+     "dev_trades": 339,
+     "oos_net": 232.5584323157707,
+     "oos_trades": 265
+    },
+    "roi x0.75": {
+     "dev_net": -14795.644144210042,
+     "dev_trades": 377,
+     "oos_net": -1237.949297008709,
+     "oos_trades": 301
+    },
+    "roi x1.25": {
+     "dev_net": -20402.524879600507,
+     "dev_trades": 318,
+     "oos_net": 687.1006347035969,
+     "oos_trades": 242
+    }
+   },
+   "seconds": 1.1
+  },
+  "ReinforcedQuickie": {
+   "class": "ReinforcedQuickie",
+   "settings": {
+    "timeframe": "5m",
+    "minimal_roi": {
+     "0": 0.01
+    },
+    "stoploss": -0.05,
+    "trailing_stop": false,
+    "trailing_stop_positive": null,
+    "trailing_stop_positive_offset": 0.0,
+    "trailing_only_offset_is_reached": false,
+    "use_exit_signal": true,
+    "exit_profit_only": false,
+    "exit_profit_offset": 0.0,
+    "ignore_roi_if_entry_signal": false,
+    "can_short": false,
+    "callbacks": [],
+    "mode": "spot"
+   },
+   "btc_spot": {
+    "dev": {
+     "trades": 1946,
+     "net": -28270.646024099697,
+     "ret_pct": -282.70646024099693,
+     "win_rate": 68.5508735868448,
+     "pf": 0.7926693546117937,
+     "max_dd_pct": -100.0,
+     "exp_usd": -14.527567329958734,
+     "exp_pct": -0.14527567329958732,
+     "gross_pct": 0.09472432670041267,
+     "funding_pct": 0.0,
+     "avg_hold_min": 579.6125385405961,
+     "trades_per_year": 389.25328587075575,
+     "exposure_pct": 42.89605391262018,
+     "by_reason": {
+      "EXIT_SIGNAL": 788,
+      "ROI": 974,
+      "STOP": 184
+     },
+     "ruined_on": "2019-11-18",
+     "t_stat": -3.455751075196571
+    },
+    "oos": {
+     "trades": 1345,
+     "net": -21147.137769152945,
+     "ret_pct": -211.47137769152943,
+     "win_rate": 59.10780669144982,
+     "pf": 0.6951639140885194,
+     "max_dd_pct": -100.0,
+     "exp_usd": -15.722779010522636,
+     "exp_pct": -0.15722779010522636,
+     "gross_pct": 0.08277220989477366,
+     "funding_pct": 0.0,
+     "avg_hold_min": 692.6193308550186,
+     "trades_per_year": 351.1517155110794,
+     "exposure_pct": 46.24200818044635,
+     "by_reason": {
+      "EXIT_SIGNAL": 980,
+      "ROI": 316,
+      "STOP": 49
+     },
+     "ruined_on": "2024-08-01",
+     "t_stat": -4.266129953242379
+    },
+    "full": {
+     "trades": 3291,
+     "net": -49417.78379325264,
+     "ret_pct": -494.17783793252636,
+     "win_rate": 64.69158310543908,
+     "pf": 0.7597901227301258,
+     "max_dd_pct": -100.0,
+     "exp_usd": -15.016038831131157,
+     "exp_pct": -0.15016038831131157,
+     "gross_pct": 0.08983961168868844,
+     "funding_pct": 0.0,
+     "avg_hold_min": 625.797326040717,
+     "trades_per_year": 372.7248837209302,
+     "exposure_pct": 44.347523686477174,
+     "by_reason": {
+      "EXIT_SIGNAL": 1768,
+      "ROI": 1290,
+      "STOP": 233
+     },
+     "ruined_on": "2019-11-18",
+     "t_stat": -5.166989284868059
+    },
+    "yearly": {
+     "2018": -6374.46,
+     "2019": -3867.98,
+     "2020": 1857.35,
+     "2021": -12104.97,
+     "2022": -7780.58,
+     "2023": -5115.9,
+     "2024": -5680.66,
+     "2025": -5825.75,
+     "2026": -4524.83
+    }
+   },
+   "eth_spot": {
+    "dev": {
+     "trades": 964,
+     "net": -15814.500080266134,
+     "ret_pct": -158.14500080266134,
+     "win_rate": 74.5850622406639,
+     "pf": 0.7948593489054359,
+     "max_dd_pct": -100.0,
+     "exp_usd": -16.405083070815493,
+     "exp_pct": -0.1640508307081549,
+     "gross_pct": 0.07594916929184507,
+     "funding_pct": 0.0,
+     "avg_hold_min": 379.8319502074689,
+     "trades_per_year": 482.33013698630134,
+     "exposure_pct": 34.83238203957382,
+     "by_reason": {
+      "EXIT_SIGNAL": 265,
+      "ROI": 576,
+      "STOP": 123
+     },
+     "ruined_on": "2021-12-13",
+     "t_stat": -2.460810498999877
+    },
+    "oos": {
+     "trades": 1288,
+     "net": -31958.03533103168,
+     "ret_pct": -319.5803533103168,
+     "win_rate": 60.79192546583852,
+     "pf": 0.6376533831233026,
+     "max_dd_pct": -100.0,
+     "exp_usd": -24.812139232167453,
+     "exp_pct": -0.24812139232167452,
+     "gross_pct": -0.00812139232167449,
+     "funding_pct": 0.0,
+     "avg_hold_min": 587.02950310559,
+     "trades_per_year": 363.27567567567564,
+     "exposure_pct": 40.54558129558129,
+     "by_reason": {
+      "END": 1,
+      "EXIT_SIGNAL": 739,
+      "ROI": 452,
+      "STOP": 96
+     },
+     "ruined_on": "2024-05-10",
+     "t_stat": -5.2678427143642885
+    },
+    "yearly": {
+     "2021": -10939.11,
+     "2022": -4875.39,
+     "2023": -7545.49,
+     "2024": -3831.79,
+     "2025": -14857.45,
+     "2026": -5723.3
+    }
+   },
+   "btc_perp_adaptation": {
+    "dev": {
+     "trades": 1200,
+     "net": -11831.374843489884,
+     "ret_pct": -118.31374843489884,
+     "win_rate": 71.0,
+     "pf": 0.856085070780275,
+     "max_dd_pct": -100.0,
+     "exp_usd": -9.85947903624157,
+     "exp_pct": -0.09859479036241568,
+     "gross_pct": 0.0804052354709176,
+     "funding_pct": 0.02100002583333333,
+     "avg_hold_min": 561.9383333333334,
+     "trades_per_year": 399.90875912408757,
+     "exposure_pct": 42.72645478507705,
+     "by_reason": {
+      "EXIT_SIGNAL": 430,
+      "ROI": 654,
+      "STOP": 116
+     },
+     "ruined_on": "2022-05-14",
+     "t_stat": -1.8367111742383073
+    },
+    "oos": {
+     "trades": 1365,
+     "net": -11698.430202251222,
+     "ret_pct": -116.98430202251222,
+     "win_rate": 63.22344322344322,
+     "pf": 0.8218012472261184,
+     "max_dd_pct": -100.0,
+     "exp_usd": -8.570278536447782,
+     "exp_pct": -0.0857027853644778,
+     "gross_pct": 0.08117539998350752,
+     "funding_pct": 0.008878185347985349,
+     "avg_hold_min": 675.5941391941392,
+     "trades_per_year": 356.37330235882774,
+     "exposure_pct": 45.77605035342705,
+     "by_reason": {
+      "EXIT_SIGNAL": 955,
+      "ROI": 361,
+      "STOP": 49
+     },
+     "ruined_on": "2026-03-04",
+     "t_stat": -2.3665914756743267
+    }
+   },
+   "btc_spot_x2_oos": {
+    "trades": 1316,
+    "net": -50818.28758581396,
+    "ret_pct": -508.1828758581396,
+    "win_rate": 44.07294832826747,
+    "pf": 0.4010316489204216,
+    "max_dd_pct": -100.0,
+    "exp_usd": -38.61572005001061,
+    "exp_pct": -0.38615720050010616,
+    "gross_pct": 0.09384279949989392,
+    "funding_pct": 0.0,
+    "avg_hold_min": 716.9088145896657,
+    "trades_per_year": 343.5804145818442,
+    "exposure_pct": 46.83166547533953,
+    "by_reason": {
+     "EXIT_SIGNAL": 1032,
+     "ROI": 235,
+     "STOP": 49
+    },
+    "ruined_on": "2023-10-09",
+    "t_stat": -10.093501477353891
+   },
+   "sensitivity_btc_spot": {
+    "stop x0.75": {
+     "dev_net": -31238.968979420515,
+     "dev_trades": 1961,
+     "oos_net": -22108.73894490159,
+     "oos_trades": 1354
+    },
+    "stop x1.25": {
+     "dev_net": -26727.6790690693,
+     "dev_trades": 1935,
+     "oos_net": -20502.12580460529,
+     "oos_trades": 1344
+    },
+    "roi x0.75": {
+     "dev_net": -31693.028165045136,
+     "dev_trades": 2120,
+     "oos_net": -23150.730589703788,
+     "oos_trades": 1421
+    },
+    "roi x1.25": {
+     "dev_net": -24558.094298256547,
+     "dev_trades": 1823,
+     "oos_net": -19237.47761808781,
+     "oos_trades": 1307
+    }
+   },
+   "seconds": 2.7
+  },
+  "ReinforcedSmoothScalp": {
+   "class": "ReinforcedSmoothScalp",
+   "settings": {
+    "timeframe": "1m",
+    "minimal_roi": {
+     "0": 0.02
+    },
+    "stoploss": -0.1,
+    "trailing_stop": false,
+    "trailing_stop_positive": null,
+    "trailing_stop_positive_offset": 0.0,
+    "trailing_only_offset_is_reached": false,
+    "use_exit_signal": true,
+    "exit_profit_only": false,
+    "exit_profit_offset": 0.0,
+    "ignore_roi_if_entry_signal": false,
+    "can_short": false,
+    "callbacks": [],
+    "mode": "spot"
+   },
+   "btc_spot": {
+    "dev": {
+     "trades": 765,
+     "net": -11609.426384695389,
+     "ret_pct": -116.0942638469539,
+     "win_rate": 40.26143790849673,
+     "pf": 0.5317973686207665,
+     "max_dd_pct": -100.0,
+     "exp_usd": -15.175720764307698,
+     "exp_pct": -0.15175720764307699,
+     "gross_pct": 0.08824279235692303,
+     "funding_pct": 0.0,
+     "avg_hold_min": 102.9202614379085,
+     "trades_per_year": 153.0209474260679,
+     "exposure_pct": 2.994325788000487,
+     "by_reason": {
+      "EXIT_SIGNAL": 751,
+      "ROI": 14
+     },
+     "ruined_on": "2021-12-18",
+     "t_stat": -4.835599197505792
+    },
+    "oos": {
+     "trades": 1132,
+     "net": -22887.06301739066,
+     "ret_pct": -228.87063017390662,
+     "win_rate": 19.434628975265017,
+     "pf": 0.19366293568947127,
+     "max_dd_pct": -100.0,
+     "exp_usd": -20.218253548931678,
+     "exp_pct": -0.20218253548931678,
+     "gross_pct": 0.03781746451068324,
+     "funding_pct": 0.0,
+     "avg_hold_min": 77.03180212014134,
+     "trades_per_year": 295.54181558255897,
+     "exposure_pct": 4.328488602970375,
+     "by_reason": {
+      "EXIT_SIGNAL": 1131,
+      "ROI": 1
+     },
+     "ruined_on": "2024-12-21",
+     "t_stat": -16.732364569644997
+    },
+    "full": {
+     "trades": 1897,
+     "net": -34496.48940208605,
+     "ret_pct": -344.9648940208605,
+     "win_rate": 27.833421191354766,
+     "pf": 0.35132247711029707,
+     "max_dd_pct": -100.0,
+     "exp_usd": -18.184759832412258,
+     "exp_pct": -0.18184759832412256,
+     "gross_pct": 0.058152401675877465,
+     "funding_pct": 0.0,
+     "avg_hold_min": 87.47179757511861,
+     "trades_per_year": 214.84627906976746,
+     "exposure_pct": 3.5730835486649437,
+     "by_reason": {
+      "EXIT_SIGNAL": 1882,
+      "ROI": 15
+     },
+     "ruined_on": "2021-12-18",
+     "t_stat": -12.479271272882222
+    },
+    "yearly": {
+     "2018": -2988.71,
+     "2019": -3089.83,
+     "2020": -1967.34,
+     "2021": -1913.93,
+     "2022": -1649.61,
+     "2023": -6207.23,
+     "2024": -3936.58,
+     "2025": -8393.2,
+     "2026": -4350.05
+    }
+   },
+   "eth_spot": {
+    "dev": {
+     "trades": 376,
+     "net": -7584.977186901606,
+     "ret_pct": -75.84977186901605,
+     "win_rate": 44.9468085106383,
+     "pf": 0.5815844694301562,
+     "max_dd_pct": -78.00920018529213,
+     "exp_usd": -20.172811667291505,
+     "exp_pct": -0.2017281166729151,
+     "gross_pct": 0.038271883327084935,
+     "funding_pct": 0.0,
+     "avg_hold_min": 92.08244680851064,
+     "trades_per_year": 188.12876712328767,
+     "exposure_pct": 3.293664383561644,
+     "by_reason": {
+      "EXIT_SIGNAL": 359,
+      "ROI": 15,
+      "STOP": 2
+     },
+     "ruined_on": null,
+     "t_stat": -2.952876638880783
+    },
+    "oos": {
+     "trades": 885,
+     "net": -18476.083831346667,
+     "ret_pct": -184.76083831346665,
+     "win_rate": 31.864406779661014,
+     "pf": 0.35533500387925065,
+     "max_dd_pct": -100.0,
+     "exp_usd": -20.876930882877588,
+     "exp_pct": -0.20876930882877584,
+     "gross_pct": 0.031230691171224154,
+     "funding_pct": 0.0,
+     "avg_hold_min": 85.76158192090395,
+     "trades_per_year": 249.61100386100384,
+     "exposure_pct": 4.070087945087946,
+     "by_reason": {
+      "EXIT_SIGNAL": 876,
+      "ROI": 7,
+      "STOP": 2
+     },
+     "ruined_on": "2024-12-09",
+     "t_stat": -7.755707540540786
+    },
+    "yearly": {
+     "2021": -2072.95,
+     "2022": -5512.02,
+     "2023": -6075.09,
+     "2024": -5035.03,
+     "2025": -4932.79,
+     "2026": -2433.18
+    }
+   },
+   "btc_perp_adaptation": {
+    "dev": {
+     "trades": 409,
+     "net": -2293.968089303198,
+     "ret_pct": -22.939680893031984,
+     "win_rate": 54.034229828850854,
+     "pf": 0.8004022912996807,
+     "max_dd_pct": -25.102359362744775,
+     "exp_usd": -5.608723934726646,
+     "exp_pct": -0.05608723934726646,
+     "gross_pct": 0.10374639879454284,
+     "funding_pct": 0.0018336381418092912,
+     "avg_hold_min": 95.41809290953545,
+     "trades_per_year": 136.30223540145985,
+     "exposure_pct": 2.4727544606650445,
+     "by_reason": {
+      "EXIT_SIGNAL": 404,
+      "ROI": 5
+     },
+     "ruined_on": null,
+     "t_stat": -1.317125431926468
+    },
+    "oos": {
+     "trades": 1132,
+     "net": -13730.326432378868,
+     "ret_pct": -137.30326432378868,
+     "win_rate": 30.653710247349824,
+     "pf": 0.36043628825827273,
+     "max_dd_pct": -100.0,
+     "exp_usd": -12.129263632843523,
+     "exp_pct": -0.12129263632843527,
+     "gross_pct": 0.03774345996131741,
+     "funding_pct": 0.0010360962897526503,
+     "avg_hold_min": 77.03091872791519,
+     "trades_per_year": 295.54181558255897,
+     "exposure_pct": 4.3284389643396075,
+     "by_reason": {
+      "EXIT_SIGNAL": 1131,
+      "ROI": 1
+     },
+     "ruined_on": "2025-10-27",
+     "t_stat": -10.041326141660269
+    }
+   },
+   "btc_spot_x2_oos": {
+    "trades": 1132,
+    "net": -50034.60167428403,
+    "ret_pct": -500.34601674284033,
+    "win_rate": 7.508833922261485,
+    "pf": 0.04442260379249881,
+    "max_dd_pct": -100.0,
+    "exp_usd": -44.200178157494726,
+    "exp_pct": -0.44200178157494724,
+    "gross_pct": 0.037998218425052806,
+    "funding_pct": 0.0,
+    "avg_hold_min": 77.0326855123675,
+    "trades_per_year": 295.54181558255897,
+    "exposure_pct": 4.3285382416011435,
+    "by_reason": {
+     "EXIT_SIGNAL": 1131,
+     "ROI": 1
+    },
+    "ruined_on": "2023-09-24",
+    "t_stat": -36.48899741677117
+   },
+   "sensitivity_btc_spot": {
+    "stop x0.75": {
+     "dev_net": -11742.545495931206,
+     "dev_trades": 765,
+     "oos_net": -22887.06301739066,
+     "oos_trades": 1132
+    },
+    "stop x1.25": {
+     "dev_net": -11609.426384695389,
+     "dev_trades": 765,
+     "oos_net": -22887.06301739066,
+     "oos_trades": 1132
+    },
+    "roi x0.75": {
+     "dev_net": -12291.39898993901,
+     "dev_trades": 765,
+     "oos_net": -22928.454223639754,
+     "oos_trades": 1132
+    },
+    "roi x1.25": {
+     "dev_net": -11247.911041371899,
+     "dev_trades": 765,
+     "oos_net": -22858.89234884528,
+     "oos_trades": 1132
+    }
+   },
+   "seconds": 1.6
+  }
+ },
+ "windows": {
+  "BTC/USDT": {
+   "dev": [
+    "2018-01-01",
+    "2023-01-01"
+   ],
+   "oos": [
+    "2023-01-01",
+    "2026-10-31"
+   ]
+  },
+  "ETH/USDT": {
+   "dev": [
+    "2021-01-01",
+    "2023-01-01"
+   ],
+   "oos": [
+    "2023-01-01",
+    "2026-07-19"
+   ]
+  },
+  "PERP": {
+   "dev": [
+    "2020-01-01",
+    "2023-01-01"
+   ],
+   "oos": [
+    "2023-01-01",
+    "2026-10-31"
+   ]
+  }
+ },
+ "costs": {
+  "spot": "Binance spot taker 0.10% a side + 2 bp slippage a side (original market)",
+  "perp": "Delta India taker 0.05% + 18% GST = 5.9 bp a side + 2 bp slippage + Binance USDT-M funding (adaptation)",
+  "spot_x2": "stress: twice the spot costs"
+ },
+ "notional_usd": 10000.0
+}

@@ -1,0 +1,5547 @@
+{
+ "repo": "https://github.com/freqtrade/freqtrade-strategies",
+ "commit": "f3340ce11f5bdf62f598522e64d1f5638eaa13f5",
+ "licence": "GPL-3.0 (repository LICENSE)",
+ "strategies": [
+  {
+   "file": "user_data/strategies/AlmgrenChrissStrategy.py",
+   "class": "AlmgrenChrissStrategy",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    14,
+    234
+   ],
+   "sha256_file": "b336a714198174b8e652a4115423b37915ee8eacbd89cc412c090b61f4043522",
+   "settings": {
+    "timeframe": {
+     "value": "15m",
+     "line": 31
+    },
+    "stoploss": {
+     "value": -0.1,
+     "line": 32
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.02
+     },
+     "line": 33
+    },
+    "process_only_new_candles": {
+     "value": true,
+     "line": 34
+    },
+    "startup_candle_count": {
+     "value": 30,
+     "line": 35
+    },
+    "can_short": {
+     "value": true,
+     "line": 36
+    },
+    "position_adjustment_enable": {
+     "value": true,
+     "line": 37
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      51,
+      54
+     ],
+     "calls": [
+      "ta.RSI"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      56,
+      68
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      70,
+      72
+     ],
+     "calls": []
+    },
+    "adjust_trade_position": {
+     "lines": [
+      161,
+      185
+     ],
+     "calls": []
+    }
+   },
+   "flags": [
+    {
+     "kind": "review",
+     "line": 86,
+     "why": "reads the LAST row of the whole frame (whole-frame value used as a signal input?)",
+     "code": "last_candle = dataframe.iloc[-1]"
+    },
+    {
+     "kind": "review",
+     "line": 98,
+     "why": "whole-column aggregate (may use the full history, future included)",
+     "code": "sigma = dataframe[\"close\"].rolling(self.vol_window).std()"
+    },
+    {
+     "kind": "review",
+     "line": 99,
+     "why": "whole-column aggregate (may use the full history, future included)",
+     "code": "avg_spread = (dataframe[\"high\"] - dataframe[\"low\"]).rolling(self.vol_window).mean()"
+    },
+    {
+     "kind": "review",
+     "line": 100,
+     "why": "whole-column aggregate (may use the full history, future included)",
+     "code": "avg_volume = dataframe[\"volume\"].rolling(self.vol_window).mean()"
+    },
+    {
+     "kind": "review",
+     "line": 129,
+     "why": "reads the LAST row of the whole frame (whole-frame value used as a signal input?)",
+     "code": "value = dataframe[\"kappa\"].iloc[-1]"
+    }
+   ],
+   "shorts": true,
+   "averaging": true,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/Bandtastic.py",
+   "class": "Bandtastic",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    21,
+    163
+   ],
+   "sha256_file": "15dcb60d49a3681241cd39645f0fe8e6dc247687bf878c2026f37bb1c5790b57",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 22
+    },
+    "timeframe": {
+     "value": "15m",
+     "line": 24
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.162,
+      "69": 0.097,
+      "229": 0.061,
+      "566": 0
+     },
+     "line": 27
+    },
+    "stoploss": {
+     "value": -0.345,
+     "line": 35
+    },
+    "startup_candle_count": {
+     "value": 999,
+     "line": 37
+    },
+    "trailing_stop": {
+     "value": true,
+     "line": 40
+    },
+    "trailing_stop_positive": {
+     "value": 0.01,
+     "line": 41
+    },
+    "trailing_stop_positive_offset": {
+     "value": 0.058,
+     "line": 42
+    },
+    "trailing_only_offset_is_reached": {
+     "value": false,
+     "line": 43
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      67,
+      101
+     ],
+     "calls": [
+      "qtpylib.bollinger_bands",
+      "qtpylib.typical_price",
+      "ta.EMA",
+      "ta.MFI",
+      "ta.RSI"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      103,
+      132
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      134,
+      163
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/ADXMomentum.py",
+   "class": "ADXMomentum",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    10,
+    69
+   ],
+   "sha256_file": "7ed9c2306f337a1cc49cb2e11ddf6b66397853b9c4155faa13e5cf1ea61a651a",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 21
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.01
+     },
+     "line": 25
+    },
+    "stoploss": {
+     "value": -0.25,
+     "line": 30
+    },
+    "timeframe": {
+     "value": "1h",
+     "line": 33
+    },
+    "startup_candle_count": {
+     "value": 20,
+     "line": 36
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      38,
+      45
+     ],
+     "calls": [
+      "ta.ADX",
+      "ta.MINUS_DI",
+      "ta.MOM",
+      "ta.PLUS_DI",
+      "ta.SAR"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      47,
+      57
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      59,
+      69
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/AdxSmas.py",
+   "class": "AdxSmas",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    11,
+    61
+   ],
+   "sha256_file": "01356e36b3164b66aa4338a70f67f4bb887d4c79ae81b1bc2d1be5c5ba76fca5",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 22
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.1
+     },
+     "line": 26
+    },
+    "stoploss": {
+     "value": -0.25,
+     "line": 31
+    },
+    "timeframe": {
+     "value": "1h",
+     "line": 34
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      36,
+      41
+     ],
+     "calls": [
+      "ta.ADX",
+      "ta.SMA"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      43,
+      51
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    },
+    "populate_exit_trend": {
+     "lines": [
+      53,
+      61
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/ASDTSRockwellTrading.py",
+   "class": "ASDTSRockwellTrading",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    13,
+    86
+   ],
+   "sha256_file": "58ee823e52dbf7def502c7cf069c4bca56d8198eb5037fc007856d27529e8968",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 34
+    },
+    "minimal_roi": {
+     "value": {
+      "60": 0.01,
+      "30": 0.03,
+      "20": 0.04,
+      "0": 0.05
+     },
+     "line": 37
+    },
+    "stoploss": {
+     "value": -0.3,
+     "line": 46
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 49
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      51,
+      58
+     ],
+     "calls": [
+      "ta.MACD"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      60,
+      73
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      75,
+      86
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/AverageStrategy.py",
+   "class": "AverageStrategy",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    12,
+    79
+   ],
+   "sha256_file": "63606866fdf1cb3d71dc39a951ed0784a31686690b1c4014c12d2481c8dbf094",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 21
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.5
+     },
+     "line": 24
+    },
+    "stoploss": {
+     "value": -0.2,
+     "line": 30
+    },
+    "timeframe": {
+     "value": "4h",
+     "line": 33
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      38,
+      44
+     ],
+     "calls": [
+      "ta.EMA"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      46,
+      62
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    },
+    "populate_exit_trend": {
+     "lines": [
+      64,
+      79
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/AwesomeMacd.py",
+   "class": "AwesomeMacd",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    11,
+    67
+   ],
+   "sha256_file": "8872b23514791b1e81a67e9d486e4efdd20fc08732ee5c0bf87312a82ff8a4c7",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 22
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.1
+     },
+     "line": 26
+    },
+    "stoploss": {
+     "value": -0.25,
+     "line": 31
+    },
+    "timeframe": {
+     "value": "1h",
+     "line": 34
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      36,
+      45
+     ],
+     "calls": [
+      "qtpylib.awesome_oscillator",
+      "ta.ADX",
+      "ta.MACD"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      47,
+      56
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      58,
+      67
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/BbandRsi.py",
+   "class": "BbandRsi",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    11,
+    64
+   ],
+   "sha256_file": "65718e8d0c14094b67be82b66238ea60a4af4bbf6fd9a6e1879dad5c48125547",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 22
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.1
+     },
+     "line": 26
+    },
+    "stoploss": {
+     "value": -0.25,
+     "line": 31
+    },
+    "timeframe": {
+     "value": "1h",
+     "line": 34
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      36,
+      45
+     ],
+     "calls": [
+      "qtpylib.bollinger_bands",
+      "qtpylib.typical_price",
+      "ta.RSI"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      47,
+      55
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      57,
+      64
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/BinHV27.py",
+   "class": "BinHV27",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    19,
+    137
+   ],
+   "sha256_file": "e94ea092f9d277f29ce593f5adc1d9efffb846c27f1c1abfa51c57f1c53257b5",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 25
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 1
+     },
+     "line": 26
+    },
+    "stoploss": {
+     "value": -0.5,
+     "line": 30
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 31
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      33,
+      56
+     ],
+     "calls": [
+      "ta.ADX",
+      "ta.EMA",
+      "ta.MINUS_DI",
+      "ta.PLUS_DI",
+      "ta.RSI",
+      "ta.SMA"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      58,
+      94
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      96,
+      137
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/BinHV45.py",
+   "class": "BinHV45",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    20,
+    71
+   ],
+   "sha256_file": "ae76994b6fc8dd1937d84fc6d5ef0b9d7b702f01f61f5ccf5a2870278a3422a2",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 21
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.0125
+     },
+     "line": 23
+    },
+    "stoploss": {
+     "value": -0.05,
+     "line": 27
+    },
+    "timeframe": {
+     "value": "1m",
+     "line": 28
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      41,
+      51
+     ],
+     "calls": [
+      "qtpylib.bollinger_bands"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      53,
+      64
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      66,
+      71
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/CCIStrategy.py",
+   "class": "CCIStrategy",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    12,
+    120
+   ],
+   "sha256_file": "c3b1f8b57850d12a1e1b4e1ec42e92b842b2384f439e177f9e711bd20d698aad",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 13
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.1
+     },
+     "line": 16
+    },
+    "stoploss": {
+     "value": -0.02,
+     "line": 22
+    },
+    "timeframe": {
+     "value": "1m",
+     "line": 25
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      27,
+      43
+     ],
+     "calls": [
+      "qtpylib.bollinger_bands",
+      "ta.CCI",
+      "ta.MFI",
+      "ta.RSI"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      45,
+      65
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      67,
+      83
+     ],
+     "calls": []
+    }
+   },
+   "flags": [
+    {
+     "kind": "timeframe",
+     "line": 28,
+     "why": "resampling inside the strategy: check bar alignment and that only closed bars are used",
+     "code": "dataframe = self.resample(dataframe, self.timeframe, 5)"
+    },
+    {
+     "kind": "timeframe",
+     "line": 98,
+     "why": "resampling inside the strategy: check bar alignment and that only closed bars are used",
+     "code": "def resample(self, dataframe, interval, factor):"
+    },
+    {
+     "kind": "timeframe",
+     "line": 109,
+     "why": "resampling inside the strategy: check bar alignment and that only closed bars are used",
+     "code": "df = df.resample(str(int(interval[:-1]) * factor) + 'min', label=\"right\").agg(ohlc_dict)"
+    },
+    {
+     "kind": "timeframe",
+     "line": 115,
+     "why": "resampling inside the strategy: check bar alignment and that only closed bars are used",
+     "code": "df = df.resample(interval[:-1] + 'min')"
+    },
+    {
+     "kind": "timeframe",
+     "line": 119,
+     "why": "merging frames: check the informative bar is closed before it is used",
+     "code": "dataframe = merge(dataframe, df, on='date', how='left')"
+    }
+   ],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/ClucMay72018.py",
+   "class": "ClucMay72018",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    20,
+    84
+   ],
+   "sha256_file": "d146f7bc8285b5f1e48514d5d6acc53b37b0ca00299780210e3bdf84564978aa",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 29
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.01
+     },
+     "line": 32
+    },
+    "stoploss": {
+     "value": -0.05,
+     "line": 38
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 41
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      43,
+      55
+     ],
+     "calls": [
+      "qtpylib.bollinger_bands",
+      "qtpylib.typical_price",
+      "ta.ADX",
+      "ta.EMA",
+      "ta.MACD",
+      "ta.RSI"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      57,
+      71
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      73,
+      84
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/CMCWinner.py",
+   "class": "CMCWinner",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    14,
+    95
+   ],
+   "sha256_file": "0529996f7e895c3c15ee143f1f0c5ff75d78fd6522856ba0daa55b94437bfc3f",
+   "settings": {
+    "minimal_roi": {
+     "value": {
+      "40": 0.0,
+      "30": 0.02,
+      "20": 0.03,
+      "0": 0.05
+     },
+     "line": 32
+    },
+    "stoploss": {
+     "value": -0.05,
+     "line": 41
+    },
+    "timeframe": {
+     "value": "15m",
+     "line": 44
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      46,
+      64
+     ],
+     "calls": [
+      "ta.CCI",
+      "ta.CMO",
+      "ta.MFI"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      66,
+      80
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      82,
+      95
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/CofiBitStrategy.py",
+   "class": "CofiBitStrategy",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    12,
+    94
+   ],
+   "sha256_file": "c565296f014ade283b684cae3ff375bd1b80c8696d7b8498b2b5915d2a6553ff",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 17
+    },
+    "minimal_roi": {
+     "value": {
+      "40": 0.05,
+      "30": 0.06,
+      "20": 0.07,
+      "0": 0.1
+     },
+     "line": 31
+    },
+    "stoploss": {
+     "value": -0.25,
+     "line": 40
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 43
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      49,
+      58
+     ],
+     "calls": [
+      "ta.ADX",
+      "ta.EMA",
+      "ta.STOCHF"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      60,
+      76
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    },
+    "populate_exit_trend": {
+     "lines": [
+      78,
+      94
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/CombinedBinHAndCluc.py",
+   "class": "CombinedBinHAndCluc",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    17,
+    76
+   ],
+   "sha256_file": "546256271db535f1e326130c6b2d9849dd9a5efb602eb92ed45dad282967f45d",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 23
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.05
+     },
+     "line": 24
+    },
+    "stoploss": {
+     "value": -0.05,
+     "line": 27
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 28
+    },
+    "use_exit_signal": {
+     "value": true,
+     "line": 30
+    },
+    "exit_profit_only": {
+     "value": true,
+     "line": 31
+    },
+    "ignore_roi_if_entry_signal": {
+     "value": false,
+     "line": 32
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      34,
+      48
+     ],
+     "calls": [
+      "qtpylib.bollinger_bands",
+      "qtpylib.typical_price",
+      "ta.EMA"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      50,
+      67
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      69,
+      76
+     ],
+     "calls": []
+    }
+   },
+   "flags": [
+    {
+     "kind": "review",
+     "line": 46,
+     "why": "whole-column aggregate (may use the full history, future included)",
+     "code": "dataframe['volume_mean_slow'] = dataframe['volume'].rolling(window=30).mean()"
+    }
+   ],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/DoesNothingStrategy.py",
+   "class": "DoesNothingStrategy",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    7,
+    45
+   ],
+   "sha256_file": "8ec83bd94f76e6d67b13ef2d2cb63f5284d8819f576bdf3fe6270335680942be",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 16
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 100000
+     },
+     "line": 20
+    },
+    "stoploss": {
+     "value": -1,
+     "line": 25
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 28
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      30,
+      31
+     ],
+     "calls": []
+    },
+    "populate_entry_trend": {
+     "lines": [
+      33,
+      38
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      40,
+      45
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/EMASkipPump.py",
+   "class": "EMASkipPump",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    12,
+    86
+   ],
+   "sha256_file": "74117c68b3407a775d80fc4d4f1b27852689baad2255f19a7026a2b0c45b2085",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 18
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.1
+     },
+     "line": 25
+    },
+    "stoploss": {
+     "value": -0.05,
+     "line": 32
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 35
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      37,
+      61
+     ],
+     "calls": [
+      "qtpylib.bollinger_bands",
+      "qtpylib.typical_price",
+      "ta.EMA",
+      "ta.MAX",
+      "ta.MIN"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      63,
+      74
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      76,
+      86
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/Freqtrade_backtest_validation_freqtrade1.py",
+   "class": "Freqtrade_backtest_validation_freqtrade1",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    16,
+    50
+   ],
+   "sha256_file": "758d3730e57c7337f988ac68420d8140a0bff72d99fa9182017cd1f8b160c869",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 17
+    },
+    "minimal_roi": {
+     "value": {
+      "40": 2.0,
+      "30": 2.01,
+      "20": 2.02,
+      "0": 2.04
+     },
+     "line": 19
+    },
+    "stoploss": {
+     "value": -0.9,
+     "line": 26
+    },
+    "timeframe": {
+     "value": "1h",
+     "line": 27
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      29,
+      33
+     ],
+     "calls": [
+      "ta.SMA"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      35,
+      42
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      44,
+      50
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/Low_BB.py",
+   "class": "Low_BB",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    21,
+    109
+   ],
+   "sha256_file": "36e058d11b438beeab017d293558d06976e950542b6568b2207b7f42940ff63b",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 32
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.9,
+      "1": 0.05,
+      "10": 0.04,
+      "15": 0.5
+     },
+     "line": 35
+    },
+    "stoploss": {
+     "value": -0.015,
+     "line": 44
+    },
+    "timeframe": {
+     "value": "1m",
+     "line": 47
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      49,
+      81
+     ],
+     "calls": [
+      "qtpylib.bollinger_bands",
+      "qtpylib.typical_price",
+      "ta.CCI",
+      "ta.MACD",
+      "ta.MFI",
+      "ta.RSI"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      83,
+      98
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      100,
+      109
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/MACDStrategy.py",
+   "class": "MACDStrategy",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    11,
+    103
+   ],
+   "sha256_file": "80ce71ddb59191921e6dcd08101418f11e0d76d7b61471479ee5617605d22d55",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 32
+    },
+    "minimal_roi": {
+     "value": {
+      "60": 0.01,
+      "30": 0.03,
+      "20": 0.04,
+      "0": 0.05
+     },
+     "line": 36
+    },
+    "stoploss": {
+     "value": -0.3,
+     "line": 45
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 48
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      63,
+      71
+     ],
+     "calls": [
+      "ta.CCI",
+      "ta.MACD"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      73,
+      87
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      89,
+      103
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/MACDStrategy_crossed.py",
+   "class": "MACDStrategy_crossed",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    13,
+    78
+   ],
+   "sha256_file": "af5aed1cbb9a9d3ed519ea8649363a2cfaa95cbffe443f073d9f96b2aa91b0f6",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 23
+    },
+    "minimal_roi": {
+     "value": {
+      "60": 0.01,
+      "30": 0.03,
+      "20": 0.04,
+      "0": 0.05
+     },
+     "line": 26
+    },
+    "stoploss": {
+     "value": -0.3,
+     "line": 35
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 38
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      40,
+      48
+     ],
+     "calls": [
+      "ta.CCI",
+      "ta.MACD"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      50,
+      63
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    },
+    "populate_exit_trend": {
+     "lines": [
+      65,
+      78
+     ],
+     "calls": [
+      "qtpylib.crossed_below"
+     ]
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/MultiRSI.py",
+   "class": "MultiRSI",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    9,
+    71
+   ],
+   "sha256_file": "0bd453350bdf32db4355277d79a3c7268d166d043bab59e30403a1e97687aa06",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 17
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.01
+     },
+     "line": 18
+    },
+    "stoploss": {
+     "value": -0.05,
+     "line": 23
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 26
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      31,
+      52
+     ],
+     "calls": [
+      "ta.RSI",
+      "ta.SMA"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      54,
+      62
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      64,
+      71
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/Quickie.py",
+   "class": "Quickie",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    12,
+    78
+   ],
+   "sha256_file": "85733568de6bb80c3db87e26faff93ab5e5da95dbb298cc42737365d3e6500a7",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 21
+    },
+    "minimal_roi": {
+     "value": {
+      "100": 0.01,
+      "30": 0.03,
+      "15": 0.06,
+      "10": 0.15
+     },
+     "line": 24
+    },
+    "stoploss": {
+     "value": -0.25,
+     "line": 33
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 36
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      38,
+      56
+     ],
+     "calls": [
+      "qtpylib.bollinger_bands",
+      "ta.ADX",
+      "ta.MACD",
+      "ta.SMA",
+      "ta.TEMA"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      58,
+      68
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      70,
+      78
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/ReinforcedAverageStrategy.py",
+   "class": "ReinforcedAverageStrategy",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    14,
+    97
+   ],
+   "sha256_file": "50c8e88441ffead38fd1e1b3d49b151a001068f5eff01a23c10178b1f2c87e38",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 23
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.5
+     },
+     "line": 26
+    },
+    "stoploss": {
+     "value": -0.2,
+     "line": 32
+    },
+    "timeframe": {
+     "value": "4h",
+     "line": 35
+    },
+    "trailing_stop": {
+     "value": false,
+     "line": 38
+    },
+    "trailing_stop_positive": {
+     "value": 0.01,
+     "line": 39
+    },
+    "trailing_stop_positive_offset": {
+     "value": 0.02,
+     "line": 40
+    },
+    "trailing_only_offset_is_reached": {
+     "value": false,
+     "line": 41
+    },
+    "process_only_new_candles": {
+     "value": true,
+     "line": 44
+    },
+    "use_exit_signal": {
+     "value": true,
+     "line": 47
+    },
+    "exit_profit_only": {
+     "value": false,
+     "line": 48
+    },
+    "ignore_roi_if_entry_signal": {
+     "value": false,
+     "line": 49
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      51,
+      66
+     ],
+     "calls": [
+      "qtpylib.bollinger_bands",
+      "ta.EMA",
+      "ta.SMA"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      68,
+      83
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    },
+    "populate_exit_trend": {
+     "lines": [
+      85,
+      97
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/ReinforcedQuickie.py",
+   "class": "ReinforcedQuickie",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    19,
+    195
+   ],
+   "sha256_file": "e4b362d68be33ddd90f7c372fafb2754782a9d37422dfa1f21ee89741328a624",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 30
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.01
+     },
+     "line": 33
+    },
+    "stoploss": {
+     "value": -0.05,
+     "line": 39
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 42
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      51,
+      95
+     ],
+     "calls": [
+      "qtpylib.bollinger_bands",
+      "qtpylib.typical_price",
+      "ta.CCI",
+      "ta.EMA",
+      "ta.MACD",
+      "ta.MAX",
+      "ta.MFI",
+      "ta.MIN",
+      "ta.RSI"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      97,
+      140
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      142,
+      173
+     ],
+     "calls": []
+    }
+   },
+   "flags": [
+    {
+     "kind": "timeframe",
+     "line": 52,
+     "why": "resampling inside the strategy: check bar alignment and that only closed bars are used",
+     "code": "dataframe = self.resample(dataframe, self.timeframe, self.resample_factor)"
+    },
+    {
+     "kind": "timeframe",
+     "line": 175,
+     "why": "resampling inside the strategy: check bar alignment and that only closed bars are used",
+     "code": "def resample(self, dataframe, interval, factor):"
+    },
+    {
+     "kind": "timeframe",
+     "line": 186,
+     "why": "resampling inside the strategy: check bar alignment and that only closed bars are used",
+     "code": "df = df.resample(str(int(interval[:-1]) * factor) + 'min',"
+    },
+    {
+     "kind": "timeframe",
+     "line": 190,
+     "why": "resampling inside the strategy: check bar alignment and that only closed bars are used",
+     "code": "df = df.resample(interval[:-1] + 'min')"
+    },
+    {
+     "kind": "timeframe",
+     "line": 194,
+     "why": "merging frames: check the informative bar is closed before it is used",
+     "code": "dataframe = merge(dataframe, df, on='date', how='left')"
+    }
+   ],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/ReinforcedSmoothScalp.py",
+   "class": "ReinforcedSmoothScalp",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    14,
+    138
+   ],
+   "sha256_file": "d510b70a62dfcde39697184f62b48e93cae8a6c87a67670e0fadb8bed51b73c5",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 21
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.02
+     },
+     "line": 24
+    },
+    "stoploss": {
+     "value": -0.1,
+     "line": 31
+    },
+    "timeframe": {
+     "value": "1m",
+     "line": 34
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      60,
+      84
+     ],
+     "calls": [
+      "qtpylib.bollinger_bands",
+      "ta.ADX",
+      "ta.CCI",
+      "ta.EMA",
+      "ta.MFI",
+      "ta.RSI",
+      "ta.SMA",
+      "ta.STOCHF"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      86,
+      110
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    },
+    "populate_exit_trend": {
+     "lines": [
+      112,
+      138
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/Scalp.py",
+   "class": "Scalp",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    10,
+    75
+   ],
+   "sha256_file": "3163f460f08db33b4aded14c00f880f6b5e5f2413489137e522c1f93a8954a65",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 19
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.01
+     },
+     "line": 22
+    },
+    "stoploss": {
+     "value": -0.04,
+     "line": 29
+    },
+    "timeframe": {
+     "value": "1m",
+     "line": 32
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      34,
+      49
+     ],
+     "calls": [
+      "qtpylib.bollinger_bands",
+      "ta.ADX",
+      "ta.EMA",
+      "ta.STOCHF"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      51,
+      63
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    },
+    "populate_exit_trend": {
+     "lines": [
+      65,
+      75
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/Simple.py",
+   "class": "Simple",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    12,
+    76
+   ],
+   "sha256_file": "812a8d63b0e0ddff6b9bae582c4d573ab9a4ffec6dd0d1c5b8f8180f11db6d0b",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 23
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.01
+     },
+     "line": 27
+    },
+    "stoploss": {
+     "value": -0.25,
+     "line": 33
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 36
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      38,
+      54
+     ],
+     "calls": [
+      "qtpylib.bollinger_bands",
+      "ta.MACD",
+      "ta.RSI"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      56,
+      67
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      69,
+      76
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/SmoothOperator.py",
+   "class": "SmoothOperator",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    15,
+    205
+   ],
+   "sha256_file": "46f608cc51f9b18e9bb52983776a6d55d9b13814a93f7666cc8ecdb4f86c3915",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 26
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.1
+     },
+     "line": 29
+    },
+    "stoploss": {
+     "value": -0.05,
+     "line": 36
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 39
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      41,
+      103
+     ],
+     "calls": [
+      "qtpylib.bollinger_bands",
+      "ta.ADX",
+      "ta.CCI",
+      "ta.EMA",
+      "ta.MACD",
+      "ta.MFI",
+      "ta.RSI",
+      "ta.SMA",
+      "ta.TEMA"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      105,
+      173
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      175,
+      205
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/SmoothScalp.py",
+   "class": "SmoothScalp",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    18,
+    102
+   ],
+   "sha256_file": "e32a8f758d8d57876210d479576e7e415ff924400b8d037bb0f30799cd801a5b",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 25
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.01
+     },
+     "line": 28
+    },
+    "stoploss": {
+     "value": -0.5,
+     "line": 35
+    },
+    "timeframe": {
+     "value": "1m",
+     "line": 38
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      40,
+      64
+     ],
+     "calls": [
+      "qtpylib.bollinger_bands",
+      "ta.ADX",
+      "ta.CCI",
+      "ta.EMA",
+      "ta.MACD",
+      "ta.MFI",
+      "ta.RSI",
+      "ta.STOCHF"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      66,
+      83
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    },
+    "populate_exit_trend": {
+     "lines": [
+      85,
+      102
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/TDSequentialStrategy.py",
+   "class": "TDSequentialStrategy",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    8,
+    151
+   ],
+   "sha256_file": "b2a4b0e7a05ef50aa913c4f9d83062ecc6c5c17e2021d19f3cc2b30ec98ba1cf",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 24
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 5
+     },
+     "line": 27
+    },
+    "stoploss": {
+     "value": -0.05,
+     "line": 30
+    },
+    "trailing_stop": {
+     "value": false,
+     "line": 33
+    },
+    "timeframe": {
+     "value": "1h",
+     "line": 39
+    },
+    "use_exit_signal": {
+     "value": true,
+     "line": 42
+    },
+    "exit_profit_only": {
+     "value": false,
+     "line": 43
+    },
+    "ignore_roi_if_entry_signal": {
+     "value": false,
+     "line": 44
+    },
+    "order_types": {
+     "value": {
+      "entry": "limit",
+      "exit": "limit",
+      "stoploss": "limit",
+      "stoploss_on_exchange": false
+     },
+     "line": 47
+    },
+    "startup_candle_count": {
+     "value": 30,
+     "line": 55
+    }
+   },
+   "methods": {
+    "informative_pairs": {
+     "lines": [
+      63,
+      74
+     ],
+     "calls": []
+    },
+    "populate_indicators": {
+     "lines": [
+      76,
+      124
+     ],
+     "calls": []
+    },
+    "populate_entry_trend": {
+     "lines": [
+      126,
+      138
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      140,
+      151
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": true
+  },
+  {
+   "file": "user_data/strategies/berlinguyinca/TechnicalExampleStrategy.py",
+   "class": "TechnicalExampleStrategy",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    7,
+    41
+   ],
+   "sha256_file": "0a3d94c8ef857284c9bc37d592af329b1a831f9c504fb2d73b63db00d303db50",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 8
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.01
+     },
+     "line": 9
+    },
+    "stoploss": {
+     "value": -0.05,
+     "line": 13
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 16
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      18,
+      21
+     ],
+     "calls": []
+    },
+    "populate_entry_trend": {
+     "lines": [
+      23,
+      32
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      34,
+      41
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/BreakEven.py",
+   "class": "BreakEven",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    8,
+    69
+   ],
+   "sha256_file": "af632fe3b12361c9dc52e7d61ebbcb305a22e78adb580532010d88187a3e4efd",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 30
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.01,
+      "10": 0
+     },
+     "line": 32
+    },
+    "stoploss": {
+     "value": -0.05,
+     "line": 48
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 51
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      54,
+      55
+     ],
+     "calls": []
+    },
+    "populate_entry_trend": {
+     "lines": [
+      57,
+      62
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      64,
+      69
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/CustomStoplossWithPSAR.py",
+   "class": "CustomStoplossWithPSAR",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    18,
+    94
+   ],
+   "sha256_file": "9d20f081adf0c95886afc4b5135ecac00e37c2c6fec7e9ddc64671076d71cd60",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 26
+    },
+    "timeframe": {
+     "value": "1h",
+     "line": 27
+    },
+    "stoploss": {
+     "value": -0.2,
+     "line": 28
+    },
+    "use_custom_stoploss": {
+     "value": true,
+     "line": 30
+    },
+    "startup_candle_count": {
+     "value": 199,
+     "line": 32
+    }
+   },
+   "methods": {
+    "custom_stoploss": {
+     "lines": [
+      34,
+      58
+     ],
+     "calls": []
+    },
+    "populate_indicators": {
+     "lines": [
+      60,
+      68
+     ],
+     "calls": [
+      "ta.RSI",
+      "ta.SAR"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      70,
+      83
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      85,
+      94
+     ],
+     "calls": []
+    }
+   },
+   "flags": [
+    {
+     "kind": "review",
+     "line": 47,
+     "why": "reads the LAST row of the whole frame (whole-frame value used as a signal input?)",
+     "code": "last_candle = dataframe.iloc[-1].squeeze()"
+    }
+   ],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/Diamond.py",
+   "class": "Diamond",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    53,
+    155
+   ],
+   "sha256_file": "98f108f9df8f22b4b9be921b912ada3eff7669b25fc9ec455992ec902a385902",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 58
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.242,
+      "13": 0.044,
+      "51": 0.02,
+      "170": 0
+     },
+     "line": 77
+    },
+    "stoploss": {
+     "value": -0.271,
+     "line": 85
+    },
+    "trailing_stop": {
+     "value": true,
+     "line": 88
+    },
+    "trailing_stop_positive": {
+     "value": 0.011,
+     "line": 89
+    },
+    "trailing_stop_positive_offset": {
+     "value": 0.054,
+     "line": 90
+    },
+    "trailing_only_offset_is_reached": {
+     "value": false,
+     "line": 91
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 93
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      117,
+      123
+     ],
+     "calls": [
+      "ta.SMA"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      125,
+      140
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    },
+    "populate_exit_trend": {
+     "lines": [
+      142,
+      155
+     ],
+     "calls": [
+      "qtpylib.crossed_below"
+     ]
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/FixedRiskRewardLoss.py",
+   "class": "FixedRiskRewardLoss",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    20,
+    121
+   ],
+   "sha256_file": "338fc39a8f236d0ddb79c0f7e6a1f593be721bdb2a598815347e0883cc7696fc",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 32
+    },
+    "use_custom_stoploss": {
+     "value": true,
+     "line": 37
+    },
+    "stoploss": {
+     "value": -0.9,
+     "line": 38
+    }
+   },
+   "methods": {
+    "custom_stoploss": {
+     "lines": [
+      40,
+      88
+     ],
+     "calls": []
+    },
+    "populate_indicators": {
+     "lines": [
+      90,
+      98
+     ],
+     "calls": [
+      "ta.ATR",
+      "ta.RSI"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      100,
+      109
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      111,
+      121
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/futures/FAdxSmaStrategy.py",
+   "class": "FAdxSmaStrategy",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    25,
+    130
+   ],
+   "sha256_file": "43ae02ecca4553b8a609d4533cb4d5b6517292d35b41fc4c77f54f8e959ced89",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 27
+    },
+    "timeframe": {
+     "value": "1h",
+     "line": 28
+    },
+    "minimal_roi": {
+     "value": {
+      "60": 0.075,
+      "30": 0.1,
+      "0": 0.05
+     },
+     "line": 31
+    },
+    "stoploss": {
+     "value": -0.05,
+     "line": 34
+    },
+    "can_short": {
+     "value": true,
+     "line": 35
+    },
+    "trailing_stop": {
+     "value": false,
+     "line": 38
+    },
+    "process_only_new_candles": {
+     "value": true,
+     "line": 44
+    },
+    "startup_candle_count": {
+     "value": 14,
+     "line": 47
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      60,
+      74
+     ],
+     "calls": [
+      "ta.ADX",
+      "ta.SMA"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      76,
+      111
+     ],
+     "calls": [
+      "qtpylib.crossed_above",
+      "qtpylib.crossed_below"
+     ]
+    },
+    "populate_exit_trend": {
+     "lines": [
+      113,
+      130
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": true,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/futures/FOttStrategy.py",
+   "class": "FOttStrategy",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    11,
+    186
+   ],
+   "sha256_file": "6e7dd4802915f6952c9f7be6b5fe9840d1c894a89476e1b274fb163b096d930e",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 15
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.1,
+      "30": 0.75,
+      "60": 0.05,
+      "120": 0.025
+     },
+     "line": 17
+    },
+    "stoploss": {
+     "value": -0.265,
+     "line": 21
+    },
+    "trailing_stop": {
+     "value": true,
+     "line": 24
+    },
+    "trailing_stop_positive": {
+     "value": 0.05,
+     "line": 25
+    },
+    "trailing_stop_positive_offset": {
+     "value": 0.1,
+     "line": 26
+    },
+    "trailing_only_offset_is_reached": {
+     "value": false,
+     "line": 27
+    },
+    "timeframe": {
+     "value": "1h",
+     "line": 29
+    },
+    "startup_candle_count": {
+     "value": 18,
+     "line": 31
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      33,
+      39
+     ],
+     "calls": [
+      "ta.ADX"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      41,
+      53
+     ],
+     "calls": [
+      "qtpylib.crossed_above",
+      "qtpylib.crossed_below"
+     ]
+    },
+    "populate_exit_trend": {
+     "lines": [
+      55,
+      70
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/futures/FReinforcedStrategy.py",
+   "class": "FReinforcedStrategy",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    27,
+    144
+   ],
+   "sha256_file": "4148d3d2d736a454a470649646a59b77a62f7d4ccb7f7bc6d2ecc5ad0ec01152",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 29
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 30
+    },
+    "minimal_roi": {
+     "value": {
+      "60": 0.075,
+      "30": 0.1,
+      "0": 0.05
+     },
+     "line": 33
+    },
+    "stoploss": {
+     "value": -0.05,
+     "line": 36
+    },
+    "can_short": {
+     "value": true,
+     "line": 37
+    },
+    "trailing_stop": {
+     "value": false,
+     "line": 40
+    },
+    "process_only_new_candles": {
+     "value": true,
+     "line": 46
+    },
+    "startup_candle_count": {
+     "value": 14,
+     "line": 49
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      62,
+      87
+     ],
+     "calls": [
+      "qtpylib.bollinger_bands",
+      "ta.ADX",
+      "ta.EMA",
+      "ta.SMA"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      89,
+      125
+     ],
+     "calls": [
+      "qtpylib.crossed_above",
+      "qtpylib.crossed_below"
+     ]
+    },
+    "populate_exit_trend": {
+     "lines": [
+      127,
+      144
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": true,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/futures/FSampleStrategy.py",
+   "class": "FSampleStrategy",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    24,
+    162
+   ],
+   "sha256_file": "3fcbe2ed16dd097fd6e4548172acbde871bdfe64c5a7341f337f19caf3daa225",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 26
+    },
+    "timeframe": {
+     "value": "1h",
+     "line": 27
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 1
+     },
+     "line": 31
+    },
+    "stoploss": {
+     "value": -0.05,
+     "line": 33
+    },
+    "can_short": {
+     "value": true,
+     "line": 34
+    },
+    "trailing_stop": {
+     "value": false,
+     "line": 37
+    },
+    "process_only_new_candles": {
+     "value": true,
+     "line": 43
+    },
+    "startup_candle_count": {
+     "value": 30,
+     "line": 46
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      48,
+      95
+     ],
+     "calls": [
+      "qtpylib.bollinger_bands",
+      "qtpylib.typical_price",
+      "ta.ADX",
+      "ta.HT_SINE",
+      "ta.MACD",
+      "ta.MFI",
+      "ta.RSI",
+      "ta.SAR",
+      "ta.STOCHF",
+      "ta.TEMA"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      97,
+      129
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    },
+    "populate_exit_trend": {
+     "lines": [
+      131,
+      162
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    }
+   },
+   "flags": [],
+   "shorts": true,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/futures/FSupertrendStrategy.py",
+   "class": "FSupertrendStrategy",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    24,
+    232
+   ],
+   "sha256_file": "93f31258c4b6c05cf2380fc81f235f37355d97a3e4d2ebdf075e948e07978e19",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 28
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.1,
+      "30": 0.75,
+      "60": 0.05,
+      "120": 0.025
+     },
+     "line": 50
+    },
+    "stoploss": {
+     "value": -0.265,
+     "line": 54
+    },
+    "trailing_stop": {
+     "value": true,
+     "line": 57
+    },
+    "trailing_stop_positive": {
+     "value": 0.05,
+     "line": 58
+    },
+    "trailing_stop_positive_offset": {
+     "value": 0.1,
+     "line": 59
+    },
+    "trailing_only_offset_is_reached": {
+     "value": false,
+     "line": 60
+    },
+    "timeframe": {
+     "value": "1h",
+     "line": 62
+    },
+    "startup_candle_count": {
+     "value": 18,
+     "line": 64
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      80,
+      152
+     ],
+     "calls": []
+    },
+    "populate_entry_trend": {
+     "lines": [
+      154,
+      200
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      202,
+      221
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/futures/TrendFollowingStrategy.py",
+   "class": "TrendFollowingStrategy",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    9,
+    68
+   ],
+   "sha256_file": "6b8f3e272acfd4923539120364b9ddceccc17a385117d12a249dc1460ea53c4f",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 11
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.15,
+      "30": 0.1,
+      "60": 0.05
+     },
+     "line": 13
+    },
+    "stoploss": {
+     "value": -0.265,
+     "line": 17
+    },
+    "trailing_stop": {
+     "value": true,
+     "line": 20
+    },
+    "trailing_stop_positive": {
+     "value": 0.05,
+     "line": 21
+    },
+    "trailing_stop_positive_offset": {
+     "value": 0.1,
+     "line": 22
+    },
+    "trailing_only_offset_is_reached": {
+     "value": false,
+     "line": 23
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 25
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      27,
+      34
+     ],
+     "calls": [
+      "ta.OBV"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      36,
+      51
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      53,
+      68
+     ],
+     "calls": []
+    }
+   },
+   "flags": [
+    {
+     "kind": "review",
+     "line": 32,
+     "why": "whole-column aggregate (may use the full history, future included)",
+     "code": "dataframe['trend'] = dataframe['close'].ewm(span=20, adjust=False).mean()"
+    }
+   ],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/futures/VolatilitySystem.py",
+   "class": "VolatilitySystem",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    21,
+    157
+   ],
+   "sha256_file": "10a32ea131fb8f4684741b48cd3eae70aa4d4990319b49a7acb7a2f9c7c8a672",
+   "settings": {
+    "can_short": {
+     "value": true,
+     "line": 28
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 100
+     },
+     "line": 30
+    },
+    "stoploss": {
+     "value": -1,
+     "line": 34
+    },
+    "timeframe": {
+     "value": "1h",
+     "line": 37
+    },
+    "position_adjustment_enable": {
+     "value": true,
+     "line": 118
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      51,
+      78
+     ],
+     "calls": [
+      "ta.ATR"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      80,
+      97
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    },
+    "populate_exit_trend": {
+     "lines": [
+      99,
+      109
+     ],
+     "calls": []
+    },
+    "adjust_trade_position": {
+     "lines": [
+      120,
+      140
+     ],
+     "calls": []
+    },
+    "leverage": {
+     "lines": [
+      142,
+      157
+     ],
+     "calls": []
+    }
+   },
+   "flags": [
+    {
+     "kind": "review",
+     "line": 128,
+     "why": "reads the LAST row of the whole frame (whole-frame value used as a signal input?)",
+     "code": "last_candle = dataframe.iloc[-1].squeeze()"
+    }
+   ],
+   "shorts": true,
+   "averaging": true,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/GodStra.py",
+   "class": "GodStra",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    32,
+    178
+   ],
+   "sha256_file": "48e405f6d073944da9b993dfbce03aa980d0eea8a5da3c4a6b60f2f1b7264b86",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 41
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.3556,
+      "4818": 0.21275,
+      "6395": 0.09024,
+      "22372": 0
+     },
+     "line": 61
+    },
+    "stoploss": {
+     "value": -0.34549,
+     "line": 69
+    },
+    "trailing_stop": {
+     "value": true,
+     "line": 72
+    },
+    "trailing_stop_positive": {
+     "value": 0.22673,
+     "line": 73
+    },
+    "trailing_stop_positive_offset": {
+     "value": 0.2684,
+     "line": 74
+    },
+    "trailing_only_offset_is_reached": {
+     "value": true,
+     "line": 75
+    },
+    "timeframe": {
+     "value": "12h",
+     "line": 77
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      88,
+      95
+     ],
+     "calls": []
+    },
+    "populate_entry_trend": {
+     "lines": [
+      97,
+      138
+     ],
+     "calls": [
+      "qtpylib.crossed_above",
+      "qtpylib.crossed_below"
+     ]
+    },
+    "populate_exit_trend": {
+     "lines": [
+      140,
+      178
+     ],
+     "calls": [
+      "qtpylib.crossed_above",
+      "qtpylib.crossed_below"
+     ]
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/Heracles.py",
+   "class": "Heracles",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    28,
+    121
+   ],
+   "sha256_file": "5b25d85297329243d7a3c65770975b5a70e52ec2684b1e007e5d8a3d1a7e3718",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 32
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.598,
+      "644": 0.166,
+      "3269": 0.115,
+      "7289": 0
+     },
+     "line": 46
+    },
+    "stoploss": {
+     "value": -0.256,
+     "line": 54
+    },
+    "timeframe": {
+     "value": "4h",
+     "line": 57
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      67,
+      89
+     ],
+     "calls": [
+      "ta.volatility.donchian_channel_pband",
+      "ta.volatility.keltner_channel_wband"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      91,
+      114
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      116,
+      121
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/hlhb.py",
+   "class": "hlhb",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    11,
+    127
+   ],
+   "sha256_file": "bd4523d134b686b012947896ffd7a5a299add87ac12aa0d18fac36c9e7ca3822",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 17
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.6225,
+      "703": 0.2187,
+      "2849": 0.0363,
+      "5520": 0
+     },
+     "line": 23
+    },
+    "stoploss": {
+     "value": -0.3211,
+     "line": 32
+    },
+    "trailing_stop": {
+     "value": true,
+     "line": 35
+    },
+    "trailing_stop_positive": {
+     "value": 0.0117,
+     "line": 36
+    },
+    "trailing_stop_positive_offset": {
+     "value": 0.0186,
+     "line": 37
+    },
+    "trailing_only_offset_is_reached": {
+     "value": true,
+     "line": 38
+    },
+    "timeframe": {
+     "value": "4h",
+     "line": 41
+    },
+    "process_only_new_candles": {
+     "value": true,
+     "line": 44
+    },
+    "use_exit_signal": {
+     "value": true,
+     "line": 47
+    },
+    "exit_profit_only": {
+     "value": false,
+     "line": 48
+    },
+    "ignore_roi_if_entry_signal": {
+     "value": true,
+     "line": 49
+    },
+    "startup_candle_count": {
+     "value": 30,
+     "line": 52
+    },
+    "order_types": {
+     "value": {
+      "entry": "limit",
+      "exit": "limit",
+      "stoploss": "market",
+      "stoploss_on_exchange": false
+     },
+     "line": 55
+    }
+   },
+   "methods": {
+    "informative_pairs": {
+     "lines": [
+      85,
+      86
+     ],
+     "calls": []
+    },
+    "populate_indicators": {
+     "lines": [
+      88,
+      104
+     ],
+     "calls": [
+      "ta.ADX",
+      "ta.EMA",
+      "ta.RSI"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      106,
+      116
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    },
+    "populate_exit_trend": {
+     "lines": [
+      118,
+      127
+     ],
+     "calls": [
+      "qtpylib.crossed_below"
+     ]
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": true
+  },
+  {
+   "file": "user_data/strategies/HourBasedStrategy.py",
+   "class": "HourBasedStrategy",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    20,
+    104
+   ],
+   "sha256_file": "61755d49c46b3037c102f60de30841910472b6da06e9b578882b3dfc125b9ccc",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 52
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.528,
+      "169": 0.113,
+      "528": 0.089,
+      "1837": 0
+     },
+     "line": 66
+    },
+    "stoploss": {
+     "value": -0.1,
+     "line": 74
+    },
+    "timeframe": {
+     "value": "1h",
+     "line": 77
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      85,
+      87
+     ],
+     "calls": []
+    },
+    "populate_entry_trend": {
+     "lines": [
+      89,
+      96
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      98,
+      104
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/InformativeSample.py",
+   "class": "InformativeSample",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    13,
+    132
+   ],
+   "sha256_file": "1a96c6ecf7f6dd2afe086a31a80fd894811a81d88a7a2d814e69c8f3bebee564",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 24
+    },
+    "minimal_roi": {
+     "value": {
+      "60": 0.01,
+      "30": 0.03,
+      "20": 0.04,
+      "0": 0.05
+     },
+     "line": 27
+    },
+    "stoploss": {
+     "value": -0.1,
+     "line": 36
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 39
+    },
+    "trailing_stop": {
+     "value": false,
+     "line": 42
+    },
+    "trailing_stop_positive": {
+     "value": 0.02,
+     "line": 43
+    },
+    "trailing_stop_positive_offset": {
+     "value": 0.04,
+     "line": 44
+    },
+    "process_only_new_candles": {
+     "value": true,
+     "line": 47
+    },
+    "use_exit_signal": {
+     "value": true,
+     "line": 50
+    },
+    "exit_profit_only": {
+     "value": true,
+     "line": 51
+    },
+    "ignore_roi_if_entry_signal": {
+     "value": false,
+     "line": 52
+    },
+    "order_types": {
+     "value": {
+      "entry": "limit",
+      "exit": "limit",
+      "stoploss": "market",
+      "stoploss_on_exchange": false
+     },
+     "line": 55
+    }
+   },
+   "methods": {
+    "informative_pairs": {
+     "lines": [
+      62,
+      73
+     ],
+     "calls": []
+    },
+    "populate_indicators": {
+     "lines": [
+      75,
+      101
+     ],
+     "calls": [
+      "ta.EMA"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      103,
+      117
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      119,
+      132
+     ],
+     "calls": []
+    }
+   },
+   "flags": [
+    {
+     "kind": "review",
+     "line": 94,
+     "why": "whole-column aggregate (may use the full history, future included)",
+     "code": "informative['sma20'] = informative['close'].rolling(20).mean()"
+    }
+   ],
+   "shorts": false,
+   "averaging": false,
+   "informative": true
+  },
+  {
+   "file": "user_data/strategies/lookahead_bias/DevilStra.py",
+   "class": "DevilStra",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    535,
+    721
+   ],
+   "sha256_file": "22e9dc39c9f71bf57e9f613ea50052033e4c33b54438ad19ea4e131dff36d3a0",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 539
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.574,
+      "1757": 0.158,
+      "3804": 0.089,
+      "6585": 0
+     },
+     "line": 551
+    },
+    "stoploss": {
+     "value": -0.28,
+     "line": 559
+    },
+    "timeframe": {
+     "value": "4h",
+     "line": 563
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      582,
+      584
+     ],
+     "calls": []
+    },
+    "populate_entry_trend": {
+     "lines": [
+      586,
+      654
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      656,
+      721
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/lookahead_bias/GodStraNew.py",
+   "class": "GodStraNew",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    460,
+    644
+   ],
+   "sha256_file": "573a9b6d6bd6b2386197fb07a1f49f84ecf12e12f30da374b513058a18f14f84",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 462
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.598,
+      "644": 0.166,
+      "3269": 0.115,
+      "7289": 0
+     },
+     "line": 464
+    },
+    "stoploss": {
+     "value": -0.128,
+     "line": 472
+    },
+    "timeframe": {
+     "value": "4h",
+     "line": 474
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      533,
+      541
+     ],
+     "calls": []
+    },
+    "populate_entry_trend": {
+     "lines": [
+      543,
+      595
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      597,
+      644
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/lookahead_bias/wtc.py",
+   "class": "wtc",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    31,
+    157
+   ],
+   "sha256_file": "219f9e2cb9bd35e868a9cf29f7858310938d4e8584f397d580c56d2cf0488912",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 48
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.30873,
+      "569": 0.16689,
+      "3211": 0.06473,
+      "7617": 0
+     },
+     "line": 68
+    },
+    "stoploss": {
+     "value": -0.128,
+     "line": 74
+    },
+    "timeframe": {
+     "value": "30m",
+     "line": 76
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      99,
+      130
+     ],
+     "calls": [
+      "ta.EMA",
+      "ta.SMA",
+      "ta.STOCH"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      132,
+      144
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    },
+    "populate_exit_trend": {
+     "lines": [
+      146,
+      157
+     ],
+     "calls": [
+      "qtpylib.crossed_below"
+     ]
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/lookahead_bias/Zeus.py",
+   "class": "Zeus",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    26,
+    148
+   ],
+   "sha256_file": "6267f9960b7b051b48403ae65775143c5a3a5075ed681fba73434a8696185af7",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 36
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.564,
+      "567": 0.273,
+      "2814": 0.12,
+      "7675": 0
+     },
+     "line": 50
+    },
+    "stoploss": {
+     "value": -0.256,
+     "line": 58
+    },
+    "timeframe": {
+     "value": "4h",
+     "line": 70
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      72,
+      105
+     ],
+     "calls": [
+      "ta.trend.KSTIndicator",
+      "ta.trend.ichimoku_base_line"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      107,
+      126
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      128,
+      148
+     ],
+     "calls": []
+    }
+   },
+   "flags": [
+    {
+     "kind": "review",
+     "line": 102,
+     "why": "whole-column aggregate (may use the full history, future included)",
+     "code": "tib-tib.min())/(tib.max()-tib.min())"
+    },
+    {
+     "kind": "review",
+     "line": 104,
+     "why": "whole-column aggregate (may use the full history, future included)",
+     "code": "dataframe['trend_kst_diff'] = (tkd-tkd.min())/(tkd.max()-tkd.min())"
+    }
+   ],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/mabStra.py",
+   "class": "mabStra",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    15,
+    97
+   ],
+   "sha256_file": "1c483a549398a0244ca6d87f9736a76ed462056aca8a5ee9affd9aa65efd9393",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 17
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.598,
+      "644": 0.166,
+      "3269": 0.115,
+      "7289": 0
+     },
+     "line": 20
+    },
+    "stoploss": {
+     "value": -0.128,
+     "line": 28
+    },
+    "timeframe": {
+     "value": "4h",
+     "line": 30
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      51,
+      65
+     ],
+     "calls": [
+      "ta.SMA"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      67,
+      82
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      84,
+      97
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/multi_tf.py",
+   "class": "multi_tf",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    17,
+    138
+   ],
+   "sha256_file": "2385b24ca435997644c872e75676154898d28ac258394ec97a695db14e33f627",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 22
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.2
+     },
+     "line": 25
+    },
+    "stoploss": {
+     "value": -0.1,
+     "line": 30
+    },
+    "trailing_stop": {
+     "value": false,
+     "line": 33
+    },
+    "trailing_stop_positive": {
+     "value": 0.001,
+     "line": 34
+    },
+    "trailing_stop_positive_offset": {
+     "value": 0.01,
+     "line": 35
+    },
+    "trailing_only_offset_is_reached": {
+     "value": true,
+     "line": 36
+    },
+    "use_exit_signal": {
+     "value": true,
+     "line": 39
+    },
+    "exit_profit_only": {
+     "value": false,
+     "line": 40
+    },
+    "ignore_roi_if_entry_signal": {
+     "value": false,
+     "line": 42
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 44
+    },
+    "process_only_new_candles": {
+     "value": true,
+     "line": 46
+    },
+    "startup_candle_count": {
+     "value": 100,
+     "line": 47
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      93,
+      98
+     ],
+     "calls": [
+      "ta.RSI"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      100,
+      124
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      126,
+      138
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": true
+  },
+  {
+   "file": "user_data/strategies/MultiMa.py",
+   "class": "MultiMa",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    17,
+    99
+   ],
+   "sha256_file": "cae77a6c8f983377e392a2c66bfc541e7c1400fae03c3a413194902b2eda6626",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 20
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.523,
+      "1553": 0.123,
+      "2332": 0.076,
+      "3169": 0
+     },
+     "line": 34
+    },
+    "stoploss": {
+     "value": -0.345,
+     "line": 42
+    },
+    "trailing_stop": {
+     "value": false,
+     "line": 45
+    },
+    "trailing_stop_positive": {
+     "value": null,
+     "line": 46
+    },
+    "trailing_stop_positive_offset": {
+     "value": 0.0,
+     "line": 47
+    },
+    "trailing_only_offset_is_reached": {
+     "value": false,
+     "line": 48
+    },
+    "timeframe": {
+     "value": "4h",
+     "line": 51
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      62,
+      71
+     ],
+     "calls": [
+      "ta.TEMA"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      73,
+      86
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      88,
+      99
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/PatternRecognition.py",
+   "class": "PatternRecognition",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    21,
+    88
+   ],
+   "sha256_file": "cce61e4af8ed3cb8e78a5d9713aba7891ec08d1bdb1da9911c3f550424db795d",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 30
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.936,
+      "5271": 0.332,
+      "18147": 0.086,
+      "48152": 0
+     },
+     "line": 38
+    },
+    "stoploss": {
+     "value": -0.288,
+     "line": 46
+    },
+    "trailing_stop": {
+     "value": true,
+     "line": 49
+    },
+    "trailing_stop_positive": {
+     "value": 0.032,
+     "line": 50
+    },
+    "trailing_stop_positive_offset": {
+     "value": 0.084,
+     "line": 51
+    },
+    "trailing_only_offset_is_reached": {
+     "value": true,
+     "line": 52
+    },
+    "timeframe": {
+     "value": "1d",
+     "line": 55
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      64,
+      68
+     ],
+     "calls": []
+    },
+    "populate_entry_trend": {
+     "lines": [
+      70,
+      78
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      80,
+      88
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/PowerTower.py",
+   "class": "PowerTower",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    21,
+    104
+   ],
+   "sha256_file": "ce423a28ea54cfa46f44566ef5632d2ec04718a0723b16e322e9f9ac92df8f41",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 28
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 31
+    },
+    "can_short": {
+     "value": false,
+     "line": 34
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.213,
+      "39": 0.048,
+      "56": 0.029,
+      "159": 0
+     },
+     "line": 58
+    },
+    "stoploss": {
+     "value": -0.288,
+     "line": 66
+    },
+    "trailing_stop": {
+     "value": false,
+     "line": 69
+    },
+    "trailing_stop_positive": {
+     "value": null,
+     "line": 70
+    },
+    "trailing_stop_positive_offset": {
+     "value": 0.0,
+     "line": 71
+    },
+    "trailing_only_offset_is_reached": {
+     "value": false,
+     "line": 72
+    },
+    "startup_candle_count": {
+     "value": 30,
+     "line": 75
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      81,
+      82
+     ],
+     "calls": []
+    },
+    "populate_entry_trend": {
+     "lines": [
+      84,
+      94
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      96,
+      104
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/Strategy001.py",
+   "class": "Strategy001",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    13,
+    122
+   ],
+   "sha256_file": "2357996e6594458e8db45b5f757918462afa3c998de9d06e2af0c009ddc4b80d",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 23
+    },
+    "minimal_roi": {
+     "value": {
+      "60": 0.01,
+      "30": 0.03,
+      "20": 0.04,
+      "0": 0.05
+     },
+     "line": 26
+    },
+    "stoploss": {
+     "value": -0.1,
+     "line": 35
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 38
+    },
+    "trailing_stop": {
+     "value": false,
+     "line": 41
+    },
+    "trailing_stop_positive": {
+     "value": 0.01,
+     "line": 42
+    },
+    "trailing_stop_positive_offset": {
+     "value": 0.02,
+     "line": 43
+    },
+    "process_only_new_candles": {
+     "value": true,
+     "line": 46
+    },
+    "use_exit_signal": {
+     "value": true,
+     "line": 49
+    },
+    "exit_profit_only": {
+     "value": true,
+     "line": 50
+    },
+    "ignore_roi_if_entry_signal": {
+     "value": false,
+     "line": 51
+    },
+    "order_types": {
+     "value": {
+      "entry": "limit",
+      "exit": "limit",
+      "stoploss": "market",
+      "stoploss_on_exchange": false
+     },
+     "line": 54
+    }
+   },
+   "methods": {
+    "informative_pairs": {
+     "lines": [
+      61,
+      72
+     ],
+     "calls": []
+    },
+    "populate_indicators": {
+     "lines": [
+      74,
+      91
+     ],
+     "calls": [
+      "qtpylib.heikinashi",
+      "ta.EMA"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      93,
+      107
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    },
+    "populate_exit_trend": {
+     "lines": [
+      109,
+      122
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    }
+   },
+   "flags": [
+    {
+     "kind": "synthetic",
+     "line": 87,
+     "why": "Heikin-Ashi candles: synthetic prices, not executable fills",
+     "code": "heikinashi = qtpylib.heikinashi(dataframe)"
+    },
+    {
+     "kind": "synthetic",
+     "line": 88,
+     "why": "Heikin-Ashi candles: synthetic prices, not executable fills",
+     "code": "dataframe['ha_open'] = heikinashi['open']"
+    },
+    {
+     "kind": "synthetic",
+     "line": 89,
+     "why": "Heikin-Ashi candles: synthetic prices, not executable fills",
+     "code": "dataframe['ha_close'] = heikinashi['close']"
+    }
+   ],
+   "shorts": false,
+   "averaging": false,
+   "informative": true
+  },
+  {
+   "file": "user_data/strategies/Strategy001_custom_exit.py",
+   "class": "Strategy001_custom_exit",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    13,
+    143
+   ],
+   "sha256_file": "d53ac16d0e81b755a19ea83c535f50a6dd0629c76087b822ae399fabeaa5e841",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 24
+    },
+    "minimal_roi": {
+     "value": {
+      "60": 0.01,
+      "30": 0.03,
+      "20": 0.04,
+      "0": 0.05
+     },
+     "line": 27
+    },
+    "stoploss": {
+     "value": -0.1,
+     "line": 36
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 39
+    },
+    "trailing_stop": {
+     "value": false,
+     "line": 42
+    },
+    "trailing_stop_positive": {
+     "value": 0.01,
+     "line": 43
+    },
+    "trailing_stop_positive_offset": {
+     "value": 0.02,
+     "line": 44
+    },
+    "process_only_new_candles": {
+     "value": true,
+     "line": 47
+    },
+    "use_exit_signal": {
+     "value": true,
+     "line": 50
+    },
+    "exit_profit_only": {
+     "value": true,
+     "line": 51
+    },
+    "ignore_roi_if_entry_signal": {
+     "value": false,
+     "line": 52
+    },
+    "order_types": {
+     "value": {
+      "entry": "limit",
+      "exit": "limit",
+      "stoploss": "market",
+      "stoploss_on_exchange": false
+     },
+     "line": 55
+    }
+   },
+   "methods": {
+    "informative_pairs": {
+     "lines": [
+      62,
+      73
+     ],
+     "calls": []
+    },
+    "populate_indicators": {
+     "lines": [
+      75,
+      94
+     ],
+     "calls": [
+      "qtpylib.heikinashi",
+      "ta.EMA",
+      "ta.RSI"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      96,
+      110
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    },
+    "populate_exit_trend": {
+     "lines": [
+      112,
+      125
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    },
+    "custom_exit": {
+     "lines": [
+      127,
+      143
+     ],
+     "calls": []
+    }
+   },
+   "flags": [
+    {
+     "kind": "synthetic",
+     "line": 88,
+     "why": "Heikin-Ashi candles: synthetic prices, not executable fills",
+     "code": "heikinashi = qtpylib.heikinashi(dataframe)"
+    },
+    {
+     "kind": "synthetic",
+     "line": 89,
+     "why": "Heikin-Ashi candles: synthetic prices, not executable fills",
+     "code": "dataframe['ha_open'] = heikinashi['open']"
+    },
+    {
+     "kind": "synthetic",
+     "line": 90,
+     "why": "Heikin-Ashi candles: synthetic prices, not executable fills",
+     "code": "dataframe['ha_close'] = heikinashi['close']"
+    },
+    {
+     "kind": "review",
+     "line": 136,
+     "why": "reads the LAST row of the whole frame (whole-frame value used as a signal input?)",
+     "code": "current_candle = dataframe.iloc[-1].squeeze()"
+    }
+   ],
+   "shorts": false,
+   "averaging": false,
+   "informative": true
+  },
+  {
+   "file": "user_data/strategies/Strategy002.py",
+   "class": "Strategy002",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    14,
+    136
+   ],
+   "sha256_file": "d1ca86a4ceb68ef828b35490ce1112330dad209cc3bb1e1b6c303c21ab3d8a90",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 24
+    },
+    "minimal_roi": {
+     "value": {
+      "60": 0.01,
+      "30": 0.03,
+      "20": 0.04,
+      "0": 0.05
+     },
+     "line": 27
+    },
+    "stoploss": {
+     "value": -0.1,
+     "line": 36
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 39
+    },
+    "trailing_stop": {
+     "value": false,
+     "line": 42
+    },
+    "trailing_stop_positive": {
+     "value": 0.01,
+     "line": 43
+    },
+    "trailing_stop_positive_offset": {
+     "value": 0.02,
+     "line": 44
+    },
+    "process_only_new_candles": {
+     "value": true,
+     "line": 47
+    },
+    "use_exit_signal": {
+     "value": true,
+     "line": 50
+    },
+    "exit_profit_only": {
+     "value": true,
+     "line": 51
+    },
+    "ignore_roi_if_entry_signal": {
+     "value": false,
+     "line": 52
+    },
+    "order_types": {
+     "value": {
+      "entry": "limit",
+      "exit": "limit",
+      "stoploss": "market",
+      "stoploss_on_exchange": false
+     },
+     "line": 55
+    }
+   },
+   "methods": {
+    "informative_pairs": {
+     "lines": [
+      62,
+      73
+     ],
+     "calls": []
+    },
+    "populate_indicators": {
+     "lines": [
+      75,
+      105
+     ],
+     "calls": [
+      "qtpylib.bollinger_bands",
+      "qtpylib.typical_price",
+      "ta.CDLHAMMER",
+      "ta.RSI",
+      "ta.SAR",
+      "ta.STOCH"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      107,
+      122
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      124,
+      136
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": true
+  },
+  {
+   "file": "user_data/strategies/Strategy003.py",
+   "class": "Strategy003",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    14,
+    153
+   ],
+   "sha256_file": "055984b4672779b36a2391f790ccbcd320e408eb0634e34718d7182acaeef9c9",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 24
+    },
+    "minimal_roi": {
+     "value": {
+      "60": 0.01,
+      "30": 0.03,
+      "20": 0.04,
+      "0": 0.05
+     },
+     "line": 27
+    },
+    "stoploss": {
+     "value": -0.1,
+     "line": 36
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 39
+    },
+    "trailing_stop": {
+     "value": false,
+     "line": 42
+    },
+    "trailing_stop_positive": {
+     "value": 0.01,
+     "line": 43
+    },
+    "trailing_stop_positive_offset": {
+     "value": 0.02,
+     "line": 44
+    },
+    "process_only_new_candles": {
+     "value": true,
+     "line": 47
+    },
+    "use_exit_signal": {
+     "value": true,
+     "line": 50
+    },
+    "exit_profit_only": {
+     "value": true,
+     "line": 51
+    },
+    "ignore_roi_if_entry_signal": {
+     "value": false,
+     "line": 52
+    },
+    "order_types": {
+     "value": {
+      "entry": "limit",
+      "exit": "limit",
+      "stoploss": "market",
+      "stoploss_on_exchange": false
+     },
+     "line": 55
+    }
+   },
+   "methods": {
+    "informative_pairs": {
+     "lines": [
+      62,
+      73
+     ],
+     "calls": []
+    },
+    "populate_indicators": {
+     "lines": [
+      75,
+      115
+     ],
+     "calls": [
+      "qtpylib.bollinger_bands",
+      "qtpylib.typical_price",
+      "ta.EMA",
+      "ta.MFI",
+      "ta.RSI",
+      "ta.SAR",
+      "ta.SMA",
+      "ta.STOCHF"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      117,
+      139
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    },
+    "populate_exit_trend": {
+     "lines": [
+      141,
+      153
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": true
+  },
+  {
+   "file": "user_data/strategies/Strategy004.py",
+   "class": "Strategy004",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    12,
+    158
+   ],
+   "sha256_file": "1b4c001e80b077aaf3ec227577c78d3283be549c7d25ce9279ea03f1db5de64a",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 23
+    },
+    "minimal_roi": {
+     "value": {
+      "60": 0.01,
+      "30": 0.03,
+      "20": 0.04,
+      "0": 0.05
+     },
+     "line": 26
+    },
+    "stoploss": {
+     "value": -0.1,
+     "line": 35
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 38
+    },
+    "trailing_stop": {
+     "value": false,
+     "line": 41
+    },
+    "trailing_stop_positive": {
+     "value": 0.01,
+     "line": 42
+    },
+    "trailing_stop_positive_offset": {
+     "value": 0.02,
+     "line": 43
+    },
+    "process_only_new_candles": {
+     "value": true,
+     "line": 46
+    },
+    "use_exit_signal": {
+     "value": true,
+     "line": 49
+    },
+    "exit_profit_only": {
+     "value": true,
+     "line": 50
+    },
+    "ignore_roi_if_entry_signal": {
+     "value": false,
+     "line": 51
+    },
+    "order_types": {
+     "value": {
+      "entry": "limit",
+      "exit": "limit",
+      "stoploss": "market",
+      "stoploss_on_exchange": false
+     },
+     "line": 54
+    }
+   },
+   "methods": {
+    "informative_pairs": {
+     "lines": [
+      61,
+      72
+     ],
+     "calls": []
+    },
+    "populate_indicators": {
+     "lines": [
+      74,
+      112
+     ],
+     "calls": [
+      "ta.ADX",
+      "ta.CCI",
+      "ta.EMA",
+      "ta.STOCHF"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      114,
+      142
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      144,
+      158
+     ],
+     "calls": []
+    }
+   },
+   "flags": [
+    {
+     "kind": "review",
+     "line": 110,
+     "why": "whole-column aggregate (may use the full history, future included)",
+     "code": "dataframe['mean-volume'] = dataframe['volume'].rolling(12).mean()"
+    }
+   ],
+   "shorts": false,
+   "averaging": false,
+   "informative": true
+  },
+  {
+   "file": "user_data/strategies/Strategy005.py",
+   "class": "Strategy005",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    14,
+    185
+   ],
+   "sha256_file": "797b293f5acd809f8c77f26b38c004c87b75d8847be4cde4d0224040cc591030",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 23
+    },
+    "minimal_roi": {
+     "value": {
+      "1440": 0.01,
+      "80": 0.02,
+      "40": 0.03,
+      "20": 0.04,
+      "0": 0.05
+     },
+     "line": 27
+    },
+    "stoploss": {
+     "value": -0.1,
+     "line": 37
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 40
+    },
+    "trailing_stop": {
+     "value": false,
+     "line": 43
+    },
+    "trailing_stop_positive": {
+     "value": 0.01,
+     "line": 44
+    },
+    "trailing_stop_positive_offset": {
+     "value": 0.02,
+     "line": 45
+    },
+    "process_only_new_candles": {
+     "value": true,
+     "line": 48
+    },
+    "use_exit_signal": {
+     "value": true,
+     "line": 51
+    },
+    "exit_profit_only": {
+     "value": true,
+     "line": 52
+    },
+    "ignore_roi_if_entry_signal": {
+     "value": false,
+     "line": 53
+    },
+    "order_types": {
+     "value": {
+      "entry": "limit",
+      "exit": "limit",
+      "stoploss": "market",
+      "stoploss_on_exchange": false
+     },
+     "line": 56
+    }
+   },
+   "methods": {
+    "informative_pairs": {
+     "lines": [
+      90,
+      101
+     ],
+     "calls": []
+    },
+    "populate_indicators": {
+     "lines": [
+      103,
+      143
+     ],
+     "calls": [
+      "ta.MACD",
+      "ta.MINUS_DI",
+      "ta.RSI",
+      "ta.SAR",
+      "ta.SMA",
+      "ta.STOCHF"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      145,
+      164
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      166,
+      185
+     ],
+     "calls": [
+      "qtpylib.crossed_above"
+     ]
+    }
+   },
+   "flags": [
+    {
+     "kind": "review",
+     "line": 155,
+     "why": "whole-column aggregate (may use the full history, future included)",
+     "code": "(dataframe['volume'] > dataframe['volume'].rolling(self.buy_volumeAVG.value).mean() * 4) &"
+    }
+   ],
+   "shorts": false,
+   "averaging": false,
+   "informative": true
+  },
+  {
+   "file": "user_data/strategies/Supertrend.py",
+   "class": "Supertrend",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    24,
+    155
+   ],
+   "sha256_file": "c73d2dc221e2a52274b20846bed0879212eaca72916948e8c6103f4d4dd8aeea",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 28
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.087,
+      "372": 0.058,
+      "861": 0.029,
+      "2221": 0
+     },
+     "line": 50
+    },
+    "stoploss": {
+     "value": -0.265,
+     "line": 58
+    },
+    "trailing_stop": {
+     "value": true,
+     "line": 61
+    },
+    "trailing_stop_positive": {
+     "value": 0.05,
+     "line": 62
+    },
+    "trailing_stop_positive_offset": {
+     "value": 0.144,
+     "line": 63
+    },
+    "trailing_only_offset_is_reached": {
+     "value": false,
+     "line": 64
+    },
+    "timeframe": {
+     "value": "1h",
+     "line": 66
+    },
+    "startup_candle_count": {
+     "value": 199,
+     "line": 68
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      84,
+      120
+     ],
+     "calls": []
+    },
+    "populate_entry_trend": {
+     "lines": [
+      122,
+      132
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      134,
+      144
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/SwingHighToSky.py",
+   "class": "SwingHighToSky",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    36,
+    110
+   ],
+   "sha256_file": "3778a09f02b88c1ca257e5346d6cc97ae8b7dd80a7559d003ab3a760ab1e5518",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 37
+    },
+    "timeframe": {
+     "value": "15m",
+     "line": 39
+    },
+    "stoploss": {
+     "value": -0.34338,
+     "line": 41
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.27058,
+      "33": 0.0853,
+      "64": 0.04093,
+      "244": 0
+     },
+     "line": 43
+    }
+   },
+   "methods": {
+    "informative_pairs": {
+     "lines": [
+      71,
+      72
+     ],
+     "calls": []
+    },
+    "populate_indicators": {
+     "lines": [
+      74,
+      88
+     ],
+     "calls": [
+      "ta.CCI",
+      "ta.RSI"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      90,
+      99
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      101,
+      110
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": true
+  },
+  {
+   "file": "user_data/strategies/TrendRiderStrategy.py",
+   "class": "TrendRiderStrategy",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    22,
+    633
+   ],
+   "sha256_file": "84ec4f1f00bbac46cf9a7ad6f38e1de6fe5ca83cfd9aa810c334b1a7e3c803ba",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 23
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.229,
+      "124": 0.136,
+      "290": 0.044,
+      "764": 0
+     },
+     "line": 26
+    },
+    "stoploss": {
+     "value": -0.06,
+     "line": 34
+    },
+    "use_custom_stoploss": {
+     "value": false,
+     "line": 35
+    },
+    "trailing_stop": {
+     "value": true,
+     "line": 38
+    },
+    "trailing_stop_positive": {
+     "value": 0.03,
+     "line": 39
+    },
+    "trailing_stop_positive_offset": {
+     "value": 0.05,
+     "line": 40
+    },
+    "trailing_only_offset_is_reached": {
+     "value": true,
+     "line": 41
+    },
+    "timeframe": {
+     "value": "1h",
+     "line": 44
+    },
+    "startup_candle_count": {
+     "value": 210,
+     "line": 45
+    },
+    "process_only_new_candles": {
+     "value": true,
+     "line": 46
+    },
+    "can_short": {
+     "value": false,
+     "line": 47
+    },
+    "position_adjustment_enable": {
+     "value": false,
+     "line": 48
+    }
+   },
+   "methods": {
+    "leverage": {
+     "lines": [
+      102,
+      105
+     ],
+     "calls": []
+    },
+    "informative_pairs": {
+     "lines": [
+      107,
+      116
+     ],
+     "calls": []
+    },
+    "populate_indicators": {
+     "lines": [
+      118,
+      271
+     ],
+     "calls": [
+      "ta.ADX",
+      "ta.ATR",
+      "ta.BBANDS",
+      "ta.EMA",
+      "ta.MACD",
+      "ta.MINUS_DI",
+      "ta.OBV",
+      "ta.PLUS_DI",
+      "ta.RSI",
+      "ta.SMA"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      273,
+      399
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      401,
+      443
+     ],
+     "calls": []
+    },
+    "custom_exit": {
+     "lines": [
+      592,
+      613
+     ],
+     "calls": []
+    },
+    "confirm_trade_entry": {
+     "lines": [
+      615,
+      633
+     ],
+     "calls": []
+    }
+   },
+   "flags": [
+    {
+     "kind": "review",
+     "line": 621,
+     "why": "reads the LAST row of the whole frame (whole-frame value used as a signal input?)",
+     "code": "last = dataframe.iloc[-1]"
+    }
+   ],
+   "shorts": false,
+   "averaging": false,
+   "informative": true
+  },
+  {
+   "file": "user_data/strategies/TWAPStrategy.py",
+   "class": "TWAPStrategy",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    10,
+    157
+   ],
+   "sha256_file": "cb565aef94b39b2a716994868ce069cfa169023122f0f1e9fafdb524beb9365b",
+   "settings": {
+    "timeframe": {
+     "value": "15m",
+     "line": 20
+    },
+    "stoploss": {
+     "value": -0.1,
+     "line": 21
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.02
+     },
+     "line": 22
+    },
+    "process_only_new_candles": {
+     "value": true,
+     "line": 23
+    },
+    "startup_candle_count": {
+     "value": 30,
+     "line": 24
+    },
+    "can_short": {
+     "value": true,
+     "line": 25
+    },
+    "position_adjustment_enable": {
+     "value": true,
+     "line": 26
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      32,
+      34
+     ],
+     "calls": [
+      "ta.RSI"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      36,
+      48
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      50,
+      52
+     ],
+     "calls": []
+    },
+    "adjust_trade_position": {
+     "lines": [
+      86,
+      111
+     ],
+     "calls": []
+    }
+   },
+   "flags": [
+    {
+     "kind": "review",
+     "line": 70,
+     "why": "reads the LAST row of the whole frame (whole-frame value used as a signal input?)",
+     "code": "last_candle = dataframe.iloc[-1]"
+    }
+   ],
+   "shorts": true,
+   "averaging": true,
+   "informative": false
+  },
+  {
+   "file": "user_data/strategies/UniversalMACD.py",
+   "class": "UniversalMACD",
+   "bases": [
+    "IStrategy"
+   ],
+   "lines": [
+    21,
+    113
+   ],
+   "sha256_file": "b3a62e0d8a26024e7ab5f3613d0964e3954373bc3735c1ffd0678d84ce1b1e32",
+   "settings": {
+    "INTERFACE_VERSION": {
+     "value": 3,
+     "line": 27
+    },
+    "timeframe": {
+     "value": "5m",
+     "line": 30
+    },
+    "can_short": {
+     "value": false,
+     "line": 33
+    },
+    "minimal_roi": {
+     "value": {
+      "0": 0.213,
+      "27": 0.099,
+      "60": 0.03,
+      "164": 0
+     },
+     "line": 60
+    },
+    "stoploss": {
+     "value": -0.318,
+     "line": 68
+    },
+    "trailing_stop": {
+     "value": false,
+     "line": 71
+    },
+    "trailing_stop_positive": {
+     "value": null,
+     "line": 72
+    },
+    "trailing_stop_positive_offset": {
+     "value": 0.0,
+     "line": 73
+    },
+    "trailing_only_offset_is_reached": {
+     "value": false,
+     "line": 74
+    },
+    "startup_candle_count": {
+     "value": 30,
+     "line": 77
+    }
+   },
+   "methods": {
+    "populate_indicators": {
+     "lines": [
+      85,
+      94
+     ],
+     "calls": [
+      "ta.EMA"
+     ]
+    },
+    "populate_entry_trend": {
+     "lines": [
+      96,
+      104
+     ],
+     "calls": []
+    },
+    "populate_exit_trend": {
+     "lines": [
+      106,
+      113
+     ],
+     "calls": []
+    }
+   },
+   "flags": [],
+   "shorts": false,
+   "averaging": false,
+   "informative": false
+  }
+ ]
+}
