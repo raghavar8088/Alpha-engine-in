@@ -54,6 +54,9 @@ YC3F_START_DATE = min(datetime.fromtimestamp(YC3F_START_T, IST).date(), datetime
 # The channel-shortlist seventh batch (catalog.YC3G_IDS) starts later again, also flat.
 YC3G_START_T = int(datetime.fromisoformat(os.getenv("PREMIUM_YC3G_START", "2026-11-14T16:30:00+00:00")).timestamp())
 YC3G_START_DATE = min(datetime.fromtimestamp(YC3G_START_T, IST).date(), datetime.fromtimestamp(YC3G_START_T, timezone.utc).date())
+# The channel-shortlist eighth batch (catalog.YC3H_IDS: the ranks 11-20 crypto channels) starts later again, also flat.
+YC3H_START_T = int(datetime.fromisoformat(os.getenv("PREMIUM_YC3H_START", "2026-11-14T18:00:00+00:00")).timestamp())
+YC3H_START_DATE = min(datetime.fromtimestamp(YC3H_START_T, IST).date(), datetime.fromtimestamp(YC3H_START_T, timezone.utc).date())
 
 MONGO_URL = os.getenv("FACTORY_MONGO_URL", "").strip()
 MONGO_DB = os.getenv("PREMIUM_MONGO_DB", "alpha_engine_premium")

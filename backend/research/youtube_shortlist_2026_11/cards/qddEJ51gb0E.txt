@@ -1,0 +1,19 @@
+video: qddEJ51gb0E
+topic: crypto
+summary: Tom Crown's stochastic oscillator guide (August 2025): above 80 overbought, below 20 oversold, and the %K / %D crossovers add confirmation (the RSI has none). Two uses: at a well-defined resistance, an overbought reading and a bearish cross, entered once the oscillator drops back below 80; and divergences. His live setup: in a downtrend price consolidates and makes a higher high while the stochastic prints a lower high; he waits for two confirmations - the stochastic back below the overbought zone and price making a lower low - then sells the retest of that swing low, the stop just above the recent high, targeting levels lower.
+instruments: Any (crypto and forex examples); Bitcoin*; Ether*; Gold*
+timeframes: Any
+style: intraday
+= TK-07 | Stochastic (14, 3, 3) divergence in the trend: a higher high with a lower stochastic high, then %K back under 80 and a close under the swing low, sell its retest, stop above the high, 2R
+R filter E 03:11 | First identify the overall trend. | "First, we identify the overall trend of the market."
+R setup E 02:49 | The bearish divergence: price makes higher highs while the stochastic prints a lower high. | "A bearish divergence can happen when price forms higher highs but the stochcastic still prints a lower high."
+R entry E 03:36 | He waits for two confirmations. | "At this point, I like to wait for two confirmations."
+R entry E 03:43 | The stochastic back below the overbought zone, and price making a lower low. | "The stochastic has to drop back below the overbought zone, and price needs to make a lower low to confirm that bearish structure."
+R entry E 03:53 | Enter short on the retest of that swing low. | "we can look to enter a short trade on the retest of that swing low"
+R stop E 03:53 | The stop just above the recent high, targets lower. | "Your stop can go just above your recent high and you can target your levels lower."
+R market A - | Desk version: Delta BTCUSD, ETHUSD and gold (Delta XAUTUSD) on 15-minute candles, out by the session end (the UTC day for crypto, 17:00 New York for gold). | ""
+R filter A - | The trend: the 15-minute EMA 50 below the EMA 200 for shorts, above it for longs. | ""
+R setup A - | Swing highs and lows are 3-candle pivots, known three candles later. The divergence (a short): the last two swing highs are a higher high with a lower stochastic %K (14, 3, 3), the second with %K at or above 80. | ""
+R entry A - | After the second high: %K back below 80 and a close below the lowest low between the two highs, within 20 candles; then a sell limit at that low, live for 12 candles. The mirror for longs (a lower low with a higher %K at or below 20). | ""
+R stop A - | The stop is just above the second swing high; the target 2R (he names none). | ""
+T with_assumptions | the EMA 50/200 trend, the 3-candle pivots, the 20- and 12-candle windows, the 15-minute candles and 2R are ours (A)

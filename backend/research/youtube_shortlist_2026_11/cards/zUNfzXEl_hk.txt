@@ -1,0 +1,20 @@
+video: zUNfzXEl_hk
+topic: crypto
+summary: Tom Crown on Bollinger Bands (July 2025): the bands are a 20-period SMA with two standard deviations either side. Fading touches of the bands as overbought or oversold means trading against the trend, so he uses the squeeze instead: narrow bands (a low Bollinger Band Width) foreshadow a big move; an on-balance volume (OBV) divergence at the lower band - price a lower low, OBV a higher low - hints at the breakout's direction; then the bands expand (BBW rising) and a bullish candle closes above the upper band. He would then enter, for instance, on the retest of a broken resistance, with a favourable reward-to-risk.
+instruments: Any (crypto examples); Bitcoin*; Ether*
+timeframes: Any
+style: swing
+= TK-06 | Bollinger squeeze with an OBV divergence at the band, then a close beyond the opposite band as the bands widen, stop at the middle band, 2R
+R setup E 00:37 | The middle line is a 20-period simple moving average. | "the middle line, a 20 period simple moving average or SMA"
+R setup E 01:03 | The upper band adds two standard deviations to the middle line. | "The upper band is calculated by adding two standard deviations to the middle line."
+R filter E 02:37 | Using the bands as overbought or oversold means trading against the trend. | "using the Ballinger bands as an overbought or oversold indicator means you're trading against the trend"
+R setup E 02:43 | The strategy is the Bollinger Band squeeze. | "The strategy is called the Ballinger band squeeze."
+R setup E 02:55 | Low volatility: the bands squeeze and become narrow. | "When volatility is low in the market, the upper and lower band begin to squeeze and they become narrow."
+R setup E 04:41 | The divergence: OBV makes a higher low while price makes a lower low. | "The OBV has made a higher low while price has made a lower low."
+R entry E 04:47 | The bands begin to expand, seen in the rising BBW. | "Next, we see the bands are beginning to expand, and this can also be seen by the rising BBW."
+R entry E 04:54 | Then a green candle closes above the upper band. | "This is then followed up by a green bullish candle that's closed above the upper band."
+R market A - | Desk version: Delta BTCUSD and ETHUSD (their exchange volume for the OBV) on 1-hour candles, held across days. | ""
+R setup A - | The squeeze: the band width (upper minus lower over the middle) made its lowest of the last 120 candles within the last 10. The divergence (a long): the lowest low of the last 10 candles is below the lowest low of the 20 candles before them, touched the lower band, and has a higher OBV than that earlier low; the mirror at the upper band for a short. | ""
+R entry A - | The trigger: a candle closing above the upper band (an up candle; below the lower band for a short) with the band width rising; enter at the next open. | ""
+R stop A - | The stop is the middle band at the trigger candle; the target 2R; out after 7,200 one-minute rows (five days) if neither is hit. | ""
+T with_assumptions | the timeframe, the 120-candle squeeze, the 10/20-candle divergence windows, the stop at the middle band, 2R and the five-day limit are ours (A); his retest entry at a drawn level is replaced by the next open

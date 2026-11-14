@@ -1,0 +1,16 @@
+video: 21tLM3XrU9I
+topic: crypto
+summary: Part Time Larry codes the Supertrend in Python with CCXT and pandas (May 2021, part 3 of his Supertrend bot series): the midpoint of each candle's high and low, plus and minus three times the 7-period ATR, gives the basic bands; the final bands only ratchet in the trend's favour; a close above the upper band starts an uptrend (a buy signal) and a close below the lower band starts a downtrend (a sell signal). He checks his Python output against TradingView's indicator on Ether's daily chart, where it caught the October 2020 to February 2021 run but lost money in the choppy stretches, like a moving-average crossover.
+instruments: Ether (ETH/USDT, Binance); Bitcoin*
+timeframes: daily
+style: swing
+= PL-03 | Supertrend (ATR 7, factor 3) bot, long only: buy on the close that flips it up, sell on the close that flips it down (daily)
+R setup E 09:03 | The defaults: an ATR period of seven and a multiplier of three. | "of the super trend function here we have a default period of seven and a default atr multiplier of three"
+R entry E 08:39 | A buy signal whenever price closes above the upper band. | "basically we have a buy signal whenever the price closes above this"
+R exit E 07:14 | A close below the lower band is the sell signal. | "the price closes below that green band at which point it flips over and then to a sell signal"
+R market E 03:38 | He uses the daily timeframe. | "it on camera but for now i'm going to use the daily time frame"
+R filter E 02:52 | It loses money when the market is choppy and not trending. | "there's cases where things are very choppy and the market isn't really trending where"
+R market A - | Desk version: Delta BTCUSD and ETHUSD on daily (UTC) candles, long only (his bot only buys and sells), held across days. | ""
+R entry A - | Buy at the next daily open after the close that flips the Supertrend to an uptrend; sell at the next open after the close that flips it to a downtrend. | ""
+R stop A - | A resting stop one ATR (7) beyond the Supertrend's lower band at the buy guards against a crash between closes; no target. | ""
+T with_assumptions | the guard stop is ours (A); the rest is his code's own rule

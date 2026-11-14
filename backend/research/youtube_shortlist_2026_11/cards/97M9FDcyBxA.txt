@@ -1,0 +1,10 @@
+video: 97M9FDcyBxA
+topic: crypto
+summary: A crypto market review (October 2021) on spotting breakouts before they happen: in a bullish environment, tightening sideways ranges (12-hour and 4-hour equilibriums) favour bull breaks, and a nearby stop level makes the reward larger than the risk. Examples on bitcoin, ether, Shiba Inu, Solana and altcoins, with the 15-minute and 4-hour EMA 12 as entry areas. The ranges and levels are read by eye on each chart.
+instruments: Bitcoin; Ether; altcoins
+timeframes: 15m, 4h, 12h, daily
+style: swing
+= CG-06 | Tightening ranges in a bullish environment favour bull breaks (market review)
+R setup E 00:06 | In a bullish environment, watch for tightening ranges: the stop level is close by, so a bull break gives a reward larger than the risk. | "when we are in a bullish environment like we are currently in keep an eye out for tightening ranges"
+R filter E 13:35 | The tightening ranges favour bull breaks as long as bitcoin is in a daily uptrend. | "they favor bull breaks as long as bitcoins in a daily uptrend"
+T concept_only | the ranges, equilibriums and support levels are drawn by eye on each chart; no fixed trigger, stop or target is stated

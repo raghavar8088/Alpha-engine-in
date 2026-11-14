@@ -1,0 +1,25 @@
+video: dDLG5VEVRL8
+topic: forex_us
+summary: Tradeciety's top-down day-trading plan (2022) on GBP/USD. The 4-hour chart gives the trend, the key swing levels and a demand zone; the 5-minute chart times the trade: a break out of a triangle in the trend's direction (or a break and retest), the stop above the pattern, the target before the demand zone. The follow-up plan: price spiked through a daily Bollinger Band (2.5 standard deviations) and snapped back inside, so he looked for a long on 15 minutes - the retest of a broken level confirmed by a strong engulfing candle, Fibonacci 138/161/200 targets, and the stop trailed along the EMA 50 until a close through it.
+instruments: GBP/USD; EUR/USD*; Bitcoin*; Gold*
+timeframes: 4h, 5m, 15m, daily
+style: intraday
+= TC-05 | Daily Bollinger Band (20, 2.5) spike and snap-back, next day's 15-minute engulfing candle with the EMA 50, out on a close through the EMA 50
+R setup E 07:26 | A Bollinger Band with a 2.5 standard deviation from the daily timeframe. | "i added a bollinger band with a 2.5 standard deviation"
+R setup E 07:38 | Price broke out of the band and snapped back: a Bollinger Band spike reversal, a very strong signal. | "the market broke out of the bollinger band and then snapped back"
+R entry E 10:00 | Wait for momentum away from the level to confirm the retest. | "you want to make sure that you see momentum away from the level to confirm the retest"
+R entry E 10:05 | The entry candle: a super strong engulfing candle whose range also engulfed the candle before. | "a super strong engulfing candle engulfed this little candle here"
+R entry E 10:05 | Its range engulfed the two candles before it. | "the range of the candle also completely engulfed the candle before that"
+R exit E 11:35 | Add the EMA 50 to manage the trade. | "we could add the ema 50 period to help us manage our trade"
+R exit E 11:56 | Trail the stop along the EMA 50 as the trend progresses. | "as the trend progresses you would trail your stop loss along the 50"
+R exit E 12:13 | Out when the market broke the EMA. | "you would have been clearly out here when the market broke the ema"
+R target E 10:55 | Fibonacci targets of the ABC move: 138, 161 and 200, scaling out. | "for fibonacci targets you can use the 138 161 200"
+R market A - | Desk version: EUR/USD and GBP/USD (the desk's FX minutes), Delta BTCUSD and gold (Delta XAUTUSD), 15-minute candles, out by the session end (the UTC day for bitcoin, 17:00 New York for forex and gold). | ""
+R setup A - | The spike is the previous trading day's candle (the UTC day for bitcoin, the 17:00 New York day for forex and gold) with its low under the lower Bollinger Band (20, 2.5) and its close back above it (a long), or its high over the upper band and its close back under it (a short). His chart shows 4-hour candles against the daily band; ours reads the daily candle. | ""
+R entry A - | During the next trading day, a 15-minute candle that closes in the trade's direction, beyond the 15-minute EMA 50, with its high and low beyond both of the two candles before it; enter at the next open. One trade per spike day. | ""
+R stop A - | The stop is just beyond the engulfing candle's far end; out at the next open after a 15-minute close through the EMA 50. No fixed target (his Fibonacci targets need the ABC drawn by eye). | ""
+T with_assumptions | the daily candle as the spike, the next day's window, the EMA 50 side and the no-target exit are ours (A); the levels he retests are drawn by eye and not coded
+= TC-06 | Top-down day trade: 4-hour trend and levels, a 5-minute triangle breakout (or break and retest), stop above the pattern (walkthrough)
+R entry E 02:40 | Never trade inside consolidation patterns; trade the breakout or a break and retest. | "we could either trade only the breakout or a break and re-test"
+R stop E 05:24 | The stop at least above the 5-minute pattern. | "you definitely at least want to see that your stop loss is above the pattern"
+T concept_only | the 4-hour levels, the demand zone and the 5-minute triangle are drawn by eye on each chart; the breakout-and-retest idea is the earlier card TC-01's

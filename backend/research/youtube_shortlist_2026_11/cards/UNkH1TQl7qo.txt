@@ -1,0 +1,9 @@
+video: UNkH1TQl7qo
+topic: forex_us
+summary: Part Time Larry's first Backtrader tutorial (January 2020): what backtesting answers (what $10,000 in a stock, a buy-the-dip or a moving-average crossover would have become), installing Backtrader and running an empty Cerebro engine with a starting cash balance. No strategy yet; the series' first strategy comes in part 2.
+instruments: US stocks
+timeframes: daily
+style: tutorial
+= PL-05 | Backtrader setup: installing and running the Cerebro engine (no strategy)
+R setup E 02:15 | Backtrader answers what a strategy would have made. | "so back trader helps you answer those questions"
+T concept_only | an installation tutorial with no trading rule; the series' strategy is part 2's (PL-06)

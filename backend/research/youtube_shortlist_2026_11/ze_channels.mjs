@@ -1,7 +1,8 @@
 // The owner's channel shortlist (12 Nov 2026): three pasted lists - 50 cross-market channels, 50 more (51-100) and 50
 // Indian intraday-stock channels - merged into one list of unique channels; a fourth list (13 Nov 2026) of 50 crypto
 // and gold channels adds 31 new ones (group 'gold' = gold / metals channels), and ten more crypto channels (14 Nov,
-// D51-D60) add nine, and ten more (D61-D70) add ten. Each row:
+// D51-D60) add nine, and ten more (D61-D70) add ten; the ranks 11-20 crypto list (14 Nov) adds one, SCryptoTrader
+// (D71; the other nine were already listed). Each row:
 //   [key, name as listed, search query, star (owner's list marked it a priority), list positions, market group, earlier]
 // `earlier` names the study that already covered the channel (or screened and skipped it), so this study can skip
 // the videos it read. Market groups: in = Indian stocks / index / options, crypto, fx = forex and cross-market price
@@ -212,6 +213,8 @@ export const CHANNELS = [
   ['tradinglatino', 'Trading Latino - Jaime Merino', 'Trading Latino Jaime Merino', 0, 'D68', 'crypto', ''],
   ['bravenewcoin', 'Brave New Coin', 'Brave New Coin', 0, 'D69', 'crypto', ''],
   ['cryptosavy', 'Crypto Savy', 'Crypto Savy', 0, 'D70', 'crypto', ''],
+  // ── ranks 11-20 crypto list (14 Nov 2026): the one channel not listed before
+  ['scryptotrader', 'SCryptoTrader - Arslan Afzal', 'SCryptoTrader', 0, 'D71', 'fut', ''],
 ];
 
 const ytdlp = (args, timeout = 300_000) =>

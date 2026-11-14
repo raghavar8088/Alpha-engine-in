@@ -1,0 +1,33 @@
+video: CAGFAGGQk-w
+topic: forex_us
+summary: Tradeciety's four RSI (14) strategies (2021). One: at a retest of a high or low, an RSI reading weaker than at the first touch suggests the level holds. Two: ranges on both the price and the RSI - no breakout trade until both break. Three: divergence - price makes a lower low while the RSI makes a higher low; mark the last significant high and look for longs once price gets above it, since divergences often end trends. Four: a 4-hour EMA 50 sets the direction on a 15-minute chart; wait for a pullback against it that runs close to the average with an RSI divergence, then trade the strong-candle break of the pullback's little range with the trend. He also argues indicators lag no more than price action does.
+instruments: Forex pairs; Bitcoin*; Ether*; Gold*
+timeframes: 15m, 4h (strategy four); any
+style: intraday
+= TC-10 | 15-minute pullback against the 4-hour EMA 50 with an RSI (14) divergence, a close through the pullback's last swing, stop past the divergence extreme, 2R
+R filter E 09:31 | The price chart is 15 minutes; the moving average is the 4-hour EMA 50. | "the moving average comes from the four hour it's a 50 period ema"
+R filter E 09:45 | Below the moving average, only shorts (above it, only longs). | "as long as the market is trading below the moving average then we are only looking for short opportunities"
+R setup E 10:03 | A pullback against the trend close to the average, with a divergence. | "move close to the moving average and at the same time give us a divergence signal"
+R setup E 10:26 | The divergence: the RSI makes a lower high while price makes a higher high. | "the rsi is making a lower high and the price action is making a higher high"
+R entry E 10:35 | Then wait for the market to break lower. | "now we only need to wait for the market to break lower"
+R entry E 11:33 | The breakout candle must be strong. | "you always want to make sure that your breakout candle is very strong"
+R market A - | Desk version: EUR/USD and GBP/USD (the desk's FX minutes), Delta BTCUSD, ETHUSD and gold (Delta XAUTUSD) on 15-minute candles, out by the session end (the UTC day for bitcoin and ether, 17:00 New York for forex and gold). | ""
+R filter A - | The trend side is the 15-minute close against the last finished 4-hour EMA 50: below it shorts only, above it longs only. | ""
+R setup A - | Swing highs and lows are 3-candle pivots, known three candles later. The divergence (a short): the last two swing highs are a higher high with a lower RSI (14), the second within one 15-minute ATR (14) of the 4-hour EMA 50 and still below it; the mirror with two swing lows for a long. | ""
+R entry A - | Enter at the next open after the first close below the lowest low between the two swing highs (above the highest high between the two lows), within 20 candles of the second swing, with a body at least half a 15-minute ATR (14). | ""
+R stop A - | The stop is just beyond the second swing's extreme; the target 2R (none is named). | ""
+T with_assumptions | the 3-candle pivots, 'close to the average' as one ATR, the strong candle as half an ATR of body, the 20-candle window and 2R are ours (A)
+= TC-11 | RSI (14) divergence at a lower low (higher high), enter on the close beyond the last significant high (low) between the swings, stop past the divergence extreme, 2R
+R setup E 08:08 | The RSI makes a higher low while price makes a lower low: not much selling interest left. | "the rsi is making a higher low so there's not a lot of selling interest"
+R entry E 08:08 | Mark the last significant high. | "draw in the last significant high"
+R entry E 08:16 | Wait until the market gets above it, then look for longs. | "wait until the market gets above that and then look for long opportunities"
+R setup E 09:15 | Divergences are often the end of existing trends. | "they are often the endpoint of existing trends"
+R market A - | Desk version: Delta BTCUSD, ETHUSD and gold (Delta XAUTUSD) on 1-hour candles, held across days. | ""
+R setup A - | Swing lows and highs are 3-candle pivots, known three candles later; the divergence is the last two swing lows a lower low with a higher RSI (14) (a long), or the last two swing highs a higher high with a lower RSI (a short). | ""
+R entry A - | Enter at the next open after the first close above the highest high between the two swing lows (below the lowest low between the two highs), within 30 candles of the second swing. | ""
+R stop A - | The stop is just beyond the second swing's extreme; the target 2R (none is named); out after 4,320 one-minute rows (three days of crypto) if neither is hit. | ""
+T with_assumptions | the 3-candle pivots, the 1-hour candles, the 30-candle window, 2R and the three-day limit are ours (A)
+= TC-12 | RSI at a retested level and RSI ranges as breakout filters (concept)
+R filter E 00:56 | At a retest, an RSI not greater than at the first touch suggests the level holds. | "if the market comes back into previous high and low and the rsi such in this case for resistance is not greater than the first time"
+R filter E 04:00 | While ranges on the RSI and on price both hold, take no breakout trade. | "long trading ideas would be very very wrong here because the market is clearly in a range"
+T concept_only | filters on levels and RSI lines drawn by eye on each chart, with no trigger, stop or target of their own

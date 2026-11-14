@@ -1582,6 +1582,380 @@
    "eth_cuts": 12,
    "eth_lookahead_ok": true,
    "eth_diffs": []
+  },
+  "CG-03": {
+   "signals": 3,
+   "trades": 3,
+   "reasons": {
+    "be_stop": 2,
+    "stop": 1
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 1.1,
+   "eth_signals": 2,
+   "eth_trades": 2,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": [],
+   "long_window": {
+    "days": "gold 300, bitcoin 400",
+    "cuts": 8,
+    "signals": 22,
+    "trades": 22,
+    "reasons": {
+     "stop": 10,
+     "be_stop": 7,
+     "exit_signal": 2,
+     "time": 1,
+     "target": 2
+    },
+    "lookahead_ok": true,
+    "fill_problems": 0
+   }
+  },
+  "CG-04": {
+   "signals": 0,
+   "trades": 0,
+   "reasons": {},
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 0.0,
+   "long_window": {
+    "days": "gold 300, bitcoin 400",
+    "cuts": 8,
+    "signals": 2,
+    "trades": 2,
+    "reasons": {
+     "be_stop": 1,
+     "stop": 1
+    },
+    "lookahead_ok": true,
+    "fill_problems": 0
+   }
+  },
+  "CG-05": {
+   "signals": 17,
+   "trades": 11,
+   "reasons": {
+    "time": 1,
+    "target": 5,
+    "stop": 5
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 0.2,
+   "eth_signals": 10,
+   "eth_trades": 6,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": []
+  },
+  "TC-05": {
+   "signals": 10,
+   "trades": 7,
+   "reasons": {
+    "exit_signal": 2,
+    "stop": 3,
+    "time": 2
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 2.7
+  },
+  "TC-08": {
+   "signals": 2,
+   "trades": 2,
+   "reasons": {
+    "time": 1,
+    "stop": 1
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 0.1,
+   "long_window": {
+    "days": "gold 300, bitcoin 400",
+    "cuts": 8,
+    "signals": 18,
+    "trades": 18,
+    "reasons": {
+     "time": 1,
+     "stop": 7,
+     "exit_signal": 9,
+     "target": 1
+    },
+    "lookahead_ok": true,
+    "fill_problems": 0
+   }
+  },
+  "TC-10": {
+   "signals": 6,
+   "trades": 5,
+   "reasons": {
+    "time": 4,
+    "target": 1
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 5.6,
+   "eth_signals": 0,
+   "eth_trades": 0,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": []
+  },
+  "TC-11": {
+   "signals": 47,
+   "trades": 35,
+   "reasons": {
+    "stop": 16,
+    "exit_signal": 11,
+    "target": 7,
+    "time": 1
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 3.0,
+   "eth_signals": 15,
+   "eth_trades": 13,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": []
+  },
+  "TC-13": {
+   "signals": 30,
+   "trades": 30,
+   "reasons": {
+    "target": 7,
+    "stop": 21,
+    "time": 2
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 3.1,
+   "eth_signals": 7,
+   "eth_trades": 7,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": []
+  },
+  "MN-05": {
+   "signals": 12,
+   "trades": 12,
+   "reasons": {
+    "exit_signal": 7,
+    "target": 3,
+    "stop": 2
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 0.5,
+   "eth_signals": 8,
+   "eth_trades": 8,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": [],
+   "long_window": {
+    "days": "gold 300, bitcoin 400",
+    "cuts": 8,
+    "signals": 34,
+    "trades": 34,
+    "reasons": {
+     "exit_signal": 22,
+     "target": 9,
+     "stop": 3
+    },
+    "lookahead_ok": true,
+    "fill_problems": 0
+   }
+  },
+  "TK-06": {
+   "signals": 2,
+   "trades": 2,
+   "reasons": {
+    "target": 1,
+    "stop": 1
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 0.7,
+   "eth_signals": 2,
+   "eth_trades": 2,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": [],
+   "long_window": {
+    "days": "gold 300, bitcoin 400",
+    "cuts": 8,
+    "signals": 15,
+    "trades": 9,
+    "reasons": {
+     "target": 4,
+     "stop": 5
+    },
+    "lookahead_ok": true,
+    "fill_problems": 0
+   }
+  },
+  "TK-07": {
+   "signals": 20,
+   "trades": 17,
+   "reasons": {
+    "stop": 10,
+    "time": 4,
+    "target": 3
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 2.0,
+   "eth_signals": 5,
+   "eth_trades": 5,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": []
+  },
+  "TK-08": {
+   "signals": 3,
+   "trades": 3,
+   "reasons": {
+    "exit_signal": 1,
+    "stop": 1,
+    "time": 1
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 0.1,
+   "long_window": {
+    "days": "gold 300, bitcoin 400",
+    "cuts": 8,
+    "signals": 69,
+    "trades": 67,
+    "reasons": {
+     "exit_signal": 60,
+     "stop": 5,
+     "time": 2
+    },
+    "lookahead_ok": true,
+    "fill_problems": 0
+   }
+  },
+  "PL-03": {
+   "signals": 0,
+   "trades": 0,
+   "reasons": {},
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 0.0,
+   "eth_signals": 0,
+   "eth_trades": 0,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": [],
+   "long_window": {
+    "days": "gold 300, bitcoin 400",
+    "cuts": 8,
+    "signals": 4,
+    "trades": 4,
+    "reasons": {
+     "exit_signal": 4
+    },
+    "lookahead_ok": true,
+    "fill_problems": 0
+   }
+  },
+  "PL-06": {
+   "signals": 37,
+   "trades": 19,
+   "reasons": {
+    "exit_signal": 15,
+    "time": 3,
+    "stop": 1
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 2.7,
+   "eth_signals": 14,
+   "eth_trades": 8,
+   "eth_cuts": 12,
+   "eth_lookahead_ok": true,
+   "eth_diffs": [],
+   "long_window": {
+    "days": "gold 300, bitcoin 400",
+    "cuts": 8,
+    "signals": 175,
+    "trades": 77,
+    "reasons": {
+     "exit_signal": 67,
+     "stop": 7,
+     "time": 3
+    },
+    "lookahead_ok": true,
+    "fill_problems": 0
+   }
+  },
+  "SC-02": {
+   "signals": 72,
+   "trades": 62,
+   "reasons": {
+    "stop": 26,
+    "time": 24,
+    "target": 12
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 0.6
+  },
+  "SC-03": {
+   "signals": 378,
+   "trades": 50,
+   "reasons": {
+    "stop": 35,
+    "target": 15
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 0.4
+  },
+  "SC-04": {
+   "signals": 4,
+   "trades": 4,
+   "reasons": {
+    "stop": 3,
+    "time": 1
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 2.2,
+   "long_window": {
+    "days": "gold 300, bitcoin 400",
+    "cuts": 8,
+    "signals": 13,
+    "trades": 13,
+    "reasons": {
+     "stop": 9,
+     "time": 3,
+     "target": 1
+    },
+    "lookahead_ok": true,
+    "fill_problems": 0
+   }
   }
  },
  "problems": {}

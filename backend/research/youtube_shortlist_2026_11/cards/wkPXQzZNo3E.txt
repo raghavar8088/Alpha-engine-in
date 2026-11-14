@@ -1,0 +1,21 @@
+video: wkPXQzZNo3E
+topic: forex_us
+summary: Tradeciety on trading fakeouts (2020). On the daily chart the price takes out an important previous high, then the next candle falls straight back into the range as an engulfing candle; that sets a bearish bias for the next few days (the mirror at support for longs), and the trade is timed on a lower timeframe with breakouts, pullbacks or patterns. The stop goes above the previous high with room to breathe (stop runs and retests are common there), the target a fixed 2, 3 or 4 times the risk or a technical level such as the moving average. His four rules: you never know in advance which breakout fails; when one fails cut the loss; use big levels; and always add confluence (a run of nine same-colour candles, a deceleration pin bar, his Trend Rider indicator).
+instruments: Forex pairs (EUR/USD, GBP/USD examples); Bitcoin*; Ether*; Gold*
+timeframes: daily, 4h, 1h
+style: swing
+= TC-08 | Daily fakeout: a new 20-day high (low) then a close back below the prior day's low (above its high), short (long) the next open, stop past the extreme, 2R
+R setup E 01:40 | The market must take out the previous highs. | "that is really important that the market actually does take out the previous highs"
+R setup E 01:43 | The next candle immediately falls back into the lows, as an engulfing candle. | "the next candle here the price immediately falls back into the lows"
+R setup E 01:43 | Not a regular candle but an engulfing one. | "it doesn't only fall back with a regular candle this is an engulfing candle"
+R entry E 02:28 | The bias for the next day or the next few days is then bearish. | "your bias for the next day or for the next few days can be bearish"
+R entry E 02:39 | Go down to a lower timeframe and look for shorts in the direction of the fakeout. | "you would go down to a lower time frame and look for short opportunities into the direction of the fake out"
+R stop E 07:20 | The stop goes above the previous high. | "what is generally done is that you put your stop loss above the previous high"
+R stop E 07:31 | Not right at the high: give it a little room to breathe. | "give it a little bit of room to breathe"
+R target E 08:05 | A fixed reward-to-risk target: the stop distance times two, three or four. | "you just take the stop loss distance and then you multiply it by two three or four"
+R filter E 05:22 | Always add confluence before trading a fakeout. | "very important you must use confluence"
+R market A - | Desk version: EUR/USD and GBP/USD (the desk's FX minutes), Delta BTCUSD and gold (Delta XAUTUSD); the setup on daily candles (the UTC day for bitcoin, the 17:00 New York day for forex and gold), the trade held across days. | ""
+R setup A - | The fakeout: in the last two finished daily candles a high above the highest high of the 20 days before them, and the last finished day a down candle closing under the low of the day before it (a short); the mirror at the 20-day low for a long. | ""
+R entry A - | Enter at the open of the next trading day (his lower-timeframe entries are drawn by eye). | ""
+R stop A - | The stop is a quarter of a daily ATR (14) beyond the fakeout's extreme; the target 2R; out after 7,200 one-minute rows (five days of bitcoin, a little over five trading days of forex and gold) if neither is hit. | ""
+T with_assumptions | the 20-day high as 'the previous highs', the close beyond the prior day's low as the engulfing fall-back, the next-day open entry, the quarter-ATR room, 2R (the first of his 2, 3 or 4) and the five-day limit are ours (A); his confluence checks and Trend Rider indicator are not coded

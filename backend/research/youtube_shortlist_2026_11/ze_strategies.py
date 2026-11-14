@@ -39,6 +39,7 @@ import ze_more3 as X3  # noqa: E402
 import ze_more4 as X4  # noqa: E402
 import ze_more5 as X5  # noqa: E402
 import ze_more6 as X6  # noqa: E402
+import ze_more7 as X7  # noqa: E402
 from yc_common import BTC_X  # noqa: E402
 
 SOURCE = "youtube_shortlist"
@@ -313,6 +314,41 @@ _NEW = [
        X6.sa03, X6.sa03_x, ("BTCUSD", "ETHUSD"), (30, 240), FREE, overnight=True, readiness=A),
     _r("BV-01", "Williams Alligator side and a close beyond the last fractal, fractal trailing stop, out under the teeth",
        X6.bv01, X6.bv01_x, ("BTCUSD", "ETHUSD", "XAUUSD"), (240,), FREE, overnight=True, readiness=A),
+    # ── eighth batch: the owner's ranks 11-20 crypto channels (ze_more7) ──
+    _r("CG-03", "Back burner, 5 minutes: the first RSI (14) close under 30 after a new 30-day high, half at 1R, 3R or 3 hours",
+       X7.cg03, X7.cg03_x, ("BTCUSD", "ETHUSD"), (5,), FREE, readiness=A),
+    _r("CG-04", "Back burner, 4 hours: the first RSI (14) under 30 after a new 90-day high, daily close over its EMA 50, 1R/3R",
+       X7.cg04, X7.cg04_x, ("BTCUSD",), (240, 1440), FREE, overnight=True, readiness=A),
+    _r("CG-05", "Stair step: 10+ higher lows (lower highs) in a row, stop entry at the last candle, daily EMA 12 side, 1R/3R",
+       X7.cg05, X7.cg05_x, ("BTCUSD", "ETHUSD"), (5, 1440), FREE, readiness=A),
+    _r("TC-05", "Daily Bollinger (20, 2.5) spike and snap-back, next day's 15-minute engulfing candle with the EMA 50 trail",
+       X7.tc05, X7.tc05_x, FX + ("BTCUSD", "XAUUSD"), (15, 1440), ONE, readiness=A),
+    _r("TC-08", "Daily fakeout: a new 20-day high (low), a close back past the prior day's low (high), next open, 2R",
+       X7.tc08, X7.tc08_x, FX + ("BTCUSD", "XAUUSD"), (1440,), FREE, overnight=True, readiness=A),
+    _r("TC-10", "15-minute pullback against the 4-hour EMA 50 with an RSI (14) divergence, a strong close through, 2R",
+       X7.tc10, X7.tc10_x, FX + ("BTCUSD", "ETHUSD", "XAUUSD"), (15, 240), FREE, readiness=A),
+    _r("TC-11", "RSI (14) divergence at a lower low (higher high), a close beyond the high (low) between the swings, 2R",
+       X7.tc11, X7.tc11_x, ("BTCUSD", "ETHUSD", "XAUUSD"), (60,), FREE, overnight=True, readiness=A),
+    _r("TC-13", "Central pivot rejection with the pivot trend: a pin at the daily pivot, a strong candle away, S1/S2 target",
+       X7.tc13, X7.tc13_x, FX + ("BTCUSD", "ETHUSD", "XAUUSD"), (15,), ONE, readiness=A),
+    _r("MN-05", "Ichimoku cloud breakout with the lagging span above the cloud (4 hours, long), 3% target, out back inside",
+       X7.mn05, X7.mn05_x, ("BTCUSD", "ETHUSD"), (240,), FREE, overnight=True, readiness=A),
+    _r("TK-06", "Bollinger squeeze with an OBV divergence at the band, a close beyond the other band, middle-band stop, 2R",
+       X7.tk06, X7.tk06_x, ("BTCUSD", "ETHUSD"), (60,), FREE, overnight=True, readiness=A),
+    _r("TK-07", "Stochastic (14, 3, 3) divergence in the EMA 50/200 trend, %K back out of the zone, limit at the retest, 2R",
+       X7.tk07, X7.tk07_x, ("BTCUSD", "ETHUSD", "XAUUSD"), (15,), FREE, readiness=A),
+    _r("TK-08", "Daily Stochastic RSI %K/%D cross with the daily EMA 50 side, two-ATR stop, out on the opposite cross",
+       X7.tk08, X7.tk08_x, ("BTCUSD", "XAUUSD"), (1440,), FREE, overnight=True, readiness=A),
+    _r("PL-03", "Supertrend (ATR 7, factor 3) daily bot, long only: buy the flip up, sell the flip down",
+       X7.pl03, X7.pl03_x, ("BTCUSD", "ETHUSD"), (1440,), FREE, overnight=True, readiness=A),
+    _r("PL-06", "Backtrader dip test: buy after two lower daily closes in a row, sell five days later, three-ATR guard stop",
+       X7.pl06, X7.pl06_x, ("BTCUSD", "ETHUSD", "XAUUSD"), (1440,), FREE, overnight=True, readiness=A),
+    _r("SC-02", "Cumulative delta divergence: a higher high (lower low) with a lower (higher) session CVD, close through, 2R",
+       X7.sc02, X7.sc02_x, ("BTCUSD",), (15,), FREE, readiness=A),
+    _r("SC-03", "Absorption at the previous day's low (high): a sweep candle with delta against its colour, a close back, 2R",
+       X7.sc03, X7.sc03_x, ("BTCUSD",), (5,), ONE, readiness=A),
+    _r("SC-04", "Exhaustion: a new 4-hour extreme on fading volume, a volume spike with delta against the candle, 2R",
+       X7.sc04, X7.sc04_x, ("BTCUSD",), (5,), ONE, readiness=A),
 ]
 
 NEW = [r.sid for r in _NEW]

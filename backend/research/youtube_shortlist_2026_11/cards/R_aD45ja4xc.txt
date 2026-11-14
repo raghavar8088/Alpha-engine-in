@@ -1,0 +1,18 @@
+video: R_aD45ja4xc
+topic: forex_us
+summary: Tradeciety on the central pivot point (2020): the daily pivot is the previous day's (high + low + close) / 3. In a downtrend the central pivots step lower day by day; when price rallies back into the pivot and is rejected - a pin bar or a failed breakout attempt, then a very strong momentum candle away from it - that is a with-trend entry (shown on 15 minutes), with S1 or S2 as targets; the mirror in an uptrend. Trend lines and horizontal levels around the pivot can time the entry.
+instruments: Forex pairs; Bitcoin*; Ether*; Gold*
+timeframes: 15m, 1h, 4h, daily
+style: intraday
+= TC-13 | Central pivot rejection with the pivot trend: a pin bar at the daily pivot and a strong momentum candle away, target S1/S2
+R setup E 01:09 | The central pivot is the previous period's high, low and close summed and divided by three. | "you sum them up and then you divide them by three"
+R setup E 03:49 | Used on the 15-minute timeframe in his examples. | "here for example we are using it on the 15-minute time frame"
+R setup E 03:57 | The market moves into the central pivot point and is rejected. | "what you are going to look for is the market move into the central pivot point and then you look for rejection"
+R filter E 04:40 | In a downtrend the central pivots move lower. | "on a downtrend the central pivot points will move lower"
+R entry E 05:36 | A pin bar at the pivot, then a very strong momentum candle. | "if you can't see that with the pin bar and then the next candle was a very very strong momentum bar"
+R target E 10:52 | S1 or S2 as targets. | "you could then use the s1 or s2 as targets"
+R market A - | Desk version: EUR/USD and GBP/USD (the desk's FX minutes), Delta BTCUSD, ETHUSD and gold (Delta XAUTUSD) on 15-minute candles; pivots from the previous trading day (the UTC day for bitcoin and ether, the 17:00 New York day for forex and gold); out by the session end. | ""
+R filter A - | Shorts only when today's central pivot is below yesterday's, longs only when it is above. | ""
+R setup A - | The rejection (a short): a 15-minute candle that opens below the pivot, trades up to it and closes below it, and the next candle a down candle with a body of at least one 15-minute ATR (14) closing under the rejection candle's low; the mirror for a long. | ""
+R entry A - | Enter at the next open; the stop just above the two candles' high. The target is S1, or S2 once price is already past S1 (R1/R2 for longs); skipped when that target is less than 1R away. One trade a day. | ""
+T with_assumptions | the UTC day for the pivots, the 'strong momentum bar' as one ATR of body, the 1R minimum to the target and the one-trade limit are ours (A); trend lines around the pivot are not coded

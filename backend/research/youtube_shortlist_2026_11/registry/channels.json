@@ -8660,5 +8660,27 @@
   "pick_title": "Moon Dev",
   "pick_followers": 115000,
   "sure": true
+ },
+ "scryptotrader": {
+  "key": "scryptotrader",
+  "name": "SCryptoTrader - Arslan Afzal",
+  "query": "SCryptoTrader",
+  "star": false,
+  "lists": "D71",
+  "group": "fut",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UC8nZAuqIkFnF3DFIB-Smajw",
+    "title": "SCryptoTrader",
+    "followers": null,
+    "about": "",
+    "score": 1
+   }
+  ],
+  "pick": "UC8nZAuqIkFnF3DFIB-Smajw",
+  "pick_title": "SCryptoTrader",
+  "pick_followers": null,
+  "sure": true
  }
 }

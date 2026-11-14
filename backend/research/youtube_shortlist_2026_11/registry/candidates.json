@@ -52624,5 +52624,20 @@
     "score": 3.86
    }
   ]
+ },
+ "scryptotrader": {
+  "key": "scryptotrader",
+  "name": "SCryptoTrader - Arslan Afzal",
+  "titles": [
+   "SCryptoTrader"
+  ],
+  "star": false,
+  "group": "fut",
+  "earlier": "",
+  "listed": true,
+  "videos": 267,
+  "p1": 0,
+  "covered": [],
+  "candidates": []
  }
 }

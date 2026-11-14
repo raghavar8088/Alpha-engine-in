@@ -1,0 +1,9 @@
+video: 3VEfeykTZiU
+topic: crypto
+summary: A bitcoin and crypto market review (September 2026) around a test of the daily EMA 12: the EMA 12 as a 'launch pad' that, when tested and held, triggers the continuation move; megaphone patterns; stop wiggle room, selling partial into a bull break and moving to a break-even stop. Commentary and position management on live charts, not a set of fixed rules.
+instruments: Bitcoin; Ether; altcoins; crypto stocks
+timeframes: 4h, daily
+style: swing
+= CG-07 | Daily EMA 12 'launch pad': a test that holds triggers continuation (market review)
+R setup E 15:23 | The EMA 12 should act as a launch pad: if it is tested and holds, the continuation move follows. | "you want EMA12 to act as that launch pad where if you test it and hold it, it then triggers the continuation move"
+T concept_only | 'test and hold' and the stop wiggle room are judged live on each chart; the EMA 12 trend-management idea is the earlier card CG-02's

@@ -1,0 +1,23 @@
+video: B1Ej-EXR-C8
+topic: crypto
+summary: Moonin Papa on trend trading crypto (November 2024). First pick a strongly trending chart, then reinvest the profits (compounding). With his paid TBO indicator: when the slow line points up, buy the bounces off the TBO fast line; on 4-hour charts the bounces gave about 3-5%, so aim for 3%. With the free Ichimoku cloud: price above the cloud with the lagging span above the price and above the cloud is the 'golden zone'; the entry is the breakout where price breaks above the cloud and the lagging span does too (a daily example gained about 18-22%); price going back inside the cloud or the lagging span touching price warns of consolidation. Faster timeframes take smaller profits (about 3%).
+instruments: Crypto (MEW/BTC and others); Bitcoin*; Ether*
+timeframes: daily, 4h, 1h
+style: swing
+= MN-05 | Ichimoku cloud breakout with the lagging span above the cloud, long on 4-hour candles, 3% target, out on a close back inside the cloud
+R setup E 07:07 | The lagging span moving above the price and above the cloud shows a strong trend. | "when we have this lagging span back here and it moves above the price right here and Above This Cloud"
+R filter E 07:07 | As long as the lagging span is above the price, the trend is good. | "as long as the lagging span or I believe it's called The Cho is above the price we're golden"
+R entry E 13:00 | Wait for the lagging span to go above the cloud. | "we want to wait for the lagging span back here to go above the cloud"
+R entry E 13:20 | Price breaking above the cloud with the lagging span: the breakout to trade. | "when we see the price right there break above the cloud so does the lagging span this is actually the breakout that we want"
+R market E 13:58 | The same on faster timeframes such as 4 hours. | "we can trade with the ichal cloud on faster time frames like the 4our time frame"
+R exit E 08:31 | Price going inside the cloud shows the trend has slowed. | "when the price goes inside of the cloud this is an an indication that the trend is slowed down"
+R target E 03:56 | Aim for 3%, on the safe side. | "common denominator we have about 3 to 5% so aim for 3%"
+R market A - | Desk version: Delta BTCUSD and ETHUSD on 4-hour candles (UTC), long only, held across days. | ""
+R setup A - | Ichimoku (9, 26, 52) defaults; the cloud at a candle is the two leading spans computed 26 candles earlier. The breakout: a 4-hour close above both spans after a close that was not, with the lagging span confirming - that close above the close 26 candles earlier and above the cloud as it stood 26 candles earlier. | ""
+R entry A - | Long at the next open. | ""
+R stop A - | The stop is the cloud's lower edge at the breakout candle; out at the next open after a 4-hour close back below the cloud's upper edge; the target 3% above the entry; out after 14,400 one-minute rows (ten days) if nothing else closed it. | ""
+T with_assumptions | the default settings, the 4-hour candles, the stop at the cloud's lower edge, the 3% target he names for faster timeframes, the exit on a close back inside the cloud and the ten-day limit are ours (A); long only, as he trades it
+= MN-06 | TBO trend: buy the bounce off the TBO fast line while the slow line points up, 3% target (paid indicator)
+R entry E 03:07 | Buy when price comes back to bounce off the TBO fast line. | "we can buy when the price comes right back here to bounce off the TBO fast line"
+R target E 03:56 | Aim for 3%. | "common denominator we have about 3 to 5% so aim for 3%"
+T not_testable | the TBO lines are a paid indicator whose formulas are not given

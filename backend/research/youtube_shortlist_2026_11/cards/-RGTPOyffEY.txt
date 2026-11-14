@@ -1,0 +1,11 @@
+video: -RGTPOyffEY
+topic: forex_us
+summary: Tradeciety compares breakout and pullback trading (2020). A breakout needs a level with two or three touches (three for a trend line) and a candle that closes fully beyond it, never a decision mid-candle; very large breakout candles force a wide stop, and then a pullback entry is the alternative. The pullback comes back to the broken level and is entered on a momentum signal such as an engulfing candle; breakouts give more trades and more fakeouts, pullbacks fewer trades at better prices, and sometimes the market runs away without a pullback. Combining the two gives a second chance after a fakeout. Above all: cut losers and let winners run to a fixed target.
+instruments: Forex pairs
+timeframes: Any (4h examples)
+style: swing
+= TC-09 | Breakout versus pullback: a full close beyond a level with 2-3 touches, or the retest with an engulfing candle (comparison)
+R setup E 01:38 | A strong support level needs at least two to three touch points (three for a trend line). | "you need at least three touch points"
+R entry E 02:13 | Trade a breakout only when the candle closes fully outside the level. | "you only trade when the candle is fully closing outside"
+R entry E 12:56 | The pullback is entered on an engulfing candle at the previous breakout area. | "it's happening right at the previous breakout area"
+T concept_only | a comparison of the two entries on levels drawn by eye, with no fixed stop or target; the break-and-retest entry is the earlier card TC-01's

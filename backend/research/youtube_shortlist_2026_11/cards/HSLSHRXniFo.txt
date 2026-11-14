@@ -1,0 +1,14 @@
+video: HSLSHRXniFo
+topic: crypto
+summary: Moonin Papa's bitcoin accumulation plan for the 2026 bear market (July 2026). From his four-year 'top, bottom, recovery, rally' cycle reading, bitcoin is about 39 weeks into a 52-week bottom year and may bottom by October 2026. Instead of one leveraged entry with a tight fixed stop, he builds a spot position with no leverage and no fixed stop in a Martingale double-down: 1/7 of the planned stack at the first entry, 2/7 lower and 4/7 lower still (his levels for now: about 62K, 49K and 38,555, read from the chart), averaging the entry down; partial profits on the way back up. Back-checks on 2018 and 2022 show the position underwater for about 16 weeks before large gains.
+instruments: Bitcoin; Ether and altcoins (any)
+timeframes: weekly
+style: position
+= MN-03 | Bear-market accumulation: a Martingale double-down of spot lots 1/7, 2/7 and 4/7 at lower levels, no leverage and no fixed stop
+R market E 01:34 | DCA trading on the spot market with no leverage. | "trading on the spot market, no leverage,"
+R stop E 14:24 | No hard, fast and fixed stop loss. | "Instead of having a hard and fast and fixed stop loss"
+R entry E 15:59 | The Martingale double down. | "And that is the Martingale double down."
+R entry E 18:19 | The first lot is $100 of a $700 stack (1/7). | "going to use $100 of that $700 in my"
+R entry E 26:27 | 6/7 of the stack is kept back to average down twice. | "we're keeping the majority of our position, 6/7 of it reserved as capital"
+C return_pct | 23:44 | about 500% from a 2022 average entry near $19,500 | 2022-2025 | "ended up being a very, very handsome return of about 500%."
+T concept_only | the cycle timing and the dip levels (49K, 38,555) are read by eye from the chart, and there is no exit beyond 'partial profits on the way up': a multi-year spot accumulation with no stop or exit that a per-trade paper book cannot score

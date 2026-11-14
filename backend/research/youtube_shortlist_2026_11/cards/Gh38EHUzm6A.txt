@@ -1,0 +1,10 @@
+video: Gh38EHUzm6A
+topic: crypto
+summary: SCryptoTrader's order flow lesson 7 (June 2026, Urdu/Hindi): liquidity and stop hunts. Big players need the other side to fill, so they push price through obvious key levels where stops and breakout orders sit, then reverse. A breakout with high volume can still fail because that volume was absorbed - pending breakout orders plus stopped-out shorts - and a real breakout shows the footprint's buyers genuinely in control. His live bitcoin examples (5 minutes, the New York open) read trapped buyers and sellers from large contract prints, delta and stacked imbalances before the move.
+instruments: Bitcoin
+timeframes: 5m, 15m, 1m
+style: intraday
+= SC-05 | Real versus failed breakouts: stop hunts through key levels, absorption of the breakout volume, trapped traders (lesson 7)
+R setup E 04:56 | High volume came into the breakout, but it failed because of absorption. | "lekin brekaaaut phel ho gayaa. kyonki isamen objorpshan huee hai"
+R setup E 00:06 | Lesson seven is about liquidity and stop hunts. | "lesan sevan pe ham baat karenge likviditee end stop hant"
+T concept_only | the levels and trapped-trader reads come from the footprint's per-price prints, read by eye; a failed breakout read by delta is SC-03's absorption at the swept level

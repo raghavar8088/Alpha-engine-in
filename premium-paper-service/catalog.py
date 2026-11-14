@@ -584,6 +584,24 @@ YC3_STRATEGIES = (
     ('SA-02', 'KAMA trend on 15 minutes and 4 hours, ADX over 50, choppiness under 50, narrow bands, 2.5 ATR, 10-bar wait', 'Algo-trading with Saleh', ('BTCUSD', 'ETHUSD')),
     ('SA-03', 'Alligator trend on 30 minutes and 4 hours, ADX over 30, CMO beyond 20, Stochastic RSI pullback, 2 ATR', 'Algo-trading with Saleh', ('BTCUSD', 'ETHUSD')),
     ('BV-01', 'Williams Alligator side and a close beyond the last fractal, fractal trailing stop, out under the teeth', 'Brave New Coin (Josh Olszewicz)', ('BTCUSD', 'ETHUSD', 'XAUUSD')),
+    # the eighth batch (14-15 Nov 2026: the owner's ranks 11-20 crypto channels); trades from settings.YC3H_START_T
+    ('CG-03', 'Back burner, 5 minutes: the first RSI (14) close under 30 after a new 30-day high, half at 1R, 3R or 3 hours', 'The Chart Guys', ('BTCUSD', 'ETHUSD')),
+    ('CG-04', 'Back burner, 4 hours: the first RSI (14) under 30 after a new 90-day high, daily close over its EMA 50, 1R/3R', 'The Chart Guys', ('BTCUSD',)),
+    ('CG-05', 'Stair step: 10+ higher lows (lower highs) in a row, stop entry at the last candle, daily EMA 12 side, 1R/3R', 'The Chart Guys', ('BTCUSD', 'ETHUSD')),
+    ('TC-05', 'Daily Bollinger (20, 2.5) spike and snap-back, next day\'s 15-minute engulfing candle with the EMA 50 trail', 'Tradeciety', ('EURUSD', 'GBPUSD', 'BTCUSD', 'XAUUSD')),
+    ('TC-08', 'Daily fakeout: a new 20-day high (low), a close back past the prior day\'s low (high), next open, 2R', 'Tradeciety', ('EURUSD', 'GBPUSD', 'BTCUSD', 'XAUUSD')),
+    ('TC-10', '15-minute pullback against the 4-hour EMA 50 with an RSI (14) divergence, a strong close through, 2R', 'Tradeciety', ('EURUSD', 'GBPUSD', 'BTCUSD', 'ETHUSD', 'XAUUSD')),
+    ('TC-11', 'RSI (14) divergence at a lower low (higher high), a close beyond the high (low) between the swings, 2R', 'Tradeciety', ('BTCUSD', 'ETHUSD', 'XAUUSD')),
+    ('TC-13', 'Central pivot rejection with the pivot trend: a pin at the daily pivot, a strong candle away, S1/S2 target', 'Tradeciety', ('EURUSD', 'GBPUSD', 'BTCUSD', 'ETHUSD', 'XAUUSD')),
+    ('MN-05', 'Ichimoku cloud breakout with the lagging span above the cloud (4 hours, long), 3% target, out back inside', 'Moonin Papa (Aaron Dishner)', ('BTCUSD', 'ETHUSD')),
+    ('TK-06', 'Bollinger squeeze with an OBV divergence at the band, a close beyond the other band, middle-band stop, 2R', 'Tom Crown', ('BTCUSD', 'ETHUSD')),
+    ('TK-07', 'Stochastic (14, 3, 3) divergence in the EMA 50/200 trend, %K back out of the zone, limit at the retest, 2R', 'Tom Crown', ('BTCUSD', 'ETHUSD', 'XAUUSD')),
+    ('TK-08', 'Daily Stochastic RSI %K/%D cross with the daily EMA 50 side, two-ATR stop, out on the opposite cross', 'Tom Crown', ('BTCUSD', 'XAUUSD')),
+    ('PL-03', 'Supertrend (ATR 7, factor 3) daily bot, long only: buy the flip up, sell the flip down', 'Part Time Larry', ('BTCUSD', 'ETHUSD')),
+    ('PL-06', 'Backtrader dip test: buy after two lower daily closes in a row, sell five days later, three-ATR guard stop', 'Part Time Larry', ('BTCUSD', 'ETHUSD', 'XAUUSD')),
+    ('SC-02', 'Cumulative delta divergence: a higher high (lower low) with a lower (higher) session CVD, close through, 2R', 'SCryptoTrader (Arslan Afzal)', ('BTCUSD',)),
+    ('SC-03', 'Absorption at the previous day\'s low (high): a sweep candle with delta against its colour, a close back, 2R', 'SCryptoTrader (Arslan Afzal)', ('BTCUSD',)),
+    ('SC-04', 'Exhaustion: a new 4-hour extreme on fading volume, a volume spike with delta against the candle, 2R', 'SCryptoTrader (Arslan Afzal)', ('BTCUSD',)),
 )
 YC3B_IDS = frozenset(('MC-01', 'MC-02', 'AO-01', 'KT-01', 'KG-01', 'KG-02', 'AO-02', 'CR-02', 'QC-03', 'CT-03', 'KS-01', 'DE-09', 'CT-02', 'CT-01', 'SK-01', 'CH-01', 'CH-02', 'QC-01', 'CV-01', 'KR-01', 'TN-02', 'AC-02', 'CR-01'))
 YC3C_IDS = frozenset(('FY-01', 'FY-02', 'AO-03', 'US-01', 'US-02', 'KS-02', 'VV-01', 'VV-02', 'BJ-01', 'KT-02', 'BJ-02', 'CD-01', 'DE-10', 'CD-02', 'RT-01'))
@@ -591,6 +609,7 @@ YC3D_IDS = frozenset(('BT-01', 'PL-01', 'LT-01', 'ET-01', 'ET-02', 'MB-01', 'BR-
 YC3E_IDS = frozenset(('NK-02', 'RT-02', 'TT-02', 'TC-04', 'BX-01', 'BX-02', 'CB-01', 'VS-02', 'VS-03', 'FL-02'))
 YC3F_IDS = frozenset(('DD-01', 'DD-02', 'DD-03', 'DD-04', 'TL-06'))
 YC3G_IDS = frozenset(('TQ-01', 'TQ-02', 'TQ-03', 'JO-01', 'SA-01', 'SA-02', 'SA-03', 'BV-01'))
+YC3H_IDS = frozenset(('CG-03', 'CG-04', 'CG-05', 'TC-05', 'TC-08', 'TC-10', 'TC-11', 'TC-13', 'MN-05', 'TK-06', 'TK-07', 'TK-08', 'PL-03', 'PL-06', 'SC-02', 'SC-03', 'SC-04'))
 for _sid, _name, _ch, _mkts in YC3_STRATEGIES:
     ACCOUNTS.append(_a(_sid, YC3, _name, _ch, *[(YC2_BOOK_MARKET.get(_m, _m), "V0") for _m in _mkts]))
 BY_ID = {a.id: a for a in ACCOUNTS}

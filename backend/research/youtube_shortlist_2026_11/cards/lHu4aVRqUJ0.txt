@@ -1,0 +1,15 @@
+video: lHu4aVRqUJ0
+topic: crypto
+summary: SCryptoTrader's order flow lesson 3 (June 2026, Urdu/Hindi): delta is bid volume minus ask volume per candle - positive means buyers dominated, negative sellers - and the cumulative delta (CVD) shows where a trend gains or loses strength. The key reversal sign is a delta divergence: price makes a higher high while the delta falls (bearish), or a lower low at support while it rises (bullish). He never trades on delta alone: he wants absorption at the level too, then a lower-timeframe lower low as the trigger. Example: bitcoin 15 minutes at the New York open - a sweep of the lows, an aggressive rally with the CVD down and selling wicks at a key level, then the move back down. Order flow is a confirmation and trigger, not a strategy with set rules.
+instruments: Bitcoin; gold
+timeframes: 15m, 5m, 1m
+style: intraday
+= SC-02 | Cumulative delta divergence: a higher high (lower low) with a lower (higher) session CVD, entered on the close through the low (high) between the swings, 2R
+R setup E 03:33 | A bearish divergence: price going up while the delta comes down. | "selars preshar leke aa rahe hain. berish daayavarjan jab banatee hai jab praais oopar jaa rahee hotee hai lekin deltaa neeche aa rahaa hotaa hai"
+R filter E 03:51 | Never trade on delta alone. | "bataatee hai ki ek daayavarjens ban gayaa. usakee bhee egjaanpal ham aake dekhate hain. in maay parsanal opiniyan main kabhee bhee sirph deltaa ke bes pe tred naheen"
+R setup E 09:08 | Order flow is a trigger and confirmation, not a strategy by itself. | "karate ho. ordar phlo itaselph iज़ not a stretajee too tek treds. it ij jast a"
+R market A - | Desk version: Delta BTCUSD on 15-minute candles, with the desk's own record of bitcoin's taker buy and sell volume per minute (kept since 8 November 2026): a candle's delta is its taker buys minus taker sells, unknown when any of its minutes is unrecorded; out by the end of the UTC day. | ""
+R setup A - | The cumulative delta is the running sum of candle deltas since the UTC day began. Swing highs and lows are 3-candle pivots, known three candles later. Bearish: the day's last two swing highs a higher high with a lower cumulative delta; bullish: the last two swing lows a lower low with a higher cumulative delta. | ""
+R entry A - | Enter at the next open after the first close below the lowest low between the two highs (above the highest high between the two lows) within 12 candles of the second swing: his lower-timeframe lower low as the trigger. | ""
+R stop A - | The stop just beyond the second swing; the target 2R (he names none). The absorption check is not coded. | ""
+T with_assumptions | the session CVD, the 3-candle pivots, the 12-candle window, the 15-minute candles and 2R are ours (A); his absorption confirmation and key levels are read on the footprint and not coded

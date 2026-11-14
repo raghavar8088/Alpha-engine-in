@@ -1,0 +1,12 @@
+video: RxQ3eEgrlqE
+topic: crypto
+summary: Moonin Papa shows his 'better crypto signals' DCA bot on Altrady (July 2026): running since April 2024 it has made almost $1,000 passively, slowly, with weeks of nothing. Each deal is a base order and three DCA orders below it, doubling 1, 2, 4 and 8 lots, closed at a take-profit on the bounce; he compares it with buy-and-hold on Cardano (ADA hourly) through the 2025-2026 bear market. The deal-start signal is the paid Better Traders Club strategy, backtested from January 2021; the DCA spacing and the take-profit are not stated.
+instruments: Cardano (ADA); any crypto
+timeframes: 1h
+style: bot
+= MN-04 | 'Better crypto signals' DCA bot: base order and three DCA orders doubling 1:2:4:8, take-profit on the bounce (promotion)
+R entry E 02:05 | Four possible orders, because it is a dollar-cost-averaging bot. | "There's an order here, which is our DCA1, DCA 2, and then DCA 3."
+R entry E 02:38 | The second order is two lots, the third four lots. | "would be two lots. Then the next one down would be four lots."
+R entry E 02:38 | The orders double on the way down. | "We double down on the way down."
+C other | 00:04 | almost $1,000 of profit since April 2024 | April 2024 to July 2026 | "since then the bot has passively made almost $1,000"
+T not_testable | the deal-start signal is the paid Better Crypto Signals strategy, and the DCA spacing and the take-profit are never stated; a product promotion

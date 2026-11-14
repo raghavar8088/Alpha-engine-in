@@ -1,0 +1,11 @@
+video: T3PT4eV8xFU
+topic: forex_us
+summary: Part Time Larry starts reproducing the paper 'Can Day Trading Really Be Profitable?' in backtesting.py (July 2025): the 5-minute opening range breakout on QQQ and TQQQ, 2016-2023 plus an out-of-sample 2023-2025. This part loads Polygon minute data, installs the package and builds an empty strategy class with $25,000 of starting cash; the first five minutes' range and colour, which set the side, are coded in the next part.
+instruments: QQQ; TQQQ
+timeframes: 5m, 1m
+style: intraday
+= PL-07 | The paper's 5-minute opening range breakout on QQQ/TQQQ, rebuilt in backtesting.py (part 1)
+R setup E 00:15 | The paper's opening range breakout on the five-minute timeframe. | "usage of the opening range breakout strategy on the five minute time frame on the symbols QQQ and TQQQ"
+R setup E 04:16 | Not a moving-average cross this time, but an opening range breakout. | "tired of the simple moving average cross. We're going to do uh opening range breakout strategy, right?"
+T with_assumptions | the rules are the paper's, coded in the next part
+D PL-01 | the same paper's first-five-minutes opening range strategy is already on the desk from his earlier video (PL-01)

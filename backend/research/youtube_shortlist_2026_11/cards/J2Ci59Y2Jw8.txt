@@ -1,0 +1,16 @@
+video: J2Ci59Y2Jw8
+topic: crypto
+summary: SCryptoTrader's order flow lesson 6 (June 2026, Urdu/Hindi): exhaustion is price losing momentum - motivated buyers (or sellers) running out - before a pullback or reversal. A genuine move has rising volume and stacked imbalances; an exhausted one keeps rising on falling volume, then often prints a volume spike at the top while the delta turns negative inside a green candle. He combines three things - volume, delta and price action - for a high-probability setup, and shows bitcoin and gold examples where falling volume, a spike at the top with absorption, and negative delta came before the drop.
+instruments: Bitcoin; gold
+timeframes: 5m, 15m
+style: intraday
+= SC-04 | Exhaustion: a new 4-hour high (low) on fading volume, then a volume spike with delta against the candle, entered on the close back through it, 2R
+R setup E 01:17 | Exhaustion is price losing momentum. | "jo hotee hai egjoshan kee kaise aap dekh sakate ho. theek hai? egjoshan sinpalee yahee hai ki praais men momentam looj kar rahee hai."
+R setup E 06:49 | Volume declining in the move, then a sudden volume spike at the top. | "kaa volyoom agar aap yahaan dekho volyoom diklaain men hai. sadanalee aapako volyoom spaaik najar aataa hai top pe vo bataa rahaa hai ki yahaan pe absorpshan ho"
+R setup E 05:02 | The delta starts printing negative, showing weakness in a green candle. | "deltaa aapako bataataa hai jaise hamane preeviyas lesans men baat kee hai ki deltaa negetiv print honaa shuroo ho jaataa hai jo aapako veekanes dikhaa rahaa hai ki"
+R filter E 05:48 | Combine three different things for a high-probability setup. | "aur aapako ek achchhaa setaap mil sakataa hai. yoo need too kanbaain too three dipharent things too get haaee probebilitee setaap."
+R market A - | Desk version: Delta BTCUSD on 5-minute candles with the exchange's candle volume and the desk's recorded taker flow (since 8 November 2026; delta unknown when a minute is unrecorded); out by the end of the UTC day. | ""
+R setup A - | For a short: a candle closing at a new 4-hour high (above the 48 candles before it) after the average volume of the 6 candles before it fell below the 6 before those; the candle's volume at least twice the average of the 12 before it; an up candle with a negative delta. The mirror at a new 4-hour low for a long. | ""
+R entry A - | Enter at the next open after a close beyond the spike candle's other end (below its low for a short) within 3 candles. One trade a day. | ""
+R stop A - | The stop just beyond the most extreme price since the spike candle; the target 2R (he names none). | ""
+T with_assumptions | the 4-hour extreme, the 6/6 volume fade, the 2x spike, the 3-candle window and 2R are ours (A)

@@ -1,0 +1,15 @@
+video: A5gNI7__vJg
+topic: crypto
+summary: SCryptoTrader's order flow lesson 5 (June 2026, Urdu/Hindi): absorption is one side pushing hard - aggressive buying into a supply zone, or selling into a demand zone - while the other side quietly takes it with limit orders, so price does not move; at key levels (zones, yesterday's point of control) it is an early reversal sign once price action confirms it. His New York session bitcoin examples: aggressive buyers at a high that sellers absorbed, red delta printing while price rose on falling volume, a fakeout, then a strong selling candle and a lower low; and the mirror at a low where sellers were absorbed and price lifted.
+instruments: Bitcoin; gold
+timeframes: 5m, 1m
+style: intraday
+= SC-03 | Absorption at the previous day's low (high): a sweep candle with delta against its colour, then a close back beyond it, 2R
+R setup E 06:06 | Look for these signs at key levels. | "hogee usakee. aapako kee levals pe ye cheejen dekhanee hai."
+R setup E 06:45 | Red delta printing while price goes up. | "dekho red deltaa print ho rahaa hai. praais oopar jaa rahee hai."
+R entry E 06:45 | Then a fakeout gave the confirmation. | "aapako bataa rahe hain yah rivarsal yahaan se aa sakataa hai. end praais ne usake baad phek aaut karake kanpharmeshan dee vo ye"
+R market A - | Desk version: Delta BTCUSD on 5-minute candles, with the desk's recorded taker buy and sell volume per minute (since 8 November 2026; a candle's delta is unknown when a minute is unrecorded); out by the end of the UTC day. | ""
+R setup A - | The key level is the previous UTC day's low (high). The absorption candle, for a long: a down candle that trades below the previous day's low with a positive delta (aggressive buying the price does not show); for a short: an up candle above the previous day's high with a negative delta. | ""
+R entry A - | Enter at the next open after a close beyond the absorption candle's other end (above its high for a long) within 3 candles; his lesson-2 note: wait for the close. One trade a day. | ""
+R stop A - | The stop just beyond the most extreme price since the absorption candle; the target 2R (he names none). | ""
+T with_assumptions | the previous day's high and low as the key levels, the candle delta as his footprint read, the 3-candle window and 2R are ours (A)

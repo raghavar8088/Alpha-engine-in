@@ -1,0 +1,11 @@
+video: DoRwrw7JPes
+topic: forex_us
+summary: Tradeciety's nine price-action patterns (2021) with entries, stops and targets: the breakout build-up (price sticking to a level before it breaks), the wedge, the fakie (a wick through a high that fails, often with a pin bar or engulfing candle), the flag, the head and shoulders, trend-line breakouts and retests, the trap (a close above a high that falls straight back into the range), the triangle and the triple tap. He waits for a full close beyond the breakout level, hides the stop behind technical barriers (support and resistance, highs and lows, trend lines, moving averages) with room to spare, and looks left for targets at prior support and resistance or at Fibonacci 161/200 levels.
+instruments: Forex pairs
+timeframes: Any (4h and daily examples)
+style: swing
+= TC-07 | Nine price-action patterns (breakout build-up, wedge, fakie, flag, head and shoulders, trend-line retest, trap, triangle, triple tap), stops behind technical barriers (walkthrough)
+R entry E 04:19 | Wait for the price to close fully outside the level, better with a strong momentum push. | "you want to make sure that the price is fully closing outside of the level"
+R stop E 02:36 | Technical barriers for the stop: support and resistance, highs and lows, a trend line or a moving average. | "technical barriers could be support and resistance could be highs and lows"
+R target E 01:56 | For targets, look left to the biggest areas of support and resistance. | "keep it simple look left and look at where the biggest"
+T concept_only | every pattern, level and trend line is drawn by eye on each chart with no fixed trigger; the trap and the fakie resemble the library's trap and fakeout strategies

@@ -1,0 +1,13 @@
+video: 5VU3CJMuk0w
+topic: forex_us
+summary: Part Time Larry's second Backtrader tutorial (January 2020): loading a daily stock price file as a data feed and writing the test strategy - buy a slight dip when the close has fallen two days in a row (today's close below yesterday's, yesterday's below the day before), then hold for a number of days and sell; the sell orders, position size and commissions come in the next video.
+instruments: US stocks; Bitcoin*; Ether*; Gold*
+timeframes: daily
+style: swing
+= PL-06 | Backtrader dip test: buy after two lower closes in a row, sell five days later
+R entry E 05:46 | Buy a slight dip: price down two days in a row. | "just it's basically just buying a slight dip so we're gonna see what would happen if the price of a stock went down two"
+R exit E 06:04 | Hold it for a number of days, then sell. | "then we held it for X number of days and sold it immediately after that"
+R market A - | Desk version: Delta BTCUSD, ETHUSD and gold (Delta XAUTUSD) on daily candles (the UTC day for crypto, the 17:00 New York day for gold), held across days; one position at a time. | ""
+R entry A - | Buy at the next daily open after a close below the previous close that was itself below the close before it. | ""
+R exit A - | Sell after 7,200 one-minute rows - five days of crypto, a little over five trading days of gold (Backtrader's own quick-start holds five bars; the video leaves the number open); a guard stop three daily ATR (14) below the entry. | ""
+T with_assumptions | the five-day hold and the guard stop are ours (A); the stock data is replaced by the desk's crypto and gold

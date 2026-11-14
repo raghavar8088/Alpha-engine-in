@@ -1,0 +1,10 @@
+video: 1DCiIGD8pDw
+topic: crypto
+summary: SCryptoTrader's order flow lesson 8 (2026): the volume profile and auction theory. The point of control is the price with the most volume, the value area about 70% of it with its high and low as key levels; high and low volume nodes mark fair prices and fast-move gaps; price moves from balance to imbalance. He keeps weekly and daily points of control, and trades sweeps and reactions at the value area edges and points of control once order flow (absorption, delta divergence) confirms; profile shapes (P, b, D and thin) describe the session. He stresses small losses and big rewards over a high win rate, and that the profile is a tool, not a signal generator.
+instruments: Bitcoin; gold
+timeframes: 5m, 15m, 1h
+style: intraday
+= SC-06 | Volume profile levels: point of control, value area high and low, high and low volume nodes, confirmed by order flow (lesson 8)
+R setup E 10:58 | The volume profile is a tool to understand value, not to generate signals. | "to make you understand Volume Profile, not to generate signals, and there is no such thing as getting rich from this ."
+R setup E 10:58 | It is just a tool. | "Volume Profile is just a tool itself,"
+T concept_only | a lesson on the levels, with trades that depend on order-flow reads judged by eye at each level; he says it does not generate signals

@@ -18,7 +18,7 @@ export type SlStrategy = { id: string; version: string; name: string; topic: str
 export type SlChannel = { key: string; name: string; star: boolean; group: string; earlier: string; uploads: number;
   strategyTitles: number; picked: { video: string; why: string; analysed: boolean; id: string | null }[]; skip: string | null };
 
-export const SL_META = {"channels": 177, "coveredBefore": 23, "picked": 228, "analysed": 223, "queued": 5, "strategies": 226, "coded": 113, "blocked": 76, "duplicates": 37, "checked": 113, "paperStart": "2026-11-13T03:40:00Z", "paperStart2": "2026-11-13T05:00:00Z", "paperStart3": "2026-11-13T16:00:00Z", "paperStart4": "2026-11-13T17:00:00Z", "paperStart5": "2026-11-14T11:00:00Z", "paperStart6": "2026-11-14T16:00:00Z", "paperStart7": "2026-11-14T16:30:00Z", "batch1": 31, "batch2": 23, "batch3": 15, "batch4": 21, "batch5": 10, "batch6": 5, "batch7": 8, "built": "2026-11-14"};
+export const SL_META = {"channels": 178, "coveredBefore": 23, "picked": 266, "analysed": 260, "queued": 6, "strategies": 269, "coded": 130, "blocked": 96, "duplicates": 43, "checked": 130, "paperStart": "2026-11-13T03:40:00Z", "paperStart2": "2026-11-13T05:00:00Z", "paperStart3": "2026-11-13T16:00:00Z", "paperStart4": "2026-11-13T17:00:00Z", "paperStart5": "2026-11-14T11:00:00Z", "paperStart6": "2026-11-14T16:00:00Z", "paperStart7": "2026-11-14T16:30:00Z", "paperStart8": "2026-11-14T18:00:00Z", "batch1": 31, "batch2": 23, "batch3": 15, "batch4": 21, "batch5": 10, "batch6": 5, "batch7": 8, "batch8": 17, "built": "2026-11-14"};
 
 export const SL: SlStrategy[] = [
  {
@@ -10428,6 +10428,424 @@ export const SL: SlStrategy[] = [
   }
  },
  {
+  "id": "CG-03",
+  "version": "v1",
+  "name": "Back burner, 5 minutes: the first RSI (14) close under 30 after a new 30-day high, half at 1R with the stop to entry, the rest at 3R or after three hours",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "TheChartGuys",
+  "video": "jvSz13b9TnM",
+  "title": "Back Burner Trade Strategy",
+  "uploaded": "2020-08-28",
+  "minutes": 17,
+  "summary": "The Chart Guys' 'back burner' setup (2020): after a strong run to new highs, wait for the first oversold reading on a short timeframe and buy it instead of chasing. He found it on bitcoin: in the 2017 run, buying when the 5-minute RSI dropped under 30 gave very high-probability entries; for crypto he also names the first 4-hour oversold reading in a daily uptrend after a strong bull move. Scale in at RSI 30 and 20, take half quickly, move the stop under the low of the drop and let the rest ride for hours. Checklist: no news, high liquidity, the longer uptrend intact, a fast 'waterfall' drop, and history of the setup working on that ticker.",
+  "instruments": [
+   "Bitcoin",
+   "any crypto",
+   "US stocks (Tesla, OSTK, GRWG examples)"
+  ],
+  "timeframes": [
+   "5m",
+   "1h",
+   "4h"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)",
+   "Ether (Delta ETHUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD",
+   "ETHUSD"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-14T18:00:00Z",
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The first 5-minute (or hourly) oversold conditions after a significant bull run.",
+    "times": [
+     "00:01"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "On bitcoin: when the 5-minute RSI drops under 30, buy.",
+    "times": [
+     "01:12"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "One entry when the 5-minute RSI breaks 30, a second if it reaches 20.",
+    "times": [
+     "05:26"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Exit half a little above the entry, then put the stop under the low of the dump and let the rest run.",
+    "times": [
+     "08:01"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Highest probability when the name is in blue sky (at all-time highs).",
+    "times": [
+     "01:26"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The longer-term uptrend stays intact: the 5-minute oversold low should set an hourly higher low.",
+    "times": [
+     "03:29"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta BTCUSD and ETHUSD on 5-minute candles, RSI (14) of the closes (he trades the close; the video's low-based RSI is only for display), out by the end of the UTC day.",
+    "times": []
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "A",
+    "text": "'A significant bull run' is a new 30-day high; the first 5-minute close with the RSI under 30 after that high is the setup, once per new high; no setup until the market has 30 days of history.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Long at the next open; the second entry at RSI 20 is not coded (one position).",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Stop one ATR (14) under the lowest low since the 30-day high; half off at 1R with the stop moved to the entry, the rest at 3R or at the open three hours after the entry.",
+    "times": []
+   }
+  ],
+  "why": [
+   "'significant bull run' is our new 30-day high (A)",
+   "his single entry has no stop, so ours is one ATR under the drop (A)",
+   "the RSI-20 add and the news/liquidity checklist are not coded"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "other",
+    "at": "01:21",
+    "value": "buying bitcoin on 5-minute oversold during the 2017 run gave very high-probability entries",
+    "period": "2017",
+    "quote": "if you bought bitcoin on five minute oversold conditions your probability of a great entry was extremely high"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 22,
+   "trades": 22
+  }
+ },
+ {
+  "id": "CG-04",
+  "version": "v1",
+  "name": "Back burner, 4 hours: the first 4-hour RSI (14) close under 30 after a new 90-day high while the daily close holds its EMA 50, half at 1R, the rest at 3R",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "TheChartGuys",
+  "video": "jvSz13b9TnM",
+  "title": "Back Burner Trade Strategy",
+  "uploaded": "2020-08-28",
+  "minutes": 17,
+  "summary": "The Chart Guys' 'back burner' setup (2020): after a strong run to new highs, wait for the first oversold reading on a short timeframe and buy it instead of chasing. He found it on bitcoin: in the 2017 run, buying when the 5-minute RSI dropped under 30 gave very high-probability entries; for crypto he also names the first 4-hour oversold reading in a daily uptrend after a strong bull move. Scale in at RSI 30 and 20, take half quickly, move the stop under the low of the drop and let the rest ride for hours. Checklist: no news, high liquidity, the longer uptrend intact, a fast 'waterfall' drop, and history of the setup working on that ticker.",
+  "instruments": [
+   "Bitcoin",
+   "any crypto",
+   "US stocks (Tesla, OSTK, GRWG examples)"
+  ],
+  "timeframes": [
+   "5m",
+   "1h",
+   "4h"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD"
+  ],
+  "overnight": true,
+  "proxy": null,
+  "paperStart": "2026-11-14T18:00:00Z",
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "For crypto, the first 4-hour oversold reading in a daily uptrend after a strong bull move has proven high probability.",
+    "times": [
+     "09:06"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The setup is the first oversold reading after a significant bull run.",
+    "times": [
+     "00:01"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Enter when the RSI breaks 30.",
+    "times": [
+     "05:26"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Take half, put the stop under the low of the dump and let the rest run.",
+    "times": [
+     "08:01"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta BTCUSD on 4-hour candles (UTC), held across days (the desk keeps too little ether history for a 90-day high).",
+    "times": []
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "A",
+    "text": "'A strong bull move' is a new 90-day high; 'a daily uptrend' is the last finished daily close above its EMA 50. The first 4-hour close with the RSI (14) under 30 after that high is the setup, once per new high.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Long at the next open, stop one ATR (14) of the 4-hour candles under the lowest low since the high; half at 1R with the stop to the entry, the rest at 3R.",
+    "times": []
+   }
+  ],
+  "why": [
+   "'strong bull move' (new 90-day high) and 'daily uptrend' (close above the daily EMA 50) are ours (A)",
+   "the stop and targets are the 5-minute version's, scaled to 4-hour ATRs (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "other",
+    "at": "01:21",
+    "value": "buying bitcoin on 5-minute oversold during the 2017 run gave very high-probability entries",
+    "period": "2017",
+    "quote": "if you bought bitcoin on five minute oversold conditions your probability of a great entry was extremely high"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 2,
+   "trades": 2
+  }
+ },
+ {
+  "id": "CG-05",
+  "version": "v1",
+  "name": "Stair step: 10 or more higher lows (lower highs) in a row, enter on the break of the last candle with the daily EMA 12 on the trade's side, stop past the stair's extreme, half at 1R, the rest at 3R",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "TheChartGuys",
+  "video": "gkoJ5QoDiic",
+  "title": "Stair Step Trading Strategy",
+  "uploaded": "2021-09-12",
+  "minutes": 20,
+  "summary": "The Chart Guys' 'stair step' (2021): a higher low on every candle (or a lower high on every candle) for a significant number in a row, eight to ten or more; when that pattern breaks, enter against the short-term move the moment price breaks the last candle's low (or high), with the stop just beyond the stair's extreme. Low risk, high reward: sell half once the trade is one risk in profit so it can no longer lose, keep the original stop on the rest, and let it run. The conservative version waits for at least 10 candles and needs the longer timeframe to favour the pullback. Examples on IWM (5 minutes), AMC (weekly), DKNG (daily) and SPY (monthly).",
+  "instruments": [
+   "Any (IWM, AMC, DKNG, SPY examples)",
+   "Bitcoin",
+   "Ether"
+  ],
+  "timeframes": [
+   "Any (5m",
+   "daily",
+   "weekly",
+   "monthly examples)"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)",
+   "Ether (Delta ETHUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD",
+   "ETHUSD"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-14T18:00:00Z",
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The pattern is a higher low every candle (or a lower high every candle) for a significant number in a row; its break is the signal.",
+    "times": [
+     "00:01"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "He likes eight to ten candles or more in a row.",
+    "times": [
+     "01:11"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Enter as soon as price breaks the level, without waiting for the candle to close.",
+    "times": [
+     "03:40"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "The stop goes right above the high, with a little wiggle room.",
+    "times": [
+     "03:40"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Sell half once price has moved one risk in favour; the trade can then no longer lose.",
+    "times": [
+     "05:30"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The conservative version waits for at least 10 candles in a row.",
+    "times": [
+     "15:49"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The longer-term timeframe should favour the pullback (trade with longer-term momentum).",
+    "times": [
+     "01:21"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta BTCUSD and ETHUSD on 5-minute candles, out by the end of the UTC day.",
+    "times": []
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "A",
+    "text": "A stair is at least 10 consecutive 5-minute candles each with a higher low than the one before (for a short) or a lower high (for a long).",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "A stop entry at the last stair candle's low (short) or high (long), live for the next candle only.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "The stop is 0.05% beyond the stair's extreme; skipped when that is more than 2 ATR (14) away. Half off at 1R keeping the original stop (his rule), the rest at 3R.",
+    "times": []
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "A",
+    "text": "'The longer timeframe favouring the pullback' is the last finished daily close below its EMA 12 for a short, above it for a long.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the 10-candle count (his conservative style), the daily EMA 12 alignment and the 3R target are ours (A)",
+   "he names EMA 12 support as one possible target"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 17,
+   "trades": 11
+  }
+ },
+ {
   "id": "CT-02",
   "version": "v1",
   "name": "VWAP bounce: a run of candles on one side of the VWAP, then a candle reaching close to it, 0.8 ATR stop, 2.5R",
@@ -11949,6 +12367,152 @@ export const SL: SlStrategy[] = [
   }
  },
  {
+  "id": "MN-05",
+  "version": "v1",
+  "name": "Ichimoku cloud breakout with the lagging span above the cloud, long on 4-hour candles, 3% target, out on a close back inside the cloud",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Aaron Dishner aka Moonin Papa",
+  "video": "B1Ej-EXR-C8",
+  "title": "Trend Trading Crypto - an Untapped Strategy all trend traders need to know",
+  "uploaded": "2024-11-13",
+  "minutes": 21,
+  "summary": "Moonin Papa on trend trading crypto (November 2024). First pick a strongly trending chart, then reinvest the profits (compounding). With his paid TBO indicator: when the slow line points up, buy the bounces off the TBO fast line; on 4-hour charts the bounces gave about 3-5%, so aim for 3%. With the free Ichimoku cloud: price above the cloud with the lagging span above the price and above the cloud is the 'golden zone'; the entry is the breakout where price breaks above the cloud and the lagging span does too (a daily example gained about 18-22%); price going back inside the cloud or the lagging span touching price warns of consolidation. Faster timeframes take smaller profits (about 3%).",
+  "instruments": [
+   "Crypto (MEW/BTC and others)",
+   "Bitcoin",
+   "Ether"
+  ],
+  "timeframes": [
+   "daily",
+   "4h",
+   "1h"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)",
+   "Ether (Delta ETHUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD",
+   "ETHUSD"
+  ],
+  "overnight": true,
+  "proxy": null,
+  "paperStart": "2026-11-14T18:00:00Z",
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "The same on faster timeframes such as 4 hours.",
+    "times": [
+     "13:58"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The lagging span moving above the price and above the cloud shows a strong trend.",
+    "times": [
+     "07:07"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Wait for the lagging span to go above the cloud.",
+    "times": [
+     "13:00"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Price breaking above the cloud with the lagging span: the breakout to trade.",
+    "times": [
+     "13:20"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Aim for 3%, on the safe side.",
+    "times": [
+     "03:56"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Price going inside the cloud shows the trend has slowed.",
+    "times": [
+     "08:31"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "As long as the lagging span is above the price, the trend is good.",
+    "times": [
+     "07:07"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta BTCUSD and ETHUSD on 4-hour candles (UTC), long only, held across days.",
+    "times": []
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "A",
+    "text": "Ichimoku (9, 26, 52) defaults; the cloud at a candle is the two leading spans computed 26 candles earlier. The breakout: a 4-hour close above both spans after a close that was not, with the lagging span confirming - that close above the close 26 candles earlier and above the cloud as it stood 26 candles earlier.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Long at the next open.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "The stop is the cloud's lower edge at the breakout candle; out at the next open after a 4-hour close back below the cloud's upper edge; the target 3% above the entry; out after 14,400 one-minute rows (ten days) if nothing else closed it.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the default settings, the 4-hour candles, the stop at the cloud's lower edge, the 3% target he names for faster timeframes, the exit on a close back inside the cloud and the ten-day limit are ours (A)",
+   "long only, as he trades it"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 34,
+   "trades": 34
+  }
+ },
+ {
   "id": "NK-02",
   "version": "v1",
   "name": "Daily gold: 20/50 averages aligned, buy the oversold RSI pullback, stop under structure, trailed under structure, no target (mirror for shorts)",
@@ -12081,6 +12645,124 @@ export const SL: SlStrategy[] = [
    "fills": true,
    "signals": 12,
    "trades": 10
+  }
+ },
+ {
+  "id": "PL-03",
+  "version": "v1",
+  "name": "Supertrend (ATR 7, factor 3) bot, long only: buy on the close that flips it up, sell on the close that flips it down (daily)",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Part Time Larry",
+  "video": "21tLM3XrU9I",
+  "title": "Supertrend 3 - Detecting Uptrends and Downtrends with Python",
+  "uploaded": "2021-05-01",
+  "minutes": 22,
+  "summary": "Part Time Larry codes the Supertrend in Python with CCXT and pandas (May 2021, part 3 of his Supertrend bot series): the midpoint of each candle's high and low, plus and minus three times the 7-period ATR, gives the basic bands; the final bands only ratchet in the trend's favour; a close above the upper band starts an uptrend (a buy signal) and a close below the lower band starts a downtrend (a sell signal). He checks his Python output against TradingView's indicator on Ether's daily chart, where it caught the October 2020 to February 2021 run but lost money in the choppy stretches, like a moving-average crossover.",
+  "instruments": [
+   "Ether (ETH/USDT, Binance)",
+   "Bitcoin"
+  ],
+  "timeframes": [
+   "daily"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)",
+   "Ether (Delta ETHUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD",
+   "ETHUSD"
+  ],
+  "overnight": true,
+  "proxy": null,
+  "paperStart": "2026-11-14T18:00:00Z",
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "He uses the daily timeframe.",
+    "times": [
+     "03:38"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The defaults: an ATR period of seven and a multiplier of three.",
+    "times": [
+     "09:03"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "A buy signal whenever price closes above the upper band.",
+    "times": [
+     "08:39"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "A close below the lower band is the sell signal.",
+    "times": [
+     "07:14"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "It loses money when the market is choppy and not trending.",
+    "times": [
+     "02:52"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta BTCUSD and ETHUSD on daily (UTC) candles, long only (his bot only buys and sells), held across days.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Buy at the next daily open after the close that flips the Supertrend to an uptrend; sell at the next open after the close that flips it to a downtrend.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "A resting stop one ATR (7) beyond the Supertrend's lower band at the buy guards against a crash between closes; no target.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the guard stop is ours (A)",
+   "the rest is his code's own rule"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 4,
+   "trades": 4
   }
  },
  {
@@ -12933,6 +13615,332 @@ export const SL: SlStrategy[] = [
   }
  },
  {
+  "id": "SC-02",
+  "version": "v1",
+  "name": "Cumulative delta divergence: a higher high (lower low) with a lower (higher) session CVD, entered on the close through the low (high) between the swings, 2R",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "SCryptoTrader",
+  "video": "lHu4aVRqUJ0",
+  "title": "🎯Order Flow Course L 03: Trend Reversal Strategy | Before Reversal Delta will give you this Signal",
+  "uploaded": "2026-06-11",
+  "minutes": 10,
+  "summary": "SCryptoTrader's order flow lesson 3 (June 2026, Urdu/Hindi): delta is bid volume minus ask volume per candle - positive means buyers dominated, negative sellers - and the cumulative delta (CVD) shows where a trend gains or loses strength. The key reversal sign is a delta divergence: price makes a higher high while the delta falls (bearish), or a lower low at support while it rises (bullish). He never trades on delta alone: he wants absorption at the level too, then a lower-timeframe lower low as the trigger. Example: bitcoin 15 minutes at the New York open - a sweep of the lows, an aggressive rally with the CVD down and selling wicks at a key level, then the move back down. Order flow is a confirmation and trigger, not a strategy with set rules.",
+  "instruments": [
+   "Bitcoin",
+   "gold"
+  ],
+  "timeframes": [
+   "15m",
+   "5m",
+   "1m"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-14T18:00:00Z",
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "A bearish divergence: price going up while the delta comes down.",
+    "times": [
+     "03:33"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Order flow is a trigger and confirmation, not a strategy by itself.",
+    "times": [
+     "09:08"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Never trade on delta alone.",
+    "times": [
+     "03:51"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta BTCUSD on 15-minute candles, with the desk's own record of bitcoin's taker buy and sell volume per minute (kept since 8 November 2026): a candle's delta is its taker buys minus taker sells, unknown when any of its minutes is unrecorded; out by the end of the UTC day.",
+    "times": []
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "A",
+    "text": "The cumulative delta is the running sum of candle deltas since the UTC day began. Swing highs and lows are 3-candle pivots, known three candles later. Bearish: the day's last two swing highs a higher high with a lower cumulative delta; bullish: the last two swing lows a lower low with a higher cumulative delta.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Enter at the next open after the first close below the lowest low between the two highs (above the highest high between the two lows) within 12 candles of the second swing: his lower-timeframe lower low as the trigger.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "The stop just beyond the second swing; the target 2R (he names none). The absorption check is not coded.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the session CVD, the 3-candle pivots, the 12-candle window, the 15-minute candles and 2R are ours (A)",
+   "his absorption confirmation and key levels are read on the footprint and not coded"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 72,
+   "trades": 62
+  }
+ },
+ {
+  "id": "SC-03",
+  "version": "v1",
+  "name": "Absorption at the previous day's low (high): a sweep candle with delta against its colour, then a close back beyond it, 2R",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "SCryptoTrader",
+  "video": "A5gNI7__vJg",
+  "title": "🚨Order Flow Course Lesson 05: Stop Guessing Reversals | Use Footprint Absorption 2026 URDU Hindi",
+  "uploaded": "2026-06-13",
+  "minutes": 11,
+  "summary": "SCryptoTrader's order flow lesson 5 (June 2026, Urdu/Hindi): absorption is one side pushing hard - aggressive buying into a supply zone, or selling into a demand zone - while the other side quietly takes it with limit orders, so price does not move; at key levels (zones, yesterday's point of control) it is an early reversal sign once price action confirms it. His New York session bitcoin examples: aggressive buyers at a high that sellers absorbed, red delta printing while price rose on falling volume, a fakeout, then a strong selling candle and a lower low; and the mirror at a low where sellers were absorbed and price lifted.",
+  "instruments": [
+   "Bitcoin",
+   "gold"
+  ],
+  "timeframes": [
+   "5m",
+   "1m"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD"
+  ],
+  "overnight": false,
+  "proxy": "his key levels are drawn zones and yesterday's point of control; coded at the previous day's high and low",
+  "paperStart": "2026-11-14T18:00:00Z",
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Look for these signs at key levels.",
+    "times": [
+     "06:06"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Red delta printing while price goes up.",
+    "times": [
+     "06:45"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Then a fakeout gave the confirmation.",
+    "times": [
+     "06:45"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta BTCUSD on 5-minute candles, with the desk's recorded taker buy and sell volume per minute (since 8 November 2026; a candle's delta is unknown when a minute is unrecorded); out by the end of the UTC day.",
+    "times": []
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "A",
+    "text": "The key level is the previous UTC day's low (high). The absorption candle, for a long: a down candle that trades below the previous day's low with a positive delta (aggressive buying the price does not show); for a short: an up candle above the previous day's high with a negative delta.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Enter at the next open after a close beyond the absorption candle's other end (above its high for a long) within 3 candles; his lesson-2 note: wait for the close. One trade a day.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "The stop just beyond the most extreme price since the absorption candle; the target 2R (he names none).",
+    "times": []
+   }
+  ],
+  "why": [
+   "the previous day's high and low as the key levels, the candle delta as his footprint read, the 3-candle window and 2R are ours (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 378,
+   "trades": 50
+  }
+ },
+ {
+  "id": "SC-04",
+  "version": "v1",
+  "name": "Exhaustion: a new 4-hour high (low) on fading volume, then a volume spike with delta against the candle, entered on the close back through it, 2R",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "SCryptoTrader",
+  "video": "J2Ci59Y2Jw8",
+  "title": "🚨 Order Flow Course Lesson 06: How to Spot Exhaustion Before Every Major Reversal 2026 Urdu / Hindi",
+  "uploaded": "2026-06-14",
+  "minutes": 12,
+  "summary": "SCryptoTrader's order flow lesson 6 (June 2026, Urdu/Hindi): exhaustion is price losing momentum - motivated buyers (or sellers) running out - before a pullback or reversal. A genuine move has rising volume and stacked imbalances; an exhausted one keeps rising on falling volume, then often prints a volume spike at the top while the delta turns negative inside a green candle. He combines three things - volume, delta and price action - for a high-probability setup, and shows bitcoin and gold examples where falling volume, a spike at the top with absorption, and negative delta came before the drop.",
+  "instruments": [
+   "Bitcoin",
+   "gold"
+  ],
+  "timeframes": [
+   "5m",
+   "15m"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-14T18:00:00Z",
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Exhaustion is price losing momentum.",
+    "times": [
+     "01:17"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Volume declining in the move, then a sudden volume spike at the top.",
+    "times": [
+     "06:49"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The delta starts printing negative, showing weakness in a green candle.",
+    "times": [
+     "05:02"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Combine three different things for a high-probability setup.",
+    "times": [
+     "05:48"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta BTCUSD on 5-minute candles with the exchange's candle volume and the desk's recorded taker flow (since 8 November 2026; delta unknown when a minute is unrecorded); out by the end of the UTC day.",
+    "times": []
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "A",
+    "text": "For a short: a candle closing at a new 4-hour high (above the 48 candles before it) after the average volume of the 6 candles before it fell below the 6 before those; the candle's volume at least twice the average of the 12 before it; an up candle with a negative delta. The mirror at a new 4-hour low for a long.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Enter at the next open after a close beyond the spike candle's other end (below its low for a short) within 3 candles. One trade a day.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "The stop just beyond the most extreme price since the spike candle; the target 2R (he names none).",
+    "times": []
+   }
+  ],
+  "why": [
+   "the 4-hour extreme, the 6/6 volume fade, the 2x spike, the 3-candle window and 2R are ours (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 13,
+   "trades": 13
+  }
+ },
+ {
   "id": "SK-01",
   "version": "v1",
   "name": "After an exhaustive impulse, a limit at the previous impulse's stopping level with the 20 MA there, 2:1",
@@ -13246,6 +14254,447 @@ export const SL: SlStrategy[] = [
    "fills": true,
    "signals": 789,
    "trades": 259
+  }
+ },
+ {
+  "id": "TK-06",
+  "version": "v1",
+  "name": "Bollinger squeeze with an OBV divergence at the band, then a close beyond the opposite band as the bands widen, stop at the middle band, 2R",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Tom Crown",
+  "video": "zUNfzXEl_hk",
+  "title": "How to Trade Bollinger Bands [SECRETS REVEALED]",
+  "uploaded": "2025-07-17",
+  "minutes": 7,
+  "summary": "Tom Crown on Bollinger Bands (July 2025): the bands are a 20-period SMA with two standard deviations either side. Fading touches of the bands as overbought or oversold means trading against the trend, so he uses the squeeze instead: narrow bands (a low Bollinger Band Width) foreshadow a big move; an on-balance volume (OBV) divergence at the lower band - price a lower low, OBV a higher low - hints at the breakout's direction; then the bands expand (BBW rising) and a bullish candle closes above the upper band. He would then enter, for instance, on the retest of a broken resistance, with a favourable reward-to-risk.",
+  "instruments": [
+   "Any (crypto examples)",
+   "Bitcoin",
+   "Ether"
+  ],
+  "timeframes": [
+   "Any"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)",
+   "Ether (Delta ETHUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD",
+   "ETHUSD"
+  ],
+  "overnight": true,
+  "proxy": null,
+  "paperStart": "2026-11-14T18:00:00Z",
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The middle line is a 20-period simple moving average.",
+    "times": [
+     "00:37"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The upper band adds two standard deviations to the middle line.",
+    "times": [
+     "01:03"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The strategy is the Bollinger Band squeeze.",
+    "times": [
+     "02:43"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Low volatility: the bands squeeze and become narrow.",
+    "times": [
+     "02:55"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The divergence: OBV makes a higher low while price makes a lower low.",
+    "times": [
+     "04:41"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The bands begin to expand, seen in the rising BBW.",
+    "times": [
+     "04:47"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Then a green candle closes above the upper band.",
+    "times": [
+     "04:54"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Using the bands as overbought or oversold means trading against the trend.",
+    "times": [
+     "02:37"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta BTCUSD and ETHUSD (their exchange volume for the OBV) on 1-hour candles, held across days.",
+    "times": []
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "A",
+    "text": "The squeeze: the band width (upper minus lower over the middle) made its lowest of the last 120 candles within the last 10. The divergence (a long): the lowest low of the last 10 candles is below the lowest low of the 20 candles before them, touched the lower band, and has a higher OBV than that earlier low; the mirror at the upper band for a short.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "The trigger: a candle closing above the upper band (an up candle; below the lower band for a short) with the band width rising; enter at the next open.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "The stop is the middle band at the trigger candle; the target 2R; out after 7,200 one-minute rows (five days) if neither is hit.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the timeframe, the 120-candle squeeze, the 10/20-candle divergence windows, the stop at the middle band, 2R and the five-day limit are ours (A)",
+   "his retest entry at a drawn level is replaced by the next open"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 15,
+   "trades": 9
+  }
+ },
+ {
+  "id": "TK-07",
+  "version": "v1",
+  "name": "Stochastic (14, 3, 3) divergence in the trend: a higher high with a lower stochastic high, then %K back under 80 and a close under the swing low, sell its retest, stop above the high, 2R",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Tom Crown",
+  "video": "qddEJ51gb0E",
+  "title": "The ONLY Stochastic Trading Guide You'll EVER Need",
+  "uploaded": "2025-08-05",
+  "minutes": 5,
+  "summary": "Tom Crown's stochastic oscillator guide (August 2025): above 80 overbought, below 20 oversold, and the %K / %D crossovers add confirmation (the RSI has none). Two uses: at a well-defined resistance, an overbought reading and a bearish cross, entered once the oscillator drops back below 80; and divergences. His live setup: in a downtrend price consolidates and makes a higher high while the stochastic prints a lower high; he waits for two confirmations - the stochastic back below the overbought zone and price making a lower low - then sells the retest of that swing low, the stop just above the recent high, targeting levels lower.",
+  "instruments": [
+   "Any (crypto and forex examples)",
+   "Bitcoin",
+   "Ether",
+   "Gold"
+  ],
+  "timeframes": [
+   "Any"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)",
+   "Ether (Delta ETHUSD)",
+   "Gold (Delta XAUTUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD",
+   "ETHUSD",
+   "XAUUSD"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-14T18:00:00Z",
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The bearish divergence: price makes higher highs while the stochastic prints a lower high.",
+    "times": [
+     "02:49"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "He waits for two confirmations.",
+    "times": [
+     "03:36"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The stochastic back below the overbought zone, and price making a lower low.",
+    "times": [
+     "03:43"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Enter short on the retest of that swing low.",
+    "times": [
+     "03:53"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "The stop just above the recent high, targets lower.",
+    "times": [
+     "03:53"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "First identify the overall trend.",
+    "times": [
+     "03:11"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta BTCUSD, ETHUSD and gold (Delta XAUTUSD) on 15-minute candles, out by the session end (the UTC day for crypto, 17:00 New York for gold).",
+    "times": []
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "A",
+    "text": "Swing highs and lows are 3-candle pivots, known three candles later. The divergence (a short): the last two swing highs are a higher high with a lower stochastic %K (14, 3, 3), the second with %K at or above 80.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "After the second high: %K back below 80 and a close below the lowest low between the two highs, within 20 candles; then a sell limit at that low, live for 12 candles. The mirror for longs (a lower low with a higher %K at or below 20).",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "The stop is just above the second swing high; the target 2R (he names none).",
+    "times": []
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "A",
+    "text": "The trend: the 15-minute EMA 50 below the EMA 200 for shorts, above it for longs.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the EMA 50/200 trend, the 3-candle pivots, the 20- and 12-candle windows, the 15-minute candles and 2R are ours (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 20,
+   "trades": 17
+  }
+ },
+ {
+  "id": "TK-08",
+  "version": "v1",
+  "name": "Daily Stochastic RSI %K/%D cross in the direction of the daily EMA 50, out on the opposite cross",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Tom Crown",
+  "video": "WfUxuf6Vjk8",
+  "title": "How To Trade STOCH RSI Bitcoin Trading",
+  "uploaded": "2020-09-21",
+  "minutes": 14,
+  "summary": "Tom Crown on the Stochastic RSI with bitcoin (September 2020): traders misuse it on short timeframes and to fade overbought and oversold readings against the trend; it is a trend-continuation tool. On the daily chart, the 50-day EMA sets the trend: above it, any cross of %K up through %D is a long signal; below it, any cross down is a short signal, wherever the cross happens. He shows about a dozen daily bitcoin examples from 2019-2020, warns that lower timeframes are mostly noise, and suggests combining it with the MACD for divergences.",
+  "instruments": [
+   "Bitcoin",
+   "Ether",
+   "Gold"
+  ],
+  "timeframes": [
+   "daily"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)",
+   "Gold (Delta XAUTUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD",
+   "XAUUSD"
+  ],
+  "overnight": true,
+  "proxy": null,
+  "paperStart": "2026-11-14T18:00:00Z",
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "Not below the daily timeframe.",
+    "times": [
+     "06:20"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Above the 50 EMA, look for long signals from the stochastic.",
+    "times": [
+     "05:46"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Below it, short signals.",
+    "times": [
+     "05:46"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The signals are the crosses up or down.",
+    "times": [
+     "06:48"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Any cross that agrees with the trend counts.",
+    "times": [
+     "10:30"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The daily chart's 50 EMA judges the trend.",
+    "times": [
+     "05:10"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Below the 50 EMA the trend is bearish.",
+    "times": [
+     "05:25"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta BTCUSD and gold (Delta XAUTUSD) on daily candles (the UTC day for bitcoin, the 17:00 New York day for gold), held across days (the desk keeps too little ether history for the daily EMA 50).",
+    "times": []
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "A",
+    "text": "The Stochastic RSI is TradingView's default (RSI 14, stochastic 14, %K 3, %D 3). A long: a daily close above the EMA 50 on the day %K crosses above %D; a short: a close below the EMA 50 on a day %K crosses below %D.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Enter at the next daily open.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "Out at the next open after the opposite cross (he names no exit); a stop two daily ATR (14) from the entry; no fixed target.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the exit on the opposite cross and the two-ATR stop are ours (A)",
+   "the TradingView default settings are assumed"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 69,
+   "trades": 67
   }
  },
  {
@@ -14809,6 +16258,180 @@ export const SL: SlStrategy[] = [
   "checks": null
  },
  {
+  "id": "CG-06",
+  "version": "v1",
+  "name": "Tightening ranges in a bullish environment favour bull breaks (market review)",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "TheChartGuys",
+  "video": "97M9FDcyBxA",
+  "title": "Scouting Sideways Setups for BREAKOUTS",
+  "uploaded": "2021-10-25",
+  "minutes": 17,
+  "summary": "A crypto market review (October 2021) on spotting breakouts before they happen: in a bullish environment, tightening sideways ranges (12-hour and 4-hour equilibriums) favour bull breaks, and a nearby stop level makes the reward larger than the risk. Examples on bitcoin, ether, Shiba Inu, Solana and altcoins, with the 15-minute and 4-hour EMA 12 as entry areas. The ranges and levels are read by eye on each chart.",
+  "instruments": [
+   "Bitcoin",
+   "Ether",
+   "altcoins"
+  ],
+  "timeframes": [
+   "15m",
+   "4h",
+   "12h",
+   "daily"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "In a bullish environment, watch for tightening ranges: the stop level is close by, so a bull break gives a reward larger than the risk.",
+    "times": [
+     "00:06"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The tightening ranges favour bull breaks as long as bitcoin is in a daily uptrend.",
+    "times": [
+     "13:35"
+    ]
+   }
+  ],
+  "why": [
+   "the ranges, equilibriums and support levels are drawn by eye on each chart",
+   "no fixed trigger, stop or target is stated"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the ranges, equilibriums and support levels are drawn by eye on each chart; no fixed trigger, stop or target is stated",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "CG-07",
+  "version": "v1",
+  "name": "Daily EMA 12 'launch pad': a test that holds triggers continuation (market review)",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "TheChartGuys",
+  "video": "3VEfeykTZiU",
+  "title": "BTC Daily EMA12 Battle",
+  "uploaded": "2026-09-09",
+  "minutes": 37,
+  "summary": "A bitcoin and crypto market review (September 2026) around a test of the daily EMA 12: the EMA 12 as a 'launch pad' that, when tested and held, triggers the continuation move; megaphone patterns; stop wiggle room, selling partial into a bull break and moving to a break-even stop. Commentary and position management on live charts, not a set of fixed rules.",
+  "instruments": [
+   "Bitcoin",
+   "Ether",
+   "altcoins",
+   "crypto stocks"
+  ],
+  "timeframes": [
+   "4h",
+   "daily"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The EMA 12 should act as a launch pad: if it is tested and holds, the continuation move follows.",
+    "times": [
+     "15:23"
+    ]
+   }
+  ],
+  "why": [
+   "'test and hold' and the stop wiggle room are judged live on each chart",
+   "the EMA 12 trend-management idea is the earlier card CG-02's"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "'test and hold' and the stop wiggle room are judged live on each chart; the EMA 12 trend-management idea is the earlier card CG-02's",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "CG-08",
+  "version": "v1",
+  "name": "Entry tools webinar: falling wedges, inverse head and shoulders, bottom fishing and trend-change entries",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "TheChartGuys",
+  "video": "WfVVjp4jrBE",
+  "title": "Best Trading Entry Strategies",
+  "uploaded": "2023-10-13",
+  "minutes": 67,
+  "summary": "A 67-minute private webinar (2023) on entry tools: bottom fishing at support, falling wedges, inverse head and shoulders, the stair step and trend-change entries, with examples down to 1-minute stair steps after a test of the 15-minute EMA 12. The stop goes beyond the pattern's low or high and he likes to get risk-free quickly. The patterns are drawn by eye on each chart.",
+  "instruments": [
+   "Any (stocks and crypto examples)"
+  ],
+  "timeframes": [
+   "Any (1m to daily examples)"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Entries on drawn patterns such as the falling wedge.",
+    "times": [
+     "13:20"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Triggered in long, the stop goes below the low, and he gets risk-free quickly.",
+    "times": [
+     "30:27"
+    ]
+   }
+  ],
+  "why": [
+   "the wedges, necklines and trend changes are drawn by eye on each chart",
+   "its stair step is the separate video's CG-05"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the wedges, necklines and trend changes are drawn by eye on each chart; its stair step is the separate video's CG-05",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
   "id": "CH-04",
   "version": "v1",
   "name": "Day trading at statistically backed levels: naked supply and demand, market structure, confluence, a confirmation reaction (80% win rate claim)",
@@ -15576,6 +17199,350 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": "the signal thresholds are on a settings slide but never stated; the creator's own week of live trading lost 4.5%",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "HB-02",
+  "version": "v1",
+  "name": "Hummingbot v2 directional RSI script: long at RSI 30, short at RSI 70, triple-barrier exits with the default settings",
+  "topic": "crypto",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Hummingbot",
+  "video": "78S76zskqt4",
+  "title": "Running Directional Trading Strategies on HyperLiquid + OKX (Hummingbot v2.1 update)",
+  "uploaded": "2024-12-18",
+  "minutes": 41,
+  "summary": "Hummingbot's v2.1 walkthrough of directional trading (December 2024): a rolling window of candles feeds an indicator that emits +1 (long), -1 (short) or 0; each filled position gets a position executor with a 'triple barrier' (take profit above, stop loss below and a time limit, after Lopez de Prado). The simple v2 directional RSI script on Hyperliquid goes long when the RSI hits 30 and short at 70 on one-minute candles, using the executor's default stop loss, take profit and time limit; the dashboard's MACD-BB V1 controller combines a Bollinger %B long/short threshold with a MACD crossover, configured and backtested on OKX perpetuals over three days.",
+  "instruments": [
+   "HYPE (Hyperliquid)",
+   "WIF (OKX perpetual)",
+   "any crypto"
+  ],
+  "timeframes": [
+   "1m",
+   "3m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Each entry gets a box: take profit above, stop loss below, a time limit at its end.",
+    "times": [
+     "05:38"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "RSI hitting 30 is the long signal (70 the short).",
+    "times": [
+     "20:26"
+    ]
+   }
+  ],
+  "why": [
+   "the triple barrier's default stop, target and time limit are not read out"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": "YT-25",
+  "duplicateWhy": "the RSI 30/70 reversal is already in the library (the top-20 study's YT-25)",
+  "checks": null
+ },
+ {
+  "id": "HB-03",
+  "version": "v1",
+  "name": "Hummingbot MACD-BB V1 controller: a Bollinger %B threshold plus a MACD crossover, triple-barrier exits (configuration demo)",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Hummingbot",
+  "video": "78S76zskqt4",
+  "title": "Running Directional Trading Strategies on HyperLiquid + OKX (Hummingbot v2.1 update)",
+  "uploaded": "2024-12-18",
+  "minutes": 41,
+  "summary": "Hummingbot's v2.1 walkthrough of directional trading (December 2024): a rolling window of candles feeds an indicator that emits +1 (long), -1 (short) or 0; each filled position gets a position executor with a 'triple barrier' (take profit above, stop loss below and a time limit, after Lopez de Prado). The simple v2 directional RSI script on Hyperliquid goes long when the RSI hits 30 and short at 70 on one-minute candles, using the executor's default stop loss, take profit and time limit; the dashboard's MACD-BB V1 controller combines a Bollinger %B long/short threshold with a MACD crossover, configured and backtested on OKX perpetuals over three days.",
+  "instruments": [
+   "HYPE (Hyperliquid)",
+   "WIF (OKX perpetual)",
+   "any crypto"
+  ],
+  "timeframes": [
+   "1m",
+   "3m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Two indicators, MACD and Bollinger Bands, decide the long and short entries.",
+    "times": [
+     "34:15"
+    ]
+   }
+  ],
+  "why": [
+   "the thresholds, MACD settings and the triple barrier's values are set on the configuration screen and never read out",
+   "a three-day demo backtest"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the thresholds, MACD settings and the triple barrier's values are set on the configuration screen and never read out; a three-day demo backtest",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "HB-04",
+  "version": "v1",
+  "name": "Aroon-skewed market making: two-sided quotes between a minimum and maximum spread, widened on the trending side",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Hummingbot",
+  "video": "5iOorb46aVw",
+  "title": "Aroon Indicator Strategy Hummingbot Live Followup",
+  "uploaded": "2021-08-16",
+  "minutes": 5,
+  "summary": "Hummingbot's follow-up on a community market-making strategy (August 2021): the bot quotes both sides of DOGE/USDT between a minimum and a maximum spread, and an Aroon oscillator pushes each side's spread out when it believes the market is trending that way. After about 24 hours DOGE rose about 10%: 171 buys and 239 sells, a negative P&L from the smaller DOGE inventory, but an average buy price below the average sell price.",
+  "instruments": [
+   "DOGE/USDT"
+  ],
+  "timeframes": [
+   "Any"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The spread sits between the max and min spread settings.",
+    "times": [
+     "00:14"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The Aroon oscillator pushes the spreads toward the max or the min.",
+    "times": [
+     "00:43"
+    ]
+   }
+  ],
+  "why": [
+   "a market-making bot: two-sided resting quotes whose fills depend on the order queue, which the desk's signal books cannot simulate",
+   "the Aroon settings are not given"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "a market-making bot: two-sided resting quotes whose fills depend on the order queue, which the desk's signal books cannot simulate; the Aroon settings are not given",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "HB-05",
+  "version": "v1",
+  "name": "Fixed long grid: buy and sell limits at levels between a floor and a ceiling, the level spacing above the round-trip fees",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Hummingbot",
+  "video": "1j81gP2ToCE",
+  "title": "Grid Strategy Experiment",
+  "uploaded": "2023-07-31",
+  "minutes": 16,
+  "summary": "Hummingbot's fixed grid experiment (July 2023): choose a floor and a ceiling, place a number of levels between them - sells above the current price, buys below - with a spread between levels wide enough to beat the round-trip fees (10 levels over 0.070-0.077 on PLAY/USDT gave about 1% against 0.4% of fees). The grid profits while price stays inside the range and keeps moving; above the ceiling it earns less than holding, below the floor it loses. His 364-hour run: 167 trades, about 13,000 USDT of volume and a positive P&L while the price fell 8%; then a new ENJ/USDT grid from 0.30 to 0.33.",
+  "instruments": [
+   "PLAY/USDT",
+   "ENJ/USDT (AscendEX)"
+  ],
+  "timeframes": [
+   "Any"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "First define a floor and a ceiling for the grid.",
+    "times": [
+     "00:44"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The spacing must be large enough not to lose money on fees.",
+    "times": [
+     "01:36"
+    ]
+   }
+  ],
+  "why": [
+   "the floor and ceiling are picked by eye on each chart, and a grid is many resting orders at once, which the desk's one-position books do not simulate"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the floor and ceiling are picked by eye on each chart, and a grid is many resting orders at once, which the desk's one-position books do not simulate",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "HB-06",
+  "version": "v1",
+  "name": "Bollinger V1 controller tuned by Optuna: short near the upper band, long near the lower band (optimisation tutorial)",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Hummingbot",
+  "video": "bAi2ok7_boo",
+  "title": "7- Controllers, Backtesting & Optimization",
+  "uploaded": "2023-10-13",
+  "minutes": 8,
+  "summary": "Hummingbot's dashboard chapter on controllers, backtesting and optimisation (October 2023): download candles, pick a directional controller (Bollinger V1, MACD-BB V1, trend following V1), and let Optuna search its parameters - here the Bollinger V1 controller on NEAR/USDT 3-minute candles, with a band length of 100-400 (step 50), 2-3 standard deviations, long and short thresholds on the band position, and stop loss, take profit and time limit ranges - over 300 trials ranked by net P&L, to be analysed and deployed in the next chapter.",
+  "instruments": [
+   "NEAR/USDT (Binance perpetual)"
+  ],
+  "timeframes": [
+   "3m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The Bollinger strategy is the one optimised.",
+    "times": [
+     "00:58"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Touching the upper band is a good time to short.",
+    "times": [
+     "01:22"
+    ]
+   }
+  ],
+  "why": [
+   "the parameters are left to a 300-trial Optuna search whose winner is not shown, so there is no fixed rule to run"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the parameters are left to a 300-trial Optuna search whose winner is not shown, so there is no fixed rule to run",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "HB-07",
+  "version": "v1",
+  "name": "Cross-venue funding rate arbitrage: long where longs are paid, short where shorts are paid, entered above a minimum daily difference",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Hummingbot",
+  "video": "Ly8R5g3juxw",
+  "title": "Funding Rate Arbitrage: Deep Dive into Designing and Running the Strategy in Hummingbot",
+  "uploaded": "2024-04-22",
+  "minutes": 24,
+  "summary": "Hummingbot on funding rate arbitrage (April 2024): perpetual funding moves the contract toward the index price - when funding is positive longs pay shorts, when negative shorts pay longs. The script normalises the funding rates of several venues (Hyperliquid pays hourly, Binance every eight hours) to a daily figure, opens a long on the venue that pays longs and a short on the one that pays shorts when the daily difference beats a minimum profitability (for example 0.2% against an expected 0.1%), optionally checks that the price gap and fees leave a positive trade P&L, collects the payments and closes both legs at a minimum take-profit or when the funding difference flips.",
+  "instruments": [
+   "Any perpetual (Hyperliquid, Binance)"
+  ],
+  "timeframes": [
+   "funding intervals (1h",
+   "8h)"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Positive funding: go short to get paid.",
+    "times": [
+     "03:18"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Enter only above a threshold daily funding difference.",
+    "times": [
+     "08:05"
+    ]
+   }
+  ],
+  "why": [
+   "needs two exchanges' perpetual prices and funding histories at once",
+   "the desk has Delta's alone"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "needs two exchanges' perpetual prices and funding histories at once; the desk has Delta's alone",
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -16413,6 +18380,362 @@ export const SL: SlStrategy[] = [
   "checks": null
  },
  {
+  "id": "MN-03",
+  "version": "v1",
+  "name": "Bear-market accumulation: a Martingale double-down of spot lots 1/7, 2/7 and 4/7 at lower levels, no leverage and no fixed stop",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Aaron Dishner aka Moonin Papa",
+  "video": "HSLSHRXniFo",
+  "title": "My Bitcoin Accumulation Plan (detailed strategy explained)",
+  "uploaded": "2026-07-12",
+  "minutes": 34,
+  "summary": "Moonin Papa's bitcoin accumulation plan for the 2026 bear market (July 2026). From his four-year 'top, bottom, recovery, rally' cycle reading, bitcoin is about 39 weeks into a 52-week bottom year and may bottom by October 2026. Instead of one leveraged entry with a tight fixed stop, he builds a spot position with no leverage and no fixed stop in a Martingale double-down: 1/7 of the planned stack at the first entry, 2/7 lower and 4/7 lower still (his levels for now: about 62K, 49K and 38,555, read from the chart), averaging the entry down; partial profits on the way back up. Back-checks on 2018 and 2022 show the position underwater for about 16 weeks before large gains.",
+  "instruments": [
+   "Bitcoin",
+   "Ether and altcoins (any)"
+  ],
+  "timeframes": [
+   "weekly"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "DCA trading on the spot market with no leverage.",
+    "times": [
+     "01:34"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The Martingale double down.",
+    "times": [
+     "15:59"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The first lot is $100 of a $700 stack (1/7).",
+    "times": [
+     "18:19"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "6/7 of the stack is kept back to average down twice.",
+    "times": [
+     "26:27"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "No hard, fast and fixed stop loss.",
+    "times": [
+     "14:24"
+    ]
+   }
+  ],
+  "why": [
+   "the cycle timing and the dip levels (49K, 38,555) are read by eye from the chart, and there is no exit beyond 'partial profits on the way up': a multi-year spot accumulation with no stop or exit that a per-trade paper book cannot score"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "return_pct",
+    "at": "23:44",
+    "value": "about 500% from a 2022 average entry near $19,500",
+    "period": "2022-2025",
+    "quote": "ended up being a very, very handsome return of about 500%."
+   }
+  ],
+  "examples": [],
+  "blockedReason": "the cycle timing and the dip levels (49K, 38,555) are read by eye from the chart, and there is no exit beyond 'partial profits on the way up': a multi-year spot accumulation with no stop or exit that a per-trade paper book cannot score",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "MN-04",
+  "version": "v1",
+  "name": "'Better crypto signals' DCA bot: base order and three DCA orders doubling 1:2:4:8, take-profit on the bounce (promotion)",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Aaron Dishner aka Moonin Papa",
+  "video": "RxQ3eEgrlqE",
+  "title": "This Crypto Bot Strategy Beats Bear Markets Since 2021",
+  "uploaded": "2026-07-27",
+  "minutes": 13,
+  "summary": "Moonin Papa shows his 'better crypto signals' DCA bot on Altrady (July 2026): running since April 2024 it has made almost $1,000 passively, slowly, with weeks of nothing. Each deal is a base order and three DCA orders below it, doubling 1, 2, 4 and 8 lots, closed at a take-profit on the bounce; he compares it with buy-and-hold on Cardano (ADA hourly) through the 2025-2026 bear market. The deal-start signal is the paid Better Traders Club strategy, backtested from January 2021; the DCA spacing and the take-profit are not stated.",
+  "instruments": [
+   "Cardano (ADA)",
+   "any crypto"
+  ],
+  "timeframes": [
+   "1h"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Four possible orders, because it is a dollar-cost-averaging bot.",
+    "times": [
+     "02:05"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The second order is two lots, the third four lots.",
+    "times": [
+     "02:38"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The orders double on the way down.",
+    "times": [
+     "02:38"
+    ]
+   }
+  ],
+  "why": [
+   "the deal-start signal is the paid Better Crypto Signals strategy, and the DCA spacing and the take-profit are never stated",
+   "a product promotion"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "other",
+    "at": "00:04",
+    "value": "almost $1,000 of profit since April 2024",
+    "period": "April 2024 to July 2026",
+    "quote": "since then the bot has passively made almost $1,000"
+   }
+  ],
+  "examples": [],
+  "blockedReason": "the deal-start signal is the paid Better Crypto Signals strategy, and the DCA spacing and the take-profit are never stated; a product promotion",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "MN-06",
+  "version": "v1",
+  "name": "TBO trend: buy the bounce off the TBO fast line while the slow line points up, 3% target (paid indicator)",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Aaron Dishner aka Moonin Papa",
+  "video": "B1Ej-EXR-C8",
+  "title": "Trend Trading Crypto - an Untapped Strategy all trend traders need to know",
+  "uploaded": "2024-11-13",
+  "minutes": 21,
+  "summary": "Moonin Papa on trend trading crypto (November 2024). First pick a strongly trending chart, then reinvest the profits (compounding). With his paid TBO indicator: when the slow line points up, buy the bounces off the TBO fast line; on 4-hour charts the bounces gave about 3-5%, so aim for 3%. With the free Ichimoku cloud: price above the cloud with the lagging span above the price and above the cloud is the 'golden zone'; the entry is the breakout where price breaks above the cloud and the lagging span does too (a daily example gained about 18-22%); price going back inside the cloud or the lagging span touching price warns of consolidation. Faster timeframes take smaller profits (about 3%).",
+  "instruments": [
+   "Crypto (MEW/BTC and others)",
+   "Bitcoin",
+   "Ether"
+  ],
+  "timeframes": [
+   "daily",
+   "4h",
+   "1h"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Buy when price comes back to bounce off the TBO fast line.",
+    "times": [
+     "03:07"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Aim for 3%.",
+    "times": [
+     "03:56"
+    ]
+   }
+  ],
+  "why": [
+   "the TBO lines are a paid indicator whose formulas are not given"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the TBO lines are a paid indicator whose formulas are not given",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "MN-07",
+  "version": "v1",
+  "name": "TBT divergence clusters for dip buys and profit-taking (paid indicator)",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Aaron Dishner aka Moonin Papa",
+  "video": "x2tSXrA_m5c",
+  "title": "The Easiest Indicator for Entries and Exits",
+  "uploaded": "2025-03-22",
+  "minutes": 8,
+  "summary": "Moonin Papa presents his paid TBT Divergence indicator (March 2025): triangles mark price-versus-RSI divergences and thick 'clusters' mark the strongest ones, used to buy dips and to shave off profits near resistance, ideally together with his TBO indicator's slow line; examples on bitcoin, Ether and SHIB daily charts. He says not to sell on every signal, still follows a DCA approach with them, and for those without the indicator suggests keeping it simple with a moving average and the RSI.",
+  "instruments": [
+   "Bitcoin",
+   "Ether",
+   "SHIB"
+  ],
+  "timeframes": [
+   "daily"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The TBT divergence signal is the key tool.",
+    "times": [
+     "00:48"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The thick tags are divergence clusters, the signals he likes most.",
+    "times": [
+     "02:38"
+    ]
+   }
+  ],
+  "why": [
+   "TBT Divergence is a paid indicator ('a lot of math involved') whose rules are not given, with no stop or target"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "TBT Divergence is a paid indicator ('a lot of math involved') whose rules are not given, with no stop or target",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "MN-08",
+  "version": "v1",
+  "name": "3Commas DCA bot: TBO breakout deal start, safety orders below the base order, closed on the bounce",
+  "topic": "crypto",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Aaron Dishner aka Moonin Papa",
+  "video": "yrmilq2PAqU",
+  "title": "Do DCA Bots Really Work? 🤔",
+  "uploaded": "2022-02-15",
+  "minutes": 9,
+  "summary": "Moonin Papa (a 3Commas ambassador) on whether DCA bots work (February 2022): a 3Commas bot that starts deals on his TBO breakout signal, places safety orders below the base order (base at 10, safety orders at 9, 8, 7) to average the buy price down, and closes the deal in profit on the bounce - a Kadena deal that opened at 10.01 closed 9% below its opening price. Never put 100% of the account into bots (keep at least 30% free); think of bots as small, steady gains that compound.",
+  "instruments": [
+   "Kadena (KDA)",
+   "any crypto"
+  ],
+  "timeframes": [
+   "Any"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Deals start on the TBO breakout.",
+    "times": [
+     "01:22"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Safety orders below the base order: a base at 10, then 9, 8 and 7.",
+    "times": [
+     "02:48"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Keep at least 30% of the account free.",
+    "times": [
+     "05:46"
+    ]
+   }
+  ],
+  "why": [
+   "the TBO deal-start signal is a paid indicator and the take-profit is not stated"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": "MN-02",
+  "duplicateWhy": "the same 3Commas DCA bot on the TBO deal-start signal, from his earlier video",
+  "checks": null
+ },
+ {
   "id": "MP-01",
   "version": "v1",
   "name": "Gold: 1-hour structure and order blocks, 15-minute reaction, 5-minute confirmation, adding on new lows (live challenge)",
@@ -16748,6 +19071,64 @@ export const SL: SlStrategy[] = [
   "checks": null
  },
  {
+  "id": "PL-04",
+  "version": "v1",
+  "name": "The Supertrend (7, 3) bot running live on one-minute candles with an in-position flag (order-execution demo)",
+  "topic": "crypto",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Part Time Larry",
+  "video": "1PEyddA1y5E",
+  "title": "Supertrend 4 - CCXT Crypto Bot - Order Execution with Python",
+  "uploaded": "2021-05-01",
+  "minutes": 34,
+  "summary": "Part Time Larry wires the Supertrend into a live CCXT bot (May 2021, part 4): a schedule fetches the latest 100 one-minute Ether candles every few seconds, recomputes the Supertrend (7, 3) and checks the last two candles; a change from downtrend to uptrend sends a market buy on Binance, a change back sends a sell, and an 'in position' flag stops repeat buys. He drops to one-minute candles only so trades happen on camera and expects that timeframe not to make money, inviting viewers to experiment with parameters and other indicators.",
+  "instruments": [
+   "Ether (ETH/USDT, Binance)"
+  ],
+  "timeframes": [
+   "1m (demo)",
+   "daily"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "One-minute candles only for the demo, which he expects not to make money.",
+    "times": [
+     "03:21"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Buy only when not already in a position.",
+    "times": [
+     "23:23"
+    ]
+   }
+  ],
+  "why": [
+   "the same flip rule as PL-03, on one-minute candles chosen only for the demo"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": "PL-03",
+  "duplicateWhy": "the same Supertrend (7, 3) long-only flip bot as part 3 of the series; the one-minute timeframe is only for the live demo",
+  "checks": null
+ },
+ {
   "id": "PO-01",
   "version": "v1",
   "name": "Monthly CPR on bitcoin: R1 then back to the pivot in uptrends, failures to reach R1 as warnings, narrow CPR before impulses (reading model)",
@@ -16880,6 +19261,197 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "market commentary with management principles; no entry trigger, level rule or exit is defined",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "SC-01",
+  "version": "v1",
+  "name": "Footprint basics: delta, imbalance (300%), absorption, point of control, value area and VWAP (lesson 2)",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "SCryptoTrader",
+  "video": "hzjbl2qMVQQ",
+  "title": "Order Flow Course Lesson 02: Footprint Chart Mastery | Delta, Imbalance & Absorption 2026",
+  "uploaded": "2026-06-10",
+  "minutes": 13,
+  "summary": "SCryptoTrader's order flow course, lesson 2 (June 2026, Urdu/Hindi): the footprint chart shows who dominates inside each candle. Delta (aggressive buys minus sells) says whether buyers or sellers dominate; imbalance (he uses 300%, many traders 3x) marks strong one-sided buying or selling and stacked imbalances show momentum; absorption is big volume that does not move price (hidden limit orders taking the other side); the point of control is the price with the most volume; the value area holds about 70% of it; VWAP is volume-based. His live 5-minute bitcoin example: after a VWAP rejection and a fakeout below, red candles with positive delta three times (absorption), then a long on the break of the high with the stop below the low; it hit the target.",
+  "instruments": [
+   "Bitcoin",
+   "gold",
+   "any futures"
+  ],
+  "timeframes": [
+   "5m",
+   "1m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "A red candle with positive delta after a rejection means absorption.",
+    "times": [
+     "10:56"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "He uses a 300% imbalance ratio.",
+    "times": [
+     "08:19"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Entry on the break of the high; he should have waited for the close.",
+    "times": [
+     "12:46"
+    ]
+   }
+  ],
+  "why": [
+   "a lesson of definitions",
+   "its absorption trade is lesson 5's SC-03, and footprint imbalances need trade-by-trade prices the desk does not record"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "a lesson of definitions; its absorption trade is lesson 5's SC-03, and footprint imbalances need trade-by-trade prices the desk does not record",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "SC-05",
+  "version": "v1",
+  "name": "Real versus failed breakouts: stop hunts through key levels, absorption of the breakout volume, trapped traders (lesson 7)",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "SCryptoTrader",
+  "video": "Gh38EHUzm6A",
+  "title": "🚨 Order Flow Course Lesson 07: Why 90% of Breakouts Fail | Identify Real Breakouts Using Order Flow",
+  "uploaded": "2026-06-15",
+  "minutes": 18,
+  "summary": "SCryptoTrader's order flow lesson 7 (June 2026, Urdu/Hindi): liquidity and stop hunts. Big players need the other side to fill, so they push price through obvious key levels where stops and breakout orders sit, then reverse. A breakout with high volume can still fail because that volume was absorbed - pending breakout orders plus stopped-out shorts - and a real breakout shows the footprint's buyers genuinely in control. His live bitcoin examples (5 minutes, the New York open) read trapped buyers and sellers from large contract prints, delta and stacked imbalances before the move.",
+  "instruments": [
+   "Bitcoin"
+  ],
+  "timeframes": [
+   "5m",
+   "15m",
+   "1m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "High volume came into the breakout, but it failed because of absorption.",
+    "times": [
+     "04:56"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Lesson seven is about liquidity and stop hunts.",
+    "times": [
+     "00:06"
+    ]
+   }
+  ],
+  "why": [
+   "the levels and trapped-trader reads come from the footprint's per-price prints, read by eye",
+   "a failed breakout read by delta is SC-03's absorption at the swept level"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the levels and trapped-trader reads come from the footprint's per-price prints, read by eye; a failed breakout read by delta is SC-03's absorption at the swept level",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "SC-06",
+  "version": "v1",
+  "name": "Volume profile levels: point of control, value area high and low, high and low volume nodes, confirmed by order flow (lesson 8)",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "SCryptoTrader",
+  "video": "1DCiIGD8pDw",
+  "title": "Order Flow Course Lesson 8:Volume Profile Secrets Trade From Real Institutional Levels Action theory",
+  "uploaded": "2026-07-02",
+  "minutes": 23,
+  "summary": "SCryptoTrader's order flow lesson 8 (2026): the volume profile and auction theory. The point of control is the price with the most volume, the value area about 70% of it with its high and low as key levels; high and low volume nodes mark fair prices and fast-move gaps; price moves from balance to imbalance. He keeps weekly and daily points of control, and trades sweeps and reactions at the value area edges and points of control once order flow (absorption, delta divergence) confirms; profile shapes (P, b, D and thin) describe the session. He stresses small losses and big rewards over a high win rate, and that the profile is a tool, not a signal generator.",
+  "instruments": [
+   "Bitcoin",
+   "gold"
+  ],
+  "timeframes": [
+   "5m",
+   "15m",
+   "1h"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The volume profile is a tool to understand value, not to generate signals.",
+    "times": [
+     "10:58"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "It is just a tool.",
+    "times": [
+     "10:58"
+    ]
+   }
+  ],
+  "why": [
+   "a lesson on the levels, with trades that depend on order-flow reads judged by eye at each level",
+   "he says it does not generate signals"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "a lesson on the levels, with trades that depend on order-flow reads judged by eye at each level; he says it does not generate signals",
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -17121,6 +19693,139 @@ export const SL: SlStrategy[] = [
   "blockedReason": "the levels, liquidity and divergence are read by eye",
   "duplicateOf": null,
   "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "TK-05",
+  "version": "v1",
+  "name": "Swing failure pattern (LuxAlgo): a sweep of relative equal highs (lows) that fails to close beyond, a close past the confirmation level, stop beyond the wick",
+  "topic": "crypto",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Tom Crown",
+  "video": "coVXCNjPBm4",
+  "title": "How to Trade Swing Failure Patterns Like A Pro! (LuxAlgo Indicator)",
+  "uploaded": "2025-05-02",
+  "minutes": 6,
+  "summary": "Tom Crown on swing failure patterns (May 2025): relative equal highs or lows attract price; it trades through them, sweeping the liquidity, but fails to close beyond and then reverses. LuxAlgo's free 'Swing Failure Pattern' indicator on TradingView highlights the sweeping wick, labels it and draws a confirmation level; a close beyond that level marks the likely reversal. Higher swing sensitivity gives fewer, stronger signals; the volume filter keeps only sweeps whose volume outside the swing area is under 25% of the total. The stop goes beyond the swing failure, the target at a favourable reward-to-risk.",
+  "instruments": [
+   "Any (crypto and forex examples)"
+  ],
+  "timeframes": [
+   "Any"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Relative equal highs or lows are an objective for the market.",
+    "times": [
+     "01:22"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "A close beyond the indicator's confirmation level marks the likely reversal.",
+    "times": [
+     "02:21"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "The stop goes above the swing failure pattern.",
+    "times": [
+     "04:22"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The volume filter: volume outside the swing area under 25% of the total.",
+    "times": [
+     "03:33"
+    ]
+   }
+  ],
+  "why": [
+   "the swing sensitivity and confirmation level are the indicator's own settings, and the volume split needs lower-timeframe volume",
+   "the target is 'a favourable reward-to-risk'"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": "LS-00",
+  "duplicateWhy": "a sweep of a swing level that closes back inside is already on the desk (LS-00 and its versions; CC-02)",
+  "checks": null
+ },
+ {
+  "id": "TK-09",
+  "version": "v1",
+  "name": "Fair value gap in the discount after a liquidity sweep and a break of structure, stop beyond the gap",
+  "topic": "crypto",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Tom Crown",
+  "video": "1g365cw7PdU",
+  "title": "How To Trade Fair Value Gaps (FVG)",
+  "uploaded": "2026-11-10",
+  "minutes": 12,
+  "summary": "Tom Crown's fair value gap guide (November 2026): the three-candle gap (BISI bullish, SIBI bearish) acts as a magnet and an entry area; its three levels are the edge (IOFED), the midpoint (consequent encroachment) and the complete fill. Trade only gaps made by strong displacement and inside a market-structure story: a liquidity sweep, a break of structure, a gap in the discount half of the move (below its 0.5 Fibonacci for longs) and a retest of old structure; avoid gaps inside sideways ranges (except at range extremes), gaps already traded through and gaps against strong momentum. The stop goes beyond the gap, targets at levels higher or lower.",
+  "instruments": [
+   "Any (crypto and forex examples)"
+  ],
+  "timeframes": [
+   "Any"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The confluence: a liquidity sweep, a break of structure, a bullish gap in discount and a retest of structure.",
+    "times": [
+     "09:27"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "The stop below the gap, targeting levels higher.",
+    "times": [
+     "09:47"
+    ]
+   }
+  ],
+  "why": [
+   "the structure, swept levels and targets are read by eye on each chart"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": "MY-01",
+  "duplicateWhy": "a fair value gap in the discount of the dealing range after a sweep is already coded (MY-01; also the desk's FVG books such as NJ-28 and CP-13)",
   "checks": null
  },
  {
@@ -20122,6 +22827,101 @@ export const SL: SlStrategy[] = [
   }
  },
  {
+  "id": "PL-06",
+  "version": "v1",
+  "name": "Backtrader dip test: buy after two lower closes in a row, sell five days later",
+  "topic": "forex_us",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Part Time Larry",
+  "video": "5VU3CJMuk0w",
+  "title": "Algorithmic Trading with Python and Backtrader (Part 2)",
+  "uploaded": "2020-01-13",
+  "minutes": 10,
+  "summary": "Part Time Larry's second Backtrader tutorial (January 2020): loading a daily stock price file as a data feed and writing the test strategy - buy a slight dip when the close has fallen two days in a row (today's close below yesterday's, yesterday's below the day before), then hold for a number of days and sell; the sell orders, position size and commissions come in the next video.",
+  "instruments": [
+   "US stocks",
+   "Bitcoin",
+   "Ether",
+   "Gold"
+  ],
+  "timeframes": [
+   "daily"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)",
+   "Ether (Delta ETHUSD)",
+   "Gold (Delta XAUTUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD",
+   "ETHUSD",
+   "XAUUSD"
+  ],
+  "overnight": true,
+  "proxy": "the video tests a stock's daily prices; coded on Delta bitcoin, ether and gold daily candles",
+  "paperStart": "2026-11-14T18:00:00Z",
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Buy a slight dip: price down two days in a row.",
+    "times": [
+     "05:46"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Hold it for a number of days, then sell.",
+    "times": [
+     "06:04"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta BTCUSD, ETHUSD and gold (Delta XAUTUSD) on daily candles (the UTC day for crypto, the 17:00 New York day for gold), held across days; one position at a time.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Buy at the next daily open after a close below the previous close that was itself below the close before it.",
+    "times": []
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "A",
+    "text": "Sell after 7,200 one-minute rows - five days of crypto, a little over five trading days of gold (Backtrader's own quick-start holds five bars; the video leaves the number open); a guard stop three daily ATR (14) below the entry.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the five-day hold and the guard stop are ours (A)",
+   "the stock data is replaced by the desk's crypto and gold"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 175,
+   "trades": 77
+  }
+ },
+ {
   "id": "QC-01",
   "version": "v1",
   "name": "30-minute opening range breakout, all-in, closed at 13:30 New York",
@@ -20544,6 +23344,759 @@ export const SL: SlStrategy[] = [
    "fills": true,
    "signals": 2,
    "trades": 2
+  }
+ },
+ {
+  "id": "TC-05",
+  "version": "v1",
+  "name": "Daily Bollinger Band (20, 2.5) spike and snap-back, next day's 15-minute engulfing candle with the EMA 50, out on a close through the EMA 50",
+  "topic": "forex_us",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Tradeciety.com",
+  "video": "dDLG5VEVRL8",
+  "title": "amazing DAY TRADING strategy - entry, exit and all rules",
+  "uploaded": "2022-01-18",
+  "minutes": 13,
+  "summary": "Tradeciety's top-down day-trading plan (2022) on GBP/USD. The 4-hour chart gives the trend, the key swing levels and a demand zone; the 5-minute chart times the trade: a break out of a triangle in the trend's direction (or a break and retest), the stop above the pattern, the target before the demand zone. The follow-up plan: price spiked through a daily Bollinger Band (2.5 standard deviations) and snapped back inside, so he looked for a long on 15 minutes - the retest of a broken level confirmed by a strong engulfing candle, Fibonacci 138/161/200 targets, and the stop trailed along the EMA 50 until a close through it.",
+  "instruments": [
+   "GBP/USD",
+   "EUR/USD",
+   "Bitcoin",
+   "Gold"
+  ],
+  "timeframes": [
+   "4h",
+   "5m",
+   "15m",
+   "daily"
+  ],
+  "markets": [
+   "EUR/USD",
+   "GBP/USD",
+   "Bitcoin (Delta BTCUSD)",
+   "Gold (Delta XAUTUSD)"
+  ],
+  "deskMarkets": [
+   "EURUSD",
+   "GBPUSD",
+   "BTCUSD",
+   "XAUUSD"
+  ],
+  "overnight": false,
+  "proxy": "the video trades GBP/USD; coded on the desk's EUR/USD and GBP/USD plus Delta bitcoin and gold",
+  "paperStart": "2026-11-14T18:00:00Z",
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "A Bollinger Band with a 2.5 standard deviation from the daily timeframe.",
+    "times": [
+     "07:26"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Price broke out of the band and snapped back: a Bollinger Band spike reversal, a very strong signal.",
+    "times": [
+     "07:38"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Wait for momentum away from the level to confirm the retest.",
+    "times": [
+     "10:00"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The entry candle: a super strong engulfing candle whose range also engulfed the candle before.",
+    "times": [
+     "10:05"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Its range engulfed the two candles before it.",
+    "times": [
+     "10:05"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Fibonacci targets of the ABC move: 138, 161 and 200, scaling out.",
+    "times": [
+     "10:55"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Add the EMA 50 to manage the trade.",
+    "times": [
+     "11:35"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Trail the stop along the EMA 50 as the trend progresses.",
+    "times": [
+     "11:56"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Out when the market broke the EMA.",
+    "times": [
+     "12:13"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: EUR/USD and GBP/USD (the desk's FX minutes), Delta BTCUSD and gold (Delta XAUTUSD), 15-minute candles, out by the session end (the UTC day for bitcoin, 17:00 New York for forex and gold).",
+    "times": []
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "A",
+    "text": "The spike is the previous trading day's candle (the UTC day for bitcoin, the 17:00 New York day for forex and gold) with its low under the lower Bollinger Band (20, 2.5) and its close back above it (a long), or its high over the upper band and its close back under it (a short). His chart shows 4-hour candles against the daily band; ours reads the daily candle.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "During the next trading day, a 15-minute candle that closes in the trade's direction, beyond the 15-minute EMA 50, with its high and low beyond both of the two candles before it; enter at the next open. One trade per spike day.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "The stop is just beyond the engulfing candle's far end; out at the next open after a 15-minute close through the EMA 50. No fixed target (his Fibonacci targets need the ABC drawn by eye).",
+    "times": []
+   }
+  ],
+  "why": [
+   "the daily candle as the spike, the next day's window, the EMA 50 side and the no-target exit are ours (A)",
+   "the levels he retests are drawn by eye and not coded"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 10,
+   "trades": 7
+  }
+ },
+ {
+  "id": "TC-08",
+  "version": "v1",
+  "name": "Daily fakeout: a new 20-day high (low) then a close back below the prior day's low (above its high), short (long) the next open, stop past the extreme, 2R",
+  "topic": "forex_us",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Tradeciety.com",
+  "video": "wkPXQzZNo3E",
+  "title": "Mastering fakeouts - How to trade false breakouts!",
+  "uploaded": "2020-07-20",
+  "minutes": 17,
+  "summary": "Tradeciety on trading fakeouts (2020). On the daily chart the price takes out an important previous high, then the next candle falls straight back into the range as an engulfing candle; that sets a bearish bias for the next few days (the mirror at support for longs), and the trade is timed on a lower timeframe with breakouts, pullbacks or patterns. The stop goes above the previous high with room to breathe (stop runs and retests are common there), the target a fixed 2, 3 or 4 times the risk or a technical level such as the moving average. His four rules: you never know in advance which breakout fails; when one fails cut the loss; use big levels; and always add confluence (a run of nine same-colour candles, a deceleration pin bar, his Trend Rider indicator).",
+  "instruments": [
+   "Forex pairs (EUR/USD, GBP/USD examples)",
+   "Bitcoin",
+   "Ether",
+   "Gold"
+  ],
+  "timeframes": [
+   "daily",
+   "4h",
+   "1h"
+  ],
+  "markets": [
+   "EUR/USD",
+   "GBP/USD",
+   "Bitcoin (Delta BTCUSD)",
+   "Gold (Delta XAUTUSD)"
+  ],
+  "deskMarkets": [
+   "EURUSD",
+   "GBPUSD",
+   "BTCUSD",
+   "XAUUSD"
+  ],
+  "overnight": true,
+  "proxy": "the video trades forex pairs; coded on the desk's EUR/USD and GBP/USD plus Delta bitcoin and gold",
+  "paperStart": "2026-11-14T18:00:00Z",
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The market must take out the previous highs.",
+    "times": [
+     "01:40"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The next candle immediately falls back into the lows, as an engulfing candle.",
+    "times": [
+     "01:43"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Not a regular candle but an engulfing one.",
+    "times": [
+     "01:43"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The bias for the next day or the next few days is then bearish.",
+    "times": [
+     "02:28"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Go down to a lower timeframe and look for shorts in the direction of the fakeout.",
+    "times": [
+     "02:39"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "The stop goes above the previous high.",
+    "times": [
+     "07:20"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Not right at the high: give it a little room to breathe.",
+    "times": [
+     "07:31"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "A fixed reward-to-risk target: the stop distance times two, three or four.",
+    "times": [
+     "08:05"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Always add confluence before trading a fakeout.",
+    "times": [
+     "05:22"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: EUR/USD and GBP/USD (the desk's FX minutes), Delta BTCUSD and gold (Delta XAUTUSD); the setup on daily candles (the UTC day for bitcoin, the 17:00 New York day for forex and gold), the trade held across days.",
+    "times": []
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "A",
+    "text": "The fakeout: in the last two finished daily candles a high above the highest high of the 20 days before them, and the last finished day a down candle closing under the low of the day before it (a short); the mirror at the 20-day low for a long.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Enter at the open of the next trading day (his lower-timeframe entries are drawn by eye).",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "The stop is a quarter of a daily ATR (14) beyond the fakeout's extreme; the target 2R; out after 7,200 one-minute rows (five days of bitcoin, a little over five trading days of forex and gold) if neither is hit.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the 20-day high as 'the previous highs', the close beyond the prior day's low as the engulfing fall-back, the next-day open entry, the quarter-ATR room, 2R (the first of his 2, 3 or 4) and the five-day limit are ours (A)",
+   "his confluence checks and Trend Rider indicator are not coded"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 18,
+   "trades": 18
+  }
+ },
+ {
+  "id": "TC-10",
+  "version": "v1",
+  "name": "15-minute pullback against the 4-hour EMA 50 with an RSI (14) divergence, a close through the pullback's last swing, stop past the divergence extreme, 2R",
+  "topic": "forex_us",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Tradeciety.com",
+  "video": "CAGFAGGQk-w",
+  "title": "My 4 favorite RSI strategies + secrets that work",
+  "uploaded": "2021-10-26",
+  "minutes": 16,
+  "summary": "Tradeciety's four RSI (14) strategies (2021). One: at a retest of a high or low, an RSI reading weaker than at the first touch suggests the level holds. Two: ranges on both the price and the RSI - no breakout trade until both break. Three: divergence - price makes a lower low while the RSI makes a higher low; mark the last significant high and look for longs once price gets above it, since divergences often end trends. Four: a 4-hour EMA 50 sets the direction on a 15-minute chart; wait for a pullback against it that runs close to the average with an RSI divergence, then trade the strong-candle break of the pullback's little range with the trend. He also argues indicators lag no more than price action does.",
+  "instruments": [
+   "Forex pairs",
+   "Bitcoin",
+   "Ether",
+   "Gold"
+  ],
+  "timeframes": [
+   "15m",
+   "4h (strategy four); any"
+  ],
+  "markets": [
+   "EUR/USD",
+   "GBP/USD",
+   "Bitcoin (Delta BTCUSD)",
+   "Ether (Delta ETHUSD)",
+   "Gold (Delta XAUTUSD)"
+  ],
+  "deskMarkets": [
+   "EURUSD",
+   "GBPUSD",
+   "BTCUSD",
+   "ETHUSD",
+   "XAUUSD"
+  ],
+  "overnight": false,
+  "proxy": "the video trades forex pairs; coded on the desk's EUR/USD and GBP/USD plus Delta bitcoin, ether and gold",
+  "paperStart": "2026-11-14T18:00:00Z",
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "A pullback against the trend close to the average, with a divergence.",
+    "times": [
+     "10:03"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The divergence: the RSI makes a lower high while price makes a higher high.",
+    "times": [
+     "10:26"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Then wait for the market to break lower.",
+    "times": [
+     "10:35"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The breakout candle must be strong.",
+    "times": [
+     "11:33"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The price chart is 15 minutes; the moving average is the 4-hour EMA 50.",
+    "times": [
+     "09:31"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Below the moving average, only shorts (above it, only longs).",
+    "times": [
+     "09:45"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: EUR/USD and GBP/USD (the desk's FX minutes), Delta BTCUSD, ETHUSD and gold (Delta XAUTUSD) on 15-minute candles, out by the session end (the UTC day for bitcoin and ether, 17:00 New York for forex and gold).",
+    "times": []
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "A",
+    "text": "Swing highs and lows are 3-candle pivots, known three candles later. The divergence (a short): the last two swing highs are a higher high with a lower RSI (14), the second within one 15-minute ATR (14) of the 4-hour EMA 50 and still below it; the mirror with two swing lows for a long.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Enter at the next open after the first close below the lowest low between the two swing highs (above the highest high between the two lows), within 20 candles of the second swing, with a body at least half a 15-minute ATR (14).",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "The stop is just beyond the second swing's extreme; the target 2R (none is named).",
+    "times": []
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "A",
+    "text": "The trend side is the 15-minute close against the last finished 4-hour EMA 50: below it shorts only, above it longs only.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the 3-candle pivots, 'close to the average' as one ATR, the strong candle as half an ATR of body, the 20-candle window and 2R are ours (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 6,
+   "trades": 5
+  }
+ },
+ {
+  "id": "TC-11",
+  "version": "v1",
+  "name": "RSI (14) divergence at a lower low (higher high), enter on the close beyond the last significant high (low) between the swings, stop past the divergence extreme, 2R",
+  "topic": "forex_us",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Tradeciety.com",
+  "video": "CAGFAGGQk-w",
+  "title": "My 4 favorite RSI strategies + secrets that work",
+  "uploaded": "2021-10-26",
+  "minutes": 16,
+  "summary": "Tradeciety's four RSI (14) strategies (2021). One: at a retest of a high or low, an RSI reading weaker than at the first touch suggests the level holds. Two: ranges on both the price and the RSI - no breakout trade until both break. Three: divergence - price makes a lower low while the RSI makes a higher low; mark the last significant high and look for longs once price gets above it, since divergences often end trends. Four: a 4-hour EMA 50 sets the direction on a 15-minute chart; wait for a pullback against it that runs close to the average with an RSI divergence, then trade the strong-candle break of the pullback's little range with the trend. He also argues indicators lag no more than price action does.",
+  "instruments": [
+   "Forex pairs",
+   "Bitcoin",
+   "Ether",
+   "Gold"
+  ],
+  "timeframes": [
+   "15m",
+   "4h (strategy four); any"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)",
+   "Ether (Delta ETHUSD)",
+   "Gold (Delta XAUTUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD",
+   "ETHUSD",
+   "XAUUSD"
+  ],
+  "overnight": true,
+  "proxy": null,
+  "paperStart": "2026-11-14T18:00:00Z",
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The RSI makes a higher low while price makes a lower low: not much selling interest left.",
+    "times": [
+     "08:08"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Divergences are often the end of existing trends.",
+    "times": [
+     "09:15"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Mark the last significant high.",
+    "times": [
+     "08:08"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Wait until the market gets above it, then look for longs.",
+    "times": [
+     "08:16"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta BTCUSD, ETHUSD and gold (Delta XAUTUSD) on 1-hour candles, held across days.",
+    "times": []
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "A",
+    "text": "Swing lows and highs are 3-candle pivots, known three candles later; the divergence is the last two swing lows a lower low with a higher RSI (14) (a long), or the last two swing highs a higher high with a lower RSI (a short).",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Enter at the next open after the first close above the highest high between the two swing lows (below the lowest low between the two highs), within 30 candles of the second swing.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "The stop is just beyond the second swing's extreme; the target 2R (none is named); out after 4,320 one-minute rows (three days of crypto) if neither is hit.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the 3-candle pivots, the 1-hour candles, the 30-candle window, 2R and the three-day limit are ours (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 47,
+   "trades": 35
+  }
+ },
+ {
+  "id": "TC-13",
+  "version": "v1",
+  "name": "Central pivot rejection with the pivot trend: a pin bar at the daily pivot and a strong momentum candle away, target S1/S2",
+  "topic": "forex_us",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Tradeciety.com",
+  "video": "R_aD45ja4xc",
+  "title": "A powerful Pivot Point trading strategy",
+  "uploaded": "2020-01-27",
+  "minutes": 11,
+  "summary": "Tradeciety on the central pivot point (2020): the daily pivot is the previous day's (high + low + close) / 3. In a downtrend the central pivots step lower day by day; when price rallies back into the pivot and is rejected - a pin bar or a failed breakout attempt, then a very strong momentum candle away from it - that is a with-trend entry (shown on 15 minutes), with S1 or S2 as targets; the mirror in an uptrend. Trend lines and horizontal levels around the pivot can time the entry.",
+  "instruments": [
+   "Forex pairs",
+   "Bitcoin",
+   "Ether",
+   "Gold"
+  ],
+  "timeframes": [
+   "15m",
+   "1h",
+   "4h",
+   "daily"
+  ],
+  "markets": [
+   "EUR/USD",
+   "GBP/USD",
+   "Bitcoin (Delta BTCUSD)",
+   "Ether (Delta ETHUSD)",
+   "Gold (Delta XAUTUSD)"
+  ],
+  "deskMarkets": [
+   "EURUSD",
+   "GBPUSD",
+   "BTCUSD",
+   "ETHUSD",
+   "XAUUSD"
+  ],
+  "overnight": false,
+  "proxy": "the video trades forex pairs; coded on the desk's EUR/USD and GBP/USD plus Delta bitcoin, ether and gold",
+  "paperStart": "2026-11-14T18:00:00Z",
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The central pivot is the previous period's high, low and close summed and divided by three.",
+    "times": [
+     "01:09"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Used on the 15-minute timeframe in his examples.",
+    "times": [
+     "03:49"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The market moves into the central pivot point and is rejected.",
+    "times": [
+     "03:57"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "A pin bar at the pivot, then a very strong momentum candle.",
+    "times": [
+     "05:36"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "S1 or S2 as targets.",
+    "times": [
+     "10:52"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "In a downtrend the central pivots move lower.",
+    "times": [
+     "04:40"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: EUR/USD and GBP/USD (the desk's FX minutes), Delta BTCUSD, ETHUSD and gold (Delta XAUTUSD) on 15-minute candles; pivots from the previous trading day (the UTC day for bitcoin and ether, the 17:00 New York day for forex and gold); out by the session end.",
+    "times": []
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "A",
+    "text": "The rejection (a short): a 15-minute candle that opens below the pivot, trades up to it and closes below it, and the next candle a down candle with a body of at least one 15-minute ATR (14) closing under the rejection candle's low; the mirror for a long.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Enter at the next open; the stop just above the two candles' high. The target is S1, or S2 once price is already past S1 (R1/R2 for longs); skipped when that target is less than 1R away. One trade a day.",
+    "times": []
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "A",
+    "text": "Shorts only when today's central pivot is below yesterday's, longs only when it is above.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the UTC day for the pivots, the 'strong momentum bar' as one ATR of body, the 1R minimum to the target and the one-trade limit are ours (A)",
+   "trend lines around the pivot are not coded"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 30,
+   "trades": 30
   }
  },
  {
@@ -23455,6 +27008,114 @@ export const SL: SlStrategy[] = [
   "checks": null
  },
  {
+  "id": "PL-05",
+  "version": "v1",
+  "name": "Backtrader setup: installing and running the Cerebro engine (no strategy)",
+  "topic": "forex_us",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Part Time Larry",
+  "video": "UNkH1TQl7qo",
+  "title": "Algorithmic Trading with Python and Backtrader (Part 1)",
+  "uploaded": "2020-01-13",
+  "minutes": 6,
+  "summary": "Part Time Larry's first Backtrader tutorial (January 2020): what backtesting answers (what $10,000 in a stock, a buy-the-dip or a moving-average crossover would have become), installing Backtrader and running an empty Cerebro engine with a starting cash balance. No strategy yet; the series' first strategy comes in part 2.",
+  "instruments": [
+   "US stocks"
+  ],
+  "timeframes": [
+   "daily"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Backtrader answers what a strategy would have made.",
+    "times": [
+     "02:15"
+    ]
+   }
+  ],
+  "why": [
+   "an installation tutorial with no trading rule",
+   "the series' strategy is part 2's (PL-06)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "an installation tutorial with no trading rule; the series' strategy is part 2's (PL-06)",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "PL-07",
+  "version": "v1",
+  "name": "The paper's 5-minute opening range breakout on QQQ/TQQQ, rebuilt in backtesting.py (part 1)",
+  "topic": "forex_us",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Part Time Larry",
+  "video": "T3PT4eV8xFU",
+  "title": "Backtesting.py (1/2) - Backtest Trading Strategies in Python",
+  "uploaded": "2025-07-16",
+  "minutes": 10,
+  "summary": "Part Time Larry starts reproducing the paper 'Can Day Trading Really Be Profitable?' in backtesting.py (July 2025): the 5-minute opening range breakout on QQQ and TQQQ, 2016-2023 plus an out-of-sample 2023-2025. This part loads Polygon minute data, installs the package and builds an empty strategy class with $25,000 of starting cash; the first five minutes' range and colour, which set the side, are coded in the next part.",
+  "instruments": [
+   "QQQ",
+   "TQQQ"
+  ],
+  "timeframes": [
+   "5m",
+   "1m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The paper's opening range breakout on the five-minute timeframe.",
+    "times": [
+     "00:15"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Not a moving-average cross this time, but an opening range breakout.",
+    "times": [
+     "04:16"
+    ]
+   }
+  ],
+  "why": [
+   "the rules are the paper's, coded in the next part"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "duplicateOf": "PL-01",
+  "duplicateWhy": "the same paper's first-five-minutes opening range strategy is already on the desk from his earlier video (PL-01)",
+  "checks": null
+ },
+ {
   "id": "PP-01",
   "version": "v1",
   "name": "4-hour 200 MA trend, 15-minute pullback and MACD signal-line exit from the histogram in the trend's direction, target higher-timeframe levels",
@@ -23977,6 +27638,265 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "several discretionary readings with no fixed trigger, stop or target; the weekly-level fakeout and pivot ideas resemble TC-01/TC-02 and the library's trap strategies",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "TC-06",
+  "version": "v1",
+  "name": "Top-down day trade: 4-hour trend and levels, a 5-minute triangle breakout (or break and retest), stop above the pattern (walkthrough)",
+  "topic": "forex_us",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Tradeciety.com",
+  "video": "dDLG5VEVRL8",
+  "title": "amazing DAY TRADING strategy - entry, exit and all rules",
+  "uploaded": "2022-01-18",
+  "minutes": 13,
+  "summary": "Tradeciety's top-down day-trading plan (2022) on GBP/USD. The 4-hour chart gives the trend, the key swing levels and a demand zone; the 5-minute chart times the trade: a break out of a triangle in the trend's direction (or a break and retest), the stop above the pattern, the target before the demand zone. The follow-up plan: price spiked through a daily Bollinger Band (2.5 standard deviations) and snapped back inside, so he looked for a long on 15 minutes - the retest of a broken level confirmed by a strong engulfing candle, Fibonacci 138/161/200 targets, and the stop trailed along the EMA 50 until a close through it.",
+  "instruments": [
+   "GBP/USD",
+   "EUR/USD",
+   "Bitcoin",
+   "Gold"
+  ],
+  "timeframes": [
+   "4h",
+   "5m",
+   "15m",
+   "daily"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Never trade inside consolidation patterns; trade the breakout or a break and retest.",
+    "times": [
+     "02:40"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "The stop at least above the 5-minute pattern.",
+    "times": [
+     "05:24"
+    ]
+   }
+  ],
+  "why": [
+   "the 4-hour levels, the demand zone and the 5-minute triangle are drawn by eye on each chart",
+   "the breakout-and-retest idea is the earlier card TC-01's"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the 4-hour levels, the demand zone and the 5-minute triangle are drawn by eye on each chart; the breakout-and-retest idea is the earlier card TC-01's",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "TC-07",
+  "version": "v1",
+  "name": "Nine price-action patterns (breakout build-up, wedge, fakie, flag, head and shoulders, trend-line retest, trap, triangle, triple tap), stops behind technical barriers (walkthrough)",
+  "topic": "forex_us",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Tradeciety.com",
+  "video": "DoRwrw7JPes",
+  "title": "9 Price Action Strategies with Entries, Stops and Targets - Complete Strategies",
+  "uploaded": "2021-10-05",
+  "minutes": 26,
+  "summary": "Tradeciety's nine price-action patterns (2021) with entries, stops and targets: the breakout build-up (price sticking to a level before it breaks), the wedge, the fakie (a wick through a high that fails, often with a pin bar or engulfing candle), the flag, the head and shoulders, trend-line breakouts and retests, the trap (a close above a high that falls straight back into the range), the triangle and the triple tap. He waits for a full close beyond the breakout level, hides the stop behind technical barriers (support and resistance, highs and lows, trend lines, moving averages) with room to spare, and looks left for targets at prior support and resistance or at Fibonacci 161/200 levels.",
+  "instruments": [
+   "Forex pairs"
+  ],
+  "timeframes": [
+   "Any (4h and daily examples)"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Wait for the price to close fully outside the level, better with a strong momentum push.",
+    "times": [
+     "04:19"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Technical barriers for the stop: support and resistance, highs and lows, a trend line or a moving average.",
+    "times": [
+     "02:36"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "For targets, look left to the biggest areas of support and resistance.",
+    "times": [
+     "01:56"
+    ]
+   }
+  ],
+  "why": [
+   "every pattern, level and trend line is drawn by eye on each chart with no fixed trigger",
+   "the trap and the fakie resemble the library's trap and fakeout strategies"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "every pattern, level and trend line is drawn by eye on each chart with no fixed trigger; the trap and the fakie resemble the library's trap and fakeout strategies",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "TC-09",
+  "version": "v1",
+  "name": "Breakout versus pullback: a full close beyond a level with 2-3 touches, or the retest with an engulfing candle (comparison)",
+  "topic": "forex_us",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Tradeciety.com",
+  "video": "-RGTPOyffEY",
+  "title": "Pullback vs Breakout Trading Strategy - Step by Step",
+  "uploaded": "2020-08-11",
+  "minutes": 16,
+  "summary": "Tradeciety compares breakout and pullback trading (2020). A breakout needs a level with two or three touches (three for a trend line) and a candle that closes fully beyond it, never a decision mid-candle; very large breakout candles force a wide stop, and then a pullback entry is the alternative. The pullback comes back to the broken level and is entered on a momentum signal such as an engulfing candle; breakouts give more trades and more fakeouts, pullbacks fewer trades at better prices, and sometimes the market runs away without a pullback. Combining the two gives a second chance after a fakeout. Above all: cut losers and let winners run to a fixed target.",
+  "instruments": [
+   "Forex pairs"
+  ],
+  "timeframes": [
+   "Any (4h examples)"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "A strong support level needs at least two to three touch points (three for a trend line).",
+    "times": [
+     "01:38"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Trade a breakout only when the candle closes fully outside the level.",
+    "times": [
+     "02:13"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The pullback is entered on an engulfing candle at the previous breakout area.",
+    "times": [
+     "12:56"
+    ]
+   }
+  ],
+  "why": [
+   "a comparison of the two entries on levels drawn by eye, with no fixed stop or target",
+   "the break-and-retest entry is the earlier card TC-01's"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "a comparison of the two entries on levels drawn by eye, with no fixed stop or target; the break-and-retest entry is the earlier card TC-01's",
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "TC-12",
+  "version": "v1",
+  "name": "RSI at a retested level and RSI ranges as breakout filters (concept)",
+  "topic": "forex_us",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Tradeciety.com",
+  "video": "CAGFAGGQk-w",
+  "title": "My 4 favorite RSI strategies + secrets that work",
+  "uploaded": "2021-10-26",
+  "minutes": 16,
+  "summary": "Tradeciety's four RSI (14) strategies (2021). One: at a retest of a high or low, an RSI reading weaker than at the first touch suggests the level holds. Two: ranges on both the price and the RSI - no breakout trade until both break. Three: divergence - price makes a lower low while the RSI makes a higher low; mark the last significant high and look for longs once price gets above it, since divergences often end trends. Four: a 4-hour EMA 50 sets the direction on a 15-minute chart; wait for a pullback against it that runs close to the average with an RSI divergence, then trade the strong-candle break of the pullback's little range with the trend. He also argues indicators lag no more than price action does.",
+  "instruments": [
+   "Forex pairs",
+   "Bitcoin",
+   "Ether",
+   "Gold"
+  ],
+  "timeframes": [
+   "15m",
+   "4h (strategy four); any"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "At a retest, an RSI not greater than at the first touch suggests the level holds.",
+    "times": [
+     "00:56"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "While ranges on the RSI and on price both hold, take no breakout trade.",
+    "times": [
+     "04:00"
+    ]
+   }
+  ],
+  "why": [
+   "filters on levels and RSI lines drawn by eye on each chart, with no trigger, stop or target of their own"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "filters on levels and RSI lines drawn by eye on each chart, with no trigger, stop or target of their own",
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -24757,6 +28677,36 @@ export const SL_CHANNELS: SlChannel[] = [
     "why": "EMA Rider strategy",
     "analysed": true,
     "id": "CG-02"
+   },
+   {
+    "video": "jvSz13b9TnM",
+    "why": "ranks 11-20: The Chart Guys' signature \"Back Burner\" trend-continuation setup (owner's ranks 11-20 list: EMA-based trend continuation)",
+    "analysed": true,
+    "id": "CG-04"
+   },
+   {
+    "video": "gkoJ5QoDiic",
+    "why": "ranks 11-20: \"Stair Step\" trend-continuation strategy",
+    "analysed": true,
+    "id": "CG-05"
+   },
+   {
+    "video": "WfVVjp4jrBE",
+    "why": "ranks 11-20: webinar: best trading entry strategies (multiple-timeframe structure)",
+    "analysed": true,
+    "id": "CG-08"
+   },
+   {
+    "video": "3VEfeykTZiU",
+    "why": "ranks 11-20: BTC daily EMA12 (their EMA-rider guide applied to bitcoin)",
+    "analysed": true,
+    "id": "CG-07"
+   },
+   {
+    "video": "97M9FDcyBxA",
+    "why": "ranks 11-20: sideways setups for breakouts (crypto chart review)",
+    "analysed": true,
+    "id": "CG-06"
    }
   ],
   "skip": null
@@ -24966,6 +28916,42 @@ export const SL_CHANNELS: SlChannel[] = [
     "why": "list 4: 5-minute day trading strategy for forex, indices and commodities",
     "analysed": true,
     "id": "TC-04"
+   },
+   {
+    "video": "dDLG5VEVRL8",
+    "why": "ranks 11-20: day trading strategy with \"entry, exit and all rules\"",
+    "analysed": true,
+    "id": "TC-06"
+   },
+   {
+    "video": "DoRwrw7JPes",
+    "why": "ranks 11-20: nine price-action strategies with entries, stops and targets",
+    "analysed": true,
+    "id": "TC-07"
+   },
+   {
+    "video": "wkPXQzZNo3E",
+    "why": "ranks 11-20: fakeouts: trading false breakouts (owner's list: fakeouts)",
+    "analysed": true,
+    "id": "TC-08"
+   },
+   {
+    "video": "-RGTPOyffEY",
+    "why": "ranks 11-20: pullback vs breakout strategy step by step",
+    "analysed": true,
+    "id": "TC-09"
+   },
+   {
+    "video": "CAGFAGGQk-w",
+    "why": "ranks 11-20: four RSI strategies",
+    "analysed": true,
+    "id": "TC-12"
+   },
+   {
+    "video": "R_aD45ja4xc",
+    "why": "ranks 11-20: pivot point trading strategy",
+    "analysed": true,
+    "id": "TC-13"
    }
   ],
   "skip": null
@@ -26216,6 +30202,36 @@ export const SL_CHANNELS: SlChannel[] = [
     "why": "5-minute ORB on QQQ (PyBroker)",
     "analysed": true,
     "id": "PL-01"
+   },
+   {
+    "video": "21tLM3XrU9I",
+    "why": "ranks 11-20: Supertrend bot part 3: trend detection (owner's list: Supertrend crypto bots)",
+    "analysed": true,
+    "id": "PL-03"
+   },
+   {
+    "video": "1PEyddA1y5E",
+    "why": "ranks 11-20: Supertrend bot part 4: CCXT order execution (same bot)",
+    "analysed": true,
+    "id": "PL-04"
+   },
+   {
+    "video": "T3PT4eV8xFU",
+    "why": "ranks 11-20: Backtesting.py part 1: the demo strategy",
+    "analysed": true,
+    "id": "PL-07"
+   },
+   {
+    "video": "UNkH1TQl7qo",
+    "why": "ranks 11-20: Backtrader part 1: the demo strategy",
+    "analysed": true,
+    "id": "PL-05"
+   },
+   {
+    "video": "5VU3CJMuk0w",
+    "why": "ranks 11-20: Backtrader part 2: the demo strategy's rules",
+    "analysed": true,
+    "id": "PL-06"
    }
   ],
   "skip": null
@@ -27476,6 +31492,36 @@ export const SL_CHANNELS: SlChannel[] = [
     "why": "ten more: 3Commas DCA bot settings (the channel's bot method)",
     "analysed": true,
     "id": "MN-02"
+   },
+   {
+    "video": "HSLSHRXniFo",
+    "why": "ranks 11-20: bitcoin accumulation plan (owner's list: accumulation strategies)",
+    "analysed": true,
+    "id": "MN-03"
+   },
+   {
+    "video": "RxQ3eEgrlqE",
+    "why": "ranks 11-20: crypto bot strategy \"beats bear markets since 2021\"",
+    "analysed": true,
+    "id": "MN-04"
+   },
+   {
+    "video": "B1Ej-EXR-C8",
+    "why": "ranks 11-20: trend trading crypto strategy",
+    "analysed": true,
+    "id": "MN-06"
+   },
+   {
+    "video": "x2tSXrA_m5c",
+    "why": "ranks 11-20: indicator for entries and exits (trade management)",
+    "analysed": true,
+    "id": "MN-07"
+   },
+   {
+    "video": "yrmilq2PAqU",
+    "why": "ranks 11-20: do DCA bots work (bot settings)",
+    "analysed": true,
+    "id": "MN-08"
    }
   ],
   "skip": null
@@ -27512,6 +31558,36 @@ export const SL_CHANNELS: SlChannel[] = [
     "why": "ten more: his reversal strategy",
     "analysed": true,
     "id": "TK-04"
+   },
+   {
+    "video": "coVXCNjPBm4",
+    "why": "ranks 11-20: swing failure patterns",
+    "analysed": true,
+    "id": "TK-05"
+   },
+   {
+    "video": "zUNfzXEl_hk",
+    "why": "ranks 11-20: Bollinger Bands strategy",
+    "analysed": true,
+    "id": "TK-06"
+   },
+   {
+    "video": "qddEJ51gb0E",
+    "why": "ranks 11-20: stochastic trading guide",
+    "analysed": true,
+    "id": "TK-07"
+   },
+   {
+    "video": "WfUxuf6Vjk8",
+    "why": "ranks 11-20: Stoch RSI bitcoin trading lesson",
+    "analysed": true,
+    "id": "TK-08"
+   },
+   {
+    "video": "1g365cw7PdU",
+    "why": "ranks 11-20: fair value gap trading guide",
+    "analysed": true,
+    "id": "TK-09"
    }
   ],
   "skip": null
@@ -27530,6 +31606,36 @@ export const SL_CHANNELS: SlChannel[] = [
     "why": "ten more: directional strategy experiment, MACD cumulative difference (the one directional rule set)",
     "analysed": true,
     "id": "HB-01"
+   },
+   {
+    "video": "78S76zskqt4",
+    "why": "ranks 11-20: directional trading strategies (v2.1)",
+    "analysed": true,
+    "id": "HB-03"
+   },
+   {
+    "video": "5iOorb46aVw",
+    "why": "ranks 11-20: Aroon indicator strategy",
+    "analysed": true,
+    "id": "HB-04"
+   },
+   {
+    "video": "1j81gP2ToCE",
+    "why": "ranks 11-20: grid strategy experiment",
+    "analysed": true,
+    "id": "HB-05"
+   },
+   {
+    "video": "bAi2ok7_boo",
+    "why": "ranks 11-20: controllers, backtesting and optimisation",
+    "analysed": true,
+    "id": "HB-06"
+   },
+   {
+    "video": "Ly8R5g3juxw",
+    "why": "ranks 11-20: funding rate arbitrage (owner's list: arbitrage)",
+    "analysed": true,
+    "id": "HB-07"
    }
   ],
   "skip": null
@@ -27810,6 +31916,60 @@ export const SL_CHANNELS: SlChannel[] = [
     "why": "ten more (61-70): anchored-VWAP strategy found by an AI coding agent (claims to check)",
     "analysed": true,
     "id": "MD-01"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "scryptotrader",
+  "name": "SCryptoTrader - Arslan Afzal",
+  "star": false,
+  "group": "fut",
+  "earlier": "",
+  "uploads": 267,
+  "strategyTitles": 0,
+  "picked": [
+   {
+    "video": "hzjbl2qMVQQ",
+    "why": "ranks 11-20: order flow lesson 2: footprint, delta, imbalance, absorption (definitions)",
+    "analysed": true,
+    "id": "SC-01"
+   },
+   {
+    "video": "lHu4aVRqUJ0",
+    "why": "ranks 11-20: order flow lesson 3: delta signal before a reversal",
+    "analysed": true,
+    "id": "SC-02"
+   },
+   {
+    "video": "jwLqXb9Fj_Y",
+    "why": "ranks 11-20: order flow lesson 4: FVG with footprint confirmation",
+    "analysed": false,
+    "id": null
+   },
+   {
+    "video": "A5gNI7__vJg",
+    "why": "ranks 11-20: order flow lesson 5: absorption reversals",
+    "analysed": true,
+    "id": "SC-03"
+   },
+   {
+    "video": "J2Ci59Y2Jw8",
+    "why": "ranks 11-20: order flow lesson 6: exhaustion before reversals",
+    "analysed": true,
+    "id": "SC-04"
+   },
+   {
+    "video": "Gh38EHUzm6A",
+    "why": "ranks 11-20: order flow lesson 7: real breakouts with order flow",
+    "analysed": true,
+    "id": "SC-05"
+   },
+   {
+    "video": "1DCiIGD8pDw",
+    "why": "ranks 11-20: order flow lesson 8: volume profile levels",
+    "analysed": true,
+    "id": "SC-06"
    }
   ],
   "skip": null
