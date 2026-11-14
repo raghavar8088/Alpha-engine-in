@@ -1,10 +1,12 @@
 "use client";
 
-// Real money on Delta Exchange India for ten Premium strategies (13 Nov 2026). The backend desk is
-// app/services/premium_live.py: it copies the paper desk's trades of the ten into real Delta orders at the owner's
-// size ($5 risked a trade, a $20 daily loss stop), with each trade's stop and target held on Delta. This page shows
-// what it did and holds its switches. Going live and flattening need the owner's PIN; stopping never does.
-import { useCallback, useEffect, useState } from "react";
+// Real money on Delta Exchange India for Premium strategies (13 Nov 2026; two desks from 14 Nov). The backend is
+// app/services/premium_live.py: each desk copies the paper desk's trades of its picks into real Delta orders at the
+// owner's size ($5 risked a trade, a $20 daily loss stop), with each trade's stop and target held on Delta. The gold
+// desk shows on Premium Strategies (the original /api/premium-paper/live routes); the crypto desk is the Delta Exchange
+// Live Trading module (/api/premium-paper/live/desk/crypto). This page shows what a desk did and holds its switches.
+// Going live and flattening need the owner's PIN; stopping never does.
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { apiFetch } from "../../lib/api";
 
 type Rec = { trades: number; wins: number; pnl_usd: number; open: number };
@@ -42,7 +44,7 @@ const ago = (t: number | null | undefined, now: number) => {
   return s < 90 ? `${s}s ago` : s < 5400 ? `${Math.round(s / 60)} min ago` : `${Math.round(s / 3600)} h ago`;
 };
 const MODE: Record<string, { label: string; cls: string; what: string }> = {
-  live: { label: "LIVE — real money", cls: "live", what: "Real orders go to Delta for every new signal of the ten." },
+  live: { label: "LIVE — real money", cls: "live", what: "Real orders go to Delta for every new signal of these strategies." },
   shadow: { label: "SHADOW — no orders", cls: "shadow", what: "Every decision is made and logged with simulated fills; nothing is sent." },
   off: { label: "OFF", cls: "off", what: "No new trade. Anything still open is managed to its close." },
 };
@@ -55,10 +57,21 @@ const happened = (t: LiveTrade) => {
   return "open";
 };
 
+/** What the picks' own backtests said, counted from the data (so it stays true when a desk's picks change). */
+const verdict = (picks: Pick[]) => {
+  const n = picks.length;
+  const lose = picks.filter((p) => p.backtest.startsWith("loses")).length;
+  const never = picks.filter((p) => p.backtest.startsWith("never")).length;
+  const parts: string[] = [];
+  if (lose) parts.push(`${lose === n ? "All" : lose} of these ${n} ${lose === 1 ? "loses" : "lose"} in ${lose === 1 ? "its" : "their"} own 2-year backtest${lose === 1 ? "" : "s"}`);
+  if (never) parts.push(`${never} ${never === 1 ? "was" : "were"} never backtested`);
+  return `${parts.join(" and ")}${parts.length ? ":" : ""} a few good paper trades picked them.`;
+};
+
 /** What the page shows, given the desk's status: no state of its own beyond its props. */
-export function LiveDeltaView({ s, now, pin, setPin, confirm, setConfirm, busy, msg, onAct }: {
+export function LiveDeltaView({ s, now, pin, setPin, confirm, setConfirm, busy, msg, onAct, intro }: {
   s: LiveStatus; now: number; pin: string; setPin: (v: string) => void; confirm: string; setConfirm: (v: string) => void;
-  busy: string | null; msg: string | null; onAct: (key: "shadow" | "live" | "off" | "flatten") => void;
+  busy: string | null; msg: string | null; onAct: (key: "shadow" | "live" | "off" | "flatten") => void; intro?: ReactNode;
 }) {
   const m = MODE[s.mode] ?? MODE.off;
   const L = s.limits;
@@ -67,10 +80,10 @@ export function LiveDeltaView({ s, now, pin, setPin, confirm, setConfirm, busy, 
   return (
     <div className="ld">
       <div className="ld-warn">
-        <b>Real money, on strategies that are not proven.</b> Since 8 Nov the paper desk&apos;s bitcoin strategies lost a
-        combined −397R and its gold strategies −166R. Six of these ten lose in their own 2-year backtests and four were never
-        backtested: one good week picked them. The size is the one chosen for this: {usd(L.risk_usd)} risked a trade and a{" "}
-        {usd(L.daily_stop_usd)} daily loss stop.
+        <b>Real money, on strategies that are not proven.</b>{" "}
+        {intro ?? <>Since 8 Nov the paper desk&apos;s bitcoin strategies lost a combined −397R and its gold strategies −166R.</>}{" "}
+        {verdict(s.picks)}{" "}
+        {`The size is the one chosen for this: ${usd(L.risk_usd)} risked a trade and a ${usd(L.daily_stop_usd)} daily loss stop.`}
       </div>
 
       <div className="ld-head">
@@ -130,11 +143,11 @@ export function LiveDeltaView({ s, now, pin, setPin, confirm, setConfirm, busy, 
         {msg && <p className="ld-msg">{msg}</p>}
       </div>
 
-      <h4 className="ld-h">The ten (fixed {ist(Date.parse(s.picked_at) / 1000)} IST)</h4>
+      <h4 className="ld-h">{`The ${s.picks.length} strategies (fixed ${ist(Date.parse(s.picked_at) / 1000)} IST)`}</h4>
       <div className="ld-scroll">
         <table className="ld-table">
           <thead>
-            <tr><th className="l">Strategy</th><th>Trades on</th><th>Paper since 8 Nov</th><th className="l">Its 2-year backtest</th><th>Real money</th><th>Shadow</th></tr>
+            <tr><th className="l">Strategy</th><th>Trades on</th><th>Paper record at the pick</th><th className="l">Its 2-year backtest</th><th>Real money</th><th>Shadow</th></tr>
           </thead>
           <tbody>
             {s.picks.map((p) => (
@@ -200,7 +213,7 @@ export function LiveDeltaView({ s, now, pin, setPin, confirm, setConfirm, busy, 
             </tbody>
           </table>
         </div>
-      ) : <p className="ld-dim">No signal from the ten yet.</p>}
+      ) : <p className="ld-dim">No signal from these strategies yet.</p>}
 
       <ul className="ld-notes">
         {s.notes.map((n, i) => <li key={i}>{n}</li>)}
@@ -258,7 +271,9 @@ export function LiveDeltaView({ s, now, pin, setPin, confirm, setConfirm, busy, 
   );
 }
 
-export default function LiveDelta() {
+export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "crypto"; intro?: ReactNode }) {
+  // the gold desk keeps the original routes (they work on every server build); other desks use /live/desk/{desk}
+  const base = desk === "gold" ? "/api/premium-paper/live" : `/api/premium-paper/live/desk/${desk}`;
   const [s, setS] = useState<LiveStatus | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [pin, setPin] = useState("");
@@ -269,13 +284,13 @@ export default function LiveDelta() {
 
   const load = useCallback(async () => {
     try {
-      setS(await apiFetch("/api/premium-paper/live"));
+      setS(await apiFetch(base));
       setErr(null);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Could not read the desk.");
     }
     setNow(Date.now() / 1000);
-  }, []);
+  }, [base]);
   useEffect(() => {
     load();
     const t = setInterval(load, 15000);
@@ -283,14 +298,14 @@ export default function LiveDelta() {
   }, [load]);
 
   const onAct = async (key: "shadow" | "live" | "off" | "flatten") => {
-    if (key === "live" && !window.confirm("Send REAL orders to Delta Exchange for the ten strategies?")) return;
+    if (key === "live" && !window.confirm(`Send REAL orders to Delta Exchange for the ${s?.picks.length ?? ""} strategies of this desk?`)) return;
     if (key === "flatten" && !window.confirm("Close every open position this desk holds on Delta now, at the market?")) return;
     setBusy(key);
     setMsg(null);
     try {
       const r = key === "flatten"
-        ? await apiFetch("/api/premium-paper/live/flatten", { method: "POST", body: JSON.stringify({ pin }) })
-        : await apiFetch("/api/premium-paper/live/mode", { method: "POST", body: JSON.stringify({ mode: key, pin, confirm }) });
+        ? await apiFetch(`${base}/flatten`, { method: "POST", body: JSON.stringify({ pin }) })
+        : await apiFetch(`${base}/mode`, { method: "POST", body: JSON.stringify({ mode: key, pin, confirm }) });
       if (r?.status) setS(r.status);
       setMsg(r?.ok ? (key === "live" ? "Live: real orders from the next signal." : key === "flatten" ? "Flattened, and switched off." : `Now ${key}.`) : r?.why ?? "Refused.");
       if (r?.ok) { setPin(""); setConfirm(""); }
@@ -312,5 +327,5 @@ export default function LiveDelta() {
   }
   if (!s) return <div style={{ fontSize: 13, color: "var(--text-muted)" }}>Loading the Delta desk…</div>;
   if (!s.configured_db) return <div style={{ fontSize: 13, color: "var(--loss)" }}>The paper desk&apos;s database is not configured on this server.</div>;
-  return <LiveDeltaView s={s} now={now} pin={pin} setPin={setPin} confirm={confirm} setConfirm={setConfirm} busy={busy} msg={msg} onAct={onAct} />;
+  return <LiveDeltaView s={s} now={now} pin={pin} setPin={setPin} confirm={confirm} setConfirm={setConfirm} busy={busy} msg={msg} onAct={onAct} intro={intro} />;
 }

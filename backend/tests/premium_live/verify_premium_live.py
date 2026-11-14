@@ -13,6 +13,11 @@ trade disappears; one position per product; late and drifted signals refused; a 
 at once and switching the desk off; a lost order answer adopted from the account; the $20 daily stop and its reset;
 a stale paper desk; shadow mode sending nothing; flatten; the PIN, its lockout and the REAL MONEY confirmation;
 leverage set to 10x before going live; three venue errors switching the desk off.
+
+Two desks since 14 Nov 2026: the bitcoin scenarios run on the crypto desk (the Delta Exchange Live Trading module: TH-05,
+TL-04, TH-01) and the gold ones on the gold desk. Sections 16-18 pin the split down: each desk trades only its own picks
+and product; former bitcoin picks and TL-04's gold book are ignored; a bitcoin trade the gold desk opened before the
+split is managed by it to its close and blocks the crypto desk from going live; each desk has its own switch and stop.
 """
 
 import asyncio
@@ -203,15 +208,21 @@ class FakeDelta(Delta):
 
 def fresh(mode="live", btc=69000.0, gold=3885.0):
     db = SimpleNamespace(premium_trades=Coll("pt"), premium_meta=Coll("pm"), live_delta_trades=Coll("lt"),
-                         live_delta_state=Coll("ls"))
+                         live_delta_state=Coll("ls"), live_crypto_trades=Coll("ct"), live_crypto_state=Coll("cs"))
     db.premium_meta.docs.append({"_id": "status", "segments_at": datetime.fromtimestamp(CLOCK[0], UTC).isoformat()})
     M._db = lambda: db
     M.D = FakeDelta()
     M.D.mid.update(BTCUSD=btc, XAUTUSD=gold)
     if mode != "off":
-        db.live_delta_state.docs.append({"_id": "state", "mode": mode, "since": CLOCK[0] - 3600, "errors_in_row": 0,
-                                         "pin_fails": [], "products": {}})
+        for coll in (db.live_delta_state, db.live_crypto_state):
+            coll.docs.append({"_id": "state", "mode": mode, "since": CLOCK[0] - 3600, "errors_in_row": 0,
+                              "pin_fails": [], "products": {}})
     return db
+
+
+def st_of(db, desk):
+    coll = db.live_crypto_state if desk == "crypto" else db.live_delta_state
+    return coll.docs[0] if coll.docs else {}
 
 
 def paper(db, acct, mkt, side, entry, stop, target, ago=30, **kw):
@@ -229,7 +240,7 @@ def close_paper(db, tid, reason, exit_px):
 
 
 def trade(db, tid):
-    return next((d for d in db.live_delta_trades.docs if d["_id"] == tid), None)
+    return next((d for d in db.live_crypto_trades.docs + db.live_delta_trades.docs if d["_id"] == tid), None)
 
 
 def heartbeat(db):
@@ -252,7 +263,7 @@ async def main():
     ask = M.D.ask("BTCUSD")
     want = min(math.floor(5 / ((ask - 68650.0) * 0.001)), math.floor(2500 / (ask * 0.001)))
     check("a market buy of the risk-sized contracts went in", t and t["status"] == "open" and t["contracts"] == want
-          and M.D.orders[-1]["side"] == "buy" and M.D.pos[BTC]["size"] == want, f"{r['entered']} / {want} contracts")
+          and M.D.orders[-1]["side"] == "buy" and M.D.pos[BTC]["size"] == want, f"{r['crypto']['entered']} / {want} contracts")
     check("its risk at the stop is at most $5", t["plan"]["risk_usd"] <= 5.0 + 1e-9, t["plan"])
     lg = M.D.legs.get(BTC)
     check("the venue holds the paper's stop, its limit 20% of the risk past it, no target leg, last-traded trigger",
@@ -277,7 +288,7 @@ async def main():
     # ── 3. the paper's own exit closes it ───────────────────────────────────────────────────────────
     section("3. The paper trade exits on its signal: the real one is closed at the market")
     db = fresh()
-    t3 = paper(db, "TD-02", "BTCUSD", -1, 69000.0, 69300.0, None)
+    t3 = paper(db, "TH-05", "BTCUSD", -1, 69000.0, 69300.0, None)
     await cyc(db)
     advance(1800)
     M.D.set_price("BTCUSD", 68800.0)
@@ -312,7 +323,7 @@ async def main():
     section("5. One position per product; a position the desk does not own blocks the product")
     db = fresh()
     a = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68650.0, None)
-    b = paper(db, "RU-04", "BTCUSD", -1, 69000.0, 69400.0, 68400.0, ago=20)
+    b = paper(db, "TL-04", "BTCUSD", -1, 69000.0, 69400.0, 68400.0, ago=20)
     await cyc(db)
     check("the first bitcoin signal opened, the second was skipped (Delta nets by product)",
           trade(db, a)["status"] == "open" and trade(db, b)["status"] == "skipped" and "already holds" in trade(db, b)["reason"],
@@ -358,7 +369,7 @@ async def main():
     M.D.fail["bracket"] = "definite"
     t8 = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68650.0, None)
     await cyc(db)
-    t, st = trade(db, t8), db.live_delta_state.docs[0]
+    t, st = trade(db, t8), st_of(db, "crypto")
     check("the position was closed in the same pass", BTC not in M.D.pos and t["status"] == "closed"
           and "bracket refused" in t["close_reason"], t.get("close_reason"))
     check("the desk switched itself off and says why", st["mode"] == "off" and "bracket refused" in (st.get("switched_off") or ""))
@@ -392,7 +403,7 @@ async def main():
         M.D.set_price("BTCUSD", M.D.mid["BTCUSD"] - 400.0)
         await cyc(db)
         advance(60)
-    day_loss = sum(t.get("pnl_usd") or 0 for t in db.live_delta_trades.docs if t["status"] == "closed")
+    day_loss = sum(t.get("pnl_usd") or 0 for t in db.live_crypto_trades.docs if t["status"] == "closed")
     nxt = paper(db, "TH-01", "BTCUSD", 1, M.D.mid["BTCUSD"], M.D.mid["BTCUSD"] - 350.0, None, ago=10)
     await cyc(db)
     check("four stopped trades lose about $20, and the next is refused", day_loss <= -20 and trade(db, nxt)["status"] == "skipped"
@@ -405,7 +416,7 @@ async def main():
     # ── 11. the paper trade disappears; the paper desk goes quiet ───────────────────────────────────
     section("11. A paper trade that disappears, and a paper desk that stops updating")
     db = fresh()
-    t11 = paper(db, "RU-04", "BTCUSD", 1, 69000.0, 68300.0, 70400.0)
+    t11 = paper(db, "TL-04", "BTCUSD", 1, 69000.0, 68300.0, 70400.0)
     await cyc(db)
     db.premium_trades.docs = [d for d in db.premium_trades.docs if d["_id"] != t11]
     await cyc(db)
@@ -415,7 +426,7 @@ async def main():
     check("closed after five minutes gone", trade(db, t11)["status"] == "closed"
           and trade(db, t11)["close_reason"] == "the paper trade disappeared" and BTC not in M.D.pos)
     db = fresh()
-    t11b = paper(db, "RU-04", "BTCUSD", 1, 69000.0, 68300.0, 70400.0)
+    t11b = paper(db, "TL-04", "BTCUSD", 1, 69000.0, 68300.0, 70400.0)
     await cyc(db)
     advance(1500)
     stale = paper(db, "DR-01", "XAUTUSD", 1, 3885.0, 3880.0, 3895.0, ago=10)
@@ -444,42 +455,47 @@ async def main():
     # ── 13. the owner's controls ────────────────────────────────────────────────────────────────────
     section("13. Going live needs the PIN and the words REAL MONEY; leverage is set to 10x first")
     db = fresh(mode="off")
-    r = await M.set_mode("live", "0000", "REAL MONEY")
+    r = await M.set_mode("live", "0000", "REAL MONEY", desk="crypto")
     check("a wrong PIN is refused and counted", not r["ok"] and "wrong PIN" in r["why"], r["why"])
-    r = await M.set_mode("live", PIN, "yes")
+    r = await M.set_mode("live", PIN, "yes", desk="crypto")
     check("the right PIN without the words is refused", not r["ok"] and "REAL MONEY" in r["why"], r["why"])
     M.D.pos[BTC] = {"size": 3, "entry": 69000.0}
-    r = await M.set_mode("live", PIN, "real money")
+    r = await M.set_mode("live", PIN, "real money", desk="crypto")
     check("a position the desk does not own blocks going live", not r["ok"] and "already holds BTCUSD" in r["why"], r["why"])
     M.D.pos.pop(BTC)
-    r = await M.set_mode("live", PIN, "REAL MONEY")
-    check("then it goes live, with leverage at 10x on both products (Delta's defaults were 200x and 100x)",
-          r["ok"] and M.D.lev[BTC] == 10 and M.D.lev[GOLD] == 10 and db.live_delta_state.docs[0]["mode"] == "live", r)
+    r = await M.set_mode("live", PIN, "REAL MONEY", desk="crypto")
+    check("then it goes live, with leverage at 10x on BTCUSD only (gold keeps Delta's default until its own desk arms)",
+          r["ok"] and M.D.lev[BTC] == 10 and M.D.lev[GOLD] == 100 and st_of(db, "crypto")["mode"] == "live"
+          and not db.live_delta_state.docs, r)
     for _ in range(5):
-        await M.set_mode("live", "0000", "REAL MONEY")
-    r = await M.set_mode("live", PIN, "REAL MONEY")
+        await M.set_mode("live", "0000", "REAL MONEY", desk="crypto")
+    r = await M.set_mode("live", PIN, "REAL MONEY", desk="crypto")
     check("five wrong PINs lock going live for an hour, even with the right one", not r["ok"] and "locked" in r["why"], r["why"])
     advance(3601)
-    r = await M.set_mode("live", PIN, "REAL MONEY")
+    r = await M.set_mode("live", PIN, "REAL MONEY", desk="crypto")
     check("an hour later it works again", r["ok"], r)
-    r = await M.set_mode("off")
-    check("switching off needs no PIN", r["ok"] and db.live_delta_state.docs[0]["mode"] == "off")
+    r = await M.set_mode("live", PIN, "REAL MONEY")
+    check("the gold desk arms on its own, setting 10x on XAUTUSD only", r["ok"] and M.D.lev[GOLD] == 10
+          and st_of(db, "gold")["mode"] == "live", r)
+    r = await M.set_mode("off", desk="crypto")
+    check("switching off needs no PIN, and switches only that desk", r["ok"] and st_of(db, "crypto")["mode"] == "off"
+          and st_of(db, "gold")["mode"] == "live")
     db = fresh()
     f = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68650.0, None)
     await cyc(db)
-    r = await M.flatten("0000")
+    r = await M.flatten("0000", desk="crypto")
     check("flatten with a wrong PIN does nothing", not r["ok"] and BTC in M.D.pos)
     heartbeat(db)
-    r = await M.flatten(PIN)
+    r = await M.flatten(PIN, desk="crypto")
     check("flatten closes every open position and switches off", r["ok"] and BTC not in M.D.pos
-          and trade(db, f)["status"] == "closed" and db.live_delta_state.docs[0]["mode"] == "off")
+          and trade(db, f)["status"] == "closed" and st_of(db, "crypto")["mode"] == "off")
 
     # ── 14. off still manages; errors switch off ────────────────────────────────────────────────────
     section("14. Off still manages what is open; three venue errors in a row switch the desk off")
     db = fresh()
-    o14 = paper(db, "RU-04", "BTCUSD", 1, 69000.0, 68300.0, 70400.0)
+    o14 = paper(db, "TL-04", "BTCUSD", 1, 69000.0, 68300.0, 70400.0)
     await cyc(db)
-    await M.set_mode("off")
+    await M.set_mode("off", desk="crypto")
     advance(600)
     close_paper(db, o14, "time", 69100.0)
     await cyc(db)
@@ -488,16 +504,83 @@ async def main():
     M.D.fail["positions"] = "definite"
     for _ in range(3):
         await cyc(db)
-    st = db.live_delta_state.docs[0]
-    check("three failed position reads in a row: off", st["mode"] == "off" and st["errors_in_row"] >= 3, st.get("switched_off"))
+    st, sg = st_of(db, "crypto"), st_of(db, "gold")
+    check("three failed position reads in a row: off (each desk counts its own)", st["mode"] == "off" and st["errors_in_row"] >= 3
+          and sg["mode"] == "off" and sg["errors_in_row"] >= 3, st.get("switched_off"))
 
     # ── 15. the read model ──────────────────────────────────────────────────────────────────────────
     section("15. What the page reads")
     s = await M.status()
-    check("status: mode, keys, PIN, limits, the ten picks, notes", s["keys"] and s["pin_set"] and len(s["picks"]) == 10
+    check("status (gold, the original routes): mode, keys, PIN, limits, its five gold picks, notes", s["keys"] and s["pin_set"]
+          and s["desk"] == "gold" and len(s["picks"]) == 5 and {p["product"] for p in s["picks"]} == {"XAUTUSD"}
           and s["limits"]["risk_usd"] == 5 and s["limits"]["daily_stop_usd"] == 20 and s["limits"]["leverage"] == 10
           and len(s["notes"]) >= 5)
+    c = await M.status("crypto")
+    check("status (crypto): TH-05, TL-04 and TH-01 on BTCUSD, $5 a trade, a $20 daily stop",
+          c["desk"] == "crypto" and [p["acct"] for p in c["picks"]] == ["TH-05", "TL-04", "TH-01"]
+          and {p["product"] for p in c["picks"]} == {"BTCUSD"} and c["limits"]["risk_usd"] == 5
+          and c["limits"]["daily_stop_usd"] == 20 and c["picked_at"].startswith("2026-11-14"), [p["acct"] for p in c["picks"]])
+    check("an unknown desk is refused", "error" in await M.status("nope") and not (await M.set_mode("off", desk="nope"))["ok"])
     check("the secrets never appear in what the page reads", "s\n" not in str(s) and SALT not in str(s) and "DELTA_API_SECRET" not in str(s))
+    # ── 16. two desks ─────────────────────────────────────────────────────────────
+    section("16. Two desks: each trades only its own picks and its own product")
+    db = fresh()
+    b16 = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68650.0, None)
+    g16 = paper(db, "DR-01", "XAUTUSD", 1, 3885.0, 3880.0, 3895.0)
+    old = paper(db, "RU-04", "BTCUSD", 1, 69000.0, 68650.0, None, ago=20)     # a former gold-desk bitcoin pick
+    tlg = paper(db, "TL-04", "XAUTUSD", 1, 3885.0, 3880.0, 3895.0, ago=20)    # TL-04's gold book is not a pick
+    await cyc(db)
+    check("the bitcoin trade is the crypto desk's, the gold trade the gold desk's",
+          [d["_id"] for d in db.live_crypto_trades.docs] == [b16] and [d["_id"] for d in db.live_delta_trades.docs] == [g16],
+          ([d["_id"] for d in db.live_crypto_trades.docs], [d["_id"] for d in db.live_delta_trades.docs]))
+    check("a former bitcoin pick (RU-04) and TL-04's gold book are ignored by both desks: no record, no order",
+          trade(db, old) is None and trade(db, tlg) is None and len(M.D.orders) == 2)
+    check("one position on each product", M.D.pos[BTC]["size"] > 0 and M.D.pos[GOLD]["size"] > 0)
+    # ── 17. a bitcoin trade from before the split ───────────────────────────────────────
+    section("17. A live bitcoin trade the gold desk opened before the split is managed by it to its close")
+    db = fresh()
+    leg = paper(db, "RU-04", "BTCUSD", 1, 69000.0, 68300.0, 70400.0, ago=600)
+    M.D.pos[BTC] = {"size": 7, "entry": 69000.0}
+    db.live_delta_trades.docs.append({"_id": leg, "acct": "RU-04", "mkt": "BTCUSD", "product": "BTCUSD", "name": "earlier pick",
+                                      "mode": "live", "side": 1, "status": "open", "contracts": 7, "fill": 69000.0,
+                                      "stop": 68300.0, "target": 70400.0, "entry_fee": 0.2, "opened_at": CLOCK[0] - 600,
+                                      "created_at": CLOCK[0] - 600, "day": "2026-11-16", "legs": {"stop": "68300"}})
+    new = paper(db, "TH-05", "BTCUSD", 1, 69000.0, 68650.0, None)
+    await cyc(db)
+    check("still open and marked by the gold desk: not closed early, no error", trade(db, leg)["status"] == "open"
+          and trade(db, leg).get("mark") and not st_of(db, "gold").get("switched_off"), trade(db, leg))
+    check("the crypto desk's bitcoin signal is skipped while the account holds that BTCUSD",
+          trade(db, new)["status"] == "skipped" and "account already holds" in trade(db, new)["reason"], trade(db, new)["reason"])
+    await M.set_mode("off", desk="crypto")
+    r = await M.set_mode("live", PIN, "REAL MONEY", desk="crypto")
+    check("the crypto desk cannot go live while the account holds BTCUSD it does not own",
+          not r["ok"] and "already holds BTCUSD" in r["why"], r.get("why"))
+    advance(1200)
+    M.D.set_price("BTCUSD", 69500.0)
+    close_paper(db, leg, "exit_signal", 69500.0)
+    await cyc(db)
+    check("closed by the gold desk with its paper exit; the account is flat", trade(db, leg)["status"] == "closed"
+          and trade(db, leg)["close_reason"] == "paper exit: exit_signal" and BTC not in M.D.pos, trade(db, leg).get("close_reason"))
+    r = await M.set_mode("live", PIN, "REAL MONEY", desk="crypto")
+    check("then the crypto desk can go live", r["ok"], r.get("why"))
+    # ── 18. separate switches and stops ─────────────────────────────────────────────────
+    section("18. Each desk has its own switch and its own $20 daily stop")
+    db = fresh()
+    await M.set_mode("off")                                   # the gold desk only
+    g18 = paper(db, "YT-14", "XAUUSD", 1, 3885.0, 3878.0, 3899.0)
+    b18 = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68650.0, None)
+    await cyc(db)
+    check("gold off: its signal is not taken; crypto live: its signal is", trade(db, g18) is None
+          and trade(db, b18)["status"] == "open")
+    db = fresh()
+    db.live_crypto_trades.docs.append({"_id": "lost-today", "acct": "TH-05", "mkt": "BTCUSD", "product": "BTCUSD", "mode": "live",
+                                       "side": 1, "status": "closed", "day_closed": M._day(), "pnl_usd": -25.0})
+    b18b = paper(db, "TH-05", "BTCUSD", 1, 69000.0, 68650.0, None)
+    g18b = paper(db, "DR-01", "XAUTUSD", 1, 3885.0, 3880.0, 3895.0)
+    await cyc(db)
+    check("the crypto desk's daily stop does not stop the gold desk", trade(db, b18b)["status"] == "skipped"
+          and "daily loss stop" in trade(db, b18b)["reason"] and trade(db, g18b)["status"] == "open",
+          (trade(db, b18b)["reason"], trade(db, g18b)["status"]))
 
 
 if __name__ == "__main__":

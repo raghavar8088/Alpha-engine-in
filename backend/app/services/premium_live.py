@@ -1,7 +1,16 @@
-"""Real money on Delta Exchange India for ten Premium strategies (2026-11-13).
+"""Real money on Delta Exchange India for Premium strategies: two desks on one engine (2026-11-13, split 2026-11-14).
 
-The owner asked for five bitcoin and five gold strategies from Premium Strategies to trade REAL money on Delta,
-and chose the size: $5 of risk a trade and a $20 daily loss stop. Before choosing, the owner was shown the record:
+DESKS. Each desk has its own picks, products, switch (off / shadow / live), daily loss stop, state and trade records;
+they share the Delta account, its keys and the owner's PIN, and never trade the same product.
+- gold (Premium Strategies > "Real money · Delta gold"): the five gold picks of 13 Nov, on XAUTUSD. Its records are the
+  original ones (live_delta_state / live_delta_trades).
+- crypto (the "Delta Exchange Live Trading" module, 14 Nov): the bitcoin strategies the owner picked on 14 Nov from the
+  Crypto tab - TH-05, TL-04 and TH-01 - on BTCUSD, $5 a trade, a $20 daily stop (live_crypto_state / live_crypto_trades).
+  On 14 Nov the owner moved bitcoin here from the gold desk; the gold desk's earlier bitcoin picks (TH-01, TH-05, RU-04,
+  TD-02, TD-03) left it, and any bitcoin trade it still had open would be managed by it to its close.
+
+THE ORIGINAL DESK (13 Nov). The owner asked for five bitcoin and five gold strategies from Premium Strategies to trade
+REAL money on Delta, and chose the size: $5 of risk a trade and a $20 daily loss stop. Before choosing, the owner was shown the record:
 since 8 Nov the desk's 107 bitcoin books lost -397R over 585 trades and its 90 gold books -166R; of the ten below, six
 lose in their own 2-year backtests (700-2,900 trades each) and four were never backtested; every backtested bitcoin
 strategy in the module loses after Delta's fee but one with 24 trades. None is proven. This desk exists because the
@@ -38,6 +47,8 @@ Three venue errors in a row switch the desk off.
 from __future__ import annotations
 
 import asyncio
+import contextlib
+import contextvars
 import hashlib
 import hmac
 import logging
@@ -53,8 +64,10 @@ from app.services.delta_rest import Delta, DeltaError, Product
 logger = logging.getLogger("premium_live")
 
 IST = timezone(timedelta(hours=5, minutes=30))
-RISK_USD = float(os.getenv("PREMIUM_LIVE_RISK_USD", "5"))
+RISK_USD = float(os.getenv("PREMIUM_LIVE_RISK_USD", "5"))              # the gold desk
 DAILY_STOP_USD = float(os.getenv("PREMIUM_LIVE_DAILY_STOP_USD", "20"))
+CRYPTO_RISK_USD = float(os.getenv("PREMIUM_CRYPTO_RISK_USD", "5"))       # the crypto desk (the owner's choice, 14 Nov)
+CRYPTO_DAILY_STOP_USD = float(os.getenv("PREMIUM_CRYPTO_DAILY_STOP_USD", "20"))
 MAX_NOTIONAL_USD = float(os.getenv("PREMIUM_LIVE_MAX_NOTIONAL_USD", "2500"))
 LEVERAGE = int(os.getenv("PREMIUM_LIVE_LEVERAGE", "10"))
 MAX_LAG_S = int(os.getenv("PREMIUM_LIVE_MAX_LAG_S", "300"))
@@ -67,7 +80,8 @@ MARGIN_BUFFER = 1.25           # free balance needed: margin x this
 ERRORS_TO_STOP = 3
 PIN_TRIES = 5                  # wrong PINs an hour before going live is locked for the hour
 GST = 0.18                     # on Delta India's fees (shadow estimates only; live uses Delta's own figures)
-PICKED_AT = "2026-11-13T23:00:00+05:30"
+PICKED_AT = "2026-11-13T23:00:00+05:30"        # the gold desk
+CRYPTO_PICKED_AT = "2026-11-14T09:44:00+05:30"
 CONFIRM = "REAL MONEY"
 D = Delta()
 
@@ -85,17 +99,7 @@ class Pick:
     backtest: str       # what its own 2-year backtest said
 
 
-PICKS: tuple[Pick, ...] = (
-    Pick("TH-01", "BTCUSD", "BTCUSD", "Bitcoin 6 PM session: anchored VWAP + EMA 25, the N pattern", 8, 10.82, 0.56, 12,
-         "never backtested"),
-    Pick("TH-05", "BTCUSD", "BTCUSD", "EMA 50/200 trend, pullback to EMA 50 with RSI 40-55", 8, 2.75, 0.42, 38,
-         "never backtested"),
-    Pick("RU-04", "BTCUSD", "BTCUSD", "Williams fractal breakout in the 200 MA trend, 1.5R", 7, 1.06, 0.34, 43,
-         "loses: -0.16R a trade over 1,178 trades (t -5.3)"),
-    Pick("TD-02", "BTCUSD", "BTCUSD", "9/15 EMA cross filtered by the SMI (7, 2, 2)", 5, 0.84, 0.17, 40,
-         "loses: -0.37R a trade over 998 trades (t -3.5)"),
-    Pick("TD-03", "BTCUSD", "BTCUSD", "UT Bot pair + Schaff Trend Cycle, 2R (15-minute)", 6, 0.48, 0.13, 50,
-         "loses: -0.20R a trade over 1,092 trades (t -5.5)"),
+GOLD_PICKS: tuple[Pick, ...] = (
     Pick("RU-02", "XAUTUSD", "XAUTUSD", "Stochastic below 20, then a MACD cross, 1.5R (30-minute)", 5, 2.73, 1.47, 60,
          "loses: -0.06R a trade over 795 trades (t -1.6)"),
     Pick("CP-23", "XAUUSD", "XAUTUSD", "Inducement", 8, 5.29, 1.33, 62, "never backtested"),
@@ -105,21 +109,103 @@ PICKS: tuple[Pick, ...] = (
          "loses: -0.26R a trade over 1,467 trades (t -7.3)"),
     Pick("CP-05", "XAUUSD", "XAUTUSD", "Turning-point zones (3 touches)", 8, 3.74, 0.86, 50, "never backtested"),
 )
-PICK = {(p.acct, p.mkt): p for p in PICKS}
-PRODUCTS = sorted({p.product for p in PICKS})
-NOTES = (
-    "Real money on ten unproven strategies, at the owner's chosen size: $5 risked a trade, a $20 daily loss stop.",
-    "Six of the ten lose in their own 2-year backtests and four were never backtested; their good week is the only "
+# picked by the owner on 14 Nov 2026 from the Crypto tab; records = their bitcoin paper trades at 09:44 IST
+CRYPTO_PICKS: tuple[Pick, ...] = (
+    Pick("TH-05", "BTCUSD", "BTCUSD", "EMA 50/200 trend, pullback to EMA 50 with RSI 40-55", 9, 8.41, 1.00, 44,
+         "never backtested"),
+    Pick("TL-04", "BTCUSD", "BTCUSD", "EMA 200 + RSI 50 + engulfing, stop two candles, 2R", 15, 3.58, 0.67, 47,
+         "loses: -0.31R a trade over 2,134 trades (t -11.1)"),
+    Pick("TH-01", "BTCUSD", "BTCUSD", "Bitcoin 6 PM session: anchored VWAP + EMA 25, the N pattern", 9, 9.55, 0.49, 11,
+         "never backtested"),
+)
+GOLD_NOTES = (
+    "Real money on five unproven gold strategies, at the owner's chosen size: $5 risked a trade, a $20 daily loss stop.",
+    "Three of the five lose in their own 2-year backtests and two were never backtested; their good week is the only "
     "thing that picked them.",
+    "On 14 Nov 2026 the owner moved the bitcoin strategies to the Delta Exchange Live Trading module; this desk trades "
+    "gold (XAUTUSD) only.",
     "Each real trade is the paper desk's trade: its entry signal, its stop, its target, its exit. The paper desk sees a "
     "new bar up to a few minutes late, so a fast strategy's copy is often skipped as late or drifted rather than chased.",
-    "Delta nets positions by product, so only one bitcoin and one gold position can be open at a time; a second signal "
-    "is skipped while one is held.",
+    "Delta nets positions by product, so only one gold position can be open at a time; a second signal is skipped "
+    "while one is held.",
     "Stops and targets live on Delta itself (a bracket), so a position stays protected if this server goes down.",
-    "Leverage is set to 10x on both products before going live; positions are capped at $2,500 of notional.",
+    "Leverage is set to 10x on XAUTUSD before going live; positions are capped at $2,500 of notional.",
     "Fees and funding are Delta's own, read from its fills. Profit and loss are in US dollars.",
 )
+CRYPTO_NOTES = (
+    "Real money on three bitcoin strategies the owner picked on 14 Nov 2026 from the Crypto tab (TH-05, TL-04, TH-01), "
+    "at the owner's chosen size: $5 risked a trade and a $20 daily loss stop.",
+    "None is proven: TL-04 loses in its own 2-year bitcoin backtest (-0.31R a trade over 2,134 trades, t -11.1) and "
+    "TH-05 and TH-01 were never backtested; 9 to 15 paper trades picked them.",
+    "Each real trade is the paper desk's trade on Delta's live BTCUSD candles: its entry, stop, target and exit. A "
+    "signal seen more than 5 minutes late, or already 30% of its risk away, is skipped, never chased.",
+    "Delta nets positions by product, so only one bitcoin position can be open at a time across the three; a second "
+    "signal is skipped while one is held.",
+    "Stops and targets live on Delta itself (a bracket), so a position stays protected if this server goes down.",
+    "Leverage is set to 10x on BTCUSD before going live; positions are capped at $2,500 of notional.",
+    "Fees and funding are Delta's own, read from its fills. Profit and loss are in US dollars.",
+    "This desk and the gold desk (Premium Strategies > Real money · Delta gold) share the Delta account, its keys and "
+    "the PIN; each has its own switch and its own $20 daily stop.",
+)
 
+
+@dataclass(frozen=True)
+class Desk:
+    key: str
+    title: str
+    picks: tuple[Pick, ...]
+    state_coll: str
+    trades_coll: str
+    risk_usd: float
+    daily_stop_usd: float
+    picked_at: str
+    notes: tuple[str, ...]
+
+    @property
+    def pick(self) -> dict:
+        return {(p.acct, p.mkt): p for p in self.picks}
+
+    @property
+    def products(self) -> list[str]:
+        return sorted({p.product for p in self.picks})
+
+
+DESKS: dict[str, Desk] = {
+    "gold": Desk("gold", "Real money · Delta gold", GOLD_PICKS, "live_delta_state", "live_delta_trades", RISK_USD,
+                 DAILY_STOP_USD, PICKED_AT, GOLD_NOTES),
+    "crypto": Desk("crypto", "Delta Exchange Live Trading", CRYPTO_PICKS, "live_crypto_state", "live_crypto_trades",
+                   CRYPTO_RISK_USD, CRYPTO_DAILY_STOP_USD, CRYPTO_PICKED_AT, CRYPTO_NOTES),
+}
+if set(DESKS["gold"].products) & set(DESKS["crypto"].products):
+    raise RuntimeError("two desks may never trade the same product")
+# The desk the current task works for. The loop and every API call set it (_use); the default is the gold desk, so
+# a caller that names no desk gets the original one.
+_CUR: contextvars.ContextVar[str] = contextvars.ContextVar("premium_live_desk", default="gold")
+
+
+def _d() -> Desk:
+    return DESKS[_CUR.get()]
+
+
+@contextlib.contextmanager
+def _use(key: str):
+    if key not in DESKS:
+        raise KeyError(key)
+    tok = _CUR.set(key)
+    try:
+        yield DESKS[key]
+    finally:
+        _CUR.reset(tok)
+
+
+def _sc(db):
+    """This desk's state collection."""
+    return getattr(db, _d().state_coll)
+
+
+def _tc(db):
+    """This desk's trade records."""
+    return getattr(db, _d().trades_coll)
 
 # -- small helpers -------------------------------------------------------------------------------------
 
@@ -152,22 +238,22 @@ def _fee(notional: float, rate: float) -> float:
 
 
 async def _state(db) -> dict:
-    st = await db.live_delta_state.find_one({"_id": "state"})
+    st = await _sc(db).find_one({"_id": "state"})
     if st is None:
         st = {"_id": "state", "mode": "off", "since": _now(), "errors_in_row": 0, "pin_fails": [], "products": {},
               "created_at": _now()}
-        await db.live_delta_state.update_one({"_id": "state"}, {"$setOnInsert": {k: v for k, v in st.items() if k != "_id"}},
+        await _sc(db).update_one({"_id": "state"}, {"$setOnInsert": {k: v for k, v in st.items() if k != "_id"}},
                                              upsert=True)
-        st = await db.live_delta_state.find_one({"_id": "state"}) or st
+        st = await _sc(db).find_one({"_id": "state"}) or st
     return st
 
 
 async def _set_state(db, **fields) -> None:
-    await db.live_delta_state.update_one({"_id": "state"}, {"$set": {**fields, "updated_at": _now()}}, upsert=True)
+    await _sc(db).update_one({"_id": "state"}, {"$set": {**fields, "updated_at": _now()}}, upsert=True)
 
 
 async def _set_trade(db, tid: str, **fields) -> None:
-    await db.live_delta_trades.update_one({"_id": tid}, {"$set": {**fields, "updated_at": _now()}})
+    await _tc(db).update_one({"_id": tid}, {"$set": {**fields, "updated_at": _now()}})
 
 
 async def _venue_error(db, st: dict, what: str) -> None:
@@ -178,20 +264,21 @@ async def _venue_error(db, st: dict, what: str) -> None:
         fields.update(mode="off", switched_off=f"{n} venue errors in a row: {what}")
         st["mode"] = "off"
     await _set_state(db, **fields)
-    logger.warning("[premium live] %s", what)
+    logger.warning("[premium live %s] %s", _d().key, what)
 
 
 async def _switch_off(db, st: dict, why: str) -> None:
     st["mode"] = "off"
     await _set_state(db, mode="off", switched_off=why, last_error=why, last_error_at=_now())
-    logger.error("[premium live] switched off: %s", why)
+    logger.error("[premium live %s] switched off: %s", _d().key, why)
 
 
-async def _products(db, st: dict) -> dict[str, Product]:
-    """Both products' specs from Delta, cached in the state; never a default (sizes differ a thousandfold)."""
+async def _products(db, st: dict, extra: set | None = None) -> dict[str, Product]:
+    """The desk's products' specs from Delta (plus any product a still-open trade holds), cached in the state; never a
+    default (sizes differ a thousandfold)."""
     cached = st.get("products") or {}
     out: dict[str, Product] = {}
-    for sym in PRODUCTS:
+    for sym in sorted(set(_d().products) | set(extra or ())):
         c = cached.get(sym)
         if c and _now() - float(c.get("at") or 0) < 6 * 3600:
             out[sym] = Product(int(c["id"]), sym, float(c["contract_value"]), float(c["tick"]),
@@ -216,12 +303,15 @@ async def _desk_age(db) -> float:
 
 
 async def _paper(db, since: float, ids: list[str]) -> dict[str, dict]:
-    """The ten books' sized paper trades that entered since `since`, plus any an open real trade points at."""
-    q = {"acct": {"$in": sorted({p.acct for p in PICKS})}, "qty": {"$gt": 0},
-         "$or": [{"entry_t": {"$gte": int(since) - MAX_LAG_S}}, {"_id": {"$in": ids}}]}
+    """The desk's picks' sized paper trades that entered since `since`, plus any an open real trade points at (kept
+    even when its book is no longer a pick, so a trade from before a re-pick is still managed to its close)."""
+    want = set(ids)
+    q = {"qty": {"$gt": 0},
+         "$or": [{"acct": {"$in": sorted({p.acct for p in _d().picks})}, "entry_t": {"$gte": int(since) - MAX_LAG_S}},
+                 {"_id": {"$in": ids}}]}
     out = {}
     async for t in db.premium_trades.find(q):
-        if (t.get("acct"), t.get("mkt")) in PICK:
+        if t["_id"] in want or (t.get("acct"), t.get("mkt")) in _d().pick:
             out[t["_id"]] = t
     return out
 
@@ -266,16 +356,16 @@ async def _record_close(db, t: dict, ex: dict, reason: str, product: Product) ->
     fees = float(t.get("entry_fee") or 0.0) + float(ex["fee"] or 0.0)
     pnl = _pnl(t["side"], float(t["fill"]), float(ex["price"]), int(t["contracts"]), product.contract_value, fees)
     await _set_trade(db, t["_id"], status="closed", exit_price=round(float(ex["price"]), 6), exit_fee=round(float(ex["fee"]), 6),
-                     exit_basis=ex["basis"], fees=round(fees, 6), pnl_usd=pnl, r=round(pnl / RISK_USD, 3),
+                     exit_basis=ex["basis"], fees=round(fees, 6), pnl_usd=pnl, r=round(pnl / _d().risk_usd, 3),
                      close_reason=reason, closed_at=_now(), day_closed=_day(), unrealised_usd=0.0)
 
 
 async def _day_pnl(db, mode: str, positions: dict | None) -> float:
     """Today's (IST) closed P&L plus the open trades' marks, in USD, for one mode."""
     total = 0.0
-    async for t in db.live_delta_trades.find({"mode": mode, "day_closed": _day(), "status": "closed"}, {"pnl_usd": 1}):
+    async for t in _tc(db).find({"mode": mode, "day_closed": _day(), "status": "closed"}, {"pnl_usd": 1}):
         total += float(t.get("pnl_usd") or 0.0)
-    async for t in db.live_delta_trades.find({"mode": mode, "status": {"$in": ["open", "closing"]}}, {"unrealised_usd": 1}):
+    async for t in _tc(db).find({"mode": mode, "status": {"$in": ["open", "closing"]}}, {"unrealised_usd": 1}):
         total += float(t.get("unrealised_usd") or 0.0)
     return round(total, 4)
 
@@ -422,7 +512,7 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, position
 
     async def skip(why: str, **extra) -> str:
         try:
-            await db.live_delta_trades.insert_one({**base, **extra, "status": "skipped", "reason": why})
+            await _tc(db).insert_one({**base, **extra, "status": "skipped", "reason": why})
         except Exception:  # noqa: BLE001 - decided by an earlier pass
             pass
         return f"skipped: {why}"
@@ -434,7 +524,7 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, position
         return await skip(f"seen {lag / 60:.0f} min after its entry (limit {MAX_LAG_S // 60})", lag_s=round(lag))
     if stop <= 0 or entry <= 0:
         return await skip("no stop on the paper trade")
-    if day_pnl <= -DAILY_STOP_USD:
+    if day_pnl <= -_d().daily_stop_usd:
         return await skip(f"daily loss stop reached ({day_pnl:+.2f} USD today)")
     if desk_age > DESK_STALE_S:
         return await skip("the paper desk has not updated for over 20 minutes")
@@ -454,7 +544,7 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, position
     if abs(px - entry) > DRIFT_FRAC * abs(entry - stop):
         return await skip(f"price moved {abs(px - entry) / abs(entry - stop):.0%} of the risk away from the paper entry",
                           price=px)
-    by_risk = math.floor(RISK_USD / (abs(px - stop) * product.contract_value))
+    by_risk = math.floor(_d().risk_usd / (abs(px - stop) * product.contract_value))
     by_cap = math.floor(MAX_NOTIONAL_USD / (px * product.contract_value))
     contracts = min(by_risk, by_cap)
     if contracts < 1:
@@ -465,7 +555,7 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, position
 
     if mode == "shadow":
         fee = _fee(notional, product.taker_rate)
-        await db.live_delta_trades.insert_one({**base, "status": "open", "plan": plan, "contracts": contracts, "fill": px,
+        await _tc(db).insert_one({**base, "status": "open", "plan": plan, "contracts": contracts, "fill": px,
                                                "entry_fee": round(fee, 6), "opened_at": _now(), "unrealised_usd": -fee})
         busy.add(pick.product)
         return f"shadow entry: {contracts} {pick.product} at {px}"
@@ -477,7 +567,7 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, position
         return await skip("could not read the wallet")
     if w["available"] < plan["margin_usd"] * MARGIN_BUFFER:
         return await skip(f"not enough free balance (${w['available']:.2f} for ${plan['margin_usd']:.2f} of margin)")
-    await db.live_delta_trades.insert_one({**base, "status": "entering", "plan": plan, "contracts": contracts})
+    await _tc(db).insert_one({**base, "status": "entering", "plan": plan, "contracts": contracts})
     busy.add(pick.product)
     try:
         o = await D.market(product.id, contracts, _side(side), client_order_id=_cid(tid))
@@ -511,7 +601,7 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, position
             await D.cancel_stops(product.id)
         except DeltaError:
             pass
-        t = await db.live_delta_trades.find_one({"_id": tid})
+        t = await _tc(db).find_one({"_id": tid})
         ex = await _exit_from_fills(t, product, o2.get("avg_price") or None, o2.get("commission"))
         await _record_close(db, t, ex, f"bracket refused, closed at once: {exc}", product)
         return f"error: bracket refused ({exc}); closed at once"
@@ -523,22 +613,23 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, position
 
 # -- the cycle -----------------------------------------------------------------------------------------
 
-_lock = asyncio.Lock()
+_LOCKS: dict[str, asyncio.Lock] = {k: asyncio.Lock() for k in DESKS}
 
 
-async def cycle() -> dict:
+async def _cycle_one() -> dict:
+    """One pass of the current desk."""
     db = _db()
     if db is None:
         return {"error": "the paper desk's database is not configured on this server"}
-    async with _lock:
+    async with _LOCKS[_d().key]:
         st = await _state(db)
         await _set_state(db, last_cycle_at=_now())
         out: dict = {"mode": st["mode"], "managed": [], "entered": []}
-        open_rows = [t async for t in db.live_delta_trades.find({"status": {"$in": ["entering", "open", "closing"]}})]
+        open_rows = [t async for t in _tc(db).find({"status": {"$in": ["entering", "open", "closing"]}})]
         if st["mode"] == "off" and not open_rows:
             return out
         try:
-            products = await _products(db, st)
+            products = await _products(db, st, {t["product"] for t in open_rows})
         except DeltaError as exc:
             await _venue_error(db, st, f"product specs unavailable ({exc})")
             return {**out, "error": str(exc)}
@@ -566,8 +657,8 @@ async def cycle() -> dict:
             out["managed"].append(t["_id"])
         if st["mode"] == "off" or (st["mode"] == "live" and positions is None):
             return out
-        decided = {t["_id"] async for t in db.live_delta_trades.find({"_id": {"$in": list(paper)}}, {"_id": 1})}
-        still_open = [t async for t in db.live_delta_trades.find({"status": {"$in": ["entering", "open", "closing"]}},
+        decided = {t["_id"] async for t in _tc(db).find({"_id": {"$in": list(paper)}}, {"_id": 1})}
+        still_open = [t async for t in _tc(db).find({"status": {"$in": ["entering", "open", "closing"]}},
                                                                  {"product": 1, "mode": 1})]
         busy = {t["product"] for t in still_open}
         if st["mode"] == "live" and positions is not None:
@@ -582,20 +673,40 @@ async def cycle() -> dict:
                 continue
             if st["mode"] not in ("shadow", "live"):
                 break
-            res = await _enter(db, st, PICK[(p["acct"], p["mkt"])], p, products, positions if st["mode"] == "live" else None,
+            pk = _d().pick.get((p["acct"], p["mkt"]))
+            if pk is None:                      # a trade from before a re-pick: managed above, never entered again
+                continue
+            res = await _enter(db, st, pk, p, products, positions if st["mode"] == "live" else None,
                                busy, day_pnl, desk_age)
             out["entered"].append({"id": tid, "result": res})
         return out
 
 
+async def cycle(desk: str | None = None) -> dict:
+    """One pass of one desk (its report), or of every desk when none is named ({desk: report})."""
+    if desk is not None:
+        with _use(desk):
+            return await _cycle_one()
+    out = {}
+    for key in DESKS:
+        try:
+            with _use(key):
+                out[key] = await _cycle_one()
+        except Exception as exc:  # noqa: BLE001 - one desk's failure must not stop the other
+            logger.warning("[premium live %s] cycle failed", key, exc_info=True)
+            out[key] = {"error": f"cycle failed: {exc}"}
+    return out
+
+
 async def loop() -> None:
-    """Every TICK_S seconds, around the clock. Started by the premium routes' startup hook."""
+    """Every TICK_S seconds, around the clock, every desk in turn. Started by the premium routes' startup hook."""
     await asyncio.sleep(60)
     while True:
         try:
             r = await cycle()
-            if r.get("entered") or r.get("error"):
-                logger.info("[premium live] %s", r)
+            for key, rep_ in r.items():
+                if rep_.get("entered") or rep_.get("error"):
+                    logger.info("[premium live %s] %s", key, rep_)
         except Exception:  # noqa: BLE001 - the loop must outlive any one bad cycle
             logger.warning("[premium live] cycle failed", exc_info=True)
         await asyncio.sleep(TICK_S)
@@ -630,7 +741,7 @@ async def _check_pin(db, st: dict, pin: str | None) -> str | None:
     return None
 
 
-async def set_mode(mode: str, pin: str | None = None, confirm: str | None = None) -> dict:
+async def _set_mode_one(mode: str, pin: str | None = None, confirm: str | None = None) -> dict:
     db = _db()
     if db is None:
         return {"ok": False, "why": "the paper desk's database is not configured on this server"}
@@ -663,7 +774,7 @@ async def set_mode(mode: str, pin: str | None = None, confirm: str | None = None
             lev[sym] = LEVERAGE
     except DeltaError as exc:
         return {"ok": False, "why": f"Delta refused the check: {exc}"}
-    tracked = {t["product"] async for t in db.live_delta_trades.find({"mode": "live", "status": {"$in": ["entering", "open", "closing"]}},
+    tracked = {t["product"] async for t in _tc(db).find({"mode": "live", "status": {"$in": ["entering", "open", "closing"]}},
                                                                      {"product": 1})}
     foreign = [sym for sym, p in products.items() if p.id in positions and sym not in tracked]
     if foreign:
@@ -676,7 +787,7 @@ async def set_mode(mode: str, pin: str | None = None, confirm: str | None = None
     return {"ok": True, "mode": "live", "wallet": w, "leverage": lev}
 
 
-async def flatten(pin: str | None = None) -> dict:
+async def _flatten_one(pin: str | None = None) -> dict:
     """Close every open real position this desk holds, now, and switch it off."""
     db = _db()
     if db is None:
@@ -687,11 +798,27 @@ async def flatten(pin: str | None = None) -> dict:
         return {"ok": False, "why": why}
     await _set_state(db, mode="off", switched_off="flattened by the owner")
     n = 0
-    async for t in db.live_delta_trades.find({"status": {"$in": ["open", "entering"]}}):
+    async for t in _tc(db).find({"status": {"$in": ["open", "entering"]}}):
         await _set_trade(db, t["_id"], status="closing", close_reason="flattened by the owner")
         n += 1
-    r = await cycle()
+    r = await _cycle_one()
     return {"ok": True, "closing": n, "cycle": r}
+
+
+async def set_mode(mode: str, pin: str | None = None, confirm: str | None = None, desk: str = "gold") -> dict:
+    """Switch one desk (the gold desk unless named). Going live needs the PIN and the words REAL MONEY."""
+    if desk not in DESKS:
+        return {"ok": False, "why": f"unknown desk {desk!r}"}
+    with _use(desk):
+        return await _set_mode_one(mode, pin, confirm)
+
+
+async def flatten(pin: str | None = None, desk: str = "gold") -> dict:
+    """Close every open real position one desk holds (the gold desk unless named), and switch it off."""
+    if desk not in DESKS:
+        return {"ok": False, "why": f"unknown desk {desk!r}"}
+    with _use(desk):
+        return await _flatten_one(pin)
 
 
 # -- the read model ------------------------------------------------------------------------------------
@@ -703,12 +830,12 @@ def _clean(t: dict) -> dict:
     return t
 
 
-async def status() -> dict:
+async def _status_one() -> dict:
     db = _db()
     if db is None:
         return {"configured_db": False}
     st = await _state(db)
-    rows = [t async for t in db.live_delta_trades.find({})]
+    rows = [t async for t in _tc(db).find({})]
     rows.sort(key=lambda t: -(float(t.get("created_at") or 0)))
     per: dict[str, dict] = {}
     for t in rows:
@@ -722,7 +849,7 @@ async def status() -> dict:
         else:
             x["open"] += 1
     picks = []
-    for p in PICKS:
+    for p in _d().picks:
         picks.append({**asdict(p), "live": per.get(f"live|{p.acct}|{p.mkt}"), "shadow": per.get(f"shadow|{p.acct}|{p.mkt}")})
     today = {m: await _day_pnl(db, m, None) for m in ("live", "shadow")}
     totals = {}
@@ -739,9 +866,18 @@ async def status() -> dict:
         "switched_off": st.get("switched_off"), "last_error": st.get("last_error"), "last_error_at": st.get("last_error_at"),
         "errors_in_row": st.get("errors_in_row"), "last_cycle_at": st.get("last_cycle_at"), "wallet": st.get("wallet"),
         "wallet_at": st.get("wallet_at"), "products": st.get("products"),
-        "limits": {"risk_usd": RISK_USD, "daily_stop_usd": DAILY_STOP_USD, "max_notional_usd": MAX_NOTIONAL_USD,
+        "limits": {"risk_usd": _d().risk_usd, "daily_stop_usd": _d().daily_stop_usd, "max_notional_usd": MAX_NOTIONAL_USD,
                    "leverage": LEVERAGE, "max_lag_s": MAX_LAG_S, "drift_frac": DRIFT_FRAC, "tick_s": TICK_S},
-        "today": today, "totals": totals, "picked_at": PICKED_AT, "picks": picks,
+        "today": today, "totals": totals, "picked_at": _d().picked_at, "picks": picks,
+        "desk": _d().key, "title": _d().title, "desk_products": _d().products,
         "open": [_clean(t) for t in rows if t.get("status") in ("entering", "open", "closing")],
-        "recent": [_clean(t) for t in rows[:150]], "notes": list(NOTES),
+        "recent": [_clean(t) for t in rows[:150]], "notes": list(_d().notes),
     }
+
+
+async def status(desk: str = "gold") -> dict:
+    """What a desk's page reads (the gold desk unless named)."""
+    if desk not in DESKS:
+        return {"error": f"unknown desk {desk!r}"}
+    with _use(desk):
+        return await _status_one()

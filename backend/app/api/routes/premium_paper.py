@@ -5,9 +5,11 @@
   GET /api/premium-paper/accounts/{id}/trades    its trades, newest first (?limit=&offset=)
   GET /api/premium-paper/today-bars              today's finished bars from this process's memory, for the desk's cycle
 
-  GET  /api/premium-paper/live                   the Delta real-money desk on ten of these strategies (premium_live)
+  GET  /api/premium-paper/live                   the Delta real-money GOLD desk (premium_live; the original routes)
   POST /api/premium-paper/live/mode              {"mode": "off" | "shadow" | "live", "pin", "confirm"}
   POST /api/premium-paper/live/flatten           {"pin"}: close its open positions now and switch it off
+  GET  /api/premium-paper/live/desk/{desk}       any desk: gold, or crypto (the Delta Exchange Live Trading module)
+  POST /api/premium-paper/live/desk/{desk}/mode, /live/desk/{desk}/flatten   the same controls, per desk
 
 The desk itself runs in its own container (premium-paper-service), because this process sits at its memory cap; its
 records are in the box's second MongoDB (FACTORY_MONGO_URL), never on the near-quota Atlas cluster. Everything above
@@ -151,3 +153,32 @@ async def live_flatten(payload: dict = Body(...), _user: dict = Depends(get_curr
     from app.services import premium_live
     r = await premium_live.flatten(payload.get("pin"))
     return {**r, "status": await premium_live.status()}
+
+
+def _desk_or_404(desk: str) -> None:
+    from app.services import premium_live
+    if desk not in premium_live.DESKS:
+        raise HTTPException(status_code=404, detail="Not Found")
+
+
+@router.get("/live/desk/{desk}")
+async def live_desk_status(desk: str, _user: dict = Depends(get_current_user)):
+    from app.services import premium_live
+    _desk_or_404(desk)
+    return await premium_live.status(desk)
+
+
+@router.post("/live/desk/{desk}/mode")
+async def live_desk_mode(desk: str, payload: dict = Body(...), _user: dict = Depends(get_current_user)):
+    from app.services import premium_live
+    _desk_or_404(desk)
+    r = await premium_live.set_mode(str(payload.get("mode") or ""), payload.get("pin"), payload.get("confirm"), desk=desk)
+    return {**r, "status": await premium_live.status(desk)}
+
+
+@router.post("/live/desk/{desk}/flatten")
+async def live_desk_flatten(desk: str, payload: dict = Body(...), _user: dict = Depends(get_current_user)):
+    from app.services import premium_live
+    _desk_or_404(desk)
+    r = await premium_live.flatten(payload.get("pin"), desk=desk)
+    return {**r, "status": await premium_live.status(desk)}

@@ -65,6 +65,18 @@ const GROUPS: { label: string; links: { href: string; label: string; icon: React
         ),
       },
       {
+        // Directly below Premium Strategies, as asked (2026-11-14). REAL money on Delta Exchange India for the bitcoin
+        // Premium strategies the owner picked (premium_live's crypto desk). A bolt in a ring: live, not paper.
+        href: "/delta-live",
+        label: "Delta Exchange Live Trading",
+        icon: (
+          <>
+            <circle cx="12" cy="12" r="9" />
+            <path d="M13 6.5l-4.5 6.5h4l-1.5 4.5 4.5-6.5h-4l1.5-4.5z" />
+          </>
+        ),
+      },
+      {
         // Directly below Gold Desk, as asked (2026-10-12). Cash-market intraday on the indexes
         // themselves — no options or futures — so an index line between the session's open and
         // close bars, not another option or bullion mark.

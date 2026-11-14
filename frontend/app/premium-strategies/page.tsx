@@ -28,7 +28,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "crypto", label: "Crypto" },
   { id: "gold", label: "Gold" },
   { id: "global", label: "Forex & US" },
-  { id: "live", label: "Real money · Delta" },
+  { id: "live", label: "Real money · Delta gold" },
   { id: "shortlist", label: "Channel shortlist (new)" },
   { id: "websources", label: "Web sources: crypto & gold" },
   { id: "channels20", label: "20 channels" },

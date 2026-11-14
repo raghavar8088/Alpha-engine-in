@@ -53,6 +53,7 @@ MAX_ENTRIES = int(os.getenv("API_CACHE_MAX", "800"))
 NEVER_CACHE = (
     "auth", "users", "broker", "settings",
     "live-trading/angel-account",   # the real balance behind real orders
+    "premium-paper/live",           # the Delta real-money desks: mode, wallet and open positions must be current
     "fno/margin",                   # a quoted margin must not be stale
     "desk-history/fno",             # cheap already, and account-scoped
     # Server-sent events. Buffering an endless generator emits no headers and hangs the
