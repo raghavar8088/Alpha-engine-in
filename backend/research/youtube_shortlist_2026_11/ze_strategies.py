@@ -36,6 +36,8 @@ import ze_india as N  # noqa: E402
 import ze_more as X  # noqa: E402
 import ze_more2 as X2  # noqa: E402
 import ze_more3 as X3  # noqa: E402
+import ze_more4 as X4  # noqa: E402
+from yc_common import BTC_X  # noqa: E402
 
 SOURCE = "youtube_shortlist"
 STUDY = "youtube_shortlist_2026_11"
@@ -55,6 +57,11 @@ class ZE(YC):
     @property
     def channel_name(self) -> str:
         return self.chan
+
+    def exit_clock(self, market: str) -> tuple:
+        if market == "ETHUSD" and self.clock is None and not self.overnight:
+            return BTC_X                 # ether trades the UTC day as bitcoin does (the 11-channel clocks have no ether)
+        return super().exit_clock(market)
 
 
 def _r(sid, name, fn, ex, markets, tfs, limits=FREE, **kw):
@@ -255,6 +262,27 @@ _NEW = [
        X3.td12, X3.td12_x, FX + ("BTCUSD",), (30,), ONE, readiness=A),
     _r("DX-01", "Limit at 70% of a structure-breaking impulse, stop at 100%, half at 38.2% with break-even, rest at 10%",
        X3.dx01, X3.dx01_x, ("XAUUSD",) + FX, (5,), L3, readiness=A),
+    # ── fifth batch (14 Nov 2026: the owner's fourth list, crypto and gold channels; ze_more4) ──
+    _r("NK-02", "Daily gold: SMA 20 over SMA 50 and RSI (7) at 30 or below (mirror), 10-day-low stop trailed to new swing lows",
+       X4.nk02, X4.nk02_x, ("XAUUSD",), (1440,), FREE, overnight=True, readiness=A),
+    _r("RT-02", "4-hour bitcoin: close above the Bollinger Band (200, 4) over the 300-bar average, out under the (200, 0.5)",
+       X4.rt02, X4.rt02_x, ("BTCUSD",), (240,), FREE, overnight=True, readiness=A),
+    _r("TT-02", "Daily break of the highest high above the 50 EMA, a 4-hour candle combination at the broken level, 2R",
+       X4.tt02, X4.tt02_x, ("BTCUSD", "XAUUSD"), (1440, 240), FREE, overnight=True, readiness=A),
+    _r("TC-04", "5-minute EMA 100 trend, a close outside the opposite Bollinger Band (20, 1) back inside within 3 bars, 3R",
+       X4.tc04, X4.tc04_x, ("XAUUSD", "BTCUSD", "ETHUSD"), (5,), L3, readiness=A),
+    _r("BX-01", "First green Heikin Ashi candle with MFI (14) at 20 or below, out on the first red one after MFI 80 (long only)",
+       X4.bx01, X4.bx01_x, ("BTCUSD", "ETHUSD"), (15,), FREE, readiness=A),
+    _r("BX-02", "TradingView Pivot Reversal (4, 2) on 1-hour bars: stop orders at the latest pivots, stop and reverse",
+       X4.bx02, X4.bx02_x, ("BTCUSD", "ETHUSD"), (60,), FREE, overnight=True, readiness=A),
+    _r("CB-01", "1-hour swing trend, a 5-minute structure shift after a retrace to a new swing, half at 1R, rest at 2R",
+       X4.cb01, X4.cb01_x, ("BTCUSD", "ETHUSD"), (5, 60), L3, readiness=A),
+    _r("VS-02", "4-hour gold: SMA 9 over EMA 20 confirmed by the next close, 2 ATR stop trailed at EMA 20 - 1 ATR (long only)",
+       X4.vs02, X4.vs02_x, ("XAUUSD",), (240,), FREE, overnight=True, readiness=A),
+    _r("VS-03", "Gold weekend gap of 0.15% or more: a 1-hour close beyond the 6-bar box toward it, target last week's close",
+       X4.vs03, X4.vs03_x, ("XAUUSD",), (60,), FREE, overnight=True, readiness=A),
+    _r("FL-02", "Williams Alligator: the 5-minute candle clear of all three lines and engulfing, with the 1-hour EMA 50, 1R",
+       X4.fl02, X4.fl02_x, ("XAUUSD", "BTCUSD", "ETHUSD"), (5, 60), L3, readiness=A),
 ]
 
 NEW = [r.sid for r in _NEW]

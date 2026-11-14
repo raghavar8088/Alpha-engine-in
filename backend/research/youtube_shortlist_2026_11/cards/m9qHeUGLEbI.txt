@@ -1,0 +1,16 @@
+video: m9qHeUGLEbI
+topic: crypto
+summary: A Crypto Banter presenter shows her free 'Annii's Ribbon' indicator: EMAs from 2 to 100, two of them yellow, red when price is below and green when above. She trades altcoins on 15 minutes with support and resistance from the 1-hour. Wait for price to cross back above all the EMAs, then buy the first retest of a yellow EMA with a bullish candle (engulfing, hammer, railroad tracks), stop below the ribbon, target the 1-hour resistance. Fanning of the top three EMAs signals exhaustion; exit on a close back through the yellow EMAs. Flat EMAs are a no-trade zone. Her example reaches 9.5R.
+instruments: Altcoins
+timeframes: 15m (1h levels)
+style: intraday
+= CB-02 | EMA ribbon (2-100) flip, first retest of the yellow EMAs with a reversal candle, stop below the ribbon, exit on a close back through
+R timeframe E 01:27,02:50 | Entries on 15 minutes, support and resistance from the 1-hour. | "I'm going to be showing you this strategy on the 15minute time frame"
+R indicator E 04:13 | 'Annii's Ribbon': EMAs from 2 to 100, two of them yellow. | "it starts from EMA 2 and runs up to Ema 100"
+R entry E 06:25,07:05 | After price crosses back above all the EMAs (a green ribbon), buy the retest of a yellow EMA with a bullish candle. | "all I'm looking for now is some sort of retest of one of those yellow EMAs"
+R stop E 07:45 | Stop below the EMAs; target the 1-hour resistance. | "my stop loss should go below the EMAs my target would be back at the 1 hour resistance"
+R exit E 08:25,09:09 | Exhaustion when the top three EMAs fan out; exit when price closes below the yellow EMAs. | "price crosses below those EMAs in the case of a long position then you want to exit that trade"
+R no_trade E 16:18 | Flat EMAs are a no-trade zone. | "when the EMAs are flat we're not in a trend"
+T with_assumptions | the ribbon's exact lengths and which EMAs are yellow are not given
+D BN-01 | the EMA-stack trend with a retest of the middle EMAs on a reversal candle, on 15-minute bitcoin, is already coded (BN-01; SB-01 in the library)
+C r_multiple | 12:45 | 6.6R rising to 9.5R on the example | one 15-minute example | "we're now looking at a 9.5 to1 risk reward"

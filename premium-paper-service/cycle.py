@@ -30,6 +30,7 @@ from settings import YC3_START_DATE, YC3_START_T  # noqa: E402
 from settings import YC3B_START_DATE, YC3B_START_T  # noqa: E402
 from settings import YC3C_START_DATE, YC3C_START_T  # noqa: E402
 from settings import YC3D_START_DATE, YC3D_START_T  # noqa: E402
+from settings import YC3E_START_DATE, YC3E_START_T  # noqa: E402
 
 log = logging.getLogger("premium.cycle")
 INDEX_WARM_DAYS, GLOBAL_WARM_DAYS = 95, 45
@@ -54,6 +55,8 @@ def _is_yc(a) -> bool:
 
 def _yc_start(a) -> tuple[int, date]:
     if a.source == getattr(C, "YC3", None):
+        if a.id in getattr(C, "YC3E_IDS", ()):
+            return YC3E_START_T, YC3E_START_DATE
         if a.id in getattr(C, "YC3D_IDS", ()):
             return YC3D_START_T, YC3D_START_DATE
         if a.id in getattr(C, "YC3C_IDS", ()):

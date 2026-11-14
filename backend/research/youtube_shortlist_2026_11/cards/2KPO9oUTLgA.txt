@@ -1,0 +1,13 @@
+video: 2KPO9oUTLgA
+topic: crypto
+summary: Krown shows CareTaker's indicator that plots moving-average crosses, focusing on two simple trend strategies for bitcoin. Short term: the 10 SMA above the 21 EMA keeps you long, and the cross back says the trend is under pressure, time to get defensive or out. Mid term: the 21 EMA against the 30 SMA. Long term: the 50/200 golden and death crosses. They work in trending markets; in ranges he scalps instead. Any timeframe works, higher ones better.
+instruments: Bitcoin
+timeframes: Any (daily shown)
+style: swing
+= KW-03 | CareTaker crossovers: the 10 SMA over the 21 EMA keeps you long (21 EMA / 30 SMA mid term, 50/200 long term), out on the cross back
+R indicator E 02:13,03:36 | The 21 EMA with the 10 SMA (short term) and the 21 EMA with the 30 SMA (mid term). | "the 21 ema and the 10 simple and the 21 ema and the 30 simple"
+R entry E 04:58 | The 10 SMA trending above the 21 EMA is the long entry. | "you have the 10 simple trending above the 21x benchmark which in this case that is your long entry"
+R exit E 02:55,05:41 | The cross back says the trend is under pressure: get defensive or out. | "it tells you when to get the [ __ ] out"
+R no_trade E 06:23 | In ranges he scalps instead of trading the crosses. | "i want to be trading ranges and doing more or less uh scalping strategies in those sorts of times"
+T with_assumptions | applicable to any timeframe; the exits for the longer crosses are left open
+D TB-04 | a daily fast/slow moving-average cross held long until the cross back is already coded (TB-04, EMA 9/20; PR-09 and KS-02 are intraday versions); only the lengths differ

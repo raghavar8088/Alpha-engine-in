@@ -1,0 +1,17 @@
+video: Q9AafRH2BWg
+topic: crypto
+summary: VasilyTrader's gold gap strategy. Gold's gaps are mostly weekend opening gaps, priced from news while the market is closed, and most get filled back to the gap opening level (the last close before the weekend). On the 1-hour or 4-hour chart, after a gap down: wait for a test of a demand zone, then a consolidation under a minor resistance. Buy the candle that closes above that resistance, or set a limit on its retest. The stop goes below the consolidation's low and the target a couple of pips below the gap opening level. Gap ups mirror this below a minor support. He needs at least 1.1R and shows a live trade that filled overnight.
+instruments: Gold (XAUUSD)
+timeframes: 1h, 4h
+style: intraday
+= VS-03 | Gold weekend gap: after the gap, a 1-hour breakout of the consolidation toward the gap, stop beyond the consolidation, target the gap fill
+R setup E 00:00,01:28 | Gold's gaps are mostly weekend opening gaps, and most get filled back to the gap opening level. | "Most of the gaps are filled"
+R timeframe E 02:14 | Use the 1-hour or 4-hour chart. | "I recommend using this model on an hourly or 4hour time frames"
+R entry E 02:14,02:54 | After a gap down, wait for a demand-zone test and a consolidation under a minor resistance; buy the candle that closes above it (or a limit on its retest). | "Your signal that gold is ready to fill a gap down will be a bullish breakout of this resistance and a candle c"
+R stop E 02:54 | Stop below the consolidation's low; target a couple of pips below the gap opening level. | "Set your stop loss below the lows of a consolidation"
+R entry E 02:54,03:38 | Gap up: the mirror, below a minor support. | "The same model and strategy will be used for trading gap up"
+R market A - | Desk version: Delta XAUTUSD (gold) on 1-hour candles. The gap is the week's first open against the previous week's last close, at least 0.15%. | ""
+R entry A - | From the week's first hour until the gap fills: for a gap down, a 1-hour close above the highest high of the previous 6 hourly bars, before any bar has reached the previous close, enters at the next open (for a gap up, a close below their lowest low). First signal only, within the week's first 3 trading days. | ""
+R stop A - | Stop 0.05% beyond the opposite extreme of those 6 bars; target 0.02% short of the previous week's close; held until the target or stop (overnight). | ""
+T with_assumptions | the demand zone, the consolidation and 'a couple of pips' are read by eye; the 6-bar box, the 0.15% minimum gap and the 3-day window are ours (A)
+C r_multiple | 07:14 | at least 1.1R per trade (his minimum) | his gold gap trades | "I need at least 1.1 reward to risk ratio"

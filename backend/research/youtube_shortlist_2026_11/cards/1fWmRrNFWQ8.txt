@@ -1,0 +1,14 @@
+video: 1fWmRrNFWQ8
+topic: forex_us
+summary: A Pepperstone webinar (FX Evolution) on scalping with the MACD and the stochastic. First recognise the trend on the 4-hour (ideally the daily too): price clearly above or below the 200 moving average, with higher highs and lows (or lower). Then, on the 15-minute, take the MACD signal-line cross out of the histogram in the trend's direction after a pullback toward the 200 (or the 20/50 EMAs). Stops go beyond the recent highs or lows, sized from the last candle's range. Targets are higher-timeframe support or resistance, about 3:1 in the example. The stochastic leaving overbought or oversold is an alternative trigger, and a points checklist (at least 75) gates trades. The London open is the best session, Asia the worst.
+instruments: Forex pairs (NZD/USD, GBP/USD)
+timeframes: 4h trend, 15m entries
+style: scalping
+= PP-01 | 4-hour 200 MA trend, 15-minute pullback and MACD signal-line exit from the histogram in the trend's direction, target higher-timeframe levels
+R filter E 05:01,06:24 | Trade with the 4-hour (ideally daily) trend: price above or below the 200 moving average with higher highs and lows. | "4 hour is the absolute minimum"
+R entry E 13:22,14:06 | On 15 minutes, enter when the MACD signal line leaves the histogram in the trend's direction after a pullback. | "if it's exiting the histogram from below like it is in F and also in D that would be your buy signal"
+R stop E 16:58,23:30 | Stop beyond the recent highs (a market-adaptive distance from the last candle's range). | "you really should be of course putting your stop-loss above the highs"
+R target E 24:53,25:34 | Take profit at higher-timeframe support or resistance (about 3:1 in the example). | "these are the kind of levels that you'd be wanting to set potential take profits for"
+R session E 28:27 | The London open is the best time; Asia the worst. | "there's no question in my mind that london open is the best trading time"
+T with_assumptions | 'a decent amount' above the 200 and the points checklist are judged by eye
+D RU-01 | a MACD cross in the direction of the 200-period trend after a pullback is already coded (RU-01; RU-06 adds a zero-lag MACD)

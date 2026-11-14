@@ -1,0 +1,14 @@
+video: PUMBSCzzST0
+topic: crypto
+summary: VasilyTrader's gold day-trading model needs a key level and two moving averages. Map the important daily structures (horizontal levels, trend lines) first. Once price tests one, look on the 30-minute chart for the SMA 5 crossing the EMA 9 in the expected direction. Enter from the closest minor structure (a retest). The stop goes beyond the key daily structure (wide on purpose, because crosses give false signals), and the target sits just in front of the closest strong 30-minute resistance (support for shorts).
+instruments: Gold (XAUUSD)
+timeframes: 1d levels, 30m entries
+style: intraday
+= VS-01 | Gold: test of a daily key level, then a 30-minute SMA 5 / EMA 9 cross, entry at the nearest minor structure, stop beyond the key level
+R setup E 00:02,01:24 | Start on the daily chart: mark the key structures (horizontal levels, trend lines). | "your analysis always starts with a daily"
+R entry E 02:05,02:49 | After a key level is tested, the 30-minute SMA 5 crossing the EMA 9 in the expected direction is the signal. | "your bullish signal will be the crossover of two moving averages"
+R entry E 03:31 | Enter from the closest minor structure (a retest). | "I strictly recommend to treat it from the closest minor structure"
+R stop E 03:31,04:18 | Stop beyond the key structure (wide, structure-based). | "your stop loss should be below the key structure from where you are treating"
+R target E 04:18 | Target just in front of the closest strong 30-minute resistance. | "identify the closest strong resistance"
+T with_assumptions | the key structures are drawn by eye
+D TD-01 | a moving-average cross after a tested level, traded with the trend, is already coded (the 20-channel study's TD-01, the 9/20 EMA cross at a tested level)

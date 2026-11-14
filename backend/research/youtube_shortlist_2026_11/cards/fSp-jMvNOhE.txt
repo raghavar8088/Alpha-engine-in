@@ -1,0 +1,14 @@
+video: fSp-jMvNOhE
+topic: crypto
+summary: Forex Trading Lions' five-minute gold scalp. Add a 20 and a 50 moving average. Read the weekly, daily and 4-hour candles for the bias: below the averages and breaking support means bearish. On the 5-minute, wait for a structure break below both averages and a bearish engulfing candle off them, then sell. The stop is 750 ticks and the target 1,500 (2:1) toward the 4-hour support, closing half at the first milestone and moving the stop to entry. The RSI above 50 hinted at more room to fall in the example.
+instruments: Gold (XAUUSD)
+timeframes: 1w-4h bias, 5m entries
+style: scalping
+= FL-01 | Gold five-minute: higher-timeframe bias from the 20/50 averages, a bearish engulfing candle off the averages after a structure break, 2:1
+R indicator E 00:02 | Two moving averages, 20 and 50. | "make sure that the fast moving average setting is 20 and the second moving average is 50"
+R filter E 00:46,01:26 | Weekly, daily and 4-hour candles below the averages and breaking support set a bearish bias. | "we see a four hour break on the 50 moving average"
+R entry E 02:57 | On 5 minutes, a structure break below both averages and a bearish engulfing candle off them: sell. | "we recently got a bearish engulfing Candlestick of the two moving averages"
+R stop E 03:42 | A 750-tick stop and a 1,500-tick target (2:1) toward the 4-hour support. | "this is a two to one risk to reward ratio"
+R management E 05:08 | Close half at the first milestone and move the stop to the entry. | "you should close 50 of your lot size and then maybe move your stop loss to entry"
+T with_assumptions | the higher-timeframe structure is read by eye
+D YT-16 | a pullback to the moving averages with an engulfing trigger at 1:2 is already coded (YT-16; BN-01 on bitcoin)

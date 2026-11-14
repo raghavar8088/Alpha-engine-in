@@ -27,6 +27,7 @@ from settings import YC3_START_T  # noqa: E402
 from settings import YC3B_START_T  # noqa: E402
 from settings import YC3C_START_T  # noqa: E402
 from settings import YC3D_START_T  # noqa: E402
+from settings import YC3E_START_T  # noqa: E402
 
 log = logging.getLogger("premium.segments")
 
@@ -166,6 +167,8 @@ def feeds_now(group: str, info: dict) -> dict:
 
 def _start_of(mk: str, acct=None) -> datetime:
     if acct is not None and acct.source == getattr(C, "YC3", None):
+        if acct.id in getattr(C, "YC3E_IDS", ()):
+            return datetime.fromtimestamp(YC3E_START_T, timezone.utc)
         if acct.id in getattr(C, "YC3D_IDS", ()):
             return datetime.fromtimestamp(YC3D_START_T, timezone.utc)
         if acct.id in getattr(C, "YC3C_IDS", ()):

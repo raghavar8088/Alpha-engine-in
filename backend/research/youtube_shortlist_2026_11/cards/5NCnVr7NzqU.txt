@@ -1,0 +1,12 @@
+video: 5NCnVr7NzqU
+topic: crypto
+summary: Krown studies every vertical bitcoin run since 2011 (1,600 backtested versions, declustered) to test the common plan of waiting for a 2-15% dip before buying. Shallow dips fill about half the time, saving a few percent; when they never fill, the median chase is about 23.5%. Dips of 10% or more fill only 17-28% of the time, and most fills come within about 48 hours, so waiting for the dip is really a 48-hour plan. He adds that bitcoin's weekly candles rarely stay disconnected from the weekly 5 EMA for more than two closes without a retest, and gives his own levels and cycle targets.
+instruments: Bitcoin
+timeframes: 1d, 1w
+style: positional
+= KW-02 | Waiting for a bitcoin pullback after a vertical run: 1,600 backtested versions say it usually costs more than it saves (study)
+R setup E 01:29,02:50 | After a vertical run, a 2-15% dip below the close fills about half the time; when it never fills, the median chase is about 23.5%. | "the median price you had to chase was was up about 23 and 1/2%"
+R setup E 05:39 | Dips of 10% or more fill only 17-28% of the time. | "If you want the big dip, the one that's, you know, 10% or more, you're talking about something that fills like less than 28% of the time"
+R setup E 12:37,13:27 | The weekly 5 EMA rarely stays disconnected for more than two closes without a retest. | "extremely unlikely to see it disconnect for more than two closures without an official retest"
+T concept_only | a study of whether to wait for a dip, not an entry rule; the weekly 5 EMA retest needs weekly history the desk does not keep
+C other | 02:50 | a median chase of about 23.5% when the dip never filled | bitcoin's vertical runs since 2011 | "the median price you had to chase was was up about 23 and 1/2%"

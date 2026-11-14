@@ -1,0 +1,11 @@
+video: M-wrcdlznYY
+topic: crypto
+summary: Tyler S's beginner guide argues that a trader can be profitable winning only 20% of trades if each trade risks little and targets much. One bitcoin example: an ascending triangle bought on the breakout, with the stop under the previous low and the target at overhead resistance (about 7.6:1). A shorter day trade on the same structure follows, then moving the stop up as the trade works. Exchange links and demo accounts close the video.
+instruments: Bitcoin
+timeframes: Weekly to intraday
+style: mixed
+= TX-01 | Risk-to-reward first: a 20% win rate can pay; an ascending-triangle breakout example (beginner guide)
+R setup E 00:01,00:45 | With much higher reward than risk, even a 20% win rate can be profitable. | "If I told you that you could be profitable while only winning 20% of your trades"
+R entry E 02:07,02:49 | Example: an ascending-triangle breakout, the stop under the previous low, the target at resistance. | "The risk to reward of this is actually about 7.6 to 1"
+R management E 04:57,05:39 | Move the stop up as the trade works. | "you can then adjust your stop loss"
+T concept_only | a beginner's guide to risk and reward with one illustrative setup; no repeatable rule

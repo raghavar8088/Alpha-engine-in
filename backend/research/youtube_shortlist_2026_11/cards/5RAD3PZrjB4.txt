@@ -1,0 +1,16 @@
+video: 5RAD3PZrjB4
+topic: crypto
+summary: Chart Champions' 2020 range strategy for crypto and forex rests on three questions: is support or resistance clear, is there confluence, and is price action in your favour? Draw a 4-hour (or daily) level that held several times and check that their Fibonacci 'CC' zone lines up with it. On the lower timeframe (15 or 5 minutes, or 1-4 hours), short a shooting star or bearish engulfing candle at resistance, or buy a hammer or bullish engulfing at support. No pattern means no trade. The stop goes beyond the trigger candle, and the trade always closes at the range's other side, the Fibonacci's zero point. Examples on bitcoin and ether show 1:20 and 1:25.
+instruments: Bitcoin, Ether, forex pairs
+timeframes: 4h / 1d levels, 5m-4h triggers
+style: mixed
+= CH-05 | 4-hour level with Fibonacci 'CC' confluence, engulfing or shooting star (hammer) on the lower timeframe, target the Fibonacci's zero point
+R setup E 00:49 | Three questions: clear support and resistance, confluence at the level, price action in favour. | "can i clearly see my support and resistance levels number two do i have confluence at this level"
+R setup E 01:33 | A 4-hour level that acted as resistance (support) several times, with the Fibonacci 'CC' zone next to it. | "this four-hour level acted as resistance multiple times so we draw the resistance level then we look for confluence"
+R entry E 01:33,05:18 | On the lower timeframe, short a shooting star or bearish engulfing at the level (long a hammer or bullish engulfing); no pattern, no trade. | "when we want to take a short we always look for a shooting star or a bearish engulfing candle formation"
+R stop E 02:16 | Stop beyond the trigger candle. | "we put our stop loss above this candle's high"
+R target E 03:02 | Close at the range's other side, the Fibonacci's zero point. | "we always close the trade at our support because no trader can know exactly"
+T with_assumptions | the 'CC' Fibonacci zone is their own level and is not defined in the video
+D CP-03 | buying support and selling resistance inside a range with a candle trigger and the opposite extreme as the target is the crypto playlist's range ping-pong (CP-03)
+C r_multiple | 03:02 | 1:20 and 1:25 on the examples | bitcoin and ether examples | "we risked one to make 20 times more"
+U Which retracement levels make the 'CC' Fibonacci zone?

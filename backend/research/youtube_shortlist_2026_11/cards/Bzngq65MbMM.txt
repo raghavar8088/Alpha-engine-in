@@ -1,0 +1,17 @@
+video: Bzngq65MbMM
+topic: crypto
+summary: VasilyTrader's simple gold trend strategy uses two default indicators on the 4-hour chart. Buy when the SMA 9 crosses above the EMA 20, confirmed only if the next 4-hour candle closes with the SMA still above; enter right after that close. The stop goes 2 ATR (of the last 4-hour candle) below the entry. There is no fixed target: as the EMA 20 rises, the stop trails at the EMA minus 1 ATR. His example made more than 3,000 pips before the trailing stop closed it. He shows bullish trades only.
+instruments: Gold (XAUUSD)
+timeframes: 4h
+style: swing
+= VS-02 | Gold 4-hour SMA 9 crossing the EMA 20, confirmed by the next close, 2 ATR stop, trailed at the EMA minus 1 ATR (long only)
+R indicator E 00:44 | A simple moving average of 9 and an exponential moving average of 20. | "It should have nine lengths. and our exponential moving average will have 20 lengths"
+R entry E 00:44,01:30 | Buy when the SMA 9 crosses above the EMA 20 on the 4-hour chart. | "We will strictly look for such a crossover on a 4hour time frame"
+R filter E 02:10,02:51 | The cross counts only if the next 4-hour candle closes with the SMA still above; buy right after that close. | "We will open our buy position immediately after this 4hour candle closes"
+R stop E 02:51,03:32 | Stop 2 ATR (of the last 4-hour candle) below the entry. | "Your safe stop loss will be 2 ATR from entry level"
+R exit E 03:32,04:14 | No fixed target: trail the stop to the EMA minus 1 ATR while the EMA rises. | "We take our one ATR and we trail our stop loss to that level"
+R market A - | Desk version: Delta XAUTUSD (gold) on 4-hour candles; ATR(14); long only, as taught. | ""
+R entry A - | The cross happens at bar j (SMA 9 above the EMA 20, not above at j-1). It is confirmed when the SMA 9 is still above at j+1, and the buy is at the open after j+1 closes. | ""
+R stop A - | The initial stop is 2 x ATR(14) of the confirmation bar below the entry. After each 4-hour close, the stop moves up to the EMA 20 minus 1 x ATR(14) when that is higher. Held overnight. | ""
+T with_assumptions | the ATR length and the exact trail update are ours (A); he shows bullish trades only
+C other | 04:56 | more than 3,000 pips on one signal | one gold 4-hour example | "generated more than 3,000 pips before the trade was closed on a stop-loss"

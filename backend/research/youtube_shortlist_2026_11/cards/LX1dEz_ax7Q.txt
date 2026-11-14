@@ -1,0 +1,16 @@
+video: LX1dEz_ax7Q
+topic: crypto
+summary: Rayner Teo shares a Bollinger Band trend-following system for US stocks (credited to other traders), said to have made 3,227% from 1995 to 2021. Trade only while the Russell 1000 is above its 300-day moving average. Buy when a Russell 1000 stock closes above its upper Bollinger Band (200 periods, 4 standard deviations), and sell at the next open after a close below the lower band (200 periods, 0.5 standard deviations). Each position gets 10% of capital, at most ten at once, with setups ranked by their 300-day rate of change. Results: 13.86% a year, a 56.31% win rate, an average win of 32.6% against an average loss of 10%, and a 38% maximum drawdown (buy and hold about 55%).
+instruments: Russell 1000 stocks
+timeframes: 1d
+style: positional
+= RT-02 | A close above the Bollinger Band (200, 4) in a bull trend, out on a close below the Bollinger Band (200, 0.5) (long only)
+R filter E 02:12 | Trade only when the market (the Russell 1000) is above its 300-day moving average. | "we want to make sure that the Russell 1000 is above the 300 day moving average"
+R entry E 02:54,07:55 | Buy when the price closes above the upper Bollinger Band (200 periods, 4 standard deviations). | "we are using the 200 period Ballinger B Ballinger band settings and we're using four standard deviation"
+R exit E 03:39,10:05 | Sell at the next open after a close below the lower Bollinger Band (200 periods, 0.5 standard deviations). | "we will sell the stock right when the stock price closes below the lower Bing b"
+R sizing E 05:08,06:29 | 10% of capital per stock, at most ten; rank the setups by their 300-day rate of change. | "10% means right we only allocate 10% of our Capital to one stock"
+R market A - | Desk version: Delta BTCUSD on 4-hour bars, with the same 200-bar bands. Bitcoin above its own 300-bar average replaces the Russell 1000 filter, because 300 daily bars would need more history than the desk keeps. Long only, held overnight. | ""
+R stop A - | A protective stop at the signal bar's lower band (200, 0.5), so the book can size. The 10% slices and the ranking are not used (one market). | ""
+T with_assumptions | US stocks become bitcoin on 4-hour bars (A); the market filter becomes the coin's own 300-bar average (A)
+C return_pct | 11:29 | 13.86% a year; win rate 56.31%; average win 32.6%, average loss 10% | Russell 1000 stocks, 1995-2021 | "return about 13.86% I think beating the S&P 500"
+C other | 12:10 | maximum drawdown 38% (buy and hold 55-56%) | 1995-2021 | "your draw down was uh 38%"

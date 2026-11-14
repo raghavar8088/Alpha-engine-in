@@ -1,0 +1,16 @@
+video: CGdiSXF7FS8
+topic: crypto
+summary: Bitcoin Trading Challenge's MFI and Heikin Ashi scalping setup for bitcoin. Wait for the Money Flow Index to be oversold, then buy the first green Heikin Ashi candle. Skip a buy if MFI was not oversold when the first green candle printed, or if many green candles had already printed when MFI turned oversold. Aggressive exit: MFI overbought (above 80) and the first red Heikin Ashi candle. Conservative exit: the first red Heikin Ashi candle. No stop and no timeframe are stated.
+instruments: Bitcoin
+timeframes: Not stated (intraday charts)
+style: scalping
+= BX-01 | Buy the first green Heikin Ashi candle while MFI is oversold, sell after MFI is overbought and a red Heikin Ashi candle prints (long only)
+R indicator E 00:01 | The Money Flow Index and Heikin Ashi candles. | "we will be looking at mfi and hiachi candlesticks for profitable trading"
+R entry E 00:01,00:45 | Wait for MFI to be oversold, then buy the first green Heikin Ashi candle. | "you need to wait until you see one green hinachi Candlestick"
+R filter E 01:25,02:06 | No buy if MFI is not oversold at the first green candle, or if many green candles printed before MFI turned oversold. | "you probably wouldn't buy this because mfi is not oversold when the first ja Japanese Candlestick prints green"
+R exit E 02:47,03:33 | Aggressive exit: MFI overbought (above 80), then the first red Heikin Ashi candle. | "you want to wait till mfi is overbought which means it's white in this area because it's above 80"
+R exit E 04:15 | Conservative exit: the first red Heikin Ashi candle. | "simply get out when you see the first red printed hinachi bar"
+R market A - | Desk version: Delta BTCUSD and ETHUSD on 15-minute candles (the video's timeframe is not stated). MFI(14) uses real volume; oversold is below 20 and overbought above 80. Long only. | ""
+R entry A - | The first green Heikin Ashi candle after at least two red ones, with MFI(14) at or below 20 on that bar or the one before: enter at the next open. | ""
+R stop A - | The aggressive exit: after MFI(14) reaches 80, the first red Heikin Ashi candle exits at the next open. A 2% stop from the fill exists only so the book can size. Out at the day's end. | ""
+T with_assumptions | the timeframe, the stop and the oversold / overbought levels are ours (A)

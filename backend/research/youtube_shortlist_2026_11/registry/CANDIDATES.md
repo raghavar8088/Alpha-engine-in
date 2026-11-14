@@ -202,7 +202,7 @@ videos 3896, P1 26 (1%), candidates 64, cov 0
 -  6.76 | sCfIJthvhZY | 30m | 5800 | 2021-11-13 | Gap Downs For Buying
 -  6.76 | Y92A2JzbS14 | 17m | 5800 | 2021-11-13 | Gap Ups For Selling
 
-## krown - Krown / Eric Krown (Krown)  [crypto] 
+## krown - Krown / Eric Krown (Krown) * [crypto] 
 videos 3042, P1 118 (4%), candidates 289, cov 0
 -  8.87 | AUK9BQg6XkU | 34m | 7400 | 2026-10-13 | Market Manipulation Is Real: The $920 Million Trick Explained
 -  8.78 | ypHtDVw18sU | 7m | 6000 | 2025-11-13 | Quantum Wave Bands - 30m & Hourly Crypto Scalp Trading Indicator
@@ -312,7 +312,7 @@ videos 2096, P1 279 (13%), candidates 296, cov 0
 -  9.75 | ZU0Gxf2PHVo | 98m | 556 | 2025-11-13 | 🔴LIVE Proven Scalping Strategy for NAS100 (NQ Nasdaq) & ES SP500 Futures - NY SESSION
 -  9.69 | 6JSIcTTZ-E4 | 15m | 4900 | 2026-07-13 | How I Took Prop Firm Payouts with 86% Win Rate VWAP Trading Strategy
 
-## tradernick - TraderNick (TraderNick)  [fx] earlier: channels20-skipped
+## tradernick - TraderNick (TraderNick) * [fx] earlier: channels20-skipped
 videos 2583, P1 500 (19%), candidates 545, cov 0
 -  9.30 | 6EOkciqhO9g | 16m | 20000 | 2021-11-09 | 🚨US30 Forex Trading Strategy: Scalp the New York Session like a PRO!
 -  8.09 | P1pdBtRk6_M | 22m | 122000 | 2019-11-09 | FREE Price Action Mastery Course: DayTrading Momentum! 📈💰
@@ -1308,4 +1308,334 @@ videos 377, P1 29 (8%), candidates 28, cov 0
 -  6.28 | pV-CRawh6-A | 97m | 19000 | 2020-11-13 | Market Profile Intraday Trading Strategies
 -  6.21 | gOOVPa84eJk | 36m | 1600 | 2022-11-13 | Creating Hull of RSI Based Trend Trading System using Amibroker
 -  6.05 | Nbqte4cUbbo | 37m | 1100 | 2024-11-13 | Amibroker Scanner/Exploration Based Equity Intraday Strategy Automation using OpenAlgo
+
+## bitcointradingchallenge - Bitcoin Trading Challenge (Bitcoin Trading Challenge) * [crypto] 
+videos 614, P1 26 (4%), candidates 42, cov 0
+-  9.79 | CGdiSXF7FS8 | 6m | 62000 | 2017-11-14 | Simple MFI Scalping Strategy
+-  8.73 | _Yu9gQ5eLNk | 20m | 5300 | 2025-11-14 | A New Way to Scalp (I make 3 trades in 10 minutes)
+-  8.02 | XLz0xUkD2LE | 12m | 105000 | 2018-11-14 | Simple Cryptocurrency Scalping Strategy
+-  7.59 | gG1iCf1EAig | 24m | 39000 | 2019-11-14 | Scalping Bitmex Liquidations
+-  7.42 | gjxNrmRW5Lw | 18m | 26000 | 2019-11-14 | Scalping using an Advanced Cryptoscanner
+-  7.42 | ICwIDKNeftQ | 7m | 26000 | 2017-11-14 | EMA Crossover Strategy
+-  7.40 | -62aiH5M7m0 | 13m | 2500 | 2024-11-14 | Earn 38.25% APR Passively while Scalping!
+-  7.40 | dMSeQvGa_do | 25m | 25000 | 2019-11-14 | Advanced Order Flow #4: Scalping the Heatmap
+
+## bitcoinhyper - Bitcoin Hyper (BitcoinHyper) * [crypto] 
+videos 546, P1 5 (1%), candidates 0, cov 0
+
+## morecryptoonline - More Crypto Online (More Crypto Online)  [crypto] 
+videos 2557, P1 13 (1%), candidates 99, cov 0
+-  8.11 | D_hf6Rny5Ns | 17m | 13000 | 2026-05-14 | Bitcoin CME Gap Trap: What Happens Next?
+-  6.80 | eq4naN6Z70k | 9m | 6300 | 2026-06-14 | SUI to 65 Cents? Fibonacci Support Levels Explained
+-  6.26 | tMzkyz1nJE0 | 10m | 18000 | 2026-10-14 | Why the Breakout Above $83,000 Could Be Imminent
+-  6.26 | ijYVK3lx58o | 14m | 18000 | 2026-09-14 | Is the Bitcoin Breakout Imminent? The $93,000 Target
+-  6.26 | T2tkGqEsokU | 16m | 18000 | 2026-09-14 | Is Bitcoin Ready for a Breakout?
+-  6.23 | m4bl7C0vphc | 9m | 17000 | 2026-10-14 | Ethereum (ETH) Starts a Pullback: How Deep Will It Go?
+-  6.20 | wEAuvpDcxiw | 15m | 16000 | 2026-10-31 | Bitcoin Breaks Out: Real Rally or Bull Trap?
+-  6.20 | w8Bpkq9UABo | 12m | 16000 | 2026-10-14 | Bitcoin: Is a Pullback Below $70,000 Still Realistic?
+
+## cryptoanup - Crypto Anup (Crypto Anup)  [crypto] 
+videos 1856, P1 12 (1%), candidates 206, cov 0
+-  7.11 | J_tY5ntJ2YA | 8m | 13000 | 2021-11-14 | OMG!!!!! FINAL BITCOIN RETEST BEFORE THIS PARABOLIC MOVE!!!!!!!!!!!!
+-  7.08 | rh0kopTv60E | 9m | 12000 | 2021-11-14 | THIS IS STOPPING BITCOIN FROM A BREAKOUT!!!!!! [break this level and we go parabolic!!!!!!!]
+-  5.98 | k3r5x87FQuI | 11m | 9600 | 2024-11-14 | ❌ BITCOIN: **BIGGEST TRAP** IN HISTORY!!!!!!!! ❌ [watch NOWWW!!!!!!!!]
+-  5.94 | hR0xitJ9hqU | 12m | 8700 | 2024-11-14 | ❌ BITCOIN: DON'T FALL FOR THIS TRAP!!!!!!! ❌  [don't ignore this chart!!!!!]
+-  5.90 | ZvFsll8RvD4 | 10m | 7900 | 2024-11-14 | 🚨 IT'S URGENT!!!! BITCOIN MUST DO THIS TO AVOID THE TRAP!!!!!!!
+-  5.90 | tVzlbhYnZ4Q | 14m | 7900 | 2020-11-14 | EMERGENCY UPDATE!!! BITCOIN GOING TO BACKTEST BULL MARKET TREND LINE!!! MUST SEE!!!
+-  5.88 | JrQNXfWZzbc | 16m | 7600 | 2024-11-14 | ❌ BIGGEST TRAP IN HISTORY OF BITCOIN!!!!!!!????? ❌ [99% will get this wrong!!!!!!]
+-  5.83 | emaI8hkbbUA | 9m | 6700 | 2024-11-14 | BITCOIN: IT'S A BEAR TRAP!!!!!!!!??? YOU'VE BEEN WARNED!!!!!!
+
+## cryptoface - Crypto Face (Crypto Face)  [crypto] 
+videos 1813, P1 44 (2%), candidates 57, cov 0
+-  8.18 | JseU7eWG0j8 | 100m | 15000 | 2025-11-14 | LIVE - $3,000,000 Million Dollar Trade - Pump Scalping
+-  8.11 | SdjaKF4owHQ | 104m | 13000 | 2024-11-14 | LIVE  -  $1,000,000 Million Dollar Bitcoin DUMP Scalp Hunting - LIVE
+-  7.52 | stpDOpLKP1s | 16m | 33000 | 2022-11-14 | Life - I SUCK AT TRADING 13k MINI SCALP TRADE LIVE
+-  7.46 | 8jWJw5mmAog | 55m | 29000 | 2022-11-14 | LIVE - Everyone Is Wrong - $4,000,000 Bitcoin Trade Short Scalping
+-  7.42 | gydLXH2m5gM | 115m | 26000 | 2021-11-14 | LIVE -  HIGH RISK $5 Million Bitcoin Ethereum DONT DO THIS AT HOME SCALP TRADING $300k LOCKED IN
+-  6.90 | 6UN_dVJDzk0 | 96m | 8000 | 2021-11-14 | LIVE - Saturday Night 5 Mill Scalp Trading HIGH RISK HIGH DANGER HIGH REWARD
+-  6.80 | DwD8YAFdhHU | 38m | 6300 | 2021-11-14 | LIVE - Late Night 8 Million Dollar Scalping Bitcoin HIGH RISK BIG GAINS
+-  6.67 | qTGZeDBuETQ | 54m | 4700 | 2019-11-14 | 800k Long Live Scalp Setup? Market Cipher Action, Bybit Bitmex
+
+## tradingparrot - The Trading Parrot (The Trading Parrot)  [crypto] 
+videos 1509, P1 64 (4%), candidates 265, cov 0
+-  9.51 | l2C9txuGfPE | 37m | 3200 | 2025-11-14 | Bitcoin Above 120K: Critical RSI Levels & CME Gap Analysis
+-  8.98 | mCViGSb8HPc | 9m | 944 | 2025-11-14 | BTC Market Open Update Technical Analysis: CME Gap Gone
+-  7.94 | ap-bmxEqV2Q | 112m | 8800 | 2026-10-14 | Bitcoin BREAKOUT Live: Short Squeeze Rips BTC to $85K — Is $100K Next?
+-  7.65 | mDTFZVtClac | 21m | 4500 | 2024-11-14 | How To Use CPR To Trade Bitcoin - Central Pivot Range In TradingView - Top Leading Indicator
+-  7.62 | 5zMLy1wjbVs | 24m | 4200 | 2026-02-14 | $9K CME Gap - Will Bitcoin Fill It Fast?
+-  7.60 | gTdLEQZXEms | 34m | 4000 | 2025-11-14 | Crypto Summit Pump: CME Gap Rally Spoiler? - Bitcoin Today
+-  7.59 | wjuiZzdp74w | 29m | 3900 | 2026-07-14 | BTC Scalp Long Nails $64K! Weekend Breakout to $70K or Doomed to New Lows?
+-  7.59 | SzbHOXk7Jpk | 12m | 3900 | 2025-11-14 | Bitcoin 80K Reclaimed? CME Gap Leftover - Bitcoin Today
+
+## cryptocrewuniversity - Crypto Crew University (Crypto Crew University)  [crypto] 
+videos 1083, P1 33 (3%), candidates 53, cov 0
+-  7.58 | KDcShMF7HCM | 11m | 38000 | 2024-11-14 | BEGINNER BITCOIN GUIDE: HOW TO MAKE MONEY IN 2024 USING ICHIMOKU (EASY STEP-BY-STEP)
+-  6.93 | h1TjDLZBPFc | 12m | 85000 | 2024-11-14 | WARNING: BITCOIN WAVE TREND REVERSAL– BE READY FOR THIS NEXT
+-  6.92 | cBnhj8FdioU | 13m | 83000 | 2024-11-14 | BREAKING: BITCOIN WAVE TREND REVERSAL – BE READY FOR THIS NEXT
+-  6.92 | a3TWgkO3gAE | 19m | 83000 | 2024-11-14 | WARNING: BITCOIN WAVE TREND BLOODBATH CRASH– BE READY FOR THIS NEXT
+-  6.87 | jC55b_gXc-Q | 11m | 74000 | 2025-11-14 | WARNING: BITCOIN HOT ZONE REVERSAL
+-  6.79 | B27jj4wbdNg | 15m | 61000 | 2024-11-14 | BITCOIN CHEAT CODE REJECTION – WE IN TROUBLE?
+-  6.76 | XLyKB-0-GEA | 21m | 57000 | 2026-05-14 | BREAKING: BEAR FLAG BREAKOUT (Secret Clue)
+-  6.71 | tkQkzq_ClLQ | 14m | 51000 | 2024-11-14 | WARNING: BITCOIN WAVE TREND ABOUT TO BREAK
+
+## jasonpizzino - Jason Pizzino (Jason Pizzino)  [crypto] 
+videos 1072, P1 36 (3%), candidates 117, cov 0
+-  7.68 | Rg2ch2JzT54 | 26m | 48000 | 2024-11-14 | Bitcoin: PROVEN Indicator is Signalling A MAJOR REVERSAL for Crypto (Watch ASAP)
+-  6.83 | NER36_nhx_4 | 26m | 68000 | 2024-11-14 | Bitcoin Crash Warning: Don’t Get Caught Out Selling Crypto Into This Trap! (Watch ASAP)
+-  6.82 | 98HpRUQrBl8 | 22m | 66000 | 2024-11-14 | Bitcoin WARNING: The Bull Market Is A TRAP! (Watch ASAP if you plan to SELL Crypto)
+-  6.80 | GM7PFaCywfU | 24m | 63000 | 2024-11-14 | Bitcoin WARNING: An ATH BREAKOUT Could Spell Disaster for Crypto (Watch ASAP)
+-  6.80 | qzY8reDeN_o | 23m | 63000 | 2024-11-14 | Bitcoin BREAKOUT: A Shocking Warning For an Early Crypto ATH (Watch ASAP)
+-  6.76 | eEGyp5TP8Ec | 29m | 58000 | 2026-09-14 | Bitcoin Breakout: NOW Is Different (and confirming the cycle low)
+-  6.72 | Hlot1KhrlMs | 31m | 52000 | 2026-10-14 | Bitcoin: BREAKOUT! (but here’s what NO ONE sees coming)
+-  6.72 | VQ_jYFrO564 | 27m | 53000 | 2024-11-14 | WARNING: Bitcoin Major BREAK OUT! When Will This Pump End? Should I Sell Crypto & Take Profits?
+
+## rektcapital - Rekt Capital (Rekt Capital)  [crypto] 
+videos 604, P1 17 (3%), candidates 55, cov 0
+-  8.08 | O1hikQqSLeE | 14m | 12000 | 2026-05-14 | Where Is Bitcoin In the Cycle? EMA Crossover Analysis
+-  8.00 | sPBtI5pP4PM | 11m | 10000 | 2026-06-14 | Where Is Bitcoin In the Cycle? EMA Crossover Analysis
+-  7.90 | y1VZlQtjUwY | 8m | 8000 | 2026-08-14 | Where Is Bitcoin In the Cycle? EMA Crossover Analysis
+-  6.78 | 1wKhrcq7MP8 | 7m | 6000 | 2021-11-14 | Massive Bullish MACD Crossover for Bitcoin?
+-  6.71 | 47zqReWxyGY | 12m | 5100 | 2023-11-14 | Bitcoin On The Cusp Of A New Bull Market? - RSI Breakout Analysis
+-  6.61 | qqRrGYZ2NnY | 8m | 4100 | 2021-11-14 | Bullish Bitcoin MACD Crossover Close To Being Invalidated?
+-  6.60 | BlpXnyejid0 | 13m | 4000 | 2023-11-14 | Could Bitcoin Crash to $20,000 in 2023? CME Gap Analysis!
+-  6.45 | BEjR1r-g-Y8 | 12m | 2800 | 2023-11-14 | Bitcoin Multi-Month Breakout Incoming? - RSI Breakout Analysis
+
+## alessiorastani - Alessio Rastani (Alessio Rastani)  [crypto] 
+videos 959, P1 20 (2%), candidates 48, cov 0
+-  7.62 | _KaDWkz1ooY | 5m | 42000 | 2012-11-14 | Trading The Gap on Stock Index Futures
+-  7.60 | RvMUXj5I60s | 10m | 40000 | 2019-11-14 | Will Bitcoin Fill Its Gap?
+-  7.38 | 4dU7T_satz0 | 6m | 24000 | 2020-11-14 | This Chart Pattern is Very Likely to Happen Again (filling the gap)
+-  6.82 | pbkr7duMNvc | 13m | 66000 | 2024-11-14 | Bitcoin TRIGGERED a New Crossover Signal ...what this means and mistakes to avoid
+-  6.80 | SpUIo9Jwh5Q | 6m | 63000 | 2026-09-14 | What the Powerful Breakout Rally in Bitcoin Means Now
+-  6.74 | U8f-NEFNIvY | 11m | 55000 | 2024-11-14 | Bitcoin BREAKS Key Trendline ...Has the Trend Reversed on BTC?
+-  6.69 | kMU9w13X3YQ | 19m | 49000 | 2024-11-14 | Bitcoin and Stock Market BREAKOUT after Election win for Trump (what now?)
+-  6.60 | KhbhfFgGpn8 | 15m | 40000 | 2025-11-14 | Bitcoin Nears 100K with MASSIVE Momentum in Ethereum and XRP …now what?
+
+## cryptobanter - Crypto Banter (Crypto Banter)  [crypto] 
+videos 3422, P1 212 (6%), candidates 423, cov 0
+-  8.93 | sdHM5YKxWEU | 50m | 86000 | 2024-11-14 | Bitcoin DUMP Will Get MUCH WORSE! (CME Gap Filled?)
+-  8.85 | h0yP2702T6o | 23m | 71000 | 2025-11-14 | Crypto Scalping Made Easy! [Step-By-Step Breakdown]
+-  8.52 | GfsdOftfiEc | 27m | 33000 | 2025-11-14 | CME Gap Closed, Bull Market Back On!! [TODAY'S ALTCOIN TRADES]
+-  8.06 | m9qHeUGLEbI | 19m | 115000 | 2024-11-14 | How to Make $900 a Day Trading Altcoins (Super Simple Strategy)
+-  7.98 | wre0FMXrAo0 | 66m | 9500 | 2026-10-24 | The Only Altcoins I’m Scalping Right Now (Live Crypto Trading)
+-  7.97 | ik1qrq3tKrQ | 59m | 9300 | 2026-10-17 | Scalping the Crypto Market Live: Today’s Best Altcoin Setups
+-  7.89 | o88sPKZRuRE | 86m | 7700 | 2026-06-14 | LIVE Bitcoin & Crypto Trading: Is The Gap Filled?
+-  7.85 | yQZCMTBD5tM | 72m | 7100 | 2026-10-31 | Live Altcoin Trading: Scalping Setups and Analysis
+
+## cryptokirby - Crypto Kirby (Crypto Kirby Trading)  [crypto] 
+videos 363, P1 6 (2%), candidates 33, cov 0
+-  6.15 | gKVBK8J-DLw | 23m | 14000 | 2020-11-14 | BITCOIN SQUEEZE CORRECTION TO $8,540 GAP ?! 💥LIVE Crypto Analysis TA & BTC Cryptocurrency Price News
+-  4.26 | LRQ4uO8MMPI | 13m | 18000 | 2020-11-14 | I KNOW WHY BITCOIN CRASHED… | Crash to $3.8K Explained (Not Clickbait)
+-  4.04 | hC-UJrv_-wQ | 18m | 11000 | 2020-11-14 | BITCOIN Gap Fill Target $8.5K?! VERY SOON?!❗️LIVE Crypto Analysis TA & BTC Cryptocurrency Price News
+-  2.52 | 39gqq1k5Lxs | 20m | 33000 | 2021-11-14 | ⚠️ TO $50k+ OR BULL TRAP FOR BITCOIN!!!? ⚠️ Crypto Price Analysis TA & BTC Cryptocurrency News Today
+-  2.49 | TCEhhLUf_JY | 18m | 31000 | 2021-11-14 | ⚠️ BIGGEST TRAP IN BITCOIN HISTORY!!!!!? ⚠️ Crypto Price Analysis TA & BTC Cryptocurrency News Today
+-  2.43 | idVirFLEnK0 | 11m | 27000 | 2022-11-14 | ⚠️**URGENT!** BITCOIN BREAKOUT IMMINENT!!!?⚠️Crypto Price Analysis TA/ BTC Cryptocurrency News Today
+-  2.40 | YGAlUQfbWvc | 18m | 25000 | 2022-11-14 | ⚠️ IT'S A TRAP!!!!!!? BITCOIN URGENT PRICE UPDATE!!!!⚠️Crypto Analysis TA/ Cryptocurrency News Today
+-  2.30 | 27UuwVmUYV8 | 20m | 20000 | 2020-11-14 | The BITCOIN Trend NOBODY is Seeing?!! ⚠️Crypto Analysis TA Today & BTC Cryptocurrency Price News Now
+
+## tylers - Tyler S (Tyler S)  [crypto] 
+videos 1643, P1 39 (2%), candidates 162, cov 0
+-  7.80 | M-wrcdlznYY | 7m | 6300 | 2026-03-14 | How To Start Day Trading As A Beginner in only 7 Minutes [2026 Full Guide]
+-  7.65 | IQweWWW4i9o | 11m | 45000 | 2021-11-14 | SHOCKING ETHEREUM BREAK AT **THIS** PRICE?? - BITCOIN ENTERS PARABOLIC TREND CONTINUED!!!
+-  6.77 | MxSH3BjhdnQ | 14m | 59000 | 2024-11-14 | 🚨Bitcoin CODE RED WARNING: BLACKROCK TRAP TO CAUSE *MAXIMUM PAIN*?!!
+-  6.61 | DZu11Gik61I | 20m | 41000 | 2025-11-14 | holy S***⚠️ i am shocked... so many are about to fall for this bitcoin and crypto trap
+-  6.61 | SAr0urZ87eg | 12m | 41000 | 2024-11-14 | Bitcoin TRAP ALERT 🚨 *BIG* CRYPTO FAKEOUT INCOMING...
+-  6.57 | YZ6clkUeBDk | 24m | 37000 | 2025-11-14 | IMMINENT🚨Bitcoin and Crypto Altcoin FLASH CRASH....[Or Bear Trap]
+-  6.54 | ykF65_bdaz8 | 13m | 35000 | 2024-11-14 | WARNING🚨 BITCOIN *GIGA BEAR TRAP* UNLIKE ANYTHING WE'VE EVER SEEN...
+-  6.53 | BXtv_m0mrjY | 11m | 34000 | 2024-11-14 | BITCOIN WARNING🚨THIS CRYPTO CRASH IS A *GIANT* TRAP!!!!!!!
+
+## opticalartcrypto - OpticalArt Crypto (OPTICALARTdotCOM)  [crypto] 
+videos 811, P1 24 (3%), candidates 51, cov 0
+-  9.15 | EpE9mUaDjmo | 18m | 14000 | 2023-11-14 | Next point Bitcoin will go parabolic! Next scalp short entry!
+-  7.95 | dI7DKR9qM8w | 9m | 9000 | 2024-11-14 | Epic Bitcoin Short Squeeze or Breakout? We find out in 8 hours.
+-  7.79 | MwUqmDtUIEo | 15m | 6100 | 2025-11-14 | Bitcoin bull trap and cr@p to gap?
+-  7.78 | y7dcUSe39-A | 16m | 6000 | 2026-09-14 | Nice bitcoin scalp short! Might be time to TP and long btc now.
+-  7.64 | Jp7eYIxDasc | 12m | 4400 | 2025-11-14 | It's make or break for bitcoin! Scalp short soon could be a smart play.
+-  7.59 | 1pZ8np2jDRI | 12m | 3900 | 2025-11-14 | Bitcoin dropped to key support level. Time to scalp a long?
+-  7.51 | WNQdUtygTvY | 17m | 3200 | 2026-04-14 | Bitcoin gap filled as predicted! My next BTC long & short entries. FOMC today!
+-  7.00 | DGdbzg0Aq7o | 15m | 9900 | 2020-11-14 | Yellow ring predicted bitcoin price drop! gaps at 10k, 8.5k, if we fill 7.7k gap BTC will crash hard
+
+## investanswers - InvestAnswers (InvestAnswers)  [crypto] 
+videos 2107, P1 83 (4%), candidates 124, cov 0
+-  9.65 | I37oaEvuou0 | 21m | 45000 | 2026-02-14 | 3.6% Rule 📈, Riot’s $311M AI Pivot ⚡️+ Midterm Trap? 📉
+-  8.79 | yb-P4r7xa34 | 16m | 61000 | 2024-11-14 | 🔮 CME Gap Sealed! Beware the Sell Side Shakeout 📉
+-  8.63 | 6qCOLq1ZnLI | 71m | 43000 | 2026-06-14 | 🚀 ALPHA PIVOT: SpaceX Capital Shock & Tesla’s Massive Q3 Breakout! 🎯
+-  7.90 | b9-s0DiflRQ | 20m | 80000 | 2024-11-14 | 🐂 Bitcoin's Bullish Setup: ETF Frenzy, Political Pivot, Pizza Day
+-  7.61 | sKmCujZNsqs | 18m | 41000 | 2026-09-14 | ⚡ Calm Before The Storm: Bottom Setup, Capex Pivot & Massive Shortages 📊
+-  7.22 | fijjNK8AsE8 | 22m | 167000 | 2024-11-14 | The World is NOT Ready & Beware Bitcoin Trap
+-  7.05 | K7w7OeS4ldE | 19m | 112000 | 2024-11-14 | 🚨Breakout Confirmed! Here’s Why Next 90 Days Will Be NUTS!🥜
+-  6.98 | _6bedIqSAnE | 26m | 96000 | 2025-11-14 | Bitcoin Daily: Liquidity Mother LODE Incoming? 💰💹🌊
+
+## cryptozombie - Crypto Zombie (Crypto Zombie)  [crypto] 
+videos 1574, P1 55 (3%), candidates 144, cov 0
+-  7.60 | c5XsrwTaoFQ | 16m | 40000 | 2021-11-14 | HOLY SH!!T!!! BITCOIN SMASHES $30,1,2,3K!!! WARNING: LIQUIDITY SQUEEZE IMMINENT!!!!
+-  7.59 | gIWh8-rXLj4 | 18m | 39000 | 2021-11-14 | BITCOIN $500 BILLION CAP!!!!! WARNING: BTC $5K GAP!!! DANGER AHEAD?!! [Watch Before Monday]
+-  7.52 | XH79qVnZqSw | 15m | 33000 | 2021-11-14 | BITCOIN PULLBACK OVER!!! BTC HALVING PHASE ABOUT TO GO PARABOLIC!!! $23k NEXT!!!?
+-  7.49 | c5W2zecgAwA | 37m | 31000 | 2019-11-14 | BITCOIN BREAKOUT or FAKE OUT?! Did the Fed Just Kickstart the Next Parabolic Run?!
+-  7.40 | HiRyjy_4e-w | 15m | 25000 | 2020-11-14 | 🚨 BITCOIN CHRISTMAS DUMP?! CME GAP NEVER FILLED!! CRYPTO UNDER ATTACK!! 🔥
+-  7.40 | iICtXs30b8E | 19m | 25000 | 2019-11-14 | BITCOIN CME GAP FILLED!! $BTC READY for BLAST OFF or Manipulation? Don’t Get REKT!
+-  7.40 | FT19c9vhuT0 | 17m | 25000 | 2019-11-14 | BITCOIN Pullback OVER or ONE FINAL DIP?!? PARABOLIC RUN Possible! $90k by Q2 2020?
+-  7.36 | HdVIKImewq4 | 23m | 23000 | 2020-11-14 | BITCOIN REJECTED!!? 〽️ Was THAT the “BIG CORRECTION?” Weak Hands CRUSHED!! Gap?
+
+## larkdavis - Lark Davis (Lark Davis)  [crypto] 
+videos 3025, P1 167 (6%), candidates 204, cov 0
+-  8.34 | rHbEyC_T0Bo | 15m | 22000 | 2025-11-14 | Make $100 A Day Trading Crypto With These 3 Breakout Strategies
+-  8.13 | 7BKXBGAq49s | 14m | 135000 | 2025-11-14 | How I would invest $1000 If I Started Crypto Today [Beginner Guide]
+-  7.92 | ak71xbE11Sg | 11m | 84000 | 2024-11-14 | Crypto Bull Run Guide - Parabolic Stage Begins Now
+-  7.30 | W4sttftGr58 | 9m | 20000 | 2022-11-14 | Bitcoin Daily RSI Trend & Cardano Price Targets! [Crypto Analysis]
+-  6.79 | NzeyoCngv9I | 42m | 62000 | 2024-11-14 | Bitcoin's Shocking Rejection
+-  6.65 | AqR-gRNOSJE | 14m | 45000 | 2024-11-14 | BITCOIN MAJOR BREAKOUT [Get Ready]
+-  6.63 | D8c6bcvBif4 | 32m | 43000 | 2025-11-14 | Crypto Bear Trap CAUTION!!!
+-  6.62 | T0dsKyOkAcc | 12m | 42000 | 2025-11-14 | Bitcoin Bounces As New AI Trend EXPLODES
+
+## vasilytrader - VasilyTrader (VasilyTrader) * [gold] 
+videos 677, P1 291 (43%), candidates 281, cov 0
+-  9.64 | c-4THNEuzU0 | 6m | 4400 | 2026-04-14 | Easy Way to Confirm Fair Value Gap. Valid & Invalid FVG Explained
+-  9.08 | PUMBSCzzST0 | 7m | 12000 | 2024-11-14 | Simple XAUUSD Day Trading STRATEGY with MOVING AVERAGE Technical Indicator
+-  7.99 | Bzngq65MbMM | 6m | 9800 | 2025-11-14 | Simple GOLD Indicator Strategy For Beginners. EASY XAUUSD Trend Trading Explained (MA + ATR Forex)
+-  7.81 | BfQUErC1OVI | 6m | 6500 | 2024-11-14 | Best Time Frames For Scalping Forex With Multiple Time Frame Analysis Trading
+-  7.67 | HO3EFwprLbE | 9m | 4700 | 2024-11-14 | How to Trade Gap Up and Gap Down Opening. Simple Strategy With Examples
+-  7.57 | zp0J8wRyCtc | 7m | 3700 | 2024-11-14 | Best Lot Size For Scalping, Day Trading, Swing Trading GOLD XAUUSD
+-  7.48 | Q9AafRH2BWg | 8m | 3000 | 2026-06-14 | Profitable GOLD Gap Trading Strategy Explained. XAUUSD
+-  7.42 | X9zTOLiR1v0 | 10m | 2600 | 2025-11-14 | Your Step-By-Step Guide for Trading Gaps. Profitable Gap Fill Trading Strategy Explained (Forex)
+
+## garethsoloway - Gareth Soloway (Gareth Soloway)  [gold] 
+videos 1755, P1 78 (4%), candidates 148, cov 0
+-  9.05 | m88vIKc7JMY | 10m | 111000 | 2026-02-14 | Gold & Silver Alert: The RSI "Negative Divergence" Big Money Doesn't Want You to See
+-  8.80 | 7Pb-vTQSuPU | 10m | 63000 | 2026-04-14 | BITCOIN SMART MONEY SMILES: The Breakout, The Squeeze, The Target (Plus SOL & ETH Targets) 🚀
+-  8.46 | WLSVr8gZDsI | 19m | 29000 | 2023-11-14 | Gap & Crap On Stocks, PPI Data Impact, Yield Super-Spike, Crypto Alt Trades
+-  8.40 | 9paRUFjWHo8 | 21m | 25000 | 2025-11-14 | Key Trades For The Day As Markets Continue Pullback Off Key Fibonacci 61.8
+-  8.36 | NVdYnOvBxy4 | 12m | 23000 | 2025-11-14 | Market Gap Down & Rebound on Rumors - Key Trading Levels
+-  8.34 | NIk1ASsFbwM | 19m | 22000 | 2025-11-14 | Key Trade Setups And Alerts As Markets Near All-Time Highs, Semi's Near Gap Fill
+-  8.30 | 8uZWgZcrFKY | 13m | 20000 | 2025-11-14 | Cycle Update: Market Reversal After Gap Up As Tariffs Weigh
+-  7.86 | JqHBVP_5aFg | 5m | 7300 | 2024-11-14 | DE: Double Bottom - Gap Fill Bounce Incoming!  Gareth Reveals Bullish Ladder Entry Point for Nat Gas
+
+## goldsilverclub - The Gold & Silver Club (TheGoldAndSilverClub)  [gold] 
+videos 1335, P1 16 (1%), candidates 17, cov 0
+-  5.11 | 7ab0hDGxtqo | 6m | 13000 | 2017-11-14 | WEEK AHEAD CRYPTO REPORT : Sept 6, 2017 | Bitcoin Pullback A Buying Opportunity?
+-  3.81 | X9sXVQMsA_Y | 10m | 6400 | 2016-11-14 | The Gold & Silver Club | Commodity Report: Nov 7-11, 2016 | How To Trade The U.S Election
+-  3.65 | XsXkZnpH8K8 | 8m | 4500 | 2017-11-14 | The Gold & Silver Club | Week Ahead Commodity Report: March 27, 2017 | How To Trade Article 50
+-  3.64 | YBXGHvhYlv4 | 10m | 4400 | 2016-11-14 | The Gold & Silver Club | Commodity Report: June 27, 2016 | Has Gold Reached Its Post-Brexit Peak?
+-  3.63 | wn5xpf9AqFw | 12m | 4300 | 2016-11-14 | The Gold & Silver Club | Commodity Report: Sept 19-23, 2016 | How To Trade The FOMC Statement
+-  3.59 | p8a23wfnxw4 | 8m | 3900 | 2016-11-14 | The Gold & Silver Club | Market Commentary | How To Trade Gold & Silver During The U.S Election
+-  3.55 | JLb9ZDcxHQg | 10m | 3500 | 2017-11-14 | The Gold & Silver Club | Commodity Report: Dec 12-16, 2016 | How To Trade The FOMC Statement
+-  3.42 | 3aJeZT1gUsg | 6m | 2600 | 2016-11-14 | The Gold & Silver Club | Commodity Market Commentary | How To Trade Gold And Oil
+
+## pepperstone - Pepperstone (Pepperstone Australia)  [gold] 
+videos 2618, P1 96 (4%), candidates 139, cov 0
+-  9.18 | 1fWmRrNFWQ8 | 48m | 15000 | 2019-11-14 | Scalping using stochastic and MACD indicators
+-  9.11 | DqRVL3Hg8zc | 61m | 13000 | 2023-11-14 | The Opening Range Breakout Trade with Mark Holstead
+-  9.05 | hR6tWVs4AAw | 40m | 1100 | 2024-11-14 | Mastering Day Trading: Scalping Strategies with Bollinger Bands & Anchored VWAP
+-  8.79 | DU8KaUV1bDg | 44m | 6200 | 2023-11-14 | Scalping with the Stochastic Oscillator: A Simple yet Powerful Trading Strategy
+-  8.74 | WEoxTJnfBKE | 44m | 535 | 2025-11-14 | Mastering Market Momentum: Using Rate of Change and Anchored VWAP for Precise Trade Entries
+-  8.69 | lF3tUeDaNkA | 41m | 478 | 2024-11-14 | Mastering Scalping Strategies: Unleashing market structure & volume profile tactics
+-  8.68 | vk9kSRN6mDE | 68m | 4800 | 2024-11-14 | Trading with VWAP: 4 Key Strategies
+-  8.67 | Wq86YuQrNpI | 43m | 456 | 2025-11-14 | Mastering Extreme Volatility: VWAP and Momentum Tactics
+
+## capitalcom - Capital.com (Capital.com)  [gold] 
+videos 563, P1 36 (6%), candidates 40, cov 0
+-  8.08 | G5t73Vhc_0E | 5m | 12000 | 2026-04-14 | We’ve Never Seen This Economic Gap Before
+-  7.65 | EoN1vs-j0Vo | 13m | 447000 | 2022-11-14 | Day Trading Explained For Beginners!
+-  7.45 | xQYrUSRrLYo | 10m | 28000 | 2026-03-14 | MACD Indicator Trading Explained (For Beginners)
+-  6.71 | eGjvyDEfyQc | 10m | 51000 | 2021-11-14 | Stochastic Indicator Explained for Beginners - Create a Stochastic Strategy
+-  6.65 | o_v1pjZ3vjU | 7m | 45000 | 2020-11-14 | Heikin-Ashi Candlesticks Explained | Heikin-Ashi Trading Strategy for Beginners
+-  6.54 | Ghea_gi3fDY | 12m | 35000 | 2023-11-14 | How to use Bollinger Bands - Technical 101
+-  6.51 | LP42u8UxQz0 | 14m | 32000 | 2020-11-14 | Bollinger Bands Trading Strategy - How to Use Bollinger Bands Tutorial
+-  6.46 | WuWAXtGju1o | 13m | 29000 | 2021-11-14 | RSI Trading Indicator Explained for Beginners | RSI Trading Strategy
+
+## interactivebrokers - Interactive Brokers (Interactive Brokers)  [gold] 
+videos 1438, P1 10 (1%), candidates 13, cov 0
+-  8.08 | kNfU0mCBoKg | 6m | 12000 | 2024-11-14 | Moving Average Convergence Divergence (MACD)
+-  5.66 | qEH3PUgSnOM | 9m | 4600 | 2024-11-14 | Option Liquidity Tool
+-  4.57 | xOqxg566nu4 | 20m | 362 | 2025-12-14 | The Fed blinked—and liquidity blinked back - Cents of Security Ep.132
+-  4.52 | J7P28z7ovfA | 6m | 33000 | 2022-11-14 | Using Strategy Builder in Mosaic - TWS Option Tools
+-  3.86 | TE6jjq1n6Vo | 9m | 63 | 2025-11-14 | Outil Option Liquidity
+-  3.33 | xwDdhZs1S68 | 8m | 205 | 2025-11-14 | Option Strategy Lab – прогноз цены
+-  3.31 | qsH6B6JsT7I | 8m | 192 | 2025-11-14 | Option Strategy Lab – Intervallo del prezzo stimato
+-  3.22 | LqfFx4VFYag | 8m | 155 | 2025-11-14 | Option Strategy Lab – geschätzte Kursspanne
+
+## tradewithpat - Trade with Pat (Trade with Pat)  [gold] earlier: channels20
+videos 254, P1 40 (16%), candidates 53, cov 7
+- 12.65 | ZNL13Ek-QXI | 9m | 45000 | 2025-11-09 | 4 Best Free Indicators for my Scalping Strategy (ORB, EMA, FIBONACCI)
+- 11.91 | yFPrP6nJRYQ | 12m | 82000 | 2026-05-09 | Fair Value Gap Trading Strategy (Tested 1001+ Times)
+- 11.65 | yM-qSKJEylI | 9m | 45000 | 2026-04-09 | The Only 1 Minute ORB Scalping Strategy That I TRUST
+- 10.07 | nCBF6wrOKic | 14m | 117000 | 2025-11-09 | ULTIMATE Gold Scalping Strategy in 14 Minutes (Beginner to PRO)
+-  9.95 | IZpcVFFGW1w | 13m | 90000 | 2025-11-09 | FULL Supply & Demand Trading Strategy in ONLY 13 Minutes (Scalping)
+-  8.82 | Jw4woeigTYM | 16m | 66000 | 2025-11-09 | My '1 CANDLE' Scalping Strategy Works Everyday (Stupid Simple & Verified)
+-  8.60 | ckf6mJW9vZg | 11m | 40000 | 2026-08-09 | The Liquidity Strategy I’d Use to Make $500/Day Trading
+-  7.30 | sclIAK3x2dw | 8m | 198000 | 2026-04-09 | The ONLY Liquidity Trading Strategy WORTH Learning (3 Steps)
+
+## smartrisk - Smart Risk (Smart Risk)  [gold] 
+videos 169, P1 97 (57%), candidates 110, cov 0
+- 11.60 | OUeVbFNHl2k | 17m | 395000 | 2025-11-09 | Fair Value Gap + Liquidity = Profit | Best Fair Value Gap Trading Plan in 2025!
+- 11.52 | zm2CyPrD5Uk | 13m | 334000 | 2026-01-09 | High-Quality Fair Value Gap Trading Strategy
+- 11.29 | 6lBCw0zIYM8 | 13m | 194000 | 2025-11-09 | The Ultimate Guide to Fair Value Gaps: Inversed Fair Value Gap (IFVG) Trading Strategy Explained!
+- 11.21 | hPYllIQ_2Sk | 17m | 161000 | 2025-11-09 | Smart Money Concepts: Fair Value Gap Trading in 2025
+- 11.00 | BFfF_Lnk9T4 | 15m | 1000000 | 2024-11-09 | Fair Value Gap Simplified - Smart Money Course
+- 10.94 | -uRKGucJEkE | 17m | 863000 | 2024-11-09 | Best Fair Value Gap Trading Strategy
+- 10.45 | JEoEYDmfDrk | 13m | 280000 | 2024-11-09 | Order Block Entry VS Fair Value Gap Entry
+-  9.79 | Jl2su_JXhig | 13m | 61000 | 2026-10-09 | I Tested Every ICT Gap Strategy So You Don't Have To
+
+## mambafx - MambaFx (MambaFx)  [gold] 
+videos 132, P1 24 (18%), candidates 27, cov 1
+-  8.68 | I2I4EVPFoak | 13m | 475000 | 2021-11-09 | EASY FOREX SCALPING STRATEGY | INSANE METHOD!
+-  8.64 | o8TCjsQyCtM | 8m | 433000 | 2020-11-09 | INSANE Scalping Strategy For SMALL Forex Accounts! (EASY) -Mamba
+-  8.51 | NGwPFkOEVpA | 13m | 323000 | 2020-11-09 | The BEST Scalping Strategy For SMALL Forex Accounts!
+-  8.45 | Gav-iFiFDYs | 19m | 283000 | 2021-11-09 | Super FOREX SCALPING STRATEGY for Small Accounts | EASY PROFITS!!
+-  8.27 | dCCVN-0cqH0 | 11m | 186000 | 2022-11-09 | $62,000 scalping forex LIVE | Withdrawal PROOF!!
+-  8.05 | Bh_blDiokHQ | 8m | 112000 | 2026-04-09 | Breakout Trading Made SIMPLE in 10 Minutes
+-  7.87 | -2oONqLBAq4 | 6m | 74000 | 2021-11-09 | SCALPING Forex | FULL FREE COURSE!!
+-  7.59 | 5cnHDWQkwLg | 18m | 393000 | 2025-11-09 | How To Trade SMALL Forex Accounts Using the 1 Minute Timeframe
+
+## faizsmc - Faiz SMC (Faiz SMC)  [gold] earlier: channels20
+videos 220, P1 127 (58%), candidates 125, cov 5
+- 10.26 | 7HkuwkPpeps | 15m | 18000 | 2026-08-09 | 15-Min ORB Strategy + Orderflow + Gamma = Profit
+-  9.60 | 5Yz_-bpV5_Y | 16m | 40000 | 2024-11-09 | Inverse Fair Value Gap
+-  9.26 | vvjFOe5Loqk | 13m | 18000 | 2024-11-09 | Best Fair Value Gap Trading Strategy
+-  8.57 | Ei0MtKztZtA | 13m | 37000 | 2025-11-09 | This Gold Scalping Strategy Works Everyday! (Easy & Profitable)
+-  8.30 | s9lsHH1WwKg | 13m | 20000 | 2025-11-09 | Easy ICT Scalping Trading Strategy That Makes $1,000/Day
+-  8.23 | 3e2xQo-dsOI | 13m | 17000 | 2025-11-09 | Gold Scalping Strategy For Beginners (FULL GUIDE)
+-  8.16 | LsC2IokcYpc | 21m | 144000 | 2026-05-09 | The Easiest Gold Volume Profile Trading Strategy That Works!
+-  8.02 | dcmKOcMMT8Y | 45m | 105000 | 2026-04-09 | The Only Volume Profile Strategy You'll Ever Need! (FULL COURSE)
+
+## mrpfx - Mr P Fx (Mr P Fx)  [gold] 
+videos 452, P1 144 (32%), candidates 151, cov 0
+-  8.86 | 3XSj-nJsrz8 | 22m | 72000 | 2024-11-14 | Trading a $50 Forex Account To $50k Using This Best Scalping Strategy And Price Action For Beginners
+-  8.70 | 4XdpTQdOl0c | 12m | 50000 | 2025-12-14 | The Crazy 5 Minutes Strategy That Made Me Over $10K DAY TRADING 
+-  8.48 | HlL_U4DPPps | 15m | 30000 | 2024-11-14 | This Is Best Forex Trading Strategy And Best Scalping Strategy To Grow Small Accounts For Beginners
+-  8.42 | 6JI956aTNAU | 20m | 26000 | 2026-09-14 | The BEST Gold Scalping Strategy (Beginner to PRO)
+-  8.38 | 4CCSYwlGZyM | 14m | 24000 | 2024-11-14 | Best Price Action Trading Strategy For Day Trading And Scalping Small Forex Accounts For Beginners
+-  8.11 | Baa6Ysja22c | 10m | 13000 | 2026-10-31 | I Made GOLD Scalping Look TOO EASY (Anyone can do it!)
+-  8.11 | RdhT4j3NfYw | 8m | 13000 | 2021-11-14 | BOOM AND CRASH 3 MINUTES SCALP AND ESCAPE INDICATOR | ESCAPE EVERY SPIKE LIKE A LEGEND | FREE!!!
+-  8.08 | UuHinAznSf4 | 13m | 12000 | 2024-11-14 | Let's Catch 100 Spikes on Boom and Crash, Made $8,900 (Scalp Boom and Crash)
+
+## tradewithaaro - Trade With Aaro (TRADE WITH AARO)  [gold] 
+videos 105, P1 1 (1%), candidates 5, cov 0
+-  4.69 | PH-12hzrBPE | 91m | 4900 | 2026-11-11 | 🔴 Gold Live Trading Hindi | XAUUSD Live & BTC Live Scalping Today | 10 Nov 2026
+-  4.65 | oLXajv_B2vk | 15m | 4500 | 2025-11-14 | EXNESS पर अकाउंट कैसे खोलें | आसान और तेज़ प्रक्रिया | #exnessaccount  #ForexTrading #cryptotrading
+-  4.62 | cvPGohBBZEU | 119m | 4200 | 2026-11-13 | 🔴 Gold Live Trading Hindi | XAUUSD Live Today & BTC Live Scalping | 12 Nov 2026
+-  4.62 | v5P9n7kXvrw | 80m | 4200 | 2026-11-12 | 🔴 Gold Live Trading Hindi | XAUUSD Live & BTC Live Scalping Today | 11 Nov 2026
+-  4.61 | qUIo6xcsYpk | 91m | 4100 | 2026-11-12 | 🔴 Gold Live Trading Hindi | XAUUSD Live Today & BTC Live Scalping | 11 Nov 2026
+
+## forextradinglions - Forex Trading Lions (Forex Trading Lions)  [gold] 
+videos 197, P1 122 (62%), candidates 140, cov 0
+- 11.18 | bV0rA2zBJ-k | 7m | 15000 | 2024-11-14 | Incredible 1 Minute Forex Scalping Strategy | Donchian Channels
+- 10.72 | hKupaJxkAIM | 10m | 52000 | 2022-11-14 | 5 Minute Forex Scalping Trading Strategy: Williams Alligator Indicator
+- 10.69 | 5upcIgapzjI | 14m | 49000 | 2020-11-14 | 5 Minute Scalping System: with 20-50 MA and Stochastic RSI
+- 10.51 | KLxfsPbfuwo | 13m | 32000 | 2020-11-14 | Make $300 A Day Forex Scalping LIVE With Bollinger Bands & RSI On 5 Minute Time frame!
+- 10.40 | fSp-jMvNOhE | 6m | 251000 | 2023-11-14 | Proven 5-Minute Forex Scalping Strategy for XAUUSD/GOLD. 🦁📈
+- 10.32 | dQh-WXMI0SE | 8m | 21000 | 2022-11-14 | I Tested Williams Alligator Scalping Strategy 100x & Made It BETTER (80%+ WIN RATE?!)
+- 10.32 | p1eoiiNbZNw | 12m | 21000 | 2022-11-14 | 1 Minute Forex Strategy: Scalping With Parabolic SAR | Powerful Trading Indicator
+-  9.75 | jgwZj0wWhok | 17m | 56000 | 2026-09-14 | I Found By FAR The Most Effective 1-Minute Scalping Strategy Ever
+
+## tradingview - TradingView (TradingView)  [sys] 
+videos 499, P1 13 (3%), candidates 28, cov 0
+-  9.91 | b7w68Dq4s5U | 12m | 82000 | 2025-11-14 | How to use Volume Weighted Average Price (VWAP) Indicator: Tutorial
+-  9.24 | mH_kGj0rLgA | 14m | 172000 | 2025-11-14 | Fixed Range Volume Profile: Tutorial
+-  8.84 | 60T-XAMgNVg | 17m | 69000 | 2024-11-14 | Visible Range Volume Profile Updated and Explained: Tutorial
+-  8.65 | APfLDVFLiBY | 16m | 45000 | 2025-11-14 | The Fibonacci Trend Drawing Tool: Tutorial
+-  8.42 | ygcGVlpzI5E | 15m | 26000 | 2026-10-14 | Fibonacci Extensions Guide: Trend-Based and Auto Fib
+-  8.39 | 5gsBD-XONRE | 31m | 244000 | 2021-11-14 | Fixed Range Volume Profile: Tutorial
+-  8.34 | 31FZlPz__Nk | 17m | 22000 | 2026-07-14 | RSI Divergence Indicator: Identify Momentum Shifts
+-  8.32 | owKD6tLfNdw | 17m | 21000 | 2026-02-14 | Ichimoku Cloud for Trend, Impulse, and Signals: Tutorial
 

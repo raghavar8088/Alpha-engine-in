@@ -1,0 +1,15 @@
+video: Jl2su_JXhig
+topic: forex_us
+summary: Smart Risk backtests three ICT entry zones on 1-hour EUR/USD (June-August 2026, replay mode, 3% risk) with objective rules. A limit sits at the start of the gap; the stop is half an ATR beyond it; gaps smaller than a third of an ATR or larger than two ATRs are skipped; the target is a fixed 1:2. Taken unfiltered, fair value gaps won 31% of 29 trades (-6%), breakaway gaps 31% of 45 (-9%) and inversion gaps 33% of 27 (break-even), before spread and commission. Trading fair value and breakaway gaps only with the market-structure trend (protected highs and lows, change of character, change in state of delivery) won 48.3% of 29 trades for +39% with a 9% drawdown. Inversion gaps with the trend were profitable on only 12 trades.
+instruments: EUR/USD
+timeframes: 1h
+style: intraday
+= SR-01 | Fair value / breakaway gap limit with the market-structure trend, stop half an ATR beyond, gaps between 1/3 and 2 ATR, 1:2
+R entry E 02:19 | When a fair value gap forms, a limit at the start of the gap, the stop beyond it, a fixed 1:2. | "we place an order at the start of the gap and set the stop loss below the zone"
+R stop E 03:48,04:31 | Stop half an ATR beyond the gap; skip gaps smaller than a third of an ATR or larger than two. | "We will skip the trade if the fair value gap is smaller than 1/3 of the ATR or"
+R filter E 07:17,07:59 | Trade only with the market-structure trend (above the protected low, only buys). | "As long as the price stays above this level, buyers are in control and we should only look for buying opportunities"
+R market E 04:31 | Tested on EUR/USD 1-hour, June-August 2026, at 3% risk per trade. | "we're going to back test the euro dollar pair on the 1-hour chart"
+T with_assumptions | the protected-low structure is marked by eye
+D NJ-30 | a limit entry at a fair value gap with a 1:2 target is already coded (NJ-30; CP-20 for inversions); his ATR filters and the trend filter refine it
+C win_rate | 05:14 | unfiltered: fair value gaps 31% of 29 (-6%), breakaway gaps 31% of 45 (-9%), inversions 33% of 27 (flat) | EUR/USD 1-hour, June-August 2026 | "out of 29 trades, nine were winners and 20 were losers, giving us a 31% win rate"
+C win_rate | 10:48 | with the structure filter: 48.3% of 29 trades, +39%, 9% drawdown | EUR/USD 1-hour, June-August 2026 | "we took 29 trades with 14 winners and 15 losers, giving us a 48.3% win rate"

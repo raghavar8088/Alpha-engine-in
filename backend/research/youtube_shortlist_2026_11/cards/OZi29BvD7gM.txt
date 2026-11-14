@@ -1,0 +1,13 @@
+video: OZi29BvD7gM
+topic: crypto
+summary: Chart Champions explains the framework behind a day-trading strategy it says wins over 80% of the time, traded on ES futures and crypto. Read naked price action first: previous supply and demand zones and their flips. Then market structure: a low, a high and a higher low; in a range, trade only the extremes. Every level on the chart must carry a statistic from at least 200 backtested observations, and confluences such as a naked weekly POC, the anchored VWAP or the 0.75 Fibonacci of the range are added. Never enter at the level itself: wait for a reaction or confirmation candle formation, which is taught in their course. ES examples include a $90,000 trade and a $7,000 winner.
+instruments: ES futures, crypto
+timeframes: Intraday
+style: intraday
+= CH-04 | Day trading at statistically backed levels: naked supply and demand, market structure, confluence, a confirmation reaction (80% win rate claim)
+R setup E 04:20,07:03 | Read naked price action: previous supply and demand zones and their flips. | "a demand into supply flip"
+R setup E 08:27,09:09 | Market structure: a low, a high, a higher low; in a range, trade only the extremes. | "we always need three things in order to look at a confirmed market structure"
+R setup E 10:30,11:12 | Every level needs a statistic: at least 200 backtested observations. | "For me, the minimum would be 200 observations to class a level as a rel"
+R entry E 16:22,17:04 | Enter only after a reaction at the level (a confirmation candle formation from their course). | "I need to see a reaction"
+T concept_only | the levels' statistics and the confirmation candle are in their paid course; the levels are chosen by eye
+C win_rate | 00:01 | over 80% | his day trading strategy | "I now came up with a strategy that has an over 80% win rate"

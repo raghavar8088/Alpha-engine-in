@@ -1,0 +1,18 @@
+video: -9A8qZpEPac
+topic: crypto
+summary: TraderNick backtests the technical part of his gold swing approach on daily XAUUSD in Forex Tester Online. A 20-period moving average and a 50-period simple moving average set the trend. In an uptrend (the averages aligned) he buys pullbacks that reach an oversold reading on a short-period RSI, with the stop below the market-structure support to the left, risking 1% a trade and taking no profit target. The stop is trailed below each new market-structure low or breakout candle, and shorts mirror this in a downtrend at an overbought reading. He also adds a second 1% position after a new high. Twelve trades over about two years returned 15.37%: small losses, small wins and the occasional large win.
+instruments: Gold (XAUUSD)
+timeframes: 1d
+style: swing
+= NK-02 | Daily gold: 20/50 averages aligned, buy the oversold RSI pullback, stop under structure, trailed under structure, no target (mirror for shorts)
+R indicator E 00:44 | A 20-period moving average and a 50-period simple moving average on the daily chart. | "I'm going to go ahead and apply a 20 period moving average"
+R indicator E 01:28 | A shorter-period RSI, to be more nimble. | "I like to use a shorter period RSI to make it more nimble with current price action"
+R entry E 01:28,02:08 | With the averages aligned, wait for a pullback with an oversold reading and buy. | "I'm going to be looking for an oversold condition within these moving averages being aligned"
+R stop E 02:08 | Stop below the market-structure support to the left; risk 1% a trade. | "I'm going to also use stop losses based on a market structure point"
+R exit E 03:36,12:46 | No take-profit: trail the stop below market structure as new highs form. | "I'm going to actually trail my stop below market structure here"
+R entry E 02:54,09:14 | Shorts mirror when the averages turn down, at an overbought reading. | "we are starting to get an overbought reading. Let's take another short position"
+R market A - | Desk version: Delta XAUTUSD (gold) on daily candles of the desk's trading day. The daily averages need 50 sessions of the desk's own history before the first signal. | ""
+R entry A - | SMA 20 and SMA 50, and RSI(7) as 'a shorter period'. Long when SMA 20 is above SMA 50 and RSI(7) closes at or below 30; short when SMA 20 is below SMA 50 and RSI(7) closes at or above 70. Enter at the next open, one position at a time. | ""
+R stop A - | The first stop sits 0.1% beyond the lowest low (highest high) of the last 10 daily bars. It then trails to each newly confirmed swing low (high) of two bars each side when that is tighter. No target; positions are held overnight. | ""
+T with_assumptions | the RSI period, the first average's type and 'market structure' are not stated (A); his fundamental filter and the add-on position are not coded
+C return_pct | 18:34 | 15.37% | about two years of daily gold, 12 trades | "So, 15.37%. It's not too bad."

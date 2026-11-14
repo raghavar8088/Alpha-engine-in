@@ -1,0 +1,14 @@
+video: LsC2IokcYpc
+topic: crypto
+summary: Faiz SMC's gold volume-profile scalp. Draw a fixed-range volume profile on 5 minutes from 03:00 to 07:00 New York (value area high, value area low, point of control). Failed auction: a 5-minute close below the value area low, then an instant close back above it. Buy at once or on the retest, targeting the value area high, with break-even or a partial at the POC and the stop beyond the excursion; mirror at the value area high. Breakout: if price instead builds a new balance outside the value area, trade the break away from it. The profile's shape (P, b, D) sets the bias, and he wants at least 1:2.
+instruments: Gold (XAUUSD)
+timeframes: 5m
+style: scalping
+= FZ-05 | Gold 03:00-07:00 New York profile: a close outside the value area and an instant reclaim, target the other edge, partial at the POC
+R setup E 10:55 | A fixed-range volume profile on 5 minutes from 03:00 to 07:00 New York on gold (value area high, low and POC). | "draw out your volume profile on the 5-minute time frame from 3:00 a.m. till 7:00 a.m. on gold"
+R entry E 03:41,04:25 | Failed auction: a 5-minute close below the value area low, then a close back above it; buy (or on the retest) toward the value area high, with break-even or a partial at the POC. | "We need a candle to close below the value area low, not wick, just close"
+R stop E 05:09 | Stop beyond the excursion's extreme. | "your stop loss is always going to go above the high or the low"
+R entry E 08:42,09:28 | Breakout: if price builds a new balance outside the value area, trade the break away from it. | "if price stays below the value area low for quite a long time"
+R target E 14:37 | He wants at least 1:2. | "if you're just going for like 0.7 RR, it's not going to be beneficial for you. So, one to two"
+T with_assumptions | the profile shape and 'instant' reclaim are judged by eye; gold has no real volume on the desk
+D JR-02 | the value-area failure fade (a close back inside the value area, targeting the other edge) is already coded (the 20-channel study's JR-02, on bitcoin's 09:30-09:45 profile)

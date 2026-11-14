@@ -1,0 +1,18 @@
+video: pSog5mibYWE
+topic: crypto
+summary: The Trading Channel (Steven Hart) explains his 4-hour swing strategy, built on CEST: conditions, entries, stops, targets. On the daily chart, an uptrend starts only when the highest high made above the 50 EMA is broken (a 'one-two-three' move); the broken high becomes the zone for buys. Downtrends mirror this with lows below the 50 EMA, and everything in between is consolidation. When price pulls back to the zone, he looks on the 4-hour (or 1-hour) chart for a candlestick combination: a shooting star, hammer or engulfing candle followed by a candle in the trade's direction. He enters at the close of that second candle, with the stop beyond the pattern or zone (an ATR, or about 20 pips on the 4-hour) and a 2:1 target. He uses it on forex, crypto and stocks.
+instruments: Forex pairs, crypto, stocks
+timeframes: 1d trend, 4h (1h) entries
+style: swing
+= TT-02 | Daily trend from the break of the highest high above the 50 EMA, a 4-hour candle combination at the broken level, 2:1
+R timeframe E 00:54 | Trade on the 4-hour chart; the trend and levels come from the daily chart. | "this is a strategy I trade on the 4-hour chart, but all my pre-emptive analysis for this strategy is done on the daily chart"
+R setup E 02:57,06:27 | An uptrend starts once the highest high made above the 50 EMA is broken; that broken high is the zone for buys (mirror with lows below the 50 EMA). | "Once I see the highest high that was above the 50 EMA broken, then I know not only that we are in an uptrend now"
+R entry E 10:47,16:24 | At the zone, a candlestick combination: a shooting star, hammer or engulfing candle followed by a candle in the trade's direction; enter at the close of the second candle. | "a candlestick pattern combination is something like a shooting star candle followed by a red candle"
+R stop E 13:31,14:12 | Stop beyond the zone or the pattern (an ATR, or about 20 pips on the 4-hour chart). | "let's just say you go 20 pips above the high of the candlestick pattern"
+R target E 14:12 | Target 2:1. | "let's say you use something like a 2:1 reward to risk ratio"
+R market E 21:24 | He also uses it on crypto and stocks. | "This isn't something that just works in forex. I've used this in crypto and in stocks as well."
+R market A - | Desk version: Delta BTCUSD and XAUTUSD (gold), with daily bars of the desk's trading day for the trend and 4-hour bars for entries. Gold needs about 50 sessions of the desk's own history before its first daily trend. | ""
+R setup A - | Take the highest high of the prior 20 sessions that closed above the 50 EMA: a daily close above it starts (or renews) the uptrend and makes it the zone (for shorts, the lowest low of the prior 20 sessions that closed below the EMA). The zone lasts until the opposite break. | ""
+R entry A - | On 4-hour bars, a bar touching the zone (within 0.3%) starts a six-bar watch. A hammer or bullish engulfing candle followed by a green close enters at the next open (for shorts, a shooting star or bearish engulfing then a red close). | ""
+R stop A - | Stop half a 4-hour ATR(14) beyond the pattern's extreme; target 2R; one position at a time. | ""
+T with_assumptions | the pattern tests, the zone tolerance and the ATR stop are ours (A)

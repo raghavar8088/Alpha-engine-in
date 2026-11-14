@@ -1,0 +1,11 @@
+video: IBi3vM0woZE
+topic: crypto
+summary: Benjamin Cowen explains Heikin-Ashi candles (close = the average of open, high, low and close; open = the midpoint of the previous candle) and uses weekly to two-month Heikin-Ashi charts to read bitcoin's momentum shifts. Uptrends show large bodies, long upper shadows and no lower shadows, and downtrends the reverse. Sideways stretches that feel like downtrends show up clearly. The candles lag, but they help holders stay with a trend. He counts the run of green two-month candles in past cycles and ties this to his cycle view; no trade rules are given.
+instruments: Bitcoin, Ether
+timeframes: 1w to 2M
+style: positional
+= BC-02 | Weekly Heikin-Ashi candles to read bitcoin's trend: large bodies without lower shadows mean an uptrend (a view, not rules)
+R indicator E 02:51,03:33 | Heikin-Ashi close = the average of open, high, low and close; the open is the midpoint of the previous candle. | "it's the average price so it's divided by four"
+R setup E 06:24 | Uptrends show large bodies, long upper shadows and no lower shadows; downtrends the reverse. | "an uptrend large candle bodies long upper shadows no lower shadows"
+R setup E 04:56 | They lag, but show the general up and down trends clearly. | "it is a bit of a lagging indicator"
+T concept_only | a way to view the trend on weekly to two-month candles; no entry, stop or exit is given

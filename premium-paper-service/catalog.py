@@ -558,10 +558,22 @@ YC3_STRATEGIES = (
     ('TD-11', 'First pullback to the previous session\'s point of control after price moves away, 1:1 at 15% of ADR', 'Trader Dale', ('EURUSD', 'GBPUSD', 'BTCUSD')),
     ('TD-12', 'Week-anchored VWAP: the first pullback after 12 closes away from it, 1:1 at 15% of the daily range', 'Trader Dale', ('EURUSD', 'GBPUSD', 'BTCUSD')),
     ('DX-01', 'Limit at 70% of a structure-breaking impulse, stop at 100%, half at 38.2% with break-even, rest at 10%', 'Doyle Exchange', ('XAUUSD', 'EURUSD', 'GBPUSD')),
+    # the fifth batch (14 Nov 2026: the owner's fourth list, crypto and gold); trades from settings.YC3E_START_T
+    ('NK-02', 'Daily gold: SMA 20 over SMA 50 and RSI (7) at 30 or below (mirror), 10-day-low stop trailed to new swing lows', 'TraderNick', ('XAUUSD',)),
+    ('RT-02', '4-hour bitcoin: close above the Bollinger Band (200, 4) over the 300-bar average, out under the (200, 0.5)', 'Rayner Teo', ('BTCUSD',)),
+    ('TT-02', 'Daily break of the highest high above the 50 EMA, a 4-hour candle combination at the broken level, 2R', 'The Trading Channel (Steven Hart)', ('BTCUSD', 'XAUUSD')),
+    ('TC-04', '5-minute EMA 100 trend, a close outside the opposite Bollinger Band (20, 1) back inside within 3 bars, 3R', 'Tradeciety', ('XAUUSD', 'BTCUSD', 'ETHUSD')),
+    ('BX-01', 'First green Heikin Ashi candle with MFI (14) at 20 or below, out on the first red one after MFI 80 (long only)', 'Bitcoin Trading Challenge', ('BTCUSD', 'ETHUSD')),
+    ('BX-02', 'TradingView Pivot Reversal (4, 2) on 1-hour bars: stop orders at the latest pivots, stop and reverse', 'Bitcoin Trading Challenge', ('BTCUSD', 'ETHUSD')),
+    ('CB-01', '1-hour swing trend, a 5-minute structure shift after a retrace to a new swing, half at 1R, rest at 2R', 'Crypto Banter', ('BTCUSD', 'ETHUSD')),
+    ('VS-02', '4-hour gold: SMA 9 over EMA 20 confirmed by the next close, 2 ATR stop trailed at EMA 20 - 1 ATR (long only)', 'VasilyTrader', ('XAUUSD',)),
+    ('VS-03', 'Gold weekend gap of 0.15% or more: a 1-hour close beyond the 6-bar box toward it, target last week\'s close', 'VasilyTrader', ('XAUUSD',)),
+    ('FL-02', 'Williams Alligator: the 5-minute candle clear of all three lines and engulfing, with the 1-hour EMA 50, 1R', 'Forex Trading Lions', ('XAUUSD', 'BTCUSD', 'ETHUSD')),
 )
 YC3B_IDS = frozenset(('MC-01', 'MC-02', 'AO-01', 'KT-01', 'KG-01', 'KG-02', 'AO-02', 'CR-02', 'QC-03', 'CT-03', 'KS-01', 'DE-09', 'CT-02', 'CT-01', 'SK-01', 'CH-01', 'CH-02', 'QC-01', 'CV-01', 'KR-01', 'TN-02', 'AC-02', 'CR-01'))
 YC3C_IDS = frozenset(('FY-01', 'FY-02', 'AO-03', 'US-01', 'US-02', 'KS-02', 'VV-01', 'VV-02', 'BJ-01', 'KT-02', 'BJ-02', 'CD-01', 'DE-10', 'CD-02', 'RT-01'))
 YC3D_IDS = frozenset(('BT-01', 'PL-01', 'LT-01', 'ET-01', 'ET-02', 'MB-01', 'BR-01', 'CI-21', 'CI-22', 'SP-02', 'FP-01', 'TM-01', 'QI-02', 'QI-01', 'MS-01', 'AV-01', 'FS-01', 'TT-01', 'TD-11', 'TD-12', 'DX-01'))
+YC3E_IDS = frozenset(('NK-02', 'RT-02', 'TT-02', 'TC-04', 'BX-01', 'BX-02', 'CB-01', 'VS-02', 'VS-03', 'FL-02'))
 for _sid, _name, _ch, _mkts in YC3_STRATEGIES:
     ACCOUNTS.append(_a(_sid, YC3, _name, _ch, *[(YC2_BOOK_MARKET.get(_m, _m), "V0") for _m in _mkts]))
 BY_ID = {a.id: a for a in ACCOUNTS}

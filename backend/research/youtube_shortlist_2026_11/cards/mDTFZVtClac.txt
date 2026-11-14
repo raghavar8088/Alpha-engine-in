@@ -1,0 +1,12 @@
+video: mDTFZVtClac
+topic: crypto
+summary: The Trading Parrot shows how he reads bitcoin each month with the monthly CPR (the 'Pivots Points CPR with MWD' indicator: pivot, top and bottom central pivots, resistances and supports). In a bull trend price typically touches the first resistance and comes back to test the pivot. A month that fails to reach the first resistance, or touches support instead, warns of weakness. A narrow ('tightening') CPR flags an impulsive move ahead. He never uses it alone: bitcoin seasonality and liquidation pools come first.
+instruments: Bitcoin
+timeframes: Monthly levels on the daily chart
+style: positional
+= PO-01 | Monthly CPR on bitcoin: R1 then back to the pivot in uptrends, failures to reach R1 as warnings, narrow CPR before impulses (reading model)
+R indicator E 03:34,04:17 | The monthly CPR (pivot, top and bottom central pivots, resistances and supports). | "remove everything else apart from monthly monthly pivots"
+R setup E 10:35,11:16 | In a bull trend price touches the first resistance and comes back to test the pivot; a short there can target the pivot. | "test the pivots so you could take a short there"
+R setup E 14:06 | A tightening (narrow) CPR flags an impulsive move ahead. | "flaged as tightening that means that an impulsive move is about to happen"
+R filter E 05:41 | He combines it with bitcoin seasonality and liquidation pools, never alone. | "I use it together with Bitcoin seasonality I use it with with liquidation pools"
+T concept_only | a monthly reading model he does not trade on its own; no entry, stop or exit rule is fixed

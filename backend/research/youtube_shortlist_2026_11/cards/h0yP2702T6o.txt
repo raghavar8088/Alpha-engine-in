@@ -1,0 +1,18 @@
+video: h0yP2702T6o
+topic: crypto
+summary: Fefe on Crypto Banter breaks down his crypto scalping. Read market structure on every timeframe (higher highs and lows, lower highs and lows) and trade only with the hourly trend: in an hourly downtrend only shorts. When price retraces into a rejection area, drop to the 5-minute (or 15-minute) and enter on a market structure shift in the trend's direction. The stop goes at the high of the rejection zone (about half a percent, run at 10-20x leverage). Take 1:1 to 1:2 and close half early. Liquidity (equal highs and lows, trend lines, sessions) shows where moves are heading.
+instruments: Bitcoin, altcoins
+timeframes: 1h trend, 5m-15m entries
+style: scalping
+= CB-01 | Hourly structure trend, a five-minute market structure shift after a retrace, stop at the rejection high, half off at 1R
+R setup E 05:39,07:07 | Market structure: higher highs and higher lows, or lower ones, on every timeframe. | "you're forming higher lows because this low is higher than the previous low"
+R filter E 08:30,14:49 | Trade with the hourly trend: in an hourly downtrend, only shorts. | "I know I'm looking for short positions shorts I don't look I'm not looking for for Longs"
+R entry E 09:55,19:43 | Enter on a lower-timeframe market structure shift in the trend's direction after a retrace into a rejection area. | "once the higher high happens you shift a trend it's called a market structure shift"
+R stop E 18:22,19:43 | Stop at the high of the rejection zone (about half a percent). | "can use the high of the rejection Zone"
+R target E 18:22 | Take 1:1 to 1:2; close half early. | "you can go to 1: one you can go to 1 to2"
+R timeframe E 16:58 | The 5-minute is the sweet spot for entries. | "but a 5 minutes is perfect"
+R market A - | Desk version: Delta BTCUSD and ETHUSD, with the 1-hour trend and 5-minute entries. | ""
+R setup A - | The 1-hour trend is down when its last two confirmed swing highs and lows (two bars each side) are both lower, and up when both are higher. | ""
+R entry A - | In a 1-hour downtrend, the 5-minute price first rallies to a new confirmed 5-minute swing high (the retrace). Then a 5-minute close below the latest confirmed 5-minute swing low is the shift: short at the next open (a trade above the retrace high first cancels it). Mirror for longs; at most 3 trades a day. | ""
+R stop A - | Stop 0.05% beyond the retrace's extreme; half off at 1R with the stop to break-even, the rest at 2R; out at the day's end. | ""
+T with_assumptions | 'rejection areas' and liquidity are read by eye; the structure tests are ours (A)

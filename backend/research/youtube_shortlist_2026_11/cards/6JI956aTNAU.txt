@@ -1,0 +1,11 @@
+video: 6JI956aTNAU
+topic: crypto
+summary: Mr P Fx trades gold live, trying to double a $1,000 account. On the 1-hour he maps support, resistance and order blocks and waits for a structural change. The 15-minute shows the reaction at the zone, and the 5-minute gives the confirmation and entry. He adds positions on each new lower low and tightens the stop after each add, ending above $2,000. The risk is openly aggressive.
+instruments: Gold (XAUUSD)
+timeframes: 1h, 15m, 5m
+style: scalping
+= MP-01 | Gold: 1-hour structure and order blocks, 15-minute reaction, 5-minute confirmation, adding on new lows (live challenge)
+R timeframe E 05:33,18:34 | Three timeframes: 1 hour for structure and order blocks, 15 minutes for the reaction, 5 minutes for confirmation and execution. | "we'll be using our 1 hour frame, which will tell us where gold should be heading"
+R setup E 02:08,02:49 | Map support, resistance and order blocks; wait for a structural change. | "created something we can call an order block"
+R management E 12:51 | Add a position on each new confirmation and tighten the stop each time. | "I'm adding one more sell"
+T concept_only | levels, order blocks and confirmations are read by eye in a live account challenge; positions are added at discretion

@@ -1,0 +1,11 @@
+video: I2I4EVPFoak
+topic: forex_us
+summary: MambaFx explains how he scalps forex mainly through trade management. Take a partial at 1:1, then trail the stop behind price: at 1:2 the stop moves to 1:1, and so on, so a 1:1 trade can run to 1:5 or more and can no longer lose. His five-minute entries come from support and resistance in the higher timeframe's direction (for example, a break above the moving averages with the stop just below) or from an 'M' double top targeting the pattern's low.
+instruments: Forex pairs
+timeframes: 5m (higher timeframe direction)
+style: scalping
+= MF-01 | Five-minute scalps at levels in the higher timeframe's direction, managed by trailing the stop from 1:1 onward (technique)
+R management E 02:05,02:48 | Trail the stop as the trade moves: a partial at 1:1, at 1:2 move the stop to 1:1, and keep going. | "as your trade starts to move into profit you're going to bring your stop-loss and trail it"
+R entry E 07:43,09:13 | Five-minute entries at support or resistance in the higher-timeframe direction, e.g. on a break above the moving averages. | "as we broke above our moving averages take our long position with our stops just below"
+R setup E 10:35,11:16 | An 'M' (double top) targets the bottom of the pattern. | "whenever the market makes an m uh it's pretty obvious what's going to happen"
+T concept_only | a trailing-stop technique around setups picked by eye; no fixed entry rule

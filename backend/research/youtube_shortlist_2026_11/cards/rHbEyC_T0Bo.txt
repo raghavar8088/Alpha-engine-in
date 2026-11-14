@@ -1,0 +1,14 @@
+video: rHbEyC_T0Bo
+topic: crypto
+summary: Lark Davis shows three daily crypto breakout trades. One: a downtrend line drawn along the lower peaks breaks (often after a first fakeout), then retests. Two: an all-time-high breakout on a daily candle close, with the stop just under the old high. Three: a resistance breakout to the next resistance level, where broken resistance turns into support. He prefers daily and weekly charts and expects some stops on fakeouts. The examples are bitcoin, Sui and Dogecoin.
+instruments: Bitcoin, Sui, Dogecoin
+timeframes: 1d, 1w (4h at most)
+style: swing
+= LD-01 | Daily crypto breakouts: downtrend line, all-time high and resistance, stop just under the broken level
+R setup E 00:43,01:25 | Downtrend-line break: a line along the lower peaks; the second break after a fakeout carried. | "we came to a point where we got over the downtrend line"
+R entry E 07:06,09:19 | All-time-high breakout on the daily candle close. | "daily candle boom that's where you make your entry"
+R entry E 10:05,11:31 | Resistance breakout: go long over resistance, targeting the next resistance. | "you could have gone long at this situation with price targets up to the next area of price resistance"
+R stop E 08:39,09:19 | Stop just below the broken line; first attempts often fake out. | "put your stop loss down here around 210 just under the Orange Line"
+R timeframe E 04:12 | Daily or weekly charts (4-hour at most). | "I don't like to go really below daily charts personally"
+T with_assumptions | trend lines and levels are drawn by eye
+D CP-02 | a daily close beyond the last swing high with the stop under the broken level is already coded (CP-02, the power-candle breakout of the last swing; YT-17)

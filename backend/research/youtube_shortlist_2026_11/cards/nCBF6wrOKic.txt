@@ -1,0 +1,14 @@
+video: nCBF6wrOKic
+topic: crypto
+summary: Trade with Pat's gold scalping strategy for two hours a day. Stay in buy-only mode on gold while the weekly chart trends up. Mark the first 15-minute candle of the New York session (09:30-09:45) as the opening range. On 5 minutes, a break and close above the top confirms buys. Three entry models: a retest of the range top after an impulsive move, the range midline, or a fair value gap left by the impulse. Price above the 200 EMA is an extra confirmation. The stop goes below the range or the EMA, a partial comes off at 1:1, and the target is the next resistance. Three live examples follow.
+instruments: Gold (XAUUSD)
+timeframes: 15m range, 5m entries
+style: scalping
+= TP-06 | Gold buy-only New York 15-minute opening range: close above, enter at the top retest, midline or fair value gap, stop below the range
+R filter E 00:44 | Gold: buy-only mode while the weekly chart trends up. | "Step one, we are in buy only mode on gold"
+R setup E 01:32,02:12 | The opening range is the first 15-minute candle, 9:30-9:45 New York. | "Time period 15 minutes, custom range, 9:30 to 9:45"
+R entry E 02:52,03:33 | On 5 minutes, a close above the range top confirms buys; enter on the retest of the top, the midline or a fair value gap. | "these are the three entry models I found most profitable for trading gold"
+R filter E 06:24 | Price above the 200 EMA as an extra confirmation. | "I'm using the 200 period EMA"
+R stop E 09:20,10:46 | Stop below the range (or the EMA); a partial at 1:1, the target at resistance. | "We could put our stop loss below the range right there"
+T with_assumptions | the entry model and the target level are chosen by eye
+D TP-04 | the New York 15-minute ORB with limits at the edge, midline or far side is already coded from this channel (the 20-channel study's TP-04)

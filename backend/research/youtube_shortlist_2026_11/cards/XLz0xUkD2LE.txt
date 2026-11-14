@@ -1,0 +1,17 @@
+video: XLz0xUkD2LE
+topic: crypto
+summary: Bitcoin Trading Challenge walks through TradingView's built-in Pivot Reversal strategy on bitcoin. Its arrows give the candle and the exact price to buy or sell at the latest pivot. The most recent arrow tells the market state: up means bullish, down bearish. It keeps you in trends and cuts wrong trades early. He checks sentiment (longs, shorts, open interest) before following a signal. On TradingView's strategy tester the 1-hour beats the 5-minute (fewer signals, lower fees, bigger moves), with net profit about three times buy and hold on the hourly chart.
+instruments: Bitcoin
+timeframes: 1h (5m tested)
+style: intraday
+= BX-02 | TradingView's Pivot Reversal: stop orders at the latest confirmed pivot high and low, stop and reverse, on hourly bitcoin
+R indicator E 00:01 | TradingView's Pivot Reversal strategy: pivot points mark momentum shifts and reversal zones. | "we're me talking about the pivot reversal strategy and this is an indicator you can find on trading view"
+R entry E 01:23,02:05 | Its arrows give the candle and the price to buy and to sell. | "the side arrow is telling us the price that it was indicated to buy or to sell out"
+R setup E 06:20,07:03 | The latest arrow tells the market state: up is bullish, down is bearish. | "when the most recent indication is down what that tells us is that we are currently in a bearish market"
+R timeframe E 09:14 | The 1-hour on bitcoin beats the 5-minute. | "the one hour is leagues better than the 5-minute"
+R filter E 03:29,04:13 | He also checks sentiment (longs, shorts, open interest) before following a signal. | "let's talk about sentiment and combining that with PRS"
+R market A - | Desk version: Delta BTCUSD and ETHUSD on 1-hour bars. | ""
+R entry A - | TradingView's default settings, 4 bars left and 2 right. Once a pivot high is confirmed, a buy-stop one tick above it rests (re-placed at each hourly close while the price is below it) until the next pivot high replaces it; a sell-stop sits under the latest pivot low the same way. When the opposite level is crossed, the position stops there and the reverse order fills at the open two minutes later (the desk closes the old position first), so it is almost always in the market. | ""
+R stop A - | The opposite pending level is the stop (the latest pivot low for longs). The sentiment check is not coded (no feed). | ""
+T with_assumptions | the indicator's default settings (4 left, 2 right) are assumed; the sentiment check needs data the desk does not have
+C other | 08:33 | net profit about three times buy and hold | bitcoin 1-hour, TradingView strategy tester | "that's about three times more than just buying and holding"

@@ -1,0 +1,19 @@
+video: dQh-WXMI0SE
+topic: crypto
+summary: Forex Trading Lions backtests a Williams Alligator scalp 100 times on 5-minute charts. Buy when all three Alligator lines (default settings) are below the candles and a bullish engulfing candle forms; sell the mirror on a bearish engulfing. The stop goes just beyond the three lines (about 6-7 pips) and the target is 1:1. Untuned on EUR/USD (under a month), it won 62% of 100 trades for +26% with a profit factor of 1.63. Taking only trades with the overall trend lifted that to 71% and +51% (profit factor 2.45), and to 82% on USD/JPY. A runner can move to break-even at the first target and exit when candles cross the middle line.
+instruments: EUR/USD, USD/JPY (all pairs)
+timeframes: 5m (1m shown live)
+style: scalping
+= FL-02 | Williams Alligator: all three lines on one side plus an engulfing candle, with the trend only, stop beyond the lines, 1:1
+R indicator E 00:49 | The Williams Alligator with its default settings. | "want to change any of them at all"
+R entry E 00:49,01:32 | Buy when all three Alligator lines are below the candles and a bullish engulfing candle forms; sell the mirror. | "for a buy position we want all three alligator lines over here to be below the candlesticks"
+R stop E 00:49,01:32 | Stop just beyond the three lines (about 6-7 pips); target 1:1. | "we want our stop loss to be below all three moving averages"
+R filter E 03:03,03:47 | Trade only with the overall trend (only sells in a downtrend). | "if we follow the overall trending Direction"
+R management E 05:11,05:52 | At the first target, move the stop to the entry; a runner can exit when candles cross the middle line. | "once we reach our first take profit move stop loss to entry"
+R market A - | Desk version: Delta XAUTUSD (gold), BTCUSD and ETHUSD on 5-minute candles. Alligator: SMMA 13, 8 and 5 of the median price, shifted 8, 5 and 3 bars. | ""
+R filter A - | The overall trend: the 1-hour close above its EMA 50 for buys (below for sells). | ""
+R entry A - | Long: the 5-minute candle's low is above all three lines and it is a bullish engulfing candle; enter at the next open. Mirror for shorts; at most 3 trades a day. | ""
+R stop A - | Stop 0.02% beyond the farthest of the three lines at the signal bar; target 1R; out at the day's end. | ""
+T with_assumptions | 'the overall trend' as the 1-hour EMA 50 side is ours (A); the runner is not coded
+C win_rate | 03:03 | 62% of 100 trades, profit factor 1.63 | EUR/USD 5-minute, under a month | "win rate 62% which is really surprising"
+C win_rate | 03:47 | 71% of 100 trades with the trend filter, profit factor 2.45; 82% on USD/JPY | EUR/USD and USD/JPY 5-minute | "71% win rate profit and loss 51%"

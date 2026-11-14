@@ -1,0 +1,10 @@
+video: 4XdpTQdOl0c
+topic: forex_us
+summary: Mr P Fx trades his 'step pattern' live on a $29,000 account aiming for $10,000: an impulsive move, a consolidation or pullback, then buying aggressively when price taps the pullback level, expecting the next impulsive leg. Most of the video is waiting for the move with large, stacked positions; he warns viewers not to risk that much.
+instruments: Gold and forex
+timeframes: 5m
+style: scalping
+= MP-02 | 'Step pattern': an impulsive move, a pullback, buy when the pullback level is tapped (live trade)
+R setup E 01:31 | The step pattern: an impulsive move, then a consolidation or a pullback. | "what are we noticing next? We notice what we call a consolidation"
+R entry E 03:00 | When the pullback taps the level, buy aggressively. | "Immediately it tapped on our level"
+T concept_only | a live trade with very large risk; the level and the pattern are chosen by eye

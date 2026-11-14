@@ -1,0 +1,13 @@
+video: Ei0MtKztZtA
+topic: crypto
+summary: Faiz SMC's mechanical gold model, using New York time. Before the 8:00 p.m. open, mark the most recent unswept 15-minute high and low. After the open, wait for one to be swept, then drop to the 1-minute for a market structure shift with displacement (one that leaves a fair value gap). Enter at once or at the gap, with the stop beyond the sweep; target 1:2, taking break-even and a small partial at 1:1. When that trade is done, the 9:00 p.m. open runs the same model. Entries must come before midnight, with at most two trades a day.
+instruments: Gold (XAUUSD)
+timeframes: 15m levels, 1m entries
+style: scalping
+= FZ-04 | Gold 8 PM / 9 PM New York: a sweep of the latest 15-minute high or low, then a 1-minute shift with displacement, 1:2
+R setup E 01:26,02:09 | Gold only, New York time: before the 8:00 p.m. open, mark the most recent unswept 15-minute high and low. | "identifying the most recent high and the most recent low"
+R entry E 02:51,03:34 | After one is swept, a 1-minute market structure shift with displacement (a fair value gap): enter right away or at the gap. | "we simply drop down to 1 minute time frame and we are simply looking for a market structure shift with displacement"
+R target E 04:18,05:45 | Target 1:2 (break-even with a small partial at 1:1); then the 9:00 p.m. model the same way. | "target 1 to2 or R"
+R no_trade E 06:29 | Entries only before midnight; at most two trades a day. | "your entry must be before the midnight open"
+T with_assumptions | the 'most recent' levels and the displacement are read by eye
+D FZ-01 | the 8 PM / 9 PM New York model on gold is already coded from this channel (the 20-channel study's FZ-01)

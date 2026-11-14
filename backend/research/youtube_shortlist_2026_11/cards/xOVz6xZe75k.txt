@@ -1,0 +1,20 @@
+video: xOVz6xZe75k
+topic: crypto
+summary: Tradeciety's five-minute trend-continuation strategy for forex, indices, crypto, commodities and gold. An EMA 100 sets the side: above it only longs, below it only shorts. Bollinger Bands use one standard deviation. After a strong trend wave, look for a correction that closes outside the opposite band but cannot stay there: back inside within two or three candles. Then enter on the break into a new high (new low for shorts), or a break and retest. The stop goes behind the break candle, or more conservatively beyond the opposite band. The target is a fixed 3:1 or 4:1, or a trail along the outer band until a close back inside it. His examples show 4.5R, 2.8R and 6.5R.
+instruments: Forex, indices, crypto, commodities, gold
+timeframes: 5m
+style: intraday
+= TC-04 | Five-minute trend continuation: EMA 100 side, a correction closing outside the opposite Bollinger Band (20, 1) that returns within three candles, buy the break of the swing high, 3R
+R indicator E 00:02 | EMA 100 as the trend filter and Bollinger Bands with one standard deviation. | "change it to 100 this is our long-term Trend filter"
+R filter E 00:02,00:44 | Above the EMA only longs, below it only shorts. | "if the price is above the moving average we are only looking for long opportunities"
+R setup E 00:44,05:50 | After a strong trend wave, the correction closes outside the opposite band. | "the characteristics that we're looking for in this specific strategy on the pullback is a move outside of the opposite side of the Ballinger band"
+R setup E 03:42,06:37 | The correction must not stay outside: price is back inside within two or three candles. | "we are back inside of the Ballinger band within just three candles this is very important"
+R entry E 01:27,06:37 | Enter on the break into a new high (new low for shorts) after the correction. | "wait for the price to break into the new low this happens here this could have been a theoretical trade entry"
+R stop E 01:27,05:07 | Stop behind the break candle, or conservatively beyond the opposite band. | "you can just put it behind the break candle or even all the way on the opposite side of the Ballinger bands"
+R target E 01:27,02:10 | A fixed 3:1 or 4:1, or a trailing stop along the outer band. | "you can either work with a fixed reward risk ratio such as 3 to1 4:1"
+R market E 00:02 | Forex, crypto, commodities and gold on five-minute charts. | "Forex but also on markets such as crypto Commodities and gold"
+R market A - | Desk version: Delta XAUTUSD (gold), BTCUSD and ETHUSD on five-minute bars. | ""
+R entry A - | Long setup: the close is above the EMA 100, and at least 6 of the previous 12 bars closed above the middle band (the trend wave). A close below the lower band (20, 1) starts the correction, which must close back inside within 3 bars. Then a buy-stop one tick above the highest high of the 12 bars before the correction, live for 24 bars. Mirror for shorts; at most 3 trades a day. | ""
+R stop A - | Stop just beyond the correction's extreme (its lowest low for longs); target 3R; out at the day's end. | ""
+T with_assumptions | 'strong trend wave' and the breakout level are ours (A); the trailing-band exit is not coded
+C r_multiple | 02:57 | 4.5R and 2.8R on the examples, up to 6.5R | five-minute examples | "this is a 4.5 reward to risk ratio which is an exceptionally large outcome"
