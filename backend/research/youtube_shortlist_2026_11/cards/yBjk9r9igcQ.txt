@@ -1,0 +1,21 @@
+video: yBjk9r9igcQ
+topic: crypto
+summary: TRADING RUSH tests the Bollinger Bands + RSI reversal 100 times: after the RSI goes under 30, buy the first candle that closes clearly above the middle band (a slight touch does not count), stop below the lower band; after the RSI goes over 70, sell the first candle that closes clearly below the middle band, stop above the upper band; 1.5:1 reward to risk, without the 200 MA filter. About 35% winners, one of the worst results on the channel.
+instruments: forex and stocks (Trading Rush app)
+timeframes: intraday
+style: intraday
+= RU-07 | RSI under 30, then the first candle closing well above the Bollinger middle band, stop below the lower band, 1.5R (mirror for shorts)
+R entry E 01:24 | Buy at the first candle that closes above the middle band soon after the RSI was oversold. | "a buy entry signal is at the first candle that closes above the middle bollinger band, soon after RSI was over sold"
+R filter E 01:24 | Oversold: the RSI under 30. | "RSI value below 30 is considered to be over sold"
+R entry E 01:24 | A good portion of the candle must close above the middle band. | "a good portion of the candle has to close above the middle bollinger band, a slight touch will be considered as invalid"
+R entry E 01:24 | Sell: the first candle closing below the middle band ... | "a sell entry signal is at the first candle that closes below the middle bollinger"
+R filter E 02:07 | ... soon after the RSI was over 70. | "RSI value above 70 is considered as over bought"
+R stop E 02:07 | Stop below the lower band (above the upper band for shorts). | "You can set the stoploss below the lower bollinger band"
+R filter E 02:51 | No 200-period moving average filter. | "you cannot use the 200 period moving average to find the trend direction"
+R target E 06:24 | Reward to risk 1.5:1. | "With a reward risk ratio of 1.5 to 1, the win rate of the Bollinger Bands RSI strategy I got"
+R market A - | Desk version: bitcoin and gold (Delta XAUTUSD) on 30-minute candles, like the channel's other books (RU-06); out at the day's end. | ""
+R indicator A - | Bollinger (20, 2) and RSI (14), the default settings. | ""
+R entry A - | 'Soon after': a reading under 30 arms the long for 20 candles (a reading over 70 cancels it); 'a good portion': the close above the middle band with at least half of the candle's body above it; entry at the next open; one position at a time; mirror for shorts. | ""
+R stop A - | The stop is one tick beyond the outer band's value at the signal candle; target 1.5R. | ""
+T with_assumptions | 'soon after' and 'a good portion' are read as in the A rules; the timeframe and the markets are ours (A)
+C win_rate | 07:07 | about 35% winners at 1.5:1 | 100 trades | "in this backtest, was approximately 35 percent"

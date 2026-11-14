@@ -3,7 +3,7 @@ topic: crypto
 summary: Moonin Papa (a 3Commas ambassador) on whether DCA bots work (February 2022): a 3Commas bot that starts deals on his TBO breakout signal, places safety orders below the base order (base at 10, safety orders at 9, 8, 7) to average the buy price down, and closes the deal in profit on the bounce - a Kadena deal that opened at 10.01 closed 9% below its opening price. Never put 100% of the account into bots (keep at least 30% free); think of bots as small, steady gains that compound.
 instruments: Kadena (KDA); any crypto
 timeframes: Any
-style: bot
+style: swing
 = MN-08 | 3Commas DCA bot: TBO breakout deal start, safety orders below the base order, closed on the bounce
 R entry E 01:22 | Deals start on the TBO breakout. | "i'm using the tbo breakout to start all of my deals"
 R entry E 02:48 | Safety orders below the base order: a base at 10, then 9, 8 and 7. | "then you should be placing your additional buy orders at 9 8 7"

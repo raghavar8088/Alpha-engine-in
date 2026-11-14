@@ -1,0 +1,14 @@
+video: X50-c54BWV8
+topic: crypto
+summary: Algovibes codes a live Binance bot in Python (1-minute ADA/USDT): buy when the Stochastic %K (14, 3) and %D (3) both crossed below 20 within the last few candles and are now between 20 and 80, the RSI (14) is above 50 and the MACD is above its signal line; sell at +0.5% or -0.5%. He says the 25-candle look-back only provokes a demo trade and the exits are placeholders to tune.
+instruments: Cardano (ADA/USDT)
+timeframes: 1m
+style: scalping
+= AV-02 | Stochastic (14, 3, 3) back between 20 and 80 after both lines dipped under 20, RSI above 50, MACD above its signal, +0.5% / -0.5% (one minute)
+R entry E 00:01 | Buy when K and D are between 20 and 80, the RSI is above 50 and the MACD is above the signal line. | "so the k and d line has to be between 20 and 80 the rsi above 50 and the macd should be above the signal line"
+R setup E 00:01 | Trigger: within the last n candles both the K and the D line crossed below 20. | "the trigger condition is that in the last n time steps both the k and d line"
+R indicator E 03:47 | Stochastic window 14 with a smoothing of 3 (D = the 3-step average of K); RSI 14. | "the window of 14 days and we need a smooth window of three days"
+R stop E 00:43 | Stop at 99.5% of the buy price ... | "we are taking a certain amount for example 99.5 of the buying price as our stop-loss limit"
+R target E 00:43 | ... target 0.5% above it. | "we are reaching a target profit of 0.5 on top of the buying price"
+T with_assumptions | the look-back n is three or five (25 only for the demo) and the exits are placeholders he says to tune
+D DT-03 | the same Stochastic-oversold, RSI 50 and MACD-cross entry is already coded (the 20-channel study's DT-03, 1.5R on 30 minutes); his 0.5% exits on 1-minute bars are untuned placeholders

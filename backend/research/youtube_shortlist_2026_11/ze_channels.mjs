@@ -2,7 +2,8 @@
 // Indian intraday-stock channels - merged into one list of unique channels; a fourth list (13 Nov 2026) of 50 crypto
 // and gold channels adds 31 new ones (group 'gold' = gold / metals channels), and ten more crypto channels (14 Nov,
 // D51-D60) add nine, and ten more (D61-D70) add ten; the ranks 11-20 crypto list (14 Nov) adds one, SCryptoTrader
-// (D71; the other nine were already listed). Each row:
+// (D71; the other nine were already listed); the list 21-40 (14 Nov) adds 14 (D72-D91; six were already listed). Each
+// row:
 //   [key, name as listed, search query, star (owner's list marked it a priority), list positions, market group, earlier]
 // `earlier` names the study that already covered the channel (or screened and skipped it), so this study can skip
 // the videos it read. Market groups: in = Indian stocks / index / options, crypto, fx = forex and cross-market price
@@ -61,7 +62,7 @@ export const CHANNELS = [
   ['ukspreadbetting', 'UKspreadbetting', 'UKspreadbetting', 0, 'A33 D44', 'fx', ''],
   ['ict', 'The Inner Circle Trader - ICT', 'The Inner Circle Trader', 0, 'A34', 'fx', 'top20'],
   ['themovingaverage', 'The Moving Average', 'The Moving Average trading', 0, 'A35', 'fx', 'top20'],
-  ['tradingrush', 'Trading Rush', 'TRADING RUSH', 1, 'A36', 'fx', 'channels20'],
+  ['tradingrush', 'Trading Rush', 'TRADING RUSH', 1, 'A36 D81', 'fx', 'channels20'],
   ['traderdale', 'Trader Dale', 'Trader Dale', 0, 'A37', 'fx', ''],
   ['adamkhoo', 'Adam Khoo', 'Adam Khoo', 0, 'A38 D47', 'fx', 'top20'],
   ['akilstokes', 'Akil Stokes', 'Akil Stokes', 0, 'A39 D45', 'fx', ''],
@@ -122,14 +123,14 @@ export const CHANNELS = [
   ['tanjatrades', 'Tanja Trades', 'Tanja Trades', 0, 'B89', 'fut', ''],
   ['covetrader', 'Cove Trader', 'Cove Trader', 0, 'B90', 'fut', ''],
   // ── list 2: systematic trading and coding (91-100)
-  ['quantinsti', 'QuantInsti', 'QuantInsti', 1, 'B91 C49', 'sys', ''],
-  ['quantconnect', 'QuantConnect', 'QuantConnect', 1, 'B92', 'sys', ''],
+  ['quantinsti', 'QuantInsti', 'QuantInsti', 1, 'B91 C49 D90', 'sys', ''],
+  ['quantconnect', 'QuantConnect', 'QuantConnect', 1, 'B92 D91', 'sys', ''],
   ['parttimelarry', 'Part Time Larry', 'Part Time Larry', 1, 'B93 D56', 'sys', ''],
-  ['codetrading', 'CodeTrading', 'CodeTrading', 1, 'B94', 'sys', ''],
-  ['algovibes', 'Algovibes', 'Algovibes', 0, 'B95', 'sys', ''],
+  ['codetrading', 'CodeTrading', 'CodeTrading', 1, 'B94 D72', 'sys', ''],
+  ['algovibes', 'Algovibes', 'Algovibes', 1, 'B95 D73', 'sys', ''],
   ['kevindavey', 'Algo Trading With Kevin Davey', 'Kevin Davey algo trading', 1, 'B96', 'sys', ''],
   ['strategyquant', 'StrategyQuant', 'StrategyQuant', 0, 'B97', 'sys', ''],
-  ['artoftrading', 'The Art of Trading - Matthew J. Slabosz', 'The Art of Trading Matthew Slabosz', 1, 'B98', 'sys', ''],
+  ['artoftrading', 'The Art of Trading - Matthew J. Slabosz', 'The Art of Trading Matthew Slabosz', 1, 'B98 D80', 'sys', ''],
   ['quantpy', 'QuantPy', 'QuantPy', 0, 'B99', 'sys', ''],
   ['bettersystemtrader', 'Better System Trader', 'Better System Trader', 1, 'B100', 'sys', ''],
   // ── list 3: Indian intraday stock channels not in lists 1-2
@@ -215,6 +216,21 @@ export const CHANNELS = [
   ['cryptosavy', 'Crypto Savy', 'Crypto Savy', 0, 'D70', 'crypto', ''],
   // ── ranks 11-20 crypto list (14 Nov 2026): the one channel not listed before
   ['scryptotrader', 'SCryptoTrader - Arslan Afzal', 'SCryptoTrader', 0, 'D71', 'fut', ''],
+  // ── the list 21-40 (14 Nov 2026): 14 channels not listed before (D72-D91; six were already listed)
+  ['robottraders', 'Robot Traders', 'Robot Traders algorithmic trading', 1, 'D74', 'sys', ''],
+  ['quantnomad', 'QuantNomad', 'QuantNomad', 1, 'D75', 'sys', ''],
+  ['chadthackray', 'Chad Thackray', 'Chad Thackray vectorbt', 0, 'D76', 'sys', ''],
+  ['qubitquants', 'Qubit Quants', 'Qubit Quants', 0, 'D77', 'sys', ''],
+  ['pyquantnews', 'PyQuant News', 'PyQuant News', 0, 'D78', 'sys', ''],
+  ['tradescience', 'Trade Science', 'Trade Science walk forward', 0, 'D79', 'sys', ''],
+  ['altfins', 'altFINS', 'altFINS crypto', 1, 'D82', 'crypto', ''],
+  ['altrady', 'Altrady', 'Altrady crypto trading', 0, 'D83', 'crypto', ''],
+  ['wundertrading', 'WunderTrading', 'WunderTrading', 0, 'D84', 'crypto', ''],
+  ['threecommas', '3Commas', '3Commas official', 0, 'D85', 'crypto', ''],
+  ['cryptohopper', 'Cryptohopper', 'Cryptohopper', 0, 'D86', 'crypto', ''],
+  ['coinrule', 'Coinrule', 'Coinrule', 0, 'D87', 'crypto', ''],
+  ['bitsgap', 'Bitsgap', 'Bitsgap', 0, 'D88', 'crypto', ''],
+  ['secretmindset', 'The Secret Mindset', 'The Secret Mindset trading', 0, 'D89', 'fx', 'top20'],
 ];
 
 const ytdlp = (args, timeout = 300_000) =>

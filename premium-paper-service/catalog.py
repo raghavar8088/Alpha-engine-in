@@ -602,6 +602,18 @@ YC3_STRATEGIES = (
     ('SC-02', 'Cumulative delta divergence: a higher high (lower low) with a lower (higher) session CVD, close through, 2R', 'SCryptoTrader (Arslan Afzal)', ('BTCUSD',)),
     ('SC-03', 'Absorption at the previous day\'s low (high): a sweep candle with delta against its colour, a close back, 2R', 'SCryptoTrader (Arslan Afzal)', ('BTCUSD',)),
     ('SC-04', 'Exhaustion: a new 4-hour extreme on fading volume, a volume spike with delta against the candle, 2R', 'SCryptoTrader (Arslan Afzal)', ('BTCUSD',)),
+    # the ninth batch (14 Nov 2026: the owner's channel list 21-40); trades from settings.YC3I_START_T
+    ('CT-04', 'Larry Williams outside bar: a red (green) outside candle closing beyond the previous low (high), 250-pip stop, out at the next open once in profit', 'CodeTrading', ('EURUSD', 'GBPUSD')),
+    ('CT-05', 'EMA 100 and VWAP trend (six and three candles), a candle reaching close to the VWAP, 0.8 ATR stop, 2R', 'CodeTrading', ('BTCUSD', 'ETHUSD')),
+    ('CT-06', 'Hull MA 16 / 65 cross on 4 hours with the RSI above 52 and the daily close above its 50-day linear regression, out on the cross back', 'CodeTrading', ('BTCUSD',)),
+    ('CT-08', 'ADX regime switch: Bollinger re-entries in trend mode (ADX above 20, linear regression rising) and range mode (ADX below 16, RSI below 35), 5.5% target, 1.5% stop', 'CodeTrading', ('BTCUSD',)),
+    ('RB-01', 'Envelope mean reversion: a limit 7% from the 6-period Donchian midline, out at the midline, 40% stop, a 15% price-jump exit', 'Robot Traders', ('BTCUSD', 'ETHUSD')),
+    ('QN-01', 'SMA 25 / SMA 100 on 5 minutes, always in the market (stop and reverse)', 'QuantNomad', ('AAPL',)),
+    ('MS-03', 'Previous day\'s high / low breakout: OCO stop orders 3 pips beyond, 5-pip stop, 10-pip target', 'The Art of Trading (Matthew Slabosz)', ('EURUSD', 'GBPUSD')),
+    ('RU-07', 'RSI under 30, then the first candle closing well above the Bollinger middle band, stop below the lower band, 1.5R', 'TRADING RUSH', ('BTCUSD', 'XAUUSD')),
+    ('AN-01', 'EMA 12 crossing above the EMA 50 within two daily bars with the price above the EMA 12, out on the cross back', 'altFINS', ('BTCUSD',)),
+    ('WT-02', 'A close beyond the Keltner Channel with the DMI line of that side above 25, stop at the other band, 2R', 'WunderTrading', ('BTCUSD',)),
+    ('CU-01', 'MA 9 crossing above the MA 50 under a falling MA 50 / 100 / 200 stack, out when the MA 9 crosses above the MA 200 or at +8%', 'Coinrule', ('BTCUSD',)),
 )
 YC3B_IDS = frozenset(('MC-01', 'MC-02', 'AO-01', 'KT-01', 'KG-01', 'KG-02', 'AO-02', 'CR-02', 'QC-03', 'CT-03', 'KS-01', 'DE-09', 'CT-02', 'CT-01', 'SK-01', 'CH-01', 'CH-02', 'QC-01', 'CV-01', 'KR-01', 'TN-02', 'AC-02', 'CR-01'))
 YC3C_IDS = frozenset(('FY-01', 'FY-02', 'AO-03', 'US-01', 'US-02', 'KS-02', 'VV-01', 'VV-02', 'BJ-01', 'KT-02', 'BJ-02', 'CD-01', 'DE-10', 'CD-02', 'RT-01'))
@@ -610,6 +622,7 @@ YC3E_IDS = frozenset(('NK-02', 'RT-02', 'TT-02', 'TC-04', 'BX-01', 'BX-02', 'CB-
 YC3F_IDS = frozenset(('DD-01', 'DD-02', 'DD-03', 'DD-04', 'TL-06'))
 YC3G_IDS = frozenset(('TQ-01', 'TQ-02', 'TQ-03', 'JO-01', 'SA-01', 'SA-02', 'SA-03', 'BV-01'))
 YC3H_IDS = frozenset(('CG-03', 'CG-04', 'CG-05', 'TC-05', 'TC-08', 'TC-10', 'TC-11', 'TC-13', 'MN-05', 'TK-06', 'TK-07', 'TK-08', 'PL-03', 'PL-06', 'SC-02', 'SC-03', 'SC-04'))
+YC3I_IDS = frozenset(('CT-04', 'CT-05', 'CT-06', 'CT-08', 'RB-01', 'QN-01', 'MS-03', 'RU-07', 'AN-01', 'WT-02', 'CU-01'))
 for _sid, _name, _ch, _mkts in YC3_STRATEGIES:
     ACCOUNTS.append(_a(_sid, YC3, _name, _ch, *[(YC2_BOOK_MARKET.get(_m, _m), "V0") for _m in _mkts]))
 BY_ID = {a.id: a for a in ACCOUNTS}

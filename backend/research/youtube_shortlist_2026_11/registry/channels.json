@@ -1729,7 +1729,7 @@
   "name": "Trading Rush",
   "query": "TRADING RUSH",
   "star": true,
-  "lists": "A36",
+  "lists": "A36 D81",
   "group": "fx",
   "earlier": "channels20",
   "candidates": [
@@ -4390,7 +4390,7 @@
   "name": "QuantInsti",
   "query": "QuantInsti",
   "star": true,
-  "lists": "B91 C49",
+  "lists": "B91 C49 D90",
   "group": "sys",
   "earlier": "",
   "candidates": [
@@ -4441,7 +4441,7 @@
   "name": "QuantConnect",
   "query": "QuantConnect",
   "star": true,
-  "lists": "B92",
+  "lists": "B92 D91",
   "group": "sys",
   "earlier": "",
   "candidates": [
@@ -4542,7 +4542,7 @@
   "name": "CodeTrading",
   "query": "CodeTrading",
   "star": true,
-  "lists": "B94",
+  "lists": "B94 D72",
   "group": "sys",
   "earlier": "",
   "candidates": [
@@ -4591,8 +4591,8 @@
   "key": "algovibes",
   "name": "Algovibes",
   "query": "Algovibes",
-  "star": false,
-  "lists": "B95",
+  "star": true,
+  "lists": "B95 D73",
   "group": "sys",
   "earlier": "",
   "candidates": [
@@ -4742,7 +4742,7 @@
   "name": "The Art of Trading - Matthew J. Slabosz",
   "query": "The Art of Trading Matthew Slabosz",
   "star": true,
-  "lists": "B98",
+  "lists": "B98 D80",
   "group": "sys",
   "earlier": "",
   "candidates": [
@@ -8682,5 +8682,638 @@
   "pick_title": "SCryptoTrader",
   "pick_followers": null,
   "sure": true
+ },
+ "robottraders": {
+  "key": "robottraders",
+  "name": "Robot Traders",
+  "query": "Robot Traders algorithmic trading",
+  "star": true,
+  "lists": "D74",
+  "group": "sys",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCOoKHYcIsEQsiZAMyu5I68g",
+    "title": "Robot Traders",
+    "followers": 11100,
+    "about": "Algorithmic Trading: Learn the Craft or Get It Built. All content is educational. I am not a licensed financial advisor. I actively trade ..",
+    "score": 1
+   },
+   {
+    "id": "UCMecIwIIgAoj3Es80ZprOhg",
+    "title": "DWG ALGO",
+    "followers": 597000,
+    "about": "यह channel Forex Trading, XAUUSD/Gold Analysis, Algo Trading, Automated Trading, MT5 Trading Robots, Technical Analysis ...",
+    "score": 0
+   },
+   {
+    "id": "UCkGc7eYo8soWrmqV_LLw8og",
+    "title": "Best Trading Robots",
+    "followers": 1170,
+    "about": "Welcome to the 'Best Trading Robots Reviews' channel! Here you will find fresh and up-to-date comparison of trading robots with ...",
+    "score": 0
+   },
+   {
+    "id": "UCdJ3OOOoIyEy3SabxKbrPaw",
+    "title": "Algo Trading Space",
+    "followers": 25200,
+    "about": "Algo Trading Space (formerly EA Trading Academy) is a community-driven YouTube channel where top traders share their algo ...",
+    "score": 0
+   },
+   {
+    "id": "UC8_Y7jDQcyvpF87mbjrl_qA",
+    "title": "Unfiltered Finance With Sahil",
+    "followers": 51900,
+    "about": "Algo Backtest + Automate ANY trading strategy — equity, index, F&O, commodity, crypto, forex, gold & prop firm. Real data, real ...",
+    "score": 0
+   }
+  ],
+  "pick": "UCOoKHYcIsEQsiZAMyu5I68g",
+  "pick_title": "Robot Traders",
+  "pick_followers": 11100,
+  "sure": true
+ },
+ "quantnomad": {
+  "key": "quantnomad",
+  "name": "QuantNomad",
+  "query": "QuantNomad",
+  "star": true,
+  "lists": "D75",
+  "group": "sys",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UC57DoaeefbGM9nbcVA3V5mg",
+    "title": "QuantNomad",
+    "followers": 16500,
+    "about": "Ex-hedge fund quant building institutional-grade tools for traders. I teach AI-powered Pine Script, futures signals, and systematic ...",
+    "score": 1
+   },
+   {
+    "id": "UCjbUKFFbH0JYU94ONGDeM-A",
+    "title": "Lit Nomad",
+    "followers": 176000,
+    "about": "Hi I'm Tyler, a retired Hedge Fund quant and Ivy League alum. This channel is about alternative thinking and alternative living.",
+    "score": 0
+   },
+   {
+    "id": "UCK6SAQm_PfYAFyWuDoTmcAA",
+    "title": "taughttotrade",
+    "followers": null,
+    "about": "",
+    "score": 0
+   }
+  ],
+  "pick": "UC57DoaeefbGM9nbcVA3V5mg",
+  "pick_title": "QuantNomad",
+  "pick_followers": 16500,
+  "sure": true
+ },
+ "chadthackray": {
+  "key": "chadthackray",
+  "name": "Chad Thackray",
+  "query": "Chad Thackray vectorbt",
+  "star": false,
+  "lists": "D76",
+  "group": "sys",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UChQruMfFGJFdZTG6_mDHj5w",
+    "title": "Chad Thackray",
+    "followers": 23100,
+    "about": "Programming education for Traders If you'd like to contact me, you can do so through the email below. Check your spam filter if ...",
+    "score": 1
+   }
+  ],
+  "pick": "UChQruMfFGJFdZTG6_mDHj5w",
+  "pick_title": "Chad Thackray",
+  "pick_followers": 23100,
+  "sure": true
+ },
+ "qubitquants": {
+  "key": "qubitquants",
+  "name": "Qubit Quants",
+  "query": "Qubit Quants",
+  "star": false,
+  "lists": "D77",
+  "group": "sys",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UC4-ftWulYTU08yEtaaSIFJw",
+    "title": "Qubit Quants",
+    "followers": 369,
+    "about": "An open community for dedicated Quantitative and Algorithmic Trading practitioners to discuss, research and develop content ...",
+    "score": 1
+   },
+   {
+    "id": "UChUVnQrfsilKSyebmIyV5jg",
+    "title": "Qubit Quant",
+    "followers": 2,
+    "about": "Most channels talk. Ours shows the account. We build trading robots for MT5, then prove them the only way that counts — live, ...",
+    "score": 0.5
+   },
+   {
+    "id": "UCKRBOznpSWiizXIotf9KAuw",
+    "title": "QuantMan",
+    "followers": 10300,
+    "about": "Hi, this channel is created to explain all about the QUANTMAN platform in an easy and understandable manner and every video ...",
+    "score": 0
+   },
+   {
+    "id": "UCtFvh0haQ6ekMZIHuwOtp_g",
+    "title": "Quantum xd",
+    "followers": 98300,
+    "about": "Wanna Know Me ? Check the Content!",
+    "score": 0
+   },
+   {
+    "id": "UCnN_JDIbDiOR1FPr9rw-CrQ",
+    "title": "Quant Decoded",
+    "followers": 9,
+    "about": "Quantum computing, decoded. One idea at a time — plus the advances actually moving the field. New Shorts every day: qubits, ...",
+    "score": 0
+   }
+  ],
+  "pick": "UC4-ftWulYTU08yEtaaSIFJw",
+  "pick_title": "Qubit Quants",
+  "pick_followers": 369,
+  "sure": true
+ },
+ "pyquantnews": {
+  "key": "pyquantnews",
+  "name": "PyQuant News",
+  "query": "PyQuant News",
+  "star": false,
+  "lists": "D78",
+  "group": "sys",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCmLPW8ymLpFjrZPCc8DMkHQ",
+    "title": "PyQuant News 🐍",
+    "followers": 8850,
+    "about": "Real Python code for quant finance, algorithmic trading, and market data analysis. PyQuant News content is read by millions of ...",
+    "score": 1
+   }
+  ],
+  "pick": "UCmLPW8ymLpFjrZPCc8DMkHQ",
+  "pick_title": "PyQuant News 🐍",
+  "pick_followers": 8850,
+  "sure": true
+ },
+ "tradescience": {
+  "key": "tradescience",
+  "name": "Trade Science",
+  "query": "Trade Science walk forward",
+  "star": false,
+  "lists": "D79",
+  "group": "sys",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCIQ60AEcYg2S6Wa7VRyWAaQ",
+    "title": "Trade Science",
+    "followers": 1010,
+    "about": "Welcome to Trade Science, your go-to channel for reality based technical analysis, systematic trading systems, strategy ...",
+    "score": 1
+   },
+   {
+    "id": "UClsS3T1SnsX__1g9COtfKCQ",
+    "title": "SCI",
+    "followers": 576000,
+    "about": "",
+    "score": 0
+   },
+   {
+    "id": "UCkattYRzYsSjin1ESnb6Lmg",
+    "title": "Scientific Optimo Flow",
+    "followers": 87800,
+    "about": "Registered AP NSE Certificate No - INZ000006031 Scientific Optimo Flow Where Trading Meets Logic, Discipline & Real Market ...",
+    "score": 0
+   },
+   {
+    "id": "UCAjmh65eNIw-gH_6kXSSNww",
+    "title": "Meridian · The Science of Trading",
+    "followers": 34,
+    "about": "Trading psychology and decision science for serious day & futures traders. One money-losing mechanism per video, backed by ...",
+    "score": 0.5
+   },
+   {
+    "id": "UC8wuke6XZahXG9C01k6GlyA",
+    "title": "Scientific Trading Pro Institute ",
+    "followers": 14500,
+    "about": "The goal of Scientific Forex Pro is to use SCIENTIFIC PRICE ACTION SKILLS to decipher Forex and cryptocurrency trading.",
+    "score": 0
+   }
+  ],
+  "pick": "UCIQ60AEcYg2S6Wa7VRyWAaQ",
+  "pick_title": "Trade Science",
+  "pick_followers": 1010,
+  "sure": true
+ },
+ "altfins": {
+  "key": "altfins",
+  "name": "altFINS",
+  "query": "altFINS crypto",
+  "star": true,
+  "lists": "D82",
+  "group": "crypto",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCD9ITNcSok233Vov24gHpGQ",
+    "title": "altFINS",
+    "followers": 16000,
+    "about": "Register for free to unlock trade ideas: https://altfins.com/ altFINS helps crypto traders discover profitable trading ideas and ...",
+    "score": 1
+   },
+   {
+    "id": "UCgEDBbi8G-BX7-ox2pxfauw",
+    "title": "Crypto analysis with ALTFINS",
+    "followers": 2,
+    "about": "",
+    "score": 0.67
+   },
+   {
+    "id": "UCdHKXBlmx4neWqtPW9bDHsA",
+    "title": "Crypto altFINS Alerts™️",
+    "followers": null,
+    "about": "We give free signals and also teach trade ‍ Join us to grow your account and copy trade t.me/CryptoaltFINSAlerts ...",
+    "score": 0.67
+   },
+   {
+    "id": "UCC8Qtmx7CjTi-IxLB_aLuYA",
+    "title": "Richard Fetyko",
+    "followers": 6,
+    "about": "",
+    "score": 0
+   },
+   {
+    "id": "UCfPtiyyF0grxAI9Xri9coVA",
+    "title": "Finance AI Review",
+    "followers": 51800,
+    "about": "",
+    "score": 0
+   }
+  ],
+  "pick": "UCD9ITNcSok233Vov24gHpGQ",
+  "pick_title": "altFINS",
+  "pick_followers": 16000,
+  "sure": true
+ },
+ "altrady": {
+  "key": "altrady",
+  "name": "Altrady",
+  "query": "Altrady crypto trading",
+  "star": false,
+  "lists": "D83",
+  "group": "crypto",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UC4xRJbc8HZI-BcYkoL-TG-Q",
+    "title": "Altrady",
+    "followers": 10100,
+    "about": "Altrady is the Trading Operating System for Active Crypto Traders. Scan markets, analyze opportunities, execute and manage ...",
+    "score": 1
+   },
+   {
+    "id": "UC_609nQ4zACu8SbaVcK7z2w",
+    "title": "Altrady Live",
+    "followers": 36,
+    "about": "Welcome to Altrady Live — the live trading and education channel from Altrady. Join us for live market analysis, trading strategies, ...",
+    "score": 0.5
+   },
+   {
+    "id": "UCMEuECmO5SXl6LSqafNeSCg",
+    "title": "Altrady Nederland",
+    "followers": 111,
+    "about": "Welkom bij het Altrady YouTube-kanaal, de ultieme bestemming voor cryptocurrency-handelaren die hun handelsproces willen ...",
+    "score": 0.5
+   },
+   {
+    "id": "UC93CYUQp1Im69V3c7aK3WuQ",
+    "title": "Altrady - UA",
+    "followers": 159,
+    "about": "Розумна торгівля на всіх ваших біржах з однієї програми. Заощаджуйте години ручної торгівлі за допомогою нашої ...",
+    "score": 0.5
+   },
+   {
+    "id": "UConkhrbeRoxQV7GeUZP2F_g",
+    "title": "Altrady - Italy",
+    "followers": 112,
+    "about": "Trading intelligente su tutti i tuoi exchange da un'unica app. Risparmia ore di trading manuale grazie alla nostra automazione ...",
+    "score": 0.5
+   }
+  ],
+  "pick": "UC4xRJbc8HZI-BcYkoL-TG-Q",
+  "pick_title": "Altrady",
+  "pick_followers": 10100,
+  "sure": true
+ },
+ "wundertrading": {
+  "key": "wundertrading",
+  "name": "WunderTrading",
+  "query": "WunderTrading",
+  "star": false,
+  "lists": "D84",
+  "group": "crypto",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCdl34X83KuirjTQXx0hVHSg",
+    "title": "WunderTrading",
+    "followers": 21800,
+    "about": "Welcome to the official WunderTrading YouTube channel — your home for smarter, automated crypto trading. We help 210000+ ...",
+    "score": 1
+   },
+   {
+    "id": "UCetc6qT2E4_jcQHVB1iQA7w",
+    "title": "WunderTrading Бот",
+    "followers": 1650,
+    "about": "Канал о криптотрейдинге, торговых роботах и эффективных стратегиях для успешных инвестиций.",
+    "score": 1
+   },
+   {
+    "id": "UCGE98gH5mAjsLk538szMIfg",
+    "title": "Soltani samir",
+    "followers": null,
+    "about": "Welcome to TRADX 7 Discover the world of automated trading with WunderTrading. **Automated Trading Bots** Build, ...",
+    "score": 0
+   },
+   {
+    "id": "UCpgDadA5H5n5Z_JPyos2-fQ",
+    "title": "behailualemayehu",
+    "followers": 3,
+    "about": "",
+    "score": 0
+   },
+   {
+    "id": "UCqJPXLVT_B1_ZQnjMf2qGgw",
+    "title": "Humbleofweb3",
+    "followers": null,
+    "about": "",
+    "score": 0
+   }
+  ],
+  "pick": "UCdl34X83KuirjTQXx0hVHSg",
+  "pick_title": "WunderTrading",
+  "pick_followers": 21800,
+  "sure": true
+ },
+ "threecommas": {
+  "key": "threecommas",
+  "name": "3Commas",
+  "query": "3Commas official",
+  "star": false,
+  "lists": "D85",
+  "group": "crypto",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCig8XY-gsthRgM-zyv1nx6Q",
+    "title": "3Сommas",
+    "followers": 30700,
+    "about": "3Commas is a crypto trading automation platform trusted by millions of traders since 2017. It connects to 15+ exchanges in a safe ...",
+    "score": 0
+   },
+   {
+    "id": "UCXmLFznXvw7_Zp77Bmkpktw",
+    "title": "3coMMas - Official",
+    "followers": 2850,
+    "about": "",
+    "score": 1
+   },
+   {
+    "id": "UC2U7IlLSjDb3yH5oFryQ93Q",
+    "title": "DeadlyCrypto",
+    "followers": 2670,
+    "about": "On this channel I help others learn to trade! Here you will find everything from the basics to advanced trading strategies. I am sure ...",
+    "score": 0
+   },
+   {
+    "id": "UCzHyRmZfXrwXjL8an9QhSUw",
+    "title": "Cornix Trading Bot",
+    "followers": 17700,
+    "about": "Unlock the world of automated crypto trading with Cornix! Whether you're a novice or a pro, we've got you covered. Access ...",
+    "score": 0
+   },
+   {
+    "id": "UCCawMqMlLQFet_eRqfAUP3Q",
+    "title": "Алина Юрасова",
+    "followers": 4,
+    "about": "",
+    "score": 0
+   }
+  ],
+  "pick": "UCig8XY-gsthRgM-zyv1nx6Q",
+  "pick_title": "3Сommas",
+  "pick_followers": 30700,
+  "sure": true,
+  "override": "the official 3Commas channel (30.7k); the exact-title hit is a small mirror"
+ },
+ "cryptohopper": {
+  "key": "cryptohopper",
+  "name": "Cryptohopper",
+  "query": "Cryptohopper",
+  "star": false,
+  "lists": "D86",
+  "group": "crypto",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCBbjAhi-qFmJQMnS6iXEFmw",
+    "title": "Cryptohopper - Automated Crypto Trading Platform",
+    "followers": 12100,
+    "about": "Cryptohopper is the world's most customizable automated crypto trading bot. Configure your bot and let it run and trade according ...",
+    "score": 0.25
+   },
+   {
+    "id": "UCL0yhsvDty5qpwLyL3iroqw",
+    "title": "CryptoHopper Trading Bot",
+    "followers": 161,
+    "about": "I am trading Bitcoin and Cryptocurrency using the Cryptohopper.com automatic trading bots, signals, strategies, and AI.",
+    "score": 0.5
+   },
+   {
+    "id": "UCdi6ZrLfYXAtwCpNL-9vGgg",
+    "title": "Cryptohopper Español",
+    "followers": 815,
+    "about": "",
+    "score": 0.33
+   },
+   {
+    "id": "UC-m2y2zYg-uotKiBS62Lnjg",
+    "title": "Cryptohopper Nederland",
+    "followers": 47,
+    "about": "Het officiële Youtube kanaal van Cryptohopper, de toonaangevende trading bot op het gebied van cryptocurrency. Hier zullen we ...",
+    "score": 0.5
+   },
+   {
+    "id": "UCx3XrqbRMtjtgnh3OaEt0cg",
+    "title": "Cryptohopper Deutschland",
+    "followers": 41,
+    "about": "",
+    "score": 0.5
+   }
+  ],
+  "pick": "UCBbjAhi-qFmJQMnS6iXEFmw",
+  "pick_title": "Cryptohopper - Automated Crypto Trading Platform",
+  "pick_followers": 12100,
+  "sure": true,
+  "override": "the official Cryptohopper channel; the exact-title hit is a user's channel"
+ },
+ "coinrule": {
+  "key": "coinrule",
+  "name": "Coinrule",
+  "query": "Coinrule",
+  "star": false,
+  "lists": "D87",
+  "group": "crypto",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCCSylQq7Biq9xDEWR4QI1Mg",
+    "title": "Coinrule",
+    "followers": 2790,
+    "about": "Coinrule Catches the Next Market Opportunity on Your Behalf by Automating Your Crypto Investments With AI Agents Join The ...",
+    "score": 1
+   },
+   {
+    "id": "UCPS3Q7ycqYkFBuKdPSZ1Vxg",
+    "title": "Coinrule Review",
+    "followers": 32,
+    "about": "The channel is dedicated to Coinrule bot for cryptocurrency trading. Here we understand the work and how you can use the bot to ...",
+    "score": 0.5
+   },
+   {
+    "id": "UCIedyLXVomzxnfvLGuYndeA",
+    "title": "COIN RULE - торговый бот для бинарных опционов",
+    "followers": 1100,
+    "about": "Заядлый Кодер. Разработчик авто ботов и индикаторов для опционов! Трейдер с 2018 года. Торгую везде где только ...",
+    "score": 0
+   },
+   {
+    "id": "UCfPmjjemjjzQHNhdUoFepCA",
+    "title": "Coinrule Wealthmiser",
+    "followers": 2,
+    "about": "",
+    "score": 0.5
+   },
+   {
+    "id": "UCNBTwsl5eZ0oT1vt1pDWc4w",
+    "title": "COinrule бот для бинарных опции   обзор бота",
+    "followers": null,
+    "about": "Вот ссылка на переходите покупайте смотри те не пожалеете всем хорошего ...",
+    "score": 1
+   }
+  ],
+  "pick": "UCCSylQq7Biq9xDEWR4QI1Mg",
+  "pick_title": "Coinrule",
+  "pick_followers": 2790,
+  "sure": true
+ },
+ "bitsgap": {
+  "key": "bitsgap",
+  "name": "Bitsgap",
+  "query": "Bitsgap",
+  "star": false,
+  "lists": "D88",
+  "group": "crypto",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCPi-HyNRhwgjNhGMc7j0pPQ",
+    "title": "Bitsgap",
+    "followers": 20300,
+    "about": "Everything you need to know about automated crypto trading and how to trade futures efficiently. Bitsgap.com platform provides ...",
+    "score": 1
+   },
+   {
+    "id": "UCiCIk3I3lb7c4dYAiFje1Gw",
+    "title": "Bitsgap ",
+    "followers": 8,
+    "about": "",
+    "score": 1
+   },
+   {
+    "id": "UCWItz7ow9XlJWqFr8Z5Zx0g",
+    "title": "BitsGap Trade",
+    "followers": 1,
+    "about": "",
+    "score": 0.5
+   },
+   {
+    "id": "UCLRZZ8cdWAJPNMKHaF3gT9w",
+    "title": "MINES BitsGap V3.0",
+    "followers": 17,
+    "about": "",
+    "score": 0.33
+   },
+   {
+    "id": "UC_jJv-bbV1GBHSYwDxf1ejw",
+    "title": "Bitsgap Efficace",
+    "followers": 313,
+    "about": "Ici on parle de générer un revenu passif avec les cryptomonnaies grâce à la volatilité naturelle de ce marché, en utilisant les ...",
+    "score": 0.5
+   }
+  ],
+  "pick": "UCPi-HyNRhwgjNhGMc7j0pPQ",
+  "pick_title": "Bitsgap",
+  "pick_followers": 20300,
+  "sure": true
+ },
+ "secretmindset": {
+  "key": "secretmindset",
+  "name": "The Secret Mindset",
+  "query": "The Secret Mindset trading",
+  "star": false,
+  "lists": "D89",
+  "group": "fx",
+  "earlier": "top20",
+  "candidates": [
+   {
+    "id": "UC9yk_6ks1g1ipJJsxtLKLcA",
+    "title": "The Secret Mindset",
+    "followers": 998000,
+    "about": "You are here because the way you've been taught to trade isn't working. This channel is the antidote. No gurus, no lifestyle, ...",
+    "score": 1
+   },
+   {
+    "id": "UCpJF2U8-x7zJKzdrXUhkWNg",
+    "title": "తెలుగు Trading Secret",
+    "followers": 3760,
+    "about": "Welcome to Telugu Trading Secret! Are you struggling with consistent losses or find it hard to control your emotions while ...",
+    "score": 1
+   },
+   {
+    "id": "UClsS3T1SnsX__1g9COtfKCQ",
+    "title": "SCI",
+    "followers": 576000,
+    "about": "",
+    "score": 0
+   },
+   {
+    "id": "UCBKVf2eWgShfOmW04Okafcw",
+    "title": "Wealth Secret",
+    "followers": 1080000,
+    "about": "I have 4 years experience in Stock Market. Specially in Futures and Options.Now started Crypto Future Trading from last 2 Year.",
+    "score": 0.5
+   },
+   {
+    "id": "UCDQ4yQDStmq2Z7al_fpsEfA",
+    "title": "Secret mindset",
+    "followers": null,
+    "about": "Welcome to Secret Mindset! Success and financial freedom aren't just about working harder—they're about thinking smarter.",
+    "score": 1
+   }
+  ],
+  "pick": "UC9yk_6ks1g1ipJJsxtLKLcA",
+  "pick_title": "The Secret Mindset",
+  "pick_followers": 998000,
+  "sure": true,
+  "override": "The Secret Mindset itself; the search matched Wealth Secret first"
  }
 }

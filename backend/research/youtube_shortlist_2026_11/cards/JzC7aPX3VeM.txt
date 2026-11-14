@@ -1,0 +1,26 @@
+video: JzC7aPX3VeM
+topic: crypto
+summary: Robot Traders' envelope strategy on 1-hour BTC/USDT and other perpetuals (TradingView, about 3 years): a 6-period Donchian-midline average of the close with envelopes 7%, 11% and 14% away; resting limit orders at every band each candle, one third of the portfolio per band; every position exits at the average (updated each candle), with a 40% stop from the average entry, a 'price jump' close-all when a candle closes 15% beyond the one before, and no new trade after a stop or a jump until the price is back at the average. Bitcoin: about +150%, 80% winners, profit factor 16, a 4% equity drawdown (0.02% maker fees).
+instruments: Bitcoin; Ether; other perpetuals
+timeframes: 1h
+style: swing
+= RB-01 | Envelope mean reversion: a limit order 7% from the 6-period Donchian midline, out at the midline, 40% stop, a 15% price-jump exit (first envelope only)
+R timeframe E 00:03 | 1-hour BTC/USDT futures, about three years. | "a back test period of around 3 years on a 1H hour time frame BTC usdt Futures pair"
+R indicator E 04:21 | The average uses the close as its source ... | "this is computed using as a source the close of the candle"
+R indicator E 04:21 | ... over 6 periods, as a Donchian channel midline. | "the type is DCM which stands for donchan channel midline"
+R setup E 05:01 | Envelopes: the average displaced by 7% ... | "the first upper band here will correspond to a displacement of plus 7%"
+R setup E 05:01 | ... then 11% and 14%. | "the next envelope this one corresponds to displacements of 11% and the final one is 14%"
+R entry E 05:44 | Bottom bands trigger longs, top bands shorts. | "remember bottom bands trigger Longs and top bands trigger shorts"
+R sizing E 06:28 | Each band takes the portfolio divided by the number of envelopes. | "you enter with the portfolio divided by the number of envelopes that you've considered"
+R entry E 24:59 | All the band limit orders are placed at every new candle. | "this strategy at every new candle sends out puts out there all its limit orders"
+R exit E 05:44 | Exit when the price comes back to the average. | "you exit the trade when the price hits back the Y price average"
+R stop E 07:51 | A stop in percent of the average entry price ... | "a stop loss given in percentage with respect to the average entry price"
+R stop E 19:06 | ... set back to 40% after his test at 20%. | "I'm going to go back to four and to 40%"
+R exit E 20:37 | Price jump: close all when a candle closes 15% beyond the previous close. | "this price jump percentage that we fixed as default to 15%"
+R no_trade E 21:19 | After a stop or a jump exit, no new trade until the price has touched the average again. | "we're not allowed to enter again the trade before the price has touched again the average"
+R market A - | Desk version: the Delta Exchange bitcoin and ether perpetuals on 1-hour candles (UTC grid); trades held across days. | ""
+R entry A - | The desk holds one position at a time, so only the first envelope (7%) is traded, at his one-third size (sized on a 3% risk unit); each candle's limit at the band is valid for the next candle only. | ""
+R exit A - | The exit limit starts at the signal candle's average and moves to each completed candle's average while that is beyond the entry; a close back at the average exits at the next open (where his limit would be marketable), so when the average has fallen past the entry the exit comes at the next open after such a close; the jump test (a close 15% beyond the previous close) exits at the next open, as in his corrected version. | ""
+R no_trade A - | The wait after a stop or a jump exit is decided by replaying the strategy's own earlier trades on 1-hour candles up to the signal (no look-ahead). | ""
+T with_assumptions | the 11% and 14% envelopes (averaging in) are not traded, as the desk holds one position (A); the wait is replayed on hourly candles (A)
+C win_rate | 00:03 | about +150%, 80% winners, profit factor 16, -4% equity drawdown | BTC/USDT 1h, about 3 years | "gives us almost 150% profits the win rate is completely insane 80%"

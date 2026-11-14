@@ -1,0 +1,20 @@
+video: 0XfcnDAVY7Y
+topic: crypto
+summary: CodeTrading's first VWAP scalp in Python (bitcoin 15-minute candles, 2019-2022): the trend needs six candles on one side of the EMA 100 and three on the same side of the VWAP; then a candle whose nearer extreme comes within $100 of the VWAP is an entry in the trend's direction. Stop 0.8 x ATR, target twice the stop, one trade at a time, 1:5 margin, no commissions: about +10,000% against +248% for buy and hold, though the last ten months went flat.
+instruments: Bitcoin
+timeframes: 15m
+style: intraday
+= CT-05 | EMA 100 and VWAP trend (six and three candles), a candle reaching close to the VWAP, 0.8 ATR stop, 2R
+R timeframe E 01:25 | Bitcoin 15-minute candles with the EMA 100 and the VWAP. | "first we will use 15 minutes time frame for the bitcoin us dollar trading price and we're including two indicators the 100 dma and the v app"
+R setup E 04:52 | Trend by the EMA: six consecutive candles below it = downtrend (above = uptrend). | "whenever we have six consecutive candles falling below the ema curve we consider that the ema signal is a selling signal"
+R setup E 05:32 | Confirmed by three consecutive candles on the same side of the VWAP. | "if we have three consecutive candles below or above the v wap curve it is a confirmation"
+R entry E 07:00 | Entry: the candle's nearer extreme (its high or low) is within the close distance of the VWAP. | "we are looking for the closest point of the current candle to the v wap and we are measuring this distance"
+R entry E 07:42 | The close distance is $100 for bitcoin. | "and here i put it to 100"
+R stop E 09:52 | Stop 0.8 x the ATR. | "the stop loss atr distance is going to be 0.8 times the current atr"
+R target E 10:34 | Target twice the stop distance. | "profit stop-loss ratio is two in other words the take profit distance is twice as big"
+R sizing E 10:34 | One trade at a time (1:5 margin in his test). | "we are allowing one trade at a time"
+R market A - | Desk version: Delta Exchange bitcoin and ether perpetuals on 15-minute candles with real volume; the VWAP resets at 00:00 UTC; out at 23:55 UTC, as CT-02. | ""
+R setup A - | A candle counts as above (below) a curve when its body is: open and close both above (below); the signal candle is one of the counted candles; the $100 distance becomes 0.2% of price, as in CT-02. | ""
+R stop A - | ATR length 7 (as in CT-02); entry at the next candle's open. | ""
+T with_assumptions | the body rule, the distance in percent and the ATR length are ours (A), as for CT-02; this video adds the EMA 100 and states the run lengths (6 and 3) and 2R, where CT-02's VWAP-only video leaves the run length out and uses 2.5R
+C return_pct | 11:18 | about +10,000% (buy and hold +248%) | bitcoin 15m 2019-2022, 1:5 margin, no commissions | "like 10 000 percent of returns"

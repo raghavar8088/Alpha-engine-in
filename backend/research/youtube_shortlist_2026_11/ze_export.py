@@ -1,7 +1,7 @@
 """Writes frontend/app/premium-strategies/shortlistData.ts: every strategy of the channel-shortlist study with its video,
 rules (tagged E / I / A with their times), what is missing or ambiguous, the claims as said, the status (coded, blocked
 or duplicate) and the look-ahead / fill check of the coded ones (results/checks.json), plus the coverage of every listed
-channel (177 over the owner's four lists and twenty extra crypto channels: picked, analysed, skipped and why). Generated: never edit the .ts by hand.      python -I ze_export.py
+channel (192 over the owner's four lists, twenty extra crypto channels, the ranks 11-20 list and the list 21-40: picked, analysed, skipped and why). Generated: never edit the .ts by hand.      python -I ze_export.py
 """
 
 from __future__ import annotations
@@ -21,7 +21,7 @@ OUT = ROOT / "frontend" / "app" / "premium-strategies" / "shortlistData.ts"
 MARKET_LABEL = {"NIFTY": "Nifty 50", "BANKNIFTY": "Bank Nifty", "NSE5": "NSE stocks (5-minute pool)",
                 "NSE15": "NSE stocks (15-minute bars)", "NSED": "NSE stocks (daily, long only)", "BTCUSD": "Bitcoin (Delta BTCUSD)",
                 "XAUUSD": "Gold (Delta XAUTUSD)", "EURUSD": "EUR/USD", "GBPUSD": "GBP/USD", "NAS100": "Nasdaq 100 (cash session)",
-                "ETHUSD": "Ether (Delta ETHUSD)"}
+                "ETHUSD": "Ether (Delta ETHUSD)", "AAPL": "Apple (New York cash session)"}
 PROXY = {"PW-01": "the video buys ATM options; coded on the index as a labelled proxy (delta 0.5)",
          "DH-09": "the video trades index futures; coded on the index", "DH-10": "coded on the index",
          "CK-01": "the video scalps Nifty options; coded on the index",
@@ -39,7 +39,13 @@ PROXY = {"PW-01": "the video buys ATM options; coded on the index as a labelled 
          "TC-10": "the video trades forex pairs; coded on the desk's EUR/USD and GBP/USD plus Delta bitcoin, ether and gold",
          "TC-13": "the video trades forex pairs; coded on the desk's EUR/USD and GBP/USD plus Delta bitcoin, ether and gold",
          "PL-06": "the video tests a stock's daily prices; coded on Delta bitcoin, ether and gold daily candles",
-         "SC-03": "his key levels are drawn zones and yesterday's point of control; coded at the previous day's high and low"}
+         "SC-03": "his key levels are drawn zones and yesterday's point of control; coded at the previous day's high and low",
+         "CT-04": "the video's EUR/USD and GBP/USD are spot prices; the desk trades the CME euro and pound futures (Yahoo minutes)",
+         "CT-05": "the video trades bitcoin; ether is added with the same distance (his $100 on bitcoin becomes 0.2% of the price)",
+         "RB-01": "the video adds two more envelopes (11% and 14%, averaging in); the desk holds one position and trades the first (7%)",
+         "MS-03": "the video shows EUR/NZD and EUR/JPY; coded on the desk's EUR/USD and GBP/USD (CME futures)",
+         "RU-07": "the video tests forex and stocks in the Trading Rush app; coded on Delta bitcoin and gold 30-minute candles",
+         "AN-01": "the video screens altcoins; coded on the Delta bitcoin perpetual's daily candles"}
 TOPICS = ["india_index", "india_stocks", "crypto", "forex_us"]
 # when each batch's books start on the desk (premium-paper-service settings.YC3_START_T / YC3B_START_T)
 START1, START2, START3 = "2026-11-13T03:40:00Z", "2026-11-13T05:00:00Z", "2026-11-13T16:00:00Z"
@@ -48,13 +54,15 @@ START5 = "2026-11-14T11:00:00Z"
 START6 = "2026-11-14T16:00:00Z"
 START7 = "2026-11-14T16:30:00Z"
 START8 = "2026-11-14T18:00:00Z"
+START9 = "2026-11-14T18:30:00Z"
 BATCH2 = {r.sid for r in ZS._NEW[31:54]}
 BATCH3 = {r.sid for r in ZS._NEW[54:69]}
 BATCH4 = {r.sid for r in ZS._NEW[69:90]}
 BATCH5 = {r.sid for r in ZS._NEW[90:100]}
 BATCH6 = {r.sid for r in ZS._NEW[100:105]}
 BATCH7 = {r.sid for r in ZS._NEW[105:113]}
-BATCH8 = {r.sid for r in ZS._NEW[113:]}
+BATCH8 = {r.sid for r in ZS._NEW[113:130]}
+BATCH9 = {r.sid for r in ZS._NEW[130:]}
 SKIP_REASON = {
     "boomingbulls": "fully covered by the Booming Bulls study (96 strategy videos analysed)",
     "sensibull": "options education (premiums, Greeks): no rule the desk can trade without option prices",
@@ -94,6 +102,11 @@ SKIP_REASON = {
     "cryptowendyo": "crypto news, interviews and market commentary: no trading rules",
     # channels 61-70
     "cryptosavy": "chart scenarios, Elliott Wave counts and bull-trap calls: no complete rule set",
+    # the list 21-40 (14 Nov 2026)
+    "chadthackray": "Python and vectorbt programming courses: no strategy with stated rules",
+    "qubitquants": "VectorBT and MetaTrader 5 tooling tutorials: no strategy with stated rules",
+    "tradescience": "walk-forward testing and filter tooling tutorials: no strategy with stated rules",
+    "cryptohopper": "platform features and single-indicator explainers: no complete strategy",
 }
 
 
@@ -119,13 +132,13 @@ def main():
                 "markets": [MARKET_LABEL.get(x, x) for x in (rec.markets if rec else ())],
                 "deskMarkets": list(rec.markets) if rec else [], "overnight": bool(rec and (rec.overnight or "NSED" in rec.markets)),
                 "proxy": PROXY.get(sid),
-                "paperStart": (START8 if sid in BATCH8 else START7 if sid in BATCH7 else START6 if sid in BATCH6 else START5 if sid in BATCH5
+                "paperStart": (START9 if sid in BATCH9 else START8 if sid in BATCH8 else START7 if sid in BATCH7 else START6 if sid in BATCH6 else START5 if sid in BATCH5
                                else START4 if sid in BATCH4 else START3 if sid in BATCH3 else START2 if sid in BATCH2
                                else START1) if rec else None,
                 "rules": [{"kind": r["kind"], "label": CL.KIND_LABEL[r["kind"]], "tag": r["tag"], "text": r["text"], "times": r["times"]}
                           for r in sorted(s["rules"], key=lambda r: (r["tag"] == "A", CL.KINDS_ORDER.index(r["kind"])))],
                 "why": s["reasons"], "vague": c["vague"], "unclear": c["unclear"], "claims": c["claims"], "examples": c["examples"],
-                "blockedReason": ZS.BLOCKED.get(sid), "duplicateOf": s["duplicate"]["of"] if s["duplicate"] else None,
+                "blockedReason": ZS.BLOCKED.get(sid), "dataBlocked": sid in ZS.DATA_BLOCKED, "duplicateOf": s["duplicate"]["of"] if s["duplicate"] else None,
                 "duplicateWhy": s["duplicate"]["why"] if s["duplicate"] else None,
                 "checks": ({"lookahead": bool(ch.get("lookahead_ok")), "fills": not ch.get("fill_problems"),
                             # the slow books were also checked on long windows (gold 300 days, bitcoin 400): their counts
@@ -159,10 +172,10 @@ def main():
             "duplicates": sum(1 for r in rows if r["status"] == "duplicate"),
             "checked": sum(1 for r in coded if r["checks"] and r["checks"]["lookahead"] and r["checks"]["fills"]),
             "paperStart": START1, "paperStart2": START2, "paperStart3": START3, "paperStart4": START4,
-            "paperStart5": START5, "paperStart6": START6, "paperStart7": START7, "paperStart8": START8,
-            "batch1": len(ZS._NEW) - len(BATCH2) - len(BATCH3) - len(BATCH4) - len(BATCH5) - len(BATCH6) - len(BATCH7) - len(BATCH8),
+            "paperStart5": START5, "paperStart6": START6, "paperStart7": START7, "paperStart8": START8, "paperStart9": START9,
+            "batch1": len(ZS._NEW) - len(BATCH2) - len(BATCH3) - len(BATCH4) - len(BATCH5) - len(BATCH6) - len(BATCH7) - len(BATCH8) - len(BATCH9),
             "batch2": len(BATCH2), "batch3": len(BATCH3), "batch4": len(BATCH4), "batch5": len(BATCH5),
-            "batch6": len(BATCH6), "batch7": len(BATCH7), "batch8": len(BATCH8),
+            "batch6": len(BATCH6), "batch7": len(BATCH7), "batch8": len(BATCH8), "batch9": len(BATCH9),
             "built": "2026-11-14"}
     head = (
         "// GENERATED by backend/research/youtube_shortlist_2026_11/ze_export.py - do not edit by hand.\n"
@@ -179,7 +192,7 @@ def main():
         "  minutes: number; summary: string; instruments: string[]; timeframes: string[]; markets: string[]; deskMarkets: string[];\n"
         "  overnight: boolean; proxy: string | null; paperStart: string | null; rules: SlRule[]; why: string[]; vague: SlVague[];\n"
         "  unclear: string[];\n"
-        "  claims: SlClaim[]; examples: SlExample[]; blockedReason: string | null; duplicateOf: string | null; duplicateWhy: string | null;\n"
+        "  claims: SlClaim[]; examples: SlExample[]; blockedReason: string | null; dataBlocked: boolean; duplicateOf: string | null; duplicateWhy: string | null;\n"
         "  checks: { lookahead: boolean; fills: boolean; signals: number; trades: number } | null };\n"
         "export type SlChannel = { key: string; name: string; star: boolean; group: string; earlier: string; uploads: number;\n"
         "  strategyTitles: number; picked: { video: string; why: string; analysed: boolean; id: string | null }[]; skip: string | null };\n\n")

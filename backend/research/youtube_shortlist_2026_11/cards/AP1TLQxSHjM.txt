@@ -1,0 +1,12 @@
+video: AP1TLQxSHjM
+topic: crypto
+summary: Coinrule's 'RSI and MA strategy with trailing stop loss and take profit' (week 9): buy when the RSI is above 50 and increases by five while the MA 9 is above the MA 50; exit with a 1% trailing take-profit and a 2% trailing stop. On 30-minute AVAX/USDT (bear market) the script showed +98% over 280 trades.
+instruments: AVAX/USDT
+timeframes: 30m
+style: intraday
+= CU-02 | RSI above 50 and up by 5 with the MA 9 above the MA 50, 1% trailing take-profit, 2% trailing stop
+R entry E 01:37 | The RSI above 50 and up by five ... | "requires the RSI is greater than 50 and increases by five"
+R filter E 01:37 | ... with the MA 9 above the MA 50. | "the second entry condition relies on ma9 being above ma50"
+R exit E 01:37 | A 1% trailing take-profit and a 2% trailing stop. | "the take profit condition is a one percent price increase trailing and the stop loss condition is a two percent price decrease trailing"
+T not_testable | 'increases by five' gives no window (against the last candle? over how many?), and how the 1% trailing take-profit differs from the 2% trailing stop is not defined
+C return_pct | 03:06 | +98% over 280 trades | AVAX/USDT 30m, bear market | "out of 280 trades it made 98 net profit"

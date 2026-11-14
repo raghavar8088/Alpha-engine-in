@@ -5,7 +5,7 @@
 2. every book runs through runner.run_yc (pool books on a few stocks, with DF-01's contexts), its documents have unique
    ids, and the ledger sizes them;
 3. a book that starts mid-way starts flat;
-4. the YC3 books get the 20-channel states and their own start (the second to eighth batches their own, later
+4. the YC3 books get the 20-channel states and their own start (the second to ninth batches their own, later
    ones)."""
 
 import os
@@ -23,6 +23,7 @@ os.environ.setdefault("PREMIUM_YC3E_START", "2026-01-05T00:00:00+00:00")
 os.environ.setdefault("PREMIUM_YC3F_START", "2026-01-06T00:00:00+00:00")
 os.environ.setdefault("PREMIUM_YC3G_START", "2026-01-07T00:00:00+00:00")
 os.environ.setdefault("PREMIUM_YC3H_START", "2026-01-08T00:00:00+00:00")
+os.environ.setdefault("PREMIUM_YC3I_START", "2026-01-09T00:00:00+00:00")
 HERE = Path.cwd()
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent / "backend" / "research" / "youtube_channels11_2026_11"))
@@ -63,6 +64,15 @@ check("YC3 is a YouTube-channel source", C.YC3 in C.YC_SOURCES)
 data = {nm: MK.window(nm, 40) for nm in ("NIFTY", "BANKNIFTY", "XAUUSD", "EURUSD", "GBPUSD", "NAS100")}
 data["BTCUSD"] = MK.window("BTCUSD", 60)
 data["ETHUSD"] = MK.window("ETHUSD", 60)          # the fifth batch trades ether (Delta ETHUSD)
+# the ninth batch trades Apple: the research caches hold no Apple minutes, so its book runs here on the Nasdaq 100
+# minutes (the same 09:30-16:00 session) brought to an Apple-like price with Apple's cost model (the ledger buys
+# whole shares)
+import dataclasses  # noqa: E402
+import yt_markets as YM  # noqa: E402
+_nq = data["NAS100"]
+data["AAPL"] = dataclasses.replace(_nq, name="AAPL", o=_nq.o * 0.01, h=_nq.h * 0.01, l=_nq.l * 0.01, c=_nq.c * 0.01,
+                                   half=np.full(len(_nq.t), YM.COSTS["AAPL"].half_spread), cost=YM.COSTS["AAPL"])
+data["AAPL"].split_key, data["AAPL"].overnight = _nq.split_key, _nq.overnight
 nsed = MK.nsed(limit=25)
 pool = MK.nse_pool([m.name for m in nsed if (Path("D:/intraday_ai_data/intraday/5m") / f"{m.name}.ibar").exists()][:6], 30)
 ctx = R.YCR.contexts({"ze_rank930", "ze_nifty930"}, pool=pool, nifty=data["NIFTY"])
@@ -116,7 +126,11 @@ check("seventh-batch books start at YC3G_START_T", SG._start_of("XAUTUSD", b7) =
 check("YC3G_IDS is the registry's seventh batch", set(C.YC3G_IDS) == {r.sid for r in ZS._NEW[105:113]})
 b8 = C.BY_ID["TC-05"]
 check("eighth-batch books start at YC3H_START_T", SG._start_of("XAUTUSD", b8) == datetime.fromtimestamp(S.YC3H_START_T, timezone.utc))
-check("YC3H_IDS is the registry's eighth batch", set(C.YC3H_IDS) == {r.sid for r in ZS._NEW[113:]})
+check("YC3H_IDS is the registry's eighth batch", set(C.YC3H_IDS) == {r.sid for r in ZS._NEW[113:130]})
+b9 = C.BY_ID["CT-05"]
+check("ninth-batch books start at YC3I_START_T", SG._start_of("BTCUSD", b9) == datetime.fromtimestamp(S.YC3I_START_T, timezone.utc))
+check("YC3I_IDS is the registry's ninth batch", set(C.YC3I_IDS) == {r.sid for r in ZS._NEW[130:]})
+check("the ninth batch's Apple book trades the desk's Apple market", C.BY_ID["QN-01"].books == (("AAPL", "V0"),))
 check("eighth-batch order-flow books trade bitcoin only", all(C.BY_ID[s].books == (("BTCUSD", "V0"),) for s in ("SC-02", "SC-03", "SC-04")))
 check("ether books close at the UTC day's end unless held overnight",
       ZS.YS.STRATEGIES["TC-04"].exit_clock("ETHUSD") == ("ist", 5 * 60 + 25) and ZS.YS.STRATEGIES["BX-02"].exit_clock("ETHUSD") == ("end", 0))

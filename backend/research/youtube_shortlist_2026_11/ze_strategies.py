@@ -40,6 +40,7 @@ import ze_more4 as X4  # noqa: E402
 import ze_more5 as X5  # noqa: E402
 import ze_more6 as X6  # noqa: E402
 import ze_more7 as X7  # noqa: E402
+import ze_more8 as X8  # noqa: E402
 from yc_common import BTC_X  # noqa: E402
 
 SOURCE = "youtube_shortlist"
@@ -349,6 +350,30 @@ _NEW = [
        X7.sc03, X7.sc03_x, ("BTCUSD",), (5,), ONE, readiness=A),
     _r("SC-04", "Exhaustion: a new 4-hour extreme on fading volume, a volume spike with delta against the candle, 2R",
        X7.sc04, X7.sc04_x, ("BTCUSD",), (5,), ONE, readiness=A),
+    # ── the ninth batch (14 Nov 2026): the owner's channel list 21-40 (ze_more8) ──
+    _r("CT-04", "Larry Williams outside bar: a red (green) outside candle closing beyond the previous low (high), 250-pip "
+       "stop, out at the next open once in profit", X8.ct04, X8.ct04_x, FX, (1,), FREE, overnight=True, readiness=A),
+    _r("CT-05", "EMA 100 and VWAP trend (six and three candles), a candle reaching close to the VWAP, 0.8 ATR stop, 2R",
+       X8.ct05, X8.ct05_x, ("BTCUSD", "ETHUSD"), (15,), FREE, readiness=A),
+    _r("CT-06", "Hull MA 16 / 65 cross on 4 hours with the RSI above 52 and the daily close above its 50-day linear "
+       "regression, out on the cross back", X8.ct06, X8.ct06_x, ("BTCUSD",), (240,), FREE, overnight=True, readiness=A),
+    _r("CT-08", "ADX regime switch: Bollinger re-entries in trend mode (ADX above 20, linear regression rising) and range "
+       "mode (ADX below 16, RSI below 35), 5.5% target, 1.5% stop", X8.ct08, X8.ct08_x, ("BTCUSD",), (60, 240), FREE,
+       overnight=True, readiness=A),
+    _r("RB-01", "Envelope mean reversion: a limit 7% from the 6-period Donchian midline, out at the midline, 40% stop, a "
+       "15% price-jump exit", X8.rb01, X8.rb01_x, ("BTCUSD", "ETHUSD"), (60,), FREE, overnight=True, readiness=A),
+    _r("QN-01", "SMA 25 / SMA 100 on 5 minutes, always in the market (stop and reverse)", X8.qn01, X8.qn01_x, ("AAPL",),
+       (5,), FREE, overnight=True, reverse=True, readiness=A),
+    _r("MS-03", "Previous day's high / low breakout: OCO stop orders 3 pips beyond, 5-pip stop, 10-pip target", X8.ms03,
+       X8.ms03_x, FX, (1,), FREE, overnight=True, readiness=A),
+    _r("RU-07", "RSI under 30, then the first candle closing well above the Bollinger middle band, stop below the lower "
+       "band, 1.5R", X8.ru07, X8.ru07_x, ("BTCUSD", "XAUUSD"), (30,), FREE, readiness=A),
+    _r("AN-01", "EMA 12 crossing above the EMA 50 within two daily bars with the price above the EMA 12, out on the cross "
+       "back", X8.an01, X8.an01_x, ("BTCUSD",), (1,), FREE, overnight=True, readiness=A),
+    _r("WT-02", "A close beyond the Keltner Channel with the DMI line of that side above 25, stop at the other band, 2R",
+       X8.wt02, X8.wt02_x, ("BTCUSD",), (60,), FREE, overnight=True, readiness=A),
+    _r("CU-01", "MA 9 crossing above the MA 50 under a falling MA 50 / 100 / 200 stack, out when the MA 9 crosses above "
+       "the MA 200 or at +8%", X8.cu01, X8.cu01_x, ("BTCUSD",), (60,), FREE, overnight=True, readiness=A),
 ]
 
 NEW = [r.sid for r in _NEW]
@@ -359,6 +384,11 @@ DATA_BLOCKED = {
              "200 EMA channel); the desk has no intraday option premiums",
     "AF-02": "a news-release fade read from 5-second charts and the order ladder; the desk has neither the release "
              "timing nor sub-minute data",
+    "AV-03": "it needs the 24-hour ranking of about 1,600 Binance pairs and their minute data; the desk trades bitcoin, "
+             "ether and gold, so it has no top-gainer universe",
+    "PQ-01": "TLT (the US Treasury bond ETF) is not on the desk",
+    "MS-04": "it needs about two years of weekly stock bars (the 90-week EMA, the 100-week average volume) and a US-stock "
+             "universe; the desk's NSE daily panel keeps 560 days and the desk has no US stock pool",
 }
 
 

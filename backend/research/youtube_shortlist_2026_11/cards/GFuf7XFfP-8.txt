@@ -1,0 +1,13 @@
+video: GFuf7XFfP-8
+topic: forex_us
+summary: PyQuant News tests a month-end rebalancing hypothesis on the TLT bond ETF with pandas (about 20 years of daily data): short in the first week of the month (days 1-6), long in the last week (from the 23rd), no costs or slippage: +191%, with only three losing years.
+instruments: TLT (US Treasury bond ETF)
+timeframes: 1D
+style: swing
+= PQ-01 | TLT short in the first week of the month and long from the 23rd (month-end rebalancing)
+R market E 00:42 | The TLT bond ETF. | "we're going to look at the TLT bond ETF"
+R entry E 02:50 | Short the first week of the month, long the last week. | "our strategy will basically look to get short in the first week of the month and long the last week of the month"
+R setup E 02:50 | The first week: the day of the month below 7. | "we are going to look where the day of the month is less than seven"
+R setup E 04:16 | The last week: the day of the month 23 or later. | "is greater than or equal to 23 Give me the column last week returns"
+T not_testable | TLT is not on the desk (it trades bitcoin, ether, gold, FX futures, the Nasdaq 100, Apple, US index dailies and Indian markets); his test has no costs
+C return_pct | 07:00 | +191% | TLT daily, about 20 years, no costs | "And this strategy returned 191%"

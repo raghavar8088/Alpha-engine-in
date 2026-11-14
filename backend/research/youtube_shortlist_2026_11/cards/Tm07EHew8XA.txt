@@ -1,0 +1,19 @@
+video: Tm07EHew8XA
+topic: crypto
+summary: WunderTrading's Keltner + DMI trend bot for 1-hour bitcoin: go long when a candle closes above the upper Keltner Channel with the DI+ above 25 showing the green bar, short when a candle closes below the lower channel with the DI- above 25 showing red; the stop sits at the opposite side of the channel and the target is 2:1. Optimised: +446%, profit factor 1.78.
+instruments: Bitcoin
+timeframes: 1h
+style: intraday
+= WT-02 | A close beyond the Keltner Channel with the DMI line of that side above 25, stop at the other band, 2R
+R indicator E 00:05 | The Keltner Channel at its default settings. | "we'll leave the default settings for now"
+R filter E 01:28 | The DMI with a threshold line at 25. | "as a default we'll put it at 25"
+R entry E 01:28 | Long: a candle closes above the upper Keltner band with the DMI above the threshold showing the green bar. | "the entry for loan will occur when the candle will close above the upper caltner's Channel and DMI will be above a threshold and will show the green bar"
+R stop E 01:28 | Stop at the opposite side of the channel; reward to risk 2:1. | "you can place your stop loss at the opposite side of the Kelton Channel and make a risk to reward ratio of 2 to 1"
+R entry E 01:28 | Short: a close below the channel with the DMI bar red. | "the candle will be closed below the kelton's channel and the DMI bar will be red"
+R timeframe E 02:10 | Optimised for bitcoin on 1 hour. | "the bot is optimized for Bitcoin chart one hour time frame"
+R market A - | Desk version: the Delta Exchange bitcoin perpetual on 1-hour candles (UTC grid); entry at the next open; one position at a time; held across days. | ""
+R indicator A - | Keltner = TradingView's defaults: the EMA 20 of the close plus or minus 2 x ATR (10); DMI (14, 14). | ""
+R entry A - | 'The green bar' is read as the DI+ above the DI- (and above 25) for longs; the DI- above the DI+ and above 25 for shorts. | ""
+R stop A - | The stop is the opposite band's value at the signal candle; target 2R from the fill. | ""
+T with_assumptions | the Keltner settings are TradingView's defaults, as he leaves them (A); his bot's optimised settings are not shown
+C return_pct | 00:05 | +446%, profit factor 1.78 | bitcoin 1h, optimised | "it will give you a profit of 446 and a nice profit factor of 1.78"

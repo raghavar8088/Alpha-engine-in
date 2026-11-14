@@ -1,0 +1,11 @@
+video: g04GeHe-dJw
+topic: crypto
+summary: Algovibes' 'high-risk' Binance bot: each loop it picks the USDT pair (leveraged tokens excluded) with the biggest 24-hour price change, buys it at market when its cumulative return over the last 120 one-minute candles is positive, and sells at +2% or -1.5%. He warns the coins can be illiquid or fraudulent.
+instruments: the top 24-hour gainer among about 1,600 Binance USDT pairs
+timeframes: 1m
+style: scalping
+= AV-03 | The day's top Binance gainer, bought while its last 120 minutes are up, +2% target, -1.5% stop
+R setup E 00:01 | Screen the whole Binance platform for the top 24-hour performer. | "we are screening the whole binance platform for the top performing coins over the last 24 hours"
+R entry E 16:07 | Buy when the cumulative return of the last 120 minutes is positive. | "we are checking if the cumulative returns over the last 120 minutes are positive"
+R stop E 13:52 | Stop 1.5%, target 2%. | "a stop loss limit we are just taking 1.5 percent here and we are taking a target profit of two percent"
+T not_testable | it needs the 24-hour ranking of about 1,600 Binance pairs with their minute data; the desk trades bitcoin, ether and gold, so it has no top-gainer universe

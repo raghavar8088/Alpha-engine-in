@@ -3,7 +3,7 @@ topic: crypto
 summary: Hummingbot's follow-up on a community market-making strategy (August 2021): the bot quotes both sides of DOGE/USDT between a minimum and a maximum spread, and an Aroon oscillator pushes each side's spread out when it believes the market is trending that way. After about 24 hours DOGE rose about 10%: 171 buys and 239 sells, a negative P&L from the smaller DOGE inventory, but an average buy price below the average sell price.
 instruments: DOGE/USDT
 timeframes: Any
-style: bot
+style: scalping
 = HB-04 | Aroon-skewed market making: two-sided quotes between a minimum and maximum spread, widened on the trending side
 R setup E 00:14 | The spread sits between the max and min spread settings. | "sets the average uh between the max spread and min spread so in this case it'd be like about 0.5 percent uh an average of 0.1 uh but"
 R setup E 00:43 | The Aroon oscillator pushes the spreads toward the max or the min. | "like the roon oscillator indicator that this user uh created in order to kind of"

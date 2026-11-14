@@ -3,7 +3,7 @@ topic: crypto
 summary: Part Time Larry wires the Supertrend into a live CCXT bot (May 2021, part 4): a schedule fetches the latest 100 one-minute Ether candles every few seconds, recomputes the Supertrend (7, 3) and checks the last two candles; a change from downtrend to uptrend sends a market buy on Binance, a change back sends a sell, and an 'in position' flag stops repeat buys. He drops to one-minute candles only so trades happen on camera and expects that timeframe not to make money, inviting viewers to experiment with parameters and other indicators.
 instruments: Ether (ETH/USDT, Binance)
 timeframes: 1m (demo), daily
-style: bot
+style: intraday
 = PL-04 | The Supertrend (7, 3) bot running live on one-minute candles with an in-position flag (order-execution demo)
 R market E 03:21 | One-minute candles only for the demo, which he expects not to make money. | "the way down to the one minute time frame even though i kind of expect this isn't going to make any money on the one minute time frame"
 R entry E 23:23 | Buy only when not already in a position. | "buy if i'm not in the position so if not in position then i'm going to"

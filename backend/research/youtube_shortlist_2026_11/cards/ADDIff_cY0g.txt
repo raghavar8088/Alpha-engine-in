@@ -1,0 +1,11 @@
+video: ADDIff_cY0g
+topic: crypto
+summary: WunderTrading's volume bot: long when a candle's volume is above its moving average times a multiplier and the price is above the 200 EMA, short on such a volume spike below the 200 EMA; take-profit and stop from the ATR (or a trailing stop after the first target), with optional EMA and high/low filters; the look-back, the average length, the multiplier and the ATR multiples are left to optimise per asset.
+instruments: crypto (more than 10 assets)
+timeframes: unclear
+style: intraday
+= WT-03 | Volume above its average times a multiplier on the 200 EMA side, ATR target and stop
+R entry E 01:35 | Long: the volume above its sliding average times the multiplier ... | "to enter the along position we need to ensure that the volume is higher than the sliding average for a given number of bars multiplied by the multiplier"
+R filter E 01:35 | ... with the price above the 200 EMA. | "to confirm the signal the price should also be higher than 200 EMA"
+R stop E 03:01 | The take-profit and stop come from the ATR. | "levels based on the ATR"
+T not_testable | the look-back, the average length, the multiplier (2 is only an example) and the ATR multiples of the target and the stop are not stated

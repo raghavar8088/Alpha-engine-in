@@ -1,0 +1,17 @@
+video: f2I1RJnyLRg
+topic: forex_us
+summary: QuantNomad backtests a simple always-in-the-market rule in R on Apple's 5-minute chart (2007-2020): long while the 25-period SMA is above the 100-period SMA, short while it is below, the position taken from the bar after the signal close, all the money all the time, no costs: about +3,500%, 31% a year, a -60% max drawdown, Sharpe 0.8.
+instruments: Apple (AAPL)
+timeframes: 5m
+style: mixed
+= QN-01 | SMA 25 / SMA 100 on 5 minutes, always in the market: long above, short below (stop and reverse)
+R market E 01:25 | Apple shares on a 5-minute chart. | "so here I'm using Apple share a 5 minute chart"
+R indicator E 03:33 | Two simple moving averages, 25 and 100. | "two simple moving averages of length 25 and 100"
+R entry E 03:33 | Long while the fast average is above the slow one, short while below. | "if my fast moving average is below my slow moving average I will go short"
+R entry E 05:38 | The position starts on the bar after the signal. | "I need to lock my on my position by 1"
+R sizing E 07:01 | All the money, long or short, all the time. | "we invest 100% of our money into the strategy both long and short all the time"
+R market A - | Desk version: Apple as the desk trades it (Yahoo Finance minutes, the 09:30-16:00 New York session) on 5-minute candles; positions are held overnight, as in his test. | ""
+R entry A - | A cross of the two SMAs at a 5-minute close reverses the position at the next open; the desk starts flat and takes the first cross after its start. | ""
+R stop A - | No stop in the video: a 15% catastrophe stop, sized as 1x the account (on a 1% risk unit). | ""
+T with_assumptions | the desk starts flat and enters on the first cross (A); the far stop is ours (A); his test has no costs
+C return_pct | 10:25 | about +3,500%, 31% a year, -60% max drawdown, Sharpe 0.8 | Apple 5m 2007-2020, no costs | "our strategy game click three thousand five hundred percent"

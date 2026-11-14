@@ -1,0 +1,14 @@
+video: 2176SVyz814
+topic: crypto
+summary: Robot Traders walks through a free Python backtester (Binance data, risk-based position sizing, fees, leverage, liquidation) with a 'very textbook' example: long when the close is above a trend SMA and a fast EMA crosses above a slow EMA with the RSI not overbought, out on the opposite cross, stop 2 x ATR, target 4R (shorts mirrored). On BTC/USDT daily 2019-2022: 18 trades, 55% winners, profit factor 3 at 5x leverage.
+instruments: Bitcoin
+timeframes: 1D
+style: swing
+= RB-02 | Close above a trend SMA, a fast/slow EMA cross, RSI not overbought, 2 ATR stop, 4R (the backtester's example)
+R entry E 10:03 | Long: the close above the trend average and the fast EMA crossing above the slow EMA. | "then I need the fast EMA to cross above the slow EMA"
+R filter E 10:03 | The RSI not overbought at entry. | "I make sure that the RSI is not in an overbought situation when I enter the trade"
+R exit E 10:03 | Exit on the opposite EMA cross. | "the exit of the trade to be the opposite crossing of the EMAs"
+R stop E 10:03 | Stop at the entry minus 2 ATR. | "it is the entry price minus two times the ATR"
+R target E 10:03 | Target 4R. | "a risk reward ratio that I've set to four in this"
+T not_testable | the EMA, SMA and RSI lengths and the overbought level are never said (only shown in code); he presents the rules only to illustrate the backtester
+C win_rate | 20:48 | 18 trades, 55% winners, profit factor 3 | BTC/USDT daily 2019-2022, 5x leverage | "you see that the win rate of the strategy is around 55 percent"

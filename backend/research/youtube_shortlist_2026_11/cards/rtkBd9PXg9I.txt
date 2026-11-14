@@ -1,0 +1,11 @@
+video: rtkBd9PXg9I
+topic: crypto
+summary: TRADING RUSH re-tests its zero-lag MACD strategy (RU-06) with a 50 EMA trend filter instead of the 200 EMA: the 50 filtered some losing trades but also some winners; 200 trades gave about 35% winners against 33% with the 200 EMA - still a losing strategy.
+instruments: forex and stocks (Trading Rush app)
+timeframes: intraday
+style: intraday
+= RU-08 | Zero-lag MACD cross below / above zero in the 50 EMA trend, pullback stop, 1.5R
+R filter E 00:40 | The same strategy with the 50 EMA as the trend filter. | "why don't we test the same strategy with the 50 period exponential moving average"
+T with_assumptions | the rules are RU-06's with the 50 EMA
+D RU-06 | the same zero-lag MACD rules, stop and 1.5R with the 50 EMA instead of the 200; his own result: 35% winners against 33%
+C win_rate | 05:33 | about 35% winners after 200 trades | 200 trades | "it got a 35 percent approximate winrate"

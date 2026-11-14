@@ -964,7 +964,7 @@ videos 353, P1 39 (11%), candidates 49, cov 0
 - 10.20 | NoNucP_IVB0 | 15m | 16000 | 2022-11-13 | Simple EMA Scalping Trading Strategy Backtest In Python (Part 1)
 - 10.00 | ybmep_u5MeU | 19m | 10000 | 2022-11-13 | Simple EMA Scalping Trading Strategy Backtest In Python (Part 2 Optimization)
 
-## algovibes - Algovibes (Algovibes)  [sys] 
+## algovibes - Algovibes (Algovibes) * [sys] 
 videos 367, P1 44 (12%), candidates 62, cov 0
 -  9.91 | vBwzMD8i8P4 | 14m | 8100 | 2026-08-13 | I Tested 3,224,600 Day-Trading Strategies on 920 Stocks
 -  9.38 | -jXk5nZetfE | 14m | 2400 | 2026-02-13 | Data Trader’s “Best 5-Minute Scalping Strategy Ever” — Tested
@@ -1842,4 +1842,122 @@ videos 442, P1 3 (1%), candidates 3, cov 0
 -  8.45 | RH52FuSbEpI | 11m | 2800 | 2026-06-15 | Claude Code Found a 2,610% Trading Strategy While I Slept (Anchored VWAP)
 -  6.40 | D5KYQieIeC0 | 10m | 2500 | 2026-09-15 | AI Trading the $1 Billion/day Trading System 24/7
 -  3.86 | D-oYWpr4pxY | 74m | 7300 | 2023-11-15 | Smart Money Concepts Trading Bot (step by step tutorial)
+
+## scryptotrader - SCryptoTrader - Arslan Afzal (SCryptoTrader)  [fut] 
+videos 267, P1 91 (34%), candidates 84, cov 0
+-  6.99 | fXrhXhx6oXU | 13m | 960 | 2024-11-15 | $100 a Day Trading Meme Coins | Proven Strategy !!!
+-  6.74 | 1DCiIGD8pDw | 23m | 5500 | 2026-07-15 | Order Flow Course Lesson 8:Volume Profile Secrets Trade From Real Institutional Levels Action theory
+-  5.87 | w9WvU4vox6k | 14m | 725 | 2024-11-15 | Why Bitcoin is Going Parabolic ?!! Follow my Setup Now !!!
+-  5.26 | lHu4aVRqUJ0 | 10m | 1800 | 2026-06-15 | 🎯Order Flow Course L 03: Trend Reversal Strategy | Before Reversal Delta will give you this Signal
+-  5.12 | J2Ci59Y2Jw8 | 12m | 1300 | 2026-06-15 | 🚨 Order Flow Course Lesson 06: How to Spot Exhaustion Before Every Major Reversal 2026 Urdu / Hindi
+-  5.05 | ia1ZN5BeoB8 | 29m | 1100 | 2025-11-15 | 🚨CPI DATA LIVE Crypto Trading😱5 Rate Cut Coming😱 AltSeason Loading ?🚀  Live AltCoins Trading Setups
+-  5.00 | JqXIYMDpkzc | 79m | 1000 | 2025-11-15 | 🚨Live Crypto Trading Bitcoin Breakout & AltSeason🚀 Best Coins to Buy Now😱 ETH XRP SOL URDU/Hindi
+-  4.96 | qaS06VwwygE | 47m | 900 | 2025-11-15 | 🚨Live Crypto Trading; Bitcoin Breakout & AltSeason Loading 🚀 Best Coins Now😱 ETH XRP SOL URDU/Hindi
+
+## robottraders - Robot Traders (Robot Traders) * [sys] 
+videos 84, P1 14 (17%), candidates 12, cov 0
+-  6.00 | PljviyzhdhU | 29m | 1000 | 2023-11-15 | Optimise Your Trading Strategies For SAFER and More PROFITABLE Results With the RSI in Python
+-  5.48 | wEJGjaoniVE | 30m | 3000 | 2025-11-15 | Backtest Your Crypto Trading Bot on Hyperliquid DEX | Full Python Guide
+-  5.36 | dkeXOXd1j-Y | 14m | 2300 | 2023-11-15 | Simple EMA+RSI Crypto Trading Strategy
+-  5.08 | eE8lqG5Rsf8 | 8m | 1200 | 2025-12-15 | Why Your AI Crypto Trading Bot NEEDS Discord (3-Minute Setup)
+-  4.94 | BLTEXDpP2Us | 39m | 8600 | 2025-11-15 | How to Build an AI Crypto Trading Bot PROPERLY - Full Python Guide
+-  4.94 | TpyS5JExpNg | 11m | 863 | 2023-11-15 | The Bollinger Bands Bitcoin & Ethereum Trading Strategy
+-  4.72 | 2176SVyz814 | 25m | 5200 | 2023-11-15 | Backtest Crypto Trading Strategies in Python
+-  4.38 | zIWMxX00ty4 | 24m | 2400 | 2025-11-15 | Aster DEX Automated Crypto Trading with Python | Full Guide
+
+## quantnomad - QuantNomad (QuantNomad) * [sys] 
+videos 106, P1 6 (6%), candidates 5, cov 0
+-  6.00 | f2I1RJnyLRg | 14m | 9900 | 2020-11-15 | Backtesting Simple Intraday Strategy in R
+-  5.76 | aqulu594F_c | 5m | 5700 | 2019-11-15 | TA 101. What Are Pivot Points and How to Trade Them  (TradingView)
+-  5.49 | HJMvCzGRsSs | 6m | 3100 | 2019-11-15 | TA 101. What Are Traditional Pivot Points and How to Trade Them (TradingView)
+-  5.38 | NtQFMyU8QrA | 6m | 24000 | 2019-11-15 | Adding time range to PineScript indicator or strategy (TradingView)
+-  4.56 | Nug6Be3G1Ao | 6m | 36000 | 2019-11-15 | How to transform a TradingView indicator to a strategy for backtesting.
+
+## chadthackray - Chad Thackray (Chad Thackray)  [sys] 
+videos 80, P1 0 (0%), candidates 0, cov 0
+
+## qubitquants - Qubit Quants (Qubit Quants)  [sys] 
+videos 6, P1 0 (0%), candidates 0, cov 0
+
+## pyquantnews - PyQuant News (PyQuant News 🐍)  [sys] 
+videos 25, P1 0 (0%), candidates 0, cov 0
+
+## tradescience - Trade Science (Trade Science)  [sys] 
+videos 4, P1 0 (0%), candidates 0, cov 0
+
+## altfins - altFINS (altFINS) * [crypto] 
+videos 270, P1 34 (13%), candidates 44, cov 0
+-  6.51 | VgDMavcUpBg | 10m | 3200 | 2022-11-15 | EMA 12 / 50 is a simple trend following strategy using moving average crossovers | How to trade it?
+-  6.43 | 006QvU74oC4 | 8m | 2700 | 2022-11-15 | Bullish EMA Crossover: AVAX, DASH, SNX
+-  6.32 | jfz9oUZybZk | 14m | 21000 | 2022-11-15 | How to find oversold coins (RSI) near support levels/ ADA, ALGO, ONE, KSM, CRV
+-  6.05 | S_xvozzRlKM | 6m | 1100 | 2023-11-15 | Litecoin (LTC) Technical Analysis | How To Identify Bearish RSI Divergence | Is Litecoin a Good Buy?
+-  5.49 | SIL-19eK9RM | 11m | 3100 | 2023-11-15 | How to trade EMA crossovers (HNT example)
+-  5.31 | 4X_pPDXKxSU | 7m | 194 | 2020-11-15 | Trading MAs part 1 EMA 12 50 crossover
+-  5.30 | nybRZKrC-0U | 15m | 2000 | 2026-10-15 | BTC Bullish Flag Breakout! + DOGE & XRP Analysis + 3 Breakout Scans
+-  5.26 | D6LxfVOkwTg | 22m | 1800 | 2025-11-15 | Altcoins Are Waking Up | We Spotted This Crypto Trend Early | Here’s What’s Next
+
+## altrady - Altrady (Altrady)  [crypto] 
+videos 407, P1 41 (10%), candidates 75, cov 0
+-  6.57 | 3BrPbbgPpoc | 72m | 358 | 2026-03-15 | WE MISSED 30% PROFIT in Minutes… Because Stop Loss Was TOO TIGHT! 😱 (Real Account Live Scalping)
+-  6.56 | OkkCmz51MAg | 67m | 351 | 2025-11-15 | Live Scalp Trading 6 wins 3 losses, 5% in 1 hour with Ben & Raffa
+-  6.48 | LREB_Y60qq8 | 68m | 290 | 2025-11-15 | Live Scalp Trading with Ben & Raffa
+-  6.48 | hPuePyaNBYE | 74m | 295 | 2025-11-15 | Live Scalping Strategies using Quick Scanner with Ben & Raffa
+-  6.45 | 5jeBEnLNQ1k | 46m | 270 | 2025-11-15 | Live Scalp Trading with Cata & Raffa
+-  6.43 | Eko3K3GV6w4 | 79m | 257 | 2025-11-15 | Live Scalp Trading with Ben & Raffa
+-  6.42 | SHsduh5czhg | 63m | 2600 | 2025-11-15 | Smart Money Concept: POIs, Fibonacci & Smart Money Strategies
+-  6.41 | lJrj-keeVCk | 73m | 249 | 2025-11-15 | Live Scalp Trading Session with Ben & Raffa
+
+## wundertrading - WunderTrading (WunderTrading)  [crypto] 
+videos 220, P1 20 (9%), candidates 14, cov 0
+-  5.93 | tyHAa2rFWn4 | 16m | 85000 | 2025-11-15 | Automated Trading for Any TradingView Indicator and Strategy Alerts
+-  5.89 | sIYtzf58F54 | 12m | 78000 | 2025-11-15 | DeepSeek AI: Convert Any TradingView Indicator into a Strategy!
+-  5.04 | Tm07EHew8XA | 8m | 11000 | 2023-11-15 | Bitcoin Crypto Strategy for any trend
+-  4.30 | vIUU7XUcVJY | 6m | 20000 | 2023-11-15 | Crypto Arbitrage and Spread Trading Explained (aka Crypto Pairs Trading)
+-  3.96 | YBgac6pts7M | 6m | 9200 | 2020-11-15 | Crypto Futures Spread trading – crypto arbitrage strategy
+-  3.91 | pXGz0lnaZp0 | 5m | 8100 | 2022-11-15 | Best profitable crypto trading strategy
+-  3.62 | gbgNx-Cr7pk | 7m | 4200 | 2022-11-15 | Crypto Trading Bots for Bitcoin - Investment Strategy
+-  3.53 | ADDIff_cY0g | 6m | 3400 | 2023-11-15 | Volume Based Crypto Trading Strategy
+
+## threecommas - 3Commas (3Сommas)  [crypto] 
+videos 142, P1 2 (1%), candidates 2, cov 0
+-  3.76 | cHgAbITr3VQ | 5m | 565 | 2025-11-15 | Master Grid Bots and Take Control of Your Crypto Trading Strategy
+-  3.74 | 0BCnldjtAqM | 65m | 538 | 2025-11-15 | Backtesting Your Crypto Strategies with a Quant Trader
+
+## cryptohopper - Cryptohopper (Cryptohopper - Automated Crypto Trading Platform)  [crypto] 
+videos 163, P1 9 (6%), candidates 2, cov 0
+-  2.61 | QMN76EID1Yo | 27m | 400 | 2023-11-15 | Discussing Crypto Investment Risk Management Strategies
+-  2.54 | i0zIszZn94g | 18m | 333 | 2023-11-15 | How to trade with Support and Resistance
+
+## coinrule - Coinrule (Coinrule)  [crypto] 
+videos 229, P1 53 (23%), candidates 36, cov 0
+-  7.50 | _xTNUU3E2aw | 12m | 309 | 2020-11-15 | Scalping Cardano on Trend - $1000 Bitcoin Challenge Ep.12
+-  7.36 | LPYqoTKMu50 | 17m | 220 | 2020-11-15 | Scalp Ethereum Dips - $1000 Bitcoin Challenge Part 3
+-  7.32 | 0Uo2WKLchSo | 7m | 198 | 2020-11-15 | Scalping Uniswap Dips On Uptrend – $1000 Bitcoin Challenge Ep 11
+-  7.29 | PX_lAuRURE8 | 8m | 183 | 2020-11-15 | Scalp Binance Coin - $1000 Bitcoin Challenge Ep 9
+-  7.23 | LQ57lSqC39w | 14m | 159 | 2021-11-15 | Scalping Litecoin - $1000 Bitcoin Challenge Ep19
+-  7.21 | WS00JVxthlw | 9m | 1600 | 2023-11-15 | Moving Average Scalper with Fixed Take Profit- Coinrule Strategy of the Week 13
+-  6.12 | nlT-3AnIKNE | 6m | 1300 | 2020-11-15 | Altcoin Oversold Scalping - Coinrule Live Strategy 6.05.2020
+-  5.79 | OqF1xJDaUDs | 12m | 605 | 2020-11-15 | Bitcoin Breaks Out And Potential Altcoin Momentum - $1000 Bitcoin Challenge Ep.14
+
+## bitsgap - Bitsgap (Bitsgap)  [crypto] 
+videos 158, P1 22 (14%), candidates 12, cov 0
+-  4.91 | QGGVL_bU1ks | 57m | 811 | 2025-11-15 | Master Out-of-Range Strategies for Grid Bots!
+-  4.60 | mO1LM1aVmsQ | 5m | 4000 | 2025-11-15 | How to Use the Bitsgap AI Assistant: AI Bot Setup and Strategy | Crypto Trading Tutorial
+-  4.53 | zCE8aKW0VaA | 9m | 3400 | 2024-11-15 | Mastering Bitsgap's DCA Bot: Setup and Strategy Guide | Crypto Trading Series [Part 3]
+-  4.46 | k8QlD4yXuYI | 6m | 2900 | 2024-11-15 | Optimizing Your GRID Bot on Bitsgap: Setup Guide | Crypto Trading Series [Part 3]
+-  4.36 | qn5nzuuflRU | 8m | 2300 | 2025-11-15 | How to Use the Bitsgap Buy the Dip Bot: A Crypto Trading Bot Tutorial
+-  4.28 | 4FvMzTBhvYk | 27m | 19000 | 2018-11-15 | Tutorial - How to use Bitsgap crypto trading platform
+-  4.21 | I94y19aAGSo | 6m | 1600 | 2024-11-15 | Mastering Bitsgap's DCA Futures Bot: Setup and Strategy Guide | Crypto Trading Series [Part 4]
+-  4.00 | sBX5IEMFryU | 78m | 9900 | 2021-11-15 | [Webcast] Ninja Crypto Trading Mode at Bitsgap - Ultimate Setup
+
+## secretmindset - The Secret Mindset (The Secret Mindset)  [fx] earlier: top20
+videos 280, P1 168 (60%), candidates 170, cov 3
+- 11.86 | bO_qQi-NJEo | 13m | 72000 | 2026-03-08 | Copy This EMA Strategy, It'll Fix Your 1-Minute Scalping Forever
+- 10.72 | En2ZIfAyhBg | 10m | 525000 | 2020-11-08 | Amazingly Simple 21/55 Moving Average Strategy For Day Trading & Scalping
+- 10.59 | vBM0imYSzxI | 16m | 387000 | 2021-11-08 | Scalping Trading Was Impossible, Until I Found How To Combine EMA RSI ADX Indicators (FULL Strategy)
+- 10.57 | Jd1JVF7Oy_A | 13m | 369000 | 2021-11-08 | The FASTEST & Most AGGRESSIVE EMA Indicators For ZERO Lag Scalping Trading
+- 10.34 | 48gxeTt-Sdw | 13m | 218000 | 2021-11-08 | Private EMA Heikin Ashi Scalping | How To Scalp Forex & Stocks Using HI-LO Trading Strategy
+- 10.30 | LoasNROKPNA | 10m | 199000 | 2020-11-08 | Explosive VWAP Trading Strategy For Scalping & Day Trading Stocks (For Beginners)
+- 10.22 | R7_ujGtaKdw | 28m | 166000 | 2025-11-08 | Only 1 In 100 Traders Knows This 1 Minute Forex Scalping Strategy | Scalping Trading Course
+- 10.16 | 1HFoStW_wsc | 21m | 144000 | 2025-12-08 | Ultimate VWAP Strategy for Day Trading (Institutional Grade)
 

@@ -3,7 +3,7 @@ topic: crypto
 summary: Hummingbot's v2.1 walkthrough of directional trading (December 2024): a rolling window of candles feeds an indicator that emits +1 (long), -1 (short) or 0; each filled position gets a position executor with a 'triple barrier' (take profit above, stop loss below and a time limit, after Lopez de Prado). The simple v2 directional RSI script on Hyperliquid goes long when the RSI hits 30 and short at 70 on one-minute candles, using the executor's default stop loss, take profit and time limit; the dashboard's MACD-BB V1 controller combines a Bollinger %B long/short threshold with a MACD crossover, configured and backtested on OKX perpetuals over three days.
 instruments: HYPE (Hyperliquid); WIF (OKX perpetual); any crypto
 timeframes: 1m, 3m
-style: bot
+style: intraday
 = HB-02 | Hummingbot v2 directional RSI script: long at RSI 30, short at RSI 70, triple-barrier exits with the default settings
 R setup E 05:38 | Each entry gets a box: take profit above, stop loss below, a time limit at its end. | "advances in financial machine learning and the idea is that uh for every entry point you can draw a box around the"
 R entry E 20:26 | RSI hitting 30 is the long signal (70 the short). | "hits 30 then that's that'll be the long signal uh because it's a signal that the Market's overbought and conversely if"

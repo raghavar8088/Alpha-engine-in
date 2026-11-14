@@ -3,7 +3,7 @@ topic: crypto
 summary: Hummingbot on funding rate arbitrage (April 2024): perpetual funding moves the contract toward the index price - when funding is positive longs pay shorts, when negative shorts pay longs. The script normalises the funding rates of several venues (Hyperliquid pays hourly, Binance every eight hours) to a daily figure, opens a long on the venue that pays longs and a short on the one that pays shorts when the daily difference beats a minimum profitability (for example 0.2% against an expected 0.1%), optionally checks that the price gap and fees leave a positive trade P&L, collects the payments and closes both legs at a minimum take-profit or when the funding difference flips.
 instruments: Any perpetual (Hyperliquid, Binance)
 timeframes: funding intervals (1h, 8h)
-style: arbitrage
+style: positional
 = HB-07 | Cross-venue funding rate arbitrage: long where longs are paid, short where shorts are paid, entered above a minimum daily difference
 R entry E 03:18 | Positive funding: go short to get paid. | "funding rate is positive we would like to short so we get paid"
 R entry E 08:05 | Enter only above a threshold daily funding difference. | "your threshold to enter is only enter if the funding difference is greater than 0.2%"

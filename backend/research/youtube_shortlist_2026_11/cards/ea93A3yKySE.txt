@@ -1,0 +1,15 @@
+video: ea93A3yKySE
+topic: forex_us
+summary: The Art of Trading codes a viewer's weekly channel breakout (Pine Script and RealTest): buy when a weekly bar closes above the previous 15-week high, above the 90-week EMA, above its open, on volume at least 1.25% above the previous week's, in a liquid stock (100-week average volume above a million shares, optionally turnover above $500,000); exit at the next open after a weekly close below the 10-week EMA. On a 20-position Russell 1000 portfolio it matched buy-and-hold's 8.4% a year with half the drawdown.
+instruments: US stocks (Russell 1000)
+timeframes: 1W
+style: positional
+= MS-04 | Weekly close above the 15-week high, above the 90-week EMA, bullish, on rising volume, out below the 10-week EMA (long)
+R entry E 08:25 | The close above the channel high (the previous bar's 15-bar high). | "first condition is the current close must be greater than our Channel high"
+R filter E 09:09 | Above the 90-week EMA. | "be above our EMA which in this case is our 90 period EMA so 90 week EMA"
+R filter E 09:09 | A bullish bar. | "the third condition is that the bar must close higher than it's open"
+R filter E 04:11 | Volume at least 1.25% above the previous bar's. | "1.25 percent is how much volume needs to increase a minimum of 1.25 on the previous bar"
+R filter E 04:54 | Liquidity: the 100-bar average volume above a million shares. | "if that value that average 100 bar volume traded shares traded is greater than a million shares then we consider this a valid setup"
+R exit E 11:57 | Exit at the next open after a close below the 10-bar EMA. | "once we get a close below that 10 period EMA we exit on the next bar is open"
+T not_testable | it needs weekly stock bars with about two years of history (the 90-week EMA, the 100-week average volume) and a US-stock universe; the desk's NSE daily panel keeps 560 days (80 weeks) and the desk has no US stock pool
+C return_pct | 02:04 | about 8.4% a year, like buy-and-hold, with half its drawdown | Russell 1000, 20 positions, no leverage | "this really simple Channel breakout system has almost an identical rate of return but half the drawdown"

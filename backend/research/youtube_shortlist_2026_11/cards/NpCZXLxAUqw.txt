@@ -1,0 +1,10 @@
+video: NpCZXLxAUqw
+topic: crypto
+summary: The Secret Mindset's price-action guide to telling trend days from range days: trend days show follow-through bars, higher highs and lows and price holding one side of the 20 EMA (buy the first deep pullback to it); range days show wicks, alternating bars, dojis and overlap around the EMA (trade only the extremes after confirmation).
+instruments: any market
+timeframes: intraday
+style: intraday
+= MI-02 | Trend day or range day by price action and the 20 EMA (the first deep pullback; the range extremes)
+R indicator E 06:18 | The 20-period EMA. | "I personally use the 20-period EMA on my chart when trading price action"
+R entry E 07:01 | In a strong trend, enter the first deep pullback to the EMA. | "One of the trade model I employ often is to enter the 1st Deep Pullback"
+T concept_only | the day type, the depth of a pullback and the range extremes are judged by eye; no stop, target or exit is stated

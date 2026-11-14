@@ -1,0 +1,14 @@
+video: xaB1GS7X0xA
+topic: crypto
+summary: CodeTrading rebuilds the CoinQuant bitcoin strategy (CT-06) in Python with backtesting.py and a custom backtester and matches CoinQuant trade for trade (131 against 132 trades, about +1,000%) once the commission is set to 0.0003: the Hull MA 16 crossing above the Hull MA 64 on 4 hours, the RSI (14) above 52 and the close above the 50-bar linear regression (4-hour or daily).
+instruments: Bitcoin
+timeframes: 4h, 1D
+style: swing
+= CT-07 | Hull MA 16 / 64 cross with the RSI above 52 and the close above the 50-bar linear regression (the CoinQuant strategy rebuilt in Python)
+R entry E 00:01 | The fast moving average crosses above the slow one on 4 hours. | "the first one is that the first moving average should cross above"
+R filter E 00:47 | The RSI 14 above 52 on 4 hours. | "we need the rsi 14 to be above 52 of value as a threshold on the 4-hours time frame"
+R filter E 00:47 | The close above the 50-bar linear regression (4 hours here; daily in the original). | "we need the closing price of the current candle to be above the linear regression length 50 on the 4-hours time frame"
+R indicator E 10:11 | The lengths: HMA 16 and 64, RSI 14 over 52, regression 50. | "we have a fast moving average of 16 length, slow one is 64"
+T with_assumptions | the exit is not restated here (CT-06's video gives it: the cross back)
+D CT-06 | the same CoinQuant strategy (CT-06's video), rebuilt in Python; it gives the slow HMA as 64 where the original says 65
+C return_pct | 04:16 | about +1,000% over 131 trades, matching CoinQuant's 132 | bitcoin 4h | "the total returns are 950% in python"

@@ -13,12 +13,12 @@ export type SlStrategy = { id: string; version: string; name: string; topic: str
   minutes: number; summary: string; instruments: string[]; timeframes: string[]; markets: string[]; deskMarkets: string[];
   overnight: boolean; proxy: string | null; paperStart: string | null; rules: SlRule[]; why: string[]; vague: SlVague[];
   unclear: string[];
-  claims: SlClaim[]; examples: SlExample[]; blockedReason: string | null; duplicateOf: string | null; duplicateWhy: string | null;
+  claims: SlClaim[]; examples: SlExample[]; blockedReason: string | null; dataBlocked: boolean; duplicateOf: string | null; duplicateWhy: string | null;
   checks: { lookahead: boolean; fills: boolean; signals: number; trades: number } | null };
 export type SlChannel = { key: string; name: string; star: boolean; group: string; earlier: string; uploads: number;
   strategyTitles: number; picked: { video: string; why: string; analysed: boolean; id: string | null }[]; skip: string | null };
 
-export const SL_META = {"channels": 178, "coveredBefore": 23, "picked": 266, "analysed": 260, "queued": 6, "strategies": 269, "coded": 130, "blocked": 96, "duplicates": 43, "checked": 130, "paperStart": "2026-11-13T03:40:00Z", "paperStart2": "2026-11-13T05:00:00Z", "paperStart3": "2026-11-13T16:00:00Z", "paperStart4": "2026-11-13T17:00:00Z", "paperStart5": "2026-11-14T11:00:00Z", "paperStart6": "2026-11-14T16:00:00Z", "paperStart7": "2026-11-14T16:30:00Z", "paperStart8": "2026-11-14T18:00:00Z", "batch1": 31, "batch2": 23, "batch3": 15, "batch4": 21, "batch5": 10, "batch6": 5, "batch7": 8, "batch8": 17, "built": "2026-11-14"};
+export const SL_META = {"channels": 192, "coveredBefore": 24, "picked": 296, "analysed": 289, "queued": 7, "strategies": 298, "coded": 141, "blocked": 111, "duplicates": 46, "checked": 141, "paperStart": "2026-11-13T03:40:00Z", "paperStart2": "2026-11-13T05:00:00Z", "paperStart3": "2026-11-13T16:00:00Z", "paperStart4": "2026-11-13T17:00:00Z", "paperStart5": "2026-11-14T11:00:00Z", "paperStart6": "2026-11-14T16:00:00Z", "paperStart7": "2026-11-14T16:30:00Z", "paperStart8": "2026-11-14T18:00:00Z", "paperStart9": "2026-11-14T18:30:00Z", "batch1": 31, "batch2": 23, "batch3": 15, "batch4": 21, "batch5": 10, "batch6": 5, "batch7": 8, "batch8": 17, "batch9": 11, "built": "2026-11-14"};
 
 export const SL: SlStrategy[] = [
  {
@@ -155,6 +155,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -292,6 +293,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -423,6 +425,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -551,6 +554,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -681,6 +685,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -820,6 +825,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -1031,6 +1037,7 @@ export const SL: SlStrategy[] = [
    }
   ],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -1200,6 +1207,7 @@ export const SL: SlStrategy[] = [
    }
   ],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -1354,6 +1362,7 @@ export const SL: SlStrategy[] = [
    }
   ],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -1492,6 +1501,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -1613,6 +1623,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -1740,6 +1751,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -1877,6 +1889,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -2029,6 +2042,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -2134,6 +2148,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -2236,6 +2251,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -2388,6 +2404,7 @@ export const SL: SlStrategy[] = [
    }
   ],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -2499,6 +2516,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -2603,6 +2621,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -2739,6 +2758,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -2832,6 +2852,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -2922,6 +2943,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -3119,6 +3141,7 @@ export const SL: SlStrategy[] = [
    }
   ],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -3248,6 +3271,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -3388,6 +3412,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -3517,6 +3542,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -3637,6 +3663,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -3776,6 +3803,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -3917,6 +3945,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -4009,6 +4038,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the setups are shown through garbled Hindi captions with thresholds he calls adjustable guidelines; the opening range part repeats BB-02 and the gap fade overlaps BT-01",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -4089,6 +4119,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "BB-02",
   "duplicateWhy": "the 15-minute opening range break on a five-minute close is already in the library (BB-02; QC-01 for 30 minutes)",
   "checks": null
@@ -4234,6 +4265,7 @@ export const SL: SlStrategy[] = [
    }
   ],
   "blockedReason": "every entry and stop is read from the ATM option's own one-minute premium chart (its Camarilla levels and 200 EMA channel); the desk has no intraday option premiums",
+  "dataBlocked": true,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -4283,6 +4315,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the Hindi auto-captions are too garbled to recover the rules; a reading needs a clean transcript or the audio",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -4370,6 +4403,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "VWAP-A",
   "duplicateWhy": "the trend-day VWAP retest with a confirming candle is already on the desk (the VWAP study's setup A; DH-01 and AF-01 are close variants); the desk's index rows have no volume for a futures VWAP",
   "checks": null
@@ -4430,6 +4464,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "a demonstration of order tools; the straddle and grid ideas need option premiums the desk does not have, and no entry signal is defined",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -4509,6 +4544,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "NJ-02",
   "duplicateWhy": "the same narrow-CPR, trade-the-open's-side rule, already coded with exact rules in the 11-channel study",
   "checks": null
@@ -4580,6 +4616,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "a market reading with no entry, stop or exit rule",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -4657,6 +4694,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the signal is the change in call and put open interest around the ATM strikes, which the desk does not have",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -4754,6 +4792,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "YT-27",
   "duplicateWhy": "the Camarilla R3/S3 fade with an R4/S4 breakout is already in the library (top-20 study)",
   "checks": null
@@ -4834,6 +4873,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "an explanation of the timeframe with one example; the setups are those of PC-01/PC-02 on one-minute candles",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -4933,6 +4973,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": "an opening bias, not a strategy: no entry trigger, stop or exit is stated, and the Hindi auto-captions are too garbled to recover more",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -4993,6 +5034,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the rules sit in an invite-only paid script and a paid session; the video discloses no entry, stop or exit rule",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -5043,6 +5085,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the auto-captions are too garbled to recover the entry, stop and exit; the RSI 60/40 break is already the library's TG-02",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -5132,6 +5175,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "a live discretionary trade that needs option IVs, open interest and a paid levels indicator the desk does not have; the range break itself is the library's 5-minute ORB family",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -5222,6 +5266,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the zones come from a paid indicator and the trade is read live on the option's own chart; the desk has neither",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -5359,6 +5404,7 @@ export const SL: SlStrategy[] = [
    }
   ],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -5517,6 +5563,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -5682,6 +5729,7 @@ export const SL: SlStrategy[] = [
    }
   ],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -5810,6 +5858,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -5933,6 +5982,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -6148,6 +6198,7 @@ export const SL: SlStrategy[] = [
    }
   ],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -6328,6 +6379,7 @@ export const SL: SlStrategy[] = [
    }
   ],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -6484,6 +6536,7 @@ export const SL: SlStrategy[] = [
    }
   ],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -6629,6 +6682,7 @@ export const SL: SlStrategy[] = [
    }
   ],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -6773,6 +6827,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -6914,6 +6969,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -7091,6 +7147,7 @@ export const SL: SlStrategy[] = [
    }
   ],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -7215,6 +7272,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -7322,6 +7380,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -7429,6 +7488,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -7566,6 +7626,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -7686,6 +7747,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -7873,6 +7935,7 @@ export const SL: SlStrategy[] = [
    }
   ],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -8063,6 +8126,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -8215,6 +8279,7 @@ export const SL: SlStrategy[] = [
    }
   ],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -8331,6 +8396,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -8414,6 +8480,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the stocks come from his scanner and the ranges are drawn by eye; the Bank Nifty tool needs option-writing data the desk does not have",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -8485,6 +8552,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "scanner filters without an entry, stop or exit rule; the promised success ratios are not in this video",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -8544,6 +8612,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "an indicator explainer with no trade rule; the auto-captions are too garbled to recover more; the RSI 70/30 reversal is already the library's YT-25",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -8622,6 +8691,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "QC-01",
   "duplicateWhy": "the 30-minute opening range break is already coded in this study (QC-01; TW-01 and CV-01 for 15-minute ranges); here the exits are left to the user",
   "checks": null
@@ -8700,6 +8770,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "TW-01",
   "duplicateWhy": "the 15-minute opening range break on a volume expansion is already coded in this study (TW-01; also BB-02 and YT-26 in the library)",
   "checks": null
@@ -8776,6 +8847,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "SI-11",
   "duplicateWhy": "the same open-equals-low / open-equals-high idea, already coded with exact rules from Rajesh Jain's video (four-topic study)",
   "checks": null
@@ -8856,6 +8928,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "market commentary; the stock selection is proprietary, and the two rules repeat CR-02 (VWAP rejection) and the library's five-minute ORB",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -8914,6 +8987,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "MC-01",
   "duplicateWhy": "the Supertrend stop-and-reverse flip is already coded from the Marketcalls video in this study",
   "checks": null
@@ -8993,6 +9067,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "discretionary pattern reading; no entry or stop rule is defined",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -9072,6 +9147,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the confirmation the entry requires is left to the viewer; no stop, target or exit is given",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -9148,9 +9224,102 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "guidance on gaps with no entry, stop or exit rule",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
+ },
+ {
+  "id": "AN-01",
+  "version": "v1",
+  "name": "EMA 12 crossing above the EMA 50 within two daily bars with the price above the EMA 12, out on the cross back (long)",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "altFINS",
+  "video": "VgDMavcUpBg",
+  "title": "EMA 12 / 50 is a simple trend following strategy using moving average crossovers | How to trade it?",
+  "uploaded": "2022-11-06",
+  "minutes": 10,
+  "summary": "altFINS explains its 'fresh bullish crossover EMA 12/50' screen on daily candles: buy coins whose EMA 12 crossed above the EMA 50 within the last two days while the price is still above the EMA 12, and sell when the EMA 12 crosses back below the EMA 50; revenue trends and avoiding an overbought RSI are optional extra filters. No stop and no results are given.",
+  "instruments": [
+   "altcoins (Solana, Polkadot and Lido shown)"
+  ],
+  "timeframes": [
+   "1D"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD"
+  ],
+  "overnight": true,
+  "proxy": "the video screens altcoins; coded on the Delta bitcoin perpetual's daily candles",
+  "paperStart": "2026-11-14T18:30:00Z",
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The EMA 12 crossed above the EMA 50 within the last two intervals (days).",
+    "times": [
+     "01:29"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Sell when the EMA 12 crosses back below the EMA 50.",
+    "times": [
+     "05:43"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The last price still above the EMA 12.",
+    "times": [
+     "02:11"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the Delta Exchange bitcoin perpetual on daily candles (the UTC day; the desk's ether history is too short for a 50-day EMA); long only; entry at the next day's open; one trade per cross.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "No stop in the video: a 50% catastrophe stop, sized as 1x the account (on a 1% risk unit); the exit at the next open after a daily close with the EMA 12 back below the EMA 50.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the markets are ours (A): his screen lists altcoins",
+   "the optional filters (revenues, RSI not overbought) are not coded",
+   "no stop is given"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 3,
+   "trades": 3
+  }
  },
  {
   "id": "AV-01",
@@ -9261,6 +9430,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -9405,6 +9575,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -9541,6 +9712,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -9660,6 +9832,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -9788,6 +9961,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -9926,6 +10100,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -10113,6 +10288,7 @@ export const SL: SlStrategy[] = [
    }
   ],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -10257,6 +10433,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -10418,6 +10595,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -10564,6 +10742,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -10682,6 +10861,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -10836,6 +11016,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -10963,6 +11144,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -10970,6 +11152,642 @@ export const SL: SlStrategy[] = [
    "fills": true,
    "signals": 553,
    "trades": 258
+  }
+ },
+ {
+  "id": "CT-05",
+  "version": "v1",
+  "name": "EMA 100 and VWAP trend (six and three candles), a candle reaching close to the VWAP, 0.8 ATR stop, 2R",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "CodeTrading",
+  "video": "0XfcnDAVY7Y",
+  "title": "Easy Crypto Trading: A Comprehensive Guide to VWAP Strategy in Python",
+  "uploaded": "2022-06-02",
+  "minutes": 14,
+  "summary": "CodeTrading's first VWAP scalp in Python (bitcoin 15-minute candles, 2019-2022): the trend needs six candles on one side of the EMA 100 and three on the same side of the VWAP; then a candle whose nearer extreme comes within $100 of the VWAP is an entry in the trend's direction. Stop 0.8 x ATR, target twice the stop, one trade at a time, 1:5 margin, no commissions: about +10,000% against +248% for buy and hold, though the last ten months went flat.",
+  "instruments": [
+   "Bitcoin"
+  ],
+  "timeframes": [
+   "15m"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)",
+   "Ether (Delta ETHUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD",
+   "ETHUSD"
+  ],
+  "overnight": false,
+  "proxy": "the video trades bitcoin; ether is added with the same distance (his $100 on bitcoin becomes 0.2% of the price)",
+  "paperStart": "2026-11-14T18:30:00Z",
+  "rules": [
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "Bitcoin 15-minute candles with the EMA 100 and the VWAP.",
+    "times": [
+     "01:25"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Trend by the EMA: six consecutive candles below it = downtrend (above = uptrend).",
+    "times": [
+     "04:52"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Confirmed by three consecutive candles on the same side of the VWAP.",
+    "times": [
+     "05:32"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Entry: the candle's nearer extreme (its high or low) is within the close distance of the VWAP.",
+    "times": [
+     "07:00"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The close distance is $100 for bitcoin.",
+    "times": [
+     "07:42"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop 0.8 x the ATR.",
+    "times": [
+     "09:52"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Target twice the stop distance.",
+    "times": [
+     "10:34"
+    ]
+   },
+   {
+    "kind": "sizing",
+    "label": "Position sizing and risk",
+    "tag": "E",
+    "text": "One trade at a time (1:5 margin in his test).",
+    "times": [
+     "10:34"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Delta Exchange bitcoin and ether perpetuals on 15-minute candles with real volume; the VWAP resets at 00:00 UTC; out at 23:55 UTC, as CT-02.",
+    "times": []
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "A",
+    "text": "A candle counts as above (below) a curve when its body is: open and close both above (below); the signal candle is one of the counted candles; the $100 distance becomes 0.2% of price, as in CT-02.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "ATR length 7 (as in CT-02); entry at the next candle's open.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the body rule, the distance in percent and the ATR length are ours (A), as for CT-02",
+   "this video adds the EMA 100 and states the run lengths (6 and 3) and 2R, where CT-02's VWAP-only video leaves the run length out and uses 2.5R"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "return_pct",
+    "at": "11:18",
+    "value": "about +10,000% (buy and hold +248%)",
+    "period": "bitcoin 15m 2019-2022, 1:5 margin, no commissions",
+    "quote": "like 10 000 percent of returns"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 2014,
+   "trades": 856
+  }
+ },
+ {
+  "id": "CT-06",
+  "version": "v1",
+  "name": "Hull MA 16 / 65 cross on 4 hours with the RSI (14) above 52 and the daily close above its 50-day linear regression, out on the cross back (long)",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "CodeTrading",
+  "video": "aOIRo4Q7qZE",
+  "title": "A Simple Multi-Timeframe Strategy That Beat Buy & Hold",
+  "uploaded": "2026-05-02",
+  "minutes": 16,
+  "summary": "CodeTrading's multi-timeframe bitcoin strategy built on CoinQuant (4-hour candles, 2017-2026): go long when the Hull MA 16 crosses above the Hull MA 65, the RSI (14) is above 52 and the daily close is above the 50-day linear regression; exit only when the HMA 16 crosses back below the HMA 65 - no stop, no target, the whole account, fees and slippage included: +1,700%, 47% winners, -19% max drawdown, Sharpe 1.36 over 184 trades; a parameter Monte Carlo kept every run profitable.",
+  "instruments": [
+   "Bitcoin"
+  ],
+  "timeframes": [
+   "4h",
+   "1D"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD"
+  ],
+  "overnight": true,
+  "proxy": null,
+  "paperStart": "2026-11-14T18:30:00Z",
+  "rules": [
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "The 4-hour chart with a daily confirmation filter.",
+    "times": [
+     "00:49"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "The fast HMA is 16 on 4 hours ...",
+    "times": [
+     "01:33"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Long when the fast Hull MA crosses above the slow one.",
+    "times": [
+     "00:49"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Exit when the HMA 16 crosses back below the HMA 65.",
+    "times": [
+     "01:33"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "No stop and no target.",
+    "times": [
+     "01:33"
+    ]
+   },
+   {
+    "kind": "sizing",
+    "label": "Position sizing and risk",
+    "tag": "E",
+    "text": "The whole account, no leverage.",
+    "times": [
+     "02:16"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "... the slow HMA 65, and the RSI (14) on 4 hours above 52.",
+    "times": [
+     "02:16"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The daily close above the 50-day linear regression.",
+    "times": [
+     "02:16"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the Delta Exchange bitcoin perpetual; 4-hour candles on the UTC grid; the daily filter uses the last completed UTC day (its close and its 50-day linear regression), never the forming day; entry at the next 4-hour open; long only.",
+    "times": []
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "A",
+    "text": "Hull MA with Pine's integer rounding (as DD-03); the linear regression is the least-squares line's value at the last of the 50 daily closes (Pine's linreg(close, 50, 0)).",
+    "times": []
+   },
+   {
+    "kind": "sizing",
+    "label": "Position sizing and risk",
+    "tag": "A",
+    "text": "His whole-account position becomes a 1x position (sized on a 1% risk unit) with a catastrophe stop 50% away.",
+    "times": []
+   }
+  ],
+  "why": [
+   "his Python rebuild (xaB1GS7X0xA) gives the slow HMA as 64 where this video says 65: 65 coded (I)",
+   "the daily filter on the last completed day is ours (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "return_pct",
+    "at": "05:06",
+    "value": "+1,700%, 47% winners, -19% max drawdown, Sharpe 1.36, 184 trades",
+    "period": "bitcoin 4h 2017-2026, fees and slippage included",
+    "quote": "we have 1,700% so it's still winning actually"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 15,
+   "trades": 15
+  }
+ },
+ {
+  "id": "CT-08",
+  "version": "v1",
+  "name": "ADX regime switch: in trend mode (ADX above 20) a close back above the lower Bollinger Band with the linear regression rising, in range mode (ADX below 16) with the RSI below 35; 5.5% target, 1.5% stop",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "CodeTrading",
+  "video": "pD1gDYnLRu0",
+  "title": "I Built a BTC Strategy Using AI in CoinQuant [Full Backtest]",
+  "uploaded": "2026-07-03",
+  "minutes": 13,
+  "summary": "CodeTrading's 'regime adaptive' bitcoin strategy on CoinQuant (1-hour candles, 2018-2026): the ADX (14) above 20 means trend mode, below 16 range mode, in between no new trades. Trend longs need the close above the 4-hour 50-bar linear regression, a positive 100-bar regression slope, a close crossing back above the lower Bollinger Band and the RSI above 20 (shorts mirrored); range longs need the close crossing above the lower band with the RSI below 35. Exits: a 5.5% target and a 1.5% stop (the range-mode exit at the middle band was ignored by the platform). +215% with a -22% max drawdown over the whole period; every year but 2021 was positive.",
+  "instruments": [
+   "Bitcoin"
+  ],
+  "timeframes": [
+   "1h",
+   "4h"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD"
+  ],
+  "overnight": true,
+  "proxy": null,
+  "paperStart": "2026-11-14T18:30:00Z",
+  "rules": [
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "Bitcoin, 1-hour candles.",
+    "times": [
+     "02:07"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "ADX above 20: trend mode.",
+    "times": [
+     "01:25"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The close crosses above the lower Bollinger Band.",
+    "times": [
+     "02:47"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Trend shorts mirror the long rules.",
+    "times": [
+     "03:31"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Range long (ADX below 16): the close crosses above the lower band ...",
+    "times": [
+     "04:12"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "... and stop 1.5%, long and short.",
+    "times": [
+     "04:53"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Target 5.5% ...",
+    "times": [
+     "04:12"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Range trades were meant to exit back at the middle band; the platform ignored it.",
+    "times": [
+     "05:34"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Trend long: the 1-hour close above the 50-bar linear regression of the 4-hour timeframe.",
+    "times": [
+     "02:07"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The 1-hour linear regression slope (100) above zero.",
+    "times": [
+     "02:47"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The RSI (14) above 20.",
+    "times": [
+     "03:31"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "... with the RSI below 35.",
+    "times": [
+     "04:12"
+    ]
+   },
+   {
+    "kind": "no_trade",
+    "label": "When not to trade",
+    "tag": "E",
+    "text": "ADX below 16: range mode; between 16 and 20 no trades.",
+    "times": [
+     "01:25"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the Delta Exchange bitcoin perpetual on 1-hour candles (UTC grid); Bollinger (20, 2), ADX / DI (14) and RSI (14) at their TradingView defaults; the 4-hour regression is the last completed 4-hour bar's; entry at the next 1-hour open; one position at a time; held across days.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Range shorts: the close crosses below the upper band with the RSI above 65 (the mirror of 35); trend shorts: the close below the 4-hour regression, a negative slope, a close crossing below the upper band and the RSI below 80.",
+    "times": []
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "A",
+    "text": "The 5.5% target and 1.5% stop apply in both modes, as in his reported backtest; the middle-band exit of range trades is not coded.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the range-mode exit at the middle band is stated but was not in his backtest: coded as tested, 5.5% / 1.5% for every trade (A)",
+   "the mirrored thresholds (65, 80) are ours (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "return_pct",
+    "at": "11:13",
+    "value": "+215%, -22% max drawdown",
+    "period": "bitcoin 1h 2018-2026, fees included",
+    "quote": "we have 215% in terms of total returns"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 70,
+   "trades": 47
+  }
+ },
+ {
+  "id": "CU-01",
+  "version": "v1",
+  "name": "MA 9 crossing above the MA 50 under a falling MA 50 / 100 / 200 stack, out when the MA 9 crosses above the MA 200 or at +8% (long, no stop)",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Coinrule",
+  "video": "WS00JVxthlw",
+  "title": "Moving Average Scalper with Fixed Take Profit- Coinrule Strategy of the Week 13",
+  "uploaded": "2023-03-02",
+  "minutes": 9,
+  "summary": "Coinrule's 'moving average scalper with fixed take profit' (strategy of the week 13): buy when the MA 9 crosses above the MA 50 while the MA 50 is below the MA 100 and the MA 100 below the MA 200; sell when the MA 9 crosses above the MA 200 or the price is 8% above the entry; no stop. On 1-hour BTC/USDT the TradingView script showed +52%, usually with 70-80% winners.",
+  "instruments": [
+   "Bitcoin (BTC/USDT)"
+  ],
+  "timeframes": [
+   "1h"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD"
+  ],
+  "overnight": true,
+  "proxy": null,
+  "paperStart": "2026-11-14T18:30:00Z",
+  "rules": [
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "Run on the 1-hour bitcoin chart.",
+    "times": [
+     "05:56"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Simple moving averages.",
+    "times": [
+     "00:55"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The MA 9 crosses above the MA 50 ...",
+    "times": [
+     "02:18"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "... or when the price is 8% above the entry.",
+    "times": [
+     "03:40"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Exit when the MA 9 crosses above the MA 200 ...",
+    "times": [
+     "03:40"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "... with the MA 50 below the MA 100 ...",
+    "times": [
+     "02:59"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "... and the MA 100 below the MA 200.",
+    "times": [
+     "02:59"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the Delta Exchange bitcoin perpetual on 1-hour candles (UTC grid); long only; entry at the next open; held across days.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "No stop in the video: a 50% catastrophe stop, sized as 1x the account (on a 1% risk unit); the MA 9 / MA 200 exit at the next open after the crossing close.",
+    "times": []
+   }
+  ],
+  "why": [
+   "no stop is given: the catastrophe stop and the sizing are ours (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "win_rate",
+    "at": "05:56",
+    "value": "+52%, usually 70-80% winners",
+    "period": "BTC/USDT 1h (TradingView)",
+    "quote": "52 net profit"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 63,
+   "trades": 26
   }
  },
  {
@@ -11146,6 +11964,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -11316,6 +12135,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -11484,6 +12304,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -11658,6 +12479,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -11815,6 +12637,7 @@ export const SL: SlStrategy[] = [
    }
   ],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -11942,6 +12765,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -12087,6 +12911,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -12207,6 +13032,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -12357,6 +13183,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -12503,6 +13330,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -12638,6 +13466,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -12756,12 +13585,220 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
    "lookahead": true,
    "fills": true,
    "signals": 4,
+   "trades": 4
+  }
+ },
+ {
+  "id": "RB-01",
+  "version": "v1",
+  "name": "Envelope mean reversion: a limit order 7% from the 6-period Donchian midline, out at the midline, 40% stop, a 15% price-jump exit (first envelope only)",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Robot Traders",
+  "video": "JzC7aPX3VeM",
+  "title": "Mastering Crypto Volatility: Envelope Trading Strategy Explained",
+  "uploaded": "2024-05-24",
+  "minutes": 29,
+  "summary": "Robot Traders' envelope strategy on 1-hour BTC/USDT and other perpetuals (TradingView, about 3 years): a 6-period Donchian-midline average of the close with envelopes 7%, 11% and 14% away; resting limit orders at every band each candle, one third of the portfolio per band; every position exits at the average (updated each candle), with a 40% stop from the average entry, a 'price jump' close-all when a candle closes 15% beyond the one before, and no new trade after a stop or a jump until the price is back at the average. Bitcoin: about +150%, 80% winners, profit factor 16, a 4% equity drawdown (0.02% maker fees).",
+  "instruments": [
+   "Bitcoin",
+   "Ether",
+   "other perpetuals"
+  ],
+  "timeframes": [
+   "1h"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)",
+   "Ether (Delta ETHUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD",
+   "ETHUSD"
+  ],
+  "overnight": true,
+  "proxy": "the video adds two more envelopes (11% and 14%, averaging in); the desk holds one position and trades the first (7%)",
+  "paperStart": "2026-11-14T18:30:00Z",
+  "rules": [
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "1-hour BTC/USDT futures, about three years.",
+    "times": [
+     "00:03"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "The average uses the close as its source ...",
+    "times": [
+     "04:21"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "... over 6 periods, as a Donchian channel midline.",
+    "times": [
+     "04:21"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Envelopes: the average displaced by 7% ...",
+    "times": [
+     "05:01"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "... then 11% and 14%.",
+    "times": [
+     "05:01"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Bottom bands trigger longs, top bands shorts.",
+    "times": [
+     "05:44"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "All the band limit orders are placed at every new candle.",
+    "times": [
+     "24:59"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "A stop in percent of the average entry price ...",
+    "times": [
+     "07:51"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "... set back to 40% after his test at 20%.",
+    "times": [
+     "19:06"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Exit when the price comes back to the average.",
+    "times": [
+     "05:44"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Price jump: close all when a candle closes 15% beyond the previous close.",
+    "times": [
+     "20:37"
+    ]
+   },
+   {
+    "kind": "sizing",
+    "label": "Position sizing and risk",
+    "tag": "E",
+    "text": "Each band takes the portfolio divided by the number of envelopes.",
+    "times": [
+     "06:28"
+    ]
+   },
+   {
+    "kind": "no_trade",
+    "label": "When not to trade",
+    "tag": "E",
+    "text": "After a stop or a jump exit, no new trade until the price has touched the average again.",
+    "times": [
+     "21:19"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the Delta Exchange bitcoin and ether perpetuals on 1-hour candles (UTC grid); trades held across days.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "The desk holds one position at a time, so only the first envelope (7%) is traded, at his one-third size (sized on a 3% risk unit); each candle's limit at the band is valid for the next candle only.",
+    "times": []
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "A",
+    "text": "The exit limit starts at the signal candle's average and moves to each completed candle's average while that is beyond the entry; a close back at the average exits at the next open (where his limit would be marketable), so when the average has fallen past the entry the exit comes at the next open after such a close; the jump test (a close 15% beyond the previous close) exits at the next open, as in his corrected version.",
+    "times": []
+   },
+   {
+    "kind": "no_trade",
+    "label": "When not to trade",
+    "tag": "A",
+    "text": "The wait after a stop or a jump exit is decided by replaying the strategy's own earlier trades on 1-hour candles up to the signal (no look-ahead).",
+    "times": []
+   }
+  ],
+  "why": [
+   "the 11% and 14% envelopes (averaging in) are not traded, as the desk holds one position (A)",
+   "the wait is replayed on hourly candles (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "win_rate",
+    "at": "00:03",
+    "value": "about +150%, 80% winners, profit factor 16, -4% equity drawdown",
+    "period": "BTC/USDT 1h, about 3 years",
+    "quote": "gives us almost 150% profits the win rate is completely insane 80%"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 23550,
    "trades": 4
   }
  },
@@ -12873,6 +13910,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -12989,6 +14027,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -13104,6 +14143,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -13111,6 +14151,166 @@ export const SL: SlStrategy[] = [
    "fills": true,
    "signals": 203,
    "trades": 173
+  }
+ },
+ {
+  "id": "RU-07",
+  "version": "v1",
+  "name": "RSI under 30, then the first candle closing well above the Bollinger middle band, stop below the lower band, 1.5R (mirror for shorts)",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "TRADING RUSH",
+  "video": "yBjk9r9igcQ",
+  "title": "Taking 100 Trades with Bollinger Bands + RSI Trading Strategy",
+  "uploaded": "2020-10-25",
+  "minutes": 8,
+  "summary": "TRADING RUSH tests the Bollinger Bands + RSI reversal 100 times: after the RSI goes under 30, buy the first candle that closes clearly above the middle band (a slight touch does not count), stop below the lower band; after the RSI goes over 70, sell the first candle that closes clearly below the middle band, stop above the upper band; 1.5:1 reward to risk, without the 200 MA filter. About 35% winners, one of the worst results on the channel.",
+  "instruments": [
+   "forex and stocks (Trading Rush app)"
+  ],
+  "timeframes": [
+   "intraday"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)",
+   "Gold (Delta XAUTUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD",
+   "XAUUSD"
+  ],
+  "overnight": false,
+  "proxy": "the video tests forex and stocks in the Trading Rush app; coded on Delta bitcoin and gold 30-minute candles",
+  "paperStart": "2026-11-14T18:30:00Z",
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Buy at the first candle that closes above the middle band soon after the RSI was oversold.",
+    "times": [
+     "01:24"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "A good portion of the candle must close above the middle band.",
+    "times": [
+     "01:24"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Sell: the first candle closing below the middle band ...",
+    "times": [
+     "01:24"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop below the lower band (above the upper band for shorts).",
+    "times": [
+     "02:07"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Reward to risk 1.5:1.",
+    "times": [
+     "06:24"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Oversold: the RSI under 30.",
+    "times": [
+     "01:24"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "... soon after the RSI was over 70.",
+    "times": [
+     "02:07"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "No 200-period moving average filter.",
+    "times": [
+     "02:51"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: bitcoin and gold (Delta XAUTUSD) on 30-minute candles, like the channel's other books (RU-06); out at the day's end.",
+    "times": []
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "A",
+    "text": "Bollinger (20, 2) and RSI (14), the default settings.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "'Soon after': a reading under 30 arms the long for 20 candles (a reading over 70 cancels it); 'a good portion': the close above the middle band with at least half of the candle's body above it; entry at the next open; one position at a time; mirror for shorts.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "The stop is one tick beyond the outer band's value at the signal candle; target 1.5R.",
+    "times": []
+   }
+  ],
+  "why": [
+   "'soon after' and 'a good portion' are read as in the A rules",
+   "the timeframe and the markets are ours (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "win_rate",
+    "at": "07:07",
+    "value": "about 35% winners at 1.5:1",
+    "period": "100 trades",
+    "quote": "in this backtest, was approximately 35 percent"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 505,
+   "trades": 475
   }
  },
  {
@@ -13262,6 +14462,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -13429,6 +14630,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -13605,6 +14807,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -13712,6 +14915,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -13817,6 +15021,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -13931,6 +15136,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -14087,6 +15293,7 @@ export const SL: SlStrategy[] = [
    }
   ],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -14247,6 +15454,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -14400,6 +15608,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -14544,6 +15753,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -14688,6 +15898,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -14833,6 +16044,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -14981,6 +16193,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -15126,6 +16339,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -15264,6 +16478,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -15400,6 +16615,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -15527,6 +16743,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -15654,6 +16871,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -15662,6 +16880,427 @@ export const SL: SlStrategy[] = [
    "signals": 15,
    "trades": 15
   }
+ },
+ {
+  "id": "WT-02",
+  "version": "v1",
+  "name": "A close beyond the Keltner Channel with the DMI line of that side above 25, stop at the other band, 2R",
+  "topic": "crypto",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "WunderTrading",
+  "video": "Tm07EHew8XA",
+  "title": "Bitcoin Crypto Strategy for any trend",
+  "uploaded": "2022-11-17",
+  "minutes": 8,
+  "summary": "WunderTrading's Keltner + DMI trend bot for 1-hour bitcoin: go long when a candle closes above the upper Keltner Channel with the DI+ above 25 showing the green bar, short when a candle closes below the lower channel with the DI- above 25 showing red; the stop sits at the opposite side of the channel and the target is 2:1. Optimised: +446%, profit factor 1.78.",
+  "instruments": [
+   "Bitcoin"
+  ],
+  "timeframes": [
+   "1h"
+  ],
+  "markets": [
+   "Bitcoin (Delta BTCUSD)"
+  ],
+  "deskMarkets": [
+   "BTCUSD"
+  ],
+  "overnight": true,
+  "proxy": null,
+  "paperStart": "2026-11-14T18:30:00Z",
+  "rules": [
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "Optimised for bitcoin on 1 hour.",
+    "times": [
+     "02:10"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "The Keltner Channel at its default settings.",
+    "times": [
+     "00:05"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Long: a candle closes above the upper Keltner band with the DMI above the threshold showing the green bar.",
+    "times": [
+     "01:28"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Short: a close below the channel with the DMI bar red.",
+    "times": [
+     "01:28"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop at the opposite side of the channel; reward to risk 2:1.",
+    "times": [
+     "01:28"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The DMI with a threshold line at 25.",
+    "times": [
+     "01:28"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the Delta Exchange bitcoin perpetual on 1-hour candles (UTC grid); entry at the next open; one position at a time; held across days.",
+    "times": []
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "A",
+    "text": "Keltner = TradingView's defaults: the EMA 20 of the close plus or minus 2 x ATR (10); DMI (14, 14).",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "'The green bar' is read as the DI+ above the DI- (and above 25) for longs; the DI- above the DI+ and above 25 for shorts.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "The stop is the opposite band's value at the signal candle; target 2R from the fill.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the Keltner settings are TradingView's defaults, as he leaves them (A)",
+   "his bot's optimised settings are not shown"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "return_pct",
+    "at": "00:05",
+    "value": "+446%, profit factor 1.78",
+    "period": "bitcoin 1h, optimised",
+    "quote": "it will give you a profit of 446 and a nice profit factor of 1.78"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 1202,
+   "trades": 59
+  }
+ },
+ {
+  "id": "AN-02",
+  "version": "v1",
+  "name": "Oversold altcoins (RSI under 30) near a support level read by eye",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "altFINS",
+  "video": "jfz9oUZybZk",
+  "title": "How to find oversold coins (RSI) near support levels/ ADA, ALGO, ONE, KSM, CRV",
+  "uploaded": "2022-02-24",
+  "minutes": 14,
+  "summary": "altFINS screens for oversold altcoins (RSI under 30, or under 25 for very oversold) with a market-cap floor during a sell-off, then reads each chart by eye for the next support level and suggests buying near support for a bounce.",
+  "instruments": [
+   "altcoins (Cardano, Algorand, Harmony, Kusama, Curve)"
+  ],
+  "timeframes": [
+   "1D"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Then find the next support level on the chart.",
+    "times": [
+     "04:55"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Oversold: the RSI under 30.",
+    "times": [
+     "02:49"
+    ]
+   }
+  ],
+  "why": [
+   "the support levels are read by eye, coin by coin",
+   "no entry, stop or exit is stated"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the support levels are read by eye, coin by coin; no entry, stop or exit is stated",
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "AV-02",
+  "version": "v1",
+  "name": "Stochastic (14, 3, 3) back between 20 and 80 after both lines dipped under 20, RSI above 50, MACD above its signal, +0.5% / -0.5% (one minute)",
+  "topic": "crypto",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Algovibes",
+  "video": "X50-c54BWV8",
+  "title": "CRYPTO Live Trading Bot with Python [Stoch, RSI, MACD]",
+  "uploaded": "2021-09-26",
+  "minutes": 24,
+  "summary": "Algovibes codes a live Binance bot in Python (1-minute ADA/USDT): buy when the Stochastic %K (14, 3) and %D (3) both crossed below 20 within the last few candles and are now between 20 and 80, the RSI (14) is above 50 and the MACD is above its signal line; sell at +0.5% or -0.5%. He says the 25-candle look-back only provokes a demo trade and the exits are placeholders to tune.",
+  "instruments": [
+   "Cardano (ADA/USDT)"
+  ],
+  "timeframes": [
+   "1m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Stochastic window 14 with a smoothing of 3 (D = the 3-step average of K); RSI 14.",
+    "times": [
+     "03:47"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Trigger: within the last n candles both the K and the D line crossed below 20.",
+    "times": [
+     "00:01"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Buy when K and D are between 20 and 80, the RSI is above 50 and the MACD is above the signal line.",
+    "times": [
+     "00:01"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop at 99.5% of the buy price ...",
+    "times": [
+     "00:43"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "... target 0.5% above it.",
+    "times": [
+     "00:43"
+    ]
+   }
+  ],
+  "why": [
+   "the look-back n is three or five (25 only for the demo) and the exits are placeholders he says to tune"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": "DT-03",
+  "duplicateWhy": "the same Stochastic-oversold, RSI 50 and MACD-cross entry is already coded (the 20-channel study's DT-03, 1.5R on 30 minutes); his 0.5% exits on 1-minute bars are untuned placeholders",
+  "checks": null
+ },
+ {
+  "id": "AV-03",
+  "version": "v1",
+  "name": "The day's top Binance gainer, bought while its last 120 minutes are up, +2% target, -1.5% stop",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Algovibes",
+  "video": "g04GeHe-dJw",
+  "title": "Altcoin [High Risk] Live Trading Bot with Python using the Binance API",
+  "uploaded": "2021-10-10",
+  "minutes": 30,
+  "summary": "Algovibes' 'high-risk' Binance bot: each loop it picks the USDT pair (leveraged tokens excluded) with the biggest 24-hour price change, buys it at market when its cumulative return over the last 120 one-minute candles is positive, and sells at +2% or -1.5%. He warns the coins can be illiquid or fraudulent.",
+  "instruments": [
+   "the top 24-hour gainer among about 1,600 Binance USDT pairs"
+  ],
+  "timeframes": [
+   "1m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Screen the whole Binance platform for the top 24-hour performer.",
+    "times": [
+     "00:01"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Buy when the cumulative return of the last 120 minutes is positive.",
+    "times": [
+     "16:07"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop 1.5%, target 2%.",
+    "times": [
+     "13:52"
+    ]
+   }
+  ],
+  "why": [
+   "it needs the 24-hour ranking of about 1,600 Binance pairs with their minute data",
+   "the desk trades bitcoin, ether and gold, so it has no top-gainer universe"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "it needs the 24-hour ranking of about 1,600 Binance pairs and their minute data; the desk trades bitcoin, ether and gold, so it has no top-gainer universe",
+  "dataBlocked": true,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "AY-01",
+  "version": "v1",
+  "name": "Four swing set-ups: a moving-average pullback with a continuation pattern, reversals at key levels, range false breakouts, hedging",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Altrady",
+  "video": "jAmHSm0FXXk",
+  "title": "Top 4 Swing Trading Strategies That Work in 2025",
+  "uploaded": "2025-11-18",
+  "minutes": 4,
+  "summary": "Altrady shows four discretionary swing set-ups on its platform: riding the trend (a pullback to the 50 or 21 MA followed by a continuation pattern), hunting reversals at key levels (rejection candles, the Ross 1-2-3 hook), ping-pong range trading (false breakouts, take-profits before the opposite level) and hedging a losing position.",
+  "instruments": [
+   "crypto (Solana shown)"
+  ],
+  "timeframes": [
+   "unclear"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Ride the trend: a 50-period moving average ...",
+    "times": [
+     "00:02"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Ping-pong: identify the range and wait for a false breakout.",
+    "times": [
+     "02:12"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "... a touch of it, then a continuation pattern, is the long signal.",
+    "times": [
+     "00:46"
+    ]
+   }
+  ],
+  "why": [
+   "the trends, the patterns and the levels are judged by eye",
+   "the only exit rule is 'take profits before the opposite level'",
+   "hedging is not an entry rule"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the trends, the patterns and the levels are judged by eye; the only exit rule is 'take profits before the opposite level'; hedging is not an entry rule",
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
  },
  {
   "id": "BC-01",
@@ -15728,6 +17367,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "market commentary on one moment; no entry, stop or exit",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -15796,6 +17436,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "a way to view the trend on weekly to two-month candles; no entry, stop or exit is given",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -15880,6 +17521,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": "the order blocks, the profile range and the channels are drawn by eye; Market Cipher is a paid indicator the desk does not have",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -15948,6 +17590,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "explains why the gaps fill; no entry, stop or exit; the CME's 24/7 bitcoin futures (announced for early 2026) end weekend gaps",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -16006,6 +17649,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the same method as BU-01 on the daily and 4-hour charts: zones drawn by eye and the paid Market Cipher",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -16064,6 +17708,102 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "presented as a bias and trailing-stop aid to combine with other checks, not a complete rule set (SAR strategies are already coded: NJ-22, DT-02)",
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "C3-01",
+  "version": "v1",
+  "name": "DCA bot: the 1-hour RSI (14) under 30 starts a deal, three safety orders 2.5% apart (x2 size, x4 step), 7.5% take-profit, no stop",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "3Сommas",
+  "video": "eSjhsG8Df24",
+  "title": "3Commas - How To Create a DCA Bot! (Official Tutorial)",
+  "uploaded": "2023-09-26",
+  "minutes": 15,
+  "summary": "3Commas' official DCA-bot tutorial builds an example long bot over the top five Kraken pairs: one deal at a time, a deal starts when the 1-hour RSI (14) is below 30, a $20 base order, three safety orders 2.5% apart with a volume scale of 2 and a step scale of 4 (covering a 52.5% drop), a 7.5% take-profit on the whole position, no stop.",
+  "instruments": [
+   "BTC, ETH, SOL, XRP and EOS (Kraken)"
+  ],
+  "timeframes": [
+   "1h"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "RSI length 14 ...",
+    "times": [
+     "07:54"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "... a deal only when the 1-hour RSI is below 30.",
+    "times": [
+     "08:35"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "No stop.",
+    "times": [
+     "11:28"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Take-profit 7.5%.",
+    "times": [
+     "09:15"
+    ]
+   },
+   {
+    "kind": "management",
+    "label": "Trade management",
+    "tag": "E",
+    "text": "Safety orders 2.5% apart ...",
+    "times": [
+     "05:47"
+    ]
+   },
+   {
+    "kind": "management",
+    "label": "Trade management",
+    "tag": "E",
+    "text": "... covering a 52.5% drop with the step scale raised.",
+    "times": [
+     "05:47"
+    ]
+   }
+  ],
+  "why": [
+   "the safety-order size is not stated (he lowers it from $20 without saying to what)",
+   "the desk's engine holds one entry per position, so averaging down with safety orders cannot be modelled"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the safety-order size is not stated (he lowers it from $20 without saying to what); the desk's engine holds one entry per position, so averaging down with safety orders cannot be modelled",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -16168,6 +17908,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "BN-01",
   "duplicateWhy": "the EMA-stack trend with a retest of the middle EMAs on a reversal candle, on 15-minute bitcoin, is already coded (BN-01; SB-01 in the library)",
   "checks": null
@@ -16253,6 +17994,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "LS-00",
   "duplicateWhy": "the sweep of a level that closes back inside is already on the desk (LS-00 and its versions; NJ-44 and CP-26 turtle soup); his failed-break variant is CC-01's double close",
   "checks": null
@@ -16316,6 +18058,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the ranges, equilibriums and support levels are drawn by eye on each chart; no fixed trigger, stop or target is stated",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -16369,6 +18112,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "'test and hold' and the stop wiggle room are judged live on each chart; the EMA 12 trend-management idea is the earlier card CG-02's",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -16427,6 +18171,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the wedges, necklines and trend changes are drawn by eye on each chart; its stair step is the separate video's CG-05",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -16515,6 +18260,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": "the levels' statistics and the confirmation candle are in their paid course; the levels are chosen by eye",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -16611,6 +18357,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "CP-03",
   "duplicateWhy": "buying support and selling resistance inside a range with a candle trigger and the opposite extreme as the target is the crypto playlist's range ping-pong (CP-03)",
   "checks": null
@@ -16677,8 +18424,265 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "CP-03",
   "duplicateWhy": "buying the lower part of a sideways range and selling the upper part is already coded (CP-03 range ping-pong); a 16-order grid needs a multi-order engine the desk does not run",
+  "checks": null
+ },
+ {
+  "id": "CT-07",
+  "version": "v1",
+  "name": "Hull MA 16 / 64 cross with the RSI above 52 and the close above the 50-bar linear regression (the CoinQuant strategy rebuilt in Python)",
+  "topic": "crypto",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "CodeTrading",
+  "video": "xaB1GS7X0xA",
+  "title": "I Rebuilt the CoinQuant AI BTC Strategy in Python [Free Code]",
+  "uploaded": "2026-05-15",
+  "minutes": 13,
+  "summary": "CodeTrading rebuilds the CoinQuant bitcoin strategy (CT-06) in Python with backtesting.py and a custom backtester and matches CoinQuant trade for trade (131 against 132 trades, about +1,000%) once the commission is set to 0.0003: the Hull MA 16 crossing above the Hull MA 64 on 4 hours, the RSI (14) above 52 and the close above the 50-bar linear regression (4-hour or daily).",
+  "instruments": [
+   "Bitcoin"
+  ],
+  "timeframes": [
+   "4h",
+   "1D"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "The lengths: HMA 16 and 64, RSI 14 over 52, regression 50.",
+    "times": [
+     "10:11"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The fast moving average crosses above the slow one on 4 hours.",
+    "times": [
+     "00:01"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The RSI 14 above 52 on 4 hours.",
+    "times": [
+     "00:47"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The close above the 50-bar linear regression (4 hours here; daily in the original).",
+    "times": [
+     "00:47"
+    ]
+   }
+  ],
+  "why": [
+   "the exit is not restated here (CT-06's video gives it: the cross back)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "return_pct",
+    "at": "04:16",
+    "value": "about +1,000% over 131 trades, matching CoinQuant's 132",
+    "period": "bitcoin 4h",
+    "quote": "the total returns are 950% in python"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": "CT-06",
+  "duplicateWhy": "the same CoinQuant strategy (CT-06's video), rebuilt in Python; it gives the slow HMA as 64 where the original says 65",
+  "checks": null
+ },
+ {
+  "id": "CU-02",
+  "version": "v1",
+  "name": "RSI above 50 and up by 5 with the MA 9 above the MA 50, 1% trailing take-profit, 2% trailing stop",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Coinrule",
+  "video": "AP1TLQxSHjM",
+  "title": "RSI and MA Strategy with Trailing Stop Loss and Take Profit- Coinrule Strategy of the Week 9",
+  "uploaded": "2022-12-21",
+  "minutes": 6,
+  "summary": "Coinrule's 'RSI and MA strategy with trailing stop loss and take profit' (week 9): buy when the RSI is above 50 and increases by five while the MA 9 is above the MA 50; exit with a 1% trailing take-profit and a 2% trailing stop. On 30-minute AVAX/USDT (bear market) the script showed +98% over 280 trades.",
+  "instruments": [
+   "AVAX/USDT"
+  ],
+  "timeframes": [
+   "30m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The RSI above 50 and up by five ...",
+    "times": [
+     "01:37"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "A 1% trailing take-profit and a 2% trailing stop.",
+    "times": [
+     "01:37"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "... with the MA 9 above the MA 50.",
+    "times": [
+     "01:37"
+    ]
+   }
+  ],
+  "why": [
+   "'increases by five' gives no window (against the last candle? over how many?), and how the 1% trailing take-profit differs from the 2% trailing stop is not defined"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "return_pct",
+    "at": "03:06",
+    "value": "+98% over 280 trades",
+    "period": "AVAX/USDT 30m, bear market",
+    "quote": "out of 280 trades it made 98 net profit"
+   }
+  ],
+  "examples": [],
+  "blockedReason": "'increases by five' gives no window (against the last candle? over how many?), and how the 1% trailing take-profit differs from the 2% trailing stop is not defined",
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "CU-03",
+  "version": "v1",
+  "name": "Ichimoku bullish (Tenkan over Kijun, Chikou over the price, close over the cloud) with the -DI over the +DI and the ADX above 45, 3% trailing exits",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Coinrule",
+  "video": "x5Gey-XHkew",
+  "title": "Ichimoku Cloud and ADX with Trailing Stop Loss - Coinrule Trading Bots - Strategy of the Week #11",
+  "uploaded": "2023-01-26",
+  "minutes": 6,
+  "summary": "Coinrule's 'Ichimoku Cloud and ADX with trailing stop loss' (week 11): buy when the Tenkan is above the Kijun, the Chikou above the close of 26 bars ago, the close above the cloud, the -DI above the +DI and the ADX above 45; exit with 3% trailing exits. On 45-minute ETH/USDT in 2022 the script showed +299% over 176 trades with 40% winners.",
+  "instruments": [
+   "ETH/USDT",
+   "BTC/USDT"
+  ],
+  "timeframes": [
+   "45m",
+   "5m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The Tenkan above the Kijun ...",
+    "times": [
+     "01:30"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "3% trailing take-profit and stop.",
+    "times": [
+     "02:13"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "... the Chikou above the close of 26 bars ago ...",
+    "times": [
+     "01:30"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "... the close above the cloud ...",
+    "times": [
+     "01:30"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "... the -DI above the +DI and the ADX above 45.",
+    "times": [
+     "01:30"
+    ]
+   }
+  ],
+  "why": [
+   "the trailing take-profit and stop are not defined (what they trail from, and the take-profit is described as a price decrease)",
+   "the Ichimoku and DMI settings are not given"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "return_pct",
+    "at": "02:57",
+    "value": "+299% over 176 trades, 40% winners",
+    "period": "ETH/USDT 45m, 2022",
+    "quote": "299 net profit with 176 trades"
+   }
+  ],
+  "examples": [],
+  "blockedReason": "the trailing take-profit and stop are not defined (what they trail from, and the take-profit is described as a price decrease); the Ichimoku and DMI settings are not given",
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
   "checks": null
  },
  {
@@ -16756,6 +18760,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "cycle-top signals on two-week candles need years of history; the desk keeps 150 days of bitcoin",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -16814,6 +18819,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "a live stream: the levels, retests and ladders are chosen by eye, on coins the desk does not trade",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -16872,6 +18878,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "an XRP price forecast from a 2-week EMA retest; no entry, stop or exit, and XRP is not on the desk",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -16958,6 +18965,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "YT-16",
   "duplicateWhy": "a pullback to the moving averages with an engulfing trigger at 1:2 is already coded (YT-16; BN-01 on bitcoin)",
   "checks": null
@@ -17037,6 +19045,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "FZ-01",
   "duplicateWhy": "the 8 PM / 9 PM New York model on gold is already coded from this channel (the 20-channel study's FZ-01)",
   "checks": null
@@ -17124,8 +19133,67 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "JR-02",
   "duplicateWhy": "the value-area failure fade (a close back inside the value area, targeting the other edge) is already coded (the 20-channel study's JR-02, on bitcoin's 09:30-09:45 profile)",
+  "checks": null
+ },
+ {
+  "id": "GP-01",
+  "version": "v1",
+  "name": "DCA bot settings guide (no example values)",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Bitsgap",
+  "video": "zCE8aKW0VaA",
+  "title": "Mastering Bitsgap's DCA Bot: Setup and Strategy Guide | Crypto Trading Series [Part 3]",
+  "uploaded": "2024-09-25",
+  "minutes": 9,
+  "summary": "Bitsgap's DCA-bot tutorial explains the settings - start immediately or on an indicator signal, the base order, averaging orders with amount and step multipliers, take-profit by the average or the base-order price with an optional trailing take-profit, a stop-loss from the highest weighted average price, pump/dump protection, total profit and loss limits - and general tips; no complete set of values is given.",
+  "instruments": [
+   "crypto"
+  ],
+  "timeframes": [
+   "unclear"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Four ways to set the take-profit.",
+    "times": [
+     "04:11"
+    ]
+   },
+   {
+    "kind": "management",
+    "label": "Trade management",
+    "tag": "E",
+    "text": "Averaging orders with amount and step multipliers.",
+    "times": [
+     "02:47"
+    ]
+   }
+  ],
+  "why": [
+   "a settings tutorial: no start signal, order sizes, steps, take-profit or stop values are given"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "a settings tutorial: no start signal, order sizes, steps, take-profit or stop values are given",
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
   "checks": null
  },
  {
@@ -17199,6 +19267,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": "the signal thresholds are on a settings slide but never stated; the creator's own week of live trading lost 4.5%",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -17259,6 +19328,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "YT-25",
   "duplicateWhy": "the RSI 30/70 reversal is already in the library (the top-20 study's YT-25)",
   "checks": null
@@ -17311,6 +19381,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the thresholds, MACD settings and the triple barrier's values are set on the configuration screen and never read out; a three-day demo backtest",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -17369,6 +19440,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "a market-making bot: two-sided resting quotes whose fills depend on the order queue, which the desk's signal books cannot simulate; the Aroon settings are not given",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -17427,6 +19499,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the floor and ceiling are picked by eye on each chart, and a grid is many resting orders at once, which the desk's one-position books do not simulate",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -17484,6 +19557,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the parameters are left to a 300-trial Optuna search whose winner is not shown, so there is no fixed rule to run",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -17543,6 +19617,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "needs two exchanges' perpetual prices and funding histories at once; the desk has Delta's alone",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -17620,6 +19695,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the screen only shortlists altcoins; the trade is decided from chart patterns read by eye on the 6- and 12-hour charts",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -17688,6 +19764,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the trend lines and channels are drawn by eye; the bounce and breakout entries depend on them",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -17754,6 +19831,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "NJ-40",
   "duplicateWhy": "price, cloud and TK cross aligned (the Ichimoku trifecta) is already coded (NJ-40; DT-04 on bitcoin's daily cloud)",
   "checks": null
@@ -17820,6 +19898,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": "a forecast from a trend line drawn by eye on the weekly RSI; no entry, stop or exit",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -17913,6 +19992,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": "the entry signal is a paid, closed-source indicator (the Jewel Light), so it cannot be rebuilt; only the PMARP exit is public",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -17991,6 +20071,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": "a study of whether to wait for a dip, not an entry rule; the weekly 5 EMA retest needs weekly history the desk does not keep",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -18069,6 +20150,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "TB-04",
   "duplicateWhy": "a daily fast/slow moving-average cross held long until the cross back is already coded (TB-04, EMA 9/20; PR-09 and KS-02 are intraday versions); only the lengths differ",
   "checks": null
@@ -18158,6 +20240,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "CP-02",
   "duplicateWhy": "a daily close beyond the last swing high with the stop under the broken level is already coded (CP-02, the power-candle breakout of the last swing; YT-17)",
   "checks": null
@@ -18224,6 +20307,134 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": "the agents' rules and anchors are never stated; his best results come from liquidation data the desk does not have",
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "MI-01",
+  "version": "v1",
+  "name": "Heikin Ashi colour change at a support / resistance and VWAP band confluence, stop beyond the level, targets at the bands",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "The Secret Mindset",
+  "video": "4xIAZ7vSsRY",
+  "title": "99% Of Scalpers Missed This “Double VWAP” Hack (VWAP Heiken Ashi Trading Strategy)",
+  "uploaded": "2021-09-25",
+  "minutes": 15,
+  "summary": "The Secret Mindset's 'double VWAP' scalping method: Heikin Ashi candles with two sets of VWAP standard-deviation bands (1 and 2), traded at confluences where a hand-drawn support or resistance level lines up with a band; enter when the Heikin Ashi candles change colour after the rejection (optionally confirmed by an RSI or MACD divergence), stop beyond the level, partial profits at the VWAP bands.",
+  "instruments": [
+   "stocks and other markets"
+  ],
+  "timeframes": [
+   "intraday"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Two sets of VWAP bands, at 1 and 2 standard deviations.",
+    "times": [
+     "06:07"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Confluence: a support or resistance level that lines up with the VWAP bands.",
+    "times": [
+     "08:20"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "The stop below the support level and the confluence area.",
+    "times": [
+     "09:01"
+    ]
+   }
+  ],
+  "why": [
+   "the support and resistance levels and trend lines are drawn by eye",
+   "the confluence and the profit-taking are judged case by case"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the support and resistance levels and trend lines are drawn by eye; the confluence and the profit-taking are judged case by case",
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "MI-02",
+  "version": "v1",
+  "name": "Trend day or range day by price action and the 20 EMA (the first deep pullback; the range extremes)",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "The Secret Mindset",
+  "video": "NpCZXLxAUqw",
+  "title": "Price Action Trading Was Hard, Until I Found This \"Momentum Tactic\" (Strategies Included)",
+  "uploaded": "2021-12-18",
+  "minutes": 15,
+  "summary": "The Secret Mindset's price-action guide to telling trend days from range days: trend days show follow-through bars, higher highs and lows and price holding one side of the 20 EMA (buy the first deep pullback to it); range days show wicks, alternating bars, dojis and overlap around the EMA (trade only the extremes after confirmation).",
+  "instruments": [
+   "any market"
+  ],
+  "timeframes": [
+   "intraday"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "The 20-period EMA.",
+    "times": [
+     "06:18"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "In a strong trend, enter the first deep pullback to the EMA.",
+    "times": [
+     "07:01"
+    ]
+   }
+  ],
+  "why": [
+   "the day type, the depth of a pullback and the range extremes are judged by eye",
+   "no stop, target or exit is stated"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the day type, the depth of a pullback and the range extremes are judged by eye; no stop, target or exit is stated",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -18309,6 +20520,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": "the coin and the entry are picked by eye, on memecoins the desk does not trade; entries are 'anywhere'",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -18375,6 +20587,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": "the deal-start signal is the paid TBO indicator and the bot settings are not all stated; a product promotion",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -18468,6 +20681,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": "the cycle timing and the dip levels (49K, 38,555) are read by eye from the chart, and there is no exit beyond 'partial profits on the way up': a multi-year spot accumulation with no stop or exit that a per-trade paper book cannot score",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -18544,6 +20758,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": "the deal-start signal is the paid Better Crypto Signals strategy, and the DCA spacing and the take-profit are never stated; a product promotion",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -18605,6 +20820,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the TBO lines are a paid indicator whose formulas are not given",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -18664,6 +20880,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "TBT Divergence is a paid indicator ('a lot of math involved') whose rules are not given, with no stop or target",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -18731,6 +20948,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "MN-02",
   "duplicateWhy": "the same 3Commas DCA bot on the TBO deal-start signal, from his earlier video",
   "checks": null
@@ -18802,6 +21020,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "levels, order blocks and confirmations are read by eye in a live account challenge; positions are added at discretion",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -18859,6 +21078,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "an indicator set-up tutorial: no entry, stop or exit rule",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -18917,6 +21137,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "wick reading as momentum inside a trend read by eye; no entry, stop or exit (a flat-bottom Heikin Ashi entry is already coded as SP-02)",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -19006,6 +21227,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "TP-01",
   "duplicateWhy": "an impulsive fair value gap in the discount of a range with the trend, entered at the gap, is already in the library (20-channel study; also NJ-30)",
   "checks": null
@@ -19066,6 +21288,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "an explanation of patterns with no entry, stop or target rule; the sweep-and-shift idea is already in the library's liquidity-sweep strategies",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -19124,6 +21347,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "PL-03",
   "duplicateWhy": "the same Supertrend (7, 3) long-only flip bot as part 3 of the series; the one-minute timeframe is only for the live demo",
   "checks": null
@@ -19202,6 +21426,101 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "a monthly reading model he does not trade on its own; no entry, stop or exit rule is fixed",
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "RB-02",
+  "version": "v1",
+  "name": "Close above a trend SMA, a fast/slow EMA cross, RSI not overbought, 2 ATR stop, 4R (the backtester's example)",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Robot Traders",
+  "video": "2176SVyz814",
+  "title": "Backtest Crypto Trading Strategies in Python",
+  "uploaded": "2023-07-28",
+  "minutes": 25,
+  "summary": "Robot Traders walks through a free Python backtester (Binance data, risk-based position sizing, fees, leverage, liquidation) with a 'very textbook' example: long when the close is above a trend SMA and a fast EMA crosses above a slow EMA with the RSI not overbought, out on the opposite cross, stop 2 x ATR, target 4R (shorts mirrored). On BTC/USDT daily 2019-2022: 18 trades, 55% winners, profit factor 3 at 5x leverage.",
+  "instruments": [
+   "Bitcoin"
+  ],
+  "timeframes": [
+   "1D"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Long: the close above the trend average and the fast EMA crossing above the slow EMA.",
+    "times": [
+     "10:03"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop at the entry minus 2 ATR.",
+    "times": [
+     "10:03"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Target 4R.",
+    "times": [
+     "10:03"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Exit on the opposite EMA cross.",
+    "times": [
+     "10:03"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The RSI not overbought at entry.",
+    "times": [
+     "10:03"
+    ]
+   }
+  ],
+  "why": [
+   "the EMA, SMA and RSI lengths and the overbought level are never said (only shown in code)",
+   "he presents the rules only to illustrate the backtester"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "win_rate",
+    "at": "20:48",
+    "value": "18 trades, 55% winners, profit factor 3",
+    "period": "BTC/USDT daily 2019-2022, 5x leverage",
+    "quote": "you see that the win rate of the strategy is around 55 percent"
+   }
+  ],
+  "examples": [],
+  "blockedReason": "the EMA, SMA and RSI lengths and the overbought level are never said (only shown in code); he presents the rules only to illustrate the backtester",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -19261,6 +21580,131 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "market commentary with management principles; no entry trigger, level rule or exit is defined",
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "RU-08",
+  "version": "v1",
+  "name": "Zero-lag MACD cross below / above zero in the 50 EMA trend, pullback stop, 1.5R",
+  "topic": "crypto",
+  "status": "duplicate",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "TRADING RUSH",
+  "video": "rtkBd9PXg9I",
+  "title": "50 EMA vs 200 EMA? I took 100 TRADES to find the TRUTH... Trading Strategy - Forex Day Trading",
+  "uploaded": "2021-01-22",
+  "minutes": 9,
+  "summary": "TRADING RUSH re-tests its zero-lag MACD strategy (RU-06) with a 50 EMA trend filter instead of the 200 EMA: the 50 filtered some losing trades but also some winners; 200 trades gave about 35% winners against 33% with the 200 EMA - still a losing strategy.",
+  "instruments": [
+   "forex and stocks (Trading Rush app)"
+  ],
+  "timeframes": [
+   "intraday"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The same strategy with the 50 EMA as the trend filter.",
+    "times": [
+     "00:40"
+    ]
+   }
+  ],
+  "why": [
+   "the rules are RU-06's with the 50 EMA"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "win_rate",
+    "at": "05:33",
+    "value": "about 35% winners after 200 trades",
+    "period": "200 trades",
+    "quote": "it got a 35 percent approximate winrate"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": "RU-06",
+  "duplicateWhy": "the same zero-lag MACD rules, stop and 1.5R with the 50 EMA instead of the 200; his own result: 35% winners against 33%",
+  "checks": null
+ },
+ {
+  "id": "RU-09",
+  "version": "v1",
+  "name": "Bullish engulfing with the 200 MA: the next day's direction (54 of 100 up)",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "TRADING RUSH",
+  "video": "CHZjILOv_Mo",
+  "title": "Bullish Engulfing Pattern Tested 100 TIMES so you can master your Candlestick Trading Strategy",
+  "uploaded": "2020-09-30",
+  "minutes": 8,
+  "summary": "TRADING RUSH counts what happens the day after a bullish engulfing pattern on daily charts with a 200-period moving average filter: the price moved up the next day 54 times out of 100. Patterns after four or more red candles, on above-average volume, or engulfing the whole previous candle did better; he gives no stop, target or exit and suggests using the pattern as an entry trigger inside another strategy.",
+  "instruments": [
+   "stocks and forex"
+  ],
+  "timeframes": [
+   "1D"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The pattern: a small red candle followed by a big green one that engulfs its body.",
+    "times": [
+     "00:00"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "A 200-period moving average as the filter.",
+    "times": [
+     "02:53"
+    ]
+   }
+  ],
+  "why": [
+   "a count of next-day moves after the pattern",
+   "no entry price, stop, target or exit is stated (engulfing strategies are already coded, e.g. TG-04)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "win_rate",
+    "at": "06:22",
+    "value": "54 of 100 next days up",
+    "period": "daily, with the 200 MA",
+    "quote": "54 out of 100 times, the price did make a move in the upward direction"
+   }
+  ],
+  "examples": [],
+  "blockedReason": "a count of next-day moves after the pattern; no entry price, stop, target or exit is stated (engulfing strategies are already coded, e.g. TG-04)",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -19331,6 +21775,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "a lesson of definitions; its absorption trade is lesson 5's SC-03, and footprint imbalances need trade-by-trade prices the desk does not record",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -19391,6 +21836,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the levels and trapped-trader reads come from the footprint's per-price prints, read by eye; a failed breakout read by delta is SC-03's absorption at the swept level",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -19452,6 +21898,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "a lesson on the levels, with trades that depend on order-flow reads judged by eye at each level; he says it does not generate signals",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -19510,6 +21957,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the levels, Fibonacci areas and candle patterns are read by eye; the VWAP only adds confluence",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -19577,6 +22025,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "JR-04",
   "duplicateWhy": "the 9:30-9:35 range with a close outside and a retest entry at 2R is already coded (the 20-channel study's JR-04; PR-02 on Nifty)",
   "checks": null
@@ -19634,6 +22083,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the higher-timeframe structure and the levels are read by eye",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -19691,6 +22141,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the levels, liquidity and divergence are read by eye",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -19767,6 +22218,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "LS-00",
   "duplicateWhy": "a sweep of a swing level that closes back inside is already on the desk (LS-00 and its versions; CC-02)",
   "checks": null
@@ -19824,6 +22276,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "MY-01",
   "duplicateWhy": "a fair value gap in the discount of the dealing range after a sweep is already coded (MY-01; also the desk's FVG books such as NJ-28 and CP-13)",
   "checks": null
@@ -19890,6 +22343,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "JR-02",
   "duplicateWhy": "the value-area fade (from outside the value area back to the POC and the other edge) is already coded (JR-02; BB-09 value-area trap)",
   "checks": null
@@ -19948,6 +22402,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "LS-14",
   "duplicateWhy": "fading a sweep of a range edge toward the opposite liquidity is already coded (LS-14; CP-03 range ping-pong)",
   "checks": null
@@ -20036,6 +22491,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "TP-04",
   "duplicateWhy": "the New York 15-minute ORB with limits at the edge, midline or far side is already coded from this channel (the 20-channel study's TP-04)",
   "checks": null
@@ -20119,6 +22575,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "DE-02",
   "duplicateWhy": "the EMA 20 / 50 / 100 stack with a Williams fractal entry on 1-minute bars is already coded (the 20-channel study's DE-02; YT-15)",
   "checks": null
@@ -20189,6 +22646,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "a beginner's guide to risk and reward with one illustrative setup; no repeatable rule",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -20277,8 +22735,160 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "TD-01",
   "duplicateWhy": "a moving-average cross after a tested level, traded with the trend, is already coded (the 20-channel study's TD-01, the 9/20 EMA cross at a tested level)",
+  "checks": null
+ },
+ {
+  "id": "WT-01",
+  "version": "v1",
+  "name": "The RSI of the VWAP crossing its thresholds, 3.3% / 4% stops (15-minute ether)",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "WunderTrading",
+  "video": "bMCjT6VvsgE",
+  "title": "NET PROFIT 705% in 6 month – Free RSI-VWAP bot TradingView strategy",
+  "uploaded": "2020-07-01",
+  "minutes": 5,
+  "summary": "WunderTrading adapts a TradingView 'RSI-VWAP' strategy for an ether perpetual on 15-minute candles (FTX): the RSI is computed from the VWAP instead of the close; buy when it crosses up through its threshold and sell on the opposite side, now long and short, with a 3.3% stop for longs and 4% for shorts as the only exits used. +700% with a 9% max drawdown and a low win rate; he calls it purely trend-following (good in May 2020, not in June).",
+  "instruments": [
+   "Ether perpetual (FTX)"
+  ],
+  "timeframes": [
+   "15m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "An ether perpetual on 15 minutes.",
+    "times": [
+     "00:47"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "The RSI computed with the VWAP as its source.",
+    "times": [
+     "00:04"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Buy when it crosses the threshold from below; sell on the opposite side.",
+    "times": [
+     "00:04"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stops 3.3% for longs and 4% for shorts.",
+    "times": [
+     "02:11"
+    ]
+   }
+  ],
+  "why": [
+   "the RSI length and the buy and sell thresholds are only in his code, never stated"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "return_pct",
+    "at": "01:30",
+    "value": "+700%, -9% max drawdown, a low win rate",
+    "period": "ether perpetual 15m",
+    "quote": "above 700 percent the max drawdown is almost nine percent"
+   }
+  ],
+  "examples": [],
+  "blockedReason": "the RSI length and the buy and sell thresholds are only in his code, never stated",
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "WT-03",
+  "version": "v1",
+  "name": "Volume above its average times a multiplier on the 200 EMA side, ATR target and stop",
+  "topic": "crypto",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "WunderTrading",
+  "video": "ADDIff_cY0g",
+  "title": "Volume Based Crypto Trading Strategy",
+  "uploaded": "2023-03-03",
+  "minutes": 6,
+  "summary": "WunderTrading's volume bot: long when a candle's volume is above its moving average times a multiplier and the price is above the 200 EMA, short on such a volume spike below the 200 EMA; take-profit and stop from the ATR (or a trailing stop after the first target), with optional EMA and high/low filters; the look-back, the average length, the multiplier and the ATR multiples are left to optimise per asset.",
+  "instruments": [
+   "crypto (more than 10 assets)"
+  ],
+  "timeframes": [
+   "unclear"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Long: the volume above its sliding average times the multiplier ...",
+    "times": [
+     "01:35"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "The take-profit and stop come from the ATR.",
+    "times": [
+     "03:01"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "... with the price above the 200 EMA.",
+    "times": [
+     "01:35"
+    ]
+   }
+  ],
+  "why": [
+   "the look-back, the average length, the multiplier (2 is only an example) and the ATR multiples of the target and the stop are not stated"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the look-back, the average length, the multiplier (2 is only an example) and the ATR multiples of the target and the stop are not stated",
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
   "checks": null
  },
  {
@@ -20444,6 +23054,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -20580,6 +23191,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -20705,6 +23317,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -20840,6 +23453,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -20971,6 +23585,7 @@ export const SL: SlStrategy[] = [
    }
   ],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -21092,6 +23707,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -21238,6 +23854,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -21369,6 +23986,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -21376,6 +23994,169 @@ export const SL: SlStrategy[] = [
    "fills": true,
    "signals": 506,
    "trades": 377
+  }
+ },
+ {
+  "id": "CT-04",
+  "version": "v1",
+  "name": "Larry Williams outside bar: a red (green) outside candle closing beyond the previous low (high), 250-pip stop, out at the next open once in profit",
+  "topic": "forex_us",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "CodeTrading",
+  "video": "J6VRMhDnVrM",
+  "title": "How a Simple Candles Strategy Achieved a Positive Win Rate With 7-Year Automated Backtest",
+  "uploaded": "2024-11-09",
+  "minutes": 15,
+  "summary": "CodeTrading codes Larry Williams' 1999 outside-bar pattern on daily EUR/USD and GBP/USD (2017-2024): buy the next open after a red outside candle that closes below the previous low, sell the next open after a green one that closes above the previous high; the stop is 250 pips (200 in the literature), there is no target, and a trade that is in profit at a daily close is closed at the start of the next session. 10% of equity per trade with a small commission: 87.5% winners but only +26% in seven years (-11% max drawdown).",
+  "instruments": [
+   "EUR/USD",
+   "GBP/USD"
+  ],
+  "timeframes": [
+   "1D"
+  ],
+  "markets": [
+   "EUR/USD",
+   "GBP/USD"
+  ],
+  "deskMarkets": [
+   "EURUSD",
+   "GBPUSD"
+  ],
+  "overnight": true,
+  "proxy": "the video's EUR/USD and GBP/USD are spot prices; the desk trades the CME euro and pound futures (Yahoo minutes)",
+  "paperStart": "2026-11-14T18:30:00Z",
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "Daily candles of EUR/USD and GBP/USD.",
+    "times": [
+     "04:54"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Long setup: an outside red candle - its high above the previous high and its low below the previous low.",
+    "times": [
+     "00:42"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "It must close below the previous candle's low.",
+    "times": [
+     "00:42"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Enter at the next candle's open.",
+    "times": [
+     "00:42"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Short: the mirror - a green outside candle closing above the previous high.",
+    "times": [
+     "01:22"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop 250 pips (his code; 200 is the default he read).",
+    "times": [
+     "09:14"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "No target: the trade stays open until the stop, or until a daily session ends with it in profit.",
+    "times": [
+     "01:22"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "A winning trade is closed at the beginning of the next session.",
+    "times": [
+     "09:14"
+    ]
+   },
+   {
+    "kind": "sizing",
+    "label": "Position sizing and risk",
+    "tag": "E",
+    "text": "10% of equity per trade.",
+    "times": [
+     "08:33"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: EUR/USD and GBP/USD as the desk trades them (the CME euro and pound futures, Yahoo Finance minutes), one bar per trading day (the 17:00 New York roll); trades are held overnight; one position at a time.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "The stop is 250 pips (0.0250) from the signal candle's close, as his code takes that close as the entry price.",
+    "times": []
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "A",
+    "text": "'Winning' is judged at each daily close against the entry (the day's open plus the spread): after a close beyond it the trade exits at the next day's open, as his backtesting.py code does; decided by replaying the strategy's own trades up to that close.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the desk's EUR/USD and GBP/USD are the CME futures (A)",
+   "sizing is the desk's 1% risk on the 250-pip stop, not his 10% of equity"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "win_rate",
+    "at": "10:36",
+    "value": "87.5% winners, +26% in total, -11% max drawdown",
+    "period": "EUR/USD and GBP/USD daily 2017-2024, small commission",
+    "quote": "we have a win rate of 8 7% 87.5% we have an aggregated returns of 26%"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 5,
+   "trades": 5
   }
  },
  {
@@ -21494,6 +24275,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -21618,6 +24400,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -21745,6 +24528,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -21860,6 +24644,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -21984,6 +24769,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -22126,6 +24912,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -22248,6 +25035,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -22409,6 +25197,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -22544,6 +25333,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -22551,6 +25341,126 @@ export const SL: SlStrategy[] = [
    "fills": true,
    "signals": 360,
    "trades": 237
+  }
+ },
+ {
+  "id": "MS-03",
+  "version": "v1",
+  "name": "Previous day's high / low breakout: OCO stop orders 3 pips beyond, 5-pip stop, 10-pip target, one trade at a time",
+  "topic": "forex_us",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "The Art of Trading",
+  "video": "Dr-GxdbAaXg",
+  "title": "Pine Script V4: A Breakout Strategy",
+  "uploaded": "2021-08-26",
+  "minutes": 23,
+  "summary": "The Art of Trading codes a student's daily breakout in Pine Script (EUR/NZD and EUR/JPY): at each new day, when flat, a buy stop 3 pips above the previous day's high and a sell stop 3 pips below its low, one cancelling the other; a 5-pip stop and a 10-pip target (2:1); one trade at a time. He warns that TradingView's tester misreads a stop and a target touched inside one bar, so the high win rate of its 773 trades cannot be trusted.",
+  "instruments": [
+   "Forex (EUR/NZD, EUR/JPY shown)"
+  ],
+  "timeframes": [
+   "1D levels",
+   "1h chart"
+  ],
+  "markets": [
+   "EUR/USD",
+   "GBP/USD"
+  ],
+  "deskMarkets": [
+   "EURUSD",
+   "GBPUSD"
+  ],
+  "overnight": true,
+  "proxy": "the video shows EUR/NZD and EUR/JPY; coded on the desk's EUR/USD and GBP/USD (CME futures)",
+  "paperStart": "2026-11-14T18:30:00Z",
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The previous day's high and low.",
+    "times": [
+     "00:09"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "A buy stop 3 pips above the previous day's high (a sell stop 3 pips below the low); a 5-pip stop and a 10-pip target.",
+    "times": [
+     "00:49"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The orders go in when a new day starts and no trade is open.",
+    "times": [
+     "06:44"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Exit only at the target or the stop.",
+    "times": [
+     "12:28"
+    ]
+   },
+   {
+    "kind": "management",
+    "label": "Trade management",
+    "tag": "E",
+    "text": "One cancels all: one trade a day.",
+    "times": [
+     "11:01"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: EUR/USD and GBP/USD (the CME futures the desk trades) on minute rows; the day rolls at 17:00 New York; a pip is 0.0001.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "The day's two orders are valid until the day ends; the stop and target are fixed 5 and 10 pips from the order price, as in his script; a trade may run into later days; once one order fills the other is cancelled; a trade still open from an earlier day blocks that day's orders while it lasts (his script places none that day).",
+    "times": []
+   }
+  ],
+  "why": [
+   "the pairs are ours (A): the video shows EUR/NZD and EUR/JPY, which the desk does not trade",
+   "the desk fills stops and targets minute by minute, the stop first when one minute touches both"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "trade_count",
+    "at": "19:40",
+    "value": "773 trades in TradingView's tester, which he distrusts",
+    "period": "his test",
+    "quote": "who knows how many times this has happened over 773 trades"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 118,
+   "trades": 85
   }
  },
  {
@@ -22662,6 +25572,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -22817,6 +25728,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -22912,6 +25824,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -23022,6 +25935,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -23029,6 +25943,131 @@ export const SL: SlStrategy[] = [
    "fills": true,
    "signals": 86,
    "trades": 86
+  }
+ },
+ {
+  "id": "QN-01",
+  "version": "v1",
+  "name": "SMA 25 / SMA 100 on 5 minutes, always in the market: long above, short below (stop and reverse)",
+  "topic": "forex_us",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "QuantNomad",
+  "video": "f2I1RJnyLRg",
+  "title": "Backtesting Simple Intraday Strategy in R",
+  "uploaded": "2020-04-23",
+  "minutes": 14,
+  "summary": "QuantNomad backtests a simple always-in-the-market rule in R on Apple's 5-minute chart (2007-2020): long while the 25-period SMA is above the 100-period SMA, short while it is below, the position taken from the bar after the signal close, all the money all the time, no costs: about +3,500%, 31% a year, a -60% max drawdown, Sharpe 0.8.",
+  "instruments": [
+   "Apple (AAPL)"
+  ],
+  "timeframes": [
+   "5m"
+  ],
+  "markets": [
+   "Apple (New York cash session)"
+  ],
+  "deskMarkets": [
+   "AAPL"
+  ],
+  "overnight": true,
+  "proxy": null,
+  "paperStart": "2026-11-14T18:30:00Z",
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "Apple shares on a 5-minute chart.",
+    "times": [
+     "01:25"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Two simple moving averages, 25 and 100.",
+    "times": [
+     "03:33"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Long while the fast average is above the slow one, short while below.",
+    "times": [
+     "03:33"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The position starts on the bar after the signal.",
+    "times": [
+     "05:38"
+    ]
+   },
+   {
+    "kind": "sizing",
+    "label": "Position sizing and risk",
+    "tag": "E",
+    "text": "All the money, long or short, all the time.",
+    "times": [
+     "07:01"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: Apple as the desk trades it (Yahoo Finance minutes, the 09:30-16:00 New York session) on 5-minute candles; positions are held overnight, as in his test.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "A cross of the two SMAs at a 5-minute close reverses the position at the next open; the desk starts flat and takes the first cross after its start.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "No stop in the video: a 15% catastrophe stop, sized as 1x the account (on a 1% risk unit).",
+    "times": []
+   }
+  ],
+  "why": [
+   "the desk starts flat and enters on the first cross (A)",
+   "the far stop is ours (A)",
+   "his test has no costs"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "return_pct",
+    "at": "10:25",
+    "value": "about +3,500%, 31% a year, -60% max drawdown, Sharpe 0.8",
+    "period": "Apple 5m 2007-2020, no costs",
+    "quote": "our strategy game click three thousand five hundred percent"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 73,
+   "trades": 73
   }
  },
  {
@@ -23183,6 +26222,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -23337,6 +26377,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -23507,6 +26548,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -23676,6 +26718,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -23825,6 +26868,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -23945,6 +26989,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -24090,6 +27135,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -24231,6 +27277,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -24335,6 +27382,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -24472,6 +27520,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -24597,6 +27646,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -24722,6 +27772,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -24866,6 +27917,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": {
@@ -24940,6 +27992,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "a day-type read with no entry, stop or target; his next video turns it into rules (coded as AC-02)",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -25032,6 +28085,7 @@ export const SL: SlStrategy[] = [
    }
   ],
   "blockedReason": "a news-release fade read from 5-second charts and the order ladder; the desk has neither the release timing nor sub-minute data",
+  "dataBlocked": true,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -25120,6 +28174,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": "a discretionary structure trade; he states he has no backtest or statistics, and levels are drawn by eye",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -25200,6 +28255,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the triggers need footprint data (each candle's volume point of control and bid/ask zeros), which the desk does not have; the phase calls are judged by eye",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -25269,6 +28325,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "TW-01",
   "duplicateWhy": "a 15-minute opening range break on a volume pick-up is already coded (TW-01; CV-01 on the Nasdaq)",
   "checks": null
@@ -25342,6 +28399,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "a discretionary trade-management walkthrough; the thesis, entries and adds are judged live and no stop rule is set beyond a daily loss limit",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -25410,6 +28468,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "a trend-management guide; the entries come from his separate 'back burner' and higher-low setups, and the timeframe is chosen by eye per chart",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -25497,6 +28556,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "BB-01",
   "duplicateWhy": "the previous-day high/low breakout and trap (sweep) is already in the library (Booming Bulls study); see also CK-02 and PC-02 in this study",
   "checks": null
@@ -25585,6 +28645,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "several discretionary plays without fixed triggers, stops or targets",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -25654,6 +28715,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "support, the box size and the bias are judged by eye; the layering has no fixed entry levels or exit rule",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -25722,6 +28784,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "he calls it a framework without rules; entries, stops and the choice of levels are discretionary",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -25801,6 +28864,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "UK-01",
   "duplicateWhy": "the first one-minute range bracket at the cash open is already coded in this study (UK-01; CV-01 for the 15-minute range)",
   "checks": null
@@ -25870,6 +28934,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "CH-03",
   "duplicateWhy": "the previous-day high/low sweep-and-reclaim or acceptance-beyond rule is already coded (CH-03; BB-01 in the library)",
   "checks": null
@@ -25938,6 +29003,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "NJ-37",
   "duplicateWhy": "the first fair value gap after the open's liquidity raid is already coded (NJ-37, the New York open FVG; JR-01 and TP-03 are close); the 30-minute range and the narrative are his framing",
   "checks": null
@@ -26014,6 +29080,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "YT-25",
   "duplicateWhy": "the same RSI 70/30 reversal is already in the library (top-20 study); this video's test says it does not work by itself",
   "checks": null
@@ -26090,6 +29157,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "NJ-09",
   "duplicateWhy": "the MACD signal-line cross is already in the library (channels11 study); this video's test says it does not work by itself",
   "checks": null
@@ -26160,6 +29228,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "a trailing-stop technique around setups picked by eye; no fixed entry rule",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -26218,6 +29287,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "a live trade with very large risk; the level and the pattern are chosen by eye",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -26305,8 +29375,112 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "RU-01",
   "duplicateWhy": "the Trading Rush MACD cross beyond zero in the 200 EMA trend is already in the library (RU-01; RU-06 adds a zero-lag MACD); only the exits and a closes-across-the-EMA filter differ",
+  "checks": null
+ },
+ {
+  "id": "MS-04",
+  "version": "v1",
+  "name": "Weekly close above the 15-week high, above the 90-week EMA, bullish, on rising volume, out below the 10-week EMA (long)",
+  "topic": "forex_us",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "The Art of Trading",
+  "video": "ea93A3yKySE",
+  "title": "Example of a CHANNEL BREAKOUT Strategy in Pine Script",
+  "uploaded": "2023-09-22",
+  "minutes": 27,
+  "summary": "The Art of Trading codes a viewer's weekly channel breakout (Pine Script and RealTest): buy when a weekly bar closes above the previous 15-week high, above the 90-week EMA, above its open, on volume at least 1.25% above the previous week's, in a liquid stock (100-week average volume above a million shares, optionally turnover above $500,000); exit at the next open after a weekly close below the 10-week EMA. On a 20-position Russell 1000 portfolio it matched buy-and-hold's 8.4% a year with half the drawdown.",
+  "instruments": [
+   "US stocks (Russell 1000)"
+  ],
+  "timeframes": [
+   "1W"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The close above the channel high (the previous bar's 15-bar high).",
+    "times": [
+     "08:25"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Exit at the next open after a close below the 10-bar EMA.",
+    "times": [
+     "11:57"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Above the 90-week EMA.",
+    "times": [
+     "09:09"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "A bullish bar.",
+    "times": [
+     "09:09"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Volume at least 1.25% above the previous bar's.",
+    "times": [
+     "04:11"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Liquidity: the 100-bar average volume above a million shares.",
+    "times": [
+     "04:54"
+    ]
+   }
+  ],
+  "why": [
+   "it needs weekly stock bars with about two years of history (the 90-week EMA, the 100-week average volume) and a US-stock universe",
+   "the desk's NSE daily panel keeps 560 days (80 weeks) and the desk has no US stock pool"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "return_pct",
+    "at": "02:04",
+    "value": "about 8.4% a year, like buy-and-hold, with half its drawdown",
+    "period": "Russell 1000, 20 positions, no leverage",
+    "quote": "this really simple Channel breakout system has almost an identical rate of return but half the drawdown"
+   }
+  ],
+  "examples": [],
+  "blockedReason": "it needs about two years of weekly stock bars (the 90-week EMA, the 100-week average volume) and a US-stock universe; the desk's NSE daily panel keeps 560 days and the desk has no US stock pool",
+  "dataBlocked": true,
+  "duplicateOf": null,
+  "duplicateWhy": null,
   "checks": null
  },
  {
@@ -26374,6 +29548,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the one rule-like idea needs IG's client sentiment data, which the desk does not have; the rest is advice with no entry, stop or exit",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -26432,6 +29607,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "a method for searching indicators; the examples are shown as poor and no indicator or trading rule is recommended",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -26510,6 +29686,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": "entries come from intuition and experience by his own account; zones and extensions are judged by eye",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -26597,6 +29774,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "a live discretionary session: the range's length, the pay line and the swing targets are not defined as rules",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -26685,6 +29863,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": "statistics used as a bias; they say entries are the trader's own and the tool never gives buy or sell signals",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -26754,6 +29933,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the patterns come from his own detection software and quality scores; pivots and volatility are context, not a rule set",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -26823,6 +30003,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "an overview of scalping tools with one live example; no setup, stop or target rule is defined",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -26901,6 +30082,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the nodes, cuts, profile periods and trend are drawn by eye as 'general zones'; no fixed profile or entry trigger",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -27003,6 +30185,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "CV-01",
   "duplicateWhy": "the same 15-minute opening-range break on the Nasdaq is already coded (CV-01); only the exits differ (one range up, range-low stop, long only), and his test ran on Nasdaq 100 stocks the desk does not carry",
   "checks": null
@@ -27052,6 +30235,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "an installation tutorial with no trading rule; the series' strategy is part 2's (PL-06)",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -27111,6 +30295,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "PL-01",
   "duplicateWhy": "the same paper's first-five-minutes opening range strategy is already on the desk from his earlier video (PL-01)",
   "checks": null
@@ -27200,8 +30385,94 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "RU-01",
   "duplicateWhy": "a MACD cross in the direction of the 200-period trend after a pullback is already coded (RU-01; RU-06 adds a zero-lag MACD)",
+  "checks": null
+ },
+ {
+  "id": "PQ-01",
+  "version": "v1",
+  "name": "TLT short in the first week of the month and long from the 23rd (month-end rebalancing)",
+  "topic": "forex_us",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "PyQuant News 🐍",
+  "video": "GFuf7XFfP-8",
+  "title": "Quickly test trading strategy with 191.6% returns over 10 years",
+  "uploaded": "2024-11-16",
+  "minutes": 8,
+  "summary": "PyQuant News tests a month-end rebalancing hypothesis on the TLT bond ETF with pandas (about 20 years of daily data): short in the first week of the month (days 1-6), long in the last week (from the 23rd), no costs or slippage: +191%, with only three losing years.",
+  "instruments": [
+   "TLT (US Treasury bond ETF)"
+  ],
+  "timeframes": [
+   "1D"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "The TLT bond ETF.",
+    "times": [
+     "00:42"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The first week: the day of the month below 7.",
+    "times": [
+     "02:50"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The last week: the day of the month 23 or later.",
+    "times": [
+     "04:16"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Short the first week of the month, long the last week.",
+    "times": [
+     "02:50"
+    ]
+   }
+  ],
+  "why": [
+   "TLT is not on the desk (it trades bitcoin, ether, gold, FX futures, the Nasdaq 100, Apple, US index dailies and Indian markets)",
+   "his test has no costs"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "return_pct",
+    "at": "07:00",
+    "value": "+191%",
+    "period": "TLT daily, about 20 years, no costs",
+    "quote": "And this strategy returned 191%"
+   }
+  ],
+  "examples": [],
+  "blockedReason": "TLT (the US Treasury bond ETF) is not on the desk",
+  "dataBlocked": true,
+  "duplicateOf": null,
+  "duplicateWhy": null,
   "checks": null
  },
  {
@@ -27259,6 +30530,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "a discretionary bar-by-bar review: trend lines, channels and signal bars are drawn by eye, and runners are managed by personal preference",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -27340,6 +30612,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "principles without a fixed trigger, stop or target; the break-and-retest and band ideas are already coded here as DE-10, CH-01 and AC-02",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -27408,6 +30681,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "needs a daily US stock universe ranked by dollar volume; the desk has neither US stock data nor volume in its NSE daily panel",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -27476,6 +30750,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "a template for a random strategy generator: the filters and exits are chosen by the software, so there is no single strategy to trade",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -27568,6 +30843,7 @@ export const SL: SlStrategy[] = [
   ],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "NJ-30",
   "duplicateWhy": "a limit entry at a fair value gap with a 1:2 target is already coded (NJ-30; CP-20 for inversions); his ATR filters and the trend filter refine it",
   "checks": null
@@ -27638,6 +30914,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "several discretionary readings with no fixed trigger, stop or target; the weekly-level fakeout and pivot ideas resemble TC-01/TC-02 and the library's trap strategies",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -27702,6 +30979,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the 4-hour levels, the demand zone and the 5-minute triangle are drawn by eye on each chart; the breakout-and-retest idea is the earlier card TC-01's",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -27769,6 +31047,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "every pattern, level and trend line is drawn by eye on each chart with no fixed trigger; the trap and the fakie resemble the library's trap and fakeout strategies",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -27836,6 +31115,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "a comparison of the two entries on levels drawn by eye, with no fixed stop or target; the break-and-retest entry is the earlier card TC-01's",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -27897,6 +31177,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "filters on levels and RSI lines drawn by eye on each chart, with no trigger, stop or target of their own",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -27996,6 +31277,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the weekly bias is read from a weekly fair value gap by eye; entries and stops are not given as rules",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -28077,6 +31359,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": null,
+  "dataBlocked": false,
   "duplicateOf": "MH-03",
   "duplicateWhy": "the Asian-session liquidity sweep into a higher-timeframe zone is already in the library (20-channel study; also TP-03, BB-08)",
   "checks": null
@@ -28155,6 +31438,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "range zones and a fading attitude, with no entry trigger, stop or target defined",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -28213,6 +31497,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "levels and entries are judged by eye and feel; no entry, stop or exit rule is given",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -28282,6 +31567,7 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "anchors, key zones and trend lines are drawn by eye; no stop or target is given",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -29138,6 +32424,24 @@ export const SL_CHANNELS: SlChannel[] = [
     "why": "zero-lag MACD tested 100 times (new video)",
     "analysed": true,
     "id": "RU-06"
+   },
+   {
+    "video": "yBjk9r9igcQ",
+    "why": "list 21-40: Bollinger Bands + RSI tested 100 trades",
+    "analysed": true,
+    "id": "RU-07"
+   },
+   {
+    "video": "rtkBd9PXg9I",
+    "why": "list 21-40: 50 EMA vs 200 EMA tested 100 trades",
+    "analysed": true,
+    "id": "RU-08"
+   },
+   {
+    "video": "CHZjILOv_Mo",
+    "why": "list 21-40: bullish engulfing tested 100 times",
+    "analysed": true,
+    "id": "RU-09"
    }
   ],
   "skip": null
@@ -30262,6 +33566,36 @@ export const SL_CHANNELS: SlChannel[] = [
     "why": "a simple VWAP rule, backtested",
     "analysed": true,
     "id": "CT-03"
+   },
+   {
+    "video": "J6VRMhDnVrM",
+    "why": "list 21-40: simple candles strategy with a 7-year automated backtest",
+    "analysed": true,
+    "id": "CT-04"
+   },
+   {
+    "video": "0XfcnDAVY7Y",
+    "why": "list 21-40: crypto VWAP strategy coded in Python",
+    "analysed": true,
+    "id": "CT-05"
+   },
+   {
+    "video": "xaB1GS7X0xA",
+    "why": "list 21-40: a bitcoin strategy rebuilt in Python",
+    "analysed": true,
+    "id": "CT-07"
+   },
+   {
+    "video": "aOIRo4Q7qZE",
+    "why": "list 21-40: the original video of the CoinQuant bitcoin strategy (read for its exit rule)",
+    "analysed": true,
+    "id": "CT-06"
+   },
+   {
+    "video": "pD1gDYnLRu0",
+    "why": "list 21-40: a regime-adaptive bitcoin strategy built on CoinQuant (read with the rebuild)",
+    "analysed": true,
+    "id": "CT-08"
    }
   ],
   "skip": null
@@ -30269,7 +33603,7 @@ export const SL_CHANNELS: SlChannel[] = [
  {
   "key": "algovibes",
   "name": "Algovibes",
-  "star": false,
+  "star": true,
   "group": "sys",
   "earlier": "",
   "uploads": 367,
@@ -30280,6 +33614,18 @@ export const SL_CHANNELS: SlChannel[] = [
     "why": "first hour vs rest of day intraday edge",
     "analysed": true,
     "id": "AV-01"
+   },
+   {
+    "video": "X50-c54BWV8",
+    "why": "list 21-40: crypto live bot with Stochastic, RSI and MACD",
+    "analysed": true,
+    "id": "AV-02"
+   },
+   {
+    "video": "g04GeHe-dJw",
+    "why": "list 21-40: altcoin momentum live bot",
+    "analysed": true,
+    "id": "AV-03"
    }
   ],
   "skip": null
@@ -30346,6 +33692,18 @@ export const SL_CHANNELS: SlChannel[] = [
     "why": "a two-target MACD strategy (Pine Script)",
     "analysed": true,
     "id": "MS-02"
+   },
+   {
+    "video": "Dr-GxdbAaXg",
+    "why": "list 21-40: Pine Script breakout strategy",
+    "analysed": true,
+    "id": "MS-03"
+   },
+   {
+    "video": "ea93A3yKySE",
+    "why": "list 21-40: channel breakout strategy in Pine Script",
+    "analysed": true,
+    "id": "MS-04"
    }
   ],
   "skip": null
@@ -31927,7 +35285,7 @@ export const SL_CHANNELS: SlChannel[] = [
   "group": "fut",
   "earlier": "",
   "uploads": 267,
-  "strategyTitles": 0,
+  "strategyTitles": 91,
   "picked": [
    {
     "video": "hzjbl2qMVQQ",
@@ -31970,6 +35328,278 @@ export const SL_CHANNELS: SlChannel[] = [
     "why": "ranks 11-20: order flow lesson 8: volume profile levels",
     "analysed": true,
     "id": "SC-06"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "robottraders",
+  "name": "Robot Traders",
+  "star": true,
+  "group": "sys",
+  "earlier": "",
+  "uploads": 84,
+  "strategyTitles": 14,
+  "picked": [
+   {
+    "video": "JzC7aPX3VeM",
+    "why": "list 21-40: envelope strategy for crypto volatility",
+    "analysed": true,
+    "id": "RB-01"
+   },
+   {
+    "video": "dkeXOXd1j-Y",
+    "why": "list 21-40: simple EMA + RSI crypto strategy",
+    "analysed": false,
+    "id": null
+   },
+   {
+    "video": "2176SVyz814",
+    "why": "list 21-40: backtesting crypto strategies in Python",
+    "analysed": true,
+    "id": "RB-02"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "quantnomad",
+  "name": "QuantNomad",
+  "star": true,
+  "group": "sys",
+  "earlier": "",
+  "uploads": 106,
+  "strategyTitles": 6,
+  "picked": [
+   {
+    "video": "f2I1RJnyLRg",
+    "why": "list 21-40: simple intraday strategy backtested",
+    "analysed": true,
+    "id": "QN-01"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "chadthackray",
+  "name": "Chad Thackray",
+  "star": false,
+  "group": "sys",
+  "earlier": "",
+  "uploads": 80,
+  "strategyTitles": 0,
+  "picked": [],
+  "skip": "Python and vectorbt programming courses: no strategy with stated rules"
+ },
+ {
+  "key": "qubitquants",
+  "name": "Qubit Quants",
+  "star": false,
+  "group": "sys",
+  "earlier": "",
+  "uploads": 6,
+  "strategyTitles": 0,
+  "picked": [],
+  "skip": "VectorBT and MetaTrader 5 tooling tutorials: no strategy with stated rules"
+ },
+ {
+  "key": "pyquantnews",
+  "name": "PyQuant News",
+  "star": false,
+  "group": "sys",
+  "earlier": "",
+  "uploads": 25,
+  "strategyTitles": 0,
+  "picked": [
+   {
+    "video": "GFuf7XFfP-8",
+    "why": "list 21-40: a strategy tested over 10 years",
+    "analysed": true,
+    "id": "PQ-01"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "tradescience",
+  "name": "Trade Science",
+  "star": false,
+  "group": "sys",
+  "earlier": "",
+  "uploads": 4,
+  "strategyTitles": 0,
+  "picked": [],
+  "skip": "walk-forward testing and filter tooling tutorials: no strategy with stated rules"
+ },
+ {
+  "key": "altfins",
+  "name": "altFINS",
+  "star": true,
+  "group": "crypto",
+  "earlier": "",
+  "uploads": 270,
+  "strategyTitles": 34,
+  "picked": [
+   {
+    "video": "VgDMavcUpBg",
+    "why": "list 21-40: EMA 12/50 trend-following crossovers",
+    "analysed": true,
+    "id": "AN-01"
+   },
+   {
+    "video": "jfz9oUZybZk",
+    "why": "list 21-40: oversold coins (RSI) near support",
+    "analysed": true,
+    "id": "AN-02"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "altrady",
+  "name": "Altrady",
+  "star": false,
+  "group": "crypto",
+  "earlier": "",
+  "uploads": 407,
+  "strategyTitles": 41,
+  "picked": [
+   {
+    "video": "jAmHSm0FXXk",
+    "why": "list 21-40: top 4 swing trading strategies",
+    "analysed": true,
+    "id": "AY-01"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "wundertrading",
+  "name": "WunderTrading",
+  "star": false,
+  "group": "crypto",
+  "earlier": "",
+  "uploads": 220,
+  "strategyTitles": 20,
+  "picked": [
+   {
+    "video": "bMCjT6VvsgE",
+    "why": "list 21-40: RSI-VWAP bot strategy",
+    "analysed": true,
+    "id": "WT-01"
+   },
+   {
+    "video": "Tm07EHew8XA",
+    "why": "list 21-40: bitcoin strategy for any trend",
+    "analysed": true,
+    "id": "WT-02"
+   },
+   {
+    "video": "ADDIff_cY0g",
+    "why": "list 21-40: volume-based crypto strategy",
+    "analysed": true,
+    "id": "WT-03"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "threecommas",
+  "name": "3Commas",
+  "star": false,
+  "group": "crypto",
+  "earlier": "",
+  "uploads": 142,
+  "strategyTitles": 2,
+  "picked": [
+   {
+    "video": "eSjhsG8Df24",
+    "why": "list 21-40: DCA bot rules (official tutorial)",
+    "analysed": true,
+    "id": "C3-01"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "cryptohopper",
+  "name": "Cryptohopper",
+  "star": false,
+  "group": "crypto",
+  "earlier": "",
+  "uploads": 163,
+  "strategyTitles": 9,
+  "picked": [],
+  "skip": "platform features and single-indicator explainers: no complete strategy"
+ },
+ {
+  "key": "coinrule",
+  "name": "Coinrule",
+  "star": false,
+  "group": "crypto",
+  "earlier": "",
+  "uploads": 229,
+  "strategyTitles": 53,
+  "picked": [
+   {
+    "video": "WS00JVxthlw",
+    "why": "list 21-40: moving-average scalper with a fixed take profit",
+    "analysed": true,
+    "id": "CU-01"
+   },
+   {
+    "video": "AP1TLQxSHjM",
+    "why": "list 21-40: RSI and MA strategy with trailing stop and take profit",
+    "analysed": true,
+    "id": "CU-02"
+   },
+   {
+    "video": "x5Gey-XHkew",
+    "why": "list 21-40: Ichimoku cloud and ADX with a trailing stop",
+    "analysed": true,
+    "id": "CU-03"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "bitsgap",
+  "name": "Bitsgap",
+  "star": false,
+  "group": "crypto",
+  "earlier": "",
+  "uploads": 158,
+  "strategyTitles": 22,
+  "picked": [
+   {
+    "video": "zCE8aKW0VaA",
+    "why": "list 21-40: DCA bot setup and strategy",
+    "analysed": true,
+    "id": "GP-01"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "secretmindset",
+  "name": "The Secret Mindset",
+  "star": false,
+  "group": "fx",
+  "earlier": "top20",
+  "uploads": 280,
+  "strategyTitles": 168,
+  "picked": [
+   {
+    "video": "4xIAZ7vSsRY",
+    "why": "list 21-40: double VWAP Heikin Ashi scalping",
+    "analysed": true,
+    "id": "MI-01"
+   },
+   {
+    "video": "NpCZXLxAUqw",
+    "why": "list 21-40: momentum tactic for price action",
+    "analysed": true,
+    "id": "MI-02"
    }
   ],
   "skip": null

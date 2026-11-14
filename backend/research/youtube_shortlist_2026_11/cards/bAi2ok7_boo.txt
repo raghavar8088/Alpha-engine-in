@@ -3,7 +3,7 @@ topic: crypto
 summary: Hummingbot's dashboard chapter on controllers, backtesting and optimisation (October 2023): download candles, pick a directional controller (Bollinger V1, MACD-BB V1, trend following V1), and let Optuna search its parameters - here the Bollinger V1 controller on NEAR/USDT 3-minute candles, with a band length of 100-400 (step 50), 2-3 standard deviations, long and short thresholds on the band position, and stop loss, take profit and time limit ranges - over 300 trials ranked by net P&L, to be analysed and deployed in the next chapter.
 instruments: NEAR/USDT (Binance perpetual)
 timeframes: 3m
-style: bot
+style: intraday
 = HB-06 | Bollinger V1 controller tuned by Optuna: short near the upper band, long near the lower band (optimisation tutorial)
 R entry E 01:22 | Touching the upper band is a good time to short. | "if it's touching the upper bound is a good time to short"
 R setup E 00:58 | The Bollinger strategy is the one optimised. | "Ballinger strategy is a very simple strategy probably you know about it if"
