@@ -164,10 +164,12 @@ def feeds_now(group: str, info: dict) -> dict:
     """What this cycle learnt about its group's feeds (a feed it did not see keeps its previous entry)."""
     out: dict = {}
     errors = info.get("errors") or {}
-    if group == "global":
-        for fid, store in (("BTCUSD", F.DELTA_STORES["BTCUSD"]), ("ETHUSD", F.DELTA_STORES["ETHUSD"]),
-                           ("XAUUSD", F.DELTA_STORES["XAUTUSD"]), ("EURUSD", "EURUSD"),
-                           ("GBPUSD", "GBPUSD"), ("NAS100", "NAS100"), ("AAPL", "AAPL"), ("XAGUSD", "XAGUSD")):
+    if group in ("global", "live"):
+        pairs = (("BTCUSD", F.DELTA_STORES["BTCUSD"]), ("ETHUSD", F.DELTA_STORES["ETHUSD"]),
+                 ("XAUUSD", F.DELTA_STORES["XAUTUSD"]))
+        if group == "global":           # the quick pass (live) reads only the Delta candles
+            pairs += (("EURUSD", "EURUSD"), ("GBPUSD", "GBPUSD"), ("NAS100", "NAS100"), ("AAPL", "AAPL"), ("XAGUSD", "XAGUSD"))
+        for fid, store in pairs:
             t, p = _last_bar(store)
             out[fid] = {"last_t": t, "last_price": p, "fetch_error": errors.get(f"feed {fid}")}
     elif group == "index":

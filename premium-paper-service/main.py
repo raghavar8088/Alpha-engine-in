@@ -24,7 +24,8 @@ from settings import APP_SECRET, BACKEND, now_ist
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 log = logging.getLogger("premium.main")
 HERE = Path(__file__).resolve().parent
-TIMEOUT_S = {"index": 300, "stocks": 900, "global": 900, "daily": 900}
+TIMEOUT_S = {"live": 120, "index": 300, "stocks": 900, "global": 900, "daily": 900}
+ORDER = ("live", "index", "stocks", "global", "daily")     # due groups run in this order: the quick pass first
 MODULE = "premium_strategies"
 
 
@@ -50,8 +51,11 @@ def interval_s(group: str) -> int:
         return 300 if session else 1800
     if group == "stocks":
         return 900 if session else 3600
+    if group == "live":
+        return 60               # the books a real-money desk copies, with the Delta candles, every minute (15 Nov 2026)
     if group == "global":
-        return 120              # Delta Exchange (bitcoin, gold) every 2 minutes, all week; Yahoo is throttled to every 9 minutes inside
+        return 480              # every book every 8 minutes (until 15 Nov back to back: 386 books starved the box's CPU);
+                                # Yahoo is throttled to every 9 minutes inside
     return 3600
 
 
@@ -80,7 +84,7 @@ def main() -> None:
     last = {g: 0.0 for g in TIMEOUT_S}
     while True:
         try:
-            due = [g for g in ("index", "stocks", "global", "daily") if time.time() - last[g] >= interval_s(g)]
+            due = [g for g in ORDER if time.time() - last[g] >= interval_s(g)]
             if due and switch_on():
                 for g in due:
                     last[g] = time.time()

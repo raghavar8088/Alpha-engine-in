@@ -347,6 +347,96 @@ def _run_first(db, errors: dict) -> set:
         return set()
 
 
+def _market_books(books: list, name: str) -> list:
+    """The global group's books on one Yahoo or gold market (a XAUTUSD book belongs to the gold market)."""
+    return [b for b in books if b[1] == name or C.YC_BOOK_MARKET.get(b[1]) == name]
+
+
+def _run_market_books(db, name: str, mine: list, errors: dict, touched: set, window: list | None = None) -> int:
+    """One Yahoo or gold market, read once: every book in `mine` replayed and saved. The replay window starts
+    GLOBAL_WARM_DAYS before the earliest replay start among `window` (default: `mine`). The quick pass passes the whole
+    market's books as the window, so its few books warm up their indicators on exactly the window the full pass uses
+    and both passes compute the same trades (15 Nov 2026; this was the body of run_global's market loop)."""
+    if not mine:
+        return 0
+    fixed_since = PAPER_START - timedelta(days=GLOBAL_WARM_DAYS)
+    full = F.gold_market(fixed_since) if name == "XAUUSD" else F.global_market(name, fixed_since)
+    if full is None:
+        return 0
+    n_docs = 0
+    final = F.global_final_day(name)
+    last_day = str(full.date[-1])
+    live_day = last_day if last_day > final else None
+    firsts = [_from(db, a, bmk) for a, bmk, _, on in (window if window is not None else mine) if not on]
+    recent = F.slice_from(full, min(firsts) - timedelta(days=GLOBAL_WARM_DAYS)) if firsts else None
+    ym_full, ym_recent = YM._as_mkt(full, name, name, F.yt_cost(name)), YM._as_mkt(recent, name, name, F.yt_cost(name)) if recent is not None else None
+    c_full, c_recent = {}, {}
+    for a, bmk, v, on in mine:
+        m = full if on else recent
+        if m is None:
+            continue
+        start = _from(db, a, bmk, on)
+        try:
+            if a.source == C.BB:
+                tr, _ = R.run_bb(a.id, v, m, c_full if on else c_recent)
+            elif _is_yc(a):
+                tr, _ = R.run_yc(a.id, bmk, ym_full if on else ym_recent, c_full if on else c_recent, since_t=_yc_start(a)[0],
+                                 risk_pct=C.MONEY[bmk].risk_pct)
+            elif a.source == C.CP:
+                tr, _ = R.run_cp(a.id, name, ym_full if on else ym_recent, c_full if on else c_recent,
+                                 _companion(a.id, name, m))
+            else:
+                tr, _ = R.run_yt(a.id, v, name, ym_full if on else ym_recent, c_full if on else c_recent)
+            n_docs += _save_book(db, a, bmk, tr, m, on, start, final, live_day)
+            touched.add(a.id)
+        except Exception as exc:  # noqa: BLE001
+            log.exception("%s %s", a.id, bmk)
+            errors[f"{a.id}|{bmk}"] = str(exc)[:200]
+    return n_docs
+
+
+def _run_first_gold(db, errors: dict) -> set:
+    """The gold books a real-money desk copies, any source (crypto playlist, YouTube top 20, channel books on XAUTUSD),
+    run and sized in the quick pass once per new gold minute, on the full pass's window (see _run_market_books).
+    Returns their account ids; none after a failure (the full pass still runs them)."""
+    t0 = time.time()
+    try:
+        want = set((db.premium_meta.find_one({"_id": "live_priority"}) or {}).get("books") or [])
+        gold = _market_books([(a, mk, v, R.is_overnight(a.id, mk)) for a, mk, v in C.books_in("global")], "XAUUSD")
+        mine = [b for b in gold if f"{b[0].id}|{b[1]}" in want]
+        if not mine:
+            return set()
+        last = F.last_minute(F.DELTA_STORES["XAUTUSD"])
+        if last == (db.premium_meta.find_one({"_id": "sig_first_gold"}) or {}).get("last"):
+            return set()
+        done: set = set()
+        _run_market_books(db, "XAUUSD", mine, errors, done, window=gold)
+        if done:
+            L.update_accounts(db, sorted(done))
+        db.premium_meta.update_one({"_id": "sig_first_gold"}, {"$set": {"last": last, "t": time.time()}}, upsert=True)
+        log.info("first gold: %s through the %s UTC minute, in %.1fs", ",".join(sorted(done)) or "none",
+                 time.strftime("%H:%M", time.gmtime(last)) if last else "-", time.time() - t0)
+        return done
+    except Exception as exc:  # noqa: BLE001
+        log.exception("first gold books")
+        errors["first gold books"] = str(exc)[:200]
+        return set()
+
+
+def run_live(db, now: datetime) -> dict:
+    """The quick pass (15 Nov 2026): every minute, the Delta candles, then the books a real-money desk copies, bitcoin
+    and gold, run and sized. The full pass over every book of the group runs every few minutes (main.interval_s) and
+    still runs these books too, so nothing depends on this pass alone."""
+    new, errors = {}, {}
+    for _sym, _mk in (("BTCUSD", "BTCUSD"), ("XAUTUSD", "XAUUSD"), ("ETHUSD", "ETHUSD")):
+        try:
+            new[_mk] = F.update_delta_candles(symbol=_sym)["new"]
+        except Exception as exc:  # noqa: BLE001
+            errors[f"feed {_mk}"] = str(exc)[:200]
+    first = _run_first(db, errors) | _run_first_gold(db, errors)
+    return {"new": new, "errors": errors, "first": sorted(first)}
+
+
 def run_global(db, now: datetime) -> dict:
     new, errors = {}, {}
     for _sym, _mk in (("BTCUSD", "BTCUSD"), ("XAUTUSD", "XAUUSD"), ("ETHUSD", "ETHUSD")):   # Delta first: see _run_first
@@ -391,40 +481,8 @@ def run_global(db, now: datetime) -> dict:
         return {"waiting_for": PAPER_START.isoformat(), "new": new, "errors": errors}
     books = [(a, mk, v, R.is_overnight(a.id, mk)) for a, mk, v in C.books_in("global")]
     n_docs, touched = 0, set()
-    fixed_since = PAPER_START - timedelta(days=GLOBAL_WARM_DAYS)
     for name in list(F.YF) + ["XAUUSD"]:
-        full = F.gold_market(fixed_since) if name == "XAUUSD" else F.global_market(name, fixed_since)
-        if full is None:
-            continue
-        final = F.global_final_day(name)
-        last_day = str(full.date[-1])
-        live_day = last_day if last_day > final else None
-        mine = [b for b in books if b[1] == name or C.YC_BOOK_MARKET.get(b[1]) == name]
-        firsts = [_from(db, a, bmk) for a, bmk, _, on in mine if not on]
-        recent = F.slice_from(full, min(firsts) - timedelta(days=GLOBAL_WARM_DAYS)) if firsts else None
-        ym_full, ym_recent = YM._as_mkt(full, name, name, F.yt_cost(name)), YM._as_mkt(recent, name, name, F.yt_cost(name)) if recent is not None else None
-        c_full, c_recent = {}, {}
-        for a, bmk, v, on in mine:
-            m = full if on else recent
-            if m is None:
-                continue
-            start = _from(db, a, bmk, on)
-            try:
-                if a.source == C.BB:
-                    tr, _ = R.run_bb(a.id, v, m, c_full if on else c_recent)
-                elif _is_yc(a):
-                    tr, _ = R.run_yc(a.id, bmk, ym_full if on else ym_recent, c_full if on else c_recent, since_t=_yc_start(a)[0],
-                                     risk_pct=C.MONEY[bmk].risk_pct)
-                elif a.source == C.CP:
-                    tr, _ = R.run_cp(a.id, name, ym_full if on else ym_recent, c_full if on else c_recent,
-                                     _companion(a.id, name, m))
-                else:
-                    tr, _ = R.run_yt(a.id, v, name, ym_full if on else ym_recent, c_full if on else c_recent)
-                n_docs += _save_book(db, a, bmk, tr, m, on, start, final, live_day)
-                touched.add(a.id)
-            except Exception as exc:  # noqa: BLE001
-                log.exception("%s %s", a.id, bmk)
-                errors[f"{a.id}|{bmk}"] = str(exc)[:200]
+        n_docs += _run_market_books(db, name, _market_books(books, name), errors, touched)
     # bitcoin (Delta Exchange BTCUSD): the Crypto-playlist books, all intraday, trading from BTC_START_T
     btc_books = [b for b in books if b[1] == "BTCUSD" and not _is_yc(b[0])]
     if btc_books:
@@ -633,7 +691,7 @@ def run_daily(db, now: datetime) -> dict:
     return {**info, "trades": n_docs, "lasts": lasts, "errors": errors}
 
 
-GROUPS = {"index": run_index, "stocks": run_stocks, "global": run_global, "daily": run_daily}
+GROUPS = {"live": run_live, "index": run_index, "stocks": run_stocks, "global": run_global, "daily": run_daily}
 
 
 def main(group: str) -> int:

@@ -5,7 +5,9 @@ Run:  python premium-paper-service/test_first.py
 The backend's real-money desk (premium_live) names the books it copies in premium_meta 'live_priority'. Each bitcoin
 pass now reads the Delta candles, runs and sizes those books, and only then does everything else (15 Nov 2026). No
 network, database or market data is used: the feeds, the catalog, the ledger and the channel-book runner are replaced
-by recorders, so what is checked is the order of the work and which books run where.
+by recorders, so what is checked is the order of the work and which books run where. From 15 Nov also the quick pass ("live", every
+minute: the Delta candles, then the bitcoin AND gold books a real-money desk copies), the gold books' replay window
+(the quick pass's few books warm up on the full pass's window), the supervisor's schedule and the status panel's feeds.
 """
 import sys
 import types
@@ -137,6 +139,83 @@ check("Delta candles first, then the three books and their sizing, then Yahoo, t
 check("the pass runs only the other bitcoin book (ZZ-01), so nothing runs twice",
       [c for c in calls if c[0] == "run"] == [("run", ["TH-05", "TL-04", "TH-01"]), ("run", ["ZZ-01"])], calls)
 check("its report names the first books", info.get("first") == ["TH-01", "TH-05", "TL-04"], info)
+
+# 6. the gold books' replay window (15 Nov): the quick pass's few books warm up on the full pass's window
+from datetime import date, timedelta  # noqa: E402
+GOLD_BOOKS = [(SimpleNamespace(id=i, source=src), mk, "V0") for i, src, mk in
+              (("CP-23", cycle.C.CP, "XAUUSD"), ("DR-01", YC, "XAUTUSD"), ("ZZ-09", cycle.C.CP, "XAUUSD"), ("YT-14", "yt", "XAUUSD"))]
+FIRSTS = {"CP-23": date(2026, 11, 10), "DR-01": date(2026, 11, 12), "ZZ-09": date(2026, 11, 1), "YT-14": date(2026, 11, 8)}
+ran, sliced = [], []
+cycle._from = lambda db, a, bmk, on=False: FIRSTS[a.id]
+cycle.F.gold_market = lambda since: SimpleNamespace(date=["2026-11-14"])
+cycle.F.slice_from = lambda full, d: sliced.append(d) or SimpleNamespace(date=["2026-11-14"])
+cycle.F.yt_cost = lambda name: 0.0
+cycle.YM._as_mkt = lambda m, *a, **k: m
+cycle.R.run_cp = lambda acct, name, m, cache, comp: ran.append(acct) or ([], None)
+cycle.R.run_yc = lambda acct, mk, m, cache, **k: ran.append(acct) or ([], None)
+cycle.R.run_yt = lambda acct, v, name, m, cache: ran.append(acct) or ([], None)
+cycle._companion = lambda *a: None
+cycle._save_book = lambda *a: 1
+gold4 = [(a, mk, v, False) for a, mk, v in GOLD_BOOKS]
+named = [b for b in gold4 if b[0].id in ("CP-23", "DR-01")]
+touched6: set = set()
+cycle._run_market_books(db_with(), "XAUUSD", named, {}, touched6, window=gold4)
+want_start = date(2026, 11, 1) - timedelta(days=cycle.GLOBAL_WARM_DAYS)
+check("the quick pass replays only its named gold books (any source)", sorted(ran) == ["CP-23", "DR-01"]
+      and touched6 == {"CP-23", "DR-01"}, ran)
+check("on the full pass's window: GLOBAL_WARM_DAYS before the earliest start of ALL the gold books", sliced == [want_start], sliced)
+ran.clear()
+sliced.clear()
+cycle._run_market_books(db_with(), "XAUUSD", gold4, {}, set())
+check("the full pass replays all four, on the same window", sorted(ran) == ["CP-23", "DR-01", "YT-14", "ZZ-09"]
+      and sliced == [want_start], (ran, sliced))
+
+# 7. the named gold books in the quick pass
+mb_calls: list = []
+
+
+def fake_market_books(db, name, mine, errors, touched, window=None):
+    mb_calls.append((name, sorted(b[0].id for b in mine), sorted(b[0].id for b in (window or []))))
+    touched.update(b[0].id for b in mine)
+    return len(mine)
+
+
+cycle.C.books_in = lambda group: list(GOLD_BOOKS) + [b for b in BOOKS if b[0].id != "DR-01"]   # DR-01 once
+cycle._run_market_books = fake_market_books
+calls.clear()
+LAST[0] += 60
+db = db_with({"_id": "live_priority", "books": ["CP-23|XAUUSD", "DR-01|XAUTUSD", "TH-05|BTCUSD"]})
+got = cycle._run_first_gold(db, {})
+check("the named gold books run first, on the gold market's whole window, and are sized at once",
+      got == {"CP-23", "DR-01"} and mb_calls[-1] == ("XAUUSD", ["CP-23", "DR-01"], ["CP-23", "DR-01", "YT-14", "ZZ-09"])
+      and calls[-1:] == [("size", ["CP-23", "DR-01"])], (got, mb_calls, calls))
+check("once per new gold minute", cycle._run_first_gold(db, {}) == set() and len(mb_calls) == 1)
+
+# 8. the quick pass, in order
+calls.clear()
+mb_calls.clear()
+LAST[0] += 60
+db = db_with({"_id": "live_priority", "books": NAMED + ["CP-23|XAUUSD"]})
+info = cycle.run_live(db, datetime(2026, 11, 16, 6, 0, tzinfo=timezone.utc))
+order = [c[0] if c[0] != "run" else "run " + "+".join(c[1]) for c in calls]
+check("the quick pass: the Delta candles, the bitcoin books and their sizing, the gold books and theirs; nothing else",
+      order == ["delta", "delta", "delta", "run TH-05+TL-04+TH-01", "size", "size"]
+      and mb_calls == [("XAUUSD", ["CP-23", "DR-01"], ["CP-23", "DR-01", "YT-14", "ZZ-09"])], (order, mb_calls))
+check("its report names every book it ran first", info.get("first") == ["CP-23", "DR-01", "TH-01", "TH-05", "TL-04"], info)
+
+# 9. the supervisor's schedule
+import main as SUP  # noqa: E402
+check("the quick pass every minute and first in line; every book every 8 minutes",
+      SUP.interval_s("live") == 60 and SUP.interval_s("global") == 480 and SUP.ORDER[0] == "live"
+      and set(SUP.ORDER) == set(SUP.TIMEOUT_S), (SUP.ORDER, SUP.TIMEOUT_S))
+
+# 10. the status panel's feeds after a quick pass
+import segments as SEG  # noqa: E402
+SEG._last_bar = lambda store: (1_794_700_000, 1.0)
+out = SEG.feeds_now("live", {"errors": {"feed XAUUSD": "x"}})
+check("a quick pass reports the three Delta feeds (so no book looks stale between full passes)",
+      sorted(out) == ["BTCUSD", "ETHUSD", "XAUUSD"] and out["XAUUSD"]["fetch_error"] == "x", out)
+check("a full pass still reports every feed", len(SEG.feeds_now("global", {})) == 8)
 
 print("\nALL PASS" if not FAILS else f"\n{len(FAILS)} FAILED")
 sys.exit(1 if FAILS else 0)
