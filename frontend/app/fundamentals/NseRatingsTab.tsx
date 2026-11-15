@@ -838,8 +838,8 @@ export default function NseRatingsTab() {
           <b>historical returns</b> (what the stock did) and the <b>forward estimates</b> (the range of
           what it might do, from its own volatility, validated against what actually happened). The
           estimates are ranges, not predictions or advice. Where the data cannot support a number, the
-          row says <b>Insufficient Data</b> and why. The <b>Rank</b> orders the rated stocks by the
-          rating&rsquo;s business parts only, momentum left out. Tested on five years of NSE history, it
+          row says <b>Insufficient Data</b> and why. The <b>Rank</b>{" "}orders the rated stocks by the
+          rating’s business parts only, momentum left out. Tested on five years of NSE history, it
           measures fundamental strength, not future returns.
         </p>
         <div className="nsr-tiles">
