@@ -47,7 +47,7 @@ MODES
 - live: real orders.
 Going live, flattening and changing the risk a trade need the owner's PIN. Switching to off or shadow never does,
 since neither sends an order.
-Three venue errors in a row switch the desk off.
+Three venue errors in a row switch the desk off (a good answer from Delta starts the count again).
 """
 
 from __future__ import annotations
@@ -308,6 +308,14 @@ async def _set_state(db, **fields) -> None:
 
 async def _set_trade(db, tid: str, **fields) -> None:
     await _tc(db).update_one({"_id": tid}, {"$set": {**fields, "updated_at": _now()}})
+
+
+async def _venue_ok(db, st: dict) -> None:
+    """Delta answered: the count of venue errors IN A ROW starts again. (Before 15 Nov only an entry or arming reset it,
+    so scattered timeouts added up until a desk switched itself off.)"""
+    if st.get("errors_in_row"):
+        st["errors_in_row"] = 0
+        await _set_state(db, errors_in_row=0)
 
 
 async def _venue_error(db, st: dict, what: str) -> None:
@@ -709,6 +717,8 @@ async def _cycle_one() -> dict:
             except DeltaError as exc:
                 await _venue_error(db, st, f"positions unavailable ({exc})")
                 positions = None
+            else:
+                await _venue_ok(db, st)                     # errors count only in a row
             if positions is not None and _now() - float(st.get("wallet_at") or 0) > 300:
                 try:
                     await _set_state(db, wallet=await D.wallet(), wallet_at=_now())

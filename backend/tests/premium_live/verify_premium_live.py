@@ -694,6 +694,29 @@ async def main():
                                            for p in c["picks"] + g["picks"] if p["acct"] in ("TD-02", "CP-06"))
           and all(p.get("picked_at") is None for p in c["picks"] + g["picks"] if p["acct"] not in ("TD-02", "CP-06")),
           ([p["acct"] for p in c["picks"]], [p["acct"] for p in g["picks"]]))
+    # ── 23. venue errors count only in a row ───────────────────────────────────────────────────────
+    section("23. Venue errors count only in a row: a good answer from Delta starts the count again")
+    db = fresh()
+    M.D.fail["positions"] = "definite"
+    for _ in range(2):
+        await cyc(db)
+    two = st_of(db, "crypto")["errors_in_row"]
+    M.D.fail.pop("positions")
+    await cyc(db)
+    reset = (st_of(db, "crypto")["errors_in_row"], st_of(db, "gold")["errors_in_row"])
+    M.D.fail["positions"] = "definite"
+    for _ in range(2):
+        await cyc(db)
+    M.D.fail.pop("positions")
+    st, sg = st_of(db, "crypto"), st_of(db, "gold")
+    check("two errors, a good read, two more errors: both desks still live (the count is 2, not 4)", two == 2
+          and reset == (0, 0) and st["mode"] == "live" and sg["mode"] == "live" and st["errors_in_row"] == 2,
+          (two, reset, st["errors_in_row"], st["mode"], sg["mode"]))
+    M.D.fail["positions"] = "definite"
+    await cyc(db)
+    M.D.fail.pop("positions")
+    check("a third error in a row still switches the desk off", st_of(db, "crypto")["mode"] == "off"
+          and "3 venue errors in a row" in (st_of(db, "crypto").get("switched_off") or ""), st_of(db, "crypto").get("switched_off"))
 
 
 if __name__ == "__main__":
