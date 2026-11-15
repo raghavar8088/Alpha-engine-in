@@ -5,7 +5,7 @@ instruments: stocks and forex
 timeframes: 1D
 style: swing
 = RU-09 | Bullish engulfing with the 200 MA: the next day's direction (54 of 100 up)
-R setup E 00:00 | The pattern: a small red candle followed by a big green one that engulfs its body. | "the bullish engulfing pattern is a two candlestick pattern, where a small red candle is followed by a big green candle that completely engulfs the body of the previous red candle"
-R filter E 02:53 | A 200-period moving average as the filter. | "I added the 200 period moving average to filter false signals"
+R setup E 00:26 | The pattern: a small red candle followed by a big green one that engulfs its body. | "the bullish engulfing pattern is a two candlestick pattern, where a small red candle is followed by a big green candle that completely engulfs the body of the previous red candle"
+R filter E 03:14 | A 200-period moving average as the filter. | "I added the 200 period moving average to filter false signals"
 T concept_only | a count of next-day moves after the pattern; no entry price, stop, target or exit is stated (engulfing strategies are already coded, e.g. TG-04)
 C win_rate | 06:22 | 54 of 100 next days up | daily, with the 200 MA | "54 out of 100 times, the price did make a move in the upward direction"

@@ -5,13 +5,13 @@ instruments: Stocks, forex, crypto
 timeframes: Not stated
 style: intraday
 = TL-06 | Range breakout confirmed by a momentum candle, stop beyond the level, half at 1.5R, rest on the Chandelier Exit flip
-R setup E 00:43 | A breakout needs support and resistance with several rejections at both. | "a breakout is when you have a support and resistance, where there are multiple key rejections for both"
-R entry E 02:47 | Momentum candles: one big body, or three medium candles in the same direction. | "Or 3 medium sized candles, all going in the same directions"
-R entry E 03:27 | Most of the big candle's body must be beyond the level. | "the majority of the body would have had to be crossing the resistance level"
-R entry E 04:48 | Enter at the momentum candle's close instead of waiting for a pullback. | "Rather than wait for a pullback"
-R stop E 04:48 | Stop just below the broken resistance. | "Then, I will set my stop loss right below the resistance level"
+R setup E 01:00 | A breakout needs support and resistance with several rejections at both. | "a breakout is when you have a support and resistance, where there are multiple key rejections for both"
+R entry E 03:02 | Momentum candles: one big body, or three medium candles in the same direction. | "Or 3 medium sized candles, all going in the same directions"
+R entry E 03:41 | Most of the big candle's body must be beyond the level. | "the majority of the body would have had to be crossing the resistance level"
+R entry E 04:59 | Enter at the momentum candle's close instead of waiting for a pullback. | "Rather than wait for a pullback"
+R stop E 05:04 | Stop just below the broken resistance. | "Then, I will set my stop loss right below the resistance level"
 R target E 05:28,06:10 | Half off at 1.5R, then the stop moves up to that take-profit level. | "Next, we will raise our stop loss to our previous take profit mark"
-R exit E 06:10 | The rest exits when the Chandelier Exit (ATR multiplier 2) changes colour. | "we will exit the trade once the chandelier indicator changes colors"
+R exit E 06:47 | The rest exits when the Chandelier Exit (ATR multiplier 2) changes colour. | "we will exit the trade once the chandelier indicator changes colors"
 R market A - | Desk version: Delta BTCUSD, ETHUSD and XAUTUSD (gold) on 15-minute candles; out at the day's end; at most 3 trades a day. | ""
 R setup A - | The range: the highest high and lowest low of the 30 bars before the break, no taller than 4 x ATR (14), with at least two bars touching each edge (within 10% of the range's height), three or more bars apart. | ""
 R entry A - | Long: a close above the range high by a bar whose body is at least 1.5 x the 20-bar average body with half or more of it above the high, or the third green close in a row after the first close above the high: enter at the next open. Mirror for shorts. | ""

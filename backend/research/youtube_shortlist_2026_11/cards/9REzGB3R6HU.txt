@@ -5,7 +5,7 @@ instruments: Any
 timeframes: Not stated
 style: intraday
 = TL-08 | Consolidation range: fade the break of an edge, target the opposite edge
-R entry E 03:33 | Short a break of equal highs, buy a break of equal lows. | "So if price ever breaks equal highs, you should be looking to short"
-R target E 05:46 | Target the opposite liquidity point. | "So once price breaks this upper end of liquidity, you enter a short, target the next liquidity point"
+R entry E 04:07 | Short a break of equal highs, buy a break of equal lows. | "So if price ever breaks equal highs, you should be looking to short"
+R target E 05:58 | Target the opposite liquidity point. | "So once price breaks this upper end of liquidity, you enter a short, target the next liquidity point"
 T with_assumptions | the range is marked by eye; no stop is stated
 D LS-14 | fading a sweep of a range edge toward the opposite liquidity is already coded (LS-14; CP-03 range ping-pong)

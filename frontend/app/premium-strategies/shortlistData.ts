@@ -57,7 +57,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "At 9:25, the current week's option chain.",
     "times": [
-     "02:14"
+     "02:22"
     ]
    },
    {
@@ -66,7 +66,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The in-the-money call trading very close to Rs 180 ...",
     "times": [
-     "02:56"
+     "03:20"
     ]
    },
    {
@@ -75,7 +75,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... and the same on the put side.",
     "times": [
-     "03:39"
+     "04:00"
     ]
    },
    {
@@ -84,7 +84,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Whichever breaks Rs 180 first and sustains above it is bought.",
     "times": [
-     "05:10"
+     "05:26"
     ]
    },
    {
@@ -93,7 +93,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop 20 points.",
     "times": [
-     "05:54"
+     "06:28"
     ]
    },
    {
@@ -102,7 +102,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Target 40 points (Rs 220 from Rs 180).",
     "times": [
-     "08:38"
+     "08:50"
     ]
    },
    {
@@ -111,7 +111,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Out at 9:45 if neither is hit.",
     "times": [
-     "11:21"
+     "11:24"
     ]
    },
    {
@@ -227,7 +227,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Target 1:1 (1.5:1 if extended); exit if price stalls after entry.",
     "times": [
-     "06:21"
+     "06:27"
     ]
    },
    {
@@ -324,7 +324,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "EMA 9 and EMA 21.",
     "times": [
-     "01:29"
+     "01:35"
     ]
    },
    {
@@ -371,7 +371,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Target 1:2 (1:3 when available).",
     "times": [
-     "04:59"
+     "05:22"
     ]
    },
    {
@@ -380,7 +380,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "When the EMA's angle flattens, take no entries.",
     "times": [
-     "05:39"
+     "06:11"
     ]
    },
    {
@@ -460,7 +460,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "15-minute candles.",
     "times": [
-     "03:34"
+     "04:04"
     ]
    },
    {
@@ -469,7 +469,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Lines at the day's high and low, for the next day.",
     "times": [
-     "04:15"
+     "04:42"
     ]
    },
    {
@@ -478,7 +478,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Above the high and holding: buy only.",
     "times": [
-     "06:28"
+     "06:34"
     ]
    },
    {
@@ -487,7 +487,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Below the low: sell only.",
     "times": [
-     "06:28"
+     "06:48"
     ]
    },
    {
@@ -496,7 +496,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "To sell: after a green candle, a close below its open.",
     "times": [
-     "10:36"
+     "10:50"
     ]
    },
    {
@@ -514,7 +514,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop at the pullback candle's high ...",
     "times": [
-     "21:24"
+     "21:31"
     ]
    },
    {
@@ -523,7 +523,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... with a buffer.",
     "times": [
-     "22:05"
+     "22:28"
     ]
    },
    {
@@ -532,7 +532,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Two levels: 1:1 and 1:2.",
     "times": [
-     "17:02"
+     "17:27"
     ]
    },
    {
@@ -541,7 +541,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Half booked at 1:1; the rest runs to 1:2 or the stop.",
     "times": [
-     "18:30"
+     "18:36"
     ]
    },
    {
@@ -550,7 +550,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Between them: no trading day.",
     "times": [
-     "07:51"
+     "07:58"
     ]
    },
    {
@@ -559,7 +559,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Three pullback candles are a reversal: no entry.",
     "times": [
-     "12:04"
+     "12:10"
     ]
    },
    {
@@ -807,7 +807,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Skip when the 200 EMA is right in the way (after a gap).",
     "times": [
-     "13:25"
+     "13:46"
     ]
    },
    {
@@ -1027,7 +1027,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Nifty five-minute chart; the indicator is noisy and only for scalpers.",
     "times": [
-     "04:56"
+     "05:17"
     ]
    },
    {
@@ -1198,7 +1198,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Long setup: RSI below 30 and hovering there.",
     "times": [
-     "04:52"
+     "05:06"
     ]
    },
    {
@@ -1227,7 +1227,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Short: RSI above 70, the first five-minute close back below 70 triggers; short at the next candle's open.",
     "times": [
-     "07:02"
+     "07:17"
     ]
    },
    {
@@ -1257,7 +1257,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Trade in pairs (2, 4 or 6 lots) so a part is booked at every level.",
     "times": [
-     "06:20"
+     "06:56"
     ]
    },
    {
@@ -1266,7 +1266,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "On trending days an RSI divergence gives the better entry.",
     "times": [
-     "13:18"
+     "13:50"
     ]
    },
    {
@@ -1310,7 +1310,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "other",
-    "at": "04:12",
+    "at": "04:46",
     "value": "Nifty gives about 1:2, Bank Nifty about 1:3",
     "period": "not stated",
     "quote": "you get a Nifty one is to 2R and Bank Nifty you get one is to three era"
@@ -1379,7 +1379,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Index futures (Sensex, Nifty, Bank Nifty); options possible but futures preferred (no theta decay).",
     "times": [
-     "01:31"
+     "01:36"
     ]
    },
    {
@@ -1388,7 +1388,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Five-minute chart for scalping on indices.",
     "times": [
-     "00:49"
+     "00:55"
     ]
    },
    {
@@ -1407,7 +1407,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "MACD with four-times parameters: 48, 104, 36.",
     "times": [
-     "02:57"
+     "03:00"
     ]
    },
    {
@@ -1426,7 +1426,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Partial booking at Nifty 30-40, Bank Nifty about 100, Sensex 120-130 points.",
     "times": [
-     "05:38"
+     "05:40"
     ]
    },
    {
@@ -1435,7 +1435,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Trail the rest on the EMA 5/15 cross: exit a long when EMA 5 goes below EMA 15 (a short when it goes above).",
     "times": [
-     "05:38"
+     "06:02"
     ]
    },
    {
@@ -1444,7 +1444,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "He personally does not take trades right at the open.",
     "times": [
-     "03:37"
+     "04:10"
     ]
    },
    {
@@ -1561,7 +1561,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Hull Suite: a band of Hull moving averages; when the bearish averages turn, the trend is turning bearish.",
     "times": [
-     "06:16"
+     "06:21"
     ]
    },
    {
@@ -1600,7 +1600,7 @@ export const SL: SlStrategy[] = [
     "tag": "I",
     "text": "A losing signal is cut quickly (80 points on the first trade of the example).",
     "times": [
-     "08:27"
+     "08:47"
     ]
    },
    {
@@ -1702,7 +1702,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "An in-the-money option, 100-200 points in.",
     "times": [
-     "04:18"
+     "04:36"
     ]
    },
    {
@@ -1711,7 +1711,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "NIFTY 2-minute chart.",
     "times": [
-     "02:17"
+     "02:28"
     ]
    },
    {
@@ -1720,7 +1720,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Ready from 2:45 to 3:00.",
     "times": [
-     "02:57"
+     "03:06"
     ]
    },
    {
@@ -1729,7 +1729,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "MACD for the direction.",
     "times": [
-     "02:17"
+     "02:50"
     ]
    },
    {
@@ -1738,7 +1738,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The break of the signal candle's low (a put) - or high (a call).",
     "times": [
-     "03:38"
+     "04:01"
     ]
    },
    {
@@ -1747,7 +1747,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Book 15-17 points.",
     "times": [
-     "08:24"
+     "08:27"
     ]
    },
    {
@@ -1756,7 +1756,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Only when the ADX is above 25 ...",
     "times": [
-     "02:57"
+     "03:28"
     ]
    },
    {
@@ -1765,7 +1765,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... and rising.",
     "times": [
-     "04:59"
+     "05:27"
     ]
    },
    {
@@ -1876,7 +1876,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Sell mirror: Supertrend sell near a resistance, or on a candle breaking a support.",
     "times": [
-     "12:49"
+     "12:54"
     ]
    },
    {
@@ -1929,7 +1929,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "02:41",
+    "at": "03:12",
     "value": "filtering lifts accuracy from about 32-40% to 70-75%",
     "period": "not stated",
     "quote": "isakaa ek reskyoo leval barhakar aapakaa 70% too 75% ho jaaegaa"
@@ -1985,7 +1985,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The strategy runs from 09:30 to 15:15.",
     "times": [
-     "17:45"
+     "17:48"
     ]
    },
    {
@@ -2115,7 +2115,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "VWAP with a length of 14, Chaikin oscillator (3, 10), EMA 10.",
     "times": [
-     "00:47"
+     "00:40"
     ]
    },
    {
@@ -2143,7 +2143,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A strict Rs 4,500 stop per lot; flat at 15:15.",
     "times": [
-     "03:38"
+     "03:45"
     ]
    },
    {
@@ -2179,7 +2179,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "money",
-    "at": "04:23",
+    "at": "05:15",
     "value": "Rs 1,94,873 gross, Rs 96,500 net after Rs 98,400 of charges (48.3%, 21.8% a year); 263 trades, 81 winners (30.8%); average win Rs 3,700, average loss Rs 1,100",
     "period": "1 Oct 2024 - 1 Oct 2026, Rs 2 lakh, zero slippage",
     "quote": "total 263 treds mile jisamen sirph 81 treds prophitebal rahe"
@@ -2253,7 +2253,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Exit when the position loses Rs 3,000 (also the daily risk cap).",
     "times": [
-     "00:44"
+     "01:07"
     ]
    },
    {
@@ -2262,7 +2262,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A profit exit (its amount is lost in the captions), else flat at 15:25.",
     "times": [
-     "00:44"
+     "01:07"
     ]
    },
    {
@@ -2281,7 +2281,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Sideways, choppy markets give false breakouts; suited to trending markets.",
     "times": [
-     "01:26"
+     "01:20"
     ]
    },
    {
@@ -2317,7 +2317,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "money",
-    "at": "00:02",
+    "at": "00:08",
     "value": "about Rs 36,000 net on Rs 1 lakh in one year",
     "period": "his platform backtest, zero slippage",
     "quote": "1 laakh ke inishiyal kaipital par aproksimametalee 36,000 kaa total net ritarn aayaa hai"
@@ -2372,7 +2372,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Buying only, never selling.",
     "times": [
-     "04:38"
+     "04:58"
     ]
    },
    {
@@ -2381,7 +2381,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "NIFTY on 5-minute candles.",
     "times": [
-     "03:47"
+     "04:13"
     ]
    },
    {
@@ -2390,7 +2390,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Fibonacci retracement with his levels 0.22, 0.44, 0.77, 1 and 1.22.",
     "times": [
-     "06:03"
+     "06:42"
     ]
    },
    {
@@ -2399,7 +2399,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "At least an 80-point intraday fall.",
     "times": [
-     "03:47"
+     "04:25"
     ]
    },
    {
@@ -2408,7 +2408,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "At other index levels, half a percent.",
     "times": [
-     "12:34"
+     "13:00"
     ]
    },
    {
@@ -2417,7 +2417,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Buy when price crosses 0.44.",
     "times": [
-     "09:44"
+     "09:47"
     ]
    },
    {
@@ -2426,7 +2426,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop at 0.22.",
     "times": [
-     "09:44"
+     "09:50"
     ]
    },
    {
@@ -2435,7 +2435,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "First target 0.77 ...",
     "times": [
-     "09:44"
+     "10:04"
     ]
    },
    {
@@ -2453,7 +2453,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Most of the quantity is booked at the first target.",
     "times": [
-     "14:01"
+     "14:40"
     ]
    },
    {
@@ -2487,7 +2487,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "00:09",
+    "at": "00:27",
     "value": "over 90% success in 111 trades",
     "period": "NIFTY, his own trading since October-November",
     "quote": "sakses ret lagabhag lagabhag 90% ke oopar kaa hai"
@@ -2541,7 +2541,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "At 9:16, the strike whose premium is closest to Rs 200.",
     "times": [
-     "02:52"
+     "02:59"
     ]
    },
    {
@@ -2550,7 +2550,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The premiums are tracked to the 11:15 close: that is the range.",
     "times": [
-     "02:52"
+     "03:08"
     ]
    },
    {
@@ -2559,7 +2559,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A premium close above the range buys.",
     "times": [
-     "02:52"
+     "03:14"
     ]
    },
    {
@@ -2568,7 +2568,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "One call and one put breakout, if triggered.",
     "times": [
-     "03:35"
+     "03:39"
     ]
    },
    {
@@ -2577,7 +2577,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "20% stop on the entry premium.",
     "times": [
-     "03:35"
+     "03:42"
     ]
    },
    {
@@ -2714,7 +2714,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "When the daily CPR is wide, scalp: take the first target only.",
     "times": [
-     "05:02"
+     "05:26"
     ]
    },
    {
@@ -2723,7 +2723,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A break of the CPR alone is not a trade.",
     "times": [
-     "06:29"
+     "06:52"
     ]
    },
    {
@@ -2826,7 +2826,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Far from the CPR: short toward the CPR; close to it: short when a candle breaks the CPR and scalp to S1 and the previous day low.",
     "times": [
-     "15:09"
+     "15:18"
     ]
    },
    {
@@ -2922,7 +2922,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Buy when the EMA 10 crosses above the EMA 13 and stay long while it is above; sell when it crosses below.",
     "times": [
-     "06:37"
+     "06:51"
     ]
    },
    {
@@ -2958,7 +2958,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "money",
-    "at": "01:37",
+    "at": "01:50",
     "value": "Rs 2.6 lakh (Bank Nifty lot), Rs 2.3 lakh (Nifty), Rs 3.5 lakh (Adani Enterprises), Rs 2.1 lakh (Titan); about 62-63% winners; about Rs 6,000 a trade",
     "period": "about two months, November-December",
     "quote": "do maheenon men banate ek laut baink niphtee par 2 laakh 60 hajaar rupaye"
@@ -3025,7 +3025,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "MACD with default settings for the trigger.",
     "times": [
-     "02:05"
+     "02:28"
     ]
    },
    {
@@ -3054,7 +3054,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop below the swing low (above the swing high for shorts).",
     "times": [
-     "04:16"
+     "04:40"
     ]
    },
    {
@@ -3073,7 +3073,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "No trade when MACD has not crossed to the trade's side.",
     "times": [
-     "05:38"
+     "05:52"
     ]
    },
    {
@@ -3177,7 +3177,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Five-minute charts, long and short.",
     "times": [
-     "03:38"
+     "03:51"
     ]
    },
    {
@@ -3186,7 +3186,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Non-repainting Supertrend with factor 3 and ATR period 7 (optimised for Nifty futures; defaults are 3 and 11).",
     "times": [
-     "00:47"
+     "00:58"
     ]
    },
    {
@@ -3223,7 +3223,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "04:21",
+    "at": "04:43",
     "value": "11 trades, 63.64% winners, net +Rs 6,755 from 27 July to 3 August",
     "period": "one week",
     "quote": "the winning ratio is 63.64% as of now and the net profit is 6,755 rupees"
@@ -3290,7 +3290,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A zero-lag EMA (lag removed from the EMA) and a normal EMA.",
     "times": [
-     "00:02"
+     "00:13"
     ]
    },
    {
@@ -3299,7 +3299,7 @@ export const SL: SlStrategy[] = [
     "tag": "I",
     "text": "Trade the cross of the zero-lag EMA through the EMA (the AFL code is shown, not read out).",
     "times": [
-     "00:44"
+     "00:39"
     ]
    },
    {
@@ -3328,7 +3328,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "money",
-    "at": "01:27",
+    "at": "01:36",
     "value": "+Rs 5 lakh on Rs 2 lakh in four years (24.8%), 417 trades, 11 losses in a row, 23.6% drawdown",
     "period": "4 years",
     "quote": "returns had end with an uh um with a net profit of 5 lakhs we back tested with an initial capital of 2 lakhs"
@@ -3393,7 +3393,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Five-minute candles.",
     "times": [
-     "05:45"
+     "06:20"
     ]
    },
    {
@@ -3431,7 +3431,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop below the candle.",
     "times": [
-     "07:11"
+     "07:23"
     ]
    },
    {
@@ -3440,7 +3440,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Book quickly once in profit (15-20 minutes, at the previous swing).",
     "times": [
-     "07:11"
+     "07:23"
     ]
    },
    {
@@ -3715,7 +3715,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "15-minute candles.",
     "times": [
-     "09:42"
+     "09:54"
     ]
    },
    {
@@ -3764,7 +3764,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Target at least 1:1 (Rs 50 stop, Rs 50 target) while learning.",
     "times": [
-     "14:29"
+     "14:41"
     ]
    },
    {
@@ -3835,7 +3835,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "14:29",
+    "at": "14:57",
     "value": "accuracy about 60-70% at 1:1",
     "period": "not stated",
     "quote": "Its accuracy will be near about 60-70%"
@@ -3902,7 +3902,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "NIFTY.",
     "times": [
-     "00:42"
+     "01:11"
     ]
    },
    {
@@ -3920,7 +3920,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... buying a call.",
     "times": [
-     "01:23"
+     "01:32"
     ]
    },
    {
@@ -3938,7 +3938,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Supertrend 10, 2.",
     "times": [
-     "02:07"
+     "02:18"
     ]
    },
    {
@@ -3947,7 +3947,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The close above the Parabolic SAR ...",
     "times": [
-     "02:07"
+     "02:42"
     ]
    },
    {
@@ -3965,7 +3965,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... and above R1.",
     "times": [
-     "02:49"
+     "03:10"
     ]
    },
    {
@@ -3974,7 +3974,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The put's target is 20 points.",
     "times": [
-     "04:12"
+     "04:20"
     ]
    },
    {
@@ -3983,7 +3983,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "When the close crosses below the Supertrend the market reversed: a counter position.",
     "times": [
-     "03:31"
+     "03:47"
     ]
    },
    {
@@ -3992,7 +3992,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "One transaction a day.",
     "times": [
-     "04:12"
+     "04:51"
     ]
    },
    {
@@ -4027,7 +4027,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "04:56",
+    "at": "05:05",
     "value": "about 47% winners, maximum loss about 6,870",
     "period": "QuantMan backtest, January 2024 - June 2025",
     "quote": "maaee vining probebilitee iज़ araaund 47%"
@@ -4081,7 +4081,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "NIFTY.",
     "times": [
-     "00:44"
+     "01:17"
     ]
    },
    {
@@ -4090,7 +4090,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A call, spot-based ATM ...",
     "times": [
-     "01:25"
+     "01:39"
     ]
    },
    {
@@ -4099,7 +4099,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... locked at 9:16.",
     "times": [
-     "01:25"
+     "01:59"
     ]
    },
    {
@@ -4108,7 +4108,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Supertrend 10, 2 on 3-minute candles of the premium basket.",
     "times": [
-     "02:08"
+     "02:28"
     ]
    },
    {
@@ -4117,7 +4117,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "RSI 14 on 3 minutes.",
     "times": [
-     "02:08"
+     "02:40"
     ]
    },
    {
@@ -4126,7 +4126,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "CCI with period 8.",
     "times": [
-     "02:52"
+     "03:01"
     ]
    },
    {
@@ -4135,7 +4135,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The range 9:16 to 9:30.",
     "times": [
-     "02:52"
+     "03:14"
     ]
    },
    {
@@ -4153,7 +4153,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The close above the Supertrend ...",
     "times": [
-     "03:33"
+     "04:00"
     ]
    },
    {
@@ -4162,7 +4162,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... the CCI above ...",
     "times": [
-     "04:13"
+     "04:15"
     ]
    },
    {
@@ -4171,7 +4171,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... the close above the upper Bollinger Band ...",
     "times": [
-     "04:13"
+     "04:27"
     ]
    },
    {
@@ -4180,7 +4180,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... above the range high ...",
     "times": [
-     "04:13"
+     "04:50"
     ]
    },
    {
@@ -4189,7 +4189,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... above R1 ...",
     "times": [
-     "04:55"
+     "04:57"
     ]
    },
    {
@@ -4198,7 +4198,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... and the RSI above 70.",
     "times": [
-     "04:55"
+     "05:15"
     ]
    },
    {
@@ -4207,7 +4207,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Out when the close crosses below the Supertrend.",
     "times": [
-     "05:39"
+     "05:51"
     ]
    },
    {
@@ -4216,7 +4216,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "At most two trades a day.",
     "times": [
-     "06:21"
+     "06:48"
     ]
    },
    {
@@ -4225,7 +4225,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Case 1: days to expiry above two ...",
     "times": [
-     "04:55"
+     "05:34"
     ]
    },
    {
@@ -4269,7 +4269,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "06:21",
+    "at": "06:54",
     "value": "above 50% winners, above 1% per trade",
     "period": "QuantMan backtest from January 2022",
     "quote": "maay vining probebilitee iज़ aalso abav 50%"
@@ -4323,7 +4323,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "From 9:20, options trading around Rs 50; the one that moves from 50 to 60 is entered.",
     "times": [
-     "14:08"
+     "14:15"
     ]
    },
    {
@@ -4332,7 +4332,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Only the leg that moves is entered.",
     "times": [
-     "13:23"
+     "13:40"
     ]
    },
    {
@@ -4341,7 +4341,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop 20 points, target 40.",
     "times": [
-     "14:08"
+     "14:30"
     ]
    },
    {
@@ -4350,7 +4350,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Entry from 9:20, exit at 3:29.",
     "times": [
-     "16:58"
+     "17:15"
     ]
    },
    {
@@ -4359,7 +4359,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Trailing stop 1:1.",
     "times": [
-     "15:32"
+     "15:50"
     ]
    },
    {
@@ -4368,7 +4368,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Only on expiry day and the day before.",
     "times": [
-     "17:38"
+     "17:47"
     ]
    },
    {
@@ -4377,7 +4377,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Only when India VIX is under 14.",
     "times": [
-     "22:41"
+     "22:57"
     ]
    },
    {
@@ -4460,7 +4460,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The at-the-money option.",
     "times": [
-     "08:10"
+     "08:29"
     ]
    },
    {
@@ -4469,7 +4469,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "5-minute candles.",
     "times": [
-     "08:52"
+     "09:02"
     ]
    },
    {
@@ -4478,7 +4478,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The previous two days' closes in the same direction, both candles the same colour.",
     "times": [
-     "03:27"
+     "04:06"
     ]
    },
    {
@@ -4487,7 +4487,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Red candles that close above the previous close do not count.",
     "times": [
-     "02:46"
+     "03:13"
     ]
    },
    {
@@ -4496,7 +4496,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "On a down-down day only sells (puts) are taken.",
     "times": [
-     "04:48"
+     "04:57"
     ]
    },
    {
@@ -4505,7 +4505,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Wait until 9:40 ...",
     "times": [
-     "04:07"
+     "04:29"
     ]
    },
    {
@@ -4514,7 +4514,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... and mark the range's high and low.",
     "times": [
-     "04:07"
+     "04:39"
     ]
    },
    {
@@ -4523,7 +4523,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Not the first break: the first retest.",
     "times": [
-     "04:48"
+     "05:22"
     ]
    },
    {
@@ -4532,7 +4532,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "After the retest, the first candle of our direction is the alert candle ...",
     "times": [
-     "05:28"
+     "05:56"
     ]
    },
    {
@@ -4541,7 +4541,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... and the break of its low is the entry.",
     "times": [
-     "05:28"
+     "06:06"
     ]
    },
    {
@@ -4550,7 +4550,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop just beyond the retest candle.",
     "times": [
-     "06:48"
+     "07:03"
     ]
    },
    {
@@ -4559,7 +4559,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Exit when two candles of the same colour form the other way ...",
     "times": [
-     "06:48"
+     "07:16"
     ]
    },
    {
@@ -4568,7 +4568,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... at the break of the second one's high.",
     "times": [
-     "07:28"
+     "07:59"
     ]
    },
    {
@@ -4577,7 +4577,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "If the range breaks the other way, forget the day.",
     "times": [
-     "08:52"
+     "09:13"
     ]
    },
    {
@@ -4682,7 +4682,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "About 10 points a trade on crude.",
     "times": [
-     "04:16"
+     "04:25"
     ]
    },
    {
@@ -4691,7 +4691,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stay in while the candles are above the SMA; exit when they come down to it or below.",
     "times": [
-     "07:02"
+     "07:23"
     ]
    },
    {
@@ -4790,7 +4790,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The option: 100 points in the money.",
     "times": [
-     "08:24"
+     "08:46"
     ]
    },
    {
@@ -4799,7 +4799,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The 9:20 candle is the first 5-minute candle; its high and low are marked.",
     "times": [
-     "01:27"
+     "01:30"
     ]
    },
    {
@@ -4808,7 +4808,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A gap of 100 points between yesterday's close and today's open.",
     "times": [
-     "04:14"
+     "04:18"
     ]
    },
    {
@@ -4817,7 +4817,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "After a gap up, a break of the low shorts (a gap down's break of the high buys).",
     "times": [
-     "08:24"
+     "08:30"
     ]
    },
    {
@@ -4826,7 +4826,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop 100 points when the 9:20 candle is over 150 points ...",
     "times": [
-     "07:00"
+     "07:28"
     ]
    },
    {
@@ -4844,7 +4844,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Target: a 200-point move.",
     "times": [
-     "02:07"
+     "02:20"
     ]
    },
    {
@@ -4853,7 +4853,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Also out when an opposite candle falls 50 points from its high (a long's red candle).",
     "times": [
-     "07:40"
+     "07:58"
     ]
    },
    {
@@ -4862,7 +4862,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Everything squared off at 3:15.",
     "times": [
-     "09:52"
+     "09:55"
     ]
    },
    {
@@ -5017,7 +5017,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "48:46",
+    "at": "48:55",
     "value": "22 of 24 trades profitable, two stops",
     "period": "Nifty, June 2013 to 2017",
     "quote": "there were 24 trades and only two trades have gone wrong guys. 22 trades have given us profit"
@@ -5088,7 +5088,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "3-minute candles.",
     "times": [
-     "02:10"
+     "02:47"
     ]
    },
    {
@@ -5097,7 +5097,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Two simple moving averages, 22 and 33.",
     "times": [
-     "02:53"
+     "02:57"
     ]
    },
    {
@@ -5106,7 +5106,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Buy: both SMAs rising, price retests and forms a green candle at the band.",
     "times": [
-     "02:53"
+     "03:26"
     ]
    },
    {
@@ -5124,7 +5124,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Entry at the trigger candle's high.",
     "times": [
-     "03:45"
+     "03:57"
     ]
    },
    {
@@ -5133,7 +5133,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Sell: both SMAs falling and a red candle at the band, entry at its low, stop at its high.",
     "times": [
-     "04:29"
+     "05:04"
     ]
    },
    {
@@ -5142,7 +5142,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop at the trigger candle's low.",
     "times": [
-     "03:45"
+     "03:57"
     ]
    },
    {
@@ -5151,7 +5151,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Target twice the risk.",
     "times": [
-     "03:45"
+     "03:57"
     ]
    },
    {
@@ -5226,7 +5226,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "NIFTY on 15-minute candles.",
     "times": [
-     "02:15"
+     "02:19"
     ]
    },
    {
@@ -5235,7 +5235,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The standard pivot point (the pivot level only) and a 20 MA.",
     "times": [
-     "02:15"
+     "02:43"
     ]
    },
    {
@@ -5244,7 +5244,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Case 1: the close above the pivot and a green candle crossing and closing above the 20 MA.",
     "times": [
-     "02:56"
+     "03:13"
     ]
    },
    {
@@ -5262,7 +5262,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Entry at the trigger candle's close.",
     "times": [
-     "03:37"
+     "03:54"
     ]
    },
    {
@@ -5280,7 +5280,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop below the candle's low or the 20 MA, whichever is lower.",
     "times": [
-     "03:37"
+     "03:58"
     ]
    },
    {
@@ -5289,7 +5289,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Target twice the risk.",
     "times": [
-     "03:37"
+     "04:03"
     ]
    },
    {
@@ -5316,7 +5316,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "08:30",
+    "at": "08:55",
     "value": "53% winners in 100 trades, +62.13%, -4.56% drawdown in six months",
     "period": "NIFTY 15m (Trader Insights' manual test)",
     "quote": "So the win rate was 53%"
@@ -5420,7 +5420,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Not at the 09:15 open: enter once the market settles (about 09:30-09:45).",
     "times": [
-     "05:04"
+     "05:38"
     ]
    },
    {
@@ -5512,7 +5512,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Close below the pivot = sell bias only; close above it = buy bias only.",
     "times": [
-     "04:59"
+     "05:04"
     ]
    },
    {
@@ -5531,7 +5531,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Recommended: R1 with an R2 stop (aggressive) or R2 with an R3 stop (conservative, fewer but more accurate trades).",
     "times": [
-     "24:06"
+     "24:16"
     ]
    },
    {
@@ -5622,7 +5622,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A NIFTY option-buying strategy.",
     "times": [
-     "00:02"
+     "00:26"
     ]
    },
    {
@@ -5631,7 +5631,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The option: premium near Rs 250 (ATM or slightly in the money).",
     "times": [
-     "04:05"
+     "04:25"
     ]
    },
    {
@@ -5640,7 +5640,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "3-minute candles.",
     "times": [
-     "01:23"
+     "01:32"
     ]
    },
    {
@@ -5649,7 +5649,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The close above the Supertrend and the RSI above 72.",
     "times": [
-     "02:04"
+     "02:17"
     ]
    },
    {
@@ -5658,7 +5658,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The close above the upper Bollinger Band.",
     "times": [
-     "02:04"
+     "02:28"
     ]
    },
    {
@@ -5667,7 +5667,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A green candle: the close above the open.",
     "times": [
-     "02:44"
+     "02:46"
     ]
    },
    {
@@ -5676,7 +5676,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The close above R1.",
     "times": [
-     "02:44"
+     "02:53"
     ]
    },
    {
@@ -5685,7 +5685,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Out when the close crosses below the Supertrend; no separate stop.",
     "times": [
-     "04:05"
+     "04:14"
     ]
    },
    {
@@ -5694,7 +5694,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "At most 10 entries in his test settings.",
     "times": [
-     "04:47"
+     "04:55"
     ]
    },
    {
@@ -5728,7 +5728,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "04:47",
+    "at": "05:17",
     "value": "50.68% winners; about 43% return after 1% slippage",
     "period": "NIFTY 2019-2025 on AlgoVerse",
     "quote": "ye stretajee kee probebilitee olamost 50.68% hai"
@@ -5785,7 +5785,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Heikin Ashi candles; the first candle must be a doji (red or green).",
     "times": [
-     "06:58"
+     "07:22"
     ]
    },
    {
@@ -5974,7 +5974,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Book early (about 100 points on Bank Nifty), trail the rest until the Supertrend flips.",
     "times": [
-     "20:57"
+     "21:02"
     ]
    },
    {
@@ -6069,7 +6069,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A gap greater than 3% whose first five-minute candle reverses: trade the reversal, not the gap (a guideline).",
     "times": [
-     "33:04"
+     "33:19"
     ]
    },
    {
@@ -6169,7 +6169,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "An optional stop at the breakout candle's midpoint.",
     "times": [
-     "34:26"
+     "34:42"
     ]
    },
    {
@@ -6349,7 +6349,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Not option buying: the video is about selling.",
     "times": [
-     "00:01"
+     "00:06"
     ]
    },
    {
@@ -6367,7 +6367,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The previous day's low (and high) as the levels.",
     "times": [
-     "04:14"
+     "04:52"
     ]
    },
    {
@@ -6376,7 +6376,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "At the upper level, weakness can bring the market down.",
     "times": [
-     "04:58"
+     "05:06"
     ]
    }
   ],
@@ -6458,7 +6458,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "VWAP on the futures chart (spot has no volume).",
     "times": [
-     "22:46"
+     "23:16"
     ]
    },
    {
@@ -6572,7 +6572,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "An option-selling strategy.",
     "times": [
-     "00:06"
+     "00:09"
     ]
    },
    {
@@ -6581,7 +6581,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A moving average channel ...",
     "times": [
-     "00:49"
+     "01:16"
     ]
    },
    {
@@ -6590,7 +6590,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... on Heikin Ashi candles.",
     "times": [
-     "02:11"
+     "02:43"
     ]
    },
    {
@@ -6599,7 +6599,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "20 for the entry, 34 for the exit.",
     "times": [
-     "05:03"
+     "05:13"
     ]
    },
    {
@@ -6617,7 +6617,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The safer trade is selling the call.",
     "times": [
-     "03:36"
+     "03:59"
     ]
    }
   ],
@@ -6735,7 +6735,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Repeated support at the VWAP marks a buy-on-dips market; repeated resistance marks sell-on-rise.",
     "times": [
-     "07:35"
+     "07:43"
     ]
    },
    {
@@ -6865,7 +6865,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A time-based opening range from 9:15 to 10:15 on a 3-minute chart.",
     "times": [
-     "05:44"
+     "06:00"
     ]
    },
    {
@@ -6874,7 +6874,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A close above the range high after 10:15 goes long, the stop at the range low.",
     "times": [
-     "05:44"
+     "06:07"
     ]
    },
    {
@@ -6883,7 +6883,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A close below the range goes short, the stop at the high.",
     "times": [
-     "05:44"
+     "06:13"
     ]
    }
   ],
@@ -6964,7 +6964,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Only large, liquid names; not small stocks.",
     "times": [
-     "06:25"
+     "07:02"
     ]
    }
   ],
@@ -7085,7 +7085,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "15-minute candles.",
     "times": [
-     "07:15"
+     "07:35"
     ]
    },
    {
@@ -7094,7 +7094,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "RSI 14 with the middle level 50.",
     "times": [
-     "10:42"
+     "11:17"
     ]
    },
    {
@@ -7112,7 +7112,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... and price above the VWAP triggers the call.",
     "times": [
-     "08:41"
+     "08:47"
     ]
    },
    {
@@ -7121,7 +7121,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop 25% under the premium, target 50% above.",
     "times": [
-     "09:22"
+     "09:49"
     ]
    },
    {
@@ -7130,7 +7130,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Out by 3:00.",
     "times": [
-     "14:19"
+     "14:38"
     ]
    }
   ],
@@ -7200,7 +7200,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "At 0.3 delta, a 20-point stop.",
     "times": [
-     "46:15"
+     "46:18"
     ]
    },
    {
@@ -7209,7 +7209,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Act only on an imbalance of at least 20-25%.",
     "times": [
-     "37:04"
+     "37:07"
     ]
    }
   ],
@@ -7258,7 +7258,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The trending OI strategy.",
     "times": [
-     "00:03"
+     "00:25"
     ]
    },
    {
@@ -7267,7 +7267,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Entry, exit, averaging and stop.",
     "times": [
-     "00:03"
+     "00:32"
     ]
    }
   ],
@@ -7356,7 +7356,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Flat by 15:10-15:15 when the target is not reached.",
     "times": [
-     "09:04"
+     "09:09"
     ]
    },
    {
@@ -7365,7 +7365,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Between H3 and H4 (or L3 and L4): no trade.",
     "times": [
-     "06:19"
+     "06:22"
     ]
    }
   ],
@@ -7505,7 +7505,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Day two opens near the previous high or low.",
     "times": [
-     "06:23"
+     "06:26"
     ]
    },
    {
@@ -7514,7 +7514,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Entry only once the range breaks.",
     "times": [
-     "07:06"
+     "07:08"
     ]
    }
   ],
@@ -7583,7 +7583,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Wait for the series of pin bars near the red candle's high.",
     "times": [
-     "02:54"
+     "02:59"
     ]
    }
   ],
@@ -7635,7 +7635,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Index (Nifty) gap openings after the previous day's candle.",
     "times": [
-     "00:49"
+     "01:28"
     ]
    },
    {
@@ -7674,7 +7674,7 @@ export const SL: SlStrategy[] = [
     "tag": "I",
     "text": "He waits for price action or a breakout in the planned direction after the open before entering.",
     "times": [
-     "14:08"
+     "14:23"
     ]
    }
   ],
@@ -7688,7 +7688,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "02:59",
+    "at": "03:06",
     "value": "works about 60-70% of the time",
     "period": "not stated",
     "quote": "1560 70% taaim kaam karegaa"
@@ -7794,7 +7794,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Buyer- and seller-initiated quantity.",
     "times": [
-     "04:17"
+     "04:20"
     ]
    },
    {
@@ -7803,7 +7803,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A breakout zone with good volume.",
     "times": [
-     "04:17"
+     "04:20"
     ]
    }
   ],
@@ -7852,7 +7852,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Bank Nifty momentum.",
     "times": [
-     "00:03"
+     "00:05"
     ]
    },
    {
@@ -7861,7 +7861,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Order-book data, real time.",
     "times": [
-     "01:42"
+     "01:58"
     ]
    },
    {
@@ -7870,7 +7870,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Buyer-initiated quantity: buyers lifting the ask.",
     "times": [
-     "04:28"
+     "04:37"
     ]
    }
   ],
@@ -7930,7 +7930,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "For buys the averages must be rising.",
     "times": [
-     "01:28"
+     "01:58"
     ]
    },
    {
@@ -7939,7 +7939,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop just under the candle, target 1:2.",
     "times": [
-     "02:12"
+     "02:41"
     ]
    }
   ],
@@ -7989,7 +7989,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A 20-period moving average.",
     "times": [
-     "02:03"
+     "02:06"
     ]
    },
    {
@@ -8048,7 +8048,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The NIFTY futures chart (the VWAP needs volume).",
     "times": [
-     "02:08"
+     "02:30"
     ]
    },
    {
@@ -8057,7 +8057,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "5-minute candles.",
     "times": [
-     "06:19"
+     "06:31"
     ]
    },
    {
@@ -8066,7 +8066,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Trade after 10:30, once the initial balance is complete.",
     "times": [
-     "09:03"
+     "09:30"
     ]
    },
    {
@@ -8075,7 +8075,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The VWAP's upper and lower bands enabled (multipliers 1, 2, 3).",
     "times": [
-     "06:19"
+     "06:48"
     ]
    },
    {
@@ -8084,7 +8084,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "At the third deviation, take the opposite side.",
     "times": [
-     "09:03"
+     "09:24"
     ]
    },
    {
@@ -8093,7 +8093,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop beyond the third deviation.",
     "times": [
-     "11:16"
+     "11:26"
     ]
    },
    {
@@ -8102,7 +8102,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Half at the VWAP, half at the next deviation.",
     "times": [
-     "10:31"
+     "10:45"
     ]
    },
    {
@@ -8111,7 +8111,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Only on sideways days.",
     "times": [
-     "10:31"
+     "11:01"
     ]
    }
   ],
@@ -8230,7 +8230,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Define a range first, then enter on its break.",
     "times": [
-     "03:03"
+     "03:06"
     ]
    }
   ],
@@ -8281,7 +8281,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "15-minute candles.",
     "times": [
-     "01:26"
+     "01:43"
     ]
    },
    {
@@ -8290,7 +8290,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Entry on the breakout or breakdown of the first 15-minute candle.",
     "times": [
-     "01:26"
+     "01:47"
     ]
    },
    {
@@ -8299,7 +8299,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop about 50-60 NIFTY points.",
     "times": [
-     "01:26"
+     "02:05"
     ]
    },
    {
@@ -8308,7 +8308,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "1:3, and one trade a day.",
     "times": [
-     "02:12"
+     "02:33"
     ]
    },
    {
@@ -8317,7 +8317,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Out at 3:15.",
     "times": [
-     "05:46"
+     "05:58"
     ]
    }
   ],
@@ -8376,7 +8376,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A range of at least six candles.",
     "times": [
-     "01:29"
+     "01:34"
     ]
    },
    {
@@ -8385,7 +8385,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Wait for the breakout candle to close.",
     "times": [
-     "01:29"
+     "01:57"
     ]
    },
    {
@@ -8403,7 +8403,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... and not more than 100 points.",
     "times": [
-     "04:55"
+     "05:19"
     ]
    },
    {
@@ -8412,7 +8412,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "At least 1:3.",
     "times": [
-     "02:09"
+     "02:19"
     ]
    },
    {
@@ -8421,7 +8421,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "At most two trades a day.",
     "times": [
-     "02:09"
+     "02:30"
     ]
    },
    {
@@ -8430,7 +8430,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The first candle is ignored after a big gap.",
     "times": [
-     "02:54"
+     "03:01"
     ]
    }
   ],
@@ -8489,7 +8489,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A small option stop, about 8-9 points.",
     "times": [
-     "02:10"
+     "02:28"
     ]
    },
    {
@@ -8580,7 +8580,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Enter on the clear breakout candle from that consolidation.",
     "times": [
-     "12:33"
+     "12:36"
     ]
    },
    {
@@ -8666,7 +8666,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stocks with news, results or a trigger that day (they move); heavyweights such as HDFC Bank also work.",
     "times": [
-     "04:59"
+     "04:51"
     ]
    },
    {
@@ -8705,7 +8705,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Initial stop beyond the range's far side (below the low for a buy).",
     "times": [
-     "05:42"
+     "05:35"
     ]
    },
    {
@@ -8809,7 +8809,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Signals 09:30-14:30 (at most three after 14:30), everything closed by 15:20.",
     "times": [
-     "12:46"
+     "12:51"
     ]
    },
    {
@@ -9017,7 +9017,7 @@ export const SL: SlStrategy[] = [
     "tag": "I",
     "text": "An indicator line confirming volatility (its middle line must be crossed upward) is mentioned; the captions are too garbled to recover it.",
     "times": [
-     "19:43"
+     "20:04"
     ]
    },
    {
@@ -9153,7 +9153,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Rejection: below the VWAP, a relief rally stalls at it (ideally with a five-minute supply zone): short.",
     "times": [
-     "10:21"
+     "10:29"
     ]
    },
    {
@@ -9162,7 +9162,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop below the VWAP or below the wick.",
     "times": [
-     "06:06"
+     "06:18"
     ]
    },
    {
@@ -9171,7 +9171,7 @@ export const SL: SlStrategy[] = [
     "tag": "I",
     "text": "His example risked about 2.5 points for 5 (2:1).",
     "times": [
-     "08:56"
+     "09:06"
     ]
    },
    {
@@ -9263,7 +9263,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "VWAP reset daily on intraday candles.",
     "times": [
-     "02:11"
+     "02:44"
     ]
    },
    {
@@ -9475,7 +9475,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "At most two or three stop-losses a day, then stop; fixed quantity per trade.",
     "times": [
-     "16:05"
+     "16:13"
     ]
    },
    {
@@ -9534,7 +9534,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "13:54",
+    "at": "14:31",
     "value": "hit ratio around 40-50% with a good risk-reward",
     "period": "not stated",
     "quote": "ho sakataa hai 50 par ke aasapaas 40 par ke aasapaas aapakaa hit resho ho"
@@ -9612,7 +9612,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "15-minute candles.",
     "times": [
-     "02:53"
+     "02:59"
     ]
    },
    {
@@ -9661,7 +9661,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop at the high of that first red candle.",
     "times": [
-     "15:07"
+     "15:24"
     ]
    },
    {
@@ -9680,7 +9680,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Visual exhaustion: long candles distinctly outside the band; skip small-bodied drifts along the band.",
     "times": [
-     "12:56"
+     "13:23"
     ]
    },
    {
@@ -9782,7 +9782,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "F&O stocks only, not indices.",
     "times": [
-     "00:03"
+     "00:35"
     ]
    },
    {
@@ -9791,7 +9791,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "15-minute chart, intraday only.",
     "times": [
-     "00:45"
+     "01:12"
     ]
    },
    {
@@ -9830,7 +9830,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Target twice the stop.",
     "times": [
-     "04:54"
+     "05:25"
     ]
    },
    {
@@ -9839,7 +9839,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Trade only if the first 15-minute candle's volume is at least twice the previous day's closing candle's volume.",
     "times": [
-     "02:49"
+     "03:14"
     ]
    },
    {
@@ -9969,7 +9969,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A stop loss is mandatory.",
     "times": [
-     "05:35"
+     "05:51"
     ]
    },
    {
@@ -9978,7 +9978,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A predetermined target in proportion to the stop, or the next resistance.",
     "times": [
-     "06:16"
+     "06:21"
     ]
    },
    {
@@ -10133,7 +10133,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop just below the VWAP with a 2-3 point buffer.",
     "times": [
-     "05:29"
+     "06:00"
     ]
    },
    {
@@ -10270,7 +10270,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "100% of capital per trade, no leverage, one position at a time.",
     "times": [
-     "07:02"
+     "07:17"
     ]
    },
    {
@@ -10297,28 +10297,28 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "return_pct",
-    "at": "08:25",
+    "at": "08:36",
     "value": "about 7.6% a year against about 10% for buy and hold",
     "period": "S&P 500, JB Marwood's AmiBroker test",
     "quote": "this strategy returns about 7.6%"
    },
    {
     "kind": "other",
-    "at": "09:09",
+    "at": "09:26",
     "value": "maximum drawdown 12% against 55% for buy and hold",
     "period": "S&P 500, JB Marwood's AmiBroker test",
     "quote": "look at the max draw down 12%"
    },
    {
     "kind": "win_rate",
-    "at": "09:09",
+    "at": "09:44",
     "value": "75%",
     "period": "S&P 500, JB Marwood's AmiBroker test",
     "quote": "75% win rate is pretty impressive"
    },
    {
     "kind": "trade_count",
-    "at": "28:23",
+    "at": "28:46",
     "value": "457 trades",
     "period": "SPY, TradingView, 1995 to 2022",
     "quote": "over 457 trades over several years"
@@ -10383,7 +10383,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "RSI as a speedometer: below 40 bearish, above 60 bullish, between sideways.",
     "times": [
-     "02:50"
+     "03:03"
     ]
    },
    {
@@ -10550,7 +10550,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Most useful on daily, weekly or monthly candles; intraday it gives many false signals.",
     "times": [
-     "02:58"
+     "03:03"
     ]
    },
    {
@@ -10559,7 +10559,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Williams %R with a 10-period look-back on daily candles (two trading weeks).",
     "times": [
-     "02:18"
+     "02:21"
     ]
    },
    {
@@ -10621,7 +10621,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "other",
-    "at": "07:10",
+    "at": "07:34",
     "value": "the full signal fired only five times in a year",
     "period": "1 year",
     "quote": "this signal is only happened five times"
@@ -10685,7 +10685,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Gap = today's opening price minus yesterday's 16:00 close, measured one minute after the open.",
     "times": [
-     "06:35"
+     "06:41"
     ]
    },
    {
@@ -10694,7 +10694,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Buy (100% of the account) when the gap divided by that standard deviation is below -3.",
     "times": [
-     "10:07"
+     "10:24"
     ]
    },
    {
@@ -10703,7 +10703,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Close the position 45 minutes after the open no matter what.",
     "times": [
-     "02:24"
+     "02:49"
     ]
    },
    {
@@ -10802,7 +10802,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Exit on a close below the middle band.",
     "times": [
-     "12:50"
+     "12:52"
     ]
    },
    {
@@ -10811,7 +10811,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "One position at a time; a repeated signal while long is ignored.",
     "times": [
-     "09:23"
+     "09:26"
     ]
    },
    {
@@ -10837,7 +10837,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "return_pct",
-    "at": "27:35",
+    "at": "27:48",
     "value": "5.76% a year against 10.74% for buy and hold; volatility 6.64% against 16.62%; maximum drawdown 11.79% against 38.44%",
     "period": "Nifty daily, about ten years",
     "quote": "my volatility for the strategy return is 6.64% only"
@@ -10891,7 +10891,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A day-trading strategy tested on Amazon.",
     "times": [
-     "25:58"
+     "26:16"
     ]
    },
    {
@@ -10920,7 +10920,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Close the trade at the end of the day.",
     "times": [
-     "36:07"
+     "36:11"
     ]
    },
    {
@@ -10968,14 +10968,14 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "return_pct",
-    "at": "41:07",
+    "at": "41:27",
     "value": "15% (cumulative 1.15) for the plain gap rule",
     "period": "Amazon, September 2018 to September 2019",
     "quote": "15% is good but can we do better?"
    },
    {
     "kind": "return_pct",
-    "at": "52:17",
+    "at": "52:30",
     "value": "20% (cumulative 1.2) with the 0.25 standard-deviation filter",
     "period": "Amazon, September 2018 to September 2019",
     "quote": "previously it was 1.15 but now it is 1.2"
@@ -11096,7 +11096,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "return_pct",
-    "at": "07:55",
+    "at": "08:08",
     "value": "+2,834% over 25 years, about 14% a year, 66% winners, average win 4.1% against an average loss of 4.7%, maximum drawdown 27%",
     "period": "Russell 1000, about 2000-2025",
     "quote": "annual return is about 14% a year on average in the long run"
@@ -11171,7 +11171,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Mark the opening range high and low, then wait for a breakout above the high or a breakdown below the low.",
     "times": [
-     "00:41"
+     "00:46"
     ]
    },
    {
@@ -11180,7 +11180,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Day trade stop: the session low for a long, the session high for a short.",
     "times": [
-     "03:21"
+     "03:53"
     ]
    },
    {
@@ -11189,7 +11189,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Scale out on wide-range candles and trail the stop; working professionals hold 3-4 sessions with a deeper stop.",
     "times": [
-     "11:28"
+     "12:01"
     ]
    },
    {
@@ -11228,7 +11228,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Broad market momentum is one more factor: Nifty and Bank Nifty up, advance/decline 3:1 on the long example.",
     "times": [
-     "10:07"
+     "10:23"
     ]
    },
    {
@@ -11349,7 +11349,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Prefer 30-minute to 60-minute candles for gap trading.",
     "times": [
-     "10:22"
+     "10:55"
     ]
    },
    {
@@ -11378,7 +11378,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Strong gap: wide-range candle, higher than usual volume, close near the high (low for a gap down), gap window no wider than 1-1.5%.",
     "times": [
-     "09:42"
+     "10:15"
     ]
    },
    {
@@ -11387,7 +11387,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The gap must carry price out of a well-defined range (horizontal, triangle or channel); gaps inside the range are ignored.",
     "times": [
-     "11:02"
+     "11:09"
     ]
    },
    {
@@ -11396,7 +11396,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop at the far side of the range the breakout came from (the range high for a short).",
     "times": [
-     "24:42"
+     "24:57"
     ]
    },
    {
@@ -11405,7 +11405,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Risk at most 1% of the account per trade.",
     "times": [
-     "24:42"
+     "24:52"
     ]
    },
    {
@@ -11414,7 +11414,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "If the gap candle is weak, do not trade it aggressively (wait).",
     "times": [
-     "19:15"
+     "20:02"
     ]
    },
    {
@@ -11579,7 +11579,7 @@ export const SL: SlStrategy[] = [
     "tag": "I",
     "text": "Aim for about 0.5% of capital a day.",
     "times": [
-     "11:02"
+     "11:34"
     ]
    },
    {
@@ -11710,7 +11710,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Sell only when both say sell: price below the Supertrend and below VWAP (mirror for buys).",
     "times": [
-     "05:16"
+     "05:43"
     ]
    },
    {
@@ -11814,7 +11814,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Target the previous swing high.",
     "times": [
-     "06:20"
+     "06:25"
     ]
    },
    {
@@ -11883,7 +11883,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Shown on one-hour charts.",
     "times": [
-     "22:59"
+     "23:28"
     ]
    },
    {
@@ -11892,7 +11892,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The fast Supertrend 7, 2 (the default 10, 3 is the middle one) ...",
     "times": [
-     "09:08"
+     "09:17"
     ]
    },
    {
@@ -11901,7 +11901,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... and the slow 14, 4.",
     "times": [
-     "09:08"
+     "09:25"
     ]
    },
    {
@@ -11910,7 +11910,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Calls when price is above all three.",
     "times": [
-     "12:34"
+     "12:58"
     ]
    },
    {
@@ -11919,7 +11919,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Exit when the fast Supertrend flips.",
     "times": [
-     "20:15"
+     "20:48"
     ]
    },
    {
@@ -11928,7 +11928,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Before the buy signal the RSI stays in the 50-40 zone and does not break 40.",
     "times": [
-     "22:17"
+     "22:30"
     ]
    }
   ],
@@ -11979,7 +11979,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The trigger is price action: candles, trend lines.",
     "times": [
-     "09:12"
+     "09:18"
     ]
    },
    {
@@ -11988,7 +11988,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop at most 3%.",
     "times": [
-     "13:23"
+     "13:45"
     ]
    },
    {
@@ -11997,7 +11997,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Five filters refine the entry.",
     "times": [
-     "07:03"
+     "07:34"
     ]
    },
    {
@@ -12006,7 +12006,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The RSI holding 40.",
     "times": [
-     "26:40"
+     "27:15"
     ]
    }
   ],
@@ -12056,7 +12056,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The relative-strength chart must show equities outperforming.",
     "times": [
-     "03:43"
+     "03:48"
     ]
    },
    {
@@ -12065,7 +12065,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The second thing: breadth.",
     "times": [
-     "03:43"
+     "03:55"
     ]
    }
   ],
@@ -12187,7 +12187,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "RSI zones: above 70 overbought, below 30 oversold.",
     "times": [
-     "03:00"
+     "03:07"
     ]
    },
    {
@@ -12196,7 +12196,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Oversold for a long time can hint at a buy, overbought at a short; experiment with the settings.",
     "times": [
-     "09:46"
+     "10:12"
     ]
    }
   ],
@@ -12346,7 +12346,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop a few cents beyond the breakout bar.",
     "times": [
-     "07:36"
+     "07:48"
     ]
    },
    {
@@ -12415,7 +12415,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop at the immediate support for a long, the immediate resistance for a short.",
     "times": [
-     "02:12"
+     "02:23"
     ]
    },
    {
@@ -12424,7 +12424,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Risk-reward of at least 1:2.",
     "times": [
-     "02:12"
+     "02:15"
     ]
    },
    {
@@ -12433,7 +12433,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Trade only high-volume shares.",
     "times": [
-     "01:28"
+     "02:00"
     ]
    }
   ],
@@ -12493,7 +12493,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Only on trending stocks; how they are found is a paid secret.",
     "times": [
-     "18:49"
+     "18:55"
     ]
    },
    {
@@ -12572,7 +12572,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Exit when the Supertrend crosses back below the close (the trend reverses); stop and target percentages added but not stated.",
     "times": [
-     "02:43"
+     "03:06"
     ]
    }
   ],
@@ -12643,7 +12643,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Take 20-30 points of a move; you cannot catch all of it.",
     "times": [
-     "07:01"
+     "07:04"
     ]
    },
    {
@@ -12652,7 +12652,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Risk 2% of capital (Rs 1,000 on Rs 50,000) with a 1:2 target.",
     "times": [
-     "03:31"
+     "03:36"
     ]
    }
   ],
@@ -12704,7 +12704,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Above 60 is bullish, below 40 bearish, 60-40 sideways; the bull range is 80-40 and the bear range 60-20.",
     "times": [
-     "35:18"
+     "35:35"
     ]
    },
    {
@@ -12713,7 +12713,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Monthly and weekly RSI above 60 and daily RSI at 40 is a buying location.",
     "times": [
-     "1:02:46"
+     "1:02:54"
     ]
    },
    {
@@ -12792,7 +12792,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "He sees no merit in trading the gap fill.",
     "times": [
-     "04:18"
+     "04:57"
     ]
    },
    {
@@ -12810,7 +12810,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A gap on low volume needs caution (liquidity, not news); a new position after a big gap can need a deep stop.",
     "times": [
-     "04:18"
+     "04:32"
     ]
    }
   ],
@@ -12863,7 +12863,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The EMA 12 crossed above the EMA 50 within the last two intervals (days).",
     "times": [
-     "01:29"
+     "01:56"
     ]
    },
    {
@@ -12872,7 +12872,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Sell when the EMA 12 crosses back below the EMA 50.",
     "times": [
-     "05:43"
+     "06:06"
     ]
    },
    {
@@ -12881,7 +12881,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The last price still above the EMA 12.",
     "times": [
-     "02:11"
+     "02:28"
     ]
    },
    {
@@ -12975,7 +12975,7 @@ export const SL: SlStrategy[] = [
     "tag": "I",
     "text": "Buy after an up first hour (sell after a down one) and hold for the rest of the day; the trade rule he says will most probably not work.",
     "times": [
-     "20:25"
+     "20:40"
     ]
    },
    {
@@ -12984,7 +12984,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The rest of the day runs to the close of the day's last hourly candle.",
     "times": [
-     "11:22"
+     "11:26"
     ]
    },
    {
@@ -13013,7 +13013,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "other",
-    "at": "16:53",
+    "at": "17:09",
     "value": "correlation 0.018 between first-hour and rest-of-day returns",
     "period": "BTC/USDT hourly, about 300 days",
     "quote": "we have a correlation of 0.018"
@@ -13075,7 +13075,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "15-minute chart recommended (5-minute once confident).",
     "times": [
-     "01:34"
+     "02:11"
     ]
    },
    {
@@ -13094,7 +13094,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A trend with the three EMAs evenly fanned out; no trade while they criss-cross.",
     "times": [
-     "02:20"
+     "02:33"
     ]
    },
    {
@@ -13103,7 +13103,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Wait for a retest of the 20 EMA or the 50 EMA.",
     "times": [
-     "03:05"
+     "03:32"
     ]
    },
    {
@@ -13122,7 +13122,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop beyond the wicks of the setup.",
     "times": [
-     "04:28"
+     "04:55"
     ]
    },
    {
@@ -13224,7 +13224,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Objective enough for a bot.",
     "times": [
-     "14:52"
+     "15:26"
     ]
    },
    {
@@ -13242,7 +13242,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Enter on a candle close above the latest bullish fractal.",
     "times": [
-     "07:06"
+     "07:39"
     ]
    },
    {
@@ -13251,7 +13251,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The 8 (middle) line also works as a stop.",
     "times": [
-     "01:22"
+     "01:38"
     ]
    },
    {
@@ -13260,7 +13260,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The opposite fractals act as a trailing stop.",
     "times": [
-     "07:52"
+     "07:55"
     ]
    },
    {
@@ -13358,7 +13358,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The Money Flow Index and Heikin Ashi candles.",
     "times": [
-     "00:01"
+     "00:04"
     ]
    },
    {
@@ -13387,7 +13387,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Conservative exit: the first red Heikin Ashi candle.",
     "times": [
-     "04:15"
+     "04:25"
     ]
    },
    {
@@ -13478,7 +13478,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The 1-hour on bitcoin beats the 5-minute.",
     "times": [
-     "09:14"
+     "09:17"
     ]
    },
    {
@@ -13551,7 +13551,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "other",
-    "at": "08:33",
+    "at": "08:35",
     "value": "net profit about three times buy and hold",
     "period": "bitcoin 1-hour, TradingView strategy tester",
     "quote": "that's about three times more than just buying and holding"
@@ -13647,7 +13647,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Take 1:1 to 1:2; close half early.",
     "times": [
-     "18:22"
+     "18:29"
     ]
    },
    {
@@ -13762,7 +13762,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Levels: unless a clear multi-touch level, support = the lowest close before a rally, resistance = the highest close before a drop.",
     "times": [
-     "08:41"
+     "09:08"
     ]
    },
    {
@@ -13973,7 +13973,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop just beyond the pattern.",
     "times": [
-     "07:39"
+     "08:14"
     ]
    },
    {
@@ -13991,7 +13991,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Optional: the 20 EMA above the VWAP for longs (below for shorts).",
     "times": [
-     "12:26"
+     "12:33"
     ]
    },
    {
@@ -14116,7 +14116,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Enter on the close of a bearish engulfing at the EMA (bullish engulfing for longs).",
     "times": [
-     "11:24"
+     "11:42"
     ]
    },
    {
@@ -14660,7 +14660,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "VWAP = cumulative (typical price x volume) / cumulative volume, reset each session (daily here).",
     "times": [
-     "01:25"
+     "01:30"
     ]
    },
    {
@@ -14700,7 +14700,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "One trade at a time (50% of equity at 1:5 margin in his test).",
     "times": [
-     "08:30"
+     "08:50"
     ]
    },
    {
@@ -14734,7 +14734,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "return_pct",
-    "at": "09:56",
+    "at": "11:02",
     "value": "VWAP version +473% (after a +2,400% peak and a deep drawdown); EMA version +296%, +70% a year, Sharpe 0.6; at 1:2 margin +123%, Sharpe 1.02",
     "period": "bitcoin 15m 2019-2022, no commissions",
     "quote": "the total return in this case is 473 percent"
@@ -14799,7 +14799,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Trend by the EMA: six consecutive candles below it = downtrend (above = uptrend).",
     "times": [
-     "04:52"
+     "05:13"
     ]
    },
    {
@@ -14808,7 +14808,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Confirmed by three consecutive candles on the same side of the VWAP.",
     "times": [
-     "05:32"
+     "06:06"
     ]
    },
    {
@@ -14817,7 +14817,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Entry: the candle's nearer extreme (its high or low) is within the close distance of the VWAP.",
     "times": [
-     "07:00"
+     "07:26"
     ]
    },
    {
@@ -14826,7 +14826,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The close distance is $100 for bitcoin.",
     "times": [
-     "07:42"
+     "07:51"
     ]
    },
    {
@@ -14835,7 +14835,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop 0.8 x the ATR.",
     "times": [
-     "09:52"
+     "10:23"
     ]
    },
    {
@@ -14853,7 +14853,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "One trade at a time (1:5 margin in his test).",
     "times": [
-     "10:34"
+     "10:48"
     ]
    },
    {
@@ -14887,7 +14887,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "return_pct",
-    "at": "11:18",
+    "at": "11:34",
     "value": "about +10,000% (buy and hold +248%)",
     "period": "bitcoin 15m 2019-2022, 1:5 margin, no commissions",
     "quote": "like 10 000 percent of returns"
@@ -14942,7 +14942,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The 4-hour chart with a daily confirmation filter.",
     "times": [
-     "00:49"
+     "00:56"
     ]
    },
    {
@@ -14951,7 +14951,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The fast HMA is 16 on 4 hours ...",
     "times": [
-     "01:33"
+     "02:08"
     ]
    },
    {
@@ -14960,7 +14960,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Long when the fast Hull MA crosses above the slow one.",
     "times": [
-     "00:49"
+     "01:08"
     ]
    },
    {
@@ -14969,7 +14969,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Exit when the HMA 16 crosses back below the HMA 65.",
     "times": [
-     "01:33"
+     "01:52"
     ]
    },
    {
@@ -14978,7 +14978,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "No stop and no target.",
     "times": [
-     "01:33"
+     "01:52"
     ]
    },
    {
@@ -14987,7 +14987,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The whole account, no leverage.",
     "times": [
-     "02:16"
+     "02:35"
     ]
    },
    {
@@ -15005,7 +15005,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The daily close above the 50-day linear regression.",
     "times": [
-     "02:16"
+     "02:22"
     ]
    },
    {
@@ -15039,7 +15039,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "return_pct",
-    "at": "05:06",
+    "at": "05:31",
     "value": "+1,700%, 47% winners, -19% max drawdown, Sharpe 1.36, 184 trades",
     "period": "bitcoin 4h 2017-2026, fees and slippage included",
     "quote": "we have 1,700% so it's still winning actually"
@@ -15103,7 +15103,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "ADX above 20: trend mode.",
     "times": [
-     "01:25"
+     "01:30"
     ]
    },
    {
@@ -15112,7 +15112,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The close crosses above the lower Bollinger Band.",
     "times": [
-     "02:47"
+     "03:12"
     ]
    },
    {
@@ -15121,7 +15121,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Trend shorts mirror the long rules.",
     "times": [
-     "03:31"
+     "04:00"
     ]
    },
    {
@@ -15130,7 +15130,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Range long (ADX below 16): the close crosses above the lower band ...",
     "times": [
-     "04:12"
+     "04:19"
     ]
    },
    {
@@ -15148,7 +15148,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Target 5.5% ...",
     "times": [
-     "04:12"
+     "04:47"
     ]
    },
    {
@@ -15157,7 +15157,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Range trades were meant to exit back at the middle band; the platform ignored it.",
     "times": [
-     "05:34"
+     "05:51"
     ]
    },
    {
@@ -15166,7 +15166,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Trend long: the 1-hour close above the 50-bar linear regression of the 4-hour timeframe.",
     "times": [
-     "02:07"
+     "02:14"
     ]
    },
    {
@@ -15184,7 +15184,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The RSI (14) above 20.",
     "times": [
-     "03:31"
+     "03:52"
     ]
    },
    {
@@ -15193,7 +15193,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... with the RSI below 35.",
     "times": [
-     "04:12"
+     "04:26"
     ]
    },
    {
@@ -15202,7 +15202,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "ADX below 16: range mode; between 16 and 20 no trades.",
     "times": [
-     "01:25"
+     "01:45"
     ]
    },
    {
@@ -15290,7 +15290,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Run on the 1-hour bitcoin chart.",
     "times": [
-     "05:56"
+     "06:15"
     ]
    },
    {
@@ -15299,7 +15299,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Simple moving averages.",
     "times": [
-     "00:55"
+     "01:30"
     ]
    },
    {
@@ -15308,7 +15308,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The MA 9 crosses above the MA 50 ...",
     "times": [
-     "02:18"
+     "02:46"
     ]
    },
    {
@@ -15317,7 +15317,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... or when the price is 8% above the entry.",
     "times": [
-     "03:40"
+     "04:11"
     ]
    },
    {
@@ -15326,7 +15326,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Exit when the MA 9 crosses above the MA 200 ...",
     "times": [
-     "03:40"
+     "03:46"
     ]
    },
    {
@@ -15344,7 +15344,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... and the MA 100 below the MA 200.",
     "times": [
-     "02:59"
+     "03:10"
     ]
    },
    {
@@ -15370,7 +15370,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "05:56",
+    "at": "06:25",
     "value": "+52%, usually 70-80% winners",
     "period": "BTC/USDT 1h (TradingView)",
     "quote": "52 net profit"
@@ -15426,7 +15426,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Bitcoin on the 15-minute chart.",
     "times": [
-     "00:44"
+     "00:53"
     ]
    },
    {
@@ -15445,7 +15445,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The RSI the other way round: buy as it goes into overbought, short as it comes back into oversold.",
     "times": [
-     "04:18"
+     "04:40"
     ]
    },
    {
@@ -15454,7 +15454,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Enter when the RSI crosses over the overbought line and the TDFI is green.",
     "times": [
-     "05:41"
+     "05:44"
     ]
    },
    {
@@ -15463,7 +15463,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Enter on the candle after the cross.",
     "times": [
-     "05:41"
+     "06:10"
     ]
    },
    {
@@ -15482,7 +15482,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Longs only above the SSL Channel, shorts only below it.",
     "times": [
-     "05:00"
+     "05:30"
     ]
    },
    {
@@ -15533,28 +15533,28 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "09:59",
+    "at": "10:27",
     "value": "79.84% winners",
     "period": "about nine months of 15-minute bitcoin",
     "quote": "we currently on a profitable win rate of almost 80 79.84 uh percent"
    },
    {
     "kind": "trade_count",
-    "at": "11:26",
+    "at": "11:33",
     "value": "258 trades (206 wins, 52 losses)",
     "period": "the same backtest",
     "quote": "a number of trades in total was 258"
    },
    {
     "kind": "return_pct",
-    "at": "10:41",
+    "at": "10:44",
     "value": "+127% net profit (20x leverage)",
     "period": "the same backtest",
     "quote": "we have a net profit of 127 on the account itself"
    },
    {
     "kind": "return_pct",
-    "at": "12:06",
+    "at": "12:18",
     "value": "-72% for the textbook version (buy oversold, sell overbought)",
     "period": "the same backtest",
     "quote": "it would have been a net loss actually of minus 72 percent"
@@ -15611,7 +15611,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The 200 and 50 EMAs on the 5-minute chart.",
     "times": [
-     "01:25"
+     "01:34"
     ]
    },
    {
@@ -15658,7 +15658,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Green (50) over red (200): longs only; red over green: shorts only.",
     "times": [
-     "02:10"
+     "02:22"
     ]
    },
    {
@@ -15667,7 +15667,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "At most four or five trades per EMA crossover.",
     "times": [
-     "06:35"
+     "07:00"
     ]
    },
    {
@@ -15676,7 +15676,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "VWAP filter: longs only while the VWAP is green.",
     "times": [
-     "07:57"
+     "08:29"
     ]
    },
    {
@@ -15791,7 +15791,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The HMA at 24 periods; the CMF at 20.",
     "times": [
-     "07:49"
+     "07:57"
     ]
    },
    {
@@ -15810,7 +15810,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stops from the ATR (14).",
     "times": [
-     "05:46"
+     "06:12"
     ]
    },
    {
@@ -15819,7 +15819,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "His optimised settings: reward-to-risk 1.3 and an ATR multiplier of 3.",
     "times": [
-     "13:33"
+     "13:56"
     ]
    },
    {
@@ -15828,7 +15828,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "An emergency exit when the HMA changes colour.",
     "times": [
-     "06:28"
+     "06:35"
     ]
    },
    {
@@ -15837,7 +15837,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Added: the T3 (300) for the bigger trend, longs only above it.",
     "times": [
-     "14:15"
+     "14:26"
     ]
    },
    {
@@ -15846,7 +15846,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Added: the Trend Direction Force Index and a volume-flow indicator.",
     "times": [
-     "14:15"
+     "14:39"
     ]
    },
    {
@@ -15880,7 +15880,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "12:05",
+    "at": "12:34",
     "value": "61.33% winners, profit factor 2.2",
     "period": "his optimised settings, 5-minute bitcoin",
     "quote": "I have a winning rate of 61.33 which is very good for a five minute time frame"
@@ -15894,7 +15894,7 @@ export const SL: SlStrategy[] = [
    },
    {
     "kind": "trade_count",
-    "at": "12:47",
+    "at": "13:25",
     "value": "75 trades (46 wins, 29 losses)",
     "period": "the same backtest",
     "quote": "total trades in total was 75 so a bit of a small number"
@@ -15950,7 +15950,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The 15-minute chart (bitcoin perpetual).",
     "times": [
-     "00:43"
+     "00:52"
     ]
    },
    {
@@ -15968,7 +15968,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Point 1: price breaks above the upper band.",
     "times": [
-     "01:27"
+     "02:00"
     ]
    },
    {
@@ -15986,7 +15986,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Point 3: price comes back up and is rejected at the middle line.",
     "times": [
-     "02:10"
+     "02:17"
     ]
    },
    {
@@ -16005,7 +16005,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop at the swing low (or the lower band).",
     "times": [
-     "02:50"
+     "02:55"
     ]
    },
    {
@@ -16014,7 +16014,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Target 1.5R.",
     "times": [
-     "02:50"
+     "03:05"
     ]
    },
    {
@@ -16062,14 +16062,14 @@ export const SL: SlStrategy[] = [
    },
    {
     "kind": "trade_count",
-    "at": "07:02",
+    "at": "07:05",
     "value": "102 closed trades",
     "period": "the same backtest",
     "quote": "We've done closed 102 trades"
    },
    {
     "kind": "return_pct",
-    "at": "07:02",
+    "at": "07:05",
     "value": "+1.34% net, no leverage",
     "period": "the same backtest",
     "quote": "net profit without any leverage at all is 1.34%"
@@ -16123,7 +16123,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Bitcoin on Delta Exchange, 5-minute chart.",
     "times": [
-     "00:49"
+     "01:03"
     ]
    },
    {
@@ -16151,7 +16151,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The candle must be away from the average (its high below the line for a long).",
     "times": [
-     "02:52"
+     "02:55"
     ]
    },
    {
@@ -16170,7 +16170,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A small stop just below the candle (above it for a short).",
     "times": [
-     "02:52"
+     "03:07"
     ]
    },
    {
@@ -16214,7 +16214,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "06:19",
+    "at": "06:32",
     "value": "works 8 times out of 10, about 75% accuracy, risk-reward above 1:2",
     "period": "not stated",
     "quote": "10 men se aath baar ye stretejee vark karatee hai"
@@ -16311,7 +16311,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Trade only near the VWAP line, never far from it.",
     "times": [
-     "08:34"
+     "08:50"
     ]
    },
    {
@@ -16320,7 +16320,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "An early entry: stop at the previous candle's high or low; an entry after the retest: stop at the VWAP.",
     "times": [
-     "12:44"
+     "13:18"
     ]
    },
    {
@@ -16501,7 +16501,7 @@ export const SL: SlStrategy[] = [
    },
    {
     "kind": "win_rate",
-    "at": "03:47",
+    "at": "04:24",
     "value": "71% of 100 trades with the trend filter, profit factor 2.45; 82% on USD/JPY",
     "period": "EUR/USD and USD/JPY 5-minute",
     "quote": "71% win rate profit and loss 51%"
@@ -16559,7 +16559,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Any timeframe and market.",
     "times": [
-     "00:02"
+     "00:25"
     ]
    },
    {
@@ -16568,7 +16568,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Price that enters the cloud tends to touch the other edge.",
     "times": [
-     "00:42"
+     "01:02"
     ]
    },
    {
@@ -16586,7 +16586,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Kijun bounce: bids near the kijun in a trend (discretionary, not coded).",
     "times": [
-     "06:22"
+     "06:29"
     ]
    },
    {
@@ -16685,7 +16685,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Entry trigger: two candle closes beyond the level.",
     "times": [
-     "09:18"
+     "09:24"
     ]
    },
    {
@@ -16704,7 +16704,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Take profit at 1R to start; extend only after data says so.",
     "times": [
-     "11:25"
+     "11:37"
     ]
    },
    {
@@ -16974,7 +16974,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A 20-period moving average and a 50-period simple moving average on the daily chart.",
     "times": [
-     "00:44"
+     "01:06"
     ]
    },
    {
@@ -17233,7 +17233,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "1-hour BTC/USDT futures, about three years.",
     "times": [
-     "00:03"
+     "00:08"
     ]
    },
    {
@@ -17251,7 +17251,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... over 6 periods, as a Donchian channel midline.",
     "times": [
-     "04:21"
+     "04:37"
     ]
    },
    {
@@ -17260,7 +17260,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Envelopes: the average displaced by 7% ...",
     "times": [
-     "05:01"
+     "05:04"
     ]
    },
    {
@@ -17269,7 +17269,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... then 11% and 14%.",
     "times": [
-     "05:01"
+     "05:20"
     ]
    },
    {
@@ -17278,7 +17278,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Bottom bands trigger longs, top bands shorts.",
     "times": [
-     "05:44"
+     "05:57"
     ]
    },
    {
@@ -17287,7 +17287,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "All the band limit orders are placed at every new candle.",
     "times": [
-     "24:59"
+     "25:29"
     ]
    },
    {
@@ -17296,7 +17296,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A stop in percent of the average entry price ...",
     "times": [
-     "07:51"
+     "08:09"
     ]
    },
    {
@@ -17305,7 +17305,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... set back to 40% after his test at 20%.",
     "times": [
-     "19:06"
+     "19:30"
     ]
    },
    {
@@ -17314,7 +17314,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Exit when the price comes back to the average.",
     "times": [
-     "05:44"
+     "06:05"
     ]
    },
    {
@@ -17323,7 +17323,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Price jump: close all when a candle closes 15% beyond the previous close.",
     "times": [
-     "20:37"
+     "21:01"
     ]
    },
    {
@@ -17332,7 +17332,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Each band takes the portfolio divided by the number of envelopes.",
     "times": [
-     "06:28"
+     "06:57"
     ]
    },
    {
@@ -17341,7 +17341,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "After a stop or a jump exit, no new trade until the price has touched the average again.",
     "times": [
-     "21:19"
+     "21:58"
     ]
    },
    {
@@ -17382,7 +17382,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "00:03",
+    "at": "00:24",
     "value": "about +150%, 80% winners, profit factor 16, -4% equity drawdown",
     "period": "BTC/USDT 1h, about 3 years",
     "quote": "gives us almost 150% profits the win rate is completely insane 80%"
@@ -17466,7 +17466,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Trade only when the market (the Russell 1000) is above its 300-day moving average.",
     "times": [
-     "02:12"
+     "02:33"
     ]
    },
    {
@@ -17500,7 +17500,7 @@ export const SL: SlStrategy[] = [
    },
    {
     "kind": "other",
-    "at": "12:10",
+    "at": "12:15",
     "value": "maximum drawdown 38% (buy and hold 55-56%)",
     "period": "1995-2021",
     "quote": "your draw down was uh 38%"
@@ -17556,7 +17556,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Buy when RSI crosses above 70 only if Supertrend shows an up trend; sell when RSI crosses below 30 only if Supertrend shows a down trend.",
     "times": [
-     "02:06"
+     "02:28"
     ]
    },
    {
@@ -17575,7 +17575,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Reward-to-risk 1.5:1.",
     "times": [
-     "05:40"
+     "06:11"
     ]
    },
    {
@@ -17584,7 +17584,7 @@ export const SL: SlStrategy[] = [
     "tag": "I",
     "text": "In practice you would not take another signal a few candles after the last one.",
     "times": [
-     "06:26"
+     "06:45"
     ]
    },
    {
@@ -17617,7 +17617,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "05:40",
+    "at": "06:05",
     "value": "about 45% wins at 1.5:1 over 100 trades; 8 wins and 12 losses in a row at most",
     "period": "100 trades",
     "quote": "the RSI Supertrend trading strategy got an approximate win rate of 45 percent"
@@ -17673,7 +17673,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Zero-lag MACD: the MACD built from zero-lag EMAs (histogram, signal and MACD lines).",
     "times": [
-     "00:44"
+     "01:04"
     ]
    },
    {
@@ -17682,7 +17682,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Buy when the MACD line crosses above the signal line below the zero line and the entire candle is above the 200-period EMA; sell when it crosses below above zero with the candle below the 200 EMA.",
     "times": [
-     "02:53"
+     "02:46"
     ]
    },
    {
@@ -17691,7 +17691,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop below the pullback (long), above it (short).",
     "times": [
-     "02:53"
+     "03:17"
     ]
    },
    {
@@ -17700,7 +17700,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Reward-to-risk 1.5:1.",
     "times": [
-     "05:38"
+     "05:54"
     ]
    },
    {
@@ -17733,7 +17733,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "05:38",
+    "at": "05:41",
     "value": "about 33% wins at 1.5:1, lost 1,750 on a 10,000 account over 100 trades",
     "period": "100 trades",
     "quote": "I got a 33 percent approximate win rate, which is the worst win rate we have gotten"
@@ -17789,7 +17789,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Buy at the first candle that closes above the middle band soon after the RSI was oversold.",
     "times": [
-     "01:24"
+     "01:39"
     ]
    },
    {
@@ -17798,7 +17798,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A good portion of the candle must close above the middle band.",
     "times": [
-     "01:24"
+     "01:52"
     ]
    },
    {
@@ -17807,7 +17807,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Sell: the first candle closing below the middle band ...",
     "times": [
-     "01:24"
+     "02:01"
     ]
    },
    {
@@ -17816,7 +17816,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop below the lower band (above the upper band for shorts).",
     "times": [
-     "02:07"
+     "02:25"
     ]
    },
    {
@@ -17825,7 +17825,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Reward to risk 1.5:1.",
     "times": [
-     "06:24"
+     "06:55"
     ]
    },
    {
@@ -17834,7 +17834,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Oversold: the RSI under 30.",
     "times": [
-     "01:24"
+     "01:44"
     ]
    },
    {
@@ -17852,7 +17852,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "No 200-period moving average filter.",
     "times": [
-     "02:51"
+     "03:23"
     ]
    },
    {
@@ -17949,7 +17949,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "15-minute bitcoin.",
     "times": [
-     "09:54"
+     "10:00"
     ]
    },
    {
@@ -17967,7 +17967,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Longs when %R is below -80, shorts above -20.",
     "times": [
-     "06:27"
+     "06:41"
     ]
    },
    {
@@ -17994,7 +17994,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Close when the trend direction turns against the trade.",
     "times": [
-     "02:53"
+     "03:19"
     ]
    },
    {
@@ -18012,7 +18012,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "DI+ above DI- is an uptrend (shorts the opposite).",
     "times": [
-     "00:44"
+     "00:55"
     ]
    },
    {
@@ -18045,14 +18045,14 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "return_pct",
-    "at": "15:36",
+    "at": "15:39",
     "value": "+4,400% with 5x the position size",
     "period": "2021 to June 2025, 15-minute bitcoin",
     "quote": "we ended up making 4,400% in P&L"
    },
    {
     "kind": "win_rate",
-    "at": "15:36",
+    "at": "15:52",
     "value": "61% winners",
     "period": "the same backtest",
     "quote": "The win rate was 61%"
@@ -18109,7 +18109,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The Kaufman adaptive moving average is the main indicator.",
     "times": [
-     "00:03"
+     "00:30"
     ]
    },
    {
@@ -18118,7 +18118,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Price above it is an uptrend, below it a downtrend.",
     "times": [
-     "00:03"
+     "00:40"
     ]
    },
    {
@@ -18127,7 +18127,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop and take-profit at 2.5 ATR.",
     "times": [
-     "01:31"
+     "01:43"
     ]
    },
    {
@@ -18136,7 +18136,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "No trade when ADX is below 50.",
     "times": [
-     "05:05"
+     "05:34"
     ]
    },
    {
@@ -18145,7 +18145,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The same KAMA on the 4-hour as the bigger timeframe.",
     "times": [
-     "08:31"
+     "08:46"
     ]
    },
    {
@@ -18154,7 +18154,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Only when the choppiness index is below 50.",
     "times": [
-     "11:25"
+     "11:50"
     ]
    },
    {
@@ -18163,7 +18163,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Only when the Bollinger width (x 100) is below 7.",
     "times": [
-     "14:09"
+     "14:19"
     ]
    },
    {
@@ -18172,7 +18172,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Wait 10 candles after a trade closes.",
     "times": [
-     "15:39"
+     "16:05"
     ]
    },
    {
@@ -18220,7 +18220,7 @@ export const SL: SlStrategy[] = [
    },
    {
     "kind": "return_pct",
-    "at": "18:30",
+    "at": "18:53",
     "value": "about +800% with 3x the size, -24% drawdown",
     "period": "the same backtest",
     "quote": "now with the max throw down of minus 24% we're making nearly 800% profit"
@@ -18277,7 +18277,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The lips above the teeth, both above the jaw.",
     "times": [
-     "00:43"
+     "01:21"
     ]
    },
    {
@@ -18295,7 +18295,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stochastic RSI below 20 for longs, above 80 for shorts.",
     "times": [
-     "14:14"
+     "14:36"
     ]
    },
    {
@@ -18313,7 +18313,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A fixed target at one times the risk.",
     "times": [
-     "08:29"
+     "08:45"
     ]
    },
    {
@@ -18331,7 +18331,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The same Alligator trend on the 4-hour.",
     "times": [
-     "06:21"
+     "06:37"
     ]
    },
    {
@@ -18340,7 +18340,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Price on the right side of the 4-hour 100 EMA.",
     "times": [
-     "09:12"
+     "09:43"
     ]
    },
    {
@@ -18349,7 +18349,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "CMO beyond 20 (minus 20 for shorts).",
     "times": [
-     "12:49"
+     "13:07"
     ]
    },
    {
@@ -18390,14 +18390,14 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "other",
-    "at": "14:56",
+    "at": "15:25",
     "value": "Sharpe 1.99 on 30 minutes",
     "period": "2022 to November 2024, bitcoin",
     "quote": "sharp on the 30 minutes is 1.9 99"
    },
    {
     "kind": "return_pct",
-    "at": "15:39",
+    "at": "16:06",
     "value": "+1,721% with 5x the size, -29% drawdown",
     "period": "the same backtest",
     "quote": "when the max Ron is minus 29% the net profit is at 1,721 per"
@@ -18780,7 +18780,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Gold on the 5-minute chart (the same price action as on 1-hour or daily charts).",
     "times": [
-     "00:13"
+     "00:16"
     ]
    },
    {
@@ -18818,7 +18818,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop about a dollar above the level (gold).",
     "times": [
-     "06:37"
+     "06:58"
     ]
    },
    {
@@ -18950,7 +18950,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "EMA 100 as the trend filter and Bollinger Bands with one standard deviation.",
     "times": [
-     "00:02"
+     "00:19"
     ]
    },
    {
@@ -19044,7 +19044,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "r_multiple",
-    "at": "02:57",
+    "at": "03:00",
     "value": "4.5R and 2.8R on the examples, up to 6.5R",
     "period": "five-minute examples",
     "quote": "this is a 4.5 reward to risk ratio which is an exceptionally large outcome"
@@ -19546,7 +19546,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A breakout needs support and resistance with several rejections at both.",
     "times": [
-     "00:43"
+     "01:00"
     ]
    },
    {
@@ -19555,7 +19555,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Momentum candles: one big body, or three medium candles in the same direction.",
     "times": [
-     "02:47"
+     "03:02"
     ]
    },
    {
@@ -19564,7 +19564,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Most of the big candle's body must be beyond the level.",
     "times": [
-     "03:27"
+     "03:41"
     ]
    },
    {
@@ -19573,7 +19573,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Enter at the momentum candle's close instead of waiting for a pullback.",
     "times": [
-     "04:48"
+     "04:59"
     ]
    },
    {
@@ -19582,7 +19582,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop just below the broken resistance.",
     "times": [
-     "04:48"
+     "05:04"
     ]
    },
    {
@@ -19601,7 +19601,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The rest exits when the Chandelier Exit (ATR multiplier 2) changes colour.",
     "times": [
-     "06:10"
+     "06:47"
     ]
    },
    {
@@ -19690,7 +19690,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The Heikin Ashi RSI oscillator by JayRogers.",
     "times": [
-     "00:02"
+     "00:40"
     ]
    },
    {
@@ -19699,7 +19699,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Its open smoothing set to 7.",
     "times": [
-     "00:52"
+     "00:59"
     ]
    },
    {
@@ -19708,7 +19708,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Short: the oscillator pulls back to the zero line, then a red bar continues.",
     "times": [
-     "01:39"
+     "02:00"
     ]
    },
    {
@@ -19717,7 +19717,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Long: the pullback to the zero line or below, then a green bar.",
     "times": [
-     "02:22"
+     "02:54"
     ]
    },
    {
@@ -19726,7 +19726,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop just beyond the swing; target 2R.",
     "times": [
-     "01:39"
+     "02:17"
     ]
    },
    {
@@ -19735,7 +19735,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The 200 EMA as the trend filter: longs above it, shorts below.",
     "times": [
-     "00:52"
+     "01:29"
     ]
    },
    {
@@ -19776,7 +19776,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "trade_count",
-    "at": "03:50",
+    "at": "04:23",
     "value": "44 winners, 56 losers",
     "period": "three days of 1-minute bitcoin",
     "quote": "there were 44 winning trades and 56 losing trades"
@@ -19841,7 +19841,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The 200 EMA, the 50 EMA and the ATR.",
     "times": [
-     "00:09"
+     "00:18"
     ]
    },
    {
@@ -19850,7 +19850,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "ATR 14 with RMA smoothing.",
     "times": [
-     "00:53"
+     "01:10"
     ]
    },
    {
@@ -19859,7 +19859,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "First the 50 crosses over the 200.",
     "times": [
-     "00:53"
+     "01:16"
     ]
    },
    {
@@ -19868,7 +19868,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Then the first touch of the 50 after the cross.",
     "times": [
-     "00:53"
+     "01:24"
     ]
    },
    {
@@ -19877,7 +19877,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Enter on a green candle closing above the 50, with no more than three closes below the 200.",
     "times": [
-     "01:34"
+     "01:45"
     ]
    },
    {
@@ -19886,7 +19886,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop 2 ATR from the entry candle.",
     "times": [
-     "01:34"
+     "02:09"
     ]
    },
    {
@@ -19895,7 +19895,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Target 1.5R.",
     "times": [
-     "02:20"
+     "02:23"
     ]
    },
    {
@@ -19987,7 +19987,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Supertrend ATR length 7, multiplier 5.",
     "times": [
-     "02:06"
+     "02:17"
     ]
    },
    {
@@ -19996,7 +19996,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "MACD 8, 21, 3 on the close.",
     "times": [
-     "02:06"
+     "02:22"
     ]
    },
    {
@@ -20025,7 +20025,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Target 4R.",
     "times": [
-     "03:28"
+     "04:12"
     ]
    },
    {
@@ -20034,7 +20034,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "One entry per Supertrend colour change.",
     "times": [
-     "06:58"
+     "07:33"
     ]
    },
    {
@@ -20068,7 +20068,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "05:36",
+    "at": "06:10",
     "value": "48% winners",
     "period": "his 1- and 5-minute bitcoin backtests",
     "quote": "48 win rate"
@@ -20125,7 +20125,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "He also uses it on crypto and stocks.",
     "times": [
-     "21:24"
+     "21:27"
     ]
    },
    {
@@ -20173,7 +20173,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Target 2:1.",
     "times": [
-     "14:12"
+     "14:20"
     ]
    },
    {
@@ -20388,7 +20388,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Use the 1-hour or 4-hour chart.",
     "times": [
-     "02:14"
+     "02:19"
     ]
    },
    {
@@ -20461,7 +20461,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "r_multiple",
-    "at": "07:14",
+    "at": "07:27",
     "value": "at least 1.1R per trade (his minimum)",
     "period": "his gold gap trades",
     "quote": "I need at least 1.1 reward to risk ratio"
@@ -20515,7 +20515,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Optimised for bitcoin on 1 hour.",
     "times": [
-     "02:10"
+     "02:45"
     ]
    },
    {
@@ -20524,7 +20524,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The Keltner Channel at its default settings.",
     "times": [
-     "00:05"
+     "00:32"
     ]
    },
    {
@@ -20533,7 +20533,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Long: a candle closes above the upper Keltner band with the DMI above the threshold showing the green bar.",
     "times": [
-     "01:28"
+     "01:42"
     ]
    },
    {
@@ -20542,7 +20542,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Short: a close below the channel with the DMI bar red.",
     "times": [
-     "01:28"
+     "02:03"
     ]
    },
    {
@@ -20551,7 +20551,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop at the opposite side of the channel; reward to risk 2:1.",
     "times": [
-     "01:28"
+     "01:52"
     ]
    },
    {
@@ -20560,7 +20560,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The DMI with a threshold line at 25.",
     "times": [
-     "01:28"
+     "01:36"
     ]
    },
    {
@@ -20651,7 +20651,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Then find the next support level on the chart.",
     "times": [
-     "04:55"
+     "05:22"
     ]
    },
    {
@@ -20660,7 +20660,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Oversold: the RSI under 30.",
     "times": [
-     "02:49"
+     "03:12"
     ]
    }
   ],
@@ -20710,7 +20710,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stochastic window 14 with a smoothing of 3 (D = the 3-step average of K); RSI 14.",
     "times": [
-     "03:47"
+     "04:02"
     ]
    },
    {
@@ -20719,7 +20719,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Trigger: within the last n candles both the K and the D line crossed below 20.",
     "times": [
-     "00:01"
+     "00:38"
     ]
    },
    {
@@ -20728,7 +20728,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Buy when K and D are between 20 and 80, the RSI is above 50 and the MACD is above the signal line.",
     "times": [
-     "00:01"
+     "00:24"
     ]
    },
    {
@@ -20737,7 +20737,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop at 99.5% of the buy price ...",
     "times": [
-     "00:43"
+     "00:46"
     ]
    },
    {
@@ -20746,7 +20746,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... target 0.5% above it.",
     "times": [
-     "00:43"
+     "01:02"
     ]
    }
   ],
@@ -20795,7 +20795,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Screen the whole Binance platform for the top 24-hour performer.",
     "times": [
-     "00:01"
+     "00:06"
     ]
    },
    {
@@ -20804,7 +20804,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Buy when the cumulative return of the last 120 minutes is positive.",
     "times": [
-     "16:07"
+     "16:10"
     ]
    },
    {
@@ -20813,7 +20813,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop 1.5%, target 2%.",
     "times": [
-     "13:52"
+     "14:20"
     ]
    }
   ],
@@ -20863,7 +20863,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Ride the trend: a 50-period moving average ...",
     "times": [
-     "00:02"
+     "00:39"
     ]
    },
    {
@@ -20872,7 +20872,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Ping-pong: identify the range and wait for a false breakout.",
     "times": [
-     "02:12"
+     "02:41"
     ]
    },
    {
@@ -20881,7 +20881,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... a touch of it, then a continuation pattern, is the long signal.",
     "times": [
-     "00:46"
+     "00:58"
     ]
    }
   ],
@@ -20943,7 +20943,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A break of the RSI's falling trend line is a point in favour of the bulls.",
     "times": [
-     "02:09"
+     "02:17"
     ]
    },
    {
@@ -20952,7 +20952,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Confirmation still needs a higher high in price and a move above the 50-day SMA.",
     "times": [
-     "04:57"
+     "05:11"
     ]
    }
   ],
@@ -21012,7 +21012,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Uptrends show large bodies, long upper shadows and no lower shadows; downtrends the reverse.",
     "times": [
-     "06:24"
+     "06:31"
     ]
    },
    {
@@ -21071,7 +21071,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Market Cipher's trigger wave with the VWAP cross as the entry signal.",
     "times": [
-     "04:55"
+     "05:01"
     ]
    },
    {
@@ -21080,7 +21080,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Start from a strong order block.",
     "times": [
-     "02:08"
+     "02:32"
     ]
    },
    {
@@ -21089,7 +21089,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop above the previous swing high.",
     "times": [
-     "06:16"
+     "06:49"
     ]
    },
    {
@@ -21098,7 +21098,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "At least 1:3.",
     "times": [
-     "06:58"
+     "07:01"
     ]
    }
   ],
@@ -21156,7 +21156,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The CME plans 24/7 bitcoin futures.",
     "times": [
-     "09:05"
+     "09:18"
     ]
    },
    {
@@ -21174,7 +21174,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Institutions must fill the gap to repair the basis trade.",
     "times": [
-     "07:42"
+     "07:49"
     ]
    }
   ],
@@ -21226,7 +21226,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Shorts at the value area high, longs at the value area low.",
     "times": [
-     "02:53"
+     "03:12"
     ]
    },
    {
@@ -21235,7 +21235,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Enter at those zones only on a divergence or a trigger wave.",
     "times": [
-     "08:30"
+     "08:49"
     ]
    }
   ],
@@ -21285,7 +21285,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "SAR is stop-and-reverse and fails in ranges.",
     "times": [
-     "00:02"
+     "00:23"
     ]
    },
    {
@@ -21294,7 +21294,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Not usable alone.",
     "times": [
-     "07:44"
+     "08:16"
     ]
    }
   ],
@@ -21343,7 +21343,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "RSI length 14 ...",
     "times": [
-     "07:54"
+     "08:04"
     ]
    },
    {
@@ -21352,7 +21352,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... a deal only when the 1-hour RSI is below 30.",
     "times": [
-     "08:35"
+     "08:38"
     ]
    },
    {
@@ -21361,7 +21361,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "No stop.",
     "times": [
-     "11:28"
+     "11:41"
     ]
    },
    {
@@ -21370,7 +21370,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Take-profit 7.5%.",
     "times": [
-     "09:15"
+     "09:28"
     ]
    },
    {
@@ -21379,7 +21379,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Safety orders 2.5% apart ...",
     "times": [
-     "05:47"
+     "05:52"
     ]
    },
    {
@@ -21388,7 +21388,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... covering a 52.5% drop with the step scale raised.",
     "times": [
-     "05:47"
+     "06:16"
     ]
    }
   ],
@@ -21448,7 +21448,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "'Annii's Ribbon': EMAs from 2 to 100, two of them yellow.",
     "times": [
-     "04:13"
+     "04:46"
     ]
    },
    {
@@ -21467,7 +21467,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop below the EMAs; target the 1-hour resistance.",
     "times": [
-     "07:45"
+     "07:47"
     ]
    },
    {
@@ -21486,7 +21486,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Flat EMAs are a no-trade zone.",
     "times": [
-     "16:18"
+     "16:39"
     ]
    }
   ],
@@ -21498,7 +21498,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "r_multiple",
-    "at": "12:45",
+    "at": "12:52",
     "value": "6.6R rising to 9.5R on the example",
     "period": "one 15-minute example",
     "quote": "we're now looking at a 9.5 to1 risk reward"
@@ -21561,7 +21561,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A failed break: an effort through the level, then a close back across it.",
     "times": [
-     "38:28"
+     "38:33"
     ]
    },
    {
@@ -21850,7 +21850,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "00:01",
+    "at": "00:10",
     "value": "over 80%",
     "period": "his day trading strategy",
     "quote": "I now came up with a strategy that has an over 80% win rate"
@@ -21896,7 +21896,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Three questions: clear support and resistance, confluence at the level, price action in favour.",
     "times": [
-     "00:49"
+     "01:12"
     ]
    },
    {
@@ -21905,7 +21905,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A 4-hour level that acted as resistance (support) several times, with the Fibonacci 'CC' zone next to it.",
     "times": [
-     "01:33"
+     "01:36"
     ]
    },
    {
@@ -21924,7 +21924,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop beyond the trigger candle.",
     "times": [
-     "02:16"
+     "02:41"
     ]
    },
    {
@@ -21933,7 +21933,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Close at the range's other side, the Fibonacci's zero point.",
     "times": [
-     "03:02"
+     "03:41"
     ]
    }
   ],
@@ -21947,7 +21947,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "r_multiple",
-    "at": "03:02",
+    "at": "03:14",
     "value": "1:20 and 1:25 on the examples",
     "period": "bitcoin and ether examples",
     "quote": "we risked one to make 20 times more"
@@ -21992,7 +21992,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Buy orders on the lower side of the range, sell orders on the upper side.",
     "times": [
-     "00:01"
+     "00:35"
     ]
    },
    {
@@ -22001,7 +22001,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Set the range's lower and upper prices.",
     "times": [
-     "04:16"
+     "04:54"
     ]
    },
    {
@@ -22060,7 +22060,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The lengths: HMA 16 and 64, RSI 14 over 52, regression 50.",
     "times": [
-     "10:11"
+     "10:29"
     ]
    },
    {
@@ -22069,7 +22069,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The fast moving average crosses above the slow one on 4 hours.",
     "times": [
-     "00:01"
+     "00:39"
     ]
    },
    {
@@ -22078,7 +22078,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The RSI 14 above 52 on 4 hours.",
     "times": [
-     "00:47"
+     "01:05"
     ]
    },
    {
@@ -22087,7 +22087,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The close above the 50-bar linear regression (4 hours here; daily in the original).",
     "times": [
-     "00:47"
+     "01:16"
     ]
    }
   ],
@@ -22099,7 +22099,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "return_pct",
-    "at": "04:16",
+    "at": "04:41",
     "value": "about +1,000% over 131 trades, matching CoinQuant's 132",
     "period": "bitcoin 4h",
     "quote": "the total returns are 950% in python"
@@ -22144,7 +22144,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The RSI above 50 and up by five ...",
     "times": [
-     "01:37"
+     "01:45"
     ]
    },
    {
@@ -22153,7 +22153,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A 1% trailing take-profit and a 2% trailing stop.",
     "times": [
-     "01:37"
+     "02:06"
     ]
    },
    {
@@ -22162,7 +22162,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... with the MA 9 above the MA 50.",
     "times": [
-     "01:37"
+     "01:53"
     ]
    }
   ],
@@ -22174,7 +22174,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "return_pct",
-    "at": "03:06",
+    "at": "03:34",
     "value": "+98% over 280 trades",
     "period": "AVAX/USDT 30m, bear market",
     "quote": "out of 280 trades it made 98 net profit"
@@ -22221,7 +22221,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The Tenkan above the Kijun ...",
     "times": [
-     "01:30"
+     "01:44"
     ]
    },
    {
@@ -22230,7 +22230,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "3% trailing take-profit and stop.",
     "times": [
-     "02:13"
+     "02:21"
     ]
    },
    {
@@ -22239,7 +22239,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... the Chikou above the close of 26 bars ago ...",
     "times": [
-     "01:30"
+     "01:44"
     ]
    },
    {
@@ -22248,7 +22248,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... the close above the cloud ...",
     "times": [
-     "01:30"
+     "01:51"
     ]
    },
    {
@@ -22257,7 +22257,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... the -DI above the +DI and the ADX above 45.",
     "times": [
-     "01:30"
+     "02:00"
     ]
    }
   ],
@@ -22270,7 +22270,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "return_pct",
-    "at": "02:57",
+    "at": "03:31",
     "value": "+299% over 176 trades, 40% winners",
     "period": "ETH/USDT 45m, 2022",
     "quote": "299 net profit with 176 trades"
@@ -22345,7 +22345,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A flat shelf on the blue line marks a top.",
     "times": [
-     "09:08"
+     "09:21"
     ]
    }
   ],
@@ -22454,7 +22454,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The 21-period EMA on the 2-week chart.",
     "times": [
-     "01:24"
+     "01:39"
     ]
    },
    {
@@ -22463,7 +22463,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Targets of $10, $18 and $27 within weeks.",
     "times": [
-     "00:44"
+     "01:10"
     ]
    }
   ],
@@ -22514,7 +22514,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Two moving averages, 20 and 50.",
     "times": [
-     "00:02"
+     "00:23"
     ]
    },
    {
@@ -22523,7 +22523,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "On 5 minutes, a structure break below both averages and a bearish engulfing candle off them: sell.",
     "times": [
-     "02:57"
+     "03:15"
     ]
    },
    {
@@ -22532,7 +22532,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A 750-tick stop and a 1,500-tick target (2:1) toward the 4-hour support.",
     "times": [
-     "03:42"
+     "04:04"
     ]
    },
    {
@@ -22541,7 +22541,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Close half at the first milestone and move the stop to the entry.",
     "times": [
-     "05:08"
+     "05:19"
     ]
    },
    {
@@ -22709,7 +22709,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop beyond the excursion's extreme.",
     "times": [
-     "05:09"
+     "05:16"
     ]
    },
    {
@@ -22777,7 +22777,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Averaging orders with amount and step multipliers.",
     "times": [
-     "02:47"
+     "03:19"
     ]
    }
   ],
@@ -22826,7 +22826,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "5-minute bars on Binance perpetuals.",
     "times": [
-     "04:59"
+     "05:06"
     ]
    },
    {
@@ -22835,7 +22835,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The histogram's normalised cumulative relative difference.",
     "times": [
-     "02:52"
+     "03:06"
     ]
    },
    {
@@ -22844,7 +22844,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Take-profit and stop multipliers of 0.3 of the volatility target.",
     "times": [
-     "05:47"
+     "06:06"
     ]
    }
   ],
@@ -22857,7 +22857,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "return_pct",
-    "at": "09:31",
+    "at": "09:41",
     "value": "-4.5% in a week, 46% winners, 400+ positions",
     "period": "one week live",
     "quote": "this represents a degrees of 4.5 percent from our initial portfolio"
@@ -23262,7 +23262,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "From class 1: trade the Bollinger Bands when price touches the lower band.",
     "times": [
-     "04:49"
+     "05:25"
     ]
    },
    {
@@ -23271,7 +23271,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A -10% stop on the signal.",
     "times": [
-     "16:52"
+     "17:18"
     ]
    },
    {
@@ -23331,7 +23331,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Four ways to trade: against the trend, with it, bounces and breakouts.",
     "times": [
-     "09:49"
+     "10:02"
     ]
    },
    {
@@ -23349,7 +23349,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A valid breakout needs the candle body to close beyond the line.",
     "times": [
-     "14:43"
+     "14:49"
     ]
    }
   ],
@@ -23399,7 +23399,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "His crypto cloud settings: 20, 60, 120, 30.",
     "times": [
-     "00:01"
+     "00:10"
     ]
    },
    {
@@ -23408,7 +23408,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The Kumo breakout sets the tone for the trend.",
     "times": [
-     "02:49"
+     "02:55"
     ]
    },
    {
@@ -23417,7 +23417,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The trifecta: price beyond the cloud, the cloud's colour and the TK cross all agreeing.",
     "times": [
-     "02:09"
+     "02:31"
     ]
    }
   ],
@@ -23466,7 +23466,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Weekly RSI breakouts have preceded large rises.",
     "times": [
-     "02:41"
+     "02:48"
     ]
    },
    {
@@ -23475,7 +23475,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A weekly close above the RSI's resistance line would signal the next leg.",
     "times": [
-     "03:21"
+     "03:25"
     ]
    }
   ],
@@ -23488,7 +23488,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "other",
-    "at": "02:41",
+    "at": "02:57",
     "value": "+95%, +80%, +73% and +100% after past weekly RSI breakouts",
     "period": "2023-2024",
     "quote": "one being being right at the beginning of 2023 causing a 95% rise"
@@ -23533,7 +23533,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The 'Jewel' or 'Jewel Light' (his paid indicator in the Krown Trading app) and PMARP (free on TradingView).",
     "times": [
-     "01:26"
+     "01:47"
     ]
    },
    {
@@ -23542,7 +23542,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Jewel Light below 35, then the first candle that closes white: a full position at the close.",
     "times": [
-     "02:53"
+     "03:00"
     ]
    },
    {
@@ -23560,7 +23560,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Exit when PMARP closes at 75 or above, in profit or not; 70 gives a higher hit rate and slightly lower P&L.",
     "times": [
-     "03:38"
+     "03:41"
     ]
    },
    {
@@ -23569,7 +23569,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Below 20 the first white tick is usually the worst; wait for the second one.",
     "times": [
-     "09:19"
+     "09:24"
     ]
    }
   ],
@@ -23582,7 +23582,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "04:23",
+    "at": "05:24",
     "value": "22 of 30 (73.3%) and 37 of 50 wins; average win 0.74% against an average loss of 0.97%",
     "period": "his journal over about two months of a bear market",
     "quote": "it was a 37 out of 50 win rate"
@@ -23638,7 +23638,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Dips of 10% or more fill only 17-28% of the time.",
     "times": [
-     "05:39"
+     "05:42"
     ]
    },
    {
@@ -23661,7 +23661,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "other",
-    "at": "02:50",
+    "at": "02:52",
     "value": "a median chase of about 23.5% when the dip never filled",
     "period": "bitcoin's vertical runs since 2011",
     "quote": "the median price you had to chase was was up about 23 and 1/2%"
@@ -23786,7 +23786,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Daily or weekly charts (4-hour at most).",
     "times": [
-     "04:12"
+     "04:17"
     ]
    },
    {
@@ -23884,7 +23884,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The best pure version was a swing-low reclaim.",
     "times": [
-     "08:43"
+     "08:51"
     ]
    }
   ],
@@ -23897,7 +23897,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "return_pct",
-    "at": "05:10",
+    "at": "05:21",
     "value": "+2,610% (a liquidation-data strategy with the anchored VWAP added)",
     "period": "not stated",
     "quote": "It got hurt, but it's at 2,610%"
@@ -23942,7 +23942,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Two sets of VWAP bands, at 1 and 2 standard deviations.",
     "times": [
-     "06:07"
+     "06:44"
     ]
    },
    {
@@ -23951,7 +23951,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Confluence: a support or resistance level that lines up with the VWAP bands.",
     "times": [
-     "08:20"
+     "08:26"
     ]
    },
    {
@@ -23960,7 +23960,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The stop below the support level and the confluence area.",
     "times": [
-     "09:01"
+     "09:14"
     ]
    }
   ],
@@ -24019,7 +24019,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "In a strong trend, enter the first deep pullback to the EMA.",
     "times": [
-     "07:01"
+     "07:37"
     ]
    }
   ],
@@ -24079,7 +24079,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The entry price did not matter to him.",
     "times": [
-     "02:06"
+     "02:20"
     ]
    },
    {
@@ -24097,7 +24097,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Half off at +3%, the rest at +5%.",
     "times": [
-     "07:07"
+     "07:18"
     ]
    }
   ],
@@ -24155,7 +24155,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Deals start from TBO signals.",
     "times": [
-     "04:12"
+     "04:38"
     ]
    },
    {
@@ -24605,7 +24605,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Add a position on each new confirmation and tighten the stop each time.",
     "times": [
-     "12:51"
+     "12:53"
     ]
    }
   ],
@@ -24655,7 +24655,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Four EMA inputs, two moving-average inputs and a cloud switch.",
     "times": [
-     "02:15"
+     "02:50"
     ]
    },
    {
@@ -24664,7 +24664,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "How to trade them is left to later videos.",
     "times": [
-     "13:52"
+     "14:21"
     ]
    }
   ],
@@ -24722,7 +24722,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Lower wicks in an uptrend: momentum fades, look for a pullback.",
     "times": [
-     "06:30"
+     "07:22"
     ]
    }
   ],
@@ -24784,7 +24784,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Enter at the gap's edge or within its first 50% (a limit order or spread orders).",
     "times": [
-     "23:33"
+     "23:38"
     ]
    },
    {
@@ -25011,7 +25011,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "He combines it with bitcoin seasonality and liquidation pools, never alone.",
     "times": [
-     "05:41"
+     "05:53"
     ]
    }
   ],
@@ -25070,7 +25070,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop at the entry minus 2 ATR.",
     "times": [
-     "10:03"
+     "10:34"
     ]
    },
    {
@@ -25079,7 +25079,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Target 4R.",
     "times": [
-     "10:03"
+     "10:40"
     ]
    },
    {
@@ -25088,7 +25088,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Exit on the opposite EMA cross.",
     "times": [
-     "10:03"
+     "10:27"
     ]
    },
    {
@@ -25097,7 +25097,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The RSI not overbought at entry.",
     "times": [
-     "10:03"
+     "10:19"
     ]
    }
   ],
@@ -25110,7 +25110,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "20:48",
+    "at": "21:18",
     "value": "18 trades, 55% winners, profit factor 3",
     "period": "BTC/USDT daily 2019-2022, 5x leverage",
     "quote": "you see that the win rate of the strategy is around 55 percent"
@@ -25155,7 +25155,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Don't assume a high-timeframe breakout is false until it actually fails.",
     "times": [
-     "28:51"
+     "28:55"
     ]
    },
    {
@@ -25215,7 +25215,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The same strategy with the 50 EMA as the trend filter.",
     "times": [
-     "00:40"
+     "00:47"
     ]
    }
   ],
@@ -25227,7 +25227,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "05:33",
+    "at": "05:46",
     "value": "about 35% winners after 200 trades",
     "period": "200 trades",
     "quote": "it got a 35 percent approximate winrate"
@@ -25272,7 +25272,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The pattern: a small red candle followed by a big green one that engulfs its body.",
     "times": [
-     "00:00"
+     "00:26"
     ]
    },
    {
@@ -25281,7 +25281,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A 200-period moving average as the filter.",
     "times": [
-     "02:53"
+     "03:14"
     ]
    }
   ],
@@ -25533,7 +25533,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Buy at a support that lines up with the VWAP, stop below the VWAP, target the resistance above.",
     "times": [
-     "02:54"
+     "03:14"
     ]
    },
    {
@@ -25542,7 +25542,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Above the VWAP the market is bullish; below it bearish.",
     "times": [
-     "01:27"
+     "01:46"
     ]
    }
   ],
@@ -25602,7 +25602,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "After a close outside, enter on the retest of the broken level.",
     "times": [
-     "01:28"
+     "01:31"
     ]
    },
    {
@@ -25611,7 +25611,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Target 1:2 or 1:3.",
     "times": [
-     "02:08"
+     "02:20"
     ]
    }
   ],
@@ -25669,7 +25669,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Only MACD signals that match the higher-timeframe trend.",
     "times": [
-     "02:53"
+     "03:16"
     ]
    }
   ],
@@ -25718,7 +25718,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Equal highs above a broken support: liquidity.",
     "times": [
-     "01:27"
+     "01:35"
     ]
    },
    {
@@ -25727,7 +25727,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Confirmation: the first lower low, leaving a bearish fair value gap.",
     "times": [
-     "02:50"
+     "03:05"
     ]
    }
   ],
@@ -25911,7 +25911,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The value area holds 70% of the volume.",
     "times": [
-     "03:34"
+     "04:08"
     ]
    },
    {
@@ -25920,7 +25920,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Buy when price is cheap (below the value area low), sell when expensive.",
     "times": [
-     "05:00"
+     "05:11"
     ]
    },
    {
@@ -25929,7 +25929,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Partial profit at the point of control.",
     "times": [
-     "05:00"
+     "05:17"
     ]
    }
   ],
@@ -25978,7 +25978,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Short a break of equal highs, buy a break of equal lows.",
     "times": [
-     "03:33"
+     "04:07"
     ]
    },
    {
@@ -25987,7 +25987,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Target the opposite liquidity point.",
     "times": [
-     "05:46"
+     "05:58"
     ]
    }
   ],
@@ -26068,7 +26068,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Gold: buy-only mode while the weekly chart trends up.",
     "times": [
-     "00:44"
+     "01:00"
     ]
    },
    {
@@ -26077,7 +26077,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Price above the 200 EMA as an extra confirmation.",
     "times": [
-     "06:24"
+     "06:29"
     ]
    }
   ],
@@ -26126,7 +26126,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Three EMAs: 20, 50 and 100.",
     "times": [
-     "01:32"
+     "02:00"
     ]
    },
    {
@@ -26135,7 +26135,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "After the pullback into the EMAs, a Williams fractal signal.",
     "times": [
-     "02:12"
+     "02:28"
     ]
    },
    {
@@ -26144,7 +26144,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop below the 100 EMA (or the 50 if price never reached it); target 1.5R.",
     "times": [
-     "02:56"
+     "03:05"
     ]
    },
    {
@@ -26165,7 +26165,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "trade_count",
-    "at": "06:20",
+    "at": "06:26",
     "value": "50 winners, 50 losers, +25%",
     "period": "three days of 1-minute bitcoin",
     "quote": "there were 50 winners and 50 losses"
@@ -26321,7 +26321,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Target just in front of the closest strong 30-minute resistance.",
     "times": [
-     "04:18"
+     "04:37"
     ]
    }
   ],
@@ -26370,7 +26370,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "An ether perpetual on 15 minutes.",
     "times": [
-     "00:47"
+     "01:16"
     ]
    },
    {
@@ -26379,7 +26379,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The RSI computed with the VWAP as its source.",
     "times": [
-     "00:04"
+     "00:20"
     ]
    },
    {
@@ -26388,7 +26388,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Buy when it crosses the threshold from below; sell on the opposite side.",
     "times": [
-     "00:04"
+     "00:37"
     ]
    },
    {
@@ -26397,7 +26397,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stops 3.3% for longs and 4% for shorts.",
     "times": [
-     "02:11"
+     "02:30"
     ]
    }
   ],
@@ -26472,7 +26472,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "... with the price above the 200 EMA.",
     "times": [
-     "01:35"
+     "01:52"
     ]
    }
   ],
@@ -26577,7 +26577,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop just above the third band or above the spike's high.",
     "times": [
-     "04:12"
+     "04:22"
     ]
    },
    {
@@ -26586,7 +26586,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Trend trade stop: just below that first band.",
     "times": [
-     "06:17"
+     "06:24"
     ]
    },
    {
@@ -26595,7 +26595,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Sideways target: back to the VWAP.",
     "times": [
-     "02:50"
+     "02:44"
     ]
    },
    {
@@ -26738,7 +26738,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Order flow: absorption of sellers at VWAP (not available on the desk).",
     "times": [
-     "03:01"
+     "03:29"
     ]
    },
    {
@@ -26835,7 +26835,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A two-minute E-mini chart.",
     "times": [
-     "00:01"
+     "00:08"
     ]
    },
    {
@@ -26844,7 +26844,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Always In Short: two bear bars, one with a big body closing on or near its low (mirror for bulls).",
     "times": [
-     "01:23"
+     "01:25"
     ]
    },
    {
@@ -26863,7 +26863,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A short sold below a bar is exited above the bull bar that reverses it.",
     "times": [
-     "08:27"
+     "08:29"
     ]
    },
    {
@@ -26872,7 +26872,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Scalp about 2 points with small bars; with 20-point bars, 5 or 10 points, about half a bar.",
     "times": [
-     "05:39"
+     "05:46"
     ]
    },
    {
@@ -26907,7 +26907,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "money",
-    "at": "42:41",
+    "at": "42:43",
     "value": "about $900 per contract in a couple of hours if traded perfectly; 50 or more reasonable scalps a day",
     "period": "E-mini two-minute chart, one morning",
     "quote": "you could’ve made $900 in a couple hours per contract"
@@ -26965,7 +26965,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Fade gaps in the big indices; they revert to the prior close more often than single stocks.",
     "times": [
-     "12:12"
+     "12:44"
     ]
    },
    {
@@ -27043,7 +27043,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "16:20",
+    "at": "16:52",
     "value": "about 90% fill for the smallest gaps (10 cents on SPY), 80% at 20 cents, 60-70% at 30 cents, about 40% beyond 40% of the five-day ATR",
     "period": "his gap statistics",
     "quote": "the smallest gaps will have like a 90% probability of filling"
@@ -27107,7 +27107,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Buy the retest of VWAP, confirmed by a candle reclaiming the one-minute high.",
     "times": [
-     "05:36"
+     "06:07"
     ]
    },
    {
@@ -27116,7 +27116,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Risk about $200 for at least $400; anything above 1:1 is a bonus.",
     "times": [
-     "06:22"
+     "06:52"
     ]
    },
    {
@@ -27249,7 +27249,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Short on a one-minute close below the range low with price below the VWAP and the VWAP pointing down.",
     "times": [
-     "03:30"
+     "03:49"
     ]
    },
    {
@@ -27268,7 +27268,7 @@ export const SL: SlStrategy[] = [
     "tag": "I",
     "text": "His own variant: target 1 x the range with the stop near the range's 50%.",
     "times": [
-     "04:51"
+     "04:57"
     ]
    },
    {
@@ -27353,7 +27353,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Works best in a strong higher-timeframe uptrend (30-minute, 4-hour, daily higher highs and higher lows).",
     "times": [
-     "00:46"
+     "00:37"
     ]
    },
    {
@@ -27391,7 +27391,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "His example: about a 6-point stop for a 15-25 point reward.",
     "times": [
-     "08:24"
+     "08:45"
     ]
    },
    {
@@ -27400,7 +27400,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Take profits at an existing supply level.",
     "times": [
-     "11:51"
+     "12:13"
     ]
    },
    {
@@ -27444,7 +27444,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "r_multiple",
-    "at": "07:43",
+    "at": "07:58",
     "value": "$14,000 profit risking $4,300 (3.3:1) in 10 minutes; another $9,700 risking $3,400 (about 3:1)",
     "period": "his live trades",
     "quote": "I risked $4,300 to make a $14,000 profit"
@@ -27530,7 +27530,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Close a long early when RSI crosses above 90 (a short when it crosses below 10).",
     "times": [
-     "11:21"
+     "11:59"
     ]
    },
    {
@@ -27539,7 +27539,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "One trade at a time.",
     "times": [
-     "12:02"
+     "12:20"
     ]
    },
    {
@@ -27576,7 +27576,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "return_pct",
-    "at": "12:42",
+    "at": "12:56",
     "value": "+197% over three years at 1:10 margin, Sharpe 1.65, 45% wins, 51-minute average trade; first year Sharpe 2.12, +53% a year",
     "period": "EUR/USD 2019-2022 backtest, costs not stated",
     "quote": "I'm getting 197 percent in return"
@@ -27633,7 +27633,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Daily candles of EUR/USD and GBP/USD.",
     "times": [
-     "04:54"
+     "05:19"
     ]
    },
    {
@@ -27642,7 +27642,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Long setup: an outside red candle - its high above the previous high and its low below the previous low.",
     "times": [
-     "00:42"
+     "00:48"
     ]
    },
    {
@@ -27651,7 +27651,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "It must close below the previous candle's low.",
     "times": [
-     "00:42"
+     "01:08"
     ]
    },
    {
@@ -27660,7 +27660,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Enter at the next candle's open.",
     "times": [
-     "00:42"
+     "01:14"
     ]
    },
    {
@@ -27669,7 +27669,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Short: the mirror - a green outside candle closing above the previous high.",
     "times": [
-     "01:22"
+     "01:53"
     ]
    },
    {
@@ -27678,7 +27678,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop 250 pips (his code; 200 is the default he read).",
     "times": [
-     "09:14"
+     "09:41"
     ]
    },
    {
@@ -27687,7 +27687,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "No target: the trade stays open until the stop, or until a daily session ends with it in profit.",
     "times": [
-     "01:22"
+     "01:31"
     ]
    },
    {
@@ -27705,7 +27705,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "10% of equity per trade.",
     "times": [
-     "08:33"
+     "08:40"
     ]
    },
    {
@@ -27739,7 +27739,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "10:36",
+    "at": "10:55",
     "value": "87.5% winners, +26% in total, -11% max drawdown",
     "period": "EUR/USD and GBP/USD daily 2017-2024, small commission",
     "quote": "we have a win rate of 8 7% 87.5% we have an aggregated returns of 26%"
@@ -27794,7 +27794,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The setup is a clean 15-minute opening range.",
     "times": [
-     "00:46"
+     "01:09"
     ]
    },
    {
@@ -27803,7 +27803,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Buy right above the range high, sell right below its low (stop orders).",
     "times": [
-     "02:50"
+     "03:04"
     ]
    },
    {
@@ -27812,7 +27812,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A 10-point stop.",
     "times": [
-     "01:26"
+     "01:45"
     ]
    },
    {
@@ -27865,7 +27865,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "04:54",
+    "at": "04:58",
     "value": "about 80% (84-85% for 4 points, high 70s for 10) over 30+ trades a side",
     "period": "his backtest",
     "quote": "the win rate was something in like the 80% range"
@@ -28084,7 +28084,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "If the 60-10 stays stuck under 20-30 instead of rising above 80, the bigger trend is down: get out.",
     "times": [
-     "37:34"
+     "37:58"
     ]
    },
    {
@@ -28118,7 +28118,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "35:27",
+    "at": "35:37",
     "value": "75-80% good trades; a weak-setup rule removes about half of the losers",
     "period": "his own trading",
     "quote": "maybe 80 75 80% of those time trades are really good trades"
@@ -28172,7 +28172,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A bull flag starts with a steep push up off the 20 EMA.",
     "times": [
-     "33:23"
+     "33:40"
     ]
    },
    {
@@ -28181,7 +28181,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Buy when the 9-3 drops to 20 while price holds the 20 EMA; expect three to five points.",
     "times": [
-     "34:44"
+     "34:51"
     ]
    },
    {
@@ -28234,7 +28234,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "35:27",
+    "at": "35:37",
     "value": "75-80% good trades; a weak-setup rule removes about half of the losers",
     "period": "his own trading",
     "quote": "maybe 80 75 80% of those time trades are really good trades"
@@ -28314,7 +28314,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Overbought (RSI above 70): sell when a bar closes beneath the 9 EMA; oversold (below 30): buy when a bar closes above it.",
     "times": [
-     "04:29"
+     "04:39"
     ]
    },
    {
@@ -28433,7 +28433,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The previous day's point of control is naked (not retested); the setup expects a retest of it.",
     "times": [
-     "07:05"
+     "07:08"
     ]
    },
    {
@@ -28452,7 +28452,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Target the point of control.",
     "times": [
-     "12:41"
+     "12:53"
     ]
    },
    {
@@ -28557,7 +28557,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Two-minute charts.",
     "times": [
-     "05:01"
+     "05:08"
     ]
    },
    {
@@ -28576,7 +28576,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The gap is the range between the 16:00 close and the 09:30 open.",
     "times": [
-     "05:41"
+     "05:46"
     ]
    },
    {
@@ -28605,7 +28605,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Enter at the next candle's open (ideally after a test of 70.5%); the stop depends on the gap's size.",
     "times": [
-     "24:48"
+     "24:55"
     ]
    },
    {
@@ -28681,7 +28681,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "EUR/USD, tested 100 times from the London open to the New York close.",
     "times": [
-     "06:09"
+     "06:28"
     ]
    },
    {
@@ -28690,7 +28690,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Fibonacci retracement from the start to the end of the impulse (wicks included); levels 0, 0.5, 0.618, 1.",
     "times": [
-     "03:24"
+     "03:41"
     ]
    },
    {
@@ -28709,7 +28709,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A limit order at the 0.618 level.",
     "times": [
-     "04:07"
+     "04:35"
     ]
    },
    {
@@ -28718,7 +28718,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop just beyond the 1.0 level (the impulse origin).",
     "times": [
-     "04:07"
+     "04:38"
     ]
    },
    {
@@ -28787,7 +28787,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "08:13",
+    "at": "08:25",
     "value": "more wins than losses at 1:1.5-1:1.6 over 100 tested trades",
     "period": "100 trades",
     "quote": "you're having substantially more wins than you are losses"
@@ -28980,7 +28980,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The previous day's high and low.",
     "times": [
-     "00:09"
+     "00:28"
     ]
    },
    {
@@ -28998,7 +28998,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The orders go in when a new day starts and no trade is open.",
     "times": [
-     "06:44"
+     "07:18"
     ]
    },
    {
@@ -29007,7 +29007,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Exit only at the target or the stop.",
     "times": [
-     "12:28"
+     "12:42"
     ]
    },
    {
@@ -29016,7 +29016,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "One cancels all: one trade a day.",
     "times": [
-     "11:01"
+     "11:15"
     ]
    },
    {
@@ -29043,7 +29043,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "trade_count",
-    "at": "19:40",
+    "at": "20:01",
     "value": "773 trades in TradingView's tester, which he distrusts",
     "period": "his test",
     "quote": "who knows how many times this has happened over 773 trades"
@@ -29109,7 +29109,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Buy on a close above the upper band; sell on a close below the lower band.",
     "times": [
-     "00:49"
+     "01:08"
     ]
    },
    {
@@ -29118,7 +29118,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop at the middle moving average, not moved during the trade.",
     "times": [
-     "00:49"
+     "01:18"
     ]
    },
    {
@@ -29127,7 +29127,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Target 2:1.",
     "times": [
-     "00:49"
+     "01:26"
     ]
    },
    {
@@ -29136,7 +29136,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Risk 1% of the account per trade.",
     "times": [
-     "01:32"
+     "01:59"
     ]
    },
    {
@@ -29236,7 +29236,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "On the 09:34 bar, buy if its close is above the day's open (green first five minutes); sell short if it is below.",
     "times": [
-     "14:15"
+     "14:29"
     ]
    },
    {
@@ -29297,28 +29297,28 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "money",
-    "at": "23:23",
+    "at": "23:38",
     "value": "$25,000 to $31,257 (+25%)",
     "period": "January 2016, QQQ, with the stop and target",
     "quote": "we go from $25,000 to $31,257 for a total return percentage of 25%"
    },
    {
     "kind": "money",
-    "at": "26:54",
+    "at": "27:06",
     "value": "$25,000 to about $200,000+",
     "period": "January 2016 to December 2023, QQQ, no slippage or commissions",
     "quote": "it ends at 200 and something thousand"
    },
    {
     "kind": "win_rate",
-    "at": "26:54",
+    "at": "27:10",
     "value": "23%",
     "period": "January 2016 to December 2023, QQQ",
     "quote": "win rate 23%"
    },
    {
     "kind": "return_pct",
-    "at": "29:40",
+    "at": "30:00",
     "value": "about -8% in 2026 while QQQ rose",
     "period": "2026 to 27 October, out of sample",
     "quote": "I think it's down like 8% for the year whereas QQQ is actually up"
@@ -29579,7 +29579,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Apple shares on a 5-minute chart.",
     "times": [
-     "01:25"
+     "01:37"
     ]
    },
    {
@@ -29597,7 +29597,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Long while the fast average is above the slow one, short while below.",
     "times": [
-     "03:33"
+     "03:44"
     ]
    },
    {
@@ -29606,7 +29606,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The position starts on the bar after the signal.",
     "times": [
-     "05:38"
+     "05:52"
     ]
    },
    {
@@ -29615,7 +29615,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "All the money, long or short, all the time.",
     "times": [
-     "07:01"
+     "07:04"
     ]
    },
    {
@@ -29650,7 +29650,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "return_pct",
-    "at": "10:25",
+    "at": "10:58",
     "value": "about +3,500%, 31% a year, -60% max drawdown, Sharpe 0.8",
     "period": "Apple 5m 2007-2020, no costs",
     "quote": "our strategy game click three thousand five hundred percent"
@@ -29907,7 +29907,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Risk above/below the pivot and the swing high/low.",
     "times": [
-     "08:22"
+     "08:53"
     ]
    },
    {
@@ -30813,7 +30813,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Flip: when price shoots through a point of control with no reaction, trade the retest of that level from the other side.",
     "times": [
-     "11:46"
+     "12:08"
     ]
    },
    {
@@ -30867,7 +30867,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "18:08",
+    "at": "18:15",
     "value": "71% wins on EUR/USD, 59% on USD/CAD, 67% on ES",
     "period": "his trading journal",
     "quote": "the win rate here is 71%. ER dollar is my best performing pair"
@@ -31036,7 +31036,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The opening range is the high and low of the first 15 minutes of the New York open, on a five-minute chart.",
     "times": [
-     "05:02"
+     "05:12"
     ]
    },
    {
@@ -31045,7 +31045,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Double break: price breaks the bottom of the opening range and the trade targets its top (mirror from the top).",
     "times": [
-     "08:43"
+     "08:58"
     ]
    },
    {
@@ -31110,7 +31110,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "09:26",
+    "at": "09:53",
     "value": "wins 70-80% of trades; payouts taken at win rates between 63% and 86%",
     "period": "his prop-firm accounts",
     "quote": "the lowest win rate I've taken a payout on with this strategy was like 63%"
@@ -31166,7 +31166,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Conditions: the market above the 50 EMA and a support level tested three times.",
     "times": [
-     "05:50"
+     "05:54"
     ]
    },
    {
@@ -31193,7 +31193,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Target the previous structure, about 1.6:1 (at least 1:1).",
     "times": [
-     "11:39"
+     "11:48"
     ]
    },
    {
@@ -31290,7 +31290,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Index futures at the underlying cash market's open (DAX at 08:00 UK, the US indices at the New York open).",
     "times": [
-     "00:44"
+     "01:08"
     ]
    },
    {
@@ -31328,7 +31328,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Close at the end of the five-minute window (the close of the fifth one-minute bar).",
     "times": [
-     "02:05"
+     "02:13"
     ]
    },
    {
@@ -31362,7 +31362,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "other",
-    "at": "00:01",
+    "at": "00:28",
     "value": "not backtested",
     "period": "not stated",
     "quote": "i've not back tested this"
@@ -31428,7 +31428,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Buy the first test of VWAP after the excursion (mirror for shorts).",
     "times": [
-     "03:39"
+     "04:08"
     ]
    },
    {
@@ -31467,7 +31467,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Rule 2: not in the first or last hour of the session.",
     "times": [
-     "02:55"
+     "02:45"
     ]
    },
    {
@@ -31721,7 +31721,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Currency pairs; gaps at the Sunday open.",
     "times": [
-     "01:32"
+     "01:52"
     ]
    },
    {
@@ -31764,7 +31764,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "other",
-    "at": "00:49",
+    "at": "01:12",
     "value": "not a gap trader, no hard numbers",
     "period": "not stated",
     "quote": "I don't have a lot of back testing on it I don't have hard numbers"
@@ -32034,7 +32034,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "An EMA 12 is a valid guide after at least three clear holds (support) or rejections (resistance).",
     "times": [
-     "07:52"
+     "08:05"
     ]
    },
    {
@@ -32053,7 +32053,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "No use in sideways, choppy markets.",
     "times": [
-     "19:05"
+     "19:25"
     ]
    }
   ],
@@ -32132,7 +32132,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Sweep trade: stop above the sweep high; target the RTH VWAP or the opposite side of the range.",
     "times": [
-     "07:03"
+     "07:10"
     ]
    },
    {
@@ -32193,7 +32193,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Levels: the 15-minute opening range and the 60-minute initial balance.",
     "times": [
-     "01:28"
+     "01:33"
     ]
    },
    {
@@ -32212,7 +32212,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Bounce: only after price travelled far from the level (about 50 points).",
     "times": [
-     "02:51"
+     "02:57"
     ]
    },
    {
@@ -32231,7 +32231,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "No trading during lunch or while major news (a Trump speech) is running.",
     "times": [
-     "05:37"
+     "05:29"
     ]
    }
   ],
@@ -32290,7 +32290,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A worst-case 'ejection seat' stop that only ever tightens.",
     "times": [
-     "32:04"
+     "32:39"
     ]
    },
    {
@@ -32360,7 +32360,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Pick bottoms only at a prior session low.",
     "times": [
-     "11:30"
+     "11:36"
     ]
    },
    {
@@ -32520,7 +32520,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Target the liquidity left at highs and the previous day's high.",
     "times": [
-     "33:36"
+     "33:48"
     ]
    }
   ],
@@ -32657,7 +32657,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "No stop and no target: always in the market (stop and reverse), to test the signal alone.",
     "times": [
-     "03:35"
+     "03:42"
     ]
    }
   ],
@@ -32715,7 +32715,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Fast 3-15, slow 20-50, MACD length 10-30, chosen by walk-forward optimisation.",
     "times": [
-     "04:55"
+     "05:29"
     ]
    },
    {
@@ -32734,7 +32734,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "No stop and no target: always in the market.",
     "times": [
-     "04:14"
+     "04:19"
     ]
    }
   ],
@@ -32747,7 +32747,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "other",
-    "at": "09:51",
+    "at": "10:16",
     "value": "29% of 1,848 walk-forward cases profitable after slippage and commission; 9% over $50,000; 5% with drawdown under $25,000",
     "period": "2007-2025",
     "quote": "only 29% of them were profitable"
@@ -32863,7 +32863,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The step pattern: an impulsive move, then a consolidation or a pullback.",
     "times": [
-     "01:31"
+     "01:39"
     ]
    },
    {
@@ -32872,7 +32872,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "When the pullback taps the level, buy aggressively.",
     "times": [
-     "03:00"
+     "03:07"
     ]
    }
   ],
@@ -32965,7 +32965,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "return_pct",
-    "at": "55:51",
+    "at": "56:08",
     "value": "22% with a 12% drawdown; USD/JPY 38% with an 11% drawdown over 356 trades",
     "period": "30-minute forex, about two years",
     "quote": "us yen is even better 38 return with an 11 drawdown approximately um over 356 trades"
@@ -33010,7 +33010,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The close above the channel high (the previous bar's 15-bar high).",
     "times": [
-     "08:25"
+     "08:38"
     ]
    },
    {
@@ -33019,7 +33019,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Exit at the next open after a close below the 10-bar EMA.",
     "times": [
-     "11:57"
+     "12:04"
     ]
    },
    {
@@ -33037,7 +33037,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "A bullish bar.",
     "times": [
-     "09:09"
+     "09:13"
     ]
    },
    {
@@ -33046,7 +33046,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Volume at least 1.25% above the previous bar's.",
     "times": [
-     "04:11"
+     "04:22"
     ]
    },
    {
@@ -33055,7 +33055,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Liquidity: the 100-bar average volume above a million shares.",
     "times": [
-     "04:54"
+     "05:07"
     ]
    }
   ],
@@ -33068,7 +33068,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "return_pct",
-    "at": "02:04",
+    "at": "02:24",
     "value": "about 8.4% a year, like buy-and-hold, with half its drawdown",
     "period": "Russell 1000, 20 positions, no leverage",
     "quote": "this really simple Channel breakout system has almost an identical rate of return but half the drawdown"
@@ -33123,7 +33123,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "When most traders are short, price almost always goes long (IG client sentiment).",
     "times": [
-     "20:05"
+     "20:09"
     ]
    },
    {
@@ -33192,7 +33192,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Three kinds of trend-confirmation indicator: zero-line crosses, two-line crosses and on-chart indicators.",
     "times": [
-     "11:19"
+     "11:29"
     ]
    }
   ],
@@ -33276,7 +33276,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "r_multiple",
-    "at": "16:19",
+    "at": "16:23",
     "value": "about 2R a week, 8R a month",
     "period": "his called trades",
     "quote": "plus two R per week that is about eight R per month"
@@ -33321,7 +33321,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "S&P and Nasdaq futures around the cash open.",
     "times": [
-     "00:46"
+     "00:55"
     ]
    },
    {
@@ -33350,7 +33350,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Targets follow equidistant swings: what the market does on the downside it will do on the upside.",
     "times": [
-     "03:38"
+     "03:59"
     ]
    },
    {
@@ -33453,7 +33453,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "04:19",
+    "at": "04:45",
     "value": "gap downs filled 66%, gap ups 59%; half the gap 78% and 73%",
     "period": "ES, six months",
     "quote": "every time there was a gap down in the last 6 months 66% of the time that gap has filled"
@@ -33588,7 +33588,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "As soon as the trade is in profit, move the stop into a small profit.",
     "times": [
-     "12:59"
+     "13:02"
     ]
    }
   ],
@@ -33648,7 +33648,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "In a downtrend, only sell the top edges of high-volume nodes.",
     "times": [
-     "42:12"
+     "42:21"
     ]
    },
    {
@@ -33727,7 +33727,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Buy once a day when a bar closes above the opening range high.",
     "times": [
-     "20:46"
+     "20:49"
     ]
    },
    {
@@ -33736,7 +33736,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop on a close below the opening range high minus the range (the range low).",
     "times": [
-     "34:34"
+     "34:40"
     ]
    },
    {
@@ -33755,7 +33755,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Nearly all in on every trade (95% of the account).",
     "times": [
-     "07:58"
+     "08:07"
     ]
    }
   ],
@@ -33768,7 +33768,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "money",
-    "at": "46:58",
+    "at": "47:03",
     "value": "$100,000 to $132,000",
     "period": "AMD, 2020, 15-minute range",
     "quote": "you see this little number on the right is 132 000"
@@ -34020,7 +34020,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The TLT bond ETF.",
     "times": [
-     "00:42"
+     "01:03"
     ]
    },
    {
@@ -34029,7 +34029,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "The first week: the day of the month below 7.",
     "times": [
-     "02:50"
+     "03:21"
     ]
    },
    {
@@ -34047,7 +34047,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Short the first week of the month, long the last week.",
     "times": [
-     "02:50"
+     "03:02"
     ]
    }
   ],
@@ -34060,7 +34060,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "return_pct",
-    "at": "07:00",
+    "at": "07:33",
     "value": "+191%",
     "period": "TLT daily, about 20 years, no costs",
     "quote": "And this strategy returned 191%"
@@ -34266,7 +34266,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Ten names, 10% of the portfolio each; liquidate names that leave before adding.",
     "times": [
-     "02:13"
+     "02:45"
     ]
    }
   ],
@@ -34336,7 +34336,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Stop, target, break-even and trailing stop are all generated randomly by the builder.",
     "times": [
-     "06:34"
+     "06:47"
     ]
    }
   ],
@@ -34385,7 +34385,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Tested on EUR/USD 1-hour, June-August 2026, at 3% risk per trade.",
     "times": [
-     "04:31"
+     "05:10"
     ]
    },
    {
@@ -34394,7 +34394,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "When a fair value gap forms, a limit at the start of the gap, the stop beyond it, a fixed 1:2.",
     "times": [
-     "02:19"
+     "02:52"
     ]
    },
    {
@@ -34426,7 +34426,7 @@ export const SL: SlStrategy[] = [
   "claims": [
    {
     "kind": "win_rate",
-    "at": "05:14",
+    "at": "05:36",
     "value": "unfiltered: fair value gaps 31% of 29 (-6%), breakaway gaps 31% of 45 (-9%), inversions 33% of 27 (flat)",
     "period": "EUR/USD 1-hour, June-August 2026",
     "quote": "out of 29 trades, nine were winners and 20 were losers, giving us a 31% win rate"
@@ -34814,7 +34814,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Entries on the 15-minute chart.",
     "times": [
-     "07:47"
+     "07:35"
     ]
    },
    {
@@ -34853,7 +34853,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Out by the London close; if wrong, done for the day.",
     "times": [
-     "09:15"
+     "09:27"
     ]
    },
    {
@@ -34862,7 +34862,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "New highs or lows are unlikely late in the week (Friday).",
     "times": [
-     "06:18"
+     "06:43"
     ]
    }
   ],
@@ -34995,7 +34995,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Measure each product's intraday range percentiles (50th, 75th, 95th) over the last 12 months.",
     "times": [
-     "02:13"
+     "02:10"
     ]
    },
    {
@@ -35014,7 +35014,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Beyond the normal range stop fading and trade with the move.",
     "times": [
-     "10:44"
+     "10:55"
     ]
    },
    {
@@ -35082,7 +35082,7 @@ export const SL: SlStrategy[] = [
     "tag": "E",
     "text": "Read the candles' behaviour, not pattern names.",
     "times": [
-     "44:12"
+     "44:19"
     ]
    }
   ],

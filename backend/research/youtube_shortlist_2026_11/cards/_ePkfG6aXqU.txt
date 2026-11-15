@@ -5,8 +5,8 @@ instruments: NIFTY index
 timeframes: 3m
 style: intraday
 = IM-01 | Spot opening-range breakout: a 3-minute close beyond the 9:15-10:15 (or 11:15) range, stop at the other side
-R setup E 05:44 | A time-based opening range from 9:15 to 10:15 on a 3-minute chart. | "We define a timebased opening range from 9:15 to 10:15 using 3minut candlestick chart"
-R entry E 05:44 | A close above the range high after 10:15 goes long, the stop at the range low. | "If price closes above the range high after 10:15, we enter a long position with a stop-loss placed at the low of the range"
-R entry E 05:44 | A close below the range goes short, the stop at the high. | "If price closes below the range, we go short with a stop-loss at the high of the range"
+R setup E 06:00 | A time-based opening range from 9:15 to 10:15 on a 3-minute chart. | "We define a timebased opening range from 9:15 to 10:15 using 3minut candlestick chart"
+R entry E 06:07 | A close above the range high after 10:15 goes long, the stop at the range low. | "If price closes above the range high after 10:15, we enter a long position with a stop-loss placed at the low of the range"
+R entry E 06:13 | A close below the range goes short, the stop at the high. | "If price closes below the range, we go short with a stop-loss at the high of the range"
 T ready | the episode's spot test; part 2 (IM-02) trades the same breakout on the option premium
 D BB-02 | the opening-range breakout with the stop at the range's far side is already coded on NIFTY (BB-02, and SI-09 in the four-topics study); only the window lengths differ

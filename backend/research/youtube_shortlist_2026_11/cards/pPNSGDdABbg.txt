@@ -9,8 +9,8 @@ R indicator E 02:06,02:50 | Expanded Camarilla levels; keep H3, H4, H5 and L3, L
 R entry E 04:55,05:38 | Inside H3-L3: sell a reversal at H3, buy a reversal at L3; the level must be touched. | "laal vaale pe bechanaa hai. green vaale pe khareedanaa hai"
 R target E 05:38,10:30 | A fade's target is the opposite level; its stop the level behind. | "red se ghoomegaa to aap short karoge green vaale ke lie"
 R entry E 06:19,06:59 | A break above H4 is held for H5 (below L4 for L5), stop at H3 (L3). | "agar 24838 brekaaaut karegaa to ham 24942 tak baithenge"
-R no_trade E 06:19 | Between H3 and H4 (or L3 and L4): no trade. | "ye no tred ज़on hai hamaare paas"
-R exit E 09:04 | Flat by 15:10-15:15 when the target is not reached. | "3:15 310 tak jo ret mil rahaa hai vahaan pe nikaal do"
+R no_trade E 06:22 | Between H3 and H4 (or L3 and L4): no trade. | "ye no tred ज़on hai hamaare paas"
+R exit E 09:09 | Flat by 15:10-15:15 when the target is not reached. | "3:15 310 tak jo ret mil rahaa hai vahaan pe nikaal do"
 T with_assumptions | the reversal candle is judged by eye
 D YT-27 | the Camarilla R3/S3 fade with an R4/S4 breakout is already in the library (top-20 study)
 P 00:04 | 00:45 | Broker webinar series

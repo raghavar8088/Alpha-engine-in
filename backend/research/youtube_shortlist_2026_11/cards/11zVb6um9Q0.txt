@@ -11,7 +11,7 @@ R indicator E 09:54,10:34 | Bollinger Bands (20, 2) on closes; volume against it
 R entry E 14:51,15:35,19:45 | Five minutes: a strong bullish candle (close equal to its high) closing over the middle band with volume at least 1.5 times average; enter when it closes. | "apane evarej se derh gunaa volyoom ho. tab yah yahaan par ek baay signal trigar karegaa"
 R stop E 15:35,16:17 | Stop under the lower band or 1.5 x ATR. | "yaa to loar baind ke neeche lagaa lo yaa aap 1.5 eteeaar le lo"
 R target E 16:17,21:48 | Target 2 x ATR, 2:1 or the 15-minute upper band. | "taaraget aapakaa 2TR hogaa yaa jo 15 minat kaa taaim phrem hai usakaa apar baind hogaa"
-R session E 12:46 | Signals 09:30-14:30 (at most three after 14:30), everything closed by 15:20. | "9:30 se 2:30 ke beech men hee aap jo hai un signals ko egjeekyoot karen"
+R session E 12:51 | Signals 09:30-14:30 (at most three after 14:30), everything closed by 15:20. | "9:30 se 2:30 ke beech men hee aap jo hai un signals ko egjeekyoot karen"
 R entry E 27:25,29:31 | Shorts mirror it: one-hour below the middle band, a 15-minute rally that does not break the upper band, a strong five-minute close below the middle band, entry under its low. | "isake lo ke neeche ham jo hai apanee entree lenge. stop los kahaan lagaayaa? ham logon ne appar baind pe stop los lagaa diyaa"
 R market A - | Desk version: the NSE stock pool (real volume) on five-minute candles with 15- and 60-minute bars built from them (the 60-minute bars run on the clock hour, not from 09:15). | ""
 R setup A - | One-hour bias from the last completed hour's close against its middle band; the 15-minute pullback = a low within 0.2% of (or under) the middle or lower band in the last 4 bars with no 15-minute close under the lower band. | ""

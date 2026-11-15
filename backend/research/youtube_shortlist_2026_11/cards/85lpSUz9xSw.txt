@@ -7,5 +7,5 @@ style: positional
 = QC-02 | Top dollar-volume US stocks with EMA 50 above EMA 200, ten names at 10% each
 R market E 00:51,01:31 | US stocks priced above $10, sorted by dollar volume. | "it's asking us to take all of the stocks which are greater than $10"
 R setup E 09:29 | Keep the names whose 50 EMA is above their 200 EMA (with both ready). | "if the fast indicator is greater than the slow indicator and the indicators are ready to use"
-R sizing E 02:13 | Ten names, 10% of the portfolio each; liquidate names that leave before adding. | "we can allocate 10% of our portfolio between each security"
+R sizing E 02:45 | Ten names, 10% of the portfolio each; liquidate names that leave before adding. | "we can allocate 10% of our portfolio between each security"
 T not_testable | needs a daily US stock universe ranked by dollar volume; the desk has neither US stock data nor volume in its NSE daily panel

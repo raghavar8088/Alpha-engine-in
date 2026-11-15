@@ -5,9 +5,9 @@ instruments: Ether perpetual (FTX)
 timeframes: 15m
 style: intraday
 = WT-01 | The RSI of the VWAP crossing its thresholds, 3.3% / 4% stops (15-minute ether)
-R indicator E 00:04 | The RSI computed with the VWAP as its source. | "it takes the volume weighted average price as the close price for calculation of arrow sign instead of the just closing price"
-R entry E 00:04 | Buy when it crosses the threshold from below; sell on the opposite side. | "when the arrow size crossing the threshold from the bottom the strategy signal is to buy"
-R timeframe E 00:47 | An ether perpetual on 15 minutes. | "we use this strategy for a theorem perpetual contract on FTX using the 15-minute time frame"
-R stop E 02:11 | Stops 3.3% for longs and 4% for shorts. | "your stop loss for the long will be three point three percent and your stop loss for the short positions will be just four percent"
+R indicator E 00:20 | The RSI computed with the VWAP as its source. | "it takes the volume weighted average price as the close price for calculation of arrow sign instead of the just closing price"
+R entry E 00:37 | Buy when it crosses the threshold from below; sell on the opposite side. | "when the arrow size crossing the threshold from the bottom the strategy signal is to buy"
+R timeframe E 01:16 | An ether perpetual on 15 minutes. | "we use this strategy for a theorem perpetual contract on FTX using the 15-minute time frame"
+R stop E 02:30 | Stops 3.3% for longs and 4% for shorts. | "your stop loss for the long will be three point three percent and your stop loss for the short positions will be just four percent"
 T not_testable | the RSI length and the buy and sell thresholds are only in his code, never stated
 C return_pct | 01:30 | +700%, -9% max drawdown, a low win rate | ether perpetual 15m | "above 700 percent the max drawdown is almost nine percent"

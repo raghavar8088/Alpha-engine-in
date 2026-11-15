@@ -5,19 +5,19 @@ instruments: NIFTY weekly options
 timeframes: 5m
 style: options_buying
 = QM-01 | Option basket: the ATM call locked at 9:16; on its 5-minute premium a close above the Parabolic SAR, the Supertrend (10, 2) and R1; out on a close below the Supertrend; one trade a day (real NIFTY premiums)
-R market E 00:42 | NIFTY. | "d instrooment dait aaee haiv choosan hiyar iज़ niphtee"
+R market E 01:11 | NIFTY. | "d instrooment dait aaee haiv choosan hiyar iज़ niphtee"
 R market E 01:23 | The basket opens at 9:16 ... | "aaee em going too opan dis baasket vhen maay taaim oफ़ de iज़ ikval too 916"
-R market E 01:23 | ... buying a call. | "aaee em going too baay a kol opshan"
+R market E 01:32 | ... buying a call. | "aaee em going too baay a kol opshan"
 R timeframe E 02:07 | 5-minute candles of the premium basket. | "so, aaee em going too tred on 5 minats staart"
-R indicator E 02:07 | Supertrend 10, 2. | "supar trend oफ़ 10 end too malteepleyar oफ़ 5 minats"
-R entry E 02:07 | The close above the Parabolic SAR ... | "d pharst entree kandeeshan vil bee karant kloj iज़ abav pairaabolik esaeaar"
+R indicator E 02:18 | Supertrend 10, 2. | "supar trend oफ़ 10 end too malteepleyar oफ़ 5 minats"
+R entry E 02:42 | The close above the Parabolic SAR ... | "d pharst entree kandeeshan vil bee karant kloj iज़ abav pairaabolik esaeaar"
 R entry E 02:49 | ... above the Supertrend ... | "maay anadar entree kandeeshan vil bee karant kloज़ iज़ abav supar trend"
-R entry E 02:49 | ... and above R1. | "karant kloj iज़ abav peevot R1"
-R exit E 03:31 | When the close crosses below the Supertrend the market reversed: a counter position. | "thinking d maarket got rivars. aaee em going too opan a kaauntar pojeeshan"
-R target E 04:12 | The put's target is 20 points. | "end d taaraget dait aay em going giv hiyar iज़ 20 points"
-R sizing E 04:12 | One transaction a day. | "maay maiksimam traanjaikshan vil bee van par"
+R entry E 03:10 | ... and above R1. | "karant kloj iज़ abav peevot R1"
+R exit E 03:47 | When the close crosses below the Supertrend the market reversed: a counter position. | "thinking d maarket got rivars. aaee em going too opan a kaauntar pojeeshan"
+R target E 04:20 | The put's target is 20 points. | "end d taaraget dait aay em going giv hiyar iज़ 20 points"
+R sizing E 04:51 | One transaction a day. | "maay maiksimam traanjaikshan vil bee van par"
 R indicator A - | Parabolic SAR at its default (0.02, 0.2); R1 is the classic pivot of the contract's previous-session mids. | ""
 R exit A - | Desk version: the call is closed on a 5-minute close below the Supertrend; the put adjustment is left out - its conditions ('leg percentage above zero', 'leg already exited') are not clear. | ""
 R market A - | The real recorded NIFTY quotes; the premium chart is the minute mids with the previous session's quotes in front; entries at the next minute's ask; no entries from 15:00; out by 15:14 at the bid; a 50% premium guard stop sizes the position (none is stated). | ""
 T with_assumptions | the put adjustment is not traded (its conditions are unclear); the guard stop is ours (A); minute mids stand in for the traded-price chart (A)
-C win_rate | 04:56 | about 47% winners, maximum loss about 6,870 | QuantMan backtest, January 2024 - June 2025 | "maaee vining probebilitee iज़ araaund 47%"
+C win_rate | 05:05 | about 47% winners, maximum loss about 6,870 | QuantMan backtest, January 2024 - June 2025 | "maaee vining probebilitee iज़ araaund 47%"

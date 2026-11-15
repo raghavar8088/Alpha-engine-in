@@ -5,7 +5,7 @@ instruments: crypto (Solana shown)
 timeframes: unclear
 style: swing
 = AY-01 | Four swing set-ups: a moving-average pullback with a continuation pattern, reversals at key levels, range false breakouts, hedging
-R setup E 00:02 | Ride the trend: a 50-period moving average ... | "I set up a 50 period moving"
-R entry E 00:46 | ... a touch of it, then a continuation pattern, is the long signal. | "If we're in an uptrend and price touches the moving average, then prints a continuation pattern"
-R setup E 02:12 | Ping-pong: identify the range and wait for a false breakout. | "Identify the range, wait for false breakout"
+R setup E 00:39 | Ride the trend: a 50-period moving average ... | "I set up a 50 period moving"
+R entry E 00:58 | ... a touch of it, then a continuation pattern, is the long signal. | "If we're in an uptrend and price touches the moving average, then prints a continuation pattern"
+R setup E 02:41 | Ping-pong: identify the range and wait for a false breakout. | "Identify the range, wait for false breakout"
 T concept_only | the trends, the patterns and the levels are judged by eye; the only exit rule is 'take profits before the opposite level'; hedging is not an entry rule

@@ -5,6 +5,6 @@ instruments: Forex pairs
 timeframes: 1d
 style: unclear
 = NN-02 | Choosing NNFX confirmation indicators: zero-cross, two-line cross and on-chart types, tested on the daily chart (method only)
-R indicator E 11:19 | Three kinds of trend-confirmation indicator: zero-line crosses, two-line crosses and on-chart indicators. | "first off is the zero cross so it's an oscillator that goes below your chart"
+R indicator E 11:29 | Three kinds of trend-confirmation indicator: zero-line crosses, two-line crosses and on-chart indicators. | "first off is the zero cross so it's an oscillator that goes below your chart"
 R timeframe E 12:00 | Test on common pairs on the daily chart, without cherry-picking. | "I always use the daily chart we don't cherry-pick here"
 T concept_only | a method for searching indicators; the examples are shown as poor and no indicator or trading rule is recommended

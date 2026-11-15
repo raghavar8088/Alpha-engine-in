@@ -9,7 +9,7 @@ R setup E 05:39,07:07 | Market structure: higher highs and higher lows, or lower
 R filter E 08:30,14:49 | Trade with the hourly trend: in an hourly downtrend, only shorts. | "I know I'm looking for short positions shorts I don't look I'm not looking for for Longs"
 R entry E 09:55,19:43 | Enter on a lower-timeframe market structure shift in the trend's direction after a retrace into a rejection area. | "once the higher high happens you shift a trend it's called a market structure shift"
 R stop E 18:22,19:43 | Stop at the high of the rejection zone (about half a percent). | "can use the high of the rejection Zone"
-R target E 18:22 | Take 1:1 to 1:2; close half early. | "you can go to 1: one you can go to 1 to2"
+R target E 18:29 | Take 1:1 to 1:2; close half early. | "you can go to 1: one you can go to 1 to2"
 R timeframe E 16:58 | The 5-minute is the sweet spot for entries. | "but a 5 minutes is perfect"
 R market A - | Desk version: Delta BTCUSD and ETHUSD, with the 1-hour trend and 5-minute entries. | ""
 R setup A - | The 1-hour trend is down when its last two confirmed swing highs and lows (two bars each side) are both lower, and up when both are higher. | ""

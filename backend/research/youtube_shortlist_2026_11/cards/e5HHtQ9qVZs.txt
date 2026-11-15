@@ -9,7 +9,7 @@ R setup E 01:31,02:17 | A steady (not parabolic) trend day with an early directi
 R entry E 02:17,03:01 | Buy at VWAP on the first test back if it holds. | "you're looking to buy at vwap"
 R target E 03:01,03:44 | Exit as price breaks the recent high. | "exit as you go and break a new high giving you a really clear target"
 R filter E 04:25,05:08 | Best on gap days: the gap puts price away from where VWAP builds. | "a day where you get a gap open my first thought is this could be v day"
-R filter E 03:01 | Order flow: absorption of sellers at VWAP (not available on the desk). | "you're looking then as well from an order flow perspective to see absorption"
+R filter E 03:29 | Order flow: absorption of sellers at VWAP (not available on the desk). | "you're looking then as well from an order flow perspective to see absorption"
 R market A - | Desk version: Nasdaq 100 cash session. | ""
 R setup A - | Gap open of at least 0.3% from the previous close; within the first 30 minutes price closes at least 0.4% away from VWAP on the gap's side. | ""
 R entry A - | After 10:00 New York, a limit at VWAP for the first touch (long on an up gap, short on a down gap). | ""

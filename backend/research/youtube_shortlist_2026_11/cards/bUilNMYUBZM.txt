@@ -5,8 +5,8 @@ instruments: Bitcoin, altcoins
 timeframes: 4h to weekly
 style: swing
 = JO-02 | Kumo breakout with the Ichimoku trifecta (price, cloud and TK cross aligned)
-R indicator E 00:01 | His crypto cloud settings: 20, 60, 120, 30. | "settings for the cloud that I use are 2061 2030"
-R entry E 02:09 | The trifecta: price beyond the cloud, the cloud's colour and the TK cross all agreeing. | "you're looking for the trifecta price above Cloud or below Cloud the cloud bullish or bearish and then the TK cross bullish or bearish"
-R setup E 02:49 | The Kumo breakout sets the tone for the trend. | "the Kumo breakout is arguably the single most important it sets the tone for the trend"
+R indicator E 00:10 | His crypto cloud settings: 20, 60, 120, 30. | "settings for the cloud that I use are 2061 2030"
+R entry E 02:31 | The trifecta: price beyond the cloud, the cloud's colour and the TK cross all agreeing. | "you're looking for the trifecta price above Cloud or below Cloud the cloud bullish or bearish and then the TK cross bullish or bearish"
+R setup E 02:55 | The Kumo breakout sets the tone for the trend. | "the Kumo breakout is arguably the single most important it sets the tone for the trend"
 T with_assumptions | the higher-timeframe context and the weight of a 'first time in months' breakout are read by eye
 D NJ-40 | price, cloud and TK cross aligned (the Ichimoku trifecta) is already coded (NJ-40; DT-04 on bitcoin's daily cloud)

@@ -8,5 +8,5 @@ style: positional
 R indicator E 00:42,01:25 | An Ichimoku indicator on the two-week bitcoin chart. | "we're on the Bitcoin Us doll index and we're on the twoe chart"
 R setup E 03:33,04:15 | The yellow line turning marks the cycle top; the red line crossing below the blue confirms it. | "when this red line crosses below the Blue Line"
 R setup E 06:20,07:01 | The yellow line crossing down through the blue near the cycle top. | "the third one is the Yellow Line crossing down through the blue line right near the market cycle top"
-R setup E 09:08 | A flat shelf on the blue line marks a top. | "what you want to look at is a shelf on the blue line"
+R setup E 09:21 | A flat shelf on the blue line marks a top. | "what you want to look at is a shelf on the blue line"
 T not_testable | cycle-top signals on two-week candles need years of history; the desk keeps 150 days of bitcoin

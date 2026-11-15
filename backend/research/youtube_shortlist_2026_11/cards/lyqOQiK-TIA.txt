@@ -10,7 +10,7 @@ R session E 03:36,04:20 | The Asia session, 05:30 to 14:00 IST (linear, no news)
 R setup E 05:43,06:26 | Price below the EMA = shorts only; above = longs only. | "agar praais mooving evarej ke neeche hai to ham log kyaa karenge? short karenge"
 R filter E 08:32,09:16 | The EMA's slope must agree: no longs while it slopes down, even on pullbacks; when it turns, trade the pullbacks. | "ivan on pulabaik aap long tred naheen lenge. kyon? kyonki abhee mooving evarej aisaa neeche hee jaa rahee hai"
 R entry E 09:59,11:24 | No trade on the break; wait for a pullback to the EMA (a touch, or very near it). | "pulabaik kahaan tak chaahie? mooving evarej tak chaahie"
-R entry E 11:24 | Enter on the close of a bearish engulfing at the EMA (bullish engulfing for longs). | "berish ingalphing banee hai to aap log kyaa karenge? aap yahaan par ek short tred inishiet karenge"
+R entry E 11:42 | Enter on the close of a bearish engulfing at the EMA (bullish engulfing for longs). | "berish ingalphing banee hai to aap log kyaa karenge? aap yahaan par ek short tred inishiet karenge"
 R stop E 11:24,12:09 | Stop above the candle that pierced the moving average. | "stop los rahegaa jis bhee kaindal ne brek kiyaa thaa mooving evarej ko. theek hai naa? usake oopar aap stop los lagaaenge"
 R target E 12:09 | Target at least 1:2 (1:3, 1:4). | "taaraget kyaa rakhenge? minimam 1:2, 1:3"
 R market A - | Desk version: gold on one-minute bars (booked on Delta XAUTUSD); 00:00-08:30 UTC. | ""

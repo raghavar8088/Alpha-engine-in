@@ -10,5 +10,5 @@ R target E 05:02,05:46 | A partial target at half the gap raises the fill odds (
 R setup E 07:47,08:28 | Opening range (09:30-09:45): if double breaks are the most frequent outcome lately, a break of one side becomes a bias toward the other side. | "the moment price breaks out to this top side, you can get short targeting a double break"
 R management E 12:03,12:48 | In the last hour a new high or low of the day is unlikely: take profits before the day's extreme. | "81% of the time in the last 6 months, a new low of day was not made"
 T concept_only | statistics used as a bias; they say entries are the trader's own and the tool never gives buy or sell signals
-C win_rate | 04:19 | gap downs filled 66%, gap ups 59%; half the gap 78% and 73% | ES, six months | "every time there was a gap down in the last 6 months 66% of the time that gap has filled"
+C win_rate | 04:45 | gap downs filled 66%, gap ups 59%; half the gap 78% and 73% | ES, six months | "every time there was a gap down in the last 6 months 66% of the time that gap has filled"
 P 14:15 | 14:56 | Edgeful subscription; NinjaTrader platform

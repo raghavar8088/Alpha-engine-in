@@ -5,6 +5,6 @@ instruments: Bitcoin, Ether, altcoins
 timeframes: 1w, 1d (4h)
 style: swing
 = BV-02 | Parabolic SAR as a trend bias and trailing stop (explainer)
-R setup E 00:02 | SAR is stop-and-reverse and fails in ranges. | "stands for stop and reverse it is not really useful in a ranging market"
-R setup E 07:44 | Not usable alone. | "i don't think alone you can really use it for trading"
+R setup E 00:23 | SAR is stop-and-reverse and fails in ranges. | "stands for stop and reverse it is not really useful in a ranging market"
+R setup E 08:16 | Not usable alone. | "i don't think alone you can really use it for trading"
 T concept_only | presented as a bias and trailing-stop aid to combine with other checks, not a complete rule set (SAR strategies are already coded: NJ-22, DT-02)

@@ -9,6 +9,6 @@ R setup E 00:02,01:24 | Start on the daily chart: mark the key structures (horiz
 R entry E 02:05,02:49 | After a key level is tested, the 30-minute SMA 5 crossing the EMA 9 in the expected direction is the signal. | "your bullish signal will be the crossover of two moving averages"
 R entry E 03:31 | Enter from the closest minor structure (a retest). | "I strictly recommend to treat it from the closest minor structure"
 R stop E 03:31,04:18 | Stop beyond the key structure (wide, structure-based). | "your stop loss should be below the key structure from where you are treating"
-R target E 04:18 | Target just in front of the closest strong 30-minute resistance. | "identify the closest strong resistance"
+R target E 04:37 | Target just in front of the closest strong 30-minute resistance. | "identify the closest strong resistance"
 T with_assumptions | the key structures are drawn by eye
 D TD-01 | a moving-average cross after a tested level, traded with the trend, is already coded (the 20-channel study's TD-01, the 9/20 EMA cross at a tested level)

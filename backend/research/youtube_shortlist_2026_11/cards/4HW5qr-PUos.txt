@@ -5,6 +5,6 @@ instruments: NIFTY options
 timeframes: 1m
 style: options_buying
 = OS-01 | Trending OI option buying on OI Pulse, with averaging
-R indicator E 00:03 | The trending OI strategy. | "Today, we will learn the trending OI strategy"
-R management E 00:03 | Entry, exit, averaging and stop. | "You'll understand the entry, the exit, averaging, and the stop loss for the trending OI strategy"
+R indicator E 00:25 | The trending OI strategy. | "Today, we will learn the trending OI strategy"
+R management E 00:32 | Entry, exit, averaging and stop. | "You'll understand the entry, the exit, averaging, and the stop loss for the trending OI strategy"
 T not_testable | it reads the platform's own trending-OI signal, which the video does not define, and averages into losing trades

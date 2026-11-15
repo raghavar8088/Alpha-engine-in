@@ -5,14 +5,14 @@ instruments: NIFTY weekly options
 timeframes: 2m
 style: options_buying
 = DH-12 | 3 PM momentum: a 2-minute MACD histogram flip from 14:45 with ADX above 25 and rising, the flip candle's extreme broken, an in-the-money option, 15 premium points (real premiums)
-R timeframe E 02:17 | NIFTY 2-minute chart. | "2 minats kaa chaart yooज़ kar rahaa hoon"
-R indicator E 02:17 | MACD for the direction. | "trend pataa karane ke lie mujhe chaahie emaeseedee"
-R session E 02:57 | Ready from 2:45 to 3:00. | "3:00 baje ke baad yaa phir main boloon 2:45 ke baad aap bilkul redee ho jaaie"
-R filter E 02:57 | Only when the ADX is above 25 ... | "jisaj men edeeeks aapakaa 25 se oopar chalaa jaaegaa"
-R filter E 04:59 | ... and rising. | "agar edeeeks barh rahaa hogaa jaise ki hamaaraa is vaale tred men barh rahaa thaa"
-R entry E 03:38 | The break of the signal candle's low (a put) - or high (a call). | "isakaa lo brek hotaa hai 259 pe"
-R market E 04:18 | An in-the-money option, 100-200 points in. | "ham et d manee naheen ham in d manee put baay karenge to 23300 kee jagah main 23400 yaa 23500 kee put paraches karoongaa"
-R target E 08:24 | Book 15-17 points. | "ham sirph 15-17 point lenge aur maarket se baahar ho jaaenge"
+R timeframe E 02:28 | NIFTY 2-minute chart. | "2 minats kaa chaart yooज़ kar rahaa hoon"
+R indicator E 02:50 | MACD for the direction. | "trend pataa karane ke lie mujhe chaahie emaeseedee"
+R session E 03:06 | Ready from 2:45 to 3:00. | "3:00 baje ke baad yaa phir main boloon 2:45 ke baad aap bilkul redee ho jaaie"
+R filter E 03:28 | Only when the ADX is above 25 ... | "jisaj men edeeeks aapakaa 25 se oopar chalaa jaaegaa"
+R filter E 05:27 | ... and rising. | "agar edeeeks barh rahaa hogaa jaise ki hamaaraa is vaale tred men barh rahaa thaa"
+R entry E 04:01 | The break of the signal candle's low (a put) - or high (a call). | "isakaa lo brek hotaa hai 259 pe"
+R market E 04:36 | An in-the-money option, 100-200 points in. | "ham et d manee naheen ham in d manee put baay karenge to 23300 kee jagah main 23400 yaa 23500 kee put paraches karoongaa"
+R target E 08:27 | Book 15-17 points. | "ham sirph 15-17 point lenge aur maarket se baahar ho jaaenge"
 R indicator A - | MACD (12, 26, 9) histogram crossing zero; ADX (14); bars are 2-minute bars of the recorded NIFTY spot. | ""
 R entry A - | Desk version: the real recorded quotes; the first histogram flip from 14:45 to 15:16; the entry is the first spot snapshot beyond the flip candle's extreme within three bars; the option is 150 points in the money (rounded to 100), the current expiry, bought at the ask; target 15 points; out at 15:25. | ""
 R stop A - | No stop is stated: a 25% premium stop guards the position. | ""

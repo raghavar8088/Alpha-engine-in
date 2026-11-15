@@ -5,7 +5,7 @@ instruments: the top 24-hour gainer among about 1,600 Binance USDT pairs
 timeframes: 1m
 style: scalping
 = AV-03 | The day's top Binance gainer, bought while its last 120 minutes are up, +2% target, -1.5% stop
-R setup E 00:01 | Screen the whole Binance platform for the top 24-hour performer. | "we are screening the whole binance platform for the top performing coins over the last 24 hours"
-R entry E 16:07 | Buy when the cumulative return of the last 120 minutes is positive. | "we are checking if the cumulative returns over the last 120 minutes are positive"
-R stop E 13:52 | Stop 1.5%, target 2%. | "a stop loss limit we are just taking 1.5 percent here and we are taking a target profit of two percent"
+R setup E 00:06 | Screen the whole Binance platform for the top 24-hour performer. | "we are screening the whole binance platform for the top performing coins over the last 24 hours"
+R entry E 16:10 | Buy when the cumulative return of the last 120 minutes is positive. | "we are checking if the cumulative returns over the last 120 minutes are positive"
+R stop E 14:20 | Stop 1.5%, target 2%. | "a stop loss limit we are just taking 1.5 percent here and we are taking a target profit of two percent"
 T not_testable | it needs the 24-hour ranking of about 1,600 Binance pairs with their minute data; the desk trades bitcoin, ether and gold, so it has no top-gainer universe

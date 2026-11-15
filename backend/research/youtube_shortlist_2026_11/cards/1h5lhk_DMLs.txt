@@ -5,6 +5,6 @@ instruments: Crypto (any)
 timeframes: Not stated
 style: unclear
 = MR-01 | Mango Ribbon: EMAs, SMAs and Ichimoku in one indicator (set-up tutorial)
-R indicator E 02:15 | Four EMA inputs, two moving-average inputs and a cloud switch. | "you'll have four eme inputs okay two moving average inputs and one tick box"
-R setup E 13:52 | How to trade them is left to later videos. | "I will discuss them in the upcoming videos in the series"
+R indicator E 02:50 | Four EMA inputs, two moving-average inputs and a cloud switch. | "you'll have four eme inputs okay two moving average inputs and one tick box"
+R setup E 14:21 | How to trade them is left to later videos. | "I will discuss them in the upcoming videos in the series"
 T not_testable | an indicator set-up tutorial: no entry, stop or exit rule

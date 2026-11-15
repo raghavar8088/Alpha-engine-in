@@ -8,7 +8,7 @@ style: intraday
 R market E 02:52,22:46 | Nifty only, buying the at-the-money weekly call or put (the next expiry on expiry day). | "isamen sirph niphtee ke oopar intraade stretajee hai. vo bhee opshans baaing"
 R indicator E 05:00,05:48 | Camarilla levels H3/H4/H5 and L3/L4/L5 from the previous day's high, low and close, plotted on spot, futures and each option. | "ye jo chhah levals hote hain matalab H3, H4, H5, L3, L4, L5"
 R indicator E 10:02,24:13 | A channel of the 200-period EMA of highs and of lows on the one-minute option chart: avoid buying when it slopes down. | "agar chainal samajho daaun van daaun trend men slop kar rahaa hai to janaralee aapako baaing avoid karanaa chaahie"
-R indicator E 22:46 | VWAP on the futures chart (spot has no volume). | "jo veevap hai vo aapako phyoochar ke chaart men lagaanaa hai"
+R indicator E 23:16 | VWAP on the futures chart (spot has no volume). | "jo veevap hai vo aapako phyoochar ke chaart men lagaanaa hai"
 R entry E 09:21,14:58 | Buy the option when it crosses its own Camarilla level (H3, or the previous resistance such as L5) with the channel turning up and Nifty breaking VWAP / a level the same way; a 1% Point & Figure breakout on the option confirms. | "jaise jo kandeeshan sar ne bataaee hai agar hamen spot men dikhataa hai ki bhaaee ek inportent yoo no praais brek kar rahaa hai"
 R stop E 12:55,17:53 | Stop: the swing low under VWAP or H5 (about 20-30 option points in the example). | "striktalee veevap ke neeche jo bhee ek sving lo aaegaa yaa H5 ke neeche vo striktalee stop los banataa hai"
 R target E 15:41,17:53 | Never trade one lot: book the first lot at the next Camarilla level (H4, H5) and ride the second. | "nevar tred vid van lot"

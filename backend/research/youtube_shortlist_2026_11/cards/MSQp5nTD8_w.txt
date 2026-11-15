@@ -5,6 +5,6 @@ instruments: Crypto
 timeframes: Not stated
 style: intraday
 = TK-04 | Reversal at a key level with equal highs and RSI divergence, entered on the first lower low's fair-value-gap retest
-R setup E 01:27 | Equal highs above a broken support: liquidity. | "a cluster of equal highs just above here this is exactly where liquidity tends to build up"
-R entry E 02:50 | Confirmation: the first lower low, leaving a bearish fair value gap. | "price makes its very first lower low leaving behind a bearish fair value gap"
+R setup E 01:35 | Equal highs above a broken support: liquidity. | "a cluster of equal highs just above here this is exactly where liquidity tends to build up"
+R entry E 03:05 | Confirmation: the first lower low, leaving a bearish fair value gap. | "price makes its very first lower low leaving behind a bearish fair value gap"
 T concept_only | the levels, liquidity and divergence are read by eye

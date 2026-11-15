@@ -5,18 +5,18 @@ instruments: Bitcoin (BTCUSDT)
 timeframes: 15m, 30m (4h as the bigger timeframe)
 style: scalping
 = SA-02 | KAMA trend on 15 minutes and 4 hours, ADX over 50, choppiness under 50, narrow bands, 2.5 ATR, 10-bar wait
-R indicator E 00:03 | The Kaufman adaptive moving average is the main indicator. | "the main indicator of this strategy is called kofman adaptive moving average"
-R entry E 00:03 | Price above it is an uptrend, below it a downtrend. | "when the current price is below the moving average we're in a downtrend"
-R stop E 01:31 | Stop and take-profit at 2.5 ATR. | "set the suplus and take profit at 2.5 times of the current ATR"
-R filter E 05:05 | No trade when ADX is below 50. | "I don't want the strategy to take any trades if the adx is below 50"
-R filter E 08:31 | The same KAMA on the 4-hour as the bigger timeframe. | "use the 4 hours as a bigger time frame"
-R filter E 11:25 | Only when the choppiness index is below 50. | "I want to take only positions when the choppiness index is below 50"
-R filter E 14:09 | Only when the Bollinger width (x 100) is below 7. | "I want to take a trade only if the value of it multiplied by 100 is below 7"
-R filter E 15:39 | Wait 10 candles after a trade closes. | "I don't want to take another trade until at least another 10 candles has been passed"
+R indicator E 00:30 | The Kaufman adaptive moving average is the main indicator. | "the main indicator of this strategy is called kofman adaptive moving average"
+R entry E 00:40 | Price above it is an uptrend, below it a downtrend. | "when the current price is below the moving average we're in a downtrend"
+R stop E 01:43 | Stop and take-profit at 2.5 ATR. | "set the suplus and take profit at 2.5 times of the current ATR"
+R filter E 05:34 | No trade when ADX is below 50. | "I don't want the strategy to take any trades if the adx is below 50"
+R filter E 08:46 | The same KAMA on the 4-hour as the bigger timeframe. | "use the 4 hours as a bigger time frame"
+R filter E 11:50 | Only when the choppiness index is below 50. | "I want to take only positions when the choppiness index is below 50"
+R filter E 14:19 | Only when the Bollinger width (x 100) is below 7. | "I want to take a trade only if the value of it multiplied by 100 is below 7"
+R filter E 16:05 | Wait 10 candles after a trade closes. | "I don't want to take another trade until at least another 10 candles has been passed"
 R market A - | Desk version: Delta BTCUSD and ETHUSD on 15-minute candles with the 4-hour KAMA; held across days; 1% risk. | ""
 R indicator A - | Jesse's defaults: KAMA (14, fast 2, slow 30) on 15-minute and 4-hour closes, ADX (14), choppiness index (14), Bollinger Bands (20, 2) with width = (upper - lower) / middle x 100, ATR (14). | ""
 R entry A - | Long when the close is above both KAMAs (the 4-hour one from the last completed 4-hour bar), ADX above 50, choppiness below 50, the width below 7 and at least 10 bars since the last trade closed: enter at the next open. Mirror for shorts. | ""
 R stop A - | Stop and target 2.5 x ATR (14) from the fill; one position at a time. | ""
 T with_assumptions | the indicator defaults are Jesse's (A); the 10-bar wait is counted from our replay of the earlier trades (A)
 C other | 17:46 | Sharpe 1.9 on 15 minutes, max drawdown under 10% | 2022 to November 2024, bitcoin | "the sharp is upgraded to 1.9 on the 15 minutes time frame"
-C return_pct | 18:30 | about +800% with 3x the size, -24% drawdown | the same backtest | "now with the max throw down of minus 24% we're making nearly 800% profit"
+C return_pct | 18:53 | about +800% with 3x the size, -24% drawdown | the same backtest | "now with the max throw down of minus 24% we're making nearly 800% profit"

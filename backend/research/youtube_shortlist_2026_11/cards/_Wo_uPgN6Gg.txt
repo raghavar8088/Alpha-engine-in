@@ -7,5 +7,5 @@ style: options_buying
 = SO-01 | Stockmock's range-breakout feature (demo)
 R market E 00:04 | The feature: range breakout. | "today in this video we're going to talk about a new feature which is range breakout"
 R setup E 02:19 | The ATM is set from the spot price at 10:15. | "so at 10 15 how we are deciding it we are observing the spot price at 10 15"
-R entry E 03:03 | Define a range first, then enter on its break. | "we don't want to enter into the trade right away we have to define a range for that instrument first"
+R entry E 03:06 | Define a range first, then enter on its break. | "we don't want to enter into the trade right away we have to define a range for that instrument first"
 T concept_only | a demo of a platform feature with example settings; no rule set is put forward as a strategy

@@ -5,7 +5,7 @@ instruments: POWR/BTC (altcoins)
 timeframes: Not stated
 style: unclear
 = MN-02 | 3Commas DCA bot: TBO deal-start signal, safety orders, 3% target (backtester promotion)
-R entry E 04:12 | Deals start from TBO signals. | "we also have tbo deal start conditions"
+R entry E 04:38 | Deals start from TBO signals. | "we also have tbo deal start conditions"
 R target E 04:12 | A 3% take profit worked best. | "it actually works best at three"
 T not_testable | the deal-start signal is the paid TBO indicator and the bot settings are not all stated; a product promotion
 C return_pct | 02:48 | +56% (123 closed deals) | 1 December 2021 to March 2022, paper account | "56 since december 1st"

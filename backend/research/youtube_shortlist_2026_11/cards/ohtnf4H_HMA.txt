@@ -5,13 +5,13 @@ instruments: Forex (shown in pips)
 timeframes: 1m
 style: scalping
 = TQ-02 | EMA 50 / 200 cross, the first touch of the EMA 50 and a candle back beyond it, 2 ATR stop, 1.5R
-R indicator E 00:09 | The 200 EMA, the 50 EMA and the ATR. | "all this strategy uses is a 200 period ema 50 ema and the atr"
-R indicator E 00:53 | ATR 14 with RMA smoothing. | "the atr settings are 14 for length and smoothing is rma"
-R setup E 00:53 | First the 50 crosses over the 200. | "you're simply waiting for the 50 to cross over the 200 that's the first thing you need to see"
-R setup E 00:53 | Then the first touch of the 50 after the cross. | "the next thing that you wait for is the first touch on the 50 after the cross"
-R entry E 01:34 | Enter on a green candle closing above the 50, with no more than three closes below the 200. | "a green candle that closes above the 50 period without getting more than three candles closing below the 200"
-R stop E 01:34 | Stop 2 ATR from the entry candle. | "you simply place your stop loss two times the atr value below the entry candle"
-R target E 02:20 | Target 1.5R. | "you're gonna target 1.5 times the risk that is the strategy"
+R indicator E 00:18 | The 200 EMA, the 50 EMA and the ATR. | "all this strategy uses is a 200 period ema 50 ema and the atr"
+R indicator E 01:10 | ATR 14 with RMA smoothing. | "the atr settings are 14 for length and smoothing is rma"
+R setup E 01:16 | First the 50 crosses over the 200. | "you're simply waiting for the 50 to cross over the 200 that's the first thing you need to see"
+R setup E 01:24 | Then the first touch of the 50 after the cross. | "the next thing that you wait for is the first touch on the 50 after the cross"
+R entry E 01:45 | Enter on a green candle closing above the 50, with no more than three closes below the 200. | "a green candle that closes above the 50 period without getting more than three candles closing below the 200"
+R stop E 02:09 | Stop 2 ATR from the entry candle. | "you simply place your stop loss two times the atr value below the entry candle"
+R target E 02:23 | Target 1.5R. | "you're gonna target 1.5 times the risk that is the strategy"
 R market A - | Desk version: Delta BTCUSD, ETHUSD and XAUTUSD (gold) on 1-minute candles; out at the day's end. | ""
 R entry A - | After the EMA 50 crosses above the EMA 200, the first bar whose low reaches the EMA 50 arms the setup, and the first green bar closing above the EMA 50 from then on enters at the next open; more than three closes below the EMA 200 since the cross cancel it until the next cross. One trade per cross; mirror for shorts. | ""
 R stop A - | Stop 2 x ATR (14) from the fill; target 1.5R. | ""

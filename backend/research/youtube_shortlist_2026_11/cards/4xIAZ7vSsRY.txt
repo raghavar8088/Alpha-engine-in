@@ -5,7 +5,7 @@ instruments: stocks and other markets
 timeframes: intraday
 style: scalping
 = MI-01 | Heikin Ashi colour change at a support / resistance and VWAP band confluence, stop beyond the level, targets at the bands
-R indicator E 06:07 | Two sets of VWAP bands, at 1 and 2 standard deviations. | "One VWAP with standard deviation bands of 1, and the second one with standard deviation"
-R setup E 08:20 | Confluence: a support or resistance level that lines up with the VWAP bands. | "Points where a support or resistance level aligns with VWAP bands"
-R stop E 09:01 | The stop below the support level and the confluence area. | "Stop loss always goes below the support level, below the confluence area"
+R indicator E 06:44 | Two sets of VWAP bands, at 1 and 2 standard deviations. | "One VWAP with standard deviation bands of 1, and the second one with standard deviation"
+R setup E 08:26 | Confluence: a support or resistance level that lines up with the VWAP bands. | "Points where a support or resistance level aligns with VWAP bands"
+R stop E 09:14 | The stop below the support level and the confluence area. | "Stop loss always goes below the support level, below the confluence area"
 T concept_only | the support and resistance levels and trend lines are drawn by eye; the confluence and the profit-taking are judged case by case

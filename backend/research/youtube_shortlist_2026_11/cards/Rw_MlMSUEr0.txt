@@ -5,19 +5,19 @@ instruments: Bitcoin (BTCUSDT)
 timeframes: 30m, 1h (4h as the bigger timeframe)
 style: intraday
 = SA-03 | Alligator trend on 30 minutes and 4 hours, ADX over 30, CMO beyond 20, Stochastic RSI pullback, 2 ATR
-R entry E 00:43 | The lips above the teeth, both above the jaw. | "we want the value for the lips to be bigger than teeth and both of them to"
+R entry E 01:21 | The lips above the teeth, both above the jaw. | "we want the value for the lips to be bigger than teeth and both of them to"
 R entry E 01:27 | And price above all three lines. | "we want the current price to be above all the three lines"
 R stop E 02:53 | Stop 2 ATR from the entry. | "minus the ATR with default values multiplied by two"
 R filter E 04:57 | ADX above 30. | "if the current adx for the current candles is more than 30"
-R filter E 06:21 | The same Alligator trend on the 4-hour. | "as the time frame I will pass 4 hours"
-R target E 08:29 | A fixed target at one times the risk. | "I want my risk reward ratio to be one so I will multiply it by two"
-R filter E 09:12 | Price on the right side of the 4-hour 100 EMA. | "using the 100 moving average but with the bigger time frame"
-R filter E 12:49 | CMO beyond 20 (minus 20 for shorts). | "let's go back and try the same thing except with the number 20"
-R entry E 14:14 | Stochastic RSI below 20 for longs, above 80 for shorts. | "if the RSI is below 20 I will take long positions and if is above 80 I will take short positions"
+R filter E 06:37 | The same Alligator trend on the 4-hour. | "as the time frame I will pass 4 hours"
+R target E 08:45 | A fixed target at one times the risk. | "I want my risk reward ratio to be one so I will multiply it by two"
+R filter E 09:43 | Price on the right side of the 4-hour 100 EMA. | "using the 100 moving average but with the bigger time frame"
+R filter E 13:07 | CMO beyond 20 (minus 20 for shorts). | "let's go back and try the same thing except with the number 20"
+R entry E 14:36 | Stochastic RSI below 20 for longs, above 80 for shorts. | "if the RSI is below 20 I will take long positions and if is above 80 I will take short positions"
 R market A - | Desk version: Delta BTCUSD and ETHUSD on 30-minute candles with the 4-hour as the bigger timeframe; held across days; 1% risk. | ""
 R indicator A - | Jesse's defaults: the Alligator of the close (SMMA 13, 8, 5 shifted 8, 5, 3), ADX (14), EMA 100 of 4-hour closes, CMO (14), Stochastic RSI (14, 14, 3, 3) %K, ATR (14). | ""
 R entry A - | Long when, on 30 minutes, lips > teeth > jaw with the close above the lips, the same holds on the last completed 4-hour bar, ADX is above 30, the close is above the 4-hour EMA 100, CMO is above 20 and %K is below 20: enter at the next open. Mirror for shorts. | ""
 R stop A - | Stop and target 2 x ATR (14) from the fill; one position at a time. | ""
 T with_assumptions | the indicator defaults are Jesse's (A); his first exit (on a trend flip) was replaced by the fixed target, as in his final version
-C other | 14:56 | Sharpe 1.99 on 30 minutes | 2022 to November 2024, bitcoin | "sharp on the 30 minutes is 1.9 99"
-C return_pct | 15:39 | +1,721% with 5x the size, -29% drawdown | the same backtest | "when the max Ron is minus 29% the net profit is at 1,721 per"
+C other | 15:25 | Sharpe 1.99 on 30 minutes | 2022 to November 2024, bitcoin | "sharp on the 30 minutes is 1.9 99"
+C return_pct | 16:06 | +1,721% with 5x the size, -29% drawdown | the same backtest | "when the max Ron is minus 29% the net profit is at 1,721 per"

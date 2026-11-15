@@ -5,14 +5,14 @@ instruments: forex and stocks (Trading Rush app)
 timeframes: intraday
 style: intraday
 = RU-07 | RSI under 30, then the first candle closing well above the Bollinger middle band, stop below the lower band, 1.5R (mirror for shorts)
-R entry E 01:24 | Buy at the first candle that closes above the middle band soon after the RSI was oversold. | "a buy entry signal is at the first candle that closes above the middle bollinger band, soon after RSI was over sold"
-R filter E 01:24 | Oversold: the RSI under 30. | "RSI value below 30 is considered to be over sold"
-R entry E 01:24 | A good portion of the candle must close above the middle band. | "a good portion of the candle has to close above the middle bollinger band, a slight touch will be considered as invalid"
-R entry E 01:24 | Sell: the first candle closing below the middle band ... | "a sell entry signal is at the first candle that closes below the middle bollinger"
+R entry E 01:39 | Buy at the first candle that closes above the middle band soon after the RSI was oversold. | "a buy entry signal is at the first candle that closes above the middle bollinger band, soon after RSI was over sold"
+R filter E 01:44 | Oversold: the RSI under 30. | "RSI value below 30 is considered to be over sold"
+R entry E 01:52 | A good portion of the candle must close above the middle band. | "a good portion of the candle has to close above the middle bollinger band, a slight touch will be considered as invalid"
+R entry E 02:01 | Sell: the first candle closing below the middle band ... | "a sell entry signal is at the first candle that closes below the middle bollinger"
 R filter E 02:07 | ... soon after the RSI was over 70. | "RSI value above 70 is considered as over bought"
-R stop E 02:07 | Stop below the lower band (above the upper band for shorts). | "You can set the stoploss below the lower bollinger band"
-R filter E 02:51 | No 200-period moving average filter. | "you cannot use the 200 period moving average to find the trend direction"
-R target E 06:24 | Reward to risk 1.5:1. | "With a reward risk ratio of 1.5 to 1, the win rate of the Bollinger Bands RSI strategy I got"
+R stop E 02:25 | Stop below the lower band (above the upper band for shorts). | "You can set the stoploss below the lower bollinger band"
+R filter E 03:23 | No 200-period moving average filter. | "you cannot use the 200 period moving average to find the trend direction"
+R target E 06:55 | Reward to risk 1.5:1. | "With a reward risk ratio of 1.5 to 1, the win rate of the Bollinger Bands RSI strategy I got"
 R market A - | Desk version: bitcoin and gold (Delta XAUTUSD) on 30-minute candles, like the channel's other books (RU-06); out at the day's end. | ""
 R indicator A - | Bollinger (20, 2) and RSI (14), the default settings. | ""
 R entry A - | 'Soon after': a reading under 30 arms the long for 20 candles (a reading over 70 cancels it); 'a good portion': the close above the middle band with at least half of the candle's body above it; entry at the next open; one position at a time; mirror for shorts. | ""

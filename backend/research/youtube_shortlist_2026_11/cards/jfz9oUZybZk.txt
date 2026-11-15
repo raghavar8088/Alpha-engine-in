@@ -5,6 +5,6 @@ instruments: altcoins (Cardano, Algorand, Harmony, Kusama, Curve)
 timeframes: 1D
 style: swing
 = AN-02 | Oversold altcoins (RSI under 30) near a support level read by eye
-R filter E 02:49 | Oversold: the RSI under 30. | "typically, when you get under 30, that's oversold"
-R setup E 04:55 | Then find the next support level on the chart. | "it's good to look at the charts and determine where is the next next uh support level"
+R filter E 03:12 | Oversold: the RSI under 30. | "typically, when you get under 30, that's oversold"
+R setup E 05:22 | Then find the next support level on the chart. | "it's good to look at the charts and determine where is the next next uh support level"
 T concept_only | the support levels are read by eye, coin by coin; no entry, stop or exit is stated

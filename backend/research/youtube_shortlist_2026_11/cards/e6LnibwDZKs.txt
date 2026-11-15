@@ -5,16 +5,16 @@ instruments: Bitcoin (BTCUSD)
 timeframes: 1m
 style: scalping
 = TQ-01 | Heikin Ashi RSI oscillator back to its zero line, then the first candle with the EMA 200 trend, swing stop, 2R
-R indicator E 00:02 | The Heikin Ashi RSI oscillator by JayRogers. | "it's going to be called hikanashi rsi oscillator by j rogers"
-R indicator E 00:52 | Its open smoothing set to 7. | "the settings that i was told to use seven uh for the open smoothing"
-R filter E 00:52 | The 200 EMA as the trend filter: longs above it, shorts below. | "you have the 200 period exponential moving average here and this just is going to operate as the trend direction filter"
-R entry E 01:39 | Short: the oscillator pulls back to the zero line, then a red bar continues. | "looking for a pullback into the zero line and then a continuation with a red bar for a short position"
-R entry E 02:22 | Long: the pullback to the zero line or below, then a green bar. | "we're looking for the pullback that is going to the zero line or below and then we're looking for a green signal"
-R stop E 01:39 | Stop just beyond the swing; target 2R. | "stop loss placed just above the swing high and targeting two times the risk"
+R indicator E 00:40 | The Heikin Ashi RSI oscillator by JayRogers. | "it's going to be called hikanashi rsi oscillator by j rogers"
+R indicator E 00:59 | Its open smoothing set to 7. | "the settings that i was told to use seven uh for the open smoothing"
+R filter E 01:29 | The 200 EMA as the trend filter: longs above it, shorts below. | "you have the 200 period exponential moving average here and this just is going to operate as the trend direction filter"
+R entry E 02:00 | Short: the oscillator pulls back to the zero line, then a red bar continues. | "looking for a pullback into the zero line and then a continuation with a red bar for a short position"
+R entry E 02:54 | Long: the pullback to the zero line or below, then a green bar. | "we're looking for the pullback that is going to the zero line or below and then we're looking for a green signal"
+R stop E 02:17 | Stop just beyond the swing; target 2R. | "stop loss placed just above the swing high and targeting two times the risk"
 R market A - | Desk version: Delta BTCUSD and ETHUSD on 1-minute candles; out by the end of the UTC day. | ""
 R indicator A - | The oscillator: Heikin Ashi candles built from RSI (14) minus 50 of the close, high and low, with the open smoothed over 7 bars (JayRogers' formula). | ""
 R entry A - | Long: the close is above the EMA 200; an oscillator candle whose low reaches zero arms the setup; the next green oscillator candle enters at the next open. Short: the mirror below the EMA 200. One position at a time. | ""
 R stop A - | Stop one tick beyond the lowest low (highest high) of the last 10 bars; target 2R. | ""
 T with_assumptions | the 10-bar swing and the zero-line touch test are ours (A); he says 1-minute fees make it unprofitable
-C trade_count | 03:50 | 44 winners, 56 losers | three days of 1-minute bitcoin | "there were 44 winning trades and 56 losing trades"
+C trade_count | 04:23 | 44 winners, 56 losers | three days of 1-minute bitcoin | "there were 44 winning trades and 56 losing trades"
 C return_pct | 04:36 | +32% at 1% risk, before fees | the same test | "32 so it sounds absolutely out of this world"

@@ -14,5 +14,5 @@ R market E 39:30,01:01:18 | Nifty and Bank Nifty futures only; long only. | "Thi
 R market A - | Desk version: the Nifty and Bank Nifty index rows (one minute) as a proxy for the futures, held overnight. | ""
 R entry A - | The gap must still be open at 15:14, when the day's high so far sets the target; entry at the 15:15 open. The previous trend counts as down when the prior day closed below its 20-session average close. No time exit; one position at a time. | ""
 T with_assumptions | 'previous trend down' is judged by eye (A: below the 20-session average); the index replaces futures (A)
-C win_rate | 48:46 | 22 of 24 trades profitable, two stops | Nifty, June 2013 to 2017 | "there were 24 trades and only two trades have gone wrong guys. 22 trades have given us profit"
+C win_rate | 48:55 | 22 of 24 trades profitable, two stops | Nifty, June 2013 to 2017 | "there were 24 trades and only two trades have gone wrong guys. 22 trades have given us profit"
 C trade_count | 50:54 | four trades in 2017 so far, all winners | Nifty, 2017 | "in this year it was only four till now and all the four had given us profits"

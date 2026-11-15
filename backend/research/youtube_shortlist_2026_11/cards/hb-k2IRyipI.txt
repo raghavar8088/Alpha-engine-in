@@ -5,8 +5,8 @@ instruments: NIFTY options; SENSEX options
 timeframes: 5m
 style: options_selling
 = CJ-01 | Expiry-day option-selling scalps at the previous day's high and low
-R market E 00:01 | Not option buying: the video is about selling. | "to agar aap samajh rahe hain ki main opshan skailping opshans baaing ke andar bataane vaalaa hoon to yah veediyo aapake lie naheen hai"
+R market E 00:06 | Not option buying: the video is about selling. | "to agar aap samajh rahe hain ki main opshan skailping opshans baaing ke andar bataane vaalaa hoon to yah veediyo aapake lie naheen hai"
 R session E 02:05 | Only on expiry day. | "main sirph eksapaayaree vaale de kaa de par hee karataa hoon"
-R setup E 04:14 | The previous day's low (and high) as the levels. | "to preeviyas de kaa lo aap dekhenge"
-R entry E 04:58 | At the upper level, weakness can bring the market down. | "agar oopar vaale leval par maarket aataa hai aur thoraa saa veekanes dikhaataa hai to yahaan se maarket neeche aa sakataa hai"
+R setup E 04:52 | The previous day's low (and high) as the levels. | "to preeviyas de kaa lo aap dekhenge"
+R entry E 05:06 | At the upper level, weakness can bring the market down. | "agar oopar vaale leval par maarket aataa hai aur thoraa saa veekanes dikhaataa hai to yahaan se maarket neeche aa sakataa hai"
 T not_testable | expiry-day option selling on 'weakness' judged by eye; no entry trigger, stop or target size is stated

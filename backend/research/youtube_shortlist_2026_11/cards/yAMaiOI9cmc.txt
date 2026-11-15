@@ -6,7 +6,7 @@ timeframes: 5m range, 1m entries
 style: scalping
 = TK-02 | 9:30 New York 5-minute opening range: a 1-minute close outside, trade the retest, 1:2 to 1:3
 R setup E 00:43 | The range is the first 5-minute candle after the 9:30 New York open. | "for the first 5-minute candle close after the 9:30 New York session open"
-R entry E 01:28 | After a close outside, enter on the retest of the broken level. | "If price returns to the range after the breakout and tests the same level as support, the retest is then successful and we can look to take a long position"
-R target E 02:08 | Target 1:2 or 1:3. | "we can target a 1:2 or 1:3 risk-to-reward ratio"
+R entry E 01:31 | After a close outside, enter on the retest of the broken level. | "If price returns to the range after the breakout and tests the same level as support, the retest is then successful and we can look to take a long position"
+R target E 02:20 | Target 1:2 or 1:3. | "we can target a 1:2 or 1:3 risk-to-reward ratio"
 T with_assumptions | the stop placement is shown, not stated
 D JR-04 | the 9:30-9:35 range with a close outside and a retest entry at 2R is already coded (the 20-channel study's JR-04; PR-02 on Nifty)

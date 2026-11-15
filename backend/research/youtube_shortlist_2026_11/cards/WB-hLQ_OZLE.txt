@@ -9,7 +9,7 @@ R indicator E 00:42 | Traditional daily pivot points (P, R1-R3, S1-S3). | "we ar
 R setup E 00:42,08:22 | The previous day must be clearly trending up or down. | "the previous day has to be trending up or down clearly"
 R setup E 00:42,08:22 | During the Asian session price grinds back into the daily pivot. | "we grind back into the daily pivot during the asian session"
 R entry E 00:42,08:22 | Enter on the 5-minute breakout in the prevailing trend's direction during the London open (sometimes the New York open). | "we enter with the breakout on the 5-minute chart during the London session opening"
-R stop E 08:22 | Risk above/below the pivot and the swing high/low. | "risk above or below the pivot and swing high or low"
+R stop E 08:53 | Risk above/below the pivot and the swing high/low. | "risk above or below the pivot and swing high or low"
 R target E 01:23,08:22 | Take profit at the pivot levels, usually S1/R1 or S2/R2; take no trade below 2:1. | "I don't recommend taking trades below two-to-one"
 R exit E 02:05,09:03 | If the target is not reached, close at the end of the session. | "if your take profit was not reached ... until the end of the session you closed your trade"
 R market A - | Desk version: EUR/USD and GBP/USD (the desk's FX futures minutes). | ""

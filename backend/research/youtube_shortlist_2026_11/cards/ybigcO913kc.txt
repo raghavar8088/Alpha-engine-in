@@ -13,5 +13,5 @@ R sizing E 02:08,07:15 | At most five positions at 20% of capital each, ranked b
 R market A - | Desk version: the NSE daily stock pool (long only, overnight). | ""
 R stop A - | No price stop is taught; the desk sets a protective stop 15% under the limit price so it can size; the five-position cap and the 150-day ranking are not coded (each pool stock trades on its own). | ""
 T with_assumptions | the US universe, the ranking and the position cap are replaced by the desk's NSE pool (A)
-C return_pct | 07:55 | +2,834% over 25 years, about 14% a year, 66% winners, average win 4.1% against an average loss of 4.7%, maximum drawdown 27% | Russell 1000, about 2000-2025 | "annual return is about 14% a year on average in the long run"
+C return_pct | 08:08 | +2,834% over 25 years, about 14% a year, 66% winners, average win 4.1% against an average loss of 4.7%, maximum drawdown 27% | Russell 1000, about 2000-2025 | "annual return is about 14% a year on average in the long run"
 P 15:04 | 15:49 | Free systems-trading guide (email signup)

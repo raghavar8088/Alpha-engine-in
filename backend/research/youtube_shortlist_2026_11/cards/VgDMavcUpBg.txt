@@ -5,9 +5,9 @@ instruments: altcoins (Solana, Polkadot and Lido shown)
 timeframes: 1D
 style: swing
 = AN-01 | EMA 12 crossing above the EMA 50 within two daily bars with the price above the EMA 12, out on the cross back (long)
-R setup E 01:29 | The EMA 12 crossed above the EMA 50 within the last two intervals (days). | "the EMA 12s the 12 Day moving average has crossed above the 50-day moving average within the last two intervals"
-R filter E 02:11 | The last price still above the EMA 12. | "we also want to see the last price still above the 12-day moving average"
-R exit E 05:43 | Sell when the EMA 12 crosses back below the EMA 50. | "the trader sells it when the 12-day moving average crosses back below the 50-day moving average"
+R setup E 01:56 | The EMA 12 crossed above the EMA 50 within the last two intervals (days). | "the EMA 12s the 12 Day moving average has crossed above the 50-day moving average within the last two intervals"
+R filter E 02:28 | The last price still above the EMA 12. | "we also want to see the last price still above the 12-day moving average"
+R exit E 06:06 | Sell when the EMA 12 crosses back below the EMA 50. | "the trader sells it when the 12-day moving average crosses back below the 50-day moving average"
 R market A - | Desk version: the Delta Exchange bitcoin perpetual on daily candles (the UTC day; the desk's ether history is too short for a 50-day EMA); long only; entry at the next day's open; one trade per cross. | ""
 R stop A - | No stop in the video: a 50% catastrophe stop, sized as 1x the account (on a 1% risk unit); the exit at the next open after a daily close with the EMA 12 back below the EMA 50. | ""
 T with_assumptions | the markets are ours (A): his screen lists altcoins; the optional filters (revenues, RSI not overbought) are not coded; no stop is given

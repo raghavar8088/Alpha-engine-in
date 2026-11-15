@@ -7,6 +7,6 @@ style: intraday
 = FW-02 | Previous-day high/low/open/close: breakout and retest with the trend, or failed breakout back inside
 R setup E 15:26,16:06 | Two setups at the previous day's levels: a breakout or breakout-and-retest, and a failed breakout. | "the second setup you will be looking for is a failed breakout"
 R entry E 20:56,21:37 | Wait for a failure pattern at the level before fading it; the trigger can be a structure shift or an anchored VWAP. | "I'm waiting for a failure pattern"
-R target E 33:36 | Target the liquidity left at highs and the previous day's high. | "potentially for a run up to the previous day high"
+R target E 33:48 | Target the liquidity left at highs and the previous day's high. | "potentially for a run up to the previous day high"
 T with_assumptions | the triggers and blocks are read by eye on lower timeframes
 D CH-03 | the previous-day high/low sweep-and-reclaim or acceptance-beyond rule is already coded (CH-03; BB-01 in the library)

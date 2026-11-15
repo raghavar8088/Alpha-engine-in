@@ -6,8 +6,8 @@ timeframes: 1m, 5m
 style: scalping
 = MN-01 | Memecoin 1-minute scalps after a crash: two DCA orders 15% apart, half off at +3%, half at +5%
 R setup E 01:21 | Pick charts that are very oversold and very volatile, then zoom in. | "when I find charts that are incredibly oversold that are incredibly volatile is I like to zoom in"
-R entry E 02:06 | The entry price did not matter to him. | "I did not care honestly at all where I was buying"
+R entry E 02:20 | The entry price did not matter to him. | "I did not care honestly at all where I was buying"
 R entry E 05:42 | Two orders: at the current price and about 15% lower. | "I break it up into two orders"
-R target E 07:07 | Half off at +3%, the rest at +5%. | "a fixed half take profit at 3% and the other half at 5%"
+R target E 07:18 | Half off at +3%, the rest at +5%. | "a fixed half take profit at 3% and the other half at 5%"
 T concept_only | the coin and the entry are picked by eye, on memecoins the desk does not trade; entries are 'anywhere'
 C return_pct | 00:01 | +30% portfolio | not stated | "how I grew my portfolio 30% by scalping beer"

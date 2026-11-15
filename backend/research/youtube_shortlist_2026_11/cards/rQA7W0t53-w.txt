@@ -7,5 +7,5 @@ style: options_buying
 = PC-06 | Mid-afternoon reversal: pin bars under the first big red candle's high, then a red-bodied candle
 R session E 02:14 | Mid-afternoon, not at the open. | "this strategy is most applicable at the midafternoon"
 R setup E 02:14 | The first red candle's high, somewhere in mid-afternoon. | "first red candle high at somewhere in midafternoon"
-R setup E 02:54 | Wait for the series of pin bars near the red candle's high. | "you have to wait till the series of Pinar near the high of the red candle"
+R setup E 02:59 | Wait for the series of pin bars near the red candle's high. | "you have to wait till the series of Pinar near the high of the red candle"
 T not_testable | the 'big' red candle, the pin bars 'near' its high and the consolidation are judged by eye; no stop or target sizes are given

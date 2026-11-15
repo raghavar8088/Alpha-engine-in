@@ -6,5 +6,5 @@ timeframes: Weekly to 5m
 style: unclear
 = UF-01 | Support and resistance from supply and demand, read top-down and by the feel of the candles (webinar)
 R setup E 35:31 | When buyers get more aggressive, ignore the lower support level. | "this SNR the lower one you must ignore"
-R entry E 44:12 | Read the candles' behaviour, not pattern names. | "feel it feel feel it right don't gues"
+R entry E 44:19 | Read the candles' behaviour, not pattern names. | "feel it feel feel it right don't gues"
 T concept_only | levels and entries are judged by eye and feel; no entry, stop or exit rule is given

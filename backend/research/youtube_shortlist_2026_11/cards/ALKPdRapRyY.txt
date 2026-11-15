@@ -5,6 +5,6 @@ instruments: NIFTY options
 timeframes: 1m
 style: options_buying
 = QS-01 | OTM option buying from order-flow zones (Quantsapp)
-R setup E 04:17 | A breakout zone with good volume. | "this particular uh breakout this Zone we are seeing good volume"
-R indicator E 04:17 | Buyer- and seller-initiated quantity. | "if we talk about the buyer and seller initiated quantity"
+R setup E 04:20 | A breakout zone with good volume. | "this particular uh breakout this Zone we are seeing good volume"
+R indicator E 04:20 | Buyer- and seller-initiated quantity. | "if we talk about the buyer and seller initiated quantity"
 T not_testable | the zones and entries are judged by eye from Quantsapp's buyer- and seller-initiated order flow, which the desk does not record

@@ -5,7 +5,7 @@ instruments: Bitcoin, altcoins
 timeframes: 1w
 style: swing
 = KV-01 | Weekly RSI trend-line breakout as a bullish signal (forecast)
-R setup E 02:41 | Weekly RSI breakouts have preceded large rises. | "every time we get a major weekly RSI breakout there's a large rise in price"
-R entry E 03:21 | A weekly close above the RSI's resistance line would signal the next leg. | "if we do get a close Above This resistance line well it may indicate a huge leg up for Bitcoin is underway"
+R setup E 02:48 | Weekly RSI breakouts have preceded large rises. | "every time we get a major weekly RSI breakout there's a large rise in price"
+R entry E 03:25 | A weekly close above the RSI's resistance line would signal the next leg. | "if we do get a close Above This resistance line well it may indicate a huge leg up for Bitcoin is underway"
 T concept_only | a forecast from a trend line drawn by eye on the weekly RSI; no entry, stop or exit
-C other | 02:41 | +95%, +80%, +73% and +100% after past weekly RSI breakouts | 2023-2024 | "one being being right at the beginning of 2023 causing a 95% rise"
+C other | 02:57 | +95%, +80%, +73% and +100% after past weekly RSI breakouts | 2023-2024 | "one being being right at the beginning of 2023 causing a 95% rise"

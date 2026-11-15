@@ -5,6 +5,6 @@ instruments: Bitcoin, altcoins
 timeframes: 1d, 4h
 style: swing
 = BU-03 | Volume-profile value area + order blocks + Market Cipher + RSI rhyme on the daily and 4-hour (six confluences)
-R setup E 02:53 | Shorts at the value area high, longs at the value area low. | "We look for our shorts in the value area high, we look for our longs in the value area low"
-R entry E 08:30 | Enter at those zones only on a divergence or a trigger wave. | "enter at these zones if we get either a bearish divergence or a nice trigger wave"
+R setup E 03:12 | Shorts at the value area high, longs at the value area low. | "We look for our shorts in the value area high, we look for our longs in the value area low"
+R entry E 08:49 | Enter at those zones only on a divergence or a trigger wave. | "enter at these zones if we get either a bearish divergence or a nice trigger wave"
 T not_testable | the same method as BU-01 on the daily and 4-hour charts: zones drawn by eye and the paid Market Cipher

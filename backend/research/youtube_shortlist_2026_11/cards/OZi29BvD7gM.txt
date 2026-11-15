@@ -10,4 +10,4 @@ R setup E 08:27,09:09 | Market structure: a low, a high, a higher low; in a rang
 R setup E 10:30,11:12 | Every level needs a statistic: at least 200 backtested observations. | "For me, the minimum would be 200 observations to class a level as a rel"
 R entry E 16:22,17:04 | Enter only after a reaction at the level (a confirmation candle formation from their course). | "I need to see a reaction"
 T concept_only | the levels' statistics and the confirmation candle are in their paid course; the levels are chosen by eye
-C win_rate | 00:01 | over 80% | his day trading strategy | "I now came up with a strategy that has an over 80% win rate"
+C win_rate | 00:10 | over 80% | his day trading strategy | "I now came up with a strategy that has an over 80% win rate"

@@ -9,6 +9,6 @@ R setup E 00:43,01:25 | Downtrend-line break: a line along the lower peaks; the 
 R entry E 07:06,09:19 | All-time-high breakout on the daily candle close. | "daily candle boom that's where you make your entry"
 R entry E 10:05,11:31 | Resistance breakout: go long over resistance, targeting the next resistance. | "you could have gone long at this situation with price targets up to the next area of price resistance"
 R stop E 08:39,09:19 | Stop just below the broken line; first attempts often fake out. | "put your stop loss down here around 210 just under the Orange Line"
-R timeframe E 04:12 | Daily or weekly charts (4-hour at most). | "I don't like to go really below daily charts personally"
+R timeframe E 04:17 | Daily or weekly charts (4-hour at most). | "I don't like to go really below daily charts personally"
 T with_assumptions | trend lines and levels are drawn by eye
 D CP-02 | a daily close beyond the last swing high with the stop under the broken level is already coded (CP-02, the power-candle breakout of the last swing; YT-17)

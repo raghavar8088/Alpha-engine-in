@@ -5,15 +5,15 @@ instruments: NIFTY options*; NIFTY index
 timeframes: 15m
 style: intraday
 = TZ-02 | Pivot point + 20 MA: above the pivot a green candle through the MA (or above the MA a candle through the pivot), stop under the candle or the MA, 2R (NIFTY, 15 minutes)
-R timeframe E 02:15 | NIFTY on 15-minute candles. | "Now, let's change the time frame to 15 minutes"
-R indicator E 02:15 | The standard pivot point (the pivot level only) and a 20 MA. | "we'll uncheck all the levels except for the pivot level"
-R entry E 02:56 | Case 1: the close above the pivot and a green candle crossing and closing above the 20 MA. | "Case 1: The candle's close price should be above the pivot point. A green candle should cross and close above the 20 MA"
+R timeframe E 02:19 | NIFTY on 15-minute candles. | "Now, let's change the time frame to 15 minutes"
+R indicator E 02:43 | The standard pivot point (the pivot level only) and a 20 MA. | "we'll uncheck all the levels except for the pivot level"
+R entry E 03:13 | Case 1: the close above the pivot and a green candle crossing and closing above the 20 MA. | "Case 1: The candle's close price should be above the pivot point. A green candle should cross and close above the 20 MA"
 R entry E 03:37 | Case 2: the close above the 20 MA and the candle crossing and closing above the pivot. | "The candle's close price is above the 20 MA. The candle crosses and closes above the pivot level"
-R entry E 03:37 | Entry at the trigger candle's close. | "Entry = Close of the trigger candle"
-R stop E 03:37 | Stop below the candle's low or the 20 MA, whichever is lower. | "Stoploss = Below the low of the trigger candle or below the 20 MA (whichever is lower)"
-R target E 03:37 | Target twice the risk. | "Target = We will consider it as 2 times the risk"
+R entry E 03:54 | Entry at the trigger candle's close. | "Entry = Close of the trigger candle"
+R stop E 03:58 | Stop below the candle's low or the 20 MA, whichever is lower. | "Stoploss = Below the low of the trigger candle or below the 20 MA (whichever is lower)"
+R target E 04:03 | Target twice the risk. | "Target = We will consider it as 2 times the risk"
 R entry E 07:06 | Sells are the opposite. | "These rules are the opposite of the buy rules"
 R indicator A - | The 20 MA is simple; the pivot is the classic (H + L + C) / 3 of the previous session. | ""
 R market A - | Desk version: the NIFTY index (Angel One minutes), entry at the next minute's open after the close; no entries from 15:00; out by 15:14. | ""
 T with_assumptions | the MA type is not said (simple, A); the book trades the index as the option's proxy (A)
-C win_rate | 08:30 | 53% winners in 100 trades, +62.13%, -4.56% drawdown in six months | NIFTY 15m (Trader Insights' manual test) | "So the win rate was 53%"
+C win_rate | 08:55 | 53% winners in 100 trades, +62.13%, -4.56% drawdown in six months | NIFTY 15m (Trader Insights' manual test) | "So the win rate was 53%"

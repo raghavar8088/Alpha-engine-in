@@ -5,7 +5,7 @@ instruments: Bitcoin and crypto; EUR/USD, USD/CHF, GBP/USD
 timeframes: 1d, 4h, 1h, 15m
 style: swing
 = CC-01 | Clean double close through a level (failed flip), limit at the level, thrust-candle stop
-R setup E 08:41 | Levels: unless a clear multi-touch level, support = the lowest close before a rally, resistance = the highest close before a drop. | "I simply use the lowest close before a rally as support and the highest close before a drop as resistance"
+R setup E 09:08 | Levels: unless a clear multi-touch level, support = the lowest close before a rally, resistance = the highest close before a drop. | "I simply use the lowest close before a rally as support and the highest close before a drop as resistance"
 R setup E 03:43,04:25 | Bullish: price closes below support, then the next time it trades to the level it closes back above it impulsively; mirror for bearish. | "price closes below the level and then when price next trades to the level ... it closes above it impulsively"
 R filter E 04:25,12:18 | There must be no touch, wick or retest of the level between the first and second break. | "there must be no retest wick interaction of any kind between break one and break two"
 R filter E 11:35,28:49 | The second break should be strong and fast (ideally engulfing); a weak close with a long wick does not count. | "the second break or break back through the level should be strong and fast"

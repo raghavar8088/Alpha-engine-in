@@ -5,12 +5,12 @@ instruments: Forex (EUR/NZD, EUR/JPY shown)
 timeframes: 1D levels, 1h chart
 style: intraday
 = MS-03 | Previous day's high / low breakout: OCO stop orders 3 pips beyond, 5-pip stop, 10-pip target, one trade at a time
-R setup E 00:09 | The previous day's high and low. | "first draws the previous days low and high onto his chart"
+R setup E 00:28 | The previous day's high and low. | "first draws the previous days low and high onto his chart"
 R entry E 00:49 | A buy stop 3 pips above the previous day's high (a sell stop 3 pips below the low); a 5-pip stop and a 10-pip target. | "the previous day's high a stop loss five pips below his entry and his take profit ten pips from his entry"
-R entry E 06:44 | The orders go in when a new day starts and no trade is open. | "we check if a new day has started and we're flat"
-R management E 11:01 | One cancels all: one trade a day. | "in other words we're only taking one trade per day"
-R exit E 12:28 | Exit only at the target or the stop. | "it will only exit this trade if our take profit is hit by price action or our stop loss is hit by price action"
+R entry E 07:18 | The orders go in when a new day starts and no trade is open. | "we check if a new day has started and we're flat"
+R management E 11:15 | One cancels all: one trade a day. | "in other words we're only taking one trade per day"
+R exit E 12:42 | Exit only at the target or the stop. | "it will only exit this trade if our take profit is hit by price action or our stop loss is hit by price action"
 R market A - | Desk version: EUR/USD and GBP/USD (the CME futures the desk trades) on minute rows; the day rolls at 17:00 New York; a pip is 0.0001. | ""
 R entry A - | The day's two orders are valid until the day ends; the stop and target are fixed 5 and 10 pips from the order price, as in his script; a trade may run into later days; once one order fills the other is cancelled; a trade still open from an earlier day blocks that day's orders while it lasts (his script places none that day). | ""
 T with_assumptions | the pairs are ours (A): the video shows EUR/NZD and EUR/JPY, which the desk does not trade; the desk fills stops and targets minute by minute, the stop first when one minute touches both
-C trade_count | 19:40 | 773 trades in TradingView's tester, which he distrusts | his test | "who knows how many times this has happened over 773 trades"
+C trade_count | 20:01 | 773 trades in TradingView's tester, which he distrusts | his test | "who knows how many times this has happened over 773 trades"

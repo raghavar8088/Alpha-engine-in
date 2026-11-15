@@ -9,6 +9,6 @@ R setup E 09:59 | Mark only significant levels: obvious swings and the previous 
 R setup E 24:06 | An SFP is a spike beyond a key high or low that closes back inside on the same time frame. | "it's a spike and closed below a key high or low on a given time frame and that acts as evidence of a reversal"
 R entry E 26:52 | Enter on the candle close, or on a retest of the level. | "it can be on the candle close and sometimes on the retest of the level"
 R target E 28:59,47:50 | In a range, target the midpoint or the other side (the other side of an inside candle); in a trend, trend continuation. | "in a Range it can be the midpoint and the other side of the range"
-R setup E 38:28 | A failed break: an effort through the level, then a close back across it. | "part one is price making an effort to break through the key level"
+R setup E 38:33 | A failed break: an effort through the level, then a close back across it. | "part one is price making an effort to break through the key level"
 T with_assumptions | which highs and lows are significant is judged by eye
 D LS-00 | the sweep of a level that closes back inside is already on the desk (LS-00 and its versions; NJ-44 and CP-26 turtle soup); his failed-break variant is CC-01's double close

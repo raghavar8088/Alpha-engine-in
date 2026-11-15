@@ -6,7 +6,7 @@ timeframes: 3m
 style: scalping
 = SG-01 | Siddharth Bhanushali's SMA 22 / 33 scalp (Strategic Stocks' test)
 R indicator E 01:28 | Two simple moving averages, 22 and 33. | "ek 22 peeriyad kaa hai aur ek 33 peeriyad kaa hai"
-R setup E 01:28 | For buys the averages must be rising. | "baaik ke lie aapakaa moovee evarej raaijing hanee chaahie"
-R stop E 02:12 | Stop just under the candle, target 1:2. | "hamaaraa stok los jast neeche rahegaa stop los aur ham 1:2 pe ham kriet karenge"
+R setup E 01:58 | For buys the averages must be rising. | "baaik ke lie aapakaa moovee evarej raaijing hanee chaahie"
+R stop E 02:41 | Stop just under the candle, target 1:2. | "hamaaraa stok los jast neeche rahegaa stop los aur ham 1:2 pe ham kriet karenge"
 T ready | the same rules as TZ-01's video
 D TZ-01 | the same SMA 22 / 33 strategy (Siddharth Bhanushali's), coded from Trader Insights' test as TZ-01

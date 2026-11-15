@@ -5,10 +5,10 @@ instruments: BTC, ETH, SOL, XRP and EOS (Kraken)
 timeframes: 1h
 style: swing
 = C3-01 | DCA bot: the 1-hour RSI (14) under 30 starts a deal, three safety orders 2.5% apart (x2 size, x4 step), 7.5% take-profit, no stop
-R indicator E 07:54 | RSI length 14 ... | "for our example we're going to set it to 14"
-R entry E 08:35 | ... a deal only when the 1-hour RSI is below 30. | "it would not be able to enter a deal unless the RSI value of the pair for the 1hour time frame is less than 30"
-R management E 05:47 | Safety orders 2.5% apart ... | "so we'll go ahead and do 2.5%"
-R management E 05:47 | ... covering a 52.5% drop with the step scale raised. | "52.5% max safety order price deviation is decently safe"
-R target E 09:15 | Take-profit 7.5%. | "will set this to 7.5%"
-R stop E 11:28 | No stop. | "I'm going to disable it since for the Bots I'm not going to want to use it"
+R indicator E 08:04 | RSI length 14 ... | "for our example we're going to set it to 14"
+R entry E 08:38 | ... a deal only when the 1-hour RSI is below 30. | "it would not be able to enter a deal unless the RSI value of the pair for the 1hour time frame is less than 30"
+R management E 05:52 | Safety orders 2.5% apart ... | "so we'll go ahead and do 2.5%"
+R management E 06:16 | ... covering a 52.5% drop with the step scale raised. | "52.5% max safety order price deviation is decently safe"
+R target E 09:28 | Take-profit 7.5%. | "will set this to 7.5%"
+R stop E 11:41 | No stop. | "I'm going to disable it since for the Bots I'm not going to want to use it"
 T not_testable | the safety-order size is not stated (he lowers it from $20 without saying to what); the desk's engine holds one entry per position, so averaging down with safety orders cannot be modelled

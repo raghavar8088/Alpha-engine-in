@@ -16,4 +16,4 @@ R entry A - | Long: the 5-minute candle's low is above all three lines and it is
 R stop A - | Stop 0.02% beyond the farthest of the three lines at the signal bar; target 1R; out at the day's end. | ""
 T with_assumptions | 'the overall trend' as the 1-hour EMA 50 side is ours (A); the runner is not coded
 C win_rate | 03:03 | 62% of 100 trades, profit factor 1.63 | EUR/USD 5-minute, under a month | "win rate 62% which is really surprising"
-C win_rate | 03:47 | 71% of 100 trades with the trend filter, profit factor 2.45; 82% on USD/JPY | EUR/USD and USD/JPY 5-minute | "71% win rate profit and loss 51%"
+C win_rate | 04:24 | 71% of 100 trades with the trend filter, profit factor 2.45; 82% on USD/JPY | EUR/USD and USD/JPY 5-minute | "71% win rate profit and loss 51%"

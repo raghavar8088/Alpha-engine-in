@@ -5,6 +5,6 @@ instruments: Crypto, stocks
 timeframes: Not stated
 style: swing
 = TK-03 | MACD signal cross in the higher-timeframe trend, at a support or resistance level
-R entry E 02:53 | Only MACD signals that match the higher-timeframe trend. | "I only take signals from the macd that match with a higher time frame Trend"
+R entry E 03:16 | Only MACD signals that match the higher-timeframe trend. | "I only take signals from the macd that match with a higher time frame Trend"
 R setup E 05:43 | In a bearish structure, shorts only. | "we should look only for shorting opportunities"
 T concept_only | the higher-timeframe structure and the levels are read by eye

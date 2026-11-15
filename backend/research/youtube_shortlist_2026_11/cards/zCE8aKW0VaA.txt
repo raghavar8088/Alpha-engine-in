@@ -5,6 +5,6 @@ instruments: crypto
 timeframes: unclear
 style: unclear
 = GP-01 | DCA bot settings guide (no example values)
-R management E 02:47 | Averaging orders with amount and step multipliers. | "the amount and step multipliers are designed to enhance the efficiency of your DCA Bots averaging process"
+R management E 03:19 | Averaging orders with amount and step multipliers. | "the amount and step multipliers are designed to enhance the efficiency of your DCA Bots averaging process"
 R target E 04:11 | Four ways to set the take-profit. | "there are four distinct methods to configure your takeprofit strategy"
 T concept_only | a settings tutorial: no start signal, order sizes, steps, take-profit or stop values are given

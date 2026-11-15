@@ -5,17 +5,17 @@ instruments: EUR/USD; GBP/USD
 timeframes: 1D
 style: swing
 = CT-04 | Larry Williams outside bar: a red (green) outside candle closing beyond the previous low (high), 250-pip stop, out at the next open once in profit
-R market E 04:54 | Daily candles of EUR/USD and GBP/USD. | "i'm using the eur us dollar and the gbp us dollar"
-R setup E 00:42 | Long setup: an outside red candle - its high above the previous high and its low below the previous low. | "for a long setup we will wait for an external red candle meaning the high is greater than the previous High and the low is lower than the previous low"
-R setup E 00:42 | It must close below the previous candle's low. | "we also need the recent candle to close below the low of the previous candle"
-R entry E 00:42 | Enter at the next candle's open. | "we Mark the closing price level and we enter the market on the next candle open"
-R entry E 01:22 | Short: the mirror - a green outside candle closing above the previous high. | "whenever we have a green external candle with wide high and low levels and a closing price above the high of the previous candle"
-R stop E 09:14 | Stop 250 pips (his code; 200 is the default he read). | "I'm changing the Pips distance to 250"
-R exit E 01:22 | No target: the trade stays open until the stop, or until a daily session ends with it in profit. | "we will keep the trade open until either it hits the stop- loss or by the end of a daily session it becomes a winning trade"
+R market E 05:19 | Daily candles of EUR/USD and GBP/USD. | "i'm using the eur us dollar and the gbp us dollar"
+R setup E 00:48 | Long setup: an outside red candle - its high above the previous high and its low below the previous low. | "for a long setup we will wait for an external red candle meaning the high is greater than the previous High and the low is lower than the previous low"
+R setup E 01:08 | It must close below the previous candle's low. | "we also need the recent candle to close below the low of the previous candle"
+R entry E 01:14 | Enter at the next candle's open. | "we Mark the closing price level and we enter the market on the next candle open"
+R entry E 01:53 | Short: the mirror - a green outside candle closing above the previous high. | "whenever we have a green external candle with wide high and low levels and a closing price above the high of the previous candle"
+R stop E 09:41 | Stop 250 pips (his code; 200 is the default he read). | "I'm changing the Pips distance to 250"
+R exit E 01:31 | No target: the trade stays open until the stop, or until a daily session ends with it in profit. | "we will keep the trade open until either it hits the stop- loss or by the end of a daily session it becomes a winning trade"
 R exit E 09:14 | A winning trade is closed at the beginning of the next session. | "if we have a winning trade we're going to close it this happens at the beginning of each session"
-R sizing E 08:33 | 10% of equity per trade. | "the size of the lot is 10% of the equity"
+R sizing E 08:40 | 10% of equity per trade. | "the size of the lot is 10% of the equity"
 R market A - | Desk version: EUR/USD and GBP/USD as the desk trades them (the CME euro and pound futures, Yahoo Finance minutes), one bar per trading day (the 17:00 New York roll); trades are held overnight; one position at a time. | ""
 R stop A - | The stop is 250 pips (0.0250) from the signal candle's close, as his code takes that close as the entry price. | ""
 R exit A - | 'Winning' is judged at each daily close against the entry (the day's open plus the spread): after a close beyond it the trade exits at the next day's open, as his backtesting.py code does; decided by replaying the strategy's own trades up to that close. | ""
 T with_assumptions | the desk's EUR/USD and GBP/USD are the CME futures (A); sizing is the desk's 1% risk on the 250-pip stop, not his 10% of equity
-C win_rate | 10:36 | 87.5% winners, +26% in total, -11% max drawdown | EUR/USD and GBP/USD daily 2017-2024, small commission | "we have a win rate of 8 7% 87.5% we have an aggregated returns of 26%"
+C win_rate | 10:55 | 87.5% winners, +26% in total, -11% max drawdown | EUR/USD and GBP/USD daily 2017-2024, small commission | "we have a win rate of 8 7% 87.5% we have an aggregated returns of 26%"

@@ -6,11 +6,11 @@ timeframes: 5m
 style: options_buying
 = SU-02 | Range of six or more 5-minute candles, a close beyond it, stop beyond the breakout candle, at least 1:3, two trades a day
 R timeframe E 01:29 | 5-minute candles. | "minats kee kaindal stik ko yooj karenge tred karane ke lie"
-R setup E 01:29 | A range of at least six candles. | "to ham ek renj phaaind aaut karenge minimam siks kaindals kee"
-R entry E 01:29 | Wait for the breakout candle to close. | "hamen brekaaaut pe kaindal kloj hone kaa vet karanaa hai isase pahale ki ham entree karen"
+R setup E 01:34 | A range of at least six candles. | "to ham ek renj phaaind aaut karenge minimam siks kaindals kee"
+R entry E 01:57 | Wait for the breakout candle to close. | "hamen brekaaaut pe kaindal kloj hone kaa vet karanaa hai isase pahale ki ham entree karen"
 R stop E 02:09 | Stop just beyond the breakout candle ... | "agar green kaindal ne brek aaut kiyaa hai to usake neeche hamaaraa stop los aa jaaegaa"
-R stop E 04:55 | ... and not more than 100 points. | "100 point jyaadaa naheen honaa chaahie"
-R target E 02:09 | At least 1:3. | "risk end rivard hamaaraa minimam 1:3"
-R sizing E 02:09 | At most two trades a day. | "ek din men ham jyaadaa se jyaadaa do tred lenge"
-R no_trade E 02:54 | The first candle is ignored after a big gap. | "pahalee kaindal ko main ignor karoongaa main ignor kis kes men karoongaa jab baraa gaip ap hogaa"
+R stop E 05:19 | ... and not more than 100 points. | "100 point jyaadaa naheen honaa chaahie"
+R target E 02:19 | At least 1:3. | "risk end rivard hamaaraa minimam 1:3"
+R sizing E 02:30 | At most two trades a day. | "ek din men ham jyaadaa se jyaadaa do tred lenge"
+R no_trade E 03:01 | The first candle is ignored after a big gap. | "pahalee kaindal ko main ignor karoongaa main ignor kis kes men karoongaa jab baraa gaip ap hogaa"
 T not_testable | what counts as a range is shown only on the chart: six candles is the minimum, but no width or containment rule is given, and the 'big gap' is not sized

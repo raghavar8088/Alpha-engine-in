@@ -7,7 +7,7 @@ style: intraday
 = CH-03 | Previous-day high/low: sweep and reclaim back inside (fade to the VWAP), or acceptance beyond it (go with it), chop = no trade
 R setup E 05:40 | Three reactions at the previous day's high or low: a liquidity sweep and reversal, a breakout and acceptance, or unclear chop (no trade). | "The first one is a liquidity sweep and reversal. The second one is a breakout and acceptance. The third is unclear price action where no trade should be taken"
 R entry E 06:20,07:03 | Sweep: price trades above the previous day high, then closes back below and cannot reclaim it: short. | "The close below and unable to reclaim is then our short trade confirmation"
-R stop E 07:03 | Sweep trade: stop above the sweep high; target the RTH VWAP or the opposite side of the range. | "The stop loss would normally be placed above the sweep high and the target for this typical setup is the VWAP"
+R stop E 07:10 | Sweep trade: stop above the sweep high; target the RTH VWAP or the opposite side of the range. | "The stop loss would normally be placed above the sweep high and the target for this typical setup is the VWAP"
 R entry E 08:25,09:07 | Acceptance: price breaks through and every bar opens and closes beyond the level; enter on the second close beyond, stop past the breakout candle. | "the stop will have to be right above the candle that breaks through the level"
 R no_trade E 10:36,11:17 | Overlapping candles trading back and forth through the level: wait. | "this is not a signal to trade more often ... This is normally where we wait"
 T with_assumptions | 'cannot reclaim' and 'acceptance' are judged by eye

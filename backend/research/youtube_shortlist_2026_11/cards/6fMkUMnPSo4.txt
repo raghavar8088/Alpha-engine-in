@@ -5,11 +5,11 @@ instruments: Stock options (e.g. Bharat Dynamics, IIFL Finance)
 timeframes: 1h
 style: options_buying
 = BJ-03 | Triple Supertrend (7, 2), (10, 3), (14, 4) with the RSI holding 40 / 60 on hourly stock charts, ATM monthly option, out on the fast Supertrend's flip
-R indicator E 09:08 | The fast Supertrend 7, 2 (the default 10, 3 is the middle one) ... | "pahalaa supar trend ham logon ne liyaa hai 72"
-R indicator E 09:08 | ... and the slow 14, 4. | "teesaraa supar trend thoraa saa slo supar trend le rahe hain jo ki hai 14 aur phor peeriyad"
-R entry E 12:34 | Calls when price is above all three. | "jab praais teenon supar trend ke oopar ho"
-R filter E 22:17 | Before the buy signal the RSI stays in the 50-40 zone and does not break 40. | "aaraesaaaee jo hai vo 50-4 ज़on ke rahe. 50-40 ज़on ko toड़e naheen"
-R exit E 20:15 | Exit when the fast Supertrend flips. | "jaise hee yah green ho gayaa egjit on sevath agast vhen d phaast supar trend tarns green"
-R timeframe E 22:59 | Shown on one-hour charts. | "main aapako 1 ghante ke chaart pe dikhaa rahaa hoon"
+R indicator E 09:17 | The fast Supertrend 7, 2 (the default 10, 3 is the middle one) ... | "pahalaa supar trend ham logon ne liyaa hai 72"
+R indicator E 09:25 | ... and the slow 14, 4. | "teesaraa supar trend thoraa saa slo supar trend le rahe hain jo ki hai 14 aur phor peeriyad"
+R entry E 12:58 | Calls when price is above all three. | "jab praais teenon supar trend ke oopar ho"
+R filter E 22:30 | Before the buy signal the RSI stays in the 50-40 zone and does not break 40. | "aaraesaaaee jo hai vo 50-4 ज़on ke rahe. 50-40 ज़on ko toड़e naheen"
+R exit E 20:48 | Exit when the fast Supertrend flips. | "jaise hee yah green ho gayaa egjit on sevath agast vhen d phaast supar trend tarns green"
+R timeframe E 23:28 | Shown on one-hour charts. | "main aapako 1 ghante ke chaart pe dikhaa rahaa hoon"
 R market E 19:32 | Options with 30-40 days to expiry. | "kam se kam jab aap opshan baaing karen to 30 se 40 din kaa deeteeee ho"
 T not_testable | monthly stock options held for days on hourly charts: the desk records no stock option premiums and its NSE stock books are intraday (flat each evening); the stocks are picked by eye

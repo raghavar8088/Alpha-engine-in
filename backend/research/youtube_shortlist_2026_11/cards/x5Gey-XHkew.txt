@@ -5,10 +5,10 @@ instruments: ETH/USDT; BTC/USDT
 timeframes: 45m, 5m
 style: intraday
 = CU-03 | Ichimoku bullish (Tenkan over Kijun, Chikou over the price, close over the cloud) with the -DI over the +DI and the ADX above 45, 3% trailing exits
-R entry E 01:30 | The Tenkan above the Kijun ... | "first we require the 10 consent this blue line here is above the Cajun sand"
-R filter E 01:30 | ... the Chikou above the close of 26 bars ago ... | "we require that the chicken span this green line here is above the close of 26 bars ago"
-R filter E 01:30 | ... the close above the cloud ... | "we also require that the close is greater than the Kumo Cloud"
-R filter E 01:30 | ... the -DI above the +DI and the ADX above 45. | "We require the negative di line it's greater than the positive di line that the adx which is this red line here is greater than 45"
-R exit E 02:13 | 3% trailing take-profit and stop. | "the take profit condition is a three percent price decrease failing and the stop loss condition is a three percent price increase trailer"
+R entry E 01:44 | The Tenkan above the Kijun ... | "first we require the 10 consent this blue line here is above the Cajun sand"
+R filter E 01:44 | ... the Chikou above the close of 26 bars ago ... | "we require that the chicken span this green line here is above the close of 26 bars ago"
+R filter E 01:51 | ... the close above the cloud ... | "we also require that the close is greater than the Kumo Cloud"
+R filter E 02:00 | ... the -DI above the +DI and the ADX above 45. | "We require the negative di line it's greater than the positive di line that the adx which is this red line here is greater than 45"
+R exit E 02:21 | 3% trailing take-profit and stop. | "the take profit condition is a three percent price decrease failing and the stop loss condition is a three percent price increase trailer"
 T not_testable | the trailing take-profit and stop are not defined (what they trail from, and the take-profit is described as a price decrease); the Ichimoku and DMI settings are not given
-C return_pct | 02:57 | +299% over 176 trades, 40% winners | ETH/USDT 45m, 2022 | "299 net profit with 176 trades"
+C return_pct | 03:31 | +299% over 176 trades, 40% winners | ETH/USDT 45m, 2022 | "299 net profit with 176 trades"

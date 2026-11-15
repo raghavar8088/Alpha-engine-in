@@ -9,4 +9,4 @@ R entry E 00:05,00:46 | Buy or sell on whether he believes price will go up or d
 R setup E 05:40,06:24 | Favour pairs with big one-hour extensions that fail to continue. | "seeing pairs that have had big extensions in One Direction"
 R stop E 02:55 | Stop beyond the zone, target on the other side. | "I'll put a stop loss above the Zone Target below"
 T concept_only | entries come from intuition and experience by his own account; zones and extensions are judged by eye
-C r_multiple | 16:19 | about 2R a week, 8R a month | his called trades | "plus two R per week that is about eight R per month"
+C r_multiple | 16:23 | about 2R a week, 8R a month | his called trades | "plus two R per week that is about eight R per month"

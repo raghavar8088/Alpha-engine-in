@@ -7,7 +7,7 @@ style: swing
 = MY-01 | Fair value gap in the discount of the dealing range after a sweep, entry in its first half, stop past candle one (top-down)
 R setup E 00:44,02:10 | A fair value gap: three candles, the middle a displacement candle; the gap runs from candle one's high to candle three's low (bullish). | "It's going to be the high of candle one to the low of candle three"
 R filter E 09:49,10:35 | Higher-probability gaps: in the discount of the dealing range (below its 50%) for longs, after taking sell-side liquidity, with the higher-timeframe trend. | "where are the best longs? Near the range low, in a discount, after taking out sell-side liquidity"
-R entry E 23:33 | Enter at the gap's edge or within its first 50% (a limit order or spread orders). | "the entry itself is the fair value gap beginning. Or, in a bearish fair value gap, it's the 50% and down"
+R entry E 23:38 | Enter at the gap's edge or within its first 50% (a limit order or spread orders). | "the entry itself is the fair value gap beginning. Or, in a bearish fair value gap, it's the 50% and down"
 R stop E 24:15,25:38 | Stop directly beyond the gap (tightest) or beyond candle one (more room). | "Your stop loss has two options ... directly below the fair value gap ... The second option ... below candle one"
 R target E 26:24 | Target the external range liquidity (the range's far extreme). | "Our target, obviously, is going to be the external range liquidity"
 T with_assumptions | the dealing range, structure and liquidity reads are top-down and by eye

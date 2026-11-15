@@ -5,7 +5,7 @@ instruments: Gold (XAUUSD)
 timeframes: 1d
 style: swing
 = NK-02 | Daily gold: 20/50 averages aligned, buy the oversold RSI pullback, stop under structure, trailed under structure, no target (mirror for shorts)
-R indicator E 00:44 | A 20-period moving average and a 50-period simple moving average on the daily chart. | "I'm going to go ahead and apply a 20 period moving average"
+R indicator E 01:06 | A 20-period moving average and a 50-period simple moving average on the daily chart. | "I'm going to go ahead and apply a 20 period moving average"
 R indicator E 01:28 | A shorter-period RSI, to be more nimble. | "I like to use a shorter period RSI to make it more nimble with current price action"
 R entry E 01:28,02:08 | With the averages aligned, wait for a pullback with an oversold reading and buy. | "I'm going to be looking for an oversold condition within these moving averages being aligned"
 R stop E 02:08 | Stop below the market-structure support to the left; risk 1% a trade. | "I'm going to also use stop losses based on a market structure point"

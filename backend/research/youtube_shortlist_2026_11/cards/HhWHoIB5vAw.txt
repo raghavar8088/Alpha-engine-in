@@ -5,14 +5,14 @@ instruments: Bitcoin (BTCUSDT)
 timeframes: 5m chart, 1m MACD
 style: scalping
 = DD-02 | EMA 50/200 trend, a larger-than-average 1-minute MACD histogram pullback, 0.7% target and stop, with the VWAP side
-R indicator E 01:25 | The 200 and 50 EMAs on the 5-minute chart. | "we're going to need to add the 200 EMA"
+R indicator E 01:34 | The 200 and 50 EMAs on the 5-minute chart. | "we're going to need to add the 200 EMA"
 R indicator E 01:25 | The MACD histogram, switched to the 1-minute timeframe. | "we're actually going to change the indicators time frame to 1 minute"
-R filter E 02:10 | Green (50) over red (200): longs only; red over green: shorts only. | "When the EMAs, the green is over the red, we're looking for a long and when the red is over the green, we're looking for a short position"
+R filter E 02:22 | Green (50) over red (200): longs only; red over green: shorts only. | "When the EMAs, the green is over the red, we're looking for a long and when the red is over the green, we're looking for a short position"
 R entry E 02:10,02:51 | Enter on a pullback in the MACD: a larger-than-average histogram bar against the trend (red in an uptrend). | "we're looking for a larger stick candle here over the average"
 R entry E 02:51 | In an uptrend the bar must be red: the pullback. | "we want to be in the red because we're looking for the pullback as it's going in an uptrend"
 R stop E 02:51,07:17 | Take profit 0.7% and stop 0.7%, one to one. | "and a 0.7, one-to-one ratio"
-R filter E 06:35 | At most four or five trades per EMA crossover. | "you should maximum do four to five trades per crossover"
-R filter E 07:57 | VWAP filter: longs only while the VWAP is green. | "when it's the VWAP's in the green, it will take long positions"
+R filter E 07:00 | At most four or five trades per EMA crossover. | "you should maximum do four to five trades per crossover"
+R filter E 08:29 | VWAP filter: longs only while the VWAP is green. | "when it's the VWAP's in the green, it will take long positions"
 R market A - | Desk version: Delta BTCUSD and ETHUSD; EMA 50 and EMA 200 on 5-minute closes; MACD (12, 26, 9) histogram on 1-minute bars; session VWAP of the UTC day (real volume). | ""
 R entry A - | Long: the last completed 5-minute bar has EMA 50 above EMA 200, the 1-minute histogram closes below minus the average absolute histogram of the previous 100 minutes (it was not below on the minute before), and the close is above the VWAP: enter at the next minute's open. Mirror for shorts. At most five signals per EMA crossover. | ""
 R stop A - | Stop and target 0.7% from the fill; one position at a time; out by the end of the UTC day. | ""

@@ -5,7 +5,7 @@ instruments: BANKNIFTY options
 timeframes: 1m
 style: options_buying
 = QS-02 | Bank Nifty momentum from order-book market-order flow (Quantsapp)
-R market E 00:03 | Bank Nifty momentum. | "spesiphikalee aapan diskas karanaar aahot menalee phor d bank niphtee momentam"
-R indicator E 01:42 | Order-book data, real time. | "ordar buk detaa kaay aahe ordar buk detaa ij a riyal taaeem maarket detaa point"
-R indicator E 04:28 | Buyer-initiated quantity: buyers lifting the ask. | "so det kams andar dee a baayar inishieted kvaantitee"
+R market E 00:05 | Bank Nifty momentum. | "spesiphikalee aapan diskas karanaar aahot menalee phor d bank niphtee momentam"
+R indicator E 01:58 | Order-book data, real time. | "ordar buk detaa kaay aahe ordar buk detaa ij a riyal taaeem maarket detaa point"
+R indicator E 04:37 | Buyer-initiated quantity: buyers lifting the ask. | "so det kams andar dee a baayar inishieted kvaantitee"
 T not_testable | it reads buyer- and seller-initiated market-order quantities from Quantsapp's order-book feed second by second; the desk records one quote a minute and no trade-side data

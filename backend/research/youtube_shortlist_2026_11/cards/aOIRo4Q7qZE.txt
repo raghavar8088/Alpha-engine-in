@@ -5,16 +5,16 @@ instruments: Bitcoin
 timeframes: 4h, 1D
 style: swing
 = CT-06 | Hull MA 16 / 65 cross on 4 hours with the RSI (14) above 52 and the daily close above its 50-day linear regression, out on the cross back (long)
-R timeframe E 00:49 | The 4-hour chart with a daily confirmation filter. | "this is a multi-time frame strategy running on the 4 hours chart with a daily confirmation filter"
-R entry E 00:49 | Long when the fast Hull MA crosses above the slow one. | "we go long when the fast hull moving average crosses above the slow hull moving average"
-R indicator E 01:33 | The fast HMA is 16 on 4 hours ... | "hull moving average 16 on the 4 hours crosses above"
+R timeframe E 00:56 | The 4-hour chart with a daily confirmation filter. | "this is a multi-time frame strategy running on the 4 hours chart with a daily confirmation filter"
+R entry E 01:08 | Long when the fast Hull MA crosses above the slow one. | "we go long when the fast hull moving average crosses above the slow hull moving average"
+R indicator E 02:08 | The fast HMA is 16 on 4 hours ... | "hull moving average 16 on the 4 hours crosses above"
 R filter E 02:16 | ... the slow HMA 65, and the RSI (14) on 4 hours above 52. | "the hma 65 and also if the rsi 14 on the 4 hours is greater than 52"
-R filter E 02:16 | The daily close above the 50-day linear regression. | "if the price close on the one day on the daily time frame is above the linear regression 50"
-R exit E 01:33 | Exit when the HMA 16 crosses back below the HMA 65. | "we close the trade when the fast hma crosses back below the slow hma"
-R exit E 01:33 | No stop and no target. | "no trading stop. no take profit target. exit is purely signal driven"
-R sizing E 02:16 | The whole account, no leverage. | "since we're not using a leverage account, we can flip all the equity"
+R filter E 02:22 | The daily close above the 50-day linear regression. | "if the price close on the one day on the daily time frame is above the linear regression 50"
+R exit E 01:52 | Exit when the HMA 16 crosses back below the HMA 65. | "we close the trade when the fast hma crosses back below the slow hma"
+R exit E 01:52 | No stop and no target. | "no trading stop. no take profit target. exit is purely signal driven"
+R sizing E 02:35 | The whole account, no leverage. | "since we're not using a leverage account, we can flip all the equity"
 R market A - | Desk version: the Delta Exchange bitcoin perpetual; 4-hour candles on the UTC grid; the daily filter uses the last completed UTC day (its close and its 50-day linear regression), never the forming day; entry at the next 4-hour open; long only. | ""
 R indicator A - | Hull MA with Pine's integer rounding (as DD-03); the linear regression is the least-squares line's value at the last of the 50 daily closes (Pine's linreg(close, 50, 0)). | ""
 R sizing A - | His whole-account position becomes a 1x position (sized on a 1% risk unit) with a catastrophe stop 50% away. | ""
 T with_assumptions | his Python rebuild (xaB1GS7X0xA) gives the slow HMA as 64 where this video says 65: 65 coded (I); the daily filter on the last completed day is ours (A)
-C return_pct | 05:06 | +1,700%, 47% winners, -19% max drawdown, Sharpe 1.36, 184 trades | bitcoin 4h 2017-2026, fees and slippage included | "we have 1,700% so it's still winning actually"
+C return_pct | 05:31 | +1,700%, 47% winners, -19% max drawdown, Sharpe 1.36, 184 trades | bitcoin 4h 2017-2026, fees and slippage included | "we have 1,700% so it's still winning actually"
