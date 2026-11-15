@@ -2,7 +2,8 @@
 
 // Real money on Delta Exchange India for Premium strategies (13 Nov 2026; two desks from 14 Nov). The backend is
 // app/services/premium_live.py: each desk copies the paper desk's trades of its picks into real Delta orders at the
-// owner's size ($5 risked a trade, a $20 daily loss stop), with each trade's stop and target held on Delta. The gold
+// owner's size ($1 to $5 risked a trade, picked here with the PIN from 15 Nov; a $20 daily loss stop), with each
+// trade's stop and target held on Delta. The gold
 // desk shows on Premium Strategies (the original /api/premium-paper/live routes); the crypto desk is the Delta Exchange
 // Live Trading module (/api/premium-paper/live/desk/crypto). This page shows what a desk did and holds its switches.
 // Going live and flattening need the owner's PIN; stopping never does. Live trading has one ON/OFF switch (14 Nov): OFF
@@ -24,7 +25,7 @@ export type LiveStatus = { configured_db: boolean; keys: boolean; pin_set: boole
   last_cycle_at?: number; wallet?: { asset: string | null; balance: number; available: number; blocked: number } | null;
   wallet_at?: number;
   limits: { risk_usd: number; daily_stop_usd: number; max_notional_usd: number; leverage: number; max_lag_s: number;
-    drift_frac: number; tick_s: number };
+    drift_frac: number; tick_s: number; risk_cap_usd?: number; risk_min_usd?: number; risk_set_at?: number | null };
   today: { live: number; shadow: number }; totals: { live: Totals; shadow: Totals }; picked_at: string; picks: Pick[];
   open: LiveTrade[]; recent: LiveTrade[]; notes: string[] };
 
@@ -49,7 +50,7 @@ const MODE: Record<string, { label: string; cls: string; what: string }> = {
   shadow: { label: "SHADOW — no orders", cls: "shadow", what: "Every decision is made and logged with simulated fills; nothing is sent." },
   off: { label: "OFF", cls: "off", what: "No new trade. Anything still open is managed to its close." },
 };
-export type Ask = null | "live" | "flatten";
+export type Ask = null | "live" | "flatten" | "risk";
 const PIN_KEY = "deltaLivePin";
 const readPin = () => { try { return window.localStorage.getItem(PIN_KEY) || ""; } catch { return ""; } };
 const keepPin = (p: string | null) => {
@@ -76,15 +77,18 @@ const verdict = (picks: Pick[]) => {
 };
 
 /** What the page shows, given the desk's status: no state of its own beyond its props. */
-export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, saved, ask, busy, msg, onToggle, onShadow, onFlatten,
-  onSubmitPin, onCancel, onForgetPin, intro }: {
+export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, saved, ask, pendingRisk, busy, msg, onToggle,
+  onShadow, onFlatten, onRisk, onSubmitPin, onCancel, onForgetPin, intro }: {
   s: LiveStatus; now: number; pin: string; setPin: (v: string) => void; remember: boolean; setRemember: (v: boolean) => void;
-  saved: boolean; ask: Ask; busy: string | null; msg: string | null; onToggle: () => void; onShadow: () => void; onFlatten: () => void;
-  onSubmitPin: () => void; onCancel: () => void; onForgetPin: () => void; intro?: ReactNode;
+  saved: boolean; ask: Ask; pendingRisk: number | null; busy: string | null; msg: string | null; onToggle: () => void;
+  onShadow: () => void; onFlatten: () => void; onRisk: (r: number) => void; onSubmitPin: () => void; onCancel: () => void;
+  onForgetPin: () => void; intro?: ReactNode;
 }) {
   const isLive = s.mode === "live";
   const m = MODE[s.mode] ?? MODE.off;
   const L = s.limits;
+  // the risk a trade the owner picks, whole dollars from the server's minimum to its cap; shown once the server offers it
+  const risks = L.risk_cap_usd ? [1, 2, 3, 4, 5].filter((r) => r >= (L.risk_min_usd ?? 1) && r <= (L.risk_cap_usd ?? 5)) : [];
   const live = s.totals.live;
   const dayLeft = L.daily_stop_usd + s.today.live;
   return (
@@ -149,9 +153,26 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
             </span>
           </div>
         </div>
+        {risks.length > 0 && (
+          <div className="ld-risk-row">
+            <span className="ld-risk-k" id="ld-risk-k">Risk a trade</span>
+            <div className="ld-seg" role="radiogroup" aria-labelledby="ld-risk-k">
+              {risks.map((r) => {
+                const on = Math.abs(L.risk_usd - r) < 0.005;
+                return (
+                  <button key={r} type="button" role="radio" aria-checked={on} className={`ld-seg-b${on ? " on" : ""}`}
+                    disabled={!!busy} onClick={() => onRisk(r)}>${r}</button>
+                );
+              })}
+            </div>
+            <span className="ld-risk-s">
+              {busy === "risk" ? "Saving…" : "The most one trade loses if its stop is hit, plus about $0.10-0.30 of fees. A trade whose smallest order (one contract) would lose more is skipped."}
+            </span>
+          </div>
+        )}
         {ask && (
           <div className="ld-ctl-row">
-            <label>{ask === "live" ? "Your PIN, to switch ON" : "Your PIN, to close every position"}
+            <label>{ask === "live" ? "Your PIN, to switch ON" : ask === "risk" ? `Your PIN, to set ${usd(pendingRisk)} a trade` : "Your PIN, to close every position"}
               <input type="password" autoComplete="off" inputMode="numeric" autoFocus value={pin} onChange={(e) => setPin(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") onSubmitPin(); }} />
             </label>
@@ -159,7 +180,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
               <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} /> Remember the PIN on this device
             </label>
             <button className={`ld-btn${ask === "live" ? " danger" : ""}`} disabled={!!busy || !pin} onClick={onSubmitPin}>
-              {ask === "live" ? "Switch ON — real money" : "Close every position now"}
+              {ask === "live" ? "Switch ON — real money" : ask === "risk" ? `Set ${usd(pendingRisk)} a trade` : "Close every position now"}
             </button>
             <button className="ld-btn" disabled={!!busy} onClick={onCancel}>Cancel</button>
           </div>
@@ -312,6 +333,17 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         .ld .ld-switch-text b { font-size: 15px; color: var(--text); }
         .ld .ld-ctl label.ld-check { flex-direction: row; align-items: center; gap: 6px; font-weight: 600; font-size: 12.5px; }
         .ld .ld-ctl label.ld-check input { min-width: 0; width: auto; padding: 0; }
+        .ld .ld-risk-row { display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; }
+        .ld .ld-risk-k { font-size: 12.5px; font-weight: 800; color: var(--text); }
+        .ld .ld-seg { display: inline-flex; border: 1px solid var(--panel-border); border-radius: 10px; overflow: hidden;
+                      background: var(--panel); }
+        .ld .ld-seg-b { padding: 7px 14px; font-size: 13px; font-weight: 700; border: 0; border-left: 1px solid var(--panel-border);
+                        background: transparent; color: var(--text); cursor: pointer; font-variant-numeric: tabular-nums; }
+        .ld .ld-seg-b:first-child { border-left: 0; }
+        .ld .ld-seg-b.on { background: var(--text); color: var(--panel); }
+        .ld .ld-seg-b:disabled { cursor: default; opacity: 0.6; }
+        .ld .ld-seg-b:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+        .ld .ld-risk-s { flex: 1 1 260px; font-size: 12px; line-height: 1.45; color: var(--text-muted); }
         @media (max-width: 640px) { .ld .ld-v { font-size: 19px; } .ld .ld-ctl input { min-width: 140px; } }
       `}</style>
     </div>
@@ -327,6 +359,7 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
   const [remember, setRemember] = useState(false);
   const [saved, setSaved] = useState(false);
   const [ask, setAsk] = useState<Ask>(null);
+  const [pendingRisk, setPendingRisk] = useState<number | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now() / 1000);
@@ -353,21 +386,26 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
   }, []);
   const forget = () => { keepPin(null); setSaved(false); setPin(""); setRemember(false); };
 
-  const act = async (key: "shadow" | "live" | "off" | "flatten", usePin = "") => {
+  const act = async (key: "shadow" | "live" | "off" | "flatten" | "risk", usePin = "", riskUsd = 0) => {
     setBusy(key);
     setMsg(null);
     try {
       const r = key === "flatten"
         ? await apiFetch(`${base}/flatten`, { method: "POST", body: JSON.stringify({ pin: usePin }) })
-        : await apiFetch(`${base}/mode`, { method: "POST",
-            body: JSON.stringify(key === "live" ? { mode: "live", pin: usePin, confirm: "REAL MONEY" } : { mode: key }) });
+        : key === "risk"
+          ? await apiFetch(`${base}/risk`, { method: "POST", body: JSON.stringify({ risk_usd: riskUsd, pin: usePin }) })
+          : await apiFetch(`${base}/mode`, { method: "POST",
+              body: JSON.stringify(key === "live" ? { mode: "live", pin: usePin, confirm: "REAL MONEY" } : { mode: key }) });
       if (r?.status) setS(r.status);
+      const pinned = key === "live" || key === "flatten" || key === "risk";
       if (r?.ok) {
         setMsg(key === "live" ? "Live trading is ON: a real order goes to Delta for the next signal."
           : key === "flatten" ? "Every position is closed, and live trading is OFF."
+          : key === "risk" ? `From the next signal, a trade loses at most ${usd(riskUsd)} at its stop, plus fees.`
           : key === "off" ? "Live trading is OFF: no new trades." : "Shadow test running: decisions are logged, nothing is sent.");
         setAsk(null);
-        if (key === "live" || key === "flatten") {
+        setPendingRisk(null);
+        if (pinned) {
           if (remember) { keepPin(usePin); setSaved(true); } else forget();
         }
       } else {
@@ -375,7 +413,7 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
         setMsg(why);
         if (/wrong PIN|locked/i.test(why)) {   // a saved PIN that no longer works is forgotten, and the PIN is asked again
           forget();
-          if (key === "live" || key === "flatten") setAsk(key);
+          if (pinned) setAsk(key as Ask);
         }
       }
     } catch (e) {
@@ -399,12 +437,24 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
   };
   const onFlatten = () => { if (saved && pin) doFlatten(pin); else setAsk("flatten"); };
   const onShadow = () => act(s?.mode === "shadow" ? "off" : "shadow");
+  const setRisk = (r: number, p: string) => {
+    // lowering is always safe; raising asks once, since a trade that hits its stop then loses more
+    if (s && r > s.limits.risk_usd && !window.confirm(`Raise the risk to ${usd(r)} a trade? A trade that hits its stop then loses up to ${usd(r)}.`)) return;
+    act("risk", p, r);
+  };
+  const onRisk = (r: number) => {
+    if (!s || Math.abs(r - s.limits.risk_usd) < 0.005) return;
+    if (saved && pin) { setRisk(r, pin); return; }
+    setPendingRisk(r);
+    setAsk("risk");
+  };
   const onSubmitPin = () => {
     if (!pin || busy) return;
     if (ask === "live") goLive(pin);
     else if (ask === "flatten") doFlatten(pin);
+    else if (ask === "risk" && pendingRisk !== null) setRisk(pendingRisk, pin);
   };
-  const onCancel = () => { setAsk(null); if (!saved) setPin(""); };
+  const onCancel = () => { setAsk(null); setPendingRisk(null); if (!saved) setPin(""); };
   const onForgetPin = () => { forget(); setMsg("The PIN saved on this device is forgotten."); };
 
   if (err && !s) {
@@ -418,6 +468,6 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
   if (!s) return <div style={{ fontSize: 13, color: "var(--text-muted)" }}>Loading the Delta desk…</div>;
   if (!s.configured_db) return <div style={{ fontSize: 13, color: "var(--loss)" }}>The paper desk&apos;s database is not configured on this server.</div>;
   return <LiveDeltaView s={s} now={now} pin={pin} setPin={setPin} remember={remember} setRemember={setRemember} saved={saved} ask={ask}
-    busy={busy} msg={msg} onToggle={onToggle} onShadow={onShadow} onFlatten={onFlatten} onSubmitPin={onSubmitPin} onCancel={onCancel}
-    onForgetPin={onForgetPin} intro={intro} />;
+    pendingRisk={pendingRisk} busy={busy} msg={msg} onToggle={onToggle} onShadow={onShadow} onFlatten={onFlatten} onRisk={onRisk}
+    onSubmitPin={onSubmitPin} onCancel={onCancel} onForgetPin={onForgetPin} intro={intro} />;
 }

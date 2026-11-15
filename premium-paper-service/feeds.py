@@ -597,15 +597,22 @@ DELTA_COST = YM.Cost(0.0, 0.0, 0.0, False, 1, pct_slip=0.0002, pct_comm=0.00059)
 DELTA_HALF = 0.5                                   # half a $1 spread
 
 
+DELTA_SETTLE_S = 15     # a finished minute is stored once it ended this long ago (60 until 15 Nov 2026). The order-flow
+                        # recorder writes a minute 3 s after it ends, and a real-money desk copies trades made on these
+                        # candles, so every second here is a second later into a real trade.
+
+
 def update_delta_candles(now_ts: int | None = None, symbol: str = "BTCUSD") -> dict:
-    """Append finished 1-minute candles of a Delta India perpetual (BTCUSD, XAUTUSD); the forming minute is never stored."""
+    """Append finished 1-minute candles of a Delta India perpetual (BTCUSD, XAUTUSD); the forming minute is never stored,
+    and a finished one only DELTA_SETTLE_S after it ends."""
     store = DELTA_STORES[symbol]
     now_ts = now_ts or int(time.time())
+    cut = now_ts - 60 - DELTA_SETTLE_S           # the newest minute start that has ended and settled
     have = _read_cols(store, _ym(now_ts - 60 * 86400), ("t",))[0]
     last = int(have[-1]) if len(have) else now_ts - 46 * 86400
     rows, start = [], last + 60
-    while start < now_ts - 120:
-        end = min(start + 2000 * 60, now_ts - 120)
+    while start < cut:
+        end = min(start + 2000 * 60, cut)
         url = f"{DELTA_API}/v2/history/candles?" + urllib.parse.urlencode({"resolution": "1m", "symbol": symbol, "start": start, "end": end})
         with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": UA}), timeout=30) as r:
             rows += json.load(r).get("result") or []
@@ -616,7 +623,7 @@ def update_delta_candles(now_ts: int | None = None, symbol: str = "BTCUSD") -> d
     a = np.array([[float(x["time"]), float(x["open"]), float(x["high"]), float(x["low"]), float(x["close"]), float(x.get("volume") or 0)]
                   for x in rows])
     t = a[:, 0].astype(np.int64)
-    keep = (t > last) & (t <= now_ts - 120) & (t % 60 == 0)
+    keep = (t > last) & (t <= cut) & (t % 60 == 0)
     a, t = a[keep], t[keep]
     if not len(t):
         return {"new": 0, "last": last}

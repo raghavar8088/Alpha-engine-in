@@ -5,7 +5,8 @@ they share the Delta account, its keys and the owner's PIN, and never trade the 
 - gold (Premium Strategies > "Real money · Delta gold"): the five gold picks of 13 Nov, on XAUTUSD. Its records are the
   original ones (live_delta_state / live_delta_trades).
 - crypto (the "Delta Exchange Live Trading" module, 14 Nov): the bitcoin strategies the owner picked on 14 Nov from the
-  Crypto tab - TH-05, TL-04 and TH-01 - on BTCUSD, $5 a trade, a $20 daily stop (live_crypto_state / live_crypto_trades).
+  Crypto tab - TH-05, TL-04 and TH-01 - on BTCUSD, a $20 daily stop (live_crypto_state / live_crypto_trades). From 15
+  Nov the owner sets its risk a trade on the page ($1 to $5) and it copies a signal seen up to 10 minutes late.
   On 14 Nov the owner moved bitcoin here from the gold desk; the gold desk's earlier bitcoin picks (TH-01, TH-05, RU-04,
   TD-02, TD-03) left it, and any bitcoin trade it still had open would be managed by it to its close.
 
@@ -22,10 +23,12 @@ R a trade (R = what a trade risks).
 
 WHAT IT DOES. It copies the paper desk's trades of those ten (premium-paper-service's premium_trades, in the box's
 local MongoDB) into real Delta orders. The paper desk decides every entry and exit, and this desk never re-scans:
-- A paper entry is copied only if it is seen within MAX_LAG_S of its entry time, the market is still within
-  DRIFT_FRAC of a risk distance of the paper entry, and the price is strictly between the paper's stop and target.
-  The order is a market order sized so the paper's stop loses RISK_USD:
-  contracts = RISK_USD / (|price - stop| x contract value), and never more than MAX_NOTIONAL_USD of notional.
+- A paper entry is copied only if it is seen within its desk's lag limit of its entry time (MAX_LAG_S; the bitcoin
+  desk's CRYPTO_MAX_LAG_S), the market is still within DRIFT_FRAC of a risk distance of the paper entry, and the price
+  is strictly between the paper's stop and target. The order is a market order sized so the paper's stop loses at most
+  the owner's chosen risk (RISK_MIN_USD up to the desk's RISK_USD, set on the page with the PIN):
+  contracts = risk / (|price - stop| x contract value), and never more than MAX_NOTIONAL_USD of notional. A trade
+  whose single contract would lose more than that risk is skipped.
 - The paper's own stop and target go on the venue as a bracket right after the fill. If the bracket is refused, the
   position is closed at once and the desk switches itself off: a real position never stays unprotected.
 - When the paper trade closes, for any reason, or disappears, the real one is closed at the market and its legs are
@@ -40,7 +43,8 @@ MODES
 - off: no new trade; open positions are still managed to their close.
 - shadow: every decision is made and logged with simulated fills at the quote, and no order is sent.
 - live: real orders.
-Going live and flattening need the owner's PIN. Switching to off or shadow never does, since neither sends an order.
+Going live, flattening and changing the risk a trade need the owner's PIN. Switching to off or shadow never does,
+since neither sends an order.
 Three venue errors in a row switch the desk off.
 """
 
@@ -71,6 +75,9 @@ CRYPTO_DAILY_STOP_USD = float(os.getenv("PREMIUM_CRYPTO_DAILY_STOP_USD", "20"))
 MAX_NOTIONAL_USD = float(os.getenv("PREMIUM_LIVE_MAX_NOTIONAL_USD", "2500"))
 LEVERAGE = int(os.getenv("PREMIUM_LIVE_LEVERAGE", "10"))
 MAX_LAG_S = int(os.getenv("PREMIUM_LIVE_MAX_LAG_S", "300"))
+CRYPTO_MAX_LAG_S = int(os.getenv("PREMIUM_CRYPTO_MAX_LAG_S", "600"))   # the bitcoin desk (the owner's choice, 15 Nov)
+RISK_MIN_USD = 1.0             # the lowest risk a trade the owner can pick on the page; the highest is the desk's own
+PRIORITY_REFRESH_S = 600       # the books named to the paper desk (live_priority) are re-written at least this often
 DRIFT_FRAC = float(os.getenv("PREMIUM_LIVE_DRIFT_FRAC", "0.30"))
 TICK_S = int(os.getenv("PREMIUM_LIVE_TICK_S", "20"))
 MISSING_GRACE_S = 300          # a paper trade gone this long is treated as closed
@@ -119,13 +126,15 @@ CRYPTO_PICKS: tuple[Pick, ...] = (
          "never backtested"),
 )
 GOLD_NOTES = (
-    "Real money on five unproven gold strategies, at the owner's chosen size: $5 risked a trade, a $20 daily loss stop.",
+    "Real money on five unproven gold strategies, at the owner's chosen size: $1 to $5 risked a trade (set on this "
+    "page with the PIN) and a $20 daily loss stop.",
     "Three of the five lose in their own 2-year backtests and two were never backtested; their good week is the only "
     "thing that picked them.",
     "On 14 Nov 2026 the owner moved the bitcoin strategies to the Delta Exchange Live Trading module; this desk trades "
     "gold (XAUTUSD) only.",
     "Each real trade is the paper desk's trade: its entry signal, its stop, its target, its exit. The paper desk sees a "
     "new bar up to a few minutes late, so a fast strategy's copy is often skipped as late or drifted rather than chased.",
+    "A trade whose smallest order (one contract) would lose more than the chosen risk at its stop is skipped.",
     "Delta nets positions by product, so only one gold position can be open at a time; a second signal is skipped "
     "while one is held.",
     "Stops and targets live on Delta itself (a bracket), so a position stays protected if this server goes down.",
@@ -134,11 +143,12 @@ GOLD_NOTES = (
 )
 CRYPTO_NOTES = (
     "Real money on three bitcoin strategies the owner picked on 14 Nov 2026 from the Crypto tab (TH-05, TL-04, TH-01), "
-    "at the owner's chosen size: $5 risked a trade and a $20 daily loss stop.",
+    "at the owner's chosen size: $1 to $5 risked a trade (set on this page with the PIN) and a $20 daily loss stop.",
     "None is proven: TL-04 loses in its own 2-year bitcoin backtest (-0.31R a trade over 2,134 trades, t -11.1) and "
     "TH-05 and TH-01 were never backtested; 9 to 15 paper trades picked them.",
     "Each real trade is the paper desk's trade on Delta's live BTCUSD candles: its entry, stop, target and exit. A "
-    "signal seen more than 5 minutes late, or already 30% of its risk away, is skipped, never chased.",
+    "signal seen more than 10 minutes late, or already 30% of its risk away, is skipped, never chased. A trade whose "
+    "smallest order (one contract) would lose more than the chosen risk at its stop is skipped too.",
     "Delta nets positions by product, so only one bitcoin position can be open at a time across the three; a second "
     "signal is skipped while one is held.",
     "Stops and targets live on Delta itself (a bracket), so a position stays protected if this server goes down.",
@@ -160,6 +170,7 @@ class Desk:
     daily_stop_usd: float
     picked_at: str
     notes: tuple[str, ...]
+    max_lag_s: int = MAX_LAG_S      # a paper entry seen later than this after its entry time is skipped
 
     @property
     def pick(self) -> dict:
@@ -174,7 +185,7 @@ DESKS: dict[str, Desk] = {
     "gold": Desk("gold", "Real money · Delta gold", GOLD_PICKS, "live_delta_state", "live_delta_trades", RISK_USD,
                  DAILY_STOP_USD, PICKED_AT, GOLD_NOTES),
     "crypto": Desk("crypto", "Delta Exchange Live Trading", CRYPTO_PICKS, "live_crypto_state", "live_crypto_trades",
-                   CRYPTO_RISK_USD, CRYPTO_DAILY_STOP_USD, CRYPTO_PICKED_AT, CRYPTO_NOTES),
+                   CRYPTO_RISK_USD, CRYPTO_DAILY_STOP_USD, CRYPTO_PICKED_AT, CRYPTO_NOTES, CRYPTO_MAX_LAG_S),
 }
 if set(DESKS["gold"].products) & set(DESKS["crypto"].products):
     raise RuntimeError("two desks may never trade the same product")
@@ -235,6 +246,25 @@ def _side(side: int) -> str:
 
 def _fee(notional: float, rate: float) -> float:
     return abs(notional) * rate * (1 + GST)
+
+
+def _risk(st: dict) -> float:
+    """The most a new trade of this desk may lose at its stop: the owner's choice on the page (RISK_MIN_USD up to the
+    desk's own risk), or the desk's own risk until one is chosen."""
+    try:
+        r = float(st.get("risk_usd"))
+    except (TypeError, ValueError):
+        return _d().risk_usd
+    return min(max(r, RISK_MIN_USD), _d().risk_usd) if math.isfinite(r) else _d().risk_usd
+
+
+def _trade_risk(t: dict) -> float:
+    """The risk a trade was sized for, for its R (records from before 15 Nov were all sized at the desk's own)."""
+    try:
+        r = float((t.get("plan") or {}).get("risk_set_usd") or 0)
+    except (TypeError, ValueError):
+        r = 0.0
+    return r if r > 0 else _d().risk_usd
 
 
 async def _state(db) -> dict:
@@ -307,7 +337,7 @@ async def _paper(db, since: float, ids: list[str]) -> dict[str, dict]:
     even when its book is no longer a pick, so a trade from before a re-pick is still managed to its close)."""
     want = set(ids)
     q = {"qty": {"$gt": 0},
-         "$or": [{"acct": {"$in": sorted({p.acct for p in _d().picks})}, "entry_t": {"$gte": int(since) - MAX_LAG_S}},
+         "$or": [{"acct": {"$in": sorted({p.acct for p in _d().picks})}, "entry_t": {"$gte": int(since) - _d().max_lag_s}},
                  {"_id": {"$in": ids}}]}
     out = {}
     async for t in db.premium_trades.find(q):
@@ -356,7 +386,7 @@ async def _record_close(db, t: dict, ex: dict, reason: str, product: Product) ->
     fees = float(t.get("entry_fee") or 0.0) + float(ex["fee"] or 0.0)
     pnl = _pnl(t["side"], float(t["fill"]), float(ex["price"]), int(t["contracts"]), product.contract_value, fees)
     await _set_trade(db, t["_id"], status="closed", exit_price=round(float(ex["price"]), 6), exit_fee=round(float(ex["fee"]), 6),
-                     exit_basis=ex["basis"], fees=round(fees, 6), pnl_usd=pnl, r=round(pnl / _d().risk_usd, 3),
+                     exit_basis=ex["basis"], fees=round(fees, 6), pnl_usd=pnl, r=round(pnl / _trade_risk(t), 3),
                      close_reason=reason, closed_at=_now(), day_closed=_day(), unrealised_usd=0.0)
 
 
@@ -520,8 +550,8 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, position
     lag = _now() - float(paper.get("entry_t") or 0)
     if not paper.get("open"):
         return await skip("closed on paper before it could be copied")
-    if lag > MAX_LAG_S:
-        return await skip(f"seen {lag / 60:.0f} min after its entry (limit {MAX_LAG_S // 60})", lag_s=round(lag))
+    if lag > _d().max_lag_s:
+        return await skip(f"seen {lag / 60:.0f} min after its entry (limit {_d().max_lag_s // 60})", lag_s=round(lag))
     if stop <= 0 or entry <= 0:
         return await skip("no stop on the paper trade")
     if day_pnl <= -_d().daily_stop_usd:
@@ -544,13 +574,17 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, position
     if abs(px - entry) > DRIFT_FRAC * abs(entry - stop):
         return await skip(f"price moved {abs(px - entry) / abs(entry - stop):.0%} of the risk away from the paper entry",
                           price=px)
-    by_risk = math.floor(_d().risk_usd / (abs(px - stop) * product.contract_value))
+    risk = _risk(st)
+    one = abs(px - stop) * product.contract_value           # what a single contract loses at the stop
+    by_risk = math.floor(risk / one)
     by_cap = math.floor(MAX_NOTIONAL_USD / (px * product.contract_value))
     contracts = min(by_risk, by_cap)
     if contracts < 1:
-        return await skip("under one contract at this risk", price=px)
+        why = (f"one contract would lose ${one:.2f} at its stop, more than the ${risk:.2f} a trade you set" if by_risk < 1
+               else "under one contract within the notional cap")
+        return await skip(why, price=px)
     notional = contracts * product.contract_value * px
-    plan = {"price": px, "contracts": contracts, "risk_usd": round(abs(px - stop) * contracts * product.contract_value, 4),
+    plan = {"price": px, "contracts": contracts, "risk_usd": round(one * contracts, 4), "risk_set_usd": risk,
             "notional_usd": round(notional, 2), "margin_usd": round(notional / LEVERAGE, 2), "capped": by_cap < by_risk}
 
     if mode == "shadow":
@@ -682,6 +716,28 @@ async def _cycle_one() -> dict:
         return out
 
 
+_PRIORITY_SENT: tuple[list[str], float] | None = None
+
+
+async def _publish_priority() -> None:
+    """Name the books these desks copy to the paper desk (premium_meta 'live_priority', "ACCT|MARKET"). Its bitcoin pass
+    runs them first, right after it reads new candles, so their trades reach these desks minutes sooner. Written after
+    a restart, when the picks change and every PRIORITY_REFRESH_S; a failure is only logged (only speed depends on it)."""
+    global _PRIORITY_SENT
+    books = sorted({f"{p.acct}|{p.mkt}" for d in DESKS.values() for p in d.picks})
+    if _PRIORITY_SENT and _PRIORITY_SENT[0] == books and _now() - _PRIORITY_SENT[1] < PRIORITY_REFRESH_S:
+        return
+    db = _db()
+    if db is None:
+        return
+    try:
+        await db.premium_meta.update_one({"_id": "live_priority"}, {"$set": {"books": books, "at": _now(),
+                                                                             "by": "premium_live"}}, upsert=True)
+        _PRIORITY_SENT = (books, _now())
+    except Exception:  # noqa: BLE001
+        logger.warning("[premium live] could not name the priority books to the paper desk", exc_info=True)
+
+
 async def cycle(desk: str | None = None) -> dict:
     """One pass of one desk (its report), or of every desk when none is named ({desk: report})."""
     if desk is not None:
@@ -695,6 +751,7 @@ async def cycle(desk: str | None = None) -> dict:
         except Exception as exc:  # noqa: BLE001 - one desk's failure must not stop the other
             logger.warning("[premium live %s] cycle failed", key, exc_info=True)
             out[key] = {"error": f"cycle failed: {exc}"}
+    await _publish_priority()
     return out
 
 
@@ -821,6 +878,33 @@ async def flatten(pin: str | None = None, desk: str = "gold") -> dict:
         return await _flatten_one(pin)
 
 
+async def _set_risk_one(risk_usd, pin: str | None = None) -> dict:
+    db = _db()
+    if db is None:
+        return {"ok": False, "why": "the paper desk's database is not configured on this server"}
+    try:
+        r = round(float(risk_usd), 2)
+    except (TypeError, ValueError):
+        return {"ok": False, "why": "the risk a trade must be a number of US dollars"}
+    if not (math.isfinite(r) and RISK_MIN_USD <= r <= _d().risk_usd):
+        return {"ok": False, "why": f"the risk a trade must be from ${RISK_MIN_USD:.0f} to ${_d().risk_usd:.0f}"}
+    st = await _state(db)
+    why = await _check_pin(db, st, pin)
+    if why:
+        return {"ok": False, "why": why}
+    await _set_state(db, risk_usd=r, risk_set_at=_now())
+    return {"ok": True, "risk_usd": r}
+
+
+async def set_risk(risk_usd, pin: str | None = None, desk: str = "gold") -> dict:
+    """The most one new trade of a desk may lose at its stop, RISK_MIN_USD up to the desk's own risk (the owner picks it
+    on the page). Needs the PIN; a trade already open keeps the size it was given."""
+    if desk not in DESKS:
+        return {"ok": False, "why": f"unknown desk {desk!r}"}
+    with _use(desk):
+        return await _set_risk_one(risk_usd, pin)
+
+
 # -- the read model ------------------------------------------------------------------------------------
 
 
@@ -866,8 +950,10 @@ async def _status_one() -> dict:
         "switched_off": st.get("switched_off"), "last_error": st.get("last_error"), "last_error_at": st.get("last_error_at"),
         "errors_in_row": st.get("errors_in_row"), "last_cycle_at": st.get("last_cycle_at"), "wallet": st.get("wallet"),
         "wallet_at": st.get("wallet_at"), "products": st.get("products"),
-        "limits": {"risk_usd": _d().risk_usd, "daily_stop_usd": _d().daily_stop_usd, "max_notional_usd": MAX_NOTIONAL_USD,
-                   "leverage": LEVERAGE, "max_lag_s": MAX_LAG_S, "drift_frac": DRIFT_FRAC, "tick_s": TICK_S},
+        "limits": {"risk_usd": _risk(st), "risk_cap_usd": _d().risk_usd, "risk_min_usd": RISK_MIN_USD,
+                   "risk_set_at": st.get("risk_set_at"), "daily_stop_usd": _d().daily_stop_usd,
+                   "max_notional_usd": MAX_NOTIONAL_USD, "leverage": LEVERAGE, "max_lag_s": _d().max_lag_s,
+                   "drift_frac": DRIFT_FRAC, "tick_s": TICK_S},
         "today": today, "totals": totals, "picked_at": _d().picked_at, "picks": picks,
         "desk": _d().key, "title": _d().title, "desk_products": _d().products,
         "open": [_clean(t) for t in rows if t.get("status") in ("entering", "open", "closing")],

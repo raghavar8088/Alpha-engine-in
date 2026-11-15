@@ -12,7 +12,9 @@ the stop's limit past its trigger; closes when the paper closes, when the venue'
 trade disappears; one position per product; late and drifted signals refused; a refused bracket closing the position
 at once and switching the desk off; a lost order answer adopted from the account; the $20 daily stop and its reset;
 a stale paper desk; shadow mode sending nothing; flatten; the PIN, its lockout and the REAL MONEY confirmation;
-leverage set to 10x before going live; three venue errors switching the desk off.
+leverage set to 10x before going live; three venue errors switching the desk off. Then (15 Nov): the owner's risk a
+trade, $1 to $5 with the PIN; each desk's lag limit, 10 minutes on bitcoin and 5 on gold; the books named to the paper
+desk so it runs them first.
 
 Two desks since 14 Nov 2026: the bitcoin scenarios run on the crypto desk (the Delta Exchange Live Trading module: TH-05,
 TL-04, TH-01) and the gold ones on the gold desk. Sections 16-18 pin the split down: each desk trades only its own picks
@@ -338,9 +340,10 @@ async def main():
     # ── 6. late, drifted and outside the levels ─────────────────────────────────────────────────────
     section("6. Late or moved signals are refused, never chased")
     db = fresh()
-    late = paper(db, "TH-05", "BTCUSD", 1, 69000.0, 68700.0, None, ago=400)
+    late = paper(db, "TH-05", "BTCUSD", 1, 69000.0, 68700.0, None, ago=700)
     await cyc(db)
-    check("seen 6+ minutes after its entry: skipped", trade(db, late)["status"] == "skipped" and "after its entry" in trade(db, late)["reason"])
+    check("bitcoin seen 11+ minutes after its entry: skipped (its limit is 10)", trade(db, late)["status"] == "skipped"
+          and "after its entry (limit 10)" in trade(db, late)["reason"], trade(db, late)["reason"])
     db = fresh(btc=69150.0)
     drift = paper(db, "TH-05", "BTCUSD", 1, 69000.0, 68700.0, None)
     await cyc(db)
@@ -581,6 +584,67 @@ async def main():
     check("the crypto desk's daily stop does not stop the gold desk", trade(db, b18b)["status"] == "skipped"
           and "daily loss stop" in trade(db, b18b)["reason"] and trade(db, g18b)["status"] == "open",
           (trade(db, b18b)["reason"], trade(db, g18b)["status"]))
+    # ── 19. ten minutes on the bitcoin desk, five on the gold desk ─────────────────────────────────
+    section("19. A late signal: the bitcoin desk copies one seen up to 10 minutes late (15 Nov), the gold desk 5")
+    db = fresh()
+    b19 = paper(db, "TL-04", "BTCUSD", -1, 69000.0, 69400.0, 68200.0, ago=406)    # as 03:30 IST on 15 Nov: 6.8 min late
+    g19 = paper(db, "DR-01", "XAUTUSD", 1, 3885.0, 3880.0, 3895.0, ago=406)
+    await cyc(db)
+    check("bitcoin seen 6.8 minutes late: copied", trade(db, b19)["status"] == "open", trade(db, b19).get("reason"))
+    check("gold seen 6.8 minutes late: skipped (its limit is 5)", trade(db, g19)["status"] == "skipped"
+          and "(limit 5)" in trade(db, g19)["reason"], trade(db, g19)["reason"])
+    c, g = await M.status("crypto"), await M.status()
+    check("the page reads each desk's own limit, and the bitcoin notes say 10 minutes", c["limits"]["max_lag_s"] == 600
+          and g["limits"]["max_lag_s"] == 300 and any("10 minutes" in n for n in c["notes"]), (c["limits"], g["limits"]))
+    # ── 20. the owner's risk a trade ───────────────────────────────────────────────────────────────
+    section("20. The risk a trade, $1 to $5, set by the owner with the PIN")
+    db = fresh()
+    r = await M.set_risk(2, "000000", desk="crypto")
+    check("a wrong PIN is refused and counted; the risk stays $5", not r["ok"] and "wrong PIN" in r["why"]
+          and (await M.status("crypto"))["limits"]["risk_usd"] == 5 and len(st_of(db, "crypto")["pin_fails"]) == 1, r)
+    bad = [await M.set_risk(v, PIN, desk="crypto") for v in (0.5, 5.01, 6, "two", None, float("nan"))]
+    check("below $1, above $5 or not a number: refused, before the PIN is even checked", not any(x["ok"] for x in bad)
+          and len(st_of(db, "crypto")["pin_fails"]) == 1, [x["why"] for x in bad])
+    r = await M.set_risk(2, PIN, desk="crypto")
+    c, g = await M.status("crypto"), await M.status()
+    check("$2 with the PIN: set on the bitcoin desk only", r["ok"] and c["limits"]["risk_usd"] == 2
+          and c["limits"]["risk_cap_usd"] == 5 and c["limits"]["risk_min_usd"] == 1 and g["limits"]["risk_usd"] == 5,
+          (r, c["limits"]))
+    t20 = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68650.0, None)
+    await cyc(db)
+    t = trade(db, t20)
+    want = math.floor(2 / ((M.D.ask("BTCUSD") - 68650.0) * 0.001))
+    check("the next trade is sized for $2: its stop loses at most $2", t["status"] == "open" and t["contracts"] == want
+          and t["plan"]["risk_usd"] <= 2 + 1e-9 and t["plan"]["risk_set_usd"] == 2, (t["contracts"], want, t["plan"]))
+    advance(60)
+    M.D.set_price("BTCUSD", 69350.0)
+    close_paper(db, t20, "exit_signal", 69350.0)
+    await cyc(db)
+    t = trade(db, t20)
+    check("its R is counted against the $2 it was sized for", t["status"] == "closed"
+          and abs(t["r"] - t["pnl_usd"] / 2) < 0.002, (t.get("r"), t.get("pnl_usd")))
+    db = fresh()
+    await M.set_risk(1, PIN, desk="crypto")
+    w20 = paper(db, "TL-04", "BTCUSD", 1, 69000.0, 67500.0, 72000.0)
+    await cyc(db)
+    check("$1 and a stop so wide that one contract would lose $1.50: skipped, and the reason says so",
+          trade(db, w20)["status"] == "skipped" and "one contract would lose $1.50 at its stop" in trade(db, w20)["reason"]
+          and "more than the $1.00 a trade you set" in trade(db, w20)["reason"] and not M.D.orders, trade(db, w20)["reason"])
+    # ── 21. the books named to the paper desk ──────────────────────────────────────────────────────
+    section("21. The paper desk is told which of its books feed a real-money desk")
+    db = fresh()
+    M._PRIORITY_SENT = None
+    await cyc(db)
+    doc = next((d for d in db.premium_meta.docs if d["_id"] == "live_priority"), None)
+    check("premium_meta 'live_priority' names every pick of both desks", doc is not None and {
+        "TH-05|BTCUSD", "TL-04|BTCUSD", "TH-01|BTCUSD", "RU-02|XAUTUSD", "CP-23|XAUUSD"} <= set(doc["books"]), doc)
+    db.premium_meta.docs[:] = [d for d in db.premium_meta.docs if d["_id"] != "live_priority"]
+    await cyc(db)
+    gone = not any(d["_id"] == "live_priority" for d in db.premium_meta.docs)
+    advance(601)
+    await cyc(db)
+    check("not re-written every cycle, but again within 10 minutes if it went missing", gone
+          and any(d["_id"] == "live_priority" for d in db.premium_meta.docs))
 
 
 if __name__ == "__main__":

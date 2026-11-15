@@ -155,6 +155,13 @@ async def live_flatten(payload: dict = Body(...), _user: dict = Depends(get_curr
     return {**r, "status": await premium_live.status()}
 
 
+@router.post("/live/risk")
+async def live_risk(payload: dict = Body(...), _user: dict = Depends(get_current_user)):
+    from app.services import premium_live
+    r = await premium_live.set_risk(payload.get("risk_usd"), payload.get("pin"))
+    return {**r, "status": await premium_live.status()}
+
+
 def _desk_or_404(desk: str) -> None:
     from app.services import premium_live
     if desk not in premium_live.DESKS:
@@ -181,4 +188,12 @@ async def live_desk_flatten(desk: str, payload: dict = Body(...), _user: dict = 
     from app.services import premium_live
     _desk_or_404(desk)
     r = await premium_live.flatten(payload.get("pin"), desk=desk)
+    return {**r, "status": await premium_live.status(desk)}
+
+
+@router.post("/live/desk/{desk}/risk")
+async def live_desk_risk(desk: str, payload: dict = Body(...), _user: dict = Depends(get_current_user)):
+    from app.services import premium_live
+    _desk_or_404(desk)
+    r = await premium_live.set_risk(payload.get("risk_usd"), payload.get("pin"), desk=desk)
     return {**r, "status": await premium_live.status(desk)}

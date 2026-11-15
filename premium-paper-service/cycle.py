@@ -262,8 +262,46 @@ def _yc_stock_context(pool_books, panel, now: datetime) -> dict:
 YAHOO_EVERY_S = 540      # the cycle runs every 2 minutes for Delta Exchange; Yahoo is asked at most every 9 minutes
 
 
+def _run_first(db, errors: dict) -> set:
+    """The bitcoin books a real-money desk copies, run and sized before anything else in the pass.
+
+    The backend's premium_live names them in premium_meta 'live_priority' ("ACCT|BTCUSD"). They run here, right after
+    the Delta candles are read and once per new bitcoin minute, so their trades reach the real-money desk seconds after
+    the candle instead of at the end of a pass over every book (2 to 8 minutes on 14-15 Nov 2026). Only channel books
+    (yc) on BTCUSD move; the pass then skips the ones that ran here. Returns their account ids; after any failure,
+    none, so the pass runs them where it always did."""
+    t0 = time.time()
+    try:
+        want = set((db.premium_meta.find_one({"_id": "live_priority"}) or {}).get("books") or [])
+        books = [(a, mk, v, R.is_overnight(a.id, mk)) for a, mk, v in C.books_in("global")
+                 if mk == "BTCUSD" and _is_yc(a) and f"{a.id}|BTCUSD" in want]
+        if not books:
+            return set()
+        last = F.last_minute(F.DELTA_STORES["BTCUSD"])
+        if last == (db.premium_meta.find_one({"_id": "sig_first"}) or {}).get("last"):
+            return set()
+        done: set = set()
+        _run_yc_btc(db, books, errors, done)
+        if done:
+            L.update_accounts(db, sorted(done))
+        db.premium_meta.update_one({"_id": "sig_first"}, {"$set": {"last": last, "t": time.time()}}, upsert=True)
+        log.info("first: %s through the %s UTC minute, in %.1fs", ",".join(sorted(done)) or "none",
+                 time.strftime("%H:%M", time.gmtime(last)) if last else "-", time.time() - t0)
+        return done
+    except Exception as exc:  # noqa: BLE001 - the pass then runs them in their usual place
+        log.exception("first books")
+        errors["first books"] = str(exc)[:200]
+        return set()
+
+
 def run_global(db, now: datetime) -> dict:
     new, errors = {}, {}
+    for _sym, _mk in (("BTCUSD", "BTCUSD"), ("XAUTUSD", "XAUUSD"), ("ETHUSD", "ETHUSD")):   # Delta first: see _run_first
+        try:
+            new[_mk] = F.update_delta_candles(symbol=_sym)["new"]
+        except Exception as exc:  # noqa: BLE001
+            errors[f"feed {_mk}"] = str(exc)[:200]
+    first = _run_first(db, errors)
     yahoo_due = time.time() - float((db.premium_meta.find_one({"_id": "yahoo_at"}) or {}).get("t") or 0) >= YAHOO_EVERY_S
     for name in (F.YF if yahoo_due else ()):
         try:
@@ -271,11 +309,6 @@ def run_global(db, now: datetime) -> dict:
         except Exception as exc:  # noqa: BLE001 - a market that cannot be fetched just waits for the next cycle
             errors[f"feed {name}"] = str(exc)[:200]
         time.sleep(0.5)
-    for _sym, _mk in (("BTCUSD", "BTCUSD"), ("XAUTUSD", "XAUUSD"), ("ETHUSD", "ETHUSD")):
-        try:
-            new[_mk] = F.update_delta_candles(symbol=_sym)["new"]
-        except Exception as exc:  # noqa: BLE001
-            errors[f"feed {_mk}"] = str(exc)[:200]
     try:                                       # once: older bitcoin minutes for the 11-channel books' warm-up
         warm = (now.date() - YC_START_DATE).days + YC_BTC_WARM_DAYS + 1
         bf = F.backfill_delta_candles("BTCUSD", warm)
@@ -363,7 +396,7 @@ def run_global(db, now: datetime) -> dict:
                 except Exception as exc:  # noqa: BLE001
                     log.exception("%s BTCUSD", a.id)
                     errors[f"{a.id}|BTCUSD"] = str(exc)[:200]
-    yc_btc = [b for b in books if b[1] == "BTCUSD" and _is_yc(b[0])]
+    yc_btc = [b for b in books if b[1] == "BTCUSD" and _is_yc(b[0]) and b[0].id not in first]   # first: done above
     if yc_btc:
         n_docs += _run_yc_btc(db, yc_btc, errors, touched)
     yc_eth = [b for b in books if b[1] == "ETHUSD" and _is_yc(b[0])]
@@ -372,7 +405,7 @@ def run_global(db, now: datetime) -> dict:
     if touched:
         L.update_accounts(db, sorted(touched))
     L.set_signature(db, "global", sig)
-    return {"trades": n_docs, "new": new, "errors": errors}
+    return {"trades": n_docs, "new": new, "errors": errors, "first": sorted(first)}
 
 
 def _run_yc_btc(db, books, errors: dict, touched: set) -> int:
