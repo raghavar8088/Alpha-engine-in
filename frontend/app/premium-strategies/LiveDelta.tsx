@@ -2,8 +2,8 @@
 
 // Real money on Delta Exchange India for Premium strategies (13 Nov 2026; two desks from 14 Nov). The backend is
 // app/services/premium_live.py: each desk copies the paper desk's trades of its picks into real Delta orders at the
-// owner's size ($1 to $5 risked a trade, picked here with the PIN from 15 Nov; a $20 daily loss stop), with each
-// trade's stop and target held on Delta. The gold
+// owner's size (from 15 Nov one contract a trade, the smallest order, or $1 to $5 of risk picked here with the PIN;
+// a $20 daily loss stop), with each trade's stop and target held on Delta. The gold
 // desk shows on Premium Strategies (the original /api/premium-paper/live routes); the crypto desk is the Delta Exchange
 // Live Trading module (/api/premium-paper/live/desk/crypto). This page shows what a desk did and holds its switches.
 // Going live and flattening need the owner's PIN; stopping never does. Live trading has one ON/OFF switch (14 Nov): OFF
@@ -13,7 +13,7 @@ import { apiFetch } from "../../lib/api";
 
 type Rec = { trades: number; wins: number; pnl_usd: number; open: number };
 type Pick = { acct: string; mkt: string; product: string; name: string; trades: number; sum_r: number; t: number; win: number;
-  backtest: string; live: Rec | null; shadow: Rec | null };
+  backtest: string; live: Rec | null; shadow: Rec | null; picked_at?: string | null };
 type Plan = { price: number; contracts: number; risk_usd: number; notional_usd: number; margin_usd: number; capped: boolean };
 export type LiveTrade = { id: string; acct: string; mkt: string; product: string; name: string; mode: "live" | "shadow"; status: string;
   reason?: string; side: number; contracts?: number; fill?: number; stop: number; target: number | null; mark?: number;
@@ -25,7 +25,8 @@ export type LiveStatus = { configured_db: boolean; keys: boolean; pin_set: boole
   last_cycle_at?: number; wallet?: { asset: string | null; balance: number; available: number; blocked: number } | null;
   wallet_at?: number;
   limits: { risk_usd: number; daily_stop_usd: number; max_notional_usd: number; leverage: number; max_lag_s: number;
-    drift_frac: number; tick_s: number; risk_cap_usd?: number; risk_min_usd?: number; risk_set_at?: number | null };
+    drift_frac: number; tick_s: number; risk_cap_usd?: number; risk_min_usd?: number; risk_set_at?: number | null;
+    sizing?: "min" | "risk" };
   today: { live: number; shadow: number }; totals: { live: Totals; shadow: Totals }; picked_at: string; picks: Pick[];
   open: LiveTrade[]; recent: LiveTrade[]; notes: string[] };
 
@@ -34,6 +35,7 @@ const usd = (v: number | null | undefined, signed = false) => {
   const sign = signed ? (v > 0 ? "+" : v < 0 ? "−" : "") : v < 0 ? "−" : "";
   return `${sign}$${Math.abs(v).toFixed(2)}`;
 };
+const sizeLabel = (r: number | "min" | null) => (r === "min" ? "1 contract a trade" : `${usd(r)} a trade`);
 const px = (v: number | null | undefined) =>
   v === null || v === undefined ? "—" : v.toLocaleString("en-US", { maximumFractionDigits: v > 1000 ? 1 : 2 });
 const tone = (v: number | null | undefined) => (!v ? "" : v > 0 ? "gain" : "loss");
@@ -80,8 +82,8 @@ const verdict = (picks: Pick[]) => {
 export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, saved, ask, pendingRisk, busy, msg, onToggle,
   onShadow, onFlatten, onRisk, onSubmitPin, onCancel, onForgetPin, intro }: {
   s: LiveStatus; now: number; pin: string; setPin: (v: string) => void; remember: boolean; setRemember: (v: boolean) => void;
-  saved: boolean; ask: Ask; pendingRisk: number | null; busy: string | null; msg: string | null; onToggle: () => void;
-  onShadow: () => void; onFlatten: () => void; onRisk: (r: number) => void; onSubmitPin: () => void; onCancel: () => void;
+  saved: boolean; ask: Ask; pendingRisk: number | "min" | null; busy: string | null; msg: string | null; onToggle: () => void;
+  onShadow: () => void; onFlatten: () => void; onRisk: (r: number | "min") => void; onSubmitPin: () => void; onCancel: () => void;
   onForgetPin: () => void; intro?: ReactNode;
 }) {
   const isLive = s.mode === "live";
@@ -89,6 +91,9 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
   const L = s.limits;
   // the risk a trade the owner picks, whole dollars from the server's minimum to its cap; shown once the server offers it
   const risks = L.risk_cap_usd ? [1, 2, 3, 4, 5].filter((r) => r >= (L.risk_min_usd ?? 1) && r <= (L.risk_cap_usd ?? 5)) : [];
+  const oneContract = L.sizing === "min";       // one contract a trade, the smallest order (the default from 15 Nov)
+  const sizeText = oneContract ? "1 contract a trade (the smallest order Delta allows)" : `${usd(L.risk_usd)} risked a trade`;
+  const mixed = s.picks.some((p) => p.picked_at);   // some picks joined later: each record is as of its own pick
   const live = s.totals.live;
   const dayLeft = L.daily_stop_usd + s.today.live;
   return (
@@ -97,7 +102,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         <b>Real money, on strategies that are not proven.</b>{" "}
         {intro ?? <>Since 8 Nov the paper desk&apos;s bitcoin strategies lost a combined −397R and its gold strategies −166R.</>}{" "}
         {verdict(s.picks)}{" "}
-        {`The size is the one chosen for this: ${usd(L.risk_usd)} risked a trade and a ${usd(L.daily_stop_usd)} daily loss stop.`}
+        {`The size is the one chosen for this: ${sizeText} and a ${usd(L.daily_stop_usd)} daily loss stop.`}
       </div>
 
       <div className="ld-head">
@@ -149,16 +154,20 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
             <span>
               {busy === "live" ? "Checking Delta and switching on…" : busy === "off" ? "Switching off…" : isLive
                 ? "Real orders go to Delta for every new signal. Switch OFF to stop new trades; a position already open still closes at its stop, its target or its strategy's exit."
-                : `Switch ON to start: a real order for every new signal, ${usd(L.risk_usd)} risked a trade, stopping for the day after a ${usd(L.daily_stop_usd)} loss.${s.mode === "shadow" ? " A shadow test is running now: decisions are logged, nothing is sent." : ""}`}
+                : `Switch ON to start: a real order for every new signal, ${sizeText}, stopping for the day after a ${usd(L.daily_stop_usd)} loss.${s.mode === "shadow" ? " A shadow test is running now: decisions are logged, nothing is sent." : ""}`}
             </span>
           </div>
         </div>
         {risks.length > 0 && (
           <div className="ld-risk-row">
-            <span className="ld-risk-k" id="ld-risk-k">Risk a trade</span>
+            <span className="ld-risk-k" id="ld-risk-k">Trade size</span>
             <div className="ld-seg" role="radiogroup" aria-labelledby="ld-risk-k">
+              {L.sizing !== undefined && (
+                <button type="button" role="radio" aria-checked={oneContract} className={`ld-seg-b${oneContract ? " on" : ""}`}
+                  disabled={!!busy} onClick={() => onRisk("min")}>1 contract</button>
+              )}
               {risks.map((r) => {
-                const on = Math.abs(L.risk_usd - r) < 0.005;
+                const on = !oneContract && Math.abs(L.risk_usd - r) < 0.005;
                 return (
                   <button key={r} type="button" role="radio" aria-checked={on} className={`ld-seg-b${on ? " on" : ""}`}
                     disabled={!!busy} onClick={() => onRisk(r)}>${r}</button>
@@ -166,13 +175,15 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
               })}
             </div>
             <span className="ld-risk-s">
-              {busy === "risk" ? "Saving…" : "The most one trade loses if its stop is hit, plus about $0.10-0.30 of fees. A trade whose smallest order (one contract) would lose more is skipped."}
+              {busy === "risk" ? "Saving…" : oneContract
+                ? "Every trade is 1 contract, the smallest order Delta allows. What it loses at its stop depends on how far away the stop is: on bitcoin usually $0.20-0.60, on gold under 5 cents, plus fees. A trade whose one contract would lose more than $5 is skipped."
+                : "A dollar amount is the most one trade loses if its stop is hit, plus about $0.10-0.30 of fees. A trade whose smallest order (one contract) would lose more is skipped."}
             </span>
           </div>
         )}
         {ask && (
           <div className="ld-ctl-row">
-            <label>{ask === "live" ? "Your PIN, to switch ON" : ask === "risk" ? `Your PIN, to set ${usd(pendingRisk)} a trade` : "Your PIN, to close every position"}
+            <label>{ask === "live" ? "Your PIN, to switch ON" : ask === "risk" ? `Your PIN, to set ${sizeLabel(pendingRisk)}` : "Your PIN, to close every position"}
               <input type="password" autoComplete="off" inputMode="numeric" autoFocus value={pin} onChange={(e) => setPin(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") onSubmitPin(); }} />
             </label>
@@ -180,7 +191,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
               <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} /> Remember the PIN on this device
             </label>
             <button className={`ld-btn${ask === "live" ? " danger" : ""}`} disabled={!!busy || !pin} onClick={onSubmitPin}>
-              {ask === "live" ? "Switch ON — real money" : ask === "risk" ? `Set ${usd(pendingRisk)} a trade` : "Close every position now"}
+              {ask === "live" ? "Switch ON — real money" : ask === "risk" ? `Set ${sizeLabel(pendingRisk)}` : "Close every position now"}
             </button>
             <button className="ld-btn" disabled={!!busy} onClick={onCancel}>Cancel</button>
           </div>
@@ -198,7 +209,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         {msg && <p className="ld-msg">{msg}</p>}
       </div>
 
-      <h4 className="ld-h">{`The ${s.picks.length} strategies (fixed ${ist(Date.parse(s.picked_at) / 1000)} IST)`}</h4>
+      <h4 className="ld-h">{mixed ? `The ${s.picks.length} strategies (each record as of its own pick)` : `The ${s.picks.length} strategies (fixed ${ist(Date.parse(s.picked_at) / 1000)} IST)`}</h4>
       <div className="ld-scroll">
         <table className="ld-table">
           <thead>
@@ -209,7 +220,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
               <tr key={`${p.acct}|${p.mkt}`}>
                 <td className="l"><b>{p.acct}</b> {p.name}</td>
                 <td>{p.product}</td>
-                <td>{`${p.trades} trades · ${p.sum_r >= 0 ? "+" : ""}${p.sum_r.toFixed(1)}R · t ${p.t.toFixed(2)} · ${p.win}% won`}</td>
+                <td>{`${p.trades} trades · ${p.sum_r >= 0 ? "+" : ""}${p.sum_r.toFixed(1)}R · t ${p.t.toFixed(2)} · ${p.win}% won${mixed ? ` · picked ${ist(Date.parse(p.picked_at || s.picked_at) / 1000)}` : ""}`}</td>
                 <td className={`l ${p.backtest.startsWith("loses") ? "loss" : ""}`}>{p.backtest}</td>
                 <td className={tone(p.live?.pnl_usd)}>{p.live ? `${usd(p.live.pnl_usd, true)} · ${p.live.trades}${p.live.open ? ` · ${p.live.open} open` : ""}` : "—"}</td>
                 <td className={tone(p.shadow?.pnl_usd)}>{p.shadow ? `${usd(p.shadow.pnl_usd, true)} · ${p.shadow.trades}` : "—"}</td>
@@ -272,7 +283,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
 
       <ul className="ld-notes">
         {s.notes.map((n, i) => <li key={i}>{n}</li>)}
-        <li>{`Limits: ${usd(L.risk_usd)} risk a trade, ${usd(L.daily_stop_usd)} daily stop, at most ${usd(L.max_notional_usd)} of notional a position, ${L.leverage}x leverage, a signal older than ${Math.round(L.max_lag_s / 60)} minutes or already ${Math.round(L.drift_frac * 100)}% of its risk away is skipped.`}</li>
+        <li>{`Limits: ${oneContract ? `1 contract a trade (skipped if it would lose more than ${usd(L.risk_cap_usd)})` : `${usd(L.risk_usd)} risk a trade`}, ${usd(L.daily_stop_usd)} daily stop, at most ${usd(L.max_notional_usd)} of notional a position, ${L.leverage}x leverage, a signal older than ${Math.round(L.max_lag_s / 60)} minutes or already ${Math.round(L.drift_frac * 100)}% of its risk away is skipped.`}</li>
       </ul>
 
       {/* global: every selector is under .ld, so nothing outside this tab is touched */}
@@ -340,11 +351,12 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         .ld .ld-seg-b { padding: 7px 14px; font-size: 13px; font-weight: 700; border: 0; border-left: 1px solid var(--panel-border);
                         background: transparent; color: var(--text); cursor: pointer; font-variant-numeric: tabular-nums; }
         .ld .ld-seg-b:first-child { border-left: 0; }
+        .ld .ld-seg-b { white-space: nowrap; }
         .ld .ld-seg-b.on { background: var(--text); color: var(--panel); }
         .ld .ld-seg-b:disabled { cursor: default; opacity: 0.6; }
         .ld .ld-seg-b:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
         .ld .ld-risk-s { flex: 1 1 260px; font-size: 12px; line-height: 1.45; color: var(--text-muted); }
-        @media (max-width: 640px) { .ld .ld-v { font-size: 19px; } .ld .ld-ctl input { min-width: 140px; } }
+        @media (max-width: 640px) { .ld .ld-v { font-size: 19px; } .ld .ld-ctl input { min-width: 140px; } .ld .ld-seg-b { padding: 7px 10px; } }
       `}</style>
     </div>
   );
@@ -359,7 +371,7 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
   const [remember, setRemember] = useState(false);
   const [saved, setSaved] = useState(false);
   const [ask, setAsk] = useState<Ask>(null);
-  const [pendingRisk, setPendingRisk] = useState<number | null>(null);
+  const [pendingRisk, setPendingRisk] = useState<number | "min" | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now() / 1000);
@@ -386,7 +398,7 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
   }, []);
   const forget = () => { keepPin(null); setSaved(false); setPin(""); setRemember(false); };
 
-  const act = async (key: "shadow" | "live" | "off" | "flatten" | "risk", usePin = "", riskUsd = 0) => {
+  const act = async (key: "shadow" | "live" | "off" | "flatten" | "risk", usePin = "", riskUsd: number | "min" = 0) => {
     setBusy(key);
     setMsg(null);
     try {
@@ -401,7 +413,8 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
       if (r?.ok) {
         setMsg(key === "live" ? "Live trading is ON: a real order goes to Delta for the next signal."
           : key === "flatten" ? "Every position is closed, and live trading is OFF."
-          : key === "risk" ? `From the next signal, a trade loses at most ${usd(riskUsd)} at its stop, plus fees.`
+          : key === "risk" ? (riskUsd === "min" ? "From the next signal, every trade is 1 contract, the smallest order."
+            : `From the next signal, a trade loses at most ${usd(riskUsd)} at its stop, plus fees.`)
           : key === "off" ? "Live trading is OFF: no new trades." : "Shadow test running: decisions are logged, nothing is sent.");
         setAsk(null);
         setPendingRisk(null);
@@ -437,13 +450,17 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
   };
   const onFlatten = () => { if (saved && pin) doFlatten(pin); else setAsk("flatten"); };
   const onShadow = () => act(s?.mode === "shadow" ? "off" : "shadow");
-  const setRisk = (r: number, p: string) => {
-    // lowering is always safe; raising asks once, since a trade that hits its stop then loses more
-    if (s && r > s.limits.risk_usd && !window.confirm(`Raise the risk to ${usd(r)} a trade? A trade that hits its stop then loses up to ${usd(r)}.`)) return;
+  const isCurrent = (r: number | "min") => !!s && (r === "min" ? s.limits.sizing === "min"
+    : s.limits.sizing !== "min" && Math.abs(r - s.limits.risk_usd) < 0.005);
+  const setRisk = (r: number | "min", p: string) => {
+    // one contract, or a lower amount, is always safe; a dollar amount above the current size asks once, since a trade
+    // that hits its stop then loses more
+    if (typeof r === "number" && (s?.limits.sizing === "min" || r > (s?.limits.risk_usd ?? 0))
+      && !window.confirm(`Raise the size to ${usd(r)} of risk a trade? A trade that hits its stop then loses up to ${usd(r)}.`)) return;
     act("risk", p, r);
   };
-  const onRisk = (r: number) => {
-    if (!s || Math.abs(r - s.limits.risk_usd) < 0.005) return;
+  const onRisk = (r: number | "min") => {
+    if (!s || isCurrent(r)) return;
     if (saved && pin) { setRisk(r, pin); return; }
     setPendingRisk(r);
     setAsk("risk");

@@ -1,9 +1,9 @@
 "use client";
 
 // Delta Exchange Live Trading (14 Nov 2026): REAL money on Delta Exchange India for the bitcoin Premium strategies the
-// owner picked from the Crypto tab - TH-05, TL-04 and TH-01 - at $1 to $5 risked a trade (the owner picks it on the
-// page, from 15 Nov) and a $20 daily loss stop. The desk
-// is premium_live's "crypto" desk: it copies the paper desk's trades of the three (their signals come from Delta's live
+// owner picked from the Crypto tab - TH-05, TL-04 and TH-01 on 14 Nov, TD-02 on 15 Nov - at one contract a trade (the
+// smallest order; or $1 to $5 of risk the owner picks on the page) and a $20 daily loss stop. The desk
+// is premium_live's "crypto" desk: it copies the paper desk's trades of the four (their signals come from Delta's live
 // BTCUSD candles) into real Delta orders, each with its stop and target held on Delta. One ON/OFF switch runs it: ON
 // needs the owner's PIN and one confirmation (the page sends the words REAL MONEY the server asks for); OFF never needs
 // the PIN. The gold desk stays on Premium Strategies.
@@ -17,14 +17,14 @@ export default function DeltaLiveTradingPage() {
       <PageHeader
         crumb="Delta Exchange Live Trading"
         title="Delta Exchange Live Trading"
-        subtitle="Real money on Delta Exchange India for the bitcoin Premium strategies you picked: TH-05, TL-04 and TH-01, traded on Delta's live BTCUSD data."
+        subtitle="Real money on Delta Exchange India for the bitcoin Premium strategies you picked: TH-05, TL-04, TH-01 and TD-02, traded on Delta's live BTCUSD data."
       />
       <div className="dl-box">
         <p>
-          Each of the three runs on the Premium paper desk on Delta&apos;s live one-minute BTCUSD candles. When one of them
-          enters, this desk sends the same trade to your Delta account as a real order: a market entry sized so that its
-          stop loses no more than the risk you pick below ($1 to $5), with that strategy&apos;s own stop and target placed
-          on Delta as a bracket. When the strategy exits, the
+          Each of the four runs on the Premium paper desk on Delta&apos;s live one-minute BTCUSD candles. When one of them
+          enters, this desk sends the same trade to your Delta account as a real order: a market entry of 1 contract, the
+          smallest order Delta allows (or sized to a risk of $1 to $5 if you pick one below), with that strategy&apos;s own
+          stop and target placed on Delta as a bracket. When the strategy exits, the
           real position is closed. The desk never adds trades of its own, and Delta holds one bitcoin position at a time, so
           a second signal is skipped while one is open.
         </p>
@@ -38,7 +38,7 @@ export default function DeltaLiveTradingPage() {
       </div>
       <LiveDelta
         desk="crypto"
-        intro={<>These three were picked on 14 Nov from the Crypto tab after 9 to 15 paper trades each, and TL-04&apos;s own 2-year bitcoin backtest loses −0.31R a trade over 2,134 trades.</>}
+        intro={<>TH-05, TL-04 and TH-01 were picked on 14 Nov and TD-02 on 15 Nov, each after 7 to 15 paper trades; TL-04&apos;s and TD-02&apos;s own 2-year bitcoin backtests lose (−0.31R and −0.37R a trade).</>}
       />
       <style jsx>{`
         .dl-page { padding: 0 0 40px; }

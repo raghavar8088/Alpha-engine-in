@@ -2,11 +2,12 @@
 
 DESKS. Each desk has its own picks, products, switch (off / shadow / live), daily loss stop, state and trade records;
 they share the Delta account, its keys and the owner's PIN, and never trade the same product.
-- gold (Premium Strategies > "Real money · Delta gold"): the five gold picks of 13 Nov, on XAUTUSD. Its records are the
-  original ones (live_delta_state / live_delta_trades).
-- crypto (the "Delta Exchange Live Trading" module, 14 Nov): the bitcoin strategies the owner picked on 14 Nov from the
-  Crypto tab - TH-05, TL-04 and TH-01 - on BTCUSD, a $20 daily stop (live_crypto_state / live_crypto_trades). From 15
-  Nov the owner sets its risk a trade on the page ($1 to $5) and it copies a signal seen up to 10 minutes late.
+- gold (Premium Strategies > "Real money · Delta gold"): the five gold picks of 13 Nov and CP-06 (15 Nov), on XAUTUSD.
+  Its records are the original ones (live_delta_state / live_delta_trades).
+- crypto (the "Delta Exchange Live Trading" module, 14 Nov): the bitcoin strategies the owner picked from the Crypto
+  tab - TH-05, TL-04 and TH-01 on 14 Nov, TD-02 on 15 Nov - on BTCUSD, a $20 daily stop (live_crypto_state /
+  live_crypto_trades). From 15 Nov both desks trade one contract a trade (the owner can pick $1 to $5 of risk
+  instead) and copy a signal seen up to 10 minutes late.
   On 14 Nov the owner moved bitcoin here from the gold desk; the gold desk's earlier bitcoin picks (TH-01, TH-05, RU-04,
   TD-02, TD-03) left it, and any bitcoin trade it still had open would be managed by it to its close.
 
@@ -25,10 +26,11 @@ WHAT IT DOES. It copies the paper desk's trades of those ten (premium-paper-serv
 local MongoDB) into real Delta orders. The paper desk decides every entry and exit, and this desk never re-scans:
 - A paper entry is copied only if it is seen within its desk's lag limit of its entry time (MAX_LAG_S; the bitcoin
   desk's CRYPTO_MAX_LAG_S), the market is still within DRIFT_FRAC of a risk distance of the paper entry, and the price
-  is strictly between the paper's stop and target. The order is a market order sized so the paper's stop loses at most
-  the owner's chosen risk (RISK_MIN_USD up to the desk's RISK_USD, set on the page with the PIN):
-  contracts = risk / (|price - stop| x contract value), and never more than MAX_NOTIONAL_USD of notional. A trade
-  whose single contract would lose more than that risk is skipped.
+  is strictly between the paper's stop and target. The order is a market order of one contract, the smallest order
+  Delta allows (the default from 15 Nov; skipped if that one contract would lose more than the desk's RISK_USD at the
+  stop), or, when the owner picks a dollar risk on the page (RISK_MIN_USD up to RISK_USD, with the PIN), sized so the
+  paper's stop loses at most that: contracts = risk / (|price - stop| x contract value), and never more than
+  MAX_NOTIONAL_USD of notional; then a trade whose single contract would lose more than that risk is skipped.
 - The paper's own stop and target go on the venue as a bracket right after the fill. If the bracket is refused, the
   position is closed at once and the desk switches itself off: a real position never stays unprotected.
 - When the paper trade closes, for any reason, or disappears, the real one is closed at the market and its legs are
@@ -76,6 +78,8 @@ MAX_NOTIONAL_USD = float(os.getenv("PREMIUM_LIVE_MAX_NOTIONAL_USD", "2500"))
 LEVERAGE = int(os.getenv("PREMIUM_LIVE_LEVERAGE", "10"))
 MAX_LAG_S = int(os.getenv("PREMIUM_LIVE_MAX_LAG_S", "300"))
 CRYPTO_MAX_LAG_S = int(os.getenv("PREMIUM_CRYPTO_MAX_LAG_S", "600"))   # the bitcoin desk (the owner's choice, 15 Nov)
+GOLD_MAX_LAG_S = int(os.getenv("PREMIUM_GOLD_MAX_LAG_S", "600"))       # the gold desk too, when it went live (15 Nov)
+SIZING_DEFAULT = os.getenv("PREMIUM_LIVE_SIZING", "min")   # "min": one contract a trade, the owner's choice on 15 Nov
 RISK_MIN_USD = 1.0             # the lowest risk a trade the owner can pick on the page; the highest is the desk's own
 PRIORITY_REFRESH_S = 600       # the books named to the paper desk (live_priority) are re-written at least this often
 DRIFT_FRAC = float(os.getenv("PREMIUM_LIVE_DRIFT_FRAC", "0.30"))
@@ -104,6 +108,7 @@ class Pick:
     t: float            # t-stat of the net R a trade
     win: int            # % of trades won
     backtest: str       # what its own 2-year backtest said
+    picked_at: str | None = None    # its own pick time, when it joined the desk after the others (its record's time)
 
 
 GOLD_PICKS: tuple[Pick, ...] = (
@@ -115,6 +120,9 @@ GOLD_PICKS: tuple[Pick, ...] = (
     Pick("DR-01", "XAUTUSD", "XAUTUSD", "EMA 200 side + counter-trend-line breakout, 1:2 (15-minute)", 15, 5.27, 0.88, 53,
          "loses: -0.26R a trade over 1,467 trades (t -7.3)"),
     Pick("CP-05", "XAUUSD", "XAUTUSD", "Turning-point zones (3 touches)", 8, 3.74, 0.86, 50, "never backtested"),
+    # added by the owner on 15 Nov 2026 from the Gold tab's ranking; record = its gold paper trades at 13:40 IST
+    Pick("CP-06", "XAUUSD", "XAUTUSD", "Triple top / triple bottom", 3, 1.44, 0.37, 67, "never backtested",
+         "2026-11-15T13:40:00+05:30"),
 )
 # picked by the owner on 14 Nov 2026 from the Crypto tab; records = their bitcoin paper trades at 09:44 IST
 CRYPTO_PICKS: tuple[Pick, ...] = (
@@ -124,17 +132,22 @@ CRYPTO_PICKS: tuple[Pick, ...] = (
          "loses: -0.31R a trade over 2,134 trades (t -11.1)"),
     Pick("TH-01", "BTCUSD", "BTCUSD", "Bitcoin 6 PM session: anchored VWAP + EMA 25, the N pattern", 9, 9.55, 0.49, 11,
          "never backtested"),
+    # added by the owner on 15 Nov 2026 from the Crypto tab; record = its bitcoin paper trades at 13:40 IST
+    Pick("TD-02", "BTCUSD", "BTCUSD", "9/15 EMA cross filtered by the SMI (7, 2, 2)", 7, 20.0, 0.94, 43,
+         "loses: -0.37R a trade over 998 trades (t -3.5)", "2026-11-15T13:40:00+05:30"),
 )
 GOLD_NOTES = (
-    "Real money on five unproven gold strategies, at the owner's chosen size: $1 to $5 risked a trade (set on this "
-    "page with the PIN) and a $20 daily loss stop.",
-    "Three of the five lose in their own 2-year backtests and two were never backtested; their good week is the only "
+    "Real money on six unproven gold strategies (CP-06 joined the five on 15 Nov), at the owner's chosen size: one "
+    "contract a trade, the smallest order (or $1 to $5 of risk picked on this page with the PIN), and a $20 daily "
+    "loss stop.",
+    "Three of the six lose in their own 2-year backtests and three were never backtested; their good week is the only "
     "thing that picked them.",
     "On 14 Nov 2026 the owner moved the bitcoin strategies to the Delta Exchange Live Trading module; this desk trades "
     "gold (XAUTUSD) only.",
     "Each real trade is the paper desk's trade: its entry signal, its stop, its target, its exit. The paper desk sees a "
     "new bar up to a few minutes late, so a fast strategy's copy is often skipped as late or drifted rather than chased.",
-    "A trade whose smallest order (one contract) would lose more than the chosen risk at its stop is skipped.",
+    "One gold contract is 0.001 XAUT (about $4 of gold), so a trade of one contract loses cents at its stop. A trade "
+    "whose one contract would lose more than $5 is skipped (or more than the chosen risk, with a dollar risk).",
     "Delta nets positions by product, so only one gold position can be open at a time; a second signal is skipped "
     "while one is held.",
     "Stops and targets live on Delta itself (a bracket), so a position stays protected if this server goes down.",
@@ -142,14 +155,16 @@ GOLD_NOTES = (
     "Fees and funding are Delta's own, read from its fills. Profit and loss are in US dollars.",
 )
 CRYPTO_NOTES = (
-    "Real money on three bitcoin strategies the owner picked on 14 Nov 2026 from the Crypto tab (TH-05, TL-04, TH-01), "
-    "at the owner's chosen size: $1 to $5 risked a trade (set on this page with the PIN) and a $20 daily loss stop.",
-    "None is proven: TL-04 loses in its own 2-year bitcoin backtest (-0.31R a trade over 2,134 trades, t -11.1) and "
-    "TH-05 and TH-01 were never backtested; 9 to 15 paper trades picked them.",
+    "Real money on four bitcoin strategies the owner picked from the Crypto tab (TH-05, TL-04, TH-01 on 14 Nov 2026, "
+    "TD-02 on 15 Nov), at the owner's chosen size: one contract a trade, the smallest order (or $1 to $5 of risk "
+    "picked on this page with the PIN), and a $20 daily loss stop.",
+    "None is proven: TL-04 and TD-02 lose in their own 2-year bitcoin backtests (-0.31R a trade over 2,134 trades and "
+    "-0.37R over 998) and TH-05 and TH-01 were never backtested; 7 to 15 paper trades picked them.",
     "Each real trade is the paper desk's trade on Delta's live BTCUSD candles: its entry, stop, target and exit. A "
-    "signal seen more than 10 minutes late, or already 30% of its risk away, is skipped, never chased. A trade whose "
-    "smallest order (one contract) would lose more than the chosen risk at its stop is skipped too.",
-    "Delta nets positions by product, so only one bitcoin position can be open at a time across the three; a second "
+    "signal seen more than 10 minutes late, or already 30% of its risk away, is skipped, never chased. One bitcoin "
+    "contract is 0.001 BTC; a trade whose one contract would lose more than $5 at its stop is skipped too (or more "
+    "than the chosen risk, with a dollar risk).",
+    "Delta nets positions by product, so only one bitcoin position can be open at a time across the four; a second "
     "signal is skipped while one is held.",
     "Stops and targets live on Delta itself (a bracket), so a position stays protected if this server goes down.",
     "Leverage is set to 10x on BTCUSD before going live; positions are capped at $2,500 of notional.",
@@ -183,7 +198,7 @@ class Desk:
 
 DESKS: dict[str, Desk] = {
     "gold": Desk("gold", "Real money · Delta gold", GOLD_PICKS, "live_delta_state", "live_delta_trades", RISK_USD,
-                 DAILY_STOP_USD, PICKED_AT, GOLD_NOTES),
+                 DAILY_STOP_USD, PICKED_AT, GOLD_NOTES, GOLD_MAX_LAG_S),
     "crypto": Desk("crypto", "Delta Exchange Live Trading", CRYPTO_PICKS, "live_crypto_state", "live_crypto_trades",
                    CRYPTO_RISK_USD, CRYPTO_DAILY_STOP_USD, CRYPTO_PICKED_AT, CRYPTO_NOTES, CRYPTO_MAX_LAG_S),
 }
@@ -246,6 +261,15 @@ def _side(side: int) -> str:
 
 def _fee(notional: float, rate: float) -> float:
     return abs(notional) * rate * (1 + GST)
+
+
+def _sizing(st: dict) -> str:
+    """"min" (one contract a trade, the smallest order: the default from 15 Nov) or "risk" (sized to the owner's dollar
+    risk). A dollar risk chosen before the one-contract choice existed (risk_set_at, no sizing) counts as "risk"."""
+    s = st.get("sizing")
+    if s in ("min", "risk"):
+        return s
+    return "risk" if st.get("risk_set_at") else SIZING_DEFAULT
 
 
 def _risk(st: dict) -> float:
@@ -574,9 +598,16 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, position
     if abs(px - entry) > DRIFT_FRAC * abs(entry - stop):
         return await skip(f"price moved {abs(px - entry) / abs(entry - stop):.0%} of the risk away from the paper entry",
                           price=px)
-    risk = _risk(st)
+    sizing = _sizing(st)
     one = abs(px - stop) * product.contract_value           # what a single contract loses at the stop
-    by_risk = math.floor(risk / one)
+    if sizing == "min":                                     # the smallest order; the desk's own risk still caps it
+        if one > _d().risk_usd:
+            return await skip(f"one contract would lose ${one:.2f} at its stop, more than the ${_d().risk_usd:.2f} cap a "
+                              "trade", price=px)
+        risk, by_risk = one, 1
+    else:
+        risk = _risk(st)
+        by_risk = math.floor(risk / one)
     by_cap = math.floor(MAX_NOTIONAL_USD / (px * product.contract_value))
     contracts = min(by_risk, by_cap)
     if contracts < 1:
@@ -584,8 +615,9 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, position
                else "under one contract within the notional cap")
         return await skip(why, price=px)
     notional = contracts * product.contract_value * px
-    plan = {"price": px, "contracts": contracts, "risk_usd": round(one * contracts, 4), "risk_set_usd": risk,
-            "notional_usd": round(notional, 2), "margin_usd": round(notional / LEVERAGE, 2), "capped": by_cap < by_risk}
+    plan = {"price": px, "contracts": contracts, "risk_usd": round(one * contracts, 6), "risk_set_usd": round(risk, 6),
+            "sizing": sizing, "notional_usd": round(notional, 2), "margin_usd": round(notional / LEVERAGE, 2),
+            "capped": by_cap < by_risk}
 
     if mode == "shadow":
         fee = _fee(notional, product.taker_rate)
@@ -882,23 +914,30 @@ async def _set_risk_one(risk_usd, pin: str | None = None) -> dict:
     db = _db()
     if db is None:
         return {"ok": False, "why": "the paper desk's database is not configured on this server"}
-    try:
-        r = round(float(risk_usd), 2)
-    except (TypeError, ValueError):
-        return {"ok": False, "why": "the risk a trade must be a number of US dollars"}
-    if not (math.isfinite(r) and RISK_MIN_USD <= r <= _d().risk_usd):
-        return {"ok": False, "why": f"the risk a trade must be from ${RISK_MIN_USD:.0f} to ${_d().risk_usd:.0f}"}
+    if isinstance(risk_usd, str) and risk_usd.strip().lower() in ("min", "1 contract", "one contract"):
+        r = None                                            # one contract a trade, the smallest order
+    else:
+        try:
+            r = round(float(risk_usd), 2)
+        except (TypeError, ValueError):
+            return {"ok": False, "why": "the size must be one contract (min) or a number of US dollars"}
+        if not (math.isfinite(r) and RISK_MIN_USD <= r <= _d().risk_usd):
+            return {"ok": False, "why": f"the risk a trade must be from ${RISK_MIN_USD:.0f} to ${_d().risk_usd:.0f}"}
     st = await _state(db)
     why = await _check_pin(db, st, pin)
     if why:
         return {"ok": False, "why": why}
-    await _set_state(db, risk_usd=r, risk_set_at=_now())
-    return {"ok": True, "risk_usd": r}
+    if r is None:
+        await _set_state(db, sizing="min", risk_set_at=_now())
+        return {"ok": True, "sizing": "min"}
+    await _set_state(db, sizing="risk", risk_usd=r, risk_set_at=_now())
+    return {"ok": True, "sizing": "risk", "risk_usd": r}
 
 
 async def set_risk(risk_usd, pin: str | None = None, desk: str = "gold") -> dict:
-    """The most one new trade of a desk may lose at its stop, RISK_MIN_USD up to the desk's own risk (the owner picks it
-    on the page). Needs the PIN; a trade already open keeps the size it was given."""
+    """A desk's trade size, picked by the owner on the page: "min" (one contract a trade, the smallest order) or the most
+    one trade may lose at its stop, RISK_MIN_USD up to the desk's own risk. Needs the PIN; a trade already open keeps
+    the size it was given."""
     if desk not in DESKS:
         return {"ok": False, "why": f"unknown desk {desk!r}"}
     with _use(desk):
@@ -951,7 +990,7 @@ async def _status_one() -> dict:
         "errors_in_row": st.get("errors_in_row"), "last_cycle_at": st.get("last_cycle_at"), "wallet": st.get("wallet"),
         "wallet_at": st.get("wallet_at"), "products": st.get("products"),
         "limits": {"risk_usd": _risk(st), "risk_cap_usd": _d().risk_usd, "risk_min_usd": RISK_MIN_USD,
-                   "risk_set_at": st.get("risk_set_at"), "daily_stop_usd": _d().daily_stop_usd,
+                   "risk_set_at": st.get("risk_set_at"), "sizing": _sizing(st), "daily_stop_usd": _d().daily_stop_usd,
                    "max_notional_usd": MAX_NOTIONAL_USD, "leverage": LEVERAGE, "max_lag_s": _d().max_lag_s,
                    "drift_frac": DRIFT_FRAC, "tick_s": TICK_S},
         "today": today, "totals": totals, "picked_at": _d().picked_at, "picks": picks,
