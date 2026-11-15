@@ -136,11 +136,11 @@ TABLE_FIELDS = (
     "mom_score", "mom_pct", "mom_12_1", "vol_tercile", "est", "est_asof",
     "explain", "tflags", "sflags", "freshness", "behind", "next_q",
     "next_due", "pending", "last_meeting", "next_meeting", "basis", "source_url",
-    "fetched_at", "fetch_error", "listed",
+    "fetched_at", "fetch_error", "listed", "frank", "frank_of", "fscore",
 )
 
 SORTS = {
-    "overall": "overall", "fundamentals": "fund", "quarter": "quarter", "pnl": "pnl",
+    "frank": "frank", "overall": "overall", "fundamentals": "fund", "quarter": "quarter", "pnl": "pnl",
     "c_quality": "rating_parts.quality", "c_growth": "rating_parts.growth",
     "c_valuation": "rating_parts.valuation", "c_strength": "rating_parts.strength",
     "c_momentum": "rating_parts.momentum",
@@ -492,6 +492,28 @@ async def reevaluate(force: bool = False) -> dict:
     return {"checked": seen, "valuation_changed": len(changed)}
 
 
+async def fundamental_ranks() -> dict:
+    """The Rank column: every listed, rated stock ordered by L.fundamental_score (the rating's business parts,
+    momentum left out), 1 = strongest. One projection over the table each cycle; writes only rows that changed."""
+    docs = [d async for d in rows.find({}, {"listed": 1, "ovr_status": 1, "rating_parts": 1,
+                                             "frank": 1, "frank_of": 1, "fscore": 1})]
+    scores: dict[str, float] = {}
+    for d in docs:
+        if d.get("listed") and d.get("ovr_status") == "rated":
+            s = L.fundamental_score(d.get("rating_parts"))
+            if s is not None:
+                scores[d["_id"]] = s
+    ranks = L.rank_scores(scores)
+    blank = {"frank": None, "frank_of": None, "fscore": None}
+    ops = []
+    for d in docs:
+        want = ranks.get(d["_id"], blank)
+        if any(d.get(k) != v for k, v in want.items()):
+            ops.append(UpdateOne({"_id": d["_id"]}, {"$set": want}))
+    await _bulk(ops)
+    return {"ranked": len(ranks), "changed": len(ops)}
+
+
 # ── rows from the cached pages ───────────────────────────────────────────────────
 
 
@@ -742,6 +764,7 @@ async def run_cycle(force: frozenset[str] = frozenset()) -> dict:
                 market_ran = bool(out["returns"]) and not (out["returns"] or {}).get("skipped")
 
             out["reevaluate"] = await _step("reevaluate", reevaluate, force=meetings_ran or market_ran)
+            out["rank"] = await _step("rank", fundamental_ranks)
             if "norefresh" not in force:
                 out["refresh"] = await _step("refresh", refresh_due)
             out["highs"] = await _step("highs", seed_missing_highs)

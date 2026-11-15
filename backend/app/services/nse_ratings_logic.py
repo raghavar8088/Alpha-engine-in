@@ -725,6 +725,67 @@ def overall_rating(row: dict, fr: dict) -> dict:
             "rating_parts": parts}
 
 
+# ── the Rank column (2026-11-15): fundamental strength, price momentum left out ──────────────────────────────
+# The owner asked for the stocks ranked on their fundamentals, with the ranking validated. The Rank is the stock
+# rating's five business parts at the rating's own weights (quality 25, growth 20, quarterly results 15, valuation 15,
+# financial strength 15), shared over the parts present: 4 of the 5 needed, quality always. No weight was fitted
+# to returns. Tested point in time (backend/research/fundamental_rank_2026_11; rules fixed in PLAN.md before any
+# result): no fundamental component predicted the next 12 months' return consistently, and this ordering did not
+# either. Its strongest fifth lagged the weakest fifth in the 2021-22 and 2023-24 rallies and fell less in the
+# falling 2024-26 market. It ranks fundamental strength; it is not a return forecast.
+FUND_RANK_PARTS = ("quality", "growth", "quarter", "valuation", "strength")
+FUND_RANK_MIN_PARTS = 4
+# (ranked on 1 Oct of, rank IC against the next 12 months, strongest fifth's median return %, weakest fifth's %,
+#  stocks ranked). Quarterly results enter only from 2024: no quarters before Sep 2023 are cached.
+FUND_RANK_RECORD = (
+    ("2021", -0.192, -13.7, 15.0, 912),
+    ("2022", -0.006, 23.1, 21.8, 1118),
+    ("2023", -0.030, 30.2, 36.7, 1216),
+    ("2024", 0.140, -16.8, -25.0, 1372),
+    ("2025", 0.161, -9.1, -21.5, 1971),
+)
+
+
+def fundamental_score(parts: dict | None) -> float | None:
+    """The Rank column's score: the rating's business parts, momentum left out. None when it cannot rank."""
+    parts = parts or {}
+    live = [(parts[k], RATING_WEIGHTS[k]) for k in FUND_RANK_PARTS if parts.get(k) is not None]
+    if parts.get("quality") is None or len(live) < FUND_RANK_MIN_PARTS:
+        return None
+    return sum(v * w for v, w in live) / sum(w for _, w in live)
+
+
+def rank_scores(scores: dict[str, float]) -> dict[str, dict]:
+    """1 = the highest score; equal scores share a rank (1, 2, 2, 4)."""
+    order = sorted(scores.items(), key=lambda kv: (-kv[1], kv[0]))
+    out: dict[str, dict] = {}
+    n, prev, rank = len(order), None, 0
+    for i, (sym, s) in enumerate(order, 1):
+        key = round(s, 6)
+        if key != prev:
+            rank, prev = i, key
+        out[sym] = {"frank": rank, "frank_of": n, "fscore": round(s, 2)}
+    return out
+
+
+FUND_RANK = {
+    "parts": list(FUND_RANK_PARTS), "min_parts": FUND_RANK_MIN_PARTS,
+    "weights": {k: RATING_WEIGHTS[k] for k in FUND_RANK_PARTS},
+    "definition": ("Rank = the stock rating's five business parts at the rating's own weights (quality 25%, growth "
+                   "20%, quarterly results 15%, valuation 15%, financial strength 15%), shared over the parts "
+                   "present: 4 of the 5 needed, quality always. Price momentum is left out. 1 = the strongest "
+                   "fundamentals among the rated stocks; equal scores share a rank."),
+    "validation": ("Tested point in time on NSE, Oct 2021 to Oct 2026: on each 1 October, the companies' filings as "
+                   "they stood then, scored by this module's own code, against the next 12 months' price return. "
+                   "It did not predict returns consistently. The strongest fifth lagged the weakest fifth in the "
+                   "2021-22 and 2023-24 rallies and fell less in the falling 2024-26 market. Read it as fundamental "
+                   "strength, not a return forecast."),
+    "record": [{"asof": y, "ic": ic, "top_median": t, "bottom_median": b, "n": n}
+               for y, ic, t, b, n in FUND_RANK_RECORD],
+    "study": "backend/research/fundamental_rank_2026_11",
+}
+
+
 def time_fields(row: dict, today: date) -> dict:
     """What depends on today's date: freshness, pending refresh, flags and the overall."""
     qend = as_date(row.get("qend"))
@@ -1106,6 +1167,7 @@ METHODOLOGY = {
     "min_pillars": MIN_PILLARS,
     "min_applicable_coverage": MIN_APPLICABLE_COVERAGE,
     "overdue_insufficient": OVERDUE_INSUFFICIENT,
+    "fund_rank": FUND_RANK,
     "rules": [
         "Stock rating = 25% quality + 20% growth + 15% quarterly results + 15% valuation + "
         "15% financial strength + 10% price momentum, each scored 0-10. A component with no "

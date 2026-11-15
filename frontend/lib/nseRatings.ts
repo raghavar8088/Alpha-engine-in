@@ -41,6 +41,10 @@ export interface NseRatingRow {
   idx_rank?: number | null;
 
   overall: number | null;
+  /** Rank on fundamentals (the rating's business parts, momentum left out): 1 = strongest. */
+  frank?: number | null;
+  frank_of?: number | null;
+  fscore?: number | null;
   ovr_key: OverallKey | null;
   ovr_tier: string | null;
   ovr_status?: "rated" | "insufficient";
@@ -280,8 +284,20 @@ export interface NseRatingsSummary {
     min_applicable_coverage: number;
     overdue_insufficient: number;
     rules: string[];
+    fund_rank?: FundRankMethod;
   };
   sources: Record<string, string>;
+}
+
+/** How the Rank column is built, and how it fared when tested point in time. */
+export interface FundRankMethod {
+  parts: string[];
+  min_parts: number;
+  weights: Record<string, number>;
+  definition: string;
+  validation: string;
+  record: { asof: string; ic: number; top_median: number; bottom_median: number; n: number }[];
+  study: string;
 }
 
 export interface NseRatingDetail {

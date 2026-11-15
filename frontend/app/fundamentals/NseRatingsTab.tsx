@@ -82,6 +82,9 @@ const COLS: Col[] = [
   { key: "sector", label: "Sector", section: "company", sort: "sector", first: "asc" },
   { key: "index", label: "Nifty index", section: "company", sort: "index", first: "asc" },
 
+  { key: "frank", label: "Rank", section: "rating", sort: "frank", first: "asc",
+    title: "Rank on fundamentals: the rating's five business parts, momentum left out. 1 = strongest. "
+      + "It ranks fundamental strength, not future returns (tested on 2021-2026: see How ratings & estimates work)" },
   { key: "overall", label: "Rating", section: "rating", sort: "overall",
     title: "25% quality + 20% growth + 15% quarterly results + 15% valuation + 15% financial strength + 10% price momentum" },
   { key: "c_quarter", label: "Quarterly", section: "rating", sort: "quarter",
@@ -161,15 +164,15 @@ const COLS: Col[] = [
 
 const ALL_KEYS = COLS.map((c) => c.key);
 const PRESETS: { key: string; label: string; cols: string[] }[] = [
-  { key: "overview", label: "Overview", cols: ["stock", "sector", "index", "overall", "c_quarter", "c_quality",
+  { key: "overview", label: "Overview", cols: ["stock", "sector", "index", "frank", "overall", "c_quarter", "c_quality",
     "c_valuation", "c_growth", "c_strength", "c_momentum", "why", "qlabel", "rev_yoy", "np_yoy", "pe", "pe_rel",
     "mcap", "r1d", "r1w", "r1m", "r3m", "r1y", "r5y", "vol", "mdd", "liquidity", "e1w", "e1m", "e3m", "source"] },
-  { key: "rating", label: "Ratings", cols: ["stock", "sector", "index", "overall", "c_quarter", "c_quality",
+  { key: "rating", label: "Ratings", cols: ["stock", "sector", "index", "frank", "overall", "c_quarter", "c_quality",
     "c_valuation", "c_growth", "c_strength", "c_momentum", "why", "qlabel", "source"] },
-  { key: "fundamentals", label: "Fundamentals", cols: ["stock", "sector", "overall", ...COLS.filter((c) => c.section === "fundamentals").map((c) => c.key)] },
-  { key: "returns", label: "Returns & risk", cols: ["stock", "sector", "index", "overall",
+  { key: "fundamentals", label: "Fundamentals", cols: ["stock", "sector", "frank", "overall", ...COLS.filter((c) => c.section === "fundamentals").map((c) => c.key)] },
+  { key: "returns", label: "Returns & risk", cols: ["stock", "sector", "index", "frank", "overall",
     ...COLS.filter((c) => c.section === "returns" || c.section === "risk").map((c) => c.key)] },
-  { key: "estimates", label: "Estimates", cols: ["stock", "sector", "overall", "r1m", "r3m", "r1y", "vol", "liquidity",
+  { key: "estimates", label: "Estimates", cols: ["stock", "sector", "frank", "overall", "r1m", "r3m", "r1y", "vol", "liquidity",
     "e1d", "e1w", "e1m", "e3m"] },
   { key: "all", label: "Everything", cols: ALL_KEYS },
 ];
@@ -630,6 +633,17 @@ export default function NseRatingsTab() {
         );
       case "index":
         return <td key={c.key} className="nsr-l nsr-idx">{r.index_label || "—"}</td>;
+      case "frank":
+        return (
+          <td key={c.key} title={r.frank != null
+            ? `Rank ${r.frank} of ${r.frank_of ?? "?"} on fundamentals, momentum left out (score ${r.fscore?.toFixed(2) ?? "-"}). `
+              + "It ranks fundamental strength, not future returns: see How ratings & estimates work."
+            : "Not ranked: needs a stock rating with quality and 4 of the 5 business parts"}>
+            {r.frank != null ? (
+              <><b>{r.frank}</b><div className="nsr-sub">of {(r.frank_of ?? 0).toLocaleString("en-IN")}</div></>
+            ) : "—"}
+          </td>
+        );
       case "overall":
         return (
           <td key={c.key}>
@@ -824,7 +838,9 @@ export default function NseRatingsTab() {
           <b>historical returns</b> (what the stock did) and the <b>forward estimates</b> (the range of
           what it might do, from its own volatility, validated against what actually happened). The
           estimates are ranges, not predictions or advice. Where the data cannot support a number, the
-          row says <b>Insufficient Data</b> and why.
+          row says <b>Insufficient Data</b> and why. The <b>Rank</b> orders the rated stocks by the
+          rating&rsquo;s business parts only, momentum left out. Tested on five years of NSE history, it
+          measures fundamental strength, not future returns.
         </p>
         <div className="nsr-tiles">
           <Tile label="Listed stocks" value={counts.listed} />
@@ -1835,6 +1851,30 @@ function Methodology({ summary }: { summary: NseRatingsSummary }) {
           <h4>Data, freshness and historical returns</h4>
           <ul>{(m.rules ?? []).slice(4).map((r) => <li key={r}>{r}</li>)}</ul>
         </div>
+        {m.fund_rank && (
+          <div className="nsm-card">
+            <h4>Rank: fundamental strength, not a forecast</h4>
+            <p>{m.fund_rank.definition}</p>
+            <p>{m.fund_rank.validation}</p>
+            <table className="nsm-val">
+              <thead>
+                <tr><th>Ranked on 1 Oct</th><th>Strongest fifth</th><th>Weakest fifth</th><th>Rank IC</th><th>Stocks</th></tr>
+              </thead>
+              <tbody>
+                {m.fund_rank.record.map((x) => (
+                  <tr key={x.asof}>
+                    <td>{x.asof}</td>
+                    <td className={x.top_median >= x.bottom_median ? "up" : "down"}>{x.top_median > 0 ? "+" : ""}{x.top_median.toFixed(1)}%</td>
+                    <td>{x.bottom_median > 0 ? "+" : ""}{x.bottom_median.toFixed(1)}%</td>
+                    <td>{x.ic > 0 ? "+" : ""}{x.ic.toFixed(2)}</td>
+                    <td>{x.n.toLocaleString("en-IN")}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="nsr-sub">Median price return over the next 12 months. Quarterly results enter from 2024.</p>
+          </div>
+        )}
         <div className="nsm-card">
           <h4>Forward estimates: ranges, not predictions</h4>
           <p>{est?.method ?? "The estimate calibration is not installed yet."}</p>
