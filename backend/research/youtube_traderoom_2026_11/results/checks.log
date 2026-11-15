@@ -1,0 +1,5 @@
+data loaded in 4.6 s: {'NIFTY': 33750, 'BANKNIFTY': 33750, 'XAUUSD': 81385, 'BTCUSD': 108000}
+TR-02  signals    528 trades   365 look-ahead ok  fills ok  3.9s
+TR-03  signals    896 trades   330 look-ahead ok  fills ok  3.8s
+TR-04  signals   1986 trades   347 look-ahead ok  fills ok  2.4s
+strategies 3 failed [] in 10 s

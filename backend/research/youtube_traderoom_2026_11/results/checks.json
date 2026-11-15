@@ -1,0 +1,44 @@
+{
+ "results": {
+  "TR-02": {
+   "signals": 528,
+   "trades": 365,
+   "reasons": {
+    "stop": 252,
+    "time": 24,
+    "target": 89
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 3.9
+  },
+  "TR-03": {
+   "signals": 896,
+   "trades": 330,
+   "reasons": {
+    "stop": 223,
+    "time": 3,
+    "target": 104
+   },
+   "conservative_fills": 1,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 3.8
+  },
+  "TR-04": {
+   "signals": 1986,
+   "trades": 347,
+   "reasons": {
+    "stop": 239,
+    "target": 97,
+    "time": 11
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 2.4
+  }
+ },
+ "problems": {}
+}

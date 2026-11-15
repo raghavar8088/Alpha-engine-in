@@ -33,6 +33,7 @@ from settings import YC3G_START_T  # noqa: E402
 from settings import YC3H_START_T  # noqa: E402
 from settings import YC3I_START_T  # noqa: E402
 from settings import YC3J_START_T  # noqa: E402
+from settings import YC4_START_T  # noqa: E402
 
 log = logging.getLogger("premium.segments")
 
@@ -189,6 +190,8 @@ def feeds_now(group: str, info: dict) -> dict:
 
 
 def _start_of(mk: str, acct=None) -> datetime:
+    if acct is not None and acct.source == getattr(C, "YC4", None):
+        return datetime.fromtimestamp(YC4_START_T, timezone.utc)
     if acct is not None and acct.source == getattr(C, "YC3", None):
         if acct.id in getattr(C, "YC3J_IDS", ()):
             return datetime.fromtimestamp(YC3J_START_T, timezone.utc)
@@ -241,7 +244,7 @@ def _book_state(a, mk: str, key: str, s: dict, fd: dict | None, sig: dict, error
         if fd["state"] != "live":
             why += f" Its feed: {fd.get('short') or fd['reason']}"
         return "in trade", why
-    yc2 = a.source in (getattr(C, "YC2", None), getattr(C, "YC3", None))
+    yc2 = a.source in (getattr(C, "YC2", None), getattr(C, "YC3", None), getattr(C, "YC4", None))
     if fd["state"] != "live":
         if yc2 and fd["state"] == "closed":
             return "armed", f"Armed — waiting for market open. {fd.get('short') or fd['reason']}"
@@ -313,7 +316,7 @@ def _refresh(db, group: str, info: dict) -> None:
             s = stats.get(key, blank)
             fid = FEED_OF.get(mk, mk)
             state, why = _book_state(a, mk, key, s, feeds.get(fid), signals.get(key) or {}, errors, rec, now)
-            if a.source in (getattr(C, "YC2", None), getattr(C, "YC3", None)):
+            if a.source in (getattr(C, "YC2", None), getattr(C, "YC3", None), getattr(C, "YC4", None)):
                 sg = signals.get(key) or {}
                 extra = {"signal": {k: sg.get(k) for k in ("last_t", "today", "taken", "why", "n_today")}}
             else:

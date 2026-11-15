@@ -63,6 +63,10 @@ YC3I_START_DATE = min(datetime.fromtimestamp(YC3I_START_T, IST).date(), datetime
 # The channel-shortlist tenth batch (catalog.YC3J_IDS: list E, the NIFTY option-buying channels) starts later again, also flat.
 YC3J_START_T = int(datetime.fromisoformat(os.getenv("PREMIUM_YC3J_START", "2026-11-15T09:00:00+00:00")).timestamp())
 YC3J_START_DATE = min(datetime.fromtimestamp(YC3J_START_T, IST).date(), datetime.fromtimestamp(YC3J_START_T, timezone.utc).date())
+# The Trade Room books (catalog.YC4_STRATEGIES; backend/research/youtube_traderoom_2026_11) trade forward from their
+# activation, flat at the start, entering only on fresh bars like the channel-shortlist books.
+YC4_START_T = int(datetime.fromisoformat(os.getenv("PREMIUM_YC4_START", "2026-11-15T19:30:00+00:00")).timestamp())
+YC4_START_DATE = min(datetime.fromtimestamp(YC4_START_T, IST).date(), datetime.fromtimestamp(YC4_START_T, timezone.utc).date())
 
 MONGO_URL = os.getenv("FACTORY_MONGO_URL", "").strip()
 MONGO_DB = os.getenv("PREMIUM_MONGO_DB", "alpha_engine_premium")

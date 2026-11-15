@@ -36,6 +36,7 @@ from settings import YC3G_START_DATE, YC3G_START_T  # noqa: E402
 from settings import YC3H_START_DATE, YC3H_START_T  # noqa: E402
 from settings import YC3I_START_DATE, YC3I_START_T  # noqa: E402
 from settings import YC3J_START_DATE, YC3J_START_T  # noqa: E402
+from settings import YC4_START_DATE, YC4_START_T  # noqa: E402
 
 log = logging.getLogger("premium.cycle")
 INDEX_WARM_DAYS, GLOBAL_WARM_DAYS = 95, 45
@@ -59,6 +60,8 @@ def _is_yc(a) -> bool:
 
 
 def _yc_start(a) -> tuple[int, date]:
+    if a.source == getattr(C, "YC4", None):
+        return YC4_START_T, YC4_START_DATE
     if a.source == getattr(C, "YC3", None):
         if a.id in getattr(C, "YC3J_IDS", ()):
             return YC3J_START_T, YC3J_START_DATE
@@ -86,7 +89,7 @@ def _fresh_only(db, a, market: str, docs: list[dict]) -> list[dict]:
     """The 20-channel books enter only on fresh bars: a trade this desk has not recorded before is taken only if its entry
     bar is recent (settings.YC2_LATE_S for the market's group). After a stale or missing feed, or while the desk was down,
     bars that arrive late are used for indicators and exits, but never for new entries."""
-    if a.source not in (C.YC2, getattr(C, "YC3", None)) or not docs:
+    if a.source not in (C.YC2, getattr(C, "YC3", None), getattr(C, "YC4", None)) or not docs:
         return docs
     known = {d["_id"] for d in db.premium_trades.find({"book": f"{a.id}|{market}"}, {"_id": 1})}
     late = time.time() - YC2_LATE_S.get(C.MONEY[market].group, 1200)

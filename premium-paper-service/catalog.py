@@ -645,6 +645,20 @@ MONEY["NIFTY_OPT"] = Money("index", margin=1.0, lot=65, max_open=2)
 LABEL["NIFTY_OPT"] = "Nifty options (recorded quotes)"
 for _sid, _name, _ch, _mkts in YC3_STRATEGIES:
     ACCOUNTS.append(_a(_sid, YC3, _name, _ch, *[(YC2_BOOK_MARKET.get(_m, _m), "V0") for _m in _mkts]))
+# The Trade Room study (backend/research/youtube_traderoom_2026_11, 15 Nov 2026): Mayank Raj's teaching videos, live gold
+# and crypto sessions and shorts read in full; each clearly defined method written as exact rules (zt_spec.py: E stated,
+# I inferred, A assumed, each stated rule with its video time), checked for look-ahead and fills, version v1, not
+# backtested. They trade from settings.YC4_START_T, flat at the start, Rs 10 lakh each, on real prices with simulated
+# orders only: gold and bitcoin on Delta Exchange (XAUTUSD, BTCUSD), Nifty and Bank Nifty on the desk's index minutes.
+YC4 = "youtube_traderoom"
+YC_SOURCES = YC_SOURCES + (YC4,)
+YC4_STRATEGIES = (
+    ('TR-02', 'Daily EMA 9 side, a 5-minute supply or demand box, one of three entry candles, candle stop, 1:2, three trades a day', 'The Trade Room (Mayank Raj)', ('NIFTY', 'BANKNIFTY')),
+    ('TR-03', 'Momentum candle through the EMA 9 and 15: a limit at its 50%, the stop beyond it, 1:2 (15 minutes)', 'The Trade Room (Mayank Raj)', ('BTCUSD', 'XAUUSD')),
+    ('TR-04', "TR-01's EMA 9/15 three-candle scalp on Delta gold and bitcoin (15 minutes)", 'The Trade Room (Mayank Raj)', ('BTCUSD', 'XAUUSD')),
+)
+for _sid, _name, _ch, _mkts in YC4_STRATEGIES:
+    ACCOUNTS.append(_a(_sid, YC4, _name, _ch, *[(YC2_BOOK_MARKET.get(_m, _m), "V0") for _m in _mkts]))
 BY_ID = {a.id: a for a in ACCOUNTS}
 
 

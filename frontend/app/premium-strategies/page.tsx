@@ -22,8 +22,9 @@ import Shortlist from "./Shortlist";
 import WebSources from "./WebSources";
 import LiveDelta from "./LiveDelta";
 import YtChannels from "./YtChannels";
+import TradeRoom from "./TradeRoom";
 
-type Tab = "indian" | "crypto" | "gold" | "global" | "paper" | "strategies" | "results" | "november" | "daily" | "method" | "channels20" | "intraday4" | "shortlist" | "live" | "websources" | "ytchannels";
+type Tab = "indian" | "crypto" | "gold" | "global" | "paper" | "strategies" | "results" | "november" | "daily" | "method" | "channels20" | "intraday4" | "shortlist" | "live" | "websources" | "ytchannels" | "traderoom";
 const TABS: { id: Tab; label: string }[] = [
   { id: "indian", label: "Indian Market" },
   { id: "crypto", label: "Crypto" },
@@ -32,6 +33,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "live", label: "Real money · Delta gold" },
   { id: "ytchannels", label: "All YouTube channels" },
   { id: "shortlist", label: "Channel shortlist (new)" },
+  { id: "traderoom", label: "The Trade Room (new)" },
   { id: "websources", label: "Web sources: crypto & gold" },
   { id: "channels20", label: "20 channels" },
   { id: "intraday4", label: "4 intraday topics" },
@@ -200,6 +202,7 @@ export default function PremiumStrategiesPage() {
       {tab === "intraday4" && <Intraday4 />}
 
       {tab === "shortlist" && <Shortlist summary={summary} error={error} />}
+      {tab === "traderoom" && <TradeRoom summary={summary} error={error} onOpen={openSeg} />}
       {tab === "websources" && <WebSources />}
       {tab === "ytchannels" && <YtChannels />}
       {tab === "live" && <LiveDelta />}
