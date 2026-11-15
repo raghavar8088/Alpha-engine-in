@@ -209,7 +209,7 @@ def docs_from(trades, m, acct: str, market: str, overnight: bool, live_day: str 
     for t in trades:
         exit_date = str(m.date[m.day[t.exit_k]])
         still_open = t.reason == "time" and t.exit_k == last and (overnight or exit_date == live_day)
-        sym = m.name if market in ("NSE15", "NSE5", "NSED") else market
+        sym = m.name if market in ("NSE15", "NSE5", "NSED", "NIFTY_OPT") else market
         entry_t = int(m.t[t.entry_k])
         out.append({
             "_id": f"{acct}|{market}|{sym}|{entry_t}|{t.side}", "acct": acct, "book": f"{acct}|{market}", "mkt": market, "sym": sym,
@@ -259,7 +259,7 @@ def live_k_end(m, f):
     return k_end
 
 
-POOLS = {"NSE15", "NSE5", "NSED", "MIRROR15", "VWAP"}     # one book over many stocks, run one stock at a time
+POOLS = {"NSE15", "NSE5", "NSED", "MIRROR15", "VWAP", "NIFTY_OPT"}   # one book over many stocks or contracts, one at a time
 
 
 def note_signals(key: str, m, signals, trades, rejects, rerun=None) -> None:

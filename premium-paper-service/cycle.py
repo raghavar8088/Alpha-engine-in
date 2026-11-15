@@ -35,6 +35,7 @@ from settings import YC3F_START_DATE, YC3F_START_T  # noqa: E402
 from settings import YC3G_START_DATE, YC3G_START_T  # noqa: E402
 from settings import YC3H_START_DATE, YC3H_START_T  # noqa: E402
 from settings import YC3I_START_DATE, YC3I_START_T  # noqa: E402
+from settings import YC3J_START_DATE, YC3J_START_T  # noqa: E402
 
 log = logging.getLogger("premium.cycle")
 INDEX_WARM_DAYS, GLOBAL_WARM_DAYS = 95, 45
@@ -59,6 +60,8 @@ def _is_yc(a) -> bool:
 
 def _yc_start(a) -> tuple[int, date]:
     if a.source == getattr(C, "YC3", None):
+        if a.id in getattr(C, "YC3J_IDS", ()):
+            return YC3J_START_T, YC3J_START_DATE
         if a.id in getattr(C, "YC3I_IDS", ()):
             return YC3I_START_T, YC3I_START_DATE
         if a.id in getattr(C, "YC3H_IDS", ()):
@@ -115,6 +118,8 @@ def _from(db, a, market: str, overnight: bool = False) -> date:
 
 def run_index(db, now: datetime) -> dict:
     books = [(a, mk, v, _from(db, a, mk)) for a, mk, v in C.books_in("index")]
+    opt_books = [b for b in books if b[1] == "NIFTY_OPT"]           # the recorded option chain: _run_options
+    books = [b for b in books if b[1] != "NIFTY_OPT"]
     first = min(b[3] for b in books)
     live = F.today_bars("index")
     since = first - timedelta(days=INDEX_WARM_DAYS)
@@ -152,9 +157,54 @@ def run_index(db, now: datetime) -> dict:
         except Exception as exc:  # noqa: BLE001 - one broken book must not stop the others
             log.exception("%s %s", a.id, market)
             errors[f"{a.id}|{market}"] = str(exc)[:200]
+    opt_to = None
+    if opt_books:
+        n_opt, opt_to = _run_options(db, opt_books, mk["NIFTY"][1], final, errors, touched)
+        n_docs += n_opt
     L.update_accounts(db, sorted(touched))
     L.set_signature(db, "index", sig)
-    return {"trades": n_docs, "final": final, "live_day": mk["NIFTY"][1], "bars_to": int(mk["NIFTY"][0].t[-1]), "errors": errors}
+    return {"trades": n_docs, "final": final, "live_day": mk["NIFTY"][1], "bars_to": int(mk["NIFTY"][0].t[-1]), "errors": errors,
+            "optchain_to": opt_to}
+
+
+def _run_options(db, books, live_day, final, errors: dict, touched: set) -> tuple[int, int | None]:
+    """The books on the recorded NIFTY option chain (market NIFTY_OPT, the tenth channel-shortlist batch): each strategy
+    picks its contracts from the day's chain using only the snapshots known at each minute (ze_more9.CONTEXT), runs on each
+    picked contract-day (its quotes plus the previous session's, for the premium chart's history) and keeps at most
+    MONEY.max_open contracts at once. Buys fill at the recorded ask, sales at the bid. Returns (documents written, the time of
+    the last recorded snapshot); with no chain at all nothing is replayed, so a missing file never erases a book."""
+    import ze_more9 as X9
+    import ze_opt as O
+    first = min(b[3] for b in books)
+    try:
+        days = O.load_days(since=first - timedelta(days=7))
+    except Exception as exc:  # noqa: BLE001
+        log.exception("option chain")
+        errors["feed NIFTY_OPT"] = str(exc)[:200]
+        return 0, None
+    if not days:
+        errors["feed NIFTY_OPT"] = f"no recorded option chain since {first - timedelta(days=7)} in {O.CHAIN_DIR}"
+        return 0, None
+    last_t = int(days[-1].t[-1]) if len(days[-1].t) else None
+    ctx, picks = X9.CONTEXT(days)
+    pool = [m for m in O.pool_of(days, picks) if m.chain_date >= first.isoformat()]
+    caches = {id(m): {} for m in pool}
+    n_docs = 0
+    for a, market, v, start in books:
+        try:
+            docs = []
+            for m in pool:
+                if m.chain_date < start.isoformat():
+                    continue
+                tr, _ = R.run_yc(a.id, market, m, caches[id(m)], {"ctx": ctx}, since_t=_yc_start(a)[0])
+                docs += [d for d in R.yc_docs(tr, m, a.id, market, False, live_day) if d["date"] >= start.isoformat()]
+            docs = _fresh_only(db, a, market, R.take_slots(docs, C.MONEY[market].max_open))
+            n_docs += L.persist(db, a.id, market, docs, start.isoformat(), final, False)
+            touched.add(a.id)
+        except Exception as exc:  # noqa: BLE001 - one broken book must not stop the others
+            log.exception("%s %s", a.id, market)
+            errors[f"{a.id}|{market}"] = str(exc)[:200]
+    return n_docs, last_t
 
 
 # ── NSE stocks, intraday ─────────────────────────────────────────────────────────────

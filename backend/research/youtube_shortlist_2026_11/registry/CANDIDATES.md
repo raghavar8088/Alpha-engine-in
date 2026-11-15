@@ -1071,7 +1071,7 @@ videos 1642, P1 14 (1%), candidates 37, cov 0
 -  6.64 | 8JHLcGnweZQ | 15m | 44000 | 2025-11-13 | 3 Stocks at Multi-Year Breakout!
 -  6.61 | PIwF21yHxf0 | 13m | 41000 | 2025-11-13 | 3 strongest mid-cap breakout stocks after long consolidation 
 
-## upstox - Upstox (Upstox)  [broker] 
+## upstox - Upstox (Upstox) * [broker] 
 videos 1850, P1 240 (13%), candidates 159, cov 0
 -  9.83 | NvQCerlr6co | 63m | 6800 | 2025-12-13 | Mastering the ORB: Catch the Trend, Avoid the Noise | Intraday Trading Series | Amit Goel | Upstox
 -  8.86 | b-sKRXtjTmk | 64m | 7300 | 2025-12-13 | VWAP Made Simple: Smart Intraday Entries & Exits | Intraday Trading Series | Amit Goel | Upstox
@@ -1960,4 +1960,337 @@ videos 280, P1 168 (60%), candidates 170, cov 3
 - 10.30 | LoasNROKPNA | 10m | 199000 | 2020-11-08 | Explosive VWAP Trading Strategy For Scalping & Day Trading Stocks (For Beginners)
 - 10.22 | R7_ujGtaKdw | 28m | 166000 | 2025-11-08 | Only 1 In 100 Traders Knows This 1 Minute Forex Scalping Strategy | Scalping Trading Course
 - 10.16 | 1HFoStW_wsc | 21m | 144000 | 2025-12-08 | Ultimate VWAP Strategy for Day Trading (Institutional Grade)
+
+## inthemoney - In The Money by Zerodha (In The Money by Zerodha) * [in] 
+videos 195, P1 5 (3%), candidates 13, cov 0
+- 10.38 | _ePkfG6aXqU | 12m | 24000 | 2026-03-15 | All About Opening Range Breakout (ORB) — Part 1 | The Long & The Short Ep.22
+- 10.15 | erjnU13EYjk | 13m | 14000 | 2026-03-15 | How to Trade Opening Range Breakout (ORB) with NIFTY Options? — Part 2 | The Long & The Short Ep.23
+-  8.20 | 0AElRA36HTs | 18m | 16000 | 2026-03-15 | All about Scalping — Part 1 | The Long & The Short Ep.24
+-  8.11 | 6TfL7S8gmKk | 15m | 13000 | 2025-11-15 | Trend Following in India — Part 1: Testing Donchian’s Classic Rules | The Long & The Short Ep. 9
+-  8.08 | HaiGk0phwjA | 16m | 12000 | 2026-04-15 | Intraday Market Structure for Scalpers: Breakouts & Trend Days — Part 2 | The Long & The Short Ep.25
+-  8.04 | _pMO8cqL26o | 29m | 11000 | 2026-04-15 | Scalping Setups: Entries, Exits & Strike Selection — Part 5 | The Long and The Short Ep.28
+-  7.95 | ZiuboDpCCxw | 23m | 9000 | 2026-04-15 | Key Indicators for Scalping — Part 4 | The Long & The Short Ep.27
+-  7.90 | qMD4FdWCtf8 | 12m | 8000 | 2026-04-15 | Scalping Non-Trend Days — Part 3 | The Long & The Short Ep.26
+
+## algotest - AlgoTest (AlgoTest) * [in] 
+videos 434, P1 136 (31%), candidates 128, cov 0
+- 10.71 | fMCronFHcNk | 7m | 5100 | 2025-11-15 | Previous Day High-Low Algo Trading Strategy | ORB & BTST Setup Explained on AlgoTest
+- 10.30 | vPREXjLk5jw | 13m | 20000 | 2024-11-15 | 5 EMA SCALPING STRATEGY by @POWEROFSTOCKSBySubasish  | How to Automate
+- 10.18 | bWyxlffoTBw | 59m | 15000 | 2024-11-15 | Scalping Strategy Automation | Oscillator + MACD Strategy | Algo Trading India | AlgoTest
+-  9.77 | X9xTpoE-Png | 19m | 5900 | 2024-11-15 | Intraday Scalping Strategy with EMA and Stochastic by @Neeraj joshi
+-  9.68 | v2NMYaMHPkk | 59m | 4800 | 2024-11-15 | Automate Trend Following Strategy on AlgoTest || All In One Pinescript || VWAP Indicator
+-  9.40 | w2HffuHhOwY | 15m | 25000 | 2024-11-15 | VWAP on Straddle Option Selling Strategy | Algo trading strategy | AlgoTest
+-  9.26 | 43hDMug83kI | 21m | 18000 | 2023-11-15 | Range Breakout | NEW Feature | ORB | Algo Trading India
+-  9.15 | DKrDlOcGUuk | 13m | 14000 | 2024-11-15 | BIG TARGET SMALL SL | Automate Option Buying Strategy using VWAP
+
+## aatradingblog - A&A Trading Blog (A&A Trading Blog) * [in] 
+videos 594, P1 47 (8%), candidates 45, cov 1
+- 10.03 | wvFvpjyI67M | 23m | 108000 | 2021-11-15 | Learn this Day Trading Strategy Using Pivot Point & CPR - Central Pivot Range | Intraday strategy
+-  9.33 | 7896wGFL1Zo | 26m | 213000 | 2021-11-15 | Simple Intraday Trading Strategy🔥🔥 for Intraday and Swing Trading| Heikin Ashi Trading Strategy
+-  8.86 | c1vzb5SYcIA | 19m | 73000 | 2022-11-15 | How to Trade using the Fibonacci Tool | Intraday & Swing Trading Strategy
+-  8.82 | Dz9LeIpmjyc | 9m | 66000 | 2021-11-15 | How to Plot CPR & Pivot Point in Trading View | Day Trading Strategy using Pivot Points
+-  8.12 | MER76vGBx9U | 16m | 132000 | 2021-11-15 | Best Intraday Strategy | Intraday Gap Up Strategy |  Intraday Gap Down  Strategy| Price Action
+-  8.00 | yID89h8sAzQ | 13m | 1000000 | 2021-11-15 | Intraday Option Trading Strategies | Call & Put Options Trading for beginners | No Loss strategy
+-  7.92 | HskBzDwRONA | 20m | 83000 | 2021-11-15 | Day Trading Strategy for Beginners | Intraday Breakout Strategies | 72.33% accuracy
+-  7.52 | l_G1JDHHjTY | 46m | 33000 | 2024-11-15 | Advanced Option Trading Strategies Free | Regular Income Option Strategies | Intraday & Swing trade
+
+## quantsapp - Quantsapp (Quantsapp) * [in] 
+videos 3314, P1 853 (26%), candidates 744, cov 0
+- 10.18 | x6-ONqKrAUk | 17m | 1500 | 2025-11-15 | 9:30 to 11:45 Intraday Strategy: 15-Minute Candle Breakout | Quantsapp
+-  9.32 | EL52j304odg | 13m | 21000 | 2025-11-15 | Super Fast Scalping strategy ( 1 min )
+-  9.28 | K7_sIs6uHL4 | 18m | 1900 | 2025-11-15 | VWAP se Scalping aur Short-Term Trading (Hindi) | Quantsapp
+-  9.15 | i8lXzdRXsKU | 15m | 1400 | 2025-11-15 | Fibonacci Retracement se Scalping: Golden Pocket (Hindi) | Quantsapp
+-  9.15 | 266k7fiCrZk | 12m | 1400 | 2024-11-15 | EMA Scalping Strategy with 8, 21 and 200 EMA | Quantsapp
+-  9.08 | MZF-1Ze88-A | 13m | 1200 | 2024-11-15 | Morning Rush Scalping: 9:15-10 AM Mother-Baby Candle Strategy!
+-  8.90 | xQA3czjdyac | 15m | 787 | 2025-11-15 | RSI, Supertrend aur Volume Intraday Trend Strategy (Hindi) | Quantsapp
+-  8.90 | IJI6msx5pgk | 16m | 786 | 2024-11-15 | Stochastic and EMA Scalping Strategy Explained | Quantsapp
+
+## dhantamil - Dhan Tamil (Dhan Tamil)  [in] 
+videos 303, P1 128 (42%), candidates 146, cov 0
+- 10.91 | 447jK8vxJEE | 10m | 8200 | 2025-11-15 | 5Min Intraday Super Trend Trading strategy actually works ! எப்படி பயன்படுத்தனும் ? முழு விளக்கம்
+- 10.36 | OIZeD5ZzRhM | 13m | 2300 | 2026-01-15 | How to get 15 min Breakout Stocks? Super trend + Breakout எப்படி Intradayக்கு பயன்படுத்தனும் ?
+-  9.73 | IlxR0mFSIZo | 14m | 5400 | 2025-11-15 | How To trade Natural Gas in 15min using VWAP Strategy ? எப்பொழுது Trade எடுக்கணும் ?
+-  9.71 | hcBjUxfxbf4 | 15m | 5100 | 2026-10-18 | Fair Value Gap மட்டும் பார்த்து Trade பண்ணாதீங்க! ⚠️ Displacement முக்கியம்? SMC-ன் Next 3 Concepts
+-  9.45 | b8EiHXmH5V8 | 11m | 28000 | 2025-11-15 | Intraday Tradingக்கு CPR Indicator Use பண்ண வேண்டிய நேரம் | Weekly vs Monthly CPR Explained
+-  9.28 | l7whJXwAxbg | 14m | 19000 | 2026-09-15 | Intraday-ல் Stock Select பண்ண தெரியலையா? இந்த Screener + Supertrend & RSI Intraday Strategy போதும் 🔥
+-  9.26 | YSFAPI_Kla4 | 12m | 1800 | 2026-01-15 | 15min EMA Natural Gas strategy revealed ! இந்த Strategyஐ Intradayக்கு எப்படி use பண்ணனும் ?
+-  9.21 | wBGdCnr2abA | 17m | 1600 | 2026-07-15 | Best 5min Silver Micro Intraday Strategy? Bollinger Bands & EMA எளிமையான Strategy முழு விளக்கம்
+
+## quantman - QuantMan (QuantMan)  [in] 
+videos 119, P1 17 (14%), candidates 13, cov 0
+- 11.98 | KtjderUYfwk | 12m | 9500 | 2025-11-15 | Opening range breakout and CPR | Banknifty | Algo trading | Hindi | QuantMan
+-  6.86 | j744ULxpZu0 | 7m | 7200 | 2025-11-15 | Options Basket Strategy for Intraday Buying | Algo Trading | QuantMan | Trading Tips
+-  6.53 | KlWDzCgjSZA | 6m | 3400 | 2025-11-15 | Options Basket Strategy for Intraday Selling | Algo Trading | QuantMan | Trading Tips
+-  4.73 | -0Rwq8it__I | 38m | 5400 | 2025-11-15 | Option Buying Strategies in Weekly Contracts | English | Algo Trading Platform
+-  4.64 | zWtshUgOaUc | 8m | 4400 | 2025-11-15 | Expiry Day | Options Selling Strategy Using Options Basket | QuantMan | Algo Trading | Traders
+-  4.59 | 66KNwZ_EzOo | 9m | 3900 | 2025-11-15 | Multi-Indicator Options Basket's Buying Strategy | Algo Trading | QuantMan | Trading Tips
+-  4.51 | 8crirZ06gBM | 8m | 3200 | 2025-11-15 | Expiry Day Options Selling Strategy | Options Basket | QuantMan | Algo Trading | Traders
+-  4.42 | v92LMKK1q9s | 6m | 2600 | 2025-11-15 | Options Spread | Build Credit Spread Strategy in QuantMan | QuantMan | Algo Trading
+
+## stockmock - Stockmock (StockMock)  [in] 
+videos 2, P1 0 (0%), candidates 0, cov 0
+
+## tradingwithsidhant - Trading With Sidhant (Trading With Sidhant)  [in] 
+videos 145, P1 32 (22%), candidates 30, cov 0
+-  9.63 | O5Z2Wfv56cU | 33m | 427000 | 2022-11-15 | Trader Reacts to 9.20 Strategy by Art of Trading | Make It Better
+-  9.57 | yrex5c4NBJE | 29m | 37000 | 2024-11-15 | Trader Reacts to 9:20 Strategy by Ghanshyam Tech | 2024 Updated
+-  9.11 | WM7QEwFMNJs | 15m | 13000 | 2025-11-15 | Most Powerful VWAP Strategy for Nifty Intraday | 70% Success Rate | Step-by-Step Tutorial
+-  9.08 | F7mVYJj0ldI | 11m | 119000 | 2026-08-15 | This Simple Scalping Strategy Makes Me Over ₹10L/Month
+-  8.82 | XKQpbSbCuO8 | 30m | 66000 | 2023-11-15 | How to Use VWAP - Most Powerful Intraday Trading Indicator | Full Tutorial
+-  7.88 | 50pB2HMCHz4 | 22m | 76000 | 2023-11-15 | Complete Scalping Guide FREE | How to Make Money in 30 Seconds
+-  7.46 | UdGXYHp1nYA | 35m | 290000 | 2026-09-15 | I Backtested Gautam Jha's Gold Strategy | Honest Review
+-  7.11 | 5Zeb20E9zDY | 53m | 128000 | 2022-11-15 | Trader Reacts to 5 EMA Strategy by Power of Stocks | Make it Better
+
+## studentsofmarket - Students of Market (Students of Market)  [in] 
+videos 168, P1 42 (25%), candidates 48, cov 0
+-  8.56 | Ib9kWtK5WjE | 40m | 3600 | 2024-11-15 | How To Use The RSI Indicator To Make Intraday Profits With 01 month Back-test in Nifty | Ep-56
+-  8.45 | CJk76Krno6s | 26m | 2800 | 2024-11-15 | How to Make Money In Volatile Stock Market using Bollinger Band Indicator Intraday Trading Strategy
+-  8.15 | RlkZvUY13X0 | 41m | 1400 | 2024-11-15 | Simple Strategy for Daily Intraday Profits | CCI Indicator Back-test on BankNifty.
+-  7.33 | rCyA7zJqgwk | 26m | 204 | 2024-11-15 | Fibonacci Retracements: Best Intraday Option Buying Strategy for Big Profits with Back-test
+-  6.72 | MbCincNdg1k | 27m | 5200 | 2024-11-15 | Swing Trading की सबसे जबरदस्त Strategy | RSI Indicator for weekly profit With Back-test on Nifty.
+-  6.69 | yd9lHZC8B2E | 30m | 4900 | 2024-11-15 | How to use MACD Indicator | Best Swing Trading Strategy With 01 Year Back-test in Nifty | Ep-55
+-  6.52 | Lt-61-kovKw | 47m | 3300 | 2023-11-15 | Best Trend Following Chart Pattern for Intraday & Swing Option Trading | Pole And Flag | Se-02 Ep-39
+-  6.51 | NGGHK8Zm2YM | 16m | 310 | 2024-11-15 | Nifty Range Breakout Strategy for Intraday Option Buying | F&O Series EP-13
+
+## optionsscalpingsiva - Options Scalping - Siva (Options Scalping)  [in] 
+videos 264, P1 26 (10%), candidates 33, cov 0
+-  9.00 | QHRpiX0A1mQ | 8m | 10000 | 2026-11-03 | ⚡ 4 Min Fast Breakout Scalping - LIVE | 🔄️ Stop & Reverse Trade Strategy | Trade date: 29 Sep 2026
+-  8.63 | hC2l0chyh7c | 55m | 43000 | 2024-11-15 | 🎙️ English & தமிழ் | Quick Live Scalping Session | 14 Feb 2024
+-  8.08 | c4NAJJe-lTM | 7m | 12000 | 2026-10-15 | 📊 40% Trending Oi Strength — Why it matters? | 🔴 Live Option Scalping | Trade date: 26 Aug 2026
+-  7.94 | M6OSrkSKmRw | 45m | 88000 | 2020-11-15 | How to Use NEST Trading Platform For Scalping
+-  7.92 | 5jwo5TRwpOE | 43m | 83000 | 2022-11-15 | 2 Candle Theory || Scalping Strategy || Hindi ||
+-  7.60 | xcuTdFloCT4 | 7m | 40000 | 2023-11-15 | 🚀Boost Your SCALPING Speed | 1Cliq🔗Zerodha API | ✅Best Trading Tool Ever #1cliq
+-  7.51 | 8FTPdAioktQ | 7m | 3200 | 2026-06-15 | Riding Intraday Trend with OiPulse | Decoding Market with OiPulse | 20 May 2026
+-  7.40 | 3561NQ-AsKc | 5m | 2500 | 2026-07-15 | ❌ When to Avoid Trading a Good Setup? | Trading After Huge Gap Ups | 15 June 2026
+
+## investarindia - InvestarIndia: NOT LISTED
+
+## strategicstocks - Strategic Stocks (Strategic Stocks)  [in] 
+videos 247, P1 126 (51%), candidates 124, cov 0
+- 11.08 | hEqDhf0M2gU | 14m | 12000 | 2025-11-15 | Cant believe that this backtest is so solid in stocks | 5 EMA Scalping
+- 11.04 | BwVvtSmTPhU | 9m | 11000 | 2024-11-15 | This Backtest on 3k trades is wow.. Option Buying- Nifty | 5 EMA Scalping
+- 10.79 | j-6jlcphMRQ | 13m | 62000 | 2023-11-15 | Revealing the reality of 9 & 15 EMA Scalping Strategy on every timeframe | Backtest
+- 10.59 | SHMfDmMAvAY | 18m | 385000 | 2022-11-15 | 5 EMA Intraday Strategy -1 | Backtest | Power of stocks | Traders Carnival
+- 10.49 | XAhjKYo6lqg | 8m | 3100 | 2025-11-15 | 5 EMA Scalping Backtest Kit | The Reason
+- 10.16 | rCLPBr42Ne0 | 18m | 145000 | 2022-11-15 | 5 EMA Intraday Strategy -2 | Backtest | Power of stocks | Traders Carnival
+- 10.15 | 6MB4PrH3vX4 | 9m | 14000 | 2022-11-15 | Supertrend RSI Scalping Strategy Backtest | CA Akshatha Udupa | Nifty Bank & Stocks
+- 10.15 | Ts28YPUYbPQ | 7m | 14000 | 2022-11-15 | ORB -3| Awesome Results | Intraday Opening Range Gap Up/Down Breakout Strategy | Backtest
+
+## traderinsights - Trader Insights (Trader Insights)  [in] 
+videos 108, P1 76 (70%), candidates 79, cov 0
+- 10.48 | 1AV1oCSzX7w | 8m | 30000 | 2023-11-15 | 9 and 15 EMA Strategy | The Trade Room | Scalping Strategy | Nifty | High Winrate (Not Clickbait)
+- 10.23 | 1kx9BqLAMFs | 9m | 17000 | 2023-11-15 | 22 & 33 SMA Scalping Strategy - Siddharth bhanushali's Option Buying Strategy | Backtest on Nifty
+- 10.18 | h_HYM6-4rBQ | 10m | 15000 | 2023-11-15 | CPR + S1R1 + PDHL  Breakout Strategy Tested | Gomathi Shankar | CPR BY KGS | Banknifty
+-  9.92 | FBMx4yULHlY | 11m | 8400 | 2023-11-15 | MACD + Stochastic + Parabolic SAR Strategy Tested | Scalping | Neeraj Joshi | Bank Nifty
+-  9.81 | 0TNEmXdV_U0 | 6m | 6500 | 2021-11-15 | EMA Crossover Day Trading Strategy Tested 100 Times! | Indian Market | Full Results
+-  9.63 | vLf7KRMezaM | 12m | 43000 | 2021-11-15 | VWAP+PIVOT+STOCHASTIC RSI Trading Strategy Tested 100 Times || Anish Singh Thakur | Full Results
+-  9.45 | qymYCj-fUCo | 14m | 28000 | 2022-11-15 | Bank Nifty Option 9.20 Strategy Tested | Bank Nifty | Art of Trading | Ghanshyam Tech | Full Results
+-  9.08 | -EtVjYzCFEk | 13m | 12000 | 2022-11-15 | VWAP+PIVOTS+MOVING AVERAGE Strategy | Wise Stock Research | Mukul Choudhary | Full Results
+
+## artofoptionlearning - Art of Option Learning - Ghanshyam (Art of Option Learning)  [in] 
+videos 228, P1 67 (29%), candidates 74, cov 0
+- 10.97 | k-XoVz6J0j8 | 17m | 944000 | 2022-11-15 | Bank Nifty 9.20 Strategy Part-2 !! Bank Nifty Big Gap UP & Gap Down Trading Strategy
+- 10.83 | uwnQ6-jA-jA | 10m | 68000 | 2025-11-15 | Powerful Price Action Strategy !! Opening Range Breakout Price Action Strategy
+-  9.71 | LgeCrhKeBgY | 18m | 51000 | 2026-07-15 | Intraday Trading ka Complete Guide | Capital, Volume & Moving Average | Intraday Trading Simple Bana
+-  9.70 | KcbijcsZ0cM | 10m | 50000 | 2026-06-15 | Scalping Trading for Beginners | The Full Truth About 1-Minute Trading
+-  8.46 | 75AFmvOFbcs | 19m | 289000 | 2020-11-15 | Bank Nifty Gap Down Trading Strategy #Bank Nifty Momentum Trading Strategy #GapDown Trading Strategy
+-  8.40 | Ksqeddodips | 22m | 250000 | 2020-11-15 | Bank Nifty Option Boom Boom# Bank Nifty Gap Up Trading Strategy# Bank Nifty Secrets Trading Strategy
+-  8.15 | OytM2YH8kGg | 21m | 1400000 | 2020-11-15 | चार्ट छोड़ो प्राइस पकड़ो  # Price Action Intraday Strategy # Trading Without Chart # Secrets Strategy
+-  7.97 | s62QX8Y7a1M | 22m | 940000 | 2023-11-15 | Intraday में आप का Support Resistance fail क्यों हो जाता है !! Secrets of Support And Resistance
+
+## sakethramakrishna - Saketh Ramakrishna (Saketh Ramakrishna)  [in] 
+videos 155, P1 18 (12%), candidates 21, cov 0
+-  8.81 | JJ4xlhsj2b4 | 17m | 6400 | 2025-11-15 | Does Super Trend Work on BTC? Shocking Results | Python Backtesting
+-  8.19 | TZCM6qFV3S0 | 29m | 155000 | 2024-11-15 | Intraday Option Buying Strategy in Nifty | Fully Automated | Saketh R
+-  7.77 | SMq6jckUP0Y | 16m | 59000 | 2024-11-15 | Banknifty Intraday Strategy | Low Risk Low Reward | Fully Automated
+-  7.68 | qRThKj3KdgI | 15m | 4800 | 2026-02-15 | This Gap-Up Exposed a Dangerous Trading Habit
+-  7.43 | IrJOtNAVlnY | 12m | 2700 | 2025-11-15 | Backtesting Moving Average Crossover on Python
+-  7.23 | r9hR8ejl_44 | 25m | 170000 | 2023-11-15 | Best Intraday Strategy in Nifty | Fully Automated | Low Risk Low Reward | Saketh R
+-  5.49 | HmMU8yu_NR0 | 23m | 31000 | 2024-11-15 | The Best Options Strategy For Election! Profits with Long Term Options
+-  5.38 | Ab-8JHINMho | 18m | 24000 | 2024-11-15 | Live Expiry Trading in Nifty | Strategy Mistakes and More | 21 March 2024
+
+## niftylearningbrijesh - Nifty Learning with Brijesh (Nifty Learning with Brijesh)  [in] 
+videos 39, P1 25 (64%), candidates 26, cov 0
+-  7.60 | HPX_7PfjFe8 | 20m | 4000 | 2026-07-15 | Simple & Powerful Options Selling Strategy | अब Gap Up & Gap Down की No Tension!
+-  7.53 | f-mfBkFWMOQ | 18m | 3400 | 2025-12-15 | Weekly Option Selling Strategy | Gap Up / Gap Down Ka No Tension Setup | Options Selling आसान तरीका
+-  7.18 | OaE5Mn7Go9I | 18m | 15000 | 2026-03-15 | Daily Income Options Selling Strategy | Simple Intraday Options Selling Strategy
+-  6.76 | FNHq9NGxLL4 | 25m | 5800 | 2026-03-15 | Beginner Friendly Low Risk Options Selling Strategy | Intraday Setup
+-  6.59 | jExFieTDYcg | 26m | 3900 | 2026-09-15 | Intraday Stock Options Selling Strategy | Risk Managed Option Selling Strategy for Traders
+-  6.05 | QYsYnoo4mzU | 9m | 1100 | 2026-03-15 | ALL RSI in One Box 🔥 Multi Timeframe RSI Strategy | Don’t Trade Until All RSI Agree!
+-  5.38 | wHuT07q1XHo | 18m | 2400 | 2025-11-15 | Best Magical Crossover Strategy | Option Selling, Buying & Swing Trading Setup (Part 1)
+-  5.04 | HV6ZZ7f794k | 21m | 11000 | 2026-10-15 | 3 & 5 Option Selling Strategy: Easy to Trade, Hard to Beat | Regular Income के लिए Powerful Strategy
+
+## kevalkhimsariya - CA Keval Khimsariya (CA Keval Khimsariya)  [in] 
+videos 151, P1 34 (23%), candidates 36, cov 0
+-  8.68 | bbsp_CP4Bd0 | 7m | 4800 | 2022-11-15 | How to find Trend for Intraday Trading | How to use VWAP like a Pro?
+-  7.93 | N6qXX4jGwYM | 11m | 8500 | 2022-11-15 | Modified 9:20 Straddle | Bank Nifty Option Strategy | Low Risk Intraday Strategy
+-  6.65 | uNbbZYtPte0 | 6m | 4500 | 2024-11-15 | New Option Buying Strategy on Quantman | Using Ichimoku Clouds
+-  5.45 | CjNfVlmLbh4 | 12m | 28000 | 2024-11-15 | Best Option Buying Strategy Quantman
+-  5.40 | O7Y7TADV7-g | 8m | 2500 | 2022-11-15 | Best Intraday Option Strategy?
+-  5.38 | x9VlssNZMak | 10m | 2400 | 2020-11-15 | QuantsApp Web (Part – 2) | IV | Option Pain & Gain | PCR | Trap Indicator | Result | Rollover |
+-  5.18 | CQEjTpNabaw | 8m | 15000 | 2024-11-15 | Expiry Day Option Selling Strategy | BANKNIFTY | NIFTY | FINNIFTY | Quantman
+-  5.18 | U2yk0QBV-KM | 5m | 15000 | 2020-11-15 | How to pull Multiple Scripts Option Chain Data into Single Sheet | Method – 2 |
+
+## tradetron - Tradetron (Tradetron)  [in] 
+videos 477, P1 93 (19%), candidates 80, cov 0
+-  9.36 | TB6ameKiAr0 | 44m | 23000 | 2020-11-15 | Opening Range Breakout with Repair Continuous
+-  9.32 | xAKoew8OU7o | 41m | 21000 | 2020-11-15 | Create Range Breakout Strategy on a List of Stocks using ORB Keyword
+-  9.04 | dDx_iPrhLVs | 11m | 11000 | 2023-11-15 | Backtested and Optimized -Ghanshyam Tech 920 Option Buying strategy on Tradetron
+-  8.34 | byuPoDOVzm8 | 47m | 22000 | 2021-11-15 | Create a VWAP strategy on Tradetron (VWAP Series Keyword)
+-  8.28 | aZRiuI_Npnw | 15m | 19000 | 2024-11-15 | Pushkar Raj Thakur Double Supertrend Strategy Build and Backtest on Tradetron
+-  8.18 | G9BmdjqIu-8 | 11m | 15000 | 2023-11-15 | 920 Option Buying Strategy | Ghanshyam Tech | Algo trading strategy build
+-  7.92 | 4PbXCTfwDJw | 5m | 8400 | 2021-11-15 | Create a strategy -920 Straddle Part 2 #NTT #13
+-  7.82 | kqYmgmFNL-0 | 13m | 6600 | 2024-11-15 | Backtest According to Lot Size of Strategy | Options Selling Intraday Hedged Strategy Part 2 #hindi
+
+## nitinmurarka - Nitin Murarka (Nitin Murarka Nifty ke Nishanebaaz)  [in] 
+videos 108, P1 38 (35%), candidates 37, cov 0
+- 10.89 | _nsWwFiQwxc | 36m | 78000 | 2026-06-15 | Intraday Nifty option trading plan? | PCR+VWAP+Data से Call Put कैसे Decide करें? |Nitin Murarka
+-  8.43 | OT547Y3B0jk | 87m | 27000 | 2024-11-15 | How to Use PCR Data Effectively In Intraday Trading Part:-02 || Nitin Murarka Nifty ke Nishanebaaz
+-  8.43 | njUvs3yek18 | 65m | 27000 | 2024-11-15 | How to Use the Put Call Ratio[PCR] Data Effectively on Intraday|| Nitin Murarka Nifty ke Nishanebaaz
+-  7.76 | qCmV47-8rVI | 80m | 57000 | 2025-11-15 | Intraday Options Buying Strategies || Nitin Murarka Nifty ke Nishanebaaz
+-  7.65 | pcRaV9BBP3k | 51m | 45000 | 2026-09-15 | NIFTY में Moving Average कैसे Use करें? | Option Trading | Nifty ke Nishanebaaz Nitin Murarka
+-  7.53 | z10Eda903Ck | 24m | 34000 | 2026-08-15 | My 5-Step Intraday Options Setup | OPTION TRADING | Nitin Murarka Nifty ke Nishanebaaz |
+-  7.36 | XLXAJU6i1JI | 62m | 23000 | 2026-08-15 | Fibonacci Strategy: Live Option Trade with Excellent Entry | Nitin Murarka Nifty ke Nishanebaaz |
+-  7.23 | 60ck2dHXEmU | 88m | 17000 | 2025-11-15 | Learn The Top 3 Strategies for Intraday Trading || Nitin Murarka Nifty ke Nishanebaaz
+
+## moneytalkspayal - Money Talks With Payal (Money Talks With Payal)  [in] 
+videos 2060, P1 42 (2%), candidates 20, cov 0
+-  7.51 | J3Arp_FmTr4 | 6m | 3200 | 2025-11-15 | Options Trading on Mobile App | Scalping on Mobile | Beginner's Guide to Option Trading Payal Arora
+-  6.58 | 3Khzvwd0ovg | 6m | 3800 | 2022-11-15 | Scalping Trading Strategy | Options Trading Strategy | Earn More Profit With Same Capital |
+-  6.32 | LX-aJowHXnM | 12m | 2100 | 2026-02-15 | Options Buying Strategy with Buy & Sell Signals | High probability Intraday Setup | Payal Arora
+-  6.23 | GyeA6YBBhdw | 8m | 1700 | 2025-11-15 | Easy Options Selling Strategy | Strangle Strategy for Intraday Trading | Algo Trading | Payal
+-  6.08 | h1GNJtmACms | 6m | 1200 | 2024-11-15 | RSI option buying strategy on Punch APP| Single Screen Trading Platform #optionstrading #punchapp
+-  5.66 | s-c5Pr9FMiU | 11m | 4600 | 2023-11-15 | अब रोज़ होगा PROFIT ! Best Intraday Trading Strategy | Forex Trading With OctaFx Payal Arora
+-  5.65 | fU2bZ2twM_M | 7m | 4500 | 2023-11-15 | 20k Profit Daily! Nifty At All Time High | Best Intraday Trading Strategy For Beginners | Payal
+-  5.45 | uMHrKxayVYE | 16m | 28000 | 2024-11-15 | Option Selling with 10,000 only ! Easy Options Trading Strategy | Delta Exchange | Payal Payal Arora
+
+## tradingwithvivek - Trading With Vivek (Trading With Vivek)  [in] 
+videos 891, P1 21 (2%), candidates 24, cov 0
+-  7.65 | C39ZyD3X8yw | 19m | 45000 | 2022-11-15 | TCS Share Gap Down Analysis - Should I Sell?
+-  7.62 | dAH1mcmRUwM | 15m | 418000 | 2022-11-15 | Huge Profit With SuperTrend Indicator Strategy
+-  7.27 | ucz3aoKT7_E | 13m | 187000 | 2021-11-15 | RSI Automatic Buy and Sell Signal Strategy | RSI Strategy in Hindi | Trading With Vivek
+-  7.22 | s_JkhxO4xos | 14m | 166000 | 2020-11-15 | Consistent Profit Making Strategy Using Moving Averages | Moving Average Trading Strategy
+-  6.46 | QlulsyIU9Sk | 16m | 287000 | 2024-11-15 | Master Trading Strategy - Best Swing Trading Strategies
+-  6.38 | YJ-gzbH41EY | 16m | 240000 | 2024-11-15 | 52 Week Swing Trading Strategy with Indicator
+-  5.84 | kBooAIzuvXo | 8m | 69000 | 2023-11-15 | 8 Top Stocks - Range Bound Strategy | Best Stocks To Buy Now ?
+-  5.79 | 8cLAi4nCl8E | 10m | 61000 | 2023-11-15 | How To Avoid Fake Breakout | Breakout Trading Strategy
+
+## daytradertelugu - Day Trader Telugu (DAY TRADER తెలుగు)  [in] 
+videos 2364, P1 17 (1%), candidates 24, cov 0
+- 10.23 | Jkn9D0q0Nm4 | 9m | 171000 | 2019-11-09 | Opening Range Breakout ORB(TELUGU)
+-  8.18 | EIBZr92r-Fo | 13m | 151000 | 2019-11-09 | MACD(Telugu) technical indicator , BULLISH DIVERGENCE, BEARISH DIVERGENCE Telugu
+-  8.03 | TWle9LLdddU | 15m | 106000 | 2019-11-09 | SUPER TREND(telugu) | Technical Indicator | Stock Market
+-  7.93 | jpgIlxCcOsY | 11m | 85000 | 2019-11-09 | 📈 ATR - Average true Range (TELUGU) | Stop Loss స్ట్రాటజీ
+-  7.53 | wVRbhnJE5ec | 24m | 338000 | 2025-11-09 | 🚨FLAT TRAP EXPOSED! | Home Buying Masterclass
+-  7.52 | Ij_50IG-2AY | 32m | 334000 | 2026-11-06 | 🚨GOLD, SILVER Price TRAP Explained
+-  7.52 | 52KuZbxqFhA | 13m | 329000 | 2026-05-09 | 5 Money Secrets from Thaai Kizhavi, Middle Class Trap Explained
+-  7.30 | vao6Ak_sUEk | 23m | 198000 | 2025-11-09 | Save from Middle class Debt Trap
+
+## moneypurse - Money Purse (Money Purse { మనీ పర్స్ })  [in] 
+videos 2237, P1 3 (0%), candidates 8, cov 0
+-  7.05 | 44PcpVKC11Y | 19m | 111000 | 2024-11-15 | DISCOUNT TRAP | How e commerce sites fool you with Discounts | Money Purse
+-  6.77 | VyGDKtBN97U | 17m | 59000 | 2024-11-15 | #824 2500 Points పెరిగిన Sensex, ఈ Market Trap లో పడకండి| ఈ Modi Stocks ని Focus  చెయ్యండి| NTPC
+-  6.22 | zSDtEPc_9E8 | 32m | 166000 | 2025-11-15 | 🔴Time To Exit From Mid & Small Caps & Stop SIP Now? Opportunity In this Fall? Gold Investment Now
+-  5.94 | hNMWU3PCDgI | 16m | 87000 | 2023-11-15 | Insurance Policy is a big Scam| No one Can Escape This Trap 😲| Age 20 - 40 Careful!! 🔴| Scammed Ep-2
+-  5.90 | BCaSBH0dGjk | 16m | 79000 | 2021-11-15 | Liquidity Ratios నేర్చుకోండి (2023) ! Fundamental Analysis Part 11 | #fundamentalanalysis
+-  5.26 | 2bDua8Lmc48 | 28m | 181000 | 2022-11-15 | How to Find Future Multibagger Stocks 💰
+-  5.11 | 0I790DttTc4 | 6m | 13000 | 2022-11-15 | Best Ratios To Find Company's Liquidity Condition | Liquidity Ratios నేర్చుకోండి| #stockmarket
+-  5.09 | FXU54dfNOjk | 78m | 123000 | 2022-11-15 | The Ultimate Guide For MultiBagger Stock Selection Ft Mr.GautamBaid Author OfThe Joys Of Compounding
+
+## tradingkannada - Trading Kannada (TRADING KANNADA)  [in] 
+videos 306, P1 24 (8%), candidates 37, cov 0
+-  8.83 | BDVkY6DhgEc | 25m | 6700 | 2026-09-15 | 80%+ Win Rate XAUUSD GOLD Scalping Strategy in Kannada 📈 Trading Kannada
+-  8.11 | qCj6tob1w9k | 12m | 13000 | 2026-10-15 | Ondhu Nimishadalli Laaba || Nifty Scalping || Trading Kannada
+-  8.04 | STyPIf1smQs | 14m | 11000 | 2024-11-15 | ಸಣ್ಣ STOPLOSS ದೊಡ್ಡ ಟಾರ್ಗೆಟ್‌ ನೀಡುವ Scalping Strategy
+-  7.96 | AOf-M6a1FwM | 14m | 9100 | 2024-11-15 | Sideways Marketನಲ್ಲಿ Scalping ಮಾಡೋದು ಹೇಗೆ.?! Trading Kannada
+-  7.86 | YMD22y1NzaM | 11m | 7300 | 2024-11-15 | Morning Scalping Option Buying Strategy || Trading Kannada
+-  7.75 | M0vOg-2vRr8 | 6m | 5600 | 2024-11-15 | ನಿಪ್ಟಿ ಯಲ್ಲಿ ಬೆಳಗ್ಗೆಯ QUICK SCALPING || Trading Kannada
+-  7.56 | destft4S1Sk | 12m | 36000 | 2022-11-15 | ಇಂಟ್ರಾ-ಡೇ ಟ್ರೇಡಿಂಗ್‌ ಟ್ರೆಂಡ್‌-ಲೈನ್‌  ಸ್ಟ್ರಾಟಜಿ  | Day Trading Trendline breakout Strategy | kannada
+-  7.46 | rvJnh6mt0s8 | 8m | 2900 | 2024-11-15 | ಬೆಳಿಗ್ಗೆಯ Quick Scalping ಟ್ರೇಡ್‌ || Trading Kannada
+
+## buycryrepeat - BuyCryRepeat Kannada (Buy Cry Repeat Kannada)  [in] 
+videos 31, P1 18 (58%), candidates 18, cov 0
+-  4.63 | 06tJmGPgCJI | 22m | 4300 | 2026-04-15 | 1 : Futures and Options Trading Course in Kannada | Call & Put Option Explained | F&O Basics
+-  4.12 | EqvYOifCKI8 | 8m | 1300 | 2026-04-15 | 12 : Option Greeks Explained in Kannada | Delta Gamma Theta Vega Basics | Options Trading Course
+-  3.86 | j8F51toRxqU | 23m | 722 | 2026-04-15 | 3 : 📈 Option Buying vs Selling Explained | Options Trading Basics in Kannada | FnO Course Kannada
+-  3.72 | D7CFdDsIpTU | 23m | 513 | 2026-04-15 | 20 : Open Interest Explained in Kannada | Volume vs OI | Futures & Options Trading Course
+-  3.63 | xYbz_NW2Wn4 | 23m | 418 | 2026-04-15 | 5: Option Premium Explained in Kannada | Intrinsic, Time Value & Volatility | Options Trading Course
+-  3.60 | RlM_eNxcfw8 | 15m | 389 | 2026-04-15 | 4 : Futures & Options Trading: Strike Price, ATM, ITM, OTM Explained | Free F&O Course in Kannada
+-  3.55 | zgbHM5wR_Z4 | 20m | 341 | 2026-04-15 | 13 : Option Delta Explained in Kannada | Option Greeks Delta | Options Trading Course Kannada
+-  3.50 | YG522rTVUKE | 30m | 309 | 2026-04-15 | 14 : Option Greeks Gamma Explained in Kannada | Gamma in Options Trading | F&O Course
+
+## shariquesamsudheen - Sharique Samsudheen (Sharique Samsudheen)  [in] 
+videos 412, P1 46 (11%), candidates 52, cov 0
+- 10.78 | wptZZ1MydW0 | 25m | 607000 | 2020-11-15 | Moving Average Crossover Strategy for Intraday Trading | Learn Technical Analysis Malayalam Ep 28
+- 10.49 | Mp4NuXgKZpw | 23m | 312000 | 2020-11-15 | CPR - Central Pivot Range Indicator Strategy for Profitable Intraday Trading |Stock Market Malayalam
+- 10.49 | 9fPxboqvgp8 | 24m | 312000 | 2020-11-15 | Best Intraday Trading Strategy #2 - Opening Range Breakout Strategy (ORB) for Profits | Malayalam
+-  9.72 | 3XgrFDXZVvs | 23m | 519000 | 2020-11-15 | MACD Indicator Strategy for Profits in Intraday Trading | Learn Technical Analysis Malayalam Ep 29
+-  9.67 | bfp8zoAphng | 24m | 471000 | 2020-11-15 | RSI & Stochastics Indicator Strategy for Profits in Intraday Trading | Learn Technical Analysis E 30
+-  9.45 | BNd9SSOnskc | 25m | 285000 | 2020-11-15 | VWAP Indicator Strategy for Profitable Intraday Trading | Learn Technical Analysis Malayalam Ep 60
+-  8.83 | gzCF0LAHvJU | 16m | 670000 | 2020-11-15 | What is Up Trend, Down Trend & Sideways Trend? Intraday Technical Analysis Basics Malayalam Ep 23
+-  8.68 | QA52un9kHy8 | 23m | 482000 | 2020-11-15 | Multiple Candlestick Patterns - Gap Up & Down, Harami, Engulfing for Intraday Trading Malayalam E 27
+
+## arunishoptionbuyer - Arunish Intraday Option Buyer (Arunish Intraday Option Buyer)  [in] 
+videos 43, P1 12 (28%), candidates 11, cov 0
+-  7.58 | 4sqBQWhAtgI | 33m | 3800 | 2025-11-15 | Intraday Option Buy,  NCOD Trading System,  The Result of Last 3 Years,  Arunish Meetup  2025
+-  6.76 | wnyfy0vOSSU | 14m | 5800 | 2022-11-15 | TREND REVERSE PRICE ACTION TRADING SET UP || Nifty Intraday Option Buying Strategy. ||CHART READING
+-  6.20 | CzeK0HENbDk | 69m | 16000 | 2023-11-15 | How to read charts for the best entry point || Arunish Nifty Intraday Option Buyer, Demand Zone
+-  6.18 | xSP_bEMXbCM | 45m | 15000 | 2022-11-15 | CHART READING SKILL 07 Oct 2022 || Arunish Intraday Nifty Option Buying Strategy || Live  Class
+-  6.15 | enTnUBgtUek | 28m | 14000 | 2022-11-15 | intraday option buying setup || Chart Reading Skill || Intraday Option Buying Live Video
+-  6.11 | YzWXXzk0x88 | 34m | 13000 | 2022-11-15 | Live Class Chart Reading Skill - Arunish Nifty Intraday Option Buying Trading Strategy Malayalam
+-  5.79 | 9VbYn6Lz6FQ | 18m | 6100 | 2023-11-15 | ട്രേഡിങ്ങ് സൈക്കോളജി മലയാളം Intraday Option Buy   Part 10 Day -2 - Intraday option buy Strategy
+-  5.52 | kvd0R5h9N3Y | 16m | 3300 | 2023-11-15 | Live Market Demand Zone Trading - Arunish Nifty Intraday Option Buying Trading Strategy Malayalam
+
+## uniquetelugutrader - Unique Telugu Trader (Unique Telugu Trader.(UTT))  [in] 
+videos 353, P1 51 (14%), candidates 50, cov 0
+-  8.11 | jsFzXp8j_f0 | 9m | 13000 | 2024-11-15 | SCALPING STRATEGY MORE THAN 95% ACCURACY ,USE IN ANY INDEX,SPOT,FUTURE AND OPTION #trading #status
+-  7.57 | SMA47xSJ75A | 19m | 37000 | 2023-11-15 | Scalping king video in Banknifty ,nifty , finnifty   90%Accuracy#bankniftystrategy #niftytrading UTT
+-  7.49 | PiHq1RTBEDM | 18m | 3100 | 2025-11-15 | Trading with Fyers Scalping Terminal | Trade Like a Pro!" Daily 100points in fno
+-  7.49 | B10u5715BCU | 13m | 31000 | 2023-11-15 | GAP UP & GAP DOWN STRATEGY FOR BANLKNIFTY,NIFTY ,FINNIFTY ETC...,MORE THANK 90+++ACCURACY
+-  7.23 | GXbOg-Wq9cs | 23m | 17000 | 2025-11-15 | NO-LOSS INTRADAY OPTION TRADING STRATEGY  TELUGU WITH SINGLE CANDLE # EMPLOYEE STRATEGY #100K VIEWS
+-  7.23 | CNrvEt-pWm8 | 10m | 17000 | 2024-11-15 | MONTHLY RETURNS WITH BTST STRATEGY FOR FREE IN BANKNIFTY AND STOCKS #intradaytradingstrategy
+-  7.00 | sv9WG0nLZWQ | 26m | 99000 | 2023-11-15 | best intraday trading strategy having more than GOOD ACCURACY ONE STARTEGY ENOUGH FOR LIFE
+-  6.93 | BqRE2Hye-SM | 18m | 86000 | 2023-11-15 | simple intraday strategy become rich. 95 % Accuracy
+
+## dpthetrader - DP The Trader (DP The Trader SMC)  [in] 
+videos 136, P1 44 (32%), candidates 45, cov 0
+-  9.12 | dussCx_CtyY | 45m | 1300 | 2026-05-15 | Best Nifty Scalping Strategy 🔥 SMC + Fibonacci | Daily Option Buying Entries
+-  8.67 | USVSm2mmqYA | 15m | 459 | 2026-06-15 | Fair Value Gap Explained in Telugu | FVG Trading Strategy for Forex, Gold, BTC
+-  8.56 | iJ5r1do1WPg | 29m | 356 | 2026-06-15 | SMC Order Block Trading Strategy with Imbalance Telugu | Fair Value Gap Explained
+-  7.70 | NArqJZ12ioY | 50m | 487 | 2026-06-15 | VWAP + Pivot Points + SMC Strategy | Ultimate Option Buying Strategy Telugu
+-  6.41 | 536y9tTqmAg | 67m | 250 | 2026-06-15 | Best Scalping Entries for Nifty & BankNifty Using SMC | Telugu Trading Strategy
+-  6.36 | CduwcfDRkCM | 48m | 218 | 2026-06-15 | Nifty & Bank Nifty Gap Up Gap Down Trading Strategy Telugu | SMC Trading Concepts
+-  5.89 | l-mjX2Rtoy8 | 18m | 771 | 2026-05-15 | Order Flow Explained in Telugu 🔥 | Smart Money Concepts | Order Block Trading Strategy
+-  5.87 | jKIimlf6sA4 | 27m | 724 | 2026-06-15 | Order Block Trading Telugu | Valid Order Block & FVG Strategy for Beginners
+
+## zebutelugu - Zebu Telugu (Zebu Telugu)  [in] 
+videos 23, P1 6 (26%), candidates 6, cov 0
+-  6.90 | e5g8wlFKa4w | 10m | 7900 | 2026-11-13 | Option Buying Complete Guide in Telugu | Advance Decline, India VIX & CPR Setup | Zebu Telugu
+-  4.88 | nBnToK5eHgA | 19m | 7600 | 2026-08-15 | Options Trading లో Right Strike Price ఎలా Select చేయాలి? | Trading Strategy Telugu
+-  4.82 | e3HYWLhOu6U | 24m | 6600 | 2026-09-15 | Expiry రోజు Options Settle ఎలా అవుతాయి? | Nifty & Sensex Rules | PART 12
+-  4.81 | -Zf5SRUyANY | 19m | 6500 | 2026-07-15 | Retail Losses వెనుక Secret నిజాలు! | Futures and Options Trading Course in Telugu | Part 1
+-  4.74 | 6rrpVde1Qm8 | 31m | 5500 | 2026-09-15 | Stock Options vs Index Options | Expiry Rules & Risk Management in Telugu | PART - 15.
+-  4.72 | gKK6CzJg6w4 | 25m | 5200 | 2026-08-15 | Call Options (CE) అంటే ఏంటి? | Call Option Basics & Payoff Diagram Explained in Telugu.
+
+## derivativetradersameer - Derivative Trader Sameer (Derivative Trader Sameer )  [in] 
+videos 629, P1 140 (22%), candidates 152, cov 0
+-  9.99 | _gIX5QN7SRo | 8m | 977 | 2026-10-25 | Opening Range Breakout Strategy in Hindi: 9:15 Pe Trade Mat Karo | Pehle 30 Minute Kaise Padhein
+-  8.75 | nCrMHgrVI20 | 14m | 547 | 2025-11-15 | ORB Strategy Hindi: कब Breakout, कब Fade? | Opening Range Breakout
+-  8.71 | 1L0h7V0chpM | 14m | 504 | 2025-11-15 | 10 बजे का Reversal + Unusual First Candle | Nifty Trading
+-  8.67 | uqFdVLsKTHs | 8m | 461 | 2025-11-15 | Gap Up Open पर कब बाहर रहें? | Big First Candle Trap
+-  8.48 | woAAe_RV6vw | 14m | 294 | 2025-11-15 | Choppy Day पहले ही कैसे पहचानें? | Trap वाली First Candle
+-  8.36 | eji4jUuxK6g | 11m | 221 | 2026-06-15 | Option Buyer कब Trade ना करें? | First 5 Min Candle Rule
+-  8.30 | 4bk4bwhOWfM | 10m | 188 | 2026-05-15 | Morning Range के अंदर Trade मत करो | Nifty Opening Range
+-  7.13 | ZoKb1OAzcbA | 7m | 125 | 2026-11-11 | VWAP Indicator in Hindi: Tum Buy Kar Rahe The, Funds Bech Rahe The | VWAP Ke 3 Rules
+
+## abhishekxtrades - AbhishekXTrades (AbhishekXTrades)  [in] 
+videos 406, P1 158 (39%), candidates 133, cov 8
+- 10.08 | amcgWlC6fLc | 13m | 12000 | 2025-11-09 | How to Capture Fast Momentum in Intraday Trading | ADX Indicator (Step-by-Step for Beginners)
+-  9.86 | NcfddSfm7iQ | 102m | 7200 | 2026-10-09 | 🔴  BTC & GOLD Live Scalping Entry | Small Account Flipping Challenge | CPR Strategy
+-  9.83 | uM7YS7eLBHI | 98m | 6800 | 2026-10-09 | 🔴  BTC & GOLD Live Scalping Entry | Small Account Flipping Challenge | CPR Strategy
+-  9.69 | FTcRtCSIwy4 | 93m | 4900 | 2026-10-09 | 🔴  BTC & GOLD Live Scalping Entry | Small Account Flipping Challenge | CPR Strategy
+-  9.66 | TvZnEx9uajw | 105m | 4600 | 2026-10-09 | 🔴  BTC & GOLD Live Scalping Entry | Small Account Flipping Challenge | CPR Strategy
+-  9.52 | NCQ5t1IIiRY | 30m | 33000 | 2025-11-09 | EMA Strategy for Intraday Trading | Full Guide
+-  9.45 | 90449gxwp9s | 26m | 28000 | 2025-11-09 | Fibonacci Hack: ₹500-₹1000 Daily with This Secret Strategy! 🤯🔥
+-  9.38 | fEeBBzafWrk | 17m | 24000 | 2025-11-09 | Free Premium Intraday Strategy: Moving Average + Fibo Setup That Works!
 

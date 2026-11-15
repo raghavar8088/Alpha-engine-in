@@ -614,6 +614,21 @@ YC3_STRATEGIES = (
     ('AN-01', 'EMA 12 crossing above the EMA 50 within two daily bars with the price above the EMA 12, out on the cross back', 'altFINS', ('BTCUSD',)),
     ('WT-02', 'A close beyond the Keltner Channel with the DMI line of that side above 25, stop at the other band, 2R', 'WunderTrading', ('BTCUSD',)),
     ('CU-01', 'MA 9 crossing above the MA 50 under a falling MA 50 / 100 / 200 stack, out when the MA 9 crosses above the MA 200 or at +8%', 'Coinrule', ('BTCUSD',)),
+    # the tenth batch (15 Nov 2026: the owner's list E of NIFTY option-buying channels); trades from settings.YC3J_START_T.
+    # NIFTY_OPT books trade the NIFTY option quotes the app records every minute; the index books use the index as the proxy
+    ('TZ-01', 'SMA 22 / 33 scalp: both rising (falling), a green (red) candle touching the band, a stop order beyond it, stop at its other end, 2R (NIFTY, 3 minutes)', 'Trader Insights', ('NIFTY',)),
+    ('TZ-02', 'Pivot point + 20 MA: above the pivot a green candle through the MA (or above the MA a candle through the pivot), stop under the candle or the MA, 2R (NIFTY, 15 minutes)', 'Trader Insights', ('NIFTY',)),
+    ('TE-01', '9:20 gap fade: a gap over 100 points faded through the first 5-minute candle\'s range, 200-point target, 70 / 100-point stop by the candle\'s size, out on an opposite candle 50 points off its extreme (BANKNIFTY)', 'Tradetron', ('BANKNIFTY',)),
+    ('UX-01', 'Upstox AlgoVerse build: a 3-minute close above the Supertrend, the upper Bollinger Band and the day\'s R1 with RSI above 72 and a green candle; out on a close back below the Supertrend (long only)', 'Upstox', ('NIFTY',)),
+    ('SJ-01', 'Two daily closes one way set the side; the 9:15-9:45 range, its first retest after a break, an alert candle\'s break; stop beyond the retest candle; out when two opposite candles break the second\'s extreme (NIFTY, 5 minutes)', 'Trading With Sidhant', ('NIFTY',)),
+    ('GT-01', '44FR: after NIFTY falls at least 80 points (half a percent at today\'s level) from the day\'s high, a Fibonacci to the low; buy through 0.44, stop 0.22, half out at 0.77, the rest at 1.0 (NIFTY, 5 minutes, calls only)', 'Art of Option Learning', ('NIFTY',)),
+    ('AX-07', 'Previous day\'s high / low set the side; one or two pullback candles, a close beyond the last one\'s open; stop at the pullback\'s extreme, half out at 1R, the rest at 2R or the stop (NIFTY, 15 minutes)', 'AbhishekXTrades', ('NIFTY',)),
+    ('IM-02', 'Premium ORB: the call and the put closest to Rs 200 at 9:16, their 9:16-11:15 premium range, a close above it buys, 20% stop on the entry premium (real NIFTY premiums)', 'In The Money by Zerodha', ('NIFTY_OPT',)),
+    ('AA-01', '9:30 premium breakout: the in-the-money call and put nearest Rs 180 at 9:25, buy the first to break Rs 180 and hold above it, 20-point stop, 40-point target, out at 9:45 (real NIFTY premiums)', 'A&A Trading Blog', ('NIFTY_OPT',)),
+    ('DH-12', '3 PM momentum: a 2-minute MACD histogram flip from 14:45 with ADX above 25 and rising, the flip candle\'s extreme broken, an in-the-money option, 15 premium points (real premiums)', 'Dhan', ('NIFTY_OPT',)),
+    ('RK-01', 'Rs 50 wait and trade: at 9:20 the call and the put nearest Rs 50, each bought when it gains 10 points, 20-point stop trailed 1:1, 40-point target, out at 3:29; expiry day and the day before only, India VIX under 14 (real NIFTY premiums)', 'Saketh Ramakrishna', ('NIFTY_OPT',)),
+    ('QM-02', 'Multi-indicator basket: the ATM call locked at 9:16; on its 3-minute premium a close above the Supertrend (10, 2), the upper band (15, 2), the 9:16-9:30 high and R1 with RSI above 70 and CCI (8) above 100; out on a close below the Supertrend; two trades a day (real NIFTY premiums)', 'QuantMan', ('NIFTY_OPT',)),
+    ('QM-01', 'Option basket: the ATM call locked at 9:16; on its 5-minute premium a close above the Parabolic SAR, the Supertrend (10, 2) and R1; out on a close below the Supertrend; one trade a day (real NIFTY premiums)', 'QuantMan', ('NIFTY_OPT',)),
 )
 YC3B_IDS = frozenset(('MC-01', 'MC-02', 'AO-01', 'KT-01', 'KG-01', 'KG-02', 'AO-02', 'CR-02', 'QC-03', 'CT-03', 'KS-01', 'DE-09', 'CT-02', 'CT-01', 'SK-01', 'CH-01', 'CH-02', 'QC-01', 'CV-01', 'KR-01', 'TN-02', 'AC-02', 'CR-01'))
 YC3C_IDS = frozenset(('FY-01', 'FY-02', 'AO-03', 'US-01', 'US-02', 'KS-02', 'VV-01', 'VV-02', 'BJ-01', 'KT-02', 'BJ-02', 'CD-01', 'DE-10', 'CD-02', 'RT-01'))
@@ -623,6 +638,11 @@ YC3F_IDS = frozenset(('DD-01', 'DD-02', 'DD-03', 'DD-04', 'TL-06'))
 YC3G_IDS = frozenset(('TQ-01', 'TQ-02', 'TQ-03', 'JO-01', 'SA-01', 'SA-02', 'SA-03', 'BV-01'))
 YC3H_IDS = frozenset(('CG-03', 'CG-04', 'CG-05', 'TC-05', 'TC-08', 'TC-10', 'TC-11', 'TC-13', 'MN-05', 'TK-06', 'TK-07', 'TK-08', 'PL-03', 'PL-06', 'SC-02', 'SC-03', 'SC-04'))
 YC3I_IDS = frozenset(('CT-04', 'CT-05', 'CT-06', 'CT-08', 'RB-01', 'QN-01', 'MS-03', 'RU-07', 'AN-01', 'WT-02', 'CU-01'))
+YC3J_IDS = frozenset(('TZ-01', 'TZ-02', 'TE-01', 'UX-01', 'SJ-01', 'GT-01', 'AX-07', 'IM-02', 'AA-01', 'DH-12', 'RK-01', 'QM-02', 'QM-01'))
+# the recorded NIFTY option chain (backend option_chain_recorder: Angel One best bid / ask every minute): one book over the
+# contracts its strategy picks each day, premium paid in full, whole lots of 65, at most two contracts open at once
+MONEY["NIFTY_OPT"] = Money("index", margin=1.0, lot=65, max_open=2)
+LABEL["NIFTY_OPT"] = "Nifty options (recorded quotes)"
 for _sid, _name, _ch, _mkts in YC3_STRATEGIES:
     ACCOUNTS.append(_a(_sid, YC3, _name, _ch, *[(YC2_BOOK_MARKET.get(_m, _m), "V0") for _m in _mkts]))
 BY_ID = {a.id: a for a in ACCOUNTS}

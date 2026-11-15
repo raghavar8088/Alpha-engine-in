@@ -1,0 +1,10 @@
+video: VjYiGyK6BEA
+topic: india_stocks
+summary: Definedge on momentum option buying with a turtle breakout: first the relative-strength chart must show equities outperforming, then market breadth must not be in an extreme zone, then stock options are bought on turtle breakouts.
+instruments: Stock options
+timeframes: 1D
+style: options_buying
+= DF-05 | Turtle breakout on stocks gated by relative strength and market breadth (stock options)
+R filter E 03:43 | The relative-strength chart must show equities outperforming. | "vo aapako aaraes ke chaart pe honaa chaahie ki ikvitee aautaparaphorm kar rahaa hai"
+R filter E 03:43 | The second thing: breadth. | "sekand thing aapakaa honaa chaahie ki breth"
+T not_testable | the breadth zone and the relative-strength reading are judged by eye and the stock list is not given; the desk records no stock option premiums

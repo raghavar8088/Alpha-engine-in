@@ -1,0 +1,11 @@
+video: DKrDlOcGUuk
+topic: india_index
+summary: AlgoTest automates an option-buying strategy on its all-in-one indicator template's VWAP signal: a Bank Nifty long straddle (ATM call and put combined), entered and exited as the indicator says.
+instruments: BANKNIFTY options
+timeframes: 5m
+style: options_buying
+= AJ-02 | Bank Nifty long straddle on AlgoTest's all-in-one indicator VWAP signal
+R indicator E 00:06 | Built on AlgoTest's all-in-one indicator template. | "our previous vwap strategy video on the basis of our all-in-one indicator template"
+R market E 02:54 | A straddle: the ATM call and put. | "the strikes I'm going to select are 517 00 call and 51700 put this is basically a straddle"
+R entry E 04:18 | Entries and exits as the indicator says. | "so let's actually have a look at how much you would have made if you entered and exited as per the indicator"
+T not_testable | the entries come from AlgoTest's own indicator template, whose rules are not shown; the desk records NIFTY options only

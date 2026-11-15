@@ -1,0 +1,22 @@
+video: ibdPUxvvDJ4
+topic: india_index
+summary: Art of Option Learning's 44FR NIFTY strategy (buying only): on 5-minute candles, once NIFTY has fallen at least 80 points intraday (half a percent at other index levels), draw a Fibonacci from the high to the low with his levels 0.22, 0.44, 0.77, 1 and 1.22; buy calls when price crosses back above 0.44, stop at 0.22, targets 0.77, 1 and 1.22, booking most at the first. He claims over 90% success in 111 trades.
+instruments: NIFTY options*; NIFTY index
+timeframes: 5m
+style: options_buying
+= GT-01 | 44FR: after NIFTY falls at least 80 points (half a percent at today's level) from the day's high, a Fibonacci to the low; buy through 0.44, stop 0.22, half out at 0.77, the rest at 1.0 (NIFTY, 5 minutes, calls only)
+R timeframe E 03:47 | NIFTY on 5-minute candles. | "taaim phrem jo hai chaart kaa vah hamaaraa kyaa hai 5 minat"
+R setup E 03:47 | At least an 80-point intraday fall. | "niftee men minimam kyaa honaa chaahie 80 point kaa kalekshan honaa chaahie"
+R setup E 12:34 | At other index levels, half a percent. | "haaph parasent ko aap pholo kar sakate hain"
+R market E 04:38 | Buying only, never selling. | "ham isako sel men naheen dekh rahe hain"
+R indicator E 06:03 | Fibonacci retracement with his levels 0.22, 0.44, 0.77, 1 and 1.22. | "yahaan pe 0.22 kaa mainne yahaan pe aplaaee kiyaa hai yahaan pe mainne 0.44 aplaaee kiyaa hai"
+R entry E 09:44 | Buy when price crosses 0.44. | "jab ye 44 ko kros karegaa tab main baaing karoongaa"
+R stop E 09:44 | Stop at 0.22. | "dabal too meraa sel hai ye jo hai ye meraa es l hai"
+R target E 09:44 | First target 0.77 ... | "pharst taaraget jo meraa hogaa vo hogaa dabal sevan kaa"
+R target E 10:25 | ... second 1, third 1.22. | "sekand taaraget hamaaraa jo hotaa hai vo van kaa hotaa hai aur thard taaraget jo meraa hotaa hai vo 1.2 kaa"
+R management E 14:01 | Most of the quantity is booked at the first target. | "150 to buk kar hee loongaa"
+R setup A - | Desk version: the NIFTY index (Angel One minutes), a labelled proxy for the call; the fall is measured from the day's running high to the lowest low after it, at least max(80 points, 0.5% of the high); the Fibonacci runs from that low (0) to the high (1). | ""
+R entry A - | After each 5-minute candle closing below 0.44, a stop order at 0.44 for the next candle (re-placed as the low moves); one trade a day; no entries from 15:00; out by 15:14. | ""
+R target A - | Half is booked at 0.77 and the rest at 1.0; the stop stays at 0.22 (how the quantity is split is not said). | ""
+T with_assumptions | the split between the three targets is not said (half at 0.77, half at 1.0, A); the book trades the index as the call's proxy (A)
+C win_rate | 00:09 | over 90% success in 111 trades | NIFTY, his own trading since October-November | "sakses ret lagabhag lagabhag 90% ke oopar kaa hai"

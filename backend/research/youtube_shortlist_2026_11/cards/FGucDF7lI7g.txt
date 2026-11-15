@@ -1,0 +1,11 @@
+video: FGucDF7lI7g
+topic: india_index
+summary: Pivot Call's favourite option-buying setup: after a sideways previous day with a tight range, a day that opens near (not at the centre of) the previous high or low; consolidation there; entry only once the range breaks.
+instruments: NIFTY options; BANKNIFTY options
+timeframes: 5m
+style: options_buying
+= PC-05 | Tight-range day, an open near the previous high or low, consolidation, entry on the range break
+R setup E 05:42 | Day one: a sideways day with a tight range. | "is the previous day day one market must have been sideways day with a tight range"
+R setup E 06:23 | Day two opens near the previous high or low. | "if it opens near the pdh that mean below the pdh or near the PDL that mean above the PDL"
+R entry E 07:06 | Entry only once the range breaks. | "entry only once range is broken"
+T not_testable | 'a tight range', 'near' the previous day's high or low and the consolidation are judged by eye; no sizes, stop or target are given

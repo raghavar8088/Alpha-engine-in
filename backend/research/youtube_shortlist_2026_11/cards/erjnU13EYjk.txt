@@ -1,0 +1,15 @@
+video: erjnU13EYjk
+topic: india_index
+summary: Zerodha's In The Money, ORB part 2 on NIFTY options: at 9:16 take the call and the put whose premiums are closest to Rs 200, track each premium's range until 11:15, and buy the one whose premium then closes above its range (both may trigger); 20% stop on the entry premium. The selling version shorts the premium that closes below its range.
+instruments: NIFTY weekly options
+timeframes: 3m
+style: options_buying
+= IM-02 | Premium ORB: the call and the put closest to Rs 200 at 9:16, their 9:16-11:15 premium range, a close above it buys, 20% stop on the entry premium (real NIFTY premiums)
+R market E 02:52 | At 9:16, the strike whose premium is closest to Rs 200. | "At 916, we select a strike whose premium is closest to 200 rupees"
+R setup E 02:52 | The premiums are tracked to the 11:15 close: that is the range. | "Then we track them till 11:15 close"
+R entry E 02:52 | A premium close above the range buys. | "If the premium closes above the range, example about 250, that triggers a long trade"
+R entry E 03:35 | One call and one put breakout, if triggered. | "1 C and 1 P breakout if triggered"
+R stop E 03:35 | 20% stop on the entry premium. | "That is each trade has a 20% stop- loss on the entry premium"
+R timeframe A - | 3-minute closes, as part 1 (_ePkfG6aXqU) builds its range on a 3-minute chart. | ""
+R market A - | Desk version: the real NIFTY option quotes the app records every minute (Angel One best bid and ask); the range is the high of the minute mids 9:16-11:15; a 3-minute close above it from 11:15 to 14:57 buys at the next minute's ask; the stop is 20% under the fill; out by 15:14 at the bid. | ""
+T with_assumptions | the close's timeframe and the exit time are not said in this part (A); minute snapshots can miss a quote, so a stop can fill beyond its price

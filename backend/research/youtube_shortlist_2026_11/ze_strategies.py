@@ -41,6 +41,7 @@ import ze_more5 as X5  # noqa: E402
 import ze_more6 as X6  # noqa: E402
 import ze_more7 as X7  # noqa: E402
 import ze_more8 as X8  # noqa: E402
+import ze_more9 as X9  # noqa: E402
 from yc_common import BTC_X  # noqa: E402
 
 SOURCE = "youtube_shortlist"
@@ -72,6 +73,7 @@ def _r(sid, name, fn, ex, markets, tfs, limits=FREE, **kw):
     return ZE(sid, name, fn, ex, markets, tfs, limits, **kw)
 
 
+OPT_X = ("ist", 15 * 60 + 14)          # the option books' session end (the index books' NIFTY_X)
 L2 = Limits(2, False, False)
 L3 = Limits(3, False, False)
 L4 = Limits(4, False, False)
@@ -374,14 +376,56 @@ _NEW = [
        X8.wt02, X8.wt02_x, ("BTCUSD",), (60,), FREE, overnight=True, readiness=A),
     _r("CU-01", "MA 9 crossing above the MA 50 under a falling MA 50 / 100 / 200 stack, out when the MA 9 crosses above "
        "the MA 200 or at +8%", X8.cu01, X8.cu01_x, ("BTCUSD",), (60,), FREE, overnight=True, readiness=A),
+    # ── the tenth batch (15 Nov 2026): the owner's list E of NIFTY option-buying channels (ze_more9). NIFTY_OPT books
+    #    trade the real NIFTY option quotes the app records every minute (ze_opt); the index books use the index as the
+    #    labelled proxy of the video's option ──
+    _r("TZ-01", "SMA 22 / 33 scalp: both rising (falling), a green (red) candle touching the band, a stop order beyond it, "
+       "stop at its other end, 2R (NIFTY, 3 minutes)", X9.tz01, X9.tz01_x, ("NIFTY",), (3,), FREE, readiness=A),
+    _r("TZ-02", "Pivot point + 20 MA: above the pivot a green candle through the MA (or above the MA a candle through the "
+       "pivot), stop under the candle or the MA, 2R (NIFTY, 15 minutes)", X9.tz02, X9.tz02_x, ("NIFTY",), (15,), FREE,
+       readiness=A),
+    _r("TE-01", "9:20 gap fade: a gap over 100 points faded through the first 5-minute candle's range, 200-point target, "
+       "70 / 100-point stop by the candle's size, out on an opposite candle 50 points off its extreme (BANKNIFTY)",
+       X9.te01, X9.te01_x, ("BANKNIFTY",), (5,), ONE, readiness=A),
+    _r("UX-01", "Upstox AlgoVerse build: a 3-minute close above the Supertrend, the upper Bollinger Band and the day's R1 "
+       "with RSI above 72 and a green candle; out on a close back below the Supertrend (long only)", X9.ux01, X9.ux01_x,
+       ("NIFTY",), (3,), Limits(10, False, False), readiness=A),
+    _r("SJ-01", "Two daily closes one way set the side; the 9:15-9:45 range, its first retest after a break, an alert "
+       "candle's break; stop beyond the retest candle; out when two opposite candles break the second's extreme (NIFTY, "
+       "5 minutes)", X9.sj01, X9.sj01_x, ("NIFTY",), (5,), ONE, readiness=A),
+    _r("GT-01", "44FR: after NIFTY falls at least 80 points (half a percent at today's level) from the day's high, a "
+       "Fibonacci to the low; buy through 0.44, stop 0.22, half out at 0.77, the rest at 1.0 (NIFTY, 5 minutes, calls "
+       "only)", X9.gt01, X9.gt01_x, ("NIFTY",), (5,), ONE, readiness=A),
+    _r("AX-07", "Previous day's high / low set the side; one or two pullback candles, a close beyond the last one's open; "
+       "stop at the pullback's extreme, half out at 1R, the rest at 2R or the stop (NIFTY, 15 minutes)", X9.ax07,
+       X9.ax07_x, ("NIFTY",), (15,), Limits(3, True, True), readiness=A),
+    _r("IM-02", "Premium ORB: the call and the put closest to Rs 200 at 9:16, their 9:16-11:15 premium range, a close "
+       "above it buys, 20% stop on the entry premium (real NIFTY premiums)", X9.im02, X9.im02_x, ("NIFTY_OPT",), (1, 3),
+       FREE, clock=OPT_X, readiness=A),
+    _r("AA-01", "9:30 premium breakout: the in-the-money call and put nearest Rs 180 at 9:25, buy the first to break Rs "
+       "180 and hold above it, 20-point stop, 40-point target, out at 9:45 (real NIFTY premiums)", X9.aa01, X9.aa01_x,
+       ("NIFTY_OPT",), (1,), FREE, clock=OPT_X, readiness=A),
+    _r("DH-12", "3 PM momentum: a 2-minute MACD histogram flip from 14:45 with ADX above 25 and rising, the flip candle's "
+       "extreme broken, an in-the-money option, 15 premium points (real premiums)", X9.dh12, X9.dh12_x, ("NIFTY_OPT",),
+       (1,), FREE, clock=OPT_X, readiness=A),
+    _r("RK-01", "Rs 50 wait and trade: at 9:20 the call and the put nearest Rs 50, each bought when it gains 10 points, "
+       "20-point stop trailed 1:1, 40-point target, out at 3:29; expiry day and the day before only, India VIX under 14 "
+       "(real NIFTY premiums)", X9.rk01, X9.rk01_x, ("NIFTY_OPT",), (1,), ONE, clock=("ist", 15 * 60 + 28), readiness=A),
+    _r("QM-02", "Multi-indicator basket: the ATM call locked at 9:16; on its 3-minute premium a close above the Supertrend "
+       "(10, 2), the upper band (15, 2), the 9:16-9:30 high and R1 with RSI above 70 and CCI (8) above 100; out on a "
+       "close below the Supertrend; two trades a day (real NIFTY premiums)", X9.qm02, X9.qm02_x, ("NIFTY_OPT",), (3,), L2,
+       clock=OPT_X, readiness=A),
+    _r("QM-01", "Option basket: the ATM call locked at 9:16; on its 5-minute premium a close above the Parabolic SAR, the "
+       "Supertrend (10, 2) and R1; out on a close below the Supertrend; one trade a day (real NIFTY premiums)", X9.qm01,
+       X9.qm01_x, ("NIFTY_OPT",), (5,), ONE, clock=OPT_X, readiness=A),
 ]
 
 NEW = [r.sid for r in _NEW]
 
 # Data the desk does not have (not a judgment of the video): no account.
 DATA_BLOCKED = {
-    "DF-03": "every entry and stop is read from the ATM option's own one-minute premium chart (its Camarilla levels and "
-             "200 EMA channel); the desk has no intraday option premiums",
+    "DF-03": "every entry is read from the ATM option's own one-minute Camarilla levels and 200 EMA channel together with "
+             "the NIFTY futures VWAP; the desk has recorded NIFTY option quotes since 5 Oct 2026, but no futures volume",
     "AF-02": "a news-release fade read from 5-second charts and the order ladder; the desk has neither the release "
              "timing nor sub-minute data",
     "AV-03": "it needs the 24-hour ranking of about 1,600 Binance pairs and their minute data; the desk trades bitcoin, "
@@ -389,6 +433,14 @@ DATA_BLOCKED = {
     "PQ-01": "TLT (the US Treasury bond ETF) is not on the desk",
     "MS-04": "it needs about two years of weekly stock bars (the 90-week EMA, the 100-week average volume) and a US-stock "
              "universe; the desk's NSE daily panel keeps 560 days and the desk has no US stock pool",
+    "SJ-02": "the VWAP and its deviation bands need NIFTY futures volume; the desk records the NIFTY index (no volume) and "
+             "the NIFTY option chain, not futures",
+    "NB-01": "the VWAP needs NIFTY futures volume; the desk records the NIFTY index (no volume) and the NIFTY option chain, "
+             "not futures",
+    "QS-02": "it reads buyer- and seller-initiated market-order quantities second by second from Quantsapp's order-book "
+             "feed; the desk records one best bid and ask a minute and no trade-side data",
+    "BJ-03": "monthly stock options held for days on hourly charts: the desk records no stock option premiums, and its NSE "
+             "stock books are intraday (flat each evening)",
 }
 
 

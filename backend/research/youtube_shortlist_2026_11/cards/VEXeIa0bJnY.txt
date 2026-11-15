@@ -1,0 +1,11 @@
+video: VEXeIa0bJnY
+topic: india_index
+summary: Strategic Stocks tests Abhishek Kar's NIFTY option-buying strategy: a 20-period moving average and the standard pivot point only; above the pivot, a candle crossing the moving average buys (green candles), with a backtest and a free kit.
+instruments: NIFTY options*; NIFTY index
+timeframes: 15m
+style: intraday
+= SG-02 | Abhishek Kar's pivot point + 20 MA (Strategic Stocks' test)
+R indicator E 02:03 | A 20-period moving average. | "dis is dee 20 peeriyad moovee evarej"
+R entry E 02:48 | Above the pivot, crossing the moving average, buy. | "agar pement ke oopar rahegaa aur aapakaa jo hai mooving evarej ko kros kar rahaa hogaa to aap baay lenge"
+T ready | the same rules as TZ-02's video
+D TZ-02 | Abhishek Kar's pivot point + 20 MA strategy, coded from Trader Insights' test as TZ-02

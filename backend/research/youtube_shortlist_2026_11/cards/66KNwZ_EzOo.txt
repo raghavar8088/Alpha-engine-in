@@ -1,0 +1,30 @@
+video: 66KNwZ_EzOo
+topic: india_index
+summary: QuantMan builds a multi-indicator NIFTY option-buying basket: the spot-based ATM call is locked at 9:16; on its own 3-minute premium chart buy when the close is above the Supertrend (10, 2), the upper Bollinger Band (15, 2), the 9:16-9:30 range high and the pivot R1, the CCI (8) is above (its level is not said) and the RSI (14) above 70; exit on a close below the Supertrend; at most two trades a day; one case for more than two days to expiry and one for expiry day. Backtest from January 2022: above 50% winners.
+instruments: NIFTY weekly options
+timeframes: 3m
+style: options_buying
+= QM-02 | Multi-indicator basket: the ATM call locked at 9:16; on its 3-minute premium a close above the Supertrend (10, 2), the upper band (15, 2), the 9:16-9:30 high and R1 with RSI above 70 and CCI (8) above 100; out on a close below the Supertrend; two trades a day (real NIFTY premiums)
+R market E 00:44 | NIFTY. | "vee aar going too tred d stretajee in niphtee"
+R market E 01:25 | A call, spot-based ATM ... | "aaee em going too giv hiyar kol opshan baay et d spot besd eteeem"
+R market E 01:25 | ... locked at 9:16. | "vhaataevar straaik praais iज़ deyar et 916 d kvaain main vil lok d straaik praais"
+R indicator E 02:08 | Supertrend 10, 2 on 3-minute candles of the premium basket. | "let it bee in 10 end too end d kaindal intaravel vil bee 3 minats"
+R indicator E 02:08 | RSI 14 on 3 minutes. | "let it bee in 14 peeriyad oफ़ 3 minats"
+R indicator E 02:52 | CCI with period 8. | "aaee em going too chenj d peeriyad intoo et"
+R indicator E 02:52 | The range 9:16 to 9:30. | "maay renj brekaaaut staart taaim end end taaim vil bee oph 9:16 too 9:30"
+R indicator E 03:33 | Bollinger 15, multiplier 2. | "d peeriyad dait aaee em going too chenj iज़ 15 peeriyad oफ़ too malteeplaayar"
+R entry E 03:33 | The close above the Supertrend ... | "aaee em going too giv d entree kandeeshan es karant kloj ij abaaut supar trend"
+R entry E 04:13 | ... the CCI above ... | "d nekst kandeeshan dait aaee em going too aid iज़ seeseeaaee iज़ abov"
+R entry E 04:13 | ... the close above the upper Bollinger Band ... | "karant kloj iज़ abav bulinjar appar baind"
+R entry E 04:13 | ... above the range high ... | "karant kloज़ iज़ abov renj brekaaaut haaee"
+R entry E 04:55 | ... above R1 ... | "karant kloj iज़ abav peevot aar van"
+R entry E 04:55 | ... and the RSI above 70. | "vhenaevar maay aaraesaaaee ij abov 70"
+R filter E 04:55 | Case 1: days to expiry above two ... | "dej too eksapaayar iज़ abav too"
+R filter E 06:21 | ... case 2: expiry day. | "aaee em going too chenj dis eज़ ikval too jeero"
+R exit E 05:39 | Out when the close crosses below the Supertrend. | "vhenaevar maay karant kloज़ kroses bilo supar trend, aaee vil bee egjiting"
+R sizing E 06:21 | At most two trades a day. | "d maiksimam traanjaikshan par de vil bee too"
+R indicator A - | CCI (8) above 100: the level is not said; 100 is the usual line. The EMA 9 he adds is never used in a condition. | ""
+R market A - | Desk version: the real recorded NIFTY quotes; the premium chart is the minute mids with the previous session's quotes in front (so the indicators exist at the open); R1 is the classic pivot of the contract's previous-session mids; entries on 3-minute closes from 9:30 to 14:57 at the next minute's ask; out by 15:14 at the bid; days to expiry in weekdays. | ""
+R stop A - | No stop is stated: a 50% premium guard stop sizes the position. | ""
+T with_assumptions | the CCI level is not said (100, A); the guard stop is ours (A); minute mids stand in for the traded-price chart (A)
+C win_rate | 06:21 | above 50% winners, above 1% per trade | QuantMan backtest from January 2022 | "maay vining probebilitee iज़ aalso abav 50%"

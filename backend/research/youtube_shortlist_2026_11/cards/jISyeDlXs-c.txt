@@ -1,0 +1,12 @@
+video: jISyeDlXs-c
+topic: india_stocks
+summary: Bharat Jhunjhunwala on timing option buys with five filters - trend, Fibonacci timing, volume, a price-action trigger and the RSI holding 40 - with a 3% maximum stop.
+instruments: Stock options; NIFTY options
+timeframes: 1h
+style: options_buying
+= BJ-04 | Five filters for option buying: trend, Fibonacci, volume, price action, RSI holding 40
+R filter E 07:03 | Five filters refine the entry. | "to yahaan par ham paanch फ़iltar apanaaenge yooज़ karenge apanee ek entree ko riphaain karane ke lie"
+R entry E 09:12 | The trigger is price action: candles, trend lines. | "aur phaainalee hamaaraa trigar hogaa praais ekshan yaanee ki kaindal stiks, trend laain vhaataevar dekhakar ham apanee entree jo hai vo selekt kar"
+R filter E 26:40 | The RSI holding 40. | "kyonki aaraesaaaee iज़ holding d 40 levals"
+R stop E 13:23 | Stop at most 3%. | "maiksimam stop los 3% honaa chaahie"
+T not_testable | the trigger is read from candles and trend lines by eye; the Fibonacci timing and the volume test are not defined

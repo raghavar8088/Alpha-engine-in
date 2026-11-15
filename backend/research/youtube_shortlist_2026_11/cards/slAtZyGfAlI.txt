@@ -1,0 +1,22 @@
+video: slAtZyGfAlI
+topic: india_index
+summary: AbhishekXTrades' 'zero to hero' NIFTY option-buying framework on 15-minute candles: the previous day's high and low are the only levels; above the high buy only, below the low sell only, between them no trade. Wait for one or two candles against the side (the pullback), then a 15-minute close beyond the last pullback candle's open is the entry (a third pullback candle is a reversal: no trade); stop at that candle's extreme with a buffer; book half at 1:1 and the rest at 1:2 or the stop (the zero-to-hero variant lets the rest run).
+instruments: NIFTY options*; NIFTY index
+timeframes: 15m
+style: options_buying
+= AX-07 | Previous day's high / low set the side; one or two pullback candles, a close beyond the last one's open; stop at the pullback's extreme, half out at 1R, the rest at 2R or the stop (NIFTY, 15 minutes)
+R timeframe E 03:34 | 15-minute candles. | "15 minat kaa taaim phrem aap lagaa leejie"
+R indicator E 04:15 | Lines at the day's high and low, for the next day. | "aaj kaa haaee pe ek aapako laain dro kar denee hai. aur aaj ke lo pe ek aapako laain dro kar denee hai"
+R setup E 06:28 | Above the high and holding: buy only. | "agar maarket aapake haaee ke oopar hai, tred aur sasten kar rahaa hai to aapako sirph aur sirph baay karanaa hai"
+R setup E 06:28 | Below the low: sell only. | "agar maarket aapake lo ke neeche hai, ye vaalee laain ke neeche hai to sirph aapako kyaa karanaa hai"
+R no_trade E 07:51 | Between them: no trading day. | "agar beech men hai to aapako no treding de apanaa banaa denaa hai"
+R entry E 10:36 | To sell: after a green candle, a close below its open. | "isake opan jahaan se baayar ne shuruaat karee hai naa jaan lagaane kee us leval ke neeche mujhe selar kee klojing chaahie"
+R entry E 11:17 | After a second green candle, a close below its open. | "doosaree green kaindal ban gaee to usake opan ke neeche bhee agar klojing aatee hai to main entree le loongaa"
+R no_trade E 12:04 | Three pullback candles are a reversal: no entry. | "jab teen kaindal pulabaik kar rahaa hai to yah pulabaik naheen hai. yah rivarsal hai"
+R stop E 21:24 | Stop at the pullback candle's high ... | "stop los lagaayaa us kaindal ke haaee pe"
+R stop E 22:05 | ... with a buffer. | "yahaan par naa apanaa stop los lagaaoongaa baphar ke saath"
+R target E 17:02 | Two levels: 1:1 and 1:2. | "1:1 aur 1:2 do leval set kar lene hain"
+R management E 18:30 | Half booked at 1:1; the rest runs to 1:2 or the stop. | "do lot ko aap 1:2 yaa phir stop los pe ran hone do"
+R setup A - | Desk version: the NIFTY index (Angel One minutes), a labelled proxy for the option; the side is read from the trigger candle's close (above the previous high, below the previous low); the trigger must be the candle right after the last pullback candle, else the setup resets; the buffer is one tick; entry at the next minute's open. | ""
+R management A - | Up to three trades a day, a new one only after a stop and none after a target; no entries from 15:00; out by 15:14. | ""
+T with_assumptions | the buffer, the reset rule and the daily trade count are ours (A); the zero-to-hero variant (let the rest run) is not traded (A); the book trades the index as the option's proxy (A)

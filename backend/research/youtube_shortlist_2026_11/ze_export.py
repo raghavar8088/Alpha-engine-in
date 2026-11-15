@@ -1,7 +1,7 @@
 """Writes frontend/app/premium-strategies/shortlistData.ts: every strategy of the channel-shortlist study with its video,
 rules (tagged E / I / A with their times), what is missing or ambiguous, the claims as said, the status (coded, blocked
 or duplicate) and the look-ahead / fill check of the coded ones (results/checks.json), plus the coverage of every listed
-channel (192 over the owner's four lists, twenty extra crypto channels, the ranks 11-20 list and the list 21-40: picked, analysed, skipped and why). Generated: never edit the .ts by hand.      python -I ze_export.py
+channel (224 over the owner's four lists, twenty extra crypto channels, the ranks 11-20 list, the list 21-40 and the NIFTY option-buying list E: picked, analysed, skipped and why). Generated: never edit the .ts by hand.      python -I ze_export.py
 """
 
 from __future__ import annotations
@@ -21,7 +21,8 @@ OUT = ROOT / "frontend" / "app" / "premium-strategies" / "shortlistData.ts"
 MARKET_LABEL = {"NIFTY": "Nifty 50", "BANKNIFTY": "Bank Nifty", "NSE5": "NSE stocks (5-minute pool)",
                 "NSE15": "NSE stocks (15-minute bars)", "NSED": "NSE stocks (daily, long only)", "BTCUSD": "Bitcoin (Delta BTCUSD)",
                 "XAUUSD": "Gold (Delta XAUTUSD)", "EURUSD": "EUR/USD", "GBPUSD": "GBP/USD", "NAS100": "Nasdaq 100 (cash session)",
-                "ETHUSD": "Ether (Delta ETHUSD)", "AAPL": "Apple (New York cash session)"}
+                "ETHUSD": "Ether (Delta ETHUSD)", "AAPL": "Apple (New York cash session)",
+                "NIFTY_OPT": "Nifty options (recorded Angel One quotes)"}
 PROXY = {"PW-01": "the video buys ATM options; coded on the index as a labelled proxy (delta 0.5)",
          "DH-09": "the video trades index futures; coded on the index", "DH-10": "coded on the index",
          "CK-01": "the video scalps Nifty options; coded on the index",
@@ -45,7 +46,14 @@ PROXY = {"PW-01": "the video buys ATM options; coded on the index as a labelled 
          "RB-01": "the video adds two more envelopes (11% and 14%, averaging in); the desk holds one position and trades the first (7%)",
          "MS-03": "the video shows EUR/NZD and EUR/JPY; coded on the desk's EUR/USD and GBP/USD (CME futures)",
          "RU-07": "the video tests forex and stocks in the Trading Rush app; coded on Delta bitcoin and gold 30-minute candles",
-         "AN-01": "the video screens altcoins; coded on the Delta bitcoin perpetual's daily candles"}
+         "AN-01": "the video screens altcoins; coded on the Delta bitcoin perpetual's daily candles",
+         "TZ-01": "the video buys NIFTY options; coded on the NIFTY index, a labelled proxy (the result is in index points)",
+         "TZ-02": "the video buys NIFTY options; coded on the NIFTY index, a labelled proxy (the result is in index points)",
+         "TE-01": "the video buys a 100-point in-the-money BANKNIFTY option; coded on the BANKNIFTY index, a labelled proxy",
+         "UX-01": "the video buys the option nearest a Rs 250 premium; coded on the NIFTY index, a labelled proxy",
+         "SJ-01": "the video buys the ATM option; coded on the NIFTY index, a labelled proxy (the result is in index points)",
+         "GT-01": "the video buys calls; coded on the NIFTY index, a labelled proxy (the result is in index points)",
+         "AX-07": "the video buys options; coded on the NIFTY index, a labelled proxy (the result is in index points)"}
 TOPICS = ["india_index", "india_stocks", "crypto", "forex_us"]
 # when each batch's books start on the desk (premium-paper-service settings.YC3_START_T / YC3B_START_T)
 START1, START2, START3 = "2026-11-13T03:40:00Z", "2026-11-13T05:00:00Z", "2026-11-13T16:00:00Z"
@@ -55,6 +63,7 @@ START6 = "2026-11-14T16:00:00Z"
 START7 = "2026-11-14T16:30:00Z"
 START8 = "2026-11-14T18:00:00Z"
 START9 = "2026-11-14T18:30:00Z"
+START10 = "2026-11-15T09:00:00Z"
 BATCH2 = {r.sid for r in ZS._NEW[31:54]}
 BATCH3 = {r.sid for r in ZS._NEW[54:69]}
 BATCH4 = {r.sid for r in ZS._NEW[69:90]}
@@ -62,10 +71,11 @@ BATCH5 = {r.sid for r in ZS._NEW[90:100]}
 BATCH6 = {r.sid for r in ZS._NEW[100:105]}
 BATCH7 = {r.sid for r in ZS._NEW[105:113]}
 BATCH8 = {r.sid for r in ZS._NEW[113:130]}
-BATCH9 = {r.sid for r in ZS._NEW[130:]}
+BATCH9 = {r.sid for r in ZS._NEW[130:141]}
+BATCH10 = {r.sid for r in ZS._NEW[141:]}
 SKIP_REASON = {
     "boomingbulls": "fully covered by the Booming Bulls study (96 strategy videos analysed)",
-    "sensibull": "options education (premiums, Greeks): no rule the desk can trade without option prices",
+    "sensibull": "options education (premiums, Greeks, buying against selling): no complete rule set",
     "cmegroup": "exchange education on contracts and hedging: one strategy-titled upload",
     "mcxindia": "exchange education on contracts and settlement",
     "futurestrader71": "daily market commentary (TraderBite): no strategy titles",
@@ -76,7 +86,7 @@ SKIP_REASON = {
     "jigsawtrading": "order-book (DOM) and tape reading: needs data the desk lacks", "quantpy": "option pricing and quant theory",
     "marketgurukul": "2013-16 indicator foundations", "sharekhan": "market updates and a proprietary indicator",
     "motilaloswal": "investing and market news", "stockedge": "scanner and product tutorials", "thetagainers": "option selling (needs premiums); covered by the 11-channel study",
-    "siddharthbhanushali": "swing moving-average courses; covered by the top-20 study", "adamkhoo": "swing Fibonacci; covered by the top-20 study",
+    "siddharthbhanushali": "swing moving-average courses (covered by the top-20 study); his SMA 22 / 33 scalp is coded as TZ-01 from Trader Insights' test", "adamkhoo": "swing Fibonacci; covered by the top-20 study",
     "toritrades": "discretionary trend lines; covered by the top-20 study", "sunilminglani": "rules of thumb; covered by the top-20 study",
     "pushkarrajthakur": "option-chain strategies; covered by the top-20 and 11-channel studies", "vijaythakkar": "option selling and swing; covered by the 20-channel study",
     "imantrading": "US single-stock options and general guides",
@@ -107,6 +117,13 @@ SKIP_REASON = {
     "qubitquants": "VectorBT and MetaTrader 5 tooling tutorials: no strategy with stated rules",
     "tradescience": "walk-forward testing and filter tooling tutorials: no strategy with stated rules",
     "cryptohopper": "platform features and single-indicator explainers: no complete strategy",
+    # list E (15 Nov 2026): the NIFTY option-buying channels
+    "investarindia": "the channel could not be found on YouTube under this name",
+    "tradingwithvivek": "no NIFTY option-buying strategy among its uploads' titles",
+    "daytradertelugu": "Telugu personal finance and market news: no strategy with stated rules",
+    "moneypurse": "personal finance and investing: no trading strategy",
+    "buycryrepeat": "a Kannada stock-market basics course: no strategy with stated rules",
+    "shariquesamsudheen": "Malayalam market education and interviews: no strategy with stated rules",
 }
 
 
@@ -132,7 +149,7 @@ def main():
                 "markets": [MARKET_LABEL.get(x, x) for x in (rec.markets if rec else ())],
                 "deskMarkets": list(rec.markets) if rec else [], "overnight": bool(rec and (rec.overnight or "NSED" in rec.markets)),
                 "proxy": PROXY.get(sid),
-                "paperStart": (START9 if sid in BATCH9 else START8 if sid in BATCH8 else START7 if sid in BATCH7 else START6 if sid in BATCH6 else START5 if sid in BATCH5
+                "paperStart": (START10 if sid in BATCH10 else START9 if sid in BATCH9 else START8 if sid in BATCH8 else START7 if sid in BATCH7 else START6 if sid in BATCH6 else START5 if sid in BATCH5
                                else START4 if sid in BATCH4 else START3 if sid in BATCH3 else START2 if sid in BATCH2
                                else START1) if rec else None,
                 "rules": [{"kind": r["kind"], "label": CL.KIND_LABEL[r["kind"]], "tag": r["tag"], "text": r["text"], "times": r["times"]}
@@ -173,10 +190,11 @@ def main():
             "checked": sum(1 for r in coded if r["checks"] and r["checks"]["lookahead"] and r["checks"]["fills"]),
             "paperStart": START1, "paperStart2": START2, "paperStart3": START3, "paperStart4": START4,
             "paperStart5": START5, "paperStart6": START6, "paperStart7": START7, "paperStart8": START8, "paperStart9": START9,
-            "batch1": len(ZS._NEW) - len(BATCH2) - len(BATCH3) - len(BATCH4) - len(BATCH5) - len(BATCH6) - len(BATCH7) - len(BATCH8) - len(BATCH9),
+            "paperStart10": START10,
+            "batch1": len(ZS._NEW) - len(BATCH2) - len(BATCH3) - len(BATCH4) - len(BATCH5) - len(BATCH6) - len(BATCH7) - len(BATCH8) - len(BATCH9) - len(BATCH10),
             "batch2": len(BATCH2), "batch3": len(BATCH3), "batch4": len(BATCH4), "batch5": len(BATCH5),
-            "batch6": len(BATCH6), "batch7": len(BATCH7), "batch8": len(BATCH8), "batch9": len(BATCH9),
-            "built": "2026-11-14"}
+            "batch6": len(BATCH6), "batch7": len(BATCH7), "batch8": len(BATCH8), "batch9": len(BATCH9), "batch10": len(BATCH10),
+            "built": "2026-11-15"}
     head = (
         "// GENERATED by backend/research/youtube_shortlist_2026_11/ze_export.py - do not edit by hand.\n"
         "// The channel-shortlist study (Nov 2026): strategies from the owner's lists of YouTube channels, each with its\n"

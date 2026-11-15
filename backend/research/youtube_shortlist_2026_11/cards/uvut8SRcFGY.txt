@@ -1,0 +1,16 @@
+video: uvut8SRcFGY
+topic: india_index
+summary: A&A Trading's 9:30 NIFTY option-buying strategy for busy people: at 9:25 open the current-week chain and note the in-the-money call and put trading closest to Rs 180; whichever breaks Rs 180 first and sustains above it is bought (around 9:30); 20-point stop, 40-point minimum target, out at 9:45 (experienced traders may wait to 10:00).
+instruments: NIFTY weekly options
+timeframes: 1m
+style: options_buying
+= AA-01 | 9:30 premium breakout: the in-the-money call and put nearest Rs 180 at 9:25, buy the first to break Rs 180 and hold above it, 20-point stop, 40-point target, out at 9:45 (real NIFTY premiums)
+R market E 02:14 | At 9:25, the current week's option chain. | "exactly at 9:25 you have to open nifty option chain data for the current week expiry"
+R setup E 02:56 | The in-the-money call trading very close to Rs 180 ... | "If you observe on the call option side any one of the in the money strike price will be trading very close to 180 rupees"
+R setup E 03:39 | ... and the same on the put side. | "Same way what you will do in put option side definitely 99% of the time there will be one strike price which is trading very close to 180 rupees"
+R entry E 05:10 | Whichever breaks Rs 180 first and sustains above it is bought. | "Whichever breaks 180 price level first that strike price without thinking too much we will take entry"
+R stop E 05:54 | Stop 20 points. | "The stop loss for the trade will be 20 points"
+R target E 08:38 | Target 40 points (Rs 220 from Rs 180). | "So, if you calculate as per the riskreward ratio, stop-loss is 20 points, target will be 40 points"
+R exit E 11:21 | Out at 9:45 if neither is hit. | "at 9:45 you have to exit from the trade"
+R entry A - | Desk version: the real recorded NIFTY quotes; the candidates are the in-the-money call and put whose mid is closest to Rs 180 without being above it at 9:25; 'sustains' is two minutes in a row above Rs 180 after being at or below it, before 9:45; bought at the next minute's ask, stop 20 and target 40 points from the fill. | ""
+T with_assumptions | 'sustaining' is not measured in the video (two minutes, A); the same video was coded as OB-01 in the four-topics study as an index proxy that never paper-traded - this book trades the premium rule itself on recorded quotes

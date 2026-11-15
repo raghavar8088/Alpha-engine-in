@@ -32,10 +32,11 @@ from settings import YC3F_START_T  # noqa: E402
 from settings import YC3G_START_T  # noqa: E402
 from settings import YC3H_START_T  # noqa: E402
 from settings import YC3I_START_T  # noqa: E402
+from settings import YC3J_START_T  # noqa: E402
 
 log = logging.getLogger("premium.segments")
 
-SEGMENT = {"NIFTY": "in_options", "BANKNIFTY": "in_options", "NIFTY_D": "in_options",
+SEGMENT = {"NIFTY": "in_options", "BANKNIFTY": "in_options", "NIFTY_D": "in_options", "NIFTY_OPT": "in_options",
            "VWAP": "in_equity", "NSE15": "in_equity", "NSE5": "in_equity", "MIRROR15": "in_equity", "NSED": "in_equity_daily",
            "BTCUSD": "crypto", "BTC_SPOT": "crypto", "ETHUSD": "crypto", "XAUUSD": "gold", "XAUTUSD": "gold",
            "EURUSD": "global", "GBPUSD": "global", "NAS100": "global", "AAPL": "global", "SPX500_D": "global", "NAS100_D": "global"}
@@ -51,6 +52,8 @@ SOURCE = {
     "SPX500_D": ("Yahoo Finance", "^GSPC daily"), "NAS100_D": ("Yahoo Finance", "^NDX daily"),
     "NIFTY": ("Angel One, through the app's backend", "Nifty 50 index, 1-minute"),
     "BANKNIFTY": ("Angel One, through the app's backend", "Nifty Bank index, 1-minute"),
+    "NIFTY_OPT": ("Angel One option chain, recorded every minute by the app's backend",
+                  "Nifty weekly options, current and next expiry, ATM +-12 strikes: best bid and ask"),
     "NIFTY_D": ("Angel One", "Nifty 50 daily, from the 1-minute store"),
     "NSE": ("Angel One, through the app's backend", "NSE stocks, 5-minute"), "NSED": ("NSE", "daily bhavcopy"),
 }
@@ -114,10 +117,10 @@ def feed_state(fid: str, fd: dict, now_utc: datetime) -> tuple[str, str, str]:
     if fid in ("NAS100", "AAPL") and not cash_open_ny(now_utc):
         return ("closed", "The US cash session is closed (09:30-16:00 New York, Monday to Friday).",
                 "US cash session closed (opens 09:30 New York).")
-    if fid in ("NIFTY", "BANKNIFTY", "NSE") and not india_open(now_utc):
+    if fid in ("NIFTY", "BANKNIFTY", "NSE", "NIFTY_OPT") and not india_open(now_utc):
         return "closed", "NSE is closed (09:15-15:30 IST, Monday to Friday).", "NSE closed (opens 09:15 IST, Monday to Friday)."
     if last_t is None:
-        if fid in ("NIFTY", "BANKNIFTY", "NSE"):
+        if fid in ("NIFTY", "BANKNIFTY", "NSE", "NIFTY_OPT"):
             return ("no data", "No live bars have arrived today from the app's backend (on an NSE holiday this is expected).",
                     "No live bars today yet.")
         return "no data", "No bars received yet.", "No bars received yet."
@@ -144,6 +147,18 @@ def _last_bar(store: str) -> tuple[int | None, float | None]:
     return int(t[-1]), float(c[-1])
 
 
+def _chain_written() -> int | None:
+    """When the backend's option-chain recorder last wrote a file of the NIFTY chain (None if there is none)."""
+    try:
+        from pathlib import Path
+
+        import ze_opt as O
+        files = list(Path(O.CHAIN_DIR).glob("*.jsonl*"))
+        return int(max(f.stat().st_mtime for f in files)) if files else None
+    except Exception:  # noqa: BLE001
+        return None
+
+
 def feeds_now(group: str, info: dict) -> dict:
     """What this cycle learnt about its group's feeds (a feed it did not see keeps its previous entry)."""
     out: dict = {}
@@ -158,6 +173,10 @@ def feeds_now(group: str, info: dict) -> dict:
         for fid in ("NIFTY", "BANKNIFTY"):
             t = F.LIVE_LAST.get(fid)
             out[fid] = {"last_t": t, "last_price": None, "fetch_error": None}
+        opt_t = info.get("optchain_to")         # the recorded option chain: the last snapshot the cycle read, else the
+        if opt_t is None:                       # time the recorder last wrote its newest file (a skipped cycle)
+            opt_t = _chain_written()
+        out["NIFTY_OPT"] = {"last_t": opt_t, "last_price": None, "fetch_error": errors.get("feed NIFTY_OPT")}
     elif group == "stocks":
         out["NSE"] = {"last_t": F.LIVE_LAST.get("NSE"), "last_price": None, "fetch_error": None}
     elif group == "daily":
@@ -171,6 +190,8 @@ def feeds_now(group: str, info: dict) -> dict:
 
 def _start_of(mk: str, acct=None) -> datetime:
     if acct is not None and acct.source == getattr(C, "YC3", None):
+        if acct.id in getattr(C, "YC3J_IDS", ()):
+            return datetime.fromtimestamp(YC3J_START_T, timezone.utc)
         if acct.id in getattr(C, "YC3I_IDS", ()):
             return datetime.fromtimestamp(YC3I_START_T, timezone.utc)
         if acct.id in getattr(C, "YC3H_IDS", ()):

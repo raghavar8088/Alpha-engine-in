@@ -18,9 +18,129 @@ export type SlStrategy = { id: string; version: string; name: string; topic: str
 export type SlChannel = { key: string; name: string; star: boolean; group: string; earlier: string; uploads: number;
   strategyTitles: number; picked: { video: string; why: string; analysed: boolean; id: string | null }[]; skip: string | null };
 
-export const SL_META = {"channels": 192, "coveredBefore": 24, "picked": 296, "analysed": 289, "queued": 7, "strategies": 298, "coded": 141, "blocked": 111, "duplicates": 46, "checked": 141, "paperStart": "2026-11-13T03:40:00Z", "paperStart2": "2026-11-13T05:00:00Z", "paperStart3": "2026-11-13T16:00:00Z", "paperStart4": "2026-11-13T17:00:00Z", "paperStart5": "2026-11-14T11:00:00Z", "paperStart6": "2026-11-14T16:00:00Z", "paperStart7": "2026-11-14T16:30:00Z", "paperStart8": "2026-11-14T18:00:00Z", "paperStart9": "2026-11-14T18:30:00Z", "batch1": 31, "batch2": 23, "batch3": 15, "batch4": 21, "batch5": 10, "batch6": 5, "batch7": 8, "batch8": 17, "batch9": 11, "built": "2026-11-14"};
+export const SL_META = {"channels": 224, "coveredBefore": 24, "picked": 342, "analysed": 322, "queued": 20, "strategies": 331, "coded": 154, "blocked": 126, "duplicates": 51, "checked": 154, "paperStart": "2026-11-13T03:40:00Z", "paperStart2": "2026-11-13T05:00:00Z", "paperStart3": "2026-11-13T16:00:00Z", "paperStart4": "2026-11-13T17:00:00Z", "paperStart5": "2026-11-14T11:00:00Z", "paperStart6": "2026-11-14T16:00:00Z", "paperStart7": "2026-11-14T16:30:00Z", "paperStart8": "2026-11-14T18:00:00Z", "paperStart9": "2026-11-14T18:30:00Z", "paperStart10": "2026-11-15T09:00:00Z", "batch1": 31, "batch2": 23, "batch3": 15, "batch4": 21, "batch5": 10, "batch6": 5, "batch7": 8, "batch8": 17, "batch9": 11, "batch10": 13, "built": "2026-11-15"};
 
 export const SL: SlStrategy[] = [
+ {
+  "id": "AA-01",
+  "version": "v1",
+  "name": "9:30 premium breakout: the in-the-money call and put nearest Rs 180 at 9:25, buy the first to break Rs 180 and hold above it, 20-point stop, 40-point target, out at 9:45 (real NIFTY premiums)",
+  "topic": "india_index",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "A&A Trading Blog",
+  "video": "uvut8SRcFGY",
+  "title": "Simple 9:30 AM Nifty Option Buying Strategy for Beginners and Busy Professionals",
+  "uploaded": "2025-08-13",
+  "minutes": 31,
+  "summary": "A&A Trading's 9:30 NIFTY option-buying strategy for busy people: at 9:25 open the current-week chain and note the in-the-money call and put trading closest to Rs 180; whichever breaks Rs 180 first and sustains above it is bought (around 9:30); 20-point stop, 40-point minimum target, out at 9:45 (experienced traders may wait to 10:00).",
+  "instruments": [
+   "NIFTY weekly options"
+  ],
+  "timeframes": [
+   "1m"
+  ],
+  "markets": [
+   "Nifty options (recorded Angel One quotes)"
+  ],
+  "deskMarkets": [
+   "NIFTY_OPT"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-15T09:00:00Z",
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "At 9:25, the current week's option chain.",
+    "times": [
+     "02:14"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The in-the-money call trading very close to Rs 180 ...",
+    "times": [
+     "02:56"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "... and the same on the put side.",
+    "times": [
+     "03:39"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Whichever breaks Rs 180 first and sustains above it is bought.",
+    "times": [
+     "05:10"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop 20 points.",
+    "times": [
+     "05:54"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Target 40 points (Rs 220 from Rs 180).",
+    "times": [
+     "08:38"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Out at 9:45 if neither is hit.",
+    "times": [
+     "11:21"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Desk version: the real recorded NIFTY quotes; the candidates are the in-the-money call and put whose mid is closest to Rs 180 without being above it at 9:25; 'sustains' is two minutes in a row above Rs 180 after being at or below it, before 9:45; bought at the next minute's ask, stop 20 and target 40 points from the fill.",
+    "times": []
+   }
+  ],
+  "why": [
+   "'sustaining' is not measured in the video (two minutes, A)",
+   "the same video was coded as OB-01 in the four-topics study as an index proxy that never paper-traded - this book trades the premium rule itself on recorded quotes"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 20,
+   "trades": 20
+  }
+ },
  {
   "id": "AO-01",
   "version": "v1",
@@ -301,6 +421,180 @@ export const SL: SlStrategy[] = [
    "fills": true,
    "signals": 2663,
    "trades": 445
+  }
+ },
+ {
+  "id": "AX-07",
+  "version": "v1",
+  "name": "Previous day's high / low set the side; one or two pullback candles, a close beyond the last one's open; stop at the pullback's extreme, half out at 1R, the rest at 2R or the stop (NIFTY, 15 minutes)",
+  "topic": "india_index",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "AbhishekXTrades",
+  "video": "slAtZyGfAlI",
+  "title": "Zero to Hero Option Buying Strategy | 3 Step Entry-Exit for Nifty Options",
+  "uploaded": "2026-07-25",
+  "minutes": 33,
+  "summary": "AbhishekXTrades' 'zero to hero' NIFTY option-buying framework on 15-minute candles: the previous day's high and low are the only levels; above the high buy only, below the low sell only, between them no trade. Wait for one or two candles against the side (the pullback), then a 15-minute close beyond the last pullback candle's open is the entry (a third pullback candle is a reversal: no trade); stop at that candle's extreme with a buffer; book half at 1:1 and the rest at 1:2 or the stop (the zero-to-hero variant lets the rest run).",
+  "instruments": [
+   "NIFTY options",
+   "NIFTY index"
+  ],
+  "timeframes": [
+   "15m"
+  ],
+  "markets": [
+   "Nifty 50"
+  ],
+  "deskMarkets": [
+   "NIFTY"
+  ],
+  "overnight": false,
+  "proxy": "the video buys options; coded on the NIFTY index, a labelled proxy (the result is in index points)",
+  "paperStart": "2026-11-15T09:00:00Z",
+  "rules": [
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "15-minute candles.",
+    "times": [
+     "03:34"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Lines at the day's high and low, for the next day.",
+    "times": [
+     "04:15"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Above the high and holding: buy only.",
+    "times": [
+     "06:28"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Below the low: sell only.",
+    "times": [
+     "06:28"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "To sell: after a green candle, a close below its open.",
+    "times": [
+     "10:36"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "After a second green candle, a close below its open.",
+    "times": [
+     "11:17"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop at the pullback candle's high ...",
+    "times": [
+     "21:24"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "... with a buffer.",
+    "times": [
+     "22:05"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Two levels: 1:1 and 1:2.",
+    "times": [
+     "17:02"
+    ]
+   },
+   {
+    "kind": "management",
+    "label": "Trade management",
+    "tag": "E",
+    "text": "Half booked at 1:1; the rest runs to 1:2 or the stop.",
+    "times": [
+     "18:30"
+    ]
+   },
+   {
+    "kind": "no_trade",
+    "label": "When not to trade",
+    "tag": "E",
+    "text": "Between them: no trading day.",
+    "times": [
+     "07:51"
+    ]
+   },
+   {
+    "kind": "no_trade",
+    "label": "When not to trade",
+    "tag": "E",
+    "text": "Three pullback candles are a reversal: no entry.",
+    "times": [
+     "12:04"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "A",
+    "text": "Desk version: the NIFTY index (Angel One minutes), a labelled proxy for the option; the side is read from the trigger candle's close (above the previous high, below the previous low); the trigger must be the candle right after the last pullback candle, else the setup resets; the buffer is one tick; entry at the next minute's open.",
+    "times": []
+   },
+   {
+    "kind": "management",
+    "label": "Trade management",
+    "tag": "A",
+    "text": "Up to three trades a day, a new one only after a stop and none after a target; no entries from 15:00; out by 15:14.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the buffer, the reset rule and the daily trade count are ours (A)",
+   "the zero-to-hero variant (let the rest run) is not traded (A)",
+   "the book trades the index as the option's proxy (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 113,
+   "trades": 68
   }
  },
  {
@@ -1373,6 +1667,148 @@ export const SL: SlStrategy[] = [
   }
  },
  {
+  "id": "DH-12",
+  "version": "v1",
+  "name": "3 PM momentum: a 2-minute MACD histogram flip from 14:45 with ADX above 25 and rising, the flip candle's extreme broken, an in-the-money option, 15 premium points (real premiums)",
+  "topic": "india_index",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Dhan ⚡",
+  "video": "bfXfZp95x6k",
+  "title": "Nifty Option Buying After 3 PM Strategy! (High Momentum Setup)",
+  "uploaded": "2026-06-07",
+  "minutes": 10,
+  "summary": "Dhan's NIFTY option buying after 3 PM: on the 2-minute chart, from 2:45 take the MACD histogram's fresh signal only when the ADX is above 25 and rising; buy an in-the-money option (100-200 points in) when the signal candle's extreme breaks; book 15-17 points and get out.",
+  "instruments": [
+   "NIFTY weekly options"
+  ],
+  "timeframes": [
+   "2m"
+  ],
+  "markets": [
+   "Nifty options (recorded Angel One quotes)"
+  ],
+  "deskMarkets": [
+   "NIFTY_OPT"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-15T09:00:00Z",
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "An in-the-money option, 100-200 points in.",
+    "times": [
+     "04:18"
+    ]
+   },
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "NIFTY 2-minute chart.",
+    "times": [
+     "02:17"
+    ]
+   },
+   {
+    "kind": "session",
+    "label": "Session",
+    "tag": "E",
+    "text": "Ready from 2:45 to 3:00.",
+    "times": [
+     "02:57"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "MACD for the direction.",
+    "times": [
+     "02:17"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The break of the signal candle's low (a put) - or high (a call).",
+    "times": [
+     "03:38"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Book 15-17 points.",
+    "times": [
+     "08:24"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Only when the ADX is above 25 ...",
+    "times": [
+     "02:57"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "... and rising.",
+    "times": [
+     "04:59"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "A",
+    "text": "MACD (12, 26, 9) histogram crossing zero; ADX (14); bars are 2-minute bars of the recorded NIFTY spot.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Desk version: the real recorded quotes; the first histogram flip from 14:45 to 15:16; the entry is the first spot snapshot beyond the flip candle's extreme within three bars; the option is 150 points in the money (rounded to 100), the current expiry, bought at the ask; target 15 points; out at 15:25.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "No stop is stated: a 25% premium stop guards the position.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the stop, the exact strike and the MACD settings are not said (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 2,
+   "trades": 2
+  }
+ },
+ {
   "id": "EC-01",
   "version": "v1",
   "name": "Supertrend signals only at pivot support or on a resistance break, Heikin Ashi candles",
@@ -1897,6 +2333,285 @@ export const SL: SlStrategy[] = [
    "fills": true,
    "signals": 90,
    "trades": 90
+  }
+ },
+ {
+  "id": "GT-01",
+  "version": "v1",
+  "name": "44FR: after NIFTY falls at least 80 points (half a percent at today's level) from the day's high, a Fibonacci to the low; buy through 0.44, stop 0.22, half out at 0.77, the rest at 1.0 (NIFTY, 5 minutes, calls only)",
+  "topic": "india_index",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Art of Option Learning",
+  "video": "ibdPUxvvDJ4",
+  "title": "Nifty & Nifty Option 44FR Trading Strategy !! 44FR Intraday Strategy Wining Rate Above- 90 %",
+  "uploaded": "2023-01-21",
+  "minutes": 26,
+  "summary": "Art of Option Learning's 44FR NIFTY strategy (buying only): on 5-minute candles, once NIFTY has fallen at least 80 points intraday (half a percent at other index levels), draw a Fibonacci from the high to the low with his levels 0.22, 0.44, 0.77, 1 and 1.22; buy calls when price crosses back above 0.44, stop at 0.22, targets 0.77, 1 and 1.22, booking most at the first. He claims over 90% success in 111 trades.",
+  "instruments": [
+   "NIFTY options",
+   "NIFTY index"
+  ],
+  "timeframes": [
+   "5m"
+  ],
+  "markets": [
+   "Nifty 50"
+  ],
+  "deskMarkets": [
+   "NIFTY"
+  ],
+  "overnight": false,
+  "proxy": "the video buys calls; coded on the NIFTY index, a labelled proxy (the result is in index points)",
+  "paperStart": "2026-11-15T09:00:00Z",
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "Buying only, never selling.",
+    "times": [
+     "04:38"
+    ]
+   },
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "NIFTY on 5-minute candles.",
+    "times": [
+     "03:47"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Fibonacci retracement with his levels 0.22, 0.44, 0.77, 1 and 1.22.",
+    "times": [
+     "06:03"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "At least an 80-point intraday fall.",
+    "times": [
+     "03:47"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "At other index levels, half a percent.",
+    "times": [
+     "12:34"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Buy when price crosses 0.44.",
+    "times": [
+     "09:44"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop at 0.22.",
+    "times": [
+     "09:44"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "First target 0.77 ...",
+    "times": [
+     "09:44"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "... second 1, third 1.22.",
+    "times": [
+     "10:25"
+    ]
+   },
+   {
+    "kind": "management",
+    "label": "Trade management",
+    "tag": "E",
+    "text": "Most of the quantity is booked at the first target.",
+    "times": [
+     "14:01"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "A",
+    "text": "Desk version: the NIFTY index (Angel One minutes), a labelled proxy for the call; the fall is measured from the day's running high to the lowest low after it, at least max(80 points, 0.5% of the high); the Fibonacci runs from that low (0) to the high (1).",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "After each 5-minute candle closing below 0.44, a stop order at 0.44 for the next candle (re-placed as the low moves); one trade a day; no entries from 15:00; out by 15:14.",
+    "times": []
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "A",
+    "text": "Half is booked at 0.77 and the rest at 1.0; the stop stays at 0.22 (how the quantity is split is not said).",
+    "times": []
+   }
+  ],
+  "why": [
+   "the split between the three targets is not said (half at 0.77, half at 1.0, A)",
+   "the book trades the index as the call's proxy (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "win_rate",
+    "at": "00:09",
+    "value": "over 90% success in 111 trades",
+    "period": "NIFTY, his own trading since October-November",
+    "quote": "sakses ret lagabhag lagabhag 90% ke oopar kaa hai"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 1641,
+   "trades": 25
+  }
+ },
+ {
+  "id": "IM-02",
+  "version": "v1",
+  "name": "Premium ORB: the call and the put closest to Rs 200 at 9:16, their 9:16-11:15 premium range, a close above it buys, 20% stop on the entry premium (real NIFTY premiums)",
+  "topic": "india_index",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "In The Money by Zerodha",
+  "video": "erjnU13EYjk",
+  "title": "How to Trade Opening Range Breakout (ORB) with NIFTY Options? — Part 2 | The Long & The Short Ep.23",
+  "uploaded": "2026-03-05",
+  "minutes": 13,
+  "summary": "Zerodha's In The Money, ORB part 2 on NIFTY options: at 9:16 take the call and the put whose premiums are closest to Rs 200, track each premium's range until 11:15, and buy the one whose premium then closes above its range (both may trigger); 20% stop on the entry premium. The selling version shorts the premium that closes below its range.",
+  "instruments": [
+   "NIFTY weekly options"
+  ],
+  "timeframes": [
+   "3m"
+  ],
+  "markets": [
+   "Nifty options (recorded Angel One quotes)"
+  ],
+  "deskMarkets": [
+   "NIFTY_OPT"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-15T09:00:00Z",
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "At 9:16, the strike whose premium is closest to Rs 200.",
+    "times": [
+     "02:52"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The premiums are tracked to the 11:15 close: that is the range.",
+    "times": [
+     "02:52"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "A premium close above the range buys.",
+    "times": [
+     "02:52"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "One call and one put breakout, if triggered.",
+    "times": [
+     "03:35"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "20% stop on the entry premium.",
+    "times": [
+     "03:35"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the real NIFTY option quotes the app records every minute (Angel One best bid and ask); the range is the high of the minute mids 9:16-11:15; a 3-minute close above it from 11:15 to 14:57 buys at the next minute's ask; the stop is 20% under the fill; out by 15:14 at the bid.",
+    "times": []
+   },
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "A",
+    "text": "3-minute closes, as part 1 (_ePkfG6aXqU) builds its range on a 3-minute chart.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the close's timeframe and the exit time are not said in this part (A)",
+   "minute snapshots can miss a quote, so a stop can fill beyond its price"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 26,
+   "trades": 26
   }
  },
  {
@@ -3152,6 +3867,754 @@ export const SL: SlStrategy[] = [
   }
  },
  {
+  "id": "QM-01",
+  "version": "v1",
+  "name": "Option basket: the ATM call locked at 9:16; on its 5-minute premium a close above the Parabolic SAR, the Supertrend (10, 2) and R1; out on a close below the Supertrend; one trade a day (real NIFTY premiums)",
+  "topic": "india_index",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "QuantMan",
+  "video": "j744ULxpZu0",
+  "title": "Options Basket Strategy for Intraday Buying | Algo Trading | QuantMan | Trading Tips",
+  "uploaded": "2025-07-09",
+  "minutes": 7,
+  "summary": "QuantMan's option basket for intraday buying: the spot-based ATM NIFTY call is locked at 9:16; on its 5-minute premium chart buy when the close is above the Parabolic SAR, the Supertrend (10, 2) and the premium's pivot R1; when the close crosses below the Supertrend the call is closed and a put opened (20-point target) under conditions the video does not make clear; one transaction a day. January 2024 - June 2025: about 47% winners.",
+  "instruments": [
+   "NIFTY weekly options"
+  ],
+  "timeframes": [
+   "5m"
+  ],
+  "markets": [
+   "Nifty options (recorded Angel One quotes)"
+  ],
+  "deskMarkets": [
+   "NIFTY_OPT"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-15T09:00:00Z",
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "NIFTY.",
+    "times": [
+     "00:42"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "The basket opens at 9:16 ...",
+    "times": [
+     "01:23"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "... buying a call.",
+    "times": [
+     "01:23"
+    ]
+   },
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "5-minute candles of the premium basket.",
+    "times": [
+     "02:07"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Supertrend 10, 2.",
+    "times": [
+     "02:07"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The close above the Parabolic SAR ...",
+    "times": [
+     "02:07"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "... above the Supertrend ...",
+    "times": [
+     "02:49"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "... and above R1.",
+    "times": [
+     "02:49"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "The put's target is 20 points.",
+    "times": [
+     "04:12"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "When the close crosses below the Supertrend the market reversed: a counter position.",
+    "times": [
+     "03:31"
+    ]
+   },
+   {
+    "kind": "sizing",
+    "label": "Position sizing and risk",
+    "tag": "E",
+    "text": "One transaction a day.",
+    "times": [
+     "04:12"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "The real recorded NIFTY quotes; the premium chart is the minute mids with the previous session's quotes in front; entries at the next minute's ask; no entries from 15:00; out by 15:14 at the bid; a 50% premium guard stop sizes the position (none is stated).",
+    "times": []
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "A",
+    "text": "Parabolic SAR at its default (0.02, 0.2); R1 is the classic pivot of the contract's previous-session mids.",
+    "times": []
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "A",
+    "text": "Desk version: the call is closed on a 5-minute close below the Supertrend; the put adjustment is left out - its conditions ('leg percentage above zero', 'leg already exited') are not clear.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the put adjustment is not traded (its conditions are unclear)",
+   "the guard stop is ours (A)",
+   "minute mids stand in for the traded-price chart (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "win_rate",
+    "at": "04:56",
+    "value": "about 47% winners, maximum loss about 6,870",
+    "period": "QuantMan backtest, January 2024 - June 2025",
+    "quote": "maaee vining probebilitee iज़ araaund 47%"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 375,
+   "trades": 14
+  }
+ },
+ {
+  "id": "QM-02",
+  "version": "v1",
+  "name": "Multi-indicator basket: the ATM call locked at 9:16; on its 3-minute premium a close above the Supertrend (10, 2), the upper band (15, 2), the 9:16-9:30 high and R1 with RSI above 70 and CCI (8) above 100; out on a close below the Supertrend; two trades a day (real NIFTY premiums)",
+  "topic": "india_index",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "QuantMan",
+  "video": "66KNwZ_EzOo",
+  "title": "Multi-Indicator Options Basket's Buying Strategy | Algo Trading | QuantMan | Trading Tips",
+  "uploaded": "2025-07-12",
+  "minutes": 9,
+  "summary": "QuantMan builds a multi-indicator NIFTY option-buying basket: the spot-based ATM call is locked at 9:16; on its own 3-minute premium chart buy when the close is above the Supertrend (10, 2), the upper Bollinger Band (15, 2), the 9:16-9:30 range high and the pivot R1, the CCI (8) is above (its level is not said) and the RSI (14) above 70; exit on a close below the Supertrend; at most two trades a day; one case for more than two days to expiry and one for expiry day. Backtest from January 2022: above 50% winners.",
+  "instruments": [
+   "NIFTY weekly options"
+  ],
+  "timeframes": [
+   "3m"
+  ],
+  "markets": [
+   "Nifty options (recorded Angel One quotes)"
+  ],
+  "deskMarkets": [
+   "NIFTY_OPT"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-15T09:00:00Z",
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "NIFTY.",
+    "times": [
+     "00:44"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "A call, spot-based ATM ...",
+    "times": [
+     "01:25"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "... locked at 9:16.",
+    "times": [
+     "01:25"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Supertrend 10, 2 on 3-minute candles of the premium basket.",
+    "times": [
+     "02:08"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "RSI 14 on 3 minutes.",
+    "times": [
+     "02:08"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "CCI with period 8.",
+    "times": [
+     "02:52"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "The range 9:16 to 9:30.",
+    "times": [
+     "02:52"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Bollinger 15, multiplier 2.",
+    "times": [
+     "03:33"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The close above the Supertrend ...",
+    "times": [
+     "03:33"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "... the CCI above ...",
+    "times": [
+     "04:13"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "... the close above the upper Bollinger Band ...",
+    "times": [
+     "04:13"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "... above the range high ...",
+    "times": [
+     "04:13"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "... above R1 ...",
+    "times": [
+     "04:55"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "... and the RSI above 70.",
+    "times": [
+     "04:55"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Out when the close crosses below the Supertrend.",
+    "times": [
+     "05:39"
+    ]
+   },
+   {
+    "kind": "sizing",
+    "label": "Position sizing and risk",
+    "tag": "E",
+    "text": "At most two trades a day.",
+    "times": [
+     "06:21"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Case 1: days to expiry above two ...",
+    "times": [
+     "04:55"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "... case 2: expiry day.",
+    "times": [
+     "06:21"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the real recorded NIFTY quotes; the premium chart is the minute mids with the previous session's quotes in front (so the indicators exist at the open); R1 is the classic pivot of the contract's previous-session mids; entries on 3-minute closes from 9:30 to 14:57 at the next minute's ask; out by 15:14 at the bid; days to expiry in weekdays.",
+    "times": []
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "A",
+    "text": "CCI (8) above 100: the level is not said; 100 is the usual line. The EMA 9 he adds is never used in a condition.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "No stop is stated: a 50% premium guard stop sizes the position.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the CCI level is not said (100, A)",
+   "the guard stop is ours (A)",
+   "minute mids stand in for the traded-price chart (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "win_rate",
+    "at": "06:21",
+    "value": "above 50% winners, above 1% per trade",
+    "period": "QuantMan backtest from January 2022",
+    "quote": "maay vining probebilitee iज़ aalso abav 50%"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 15,
+   "trades": 6
+  }
+ },
+ {
+  "id": "RK-01",
+  "version": "v1",
+  "name": "Rs 50 wait and trade: at 9:20 the call and the put nearest Rs 50, each bought when it gains 10 points, 20-point stop trailed 1:1, 40-point target, out at 3:29; expiry day and the day before only, India VIX under 14 (real NIFTY premiums)",
+  "topic": "india_index",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Saketh Ramakrishna",
+  "video": "TZCM6qFV3S0",
+  "title": "Intraday Option Buying Strategy in Nifty | Fully Automated | Saketh R",
+  "uploaded": "2023-11-24",
+  "minutes": 29,
+  "summary": "Saketh Ramakrishna builds a fully automated NIFTY option-buying system (Fin Target, tested on Stockmock): at 9:20 take the call and the put trading around Rs 50 and buy whichever gains 10 points first (wait and trade); 20-point stop, 40-point target, a 1:1 trailing stop, out at 3:29. Optimised to expiry day and the day before only, then to days with India VIX under 14: 54% winners, about 1:2 reward to risk.",
+  "instruments": [
+   "NIFTY weekly options"
+  ],
+  "timeframes": [
+   "1m"
+  ],
+  "markets": [
+   "Nifty options (recorded Angel One quotes)"
+  ],
+  "deskMarkets": [
+   "NIFTY_OPT"
+  ],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": "2026-11-15T09:00:00Z",
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "From 9:20, options trading around Rs 50; the one that moves from 50 to 60 is entered.",
+    "times": [
+     "14:08"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Only the leg that moves is entered.",
+    "times": [
+     "13:23"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop 20 points, target 40.",
+    "times": [
+     "14:08"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Entry from 9:20, exit at 3:29.",
+    "times": [
+     "16:58"
+    ]
+   },
+   {
+    "kind": "management",
+    "label": "Trade management",
+    "tag": "E",
+    "text": "Trailing stop 1:1.",
+    "times": [
+     "15:32"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Only on expiry day and the day before.",
+    "times": [
+     "17:38"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Only when India VIX is under 14.",
+    "times": [
+     "22:41"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the real recorded NIFTY quotes; at 9:20 the current-expiry call and put whose mids are nearest Rs 50; each is bought at the ask when its premium reaches the 9:20 mid + 10 (both can trigger on a whipsaw day, as the platform's legs are independent); stop 20 and target 40 from the fill; the stop trails 20 points behind the best price; out at 15:28.",
+    "times": []
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "A",
+    "text": "Days to expiry counted in weekdays; India VIX read at 9:20 from the recorder (expiry is now Tuesday, so the days are Monday and Tuesday).",
+    "times": []
+   }
+  ],
+  "why": [
+   "the VIX limit and the expiry-day filter are fitted on his own backtest",
+   "India VIX stayed above 14 through the recording so far, so the book may wait a long time"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "win_rate",
+    "at": "24:02",
+    "value": "54% winners, about 1:2 reward to risk with the VIX filter",
+    "period": "Stockmock, two years",
+    "quote": "strategy which has a probability of 54% and almost 1 is to two risk reward"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 0,
+   "trades": 0
+  }
+ },
+ {
+  "id": "SJ-01",
+  "version": "v1",
+  "name": "Two daily closes one way set the side; the 9:15-9:45 range, its first retest after a break, an alert candle's break; stop beyond the retest candle; out when two opposite candles break the second's extreme (NIFTY, 5 minutes)",
+  "topic": "india_index",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Trading With Sidhant",
+  "video": "3uBZItiNeo4",
+  "title": "From Random Trades to a System: Simple Nifty Options Strategy",
+  "uploaded": "2026-03-17",
+  "minutes": 15,
+  "summary": "Trading with Sidhant's simple NIFTY options system: when the last two daily closes moved the same way (each below the day before's, both red - or both up and green), trade only that side. On 5-minute candles mark the high and low up to 9:40; after the range breaks on that side, don't trade the first break - wait for the first retest, then the first candle of the day's colour is the alert candle and the break of its extreme is the entry; stop just beyond the retest candle; exit when two candles of the other colour form and the second one's extreme breaks. Buy the ATM option.",
+  "instruments": [
+   "NIFTY options",
+   "NIFTY index"
+  ],
+  "timeframes": [
+   "1D",
+   "5m"
+  ],
+  "markets": [
+   "Nifty 50"
+  ],
+  "deskMarkets": [
+   "NIFTY"
+  ],
+  "overnight": false,
+  "proxy": "the video buys the ATM option; coded on the NIFTY index, a labelled proxy (the result is in index points)",
+  "paperStart": "2026-11-15T09:00:00Z",
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "The at-the-money option.",
+    "times": [
+     "08:10"
+    ]
+   },
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "5-minute candles.",
+    "times": [
+     "08:52"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The previous two days' closes in the same direction, both candles the same colour.",
+    "times": [
+     "03:27"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Red candles that close above the previous close do not count.",
+    "times": [
+     "02:46"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "On a down-down day only sells (puts) are taken.",
+    "times": [
+     "04:48"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Wait until 9:40 ...",
+    "times": [
+     "04:07"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "... and mark the range's high and low.",
+    "times": [
+     "04:07"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Not the first break: the first retest.",
+    "times": [
+     "04:48"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "After the retest, the first candle of our direction is the alert candle ...",
+    "times": [
+     "05:28"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "... and the break of its low is the entry.",
+    "times": [
+     "05:28"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop just beyond the retest candle.",
+    "times": [
+     "06:48"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Exit when two candles of the same colour form the other way ...",
+    "times": [
+     "06:48"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "... at the break of the second one's high.",
+    "times": [
+     "07:28"
+    ]
+   },
+   {
+    "kind": "no_trade",
+    "label": "When not to trade",
+    "tag": "E",
+    "text": "If the range breaks the other way, forget the day.",
+    "times": [
+     "08:52"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "A",
+    "text": "Desk version: the NIFTY index (Angel One minutes), a labelled proxy for the ATM option; daily candles are the sessions' opens and closes; the range is the six 5-minute candles 9:15-9:40 (all six needed); a break is a 5-minute close beyond the edge; the retest is the first later candle reaching the edge.",
+    "times": []
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Each candle of the day's colour after the retest arms a stop order one tick beyond its extreme for the next candle only; one trade a day; no entries from 15:00; out by 15:14 if the exit never comes.",
+    "times": []
+   }
+  ],
+  "why": [
+   "'break' as a close, how long the alert order waits and the end-of-day exit are ours (A)",
+   "the book trades the index as the option's proxy (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 275,
+   "trades": 12
+  }
+ },
+ {
   "id": "SP-02",
   "version": "v1",
   "name": "Heikin Ashi: flat-bottomed candle above the 20 SMA with RSI over 50, break of its high, out on a close under the SMA, higher-timeframe side",
@@ -3279,6 +4742,163 @@ export const SL: SlStrategy[] = [
    "fills": true,
    "signals": 169,
    "trades": 83
+  }
+ },
+ {
+  "id": "TE-01",
+  "version": "v1",
+  "name": "9:20 gap fade: a gap over 100 points faded through the first 5-minute candle's range, 200-point target, 70 / 100-point stop by the candle's size, out on an opposite candle 50 points off its extreme (BANKNIFTY)",
+  "topic": "india_index",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Tradetron",
+  "video": "G9BmdjqIu-8",
+  "title": "920 Option Buying Strategy | Ghanshyam Tech | Algo trading strategy build",
+  "uploaded": "2023-07-30",
+  "minutes": 11,
+  "summary": "Ghanshyam Tech's 9:20 BANKNIFTY strategy rebuilt on Tradetron. When the open gaps more than 100 points from yesterday's close, fade it through the first 5-minute candle (9:15-9:20): after a gap up a break of its low shorts (a 100-point in-the-money put), after a gap down a break of its high buys. Target 200 points; stop 100 points when that candle is over 150 points, else 70; also out when an opposite candle runs 50 points from its extreme; one trade a day, all closed at 3:15.",
+  "instruments": [
+   "BANKNIFTY options",
+   "BANKNIFTY index"
+  ],
+  "timeframes": [
+   "5m"
+  ],
+  "markets": [
+   "Bank Nifty"
+  ],
+  "deskMarkets": [
+   "BANKNIFTY"
+  ],
+  "overnight": false,
+  "proxy": "the video buys a 100-point in-the-money BANKNIFTY option; coded on the BANKNIFTY index, a labelled proxy",
+  "paperStart": "2026-11-15T09:00:00Z",
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "Bank Nifty, Ghanshyam Tech's 9:20 strategy built on Tradetron.",
+    "times": [
+     "10:38"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "The option: 100 points in the money.",
+    "times": [
+     "08:24"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The 9:20 candle is the first 5-minute candle; its high and low are marked.",
+    "times": [
+     "01:27"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "A gap of 100 points between yesterday's close and today's open.",
+    "times": [
+     "04:14"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "After a gap up, a break of the low shorts (a gap down's break of the high buys).",
+    "times": [
+     "08:24"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop 100 points when the 9:20 candle is over 150 points ...",
+    "times": [
+     "07:00"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "... 70 points when it is under 150.",
+    "times": [
+     "07:40"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Target: a 200-point move.",
+    "times": [
+     "02:07"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Also out when an opposite candle falls 50 points from its high (a long's red candle).",
+    "times": [
+     "07:40"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Everything squared off at 3:15.",
+    "times": [
+     "09:52"
+    ]
+   },
+   {
+    "kind": "sizing",
+    "label": "Position sizing and risk",
+    "tag": "E",
+    "text": "One trade a day.",
+    "times": [
+     "05:37"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Desk version: the BANKNIFTY index (Angel One minutes), a labelled proxy for the in-the-money option; the stop order sits 0.05 beyond the candle and lives all day; the 50-point exit is judged at the candle's close (the platform watches it live).",
+    "times": []
+   }
+  ],
+  "why": [
+   "the 50-point exit is read at candle closes (A)",
+   "the book trades the index as the option's proxy (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 35,
+   "trades": 24
   }
  },
  {
@@ -3420,6 +5040,298 @@ export const SL: SlStrategy[] = [
    "fills": true,
    "signals": 5,
    "trades": 5
+  }
+ },
+ {
+  "id": "TZ-01",
+  "version": "v1",
+  "name": "SMA 22 / 33 scalp: both rising (falling), a green (red) candle touching the band, a stop order beyond it, stop at its other end, 2R (NIFTY, 3 minutes)",
+  "topic": "india_index",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Trader Insights",
+  "video": "1kx9BqLAMFs",
+  "title": "22 & 33 SMA Scalping Strategy - Siddharth bhanushali's Option Buying Strategy | Backtest on Nifty",
+  "uploaded": "2023-08-19",
+  "minutes": 9,
+  "summary": "Trader Insights tests Siddharth Bhanushali's '22 & 33 SMA scalping strategy' on NIFTY 3-minute candles: buy when both SMAs rise and a green candle touches the band between them (the trigger candle), with a stop order at its high, the stop at its low and a 2R target; sell is the mirror. His manual test of 100 trades: +26.47% in 1.5 months, -1.25% drawdown.",
+  "instruments": [
+   "NIFTY options",
+   "NIFTY index"
+  ],
+  "timeframes": [
+   "3m"
+  ],
+  "markets": [
+   "Nifty 50"
+  ],
+  "deskMarkets": [
+   "NIFTY"
+  ],
+  "overnight": false,
+  "proxy": "the video buys NIFTY options; coded on the NIFTY index, a labelled proxy (the result is in index points)",
+  "paperStart": "2026-11-15T09:00:00Z",
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "NIFTY.",
+    "times": [
+     "02:10"
+    ]
+   },
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "3-minute candles.",
+    "times": [
+     "02:10"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Two simple moving averages, 22 and 33.",
+    "times": [
+     "02:53"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Buy: both SMAs rising, price retests and forms a green candle at the band.",
+    "times": [
+     "02:53"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The green candle touches the band.",
+    "times": [
+     "03:45"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Entry at the trigger candle's high.",
+    "times": [
+     "03:45"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Sell: both SMAs falling and a red candle at the band, entry at its low, stop at its high.",
+    "times": [
+     "04:29"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop at the trigger candle's low.",
+    "times": [
+     "03:45"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Target twice the risk.",
+    "times": [
+     "03:45"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "A",
+    "text": "Desk version: the NIFTY index (Angel One minutes); the stop order sits one tick beyond the candle and lives for three more 3-minute candles (how long it waits is not said); one position at a time; no entries from 15:00; out by 15:14.",
+    "times": []
+   }
+  ],
+  "why": [
+   "how long the entry order waits is not said (A)",
+   "the book trades the index as the option's proxy (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "return_pct",
+    "at": "06:53",
+    "value": "+26.47% in 1.5 months, -1.25% drawdown",
+    "period": "100 trades, NIFTY 3m (Trader Insights' manual test)",
+    "quote": "with a 26.47% gain in 1.512 months and a drawdown of -1.25%"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 1210,
+   "trades": 382
+  }
+ },
+ {
+  "id": "TZ-02",
+  "version": "v1",
+  "name": "Pivot point + 20 MA: above the pivot a green candle through the MA (or above the MA a candle through the pivot), stop under the candle or the MA, 2R (NIFTY, 15 minutes)",
+  "topic": "india_index",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Trader Insights",
+  "video": "uFrgt50Y6ZE",
+  "title": "Pivot Points + 20 Moving Average Strategy | Abhishek Kar | Nifty Strategy | Backtested",
+  "uploaded": "2023-05-21",
+  "minutes": 11,
+  "summary": "Trader Insights tests Abhishek Kar's pivot point + 20 MA strategy on NIFTY 15-minute candles. Buy when a candle above the pivot crosses and closes above the 20 MA (case 1), or a candle above the 20 MA crosses and closes above the pivot (case 2); enter at the close, stop below the candle's low or the 20 MA (whichever is lower), 2R target; sells are the mirror. 100 trades: 53% winners, +62.13%, -4.56% drawdown in six months.",
+  "instruments": [
+   "NIFTY options",
+   "NIFTY index"
+  ],
+  "timeframes": [
+   "15m"
+  ],
+  "markets": [
+   "Nifty 50"
+  ],
+  "deskMarkets": [
+   "NIFTY"
+  ],
+  "overnight": false,
+  "proxy": "the video buys NIFTY options; coded on the NIFTY index, a labelled proxy (the result is in index points)",
+  "paperStart": "2026-11-15T09:00:00Z",
+  "rules": [
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "NIFTY on 15-minute candles.",
+    "times": [
+     "02:15"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "The standard pivot point (the pivot level only) and a 20 MA.",
+    "times": [
+     "02:15"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Case 1: the close above the pivot and a green candle crossing and closing above the 20 MA.",
+    "times": [
+     "02:56"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Case 2: the close above the 20 MA and the candle crossing and closing above the pivot.",
+    "times": [
+     "03:37"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Entry at the trigger candle's close.",
+    "times": [
+     "03:37"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Sells are the opposite.",
+    "times": [
+     "07:06"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop below the candle's low or the 20 MA, whichever is lower.",
+    "times": [
+     "03:37"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Target twice the risk.",
+    "times": [
+     "03:37"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the NIFTY index (Angel One minutes), entry at the next minute's open after the close; no entries from 15:00; out by 15:14.",
+    "times": []
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "A",
+    "text": "The 20 MA is simple; the pivot is the classic (H + L + C) / 3 of the previous session.",
+    "times": []
+   }
+  ],
+  "why": [
+   "the MA type is not said (simple, A)",
+   "the book trades the index as the option's proxy (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "win_rate",
+    "at": "08:30",
+    "value": "53% winners in 100 trades, +62.13%, -4.56% drawdown in six months",
+    "period": "NIFTY 15m (Trader Insights' manual test)",
+    "quote": "So the win rate was 53%"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 138,
+   "trades": 86
   }
  },
  {
@@ -3671,6 +5583,167 @@ export const SL: SlStrategy[] = [
    "fills": true,
    "signals": 3148,
    "trades": 553
+  }
+ },
+ {
+  "id": "UX-01",
+  "version": "v1",
+  "name": "Upstox AlgoVerse build: a 3-minute close above the Supertrend, the upper Bollinger Band and the day's R1 with RSI above 72 and a green candle; out on a close back below the Supertrend (long only)",
+  "topic": "india_index",
+  "status": "coded",
+  "readiness": "assumptions",
+  "cardStatus": "with_assumptions",
+  "channel": "Upstox",
+  "video": "I16se8r7J3E",
+  "title": "How to Build an Option Buying Strategy on Upstox AlgoVerse | Part 5",
+  "uploaded": "2026-04-26",
+  "minutes": 8,
+  "summary": "Upstox's AlgoVerse course, part 5: an option-buying build for NIFTY on 3-minute candles. Enter when the close is above the Supertrend, above the upper Bollinger Band and above the pivot R1, the RSI is above 72 and the candle is green; buy the option whose premium is near Rs 250 (ATM or slightly in the money); exit when a close crosses back below the Supertrend - no separate stop. Six years on AlgoVerse: 50.68% winners, about 43% return after 1% slippage.",
+  "instruments": [
+   "NIFTY options",
+   "NIFTY index"
+  ],
+  "timeframes": [
+   "3m"
+  ],
+  "markets": [
+   "Nifty 50"
+  ],
+  "deskMarkets": [
+   "NIFTY"
+  ],
+  "overnight": false,
+  "proxy": "the video buys the option nearest a Rs 250 premium; coded on the NIFTY index, a labelled proxy",
+  "paperStart": "2026-11-15T09:00:00Z",
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "A NIFTY option-buying strategy.",
+    "times": [
+     "00:02"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "The option: premium near Rs 250 (ATM or slightly in the money).",
+    "times": [
+     "04:05"
+    ]
+   },
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "3-minute candles.",
+    "times": [
+     "01:23"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The close above the Supertrend and the RSI above 72.",
+    "times": [
+     "02:04"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The close above the upper Bollinger Band.",
+    "times": [
+     "02:04"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "A green candle: the close above the open.",
+    "times": [
+     "02:44"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The close above R1.",
+    "times": [
+     "02:44"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Out when the close crosses below the Supertrend; no separate stop.",
+    "times": [
+     "04:05"
+    ]
+   },
+   {
+    "kind": "sizing",
+    "label": "Position sizing and risk",
+    "tag": "E",
+    "text": "At most 10 entries in his test settings.",
+    "times": [
+     "04:47"
+    ]
+   },
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "A",
+    "text": "Desk version: the signals and the result are on the NIFTY index (Angel One one-minute data through the app's backend), a labelled proxy for the Rs 250 option; long only; no entries from 15:00; out by the desk's 15:14 close.",
+    "times": []
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "A",
+    "text": "Supertrend (10, 3): he says he sets the multiplier later and never does; RSI 14; Bollinger (20, 2); R1 is the classic pivot of the previous session.",
+    "times": []
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "A",
+    "text": "A 1% guard stop on the index sizes the position (the video's only exit is the Supertrend close).",
+    "times": []
+   }
+  ],
+  "why": [
+   "the Supertrend multiplier and the band settings are not said (A)",
+   "the book trades the index as a proxy for the Rs 250 option (A)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [
+   {
+    "kind": "win_rate",
+    "at": "04:47",
+    "value": "50.68% winners; about 43% return after 1% slippage",
+    "period": "NIFTY 2019-2025 on AlgoVerse",
+    "quote": "ye stretajee kee probebilitee olamost 50.68% hai"
+   }
+  ],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": {
+   "lookahead": true,
+   "fills": true,
+   "signals": 61,
+   "trades": 26
   }
  },
  {
@@ -4125,6 +6198,203 @@ export const SL: SlStrategy[] = [
   "checks": null
  },
  {
+  "id": "AJ-01",
+  "version": "v1",
+  "name": "Power of Stocks' 5 EMA strategy automated on AlgoTest",
+  "topic": "india_index",
+  "status": "duplicate",
+  "readiness": "ready",
+  "cardStatus": "ready",
+  "channel": "AlgoTest",
+  "video": "gk7H8xfIydo",
+  "title": "Automate 5 EMA strategy of @POWEROFSTOCKSBySubasish  on AlgoTest | Algo Trading",
+  "uploaded": "2024-06-04",
+  "minutes": 30,
+  "summary": "AlgoTest live session automating Power of Stocks' (Subhasish Pani's) 5 EMA strategy with a Pine script and TradingView alerts on Bank Nifty and Nifty.",
+  "instruments": [
+   "NIFTY options",
+   "BANKNIFTY options"
+  ],
+  "timeframes": [
+   "5m",
+   "15m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "The 5 EMA strategy of Subhasish Pani (Power of Stocks), automated.",
+    "times": [
+     "03:31"
+    ]
+   }
+  ],
+  "why": [
+   "an automation walkthrough of a strategy already in the app"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": "YT-01",
+  "duplicateWhy": "Power of Stocks' 5 EMA alert-candle strategy is already coded (YT-01)",
+  "checks": null
+ },
+ {
+  "id": "AJ-02",
+  "version": "v1",
+  "name": "Bank Nifty long straddle on AlgoTest's all-in-one indicator VWAP signal",
+  "topic": "india_index",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "AlgoTest",
+  "video": "DKrDlOcGUuk",
+  "title": "BIG TARGET SMALL SL | Automate Option Buying Strategy using VWAP",
+  "uploaded": "2024-10-13",
+  "minutes": 13,
+  "summary": "AlgoTest automates an option-buying strategy on its all-in-one indicator template's VWAP signal: a Bank Nifty long straddle (ATM call and put combined), entered and exited as the indicator says.",
+  "instruments": [
+   "BANKNIFTY options"
+  ],
+  "timeframes": [
+   "5m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "A straddle: the ATM call and put.",
+    "times": [
+     "02:54"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Built on AlgoTest's all-in-one indicator template.",
+    "times": [
+     "00:06"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Entries and exits as the indicator says.",
+    "times": [
+     "04:18"
+    ]
+   }
+  ],
+  "why": [
+   "the entries come from AlgoTest's own indicator template, whose rules are not shown",
+   "the desk records NIFTY options only"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the entries come from AlgoTest's own indicator template, whose rules are not shown; the desk records NIFTY options only",
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "CJ-01",
+  "version": "v1",
+  "name": "Expiry-day option-selling scalps at the previous day's high and low",
+  "topic": "india_index",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Trading Chanakya",
+  "video": "hb-k2IRyipI",
+  "title": "\"30 Min में Profit! 🔥 Nifty Option Scalping Strategy जो काम करती है 💯\"",
+  "uploaded": "2025-04-10",
+  "minutes": 26,
+  "summary": "Trading Chanakya (Anmol Mittal) on expiry-day option scalping - by selling, not buying: on expiry day only, the previous day's high and low are resistance and support; a sell is tried where the market shows weakness at a level, with a stop.",
+  "instruments": [
+   "NIFTY options",
+   "SENSEX options"
+  ],
+  "timeframes": [
+   "5m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "Not option buying: the video is about selling.",
+    "times": [
+     "00:01"
+    ]
+   },
+   {
+    "kind": "session",
+    "label": "Session",
+    "tag": "E",
+    "text": "Only on expiry day.",
+    "times": [
+     "02:05"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The previous day's low (and high) as the levels.",
+    "times": [
+     "04:14"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "At the upper level, weakness can bring the market down.",
+    "times": [
+     "04:58"
+    ]
+   }
+  ],
+  "why": [
+   "expiry-day option selling on 'weakness' judged by eye",
+   "no entry trigger, stop or target size is stated"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "expiry-day option selling on 'weakness' judged by eye; no entry trigger, stop or target size is stated",
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
   "id": "DF-03",
   "version": "v1",
   "name": "Camarilla levels on the ATM option's own one-minute chart, 200 EMA high/low channel, two lots",
@@ -4264,8 +6534,102 @@ export const SL: SlStrategy[] = [
     "note": "first lot +65 points in about 25 minutes"
    }
   ],
-  "blockedReason": "every entry and stop is read from the ATM option's own one-minute premium chart (its Camarilla levels and 200 EMA channel); the desk has no intraday option premiums",
+  "blockedReason": "every entry is read from the ATM option's own one-minute Camarilla levels and 200 EMA channel together with the NIFTY futures VWAP; the desk has recorded NIFTY option quotes since 5 Oct 2026, but no futures volume",
   "dataBlocked": true,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "DF-04",
+  "version": "v1",
+  "name": "Heikin Ashi with a moving average channel (20 entry, 34 exit): sell a call on a close below the 20 low line",
+  "topic": "india_index",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Definedge",
+  "video": "uBV_voVMJSM",
+  "title": "A simple Nifty Options strategy",
+  "uploaded": "2026-08-26",
+  "minutes": 26,
+  "summary": "Definedge (Brijesh and Prashant) on a simple NIFTY option-selling strategy: a moving average channel (20 for entries, 34 for exits) on Heikin Ashi candles; a close below the 20-period low line sells a call (the 'safer' side), with the stop argued on air.",
+  "instruments": [
+   "NIFTY options"
+  ],
+  "timeframes": [
+   "unclear"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "An option-selling strategy.",
+    "times": [
+     "00:06"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "A moving average channel ...",
+    "times": [
+     "00:49"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "... on Heikin Ashi candles.",
+    "times": [
+     "02:11"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "20 for the entry, 34 for the exit.",
+    "times": [
+     "05:03"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The first candle closing below the 20 moving average low.",
+    "times": [
+     "02:54"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The safer trade is selling the call.",
+    "times": [
+     "03:36"
+    ]
+   }
+  ],
+  "why": [
+   "option selling with the strike left open ('the strike above'), the timeframe not stated and the stop argued on air (25 option points or 50 NIFTY points)"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "option selling with the strike left open ('the strike above'), the timeframe not stated and the stop argued on air (25 option points or 50 NIFTY points)",
+  "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
   "checks": null
@@ -4470,6 +6834,74 @@ export const SL: SlStrategy[] = [
   "checks": null
  },
  {
+  "id": "IM-01",
+  "version": "v1",
+  "name": "Spot opening-range breakout: a 3-minute close beyond the 9:15-10:15 (or 11:15) range, stop at the other side",
+  "topic": "india_index",
+  "status": "duplicate",
+  "readiness": "ready",
+  "cardStatus": "ready",
+  "channel": "In The Money by Zerodha",
+  "video": "_ePkfG6aXqU",
+  "title": "All About Opening Range Breakout (ORB) — Part 1 | The Long & The Short Ep.22",
+  "uploaded": "2026-02-25",
+  "minutes": 12,
+  "summary": "Zerodha's In The Money, ORB part 1: what an opening-range breakout is, tested on NIFTY spot with 3-minute candles and time-based ranges (9:15-10:15 and others): a close above the range high after the window goes long with the stop at the range low, a close below goes short with the stop at the high. Part 2 (IM-02) moves it to the option premium.",
+  "instruments": [
+   "NIFTY index"
+  ],
+  "timeframes": [
+   "3m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "A time-based opening range from 9:15 to 10:15 on a 3-minute chart.",
+    "times": [
+     "05:44"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "A close above the range high after 10:15 goes long, the stop at the range low.",
+    "times": [
+     "05:44"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "A close below the range goes short, the stop at the high.",
+    "times": [
+     "05:44"
+    ]
+   }
+  ],
+  "why": [
+   "the episode's spot test",
+   "part 2 (IM-02) trades the same breakout on the option premium"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": "BB-02",
+  "duplicateWhy": "the opening-range breakout with the stop at the range's far side is already coded on NIFTY (BB-02, and SI-09 in the four-topics study); only the window lengths differ",
+  "checks": null
+ },
+ {
   "id": "LA-01",
   "version": "v1",
   "name": "Narrow CPR = trending day: trade the side the market opens / breaks from the CPR",
@@ -4622,6 +7054,101 @@ export const SL: SlStrategy[] = [
   "checks": null
  },
  {
+  "id": "NB-01",
+  "version": "v1",
+  "name": "RSI (14) through 50 with price beyond the VWAP (NIFTY, 15 minutes); 25% stop, 50% target on the premium; out by 3:00",
+  "topic": "india_index",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Nifty Learning with Brijesh",
+  "video": "GdZjghXqtM0",
+  "title": "Options Buying With Free ALGO | Algo Based Options Buying Strategy with Backtesting Data",
+  "uploaded": "2026-05-16",
+  "minutes": 20,
+  "summary": "Nifty Learning (Brijesh) on a free algo for option buying: on NIFTY 15-minute candles buy a call when the RSI (14) closes above 50 and price is above the VWAP (puts the other way); 25% stop and 50% target on the premium; out by 3:00.",
+  "instruments": [
+   "NIFTY options"
+  ],
+  "timeframes": [
+   "15m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "15-minute candles.",
+    "times": [
+     "07:15"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "RSI 14 with the middle level 50.",
+    "times": [
+     "10:42"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The RSI closing above 50 on the 15-minute chart ...",
+    "times": [
+     "08:41"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "... and price above the VWAP triggers the call.",
+    "times": [
+     "08:41"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop 25% under the premium, target 50% above.",
+    "times": [
+     "09:22"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Out by 3:00.",
+    "times": [
+     "14:19"
+    ]
+   }
+  ],
+  "why": [
+   "the VWAP needs NIFTY futures volume, which the desk does not record (the index has none)",
+   "which option is bought is not said"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the VWAP needs NIFTY futures volume; the desk records the NIFTY index (no volume) and the NIFTY option chain, not futures",
+  "dataBlocked": true,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
   "id": "NM-01",
   "version": "v1",
   "name": "Call/put open-interest change from 09:15 to 11:00 sets the side when the imbalance is at least 20-25%; buy 0.3-0.5 delta options near the VWAP after 11:00",
@@ -4694,6 +7221,64 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the signal is the change in call and put open interest around the ATM strikes, which the desk does not have",
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "OS-01",
+  "version": "v1",
+  "name": "Trending OI option buying on OI Pulse, with averaging",
+  "topic": "india_index",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Options Scalping",
+  "video": "4HW5qr-PUos",
+  "title": "⚡ Trending Oi Option Buying Strategy! | 🎓 Complete Trade Guide | Trade date: 26 Aug 2026",
+  "uploaded": "2026-10-14",
+  "minutes": 7,
+  "summary": "Options Scalping (Siva) teaches a 'trending OI' option-buying strategy on the OI Pulse platform: entry, exit, averaging and stop from the platform's trending open-interest reading.",
+  "instruments": [
+   "NIFTY options"
+  ],
+  "timeframes": [
+   "1m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "The trending OI strategy.",
+    "times": [
+     "00:03"
+    ]
+   },
+   {
+    "kind": "management",
+    "label": "Trade management",
+    "tag": "E",
+    "text": "Entry, exit, averaging and stop.",
+    "times": [
+     "00:03"
+    ]
+   }
+  ],
+  "why": [
+   "it reads the platform's own trending-OI signal, which the video does not define, and averages into losing trades"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "it reads the platform's own trending-OI signal, which the video does not define, and averages into losing trades",
   "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
@@ -4879,6 +7464,144 @@ export const SL: SlStrategy[] = [
   "checks": null
  },
  {
+  "id": "PC-05",
+  "version": "v1",
+  "name": "Tight-range day, an open near the previous high or low, consolidation, entry on the range break",
+  "topic": "india_index",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Pivot Call",
+  "video": "FGucDF7lI7g",
+  "title": "My favourite Option buying set up (Option buying series)",
+  "uploaded": "2024-04-11",
+  "minutes": 20,
+  "summary": "Pivot Call's favourite option-buying setup: after a sideways previous day with a tight range, a day that opens near (not at the centre of) the previous high or low; consolidation there; entry only once the range breaks.",
+  "instruments": [
+   "NIFTY options",
+   "BANKNIFTY options"
+  ],
+  "timeframes": [
+   "5m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Day one: a sideways day with a tight range.",
+    "times": [
+     "05:42"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Day two opens near the previous high or low.",
+    "times": [
+     "06:23"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Entry only once the range breaks.",
+    "times": [
+     "07:06"
+    ]
+   }
+  ],
+  "why": [
+   "'a tight range', 'near' the previous day's high or low and the consolidation are judged by eye",
+   "no sizes, stop or target are given"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "'a tight range', 'near' the previous day's high or low and the consolidation are judged by eye; no sizes, stop or target are given",
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "PC-06",
+  "version": "v1",
+  "name": "Mid-afternoon reversal: pin bars under the first big red candle's high, then a red-bodied candle",
+  "topic": "india_index",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Pivot Call",
+  "video": "rQA7W0t53-w",
+  "title": "Reversal strategy for Option buyers (Option buying series)",
+  "uploaded": "2024-05-16",
+  "minutes": 18,
+  "summary": "Pivot Call's reversal setup for option buyers: in mid-afternoon, after the day's first big red candle, a series of pin bars near its high that fail to break it; then a red-bodied candle starts the reversal.",
+  "instruments": [
+   "NIFTY options",
+   "BANKNIFTY options"
+  ],
+  "timeframes": [
+   "5m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "session",
+    "label": "Session",
+    "tag": "E",
+    "text": "Mid-afternoon, not at the open.",
+    "times": [
+     "02:14"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The first red candle's high, somewhere in mid-afternoon.",
+    "times": [
+     "02:14"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "Wait for the series of pin bars near the red candle's high.",
+    "times": [
+     "02:54"
+    ]
+   }
+  ],
+  "why": [
+   "the 'big' red candle, the pin bars 'near' its high and the consolidation are judged by eye",
+   "no stop or target sizes are given"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the 'big' red candle, the pin bars 'near' its high and the consolidation are judged by eye; no stop or target sizes are given",
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
   "id": "PW-02",
   "version": "v1",
   "name": "Gap against the previous day's candle: beyond its 50% = reversal, flat = continuation (bias only)",
@@ -5040,6 +7763,373 @@ export const SL: SlStrategy[] = [
   "checks": null
  },
  {
+  "id": "QS-01",
+  "version": "v1",
+  "name": "OTM option buying from order-flow zones (Quantsapp)",
+  "topic": "india_index",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Quantsapp",
+  "video": "ALKPdRapRyY",
+  "title": "Nifty OTM Option Buying Strategy Samjhe (Hindi) | Quantsapp",
+  "uploaded": "2024-11-29",
+  "minutes": 9,
+  "summary": "Quantsapp (in Hindi) on buying out-of-the-money NIFTY options from order-flow zones: breakouts from zones with good volume, judged by buyer- and seller-initiated quantities.",
+  "instruments": [
+   "NIFTY options"
+  ],
+  "timeframes": [
+   "1m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Buyer- and seller-initiated quantity.",
+    "times": [
+     "04:17"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "A breakout zone with good volume.",
+    "times": [
+     "04:17"
+    ]
+   }
+  ],
+  "why": [
+   "the zones and entries are judged by eye from Quantsapp's buyer- and seller-initiated order flow, which the desk does not record"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the zones and entries are judged by eye from Quantsapp's buyer- and seller-initiated order flow, which the desk does not record",
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "QS-02",
+  "version": "v1",
+  "name": "Bank Nifty momentum from order-book market-order flow (Quantsapp)",
+  "topic": "india_index",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Quantsapp",
+  "video": "vZv1wKxXR2M",
+  "title": "Big Move in 1 hour. Nifty option buying strategy.",
+  "uploaded": "2024-07-29",
+  "minutes": 18,
+  "summary": "Quantsapp (in Marathi) on spotting Bank Nifty momentum with order-book data: buyer- and seller-initiated market-order quantities, refreshed every second, plotted on the chart to see which side is aggressive.",
+  "instruments": [
+   "BANKNIFTY options"
+  ],
+  "timeframes": [
+   "1m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "Bank Nifty momentum.",
+    "times": [
+     "00:03"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Order-book data, real time.",
+    "times": [
+     "01:42"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Buyer-initiated quantity: buyers lifting the ask.",
+    "times": [
+     "04:28"
+    ]
+   }
+  ],
+  "why": [
+   "it reads buyer- and seller-initiated market-order quantities from Quantsapp's order-book feed second by second",
+   "the desk records one quote a minute and no trade-side data"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "it reads buyer- and seller-initiated market-order quantities second by second from Quantsapp's order-book feed; the desk records one best bid and ask a minute and no trade-side data",
+  "dataBlocked": true,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "SG-01",
+  "version": "v1",
+  "name": "Siddharth Bhanushali's SMA 22 / 33 scalp (Strategic Stocks' test)",
+  "topic": "india_index",
+  "status": "duplicate",
+  "readiness": "ready",
+  "cardStatus": "ready",
+  "channel": "Strategic Stocks",
+  "video": "_8YpL9Ahxfw",
+  "title": "Siddharth Bhanushali's Option Buying Scalping Strategy on MA- 22, 33 |  Backtest on Nifty",
+  "uploaded": "2023-08-11",
+  "minutes": 10,
+  "summary": "Strategic Stocks tests Siddharth Bhanushali's SMA 22 / 33 option-buying scalp: both averages rising for buys, a candle touching (or close to) the averages, entry on the break of its high, stop just under it, 1:2.",
+  "instruments": [
+   "NIFTY options",
+   "NIFTY index"
+  ],
+  "timeframes": [
+   "3m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "Two simple moving averages, 22 and 33.",
+    "times": [
+     "01:28"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "For buys the averages must be rising.",
+    "times": [
+     "01:28"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop just under the candle, target 1:2.",
+    "times": [
+     "02:12"
+    ]
+   }
+  ],
+  "why": [
+   "the same rules as TZ-01's video"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": "TZ-01",
+  "duplicateWhy": "the same SMA 22 / 33 strategy (Siddharth Bhanushali's), coded from Trader Insights' test as TZ-01",
+  "checks": null
+ },
+ {
+  "id": "SG-02",
+  "version": "v1",
+  "name": "Abhishek Kar's pivot point + 20 MA (Strategic Stocks' test)",
+  "topic": "india_index",
+  "status": "duplicate",
+  "readiness": "ready",
+  "cardStatus": "ready",
+  "channel": "Strategic Stocks",
+  "video": "VEXeIa0bJnY",
+  "title": "Nifty Option Buying Strategy by Abhishek Kar | Backtest + Free Kit | @StrategicStocks",
+  "uploaded": "2023-04-29",
+  "minutes": 10,
+  "summary": "Strategic Stocks tests Abhishek Kar's NIFTY option-buying strategy: a 20-period moving average and the standard pivot point only; above the pivot, a candle crossing the moving average buys (green candles), with a backtest and a free kit.",
+  "instruments": [
+   "NIFTY options",
+   "NIFTY index"
+  ],
+  "timeframes": [
+   "15m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "A 20-period moving average.",
+    "times": [
+     "02:03"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Above the pivot, crossing the moving average, buy.",
+    "times": [
+     "02:48"
+    ]
+   }
+  ],
+  "why": [
+   "the same rules as TZ-02's video"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": "TZ-02",
+  "duplicateWhy": "Abhishek Kar's pivot point + 20 MA strategy, coded from Trader Insights' test as TZ-02",
+  "checks": null
+ },
+ {
+  "id": "SJ-02",
+  "version": "v1",
+  "name": "VWAP third-deviation fade after 10:30 (NIFTY futures, 5 minutes): stop beyond the band, half at the VWAP, the rest at the opposite first band",
+  "topic": "india_index",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Trading With Sidhant",
+  "video": "WM7QEwFMNJs",
+  "title": "Most Powerful VWAP Strategy for Nifty Intraday | 70% Success Rate | Step-by-Step Tutorial",
+  "uploaded": "2025-09-02",
+  "minutes": 15,
+  "summary": "Trading with Sidhant's VWAP setup for sideways NIFTY days ('seven days in ten'): on the 5-minute NIFTY futures chart, a session VWAP with bands at 1, 2 and 3 standard deviations; after 10:30, when price reaches the third band take the opposite side on an opposite candle; stop beyond the third band; book half at the VWAP and the rest at the first band on the other side.",
+  "instruments": [
+   "NIFTY futures",
+   "NIFTY options"
+  ],
+  "timeframes": [
+   "5m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "The NIFTY futures chart (the VWAP needs volume).",
+    "times": [
+     "02:08"
+    ]
+   },
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "5-minute candles.",
+    "times": [
+     "06:19"
+    ]
+   },
+   {
+    "kind": "session",
+    "label": "Session",
+    "tag": "E",
+    "text": "Trade after 10:30, once the initial balance is complete.",
+    "times": [
+     "09:03"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "The VWAP's upper and lower bands enabled (multipliers 1, 2, 3).",
+    "times": [
+     "06:19"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "At the third deviation, take the opposite side.",
+    "times": [
+     "09:03"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop beyond the third deviation.",
+    "times": [
+     "11:16"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "Half at the VWAP, half at the next deviation.",
+    "times": [
+     "10:31"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Only on sideways days.",
+    "times": [
+     "10:31"
+    ]
+   }
+  ],
+  "why": [
+   "the VWAP and its bands need NIFTY futures volume, which the desk does not record (the index has none)",
+   "the sideways-day forecast it promises is never given"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the VWAP and its deviation bands need NIFTY futures volume; the desk records the NIFTY index (no volume) and the NIFTY option chain, not futures",
+  "dataBlocked": true,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
   "id": "SM-01",
   "version": "v1",
   "name": "RSI 60/40 momentum entries on 15-minute Nifty futures (garbled interview)",
@@ -5085,6 +8175,273 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the auto-captions are too garbled to recover the entry, stop and exit; the RSI 60/40 break is already the library's TG-02",
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "SO-01",
+  "version": "v1",
+  "name": "Stockmock's range-breakout feature (demo)",
+  "topic": "india_index",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "concept_only",
+  "channel": "Stockmock (Backtesting & Strategy Builder)",
+  "video": "_Wo_uPgN6Gg",
+  "title": "Directional Feature: Range Breakout | Option Buying Strategies | StockMock",
+  "uploaded": "2021-09-22",
+  "minutes": 21,
+  "summary": "Stockmock demonstrates its range-breakout feature for option buying: define a range for the instrument (from 10:15 in the demo) and enter only when it breaks, shown on a long straddle.",
+  "instruments": [
+   "NIFTY options"
+  ],
+  "timeframes": [
+   "1m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "The feature: range breakout.",
+    "times": [
+     "00:04"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "The ATM is set from the spot price at 10:15.",
+    "times": [
+     "02:19"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Define a range first, then enter on its break.",
+    "times": [
+     "03:03"
+    ]
+   }
+  ],
+  "why": [
+   "a demo of a platform feature with example settings",
+   "no rule set is put forward as a strategy"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "a demo of a platform feature with example settings; no rule set is put forward as a strategy",
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "SU-01",
+  "version": "v1",
+  "name": "First 15-minute candle breakout, stop under the entry candle (50-60 points), 1:3, one trade a day",
+  "topic": "india_index",
+  "status": "duplicate",
+  "readiness": "ready",
+  "cardStatus": "ready",
+  "channel": "Students of Market",
+  "video": "Gi8wq2BDWYw",
+  "title": "Nifty Option Buying Strategy for Intraday Traders | F&O Series EP-12",
+  "uploaded": "2024-06-21",
+  "minutes": 22,
+  "summary": "Students of Market, F&O series episode 12: a NIFTY option-buying strategy on 15-minute candles - enter on the breakout or breakdown of the first 15-minute candle, stop under the entry candle (about 50-60 NIFTY points, kept logical), target 1:3, out at 3:15, one trade a day; a month's backtest on the chart.",
+  "instruments": [
+   "NIFTY options",
+   "NIFTY index"
+  ],
+  "timeframes": [
+   "15m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "15-minute candles.",
+    "times": [
+     "01:26"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Entry on the breakout or breakdown of the first 15-minute candle.",
+    "times": [
+     "01:26"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop about 50-60 NIFTY points.",
+    "times": [
+     "01:26"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "1:3, and one trade a day.",
+    "times": [
+     "02:12"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Out at 3:15.",
+    "times": [
+     "05:46"
+    ]
+   }
+  ],
+  "why": [
+   "its stop (under the entry candle, 50-60 points) and 1:3 target are its only differences from the coded breakouts"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": null,
+  "dataBlocked": false,
+  "duplicateOf": "BB-02",
+  "duplicateWhy": "the first 15-minute candle's breakout on NIFTY is already coded (BB-02, and SI-09 in the four-topics study)",
+  "checks": null
+ },
+ {
+  "id": "SU-02",
+  "version": "v1",
+  "name": "Range of six or more 5-minute candles, a close beyond it, stop beyond the breakout candle, at least 1:3, two trades a day",
+  "topic": "india_index",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Students of Market",
+  "video": "NGGHK8Zm2YM",
+  "title": "Nifty Range Breakout Strategy for Intraday Option Buying | F&O Series EP-13",
+  "uploaded": "2024-06-28",
+  "minutes": 16,
+  "summary": "Students of Market, F&O series episode 13: a NIFTY range-breakout strategy for option buying on 5-minute candles - find a range of at least six candles at any time of day, enter on a candle that closes beyond it, stop just beyond the breakout candle (at most 100 points, its middle if it is huge), at least 1:3, at most two trades a day; the first candle is ignored after a big gap.",
+  "instruments": [
+   "NIFTY options",
+   "NIFTY index"
+  ],
+  "timeframes": [
+   "5m"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "5-minute candles.",
+    "times": [
+     "01:29"
+    ]
+   },
+   {
+    "kind": "setup",
+    "label": "Setup",
+    "tag": "E",
+    "text": "A range of at least six candles.",
+    "times": [
+     "01:29"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Wait for the breakout candle to close.",
+    "times": [
+     "01:29"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop just beyond the breakout candle ...",
+    "times": [
+     "02:09"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "... and not more than 100 points.",
+    "times": [
+     "04:55"
+    ]
+   },
+   {
+    "kind": "target",
+    "label": "Target",
+    "tag": "E",
+    "text": "At least 1:3.",
+    "times": [
+     "02:09"
+    ]
+   },
+   {
+    "kind": "sizing",
+    "label": "Position sizing and risk",
+    "tag": "E",
+    "text": "At most two trades a day.",
+    "times": [
+     "02:09"
+    ]
+   },
+   {
+    "kind": "no_trade",
+    "label": "When not to trade",
+    "tag": "E",
+    "text": "The first candle is ignored after a big gap.",
+    "times": [
+     "02:54"
+    ]
+   }
+  ],
+  "why": [
+   "what counts as a range is shown only on the chart: six candles is the minimum, but no width or containment rule is given, and the 'big gap' is not sized"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "what counts as a range is shown only on the chart: six candles is the minimum, but no width or containment rule is given, and the 'big gap' is not sized",
   "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
@@ -8480,6 +11837,247 @@ export const SL: SlStrategy[] = [
   "claims": [],
   "examples": [],
   "blockedReason": "the stocks come from his scanner and the ranges are drawn by eye; the Bank Nifty tool needs option-writing data the desk does not have",
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "BJ-03",
+  "version": "v1",
+  "name": "Triple Supertrend (7, 2), (10, 3), (14, 4) with the RSI holding 40 / 60 on hourly stock charts, ATM monthly option, out on the fast Supertrend's flip",
+  "topic": "india_stocks",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Bharat Jhunjhunwala",
+  "video": "6fMkUMnPSo4",
+  "title": "Low-Risk OPTION BUYING Strategy: Price Action + Supertrend + RSI Precision",
+  "uploaded": "2025-12-10",
+  "minutes": 28,
+  "summary": "Bharat Jhunjhunwala's low-risk option buying with three Supertrends (7, 2), (10, 3) and (14, 4) and the RSI on one-hour stock charts: buy the ATM call when price is above all three with the RSI holding 40 (the ATM put below all three with the RSI capped at 60), exit when the fast Supertrend flips; monthly options with 30-40 days left.",
+  "instruments": [
+   "Stock options (e.g. Bharat Dynamics, IIFL Finance)"
+  ],
+  "timeframes": [
+   "1h"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "market",
+    "label": "Market and instruments",
+    "tag": "E",
+    "text": "Options with 30-40 days to expiry.",
+    "times": [
+     "19:32"
+    ]
+   },
+   {
+    "kind": "timeframe",
+    "label": "Timeframe",
+    "tag": "E",
+    "text": "Shown on one-hour charts.",
+    "times": [
+     "22:59"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "The fast Supertrend 7, 2 (the default 10, 3 is the middle one) ...",
+    "times": [
+     "09:08"
+    ]
+   },
+   {
+    "kind": "indicator",
+    "label": "Indicators and settings",
+    "tag": "E",
+    "text": "... and the slow 14, 4.",
+    "times": [
+     "09:08"
+    ]
+   },
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "Calls when price is above all three.",
+    "times": [
+     "12:34"
+    ]
+   },
+   {
+    "kind": "exit",
+    "label": "Exit",
+    "tag": "E",
+    "text": "Exit when the fast Supertrend flips.",
+    "times": [
+     "20:15"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Before the buy signal the RSI stays in the 50-40 zone and does not break 40.",
+    "times": [
+     "22:17"
+    ]
+   }
+  ],
+  "why": [
+   "monthly stock options held for days on hourly charts: the desk records no stock option premiums and its NSE stock books are intraday (flat each evening)",
+   "the stocks are picked by eye"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "monthly stock options held for days on hourly charts: the desk records no stock option premiums, and its NSE stock books are intraday (flat each evening)",
+  "dataBlocked": true,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "BJ-04",
+  "version": "v1",
+  "name": "Five filters for option buying: trend, Fibonacci, volume, price action, RSI holding 40",
+  "topic": "india_stocks",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Bharat Jhunjhunwala",
+  "video": "jISyeDlXs-c",
+  "title": "Option Buying Strategy: Stop Buying Options at the Wrong Time",
+  "uploaded": "2026-10-28",
+  "minutes": 38,
+  "summary": "Bharat Jhunjhunwala on timing option buys with five filters - trend, Fibonacci timing, volume, a price-action trigger and the RSI holding 40 - with a 3% maximum stop.",
+  "instruments": [
+   "Stock options",
+   "NIFTY options"
+  ],
+  "timeframes": [
+   "1h"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "entry",
+    "label": "Entry and confirmation",
+    "tag": "E",
+    "text": "The trigger is price action: candles, trend lines.",
+    "times": [
+     "09:12"
+    ]
+   },
+   {
+    "kind": "stop",
+    "label": "Stop-loss",
+    "tag": "E",
+    "text": "Stop at most 3%.",
+    "times": [
+     "13:23"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "Five filters refine the entry.",
+    "times": [
+     "07:03"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The RSI holding 40.",
+    "times": [
+     "26:40"
+    ]
+   }
+  ],
+  "why": [
+   "the trigger is read from candles and trend lines by eye",
+   "the Fibonacci timing and the volume test are not defined"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the trigger is read from candles and trend lines by eye; the Fibonacci timing and the volume test are not defined",
+  "dataBlocked": false,
+  "duplicateOf": null,
+  "duplicateWhy": null,
+  "checks": null
+ },
+ {
+  "id": "DF-05",
+  "version": "v1",
+  "name": "Turtle breakout on stocks gated by relative strength and market breadth (stock options)",
+  "topic": "india_stocks",
+  "status": "blocked",
+  "readiness": "assumptions",
+  "cardStatus": "not_testable",
+  "channel": "Definedge",
+  "video": "VjYiGyK6BEA",
+  "title": "Learn Momentum Option Buying Strategy with Turtle Breakout",
+  "uploaded": "2026-06-01",
+  "minutes": 21,
+  "summary": "Definedge on momentum option buying with a turtle breakout: first the relative-strength chart must show equities outperforming, then market breadth must not be in an extreme zone, then stock options are bought on turtle breakouts.",
+  "instruments": [
+   "Stock options"
+  ],
+  "timeframes": [
+   "1D"
+  ],
+  "markets": [],
+  "deskMarkets": [],
+  "overnight": false,
+  "proxy": null,
+  "paperStart": null,
+  "rules": [
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The relative-strength chart must show equities outperforming.",
+    "times": [
+     "03:43"
+    ]
+   },
+   {
+    "kind": "filter",
+    "label": "Filters",
+    "tag": "E",
+    "text": "The second thing: breadth.",
+    "times": [
+     "03:43"
+    ]
+   }
+  ],
+  "why": [
+   "the breadth zone and the relative-strength reading are judged by eye and the stock list is not given",
+   "the desk records no stock option premiums"
+  ],
+  "vague": [],
+  "unclear": [],
+  "claims": [],
+  "examples": [],
+  "blockedReason": "the breadth zone and the relative-strength reading are judged by eye and the stock list is not given; the desk records no stock option premiums",
   "dataBlocked": false,
   "duplicateOf": null,
   "duplicateWhy": null,
@@ -31643,6 +35241,18 @@ export const SL_CHANNELS: SlChannel[] = [
     "why": "RSI rules for an intraday trading system",
     "analysed": true,
     "id": "DF-02"
+   },
+   {
+    "video": "uBV_voVMJSM",
+    "why": "list E: a simple Nifty options strategy",
+    "analysed": true,
+    "id": "DF-04"
+   },
+   {
+    "video": "VjYiGyK6BEA",
+    "why": "list E: momentum option buying with a turtle breakout",
+    "analysed": true,
+    "id": "DF-05"
    }
   ],
   "skip": null
@@ -31715,7 +35325,7 @@ export const SL_CHANNELS: SlChannel[] = [
   "uploads": 113,
   "strategyTitles": 39,
   "picked": [],
-  "skip": "swing moving-average courses; covered by the top-20 study"
+  "skip": "swing moving-average courses (covered by the top-20 study); his SMA 22 / 33 scalp is coded as TZ-01 from Trader Insights' test"
  },
  {
   "key": "malkansview",
@@ -31761,6 +35371,12 @@ export const SL_CHANNELS: SlChannel[] = [
     "why": "Larry Williams intraday volatility breakout",
     "analysed": true,
     "id": "CK-02"
+   },
+   {
+    "video": "hb-k2IRyipI",
+    "why": "list E: a Nifty option scalping strategy",
+    "analysed": true,
+    "id": "CJ-01"
    }
   ],
   "skip": null
@@ -31774,7 +35390,7 @@ export const SL_CHANNELS: SlChannel[] = [
   "uploads": 161,
   "strategyTitles": 6,
   "picked": [],
-  "skip": "options education (premiums, Greeks): no rule the desk can trade without option prices"
+  "skip": "options education (premiums, Greeks, buying against selling): no complete rule set"
  },
  {
   "key": "zerodhavarsity",
@@ -31820,6 +35436,12 @@ export const SL_CHANNELS: SlChannel[] = [
     "why": "intraday reversal with Bollinger Bands and RSI (new 2026 setup)",
     "analysed": true,
     "id": "DH-11"
+   },
+   {
+    "video": "bfXfZp95x6k",
+    "why": "list E: Nifty option buying after 3 PM, named by the report",
+    "analysed": true,
+    "id": "DH-12"
    }
   ],
   "skip": null
@@ -32720,6 +36342,18 @@ export const SL_CHANNELS: SlChannel[] = [
     "why": "why he scalps only the 1-minute Nifty / Bank Nifty chart",
     "analysed": true,
     "id": "PC-04"
+   },
+   {
+    "video": "FGucDF7lI7g",
+    "why": "list E: his favourite option-buying setup, named by the report",
+    "analysed": true,
+    "id": "PC-05"
+   },
+   {
+    "video": "rQA7W0t53-w",
+    "why": "list E: a reversal strategy for option buyers",
+    "analysed": true,
+    "id": "PC-06"
    }
   ],
   "skip": null
@@ -33830,7 +37464,7 @@ export const SL_CHANNELS: SlChannel[] = [
  {
   "key": "upstox",
   "name": "Upstox",
-  "star": false,
+  "star": true,
   "group": "broker",
   "earlier": "",
   "uploads": 1850,
@@ -33847,6 +37481,12 @@ export const SL_CHANNELS: SlChannel[] = [
     "why": "mastering the opening range breakout",
     "analysed": true,
     "id": "AG-02"
+   },
+   {
+    "video": "I16se8r7J3E",
+    "why": "list E: how to build an option-buying strategy on AlgoVerse (Part 5), named by the owner's report",
+    "analysed": true,
+    "id": "UX-01"
    }
   ],
   "skip": null
@@ -33966,6 +37606,18 @@ export const SL_CHANNELS: SlChannel[] = [
     "why": "intraday Bollinger Band breakout, multi-timeframe",
     "analysed": true,
     "id": "BJ-02"
+   },
+   {
+    "video": "6fMkUMnPSo4",
+    "why": "list E: low-risk option buying with price action, Supertrend and RSI, named by the report",
+    "analysed": true,
+    "id": "BJ-03"
+   },
+   {
+    "video": "jISyeDlXs-c",
+    "why": "list E: an option-buying timing strategy",
+    "analysed": true,
+    "id": "BJ-04"
    }
   ],
   "skip": null
@@ -35600,6 +39252,606 @@ export const SL_CHANNELS: SlChannel[] = [
     "why": "list 21-40: momentum tactic for price action",
     "analysed": true,
     "id": "MI-02"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "inthemoney",
+  "name": "In The Money by Zerodha",
+  "star": true,
+  "group": "in",
+  "earlier": "",
+  "uploads": 195,
+  "strategyTitles": 5,
+  "picked": [
+   {
+    "video": "_ePkfG6aXqU",
+    "why": "list E: opening range breakout explained (Part 1)",
+    "analysed": true,
+    "id": "IM-01"
+   },
+   {
+    "video": "erjnU13EYjk",
+    "why": "list E: ORB with Nifty options (Part 2), the report's first-ranked source",
+    "analysed": true,
+    "id": "IM-02"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "algotest",
+  "name": "AlgoTest",
+  "star": true,
+  "group": "in",
+  "earlier": "",
+  "uploads": 434,
+  "strategyTitles": 136,
+  "picked": [
+   {
+    "video": "gk7H8xfIydo",
+    "why": "list E: automating the 5 EMA strategy, named by the report",
+    "analysed": true,
+    "id": "AJ-01"
+   },
+   {
+    "video": "DKrDlOcGUuk",
+    "why": "list E: an automated VWAP option-buying strategy",
+    "analysed": true,
+    "id": "AJ-02"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "aatradingblog",
+  "name": "A&A Trading Blog",
+  "star": true,
+  "group": "in",
+  "earlier": "",
+  "uploads": 594,
+  "strategyTitles": 47,
+  "picked": [
+   {
+    "video": "uvut8SRcFGY",
+    "why": "list E: the 9:30 AM Nifty option-buying strategy, named by the report",
+    "analysed": true,
+    "id": "AA-01"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "quantsapp",
+  "name": "Quantsapp",
+  "star": true,
+  "group": "in",
+  "earlier": "",
+  "uploads": 3314,
+  "strategyTitles": 853,
+  "picked": [
+   {
+    "video": "vZv1wKxXR2M",
+    "why": "list E: the one-hour Nifty range breakout, named by the report",
+    "analysed": true,
+    "id": "QS-02"
+   },
+   {
+    "video": "ALKPdRapRyY",
+    "why": "list E: a Nifty OTM option-buying strategy",
+    "analysed": true,
+    "id": "QS-01"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "dhantamil",
+  "name": "Dhan Tamil",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 303,
+  "strategyTitles": 128,
+  "picked": [
+   {
+    "video": "QVpzhXLIcFc",
+    "why": "list E: ORB for Nifty option buyers, named by the report",
+    "analysed": false,
+    "id": null
+   },
+   {
+    "video": "aEmkIRKEMCM",
+    "why": "list E: a 3-minute Nifty pivot option-buying strategy",
+    "analysed": false,
+    "id": null
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "quantman",
+  "name": "QuantMan",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 119,
+  "strategyTitles": 17,
+  "picked": [
+   {
+    "video": "j744ULxpZu0",
+    "why": "list E: the options-basket intraday buying strategy, named by the report",
+    "analysed": true,
+    "id": "QM-01"
+   },
+   {
+    "video": "66KNwZ_EzOo",
+    "why": "list E: a multi-indicator options-basket buying strategy",
+    "analysed": true,
+    "id": "QM-02"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "stockmock",
+  "name": "Stockmock",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 2,
+  "strategyTitles": 0,
+  "picked": [
+   {
+    "video": "_Wo_uPgN6Gg",
+    "why": "list E: range breakout option-buying strategies, named by the report",
+    "analysed": true,
+    "id": "SO-01"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "tradingwithsidhant",
+  "name": "Trading With Sidhant",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 145,
+  "strategyTitles": 32,
+  "picked": [
+   {
+    "video": "3uBZItiNeo4",
+    "why": "list E: a simple Nifty options system",
+    "analysed": true,
+    "id": "SJ-01"
+   },
+   {
+    "video": "WM7QEwFMNJs",
+    "why": "list E: a VWAP strategy for Nifty intraday",
+    "analysed": true,
+    "id": "SJ-02"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "studentsofmarket",
+  "name": "Students of Market",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 168,
+  "strategyTitles": 42,
+  "picked": [
+   {
+    "video": "Gi8wq2BDWYw",
+    "why": "list E: Nifty option buying for intraday traders (F&O EP-12), named by the report",
+    "analysed": true,
+    "id": "SU-01"
+   },
+   {
+    "video": "NGGHK8Zm2YM",
+    "why": "list E: Nifty range breakout for option buying (F&O EP-13)",
+    "analysed": true,
+    "id": "SU-02"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "optionsscalpingsiva",
+  "name": "Options Scalping - Siva",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 264,
+  "strategyTitles": 26,
+  "picked": [
+   {
+    "video": "4HW5qr-PUos",
+    "why": "list E: the trending-OI option-buying guide, named by the report",
+    "analysed": true,
+    "id": "OS-01"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "investarindia",
+  "name": "InvestarIndia",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 0,
+  "strategyTitles": 0,
+  "picked": [],
+  "skip": "the channel could not be found on YouTube under this name"
+ },
+ {
+  "key": "strategicstocks",
+  "name": "Strategic Stocks",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 247,
+  "strategyTitles": 126,
+  "picked": [
+   {
+    "video": "_8YpL9Ahxfw",
+    "why": "list E: Siddharth Bhanushali's 22/33 MA scalp backtested on Nifty",
+    "analysed": true,
+    "id": "SG-01"
+   },
+   {
+    "video": "VEXeIa0bJnY",
+    "why": "list E: Abhishek Kar's Nifty option-buying strategy backtested",
+    "analysed": true,
+    "id": "SG-02"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "traderinsights",
+  "name": "Trader Insights",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 108,
+  "strategyTitles": 76,
+  "picked": [
+   {
+    "video": "1kx9BqLAMFs",
+    "why": "list E: the 22 & 33 SMA scalp tested on Nifty, named by the report",
+    "analysed": true,
+    "id": "TZ-01"
+   },
+   {
+    "video": "uFrgt50Y6ZE",
+    "why": "list E: pivot points + 20 MA (Abhishek Kar) tested on Nifty",
+    "analysed": true,
+    "id": "TZ-02"
+   },
+   {
+    "video": "nKusZidwvjE",
+    "why": "list E: Supertrend + RSI (CA Akshatha Udupa) tested on Nifty",
+    "analysed": false,
+    "id": null
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "artofoptionlearning",
+  "name": "Art of Option Learning - Ghanshyam",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 228,
+  "strategyTitles": 67,
+  "picked": [
+   {
+    "video": "ibdPUxvvDJ4",
+    "why": "list E: the 44FR strategy for Nifty and Nifty options",
+    "analysed": true,
+    "id": "GT-01"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "sakethramakrishna",
+  "name": "Saketh Ramakrishna",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 155,
+  "strategyTitles": 18,
+  "picked": [
+   {
+    "video": "TZCM6qFV3S0",
+    "why": "list E: a fully automated Nifty option-buying strategy, named by the report",
+    "analysed": true,
+    "id": "RK-01"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "niftylearningbrijesh",
+  "name": "Nifty Learning with Brijesh",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 39,
+  "strategyTitles": 25,
+  "picked": [
+   {
+    "video": "GdZjghXqtM0",
+    "why": "list E: an algo-based option-buying strategy with backtest data",
+    "analysed": true,
+    "id": "NB-01"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "kevalkhimsariya",
+  "name": "CA Keval Khimsariya",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 151,
+  "strategyTitles": 34,
+  "picked": [
+   {
+    "video": "CjNfVlmLbh4",
+    "why": "list E: his best option-buying strategy on Quantman, named by the report",
+    "analysed": false,
+    "id": null
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "tradetron",
+  "name": "Tradetron",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 477,
+  "strategyTitles": 93,
+  "picked": [
+   {
+    "video": "G9BmdjqIu-8",
+    "why": "list E: the 9:20 option-buying strategy (Ghanshyam Tech) built on Tradetron",
+    "analysed": true,
+    "id": "TE-01"
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "nitinmurarka",
+  "name": "Nitin Murarka",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 108,
+  "strategyTitles": 38,
+  "picked": [
+   {
+    "video": "2-PYEXJIDuA",
+    "why": "list E: his formula for buying index options",
+    "analysed": false,
+    "id": null
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "moneytalkspayal",
+  "name": "Money Talks With Payal",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 2060,
+  "strategyTitles": 42,
+  "picked": [
+   {
+    "video": "LX-aJowHXnM",
+    "why": "list E: an option-buying strategy with buy and sell signals",
+    "analysed": false,
+    "id": null
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "tradingwithvivek",
+  "name": "Trading With Vivek",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 891,
+  "strategyTitles": 21,
+  "picked": [],
+  "skip": "no NIFTY option-buying strategy among its uploads' titles"
+ },
+ {
+  "key": "daytradertelugu",
+  "name": "Day Trader Telugu",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 2364,
+  "strategyTitles": 17,
+  "picked": [],
+  "skip": "Telugu personal finance and market news: no strategy with stated rules"
+ },
+ {
+  "key": "moneypurse",
+  "name": "Money Purse",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 2237,
+  "strategyTitles": 3,
+  "picked": [],
+  "skip": "personal finance and investing: no trading strategy"
+ },
+ {
+  "key": "tradingkannada",
+  "name": "Trading Kannada",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 306,
+  "strategyTitles": 24,
+  "picked": [
+   {
+    "video": "YMD22y1NzaM",
+    "why": "list E: a morning scalping option-buying strategy",
+    "analysed": false,
+    "id": null
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "buycryrepeat",
+  "name": "BuyCryRepeat Kannada",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 31,
+  "strategyTitles": 18,
+  "picked": [],
+  "skip": "a Kannada stock-market basics course: no strategy with stated rules"
+ },
+ {
+  "key": "shariquesamsudheen",
+  "name": "Sharique Samsudheen",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 412,
+  "strategyTitles": 46,
+  "picked": [],
+  "skip": "Malayalam market education and interviews: no strategy with stated rules"
+ },
+ {
+  "key": "arunishoptionbuyer",
+  "name": "Arunish Intraday Option Buyer",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 43,
+  "strategyTitles": 12,
+  "picked": [
+   {
+    "video": "wnyfy0vOSSU",
+    "why": "list E: a trend-reversal price-action setup for Nifty option buying",
+    "analysed": false,
+    "id": null
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "uniquetelugutrader",
+  "name": "Unique Telugu Trader",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 353,
+  "strategyTitles": 51,
+  "picked": [
+   {
+    "video": "FKsyxjJRaUE",
+    "why": "list E: an option-buying strategy for beginners",
+    "analysed": false,
+    "id": null
+   },
+   {
+    "video": "EIWrOfr8m-w",
+    "why": "list E: an option-buying direction strategy with a 1:10 target",
+    "analysed": false,
+    "id": null
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "dpthetrader",
+  "name": "DP The Trader",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 136,
+  "strategyTitles": 44,
+  "picked": [
+   {
+    "video": "pjiYezL6NQU",
+    "why": "list E: the King Bar entry model for Nifty option buying",
+    "analysed": false,
+    "id": null
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "zebutelugu",
+  "name": "Zebu Telugu",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 23,
+  "strategyTitles": 6,
+  "picked": [
+   {
+    "video": "e5g8wlFKa4w",
+    "why": "list E: the advance/decline, India VIX and CPR option-buying guide, named by the report",
+    "analysed": false,
+    "id": null
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "derivativetradersameer",
+  "name": "Derivative Trader Sameer",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 629,
+  "strategyTitles": 140,
+  "picked": [
+   {
+    "video": "t49aGkRnAFs",
+    "why": "list E: his Nifty option-buying lesson, named by the report",
+    "analysed": false,
+    "id": null
+   }
+  ],
+  "skip": null
+ },
+ {
+  "key": "abhishekxtrades",
+  "name": "AbhishekXTrades",
+  "star": false,
+  "group": "in",
+  "earlier": "",
+  "uploads": 406,
+  "strategyTitles": 158,
+  "picked": [
+   {
+    "video": "slAtZyGfAlI",
+    "why": "list E: the 3-step zero-to-hero Nifty option-buying strategy, named by the report",
+    "analysed": true,
+    "id": "AX-07"
    }
   ],
   "skip": null

@@ -1,0 +1,14 @@
+video: GdZjghXqtM0
+topic: india_index
+summary: Nifty Learning (Brijesh) on a free algo for option buying: on NIFTY 15-minute candles buy a call when the RSI (14) closes above 50 and price is above the VWAP (puts the other way); 25% stop and 50% target on the premium; out by 3:00.
+instruments: NIFTY options
+timeframes: 15m
+style: options_buying
+= NB-01 | RSI (14) through 50 with price beyond the VWAP (NIFTY, 15 minutes); 25% stop, 50% target on the premium; out by 3:00
+R timeframe E 07:15 | 15-minute candles. | "taaim phrem 15 minat kaa hai"
+R indicator E 10:42 | RSI 14 with the middle level 50. | "aaraesaaaee kaa dekhie 14 peeriyad pe mainne midil leval 50 rakhaa hai"
+R entry E 08:41 | The RSI closing above 50 on the 15-minute chart ... | "jab aaraesaaaee ne yahaan 50 ke oopar kaindal kloj kee 15 minat kee chaart pe"
+R entry E 08:41 | ... and price above the VWAP triggers the call. | "aur ye kaindal kloj huee usake baad hee meraa kol opshan kaa yahaan pe taaraget trigar hogaa aur praais veevap ke oopar gayaa"
+R stop E 09:22 | Stop 25% under the premium, target 50% above. | "jo bhee opshan ham jis bhee praais pe baay karenge usase 25% neeche matalab hamaaraa preemiyam phor egjaanpal ₹100 kaa to vahaan se 25% neeche 75 pe hamaaraa stop los ho jaaegaa aur taaraget hamaaraa 150 kaa ho jaaegaa"
+R exit E 14:19 | Out by 3:00. | "adaravaaij 3:00 baje tak ham yahaan pe olaredee egjit kar jaaenge"
+T not_testable | the VWAP needs NIFTY futures volume, which the desk does not record (the index has none); which option is bought is not said

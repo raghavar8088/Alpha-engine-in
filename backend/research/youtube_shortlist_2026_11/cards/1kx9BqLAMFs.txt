@@ -1,0 +1,19 @@
+video: 1kx9BqLAMFs
+topic: india_index
+summary: Trader Insights tests Siddharth Bhanushali's '22 & 33 SMA scalping strategy' on NIFTY 3-minute candles: buy when both SMAs rise and a green candle touches the band between them (the trigger candle), with a stop order at its high, the stop at its low and a 2R target; sell is the mirror. His manual test of 100 trades: +26.47% in 1.5 months, -1.25% drawdown.
+instruments: NIFTY options*; NIFTY index
+timeframes: 3m
+style: scalping
+= TZ-01 | SMA 22 / 33 scalp: both rising (falling), a green (red) candle touching the band, a stop order beyond it, stop at its other end, 2R (NIFTY, 3 minutes)
+R market E 02:10 | NIFTY. | "Siddhart Bhanushali explained this strategy for Nifty, and we will also use it for Nifty"
+R timeframe E 02:10 | 3-minute candles. | "we will change the timeframe to 3 minutes"
+R indicator E 02:53 | Two simple moving averages, 22 and 33. | "we will set the period to 22"
+R setup E 02:53 | Buy: both SMAs rising, price retests and forms a green candle at the band. | "Both 22 & 33 SMAs are rising. Price should retest and form a green candle at this band"
+R setup E 03:45 | The green candle touches the band. | "The green candle should touch this band"
+R entry E 03:45 | Entry at the trigger candle's high. | "Entry: High of the trigger candle"
+R stop E 03:45 | Stop at the trigger candle's low. | "Stoploss: Low of the trigger candle"
+R target E 03:45 | Target twice the risk. | "Target: 2 times the risk"
+R entry E 04:29 | Sell: both SMAs falling and a red candle at the band, entry at its low, stop at its high. | "Both 22 & 33 SMAs are falling. Price should retest and form a red candle at this band"
+R entry A - | Desk version: the NIFTY index (Angel One minutes); the stop order sits one tick beyond the candle and lives for three more 3-minute candles (how long it waits is not said); one position at a time; no entries from 15:00; out by 15:14. | ""
+T with_assumptions | how long the entry order waits is not said (A); the book trades the index as the option's proxy (A)
+C return_pct | 06:53 | +26.47% in 1.5 months, -1.25% drawdown | 100 trades, NIFTY 3m (Trader Insights' manual test) | "with a 26.47% gain in 1.512 months and a drawdown of -1.25%"

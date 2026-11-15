@@ -1,0 +1,20 @@
+video: G9BmdjqIu-8
+topic: india_index
+summary: Ghanshyam Tech's 9:20 BANKNIFTY strategy rebuilt on Tradetron. When the open gaps more than 100 points from yesterday's close, fade it through the first 5-minute candle (9:15-9:20): after a gap up a break of its low shorts (a 100-point in-the-money put), after a gap down a break of its high buys. Target 200 points; stop 100 points when that candle is over 150 points, else 70; also out when an opposite candle runs 50 points from its extreme; one trade a day, all closed at 3:15.
+instruments: BANKNIFTY options*; BANKNIFTY index
+timeframes: 5m
+style: options_buying
+= TE-01 | 9:20 gap fade: a gap over 100 points faded through the first 5-minute candle's range, 200-point target, 70 / 100-point stop by the candle's size, out on an opposite candle 50 points off its extreme (BANKNIFTY)
+R market E 10:38 | Bank Nifty, Ghanshyam Tech's 9:20 strategy built on Tradetron. | "this is the strategy that I have built based on the gansham tech 920 Bank Nifty uh strategy"
+R setup E 01:27 | The 9:20 candle is the first 5-minute candle; its high and low are marked. | "if our 920 candle which is this first five minute candle"
+R setup E 04:14 | A gap of 100 points between yesterday's close and today's open. | "I'm checking if my yesterday's close value is it more than the current open price plus 100 points"
+R entry E 08:24 | After a gap up, a break of the low shorts (a gap down's break of the high buys). | "I'm basically looking for a gap up if there is a gap up and after that if the low is broken I'm taking a short trade"
+R target E 02:07 | Target: a 200-point move. | "our Target will basically be a 200 Point movement"
+R stop E 07:00 | Stop 100 points when the 9:20 candle is over 150 points ... | "if my uh difference is more than 150 points in that case I am keeping a stop loss of a hundred points"
+R stop E 07:40 | ... 70 points when it is under 150. | "a less than 150 points in that case I am keeping a stop loss of um around 70 points"
+R exit E 07:40 | Also out when an opposite candle falls 50 points from its high (a long's red candle). | "I have a red candle and if the price Falls 50 points below the high of the current candle I'll basically be taking an exit"
+R exit E 09:52 | Everything squared off at 3:15. | "by Universal exit condition is a simple square of at 315"
+R market E 08:24 | The option: 100 points in the money. | "the put option will basically be 100 points in the money"
+R sizing E 05:37 | One trade a day. | "position detail will make sure that I am taking only one trade a day"
+R entry A - | Desk version: the BANKNIFTY index (Angel One minutes), a labelled proxy for the in-the-money option; the stop order sits 0.05 beyond the candle and lives all day; the 50-point exit is judged at the candle's close (the platform watches it live). | ""
+T with_assumptions | the 50-point exit is read at candle closes (A); the book trades the index as the option's proxy (A)

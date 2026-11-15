@@ -4,7 +4,7 @@
   "name": "Elearnmarkets / Face2Face",
   "query": "Elearnmarkets",
   "star": true,
-  "lists": "A1 C3",
+  "lists": "A1 C3 E23",
   "group": "in",
   "earlier": "top20",
   "candidates": [
@@ -55,7 +55,7 @@
   "name": "Trade With Trend - Raunak A",
   "query": "Trade With Trend Raunak",
   "star": true,
-  "lists": "A2 C1",
+  "lists": "A2 C1 E20",
   "group": "in",
   "earlier": "",
   "candidates": [
@@ -105,7 +105,7 @@
   "name": "Definedge",
   "query": "Definedge",
   "star": true,
-  "lists": "A3 C2",
+  "lists": "A3 C2 E6",
   "group": "in",
   "earlier": "",
   "candidates": [
@@ -155,7 +155,7 @@
   "name": "POWER OF STOCKS - Subasish Pani",
   "query": "Power of Stocks Subasish Pani",
   "star": true,
-  "lists": "A4 C22",
+  "lists": "A4 C22 E8",
   "group": "in",
   "earlier": "top20",
   "candidates": [
@@ -255,7 +255,7 @@
   "name": "Booming Bulls - Anish Singh Thakur",
   "query": "Booming Bulls",
   "star": false,
-  "lists": "A6 C21",
+  "lists": "A6 C21 E16",
   "group": "in",
   "earlier": "booming_bulls",
   "candidates": [
@@ -305,7 +305,7 @@
   "name": "Siddharth Bhanushali",
   "query": "Siddharth Bhanushali",
   "star": false,
-  "lists": "A7 C10",
+  "lists": "A7 C10 E26",
   "group": "in",
   "earlier": "top20",
   "candidates": [
@@ -405,7 +405,7 @@
   "name": "Trading Chanakya",
   "query": "Trading Chanakya",
   "star": false,
-  "lists": "A9 C9",
+  "lists": "A9 C9 E37",
   "group": "in",
   "earlier": "channels20-skipped",
   "candidates": [
@@ -455,7 +455,7 @@
   "name": "Be Sensibull",
   "query": "Sensibull",
   "star": true,
-  "lists": "A10",
+  "lists": "A10 E34",
   "group": "in",
   "earlier": "",
   "candidates": [
@@ -555,7 +555,7 @@
   "name": "Dhan",
   "query": "Dhan",
   "star": false,
-  "lists": "A12 C16",
+  "lists": "A12 C16 E13",
   "group": "broker",
   "earlier": "channels20",
   "candidates": [
@@ -2436,7 +2436,7 @@
   "name": "Pivot Call - Vikram Prabhu",
   "query": "Pivot Call Vikram Prabhu",
   "star": true,
-  "lists": "B51 C13",
+  "lists": "B51 C13 E15",
   "group": "in",
   "earlier": "",
   "candidates": [
@@ -2636,7 +2636,7 @@
   "name": "Upsurge Club",
   "query": "Upsurge Club",
   "star": false,
-  "lists": "B55 C4",
+  "lists": "B55 C4 E18",
   "group": "in",
   "earlier": "channels20",
   "candidates": [
@@ -2737,7 +2737,7 @@
   "name": "FYERS",
   "query": "Trading with FYERS",
   "star": false,
-  "lists": "B57 C17",
+  "lists": "B57 C17 E33",
   "group": "broker",
   "earlier": "",
   "candidates": [
@@ -4850,7 +4850,7 @@
   "name": "Nitin Bhatia",
   "query": "Nitin Bhatia",
   "star": false,
-  "lists": "C6",
+  "lists": "C6 E50",
   "group": "in",
   "earlier": "top20",
   "candidates": [
@@ -4994,7 +4994,7 @@
   "name": "Trading with Groww",
   "query": "Groww",
   "star": false,
-  "lists": "C18",
+  "lists": "C18 E22",
   "group": "broker",
   "earlier": "",
   "candidates": [
@@ -5043,8 +5043,8 @@
   "key": "upstox",
   "name": "Upstox",
   "query": "Upstox",
-  "star": false,
-  "lists": "C20",
+  "star": true,
+  "lists": "C20 E5",
   "group": "broker",
   "earlier": "",
   "candidates": [
@@ -5344,7 +5344,7 @@
   "name": "Bharat Jhunjhunwala",
   "query": "Bharat Jhunjhunwala",
   "star": false,
-  "lists": "C31",
+  "lists": "C31 E11",
   "group": "in",
   "earlier": "channels20-skipped",
   "candidates": [
@@ -5444,7 +5444,7 @@
   "name": "Pushkar Raj Thakur",
   "query": "Pushkar Raj Thakur",
   "star": false,
-  "lists": "C33",
+  "lists": "C33 E27",
   "group": "in",
   "earlier": "top20+channels11",
   "candidates": [
@@ -6116,7 +6116,7 @@
   "name": "Marketcalls - Rajandran",
   "query": "Marketcalls Rajandran",
   "star": false,
-  "lists": "C48",
+  "lists": "C48 E21",
   "group": "sys",
   "earlier": "",
   "candidates": [
@@ -9315,5 +9315,1543 @@
   "pick_followers": 998000,
   "sure": true,
   "override": "The Secret Mindset itself; the search matched Wealth Secret first"
+ },
+ "inthemoney": {
+  "key": "inthemoney",
+  "name": "In The Money by Zerodha",
+  "query": "In The Money by Zerodha",
+  "star": true,
+  "lists": "E1",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCraobmW5aEASA18BT9Iz-fA",
+    "title": "In The Money by Zerodha",
+    "followers": 95800,
+    "about": "In The Money is an education initiative by Zerodha, built to explore trading and active investing with nuance, data, and depth.",
+    "score": 1
+   },
+   {
+    "id": "UCUUlw3anBIkbW9W44Y-eURw",
+    "title": "Zero1 by Zerodha",
+    "followers": 860000,
+    "about": "Making money & wealth part of pop culture. LearnApp X Zerodha (Joint Venture). Zerodha is building Zero1 (financial media ...",
+    "score": 0.5
+   },
+   {
+    "id": "UCQXwgooTlP6tk2a-u6vgyUA",
+    "title": "Zerodha Varsity",
+    "followers": 793000,
+    "about": "Varsity is an extensive and in-depth collection of stock market and financial lessons created by Karthik Rangappa at Zerodha.",
+    "score": 0.5
+   },
+   {
+    "id": "UCorKX0CAjQh0SnflWPnnI9w",
+    "title": "Markets by Zerodha Hindi",
+    "followers": 214000,
+    "about": "Markets by Zerodha Hindi is an education initiative by Zerodha. Every day we put out a video on one big story from the markets or ...",
+    "score": 0.33
+   },
+   {
+    "id": "UCM7yoOhnMcfrEZ-5i9m-WFA",
+    "title": "Sonia Shenoy",
+    "followers": 253000,
+    "about": "Former CNBC TV18 executive editor and anchor , now Independent business journalist. Hi , I'm Sonia Shenoy and I'm here to talk ...",
+    "score": 0
+   }
+  ],
+  "pick": "UCraobmW5aEASA18BT9Iz-fA",
+  "pick_title": "In The Money by Zerodha",
+  "pick_followers": 95800,
+  "sure": true,
+  "override": "the In The Money channel itself; the search pick by followers was Zero1 by Zerodha"
+ },
+ "algotest": {
+  "key": "algotest",
+  "name": "AlgoTest",
+  "query": "AlgoTest",
+  "star": true,
+  "lists": "E2",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCXzgi7C8cmzy9ovY6JigpUg",
+    "title": "AlgoTest",
+    "followers": 33100,
+    "about": "AlgoTest is the most complete algo trading software in India for systematic and discretionary traders, built on one principle: test ...",
+    "score": 1
+   },
+   {
+    "id": "UCqs4u05TTfAWmATKdDKoVXw",
+    "title": "Algo Trading Tamil",
+    "followers": 6940,
+    "about": "Spreading Knowledge About Algo Trading in TAMIL NADU ! ⚠️Disclaimer : The information provided on this channel ( Algo ...",
+    "score": 0
+   },
+   {
+    "id": "UC8_Y7jDQcyvpF87mbjrl_qA",
+    "title": "Unfiltered Finance With Sahil",
+    "followers": 51900,
+    "about": "Algo Backtest + Automate ANY trading strategy — equity, index, F&O, commodity, crypto, forex, gold & prop firm. Real data, real ...",
+    "score": 0
+   },
+   {
+    "id": "UCZFu8fhycLdDG4qbt9CBLfQ",
+    "title": "Utkarsh Bhargava",
+    "followers": 84200,
+    "about": "Welcome! I'm Utkarsh Bhargava, a SEBI Registered Research Analyst (INH000021225), sharing practical insights on investing, ...",
+    "score": 0
+   },
+   {
+    "id": "UCI_J9XnGqVqbTjZXv3z-VRA",
+    "title": "The Algo Test",
+    "followers": 10,
+    "about": "स्वागत है दोस्तों! आप देख रहे हैं 'The Algo Test', जहाँ हम इंटरनेट पर वायरल ...",
+    "score": 0
+   }
+  ],
+  "pick": "UCXzgi7C8cmzy9ovY6JigpUg",
+  "pick_title": "AlgoTest",
+  "pick_followers": 33100,
+  "sure": true
+ },
+ "aatradingblog": {
+  "key": "aatradingblog",
+  "name": "A&A Trading Blog",
+  "query": "A&A Trading Blog",
+  "star": true,
+  "lists": "E3",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCqCuHlewag_cTtI5Q-YZMGw",
+    "title": "A&A Trading Blog",
+    "followers": 122000,
+    "about": "This Channel is an effort to share my point of view on Price Action trading. Please hit the Subscribe Button and Press the Bell Icon ...",
+    "score": 1
+   },
+   {
+    "id": "UCNqR2Aj6D6NgDw-8sYK8cIg",
+    "title": "voxhere",
+    "followers": 23,
+    "about": "everything from Start here.",
+    "score": 0
+   },
+   {
+    "id": "UCt3w0JBj1gniWfGqPO6soHw",
+    "title": "Simran Mahi",
+    "followers": 218000,
+    "about": "Bangalore Fashion • Beauty • Lifestyle Creating smiles & real moments Vlogs | Daily Life Managed by @socialbloom.in Business ...",
+    "score": 0
+   },
+   {
+    "id": "UCiVWjDbSQMGFddqRwToBRbg",
+    "title": "Design Anthology",
+    "followers": 549000,
+    "about": "Design Anthology was founded in 2014, dedicated to documenting Asia's burgeoning design sector. Today, more than a decade ...",
+    "score": 0
+   }
+  ],
+  "pick": "UCqCuHlewag_cTtI5Q-YZMGw",
+  "pick_title": "A&A Trading Blog",
+  "pick_followers": 122000,
+  "sure": true
+ },
+ "quantsapp": {
+  "key": "quantsapp",
+  "name": "Quantsapp",
+  "query": "Quantsapp",
+  "star": true,
+  "lists": "E4",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCKO21sN386P_8h713o6nkGA",
+    "title": "Quantsapp",
+    "followers": 199000,
+    "about": "Quantsapp offers largest range of Derivatives trading tools in India for Options Trading with 1.6 million users. It also offers a ...",
+    "score": 1
+   },
+   {
+    "id": "UCb8AtU3DapYniXqVRm7r3EQ",
+    "title": "Quantsapp",
+    "followers": null,
+    "about": "",
+    "score": 1
+   },
+   {
+    "id": "UCA9ZENMepsDQMn9UEtwFMkg",
+    "title": "Quantsapp",
+    "followers": null,
+    "about": "",
+    "score": 1
+   },
+   {
+    "id": "UC9F6EG760PrON9mYc0SadsQ",
+    "title": "Quantsapp Advisory Review",
+    "followers": 1,
+    "about": "",
+    "score": 0.33
+   },
+   {
+    "id": "UCAZPbKB4Rjelqv33ZpK3x1w",
+    "title": "Harshal Quantsapp",
+    "followers": null,
+    "about": "",
+    "score": 0.5
+   }
+  ],
+  "pick": "UCKO21sN386P_8h713o6nkGA",
+  "pick_title": "Quantsapp",
+  "pick_followers": 199000,
+  "sure": true
+ },
+ "dhantamil": {
+  "key": "dhantamil",
+  "name": "Dhan Tamil",
+  "query": "Dhan Tamil",
+  "star": false,
+  "lists": "E7",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCuF8XLks1Dp-dU9lRzMdloA",
+    "title": "Dhan Tamil",
+    "followers": 53800,
+    "about": "Building an incredible product experience for Indian Traders & Investors⚡ We believe that Stock Markets provide a unique ...",
+    "score": 1
+   },
+   {
+    "id": "UCJu-GDbzsofUW7-XYO_qnwA",
+    "title": "Avlo Dhan",
+    "followers": 51,
+    "about": "Vanakkam Thozhargaley... Avlo dhaan nu sonna odane oru feel varum la? Indha channel la irukum content-um apdi dhan.",
+    "score": 0.5
+   },
+   {
+    "id": "UCgcGPEzRNST7SCpxFEmAn6A",
+    "title": "GyanDhan",
+    "followers": 110000,
+    "about": "Were you searching for the right guidance on education loans? This is where we come to help. GyanDhan was founded by IIT ...",
+    "score": 0
+   },
+   {
+    "id": "UCrcRyyblnDiI4YBDcigQMEg",
+    "title": "Commodities by Dhan",
+    "followers": 29900,
+    "about": "Building smarter trading experiences for Commodity Traders ⚡ We believe commodities like Crude Oil, Natural Gas, Gold, and ...",
+    "score": 0.5
+   },
+   {
+    "id": "UCfFOKcd0w2AzA4AKqzL0MJw",
+    "title": "SINDHU DHAN",
+    "followers": 13000,
+    "about": "Hi, My name is Sindhu, i am obsessed with travelling, dancing and my best friend . You can find the cooking, dance, travel, funny ...",
+    "score": 0.5
+   }
+  ],
+  "pick": "UCuF8XLks1Dp-dU9lRzMdloA",
+  "pick_title": "Dhan Tamil",
+  "pick_followers": 53800,
+  "sure": true
+ },
+ "quantman": {
+  "key": "quantman",
+  "name": "QuantMan",
+  "query": "QuantMan algo trading",
+  "star": false,
+  "lists": "E9",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCKRBOznpSWiizXIotf9KAuw",
+    "title": "QuantMan",
+    "followers": 10300,
+    "about": "Millennials are crazier about options trading in which they believe automated trading will be easier and also a big reliever from ...",
+    "score": 1
+   },
+   {
+    "id": "UClAKrQpvzlZHiCYMkeG5unA",
+    "title": "Algo Traders Tamil",
+    "followers": 2350,
+    "about": "Welcome to Algo Traders Tamil! I'm Maheshwaran, B.E., MBA — Intraday & Positional F&O Trader with 10+ Years of ...",
+    "score": 0.33
+   },
+   {
+    "id": "UCYRB8kDbaW6a1Gufr_qwVTA",
+    "title": "The Simple Trade",
+    "followers": 92300,
+    "about": "Welcome to DD Nifty – your ultimate destination for everything related to share market and trading in India. Whether you're a ...",
+    "score": 0
+   },
+   {
+    "id": "UCdy3PQZGgSp5OkYV_fe6arA",
+    "title": "QUANTMAN ALGO ",
+    "followers": 116,
+    "about": "डिस्क्लेमर (Disclaimer): \"शेयर बाजार जोखिमों के अधीन है। मैं SEBI रजिस्टर्ड ...",
+    "score": 1
+   },
+   {
+    "id": "UC0REE4QKSJEOxKmq1BLgEdw",
+    "title": "Quantman algo",
+    "followers": 30,
+    "about": "Welcome Join my telegram group link https://t.me/algoking007 This group is designed to help you learn about trading ...",
+    "score": 1
+   }
+  ],
+  "pick": "UCKRBOznpSWiizXIotf9KAuw",
+  "pick_title": "QuantMan",
+  "pick_followers": 10300,
+  "sure": true
+ },
+ "stockmock": {
+  "key": "stockmock",
+  "name": "Stockmock",
+  "query": "Stockmock",
+  "star": false,
+  "lists": "E10",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCrVbka1uy5CpeKI295LPGVQ",
+    "title": "Stockmock (Backtesting & Strategy Builder)",
+    "followers": 47000,
+    "about": "Stockmock offers Backtesting, Options Simulator, Strategy Builder. We are India's First Intraday and First Time-Based Backtesting ...",
+    "score": 0.25
+   },
+   {
+    "id": "UCXUOVZ-TmSWY9-LFLHcXsDg",
+    "title": "StockMojo",
+    "followers": 2590,
+    "about": "Option Tools.",
+    "score": 0
+   },
+   {
+    "id": "UCB6bDAXN3OQIVOm5kIZavpQ",
+    "title": "StockMock",
+    "followers": null,
+    "about": "",
+    "score": 1
+   },
+   {
+    "id": "UCjqGrJ3ZqFeF83DYQMTtf-A",
+    "title": "NK Stock Talk",
+    "followers": 188000,
+    "about": "SEBI Registered Research Analyst – INH000023038 BSE ENLISTEMENT NO- 6724 Get ready to embark on an exciting journey ...",
+    "score": 0
+   },
+   {
+    "id": "UC1m5uBobhQfYn-m1WH3rfNQ",
+    "title": "Stockpractice",
+    "followers": null,
+    "about": "",
+    "score": 0
+   }
+  ],
+  "pick": "UCrVbka1uy5CpeKI295LPGVQ",
+  "pick_title": "Stockmock (Backtesting & Strategy Builder)",
+  "pick_followers": 47000,
+  "sure": true,
+  "override": "the Stockmock platform channel (found with the query \"Stockmock backtesting options\"); the first search hit was a two-clip channel"
+ },
+ "tradingwithsidhant": {
+  "key": "tradingwithsidhant",
+  "name": "Trading With Sidhant",
+  "query": "Trading With Sidhant",
+  "star": false,
+  "lists": "E12",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UC9VKHMUGg5gqSebXW1m5GBw",
+    "title": "Trading With Sidhant",
+    "followers": 528000,
+    "about": "Stock Market Trading | Crypto Trading | Price Action | Risk Management | Trading Psychology Trading With Sidhant is for traders ...",
+    "score": 1
+   },
+   {
+    "id": "UCqCk1_pDdWe50bPMyZpAPew",
+    "title": "Siddhant Ke Siddhant",
+    "followers": 89200,
+    "about": "Educating and Empowering Traders Options & Equity Trading in India 72% Accuracy with Fib Options Strategy Join ...",
+    "score": 0
+   },
+   {
+    "id": "UC9jKe9y515nquVoXstuvw8Q",
+    "title": "Trade With Siddhant ",
+    "followers": 37400,
+    "about": "",
+    "score": 0
+   },
+   {
+    "id": "UCtfejuPOXuSJfMb0a-vwECg",
+    "title": "Trading with Sidhant",
+    "followers": 18,
+    "about": "Stock Market | Trading I Psychology | Price Action | Make Money Online Trading With Sidhant is the ultimate destination for traders ...",
+    "score": 1
+   },
+   {
+    "id": "UCc4Q46E-SzpdOaH3mNOkX6Q",
+    "title": "trade with sidhant ",
+    "followers": null,
+    "about": "",
+    "score": 0.5
+   }
+  ],
+  "pick": "UC9VKHMUGg5gqSebXW1m5GBw",
+  "pick_title": "Trading With Sidhant",
+  "pick_followers": 528000,
+  "sure": true
+ },
+ "studentsofmarket": {
+  "key": "studentsofmarket",
+  "name": "Students of Market",
+  "query": "Students of Market",
+  "star": false,
+  "lists": "E14",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCMmSkpXKZpLvHe_byqs8Y5A",
+    "title": "Students of Market",
+    "followers": 2680,
+    "about": "Welcome to Students of Market, your ultimate destination for all things related to stock market investing and trading. Owned and ...",
+    "score": 1
+   },
+   {
+    "id": "UCEAAzv2OBqxsSczKJ2QZyGQ",
+    "title": "Pushkar Raj Thakur: Stock Market Educator 📈",
+    "followers": 15500000,
+    "about": "Pushkar Raj Thakur is India's Leading Stock Market Educator, Finance Influencer & Business Coach. He is a Guinness World ...",
+    "score": 0.17
+   },
+   {
+    "id": "UCY3tEpCcbxBZNJ2hKUB_pDA",
+    "title": "Student of Market",
+    "followers": 4,
+    "about": "Just trying something...",
+    "score": 0.5
+   },
+   {
+    "id": "UCIkF6qwGPLNo6dw0VwYha3w",
+    "title": "Student of Market",
+    "followers": 7,
+    "about": "",
+    "score": 0.5
+   },
+   {
+    "id": "UCau-p4wLUoYemxrIGpxpJnA",
+    "title": "STUDENTS OF GEH GEH IN AGBOJU / FESTAC MARKET",
+    "followers": 39,
+    "about": "CONTENT IN REALITY O LORD ✝️ PLEASE CROWN OUR EFFORTS WITH UNLIMITED SUCCESS ...",
+    "score": 0.33
+   }
+  ],
+  "pick": "UCMmSkpXKZpLvHe_byqs8Y5A",
+  "pick_title": "Students of Market",
+  "pick_followers": 2680,
+  "sure": true
+ },
+ "optionsscalpingsiva": {
+  "key": "optionsscalpingsiva",
+  "name": "Options Scalping - Siva",
+  "query": "Options Scalping Siva",
+  "star": false,
+  "lists": "E17",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UC0kKxsSzUbJdbfRo89CuxIw",
+    "title": "Options Scalping",
+    "followers": 99000,
+    "about": "DISCLAIMER - I am not a SEBI Registered Advisor. This channel is purely for training purposes only. I will not be responsible for ...",
+    "score": 1
+   },
+   {
+    "id": "UCwowLmY_KKR4aGLC1SU-Tkg",
+    "title": "Scalper Pros",
+    "followers": 58700,
+    "about": "Sivakumar Jayachandran is an ace scalper and one of rare traders who have generated consistent returns by buying options.",
+    "score": 0
+   },
+   {
+    "id": "UCcoajn8HzmDOlYloGhZTjCA",
+    "title": "Shiva ji Trading.c",
+    "followers": 511,
+    "about": "शेयर बाजार में जो हारता है वही जीत का नया रास्ता जानता है, | क्योकि जीत ...",
+    "score": 0
+   },
+   {
+    "id": "UClQ7Qs8ov6Bfo0WSzznZpzg",
+    "title": "The Kill Switch Trader",
+    "followers": 2410,
+    "about": "Hi I am Arif Hasan I am a Option Scalper or Buyer My Favorite Strategy is Supertrend Retracement after 2 candle Theory.",
+    "score": 0
+   },
+   {
+    "id": "UCI7_t2Eo3kAH6Vi8hfUHUpQ",
+    "title": "The Scalper King",
+    "followers": 95400,
+    "about": "Hello Trader's Welcome to our channel The Scalper King . The Content Uploaded in my Channel is only for educational purpose ...",
+    "score": 0
+   }
+  ],
+  "pick": "UC0kKxsSzUbJdbfRo89CuxIw",
+  "pick_title": "Options Scalping",
+  "pick_followers": 99000,
+  "sure": true
+ },
+ "investarindia": {
+  "key": "investarindia",
+  "name": "InvestarIndia",
+  "query": "InvestarIndia",
+  "star": false,
+  "lists": "E19",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCdZDUJkWJ4fAcddtSd5Y0xQ",
+    "title": "Investar",
+    "followers": 4,
+    "about": "",
+    "score": 0
+   },
+   {
+    "id": "UCrg6IDPf4a7pUKTN90n6syg",
+    "title": "Dividend Growth Investing",
+    "followers": 83000,
+    "about": "My name is Jake. My wife and I reached Barista F.I.R.E. in 2023 at the age of 37. JL Collins pioneered the idea of investing into ...",
+    "score": 0
+   }
+  ],
+  "pick": null,
+  "pick_title": null,
+  "pick_followers": null,
+  "sure": false,
+  "override": "not found: channel search (three queries) and the @InvestarIndia handles return no InvestarIndia channel"
+ },
+ "strategicstocks": {
+  "key": "strategicstocks",
+  "name": "Strategic Stocks",
+  "query": "Strategic Stocks",
+  "star": false,
+  "lists": "E24",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCOr4whRlW4GlNu5q5y4ZX8A",
+    "title": "Strategic Stocks",
+    "followers": 48800,
+    "about": "Hello Traders, We are pleased to announce a new journey. We present you this channel which will have the content that is mostly ...",
+    "score": 1
+   },
+   {
+    "id": "UClZQD6J6olgHvRvLMjcG2iQ",
+    "title": "Kotak Stockshaala",
+    "followers": 128000,
+    "about": "Kotak StockShaala Everything you need to understand the stock market—without the complexity or the cost. Learn. Understand.",
+    "score": 0
+   },
+   {
+    "id": "UC09nS1O2Ubs1txv33HyIRwQ",
+    "title": "Strategic Alpha",
+    "followers": 9300,
+    "about": "Strategic Alpha YouTube Channel is dedicated to TechnoValue Investing, in-depth stock analysis, and case studies. All content ...",
+    "score": 0.5
+   },
+   {
+    "id": "UCPOi4Pw3uVcJqSAeGD5mKjA",
+    "title": "Himanshu Arora",
+    "followers": 38600,
+    "about": "Join the Trading Mentorship Program by Himanshu Arora I am Himanshu Arora, a trader with over 10 years of experience in ...",
+    "score": 0
+   },
+   {
+    "id": "UCeXSLuQxgWuNAH61A6YJPSg",
+    "title": "StrategicPulseIndia",
+    "followers": 197,
+    "about": "Strategic Pulse India | Decode Company Strategies in 5 Minutes Are you a fundamental investor, a finance student or a busy ...",
+    "score": 0
+   }
+  ],
+  "pick": "UCOr4whRlW4GlNu5q5y4ZX8A",
+  "pick_title": "Strategic Stocks",
+  "pick_followers": 48800,
+  "sure": true
+ },
+ "traderinsights": {
+  "key": "traderinsights",
+  "name": "Trader Insights",
+  "query": "Trader Insights",
+  "star": false,
+  "lists": "E25",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCmKKN8CW3dk5OgysejYxWXQ",
+    "title": "Trader Insights",
+    "followers": 19200,
+    "about": "I'm here to help you become a profitable trader while keeping things realistic and to the point. My focus is on creating rigid, ...",
+    "score": 1
+   },
+   {
+    "id": "UCqrGctKe0rPyhIeVv4aSrvw",
+    "title": "Trade Insight",
+    "followers": 12800,
+    "about": "Trade Insight — Ethiopia's trading psychology & discipline community. Learn to trade Gold and Forex with a plan, strict risk ...",
+    "score": 0
+   },
+   {
+    "id": "UC_1c2lc_nti_aQVgk6INviQ",
+    "title": "Trading Insights",
+    "followers": 5720,
+    "about": "You will not find 'get-rich-quick' schemes or 'secret indicators.' You will find hard-won lessons on risk management, emotional ...",
+    "score": 1
+   },
+   {
+    "id": "UCB_RAechvtcNpWWyDP269SQ",
+    "title": "Forex Insights",
+    "followers": 941000,
+    "about": "Forex Insights is a YouTube channel dedicated to providing valuable information about Forex Trading. Viewers can expect to ...",
+    "score": 0.5
+   },
+   {
+    "id": "UC9OEQijEr3-buK_2jvc6qbw",
+    "title": "Derivatives Insights",
+    "followers": 58,
+    "about": "Welcome to Derivatives Insights! Your go-to destination for comprehensive and insightful information on the Indian derivatives ...",
+    "score": 0.5
+   }
+  ],
+  "pick": "UCmKKN8CW3dk5OgysejYxWXQ",
+  "pick_title": "Trader Insights",
+  "pick_followers": 19200,
+  "sure": true,
+  "override": "the exact-title channel; the search pick by followers was Forex Insights"
+ },
+ "artofoptionlearning": {
+  "key": "artofoptionlearning",
+  "name": "Art of Option Learning - Ghanshyam",
+  "query": "Art of Option Learning",
+  "star": false,
+  "lists": "E28",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCN3DuDf9Abnksfkh8aXyLcw",
+    "title": "Art of Option Learning",
+    "followers": 1470000,
+    "about": "Zerodha Broking Ltd. SEBI Registration no.: INZ000031633 • GHANSHYAM RAMSINGAR YADAV • NSE AP reg. no.",
+    "score": 1
+   },
+   {
+    "id": "UCzB_fFXHWEG2urYfGhs1UTA",
+    "title": "ART OF OPTION TRADING",
+    "followers": 66900,
+    "about": "The primary goal of this channel is to educate viewers on responsible trading. There was actually no one to lead me down the ...",
+    "score": 1
+   },
+   {
+    "id": "UC5AqP0rxCns2LeE9CclGaSg",
+    "title": "Art of option learning",
+    "followers": 12,
+    "about": "Hi I'm a trader who wants to help beginners to the option trading.",
+    "score": 1
+   },
+   {
+    "id": "UCMpZFl9BpAT5kOK70GIBvgA",
+    "title": "Art of Option Learning",
+    "followers": 8,
+    "about": "",
+    "score": 1
+   },
+   {
+    "id": "UC1zFfFcAJI5Dz_QwdnMsY0Q",
+    "title": "Art of Option Learning By Ghanshyam Tech",
+    "followers": 284,
+    "about": "नमस्कार दोस्तों, आपका बहुत बहुत स्वागत है हमारे चैनल \"Ghanshyamtech\" में, ...",
+    "score": 0.6
+   }
+  ],
+  "pick": "UCN3DuDf9Abnksfkh8aXyLcw",
+  "pick_title": "Art of Option Learning",
+  "pick_followers": 1470000,
+  "sure": true
+ },
+ "sakethramakrishna": {
+  "key": "sakethramakrishna",
+  "name": "Saketh Ramakrishna",
+  "query": "Saketh Ramakrishna",
+  "star": false,
+  "lists": "E29",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCtf77zdrGTGZP1NtpT2RHsg",
+    "title": "Saketh Ramakrishna",
+    "followers": 61800,
+    "about": "Hey There, Welcome to my channel on trading stocks and options! If you're interested in learning about options, then you're in the ...",
+    "score": 1
+   },
+   {
+    "id": "UCySWu0MBAkTTkouMVqQOa3g",
+    "title": "Saketh Ramakrishna",
+    "followers": 1370,
+    "about": "",
+    "score": 1
+   },
+   {
+    "id": "UCg0mGKPtd-ImrJDzRqukuOw",
+    "title": "TheSidTrade",
+    "followers": 281,
+    "about": "",
+    "score": 0
+   },
+   {
+    "id": "UCs0GmzouZUmhXISsjOTaLoQ",
+    "title": "Saketh  creative clicks",
+    "followers": 72,
+    "about": "",
+    "score": 0.33
+   },
+   {
+    "id": "UCtHcn3B47AbrjCozLJBmCDw",
+    "title": "Lingala Ramakrishna",
+    "followers": 20,
+    "about": "",
+    "score": 0.5
+   }
+  ],
+  "pick": "UCtf77zdrGTGZP1NtpT2RHsg",
+  "pick_title": "Saketh Ramakrishna",
+  "pick_followers": 61800,
+  "sure": true
+ },
+ "niftylearningbrijesh": {
+  "key": "niftylearningbrijesh",
+  "name": "Nifty Learning with Brijesh",
+  "query": "Nifty Learning with Brijesh",
+  "star": false,
+  "lists": "E30",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UC3yL5GVe2TFzmiRlw86AoWg",
+    "title": "Nifty Learning with Brijesh",
+    "followers": 2930,
+    "about": "Welcome to our channel, Nifty Learning With Brijesh. Our vision: protect your capital first, profit next. I am CMT Brijesh Kumar, ...",
+    "score": 1
+   },
+   {
+    "id": "UC9v6XZXGq9j0WEdZJMMqkkg",
+    "title": "EYE OF CHART / Brijesh Yadav",
+    "followers": 892,
+    "about": "Welcome to Eye Of Chart I'm Brijesh Yadav — a trader rebuilding his life after ₹1 Crore in debt and trading losses. Yahan main ...",
+    "score": 0.25
+   },
+   {
+    "id": "UChYTjFodcV3wJO8WxfAkPzQ",
+    "title": "Brijesh Trading Journy ",
+    "followers": 1220,
+    "about": "Brijesh Trading Journey Namaste dosto! Welcome to Brijesh Trading Journey. Is channel par main apni trading learning journey ...",
+    "score": 0.5
+   },
+   {
+    "id": "UCZOWBq9cPpMijzDpKIuUXog",
+    "title": "Trader Brijesh ",
+    "followers": 65,
+    "about": "Hello Gys Welcome to my youtube channel.My name is Brijesh Kumar and I am trader. I am learning trading indian and crypto ....",
+    "score": 0.5
+   },
+   {
+    "id": "UCStShVhbgkFQssP2yzHWKBg",
+    "title": "Brijeesh Nishad",
+    "followers": 1,
+    "about": "Welcome to Brijesh The Option Trader I'm Brijesh, an Option Trader sharing my daily trading journey, market analysis, ...",
+    "score": 0
+   }
+  ],
+  "pick": "UC3yL5GVe2TFzmiRlw86AoWg",
+  "pick_title": "Nifty Learning with Brijesh",
+  "pick_followers": 2930,
+  "sure": true
+ },
+ "kevalkhimsariya": {
+  "key": "kevalkhimsariya",
+  "name": "CA Keval Khimsariya",
+  "query": "CA Keval Khimsariya",
+  "star": false,
+  "lists": "E31",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCzAbk10B8ckoVKaGElsTruQ",
+    "title": "CA Keval Khimsariya",
+    "followers": 26700,
+    "about": "On a mission to make Traders and Investors Independent. Stock Market and Finance related educational videos. Helping people ...",
+    "score": 1
+   }
+  ],
+  "pick": "UCzAbk10B8ckoVKaGElsTruQ",
+  "pick_title": "CA Keval Khimsariya",
+  "pick_followers": 26700,
+  "sure": true
+ },
+ "tradetron": {
+  "key": "tradetron",
+  "name": "Tradetron",
+  "query": "Tradetron",
+  "star": false,
+  "lists": "E32",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCvw85AMGH07-1J_VVEx0Txg",
+    "title": "Tradetron",
+    "followers": 36600,
+    "about": "Tradetron is a multi-asset, multi-currency, multi-exchange Algo Strategy marketplace that allows people to create algo strategies ...",
+    "score": 1
+   },
+   {
+    "id": "UC6_kwRxietdhFj76WQ8ihoA",
+    "title": "Tradetron",
+    "followers": 127,
+    "about": "Tradetron is a multi asset, multi-currency, multi exchange Algo Strategy marketplace which allows people to create algo strategies ...",
+    "score": 1
+   },
+   {
+    "id": "UCgZmj7IGl1Vywv5IVh4GoKQ",
+    "title": "TradetronUSA",
+    "followers": 195,
+    "about": "Tradetron is a powerful platform for options traders to automate their strategies. You can build your own options strategy, or our ...",
+    "score": 0
+   },
+   {
+    "id": "UCADAJdaOPVKaFyoeWtEaq2g",
+    "title": "Ravi Mehta",
+    "followers": 15800,
+    "about": "Hi guys, this is Ravi Mehta. Here I will share all my stock market trading experience and knowledge with you in very simple way.",
+    "score": 0
+   },
+   {
+    "id": "UCI9ovyXwBO4Slg9GArfsT5A",
+    "title": "NiftyHacks",
+    "followers": 4010,
+    "about": "Channel to make Technical Analysis as Fun and Easy as possible. Also helping people for Algo Trading via automating strategies ...",
+    "score": 0
+   }
+  ],
+  "pick": "UCvw85AMGH07-1J_VVEx0Txg",
+  "pick_title": "Tradetron",
+  "pick_followers": 36600,
+  "sure": true
+ },
+ "nitinmurarka": {
+  "key": "nitinmurarka",
+  "name": "Nitin Murarka",
+  "query": "Nitin Murarka",
+  "star": false,
+  "lists": "E35",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCJ7M28IPpHU3cUMEnXPGZFQ",
+    "title": "Nitin Murarka Nifty ke Nishanebaaz",
+    "followers": 242000,
+    "about": "Professionally, a Chartered Accountant, having 20 years of experience in Equity Derivatives and Nifty Index options trading.",
+    "score": 0.4
+   },
+   {
+    "id": "UCUj6XspkY83Db1vKaSGmbvQ",
+    "title": "Nitin Murarka Strategy",
+    "followers": 75,
+    "about": "Subscribe M@rket View Channel.",
+    "score": 0.67
+   },
+   {
+    "id": "UCITA0drW6vCZV6gUt2yQLww",
+    "title": "niTin murArkA opTion TrAding ",
+    "followers": 2,
+    "about": "",
+    "score": 0.67
+   },
+   {
+    "id": "UCAWq5MwYu4BeJm0FXosOE_Q",
+    "title": "Ca Nitin Murarka Daily joiner",
+    "followers": 2,
+    "about": "Option trading gain loss or profit Daily.",
+    "score": 0.4
+   },
+   {
+    "id": "UCKNIfNl_YE7fKUA0__vdGew",
+    "title": "Nitin Murarka",
+    "followers": 1,
+    "about": "",
+    "score": 1
+   }
+  ],
+  "pick": "UCJ7M28IPpHU3cUMEnXPGZFQ",
+  "pick_title": "Nitin Murarka Nifty ke Nishanebaaz",
+  "pick_followers": 242000,
+  "sure": true,
+  "override": "Nitin Murarka's own channel (a CA, 20 years in equity); the exact-title hits are empty fan channels"
+ },
+ "moneytalkspayal": {
+  "key": "moneytalkspayal",
+  "name": "Money Talks With Payal",
+  "query": "Money Talks With Payal",
+  "star": false,
+  "lists": "E36",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCckYcYcb3LhOeDsytM-MyaQ",
+    "title": "Money Talks With Payal",
+    "followers": 92000,
+    "about": "Hey Money Talkers! Business inquiries- moneytalkswithpayal@gmail.com This is Payal, a working professional in a reputed and ...",
+    "score": 1
+   },
+   {
+    "id": "UC75_GYjlXXYKkqTYldhoJqg",
+    "title": "Wealth Battles with Payal",
+    "followers": 1,
+    "about": "Welcome to Wealth Battles with Payal! Money and investing can feel complicated. Here, I break them down in simple language ...",
+    "score": 0.33
+   },
+   {
+    "id": "UCHY5T6GA5OiXvgptnnzxiXw",
+    "title": "Payal Pawar",
+    "followers": null,
+    "about": "",
+    "score": 0.5
+   },
+   {
+    "id": "UCf6PIMsGE2g0rSRbMSlA2oQ",
+    "title": "Learning Markets With Manish",
+    "followers": 556000,
+    "about": "Here I will try making it easy for you to understand Capital Markets in India, What it is and how things work in the market.",
+    "score": 0
+   },
+   {
+    "id": "UCzR3BJ4Q1gOfjfd_MzSer8g",
+    "title": "Payal Talks",
+    "followers": 7,
+    "about": "",
+    "score": 1
+   }
+  ],
+  "pick": "UCckYcYcb3LhOeDsytM-MyaQ",
+  "pick_title": "Money Talks With Payal",
+  "pick_followers": 92000,
+  "sure": true
+ },
+ "tradingwithvivek": {
+  "key": "tradingwithvivek",
+  "name": "Trading With Vivek",
+  "query": "Trading With Vivek",
+  "star": false,
+  "lists": "E38",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCihPYlorLXjroDGnQL17YvQ",
+    "title": "Trading With Vivek",
+    "followers": 625000,
+    "about": "TradingWithVivek.Com is an investment and trading educational channel. Our aim is to make yourself smart enough to take ...",
+    "score": 1
+   },
+   {
+    "id": "UCwymWPViFnfKcWZyqpjjN1w",
+    "title": "TRADE WITH VIVEK",
+    "followers": 7180,
+    "about": "Welcome to our Trading Channel! Here, you'll find valuable insights and essential trading knowledge to enhance your skills.",
+    "score": 0.5
+   },
+   {
+    "id": "UC7osT6SncBg6PFk7MB6avgg",
+    "title": "Systematic Trader Vivek",
+    "followers": 28900,
+    "about": "Hi, I'm a SEBI-Registered Research Analyst License No.: INH000020156 MBA in Finance NCFM Certified Technical ...",
+    "score": 0.33
+   },
+   {
+    "id": "UC2AXhv0in3yStEjjV_nYr8A",
+    "title": "Trader Vivek Official ",
+    "followers": 3670,
+    "about": "FIRST LEARN, THEN EARN ​Welcome to Trader Vivek Official — your home for raw, practical, and price action-based Stock ...",
+    "score": 0.33
+   },
+   {
+    "id": "UCTqhzLBrUHTAUpyT32KbjzQ",
+    "title": "Nifty Live with Vivek",
+    "followers": 2420,
+    "about": "Welcome to Nifty Live with Vivek I share daily intraday trading videos with real entries and exits in Nifty & Bank Nifty. On this ...",
+    "score": 0.33
+   }
+  ],
+  "pick": "UCihPYlorLXjroDGnQL17YvQ",
+  "pick_title": "Trading With Vivek",
+  "pick_followers": 625000,
+  "sure": true
+ },
+ "daytradertelugu": {
+  "key": "daytradertelugu",
+  "name": "Day Trader Telugu",
+  "query": "Day Trader Telugu",
+  "star": false,
+  "lists": "E39",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCeEP6GESh2t4-e2132uj3Sg",
+    "title": "DAY TRADER తెలుగు",
+    "followers": 2710000,
+    "about": "Hello Andi! Welcome to our channel! If you're new here, please note: ❌ No Paid Courses, No Paid Tips, No Mentorships, No ...",
+    "score": 1
+   },
+   {
+    "id": "UC0jB9fB5gzCplA3-2pGw6ag",
+    "title": "DAY TRADER తెలుగు 2.0",
+    "followers": 530000,
+    "about": "Hello, our old subscribers know us well but if you are NEW kindly Note we have No paid courses | No paid Tips | No mentorships ...",
+    "score": 1
+   },
+   {
+    "id": "UC62QuPoBBcjNrNRC-ZqNPhw",
+    "title": "Nikhita Telugu Trading",
+    "followers": 26500,
+    "about": "",
+    "score": 0.5
+   },
+   {
+    "id": "UC4-4k6otdj24HDvMs5mlEWQ",
+    "title": "Forex Trader తెలుగు",
+    "followers": 9030,
+    "about": "Join the FTT Community on Telegram for market updates and trading discussions. Follow Forex Trader Telugu on X ...",
+    "score": 0.5
+   },
+   {
+    "id": "UC9nfPFi-bmZDokaBThuaiBQ",
+    "title": "BT Money Talks",
+    "followers": 80600,
+    "about": "BT Money Talks | Nimmadi Upendra SEBI Registered Research Analyst Registration No.: INH000031499 Since November 19, ...",
+    "score": 0
+   }
+  ],
+  "pick": "UCeEP6GESh2t4-e2132uj3Sg",
+  "pick_title": "DAY TRADER తెలుగు",
+  "pick_followers": 2710000,
+  "sure": true
+ },
+ "moneypurse": {
+  "key": "moneypurse",
+  "name": "Money Purse",
+  "query": "Money Purse",
+  "star": false,
+  "lists": "E40",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UChBT5TlUeG68PKvJSg6MkqQ",
+    "title": "Money Purse { మనీ పర్స్ }",
+    "followers": 2130000,
+    "about": "Money Purse is one of the largest Telugu financial education platforms, dedicated to helping you understand the true essence of ...",
+    "score": 1
+   },
+   {
+    "id": "UCHXf38_oLI31-ZABVUapOHQ",
+    "title": "SumanTV Money Purse",
+    "followers": 55100,
+    "about": "Contact SumanTV For Your Business Promotions. Looking to scale your business visibility & revenue? SumanTV delivers ...",
+    "score": 0.67
+   },
+   {
+    "id": "UCmcveOnc7PoOFd3EWnL1Ydw",
+    "title": "SumanTV Money Wallet",
+    "followers": 479000,
+    "about": "Contact SumanTV For Your Business Promotions. Looking to scale your business visibility & revenue? SumanTV delivers ...",
+    "score": 0.33
+   },
+   {
+    "id": "UCvjeTDhdiZIa5HXd9eu-z8Q",
+    "title": "Money Purse Clips",
+    "followers": 65400,
+    "about": "Money Purse is one of the largest Telugu financial education platforms, dedicated to helping you understand the true essence of ...",
+    "score": 0.67
+   },
+   {
+    "id": "UCAXiiYO9VsSOYzaIj_xNuGg",
+    "title": "V2K MoneyPurse",
+    "followers": 1710,
+    "about": "Welcome to V2KMoney Purse! Description \"Welcome to V2KMoney Purse, your one-stop destination for all things finance and ...",
+    "score": 0
+   }
+  ],
+  "pick": "UChBT5TlUeG68PKvJSg6MkqQ",
+  "pick_title": "Money Purse { మనీ పర్స్ }",
+  "pick_followers": 2130000,
+  "sure": true
+ },
+ "tradingkannada": {
+  "key": "tradingkannada",
+  "name": "Trading Kannada",
+  "query": "Trading Kannada",
+  "star": false,
+  "lists": "E41",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCFMQXuy2RtVJvAFqYGf12mw",
+    "title": "TRADING KANNADA",
+    "followers": 82100,
+    "about": "",
+    "score": 1
+   },
+   {
+    "id": "UCnDbuv2RJ4lSyT_YVmzXIvQ",
+    "title": "Trading Kannada Live",
+    "followers": 16600,
+    "about": "ಇದು ಟ್ರೇಡಿಂಗ್‌ ಕನ್ನಡ ಚಾನೆಲ್‌ ನ LIVE ಚಾನೆಲ್‌ .ಇಲ್ಲಿ Daily LIVE ವೀಡಿಯೋ ನಿಮಗೆ ...",
+    "score": 0.5
+   },
+   {
+    "id": "UCsa97EbW0qSUlf8-MdSC-ZA",
+    "title": "Stock Market Kannada",
+    "followers": 95800,
+    "about": "Welcome to Stock Market Kannada—your trusted source for educational content on investing, finance, and the Indian stock market ...",
+    "score": 0.33
+   },
+   {
+    "id": "UCmzchOBoiuAh8yvPKBSt_9Q",
+    "title": " Shankara Mindset Day Trading In Kannada ",
+    "followers": 7840,
+    "about": "Stock market videos in kannada language. videos are for Educational Purpose only and should not be considered as Trading ...",
+    "score": 0.2
+   },
+   {
+    "id": "UCr4COD4p5mGFJ6YtQrCpEyw",
+    "title": "Trade with dream zone in kannada",
+    "followers": 48,
+    "about": "Dream Zone Trader Contact -9035553392.",
+    "score": 0.2
+   }
+  ],
+  "pick": "UCFMQXuy2RtVJvAFqYGf12mw",
+  "pick_title": "TRADING KANNADA",
+  "pick_followers": 82100,
+  "sure": true
+ },
+ "buycryrepeat": {
+  "key": "buycryrepeat",
+  "name": "BuyCryRepeat Kannada",
+  "query": "BuyCryRepeat Kannada",
+  "star": false,
+  "lists": "E42",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCGWv_z-4Lm-dk_wuF-AR8eA",
+    "title": "Buy Cry Repeat - Kannada",
+    "followers": 421,
+    "about": "Buy Cry Repeat Kannada ಗೆ ಸ್ವಾಗತ! ಈ ಚಾನೆಲ್‌ನಲ್ಲಿ ಸ್ಟಾಕ್ ಮಾರ್ಕೆಟ್ ಟ್ರೇಡಿಂಗ್ ...",
+    "score": 0.25
+   },
+   {
+    "id": "UCk-0S_-PPK1IMtvxxYT1GFg",
+    "title": "Buy Cry Repeat",
+    "followers": 546,
+    "about": "Welcome to Buy Cry Repeat ! Learn stock market trading in Hindi — from basics to advanced concepts — in a simple and ...",
+    "score": 0
+   },
+   {
+    "id": "UCmz_BspsPjpS4ghvkXlzgWw",
+    "title": "Shreya Kalra",
+    "followers": 1700000,
+    "about": "A Complicated Sweetheart ❤️ Video content managed by -: Qyuki Digital Media Pvt Ltd.",
+    "score": 0
+   },
+   {
+    "id": "UCQkOurRrZuDNa6Q_A54RzjA",
+    "title": "Vibe with YASHI",
+    "followers": 773000,
+    "about": "Business enquiries- shivani@ringlightmedia.com Instagram - vibe.with.yashi24.",
+    "score": 0
+   },
+   {
+    "id": "UC4XR0EZ0oHwSV2XhhShzX5A",
+    "title": "Crazy Frog",
+    "followers": 19000000,
+    "about": "The OFFICIAL YouTube Channel for Crazy Frog - everyone's favorite animated annoying thing!!! Entertainment and fun for ...",
+    "score": 0
+   }
+  ],
+  "pick": "UCGWv_z-4Lm-dk_wuF-AR8eA",
+  "pick_title": "Buy Cry Repeat - Kannada",
+  "pick_followers": 421,
+  "sure": true,
+  "override": "the Kannada channel itself; the search pick by followers was unrelated"
+ },
+ "shariquesamsudheen": {
+  "key": "shariquesamsudheen",
+  "name": "Sharique Samsudheen",
+  "query": "Sharique Samsudheen",
+  "star": false,
+  "lists": "E43",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UC9CKy1ai9qI8p6_Oh0Qa3Rg",
+    "title": "Sharique Samsudheen",
+    "followers": 1720000,
+    "about": "The name is Sharique Samsudheen. Born and raised in Kollam, Kerala. Attended NIT Jamshedpur. To put in simple words, I am a ...",
+    "score": 1
+   },
+   {
+    "id": "UCmapkf4A5883lT90j86WXFg",
+    "title": "marketfeed",
+    "followers": 582000,
+    "about": "Welcome to marketfeed. We are building a community of informed investors and financially empowered individuals. Our mission is ...",
+    "score": 0
+   },
+   {
+    "id": "UCyMxR-MxlyrX30t3hj0hVvg",
+    "title": "Sharique Samsudheen v2",
+    "followers": 8,
+    "about": "",
+    "score": 0.67
+   },
+   {
+    "id": "UCB_O7OozAfncIUV2OUjhw1A",
+    "title": "Sharique Samsudheen",
+    "followers": 1,
+    "about": "",
+    "score": 1
+   },
+   {
+    "id": "UCOWTvSnYUIrgNbKrdE5yC8w",
+    "title": "talk.cuts__",
+    "followers": 4,
+    "about": "Big Talks. short clips.",
+    "score": 0
+   }
+  ],
+  "pick": "UC9CKy1ai9qI8p6_Oh0Qa3Rg",
+  "pick_title": "Sharique Samsudheen",
+  "pick_followers": 1720000,
+  "sure": true
+ },
+ "arunishoptionbuyer": {
+  "key": "arunishoptionbuyer",
+  "name": "Arunish Intraday Option Buyer",
+  "query": "Arunish Intraday Option Buyer",
+  "star": false,
+  "lists": "E44",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UC_6IEA9G2wnBUMHuzO4aprA",
+    "title": "Arunish Intraday Option Buyer",
+    "followers": 6240,
+    "about": "This Channel is Exclusively for Intraday Nifty Option Buying Education Purpose. Learn How Can you Manage Intraday Option ...",
+    "score": 1
+   },
+   {
+    "id": "UCmxf1zGSWryGd-CjclsPebQ",
+    "title": "Arunish Shivam",
+    "followers": 17,
+    "about": "",
+    "score": 0.5
+   },
+   {
+    "id": "UCnEKl0oQlfWaIBP8Q603p7g",
+    "title": "𝗔𝗥𝗨𝗡𝗘𝗦𝗛 𝗔𝗖𝗔𝗗𝗘𝗠𝗬",
+    "followers": 792,
+    "about": "To know the Power of Competitive Exam.",
+    "score": 0
+   }
+  ],
+  "pick": "UC_6IEA9G2wnBUMHuzO4aprA",
+  "pick_title": "Arunish Intraday Option Buyer",
+  "pick_followers": 6240,
+  "sure": true
+ },
+ "uniquetelugutrader": {
+  "key": "uniquetelugutrader",
+  "name": "Unique Telugu Trader",
+  "query": "Unique Telugu Trader",
+  "star": false,
+  "lists": "E45",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCLhHZdQS4yZj7AOwDk7rLKw",
+    "title": "Unique Telugu Trader.(UTT)",
+    "followers": 35200,
+    "about": "telugu unique trader is an initiative for the young generation who is interested in making more, willing to step forward and be free ...",
+    "score": 0.75
+   },
+   {
+    "id": "UC62QuPoBBcjNrNRC-ZqNPhw",
+    "title": "Nikhita Telugu Trading",
+    "followers": 26500,
+    "about": "",
+    "score": 0.5
+   },
+   {
+    "id": "UCxEMB_lmqMTshzwhr6Qkceg",
+    "title": "BhairavaICT",
+    "followers": 12300,
+    "about": "The Algorithms Behind The Market ⚡ I'm a 19-year-old trader who draws lines and predicts the future in financial markets.",
+    "score": 0
+   },
+   {
+    "id": "UCkQaOUnd4qQhI23n71wVzSA",
+    "title": "Sowmya Sasun",
+    "followers": 26700,
+    "about": "Hey! Happy to have you here. Contact : brbstudying57@gmail.com My instagram main: @sowmyasasunn Telugu instagram: ...",
+    "score": 0
+   },
+   {
+    "id": "UCBmOHCOxGQ5wQtLV-Z8vVVA",
+    "title": "Zerroday",
+    "followers": 7140,
+    "about": "Welcome to Zerroday Official 🛡️ Built for Indian options traders who want better discipline, stronger psychology and ...",
+    "score": 0
+   }
+  ],
+  "pick": "UCLhHZdQS4yZj7AOwDk7rLKw",
+  "pick_title": "Unique Telugu Trader.(UTT)",
+  "pick_followers": 35200,
+  "sure": true,
+  "override": "the report could not attribute the lesson to one channel; this is the largest exact-name channel"
+ },
+ "dpthetrader": {
+  "key": "dpthetrader",
+  "name": "DP The Trader",
+  "query": "DP The Trader",
+  "star": false,
+  "lists": "E46",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCJBdWQh5TNHZZ96jinwAqBw",
+    "title": "DP The Trader SMC",
+    "followers": 3470,
+    "about": "This channel is for educational purposes only and does not provide financial or investment advice. We are not SEBI registered; ...",
+    "score": 0.67
+   },
+   {
+    "id": "UCrywmrbBLm3cBlQvQ_BgNPg",
+    "title": "Mr. SMC Trader తెలుగు ",
+    "followers": 6330,
+    "about": "Learn About The A-Z Of The Smart Money Concepts In Telugu.",
+    "score": 0.33
+   },
+   {
+    "id": "UCeEP6GESh2t4-e2132uj3Sg",
+    "title": "DAY TRADER తెలుగు",
+    "followers": 2710000,
+    "about": "Hello Andi! Welcome to our channel! If you're new here, please note: ❌ No Paid Courses, No Paid Tips, No Mentorships, No ...",
+    "score": 0.5
+   },
+   {
+    "id": "UCyyHiTHuwxvwVOiFBjJfjVg",
+    "title": "NIMA DP TRADER",
+    "followers": 2080,
+    "about": "https://www.nimadptrader.com/ ~Welcome to the channel. Subscribe our channel to watch our free LIVE SENSEX/ NIFTY/ ...",
+    "score": 0.67
+   },
+   {
+    "id": "UCcCOU7hEJSYnbEI0pggfrjQ",
+    "title": "DP TRADER LIFE",
+    "followers": 91,
+    "about": "WELCOME TO DP TRADER LIFE एक Trader, अनेक स्वप्नं! ❤️ Welcome to DP TRADER LIFE — a channel ...",
+    "score": 0.67
+   }
+  ],
+  "pick": "UCJBdWQh5TNHZZ96jinwAqBw",
+  "pick_title": "DP The Trader SMC",
+  "pick_followers": 3470,
+  "sure": true,
+  "override": "matches the report's NIFTY / BANKNIFTY SMC lesson; the search pick by followers was Day Trader Telugu"
+ },
+ "zebutelugu": {
+  "key": "zebutelugu",
+  "name": "Zebu Telugu",
+  "query": "Zebu Telugu",
+  "star": false,
+  "lists": "E47",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCbVxYrzu5y-2vnSc8FKe-Lw",
+    "title": "Zebu Telugu",
+    "followers": 6540,
+    "about": "Welcome to Zebu Telugu YouTube Channel! Your one-stop destination for stock market, trading, and investment videos. Here ...",
+    "score": 1
+   },
+   {
+    "id": "UCa1wXTJd0_6eQWK_gm7rKfg",
+    "title": "Vidya24X7",
+    "followers": 7700,
+    "about": "Vidya24X7 — చదువు నుంచి రోజువారీ జీవితానికి ఉపయోగపడే జ్ఞానం, సులభమైన ...",
+    "score": 0
+   },
+   {
+    "id": "UCDukU4WTRTo2Mg2FD1_J4XA",
+    "title": "భూమిపుత్ర ",
+    "followers": 57100,
+    "about": "NO FARMER .. NO FOOD రైతులు సాధిస్తున్న విజయాలు, వారి అనుభవాలు, ...",
+    "score": 0
+   },
+   {
+    "id": "UCVbdEN8_nOIKyTxhIzyNfwA",
+    "title": "iD Telugu Interviews",
+    "followers": 31400,
+    "about": "Welcome to iD Telugu Interviews Channels, is your go-to source for breaking news, viral videos, and exclusive entertainment ...",
+    "score": 0.33
+   },
+   {
+    "id": "UCSofJg-ImyHqmJyuqVj71vQ",
+    "title": "Telugu - All in One",
+    "followers": 77000,
+    "about": "Welcome to Telugu All in One Official! Our channel is all about sharing fun and wholesome content for everyone to enjoy.",
+    "score": 0.25
+   }
+  ],
+  "pick": "UCbVxYrzu5y-2vnSc8FKe-Lw",
+  "pick_title": "Zebu Telugu",
+  "pick_followers": 6540,
+  "sure": true
+ },
+ "derivativetradersameer": {
+  "key": "derivativetradersameer",
+  "name": "Derivative Trader Sameer",
+  "query": "Derivative Trader Sameer",
+  "star": false,
+  "lists": "E48",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCRhXUz2Hj6aLk4i8BhEYORQ",
+    "title": "Derivative Trader Sameer ",
+    "followers": 5990,
+    "about": "Welcome to your journey of learning and improving everyday. All about option trading Option pricing Undervalued and overvalued ...",
+    "score": 1
+   },
+   {
+    "id": "UCt2pX_5aUXrIvJP5HIL5xFg",
+    "title": "Derivative Trader Sameer course",
+    "followers": 6,
+    "about": "",
+    "score": 0.75
+   },
+   {
+    "id": "UC8tinx3BLiIrt7-MNwsGA2Q",
+    "title": "Sab Sikho",
+    "followers": 62,
+    "about": "",
+    "score": 0
+   },
+   {
+    "id": "UCaKQkdAq2S-_B9vn3VfNX3w",
+    "title": "Sab Sikho",
+    "followers": 15,
+    "about": "",
+    "score": 0
+   },
+   {
+    "id": "UCwU88lK2TmadTMV1CkgYxyg",
+    "title": "Trade With Sameer",
+    "followers": 13,
+    "about": "",
+    "score": 0.5
+   }
+  ],
+  "pick": "UCRhXUz2Hj6aLk4i8BhEYORQ",
+  "pick_title": "Derivative Trader Sameer ",
+  "pick_followers": 5990,
+  "sure": true
+ },
+ "abhishekxtrades": {
+  "key": "abhishekxtrades",
+  "name": "AbhishekXTrades",
+  "query": "AbhishekXTrades",
+  "star": false,
+  "lists": "E49",
+  "group": "in",
+  "earlier": "",
+  "candidates": [
+   {
+    "id": "UCUJmHX01pQAsP8yQ_TfsmZw",
+    "title": "AbhishekXTrades",
+    "followers": 216000,
+    "about": "Welcome to AbhishekXTrades - Your Guide to the Indian Stock Market & Smart Trading At AbhishekXTrades, we simplify trading ...",
+    "score": 1
+   },
+   {
+    "id": "UCYFmml9ZdATuR-Re_-3IvBg",
+    "title": "Abhishek Updates ",
+    "followers": 8,
+    "about": "DISCLAIMER This is an unofficial fan page dedicated to Abhishek Nautiyal (AbhishekxTrades), created to share stock market ...",
+    "score": 0
+   },
+   {
+    "id": "UCHurVcnBfWHXBeS8gsaITSQ",
+    "title": "Abhishekxtrader_",
+    "followers": 10,
+    "about": "Main @AbhishekXTrades ⚜️ • Not impersonating.",
+    "score": 0
+   },
+   {
+    "id": "UCe8naTRlvH0EG8KGyCUirog",
+    "title": "Abhishek_Daily ",
+    "followers": 3,
+    "about": "DISCLAIMER This is an unofficial fan page dedicated to Abhishek Nautiyal (AbhishekxTrades), created to share stock market ...",
+    "score": 0
+   },
+   {
+    "id": "UCesMZvEIT4SmjjjAkR-z7CA",
+    "title": "TeamAbhishekxTrades",
+    "followers": 7,
+    "about": "",
+    "score": 0
+   }
+  ],
+  "pick": "UCUJmHX01pQAsP8yQ_TfsmZw",
+  "pick_title": "AbhishekXTrades",
+  "pick_followers": 216000,
+  "sure": true
  }
 }

@@ -2178,6 +2178,185 @@
     "fill_problems": 0,
     "lookahead_ok": true
    }
+  },
+  "TZ-01": {
+   "signals": 1210,
+   "trades": 382,
+   "reasons": {
+    "stop": 260,
+    "target": 100,
+    "time": 22
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 1.0
+  },
+  "TZ-02": {
+   "signals": 138,
+   "trades": 86,
+   "reasons": {
+    "stop": 30,
+    "time": 31,
+    "target": 25
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 0.3
+  },
+  "TE-01": {
+   "signals": 35,
+   "trades": 24,
+   "reasons": {
+    "time": 3,
+    "exit_signal": 13,
+    "stop": 5,
+    "target": 3
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 0.1
+  },
+  "UX-01": {
+   "signals": 61,
+   "trades": 26,
+   "reasons": {
+    "exit_signal": 21,
+    "time": 5
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 2.3
+  },
+  "SJ-01": {
+   "signals": 275,
+   "trades": 12,
+   "reasons": {
+    "stop": 4,
+    "trail_stop": 7,
+    "time": 1
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 0.1
+  },
+  "GT-01": {
+   "signals": 1641,
+   "trades": 25,
+   "reasons": {
+    "stop": 14,
+    "time": 5,
+    "target": 6
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 0.3
+  },
+  "AX-07": {
+   "signals": 113,
+   "trades": 68,
+   "reasons": {
+    "time": 19,
+    "stop": 36,
+    "target": 13
+   },
+   "conservative_fills": 0,
+   "lookahead_ok": true,
+   "fill_problems": 0,
+   "seconds": 0.2
+  },
+  "IM-02": {
+   "signals": 26,
+   "trades": 26,
+   "reasons": {
+    "stop": 11,
+    "time": 15
+   },
+   "lookahead_ok": true,
+   "cuts": 60,
+   "fill_problems": 0,
+   "days": "2026-10-05 to 2026-11-13 (28 recorded sessions)",
+   "note": "checked on the app's recorded NIFTY option chain (2026-10-05 to 2026-11-13 (28 recorded sessions)): look-ahead by cutting the chain at 60 random minutes; every buy at or above the recorded ask, every sale at or below the bid"
+  },
+  "AA-01": {
+   "signals": 20,
+   "trades": 20,
+   "reasons": {
+    "time": 9,
+    "stop": 9,
+    "target": 2
+   },
+   "lookahead_ok": true,
+   "cuts": 60,
+   "fill_problems": 0,
+   "days": "2026-10-05 to 2026-11-13 (28 recorded sessions)",
+   "note": "checked on the app's recorded NIFTY option chain (2026-10-05 to 2026-11-13 (28 recorded sessions)): look-ahead by cutting the chain at 60 random minutes; every buy at or above the recorded ask, every sale at or below the bid"
+  },
+  "DH-12": {
+   "signals": 2,
+   "trades": 2,
+   "reasons": {
+    "time": 1,
+    "target": 1
+   },
+   "lookahead_ok": true,
+   "cuts": 60,
+   "fill_problems": 0,
+   "days": "2026-10-05 to 2026-11-13 (28 recorded sessions)",
+   "note": "checked on the app's recorded NIFTY option chain (2026-10-05 to 2026-11-13 (28 recorded sessions)): look-ahead by cutting the chain at 60 random minutes; every buy at or above the recorded ask, every sale at or below the bid"
+  },
+  "RK-01": {
+   "signals": 0,
+   "trades": 0,
+   "reasons": {},
+   "lookahead_ok": true,
+   "cuts": 60,
+   "fill_problems": 0,
+   "days": "2026-10-05 to 2026-11-13 (28 recorded sessions)",
+   "note": "checked on the app's recorded NIFTY option chain (2026-10-05 to 2026-11-13 (28 recorded sessions)): look-ahead by cutting the chain at 60 random minutes; every buy at or above the recorded ask, every sale at or below the bid; India VIX stayed above 14 through the recording, so the book itself had no trade to check",
+   "mechanics": {
+    "vix_filter": "off for the check only",
+    "signals": 24,
+    "trades": 17,
+    "reasons": {
+     "stop": 4,
+     "trail_stop": 9,
+     "target": 4
+    },
+    "lookahead_ok": true,
+    "cuts": 40
+   }
+  },
+  "QM-02": {
+   "signals": 15,
+   "trades": 6,
+   "reasons": {
+    "exit_signal": 5,
+    "time": 1
+   },
+   "lookahead_ok": true,
+   "cuts": 60,
+   "fill_problems": 0,
+   "days": "2026-10-05 to 2026-11-13 (28 recorded sessions)",
+   "note": "checked on the app's recorded NIFTY option chain (2026-10-05 to 2026-11-13 (28 recorded sessions)): look-ahead by cutting the chain at 60 random minutes; every buy at or above the recorded ask, every sale at or below the bid"
+  },
+  "QM-01": {
+   "signals": 375,
+   "trades": 14,
+   "reasons": {
+    "exit_signal": 13,
+    "time": 1
+   },
+   "lookahead_ok": true,
+   "cuts": 60,
+   "fill_problems": 0,
+   "days": "2026-10-05 to 2026-11-13 (28 recorded sessions)",
+   "note": "checked on the app's recorded NIFTY option chain (2026-10-05 to 2026-11-13 (28 recorded sessions)): look-ahead by cutting the chain at 60 random minutes; every buy at or above the recorded ask, every sale at or below the bid"
   }
  },
  "problems": {}

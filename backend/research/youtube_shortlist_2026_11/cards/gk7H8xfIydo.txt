@@ -1,0 +1,10 @@
+video: gk7H8xfIydo
+topic: india_index
+summary: AlgoTest live session automating Power of Stocks' (Subhasish Pani's) 5 EMA strategy with a Pine script and TradingView alerts on Bank Nifty and Nifty.
+instruments: NIFTY options; BANKNIFTY options
+timeframes: 5m, 15m
+style: options_buying
+= AJ-01 | Power of Stocks' 5 EMA strategy automated on AlgoTest
+R market E 03:31 | The 5 EMA strategy of Subhasish Pani (Power of Stocks), automated. | "ham baat karenge 5 pam men stretajee kee otomeshan kee kaise aap apanee 5 em kee jo stretajee hotee hai usako aap otomet kar sakate hain jo subhaasheesh sar kee stretajee hai paavar oph stok"
+T ready | an automation walkthrough of a strategy already in the app
+D YT-01 | Power of Stocks' 5 EMA alert-candle strategy is already coded (YT-01)

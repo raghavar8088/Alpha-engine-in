@@ -1,0 +1,16 @@
+video: WM7QEwFMNJs
+topic: india_index
+summary: Trading with Sidhant's VWAP setup for sideways NIFTY days ('seven days in ten'): on the 5-minute NIFTY futures chart, a session VWAP with bands at 1, 2 and 3 standard deviations; after 10:30, when price reaches the third band take the opposite side on an opposite candle; stop beyond the third band; book half at the VWAP and the rest at the first band on the other side.
+instruments: NIFTY futures; NIFTY options*
+timeframes: 5m
+style: intraday
+= SJ-02 | VWAP third-deviation fade after 10:30 (NIFTY futures, 5 minutes): stop beyond the band, half at the VWAP, the rest at the opposite first band
+R market E 02:08 | The NIFTY futures chart (the VWAP needs volume). | "sabase pahale ham lagaa lenge niphtee kaa phyoochars chaart"
+R timeframe E 06:19 | 5-minute candles. | "so isako main lagaa detaa hoon 5 minats"
+R indicator E 06:19 | The VWAP's upper and lower bands enabled (multipliers 1, 2, 3). | "ab yahaan par aapako apar baind van, loar baind van bhee inebal karanaa hai"
+R session E 09:03 | Trade after 10:30, once the initial balance is complete. | "let it 10 10:30 ke baad isako aap tred karoge to inishiyal bailens kanpleet ho jaataa hai"
+R entry E 09:03 | At the third deviation, take the opposite side. | "jab bhee baind ke teesare devieshan pe aaegaa aap oojit end kee entree le lo"
+R stop E 11:16 | Stop beyond the third deviation. | "thard staindard devieshan ke oopar aapakee egjit rahegee yaanee stop los rahegaa"
+R target E 10:31 | Half at the VWAP, half at the next deviation. | "so 50% aap veev pe buk karoge. baakee 50% nekst staindard devieshan buk karoge"
+R filter E 10:31 | Only on sideways days. | "jab bhee aapako saaidavej maarket milegaa aur thard staindard devieshan pe jaaegaa"
+T not_testable | the VWAP and its bands need NIFTY futures volume, which the desk does not record (the index has none); the sideways-day forecast it promises is never given

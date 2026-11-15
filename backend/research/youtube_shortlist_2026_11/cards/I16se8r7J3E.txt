@@ -1,0 +1,21 @@
+video: I16se8r7J3E
+topic: india_index
+summary: Upstox's AlgoVerse course, part 5: an option-buying build for NIFTY on 3-minute candles. Enter when the close is above the Supertrend, above the upper Bollinger Band and above the pivot R1, the RSI is above 72 and the candle is green; buy the option whose premium is near Rs 250 (ATM or slightly in the money); exit when a close crosses back below the Supertrend - no separate stop. Six years on AlgoVerse: 50.68% winners, about 43% return after 1% slippage.
+instruments: NIFTY options*; NIFTY index
+timeframes: 3m
+style: options_buying
+= UX-01 | Upstox AlgoVerse build: a 3-minute close above the Supertrend, the upper Bollinger Band and the day's R1 with RSI above 72 and a green candle; out on a close back below the Supertrend (long only)
+R market E 00:02 | A NIFTY option-buying strategy. | "stretajee kaa naam rakhie niphtee opshan baaing"
+R timeframe E 01:23 | 3-minute candles. | "jo hamaaree karant kaindal hai vo 5 minat kee hai. usako ham 3 minat pe laate hain"
+R entry E 02:04 | The close above the Supertrend and the RSI above 72. | "vhen maay karant kloज़ iज़ abav supar trend, den maay aaraesaaaee iज़ abav 72"
+R entry E 02:04 | The close above the upper Bollinger Band. | "naau inportent kandeeshan karant kloज़ iज़ abav bolinjar baind"
+R entry E 02:44 | A green candle: the close above the open. | "so karant kaindal kloj iज़ abav karant opan"
+R entry E 02:44 | The close above R1. | "meraa karant kloj iज़ abav R1"
+R exit E 04:05 | Out when the close crosses below the Supertrend; no separate stop. | "so meraa karant kloj kroses bilo supar trend main nikal jaaoongaa"
+R market E 04:05 | The option: premium near Rs 250 (ATM or slightly in the money). | "ham entree lenge jab bhee hamaaraa preemiyam niyar 250 hai"
+R sizing E 04:47 | At most 10 entries in his test settings. | "baik test aur ham total nanbar oफ़ entreej 10 lete hain"
+R indicator A - | Supertrend (10, 3): he says he sets the multiplier later and never does; RSI 14; Bollinger (20, 2); R1 is the classic pivot of the previous session. | ""
+R market A - | Desk version: the signals and the result are on the NIFTY index (Angel One one-minute data through the app's backend), a labelled proxy for the Rs 250 option; long only; no entries from 15:00; out by the desk's 15:14 close. | ""
+R stop A - | A 1% guard stop on the index sizes the position (the video's only exit is the Supertrend close). | ""
+T with_assumptions | the Supertrend multiplier and the band settings are not said (A); the book trades the index as a proxy for the Rs 250 option (A)
+C win_rate | 04:47 | 50.68% winners; about 43% return after 1% slippage | NIFTY 2019-2025 on AlgoVerse | "ye stretajee kee probebilitee olamost 50.68% hai"

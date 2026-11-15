@@ -1,0 +1,18 @@
+video: TZCM6qFV3S0
+topic: india_index
+summary: Saketh Ramakrishna builds a fully automated NIFTY option-buying system (Fin Target, tested on Stockmock): at 9:20 take the call and the put trading around Rs 50 and buy whichever gains 10 points first (wait and trade); 20-point stop, 40-point target, a 1:1 trailing stop, out at 3:29. Optimised to expiry day and the day before only, then to days with India VIX under 14: 54% winners, about 1:2 reward to risk.
+instruments: NIFTY weekly options
+timeframes: 1m
+style: options_buying
+= RK-01 | Rs 50 wait and trade: at 9:20 the call and the put nearest Rs 50, each bought when it gains 10 points, 20-point stop trailed 1:1, 40-point target, out at 3:29; expiry day and the day before only, India VIX under 14 (real NIFTY premiums)
+R entry E 14:08 | From 9:20, options trading around Rs 50; the one that moves from 50 to 60 is entered. | "so 9:20 we are going to start looking at options trading around 50 rupees the moment one option becomes from 50 rupees to 60 rupees we are going to enter the option with the momentum"
+R stop E 14:08 | Stop 20 points, target 40. | "keep a stop- loss of 20 points and target of 40 points"
+R management E 15:32 | Trailing stop 1:1. | "I'm going to keep one is to one trailing that means means for every one point the option moves in our favor our stop loss is also going to move up by one point"
+R exit E 16:58 | Entry from 9:20, exit at 3:29. | "the time is 920 and the exit time is 3:29"
+R filter E 17:38 | Only on expiry day and the day before. | "only work with 1 DTE and zero DTE"
+R filter E 22:41 | Only when India VIX is under 14. | "we are going to use this system only if the Wix is between 1 to 14"
+R entry E 13:23 | Only the leg that moves is entered. | "fin Target is only going to enter the call option without entering put option"
+R market A - | Desk version: the real recorded NIFTY quotes; at 9:20 the current-expiry call and put whose mids are nearest Rs 50; each is bought at the ask when its premium reaches the 9:20 mid + 10 (both can trigger on a whipsaw day, as the platform's legs are independent); stop 20 and target 40 from the fill; the stop trails 20 points behind the best price; out at 15:28. | ""
+R filter A - | Days to expiry counted in weekdays; India VIX read at 9:20 from the recorder (expiry is now Tuesday, so the days are Monday and Tuesday). | ""
+T with_assumptions | the VIX limit and the expiry-day filter are fitted on his own backtest; India VIX stayed above 14 through the recording so far, so the book may wait a long time
+C win_rate | 24:02 | 54% winners, about 1:2 reward to risk with the VIX filter | Stockmock, two years | "strategy which has a probability of 54% and almost 1 is to two risk reward"

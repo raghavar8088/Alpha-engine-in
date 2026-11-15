@@ -38,7 +38,7 @@ const REASON: Record<string, string> = {
 };
 const MKT: Record<string, string> = { BTCUSD: "Bitcoin", ETHUSD: "Ether", XAUTUSD: "Gold", XAUUSD: "Gold", NAS100: "Nasdaq 100",
   AAPL: "Apple", EURUSD: "EUR/USD", GBPUSD: "GBP/USD", NIFTY: "Nifty", BANKNIFTY: "Bank Nifty", NSE5: "NSE stocks",
-  NSE15: "NSE stocks", NSED: "NSE stocks" };
+  NSE15: "NSE stocks", NSED: "NSE stocks", NIFTY_OPT: "Nifty options" };
 
 const istIso = (iso: string) =>
   new Date(iso).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "medium", timeStyle: "short" });

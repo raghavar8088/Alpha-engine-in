@@ -2,11 +2,12 @@
     python -I test_yc3.py
 1. the catalog's YC3 accounts are the registry's strategies (ids, names, markets; gold on Delta XAUTUSD), every market
    has money rules and a segment, no blocked strategy has an account, ids are unique across the desk;
-2. every book runs through runner.run_yc (pool books on a few stocks, with DF-01's contexts), its documents have unique
-   ids, and the ledger sizes them;
+2. every book runs through runner.run_yc (pool books on a few stocks, with DF-01's contexts; the tenth batch's option
+   books on the recorded NIFTY option chain, with their own contexts), its documents have unique ids, and the ledger sizes
+   them (option books in whole lots of 65);
 3. a book that starts mid-way starts flat;
-4. the YC3 books get the 20-channel states and their own start (the second to ninth batches their own, later
-   ones)."""
+4. the YC3 books get the 20-channel states and their own start (the second to tenth batches their own, later
+   ones); the option books' market has its own feed, closed with NSE."""
 
 import os
 import sys
@@ -24,6 +25,7 @@ os.environ.setdefault("PREMIUM_YC3F_START", "2026-01-06T00:00:00+00:00")
 os.environ.setdefault("PREMIUM_YC3G_START", "2026-01-07T00:00:00+00:00")
 os.environ.setdefault("PREMIUM_YC3H_START", "2026-01-08T00:00:00+00:00")
 os.environ.setdefault("PREMIUM_YC3I_START", "2026-01-09T00:00:00+00:00")
+os.environ.setdefault("PREMIUM_YC3J_START", "2026-01-10T00:00:00+00:00")
 HERE = Path.cwd()
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent / "backend" / "research" / "youtube_channels11_2026_11"))
@@ -78,20 +80,34 @@ pool = MK.nse_pool([m.name for m in nsed if (Path("D:/intraday_ai_data/intraday/
 ctx = R.YCR.contexts({"ze_rank930", "ze_nifty930"}, pool=pool, nifty=data["NIFTY"])
 check("DF-01 contexts built", bool(ctx.get("ze_rank930")) and bool(ctx.get("ze_nifty930")),
       f"{len(ctx.get('ze_rank930', {}))} days ranked")
+# the tenth batch's option books trade the recorded NIFTY option chain (market NIFTY_OPT): here its research copy
+import ze_more9 as X9  # noqa: E402
+import ze_opt as O  # noqa: E402
+opt_days = O.load_days(folder=Path("D:/intraday_ai_data/optchain"))
+opt_ctx, opt_picks = X9.CONTEXT(opt_days)
+opt_pool = O.pool_of(opt_days, opt_picks)
+check("the recorded NIFTY option chain loads", len(opt_days) > 0 and len(opt_pool) > 0,
+      f"{len(opt_days)} sessions, {len(opt_pool)} contract-days")
 rates = {"2026-10-01": 88.0}
 for sid, a in sorted(ys.items()):
     docs = []
     for mk, _v in a.books:
         rules = "XAUUSD" if mk == "XAUTUSD" else mk
-        ms = pool if mk in ("NSE5", "NSE15") else (nsed if mk == "NSED" else [data[rules]])
+        ms = (pool if mk in ("NSE5", "NSE15") else nsed if mk == "NSED" else opt_pool if mk == "NIFTY_OPT"
+              else [data[rules]])
+        p = {"ctx": opt_ctx} if mk == "NIFTY_OPT" else {"ctx": ctx}
         for m in ms:
-            tr, _ = R.run_yc(sid, mk, m, {}, {"ctx": ctx}, None, risk_pct=C.MONEY[mk].risk_pct)
+            tr, _ = R.run_yc(sid, mk, m, {}, p, None, risk_pct=C.MONEY[mk].risk_pct)
             docs += R.yc_docs(tr, m, sid, mk, R.is_overnight(sid, mk), None)
     ids = [d["_id"] for d in docs]
     res = L.walk(docs, rates, "2026-12-31")
     sized = sum(1 for f in res["fields"].values() if f["qty"] > 0)
     check(f"{sid} {','.join(mk for mk, _ in a.books)}", len(ids) == len(set(ids)) and np.isfinite(res["summary"]["equity"])
           and (sized > 0 or not docs), f"trades {len(docs)} sized {sized} equity {res['summary']['equity']:,.0f}")
+    if a.books == (("NIFTY_OPT", "V0"),) and docs:
+        qtys = sorted({f["qty"] for f in res["fields"].values() if f["qty"] > 0})
+        check(f"{sid} buys whole lots of 65 of named contracts", all(q % 65 == 0 for q in qtys)
+              and all(d["sym"].startswith("NIFTY ") and d["sym"][-2:] in ("CE", "PE") for d in docs), f"qty {qtys[:4]}")
 
 for sid, mk in (("DF-02", "NIFTY"), ("BN-01", "BTCUSD"), ("RU-05", "XAUTUSD"), ("NK-01", "EURUSD"), ("UK-01", "NAS100")):
     m = data["XAUUSD" if mk == "XAUTUSD" else mk]
@@ -129,7 +145,25 @@ check("eighth-batch books start at YC3H_START_T", SG._start_of("XAUTUSD", b8) ==
 check("YC3H_IDS is the registry's eighth batch", set(C.YC3H_IDS) == {r.sid for r in ZS._NEW[113:130]})
 b9 = C.BY_ID["CT-05"]
 check("ninth-batch books start at YC3I_START_T", SG._start_of("BTCUSD", b9) == datetime.fromtimestamp(S.YC3I_START_T, timezone.utc))
-check("YC3I_IDS is the registry's ninth batch", set(C.YC3I_IDS) == {r.sid for r in ZS._NEW[130:]})
+check("YC3I_IDS is the registry's ninth batch", set(C.YC3I_IDS) == {r.sid for r in ZS._NEW[130:141]})
+b10 = C.BY_ID["IM-02"]
+check("tenth-batch books start at YC3J_START_T", SG._start_of("NIFTY_OPT", b10) == datetime.fromtimestamp(S.YC3J_START_T, timezone.utc))
+check("YC3J_IDS is the registry's tenth batch", set(C.YC3J_IDS) == {r.sid for r in ZS._NEW[141:]})
+check("the tenth batch's option books trade NIFTY_OPT, its index books the index",
+      all(C.BY_ID[s].books == (("NIFTY_OPT", "V0"),) for s in ("IM-02", "AA-01", "DH-12", "RK-01", "QM-02", "QM-01"))
+      and C.BY_ID["TE-01"].books == (("BANKNIFTY", "V0"),) and C.BY_ID["SJ-01"].books == (("NIFTY", "V0"),))
+check("NIFTY_OPT runs in the index cycle: whole lots of 65, the premium paid in full, two contracts at once",
+      C.MONEY["NIFTY_OPT"].group == "index" and C.MONEY["NIFTY_OPT"].lot == 65 and C.MONEY["NIFTY_OPT"].margin == 1.0
+      and C.MONEY["NIFTY_OPT"].max_open == 2 and "NIFTY_OPT" in R.POOLS)
+_sunday = datetime(2026, 11, 15, 8, 0, tzinfo=timezone.utc)
+_monday = datetime(2026, 11, 16, 5, 0, tzinfo=timezone.utc)
+check("NIFTY_OPT has its own feed, closed with NSE, stale without new snapshots",
+      SG.FEED_OF.get("NIFTY_OPT", "NIFTY_OPT") == "NIFTY_OPT" and SG.feed_state("NIFTY_OPT", {"last_t": None}, _sunday)[0] == "closed"
+      and SG.feed_state("NIFTY_OPT", {"last_t": int(_monday.timestamp()) - 1200}, _monday)[0] == "stale"
+      and SG.feed_state("NIFTY_OPT", {"last_t": int(_monday.timestamp()) - 60}, _monday)[0] == "live")
+check("a skipped index cycle still reports the option chain's feed (from the recorder's newest file)",
+      (SG.feeds_now("index", {"skipped": "no new bars"}).get("NIFTY_OPT") or {}).get("last_t") is not None
+      and SG.feeds_now("index", {"optchain_to": 123}).get("NIFTY_OPT", {}).get("last_t") == 123)
 check("the ninth batch's Apple book trades the desk's Apple market", C.BY_ID["QN-01"].books == (("AAPL", "V0"),))
 check("eighth-batch order-flow books trade bitcoin only", all(C.BY_ID[s].books == (("BTCUSD", "V0"),) for s in ("SC-02", "SC-03", "SC-04")))
 check("ether books close at the UTC day's end unless held overnight",

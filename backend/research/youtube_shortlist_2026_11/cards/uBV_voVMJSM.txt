@@ -1,0 +1,14 @@
+video: uBV_voVMJSM
+topic: india_index
+summary: Definedge (Brijesh and Prashant) on a simple NIFTY option-selling strategy: a moving average channel (20 for entries, 34 for exits) on Heikin Ashi candles; a close below the 20-period low line sells a call (the 'safer' side), with the stop argued on air.
+instruments: NIFTY options
+timeframes: unclear
+style: options_selling
+= DF-04 | Heikin Ashi with a moving average channel (20 entry, 34 exit): sell a call on a close below the 20 low line
+R market E 00:06 | An option-selling strategy. | "ye opshan seling ke lie ye ek bahut barhiyaa stretajee hai"
+R indicator E 00:49 | A moving average channel ... | "aur ham is pe lenge mooving evarej chainal"
+R indicator E 02:11 | ... on Heikin Ashi candles. | "ham enaashee chaarts ovar kaindalastik chaart le rahe hain"
+R indicator E 05:03 | 20 for the entry, 34 for the exit. | "entree ke lie 20 hai aur egjit ke lie 34 34 hai"
+R entry E 02:54 | The first candle closing below the 20 moving average low. | "hamaaraa pharst kaindal thaa jahaan par praais ne ye 20 mooving evarej lo ke neeche kloj diyaa"
+R entry E 03:36 | The safer trade is selling the call. | "to sephar iज़ kol sel"
+T not_testable | option selling with the strike left open ('the strike above'), the timeframe not stated and the stop argued on air (25 option points or 50 NIFTY points)
