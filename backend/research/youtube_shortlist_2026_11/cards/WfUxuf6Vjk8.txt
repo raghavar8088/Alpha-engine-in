@@ -6,12 +6,12 @@ timeframes: daily
 style: swing
 = TK-08 | Daily Stochastic RSI %K/%D cross in the direction of the daily EMA 50, out on the opposite cross
 R filter E 05:10 | The daily chart's 50 EMA judges the trend. | "are on the daily chart. So, this is the 50 exponential moving average."
-R filter E 05:25 | Below the 50 EMA the trend is bearish. | "If price is below the 50 EMA we're going to say that the trend is bearish."
-R entry E 05:46 | Above the 50 EMA, look for long signals from the stochastic. | "above 50 EMA, we're going to be looking for signals from our stock to go long"
-R entry E 05:46 | Below it, short signals. | "And below the 50 EMA, we're going to be looking uh for signals on our stock to go short."
+R filter E 05:30 | Below the 50 EMA the trend is bearish. | "If price is below the 50 EMA we're going to say that the trend is bearish."
+R entry E 05:56 | Above the 50 EMA, look for long signals from the stochastic. | "above 50 EMA, we're going to be looking for signals from our stock to go long"
+R entry E 06:01 | Below it, short signals. | "And below the 50 EMA, we're going to be looking uh for signals on our stock to go short."
 R entry E 06:48 | The signals are the crosses up or down. | "We're going to be looking for crosses up or down."
 R entry E 10:30 | Any cross that agrees with the trend counts. | "What we're looking for here is really just any cross that agrees with our trend."
-R market E 06:20 | Not below the daily timeframe. | "I wouldn't advise using a stock under the daily"
+R market E 06:24 | Not below the daily timeframe. | "I wouldn't advise using a stock under the daily"
 R market A - | Desk version: Delta BTCUSD and gold (Delta XAUTUSD) on daily candles (the UTC day for bitcoin, the 17:00 New York day for gold), held across days (the desk keeps too little ether history for the daily EMA 50). | ""
 R setup A - | The Stochastic RSI is TradingView's default (RSI 14, stochastic 14, %K 3, %D 3). A long: a daily close above the EMA 50 on the day %K crosses above %D; a short: a close below the EMA 50 on a day %K crosses below %D. | ""
 R entry A - | Enter at the next daily open. | ""

@@ -5,6 +5,6 @@ instruments: Bitcoin
 timeframes: 5m, 15m, 1m
 style: intraday
 = SC-05 | Real versus failed breakouts: stop hunts through key levels, absorption of the breakout volume, trapped traders (lesson 7)
-R setup E 04:56 | High volume came into the breakout, but it failed because of absorption. | "lekin brekaaaut phel ho gayaa. kyonki isamen objorpshan huee hai"
-R setup E 00:06 | Lesson seven is about liquidity and stop hunts. | "lesan sevan pe ham baat karenge likviditee end stop hant"
+R setup E 05:06 | High volume came into the breakout, but it failed because of absorption. | "lekin brekaaaut phel ho gayaa. kyonki isamen objorpshan huee hai"
+R setup E 00:24 | Lesson seven is about liquidity and stop hunts. | "lesan sevan pe ham baat karenge likviditee end stop hant"
 T concept_only | the levels and trapped-trader reads come from the footprint's per-price prints, read by eye; a failed breakout read by delta is SC-03's absorption at the swept level

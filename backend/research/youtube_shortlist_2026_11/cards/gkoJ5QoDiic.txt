@@ -5,13 +5,13 @@ instruments: Any (IWM, AMC, DKNG, SPY examples); Bitcoin*; Ether*
 timeframes: Any (5m, daily, weekly, monthly examples)
 style: intraday
 = CG-05 | Stair step: 10 or more higher lows (lower highs) in a row, enter on the break of the last candle with the daily EMA 12 on the trade's side, stop past the stair's extreme, half at 1R, the rest at 3R
-R setup E 00:01 | The pattern is a higher low every candle (or a lower high every candle) for a significant number in a row; its break is the signal. | "we're going to utilize the pattern of a higher low every single candlestick or a lower high every single candlestick for a significant number in a row and when that pattern breaks it is our signal to act upon"
-R setup E 01:11 | He likes eight to ten candles or more in a row. | "for me personally i like to see eight to ten candles or more in a row if i'm going to consider this trading style"
-R filter E 15:49 | The conservative version waits for at least 10 candles in a row. | "i can be waiting for at least 10 candles in a row"
-R filter E 01:21 | The longer-term timeframe should favour the pullback (trade with longer-term momentum). | "i want to ensure that the longer term time frame is potentially favoring a pullback"
+R setup E 00:06 | The pattern is a higher low every candle (or a lower high every candle) for a significant number in a row; its break is the signal. | "we're going to utilize the pattern of a higher low every single candlestick or a lower high every single candlestick for a significant number in a row and when that pattern breaks it is our signal to act upon"
+R setup E 01:15 | He likes eight to ten candles or more in a row. | "for me personally i like to see eight to ten candles or more in a row if i'm going to consider this trading style"
+R filter E 16:00 | The conservative version waits for at least 10 candles in a row. | "i can be waiting for at least 10 candles in a row"
+R filter E 01:44 | The longer-term timeframe should favour the pullback (trade with longer-term momentum). | "i want to ensure that the longer term time frame is potentially favoring a pullback"
 R entry E 03:40 | Enter as soon as price breaks the level, without waiting for the candle to close. | "i'm not waiting for candles to close i'm acting as soon as the price breaks"
-R stop E 03:40 | The stop goes right above the high, with a little wiggle room. | "my stop loss is now going to instantly be placed right away above that level"
-R target E 05:30 | Sell half once price has moved one risk in favour; the trade can then no longer lose. | "as soon as we drop down to where i can be risk free i sell half of my position"
+R stop E 03:59 | The stop goes right above the high, with a little wiggle room. | "my stop loss is now going to instantly be placed right away above that level"
+R target E 05:42 | Sell half once price has moved one risk in favour; the trade can then no longer lose. | "as soon as we drop down to where i can be risk free i sell half of my position"
 R market A - | Desk version: Delta BTCUSD and ETHUSD on 5-minute candles, out by the end of the UTC day. | ""
 R setup A - | A stair is at least 10 consecutive 5-minute candles each with a higher low than the one before (for a short) or a lower high (for a long). | ""
 R entry A - | A stop entry at the last stair candle's low (short) or high (long), live for the next candle only. | ""

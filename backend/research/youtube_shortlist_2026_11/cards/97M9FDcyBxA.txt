@@ -5,6 +5,6 @@ instruments: Bitcoin; Ether; altcoins
 timeframes: 15m, 4h, 12h, daily
 style: swing
 = CG-06 | Tightening ranges in a bullish environment favour bull breaks (market review)
-R setup E 00:06 | In a bullish environment, watch for tightening ranges: the stop level is close by, so a bull break gives a reward larger than the risk. | "when we are in a bullish environment like we are currently in keep an eye out for tightening ranges"
-R filter E 13:35 | The tightening ranges favour bull breaks as long as bitcoin is in a daily uptrend. | "they favor bull breaks as long as bitcoins in a daily uptrend"
+R setup E 00:16 | In a bullish environment, watch for tightening ranges: the stop level is close by, so a bull break gives a reward larger than the risk. | "when we are in a bullish environment like we are currently in keep an eye out for tightening ranges"
+R filter E 13:39 | The tightening ranges favour bull breaks as long as bitcoin is in a daily uptrend. | "they favor bull breaks as long as bitcoins in a daily uptrend"
 T concept_only | the ranges, equilibriums and support levels are drawn by eye on each chart; no fixed trigger, stop or target is stated

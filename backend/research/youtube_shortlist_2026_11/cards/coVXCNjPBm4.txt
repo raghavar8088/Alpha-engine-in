@@ -5,9 +5,9 @@ instruments: Any (crypto and forex examples)
 timeframes: Any
 style: intraday
 = TK-05 | Swing failure pattern (LuxAlgo): a sweep of relative equal highs (lows) that fails to close beyond, a close past the confirmation level, stop beyond the wick
-R setup E 01:22 | Relative equal highs or lows are an objective for the market. | "the market often aims for this level as an objective"
-R entry E 02:21 | A close beyond the indicator's confirmation level marks the likely reversal. | "If a candle closes beyond this confirmation level, a triangle will appear, signaling a likely market reversal."
-R filter E 03:33 | The volume filter: volume outside the swing area under 25% of the total. | "requiring that volume outside the swing area be less than 25% of the total volume"
-R stop E 04:22 | The stop goes above the swing failure pattern. | "Just looking to place our stop-loss above the swing failure pattern"
+R setup E 01:32 | Relative equal highs or lows are an objective for the market. | "the market often aims for this level as an objective"
+R entry E 02:33 | A close beyond the indicator's confirmation level marks the likely reversal. | "If a candle closes beyond this confirmation level, a triangle will appear, signaling a likely market reversal."
+R filter E 03:44 | The volume filter: volume outside the swing area under 25% of the total. | "requiring that volume outside the swing area be less than 25% of the total volume"
+R stop E 04:42 | The stop goes above the swing failure pattern. | "Just looking to place our stop-loss above the swing failure pattern"
 T with_assumptions | the swing sensitivity and confirmation level are the indicator's own settings, and the volume split needs lower-timeframe volume; the target is 'a favourable reward-to-risk'
 D LS-00 | a sweep of a swing level that closes back inside is already on the desk (LS-00 and its versions; CC-02)

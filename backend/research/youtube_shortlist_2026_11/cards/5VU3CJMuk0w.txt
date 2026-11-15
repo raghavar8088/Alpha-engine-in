@@ -5,8 +5,8 @@ instruments: US stocks; Bitcoin*; Ether*; Gold*
 timeframes: daily
 style: swing
 = PL-06 | Backtrader dip test: buy after two lower closes in a row, sell five days later
-R entry E 05:46 | Buy a slight dip: price down two days in a row. | "just it's basically just buying a slight dip so we're gonna see what would happen if the price of a stock went down two"
-R exit E 06:04 | Hold it for a number of days, then sell. | "then we held it for X number of days and sold it immediately after that"
+R entry E 05:57 | Buy a slight dip: price down two days in a row. | "just it's basically just buying a slight dip so we're gonna see what would happen if the price of a stock went down two"
+R exit E 06:07 | Hold it for a number of days, then sell. | "then we held it for X number of days and sold it immediately after that"
 R market A - | Desk version: Delta BTCUSD, ETHUSD and gold (Delta XAUTUSD) on daily candles (the UTC day for crypto, the 17:00 New York day for gold), held across days; one position at a time. | ""
 R entry A - | Buy at the next daily open after a close below the previous close that was itself below the close before it. | ""
 R exit A - | Sell after 7,200 one-minute rows - five days of crypto, a little over five trading days of gold (Backtrader's own quick-start holds five bars; the video leaves the number open); a guard stop three daily ATR (14) below the entry. | ""

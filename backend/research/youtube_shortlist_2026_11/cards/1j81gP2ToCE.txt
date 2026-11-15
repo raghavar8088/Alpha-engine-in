@@ -5,6 +5,6 @@ instruments: PLAY/USDT; ENJ/USDT (AscendEX)
 timeframes: Any
 style: mixed
 = HB-05 | Fixed long grid: buy and sell limits at levels between a floor and a ceiling, the level spacing above the round-trip fees
-R setup E 00:44 | First define a floor and a ceiling for the grid. | "the first thing is we Define a floor and a ceiling price for the grid"
+R setup E 00:49 | First define a floor and a ceiling for the grid. | "the first thing is we Define a floor and a ceiling price for the grid"
 R setup E 01:36 | The spacing must be large enough not to lose money on fees. | "the spread should be large enough so that you're not losing money on the fees"
 T concept_only | the floor and ceiling are picked by eye on each chart, and a grid is many resting orders at once, which the desk's one-position books do not simulate

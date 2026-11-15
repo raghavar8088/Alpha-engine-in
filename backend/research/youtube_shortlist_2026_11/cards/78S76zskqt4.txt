@@ -10,5 +10,5 @@ R entry E 20:26 | RSI hitting 30 is the long signal (70 the short). | "hits 30 t
 T with_assumptions | the triple barrier's default stop, target and time limit are not read out
 D YT-25 | the RSI 30/70 reversal is already in the library (the top-20 study's YT-25)
 = HB-03 | Hummingbot MACD-BB V1 controller: a Bollinger %B threshold plus a MACD crossover, triple-barrier exits (configuration demo)
-R entry E 34:15 | Two indicators, MACD and Bollinger Bands, decide the long and short entries. | "bands to determine long and short entry points so the way it works is that for Ballinger bands is looking at the the"
+R entry E 34:18 | Two indicators, MACD and Bollinger Bands, decide the long and short entries. | "bands to determine long and short entry points so the way it works is that for Ballinger bands is looking at the the"
 T not_testable | the thresholds, MACD settings and the triple barrier's values are set on the configuration screen and never read out; a three-day demo backtest

@@ -5,5 +5,5 @@ instruments: US stocks
 timeframes: daily
 style: unclear
 = PL-05 | Backtrader setup: installing and running the Cerebro engine (no strategy)
-R setup E 02:15 | Backtrader answers what a strategy would have made. | "so back trader helps you answer those questions"
+R setup E 02:34 | Backtrader answers what a strategy would have made. | "so back trader helps you answer those questions"
 T concept_only | an installation tutorial with no trading rule; the series' strategy is part 2's (PL-06)

@@ -5,9 +5,9 @@ instruments: Bitcoin; gold
 timeframes: 15m, 5m, 1m
 style: intraday
 = SC-02 | Cumulative delta divergence: a higher high (lower low) with a lower (higher) session CVD, entered on the close through the low (high) between the swings, 2R
-R setup E 03:33 | A bearish divergence: price going up while the delta comes down. | "selars preshar leke aa rahe hain. berish daayavarjan jab banatee hai jab praais oopar jaa rahee hotee hai lekin deltaa neeche aa rahaa hotaa hai"
-R filter E 03:51 | Never trade on delta alone. | "bataatee hai ki ek daayavarjens ban gayaa. usakee bhee egjaanpal ham aake dekhate hain. in maay parsanal opiniyan main kabhee bhee sirph deltaa ke bes pe tred naheen"
-R setup E 09:08 | Order flow is a trigger and confirmation, not a strategy by itself. | "karate ho. ordar phlo itaselph iज़ not a stretajee too tek treds. it ij jast a"
+R setup E 03:51 | A bearish divergence: price going up while the delta comes down. | "selars preshar leke aa rahe hain. berish daayavarjan jab banatee hai jab praais oopar jaa rahee hotee hai lekin deltaa neeche aa rahaa hotaa hai"
+R filter E 04:07 | Never trade on delta alone. | "bataatee hai ki ek daayavarjens ban gayaa. usakee bhee egjaanpal ham aake dekhate hain. in maay parsanal opiniyan main kabhee bhee sirph deltaa ke bes pe tred naheen"
+R setup E 09:19 | Order flow is a trigger and confirmation, not a strategy by itself. | "karate ho. ordar phlo itaselph iज़ not a stretajee too tek treds. it ij jast a"
 R market A - | Desk version: Delta BTCUSD on 15-minute candles, with the desk's own record of bitcoin's taker buy and sell volume per minute (kept since 8 November 2026): a candle's delta is its taker buys minus taker sells, unknown when any of its minutes is unrecorded; out by the end of the UTC day. | ""
 R setup A - | The cumulative delta is the running sum of candle deltas since the UTC day began. Swing highs and lows are 3-candle pivots, known three candles later. Bearish: the day's last two swing highs a higher high with a lower cumulative delta; bullish: the last two swing lows a lower low with a higher cumulative delta. | ""
 R entry A - | Enter at the next open after the first close below the lowest low between the two highs (above the highest high between the two lows) within 12 candles of the second swing: his lower-timeframe lower low as the trigger. | ""

@@ -5,7 +5,7 @@ instruments: Bitcoin; gold; any futures
 timeframes: 5m, 1m
 style: intraday
 = SC-01 | Footprint basics: delta, imbalance (300%), absorption, point of control, value area and VWAP (lesson 2)
-R setup E 10:56 | A red candle with positive delta after a rejection means absorption. | "kaindal red hai, rijekshan aaee hai lekin deltaa pojitiv hai. isakaa kyaa matalab hai? absorpshan ho rahee hai"
+R setup E 11:05 | A red candle with positive delta after a rejection means absorption. | "kaindal red hai, rijekshan aaee hai lekin deltaa pojitiv hai. isakaa kyaa matalab hai? absorpshan ho rahee hai"
 R setup E 08:19 | He uses a 300% imbalance ratio. | "karate hain. ab main jo yooज़ karataa hoon 300% yooज़ karataa hoon."
 R entry E 12:46 | Entry on the break of the high; he should have waited for the close. | "brek oph d haaee. aaee shud haiv vet it phor kloj."
 T concept_only | a lesson of definitions; its absorption trade is lesson 5's SC-03, and footprint imbalances need trade-by-trade prices the desk does not record

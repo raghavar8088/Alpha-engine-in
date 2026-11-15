@@ -7,8 +7,8 @@ style: positional
 = MN-03 | Bear-market accumulation: a Martingale double-down of spot lots 1/7, 2/7 and 4/7 at lower levels, no leverage and no fixed stop
 R market E 01:34 | DCA trading on the spot market with no leverage. | "trading on the spot market, no leverage,"
 R stop E 14:24 | No hard, fast and fixed stop loss. | "Instead of having a hard and fast and fixed stop loss"
-R entry E 15:59 | The Martingale double down. | "And that is the Martingale double down."
-R entry E 18:19 | The first lot is $100 of a $700 stack (1/7). | "going to use $100 of that $700 in my"
+R entry E 16:06 | The Martingale double down. | "And that is the Martingale double down."
+R entry E 18:22 | The first lot is $100 of a $700 stack (1/7). | "going to use $100 of that $700 in my"
 R entry E 26:27 | 6/7 of the stack is kept back to average down twice. | "we're keeping the majority of our position, 6/7 of it reserved as capital"
 C return_pct | 23:44 | about 500% from a 2022 average entry near $19,500 | 2022-2025 | "ended up being a very, very handsome return of about 500%."
 T concept_only | the cycle timing and the dip levels (49K, 38,555) are read by eye from the chart, and there is no exit beyond 'partial profits on the way up': a multi-year spot accumulation with no stop or exit that a per-trade paper book cannot score

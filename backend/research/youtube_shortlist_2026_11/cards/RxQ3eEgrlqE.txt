@@ -5,8 +5,8 @@ instruments: Cardano (ADA); any crypto
 timeframes: 1h
 style: swing
 = MN-04 | 'Better crypto signals' DCA bot: base order and three DCA orders doubling 1:2:4:8, take-profit on the bounce (promotion)
-R entry E 02:05 | Four possible orders, because it is a dollar-cost-averaging bot. | "There's an order here, which is our DCA1, DCA 2, and then DCA 3."
+R entry E 02:10 | Four possible orders, because it is a dollar-cost-averaging bot. | "There's an order here, which is our DCA1, DCA 2, and then DCA 3."
 R entry E 02:38 | The second order is two lots, the third four lots. | "would be two lots. Then the next one down would be four lots."
-R entry E 02:38 | The orders double on the way down. | "We double down on the way down."
+R entry E 02:45 | The orders double on the way down. | "We double down on the way down."
 C other | 00:04 | almost $1,000 of profit since April 2024 | April 2024 to July 2026 | "since then the bot has passively made almost $1,000"
 T not_testable | the deal-start signal is the paid Better Crypto Signals strategy, and the DCA spacing and the take-profit are never stated; a product promotion

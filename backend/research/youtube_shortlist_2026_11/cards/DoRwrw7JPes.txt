@@ -5,7 +5,7 @@ instruments: Forex pairs
 timeframes: Any (4h and daily examples)
 style: swing
 = TC-07 | Nine price-action patterns (breakout build-up, wedge, fakie, flag, head and shoulders, trend-line retest, trap, triangle, triple tap), stops behind technical barriers (walkthrough)
-R entry E 04:19 | Wait for the price to close fully outside the level, better with a strong momentum push. | "you want to make sure that the price is fully closing outside of the level"
-R stop E 02:36 | Technical barriers for the stop: support and resistance, highs and lows, a trend line or a moving average. | "technical barriers could be support and resistance could be highs and lows"
-R target E 01:56 | For targets, look left to the biggest areas of support and resistance. | "keep it simple look left and look at where the biggest"
+R entry E 04:42 | Wait for the price to close fully outside the level, better with a strong momentum push. | "you want to make sure that the price is fully closing outside of the level"
+R stop E 02:59 | Technical barriers for the stop: support and resistance, highs and lows, a trend line or a moving average. | "technical barriers could be support and resistance could be highs and lows"
+R target E 02:20 | For targets, look left to the biggest areas of support and resistance. | "keep it simple look left and look at where the biggest"
 T concept_only | every pattern, level and trend line is drawn by eye on each chart with no fixed trigger; the trap and the fakie resemble the library's trap and fakeout strategies

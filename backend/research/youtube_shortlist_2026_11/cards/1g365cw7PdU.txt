@@ -5,7 +5,7 @@ instruments: Any (crypto and forex examples)
 timeframes: Any
 style: intraday
 = TK-09 | Fair value gap in the discount after a liquidity sweep and a break of structure, stop beyond the gap
-R setup E 09:27 | The confluence: a liquidity sweep, a break of structure, a bullish gap in discount and a retest of structure. | "A liquidity sweep, a break of structure, a bullish fair value gap in discount, and a retest of previous structure."
-R stop E 09:47 | The stop below the gap, targeting levels higher. | "place our stop below the fair value gap, and look to just target levels higher"
+R setup E 09:40 | The confluence: a liquidity sweep, a break of structure, a bullish gap in discount and a retest of structure. | "A liquidity sweep, a break of structure, a bullish fair value gap in discount, and a retest of previous structure."
+R stop E 09:59 | The stop below the gap, targeting levels higher. | "place our stop below the fair value gap, and look to just target levels higher"
 T with_assumptions | the structure, swept levels and targets are read by eye on each chart
 D MY-01 | a fair value gap in the discount of the dealing range after a sweep is already coded (MY-01; also the desk's FVG books such as NJ-28 and CP-13)

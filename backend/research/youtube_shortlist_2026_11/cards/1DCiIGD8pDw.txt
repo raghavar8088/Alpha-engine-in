@@ -6,5 +6,5 @@ timeframes: 5m, 15m, 1h
 style: intraday
 = SC-06 | Volume profile levels: point of control, value area high and low, high and low volume nodes, confirmed by order flow (lesson 8)
 R setup E 10:58 | The volume profile is a tool to understand value, not to generate signals. | "to make you understand Volume Profile, not to generate signals, and there is no such thing as getting rich from this ."
-R setup E 10:58 | It is just a tool. | "Volume Profile is just a tool itself,"
+R setup E 11:04 | It is just a tool. | "Volume Profile is just a tool itself,"
 T concept_only | a lesson on the levels, with trades that depend on order-flow reads judged by eye at each level; he says it does not generate signals

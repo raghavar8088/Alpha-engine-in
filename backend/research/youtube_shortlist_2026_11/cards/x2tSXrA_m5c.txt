@@ -6,5 +6,5 @@ timeframes: daily
 style: swing
 = MN-07 | TBT divergence clusters for dip buys and profit-taking (paid indicator)
 R entry E 00:48 | The TBT divergence signal is the key tool. | "the TBT divergence signal is the sauce"
-R entry E 02:38 | The thick tags are divergence clusters, the signals he likes most. | "these are called TBT divergence clusters"
+R entry E 02:52 | The thick tags are divergence clusters, the signals he likes most. | "these are called TBT divergence clusters"
 T not_testable | TBT Divergence is a paid indicator ('a lot of math involved') whose rules are not given, with no stop or target

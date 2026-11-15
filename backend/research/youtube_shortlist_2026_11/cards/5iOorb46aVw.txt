@@ -5,6 +5,6 @@ instruments: DOGE/USDT
 timeframes: Any
 style: scalping
 = HB-04 | Aroon-skewed market making: two-sided quotes between a minimum and maximum spread, widened on the trending side
-R setup E 00:14 | The spread sits between the max and min spread settings. | "sets the average uh between the max spread and min spread so in this case it'd be like about 0.5 percent uh an average of 0.1 uh but"
+R setup E 00:33 | The spread sits between the max and min spread settings. | "sets the average uh between the max spread and min spread so in this case it'd be like about 0.5 percent uh an average of 0.1 uh but"
 R setup E 00:43 | The Aroon oscillator pushes the spreads toward the max or the min. | "like the roon oscillator indicator that this user uh created in order to kind of"
 T not_testable | a market-making bot: two-sided resting quotes whose fills depend on the order queue, which the desk's signal books cannot simulate; the Aroon settings are not given

@@ -5,6 +5,6 @@ instruments: NEAR/USDT (Binance perpetual)
 timeframes: 3m
 style: intraday
 = HB-06 | Bollinger V1 controller tuned by Optuna: short near the upper band, long near the lower band (optimisation tutorial)
-R entry E 01:22 | Touching the upper band is a good time to short. | "if it's touching the upper bound is a good time to short"
+R entry E 01:33 | Touching the upper band is a good time to short. | "if it's touching the upper bound is a good time to short"
 R setup E 00:58 | The Bollinger strategy is the one optimised. | "Ballinger strategy is a very simple strategy probably you know about it if"
 T not_testable | the parameters are left to a 300-trial Optuna search whose winner is not shown, so there is no fixed rule to run

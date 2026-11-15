@@ -6,7 +6,7 @@ timeframes: Any
 style: swing
 = MN-08 | 3Commas DCA bot: TBO breakout deal start, safety orders below the base order, closed on the bounce
 R entry E 01:22 | Deals start on the TBO breakout. | "i'm using the tbo breakout to start all of my deals"
-R entry E 02:48 | Safety orders below the base order: a base at 10, then 9, 8 and 7. | "then you should be placing your additional buy orders at 9 8 7"
+R entry E 03:06 | Safety orders below the base order: a base at 10, then 9, 8 and 7. | "then you should be placing your additional buy orders at 9 8 7"
 R filter E 05:46 | Keep at least 30% of the account free. | "make sure that you're leaving at least 30 of your account free available for"
 T not_testable | the TBO deal-start signal is a paid indicator and the take-profit is not stated
 D MN-02 | the same 3Commas DCA bot on the TBO deal-start signal, from his earlier video

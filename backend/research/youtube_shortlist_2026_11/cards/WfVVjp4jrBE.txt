@@ -5,6 +5,6 @@ instruments: Any (stocks and crypto examples)
 timeframes: Any (1m to daily examples)
 style: mixed
 = CG-08 | Entry tools webinar: falling wedges, inverse head and shoulders, bottom fishing and trend-change entries
-R entry E 13:20 | Entries on drawn patterns such as the falling wedge. | "We've got the falling wedge, and this is one of my favorite patterns here"
-R stop E 30:27 | Triggered in long, the stop goes below the low, and he gets risk-free quickly. | "get triggered in, you're long, your stop goes below the low"
+R entry E 13:30 | Entries on drawn patterns such as the falling wedge. | "We've got the falling wedge, and this is one of my favorite patterns here"
+R stop E 30:42 | Triggered in long, the stop goes below the low, and he gets risk-free quickly. | "get triggered in, you're long, your stop goes below the low"
 T concept_only | the wedges, necklines and trend changes are drawn by eye on each chart; its stair step is the separate video's CG-05

@@ -5,23 +5,23 @@ instruments: Bitcoin; any crypto*; US stocks (Tesla, OSTK, GRWG examples)
 timeframes: 5m, 1h, 4h
 style: intraday
 = CG-03 | Back burner, 5 minutes: the first RSI (14) close under 30 after a new 30-day high, half at 1R with the stop to entry, the rest at 3R or after three hours
-R setup E 00:01 | The first 5-minute (or hourly) oversold conditions after a significant bull run. | "it's the first five minute or first hourly oversold conditions after a significant bull run"
-R entry E 01:12 | On bitcoin: when the 5-minute RSI drops under 30, buy. | "when this little line drops under the number 30 referring to the rsi on the 5 minute time frame buy"
-R filter E 01:26 | Highest probability when the name is in blue sky (at all-time highs). | "when you're in a name that's ideally in blue sky that's when we look for this trade set up to have its highest probabilities"
-R filter E 03:29 | The longer-term uptrend stays intact: the 5-minute oversold low should set an hourly higher low. | "generally we'll look for the first five-minute oversold conditions to try and set our hourly higher low"
-R entry E 05:26 | One entry when the 5-minute RSI breaks 30, a second if it reaches 20. | "make one entry when the 5-minute rsi breaks 30 and it will be to save a second entry if the rsi gets down to 20"
-R stop E 08:01 | Exit half a little above the entry, then put the stop under the low of the dump and let the rest run. | "i exit half a dollar higher than where i entered i put my stop under the low of the dump"
+R setup E 00:08 | The first 5-minute (or hourly) oversold conditions after a significant bull run. | "it's the first five minute or first hourly oversold conditions after a significant bull run"
+R entry E 01:26 | On bitcoin: when the 5-minute RSI drops under 30, buy. | "when this little line drops under the number 30 referring to the rsi on the 5 minute time frame buy"
+R filter E 01:50 | Highest probability when the name is in blue sky (at all-time highs). | "when you're in a name that's ideally in blue sky that's when we look for this trade set up to have its highest probabilities"
+R filter E 03:38 | The longer-term uptrend stays intact: the 5-minute oversold low should set an hourly higher low. | "generally we'll look for the first five-minute oversold conditions to try and set our hourly higher low"
+R entry E 05:39 | One entry when the 5-minute RSI breaks 30, a second if it reaches 20. | "make one entry when the 5-minute rsi breaks 30 and it will be to save a second entry if the rsi gets down to 20"
+R stop E 08:06 | Exit half a little above the entry, then put the stop under the low of the dump and let the rest run. | "i exit half a dollar higher than where i entered i put my stop under the low of the dump"
 R market A - | Desk version: Delta BTCUSD and ETHUSD on 5-minute candles, RSI (14) of the closes (he trades the close; the video's low-based RSI is only for display), out by the end of the UTC day. | ""
 R setup A - | 'A significant bull run' is a new 30-day high; the first 5-minute close with the RSI under 30 after that high is the setup, once per new high; no setup until the market has 30 days of history. | ""
 R entry A - | Long at the next open; the second entry at RSI 20 is not coded (one position). | ""
 R stop A - | Stop one ATR (14) under the lowest low since the 30-day high; half off at 1R with the stop moved to the entry, the rest at 3R or at the open three hours after the entry. | ""
 T with_assumptions | 'significant bull run' is our new 30-day high (A); his single entry has no stop, so ours is one ATR under the drop (A); the RSI-20 add and the news/liquidity checklist are not coded
-C other | 01:21 | buying bitcoin on 5-minute oversold during the 2017 run gave very high-probability entries | 2017 | "if you bought bitcoin on five minute oversold conditions your probability of a great entry was extremely high"
+C other | 01:41 | buying bitcoin on 5-minute oversold during the 2017 run gave very high-probability entries | 2017 | "if you bought bitcoin on five minute oversold conditions your probability of a great entry was extremely high"
 = CG-04 | Back burner, 4 hours: the first 4-hour RSI (14) close under 30 after a new 90-day high while the daily close holds its EMA 50, half at 1R, the rest at 3R
 R setup E 09:06 | For crypto, the first 4-hour oversold reading in a daily uptrend after a strong bull move has proven high probability. | "cryptocurrency has proven itself when in a daily uptrend and after a strong bull move"
-R setup E 00:01 | The setup is the first oversold reading after a significant bull run. | "it's the first five minute or first hourly oversold conditions after a significant bull run"
-R entry E 05:26 | Enter when the RSI breaks 30. | "make one entry when the 5-minute rsi breaks 30"
-R stop E 08:01 | Take half, put the stop under the low of the dump and let the rest run. | "i exit half a dollar higher than where i entered i put my stop under the low of the dump"
+R setup E 00:08 | The setup is the first oversold reading after a significant bull run. | "it's the first five minute or first hourly oversold conditions after a significant bull run"
+R entry E 05:39 | Enter when the RSI breaks 30. | "make one entry when the 5-minute rsi breaks 30"
+R stop E 08:06 | Take half, put the stop under the low of the dump and let the rest run. | "i exit half a dollar higher than where i entered i put my stop under the low of the dump"
 R market A - | Desk version: Delta BTCUSD on 4-hour candles (UTC), held across days (the desk keeps too little ether history for a 90-day high). | ""
 R setup A - | 'A strong bull move' is a new 90-day high; 'a daily uptrend' is the last finished daily close above its EMA 50. The first 4-hour close with the RSI (14) under 30 after that high is the setup, once per new high. | ""
 R stop A - | Long at the next open, stop one ATR (14) of the 4-hour candles under the lowest low since the high; half at 1R with the stop to the entry, the rest at 3R. | ""
