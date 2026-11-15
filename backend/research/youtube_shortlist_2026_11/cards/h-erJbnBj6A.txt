@@ -5,10 +5,10 @@ instruments: SPY / S&P 500 (daily)
 timeframes: 1d
 style: swing
 = MS-01 | Close above the 200-day SMA and below the 10-day SMA, sell on a close back above the 10-day SMA or a 10% loss (long only)
-R entry E 04:17,15:32 | Buy when the close is above the 200-day moving average and below the 10-day moving average. | "we're going to want a close a above the 200 day moving average and a close below the 10day moving average"
-R exit E 04:17,17:00 | Sell when the close rises back above the 10-day moving average. | "we're going to sell when the close Rises back above that 10-day moving average"
-R stop E 05:00,07:02 | Sell at the next open after a 10% loss on a closing basis. | "we have a 10% loss on a closing basis we exit on the next bars open"
-R entry E 07:02,22:38 | Trades are entered and exited at the next bar's open. | "execution is entering trades on the next bars open"
+R entry E 04:27,15:32 | Buy when the close is above the 200-day moving average and below the 10-day moving average. | "we're going to want a close a above the 200 day moving average and a close below the 10day moving average"
+R exit E 04:53,17:00 | Sell when the close rises back above the 10-day moving average. | "we're going to sell when the close Rises back above that 10-day moving average"
+R stop E 05:00,07:10 | Sell at the next open after a 10% loss on a closing basis. | "we have a 10% loss on a closing basis we exit on the next bars open"
+R entry E 07:28,22:38 | Trades are entered and exited at the next bar's open. | "execution is entering trades on the next bars open"
 R sizing E 07:17 | 100% of capital per trade, no leverage, one position at a time. | "we have a position size of 100% of our Capital no Leverage is used"
 R market A - | Desk version: the NSE daily stock pool (long only, overnight) in place of SPY, sized by the desk's stock-pool risk rule. | ""
 R stop A - | The 10% stop is a stop order 10% below the fill; the video exits at the next open after a close 10% down. | ""

@@ -7,7 +7,7 @@ style: scalping
 = DE-10 | Session VWAP bounce, rejection and break-and-retest on five minutes, skipping a flat VWAP and long one-sided runs
 R indicator E 01:30,02:14 | A session VWAP (the 24-hour crypto day), bands removed. | "sirph veevap kee laain ko ham rakhenge"
 R setup E 03:45,04:26 | Bounce: above the VWAP, price touches it and bounces (long); reject: below it, touches and falls back (short). | "is partikular sineriyo ko ham baauns bolate hain ... isako ham rijekt bolenge"
-R setup E 05:49,07:13 | Break and retest: price crosses the VWAP, comes back to retest it from the other side and continues: the trend has changed. | "reetest ek kanpharmeshan hai ki jo abhee trend thaa vo chenj ho chukaa hai"
+R setup E 05:49,07:18 | Break and retest: price crosses the VWAP, comes back to retest it from the other side and continues: the trend has changed. | "reetest ek kanpharmeshan hai ki jo abhee trend thaa vo chenj ho chukaa hai"
 R entry E 08:50 | Trade only near the VWAP line, never far from it. | "veevap kee laain ke door ham tred ko naheen plaan karenge"
 R stop E 13:18 | An early entry: stop at the previous candle's high or low; an entry after the retest: stop at the VWAP. | "reeitest ke baad jo kaindal banatee hai usamen entree le rahe hain to ham apanaa stop los jo hai vo veevap ke leval par lagaa sakate hain"
 R no_trade E 13:30,14:12 | Avoid a flat VWAP (sideways, false signals) and counter-signals when all the price action has been on one side of the VWAP for long. | "jab veevap kee laain kaaphee jyaadaa phlait ho ... agar pooraa hee praais ekshan veevap ke kisee ek saaid hai"

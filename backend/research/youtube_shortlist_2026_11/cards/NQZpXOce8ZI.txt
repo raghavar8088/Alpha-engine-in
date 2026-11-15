@@ -5,11 +5,11 @@ instruments: NSE high-beta stocks
 timeframes: 5m, 1d
 style: intraday
 = CK-02 | Previous-day high/low break with a 0.5% buffer, day-extreme stop, 2R target, out at 3 PM (high-beta stocks)
-R market E 03:00,03:41 | High-beta stocks that move 3-5% a day with good volume; the setup fails in quiet stocks. | "jo stok 34534 parasent dileevar utaar-charhaav karate ho plas volyoom bhee honaa chaahie"
-R entry E 01:36,02:18 | Long when price breaks the previous day's high plus a 0.5% buffer; short below the previous day's low minus 0.5%. | "isamen hamen 0.5 parasent ke batar bhee rakhanaa"
+R market E 03:33,03:41 | High-beta stocks that move 3-5% a day with good volume; the setup fails in quiet stocks. | "jo stok 34534 parasent dileevar utaar-charhaav karate ho plas volyoom bhee honaa chaahie"
+R entry E 02:06,02:18 | Long when price breaks the previous day's high plus a 0.5% buffer; short below the previous day's low minus 0.5%. | "isamen hamen 0.5 parasent ke batar bhee rakhanaa"
 R stop E 07:49,12:48 | Stop at the day's low for a long (the day's high for a short). | "stopalos hogaa aaj ke din kaa ... lo"
 R target E 04:23,08:31 | Target twice the risk; if not reached, exit at 3 PM at whatever price. | "dabal prophit rakhanaa hai ... teen baje ekajut kar denge"
-R sizing E 04:23,10:01 | Risk at most 1% of capital per trade: quantity = 1% of capital / (entry - stop). | "maiksimam risk not mor than van par sent aaph yor kaipital"
+R sizing E 04:52,10:01 | Risk at most 1% of capital per trade: quantity = 1% of capital / (entry - stop). | "maiksimam risk not mor than van par sent aaph yor kaipital"
 R filter I 20:04 | An indicator line confirming volatility (its middle line must be crossed upward) is mentioned; the captions are too garbled to recover it. | "indiketar lenge isake beech vaalee laain hotee"
 R market A - | Desk version: the NSE 5-minute pool, stocks whose 20-day mean daily range (high-low over close) is at least 3%. | ""
 R entry A - | Buy-stop at the previous day's high x 1.005 and sell-stop at the previous day's low x 0.995 from 09:20 to 14:00 (the first to fill wins, one trade per stock a day). | ""

@@ -5,7 +5,7 @@ instruments: Tesla (TSLA)
 timeframes: 30m, 1m
 style: intraday
 = QC-01 | 30-minute opening range breakout, all-in, closed at 13:30 New York
-R timeframe E 00:08,04:30 | The opening range is the first 30-minute bar starting at 09:30 Eastern. | "We need to find the bar that starts at 9:30 a.m. Eastern Time"
+R timeframe E 00:08,04:53 | The opening range is the first 30-minute bar starting at 09:30 Eastern. | "We need to find the bar that starts at 9:30 a.m. Eastern Time"
 R entry E 05:31,07:24 | When price closes above the range high go long; below the range low go short; skip if already invested. | "the close price of Tesla is above the high ... We want to go long"
 R sizing E 08:07 | Full position (SetHoldings 1 or -1). | "passing in the -1 we're setting up a portfolio 100% short"
 R exit E 08:47,09:31 | Close every position at 13:30 (a scheduled event) and reset the range. | "for every day that ... Tesla at 1:30 p.m. we want to call ClosePositions"

@@ -6,10 +6,10 @@ timeframes: 1d (open to close)
 style: intraday
 = QI-02 | Trade the overnight gap's direction from the open to the close when it is beyond 0.25 of the 90-day standard deviation of overnight returns
 R market E 26:16 | A day-trading strategy tested on Amazon. | "this strategy was performed on Amazon"
-R entry E 26:50,33:22 | Buy when today's open is above yesterday's close; short when it is below. | "you will just compare whether the open price of today was more than the close price of yesterday"
+R entry E 26:57,33:22 | Buy when today's open is above yesterday's close; short when it is below. | "you will just compare whether the open price of today was more than the close price of yesterday"
 R exit E 36:11 | Close the trade at the end of the day. | "in day trading, you close the trade at the end of the day"
-R filter E 43:11,43:52,44:35 | Trade only when the overnight return is beyond 0.25 of the standard deviation of the previous 90 days' overnight returns. | "if you see that it is more than 0.25 of the standard deviation"
-R entry E 45:17,50:09 | A gap beyond that threshold upward is a buy (downward a short). | "if you have thought that you should buy the asset, you are right"
+R filter E 43:11,43:52,44:58 | Trade only when the overnight return is beyond 0.25 of the standard deviation of the previous 90 days' overnight returns. | "if you see that it is more than 0.25 of the standard deviation"
+R entry E 45:53,50:09 | A gap beyond that threshold upward is a buy (downward a short). | "if you have thought that you should buy the asset, you are right"
 R market A - | Desk version: the NSE stock pool on five-minute rows (the pool's slots go to the most liquid stocks first). The gap is the first bar's open against the prior close; entry at the 09:20 open, after the first five-minute bar. | ""
 R filter A - | The standard deviation uses the 40 prior sessions, because the desk keeps about 56 sessions of five-minute stock data. Shorts need a gap below -0.25 standard deviations. | ""
 R stop A - | A 3% stop from the fill exists only so the book can size; the video has none. One trade per stock per day, out at the desk's session end. | ""

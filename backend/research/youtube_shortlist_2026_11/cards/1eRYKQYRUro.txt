@@ -6,7 +6,7 @@ timeframes: intraday
 style: intraday
 = RU-05 | RSI through 70 (30) with Supertrend agreeing, Supertrend stop, 1.5R
 R entry E 02:28 | Buy when RSI crosses above 70 only if Supertrend shows an up trend; sell when RSI crosses below 30 only if Supertrend shows a down trend. | "we buy, when the RSI crosses above the 70 level, only if the supertrend indicator is showing an uptrend"
-R stop E 02:46,03:28 | Stop below the Supertrend line for longs, above it for shorts. | "we can set the stop loss below it"
+R stop E 03:09,03:28 | Stop below the Supertrend line for longs, above it for shorts. | "we can set the stop loss below it"
 R target E 06:11 | Reward-to-risk 1.5:1. | "The reward risk ratio was 1.5 to 1"
 R no_trade I 06:45 | In practice you would not take another signal a few candles after the last one. | "you are not going to take another trade, just a few candles after that"
 R indicator A - | RSI(14) and Supertrend(10, 3), the defaults (not stated). | ""

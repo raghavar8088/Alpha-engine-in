@@ -6,10 +6,10 @@ timeframes: 5m (1m shown live)
 style: scalping
 = FL-02 | Williams Alligator: all three lines on one side plus an engulfing candle, with the trend only, stop beyond the lines, 1:1
 R indicator E 00:49 | The Williams Alligator with its default settings. | "want to change any of them at all"
-R entry E 00:49,01:32 | Buy when all three Alligator lines are below the candles and a bullish engulfing candle forms; sell the mirror. | "for a buy position we want all three alligator lines over here to be below the candlesticks"
-R stop E 00:49,01:32 | Stop just beyond the three lines (about 6-7 pips); target 1:1. | "we want our stop loss to be below all three moving averages"
-R filter E 03:03,03:47 | Trade only with the overall trend (only sells in a downtrend). | "if we follow the overall trending Direction"
-R management E 05:11,05:52 | At the first target, move the stop to the entry; a runner can exit when candles cross the middle line. | "once we reach our first take profit move stop loss to entry"
+R entry E 00:56,01:32 | Buy when all three Alligator lines are below the candles and a bullish engulfing candle forms; sell the mirror. | "for a buy position we want all three alligator lines over here to be below the candlesticks"
+R stop E 01:04,01:32 | Stop just beyond the three lines (about 6-7 pips); target 1:1. | "we want our stop loss to be below all three moving averages"
+R filter E 03:24,03:47 | Trade only with the overall trend (only sells in a downtrend). | "if we follow the overall trending Direction"
+R management E 05:29,05:52 | At the first target, move the stop to the entry; a runner can exit when candles cross the middle line. | "once we reach our first take profit move stop loss to entry"
 R market A - | Desk version: Delta XAUTUSD (gold), BTCUSD and ETHUSD on 5-minute candles. Alligator: SMMA 13, 8 and 5 of the median price, shifted 8, 5 and 3 bars. | ""
 R filter A - | The overall trend: the 1-hour close above its EMA 50 for buys (below for sells). | ""
 R entry A - | Long: the 5-minute candle's low is above all three lines and it is a bullish engulfing candle; enter at the next open. Mirror for shorts; at most 3 trades a day. | ""

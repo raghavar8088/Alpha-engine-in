@@ -5,9 +5,9 @@ instruments: Bitcoin (BTCUSDT)
 timeframes: 5m
 style: scalping
 = DD-03 | Hull MA baseline with the Awesome Oscillator and CMF above zero, T3 (300) and TDFI filters, 3 ATR stop, 1.3R, out when the HMA turns
-R indicator E 04:17,05:01 | Baseline: the Hull moving average; confirmation: the Awesome Oscillator; the CMF for the trend's strength. | "our Baseline will be the whole moving average the HMA"
+R indicator E 04:47,05:01 | Baseline: the Hull moving average; confirmation: the Awesome Oscillator; the CMF for the trend's strength. | "our Baseline will be the whole moving average the HMA"
 R indicator E 07:57 | The HMA at 24 periods; the CMF at 20. | "I believe that the HMA would have been at 24"
-R entry E 05:01,05:46 | Long: price above the HMA with the Awesome Oscillator and the CMF above zero; shorts the mirror. | "our entry rolls for a longer trade we're looking to be above the HMA we're looking for the AO the awesome oscillator"
+R entry E 05:29,05:46 | Long: price above the HMA with the Awesome Oscillator and the CMF above zero; shorts the mirror. | "our entry rolls for a longer trade we're looking to be above the HMA we're looking for the AO the awesome oscillator"
 R stop E 06:12 | Stops from the ATR (14). | "stop losses we're going to be setting on ATR"
 R exit E 06:35 | An emergency exit when the HMA changes colour. | "if the HMA changes color so we'll exit any trades at that point"
 R target E 13:56 | His optimised settings: reward-to-risk 1.3 and an ATR multiplier of 3. | "I'm actually looking for a risk to reward of 1.3 instead and my multiplier should be at three"

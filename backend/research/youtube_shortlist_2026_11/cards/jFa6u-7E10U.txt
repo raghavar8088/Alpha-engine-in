@@ -5,7 +5,7 @@ instruments: BTC/USDT (Binance, hourly)
 timeframes: 1h
 style: intraday
 = AV-01 | First UTC hour's direction held to the end of the day (bitcoin); the presenter's own null result
-R market E 00:03,01:28 | Bitcoin against USD on one-hour candles: about 300 days of Binance data in UTC. | "I'm using intraday cryptocurrency prices"
+R market E 00:20,01:28 | Bitcoin against USD on one-hour candles: about 300 days of Binance data in UTC. | "I'm using intraday cryptocurrency prices"
 R setup E 07:50,09:13 | The first hour is the 00:00 UTC hourly candle; its return is its close over its open. | "is the return on the first hour candle"
 R exit E 11:26 | The rest of the day runs to the close of the day's last hourly candle. | "then you also want to have the last hour of the date"
 R entry I 20:40 | Buy after an up first hour (sell after a down one) and hold for the rest of the day; the trade rule he says will most probably not work. | "if you buy when the daily return is positive and or you sell then you won't have a meaningful trading strategy most probably"

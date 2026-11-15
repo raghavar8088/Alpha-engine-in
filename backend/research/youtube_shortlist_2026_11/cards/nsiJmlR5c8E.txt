@@ -7,8 +7,8 @@ style: intraday
 = VB-01 | High-activity stock, first 15-minute high/low break on 5 minutes before 2 PM, entry-candle stop
 R market E 11:54,13:20 | NSE stocks that had heavy delivery the previous day (StockEdge scan), optionally with rising relative strength. | "dileevaree se hee pataa lagataa hai kee seeriyas aadamee ghusaa huaa hai"
 R setup E 01:30,08:56 | Mark the high and low of the first 15-minute candle. | "pahale 15 minat kaa jo kaindal hai usakaa haay aur loko not kar lenge"
-R entry E 04:40,09:57 | Trade the break of that high or low, taking the entry on the 5-minute chart. | "is 15 minat ko aap kanvart kar deejie 5 minat men"
-R session E 03:28,15:39 | The break must come early enough to play out: before 2 PM (12-12:30 is fine); square off the same day. | "2:00 baje ke pahale agar huaa tab samay hai"
+R entry E 04:51,09:57 | Trade the break of that high or low, taking the entry on the 5-minute chart. | "is 15 minat ko aap kanvart kar deejie 5 minat men"
+R session E 03:28,15:44 | The break must come early enough to play out: before 2 PM (12-12:30 is fine); square off the same day. | "2:00 baje ke pahale agar huaa tab samay hai"
 R stop E 06:36 | Stop at the high of the candle you sold in, or of the candle before it (mirror for longs). | "jo kaindal hai jisamen aapane bechaa hai isakaa haay ko stop los banaa yaa isake ek kaindal pahale kaa"
 R target I 11:34 | Aim for about 0.5% of capital a day. | "agar aap apanaa kaipital kaa aadhaa parasent bhee ritarn jenaret kar rahaa hai"
 R market A - | Desk version: the NSE 5-minute pool; the delivery scan becomes a volume proxy (the desk has no delivery data): previous day's volume at least 2 x its 20-day mean. | ""

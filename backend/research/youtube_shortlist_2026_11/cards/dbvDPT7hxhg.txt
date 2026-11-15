@@ -6,9 +6,9 @@ timeframes: 5m, 60m
 style: intraday
 = AS-01 | Fade a Sunday forex gap toward the fill from a structure level (discretionary)
 R market E 01:52 | Currency pairs; gaps at the Sunday open. | "here's the gap on the Sunday open for Aussie Dollar"
-R setup E 00:49,01:32 | Most forex gaps are filled or retrace into structure near the gap. | "the majority of the time gaps are formed uh we'll see those gaps filled"
-R stop E 02:14,02:56 | Only with a structure level near the open to put the stop just beyond; no blind stops. | "without a structural level to put stops at uh you'll rarely see me take a trade"
-R target E 02:56,03:41 | Target the gap fill or the structure zone inside it (the highs of the zone), for at least 1:1. | "a little more than a one to one risk reward"
+R setup E 01:21,01:32 | Most forex gaps are filled or retrace into structure near the gap. | "the majority of the time gaps are formed uh we'll see those gaps filled"
+R stop E 02:43,02:56 | Only with a structure level near the open to put the stop just beyond; no blind stops. | "without a structural level to put stops at uh you'll rarely see me take a trade"
+R target E 02:56,04:06 | Target the gap fill or the structure zone inside it (the highs of the zone), for at least 1:1. | "a little more than a one to one risk reward"
 T concept_only | a discretionary structure trade; he states he has no backtest or statistics, and levels are drawn by eye
 C other | 01:12 | not a gap trader, no hard numbers | not stated | "I don't have a lot of back testing on it I don't have hard numbers"
 P 06:34 | 07:59 | Syndicate membership

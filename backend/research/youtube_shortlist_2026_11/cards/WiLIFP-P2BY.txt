@@ -5,14 +5,14 @@ instruments: NSE F&O stocks; Nifty / Bank Nifty on big index days
 timeframes: 1m (Point & Figure 0.15% x 3), 5m
 style: intraday
 = DF-01 | Ten strongest movers on Nifty's side, Point & Figure double-top buy / double-bottom sell, pattern stop
-R market E 09:27,12:12 | NSE F&O stocks from Definedge's intraday momentum scanner; Nifty or Bank Nifty themselves on days with a big index move. | "lets se eph endo stoks"
-R filter E 09:27,10:08 | Trade with Nifty: when Nifty is bullish take only bullish stocks, when bearish only bearish ones (counter-trend only in a very strong stock). | "pahalaa rool to yah hai agar niphtee bulish hai to aap bulish opshan silekt rakhanaa"
-R setup E 08:47,11:31 | Rank the stocks by how strongly they move against their own average volatility (the scanner's value column) and keep the top 10 (bullish) or bottom 10 (bearish) as the day's universe. | "ye pahale 10 stok hai ye aapakaa ek yoonivars ho sakataa hai"
+R market E 09:54,12:12 | NSE F&O stocks from Definedge's intraday momentum scanner; Nifty or Bank Nifty themselves on days with a big index move. | "lets se eph endo stoks"
+R filter E 10:00,10:08 | Trade with Nifty: when Nifty is bullish take only bullish stocks, when bearish only bearish ones (counter-trend only in a very strong stock). | "pahalaa rool to yah hai agar niphtee bulish hai to aap bulish opshan silekt rakhanaa"
+R setup E 08:47,11:45 | Rank the stocks by how strongly they move against their own average volatility (the scanner's value column) and keep the top 10 (bullish) or bottom 10 (bearish) as the day's universe. | "ye pahale 10 stok hai ye aapakaa ek yoonivars ho sakataa hai"
 R indicator E 03:42,07:13 | Momentum is confirmed by price outside the D-SMART cloud, above (below) all D-Pivot lines (the 'all clear zone') and the intraday breadth zone above +25 (below -25). | "intraade brik jon 25 par ke oopar hai to straang bulish momentam"
 R timeframe E 04:27 | Entries on a one-minute Point & Figure chart with a 0.15% box and 3-box reversal. | "loest posibal taaim intaraval pe ham ye chaarj plot karate hain 0.15 * 3"
-R entry E 04:27,12:58 | Long on a double-top buy pattern in a bullish stock; short on a double-bottom sell in a bearish stock. | "dabal top baay pe ham baay tred inishietiv"
-R stop E 05:11,05:51 | The initial stop is the opposite pattern signal (double-bottom sell for a long); the number of boxes keeps the initial risk small. | "inishiyal stop los aapakaa berish tred ke lie dabal top baay hai"
-R management E 05:51,12:58 | Once in the money, ride the trade with D-SMART (an optional profit-booking rule is allowed). | "ek baar praais praais aapake in d manee aa gayaa phir aap usako dee smaart se hee raaid kar sakate hain"
+R entry E 04:40,12:58 | Long on a double-top buy pattern in a bullish stock; short on a double-bottom sell in a bearish stock. | "dabal top baay pe ham baay tred inishietiv"
+R stop E 05:45,05:51 | The initial stop is the opposite pattern signal (double-bottom sell for a long); the number of boxes keeps the initial risk small. | "inishiyal stop los aapakaa berish tred ke lie dabal top baay hai"
+R management E 05:57,12:58 | Once in the money, ride the trade with D-SMART (an optional profit-booking rule is allowed). | "ek baar praais praais aapake in d manee aa gayaa phir aap usako dee smaart se hee raaid kar sakate hain"
 R session E 13:54 | Check the scanner around 9:30-9:45 and again at 1 PM; square off around 3:10 PM. | "phir aap 31 ko vagairah aap skveyar oph kar sakate ho"
 R no_trade E 16:13 | At most two or three stop-losses a day, then stop; fixed quantity per trade. | "do yaa teen stop los ke oopar maiksimam naheen honaa chaahie usake baad us din kaam naheen karenge"
 R market A - | Desk version: the NSE 5-minute stock pool (the pool stands in for the F&O list); Nifty's side = NIFTY above (below) its previous close at 09:30. | ""

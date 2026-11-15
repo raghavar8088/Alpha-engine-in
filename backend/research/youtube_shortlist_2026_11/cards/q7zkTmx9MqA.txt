@@ -5,7 +5,7 @@ instruments: GBP/JPY
 timeframes: 1h
 style: intraday
 = NK-01 | Close outside the Bollinger Band (20, 2), stop at the middle line, 2R (1-hour)
-R market E 00:04,00:49 | GBP/JPY on the one-hour chart with standard Bollinger Bands. | "we are using the standard bollinger band on a one hour chart using the pound against the japanese yen"
+R market E 00:42,00:49 | GBP/JPY on the one-hour chart with standard Bollinger Bands. | "we are using the standard bollinger band on a one hour chart using the pound against the japanese yen"
 R entry E 01:08 | Buy on a close above the upper band; sell on a close below the lower band. | "when we get a close and break outside of the bollinger band we are going to buy if it's above and sell if it closes below"
 R stop E 01:18 | Stop at the middle moving average, not moved during the trade. | "the stop-loss placement will be right at the moving average and we're not going to move this"
 R target E 01:26 | Target 2:1. | "we're going to be looking for a two to one risk to reward ratio"

@@ -5,5 +5,5 @@ instruments: Nifty futures
 timeframes: 15m
 style: intraday
 = SM-01 | RSI 60/40 momentum entries on 15-minute Nifty futures (garbled interview)
-R entry I 17:50,18:33 | RSI moving above 60 is an entry (below 40-50 for shorts), instead of the 70/30 rule. | "rs.60 ke oopar jaa rahaa hai to vah pravesh hai"
+R entry I 18:00,18:33 | RSI moving above 60 is an entry (below 40-50 for shorts), instead of the 70/30 rule. | "rs.60 ke oopar jaa rahaa hai to vah pravesh hai"
 T concept_only | the auto-captions are too garbled to recover the entry, stop and exit; the RSI 60/40 break is already the library's TG-02

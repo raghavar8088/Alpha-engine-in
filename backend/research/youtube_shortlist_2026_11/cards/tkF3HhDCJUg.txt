@@ -10,7 +10,7 @@ R timeframe E 01:12 | 15-minute chart, intraday only. | "15 minat taaim phrem va
 R filter E 03:14 | Trade only if the first 15-minute candle's volume is at least twice the previous day's closing candle's volume. | "preeviyas klojing ke taaim men jitanaa volyoom hai usakaa 2X volyoom hamen dekhanaa chaahie"
 R setup E 03:29,04:10 | The first candle must be big: a big red candle sets the sell side, a big green candle the buy side. | "red maaloom ke saath hamen kyaa chaahie big red kaindal"
 R entry E 04:10,04:54 | The next candle must close below the first candle's low (above its high for buys); enter at the third candle's open. | "isake andar ke lo ke neeche klojing chaahie ... teesaraa kaindal opan hogaa"
-R stop E 04:54,08:20 | Stop at the second candle's high (low); if that candle is too small, use the previous swing high. | "jo doosaraa kaindal hai usakaa jo bhee haaeeest point banataa hai vo stop los"
+R stop E 05:18,08:20 | Stop at the second candle's high (low); if that candle is too small, use the previous swing high. | "jo doosaraa kaindal hai usakaa jo bhee haaeeest point banataa hai vo stop los"
 R target E 05:25 | Target twice the stop. | "taaraget jo hogaa 2 * esael kar deejie"
 R market A - | Desk version: the NSE 15-minute stock pool. | ""
 R setup A - | Big candle: body at least 60% of its range and range at least 0.8% of its open; the 09:15 volume at least 2 x the previous day's 15:15 candle's volume. | ""

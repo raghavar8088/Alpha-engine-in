@@ -6,7 +6,7 @@ timeframes: 5m
 style: options_buying
 = KT-02 | VWAP pullback on the lowest volume after a run away from it, break of that candle, stop under the VWAP, half off then a swing-low trail
 R setup E 02:43 | Price runs well above the VWAP, then drops back to it. | "praais jo hai vah veevap ke kaaphee oopar chalaa jaataa hai aur phir vaapas vah drop hotaa hai veevap tak"
-R setup E 05:29,14:28 | The pullback's volume shrinks to its lowest; a pullback on big volume is not taken. | "volyoom girategirate girate olamost loest pe pahunch gayaa hai"
+R setup E 05:46,14:28 | The pullback's volume shrinks to its lowest; a pullback on big volume is not taken. | "volyoom girategirate girate olamost loest pe pahunch gayaa hai"
 R entry E 05:29 | Buy when price crosses that candle's high. | "ab vaapas se yah praais jab isakaa haaee kros karataa hai tab usake baad main isamen kol baay kar sakatee hoon"
 R stop E 06:00 | Stop just below the VWAP with a 2-3 point buffer. | "stop los bilo d veevap thoड़aa saa baphar rakh leejie do-teen point kaa"
 R management E 06:09,07:38 | Book half quickly (about Rs 5 on the option), then trail the rest under each new swing low with a small buffer. | "jo 50% bailens mere paas bachaa hogaa usako main yahaan isake neeche thoraa saa baphar rakh ke meraa stop los trel karate jaaoongee"

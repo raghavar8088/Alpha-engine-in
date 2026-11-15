@@ -5,9 +5,9 @@ instruments: Nifty 50 (option spreads); also Bank Nifty, gold, silver
 timeframes: 1m
 style: options_buying
 = FY-02 | 11:00-11:15 range breakout on one-minute Nifty, first break only, Rs 3,000 loss cap, flat at 15:25 (index proxy for the spread)
-R setup E 00:02,00:44 | Range: the high and low of 11:00-11:15 on the Nifty 50 one-minute chart. | "niphttee 50 ke 1 minat chaart par 11 se 11:15 ke beech jo haaee aur lo banataa hai vahee hamaaree renj hai"
+R setup E 00:38,00:44 | Range: the high and low of 11:00-11:15 on the Nifty 50 one-minute chart. | "niphttee 50 ke 1 minat chaart par 11 se 11:15 ke beech jo haaee aur lo banataa hai vahee hamaaree renj hai"
 R entry E 00:44 | A break above the range high buys an at-the-money call spread; a break below the low buys a put spread. | "renj haaee ke oopar brekaaaut par eteeem kol baay"
-R sizing E 00:02,00:44 | One lot; only the first valid breakout is traded; no re-entry after the exit. | "pharst vailid brekaaaut par sirph ek tred liyaa jaaegaa"
+R sizing E 00:02,00:56 | One lot; only the first valid breakout is traded; no re-entry after the exit. | "pharst vailid brekaaaut par sirph ek tred liyaa jaaegaa"
 R stop E 01:07 | Exit when the position loses Rs 3,000 (also the daily risk cap). | "los ₹3000 tak pahunchate hee pojeeshan egjit karanee hai"
 R exit E 01:07 | A profit exit (its amount is lost in the captions), else flat at 15:25. | "agar in donon men se koee bhee kandeeshan trigar naheen hotee hai to 325 par pojeeshan kanpalasaree skv oph ho jaaegee"
 R no_trade E 01:20 | Sideways, choppy markets give false breakouts; suited to trending markets. | "saaidavej yaa chaupee maarket men phols brekaaauts mil sakate hain"

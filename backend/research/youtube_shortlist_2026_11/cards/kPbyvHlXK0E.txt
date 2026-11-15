@@ -7,7 +7,7 @@ style: intraday
 = KA-01 | Break of the previous hour/day high or low after a staircase approach, two closes, swing stop, 1R
 R setup E 08:37 | Levels: the previous one-hour high/low and the previous daily high/low (objective, redrawn the same way every time). | "I like to use is just the previous 1-hour highs, the previous daily highs"
 R filter E 03:37,04:19 | Filter 1: a slow, steady staircase approach into the level (incremental higher highs and higher lows), not a sudden spike. | "a slow, steady grind into the level where each candle makes incremental progress"
-R filter E 05:43,06:29 | Filter 2: volume gradually building into the level; avoid flat or falling volume. | "What you want is volume gradually building up as price approaches your level"
+R filter E 06:17,06:29 | Filter 2: volume gradually building into the level; avoid flat or falling volume. | "What you want is volume gradually building up as price approaches your level"
 R filter E 07:09 | Filter 3: a 30-period moving average with minimal crossovers (clear direction, no chop). | "Add a 30 moving average to your chart ... What you want is minimal crossovers"
 R entry E 09:24 | Entry trigger: two candle closes beyond the level. | "you want to use two candle closes"
 R stop E 10:41,11:25 | Stop at the nearest swing low (swing high for breakdowns). | "the thing I like to use for stop losses the nearest swing lows"

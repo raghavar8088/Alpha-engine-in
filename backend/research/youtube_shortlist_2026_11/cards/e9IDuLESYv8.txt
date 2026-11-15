@@ -6,9 +6,9 @@ timeframes: 15m
 style: intraday
 = CT-03 | Close above the daily VWAP and the day's open = long (below both = short), 1.5 ATR trailing stop, flat at the day's end
 R entry E 00:43,04:16,04:59 | Long when the candle's close is above the VWAP and above the day's opening price; short when below both. | "if the close is above the VWAP closing price is above the VWAP and the closing price is above the opening price ... the closing price is above the day open"
-R entry E 04:59,06:27 | The green-candle and red-candle condition is left out (it gave worse results). | "I noticed if I remove this one, the green and red candle, I get better results in the back test"
-R stop E 03:34,05:42 | Trailing stop 1.5 x ATR, moving only in the trade's favour. | "the ATR stop parameter 1.5 is going to define its coefficient"
-R exit E 01:29,05:42 | Close all trades at the end of the day (15:45 in his data). | "At the end of the day, since this is a day trading strategy, we will close all the open trades"
+R entry E 05:15,06:27 | The green-candle and red-candle condition is left out (it gave worse results). | "I noticed if I remove this one, the green and red candle, I get better results in the back test"
+R stop E 03:31,05:42 | Trailing stop 1.5 x ATR, moving only in the trade's favour. | "the ATR stop parameter 1.5 is going to define its coefficient"
+R exit E 01:42,05:42 | Close all trades at the end of the day (15:45 in his data). | "At the end of the day, since this is a day trading strategy, we will close all the open trades"
 R indicator E 02:44 | VWAP reset daily on intraday candles. | "Now this one is a daily reset"
 R market A - | Desk version: the NSE stock pool on 15-minute candles (real volume) and bitcoin 15-minute candles (VWAP and day from 00:00 UTC). | ""
 R entry A - | Enter at the next candle's open; ATR length 14; the stop trails at the close minus 1.5 x ATR; after a stop-out the next signal may re-enter, at most three trades a day; out at 15:15 IST (stocks) and 23:55 UTC (bitcoin). | ""

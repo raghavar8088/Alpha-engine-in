@@ -5,12 +5,12 @@ instruments: NSE stocks with news or results; Nifty, Bank Nifty (option selling)
 timeframes: 5m, 15m
 style: intraday
 = AO-02 | Stocks: first 5-minute range full breakout, stop at the far side, 9 EMA trail
-R setup E 00:43,01:27 | Opening range: 15 minutes for indices, 5 minutes for stocks. | "stoks men 5 minat kee renj bhee barhiyaa tareeke se kaam karatee hai"
-R entry E 01:27,04:16 | Signal on a full breakout: a candle close above the range high (below the low for a sell). | "phul brekaaaut kaa matalab hai jo renj kaa jo haaee yaa lo hai usake oopar yaa neeche klojing ho jaanee chaahie"
+R setup E 01:21,01:27 | Opening range: 15 minutes for indices, 5 minutes for stocks. | "stoks men 5 minat kee renj bhee barhiyaa tareeke se kaam karatee hai"
+R entry E 01:36,04:16 | Signal on a full breakout: a candle close above the range high (below the low for a sell). | "phul brekaaaut kaa matalab hai jo renj kaa jo haaee yaa lo hai usake oopar yaa neeche klojing ho jaanee chaahie"
 R stop E 05:35 | Initial stop beyond the range's far side (below the low for a buy). | "yahaan pe aapakaa is lo ke neeche stop los rahegaa"
-R exit E 04:16,05:42 | Trail with the 9 EMA; exit on the close through it. | "treling stop los ke lie aap 9 kaa yooz kar sakate ho"
+R exit E 04:22,05:42 | Trail with the 9 EMA; exit on the close through it. | "treling stop los ke lie aap 9 kaa yooz kar sakate ho"
 R market E 04:51 | Stocks with news, results or a trigger that day (they move); heavyweights such as HDFC Bank also work. | "jin stoks men koee nyooz hai yaa trigar hai jinake rijalts vagairah aae hue hain"
-R setup E 02:08,02:53 | On indices he prefers option selling: on a buy signal sell the put below the range low and hold the day. | "isake neeche kaa put opshan aap bahut hee aaraam se sel kar sakate ho"
+R setup E 02:47,02:53 | On indices he prefers option selling: on a buy signal sell the put below the range low and hold the day. | "isake neeche kaa put opshan aap bahut hee aaraam se sel kar sakate ho"
 R market A - | Desk version: the stock leg only, on the NSE 5-minute pool (no news filter: the desk has no news feed). The index option-selling leg is not coded (no option premiums). | ""
 R entry A - | Enter at the next open after the first 5-minute close above the 09:15 candle's high (below its low), until 13:00; one trade per stock a day. | ""
 R stop A - | Stop at the 09:15 candle's far side; exit at the next open after a 5-minute close through the 9 EMA; out at 15:15. | ""

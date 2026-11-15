@@ -7,7 +7,7 @@ style: scalping
 = BR-01 | Two consecutive strong trend bars ('Always In'): stop entry one tick beyond the second, scalp about half a bar, stop beyond the signal bar
 R timeframe E 00:08 | A two-minute E-mini chart. | "I’m using a 2-minute Emini chart as an example"
 R setup E 01:25 | Always In Short: two bear bars, one with a big body closing on or near its low (mirror for bulls). | "I want to see 2 bear bars, one with a big body closing on or near its low"
-R entry E 02:50,03:32 | Sell one tick below the bar; buy one tick above in a bull setup. | "Sell below, 1 tick below. Buy above, 1 tick above."
+R entry E 02:50,03:44 | Sell one tick below the bar; buy one tick above in a bull setup. | "Sell below, 1 tick below. Buy above, 1 tick above."
 R target E 05:46 | Scalp about 2 points with small bars; with 20-point bars, 5 or 10 points, about half a bar. | "If the bars were 20 points tall, you might scalp for 5 or 10 points"
 R stop E 08:29 | A short sold below a bar is exited above the bull bar that reverses it. | "If you sold below that bar, you’d get out above that bar"
 R market A - | Desk version: the Nasdaq 100 cash session on two-minute bars (the E-mini S&P is not on the desk). | ""

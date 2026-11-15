@@ -5,9 +5,9 @@ instruments: Nifty and Bank Nifty futures
 timeframes: 1d (entry at 15:15-15:30)
 style: positional
 = TM-01 | Daily open gap up after a downtrend, buy at 15:15, target the gap day's high plus the prior day's range, stop a point under the prior day's low (long only)
-R setup E 02:56,08:39 | An open gap: today's low is above yesterday's high (daily chart). | "there is a difference between yesterday's high and today's low"
-R filter E 10:10,14:25 | The previous trend must be a downtrend. | "The previous trend should be a downtrend"
-R entry E 17:11,18:33 | Buy index futures between 15:15 and 15:30 on the gap day, carried forward. | "on the gap up day between 3:15 to 3:30 is when it gets confirmed that there is an open gap and you go ahead and buy index futures"
+R setup E 02:59,08:45 | An open gap: today's low is above yesterday's high (daily chart). | "there is a difference between yesterday's high and today's low"
+R filter E 10:26,14:12 | The previous trend must be a downtrend. | "The previous trend should be a downtrend"
+R entry E 17:30,18:33 | Buy index futures between 15:15 and 15:30 on the gap day, carried forward. | "on the gap up day between 3:15 to 3:30 is when it gets confirmed that there is an open gap and you go ahead and buy index futures"
 R target E 23:59,31:01 | Target = the gap day's high plus the previous day's high-low difference. | "The difference calculated in step four plus high of entry day"
 R stop E 39:30,44:27 | Stop one point below the previous day's low, placed every day until the target. | "one point below previous day's low"
 R market E 39:30,01:01:18 | Nifty and Bank Nifty futures only; long only. | "This is only a long strategy"

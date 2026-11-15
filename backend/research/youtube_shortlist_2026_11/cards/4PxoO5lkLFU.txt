@@ -10,7 +10,7 @@ R indicator E 01:27 | The Bollinger Bands are the only indicator. | "that is act
 R setup E 02:00 | Point 1: price breaks above the upper band. | "We break above it and we create our number one"
 R setup E 02:10 | Point 2: through the middle line and a break of the lower band. | "the middle line and then we break our lower Bollinger Bands here"
 R setup E 02:17 | Point 3: price comes back up and is rejected at the middle line. | "The next part of the trading strategy is for us to come back up and be rejected rejected at the medium line here"
-R entry E 02:10,02:50 | Draw a trend line from point 1's high through point 3's high and buy the break above it. | "we're going to draw a trend line from the from the point the high point of the rejection"
+R entry E 02:29,02:50 | Draw a trend line from point 1's high through point 3's high and buy the break above it. | "we're going to draw a trend line from the from the point the high point of the rejection"
 R stop E 02:55 | Stop at the swing low (or the lower band). | "we're going to set our stop loss to the swing low here or onto the Bollinger Band lower Bollinger Band here"
 R target E 03:05 | Target 1.5R. | "the idea is for us to set our take profit to a 1. 5 here"
 R market A - | Desk version: Delta BTCUSD and ETHUSD on 15-minute candles, Bollinger Bands (20, 2); out by the end of the UTC day; at most 3 trades a day. | ""

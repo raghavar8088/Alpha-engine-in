@@ -8,6 +8,6 @@ style: intraday
 R setup E 06:46 | Three morning setups: opening range breakout, gap reversal, narrow-range breakout or breakdown. | "opaning renj brekaaaut, gaip rivarsal end nairo renj brekaaaut"
 R filter E 17:24,18:04 | A first five-minute candle whose volume beats the average five-minute volume shows strength. | "usakaa volyoom jo hai evarej 5 minat kaindal volyoom se jyaadaa hai"
 R setup E 33:19 | A gap greater than 3% whose first five-minute candle reverses: trade the reversal, not the gap (a guideline). | "opaning gaip vid a gretar den3%"
-R setup E 36:44,37:28 | An open beyond the normal one-standard-deviation range is where fading is favoured. | "vo renj ke baaundree ke baahar hee agar maarket khulataa huaa dikh rahaa hai"
+R setup E 36:44,37:31 | An open beyond the normal one-standard-deviation range is where fading is favoured. | "vo renj ke baaundree ke baahar hee agar maarket khulataa huaa dikh rahaa hai"
 R stop E 29:26 | Example: a 50-point stop and a first target of at least 100 points, then trail to cost. | "50 points. aap mainual taaraget kyaa rakhoge? etaleest 100 points kaa"
 T concept_only | the setups are shown through garbled Hindi captions with thresholds he calls adjustable guidelines; the opening range part repeats BB-02 and the gap fade overlaps BT-01

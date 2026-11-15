@@ -8,7 +8,7 @@ style: scalping
 R setup E 00:37 | Works best in a strong higher-timeframe uptrend (30-minute, 4-hour, daily higher highs and higher lows). | "This system works better in a very strong uptrending market and specifically speaking on higher time frame trending markets"
 R setup E 01:27,02:08 | Step 1: after an intraday sell-off, a balanced range (consolidation) forms; spot it on a one-minute chart or smaller. | "the first step of this process is being able to identify a balanced range after the market aggressively pulls back"
 R setup E 04:13 | Step 2: a strong rally away from the base validates it. | "on a fiveminute chart or smaller we identify a rally to the upside"
-R entry E 04:56,14:46 | Step 3: mark the base and buy the pullback into it, not the first rally. | "we wait for the market to pull back into this period of what I call market structure demand"
+R entry E 05:04,14:46 | Step 3: mark the base and buy the pullback into it, not the first rally. | "we wait for the market to pull back into this period of what I call market structure demand"
 R filter E 11:08,13:14 | Confirm with order flow: passive bids absorbing the sellers at the base. | "looking at the order flow ... we're going to see passive buyers filling"
 R stop E 08:45 | His example: about a 6-point stop for a 15-25 point reward. | "I had about a six-point stop loss for about a 15 to 25 point reward"
 R target E 12:13 | Take profits at an existing supply level. | "I take profits at an existing level of supply for this setup"

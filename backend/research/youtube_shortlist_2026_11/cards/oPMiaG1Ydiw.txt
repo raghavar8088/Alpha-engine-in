@@ -6,7 +6,7 @@ timeframes: 15m (5m and 1h also tried)
 style: scalping
 = DD-01 | Over-extended RSI scalper: RSI crossing above 70 with the SSL trend and the TDFI, 1% stop, half at 1%, rest at 2% (mirror for shorts)
 R market E 00:53 | Bitcoin on the 15-minute chart. | "i'm going to be doing this on a 15 minute time frame on btc"
-R indicator E 01:27,02:07 | Three indicators: the RSI (the main one), the SSL Channel for the trend and the TDFI as confirmation. | "the main one is actually going to be the rsi the ssl is going to be defining our"
+R indicator E 01:27,02:45 | Three indicators: the RSI (the main one), the SSL Channel for the trend and the TDFI as confirmation. | "the main one is actually going to be the rsi the ssl is going to be defining our"
 R entry E 04:40 | The RSI the other way round: buy as it goes into overbought, short as it comes back into oversold. | "i'm going to be buying or longing as i go into the over extended overbought and then i'm going to be shorting as i come back down into the oversold"
 R filter E 05:30 | Longs only above the SSL Channel, shorts only below it. | "we have to be above the ssl channel to take alongs and"
 R entry E 05:44 | Enter when the RSI crosses over the overbought line and the TDFI is green. | "we're waiting for the rsi to become above and cross this over extended uh over broad line"

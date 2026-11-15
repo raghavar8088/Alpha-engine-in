@@ -5,7 +5,7 @@ instruments: 44 futures markets (silver and heating oil best)
 timeframes: daily and intraday bars
 style: mixed
 = KD-02 | MACD signal-line cross, stop and reverse (tested: not tradeable)
-R entry E 02:05,04:14 | Buy at the next open when the MACD crosses above its average (the difference crosses zero); sell short when it crosses below. | "if that difference crosses over zero, you buy. And if it crosses under zero, you sell short"
+R entry E 02:05,04:09 | Buy at the next open when the MACD crosses above its average (the difference crosses zero); sell short when it crosses below. | "if that difference crosses over zero, you buy. And if it crosses under zero, you sell short"
 R exit E 04:19 | No stop and no target: always in the market. | "I don't have any stop loss. I don't have any profit target"
 R indicator E 05:29 | Fast 3-15, slow 20-50, MACD length 10-30, chosen by walk-forward optimisation. | "The fast length I'm going 3 to 15 in steps of three. The slow length I'm going 20 to 50 in steps of 10"
 T with_assumptions | a test of a generic signal rather than a trading rule; its result is negative

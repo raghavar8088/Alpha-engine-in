@@ -5,7 +5,7 @@ instruments: Bitcoin
 timeframes: 1d, 4h
 style: unclear
 = BC-01 | Daily RSI trend-line break as a bullish sign (commentary)
-R indicator E 00:43,01:24 | Daily RSI(14) made lower highs for months while price rose: a weakening market. | "we're starting to have lower highs"
+R indicator E 01:06,01:10 | Daily RSI(14) made lower highs for months while price rose: a weakening market. | "we're starting to have lower highs"
 R setup E 02:17 | A break of the RSI's falling trend line is a point in favour of the bulls. | "we have broken through it"
 R filter E 05:11 | Confirmation still needs a higher high in price and a move above the 50-day SMA. | "we would also want to break through the 50-day sma"
 T concept_only | market commentary on one moment; no entry, stop or exit

@@ -5,7 +5,7 @@ instruments: NSE stocks (scanner), Bank Nifty
 timeframes: 15m then 5m
 style: intraday
 = AL-01 | Rally-then-range stocks: buy a green candle close above the range, stop at its low, target the previous swing high; option writers set Bank Nifty's side
-R entry E 04:14,05:00 | Buy above a green candle that closes above the range (sell below a red one). | "agar meraa koee green kaindal kloj hotaa hai to isake abav aaee vil tek d entree"
+R entry E 04:17,05:00 | Buy above a green candle that closes above the range (sell below a red one). | "agar meraa koee green kaindal kloj hotaa hai to isake abav aaee vil tek d entree"
 R target E 06:25 | Target the previous swing high. | "ye jo preeviyas sving haaee thaa vahaan tak"
 R timeframe E 08:29 | 15-minute charts for the first three to six months, then 5 minutes. | "inishiyal praiktis phor three too siks manths 15 minats"
 R filter E 33:32,34:12 | For Bank Nifty, put writing above call writing is strongly bullish. | "put raaitar gretar den kol raaitar hone chaahie"

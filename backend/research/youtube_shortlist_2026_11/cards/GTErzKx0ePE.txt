@@ -5,8 +5,8 @@ instruments: Forex, E-mini S&P futures, bitcoin
 timeframes: Intraday and swing (volume profiles)
 style: mixed
 = PA-01 | In an uptrend buy the bottom edge of a high-volume node (sell the top edge in a downtrend), stop beyond the low-volume cut, target the POC
-R entry E 07:33,08:17 | In an uptrend, only buy the bottom edges of high-volume nodes. | "the first rule when it comes to the long side is always loo"
+R entry E 07:40,08:17 | In an uptrend, only buy the bottom edges of high-volume nodes. | "the first rule when it comes to the long side is always loo"
 R stop E 09:42 | Stop beyond the low-volume node or cut. | "we put our stop losses beyond the low volume node or low volume cut areas on the profile"
 R entry E 42:21 | In a downtrend, only sell the top edges of high-volume nodes. | "in a downtrend environment you only want to short the top edges of high volume nodes"
-R target E 42:54,47:19 | First target a trip back to the point of control. | "first target would be a trip back int"
+R target E 43:10,47:19 | First target a trip back to the point of control. | "first target would be a trip back int"
 T concept_only | the nodes, cuts, profile periods and trend are drawn by eye as 'general zones'; no fixed profile or entry trigger

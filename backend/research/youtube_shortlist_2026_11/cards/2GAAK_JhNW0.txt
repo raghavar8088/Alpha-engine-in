@@ -6,12 +6,12 @@ timeframes: 1m
 style: scalping
 = MA-01 | One-minute impulse that breaks structure, limit at the 0.618, stop past the origin, target the impulse end
 R market E 06:28 | EUR/USD, tested 100 times from the London open to the New York close. | "I back tested this strategy on EuroUSD 100 times from the London open through to the New York close"
-R setup E 00:41,03:24 | A clear trend; an impulse move that breaks the previous structure (a candle close beyond it). | "You have to wait for an impulse move that breaks structure"
+R setup E 00:41,03:28 | A clear trend; an impulse move that breaks the previous structure (a candle close beyond it). | "You have to wait for an impulse move that breaks structure"
 R indicator E 03:41 | Fibonacci retracement from the start to the end of the impulse (wicks included); levels 0, 0.5, 0.618, 1. | "take your Fibonacci retracement tool from the top of that move to the bottom of that move"
 R entry E 04:35 | A limit order at the 0.618 level. | "You set a limit order at the 618"
 R stop E 04:38 | Stop just beyond the 1.0 level (the impulse origin). | "with a stop-loss just above the one"
-R target E 04:07,06:09 | Take profit at the previous structure (the impulse end): about 1:1.6. | "a takerit at the previous structure. That will give you a 1:1.6 risk-to-reward ratio"
-R no_trade E 02:02,02:43 | No trades in choppy ranges, around news spikes, or outside the London-New York sessions. | "Only trade Fibonacci during the high volume sessions, London open to New York close"
+R target E 04:40,06:09 | Take profit at the previous structure (the impulse end): about 1:1.6. | "a takerit at the previous structure. That will give you a 1:1.6 risk-to-reward ratio"
+R no_trade E 02:34,02:43 | No trades in choppy ranges, around news spikes, or outside the London-New York sessions. | "Only trade Fibonacci during the high volume sessions, London open to New York close"
 R market A - | Desk version: EUR/USD and GBP/USD one-minute bars (the desk's FX futures minutes), 07:00-20:00 UTC. | ""
 R setup A - | Swing points = 5-bar pivots (a high above the 5 bars either side); an up impulse = a close above the latest swing high; the impulse runs from the swing low before it to the highest high since, fixed once a new 5-bar swing high forms. | ""
 R entry A - | Limit at the 0.618 retracement of that impulse, live for 30 bars or until price takes out the impulse high first. | ""

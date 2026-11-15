@@ -6,7 +6,7 @@ timeframes: 1m data, daily ranges
 style: scalping
 = TY-01 | Intraday range percentiles as scalping zones: fade inside the normal range, go with moves beyond the 95th percentile (framework)
 R setup E 02:10 | Measure each product's intraday range percentiles (50th, 75th, 95th) over the last 12 months. | "For each symbol, we measured the 50th percentile, the 75th percentile, the 95th percentile, and the daily range"
-R entry E 08:35,09:16 | Base-case days: fade extreme moves and scalp the reversals with tighter targets. | "fade extreme movements, scalp the scalp the reversals and make your targets tighter"
+R entry E 08:51,09:16 | Base-case days: fade extreme moves and scalp the reversals with tighter targets. | "fade extreme movements, scalp the scalp the reversals and make your targets tighter"
 R entry E 10:55 | Beyond the normal range stop fading and trade with the move. | "if we were down, let's say 30 handles, I would get long. If we're down 50 handles, I'd still get long"
 R sizing E 11:26,12:56 | Size each product by its range and capital requirement (more ES, less bitcoin). | "do not treat the ES and the BTC the same"
 T concept_only | range zones and a fading attitude, with no entry trigger, stop or target defined

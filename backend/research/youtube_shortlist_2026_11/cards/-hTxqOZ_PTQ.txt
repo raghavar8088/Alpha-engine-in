@@ -7,9 +7,9 @@ style: scalping
 = DH-09 | BB Trend (100, 250) side + fresh MACD (48, 104, 36) cross, part at a fixed target, EMA 5/15 trail
 R market E 01:36 | Index futures (Sensex, Nifty, Bank Nifty); options possible but futures preferred (no theta decay). | "phyoochars aar riletivalee sephar kanpeyar too opshan"
 R timeframe E 00:55 | Five-minute chart for scalping on indices. | "main yahaan par 5 minats kaa taaim phrem yooज़ karataa hoon"
-R indicator E 01:31,02:15 | BB Trend with 20/50 Bollinger lengths multiplied by five: 100 and 250. | "isake pairaatars 20 aur 50 hain. main isako phaaiv taaims karoongaa 100 250"
+R indicator E 01:31,02:24 | BB Trend with 20/50 Bollinger lengths multiplied by five: 100 and 250. | "isake pairaatars 20 aur 50 hain. main isako phaaiv taaims karoongaa 100 250"
 R indicator E 03:00 | MACD with four-times parameters: 48, 104, 36. | "main yahaan par 4x pairaameetars yooज़ karataa hoon. 48 104 aur 36"
-R entry E 02:57,04:18 | Not when both are merely the same colour: BB Trend must already be in a colour and the MACD must give a FRESH signal in that colour. | "beebee trend jo hai vo kisee partikular kalar kaa jo hogaa sem kalar men phresh emaeseedee kaa signal chaahie"
+R entry E 03:15,04:18 | Not when both are merely the same colour: BB Trend must already be in a colour and the MACD must give a FRESH signal in that colour. | "beebee trend jo hai vo kisee partikular kalar kaa jo hogaa sem kalar men phresh emaeseedee kaa signal chaahie"
 R no_trade E 04:10 | He personally does not take trades right at the open. | "main parsanalee maarket khulate hee tred naheen letaa hoon"
 R target E 05:40 | Partial booking at Nifty 30-40, Bank Nifty about 100, Sensex 120-130 points. | "niphtee men tred kar rahe hain to 30 se 40 point lenge"
 R exit E 06:02 | Trail the rest on the EMA 5/15 cross: exit a long when EMA 5 goes below EMA 15 (a short when it goes above). | "baay tred men jab 5 15 ke neeche jaaegaa to yahaan par tred ko egjit kar jaanaa hai"

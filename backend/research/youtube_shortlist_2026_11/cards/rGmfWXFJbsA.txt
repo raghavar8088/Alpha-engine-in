@@ -7,8 +7,8 @@ style: swing
 = OF-01 | Williams %R (10) bullish divergence with RSI below 30 on daily candles
 R indicator E 02:21 | Williams %R with a 10-period look-back on daily candles (two trading weeks). | "I am always using a 10 period look back if I'm looking at the daily candle"
 R timeframe E 03:03 | Most useful on daily, weekly or monthly candles; intraday it gives many false signals. | "most useful and a lot less of a false signaling indicator when you're looking at it on longer time frames"
-R setup E 05:05,05:48 | Use it for divergence: price closing lower while %R makes a higher low (mirror at tops). | "The best way to use the Williams percent range is for Divergence"
-R filter E 07:10,07:51 | The strongest signal: %R divergence while RSI is oversold below 30 (overbought above 70 for tops). | "when you have positive Divergence forming on the Williams percent range and the RSI oversold that is an extremely high probability reversal indicator"
+R setup E 05:27,05:48 | Use it for divergence: price closing lower while %R makes a higher low (mirror at tops). | "The best way to use the Williams percent range is for Divergence"
+R filter E 07:17,07:51 | The strongest signal: %R divergence while RSI is oversold below 30 (overbought above 70 for tops). | "when you have positive Divergence forming on the Williams percent range and the RSI oversold that is an extremely high probability reversal indicator"
 R market A - | Desk version: NSE stocks on daily bars, long side only (cash stocks cannot be held short overnight). | ""
 R setup A - | Two pivot lows (closes lower than the 2 closes either side) 3-20 bars apart; the later close at or below the earlier; %R(10) at the later pivot higher than at the earlier; RSI(14) below 30 at the later pivot. | ""
 R entry A - | Buy at the next open after the later pivot is confirmed (2 bars after it). | ""
