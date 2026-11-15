@@ -257,6 +257,7 @@ async def cyc(db):
 
 async def main():
     BTC, GOLD = 27, 131253
+    M.REQUIRE_PIN = True          # sections 1-23 test the PIN when the server requires one; 24 the owner's choice: none
     # ── 1. a live bitcoin entry, sized by risk, with the stop on the venue ─────────────────────────
     section("1. A live entry: $5 of risk, the paper's stop on Delta, no target when the paper has none")
     db = fresh()
@@ -717,6 +718,28 @@ async def main():
     M.D.fail.pop("positions")
     check("a third error in a row still switches the desk off", st_of(db, "crypto")["mode"] == "off"
           and "3 venue errors in a row" in (st_of(db, "crypto").get("switched_off") or ""), st_of(db, "crypto").get("switched_off"))
+    # ── 24. no PIN: the owner's choice on 15 Nov ───────────────────────────────────────────────────
+    section("24. No PIN (the owner's choice, 15 Nov): the switch, the trade size and flatten work without one")
+    M.REQUIRE_PIN = False
+    db = fresh(mode="off")
+    s = await M.status("crypto")
+    check("the page is told no PIN is needed", s["pin_required"] is False and s["keys"], s.get("pin_required"))
+    r = await M.set_mode("live", None, None, desk="crypto")
+    check("a request without the words REAL MONEY still does not arm a desk", not r["ok"] and "REAL MONEY" in r["why"], r)
+    r = await M.set_mode("live", None, "REAL MONEY", desk="crypto")
+    check("ON without a PIN, with the words the page sends", r["ok"] and st_of(db, "crypto")["mode"] == "live", r)
+    r = await M.set_risk(2, None, desk="crypto")
+    check("the trade size without a PIN", r["ok"] and (await M.status("crypto"))["limits"]["risk_usd"] == 2, r)
+    advance(60)                                               # a signal after the desk went live (earlier ones are ignored)
+    f24 = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68650.0, None)
+    await cyc(db)
+    held = BTC in M.D.pos
+    heartbeat(db)
+    r = await M.flatten(None, desk="crypto")
+    check("flatten without a PIN: closed, and switched off", held and r["ok"] and BTC not in M.D.pos
+          and trade(db, f24)["status"] == "closed" and st_of(db, "crypto")["mode"] == "off",
+          (held, r.get("ok"), (trade(db, f24) or {}).get("status")))
+    M.REQUIRE_PIN = True
 
 
 if __name__ == "__main__":

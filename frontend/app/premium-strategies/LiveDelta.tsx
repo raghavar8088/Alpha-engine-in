@@ -6,8 +6,8 @@
 // a $20 daily loss stop), with each trade's stop and target held on Delta. The gold
 // desk shows on Premium Strategies (the original /api/premium-paper/live routes); the crypto desk is the Delta Exchange
 // Live Trading module (/api/premium-paper/live/desk/crypto). This page shows what a desk did and holds its switches.
-// Going live and flattening need the owner's PIN; stopping never does. Live trading has one ON/OFF switch (14 Nov): OFF
-// is instant; ON asks for the PIN (or uses one the owner let this device remember) and one confirmation.
+// Live trading has one ON/OFF switch (14 Nov): OFF is instant, ON asks for one confirmation. A PIN is asked (for ON, the
+// trade size and flatten) only when the server says one is required (pin_required); the owner chose none on 15 Nov.
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { apiFetch } from "../../lib/api";
 
@@ -20,7 +20,7 @@ export type LiveTrade = { id: string; acct: string; mkt: string; product: string
   unrealised_usd?: number; pnl_usd?: number; fees?: number; exit_price?: number; close_reason?: string; created_at: number;
   opened_at?: number; closed_at?: number; plan?: Plan; legs?: { stop?: string; stop_limit?: string; target?: string } };
 type Totals = { trades: number; wins: number; pnl_usd: number; fees_usd: number; skipped: number; errors: number };
-export type LiveStatus = { configured_db: boolean; keys: boolean; pin_set: boolean; mode: "off" | "shadow" | "live"; since?: number;
+export type LiveStatus = { configured_db: boolean; keys: boolean; pin_set: boolean; pin_required?: boolean; mode: "off" | "shadow" | "live"; since?: number;
   armed_at?: number; switched_off?: string | null; last_error?: string | null; last_error_at?: number; errors_in_row?: number;
   last_cycle_at?: number; wallet?: { asset: string | null; balance: number; available: number; blocked: number } | null;
   wallet_at?: number;
@@ -87,6 +87,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
   onForgetPin: () => void; intro?: ReactNode;
 }) {
   const isLive = s.mode === "live";
+  const pinNeeded = s.pin_required !== false;     // an older server, or one with PREMIUM_LIVE_REQUIRE_PIN=1
   const m = MODE[s.mode] ?? MODE.off;
   const L = s.limits;
   // the risk a trade the owner picks, whole dollars from the server's minimum to its cap; shown once the server offers it
@@ -111,7 +112,8 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
       </div>
       <div className="ld-facts">
         <span>Delta keys on the server: <b className={s.keys ? "gain" : "loss"}>{s.keys ? "yes" : "no"}</b></span>
-        <span>Owner PIN set: <b className={s.pin_set ? "gain" : "loss"}>{s.pin_set ? "yes" : "no"}</b></span>
+        {pinNeeded ? <span>Owner PIN set: <b className={s.pin_set ? "gain" : "loss"}>{s.pin_set ? "yes" : "no"}</b></span>
+          : <span>PIN: <b>not needed</b></span>}
         <span>Desk checked: <b>{ago(s.last_cycle_at, now)}</b> (every {L.tick_s}s)</span>
         {s.armed_at ? <span>Live since: <b>{ist(s.armed_at)} IST</b></span> : null}
       </div>
@@ -146,7 +148,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
       <div className="ld-ctl">
         <div className="ld-switch-row">
           <button type="button" role="switch" aria-checked={isLive} aria-label="Live trading"
-            className={`ld-switch${isLive ? " on" : ""}`} disabled={!!busy || (!isLive && (!s.keys || !s.pin_set))} onClick={onToggle}>
+            className={`ld-switch${isLive ? " on" : ""}`} disabled={!!busy || (!isLive && (!s.keys || (pinNeeded && !s.pin_set)))} onClick={onToggle}>
             <span className="ld-knob" />
           </button>
           <div className="ld-switch-text">
@@ -200,12 +202,12 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
           <button className="ld-btn" disabled={!!busy || isLive} onClick={onShadow} title={isLive ? "Switch live trading OFF first" : undefined}>
             {s.mode === "shadow" ? "Stop the shadow test" : "Test without orders (shadow)"}
           </button>
-          <button className="ld-btn" disabled={!!busy || !s.pin_set} onClick={onFlatten}>
+          <button className="ld-btn" disabled={!!busy || (pinNeeded && !s.pin_set)} onClick={onFlatten}>
             {busy === "flatten" ? "Closing…" : "Flatten every position now"}
           </button>
-          {saved && <button className="ld-btn" disabled={!!busy} onClick={onForgetPin}>Forget the PIN saved on this device</button>}
+          {saved && pinNeeded && <button className="ld-btn" disabled={!!busy} onClick={onForgetPin}>Forget the PIN saved on this device</button>}
         </div>
-        {(!s.keys || !s.pin_set) && <p className="ld-dim">Delta API keys or the owner PIN are not on the server yet, so the switch cannot turn ON. The setup script sets both and keeps them off the repository.</p>}
+        {(!s.keys || (pinNeeded && !s.pin_set)) && <p className="ld-dim">Delta API keys or the owner PIN are not on the server yet, so the switch cannot turn ON. The setup script sets both and keeps them off the repository.</p>}
         {msg && <p className="ld-msg">{msg}</p>}
       </div>
 
@@ -418,7 +420,7 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
           : key === "off" ? "Live trading is OFF: no new trades." : "Shadow test running: decisions are logged, nothing is sent.");
         setAsk(null);
         setPendingRisk(null);
-        if (pinned) {
+        if (pinned && usePin) {
           if (remember) { keepPin(usePin); setSaved(true); } else forget();
         }
       } else {
@@ -446,9 +448,9 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
   };
   const onToggle = () => {
     if (s?.mode === "live") { act("off"); return; }   // OFF never needs the PIN: it can only stop new trades
-    if (saved && pin) goLive(pin); else setAsk("live");
+    if (s?.pin_required === false) goLive(""); else if (saved && pin) goLive(pin); else setAsk("live");
   };
-  const onFlatten = () => { if (saved && pin) doFlatten(pin); else setAsk("flatten"); };
+  const onFlatten = () => { if (s?.pin_required === false) doFlatten(""); else if (saved && pin) doFlatten(pin); else setAsk("flatten"); };
   const onShadow = () => act(s?.mode === "shadow" ? "off" : "shadow");
   const isCurrent = (r: number | "min") => !!s && (r === "min" ? s.limits.sizing === "min"
     : s.limits.sizing !== "min" && Math.abs(r - s.limits.risk_usd) < 0.005);
@@ -461,6 +463,7 @@ export default function LiveDelta({ desk = "gold", intro }: { desk?: "gold" | "c
   };
   const onRisk = (r: number | "min") => {
     if (!s || isCurrent(r)) return;
+    if (s?.pin_required === false) { setRisk(r, ""); return; }
     if (saved && pin) { setRisk(r, pin); return; }
     setPendingRisk(r);
     setAsk("risk");

@@ -5,8 +5,8 @@
 // smallest order; or $1 to $5 of risk the owner picks on the page) and a $20 daily loss stop. The desk
 // is premium_live's "crypto" desk: it copies the paper desk's trades of the four (their signals come from Delta's live
 // BTCUSD candles) into real Delta orders, each with its stop and target held on Delta. One ON/OFF switch runs it: ON
-// needs the owner's PIN and one confirmation (the page sends the words REAL MONEY the server asks for); OFF never needs
-// the PIN. The gold desk stays on Premium Strategies.
+// needs one confirmation (the page sends the words REAL MONEY the server asks for); since 15 Nov no PIN (the owner's
+// choice). The gold desk stays on Premium Strategies.
 import Link from "next/link";
 import PageHeader from "../../components/PageHeader";
 import LiveDelta from "../premium-strategies/LiveDelta";
@@ -29,10 +29,9 @@ export default function DeltaLiveTradingPage() {
           a second signal is skipped while one is open.
         </p>
         <p>
-          Use the <b>Live trading</b> switch below. <b>ON</b> starts real orders: it asks for your PIN (or uses the one you let
-          this device remember) and one confirmation. <b>OFF</b> stops new trades at once and needs no PIN; a position already
-          open still closes at its stop, its target or its strategy&apos;s exit. To watch the decisions without sending
-          anything, use <b>Test without orders</b>. The gold strategies stay on{" "}
+          Use the <b>Live trading</b> switch below. <b>ON</b> starts real orders after one confirmation. <b>OFF</b> stops new
+          trades at once; a position already open still closes at its stop, its target or its strategy&apos;s exit. To watch
+          the decisions without sending anything, use <b>Test without orders</b>. The gold strategies stay on{" "}
           <Link href="/premium-strategies">Premium Strategies › Real money · Delta gold</Link>, with their own switch and daily stop.
         </p>
       </div>

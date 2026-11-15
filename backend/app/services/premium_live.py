@@ -28,7 +28,7 @@ local MongoDB) into real Delta orders. The paper desk decides every entry and ex
   desk's CRYPTO_MAX_LAG_S), the market is still within DRIFT_FRAC of a risk distance of the paper entry, and the price
   is strictly between the paper's stop and target. The order is a market order of one contract, the smallest order
   Delta allows (the default from 15 Nov; skipped if that one contract would lose more than the desk's RISK_USD at the
-  stop), or, when the owner picks a dollar risk on the page (RISK_MIN_USD up to RISK_USD, with the PIN), sized so the
+  stop), or, when the owner picks a dollar risk on the page (RISK_MIN_USD up to RISK_USD), sized so the
   paper's stop loses at most that: contracts = risk / (|price - stop| x contract value), and never more than
   MAX_NOTIONAL_USD of notional; then a trade whose single contract would lose more than that risk is skipped.
 - The paper's own stop and target go on the venue as a bracket right after the fill. If the bracket is refused, the
@@ -45,8 +45,8 @@ MODES
 - off: no new trade; open positions are still managed to their close.
 - shadow: every decision is made and logged with simulated fills at the quote, and no order is sent.
 - live: real orders.
-Going live, flattening and changing the risk a trade need the owner's PIN. Switching to off or shadow never does,
-since neither sends an order.
+Going live also needs the words REAL MONEY in the request (the page sends them). The owner's PIN is asked for going
+live, flattening and changing the size only when PREMIUM_LIVE_REQUIRE_PIN=1; the owner chose no PIN on 15 Nov.
 Three venue errors in a row switch the desk off (a good answer from Delta starts the count again).
 """
 
@@ -80,6 +80,7 @@ MAX_LAG_S = int(os.getenv("PREMIUM_LIVE_MAX_LAG_S", "300"))
 CRYPTO_MAX_LAG_S = int(os.getenv("PREMIUM_CRYPTO_MAX_LAG_S", "600"))   # the bitcoin desk (the owner's choice, 15 Nov)
 GOLD_MAX_LAG_S = int(os.getenv("PREMIUM_GOLD_MAX_LAG_S", "600"))       # the gold desk too, when it went live (15 Nov)
 SIZING_DEFAULT = os.getenv("PREMIUM_LIVE_SIZING", "min")   # "min": one contract a trade, the owner's choice on 15 Nov
+REQUIRE_PIN = os.getenv("PREMIUM_LIVE_REQUIRE_PIN", "0").strip() == "1"   # the owner chose no PIN on 15 Nov
 RISK_MIN_USD = 1.0             # the lowest risk a trade the owner can pick on the page; the highest is the desk's own
 PRIORITY_REFRESH_S = 600       # the books named to the paper desk (live_priority) are re-written at least this often
 DRIFT_FRAC = float(os.getenv("PREMIUM_LIVE_DRIFT_FRAC", "0.30"))
@@ -138,7 +139,7 @@ CRYPTO_PICKS: tuple[Pick, ...] = (
 )
 GOLD_NOTES = (
     "Real money on six unproven gold strategies (CP-06 joined the five on 15 Nov), at the owner's chosen size: one "
-    "contract a trade, the smallest order (or $1 to $5 of risk picked on this page with the PIN), and a $20 daily "
+    "contract a trade, the smallest order (or $1 to $5 of risk picked on this page), and a $20 daily "
     "loss stop.",
     "Three of the six lose in their own 2-year backtests and three were never backtested; their good week is the only "
     "thing that picked them.",
@@ -157,7 +158,7 @@ GOLD_NOTES = (
 CRYPTO_NOTES = (
     "Real money on four bitcoin strategies the owner picked from the Crypto tab (TH-05, TL-04, TH-01 on 14 Nov 2026, "
     "TD-02 on 15 Nov), at the owner's chosen size: one contract a trade, the smallest order (or $1 to $5 of risk "
-    "picked on this page with the PIN), and a $20 daily loss stop.",
+    "picked on this page), and a $20 daily loss stop.",
     "None is proven: TL-04 and TD-02 lose in their own 2-year bitcoin backtests (-0.31R a trade over 2,134 trades and "
     "-0.37R over 998) and TH-05 and TH-01 were never backtested; 7 to 15 paper trades picked them.",
     "Each real trade is the paper desk's trade on Delta's live BTCUSD candles: its entry, stop, target and exit. A "
@@ -169,8 +170,8 @@ CRYPTO_NOTES = (
     "Stops and targets live on Delta itself (a bracket), so a position stays protected if this server goes down.",
     "Leverage is set to 10x on BTCUSD before going live; positions are capped at $2,500 of notional.",
     "Fees and funding are Delta's own, read from its fills. Profit and loss are in US dollars.",
-    "This desk and the gold desk (Premium Strategies > Real money · Delta gold) share the Delta account, its keys and "
-    "the PIN; each has its own switch and its own $20 daily stop.",
+    "This desk and the gold desk (Premium Strategies > Real money · Delta gold) share the Delta account and its keys; "
+    "each has its own switch and its own $20 daily stop.",
 )
 
 
@@ -825,7 +826,10 @@ def _pin_ok(pin: str | None) -> bool | None:
 
 
 async def _check_pin(db, st: dict, pin: str | None) -> str | None:
-    """None if the PIN is right; otherwise why not (wrong PINs are counted and lock it for the hour)."""
+    """None if the PIN is right; otherwise why not (wrong PINs are counted and lock it for the hour). None at once when
+    no PIN is required (REQUIRE_PIN off: the owner's choice on 15 Nov)."""
+    if not REQUIRE_PIN:
+        return None
     fails = [f for f in (st.get("pin_fails") or []) if _now() - float(f) < 3600]
     if len(fails) >= PIN_TRIES:
         return "too many wrong PINs: locked for an hour"
@@ -994,7 +998,7 @@ async def _status_one() -> dict:
                      "skipped": sum(1 for t in rows if t.get("mode") == m and t.get("status") == "skipped"),
                      "errors": sum(1 for t in rows if t.get("mode") == m and t.get("status") == "error")}
     return {
-        "configured_db": True, "keys": DR.configured(), "pin_set": _pin_ok(None) is not None,
+        "configured_db": True, "keys": DR.configured(), "pin_set": _pin_ok(None) is not None, "pin_required": REQUIRE_PIN,
         "mode": st.get("mode"), "since": st.get("since"), "armed_at": st.get("armed_at"),
         "switched_off": st.get("switched_off"), "last_error": st.get("last_error"), "last_error_at": st.get("last_error_at"),
         "errors_in_row": st.get("errors_in_row"), "last_cycle_at": st.get("last_cycle_at"), "wallet": st.get("wallet"),
