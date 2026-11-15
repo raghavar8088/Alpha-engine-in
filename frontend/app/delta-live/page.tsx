@@ -24,9 +24,9 @@ export default function DeltaLiveTradingPage() {
           Each of the four runs on the Premium paper desk on Delta&apos;s live one-minute BTCUSD candles. When one of them
           enters, this desk sends the same trade to your Delta account as a real order: a market entry of 1 contract, the
           smallest order Delta allows (or sized to a risk of $1 to $5 if you pick one below), with that strategy&apos;s own
-          stop and target placed on Delta as a bracket. When the strategy exits, the
-          real position is closed. The desk never adds trades of its own, and Delta holds one bitcoin position at a time, so
-          a second signal is skipped while one is open.
+          stop and target placed on Delta. When the strategy exits, its
+          real trade is closed. The desk never adds trades of its own. All four can be in a trade at the same time: each is
+          its own order with its own stop and target, and Delta shows their sum as one bitcoin position.
         </p>
         <p>
           Use the <b>Live trading</b> switch below. <b>ON</b> starts real orders after one confirmation. <b>OFF</b> stops new

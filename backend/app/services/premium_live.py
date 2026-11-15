@@ -31,12 +31,17 @@ local MongoDB) into real Delta orders. The paper desk decides every entry and ex
   stop), or, when the owner picks a dollar risk on the page (RISK_MIN_USD up to RISK_USD), sized so the
   paper's stop loses at most that: contracts = risk / (|price - stop| x contract value), and never more than
   MAX_NOTIONAL_USD of notional; then a trade whose single contract would lose more than that risk is skipped.
-- The paper's own stop and target go on the venue as a bracket right after the fill. If the bracket is refused, the
-  position is closed at once and the desk switches itself off: a real position never stays unprotected.
-- When the paper trade closes, for any reason, or disappears, the real one is closed at the market and its legs are
-  cancelled. When the venue closes it first (its bracket), the close is recorded from Delta's fills.
-- One real position per product at a time. Delta nets positions by product, so a signal on a product already held,
-  by this desk or by anyone, is skipped. It is never stacked or netted.
+- The paper's own stop and target go on the venue right after the fill as the trade's OWN two orders (from 15 Nov:
+  standalone stop orders of the trade's size, not reduce-only, their ids on the trade). If either is refused, the
+  trade is closed at once and the desk switches itself off: a real trade never stays unprotected.
+- When the paper trade closes, for any reason, or disappears, its legs are cancelled first and then the trade is
+  closed at the market by its own size. When a leg fills first, the other is cancelled and the close is recorded
+  from that leg; legs that filled beyond the trade (both, in a very fast move) are offset at the market at once.
+- Every strategy of a desk may hold a trade at the same time (the owner's choice, 15 Nov). Delta keeps one netted
+  position per product, so every cycle the desk checks that the account's position equals the sum of the desks'
+  trades: a mismatch makes new entries wait, and one seen on three checks switches the desk off, touching nothing.
+  A trade from before (one bracket on the whole position) is managed the old way, and nothing new enters its product
+  while it is open.
 - The daily loss stop: once today's (IST) closed plus open P&L reaches -DAILY_STOP_USD, no new entry until tomorrow.
 - Before going live, leverage is set to LEVERAGE on both products and read back. Delta's defaults, 200x on BTCUSD and
   100x on XAUTUSD, liquidate inside the strategies' stops.
@@ -65,7 +70,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
 
 from app.services import delta_rest as DR
-from app.services.delta_rest import Delta, DeltaError, Product
+from app.services.delta_rest import Delta, DeltaError, Product, fmt_tick
 
 logger = logging.getLogger("premium_live")
 
@@ -149,9 +154,9 @@ GOLD_NOTES = (
     "new bar up to a few minutes late, so a fast strategy's copy is often skipped as late or drifted rather than chased.",
     "One gold contract is 0.001 XAUT (about $4 of gold), so a trade of one contract loses cents at its stop. A trade "
     "whose one contract would lose more than $5 is skipped (or more than the chosen risk, with a dollar risk).",
-    "Delta nets positions by product, so only one gold position can be open at a time; a second signal is skipped "
-    "while one is held.",
-    "Stops and targets live on Delta itself (a bracket), so a position stays protected if this server goes down.",
+    "All six can hold a trade at the same time (from 15 Nov): each trade is its own order with its own stop and "
+    "target on Delta, and Delta shows their sum as one gold position.",
+    "Each trade's stop and target live on Delta itself, so it stays protected if this server goes down.",
     "Leverage is set to 10x on XAUTUSD before going live; positions are capped at $2,500 of notional.",
     "Fees and funding are Delta's own, read from its fills. Profit and loss are in US dollars.",
 )
@@ -165,9 +170,9 @@ CRYPTO_NOTES = (
     "signal seen more than 10 minutes late, or already 30% of its risk away, is skipped, never chased. One bitcoin "
     "contract is 0.001 BTC; a trade whose one contract would lose more than $5 at its stop is skipped too (or more "
     "than the chosen risk, with a dollar risk).",
-    "Delta nets positions by product, so only one bitcoin position can be open at a time across the four; a second "
-    "signal is skipped while one is held.",
-    "Stops and targets live on Delta itself (a bracket), so a position stays protected if this server goes down.",
+    "All four can hold a trade at the same time (from 15 Nov): each trade is its own order with its own stop and "
+    "target on Delta, and Delta shows their sum as one bitcoin position.",
+    "Each trade's stop and target live on Delta itself, so it stays protected if this server goes down.",
     "Leverage is set to 10x on BTCUSD before going live; positions are capped at $2,500 of notional.",
     "Fees and funding are Delta's own, read from its fills. Profit and loss are in US dollars.",
     "This desk and the gold desk (Premium Strategies > Real money · Delta gold) share the Delta account and its keys; "
@@ -415,12 +420,15 @@ async def _exit_from_fills(t: dict, product: Product, fallback_price: float | No
             "basis": "estimated (no fills read)"}
 
 
-async def _record_close(db, t: dict, ex: dict, reason: str, product: Product) -> None:
+async def _record_close(db, t: dict, ex: dict, reason: str, product: Product, extra_pnl: float = 0.0) -> None:
+    """`extra_pnl`: what offsetting legs that filled beyond the trade's size made or cost; part of its result."""
     fees = float(t.get("entry_fee") or 0.0) + float(ex["fee"] or 0.0)
-    pnl = _pnl(t["side"], float(t["fill"]), float(ex["price"]), int(t["contracts"]), product.contract_value, fees)
+    pnl = round(_pnl(t["side"], float(t["fill"]), float(ex["price"]), int(t["contracts"]), product.contract_value, fees)
+                + extra_pnl, 4)
     await _set_trade(db, t["_id"], status="closed", exit_price=round(float(ex["price"]), 6), exit_fee=round(float(ex["fee"]), 6),
                      exit_basis=ex["basis"], fees=round(fees, 6), pnl_usd=pnl, r=round(pnl / _trade_risk(t), 3),
-                     close_reason=reason, closed_at=_now(), day_closed=_day(), unrealised_usd=0.0)
+                     close_reason=reason, closed_at=_now(), day_closed=_day(), unrealised_usd=0.0,
+                     **({"extra_pnl": extra_pnl} if extra_pnl else {}))
 
 
 async def _day_pnl(db, mode: str, positions: dict | None) -> float:
@@ -436,7 +444,8 @@ async def _day_pnl(db, mode: str, positions: dict | None) -> float:
 # -- managing what is open -------------------------------------------------------------------------------
 
 
-async def _manage_live(db, st: dict, t: dict, paper: dict | None, positions: dict, products: dict, desk_age: float) -> None:
+async def _manage_bracket(db, st: dict, t: dict, paper: dict | None, positions: dict, products: dict, desk_age: float) -> None:
+    """A trade from before 15 Nov: its one bracket covers the whole position, so the position is the trade."""
     product = products[t["product"]]
     pos = positions.get(product.id)
     size = int(pos["size"]) if pos else 0
@@ -510,6 +519,335 @@ async def _manage_live(db, st: dict, t: dict, paper: dict | None, positions: dic
     await _record_close(db, t, ex, reason, product)
 
 
+async def _manage_live(db, st: dict, t: dict, paper: dict | None, positions: dict, products: dict, desk_age: float,
+                       resting: dict | None) -> None:
+    """A live trade: with its own stop and target on Delta (from 15 Nov), or one from before whose bracket covers the
+    whole position (managed the old way)."""
+    if _own(t):
+        if resting is None:                     # the resting orders could not be read this cycle: next cycle
+            return
+        await _manage_own(db, st, t, paper, positions, products[t["product"]], desk_age, resting.get(t["product"], {}))
+    else:
+        await _manage_bracket(db, st, t, paper, positions, products, desk_age)
+
+
+# -- each trade's own legs (15 Nov 2026) ---------------------------------------------------------------------------
+# Every strategy of a desk may hold a trade at the same time (the owner's choice, 15 Nov). Delta keeps one netted
+# position per product and one bracket per position, so each trade carries its own stop and target: standalone stop
+# orders of its own size, not reduce-only (one trade's leg may have to open or flip the net position), their ids on
+# the trade. A leg that fills ends the trade and the other leg is cancelled. When the desk closes a trade it cancels
+# both legs FIRST and then closes at the market only what is still held, so its own order and a leg never both close
+# the same contracts. Legs that filled beyond the trade's size (both, in a very fast move) are offset at once. Every
+# cycle the account's position is checked against the sum of the desks' trades (_check_books).
+
+
+def _own(t: dict) -> bool:
+    return t.get("protect") == "own"
+
+
+async def _leg_order(product: Product, side: str, size: int, kind: str, trigger: float, limit: float, cid: str) -> dict:
+    """Place one leg; an answer that was lost is looked up by its client id (it may exist without our knowing)."""
+    try:
+        return await D.stop_order(product, side, size, kind, trigger, limit, client_order_id=cid)
+    except DeltaError as exc:
+        if not exc.ambiguous:
+            raise
+        try:
+            o = await D.order_by_client_id(cid)
+        except DeltaError:
+            raise exc from None
+        if not o.get("id") or o.get("state") == "cancelled":
+            raise
+        return {**o, "stop_price_sent": fmt_tick(trigger, product.tick), "limit_price_sent": fmt_tick(limit, product.tick)}
+
+
+async def _place_legs(db, tid: str, product: Product, side: int, contracts: int, fill: float, stop: float,
+                      target: float | None) -> dict:
+    """The trade's own stop (and target) on Delta, each saved on the trade as soon as it is placed. Raises DeltaError;
+    the caller then closes the trade (a leg already placed is on the trade, so it is cancelled with it)."""
+    long_ = side > 0
+    if (long_ and stop >= fill) or (not long_ and stop <= fill):
+        raise DeltaError(f"legs: the stop {stop} is on the wrong side of the fill {fill}")
+    if target is not None and ((long_ and target <= fill) or (not long_ and target >= fill)):
+        raise DeltaError(f"legs: the target {target} is on the wrong side of the fill {fill}")
+    if abs(fill - stop) < 2 * product.tick:
+        raise DeltaError("legs: the stop is under two ticks from the fill")
+    out = "sell" if long_ else "buy"
+    slip = max(abs(fill - stop) * 0.20, 2 * product.tick)     # the stop's limit sits past its trigger (see delta_rest)
+    s = await _leg_order(product, out, contracts, "stop_loss_order", stop, stop - slip if long_ else stop + slip,
+                         _cid(tid, "s"))
+    legs = {"stop": s["stop_price_sent"], "stop_limit": s["limit_price_sent"], "stop_id": s["id"], "target": None,
+            "target_id": None}
+    await _set_trade(db, tid, legs=legs)
+    if target is not None:
+        tp = await _leg_order(product, out, contracts, "take_profit_order", target, target, _cid(tid, "t"))
+        legs.update(target=tp["stop_price_sent"], target_id=tp["id"])
+        await _set_trade(db, tid, legs=legs)
+    return legs
+
+
+def _leg_kind(o: dict) -> str:
+    """"filled" (wholly or partly) | "cancelled" | "resting" | "unknown", from an order read back."""
+    s = o.get("state") or ""
+    if o.get("filled") or s == "closed":
+        return "filled"
+    if s == "cancelled":
+        return "cancelled"
+    if s in ("open", "pending"):
+        return "resting"
+    return "unknown"
+
+
+async def _leg(product: Product, oid: str | None, resting: dict) -> tuple[str, dict]:
+    """A leg's state: from the cycle's list of resting orders, else read back by its id."""
+    if not oid:
+        return "none", {}
+    if oid in resting:
+        o = resting[oid]
+        return ("filled" if o.get("filled") else "resting"), o
+    try:
+        o = await D.order(oid)
+    except DeltaError:
+        return "unknown", {}
+    return _leg_kind(o), o
+
+
+async def _cancel_leg(product: Product, oid: str) -> tuple[str, dict]:
+    """Cancel one leg and say how it ended. Delta refuses to cancel an order that already filled or is gone
+    ("open_order_not_found"), so a refusal is answered by reading the order back."""
+    try:
+        o = await D.cancel_order(product.id, oid)
+    except DeltaError:
+        try:
+            o = await D.order(oid)
+        except DeltaError:
+            return "unknown", {}
+    k = _leg_kind(o)
+    if k == "filled" and o.get("state") in ("open", "pending"):
+        return "unknown", o                  # partly filled and still resting: not settled yet
+    return k, o
+
+
+async def _market_once(db, st: dict, t: dict, product: Product, size: int, side: str, tag: str) -> dict | None:
+    """A market order a trade sends to close ("x") or to offset legs that filled beyond it ("f"), sent once: the
+    result is kept on the trade, and an answer that was lost is looked up by its client id before anything is sent
+    again. None when it did not go through this cycle."""
+    cid = _cid(t["_id"], tag)
+    prev = (t.get("orders") or {}).get(tag) or {}
+    if prev.get("filled"):
+        return prev
+    if prev.get("ambiguous"):
+        try:
+            o = await D.order_by_client_id(cid)
+            if o.get("filled"):
+                await _set_trade(db, t["_id"], **{f"orders.{tag}": o})
+                return o
+        except DeltaError:
+            pass                                    # not found: it never went through
+    try:
+        o = await D.market(product.id, size, side, client_order_id=cid)
+    except DeltaError as exc:
+        await _set_trade(db, t["_id"], **{f"orders.{tag}": {"ambiguous": exc.ambiguous, "error": str(exc)[:200]}})
+        await _venue_error(db, st, f"{t['acct']}: market order refused ({exc})")
+        return None
+    await _set_trade(db, t["_id"], **{f"orders.{tag}": o})
+    if not o.get("filled"):
+        await _venue_error(db, st, f"{t['acct']}: the market order did not fill")
+        return None
+    return o
+
+
+async def _close_own(db, st: dict, t: dict, product: Product, reason: str, resting: dict) -> bool:
+    """Close a trade that has its own legs: cancel both legs first, close at the market only what is still held, and
+    offset at once anything its legs filled beyond its size. True when the trade is closed; False leaves it closing,
+    tried again next cycle (nothing more is sent while a leg cannot be settled)."""
+    n = int(t.get("contracts") or 0)
+    legs = t.get("legs") or {}
+    out = "sell" if t["side"] > 0 else "buy"
+    if t.get("status") != "closing" or t.get("close_reason") != reason:
+        await _set_trade(db, t["_id"], status="closing", close_reason=reason)
+    got: list[dict] = []
+    for k in ("stop", "target"):
+        oid = legs.get(f"{k}_id")
+        if not oid:
+            continue
+        kind, o = await _leg(product, oid, resting)
+        if kind in ("resting", "unknown") or (kind == "filled" and o.get("state") in ("open", "pending")):
+            kind, o = await _cancel_leg(product, oid)
+        if kind in ("resting", "unknown"):
+            await _venue_error(db, st, f"{t['acct']}: its {k} on Delta could not be cancelled or read")
+            return False
+        if kind == "filled":
+            got.append(o)
+    qty = sum(int(o["filled"]) for o in got)
+    value = sum(float(o.get("avg_price") or 0.0) * int(o["filled"]) for o in got)
+    fee = sum(float(o.get("commission") or 0.0) for o in got)
+    if qty < n:
+        o = await _market_once(db, st, t, product, n - qty, out, "x")
+        if o is None:
+            return False
+        qty += int(o["filled"])
+        value += float(o.get("avg_price") or 0.0) * int(o["filled"])
+        fee += float(o.get("commission") or 0.0)
+    extra, extra_pnl = qty - n, 0.0
+    if extra > 0:
+        # its legs filled more than it held (both, in a very fast move): the overshoot is taken back at once
+        o = await _market_once(db, st, t, product, extra, _side(t["side"]), "f")
+        if o is None:
+            return False
+        avg = value / qty
+        extra_pnl = round(-t["side"] * (float(o.get("avg_price") or avg) - avg) * extra * product.contract_value
+                          - float(o.get("commission") or 0.0), 6)
+    price = value / qty if qty else float(t.get("fill") or 0.0)
+    await _record_close(db, t, {"price": price, "fee": fee, "basis": "fills"}, reason, product, extra_pnl)
+    return True
+
+
+async def _replace_leg(db, t: dict, product: Product, k: str) -> None:
+    """Put back, once, a leg that was cancelled on Delta by someone other than this desk."""
+    legs = dict(t.get("legs") or {})
+    n, out = int(t["contracts"]), ("sell" if t["side"] > 0 else "buy")
+    if k == "stop":
+        stop = float(t["stop"])
+        slip = max(abs(float(t["fill"]) - stop) * 0.20, 2 * product.tick)
+        o = await _leg_order(product, out, n, "stop_loss_order", stop, stop - slip if t["side"] > 0 else stop + slip,
+                             _cid(t["_id"], "s2"))
+        legs.update(stop_id=o["id"], stop_replaced=True)
+    else:
+        target = float(t["target"])
+        o = await _leg_order(product, out, n, "take_profit_order", target, target, _cid(t["_id"], "t2"))
+        legs.update(target_id=o["id"], target_replaced=True)
+    await _set_trade(db, t["_id"], legs=legs)
+
+
+async def _settle_entry(db, st: dict, t: dict, product: Product) -> None:
+    """An entry whose answer was lost (or whose record stopped half-way): Delta is asked for it by its client id."""
+    if _now() - float(t.get("created_at") or 0) < 60:
+        return
+    try:
+        o = await D.order_by_client_id(_cid(t["_id"]))
+    except DeltaError:
+        o = None
+    if o and o.get("filled"):
+        fill = float(o.get("avg_price") or (t.get("plan") or {}).get("price") or 0.0)
+        n = int(o["filled"])
+        await _set_trade(db, t["_id"], status="open", contracts=n, fill=fill, entry_fee=float(o.get("commission") or 0.0),
+                         entry_order=o, opened_at=_now(), recovered=True)
+        try:
+            await _place_legs(db, t["_id"], product, t["side"], n, fill, float(t["stop"]),
+                              float(t["target"]) if t.get("target") else None)
+        except DeltaError as exc:
+            t = await _tc(db).find_one({"_id": t["_id"]})
+            await _switch_off(db, st, f"{t['acct']}: its stop or target was refused on recovery ({exc})")
+            await _close_own(db, st, t, product, f"stop or target refused on recovery: {exc}", {})
+        return
+    if (o is not None and not o.get("filled")) or _now() - float(t.get("created_at") or 0) > 300:
+        await _set_trade(db, t["_id"], status="skipped", reason="entry not confirmed by Delta")
+
+
+async def _manage_own(db, st: dict, t: dict, paper: dict | None, positions: dict, product: Product, desk_age: float,
+                      resting: dict) -> None:
+    """One trade with its own stop and target on Delta."""
+    if t["status"] == "entering":
+        await _settle_entry(db, st, t, product)
+        return
+    if t["status"] == "closing":
+        await _close_own(db, st, t, product, t.get("close_reason") or "closing", resting)
+        return
+    legs = t.get("legs") or {}
+    state = {k: await _leg(product, legs[f"{k}_id"], resting) for k in ("stop", "target") if legs.get(f"{k}_id")}
+    hit = [k for k, (kind, _o) in state.items() if kind == "filled"]
+    if hit:
+        why = "venue stop and target" if len(hit) > 1 else f"venue {hit[0]}"
+        await _close_own(db, st, t, product, why, resting)
+        return
+    lost = [k for k, (kind, _o) in state.items() if kind == "cancelled"]
+    if lost:
+        k = lost[0]
+        if legs.get(f"{k}_replaced"):
+            await _close_own(db, st, t, product, f"its {k} was cancelled on Delta again", resting)
+            return
+        try:
+            await _replace_leg(db, t, product, k)
+        except DeltaError as exc:
+            await _close_own(db, st, t, product, f"its {k} was cancelled on Delta and could not be put back ({exc})",
+                             resting)
+        return
+    reason = None
+    if paper is None:
+        gone = float(t.get("paper_missing_since") or 0)
+        if not gone:
+            await _set_trade(db, t["_id"], paper_missing_since=_now())
+        elif _now() - gone > MISSING_GRACE_S:
+            reason = "the paper trade disappeared"
+    elif not paper.get("open"):
+        reason = f"paper exit: {paper.get('reason') or 'closed'}"
+    elif desk_age > DESK_DEAD_S:
+        reason = "the paper desk stopped updating"
+    if reason is not None:
+        await _close_own(db, st, t, product, reason, resting)
+        return
+    mark = float((positions.get(product.id) or {}).get("mark") or 0.0)
+    if not mark:                                   # the net position can be flat while trades are open
+        try:
+            mark = float((await D.ticker(product.symbol))["mark"])
+        except DeltaError:
+            mark = 0.0
+    n = int(t.get("contracts") or 0)
+    u = _pnl(t["side"], float(t["fill"]), mark, n, product.contract_value, float(t.get("entry_fee") or 0.0)) if mark else 0.0
+    fields = {"mark": mark, "unrealised_usd": u, "contracts_open": n}
+    if paper is not None:
+        fields["paper_missing_since"] = None
+    await _set_trade(db, t["_id"], **fields)
+
+
+async def _expected_net(db) -> dict[str, int]:
+    """Contracts the desks' live trades hold, signed, by product symbol, across every desk: what the account's netted
+    positions should be. Entries still in flight are not counted."""
+    out: dict[str, int] = {}
+    for d in DESKS.values():
+        async for t in getattr(db, d.trades_coll).find({"mode": "live", "status": {"$in": ["open", "closing"]}},
+                                                       {"product": 1, "side": 1, "contracts": 1}):
+            out[t["product"]] = out.get(t["product"], 0) + int(t["side"]) * int(t.get("contracts") or 0)
+    return out
+
+
+async def _legacy_products(db) -> set[str]:
+    """Products where a trade from before 15 Nov is open (its one bracket covers the whole position): no new entry
+    there until it closes."""
+    out = set()
+    for d in DESKS.values():
+        async for t in getattr(db, d.trades_coll).find({"mode": "live", "status": {"$in": ["entering", "open", "closing"]}},
+                                                       {"product": 1, "protect": 1}):
+            if t.get("protect") != "own":
+                out.add(t["product"])
+    return out
+
+
+async def _check_books(db, st: dict, products: dict, positions: dict) -> dict[str, bool]:
+    """Does the account's position on each of this desk's products equal the sum of the desks' trades on it? A
+    mismatch can be Delta's lag (its positions can take up to 10 s) or a trade in flight, so new entries just wait;
+    seen on three checks in a row (about a minute), the desk switches off and touches nothing: someone looks at Delta."""
+    want = await _expected_net(db)
+    out, bad = {}, []
+    for sym in _d().products:
+        p = products.get(sym)
+        if p is None:
+            continue
+        have = int((positions.get(p.id) or {}).get("size") or 0)
+        out[sym] = have == want.get(sym, 0)
+        if not out[sym]:
+            bad.append(f"{sym}: the account holds {have:+d} contracts, the trades {want.get(sym, 0):+d}")
+    n = int(st.get("mismatch_checks") or 0) + 1 if bad else 0
+    if n != int(st.get("mismatch_checks") or 0):
+        st["mismatch_checks"] = n
+        await _set_state(db, mismatch_checks=n, mismatch="; ".join(bad) or None)
+    if bad and n >= ERRORS_TO_STOP and st.get("mode") == "live":
+        await _switch_off(db, st, f"the account's position has not matched this desk's trades for {n} checks "
+                                  f"({'; '.join(bad)}): nothing was touched - check Delta")
+    return out
+
+
 def _near(px: float, level: float, entry: float) -> bool:
     return abs(px - level) <= max(abs(entry - level) * 0.35, 1e-9)
 
@@ -561,8 +899,8 @@ async def _manage_shadow(db, t: dict, paper: dict | None, desk_age: float, produ
 # -- entries -------------------------------------------------------------------------------------------
 
 
-async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, positions: dict | None, busy: set,
-                 day_pnl: float, desk_age: float) -> str:
+async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, busy: set, day_pnl: float,
+                 desk_age: float) -> str:
     """Decide one new paper trade, once. Returns what happened, for the cycle's report."""
     tid, mode = paper["_id"], st["mode"]
     side = 1 if int(paper.get("side") or 0) > 0 else -1
@@ -571,7 +909,7 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, position
     entry = float(paper.get("entry") or 0.0)
     base = {"_id": tid, "acct": pick.acct, "mkt": pick.mkt, "product": pick.product, "name": pick.name, "mode": mode,
             "side": side, "paper_entry": entry, "paper_entry_t": paper.get("entry_t"), "stop": stop, "target": target,
-            "setup": paper.get("setup"), "day": _day(), "created_at": _now()}
+            "setup": paper.get("setup"), "day": _day(), "created_at": _now(), "protect": "own"}
 
     async def skip(why: str, **extra) -> str:
         try:
@@ -592,10 +930,8 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, position
     if desk_age > DESK_STALE_S:
         return await skip("the paper desk has not updated for over 20 minutes")
     product = products[pick.product]
-    if pick.product in busy:
-        return await skip(f"{pick.product} already holds this desk's position (Delta nets by product)")
-    if positions is not None and product.id in positions:
-        return await skip(f"the account already holds a {pick.product} position")
+    if mode == "live" and pick.product in busy:
+        return await skip(f"{pick.product} holds an older trade whose one bracket covers the whole position")
     try:
         q = await D.ticker(product.symbol)
     except DeltaError as exc:
@@ -632,7 +968,6 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, position
         fee = _fee(notional, product.taker_rate)
         await _tc(db).insert_one({**base, "status": "open", "plan": plan, "contracts": contracts, "fill": px,
                                                "entry_fee": round(fee, 6), "opened_at": _now(), "unrealised_usd": -fee})
-        busy.add(pick.product)
         return f"shadow entry: {contracts} {pick.product} at {px}"
 
     try:
@@ -643,12 +978,11 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, position
     if w["available"] < plan["margin_usd"] * MARGIN_BUFFER:
         return await skip(f"not enough free balance (${w['available']:.2f} for ${plan['margin_usd']:.2f} of margin)")
     await _tc(db).insert_one({**base, "status": "entering", "plan": plan, "contracts": contracts})
-    busy.add(pick.product)
     try:
         o = await D.market(product.id, contracts, _side(side), client_order_id=_cid(tid))
     except DeltaError as exc:
         if exc.ambiguous:
-            # the order may have filled: it stays "entering", and the next cycles adopt it from the account or drop it
+            # the order may have filled: it stays "entering", and the next cycles ask Delta for it by its client id
             await _set_trade(db, tid, reason=f"entry answer lost ({exc}); checking the account")
             await _venue_error(db, st, f"{pick.acct}: entry answer lost ({exc})")
             return f"error: entry answer lost ({exc})"
@@ -662,25 +996,14 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, position
     await _set_trade(db, tid, contracts=o["filled"], fill=fill, entry_fee=float(o.get("commission") or 0.0), entry_order=o,
                      opened_at=_now())
     try:
-        legs = await D.bracket(product, _side(side), fill, stop, target)
+        await _place_legs(db, tid, product, side, int(o["filled"]), fill, stop, target)
     except DeltaError as exc:
         # never left unprotected: out at once, and the desk stops until someone looks
-        await _set_trade(db, tid, status="closing", close_reason=f"bracket refused: {exc}")
-        await _switch_off(db, st, f"{pick.acct} {pick.product}: bracket refused ({exc}); the position was closed")
-        try:
-            o2 = await D.market(product.id, o["filled"], "sell" if side > 0 else "buy", reduce_only=True,
-                                client_order_id=_cid(tid, "x"))
-        except DeltaError:
-            return f"error: bracket refused ({exc}); the close is retried every cycle"
-        try:
-            await D.cancel_stops(product.id)
-        except DeltaError:
-            pass
+        await _switch_off(db, st, f"{pick.acct} {pick.product}: its stop or target was refused ({exc}); the trade was closed")
         t = await _tc(db).find_one({"_id": tid})
-        ex = await _exit_from_fills(t, product, o2.get("avg_price") or None, o2.get("commission"))
-        await _record_close(db, t, ex, f"bracket refused, closed at once: {exc}", product)
-        return f"error: bracket refused ({exc}); closed at once"
-    await _set_trade(db, tid, status="open", legs=_legs(legs), unrealised_usd=-float(o.get("commission") or 0.0))
+        done = await _close_own(db, st, t, product, f"stop or target refused, closed at once: {exc}", {})
+        return f"error: stop or target refused ({exc}); " + ("closed at once" if done else "the close is retried every cycle")
+    await _set_trade(db, tid, status="open", unrealised_usd=-float(o.get("commission") or 0.0))
     st["errors_in_row"] = 0
     await _set_state(db, errors_in_row=0)
     return f"live entry: {o['filled']} {pick.product} at {fill}"
@@ -712,6 +1035,7 @@ async def _cycle_one() -> dict:
         paper = await _paper(db, float(st.get("since") or _now()), [t["_id"] for t in open_rows])
         live_rows = [t for t in open_rows if t.get("mode") == "live"]
         positions: dict | None = None
+        resting: dict | None = {}
         if st["mode"] == "live" or live_rows:
             try:
                 positions = await D.positions()
@@ -725,25 +1049,34 @@ async def _cycle_one() -> dict:
                     await _set_state(db, wallet=await D.wallet(), wallet_at=_now())
                 except DeltaError:
                     pass
+            try:                                            # the resting legs of the trades that carry their own
+                for sym in sorted({t["product"] for t in live_rows if _own(t)}):
+                    resting[sym] = await D.open_orders(products[sym].id)
+            except DeltaError as exc:
+                await _venue_error(db, st, f"resting orders unavailable ({exc})")
+                resting = None
         for t in open_rows:
             if t.get("mode") == "live":
                 if positions is not None:
-                    await _manage_live(db, st, t, paper.get(t["_id"]), positions, products, desk_age)
+                    await _manage_live(db, st, t, paper.get(t["_id"]), positions, products, desk_age, resting)
             else:
                 await _manage_shadow(db, t, paper.get(t["_id"]), desk_age, products)
             out["managed"].append(t["_id"])
         if st["mode"] == "off" or (st["mode"] == "live" and positions is None):
             return out
         decided = {t["_id"] async for t in _tc(db).find({"_id": {"$in": list(paper)}}, {"_id": 1})}
-        still_open = [t async for t in _tc(db).find({"status": {"$in": ["entering", "open", "closing"]}},
-                                                                 {"product": 1, "mode": 1})]
-        busy = {t["product"] for t in still_open}
-        if st["mode"] == "live" and positions is not None:
+        books: dict[str, bool] = {}
+        busy: set = set()
+        if st["mode"] == "live":
             try:
                 positions = await D.positions()
             except DeltaError as exc:
                 await _venue_error(db, st, f"positions unavailable ({exc})")
                 return out
+            books = await _check_books(db, st, products, positions)
+            if st["mode"] != "live":                        # the books check switched the desk off
+                return out
+            busy = await _legacy_products(db)
         day_pnl = await _day_pnl(db, st["mode"], positions)
         for tid, p in sorted(paper.items(), key=lambda kv: kv[1].get("entry_t") or 0):
             if tid in decided or float(p.get("entry_t") or 0) < float(st.get("since") or 0):
@@ -753,8 +1086,9 @@ async def _cycle_one() -> dict:
             pk = _d().pick.get((p["acct"], p["mkt"]))
             if pk is None:                      # a trade from before a re-pick: managed above, never entered again
                 continue
-            res = await _enter(db, st, pk, p, products, positions if st["mode"] == "live" else None,
-                               busy, day_pnl, desk_age)
+            if st["mode"] == "live" and not books.get(pk.product, False):
+                continue                        # the account does not match the trades yet: wait, undecided
+            res = await _enter(db, st, pk, p, products, busy, day_pnl, desk_age)
             out["entered"].append({"id": tid, "result": res})
         return out
 
@@ -877,16 +1211,16 @@ async def _set_mode_one(mode: str, pin: str | None = None, confirm: str | None =
             lev[sym] = LEVERAGE
     except DeltaError as exc:
         return {"ok": False, "why": f"Delta refused the check: {exc}"}
-    tracked = {t["product"] async for t in _tc(db).find({"mode": "live", "status": {"$in": ["entering", "open", "closing"]}},
-                                                                     {"product": 1})}
-    foreign = [sym for sym, p in products.items() if p.id in positions and sym not in tracked]
+    want = await _expected_net(db)
+    foreign = [sym for sym, p in products.items() if int((positions.get(p.id) or {}).get("size") or 0) != want.get(sym, 0)]
     if foreign:
-        return {"ok": False, "why": f"the account already holds {', '.join(foreign)}: close it on Delta first"}
+        return {"ok": False, "why": f"the account already holds {', '.join(foreign)} that the desks' trades do not "
+                                    "account for: close it on Delta first"}
     cached = st.get("products") or {}
     for sym in lev:
         cached.setdefault(sym, {})["leverage"] = lev[sym]
     await _set_state(db, mode="live", since=_now(), armed_at=_now(), errors_in_row=0, switched_off=None,
-                     products=cached, wallet=w, wallet_at=_now())
+                     mismatch_checks=0, mismatch=None, products=cached, wallet=w, wallet_at=_now())
     return {"ok": True, "mode": "live", "wallet": w, "leverage": lev}
 
 

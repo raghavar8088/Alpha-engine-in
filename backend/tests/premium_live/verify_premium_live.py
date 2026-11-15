@@ -14,7 +14,8 @@ at once and switching the desk off; a lost order answer adopted from the account
 a stale paper desk; shadow mode sending nothing; flatten; the PIN, its lockout and the REAL MONEY confirmation;
 leverage set to 10x before going live; three venue errors switching the desk off. Then (15 Nov): the owner's risk a
 trade, $1 to $5 with the PIN; each desk's lag limit, 10 minutes on bitcoin and 5 on gold; the books named to the paper
-desk so it runs them first. Later on 15 Nov: one contract a trade by default on both desks (a dollar risk is the
+desk so it runs them first. Later on 15 Nov: every strategy may hold a trade at the same time, each with its OWN
+stop and target orders on Delta (sections 1-5, 8, 9 and 25-29 test them); one contract a trade by default on both desks (a dollar risk is the
 owner's other choice), TD-02 and CP-06 added, and gold also 10 minutes.
 
 Two desks since 14 Nov 2026: the bitcoin scenarios run on the crypto desk (the Delta Exchange Live Trading module: TH-05,
@@ -78,6 +79,9 @@ class FakeDelta(Delta):
         self.fail = {}                # path key -> "definite" | "ambiguous" | ("ambiguous_after", ...)
         self.calls = []
         self.oid = 1000
+        self.stops = {}               # order id -> a trade's own leg (a standalone stop order), as Delta reports it
+        self.book = {}                # order id -> every order placed, as Delta reports it (by id or client id)
+        self.stop_orders = []         # the bodies of the legs placed
 
     # quotes
     def bid(self, sym):
@@ -93,12 +97,13 @@ class FakeDelta(Delta):
         if f == "ambiguous":
             raise DeltaError(f"{key}: no answer (ReadTimeout)", ambiguous=True)
 
-    def _fill(self, pid, side, size, price, reduce_only=False, kind="market"):
+    def _fill(self, pid, side, size, price, reduce_only=False, kind="market", order_id=None):
         sym = BY_ID[pid]
         cv = float(SPECS[sym]["cv"])
         comm = abs(size * cv * price) * float(SPECS[sym]["taker"]) * 1.18
-        self.oid += 1
-        oid = str(self.oid)
+        if order_id is None:
+            self.oid += 1
+        oid = str(order_id) if order_id is not None else str(self.oid)
         p = self.pos.get(pid, {"size": 0, "entry": 0.0})
         signed = size if side == "buy" else -size
         new = p["size"] + signed
@@ -118,9 +123,21 @@ class FakeDelta(Delta):
         return oid, comm
 
     def set_price(self, sym, px):
-        """Move the market; a resting bracket leg that the move crosses fills and the other is cancelled."""
+        """Move the market: every trade's own leg the move crosses fills (in the order placed); a resting bracket leg
+        (trades from before 15 Nov) fills and the other is cancelled."""
         self.mid[sym] = px
         pid = SPECS[sym]["id"]
+        for oid, o in sorted(self.stops.items(), key=lambda kv: int(kv[0])):
+            if o["product_id"] != pid or o["state"] != "pending":
+                continue
+            trig, lim, sell = float(o["stop_price"]), float(o["limit_price"]), o["side"] == "sell"
+            loss = o["stop_order_type"] == "stop_loss_order"
+            hit = (px <= trig if sell else px >= trig) if loss else (px >= trig if sell else px <= trig)
+            if not hit:
+                continue
+            fill = (max(self.bid(sym), lim) if sell else min(self.ask(sym), lim)) if loss else lim
+            _, comm = self._fill(pid, o["side"], int(o["size"]), fill, False, "leg", order_id=oid)
+            o.update(state="closed", unfilled_size=0, average_fill_price=f"{fill}", paid_commission=f"{comm}")
         p, lg = self.pos.get(pid), self.legs.get(pid)
         if not p or not lg:
             return
@@ -170,6 +187,53 @@ class FakeDelta(Delta):
             pid = int(q["product_ids"])
             return [f for f in self.fills_ if f["product_id"] == pid
                     and datetime.fromisoformat(f["created_at"]).timestamp() >= since]
+        if method == "GET" and base == "/v2/orders":
+            self._fail("open_orders")
+            q = dict(kv.split("=") for kv in path.split("?")[1].split("&"))
+            pid, states = int(q["product_ids"]), q["states"].split(",")
+            return [dict(o) for o in self.stops.values() if o["product_id"] == pid and o["state"] in states]
+        if method == "GET" and base.startswith("/v2/orders/client_order_id/"):
+            self._fail("order_lookup")
+            cid = base.rsplit("/", 1)[1]
+            for o in self.book.values():
+                if o.get("client_order_id") == cid:
+                    return dict(o)
+            raise DeltaError(f"GET {base}: HTTP 404 {{\"code\":\"not_found\"}}")
+        if method == "GET" and base.startswith("/v2/orders/") and base.count("/") == 3:
+            self._fail("order_lookup")
+            o = self.book.get(base.rsplit("/", 1)[1])
+            if o is None:
+                raise DeltaError(f"GET {base}: HTTP 404 {{\"code\":\"not_found\"}}")
+            return dict(o)
+        if method == "DELETE" and base == "/v2/orders":
+            self._fail("cancel")
+            o = self.stops.get(str(body["id"]))
+            if o is None or o["state"] != "pending":
+                raise DeltaError("DELETE /v2/orders: HTTP 400 {\"code\": \"open_order_not_found\"}")
+            o["state"] = "cancelled"
+            return dict(o)
+        if method == "POST" and base == "/v2/orders" and body.get("stop_order_type"):
+            self._fail("stop_order")
+            left = self.fail.get("stop_order_after")          # this many legs go through, then they are refused
+            if left is not None:
+                if left <= 0:
+                    raise DeltaError("POST /v2/orders: HTTP 400 {\"code\":\"test_refusal\"}")
+                self.fail["stop_order_after"] = left - 1
+            pid, tick = body["product_id"], float(SPECS[BY_ID[body["product_id"]]]["tick"])
+            for k in ("stop_price", "limit_price"):
+                v = body[k]
+                assert isinstance(v, str) and abs(round(float(v) / tick) * tick - float(v)) < 1e-9, f"off tick: {v}"
+            assert body["order_type"] == "limit_order" and body.get("reduce_only") is False
+            assert body.get("stop_trigger_method") == "last_traded_price"
+            self.oid += 1
+            o = {"id": self.oid, "product_id": pid, "side": body["side"], "size": body["size"], "unfilled_size": body["size"],
+                 "state": "pending", "stop_order_type": body["stop_order_type"], "stop_price": body["stop_price"],
+                 "limit_price": body["limit_price"], "client_order_id": body.get("client_order_id"),
+                 "average_fill_price": None, "paid_commission": "0"}
+            self.stops[str(self.oid)] = o
+            self.book[str(self.oid)] = o
+            self.stop_orders.append(dict(body))
+            return dict(o)
         if method == "POST" and base == "/v2/orders":
             assert body["order_type"] == "market_order"
             self.orders.append(dict(body))
@@ -183,10 +247,13 @@ class FakeDelta(Delta):
                 size = min(size, abs(p["size"])) if p else 0
             px = self.ask(sym) if side == "buy" else self.bid(sym)
             oid, comm = self._fill(pid, side, size, px, body.get("reduce_only", False)) if size else ("0", 0.0)
+            o = {"id": int(oid), "size": size, "unfilled_size": "0", "average_fill_price": f"{px}",
+                 "paid_commission": f"{comm}", "state": "closed", "client_order_id": body.get("client_order_id"),
+                 "product_id": pid, "side": side}
+            self.book[str(oid)] = o
             if f == "ambiguous":            # the order went through; the answer did not come back
                 raise DeltaError("POST /v2/orders: no answer (ReadTimeout)", ambiguous=True)
-            return {"id": int(oid), "size": size, "unfilled_size": "0", "average_fill_price": f"{px}",
-                    "paid_commission": f"{comm}", "state": "closed"}
+            return dict(o)
         if method == "POST" and base == "/v2/orders/bracket":
             self._fail("bracket")
             pid = body["product_id"]
@@ -205,6 +272,9 @@ class FakeDelta(Delta):
             return {}
         if method == "DELETE" and base == "/v2/orders/all":
             self.legs.pop(body["product_id"], None)
+            for o in self.stops.values():
+                if o["product_id"] == body["product_id"] and o["state"] == "pending":
+                    o["state"] = "cancelled"
             return {}
         raise AssertionError(f"unexpected call {method} {path}")
 
@@ -242,6 +312,12 @@ def close_paper(db, tid, reason, exit_px):
             d.update(open=False, reason=reason, exit=exit_px, exit_t=int(CLOCK[0]))
 
 
+def own_leg(t, k):
+    """A trade's own leg ("stop" or "target") as the fake exchange holds it."""
+    oid = ((t or {}).get("legs") or {}).get(f"{k}_id")
+    return M.D.stops.get(str(oid)) if oid else None
+
+
 def trade(db, tid):
     return next((d for d in db.live_crypto_trades.docs + db.live_delta_trades.docs if d["_id"] == tid), None)
 
@@ -269,10 +345,13 @@ async def main():
     check("a market buy of the risk-sized contracts went in", t and t["status"] == "open" and t["contracts"] == want
           and M.D.orders[-1]["side"] == "buy" and M.D.pos[BTC]["size"] == want, f"{r['crypto']['entered']} / {want} contracts")
     check("its risk at the stop is at most $5", t["plan"]["risk_usd"] <= 5.0 + 1e-9, t["plan"])
-    lg = M.D.legs.get(BTC)
-    check("the venue holds the paper's stop, its limit 20% of the risk past it, no target leg, last-traded trigger",
-          lg and lg["stop"][0] == 68650.0 and abs(lg["stop"][1] - (68650.0 - (ask - 68650.0) * 0.2)) <= 0.5
-          and lg["tp"] is None and lg["trigger"] == "last_traded_price", lg)
+    sl = own_leg(t, "stop")
+    check("its own stop is on Delta: a sell of its size at the paper's stop, the limit 20% of the risk past it, not "
+          "reduce-only, last-traded trigger; no target leg", sl is not None and sl["state"] == "pending" and sl["side"] == "sell"
+          and sl["size"] == want and float(sl["stop_price"]) == 68650.0
+          and abs(float(sl["limit_price"]) - (68650.0 - (ask - 68650.0) * 0.2)) <= 0.5 and t["legs"]["target_id"] is None
+          and M.D.stop_orders[-1]["reduce_only"] is False and M.D.stop_orders[-1]["stop_trigger_method"] == "last_traded_price",
+          sl)
     check("the order carried a client id derived from the paper trade", M.D.orders[-1].get("client_order_id", "").startswith("p5"))
 
     # ── 2. the venue's stop closes it ───────────────────────────────────────────────────────────────
@@ -287,7 +366,7 @@ async def main():
     fees = t["fees"]
     check("the loss is the planned risk, at most 1.2x it on a gap through the stop, plus Delta's fees",
           -(1.2 * risk + fees) - 0.01 <= t["pnl_usd"] <= -risk * 0.9, (t["pnl_usd"], round(risk, 2), round(fees, 2)))
-    check("no leg is left on the product", BTC not in M.D.legs and BTC not in M.D.pos)
+    check("no leg is left on the product", BTC not in M.D.pos and not any(o["state"] == "pending" for o in M.D.stops.values()))
 
     # ── 3. the paper's own exit closes it ───────────────────────────────────────────────────────────
     section("3. The paper trade exits on its signal: the real one is closed at the market")
@@ -299,11 +378,15 @@ async def main():
     close_paper(db, t3, "exit_signal", 68800.0)
     await cyc(db)
     t = trade(db, t3)
-    check("a reduce-only buy closed the short", M.D.orders[-1].get("reduce_only") is True and M.D.orders[-1]["side"] == "buy"
-          and BTC not in M.D.pos)
+    calls = M.D.calls
+    i_cancel = max((i for i, c in enumerate(calls) if c == ("DELETE", "/v2/orders")), default=-1)
+    i_close = max((i for i, c in enumerate(calls) if c == ("POST", "/v2/orders")), default=-1)
+    check("its stop was cancelled first, then a buy of its own size closed it (not reduce-only: trades share the position)",
+          0 <= i_cancel < i_close and M.D.orders[-1].get("reduce_only") is None and M.D.orders[-1]["side"] == "buy"
+          and M.D.orders[-1]["size"] == trade(db, t3)["contracts"] and BTC not in M.D.pos, (i_cancel, i_close))
     check("recorded with the paper's reason and a profit (short from 69,000 to 68,800)",
           t["status"] == "closed" and t["close_reason"] == "paper exit: exit_signal" and t["pnl_usd"] > 0, t.get("pnl_usd"))
-    check("the stop leg was cancelled after the close", BTC not in M.D.legs)
+    check("its stop ended cancelled, never filled", own_leg(trade(db, t3), "stop")["state"] == "cancelled")
 
     # ── 4. a gold trade reaches its target on Delta ─────────────────────────────────────────────────
     section("4. Gold: target and stop both on Delta; the target fills")
@@ -311,8 +394,10 @@ async def main():
     t4 = paper(db, "DR-01", "XAUTUSD", 1, 3885.0, 3880.0, 3895.0)
     await cyc(db)
     t = trade(db, t4)
-    lg = M.D.legs.get(GOLD)
-    check("both legs on the venue, on the 0.01 tick", lg and lg["stop"][0] == 3880.0 and lg["tp"] == (3895.0, 3895.0), lg)
+    sl, tp = own_leg(t, "stop"), own_leg(t, "target")
+    check("both of its own legs on Delta, on the 0.01 tick", sl is not None and tp is not None
+          and float(sl["stop_price"]) == 3880.0 and float(tp["stop_price"]) == 3895.0 and float(tp["limit_price"]) == 3895.0
+          and sl["state"] == tp["state"] == "pending", (sl, tp))
     advance(900)
     M.D.set_price("XAUTUSD", 3895.5)
     await cyc(db)
@@ -322,22 +407,33 @@ async def main():
     check("closed as a venue target: the trade's risk x its reward ratio, less fees (the $2,500 cap bound its size)",
           t["status"] == "closed" and t["close_reason"] == "venue target" and abs(t["pnl_usd"] - want) < 0.02
           and t["plan"]["capped"], (t["pnl_usd"], round(want, 2), t["plan"]["risk_usd"]))
+    check("its stop was cancelled once the target filled; nothing else was sent", own_leg(t, "stop")["state"] == "cancelled"
+          and len(M.D.orders) == 1 and GOLD not in M.D.pos)
 
     # ── 5. one position per product, and the account's own positions ───────────────────────────────
-    section("5. One position per product; a position the desk does not own blocks the product")
+    section("5. Every strategy on one product at once (15 Nov); a position no trade accounts for makes entries wait")
     db = fresh()
     a = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68650.0, None)
     b = paper(db, "TL-04", "BTCUSD", -1, 69000.0, 69400.0, 68400.0, ago=20)
     await cyc(db)
-    check("the first bitcoin signal opened, the second was skipped (Delta nets by product)",
-          trade(db, a)["status"] == "open" and trade(db, b)["status"] == "skipped" and "already holds" in trade(db, b)["reason"],
-          trade(db, b)["reason"])
+    ta, tb = trade(db, a), trade(db, b)
+    check("both bitcoin signals opened, each with its own stop (TL-04 its target too)", ta["status"] == "open"
+          and tb["status"] == "open" and own_leg(ta, "stop")["state"] == "pending" and own_leg(tb, "stop")["state"] == "pending"
+          and own_leg(tb, "target")["state"] == "pending", (ta.get("reason"), tb.get("reason")))
+    check("Delta holds their sum as one position (the long and the short net out)",
+          M.D.pos.get(BTC, {}).get("size", 0) == ta["contracts"] - tb["contracts"], (M.D.pos.get(BTC), ta["contracts"], tb["contracts"]))
     M.D.pos[GOLD] = {"size": 50, "entry": 3880.0}          # the owner's own gold position
     g = paper(db, "YT-14", "XAUUSD", 1, 3885.0, 3878.0, 3899.0)
     await cyc(db)
-    check("a gold signal is skipped while the account holds gold it did not open",
-          trade(db, g)["status"] == "skipped" and "account already holds" in trade(db, g)["reason"], trade(db, g)["reason"])
-    check("the owner's position was not touched", M.D.pos[GOLD]["size"] == 50)
+    check("a gold signal waits, undecided, while the account holds gold no trade accounts for",
+          trade(db, g) is None and st_of(db, "gold")["mismatch_checks"] == 1, st_of(db, "gold").get("mismatch"))
+    await cyc(db)
+    await cyc(db)
+    sg = st_of(db, "gold")
+    check("seen on three checks: the gold desk switches off and says why", sg["mode"] == "off"
+          and "has not matched" in (sg.get("switched_off") or ""), sg.get("switched_off"))
+    check("the owner's position was not touched, and the bitcoin desk carries on", M.D.pos[GOLD]["size"] == 50
+          and st_of(db, "crypto")["mode"] == "live" and trade(db, g) is None)
 
     # ── 6. late, drifted and outside the levels ─────────────────────────────────────────────────────
     section("6. Late or moved signals are refused, never chased")
@@ -369,15 +465,24 @@ async def main():
           and t["plan"]["risk_usd"] < 5, (t["contracts"], cap, t["plan"]["risk_usd"]))
 
     # ── 8. a refused bracket ────────────────────────────────────────────────────────────────────────
-    section("8. Delta refuses the bracket: the position is closed at once and the desk switches off")
+    section("8. Delta refuses a trade's stop or target: the trade is closed at once and the desk switches off")
     db = fresh()
-    M.D.fail["bracket"] = "definite"
+    M.D.fail["stop_order"] = "definite"
     t8 = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68650.0, None)
     await cyc(db)
     t, st = trade(db, t8), st_of(db, "crypto")
-    check("the position was closed in the same pass", BTC not in M.D.pos and t["status"] == "closed"
-          and "bracket refused" in t["close_reason"], t.get("close_reason"))
-    check("the desk switched itself off and says why", st["mode"] == "off" and "bracket refused" in (st.get("switched_off") or ""))
+    check("the trade was closed in the same pass", BTC not in M.D.pos and t["status"] == "closed"
+          and "stop or target refused" in t["close_reason"], t.get("close_reason"))
+    check("the desk switched itself off and says why", st["mode"] == "off"
+          and "stop or target was refused" in (st.get("switched_off") or ""), st.get("switched_off"))
+    db = fresh(gold=3885.0)
+    M.D.fail["stop_order_after"] = 1                       # the stop goes through, the target is refused
+    t8b = paper(db, "DR-01", "XAUTUSD", 1, 3885.0, 3880.0, 3895.0)
+    await cyc(db)
+    t = trade(db, t8b)
+    check("the target refused after the stop went in: the stop is cancelled and the trade closed at once",
+          t["status"] == "closed" and own_leg(t, "stop")["state"] == "cancelled" and GOLD not in M.D.pos
+          and st_of(db, "gold")["mode"] == "off", (t.get("status"), t.get("legs")))
 
     # ── 9. a lost order answer ──────────────────────────────────────────────────────────────────────
     section("9. The entry's answer is lost: the position is found on the account and protected")
@@ -390,8 +495,8 @@ async def main():
     advance(100)
     await cyc(db)
     t = trade(db, t9)
-    check("adopted from the account and given its stop", t["status"] == "open" and t.get("recovered")
-          and M.D.legs.get(BTC, {}).get("stop", (0,))[0] == 68650.0, (t["status"], M.D.legs.get(BTC)))
+    check("found on Delta by its client id, adopted and given its own stop", t["status"] == "open" and t.get("recovered")
+          and own_leg(t, "stop") is not None and float(own_leg(t, "stop")["stop_price"]) == 68650.0, (t["status"], t.get("legs")))
     db = fresh()
     M.D.fail["market"] = "definite"
     t9b = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68650.0, None)
@@ -554,12 +659,12 @@ async def main():
     await cyc(db)
     check("still open and marked by the gold desk: not closed early, no error", trade(db, leg)["status"] == "open"
           and trade(db, leg).get("mark") and not st_of(db, "gold").get("switched_off"), trade(db, leg))
-    check("the crypto desk's bitcoin signal is skipped while the account holds that BTCUSD",
-          trade(db, new)["status"] == "skipped" and "account already holds" in trade(db, new)["reason"], trade(db, new)["reason"])
+    check("the crypto desk's bitcoin signal is skipped while that older trade (one bracket on the whole position) is open",
+          trade(db, new)["status"] == "skipped" and "older trade" in trade(db, new)["reason"], trade(db, new)["reason"])
     await M.set_mode("off", desk="crypto")
     r = await M.set_mode("live", PIN, "REAL MONEY", desk="crypto")
-    check("the crypto desk cannot go live while the account holds BTCUSD it does not own",
-          not r["ok"] and "already holds BTCUSD" in r["why"], r.get("why"))
+    check("the crypto desk can go live (the account's BTCUSD is the gold desk's known trade), entering nothing beside it",
+          r["ok"], r.get("why"))
     advance(1200)
     M.D.set_price("BTCUSD", 69500.0)
     close_paper(db, leg, "exit_signal", 69500.0)
@@ -695,6 +800,104 @@ async def main():
                                            for p in c["picks"] + g["picks"] if p["acct"] in ("TD-02", "CP-06"))
           and all(p.get("picked_at") is None for p in c["picks"] + g["picks"] if p["acct"] not in ("TD-02", "CP-06")),
           ([p["acct"] for p in c["picks"]], [p["acct"] for p in g["picks"]]))
+    # ── 25. every strategy at once ─────────────────────────────────────────────────────────────────
+    section("25. All four bitcoin strategies at once (15 Nov): each its own trade, stop and target; each ends on its own")
+    db = fresh()
+    for coll in (db.live_delta_state, db.live_crypto_state):
+        coll.docs[0].pop("sizing", None)                       # one contract a trade
+    t5 = paper(db, "TH-05", "BTCUSD", 1, 69000.0, 68650.0, None)
+    tl = paper(db, "TL-04", "BTCUSD", -1, 69000.0, 69400.0, 68200.0, ago=25)
+    th = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68700.0, None, ago=20)
+    td = paper(db, "TD-02", "BTCUSD", 1, 69000.0, 68810.0, None, ago=15)
+    await cyc(db)
+    ts = [trade(db, x) for x in (t5, tl, th, td)]
+    check("four open trades of one contract, each with its own stop on Delta (TL-04 its target too)",
+          all(x is not None and x["status"] == "open" and x["contracts"] == 1 and own_leg(x, "stop")["state"] == "pending"
+              for x in ts) and own_leg(ts[1], "target")["state"] == "pending", [(x or {}).get("reason") for x in ts])
+    check("Delta holds their sum: three longs and a short make +2 contracts", M.D.pos[BTC]["size"] == 2, M.D.pos.get(BTC))
+    advance(60)
+    M.D.set_price("BTCUSD", 68800.0)                          # through TD-02's stop (68,810) only
+    await cyc(db)
+    ts = [trade(db, x) for x in (t5, tl, th, td)]
+    check("TD-02's own stop filled: it alone closed, the other three stay open with their legs",
+          ts[3]["status"] == "closed" and ts[3]["close_reason"] == "venue stop" and all(x["status"] == "open" for x in ts[:3])
+          and M.D.pos[BTC]["size"] == 1, [x["status"] for x in ts])
+    advance(60)
+    close_paper(db, tl, "exit_signal", 68800.0)
+    await cyc(db)
+    ts = [trade(db, x) for x in (t5, tl, th, td)]
+    check("TL-04's paper exit: its stop and target cancelled, one contract bought back, the longs untouched",
+          ts[1]["status"] == "closed" and own_leg(ts[1], "stop")["state"] == own_leg(ts[1], "target")["state"] == "cancelled"
+          and M.D.pos[BTC]["size"] == 2 and ts[1]["pnl_usd"] > 0 and ts[0]["status"] == ts[2]["status"] == "open",
+          (ts[1].get("pnl_usd"), M.D.pos.get(BTC)))
+    check("the account matched the trades throughout", not st_of(db, "crypto").get("mismatch_checks"))
+    # ── 26. both legs fill in a very fast move ─────────────────────────────────────────────────────
+    section("26. Both legs fill before the desk looks (a very fast move): the extra contract is offset at once")
+    db = fresh(gold=3885.0)
+    for coll in (db.live_delta_state, db.live_crypto_state):
+        coll.docs[0].pop("sizing", None)
+    g26 = paper(db, "DR-01", "XAUTUSD", 1, 3885.0, 3880.0, 3895.0)
+    await cyc(db)
+    advance(60)
+    M.D.set_price("XAUTUSD", 3895.5)                          # the target fills ...
+    M.D.set_price("XAUTUSD", 3879.0)                          # ... and the stop too, before the next cycle
+    held = M.D.pos.get(GOLD, {}).get("size", 0)
+    await cyc(db)
+    t = trade(db, g26)
+    flows = sum((1 if f["side"] == "sell" else -1) * float(f["price"]) * f["size"] * 0.001 - float(f["commission"])
+                for f in M.D.fills_ if f["product_id"] == GOLD)
+    check("both legs had filled: the account was short one extra contract", held == -1, held)
+    check("the desk bought it back at once: flat, the trade closed as 'venue stop and target'", GOLD not in M.D.pos
+          and t["status"] == "closed" and t["close_reason"] == "venue stop and target" and "extra_pnl" in t
+          and M.D.orders[-1]["side"] == "buy" and M.D.orders[-1]["size"] == 1, (M.D.pos.get(GOLD), t.get("close_reason")))
+    check("its result is every fill it caused: entry, both legs and the offset", abs(t["pnl_usd"] - flows) < 1e-3,
+          (t["pnl_usd"], round(flows, 6)))
+    # ── 27. Delta's positions lag ──────────────────────────────────────────────────────────────────
+    section("27. Delta's positions can lag a few seconds: one mismatched check only makes entries wait")
+    db = fresh()
+    M.D.pos[BTC] = {"size": 1, "entry": 69000.0}             # e.g. a close Delta has not reported yet
+    w27 = paper(db, "TH-05", "BTCUSD", 1, 69000.0, 68650.0, None)
+    await cyc(db)
+    check("one mismatched check: the signal waits, undecided", trade(db, w27) is None
+          and st_of(db, "crypto")["mismatch_checks"] == 1)
+    M.D.pos.pop(BTC)                                          # Delta catches up
+    await cyc(db)
+    check("matched again: the count resets and the waiting signal is taken", trade(db, w27)["status"] == "open"
+          and st_of(db, "crypto")["mismatch_checks"] == 0, st_of(db, "crypto").get("mismatch"))
+    # ── 28. a leg cancelled on Delta by someone else ───────────────────────────────────────────────
+    section("28. A leg cancelled on Delta by someone else is put back once; cancelled again, the trade is closed")
+    db = fresh()
+    x = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68650.0, None)
+    await cyc(db)
+    own_leg(trade(db, x), "stop")["state"] = "cancelled"      # cancelled on Delta's own site
+    await cyc(db)
+    t = trade(db, x)
+    check("put back: a new stop at the same level", t["status"] == "open" and t["legs"].get("stop_replaced")
+          and own_leg(t, "stop")["state"] == "pending" and float(own_leg(t, "stop")["stop_price"]) == 68650.0, t.get("legs"))
+    own_leg(t, "stop")["state"] = "cancelled"
+    await cyc(db)
+    t = trade(db, x)
+    check("cancelled again: the trade is closed at the market, never left unprotected", t["status"] == "closed"
+          and "cancelled on Delta again" in t["close_reason"] and BTC not in M.D.pos, t.get("close_reason"))
+    # ── 29. a leg that cannot be settled ───────────────────────────────────────────────────────────
+    section("29. A leg that cannot be cancelled or read: nothing else is sent; tried again next cycle")
+    db = fresh()
+    y = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68650.0, None)
+    await cyc(db)
+    n_orders = len(M.D.orders)
+    M.D.fail.update(cancel="ambiguous", order_lookup="ambiguous")
+    advance(60)
+    close_paper(db, y, "exit_signal", 69100.0)
+    await cyc(db)
+    t = trade(db, y)
+    check("closing, but no market order sent while its stop is unsettled", t["status"] == "closing"
+          and len(M.D.orders) == n_orders and BTC in M.D.pos, (t["status"], len(M.D.orders)))
+    M.D.fail.pop("cancel")
+    M.D.fail.pop("order_lookup")
+    await cyc(db)
+    t = trade(db, y)
+    check("next cycle: its stop cancelled, then the trade closed at the market", t["status"] == "closed"
+          and own_leg(t, "stop")["state"] == "cancelled" and BTC not in M.D.pos, t.get("status"))
     # ── 23. venue errors count only in a row ───────────────────────────────────────────────────────
     section("23. Venue errors count only in a row: a good answer from Delta starts the count again")
     db = fresh()

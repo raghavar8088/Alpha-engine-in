@@ -15,6 +15,10 @@ July-August 2026. Every lesson that client documents is kept:
 - Numbers come back quoted or bare, and ids as numbers, strings or UUIDs; everything is parsed defensively.
 - When a position is flat, its leftover bracket legs are cancelled. Delta nets by product, so an old leg could
   arm against the next position.
+- From 15 Nov a trade carries its OWN stop and target: standalone stop orders (stop_order_type stop_loss_order /
+  take_profit_order, a stop-limit triggered on the last traded price) of the trade's own size, NOT reduce-only, so
+  several trades can share one netted position. A bracket covers the whole position, and Delta allows one per
+  position. Their ids are kept on the trade; one is cancelled by id when the other fills.
 
 Keys are never in the repository. They come from the environment (DELTA_API_KEY, DELTA_API_SECRET) or from the
 secrets file the deploy script writes inside the container (DELTA_LIVE_SECRETS, one KEY=value per line). Nothing
@@ -96,6 +100,18 @@ def fmt_tick(price: float, tick: float) -> str:
     n = (Decimal(str(price)) / t).to_integral_value(rounding=ROUND_HALF_UP)
     places = max(0, -t.as_tuple().exponent)
     return f"{n * t:.{places}f}"
+
+
+def _order(o) -> dict:
+    """The fields of an order the desk uses, parsed defensively. `filled` = size - unfilled_size."""
+    o = o if isinstance(o, dict) else {}
+    size = int(round(num(o.get("size"))))
+    unfilled = int(round(num(o.get("unfilled_size"))))
+    return {"id": str(o.get("id") or ""), "state": str(o.get("state") or "").lower(), "size": size,
+            "filled": max(0, size - unfilled), "avg_price": num(o.get("average_fill_price")),
+            "commission": num(o.get("paid_commission")), "side": o.get("side"), "kind": o.get("stop_order_type"),
+            "stop_price": num(o.get("stop_price")), "limit_price": num(o.get("limit_price")),
+            "client_order_id": o.get("client_order_id")}
 
 
 @dataclass(frozen=True)
@@ -247,3 +263,46 @@ class Delta:
         """Remove every resting stop / reduce-only leg on the product (never a plain limit order)."""
         await self.request("DELETE", "/v2/orders/all", {"product_id": product_id, "cancel_limit_orders": "false",
                                                         "cancel_stop_orders": "true", "cancel_reduce_only": "true"})
+
+    # -- a trade's own legs (15 Nov 2026) -----------------------------------------------------------------
+
+    async def stop_order(self, product: Product, side: str, size: int, kind: str, trigger: float, limit: float,
+                         client_order_id: str | None = None) -> dict:
+        """One standalone stop-limit leg of `size` contracts: kind "stop_loss_order" or "take_profit_order", triggered
+        on the last traded price. Not reduce-only (several trades share one netted position). Only premium_live calls
+        this."""
+        if kind not in ("stop_loss_order", "take_profit_order") or side not in ("buy", "sell") or size < 1 \
+                or trigger <= 0 or limit <= 0:
+            raise DeltaError(f"refusing a {kind} of {size} contracts, side {side!r}, at {trigger}/{limit}")
+        body = {"product_id": product.id, "size": int(size), "side": side, "order_type": "limit_order",
+                "stop_order_type": kind, "stop_price": fmt_tick(trigger, product.tick),
+                "limit_price": fmt_tick(limit, product.tick), "stop_trigger_method": "last_traded_price",
+                "time_in_force": "gtc", "reduce_only": False}
+        if client_order_id:
+            body["client_order_id"] = client_order_id[:32]
+        o = _order(await self.request("POST", "/v2/orders", body))
+        if not o["id"]:
+            raise DeltaError(f"{kind}: Delta returned no order id", ambiguous=True)
+        return {**o, "stop_price_sent": body["stop_price"], "limit_price_sent": body["limit_price"]}
+
+    async def cancel_order(self, product_id: int, order_id: str) -> dict:
+        """Cancel one order by id; returns its last state. A filled order cannot be cancelled (DeltaError): read it
+        back with order() to learn what happened."""
+        return _order(await self.request("DELETE", "/v2/orders", {"id": int(order_id), "product_id": int(product_id)}))
+
+    async def order(self, order_id: str) -> dict:
+        """One order by id, in any state (open, pending = an untriggered stop, closed = filled, cancelled)."""
+        return _order(await self.request("GET", f"/v2/orders/{order_id}"))
+
+    async def order_by_client_id(self, client_order_id: str) -> dict:
+        return _order(await self.request("GET", f"/v2/orders/client_order_id/{client_order_id[:32]}"))
+
+    async def open_orders(self, product_id: int) -> dict[str, dict]:
+        """The resting orders on one product (open, and untriggered stops), by id."""
+        rows = await self.request("GET", f"/v2/orders?product_ids={int(product_id)}&states=open,pending&page_size=100")
+        out = {}
+        for r in rows or []:
+            o = _order(r)
+            if o["id"]:
+                out[o["id"]] = o
+        return out
