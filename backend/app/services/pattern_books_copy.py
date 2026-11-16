@@ -13,9 +13,17 @@ DELIVERY when the copy was held overnight, intraday otherwise, the same `product
 desk and the old shortlist books use. Nothing here calls Angel.
 
 ONE ACCOUNT PER BOOK. 548 slices of Rs 50,000 would be Rs 91 each. So a book is one account:
-at most MAX_OPEN positions (default 5), each up to capital / MAX_OPEN - Rs 10,000 / 40,000 /
-2,00,000 - whole shares, never two positions in one stock, no leverage. Signals are taken in the
-order the desk took them; the ones a book cannot take are COUNTED per strategy and reason.
+at most MAX_OPEN positions (default 5), each up to capital / MAX_OPEN of the account's money -
+Rs 10,000 / 40,000 / 2,00,000 - whole shares, never two positions in one stock. Signals are taken
+in the order the desk took them; the ones a book cannot take are COUNTED per strategy and reason.
+
+5x INTRADAY LEVERAGE (2026-11-16, the owner's instruction for the module's accounts). A copy of an
+INTRADAY-style trade (the desk's "intraday" and "scalping" timeframes, squared off the same session)
+is an MIS trade: it may be worth up to 5 x its slot and blocks a fifth of its value as margin
+(equity_margin). A copy of a SWING trade (4h, 1d) may be held overnight, so it is delivery and
+pays its full value, as before. `capital_deployed` is the margin; `notional` is the value. P&L is
+the price move on the shares held. History was replayed under this rule from each book's start
+(backend/scripts/rebuild_leverage_books.py; the old rows are backed up).
 
 WHY THIS FITS NOW. Before 10 Oct the desk took ~900-1,250 trades a day; capped at two strategies
 per stock and a 3% loss limit it takes ~20, over ~33 stocks (median price Rs 871). A five-slot
@@ -46,6 +54,7 @@ from app.core.db import (pattern_book_positions_collection, pattern_book_scores_
                          pattern_positions_collection)
 from app.services.angel_fees import product_for, round_trip
 from app.services.book_reset import naive_utc, reset_at
+from app.services.equity_margin import INTRADAY_STYLES, intraday_leverage
 from app.services.intraday_pattern_engine import CATALOG
 from app.services.live_intraday_mirror import (closed_after, pending_since, plan_book,
                                                window_start)
@@ -71,8 +80,15 @@ _sync_lock = asyncio.Lock()
 _indexed = False
 
 
-def position_cap(capital: float) -> float:
-    return capital / max(MAX_OPEN, 1)
+def position_cap(capital: float, leverage: float = 1.0) -> float:
+    """One slot: the account's money a position may tie up (leverage 1), or what it may be WORTH."""
+    return capital * max(leverage, 1.0) / max(MAX_OPEN, 1)
+
+
+def parent_leverage(p: dict) -> float:
+    """5x for a copy of an intraday-style trade (MIS); 1x for a swing trade, which may sleep
+    overnight and so is delivery."""
+    return intraday_leverage(None, intraday=p.get("style") in INTRADAY_STYLES)
 
 
 def _now() -> datetime:
@@ -168,7 +184,9 @@ async def _totals(book: str) -> tuple[float, float]:
 # -- writing it ---------------------------------------------------------------------
 
 
-def _row(book: str, p: dict, qty: int, spend: float, capital: float) -> dict:
+def _row(book: str, p: dict, qty: int, spend: float, capital: float,
+         notional: float | None = None, leverage: float = 1.0) -> dict:
+    value = round(float(p["entry_price"]) * qty, 2) if notional is None else notional
     return {
         "position_id": uuid4().hex[:12], "book": book,
         "source": SOURCE_TAG, "parent_position_id": p["position_id"],
@@ -178,6 +196,10 @@ def _row(book: str, p: dict, qty: int, spend: float, capital: float) -> dict:
         "symbol": p["symbol"], "side": p.get("side") or "BUY",
         "entry_price": round(float(p["entry_price"]), 2), "qty": qty,
         "capital_deployed": spend, "allocation": round(position_cap(capital), 2),
+        # capital_deployed is the MARGIN this copy blocks; notional is what it is worth.
+        "notional": value, "leverage": leverage,
+        "margin_rate": round(1.0 / max(leverage, 1.0), 4),
+        "product": "MIS" if leverage > 1.0 else "CNC",
         "target": p.get("target"), "stoploss": p.get("stoploss"),
         "ltp": p.get("ltp") or p["entry_price"], "unrealized_pnl": 0.0,
         "realized_pnl": None, "gross_pnl": None, "fees": None, "fee_breakdown": None,
@@ -246,6 +268,14 @@ async def _score(book: str, strategy_id: str, skips: dict[str, int], capital: fl
         {"book": book, "strategy_id": strategy_id}, update, upsert=True)
 
 
+def book_rules(book: str) -> dict:
+    """The plan_book rules a book trades by - the live passes and the 5x history replay
+    (backend/scripts/rebuild_leverage_books.py) both read them here. No daily breaker: these
+    books never had one, and leverage did not add one."""
+    return {"max_open": MAX_OPEN, "net_fn": _net, "source_tag": SOURCE_TAG,
+            "leverage_fn": parent_leverage}
+
+
 async def sync(*, entries: bool) -> dict:
     """Copy the Patterns desk into every book once. entries=False: closes and marks only."""
     global _indexed
@@ -284,8 +314,7 @@ async def _sync(*, entries: bool) -> dict:
         plan = plan_book(capital=capital, realized=realized, deployed=deployed,
                          open_rows=open_rows, parents=parents, decided=decided,
                          breaker_tripped=False, entries=entries,
-                         max_open=MAX_OPEN, net_fn=_net, source_tag=SOURCE_TAG,
-                         closed_rows=closed_rows)
+                         closed_rows=closed_rows, **book_rules(book))
 
         touched: dict[str, dict[str, int]] = {}
         for c in plan["closes"]:
@@ -298,7 +327,8 @@ async def _sync(*, entries: bool) -> dict:
                 total["closed"] += 1
         for o in plan["opens"]:
             p = o["parent"]
-            doc = _row(book, p, o["qty"], o["spend"], capital)
+            doc = _row(book, p, o["qty"], o["spend"], capital, o.get("notional"),
+                       o.get("leverage", 1.0))
             if o["close"] is not None:
                 doc.update(_close_fields(p, o["close"]))
             try:

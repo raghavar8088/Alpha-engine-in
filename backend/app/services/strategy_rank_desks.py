@@ -51,13 +51,19 @@ def _factory_store():
     return STORE
 
 
+# The Intraday Stocks paper accounts trade at 5x intraday leverage since 2026-11-16: their
+# `capital_deployed` is the MARGIN a position blocked, a fifth of its value. A trade's return in bp
+# is measured on what the position was WORTH (`notional`), as it always was, so leverage does not
+# multiply it; a row written before `notional` existed falls back to capital_deployed (its value).
+_POSITION_VALUE = {"$ifNull": ["$notional", "$capital_deployed"]}
+
 DESKS: dict[str, TradeSource] = {
     # Intraday Stocks
     "pattern": TradeSource("pattern_positions", CLOSED),
     "pattern-books": TradeSource("pattern_book_positions", {**CLOSED, "source": "desk"},
-                                 params={"book": "book"}),
+                                 deployed=_POSITION_VALUE, params={"book": "book"}),
     "live-intraday": TradeSource("live_intraday_positions", {**CLOSED, "source": "tournament"},
-                                 params={"book": "book"}),
+                                 deployed=_POSITION_VALUE, params={"book": "book"}),
     "focus-five": TradeSource("intraday_focus_trades", CLOSED),
     "live-trading": TradeSource("live_trading_positions", CLOSED),
     # Momentum, long horizon

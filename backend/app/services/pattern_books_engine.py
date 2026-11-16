@@ -63,6 +63,7 @@ from app.core.db import (
 )
 from app.services import book_reset
 from app.services.angel_fees import product_for, round_trip
+from app.services.equity_margin import MIS_LEVERAGE
 from app.services.intraday_pattern_engine import CATALOG
 
 IST_BOOKS = timezone(timedelta(hours=5, minutes=30))
@@ -608,15 +609,18 @@ async def _run_copy_cycle() -> dict:
 async def summary(book: str = DEFAULT_BOOK) -> dict:
     book = normalize_book(book)
     cap = book_capital(book)
-    realized = unrealized = deployed = fees = gross = 0.0
-    open_n = closed_n = 0
+    realized = unrealized = deployed = fees = gross = exposure = 0.0
+    open_n = closed_n = open_mis = 0
     async for p in pattern_book_positions_collection.find(
         {"book": book, "status": "OPEN"},
-        {"capital_deployed": 1, "unrealized_pnl": 1}
+        {"capital_deployed": 1, "unrealized_pnl": 1, "notional": 1, "entry_price": 1, "qty": 1,
+         "leverage": 1}
     ):
         open_n += 1
-        deployed += p.get("capital_deployed", 0.0) or 0.0
+        deployed += p.get("capital_deployed", 0.0) or 0.0     # the MARGIN it blocks
         unrealized += p.get("unrealized_pnl") or 0.0
+        exposure += float(p.get("notional") or (p.get("entry_price") or 0.0) * (p.get("qty") or 0))
+        open_mis += 1 if (p.get("leverage") or 1.0) > 1.0 else 0
     async for p in pattern_book_positions_collection.find(
         {"book": book, "status": "CLOSED"},
         {"realized_pnl": 1, "fees": 1, "gross_pnl": 1}
@@ -637,6 +641,7 @@ async def summary(book: str = DEFAULT_BOOK) -> dict:
     copy_info: dict = {"copy_mode": "shortlist"}
     strategies = len(SELECTED)
     alloc = per_strategy_allocation(book)
+    lev = 1.0
     source_line = "mirrors the 548-strategy pattern desk's fills for the shortlist"
     if book in COPY_BOOKS:
         from app.services import pattern_books_copy as copy
@@ -645,6 +650,8 @@ async def summary(book: str = DEFAULT_BOOK) -> dict:
         roster = book_roster(book)
         strategies = len(roster) if roster else len(CATALOG)
         alloc = copy.position_cap(cap)          # one account: the cap is per POSITION
+        # 5x on intraday-style copies (MIS); a swing copy is delivery at 1x (pattern_books_copy).
+        lev = MIS_LEVERAGE
         # "Couldn't afford" keeps its meaning: the signals this book could not pay for. Slots
         # being full or the stock already held are the account's limits, reported apart.
         declined = skipped["price_above_cap"] + skipped["no_cash"]
@@ -652,7 +659,10 @@ async def summary(book: str = DEFAULT_BOOK) -> dict:
         source_line = ("copies the Patterns desk's top 10 by Rank, picked 26 Oct 2026" if roster
                        else "copies every strategy of the 548-strategy Patterns desk")
         copy_info = {"copy_mode": "desk", "max_open_positions": copy.MAX_OPEN,
-                     "position_cap": round(alloc, 2), "skipped": skipped,
+                     "position_cap": round(alloc, 2),
+                     # What one position may be WORTH: an intraday (MIS) copy at 5x, a swing one 1x.
+                     "position_cap_intraday": round(copy.position_cap(cap, lev), 2),
+                     "skipped": skipped,
                      "copying_since": (started if started.tzinfo else started.replace(
                     tzinfo=timezone.utc)).isoformat() if started else None}
         if roster:
@@ -672,6 +682,16 @@ async def summary(book: str = DEFAULT_BOOK) -> dict:
         "gross_pnl": round(gross, 2), "fees": round(fees, 2),
         "deployed": round(deployed, 2),
         "available_cash": round(cap + realized - deployed, 2),
+        # The margin account (2026-11-16): capital unchanged; intraday copies at `leverage`, swing
+        # copies at 1x. P&L is never scaled - it is the price move on the shares held.
+        "leverage": lev,
+        "margin_rate": round(1.0 / lev, 4),
+        "buying_power": round(cap * lev, 2),
+        "margin_used": round(deployed, 2),
+        "available_margin": round(cap + realized - deployed, 2),
+        "available_buying_power": round(max(cap + realized - deployed, 0.0) * lev, 2),
+        "exposure": round(exposure, 2),
+        "open_mis_positions": open_mis,
         "open_positions": open_n, "closed_positions": closed_n,
         "roi_pct": round((equity - cap) / cap * 100, 4) if cap else 0.0,
         # How often this book's slice could not buy a single share. The whole point of

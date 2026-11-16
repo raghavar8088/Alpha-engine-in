@@ -10,6 +10,7 @@ import V2Validation from "./V2Validation";
 import { AlarmBanner, EdgeReportPanel } from "./IntradayOps";
 import ResetBook from "./ResetBook";
 import AGradeStrategies from "./AGradeStrategies";
+import MarginTiles from "./MarginTiles";
 import GatedBooks from "../../components/GatedBooks";
 import { RankNote, RankTd, RankTh, boardFromRows, rankDays, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import LineChart from "../../components/charts/LineChart";
@@ -1082,8 +1083,9 @@ export default function IntradayStocksPage() {
         multi-factor Rank after the close on 26 Oct 2026. The list is fixed; it is not re-picked as
         ranks move. Every other rule is the other Paper Trade books’: the desk’s own entry and exit
         prices, Angel One costs on this account’s quantity, one account with at most{" "}
-        {pbSummary?.max_open_positions ?? 5} positions of up to ₹{inr(pbSummary?.position_cap)} each, whole shares,
-        never two positions in one stock, no leverage.{" "}
+        {pbSummary?.max_open_positions ?? 5} positions of up to ₹{inr(pbSummary?.position_cap)} of its money each, whole shares,
+        never two positions in one stock, and {pbSummary?.leverage ?? 5}× intraday leverage on intraday-style trades
+        (worth up to ₹{inr(pbSummary?.position_cap_intraday)}, 20% margin).{" "}
         <strong>Expect few trades: all ten are 1- and 5-minute strategies</strong>, and since 10 Oct the desk lets
         at most two strategies hold a stock, giving longer timeframes first claim, so these rarely get a slot.
         Most of their record is from 6–9 Oct, before that rule. They led a board of 548 on 12–38 trades each,
@@ -1097,10 +1099,14 @@ export default function IntradayStocksPage() {
         This book trades <strong>all {pbSummary?.strategies ?? 548} Patterns strategies</strong>{" "}by copying the
         desk&apos;s own trades — the same entry and exit prices, sized to this account, with real Angel One costs
         on <em>its</em> quantity (delivery rates when a 4h or daily strategy holds overnight). It is{" "}
-        <strong>one account</strong>: at most {pbSummary?.max_open_positions ?? 5} positions at a time, each up to
-        ₹{inr(pbSummary?.position_cap)}, whole shares, never two in one stock, no leverage. The desk takes about
-        20 trades a day, so this book copies a real share of it; the signals it cannot take are counted below,
-        by reason.
+        <strong>one account</strong>: at most {pbSummary?.max_open_positions ?? 5} positions at a time, each tying up
+        at most ₹{inr(pbSummary?.position_cap)} of its money, whole shares, never two in one stock.{" "}
+        <strong>{pbSummary?.leverage ?? 5}× intraday leverage</strong> since 16 Nov 2026: a copy of an intraday or
+        scalping trade (squared off the same day) may be worth up to ₹{inr(pbSummary?.position_cap_intraday)} and
+        blocks 20% of its value as margin; a 4h or daily copy may be held overnight, so it is delivery and pays its
+        full value. The book&apos;s history was replayed under this rule from its first trade; P&amp;L is the price
+        move on the shares held. The desk takes about 20 trades a day, so this book copies a real share of it; the
+        signals it cannot take are counted below, by reason.
         {pbSummary?.copying_since ? ` Copying since ${new Date(pbSummary.copying_since).toLocaleDateString("en-IN")}.` : ""}
       </div>
       ) : (
@@ -1132,8 +1138,8 @@ export default function IntradayStocksPage() {
         <div className="tile"><div className="tile-label">Equity</div><div className="tile-value">₹{inr2(pbSummary?.equity)}</div><div className="tile-sub">₹{inr2(pbSummary?.unrealized_pnl)} unrealised</div></div>
         <div className="tile"><div className="tile-label">ROI</div><div className={`tile-value ${(pbSummary?.roi_pct ?? 0) >= 0 ? "gain" : "loss"}`}>{roiPct(pbSummary?.roi_pct)}</div><div className="tile-sub">on ₹{inr(pbSummary?.desk_capital)} book</div></div>
         <div className="tile"><div className="tile-label">Angel fees</div><div className="tile-value loss">−₹{inr2(pbSummary?.fees)}</div><div className="tile-sub">gross ₹{inr2(pbSummary?.gross_pnl)} before costs</div></div>
-        <div className="tile"><div className="tile-label">Open positions</div><div className="tile-value">{pbSummary?.open_positions ?? 0}</div><div className="tile-sub">₹{inr2(pbSummary?.deployed)} deployed</div></div>
-        <div className="tile"><div className="tile-label">Closed</div><div className="tile-value">{pbSummary?.closed_positions ?? 0}</div><div className="tile-sub">₹{inr2(pbSummary?.available_cash)} cash free</div></div>
+        <div className="tile"><div className="tile-label">Open positions</div><div className="tile-value">{pbSummary?.open_positions ?? 0}</div><div className="tile-sub">₹{inr2(pbSummary?.deployed)} margin · {pbSummary?.open_mis_positions ?? 0} intraday at {pbSummary?.leverage ?? 1}×</div></div>
+        <div className="tile"><div className="tile-label">Closed</div><div className="tile-value">{pbSummary?.closed_positions ?? 0}</div><div className="tile-sub">₹{inr2(pbSummary?.available_cash)} margin free</div></div>
         <div className="tile">
           <div className="tile-label">Couldn&rsquo;t afford</div>
           <div className={`tile-value ${(pbSummary?.skipped_unaffordable ?? 0) > 0 ? "loss" : ""}`}>{pbSummary?.skipped_unaffordable ?? 0}</div>
@@ -1142,6 +1148,11 @@ export default function IntradayStocksPage() {
             : "signals this book had to skip"}</div>
         </div>
       </div>
+
+      {pbSummary?.copy_mode === "desk" && (
+        <MarginTiles m={{ ...pbSummary, capital: pbSummary.desk_capital }}
+          eligibility={`intraday & scalping copies (MIS) · 20% margin; 4h/daily copies 1× (delivery)`} />
+      )}
 
       <PnlRow capital={pbSummary?.desk_capital} realized={pbSummary?.realized_pnl}
               unrealized={pbSummary?.unrealized_pnl} fees={pbSummary?.fees} />
@@ -1258,7 +1269,7 @@ export default function IntradayStocksPage() {
             <table className="data-table">
               <thead><tr>
                 <th style={{ textAlign: "left" }}>Strategy</th><th>TF</th><th>Symbol</th><th>Side</th>
-                <th>Qty</th><th>Entry</th><th>LTP</th><th>Target</th><th>Stop</th><th>Deployed</th><th>Unrealised</th>
+                <th>Qty</th><th>Entry</th><th>LTP</th><th>Target</th><th>Stop</th><th title="What the position is worth (entry × qty)">Value</th><th title="The account's money it blocks: a fifth of its value on an intraday copy at 5×, its full value on a swing copy">Margin</th><th>Unrealised</th>
               </tr></thead>
               <tbody>
                 {pbOpen.map((p) => (
@@ -1272,7 +1283,8 @@ export default function IntradayStocksPage() {
                     <td>₹{inr2(p.ltp)}</td>
                     <td>{p.target ? `₹${inr2(p.target)}` : "—"}</td>
                     <td>{p.stoploss ? `₹${inr2(p.stoploss)}` : "—"}</td>
-                    <td>₹{inr2(p.capital_deployed)}</td>
+                    <td>₹{inr2(p.notional ?? p.entry_price * p.qty)}</td>
+                    <td title={`${p.leverage ?? 1}×`}>₹{inr2(p.capital_deployed)}{(p.leverage ?? 1) > 1 ? ` · ${p.leverage}×` : ""}</td>
                     <td className={(p.unrealized_pnl ?? 0) >= 0 ? "gain" : "loss"}>{(p.unrealized_pnl ?? 0) >= 0 ? "+" : ""}₹{inr2(p.unrealized_pnl)}</td>
                   </tr>
                 ))}
@@ -1359,8 +1371,9 @@ export default function IntradayStocksPage() {
         multi-factor Rank after the close on 26 Oct 2026. The list is fixed; it is not re-picked as
         ranks move. Every other rule is the Live Intraday books’: the tournament’s own entry and exit
         prices (slippage already in them), estimated Angel One charges on this account’s quantity, one
-        account with at most {liveSummary?.max_open_positions ?? 5} positions of up to ₹{inr(liveSummary?.position_cap)} each,
-        whole shares, never two positions in one stock, no leverage, a 3% daily loss breaker.{" "}
+        account with at most {liveSummary?.max_open_positions ?? 5} positions worth up to ₹{inr(liveSummary?.position_cap)} each
+        at {liveSummary?.leverage ?? 5}× intraday leverage (20% margin a position), whole shares, never two positions in one
+        stock, a 3% daily loss breaker on the account&apos;s own capital.{" "}
         <strong>These ten led a board of 54, which is where luck collects</strong>, and none had cleared
         the gate, so this account is the out-of-sample test of whether they keep leading. &ldquo;Picked
         at&rdquo; is where each stood when chosen. Simulated fills, not broker-confirmed executions.
@@ -1372,8 +1385,14 @@ export default function IntradayStocksPage() {
         This book trades the tournament&apos;s {liveSummary?.tournament_strategies ?? 54}{" "}strategies by copying
         the tournament&apos;s own trades — the same entry and exit prices (slippage already in them), sized to this
         account and charged real Angel One costs on <em>its</em> quantity. It is <strong>one account</strong>, as a
-        real one would be: at most {liveSummary?.max_open_positions ?? 5} positions at a time, each up to
-        ₹{inr(liveSummary?.position_cap)}, whole shares, never two positions in the same stock, no leverage.
+        real one would be: at most {liveSummary?.max_open_positions ?? 5} positions at a time, each worth up to
+        ₹{inr(liveSummary?.position_cap)}, whole shares, never two positions in the same stock.{" "}
+        <strong>{liveSummary?.leverage ?? 5}× intraday leverage</strong> since 16 Nov 2026, as an Indian broker gives on
+        intraday (MIS) equity: the account&apos;s ₹{inr(liveSummary?.initial_capital)} is unchanged, its buying power is
+        ₹{inr(liveSummary?.buying_power)}, and each position blocks 20% of its value as margin, never more than the
+        account has. The book&apos;s history was replayed at {liveSummary?.leverage ?? 5}× from its first trade against
+        the same tournament trades; P&amp;L is the price move on the shares held, not a multiplied figure, and the 3%
+        breaker is on capital, so it trips at a fifth of the price move it used to.{" "}
         The tournament takes ~450 trades a day, so <strong>most signals cannot get a slot</strong>{" "}— the
         &ldquo;Skipped&rdquo; column counts them, by reason. Small positions pay roughly 0.3–0.6% a round trip in
         costs, against an average signal worth a few hundredths of a percent: that gap is what this book measures.
@@ -1403,9 +1422,10 @@ export default function IntradayStocksPage() {
         <div className="tile"><div className="tile-label">Realised P&amp;L</div><div className={`tile-value ${(liveSummary?.realized_pnl ?? 0) >= 0 ? "gain" : "loss"}`}>{(liveSummary?.realized_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(liveSummary?.realized_pnl)}</div><div className="tile-sub">{liveSummary?.closed_positions ?? 0} trades closed</div></div>
         <div className="tile"><div className="tile-label">Angel fees paid</div><div className="tile-value loss">−₹{inr(liveSummary?.total_fees)}</div><div className="tile-sub">gross ₹{inr(liveSummary?.gross_realized_pnl)} before costs</div></div>
         <div className="tile"><div className="tile-label">Open positions</div><div className="tile-value">{liveSummary?.open_positions ?? 0}</div><div className="tile-sub">₹{inr(liveSummary?.unrealized_pnl)} unrealised</div></div>
-        <div className="tile"><div className="tile-label">Deployed</div><div className="tile-value">₹{inr(liveSummary?.deployed_capital)}</div><div className="tile-sub">of ₹{inr(liveSummary?.equity)} equity · ₹{inr(liveSummary?.available_cash)} free</div></div>
         <div className="tile"><div className="tile-label">Strategies</div><div className="tile-value">{liveSummary?.strategy_count ?? 0}</div><div className="tile-sub">max ₹{inr(liveSummary?.position_notional)} per position, {liveSummary?.open_positions ?? 0} open now</div></div>
       </div>
+
+      <MarginTiles m={liveSummary ? { ...liveSummary, capital: liveSummary.initial_capital } : null} />
 
       <PnlRow capital={liveSummary?.initial_capital} realized={liveSummary?.realized_pnl}
               unrealized={liveSummary?.unrealized_pnl} fees={liveSummary?.total_fees} />
@@ -1474,7 +1494,7 @@ export default function IntradayStocksPage() {
         ) : (
           <div className="table-scroll">
             <table className="data-table">
-              <thead><tr><th style={{ textAlign: "left" }}>Symbol</th><th style={{ textAlign: "left" }}>Strategy</th><th>Side</th><th>Qty</th><th>Entry</th><th>LTP</th><th>Src</th><th>Target</th><th>Stop</th><th>Unrealised</th></tr></thead>
+              <thead><tr><th style={{ textAlign: "left" }}>Symbol</th><th style={{ textAlign: "left" }}>Strategy</th><th>Side</th><th>Qty</th><th>Entry</th><th>LTP</th><th>Src</th><th>Target</th><th>Stop</th><th title="What the position is worth (entry × qty)">Value</th><th title="The account's money it blocks: value / leverage">Margin</th><th>Unrealised</th></tr></thead>
               <tbody>
                 {livePositions.filter((p) => p.status === "OPEN").map((p) => (
                   <tr key={p.position_id}>
@@ -1487,6 +1507,8 @@ export default function IntradayStocksPage() {
                     <td><SourcePill source={p.ltp_source} /></td>
                     <td>₹{inr2(p.target)}</td>
                     <td>₹{inr2(p.stoploss)}</td>
+                    <td>₹{inr(p.notional ?? p.entry_price * p.qty)}</td>
+                    <td>₹{inr(p.capital_deployed)}{(p.leverage ?? 1) > 1 ? ` · ${p.leverage}×` : ""}</td>
                     <td className={(p.unrealized_pnl ?? 0) >= 0 ? "gain" : "loss"}>{(p.unrealized_pnl ?? 0) >= 0 ? "+" : ""}₹{inr(p.unrealized_pnl)}</td>
                   </tr>
                 ))}

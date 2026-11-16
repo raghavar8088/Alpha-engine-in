@@ -6,8 +6,11 @@
 // another, and each account's realised profit is reinvested in that strategy alone: every position is sized on the
 // account's realised equity / 5 at the moment of entry. The books copy the tournament's own fills (same entry and exit
 // prices), so a difference from the tournament is size and cost, never a different signal. Paper only.
+// Since 16 Nov 2026 the accounts trade at 5x intraday leverage (the owner's instruction for the module): a position may
+// be worth up to 5 x equity / 5 and blocks 20% of that as margin; P&L is the price move on the shares held.
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { apiFetch } from "../../lib/api";
+import MarginTiles from "./MarginTiles";
 
 type Book = { book: string; strategy: string; name: string; board: string; rank: number; score: number; trades: number; net: number };
 // Where each was picked (the owner's screenshots of 11 Nov 2026) - the record it earns here is the test.
@@ -28,9 +31,12 @@ type Summary = {
   available_cash: number; deployed_capital: number; today_pnl: number; breaker_tripped: boolean; daily_loss_limit: number;
   paused: boolean; copying_since?: string | null; compounding?: boolean; last_run_at?: string | null;
   skipped?: Record<string, number>;
+  leverage?: number; buying_power?: number; margin_used?: number; available_margin?: number;
+  available_buying_power?: number; exposure?: number;
 };
 type Score = { strategy_id: string; trades: number; win_rate: number; net_pnl: number; fees?: number; skipped_total?: number };
 type Position = { position_id: string; symbol: string; side: string; entry_price: number; qty: number; capital_deployed: number;
+  notional?: number; leverage?: number;
   stoploss: number | null; target: number | null; ltp: number; unrealized_pnl: number; realized_pnl: number | null;
   exit_price: number | null; exit_reason: string | null; status: string; opened_at: string | null; closed_at: string | null };
 type Trade = { trade_id: string; symbol: string; side: string; entry_price: number; exit_price: number; qty: number;
@@ -103,12 +109,15 @@ export default function AGradeStrategies() {
         <strong>A GRADE STRATEGIES · 7 ACCOUNTS · ₹10 LAKH EACH · PAPER ONLY.</strong>{" "}
         Each strategy trades <strong>its own ₹10 lakh account</strong> — one strategy&apos;s money is never used by
         another — and <strong>its profit is reinvested in that strategy alone</strong>: every new position is sized on
-        the account&apos;s realised equity ÷ 5 at the moment of entry, so ₹50,000 of profit makes each later position
-        a tenth bigger (a loss shrinks it the same way). The accounts copy the tournament&apos;s own trades for their
+        the account&apos;s realised equity at the moment of entry, so ₹50,000 of profit makes each later position
+        a twentieth bigger (a loss shrinks it the same way). The accounts copy the tournament&apos;s own trades for their
         strategy — the same entry and exit prices, sized to the account, charged Angel One&apos;s intraday costs on{" "}
-        <em>its</em> quantity: at most 5 positions at a time, whole shares, never two in one stock, no leverage, a 3%
-        daily-loss breaker. They started when they were added{started ? ` (${ist(started)} IST)` : ""}; nothing earlier is
-        back-filled. Simulated fills, not broker orders.
+        <em>its</em> quantity: at most 5 positions at a time, whole shares, never two in one stock, a 3% daily-loss
+        breaker on the account&apos;s own money.{" "}
+        <strong>5× intraday leverage since 16 Nov 2026</strong>: a position may be worth up to 5 × equity ÷ 5 and blocks
+        20% of its value as margin, never more than the account has; the record was replayed at 5× from each
+        account&apos;s first trade, and P&amp;L is the price move on the shares held. They started when they were
+        added{started ? ` (${ist(started)} IST)` : ""}; nothing earlier is back-filled. Simulated fills, not broker orders.
         <div className="ag-note">
           Picked on 11 Nov 2026: six from the paper books&apos; boards on 3 to 25 trades each, and Supertrend Flip ·
           1 hour from the Five-Strategy Desk on 123 trades (that desk fills the same rule at its own live quotes; this
@@ -170,18 +179,21 @@ export default function AGradeStrategies() {
         <div className="ag-head">
           <span>{cur.name} · ₹10 lakh account</span>
           <span className="ag-dim">
-            {d?.summary ? <>cash {inr(d.summary.available_cash)} · deployed {inr(d.summary.deployed_capital)} · fees {inr(d.summary.total_fees)} · daily loss limit {inr(d.summary.daily_loss_limit)}{d.score?.skipped_total ? ` · ${d.score.skipped_total} signals it could not take` : ""}</> : d?.error ? `could not load: ${d.error}` : "loading…"}
+            {d?.summary ? <>margin free {inr(d.summary.available_cash)} · margin used {inr(d.summary.deployed_capital)} · fees {inr(d.summary.total_fees)} · daily loss limit {inr(d.summary.daily_loss_limit)}{d.score?.skipped_total ? ` · ${d.score.skipped_total} signals it could not take` : ""}</> : d?.error ? `could not load: ${d.error}` : "loading…"}
           </span>
         </div>
+        <MarginTiles m={d?.summary ? { ...d.summary, capital: d.summary.initial_capital } : null}
+          eligibility="intraday (MIS) equity · 20% margin · sized on realised equity" />
         <h4>Open positions ({d?.open.length ?? 0})</h4>
         {d?.open.length ? (
           <div className="ag-scroll">
             <table className="ag-t">
-              <thead><tr><th>Stock</th><th>Side</th><th>Qty</th><th>Entry</th><th>Stop</th><th>Target</th><th>Last</th><th>Open P&amp;L</th><th>Since</th></tr></thead>
+              <thead><tr><th>Stock</th><th>Side</th><th>Qty</th><th>Entry</th><th>Value</th><th>Margin</th><th>Stop</th><th>Target</th><th>Last</th><th>Open P&amp;L</th><th>Since</th></tr></thead>
               <tbody>
                 {d.open.map((p) => (
                   <tr key={p.position_id}>
                     <td className="ag-name">{p.symbol}</td><td>{p.side}</td><td>{p.qty}</td><td>{p.entry_price}</td>
+                    <td>{inr(p.notional ?? p.entry_price * p.qty)}</td><td>{inr(p.capital_deployed)}{(p.leverage ?? 1) > 1 ? ` · ${p.leverage}×` : ""}</td>
                     <td>{p.stoploss ?? "—"}</td><td>{p.target ?? "—"}</td><td>{p.ltp}</td>
                     <td className={tone(p.unrealized_pnl)}>{inr(p.unrealized_pnl, true)}</td><td>{ist(p.opened_at)}</td>
                   </tr>

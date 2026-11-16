@@ -18,12 +18,21 @@ ONE SMALL ACCOUNT, NOT 54 SLICES
 The tournament gives each strategy Rs 50 lakh in five Rs 10 lakh slots and takes ~450 trades a
 day. Splitting Rs 10,000 into 54 slices would give each strategy Rs 185 - not one share of the
 median stock. A book is instead ONE account, as a real one would be:
-  * at most MAX_OPEN positions at a time, each capped at capital / MAX_OPEN
-    (Rs 16,000 / 6,000 / 2,000 at the default of five), whole shares only;
+  * at most MAX_OPEN positions at a time, each capped at LEVERAGE x capital / MAX_OPEN in value
+    (Rs 80,000 / 30,000 / 10,000 at five slots and 5x), whole shares only;
   * never two positions in the same stock (an account cannot be long and short one name, and
     two longs in it are one bigger bet, not two strategies);
-  * cash = capital + everything realised - what is tied up in open positions, no leverage;
-  * the book's own 3% daily loss breaker stops new entries.
+  * free margin = capital + everything realised - the margin open positions block;
+  * the book's own 3% daily loss breaker (of its capital) stops new entries.
+
+5x INTRADAY LEVERAGE (2026-11-16). The owner asked for the accounts to trade the way an Indian
+broker lets intraday equity trade: capital unchanged, buying power 5 x capital, each position
+blocking 20% of its value as margin (equity_margin). Every tournament trade is an intraday (MIS)
+trade in an NSE stock, squared off the same session, so every copy is eligible. A row's
+`capital_deployed` is that MARGIN - the account's own money tied up - and `notional` is the
+position's value; P&L is still the price move on the shares held, never a multiplied figure. The
+books' history was replayed at 5x from each book's first trade, against the same tournament
+trades (backend/scripts/rebuild_leverage_books.py; the 1x rows are backed up).
 Signals are taken in the order the tournament took them - in the morning most of the 54 cannot
 get a slot. Every signal a book could not take is COUNTED per strategy and reason (breaker, full,
 symbol held, share price above the cap, no cash) rather than written as a row: at ~450 signals a
@@ -64,6 +73,7 @@ from app.core.db import (intraday_lab_positions_collection, live_intraday_positi
 from app.services import intraday_v2_strategies as v2
 from app.services.angel_fees import round_trip
 from app.services.book_reset import naive_utc, reset_at
+from app.services.equity_margin import intraday_leverage, margin_for
 from pymongo.errors import DuplicateKeyError
 
 logger = logging.getLogger("live_intraday_mirror")
@@ -89,8 +99,26 @@ _PARENT_FIELDS = {
 }
 
 
-def position_cap(capital: float) -> float:
-    return capital / max(MAX_OPEN, 1)
+def position_cap(capital: float, leverage: float = 1.0) -> float:
+    """The most one position may be WORTH: buying power (leverage x capital) / slots."""
+    return capital * max(leverage, 1.0) / max(MAX_OPEN, 1)
+
+
+def parent_leverage(p: dict, limit: float) -> float:
+    """What one tournament trade may use: every one is intraday in an NSE stock (5x), unless the
+    book's own limit is lower (1x off the tournament)."""
+    if limit <= 1.0:
+        return 1.0
+    seg = (p.get("instrument") or {}).get("exchange_segment")
+    return intraday_leverage(seg, intraday=True, limit=limit)
+
+
+def ist_day(at) -> str:
+    """The IST calendar date of an instant (naive = UTC), as the books' `closed_on` writes it."""
+    t = naive_utc(at) if at is not None else None
+    if t is None or t == datetime.min:
+        return ""
+    return (t + timedelta(hours=5, minutes=30)).date().isoformat()
 
 
 def _now() -> datetime:
@@ -116,7 +144,8 @@ def plan_book(*, capital: float, realized: float, deployed: float, open_rows: li
               parents: list[dict], decided: set[str], breaker_tripped: bool,
               entries: bool, max_open: int | None = None, net_fn=None,
               source_tag: str | None = None, closed_rows: list[dict] | None = None,
-              compound: bool = False) -> dict:
+              compound: bool = False, leverage_fn=None, loss_limit: float | None = None,
+              day_realized: dict[str, float] | None = None) -> dict:
     """Replay one book against the tournament, in time order. Pure - no I/O.
 
     open_rows:   the book's OPEN positions from ANY source (they hold cash, slots, symbols).
@@ -144,9 +173,30 @@ def plan_book(*, capital: float, realized: float, deployed: float, open_rows: li
     COMPOUND (the A Grade books, 2026-11-11): each entry's cap is the book's realised equity at that
     instant / slots, not capital / slots - profit is reinvested in the book (and a loss shrinks it).
     Realised equity is followed through the replay: closes add their net when they happen, and a
-    rewound row's profit counts only from its own close time."""
+    rewound row's profit counts only from its own close time.
+
+    LEVERAGE (2026-11-16, intraday equity at 5x). `leverage_fn(parent)` is the leverage that entry
+    may use: 5.0 for an eligible intraday (MIS) cash-equity trade, 1.0 for anything else. The
+    position is then capped at leverage x the cap above in VALUE, and it blocks value / leverage of
+    the account's money as MARGIN. That margin is what `cash` (the free margin) tracks and what
+    `spend` - so a row's `capital_deployed` - is; `notional` is the value. The margin of everything
+    open together can never exceed what the account has, so its exposure can never exceed
+    leverage x its money. None means 1.0 for every entry: value and margin are the same number, as
+    they always were, so the other desks that share this function are unchanged.
+
+    DAILY LOSS ON THE TRADES' CLOCK. `loss_limit` (rupees) refuses new entries ("breaker") once the
+    realised P&L of that IST day, followed through the replay with its closes, has lost that much.
+    `breaker_tripped` is the same breaker read once, when the pass starts; this one also catches a
+    close INSIDE the pass. `day_realized` seeds the days with what was realised before t0."""
     slots = MAX_OPEN if max_open is None else max_open
     tag = SOURCE_TAG if source_tag is None else source_tag
+    lev_of = leverage_fn if leverage_fn is not None else (lambda _p: 1.0)
+    day_net: dict[str, float] = dict(day_realized or {})
+
+    def book_day(at, net: float) -> None:
+        if loss_limit is not None:
+            day = ist_day(at)
+            day_net[day] = day_net.get(day, 0.0) + float(net or 0.0)
 
     def close_net(row: dict, parent: dict):
         if net_fn is not None:
@@ -209,6 +259,7 @@ def plan_book(*, capital: float, realized: float, deployed: float, open_rows: li
             held[payload["symbol"]] = held.get(payload["symbol"], 1) - 1
             cash += float(payload.get("capital_deployed") or 0.0) + float(payload.get("realized_pnl") or 0.0)
             eq += float(payload.get("realized_pnl") or 0.0)
+            book_day(_at, payload.get("realized_pnl"))
             continue
 
         if kind in ("close_existing", "close_new"):
@@ -216,6 +267,7 @@ def plan_book(*, capital: float, realized: float, deployed: float, open_rows: li
             gross, net, fb = close_net(row, parent)
             cash += row["capital_deployed"] + net
             eq += net
+            book_day(_at, net)
             n_open -= 1
             held[row["symbol"]] = held.get(row["symbol"], 1) - 1
             close = {"gross": gross, "net": net, "fb": fb}
@@ -227,9 +279,14 @@ def plan_book(*, capital: float, realized: float, deployed: float, open_rows: li
 
         p = payload                                         # kind == "open"
         price = float(p.get("entry_price") or 0.0)
-        cap_now = max(eq, 0.0) / max(slots, 1) if compound else cap
-        qty = int(min(cap_now, max(cash, 0.0)) // price) if price > 0 else 0
-        if breaker_tripped:
+        lev = max(float(lev_of(p) or 1.0), 1.0)
+        # The most this position may be WORTH (its slot of the buying power), and the most the free
+        # margin can carry. At 1x both are the old figures exactly (x 1.0 changes no float).
+        cap_now = (max(eq, 0.0) / max(slots, 1) if compound else cap) * lev
+        room = max(cash, 0.0) * lev
+        qty = int(min(cap_now, room) // price) if price > 0 else 0
+        if breaker_tripped or (loss_limit is not None
+                               and day_net.get(ist_day(_at), 0.0) <= -loss_limit):
             reason = "breaker"
         elif n_open >= slots:
             reason = "full"
@@ -242,11 +299,13 @@ def plan_book(*, capital: float, realized: float, deployed: float, open_rows: li
         if reason:
             out["skips"].append({"parent": p, "reason": reason})
             continue
-        spend = round(price * qty, 2)
+        notional = round(price * qty, 2)
+        spend = margin_for(price * qty, lev)               # the margin; = notional at 1x
         cash -= spend
         n_open += 1
         held[p["symbol"]] = held.get(p["symbol"], 0) + 1
-        opened = {"parent": p, "qty": qty, "spend": spend, "close": None}
+        opened = {"parent": p, "qty": qty, "spend": spend, "notional": notional,
+                  "leverage": lev, "close": None}
         out["opens"].append(opened)
         if _closed(p):
             # Opened and closed between two looks. Its close is an event like any other, so an
@@ -323,6 +382,22 @@ async def closed_after(coll, book: str, t0: datetime | None) -> list[dict]:
         {"symbol": 1, "capital_deployed": 1, "realized_pnl": 1, "opened_at": 1, "closed_at": 1})]
 
 
+async def day_realized_before(coll, book: str, t0: datetime | None) -> dict[str, float]:
+    """What the book realised on t0's IST day up to t0: plan_book's `day_realized`. A row closed
+    after t0 is left out; the replay puts it back and books it at its own close time."""
+    if t0 is None:
+        return {}
+    day = ist_day(t0)
+    if not day:
+        return {}
+    start = datetime.fromisoformat(day) - timedelta(hours=5, minutes=30)    # IST midnight, naive UTC
+    total = 0.0
+    async for r in coll.find({"book": book, "status": "CLOSED",
+                              "closed_at": {"$gte": start, "$lte": t0}}, {"realized_pnl": 1}):
+        total += float(r.get("realized_pnl") or 0.0)
+    return {day: round(total, 2)}
+
+
 async def _parents(since: datetime, extra_ids: list[str]) -> list[dict]:
     """Tournament positions opened since `since` (any status), plus any parent an open book
     row still points at."""
@@ -361,8 +436,10 @@ async def _decided(book: str, parents: list[dict]) -> set[str]:
 # -- writing it ---------------------------------------------------------------------
 
 
-def _row(book: str, p: dict, qty: int, spend: float) -> dict:
+def _row(book: str, p: dict, qty: int, spend: float, notional: float | None = None,
+         leverage: float = 1.0) -> dict:
     sig = float(p.get("signal_price") or p["entry_price"])
+    value = round(float(p["entry_price"]) * qty, 2) if notional is None else notional
     return {
         "position_id": uuid4().hex[:12], "book": book,
         "source": SOURCE_TAG, "parent_position_id": p["position_id"],
@@ -372,7 +449,10 @@ def _row(book: str, p: dict, qty: int, spend: float) -> dict:
         "symbol": p["symbol"], "display_name": p["symbol"],
         "instrument": p.get("instrument") or {"symbol": p["symbol"], "lot_size": 1},
         "side": p["side"], "entry_price": round(float(p["entry_price"]), 2), "qty": qty,
-        "capital_deployed": spend,
+        # The account's own money this position ties up (its MARGIN), and what it is worth.
+        "capital_deployed": spend, "notional": value,
+        "leverage": leverage, "margin_rate": round(1.0 / max(leverage, 1.0), 4),
+        "product": "MIS" if leverage > 1.0 else "INTRADAY",
         "target": p.get("target"), "stoploss": p.get("stoploss"),
         "ltp": p.get("ltp") or p["entry_price"], "ltp_source": "tournament",
         "signal_price": round(sig, 2),
@@ -435,6 +515,17 @@ async def _score(book: str, strategy_id: str, skips: dict[str, int]) -> None:
         {"strategy_id": strategy_id, "book": book}, update, upsert=True)
 
 
+def book_rules(book: str) -> dict:
+    """The plan_book rules one book trades by - the live passes and the 5x history replay
+    (backend/scripts/rebuild_leverage_books.py) both read them here, so they cannot drift."""
+    from app.services import live_intraday_engine as li   # late: that module imports this one
+
+    lev = li.book_leverage(book)
+    return {"compound": li.book_compounds(book),
+            "leverage_fn": (lambda p, _lim=lev: parent_leverage(p, _lim)),
+            "loss_limit": li.DAILY_LOSS_BREAKER_PCT * li.book_capital(book)}
+
+
 async def sync(*, entries: bool) -> dict:
     """Copy the tournament into every book once.
 
@@ -472,13 +563,13 @@ async def _sync(*, entries: bool) -> dict:
         op, cl = await li._totals_split(live_intraday_positions_collection, {"book": book})
         breaker = (await li.breaker_state(book))["breaker_tripped"] if entries else False
         decided = await _decided(book, parents) if entries else set()
-        closed_rows = await closed_after(
-            live_intraday_positions_collection, book,
-            pending_since(parents, decided, open_rows, SOURCE_TAG)) if entries else []
+        t0 = pending_since(parents, decided, open_rows, SOURCE_TAG) if entries else None
+        closed_rows = await closed_after(live_intraday_positions_collection, book, t0) if entries else []
+        seed = await day_realized_before(live_intraday_positions_collection, book, t0) if entries else {}
         plan = plan_book(capital=capital, realized=cl["realized"], deployed=op["deployed"],
                          open_rows=open_rows, parents=parents, decided=decided,
                          breaker_tripped=breaker, entries=entries, closed_rows=closed_rows,
-                         compound=li.book_compounds(book))
+                         day_realized=seed, **book_rules(book))
 
         touched: dict[str, dict[str, int]] = {}
         for c in plan["closes"]:
@@ -491,7 +582,7 @@ async def _sync(*, entries: bool) -> dict:
                 total["closed"] += 1
         for o in plan["opens"]:
             p = o["parent"]
-            doc = _row(book, p, o["qty"], o["spend"])
+            doc = _row(book, p, o["qty"], o["spend"], o.get("notional"), o.get("leverage", 1.0))
             if o["close"] is not None:
                 doc.update(_close_fields(p, o["close"]))
             try:

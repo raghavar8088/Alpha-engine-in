@@ -53,6 +53,7 @@ from app.services import intraday_session as session
 from app.services.call_engine import IST, _scored_daily_symbols
 from app.services.desk_totals import split as _totals_split
 from app.services.dhan_client import DhanClient
+from app.services.equity_margin import MIS_LEVERAGE
 from app.services.intraday_lab_engine import _equity_quote_map, _size
 from app.services.intraday_strategies import STRATEGY_CATALOG, Signal, evaluate
 from backtesting_service.service import load_bars
@@ -84,7 +85,8 @@ SOURCE = os.getenv("LIVE_INTRADAY_SOURCE", "tournament").strip().lower()
 COPIES_TOURNAMENT = SOURCE != "legacy"
 
 # The books. Capital is the DESK total. Copying the tournament (the default), each book is
-# ONE account of up to five positions, each capped at capital / 5 (live_intraday_mirror). On
+# ONE account of up to five positions, each worth up to 5x capital / 5 at the 5x intraday leverage
+# of 2026-11-16 (book_leverage below), blocking a fifth of that as margin (live_intraday_mirror). On
 # the legacy eight, each strategy gets an equal slice instead: Rs80k/8 = Rs10,000, exactly what
 # the original single desk used, so the 80k book's history carries over unchanged.
 #
@@ -109,9 +111,10 @@ BOOK_CAPITAL: dict[str, float] = {
 # reinvested in that strategy alone - each position is sized on the account's realised equity at
 # the moment of entry (live_intraday_mirror.plan_book(compound=True)), so Rs 50k of profit makes
 # every later position a tenth bigger. Losses shrink it the same way. Every other rule is the
-# books': copy the tournament's own fills, five slots, whole shares, one position per stock, no
-# leverage, Angel costs on the book's quantity, the 3% daily breaker. FROZEN: a changed roster or
-# rule is a new book, never an edit of these.
+# books': copy the tournament's own fills, five slots, whole shares, one position per stock, Angel
+# costs on the book's quantity, the 3% daily breaker - and, since the owner asked on 16 Nov 2026 for
+# every account in the module, 5x intraday leverage, replayed from each book's first trade so one
+# rule covers its whole record. FROZEN: a changed roster is a new book, never an edit of these.
 # (book, strategy_id, the board it was picked from, rank, score, trades, net P&L there at the pick)
 # A seventh the same evening: Supertrend Flip 1 hour, #1 on the Five-Strategy Desk (intraday_focus: the same v2
 # rule, but its own entries at live quotes and its own fills; this book copies the TOURNAMENT's fills of that rule,
@@ -160,6 +163,15 @@ BOOK_ROSTER: dict[str, tuple[str, ...]] = {"top2L": TOP10_ROSTER, "top10L": TOP1
 BOOK_ROSTER.update({b: (sid,) for b, sid, *_ in A_GRADE})      # one strategy per A Grade book
 # Books whose positions are sized on their own realised equity (profit reinvested): the A Grade ones.
 COMPOUND_BOOKS: frozenset[str] = frozenset(A_GRADE_BOOKS)
+
+
+# 5x INTRADAY LEVERAGE (2026-11-16, the owner's instruction for the module's accounts). Every
+# tournament trade is an intraday (MIS) trade in an NSE stock, so a book that copies the tournament
+# gets the broker's intraday leverage: capital unchanged, buying power 5 x capital, 20% margin per
+# position (equity_margin). On the legacy eight (daily-bar swing, held overnight = delivery) it is 1x.
+# The real-money desk does not read this; its own MIS sizing lives in live_trading_engine.
+def book_leverage(book: str) -> float:
+    return MIS_LEVERAGE if COPIES_TOURNAMENT else 1.0
 
 
 def book_roster(book: str) -> tuple[str, ...] | None:
@@ -651,18 +663,24 @@ async def summary(book: str = DEFAULT_BOOK) -> dict:
     open_count, closed_count = op["n"], cl["n"]
     equity = capital + realized + unrealized
     alloc = per_strategy_allocation(book)
+    value_cap = alloc
+    lev = 1.0
     copy: dict = {"source": "legacy"}
     if COPIES_TOURNAMENT:
         from app.services import intraday_v2_strategies as v2
         from app.services import live_intraday_mirror as mirror
         # One shared account: no per-strategy slice exists, so the figure that used to be the
-        # slice is the per-POSITION cap instead.
+        # slice is one slot's MARGIN (the money one position may tie up), and `position_cap` is
+        # what one position may be WORTH at the book's leverage.
         # A compounding book's cap moves with its realised equity (A Grade); the others' is fixed.
-        alloc = mirror.position_cap(capital + realized if book_compounds(book) else capital)
+        lev = book_leverage(book)
+        base = capital + realized if book_compounds(book) else capital
+        alloc = mirror.position_cap(base)
+        value_cap = mirror.position_cap(base, lev)
         started = await mirror.started_at(book)
         roster = book_roster(book)
         copy = {"source": "tournament", "max_open_positions": mirror.MAX_OPEN,
-                "position_cap": round(alloc, 2),
+                "position_cap": round(value_cap, 2),
                 "tournament_strategies": len(roster) if roster else len(v2.CATALOG),
                 "skipped": await mirror.skipped_totals(book),
                 "copying_since": (started if started.tzinfo else started.replace(
@@ -671,14 +689,29 @@ async def summary(book: str = DEFAULT_BOOK) -> dict:
             copy["roster"] = list(roster)
             copy["roster_picked_at"] = A_GRADE_PICKED_AT if book in A_GRADE_BOOKS else TOP10_PICKED_AT
         copy["compounding"] = book_compounds(book)
+    # What the open positions are WORTH (their exposure); `deployed` is the margin they block.
+    exposure = 0.0
+    async for p in live_intraday_positions_collection.find(
+            {"book": book, "status": "OPEN"}, {"notional": 1, "entry_price": 1, "qty": 1}):
+        exposure += float(p.get("notional") or (p.get("entry_price") or 0.0) * (p.get("qty") or 0))
+    free_margin = capital + realized - deployed
     return {
         **copy,
         "book": book, "books": BOOKS,
         "book_capitals": {b: BOOK_CAPITAL[b] for b in BOOKS},
         "initial_capital": capital,
         "per_strategy_allocation": round(alloc, 2),
-        "position_notional": round(alloc, 2),
-        "available_cash": round(capital + realized - deployed, 2),
+        "position_notional": round(value_cap, 2),
+        # The margin account (2026-11-16): capital unchanged, buying power = leverage x capital,
+        # each position blocking value / leverage. P&L is never scaled - it is the shares held.
+        "leverage": lev,
+        "margin_rate": round(1.0 / lev, 4),
+        "buying_power": round(capital * lev, 2),
+        "margin_used": round(deployed, 2),
+        "available_margin": round(free_margin, 2),
+        "available_buying_power": round(max(free_margin, 0.0) * lev, 2),
+        "exposure": round(exposure, 2),
+        "available_cash": round(free_margin, 2),
         "deployed_capital": round(deployed, 2),
         "realized_pnl": round(realized, 2),
         "gross_realized_pnl": round(realized + fees, 2),
@@ -779,6 +812,7 @@ async def run_cycle(dhan: DhanClient | None) -> dict:
             "ts": _now(), "book": book, "equity": snap["equity"], "realized": snap["realized_pnl"],
             "unrealized": snap["unrealized_pnl"], "fees": snap["total_fees"],
             "roi_pct": snap["roi_pct"], "deployed": snap["deployed_capital"],
+            "exposure": snap["exposure"], "leverage": snap["leverage"],
             "open_positions": snap["open_positions"],
         })
         await live_intraday_state_collection.update_one(

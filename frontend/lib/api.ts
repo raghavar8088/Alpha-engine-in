@@ -738,7 +738,11 @@ export interface IntradayPosition {
   side: string;
   entry_price: number;
   qty: number;
+  /** On the 5x Live Intraday books (2026-11-16) this is the MARGIN the position blocks. */
   capital_deployed: number;
+  /** What the position is worth (entry x qty); absent on rows written before 2026-11-16. */
+  notional?: number;
+  leverage?: number;
   /** null for v2 rules that exit only on their stop, time stop or the close (ORB). */
   target: number | null;
   stoploss: number;
@@ -975,6 +979,15 @@ export interface LiveIntradaySummary {
   initial_capital: number;
   per_strategy_allocation: number;
   position_notional: number;
+  // The margin account (2026-11-16): capital unchanged, buying power = leverage x capital, each
+  // position blocks value / leverage. deployed_capital = margin_used; exposure = open value.
+  leverage?: number;
+  margin_rate?: number;
+  buying_power?: number;
+  margin_used?: number;
+  available_margin?: number;
+  available_buying_power?: number;
+  exposure?: number;
   available_cash: number;
   deployed_capital: number;
   realized_pnl: number;
@@ -6965,6 +6978,17 @@ export interface PatternBookSummary {
   fees: number;
   deployed: number;
   available_cash: number;
+  // The margin account (2026-11-16): intraday-style copies at `leverage` (MIS), swing copies at
+  // 1x (delivery). position_cap_intraday = what one intraday copy may be worth.
+  leverage?: number;
+  margin_rate?: number;
+  buying_power?: number;
+  margin_used?: number;
+  available_margin?: number;
+  available_buying_power?: number;
+  exposure?: number;
+  open_mis_positions?: number;
+  position_cap_intraday?: number;
   open_positions: number;
   closed_positions: number;
   roi_pct: number;
@@ -7012,7 +7036,10 @@ export interface PatternBookPosition {
   side: string;
   entry_price: number;
   qty: number;
+  /** The MARGIN it blocks (a fifth of its value on an intraday copy since 2026-11-16). */
   capital_deployed: number;
+  notional?: number;
+  leverage?: number;
   allocation: number;
   target: number | null;
   stoploss: number | null;
