@@ -1,14 +1,23 @@
-"""Live Trading desk — REAL MONEY: Selected ORB 15-min, copied from the Intraday Stocks tournament.
+"""Live Trading desk — REAL MONEY: Intraday Stocks tournament strategies, copied from the tournament.
 
-Since 10 Nov 2026 (the owner's decision) this desk trades ONE strategy: the tournament's
-pre-registered Selected ORB 15-min (iv2_orb_sel15). When the tournament's paper engine opens an
-iv2_orb_sel15 position, this desk places the same-side REAL Angel One MIS market order within
-seconds (`copy_loop`), holds it to the same stop (the opposite edge of the 09:15-09:30 range),
-and squares it off with the session (15:05 in closing-auction stocks, 15:12 otherwise), or as
-soon as the tournament's own position closes. Up to five real positions at a time, about
-Rs 30,000 each on Angel's 5x intraday leverage (Rs 6,000 of margin each). The fourteen earlier
-strategies and their record were removed at the owner's request. Angel is also the price feed; Dhan only fills quote gaps and
-never receives an order. (This needs an Angel TRADING API key.)
+Since 10 Nov 2026 (the owner's decision) this desk copies the tournament's paper positions into
+REAL orders. When the tournament's paper engine opens a position in one of this desk's
+strategies (SELECTED) that is switched on, this desk places the same-side REAL Angel One MIS
+market order within seconds (`copy_loop`), holds it to the same stop and target, and squares it
+off with the session (15:05 in closing-auction stocks, 15:12 otherwise), or as soon as the
+tournament's own position closes.
+
+Until 16 Nov 2026 the desk traded ONE strategy, the pre-registered Selected ORB 15-min
+(iv2_orb_sel15). On 16 Nov the owner added four from the tournament and Five-Strategy Desk boards:
+Gap and Go, RSI(2) Extreme 15-min, Supertrend Flip 45-min and Supertrend Flip 1-hour. They ship
+switched OFF (each has its own switch on the page). Replayed at this desk's size, 6 Oct-16 Nov
+2026, each of the four lost money after Angel's charges.
+
+All strategies share one pool: up to five real positions at a time, about Rs 30,000 each on
+Angel's 5x intraday leverage (Rs 6,000 of margin each), first come first served, and never two
+positions in one stock. The fourteen earlier strategies and their record were removed at the
+owner's request. Angel is also the price feed; Dhan only fills quote gaps and never receives an
+order. (This needs an Angel TRADING API key.)
 
 Safety model (mirrors the Antigravity Live Engine the user already runs):
   * ARMED flag — ships OFF. Nothing is ordered until the desk is armed. Disarming stops
@@ -70,14 +79,37 @@ logger = logging.getLogger("live_trading")
 
 STATE_ID = "engine"
 
-# ── the strategy: Selected ORB 15-min, copied from the tournament ─────────────────
+# ── the strategies, copied from the tournament ────────────────────────────────────
 #
-# THE OWNER'S DECISION (10 Nov 2026): this desk trades only the Intraday Stocks tournament's
+# THE OWNER'S DECISION (10 Nov 2026): this desk trades the Intraday Stocks tournament's
 # Selected ORB 15-min, the one candidate with a pre-registered expectation, a positive two-year
 # replay and a positive forward record (the others lose over two years after costs). It trades
 # it the way the tournament does on paper: same signal, same side, same stop, same session
 # square-off. Real positions are COPIED from the tournament's paper positions, so the two
 # cannot drift apart.
+#
+# THE OWNER'S DECISION (16 Nov 2026): add four strategies picked from the boards:
+#   - Gap and Go, RSI(2) Extreme 15-min and Supertrend Flip 45-min, from the tournament's Rs 10 lakh books;
+#   - Supertrend Flip 1-hour, from the Five-Strategy Desk (the same v2 rule; this desk copies the
+#     tournament's positions in it).
+# On those boards each position is Rs 2 lakh or more, so costs are a small share of it. All four
+# ship switched OFF (`default_enabled=False`), and each is turned on with its own switch on the page.
+#
+# Replay at THIS desk's size (Rs 30,000 a position, one shared pool of five, one position per
+# stock, Angel refusing NSE-flagged stocks). It used the tournament's own paper fills over 27
+# sessions, 6 Oct-16 Nov 2026, net of Angel's charges:
+#   - Selected ORB alone: 16 trades, +Rs 3,224.
+#   - Each new strategy alone: Gap and Go -Rs 1,994, RSI(2) 15m -Rs 14,306, Supertrend 45m
+#     -Rs 4,320, Supertrend 1h -Rs 6,940.
+#   - All five in one pool: 262 trades, +Rs 8,199 before charges, Rs 15,086 of charges, -Rs 6,887 net.
+# Even with no refused stocks, only Supertrend 45m ends positive (+Rs 1,461 over 178 trades).
+#
+# Every copied position follows its paper parent: the same side, stop and target, and it closes
+# when the parent closes.
+#
+# One pool: at most MAX_OPEN_POSITIONS real positions at once across all strategies, first come
+# first served. The desk never holds two positions in one stock, because Angel nets a stock's
+# MIS position across strategies.
 #
 # SIZE (the owner's choice, 11 Nov 2026, with Rs 34,272 in the Angel account): up to five positions
 # at once, about Rs 30,000 each (Rs 6,000 of margin each at 5x; Rs 1.5 lakh and about Rs 30,000 of
@@ -91,11 +123,20 @@ class CopyStrategy:
     name: str
     category: str
     is_anti: bool = False
+    default_enabled: bool = True     # its switch when no flag has been saved (the page's "Live trade")
 
 
-COPY_SOURCE = "iv2_orb_sel15"
-SELECTED = [CopyStrategy(COPY_SOURCE, "Selected ORB 15-min (top-5 expected move)", "momentum")]
+COPY_SOURCE = "iv2_orb_sel15"        # the desk's first strategy (main.py logs it at startup)
+SELECTED = [
+    CopyStrategy(COPY_SOURCE, "Selected ORB 15-min (top-5 expected move)", "momentum"),
+    # Added 16 Nov 2026 by the owner; switched OFF until turned on from the page.
+    CopyStrategy("iv2_gap_go", "Gap and Go", "momentum", default_enabled=False),
+    CopyStrategy("iv2_rsi2_15m", "RSI(2) Extreme · 15 min", "mean_reversion", default_enabled=False),
+    CopyStrategy("iv2_supertrend_45m", "Supertrend Flip · 45 min", "momentum", default_enabled=False),
+    CopyStrategy("iv2_supertrend_1h", "Supertrend Flip · 1 hour", "momentum", default_enabled=False),
+]
 SELECTED_BY_ID = {ls.strategy_id: ls for ls in SELECTED}
+COPY_SOURCES = tuple(ls.strategy_id for ls in SELECTED)
 COPY_NOTIONAL = float(os.getenv("LIVE_TRADING_COPY_NOTIONAL", "30000"))     # each position, ~Rs 30k notional
 MIS_LEVERAGE = float(os.getenv("LIVE_TRADING_MIS_LEVERAGE", "5"))          # 5x on MIS: ~Rs 6,000 of margin each
 MAX_OPEN_POSITIONS = int(os.getenv("LIVE_TRADING_MAX_OPEN", "5"))            # real positions open at once
@@ -105,7 +146,7 @@ COPY_TICK_S = float(os.getenv("LIVE_TRADING_COPY_TICK_S", "10"))            # th
 COPY_LOOP_ON = os.getenv("LIVE_TRADING_COPY_LOOP", "on").lower() != "off"   # off: only the 3-minute tick copies
 COPY_START_DELAY_S = 45.0                                                    # let the app finish starting
 COPY_SESSION = ("09:15", "15:25")                                            # IST, the fast loop's hours
-PER_STRATEGY_ALLOCATION = COPY_NOTIONAL * MAX_OPEN_POSITIONS    # the one strategy's notional across its open positions
+PER_STRATEGY_ALLOCATION = COPY_NOTIONAL * MAX_OPEN_POSITIONS    # any one strategy may use the whole shared pool
 POSITION_NOTIONAL = COPY_NOTIONAL
 DESK_CEILING = COPY_NOTIONAL * MAX_OPEN_POSITIONS
 MAX_CONSECUTIVE_REJECTS = 3        # auto-disarm after this many failed real orders in a row
@@ -113,11 +154,17 @@ PRODUCT_TYPE = "INTRADAY"          # MIS: intraday shorts allowed, everything sq
 DAILY_LOSS_BREAKER_PCT = 0.03      # same 3% desk breaker as the paper desk
 INITIAL_CAPITAL = DESK_CEILING     # the desk's notional ceiling, not money held (the real account is reported apart)
 
-# THE ARMING GATE IS OVERRIDDEN FOR THIS STRATEGY by the owner's explicit decision of 10 Nov 2026:
-# it may place real orders without a CONFIRMED forward verdict. The override is per strategy and
-# written here, so the gate still stands for anything added later, and the page shows it.
+# THE ARMING GATE IS OVERRIDDEN FOR THESE STRATEGIES by the owner's explicit decisions:
+# - 10 Nov 2026: Selected ORB 15-min.
+# - 16 Nov 2026: the four added that day, each only once its own switch is on.
+# They may place real orders without a CONFIRMED forward verdict. The override is per strategy
+# and written here, so the gate still stands for anything added later, and the page shows it.
 OWNER_OVERRIDE = {
     COPY_SOURCE: "the owner's decision of 10 Nov 2026 (real orders without a CONFIRMED forward verdict)",
+    "iv2_gap_go": "the owner's decision of 16 Nov 2026 (real orders without a CONFIRMED forward verdict)",
+    "iv2_rsi2_15m": "the owner's decision of 16 Nov 2026 (real orders without a CONFIRMED forward verdict)",
+    "iv2_supertrend_45m": "the owner's decision of 16 Nov 2026 (real orders without a CONFIRMED forward verdict)",
+    "iv2_supertrend_1h": "the owner's decision of 16 Nov 2026 (real orders without a CONFIRMED forward verdict)",
 }
 
 class LiveTradingError(Exception):
@@ -172,8 +219,8 @@ async def get_state() -> dict:
 # None of the fourteen strategies below is registered, so this desk cannot be armed today.
 # That is the intended outcome. A strategy reaches real money by running as a paper
 # strategy, passing the walk-forward gate, being registered, and confirming forward.
-# (Until 10 Nov 2026: the owner then overrode the gate for the one strategy this desk now
-# trades, by name, in OWNER_OVERRIDE. Everything else still needs its verdict.)
+# (Until 10 Nov 2026. The owner then overrode the gate, by name in OWNER_OVERRIDE, for Selected
+# ORB on 10 Nov and for the four strategies added on 16 Nov. Everything else still needs its verdict.)
 #
 # The verdict is re-checked on EVERY scan, not only when arming: a CONFIRMED strategy can
 # later FAIL its forward test, and the desk must stop ordering it on the cycle that happens.
@@ -383,7 +430,8 @@ async def _clear_rejects() -> None:
 
 async def _enabled_map() -> dict[str, bool]:
     flags = {f["strategy_id"]: bool(f.get("enabled", True)) async for f in live_trading_flags_collection.find({})}
-    return {ls.strategy_id: flags.get(ls.strategy_id, True) for ls in SELECTED}
+    # No saved flag: the strategy's own default. The four added on 16 Nov 2026 stay OFF until switched on.
+    return {ls.strategy_id: flags.get(ls.strategy_id, ls.default_enabled) for ls in SELECTED}
 
 
 async def set_strategy_enabled(strategy_id: str, enabled: bool) -> dict:
@@ -659,10 +707,11 @@ async def _open_position(ls, symbol: str, inst: dict, signal, ltp_source: str,
     so the market price is used when one is available."""
     if symbol in _refused_symbols:
         return False          # already declined by the exchange this session
-    if await live_trading_positions_collection.find_one(
-        {"strategy_id": ls.strategy_id, "symbol": symbol, "status": "OPEN"}
-    ):
-        return False  # one open position per symbol per strategy
+    if await live_trading_positions_collection.find_one({"symbol": symbol, "status": "OPEN"}):
+        # One real position per STOCK across the whole desk (16 Nov 2026). Angel nets a symbol's
+        # MIS position across strategies: a second strategy's order would add to, or cancel,
+        # the first one's shares, and the first one's exit would then close the wrong amount.
+        return False
     sig_entry = float(signal.entry or 0.0)
     ref = float(fill_price or 0.0) or sig_entry
     if ref <= 0:
@@ -782,6 +831,10 @@ def copy_check(parent: dict, ltp: float | None, open_positions: int,
     sign = 1 if parent["side"] == "BUY" else -1
     if sign * (ltp - stop) <= 0:
         return "the price is already beyond the stop", True
+    target = float(parent.get("target") or 0.0)
+    if target > 0 and sign * (ltp - target) >= 0:
+        # Copying now would open at the target and close straight back: two sets of charges for nothing.
+        return "the price is already at the paper target", True
     if abs(ltp - entry) > COPY_MAX_DRIFT_R * abs(entry - stop):
         return (f"the price has moved more than {COPY_MAX_DRIFT_R:g} of the stop distance "
                 "since the paper fill"), False
@@ -789,27 +842,36 @@ def copy_check(parent: dict, ltp: float | None, open_positions: int,
 
 
 async def _copy_entries(dhan: DhanClient | None, validated: set, enabled: dict) -> dict:
-    """Copy the tournament's new Selected ORB 15-min paper positions into REAL orders."""
+    """Copy the tournament's new paper positions in this desk's switched-on strategies into REAL orders.
+
+    All strategies share one pool of MAX_OPEN_POSITIONS real positions, taken in the order the
+    tournament opened them, and the desk never holds two positions in one stock."""
     if datetime.now(IST).strftime("%H:%M") >= ENTRY_CUTOFF_HHMM:
         return {"opened": 0, "scanned_symbols": 0, "notes": [
             f"Past the {ENTRY_CUTOFF_HHMM} IST entry cutoff — no new entries; open positions still managed."]}
-    ls = SELECTED_BY_ID[COPY_SOURCE]
-    if ls.strategy_id not in validated or not enabled.get(ls.strategy_id, True):
-        return {"opened": 0, "scanned_symbols": 0, "notes": [f"{ls.name} is disabled for real trading."]}
+    active = {ls.strategy_id: ls for ls in SELECTED
+              if ls.strategy_id in validated and enabled.get(ls.strategy_id, ls.default_enabled)}
+    if not active:
+        return {"opened": 0, "scanned_symbols": 0, "notes": ["No strategy is switched on for real trading."]}
     since = _now() - timedelta(seconds=COPY_WINDOW_S + 4 * COPY_TICK_S)   # a waiting one gets its final word
     parents = [p async for p in intraday_lab_positions_collection.find(
-        {"engine": "v2", "strategy_id": COPY_SOURCE, "status": "OPEN",
+        {"engine": "v2", "strategy_id": {"$in": list(active)}, "status": "OPEN",
          "opened_on": _today_ist().isoformat(), "opened_at": {"$gte": since}}).sort("opened_at", 1)]
     notes: list[str] = []
     opened = 0
     for par in parents:
+        ls = active.get(par.get("strategy_id"))
+        if ls is None:
+            continue
         claim = f"copy|{par['position_id']}"
         if await live_trading_state_collection.find_one({"_id": claim}, {"_id": 1}):
             continue                                    # decided before: never ordered twice
         symbol = par["symbol"]
         inst = await instruments_collection.find_one({"asset_class": "EQUITY", "symbol": symbol})
+        held = await live_trading_positions_collection.find_one(
+            {"symbol": symbol, "status": "OPEN"}, {"strategy_name": 1})
         ltp, ltp_source = None, "none"
-        if inst:
+        if inst and not held:
             quotes, sources = await _equity_quote_map(dhan, [inst])
             key = (inst["exchange_segment"], str(inst["security_id"]))
             q = quotes.get(key)
@@ -819,13 +881,16 @@ async def _copy_entries(dhan: DhanClient | None, validated: set, enabled: dict) 
         n_open = await live_trading_positions_collection.count_documents({"status": "OPEN"})
         if inst is None:
             why, final = "no instrument record for the symbol", True
+        elif held:
+            why, final = (f"the desk already holds a real position in {symbol} "
+                          f"({held.get('strategy_name') or 'another strategy'}); one per stock"), True
         else:
             why, final = copy_check(par, ltp, n_open, _now())
         if why is None and not (await account_balance())["ok"]:
             why, final = "the Angel balance could not be read", False      # retried next tick
         if why and not final:
             _copy_waiting[par["position_id"]] = why
-            notes.append(f"Waiting to copy {par.get('side')} {symbol}: {why}.")
+            notes.append(f"Waiting to copy {ls.name}: {par.get('side')} {symbol}: {why}.")
             continue
         if why and par["position_id"] in _copy_waiting:
             why = f"{why} (last wait: {_copy_waiting[par['position_id']]})"
@@ -833,21 +898,25 @@ async def _copy_entries(dhan: DhanClient | None, validated: set, enabled: dict) 
         # Claim BEFORE ordering: a retry, the other loop or a restart must never order this twice.
         res = await live_trading_state_collection.update_one(
             {"_id": claim}, {"$setOnInsert": {"at": _now(), "symbol": symbol, "side": par.get("side"),
+                                             "strategy_id": ls.strategy_id, "strategy_name": ls.name,
                                              "parent_opened_at": par.get("opened_at"),
                                              "decision": why or "ordering", "ltp": ltp}}, upsert=True)
         if res.upserted_id is None:
             continue
         if why:
-            notes.append(f"Not copied: {par.get('side')} {symbol}: {why}.")
+            notes.append(f"Not copied ({ls.name}): {par.get('side')} {symbol}: {why}.")
             continue
         live = await get_state()
         if not live["armed"] or live["kill_switch"]:
             await live_trading_state_collection.update_one({"_id": claim}, {"$set": {"decision": "desk disarmed"}})
             notes.append("Desk was disarmed / kill-switched mid-scan — stopped placing new orders.")
             break
+        # The paper position's own target travels with it (16 Nov 2026): Selected ORB has none, and
+        # the four added that day exit at theirs. The real position also closes when the paper one does.
+        paper_target = float(par.get("target") or 0.0) or None
         signal = SimpleNamespace(
-            side=par["side"], entry=float(par["entry_price"]), target=None, stoploss=float(par["stoploss"]),
-            confidence=float(par.get("confidence") or 0.0),
+            side=par["side"], entry=float(par["entry_price"]), target=paper_target,
+            stoploss=float(par["stoploss"]), confidence=float(par.get("confidence") or 0.0),
             rationale=f"copy of tournament position {par['position_id']}: {par.get('rationale') or ''}"[:400])
         ok = await _open_position(ls, symbol, inst, signal, ltp_source, ltp, parent=par)
         if ok:
@@ -860,10 +929,11 @@ async def _copy_entries(dhan: DhanClient | None, validated: set, enabled: dict) 
             decision = "not opened (size, cash, ceiling or an order failure)"
         await live_trading_state_collection.update_one({"_id": claim}, {"$set": {"decision": decision}})
         if not ok:
-            notes.append(f"Not copied: {par['side']} {symbol}: {decision}.")
+            notes.append(f"Not copied ({ls.name}): {par['side']} {symbol}: {decision}.")
         if ok:
             opened += 1
-            notes.append(f"REAL entry copied: {par['side']} {symbol} (tournament position {par['position_id']}).")
+            notes.append(f"REAL entry copied ({ls.name}): {par['side']} {symbol} "
+                         f"(tournament position {par['position_id']}).")
     return {"opened": opened, "scanned_symbols": len(parents), "notes": notes}
 
 # ── manage (always runs, even disarmed — open real positions must be exited) ─────
@@ -1434,6 +1504,7 @@ async def summary() -> dict:
     closed_count = await live_trading_positions_collection.count_documents({"status": "CLOSED"})
     state = await get_state()
     _bal = await account_balance()
+    enabled_now = await _enabled_map()
     return {
         "mode": "real",
         "armed": state["armed"],
@@ -1471,7 +1542,12 @@ async def summary() -> dict:
         "open_positions": open_count,
         "closed_positions": closed_count,
         "strategy_count": len(SELECTED),
-        "copy_source": COPY_SOURCE, "copy_notional": COPY_NOTIONAL, "mis_leverage": MIS_LEVERAGE,
+        "copy_source": COPY_SOURCE, "copy_sources": list(COPY_SOURCES),
+        # Each strategy the desk can copy, with its switch (16 Nov 2026: five, one shared pool).
+        "copy_strategies": [{"strategy_id": ls.strategy_id, "name": ls.name,
+                             "enabled": enabled_now.get(ls.strategy_id, ls.default_enabled),
+                             "override": OWNER_OVERRIDE.get(ls.strategy_id)} for ls in SELECTED],
+        "copy_notional": COPY_NOTIONAL, "mis_leverage": MIS_LEVERAGE,
         "max_open_positions": MAX_OPEN_POSITIONS, "gate_override": OWNER_OVERRIDE,
         "copy_today": await copy_decisions_today(),
         # The REAL account. `equity` above is only the desk's notional allocation + P&L;
@@ -1685,8 +1761,12 @@ async def copy_decisions_today() -> list[dict]:
             {"_id": {"$regex": "^copy\\|"}, "at": {"$gte": _session_start_utc()}}).sort("at", 1):
         if not str(d.get("_id", "")).startswith("copy|"):
             continue
+        # Records written before 16 Nov 2026 carry no strategy: they were all Selected ORB's.
+        sid = d.get("strategy_id") or COPY_SOURCE
+        known = SELECTED_BY_ID.get(sid)
         rows.append({"at": _iso(d.get("at")), "paper_opened_at": _iso(d.get("parent_opened_at")),
                      "symbol": d.get("symbol"), "side": d.get("side"), "decision": d.get("decision"),
+                     "strategy_id": sid, "strategy_name": d.get("strategy_name") or (known.name if known else sid),
                      "parent_id": str(d["_id"]).split("|", 1)[1]})
     return rows
 

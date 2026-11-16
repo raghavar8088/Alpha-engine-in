@@ -36,13 +36,25 @@ const signed = (v: number | null | undefined) =>
 const pct = (v: number | null | undefined) =>
   v === null || v === undefined ? "-" : `${v >= 0 ? "+" : ""}${v.toFixed(2)}%`;
 
-// Since 10 Nov 2026 the desk copies one tournament strategy; these fields come with it.
+// Since 10 Nov 2026 the desk copies tournament strategies; these fields come with it.
 type CopyDesk = {
   copy_notional?: number; mis_leverage?: number; max_open_positions?: number;
+  // Every strategy the desk can copy, with its switch (16 Nov 2026: five sharing one pool).
+  copy_strategies?: { strategy_id: string; name: string; enabled: boolean; override?: string | null }[];
   // Today's tournament signals and what the desk did with each (since 12 Nov 2026).
-  copy_today?: { at: string | null; symbol: string; side: string; decision: string; parent_id: string }[];
+  copy_today?: {
+    at: string | null; symbol: string; side: string; decision: string; parent_id: string;
+    strategy_id?: string; strategy_name?: string;
+  }[];
 };
 type Overridable = { override?: string | null };
+
+// The switched-on strategies, by name, for the page's sentences ("Selected ORB 15-min" before 16 Nov 2026).
+const onNames = (desk: (LiveTradingSummary & CopyDesk) | null): string => {
+  const on = (desk?.copy_strategies ?? []).filter((s) => s.enabled).map((s) => s.name);
+  if (!desk?.copy_strategies) return "Selected ORB 15-min";
+  return on.length ? on.join(", ") : "none switched on";
+};
 
 export default function LiveTradingPage() {
   const [summary, setSummary] = useState<LiveTradingSummary | null>(null);
@@ -118,9 +130,9 @@ export default function LiveTradingPage() {
       const desk = summary as LiveTradingSummary & CopyDesk;
       const ok = window.confirm(
         "ARM LIVE TRADING?\n\nThis places REAL orders with real money on your Angel One account: every " +
-          "new Selected ORB 15-min position the Intraday Stocks tournament opens is copied within seconds, " +
-          `up to ${desk.max_open_positions ?? 5} positions at a time, about ${inr(desk.copy_notional ?? summary.position_notional)} each on ` +
-          `Angel's ${desk.mis_leverage ?? 5}x intraday (MIS) leverage, and closed at the same stop, when the tournament closes it, or ` +
+          `new position the Intraday Stocks tournament opens in the strategies switched on (${onNames(desk)}) is copied within seconds, ` +
+          `up to ${desk.max_open_positions ?? 5} positions at a time across them (one per stock), about ${inr(desk.copy_notional ?? summary.position_notional)} each on ` +
+          `Angel's ${desk.mis_leverage ?? 5}x intraday (MIS) leverage, and closed at the same stop or target, when the tournament closes it, or ` +
           "at the session square-off. You can disarm or hit the kill switch at any time.\n\nArm the desk now?",
       );
       if (!ok) return;
@@ -175,10 +187,22 @@ export default function LiveTradingPage() {
 
   const toggleStrategy = async (s: LiveTradingScore) => {
     if (busy) return;
+    if (!s.enabled) {
+      // Switching a strategy ON sends real orders from the next signal while the desk is armed.
+      const desk = summary as (LiveTradingSummary & CopyDesk) | null;
+      const ok = window.confirm(
+        `TURN ON REAL-MONEY TRADING FOR ${s.name}?\n\nWhile the desk is armed, every new ${s.name} position the ` +
+          "Intraday Stocks tournament opens becomes a REAL Angel One order within seconds, sharing the desk's " +
+          `${desk?.max_open_positions ?? 5} positions (about ${inr(desk?.copy_notional ?? desk?.position_notional)} each, one per stock). ` +
+          "No forward test has confirmed it.\n\nTurn it on?",
+      );
+      if (!ok) return;
+    }
     setBusy(true);
     try {
       const r = await setLiveTradingStrategyEnabled(s.strategy_id, !s.enabled);
       setBoard(r.leaderboard);
+      load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to toggle strategy");
     } finally {
@@ -193,7 +217,7 @@ export default function LiveTradingPage() {
         refreshing={isRefreshing}
         crumb="Live Trading"
         title="Live Trading"
-        subtitle={`REAL-MONEY desk: when ARMED, copies the Intraday Stocks tournament's Selected ORB 15-min positions into real Angel One orders within seconds — up to ${(summary as (LiveTradingSummary & CopyDesk) | null)?.max_open_positions ?? 5} positions at a time, about ${inr((summary as (LiveTradingSummary & CopyDesk) | null)?.copy_notional ?? summary?.position_notional)} each on ${(summary as (LiveTradingSummary & CopyDesk) | null)?.mis_leverage ?? 5}x intraday (MIS) leverage, closed at the same stop, when the tournament closes it, or at the session square-off. Every order is INTRADAY (MIS). The forward-test gate is overridden for this strategy by your decision of 10 Nov 2026.`}
+        subtitle={`REAL-MONEY desk: when ARMED, copies the Intraday Stocks tournament's positions in the strategies switched on below (now: ${onNames(summary as (LiveTradingSummary & CopyDesk) | null)}) into real Angel One orders within seconds — up to ${(summary as (LiveTradingSummary & CopyDesk) | null)?.max_open_positions ?? 5} positions at a time across them, one per stock, about ${inr((summary as (LiveTradingSummary & CopyDesk) | null)?.copy_notional ?? summary?.position_notional)} each on ${(summary as (LiveTradingSummary & CopyDesk) | null)?.mis_leverage ?? 5}x intraday (MIS) leverage, closed at the same stop or target, when the tournament closes it, or at the session square-off. Every order is INTRADAY (MIS). The forward-test gate is overridden for these strategies by your decisions of 10 Nov 2026 (Selected ORB 15-min) and 16 Nov 2026 (the four added that day).`}
       />
 
       {error && <ErrorBanner message={error} />}
@@ -265,8 +289,9 @@ export default function LiveTradingPage() {
             A strategy reaches real money by running as a paper strategy in the Intraday Stocks
             tournament, passing the two-year walk-forward gate, and then confirming its
             pre-registered expectation over at least 40 forward paper trades. Disable a strategy
-            below to arm without it. Selected ORB 15-min trades without that confirmation: you
-            overrode the gate for it on 10 Nov 2026.
+            below to arm without it. The strategies here trade without that confirmation: you
+            overrode the gate for Selected ORB 15-min on 10 Nov 2026 and for the four added on
+            16 Nov 2026 (each only once its switch is on).
           </p>
         </div>
       )}
@@ -443,6 +468,16 @@ export default function LiveTradingPage() {
 
       <GlassPanel title="Selected strategies">
         {ranks && <RankNote board={ranks} />}
+        <p className="muted pool-note">
+          {(() => {
+            const desk = summary as (LiveTradingSummary & CopyDesk) | null;
+            return `All strategies share one pool: at most ${desk?.max_open_positions ?? 5} real positions at a time, ` +
+              `about ${inr(desk?.copy_notional ?? desk?.position_notional)} each, taken in the order the tournament opens them, ` +
+              "and never two in one stock. \"Account\" is that pool plus the strategy's own P&L. The four added on " +
+              "16 Nov 2026 start switched OFF: replayed at this desk's size (6 Oct to 16 Nov 2026), each of them lost " +
+              "money after Angel's charges.";
+          })()}
+        </p>
         <div className="table-scroll">
           <table className="data-table">
             <thead>
@@ -508,7 +543,7 @@ export default function LiveTradingPage() {
           <GlassPanel title={`Today's tournament signals (${today.length})`}>
             {today.length === 0 ? (
               <p className="muted">
-                No Selected ORB 15-min signal from the tournament yet today. While the desk is armed, each one is
+                No signal from the switched-on strategies yet today. While the desk is armed, each one is
                 copied within seconds.
               </p>
             ) : (
@@ -517,6 +552,7 @@ export default function LiveTradingPage() {
                   <thead>
                     <tr>
                       <th style={{ textAlign: "left" }}>Time (IST)</th>
+                      <th style={{ textAlign: "left" }}>Strategy</th>
                       <th style={{ textAlign: "left" }}>Symbol</th>
                       <th>Side</th>
                       <th style={{ textAlign: "left" }}>What the desk did</th>
@@ -528,6 +564,7 @@ export default function LiveTradingPage() {
                         <td style={{ textAlign: "left" }}>
                           {c.at ? new Date(c.at).toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour12: false }) : "-"}
                         </td>
+                        <td style={{ textAlign: "left" }}>{c.strategy_name ?? "Selected ORB 15-min"}</td>
                         <td style={{ textAlign: "left" }} className="sym">{c.symbol}</td>
                         <td><span className={c.side === "BUY" ? "side buy" : "side sell"}>{c.side}</span></td>
                         <td style={{ textAlign: "left" }} className={c.decision === "opened" ? "gain" : "muted"}>
@@ -674,6 +711,7 @@ export default function LiveTradingPage() {
         .mini-switch.on .mini-label { left: 9px; }
         .mini-switch.off .mini-label { right: 8px; }
         .muted { color: var(--text-faint); }
+        .pool-note { margin: 0 0 10px; font-size: 12px; line-height: 1.5; }
         .gain { color: var(--gain); }
         .loss { color: var(--loss); }
       `}</style>

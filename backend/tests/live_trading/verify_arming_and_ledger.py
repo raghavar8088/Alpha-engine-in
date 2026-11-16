@@ -16,6 +16,9 @@ WHY THIS EXISTS (measured 2026-10-10, see INTRADAY_STOCKS_RESEARCH_AND_UPGRADE_P
 - 10 Nov 2026: the desk now COPIES one tournament strategy (Selected ORB 15-min) whose gate the
   owner overrode. The gate's machinery is still checked, on eight stand-in strategies without an
   override; the copy desk has its own sections at the end.
+- 16 Nov 2026: four more strategies (Gap and Go, RSI(2) Extreme 15 min, Supertrend Flip 45 min and
+  1 hour) were added, switched OFF until the owner turns each on. All share one pool of five
+  positions, one per stock, and each exits at its paper target too.
 """
 
 import asyncio
@@ -609,9 +612,16 @@ section("THE OWNER'S OVERRIDE (10 Nov 2026)")
 
 use_real_desk()
 SEL = "iv2_orb_sel15"
-check("the desk trades exactly one strategy: the tournament's Selected ORB 15-min",
-      [ls.strategy_id for ls in LT.SELECTED] == [SEL], [ls.strategy_id for ls in LT.SELECTED])
+GAP, RSI, ST45, ST1H = "iv2_gap_go", "iv2_rsi2_15m", "iv2_supertrend_45m", "iv2_supertrend_1h"
+NEWS = [GAP, RSI, ST45, ST1H]
+check("the desk lists Selected ORB 15-min, then the four added on 16 Nov 2026",
+      [ls.strategy_id for ls in LT.SELECTED] == [SEL] + NEWS, [ls.strategy_id for ls in LT.SELECTED])
 check("its override is written down, dated, in the code", "10 Nov 2026" in LT.OWNER_OVERRIDE.get(SEL, ""))
+check("…and each added strategy's override too, dated 16 Nov 2026",
+      all("16 Nov 2026" in LT.OWNER_OVERRIDE.get(s, "") for s in NEWS), {s: LT.OWNER_OVERRIDE.get(s) for s in NEWS})
+fresh()
+check("with no saved switch only Selected ORB is on; the four added ship OFF",
+      run(LT._enabled_map()) == {SEL: True, **{s: False for s in NEWS}}, run(LT._enabled_map()))
 check("up to five real positions at once, about Rs 30,000 each on 5x (Rs 1.5 lakh across the desk)",
       LT.MAX_OPEN_POSITIONS == 5 and LT.COPY_NOTIONAL == 30000.0 and LT.MIS_LEVERAGE == 5.0
       and LT.DESK_CEILING == 150000.0 and LT.PER_STRATEGY_ALLOCATION == 150000.0)
@@ -1025,6 +1035,122 @@ check("today's signals are listed for the page, with what happened",
       len(ct) == 1 and ct[0]["symbol"] == "INFY" and "caution" in ct[0]["decision"] and ct[0]["at"], ct)
 
 # ═════════════════════════════════════════════════════════════════════════════════
+section("MORE THAN ONE STRATEGY (16 Nov 2026)")
+
+
+def switch_on(*sids, off=()):
+    LT.live_trading_flags_collection = FakeCollection(
+        [{"strategy_id": s, "enabled": True} for s in sids] + [{"strategy_id": s, "enabled": False} for s in off])
+
+
+def multi_quotes(insts, ltp=1501.0):
+    LT.instruments_collection = FakeCollection(insts)
+    LT._equity_quote_map = lambda dhan, eqs: _async((
+        {("NSE_EQ", i["security_id"]): {"last_price": ltp} for i in insts},
+        {("NSE_EQ", i["security_id"]): "test" for i in insts}))
+
+
+for sid in NEWS:
+    a = copy_desk([parent(strategy_id=sid, target=1530.0)])
+    r = run(LT.scan_cycle(None))
+    check(f"{sid} ships OFF: its paper entry places no order and is not claimed",
+          a.orders == [] and claim("T1") is None, (a.orders, r["notes"]))
+
+a = copy_desk([parent(strategy_id=GAP, target=1530.0)])
+switch_on(GAP)
+run(LT.scan_cycle(None))
+rows = real_rows()
+check("switched on, Gap and Go is copied: ONE real order, same side, MIS market",
+      len(a.orders) == 1 and a.orders[0]["transactiontype"] == "BUY" and a.orders[0]["producttype"] == "INTRADAY", a.orders)
+check("…recorded under its own name, with the paper stop AND the paper target",
+      bool(rows) and rows[0]["strategy_id"] == GAP and rows[0]["strategy_name"] == "Gap and Go"
+      and rows[0]["stoploss"] == 1485.0 and rows[0]["target"] == 1530.0,
+      rows and {k: rows[0].get(k) for k in ("strategy_id", "strategy_name", "stoploss", "target")})
+check("…and the claim names the strategy",
+      (claim("T1") or {}).get("strategy_id") == GAP and (claim("T1") or {}).get("decision") == "opened", claim("T1"))
+
+a = copy_desk([parent(strategy_id=GAP, target=1530.0)])
+switch_on(off=(GAP,))
+run(LT.scan_cycle(None))
+check("switched off again: no order", a.orders == [])
+
+a = copy_desk([parent(strategy_id="iv2_donchian_15m", target=1530.0)])
+switch_on("iv2_donchian_15m")
+run(LT.scan_cycle(None))
+check("a tournament strategy NOT on the desk's list is never copied, whatever a saved flag says", a.orders == [])
+
+a = copy_desk([parent(position_id="A1", opened_at=NOW - timedelta(seconds=30)),
+               parent(position_id="A2", strategy_id=ST45, target=1530.0, opened_at=NOW - timedelta(seconds=20))])
+switch_on(ST45)
+run(LT.scan_cycle(None))
+check("two strategies, one stock: only the first is ordered",
+      len(a.orders) == 1 and [r["strategy_id"] for r in real_rows()] == [SEL], [r["strategy_id"] for r in real_rows()])
+check("…the second is final, and says the desk already holds the stock",
+      "already holds" in (claim("A2") or {}).get("decision", ""), claim("A2"))
+run(LT.scan_cycle(None))
+check("…and it is never ordered later", len(a.orders) == 1)
+
+a = copy_desk([parent(position_id="B2", strategy_id=RSI, side="SELL", stoploss=1515.0, target=1490.0)],
+              positions=[copied(entry_confirmed=True)])
+switch_on(RSI)
+run(LT.scan_cycle(None))
+check("an opposite-side signal in a stock the desk holds is never ordered (Angel nets the stock)",
+      a.orders == [] and "already holds" in (claim("B2") or {}).get("decision", ""), claim("B2"))
+
+mix = [SEL, GAP, RSI, ST45, ST1H, GAP]
+a = copy_desk([parent(position_id=f"M{i}", symbol=s, strategy_id=mix[i], target=None if mix[i] == SEL else 1530.0,
+                      opened_at=NOW - timedelta(seconds=30 - i)) for i, s in enumerate(SIX)],
+              angel=CashAngel(cash="34272"))
+switch_on(*NEWS)
+multi_quotes(SIX_INST)
+run(LT.scan_cycle(None))
+check("five strategies share ONE pool: six entries at once -> the first five are ordered",
+      [o["tradingsymbol"] for o in a.orders] == [f"{s}-EQ" for s in SIX[:5]], [o["tradingsymbol"] for o in a.orders])
+check("…each real position carries its own strategy",
+      [r["strategy_id"] for r in real_rows()] == mix[:5], [r["strategy_id"] for r in real_rows()])
+check("…the sixth waits for a slot, unclaimed", claim("M5") is None and "M5" in LT._copy_waiting, LT._copy_waiting)
+check("…and the desk still never holds more than Rs 1.5 lakh of notional",
+      sum(p["capital_deployed"] for p in real_rows()) <= 150000.0, sum(p["capital_deployed"] for p in real_rows()))
+
+w, f = cc(parent(target=1505.0), 1506.0, 0, NOW)
+check("copy_check: a BUY already at its paper target is final (no round trip for nothing)",
+      w and "target" in w and f is True, (w, f))
+w, f = cc(parent(side="SELL", stoploss=1515.0, target=1495.0), 1494.0, 0, NOW)
+check("copy_check: a SELL already at its paper target is final", w and "target" in w and f is True, (w, f))
+check("copy_check: short of the target it is copied", cc(parent(target=1530.0), 1502.0, 0, NOW) == (None, True))
+
+a = copy_desk([parent(strategy_id=GAP, target=1530.0)], ltp=1531.0,
+              positions=[copied(strategy_id=GAP, strategy_name="Gap and Go", target=1530.0, entry_confirmed=True)],
+              angel=CashAngel(book=held, order_book=done))
+switch_on(GAP)
+run(LT.manage_cycle(None))
+p = LT.live_trading_positions_collection.docs[0]
+check("the paper target on the live price closes the real position: ONE opposite order",
+      len(a.orders) == 1 and a.orders[0]["transactiontype"] == "SELL" and p["exit_reason"] == "target",
+      (a.orders, p.get("exit_reason")))
+
+a = copy_desk([parent(strategy_id=GAP, target=1530.0)], ltp=1520.0,
+              positions=[copied(strategy_id=GAP, strategy_name="Gap and Go", target=1530.0, entry_confirmed=True)],
+              angel=CashAngel(book=held, order_book=done))
+switch_on(GAP)
+run(LT.manage_cycle(None))
+check("…short of the target and above the stop, nothing is sent", a.orders == [] and real_rows())
+
+fresh()
+switch_on(GAP)
+chk = run(LT.arming_check())
+gap_row = next(r for r in chk["strategies"] if r["strategy_id"] == GAP)
+check("arming with Gap and Go switched on is allowed by its override, counted apart",
+      chk["allowed"] is True and chk.get("overridden_enabled") == 2 and gap_row["validated"] is True
+      and "16 Nov 2026" in (gap_row.get("override") or ""), (chk["blockers"], chk.get("overridden_enabled"), gap_row))
+check("…and the warnings name the override for it",
+      any("Gap and Go" in w and "OVERRIDDEN" in w for w in chk["warnings"]), chk["warnings"])
+board = run(LT.leaderboard())
+check("the leaderboard lists all five with their switches",
+      {b["strategy_id"]: b["enabled"] for b in board} == {SEL: True, GAP: True, RSI: False, ST45: False, ST1H: False},
+      {b["strategy_id"]: b["enabled"] for b in board})
+
+# ═════════════════════════════════════════════════════════════════════════════════
 section("WHAT THE PAGE READS")
 
 a = copy_desk([parent()], positions=[copied()])
@@ -1032,9 +1158,22 @@ sm = run(LT.summary())
 check("the summary names the copied strategy, the size and the override",
       sm["copy_source"] == SEL and sm["copy_notional"] == 30000.0 and sm["max_open_positions"] == 5
       and SEL in sm["gate_override"], {k: sm.get(k) for k in ("copy_source", "copy_notional", "gate_override")})
+check("…every strategy it can copy, with its switch (only Selected ORB on until you switch one on)",
+      [(c["strategy_id"], c["enabled"]) for c in sm.get("copy_strategies", [])]
+      == [(SEL, True)] + [(s, False) for s in NEWS] and sm.get("copy_sources") == [SEL] + NEWS,
+      sm.get("copy_strategies"))
 check("…and today's tournament signals", isinstance(sm.get("copy_today"), list))
 op = run(LT.open_positions())
 check("open positions carry their tournament parent and no target", op[0]["parent_id"] == "T1" and op[0]["target"] is None)
+LT.live_trading_state_collection.docs.append({"_id": "copy|OLD1", "at": datetime.now(timezone.utc), "symbol": "TCS",
+                                               "side": "SELL", "decision": "opened"})
+LT.live_trading_state_collection.docs.append({"_id": "copy|NEW1", "at": datetime.now(timezone.utc), "symbol": "SBIN",
+                                               "side": "BUY", "decision": "opened", "strategy_id": GAP,
+                                               "strategy_name": "Gap and Go"})
+ct = {c["parent_id"]: c for c in run(LT.copy_decisions_today())}
+check("today's signals name their strategy; records from before 16 Nov read as Selected ORB",
+      ct["NEW1"]["strategy_name"] == "Gap and Go" and ct["OLD1"]["strategy_id"] == SEL
+      and ct["OLD1"]["strategy_name"].startswith("Selected ORB"), ct)
 
 print()
 if FAILURES:
