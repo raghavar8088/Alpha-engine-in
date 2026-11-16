@@ -25,7 +25,10 @@ import {
 } from "../../lib/api";
 
 const REFRESH_MS = 30000;
-type Tab = "leaderboard" | "timeframes" | "open" | "closed" | "signals" | "daily" | "paper" | "top2L" | "top10L";
+type Tab = "leaderboard" | "timeframes" | "open" | "closed" | "signals" | "daily" | "paper" | "top2L" | "top10L"
+  | "prem2L" | "prem50k";
+// The paper accounts on the shared book engine (app.services.top10_books): Top-10 and Premium Strategy.
+const BOOK_TABS: Tab[] = ["top2L", "top10L", "prem2L", "prem50k"];
 const TABS: { key: Tab; label: string }[] = [
   { key: "leaderboard", label: "Strategy leaderboard" },
   { key: "timeframes", label: "By timeframe" },
@@ -37,6 +40,10 @@ const TABS: { key: Tab; label: string }[] = [
   // The Top-10 paper books (2026-10-27): the desk's ten best by Rank, copied into one account each.
   { key: "top2L", label: "Top 10 Paper Trade · ₹2 lakh" },
   { key: "top10L", label: "Top 10 Paper Trade · ₹10 lakh" },
+  // Premium Strategy (2026-11-16): your three picks - Prior Extreme Breakout 10m, Round Number Break 5m,
+  // RSI Divergence 1h - in one account each of Rs 2 lakh and Rs 50,000.
+  { key: "prem2L", label: "Premium Strategy · ₹2 lakh" },
+  { key: "prem50k", label: "Premium Strategy · ₹50k" },
 ];
 // The timeframe and family chips filter the 504-strategy DESK. The paper book is a fixed
 // roster on one balance, so they mean nothing there and are hidden rather than left to
@@ -323,7 +330,9 @@ export default function NiftyScalpPage() {
       )}
 
       {tab === "paper" && <PaperBook board={board} />}
-      {(tab === "top2L" || tab === "top10L") && <Top10Book key={tab} desk="nifty-scalp" book={tab} />}
+      {BOOK_TABS.includes(tab) && (
+        <Top10Book key={tab} desk="nifty-scalp" book={tab as "top2L" | "top10L" | "prem2L" | "prem50k"} />
+      )}
 
       <DeskHistory deskKey={"nifty-scalp"} />
 

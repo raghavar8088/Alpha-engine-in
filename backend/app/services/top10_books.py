@@ -34,11 +34,17 @@ The stock desks' books skip an entry made on its own contract's expiry day: the 
 (2026-10-07) found the buying desk's record was mostly contracts bought and closed minutes apart on
 their expiry day, and the selling books skip the same. Zero Hero is the opposite - it trades only on
 expiry day, so nothing is skipped there.
+
+PICKED BOOKS (2026-11-16). A desk may also carry books on strategies the OWNER picked by hand, beside
+its two Top-10 books (PICKED_BOOKS). One is "Premium Strategy" on NIFTY 50 Option Scalping, in a
+Rs 2 lakh and a Rs 50,000 account. Each runs the same copy and rules as above with its own roster,
+capital and slots: one slot per strategy, each up to capital / slots.
 """
 
 from __future__ import annotations
 
 import asyncio
+import dataclasses
 import logging
 import os
 from dataclasses import dataclass, field
@@ -629,16 +635,98 @@ DESKS: dict[str, Desk] = {
 }
 
 
+# -- picked books: the owner's own picks on a desk, beside its Top-10 books ---------------------------
+
+
+@dataclass(frozen=True)
+class PickedBook:
+    """One account on strategies the owner picked by hand. It is copied by the same rules as the
+    Top-10 books, with its own roster, capital and slots."""
+    key: str
+    label: str
+    capital: float
+    picks: tuple[Pick, ...]
+    max_open: int             # one slot per strategy: each strategy holds one position at a time on its desk
+    picked_at: str
+    pick_rule: str            # what the picks are and where each was picked from
+    notes: tuple[str, ...] = ()
+
+
+_PREMIUM_NS_PICKS = _picks([
+    # (key, rank on the board it was picked from, that board's Rank score, trades there, no bp, name,
+    #  net P&L there) - as on the owner's screenshots of 16 Nov 2026. The ids were checked by NAME
+    #  against nifty_scalp_positions that evening, because an id is ns_<tf>_<template index>.
+    ("ns_10m_44", 1, 60.7, 8, None, "Prior Extreme Breakout · 10 minutes", 266319.0),
+    ("ns_5m_46", 1, 99.1, 40, None, "Round Number Break · 5 minutes", 36162.0),
+    ("ns_1h_12", 2, 65.0, 30, None, "RSI Divergence · 1 hour", 16587.0),
+])
+_PREMIUM_NS_RULE = ("Prior Extreme Breakout · 10 minutes was #1 in this page's Top 10 Paper Trade · ₹10 lakh "
+                    "account (8 trades, +₹2,66,319 there). Round Number Break · 5 minutes and RSI Divergence · "
+                    "1 hour were #1 and #2 in its Paper book · ₹2L (40 trades and +₹36,162; 30 trades and "
+                    "+₹16,587).")
+_PREMIUM_NS_NOTES = (
+    "One account with a slot for each of the three: at most three positions at once, each up to a third of "
+    "the account, in whole lots of 65. The three sometimes want the same option at the same time (7 times "
+    "in their last 30 days on the desk); the second is then skipped and counted, as in every book here.",
+    "In their last 30 days on the desk these three paid ₹31-255 an option, so one lot cost ₹2,028-16,569: "
+    "the ₹50,000 account (₹16,667 a slot) buys 1-8 lots a trade, and the ₹2 lakh account (₹66,667 a "
+    "slot) 4-32. A lot that costs more than the slot is skipped and counted.",
+    "Picked after the fact off boards where luck collects, on 8-40 trades each. On the desk itself, at "
+    "₹2 lakh each, Round Number Break · 5 minutes is up 351% over 74 trades but RSI Divergence · 1 hour "
+    "is down 79.6% over 51; the whole desk is down 8.8%.",
+)
+
+PICKED_BOOKS: dict[str, dict[str, PickedBook]] = {
+    "nifty-scalp": {
+        "prem2L": PickedBook(key="prem2L", label="Premium Strategy · ₹2 lakh", capital=200000.0,
+                             picks=_PREMIUM_NS_PICKS, max_open=3, picked_at="2026-11-16T23:30:00+05:30",
+                             pick_rule=_PREMIUM_NS_RULE, notes=_PREMIUM_NS_NOTES),
+        "prem50k": PickedBook(key="prem50k", label="Premium Strategy · ₹50k", capital=50000.0,
+                              picks=_PREMIUM_NS_PICKS, max_open=3, picked_at="2026-11-16T23:30:00+05:30",
+                              pick_rule=_PREMIUM_NS_RULE, notes=_PREMIUM_NS_NOTES),
+    },
+}
+
+
 def desk(key: str) -> Desk | None:
     return DESKS.get(key)
 
 
-def normalize_book(book: str | None) -> str:
+def picked_book(desk_key: str | None, book: str | None) -> PickedBook | None:
+    return PICKED_BOOKS.get(desk_key or "", {}).get(book or "")
+
+
+def book_keys(desk_key: str) -> list[str]:
+    """Every book on a desk: the two Top-10 books, then its picked books."""
+    return BOOKS + list(PICKED_BOOKS.get(desk_key, {}))
+
+
+def book_capital(desk_key: str, book: str) -> float:
+    pb = picked_book(desk_key, book)
+    return pb.capital if pb else BOOK_CAPITAL[book]
+
+
+def book_label(desk_key: str, book: str) -> str:
+    pb = picked_book(desk_key, book)
+    return pb.label if pb else BOOK_LABEL[book]
+
+
+def book_desk(d: Desk, book: str) -> Desk:
+    """The desk as one book trades it: a picked book has its own roster and slots."""
+    pb = picked_book(d.key, book)
+    if pb is None:
+        return d
+    return dataclasses.replace(d, picks=pb.picks, max_open=pb.max_open, notes=pb.notes)
+
+
+def normalize_book(book: str | None, desk_key: str | None = None) -> str:
+    if picked_book(desk_key, book):
+        return book
     return book if book in BOOK_CAPITAL else BOOKS[0]
 
 
 def position_cap(d: Desk, book: str) -> float:
-    return BOOK_CAPITAL[book] / max(d.max_open, 1)
+    return book_capital(d.key, book) / max(book_desk(d, book).max_open, 1)
 
 
 # -- state ------------------------------------------------------------------------------------
@@ -728,7 +816,8 @@ def _net_fn(d: Desk):
 
 
 async def _sync_book(d: Desk, book: str, entries: bool) -> dict:
-    capital = BOOK_CAPITAL[book]
+    capital = book_capital(d.key, book)
+    d = book_desk(d, book)                       # a picked book trades its own roster and slots
     floor = max(await _start(d.key, book), naive_utc(_now()) - LOOKBACK)
     open_rows = [r async for r in POSITIONS.find({"desk": d.key, "book": book, "status": "OPEN"})]
     pointed = [r["parent_position_id"] for r in open_rows if r.get("parent_position_id")]
@@ -812,7 +901,7 @@ _indexed = False
 
 
 async def sync(entries: bool = True, only: str | None = None) -> dict:
-    """Copy every desk into both books once."""
+    """Copy every desk into each of its books once (both Top-10 books, then any picked books)."""
     global _indexed
     if not _indexed:
         _indexed = True
@@ -822,13 +911,13 @@ async def sync(entries: bool = True, only: str | None = None) -> dict:
         for key, d in DESKS.items():
             if only and key != only:
                 continue
-            for book in BOOKS:
+            for book in book_keys(key):
                 try:
                     out[f"{key}:{book}"] = await _sync_book(d, book, entries)
                 except Exception as exc:  # noqa: BLE001 - one desk's bad row must not stop the rest
                     logger.warning("[top10_books] %s %s failed: %s", key, book, exc, exc_info=True)
                     out[f"{key}:{book}"] = {"error": str(exc)[:200]}
-            for book in BOOKS:
+            for book in book_keys(key):
                 try:
                     await _snapshot(d, book)
                 except Exception:  # noqa: BLE001
@@ -870,9 +959,10 @@ async def loop() -> None:
 
 
 async def summary(desk_key: str, book: str) -> dict:
-    d = DESKS[desk_key]
-    book = normalize_book(book)
-    cap = BOOK_CAPITAL[book]
+    book = normalize_book(book, desk_key)
+    d = book_desk(DESKS[desk_key], book)
+    pb = picked_book(desk_key, book)
+    cap = book_capital(desk_key, book)
     realized = unrealized = deployed = fees = gross = 0.0
     open_n = closed_n = wins = 0
     async for r in POSITIONS.find({"desk": d.key, "book": book}):
@@ -895,11 +985,14 @@ async def summary(desk_key: str, book: str) -> dict:
     start = await STATE.find_one({"_id": f"start:{d.key}:{book}"})
     started = start.get("started_at") if start else None
     equity = cap + realized + unrealized
+    keys = book_keys(desk_key)
     return {
-        "desk": d.key, "desk_label": d.label, "book": book, "books": BOOKS, "label": BOOK_LABEL[book],
-        "book_labels": BOOK_LABEL, "mode": "paper", "enabled": ENABLED,
+        "desk": d.key, "desk_label": d.label, "book": book, "books": keys, "label": book_label(desk_key, book),
+        "book_labels": {k: book_label(desk_key, k) for k in keys}, "mode": "paper", "enabled": ENABLED,
         "instrument": d.instrument, "cost_basis": d.cost_basis, "board": d.board, "notes": list(d.notes),
-        "picked_at": PICKED_AT, "roster": list(d.roster), "strategies": len(d.picks),
+        # a picked book: the owner's own picks, and where each came from (None on the Top-10 books)
+        "picked": pb is not None, "pick_rule": pb.pick_rule if pb else None,
+        "picked_at": pb.picked_at if pb else PICKED_AT, "roster": list(d.roster), "strategies": len(d.picks),
         "max_open_positions": d.max_open, "position_cap": round(position_cap(d, book), 2),
         "skip_expiry_day": d.skip_expiry_day,
         "desk_capital": cap, "equity": round(equity, 2), "realized_pnl": round(realized, 2),
@@ -912,10 +1005,10 @@ async def summary(desk_key: str, book: str) -> dict:
 
 
 async def leaderboard(desk_key: str, book: str) -> list[dict]:
-    """The ten, in pick order, each with its record in this book and where it stood when picked."""
-    d = DESKS[desk_key]
-    book = normalize_book(book)
-    cap = BOOK_CAPITAL[book]
+    """The picks, in pick order, each with its record in this book and where it stood when picked."""
+    book = normalize_book(book, desk_key)
+    d = book_desk(DESKS[desk_key], book)
+    cap = book_capital(desk_key, book)
     rec: dict[str, dict] = {p.key: {"trades": 0, "wins": 0, "net": 0.0, "gross": 0.0, "fees": 0.0, "open": 0}
                             for p in d.picks}
     async for r in POSITIONS.find({"desk": d.key, "book": book}):
@@ -959,7 +1052,7 @@ def _jsonable(doc: dict) -> dict:
 
 
 async def positions(desk_key: str, book: str, status: str = "OPEN", limit: int = 200) -> list[dict]:
-    book = normalize_book(book)
+    book = normalize_book(book, desk_key)
     q: dict = {"desk": desk_key, "book": book}
     if status.upper() != "ALL":
         q["status"] = status.upper()

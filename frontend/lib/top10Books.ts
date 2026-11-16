@@ -4,6 +4,11 @@
 import { apiFetch } from "./api";
 
 export type Top10BookKey = "top2L" | "top10L";
+// prem2L / prem50k: "Premium Strategy" picked books on NIFTY 50 Option Scalping (2026-11-16), the
+// owner's own three picks in a Rs 2 lakh and a Rs 50,000 account, on the same engine. Kept apart from
+// Top10BookKey, which the stock desk pages narrow on.
+export type PickedBookKey = "prem2L" | "prem50k";
+export type AnyBookKey = Top10BookKey | PickedBookKey;
 export type Top10Desk = "zero-hero" | "nifty-scalp" | "prelive" | "stock-buying" | "stock-selling" | "commodity"
   | "strategy-factory";
 
@@ -15,7 +20,7 @@ export const TOP10_BOOKS: { key: Top10BookKey; label: string }[] = [
 export interface Top10Summary {
   desk: string;
   desk_label: string;
-  book: Top10BookKey;
+  book: AnyBookKey;
   label: string;
   mode: string;
   enabled: boolean;
@@ -23,6 +28,9 @@ export interface Top10Summary {
   cost_basis: string;
   board: string;
   notes: string[];
+  // A picked book (the owner's own picks) says what they are; absent on the Top-10 books.
+  picked?: boolean;
+  pick_rule?: string | null;
   picked_at: string;
   roster: string[];
   strategies: number;
@@ -95,18 +103,18 @@ export interface Top10Position {
 
 const t10 = "/api/top10-books";
 
-export async function fetchTop10Summary(desk: Top10Desk, book: Top10BookKey): Promise<Top10Summary> {
+export async function fetchTop10Summary(desk: Top10Desk, book: AnyBookKey): Promise<Top10Summary> {
   return apiFetch(`${t10}/${desk}/summary?book=${book}`);
 }
 
-export async function fetchTop10Leaderboard(desk: Top10Desk, book: Top10BookKey): Promise<Top10Row[]> {
+export async function fetchTop10Leaderboard(desk: Top10Desk, book: AnyBookKey): Promise<Top10Row[]> {
   const r = await apiFetch(`${t10}/${desk}/leaderboard?book=${book}`);
   return r.rows ?? [];
 }
 
 export async function fetchTop10Positions(
   desk: Top10Desk,
-  book: Top10BookKey,
+  book: AnyBookKey,
   status: "OPEN" | "CLOSED" = "OPEN",
   limit = 200,
 ): Promise<Top10Position[]> {

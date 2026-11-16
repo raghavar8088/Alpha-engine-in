@@ -7,7 +7,7 @@ import GlassPanel from "./GlassPanel";
 import ErrorBanner from "./ErrorBanner";
 import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "./StrategyRank";
 import {
-  Top10BookKey,
+  AnyBookKey,
   Top10Desk,
   Top10Position,
   Top10Row,
@@ -29,6 +29,9 @@ const when = (v: string | null | undefined) =>
 const px = (v: number | null | undefined) =>
   v === null || v === undefined ? "—" : v.toLocaleString("en-IN", { maximumFractionDigits: 2 });
 
+const WORDS = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+const nWord = (n: number) => WORDS[n] ?? String(n);
+
 const SKIP_LABEL: Record<string, string> = {
   full: "slots full",
   symbol_held: "already holding that contract / stock",
@@ -37,7 +40,7 @@ const SKIP_LABEL: Record<string, string> = {
   expiry_day: "entry on the contract's own expiry day",
 };
 
-export default function Top10Book({ desk, book }: { desk: Top10Desk; book: Top10BookKey }) {
+export default function Top10Book({ desk, book }: { desk: Top10Desk; book: AnyBookKey }) {
   const [summary, setSummary] = useState<Top10Summary | null>(null);
   const [board, setBoard] = useState<Top10Row[]>([]);
   const [posTab, setPosTab] = useState<"OPEN" | "CLOSED">("OPEN");
@@ -71,17 +74,26 @@ export default function Top10Book({ desk, book }: { desk: Top10Desk; book: Top10
   const sk = summary?.skipped ?? {};
   const skippedTotal = Object.values(sk).reduce((a, b) => a + b, 0);
   const pickedOn = summary?.picked_at ? new Date(summary.picked_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "27 Oct 2026";
+  // A picked book (the owner's own picks, e.g. Premium Strategy) is worded from its own rule, not "the ten".
+  const picked = !!summary?.picked;
+  const count = nWord(summary?.strategies ?? 10);
 
   return (
     <>
       {error && <ErrorBanner message={error} onRetry={load} />}
 
       <div className="note">
-        <p>
-          <b>{summary?.label ?? "Top 10 Paper Trade"} · {summary?.desk_label ?? ""}.</b> One {inr(summary?.desk_capital)} paper
-          account copying the trades of just ten strategies: the ten ranked 1–10 on {summary?.board ?? "the desk's Rank"}, picked
-          on {pickedOn} and fixed — they are not re-picked as ranks move. It trades {summary?.instrument ?? "what the desk trades"}.
-        </p>
+        {picked ? (
+          <p>
+            <b>{summary?.label} · {summary?.desk_label}.</b>{" "}{`One ${inr(summary?.desk_capital)} paper account copying the trades of the ${count} strategies you picked on ${pickedOn}. ${summary?.pick_rule ?? ""} They are fixed: never re-picked. It trades ${summary?.instrument ?? "what the desk trades"}.`}
+          </p>
+        ) : (
+          <p>
+            <b>{summary?.label ?? "Top 10 Paper Trade"} · {summary?.desk_label ?? ""}.</b> One {inr(summary?.desk_capital)} paper
+            account copying the trades of just ten strategies: the ten ranked 1–10 on {summary?.board ?? "the desk's Rank"}, picked
+            on {pickedOn} and fixed — they are not re-picked as ranks move. It trades {summary?.instrument ?? "what the desk trades"}.
+          </p>
+        )}
         <p>
           <b>Rules.</b> The desk’s own entry and exit prices; at most {summary?.max_open_positions ?? 5} positions at a time, each up
           to {inr(summary?.position_cap)}; whole lots only, and a lot costs {summary?.cost_basis ?? "what the desk pays for it"}; never two
@@ -90,10 +102,17 @@ export default function Top10Book({ desk, book }: { desk: Top10Desk; book: Top10
           Signals it cannot take are counted, by reason. Nothing is backfilled{summary?.copying_since ? `: copying since ${when(summary.copying_since)}` : ""}.
         </p>
         {(summary?.notes ?? []).map((n) => <p key={n}>{n}</p>)}
-        <p>
-          <b>These ten led a board where luck collects, and none is validated.</b> This account is the out-of-sample test of whether
-          they keep leading. “Picked at” is where each stood when chosen. Paper fills, not broker executions.
-        </p>
+        {picked ? (
+          <p>
+            <b>{`These ${count} were picked off boards where luck collects, and none is validated.`}</b>{" "}
+            {"This account is the out-of-sample test of whether they keep making money. “Picked at” is where each stood on the board it was picked from. Paper fills, not broker executions."}
+          </p>
+        ) : (
+          <p>
+            <b>These ten led a board where luck collects, and none is validated.</b> This account is the out-of-sample test of whether
+            they keep leading. “Picked at” is where each stood when chosen. Paper fills, not broker executions.
+          </p>
+        )}
       </div>
 
       <div className="tiles">
@@ -111,7 +130,7 @@ export default function Top10Book({ desk, book }: { desk: Top10Desk; book: Top10
               sub={skippedTotal ? Object.entries(sk).filter(([, v]) => v).map(([k, v]) => `${v} ${k.replace("_", " ")}`).join(" · ") : "none yet"} />
       </div>
 
-      <GlassPanel title={`The ten, picked ${pickedOn}`}>
+      <GlassPanel title={`The ${count}, picked ${pickedOn}`}>
         {ranks && <RankNote board={ranks} />}
         <div className="table-scroll">
           <table className="data-table">
@@ -167,7 +186,7 @@ export default function Top10Book({ desk, book }: { desk: Top10Desk; book: Top10
         {!positions.length ? (
           <div className="empty">
             {posTab === "OPEN"
-              ? "Nothing open. This account takes a position when the desk opens one for one of its ten and a slot is free."
+              ? `Nothing open. This account takes a position when the desk opens one for one of its ${count} and a slot is free.`
               : "No closed trades yet. The account started empty and copies only trades from its start."}
           </div>
         ) : (

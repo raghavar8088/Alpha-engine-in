@@ -8,6 +8,8 @@
 
 The books copy the desks' own trades (app.services.top10_books); nothing here places an order or
 asks a broker for a price. `book` is normalized rather than rejected, as on the other book APIs.
+Besides top2L / top10L, a desk may carry picked books (16 Nov 2026: prem2L and prem50k, "Premium
+Strategy", on nifty-scalp), named in /desks.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -30,7 +32,12 @@ async def desks(_user: dict = Depends(get_current_user)):
             "desks": [{"desk": d.key, "label": d.label, "route": d.route, "instrument": d.instrument,
                        "max_open_positions": d.max_open,
                        "picks": [{"key": p.key, "name": p.name, "rank": p.rank, "score": p.score,
-                                  "trades": p.trades} for p in d.picks]}
+                                  "trades": p.trades} for p in d.picks],
+                       # every book on the desk, picked books included, with its own label
+                       "desk_books": [{"book": b, "label": t10.book_label(d.key, b),
+                                       "capital": t10.book_capital(d.key, b),
+                                       "picks": [p.key for p in t10.book_desk(d, b).picks]}
+                                      for b in t10.book_keys(d.key)]}
                       for d in t10.DESKS.values()]}
 
 
@@ -42,14 +49,14 @@ async def summary(desk: str, book: str = Query("top2L"), _user: dict = Depends(g
 @router.get("/{desk}/leaderboard")
 async def leaderboard(desk: str, book: str = Query("top2L"), _user: dict = Depends(get_current_user)):
     rows = await t10.leaderboard(_desk(desk), book)
-    return {"desk": desk, "book": t10.normalize_book(book), "rows": rows, "total": len(rows)}
+    return {"desk": desk, "book": t10.normalize_book(book, desk), "rows": rows, "total": len(rows)}
 
 
 @router.get("/{desk}/positions")
 async def positions(desk: str, book: str = Query("top2L"),
                     status: str = Query("OPEN", description="OPEN | CLOSED | ALL"),
                     limit: int = Query(200, ge=1, le=1000), _user: dict = Depends(get_current_user)):
-    return {"desk": desk, "book": t10.normalize_book(book), "status": status.upper(),
+    return {"desk": desk, "book": t10.normalize_book(book, desk), "status": status.upper(),
             "positions": await t10.positions(_desk(desk), book, status, limit)}
 
 
