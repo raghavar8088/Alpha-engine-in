@@ -21,10 +21,27 @@ from datetime import datetime, timezone
 
 from pymongo import MongoClient, UpdateOne
 
-from catalog import ACCOUNTS, BY_ID, LABEL, MIS_LEVERAGE, MONEY, ONE_LOT_MAX_RISK, equity_intraday
+from catalog import ACCOUNTS, BY_ID, LABEL, MONEY, ONE_LOT_MAX_RISK
 from settings import BTC_START_T, CAPITAL, IST, MONGO_DB, MONGO_URL, PAPER_START
 
 log = logging.getLogger("premium.ledger")
+
+
+# Indian equity intraday leverage (2026-11-16), read off the market's own sizing rather than imported, so the ledger
+# works with any catalog and never states a leverage the sizing does not use.
+def _equity_intraday(mk: str) -> bool:
+    """An NSE stock pool whose positions close in the session (NSED holds overnight; index/options are F&O)."""
+    m = MONEY.get(mk)
+    return m is not None and m.group == "stocks" and m.ccy == "INR" and not m.overnight
+
+
+def _leverage(mk: str) -> float:
+    """Buying power / money in this market: 1 / margin, and no more than the slots' value caps add up to."""
+    m = MONEY[mk]
+    lev = 1.0 / m.margin if m.margin else 1.0
+    if m.notional_cap and m.max_open:
+        lev = min(lev, m.notional_cap * m.max_open)
+    return round(max(lev, 1.0), 4)
 
 
 def database():
@@ -235,15 +252,17 @@ def update_accounts(db, ids: list[str] | None = None) -> None:
         doc = {"source": a.source, "name": a.name, "channel": a.channel,
                "markets": [LABEL.get(m, m) for m, _ in a.books], "variants": [v for _, v in a.books], **res["summary"],
                "positions": res["positions"], "curve": res["curve"], "updated_at": stamp}
-        if any(equity_intraday(m) for m, _ in a.books):
+        elig = [m for m, _ in a.books if _equity_intraday(m)]
+        if elig:
             # Indian equity intraday at 5x (2026-11-16): buying power is 5 x the account's realised money, which is
             # what the pools size on; a mixed account's futures and options keep their own margin inside the same money.
             s = res["summary"]
             money = s["capital"] + s["realised"]
-            doc.update({"leverage": MIS_LEVERAGE, "margin_rate": round(1.0 / MIS_LEVERAGE, 4),
-                        "buying_power": round(money * MIS_LEVERAGE, 2),
-                        "available_buying_power": round(max(s["available_margin"], 0.0) * MIS_LEVERAGE, 2),
-                        "equity_intraday_markets": [LABEL.get(m, m) for m, _ in a.books if equity_intraday(m)]})
+            lev = max(_leverage(m) for m in elig)
+            doc.update({"leverage": lev, "margin_rate": round(1.0 / lev, 4),
+                        "buying_power": round(money * lev, 2),
+                        "available_buying_power": round(max(s["available_margin"], 0.0) * lev, 2),
+                        "equity_intraday_markets": [LABEL.get(m, m) for m in elig]})
         db.premium_accounts.replace_one({"_id": a.id}, doc, upsert=True)
 
 
