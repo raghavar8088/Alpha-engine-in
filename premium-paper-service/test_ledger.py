@@ -63,11 +63,12 @@ s = res["summary"]
 check("open position counted as unrealised", s["open"] == 1 and s["closed"] == 0 and s["unrealised"] == s["equity"] - 1_000_000 and s["realised"] == 0, s)
 check("position listed", res["positions"][0]["sym"] == "XAUUSD" and res["positions"][0]["pnl"] == s["unrealised"])
 
-# VWAP: Rs 2,500 risk, Rs 2.5 lakh notional cap, 5% of the signal bar's volume, the study's own charges.
+# VWAP: Rs 2,500 risk, a value cap of Rs 12.5 lakh (5x intraday leverage since 16 Nov 2026; it was Rs 2.5 lakh at 1x),
+# 5% of the signal bar's volume, the study's own charges.
 d = t(1, "VWAP", 1000.0, 5.0, None, 1000, 2000, exit=1010.0, slip=0.0005, vol_cap=10000.0, vwap_costs=True)
 res = L.walk([d], {}, "2026-11-09")
-check("vwap risk sizing", fields(res, 1)["qty"] == 250, fields(res, 1))         # min(500, 250, 10000)
-qty = 250.0
+check("vwap risk sizing", fields(res, 1)["qty"] == 500, fields(res, 1))         # min(risk 500, cap 1,250, margin 5,000, vol 10,000)
+qty = 500.0
 expected = L.vwap_net(1, qty, 1000.0, 1010.0, 0.0005)
 check("vwap net uses the study's costs", abs(fields(res, 1)["pnl"] - round(expected, 2)) < 0.01 and expected < qty * 10, expected)
 d = t(1, "VWAP", 1000.0, 5.0, None, 1000, 2000, exit=1010.0, slip=0.0005, vol_cap=7.0, vwap_costs=True)
@@ -83,6 +84,28 @@ check("vwap_net by hand", abs(L.vwap_net(1, 100, 1000.0, 1010.0, 0.0) - (1000.0 
 # NSE daily pool: 10% notional cap in a cash account.
 res = L.walk([t(1, "NSED", 500.0, 5.0, 1.0, 1000, 2000)], {}, "2026-11-09")
 check("daily stock notional cap", fields(res, 1)["qty"] == 200, fields(res, 1))  # 10,000/5 = 2000, capped at 1L/500 = 200
+
+# 5x intraday leverage on the NSE stock pools (16 Nov 2026): a position may be worth 125% of equity (5 x its 25% slot)
+# and blocks 20% of its value; the 0.25% risk rule still sizes it. Stop Rs 1 on a Rs 1,000 share wants 2,500 shares.
+import catalog as C  # noqa: E402
+check("pools are 5x: margin 20%, value cap 1.25", all(C.MONEY[m].margin == 0.2 and C.MONEY[m].notional_cap == 1.25 for m in ("NSE15", "NSE5", "VWAP")))
+check("eligible: the intraday pools only", [m for m in ("NSE15", "NSE5", "VWAP", "NSED", "NIFTY", "BANKNIFTY", "NIFTY_OPT", "NIFTY_D", "BTCUSD")
+                                              if C.equity_intraday(m)] == ["NSE15", "NSE5", "VWAP"])
+res = L.walk([t(1, "NSE15", 1000.0, 1.0, 1.0, 1000, None)], {}, "2026-11-09")
+f, pos, s = fields(res, 1), res["positions"][0], res["summary"]
+check("value cap at 5x: 1,250 shares (was 250)", f["qty"] == 1250, f)
+check("its value is 5 x the slot and its margin a fifth", pos["value"] == 1_250_000.0 and pos["margin"] == 250_000.0, pos)
+check("summary: margin used, exposure, available margin", s["margin_used"] == 250_000.0 and s["exposure"] == 1_250_000.0
+      and s["available_margin"] == 750_000.0, s)
+check("P&L is the per-unit result on the shares held", f["pnl"] == 1250 * 1.0 * 1.0, f)
+# Four such positions use the whole account as margin (exposure 5 x equity); a fifth finds no free margin.
+four = [t(i, "NSE15", 1000.0, 1.0, 0.0, 1000 + i, None) for i in range(1, 6)]
+res = L.walk(four, {}, "2026-11-09")
+s = res["summary"]
+check("four 5x positions: margin = the account, exposure = 5 x it", s["margin_used"] == 1_000_000.0 and s["exposure"] == 5_000_000.0, s)
+check("the fifth is refused: no free margin", fields(res, 5)["skip"] == "below minimum size" and s["available_margin"] == 0.0, fields(res, 5))
+# A wide stop is still the risk rule's: Rs 10 stop -> 250 shares, as at 1x.
+check("wide stop unchanged by leverage", fields(L.walk([t(1, "NSE5", 1000.0, 10.0, 1.0, 1000, 2000)], {}, "x"), 1)["qty"] == 250)
 
 # Replays agree: the same trades in any order give the same account.
 a = [t(1, "NIFTY", 25000.0, 50.0, 1.0, 1000, 2000), t(2, "NIFTY", 25000.0, 50.0, -1.0, 3000, 4000), t(3, "NIFTY", 25000.0, 50.0, 2.0, 5000, 6000)]

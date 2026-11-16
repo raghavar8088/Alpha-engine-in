@@ -10,6 +10,7 @@ import { ago, day, inr, istTime, pct, price, rupees, tone } from "./format";
 import { RankNote, RankTd, RankTh, rankOnClient, sortByRank } from "../../components/StrategyRank";
 import { ACCOUNT_RANK_NOTE, PREMIUM_RANK_FACTORS, accountRankRow } from "./rank";
 import { DAYS_NOTE, dailyFigures, startOf, tradingDays, type StartStatus } from "./tradingDays";
+import MarginTiles from "../intraday-stocks/MarginTiles";
 
 export type MarketPnl = { market: string; trades: number; pnl: number };
 export type Account = {
@@ -17,9 +18,13 @@ export type Account = {
   realised: number; unrealised: number; return_pct: number; closed: number; open: number; wins: number; win_rate: number | null;
   profit_factor: number | null; max_dd_pct: number; today_pnl: number; skipped: Record<string, number>; by_market: MarketPnl[];
   last_trade_t: number | null; updated_at: string;
+  // The margin account (16 Nov 2026): every account reports what its open positions block and are worth; an account with
+  // an Indian equity intraday book also carries its 5x leverage and buying power.
+  margin_used?: number; exposure?: number; available_margin?: number;
+  leverage?: number; margin_rate?: number; buying_power?: number; available_buying_power?: number; equity_intraday_markets?: string[];
 };
 type Position = { sym: string; mkt: string; side: number; qty: number; entry: number; stop: number | null; target: number | null;
-  last: number | null; pnl: number; entry_t: number; setup: string };
+  last: number | null; pnl: number; entry_t: number; setup: string; value?: number; margin?: number };
 type Detail = Account & { positions: Position[]; curve: [string, number][] };
 type Trade = { id: string; sym: string; mkt: string; side: number; setup: string; date: string; entry_t: number; exit_t: number | null;
   entry: number; exit: number | null; reason: string; open: boolean; last: number | null; qty?: number; pnl?: number; skip?: string | null; sealed: boolean };
@@ -143,6 +148,17 @@ function AccountDetail({ a }: { a: Account }) {
   const skipped = Object.entries(a.skipped || {});
   return (
     <div className="pd-detail">
+      {detail.leverage != null && (
+        <>
+          <MarginTiles
+            m={{ ...detail, capital: detail.capital, open_positions: detail.positions.length }}
+            eligibility={`${(detail.equity_intraday_markets ?? []).join(", ") || "NSE intraday"} (MIS) · 20% margin; futures and options keep their own`} />
+          <p className="ps-foot">
+            Buying power is {detail.leverage}× the account&apos;s realised money ({rupees(detail.capital + detail.realised)}), which the stock pools size on.
+            Each trade is still sized by its strategy&apos;s risk rule, so leverage only lets a position grow to 5× its slot when that rule allows it.
+          </p>
+        </>
+      )}
       <div className="pd-detail-grid">
         <div className="pd-detail-curve">
           <h4>Equity, after costs</h4>
@@ -169,12 +185,14 @@ function AccountDetail({ a }: { a: Account }) {
           <h4>Open positions</h4>
           <div className="ps-scroll">
             <table className="ps-table">
-              <thead><tr><th>Instrument</th><th>Market</th><th>Side</th><th>Qty</th><th>Entered</th><th>Entry</th><th>Stop</th><th>Target</th><th>Last</th><th>P&amp;L</th></tr></thead>
+              <thead><tr><th>Instrument</th><th>Market</th><th>Side</th><th>Qty</th><th>Entered</th><th>Entry</th><th>Stop</th><th>Target</th><th>Last</th><th title="What the position is worth, in rupees">Value</th><th title="The account's money it blocks">Margin</th><th>P&amp;L</th></tr></thead>
               <tbody>
                 {detail.positions.map((p) => (
                   <tr key={`${p.sym}-${p.entry_t}`}>
                     <td className="ps-name">{p.sym}</td><td>{p.mkt}</td><td>{p.side > 0 ? "Long" : "Short"}</td><td>{p.qty}</td><td>{istTime(p.entry_t)}</td>
-                    <td>{price(p.entry)}</td><td>{price(p.stop)}</td><td>{price(p.target)}</td><td>{price(p.last)}</td><td className={tone(p.pnl)}>{inr(p.pnl)}</td>
+                    <td>{price(p.entry)}</td><td>{price(p.stop)}</td><td>{price(p.target)}</td><td>{price(p.last)}</td>
+                    <td>{p.value == null ? "—" : rupees(p.value)}</td><td>{p.margin == null ? "—" : rupees(p.margin)}</td>
+                    <td className={tone(p.pnl)}>{inr(p.pnl)}</td>
                   </tr>
                 ))}
               </tbody>

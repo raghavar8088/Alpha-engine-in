@@ -538,8 +538,11 @@ export default function PremiumStrategiesPage() {
             <li>
               <b>Position sizes.</b> Each trade risks 1% of the account&apos;s current equity, rounded down to whole lots or the market&apos;s smallest size, and never more than
               the free margin allows. A Nifty or Bank Nifty trade still takes one lot if that risks at most 5% of equity. Stock strategies that can signal on hundreds of
-              shares follow the VWAP study&apos;s book, scaled to ₹10 lakh: 0.25% risk, at most 25% of equity in one stock and 4 positions at once, first come
-              first served, ties to the more liquid stock. Daily stock strategies risk 1%, with at most 10% in one stock and 10 positions.
+              shares follow the VWAP study&apos;s book, scaled to ₹10 lakh: 0.25% risk and 4 positions at once, first come first served, ties to the more
+              liquid stock. Since 16 Nov 2026 they trade at <b>5× intraday leverage</b>, as an Indian broker gives on intraday (MIS) equity: one stock may be
+              worth up to 125% of equity (5 × its 25% slot; it was 25%) and blocks 20% of its value as margin, never more than the account has. The records
+              were re-stated at 5× from the first trade. Daily stock strategies (held overnight, so delivery, paid in full) risk 1%, with at most 10% in one
+              stock and 10 positions.
             </li>
             <li>
               <b>Costs.</b> Each study&apos;s own: Angel One futures charges and slippage on indices, NSE charges and slippage on stocks, spread and slippage elsewhere.

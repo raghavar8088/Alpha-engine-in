@@ -5,9 +5,10 @@
   premium_accounts  what that means for a Rs 10 lakh account: a pure function of the trades above, recomputed from the
                     first trade every cycle, so it cannot drift.
 
-Sizing: 1% of current equity at risk per trade (0.25% with a 25% notional cap in the NSE stock pools, as the VWAP study
-scaled to Rs 10 lakh; 1% with a 10% cap in the daily stock pools), rounded down to whole lots or the market's smallest size, and
-never more than the free margin allows. A lot-sized market still takes one lot if that risks at most 5% of equity.
+Sizing: 1% of current equity at risk per trade (0.25% in the NSE stock pools, as the VWAP study scaled to Rs 10 lakh,
+with a value cap of 125% of equity a position at 5x intraday leverage and 20% margin since 2026-11-16 - it was 25%, 1x;
+1% with a 10% cap in the daily stock pools), rounded down to whole lots or the market's smallest size, and never more
+than the free margin allows. A lot-sized market still takes one lot if that risks at most 5% of equity.
 Dollar markets convert at the USD/INR rate of the entry date.
 """
 
@@ -20,7 +21,7 @@ from datetime import datetime, timezone
 
 from pymongo import MongoClient, UpdateOne
 
-from catalog import ACCOUNTS, BY_ID, LABEL, MONEY, ONE_LOT_MAX_RISK
+from catalog import ACCOUNTS, BY_ID, LABEL, MIS_LEVERAGE, MONEY, ONE_LOT_MAX_RISK, equity_intraday
 from settings import BTC_START_T, CAPITAL, IST, MONGO_DB, MONGO_URL, PAPER_START
 
 log = logging.getLogger("premium.ledger")
@@ -181,12 +182,16 @@ def walk(trades: list[dict], rates: dict, today: str) -> dict:
         live.append({**d, "pnl": pnl, "qty": q, "margin": margin, "rate": rate})
 
     unrealised, positions = 0.0, []
+    margin_used = exposure = 0.0          # of the positions still open (5x intraday leverage, 2026-11-16)
     for p in sorted(live, key=lambda x: x["entry_t"]):
         if p["exit_t"] is None:
             unrealised += p["pnl"]
+            margin_used += p["margin"]
+            exposure += p["qty"] * p["entry"] * p["rate"]
             positions.append({"sym": p["sym"], "mkt": LABEL.get(p["mkt"], p["mkt"]), "side": p["side"], "qty": p["qty"], "entry": p["entry"],
                               "stop": p["stop"], "target": p["target"], "last": p["last"], "pnl": p["pnl"], "entry_t": p["entry_t"],
-                              "setup": p["setup"], "ccy": MONEY[p["mkt"]].ccy})
+                              "setup": p["setup"], "ccy": MONEY[p["mkt"]].ccy,
+                              "value": round(p["qty"] * p["entry"] * p["rate"], 2), "margin": round(p["margin"], 2)})
         else:
             realise(p)
     equity = cash + unrealised
@@ -204,6 +209,9 @@ def walk(trades: list[dict], rates: dict, today: str) -> dict:
             "profit_factor": round(gross_win / gross_loss, 2) if gross_loss > 0 else None,
             "max_dd_pct": round(100 * dd, 2), "today_pnl": round(today_pnl + unrealised, 2), "skipped": skipped,
             "by_market": sorted(by_market.values(), key=lambda x: -x["trades"]), "last_trade_t": tr[-1]["entry_t"] if tr else None,
+            # The margin account: what the open positions block and are worth, and what is left (realised money).
+            "margin_used": round(margin_used, 2), "exposure": round(exposure, 2),
+            "available_margin": round(cash - margin_used, 2),
         },
         "positions": positions, "curve": curve, "fields": fields,
     }
@@ -227,6 +235,15 @@ def update_accounts(db, ids: list[str] | None = None) -> None:
         doc = {"source": a.source, "name": a.name, "channel": a.channel,
                "markets": [LABEL.get(m, m) for m, _ in a.books], "variants": [v for _, v in a.books], **res["summary"],
                "positions": res["positions"], "curve": res["curve"], "updated_at": stamp}
+        if any(equity_intraday(m) for m, _ in a.books):
+            # Indian equity intraday at 5x (2026-11-16): buying power is 5 x the account's realised money, which is
+            # what the pools size on; a mixed account's futures and options keep their own margin inside the same money.
+            s = res["summary"]
+            money = s["capital"] + s["realised"]
+            doc.update({"leverage": MIS_LEVERAGE, "margin_rate": round(1.0 / MIS_LEVERAGE, 4),
+                        "buying_power": round(money * MIS_LEVERAGE, 2),
+                        "available_buying_power": round(max(s["available_margin"], 0.0) * MIS_LEVERAGE, 2),
+                        "equity_intraday_markets": [LABEL.get(m, m) for m, _ in a.books if equity_intraday(m)]})
         db.premium_accounts.replace_one({"_id": a.id}, doc, upsert=True)
 
 

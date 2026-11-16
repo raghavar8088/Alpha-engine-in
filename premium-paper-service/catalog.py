@@ -27,7 +27,16 @@ class Money:
     fixed_inr: float = 0.0      # a fixed rupee amount per buy (accumulation) instead of risk sizing
 
 
-NSE_POOL = dict(group="stocks", risk_pct=0.0025, margin=0.20, step=1, notional_cap=0.25, max_open=4)
+# 5x INTRADAY LEVERAGE (2026-11-16, the owner: "if the account and the strategies are in Indian equity intraday, do
+# the same" as the Intraday Stocks accounts). An NSE intraday position (the stock pools: every one closes by the end
+# of the session) may be worth up to 5 x its slot - 1.25 of equity across 4 slots, it was 0.25 (1x) - and blocks 20%
+# of its value as margin, so the 4 slots together can use the whole account as margin: buying power 5 x equity, and
+# the ledger never lets the margin of everything open pass the money. The 0.25%-of-equity risk rule still sizes every
+# trade; leverage lifts the value cap it used to hit (77% of the pools' trades at 1x). P&L is the per-unit result on
+# the quantity held. The ledger re-states every account from its first trade, so the record is at 5x too. The daily
+# pool (NSED, held overnight = delivery, full value), index futures (12%) and options (premium paid) keep their own.
+MIS_LEVERAGE = 5.0
+NSE_POOL = dict(group="stocks", risk_pct=0.0025, margin=1.0 / MIS_LEVERAGE, step=1, notional_cap=MIS_LEVERAGE / 4, max_open=4)
 MONEY = {
     "NIFTY": Money("index", margin=0.12, lot=65),
     "BANKNIFTY": Money("index", margin=0.12, lot=30),
@@ -642,6 +651,13 @@ YC3J_IDS = frozenset(('TZ-01', 'TZ-02', 'TE-01', 'UX-01', 'SJ-01', 'GT-01', 'AX-
 # the recorded NIFTY option chain (backend option_chain_recorder: Angel One best bid / ask every minute): one book over the
 # contracts its strategy picks each day, premium paid in full, whole lots of 65, at most two contracts open at once
 MONEY["NIFTY_OPT"] = Money("index", margin=1.0, lot=65, max_open=2)
+
+
+def equity_intraday(mk: str) -> bool:
+    """An Indian cash-equity market whose positions close in the session: the NSE stock pools (5x MIS since
+    2026-11-16). NSED (overnight), index futures and options are not."""
+    m = MONEY.get(mk)
+    return m is not None and m.group == "stocks" and m.ccy == "INR" and not m.overnight
 LABEL["NIFTY_OPT"] = "Nifty options (recorded quotes)"
 for _sid, _name, _ch, _mkts in YC3_STRATEGIES:
     ACCOUNTS.append(_a(_sid, YC3, _name, _ch, *[(YC2_BOOK_MARKET.get(_m, _m), "V0") for _m in _mkts]))

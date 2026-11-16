@@ -69,12 +69,12 @@ const SEG: Record<SegId, { label: string; feeds: string[]; note: string }> = {
   in_equity: {
     label: "Equity intraday",
     feeds: ["NSE"],
-    note: "NSE stocks on 5- and 15-minute bars with NSE intraday charges and slippage. Every position closes by the end of the session.",
+    note: "NSE stocks on 5- and 15-minute bars with NSE intraday charges and slippage. Every position closes by the end of the session. 5× intraday leverage since 16 Nov 2026, as an Indian broker gives on intraday (MIS) equity: an account's money is unchanged, a position may be worth up to 125% of it (5 × its 25% slot) and blocks 20% of its value as margin, and the margin of everything open never passes the money. Each trade is still sized by its strategy's 0.25%-of-equity risk rule; leverage only lifts the cap that used to hold 77% of these trades back. The records were re-stated at 5× from each account's first trade; P&L is the per-share result on the shares held.",
   },
   in_equity_daily: {
     label: "Equity daily",
     feeds: ["NSED"],
-    note: "NSE stocks on daily bars from NSE's bhavcopy, held for days, with delivery charges.",
+    note: "NSE stocks on daily bars from NSE's bhavcopy, held for days, with delivery charges. Delivery is paid in full: no intraday leverage here.",
   },
   crypto: {
     label: "Crypto",
