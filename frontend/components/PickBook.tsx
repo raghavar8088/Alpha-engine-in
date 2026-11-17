@@ -63,8 +63,9 @@ export default function PickBook({ book }: { book: PickBookKey }) {
   }, [load]);
 
   const label = summary?.label ?? PICK_BOOKS.find((b) => b.key === book)?.label ?? "Paper account";
-  const perStrategy = summary?.per_strategy ?? book !== "best2L";
-  const n = summary?.strategies ?? (book === "best2L" ? 2 : 10);
+  const shared = book === "best2L" || book === "premium50k";      // one account for the two picks
+  const perStrategy = summary?.per_strategy ?? !shared;
+  const n = summary?.strategies ?? (shared ? 2 : 10);
   const each = summary?.per_strategy_capital ?? 1000000;
   const net = (summary?.realized_pnl ?? 0) + (summary?.unrealized_pnl ?? 0);
   const sk = summary?.skipped ?? {};
@@ -93,7 +94,7 @@ export default function PickBook({ book }: { book: PickBookKey }) {
           </p>
         ) : (
           <p>
-            <b>{label} · {summary?.module ?? "Index Option Buying"}.</b> One {inr(summary?.desk_capital ?? 200000)} paper account
+            <b>{label} · {summary?.module ?? "Index Option Buying"}.</b> One {inr(summary?.desk_capital ?? (book === "premium50k" ? 50000 : 200000))} paper account
             copying the trades of {word(n)} strategies: {summary?.pick_rule ?? "the best of the Top 10 accounts"}. Picked on {pickedOn}{" "}
             and fixed. It trades {summary?.instrument ?? "ATM NIFTY options, bought"}.
           </p>
@@ -102,7 +103,7 @@ export default function PickBook({ book }: { book: PickBookKey }) {
           <b>Rules.</b>{" "}
           {perStrategy
             ? "One position at a time for each strategy, as on the tab, in whole lots up to that strategy’s free cash"
-            : `At most ${summary?.max_open_positions ?? 2} positions at a time, each up to ${inr(summary?.position_cap ?? 100000)}, in whole lots; never two positions in one contract`}
+            : `At most ${summary?.max_open_positions ?? 2} positions at a time, each up to ${inr(summary?.position_cap ?? (book === "premium50k" ? 25000 : 100000))}, in whole lots; never two positions in one contract`}
           ; a lot costs {summary?.cost_basis ?? "the premium paid"}; the desk’s own entry and exit prices; Angel One’s option charges on
           this account’s own lots. Signals it cannot take are counted, by reason. Nothing is backfilled
           {summary?.copying_since ? `: copying since ${when(summary.copying_since)}` : ": it starts with the backend’s next cycle"}.

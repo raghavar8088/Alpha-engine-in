@@ -1,14 +1,16 @@
 // Index Option Buying picked-strategy paper accounts (12 Nov 2026). Backend: app/services/prelive_pick_books.py,
 // GET /api/prelive-pick-books/{books,summary,leaderboard,positions}. Paper only: nothing here places an order.
 //   best2L       Best Strategies of Top 10: ₹2 lakh, one account, the two that led both Top 10 paper accounts
+//   premium50k   Premium Option Buying Strategies (16 Nov 2026): the same two on one ₹50,000 account
 //   sf_top10     the Strategy Factory tab's Rank 1-10, ₹10 lakh for each strategy
 //   sf_top10_20  its Rank 11-20, ₹10 lakh for each strategy
 import { apiFetch } from "./api";
 
-export type PickBookKey = "best2L" | "sf_top10" | "sf_top10_20";
+export type PickBookKey = "best2L" | "premium50k" | "sf_top10" | "sf_top10_20";
 
 export const PICK_BOOKS: { key: PickBookKey; label: string }[] = [
   { key: "best2L", label: "Best Strategies of Top 10 · ₹2 lakh" },
+  { key: "premium50k", label: "Premium Option Buying Strategies · ₹50k" },
   { key: "sf_top10", label: "Top 10 Performing Strategies · ₹10 lakh each" },
   { key: "sf_top10_20", label: "Top 10-20 Performing Strategies · ₹10 lakh each" },
 ];

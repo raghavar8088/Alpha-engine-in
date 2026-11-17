@@ -59,9 +59,9 @@ const tone = (v: number | null | undefined) => (v === null || v === undefined ? 
 // factory: the Strategy Factory's 546 strategies on NIFTY options (2026-10-27).
 // best2L / sf_top10 / sf_top10_20: picked-strategy paper accounts (2026-11-12) - the two best of the Top 10 books on
 // Rs 2 lakh, and the Strategy Factory tab's Rank 1-10 and 11-20 on Rs 10 lakh each (app.services.prelive_pick_books).
-type Tab = "tournament" | "research" | "livepaper" | "livepaper2L" | "top2L" | "top10L" | "best2L" | "factory"
+type Tab = "tournament" | "research" | "livepaper" | "livepaper2L" | "top2L" | "top10L" | "best2L" | "premium50k" | "factory"
   | "sf_top10" | "sf_top10_20";
-const PICK_TABS: Tab[] = ["best2L", "sf_top10", "sf_top10_20"];
+const PICK_TABS: Tab[] = ["best2L", "premium50k", "sf_top10", "sf_top10_20"];   // premium50k: the same two on ₹50k (16 Nov 2026)
 const STATUS_TONE: Record<string, string> = {
   CONFIRMED: "ok", INCUBATING: "wait", FAILED: "bad", REJECTED_ON_HISTORY: "bad",
 };
@@ -178,6 +178,7 @@ export default function PreLivePage() {
         <button className={tab === "top2L" ? "dt active" : "dt"} onClick={() => setTab("top2L")}>Top 10 Paper Trade · ₹2 lakh</button>
         <button className={tab === "top10L" ? "dt active" : "dt"} onClick={() => setTab("top10L")}>Top 10 Paper Trade · ₹10 lakh</button>
         <button className={tab === "best2L" ? "dt active" : "dt"} onClick={() => setTab("best2L")}>Best Strategies of Top 10 · ₹2 lakh</button>
+        <button className={tab === "premium50k" ? "dt active" : "dt"} onClick={() => setTab("premium50k")}>Premium Option Buying Strategies · ₹50k</button>
         <button className={tab === "factory" ? "dt active" : "dt"} onClick={() => setTab("factory")}>Strategy Factory · 546</button>
         <button className={tab === "sf_top10" ? "dt active" : "dt"} onClick={() => setTab("sf_top10")}>Top 10 Performing Strategies · ₹10L each</button>
         <button className={tab === "sf_top10_20" ? "dt active" : "dt"} onClick={() => setTab("sf_top10_20")}>Top 10-20 Performing Strategies · ₹10L each</button>
@@ -189,7 +190,7 @@ export default function PreLivePage() {
         <FactoryDeskView desk="index-buying" />
       ) : tab === "top2L" || tab === "top10L" ? (
         <Top10Book key={tab} desk="prelive" book={tab} />
-      ) : tab === "best2L" || tab === "sf_top10" || tab === "sf_top10_20" ? (
+      ) : tab === "best2L" || tab === "premium50k" || tab === "sf_top10" || tab === "sf_top10_20" ? (
         <PickBook key={tab} book={tab} />
       ) : tab === "livepaper" || tab === "livepaper2L" ? (
         <LivePaperBuying key={tab} book={tab === "livepaper2L" ? "2L" : "50k"} />

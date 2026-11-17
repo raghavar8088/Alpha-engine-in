@@ -1,4 +1,4 @@
-"""Index Option Buying: three picked-strategy paper accounts (12 Nov 2026).
+"""Index Option Buying: four picked-strategy paper accounts (12 Nov 2026; the fourth, premium50k, 16 Nov).
 
 The owner asked, on the Index Option Buying page, for:
 
@@ -6,6 +6,9 @@ The owner asked, on the Index Option Buying page, for:
                of this page's Top 10 paper accounts (top10_books, desk "prelive") from 27 Oct to 12 Nov
                2026: intra_ha_reversal · 15m and it_fake_breakout · 15m. ONE shared account with a slot
                for each: at most two positions at once, each up to Rs 1,00,000.
+  premium50k   "Premium Option Buying Strategies" (16 Nov 2026) - the SAME two strategies on ONE Rs 50,000
+               account: at most two positions at once, each up to Rs 25,000 of premium (paid in full: an
+               option buyer has no leverage). Its own start; nothing earlier is copied.
   sf_top10     "Top 10 Performing Strategies" - the Strategy Factory tab's Rank 1-10 on Index Option
                Buying (factory_desks, tab "index-buying"), Rs 10,00,000 for EACH strategy.
   sf_top10_20  "Top 10-20 Performing Strategies" - the same board's Rank 11-20, Rs 10,00,000 for each.
@@ -206,12 +209,29 @@ _SF_TOP10_20 = t10._picks([
     ("SF0109", 20, 53.8, 4, 5751.71, "Engulfing Candle · 45m", 19524.14),
 ])
 
+# PREMIUM OPTION BUYING STRATEGIES (16 Nov 2026). The owner asked, on the Best Strategies of Top 10 tab, for one more
+# paper account on these two strategies with Rs 50,000 in all. The same picks and the same copy; only the money
+# differs, so beside best2L it shows what account size does to the same trades (Angel's Rs 20 an order is a bigger
+# share of a 1-3 lot position).
+_PREMIUM50K_NOTES = _BEST_NOTES + (
+    "₹50,000 in one account: two positions at most, each up to ₹25,000 of premium, paid in full (an option buyer "
+    "has no leverage). A NIFTY lot is 65: the five trades the ₹2 lakh account took paid ₹84.60-163.30 an option "
+    "(₹5,500-10,600 a lot), which here is 2-4 lots a position. An option above about ₹384 cannot buy one lot within "
+    "₹25,000 and is skipped (price above the cap). Angel's ₹20 an order is a larger share of a position this size.",
+)
+
 BOOKS: dict[str, Book] = {
     "best2L": Book(
         key="best2L", label="Best Strategies of Top 10 · ₹2 lakh", desk=_BEST_DESK,
         capital=200000.0, slots=2, per_strategy=False,
         pick_rule="the two that made the most in both of this page's Top 10 Paper Trade accounts (₹2 lakh and ₹10 "
                   "lakh) from 27 Oct to 12 Nov 2026"),
+    "premium50k": Book(
+        key="premium50k", label="Premium Option Buying Strategies · ₹50k",
+        desk=dataclasses.replace(_BEST_DESK, notes=_PREMIUM50K_NOTES),
+        capital=50000.0, slots=2, per_strategy=False,
+        pick_rule="the same two as the Best Strategies of Top 10 account - the two that made the most in both of this "
+                  "page's Top 10 Paper Trade accounts (₹2 lakh and ₹10 lakh) from 27 Oct to 12 Nov 2026"),
     "sf_top10": Book(
         key="sf_top10", label="Top 10 Performing Strategies · ₹10 lakh each",
         desk=dataclasses.replace(_FACTORY_DESK, picks=_SF_TOP10, notes=_FACTORY_NOTES + (

@@ -114,8 +114,8 @@ async def factory_books():
 
     out = await pb.sync(entries=True)
     errs = {k: v for k, v in out.items() if "error" in v}
-    check("first pass: every account of the three books ran without an error",
-          len(out) == 1 + 10 + 10 and not errs, str(errs or len(out)))
+    check("first pass: every account of every book ran without an error",
+          len(out) == sum(len(b.accounts()) for b in pb.BOOKS.values()) and not errs, str(errs or len(out)))
     out2 = await pb.sync(entries=True)                     # a copy opened in a pass is marked on the next
     check("second pass is clean", not [k for k, v in out2.items() if "error" in v])
     rows = [r async for r in pb.POSITIONS.find({})]
@@ -212,6 +212,24 @@ async def best_book():
                         "expiry": "2026-11-17", "lot_size": LOT})
     await pb.sync(entries=True, only="best2L")
     await pb.sync(entries=True, only="best2L")
+    # Premium Option Buying Strategies (16 Nov 2026): the same two, the same trades, on one Rs 50,000 account.
+    await pb.sync(entries=True, only="premium50k")
+    await pb.sync(entries=True, only="premium50k")
+    prem = [r async for r in pb.POSITIONS.find({"book": "premium50k"})]
+    check("premium50k: the same two positions as best2L, the shared contract skipped",
+          sorted((r["key"], r["symbol"]) for r in prem) == [("intra_ha_reversal@15m", "50001"), ("it_fake_breakout@15m", "50002")],
+          str(prem))
+    pa = next(r for r in prem if r["key"] == "intra_ha_reversal@15m")
+    pbx = next(r for r in prem if r["key"] == "it_fake_breakout@15m")
+    lots_pa, lots_pb = int(25_000 // (151.0 * LOT)), int(25_000 // (90.5 * LOT))
+    check("premium50k: each position up to Rs 25,000 of premium (Rs 50,000 over two slots), at the ask, paid in full",
+          pa["qty"] == lots_pa and pbx["qty"] == lots_pb and pa["entry_px"] == 151.0
+          and pa["capital_deployed"] <= 25_000 and pbx["capital_deployed"] <= 25_000
+          and abs(pa["capital_deployed"] - 151.0 * LOT * lots_pa) < 0.01, f"{pa['qty']}/{lots_pa} {pbx['qty']}/{lots_pb}")
+    psc = {s["key"]: s["skipped"] async for s in pb.SCORES.find({"book": "premium50k"})}
+    check("premium50k: its own skip counts (shared contract, then full)",
+          psc.get("it_fake_breakout@15m", {}).get("symbol_held") == 1 and psc.get("intra_ha_reversal@15m", {}).get("full") == 1,
+          str(psc))
     rows = [r async for r in pb.POSITIONS.find({"book": "best2L"})]
     keys = sorted((r["key"], r["symbol"]) for r in rows)
     check("best2L: two positions, one per slot, the second contract taken and the shared one skipped",
@@ -239,6 +257,20 @@ async def best_book():
     g, n, _ = option_net(151.0, 170.5, lots_a, day(t_x))
     check("best2L: the copy closes at the tournament's exit bid", a2["status"] == "CLOSED"
           and abs(a2["realized_pnl"] - n) < 0.01, f"{a2.get('realized_pnl')} vs {n}")
+    await pb.sync(entries=True, only="premium50k")
+    pa2 = await pb.POSITIONS.find_one({"book": "premium50k", "key": "intra_ha_reversal@15m", "symbol": "50001"})
+    pg, pn, _ = option_net(151.0, 170.5, lots_pa, day(t_x))
+    check("premium50k: closes at the same exit bid, charged on its own lots", pa2["status"] == "CLOSED"
+          and abs(pa2["realized_pnl"] - pn) < 0.01 and abs(pa2["gross_pnl"] - pg) < 0.01, f"{pa2.get('realized_pnl')} vs {pn}")
+    ps = await pb.summary("premium50k")
+    check("premium50k summary: Rs 50,000, two slots, cap Rs 25,000, one account, the two picks, its own label",
+          ps["desk_capital"] == 50_000 and ps["max_open_positions"] == 2 and ps["position_cap"] == 25_000
+          and ps["per_strategy"] is False and ps["strategies"] == 2
+          and ps["label"] == "Premium Option Buying Strategies · ₹50k", str({k: ps.get(k) for k in ("desk_capital", "position_cap", "label")}))
+    plb = await pb.leaderboard("premium50k")
+    check("premium50k leaderboard: the two, with their share of Rs 50,000",
+          [r["key"] for r in plb] == ["intra_ha_reversal@15m", "it_fake_breakout@15m"]
+          and abs(plb[0]["roi_pct"] - (plb[0]["net_pnl"] + plb[0]["unrealized_pnl"]) / 50_000 * 100) < 1e-3)
     s = await pb.summary("best2L")
     check("best2L summary: Rs 2 lakh, two slots, cap Rs 1 lakh, one account",
           s["desk_capital"] == 200_000 and s["max_open_positions"] == 2 and s["position_cap"] == 100_000
@@ -270,9 +302,10 @@ def routes():
           and lb.json()["total"] == 10 and len(pos.json()["positions"]) >= 2,
           f"{s.status_code} {lb.status_code} {pos.status_code}")
     books = pb.books()
-    check("books(): three, with the owner's names", [b["label"] for b in books] == [
-        "Best Strategies of Top 10 · ₹2 lakh", "Top 10 Performing Strategies · ₹10 lakh each",
-        "Top 10-20 Performing Strategies · ₹10 lakh each"] and [b["capital"] for b in books] == [200_000, 10_000_000, 10_000_000])
+    check("books(): four, with the owner's names", [b["label"] for b in books] == [
+        "Best Strategies of Top 10 · ₹2 lakh", "Premium Option Buying Strategies · ₹50k",
+        "Top 10 Performing Strategies · ₹10 lakh each", "Top 10-20 Performing Strategies · ₹10 lakh each"]
+        and [b["capital"] for b in books] == [200_000, 50_000, 10_000_000, 10_000_000], str([b["capital"] for b in books]))
     check("unknown book names fall back to the first", pb.normalize_book("nope") == "best2L")
 
 
