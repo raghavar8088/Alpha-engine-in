@@ -3,12 +3,14 @@
 // Real money on Delta Exchange India for Premium strategies (13 Nov 2026; two desks from 14 Nov). The backend is
 // app/services/premium_live.py: each desk copies the paper desk's trades of its picks into real Delta orders at the
 // owner's size (from 15 Nov one contract a trade, the smallest order, or $1 to $5 of risk picked here with the PIN;
-// a $20 daily loss stop), with each trade's stop and target held on Delta. The gold
-// desk shows on Premium Strategies (the original /api/premium-paper/live routes); the crypto desk is the Delta Exchange
-// Live Trading module (/api/premium-paper/live/desk/crypto). This page shows what a desk did and holds its switches.
+// a $20 daily loss stop), with each trade's stop and target held on Delta. Both desks show on the Delta Exchange Live
+// Trading module (16 Nov; the gold desk also on Premium Strategies, its original /api/premium-paper/live routes; the
+// crypto desk at /api/premium-paper/live/desk/crypto). This page shows what a desk did and holds its switches.
 // Live trading has one ON/OFF switch (14 Nov): OFF is instant, ON asks for one confirmation. A PIN is asked (for ON, the
 // trade size and flatten) only when the server says one is required (pin_required); the owner chose none on 15 Nov.
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+// The view was redesigned on 16 Nov 2026 (status and controls first, then the numbers, open positions, the strategies,
+// the trade log with filters, and the desk's notes folded away). LiveDelta - every request this page sends - is unchanged.
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { apiFetch } from "../../lib/api";
 
 type Rec = { trades: number; wins: number; pnl_usd: number; open: number };
@@ -28,26 +30,28 @@ export type LiveStatus = { configured_db: boolean; keys: boolean; pin_set: boole
     drift_frac: number; tick_s: number; risk_cap_usd?: number; risk_min_usd?: number; risk_set_at?: number | null;
     sizing?: "min" | "risk" };
   today: { live: number; shadow: number }; totals: { live: Totals; shadow: Totals }; picked_at: string; picks: Pick[];
-  open: LiveTrade[]; recent: LiveTrade[]; notes: string[] };
+  open: LiveTrade[]; recent: LiveTrade[]; notes: string[]; desk?: string; title?: string; products?: Record<string, unknown> };
 
-const usd = (v: number | null | undefined, signed = false) => {
+export const usd = (v: number | null | undefined, signed = false) => {
   if (v === null || v === undefined || Number.isNaN(v)) return "—";
   const sign = signed ? (v > 0 ? "+" : v < 0 ? "−" : "") : v < 0 ? "−" : "";
-  return `${sign}$${Math.abs(v).toFixed(2)}`;
+  // a one-contract gold trade moves fractions of a cent: show them rather than "$0.00"
+  const a = Math.abs(v);
+  return `${sign}$${a > 0 && a < 0.01 ? a.toFixed(4) : a.toFixed(2)}`;
 };
 const sizeLabel = (r: number | "min" | null) => (r === "min" ? "1 contract a trade" : `${usd(r)} a trade`);
 const px = (v: number | null | undefined) =>
   v === null || v === undefined ? "—" : v.toLocaleString("en-US", { maximumFractionDigits: v > 1000 ? 1 : 2 });
-const tone = (v: number | null | undefined) => (!v ? "" : v > 0 ? "gain" : "loss");
-const ist = (t: number | null | undefined) =>
+export const tone = (v: number | null | undefined) => (!v ? "" : v > 0 ? "gain" : "loss");
+export const ist = (t: number | null | undefined) =>
   !t ? "—" : new Date(t * 1000).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short",
     hour: "2-digit", minute: "2-digit", hour12: false });
-const ago = (t: number | null | undefined, now: number) => {
+export const ago = (t: number | null | undefined, now: number) => {
   if (!t) return "never";
   const s = Math.max(0, Math.round(now - t));
   return s < 90 ? `${s}s ago` : s < 5400 ? `${Math.round(s / 60)} min ago` : `${Math.round(s / 3600)} h ago`;
 };
-const MODE: Record<string, { label: string; cls: string; what: string }> = {
+export const MODE: Record<string, { label: string; cls: string; what: string }> = {
   live: { label: "LIVE — real money", cls: "live", what: "Real orders go to Delta for every new signal of these strategies." },
   shadow: { label: "SHADOW — no orders", cls: "shadow", what: "Every decision is made and logged with simulated fills; nothing is sent." },
   off: { label: "OFF", cls: "off", what: "No new trade. Anything still open is managed to its close." },
@@ -66,6 +70,13 @@ const happened = (t: LiveTrade) => {
   if (t.status === "closing") return `closing: ${t.close_reason ?? ""}`;
   return "open";
 };
+/** The one-word state of a decision, for its badge; the reason is shown under it. */
+const STATE: Record<string, { label: string; cls: string }> = {
+  open: { label: "Open", cls: "open" }, entering: { label: "Entering", cls: "open" }, closing: { label: "Closing", cls: "open" },
+  closed: { label: "Closed", cls: "closed" }, skipped: { label: "Skipped", cls: "skipped" }, error: { label: "Error", cls: "error" },
+};
+const why = (t: LiveTrade) => (t.status === "closed" || t.status === "closing" ? t.close_reason : t.reason) ?? "";
+type Filter = "all" | "real" | "skipped" | "error";
 
 /** What the picks' own backtests said, counted from the data (so it stays true when a desk's picks change). */
 const verdict = (picks: Pick[]) => {
@@ -78,7 +89,7 @@ const verdict = (picks: Pick[]) => {
   return `${parts.join(" and ")}${parts.length ? ":" : ""} a few good paper trades picked them.`;
 };
 
-/** What the page shows, given the desk's status: no state of its own beyond its props. */
+/** What the page shows, given the desk's status: no state of its own beyond its props (and the trade-log filter). */
 export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, saved, ask, pendingRisk, busy, msg, onToggle,
   onShadow, onFlatten, onRisk, onSubmitPin, onCancel, onForgetPin, intro }: {
   s: LiveStatus; now: number; pin: string; setPin: (v: string) => void; remember: boolean; setRemember: (v: boolean) => void;
@@ -86,6 +97,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
   onShadow: () => void; onFlatten: () => void; onRisk: (r: number | "min") => void; onSubmitPin: () => void; onCancel: () => void;
   onForgetPin: () => void; intro?: ReactNode;
 }) {
+  const [filter, setFilter] = useState<Filter>("all");
   const isLive = s.mode === "live";
   const pinNeeded = s.pin_required !== false;     // an older server, or one with PREMIUM_LIVE_REQUIRE_PIN=1
   const m = MODE[s.mode] ?? MODE.off;
@@ -97,219 +109,274 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
   const mixed = s.picks.some((p) => p.picked_at);   // some picks joined later: each record is as of its own pick
   const live = s.totals.live;
   const dayLeft = L.daily_stop_usd + s.today.live;
+  const dayUsed = Math.min(100, Math.max(0, (-s.today.live / (L.daily_stop_usd || 1)) * 100));
+  const openPnl = s.open.reduce((a, t) => a + (t.unrealised_usd ?? 0), 0);
+  const showShadow = s.mode === "shadow" || s.totals.shadow.trades > 0 || s.totals.shadow.skipped > 0;
+  const counts = useMemo(() => ({
+    all: s.recent.length,
+    real: s.recent.filter((t) => t.status !== "skipped" && t.status !== "error").length,
+    skipped: s.recent.filter((t) => t.status === "skipped").length,
+    error: s.recent.filter((t) => t.status === "error").length,
+  }), [s.recent]);
+  const shown = s.recent.filter((t) => filter === "all" ? true : filter === "real" ? t.status !== "skipped" && t.status !== "error"
+    : t.status === filter);
   return (
     <div className="ld">
-      <div className="ld-warn">
+      <div className="ld-warn" role="note">
         <b>Real money, on strategies that are not proven.</b>{" "}
         {intro ?? <>Since 8 Nov the paper desk&apos;s bitcoin strategies lost a combined −397R and its gold strategies −166R.</>}{" "}
         {verdict(s.picks)}{" "}
         {`The size is the one chosen for this: ${sizeText} and a ${usd(L.daily_stop_usd)} daily loss stop.`}
       </div>
 
-      <div className="ld-head">
-        <span className={`ld-mode ${m.cls}`}>{m.label}</span>
-        <span className="ld-what">{m.what}</span>
-      </div>
-      <div className="ld-facts">
-        <span>Delta keys on the server: <b className={s.keys ? "gain" : "loss"}>{s.keys ? "yes" : "no"}</b></span>
-        {pinNeeded ? <span>Owner PIN set: <b className={s.pin_set ? "gain" : "loss"}>{s.pin_set ? "yes" : "no"}</b></span>
-          : <span>PIN: <b>not needed</b></span>}
-        <span>Desk checked: <b>{ago(s.last_cycle_at, now)}</b> (every {L.tick_s}s)</span>
-        {s.armed_at ? <span>Live since: <b>{ist(s.armed_at)} IST</b></span> : null}
-      </div>
-      {s.switched_off ? <div className="ld-alert">Switched off: {s.switched_off}</div> : null}
-      {s.last_error && s.last_error !== s.switched_off ? (
-        <div className="ld-note">Last venue message ({ago(s.last_error_at, now)}): {s.last_error}</div>
-      ) : null}
+      <section className={`ld-card ld-status ${m.cls}`} aria-label="Desk status and controls">
+        <div className="ld-status-top">
+          <div className="ld-head">
+            <span className={`ld-mode ${m.cls}`}>{m.label}</span>
+            <span className="ld-what">{m.what}</span>
+          </div>
+          <div className="ld-facts">
+            <span>Delta keys <b className={s.keys ? "gain" : "loss"}>{s.keys ? "yes" : "no"}</b></span>
+            {pinNeeded ? <span>Owner PIN set: <b className={s.pin_set ? "gain" : "loss"}>{s.pin_set ? "yes" : "no"}</b></span>
+              : <span>PIN: <b>not needed</b></span>}
+            <span>Checked <b>{ago(s.last_cycle_at, now)}</b> (every {L.tick_s}s)</span>
+            {isLive && s.armed_at ? <span>Live since <b>{ist(s.armed_at)} IST</b></span> : null}
+            {s.errors_in_row ? <span>Venue errors in a row <b className="loss">{s.errors_in_row}</b> (3 switch it off)</span> : null}
+          </div>
+        </div>
+        {s.switched_off ? <div className="ld-alert" role="alert">Switched off: {s.switched_off}</div> : null}
+        {s.last_error && s.last_error !== s.switched_off ? (
+          <div className="ld-note">Last venue message ({ago(s.last_error_at, now)}): {s.last_error}</div>
+        ) : null}
+
+        <div className="ld-ctl">
+          <div className="ld-switch-row">
+            <button type="button" role="switch" aria-checked={isLive} aria-label="Live trading"
+              className={`ld-switch${isLive ? " on" : ""}`} disabled={!!busy || (!isLive && (!s.keys || (pinNeeded && !s.pin_set)))} onClick={onToggle}>
+              <span className="ld-knob" />
+            </button>
+            <div className="ld-switch-text">
+              <b>{isLive ? "Live trading: ON" : "Live trading: OFF"}</b>
+              <span>
+                {busy === "live" ? "Checking Delta and switching on…" : busy === "off" ? "Switching off…" : isLive
+                  ? "Real orders go to Delta for every new signal. Switch OFF to stop new trades; a position already open still closes at its stop, its target or its strategy's exit."
+                  : `Switch ON to start: a real order for every new signal, ${sizeText}, stopping for the day after a ${usd(L.daily_stop_usd)} loss.${s.mode === "shadow" ? " A shadow test is running now: decisions are logged, nothing is sent." : ""}`}
+              </span>
+            </div>
+          </div>
+          {risks.length > 0 && (
+            <div className="ld-risk-row">
+              <span className="ld-risk-k" id={`ld-risk-k-${s.desk ?? "desk"}`}>Trade size</span>
+              <div className="ld-seg" role="radiogroup" aria-labelledby={`ld-risk-k-${s.desk ?? "desk"}`}>
+                {L.sizing !== undefined && (
+                  <button type="button" role="radio" aria-checked={oneContract} className={`ld-seg-b${oneContract ? " on" : ""}`}
+                    disabled={!!busy} onClick={() => onRisk("min")}>1 contract</button>
+                )}
+                {risks.map((r) => {
+                  const on = !oneContract && Math.abs(L.risk_usd - r) < 0.005;
+                  return (
+                    <button key={r} type="button" role="radio" aria-checked={on} className={`ld-seg-b${on ? " on" : ""}`}
+                      disabled={!!busy} onClick={() => onRisk(r)}>${r}</button>
+                  );
+                })}
+              </div>
+              <span className="ld-risk-s">
+                {busy === "risk" ? "Saving…" : oneContract
+                  ? "Every trade is 1 contract, the smallest order Delta allows. What it loses at its stop depends on how far away the stop is: on bitcoin usually $0.20-0.60, on gold under 5 cents, plus fees. A trade whose one contract would lose more than $5 is skipped."
+                  : "A dollar amount is the most one trade loses if its stop is hit, plus about $0.10-0.30 of fees. A trade whose smallest order (one contract) would lose more is skipped."}
+              </span>
+            </div>
+          )}
+          {ask && (
+            <div className="ld-ctl-row">
+              <label>{ask === "live" ? "Your PIN, to switch ON" : ask === "risk" ? `Your PIN, to set ${sizeLabel(pendingRisk)}` : "Your PIN, to close every position"}
+                <input type="password" autoComplete="off" inputMode="numeric" autoFocus value={pin} onChange={(e) => setPin(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") onSubmitPin(); }} />
+              </label>
+              <label className="ld-check">
+                <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} /> Remember the PIN on this device
+              </label>
+              <button className={`ld-btn${ask === "live" ? " danger" : ""}`} disabled={!!busy || !pin} onClick={onSubmitPin}>
+                {ask === "live" ? "Switch ON — real money" : ask === "risk" ? `Set ${sizeLabel(pendingRisk)}` : "Close every position now"}
+              </button>
+              <button className="ld-btn" disabled={!!busy} onClick={onCancel}>Cancel</button>
+            </div>
+          )}
+          <div className="ld-ctl-row ld-more">
+            <button className="ld-btn" disabled={!!busy || isLive} onClick={onShadow} title={isLive ? "Switch live trading OFF first" : undefined}>
+              {s.mode === "shadow" ? "Stop the shadow test" : "Test without orders (shadow)"}
+            </button>
+            <button className="ld-btn ld-btn-warn" disabled={!!busy || (pinNeeded && !s.pin_set)} onClick={onFlatten}>
+              {busy === "flatten" ? "Closing…" : "Flatten every position now"}
+            </button>
+            {saved && pinNeeded && <button className="ld-btn" disabled={!!busy} onClick={onForgetPin}>Forget the PIN saved on this device</button>}
+          </div>
+          {(!s.keys || (pinNeeded && !s.pin_set)) && <p className="ld-dim">Delta API keys or the owner PIN are not on the server yet, so the switch cannot turn ON. The setup script sets both and keeps them off the repository.</p>}
+          {msg && <p className="ld-msg" role="status">{msg}</p>}
+        </div>
+      </section>
 
       <div className="ld-tiles">
         <div className="ld-tile">
           <span className="ld-k">Today, real money (IST)</span>
           <span className={`ld-v ${tone(s.today.live)}`}>{usd(s.today.live, true)}</span>
+          <span className="ld-bar" aria-hidden="true"><span style={{ width: `${dayUsed}%` }} className={dayUsed >= 75 ? "hot" : ""} /></span>
           <span className="ld-s">{dayLeft > 0 ? `${usd(dayLeft)} left before the ${usd(L.daily_stop_usd)} daily stop` : "daily stop reached: no new trade today"}</span>
         </div>
         <div className="ld-tile">
           <span className="ld-k">All real trades</span>
           <span className={`ld-v ${tone(live.pnl_usd)}`}>{usd(live.pnl_usd, true)}</span>
-          <span className="ld-s">{`${live.trades} closed · ${live.trades ? Math.round((100 * live.wins) / live.trades) : 0}% won · fees ${usd(live.fees_usd)} · ${live.skipped} skipped`}</span>
+          <span className="ld-s">{`${live.trades} closed · ${live.trades ? Math.round((100 * live.wins) / live.trades) : 0}% won · fees ${usd(live.fees_usd)}`}</span>
+        </div>
+        <div className="ld-tile">
+          <span className="ld-k">Open now</span>
+          <span className={`ld-v ${s.open.length ? tone(openPnl) : ""}`}>{s.open.length ? usd(openPnl, true) : "0"}</span>
+          <span className="ld-s">{s.open.length ? `${s.open.length} position${s.open.length === 1 ? "" : "s"} open, marked at Delta's price` : "no position open"}</span>
+        </div>
+        <div className="ld-tile">
+          <span className="ld-k">Signals not taken</span>
+          <span className="ld-v">{live.skipped}</span>
+          <span className="ld-s">{`skipped as late, drifted or too big${live.errors ? ` · ${live.errors} error${live.errors === 1 ? "" : "s"}` : ""}`}</span>
         </div>
         <div className="ld-tile">
           <span className="ld-k">Delta wallet</span>
           <span className="ld-v">{s.wallet ? usd(s.wallet.balance) : "—"}</span>
           <span className="ld-s">{s.wallet ? `${usd(s.wallet.available)} free · read ${ago(s.wallet_at, now)}` : "read when the desk goes live"}</span>
         </div>
-        <div className="ld-tile">
-          <span className="ld-k">Shadow (no orders)</span>
-          <span className={`ld-v ${tone(s.totals.shadow.pnl_usd)}`}>{usd(s.totals.shadow.pnl_usd, true)}</span>
-          <span className="ld-s">{`${s.totals.shadow.trades} closed · ${s.totals.shadow.skipped} skipped`}</span>
-        </div>
-      </div>
-
-      <div className="ld-ctl">
-        <div className="ld-switch-row">
-          <button type="button" role="switch" aria-checked={isLive} aria-label="Live trading"
-            className={`ld-switch${isLive ? " on" : ""}`} disabled={!!busy || (!isLive && (!s.keys || (pinNeeded && !s.pin_set)))} onClick={onToggle}>
-            <span className="ld-knob" />
-          </button>
-          <div className="ld-switch-text">
-            <b>{isLive ? "Live trading: ON" : "Live trading: OFF"}</b>
-            <span>
-              {busy === "live" ? "Checking Delta and switching on…" : busy === "off" ? "Switching off…" : isLive
-                ? "Real orders go to Delta for every new signal. Switch OFF to stop new trades; a position already open still closes at its stop, its target or its strategy's exit."
-                : `Switch ON to start: a real order for every new signal, ${sizeText}, stopping for the day after a ${usd(L.daily_stop_usd)} loss.${s.mode === "shadow" ? " A shadow test is running now: decisions are logged, nothing is sent." : ""}`}
-            </span>
-          </div>
-        </div>
-        {risks.length > 0 && (
-          <div className="ld-risk-row">
-            <span className="ld-risk-k" id="ld-risk-k">Trade size</span>
-            <div className="ld-seg" role="radiogroup" aria-labelledby="ld-risk-k">
-              {L.sizing !== undefined && (
-                <button type="button" role="radio" aria-checked={oneContract} className={`ld-seg-b${oneContract ? " on" : ""}`}
-                  disabled={!!busy} onClick={() => onRisk("min")}>1 contract</button>
-              )}
-              {risks.map((r) => {
-                const on = !oneContract && Math.abs(L.risk_usd - r) < 0.005;
-                return (
-                  <button key={r} type="button" role="radio" aria-checked={on} className={`ld-seg-b${on ? " on" : ""}`}
-                    disabled={!!busy} onClick={() => onRisk(r)}>${r}</button>
-                );
-              })}
-            </div>
-            <span className="ld-risk-s">
-              {busy === "risk" ? "Saving…" : oneContract
-                ? "Every trade is 1 contract, the smallest order Delta allows. What it loses at its stop depends on how far away the stop is: on bitcoin usually $0.20-0.60, on gold under 5 cents, plus fees. A trade whose one contract would lose more than $5 is skipped."
-                : "A dollar amount is the most one trade loses if its stop is hit, plus about $0.10-0.30 of fees. A trade whose smallest order (one contract) would lose more is skipped."}
-            </span>
+        {showShadow && (
+          <div className="ld-tile">
+            <span className="ld-k">Shadow (no orders)</span>
+            <span className={`ld-v ${tone(s.totals.shadow.pnl_usd)}`}>{usd(s.totals.shadow.pnl_usd, true)}</span>
+            <span className="ld-s">{`${s.totals.shadow.trades} closed · ${s.totals.shadow.skipped} skipped`}</span>
           </div>
         )}
-        {ask && (
-          <div className="ld-ctl-row">
-            <label>{ask === "live" ? "Your PIN, to switch ON" : ask === "risk" ? `Your PIN, to set ${sizeLabel(pendingRisk)}` : "Your PIN, to close every position"}
-              <input type="password" autoComplete="off" inputMode="numeric" autoFocus value={pin} onChange={(e) => setPin(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") onSubmitPin(); }} />
-            </label>
-            <label className="ld-check">
-              <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} /> Remember the PIN on this device
-            </label>
-            <button className={`ld-btn${ask === "live" ? " danger" : ""}`} disabled={!!busy || !pin} onClick={onSubmitPin}>
-              {ask === "live" ? "Switch ON — real money" : ask === "risk" ? `Set ${sizeLabel(pendingRisk)}` : "Close every position now"}
-            </button>
-            <button className="ld-btn" disabled={!!busy} onClick={onCancel}>Cancel</button>
-          </div>
-        )}
-        <div className="ld-ctl-row ld-more">
-          <button className="ld-btn" disabled={!!busy || isLive} onClick={onShadow} title={isLive ? "Switch live trading OFF first" : undefined}>
-            {s.mode === "shadow" ? "Stop the shadow test" : "Test without orders (shadow)"}
-          </button>
-          <button className="ld-btn" disabled={!!busy || (pinNeeded && !s.pin_set)} onClick={onFlatten}>
-            {busy === "flatten" ? "Closing…" : "Flatten every position now"}
-          </button>
-          {saved && pinNeeded && <button className="ld-btn" disabled={!!busy} onClick={onForgetPin}>Forget the PIN saved on this device</button>}
-        </div>
-        {(!s.keys || (pinNeeded && !s.pin_set)) && <p className="ld-dim">Delta API keys or the owner PIN are not on the server yet, so the switch cannot turn ON. The setup script sets both and keeps them off the repository.</p>}
-        {msg && <p className="ld-msg">{msg}</p>}
       </div>
 
       <h4 className="ld-h">{mixed ? `The ${s.picks.length} strategies (each record as of its own pick)` : `The ${s.picks.length} strategies (fixed ${ist(Date.parse(s.picked_at) / 1000)} IST)`}</h4>
-      <div className="ld-scroll">
+      <div className="ld-card ld-scroll">
         <table className="ld-table">
           <thead>
-            <tr><th className="l">Strategy</th><th>Trades on</th><th>Paper record at the pick</th><th className="l">Its 2-year backtest</th><th>Real money</th><th>Shadow</th></tr>
+            <tr><th className="l">Strategy</th><th>Real money</th><th>Trades</th><th>Won</th><th>Open</th>
+              <th className="l">Paper record at the pick</th><th className="l">Its 2-year backtest</th></tr>
           </thead>
           <tbody>
             {s.picks.map((p) => (
               <tr key={`${p.acct}|${p.mkt}`}>
-                <td className="l"><b>{p.acct}</b> {p.name}</td>
-                <td>{p.product}</td>
-                <td>{`${p.trades} trades · ${p.sum_r >= 0 ? "+" : ""}${p.sum_r.toFixed(1)}R · t ${p.t.toFixed(2)} · ${p.win}% won${mixed ? ` · picked ${ist(Date.parse(p.picked_at || s.picked_at) / 1000)}` : ""}`}</td>
-                <td className={`l ${p.backtest.startsWith("loses") ? "loss" : ""}`}>{p.backtest}</td>
-                <td className={tone(p.live?.pnl_usd)}>{p.live ? `${usd(p.live.pnl_usd, true)} · ${p.live.trades}${p.live.open ? ` · ${p.live.open} open` : ""}` : "—"}</td>
-                <td className={tone(p.shadow?.pnl_usd)}>{p.shadow ? `${usd(p.shadow.pnl_usd, true)} · ${p.shadow.trades}` : "—"}</td>
+                <td className="l"><b>{p.acct}</b> <span className="ld-chip">{p.product}</span><div className="ld-sub">{p.name}</div></td>
+                <td className={`ld-num ${tone(p.live?.pnl_usd)}`}>{p.live ? usd(p.live.pnl_usd, true) : "—"}</td>
+                <td>{p.live ? p.live.trades : "—"}</td>
+                <td>{p.live && p.live.trades ? `${Math.round((100 * p.live.wins) / p.live.trades)}%` : "—"}</td>
+                <td>{p.live?.open ? <span className="ld-badge open">{p.live.open} open</span> : "—"}</td>
+                <td className="l">{`${p.trades} trades · ${p.sum_r >= 0 ? "+" : ""}${p.sum_r.toFixed(1)}R · t ${p.t.toFixed(2)} · ${p.win}% won`}
+                  {mixed ? <div className="ld-sub">{`picked ${ist(Date.parse(p.picked_at || s.picked_at) / 1000)}`}</div> : null}</td>
+                <td className="l"><span className={`ld-badge ${p.backtest.startsWith("loses") ? "error" : "skipped"}`}>
+                  {p.backtest.startsWith("loses") ? "loses" : "not tested"}</span><div className="ld-sub">{p.backtest}</div></td>
               </tr>
             ))}
           </tbody>
         </table>
+        {showShadow && (
+          <p className="ld-foot">{`Shadow: ${s.picks.filter((p) => p.shadow).map((p) => `${p.acct} ${usd(p.shadow!.pnl_usd, true)} (${p.shadow!.trades})`).join(" · ") || "no shadow trade yet"}`}</p>
+        )}
       </div>
 
-      <h4 className="ld-h">Open now ({s.open.length})</h4>
+      <h4 className="ld-h ld-h-row">
+        <span>Open positions ({s.open.length})</span>
+        {s.open.length ? <span className={`ld-h-aside ${tone(openPnl)}`}>{usd(openPnl, true)} open P&amp;L</span> : null}
+      </h4>
       {s.open.length ? (
-        <div className="ld-scroll">
+        <div className="ld-pos-grid">
+          {s.open.map((t) => (
+            <div key={t.id} className={`ld-card ld-pos ${t.side > 0 ? "long" : "short"}`}>
+              <div className="ld-pos-top">
+                <span><b>{t.acct}</b> <span className="ld-chip">{t.product}</span></span>
+                <span className={`ld-side ${t.side > 0 ? "long" : "short"}`}>{t.side > 0 ? "Long" : "Short"}</span>
+              </div>
+              <div className={`ld-pos-pnl ${tone(t.unrealised_usd)}`}>{usd(t.unrealised_usd, true)}</div>
+              <dl className="ld-pos-dl">
+                <div><dt>Contracts</dt><dd>{t.contracts ?? "—"}</dd></div>
+                <div><dt>Filled</dt><dd>{px(t.fill)}</dd></div>
+                <div><dt>Mark</dt><dd>{px(t.mark)}</dd></div>
+                <div><dt>Stop on Delta</dt><dd>{t.legs?.stop ?? px(t.stop)}</dd></div>
+                <div><dt>Target</dt><dd>{t.legs?.target ?? (t.target ? px(t.target) : "paper exit")}</dd></div>
+                <div><dt>Since</dt><dd>{ist(t.opened_at ?? t.created_at)}</dd></div>
+              </dl>
+              <div className="ld-sub">{t.mode === "shadow" ? "shadow · " : ""}{happened(t)}</div>
+            </div>
+          ))}
+        </div>
+      ) : <p className="ld-dim ld-empty">Nothing open. A position opens when one of these strategies enters on the paper desk.</p>}
+
+      <h4 className="ld-h ld-h-row">
+        <span>Trade log, newest first</span>
+        <span className="ld-filters" role="group" aria-label="Show">
+          {([["all", "All"], ["real", "Trades"], ["skipped", "Skipped"], ["error", "Errors"]] as [Filter, string][]).map(([k, label]) => (
+            <button key={k} type="button" className={`ld-fchip${filter === k ? " on" : ""}`} aria-pressed={filter === k}
+              onClick={() => setFilter(k)}>{label} <span>{counts[k]}</span></button>
+          ))}
+        </span>
+      </h4>
+      {shown.length ? (
+        <div className="ld-card ld-scroll ld-log">
           <table className="ld-table">
             <thead>
-              <tr><th className="l">Strategy</th><th>Mode</th><th>Side</th><th>Contracts</th><th>Filled</th><th>Stop on Delta</th><th>Target</th><th>Mark</th><th>Open P&amp;L</th></tr>
+              <tr><th className="l">When (IST)</th><th className="l">Strategy</th><th>Side</th><th className="l">What happened</th>
+                <th>Contracts</th><th>In → out</th><th>Fees</th><th>P&amp;L</th></tr>
             </thead>
             <tbody>
-              {s.open.map((t) => (
-                <tr key={t.id}>
-                  <td className="l"><b>{t.acct}</b> {t.product}<div className="ld-dim">{happened(t)}</div></td>
-                  <td>{t.mode}</td>
-                  <td>{t.side > 0 ? "Long" : "Short"}</td>
-                  <td>{t.contracts ?? "—"}</td>
-                  <td>{px(t.fill)}</td>
-                  <td>{t.legs?.stop ?? px(t.stop)}</td>
-                  <td>{t.legs?.target ?? (t.target ? px(t.target) : "paper exit")}</td>
-                  <td>{px(t.mark)}</td>
-                  <td className={tone(t.unrealised_usd)}>{usd(t.unrealised_usd, true)}</td>
-                </tr>
-              ))}
+              {shown.map((t) => {
+                const st = STATE[t.status] ?? { label: t.status, cls: "skipped" };
+                return (
+                  <tr key={t.id} className={t.status === "skipped" ? "ld-row-dim" : ""}>
+                    <td className="l">{ist(t.created_at)}</td>
+                    <td className="l"><b>{t.acct}</b> <span className="ld-chip">{t.product}</span>{t.mode === "shadow" ? <span className="ld-chip">shadow</span> : null}</td>
+                    <td><span className={`ld-side ${t.side > 0 ? "long" : "short"}`}>{t.side > 0 ? "Long" : "Short"}</span></td>
+                    <td className="l ld-why"><span className={`ld-badge ${st.cls}`}>{st.label}</span>{why(t) ? <div className="ld-sub">{why(t)}</div> : null}</td>
+                    <td>{t.contracts ?? t.plan?.contracts ?? "—"}</td>
+                    <td>{t.fill ? `${px(t.fill)} → ${t.exit_price ? px(t.exit_price) : "…"}` : "—"}</td>
+                    <td>{t.fees != null ? usd(t.fees) : "—"}</td>
+                    <td className={`ld-num ${tone(t.pnl_usd)}`}>{t.status === "closed" ? usd(t.pnl_usd, true) : t.status === "open" && t.unrealised_usd != null ? <span className="ld-sub">{usd(t.unrealised_usd, true)} open</span> : "—"}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
-      ) : <p className="ld-dim">Nothing open.</p>}
+      ) : <p className="ld-dim ld-empty">{s.recent.length ? "Nothing of this kind in the latest decisions." : "No signal from these strategies yet."}</p>}
 
-      <h4 className="ld-h">Every decision, newest first</h4>
-      {s.recent.length ? (
-        <div className="ld-scroll">
-          <table className="ld-table">
-            <thead>
-              <tr><th className="l">When (IST)</th><th className="l">Strategy</th><th>Mode</th><th>Side</th><th className="l">What happened</th><th>Contracts</th><th>In → out</th><th>P&amp;L</th></tr>
-            </thead>
-            <tbody>
-              {s.recent.map((t) => (
-                <tr key={t.id}>
-                  <td className="l">{ist(t.created_at)}</td>
-                  <td className="l"><b>{t.acct}</b> {t.product}</td>
-                  <td>{t.mode}</td>
-                  <td>{t.side > 0 ? "Long" : "Short"}</td>
-                  <td className="l ld-why">{happened(t)}</td>
-                  <td>{t.contracts ?? t.plan?.contracts ?? "—"}</td>
-                  <td>{t.fill ? `${px(t.fill)} → ${t.exit_price ? px(t.exit_price) : "…"}` : "—"}</td>
-                  <td className={tone(t.pnl_usd)}>{t.status === "closed" ? usd(t.pnl_usd, true) : "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : <p className="ld-dim">No signal from these strategies yet.</p>}
+      <details className="ld-card ld-more-info">
+        <summary>How this desk works, and its limits</summary>
+        <ul className="ld-notes">
+          {s.notes.map((n, i) => <li key={i}>{n}</li>)}
+          <li>{`Limits: ${oneContract ? `1 contract a trade (skipped if it would lose more than ${usd(L.risk_cap_usd)})` : `${usd(L.risk_usd)} risk a trade`}, ${usd(L.daily_stop_usd)} daily stop, at most ${usd(L.max_notional_usd)} of notional a position, ${L.leverage}x leverage, a signal older than ${Math.round(L.max_lag_s / 60)} minutes or already ${Math.round(L.drift_frac * 100)}% of its risk away is skipped.`}</li>
+        </ul>
+      </details>
 
-      <ul className="ld-notes">
-        {s.notes.map((n, i) => <li key={i}>{n}</li>)}
-        <li>{`Limits: ${oneContract ? `1 contract a trade (skipped if it would lose more than ${usd(L.risk_cap_usd)})` : `${usd(L.risk_usd)} risk a trade`}, ${usd(L.daily_stop_usd)} daily stop, at most ${usd(L.max_notional_usd)} of notional a position, ${L.leverage}x leverage, a signal older than ${Math.round(L.max_lag_s / 60)} minutes or already ${Math.round(L.drift_frac * 100)}% of its risk away is skipped.`}</li>
-      </ul>
-
-      {/* global: every selector is under .ld, so nothing outside this tab is touched */}
+      {/* global: every selector is under .ld, so nothing outside the desk is touched */}
       <style jsx global>{`
         .ld { display: flex; flex-direction: column; gap: 14px; }
-        .ld .ld-warn { font-size: 13px; line-height: 1.6; padding: 12px 16px; border-radius: 12px; color: var(--text);
-                       background: var(--loss-dim); border: 1px solid rgba(var(--loss-rgb), 0.35); }
+        .ld .gain { color: var(--gain); }
+        .ld .loss { color: var(--loss); }
+        .ld .ld-card { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 14px; }
+        .ld .ld-warn { font-size: 12.5px; line-height: 1.55; padding: 10px 14px; border-radius: 12px; color: var(--text-secondary);
+                       background: var(--loss-dim); border: 1px solid rgba(var(--loss-rgb), 0.3); }
+        .ld .ld-warn b { color: var(--loss); }
+        .ld .ld-status { padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; border-left: 4px solid var(--panel-border); }
+        .ld .ld-status.live { border-left-color: var(--loss); }
+        .ld .ld-status.shadow { border-left-color: var(--brand); }
+        .ld .ld-status-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 18px; }
         .ld .ld-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-        .ld .ld-mode { font-size: 13px; font-weight: 800; padding: 6px 12px; border-radius: 999px; letter-spacing: 0.02em; }
+        .ld .ld-mode { font-size: 12.5px; font-weight: 800; padding: 6px 12px; border-radius: 999px; letter-spacing: 0.02em; white-space: nowrap; }
         .ld .ld-mode.live { background: var(--loss); color: #fff; }
         .ld .ld-mode.shadow { background: var(--brand-dim); color: var(--brand); border: 1px solid var(--brand-border); }
         .ld .ld-mode.off { background: var(--canvas-soft); color: var(--text-muted); border: 1px solid var(--panel-border); }
         .ld .ld-what { font-size: 13px; color: var(--text-muted); }
-        .ld .ld-facts { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--text-muted); }
+        .ld .ld-facts { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12px; color: var(--text-muted); }
         .ld .ld-facts b { color: var(--text); }
-        .ld .ld-alert { font-size: 12.5px; font-weight: 700; color: var(--loss); }
-        .ld .ld-note { font-size: 12px; color: var(--text-muted); }
-        .ld .ld-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
-        .ld .ld-tile { display: flex; flex-direction: column; gap: 4px; background: var(--panel); border: 1px solid var(--panel-border);
-                       border-radius: 14px; padding: 14px 16px; }
-        .ld .ld-k { font-size: 10.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); }
-        .ld .ld-v { font-family: var(--font-data); font-size: 22px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
-        .ld .ld-s { font-size: 12px; color: var(--text-muted); }
-        .ld .ld-ctl { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border-radius: 14px; background: var(--canvas-soft);
+        .ld .ld-alert { font-size: 12.5px; font-weight: 700; color: var(--loss); padding: 8px 12px; border-radius: 10px; background: var(--loss-dim); }
+        .ld .ld-note { font-size: 12px; color: var(--text-muted); padding: 8px 12px; border-radius: 10px; background: var(--warn-dim);
+                       border: 1px solid var(--warn-border); overflow-wrap: anywhere; }
+        .ld .ld-ctl { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; border-radius: 12px; background: var(--canvas-soft);
                       border: 1px solid var(--panel-border); }
         .ld .ld-ctl-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
         .ld .ld-ctl label { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; font-weight: 700; color: var(--text-muted); }
@@ -317,22 +384,73 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
                             color: var(--text); font-size: 13px; min-width: 180px; }
         .ld .ld-btn { padding: 8px 14px; border-radius: 9px; font-size: 12.5px; font-weight: 700; cursor: pointer; background: var(--panel);
                       border: 1px solid var(--panel-border); color: var(--text); }
+        .ld .ld-btn:hover:not(:disabled) { border-color: var(--panel-border-hover); }
         .ld .ld-btn.danger { background: var(--loss); color: #fff; border-color: var(--loss); }
+        .ld .ld-btn.ld-btn-warn { color: var(--loss); border-color: rgba(var(--loss-rgb), 0.4); }
         .ld .ld-btn:disabled { opacity: 0.5; cursor: default; }
+        .ld .ld-btn:focus-visible, .ld .ld-fchip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
         .ld .ld-msg { margin: 0; font-size: 12.5px; font-weight: 700; color: var(--brand); }
-        .ld .ld-h { margin: 6px 0 0; font-size: 13.5px; font-weight: 800; color: var(--text); }
+        .ld .ld-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+        .ld .ld-tile { display: flex; flex-direction: column; gap: 5px; background: var(--panel); border: 1px solid var(--panel-border);
+                       border-radius: 14px; padding: 14px 16px; min-width: 0; }
+        .ld .ld-k { font-size: 10.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); }
+        .ld .ld-v { font-family: var(--font-data); font-size: 22px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+        .ld .ld-v.gain { color: var(--gain); }
+        .ld .ld-v.loss { color: var(--loss); }
+        .ld .ld-s { font-size: 12px; color: var(--text-muted); }
+        .ld .ld-bar { display: block; height: 5px; border-radius: 999px; background: var(--canvas-soft); overflow: hidden; }
+        .ld .ld-bar span { display: block; height: 100%; background: var(--warn); border-radius: 999px; }
+        .ld .ld-bar span.hot { background: var(--loss); }
+        .ld .ld-h { margin: 6px 0 0; font-size: 14px; font-weight: 800; color: var(--text); }
+        .ld .ld-h-row { display: flex; align-items: center; justify-content: space-between; gap: 8px 14px; flex-wrap: wrap; }
+        .ld .ld-h-aside { font-family: var(--font-data); font-size: 13px; font-weight: 700; }
         .ld .ld-scroll { overflow-x: auto; }
+        .ld .ld-log { max-height: 560px; overflow-y: auto; }
         .ld .ld-table { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
         .ld .ld-table th { font-size: 10.5px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-faint);
-                           text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--panel-border); white-space: nowrap; }
-        .ld .ld-table td { text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--panel-border); vertical-align: top; white-space: nowrap; }
+                           text-align: right; padding: 10px 12px; border-bottom: 1px solid var(--panel-border); white-space: nowrap;
+                           position: sticky; top: 0; background: var(--panel); z-index: 1; }
+        .ld .ld-table td { text-align: right; padding: 9px 12px; border-bottom: 1px solid var(--border-soft, var(--panel-border));
+                           vertical-align: top; white-space: nowrap; }
+        .ld .ld-table tbody tr:last-child td { border-bottom: 0; }
+        .ld .ld-table tbody tr:hover td { background: var(--panel-tint, var(--canvas-soft)); }
         .ld .ld-table .l { text-align: left; }
         .ld .ld-table td.l { white-space: normal; min-width: 150px; }
+        .ld .ld-num { font-family: var(--font-data); font-weight: 700; }
+        .ld .ld-row-dim td { color: var(--text-muted); }
         .ld .ld-why { max-width: 420px; }
+        .ld .ld-sub { font-size: 11.5px; color: var(--text-muted); line-height: 1.45; margin-top: 2px; white-space: normal; }
+        .ld .ld-chip { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px; margin-left: 4px;
+                       background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); }
+        .ld .ld-badge { display: inline-block; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+        .ld .ld-badge.open { background: var(--brand-dim); color: var(--brand); }
+        .ld .ld-badge.closed { background: var(--gain-dim); color: var(--gain); }
+        .ld .ld-badge.skipped { background: var(--canvas-soft); color: var(--text-muted); border: 1px solid var(--panel-border); }
+        .ld .ld-badge.error { background: var(--loss-dim); color: var(--loss); }
+        .ld .ld-side { display: inline-block; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 6px; }
+        .ld .ld-side.long { background: var(--gain-dim); color: var(--gain); }
+        .ld .ld-side.short { background: var(--loss-dim); color: var(--loss); }
+        .ld .ld-foot { margin: 0; padding: 8px 12px; font-size: 11.5px; color: var(--text-muted); border-top: 1px solid var(--panel-border); }
+        .ld .ld-pos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+        .ld .ld-pos { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; border-top: 3px solid var(--panel-border); }
+        .ld .ld-pos.long { border-top-color: var(--gain); }
+        .ld .ld-pos.short { border-top-color: var(--loss); }
+        .ld .ld-pos-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; }
+        .ld .ld-pos-pnl { font-family: var(--font-data); font-size: 20px; font-weight: 700; }
+        .ld .ld-pos-dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 10px; margin: 0; }
+        .ld .ld-pos-dl dt { font-size: 10px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); }
+        .ld .ld-pos-dl dd { margin: 0; font-family: var(--font-data); font-size: 12.5px; color: var(--text); overflow-wrap: anywhere; }
+        .ld .ld-filters { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+        .ld .ld-fchip { font-size: 12px; font-weight: 700; padding: 5px 11px; border-radius: 999px; cursor: pointer; background: var(--panel);
+                        border: 1px solid var(--panel-border); color: var(--text-muted); }
+        .ld .ld-fchip span { font-family: var(--font-data); margin-left: 3px; color: var(--text-faint); }
+        .ld .ld-fchip.on { background: var(--text); color: var(--panel); border-color: var(--text); }
+        .ld .ld-fchip.on span { color: var(--panel); }
         .ld .ld-dim { margin: 0; font-size: 12px; color: var(--text-muted); }
-        .ld .gain { color: var(--gain); }
-        .ld .loss { color: var(--loss); }
-        .ld .ld-notes { margin: 4px 0 0; padding-left: 18px; font-size: 12px; line-height: 1.6; color: var(--text-muted); }
+        .ld .ld-empty { padding: 14px 16px; border-radius: 14px; border: 1px dashed var(--panel-border); }
+        .ld .ld-more-info { padding: 12px 16px; }
+        .ld .ld-more-info summary { cursor: pointer; font-size: 13px; font-weight: 800; color: var(--text); }
+        .ld .ld-notes { margin: 10px 0 0; padding-left: 18px; font-size: 12px; line-height: 1.6; color: var(--text-muted); }
         .ld .ld-switch-row { display: flex; align-items: center; gap: 14px; }
         .ld .ld-switch { position: relative; flex: 0 0 auto; width: 62px; height: 34px; border-radius: 999px; padding: 0; border: 0;
                          background: var(--text-faint); cursor: pointer; transition: background 0.15s; }
@@ -351,14 +469,17 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         .ld .ld-seg { display: inline-flex; border: 1px solid var(--panel-border); border-radius: 10px; overflow: hidden;
                       background: var(--panel); }
         .ld .ld-seg-b { padding: 7px 14px; font-size: 13px; font-weight: 700; border: 0; border-left: 1px solid var(--panel-border);
-                        background: transparent; color: var(--text); cursor: pointer; font-variant-numeric: tabular-nums; }
+                        background: transparent; color: var(--text); cursor: pointer; font-variant-numeric: tabular-nums; white-space: nowrap; }
         .ld .ld-seg-b:first-child { border-left: 0; }
-        .ld .ld-seg-b { white-space: nowrap; }
         .ld .ld-seg-b.on { background: var(--text); color: var(--panel); }
         .ld .ld-seg-b:disabled { cursor: default; opacity: 0.6; }
         .ld .ld-seg-b:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
         .ld .ld-risk-s { flex: 1 1 260px; font-size: 12px; line-height: 1.45; color: var(--text-muted); }
-        @media (max-width: 640px) { .ld .ld-v { font-size: 19px; } .ld .ld-ctl input { min-width: 140px; } .ld .ld-seg-b { padding: 7px 10px; } }
+        @media (max-width: 640px) {
+          .ld .ld-v { font-size: 19px; } .ld .ld-ctl input { min-width: 140px; } .ld .ld-seg-b { padding: 7px 10px; }
+          .ld .ld-status { padding: 14px; } .ld .ld-pos-dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .ld .ld-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .ld .ld-tile { padding: 12px; }
+        }
       `}</style>
     </div>
   );

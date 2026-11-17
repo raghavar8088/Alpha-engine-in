@@ -621,8 +621,8 @@ async def main():
     # ── 15. the read model ──────────────────────────────────────────────────────────────────────────
     section("15. What the page reads")
     s = await M.status()
-    check("status (gold, the original routes): mode, keys, PIN, limits, its six gold picks, notes", s["keys"] and s["pin_set"]
-          and s["desk"] == "gold" and len(s["picks"]) == 6 and {p["product"] for p in s["picks"]} == {"XAUTUSD"}
+    check("status (gold, the original routes): mode, keys, PIN, limits, its seven gold picks, notes", s["keys"] and s["pin_set"]
+          and s["desk"] == "gold" and len(s["picks"]) == 7 and {p["product"] for p in s["picks"]} == {"XAUTUSD"}
           and s["limits"]["risk_usd"] == 5 and s["limits"]["daily_stop_usd"] == 20 and s["limits"]["leverage"] == 10
           and len(s["notes"]) >= 5)
     c = await M.status("crypto")
@@ -638,12 +638,13 @@ async def main():
     b16 = paper(db, "TH-01", "BTCUSD", 1, 69000.0, 68650.0, None)
     g16 = paper(db, "DR-01", "XAUTUSD", 1, 3885.0, 3880.0, 3895.0)
     old = paper(db, "RU-04", "BTCUSD", 1, 69000.0, 68650.0, None, ago=20)     # a former gold-desk bitcoin pick
-    tlg = paper(db, "TL-04", "XAUTUSD", 1, 3885.0, 3880.0, 3895.0, ago=20)    # TL-04's gold book is not a pick
+    tlg = paper(db, "CP-24", "XAUUSD", 1, 3885.0, 3880.0, 3895.0, ago=20)     # a gold book that is not a pick (TL-04's
+                                                                              # gold book became one on 16 Nov)
     await cyc(db)
     check("the bitcoin trade is the crypto desk's, the gold trade the gold desk's",
           [d["_id"] for d in db.live_crypto_trades.docs] == [b16] and [d["_id"] for d in db.live_delta_trades.docs] == [g16],
           ([d["_id"] for d in db.live_crypto_trades.docs], [d["_id"] for d in db.live_delta_trades.docs]))
-    check("a former bitcoin pick (RU-04) and TL-04's gold book are ignored by both desks: no record, no order",
+    check("a former bitcoin pick (RU-04) and a gold book that is not a pick are ignored by both desks: no record, no order",
           trade(db, old) is None and trade(db, tlg) is None and len(M.D.orders) == 2)
     check("one position on each product", M.D.pos[BTC]["size"] > 0 and M.D.pos[GOLD]["size"] > 0)
     # ── 17. a bitcoin trade from before the split ───────────────────────────────────────
@@ -749,7 +750,8 @@ async def main():
     await cyc(db)
     doc = next((d for d in db.premium_meta.docs if d["_id"] == "live_priority"), None)
     check("premium_meta 'live_priority' names every pick of both desks", doc is not None and {
-        "TH-05|BTCUSD", "TL-04|BTCUSD", "TH-01|BTCUSD", "TD-02|BTCUSD", "RU-02|XAUTUSD", "CP-23|XAUUSD", "CP-06|XAUUSD"}
+        "TH-05|BTCUSD", "TL-04|BTCUSD", "TH-01|BTCUSD", "TD-02|BTCUSD", "RU-02|XAUTUSD", "CP-23|XAUUSD", "CP-06|XAUUSD",
+        "TL-04|XAUTUSD"}
         <= set(doc["books"]), doc)
     db.premium_meta.docs[:] = [d for d in db.premium_meta.docs if d["_id"] != "live_priority"]
     await cyc(db)
@@ -794,11 +796,14 @@ async def main():
     check("one contract is picked with the PIN like an amount: $3, then back to one contract", not r1["ok"] and r2["ok"]
           and c3["sizing"] == "risk" and c3["risk_usd"] == 3 and r3["ok"] and c4["sizing"] == "min", (r1, r2, c3, r3, c4))
     c, g = await M.status("crypto"), await M.status()
-    check("the picks: TD-02 joins TH-05, TL-04 and TH-01; CP-06 joins the five gold; each new one carries its own pick time",
-          [p["acct"] for p in c["picks"]] == ["TH-05", "TL-04", "TH-01", "TD-02"] and [p["acct"] for p in g["picks"]][-1] == "CP-06"
-          and len(g["picks"]) == 6 and all((p.get("picked_at") or "").startswith("2026-11-15")
-                                           for p in c["picks"] + g["picks"] if p["acct"] in ("TD-02", "CP-06"))
-          and all(p.get("picked_at") is None for p in c["picks"] + g["picks"] if p["acct"] not in ("TD-02", "CP-06")),
+    late = {("TD-02", "BTCUSD"): "2026-11-15", ("CP-06", "XAUUSD"): "2026-11-15", ("TL-04", "XAUTUSD"): "2026-11-16"}
+    check("the picks: TD-02 joins TH-05, TL-04 and TH-01; CP-06 then TL-04's gold book join the five gold; each new one "
+          "carries its own pick time",
+          [p["acct"] for p in c["picks"]] == ["TH-05", "TL-04", "TH-01", "TD-02"]
+          and [p["acct"] for p in g["picks"]][-2:] == ["CP-06", "TL-04"] and len(g["picks"]) == 7
+          and all((p.get("picked_at") or "").startswith(late[(p["acct"], p["mkt"])])
+                  for p in c["picks"] + g["picks"] if (p["acct"], p["mkt"]) in late)
+          and all(p.get("picked_at") is None for p in c["picks"] + g["picks"] if (p["acct"], p["mkt"]) not in late),
           ([p["acct"] for p in c["picks"]], [p["acct"] for p in g["picks"]]))
     # ── 25. every strategy at once ─────────────────────────────────────────────────────────────────
     section("25. All four bitcoin strategies at once (15 Nov): each its own trade, stop and target; each ends on its own")
@@ -943,6 +948,34 @@ async def main():
           and trade(db, f24)["status"] == "closed" and st_of(db, "crypto")["mode"] == "off",
           (held, r.get("ok"), (trade(db, f24) or {}).get("status")))
     M.REQUIRE_PIN = True
+    # ── 26. TL-04's gold book joins the gold desk (16 Nov) ─────────────────────────────────────────
+    section("26. TL-04's gold book on the gold desk, its bitcoin book still on the bitcoin desk (16 Nov)")
+    db = fresh()
+    for coll in (db.live_delta_state, db.live_crypto_state):
+        coll.docs[0].pop("sizing", None)                       # one contract a trade
+    tg26 = paper(db, "TL-04", "XAUTUSD", -1, 3885.0, 3888.0, 3879.0)      # a $3 gold stop, 2R target
+    tb26 = paper(db, "TL-04", "BTCUSD", 1, 69000.0, 68600.0, 69800.0, ago=20)
+    await cyc(db)
+    g26, b26 = trade(db, tg26), trade(db, tb26)
+    check("TL-04's gold signal is a real XAUTUSD order of one contract on the GOLD desk, with its own stop and target",
+          g26 is not None and g26["status"] == "open" and g26["product"] == "XAUTUSD" and g26["contracts"] == 1
+          and any(d["_id"] == tg26 for d in db.live_delta_trades.docs) and own_leg(g26, "stop") is not None
+          and own_leg(g26, "target") is not None, g26 and (g26["status"], g26.get("reason")))
+    check("its bitcoin signal stays on the BITCOIN desk, as before", b26 is not None and b26["status"] == "open"
+          and b26["product"] == "BTCUSD" and any(d["_id"] == tb26 for d in db.live_crypto_trades.docs),
+          b26 and (b26["status"], b26.get("reason")))
+    g, c = await M.status(), await M.status("crypto")
+    gp = next(p for p in g["picks"] if p["acct"] == "TL-04")
+    check("the gold desk lists TL-04's gold book with its own record; the bitcoin desk still lists TL-04 on BTCUSD",
+          gp["mkt"] == "XAUTUSD" and gp["product"] == "XAUTUSD" and gp["trades"] == 14 and gp["live"]["open"] == 1
+          and [p["mkt"] for p in c["picks"] if p["acct"] == "TL-04"] == ["BTCUSD"], (gp, [p["mkt"] for p in c["picks"]]))
+    close_paper(db, tg26, "exit_signal", 3882.0)
+    advance(60)
+    await cyc(db)
+    g26 = trade(db, tg26)
+    check("its paper exit closes the real gold trade (legs cancelled first); the bitcoin trade is untouched",
+          g26["status"] == "closed" and own_leg(g26, "stop")["state"] == own_leg(g26, "target")["state"] == "cancelled"
+          and trade(db, tb26)["status"] == "open", (g26["status"], g26.get("close_reason")))
 
 
 if __name__ == "__main__":

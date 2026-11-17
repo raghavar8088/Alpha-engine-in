@@ -129,6 +129,10 @@ GOLD_PICKS: tuple[Pick, ...] = (
     # added by the owner on 15 Nov 2026 from the Gold tab's ranking; record = its gold paper trades at 13:40 IST
     Pick("CP-06", "XAUUSD", "XAUTUSD", "Triple top / triple bottom", 3, 1.44, 0.37, 67, "never backtested",
          "2026-11-15T13:40:00+05:30"),
+    # added by the owner on 16 Nov 2026 from the Gold tab: TL-04's GOLD book (its bitcoin book stays on the crypto desk;
+    # a pick is (account, market), so the two never meet). Record = its XAUTUSD paper trades at 23:33 IST.
+    Pick("TL-04", "XAUTUSD", "XAUTUSD", "EMA 200 + RSI 50 + engulfing, stop two candles, 2R", 14, 3.13, 0.61, 43,
+         "loses: -0.035R a trade over 1,304 trades (t -1.0)", "2026-11-16T23:33:00+05:30"),
 )
 # picked by the owner on 14 Nov 2026 from the Crypto tab; records = their bitcoin paper trades at 09:44 IST
 CRYPTO_PICKS: tuple[Pick, ...] = (
@@ -143,18 +147,18 @@ CRYPTO_PICKS: tuple[Pick, ...] = (
          "loses: -0.37R a trade over 998 trades (t -3.5)", "2026-11-15T13:40:00+05:30"),
 )
 GOLD_NOTES = (
-    "Real money on six unproven gold strategies (CP-06 joined the five on 15 Nov), at the owner's chosen size: one "
-    "contract a trade, the smallest order (or $1 to $5 of risk picked on this page), and a $20 daily "
-    "loss stop.",
-    "Three of the six lose in their own 2-year backtests and three were never backtested; their good week is the only "
+    "Real money on seven unproven gold strategies (CP-06 joined the five on 15 Nov, TL-04's gold book on 16 Nov), at "
+    "the owner's chosen size: one contract a trade, the smallest order (or $1 to $5 of risk picked on this page), and a "
+    "$20 daily loss stop.",
+    "Four of the seven lose in their own 2-year backtests and three were never backtested; their good week is the only "
     "thing that picked them.",
-    "On 14 Nov 2026 the owner moved the bitcoin strategies to the Delta Exchange Live Trading module; this desk trades "
-    "gold (XAUTUSD) only.",
+    "This desk trades gold (XAUTUSD) only; the bitcoin desk is beside it on the Delta Exchange Live Trading page (since "
+    "16 Nov both desks are there). Each has its own switch and its own $20 daily stop.",
     "Each real trade is the paper desk's trade: its entry signal, its stop, its target, its exit. The paper desk sees a "
     "new bar up to a few minutes late, so a fast strategy's copy is often skipped as late or drifted rather than chased.",
     "One gold contract is 0.001 XAUT (about $4 of gold), so a trade of one contract loses cents at its stop. A trade "
     "whose one contract would lose more than $5 is skipped (or more than the chosen risk, with a dollar risk).",
-    "All six can hold a trade at the same time (from 15 Nov): each trade is its own order with its own stop and "
+    "All seven can hold a trade at the same time (from 15 Nov): each trade is its own order with its own stop and "
     "target on Delta, and Delta shows their sum as one gold position.",
     "Each trade's stop and target live on Delta itself, so it stays protected if this server goes down.",
     "Leverage is set to 10x on XAUTUSD before going live; positions are capped at $2,500 of notional.",
@@ -175,8 +179,8 @@ CRYPTO_NOTES = (
     "Each trade's stop and target live on Delta itself, so it stays protected if this server goes down.",
     "Leverage is set to 10x on BTCUSD before going live; positions are capped at $2,500 of notional.",
     "Fees and funding are Delta's own, read from its fills. Profit and loss are in US dollars.",
-    "This desk and the gold desk (Premium Strategies > Real money · Delta gold) share the Delta account and its keys; "
-    "each has its own switch and its own $20 daily stop.",
+    "This desk and the gold desk (beside it on this page, and on Premium Strategies > Real money · Delta gold) share the "
+    "Delta account and its keys; each has its own switch and its own $20 daily stop.",
 )
 
 
