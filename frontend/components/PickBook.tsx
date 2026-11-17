@@ -5,7 +5,9 @@
 // own trades. Backend: app/services/prelive_pick_books.py. Paper only: nothing here places an order.
 // Since 17 Nov 2026 also the NIFTY BANK tab's two sets (₹2 lakh / ₹10 lakh for each of the NIFTY BANK desk's ten): the
 // summary names the copied desk (source_label) and carries the book's own caveat.
-import { useCallback, useEffect, useState } from "react";
+// Since 17 Nov 2026 also the Strategy Factory tab's Rank-band accounts (opened from PickBookBands) and its all-546 books
+// (₹2 lakh / ₹10 lakh for each of the 546): a roster that long lists the strategies that have traded, by default.
+import { useCallback, useEffect, useMemo, useState } from "react";
 import GlassPanel from "./GlassPanel";
 import ErrorBanner from "./ErrorBanner";
 import {
@@ -41,6 +43,8 @@ export default function PickBook({ book }: { book: PickBookKey }) {
   const [posTab, setPosTab] = useState<"OPEN" | "CLOSED">("OPEN");
   const [positions, setPositions] = useState<PickBookPosition[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [tradedOnly, setTradedOnly] = useState(true);              // a long roster: only those that have traded
+  const [order, setOrder] = useState<"rank" | "pnl">("rank");
 
   const load = useCallback(async () => {
     try {
@@ -65,10 +69,19 @@ export default function PickBook({ book }: { book: PickBookKey }) {
   }, [load]);
 
   const label = summary?.label ?? PICK_BOOKS.find((b) => b.key === book)?.label ?? "Paper account";
-  const shared = book === "best2L" || book === "premium50k";      // one account for the two picks
+  const band = book.startsWith("sfb");                             // a Rank band of five: one account, five slots
+  const shared = book === "best2L" || book === "premium50k" || band;  // one account for its picks
   const perStrategy = summary?.per_strategy ?? !shared;
-  const n = summary?.strategies ?? (shared ? 2 : 10);
-  const each = summary?.per_strategy_capital ?? (book === "bn2L" ? 200000 : 1000000);
+  const n = summary?.strategies ?? (band ? 5 : shared ? 2 : book.startsWith("sf_all") ? 546 : 10);
+  const each = summary?.per_strategy_capital ?? (book.endsWith("_2L") || book === "bn2L" ? 200000 : 1000000);
+  const long = n > 50;                                             // the all-546 books
+  // An older backend answers an unknown book with the first one (best2L): never show those numbers here.
+  const notOnServer = summary !== null && summary.book !== book;
+  const shown = useMemo(() => {
+    const xs = long && tradedOnly ? rows.filter((r) => r.trades || r.open_positions || r.skipped_total) : rows.slice();
+    if (order === "pnl") xs.sort((a, b) => (b.net_pnl + b.unrealized_pnl) - (a.net_pnl + a.unrealized_pnl));
+    return xs;
+  }, [rows, long, tradedOnly, order]);
   const src = summary?.source_label ?? "the tab";       // the desk this account copies, as the page names it
   const net = (summary?.realized_pnl ?? 0) + (summary?.unrealized_pnl ?? 0);
   const sk = summary?.skipped ?? {};
@@ -82,6 +95,21 @@ export default function PickBook({ book }: { book: PickBookKey }) {
     price_above_cap: "one lot costs more than a position may use",
     no_cash: "not enough free cash",
   };
+
+  if (notOnServer) {
+    return (
+      <GlassPanel title={label}>
+        <div className="wait">
+          This paper account is set up, but the server has not been updated with it yet. It starts copying on the first
+          cycle after the backend is deployed — nothing is backfilled. Until then this tab shows nothing, so no other
+          account&apos;s numbers can appear under its name.
+        </div>
+        <style jsx>{`
+          .wait { padding: 18px 20px; font-size: 12.5px; line-height: 1.55; color: var(--text-muted); }
+        `}</style>
+      </GlassPanel>
+    );
+  }
 
   return (
     <>
@@ -119,7 +147,9 @@ export default function PickBook({ book }: { book: PickBookKey }) {
       </div>
 
       <div className="tiles">
-        <Tile label="Mode" value="PAPER" sub={perStrategy ? `${n} strategies · ${inr(each)} each` : `${n} strategies · one account`} />
+        <Tile label="Mode" value="PAPER" sub={perStrategy
+          ? `${n} strategies · ${inr(each)} each${long ? ` · ${summary?.strategies_traded ?? 0} have traded` : ""}`
+          : `${n} strategies · one account`} />
         <Tile label="Equity" value={inr(summary?.equity, 2)} sub={`from ${inr(summary?.desk_capital)}`} />
         <Tile label="Net P&L" value={signed(net)} tone={tone(net) || undefined} sub={`${pctText(summary?.roi_pct)} on the book`} />
         <Tile label="Realised (after costs)" value={signed(summary?.realized_pnl)} tone={tone(summary?.realized_pnl) || undefined}
@@ -133,6 +163,25 @@ export default function PickBook({ book }: { book: PickBookKey }) {
       </div>
 
       <GlassPanel title={`The ${word(n)}, picked ${pickedOn}`} note={perStrategy ? `each on its own ${inr(each)}` : "one shared account"}>
+        {long && (
+          <div className="controls">
+            <label className="chk">
+              <input type="checkbox" checked={tradedOnly} onChange={(e) => setTradedOnly(e.target.checked)} />
+              only strategies that have traded or signalled here ({shown.length} shown of {rows.length})
+            </label>
+            {(["rank", "pnl"] as const).map((o) => (
+              <button key={o} className={order === o ? "toggle on" : "toggle"} onClick={() => setOrder(o)}>
+                {o === "rank" ? "Rank when picked" : "Net P&L here"}
+              </button>
+            ))}
+          </div>
+        )}
+        {long && tradedOnly && !shown.length ? (
+          <div className="empty">
+            No strategy has traded in this account yet. Each one trades when the tab opens a position for it; untick the
+            box to see all {rows.length}.
+          </div>
+        ) : (
         <div className="table-scroll">
           <table className="data-table">
             <thead>
@@ -153,12 +202,14 @@ export default function PickBook({ book }: { book: PickBookKey }) {
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
+              {shown.map((r) => (
                 <tr key={r.key}>
-                  <td className="rank-cell" title={`#${r.picked_rank} when picked${r.picked_score != null ? `: score ${r.picked_score.toFixed(1)}` : ""}, ${r.picked_trades} trades`
+                  <td className="rank-cell" title={r.picked_rank == null
+                    ? "Not ranked when picked: no closed trade on the tab yet"
+                    : `#${r.picked_rank} when picked${r.picked_score != null ? `: score ${r.picked_score.toFixed(1)}` : ""}, ${r.picked_trades} trades`
                     + (r.picked_bp != null ? `, ${r.picked_bp >= 0 ? "+" : ""}${r.picked_bp.toFixed(0)} bp a trade` : "")
                     + (r.picked_net_pnl != null ? `, ${signed(r.picked_net_pnl)} net there` : "")}>
-                    {r.picked_rank}{r.picked_score != null && <span className="dim"> · {r.picked_score.toFixed(1)}</span>}
+                    {r.picked_rank ?? "—"}{r.picked_score != null && <span className="dim"> · {r.picked_score.toFixed(1)}</span>}
                   </td>
                   <td style={{ textAlign: "left" }}>{r.name}</td>
                   {perStrategy && <td>{inr(r.allocation)}</td>}
@@ -177,6 +228,7 @@ export default function PickBook({ book }: { book: PickBookKey }) {
             </tbody>
           </table>
         </div>
+        )}
       </GlassPanel>
 
       <GlassPanel title="Positions">
@@ -192,7 +244,7 @@ export default function PickBook({ book }: { book: PickBookKey }) {
             {posTab === "OPEN"
               ? perStrategy
                 ? `Nothing open. A strategy’s account takes a position when ${src} opens one for it and it holds nothing.`
-                : "Nothing open. The account takes a position when the desk opens one for either strategy and a slot is free."
+                : `Nothing open. The account takes a position when the desk opens one for ${n === 2 ? "either strategy" : `any of its ${word(n)}`} and a slot is free.`
               : "No closed trades yet. The account started empty and copies only trades from its start."}
           </div>
         ) : (
@@ -249,6 +301,7 @@ export default function PickBook({ book }: { book: PickBookKey }) {
         .controls { display: flex; gap: 10px; align-items: center; padding-bottom: 10px; flex-wrap: wrap; }
         .toggle { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 8px 13px; border-radius: 9px; font-size: 12px; font-weight: 700; cursor: pointer; }
         .toggle.on { background: var(--brand-dim); border-color: rgba(var(--brand-rgb), 0.35); color: var(--brand); }
+        .chk { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; color: var(--text-muted); cursor: pointer; }
         .empty { padding: 22px 20px; font-size: 13px; color: var(--text-faint); line-height: 1.5; }
         .table-scroll { overflow-x: auto; max-height: 620px; overflow-y: auto; }
         .data-table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }

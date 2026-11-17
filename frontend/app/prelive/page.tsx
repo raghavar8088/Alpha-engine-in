@@ -20,6 +20,7 @@ import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import Top10Book from "../../components/Top10Book";
 import PickBook from "../../components/PickBook";
+import PickBookBands from "../../components/PickBookBands";
 import FactoryDeskView from "../../components/FactoryDeskView";
 import LivePaperBuying from "../../components/LivePaperBuying";
 import BankNiftyDesk from "./BankNiftyDesk";
@@ -59,9 +60,11 @@ const tone = (v: number | null | undefined) => (v === null || v === undefined ? 
 // factory: the Strategy Factory's 546 strategies on NIFTY options (2026-10-27).
 // best2L / sf_top10 / sf_top10_20: picked-strategy paper accounts (2026-11-12) - the two best of the Top 10 books on
 // Rs 2 lakh, and the Strategy Factory tab's Rank 1-10 and 11-20 on Rs 10 lakh each (app.services.prelive_pick_books).
+// sf_bands / sf_all_2L / sf_all_10L (2026-11-17): the tab's Rank in ten bands of five, each in a Rs 2 lakh and a Rs 10
+// lakh account (one overview, PickBookBands), and all 546 of its strategies on Rs 2 lakh / Rs 10 lakh each.
 type Tab = "tournament" | "research" | "livepaper" | "livepaper2L" | "top2L" | "top10L" | "best2L" | "premium50k" | "factory"
-  | "sf_top10" | "sf_top10_20";
-const PICK_TABS: Tab[] = ["best2L", "premium50k", "sf_top10", "sf_top10_20"];   // premium50k: the same two on ₹50k (16 Nov 2026)
+  | "sf_top10" | "sf_top10_20" | "sf_bands" | "sf_all_2L" | "sf_all_10L";
+const PICK_TABS: Tab[] = ["best2L", "premium50k", "sf_top10", "sf_top10_20", "sf_bands", "sf_all_2L", "sf_all_10L"];   // premium50k: the same two on ₹50k (16 Nov 2026)
 const STATUS_TONE: Record<string, string> = {
   CONFIRMED: "ok", INCUBATING: "wait", FAILED: "bad", REJECTED_ON_HISTORY: "bad",
 };
@@ -182,6 +185,9 @@ export default function PreLivePage() {
         <button className={tab === "factory" ? "dt active" : "dt"} onClick={() => setTab("factory")}>Strategy Factory · 546</button>
         <button className={tab === "sf_top10" ? "dt active" : "dt"} onClick={() => setTab("sf_top10")}>Top 10 Performing Strategies · ₹10L each</button>
         <button className={tab === "sf_top10_20" ? "dt active" : "dt"} onClick={() => setTab("sf_top10_20")}>Top 10-20 Performing Strategies · ₹10L each</button>
+        <button className={tab === "sf_bands" ? "dt active" : "dt"} onClick={() => setTab("sf_bands")}>Factory Top 1-50 in Bands of 5 · ₹2L &amp; ₹10L</button>
+        <button className={tab === "sf_all_2L" ? "dt active" : "dt"} onClick={() => setTab("sf_all_2L")}>All 546 Factory Strategies · ₹2L each</button>
+        <button className={tab === "sf_all_10L" ? "dt active" : "dt"} onClick={() => setTab("sf_all_10L")}>All 546 Factory Strategies · ₹10L each</button>
       </div>
 
       {error && <ErrorBanner message={error} />}
@@ -190,7 +196,10 @@ export default function PreLivePage() {
         <FactoryDeskView desk="index-buying" />
       ) : tab === "top2L" || tab === "top10L" ? (
         <Top10Book key={tab} desk="prelive" book={tab} />
-      ) : tab === "best2L" || tab === "premium50k" || tab === "sf_top10" || tab === "sf_top10_20" ? (
+      ) : tab === "sf_bands" ? (
+        <PickBookBands />
+      ) : tab === "best2L" || tab === "premium50k" || tab === "sf_top10" || tab === "sf_top10_20"
+          || tab === "sf_all_2L" || tab === "sf_all_10L" ? (
         <PickBook key={tab} book={tab} />
       ) : tab === "livepaper" || tab === "livepaper2L" ? (
         <LivePaperBuying key={tab} book={tab === "livepaper2L" ? "2L" : "50k"} />

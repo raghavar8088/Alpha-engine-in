@@ -4,16 +4,19 @@
   GET /api/prelive-pick-books/summary?book=best2L           capital, equity, return, costs, skips
   GET /api/prelive-pick-books/leaderboard?book=             each pick: its record here and where it stood when picked
   GET /api/prelive-pick-books/positions?book=&status=       OPEN | CLOSED | ALL
+  GET /api/prelive-pick-books/accounts?group=sf-bands       every account of a group with its summary (404: no group)
 
 Books: best2L (Best Strategies of Top 10, Rs 2 lakh), sf_top10 and sf_top10_20 (the Strategy Factory tab's
-Rank 1-10 and 11-20, Rs 10 lakh each). They copy the desks' own trades (app.services.prelive_pick_books);
+Rank 1-10 and 11-20, Rs 10 lakh each); since 17 Nov 2026 the tab's Rank bands 1-5 ... 46-50 in a Rs 2 lakh and
+a Rs 10 lakh account each (sfb1_5_2L ... sfb46_50_10L, group sf-bands) and all 546 of its strategies on Rs 2 lakh
+or Rs 10 lakh each (sf_all_2L, sf_all_10L). They copy the desks' own trades (app.services.prelive_pick_books);
 nothing here places an order. Paper only. The copy loop starts with this router.
 """
 
 import asyncio
 import logging
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.api.deps import get_current_user
 from app.services import prelive_pick_books as pb
@@ -58,3 +61,14 @@ async def positions(book: str = Query("best2L"), status: str = Query("OPEN", des
                     limit: int = Query(200, ge=1, le=500), _user: dict = Depends(get_current_user)):
     return {"book": pb.normalize_book(book), "status": status.upper(),
             "positions": await pb.positions(book, status, limit)}
+
+
+@router.get("/accounts")
+async def accounts(group: str = Query("sf-bands"), _user: dict = Depends(get_current_user)):
+    """A 404 for a group this server does not have, so a page never shows another book's numbers under its
+    names (an unknown book falls back to the first)."""
+    keys = pb.groups().get(group)
+    if not keys:
+        raise HTTPException(status_code=404, detail=f"no account group {group!r}")
+    rows = await pb.accounts(group)
+    return {"group": group, "accounts": rows, "total": len(rows)}

@@ -5,9 +5,15 @@
 //   sf_top10     the Strategy Factory tab's Rank 1-10, ₹10 lakh for each strategy
 //   sf_top10_20  its Rank 11-20, ₹10 lakh for each strategy
 //   bn2L, bn10L  (17 Nov 2026, the NIFTY BANK tab) the NIFTY BANK desk's ten strategies, ₹2 lakh / ₹10 lakh for each
+//   sfb1_5_2L ... sfb46_50_10L  (17 Nov 2026) the Strategy Factory tab's Rank in bands of five (1-5 ... 46-50), each
+//                band in one ₹2 lakh and one ₹10 lakh account (five slots), shown together: fetchPickBookAccounts
+//   sf_all_2L, sf_all_10L       (17 Nov 2026) all 546 of the tab's strategies, ₹2 lakh / ₹10 lakh for each
 import { apiFetch } from "./api";
 
-export type PickBookKey = "best2L" | "premium50k" | "sf_top10" | "sf_top10_20" | "bn2L" | "bn10L";
+export type SfBandBookKey = `sfb${number}_${number}_${"2L" | "10L"}`;
+export type PickBookKey = "best2L" | "premium50k" | "sf_top10" | "sf_top10_20" | "bn2L" | "bn10L"
+  | "sf_all_2L" | "sf_all_10L" | SfBandBookKey;
+export type PickBookGroup = "sf-bands";
 
 export const PICK_BOOKS: { key: PickBookKey; label: string }[] = [
   { key: "best2L", label: "Best Strategies of Top 10 · ₹2 lakh" },
@@ -16,6 +22,8 @@ export const PICK_BOOKS: { key: PickBookKey; label: string }[] = [
   { key: "sf_top10_20", label: "Top 10-20 Performing Strategies · ₹10 lakh each" },
   { key: "bn2L", label: "NIFTY BANK Strategies · ₹2 lakh each" },
   { key: "bn10L", label: "NIFTY BANK Strategies · ₹10 lakh each" },
+  { key: "sf_all_2L", label: "All 546 Factory Strategies · ₹2 lakh each" },
+  { key: "sf_all_10L", label: "All 546 Factory Strategies · ₹10 lakh each" },
 ];
 
 export interface PickBookSummary {
@@ -37,7 +45,11 @@ export interface PickBookSummary {
   caveat_title?: string;
   caveat?: string;
   strategies: number;
-  board_ranks: number[];
+  board_ranks: number[] | null;          // null on a book of more than 50 (its leaderboard lists them)
+  // 17 Nov 2026: the band accounts' group ("sf-bands"), their picks by name, and how many have traded here
+  group?: string | null;
+  pick_names?: string[] | null;
+  strategies_traded?: number;
   // true: every strategy has its own capital (the Strategy Factory books); false: one shared account
   per_strategy: boolean;
   per_strategy_capital: number | null;
@@ -63,7 +75,7 @@ export interface PickBookSummary {
 export interface PickBookRow {
   key: string;
   name: string;
-  picked_rank: number;
+  picked_rank: number | null;  // null: not ranked when picked (an all-546 book's strategies with no closed trade)
   picked_score: number | null;
   picked_trades: number;
   picked_bp: number | null;
@@ -124,4 +136,22 @@ export async function fetchPickBookPositions(
 ): Promise<PickBookPosition[]> {
   const r = await apiFetch(`${base}/positions?book=${book}&status=${status}&limit=${limit}`);
   return r.positions ?? [];
+}
+
+export interface PickBookAccounts {
+  group: PickBookGroup;
+  accounts: PickBookSummary[];
+  total: number;
+}
+
+/** Every account of one group, each summarised. null when the server does not have the group yet (an older
+ *  backend answers 404): the page then says so instead of showing another book's numbers. */
+export async function fetchPickBookAccounts(group: PickBookGroup): Promise<PickBookAccounts | null> {
+  try {
+    return await apiFetch(`${base}/accounts?group=${group}`);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "";
+    if (msg === "Not Found" || msg.startsWith("no account group") || msg.includes("404")) return null;
+    throw e;
+  }
 }

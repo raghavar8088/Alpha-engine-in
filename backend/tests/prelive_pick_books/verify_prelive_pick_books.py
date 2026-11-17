@@ -114,17 +114,22 @@ async def factory_books():
     await F.insert_one(fpos("g2", "SF0401", 500.0, NOW - timedelta(minutes=30), token="45407"))
 
     out = await pb.sync(entries=True)
-    errs = {k: v for k, v in out.items() if "error" in v}
+    # sync() reports per book (17 Nov 2026: a book of 546 accounts is synced from one read of each collection)
+    errs = {k: v for k, v in out.items() if "error" in v or v.get("errors")}
     check("first pass: every account of every book ran without an error",
-          len(out) == sum(len(b.accounts()) for b in pb.BOOKS.values()) and not errs, str(errs or len(out)))
+          len(out) == len(pb.BOOKS) and not errs
+          and all(v["accounts"] == len(pb.BOOKS[k].accounts()) for k, v in out.items()), str(errs or len(out)))
     out2 = await pb.sync(entries=True)                     # a copy opened in a pass is marked on the next
-    check("second pass is clean", not [k for k, v in out2.items() if "error" in v])
+    check("second pass is clean", not [k for k, v in out2.items() if "error" in v or v.get("errors")])
     rows = [r async for r in pb.POSITIONS.find({})]
-    by = {r["parent_position_id"]: r for r in rows}
+    copied = {r["parent_position_id"] for r in rows}       # in any book
+    # The checks below are about the 12 Nov Factory books; the 17 Nov band and all-546 books copy the same
+    # strategies too (verify_sf_more_books.py).
+    by = {r["parent_position_id"]: r for r in rows if r["book"] in ("sf_top10", "sf_top10_20")}
 
-    check("nothing opened before the book's start is copied", "old" not in by)
-    check("a strategy in no book is never copied", "f5" not in by)
-    check("another Strategy Factory tab's trade is never copied", "f7" not in by)
+    check("nothing opened before the book's start is copied", "old" not in copied)
+    check("a strategy in no book is never copied", "f5" not in copied)
+    check("another Strategy Factory tab's trade is never copied", "f7" not in copied)
     f1 = by.get("f1")
     lots = int(1_000_000 // (150.0 * LOT))
     check("open copy: whole lots up to the strategy's own Rs 10 lakh", f1 is not None and f1["qty"] == lots
@@ -146,7 +151,8 @@ async def factory_books():
           f"{f3 and (f3.get('qty'), f3.get('gross_pnl'), f3.get('realized_pnl'))} vs {(l3, g3, n3)}")
     f4 = by.get("f4")
     check("a Rank 11-20 strategy lands only in Top 10-20", f4 is not None and f4["book"] == "sf_top10_20"
-          and f4["account"] == "SF0116" and len([r for r in rows if r["parent_position_id"] == "f4"]) == 1)
+          and f4["account"] == "SF0116"
+          and len([r for r in rows if r["parent_position_id"] == "f4" and r["book"] in ("sf_top10", "sf_top10_20")]) == 1)
     check("two strategies on the same contract at once: each copied into its own account",
           "f6a" in by and "f6b" in by and by["f6a"]["account"] == "SF0474" and by["f6b"]["account"] == "SF0330")
     check("a strategy that lost its money cannot take the next trade (no cash)", "g1" in by and "g2" not in by)
@@ -364,7 +370,8 @@ async def banknifty_books():
         out.update(await pb.sync(entries=True, only=b))
         out.update(await pb.sync(entries=True, only=b))           # a copy opened in a pass is marked on the next
     check("bn books: every one of the 20 accounts ran without an error",
-          len(out) == 20 and not [k for k, v in out.items() if "error" in v], str(out))
+          sorted(out) == ["bn10L", "bn2L"] and all(v.get("accounts") == 10 and not v.get("errors") for v in out.values()),
+          str(out))
     asked = [t for c in BN_CALLS for t in c]
     check("bn books: only the contracts the accounts hold are quoted, each once for all twenty (a 45 s cache)",
           sorted(asked) == ["60001", "60003", "60005"], str(BN_CALLS))
@@ -471,9 +478,10 @@ def routes():
     app.include_router(r.router)
     check("the router hands its startup loop to the app", r._start_loop in app.router.on_startup)
     paths = {getattr(x, "path", "") for x in r.router.routes}
-    check("four read-only routes, no write route", paths == {
+    check("five read-only routes, no write route", paths == {
         "/api/prelive-pick-books/books", "/api/prelive-pick-books/summary",
-        "/api/prelive-pick-books/leaderboard", "/api/prelive-pick-books/positions"}
+        "/api/prelive-pick-books/leaderboard", "/api/prelive-pick-books/positions",
+        "/api/prelive-pick-books/accounts"}
         and all(x.methods == {"GET"} for x in r.router.routes), str(paths))
     c = TestClient(app)                                    # no `with`: the startup loop is not started
     s = c.get("/api/prelive-pick-books/summary", params={"book": "sf_top10"})
@@ -486,8 +494,8 @@ def routes():
     bn = c.get("/api/prelive-pick-books/summary", params={"book": "bn10L"})
     check("GET summary of a NIFTY BANK book over HTTP", bn.status_code == 200
           and bn.json()["label"] == "NIFTY BANK Strategies · ₹10 lakh each" and bn.json()["desk_capital"] == 10_000_000)
-    books = pb.books()
-    check("books(): six, with the owner's names", [b["label"] for b in books] == [
+    books = pb.books()[:6]                                 # the 17 Nov Factory accounts follow (verify_sf_more_books.py)
+    check("books(): the first six, with the owner's names", [b["label"] for b in books] == [
         "Best Strategies of Top 10 · ₹2 lakh", "Premium Option Buying Strategies · ₹50k",
         "Top 10 Performing Strategies · ₹10 lakh each", "Top 10-20 Performing Strategies · ₹10 lakh each",
         "NIFTY BANK Strategies · ₹2 lakh each", "NIFTY BANK Strategies · ₹10 lakh each"]

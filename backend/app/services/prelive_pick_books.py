@@ -42,6 +42,17 @@ THE PICKS ARE FROZEN as they stood at each book's picked_at (PICKED_AT unless th
 they are not re-picked as the boards move. Never re-pick them without the owner: a changed roster is a
 new book.
 
+MORE STRATEGY FACTORY ACCOUNTS (17 Nov 2026). The owner asked, on the same tab, for:
+  sfb1_5_2L ... sfb46_50_10L   the tab's Rank in ten bands of five (1-5, 6-10 ... 46-50), each band in a
+                               Rs 2 lakh and a Rs 10 lakh account (20 accounts). ONE shared account per band,
+                               as the Top 10 books are: a slot for each of the five, each up to a fifth of the
+                               account (Rs 40,000 / Rs 2,00,000), never two positions in one contract.
+  sf_all_2L / sf_all_10L       all 546 of the tab's strategies, each with its OWN Rs 2 lakh / Rs 10 lakh and
+                               one position at a time, as the Top 10 Performing books are.
+The roster and the Rank they were banded by are frozen in prelive_pick_roster (20:35 IST, 17 Nov 2026). The
+bands are shown together (group "sf-bands", accounts()). A book of 546 accounts is synced from one read of
+each collection a cycle (_sync_book), and plan_book runs only for an account with something to do.
+
 Paper only: nothing here places an order.
 """
 
@@ -63,6 +74,7 @@ from app.core.db import db
 from app.services import top10_books as t10
 from app.services.book_reset import naive_utc
 from app.services.live_intraday_mirror import pending_since, plan_book
+from app.services.prelive_pick_roster import PICKED_AT as SF_PICKED_AT, RANKED as SF_RANKED, SF546
 
 logger = logging.getLogger("prelive_pick_books")
 
@@ -215,6 +227,7 @@ class Book:
     source: str = "the tab"   # what the page calls the copied desk
     caveat: tuple[str, str] = ("Picked on a short, lucky-prone record, and none is validated.",   # (headline, body)
                                "This account is the out-of-sample test of whether they keep earning.")
+    group: str = ""           # accounts the page shows together ("sf-bands"); "" = its own tab
 
     @property
     def picks(self) -> tuple[t10.Pick, ...]:
@@ -410,6 +423,106 @@ BOOKS: dict[str, Book] = {
         pick_rule="the ten the NIFTY BANK desk trades, chosen by the BANKNIFTY research's pre-registered protocol "
                   "(297 tested on 2016-2026)"),
 }
+
+
+# -- the Rank-band and all-546 accounts (17 Nov 2026) ------------------------------------------------
+# Picks: prelive_pick_roster.SF546, frozen at 20:35 IST on 17 Nov 2026. Never re-pick them without the owner.
+
+SF_GROUP = "sf-bands"
+SF_SIZES = (("2L", 200000.0, "₹2 lakh"), ("10L", 1000000.0, "₹10 lakh"))
+_SF_ALL = t10._picks(list(SF546))
+_SF_TOP50 = tuple(p for p in _SF_ALL if p.rank is not None and p.rank <= 50)
+_SF_BOARD_1711 = (f"the Strategy Factory tab's Rank on Index Option Buying ({SF_RANKED} strategies with closed "
+                  "trades, 28 Oct - 17 Nov 2026)")
+_SF_DESK_1711 = dataclasses.replace(_FACTORY_DESK, board=_SF_BOARD_1711)
+_UPPER_BOUND = ("The tab buys 1 lot a signal. These accounts buy whole lots up to {room}, priced at the tab's own "
+                "1-lot fill (the ask in, the bid out) - roughly {lots} lots at the premiums these strategies have paid "
+                "(₹1,900-16,400 a lot). A real order that size would pay more to get in and out, so read the rupee "
+                "P&L as an upper bound.")
+_LUCK = ("Picked after the fact off a board of {ranked} on 1 to 31 closed trades each ({few} of the 50 have fewer "
+         "than 5). The Rank shrinks a short record toward the middle, but luck still collects at the top. On this "
+         "desk a month's top 20 option-buying strategies lost the next month 11 times in 12 (Option Buying Top 20 "
+         "study, Oct 2026).")
+
+
+def _inr(v: float) -> str:
+    """Rs in the Indian grouping: 200000 -> '₹2,00,000'."""
+    s = f"{int(round(v)):d}"
+    head, tail = s[:-3], s[-3:]
+    while len(head) > 2:
+        tail = f"{head[-2:]},{tail}"
+        head = head[:-2]
+    return f"₹{head},{tail}" if head else f"₹{tail}"
+
+
+def _lots(room: float) -> str:
+    return f"{max(int(room // 16400), 1)} to {int(room // 1900)}"
+
+
+def _twins(picks: tuple[t10.Pick, ...]) -> list[str]:
+    """Pairs in one band with the same record on the tab to the paisa: in practice the same trades."""
+    out, seen = [], set()
+    for i, a in enumerate(picks):
+        for b in picks[i + 1:]:
+            if (a.key not in seen and a.trades == b.trades and a.bp == b.bp and a.net == b.net):
+                seen.add(b.key)
+                out.append(f"#{a.rank} {a.name} and #{b.rank} {b.name} have the same record on the tab ({a.trades} "
+                           "trades, the same net to the paisa): they take the same trades, so this account usually "
+                           "holds the first and skips the second as already holding that contract.")
+    return out
+
+
+def _sf_more_books() -> dict[str, Book]:
+    """20 Rank-band accounts (ten bands of five x Rs 2 lakh / Rs 10 lakh) + the two all-546 books."""
+    out: dict[str, Book] = {}
+    few = sum(1 for p in _SF_TOP50 if p.trades < 5)
+    for lo in range(1, 51, 5):
+        hi = lo + 4
+        picks = tuple(p for p in _SF_TOP50 if lo <= p.rank <= hi)
+        rule = (f"ranks {lo}-{hi} on the Strategy Factory tab's Rank ({SF_RANKED} strategies with closed trades, "
+                "28 Oct - 17 Nov 2026), frozen at 20:35 IST on 17 Nov 2026: "
+                + "; ".join(f"#{p.rank} {p.name}" for p in picks))
+        for suffix, capital, cap_label in SF_SIZES:
+            key = f"sfb{lo}_{hi}_{suffix}"
+            slot = capital / 5
+            notes = (
+                f"One account with a slot for each of its five strategies: at most five positions at once, each up "
+                f"to a fifth of the account ({_inr(slot)}), in whole lots. Never two positions in one contract: when "
+                "two of the five want the same option at once, the second is skipped and counted.",
+                _UPPER_BOUND.format(room=f"the slot's {_inr(slot)}", lots=_lots(slot)),
+                _LUCK.format(ranked=SF_RANKED, few=few),
+                *_twins(picks),
+            )
+            out[key] = Book(
+                key=key, label=f"Strategy Factory Rank {lo}-{hi} · {cap_label}",
+                desk=dataclasses.replace(_SF_DESK_1711, picks=picks, notes=notes),
+                capital=capital, slots=5, per_strategy=False, pick_rule=rule,
+                picked_at=SF_PICKED_AT, group=SF_GROUP)
+    for suffix, capital, cap_label in SF_SIZES:
+        key = f"sf_all_{suffix}"
+        notes = (
+            f"Each of the {len(_SF_ALL)} strategies has its own {_inr(capital)} ({_inr(capital * len(_SF_ALL))} in "
+            "all) and holds one position at a time, as on the Strategy Factory tab; one strategy's losses never "
+            "reduce another's money.",
+            _UPPER_BOUND.format(room="the strategy's free cash", lots=_lots(capital)),
+            f"All {len(_SF_ALL)}, not a pick: {len(_SF_ALL) - SF_RANKED} had not closed a trade on the tab when this "
+            "account was made (1-minute strategies trade only while that feed is current; 4-hour and daily ones "
+            "signal rarely). The book's return is over every account, most of them idle, so it stays small "
+            "whichever way it goes - read each strategy's own return.",
+            "On the tab itself, 28 Oct - 17 Nov 2026 (1 lot a signal): 161 strategies closed 1,205 trades for "
+            "+₹13.35 lakh net. That is the record before this account; it starts empty.",
+        )
+        out[key] = Book(
+            key=key, label=f"All {len(_SF_ALL)} Factory Strategies · {cap_label} each",
+            desk=dataclasses.replace(_SF_DESK_1711, picks=_SF_ALL, notes=notes),
+            capital=capital, slots=1, per_strategy=True,
+            pick_rule=(f"all {len(_SF_ALL)} strategies of the Strategy Factory tab, as listed at 20:35 IST on 17 Nov "
+                       f"2026 ({SF_RANKED} of them ranked then), in Rank order"),
+            picked_at=SF_PICKED_AT)
+    return out
+
+
+BOOKS.update(_sf_more_books())
 BOOK_KEYS = list(BOOKS)
 BOOK_LABEL = {k: b.label for k, b in BOOKS.items()}
 
@@ -436,29 +549,36 @@ def _skip_doc(book: str, acct: str, day: str) -> str:
     return f"skipped:{book}:{acct}:{day}"
 
 
-async def _decided(book: str, acct: str, parents: list[dict]) -> set[str]:
-    """Parents this account has already taken or skipped."""
-    ids = [p["position_id"] for p in parents]
+async def _decided(book: str, parents_by: dict[str, list[dict]]) -> set[str]:
+    """Parents the book's accounts have already taken or skipped. A parent belongs to one account (its
+    strategy's), so one set serves them all."""
+    ids = [p["position_id"] for ps in parents_by.values() for p in ps]
     out: set[str] = set()
+    if not ids:
+        return out
     async for r in POSITIONS.find({"book": book, "parent_position_id": {"$in": ids}}, {"parent_position_id": 1}):
         out.add(r["parent_position_id"])
-    days = sorted({p.get("opened_on") for p in parents if p.get("opened_on")})
-    if days:
-        async for s in STATE.find({"_id": {"$in": [_skip_doc(book, acct, day) for day in days]}}, {"ids": 1}):
+    skip_ids = [_skip_doc(book, acct, day) for acct, ps in parents_by.items()
+                for day in sorted({p.get("opened_on") for p in ps if p.get("opened_on")})]
+    if skip_ids:
+        async for s in STATE.find({"_id": {"$in": skip_ids}}, {"ids": 1}):
             out.update(s.get("ids") or [])
     return out
 
 
-async def _totals(book: str, acct: str) -> tuple[float, float]:
-    """The account's realised P&L and the capital its open positions tie up."""
-    realized = deployed = 0.0
-    async for r in POSITIONS.find({"book": book, "account": acct},
-                                  {"status": 1, "realized_pnl": 1, "capital_deployed": 1}):
+async def _totals(book: str, accts: list[str]) -> dict[str, tuple[float, float]]:
+    """Each account's realised P&L and the capital its open positions tie up."""
+    out: dict[str, list[float]] = {a: [0.0, 0.0] for a in accts}
+    async for r in POSITIONS.find({"book": book, "account": {"$in": accts}},
+                                  {"account": 1, "status": 1, "realized_pnl": 1, "capital_deployed": 1}):
+        x = out.get(r.get("account"))
+        if x is None:
+            continue
         if r.get("status") == "OPEN":
-            deployed += r.get("capital_deployed") or 0.0
+            x[1] += r.get("capital_deployed") or 0.0
         else:
-            realized += r.get("realized_pnl") or 0.0
-    return realized, deployed
+            x[0] += r.get("realized_pnl") or 0.0
+    return {a: (v[0], v[1]) for a, v in out.items()}
 
 
 async def _closed_after(book: str, acct: str, t0: datetime | None) -> list[dict]:
@@ -472,17 +592,56 @@ async def _closed_after(book: str, acct: str, t0: datetime | None) -> list[dict]
 # -- the copy ---------------------------------------------------------------------------------------
 
 
-async def _sync_account(b: Book, acct: str, keys: set[str], entries: bool) -> dict:
-    """One account of the book: the desk's trades of its strategies, replayed in time order."""
+async def _sync_book(b: Book, entries: bool) -> dict:
+    """Every account of one book, from one read of each collection: the book's open rows, the desk's trades
+    of its strategies, what was already decided, and the totals of the accounts with something to do. An
+    account runs plan_book only when it has a trade to decide or a position to close or mark, so a book of
+    546 accounts costs a few reads a cycle, not thousands."""
     d = b.desk
     floor = max(await _start(b.key), naive_utc(t10._now()) - LOOKBACK)
-    open_rows = [r async for r in POSITIONS.find({"book": b.key, "account": acct, "status": "OPEN"})]
-    pointed = [r["parent_position_id"] for r in open_rows if r.get("parent_position_id")]
-    parents = [p for p in await d.load(floor, keys, pointed)
-               if p.get("opened_at") is not None and (p["opened_at"] >= floor or p["position_id"] in pointed)]
-    parents.sort(key=lambda p: (p["opened_at"], p["position_id"]))
-    realized, deployed = await _totals(b.key, acct)
-    decided = await _decided(b.key, acct, parents) if entries else set()
+    accts = b.accounts()
+    owner = {k: acct for acct, keys in accts for k in keys}
+    open_by: dict[str, list[dict]] = {}
+    async for r in POSITIONS.find({"book": b.key, "status": "OPEN"}):
+        open_by.setdefault(r.get("account") or SHARED, []).append(r)
+    pointed = {r["parent_position_id"] for rows in open_by.values() for r in rows if r.get("parent_position_id")}
+    parents_by: dict[str, list[dict]] = {}
+    for p in await d.load(floor, set(owner), list(pointed)):
+        acct = owner.get(p.get("key"))
+        if acct is None or p.get("opened_at") is None:
+            continue
+        if p["opened_at"] >= floor or p["position_id"] in pointed:
+            parents_by.setdefault(acct, []).append(p)
+    for ps in parents_by.values():
+        ps.sort(key=lambda p: (p["opened_at"], p["position_id"]))
+    decided = await _decided(b.key, parents_by) if entries else set()
+
+    def busy(acct: str) -> bool:
+        if open_by.get(acct):
+            return True
+        return entries and any(p["position_id"] not in decided for p in parents_by.get(acct, ()))
+
+    work = [acct for acct, _ in accts if busy(acct)]
+    totals = await _totals(b.key, work) if work else {}
+    out = {"accounts": len(accts), "active": len(work), "opened": 0, "closed": 0, "skipped": 0, "marked": 0,
+           "errors": {}}
+    for acct in work:
+        try:
+            n = await _apply_account(b, acct, parents_by.get(acct, []), open_by.get(acct, []),
+                                     *totals.get(acct, (0.0, 0.0)), decided, entries)
+        except Exception as exc:  # noqa: BLE001 - one account's bad row must not stop the rest
+            logger.warning("[prelive_pick_books] %s %s failed: %s", b.key, acct, exc, exc_info=True)
+            out["errors"][acct] = str(exc)[:200]
+            continue
+        for k, v in n.items():
+            out[k] += v
+    return out
+
+
+async def _apply_account(b: Book, acct: str, parents: list[dict], open_rows: list[dict], realized: float,
+                         deployed: float, decided: set[str], entries: bool) -> dict:
+    """One account of the book: the desk's trades of its strategies, replayed in time order."""
+    d = b.desk
     t0 = pending_since(parents, decided, open_rows, SOURCE_TAG) if entries else None
     closed_rows = await _closed_after(b.key, acct, t0) if entries else []
     plan = plan_book(capital=b.capital, realized=realized, deployed=deployed, open_rows=open_rows,
@@ -556,12 +715,11 @@ async def sync(entries: bool = True, only: str | None = None) -> dict:
         for key, b in BOOKS.items():
             if only and key != only:
                 continue
-            for acct, keys in b.accounts():
-                try:
-                    out[f"{key}:{acct}"] = await _sync_account(b, acct, keys, entries)
-                except Exception as exc:  # noqa: BLE001 - one account's bad row must not stop the rest
-                    logger.warning("[prelive_pick_books] %s %s failed: %s", key, acct, exc, exc_info=True)
-                    out[f"{key}:{acct}"] = {"error": str(exc)[:200]}
+            try:
+                out[key] = await _sync_book(b, entries)
+            except Exception as exc:  # noqa: BLE001 - one book's failure must not stop the rest
+                logger.warning("[prelive_pick_books] %s failed: %s", key, exc, exc_info=True)
+                out[key] = {"error": str(exc)[:200]}
             try:
                 await _snapshot(b)
             except Exception:  # noqa: BLE001
@@ -570,10 +728,12 @@ async def sync(entries: bool = True, only: str | None = None) -> dict:
 
 
 async def _snapshot(b: Book) -> None:
-    """An equity point at most every 15 minutes, or when realised P&L moves."""
+    """An equity point at most every 15 minutes in the NSE session, or whenever realised P&L moves. Outside
+    the session nothing is marked, so a point then would only repeat the last one."""
     s = await summary(b.key)
     last = await EQUITY.find_one({"book": b.key}, sort=[("ts", -1)])
-    stale = last is None or (naive_utc(t10._now()) - naive_utc(last["ts"])) > SNAPSHOT_EVERY
+    stale = last is None or (_nse_minutes()
+                             and (naive_utc(t10._now()) - naive_utc(last["ts"])) > SNAPSHOT_EVERY)
     if stale or abs((last or {}).get("realized", 0.0) - s["realized_pnl"]) > 0.005:
         await EQUITY.insert_one({"ts": t10._now(), "book": b.key, "equity": s["equity"],
                                  "realized": s["realized_pnl"], "unrealized": s["unrealized_pnl"],
@@ -609,8 +769,10 @@ async def summary(book: str) -> dict:
     cap = b.total_capital
     realized = unrealized = deployed = fees = gross = 0.0
     open_n = closed_n = wins = 0
+    traded: set[str] = set()
     async for r in POSITIONS.find({"book": b.key}, {"status": 1, "capital_deployed": 1, "unrealized_pnl": 1,
-                                                    "realized_pnl": 1, "fees": 1, "gross_pnl": 1}):
+                                                    "realized_pnl": 1, "fees": 1, "gross_pnl": 1, "key": 1}):
+        traded.add(r.get("key"))
         if r.get("status") == "OPEN":
             open_n += 1
             deployed += r.get("capital_deployed") or 0.0
@@ -635,9 +797,12 @@ async def summary(book: str) -> dict:
         "book": b.key, "books": BOOK_KEYS, "label": b.label, "book_labels": BOOK_LABEL, "module": MODULE,
         "desk": d.key, "desk_label": d.label, "mode": "paper", "enabled": ENABLED,
         "instrument": d.instrument, "cost_basis": d.cost_basis, "board": d.board, "pick_rule": b.pick_rule,
-        "notes": list(d.notes), "picked_at": b.picked_at, "roster": list(d.roster), "strategies": n,
+        "notes": list(d.notes), "picked_at": b.picked_at, "group": b.group or None, "strategies": n,
         "source_label": b.source, "route": d.route, "caveat_title": b.caveat[0], "caveat": b.caveat[1],
-        "board_ranks": [p.rank for p in b.picks], "per_strategy": b.per_strategy,
+        # the roster in full only where it is short; the all-546 books list theirs in the leaderboard
+        "roster": list(d.roster) if n <= 50 else None, "pick_names": [p.name for p in b.picks] if n <= 50 else None,
+        "board_ranks": [p.rank for p in b.picks] if n <= 50 else None,
+        "strategies_traded": len(traded - {None}), "per_strategy": b.per_strategy,
         "per_strategy_capital": b.capital if b.per_strategy else None,
         "positions_per_strategy": b.slots if b.per_strategy else None,
         "max_open_positions": b.slots * (n if b.per_strategy else 1),
@@ -707,11 +872,28 @@ async def positions(book: str, status: str = "OPEN", limit: int = 200) -> list[d
 
 
 def books() -> list[dict]:
+    """Every book and its picks (an all-546 book gives its count; its leaderboard lists them)."""
     return [{"book": b.key, "label": b.label, "capital": b.total_capital, "per_strategy": b.per_strategy,
              "per_strategy_capital": b.capital if b.per_strategy else None, "slots": b.slots,
-             "desk": b.desk.key, "pick_rule": b.pick_rule, "picked_at": b.picked_at,
+             "desk": b.desk.key, "pick_rule": b.pick_rule, "picked_at": b.picked_at, "group": b.group or None,
+             "strategies": len(b.picks),
              "picks": [{"key": p.key, "rank": p.rank, "score": p.score, "trades": p.trades, "bp": p.bp,
-                        "name": p.name, "net": p.net} for p in b.picks]} for b in BOOKS.values()]
+                        "name": p.name, "net": p.net} for p in b.picks] if len(b.picks) <= 50 else None}
+            for b in BOOKS.values()]
+
+
+def groups() -> dict[str, list[str]]:
+    """Books the page shows together, by group, in their defined order."""
+    out: dict[str, list[str]] = {}
+    for key, b in BOOKS.items():
+        if b.group:
+            out.setdefault(b.group, []).append(key)
+    return out
+
+
+async def accounts(group: str) -> list[dict]:
+    """Every account of one group, each with its summary: one call for an overview table."""
+    return list(await asyncio.gather(*(summary(k) for k in groups().get(group, []))))
 
 
 async def ensure_indexes() -> None:
