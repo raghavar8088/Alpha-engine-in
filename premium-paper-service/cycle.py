@@ -392,6 +392,7 @@ def _run_market_books(db, name: str, mine: list, errors: dict, touched: set, win
         except Exception as exc:  # noqa: BLE001
             log.exception("%s %s", a.id, bmk)
             errors[f"{a.id}|{bmk}"] = str(exc)[:200]
+        _tick(db)
     return n_docs
 
 
@@ -423,28 +424,65 @@ def _run_first_gold(db, errors: dict) -> set:
         return set()
 
 
+LIVE_EVERY_S = 60       # the quick work's rhythm, between full passes and inside them (16 Nov 2026)
+_LIVE: dict = {"on": False, "busy": False, "t": 0.0, "errors": {}, "new": {}, "done": set()}
+
+
+def _live_work(db, errors: dict, new: dict) -> set:
+    """The quick work: the Delta candles, then the bitcoin and gold books a real-money desk copies, run and sized.
+    The quick pass ("live") is just this. A full pass does it first and then again every LIVE_EVERY_S between its
+    books (_tick), so those books never wait for a slow full pass (8 minutes on 15 Nov 2026, while the backend ran its
+    weekly research), and it leaves them to this work (_quick_books). Returns the accounts it ran."""
+    _LIVE["busy"], _LIVE["t"] = True, time.time()
+    try:
+        for _sym, _mk in (("BTCUSD", "BTCUSD"), ("XAUTUSD", "XAUUSD"), ("ETHUSD", "ETHUSD")):
+            try:
+                new[_mk] = new.get(_mk, 0) + F.update_delta_candles(symbol=_sym)["new"]
+            except Exception as exc:  # noqa: BLE001
+                errors[f"feed {_mk}"] = str(exc)[:200]
+        return _run_first(db, errors) | _run_first_gold(db, errors)
+    finally:
+        _LIVE["busy"] = False
+
+
+def _tick(db) -> None:
+    """Between two books of a full pass: the quick work again once LIVE_EVERY_S has passed since it last started."""
+    if not _LIVE["on"] or _LIVE["busy"] or time.time() - _LIVE["t"] < LIVE_EVERY_S:
+        return
+    try:
+        _LIVE["done"] |= _live_work(db, _LIVE["errors"], _LIVE["new"])
+    except Exception as exc:  # noqa: BLE001 - the quick work must never stop a full pass
+        log.exception("quick work inside the full pass")
+        _LIVE["errors"]["quick work"] = str(exc)[:200]
+
+
+def _quick_books(db, errors: dict) -> set:
+    """The books ("ACCT|MARKET") the quick work keeps, which a full pass then leaves to it: the books a real-money
+    desk names, except after a failure in this pass (the quick work's bitcoin or gold step, or that one book), when
+    the full pass runs them where it always did."""
+    want = set((db.premium_meta.find_one({"_id": "live_priority"}) or {}).get("books") or [])
+    btc_ok, gold_ok = "first books" not in errors, "first gold books" not in errors
+    return {k for k in want if k not in errors and (btc_ok if k.endswith("|BTCUSD") else gold_ok)}
+
+
 def run_live(db, now: datetime) -> dict:
-    """The quick pass (15 Nov 2026): every minute, the Delta candles, then the books a real-money desk copies, bitcoin
-    and gold, run and sized. The full pass over every book of the group runs every few minutes (main.interval_s) and
-    still runs these books too, so nothing depends on this pass alone."""
+    """The quick pass (15 Nov 2026): every minute between full passes, the quick work (_live_work)."""
     new, errors = {}, {}
-    for _sym, _mk in (("BTCUSD", "BTCUSD"), ("XAUTUSD", "XAUUSD"), ("ETHUSD", "ETHUSD")):
-        try:
-            new[_mk] = F.update_delta_candles(symbol=_sym)["new"]
-        except Exception as exc:  # noqa: BLE001
-            errors[f"feed {_mk}"] = str(exc)[:200]
-    first = _run_first(db, errors) | _run_first_gold(db, errors)
+    first = _live_work(db, errors, new)
     return {"new": new, "errors": errors, "first": sorted(first)}
 
 
 def run_global(db, now: datetime) -> dict:
     new, errors = {}, {}
-    for _sym, _mk in (("BTCUSD", "BTCUSD"), ("XAUTUSD", "XAUUSD"), ("ETHUSD", "ETHUSD")):   # Delta first: see _run_first
-        try:
-            new[_mk] = F.update_delta_candles(symbol=_sym)["new"]
-        except Exception as exc:  # noqa: BLE001
-            errors[f"feed {_mk}"] = str(exc)[:200]
-    first = _run_first(db, errors)
+    first = _live_work(db, errors, new)        # Delta first, then the books a real-money desk copies: see _live_work
+    _LIVE.update(on=True, errors=errors, new=new, done=set())
+    try:
+        return _run_global(db, now, new, errors, first)
+    finally:
+        _LIVE["on"] = False
+
+
+def _run_global(db, now: datetime, new: dict, errors: dict, first: set) -> dict:
     yahoo_due = time.time() - float((db.premium_meta.find_one({"_id": "yahoo_at"}) or {}).get("t") or 0) >= YAHOO_EVERY_S
     for name in (F.YF if yahoo_due else ()):
         try:
@@ -452,6 +490,7 @@ def run_global(db, now: datetime) -> dict:
         except Exception as exc:  # noqa: BLE001 - a market that cannot be fetched just waits for the next cycle
             errors[f"feed {name}"] = str(exc)[:200]
         time.sleep(0.5)
+        _tick(db)
     try:                                       # once: older bitcoin minutes for the 11-channel books' warm-up
         warm = (now.date() - YC_START_DATE).days + YC_BTC_WARM_DAYS + 1
         bf = F.backfill_delta_candles("BTCUSD", warm)
@@ -482,7 +521,10 @@ def run_global(db, now: datetime) -> dict:
     books = [(a, mk, v, R.is_overnight(a.id, mk)) for a, mk, v in C.books_in("global")]
     n_docs, touched = 0, set()
     for name in list(F.YF) + ["XAUUSD"]:
-        n_docs += _run_market_books(db, name, _market_books(books, name), errors, touched)
+        market = _market_books(books, name)
+        quick = _quick_books(db, errors) if name == "XAUUSD" else set()     # the gold books the quick work keeps
+        n_docs += _run_market_books(db, name, [b for b in market if f"{b[0].id}|{b[1]}" not in quick], errors, touched,
+                                    window=market)
     # bitcoin (Delta Exchange BTCUSD): the Crypto-playlist books, all intraday, trading from BTC_START_T
     btc_books = [b for b in books if b[1] == "BTCUSD" and not _is_yc(b[0])]
     if btc_books:
@@ -507,7 +549,10 @@ def run_global(db, now: datetime) -> dict:
                 except Exception as exc:  # noqa: BLE001
                     log.exception("%s BTCUSD", a.id)
                     errors[f"{a.id}|BTCUSD"] = str(exc)[:200]
-    yc_btc = [b for b in books if b[1] == "BTCUSD" and _is_yc(b[0]) and b[0].id not in first]   # first: done above
+                _tick(db)
+    quick = _quick_books(db, errors)                  # the bitcoin channel books the quick work keeps: left to it
+    yc_btc = [b for b in books if b[1] == "BTCUSD" and _is_yc(b[0]) and b[0].id not in first
+              and f"{b[0].id}|BTCUSD" not in quick]
     if yc_btc:
         n_docs += _run_yc_btc(db, yc_btc, errors, touched)
     yc_eth = [b for b in books if b[1] == "ETHUSD" and _is_yc(b[0])]
@@ -516,7 +561,7 @@ def run_global(db, now: datetime) -> dict:
     if touched:
         L.update_accounts(db, sorted(touched))
     L.set_signature(db, "global", sig)
-    return {"trades": n_docs, "new": new, "errors": errors, "first": sorted(first)}
+    return {"trades": n_docs, "new": new, "errors": errors, "first": sorted(first | _LIVE["done"])}
 
 
 def _run_yc_btc(db, books, errors: dict, touched: set) -> int:
@@ -549,6 +594,7 @@ def _run_yc_btc(db, books, errors: dict, touched: set) -> int:
         except Exception as exc:  # noqa: BLE001
             log.exception("%s BTCUSD", a.id)
             errors[f"{a.id}|BTCUSD"] = str(exc)[:200]
+        _tick(db)
     return n_docs
 
 
@@ -575,6 +621,7 @@ def _run_yc_eth(db, books, errors: dict, touched: set) -> int:
         except Exception as exc:  # noqa: BLE001
             log.exception("%s ETHUSD", a.id)
             errors[f"{a.id}|ETHUSD"] = str(exc)[:200]
+        _tick(db)
     return n_docs
 
 

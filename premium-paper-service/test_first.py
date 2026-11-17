@@ -7,7 +7,8 @@ pass now reads the Delta candles, runs and sizes those books, and only then does
 network, database or market data is used: the feeds, the catalog, the ledger and the channel-book runner are replaced
 by recorders, so what is checked is the order of the work and which books run where. From 15 Nov also the quick pass ("live", every
 minute: the Delta candles, then the bitcoin AND gold books a real-money desk copies), the gold books' replay window
-(the quick pass's few books warm up on the full pass's window), the supervisor's schedule and the status panel's feeds.
+(the quick pass's few books warm up on the full pass's window), the supervisor's schedule and the status panel's feeds. From 16 Nov the quick work also runs inside a full pass, every
+minute between its books, and the full pass leaves those books to it (sections 11-15).
 """
 import sys
 import types
@@ -216,6 +217,154 @@ out = SEG.feeds_now("live", {"errors": {"feed XAUUSD": "x"}})
 check("a quick pass reports the three Delta feeds (so no book looks stale between full passes)",
       sorted(out) == ["BTCUSD", "ETHUSD", "XAUUSD"] and out["XAUUSD"]["fetch_error"] == "x", out)
 check("a full pass still reports every feed", len(SEG.feeds_now("global", {})) == 8)
+
+# 11. the quick work inside a full pass (16 Nov): _tick runs it again once LIVE_EVERY_S has passed since it last
+#     started; never inside itself, never outside a full pass, and a failure never stops the pass
+calls.clear()
+mb_calls.clear()
+clock = [2_000_000_000.0]
+real_time = cycle.time.time
+cycle.time.time = lambda: clock[0]
+db = db_with({"_id": "live_priority", "books": NAMED + ["CP-23|XAUUSD"]})
+errs, news = {}, {}
+cycle._LIVE.update(on=True, busy=False, t=clock[0], errors=errs, new=news, done=set())
+cycle._tick(db)
+check("inside a full pass, before LIVE_EVERY_S has passed: no quick work", not calls and not mb_calls, (calls, mb_calls))
+clock[0] += cycle.LIVE_EVERY_S
+LAST[0] += 60
+cycle._tick(db)
+check("after LIVE_EVERY_S: the quick work again, the Delta candles, then the bitcoin and the gold books",
+      [c[0] for c in calls] == ["delta", "delta", "delta", "run", "size", "size"]
+      and mb_calls == [("XAUUSD", ["CP-23", "DR-01"], ["CP-23", "DR-01", "YT-14", "ZZ-09"])], (calls, mb_calls))
+check("the books it ran count in the pass's report, its candles in the pass's 'new'",
+      cycle._LIVE["done"] == {"CP-23", "DR-01", "TH-01", "TH-05", "TL-04"} and news == {"BTCUSD": 1, "XAUUSD": 1, "ETHUSD": 1},
+      (cycle._LIVE["done"], news))
+n = len(calls)
+clock[0] += cycle.LIVE_EVERY_S - 1
+cycle._tick(db)
+check("not again until LIVE_EVERY_S after it last started", len(calls) == n, calls[n:])
+clock[0] += 1
+cycle._LIVE["busy"] = True
+cycle._tick(db)
+check("never inside itself (the loops of its own books tick too)", len(calls) == n, calls[n:])
+cycle._LIVE.update(busy=False, on=False)
+cycle._tick(db)
+check("never outside a full pass", len(calls) == n, calls[n:])
+cycle._LIVE["on"] = True
+cycle._live_work, keep_lw = boom, cycle._live_work
+try:
+    cycle._tick(db)
+    raised = False
+except Exception:  # noqa: BLE001
+    raised = True
+cycle._live_work = keep_lw
+check("a quick work that raises does not stop the full pass; the error is reported", not raised and "quick work" in errs, errs)
+cycle._LIVE["on"] = False
+cycle.time.time = real_time
+
+# 12. a full pass does the quick work first and leaves those books to it; their market still sets the window
+calls.clear()
+mb_calls.clear()
+LAST[0] += 60
+db = db_with({"_id": "live_priority", "books": NAMED + ["CP-23|XAUUSD"]}, {"_id": "yahoo_at", "t": 0})
+info = cycle.run_global(db, datetime(2026, 11, 16, 6, 0, tzinfo=timezone.utc))
+gold = [c for c in mb_calls if c[0] == "XAUUSD"]
+check("a full pass starts with the quick work: the Delta candles, the bitcoin books, the gold books",
+      [c[0] for c in calls][:6] == ["delta", "delta", "delta", "run", "size", "size"]
+      and gold[:1] == [("XAUUSD", ["CP-23", "DR-01"], ["CP-23", "DR-01", "YT-14", "ZZ-09"])], (calls, mb_calls))
+check("its gold market then runs only the other gold books, on the whole market's window",
+      gold[1:] == [("XAUUSD", ["YT-14", "ZZ-09"], ["CP-23", "DR-01", "YT-14", "ZZ-09"])], gold)
+check("and of the bitcoin channel books only the unnamed one (ZZ-01)",
+      [c for c in calls if c[0] == "run"] == [("run", ["TH-05", "TL-04", "TH-01"]), ("run", ["ZZ-01"])], calls)
+check("its report names every book the quick work ran", info.get("first") == ["CP-23", "DR-01", "TH-01", "TH-05", "TL-04"], info)
+check("and when it ends, no more ticks", cycle._LIVE["on"] is False)
+
+# 13. after a failure in the pass the full pass runs them where it always did
+calls.clear()
+mb_calls.clear()
+LAST[0] += 60
+FAIL_ONE[0] = "TL-04"
+
+
+def run_yc_btc_err(db, books, errors, touched):          # as the real one: a book that fails leaves its error
+    n = run_yc_btc(db, books, errors, touched)
+    if FAIL_ONE[0] in [a.id for a, *_ in books]:
+        errors[f"{FAIL_ONE[0]}|BTCUSD"] = "boom"
+    return n
+
+
+cycle._run_yc_btc = run_yc_btc_err
+cycle.run_global(db, datetime(2026, 11, 16, 6, 0, tzinfo=timezone.utc))
+check("a named bitcoin book that failed in the quick work runs again in the pass",
+      [c for c in calls if c[0] == "run"][-1:] == [("run", ["TL-04", "ZZ-01"])], calls)
+FAIL_ONE[0] = None
+calls.clear()
+LAST[0] += 60
+fails = [1]
+
+
+def flaky_btc(db, books, errors, touched):
+    if fails[0]:
+        fails[0] -= 1
+        raise RuntimeError("disk")
+    return run_yc_btc(db, books, errors, touched)
+
+
+cycle._run_yc_btc = flaky_btc
+info = cycle.run_global(db, datetime(2026, 11, 16, 6, 0, tzinfo=timezone.utc))
+check("the quick work's bitcoin step fails: the pass runs every bitcoin channel book itself",
+      [c for c in calls if c[0] == "run"] == [("run", ["TH-05", "TL-04", "TH-01", "ZZ-01"])] and "first books" in info["errors"],
+      (calls, info))
+cycle._run_yc_btc = run_yc_btc
+calls.clear()
+mb_calls.clear()
+LAST[0] += 60
+gfails = [1]
+
+
+def flaky_gold(db, name, mine, errors, touched, window=None):
+    if gfails[0]:
+        gfails[0] -= 1
+        raise RuntimeError("disk")
+    return fake_market_books(db, name, mine, errors, touched, window)
+
+
+cycle._run_market_books = flaky_gold
+info = cycle.run_global(db, datetime(2026, 11, 16, 6, 0, tzinfo=timezone.utc))
+cycle._run_market_books = fake_market_books
+check("the quick work's gold step fails: the pass runs all four gold books itself",
+      [c for c in mb_calls if c[0] == "XAUUSD"] == [("XAUUSD", ["CP-23", "DR-01", "YT-14", "ZZ-09"], ["CP-23", "DR-01", "YT-14", "ZZ-09"])]
+      and "first gold books" in info["errors"], (mb_calls, info))
+
+# 14. a full pass's own loops tick after every book: each market's books, the bitcoin and the ether channel books
+import importlib.util  # noqa: E402
+_spec = importlib.util.spec_from_file_location("cycle_fresh", Path(cycle.__file__))
+fresh = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(fresh)
+ticks: list = []
+fresh._tick = lambda db: ticks.append(1)
+fresh._from = cycle._from
+fresh._save_book = lambda *a: 1
+fresh._companion = lambda *a: None
+fresh._yc_from = lambda *a, **k: date(2026, 11, 9)
+fresh._run_market_books(db_with(), "XAUUSD", gold4, {}, set(), window=gold4)
+check("each market's loop ticks after every book", len(ticks) == 4, len(ticks))
+cycle.F.btc_market = lambda since: SimpleNamespace(t=[1, 2, 3], c=[100.0, 101.0, 102.0], date=["2026-11-15"])
+cycle.F.btc_final_day = lambda: "2026-11-14"
+cycle.F.eth_market = cycle.F.btc_market
+cycle.R.YCS = SimpleNamespace(STRATEGIES={b[0].id: SimpleNamespace(needs=()) for b in BOOKS})
+cycle.R.run_yc = lambda acct, *a, **k: ([], None)
+btc4 = [(a, mk, v, False) for a, mk, v in BOOKS if mk == "BTCUSD"]
+ticks.clear()
+fresh._run_yc_btc(db_with(), btc4, {}, set())
+check("the bitcoin channel books' loop ticks after every book", len(ticks) == 4, len(ticks))
+ticks.clear()
+fresh._run_yc_eth(db_with(), btc4[:2], {}, set())
+check("and the ether books' loop", len(ticks) == 2, len(ticks))
+
+# 15. the supervisor gives a full pass room for the quick work it now does
+check("a full pass is stopped only after 25 minutes; it still starts at most every 8",
+      SUP.TIMEOUT_S["global"] == 1500 and SUP.interval_s("global") == 480 and SUP.interval_s("live") == 60, SUP.TIMEOUT_S)
 
 print("\nALL PASS" if not FAILS else f"\n{len(FAILS)} FAILED")
 sys.exit(1 if FAILS else 0)

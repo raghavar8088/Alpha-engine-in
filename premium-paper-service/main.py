@@ -24,7 +24,8 @@ from settings import APP_SECRET, BACKEND, now_ist
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 log = logging.getLogger("premium.main")
 HERE = Path(__file__).resolve().parent
-TIMEOUT_S = {"live": 120, "index": 300, "stocks": 900, "global": 900, "daily": 900}
+TIMEOUT_S = {"live": 120, "index": 300, "stocks": 900, "global": 1500, "daily": 900}   # a full pass also does the quick
+                                                                                      # work every minute (16 Nov 2026)
 ORDER = ("live", "index", "stocks", "global", "daily")     # due groups run in this order: the quick pass first
 MODULE = "premium_strategies"
 
@@ -54,8 +55,9 @@ def interval_s(group: str) -> int:
     if group == "live":
         return 60               # the books a real-money desk copies, with the Delta candles, every minute (15 Nov 2026)
     if group == "global":
-        return 480              # every book every 8 minutes (until 15 Nov back to back: 386 books starved the box's CPU);
-                                # Yahoo is throttled to every 9 minutes inside
+        return 480              # every book at most every 8 minutes (until 15 Nov back to back: 386 books starved the box's
+                                # CPU); Yahoo is throttled to every 9 minutes inside. A longer pass runs back to back and
+                                # does the quick work itself every minute between its books (cycle._tick)
     return 3600
 
 
