@@ -49,23 +49,29 @@ VALIDATE_NIGHTLY = os.getenv("TS_VALIDATE_NIGHTLY", "1").lower() not in ("0", "f
 
 async def trending_session_loop() -> None:
     """Top up bars, then scan and manage, every tick while the market is open."""
-    from app.services.desk_switches import is_on
+    from app.services.desk_switches import gated
     from . import basket
     from .bars import refresh_many
     from .engine import run_paper_cycle
 
+    async def _tick() -> dict:
+        universe = await basket.active()
+        if not universe:
+            logger.debug("[trending_stocks] basket empty — nothing to scan")
+            return {}
+        # Refreshed even in a manage-only cycle (module OFF): _manage exits on these bars.
+        await refresh_many(universe, full=False)
+        return await run_paper_cycle()
+
     while True:
         try:
-            if is_market_open() and await is_on("trending_stocks"):
-                universe = await basket.active()
-                if universe:
-                    await refresh_many(universe, full=False)
-                    result = await run_paper_cycle()
+            if is_market_open():
+                # ON: full cycle. OFF with open positions: manage-only. OFF and flat: skip.
+                result = await gated("trending_stocks", _tick)
+                if result:
                     logger.info("[trending_stocks] cycle: opened=%s managed=%s closed=%s",
                                 result.get("opened"), result.get("managed"),
                                 result.get("closed"))
-                else:
-                    logger.debug("[trending_stocks] basket empty — nothing to scan")
         except Exception:
             logger.exception("[trending_stocks] session tick failed — retrying next tick")
         await asyncio.sleep(TICK_SECONDS)

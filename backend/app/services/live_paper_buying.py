@@ -381,6 +381,11 @@ async def run_cycle(force: bool = False) -> dict:
     await _migrate()
     notes: list[str] = []
     managed = await _manage()
+    from app.services.desk_switches import DRAIN_NOTE, entries_blocked
+    if entries_blocked():
+        notes.append(DRAIN_NOTE)
+        await _persist({b: 0 for b in BOOKS}, managed, notes, 0)
+        return {"opened": 0, "managed": managed, "signals": 0, "notes": notes, "books": {}}
 
     if not force and not _market_open():
         notes.append(f"Market closed (now {_hhmm()} IST) — open positions still managed.")

@@ -187,6 +187,9 @@ def _bar_end_min(r) -> int:
 
 
 async def open_position(strat: dict, kind: str, spot: float, now: datetime, decision: dict) -> dict | None:
+    from app.services.desk_switches import entries_blocked
+    if entries_blocked():
+        return None          # switched OFF in Main Control: exits only
     daily = strat["source"] == "daily"
     expiry = await choose_expiry(now.date(), MIN_LEFT_DAILY if daily else MIN_LEFT_INTRADAY)
     if not expiry:

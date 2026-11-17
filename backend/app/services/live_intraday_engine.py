@@ -790,17 +790,21 @@ async def daily(book: str = DEFAULT_BOOK, limit: int = 60) -> list[dict]:
 async def run_cycle(dhan: DhanClient | None) -> dict:
     """One tick for ALL books: manage first, then scan, then snapshot each book."""
     managed = await manage_cycle(dhan)
+    from app.services.desk_switches import DRAIN_NOTE, entries_blocked
     if PAUSE_NEW_ENTRIES:
         scan_result = {"opened": 0, "opened_by_book": {b: 0 for b in BOOKS}, "scanned_symbols": 0,
                        "notes": ["Live Intraday entries are paused; open positions still managed."]}
     elif COPIES_TOURNAMENT:
         from app.services import live_intraday_mirror as mirror
-        synced = await mirror.sync(entries=True)
+        synced = await mirror.sync(entries=not entries_blocked())
         scan_result = {"opened": synced["opened"], "opened_by_book": {b: 0 for b in BOOKS},
                        "scanned_symbols": 0,
                        "notes": [f"Copying the tournament: {synced['opened']} opened, "
                                  f"{synced['closed']} closed, {synced['skipped']} signals no book "
                                  "could take this cycle."]}
+    elif entries_blocked():
+        scan_result = {"opened": 0, "opened_by_book": {b: 0 for b in BOOKS}, "scanned_symbols": 0,
+                       "notes": [DRAIN_NOTE]}
     else:
         scan_result = await scan_cycle(dhan)
 

@@ -341,6 +341,9 @@ async def run_cycle() -> dict:
         candidates = sorted(
             (p for p in parents.values() if p.get("status") == "OPEN"),
             key=lambda p: str(p.get("opened_at") or ""))
+        from app.services.desk_switches import entries_blocked
+        if entries_blocked():
+            candidates = []      # switched OFF in Main Control: close and mark only
         for parent in candidates:
             before = await stock_book_positions_collection.count_documents(
                 {"book": book, "parent_position_id": parent.get("position_id")})

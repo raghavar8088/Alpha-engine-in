@@ -516,6 +516,12 @@ async def sync_closes() -> int:
     return closed + legacy_closed
 
 
+def _entries_blocked() -> bool:
+    """Switched OFF in Main Control: close and mark mirrors, open none."""
+    from app.services.desk_switches import entries_blocked
+    return entries_blocked()
+
+
 async def run_cycle() -> dict:
     """Mirror the parent desk: close what it closed, open what it opened.
 
@@ -534,7 +540,7 @@ async def run_cycle() -> dict:
     if COPY_BOOKS:
         # The roster books copy the desk even when the others are back on the shortlist.
         from app.services import pattern_books_copy as copy
-        synced = await copy.sync(entries=True)
+        synced = await copy.sync(entries=not _entries_blocked())
         opened += synced["opened"]
 
     sids = list(SELECTED_BY_ID)
@@ -547,7 +553,7 @@ async def run_cycle() -> dict:
 
     # 2. Mirror parent positions that are open and not yet in each book.
     for parent in parents.values():
-        if parent.get("status") != "OPEN":
+        if parent.get("status") != "OPEN" or _entries_blocked():
             continue
         for book in LEGACY_BOOKS:
             if await _open_mirror(book, parent):
@@ -577,7 +583,7 @@ async def run_cycle() -> dict:
 async def _run_copy_cycle() -> dict:
     """Copy the whole Patterns desk into every book, then snapshot each book."""
     from app.services import pattern_books_copy as copy
-    synced = await copy.sync(entries=True)
+    synced = await copy.sync(entries=not _entries_blocked())
     legacy_closed = 0
     if SELECTED:
         # Any shortlist rows still open from before the switch close their old way.

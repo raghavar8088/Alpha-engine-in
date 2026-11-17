@@ -328,6 +328,11 @@ async def _update_score(sid: str) -> None:
 async def run_cycle() -> dict:
     notes: list[str] = []
     managed = await _manage()
+    from app.services.desk_switches import DRAIN_NOTE, entries_blocked
+    if entries_blocked():
+        notes.append(DRAIN_NOTE)
+        await _persist(0, managed, notes)
+        return {"opened": 0, "managed": managed, "signals": 0, "notes": notes}
 
     hhmm = _hhmm()
     spots = await _index_spots()

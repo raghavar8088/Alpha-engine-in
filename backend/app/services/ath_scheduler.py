@@ -31,12 +31,13 @@ SEED_BATCH = int(os.getenv("ATH_SEED_BATCH", "40"))
 
 
 async def ath_scan_loop() -> None:
-    from app.services.desk_switches import is_on
+    from app.services.desk_switches import gated
 
     while True:
         try:
-            if ath_trading.market_is_open() and await is_on("ath_trading"):
-                result = await ath_trading.run_cycle()
+            if ath_trading.market_is_open():
+                # ON: full cycle. OFF with open positions: manage-only. OFF and flat: skip.
+                result = await gated("ath_trading", ath_trading.run_cycle)
                 if result.get("opened") or result.get("closed"):
                     logger.info("ath cycle: %s", result)
         except Exception:
@@ -47,8 +48,14 @@ async def ath_scan_loop() -> None:
 async def ath_seed_loop() -> None:
     # Let the instrument map and fundamentals settle before walking history.
     await asyncio.sleep(420)
+    from app.services.desk_switches import is_on
+
     while True:
         try:
+            if not await is_on("ath_trading"):
+                # History seeding is research, not position management: OFF stops it.
+                await asyncio.sleep(SCAN_SECONDS)
+                continue
             result = await ath_trading.seed_highs(limit=SEED_BATCH)
             if result.get("ok"):
                 logger.info("ath all-time-high seed: %s", result)

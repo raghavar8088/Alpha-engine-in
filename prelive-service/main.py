@@ -18,6 +18,7 @@ Run as its own long-lived process:  python main.py
 (Optionally behind the OS scheduler / nssm so it restarts on reboot.)
 """
 
+import os
 import time
 from datetime import datetime, timedelta, timezone
 
@@ -40,6 +41,33 @@ MARKET_OPEN = 9 * 60 + 15
 MARKET_CLOSE = 15 * 60 + 30
 SESSION_END = 15 * 60 + 20
 TIMEFRAMES = ["5m", "15m", "1h"]
+# Main Control (the backend's per-module switch). Same compose network, so the service name resolves.
+BACKEND_URL = os.getenv("PRELIVE_BACKEND_URL", "http://backend:8080").rstrip("/")
+SWITCH_KEY = "prelive"
+_switch = {"at": 0.0, "on": True}
+
+
+def switch_on() -> bool:
+    """Is the Index Option Buying module switched ON in Main Control? Re-read every 30 s.
+
+    OFF: no new entries; open positions are still managed and squared off at 15:20; once
+    flat the session stops polling the feed until it is switched back on. If the backend
+    cannot say (down, older build without /status), this FAILS OPEN - the desk carries on."""
+    if time.time() - _switch["at"] < 30:
+        return _switch["on"]
+    on = True
+    try:
+        secret = os.getenv("APP_SHARED_SECRET", "")
+        r = requests.get(f"{BACKEND_URL}/api/main-control/status",
+                         headers={"x-app-secret": secret} if secret else {}, timeout=10)
+        if r.ok:
+            on = bool(((r.json().get("modules") or {}).get(SWITCH_KEY) or {}).get("enabled", True))
+    except Exception as exc:  # noqa: BLE001 - a control plane that cannot decide lets work through
+        print(f"[prelive] main control unreadable ({exc}) - carrying on", flush=True)
+    if on != _switch["on"]:
+        print(f"[prelive] Main Control switch is now {'ON' if on else 'OFF'}", flush=True)
+    _switch.update(at=time.time(), on=on)
+    return on
 BUCKET_MIN = {"5m": 5, "15m": 15, "1h": 60}
 bars_collection = _db["bars"]
 
@@ -207,6 +235,14 @@ def run_session(engine: PreLiveEngine, feed: DhanFeed):
     last_tick_log = 0.0
 
     while market_open_now() and ist_minutes() < SESSION_END:
+        paused = not switch_on()
+        engine.entries_paused = paused
+        if paused and not engine.positions:
+            # Switched OFF and flat: no feed calls at all. The half-built bars are dropped so a
+            # resume never finalises one that spans the pause.
+            forming = {tf: None for tf in TIMEFRAMES}
+            time.sleep(POLL_SECONDS * 4)
+            continue
         # int() is load-bearing: Mongo stores security_id as a string, and Dhan's
         # marketfeed rejects string IDs with HTTP 400 "814 Invalid Request" — which
         # blinded the desk the moment its first-ever positions opened (2026-07-20).

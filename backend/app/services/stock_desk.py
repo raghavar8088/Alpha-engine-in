@@ -256,6 +256,11 @@ async def run_cycle(side: str) -> dict:
         return {"side": side, "opened": 0, "managed": 0, "notes": ["No universe instruments with Angel tokens."]}
 
     managed = await _manage(side)
+    from app.services.desk_switches import DRAIN_NOTE, entries_blocked
+    if entries_blocked():
+        notes.append(DRAIN_NOTE)
+        await _persist_state(side, 0, managed, notes)
+        return {"side": side, "opened": 0, "managed": managed, "notes": notes}
 
     # Opening is for market hours only. Managing and settling above may run at any time -
     # settlement in particular has to, since it is how an expired position ever leaves - but

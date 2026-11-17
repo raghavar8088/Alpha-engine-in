@@ -619,7 +619,10 @@ async def run_paper_cycle() -> dict:
     rejections: dict[str, int] = {}
     breaker = await breaker_state()
 
-    if PAUSE_NEW_ENTRIES:
+    from app.services.desk_switches import DRAIN_NOTE, entries_blocked
+    if entries_blocked():
+        notes.append(DRAIN_NOTE)
+    elif PAUSE_NEW_ENTRIES:
         notes.append("Entries paused (TS_PAUSE_ENTRIES=1); open positions still managed.")
     elif breaker["breaker_tripped"]:
         notes.append("Risk breaker tripped — " + "; ".join(breaker["breaker_reasons"])

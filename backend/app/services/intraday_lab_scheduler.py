@@ -142,7 +142,7 @@ async def intraday_lab_loop() -> None:
                 # index expires, so this is a cheap no-op most of the week.
                 try:
                     zh = await gated("zero_hero", zero_hero_run_cycle)
-                    if zh["opened"] or zh["managed"]:
+                    if zh.get("opened") or zh.get("managed"):
                         logger.info("zero-hero: %d opened, %d managed", zh["opened"], zh["managed"])
                 except Exception:
                     logger.exception("zero-hero cycle failed")
@@ -150,9 +150,9 @@ async def intraday_lab_loop() -> None:
                 # automatically through the session and squares off at 15:15.
                 try:
                     lp = await gated("live_paper", live_paper_run_cycle)
-                    if lp["opened"] or lp["managed"]:
+                    if lp.get("opened") or lp.get("managed"):
                         logger.info("live-paper: %d opened, %d managed, %d signals",
-                                    lp["opened"], lp["managed"], lp["signals"])
+                                    lp["opened"], lp["managed"], lp.get("signals", 0))
                 except Exception:
                     logger.exception("live-paper cycle failed")
                 # Daily 15:00 ATM straddle roll across the whole stock-option universe.
@@ -218,11 +218,12 @@ async def intraday_lab_loop() -> None:
                 # roll back ticks that already committed above.
                 try:
                     mom = await gated("momentum_engine", momentum_run_cycle, dhan)
-                    logger.info(
-                        "momentum cycle: %d opened, %d managed, %d symbols scanned (regime: %s)",
-                        mom["opened"], mom["managed"], mom["scanned_symbols"],
-                        "ok" if mom["regime"]["ok"] else "risk-off",
-                    )
+                    if mom:
+                        logger.info(
+                            "momentum cycle: %d opened, %d managed, %d symbols scanned (regime: %s)",
+                            mom["opened"], mom["managed"], mom["scanned_symbols"],
+                            "ok" if mom["regime"]["ok"] else "risk-off",
+                        )
                 except Exception:
                     logger.exception("momentum cycle failed — other ticks already committed")
         except Exception:

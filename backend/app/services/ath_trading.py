@@ -613,8 +613,11 @@ async def run_cycle() -> dict:
     Managing first matters: an exit frees capital that a new signal in the same cycle can
     use, and doing it the other way round would reject entries the desk could afford.
     """
-    rows = await universe()
-    if not rows:
+    from app.services.desk_switches import entries_blocked
+    # Switched OFF in Main Control: quote and manage only what is open - no universe sweep.
+    draining = entries_blocked()
+    rows = [] if draining else await universe()
+    if not rows and not draining:
         return {"scanned": 0, "opened": 0, "closed": 0, "reason": "universe empty"}
 
     open_positions = [p async for p in ath_positions_collection.find({"status": "OPEN"})]
@@ -626,7 +629,7 @@ async def run_cycle() -> dict:
     prices = await _quotes(list(watch.values()))
 
     closed = await _manage(open_positions, prices)
-    opened, skipped = await _scan(rows, prices)
+    opened, skipped = (0, 0) if draining else await _scan(rows, prices)
 
     await _write_equity(prices)
     await ath_state_collection.replace_one(

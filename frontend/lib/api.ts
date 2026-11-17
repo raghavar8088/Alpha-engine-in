@@ -70,10 +70,97 @@ export async function refreshing<T>(fn: () => Promise<T>): Promise<T> {
  *  a 40-stock fundamental rating must not be cut off half way. Pass `timeoutMs` to override. */
 const DEFAULT_GET_TIMEOUT_MS = 60000;
 
-export async function apiFetch(path: string, init?: RequestInit & { timeoutMs?: number }) {
+// ── Request hygiene (2026-11-17) ──────────────────────────────────────────────────────────
+// The backend serves every page AND runs every desk on one event loop, on a CPU-throttled
+// box: 99 page endpoints answered in ~1 s one at a time but 13 s on average four at a time.
+// So the cheapest speed-up for every page at once is asking less:
+//   * identical GETs already in flight share one request instead of each starting another;
+//   * a tab in the background stops polling - its GETs wait until it is visible again, and
+//     (being identical) collapse into one request when it is;
+//   * a PAUSED module's rows are frozen, so repeat reads of them are answered from memory for
+//     a few minutes (Refresh still goes to the server).
+// Writes, and GETs that carry their own AbortSignal, go straight through exactly as before.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const inflightGets = new Map<string, Promise<any>>();
+let pausedApiPrefixes: string[] = [];
+const frozenReads = new Map<string, { at: number; data: unknown }>();
+const FROZEN_READ_MS = 5 * 60_000;
+const FROZEN_READ_MAX = 60;
+
+/** Called by lib/moduleStatus with the API prefixes of every PAUSED module. */
+export function setPausedApiPrefixes(prefixes: string[]) {
+  pausedApiPrefixes = prefixes.filter(Boolean);
+  for (const key of Array.from(frozenReads.keys())) {
+    if (!isPausedApi(key)) frozenReads.delete(key);
+  }
+}
+
+function isPausedApi(path: string): boolean {
+  const p = path.split("?")[0];
+  return pausedApiPrefixes.some((pre) => p === pre || p.startsWith(pre + "/"));
+}
+
+// A caller that shares another's response gets its own copy, so sorting or editing it in place
+// can never change what a different component is showing.
+function copyOf<T>(data: T): T {
+  try {
+    return typeof structuredClone === "function" ? structuredClone(data) : data;
+  } catch {
+    return data;
+  }
+}
+
+function untilVisible(): Promise<void> {
+  if (typeof document === "undefined" || !document.hidden) return Promise.resolve();
+  return new Promise((resolve) => {
+    const onChange = () => {
+      if (!document.hidden) {
+        document.removeEventListener("visibilitychange", onChange);
+        resolve();
+      }
+    };
+    document.addEventListener("visibilitychange", onChange);
+  });
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function apiFetch(path: string, init?: RequestInit & { timeoutMs?: number }): Promise<any> {
   if (FORCE_FRESH) {
     path += `${path.includes("?") ? "&" : "?"}fresh=true`;
   }
+  const method = (init?.method || "GET").toUpperCase();
+  if (method !== "GET" || init?.signal) return sendRequest(path, init);
+
+  const fresh = /[?&]fresh=true(&|$)/.test(path);
+  if (!fresh && isPausedApi(path)) {
+    const hit = frozenReads.get(path);
+    if (hit && Date.now() - hit.at < FROZEN_READ_MS) return copyOf(hit.data);
+  }
+  const key = `${path}|${init?.timeoutMs ?? ""}`;
+  const shared = inflightGets.get(key);
+  if (shared) return copyOf(await shared);
+
+  const pending = (async () => {
+    await untilVisible();
+    const data = await sendRequest(path, init);
+    if (isPausedApi(path)) {
+      if (frozenReads.size >= FROZEN_READ_MAX) {
+        const oldest = frozenReads.keys().next().value;
+        if (oldest !== undefined) frozenReads.delete(oldest);
+      }
+      frozenReads.set(path, { at: Date.now(), data: copyOf(data) });
+    }
+    return data;
+  })();
+  inflightGets.set(key, pending);
+  try {
+    return await pending;
+  } finally {
+    if (inflightGets.get(key) === pending) inflightGets.delete(key);
+  }
+}
+
+async function sendRequest(path: string, init?: RequestInit & { timeoutMs?: number }) {
   const { timeoutMs: requested, ...rest } = init ?? {};
   const method = (rest.method || "GET").toUpperCase();
   const timeoutMs = requested ?? (method === "GET" ? DEFAULT_GET_TIMEOUT_MS : 0);
@@ -7128,6 +7215,16 @@ export interface ModuleSwitch {
   // the proof the toggle does something; it resets on restart.
   blocked_requests?: number;
   last_blocked?: string;
+  // Since 2026-11-17 OFF drains: "active" = ON; "stopping" = OFF but still managing open
+  // positions to their exits; "paused" = OFF and flat, nothing of it runs. Optional so an
+  // older server's response still types.
+  state?: "active" | "stopping" | "paused";
+  state_label?: string;
+  open_positions?: number | null;
+  drains?: boolean;
+  off_behaviour?: string;
+  hrefs?: string[];
+  last_drain_s?: number | null;
 }
 
 export interface ModuleSwitches {
@@ -7139,6 +7236,44 @@ export interface ModuleSwitches {
   groups?: string[];
   blocked_total?: number;
   api_prefixes_controlled?: number;
+  stopping?: number;
+  paused?: number;
+  states?: Record<string, string>;
+  // "drain" from a server that manages open positions after OFF; absent on an older one.
+  semantics?: "drain";
+}
+
+export interface PerfEndpoint {
+  endpoint: string;
+  count: number;
+  mean_s: number;
+  p50_s: number;
+  p95_s: number;
+  max_s: number;
+  total_s: number;
+  errors: number;
+}
+
+export interface PerfLagWindow {
+  samples: number;
+  p50_ms: number;
+  p95_ms: number;
+  max_ms: number;
+  blocked_pct: number;
+}
+
+export interface PerfSummary {
+  uptime_s: number;
+  event_loop_lag: Record<"last_1m" | "last_10m" | "last_60m", PerfLagWindow>;
+  endpoints: PerfEndpoint[];
+  tracked_endpoints: number;
+  how_to_read: string;
+  fast_json?: { fast: number; fallback: number; routes: number };
+}
+
+/** Where the server's time goes (Main Control): event-loop lag + slowest endpoints. */
+export async function fetchServerPerf(limit = 15): Promise<PerfSummary> {
+  return apiFetch(`/api/main-control/perf?limit=${limit}`);
 }
 
 // ---- Main Control -------------------------------------------------------------

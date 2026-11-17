@@ -342,6 +342,11 @@ async def warm_loop() -> None:
     await asyncio.sleep(WARM_DELAY)
     while True:
         try:
+            from app.services.desk_switches import is_on
+            if not await is_on("screener"):
+                # Switched OFF in Main Control: no background scan burning the CPU.
+                await asyncio.sleep(WARM_EVERY)
+                continue
             started = time.monotonic()
             res = await scan(DEFAULT_INDEX)
             logger.info("pattern scan warm: %s rows over %s symbols in %.1fs",

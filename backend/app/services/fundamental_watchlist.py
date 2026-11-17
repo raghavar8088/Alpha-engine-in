@@ -362,7 +362,9 @@ async def loop(interval_seconds: int = 300) -> None:
             # Marks are only meaningful while there are prices, but the post-close
             # snapshot has to be able to fire, so the window runs past the close.
             if market_calendar.is_trading_day(now) and "09:10" <= now.strftime("%H:%M") <= "16:10":
-                r = await tick()
+                from app.services.desk_switches import is_on
+                # Switched OFF in Main Control: no marking, no snapshot writes.
+                r = await tick() if await is_on("fundamentals") else {}
                 if r.get("marked") or r.get("snapshots"):
                     logger.info("fundamental paper books: %s", r)
         except Exception:

@@ -15,7 +15,10 @@ import {
   setMainControlModule,
   setMainControlOnly,
   resetMainControlCounts,
+  PerfSummary,
+  fetchServerPerf,
 } from "../../lib/api";
+import { publishSnapshot } from "../../lib/moduleStatus";
 
 const REFRESH_MS = 30000;
 
@@ -26,10 +29,19 @@ export default function MainControlPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
 
+  const [perf, setPerf] = useState<PerfSummary | null>(null);
+  const drainServer = data?.semantics === "drain";
+
   const load = useCallback(async () => {
     try {
-      setData(await fetchMainControl());
+      const snap = await fetchMainControl();
+      setData(snap);
+      publishSnapshot(snap); // every page header shows the same states
       setError(null);
+      // Server load is a nice-to-have: an older server has no /perf, and that is fine.
+      fetchServerPerf(12)
+        .then(setPerf)
+        .catch(() => setPerf(null));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load Main Control");
     }
@@ -60,7 +72,9 @@ export default function MainControlPage() {
     setBusy(label);
     setNotice(null);
     try {
-      setData(await fn());
+      const snap = await fn();
+      setData(snap);
+      publishSnapshot(snap);
       setNotice(msg);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to change the switch");
@@ -74,8 +88,19 @@ export default function MainControlPage() {
       m.module,
       () => setMainControlModule(m.module, !m.enabled),
       m.enabled
-        ? `${m.label} switched OFF. Its loop stops, and its API now refuses anything that would fetch data or write a row. Open positions are left as they are and will not be managed.`
+        ? drainServer && m.drains
+          ? `${m.label} switched OFF. No new entries from now. Open positions keep being managed to their exits (shown as Stopping); once it is flat it pauses completely.`
+          : `${m.label} switched OFF. It pauses at once: its loop stops and its API refuses new work. Open positions are left as they are and are not managed.`
         : `${m.label} switched ON. Its API answers again and the loop resumes on its next tick.`,
+    );
+
+  const confirmOff = (m: ModuleSwitch) =>
+    !m.enabled ||
+    window.confirm(
+      `Switch OFF "${m.label}"?\n\n` +
+        (m.module === "live_trading" ? "This is the REAL-MONEY desk.\n\n" : "") +
+        (m.off_behaviour ||
+          "It pauses at once; open positions are left as they are and are not managed while off."),
     );
 
   const only = (m: ModuleSwitch) => {
@@ -83,8 +108,10 @@ export default function MainControlPage() {
     if (
       !window.confirm(
         `Leave ONLY "${m.label}" running and switch OFF the other ${n} modules?\n\n` +
-          `Every other desk stops polling and stops trading, and their APIs stop doing work. ` +
-          `Open positions everywhere are left unmanaged.`,
+          `Every other desk stops taking new trades, and their APIs stop doing work. ` +
+          (drainServer
+            ? `Desks still holding positions keep managing them to their exits, then pause.`
+            : `Open positions everywhere are left unmanaged.`),
       )
     )
       return;
@@ -100,8 +127,11 @@ export default function MainControlPage() {
     if (
       !enabled &&
       !window.confirm(
-        `Switch OFF all ${n} modules?\n\nEvery desk stops polling and trading, and every ` +
-          `module API stops fetching and writing. Open positions are left unmanaged. ` +
+        `Switch OFF all ${n} modules?\n\nEvery desk stops taking new trades, and every ` +
+          `module API stops fetching and writing (exits still work). ` +
+          (drainServer
+            ? `Desks still holding positions keep managing them to their exits, then pause. `
+            : `Open positions are left unmanaged. `) +
           `Main Control itself stays reachable.`,
       )
     )
@@ -149,17 +179,21 @@ export default function MainControlPage() {
         title="Main Control"
         subtitle={
           <>
-            One switch per module, for the whole application. <strong>ON</strong> is exactly
-            how the module behaves today. <strong>OFF</strong> stops its background loop{" "}
-            <em>and</em> makes its API refuse any request that would call the broker or add or
-            change a document — so a module that is off costs nothing and writes nothing.
+            One switch per module, for the whole application — the same switch sits in the
+            header of each module&apos;s own page. <strong>ON</strong> is exactly how the module
+            behaves today. <strong>OFF</strong> stops its new trades, its background loop{" "}
+            <em>and</em> any API request that would call the broker or write a document, so a
+            module you do not use stops costing CPU.
           </>
         }
         actions={
           <>
-            <StatusPill label={`${data?.on ?? 0} on`} tone="gain" />
+            <StatusPill label={`${data?.on ?? 0} active`} tone="gain" />
+            {(data?.stopping ?? 0) > 0 && (
+              <StatusPill label={`${data?.stopping} stopping`} tone="warn" pulse />
+            )}
             <StatusPill
-              label={`${data?.off ?? 0} off`}
+              label={`${drainServer ? (data?.paused ?? 0) : (data?.off ?? 0)} paused`}
               tone={(data?.off ?? 0) > 0 ? "loss" : "muted"}
             />
             {blockedTotal > 0 && (
@@ -176,15 +210,80 @@ export default function MainControlPage() {
         </div>
       )}
 
-      <div className="warn">
-        <strong>Two things OFF does not do.</strong> It does not close anything — whatever a
-        module already holds stays exactly as it is, frozen at its last mark and{" "}
-        <em>not</em> managed, so an open position will not hit its own stop while the module is
-        off. Square off first if that matters. And it does not blank the page: plain reads of
-        rows already stored still answer, so an OFF module still shows its last known numbers.{" "}
-        <strong>Those numbers are frozen, not live.</strong> Blocking reads too would only cost
-        you the ability to look at history you already have.
-      </div>
+      {drainServer ? (
+        <div className="warn">
+          <strong>What OFF does.</strong> New entries stop at once. A module still holding
+          positions shows <strong>Stopping</strong>: it keeps marking them and exiting them on
+          their own stops, targets and the mandatory square-off, and its exit buttons keep
+          working. Once it is flat it shows <strong>Paused</strong>: no polling, no broker
+          calls, no background CPU. Its page still shows its history — those numbers are frozen,
+          not live. Switching it back <strong>ON</strong> resumes on the next tick. A few
+          modules cannot manage a book without doing the very work OFF stops; their card says
+          so, and they pause at once.
+        </div>
+      ) : (
+        <div className="warn">
+          <strong>Two things OFF does not do.</strong> It does not close anything — whatever a
+          module already holds stays exactly as it is, frozen at its last mark and{" "}
+          <em>not</em> managed, so an open position will not hit its own stop while the module is
+          off. Square off first if that matters. And it does not blank the page: plain reads of
+          rows already stored still answer, so an OFF module still shows its last known numbers.{" "}
+          <strong>Those numbers are frozen, not live.</strong> Blocking reads too would only cost
+          you the ability to look at history you already have.
+        </div>
+      )}
+
+      {perf && (
+        <GlassPanel
+          title="Server load"
+          note={`since the backend started ${Math.round(perf.uptime_s / 60)} min ago`}
+        >
+          <div className="perf">
+            <div className="lag">
+              {(["last_1m", "last_10m", "last_60m"] as const).map((w) => {
+                const lag = perf.event_loop_lag[w];
+                const tone = lag.blocked_pct >= 25 ? "bad" : lag.blocked_pct >= 8 ? "mid" : "ok";
+                return (
+                  <div className="lag-cell" key={w}>
+                    <div className="lag-k">{w.replace("last_", "last ")}</div>
+                    <div className={`lag-v ${tone}`}>{lag.blocked_pct}% blocked</div>
+                    <div className="lag-s">
+                      lag p95 {lag.p95_ms} ms · max {lag.max_ms} ms
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="tb-note">
+              <strong>Blocked</strong> is the share of time the server could not answer any page
+              at all because it was busy — mostly the background desks. Switching off modules you
+              do not use lowers it; this is how to check the switches are paying off.
+            </div>
+            {perf.endpoints.length > 0 && (
+              <table className="slow">
+                <thead>
+                  <tr>
+                    <th>Slowest requests</th>
+                    <th>calls</th>
+                    <th>p50</th>
+                    <th>p95</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {perf.endpoints.slice(0, 8).map((e) => (
+                    <tr key={e.endpoint}>
+                      <td className="ep">{e.endpoint}</td>
+                      <td>{e.count}</td>
+                      <td>{e.p50_s.toFixed(2)}s</td>
+                      <td>{e.p95_s.toFixed(2)}s</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </GlassPanel>
+      )}
 
       <GlassPanel
         title="Modules"
@@ -228,7 +327,10 @@ export default function MainControlPage() {
             </div>
             <div className="grid">
               {items.map((m) => (
-                <div key={m.module} className={`mod ${m.enabled ? "on" : "off"}`}>
+                <div
+                  key={m.module}
+                  className={`mod ${m.enabled ? "on" : m.state === "stopping" ? "stopping" : "off"}`}
+                >
                   <div className="m-head">
                     <div className="m-text">
                       <div className="m-label">
@@ -247,8 +349,12 @@ export default function MainControlPage() {
                     <div className="m-ctl">
                       <button
                         className={`switch ${m.enabled ? "on" : "off"}`}
-                        onClick={() => toggle(m)}
+                        onClick={() => {
+                          if (confirmOff(m)) toggle(m);
+                        }}
                         disabled={!!busy}
+                        role="switch"
+                        aria-checked={m.enabled}
                         aria-label={`Toggle ${m.label}`}
                       >
                         <span className="knob" />
@@ -267,9 +373,23 @@ export default function MainControlPage() {
 
                   {m.shared && m.note && <div className="m-note">{m.note}</div>}
 
+                  {m.state && (
+                    <div className={`m-state ${m.state}`}>
+                      <span className="sd" />
+                      {m.state === "stopping" && (m.open_positions ?? 0) > 0
+                        ? `Stopping — managing ${m.open_positions} open position${m.open_positions === 1 ? "" : "s"}`
+                        : (m.state_label ?? m.state)}
+                    </div>
+                  )}
+                  {m.enabled && m.off_behaviour && (
+                    <div className="m-behave">{m.off_behaviour}</div>
+                  )}
+
                   {!m.enabled && (
-                    <div className="m-off">
-                      Not polling, not trading, API not fetching or writing.
+                    <div className={`m-off ${m.state === "stopping" ? "draining" : ""}`}>
+                      {m.state === "stopping"
+                        ? "No new entries. Managing what it holds to the exits, then it pauses."
+                        : "Not polling, not trading, API not fetching or writing."}
                       {(m.blocked_requests ?? 0) > 0 && (
                         <>
                           {" "}
@@ -347,6 +467,32 @@ export default function MainControlPage() {
         .m-off { margin-top: 9px; padding-top: 8px; border-top: 1px solid var(--panel-border);
                  font-size: 11px; color: var(--loss); line-height: 1.45; }
         .empty { padding: 26px 20px; text-align: center; font-size: 12.5px; color: var(--text-faint); }
+        .mod.stopping { border-color: rgba(var(--warn-rgb), .4); background: var(--warn-dim); }
+        .m-off.draining { color: var(--warn); }
+        .m-state { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 11px;
+                   font-weight: 700; color: var(--text-muted); }
+        .m-state .sd { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+        .m-state.active { color: var(--gain); }
+        .m-state.stopping { color: var(--warn); }
+        .m-state.paused { color: var(--loss); }
+        .m-behave { margin-top: 5px; font-size: 10.5px; line-height: 1.45; color: var(--text-faint); }
+        .perf { padding: 14px 20px 18px; display: flex; flex-direction: column; gap: 12px; }
+        .lag { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+        .lag-cell { border: 1px solid var(--panel-border); border-radius: 10px; padding: 10px 12px;
+                    background: var(--canvas-soft); }
+        .lag-k { font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+                 color: var(--text-faint); }
+        .lag-v { margin-top: 4px; font-size: 17px; font-weight: 800; }
+        .lag-v.ok { color: var(--gain); }
+        .lag-v.mid { color: var(--warn); }
+        .lag-v.bad { color: var(--loss); }
+        .lag-s { margin-top: 2px; font-size: 11px; color: var(--text-muted); }
+        .slow { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+        .slow th { text-align: left; font-size: 10px; font-weight: 800; letter-spacing: .05em;
+                   text-transform: uppercase; color: var(--text-faint); padding: 4px 6px; }
+        .slow td { padding: 5px 6px; border-top: 1px solid var(--panel-border); color: var(--text-muted); }
+        .slow td.ep { font-family: var(--font-mono, ui-monospace), monospace; font-size: 10.5px;
+                      color: var(--text); word-break: break-all; }
       `}</style>
     </div>
   );

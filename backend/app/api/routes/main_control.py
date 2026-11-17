@@ -7,6 +7,9 @@
   POST /api/main-control/only         this module on, every other one off
   POST /api/main-control/reset-counts clear the blocked-request counters
   GET  /api/main-control/resolve      which module owns a given path (proof, not plumbing)
+  GET  /api/main-control/status       compact key -> state map every page header polls
+  GET  /api/main-control/perf         per-endpoint latency + event-loop lag since start
+  POST /api/main-control/perf/reset   clear those gauges
 
 This router is never itself gated - see module_registry.UNGATED_PREFIXES. A switch you
 cannot reach to turn back on is not a switch.
@@ -16,6 +19,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from app.api.deps import get_current_user
+from app.core import perf
 from app.services import desk_switches as sw
 from app.services import module_gate as gate
 from app.services.module_registry import REGISTRY, is_work, owned_prefixes, resolve
@@ -126,3 +130,28 @@ async def resolve_path(
             "module is OFF and this request would do work, so it is blocked" if work else
             "module is OFF but this is a plain read of stored rows, so it is still served"),
     }
+
+
+@router.get("/status")
+async def status(_user: dict = Depends(get_current_user)):
+    """Every module's switch and state in one small body - what each page header reads.
+
+    `state` is active / stopping / paused; `hrefs` + `href` say which pages it lives on."""
+    return await sw.status()
+
+
+@router.get("/perf")
+async def perf_summary(
+    limit: int = Query(40, ge=1, le=400),
+    sort: str = Query("p95", description="p95 | total | count | max"),
+    _user: dict = Depends(get_current_user),
+):
+    """Where request time goes. Read `event_loop_lag` first - see app.core.perf."""
+    from app.core import fast_json
+    return {**perf.summary(limit=limit, sort=sort), "fast_json": fast_json.stats()}
+
+
+@router.post("/perf/reset")
+async def perf_reset(_user: dict = Depends(get_current_user)):
+    perf.reset()
+    return {"reset": True}

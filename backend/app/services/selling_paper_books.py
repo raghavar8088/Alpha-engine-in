@@ -428,6 +428,9 @@ async def run_cycle() -> dict:
                 events.append((_ts(t.get("entry_ts")), t, t))
         events.sort(key=lambda e: e[0])
 
+        from app.services.desk_switches import entries_blocked
+        if entries_blocked():
+            events = []          # switched OFF in Main Control: close and mark only
         cash = await _cash(spec)
         for _, parent, trade in events:
             for pick in spec.picks:

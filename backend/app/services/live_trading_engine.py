@@ -1729,7 +1729,13 @@ async def run_cycle(dhan: DhanClient | None) -> dict:
     # otherwise be stopped or targeted off a price that was never paid.
     fills = await reconcile_fills()
     managed = await manage_cycle(dhan)   # ALWAYS manage open real positions (broker first)
-    scan_result = await scan_cycle(dhan)  # gated by armed / kill / breaker / broker / verdicts
+    from app.services.desk_switches import DRAIN_NOTE, entries_blocked
+    if entries_blocked():
+        # Switched OFF in Main Control: the real positions above were reconciled and
+        # managed as always; no new real order is placed until it is switched back on.
+        scan_result = {"opened": 0, "scanned_symbols": 0, "notes": [DRAIN_NOTE]}
+    else:
+        scan_result = await scan_cycle(dhan)  # gated by armed / kill / breaker / broker / verdicts
     snap = await summary()
     await live_trading_equity_collection.insert_one({
         "ts": _now(), "equity": snap["equity"], "realized": snap["realized_pnl"],

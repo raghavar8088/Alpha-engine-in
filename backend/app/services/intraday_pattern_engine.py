@@ -708,7 +708,9 @@ async def run_cycle() -> dict:
     if not ENABLED:
         return {"opened": 0, "closed": 0, "notes": ["desk disabled"]}
     closed = await manage()
-    r = await scan()
+    from app.services.desk_switches import DRAIN_NOTE, entries_blocked
+    r = ({"opened": 0, "evaluated": 0, "notes": [DRAIN_NOTE]} if entries_blocked()
+         else await scan())
     snap = await summary()
     await pattern_equity_collection.insert_one({
         "ts": _now(), "equity": snap["equity"], "realized": snap["realized_pnl"],

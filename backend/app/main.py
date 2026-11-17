@@ -1236,3 +1236,10 @@ async def broker_orders_ws(websocket: WebSocket):
             await websocket.receive_text()
     except WebSocketDisconnect:
         broker_manager.manager.disconnect(user_id, websocket)
+
+# Last, after every route exists: answer default-JSON routes through one C-encoder pass
+# instead of FastAPI's pure-Python jsonable_encoder walk. Same bytes; it frees the shared
+# event loop sooner on the big list endpoints. Never raises - see app/core/fast_json.py.
+from app.core.fast_json import install as _install_fast_json  # noqa: E402
+
+_install_fast_json(app)

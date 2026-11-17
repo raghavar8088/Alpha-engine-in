@@ -986,11 +986,19 @@ async def leaderboard() -> list[dict]:
     return rows
 
 
+def _drain_blocked() -> bool:
+    from app.services.desk_switches import entries_blocked
+    return entries_blocked()
+
+
 async def run_cycle(dhan: DhanClient | None) -> dict:
     managed = await manage_cycle(dhan)
     if PAUSE_NEW_ENTRIES:
         scan = {"opened": 0, "scanned_symbols": 0, "regime": await _regime(),
                 "notes": ["Momentum entries are paused (MOMENTUM_PAUSE_ENTRIES=1); open positions still managed."]}
+    elif _drain_blocked():
+        from app.services.desk_switches import DRAIN_NOTE
+        scan = {"opened": 0, "scanned_symbols": 0, "regime": await _regime(), "notes": [DRAIN_NOTE]}
     else:
         scan = await scan_cycle(dhan)
 

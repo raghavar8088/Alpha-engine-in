@@ -606,7 +606,10 @@ async def run_cycle() -> dict:
     except Exception:  # noqa: BLE001
         logger.exception("[nifty_scalp] paper book manage failed")
 
-    result = await scan()
+    from app.services.desk_switches import DRAIN_NOTE, entries_blocked
+    # Switched OFF in Main Control: both books were marked and exited above; no scan.
+    result = ({"opened": 0, "signals": 0, "notes": [DRAIN_NOTE]} if entries_blocked()
+              else await scan())
     snap = await summary()
     await nifty_scalp_equity_collection.insert_one({
         "ts": _now(), "equity": snap["equity"], "realized": snap["realized_pnl"],

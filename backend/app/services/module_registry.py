@@ -16,15 +16,19 @@ Blocked, because these spend something:
 
 Still served, on purpose:
   * plain read GETs of rows already stored
+  * EXITS - a request whose path has an exit segment (close, flatten, kill, disarm, cancel,
+    emergency...). Switching a module off must never stop you getting OUT of what it holds;
+    every one of these reduces risk.
 
-That last line is the one worth arguing about, and the reason is practical: if OFF blocked
+That middle line is the one worth arguing about, and the reason is practical: if OFF blocked
 reads too, the module's page would show nothing but an error - you could not see the history
 you already paid for, or even confirm the thing is off. Reading a document that already
 exists costs one cheap query and fetches no market data. Blocking it would buy nothing and
 cost the ability to look.
 
 The consequence to be aware of: an OFF module's page still renders its last known numbers.
-They are frozen, not live. Nothing is updating them.
+Once it has PAUSED they are frozen, not live; while it is STOPPING its open positions are
+still being marked and exited (see desk_switches on the three states).
 
 WHY A SEGMENT MATCH AND NOT A SUBSTRING
 ---------------------------------------
@@ -41,7 +45,7 @@ page. `/api/main-control` and `/api/modules` are never gated at all, because a s
 cannot reach to turn back on is not a switch.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 
 @dataclass(frozen=True)
@@ -58,6 +62,16 @@ class Module:
     note: str = ""
     # False for the handful of keys that gate a background loop and own no endpoints.
     has_api: bool = True
+    # Where its open positions live, for the STOPPING / PAUSED decision. Each entry is a
+    # collection in the main database, or "pkg.module:ATTR" naming a collection (or an async
+    # count function) the desk keeps elsewhere. "Open" means {"status": "OPEN"}.
+    positions: tuple[str, ...] = ()
+    # True when OFF DRAINS: the engine stops new entries but keeps managing what it holds
+    # (it honours desk_switches.entries_blocked(), or takes its own entries flag). False keeps
+    # the older behaviour - OFF pauses at once and an open book is left unmanaged.
+    drains: bool = False
+    # Other pages the module lives on, beyond `href` - used to put its switch in their header.
+    hrefs: tuple[str, ...] = ()
 
 
 def _m(key, label, group, href, prefixes=(), shared=False, note="") -> Module:
@@ -199,7 +213,73 @@ _MODULES: list[Module] = [
     _m("fno_stock_roll", "F&O Stock Auto-Roll (loop)", "System", "/fno-positions"),
 ]
 
-REGISTRY: dict[str, Module] = {m.key: m for m in _MODULES}
+# What switching OFF does to each module that holds positions: key -> (where its open
+# positions live, whether OFF drains them). Kept as one table beside the list above so the
+# whole "what happens to my open book" question can be read - and audited - in one place.
+#
+# drains=True rests on a code fact, not a wish: each of these engines checks
+# desk_switches.entries_blocked() at its entry point (the first block), or already takes its
+# own entries flag and manages exits whatever the switch says (the second block). Adding a
+# key here without that check would let a "stopping" module keep opening trades.
+_OFF_BEHAVIOUR: dict[str, tuple[tuple[str, ...], bool]] = {
+    # gated() desks with an entries_blocked() guard
+    "intraday_lab": (("intraday_lab_positions",), True),
+    "live_intraday": (("live_intraday_positions",), True),
+    "live_trading": (("live_trading_positions",), True),
+    "stock_desk": (("stock_desk_positions",), True),
+    "stock_books": (("stock_book_positions",), True),
+    "selling_books": (("selling_book_positions",), True),
+    "zero_hero": (("zero_hero_positions",), True),
+    "live_paper": (("live_paper_positions",), True),
+    "morning_momentum": (("app.services.morning_momentum:open_count",), True),
+    "swing_trading": (("swing_positions",), True),
+    "pattern": (("pattern_positions",), True),
+    "pattern_books": (("pattern_book_positions",), True),
+    "nifty_scalp": (("nifty_scalp_positions", "nifty_scalp_paper_positions"), True),
+    "momentum_engine": (("momentum_positions",), True),
+    "banknifty_desk": (("bn_desk_positions",), True),
+    "ath_trading": (("ath_positions",), True),
+    "trending_stocks": (("ts_positions",), True),
+    # entries here are only ever YOUR orders, which the API refuses while OFF; orders and
+    # positions already placed keep being worked until flat
+    "paper_broker": (("pt_positions",), True),
+    # desks that take an entries flag and always manage their exits themselves
+    "gold_desk": (("gold_desk_positions",), True),
+    "index_intraday": (("app.services.index_intraday.paper:POS",), True),
+    "commodity": (("commodity_positions",), True),
+    "commodity_prelive": (("commodity_prelive_positions",), True),
+    "natgas_book": (("natgas_book_positions",), True),
+    "crypto_trading": (("app.services.crypto_trading.store:POSITIONS",), True),
+    "commodity_auto": ((), True),
+    "index_auto": ((), True),
+    "intraday_focus": ((), True),
+    # its own container (prelive-service/main.py) polls /api/main-control/status and sets the
+    # engine's entries_paused; it squares off at 15:20 as always
+    "prelive": (("prelive_positions",), True),
+    # hold positions, but OFF still pauses at once (their cycle cannot mark a book without
+    # doing the very work OFF is meant to stop) - listed so the open count is shown
+    "screener": (("screener_paper_positions",), False),
+    "long_horizon": (("long_horizon_positions",), False),
+    "strategy_factory": (("sf_positions",), False),
+    "commodity_positions": (("commodity_pos_positions",), False),
+    "fno_positions": (("fno_positions", "manual_positions"), False),
+    "fundamentals": (("fundamental_paper_positions",), False),
+}
+
+# Pages a module also lives on, beyond its own href.
+_EXTRA_HREFS: dict[str, tuple[str, ...]] = {
+    "stock_desk": ("/stock-prelive-selling",),
+    "stock_books": ("/stock-prelive-selling",),
+    "fno_positions": ("/positions",),
+}
+
+REGISTRY: dict[str, Module] = {
+    m.key: replace(m,
+                   positions=_OFF_BEHAVIOUR.get(m.key, ((), False))[0],
+                   drains=_OFF_BEHAVIOUR.get(m.key, ((), False))[1],
+                   hrefs=_EXTRA_HREFS.get(m.key, ()))
+    for m in _MODULES
+}
 
 GROUP_ORDER = ("Trading", "Strategy Lab", "Analytics", "System")
 
@@ -218,6 +298,14 @@ WORK_SEGMENTS: frozenset[str] = frozenset({
     "run", "scan", "rescan", "refresh", "resync", "sync", "backfill", "seed", "rebuild",
     "reload", "ingest", "warm", "tick", "fetch", "import",
     "quote", "quotes", "ltp", "candle", "candles", "chain", "delivery", "expiry",
+})
+
+# A path SEGMENT equal to one of these gets a module OUT of something it holds or has armed.
+# Served even while the module is OFF: a switch must never trap you in a position. Exact
+# segments, so "reset-halt" (which re-enables trading) is NOT one of them.
+EXIT_SEGMENTS: frozenset[str] = frozenset({
+    "exit", "close", "close-all", "flatten", "square-off", "squareoff", "kill", "kill-switch",
+    "panic-close-all", "disarm", "cancel", "stop", "emergency",
 })
 
 # Methods that change something. GET and HEAD are the only ones that should not.
@@ -256,6 +344,24 @@ def is_work(method: str, path: str) -> bool:
     if (method or "").upper() in WRITE_METHODS:
         return True
     return any(seg.lower() in WORK_SEGMENTS for seg in path.split("/") if seg)
+
+
+def is_exit(method: str, path: str) -> bool:
+    """A write that only reduces what a module holds - allowed while the module is OFF."""
+    if (method or "").upper() not in WRITE_METHODS:
+        return False
+    return any(seg.lower() in EXIT_SEGMENTS for seg in path.split("/") if seg)
+
+
+def pages_for(path: str) -> list[str]:
+    """Module keys whose page is this browser path (exact or a sub-page of it)."""
+    out = []
+    for m in REGISTRY.values():
+        for h in (m.href, *m.hrefs):
+            if path == h or path.startswith(h.rstrip("/") + "/"):
+                out.append(m.key)
+                break
+    return out
 
 
 def owned_prefixes() -> list[str]:

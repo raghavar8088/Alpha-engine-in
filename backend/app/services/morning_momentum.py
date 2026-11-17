@@ -100,6 +100,16 @@ def due_checkpoint(done: list[str]) -> str | None:
     return None
 
 
+async def open_count() -> int:
+    """Open positions in this desk's F&O book - Main Control's STOPPING / PAUSED probe."""
+    try:
+        acct = await target_account()
+    except MomentumError:
+        return 0                     # no account, so nothing it could be holding
+    return await fno_positions_collection.count_documents(
+        {"account_id": acct["account_id"], "status": "OPEN"})
+
+
 async def target_account() -> dict:
     if ACCOUNT_ID:
         a = await fno_accounts_collection.find_one({"account_id": ACCOUNT_ID})
@@ -265,7 +275,10 @@ async def run_cycle(force_checkpoint: str | None = None) -> dict:
 
     managed = await manage(dhan, account_id)
 
-    cp = force_checkpoint or (due_checkpoint(done) if _trading_day() else None)
+    from app.services.desk_switches import entries_blocked
+    # Switched OFF in Main Control: the book was managed above; no checkpoint buys.
+    cp = None if entries_blocked() else (
+        force_checkpoint or (due_checkpoint(done) if _trading_day() else None))
     if not cp:
         await momentum_buy_state_collection.update_one(
             {"_id": STATE_ID},

@@ -647,7 +647,11 @@ async def run_cycle(dhan: DhanClient | None) -> dict:
     """One full scan+manage pass — used by both the background loop and the
     manual 'Run now' endpoint."""
     managed = await manage_cycle(dhan)
-    if V2:
+    from app.services.desk_switches import DRAIN_NOTE, entries_blocked
+    if entries_blocked():
+        # Switched OFF in Main Control: everything open was managed above; nothing new.
+        scan_result = {"opened": 0, "scanned_symbols": 0, "notes": [DRAIN_NOTE]}
+    elif V2:
         # v2 enters on its own fast task at each bar close (intraday_v2_engine.v2_loop);
         # this 3-minute tick only marks, snapshots the equity curve and records state.
         from app.services import intraday_v2_engine

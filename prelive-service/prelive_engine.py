@@ -588,6 +588,8 @@ class PreLiveEngine:
             return None  # already holding — managed by manage_open()
         if self.breaker_tripped:
             return None  # desk-level daily circuit breaker: manage open risk, open nothing new
+        if getattr(self, "entries_paused", False):
+            return None  # switched OFF in Main Control: manage open risk, open nothing new
         if self.trades_today[key] >= 6:
             return None  # generous daily cap safety
         if len(ctx.bars) < strat.warmup:

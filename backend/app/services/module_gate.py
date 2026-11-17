@@ -34,6 +34,18 @@ not which of our modules are switched off. Outside the cache for two reasons tha
 a 423 must never be stored and replayed for 20s after the module is switched back on, and a
 blocked request must not be handed a cached body it was not allowed to generate.
 
+EXITS ALWAYS PASS
+-----------------
+A write whose path carries an exit segment (`/exit`, `/close-all`, `/flatten`, `/kill`,
+`/disarm`, `/cancel`, `/emergency`...) is served even while its module is OFF. A switched-off
+module is STOPPING while it still holds positions, and refusing the button that closes one
+would trap you in exactly the risk you were trying to step away from.
+
+IT ALSO KEEPS THE CLOCK
+-----------------------
+Because every HTTP request passes through here, this is where per-endpoint latency and the
+event-loop lag sampler (`app.core.perf`) are fed. It adds a dict update per request.
+
 FAIL OPEN
 ---------
 Every failure path lets the request through. If the switch store is unreachable, if the path
@@ -44,12 +56,14 @@ fails to block.
 """
 
 import logging
+import time
 
 from starlette.datastructures import MutableHeaders
 from starlette.responses import JSONResponse
 
+from app.core import perf
 from app.services import desk_switches as sw
-from app.services.module_registry import REGISTRY, is_ungated, is_work, resolve
+from app.services.module_registry import REGISTRY, is_exit, is_ungated, is_work, resolve
 
 logger = logging.getLogger("module_gate")
 
@@ -85,14 +99,40 @@ class ModuleGateMiddleware:
         key = resolve(path)
         if key is None or await sw.is_on(key):
             return None, False
-        # Module is OFF. Reads of rows already stored still answer; anything that would spend
-        # a broker call or write a document does not. See module_registry on why.
+        # Module is OFF. Reads of rows already stored still answer, and so does anything that
+        # gets OUT of a position; anything else that would spend a broker call or write a
+        # document does not. See module_registry on why.
+        if is_exit(method, path):
+            return key, False
         return key, is_work(method, path)
 
     async def __call__(self, scope, receive, send):
         if scope.get("type") != "http":
             return await self.app(scope, receive, send)
 
+        started = time.monotonic()
+        method, path = scope.get("method", "GET"), scope.get("path", "")
+        status_box = {"status": 0, "stream": False}
+        perf.ensure_lag_monitor()
+
+        async def timed_send(message):
+            if message["type"] == "http.response.start":
+                status_box["status"] = int(message.get("status", 0))
+                for k, v in message.get("headers") or []:
+                    if k.lower() == b"content-type" and v.startswith(b"text/event-stream"):
+                        status_box["stream"] = True
+            elif message["type"] == "http.response.body" and not message.get("more_body"):
+                if not status_box["stream"] and path.startswith("/api/"):
+                    try:
+                        perf.record(method, path, time.monotonic() - started,
+                                    status_box["status"])
+                    except Exception:  # noqa: BLE001 - a gauge must never break a response
+                        pass
+            await send(message)
+
+        await self._gate(scope, receive, timed_send)
+
+    async def _gate(self, scope, receive, send):
         key = None
         block = False
         try:
@@ -116,7 +156,8 @@ class ModuleGateMiddleware:
                 headers={"X-Module": key, "X-Module-Enabled": "0"},
                 content={
                     "detail": f"{label} is switched OFF in Main Control, so this request "
-                              f"was not run. Nothing was fetched and nothing was saved.",
+                              f"was not run. Nothing was fetched and nothing was saved. "
+                              f"Exits and closes still work while it is off.",
                     "module": key,
                     "label": label,
                     "enabled": False,

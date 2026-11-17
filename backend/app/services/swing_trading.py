@@ -355,7 +355,10 @@ async def _fill(w: dict, price: float) -> bool:
 async def run_cycle() -> dict:
     if not ENABLED:
         return {"filled": 0, "closed": 0, "watching": 0, "notes": ["desk disabled"]}
-    waiting = [w async for w in swing_watchlist_collection.find({"status": "WAITING"})]
+    from app.services.desk_switches import entries_blocked
+    # Switched OFF in Main Control: no WAITING order fills; open positions still exit below.
+    waiting = [] if entries_blocked() else [
+        w async for w in swing_watchlist_collection.find({"status": "WAITING"})]
     open_pos = [p async for p in swing_positions_collection.find({"status": "OPEN"})]
 
     symbols = sorted({w["symbol"] for w in waiting} | {p["symbol"] for p in open_pos})

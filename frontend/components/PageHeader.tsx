@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import ModuleSwitch from "./ModuleSwitch";
 
 export default function PageHeader({
   crumb,
@@ -30,8 +31,11 @@ export default function PageHeader({
           <h1>{title}</h1>
           {subtitle && <p className="sub">{subtitle}</p>}
         </div>
-        {(actions || onRefresh) && (
+        {/* Always rendered: the module's ON/OFF switch sits here on every module page, and
+            renders nothing on a page that belongs to no module. */}
+        {(
           <div className="actions">
+            <ModuleSwitch />
             {onRefresh && (
               <button
                 className="refresh"

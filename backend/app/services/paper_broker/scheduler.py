@@ -38,7 +38,11 @@ async def paper_broker_loop() -> None:
     while True:
         try:
             if market_is_open() or _within_grace():
-                result = await tick()
+                # Main Control: ON works every order; OFF keeps working the orders and
+                # positions already there until flat, then pauses. New orders are
+                # refused by the API while OFF, so nothing new can arrive.
+                from app.services.desk_switches import gated
+                result = await gated("paper_broker", tick) or {}
                 if any(result.get(k) for k in ("filled", "armed", "expired", "squared_off")):
                     logger.info("paper broker tick: %s", result)
 
