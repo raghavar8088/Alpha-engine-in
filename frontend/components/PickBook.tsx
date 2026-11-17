@@ -3,6 +3,8 @@
 // One of Index Option Buying's picked-strategy paper accounts (12 Nov 2026): Best Strategies of Top 10 (₹2 lakh, one
 // account) or the Strategy Factory tab's Top 10 / Top 10-20 (₹10 lakh for each strategy), copied from the desks'
 // own trades. Backend: app/services/prelive_pick_books.py. Paper only: nothing here places an order.
+// Since 17 Nov 2026 also the NIFTY BANK tab's two sets (₹2 lakh / ₹10 lakh for each of the NIFTY BANK desk's ten): the
+// summary names the copied desk (source_label) and carries the book's own caveat.
 import { useCallback, useEffect, useState } from "react";
 import GlassPanel from "./GlassPanel";
 import ErrorBanner from "./ErrorBanner";
@@ -66,7 +68,8 @@ export default function PickBook({ book }: { book: PickBookKey }) {
   const shared = book === "best2L" || book === "premium50k";      // one account for the two picks
   const perStrategy = summary?.per_strategy ?? !shared;
   const n = summary?.strategies ?? (shared ? 2 : 10);
-  const each = summary?.per_strategy_capital ?? 1000000;
+  const each = summary?.per_strategy_capital ?? (book === "bn2L" ? 200000 : 1000000);
+  const src = summary?.source_label ?? "the tab";       // the desk this account copies, as the page names it
   const net = (summary?.realized_pnl ?? 0) + (summary?.unrealized_pnl ?? 0);
   const sk = summary?.skipped ?? {};
   const skippedTotal = Object.values(sk).reduce((a, b) => a + b, 0);
@@ -89,7 +92,7 @@ export default function PickBook({ book }: { book: PickBookKey }) {
           <p>
             <b>{label} · {summary?.module ?? "Index Option Buying"}.</b> {word(n).replace(/^./, (c) => c.toUpperCase())} strategies,
             each with its own {inr(each)} ({inr(summary?.desk_capital ?? each * n)} in all): {summary?.pick_rule ?? "a band of the tab’s Rank"},
-            picked on {pickedOn} and fixed — they are not re-picked as ranks move. It copies the tab’s own trades of those{" "}
+            picked on {pickedOn} and fixed — they are not re-picked as ranks move. It copies {src}’s own trades of those{" "}
             {word(n)}: {summary?.instrument ?? "NIFTY options bought"}.
           </p>
         ) : (
@@ -102,7 +105,7 @@ export default function PickBook({ book }: { book: PickBookKey }) {
         <p>
           <b>Rules.</b>{" "}
           {perStrategy
-            ? "One position at a time for each strategy, as on the tab, in whole lots up to that strategy’s free cash"
+            ? `One position at a time for each strategy, as on ${src}, in whole lots up to that strategy’s free cash`
             : `At most ${summary?.max_open_positions ?? 2} positions at a time, each up to ${inr(summary?.position_cap ?? (book === "premium50k" ? 25000 : 100000))}, in whole lots; never two positions in one contract`}
           ; a lot costs {summary?.cost_basis ?? "the premium paid"}; the desk’s own entry and exit prices; Angel One’s option charges on
           this account’s own lots. Signals it cannot take are counted, by reason. Nothing is backfilled
@@ -110,8 +113,8 @@ export default function PickBook({ book }: { book: PickBookKey }) {
         </p>
         {(summary?.notes ?? []).map((t) => <p key={t}>{t}</p>)}
         <p>
-          <b>Picked on a short, lucky-prone record, and none is validated.</b> This account is the out-of-sample test of whether
-          they keep earning. Paper fills, not broker executions.
+          <b>{summary?.caveat_title ?? "Picked on a short, lucky-prone record, and none is validated."}</b>{" "}
+          {summary?.caveat ?? "This account is the out-of-sample test of whether they keep earning."} Paper fills, not broker executions.
         </p>
       </div>
 
@@ -188,7 +191,7 @@ export default function PickBook({ book }: { book: PickBookKey }) {
           <div className="empty">
             {posTab === "OPEN"
               ? perStrategy
-                ? "Nothing open. A strategy’s account takes a position when the tab opens one for it and it holds nothing."
+                ? `Nothing open. A strategy’s account takes a position when ${src} opens one for it and it holds nothing.`
                 : "Nothing open. The account takes a position when the desk opens one for either strategy and a slot is free."
               : "No closed trades yet. The account started empty and copies only trades from its start."}
           </div>

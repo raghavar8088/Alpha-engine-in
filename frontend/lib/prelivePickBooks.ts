@@ -4,15 +4,18 @@
 //   premium50k   Premium Option Buying Strategies (16 Nov 2026): the same two on one ₹50,000 account
 //   sf_top10     the Strategy Factory tab's Rank 1-10, ₹10 lakh for each strategy
 //   sf_top10_20  its Rank 11-20, ₹10 lakh for each strategy
+//   bn2L, bn10L  (17 Nov 2026, the NIFTY BANK tab) the NIFTY BANK desk's ten strategies, ₹2 lakh / ₹10 lakh for each
 import { apiFetch } from "./api";
 
-export type PickBookKey = "best2L" | "premium50k" | "sf_top10" | "sf_top10_20";
+export type PickBookKey = "best2L" | "premium50k" | "sf_top10" | "sf_top10_20" | "bn2L" | "bn10L";
 
 export const PICK_BOOKS: { key: PickBookKey; label: string }[] = [
   { key: "best2L", label: "Best Strategies of Top 10 · ₹2 lakh" },
   { key: "premium50k", label: "Premium Option Buying Strategies · ₹50k" },
   { key: "sf_top10", label: "Top 10 Performing Strategies · ₹10 lakh each" },
   { key: "sf_top10_20", label: "Top 10-20 Performing Strategies · ₹10 lakh each" },
+  { key: "bn2L", label: "NIFTY BANK Strategies · ₹2 lakh each" },
+  { key: "bn10L", label: "NIFTY BANK Strategies · ₹10 lakh each" },
 ];
 
 export interface PickBookSummary {
@@ -28,6 +31,11 @@ export interface PickBookSummary {
   pick_rule: string;
   notes: string[];
   picked_at: string;
+  // what the page calls the copied desk ("the tab", "the NIFTY BANK desk") and the book's own caveat (17 Nov 2026)
+  source_label?: string;
+  route?: string;
+  caveat_title?: string;
+  caveat?: string;
   strategies: number;
   board_ranks: number[];
   // true: every strategy has its own capital (the Strategy Factory books); false: one shared account

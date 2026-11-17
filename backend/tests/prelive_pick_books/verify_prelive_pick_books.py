@@ -13,6 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "backend"))
 sys.path.insert(0, str(ROOT / "shared"))
+from bson import ObjectId  # noqa: E402
 from mongomock_motor import AsyncMongoMockClient  # noqa: E402
 
 DB = AsyncMongoMockClient()["test"]
@@ -281,6 +282,187 @@ async def best_book():
           and abs(lb[0]["roi_pct"] - (lb[0]["net_pnl"] + lb[0]["unrealized_pnl"]) / 200_000 * 100) < 1e-3)
 
 
+BN_LOT = 30
+BN_QUOTES: dict[str, dict] = {}
+BN_CALLS: list[list[str]] = []
+
+
+async def fake_bn_quotes(tokens):
+    BN_CALLS.append(list(tokens))
+    if BN_QUOTES.get("__down__"):
+        raise RuntimeError("Angel quote outage")
+    return {t: BN_QUOTES[t] for t in tokens if t in BN_QUOTES}
+
+
+def bnpos(strategy, entry, t_open, *, token="60001", status="OPEN", exit_=None, t_close=None, strike=58000,
+          typ="CE", reason="target", straddle=False):
+    """A NIFTY BANK desk position, as banknifty_desk.open_position / close_position write it."""
+    def leg(t, tok):
+        lg = {"type": t, "strike": float(strike), "expiry": "2026-11-24", "token": tok,
+              "tradingsymbol": f"BANKNIFTY24NOV26{strike}{t}", "lot_size": BN_LOT, "qty": BN_LOT,
+              "entry_ltp": entry - 2.0, "entry_bid": entry - 4.0, "entry_ask": entry, "real_entry": entry,
+              "entry_basis": "book"}
+        if status == "CLOSED":
+            lg.update({"exit_ltp": exit_ + 2.0, "exit_bid": exit_, "exit_ask": exit_ + 4.0, "real_exit": exit_,
+                       "exit_basis": "book"})
+        return lg
+    legs = [leg("CE", token), leg("PE", token + "9")] if straddle else [leg(typ, token)]
+    d = {"_id": ObjectId(), "strategy": strategy, "sid": strategy.split("@")[0], "source": "daily", "tier": "C",
+         "kind": "STRADDLE" if straddle else typ, "status": status, "session": day(t_open), "opened_at": t_open,
+         "spot_entry": 58010.0, "legs": legs, "decision": {}, "expiry": "2026-11-24"}
+    if status == "CLOSED":
+        d.update({"closed_at": t_close, "exit_reason": reason, "real_pnl": (exit_ - entry) * BN_LOT,
+                  "paper_pnl": (exit_ - entry) * BN_LOT})
+    return d
+
+
+def bn_net(entry, exit_, lots, on):
+    gross = (exit_ - entry) * BN_LOT * lots
+    fb = option_round_trip(entry, max(exit_, 0.0), lots, BN_LOT, on=datetime.fromisoformat(on).date())
+    return round(gross, 2), round(gross - fb.total, 2), fb.total
+
+
+async def banknifty_books():
+    """bn2L / bn10L (17 Nov 2026): the NIFTY BANK desk's ten strategies, Rs 2 lakh and Rs 10 lakh EACH."""
+    D = DB[pb.BN_POSITIONS]
+    pb._bn_quotes = fake_bn_quotes
+    pb._bn_marks.clear()
+    for b in ("bn2L", "bn10L"):
+        await pb.STATE.update_one({"_id": f"start:{b}"}, {"$set": {"started_at": START, "book": b}}, upsert=True)
+    ten = [p.key for p in pb.BOOKS["bn2L"].picks]
+    check("bn2L / bn10L: the desk's ten, in the research's order, frozen with their research record",
+          ten == [s for s in ("livermore_pivotal_point@1d", "swing_fractal@1d", "wt_btst@1d", "swing_gap_trend@1d",
+                              "bn_d_donchian_10@1d", "bn_d_donchian_20@1d", "swing_3day_momo@1d",
+                              "qullamaggie_flag@1d", "swing_cci@1d", "bn_gap_go_80bp_1515@5m")]
+          and [p.key for p in pb.BOOKS["bn10L"].picks] == ten
+          and [p.rank for p in pb.BOOKS["bn2L"].picks] == list(range(1, 11)), str(ten))
+    research = Path(ROOT / "backend" / "app" / "data" / "banknifty_research.json")
+    if research.exists():
+        import json
+        sel = json.loads(research.read_text(encoding="utf-8"))["selected"]
+        check("the frozen ten are the research file's ten, with its trades and net",
+              [(s["key"], s["rank"], s["research"]["all"]["trades"], round(s["research"]["all"]["net"], 2)) for s in sel]
+              == [(p.key, p.rank, p.trades, p.net) for p in pb.BOOKS["bn2L"].picks])
+
+    old = bnpos("livermore_pivotal_point@1d", 1385.5, START - timedelta(hours=1), token="60000")   # before the start
+    b1 = bnpos("swing_fractal@1d", 1359.0, NOW - timedelta(hours=2))
+    b1b = bnpos("swing_fractal@1d", 1200.0, NOW - timedelta(minutes=60), token="60009")            # while it holds b1
+    b2 = bnpos("wt_btst@1d", 1004.8, NOW - timedelta(minutes=100), token="60002", typ="PE", status="CLOSED",
+               exit_=721.45, t_close=NOW - timedelta(minutes=30), reason="signal")
+    b3 = bnpos("wt_btst@1d", 1484.8, NOW - timedelta(minutes=20), token="60003")                    # after its loss
+    same = [bnpos(k, 1385.5, NOW - timedelta(minutes=50), token="60005") for k in
+            ("qullamaggie_flag@1d", "bn_d_donchian_20@1d", "bn_d_donchian_10@1d", "swing_gap_trend@1d")]
+    strad = bnpos("swing_cci@1d", 900.0, NOW - timedelta(minutes=40), token="60007", straddle=True)
+    other = bnpos("bn_d_breakout_5@1d", 900.0, NOW - timedelta(minutes=40), token="60008")          # not one of the ten
+    await D.insert_many([old, b1, b1b, b2, b3, *same, strad, other])
+    BN_QUOTES.update({"60001": {"ltp": 1402.0, "bid": 1400.0, "ask": 1404.0},
+                      "60003": {"ltp": 1490.0, "bid": 1488.0, "ask": 1492.0},
+                      "60005": {"ltp": 1391.0, "bid": 1390.0, "ask": 1392.0}})
+    BN_CALLS.clear()
+    out = {}
+    for b in ("bn2L", "bn10L"):
+        out.update(await pb.sync(entries=True, only=b))
+        out.update(await pb.sync(entries=True, only=b))           # a copy opened in a pass is marked on the next
+    check("bn books: every one of the 20 accounts ran without an error",
+          len(out) == 20 and not [k for k, v in out.items() if "error" in v], str(out))
+    asked = [t for c in BN_CALLS for t in c]
+    check("bn books: only the contracts the accounts hold are quoted, each once for all twenty (a 45 s cache)",
+          sorted(asked) == ["60001", "60003", "60005"], str(BN_CALLS))
+    rows = [r async for r in pb.POSITIONS.find({"book": {"$in": ["bn2L", "bn10L"]}})]
+    by = {(r["book"], r["parent_position_id"]): r for r in rows}
+    check("bn: nothing the desk opened before the book's start is copied", not [r for r in rows
+          if r["parent_position_id"] == str(old["_id"])])
+    check("bn: a strategy outside the ten is never copied", not [r for r in rows
+          if r["parent_position_id"] == str(other["_id"])])
+    check("bn: a straddle (two legs) is not copied - none of the ten trades one", not [r for r in rows
+          if r["parent_position_id"] == str(strad["_id"])])
+    for book, cap in (("bn2L", 200_000), ("bn10L", 1_000_000)):
+        r1 = by.get((book, str(b1["_id"])))
+        lots = int(cap // (1359.0 * BN_LOT))
+        check(f"{book}: whole lots up to the strategy's own ₹{cap:,}, at the desk's ask", r1 is not None
+              and r1["qty"] == lots and r1["entry_px"] == 1359.0 and r1["account"] == "swing_fractal@1d"
+              and abs(r1["capital_deployed"] - lots * 1359.0 * BN_LOT) < 0.01 and r1["allocation"] == cap,
+              f"{r1 and r1.get('qty')} vs {lots}")
+        check(f"{book}: marked at the bid now", r1 is not None
+              and abs(r1["unrealized_pnl"] - (1400.0 - 1359.0) * BN_LOT * lots) < 0.01 and r1["ltp"] == 1400.0,
+              str(r1 and r1.get("unrealized_pnl")))
+        check(f"{book}: the contract, name and expiry", r1 is not None and r1["label"] == "BANKNIFTY 58000 CE 2026-11-24"
+              and r1["strategy_name"] == "Swing: Fractal Break" and r1["expiry"] == "2026-11-24" and r1["symbol"] == "60001")
+        check(f"{book}: a second signal while the strategy holds a position is skipped",
+              (book, str(b1b["_id"])) not in by)
+        r2 = by.get((book, str(b2["_id"])))
+        l2 = int(cap // (1004.8 * BN_LOT))
+        g2, n2, f2 = bn_net(1004.8, 721.45, l2, day(NOW - timedelta(minutes=30)))
+        check(f"{book}: opened-and-closed between looks: closed at the desk's bid, Angel's charges on its own lots",
+              r2 is not None and r2["status"] == "CLOSED" and r2["qty"] == l2 and abs(r2["gross_pnl"] - g2) < 0.01
+              and abs(r2["realized_pnl"] - n2) < 0.01 and abs(r2["fees"] - round(f2, 2)) < 0.01
+              and r2["exit_reason"] == "signal" and r2["label"].startswith("BANKNIFTY 58000 PE"),
+              f"{r2 and (r2.get('qty'), r2.get('realized_pnl'))} vs {(l2, n2)}")
+        r3 = by.get((book, str(b3["_id"])))
+        l3 = int((cap + n2) // (1484.8 * BN_LOT))
+        check(f"{book}: the next trade is sized on the money left after the loss", r3 is not None and r3["qty"] == l3,
+              f"{r3 and r3.get('qty')} vs {l3}")
+        accts = sorted(r["account"] for r in rows if r["book"] == book and r["symbol"] == "60005")
+        check(f"{book}: four strategies on one contract at once - each in its own account",
+              accts == sorted(s["strategy"] for s in same), str(accts))
+    sc = await pb.SCORES.find_one({"book": "bn2L", "key": "swing_fractal@1d"})
+    check("bn2L: the held-position skip is counted as full", sc is not None and sc["skipped"].get("full") == 1, str(sc))
+
+    # A quote outage: the copy still runs and the open rows keep their last mark.
+    pb._bn_marks.clear()
+    BN_QUOTES["__down__"] = True
+    out = await pb.sync(entries=True, only="bn2L")
+    r1 = await pb.POSITIONS.find_one({"book": "bn2L", "parent_position_id": str(b1["_id"])})
+    check("bn: an Angel quote outage stops nothing; the open copy keeps its last mark",
+          not [k for k, v in out.items() if "error" in v] and r1["ltp"] == 1400.0, str(out))
+    BN_QUOTES.pop("__down__")
+    pb._bn_marks.clear()
+
+    # The desk closes swing_fractal's position at the bid 1,523.4: both copies close there.
+    await D.update_one({"_id": b1["_id"]}, {"$set": {
+        "status": "CLOSED", "closed_at": NOW - timedelta(minutes=5), "exit_reason": "target",
+        "legs": [{**b1["legs"][0], "real_exit": 1523.4, "exit_bid": 1523.4, "exit_ltp": 1525.0}]}})
+    for b in ("bn2L", "bn10L"):
+        await pb.sync(entries=True, only=b)
+    for book, cap in (("bn2L", 200_000), ("bn10L", 1_000_000)):
+        r = await pb.POSITIONS.find_one({"book": book, "parent_position_id": str(b1["_id"])})
+        lots = int(cap // (1359.0 * BN_LOT))
+        g, n, _ = bn_net(1359.0, 1523.4, lots, day(NOW - timedelta(minutes=5)))
+        check(f"{book}: when the desk closes, the copy closes at the desk's bid", r["status"] == "CLOSED"
+              and abs(r["realized_pnl"] - n) < 0.01 and r["exit_px"] == 1523.4 and r["exit_reason"] == "target",
+              f"{r.get('realized_pnl')} vs {n}")
+    n_before = await pb.POSITIONS.count_documents({"book": {"$in": ["bn2L", "bn10L"]}})
+    for b in ("bn2L", "bn10L"):
+        await pb.sync(entries=True, only=b)
+    check("bn: passes are idempotent", await pb.POSITIONS.count_documents({"book": {"$in": ["bn2L", "bn10L"]}}) == n_before)
+
+    got = await pb._load_banknifty(NOW + timedelta(days=1), {"wt_btst@1d"}, [str(b3["_id"]), "not-an-id"])
+    check("bn loader: an open copy's parent is found by its id however old it is",
+          [p["position_id"] for p in got] == [str(b3["_id"])])
+
+    for book, cap in (("bn2L", 200_000), ("bn10L", 1_000_000)):
+        s = await pb.summary(book)
+        check(f"{book} summary: ₹{cap:,} each, ten accounts, one position each, its own date, desk and caveat",
+              s["desk_capital"] == cap * 10 and s["per_strategy_capital"] == cap and s["position_cap"] == cap
+              and s["max_open_positions"] == 10 and s["strategies"] == 10 and s["board_ranks"] == list(range(1, 11))
+              and s["per_strategy"] is True and s["picked_at"] == pb.BN_PICKED_AT
+              and s["source_label"] == "the NIFTY BANK desk" and s["route"] == "/prelive?index=banknifty"
+              and s["caveat_title"] == "Chosen by research, and none is proven." and s["skipped"]["full"] == 1,
+              str({k: s.get(k) for k in ("desk_capital", "per_strategy_capital", "picked_at", "skipped")}))
+        mine = [r async for r in pb.POSITIONS.find({"book": book})]
+        check(f"{book} summary adds up its accounts", abs(s["realized_pnl"] - sum(
+            r["realized_pnl"] for r in mine if r["status"] == "CLOSED")) < 0.05 and s["open_positions"] == len(
+            [r for r in mine if r["status"] == "OPEN"]))
+        lb = await pb.leaderboard(book)
+        wt = next(r for r in lb if r["key"] == "wt_btst@1d")
+        check(f"{book} leaderboard: ten rows in research order, each on its own ₹{cap:,}",
+              [r["picked_rank"] for r in lb] == list(range(1, 11)) and all(r["allocation"] == cap for r in lb)
+              and abs(wt["equity"] - (cap + wt["net_pnl"] + wt["unrealized_pnl"])) < 0.01 and wt["trades"] == 1)
+    s0 = await pb.summary("best2L")
+    check("the NIFTY 50 books keep their own date, wording and caveat", s0["picked_at"] == pb.PICKED_AT
+          and s0["source_label"] == "the tab" and s0["caveat_title"].startswith("Picked on a short"))
+
+
 def routes():
     from fastapi import FastAPI
     from fastapi.testclient import TestClient
@@ -301,17 +483,24 @@ def routes():
           and pos.status_code == 200 and s.json()["label"] == "Top 10 Performing Strategies · ₹10 lakh each"
           and lb.json()["total"] == 10 and len(pos.json()["positions"]) >= 2,
           f"{s.status_code} {lb.status_code} {pos.status_code}")
+    bn = c.get("/api/prelive-pick-books/summary", params={"book": "bn10L"})
+    check("GET summary of a NIFTY BANK book over HTTP", bn.status_code == 200
+          and bn.json()["label"] == "NIFTY BANK Strategies · ₹10 lakh each" and bn.json()["desk_capital"] == 10_000_000)
     books = pb.books()
-    check("books(): four, with the owner's names", [b["label"] for b in books] == [
+    check("books(): six, with the owner's names", [b["label"] for b in books] == [
         "Best Strategies of Top 10 · ₹2 lakh", "Premium Option Buying Strategies · ₹50k",
-        "Top 10 Performing Strategies · ₹10 lakh each", "Top 10-20 Performing Strategies · ₹10 lakh each"]
-        and [b["capital"] for b in books] == [200_000, 50_000, 10_000_000, 10_000_000], str([b["capital"] for b in books]))
+        "Top 10 Performing Strategies · ₹10 lakh each", "Top 10-20 Performing Strategies · ₹10 lakh each",
+        "NIFTY BANK Strategies · ₹2 lakh each", "NIFTY BANK Strategies · ₹10 lakh each"]
+        and [b["capital"] for b in books] == [200_000, 50_000, 10_000_000, 10_000_000, 2_000_000, 10_000_000]
+        and books[4]["picked_at"] == pb.BN_PICKED_AT and books[0]["picked_at"] == pb.PICKED_AT,
+        str([b["capital"] for b in books]))
     check("unknown book names fall back to the first", pb.normalize_book("nope") == "best2L")
 
 
 async def main():
     await factory_books()
     await best_book()
+    await banknifty_books()
     routes()
     print(f"\n{'ALL PASS' if not fails else str(len(fails)) + ' FAILED: ' + ', '.join(fails)}")
     return 1 if fails else 0

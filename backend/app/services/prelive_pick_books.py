@@ -1,4 +1,4 @@
-"""Index Option Buying: four picked-strategy paper accounts (12 Nov 2026; the fourth, premium50k, 16 Nov).
+"""Index Option Buying: picked-strategy paper accounts (12 Nov 2026; premium50k 16 Nov; the NIFTY BANK pair 17 Nov).
 
 The owner asked, on the Index Option Buying page, for:
 
@@ -12,6 +12,9 @@ The owner asked, on the Index Option Buying page, for:
   sf_top10     "Top 10 Performing Strategies" - the Strategy Factory tab's Rank 1-10 on Index Option
                Buying (factory_desks, tab "index-buying"), Rs 10,00,000 for EACH strategy.
   sf_top10_20  "Top 10-20 Performing Strategies" - the same board's Rank 11-20, Rs 10,00,000 for each.
+  bn2L, bn10L  (17 Nov 2026, the NIFTY BANK tab) - the ten strategies the NIFTY BANK desk trades
+               (banknifty_desk, chosen by the BANKNIFTY research on 13 Oct 2026), Rs 2,00,000 for EACH strategy
+               in one set and Rs 10,00,000 for each in the other.
 
 WHAT THEY COPY. Each book copies its desk's own trades of its picks - entry and exit at the desk's own
 prices - and never re-scans or calls a broker:
@@ -19,7 +22,9 @@ prices - and never re-scans or calls a broker:
     bought at the ask, sold at the bid (the tournament's real-money estimate);
   - the Factory books: the Strategy Factory tab's NIFTY option buys (factory_desk_positions, in that
     tab's own MongoDB): its ATM option bought at the ask and sold at the bid from Angel's quote, an
-    unquoted expired option at intrinsic, as the tab itself books them.
+    unquoted expired option at intrinsic, as the tab itself books them;
+  - the NIFTY BANK books: the NIFTY BANK desk's BANKNIFTY monthly option buys (bn_desk_positions) at
+    its real-money prices - bought at the ask, sold at the bid - marked at the bid while open.
 Whole lots; never two positions in one contract inside one account; Angel One's option charges on the
 book's own lots. A book starts at its first cycle and never backfills. The replay - slots, cash, one
 contract, and the rewind that keeps them honest on the trades' own clock - is plan_book's
@@ -29,10 +34,13 @@ THE SHAPES. best2L is ONE account, as the Top 10 books are. The Factory books gi
 OWN Rs 10 lakh (a book is Rs 1 crore), as the Commodity rank-band books do: one position at a time, as on
 the desk, in whole lots up to that strategy's free cash, so a strategy's losses never shrink another's
 money. The tab buys 1 lot a signal; at Rs 1,900-16,400 a lot these accounts buy roughly 60-520, priced
-at the tab's 1-lot fill - an upper bound on what an order that size would have got.
+at the tab's 1-lot fill - an upper bound on what an order that size would have got. The NIFTY BANK books
+have the same shape at Rs 2 lakh and Rs 10 lakh a strategy (Rs 20 lakh and Rs 1 crore a book); the desk
+buys 1 lot (30) a signal, and at Rs 21,000-45,000 a lot these buy roughly 4-9 and 22-47.
 
-THE PICKS ARE FROZEN as they stood at PICKED_AT; they are not re-picked as the boards move. Never re-pick
-them without the owner: a changed roster is a new book.
+THE PICKS ARE FROZEN as they stood at each book's picked_at (PICKED_AT unless the book says otherwise);
+they are not re-picked as the boards move. Never re-pick them without the owner: a changed roster is a
+new book.
 
 Paper only: nothing here places an order.
 """
@@ -43,9 +51,12 @@ import asyncio
 import dataclasses
 import logging
 import os
+import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
+from bson import ObjectId
+from bson.errors import InvalidId
 from pymongo.errors import DuplicateKeyError
 
 from app.core.db import db
@@ -108,6 +119,86 @@ async def _load_factory(since: datetime, keys: set, pointed: list) -> list[dict]
     return out
 
 
+# -- the NIFTY BANK desk's trades as parents (17 Nov 2026) -----------------------------------------
+
+BN_POSITIONS = "bn_desk_positions"   # banknifty_desk.positions, in the backend's own database
+BN_MARK_TTL = 45.0                   # seconds a quote is reused: twenty accounts read the desk each pass
+_bn_marks: dict[str, tuple[float, float | None]] = {}
+
+
+async def _bn_quotes(tokens: list[str]) -> dict[str, dict]:
+    """Angel's quotes of these NFO tokens - the call the desk itself marks with."""
+    from app.services.angel_client import angel_client
+    return await angel_client.full_quote({"NFO": tokens}) if tokens else {}
+
+
+async def _bn_bids(tokens: list[str]) -> dict[str, float | None]:
+    """Each token's bid (its last price when the book is empty), fetched at most once a BN_MARK_TTL. A quote
+    outage gives None, and an open copy then keeps its last mark."""
+    now = time.monotonic()
+    for t in [t for t, (at, _) in _bn_marks.items() if now - at > 3600]:
+        del _bn_marks[t]
+    want = [t for t in tokens if t not in _bn_marks or now - _bn_marks[t][0] > BN_MARK_TTL]
+    if want:
+        try:
+            q = await _bn_quotes(want)
+        except Exception:  # noqa: BLE001 - a quote outage must not stop the copy
+            logger.warning("[prelive_pick_books] NIFTY BANK quotes unavailable", exc_info=True)
+            q = {}
+        for t in want:
+            x = q.get(t) or {}
+            v = x.get("bid") or x.get("ltp")
+            _bn_marks[t] = (now, float(v) if v else None)
+    return {t: _bn_marks[t][1] for t in tokens}
+
+
+def _bn_parent(p: dict, bids: dict[str, float | None]) -> dict | None:
+    """One NIFTY BANK desk position (one bought BANKNIFTY monthly option) as a parent the copy replays, at the
+    desk's real-money prices: its ask in, its bid out, and the bid now while it is open."""
+    legs = p.get("legs") or []
+    # One leg: the desk can buy a straddle, but none of the ten trades one.
+    if len(legs) != 1 or not legs[0].get("real_entry") or not legs[0].get("token") or not p.get("strategy"):
+        return None
+    leg = legs[0]
+    closed = p.get("status") == "CLOSED"
+    if closed and leg.get("real_exit") is None:
+        return None
+    token = str(leg["token"])
+    return t10._option_parent(
+        pid=str(p["_id"]), key=p["strategy"], name=p["strategy"], symbol=token,
+        label=f"BANKNIFTY {int(t10._f(leg.get('strike')))} {leg.get('type') or p.get('kind') or ''} "
+              f"{leg.get('expiry') or p.get('expiry') or ''}".strip(),
+        lot_size=int(leg.get("lot_size") or 30), entry=t10._f(leg["real_entry"]),
+        exit_px=t10._f(leg["real_exit"]) if closed else None,
+        ltp=None if closed else bids.get(token),
+        opened_at=p.get("opened_at"), closed_at=p.get("closed_at"), status="CLOSED" if closed else "OPEN",
+        expiry=leg.get("expiry") or p.get("expiry"), opened_on=p.get("session"), exit_reason=p.get("exit_reason"))
+
+
+async def _load_banknifty(since: datetime, keys: set, pointed: list) -> list[dict]:
+    """The desk's positions of these strategies opened since `since`, plus any an open copy points at."""
+    ids = []
+    for x in pointed:
+        try:
+            ids.append(ObjectId(x))
+        except (InvalidId, TypeError):
+            continue
+    q = {"strategy": {"$in": list(keys)}, "$or": [{"opened_at": {"$gte": since}}, {"_id": {"$in": ids}}]}
+    docs = [p async for p in db[BN_POSITIONS].find(q)]
+    # Only what the account holds is marked (a copy opened this pass is marked from the next), so Angel is asked
+    # for the contracts the books hold and nothing else.
+    held = {str(i) for i in ids}
+    tokens = sorted({str(lg["token"]) for p in docs if p.get("status") == "OPEN" and str(p["_id"]) in held
+                     for lg in p.get("legs") or [] if lg.get("token")})
+    bids = await _bn_bids(tokens) if tokens else {}
+    out = []
+    for p in docs:
+        x = _bn_parent(p, bids)
+        if x is not None:
+            out.append(x)
+    return out
+
+
 # -- the books and their frozen picks ---------------------------------------------------------------
 
 
@@ -120,6 +211,10 @@ class Book:
     slots: int                # positions at once: in each strategy's account, or in the one account
     per_strategy: bool
     pick_rule: str            # how the picks were chosen
+    picked_at: str = PICKED_AT
+    source: str = "the tab"   # what the page calls the copied desk
+    caveat: tuple[str, str] = ("Picked on a short, lucky-prone record, and none is validated.",   # (headline, body)
+                               "This account is the out-of-sample test of whether they keep earning.")
 
     @property
     def picks(self) -> tuple[t10.Pick, ...]:
@@ -220,6 +315,58 @@ _PREMIUM50K_NOTES = _BEST_NOTES + (
     "₹25,000 and is skipped (price above the cap). Angel's ₹20 an order is a larger share of a position this size.",
 )
 
+# NIFTY BANK STRATEGIES · Rs 2 LAKH EACH / Rs 10 LAKH EACH (17 Nov 2026). The owner asked, on the NIFTY BANK tab, for
+# a paper account for each of its ten strategies, in two sets: Rs 2 lakh each and Rs 10 lakh each. They copy the
+# NIFTY BANK desk (banknifty_desk) - the ten the BANKNIFTY research chose (app/data/banknifty_research.json,
+# committed 13 Oct 2026 23:06 IST), in its order. (strategy key, research rank, no Rank score, trades over 2016-2026,
+# no bp figure, name, net P&L of 1 lot over 2016-2026 after spread and charges.)
+BN_PICKED_AT = "2026-10-13T23:06:00+05:30"
+_BN_PICKS = t10._picks([
+    ("livermore_pivotal_point@1d", 1, None, 126, None, "Jesse Livermore: Pivotal Point Breakout", 259202.0),
+    ("swing_fractal@1d", 2, None, 252, None, "Swing: Fractal Break", 413908.0),
+    ("wt_btst@1d", 3, None, 1145, None, "Wizard Trader: BTST Trade (H5)", 375575.0),
+    ("swing_gap_trend@1d", 4, None, 186, None, "Swing: Gap With Trend", 242513.0),
+    ("bn_d_donchian_10@1d", 5, None, 178, None, "10-day high/low breakout, out on the 5-day opposite break", 362469.0),
+    ("bn_d_donchian_20@1d", 6, None, 134, None, "20-day high/low breakout, out on the 10-day opposite break", 293998.0),
+    ("swing_3day_momo@1d", 7, None, 270, None, "Swing: Three-Day Momentum", 217720.0),
+    ("qullamaggie_flag@1d", 8, None, 253, None, "Kristjan Kullamägi (Qullamaggie): EMA Flag Breakout", 163844.0),
+    ("swing_cci@1d", 9, None, 272, None, "Swing: CCI ±100", 135585.0),
+    ("bn_gap_go_80bp_1515@5m", 10, None, 197, None, "Gap of 0.8%+ continuing in the first 15 minutes, out 15:15",
+     21595.0),
+])
+_BN_DESK = t10.Desk(
+    key="banknifty", label="Index Option Buying · NIFTY BANK desk", route="/prelive?index=banknifty",
+    instrument="BANKNIFTY monthly options bought at the strike nearest the index: a CE when the strategy is long, a PE "
+               "when it is short (the NIFTY BANK desk's own trades)",
+    cost_basis="the premium paid at the ask (premium × 30 a lot)",
+    board="the BANKNIFTY option-buying research: 297 strategies tested on 2016-2026, these ten kept as positive in both "
+          "2016-2021 and 2022-2026 (tier C), none statistically significant",
+    picks=_BN_PICKS, load=_load_banknifty, pnl=t10._bought_option_pnl, mark=t10._bought_option_mark, max_open=1,
+)
+
+
+def _bn_notes(each: str, lots: str) -> tuple[str, ...]:
+    return (
+        f"Each strategy has its own {each} and holds one position at a time, as on the desk; one strategy's losses "
+        "never reduce another's money.",
+        "The desk buys 1 lot (30) a signal. These accounts buy whole lots up to the strategy's free cash: at the "
+        f"₹697-1,485 an option the desk has paid so far (₹21,000-45,000 a lot) that is {lots} lots, priced at the "
+        "desk's own 1-lot fill (the ask in, the bid out). A real order that size would pay more to get in and out, "
+        "so read the rupee P&L as an upper bound.",
+        "Almost the whole account rides on each trade. The desk's stops on 23 and 30 Oct sold at about half the "
+        "premium paid, and a trade like that takes about half of the strategy's money.",
+        "Nine of the ten hold overnight for 1-7 sessions in the monthly contract (rolled to the next monthly near "
+        "expiry); the gap strategy is in and out the same day. They often take the SAME trade on the same day - on "
+        "5 Nov five bought the same call - so the accounts move together.",
+        "Started empty: the positions the desk opened before this account's start are not copied. A strategy's "
+        "account takes its first trade at that strategy's next entry on the desk.",
+    )
+
+
+_BN_CAVEAT = ("Chosen by research, and none is proven.",
+              "Of 297 strategies tested, 11 made money in both 2016-2021 and 2022-2026 and none significantly - "
+              "chance alone would have made about 70 look that good. This account is the forward test.")
+
 BOOKS: dict[str, Book] = {
     "best2L": Book(
         key="best2L", label="Best Strategies of Top 10 · ₹2 lakh", desk=_BEST_DESK,
@@ -248,6 +395,20 @@ BOOKS: dict[str, Book] = {
         capital=1000000.0, slots=1, per_strategy=True,
         pick_rule="ranks 11-20 on the Strategy Factory tab's Rank (146 strategies with closed trades, 28 Oct - 12 Nov "
                   "2026)"),
+    "bn2L": Book(
+        key="bn2L", label="NIFTY BANK Strategies · ₹2 lakh each",
+        desk=dataclasses.replace(_BN_DESK, notes=_bn_notes("₹2,00,000", "about 4-9")),
+        capital=200000.0, slots=1, per_strategy=True, picked_at=BN_PICKED_AT, source="the NIFTY BANK desk",
+        caveat=_BN_CAVEAT,
+        pick_rule="the ten the NIFTY BANK desk trades, chosen by the BANKNIFTY research's pre-registered protocol "
+                  "(297 tested on 2016-2026)"),
+    "bn10L": Book(
+        key="bn10L", label="NIFTY BANK Strategies · ₹10 lakh each",
+        desk=dataclasses.replace(_BN_DESK, notes=_bn_notes("₹10,00,000", "about 22-47")),
+        capital=1000000.0, slots=1, per_strategy=True, picked_at=BN_PICKED_AT, source="the NIFTY BANK desk",
+        caveat=_BN_CAVEAT,
+        pick_rule="the ten the NIFTY BANK desk trades, chosen by the BANKNIFTY research's pre-registered protocol "
+                  "(297 tested on 2016-2026)"),
 }
 BOOK_KEYS = list(BOOKS)
 BOOK_LABEL = {k: b.label for k, b in BOOKS.items()}
@@ -474,7 +635,8 @@ async def summary(book: str) -> dict:
         "book": b.key, "books": BOOK_KEYS, "label": b.label, "book_labels": BOOK_LABEL, "module": MODULE,
         "desk": d.key, "desk_label": d.label, "mode": "paper", "enabled": ENABLED,
         "instrument": d.instrument, "cost_basis": d.cost_basis, "board": d.board, "pick_rule": b.pick_rule,
-        "notes": list(d.notes), "picked_at": PICKED_AT, "roster": list(d.roster), "strategies": n,
+        "notes": list(d.notes), "picked_at": b.picked_at, "roster": list(d.roster), "strategies": n,
+        "source_label": b.source, "route": d.route, "caveat_title": b.caveat[0], "caveat": b.caveat[1],
         "board_ranks": [p.rank for p in b.picks], "per_strategy": b.per_strategy,
         "per_strategy_capital": b.capital if b.per_strategy else None,
         "positions_per_strategy": b.slots if b.per_strategy else None,
@@ -547,7 +709,7 @@ async def positions(book: str, status: str = "OPEN", limit: int = 200) -> list[d
 def books() -> list[dict]:
     return [{"book": b.key, "label": b.label, "capital": b.total_capital, "per_strategy": b.per_strategy,
              "per_strategy_capital": b.capital if b.per_strategy else None, "slots": b.slots,
-             "desk": b.desk.key, "pick_rule": b.pick_rule, "picked_at": PICKED_AT,
+             "desk": b.desk.key, "pick_rule": b.pick_rule, "picked_at": b.picked_at,
              "picks": [{"key": p.key, "rank": p.rank, "score": p.score, "trades": p.trades, "bp": p.bp,
                         "name": p.name, "net": p.net} for p in b.picks]} for b in BOOKS.values()]
 
