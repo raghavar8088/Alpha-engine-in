@@ -5,6 +5,7 @@
   GET  /api/top10-books/{desk}/leaderboard?book=       the ten: their record here and where they stood when picked
   GET  /api/top10-books/{desk}/positions?book=&status= OPEN | CLOSED | ALL
   POST /api/top10-books/{desk}/run                     copy that desk once, now
+  GET  /api/top10-books/{desk}/accounts?group=         one group of picked accounts, each summarised
 
 The books copy the desks' own trades (app.services.top10_books); nothing here places an order or
 asks a broker for a price. `book` is normalized rather than rejected, as on the other book APIs.
@@ -39,6 +40,18 @@ async def desks(_user: dict = Depends(get_current_user)):
                                        "picks": [p.key for p in t10.book_desk(d, b).picks]}
                                       for b in t10.book_keys(d.key)]}
                       for d in t10.DESKS.values()]}
+
+
+@router.get("/{desk}/accounts")
+async def accounts(desk: str, group: str = Query(..., description="rank-band | paper-top4"),
+                   _user: dict = Depends(get_current_user)):
+    """One group of picked accounts with every account's summary (17 Nov 2026, nifty-scalp: the 20
+    Rank-band accounts and the 8 Paper-book top-4 accounts). 404 for a group the desk does not have, so
+    a page can tell "not deployed yet" from an empty account."""
+    rows = await t10.accounts(_desk(desk), group)
+    if not rows:
+        raise HTTPException(status_code=404, detail=f"No '{group}' accounts on '{desk}'")
+    return {"desk": desk, "group": group, "groups": t10.groups(desk), "accounts": rows, "total": len(rows)}
 
 
 @router.get("/{desk}/summary")

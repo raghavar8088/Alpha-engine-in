@@ -108,8 +108,10 @@ async def books():
 
     out = await t10.sync(entries=True, only="nifty-scalp")
     errs = {k: v for k, v in out.items() if "error" in v}
-    check("first pass: the desk's four books ran without an error",
-          sorted(out) == sorted(f"nifty-scalp:{b}" for b in ALL_BOOKS) and not errs, str(errs or sorted(out)))
+    # Since 17 Nov the desk also carries 28 Rank-band / Paper-book top-4 accounts (verify_ns_accounts.py).
+    check("first pass: every book on the desk ran without an error, the Premium two among them",
+          sorted(out) == sorted(f"nifty-scalp:{b}" for b in t10.book_keys("nifty-scalp"))
+          and {f"nifty-scalp:{b}" for b in ALL_BOOKS} <= set(out) and not errs, str(errs or sorted(out)))
     out2 = await t10.sync(entries=True, only="nifty-scalp")      # a copy opened in a pass is marked on the next
     check("second pass is clean", not [k for k, v in out2.items() if "error" in v])
 
@@ -191,7 +193,7 @@ async def books():
           and s5["max_open_positions"] == 3 and s5["roster"] == PREM)
     realized = sum([r["realized_pnl"] async for r in t10.POSITIONS.find({"book": "prem2L", "status": "CLOSED"})])
     check("the summary adds up its own rows only", abs(s2["realized_pnl"] - realized) < 0.05
-          and s2["books"] == ALL_BOOKS and s2["book_labels"]["prem50k"] == "Premium Strategy · ₹50k",
+          and s2["books"][:4] == ALL_BOOKS and s2["book_labels"]["prem50k"] == "Premium Strategy · ₹50k",
           f"{s2['realized_pnl']} vs {realized}")
     check("the Premium notes travel with the book", any("slot for each of the three" in x for x in s2["notes"]))
     st = await t10.summary("nifty-scalp", "top2L")
@@ -212,7 +214,7 @@ async def books():
 
 
 async def other_desks():
-    check("only NIFTY 50 Option Scalping carries the Premium books", t10.book_keys("nifty-scalp") == ALL_BOOKS
+    check("only NIFTY 50 Option Scalping carries the Premium books", t10.book_keys("nifty-scalp")[:4] == ALL_BOOKS
           and all(t10.book_keys(k) == ["top2L", "top10L"] for k in t10.DESKS if k != "nifty-scalp"))
     check("a Premium key on another desk falls back to its first Top-10 book",
           t10.normalize_book("prem2L", "zero-hero") == "top2L" and t10.normalize_book("prem50k", "nifty-scalp") == "prem50k"
@@ -241,7 +243,7 @@ def routes():
           z.status_code == 200 and z.json()["book"] == "top2L")
     d = c.get("/api/top10-books/desks").json()
     ns = next(x for x in d["desks"] if x["desk"] == "nifty-scalp")
-    check("/desks names every book on each desk", [b["book"] for b in ns["desk_books"]] == ALL_BOOKS
+    check("/desks names every book on each desk", [b["book"] for b in ns["desk_books"]][:4] == ALL_BOOKS
           and ns["desk_books"][2]["capital"] == 200_000 and ns["desk_books"][3]["picks"] == PREM
           and all(len(x["desk_books"]) == 2 for x in d["desks"] if x["desk"] != "nifty-scalp"))
 

@@ -39,6 +39,12 @@ PICKED BOOKS (2026-11-16). A desk may also carry books on strategies the OWNER p
 its two Top-10 books (PICKED_BOOKS). One is "Premium Strategy" on NIFTY 50 Option Scalping, in a
 Rs 2 lakh and a Rs 50,000 account. Each runs the same copy and rules as above with its own roster,
 capital and slots: one slot per strategy, each up to capital / slots.
+
+RANK-BAND AND PAPER-BOOK TOP-4 ACCOUNTS (2026-11-17). Also on NIFTY 50 Option Scalping, as picked books:
+twenty accounts on the desk's Rank bands 1-5 ... 46-50 (each band in a Rs 2 lakh and a Rs 10 lakh account,
+five slots) and eight on the Paper book's top 4 (each strategy alone in a Rs 2 lakh and a Rs 10 lakh
+account, one slot, sized all-in as the desk sizes a strategy). A picked book's `group` gathers them into
+one overview (`accounts()`, GET /api/top10-books/{desk}/accounts?group=).
 """
 
 from __future__ import annotations
@@ -650,6 +656,7 @@ class PickedBook:
     picked_at: str
     pick_rule: str            # what the picks are and where each was picked from
     notes: tuple[str, ...] = ()
+    group: str = ""           # accounts a page shows together ("rank-band", "paper-top4"); "" = its own tab
 
 
 _PREMIUM_NS_PICKS = _picks([
@@ -676,6 +683,132 @@ _PREMIUM_NS_NOTES = (
     "is down 79.6% over 51; the whole desk is down 8.8%.",
 )
 
+
+# -- Rank-band and Paper-book top-4 accounts (17 Nov 2026) ----------------------------------------
+# The owner asked for Rs 2 lakh and Rs 10 lakh accounts on the desk's Rank bands 1-5, 6-10, ... 46-50,
+# and for one Rs 2 lakh and one Rs 10 lakh account on EACH of the Paper book's top 4. Picks frozen from
+# /api/strategy-rank/nifty-scalp (454 ranked) and /api/strategy-rank/nifty-scalp-paper
+# (12 ranked) at 20:20 IST on 17 Nov 2026; names checked against the live leaderboard
+# and roster, because an id is ns_<tf>_<template index>. Never re-pick these without the owner: a
+# changed roster is a new book.
+
+NS_PICKED_AT_1711 = "2026-11-17T20:20:00+05:30"
+
+# (key, Rank on the desk board, Rank score, trades there, net return a trade in bp, name, net P&L there)
+_NS_RANK_TOP50 = _picks([
+    ("ns_5m_38", 1, 90.2, 29, 1039.76, "Outside Bar Reversal · 5 minutes", 580050.87),
+    ("ns_5m_23", 2, 89.5, 30, 1141.79, "Bollinger %B Extreme · 5 minutes", 615644.92),
+    ("ns_10m_48", 3, 88.1, 55, 1491.23, "Fibonacci 61.8% Bounce · 10 minutes", 1064835.92),
+    ("ns_10m_22", 4, 87.4, 34, 1449.76, "Bollinger Mean Revert · 10 minutes", 506116.03),
+    ("ns_10m_31", 5, 87.1, 30, 2012.85, "Parabolic SAR Flip · 10 minutes", 1175113.64),
+    ("ns_10m_26", 6, 85.6, 50, 1082.99, "Donchian Slow Break · 10 minutes", 782224.0),
+    ("ns_1d_46", 7, 83.8, 33, 2146.89, "Round Number Break · 1 day", 1399820.81),
+    ("ns_1m_25", 8, 82.0, 65, 693.29, "Donchian Fast Break · 1 minute", 763804.48),
+    ("ns_10m_40", 9, 81.9, 23, 1967.09, "Morning / Evening Star · 10 minutes", 849375.35),
+    ("ns_1m_46", 10, 80.9, 33, 808.19, "Round Number Break · 1 minute", 518159.18),
+    ("ns_10m_38", 11, 80.1, 26, 1470.66, "Outside Bar Reversal · 10 minutes", 700674.16),
+    ("ns_5m_36", 12, 79.6, 32, 1019.64, "Marubozu Continuation · 5 minutes", 644430.31),
+    ("ns_10m_44", 13, 78.4, 36, 1274.02, "Prior Extreme Breakout · 10 minutes", 645342.77),
+    ("ns_1m_23", 14, 78.2, 27, 751.44, "Bollinger %B Extreme · 1 minute", 372322.74),
+    ("ns_1m_39", 15, 76.8, 89, 813.2, "Three Soldiers / Crows · 1 minute", 1100567.71),
+    ("ns_1h_40", 16, 76.0, 27, 1855.36, "Morning / Evening Star · 1 hour", 870644.68),
+    ("ns_1d_47", 17, 75.9, 36, 1580.16, "HH/HL Structure Shift · 1 day", 1001065.57),
+    ("ns_15m_48", 18, 75.7, 55, 818.78, "Fibonacci 61.8% Bounce · 15 minutes", 535531.34),
+    ("ns_5m_20", 19, 74.3, 74, 453.98, "MACD Divergence · 5 minutes", 447429.36),
+    ("ns_30m_38", 20, 73.3, 31, 834.21, "Outside Bar Reversal · 30 minutes", 486216.71),
+    ("ns_1h_38", 21, 73.2, 29, 1180.58, "Outside Bar Reversal · 1 hour", 438768.91),
+    ("ns_10m_15", 22, 73.1, 53, 801.02, "Williams %R Reversal · 10 minutes", 241373.12),
+    ("ns_1m_13", 23, 71.3, 54, 391.0, "Stochastic Extreme Cross · 1 minute", 135345.23),
+    ("ns_5m_46", 24, 71.1, 74, 485.0, "Round Number Break · 5 minutes", 702372.0),
+    ("ns_15m_23", 25, 70.6, 38, 608.96, "Bollinger %B Extreme · 15 minutes", 279955.59),
+    ("ns_10m_24", 26, 69.4, 14, 1490.84, "Keltner Breakout · 10 minutes", 382504.26),
+    ("ns_1m_61", 27, 69.4, 16, 1091.47, "Rounding Top / Bottom · 1 minute", 340454.28),
+    ("ns_1m_14", 28, 69.0, 66, 429.92, "CCI Zero Cross · 1 minute", 483339.33),
+    ("ns_1h_14", 29, 68.7, 28, 952.51, "CCI Zero Cross · 1 hour", 483336.39),
+    ("ns_10m_04", 30, 68.6, 33, 442.43, "Triple EMA Stack · 10 minutes", 207882.91),
+    ("ns_15m_22", 31, 68.4, 25, 672.98, "Bollinger Mean Revert · 15 minutes", 309641.78),
+    ("ns_4h_39", 32, 67.8, 24, 1871.21, "Three Soldiers / Crows · 4 hours", 226668.64),
+    ("ns_5m_21", 33, 67.6, 18, 980.97, "Bollinger Squeeze Break · 5 minutes", 261729.25),
+    ("ns_15m_33", 34, 67.0, 42, 358.01, "Engulfing Candle · 15 minutes", 103766.02),
+    ("ns_10m_20", 35, 66.5, 64, 780.52, "MACD Divergence · 10 minutes", 965529.0),
+    ("ns_15m_62", 36, 66.4, 18, 801.64, "Diamond · 15 minutes", 82108.67),
+    ("ns_1d_44", 37, 66.3, 35, 1366.48, "Prior Extreme Breakout · 1 day", 814912.99),
+    ("ns_5m_27", 38, 65.9, 21, 445.4, "ATR Expansion Thrust · 5 minutes", 21280.05),
+    ("ns_1d_39", 39, 65.7, 15, 2463.12, "Three Soldiers / Crows · 1 day", 159582.24),
+    ("ns_5m_24", 40, 65.6, 11, 1731.95, "Keltner Breakout · 5 minutes", 375311.41),
+    ("ns_1h_07", 41, 65.6, 21, 1004.56, "WMA Cross · 1 hour", 198952.08),
+    ("ns_5m_44", 42, 65.6, 31, 527.54, "Prior Extreme Breakout · 5 minutes", -49593.49),
+    ("ns_1m_02", 43, 65.4, 25, 458.81, "EMA Slow Cross · 1 minute", 166994.87),
+    ("ns_10m_30", 44, 65.1, 31, 568.85, "ADX + DI Cross · 10 minutes", -644.08),
+    ("ns_1h_15", 45, 64.9, 36, 407.55, "Williams %R Reversal · 1 hour", 281727.58),
+    ("ns_1m_31", 46, 64.9, 31, 440.89, "Parabolic SAR Flip · 1 minute", 227192.35),
+    ("ns_1m_52", 47, 64.6, 17, 523.59, "Double Top / Bottom · 1 minute", 60627.4),
+    ("ns_1h_32", 48, 64.5, 16, 1116.6, "Aroon Cross · 1 hour", 303207.42),
+    ("ns_10m_53", 49, 64.5, 10, 1564.46, "Triple Top / Bottom · 10 minutes", 286911.25),
+    ("ns_15m_24", 50, 64.5, 12, 1255.76, "Keltner Breakout · 15 minutes", 259046.85),
+])
+
+# (key, Rank among the Paper book's 12, Rank score there, trades there, bp there, name, net P&L there)
+_NS_PAPER_TOP4 = _picks([
+    ("ns_5m_46", 1, 93.6, 40, 760.15, "Round Number Break · 5 minutes", 36162.23),
+    ("ns_4h_28", 2, 76.0, 22, 1001.18, "TTM Squeeze Release · 4 hours", 20578.2),
+    ("ns_1h_13", 3, 67.5, 22, 50.89, "Stochastic Extreme Cross · 1 hour", 3262.86),
+    ("ns_1h_12", 4, 58.6, 31, -114.16, "RSI Divergence · 1 hour", 6751.98),
+])
+
+_NS_BAND_NOTES = (
+    "One account with a slot for each of its five strategies: at most five positions at once, each up to a "
+    "fifth of the account (₹40,000 in the ₹2 lakh account, ₹2,00,000 in the ₹10 lakh one), in whole lots of "
+    "65. A lot that costs more than the slot, or an option another of the five already holds, is skipped "
+    "and counted, as in every book here.",
+    "Picked after the fact off a board of 454 where luck collects, and the whole desk is "
+    "down about 9%. The Rank blends seven factors, not P&L alone: #42 Prior Extreme Breakout · 5 minutes (-₹49,593) and #44 ADX + DI Cross · 10 minutes (-₹644) rank in the top 50 with a "
+    "loss on the desk.",
+)
+
+_NS_PAPER4_NOTES = (
+    "One strategy, one slot: every trade may use the whole account, exactly as the desk sizes each strategy "
+    "on its own ₹2 lakh. The ₹10 lakh account is the same rule at five times the size, so a wrong run costs "
+    "five times as much.",
+    "Ranked inside the Paper book (a shared ₹2 lakh with 12 strategies), these copy the DESK's own trades of "
+    "the same strategy - the same signals the Paper book takes. On the desk at ₹2 lakh each: " + "Round Number Break · 5 minutes +351.2% over 74 trades; TTM Squeeze Release · 4 hours +244.6% over 37 trades; Stochastic Extreme Cross · 1 hour -93.4% over 36 trades; RSI Divergence · 1 hour -92.0% over 52 trades" + ".",
+)
+
+
+def _ns_short(name: str) -> str:
+    """'Round Number Break · 5 minutes' -> 'Round Number Break 5m'."""
+    base, _, tf = name.partition(" · ")
+    tf = (tf.replace(" minutes", "m").replace(" minute", "m").replace(" hours", "h")
+          .replace(" hour", "h").replace(" day", "d"))
+    return f"{base} {tf}".strip()
+
+
+def _ns_more_books() -> dict[str, "PickedBook"]:
+    """20 Rank-band accounts (10 bands x Rs 2 lakh / Rs 10 lakh) + 8 Paper-book top-4 accounts."""
+    out: dict[str, PickedBook] = {}
+    sizes = (("2L", 200000.0, "₹2 lakh"), ("10L", 1000000.0, "₹10 lakh"))
+    for lo in range(1, 51, 5):
+        hi = lo + 4
+        picks = tuple(p for p in _NS_RANK_TOP50 if lo <= p.rank <= hi)
+        rule = (f"Ranks {lo}-{hi} of this page's Strategy leaderboard by Rank (454 strategies with "
+                f"closed trades), frozen at 20:20 IST on 17 Nov 2026: "
+                + "; ".join(f"#{p.rank} {p.name}" for p in picks) + ".")
+        for suffix, capital, cap_label in sizes:
+            key = f"rank{lo}_{hi}_{suffix}"
+            out[key] = PickedBook(key=key, label=f"Rank {lo}-{hi} · {cap_label}", capital=capital, picks=picks,
+                                  max_open=5, picked_at=NS_PICKED_AT_1711, pick_rule=rule,
+                                  notes=_NS_BAND_NOTES, group="rank-band")
+    for p in _NS_PAPER_TOP4:
+        rule = (f"#{p.rank} of the 12 strategies in this page's Paper book · ₹2L by their Rank there "
+                f"({p.trades} trades, {'+' if (p.net or 0) >= 0 else ''}₹{p.net:,.0f} there), frozen at 20:20 IST on "
+                f"17 Nov 2026. It copies the desk's own trades of {p.name}.")
+        for suffix, capital, cap_label in sizes:
+            key = f"pb{p.rank}_{suffix}"
+            out[key] = PickedBook(key=key, label=f"Paper book #{p.rank} {_ns_short(p.name)} · {cap_label}",
+                                  capital=capital, picks=(p,), max_open=1, picked_at=NS_PICKED_AT_1711,
+                                  pick_rule=rule, notes=_NS_PAPER4_NOTES, group="paper-top4")
+    return out
+
 PICKED_BOOKS: dict[str, dict[str, PickedBook]] = {
     "nifty-scalp": {
         "prem2L": PickedBook(key="prem2L", label="Premium Strategy · ₹2 lakh", capital=200000.0,
@@ -684,6 +817,7 @@ PICKED_BOOKS: dict[str, dict[str, PickedBook]] = {
         "prem50k": PickedBook(key="prem50k", label="Premium Strategy · ₹50k", capital=50000.0,
                               picks=_PREMIUM_NS_PICKS, max_open=3, picked_at="2026-11-16T23:30:00+05:30",
                               pick_rule=_PREMIUM_NS_RULE, notes=_PREMIUM_NS_NOTES),
+        **_ns_more_books(),
     },
 }
 
@@ -992,7 +1126,9 @@ async def summary(desk_key: str, book: str) -> dict:
         "instrument": d.instrument, "cost_basis": d.cost_basis, "board": d.board, "notes": list(d.notes),
         # a picked book: the owner's own picks, and where each came from (None on the Top-10 books)
         "picked": pb is not None, "pick_rule": pb.pick_rule if pb else None,
+        "group": (pb.group or None) if pb else None,
         "picked_at": pb.picked_at if pb else PICKED_AT, "roster": list(d.roster), "strategies": len(d.picks),
+        "pick_names": [p.name for p in d.picks],
         "max_open_positions": d.max_open, "position_cap": round(position_cap(d, book), 2),
         "skip_expiry_day": d.skip_expiry_day,
         "desk_capital": cap, "equity": round(equity, 2), "realized_pnl": round(realized, 2),
@@ -1041,6 +1177,21 @@ async def leaderboard(desk_key: str, book: str) -> list[dict]:
             "skipped": skipped, "skipped_total": sum(skipped.values()),
         })
     return rows
+
+
+def groups(desk_key: str) -> dict[str, list[str]]:
+    """A desk's picked books that are shown together, by group, in their defined order."""
+    out: dict[str, list[str]] = {}
+    for key, pb in PICKED_BOOKS.get(desk_key, {}).items():
+        if pb.group:
+            out.setdefault(pb.group, []).append(key)
+    return out
+
+
+async def accounts(desk_key: str, group: str) -> list[dict]:
+    """Every account of one group on a desk, each with its summary - one call for an overview table."""
+    keys = groups(desk_key).get(group, [])
+    return list(await asyncio.gather(*(summary(desk_key, k) for k in keys)))
 
 
 def _jsonable(doc: dict) -> dict:

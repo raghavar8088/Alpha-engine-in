@@ -77,6 +77,7 @@ export default function Top10Book({ desk, book }: { desk: Top10Desk; book: AnyBo
   // A picked book (the owner's own picks, e.g. Premium Strategy) is worded from its own rule, not "the ten".
   const picked = !!summary?.picked;
   const count = nWord(summary?.strategies ?? 10);
+  const one = (summary?.strategies ?? 10) === 1;     // a one-strategy account (e.g. Paper-book top 4)
 
   return (
     <>
@@ -85,7 +86,7 @@ export default function Top10Book({ desk, book }: { desk: Top10Desk; book: AnyBo
       <div className="note">
         {picked ? (
           <p>
-            <b>{summary?.label} · {summary?.desk_label}.</b>{" "}{`One ${inr(summary?.desk_capital)} paper account copying the trades of the ${count} strategies you picked on ${pickedOn}. ${summary?.pick_rule ?? ""} They are fixed: never re-picked. It trades ${summary?.instrument ?? "what the desk trades"}.`}
+            <b>{summary?.label} · {summary?.desk_label}.</b>{" "}{`One ${inr(summary?.desk_capital)} paper account copying the trades of ${one ? "the one strategy" : `the ${count} strategies`} you picked on ${pickedOn}. ${summary?.pick_rule ?? ""} They are fixed: never re-picked. It trades ${summary?.instrument ?? "what the desk trades"}.`}
           </p>
         ) : (
           <p>
@@ -104,7 +105,7 @@ export default function Top10Book({ desk, book }: { desk: Top10Desk; book: AnyBo
         {(summary?.notes ?? []).map((n) => <p key={n}>{n}</p>)}
         {picked ? (
           <p>
-            <b>{`These ${count} were picked off boards where luck collects, and none is validated.`}</b>{" "}
+            <b>{one ? "It was picked off a board where luck collects, and it is not validated." : `These ${count} were picked off boards where luck collects, and none is validated.`}</b>{" "}
             {"This account is the out-of-sample test of whether they keep making money. “Picked at” is where each stood on the board it was picked from. Paper fills, not broker executions."}
           </p>
         ) : (
@@ -130,7 +131,7 @@ export default function Top10Book({ desk, book }: { desk: Top10Desk; book: AnyBo
               sub={skippedTotal ? Object.entries(sk).filter(([, v]) => v).map(([k, v]) => `${v} ${k.replace("_", " ")}`).join(" · ") : "none yet"} />
       </div>
 
-      <GlassPanel title={`The ${count}, picked ${pickedOn}`}>
+      <GlassPanel title={one ? `The strategy, picked ${pickedOn}` : `The ${count}, picked ${pickedOn}`}>
         {ranks && <RankNote board={ranks} />}
         <div className="table-scroll">
           <table className="data-table">

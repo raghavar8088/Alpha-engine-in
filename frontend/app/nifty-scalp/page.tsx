@@ -7,6 +7,7 @@ import PageHeader from "../../components/PageHeader";
 import ErrorBanner from "../../components/ErrorBanner";
 import PaperBook from "./PaperBook";
 import Top10Book from "../../components/Top10Book";
+import PickedAccounts from "./PickedAccounts";
 import { RankNote, RankTd, RankTh, sortByRank, useStrategyRanks } from "../../components/StrategyRank";
 import {
   refreshing,
@@ -26,7 +27,7 @@ import {
 
 const REFRESH_MS = 30000;
 type Tab = "leaderboard" | "timeframes" | "open" | "closed" | "signals" | "daily" | "paper" | "top2L" | "top10L"
-  | "prem2L" | "prem50k";
+  | "prem2L" | "prem50k" | "bands" | "pbtop4";
 // The paper accounts on the shared book engine (app.services.top10_books): Top-10 and Premium Strategy.
 const BOOK_TABS: Tab[] = ["top2L", "top10L", "prem2L", "prem50k"];
 const TABS: { key: Tab; label: string }[] = [
@@ -44,6 +45,10 @@ const TABS: { key: Tab; label: string }[] = [
   // RSI Divergence 1h - in one account each of Rs 2 lakh and Rs 50,000.
   { key: "prem2L", label: "Premium Strategy · ₹2 lakh" },
   { key: "prem50k", label: "Premium Strategy · ₹50k" },
+  // 17 Nov 2026: the desk's Rank bands 1-5 ... 46-50 and the Paper book's top 4, each in a Rs 2 lakh and a
+  // Rs 10 lakh account (28 in all), shown as two overviews; a click opens one account in full.
+  { key: "bands", label: "Rank-band accounts · 20" },
+  { key: "pbtop4", label: "Paper book top 4 · 8 accounts" },
 ];
 // The timeframe and family chips filter the 504-strategy DESK. The paper book is a fixed
 // roster on one balance, so they mean nothing there and are hidden rather than left to
@@ -333,6 +338,8 @@ export default function NiftyScalpPage() {
       {BOOK_TABS.includes(tab) && (
         <Top10Book key={tab} desk="nifty-scalp" book={tab as "top2L" | "top10L" | "prem2L" | "prem50k"} />
       )}
+      {tab === "bands" && <PickedAccounts key="bands" group="rank-band" />}
+      {tab === "pbtop4" && <PickedAccounts key="pbtop4" group="paper-top4" />}
 
       <DeskHistory deskKey={"nifty-scalp"} />
 

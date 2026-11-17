@@ -7,7 +7,12 @@ export type Top10BookKey = "top2L" | "top10L";
 // prem2L / prem50k: "Premium Strategy" picked books on NIFTY 50 Option Scalping (2026-11-16), the
 // owner's own three picks in a Rs 2 lakh and a Rs 50,000 account, on the same engine. Kept apart from
 // Top10BookKey, which the stock desk pages narrow on.
-export type PickedBookKey = "prem2L" | "prem50k";
+// 17 Nov 2026, also on NIFTY 50 Option Scalping: 20 Rank-band accounts (rank1_5_2L ... rank46_50_10L) and 8
+// Paper-book top-4 accounts (pb1_2L ... pb4_10L), shown together by group (fetchPickedAccounts).
+export type RankBandBookKey = `rank${number}_${number}_${"2L" | "10L"}`;
+export type PaperTopBookKey = `pb${number}_${"2L" | "10L"}`;
+export type PickedBookKey = "prem2L" | "prem50k" | RankBandBookKey | PaperTopBookKey;
+export type PickedGroup = "rank-band" | "paper-top4";
 export type AnyBookKey = Top10BookKey | PickedBookKey;
 export type Top10Desk = "zero-hero" | "nifty-scalp" | "prelive" | "stock-buying" | "stock-selling" | "commodity"
   | "strategy-factory";
@@ -31,8 +36,12 @@ export interface Top10Summary {
   // A picked book (the owner's own picks) says what they are; absent on the Top-10 books.
   picked?: boolean;
   pick_rule?: string | null;
+  // "rank-band" | "paper-top4" for accounts shown together; null on the others.
+  group?: string | null;
   picked_at: string;
   roster: string[];
+  // the picks' names, in pick order (absent on an older server)
+  pick_names?: string[];
   strategies: number;
   max_open_positions: number;
   position_cap: number;
@@ -120,4 +129,24 @@ export async function fetchTop10Positions(
 ): Promise<Top10Position[]> {
   const r = await apiFetch(`${t10}/${desk}/positions?book=${book}&status=${status}&limit=${limit}`);
   return r.positions ?? [];
+}
+
+export interface PickedAccounts {
+  desk: string;
+  group: PickedGroup;
+  groups: Record<string, string[]>;
+  accounts: Top10Summary[];
+  total: number;
+}
+
+/** One group of picked accounts, every account summarised. null when the server does not have the group
+ *  yet (an older backend answers 404): the page then says so instead of showing another book's numbers. */
+export async function fetchPickedAccounts(desk: Top10Desk, group: PickedGroup): Promise<PickedAccounts | null> {
+  try {
+    return await apiFetch(`${t10}/${desk}/accounts?group=${group}`);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "";
+    if (msg === "Not Found" || msg.startsWith("No '") || msg.includes("404")) return null;
+    throw e;
+  }
 }
