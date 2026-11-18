@@ -263,12 +263,12 @@ async def market_endpoint(_user: dict = Depends(get_current_user)):
     from tradingai_shared import mcx_calendar as mcal
 
     from app.services import mcx_market
-    from app.services.commodity_bars import LIQUID_UNDERLYINGS
+    from app.services.commodity_engine import DESK_UNDERLYINGS     # the desk's two contracts (18 Nov 2026)
 
-    listed = await mcx_market.listed_futures(LIQUID_UNDERLYINGS)
+    listed = await mcx_market.listed_futures(list(DESK_UNDERLYINGS))
     today = mcal.as_date(None)
     rows = []
-    for u in LIQUID_UNDERLYINGS:
+    for u in DESK_UNDERLYINGS:
         tradable = mcx_market.tradable_contract(listed.get(u, []), u, today)
         contracts = []
         for d in listed.get(u, [])[:4]:

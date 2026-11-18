@@ -62,6 +62,15 @@ logger = logging.getLogger("commodity_engine")
 
 STATE_ID = "commodity"
 
+# THE DESK'S CONTRACTS (2026-11-18, the owner's decision): Natural Gas Mini and Crude Oil Mini only. The
+# other eight (GOLD, GOLDM, SILVER, SILVERM, CRUDEOIL, NATURALGAS, COPPER, ZINC) are no longer traded here,
+# and their records are removed from this desk by backend/scripts/purge_commodity_symbols.py (backed up
+# first). The bar STORE still fetches all ten (commodity_bars.LIQUID_UNDERLYINGS): the Gold desk, the
+# Pre-Live desk and the Strategy Factory read it, so it is not this desk's list to shorten.
+DESK_UNDERLYINGS: tuple[str, ...] = tuple(
+    u.strip().upper() for u in os.getenv("COMMODITY_DESK_UNDERLYINGS", "NATGASMINI,CRUDEOILM").split(",")
+    if u.strip())
+
 # ── capital ──────────────────────────────────────────────────────────────────────
 PER_STRATEGY_ALLOCATION = float(os.getenv("COMMODITY_PER_STRATEGY_CAPITAL", "1000000"))  # ₹10 lakh
 MAX_POSITIONS_PER_STRATEGY = int(os.getenv("COMMODITY_MAX_POSITIONS", "1"))
@@ -439,7 +448,8 @@ async def scan_cycle() -> dict:
             f"DAILY LOSS BREAKER TRIPPED — today's P&L ₹{breaker['today_pnl']:,.0f} crossed the "
             f"₹{breaker['daily_loss_limit']:,.0f} limit. No new positions; open ones still managed."]}
 
-    universe = await front_month_universe()
+    # Only the desk's own contracts are scanned; a position already open elsewhere is still managed.
+    universe = {s: c for s, c in (await front_month_universe()).items() if s in DESK_UNDERLYINGS}
     if not universe:
         return {"opened": 0, "evaluated": 0,
                 "notes": ["No unexpired MCX front-month futures with an Angel token on file."]}

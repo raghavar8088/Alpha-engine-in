@@ -133,7 +133,9 @@ export default function CommodityPage() {
         subtitle={
           <>
             A <strong>research record</strong>, not a strategy picker. {summary?.strategy_count ?? 353} pattern
-            strategies on MCX futures, paper only. The 2026-10-03 audit found no pattern or trend rule with
+            strategies on two MCX contracts only, <strong>Natural Gas Mini and Crude Oil Mini</strong>{" "}(since 18 Nov
+            2026; the other eight commodities&apos; records were removed), paper only. The 2026-10-03 audit found no
+            pattern or trend rule with
             an edge after costs and carry, so nothing here is promoted. Real money stays locked until the
             Commodity Lab or a pre-registered hypothesis earns a CONFIRMED verdict.
           </>
