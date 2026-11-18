@@ -11,6 +11,8 @@ What this pins down:
   * The shared Rs 2 lakh / Rs 10 lakh books: every pick trade copied, each position up to capital / 5,
     on the trades' own clock never more than five open, one per strategy, cash never below zero.
   * The Rs 10 lakh-each accounts: one per strategy, each entry sized on that account's realised equity.
+  * The 18 Nov accounts (own2L_n / own10L_n): each of that day's top 5 alone on Rs 2 lakh and on Rs 10 lakh,
+    sized the same way; Keltner Breakout trades only there, HH/HL Structure Shift only in the 12 Nov books.
   * Open copies are marked at the desk's mark; they close when the desk closes, at the rate they opened at.
   * VOID desk trades void their copies; no USD/INR rate or Main Control off means no NEW copy; a book
     never back-fills; a second pass changes nothing; the desk's records are never written.
@@ -40,7 +42,8 @@ for _r in FIX["rows"]:
             _d[_k] = datetime.fromisoformat(_d[_k])        # Mongo hands back dates, not strings
     _d["instrument"] = {"contract_value": _d["multiplier"]}
     DOCS.append(_d)
-PICKED = {p.template for p in M.PICKS}
+PICKED = {p.template for p in M.PICKS}                   # the 12 Nov five (the shared books' roster)
+PICKED_ANY = {p.template for p in M.ALL_PICKS}           # either set: 12 Nov or 18 Nov
 CLOSED = [d for d in DOCS if d["status"] == "CLOSED"]
 OPEN = [d for d in DOCS if d["status"] == "OPEN"]
 CLOSED_PICKS = [d for d in CLOSED if d["strategy_template"] in PICKED]
@@ -122,8 +125,9 @@ async def main():
     check("P&L is proportional to contracts", abs(2 * n1 - n2) <= 0.03 and abs(2 * g1 - g2) <= 0.02, f"{n1} / {n2}")
     check("a stored copy keeps its own rate (the row's rate wins over today's)",
           abs(M.pnl({"qty": 100, "usd_inr": 80.0}, p)[1] - expected_net(d, 100, 80.0)) <= 0.02)
-    check("trades of other templates are never copied",
-          all(M.parent_of(x, FX) is None for x in DOCS if x["strategy_template"] not in PICKED))
+    check("trades of templates in neither pick set are never copied",
+          all(M.parent_of(x, FX) is None for x in DOCS if x["strategy_template"] not in PICKED_ANY)
+          and any(x["strategy_template"] not in PICKED_ANY for x in DOCS))
     check("each strategy holds its own position: its 'symbol' is its board id", p["symbol"] == p["key"] != "XAUTUSD")
 
     # ── 2. a week of real trades ────────────────────────────────────────────────────────
@@ -176,6 +180,30 @@ async def main():
             eq += r["realized_pnl"]
         check(f"{bid} ({p.name}): only its own {len(mine)} trades, each sized on the account's equity then",
               ok and sized, f"{len(rs)} copies, equity now Rs {eq:,.0f}")
+    for p in M.PICKS_1811:
+        mine = [x for x in CLOSED if x["strategy_template"] == p.template]
+        for kind, cap in (("own2L", 200000.0), ("own10L", 1000000.0)):
+            bid = f"{kind}_{p.n}"
+            rs = sorted(rows(bid), key=lambda r: r["opened_at"])
+            ok = len(rs) == len(mine) and all(r["key"] == p.key for r in rs) and M.BOOK[bid].capital == cap
+            eq, sized = cap, True
+            for r in rs:
+                if r["qty"] != math.floor(eq / r["entry_price"]):
+                    sized = False
+                eq += r["realized_pnl"]
+            check(f"{bid} ({p.name}): only its own {len(mine)} trades on its own Rs {cap:,.0f}, each sized on its "
+                  "equity then", ok and sized and len(rs) > 0, f"{len(rs)} copies, equity now Rs {eq:,.0f}")
+    kel = [x["position_id"] for x in CLOSED if x["strategy_template"] == "keltner_break"]
+    hh = [x["position_id"] for x in CLOSED if x["strategy_template"] == "hh_hl_shift"]
+    in_books = lambda pid: {r["book"] for r in M.POSITIONS.docs if r["parent_position_id"] == pid}  # noqa: E731
+    check("Keltner Breakout (18 Nov only) is copied into its own two accounts and nowhere else",
+          kel and all(in_books(k) == {"own2L_5", "own10L_5"} for k in kel), str([in_books(k) for k in kel]))
+    check("HH/HL Structure Shift (12 Nov only) stays in the 12 Nov books, not in the 18 Nov accounts",
+          hh and all(in_books(k) == {"top5_2L", "top5_10L", "each10L_4"} for k in hh), str([in_books(k) for k in hh]))
+    f2 = sorted(rows("own2L_1"), key=lambda r: r["opened_at"])[0]
+    f10 = sorted(rows("own10L_1"), key=lambda r: r["opened_at"])[0]
+    check("an own Rs 10 lakh account's first trade is about five times its Rs 2 lakh twin's",
+          abs(f10["qty"] - 5 * f2["qty"]) <= 5, f"{f2['qty']} vs {f10['qty']}")
     snap = copy.deepcopy(M.POSITIONS.docs)
     await M.sync(entries=True)
     check("a second pass changes nothing", M.POSITIONS.docs == snap)
@@ -247,9 +275,19 @@ async def main():
     await M.sync(entries=True)
     ov = await M.overview()
     books = {b["id"]: b for b in ov["books"]}
-    check("three account types: two shared books and five Rs 10 lakh accounts",
-          [g["group"] for g in ov["groups"]] == ["2L", "10L", "each10L"] and len(books) == 7
+    check("three 12 Nov account types (two shared books, five Rs 10 lakh accounts) and the 18 Nov ten",
+          [g["group"] for g in ov["groups"]] == ["2L", "10L", "each10L", "own2L", "own10L"] and len(books) == 17
           and ov["each_total"]["capital"] == 5_000_000 and ov["each_total"]["accounts"] == 5)
+    gt = ov["group_totals"]
+    check("18 Nov: five Rs 2 lakh and five Rs 10 lakh accounts, each total the sum of its five",
+          gt["own2L"]["capital"] == 1_000_000 and gt["own10L"]["capital"] == 5_000_000
+          and gt["own2L"]["accounts"] == 5 and gt["own10L"]["accounts"] == 5
+          and abs(gt["own2L"]["equity"] - sum(books[f"own2L_{p.n}"]["equity"] for p in M.PICKS_1811)) < 0.01
+          and books["own2L_1"]["position_cap"] is None and books["own10L_5"]["roster"] == ["XAUTUSD-keltner_break-4h"])
+    check("18 Nov: the five as picked, in board order, with when",
+          [p["template"] for p in ov["picks_1811"]] == ["round_number_break", "ema_ribbon", "donchian_fast",
+                                                         "pivot_break", "keltner_break"]
+          and ov["picked_at_1811"] == "2026-11-18T07:53:00+05:30")
     check("position caps: Rs 40,000 / Rs 2,00,000 / the account's own balance",
           books["top5_2L"]["position_cap"] == 40000 and books["top5_10L"]["position_cap"] == 200000
           and books["each10L_1"]["position_cap"] is None)

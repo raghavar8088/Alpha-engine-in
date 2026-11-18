@@ -45,6 +45,13 @@ then. Its strategy holds one position at a time, so this is exact.
 A book starts the first time it runs and never back-fills: a position H1 already held then is not
 copied. A desk trade that ends VOID (no recorded price) voids its copy - no P&L, the money back.
 Main Control's gold_desk switch gates new copies, as it gates the desk's own entries.
+
+EACH ON ITS OWN Rs 2 LAKH AND Rs 10 LAKH (18 Nov 2026). The owner asked, on the same tab, for a Rs 2 lakh and a
+Rs 10 lakh paper account for EACH of the top 5 strategies, read off the board as it stood then (PICKS_1811,
+07:53 IST 18 Nov): Round Number Break, EMA Ribbon Compression, Donchian Breakout (fast), Pivot R1/S1 Break and
+Keltner Breakout. Four are 12 Nov picks too; Keltner Breakout replaced HH/HL Structure Shift. These ten are new
+accounts (own2L_1..5, own10L_1..5) that start empty; the seven 12 Nov books keep their roster and their record.
+They are the each10L kind: one position at a time, each entry sized on that account's realised equity.
 """
 
 from __future__ import annotations
@@ -100,7 +107,19 @@ PICKS: tuple[Pick, ...] = (
     Pick(4, "XAUTUSD-hh_hl_shift-4h", "hh_hl_shift", "4h", "HH/HL Structure Shift · 4h", 52.5, 8, 12.08, 10.73, 0.24),
     Pick(5, "XAUTUSD-pivot_break-4h", "pivot_break", "4h", "Pivot R1/S1 Break · 4h", 50.6, 18, 9.48, 18.86, 0.37),
 )
-PICK = {p.key: p for p in PICKS}
+# The board's top 5 on 18 Nov 2026 at 07:53 IST (/api/strategy-rank/gold?venue=delta, 9 ranked, 129 closed trades),
+# each on its own Rs 2 lakh and its own Rs 10 lakh. net_usd is its realised P&L on the desk's Delta board then.
+PICKED_AT_1811 = "2026-11-18T07:53:00+05:30"
+BOARD_1811 = "the Gold Desk's Rank on its Delta board: H1's nine 4h templates on XAUTUSD, 129 closed trades"
+PICKS_1811: tuple[Pick, ...] = (
+    Pick(1, "XAUTUSD-round_number_break-4h", "round_number_break", "4h", "Round Number Break · 4h", 71.5, 20, 14.87, 33.00, 0.78),
+    Pick(2, "XAUTUSD-ema_ribbon-4h", "ema_ribbon", "4h", "EMA Ribbon Compression · 4h", 68.2, 12, 48.44, 64.39, 1.31),
+    Pick(3, "XAUTUSD-donchian_fast-4h", "donchian_fast", "4h", "Donchian Breakout (fast) · 4h", 62.3, 16, 22.87, 40.56, 0.66),
+    Pick(4, "XAUTUSD-pivot_break-4h", "pivot_break", "4h", "Pivot R1/S1 Break · 4h", 57.7, 20, 12.72, 28.13, 0.50),
+    Pick(5, "XAUTUSD-keltner_break-4h", "keltner_break", "4h", "Keltner Breakout · 4h", 49.7, 14, 6.45, 9.96, 0.16),
+)
+ALL_PICKS = (*PICKS, *PICKS_1811)
+PICK = {p.key: p for p in ALL_PICKS}          # a strategy's name, whichever set it is in
 ROSTER = tuple(p.key for p in PICKS)
 
 
@@ -126,13 +145,22 @@ BOOKS: tuple[Book, ...] = (
     Book("top5_2L", "2L", "Top 5 · ₹2 lakh", CAPITAL_2L, ROSTER, 5, False),
     Book("top5_10L", "10L", "Top 5 · ₹10 lakh", CAPITAL_10L, ROSTER, 5, False),
     *(Book(f"each10L_{p.n}", "each10L", f"{p.name} · ₹10 lakh", CAPITAL_10L, (p.key,), 1, True) for p in PICKS),
+    # 18 Nov 2026: each of that day's top 5 on its own Rs 2 lakh and its own Rs 10 lakh
+    *(Book(f"own2L_{p.n}", "own2L", f"{p.name} · its own ₹2 lakh", CAPITAL_2L, (p.key,), 1, True) for p in PICKS_1811),
+    *(Book(f"own10L_{p.n}", "own10L", f"{p.name} · its own ₹10 lakh", CAPITAL_10L, (p.key,), 1, True)
+      for p in PICKS_1811),
 )
 BOOK = {b.id: b for b in BOOKS}
+EACH_GROUPS = ("each10L", "own2L", "own10L")      # one account a strategy
 GROUPS = (
     {"group": "2L", "label": "Top 5 · ₹2 lakh", "about": "one ₹2 lakh account the five share: up to 5 positions of ₹40,000"},
     {"group": "10L", "label": "Top 5 · ₹10 lakh", "about": "one ₹10 lakh account the five share: up to 5 positions of ₹2,00,000"},
     {"group": "each10L", "label": "Top 5 · ₹10 lakh each",
      "about": "five ₹10 lakh accounts, one per strategy: each trade uses that account's own balance"},
+    {"group": "own2L", "label": "18 Nov top 5 · ₹2 lakh each",
+     "about": "five ₹2 lakh accounts, one per strategy of the 18 Nov top 5: each trade uses that account's own balance"},
+    {"group": "own10L", "label": "18 Nov top 5 · ₹10 lakh each",
+     "about": "five ₹10 lakh accounts, one per strategy of the 18 Nov top 5: each trade uses that account's own balance"},
 )
 NOTES = (
     "The five are the top of this desk's Rank on 12 Nov 2026 at 22:54 IST and stay fixed. They had 8 to 18 closed "
@@ -148,6 +176,10 @@ NOTES = (
     "account's about ten times; the extra depth they would eat is not modelled.",
     "The accounts started when they first ran and copy only trades H1 opens after that; nothing is back-filled. "
     "Main Control's Gold Desk switch stops new copies.",
+    "18 Nov 2026: each of that day's top 5 also has its own ₹2 lakh and its own ₹10 lakh account (ten more). Keltner "
+    "Breakout replaced HH/HL Structure Shift in the five; the 12 Nov accounts keep their five. They had 12 to 20 closed "
+    "trades each and the best t-stat was 1.31 - still a short record, not an edge. A ₹2 lakh account's position is "
+    "about twice H1's size.",
 )
 
 
@@ -309,10 +341,10 @@ async def _closed_after(book_id: str, t0: datetime | None) -> list[dict]:
 
 
 async def _load(since: datetime, pointed: list[str]) -> list[dict]:
-    """The desk's Delta positions of the five's templates opened since `since`, and any an open copy points at."""
+    """The desk's Delta positions of the picks' templates opened since `since`, and any an open copy points at."""
     q = {"venue": VENUE, "symbol": SYMBOL,
-         "strategy_template": {"$in": sorted({p.template for p in PICKS})},
-         "timeframe": {"$in": sorted({p.timeframe for p in PICKS})},
+         "strategy_template": {"$in": sorted({p.template for p in ALL_PICKS})},
+         "timeframe": {"$in": sorted({p.timeframe for p in ALL_PICKS})},
          "$or": [{"opened_at": {"$gte": since}}, {"position_id": {"$in": pointed}}]}
     return [d async for d in PARENTS.find(q)]
 
@@ -576,6 +608,9 @@ async def overview() -> dict:
         "picked_at": PICKED_AT, "board": BOARD, "venue": VENUE, "instrument": SYMBOL,
         "picks": [asdict(p) for p in PICKS], "groups": list(GROUPS), "books": books,
         "each_total": _sum_books([b for b in books if b["group"] == "each10L"]),
+        # 18 Nov 2026: that day's top 5, each on its own Rs 2 lakh and Rs 10 lakh (own2L_n / own10L_n)
+        "picks_1811": [asdict(p) for p in PICKS_1811], "picked_at_1811": PICKED_AT_1811, "board_1811": BOARD_1811,
+        "group_totals": {g: _sum_books([b for b in books if b["group"] == g]) for g in EACH_GROUPS},
         "usd_inr": {"rate": fx.get("rate"), "asof": fx.get("asof"), "at": _iso(fx.get("at"))} if fx else None,
         "notes": list(NOTES),
     }

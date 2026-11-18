@@ -266,8 +266,8 @@ export default function GoldDeskPage() {
           <span className="tv">records beside H1 · Delta XAUTUSD</span>
         </button>
         <button className={t5 ? "ptab on" : "ptab"} onClick={() => { setLab(false); setFac(false); setT5(true); }}>
-          <span>Top 5 · 3 paper accounts</span>
-          <span className="tv">₹2 lakh · ₹10 lakh · ₹10 lakh each</span>
+          <span>Top 5 · 17 paper accounts</span>
+          <span className="tv">₹2 lakh &amp; ₹10 lakh each · shared ₹2L / ₹10L</span>
         </button>
         <a href="/gold-desk/ai-approved" className="ptab" style={{ textDecoration: "none" }}>
           <span>AI Approved</span>

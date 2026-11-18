@@ -4,6 +4,8 @@
 // desk's Delta board (H1's 4h templates on XAUTUSD) - one Rs 2 lakh account the five share, one Rs 10 lakh account
 // the five share, and five Rs 10 lakh accounts, one per strategy. They copy the desk's own trades at their own size
 // (backend app/services/gold_top5_books.py). Paper only: nothing here can place an order.
+// 18 Nov 2026: that day's top 5 (Keltner Breakout in for HH/HL Structure Shift), each on its own ₹2 lakh and its own
+// ₹10 lakh account (own2L_n / own10L_n) - a second section below the 12 Nov accounts, which keep their five.
 import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "../../lib/api";
 
@@ -13,12 +15,15 @@ type StratRow = { key: string; name: string; trades: number; wins: number; net: 
 type Money = { capital: number; equity: number; realized_pnl: number; unrealized_pnl: number; deployed: number;
   available_cash: number; fees: number; gross_pnl: number; open_positions: number; closed_positions: number; wins: number;
   win_rate: number | null; roi_pct: number };
-type Book = Money & { id: string; group: "2L" | "10L" | "each10L"; label: string; roster: string[]; max_open: number;
-  position_cap: number | null; compound: boolean; skipped: Record<string, number>; voided: number; started_at: string | null;
-  strategies: StratRow[] };
+type Book = Money & { id: string; group: "2L" | "10L" | "each10L" | "own2L" | "own10L"; label: string; roster: string[];
+  max_open: number; position_cap: number | null; compound: boolean; skipped: Record<string, number>; voided: number;
+  started_at: string | null; strategies: StratRow[] };
+type Total = Money & { accounts: number };
 export type Overview = { mode: string; enabled: boolean; tick_seconds: number; picked_at: string; board: string; instrument: string;
-  picks: Pick[]; groups: { group: string; label: string; about: string }[]; books: Book[]; each_total: Money & { accounts: number };
-  usd_inr: { rate: number | null; asof: string | null; at: string | null } | null; notes: string[] };
+  picks: Pick[]; groups: { group: string; label: string; about: string }[]; books: Book[]; each_total: Total;
+  usd_inr: { rate: number | null; asof: string | null; at: string | null } | null; notes: string[];
+  // 18 Nov 2026 (absent on a server not yet updated): that day's top 5, each on its own ₹2 lakh and ₹10 lakh
+  picks_1811?: Pick[]; picked_at_1811?: string; board_1811?: string; group_totals?: Record<string, Total> };
 export type Copy = { position_id: string; book: string; key: string; strategy_name: string; side: "BUY" | "SELL"; qty: number;
   ounces: number; entry_px: number; exit_px: number | null; ltp: number | null; usd_inr: number | null;
   capital_deployed: number; unrealized_pnl: number; realized_pnl: number | null; gross_pnl: number | null;
@@ -108,7 +113,7 @@ export default function GoldTop5Panel() {
       const books = Object.values((r?.books ?? {}) as Record<string, { opened?: number; closed?: number }>);
       const opened = books.reduce((n, b) => n + (b.opened ?? 0), 0);
       const shut = books.reduce((n, b) => n + (b.closed ?? 0), 0);
-      setNote(r?.note ?? `Copied the desk now: ${opened} opened, ${shut} closed across the seven books.`);
+      setNote(r?.note ?? `Copied the desk now: ${opened} opened, ${shut} closed across the ${books.length} accounts.`);
       await Promise.all([load(), loadBook(sel)]);
     } catch (e) {
       setNote(e instanceof Error ? e.message : "The copy could not run.");
@@ -140,15 +145,81 @@ export function Top5View({ ov, sel, onSel, open, closed, busy, note, onRun }: {
   const each = ov.books.filter((b) => b.group === "each10L");
   const started = ov.books.map((b) => b.started_at).filter((x): x is string => !!x).sort()[0] ?? null;
   const cur = byId[sel];
-  const pickOf = (key: string) => ov.picks.find((p) => p.key === key);
+  const allPicks = [...(ov.picks_1811 ?? []), ...ov.picks];
+  const pickOf = (key: string) => allPicks.find((p) => p.key === key);
+  const p18 = ov.picks_1811 ?? [];
+  const own2 = ov.books.filter((b) => b.group === "own2L");
+  const own10 = ov.books.filter((b) => b.group === "own10L");
+  const gt = ov.group_totals ?? {};
 
   return (
     <div className="t5">
       <div className="t5-warn">
-        <b>Paper only, and not proven.</b> The five are the top of this desk&apos;s Rank on 12 Nov 2026 at 22:54 IST and
-        stay fixed. They had 8 to 18 closed trades each and none a t-stat of 2: a short good record, not an edge.
+        <b>Paper only, and not proven.</b> Each set of five is the top of this desk&apos;s Rank on the day it was picked
+        and stays fixed. They had 8 to 20 closed trades each and none a t-stat of 2: a short good record, not an edge.
       </div>
 
+      <h4 className="t5-h">Today&apos;s top 5 (18 Nov) · each strategy on its own ₹2 lakh and its own ₹10 lakh</h4>
+      {!ov.picks_1811 ? (
+        <p className="t5-dim">
+          These ten accounts are set up, but the server has not been updated with them yet. They start copying H1 on the
+          first pass after the backend is deployed; nothing is back-filled.
+        </p>
+      ) : (
+        <>
+          <div className="t5-cards">
+            <Card title="₹2 lakh each" sub={`${gt.own2L?.accounts ?? own2.length} accounts, one per strategy · each trade uses its own balance`}
+              m={gt.own2L} on={sel.startsWith("own2L")} onClick={() => setSel(own2[0]?.id ?? "own2L_1")} />
+            <Card title="₹10 lakh each" sub={`${gt.own10L?.accounts ?? own10.length} accounts, one per strategy · each trade uses its own balance`}
+              m={gt.own10L} on={sel.startsWith("own10L")} onClick={() => setSel(own10[0]?.id ?? "own10L_1")} />
+          </div>
+          <div className="t5-scroll">
+            <table className="t5-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th className="l">Strategy</th>
+                  <th className="l">At the pick (18 Nov, 07:53 IST)</th>
+                  <th>Its own ₹2 lakh</th>
+                  <th>Its own ₹10 lakh</th>
+                  <th>Open now</th>
+                </tr>
+              </thead>
+              <tbody>
+                {p18.map((p) => {
+                  const a = byId[`own2L_${p.n}`];
+                  const b = byId[`own10L_${p.n}`];
+                  const openNow = (a?.open_positions ?? 0) + (b?.open_positions ?? 0);
+                  return (
+                    <tr key={p.key}>
+                      <td>{p.n}</td>
+                      <td className="l"><b>{p.name}</b><div className="t5-dim">H1 template · {p.template}</div></td>
+                      <td className="l">
+                        score {p.score.toFixed(1)} · {p.trades} trades
+                        <div className="t5-dim">{`${p.bp >= 0 ? "+" : ""}${p.bp.toFixed(1)} bp a trade · t ${p.t.toFixed(2)} · ${usd(p.net_usd)} on the desk`}</div>
+                      </td>
+                      {[a, b].map((acct, i) => (
+                        <td key={i} className={tone(acct?.roi_pct)}>
+                          {acct ? (
+                            <button className={`t5-cell${sel === acct.id ? " on" : ""}`} onClick={() => setSel(acct.id)}
+                              title={`Open ${acct.label}`}>
+                              {inr(acct.equity)}
+                              <div className="t5-dim">{pct(acct.roi_pct)} · {acct.closed_positions} trades</div>
+                            </button>
+                          ) : "—"}
+                        </td>
+                      ))}
+                      <td>{openNow || "—"}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+      <h4 className="t5-h">The 12 Nov top 5 · three accounts</h4>
       <div className="t5-cards">
         <Card title="Top 5 · ₹2 lakh" sub="one account the five share · up to 5 positions of ₹40,000"
           m={byId.top5_2L} on={sel === "top5_2L"} onClick={() => setSel("top5_2L")} />
@@ -200,6 +271,11 @@ export function Top5View({ ov, sel, onSel, open, closed, busy, note, onRun }: {
 
       <div className="t5-bar">
         <div className="t5-chips" role="group" aria-label="Account">
+          {[...own2, ...own10].map((b) => (
+            <button key={b.id} className={`t5-chip${sel === b.id ? " on" : ""}`} onClick={() => setSel(b.id)}>
+              {`${SHORT(pickOf(b.roster[0])?.name ?? b.label)} · ${b.group === "own2L" ? "₹2L" : "₹10L"} (18 Nov)`}
+            </button>
+          ))}
           <button className={`t5-chip${sel === "top5_2L" ? " on" : ""}`} onClick={() => setSel("top5_2L")}>₹2 lakh book</button>
           <button className={`t5-chip${sel === "top5_10L" ? " on" : ""}`} onClick={() => setSel("top5_10L")}>₹10 lakh book</button>
           {each.map((b) => (
@@ -208,7 +284,7 @@ export function Top5View({ ov, sel, onSel, open, closed, busy, note, onRun }: {
             </button>
           ))}
         </div>
-        <button className="t5-run" disabled={busy} onClick={runNow} title="Copy the desk's latest trades into the seven books now">
+        <button className="t5-run" disabled={busy} onClick={runNow} title="Copy the desk's latest trades into every account now">
           {busy ? "Copying…" : "Copy now"}
         </button>
       </div>
@@ -333,6 +409,10 @@ export function Top5View({ ov, sel, onSel, open, closed, busy, note, onRun }: {
         .t5 .t5-chip { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted);
                        border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 700; cursor: pointer; }
         .t5 .t5-chip.on { color: var(--brand); border-color: var(--brand-border); background: var(--brand-dim); }
+        .t5 .t5-cell { font: inherit; color: inherit; text-align: right; cursor: pointer; background: transparent;
+                       border: 1px solid transparent; border-radius: 8px; padding: 2px 6px; }
+        .t5 .t5-cell:hover { border-color: var(--brand-border); }
+        .t5 .t5-cell.on { border-color: var(--brand-border); background: var(--brand-dim); }
         .t5 .t5-run { background: var(--canvas-soft); border: 1px solid var(--panel-border); color: var(--text-muted);
                       border-radius: 9px; padding: 7px 14px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
         .t5 .t5-run:hover:not(:disabled) { color: var(--brand); border-color: var(--brand-border); }
