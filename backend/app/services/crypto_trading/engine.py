@@ -866,8 +866,16 @@ async def loop() -> None:
         logger.warning("[crypto_trading] FACTORY_MONGO_URL is unset: records go to the main database %r",
                        store.store_name())
     await asyncio.sleep(45)
+    from app.services.desk_switches import should_run
     while True:
         try:
+            # Main Control (18 Nov 2026): OFF used to skip only the ENTRIES - every tick still
+            # downloaded candles and computed every pair's signals, so switching the desk off
+            # saved almost no CPU. Now OFF and flat = PAUSED: the tick does not run at all. OFF
+            # with positions open keeps ticking to manage them; tick() itself opens nothing then.
+            if not await should_run(SWITCH):
+                await asyncio.sleep(TICK_S)
+                continue
             r = await tick()
             if r.get("opened") or r.get("closed"):
                 logger.warning("[crypto_trading] %s", r)        # WARNING: the app shows no INFO lines

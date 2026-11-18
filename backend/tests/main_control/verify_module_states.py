@@ -173,6 +173,21 @@ async def main():
     check(flags["draining"] == {True} and flags["active"] == {False},
           f"interleaved desks keep their own drain flag ({flags})")
 
+    # Crypto keeps its book in its own store ("pkg:ATTR" probe). OFF and flat must skip the whole
+    # tick (should_run False); OFF with something open must keep ticking to manage it.
+    import types as _types
+    fake_store = _types.ModuleType("app.services.crypto_trading.store")
+    fake_store.POSITIONS = FakeColl(0)
+    sys.modules.setdefault("app.services.crypto_trading", _types.ModuleType("app.services.crypto_trading"))
+    sys.modules["app.services.crypto_trading.store"] = fake_store
+    await sw.set_module("crypto_trading", False)
+    check(not await sw.should_run("crypto_trading"), "Crypto OFF and flat: should_run is False, the tick is skipped")
+    fake_store.POSITIONS.open_n = 2
+    sw._open_cache.pop("crypto_trading", None)
+    check(await sw.should_run("crypto_trading"), "Crypto OFF with 2 open: still ticks to manage them")
+    await sw.set_module("crypto_trading", True)
+    check(await sw.should_run("crypto_trading"), "Crypto ON: ticks")
+
     # snapshot / status shapes
     snap = await sw.snapshot()
     row = next(r for r in snap["modules"] if r["module"] == "nifty_scalp")
