@@ -10,12 +10,27 @@
 // trade size and flatten) only when the server says one is required (pin_required); the owner chose none on 15 Nov.
 // The view was redesigned on 16 Nov 2026 (status and controls first, then the numbers, open positions, the strategies,
 // the trade log with filters, and the desk's notes folded away). LiveDelta - every request this page sends - is unchanged.
+// 19 Nov 2026: each strategy's own paper side beside the real one (the server's paper view): "Paper now" (in a paper
+// trade, its R now, or waiting) and "Paper so far" in the strategies table, with filters; a table of the strategies'
+// latest paper trades with what the desk did with each (copied, skipped and why, not copied); no t under five trades.
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { apiFetch } from "../../lib/api";
 
 type Rec = { trades: number; wins: number; pnl_usd: number; open: number };
+/** A pick's own paper trades now (18 Nov): its closed record since the paper desk started it, and its open trades. */
+type PaperOpen = { id: string; side: number; entry: number | null; stop: number | null; target: number | null; entry_t: number;
+  r_now: number | null };
+type PaperRec = { trades: number; wins: number; sum_r: number; open: PaperOpen[]; last_t: number | null };
 type Pick = { acct: string; mkt: string; product: string; name: string; trades: number; sum_r: number; t: number; win: number;
-  backtest: string; live: Rec | null; shadow: Rec | null; picked_at?: string | null };
+  backtest: string; live: Rec | null; shadow: Rec | null; picked_at?: string | null;
+  src?: string; template?: string | null;   // src "gold_h1": a Gold Desk H1 template (18 Nov), else a Premium book
+  paper?: PaperRec | null };                // undefined on an older server, null when the paper side cannot be read
+/** One of the strategies' latest paper trades, with what this desk did with it (18 Nov). */
+export type Signal = { id: string; acct: string; mkt: string; src?: string; side: number; entry_t: number; entry: number | null;
+  stop: number | null; target: number | null; open: boolean; exit: number | null; exit_t: number | null; reason: string | null;
+  r: number | null; r_now: number | null;
+  desk: { status: string; why?: string | null; pnl_usd?: number | null; unrealised_usd?: number | null; mode?: string;
+    contracts?: number | null } };
 type Plan = { price: number; contracts: number; risk_usd: number; notional_usd: number; margin_usd: number; capped: boolean };
 export type LiveTrade = { id: string; acct: string; mkt: string; product: string; name: string; mode: "live" | "shadow"; status: string;
   reason?: string; side: number; contracts?: number; fill?: number; stop: number; target: number | null; mark?: number;
@@ -30,7 +45,8 @@ export type LiveStatus = { configured_db: boolean; keys: boolean; pin_set: boole
     drift_frac: number; tick_s: number; risk_cap_usd?: number; risk_min_usd?: number; risk_set_at?: number | null;
     sizing?: "min" | "risk" };
   today: { live: number; shadow: number }; totals: { live: Totals; shadow: Totals }; picked_at: string; picks: Pick[];
-  open: LiveTrade[]; recent: LiveTrade[]; notes: string[]; desk?: string; title?: string; products?: Record<string, unknown> };
+  open: LiveTrade[]; recent: LiveTrade[]; notes: string[]; desk?: string; title?: string; products?: Record<string, unknown>;
+  signals?: Signal[] | null; paper_view?: { at?: number; paper_age_s?: number | null; gold_desk_age_s?: number | null } | null };
 
 export const usd = (v: number | null | undefined, signed = false) => {
   if (v === null || v === undefined || Number.isNaN(v)) return "—";
@@ -81,13 +97,42 @@ type Filter = "all" | "real" | "skipped" | "error";
 /** What the picks' own backtests said, counted from the data (so it stays true when a desk's picks change). */
 const verdict = (picks: Pick[]) => {
   const n = picks.length;
-  const lose = picks.filter((p) => p.backtest.startsWith("loses")).length;
-  const never = picks.filter((p) => p.backtest.startsWith("never")).length;
+  const count = (w: string) => picks.filter((p) => p.backtest.startsWith(w)).length;
+  const lose = count("loses"), earn = count("earns"), never = count("never"), pooled = count("pooled");
   const parts: string[] = [];
   if (lose) parts.push(`${lose === n ? "All" : lose} of these ${n} ${lose === 1 ? "loses" : "lose"} in ${lose === 1 ? "its" : "their"} own 2-year backtest${lose === 1 ? "" : "s"}`);
+  if (earn) parts.push(`${earn} ${earn === 1 ? "earns" : "earn"} too little in ${earn === 1 ? "its" : "their"} own to mean anything`);
   if (never) parts.push(`${never} ${never === 1 ? "was" : "were"} never backtested`);
-  return `${parts.join(" and ")}${parts.length ? ":" : ""} a few good paper trades picked them.`;
+  if (pooled) parts.push(`${pooled} ${pooled === 1 ? "was" : "were"} tested only as a family`);
+  const said = parts.length > 1 ? `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}` : parts.join("");
+  return `${said}${parts.length ? ":" : ""} a few good paper trades picked them.`;
 };
+
+/** A pick's backtest badge, from the server's wording: "loses ...", "earns ..., not significant", "never backtested",
+ *  or "pooled only" (the Gold Desk's H1 templates, replayed only as a family). */
+const btBadge = (b: string): [string, string] =>
+  b.startsWith("loses") ? ["error", "loses"] : b.startsWith("earns") ? ["skipped", "not significant"]
+    : b.startsWith("pooled") ? ["skipped", "family only"] : ["skipped", "not tested"];
+
+const rr = (v: number | null | undefined) => (v === null || v === undefined ? "—" : `${v > 0 ? "+" : v < 0 ? "−" : ""}${Math.abs(v).toFixed(2)}R`);
+const pct = (n: number, d: number) => (d ? `${Math.round((100 * n) / d)}%` : "—");
+const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? "" : "s"}`;
+/** The record at the pick: a t-stat of under five trades means nothing (two near-equal trades give a t in the hundreds). */
+const pickRecord = (p: Pick) =>
+  `${plural(p.trades, "trade")} · ${p.sum_r >= 0 ? "+" : ""}${p.sum_r.toFixed(1)}R · ${p.trades >= 5 ? `t ${p.t.toFixed(2)}` : "too few for a t"} · ${p.win}% won`;
+type PFilter = "all" | "inTrade" | "real" | "waiting";
+const inTrade = (p: Pick) => !!p.paper && p.paper.open.length > 0;
+/** What this desk did with a paper trade, as a badge (the reason goes under it). */
+const DESK_STATE: Record<string, { label: string; cls: string }> = {
+  open: { label: "Copied · open", cls: "open" }, entering: { label: "Copied · entering", cls: "open" },
+  closing: { label: "Copied · closing", cls: "open" }, closed: { label: "Copied · closed", cls: "closed" },
+  skipped: { label: "Skipped", cls: "skipped" }, error: { label: "Error", cls: "error" },
+  before: { label: "Not copied", cls: "skipped" }, off: { label: "Not copied", cls: "skipped" },
+  pending: { label: "Deciding", cls: "open" },
+};
+type SFilter = "all" | "copied" | "skipped" | "not";
+const copied = (x: Signal) => ["open", "entering", "closing", "closed"].includes(x.desk.status);
+const notCopied = (x: Signal) => ["before", "off"].includes(x.desk.status);
 
 /** What the page shows, given the desk's status: no state of its own beyond its props (and the trade-log filter). */
 export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, saved, ask, pendingRisk, busy, msg, onToggle,
@@ -120,6 +165,23 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
   }), [s.recent]);
   const shown = s.recent.filter((t) => filter === "all" ? true : filter === "real" ? t.status !== "skipped" && t.status !== "error"
     : t.status === filter);
+  // the strategies' own paper side (18 Nov): undefined on an older server, null when it could not be read
+  const [pf, setPf] = useState<PFilter>("all");
+  const [sf, setSf] = useState<SFilter>("all");
+  const hasPaper = s.picks.some((p) => p.paper !== undefined);
+  const pCounts = {
+    all: s.picks.length, inTrade: s.picks.filter(inTrade).length,
+    real: s.picks.filter((p) => (p.live?.trades ?? 0) + (p.live?.open ?? 0) > 0).length,
+    waiting: s.picks.filter((p) => !inTrade(p)).length,
+  };
+  const picksShown = s.picks.filter((p) => pf === "all" ? true : pf === "inTrade" ? inTrade(p)
+    : pf === "real" ? (p.live?.trades ?? 0) + (p.live?.open ?? 0) > 0 : !inTrade(p));
+  const sig = s.signals ?? [];
+  const sCounts = { all: sig.length, copied: sig.filter(copied).length, skipped: sig.filter((x) => x.desk.status === "skipped"
+    || x.desk.status === "error").length, not: sig.filter(notCopied).length };
+  const sigShown = sig.filter((x) => sf === "all" ? true : sf === "copied" ? copied(x)
+    : sf === "skipped" ? x.desk.status === "skipped" || x.desk.status === "error" : notCopied(x));
+  const pv = s.paper_view;
   return (
     <div className="ld">
       <div className="ld-warn" role="note">
@@ -233,6 +295,14 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
           <span className={`ld-v ${s.open.length ? tone(openPnl) : ""}`}>{s.open.length ? usd(openPnl, true) : "0"}</span>
           <span className="ld-s">{s.open.length ? `${s.open.length} position${s.open.length === 1 ? "" : "s"} open, marked at Delta's price` : "no position open"}</span>
         </div>
+        {hasPaper && (
+          <div className="ld-tile">
+            <span className="ld-k">On paper now</span>
+            <span className="ld-v">{`${pCounts.inTrade} / ${pCounts.all}`}</span>
+            <span className="ld-s">{pv ? `strategies in a paper trade · paper desk ${ago(pv.at ? pv.at - (pv.paper_age_s ?? 0) : null, now)}`
+              : "the paper desk could not be read just now"}</span>
+          </div>
+        )}
         <div className="ld-tile">
           <span className="ld-k">Signals not taken</span>
           <span className="ld-v">{live.skipped}</span>
@@ -252,36 +322,132 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         )}
       </div>
 
-      <h4 className="ld-h">{mixed ? `The ${s.picks.length} strategies (each record as of its own pick)` : `The ${s.picks.length} strategies (fixed ${ist(Date.parse(s.picked_at) / 1000)} IST)`}</h4>
+      <h4 className="ld-h ld-h-row">
+        <span>{mixed ? `The ${s.picks.length} strategies (each record as of its own pick)` : `The ${s.picks.length} strategies (fixed ${ist(Date.parse(s.picked_at) / 1000)} IST)`}</span>
+        {hasPaper && (
+          <span className="ld-filters" role="group" aria-label="Show strategies">
+            {([["all", "All"], ["inTrade", "In a paper trade"], ["real", "With real trades"], ["waiting", "Waiting"]] as [PFilter, string][]).map(([k, label]) => (
+              <button key={k} type="button" className={`ld-fchip${pf === k ? " on" : ""}`} aria-pressed={pf === k}
+                onClick={() => setPf(k)}>{label} <span>{pCounts[k]}</span></button>
+            ))}
+          </span>
+        )}
+      </h4>
       <div className="ld-card ld-scroll">
-        <table className="ld-table">
+        <table className="ld-table ld-strats">
           <thead>
-            <tr><th className="l">Strategy</th><th>Real money</th><th>Trades</th><th>Won</th><th>Open</th>
-              <th className="l">Paper record at the pick</th><th className="l">Its 2-year backtest</th></tr>
+            <tr><th className="l">Strategy</th>{hasPaper && <><th className="l">Paper now</th><th className="l">Paper so far</th></>}
+              <th>Real money</th><th className="l">Record at the pick</th><th className="l">Its 2-year backtest</th></tr>
           </thead>
           <tbody>
-            {s.picks.map((p) => (
-              <tr key={`${p.acct}|${p.mkt}`}>
-                <td className="l"><b>{p.acct}</b> <span className="ld-chip">{p.product}</span><div className="ld-sub">{p.name}</div></td>
-                <td className={`ld-num ${tone(p.live?.pnl_usd)}`}>{p.live ? usd(p.live.pnl_usd, true) : "—"}</td>
-                <td>{p.live ? p.live.trades : "—"}</td>
-                <td>{p.live && p.live.trades ? `${Math.round((100 * p.live.wins) / p.live.trades)}%` : "—"}</td>
-                <td>{p.live?.open ? <span className="ld-badge open">{p.live.open} open</span> : "—"}</td>
-                <td className="l">{`${p.trades} trades · ${p.sum_r >= 0 ? "+" : ""}${p.sum_r.toFixed(1)}R · t ${p.t.toFixed(2)} · ${p.win}% won`}
-                  {mixed ? <div className="ld-sub">{`picked ${ist(Date.parse(p.picked_at || s.picked_at) / 1000)}`}</div> : null}</td>
-                <td className="l"><span className={`ld-badge ${p.backtest.startsWith("loses") ? "error" : "skipped"}`}>
-                  {p.backtest.startsWith("loses") ? "loses" : "not tested"}</span><div className="ld-sub">{p.backtest}</div></td>
-              </tr>
-            ))}
+            {picksShown.map((p) => {
+              const o = p.paper?.open?.[0];
+              const lv = p.live;
+              return (
+                <tr key={`${p.acct}|${p.mkt}`} className={inTrade(p) ? "ld-row-on" : ""}>
+                  <td className="l ld-strat">
+                    <b>{p.acct}</b> <span className="ld-chip">{p.product}</span>
+                    {p.src === "gold_h1" ? <span className="ld-chip ld-chip-src">Gold Desk H1</span> : null}
+                    <div className="ld-sub">{p.name}</div>
+                  </td>
+                  {hasPaper && (
+                    <>
+                      <td className="l">
+                        {p.paper === null || p.paper === undefined ? <span className="ld-dim">—</span> : o ? (
+                          <>
+                            <span className="ld-badge open">In a trade</span>{" "}
+                            <span className={`ld-side ${o.side > 0 ? "long" : "short"}`}>{o.side > 0 ? "Long" : "Short"}</span>
+                            <div className="ld-sub">{`since ${ist(o.entry_t)} · ${o.r_now !== null ? `${rr(o.r_now)} now` : "marked at the next bar"}${p.paper.open.length > 1 ? ` · ${p.paper.open.length} open` : ""}`}</div>
+                          </>
+                        ) : (
+                          <>
+                            <span className="ld-badge skipped">Waiting</span>
+                            <div className="ld-sub">{p.paper.last_t ? `last signal ${ist(p.paper.last_t)}` : "no paper trade yet"}</div>
+                          </>
+                        )}
+                      </td>
+                      <td className="l">
+                        {p.paper ? (
+                          <>
+                            <span className={`ld-num ${tone(p.paper.sum_r)}`}>{p.paper.trades ? rr(p.paper.sum_r) : "—"}</span>
+                            <div className="ld-sub">{p.paper.trades ? `${plural(p.paper.trades, "trade")} · ${pct(p.paper.wins, p.paper.trades)} won` : "no closed trade yet"}</div>
+                          </>
+                        ) : <span className="ld-dim">—</span>}
+                      </td>
+                    </>
+                  )}
+                  <td>
+                    <span className={`ld-num ${tone(lv?.pnl_usd)}`}>{lv && (lv.trades || lv.open) ? usd(lv.pnl_usd, true) : "—"}</span>
+                    <div className="ld-sub">{lv && lv.trades ? `${plural(lv.trades, "trade")} · ${pct(lv.wins, lv.trades)} won` : "no real trade yet"}</div>
+                    {lv?.open ? <span className="ld-badge open">{lv.open} open</span> : null}
+                  </td>
+                  <td className="l">{pickRecord(p)}
+                    {mixed ? <div className="ld-sub">{`picked ${ist(Date.parse(p.picked_at || s.picked_at) / 1000)}`}</div> : null}</td>
+                  <td className="l"><span className={`ld-badge ${btBadge(p.backtest)[0]}`}>
+                    {btBadge(p.backtest)[1]}</span><div className="ld-sub">{p.backtest}</div></td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
+        {!picksShown.length && <p className="ld-dim ld-pad">None of these strategies is in this state right now.</p>}
         {showShadow && (
           <p className="ld-foot">{`Shadow: ${s.picks.filter((p) => p.shadow).map((p) => `${p.acct} ${usd(p.shadow!.pnl_usd, true)} (${p.shadow!.trades})`).join(" · ") || "no shadow trade yet"}`}</p>
         )}
       </div>
 
+      {s.signals !== undefined && (
+        <>
+          <h4 className="ld-h ld-h-row">
+            <span>The strategies&apos; paper trades, newest first, and what this desk did</span>
+            {s.signals ? (
+              <span className="ld-filters" role="group" aria-label="Show paper trades">
+                {([["all", "All"], ["copied", "Copied"], ["skipped", "Skipped"], ["not", "Not copied"]] as [SFilter, string][]).map(([k, label]) => (
+                  <button key={k} type="button" className={`ld-fchip${sf === k ? " on" : ""}`} aria-pressed={sf === k}
+                    onClick={() => setSf(k)}>{label} <span>{sCounts[k]}</span></button>
+                ))}
+              </span>
+            ) : null}
+          </h4>
+          {s.signals === null ? (
+            <p className="ld-dim ld-empty">The paper desk could not be read just now; its trades show again on the next refresh.</p>
+          ) : sigShown.length ? (
+            <div className="ld-card ld-scroll ld-log">
+              <table className="ld-table ld-signals">
+                <thead>
+                  <tr><th className="l">Entered (IST)</th><th className="l">Strategy</th><th>Side</th><th>Paper entry → exit</th>
+                    <th>Paper result</th><th className="l">This desk</th><th>Real P&amp;L</th></tr>
+                </thead>
+                <tbody>
+                  {sigShown.map((x) => {
+                    const ds = DESK_STATE[x.desk.status] ?? { label: x.desk.status, cls: "skipped" };
+                    const real = x.desk.status === "closed" ? x.desk.pnl_usd : x.desk.status === "open" ? x.desk.unrealised_usd : null;
+                    return (
+                      <tr key={x.id} className={notCopied(x) ? "ld-row-dim" : ""}>
+                        <td className="l">{ist(x.entry_t)}</td>
+                        <td className="l"><b>{x.acct}</b>{x.src === "gold_h1" ? <span className="ld-chip ld-chip-src">H1</span> : null}</td>
+                        <td><span className={`ld-side ${x.side > 0 ? "long" : "short"}`}>{x.side > 0 ? "Long" : "Short"}</span></td>
+                        <td>{`${px(x.entry)} → ${x.open ? "open" : px(x.exit)}`}</td>
+                        <td className={`ld-num ${tone(x.open ? x.r_now : x.r)}`}>
+                          {x.open ? <span className="ld-sub">{x.r_now !== null ? `${rr(x.r_now)} now` : "open"}</span> : rr(x.r)}
+                          {!x.open && x.reason ? <div className="ld-sub">{x.reason}</div> : null}
+                        </td>
+                        <td className="l ld-why"><span className={`ld-badge ${ds.cls}`}>{x.desk.mode === "shadow" ? `${ds.label} (shadow)` : ds.label}</span>
+                          {x.desk.why ? <div className="ld-sub">{x.desk.why}</div> : null}</td>
+                        <td className={`ld-num ${tone(real)}`}>{real !== null && real !== undefined ? (x.desk.status === "open"
+                          ? <span className="ld-sub">{usd(real, true)} open</span> : usd(real, true)) : "—"}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : <p className="ld-dim ld-empty">{sig.length ? "Nothing of this kind in the latest paper trades." : "No paper trade from these strategies yet."}</p>}
+        </>
+      )}
+
       <h4 className="ld-h ld-h-row">
-        <span>Open positions ({s.open.length})</span>
+        <span>Real positions open ({s.open.length})</span>
         {s.open.length ? <span className={`ld-h-aside ${tone(openPnl)}`}>{usd(openPnl, true)} open P&amp;L</span> : null}
       </h4>
       {s.open.length ? (
@@ -308,7 +474,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
       ) : <p className="ld-dim ld-empty">Nothing open. A position opens when one of these strategies enters on the paper desk.</p>}
 
       <h4 className="ld-h ld-h-row">
-        <span>Trade log, newest first</span>
+        <span>Real-money decisions, newest first</span>
         <span className="ld-filters" role="group" aria-label="Show">
           {([["all", "All"], ["real", "Trades"], ["skipped", "Skipped"], ["error", "Errors"]] as [Filter, string][]).map(([k, label]) => (
             <button key={k} type="button" className={`ld-fchip${filter === k ? " on" : ""}`} aria-pressed={filter === k}
@@ -390,7 +556,7 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         .ld .ld-btn:disabled { opacity: 0.5; cursor: default; }
         .ld .ld-btn:focus-visible, .ld .ld-fchip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
         .ld .ld-msg { margin: 0; font-size: 12.5px; font-weight: 700; color: var(--brand); }
-        .ld .ld-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+        .ld .ld-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 12px; }
         .ld .ld-tile { display: flex; flex-direction: column; gap: 5px; background: var(--panel); border: 1px solid var(--panel-border);
                        border-radius: 14px; padding: 14px 16px; min-width: 0; }
         .ld .ld-k { font-size: 10.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); }
@@ -475,6 +641,17 @@ export function LiveDeltaView({ s, now, pin, setPin, remember, setRemember, save
         .ld .ld-seg-b:disabled { cursor: default; opacity: 0.6; }
         .ld .ld-seg-b:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
         .ld .ld-risk-s { flex: 1 1 260px; font-size: 12px; line-height: 1.45; color: var(--text-muted); }
+        .ld .ld-strats td.ld-strat { min-width: 220px; max-width: 320px; }
+        .ld .ld-strats td { vertical-align: top; }
+        .ld .ld-strats td .ld-badge + .ld-side { margin-left: 4px; }
+        .ld .ld-row-on td { background: var(--brand-dim); }
+        .ld .ld-row-on td:first-child { box-shadow: inset 3px 0 0 var(--brand); }
+        .ld .ld-table tbody tr.ld-row-on:hover td { background: var(--brand-dim); }
+        .ld .ld-chip-src { background: var(--warn-dim); border-color: var(--warn-border); color: var(--text-secondary); }
+        .ld .ld-pad { padding: 12px 14px; }
+        .ld .ld-signals td:nth-child(4) { font-family: var(--font-data); }
+        .ld .ld-table td.ld-num.gain { color: var(--gain); }      /* a result keeps its colour in a dimmed row */
+        .ld .ld-table td.ld-num.loss { color: var(--loss); }
         @media (max-width: 640px) {
           .ld .ld-v { font-size: 19px; } .ld .ld-ctl input { min-width: 140px; } .ld .ld-seg-b { padding: 7px 10px; }
           .ld .ld-status { padding: 14px; } .ld .ld-pos-dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }

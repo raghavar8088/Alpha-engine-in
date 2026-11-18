@@ -22,6 +22,12 @@ Two desks since 14 Nov 2026: the bitcoin scenarios run on the crypto desk (the D
 TL-04, TH-01) and the gold ones on the gold desk. Sections 16-18 pin the split down: each desk trades only its own picks
 and product; former bitcoin picks and TL-04's gold book are ignored; a bitcoin trade the gold desk opened before the
 split is managed by it to its close and blocks the crypto desk from going live; each desk has its own switch and stop.
+
+18 Nov 2026 (section 31): five more bitcoin and thirteen more gold Premium picks, and six Gold Desk H1 templates on the
+gold desk, read from the Gold Desk's own positions (faked here as an in-memory collection, stored as the database does:
+naive UTC times). Pinned: what is copied and what is not; a Gold Desk that cannot be read leaves its trades waiting,
+never closed; each source's own clock (a silent Gold Desk stops H1 entries only, a silent paper desk Premium ones);
+a voided or closed position closes the real trade; the paper desk is told only its own books.
 """
 
 import asyncio
@@ -285,6 +291,11 @@ def fresh(mode="live", btc=69000.0, gold=3885.0):
                          live_delta_state=Coll("ls"), live_crypto_trades=Coll("ct"), live_crypto_state=Coll("cs"))
     db.premium_meta.docs.append({"_id": "status", "segments_at": datetime.fromtimestamp(CLOCK[0], UTC).isoformat()})
     M._db = lambda: db
+    # the Gold Desk (the gold desk's second source, 18 Nov): empty and running, unless section 31 says otherwise
+    gpos, gstate = Coll("gpos"), Coll("gstate")
+    gstate.docs.append({"_id": "delta", "last_run_at": datetime.fromtimestamp(CLOCK[0], UTC).replace(tzinfo=None)})
+    M._h1_coll, M._h1_state_coll = (lambda: gpos), (lambda: gstate)
+    M._PAPER_CACHE.clear()                  # the page's paper view is cached 30 s a desk: never across scenarios
     M.D = FakeDelta()
     M.D.mid.update(BTCUSD=btc, XAUTUSD=gold)
     if mode != "off":
@@ -622,13 +633,15 @@ async def main():
     # ── 15. the read model ──────────────────────────────────────────────────────────────────────────
     section("15. What the page reads")
     s = await M.status()
-    check("status (gold, the original routes): mode, keys, PIN, limits, its seven gold picks, notes", s["keys"] and s["pin_set"]
-          and s["desk"] == "gold" and len(s["picks"]) == 7 and {p["product"] for p in s["picks"]} == {"XAUTUSD"}
+    check("status (gold, the original routes): mode, keys, PIN, limits, its 30 gold picks (18 Nov), notes", s["keys"] and s["pin_set"]
+          and s["desk"] == "gold" and len(s["picks"]) == 30 and {p["product"] for p in s["picks"]} == {"XAUTUSD"}
           and s["limits"]["risk_usd"] == 5 and s["limits"]["daily_stop_usd"] == 20 and s["limits"]["leverage"] == 10
           and len(s["notes"]) >= 5)
     c = await M.status("crypto")
-    check("status (crypto): TH-05, TL-04, TH-01 and TD-02 on BTCUSD, $5 a trade, a $20 daily stop",
-          c["desk"] == "crypto" and [p["acct"] for p in c["picks"]] == ["TH-05", "TL-04", "TH-01", "TD-02"]
+    check("status (crypto): TH-05, TL-04, TH-01, TD-02 and the eleven of 18 Nov on BTCUSD, $5 a trade, a $20 daily stop",
+          c["desk"] == "crypto" and [p["acct"] for p in c["picks"]] == ["TH-05", "TL-04", "TH-01", "TD-02", "TH-06", "DT-02",
+                                                                        "RU-06", "NJ-47", "RU-03", "TH-04", "DT-01", "TH-07",
+                                                                        "NJ-27", "PT-04", "SB-04"]
           and {p["product"] for p in c["picks"]} == {"BTCUSD"} and c["limits"]["risk_usd"] == 5
           and c["limits"]["daily_stop_usd"] == 20 and c["picked_at"].startswith("2026-11-14"), [p["acct"] for p in c["picks"]])
     check("an unknown desk is refused", "error" in await M.status("nope") and not (await M.set_mode("off", desk="nope"))["ok"])
@@ -798,10 +811,11 @@ async def main():
           and c3["sizing"] == "risk" and c3["risk_usd"] == 3 and r3["ok"] and c4["sizing"] == "min", (r1, r2, c3, r3, c4))
     c, g = await M.status("crypto"), await M.status()
     late = {("TD-02", "BTCUSD"): "2026-11-15", ("CP-06", "XAUUSD"): "2026-11-15", ("TL-04", "XAUTUSD"): "2026-11-16"}
+    late.update({(p["acct"], p["mkt"]): "2026-11-18" for p in c["picks"][4:] + g["picks"][7:]})   # section 31
     check("the picks: TD-02 joins TH-05, TL-04 and TH-01; CP-06 then TL-04's gold book join the five gold; each new one "
           "carries its own pick time",
-          [p["acct"] for p in c["picks"]] == ["TH-05", "TL-04", "TH-01", "TD-02"]
-          and [p["acct"] for p in g["picks"]][-2:] == ["CP-06", "TL-04"] and len(g["picks"]) == 7
+          [p["acct"] for p in c["picks"]][:4] == ["TH-05", "TL-04", "TH-01", "TD-02"]
+          and [p["acct"] for p in g["picks"]][5:7] == ["CP-06", "TL-04"] and len(g["picks"]) == 30
           and all((p.get("picked_at") or "").startswith(late[(p["acct"], p["mkt"])])
                   for p in c["picks"] + g["picks"] if (p["acct"], p["mkt"]) in late)
           and all(p.get("picked_at") is None for p in c["picks"] + g["picks"] if (p["acct"], p["mkt"]) not in late),
@@ -1060,6 +1074,226 @@ async def main():
     check("a probe that cannot answer reads STOPPING (keep managing), never PAUSED", await SW.state(M.MODULE) == SW.STOPPING)
     M._db = real_db
     await SW.set_module(M.MODULE, True)
+
+    # ── 31. 18 Nov: more Premium picks, and the Gold Desk's H1 templates as a second source ─────────
+    section("31. 18 Nov: more Premium picks on both desks; six Gold Desk H1 templates on the gold desk")
+    gp, cp = M.DESKS["gold"].picks, M.DESKS["crypto"].picks
+    gk, ck = {(p.acct, p.mkt) for p in gp}, {(p.acct, p.mkt) for p in cp}
+    check("the gold desk: the 7 before, 13 + 4 Premium gold books and 6 H1 templates (30); the bitcoin desk: 4 + 5 + 6 (15)",
+          len(gp) == len(gk) == 30 and len(cp) == len(ck) == 15
+          and {("BB-11", "XAUUSD"), ("PT-04", "XAUTUSD"), ("RU-03", "XAUTUSD"), ("SB-06", "XAUUSD"), ("RU-04", "XAUTUSD"),
+               ("PR-12", "XAUTUSD"), ("TP-05", "XAUTUSD"), ("DT-01", "XAUTUSD"), ("DT-03", "XAUTUSD"), ("CD-02", "XAUTUSD"),
+               ("CP-02", "XAUUSD"), ("RU-05", "XAUTUSD"), ("FZ-02", "XAUTUSD"), ("BG-01", "XAUUSD"), ("JR-04", "XAUTUSD"),
+               ("TD-04", "XAUTUSD"), ("TC-11", "XAUTUSD")} <= gk
+          and {("TH-06", "BTCUSD"), ("DT-02", "BTCUSD"), ("RU-06", "BTCUSD"), ("NJ-47", "BTCUSD"), ("RU-03", "BTCUSD"),
+               ("TH-04", "BTCUSD"), ("DT-01", "BTCUSD"), ("TH-07", "BTCUSD"), ("NJ-27", "BTCUSD"), ("PT-04", "BTCUSD"),
+               ("SB-04", "BTCUSD")} <= ck
+          and sorted(p.template for p in gp if p.src == M.GOLD_H1) == sorted(
+              ["ema_ribbon", "round_number_break", "donchian_fast", "pivot_break", "donchian_slow", "keltner_break"])
+          and not any(p.src == M.GOLD_H1 for p in cp) and not any(p.acct in ("DD-03", "DD-04") for p in gp + cp),
+          (len(gp), len(cp)))
+    check("every 18 Nov pick's record is as of its batch (22:00 or 23:50 IST); the earlier picks keep theirs, untouched",
+          all(p.picked_at == M.NEW_PICKED_AT for p in gp[7:20] + gp[24:] + cp[4:9])
+          and all(p.picked_at == M.NEW_PICKED_AT_2 for p in gp[20:24] + cp[9:])
+          and [p.acct for p in gp[20:24]] == ["BG-01", "JR-04", "TD-04", "TC-11"]
+          and [p.picked_at for p in cp[:4]] == [None, None, None, "2026-11-15T13:40:00+05:30"]
+          and gp[6].picked_at == "2026-11-16T23:33:00+05:30" and (gp[0].trades, gp[0].sum_r) == (5, 2.73)
+          and next(p for p in gp if p.acct == "H1-RIB").trades == 12 and next(p for p in cp if p.acct == "TH-06").trades == 9)
+    naive = datetime(2026, 11, 18, 16, 3, 18)
+    one = M._h1_as_paper({"position_id": "x", "strategy_template": "ema_ribbon", "side": "SELL", "entry_price": 3750.48,
+                          "stoploss": 3815.35, "target": 3620.75, "status": "CLOSED", "opened_at": naive,
+                          "exit_price": 3815.35, "exit_reason": "stoploss", "qty": 0.296},
+                         next(p for p in gp if p.acct == "H1-RIB"))
+    check("an H1 position read as a paper trade: id H1|<position>, SELL = -1, a naive time is UTC, 'stoploss' = 'stop'",
+          one["_id"] == "H1|x" and one["side"] == -1 and one["entry_t"] == naive.replace(tzinfo=UTC).timestamp()
+          and one["reason"] == "stop" and not one["open"] and one["acct"] == "H1-RIB" and one["mkt"] == "XAUTUSD", one)
+
+    db = fresh(gold=3885.0)
+    for coll in (db.live_delta_state, db.live_crypto_state):
+        coll.docs[0].pop("sizing", None)                       # one contract a trade
+    gpos, gstate = Coll("gpos"), Coll("gstate")
+    utc_naive = lambda s: datetime.fromtimestamp(s, UTC).replace(tzinfo=None)   # noqa: E731 - how the db stores it
+    gstate.docs.append({"_id": "delta", "last_run_at": utc_naive(CLOCK[0])})
+    reads = []
+
+    class _Positions:
+        def find(self, q=None, projection=None):
+            reads.append(M._CUR.get())
+            return gpos.find(q, projection)
+    M._h1_coll, M._h1_state_coll = (lambda: _Positions()), (lambda: gstate)
+
+    def h1pos(pid, template, side, entry, stop, target, ago=30, h1=True):
+        gpos.docs.append({"position_id": pid, "venue": "delta", "h1": h1, "symbol": "XAUTUSD", "strategy_template": template,
+                          "side": side, "entry_price": entry, "stoploss": stop, "target": target, "qty": 0.296,
+                          "status": "OPEN", "opened_at": utc_naive(CLOCK[0] - ago), "exit_price": None, "exit_reason": None})
+        return "H1|" + pid
+
+    def h1_end(pid, status, reason, px):
+        for d in gpos.docs:
+            if d["position_id"] == pid:
+                d.update(status=status, exit_reason=reason, exit_price=px, closed_at=utc_naive(CLOCK[0]))
+                if status == "VOID":
+                    d["void"] = True
+
+    h_old = h1pos("p0", "ema_ribbon", "BUY", 3885.0, 3882.0, 3891.0, ago=7200)   # before the desk's start
+    h_rib = h1pos("p1", "ema_ribbon", "SELL", 3885.0, 3888.0, 3879.0)
+    h_atr = h1pos("p2", "atr_thrust", "BUY", 3885.0, 3882.0, 3891.0)              # an H1 template not picked
+    h_rec = h1pos("p3", "pivot_break", "BUY", 3885.0, 3882.0, 3891.0, h1=False)   # not the H1 record
+    bb = paper(db, "BB-11", "XAUUSD", 1, 3885.0, 3882.0, 3891.0, ago=20)
+    ru6 = paper(db, "RU-06", "BTCUSD", -1, 69000.0, 69400.0, 68400.0, ago=25)
+    M._PRIORITY_SENT = None
+    r = await cyc(db)
+    t = trade(db, h_rib)
+    check("an H1 template's new position is a real XAUTUSD order of one contract on the gold desk, with its own stop and "
+          "target at the Gold Desk's levels", t is not None and t["status"] == "open" and t["product"] == "XAUTUSD"
+          and t["side"] == -1 and t["contracts"] == 1 and t["acct"] == "H1-RIB"
+          and any(d["_id"] == h_rib for d in db.live_delta_trades.docs)
+          and float(own_leg(t, "stop")["stop_price"]) == 3888.0 and float(own_leg(t, "target")["stop_price"]) == 3879.0,
+          t and (t["status"], t.get("reason")))
+    check("not copied: an H1 template not picked, a position outside the H1 record, one from before the desk's start",
+          trade(db, h_atr) is None and trade(db, h_rec) is None and trade(db, h_old) is None)
+    check("the new Premium picks trade too: BB-11's gold book on the gold desk, RU-06 on the bitcoin desk",
+          (trade(db, bb) or {}).get("product") == "XAUTUSD" and trade(db, bb)["status"] == "open"
+          and (trade(db, ru6) or {}).get("product") == "BTCUSD" and trade(db, ru6)["status"] == "open"
+          and any(d["_id"] == ru6 for d in db.live_crypto_trades.docs))
+    check("only the gold desk asks the Gold Desk; the bitcoin desk never does", reads and set(reads) == {"gold"}, reads)
+    doc = next((d for d in db.premium_meta.docs if d["_id"] == "live_priority"), None)
+    check("the paper desk is told the new Premium books, never the H1 ones (they are not its books)", doc is not None
+          and {"BB-11|XAUUSD", "PR-12|XAUTUSD", "TH-06|BTCUSD", "RU-03|BTCUSD", "RU-03|XAUTUSD"} <= set(doc["books"])
+          and not any(b.startswith("H1-") for b in doc["books"]), doc)
+
+    class _Down:
+        def find(self, *a, **k):
+            raise RuntimeError("main database down")
+    M._h1_coll = lambda: _Down()
+    advance(400)
+    fz = paper(db, "FZ-02", "XAUTUSD", 1, 3885.0, 3882.0, 3891.0, ago=10)
+    r1 = await cyc(db)
+    advance(400)
+    r2 = await cyc(db)
+    t = trade(db, h_rib)
+    check("the Gold Desk cannot be read: its H1 trade waits, open, never counted as disappeared (two passes, 13 minutes)",
+          t["status"] == "open" and not t.get("paper_missing_since") and "could not be read" in r1["gold"].get("gold_desk", "")
+          and "could not be read" in r2["gold"].get("gold_desk", ""), (t["status"], t.get("paper_missing_since"), r1["gold"]))
+    check("... while the gold desk's Premium books still trade, and the bitcoin desk is untouched",
+          (trade(db, fz) or {}).get("status") == "open" and "gold_desk" not in r1["crypto"], (trade(db, fz) or {}).get("reason"))
+    M._h1_coll = lambda: _Positions()
+    h1_end("p1", "CLOSED", "max_hold", 3884.0)
+    advance(60)
+    gstate.docs[0]["last_run_at"] = utc_naive(CLOCK[0])
+    await cyc(db)
+    t = trade(db, h_rib)
+    check("read again, the closed H1 position closes the real trade (legs cancelled first)", t["status"] == "closed"
+          and t["close_reason"] == "paper exit: max_hold" and own_leg(t, "stop")["state"] == "cancelled"
+          and own_leg(t, "target")["state"] == "cancelled", (t["status"], t.get("close_reason")))
+
+    gstate.docs[0]["last_run_at"] = utc_naive(CLOCK[0] - 1500)           # the Gold Desk silent for 25 minutes
+    h_dcf = h1pos("p4", "donchian_fast", "BUY", 3885.0, 3882.0, 3891.0, ago=10)
+    cp2 = paper(db, "CP-02", "XAUUSD", 1, 3885.0, 3882.0, 3891.0, ago=10)
+    await cyc(db)                                                       # the paper desk itself is fresh
+    check("each source has its own clock: a silent Gold Desk stops H1 entries only", (trade(db, h_dcf) or {}).get("status")
+          == "skipped" and "the Gold Desk has not updated" in trade(db, h_dcf)["reason"]
+          and (trade(db, cp2) or {}).get("status") == "open", ((trade(db, h_dcf) or {}).get("reason"), (trade(db, cp2) or {}).get("reason")))
+    advance(1500)
+    gstate.docs[0]["last_run_at"] = utc_naive(CLOCK[0])
+    h_piv = h1pos("p5", "pivot_break", "BUY", 3885.0, 3882.0, 3891.0, ago=10)
+    dt1 = paper(db, "DT-01", "XAUTUSD", 1, 3885.0, 3882.0, 3891.0, ago=10)
+    await M.cycle()                                                     # no paper-desk heartbeat: it is 25 minutes old
+    check("... and a silent paper desk stops Premium entries only", (trade(db, h_piv) or {}).get("status") == "open"
+          and (trade(db, dt1) or {}).get("status") == "skipped" and "the paper desk has not updated" in trade(db, dt1)["reason"],
+          ((trade(db, h_piv) or {}).get("reason"), (trade(db, dt1) or {}).get("reason")))
+    h1_end("p5", "VOID", None, None)
+    advance(60)
+    gstate.docs[0]["last_run_at"] = utc_naive(CLOCK[0])
+    await cyc(db)
+    check("a position the Gold Desk voids closes its real trade", trade(db, h_piv)["status"] == "closed"
+          and trade(db, h_piv)["close_reason"] == "paper exit: void", trade(db, h_piv).get("close_reason"))
+    g = await M.status()
+    pr = next(p for p in g["picks"] if p["acct"] == "H1-RIB")
+    check("the page lists the H1 template with its source, its own record and its real trades",
+          pr["src"] == "gold_h1" and pr["template"] == "ema_ribbon" and pr["trades"] == 12 and pr["live"]["trades"] == 1
+          and pr["backtest"].startswith("pooled only") and len(g["picks"]) == 30, pr)
+
+    # ── 32. the page's paper view: each strategy's own paper trades beside what the desk did with them ─────
+    section("32. The paper view: each strategy's paper record and open trade now, its latest signals and the desk's decision")
+    db = fresh(gold=3885.0)
+    for coll in (db.live_delta_state, db.live_crypto_state):
+        coll.docs[0].pop("sizing", None)
+    gpos, gstate = Coll("gpos32"), Coll("gstate32")
+    gstate.docs.append({"_id": "delta", "last_run_at": utc_naive(CLOCK[0])})
+    M._h1_coll, M._h1_state_coll = (lambda: gpos), (lambda: gstate)
+
+    def closed_paper(acct, mkt, side, r, ago, qty=1.0):
+        tid = paper(db, acct, mkt, side, 3885.0, 3882.0 if side > 0 else 3888.0, 3891.0 if side > 0 else 3879.0, ago=ago,
+                    qty=qty)
+        close_paper(db, tid, "target" if r > 0 else "stop", 3891.0 if r > 0 else 3882.0)
+        for d in db.premium_trades.docs:
+            if d["_id"] == tid:
+                d["r_net"] = r
+        return tid
+    c_win = closed_paper("CP-23", "XAUUSD", 1, 1.5, ago=7200)              # before the desk's start (since = 1 h ago)
+    c_loss = closed_paper("CP-23", "XAUUSD", 1, -1.0, ago=6000)
+    c_unsized = closed_paper("CP-23", "XAUUSD", 1, 5.0, ago=5000, qty=0.0)  # not sized on paper: not a trade of the record
+    c_other = closed_paper("ZZ-99", "XAUUSD", 1, 3.0, ago=4000)             # not a pick
+    tl = paper(db, "TL-04", "XAUTUSD", -1, 3885.0, 3888.0, 3879.0, ago=30, last=3884.0, unit=3.0)   # open, after the start
+    gpos.docs.append({"position_id": "r1", "venue": "delta", "h1": True, "symbol": "XAUTUSD", "strategy_template": "ema_ribbon",
+                      "side": "BUY", "entry_price": 3885.0, "stoploss": 3882.0, "target": 3891.0, "qty": 0.296,
+                      "status": "CLOSED", "opened_at": utc_naive(CLOCK[0] - 9000), "closed_at": utc_naive(CLOCK[0] - 8000),
+                      "exit_price": 3891.0, "exit_reason": "target", "realized_pnl": 1.776})
+    gpos.docs.append({"position_id": "d1", "venue": "delta", "h1": True, "symbol": "XAUTUSD",
+                      "strategy_template": "donchian_fast", "side": "SELL", "entry_price": 3890.0, "stoploss": 3896.0,
+                      "target": 3878.0, "qty": 0.296, "status": "OPEN", "opened_at": utc_naive(CLOCK[0] - 9500),
+                      "ltp": 3887.0, "exit_price": None, "exit_reason": None})
+    await cyc(db)
+    g = await M.status()
+    by = {f"{p['acct']}|{p['mkt']}": p for p in g["picks"]}
+    cp23, tlp = by["CP-23|XAUUSD"]["paper"], by["TL-04|XAUTUSD"]["paper"]
+    check("a pick's paper record now: its sized closed trades (wins, net R); unsized and other books' trades left out",
+          cp23["trades"] == 2 and cp23["wins"] == 1 and cp23["sum_r"] == 0.5 and cp23["open"] == [], cp23)
+    check("... and its open paper trade, marked: TL-04 short from 3,885, last 3,884, risk 3 a unit = +0.33R",
+          len(tlp["open"]) == 1 and tlp["open"][0]["side"] == -1 and tlp["open"][0]["r_now"] == 0.33 and tlp["trades"] == 0, tlp)
+    rib, dcf = by["H1-RIB|XAUTUSD"]["paper"], by["H1-DCF|XAUTUSD"]["paper"]
+    check("the H1 templates from the Gold Desk: closed in R (1.776 / (3 x 0.296) = 2R), open marked at its ltp (+0.5R)",
+          rib["trades"] == 1 and rib["wins"] == 1 and abs(rib["sum_r"] - 2.0) < 1e-9 and len(dcf["open"]) == 1
+          and dcf["open"][0]["r_now"] == 0.5, (rib, dcf))
+    check("a pick with no paper trade yet reads an empty record, not a missing one",
+          by["PR-12|XAUTUSD"]["paper"] == {"trades": 0, "wins": 0, "sum_r": 0.0, "open": [], "last_t": None})
+    sig = {x["id"]: x for x in g["signals"]}
+    order = [x["entry_t"] for x in g["signals"]]
+    check("the latest signals, newest first: TL-04's copied (open on the desk), CP-23's before the desk was switched on",
+          order == sorted(order, reverse=True) and sig[tl]["desk"]["status"] == "open" and sig[tl]["open"]
+          and sig[c_win]["desk"]["status"] == "before" and sig[c_win]["r"] == 1.5 and sig[c_loss]["r"] == -1.0
+          and c_unsized not in sig and c_other not in sig and "H1|r1" in sig and sig["H1|r1"]["src"] == "gold_h1",
+          [(x["acct"], x["desk"]["status"]) for x in g["signals"]])
+    check("the view says how fresh both sources are", g["paper_view"]["paper_age_s"] is not None
+          and g["paper_view"]["gold_desk_age_s"] is not None and g["paper_view"]["gold_desk_age_s"] < 60, g["paper_view"])
+    closed_paper("CP-23", "XAUUSD", 1, 2.0, ago=3000)
+    advance(10)
+    again = next(p for p in (await M.status())["picks"] if p["acct"] == "CP-23")["paper"]["trades"]
+    advance(31)
+    later = next(p for p in (await M.status())["picks"] if p["acct"] == "CP-23")["paper"]["trades"]
+    check("read at most every 30 s a desk (the page polls every 15 s): the new trade shows on the next read after that",
+          again == 2 and later == 3, (again, later))
+    c = await M.status("crypto")
+    check("the bitcoin desk's view is its own: no Gold Desk, no gold signals", "gold_desk_age_s" not in (c["paper_view"] or {"x": 1})
+          and all(x["mkt"] == "BTCUSD" for x in c["signals"]), c["paper_view"])
+
+    class _Broken:
+        def find(self, *a, **k):
+            raise RuntimeError("paper database down")
+    good = db.premium_trades
+    db.premium_trades = _Broken()
+    advance(31)
+    g = await M.status()
+    check("the paper side unreadable: the page still gets the desk, its picks without a paper record, no signals",
+          g.get("mode") == "live" and len(g["picks"]) == 30 and all(p["paper"] is None for p in g["picks"])
+          and g["signals"] is None and g["paper_view"] is None)
+    db.premium_trades = good
+    db2 = fresh(mode="off")
+    paper(db2, "TH-05", "BTCUSD", 1, 69000.0, 68650.0, None, ago=30)
+    c = await M.status("crypto")
+    check("a desk that is off: its strategies' new paper trades read 'this desk is off'",
+          c["signals"] and c["signals"][0]["desk"]["status"] == "off", c["signals"] and c["signals"][0]["desk"])
 
 
 if __name__ == "__main__":

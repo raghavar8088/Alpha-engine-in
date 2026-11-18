@@ -1,8 +1,10 @@
 "use client";
 
 // Delta Exchange Live Trading (14 Nov 2026; both desks from 16 Nov): REAL money on Delta Exchange India for the
-// Premium strategies the owner picked - the bitcoin desk (TH-05, TL-04, TH-01, TD-02 on BTCUSD) and the gold desk
-// (RU-02, CP-23, YT-14, DR-01, CP-05, CP-06 and, from 16 Nov, TL-04's gold book on XAUTUSD). Each desk is
+// Premium strategies the owner picked - the bitcoin desk (TH-05, TL-04, TH-01, TD-02, and from 18 Nov eleven more, 15
+// on BTCUSD) and the gold desk (RU-02, CP-23, YT-14, DR-01, CP-05, CP-06, TL-04's gold book from 16 Nov, and from
+// 18 Nov seventeen more Premium gold books and six Gold Desk H1 templates, 30 on XAUTUSD). Each desk card shows how
+// many of its strategies are in a paper trade; the desk view shows each one's own paper trades (18 Nov). Each desk is
 // premium_live's: it copies the paper desk's trades of its picks (their signals come from Delta's live candles) into
 // real Delta orders, each with its stop and target held on Delta, at one contract a trade (or $1 to $5 of risk picked
 // on the page) and a $20 daily loss stop. Each desk has its own ON/OFF switch (one confirmation; no PIN since 15 Nov,
@@ -16,9 +18,9 @@ import LiveDelta, { MODE, ago, usd, tone, type LiveStatus } from "../premium-str
 type DeskKey = "crypto" | "gold";
 const DESKS: { key: DeskKey; label: string; product: string; path: string; intro: string }[] = [
   { key: "crypto", label: "Bitcoin desk", product: "BTCUSD", path: "/api/premium-paper/live/desk/crypto",
-    intro: "TH-05, TL-04 and TH-01 were picked on 14 Nov and TD-02 on 15 Nov, each after 7 to 15 paper trades; TL-04's and TD-02's own 2-year bitcoin backtests lose (−0.31R and −0.37R a trade)." },
+    intro: "TH-05, TL-04 and TH-01 were picked on 14 Nov, TD-02 on 15 Nov, and eleven more on 18 Nov from the Premium leaderboard (TH-06, DT-02, RU-06, NJ-47, RU-03, TH-04, DT-01, TH-07, NJ-27, PT-04, SB-04), each after 0 to 15 paper trades." },
   { key: "gold", label: "Gold desk", product: "XAUTUSD", path: "/api/premium-paper/live",
-    intro: "RU-02, CP-23, YT-14, DR-01 and CP-05 were picked on 13 Nov, CP-06 on 15 Nov and TL-04's gold book on 16 Nov, each after 3 to 15 paper trades." },
+    intro: "RU-02, CP-23, YT-14, DR-01 and CP-05 were picked on 13 Nov, CP-06 on 15 Nov, TL-04's gold book on 16 Nov, and on 18 Nov seventeen more gold books from the Premium leaderboard and six templates of the Gold Desk's H1 test (EMA Ribbon, Round Number, Donchian fast and slow, Pivot R1/S1, Keltner), each after 0 to 20 paper trades. Every gold signal comes from Delta's own XAUTUSD candles." },
 ];
 const POLL_MS = 15000;
 
@@ -120,7 +122,10 @@ export default function DeltaLiveTradingPage() {
               </span>
               {s ? (
                 <>
-                  <span className="dlx-picks">{s.picks.map((p) => p.acct).join(" · ")}</span>
+                  <span className="dlx-picks" title={s.picks.map((p) => p.acct).join(" · ")}>
+                    {`${s.picks.length} strategies`}
+                    {s.picks.some((p) => p.paper) ? <span className="dlx-on">{` · ${s.picks.filter((p) => p.paper && p.paper.open.length).length} in a paper trade`}</span> : null}
+                  </span>
                   <span className="dlx-desk-nums">
                     <span>Today <b className={tone(s.today.live)}>{usd(s.today.live, true)}</b></span>
                     <span>All <b className={tone(s.totals.live.pnl_usd)}>{usd(s.totals.live.pnl_usd, true)}</b></span>
@@ -160,6 +165,14 @@ export default function DeltaLiveTradingPage() {
           stop, its target or its strategy&apos;s exit. <b>Test without orders</b> logs every decision without sending
           anything. The two desks share one Delta account and its keys.
         </p>
+        <p>
+          Each desk lists its strategies&apos; own <b>paper</b> trades beside the <b>real</b> ones: whether each is in a
+          paper trade now (and its R so far), its paper record since it started, and, for each of the latest paper
+          trades, what the desk did with it: copied (with the real result), skipped and why, or not copied because the
+          desk was off or the trade came before the desk was switched on. Every signal is read from Delta&apos;s own
+          live one-minute candles; the Gold Desk H1 templates come from the Gold Desk, which trades Delta&apos;s
+          XAUTUSD too.
+        </p>
       </details>
 
       <style jsx>{`
@@ -187,7 +200,8 @@ export default function DeltaLiveTradingPage() {
         .dlx-pill.live { background: var(--loss); color: #fff; }
         .dlx-pill.shadow { background: var(--brand-dim); color: var(--brand); }
         .dlx-pill.off { background: var(--canvas-soft); color: var(--text-muted); border: 1px solid var(--panel-border); }
-        .dlx-picks { font-size: 12px; font-weight: 700; color: var(--text-secondary); }
+        .dlx-picks { font-size: 13px; font-weight: 700; color: var(--text-secondary); }
+        .dlx-on { color: var(--brand); }
         .dlx-desk-nums { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12.5px; color: var(--text-muted); }
         .dlx-desk-nums b { font-family: var(--font-data); color: var(--text); }
         .dlx-desk-foot { font-size: 11.5px; color: var(--text-faint); }

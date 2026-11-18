@@ -2,12 +2,13 @@
 
 DESKS. Each desk has its own picks, products, switch (off / shadow / live), daily loss stop, state and trade records;
 they share the Delta account, its keys and the owner's PIN, and never trade the same product.
-- gold (Premium Strategies > "Real money · Delta gold"): the five gold picks of 13 Nov and CP-06 (15 Nov), on XAUTUSD.
+- gold (Premium Strategies > "Real money · Delta gold"): the five gold picks of 13 Nov, CP-06 (15 Nov), TL-04's gold
+  book (16 Nov), and from 18 Nov thirteen more Premium gold books and six Gold Desk H1 templates, on XAUTUSD.
   Its records are the original ones (live_delta_state / live_delta_trades).
 - crypto (the "Delta Exchange Live Trading" module, 14 Nov): the bitcoin strategies the owner picked from the Crypto
-  tab - TH-05, TL-04 and TH-01 on 14 Nov, TD-02 on 15 Nov - on BTCUSD, a $20 daily stop (live_crypto_state /
-  live_crypto_trades). From 15 Nov both desks trade one contract a trade (the owner can pick $1 to $5 of risk
-  instead) and copy a signal seen up to 10 minutes late.
+  tab - TH-05, TL-04 and TH-01 on 14 Nov, TD-02 on 15 Nov, five more on 18 Nov - on BTCUSD, a $20 daily stop
+  (live_crypto_state / live_crypto_trades). From 15 Nov both desks trade one contract a trade (the owner can pick $1
+  to $5 of risk instead) and copy a signal seen up to 10 minutes late.
   On 14 Nov the owner moved bitcoin here from the gold desk; the gold desk's earlier bitcoin picks (TH-01, TH-05, RU-04,
   TD-02, TD-03) left it, and any bitcoin trade it still had open would be managed by it to its close.
 
@@ -59,6 +60,23 @@ Delta Exchange Live Trading page. OFF stops new entries on both desks whatever t
 is: a trade already open is still managed to its close, exactly as in mode off. Once neither desk holds a trade the loop
 stops running altogether until the switch is back ON, when each desk carries on in the mode it was left in. A signal
 from the OFF stretch is then taken only as any late-seen signal is: inside the desk's lag and drift limits.
+
+18 NOV 2026: MORE PICKS, AND A SECOND SOURCE. The owner sent the Premium leaderboard's bitcoin and gold rows and asked
+for them on these desks: five bitcoin books (TH-06, DT-02, RU-06, NJ-47, RU-03) and thirteen gold ones (BB-11, PT-04,
+RU-03, SB-06, RU-04, PR-12, TP-05, DT-01, DT-03, CD-02, CP-02, RU-05, FZ-02) join the books already here; DD-03 was in
+the screenshots too but trades Ether, which neither desk trades. Records are frozen at 22:00 IST (NEW_PICKED_AT).
+A second batch that night (records at 23:50 IST, NEW_PICKED_AT_2): gold BG-01, JR-04, TD-04, TC-11; bitcoin TH-04,
+DT-01, TH-07, NJ-27, PT-04, SB-04 (DD-04 is Ether again). Every gold book reads Delta's XAUTUSD candles on the paper
+desk, so all gold signals come from Delta's own data, as the bitcoin ones always did.
+The page also gains a paper view (_paper_view): each pick's paper record and open trades now, and the latest paper
+trades with this desk's decision on each, so the strategies' own trades show beside the real ones.
+The owner also asked for six templates of the Gold Desk's H1 forward test (EMA Ribbon Compression, Round Number Break,
+Donchian Breakout fast and slow, Pivot R1/S1 Break, Keltner Breakout; 4h, XAUTUSD). They are not Premium books: the
+gold desk reads their positions from the Gold Desk itself (gold_desk_positions, venue delta, h1) and treats each one
+as a paper trade with the id "H1|<position_id>" (_paper_h1). The H1 record itself is untouched: this desk only reads
+it. Its liveness is the Gold Desk's own (gold_desk_state "delta" last_run_at), and when those positions cannot be read
+the H1 trades wait - managed again on the next good read, their stop and target resting on Delta meanwhile - rather
+than being closed as disappeared.
 """
 
 from __future__ import annotations
@@ -105,6 +123,10 @@ PIN_TRIES = 5                  # wrong PINs an hour before going live is locked 
 GST = 0.18                     # on Delta India's fees (shadow estimates only; live uses Delta's own figures)
 PICKED_AT = "2026-11-13T23:00:00+05:30"        # the gold desk
 CRYPTO_PICKED_AT = "2026-11-14T09:44:00+05:30"
+NEW_PICKED_AT = "2026-11-18T22:00:00+05:30"   # the 18 Nov additions on both desks: their records are as of this time
+NEW_PICKED_AT_2 = "2026-11-18T23:50:00+05:30"  # ... and the second batch the owner sent that night
+PREMIUM, GOLD_H1 = "premium", "gold_h1"        # a pick's source: the Premium paper desk, or the Gold Desk's H1 test
+H1_ID = "H1|"                                  # a Gold Desk H1 position, as a paper trade id: "H1|<position_id>"
 CONFIRM = "REAL MONEY"
 D = Delta()
 
@@ -121,6 +143,19 @@ class Pick:
     win: int            # % of trades won
     backtest: str       # what its own 2-year backtest said
     picked_at: str | None = None    # its own pick time, when it joined the desk after the others (its record's time)
+    src: str = PREMIUM              # where its trades come from: PREMIUM (premium_trades) or GOLD_H1 (the Gold Desk)
+    template: str | None = None     # GOLD_H1 only: the Gold Desk's strategy_template
+
+
+_H1_BACKTEST = ("pooled only: the nine H1 templates together earned +12.2 bp a trade net on Delta's 2026 data "
+                "(1,045 trades), the data they were found in; no single template survives the luck correction")
+
+
+def _h1(code: str, template: str, name: str, trades: int, sum_r: float, t: float, win: int) -> Pick:
+    """A Gold Desk H1 template on the gold desk (18 Nov 2026). Record = its closed H1 positions at NEW_PICKED_AT, in R
+    (realised P&L over |entry - stop| x quantity)."""
+    return Pick(code, "XAUTUSD", "XAUTUSD", f"Gold Desk H1: {name}", trades, sum_r, t, win, _H1_BACKTEST,
+                NEW_PICKED_AT, GOLD_H1, template)
 
 
 GOLD_PICKS: tuple[Pick, ...] = (
@@ -139,6 +174,51 @@ GOLD_PICKS: tuple[Pick, ...] = (
     # a pick is (account, market), so the two never meet). Record = its XAUTUSD paper trades at 23:33 IST.
     Pick("TL-04", "XAUTUSD", "XAUTUSD", "EMA 200 + RSI 50 + engulfing, stop two candles, 2R", 14, 3.13, 0.61, 43,
          "loses: -0.035R a trade over 1,304 trades (t -1.0)", "2026-11-16T23:33:00+05:30"),
+    # added by the owner on 18 Nov 2026 from the Premium leaderboard's gold rows; records = their gold paper trades at
+    # 22:00 IST (closed, by the same method as above). Backtests: each one's own 2-year gold book, where it has one.
+    Pick("BB-11", "XAUUSD", "XAUTUSD", "Forex 10:00 IST range trap", 4, 4.79, 1.61, 75,
+         "loses: -0.30R a trade over 582 trades (its no-void-rule variant R1, the one on paper)", NEW_PICKED_AT),
+    Pick("PT-04", "XAUTUSD", "XAUTUSD", "4-hour inside-bar breakout in the trend, 2R", 4, 4.70, 1.60, 75,
+         "loses: -0.19R a trade over 260 trades (t -2.3)", NEW_PICKED_AT),
+    Pick("RU-03", "XAUTUSD", "XAUTUSD", "Opposite RSI: RSI through 70/30 with ADX 25 in the EMA 200 trend, 1.5R", 4, 3.99,
+         3.80, 100, "earns: +0.044R a trade over 316 trades (t 0.8), not significant", NEW_PICKED_AT),
+    Pick("SB-06", "XAUUSD", "XAUTUSD", "Gold liquidity sweep at a tested level, pause-candle or rejection trigger", 3, 4.57,
+         1.14, 67, "never backtested", NEW_PICKED_AT),
+    Pick("RU-04", "XAUTUSD", "XAUTUSD", "Williams fractal breakout in the 200 MA trend, 1.5R", 8, 2.96, 0.99, 62,
+         "earns: +0.039R a trade over 832 trades (t 1.1), not significant", NEW_PICKED_AT),
+    Pick("PR-12", "XAUTUSD", "XAUTUSD", "Gold: 4-hour Supertrend ladder with counter-scalps", 0, 0.0, 0.0, 0,
+         "never backtested", NEW_PICKED_AT),
+    Pick("TP-05", "XAUTUSD", "XAUTUSD", "9:30 displacement ORB without the session filter", 1, 1.93, 0.0, 100,
+         "loses: -0.30R a trade over 265 trades (t -3.8)", NEW_PICKED_AT),
+    Pick("DT-01", "XAUTUSD", "XAUTUSD", "MACD cross in the EMA 100 trend, swing stop, 1.5R (1-hour)", 3, 1.94, 0.77, 67,
+         "earns: +0.12R a trade over 223 trades (t 1.4), not significant", NEW_PICKED_AT),
+    Pick("DT-03", "XAUTUSD", "XAUTUSD", "Stochastic oversold, RSI 50, MACD cross, 1.5R (30-minute)", 6, 1.67, 0.53, 50,
+         "loses: -0.023R a trade over 347 trades (t -0.4)", NEW_PICKED_AT),
+    Pick("CD-02", "XAUTUSD", "XAUTUSD", "200 EMA side and slope, pullback touching the EMA, engulfing close, 2R (one minute, "
+         "Asia session)", 6, 1.42, 0.36, 50, "never backtested", NEW_PICKED_AT),
+    Pick("CP-02", "XAUUSD", "XAUTUSD", "Power-candle breakout of the last swing", 10, 1.84, 0.38, 40, "never backtested",
+         NEW_PICKED_AT),
+    Pick("RU-05", "XAUTUSD", "XAUTUSD", "RSI through 70 (30) with Supertrend agreeing, Supertrend stop, 1.5R", 1, 1.48, 0.0,
+         100, "never backtested", NEW_PICKED_AT),
+    Pick("FZ-02", "XAUTUSD", "XAUTUSD", "Gold London first FVG inversion (15-minute)", 3, 1.20, 0.56, 33,
+         "loses: -0.18R a trade over 179 trades (t -2.0)", NEW_PICKED_AT),
+    # the owner's second batch that night (23:50 IST): four more gold books. JR-04's t (2 trades of almost the same R)
+    # is what the method gives and means nothing; the page shows no t under five trades.
+    Pick("BG-01", "XAUUSD", "XAUTUSD", "Gold: 1-hour structure, 15-minute sweep at the point of interest", 7, 3.23, 0.79,
+         57, "never backtested", NEW_PICKED_AT_2),
+    Pick("JR-04", "XAUTUSD", "XAUTUSD", "9:30-9:35 range, retest close outside, stop at the midpoint, 2R", 2, 3.74, 1193.17,
+         100, "loses: -0.13R a trade over 343 trades (t -1.8)", NEW_PICKED_AT_2),
+    Pick("TD-04", "XAUTUSD", "XAUTUSD", "UT Bot + linear-regression candles trend ride (1-hour)", 7, 1.09, 0.56, 43,
+         "loses: -0.014R a trade over 620 trades (t -0.6)", NEW_PICKED_AT_2),
+    Pick("TC-11", "XAUTUSD", "XAUTUSD", "RSI (14) divergence at a lower low (higher high), a close beyond the high (low) "
+         "between the swings, 2R", 0, 0.0, 0.0, 0, "never backtested", NEW_PICKED_AT_2),
+    # and six templates of the Gold Desk's H1 forward test (its "Strategy records" table), read from the Gold Desk
+    _h1("H1-RIB", "ema_ribbon", "EMA Ribbon Compression · 4h", 12, 5.57, 1.00, 50),
+    _h1("H1-RND", "round_number_break", "Round Number Break · 4h", 20, 3.06, 0.45, 40),
+    _h1("H1-DCF", "donchian_fast", "Donchian Breakout (fast) · 4h", 16, 5.02, 0.82, 44),
+    _h1("H1-PIV", "pivot_break", "Pivot R1/S1 Break · 4h", 20, 4.08, 0.58, 40),
+    _h1("H1-DCS", "donchian_slow", "Donchian Breakout (slow) · 4h", 5, 1.30, 0.34, 40),
+    _h1("H1-KLT", "keltner_break", "Keltner Breakout · 4h", 14, 0.95, 0.17, 36),
 )
 # picked by the owner on 14 Nov 2026 from the Crypto tab; records = their bitcoin paper trades at 09:44 IST
 CRYPTO_PICKS: tuple[Pick, ...] = (
@@ -151,37 +231,69 @@ CRYPTO_PICKS: tuple[Pick, ...] = (
     # added by the owner on 15 Nov 2026 from the Crypto tab; record = its bitcoin paper trades at 13:40 IST
     Pick("TD-02", "BTCUSD", "BTCUSD", "9/15 EMA cross filtered by the SMI (7, 2, 2)", 7, 20.0, 0.94, 43,
          "loses: -0.37R a trade over 998 trades (t -3.5)", "2026-11-15T13:40:00+05:30"),
+    # added by the owner on 18 Nov 2026 from the Premium leaderboard's bitcoin rows; records = their bitcoin paper trades
+    # at 22:00 IST
+    Pick("TH-06", "BTCUSD", "BTCUSD", "Bitcoin 07:15-07:30 IST range breakout, stop at mid-range", 9, 5.29, 1.12, 78,
+         "never backtested", NEW_PICKED_AT),
+    Pick("DT-02", "BTCUSD", "BTCUSD", "MACD + Parabolic SAR + EMA 200, stop at the dot, 1:1 (30-minute)", 15, 4.36, 1.21, 73,
+         "loses: -0.18R a trade over 1,170 trades (t -6.0)", NEW_PICKED_AT),
+    Pick("RU-06", "BTCUSD", "BTCUSD", "Zero-lag MACD cross below/above zero in the 200 EMA trend, pullback stop, 1.5R", 9,
+         5.30, 1.58, 67, "never backtested", NEW_PICKED_AT),
+    Pick("NJ-47", "BTCUSD", "BTCUSD", "Smoothed Heikin Ashi retest, 1:3", 4, 3.57, 0.77, 50, "never backtested",
+         NEW_PICKED_AT),
+    Pick("RU-03", "BTCUSD", "BTCUSD", "Opposite RSI: RSI through 70/30 with ADX 25 in the EMA 200 trend, 1.5R", 7, 3.32,
+         1.24, 57, "loses: -0.081R a trade over 417 trades (t -1.7)", NEW_PICKED_AT),
+    # the second batch (23:50 IST): six more bitcoin books. DT-01's t (4 trades of almost the same R) means nothing.
+    Pick("TH-04", "BTCUSD", "BTCUSD", "Renko + Ichimoku dual system, bitcoin", 0, 0.0, 0.0, 0, "never backtested",
+         NEW_PICKED_AT_2),
+    Pick("DT-01", "BTCUSD", "BTCUSD", "MACD cross in the EMA 100 trend, swing stop, 1.5R (1-hour)", 4, 5.68, 65.44, 100,
+         "loses: -0.11R a trade over 281 trades (t -1.5)", NEW_PICKED_AT_2),
+    Pick("TH-07", "BTCUSD", "BTCUSD", "Three-way confirmation on 30 minutes", 1, 4.96, 0.0, 100, "never backtested",
+         NEW_PICKED_AT_2),
+    Pick("NJ-27", "BTCUSD", "BTCUSD", "20-candle channel breakout with EMA 200 and ATR stops, 4 hours", 1, 3.03, 0.0, 100,
+         "never backtested", NEW_PICKED_AT_2),
+    Pick("PT-04", "BTCUSD", "BTCUSD", "4-hour inside-bar breakout in the trend, 2R", 1, 1.90, 0.0, 100,
+         "loses: -0.20R a trade over 270 trades (t -2.3)", NEW_PICKED_AT_2),
+    Pick("SB-04", "BTCUSD", "BTCUSD", "200 EMA retest with a confirmation candle", 1, 1.80, 0.0, 100, "never backtested",
+         NEW_PICKED_AT_2),
 )
 GOLD_NOTES = (
-    "Real money on seven unproven gold strategies (CP-06 joined the five on 15 Nov, TL-04's gold book on 16 Nov), at "
-    "the owner's chosen size: one contract a trade, the smallest order (or $1 to $5 of risk picked on this page), and a "
-    "$20 daily loss stop.",
-    "Four of the seven lose in their own 2-year backtests and three were never backtested; their good week is the only "
-    "thing that picked them.",
+    "Real money on 30 unproven gold strategies: five picked on 13 Nov, CP-06 on 15 Nov, TL-04's gold book on 16 Nov, "
+    "and on 18 Nov seventeen more Premium gold books and six templates of the Gold Desk's H1 test, at the owner's chosen "
+    "size: one contract a trade, the smallest order (or $1 to $5 of risk picked on this page), and a $20 daily loss stop.",
+    "Eleven of the 30 lose in their own 2-year backtests, three earn too little there to mean anything (t under 2), ten "
+    "were never backtested and the six H1 templates were tested only as a family; a few good paper trades picked them.",
+    "Every one of them trades on Delta's own live data: the paper desk reads gold from Delta's XAUTUSD one-minute "
+    "candles (not from COMEX or Yahoo), and the real orders go to Delta's XAUTUSD perpetual.",
     "This desk trades gold (XAUTUSD) only; the bitcoin desk is beside it on the Delta Exchange Live Trading page (since "
     "16 Nov both desks are there). Each has its own switch and its own $20 daily stop.",
     "Each real trade is the paper desk's trade: its entry signal, its stop, its target, its exit. The paper desk sees a "
     "new bar up to a few minutes late, so a fast strategy's copy is often skipped as late or drifted rather than chased.",
+    "The six H1 templates' trades are the Gold Desk's own H1 positions (4-hour bars, held up to ten days), copied the "
+    "same way; this desk only reads the H1 record and never changes it.",
     "One gold contract is 0.001 XAUT (about $4 of gold), so a trade of one contract loses cents at its stop. A trade "
     "whose one contract would lose more than $5 is skipped (or more than the chosen risk, with a dollar risk).",
-    "All seven can hold a trade at the same time (from 15 Nov): each trade is its own order with its own stop and "
+    "All 30 can hold a trade at the same time (from 15 Nov): each trade is its own order with its own stop and "
     "target on Delta, and Delta shows their sum as one gold position.",
     "Each trade's stop and target live on Delta itself, so it stays protected if this server goes down.",
     "Leverage is set to 10x on XAUTUSD before going live; positions are capped at $2,500 of notional.",
     "Fees and funding are Delta's own, read from its fills. Profit and loss are in US dollars.",
 )
 CRYPTO_NOTES = (
-    "Real money on four bitcoin strategies the owner picked from the Crypto tab (TH-05, TL-04, TH-01 on 14 Nov 2026, "
-    "TD-02 on 15 Nov), at the owner's chosen size: one contract a trade, the smallest order (or $1 to $5 of risk "
+    "Real money on 15 bitcoin strategies the owner picked (TH-05, TL-04, TH-01 on 14 Nov 2026 and TD-02 on 15 Nov "
+    "from the Crypto tab; TH-06, DT-02, RU-06, NJ-47, RU-03, TH-04, DT-01, TH-07, NJ-27, PT-04 and SB-04 on 18 Nov from "
+    "the Premium leaderboard), at the owner's chosen size: one contract a trade, the smallest order (or $1 to $5 of risk "
     "picked on this page), and a $20 daily loss stop.",
-    "None is proven: TL-04 and TD-02 lose in their own 2-year bitcoin backtests (-0.31R a trade over 2,134 trades and "
-    "-0.37R over 998) and TH-05 and TH-01 were never backtested; 7 to 15 paper trades picked them.",
+    "None is proven: six lose in their own 2-year bitcoin backtests (TL-04 -0.31R a trade over 2,134 trades, TD-02 "
+    "-0.37R over 998, DT-02 -0.18R over 1,170, RU-03 -0.081R over 417, DT-01 -0.11R over 281, PT-04 -0.20R over 270) "
+    "and nine were never backtested; 0 to 15 paper trades picked them.",
     "Each real trade is the paper desk's trade on Delta's live BTCUSD candles: its entry, stop, target and exit. A "
     "signal seen more than 10 minutes late, or already 30% of its risk away, is skipped, never chased. One bitcoin "
     "contract is 0.001 BTC; a trade whose one contract would lose more than $5 at its stop is skipped too (or more "
     "than the chosen risk, with a dollar risk).",
-    "All four can hold a trade at the same time (from 15 Nov): each trade is its own order with its own stop and "
-    "target on Delta, and Delta shows their sum as one bitcoin position.",
+    "All 15 can hold a trade at the same time (from 15 Nov): each trade is its own order with its own stop and "
+    "target on Delta, and Delta shows their sum as one bitcoin position. Each open trade holds about a tenth of its "
+    "notional as margin, so with several open at once a new one can be skipped for want of free balance.",
     "Each trade's stop and target live on Delta itself, so it stays protected if this server goes down.",
     "Leverage is set to 10x on BTCUSD before going live; positions are capped at $2,500 of notional.",
     "Fees and funding are Delta's own, read from its fills. Profit and loss are in US dollars.",
@@ -220,6 +332,11 @@ DESKS: dict[str, Desk] = {
 }
 if set(DESKS["gold"].products) & set(DESKS["crypto"].products):
     raise RuntimeError("two desks may never trade the same product")
+for _k, _desk in DESKS.items():
+    if len(_desk.pick) != len(_desk.picks):
+        raise RuntimeError(f"the {_k} desk names one book twice")
+    if any(p.src == GOLD_H1 and not p.template for p in _desk.picks):
+        raise RuntimeError(f"the {_k} desk has an H1 pick without its template")
 # The desk the current task works for. The loop and every API call set it (_use); the default is the gold desk, so
 # a caller that names no desk gets the original one.
 _CUR: contextvars.ContextVar[str] = contextvars.ContextVar("premium_live_desk", default="gold")
@@ -402,13 +519,205 @@ async def _paper(db, since: float, ids: list[str]) -> dict[str, dict]:
     even when its book is no longer a pick, so a trade from before a re-pick is still managed to its close)."""
     want = set(ids)
     q = {"qty": {"$gt": 0},
-         "$or": [{"acct": {"$in": sorted({p.acct for p in _d().picks})}, "entry_t": {"$gte": int(since) - _d().max_lag_s}},
-                 {"_id": {"$in": ids}}]}
+         "$or": [{"acct": {"$in": sorted({p.acct for p in _d().picks if p.src == PREMIUM})},
+                  "entry_t": {"$gte": int(since) - _d().max_lag_s}},
+                 {"_id": {"$in": [i for i in ids if not i.startswith(H1_ID)]}}]}
     out = {}
     async for t in db.premium_trades.find(q):
         if t["_id"] in want or (t.get("acct"), t.get("mkt")) in _d().pick:
             out[t["_id"]] = t
     return out
+
+
+# -- the second source: the Gold Desk's H1 positions (18 Nov 2026) --------------------------------------
+
+
+def _h1_coll():
+    """The Gold Desk's positions, in the app's main database (a function, so a test can swap it)."""
+    from app.core.db import gold_positions_collection
+    return gold_positions_collection
+
+
+def _h1_state_coll():
+    from app.core.db import gold_state_collection
+    return gold_state_collection
+
+
+def _ts(v) -> float | None:
+    """A stored time as epoch seconds; a naive datetime is UTC (how the database hands it back)."""
+    if v is None:
+        return None
+    if isinstance(v, datetime):
+        return (v if v.tzinfo else v.replace(tzinfo=timezone.utc)).timestamp()
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _h1_picks() -> dict[str, Pick]:
+    """This desk's H1 picks by the Gold Desk template they copy."""
+    return {p.template: p for p in _d().picks if p.src == GOLD_H1 and p.template}
+
+
+def is_h1(trade_id: str) -> bool:
+    return str(trade_id).startswith(H1_ID)
+
+
+def _h1_as_paper(pos: dict, pick: Pick | None) -> dict:
+    """A Gold Desk H1 position in the shape of a paper trade: what _enter and the managers read."""
+    status = str(pos.get("status") or "").upper()
+    void = bool(pos.get("void")) or status == "VOID"
+    side = str(pos.get("side") or "").upper()
+    reason = "void" if void else pos.get("exit_reason")
+    return {"_id": H1_ID + str(pos["position_id"]), "src": GOLD_H1,
+            "acct": pick.acct if pick else f"H1-{pos.get('strategy_template')}", "mkt": pick.mkt if pick else "XAUTUSD",
+            "side": 1 if side in ("BUY", "LONG", "1") else -1,
+            "entry": float(pos.get("entry_price") or 0.0), "stop": float(pos.get("stoploss") or 0.0),
+            "target": float(pos["target"]) if pos.get("target") else None,
+            "entry_t": _ts(pos.get("opened_at")) or 0.0, "open": status == "OPEN" and not void,
+            "exit": float(pos["exit_price"]) if pos.get("exit_price") is not None else None,
+            # the Gold Desk says "stoploss"; the paper desk's word (which shadow mode reads) is "stop"
+            "reason": "stop" if reason == "stoploss" else reason,
+            "setup": pos.get("strategy_template"), "qty": float(pos.get("qty") or 0.0)}
+
+
+async def _paper_h1(since: float, ids: list[str]) -> dict[str, dict]:
+    """The desk's H1 picks' positions opened since `since`, plus any an open real trade points at. Raises when the
+    Gold Desk cannot be read: the caller then leaves the H1 trades waiting (never closed for a failed read)."""
+    picks = _h1_picks()
+    held = [i[len(H1_ID):] for i in ids if is_h1(i)]
+    if not picks and not held:
+        return {}
+    ors: list[dict] = []
+    if picks:
+        ors.append({"strategy_template": {"$in": sorted(picks)},
+                    "opened_at": {"$gte": datetime.fromtimestamp(int(since) - _d().max_lag_s, timezone.utc)}})
+    if held:
+        ors.append({"position_id": {"$in": held}})
+    out = {}
+    async for pos in _h1_coll().find({"venue": "delta", "h1": True, "symbol": "XAUTUSD", "$or": ors}):
+        t = _h1_as_paper(pos, picks.get(pos.get("strategy_template")))
+        out[t["_id"]] = t
+    return out
+
+
+async def _h1_age() -> float:
+    """Seconds since the Gold Desk's Delta venue last ran its cycle (gold_desk_state "delta" last_run_at)."""
+    s = await _h1_state_coll().find_one({"_id": "delta"}, {"last_run_at": 1})
+    at = _ts((s or {}).get("last_run_at"))
+    return _now() - at if at else float("inf")
+
+
+# -- the page's paper view (18 Nov 2026): each strategy's own paper trades beside what this desk did with them ----
+
+PAPER_TTL_S = 30.0             # the paper view is re-read at most this often a desk (the page polls every 15 s)
+SIGNALS_N = 60                 # the latest paper trades the page lists, each with this desk's decision on it
+_PAPER_CACHE: dict[str, tuple[float, dict]] = {}
+_PAPER_FIELDS = {"acct": 1, "mkt": 1, "side": 1, "entry_t": 1, "entry": 1, "stop": 1, "target": 1, "open": 1, "exit": 1,
+                 "exit_t": 1, "reason": 1, "r_net": 1, "last": 1, "unit": 1, "qty": 1}
+_REAL_FIELDS = {"status": 1, "reason": 1, "close_reason": 1, "pnl_usd": 1, "unrealised_usd": 1, "contracts": 1, "mode": 1}
+
+
+def _sign(v) -> int:
+    try:
+        return 1 if int(v or 0) > 0 else -1
+    except (TypeError, ValueError):
+        return -1
+
+
+def _r_now(t: dict) -> float | None:
+    """An open paper trade's R at its last mark: side x (last - entry) / its risk a unit."""
+    try:
+        unit = float(t.get("unit") or abs(float(t["entry"]) - float(t["stop"])))
+        if not unit or t.get("last") is None:
+            return None
+        return round(_sign(t.get("side")) * (float(t["last"]) - float(t["entry"])) / unit, 2)
+    except (TypeError, ValueError, KeyError):
+        return None
+
+
+async def _paper_rows(db) -> list[dict]:
+    """Every sized paper trade of this desk's picks: premium_trades, and the H1 picks' Gold Desk positions read the same
+    way (their R = realised P&L over |entry - stop| x quantity; a voided position has none)."""
+    rows: list[dict] = []
+    prem = sorted({p.acct for p in _d().picks if p.src == PREMIUM})
+    if prem:
+        async for t in db.premium_trades.find({"acct": {"$in": prem}, "qty": {"$gt": 0}}, _PAPER_FIELDS):
+            if (t.get("acct"), t.get("mkt")) in _d().pick:
+                rows.append(t)
+    picks = _h1_picks()
+    if picks:
+        async for pos in _h1_coll().find({"venue": "delta", "h1": True, "symbol": "XAUTUSD",
+                                          "strategy_template": {"$in": sorted(picks)}}):
+            t = _h1_as_paper(pos, picks.get(pos.get("strategy_template")))
+            unit = abs(t["entry"] - t["stop"])
+            closed = str(pos.get("status") or "").upper() == "CLOSED" and not pos.get("void")
+            t.update(exit_t=_ts(pos.get("closed_at")), last=pos.get("ltp"), unit=unit,
+                     r_net=float(pos.get("realized_pnl") or 0.0) / (unit * t["qty"]) if closed and unit and t["qty"] else None)
+            rows.append(t)
+    return rows
+
+
+async def _paper_view(db, st: dict) -> dict | None:
+    """What the page shows of the paper side: each pick's paper record and open trades now (every sized trade since
+    the paper desk started it), and the latest SIGNALS_N paper trades with this desk's decision on each - copied (and
+    how it went), skipped and why, or none (the desk was off, or the trade came before it was switched on). Read only;
+    cached PAPER_TTL_S a desk; None when the paper side cannot be read (the rest of the page still shows)."""
+    hit = _PAPER_CACHE.get(_d().key)
+    if hit and _now() - hit[0] < PAPER_TTL_S:
+        return hit[1]
+    try:
+        rows = await _paper_rows(db)
+        per: dict[str, dict] = {}
+        for t in rows:
+            x = per.setdefault(f"{t.get('acct')}|{t.get('mkt')}", {"trades": 0, "wins": 0, "sum_r": 0.0, "open": [],
+                                                                    "last_t": None})
+            et = float(t.get("entry_t") or 0)
+            x["last_t"] = max(x["last_t"] or 0.0, et) or None
+            if t.get("open"):
+                x["open"].append({"id": t["_id"], "side": _sign(t.get("side")), "entry": t.get("entry"),
+                                  "stop": t.get("stop"), "target": t.get("target"), "entry_t": et, "r_now": _r_now(t)})
+            elif t.get("r_net") is not None:
+                r = float(t["r_net"])
+                x["trades"] += 1
+                x["wins"] += 1 if r > 0 else 0
+                x["sum_r"] += r
+        for x in per.values():
+            x["sum_r"] = round(x["sum_r"], 2)
+            x["open"].sort(key=lambda o: -o["entry_t"])
+        rows.sort(key=lambda t: -float(t.get("entry_t") or 0))
+        latest = rows[:SIGNALS_N]
+        real = {d["_id"]: d async for d in _tc(db).find({"_id": {"$in": [t["_id"] for t in latest]}}, _REAL_FIELDS)}
+        since, mode = float(st.get("since") or 0), st.get("mode")
+        signals = []
+        for t in latest:
+            et, d = float(t.get("entry_t") or 0), real.get(t["_id"])
+            if d is not None:
+                why = d.get("close_reason") if d.get("status") in ("closed", "closing") else d.get("reason")
+                desk = {"status": d.get("status"), "why": why, "pnl_usd": d.get("pnl_usd"), "mode": d.get("mode"),
+                        "unrealised_usd": d.get("unrealised_usd"), "contracts": d.get("contracts")}
+            elif mode not in ("live", "shadow"):
+                desk = {"status": "off", "why": "this desk is off"}
+            elif since and et < since:
+                desk = {"status": "before", "why": "before this desk was switched on"}
+            else:
+                desk = {"status": "pending", "why": "being decided"}
+            closed = not t.get("open") and t.get("r_net") is not None
+            signals.append({"id": t["_id"], "acct": t.get("acct"), "mkt": t.get("mkt"), "src": t.get("src", PREMIUM),
+                            "side": _sign(t.get("side")), "entry_t": et, "entry": t.get("entry"), "stop": t.get("stop"),
+                            "target": t.get("target"), "open": bool(t.get("open")), "exit": t.get("exit"),
+                            "exit_t": t.get("exit_t"), "reason": t.get("reason"),
+                            "r": round(float(t["r_net"]), 2) if closed else None,
+                            "r_now": _r_now(t) if t.get("open") else None, "desk": desk})
+        view = {"per": per, "signals": signals, "at": _now(), "paper_age_s": round(await _desk_age(db), 1)}
+        if _h1_picks():
+            view["gold_desk_age_s"] = round(await _h1_age(), 1)
+    except Exception:  # noqa: BLE001 - the page then shows the desk without its paper side
+        logger.warning("[premium live] the paper view could not be read", exc_info=True)
+        return None
+    _PAPER_CACHE[_d().key] = (_now(), view)
+    return view
 
 
 # -- P&L -----------------------------------------------------------------------------------------------
@@ -955,7 +1264,8 @@ async def _enter(db, st: dict, pick: Pick, paper: dict, products: dict, busy: se
     if day_pnl <= -_d().daily_stop_usd:
         return await skip(f"daily loss stop reached ({day_pnl:+.2f} USD today)")
     if desk_age > DESK_STALE_S:
-        return await skip("the paper desk has not updated for over 20 minutes")
+        who = "the Gold Desk" if paper.get("src") == GOLD_H1 else "the paper desk"
+        return await skip(f"{who} has not updated for over 20 minutes")
     product = products[pick.product]
     if mode == "live" and pick.product in busy:
         return await skip(f"{pick.product} holds an older trade whose one bracket covers the whole position")
@@ -1072,7 +1382,17 @@ async def _cycle_one() -> dict:
             await _venue_error(db, st, f"product specs unavailable ({exc})")
             return {**out, "error": str(exc)}
         desk_age = await _desk_age(db)
-        paper = await _paper(db, float(st.get("since") or _now()), [t["_id"] for t in open_rows])
+        since, held = float(st.get("since") or _now()), [t["_id"] for t in open_rows]
+        paper = await _paper(db, since, held)
+        h1_age, h1_ok = float("inf"), True                 # the Gold Desk's H1 positions: the second source
+        if _h1_picks() or any(is_h1(i) for i in held):
+            try:
+                paper.update(await _paper_h1(since, held))
+                h1_age = await _h1_age()
+            except Exception as exc:  # noqa: BLE001 - its trades wait for the next good read, never closed for this
+                h1_ok = False
+                out["gold_desk"] = f"the Gold Desk's H1 positions could not be read ({str(exc)[:120]}): its trades wait"
+                logger.warning("[premium live] the Gold Desk's H1 positions could not be read", exc_info=True)
         live_rows = [t for t in open_rows if t.get("mode") == "live"]
         positions: dict | None = None
         resting: dict | None = {}
@@ -1096,11 +1416,15 @@ async def _cycle_one() -> dict:
                 await _venue_error(db, st, f"resting orders unavailable ({exc})")
                 resting = None
         for t in open_rows:
+            h1 = is_h1(t["_id"])
+            if h1 and not h1_ok and t.get("status") == "open":
+                continue                    # unread, not gone: its stop and target rest on Delta until the next pass
+            age = h1_age if h1 else desk_age
             if t.get("mode") == "live":
                 if positions is not None:
-                    await _manage_live(db, st, t, paper.get(t["_id"]), positions, products, desk_age, resting)
+                    await _manage_live(db, st, t, paper.get(t["_id"]), positions, products, age, resting)
             else:
-                await _manage_shadow(db, t, paper.get(t["_id"]), desk_age, products)
+                await _manage_shadow(db, t, paper.get(t["_id"]), age, products)
             out["managed"].append(t["_id"])
         if st["mode"] == "off" or blocked or (st["mode"] == "live" and positions is None):
             return out
@@ -1128,7 +1452,7 @@ async def _cycle_one() -> dict:
                 continue
             if st["mode"] == "live" and not books.get(pk.product, False):
                 continue                        # the account does not match the trades yet: wait, undecided
-            res = await _enter(db, st, pk, p, products, busy, day_pnl, desk_age)
+            res = await _enter(db, st, pk, p, products, busy, day_pnl, h1_age if p.get("src") == GOLD_H1 else desk_age)
             out["entered"].append({"id": tid, "result": res})
         return out
 
@@ -1141,7 +1465,7 @@ async def _publish_priority() -> None:
     runs them first, right after it reads new candles, so their trades reach these desks minutes sooner. Written after
     a restart, when the picks change and every PRIORITY_REFRESH_S; a failure is only logged (only speed depends on it)."""
     global _PRIORITY_SENT
-    books = sorted({f"{p.acct}|{p.mkt}" for d in DESKS.values() for p in d.picks})
+    books = sorted({f"{p.acct}|{p.mkt}" for d in DESKS.values() for p in d.picks if p.src == PREMIUM})
     if _PRIORITY_SENT and _PRIORITY_SENT[0] == books and _now() - _PRIORITY_SENT[1] < PRIORITY_REFRESH_S:
         return
     db = _db()
@@ -1369,9 +1693,12 @@ async def _status_one() -> dict:
             x["pnl_usd"] = round(x["pnl_usd"] + float(t.get("pnl_usd") or 0.0), 4)
         else:
             x["open"] += 1
+    view = await _paper_view(db, st)
+    empty = {"trades": 0, "wins": 0, "sum_r": 0.0, "open": [], "last_t": None}
     picks = []
     for p in _d().picks:
-        picks.append({**asdict(p), "live": per.get(f"live|{p.acct}|{p.mkt}"), "shadow": per.get(f"shadow|{p.acct}|{p.mkt}")})
+        picks.append({**asdict(p), "live": per.get(f"live|{p.acct}|{p.mkt}"), "shadow": per.get(f"shadow|{p.acct}|{p.mkt}"),
+                      "paper": None if view is None else view["per"].get(f"{p.acct}|{p.mkt}", empty)})
     today = {m: await _day_pnl(db, m, None) for m in ("live", "shadow")}
     totals = {}
     for m in ("live", "shadow"):
@@ -1395,6 +1722,8 @@ async def _status_one() -> dict:
         "desk": _d().key, "title": _d().title, "desk_products": _d().products,
         "open": [_clean(t) for t in rows if t.get("status") in ("entering", "open", "closing")],
         "recent": [_clean(t) for t in rows[:150]], "notes": list(_d().notes),
+        "signals": None if view is None else view["signals"],
+        "paper_view": None if view is None else {k: view[k] for k in ("at", "paper_age_s", "gold_desk_age_s") if k in view},
     }
 
 
