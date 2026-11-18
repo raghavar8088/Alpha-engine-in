@@ -32,10 +32,16 @@ Natural Gas book, Gold desk, Commodity Options).
 SAFETY
   * Dry run by default: it prints what it would do, and the exact confirmation to type.
   * --apply needs --confirm "DELETE <n> ROWS" with the count the dry run printed.
-  * Before any write, every document it will delete or rebuild goes into ONE gzipped bson-json file
-    (json_util: exact types, exact restore), which is read back and counted; it refuses if that check
-    fails or the disk lacks room.
-  * --restore <file> puts every deleted row back and every rebuilt collection back as it was.
+  * Before any write, every document it will delete or rebuild is STREAMED into ONE gzipped file: one
+    canonical extended-JSON line per document (json_util: exact types, exact restore), a meta line first
+    and an end line with the counts last. The file is read back and counted before anything is deleted.
+    Memory holds one batch at a time, so the run fits a 400 MB container on the box.
+  * Disk: it refuses unless the backup still leaves --min-free-mb free (default 150 - the box's own MongoDB
+    and Docker write to the same disk, which had ~380 MB free on 18 Nov 2026), sizing the backup at 1 KB a
+    document (real rows measured 0.17-0.29 KB gzipped). While writing it re-checks the disk, and stops -
+    removing the partial file, nothing deleted - if the disk falls below that.
+  * --restore <file> checks the whole file first (a cut-short file restores nothing), then puts every
+    deleted row back and every rebuilt collection back as it was. It can be run again safely.
   * It refuses while MCX is open (the desk must not be closing positions whose history is being removed),
     unless --force-hours.
 
@@ -68,6 +74,10 @@ KEEP_DEFAULT = ("NATGASMINI", "CRUDEOILM", "NATURALGAS", "CRUDEOIL")     # = com
 BATCH = 500
 IST = timezone(timedelta(hours=5, minutes=30))
 _BASE = re.compile(r"^([A-Z]+?)(?=\d|$)")
+BACKUP_FORMAT = "commodity-purge-jsonl-1"
+EST_BACKUP_BYTES_PER_DOC = 1024     # one gzipped canonical-JSON line; real rows measured 165-294 B (18 Nov 2026)
+MIN_FREE_MB_DEFAULT = 150           # left free on the backup's disk: the box's local MongoDB and Docker share it
+_JSON = json_util.CANONICAL_JSON_OPTIONS
 
 
 def underlying(symbol) -> str | None:
@@ -261,41 +271,107 @@ def mcx_open_now() -> bool:
     return bool(is_open(datetime.now(IST)))
 
 
-async def write_backup(path: Path, db, fdb, plan: dict, stamp: str) -> dict:
-    """Every row to delete, every document to rebuild - into one file, then read back and counted."""
+def _free_bytes(path: Path) -> int:
+    return shutil.disk_usage(path).free
+
+
+def disk_check(free: int, docs: int, min_free: int) -> tuple[bool, int]:
+    """(room?, bytes wanted): a backup of `docs` documents at EST_BACKUP_BYTES_PER_DOC, plus `min_free` kept."""
+    need = docs * EST_BACKUP_BYTES_PER_DOC + min_free
+    return free >= need, need
+
+
+def _nz(counts: dict) -> dict:
+    return {k: v for k, v in counts.items() if v}
+
+
+def _lines(path: Path):
+    """The backup's records, one at a time."""
+    with gzip.open(path, "rt", encoding="utf-8") as fh:
+        for line in fh:
+            if line.strip():
+                yield json_util.loads(line)
+
+
+def backup_counts(path: Path) -> dict:
+    """Read a backup through and count its documents. Refuses a file without its meta or end line, or
+    whose documents disagree with the end line's counts - a file cut short."""
+    seen: dict[str, Counter] = {"deleted": Counter(), "replaced": Counter()}
+    meta = end = None
+    for rec in _lines(path):
+        kind = rec.get("kind")
+        if kind == "meta":
+            meta = rec
+        elif kind == "end":
+            end = rec
+        elif kind in seen:
+            seen[kind][rec["store"]] += 1
+    if meta is None or meta.get("format") != BACKUP_FORMAT or end is None:
+        raise RuntimeError(f"{path}: not a complete {BACKUP_FORMAT} backup (meta or end line missing) - refusing")
+    got = {k: _nz(dict(v)) for k, v in seen.items()}
+    if got != {k: _nz(end.get(k, {})) for k in seen}:
+        raise RuntimeError(f"{path}: documents {got} disagree with the end line {end} - refusing")
+    return {k: dict(end.get(k, {})) for k in seen}
+
+
+async def write_backup(path: Path, db, fdb, plan: dict, stamp: str, *,
+                       min_free: int = MIN_FREE_MB_DEFAULT * 2**20) -> dict:
+    """Every row to delete and every document to rebuild, STREAMED into one gzipped file (one canonical
+    JSON line each, meta line first, counts on the end line), then read back and counted. Memory holds one
+    batch at a time. The disk is re-checked as the file grows; below `min_free` the write stops and the
+    partial file is removed. Nothing has been deleted at that point."""
     stores = {label: coll for label, coll, _ in deletion_targets(db, fdb)}
-    deleted: dict[str, list] = {}
-    for label, s in plan["stores"].items():
-        docs = []
-        for i in range(0, len(s["ids"]), BATCH):
-            docs += [d async for d in stores[label].find({"_id": {"$in": s["ids"][i:i + BATCH]}})]
-        if len(docs) != len(s["ids"]):
-            raise RuntimeError(f"backup of {label}: read {len(docs)} of {len(s['ids'])} rows - refusing")
-        deleted[label] = docs
-    replaced = {}
-    for label, coll, scope in rebuild_scopes(db):
-        replaced[label] = {"filter": scope, "docs": [d async for d in coll.find(scope)]}
-    payload = {"meta": {"stamp": stamp, "keep": plan["keep"], "delete_set": plan["delete_set"],
-                        "made_at": datetime.now(timezone.utc).isoformat(), "total": plan["total"]},
-               "deleted": deleted, "replaced": replaced}
     tmp = path.with_suffix(path.suffix + ".part")
-    with gzip.open(tmp, "wt", encoding="utf-8") as fh:
-        fh.write(json_util.dumps(payload))
-    with gzip.open(tmp, "rt", encoding="utf-8") as fh:
-        back = json_util.loads(fh.read())
-    for label, docs in deleted.items():
-        if len(back["deleted"].get(label, [])) != len(docs):
-            raise RuntimeError(f"backup verify failed for {label} - refusing")
-    for label, rep in replaced.items():
-        if len(back["replaced"].get(label, {}).get("docs", [])) != len(rep["docs"]):
-            raise RuntimeError(f"backup verify failed for {label} - refusing")
-    tmp.replace(path)
-    return {"deleted": {k: len(v) for k, v in deleted.items()},
-            "replaced": {k: len(v["docs"]) for k, v in replaced.items()}, "bytes": path.stat().st_size}
+    counts: dict[str, dict] = {"deleted": {}, "replaced": {}}
+
+    def room() -> None:
+        free = _free_bytes(path.parent)
+        if free < min_free:
+            raise SystemExit(f"refused: the disk fell to {free / 2**20:.0f} MB free while the backup was written "
+                             f"(keeping {min_free / 2**20:.0f} MB) - stopped, partial file removed, nothing deleted")
+
+    try:
+        with gzip.open(tmp, "wt", encoding="utf-8") as fh:
+            def put(rec: dict) -> None:
+                fh.write(json_util.dumps(rec, json_options=_JSON) + "\n")
+
+            put({"kind": "meta", "format": BACKUP_FORMAT, "stamp": stamp, "keep": plan["keep"],
+                 "delete_set": plan["delete_set"], "made_at": datetime.now(timezone.utc).isoformat(),
+                 "total": plan["total"]})
+            for label, s in plan["stores"].items():
+                n = 0
+                for i in range(0, len(s["ids"]), BATCH):
+                    async for d in stores[label].find({"_id": {"$in": s["ids"][i:i + BATCH]}}):
+                        put({"kind": "deleted", "store": label, "doc": d})
+                        n += 1
+                    room()
+                if n != len(s["ids"]):
+                    raise RuntimeError(f"backup of {label}: read {n} of {len(s['ids'])} rows - refusing")
+                counts["deleted"][label] = n
+            for label, coll, scope in rebuild_scopes(db):
+                put({"kind": "scope", "store": label, "filter": scope})
+                n = 0
+                async for d in coll.find(scope):
+                    put({"kind": "replaced", "store": label, "doc": d})
+                    n += 1
+                    if n % BATCH == 0:
+                        room()
+                counts["replaced"][label] = n
+            room()
+            put({"kind": "end", **counts})
+        back = backup_counts(tmp)
+        if {k: _nz(v) for k, v in back.items()} != {k: _nz(v) for k, v in counts.items()}:
+            raise RuntimeError(f"backup verify failed: wrote {counts}, read back {back} - refusing")
+        tmp.replace(path)
+    except BaseException:
+        tmp.unlink(missing_ok=True)
+        raise
+    return {**counts, "bytes": path.stat().st_size}
 
 
 async def apply_purge(db, fdb, keep: set[str], known: set[str], *, confirm: str, backup_dir: Path,
-                      force_hours: bool = False, rebuild=rebuild_after) -> dict:
+                      force_hours: bool = False, rebuild=rebuild_after,
+                      min_free_mb: int = MIN_FREE_MB_DEFAULT) -> dict:
     plan = await plan_purge(db, fdb, keep, known)
     if confirm != confirm_phrase(plan):
         raise SystemExit(f'refused: --confirm must be exactly "{confirm_phrase(plan)}" (got "{confirm}")')
@@ -303,13 +379,16 @@ async def apply_purge(db, fdb, keep: set[str], known: set[str], *, confirm: str,
     if not force_hours and mcx_open_now():
         raise SystemExit("refused: MCX is open - run after 23:55 IST or before 09:00 IST (or --force-hours)")
     backup_dir.mkdir(parents=True, exist_ok=True)
-    need = 3 * 3000 * (plan["total"] + 50000) + 50 * 2**20      # generous: 3 KB a row, x3, + 50 MB
-    free = shutil.disk_usage(backup_dir).free
-    if free < need:
-        raise SystemExit(f"refused: {free / 2**20:.0f} MB free in {backup_dir}, want {need / 2**20:.0f} MB")
+    min_free = min_free_mb * 2**20
+    docs = plan["total"] + sum([await coll.count_documents(scope) for _, coll, scope in rebuild_scopes(db)])
+    free = _free_bytes(backup_dir)
+    ok, need = disk_check(free, docs, min_free)
+    if not ok:
+        raise SystemExit(f"refused: {free / 2**20:.0f} MB free in {backup_dir}; a backup of {docs:,} documents "
+                         f"is sized at {(need - min_free) / 2**20:.0f} MB and {min_free_mb} MB must stay free")
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     path = backup_dir / f"commodity_purge_{stamp}.json.gz"
-    backed = await write_backup(path, db, fdb, plan, stamp)
+    backed = await write_backup(path, db, fdb, plan, stamp, min_free=min_free)
     print(f"backup written and verified: {path} ({backed['bytes'] / 2**20:.1f} MB) {backed}")
     stores = {label: coll for label, coll, _ in deletion_targets(db, fdb)}
     deleted = {}
@@ -325,33 +404,57 @@ async def apply_purge(db, fdb, keep: set[str], known: set[str], *, confirm: str,
 
 
 async def restore(path: Path, db, fdb) -> dict:
-    """Put every deleted row back; put every rebuilt scope back exactly as it was."""
+    """Put every deleted row back; put every rebuilt scope back exactly as it was. The whole file is checked
+    first - a cut-short file restores nothing - then streamed back in batches. Safe to run again: rows
+    already back are skipped as duplicates, and each rebuilt scope is cleared before it is refilled."""
     from pymongo.errors import BulkWriteError
 
-    with gzip.open(path, "rt", encoding="utf-8") as fh:
-        data = json_util.loads(fh.read())
+    backup_counts(path)                                   # raises on an incomplete file, before any write
     stores = {label: coll for label, coll, _ in deletion_targets(db, fdb)}
-    out = {"inserted": {}, "replaced": {}}
-    for label, docs in data["deleted"].items():
-        if label not in stores:
-            print(f"  {label}: its database is not reachable here - skipped ({len(docs)} rows NOT restored)")
-            continue
-        n = 0
-        for i in range(0, len(docs), BATCH):
-            try:
-                r = await stores[label].insert_many(docs[i:i + BATCH], ordered=False)
-                n += len(r.inserted_ids)
-            except BulkWriteError as e:                   # rows already back: duplicates are fine
-                n += e.details.get("nInserted", 0)
-        out["inserted"][label] = n
     scopes = {label: coll for label, coll, _ in rebuild_scopes(db)}
-    for label, rep in data["replaced"].items():
-        coll = scopes[label]
-        await coll.delete_many(rep["filter"])
-        if rep["docs"]:
-            for i in range(0, len(rep["docs"]), BATCH):
-                await coll.insert_many(rep["docs"][i:i + BATCH], ordered=False)
-        out["replaced"][label] = len(rep["docs"])
+    out: dict[str, dict] = {"inserted": {}, "replaced": {}, "not_reachable": {}}
+    buf: list = []
+    cur: tuple | None = None                              # (kind, store) the buffer belongs to
+
+    async def flush() -> None:
+        if not buf:
+            return
+        kind, label = cur
+        if kind == "deleted":
+            try:
+                r = await stores[label].insert_many(buf, ordered=False)
+                n = len(r.inserted_ids)
+            except BulkWriteError as e:                   # rows already back: duplicates are fine
+                n = e.details.get("nInserted", 0)
+            out["inserted"][label] = out["inserted"].get(label, 0) + n
+        else:
+            await scopes[label].insert_many(buf, ordered=False)
+            out["replaced"][label] = out["replaced"].get(label, 0) + len(buf)
+        buf.clear()
+
+    for rec in _lines(path):
+        kind = rec.get("kind")
+        if kind not in ("deleted", "scope", "replaced"):
+            continue
+        label = rec["store"]
+        if kind == "scope":
+            await flush()
+            await scopes[label].delete_many(rec["filter"])
+            out["replaced"].setdefault(label, 0)
+            cur = ("replaced", label)
+            continue
+        if (kind, label) != cur:
+            await flush()
+            cur = (kind, label)
+        if kind == "deleted" and label not in stores:
+            out["not_reachable"][label] = out["not_reachable"].get(label, 0) + 1
+            continue
+        buf.append(rec["doc"])
+        if len(buf) >= BATCH:
+            await flush()
+    await flush()
+    for label, n in out["not_reachable"].items():
+        print(f"  {label}: its database is not reachable here - skipped ({n} rows NOT restored)")
     return out
 
 
@@ -379,7 +482,7 @@ async def _main(args) -> int:
         print(f'\nDRY RUN - nothing written. To apply: --apply --confirm "{confirm_phrase(plan)}"')
         return 0
     print(await apply_purge(db, fdb, keep, known, confirm=args.confirm or "", backup_dir=Path(args.backup_dir),
-                            force_hours=args.force_hours))
+                            force_hours=args.force_hours, min_free_mb=args.min_free_mb))
     return 0
 
 
@@ -391,6 +494,8 @@ def main() -> int:
     ap.add_argument("--backup-dir", default=".", help="where the backup file is written")
     ap.add_argument("--restore", help="a backup file to put back")
     ap.add_argument("--force-hours", action="store_true", help="allow running while MCX is open")
+    ap.add_argument("--min-free-mb", type=int, default=MIN_FREE_MB_DEFAULT,
+                    help="MB that must stay free on the backup's disk (default: %(default)s)")
     return asyncio.run(_main(ap.parse_args()))
 
 

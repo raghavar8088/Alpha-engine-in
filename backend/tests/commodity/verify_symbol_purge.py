@@ -7,11 +7,13 @@ Real: the script (plan, backup, delete, rebuild, restore), commodity_engine.resc
 rank_band_books' capitals. Stubbed: app.core.db (in-memory), the box-local AI database (a second one).
 """
 import asyncio
+import gzip
 import importlib.util
 import os
 import sys
 import tempfile
 import types
+from collections import Counter
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -119,6 +121,11 @@ async def main():
     check("replay_curve: realised by time, open count and margin",
           [(p["equity"], p["open_positions"], p["deployed"]) for p in pts] == [(1000.0, 1, 10000.0), (1100.0, 1, 7.0), (1100.0, 1, 7.0)],
           str([(p["equity"], p["open_positions"], p["deployed"]) for p in pts]))
+    MB = 2**20
+    ok, need = purge.disk_check(380 * MB, 60_000, 150 * MB)
+    check("disk: the box's ~380 MB free (18 Nov) holds a 60,000-document backup and still keeps 150 MB free",
+          ok, f"wants {need / MB:.0f} MB")
+    check("...and a disk without that room is refused", not purge.disk_check(200 * MB, 60_000, 150 * MB)[0])
 
     await seed()
     before = {n: await DB[n].count_documents({}) for n in ("commodity_positions", "commodity_trades", "top10_book_positions",
@@ -151,9 +158,38 @@ async def main():
         check("a wrong confirmation is refused, and nothing is written",
               refused and await DB["commodity_positions"].count_documents({}) == before["commodity_positions"])
 
+        real_free = purge._free_bytes
+        try:
+            purge._free_bytes = lambda p: 100 * MB                       # under the 150 MB kept free
+            try:
+                await purge.apply_purge(DB, FDB, KEEP, KNOWN, confirm=phrase, backup_dir=Path(tmp), force_hours=True)
+                refused = False
+            except SystemExit:
+                refused = True
+            check("a disk without room is refused before anything is written",
+                  refused and await DB["commodity_positions"].count_documents({}) == before["commodity_positions"]
+                  and not any(Path(tmp).iterdir()))
+            frees = iter([10_000 * MB] + [100 * MB] * 100)                # room at the start, then the disk fills
+            purge._free_bytes = lambda p: next(frees)
+            try:
+                await purge.apply_purge(DB, FDB, KEEP, KNOWN, confirm=phrase, backup_dir=Path(tmp), force_hours=True)
+                refused = False
+            except SystemExit:
+                refused = True
+            check("the disk filling while the backup is written stops it: partial file removed, nothing deleted",
+                  refused and await DB["commodity_positions"].count_documents({}) == before["commodity_positions"]
+                  and await FDB["ai_positions"].count_documents({}) == 3 and not any(Path(tmp).iterdir()))
+        finally:
+            purge._free_bytes = real_free
+
         out = await purge.apply_purge(DB, FDB, KEEP, KNOWN, confirm=phrase, backup_dir=Path(tmp), force_hours=True)
         bk = Path(out["backup"])
         check("apply: a verified backup file first", bk.exists() and bk.stat().st_size > 0)
+        recs = list(purge._lines(bk))
+        kinds = Counter(r["kind"] for r in recs)
+        check("the backup is streamed: a meta line, one line per document, the counts on an end line",
+              recs[0]["kind"] == "meta" and recs[-1]["kind"] == "end" and kinds["deleted"] == plan["total"]
+              and recs[-1]["deleted"] == {k: v["delete"] for k, v in plan["stores"].items()}, str(kinds))
         syms = sorted([d.get("symbol") async for d in DB["commodity_positions"].find({})], key=str)
         check("only natural gas and crude oil (and the unrecognised rows) remain on the desk",
               syms == sorted(["NATGASMINI", "NATGASMINI", "CRUDEOILM", "NATURALGAS", "CRUDEOIL", None, "LEAD"], key=str), str(syms))
@@ -183,6 +219,19 @@ async def main():
               and (await DB["top10_book_scores"].find_one({"desk": "nifty-scalp"}))["skipped"] == {"full": 3})
 
         # ── restore ───────────────────────────────────────────────────────────────────────
+        cut = Path(tmp) / "cut_short.json.gz"
+        with gzip.open(bk, "rt", encoding="utf-8") as src, gzip.open(cut, "wt", encoding="utf-8") as dst:
+            dst.writelines(src.readlines()[:-1])                          # the end line lost
+        n_now = await DB["commodity_positions"].count_documents({})
+        try:
+            await purge.restore(cut, DB, FDB)
+            refused = False
+        except RuntimeError:
+            refused = True
+        check("restore refuses a cut-short backup and writes nothing",
+              refused and await DB["commodity_positions"].count_documents({}) == n_now
+              and [d["equity"] async for d in DB["commodity_equity"].find({})] != [1.0, 1.0, 1.0, 1.0])
+
         r = await purge.restore(bk, DB, FDB)
         after = {n: await DB[n].count_documents({}) for n in before}
         check("restore: every deleted row is back", after == before, f"{after} vs {before}")
@@ -192,6 +241,10 @@ async def main():
               and (await DB["top10_book_scores"].find_one({"desk": "commodity"}))["skipped"] == {"full": 7})
         check("...including the box-local AI rows", await FDB["ai_positions"].count_documents({}) == 3
               and await FDB["ai_gate_decisions"].count_documents({}) == 2, str(r))
+        r2 = await purge.restore(bk, DB, FDB)
+        check("...and a second restore changes nothing (rows already back are skipped, scopes refilled once)",
+              {n: await DB[n].count_documents({}) for n in before} == before
+              and sum(r2["inserted"].values()) == 0 and await FDB["ai_positions"].count_documents({}) == 3, str(r2))
 
     # ── the desk trades natural gas and crude oil only, both sizes ────────────────────────────
     from app.services import commodity_engine as ce
