@@ -45,6 +45,15 @@ twenty accounts on the desk's Rank bands 1-5 ... 46-50 (each band in a Rs 2 lakh
 five slots) and eight on the Paper book's top 4 (each strategy alone in a Rs 2 lakh and a Rs 10 lakh
 account, one slot, sized all-in as the desk sizes a strategy). A picked book's `group` gathers them into
 one overview (`accounts()`, GET /api/top10-books/{desk}/accounts?group=).
+
+TOP 25, EACH ON ITS OWN Rs 2 LAKH (2026-11-18). Also on NIFTY 50 Option Scalping: the desk's Rank 1-25 as
+the board stood at 22:59 IST on 18 Nov 2026, each strategy alone in a Rs 2 lakh account (one slot, sized
+all-in as the desk sizes a strategy), shown in five sets of five (Top 1-5, 6-10 ... 21-25), group
+"top25-each". The 17 Nov books keep their picks; a changed roster is a new book.
+
+PRIME PREMIUM STRATEGIES (2026-11-18). The Paper book's top two by Rank (Round Number Break 5m, TTM Squeeze
+Release 4h) together in a Rs 2 lakh and a Rs 10 lakh account (prime2L, prime10L): one account, a slot each,
+each up to half of it - the same shape as the Premium Strategy books.
 """
 
 from __future__ import annotations
@@ -656,7 +665,7 @@ class PickedBook:
     picked_at: str
     pick_rule: str            # what the picks are and where each was picked from
     notes: tuple[str, ...] = ()
-    group: str = ""           # accounts a page shows together ("rank-band", "paper-top4"); "" = its own tab
+    group: str = ""           # accounts a page shows together ("rank-band", "paper-top4", "top25-each"); "" = its own tab
 
 
 _PREMIUM_NS_PICKS = _picks([
@@ -809,6 +818,109 @@ def _ns_more_books() -> dict[str, "PickedBook"]:
                                   pick_rule=rule, notes=_NS_PAPER4_NOTES, group="paper-top4")
     return out
 
+
+# -- Top 25, each on its own Rs 2 lakh (18 Nov 2026) ----------------------------------------------------
+# The owner asked (18 Nov 2026, on the Strategy leaderboard · all 504) for a Rs 2 lakh paper account for
+# each strategy, in sets: top 1-5, 5-10, 10-15, 15-20 and 20-25 (read as Rank 1-5, 6-10 ... 21-25, as for the
+# 17 Nov bands). Picks frozen from /api/strategy-rank/nifty-scalp (454 ranked) at 22:59 IST on 18 Nov 2026;
+# names, trades and net P&L from /api/nifty-scalp/leaderboard at the same time. Never re-pick these without
+# the owner: a changed roster is a new book.
+
+NS_PICKED_AT_1811 = "2026-11-18T22:59:00+05:30"
+
+# (key, Rank on the desk board, Rank score, trades there, net return a trade in bp, name, net P&L there)
+_NS_RANK_TOP25_1811 = _picks([
+    ("ns_5m_23", 1, 90.0, 30, 1141.79, "Bollinger %B Extreme · 5 minutes", 615644.92),
+    ("ns_10m_48", 2, 87.6, 56, 1419.29, "Fibonacci 61.8% Bounce · 10 minutes", 1015858.35),
+    ("ns_10m_31", 3, 87.1, 30, 2012.85, "Parabolic SAR Flip · 10 minutes", 1175113.64),
+    ("ns_5m_38", 4, 86.8, 29, 1039.76, "Outside Bar Reversal · 5 minutes", 580050.87),
+    ("ns_10m_26", 5, 86.5, 50, 1082.99, "Donchian Slow Break · 10 minutes", 782224.0),
+    ("ns_1d_46", 6, 84.6, 33, 2146.89, "Round Number Break · 1 day", 1399820.81),
+    ("ns_10m_22", 7, 83.9, 34, 1449.76, "Bollinger Mean Revert · 10 minutes", 506116.03),
+    ("ns_10m_40", 8, 82.0, 23, 1967.09, "Morning / Evening Star · 10 minutes", 849375.35),
+    ("ns_1m_25", 9, 81.9, 65, 693.29, "Donchian Fast Break · 1 minute", 763804.48),
+    ("ns_1m_46", 10, 81.1, 33, 808.19, "Round Number Break · 1 minute", 518159.18),
+    ("ns_10m_38", 11, 80.1, 26, 1470.66, "Outside Bar Reversal · 10 minutes", 700674.16),
+    ("ns_10m_44", 12, 78.7, 36, 1274.02, "Prior Extreme Breakout · 10 minutes", 645342.77),
+    ("ns_1m_23", 13, 77.9, 27, 751.44, "Bollinger %B Extreme · 1 minute", 372322.74),
+    ("ns_1d_47", 14, 76.9, 36, 1580.16, "HH/HL Structure Shift · 1 day", 1001065.57),
+    ("ns_1m_39", 15, 76.8, 89, 813.2, "Three Soldiers / Crows · 1 minute", 1100567.71),
+    ("ns_5m_36", 16, 76.2, 32, 1019.64, "Marubozu Continuation · 5 minutes", 644430.31),
+    ("ns_1h_40", 17, 75.8, 27, 1855.36, "Morning / Evening Star · 1 hour", 870644.68),
+    ("ns_15m_48", 18, 75.7, 55, 818.78, "Fibonacci 61.8% Bounce · 15 minutes", 535531.34),
+    ("ns_5m_46", 19, 74.9, 75, 444.7, "Round Number Break · 5 minutes", 653394.43),
+    ("ns_30m_38", 20, 73.4, 31, 834.21, "Outside Bar Reversal · 30 minutes", 486216.71),
+    ("ns_1h_38", 21, 73.3, 29, 1180.58, "Outside Bar Reversal · 1 hour", 438768.91),
+    ("ns_10m_15", 22, 72.7, 53, 801.02, "Williams %R Reversal · 10 minutes", 241373.12),
+    ("ns_5m_21", 23, 72.0, 18, 980.97, "Bollinger Squeeze Break · 5 minutes", 261729.25),
+    ("ns_15m_23", 24, 71.1, 38, 608.96, "Bollinger %B Extreme · 15 minutes", 279955.59),
+    ("ns_10m_24", 25, 69.6, 14, 1490.84, "Keltner Breakout · 10 minutes", 382504.26),
+])
+
+_NS_EACH_NOTES = (
+    "One strategy, one slot: every trade may use the whole ₹2 lakh, exactly as the desk sizes each strategy on "
+    "its own ₹2 lakh - whole lots of 65, and a lot that costs more than the account's cash is skipped and "
+    "counted.",
+    "It copies the desk's own trades of its strategy from the moment it was picked (22:59 IST, 18 Nov 2026), "
+    "so it starts at ₹2 lakh while the desk's record of the same strategy carries its whole history: this "
+    "account is that strategy's out-of-sample record.",
+    "Picked after the fact off a board of 454 where luck collects, and the whole desk is down about 9%. "
+    "Eight of the 25 have fewer than 30 trades, so their Rank is pulled toward the middle and their record "
+    "is thin.",
+)
+
+
+def _ns_each_books() -> dict[str, "PickedBook"]:
+    """25 accounts: the desk's Rank 1-25 on 18 Nov, each strategy alone on Rs 2 lakh, in sets of five."""
+    out: dict[str, PickedBook] = {}
+    for p in _NS_RANK_TOP25_1811:
+        lo = (p.rank - 1) // 5 * 5 + 1
+        hi = lo + 4
+        rule = (f"#{p.rank} of this page's Strategy leaderboard by Rank (454 strategies with closed trades), "
+                f"frozen at 22:59 IST on 18 Nov 2026 - set Top {lo}-{hi} ({p.trades} trades, "
+                f"{'+' if (p.net or 0) >= 0 else '-'}₹{abs(p.net or 0):,.0f} there). It copies the desk's own "
+                f"trades of {p.name}.")
+        key = f"each{p.rank}_2L"
+        out[key] = PickedBook(key=key, label=f"#{p.rank} {_ns_short(p.name)} · ₹2 lakh", capital=200000.0,
+                              picks=(p,), max_open=1, picked_at=NS_PICKED_AT_1811, pick_rule=rule,
+                              notes=_NS_EACH_NOTES, group="top25-each")
+    return out
+
+
+
+# -- Prime Premium Strategies (18 Nov 2026) ---------------------------------------------------------
+# The owner asked (18 Nov 2026, on the Paper book · ₹2L roster) for a Rs 2 lakh and a Rs 10 lakh paper account
+# on its top two, named "Prime Premium Strategies". Read as the Premium Strategy books are built: one account
+# holding both, a slot each. Picks frozen from /api/strategy-rank/nifty-scalp-paper and /api/nifty-scalp/paper/
+# roster at 23:04 IST on 18 Nov 2026. Never re-pick these without the owner: a changed roster is a new book.
+
+NS_PRIME_PICKED_AT = "2026-11-18T23:04:00+05:30"
+
+# (key, Rank among the Paper book's 12, Rank score there, trades there, bp there, name, net P&L there)
+_NS_PRIME_PICKS = _picks([
+    ("ns_5m_46", 1, 93.6, 41, 678.3, "Round Number Break · 5 minutes", 33030.93),
+    ("ns_4h_28", 2, 76.0, 22, 1001.18, "TTM Squeeze Release · 4 hours", 20578.2),
+])
+
+_NS_PRIME_RULE = (
+    "The top two of this page's Paper book · ₹2L by their Rank there, frozen at 23:04 IST on 18 Nov 2026: "
+    "#1 Round Number Break · 5 minutes (93.6; 41 trades, +₹33,031 on its ₹16,667 slice there; 75 trades, "
+    "+326.7% on the desk) and #2 TTM Squeeze Release · 4 hours (76.0; 22 trades, +₹20,578 there; 37 trades, "
+    "+244.6% on the desk). Each copies the desk's own trades of that strategy."
+)
+
+_NS_PRIME_NOTES = (
+    "One account holding both, a slot each: at most two positions at once, each up to half the account "
+    "(₹1,00,000 in the ₹2 lakh account, ₹5,00,000 in the ₹10 lakh one), in whole lots of 65. An option the "
+    "other strategy already holds is skipped and counted, as in every book here.",
+    "Both strategies are also in the 17 Nov Paper-book top-4 accounts, each alone there (Paper book #1 and #2); "
+    "these accounts hold the pair together, so they differ from those only by the shared cash and the "
+    "half-account slots.",
+    "Picked after the fact: the top two of the Paper book's 12. TTM Squeeze Release has 22 trades there, so "
+    "its Rank is pulled toward the middle and its record is thin.",
+)
+
+
 PICKED_BOOKS: dict[str, dict[str, PickedBook]] = {
     "nifty-scalp": {
         "prem2L": PickedBook(key="prem2L", label="Premium Strategy · ₹2 lakh", capital=200000.0,
@@ -818,6 +930,13 @@ PICKED_BOOKS: dict[str, dict[str, PickedBook]] = {
                               picks=_PREMIUM_NS_PICKS, max_open=3, picked_at="2026-11-16T23:30:00+05:30",
                               pick_rule=_PREMIUM_NS_RULE, notes=_PREMIUM_NS_NOTES),
         **_ns_more_books(),
+        **_ns_each_books(),
+        "prime2L": PickedBook(key="prime2L", label="Prime Premium Strategies · ₹2 lakh", capital=200000.0,
+                              picks=_NS_PRIME_PICKS, max_open=2, picked_at=NS_PRIME_PICKED_AT,
+                              pick_rule=_NS_PRIME_RULE, notes=_NS_PRIME_NOTES),
+        "prime10L": PickedBook(key="prime10L", label="Prime Premium Strategies · ₹10 lakh", capital=1000000.0,
+                               picks=_NS_PRIME_PICKS, max_open=2, picked_at=NS_PRIME_PICKED_AT,
+                               pick_rule=_NS_PRIME_RULE, notes=_NS_PRIME_NOTES),
     },
 }
 

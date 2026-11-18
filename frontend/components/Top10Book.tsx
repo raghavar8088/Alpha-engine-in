@@ -79,6 +79,20 @@ export default function Top10Book({ desk, book }: { desk: Top10Desk; book: AnyBo
   const count = nWord(summary?.strategies ?? 10);
   const one = (summary?.strategies ?? 10) === 1;     // a one-strategy account (e.g. Paper-book top 4)
 
+  // An older backend answers an unknown book with the ₹2 lakh Top-10 book's numbers: never show them under
+  // this book's name (18 Nov 2026, Prime Premium Strategies).
+  if (summary && summary.book && summary.book !== book) {
+    return (
+      <GlassPanel title="Not on the server yet">
+        <div style={{ padding: "18px 20px", fontSize: 12.5, lineHeight: 1.55, color: "var(--text-muted)" }}>
+          This account is set up, but the server has not been updated with it yet. It starts copying the desk on the
+          first cycle after the backend is deployed; nothing is backfilled. Until then nothing is shown here, so no
+          other account&apos;s numbers can appear under this name.
+        </div>
+      </GlassPanel>
+    );
+  }
+
   return (
     <>
       {error && <ErrorBanner message={error} onRetry={load} />}

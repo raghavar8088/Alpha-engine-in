@@ -3,6 +3,7 @@
 // A group of picked paper accounts on NIFTY 50 Option Scalping (17 Nov 2026), side by side:
 //   rank-band   20 accounts - the desk's Rank bands 1-5 ... 46-50, each in Rs 2 lakh and Rs 10 lakh
 //   paper-top4   8 accounts - the Paper book's top 4, each strategy alone in Rs 2 lakh and Rs 10 lakh
+//   top25-each  25 accounts - the desk's Rank 1-25 (18 Nov 2026), each strategy alone in Rs 2 lakh, in five sets
 // One row per band / strategy with its two accounts; a click opens that account in full (Top10Book).
 // Backend: app.services.top10_books (PICKED_BOOKS, group), GET /api/top10-books/nifty-scalp/accounts.
 
@@ -37,6 +38,15 @@ const INTRO: Record<PickedGroup, { title: string; body: string }> = {
       "strategy on its own ₹2 lakh. Each copies the desk's own trades of that strategy — the same signals the " +
       "Paper book takes. Frozen at 20:20 IST on 17 Nov 2026.",
   },
+  "top25-each": {
+    title: "Top 25 · ₹2 lakh each",
+    body:
+      "The top 25 of this page's Strategy leaderboard by Rank, each strategy alone in its own ₹2 lakh paper " +
+      "account, in five sets: Top 1-5, 5-10, 10-15, 15-20 and 20-25 (Rank 1-5, 6-10 … 21-25). One strategy, one " +
+      "slot: every trade may use the whole account, as the desk sizes each strategy on its own ₹2 lakh. Each " +
+      "copies the desk's own trades of its strategy from the moment it was picked, so it starts at ₹2 lakh. " +
+      "Frozen at 22:59 IST on 18 Nov 2026 and never re-picked.",
+  },
 };
 
 function inr(v: number | null | undefined, dp = 0): string {
@@ -54,9 +64,25 @@ function tone(v: number | null | undefined): string {
 }
 
 type Pair = { key: string; label: string; small?: Top10Summary; large?: Top10Summary };
+type EachSet = { lo: number; hi: number; rows: { rank: number; s: Top10Summary }[] };
 
-export default function PickedAccounts({ group }: { group: PickedGroup }) {
-  const [data, setData] = useState<Accounts | null | undefined>(undefined);   // undefined = loading, null = not on the server
+function sumOf(xs: Top10Summary[]) {
+  const capital = xs.reduce((a, s) => a + s.desk_capital, 0);
+  const equity = xs.reduce((a, s) => a + s.equity, 0);
+  return {
+    n: xs.length, capital, equity, pnl: equity - capital,
+    roi: capital ? ((equity - capital) / capital) * 100 : 0,
+    open: xs.reduce((a, s) => a + s.open_positions, 0),
+    closed: xs.reduce((a, s) => a + s.closed_positions, 0),
+  };
+}
+
+// "Top 5-10" is how the owner names Rank 6-10; the first set is "Top 1-5".
+const setName = (lo: number, hi: number) => `Top ${lo === 1 ? 1 : lo - 1}-${hi}`;
+
+// `initial` lets a render test show a loaded group; the page never passes it.
+export default function PickedAccounts({ group, initial }: { group: PickedGroup; initial?: Accounts | null }) {
+  const [data, setData] = useState<Accounts | null | undefined>(initial);   // undefined = loading, null = not on the server
   const [error, setError] = useState<string | null>(null);
   const [sel, setSel] = useState<string | null>(null);
 
@@ -109,6 +135,26 @@ export default function PickedAccounts({ group }: { group: PickedGroup }) {
     return { small: sum((p) => p.small), large: sum((p) => p.large) };
   }, [pairs]);
 
+  // top25-each: the accounts in their five sets, by the Rank in the book key (each7_2L = #7, set 6-10).
+  const sets = useMemo<EachSet[]>(() => {
+    if (group !== "top25-each") return [];
+    const out: EachSet[] = [];
+    for (const a of data?.accounts ?? []) {
+      const rank = Number(a.book.match(/^each(\d+)_/)?.[1] ?? 0);
+      if (!rank) continue;
+      const lo = Math.floor((rank - 1) / 5) * 5 + 1;
+      let set = out.find((x) => x.lo === lo);
+      if (!set) {
+        set = { lo, hi: lo + 4, rows: [] };
+        out.push(set);
+      }
+      set.rows.push({ rank, s: a });
+    }
+    out.sort((a, b) => a.lo - b.lo);
+    for (const x of out) x.rows.sort((a, b) => a.rank - b.rank);
+    return out;
+  }, [data, group]);
+
   const intro = INTRO[group];
 
   if (data === null) {
@@ -136,6 +182,68 @@ export default function PickedAccounts({ group }: { group: PickedGroup }) {
         note={data?.accounts?.[0]?.copying_since ? "paper · copying the desk's own trades" : "paper · starts on its first cycle"}
       >
         <div className="pa-intro">{intro.body}</div>
+        {group === "top25-each" ? (
+          <>
+            <div className="pa-sets">
+              {[{ key: "all", name: "All 25 accounts", sub: "", xs: sets.flatMap((x) => x.rows.map((r) => r.s)) },
+                ...sets.map((x) => ({ key: String(x.lo), name: setName(x.lo, x.hi), sub: `Rank ${x.lo}-${x.hi}`,
+                                      xs: x.rows.map((r) => r.s) }))].map((c) => {
+                const t = sumOf(c.xs);
+                return (
+                  <div className="set" key={c.key}>
+                    <div className="set-k">{c.name}{c.sub ? ` · ${c.sub}` : ""}</div>
+                    <div className="set-v">{inr(t.equity)}</div>
+                    <div className="set-s">
+                      {t.n} accounts · {inr(t.capital)} in all ·{" "}
+                      <span className={tone(t.pnl)}>
+                        {signed(t.pnl)} ({t.roi >= 0 ? "+" : ""}
+                        {t.roi.toFixed(2)}%)
+                      </span>{" "}
+                      · {t.open} open · {t.closed} closed
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {data === undefined ? (
+              <div className="pa-load">Loading accounts…</div>
+            ) : (
+              <div className="pa-scroll">
+                <table className="pa-table">
+                  <thead>
+                    <tr>
+                      <th className="l">Set</th>
+                      <th>Rank</th>
+                      <th className="l">Strategy</th>
+                      <th>₹2 lakh account</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sets.flatMap((x) =>
+                      x.rows.map((r, i) => (
+                        <tr key={r.s.book} className={i === 0 ? "set-first" : ""}>
+                          {i === 0 && (
+                            <td className="l band" rowSpan={x.rows.length}>
+                              {setName(x.lo, x.hi)}
+                              <span className="sub">Rank {x.lo}-{x.hi}</span>
+                            </td>
+                          )}
+                          <td className="rk">#{r.rank}</td>
+                          <td className="l picks" title={r.s.pick_rule ?? ""}>
+                            {r.s.pick_names?.[0] ?? r.s.label}
+                            <span className="sub">one slot · all-in a trade</span>
+                          </td>
+                          <td><AccountCell s={r.s} on={sel === r.s.book} onPick={pick} /></td>
+                        </tr>
+                      )),
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        ) : (
+        <>
         <div className="pa-sets">
           {(["small", "large"] as const).map((k) => {
             const t = totals[k];
@@ -196,6 +304,8 @@ export default function PickedAccounts({ group }: { group: PickedGroup }) {
             </table>
           </div>
         )}
+        </>
+        )}
         <div className="pa-foot">
           Click an account for its strategies, open and closed positions, charges and skips. Picked after the fact off a
           board where luck collects; none is validated — these accounts are the out-of-sample test.
@@ -221,7 +331,9 @@ export default function PickedAccounts({ group }: { group: PickedGroup }) {
         .band { font-weight: 700; color: var(--text); white-space: nowrap; }
         .picks { font-size: 11px; color: var(--text-muted); line-height: 1.45; }
         .picks ol { margin: 0; padding-left: 22px; }
-        .picks .sub { display: block; color: var(--text-faint); font-size: 10.5px; }
+        .picks .sub, .band .sub { display: block; color: var(--text-faint); font-size: 10.5px; font-weight: 500; }
+        .rk { font-weight: 700; color: var(--text-muted); white-space: nowrap; }
+        .set-first td { border-top: 2px solid var(--panel-border); }
         .gain { color: var(--gain) !important; }
         .loss { color: var(--loss) !important; }
         .pa-foot { padding: 10px 20px 16px; font-size: 11px; line-height: 1.5; color: var(--text-faint); }

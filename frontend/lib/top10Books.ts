@@ -11,8 +11,12 @@ export type Top10BookKey = "top2L" | "top10L";
 // Paper-book top-4 accounts (pb1_2L ... pb4_10L), shown together by group (fetchPickedAccounts).
 export type RankBandBookKey = `rank${number}_${number}_${"2L" | "10L"}`;
 export type PaperTopBookKey = `pb${number}_${"2L" | "10L"}`;
-export type PickedBookKey = "prem2L" | "prem50k" | RankBandBookKey | PaperTopBookKey;
-export type PickedGroup = "rank-band" | "paper-top4";
+// 18 Nov 2026: the desk's Rank 1-25, each alone on Rs 2 lakh (each1_2L ... each25_2L, group "top25-each", shown
+// in sets of five), and "Prime Premium Strategies" (prime2L / prime10L): the Paper book's top two in one account.
+export type EachBookKey = `each${number}_2L`;
+export type PickedBookKey = "prem2L" | "prem50k" | "prime2L" | "prime10L" | RankBandBookKey | PaperTopBookKey
+  | EachBookKey;
+export type PickedGroup = "rank-band" | "paper-top4" | "top25-each";
 export type AnyBookKey = Top10BookKey | PickedBookKey;
 export type Top10Desk = "zero-hero" | "nifty-scalp" | "prelive" | "stock-buying" | "stock-selling" | "commodity"
   | "strategy-factory";

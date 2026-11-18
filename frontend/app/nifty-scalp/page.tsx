@@ -27,9 +27,10 @@ import {
 
 const REFRESH_MS = 30000;
 type Tab = "leaderboard" | "timeframes" | "open" | "closed" | "signals" | "daily" | "paper" | "top2L" | "top10L"
-  | "prem2L" | "prem50k" | "bands" | "pbtop4";
-// The paper accounts on the shared book engine (app.services.top10_books): Top-10 and Premium Strategy.
-const BOOK_TABS: Tab[] = ["top2L", "top10L", "prem2L", "prem50k"];
+  | "prem2L" | "prem50k" | "bands" | "pbtop4" | "each25" | "prime2L" | "prime10L";
+// The paper accounts on the shared book engine (app.services.top10_books): Top-10, Premium Strategy and
+// Prime Premium Strategies.
+const BOOK_TABS: Tab[] = ["top2L", "top10L", "prem2L", "prem50k", "prime2L", "prime10L"];
 const TABS: { key: Tab; label: string }[] = [
   { key: "leaderboard", label: "Strategy leaderboard" },
   { key: "timeframes", label: "By timeframe" },
@@ -49,6 +50,11 @@ const TABS: { key: Tab; label: string }[] = [
   // Rs 10 lakh account (28 in all), shown as two overviews; a click opens one account in full.
   { key: "bands", label: "Rank-band accounts · 20" },
   { key: "pbtop4", label: "Paper book top 4 · 8 accounts" },
+  // 18 Nov 2026: the Rank top 25, each strategy alone on Rs 2 lakh, in five sets (Top 1-5 ... 20-25); and the
+  // Paper book's top two (Round Number Break 5m, TTM Squeeze Release 4h) together as Prime Premium Strategies.
+  { key: "each25", label: "Top 25 · ₹2 lakh each · 25 accounts" },
+  { key: "prime2L", label: "Prime Premium Strategies · ₹2 lakh" },
+  { key: "prime10L", label: "Prime Premium Strategies · ₹10 lakh" },
 ];
 // The timeframe and family chips filter the 504-strategy DESK. The paper book is a fixed
 // roster on one balance, so they mean nothing there and are hidden rather than left to
@@ -336,10 +342,12 @@ export default function NiftyScalpPage() {
 
       {tab === "paper" && <PaperBook board={board} />}
       {BOOK_TABS.includes(tab) && (
-        <Top10Book key={tab} desk="nifty-scalp" book={tab as "top2L" | "top10L" | "prem2L" | "prem50k"} />
+        <Top10Book key={tab} desk="nifty-scalp"
+                   book={tab as "top2L" | "top10L" | "prem2L" | "prem50k" | "prime2L" | "prime10L"} />
       )}
       {tab === "bands" && <PickedAccounts key="bands" group="rank-band" />}
       {tab === "pbtop4" && <PickedAccounts key="pbtop4" group="paper-top4" />}
+      {tab === "each25" && <PickedAccounts key="each25" group="top25-each" />}
 
       <DeskHistory deskKey={"nifty-scalp"} />
 

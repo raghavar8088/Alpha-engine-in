@@ -79,12 +79,13 @@ def npos(pid, sid, entry, t_open, *, token, status="OPEN", exit_=None, t_close=N
 
 def definitions():
     keys = t10.book_keys("nifty-scalp")
+    # 18 Nov 2026: the 25 "top25-each" accounts and prime2L/prime10L follow these (verify_ns_each_accounts.py)
     check("the desk carries its 4 earlier books, then the 20 Rank-band and 8 Paper-book accounts in order",
-          keys[:4] == ["top2L", "top10L", "prem2L", "prem50k"] and keys[4:] == BAND_KEYS + PB_KEYS, str(keys[4:8]))
+          keys[:4] == ["top2L", "top10L", "prem2L", "prem50k"] and keys[4:32] == BAND_KEYS + PB_KEYS, str(keys[4:8]))
     check("no other desk gains a book", all(t10.book_keys(k) == ["top2L", "top10L"] for k in t10.DESKS if k != "nifty-scalp"))
     g = t10.groups("nifty-scalp")
     check("groups(): rank-band = 20 in band order, paper-top4 = 8", g.get("rank-band") == BAND_KEYS
-          and g.get("paper-top4") == PB_KEYS and set(g) == {"rank-band", "paper-top4"}, str(list(g)))
+          and g.get("paper-top4") == PB_KEYS and set(g) == {"rank-band", "paper-top4", "top25-each"}, str(list(g)))
     top50 = t10._NS_RANK_TOP50
     check("the frozen board: ranks 1-50 once each, ids unique", [p.rank for p in top50] == list(range(1, 51))
           and len({p.key for p in top50}) == 50)
@@ -127,7 +128,7 @@ async def trading():
     await N.insert_one(npos("x", "ns_5m_13", 70.0, NOW - timedelta(minutes=50), token="C1", ltp=71.0))       # in no new book
     out = await t10.sync(entries=True, only="nifty-scalp")
     errs = {k: v for k, v in out.items() if "error" in v}
-    check("one pass over all 32 books on the desk, no errors", len(out) == 32 and not errs, str(errs)[:300])
+    check("one pass over all 59 books on the desk, no errors", len(out) == 59 and not errs, str(errs)[:300])
     await t10.sync(entries=True, only="nifty-scalp")
 
     rows = [r async for r in t10.POSITIONS.find({})]
