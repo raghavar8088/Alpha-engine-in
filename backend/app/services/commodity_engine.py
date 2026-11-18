@@ -695,6 +695,7 @@ async def summary() -> dict:
         "per_strategy_allocation": round(PER_STRATEGY_ALLOCATION, 2),
         "position_notional": round(POSITION_NOTIONAL, 2),
         "strategy_count": len(COMMODITY_CATALOG),
+        "desk_underlyings": list(DESK_UNDERLYINGS),      # the contracts the desk trades (18 Nov 2026: the two minis)
         "available_cash": round(INITIAL_CAPITAL + realized - deployed, 2),
         "deployed_capital": round(deployed, 2),
         "realized_pnl": round(realized, 2), "unrealized_pnl": round(unrealized, 2),
